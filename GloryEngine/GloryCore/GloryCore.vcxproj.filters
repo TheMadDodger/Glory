@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2015-2019 LunarG, Inc. -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{a793c8fe-6c54-4780-90e4-868c2c9ebd4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debugging">
+      <UniqueIdentifier>{1bc90d0c-3b10-470f-a0df-e85e033a917c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{15a83805-5da4-48d7-b5c9-9053614f64b8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="GloryCore.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="GloryGame.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="GloryGameState.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="GloryModule.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Object.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GloryCore.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GloryGame.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GloryGameState.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreExceptions.h">
+      <Filter>Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="GloryGameSettings.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GloryModule.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
