@@ -37,3 +37,6 @@
 *.ilk
 *.idb
 GloryEngine/GloryCore/Debug/
+GloryEngine/GlorySDLWindow/Debug/
+GloryEngine/GloryMain/Debug/
+GloryCore/Debug/

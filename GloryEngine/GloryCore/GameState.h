@@ -3,11 +3,11 @@
 
 namespace Glory
 {
-	class GloryGameState : public Object
+	class GameState : public Object
 	{
 	public:
-		GloryGameState();
-		virtual ~GloryGameState();
+		GameState();
+		virtual ~GameState();
 
 	protected:
 		virtual void OnUserCreate() {};
@@ -20,7 +20,7 @@ namespace Glory
 		virtual void OnUserDestroy() {};
 
 	private:
-		friend class GloryGame;
+		friend class Game;
 
 	private:
 		/*GloryGameState(const GloryGameState& y) = delete;

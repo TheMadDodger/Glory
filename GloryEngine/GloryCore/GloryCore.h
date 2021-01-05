@@ -1,15 +1,6 @@
 #pragma once
-
-namespace Glory
-{
-	class GloryCore
-	{
-	public:
-		static void Initialize();
-		static void Destroy();
-
-	private:
-		GloryCore();
-		~GloryCore();
-	};
-}
+#include "CoreExceptions.h"
+#include "Engine.h"
+#include "Game.h"
+#include "GameState.h"
+#include "GameSettings.h"

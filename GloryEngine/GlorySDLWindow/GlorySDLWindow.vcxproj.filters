@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Module">
+      <UniqueIdentifier>{e9d1a713-968c-4231-8027-65c538abdf40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{5e46ed8e-c424-42e3-94c5-97f09734dc10}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SDLWindow.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="SDLWindowExceptions.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="SDLWindowModule.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SDLWindow.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="SDLWindowModule.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
