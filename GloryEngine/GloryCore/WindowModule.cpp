@@ -2,12 +2,17 @@
 
 namespace Glory
 {
-    WindowModule::WindowModule() : m_pMainWindow(nullptr), m_pWindows(std::vector<Window*>())
+    WindowModule::WindowModule(const WindowCreateInfo& mainWindowCreateInfo) : m_pMainWindow(nullptr), m_pWindows(std::vector<Window*>()), m_MainWindowCreateInfo(mainWindowCreateInfo)
     {
     }
 
     WindowModule::~WindowModule()
     {
+    }
+
+    Window* WindowModule::GetMainWindow()
+    {
+        return m_pMainWindow;
     }
 
     Window* WindowModule::CreateNewWindow(const WindowCreateInfo& createInfo)
@@ -21,13 +26,7 @@ namespace Glory
     void WindowModule::Initialize()
     {
         Initialize_Internal();
-
-        // TEMPORARY
-        WindowCreateInfo createInfo;
-        createInfo.WindowName = "Glory Game";
-        createInfo.Width = 1280;
-        createInfo.Height = 720;
-        m_pMainWindow = CreateNewWindow(createInfo);
+        m_pMainWindow = CreateNewWindow(m_MainWindowCreateInfo);
     }
 
     void WindowModule::Cleanup()

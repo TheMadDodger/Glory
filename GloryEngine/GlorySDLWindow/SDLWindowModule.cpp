@@ -4,6 +4,9 @@
 
 namespace Glory
 {
+	SDLWindowModule::SDLWindowModule(const WindowCreateInfo& mainWindowCreateInfo) : WindowModule(mainWindowCreateInfo) {}
+	SDLWindowModule::~SDLWindowModule() {}
+
 	Window* SDLWindowModule::CreateWindow_Internal(const WindowCreateInfo& createInfo)
 	{
 		return new SDLWindow(createInfo);

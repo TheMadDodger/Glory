@@ -14,6 +14,7 @@ namespace Glory
 
 		void RunGame();
 		void Destroy();
+		Engine* GetEngine();
 
 		static void Quit();
 

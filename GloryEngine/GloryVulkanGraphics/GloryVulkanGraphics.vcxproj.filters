@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Module">
+      <UniqueIdentifier>{96cbd5c3-6479-449a-9ec6-f766e93231df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Device">
+      <UniqueIdentifier>{e15a228d-4e9b-4982-a292-d2a26ada27d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{d812bac3-26d9-4b51-8cc0-876c0b490b4e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="VulkanGraphicsModule.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDeviceManager.cpp">
+      <Filter>Device</Filter>
+    </ClCompile>
+    <ClCompile Include="Device.cpp">
+      <Filter>Device</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapChain.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="VulkanGraphicsModule.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="GloryVulkan.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanExceptions.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="QueueFamilyIndices.h">
+      <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDeviceManager.h">
+      <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="Device.h">
+      <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapChain.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

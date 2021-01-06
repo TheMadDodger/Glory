@@ -8,8 +8,10 @@ namespace Glory
     class WindowModule : public Module
     {
 	public:
-		WindowModule();
+		WindowModule(const WindowCreateInfo& mainWindowCreateInfo);
 		virtual ~WindowModule();
+
+		Window* GetMainWindow();
 
 	public: // Module functions
 		Window* CreateNewWindow(const WindowCreateInfo& createInfo);
@@ -32,5 +34,6 @@ namespace Glory
 	private: // Memory stuff
 		std::vector<Window*> m_pWindows;
 		Window* m_pMainWindow;
+		WindowCreateInfo m_MainWindowCreateInfo;
     };
 }

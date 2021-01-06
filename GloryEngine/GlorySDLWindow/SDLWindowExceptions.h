@@ -16,4 +16,12 @@ namespace Glory
     private:
         const std::string m_SDLError;
     };
+
+    struct GetVulkanExtensionsException : public std::exception
+    {
+        const char* what() const throw ()
+        {
+            return "Could not get the names of required instance extensions from SDL.";
+        }
+    };
 }

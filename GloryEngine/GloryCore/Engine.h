@@ -1,12 +1,14 @@
 #pragma once
 #include "Object.h"
 #include "WindowModule.h"
+#include "GraphicsModule.h"
 
 namespace Glory
 {
 	struct EngineCreateInfo
 	{
 		WindowModule* pWindowModule;
+		GraphicsModule* pGraphicsModule;
 
 		uint32_t OptionalModuleCount;
 		Module** pOptionalModules;
@@ -20,6 +22,8 @@ namespace Glory
 	{
 	public:
 		static Engine* CreateEngine(const EngineCreateInfo& createInfo);
+
+		WindowModule* GetWindowModule();
 
 	private:
 		Engine(const EngineCreateInfo& createInfo);
@@ -35,6 +39,7 @@ namespace Glory
 
 		// Required modules
 		WindowModule* m_pWindowModule;
+		GraphicsModule* m_pGraphicsModule;
 
 		// Optional modules
 		std::vector<Module*> m_pOptionalModules;

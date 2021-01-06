@@ -40,20 +40,15 @@ namespace Glory
 		while (m_bIsRunning)
 		{
 			m_Game.m_pGameState->OnUserBeginStep();
-
-			// Logic stuff
 			m_pEngine->Update();
 			m_Game.m_pGameState->OnUserEndStep();
 
 			m_Game.m_pGameState->OnUserBeginDraw();
-			// Drawing stuff
 			m_pEngine->Draw();
 			m_Game.m_pGameState->OnUserEndDraw();
 		}
 
 		m_pGameState->OnUserEnd();
-
-		//SDL_Delay(10);
 	}
 
 	void Game::Destroy()
@@ -70,6 +65,11 @@ namespace Glory
 		delete m_pEngine;
 		m_pEngine = nullptr;
 		m_bGameCreated = false;
+	}
+
+	Engine* Game::GetEngine()
+	{
+		return m_pEngine;
 	}
 
 	void Game::Quit()

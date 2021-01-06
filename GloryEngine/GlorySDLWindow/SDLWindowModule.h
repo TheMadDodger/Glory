@@ -5,6 +5,10 @@ namespace Glory
 {
     class SDLWindowModule : public WindowModule
     {
+	public:
+		SDLWindowModule(const WindowCreateInfo& mainWindowCreateInfo);
+		virtual ~SDLWindowModule();
+
 	protected: // Internal functions
 		virtual Window* CreateWindow_Internal(const WindowCreateInfo& createInfo) override;
 

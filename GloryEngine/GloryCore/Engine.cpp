@@ -8,7 +8,12 @@ namespace Glory
 		return pEngine;
 	}
 
-	Engine::Engine(const EngineCreateInfo& createInfo) : m_pWindowModule(createInfo.pWindowModule)
+	WindowModule* Engine::GetWindowModule()
+	{
+		return m_pWindowModule;
+	}
+
+	Engine::Engine(const EngineCreateInfo& createInfo) : m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -20,6 +25,7 @@ namespace Glory
 		// Fill in the all modules vector with the required modules first
 		// In order of importance
 		m_pAllModules.push_back(m_pWindowModule);
+		m_pAllModules.push_back(m_pGraphicsModule);
 
 		// Add optional modules
 		size_t currentSize = m_pAllModules.size();
