@@ -11,6 +11,7 @@ namespace Glory
 
 	protected: // Internal functions
 		virtual Window* CreateWindow_Internal(const WindowCreateInfo& createInfo) override;
+		virtual void OpenMessageBox(const std::string& message) override;
 
 	protected:
 		virtual void Initialize_Internal() override;

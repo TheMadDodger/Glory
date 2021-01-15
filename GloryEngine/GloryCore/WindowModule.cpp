@@ -23,6 +23,8 @@ namespace Glory
         return pWindow;
     }
 
+    void WindowModule::OpenMessageBox(const std::string&) {}
+
     void WindowModule::Initialize()
     {
         Initialize_Internal();

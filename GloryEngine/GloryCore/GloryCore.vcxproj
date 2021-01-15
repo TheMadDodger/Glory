@@ -99,6 +99,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -117,6 +118,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -135,6 +137,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -153,6 +156,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -163,6 +167,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Commands.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="Debug.h" />
+    <ClInclude Include="DebugConsoleInput.h" />
     <ClInclude Include="CoreExceptions.h" />
     <ClInclude Include="GloryCore.h" />
     <ClInclude Include="Engine.h" />
@@ -172,16 +180,22 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="GraphicsModule.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WindowModule.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Commands.cpp" />
+    <ClCompile Include="Console.cpp" />
+    <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="DebugConsoleInput.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="GraphicsModule.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowModule.cpp" />
   </ItemGroup>

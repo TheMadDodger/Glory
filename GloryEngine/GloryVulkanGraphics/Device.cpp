@@ -63,6 +63,11 @@ namespace Glory
 
     }
 
+    vk::PhysicalDevice Device::GetPhysicalDevice()
+    {
+        return m_PhysicalDevice;
+    }
+
     Device::Device(vk::PhysicalDevice physicalDevice) : m_PhysicalDevice(physicalDevice), m_cPhysicalDevice((VkPhysicalDevice)physicalDevice),
         m_QueueFamilyIndices(), m_AvailableQueueFamilies(std::vector<VkQueueFamilyProperties>()), m_AvailableExtensions(std::vector<VkExtensionProperties>()),
         m_DidLastSupportCheckPass(false), m_SwapChainSupportDetails(), m_LogicalDeviceData(), m_DeviceExtensions(std::vector<const char*>()) {}

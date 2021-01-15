@@ -12,6 +12,41 @@ namespace Glory
 		return new SDLWindow(createInfo);
 	}
 
+	void SDLWindowModule::OpenMessageBox(const std::string& message)
+	{
+		const SDL_MessageBoxButtonData buttons[] = {
+				{ /* .flags, .buttonid, .text */        0, 0, "OK" },
+		};
+		const SDL_MessageBoxColorScheme colorScheme =
+		{
+			{ /* .colors (.r, .g, .b) */
+			  /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+				{ 255, 255, 255 },
+				/* [SDL_MESSAGEBOX_COLOR_TEXT] */
+				{ 0, 0, 0 },
+				/* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+				{ 0, 0, 0 },
+				/* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+				{ 255, 255, 255 },
+				/* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
+				{ 128, 128, 128 }
+			}
+		};
+		const SDL_MessageBoxData messageboxdata = {
+			SDL_MESSAGEBOX_ERROR, /* .flags */
+			NULL, /* .window */
+			"ERROR", /* .title */
+			message.data(), /* .message */
+			SDL_arraysize(buttons), /* .numbuttons */
+			buttons, /* .buttons */
+			&colorScheme /* .colorScheme */
+		};
+		int buttonid;
+		if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+			SDL_Log("error displaying message box");
+		}
+	}
+
 	void SDLWindowModule::Initialize_Internal()
 	{
 		if (SDL_Init(SDL_INIT_VIDEO) != 0)

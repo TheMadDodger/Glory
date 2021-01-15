@@ -111,7 +111,7 @@ namespace Glory
 
         /// Create graphics pipeline
         // Load shaders
-        auto vertShaderCode = ReadFile("Shaders/triangle_vert.spv");
+        auto vertShaderCode = ReadFile("Shaders/vertexbuffertest_vert.spv");
         auto fragShaderCode = ReadFile("Shaders/triangle_frag.spv");
 
         // Create shader modules
@@ -140,12 +140,29 @@ namespace Glory
 
         vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo , fragShaderStageInfo };
 
+        // Vertex binding and attributes
+        vk::VertexInputBindingDescription bindingDescription = vk::VertexInputBindingDescription();
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(Vertex);
+        bindingDescription.inputRate = vk::VertexInputRate::eVertex;
+
+        std::array<vk::VertexInputAttributeDescription, 2> attributeDescriptions{};
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = vk::Format::eR32G32Sfloat;
+        attributeDescriptions[0].offset = offsetof(Vertex, Pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = vk::Format::eR32G32B32Sfloat;
+        attributeDescriptions[1].offset = offsetof(Vertex, Color);
+
         // Vertex input state
         vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
-            .setVertexBindingDescriptionCount(0)
-            .setPVertexAttributeDescriptions(nullptr)
-            .setVertexAttributeDescriptionCount(0)
-            .setPVertexAttributeDescriptions(nullptr);
+            .setVertexBindingDescriptionCount(1)
+            .setPVertexBindingDescriptions(&bindingDescription)
+            .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attributeDescriptions.size()))
+            .setPVertexAttributeDescriptions(attributeDescriptions.data());
 
         // Input assembly
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
@@ -293,6 +310,62 @@ namespace Glory
         if (m_CommandPool == nullptr)
             throw std::runtime_error("failed to create command pool!");
 
+        // Create vertex buffer
+        const std::vector<Vertex> vertices = {
+            {{0.0f, -0.5f}, {0.5f, 0.1f, 0.6f}},
+            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.8f}},
+            {{-0.5f, 0.5f}, {1.0f, 0.1f, 0.7f}}
+        };
+
+        //m_pVertexBuffer = new VertexBuffer({
+        //    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+        //    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+        //    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+        //});
+
+        vk::BufferCreateInfo bufferCreateInfo = vk::BufferCreateInfo();
+        bufferCreateInfo.size = sizeof(vertices[0]) * vertices.size();
+        bufferCreateInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+        bufferCreateInfo.sharingMode = vk::SharingMode::eExclusive;
+
+        vk::Result result = deviceData.LogicalDevice.createBuffer(&bufferCreateInfo, nullptr, &m_VertexBuffer);
+        if (result != vk::Result::eSuccess)
+            throw std::runtime_error("failed to create vertex buffer!");
+
+        vk::MemoryRequirements memRequirements;
+        deviceData.LogicalDevice.getBufferMemoryRequirements(m_VertexBuffer, &memRequirements);
+
+        vk::PhysicalDevice physicalDevice = m_pDeviceManager->GetSelectedDevice()->GetPhysicalDevice();
+        vk::PhysicalDeviceMemoryProperties memProperties;
+        physicalDevice.getMemoryProperties(&memProperties);
+
+        uint32_t typeFilter = memRequirements.memoryTypeBits;
+        vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+        uint32_t index;
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+        {
+            if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+            {
+                index = i;
+                break;
+            }
+        }
+        vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
+        allocateInfo.allocationSize = memRequirements.size;
+        allocateInfo.memoryTypeIndex = index;
+
+        result = deviceData.LogicalDevice.allocateMemory(&allocateInfo, nullptr, &m_VertexBufferMemory);
+        if (result != vk::Result::eSuccess)
+            throw std::runtime_error("failed to allocate vertex buffer memory!");
+
+        deviceData.LogicalDevice.bindBufferMemory(m_VertexBuffer, m_VertexBufferMemory, 0);
+        void* data;
+        result = deviceData.LogicalDevice.mapMemory(m_VertexBufferMemory, (vk::DeviceSize)0, (vk::DeviceSize)bufferCreateInfo.size, (vk::MemoryMapFlags)0, &data);
+        if (result != vk::Result::eSuccess)
+            throw std::runtime_error("failed to map memory!");
+        memcpy(data, vertices.data(), (size_t)bufferCreateInfo.size);
+        deviceData.LogicalDevice.unmapMemory(m_VertexBufferMemory);
+
         // Create command buffers
         m_CommandBuffers.resize(m_SwapChainFramebuffers.size());
 
@@ -334,21 +407,44 @@ namespace Glory
 
             m_CommandBuffers[i].beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
             m_CommandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_GraphicsPipeline);
-            m_CommandBuffers[i].draw(3, 1, 0, 0);
+
+            vk::Buffer vertexBuffers[] = { m_VertexBuffer };
+            vk::DeviceSize offsets[] = { 0 };
+            m_CommandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
+
+            m_CommandBuffers[i].draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
             m_CommandBuffers[i].endRenderPass();
             m_CommandBuffers[i].end();
         }
 
-        // Create semaphores
+        // Create sync objects
+        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_ImagesInFlight.resize(m_pSwapChain->GetImageCount(), VK_NULL_HANDLE);
+
         vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
-        if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphore) != vk::Result::eSuccess || deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphore) != vk::Result::eSuccess)
-            throw std::runtime_error("failed to create semaphores!");
+        vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
+            .setFlags(vk::FenceCreateFlagBits::eSignaled);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
+                deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
+                deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
+            {
+
+                throw std::runtime_error("failed to create sync objects for a frame!");
+            }
+        }
 	}
 
 	void VulkanGraphicsModule::Cleanup()
 	{
         m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData().LogicalDevice.waitIdle();
         m_Extensions.clear();
+
+        //wdelete m_pVertexBuffer;
+        //m_pVertexBuffer = nullptr;
 
 #if defined(_DEBUG)
         VkInstance instance = VkInstance(m_Instance);
@@ -360,8 +456,16 @@ namespace Glory
 #endif
 
         auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        deviceData.LogicalDevice.destroySemaphore(m_ImageAvailableSemaphore);
-        deviceData.LogicalDevice.destroySemaphore(m_RenderFinishedSemaphore);
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            deviceData.LogicalDevice.destroySemaphore(m_ImageAvailableSemaphores[i]);
+            deviceData.LogicalDevice.destroySemaphore(m_RenderFinishedSemaphores[i]);
+            deviceData.LogicalDevice.destroyFence(m_InFlightFences[i]);
+        }
+        m_ImageAvailableSemaphores.clear();
+        m_RenderFinishedSemaphores.clear();
+        m_InFlightFences.clear();
 
         deviceData.LogicalDevice.destroyPipeline(m_GraphicsPipeline);
         deviceData.LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
@@ -377,6 +481,10 @@ namespace Glory
 
         delete m_pSwapChain;
         m_pSwapChain = nullptr;
+
+        deviceData.LogicalDevice.destroyBuffer(m_VertexBuffer);
+        deviceData.LogicalDevice.freeMemory(m_VertexBufferMemory);
+
         m_Instance.destroySurfaceKHR(m_Surface);
         delete m_pDeviceManager;
         m_pDeviceManager = nullptr;
@@ -390,16 +498,24 @@ namespace Glory
 	void VulkanGraphicsModule::Draw()
 	{
         auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+        deviceData.LogicalDevice.waitForFences(1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
         // Aqcuire swap chain image
         uint32_t imageIndex;
-        deviceData.LogicalDevice.acquireNextImageKHR(m_pSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+        deviceData.LogicalDevice.acquireNextImageKHR(m_pSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+
+        // Check if a previous frame is using this image (i.e. there is its fence to wait on)
+        if (m_ImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+            deviceData.LogicalDevice.waitForFences(1, &m_ImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+        }
+        // Mark the image as now being in use by this frame
+        m_ImagesInFlight[imageIndex] = m_InFlightFences[m_CurrentFrame];
 
         // Submit command buffer
-        vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphore };
+        vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
         vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
-        vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphore };
+        vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
         vk::SubmitInfo submitInfo = vk::SubmitInfo()
             .setWaitSemaphoreCount(1)
             .setPWaitSemaphores(waitSemaphores)
@@ -409,7 +525,9 @@ namespace Glory
             .setSignalSemaphoreCount(1)
             .setPSignalSemaphores(signalSemaphores);
 
-        if(deviceData.GraphicsQueue.submit(1, &submitInfo, VK_NULL_HANDLE) != vk::Result::eSuccess)
+        deviceData.LogicalDevice.resetFences(1, &m_InFlightFences[m_CurrentFrame]);
+
+        if(deviceData.GraphicsQueue.submit(1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != vk::Result::eSuccess)
             throw std::runtime_error("failed to submit draw command buffer!");
 
         vk::SwapchainKHR swapChains[] = { m_pSwapChain->GetSwapChain() };
@@ -423,6 +541,10 @@ namespace Glory
 
         if(deviceData.PresentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
             throw std::runtime_error("failed to present!");
+
+        deviceData.PresentQueue.waitIdle();
+
+        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
     void VulkanGraphicsModule::InitializeValidationLayers()

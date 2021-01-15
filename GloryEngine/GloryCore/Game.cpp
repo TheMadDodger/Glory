@@ -95,10 +95,6 @@ namespace Glory
 	{
 		if (m_bInitialized) return;
 		m_pEngine->Initialize();
-
-		//m_pWindow = new Window("Glory Game");
-		//m_pWindow->OpenWindow();
-
 		m_bInitialized = true;
 		m_bIsRunning = true;
 	}

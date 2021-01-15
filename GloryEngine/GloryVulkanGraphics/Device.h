@@ -28,6 +28,7 @@ namespace Glory
 		const QueueFamilyIndices& GetQueueFamilyIndices() const;
 		const LogicalDeviceData& GetLogicalDeviceData() const;
 		void CreateLogicalDevice(VulkanGraphicsModule* pGraphicsModule);
+		vk::PhysicalDevice GetPhysicalDevice();
 
 	private:
 		Device(vk::PhysicalDevice physicalDevice);

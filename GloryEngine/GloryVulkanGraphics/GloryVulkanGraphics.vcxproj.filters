@@ -24,6 +24,9 @@
     <ClCompile Include="SwapChain.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPass.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanGraphicsModule.h">
@@ -45,6 +48,9 @@
       <Filter>Device</Filter>
     </ClInclude>
     <ClInclude Include="SwapChain.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPass.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>

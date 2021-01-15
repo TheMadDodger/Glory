@@ -4,6 +4,7 @@
 #include "VulkanDeviceManager.h"
 #include "QueueFamilyIndices.h"
 #include <vulkan/vulkan.hpp>
+#include <VertexBuffer.h>
 
 namespace Glory
 {
@@ -62,8 +63,18 @@ namespace Glory
 		std::vector<vk::Framebuffer> m_SwapChainFramebuffers;
 		vk::CommandPool m_CommandPool;
 		std::vector<vk::CommandBuffer> m_CommandBuffers;
-		vk::Semaphore m_ImageAvailableSemaphore;
-		vk::Semaphore m_RenderFinishedSemaphore;
+
+		const size_t MAX_FRAMES_IN_FLIGHT = 2;
+		std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
+		std::vector<vk::Semaphore> m_RenderFinishedSemaphores;
+		std::vector<vk::Fence> m_InFlightFences;
+		std::vector<vk::Fence> m_ImagesInFlight;
+		size_t m_CurrentFrame = 0;
+
+
+		//VertexBuffer* m_pVertexBuffer;
+		vk::Buffer m_VertexBuffer;
+		vk::DeviceMemory m_VertexBufferMemory;
 		
 		static std::vector<char> ReadFile(const std::string& filename);
 

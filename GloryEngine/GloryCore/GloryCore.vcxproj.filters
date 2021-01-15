@@ -13,6 +13,9 @@
     <Filter Include="Modules\Graphics">
       <UniqueIdentifier>{1002c50a-8b51-42ef-81bd-21f0c167ee07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Console">
+      <UniqueIdentifier>{b974db2a-d750-4dc0-8164-62248fe429bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -48,6 +51,21 @@
     <ClInclude Include="Engine.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Modules\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugConsoleInput.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Console</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -73,6 +91,21 @@
     </ClCompile>
     <ClCompile Include="Engine.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>Modules\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugConsoleInput.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Console</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

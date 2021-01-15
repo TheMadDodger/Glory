@@ -15,6 +15,7 @@ namespace Glory
 
 	public: // Module functions
 		Window* CreateNewWindow(const WindowCreateInfo& createInfo);
+		virtual void OpenMessageBox(const std::string& message);
 
 	protected: // Internal functions
 		virtual Window* CreateWindow_Internal(const WindowCreateInfo& createInfo) = 0;

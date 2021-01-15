@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Console.h"
 
 namespace Glory
 {
@@ -35,6 +36,8 @@ namespace Glory
 
 	Engine::~Engine()
 	{
+		Console::Cleanup();
+
 		// We need to cleanup in reverse
 		// This makes sure things like graphics get cleaned up before we close the window
 		for (int i = (int)m_pAllModules.size() - 1; i >= 0; --i)
@@ -50,6 +53,8 @@ namespace Glory
 
 	void Engine::Initialize()
 	{
+		Console::Initialize();
+
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->Initialize();
@@ -58,6 +63,8 @@ namespace Glory
 
 	void Engine::Update()
 	{
+		Console::Update();
+
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->Update();
