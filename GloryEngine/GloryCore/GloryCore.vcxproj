@@ -167,6 +167,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Debug.h" />
@@ -177,14 +178,19 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameSettings.h" />
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="GPUMemory.h" />
+    <ClInclude Include="GraphicsMemoryManager.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Module.h" />
     <ClInclude Include="GraphicsModule.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexDefinitions.h" />
+    <ClInclude Include="VertexHelpers.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WindowModule.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Debug.cpp" />
@@ -192,10 +198,12 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="GPUMemory.cpp" />
+    <ClCompile Include="GraphicsMemoryManager.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="GraphicsModule.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowModule.cpp" />
   </ItemGroup>

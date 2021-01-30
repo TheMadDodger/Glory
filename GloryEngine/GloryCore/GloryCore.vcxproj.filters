@@ -16,6 +16,9 @@
     <Filter Include="Console">
       <UniqueIdentifier>{b974db2a-d750-4dc0-8164-62248fe429bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\Graphics\Geometry">
+      <UniqueIdentifier>{8375dcd8-84c1-4519-87e2-b27486800efe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -51,9 +54,6 @@
     <ClInclude Include="Engine.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="VertexBuffer.h">
-      <Filter>Modules\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Commands.h">
       <Filter>Console</Filter>
     </ClInclude>
@@ -65,6 +65,24 @@
     </ClInclude>
     <ClInclude Include="Debug.h">
       <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsMemoryManager.h">
+      <Filter>Modules\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUMemory.h">
+      <Filter>Modules\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Modules\Graphics\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexDefinitions.h">
+      <Filter>Modules\Graphics\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexHelpers.h">
+      <Filter>Modules\Graphics\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Modules\Graphics\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -92,9 +110,6 @@
     <ClCompile Include="Engine.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="VertexBuffer.cpp">
-      <Filter>Modules\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Commands.cpp">
       <Filter>Console</Filter>
     </ClCompile>
@@ -106,6 +121,18 @@
     </ClCompile>
     <ClCompile Include="Debug.cpp">
       <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsMemoryManager.cpp">
+      <Filter>Modules\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUMemory.cpp">
+      <Filter>Modules\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Modules\Graphics\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>Modules\Graphics\Geometry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

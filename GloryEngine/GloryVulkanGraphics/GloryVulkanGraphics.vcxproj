@@ -172,6 +172,8 @@
     <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="VulkanDeviceManager.cpp" />
     <ClCompile Include="VulkanGraphicsModule.cpp" />
+    <ClCompile Include="VulkanMesh.cpp" />
+    <ClCompile Include="VulkanBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h" />
@@ -182,6 +184,8 @@
     <ClInclude Include="VulkanDeviceManager.h" />
     <ClInclude Include="VulkanExceptions.h" />
     <ClInclude Include="VulkanGraphicsModule.h" />
+    <ClInclude Include="VulkanMesh.h" />
+    <ClInclude Include="VulkanBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

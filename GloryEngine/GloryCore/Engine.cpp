@@ -14,6 +14,11 @@ namespace Glory
 		return m_pWindowModule;
 	}
 
+	GraphicsModule* Engine::GetGraphicsModule()
+	{
+		return m_pGraphicsModule;
+	}
+
 	Engine::Engine(const EngineCreateInfo& createInfo) : m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule)
 	{
 		// Copy the optional modules into the optional modules vector

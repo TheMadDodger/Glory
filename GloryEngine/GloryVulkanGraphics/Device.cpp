@@ -61,11 +61,30 @@ namespace Glory
         m_LogicalDeviceData.GraphicsQueue = m_LogicalDeviceData.LogicalDevice.getQueue(m_QueueFamilyIndices.GraphicsFamily.value(), 0);
         m_LogicalDeviceData.PresentQueue = m_LogicalDeviceData.LogicalDevice.getQueue(m_QueueFamilyIndices.PresentFamily.value(), 0);
 
+        CreateGraphicsCommandPool();
     }
 
     vk::PhysicalDevice Device::GetPhysicalDevice()
     {
         return m_PhysicalDevice;
+    }
+
+    uint32_t Device::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags)
+    {
+        for (uint32_t i = 0; i < m_MemoryProperties.memoryTypeCount; i++)
+        {
+            if (typeFilter & (1 << i) && (m_MemoryProperties.memoryTypes[i].propertyFlags & propertyFlags) == propertyFlags)
+            {
+                return i;
+            }
+        }
+
+        throw std::runtime_error("Failed to find suitable memory type!");
+    }
+
+    vk::CommandPool Device::GetGraphicsCommandPool()
+    {
+        return m_GraphicsCommandPool;
     }
 
     Device::Device(vk::PhysicalDevice physicalDevice) : m_PhysicalDevice(physicalDevice), m_cPhysicalDevice((VkPhysicalDevice)physicalDevice),
@@ -81,6 +100,8 @@ namespace Glory
         m_SwapChainSupportDetails.Formats.clear();
         m_SwapChainSupportDetails.PresentModes.clear();
         m_DeviceExtensions.clear();
+
+        if (m_GraphicsCommandPool)m_LogicalDeviceData.LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
 	}
 
 	void Device::LoadData(VulkanGraphicsModule* pGraphicsModule)
@@ -111,6 +132,9 @@ namespace Glory
         vkEnumerateDeviceExtensionProperties(m_cPhysicalDevice, nullptr, &deviceExtensionCount, nullptr);
         m_AvailableExtensions.resize(deviceExtensionCount);
         vkEnumerateDeviceExtensionProperties(m_cPhysicalDevice, nullptr, &deviceExtensionCount, m_AvailableExtensions.data());
+
+        // Get memory properties
+        m_PhysicalDevice.getMemoryProperties(&m_MemoryProperties);
 	}
 
     bool Device::CheckSupport(VulkanGraphicsModule* pGraphicsModule, std::vector<const char*> extensions)
@@ -146,5 +170,17 @@ namespace Glory
 
         m_DidLastSupportCheckPass = true;
         return true;
+    }
+
+    void Device::CreateGraphicsCommandPool()
+    {
+        // Create command pool
+        vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
+            .setQueueFamilyIndex(m_QueueFamilyIndices.GraphicsFamily.value())
+            .setFlags((vk::CommandPoolCreateFlags)0);
+
+        m_GraphicsCommandPool = m_LogicalDeviceData.LogicalDevice.createCommandPool(commandPoolCreateInfo);
+        if (m_GraphicsCommandPool == nullptr)
+            throw std::runtime_error("failed to create command pool!");
     }
 }

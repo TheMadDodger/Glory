@@ -6,6 +6,8 @@
 #include "Device.h"
 #include "SwapChain.h"
 #include <fstream>
+#include "VulkanBuffer.h"
+#include <VertexHelpers.h>
 
 namespace Glory
 {
@@ -38,6 +40,11 @@ namespace Glory
         return m_Instance;
     }
 
+    VulkanDeviceManager* VulkanGraphicsModule::GetDeviceManager()
+    {
+        return m_pDeviceManager;
+    }
+
     const std::vector<const char*>& VulkanGraphicsModule::GetExtensions() const
     {
         return m_Extensions;
@@ -46,6 +53,11 @@ namespace Glory
     const std::vector<const char*>& VulkanGraphicsModule::GetValidationLayers() const
     {
         return m_Layers;
+    }
+
+    Buffer* VulkanGraphicsModule::CreateVertexBuffer_Internal(uint32_t bufferSize)
+    {
+        return nullptr;
     }
 
 	void VulkanGraphicsModule::Initialize()
@@ -140,29 +152,60 @@ namespace Glory
 
         vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo , fragShaderStageInfo };
 
-        // Vertex binding and attributes
-        vk::VertexInputBindingDescription bindingDescription = vk::VertexInputBindingDescription();
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(Vertex);
-        bindingDescription.inputRate = vk::VertexInputRate::eVertex;
+        // Create vertex buffer
+        const Vertex vertices[] = {
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+        };
 
-        std::array<vk::VertexInputAttributeDescription, 2> attributeDescriptions{};
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = vk::Format::eR32G32Sfloat;
-        attributeDescriptions[0].offset = offsetof(Vertex, Pos);
+        const float* verticeArray = (const float*)vertices;
 
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = vk::Format::eR32G32B32Sfloat;
-        attributeDescriptions[1].offset = offsetof(Vertex, Color);
+        uint32_t bufferSize = sizeof(Vertex) * 4;
+        vk::MemoryPropertyFlags stagingFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+        VulkanBuffer* pStagingBuffer = new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+        pStagingBuffer->CreateBuffer();
+        pStagingBuffer->Assign(verticeArray);
+
+        vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
+        vk::BufferUsageFlags usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
+        VulkanBuffer* pVertexBuffer = new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+        pVertexBuffer->CreateBuffer();
+        pVertexBuffer->CopyFrom(pStagingBuffer, bufferSize);
+        m_pVertexBuffer = pVertexBuffer;
+        delete pStagingBuffer;
+
+        const uint16_t indices[] = {
+            0, 1, 2, 2, 3, 0
+        };
+
+        uint32_t indexBufferSize = sizeof(uint32_t) * 6;
+        pStagingBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+        pStagingBuffer->CreateBuffer();
+        pStagingBuffer->Assign(indices);
+
+        usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
+        VulkanBuffer* pIndexBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+        pIndexBuffer->CreateBuffer();
+        pIndexBuffer->CopyFrom(pStagingBuffer, indexBufferSize);
+        m_pIndexBuffer = pIndexBuffer;
+        delete pStagingBuffer;
+
+        const std::vector<AttributeType> attributeTypes = {
+            AttributeType::Float2,
+            AttributeType::Float3,
+        };
+
+        m_pMesh = new VulkanMesh(4, 6, InputRate::Vertex, 0, sizeof(Vertex), attributeTypes);
+        m_pMesh->CreateBindingAndAttributeData();
 
         // Vertex input state
         vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
             .setVertexBindingDescriptionCount(1)
-            .setPVertexBindingDescriptions(&bindingDescription)
-            .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attributeDescriptions.size()))
-            .setPVertexAttributeDescriptions(attributeDescriptions.data());
+            .setPVertexBindingDescriptions(m_pMesh->GetVertexInputBindingDescription())
+            .setVertexAttributeDescriptionCount(static_cast<uint32_t>(m_pMesh->GetVertexInputAttributeDescriptionsCount()))
+            .setPVertexAttributeDescriptions(m_pMesh->GetVertexInputAttributeDescriptions());
 
         // Input assembly
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
@@ -299,23 +342,8 @@ namespace Glory
                 throw std::runtime_error("failed to create framebuffer!");
         }
 
-        auto queueFamilyIndices = m_pDeviceManager->GetSelectedDevice()->GetQueueFamilyIndices();
-
-        // Create command pool
-        vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
-            .setQueueFamilyIndex(queueFamilyIndices.GraphicsFamily.value())
-            .setFlags((vk::CommandPoolCreateFlags)0);
-
-        m_CommandPool = deviceData.LogicalDevice.createCommandPool(commandPoolCreateInfo);
-        if (m_CommandPool == nullptr)
-            throw std::runtime_error("failed to create command pool!");
-
-        // Create vertex buffer
-        const std::vector<Vertex> vertices = {
-            {{0.0f, -0.5f}, {0.5f, 0.1f, 0.6f}},
-            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.8f}},
-            {{-0.5f, 0.5f}, {1.0f, 0.1f, 0.7f}}
-        };
+        //auto queueFamilyIndices = m_pDeviceManager->GetSelectedDevice()->GetQueueFamilyIndices();
+        vk::CommandPool commandPool = m_pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool();
 
         //m_pVertexBuffer = new VertexBuffer({
         //    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -323,54 +351,11 @@ namespace Glory
         //    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
         //});
 
-        vk::BufferCreateInfo bufferCreateInfo = vk::BufferCreateInfo();
-        bufferCreateInfo.size = sizeof(vertices[0]) * vertices.size();
-        bufferCreateInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
-        bufferCreateInfo.sharingMode = vk::SharingMode::eExclusive;
-
-        vk::Result result = deviceData.LogicalDevice.createBuffer(&bufferCreateInfo, nullptr, &m_VertexBuffer);
-        if (result != vk::Result::eSuccess)
-            throw std::runtime_error("failed to create vertex buffer!");
-
-        vk::MemoryRequirements memRequirements;
-        deviceData.LogicalDevice.getBufferMemoryRequirements(m_VertexBuffer, &memRequirements);
-
-        vk::PhysicalDevice physicalDevice = m_pDeviceManager->GetSelectedDevice()->GetPhysicalDevice();
-        vk::PhysicalDeviceMemoryProperties memProperties;
-        physicalDevice.getMemoryProperties(&memProperties);
-
-        uint32_t typeFilter = memRequirements.memoryTypeBits;
-        vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-        uint32_t index;
-        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-        {
-            if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-            {
-                index = i;
-                break;
-            }
-        }
-        vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
-        allocateInfo.allocationSize = memRequirements.size;
-        allocateInfo.memoryTypeIndex = index;
-
-        result = deviceData.LogicalDevice.allocateMemory(&allocateInfo, nullptr, &m_VertexBufferMemory);
-        if (result != vk::Result::eSuccess)
-            throw std::runtime_error("failed to allocate vertex buffer memory!");
-
-        deviceData.LogicalDevice.bindBufferMemory(m_VertexBuffer, m_VertexBufferMemory, 0);
-        void* data;
-        result = deviceData.LogicalDevice.mapMemory(m_VertexBufferMemory, (vk::DeviceSize)0, (vk::DeviceSize)bufferCreateInfo.size, (vk::MemoryMapFlags)0, &data);
-        if (result != vk::Result::eSuccess)
-            throw std::runtime_error("failed to map memory!");
-        memcpy(data, vertices.data(), (size_t)bufferCreateInfo.size);
-        deviceData.LogicalDevice.unmapMemory(m_VertexBufferMemory);
-
         // Create command buffers
         m_CommandBuffers.resize(m_SwapChainFramebuffers.size());
 
         vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
-            .setCommandPool(m_CommandPool)
+            .setCommandPool(commandPool)
             .setLevel(vk::CommandBufferLevel::ePrimary)
             .setCommandBufferCount((uint32_t)m_CommandBuffers.size());
 
@@ -408,11 +393,12 @@ namespace Glory
             m_CommandBuffers[i].beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
             m_CommandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_GraphicsPipeline);
 
-            vk::Buffer vertexBuffers[] = { m_VertexBuffer };
+            vk::Buffer vertexBuffers[] = { pVertexBuffer->GetBuffer() };
             vk::DeviceSize offsets[] = { 0 };
             m_CommandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
+            m_CommandBuffers[i].bindIndexBuffer(pIndexBuffer->GetBuffer(), 0, vk::IndexType::eUint16);
 
-            m_CommandBuffers[i].draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+            m_CommandBuffers[i].drawIndexed(static_cast<uint32_t>(m_pMesh->GetIndexCount()), 1, 0, 0, 0);
             m_CommandBuffers[i].endRenderPass();
             m_CommandBuffers[i].end();
         }
@@ -477,13 +463,18 @@ namespace Glory
         m_SwapChainFramebuffers.clear();
         
         deviceData.LogicalDevice.destroyRenderPass(m_RenderPass);
-        deviceData.LogicalDevice.destroyCommandPool(m_CommandPool);
 
         delete m_pSwapChain;
         m_pSwapChain = nullptr;
 
-        deviceData.LogicalDevice.destroyBuffer(m_VertexBuffer);
-        deviceData.LogicalDevice.freeMemory(m_VertexBufferMemory);
+        delete m_pMesh;
+        m_pMesh = nullptr;
+
+        delete m_pVertexBuffer;
+        m_pVertexBuffer = nullptr;
+
+        delete m_pIndexBuffer;
+        m_pIndexBuffer = nullptr;
 
         m_Instance.destroySurfaceKHR(m_Surface);
         delete m_pDeviceManager;

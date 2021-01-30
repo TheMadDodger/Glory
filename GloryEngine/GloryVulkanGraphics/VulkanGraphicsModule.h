@@ -4,7 +4,8 @@
 #include "VulkanDeviceManager.h"
 #include "QueueFamilyIndices.h"
 #include <vulkan/vulkan.hpp>
-#include <VertexBuffer.h>
+#include <Buffer.h>
+#include "VulkanMesh.h"
 
 namespace Glory
 {
@@ -22,8 +23,12 @@ namespace Glory
 		VkInstance GetCInstance();
 		vk::Instance GetInstance();
 
+		VulkanDeviceManager* GetDeviceManager();
+
 		const std::vector<const char*>& GetExtensions() const;
 		const std::vector<const char*>& GetValidationLayers() const;
+
+		Buffer* CreateVertexBuffer_Internal(uint32_t bufferSize) override;
 
 	private:
 		virtual void Initialize() override;
@@ -61,7 +66,6 @@ namespace Glory
 		vk::PipelineLayout m_PipelineLayout;
 		vk::Pipeline m_GraphicsPipeline;
 		std::vector<vk::Framebuffer> m_SwapChainFramebuffers;
-		vk::CommandPool m_CommandPool;
 		std::vector<vk::CommandBuffer> m_CommandBuffers;
 
 		const size_t MAX_FRAMES_IN_FLIGHT = 2;
@@ -71,10 +75,9 @@ namespace Glory
 		std::vector<vk::Fence> m_ImagesInFlight;
 		size_t m_CurrentFrame = 0;
 
-
-		//VertexBuffer* m_pVertexBuffer;
-		vk::Buffer m_VertexBuffer;
-		vk::DeviceMemory m_VertexBufferMemory;
+		Buffer* m_pVertexBuffer;
+		Buffer* m_pIndexBuffer;
+		VulkanMesh* m_pMesh;
 		
 		static std::vector<char> ReadFile(const std::string& filename);
 

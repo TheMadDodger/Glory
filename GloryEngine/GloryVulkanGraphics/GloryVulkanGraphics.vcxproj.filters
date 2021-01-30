@@ -10,6 +10,9 @@
     <Filter Include="Graphics">
       <UniqueIdentifier>{d812bac3-26d9-4b51-8cc0-876c0b490b4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Buffers">
+      <UniqueIdentifier>{7403910c-2bc0-42e4-9e10-6f6abd9fc0cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VulkanGraphicsModule.cpp">
@@ -26,6 +29,12 @@
     </ClCompile>
     <ClCompile Include="RenderPass.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp">
+      <Filter>Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanBuffer.cpp">
+      <Filter>Buffers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +61,12 @@
     </ClInclude>
     <ClInclude Include="RenderPass.h">
       <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMesh.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanBuffer.h">
+      <Filter>Buffers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

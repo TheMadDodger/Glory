@@ -24,6 +24,7 @@ namespace Glory
 		static Engine* CreateEngine(const EngineCreateInfo& createInfo);
 
 		WindowModule* GetWindowModule();
+		GraphicsModule* GetGraphicsModule();
 
 	private:
 		Engine(const EngineCreateInfo& createInfo);

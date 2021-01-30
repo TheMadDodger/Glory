@@ -29,6 +29,9 @@ namespace Glory
 		const LogicalDeviceData& GetLogicalDeviceData() const;
 		void CreateLogicalDevice(VulkanGraphicsModule* pGraphicsModule);
 		vk::PhysicalDevice GetPhysicalDevice();
+		uint32_t GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
+
+		vk::CommandPool GetGraphicsCommandPool();
 
 	private:
 		Device(vk::PhysicalDevice physicalDevice);
@@ -37,9 +40,12 @@ namespace Glory
 		void LoadData(VulkanGraphicsModule* pGraphicsModule);
 		bool CheckSupport(VulkanGraphicsModule* pGraphicsModule, std::vector<const char*> extensions);
 
+		void CreateGraphicsCommandPool();
+
 	private:
 		friend class VulkanDeviceManager;
 		vk::PhysicalDevice m_PhysicalDevice;
+		vk::PhysicalDeviceMemoryProperties m_MemoryProperties;
 		VkPhysicalDevice m_cPhysicalDevice;
 		std::vector<VkQueueFamilyProperties> m_AvailableQueueFamilies;
 		std::vector<VkExtensionProperties> m_AvailableExtensions;
@@ -48,5 +54,6 @@ namespace Glory
 		SwapChainSupportDetails m_SwapChainSupportDetails;
 		LogicalDeviceData m_LogicalDeviceData;
 		std::vector<const char*> m_DeviceExtensions;
+		vk::CommandPool m_GraphicsCommandPool;
 	};
 }
