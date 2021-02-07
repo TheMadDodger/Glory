@@ -14,7 +14,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -24,7 +23,6 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
@@ -41,3 +39,7 @@ GloryEngine/GlorySDLWindow/Debug/
 GloryEngine/GloryMain/Debug/
 GloryCore/Debug/
 GloryEngine/GloryVulkanGraphics/Debug/
+GloryEngine/GlorySDLImage/Debug/Win32/
+GloryEngine/bin/Engine/
+GloryEngine/Debug/
+GloryEngine/GloryBasicRenderer/Debug/

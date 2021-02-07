@@ -15,6 +15,11 @@ namespace Glory
         return m_pMainWindow;
     }
 
+    const std::type_info& WindowModule::GetModuleType()
+    {
+        return typeid(WindowModule);
+    }
+
     Window* WindowModule::CreateNewWindow(const WindowCreateInfo& createInfo)
     {
         Window* pWindow = CreateWindow_Internal(createInfo);

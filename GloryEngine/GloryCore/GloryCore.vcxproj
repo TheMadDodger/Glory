@@ -179,11 +179,17 @@
     <ClInclude Include="GameSettings.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="GPUMemory.h" />
+    <ClInclude Include="GraphicsEnums.h" />
     <ClInclude Include="GraphicsMemoryManager.h" />
+    <ClInclude Include="ImageLoaderModule.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Module.h" />
     <ClInclude Include="GraphicsModule.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ResourceLoaderModule.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="ImageData.h" />
     <ClInclude Include="VertexDefinitions.h" />
     <ClInclude Include="VertexHelpers.h" />
     <ClInclude Include="Window.h" />
@@ -200,10 +206,15 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="GPUMemory.cpp" />
     <ClCompile Include="GraphicsMemoryManager.cpp" />
+    <ClCompile Include="ImageLoaderModule.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="GraphicsModule.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="ResourceLoaderModule.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ImageData.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowModule.cpp" />
   </ItemGroup>

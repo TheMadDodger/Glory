@@ -26,6 +26,15 @@ namespace Glory
 		WindowModule* GetWindowModule();
 		GraphicsModule* GetGraphicsModule();
 
+		template<class T>
+		T* GetModule()
+		{
+			Module* pModule = GetModule(typeid(T));
+			return (T*)pModule;
+		}
+
+		Module* GetModule(const std::type_info& type);
+
 	private:
 		Engine(const EngineCreateInfo& createInfo);
 		virtual ~Engine();

@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include <typeinfo>
 
 namespace Glory
 {
@@ -8,6 +9,8 @@ namespace Glory
 	public:
 		Module();
 		virtual ~Module();
+
+		virtual const std::type_info& GetModuleType() = 0;
 
 	protected:
 		virtual void Initialize() = 0;

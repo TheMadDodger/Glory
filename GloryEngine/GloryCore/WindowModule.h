@@ -13,6 +13,8 @@ namespace Glory
 
 		Window* GetMainWindow();
 
+		virtual const std::type_info& GetModuleType() override;
+
 	public: // Module functions
 		Window* CreateNewWindow(const WindowCreateInfo& createInfo);
 		virtual void OpenMessageBox(const std::string& message);

@@ -19,3 +19,4 @@
 #include <GloryCore.h>
 #include <SDLWindowModule.h>
 #include <VulkanGraphicsModule.h>
+#include <SDLImageLoaderModule.h>

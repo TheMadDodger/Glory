@@ -10,6 +10,8 @@ namespace Glory
         GraphicsModule();
         virtual ~GraphicsModule();
 
+        virtual const std::type_info& GetModuleType() override;
+
     public: // Module functions
         Buffer* CreateVertexBuffer(uint32_t bufferSize);
 

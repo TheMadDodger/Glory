@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Module">
+      <UniqueIdentifier>{be2933b4-97e6-4661-8620-46e29e68a034}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SDLImageLoaderModule.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="SDLTexture2D.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SDLImageLoaderModule.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="SDLTexture2D.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

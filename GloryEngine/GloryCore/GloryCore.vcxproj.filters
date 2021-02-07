@@ -19,6 +19,15 @@
     <Filter Include="Modules\Graphics\Geometry">
       <UniqueIdentifier>{8375dcd8-84c1-4519-87e2-b27486800efe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\Image">
+      <UniqueIdentifier>{2fb6bca1-20db-4703-8d2f-1a08ee6a0191}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\ResourceLoading">
+      <UniqueIdentifier>{edd496af-3764-4d40-abe3-dd89c48b0cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\ResourceLoading\Textures">
+      <UniqueIdentifier>{80fd8452-6ac6-48ac-8f11-25a9b94356cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -84,6 +93,24 @@
     <ClInclude Include="Buffer.h">
       <Filter>Modules\Graphics\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Modules\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceLoaderModule.h">
+      <Filter>Modules\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Modules\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageLoaderModule.h">
+      <Filter>Modules\ResourceLoading\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEnums.h">
+      <Filter>Modules\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageData.h">
+      <Filter>Modules\ResourceLoading\Textures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -133,6 +160,21 @@
     </ClCompile>
     <ClCompile Include="Buffer.cpp">
       <Filter>Modules\Graphics\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Modules\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceLoaderModule.cpp">
+      <Filter>Modules\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Modules\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageLoaderModule.cpp">
+      <Filter>Modules\ResourceLoading\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageData.cpp">
+      <Filter>Modules\ResourceLoading\Textures</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

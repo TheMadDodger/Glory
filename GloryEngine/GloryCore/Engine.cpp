@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "Console.h"
+#include <algorithm>
 
 namespace Glory
 {
@@ -19,13 +20,27 @@ namespace Glory
 		return m_pGraphicsModule;
 	}
 
+	Module* Engine::GetModule(const std::type_info& type)
+	{
+		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetModuleType() == type;
+		});
+
+		if (it == m_pAllModules.end()) return nullptr;
+		return *it;
+	}
+
 	Engine::Engine(const EngineCreateInfo& createInfo) : m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
 		{
 			m_pOptionalModules.resize(createInfo.OptionalModuleCount);
-			memcpy(m_pOptionalModules.data(), createInfo.pOptionalModules, (size_t)createInfo.OptionalModuleCount);
+			for (size_t i = 0; i < createInfo.OptionalModuleCount; i++)
+			{
+				m_pOptionalModules[i] = createInfo.pOptionalModules[i];
+			}
 		}
 
 		// Fill in the all modules vector with the required modules first
@@ -36,7 +51,10 @@ namespace Glory
 		// Add optional modules
 		size_t currentSize = m_pAllModules.size();
 		m_pAllModules.resize(currentSize + m_pOptionalModules.size());
-		memcpy(&m_pAllModules[0], m_pOptionalModules.data(), m_pOptionalModules.size());
+		for (size_t i = 0; i < m_pOptionalModules.size(); i++)
+		{
+			m_pAllModules[currentSize + i] = m_pOptionalModules[i];
+		}
 	}
 
 	Engine::~Engine()

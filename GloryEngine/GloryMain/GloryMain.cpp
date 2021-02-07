@@ -14,11 +14,13 @@ int main()
         windowCreateInfo.Height = 720;
         windowCreateInfo.WindowFlags = SDL_WINDOW_VULKAN;
 
+        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule() };
+
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);
         createInfo.pGraphicsModule = new Glory::VulkanGraphicsModule();
-        createInfo.OptionalModuleCount = 0;
-        createInfo.pOptionalModules = nullptr;
+        createInfo.OptionalModuleCount = static_cast<uint32_t>(optionalModules.size());
+        createInfo.pOptionalModules = optionalModules.data();
         Glory::Engine* pEngine = Glory::Engine::CreateEngine(createInfo);
 
         Glory::GameSettings gameSettings;
