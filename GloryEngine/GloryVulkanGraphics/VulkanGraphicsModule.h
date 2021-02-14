@@ -1,15 +1,26 @@
 #pragma once
+#define GLM_FORCE_RADIANS
 #include <GraphicsModule.h>
 #include <WindowModule.h>
 #include "VulkanDeviceManager.h"
 #include "QueueFamilyIndices.h"
 #include <vulkan/vulkan.hpp>
-#include <Buffer.h>
+#include "VulkanBuffer.h"
 #include "VulkanMesh.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include "VulkanTexture.h"
 
 namespace Glory
 {
 	class SwapChain;
+
+	struct UniformBufferObject
+	{
+		alignas(16) glm::mat4 model;
+		alignas(16) glm::mat4 view;
+		alignas(16) glm::mat4 proj;
+	};
 
 	class VulkanGraphicsModule : public GraphicsModule
 	{
@@ -30,6 +41,11 @@ namespace Glory
 
 		Buffer* CreateVertexBuffer_Internal(uint32_t bufferSize) override;
 
+		// Temporary will need to be moved
+		static vk::CommandBuffer BeginSingleTimeCommands();
+		static void EndSingleTimeCommands(vk::CommandBuffer commandBuffer);
+		static void TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+
 	private:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
@@ -44,6 +60,8 @@ namespace Glory
 		void LoadPhysicalDevices();
 		void CreateLogicalDevice();
 		void CreateSwapChain();
+
+		void UpdateUniformBuffer(uint32_t imageIndex);
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 
@@ -60,9 +78,12 @@ namespace Glory
 		std::vector<VkQueueFamilyProperties> m_AvailableQueueFamilies;
 		QueueFamilyIndices m_QueueFamilyIndices;
 		SwapChain* m_pSwapChain;
+		vk::DescriptorPool m_DescriptorPool;
+		std::vector<vk::DescriptorSet> m_DescriptorSets;
 
 		// TEMPORARY
 		vk::RenderPass m_RenderPass;
+		vk::DescriptorSetLayout m_DescriptorSetLayout;
 		vk::PipelineLayout m_PipelineLayout;
 		vk::Pipeline m_GraphicsPipeline;
 		std::vector<vk::Framebuffer> m_SwapChainFramebuffers;
@@ -78,6 +99,9 @@ namespace Glory
 		Buffer* m_pVertexBuffer;
 		Buffer* m_pIndexBuffer;
 		VulkanMesh* m_pMesh;
+		VulkanTexture* m_pTexture;
+
+		std::vector<VulkanBuffer*> m_pUniformBufers;
 		
 		static std::vector<char> ReadFile(const std::string& filename);
 

@@ -32,6 +32,7 @@ namespace Glory
 		uint32_t GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
 		vk::CommandPool GetGraphicsCommandPool();
+		const vk::PhysicalDeviceProperties& GetDeviceProperties() const;
 
 	private:
 		Device(vk::PhysicalDevice physicalDevice);
@@ -55,5 +56,7 @@ namespace Glory
 		LogicalDeviceData m_LogicalDeviceData;
 		std::vector<const char*> m_DeviceExtensions;
 		vk::CommandPool m_GraphicsCommandPool;
+		vk::PhysicalDeviceFeatures m_Features;
+		vk::PhysicalDeviceProperties m_DeviceProperties;
 	};
 }

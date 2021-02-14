@@ -23,23 +23,6 @@ namespace Glory
 
     void VulkanBuffer::CreateBuffer()
 	{
-        // Vertex binding and attributes
-        //vk::VertexInputBindingDescription bindingDescription = vk::VertexInputBindingDescription();
-        //bindingDescription.binding = 0;
-        //bindingDescription.stride = sizeof(Vertex);
-        //bindingDescription.inputRate = vk::VertexInputRate::eVertex;
-        //
-        //std::array<vk::VertexInputAttributeDescription, 2> attributeDescriptions{};
-        //attributeDescriptions[0].binding = 0;
-        //attributeDescriptions[0].location = 0;
-        //attributeDescriptions[0].format = vk::Format::eR32G32Sfloat;
-        //attributeDescriptions[0].offset = offsetof(Vertex, Pos);
-        //
-        //attributeDescriptions[1].binding = 0;
-        //attributeDescriptions[1].location = 1;
-        //attributeDescriptions[1].format = vk::Format::eR32G32B32Sfloat;
-        //attributeDescriptions[1].offset = offsetof(Vertex, Color);
-
         m_BufferCreateInfo = vk::BufferCreateInfo();
         m_BufferCreateInfo.size = (vk::DeviceSize)m_BufferSize;
         m_BufferCreateInfo.usage = (vk::BufferUsageFlags)m_UsageFlag; //vk::BufferUsageFlagBits::eVertexBuffer;
@@ -105,16 +88,6 @@ namespace Glory
 
     void VulkanBuffer::CopyFrom(Buffer* source, uint32_t size)
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
-        vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
-
-        vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
-        allocInfo.level = vk::CommandBufferLevel::ePrimary;
-        allocInfo.commandPool = commandPool;
-        allocInfo.commandBufferCount = 1;
-
         // Memory transfer operations are executed using command buffers,
         // just like drawing commands. Therefore we must first allocate a temporary command buffer.
         // You may wish to create a separate command pool for these kinds of short-lived buffers,
@@ -122,30 +95,15 @@ namespace Glory
         // You should use the VK_COMMAND_POOL_CREATE_TRANSIENT_BIT flag
         // during command pool generation in that case.
 
-        vk::CommandBuffer commandBuffer;
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
-        if (deviceData.LogicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer) != vk::Result::eSuccess)
-            throw std::runtime_error("Failed to allocate command buffer!");
+        vk::CommandBuffer commandBuffer = VulkanGraphicsModule::BeginSingleTimeCommands();
 
-        vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo();
-        beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-
-        commandBuffer.begin(beginInfo);
         vk::BufferCopy copyRegion = vk::BufferCopy();
         copyRegion.srcOffset = 0; // Optional
         copyRegion.dstOffset = 0; // Optional
         copyRegion.size = size;
         commandBuffer.copyBuffer(((VulkanBuffer*)source)->m_Buffer, m_Buffer, 1, &copyRegion);
-        commandBuffer.end();
 
-        vk::SubmitInfo submitInfo = vk::SubmitInfo();
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-
-        deviceData.GraphicsQueue.submit(1, &submitInfo, VK_NULL_HANDLE);
-        deviceData.GraphicsQueue.waitIdle();
-
-        deviceData.LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
+        VulkanGraphicsModule::EndSingleTimeCommands(commandBuffer);
     }
 
     vk::Buffer VulkanBuffer::GetBuffer()

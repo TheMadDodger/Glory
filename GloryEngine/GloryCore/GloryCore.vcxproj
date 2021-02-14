@@ -190,6 +190,7 @@
     <ClInclude Include="ResourceLoaderModule.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ImageData.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="VertexDefinitions.h" />
     <ClInclude Include="VertexHelpers.h" />
     <ClInclude Include="Window.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="ResourceLoaderModule.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ImageData.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowModule.cpp" />
   </ItemGroup>

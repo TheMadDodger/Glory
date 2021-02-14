@@ -111,6 +111,9 @@
     <ClInclude Include="ImageData.h">
       <Filter>Modules\ResourceLoading\Textures</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Modules\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -175,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="ImageData.cpp">
       <Filter>Modules\ResourceLoading\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Modules\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

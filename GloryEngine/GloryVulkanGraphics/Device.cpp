@@ -44,6 +44,7 @@ namespace Glory
             .setPEnabledFeatures(&deviceFeatures)
             .setEnabledExtensionCount(static_cast<uint32_t>(m_DeviceExtensions.size()))
             .setPpEnabledExtensionNames(m_DeviceExtensions.data());
+        deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 #if defined(_DEBUG)
         const std::vector<const char*>& validationLayers = pGraphicsModule->GetValidationLayers();
@@ -85,6 +86,11 @@ namespace Glory
     vk::CommandPool Device::GetGraphicsCommandPool()
     {
         return m_GraphicsCommandPool;
+    }
+
+    const vk::PhysicalDeviceProperties& Device::GetDeviceProperties() const
+    {
+        return m_DeviceProperties;
     }
 
     Device::Device(vk::PhysicalDevice physicalDevice) : m_PhysicalDevice(physicalDevice), m_cPhysicalDevice((VkPhysicalDevice)physicalDevice),
@@ -135,6 +141,9 @@ namespace Glory
 
         // Get memory properties
         m_PhysicalDevice.getMemoryProperties(&m_MemoryProperties);
+
+        // Get device properties
+        m_PhysicalDevice.getProperties(&m_DeviceProperties);
 	}
 
     bool Device::CheckSupport(VulkanGraphicsModule* pGraphicsModule, std::vector<const char*> extensions)
@@ -169,6 +178,11 @@ namespace Glory
         if (!swapChainAdequite) return false;
 
         m_DidLastSupportCheckPass = true;
+
+        // Check feature support
+        m_PhysicalDevice.getFeatures(&m_Features);
+        if (!m_Features.samplerAnisotropy) return false;
+
         return true;
     }
 

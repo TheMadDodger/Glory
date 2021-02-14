@@ -36,6 +36,15 @@
     <ClCompile Include="VulkanBuffer.cpp">
       <Filter>Buffers</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanTexture.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanImageSampler.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanStructsConverter.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanGraphicsModule.h">
@@ -67,6 +76,15 @@
     </ClInclude>
     <ClInclude Include="VulkanBuffer.h">
       <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTexture.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanImageSampler.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanStructsConverter.h">
+      <Filter>Module</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

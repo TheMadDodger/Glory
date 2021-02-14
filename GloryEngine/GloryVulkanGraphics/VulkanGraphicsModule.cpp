@@ -8,6 +8,8 @@
 #include <fstream>
 #include "VulkanBuffer.h"
 #include <VertexHelpers.h>
+#include <chrono>
+#include <ImageLoaderModule.h>
 
 namespace Glory
 {
@@ -121,10 +123,129 @@ namespace Glory
             throw std::runtime_error("failed to create render pass!");
         }
 
+        // Create texture
+        ImageLoaderModule* pImageLoader = Game::GetGame().GetEngine()->GetModule<ImageLoaderModule>();
+        ImageData* pImageData = (ImageData*)pImageLoader->Load("./Resources/chubz.PNG");
+
+        SamplerSettings samplerSettings = SamplerSettings();
+        samplerSettings.MagFilter = Filter::F_Linear;
+        samplerSettings.MinFilter = Filter::F_Linear;
+        samplerSettings.AddressModeU = SamplerAddressMode::SAM_Repeat;
+        samplerSettings.AddressModeV = SamplerAddressMode::SAM_Repeat;
+        samplerSettings.AddressModeW = SamplerAddressMode::SAM_Repeat;
+        samplerSettings.AnisotropyEnable = true;
+        samplerSettings.MaxAnisotropy = m_pDeviceManager->GetSelectedDevice()->GetDeviceProperties().limits.maxSamplerAnisotropy;
+        samplerSettings.UnnormalizedCoordinates = false;
+        samplerSettings.CompareEnable = false;
+        samplerSettings.CompareOp = CompareOp::OP_Always;
+        samplerSettings.MipmapMode = Filter::F_Linear;
+        samplerSettings.MipLODBias = 0.0f;
+        samplerSettings.MinLOD = 0.0f;
+        samplerSettings.MaxLOD = 0.0f;
+
+        vk::ImageUsageFlags imageUsageFlags = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
+        m_pTexture = new VulkanTexture(pImageData, ImageType::IT_2D, (uint32_t)imageUsageFlags, (uint32_t)vk::SharingMode::eExclusive, ImageAspect::IA_Color, samplerSettings);
+        m_pTexture->Create();
+
+        /// Create descriptor set layout
+        vk::DescriptorSetLayoutBinding uboLayoutBinding = vk::DescriptorSetLayoutBinding();
+        uboLayoutBinding.binding = 0;
+        uboLayoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+        uboLayoutBinding.descriptorCount = 1;
+        uboLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+        uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+        // For the texture sampler
+        vk::DescriptorSetLayoutBinding samplerLayoutBinding = vk::DescriptorSetLayoutBinding();
+        samplerLayoutBinding.binding = 1;
+        samplerLayoutBinding.descriptorCount = 1;
+        samplerLayoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+        samplerLayoutBinding.pImmutableSamplers = nullptr;
+        samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eFragment;
+
+        std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+
+        vk::DescriptorSetLayoutCreateInfo layoutInfo = vk::DescriptorSetLayoutCreateInfo();
+        layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+        layoutInfo.pBindings = bindings.data();
+
+        if (deviceData.LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &m_DescriptorSetLayout) != vk::Result::eSuccess)
+            throw std::runtime_error("Failed to create descriptor set layout!");
+
+        // Create descriptor pool
+        std::array<vk::DescriptorPoolSize, 2> poolSizes{};
+        poolSizes[0].type = vk::DescriptorType::eUniformBuffer;
+        poolSizes[0].descriptorCount = static_cast<uint32_t>(m_pSwapChain->GetImageCount());
+
+        poolSizes[1].type = vk::DescriptorType::eCombinedImageSampler;
+        poolSizes[1].descriptorCount = static_cast<uint32_t>(m_pSwapChain->GetImageCount());
+
+        vk::DescriptorPoolCreateInfo poolInfo = vk::DescriptorPoolCreateInfo();
+        poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+        poolInfo.pPoolSizes = poolSizes.data();
+        poolInfo.maxSets = static_cast<uint32_t>(m_pSwapChain->GetImageCount());
+
+        if(deviceData.LogicalDevice.createDescriptorPool(&poolInfo, nullptr, &m_DescriptorPool) != vk::Result::eSuccess)
+            throw std::runtime_error("Failed to create descriptor pool!");
+
+        // Create uniform buffers
+        m_pUniformBufers.resize(m_pSwapChain->GetImageCount());
+        vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+        for (size_t i = 0; i < m_pSwapChain->GetImageCount(); i++)
+        {
+            m_pUniformBufers[i] = new VulkanBuffer(sizeof(UniformBufferObject), (uint32_t)vk::BufferUsageFlagBits::eUniformBuffer, (uint32_t)memoryFlags);
+            m_pUniformBufers[i]->CreateBuffer();
+        }
+
+        // Create descriptor sets
+        std::vector<vk::DescriptorSetLayout> layouts(m_pSwapChain->GetImageCount(), m_DescriptorSetLayout);
+        vk::DescriptorSetAllocateInfo allocInfo = vk::DescriptorSetAllocateInfo();
+        allocInfo.descriptorPool = m_DescriptorPool;
+        allocInfo.descriptorSetCount = static_cast<uint32_t>(m_pSwapChain->GetImageCount());
+        allocInfo.pSetLayouts = layouts.data();
+
+        m_DescriptorSets.resize(m_pSwapChain->GetImageCount());
+        if(deviceData.LogicalDevice.allocateDescriptorSets(&allocInfo, m_DescriptorSets.data()) != vk::Result::eSuccess)
+            throw std::runtime_error("Failed to allocate descriptor sets!");
+
+        for (size_t i = 0; i < m_pSwapChain->GetImageCount(); i++)
+        {
+            vk::DescriptorBufferInfo bufferInfo = vk::DescriptorBufferInfo();
+            bufferInfo.buffer = m_pUniformBufers[i]->GetBuffer();
+            bufferInfo.offset = 0;
+            bufferInfo.range = sizeof(UniformBufferObject);
+
+            vk::DescriptorImageInfo imageInfo = vk::DescriptorImageInfo();
+            imageInfo.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+            imageInfo.imageView = m_pTexture->GetTextureImageView();
+            imageInfo.sampler = m_pTexture->GetTextureSampler();
+
+            std::array<vk::WriteDescriptorSet, 2> descriptorWrites{};
+            descriptorWrites[0].dstSet = m_DescriptorSets[i];
+            descriptorWrites[0].dstBinding = 0;
+            descriptorWrites[0].dstArrayElement = 0;
+            descriptorWrites[0].descriptorType = vk::DescriptorType::eUniformBuffer;
+            descriptorWrites[0].descriptorCount = 1;
+            descriptorWrites[0].pBufferInfo = &bufferInfo;
+            descriptorWrites[0].pImageInfo = nullptr;
+            descriptorWrites[0].pTexelBufferView = nullptr;
+
+            descriptorWrites[1].dstSet = m_DescriptorSets[i];
+            descriptorWrites[1].dstBinding = 1;
+            descriptorWrites[1].dstArrayElement = 0;
+            descriptorWrites[1].descriptorType = vk::DescriptorType::eCombinedImageSampler;
+            descriptorWrites[1].descriptorCount = 1;
+            descriptorWrites[1].pImageInfo = &imageInfo;
+            descriptorWrites[1].pBufferInfo = nullptr;
+            descriptorWrites[1].pTexelBufferView = nullptr;
+
+            deviceData.LogicalDevice.updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        }
+
         /// Create graphics pipeline
         // Load shaders
-        auto vertShaderCode = ReadFile("Shaders/vertexbuffertest_vert.spv");
-        auto fragShaderCode = ReadFile("Shaders/triangle_frag.spv");
+        auto vertShaderCode = ReadFile("Shaders/texturetest_vert.spv");
+        auto fragShaderCode = ReadFile("Shaders/texturetest_frag.spv");
 
         // Create shader modules
         vk::ShaderModule vertShaderModule;
@@ -153,22 +274,22 @@ namespace Glory
         vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo , fragShaderStageInfo };
 
         // Create vertex buffer
-        const Vertex vertices[] = {
-            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+        const VertexPosColorTex vertices[] = {
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
         };
 
         const float* verticeArray = (const float*)vertices;
 
-        uint32_t bufferSize = sizeof(Vertex) * 4;
+        uint32_t bufferSize = sizeof(VertexPosColorTex) * 4;
         vk::MemoryPropertyFlags stagingFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
         VulkanBuffer* pStagingBuffer = new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
         pStagingBuffer->CreateBuffer();
         pStagingBuffer->Assign(verticeArray);
-
-        vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
+        
+        memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
         vk::BufferUsageFlags usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
         VulkanBuffer* pVertexBuffer = new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
         pVertexBuffer->CreateBuffer();
@@ -195,9 +316,10 @@ namespace Glory
         const std::vector<AttributeType> attributeTypes = {
             AttributeType::Float2,
             AttributeType::Float3,
+            AttributeType::Float2,
         };
 
-        m_pMesh = new VulkanMesh(4, 6, InputRate::Vertex, 0, sizeof(Vertex), attributeTypes);
+        m_pMesh = new VulkanMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex), attributeTypes);
         m_pMesh->CreateBindingAndAttributeData();
 
         // Vertex input state
@@ -240,7 +362,7 @@ namespace Glory
             .setPolygonMode(vk::PolygonMode::eFill)
             .setLineWidth(1.0f)
             .setCullMode(vk::CullModeFlagBits::eBack)
-            .setFrontFace(vk::FrontFace::eClockwise)
+            .setFrontFace(vk::FrontFace::eCounterClockwise)
             .setDepthBiasEnable(VK_FALSE)
             .setDepthBiasConstantFactor(0.0f)
             .setDepthBiasClamp(0.0f)
@@ -284,8 +406,8 @@ namespace Glory
         //    .setPDynamicStates(dynamicStates);
 
         vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-            .setSetLayoutCount(0)
-            .setPSetLayouts(nullptr)
+            .setSetLayoutCount(1)
+            .setPSetLayouts(&m_DescriptorSetLayout)
             .setPushConstantRangeCount(0)
             .setPPushConstantRanges(nullptr);
 
@@ -398,6 +520,8 @@ namespace Glory
             m_CommandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
             m_CommandBuffers[i].bindIndexBuffer(pIndexBuffer->GetBuffer(), 0, vk::IndexType::eUint16);
 
+            m_CommandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_PipelineLayout, 0, 1, &m_DescriptorSets[i], 0, nullptr);
+
             m_CommandBuffers[i].drawIndexed(static_cast<uint32_t>(m_pMesh->GetIndexCount()), 1, 0, 0, 0);
             m_CommandBuffers[i].endRenderPass();
             m_CommandBuffers[i].end();
@@ -467,6 +591,18 @@ namespace Glory
         delete m_pSwapChain;
         m_pSwapChain = nullptr;
 
+        for (size_t i = 0; i < m_pUniformBufers.size(); i++)
+        {
+            delete m_pUniformBufers[i];
+        }
+        m_pUniformBufers.clear();
+
+        VulkanImageSampler::Destroy();
+        delete m_pTexture;
+
+        deviceData.LogicalDevice.destroyDescriptorPool(m_DescriptorPool);
+        deviceData.LogicalDevice.destroyDescriptorSetLayout(m_DescriptorSetLayout);
+
         delete m_pMesh;
         m_pMesh = nullptr;
 
@@ -501,6 +637,8 @@ namespace Glory
         }
         // Mark the image as now being in use by this frame
         m_ImagesInFlight[imageIndex] = m_InFlightFences[m_CurrentFrame];
+
+        UpdateUniformBuffer(imageIndex);
 
         // Submit command buffer
         vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
@@ -673,11 +811,120 @@ namespace Glory
         m_pSwapChain->Initialize(this);
     }
 
+    void VulkanGraphicsModule::UpdateUniformBuffer(uint32_t imageIndex)
+    {
+        static auto startTime = std::chrono::high_resolution_clock::now();
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+        UniformBufferObject ubo{};
+        ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        auto extent = m_pSwapChain->GetExtent();
+        ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+        ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan
+        m_pUniformBufers[imageIndex]->Assign(&ubo);
+
+    }
+
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsModule::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
     {
         if (messageSeverity != VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT && messageSeverity != VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) return VK_FALSE;
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
         return VK_FALSE;
+    }
+
+    vk::CommandBuffer VulkanGraphicsModule::BeginSingleTimeCommands()
+    {
+        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
+        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
+
+        vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
+        allocInfo.level = vk::CommandBufferLevel::ePrimary;
+        allocInfo.commandPool = commandPool;
+        allocInfo.commandBufferCount = 1;
+
+        vk::CommandBuffer commandBuffer;
+        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+        if (deviceData.LogicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer) != vk::Result::eSuccess)
+            throw std::runtime_error("Failed to allocate command buffer!");
+
+        vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo();
+        beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+        commandBuffer.begin(beginInfo);
+        return commandBuffer;
+    }
+
+    void VulkanGraphicsModule::EndSingleTimeCommands(vk::CommandBuffer commandBuffer)
+    {
+        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
+        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
+        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+
+        commandBuffer.end();
+
+        vk::SubmitInfo submitInfo = vk::SubmitInfo();
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        deviceData.GraphicsQueue.submit(1, &submitInfo, VK_NULL_HANDLE);
+        deviceData.GraphicsQueue.waitIdle();
+
+        deviceData.LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
+    }
+
+    void VulkanGraphicsModule::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
+    {
+        vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+        vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier();
+        barrier.oldLayout = oldLayout;
+        barrier.newLayout = newLayout;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = image;
+        barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = 1;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+
+        vk::PipelineStageFlags sourceStage;
+        vk::PipelineStageFlags destinationStage;
+
+        if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal) {
+            barrier.srcAccessMask = (vk::AccessFlags)0;
+            barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+            sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+            destinationStage = vk::PipelineStageFlagBits::eTransfer;
+        }
+        else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
+            barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+            barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+            sourceStage = vk::PipelineStageFlagBits::eTransfer;
+            destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+        }
+        else {
+            throw std::invalid_argument("Unsupported layout transition!");
+        }
+
+        commandBuffer.pipelineBarrier(
+            sourceStage, destinationStage,
+            (vk::DependencyFlags)0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+        );
+
+        EndSingleTimeCommands(commandBuffer);
     }
 
     std::vector<char> VulkanGraphicsModule::ReadFile(const std::string& filename)
