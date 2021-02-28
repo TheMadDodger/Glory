@@ -1,6 +1,7 @@
 #pragma once
 #include "VertexDefinitions.h"
 #include <vector>
+#include "MeshData.h"
 
 namespace Glory
 {

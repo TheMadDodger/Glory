@@ -33,6 +33,9 @@ namespace Glory
 
 		vk::CommandPool GetGraphicsCommandPool();
 		const vk::PhysicalDeviceProperties& GetDeviceProperties() const;
+		vk::Format FindSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
+		vk::Format FindDepthFormat();
+		bool HasStencilComponent(vk::Format format);
 
 	private:
 		Device(vk::PhysicalDevice physicalDevice);

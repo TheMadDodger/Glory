@@ -11,7 +11,7 @@ namespace Glory
 	{
 	}
 
-	ImageData* ImageLoaderModule::LoadResource(const std::string& path)
+	ImageData* ImageLoaderModule::LoadResource(const std::string& path, const ImportSettings&)
 	{
 		ImageData* pTexture = LoadTexture(path);
 		pTexture->BuildTexture();

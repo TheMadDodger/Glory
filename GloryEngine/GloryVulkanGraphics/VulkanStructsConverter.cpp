@@ -157,4 +157,33 @@ namespace Glory
         samplerInfo.maxLod = settings.MaxLOD;
         return samplerInfo;
     }
+
+    vk::Format VKConverter::GetVulkanFormat(const PixelFormat& format)
+    {
+        int f = (int)format;
+        if (f >= 1000156000)
+            throw std::runtime_error("Format not supported");
+        return (vk::Format)format;
+    }
+
+    vk::ShaderStageFlagBits VKConverter::GetShaderStageFlag(const ShaderType& shaderType)
+    {
+        switch (shaderType)
+        {
+        case ShaderType::ST_Vertex:
+            return vk::ShaderStageFlagBits::eVertex;
+        case ShaderType::ST_Fragment:
+            return vk::ShaderStageFlagBits::eFragment;
+        case ShaderType::ST_Geomtery:
+            return vk::ShaderStageFlagBits::eGeometry;
+        case ShaderType::ST_TessControl:
+            return vk::ShaderStageFlagBits::eTessellationControl;
+        case ShaderType::ST_TessEval:
+            return vk::ShaderStageFlagBits::eTessellationEvaluation;
+        case ShaderType::ST_Compute:
+            return vk::ShaderStageFlagBits::eCompute;
+        }
+
+        return vk::ShaderStageFlagBits();
+    }
 }

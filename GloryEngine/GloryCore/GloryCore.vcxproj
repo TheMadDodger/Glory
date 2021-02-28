@@ -182,7 +182,11 @@
     <ClInclude Include="GraphicsEnums.h" />
     <ClInclude Include="GraphicsMemoryManager.h" />
     <ClInclude Include="ImageLoaderModule.h" />
+    <ClInclude Include="ImportSettings.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshData.h" />
+    <ClInclude Include="ModelData.h" />
+    <ClInclude Include="ModelLoaderModule.h" />
     <ClInclude Include="Module.h" />
     <ClInclude Include="GraphicsModule.h" />
     <ClInclude Include="Object.h" />
@@ -190,6 +194,8 @@
     <ClInclude Include="ResourceLoaderModule.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ImageData.h" />
+    <ClInclude Include="FileData.h" />
+    <ClInclude Include="FileLoaderModule.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VertexDefinitions.h" />
     <ClInclude Include="VertexHelpers.h" />
@@ -208,7 +214,11 @@
     <ClCompile Include="GPUMemory.cpp" />
     <ClCompile Include="GraphicsMemoryManager.cpp" />
     <ClCompile Include="ImageLoaderModule.cpp" />
+    <ClCompile Include="ImportSettings.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshData.cpp" />
+    <ClCompile Include="ModelData.cpp" />
+    <ClCompile Include="ModelLoaderModule.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="GraphicsModule.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -216,6 +226,8 @@
     <ClCompile Include="ResourceLoaderModule.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ImageData.cpp" />
+    <ClCompile Include="FileData.cpp" />
+    <ClCompile Include="FileLoaderModule.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowModule.cpp" />

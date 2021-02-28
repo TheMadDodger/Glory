@@ -10,6 +10,9 @@
 #include <VertexHelpers.h>
 #include <chrono>
 #include <ImageLoaderModule.h>
+#include <ModelLoaderModule.h>
+#include <FileLoaderModule.h>
+#include "VulkanShader.h"
 
 namespace Glory
 {
@@ -79,73 +82,12 @@ namespace Glory
         LoadPhysicalDevices();
         CreateLogicalDevice();
         CreateSwapChain();
-
-        // Create render pass
-        vk::AttachmentDescription colorAttachment = vk::AttachmentDescription()
-            .setFormat(m_pSwapChain->GetFormat())
-            .setSamples(vk::SampleCountFlagBits::e1)
-            .setLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStoreOp(vk::AttachmentStoreOp::eStore)
-            .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-            .setInitialLayout(vk::ImageLayout::eUndefined)
-            .setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
-
-        vk::AttachmentReference colorAttachmentRef = vk::AttachmentReference()
-            .setAttachment(0)
-            .setLayout(vk::ImageLayout::eColorAttachmentOptimal);
-
-        vk::SubpassDescription subPass = vk::SubpassDescription()
-            .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-            .setColorAttachmentCount(1)
-            .setPColorAttachments(&colorAttachmentRef);
-
-        vk::SubpassDependency dependancy = vk::SubpassDependency()
-            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-            .setDstSubpass(0)
-            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setSrcAccessMask((vk::AccessFlags)0)
-            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
-
-        vk::RenderPassCreateInfo renderPassCreateInfo = vk::RenderPassCreateInfo()
-            .setAttachmentCount(1)
-            .setPAttachments(&colorAttachment)
-            .setSubpassCount(1)
-            .setPSubpasses(&subPass)
-            .setDependencyCount(1)
-            .setPDependencies(&dependancy);
+        CreateDepthResources();
+        CreateMainRenderPass();
+        CreateTexture();
+        CreateMesh();
 
         auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        m_RenderPass = deviceData.LogicalDevice.createRenderPass(renderPassCreateInfo);
-        if (m_RenderPass == nullptr)
-        {
-            throw std::runtime_error("failed to create render pass!");
-        }
-
-        // Create texture
-        ImageLoaderModule* pImageLoader = Game::GetGame().GetEngine()->GetModule<ImageLoaderModule>();
-        ImageData* pImageData = (ImageData*)pImageLoader->Load("./Resources/chubz.PNG");
-
-        SamplerSettings samplerSettings = SamplerSettings();
-        samplerSettings.MagFilter = Filter::F_Linear;
-        samplerSettings.MinFilter = Filter::F_Linear;
-        samplerSettings.AddressModeU = SamplerAddressMode::SAM_Repeat;
-        samplerSettings.AddressModeV = SamplerAddressMode::SAM_Repeat;
-        samplerSettings.AddressModeW = SamplerAddressMode::SAM_Repeat;
-        samplerSettings.AnisotropyEnable = true;
-        samplerSettings.MaxAnisotropy = m_pDeviceManager->GetSelectedDevice()->GetDeviceProperties().limits.maxSamplerAnisotropy;
-        samplerSettings.UnnormalizedCoordinates = false;
-        samplerSettings.CompareEnable = false;
-        samplerSettings.CompareOp = CompareOp::OP_Always;
-        samplerSettings.MipmapMode = Filter::F_Linear;
-        samplerSettings.MipLODBias = 0.0f;
-        samplerSettings.MinLOD = 0.0f;
-        samplerSettings.MaxLOD = 0.0f;
-
-        vk::ImageUsageFlags imageUsageFlags = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
-        m_pTexture = new VulkanTexture(pImageData, ImageType::IT_2D, (uint32_t)imageUsageFlags, (uint32_t)vk::SharingMode::eExclusive, ImageAspect::IA_Color, samplerSettings);
-        m_pTexture->Create();
 
         /// Create descriptor set layout
         vk::DescriptorSetLayoutBinding uboLayoutBinding = vk::DescriptorSetLayoutBinding();
@@ -242,310 +184,11 @@ namespace Glory
             deviceData.LogicalDevice.updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
 
-        /// Create graphics pipeline
-        // Load shaders
-        auto vertShaderCode = ReadFile("Shaders/texturetest_vert.spv");
-        auto fragShaderCode = ReadFile("Shaders/texturetest_frag.spv");
-
-        // Create shader modules
-        vk::ShaderModule vertShaderModule;
-        vk::ShaderModule fragShaderModule;
-
-        vk::ShaderModuleCreateInfo shaderModuleCreateInfo = vk::ShaderModuleCreateInfo()
-            .setCodeSize(vertShaderCode.size())
-            .setPCode(reinterpret_cast<const uint32_t*>(vertShaderCode.data()));
-        vertShaderModule = deviceData.LogicalDevice.createShaderModule(shaderModuleCreateInfo, nullptr);
-
-        shaderModuleCreateInfo = vk::ShaderModuleCreateInfo()
-            .setCodeSize(fragShaderCode.size())
-            .setPCode(reinterpret_cast<const uint32_t*>(fragShaderCode.data()));
-        fragShaderModule = deviceData.LogicalDevice.createShaderModule(shaderModuleCreateInfo, nullptr);
-
-        vk::PipelineShaderStageCreateInfo vertShaderStageInfo = vk::PipelineShaderStageCreateInfo()
-            .setStage(vk::ShaderStageFlagBits::eVertex)
-            .setModule(vertShaderModule)
-            .setPName("main");
-
-        vk::PipelineShaderStageCreateInfo fragShaderStageInfo = vk::PipelineShaderStageCreateInfo()
-            .setStage(vk::ShaderStageFlagBits::eFragment)
-            .setModule(fragShaderModule)
-            .setPName("main");
-
-        vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo , fragShaderStageInfo };
-
-        // Create vertex buffer
-        const VertexPosColorTex vertices[] = {
-            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-        };
-
-        const float* verticeArray = (const float*)vertices;
-
-        uint32_t bufferSize = sizeof(VertexPosColorTex) * 4;
-        vk::MemoryPropertyFlags stagingFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-        VulkanBuffer* pStagingBuffer = new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
-        pStagingBuffer->CreateBuffer();
-        pStagingBuffer->Assign(verticeArray);
-        
-        memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
-        vk::BufferUsageFlags usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
-        VulkanBuffer* pVertexBuffer = new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
-        pVertexBuffer->CreateBuffer();
-        pVertexBuffer->CopyFrom(pStagingBuffer, bufferSize);
-        m_pVertexBuffer = pVertexBuffer;
-        delete pStagingBuffer;
-
-        const uint16_t indices[] = {
-            0, 1, 2, 2, 3, 0
-        };
-
-        uint32_t indexBufferSize = sizeof(uint32_t) * 6;
-        pStagingBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
-        pStagingBuffer->CreateBuffer();
-        pStagingBuffer->Assign(indices);
-
-        usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
-        VulkanBuffer* pIndexBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
-        pIndexBuffer->CreateBuffer();
-        pIndexBuffer->CopyFrom(pStagingBuffer, indexBufferSize);
-        m_pIndexBuffer = pIndexBuffer;
-        delete pStagingBuffer;
-
-        const std::vector<AttributeType> attributeTypes = {
-            AttributeType::Float2,
-            AttributeType::Float3,
-            AttributeType::Float2,
-        };
-
-        m_pMesh = new VulkanMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex), attributeTypes);
-        m_pMesh->CreateBindingAndAttributeData();
-
-        // Vertex input state
-        vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
-            .setVertexBindingDescriptionCount(1)
-            .setPVertexBindingDescriptions(m_pMesh->GetVertexInputBindingDescription())
-            .setVertexAttributeDescriptionCount(static_cast<uint32_t>(m_pMesh->GetVertexInputAttributeDescriptionsCount()))
-            .setPVertexAttributeDescriptions(m_pMesh->GetVertexInputAttributeDescriptions());
-
-        // Input assembly
-        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
-            .setTopology(vk::PrimitiveTopology::eTriangleList)
-            .setPrimitiveRestartEnable(VK_FALSE);
-
-        auto swapchainExtent = m_pSwapChain->GetExtent();
-
-        // Viewport and scissor
-        vk::Viewport viewport = vk::Viewport()
-            .setX(0.0f)
-            .setY(0.0f)
-            .setWidth((float)swapchainExtent.width)
-            .setHeight((float)swapchainExtent.height)
-            .setMinDepth(0.0f)
-            .setMaxDepth(1.0f);
-
-        vk::Rect2D scissor = vk::Rect2D()
-            .setOffset({ 0,0 })
-            .setExtent(swapchainExtent);
-
-        vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
-            .setViewportCount(1)
-            .setPViewports(&viewport)
-            .setScissorCount(1)
-            .setPScissors(&scissor);
-
-        // Rasterizer state
-        vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
-            .setDepthClampEnable(VK_FALSE) // Requires a GPU feature
-            .setRasterizerDiscardEnable(VK_FALSE)
-            .setPolygonMode(vk::PolygonMode::eFill)
-            .setLineWidth(1.0f)
-            .setCullMode(vk::CullModeFlagBits::eBack)
-            .setFrontFace(vk::FrontFace::eCounterClockwise)
-            .setDepthBiasEnable(VK_FALSE)
-            .setDepthBiasConstantFactor(0.0f)
-            .setDepthBiasClamp(0.0f)
-            .setDepthBiasSlopeFactor(0.0f);
-
-        // Multisampling state
-        vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
-            .setSampleShadingEnable(VK_FALSE)
-            .setRasterizationSamples(vk::SampleCountFlagBits::e1)
-            .setMinSampleShading(1.0f)
-            .setPSampleMask(nullptr)
-            .setAlphaToCoverageEnable(VK_FALSE)
-            .setAlphaToOneEnable(VK_FALSE);
-
-        // Blend state
-        vk::PipelineColorBlendAttachmentState colorBlendAttachmentCreateInfo = vk::PipelineColorBlendAttachmentState()
-            .setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
-            .setBlendEnable(VK_FALSE)
-            .setSrcColorBlendFactor(vk::BlendFactor::eOne)
-            .setDstColorBlendFactor(vk::BlendFactor::eZero)
-            .setColorBlendOp(vk::BlendOp::eAdd)
-            .setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
-            .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
-            .setAlphaBlendOp(vk::BlendOp::eAdd);
-
-        vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
-            .setLogicOpEnable(VK_FALSE)
-            .setLogicOp(vk::LogicOp::eCopy)
-            .setAttachmentCount(1)
-            .setPAttachments(&colorBlendAttachmentCreateInfo)
-            .setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
-
-        // Dynamic state
-        //vk::DynamicState dynamicStates[] = {
-        //    vk::DynamicState::eViewport,
-        //    vk::DynamicState::eLineWidth
-        //};
-        //
-        //vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-        //    .setDynamicStateCount(2)
-        //    .setPDynamicStates(dynamicStates);
-
-        vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-            .setSetLayoutCount(1)
-            .setPSetLayouts(&m_DescriptorSetLayout)
-            .setPushConstantRangeCount(0)
-            .setPPushConstantRanges(nullptr);
-
-        m_PipelineLayout = deviceData.LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
-        if (m_PipelineLayout == nullptr)
-        {
-            throw std::runtime_error("failed to create pipeline layout!");
-        }
-
-        // Create the pipeline
-        vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
-            .setStageCount(2)
-            .setPStages(shaderStages)
-            .setPVertexInputState(&vertexInputStateCreateInfo)
-            .setPInputAssemblyState(&inputAssemblyStateCreateInfo)
-            .setPViewportState(&viewportStateCreateInfo)
-            .setPRasterizationState(&rasterizationStateCreateInfo)
-            .setPMultisampleState(&multisampleStateCreateInfo)
-            .setPDepthStencilState(nullptr)
-            .setPColorBlendState(&colorBlendStateCreateInfo)
-            .setPDynamicState(nullptr)
-            .setLayout(m_PipelineLayout)
-            .setRenderPass(m_RenderPass)
-            .setSubpass(0)
-            .setBasePipelineHandle(VK_NULL_HANDLE)
-            .setBasePipelineIndex(-1);
-
-        if (deviceData.LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_GraphicsPipeline) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("failed to create graphics pipeline!");
-        }
-
-        deviceData.LogicalDevice.destroyShaderModule(vertShaderModule);
-        deviceData.LogicalDevice.destroyShaderModule(fragShaderModule);
-
-        // Create framebuffers
-        m_SwapChainFramebuffers.resize(m_pSwapChain->GetImageCount());
-        for (size_t i = 0; i < m_pSwapChain->GetImageCount(); i++)
-        {
-            vk::ImageView attachments[] = {
-                m_pSwapChain->GetSwapChainImageView(i)
-            };
-
-            vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
-                .setRenderPass(m_RenderPass)
-                .setAttachmentCount(1)
-                .setPAttachments(attachments)
-                .setWidth(swapchainExtent.width)
-                .setHeight(swapchainExtent.height)
-                .setLayers(1);
-
-            m_SwapChainFramebuffers[i] = deviceData.LogicalDevice.createFramebuffer(frameBufferCreateInfo);
-            if (m_SwapChainFramebuffers[i] == nullptr)
-                throw std::runtime_error("failed to create framebuffer!");
-        }
-
+        CreatePipeline();
+        CreateSwapChainFrameBuffers();
         //auto queueFamilyIndices = m_pDeviceManager->GetSelectedDevice()->GetQueueFamilyIndices();
-        vk::CommandPool commandPool = m_pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool();
-
-        //m_pVertexBuffer = new VertexBuffer({
-        //    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        //    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        //    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-        //});
-
-        // Create command buffers
-        m_CommandBuffers.resize(m_SwapChainFramebuffers.size());
-
-        vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
-            .setCommandPool(commandPool)
-            .setLevel(vk::CommandBufferLevel::ePrimary)
-            .setCommandBufferCount((uint32_t)m_CommandBuffers.size());
-
-        if (deviceData.LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, m_CommandBuffers.data()) != vk::Result::eSuccess)
-            throw std::runtime_error("failed to allocate command buffers!");
-
-        for (size_t i = 0; i < m_CommandBuffers.size(); i++)
-        {
-            // Start the command buffer
-            vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo()
-                .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
-                .setPInheritanceInfo(nullptr);
-
-            if (m_CommandBuffers[i].begin(&commandBufferBeginInfo) != vk::Result::eSuccess)
-                throw std::runtime_error("failed to begin recording command buffer!");
-
-            // Start a render pass
-            vk::Rect2D renderArea = vk::Rect2D()
-                .setOffset({ 0,0 })
-                .setExtent(swapchainExtent);
-
-            vk::ClearColorValue clearColorValue = vk::ClearColorValue()
-                .setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
-
-            vk::ClearValue clearColor = vk::ClearValue()
-                .setColor(clearColorValue);
-
-            vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
-                .setRenderPass(m_RenderPass)
-                .setFramebuffer(m_SwapChainFramebuffers[i])
-                .setRenderArea(renderArea)
-                .setClearValueCount(1)
-                .setPClearValues(&clearColor);
-
-            m_CommandBuffers[i].beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
-            m_CommandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_GraphicsPipeline);
-
-            vk::Buffer vertexBuffers[] = { pVertexBuffer->GetBuffer() };
-            vk::DeviceSize offsets[] = { 0 };
-            m_CommandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-            m_CommandBuffers[i].bindIndexBuffer(pIndexBuffer->GetBuffer(), 0, vk::IndexType::eUint16);
-
-            m_CommandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_PipelineLayout, 0, 1, &m_DescriptorSets[i], 0, nullptr);
-
-            m_CommandBuffers[i].drawIndexed(static_cast<uint32_t>(m_pMesh->GetIndexCount()), 1, 0, 0, 0);
-            m_CommandBuffers[i].endRenderPass();
-            m_CommandBuffers[i].end();
-        }
-
-        // Create sync objects
-        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_ImagesInFlight.resize(m_pSwapChain->GetImageCount(), VK_NULL_HANDLE);
-
-        vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
-        vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
-            .setFlags(vk::FenceCreateFlagBits::eSignaled);
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
-                deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
-                deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
-            {
-
-                throw std::runtime_error("failed to create sync objects for a frame!");
-            }
-        }
+        CreateCommandPools();
+        CreateSyncObjects();
 	}
 
 	void VulkanGraphicsModule::Cleanup()
@@ -553,7 +196,7 @@ namespace Glory
         m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData().LogicalDevice.waitIdle();
         m_Extensions.clear();
 
-        //wdelete m_pVertexBuffer;
+        //delete m_pVertexBuffer;
         //m_pVertexBuffer = nullptr;
 
 #if defined(_DEBUG)
@@ -580,13 +223,17 @@ namespace Glory
         deviceData.LogicalDevice.destroyPipeline(m_GraphicsPipeline);
         deviceData.LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
 
+        delete m_pDepthImage;
+        m_pDepthImage = nullptr;
+
         for (size_t i = 0; i < m_SwapChainFramebuffers.size(); i++)
         {
             deviceData.LogicalDevice.destroyFramebuffer(m_SwapChainFramebuffers[i]);
         }
         m_SwapChainFramebuffers.clear();
         
-        deviceData.LogicalDevice.destroyRenderPass(m_RenderPass);
+        delete m_pMainRenderPass;
+        m_pMainRenderPass = nullptr;
 
         delete m_pSwapChain;
         m_pSwapChain = nullptr;
@@ -811,6 +458,369 @@ namespace Glory
         m_pSwapChain->Initialize(this);
     }
 
+    void VulkanGraphicsModule::CreateDepthResources()
+    {
+        m_pDepthImage = new DepthImage(m_pSwapChain);
+        m_pDepthImage->Initialize();
+    }
+
+    void VulkanGraphicsModule::CreateMainRenderPass()
+    {
+        RenderPassCreateInfo createInfo{};
+        createInfo.pSwapChain = m_pSwapChain;
+        createInfo.pDepth = m_pDepthImage;
+        createInfo.HasDepth = true;
+
+        m_pMainRenderPass = new VulkanRenderPass(createInfo);
+        m_pMainRenderPass->Initialize();
+    }
+
+    void VulkanGraphicsModule::CreateTexture()
+    {
+        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+        // Create texture
+        ImageLoaderModule* pImageLoader = Game::GetGame().GetEngine()->GetModule<ImageLoaderModule>();
+        ImageData* pImageData = (ImageData*)pImageLoader->Load("./Resources/viking_room_1.png");
+
+        SamplerSettings samplerSettings = SamplerSettings();
+        samplerSettings.MagFilter = Filter::F_Linear;
+        samplerSettings.MinFilter = Filter::F_Linear;
+        samplerSettings.AddressModeU = SamplerAddressMode::SAM_Repeat;
+        samplerSettings.AddressModeV = SamplerAddressMode::SAM_Repeat;
+        samplerSettings.AddressModeW = SamplerAddressMode::SAM_Repeat;
+        samplerSettings.AnisotropyEnable = true;
+        samplerSettings.MaxAnisotropy = m_pDeviceManager->GetSelectedDevice()->GetDeviceProperties().limits.maxSamplerAnisotropy;
+        samplerSettings.UnnormalizedCoordinates = false;
+        samplerSettings.CompareEnable = false;
+        samplerSettings.CompareOp = CompareOp::OP_Always;
+        samplerSettings.MipmapMode = Filter::F_Linear;
+        samplerSettings.MipLODBias = 0.0f;
+        samplerSettings.MinLOD = 0.0f;
+        samplerSettings.MaxLOD = 0.0f;
+
+        vk::ImageUsageFlags imageUsageFlags = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
+        m_pTexture = new VulkanTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), ImageType::IT_2D, (uint32_t)imageUsageFlags, (uint32_t)vk::SharingMode::eExclusive, ImageAspect::IA_Color, samplerSettings);
+        m_pTexture->Create(pImageData);
+    }
+
+    void VulkanGraphicsModule::CreateMesh()
+    {
+        // Load model
+        ModelLoaderModule* pModelLoader = Game::GetGame().GetEngine()->GetModule<ModelLoaderModule>();
+        ModelData* pModelData = (ModelData*)pModelLoader->Load("./Models/viking_room.obj");
+        MeshData* pMeshData = pModelData->GetMesh(0);
+        const float* verticeArray = (const float*)pMeshData->Vertices();
+
+        uint32_t bufferSize = pMeshData->VertexSize() * pMeshData->VertexCount();
+        vk::MemoryPropertyFlags stagingFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+        VulkanBuffer* pStagingBuffer = new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+        pStagingBuffer->CreateBuffer();
+        pStagingBuffer->Assign(verticeArray);
+
+        vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
+        vk::BufferUsageFlags usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
+        VulkanBuffer* pVertexBuffer = new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+        pVertexBuffer->CreateBuffer();
+        pVertexBuffer->CopyFrom(pStagingBuffer, bufferSize);
+        m_pVertexBuffer = pVertexBuffer;
+        delete pStagingBuffer;
+
+        uint32_t indexBufferSize = sizeof(uint32_t) * pMeshData->IndexCount();
+        pStagingBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+        pStagingBuffer->CreateBuffer();
+        pStagingBuffer->Assign(pMeshData->Indices());
+
+        usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
+        VulkanBuffer* pIndexBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+        pIndexBuffer->CreateBuffer();
+        pIndexBuffer->CopyFrom(pStagingBuffer, indexBufferSize);
+        m_pIndexBuffer = pIndexBuffer;
+        delete pStagingBuffer;
+
+        const std::vector<AttributeType> attributeTypes = {
+            AttributeType::Float3,
+            AttributeType::Float3,
+            AttributeType::Float2,
+        };
+
+        m_pMesh = new VulkanMesh(pMeshData->VertexCount(), pMeshData->IndexCount(), InputRate::Vertex, 0, pMeshData->VertexSize(), attributeTypes);
+        m_pMesh->CreateBindingAndAttributeData();
+    }
+
+    void VulkanGraphicsModule::CreatePipeline()
+    {
+        /// Create graphics pipeline
+        // Load shaders
+        FileLoaderModule* pFileLoader = Game::GetGame().GetEngine()->GetModule<FileLoaderModule>();
+        FileImportSettings importSettings{};
+        importSettings.Flags = std::ios::ate | std::ios::binary;
+        FileData* pVertFileData = (FileData*)pFileLoader->Load("./Shaders/depthbuffertest_vert.spv", importSettings);
+        FileData* pFragFileData = (FileData*)pFileLoader->Load("./Shaders/texturetest_frag.spv", importSettings);
+
+        // Create vulkan shaders
+        VulkanShader* pVertShader = new VulkanShader(pVertFileData, ShaderType::ST_Vertex, "main");
+        pVertShader->Initialize();
+        VulkanShader* pFragShader = new VulkanShader(pFragFileData, ShaderType::ST_Fragment, "main");
+        pFragShader->Initialize();
+
+        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+
+        vk::PipelineShaderStageCreateInfo shaderStages[] = { pVertShader->m_PipelineShaderStageInfo, pFragShader->m_PipelineShaderStageInfo };
+
+        // Vertex input state
+        vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
+            .setVertexBindingDescriptionCount(1)
+            .setPVertexBindingDescriptions(m_pMesh->GetVertexInputBindingDescription())
+            .setVertexAttributeDescriptionCount(static_cast<uint32_t>(m_pMesh->GetVertexInputAttributeDescriptionsCount()))
+            .setPVertexAttributeDescriptions(m_pMesh->GetVertexInputAttributeDescriptions());
+
+        // Input assembly
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
+            .setTopology(vk::PrimitiveTopology::eTriangleList)
+            .setPrimitiveRestartEnable(VK_FALSE);
+
+        auto swapchainExtent = m_pSwapChain->GetExtent();
+
+        // Viewport and scissor
+        vk::Viewport viewport = vk::Viewport()
+            .setX(0.0f)
+            .setY(0.0f)
+            .setWidth((float)swapchainExtent.width)
+            .setHeight((float)swapchainExtent.height)
+            .setMinDepth(0.0f)
+            .setMaxDepth(1.0f);
+
+        vk::Rect2D scissor = vk::Rect2D()
+            .setOffset({ 0,0 })
+            .setExtent(swapchainExtent);
+
+        vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
+            .setViewportCount(1)
+            .setPViewports(&viewport)
+            .setScissorCount(1)
+            .setPScissors(&scissor);
+
+        // Rasterizer state
+        vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
+            .setDepthClampEnable(VK_FALSE) // Requires a GPU feature
+            .setRasterizerDiscardEnable(VK_FALSE)
+            .setPolygonMode(vk::PolygonMode::eFill)
+            .setLineWidth(1.0f)
+            .setCullMode(vk::CullModeFlagBits::eBack)
+            .setFrontFace(vk::FrontFace::eCounterClockwise)
+            .setDepthBiasEnable(VK_FALSE)
+            .setDepthBiasConstantFactor(0.0f)
+            .setDepthBiasClamp(0.0f)
+            .setDepthBiasSlopeFactor(0.0f);
+
+        // Multisampling state
+        vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
+            .setSampleShadingEnable(VK_FALSE)
+            .setRasterizationSamples(vk::SampleCountFlagBits::e1)
+            .setMinSampleShading(1.0f)
+            .setPSampleMask(nullptr)
+            .setAlphaToCoverageEnable(VK_FALSE)
+            .setAlphaToOneEnable(VK_FALSE);
+
+        // Blend state
+        vk::PipelineColorBlendAttachmentState colorBlendAttachmentCreateInfo = vk::PipelineColorBlendAttachmentState()
+            .setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
+            .setBlendEnable(VK_FALSE)
+            .setSrcColorBlendFactor(vk::BlendFactor::eOne)
+            .setDstColorBlendFactor(vk::BlendFactor::eZero)
+            .setColorBlendOp(vk::BlendOp::eAdd)
+            .setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+            .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+            .setAlphaBlendOp(vk::BlendOp::eAdd);
+
+        vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
+            .setLogicOpEnable(VK_FALSE)
+            .setLogicOp(vk::LogicOp::eCopy)
+            .setAttachmentCount(1)
+            .setPAttachments(&colorBlendAttachmentCreateInfo)
+            .setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+
+        vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
+        depthStencil.depthTestEnable = VK_TRUE;
+        depthStencil.depthWriteEnable = VK_TRUE;
+        depthStencil.depthCompareOp = vk::CompareOp::eLess;
+        depthStencil.depthBoundsTestEnable = VK_FALSE;
+        depthStencil.minDepthBounds = 0.0f; // Optional
+        depthStencil.maxDepthBounds = 1.0f; // Optional
+        depthStencil.stencilTestEnable = VK_FALSE;
+        depthStencil.front = {}; // Optional
+        depthStencil.back = {}; // Optional
+
+        // Dynamic state
+        //vk::DynamicState dynamicStates[] = {
+        //    vk::DynamicState::eViewport,
+        //    vk::DynamicState::eLineWidth
+        //};
+        //
+        //vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
+        //    .setDynamicStateCount(2)
+        //    .setPDynamicStates(dynamicStates);
+
+        vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
+            .setSetLayoutCount(1)
+            .setPSetLayouts(&m_DescriptorSetLayout)
+            .setPushConstantRangeCount(0)
+            .setPPushConstantRanges(nullptr);
+
+        m_PipelineLayout = deviceData.LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
+        if (m_PipelineLayout == nullptr)
+        {
+            throw std::runtime_error("failed to create pipeline layout!");
+        }
+
+        // Create the pipeline
+        vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
+            .setStageCount(2)
+            .setPStages(shaderStages)
+            .setPVertexInputState(&vertexInputStateCreateInfo)
+            .setPInputAssemblyState(&inputAssemblyStateCreateInfo)
+            .setPViewportState(&viewportStateCreateInfo)
+            .setPRasterizationState(&rasterizationStateCreateInfo)
+            .setPMultisampleState(&multisampleStateCreateInfo)
+            .setPDepthStencilState(&depthStencil)
+            .setPColorBlendState(&colorBlendStateCreateInfo)
+            .setPDynamicState(nullptr)
+            .setLayout(m_PipelineLayout)
+            .setRenderPass(m_pMainRenderPass->m_RenderPass)
+            .setSubpass(0)
+            .setBasePipelineHandle(VK_NULL_HANDLE)
+            .setBasePipelineIndex(-1);
+
+        if (deviceData.LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_GraphicsPipeline) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("failed to create graphics pipeline!");
+        }
+
+        // Cleanup
+        delete pVertShader;
+        delete pFragShader;
+
+        delete pVertFileData;
+        delete pFragFileData;
+    }
+
+    void VulkanGraphicsModule::CreateSwapChainFrameBuffers()
+    {
+        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+
+        auto swapchainExtent = m_pSwapChain->GetExtent();
+
+        // Create framebuffers
+        m_SwapChainFramebuffers.resize(m_pSwapChain->GetImageCount());
+        for (size_t i = 0; i < m_pSwapChain->GetImageCount(); i++)
+        {
+            vk::ImageView attachments[] = {
+                m_pSwapChain->GetSwapChainImageView(i),
+                m_pDepthImage->m_DepthImageView,
+            };
+
+            vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
+                .setRenderPass(m_pMainRenderPass->m_RenderPass)
+                .setAttachmentCount(2)
+                .setPAttachments(attachments)
+                .setWidth(swapchainExtent.width)
+                .setHeight(swapchainExtent.height)
+                .setLayers(1);
+
+            m_SwapChainFramebuffers[i] = deviceData.LogicalDevice.createFramebuffer(frameBufferCreateInfo);
+            if (m_SwapChainFramebuffers[i] == nullptr)
+                throw std::runtime_error("failed to create framebuffer!");
+        }
+    }
+
+    void VulkanGraphicsModule::CreateCommandPools()
+    {
+        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+        vk::CommandPool commandPool = m_pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool();
+
+        // Create command buffers
+        m_CommandBuffers.resize(m_SwapChainFramebuffers.size());
+
+        vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
+            .setCommandPool(commandPool)
+            .setLevel(vk::CommandBufferLevel::ePrimary)
+            .setCommandBufferCount((uint32_t)m_CommandBuffers.size());
+
+        if (deviceData.LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, m_CommandBuffers.data()) != vk::Result::eSuccess)
+            throw std::runtime_error("failed to allocate command buffers!");
+
+        auto swapchainExtent = m_pSwapChain->GetExtent();
+
+        for (size_t i = 0; i < m_CommandBuffers.size(); i++)
+        {
+            // Start the command buffer
+            vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo()
+                .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
+                .setPInheritanceInfo(nullptr);
+
+            if (m_CommandBuffers[i].begin(&commandBufferBeginInfo) != vk::Result::eSuccess)
+                throw std::runtime_error("failed to begin recording command buffer!");
+
+            // Start a render pass
+            vk::Rect2D renderArea = vk::Rect2D()
+                .setOffset({ 0,0 })
+                .setExtent(swapchainExtent);
+
+            vk::ClearColorValue clearColorValue = vk::ClearColorValue()
+                .setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
+
+            std::array<vk::ClearValue, 2> clearColors{};
+            clearColors[0].setColor(clearColorValue);
+            clearColors[1].setDepthStencil({ 1.0f, 0 });
+
+            vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
+                .setRenderPass(m_pMainRenderPass->m_RenderPass)
+                .setFramebuffer(m_SwapChainFramebuffers[i])
+                .setRenderArea(renderArea)
+                .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
+                .setPClearValues(clearColors.data());
+
+            m_CommandBuffers[i].beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
+            m_CommandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_GraphicsPipeline);
+
+            vk::Buffer vertexBuffers[] = { m_pVertexBuffer->GetBuffer() };
+            vk::DeviceSize offsets[] = { 0 };
+            m_CommandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
+            m_CommandBuffers[i].bindIndexBuffer(m_pIndexBuffer->GetBuffer(), 0, vk::IndexType::eUint32);
+
+            m_CommandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_PipelineLayout, 0, 1, &m_DescriptorSets[i], 0, nullptr);
+
+            m_CommandBuffers[i].drawIndexed(static_cast<uint32_t>(m_pMesh->GetIndexCount()), 1, 0, 0, 0);
+            m_CommandBuffers[i].endRenderPass();
+            m_CommandBuffers[i].end();
+        }
+    }
+
+    void VulkanGraphicsModule::CreateSyncObjects()
+    {
+        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+
+        // Create sync objects
+        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_ImagesInFlight.resize(m_pSwapChain->GetImageCount(), VK_NULL_HANDLE);
+
+        vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
+        vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
+            .setFlags(vk::FenceCreateFlagBits::eSignaled);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
+                deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
+                deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
+            {
+
+                throw std::runtime_error("failed to create sync objects for a frame!");
+            }
+        }
+    }
+
     void VulkanGraphicsModule::UpdateUniformBuffer(uint32_t imageIndex)
     {
         static auto startTime = std::chrono::high_resolution_clock::now();
@@ -825,7 +835,6 @@ namespace Glory
         ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
         ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan
         m_pUniformBufers[imageIndex]->Assign(&ubo);
-
     }
 
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsModule::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
@@ -879,7 +888,7 @@ namespace Glory
         deviceData.LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
     }
 
-    void VulkanGraphicsModule::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
+    void VulkanGraphicsModule::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags)
     {
         vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -889,7 +898,7 @@ namespace Glory
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = image;
-        barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+        barrier.subresourceRange.aspectMask = aspectFlags;//vk::ImageAspectFlagBits::eColor;
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = 1;
         barrier.subresourceRange.baseArrayLayer = 0;
@@ -898,21 +907,32 @@ namespace Glory
         vk::PipelineStageFlags sourceStage;
         vk::PipelineStageFlags destinationStage;
 
-        if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal) {
+        if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
+        {
             barrier.srcAccessMask = (vk::AccessFlags)0;
             barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
 
             sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
             destinationStage = vk::PipelineStageFlagBits::eTransfer;
         }
-        else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
+        else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+        {
             barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
             barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
 
             sourceStage = vk::PipelineStageFlagBits::eTransfer;
             destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
         }
-        else {
+        else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
+        {
+            barrier.srcAccessMask = (vk::AccessFlags)0;
+            barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+            sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+            destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
+        }
+        else
+        {
             throw std::invalid_argument("Unsupported layout transition!");
         }
 
@@ -927,20 +947,67 @@ namespace Glory
         EndSingleTimeCommands(commandBuffer);
     }
 
-    std::vector<char> VulkanGraphicsModule::ReadFile(const std::string& filename)
+    void VulkanGraphicsModule::CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory)
     {
-        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+        vk::ImageCreateInfo imageInfo{};
+        imageInfo.imageType = vk::ImageType::e2D;
+        imageInfo.extent.width = width;
+        imageInfo.extent.height = height;
+        imageInfo.extent.depth = 1;
+        imageInfo.mipLevels = 1;
+        imageInfo.arrayLayers = 1;
+        imageInfo.format = format;
+        imageInfo.tiling = tiling;
+        imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+        imageInfo.usage = usage;
+        imageInfo.samples = vk::SampleCountFlagBits::e1;
+        imageInfo.sharingMode = vk::SharingMode::eExclusive;
 
-        if (!file.is_open())
-        {
-            throw std::runtime_error("failed to open file!");
+        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
+        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+
+        if (deviceData.LogicalDevice.createImage(&imageInfo, nullptr, &image) != vk::Result::eSuccess) {
+            throw std::runtime_error("failed to create image!");
         }
 
-        size_t fileSize = (size_t)file.tellg();
-        std::vector<char> buffer(fileSize);
-        file.seekg(0);
-        file.read(buffer.data(), fileSize);
-        file.close();
-        return buffer;
+        vk::MemoryRequirements memRequirements;
+        deviceData.LogicalDevice.getImageMemoryRequirements(image, &memRequirements);
+
+        vk::MemoryAllocateInfo allocInfo{};
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = pDevice->GetSupportedMemoryIndex(memRequirements.memoryTypeBits, properties);
+
+        if (deviceData.LogicalDevice.allocateMemory(&allocInfo, nullptr, &imageMemory) != vk::Result::eSuccess) {
+            throw std::runtime_error("failed to allocate image memory!");
+        }
+
+        deviceData.LogicalDevice.bindImageMemory(image, imageMemory, 0);
+    }
+
+    vk::ImageView VulkanGraphicsModule::CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
+    {
+        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
+        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+
+        vk::ImageViewCreateInfo viewInfo{};
+        viewInfo.image = image;
+        viewInfo.viewType = vk::ImageViewType::e2D;
+        viewInfo.format = format;
+        viewInfo.subresourceRange.aspectMask = aspectFlags;
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.levelCount = 1;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.layerCount = 1;
+
+        vk::ImageView imageView;
+        if (deviceData.LogicalDevice.createImageView(&viewInfo, nullptr, &imageView) != vk::Result::eSuccess) {
+            throw std::runtime_error("failed to create texture image view!");
+        }
+
+        return imageView;
     }
 }

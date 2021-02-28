@@ -27,9 +27,6 @@
     <ClCompile Include="SwapChain.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="RenderPass.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanMesh.cpp">
       <Filter>Buffers</Filter>
     </ClCompile>
@@ -44,6 +41,15 @@
     </ClCompile>
     <ClCompile Include="VulkanStructsConverter.cpp">
       <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanRenderPass.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthImage.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanShader.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,9 +74,6 @@
     <ClInclude Include="SwapChain.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="RenderPass.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanMesh.h">
       <Filter>Buffers</Filter>
     </ClInclude>
@@ -85,6 +88,15 @@
     </ClInclude>
     <ClInclude Include="VulkanStructsConverter.h">
       <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanRenderPass.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthImage.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanShader.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

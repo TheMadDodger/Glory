@@ -15,6 +15,8 @@ namespace Glory
 		static vk::SamplerMipmapMode GetVulkanSamplerMipmapMode(const Filter& filter);
 		static vk::SamplerAddressMode GetSamplerAddressMode(const SamplerAddressMode& mode);
 		static vk::SamplerCreateInfo GetVulkanSamplerInfo(const SamplerSettings& settings);
+		static vk::Format GetVulkanFormat(const PixelFormat& format);
+		static vk::ShaderStageFlagBits GetShaderStageFlag(const ShaderType& shaderType);
 
 	private:
 		VKConverter() {}

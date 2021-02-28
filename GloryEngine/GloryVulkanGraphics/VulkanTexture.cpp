@@ -8,8 +8,9 @@
 
 namespace Glory
 {
-	VulkanTexture::VulkanTexture(ImageData* pImageData, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
-        : Texture(pImageData, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings), m_pSampler(nullptr)
+	VulkanTexture::VulkanTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType,
+        uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
+        : Texture(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings), m_pSampler(nullptr)
 	{
 	}
 
@@ -25,31 +26,32 @@ namespace Glory
         deviceData.LogicalDevice.freeMemory(m_TextureImageMemory, nullptr);
 	}
 
-	void VulkanTexture::Create()
+	void VulkanTexture::Create(ImageData* pImage)
 	{
         VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
         VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
         Device* pDevice = pDeviceManager->GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
-        uint32_t imageSize = m_pImageData->GetByteSize();
+        uint32_t imageSize = pImage->GetByteSize();
 
         vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
         VulkanBuffer* pTextureStagingBuffer = new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
         pTextureStagingBuffer->CreateBuffer();
-        pTextureStagingBuffer->Assign(m_pImageData->GetPixels());
+        pTextureStagingBuffer->Assign(pImage->GetPixels());
 
-        vk::Format format = vk::Format::eR8G8B8A8Srgb;
+        vk::Format format = VKConverter::GetVulkanFormat(m_PixelFormat); //vk::Format::eR8G8B8A8Srgb;
 
         vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
-        imageInfo.imageType = VKConverter::GetVulkanImageType(m_ImageType);
-        imageInfo.extent.width = m_pImageData->GetWidth();
-        imageInfo.extent.height = m_pImageData->GetHeight();
+        vk::ImageType imageType = VKConverter::GetVulkanImageType(m_ImageType);
+        imageInfo.imageType = imageType;
+        imageInfo.extent.width = pImage->GetWidth();
+        imageInfo.extent.height = pImage->GetHeight();
         imageInfo.extent.depth = 1;
         imageInfo.mipLevels = 1;
         imageInfo.arrayLayers = 1;
         imageInfo.format = format;
-        imageInfo.tiling = vk::ImageTiling::eOptimal;
+        imageInfo.tiling = format == vk::Format::eR8G8B8A8Srgb ? vk::ImageTiling::eOptimal : (vk::ImageTiling)0;
         imageInfo.initialLayout = vk::ImageLayout::eUndefined;
         imageInfo.usage = (vk::ImageUsageFlags)m_UsageFlags;
         imageInfo.sharingMode = (vk::SharingMode)m_SharingMode;
@@ -99,6 +101,10 @@ namespace Glory
         if (deviceData.LogicalDevice.createImageView(&viewInfo, nullptr, &m_TextureImageView) != vk::Result::eSuccess)
             throw std::runtime_error("failed to create texture image view!");
 	}
+
+    void VulkanTexture::Create()
+    {
+    }
 
     void VulkanTexture::CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
     {

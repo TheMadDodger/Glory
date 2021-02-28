@@ -23,7 +23,7 @@ namespace Glory
 		m_Width = static_cast<uint32_t>(m_pSurface->w);
 		m_Height = static_cast<uint32_t>(m_pSurface->h);
 
-		m_PixelFormat = Glory::PixelFormat::PF_RGB;
+		m_PixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
 		m_BytesPerPixel = m_pSurface->format->BytesPerPixel;
 
 		switch (m_BytesPerPixel)
@@ -31,21 +31,21 @@ namespace Glory
 		case 3:
 			if (m_pSurface->format->Rmask == 0x000000ff)
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_RGB;
+				m_PixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
 			}
 			else
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_BGR;
+				m_PixelFormat = Glory::PixelFormat::PF_B8G8R8Srgb;
 			}
 			break;
 		case 4:
 			if (m_pSurface->format->Rmask == 0x000000ff)
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_RGBA;
+				m_PixelFormat = Glory::PixelFormat::PF_R8G8B8A8Srgb;
 			}
 			else
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_BGRA;
+				m_PixelFormat = Glory::PixelFormat::PF_B8G8R8A8Srgb;
 			}
 			break;
 		default:

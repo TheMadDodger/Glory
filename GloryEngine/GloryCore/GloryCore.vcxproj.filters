@@ -28,6 +28,15 @@
     <Filter Include="Modules\ResourceLoading\Textures">
       <UniqueIdentifier>{80fd8452-6ac6-48ac-8f11-25a9b94356cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\ResourceLoading\Models">
+      <UniqueIdentifier>{a9d3957a-7230-4140-88b6-6973bab50456}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\ResourceLoading\File">
+      <UniqueIdentifier>{8fba0a90-3774-4636-987b-d1eee8624765}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\ResourceLoading\Base">
+      <UniqueIdentifier>{c9510934-6a96-461e-8cc9-546953c527bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -96,12 +105,6 @@
     <ClInclude Include="Shader.h">
       <Filter>Modules\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceLoaderModule.h">
-      <Filter>Modules\ResourceLoading</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Modules\ResourceLoading</Filter>
-    </ClInclude>
     <ClInclude Include="ImageLoaderModule.h">
       <Filter>Modules\ResourceLoading\Textures</Filter>
     </ClInclude>
@@ -113,6 +116,30 @@
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Modules\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoaderModule.h">
+      <Filter>Modules\ResourceLoading\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelData.h">
+      <Filter>Modules\ResourceLoading\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshData.h">
+      <Filter>Modules\ResourceLoading\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="FileData.h">
+      <Filter>Modules\ResourceLoading\File</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLoaderModule.h">
+      <Filter>Modules\ResourceLoading\File</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportSettings.h">
+      <Filter>Modules\ResourceLoading\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Modules\ResourceLoading\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceLoaderModule.h">
+      <Filter>Modules\ResourceLoading\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -167,12 +194,6 @@
     <ClCompile Include="Shader.cpp">
       <Filter>Modules\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ResourceLoaderModule.cpp">
-      <Filter>Modules\ResourceLoading</Filter>
-    </ClCompile>
-    <ClCompile Include="Resource.cpp">
-      <Filter>Modules\ResourceLoading</Filter>
-    </ClCompile>
     <ClCompile Include="ImageLoaderModule.cpp">
       <Filter>Modules\ResourceLoading\Textures</Filter>
     </ClCompile>
@@ -181,6 +202,30 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Modules\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoaderModule.cpp">
+      <Filter>Modules\ResourceLoading\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelData.cpp">
+      <Filter>Modules\ResourceLoading\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshData.cpp">
+      <Filter>Modules\ResourceLoading\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="FileData.cpp">
+      <Filter>Modules\ResourceLoading\File</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLoaderModule.cpp">
+      <Filter>Modules\ResourceLoading\File</Filter>
+    </ClCompile>
+    <ClCompile Include="ImportSettings.cpp">
+      <Filter>Modules\ResourceLoading\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Modules\ResourceLoading\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceLoaderModule.cpp">
+      <Filter>Modules\ResourceLoading\Base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

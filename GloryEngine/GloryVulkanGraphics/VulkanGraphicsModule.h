@@ -1,5 +1,6 @@
 #pragma once
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <GraphicsModule.h>
 #include <WindowModule.h>
 #include "VulkanDeviceManager.h"
@@ -10,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "VulkanTexture.h"
+#include "DepthImage.h"
+#include "VulkanRenderPass.h"
 
 namespace Glory
 {
@@ -44,7 +47,9 @@ namespace Glory
 		// Temporary will need to be moved
 		static vk::CommandBuffer BeginSingleTimeCommands();
 		static void EndSingleTimeCommands(vk::CommandBuffer commandBuffer);
-		static void TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+		static void TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags = vk::ImageAspectFlagBits::eColor);
+		static void CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
+		static vk::ImageView CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
 
 	private:
 		virtual void Initialize() override;
@@ -60,6 +65,14 @@ namespace Glory
 		void LoadPhysicalDevices();
 		void CreateLogicalDevice();
 		void CreateSwapChain();
+		void CreateDepthResources();
+		void CreateMainRenderPass();
+		void CreateTexture();
+		void CreateMesh();
+		void CreatePipeline();
+		void CreateSwapChainFrameBuffers();
+		void CreateCommandPools();
+		void CreateSyncObjects();
 
 		void UpdateUniformBuffer(uint32_t imageIndex);
 
@@ -69,6 +82,7 @@ namespace Glory
 		std::vector<const char*> m_Extensions;
 		std::vector<const char*> m_Layers;
 		std::vector<VkExtensionProperties> m_AvailableExtensions;
+
 		vk::Instance m_Instance;
 		VkInstance m_cInstance;
 		vk::SurfaceKHR m_Surface;
@@ -80,9 +94,10 @@ namespace Glory
 		SwapChain* m_pSwapChain;
 		vk::DescriptorPool m_DescriptorPool;
 		std::vector<vk::DescriptorSet> m_DescriptorSets;
+		DepthImage* m_pDepthImage;
+		VulkanRenderPass* m_pMainRenderPass;
 
 		// TEMPORARY
-		vk::RenderPass m_RenderPass;
 		vk::DescriptorSetLayout m_DescriptorSetLayout;
 		vk::PipelineLayout m_PipelineLayout;
 		vk::Pipeline m_GraphicsPipeline;
@@ -96,14 +111,12 @@ namespace Glory
 		std::vector<vk::Fence> m_ImagesInFlight;
 		size_t m_CurrentFrame = 0;
 
-		Buffer* m_pVertexBuffer;
-		Buffer* m_pIndexBuffer;
+		VulkanBuffer* m_pVertexBuffer;
+		VulkanBuffer* m_pIndexBuffer;
 		VulkanMesh* m_pMesh;
 		VulkanTexture* m_pTexture;
 
 		std::vector<VulkanBuffer*> m_pUniformBufers;
-		
-		static std::vector<char> ReadFile(const std::string& filename);
 
 #if defined(_DEBUG)
 		vk::DebugUtilsMessengerEXT m_DebugMessenger;

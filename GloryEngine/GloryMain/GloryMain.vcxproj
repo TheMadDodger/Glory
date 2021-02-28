@@ -98,13 +98,13 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,15 +117,15 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,13 +136,13 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,15 +155,15 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

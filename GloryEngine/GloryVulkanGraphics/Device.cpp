@@ -93,6 +93,38 @@ namespace Glory
         return m_DeviceProperties;
     }
 
+    vk::Format Device::FindSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features)
+    {
+        for (size_t i = 0; i < candidates.size(); i++)
+        {
+            vk::Format format = candidates[i];
+            vk::FormatProperties props;
+            m_PhysicalDevice.getFormatProperties(format, &props);
+
+            if (tiling == vk::ImageTiling::eLinear && (props.linearTilingFeatures & features) == features)
+                return format;
+
+            else if (tiling == vk::ImageTiling::eOptimal && (props.optimalTilingFeatures & features) == features)
+                return format;
+        }
+
+        throw std::runtime_error("Failed to find supported format!");
+    }
+
+    vk::Format Device::FindDepthFormat()
+    {
+        vk::Format supportedDepthFormat =
+            FindSupportedFormat({ vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint },
+                vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+
+        return supportedDepthFormat;
+    }
+
+    bool Device::HasStencilComponent(vk::Format format)
+    {
+        return format == vk::Format::eD32SfloatS8Uint || format == vk::Format::eD24UnormS8Uint;
+    }
+
     Device::Device(vk::PhysicalDevice physicalDevice) : m_PhysicalDevice(physicalDevice), m_cPhysicalDevice((VkPhysicalDevice)physicalDevice),
         m_QueueFamilyIndices(), m_AvailableQueueFamilies(std::vector<VkQueueFamilyProperties>()), m_AvailableExtensions(std::vector<VkExtensionProperties>()),
         m_DidLastSupportCheckPass(false), m_SwapChainSupportDetails(), m_LogicalDeviceData(), m_DeviceExtensions(std::vector<const char*>()) {}

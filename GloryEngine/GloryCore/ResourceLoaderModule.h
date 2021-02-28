@@ -5,6 +5,8 @@
 
 namespace Glory
 {
+	struct ImportSettings {};
+
 	/// <summary>
 	/// Resource loaders only take care of loading resources, not managing them!
 	/// </summary>
@@ -14,7 +16,7 @@ namespace Glory
 		LoaderModule();
 		virtual ~LoaderModule();
 
-		virtual Resource* Load(const std::string& path) = 0;
+		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) = 0;
 		virtual const std::type_info& GetResourceType() = 0;
 
 	protected:
@@ -24,16 +26,16 @@ namespace Glory
 		virtual void Draw() = 0;
 	};
 
-	template<class T>
+	template<class T, typename S>
 	class ResourceLoaderModule : public LoaderModule
 	{
 	public:
 		ResourceLoaderModule() {}
 		virtual ~ResourceLoaderModule() {}
 
-		virtual Resource* Load(const std::string& path) override
+		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) override
 		{
-			T* pResource = LoadResource(path);
+			T* pResource = LoadResource(path, (const S&)importSettings);
 			return (Resource*)pResource;
 		}
 
@@ -43,7 +45,7 @@ namespace Glory
 		}
 
 	protected:
-		virtual T* LoadResource(const std::string& path) = 0;
+		virtual T* LoadResource(const std::string& path, const S& importSettings) = 0;
 
 	protected:
 		virtual void Initialize() = 0;

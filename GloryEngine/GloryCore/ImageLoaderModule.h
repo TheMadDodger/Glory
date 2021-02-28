@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	class ImageLoaderModule : public ResourceLoaderModule<ImageData>
+	class ImageLoaderModule : public ResourceLoaderModule<ImageData, ImportSettings>
 	{
 	public:
 		ImageLoaderModule();
@@ -16,7 +16,7 @@ namespace Glory
 		virtual ImageData* LoadTexture(const std::string& path) = 0;
 
 	private:
-		virtual ImageData* LoadResource(const std::string& path) override;
+		virtual ImageData* LoadResource(const std::string& path, const ImportSettings&) override;
 
 	protected:
 		virtual void Initialize() = 0;
