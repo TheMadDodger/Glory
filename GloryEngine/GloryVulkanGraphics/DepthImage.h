@@ -10,6 +10,9 @@ namespace Glory
 		DepthImage(SwapChain* pSwapChain);
 		virtual ~DepthImage();
 
+		const vk::Format& GetFormat() const;
+		const vk::ImageView& GetImageView() const;
+
 	private:
 		void Initialize();
 

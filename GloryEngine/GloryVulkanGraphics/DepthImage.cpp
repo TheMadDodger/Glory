@@ -22,6 +22,16 @@ namespace Glory
         deviceData.LogicalDevice.freeMemory(m_DepthImageMemory, nullptr);
     }
 
+    const vk::ImageView& DepthImage::GetImageView() const
+    {
+        return m_DepthImageView;
+    }
+
+    const vk::Format& DepthImage::GetFormat() const
+    {
+        return m_DepthFormat;
+    }
+
     void DepthImage::Initialize()
 	{
         VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();

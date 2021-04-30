@@ -13,6 +13,9 @@
 #include "VulkanTexture.h"
 #include "DepthImage.h"
 #include "VulkanRenderPass.h"
+#include "VulkanGraphicsPipeline.h"
+#include "DeferredRenderPassTest.h"
+#include "DeferredPipelineTest.h"
 
 namespace Glory
 {
@@ -67,10 +70,11 @@ namespace Glory
 		void CreateSwapChain();
 		void CreateDepthResources();
 		void CreateMainRenderPass();
+		void CreateDeferredRenderPassTest();
 		void CreateTexture();
 		void CreateMesh();
 		void CreatePipeline();
-		void CreateSwapChainFrameBuffers();
+		void CreateDeferredTestPipeline();
 		void CreateCommandPools();
 		void CreateSyncObjects();
 
@@ -89,19 +93,17 @@ namespace Glory
 		VkSurfaceKHR m_cSurface;
 		Window* m_pMainWindow;
 		VulkanDeviceManager* m_pDeviceManager;
-		std::vector<VkQueueFamilyProperties> m_AvailableQueueFamilies;
-		QueueFamilyIndices m_QueueFamilyIndices;
 		SwapChain* m_pSwapChain;
-		vk::DescriptorPool m_DescriptorPool;
-		std::vector<vk::DescriptorSet> m_DescriptorSets;
 		DepthImage* m_pDepthImage;
 		VulkanRenderPass* m_pMainRenderPass;
+		VulkanGraphicsPipeline* m_pGraphicsPipeline;
+		DeferredRenderPassTest* m_pRenderPass;
+		DeferredPipelineTest* m_pRenderPipeline;
+
+		vk::DescriptorPool m_DescriptorPool;
+		std::vector<vk::DescriptorSet> m_DescriptorSets;
 
 		// TEMPORARY
-		vk::DescriptorSetLayout m_DescriptorSetLayout;
-		vk::PipelineLayout m_PipelineLayout;
-		vk::Pipeline m_GraphicsPipeline;
-		std::vector<vk::Framebuffer> m_SwapChainFramebuffers;
 		std::vector<vk::CommandBuffer> m_CommandBuffers;
 
 		const size_t MAX_FRAMES_IN_FLIGHT = 2;

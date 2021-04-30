@@ -17,6 +17,12 @@ namespace Glory
         Device* pDevice = pDeviceManager->GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
+        for (size_t i = 0; i < m_SwapChainFramebuffers.size(); i++)
+        {
+            deviceData.LogicalDevice.destroyFramebuffer(m_SwapChainFramebuffers[i]);
+        }
+        m_SwapChainFramebuffers.clear();
+
         deviceData.LogicalDevice.destroyRenderPass(m_RenderPass);
     }
 
@@ -29,7 +35,7 @@ namespace Glory
 
         // Create render pass
         vk::AttachmentDescription colorAttachment = vk::AttachmentDescription()
-            .setFormat(m_CreateInfo.pSwapChain->GetFormat())
+            .setFormat(m_CreateInfo.Format)
             .setSamples(vk::SampleCountFlagBits::e1)
             .setLoadOp(vk::AttachmentLoadOp::eClear)
             .setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -85,9 +91,43 @@ namespace Glory
         {
             throw std::runtime_error("failed to create render pass!");
         }
+
+        CreateSwapChainFrameBuffers();
     }
 
-    RenderPassCreateInfo::RenderPassCreateInfo() : HasDepth(false), pDepth(nullptr), pSwapChain(nullptr)
+    void VulkanRenderPass::CreateSwapChainFrameBuffers()
+    {
+        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
+        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+
+        auto swapchainExtent = m_CreateInfo.Extent;
+
+        // Create framebuffers
+        m_SwapChainFramebuffers.resize(m_CreateInfo.ImageViews.size());
+        for (size_t i = 0; i < m_CreateInfo.ImageViews.size(); i++)
+        {
+            vk::ImageView attachments[] = {
+                m_CreateInfo.ImageViews[i],
+                m_CreateInfo.pDepth->m_DepthImageView,
+            };
+
+            vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
+                .setRenderPass(m_RenderPass)
+                .setAttachmentCount(2)
+                .setPAttachments(attachments)
+                .setWidth(swapchainExtent.width)
+                .setHeight(swapchainExtent.height)
+                .setLayers(1);
+
+            m_SwapChainFramebuffers[i] = deviceData.LogicalDevice.createFramebuffer(frameBufferCreateInfo);
+            if (m_SwapChainFramebuffers[i] == nullptr)
+                throw std::runtime_error("failed to create framebuffer!");
+        }
+    }
+
+    RenderPassCreateInfo::RenderPassCreateInfo() : HasDepth(false), pDepth(nullptr)
     {
 
     }

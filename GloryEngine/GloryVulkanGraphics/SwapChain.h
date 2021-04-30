@@ -32,6 +32,7 @@ namespace Glory
 		void CreateImageViews();
 
 	private:
+		friend class VulkanGraphicsModule;
 		Window* m_pWindow;
 		Device* m_pDevice;
 

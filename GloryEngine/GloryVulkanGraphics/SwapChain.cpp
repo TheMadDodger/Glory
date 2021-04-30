@@ -14,6 +14,7 @@ namespace Glory
 	{
         const LogicalDeviceData& deviceData = m_pDevice->GetLogicalDeviceData();
         deviceData.LogicalDevice.destroySwapchainKHR(m_SwapChain);
+
         for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
         {
             deviceData.LogicalDevice.destroyImageView(m_SwapChainImageViews[i]);
@@ -48,7 +49,7 @@ namespace Glory
             .setImageColorSpace(chosenFormat.colorSpace)
             .setImageExtent(swapExtent)
             .setImageArrayLayers(1)
-            .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment); // vk::ImageUsageFlagBits::eTransferDst is used when copying an image to the swap chain, which is required when doing post processing!
+            .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst); // vk::ImageUsageFlagBits::eTransferDst is used when copying an image to the swap chain, which is required when doing post processing!
 
         uint32_t queueFamilyIndicesArray[] = { queueFamilyIndices.GraphicsFamily.value(), queueFamilyIndices.PresentFamily.value() };
 
@@ -184,8 +185,8 @@ namespace Glory
     uint32_t SwapChain::CalculateImageCount(const SwapChainSupportDetails& details)
     {
         uint32_t imageCount = details.Capabilities.minImageCount + 1;
-        if (details.Capabilities.minImageCount > 0 && imageCount > details.Capabilities.minImageCount)
-            imageCount = details.Capabilities.minImageCount;
+        if (details.Capabilities.minImageCount > 0 && imageCount > details.Capabilities.maxImageCount)
+            imageCount = details.Capabilities.maxImageCount;
         return imageCount;
     }
 

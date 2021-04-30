@@ -51,6 +51,15 @@
     <ClCompile Include="VulkanShader.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanGraphicsPipeline.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredRenderPassTest.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredPipelineTest.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanGraphicsModule.h">
@@ -96,6 +105,15 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="VulkanShader.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanGraphicsPipeline.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredRenderPassTest.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredPipelineTest.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>

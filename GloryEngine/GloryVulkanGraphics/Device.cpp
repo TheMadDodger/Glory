@@ -131,15 +131,14 @@ namespace Glory
 
 	Device::~Device()
 	{
-        if (m_LogicalDeviceData.LogicalDevice) m_LogicalDeviceData.LogicalDevice.destroy();
-
         m_AvailableQueueFamilies.clear();
         m_AvailableExtensions.clear();
         m_SwapChainSupportDetails.Formats.clear();
         m_SwapChainSupportDetails.PresentModes.clear();
         m_DeviceExtensions.clear();
 
-        if (m_GraphicsCommandPool)m_LogicalDeviceData.LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
+        if (m_LogicalDeviceData.LogicalDevice && m_GraphicsCommandPool) m_LogicalDeviceData.LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
+        if (m_LogicalDeviceData.LogicalDevice) m_LogicalDeviceData.LogicalDevice.destroy();
 	}
 
 	void Device::LoadData(VulkanGraphicsModule* pGraphicsModule)

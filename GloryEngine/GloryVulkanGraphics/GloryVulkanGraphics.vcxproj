@@ -167,11 +167,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DeferredPipelineTest.cpp" />
+    <ClCompile Include="DeferredRenderPassTest.cpp" />
     <ClCompile Include="DepthImage.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="VulkanDeviceManager.cpp" />
     <ClCompile Include="VulkanGraphicsModule.cpp" />
+    <ClCompile Include="VulkanGraphicsPipeline.cpp" />
     <ClCompile Include="VulkanImageSampler.cpp" />
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanBuffer.cpp" />
@@ -181,6 +184,8 @@
     <ClCompile Include="VulkanTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DeferredPipelineTest.h" />
+    <ClInclude Include="DeferredRenderPassTest.h" />
     <ClInclude Include="DepthImage.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="GloryVulkan.h" />
@@ -189,6 +194,7 @@
     <ClInclude Include="VulkanDeviceManager.h" />
     <ClInclude Include="VulkanExceptions.h" />
     <ClInclude Include="VulkanGraphicsModule.h" />
+    <ClInclude Include="VulkanGraphicsPipeline.h" />
     <ClInclude Include="VulkanImageSampler.h" />
     <ClInclude Include="VulkanMesh.h" />
     <ClInclude Include="VulkanBuffer.h" />

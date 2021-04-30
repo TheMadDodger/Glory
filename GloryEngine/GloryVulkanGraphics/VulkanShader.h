@@ -16,6 +16,8 @@ namespace Glory
 
 	private:
 		friend class VulkanGraphicsModule;
+		friend class VulkanGraphicsPipeline;
+		friend class DeferredPipelineTest;
 		FileData* m_pShaderFileData;
 		const ShaderType m_ShaderType;
 		const std::string m_Function;

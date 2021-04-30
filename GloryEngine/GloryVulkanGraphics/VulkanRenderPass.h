@@ -19,7 +19,10 @@ namespace Glory
 
 		bool HasDepth;
 		DepthImage* pDepth;
-		SwapChain* pSwapChain;
+		vk::Extent2D Extent;
+		vk::Format Format;
+		std::vector<vk::ImageView> ImageViews;
+		size_t SwapChainImageCount;
 	};
 
 	class VulkanRenderPass
@@ -30,10 +33,13 @@ namespace Glory
 
 	private:
 		void Initialize();
+		void CreateSwapChainFrameBuffers();
 
 	private:
 		friend class VulkanGraphicsModule;
+		friend class VulkanGraphicsPipeline;
 		vk::RenderPass m_RenderPass;
 		RenderPassCreateInfo m_CreateInfo;
+		std::vector<vk::Framebuffer> m_SwapChainFramebuffers;
 	};
 }
