@@ -37,6 +37,9 @@
     <Filter Include="Modules\ResourceLoading\Base">
       <UniqueIdentifier>{c9510934-6a96-461e-8cc9-546953c527bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\ResourceLoading\Shaders">
+      <UniqueIdentifier>{e0ff632b-5a67-4b18-aa25-29c896f6c211}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -144,6 +147,12 @@
     <ClInclude Include="Material.h">
       <Filter>Modules\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderData.h">
+      <Filter>Modules\ResourceLoading\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderLoaderModule.h">
+      <Filter>Modules\ResourceLoading\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -232,6 +241,12 @@
     </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>Modules\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderData.cpp">
+      <Filter>Modules\ResourceLoading\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderLoaderModule.cpp">
+      <Filter>Modules\ResourceLoading\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

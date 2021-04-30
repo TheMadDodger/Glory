@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{f59e8069-0e5b-421f-914e-f39399a70c07}</ProjectGuid>
-    <RootNamespace>GloryCore</RootNamespace>
+    <ProjectGuid>{152e5936-53d0-4797-ae52-699baa1be8be}</ProjectGuid>
+    <RootNamespace>GloryGLSLShaderLoader</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -98,8 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GloryCore;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -117,8 +116,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GloryCore;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -136,8 +134,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GloryCore;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -155,8 +152,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\third-party\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GloryCore;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -167,76 +163,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Buffer.h" />
-    <ClInclude Include="Commands.h" />
-    <ClInclude Include="Console.h" />
-    <ClInclude Include="Debug.h" />
-    <ClInclude Include="DebugConsoleInput.h" />
-    <ClInclude Include="CoreExceptions.h" />
-    <ClInclude Include="GloryCore.h" />
-    <ClInclude Include="Engine.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameSettings.h" />
-    <ClInclude Include="GameState.h" />
-    <ClInclude Include="GPUMemory.h" />
-    <ClInclude Include="GraphicsEnums.h" />
-    <ClInclude Include="GraphicsMemoryManager.h" />
-    <ClInclude Include="ImageLoaderModule.h" />
-    <ClInclude Include="ImportSettings.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="MeshData.h" />
-    <ClInclude Include="ModelData.h" />
-    <ClInclude Include="ModelLoaderModule.h" />
-    <ClInclude Include="Module.h" />
-    <ClInclude Include="GraphicsModule.h" />
-    <ClInclude Include="Object.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="ResourceLoaderModule.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="ImageData.h" />
-    <ClInclude Include="FileData.h" />
-    <ClInclude Include="FileLoaderModule.h" />
-    <ClInclude Include="ShaderData.h" />
-    <ClInclude Include="ShaderLoaderModule.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="VertexDefinitions.h" />
-    <ClInclude Include="VertexHelpers.h" />
-    <ClInclude Include="Window.h" />
-    <ClInclude Include="WindowModule.h" />
+    <ClCompile Include="GloryGLSLShaderLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Buffer.cpp" />
-    <ClCompile Include="Commands.cpp" />
-    <ClCompile Include="Console.cpp" />
-    <ClCompile Include="Debug.cpp" />
-    <ClCompile Include="DebugConsoleInput.cpp" />
-    <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameState.cpp" />
-    <ClCompile Include="GPUMemory.cpp" />
-    <ClCompile Include="GraphicsMemoryManager.cpp" />
-    <ClCompile Include="ImageLoaderModule.cpp" />
-    <ClCompile Include="ImportSettings.cpp" />
-    <ClCompile Include="Material.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="MeshData.cpp" />
-    <ClCompile Include="ModelData.cpp" />
-    <ClCompile Include="ModelLoaderModule.cpp" />
-    <ClCompile Include="Module.cpp" />
-    <ClCompile Include="GraphicsModule.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Resource.cpp" />
-    <ClCompile Include="ResourceLoaderModule.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="ImageData.cpp" />
-    <ClCompile Include="FileData.cpp" />
-    <ClCompile Include="FileLoaderModule.cpp" />
-    <ClCompile Include="ShaderData.cpp" />
-    <ClCompile Include="ShaderLoaderModule.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Window.cpp" />
-    <ClCompile Include="WindowModule.cpp" />
+    <ClInclude Include="GloryGLSLShaderLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
