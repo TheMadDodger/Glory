@@ -32,6 +32,11 @@ namespace Glory
 		return pData;
 	}
 
+	bool SDLImageLoaderModule::HasPriority()
+	{
+		return false;
+	}
+
 	void SDLImageLoaderModule::Initialize()
 	{
 		// Initialize for all available extensions

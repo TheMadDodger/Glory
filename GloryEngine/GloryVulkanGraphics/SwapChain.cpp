@@ -170,10 +170,8 @@ namespace Glory
             int width, height;
             m_pWindow->GetDrawableSize(&width, &height);
 
-            swapExtent = {
-                static_cast<uint32_t>(width),
-                static_cast<uint32_t>(height)
-            };
+            swapExtent.width = static_cast<uint32_t>(width);
+            swapExtent.height = static_cast<uint32_t>(height);
 
             // Clamp width and height between the allowed minimum and maximum sizes
             swapExtent.width = std::max(details.Capabilities.minImageExtent.width, std::min(details.Capabilities.maxImageExtent.width, swapExtent.width));

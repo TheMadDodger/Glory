@@ -11,6 +11,7 @@ namespace Glory
 
 	private:
 		virtual ImageData* LoadTexture(const std::string& path) override;
+		virtual bool HasPriority() override;
 
 	private:
 		virtual void Initialize() override;

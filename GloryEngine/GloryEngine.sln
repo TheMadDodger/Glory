@@ -40,6 +40,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GloryASSIMPModelLoader", "G
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GloryGLSLShaderLoader", "GloryGLSLShaderLoader\GloryGLSLShaderLoader.vcxproj", "{152E5936-53D0-4797-AE52-699BAA1BE8BE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F59E8069-0E5B-421F-914E-F39399A70C07} = {F59E8069-0E5B-421F-914E-F39399A70C07}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

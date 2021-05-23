@@ -40,6 +40,8 @@ namespace Glory
 			for (size_t i = 0; i < createInfo.OptionalModuleCount; i++)
 			{
 				m_pOptionalModules[i] = createInfo.pOptionalModules[i];
+				if (m_pOptionalModules[i]->HasPriority())
+					m_pPriorityInitializationModules.push_back(m_pOptionalModules[i]);
 			}
 		}
 
@@ -78,8 +80,15 @@ namespace Glory
 	{
 		Console::Initialize();
 
+		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
+		{
+			m_pPriorityInitializationModules[i]->Initialize();
+		}
+		
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
+			auto it = std::find(m_pPriorityInitializationModules.begin(), m_pPriorityInitializationModules.end(), m_pAllModules[i]);
+			if (it != m_pPriorityInitializationModules.end()) continue;
 			m_pAllModules[i]->Initialize();
 		}
 	}

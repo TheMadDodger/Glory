@@ -9,4 +9,9 @@ namespace Glory
 	LoaderModule::~LoaderModule()
 	{
 	}
+
+	bool LoaderModule::HasPriority()
+	{
+		return true;
+	}
 }

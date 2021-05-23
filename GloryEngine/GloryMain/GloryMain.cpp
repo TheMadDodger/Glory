@@ -2,6 +2,8 @@
 #include <SDL2/SDL_video.h>
 #include <ASSIMPModule.h>
 #include <FileLoaderModule.h>
+#include <ShaderLoaderModule.h>
+#include <GLSLShaderLoader.h>
 
 #define _CRTDBG_MAP_ALLOC
 
@@ -16,7 +18,7 @@ int main()
         windowCreateInfo.Height = 720;
         windowCreateInfo.WindowFlags = SDL_WINDOW_VULKAN;
 
-        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule() };
+        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader() };
 
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);

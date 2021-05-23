@@ -23,7 +23,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{368b9278-b0db-4fc7-9367-afaf75185386}</ProjectGuid>
     <RootNamespace>GloryMain</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -59,12 +59,14 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\GloryCore\MACROS.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\GloryCore\MACROS.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -98,13 +100,14 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-cd.lib;spirv-cross-cored.lib;spirv-cross-cppd.lib;spirv-cross-glsld.lib;spirv-cross-hlsld.lib;spirv-cross-msld.lib;spirv-cross-reflectd.lib;spirv-cross-utild.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,15 +120,15 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,13 +139,14 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-cd.lib;spirv-cross-cored.lib;spirv-cross-cppd.lib;spirv-cross-glsld.lib;spirv-cross-hlsld.lib;spirv-cross-msld.lib;spirv-cross-reflectd.lib;spirv-cross-utild.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,15 +159,15 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

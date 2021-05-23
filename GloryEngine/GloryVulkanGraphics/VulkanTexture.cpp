@@ -121,8 +121,8 @@ namespace Glory
         copyRegion.imageSubresource.baseArrayLayer = 0;
         copyRegion.imageSubresource.layerCount = 1;
 
-        copyRegion.imageOffset = { offsetX, offsetY, offsetZ };
-        copyRegion.imageExtent = { width, height, depth };
+        copyRegion.imageOffset = vk::Offset3D(offsetX, offsetY, offsetZ);
+        copyRegion.imageExtent = vk::Extent3D(width, height, depth);
 
         commandBuffer.copyBufferToImage(pVulkanBuffer->GetBuffer(), m_TextureImage, vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
 

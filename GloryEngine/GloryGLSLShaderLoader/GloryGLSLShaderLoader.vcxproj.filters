@@ -6,12 +6,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GloryGLSLShaderLoader.cpp">
+    <ClCompile Include="GLSLShaderLoader.cpp">
       <Filter>Module</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GloryGLSLShaderLoader.h">
+    <ClInclude Include="GLSLShaderLoader.h">
       <Filter>Module</Filter>
     </ClInclude>
   </ItemGroup>

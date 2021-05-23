@@ -60,6 +60,7 @@
     <ClCompile Include="DeferredPipelineTest.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderCrossCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanGraphicsModule.h">
@@ -116,5 +117,6 @@
     <ClInclude Include="DeferredPipelineTest.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderCrossCompiler.h" />
   </ItemGroup>
 </Project>

@@ -13,6 +13,8 @@
 #include <ModelLoaderModule.h>
 #include <FileLoaderModule.h>
 #include "VulkanShader.h"
+#include <ShaderLoaderModule.h>
+#include "ShaderCrossCompiler.h"
 
 namespace Glory
 {
@@ -67,6 +69,11 @@ namespace Glory
 
     void VulkanGraphicsModule::Initialize()
     {
+        ShaderLoaderModule* pShaderLoader = Game::GetGame().GetEngine()->GetModule<ShaderLoaderModule>();
+        ShaderData* pShaderData = (ShaderData*)pShaderLoader->Load("./Shaders/loadertest.frag");
+        ShaderCrossCompiler compiler;
+        compiler.Compile(pShaderData->Data(), pShaderData->Size());
+
         // Get the required extensions from the window
         m_pMainWindow = Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow();
         m_pMainWindow->GetVulkanRequiredExtensions(m_Extensions);

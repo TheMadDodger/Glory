@@ -56,5 +56,7 @@ namespace Glory
 
 		// All modules
 		std::vector<Module*> m_pAllModules;
+
+		std::vector<Module*> m_pPriorityInitializationModules;
 	};
 }

@@ -177,8 +177,8 @@ namespace Glory
         depthStencil.minDepthBounds = 0.0f; // Optional
         depthStencil.maxDepthBounds = 1.0f; // Optional
         depthStencil.stencilTestEnable = VK_FALSE;
-        depthStencil.front = {}; // Optional
-        depthStencil.back = {}; // Optional
+        //depthStencil.front = {}; // Optional
+        //depthStencil.back = {}; // Optional
 
         // Dynamic state
         //vk::DynamicState dynamicStates[] = {
