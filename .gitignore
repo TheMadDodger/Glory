@@ -56,3 +56,5 @@ GloryEngine/GlorySDLImage/Release/
 GloryEngine/GlorySDLWindow/Release/
 GloryEngine/GloryVulkanGraphics/Release/
 GloryEngine/ImGui/Debug/
+GloryEngine/bin/ImGui/
+GloryEngine/GloryEditor/Debug/

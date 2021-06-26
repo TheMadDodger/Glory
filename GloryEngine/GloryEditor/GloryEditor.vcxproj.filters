@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="imgui_impl_vulkan.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_sdl.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorWindowImpl.cpp">
+      <Filter>Backend\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorRenderImpl.cpp">
+      <Filter>Backend\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorSDLWindowImpl.cpp">
+      <Filter>Backend\SDL</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorVulkanRenderImpl.cpp">
+      <Filter>Backend\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorApplication.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorPlatform.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="GloryEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetPickerPopup.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentPopup.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorPreferencesWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentBrowser.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorSceneManager.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="FontTumbnailGenerator.cpp">
+      <Filter>Content\Tumbnails</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjectEditor.cpp">
+      <Filter>Content\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="InspectorWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelEditor.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuBar.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviorTreeEditor.cpp">
+      <Filter>Content\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentEditor.cpp">
+      <Filter>Content\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Content\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioTumbnailGenerator.cpp">
+      <Filter>Content\Tumbnails</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureTumbnailGenerator.cpp">
+      <Filter>Content\Tumbnails</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupManager.cpp">
+      <Filter>Popups</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyDrawer.cpp">
+      <Filter>Content\PropertyDrawers</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneGraphWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneViewCamera.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptableObjectEditor.cpp">
+      <Filter>Content\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="Selection.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonEditorComponent.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonObject.cpp">
+      <Filter>OLD</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardPropertyDrawers.cpp">
+      <Filter>Content\PropertyDrawers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tumbnail.cpp">
+      <Filter>Content\Tumbnails</Filter>
+    </ClCompile>
+    <ClCompile Include="TumbnailGenerator.cpp">
+      <Filter>Content\Tumbnails</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetReferencePropertyDrawer.cpp">
+      <Filter>Content\PropertyDrawers</Filter>
+    </ClCompile>
+    <ClCompile Include="MainEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{f2db7d65-d292-4394-a484-73cd24524a11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Backend">
+      <UniqueIdentifier>{cb362358-089a-4130-b25c-c4683da8e2d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Backend\Base">
+      <UniqueIdentifier>{88b6617a-9d69-4140-80a5-9de4145be23a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Backend\Vulkan">
+      <UniqueIdentifier>{39f4b0df-de22-4f7d-8467-5dfb3d8f0b38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Backend\SDL">
+      <UniqueIdentifier>{fe6b0f31-e99e-42e8-8fc0-2ca843ed632d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{9cc7d303-88ca-4771-a8d0-0e8e10199d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OLD">
+      <UniqueIdentifier>{4110a3ec-50b8-484e-890a-e282bb98e8c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Windows">
+      <UniqueIdentifier>{cf0300fd-23b7-4344-8131-7bfdb570c0e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content">
+      <UniqueIdentifier>{ed1a83ac-a68b-4d9e-abc6-7809e701cc66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\Editors">
+      <UniqueIdentifier>{7ee024ce-4fa3-4f80-85db-990df436700e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\Tumbnails">
+      <UniqueIdentifier>{39a231d5-f857-4e75-b5ae-8ebc657b9891}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\PropertyDrawers">
+      <UniqueIdentifier>{b4c47c4f-4db9-41c3-b5af-185687bb6630}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Popups">
+      <UniqueIdentifier>{bde1bb11-a741-49d3-873c-86253f1486d8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="imgui_impl_vulkan.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_sdl.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindowImpl.h">
+      <Filter>Backend\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorRenderImpl.h">
+      <Filter>Backend\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorSDLWindowImpl.h">
+      <Filter>Backend\SDL</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorVulkanRenderImpl.h">
+      <Filter>Backend\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorApplication.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorPlatform.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetPickerPopup.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentPopup.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorPreferencesWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="ContentBrowser.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorSceneManager.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="FontTumbnailGenerator.h">
+      <Filter>Content\Tumbnails</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectEditor.h">
+      <Filter>Content\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="InspectorWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelEditor.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuBar.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviorTreeEditor.h">
+      <Filter>Content\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentEditor.h">
+      <Filter>Content\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
+      <Filter>Content\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioTumbnailGenerator.h">
+      <Filter>Content\Tumbnails</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureTumbnailGenerator.h">
+      <Filter>Content\Tumbnails</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupManager.h">
+      <Filter>Popups</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyDrawer.h">
+      <Filter>Content\PropertyDrawers</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneGraphWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneViewCamera.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptableObjectEditor.h">
+      <Filter>Content\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="Selection.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonEditorComponent.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonObject.h">
+      <Filter>OLD</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardPropertyDrawers.h">
+      <Filter>Content\PropertyDrawers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tumbnail.h">
+      <Filter>Content\Tumbnails</Filter>
+    </ClInclude>
+    <ClInclude Include="TumbnailGenerator.h">
+      <Filter>Content\Tumbnails</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetReferencePropertyDrawer.h">
+      <Filter>Content\PropertyDrawers</Filter>
+    </ClInclude>
+    <ClInclude Include="MainEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
