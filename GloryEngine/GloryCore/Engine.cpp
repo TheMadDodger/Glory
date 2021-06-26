@@ -31,7 +31,9 @@ namespace Glory
 		return *it;
 	}
 
-	Engine::Engine(const EngineCreateInfo& createInfo) : m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule)
+	Engine::Engine(const EngineCreateInfo& createInfo)
+		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
+		m_pThreadManager(new ThreadManager()), m_pJobManager(new Jobs::JobManager())
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -74,6 +76,15 @@ namespace Glory
 
 		m_pAllModules.clear();
 		m_pOptionalModules.clear();
+
+		m_pJobManager->Kill();
+		m_pThreadManager->Destroy();
+
+		delete m_pJobManager;
+		m_pJobManager = nullptr;
+
+		delete m_pThreadManager;
+		m_pThreadManager = nullptr;
 	}
 
 	void Engine::Initialize()
@@ -91,6 +102,8 @@ namespace Glory
 			if (it != m_pPriorityInitializationModules.end()) continue;
 			m_pAllModules[i]->Initialize();
 		}
+
+		m_pThreadManager->Initialize();
 	}
 
 	void Engine::Update()

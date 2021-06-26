@@ -183,8 +183,13 @@
     <ClInclude Include="GPUMemory.h" />
     <ClInclude Include="GraphicsEnums.h" />
     <ClInclude Include="GraphicsMemoryManager.h" />
+    <ClInclude Include="GraphicsThread.h" />
     <ClInclude Include="ImageLoaderModule.h" />
     <ClInclude Include="ImportSettings.h" />
+    <ClInclude Include="Job.h" />
+    <ClInclude Include="JobManager.h" />
+    <ClInclude Include="JobPool.h" />
+    <ClInclude Include="JobQueue.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshData.h" />
@@ -193,6 +198,8 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="GraphicsModule.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="RenderFrame.h" />
+    <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ResourceLoaderModule.h" />
     <ClInclude Include="Shader.h" />
@@ -202,6 +209,8 @@
     <ClInclude Include="ShaderData.h" />
     <ClInclude Include="ShaderLoaderModule.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="ThreadManager.h" />
     <ClInclude Include="VertexDefinitions.h" />
     <ClInclude Include="VertexHelpers.h" />
     <ClInclude Include="Window.h" />
@@ -218,8 +227,13 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="GPUMemory.cpp" />
     <ClCompile Include="GraphicsMemoryManager.cpp" />
+    <ClCompile Include="GraphicsThread.cpp" />
     <ClCompile Include="ImageLoaderModule.cpp" />
     <ClCompile Include="ImportSettings.cpp" />
+    <ClCompile Include="Job.cpp" />
+    <ClCompile Include="JobManager.cpp" />
+    <ClCompile Include="JobPool.cpp" />
+    <ClCompile Include="JobQueue.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshData.cpp" />
@@ -228,6 +242,8 @@
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="GraphicsModule.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="RenderFrame.cpp" />
+    <ClCompile Include="RenderQueue.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ResourceLoaderModule.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -237,6 +253,8 @@
     <ClCompile Include="ShaderData.cpp" />
     <ClCompile Include="ShaderLoaderModule.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="ThreadManager.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowModule.cpp" />
   </ItemGroup>

@@ -12,6 +12,7 @@ namespace Glory
 		static Game& CreateGame(const GameSettings &gameSettings);
 		static Game& GetGame();
 
+		void Initialize();
 		void RunGame();
 		void Destroy();
 		Engine* GetEngine();
@@ -22,8 +23,6 @@ namespace Glory
 		Game(const GameSettings& pGameState);
 		Game();
 		virtual ~Game();
-
-		void Initialize();
 
 	private:
 		GameState* m_pGameState;

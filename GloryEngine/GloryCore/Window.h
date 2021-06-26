@@ -19,6 +19,7 @@ namespace Glory
 		virtual void GetVulkanRequiredExtensions(std::vector<const char*>& extensions);
 		virtual void GetVulkanSurface(void* instance, void* surface);
 		virtual void GetDrawableSize(int* width, int* height);
+		virtual void GetWindowSize(int* width, int* height);
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);

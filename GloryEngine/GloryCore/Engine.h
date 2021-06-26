@@ -2,6 +2,8 @@
 #include "Object.h"
 #include "WindowModule.h"
 #include "GraphicsModule.h"
+#include "ThreadManager.h"
+#include "JobManager.h"
 
 namespace Glory
 {
@@ -58,5 +60,9 @@ namespace Glory
 		std::vector<Module*> m_pAllModules;
 
 		std::vector<Module*> m_pPriorityInitializationModules;
+
+		// Threading
+		ThreadManager* m_pThreadManager;
+		Jobs::JobManager* m_pJobManager;
 	};
 }

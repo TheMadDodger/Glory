@@ -22,6 +22,16 @@ namespace Glory
 		SDL_GL_GetDrawableSize(m_pWindow, width, height);
 	}
 
+	void SDLWindow::GetWindowSize(int* width, int* height)
+	{
+		SDL_GetWindowSize(m_pWindow, width, height);
+	}
+
+	SDL_Window* SDLWindow::GetSDLWindow()
+	{
+		return m_pWindow;
+	}
+
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr) {}
 
 	SDLWindow::~SDLWindow()

@@ -2,13 +2,16 @@
 #include <cstdint>
 #include <optional>
 
-struct QueueFamilyIndices
+namespace Glory
 {
-	std::optional<uint32_t> GraphicsFamily;
-	std::optional<uint32_t> PresentFamily;
-
-	bool IsComplete()
+	struct QueueFamilyIndices
 	{
-		return GraphicsFamily.has_value() && PresentFamily.has_value();
-	}
-};
+		std::optional<uint32_t> GraphicsFamily;
+		std::optional<uint32_t> PresentFamily;
+
+		bool IsComplete()
+		{
+			return GraphicsFamily.has_value() && PresentFamily.has_value();
+		}
+	};
+}

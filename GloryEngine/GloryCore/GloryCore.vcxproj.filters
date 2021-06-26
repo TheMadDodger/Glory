@@ -40,6 +40,15 @@
     <Filter Include="Modules\ResourceLoading\Shaders">
       <UniqueIdentifier>{e0ff632b-5a67-4b18-aa25-29c896f6c211}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\Graphics\Rendering">
+      <UniqueIdentifier>{185c566f-1967-4b68-966a-dc80f495ff85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Threading">
+      <UniqueIdentifier>{12c568ea-27ce-4516-b780-f1447c0123ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JobSystem">
+      <UniqueIdentifier>{cc5dd0ad-1d9a-45f2-b19f-7d2349d930dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -153,6 +162,33 @@
     <ClInclude Include="ShaderLoaderModule.h">
       <Filter>Modules\ResourceLoading\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="RenderQueue.h">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderFrame.h">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsThread.h">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadManager.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Thread.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="JobManager.h">
+      <Filter>JobSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="JobPool.h">
+      <Filter>JobSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>JobSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="JobQueue.h">
+      <Filter>JobSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -247,6 +283,33 @@
     </ClCompile>
     <ClCompile Include="ShaderLoaderModule.cpp">
       <Filter>Modules\ResourceLoading\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderQueue.cpp">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderFrame.cpp">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsThread.cpp">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadManager.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="JobManager.cpp">
+      <Filter>JobSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="JobPool.cpp">
+      <Filter>JobSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>JobSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="JobQueue.cpp">
+      <Filter>JobSystem</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

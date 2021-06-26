@@ -9,6 +9,8 @@ namespace Glory
 	public:
 		void GetVulkanSurface(void* instance, void* surface) override;
 		void GetDrawableSize(int* width, int* height) override;
+		virtual void GetWindowSize(int* width, int* height) override;
+		SDL_Window* GetSDLWindow();
 
 	private:
 		SDLWindow(const WindowCreateInfo& createInfo);

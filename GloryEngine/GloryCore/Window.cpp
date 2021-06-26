@@ -19,6 +19,11 @@ namespace Glory
 
 	void Window::GetDrawableSize(int* width, int* height)
 	{
+		GetWindowSize(width, height);
+	}
+
+	void Window::GetWindowSize(int* width, int* height)
+	{
 		*width = m_Width;
 		*height = m_Height;
 	}

@@ -20,3 +20,8 @@
 #include <SDLWindowModule.h>
 #include <VulkanGraphicsModule.h>
 #include <SDLImageLoaderModule.h>
+#include <SDL2/SDL_video.h>
+#include <ASSIMPModule.h>
+#include <FileLoaderModule.h>
+#include <ShaderLoaderModule.h>
+#include <GLSLShaderLoader.h>
