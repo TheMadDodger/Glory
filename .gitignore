@@ -44,3 +44,15 @@ GloryEngine/bin/Engine/
 GloryEngine/Debug/
 GloryEngine/GloryBasicRenderer/Debug/
 GloryEngine/GloryASSIMPModelLoader/Debug/
+GloryEngine/GloryASSIMPModelLoader/Release/
+GloryEngine/GloryBasicRenderer/Release/
+GloryEngine/GloryBasicRenderer/x64/
+GloryEngine/GloryCore/Release/
+GloryEngine/GloryGLSLShaderLoader/Debug/
+GloryEngine/GloryGLSLShaderLoader/Release/
+GloryEngine/GloryMain/Release/
+GloryEngine/GlorySDLImage/Debug/
+GloryEngine/GlorySDLImage/Release/
+GloryEngine/GlorySDLWindow/Release/
+GloryEngine/GloryVulkanGraphics/Release/
+GloryEngine/ImGui/Debug/

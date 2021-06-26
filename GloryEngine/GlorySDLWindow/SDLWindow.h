@@ -7,9 +7,10 @@ namespace Glory
 	class SDLWindow : public Window
 	{
 	public:
-		void GetVulkanSurface(void* instance, void* surface) override;
-		void GetDrawableSize(int* width, int* height) override;
+		virtual void GetVulkanSurface(void* instance, void* surface) override;
+		virtual void GetDrawableSize(int* width, int* height) override;
 		virtual void GetWindowSize(int* width, int* height) override;
+		virtual void GetWindowPosition(int* x, int* y) override;
 		SDL_Window* GetSDLWindow();
 
 	private:

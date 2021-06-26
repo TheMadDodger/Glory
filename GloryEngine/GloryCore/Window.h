@@ -20,6 +20,7 @@ namespace Glory
 		virtual void GetVulkanSurface(void* instance, void* surface);
 		virtual void GetDrawableSize(int* width, int* height);
 		virtual void GetWindowSize(int* width, int* height);
+		virtual void GetWindowPosition(int* x, int* y) = 0;
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);

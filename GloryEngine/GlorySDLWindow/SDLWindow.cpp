@@ -27,6 +27,11 @@ namespace Glory
 		SDL_GetWindowSize(m_pWindow, width, height);
 	}
 
+	void SDLWindow::GetWindowPosition(int* x, int* y)
+	{
+		SDL_GetWindowPosition(m_pWindow, x, y);
+	}
+
 	SDL_Window* SDLWindow::GetSDLWindow()
 	{
 		return m_pWindow;
