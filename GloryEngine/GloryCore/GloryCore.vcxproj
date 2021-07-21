@@ -170,6 +170,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="CommandData.h" />
+    <ClInclude Include="GraphicsCommandHandler.h" />
+    <ClInclude Include="GraphicsCommandLibrary.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Debug.h" />
@@ -198,6 +201,7 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="GraphicsModule.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="GraphicsCommands.h" />
     <ClInclude Include="RenderFrame.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="Resource.h" />
@@ -218,6 +222,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="CommandData.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Debug.cpp" />
@@ -226,6 +231,8 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="GPUMemory.cpp" />
+    <ClCompile Include="GraphicsCommandHandler.cpp" />
+    <ClCompile Include="GraphicsCommandLibrary.cpp" />
     <ClCompile Include="GraphicsMemoryManager.cpp" />
     <ClCompile Include="GraphicsThread.cpp" />
     <ClCompile Include="ImageLoaderModule.cpp" />

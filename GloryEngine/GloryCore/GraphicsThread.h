@@ -15,6 +15,8 @@ namespace Glory
 	private:
 		void Run();
 
+		void OnRenderFrame(const RenderFrame& frame);
+
 	private:
 		Thread* m_pThread;
 		RenderQueue* m_pRenderQueue;

@@ -49,6 +49,9 @@
     <Filter Include="JobSystem">
       <UniqueIdentifier>{cc5dd0ad-1d9a-45f2-b19f-7d2349d930dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\Graphics\Rendering\Commands">
+      <UniqueIdentifier>{3cc24a7f-4599-4e39-a80a-825bad334403}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -189,6 +192,18 @@
     <ClInclude Include="JobQueue.h">
       <Filter>JobSystem</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsCommandHandler.h">
+      <Filter>Modules\Graphics\Rendering\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsCommandLibrary.h">
+      <Filter>Modules\Graphics\Rendering\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsCommands.h">
+      <Filter>Modules\Graphics\Rendering\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandData.h">
+      <Filter>Modules\Graphics\Rendering\Commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -311,5 +326,12 @@
     <ClCompile Include="JobQueue.cpp">
       <Filter>JobSystem</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicsCommandHandler.cpp">
+      <Filter>Modules\Graphics\Rendering\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsCommandLibrary.cpp">
+      <Filter>Modules\Graphics\Rendering\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandData.cpp" />
   </ItemGroup>
 </Project>
