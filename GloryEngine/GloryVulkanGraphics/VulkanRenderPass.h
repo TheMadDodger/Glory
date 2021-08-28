@@ -31,6 +31,9 @@ namespace Glory
 		VulkanRenderPass(const RenderPassCreateInfo& createInfo);
 		virtual ~VulkanRenderPass();
 
+		vk::RenderPass GetRenderPass();
+		vk::Framebuffer GetCurrentFrameBuffer();
+
 	private:
 		void Initialize();
 		void CreateSwapChainFrameBuffers();

@@ -1,6 +1,7 @@
 #pragma once
 #include <typeinfo>
 #include "GraphicsCommands.h"
+#include <any>
 
 namespace Glory
 {
@@ -8,25 +9,25 @@ namespace Glory
 	{
 	public:
 		BaseGraphicsCommandHandler();
-		~BaseGraphicsCommandHandler();
+		virtual ~BaseGraphicsCommandHandler();
 
 	protected:
 		virtual const std::type_info& GetCommandType();
-		virtual void Invoke(const BaseGraphicsCommand* commandData);
+		virtual void Invoke(const std::any& commandData);
 
 	private:
 		friend class GraphicsCommands;
 	};
 
 	template<typename T>
-	class GraphicsCommandHandler
+	class GraphicsCommandHandler : public BaseGraphicsCommandHandler
 	{
 	public:
 		GraphicsCommandHandler() {}
-		~GraphicsCommandHandler() {}
+		virtual ~GraphicsCommandHandler() {}
 
 	protected:
-		virtual void OnInvoke(T& commandData) = 0;
+		virtual void OnInvoke(T commandData) = 0;
 
 	private:
 		virtual const std::type_info& GetCommandType() override
@@ -34,9 +35,10 @@ namespace Glory
 			return typeid(T);
 		}
 
-		virtual void Invoke(const BaseGraphicsCommand* commandData) override
+		virtual void Invoke(const std::any& commandData) override
 		{
-			OnInvoke((T&)commandData);
+			T data = std::any_cast<T>(commandData);
+			OnInvoke(data);
 		}
 	};
 }

@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Engine.h"
 #include "GraphicsCommandLibrary.h"
+#include "FrameStates.h"
 
 namespace Glory
 {
@@ -22,6 +23,16 @@ namespace Glory
 		m_pThread = ThreadManager::Run(std::bind(&GraphicsThread::Run, this));
 	}
 
+	void GraphicsThread::Stop()
+	{
+		
+	}
+
+	RenderQueue* GraphicsThread::GetRenderQueue()
+	{
+		return m_pRenderQueue;
+	}
+
 	void GraphicsThread::Run()
 	{
 		while (true)
@@ -32,10 +43,14 @@ namespace Glory
 
 	void GraphicsThread::OnRenderFrame(const RenderFrame& frame)
 	{
+		// Tell the frame states a frame render started
+		FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();
+		pFrameStates->OnFrameStart();
 		for (size_t i = 0; i < frame.CommandQueue.size(); ++i)
 		{
-			CommandData command = frame.CommandQueue[i];
-			GraphicsCommands::RunCommand(command);
+			GraphicsCommands::RunCommand(frame.CommandQueue[i]);
 		}
+		pFrameStates->OnFrameEnd();
+		// Tell the frame states a frame render finished
 	}
 }

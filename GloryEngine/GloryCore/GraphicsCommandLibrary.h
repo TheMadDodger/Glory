@@ -1,31 +1,30 @@
 #pragma once
 #include <map>
 #include "GraphicsCommandHandler.h"
-#include "Commands.h"
 #include "CommandData.h"
 #include <typeindex>
+#include "GraphicsModule.h"
 
 namespace Glory
 {
 	class GraphicsCommands
 	{
 	public:
-
 		template<class T>
-		static void RegisterCommandHandler()
+		static void RegisterCommandHandler(GraphicsModule* pModule)
 		{
-			BaseGraphicsCommandHandler handler = (BaseGraphicsCommandHandler)(T());
-			m_CommandHandlers.emplace(handler.GetCommandType(), handler);
+			BaseGraphicsCommandHandler* handler = (BaseGraphicsCommandHandler*)(new T(pModule));
+			m_CommandHandlers.emplace(handler->GetCommandType(), handler);
 		}
 
-		static void RunCommand(const CommandData& commandData);
+		static void Destroy();
+		static void RunCommand(const std::any& commandData);
 
 	private:
 		GraphicsCommands();
 		virtual ~GraphicsCommands();
 
 	private:
-		//static std::map<const std::type_info, BaseGraphicsCommandHandler*> m_CommandHandlers;
 		static std::map<std::type_index, BaseGraphicsCommandHandler*> m_CommandHandlers;
 	};
 }

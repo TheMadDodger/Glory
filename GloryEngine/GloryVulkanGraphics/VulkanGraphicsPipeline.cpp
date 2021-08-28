@@ -33,6 +33,11 @@ namespace Glory
         m_DescriptorSetLayoutInfos.push_back(layoutInfo);
     }
 
+    vk::Pipeline VulkanGraphicsPipeline::GetPipeline()
+    {
+        return m_GraphicsPipeline;
+    }
+
 	void VulkanGraphicsPipeline::Initialize()
 	{
         VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();

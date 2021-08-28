@@ -15,6 +15,8 @@ namespace Glory
 
 		void AddDescriptorSetLayoutInfo(const vk::DescriptorSetLayoutCreateInfo& layoutInfo);
 
+		vk::Pipeline GetPipeline();
+
 	private:
 		void Initialize();
 

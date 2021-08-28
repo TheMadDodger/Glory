@@ -88,6 +88,14 @@ namespace Glory
         return m_GraphicsCommandPool;
     }
 
+    vk::CommandPool Device::GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags)
+    {
+        if (flags == (vk::CommandPoolCreateFlags)0) return GetGraphicsCommandPool();
+        auto it = m_GraphicsCommandPools.find(flags);
+        if (it == m_GraphicsCommandPools.end()) return CreateGraphicsCommandPool(flags);
+        return m_GraphicsCommandPools[flags];
+    }
+
     const vk::PhysicalDeviceProperties& Device::GetDeviceProperties() const
     {
         return m_DeviceProperties;
@@ -137,8 +145,17 @@ namespace Glory
         m_SwapChainSupportDetails.PresentModes.clear();
         m_DeviceExtensions.clear();
 
-        if (m_LogicalDeviceData.LogicalDevice && m_GraphicsCommandPool) m_LogicalDeviceData.LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
-        if (m_LogicalDeviceData.LogicalDevice) m_LogicalDeviceData.LogicalDevice.destroy();
+        if (m_LogicalDeviceData.LogicalDevice)
+        {
+            if (m_GraphicsCommandPool) m_LogicalDeviceData.LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
+
+            std::for_each(m_GraphicsCommandPools.begin(), m_GraphicsCommandPools.end(), [&](std::pair<vk::CommandPoolCreateFlags, vk::CommandPool> pair)
+                {
+                    m_LogicalDeviceData.LogicalDevice.destroyCommandPool(pair.second);
+                });
+            m_LogicalDeviceData.LogicalDevice.destroy();
+        }
+        m_GraphicsCommandPools.clear();
 	}
 
 	void Device::LoadData(VulkanGraphicsModule* pGraphicsModule)
@@ -227,5 +244,20 @@ namespace Glory
         m_GraphicsCommandPool = m_LogicalDeviceData.LogicalDevice.createCommandPool(commandPoolCreateInfo);
         if (m_GraphicsCommandPool == nullptr)
             throw std::runtime_error("failed to create command pool!");
+    }
+
+    vk::CommandPool Device::CreateGraphicsCommandPool(vk::CommandPoolCreateFlags flags)
+    {
+        // Create command pool
+        vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
+            .setQueueFamilyIndex(m_QueueFamilyIndices.GraphicsFamily.value())
+            .setFlags(flags);
+
+        vk::CommandPool pool = m_LogicalDeviceData.LogicalDevice.createCommandPool(commandPoolCreateInfo);
+        if (pool == nullptr)
+            throw std::runtime_error("failed to create command pool!");
+
+        m_GraphicsCommandPools.emplace(flags, pool);
+        return pool;
     }
 }

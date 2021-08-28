@@ -15,6 +15,10 @@
 #include "VulkanShader.h"
 #include <ShaderLoaderModule.h>
 #include "ShaderCrossCompiler.h"
+#include "RenderPassCommandHandlers.h"
+#include "VulkanFrameStates.h"
+#include <GraphicsCommandLibrary.h>
+#include "PipelineCommandHandlers.h"
 
 namespace Glory
 {
@@ -52,6 +56,26 @@ namespace Glory
         return m_pDeviceManager;
     }
 
+    SwapChain* VulkanGraphicsModule::GetSwapChain()
+    {
+        return m_pSwapChain;
+    }
+
+    VulkanCommandBuffers* VulkanGraphicsModule::GetVulkanCommandBuffers()
+    {
+        return m_pCommandBuffers;
+    }
+
+    VulkanRenderPass* VulkanGraphicsModule::GetVulkanRenderPass()
+    {
+        return m_pMainRenderPass;
+    }
+
+    VulkanGraphicsPipeline* VulkanGraphicsModule::GetVulkanGraphicsPipeline()
+    {
+        return m_pGraphicsPipeline;
+    }
+
     const std::vector<const char*>& VulkanGraphicsModule::GetExtensions() const
     {
         return m_Extensions;
@@ -67,7 +91,7 @@ namespace Glory
         return nullptr;
     }
 
-    void VulkanGraphicsModule::Initialize()
+    void VulkanGraphicsModule::OnInitialize()
     {
         //ShaderLoaderModule* pShaderLoader = Game::GetGame().GetEngine()->GetModule<ShaderLoaderModule>();
         //ShaderData* pShaderData = (ShaderData*)pShaderLoader->Load("./Shaders/loadertest.frag");
@@ -90,15 +114,21 @@ namespace Glory
         CreateLogicalDevice();
         CreateSwapChain();
         CreateDepthResources();
+        CreateMainRenderPass();
+        CreateTexture();
+        CreateMesh();
+        CreatePipeline();
+
+        m_pCommandBuffers = new VulkanCommandBuffers(this);
+        m_pCommandBuffers->Initialize();
+
         //CreateDeferredRenderPassTest();
-        //CreateTexture();
-        //CreateMesh();
         //CreateDeferredTestPipeline();
         //CreateCommandPools();
         //CreateSyncObjects();
     }
 
-    void VulkanGraphicsModule::Cleanup()
+    void VulkanGraphicsModule::OnCleanup()
     {
         m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData().LogicalDevice.waitIdle();
         m_Extensions.clear();
@@ -135,6 +165,9 @@ namespace Glory
 
         delete m_pSwapChain;
         m_pSwapChain = nullptr;
+
+        delete m_pCommandBuffers;
+        m_pCommandBuffers = nullptr;
     }
 
 //    void VulkanGraphicsModule::Initialize()
@@ -308,12 +341,25 @@ namespace Glory
 //        m_Instance.destroy();
 //    }
 
-    void VulkanGraphicsModule::Update()
+    void VulkanGraphicsModule::OnUpdate()
     {
     }
 
-    void VulkanGraphicsModule::Draw()
+    void VulkanGraphicsModule::OnDraw()
     {
+        StartFrame();
+
+        //EnqueueCommand(TestCommand("Yo Mama"));
+        
+        auto extent = m_pSwapChain->GetExtent();
+        BeginRenderPassCommand renderPassBegin = BeginRenderPassCommand({ 0,0 }, { extent.width, extent.height });
+        renderPassBegin.ClearValues.push_back(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        EnqueueCommand(renderPassBegin);
+        EnqueueCommand(BindPipelineCommand());
+        EnqueueCommand(EndRenderPassCommand());
+
+        EndFrame();
+
         //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
         //deviceData.LogicalDevice.waitForFences(1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
         //
@@ -364,6 +410,18 @@ namespace Glory
         //deviceData.PresentQueue.waitIdle();
         //
         //m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    void VulkanGraphicsModule::RegisterCommands()
+    {
+        GraphicsCommands::RegisterCommandHandler<BeginRenderPassCommandHandler>(this);
+        GraphicsCommands::RegisterCommandHandler<EndRenderPassCommandHandler>(this);
+        GraphicsCommands::RegisterCommandHandler<BindPipelineCommandHandler>(this);
+    }
+
+    FrameStates* VulkanGraphicsModule::CreateFrameStates()
+    {
+        return new VulkanFrameStates(this);
     }
 
     //void VulkanGraphicsModule::Draw()
@@ -620,7 +678,7 @@ namespace Glory
     {
         // Load model
         ModelLoaderModule* pModelLoader = Game::GetGame().GetEngine()->GetModule<ModelLoaderModule>();
-        ModelData* pModelData = (ModelData*)pModelLoader->Load("./Models/viking_room.obj");
+        ModelData* pModelData = (ModelData*)pModelLoader->Load("./Models/Cube.fbx");
         MeshData* pMeshData = pModelData->GetMesh(0);
         const float* verticeArray = (const float*)pMeshData->Vertices();
 
@@ -871,73 +929,73 @@ namespace Glory
 
     void VulkanGraphicsModule::CreateCommandPools()
     {
-        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        vk::CommandPool commandPool = m_pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool();
-
-        // Create command buffers
-        m_CommandBuffers.resize(m_pSwapChain->GetImageCount());
-
-        vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
-            .setCommandPool(commandPool)
-            .setLevel(vk::CommandBufferLevel::ePrimary)
-            .setCommandBufferCount((uint32_t)m_CommandBuffers.size());
-
-        if (deviceData.LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, m_CommandBuffers.data()) != vk::Result::eSuccess)
-            throw std::runtime_error("failed to allocate command buffers!");
-
-        auto swapchainExtent = m_pSwapChain->GetExtent();
-
-        for (size_t i = 0; i < m_CommandBuffers.size(); i++)
-        {
-            // Start the command buffer
-            vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo()
-                .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
-                .setPInheritanceInfo(nullptr);
-
-            if (m_CommandBuffers[i].begin(&commandBufferBeginInfo) != vk::Result::eSuccess)
-                throw std::runtime_error("failed to begin recording command buffer!");
-
-            // Start a render pass
-            vk::Rect2D renderArea = vk::Rect2D()
-                .setOffset({ 0,0 })
-                .setExtent(swapchainExtent);
-
-            vk::ClearColorValue clearColorValue = vk::ClearColorValue()
-                .setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
-
-            vk::ClearColorValue clearPosValue = vk::ClearColorValue()
-                .setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
-
-            vk::ClearColorValue clearNormalValue = vk::ClearColorValue()
-                .setFloat32({ 0.737f, 0.737f, 1.0f, 1.0f });
-
-            std::array<vk::ClearValue, 4> clearColors{};
-            clearColors[0].setColor(clearColorValue);
-            clearColors[1].setColor(clearPosValue);
-            clearColors[2].setColor(clearNormalValue);
-            clearColors[3].setDepthStencil({ 1.0f, 0 });
-
-            vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
-                .setRenderPass(m_pRenderPass->m_RenderPass)
-                .setFramebuffer(m_pRenderPass->m_Framebuffers[i])
-                .setRenderArea(renderArea)
-                .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
-                .setPClearValues(clearColors.data());
-
-            m_CommandBuffers[i].beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
-            m_CommandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pRenderPipeline->m_GraphicsPipeline);
-
-            vk::Buffer vertexBuffers[] = { m_pVertexBuffer->GetBuffer() };
-            vk::DeviceSize offsets[] = { 0 };
-            m_CommandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-            m_CommandBuffers[i].bindIndexBuffer(m_pIndexBuffer->GetBuffer(), 0, vk::IndexType::eUint32);
-
-            m_CommandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pRenderPipeline->m_PipelineLayout, 0, 1, &m_pRenderPipeline->m_DescriptorSets[i], 0, nullptr);
-
-            m_CommandBuffers[i].drawIndexed(static_cast<uint32_t>(m_pMesh->GetIndexCount()), 1, 0, 0, 0);
-            m_CommandBuffers[i].endRenderPass();
-            m_CommandBuffers[i].end();
-        }
+        //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+        //vk::CommandPool commandPool = m_pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool();
+        //
+        //// Create command buffers
+        //m_CommandBuffers.resize(m_pSwapChain->GetImageCount());
+        //
+        //vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
+        //    .setCommandPool(commandPool)
+        //    .setLevel(vk::CommandBufferLevel::ePrimary)
+        //    .setCommandBufferCount((uint32_t)m_CommandBuffers.size());
+        //
+        //if (deviceData.LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, m_CommandBuffers.data()) != vk::Result::eSuccess)
+        //    throw std::runtime_error("failed to allocate command buffers!");
+        //
+        //auto swapchainExtent = m_pSwapChain->GetExtent();
+        //
+        //for (size_t i = 0; i < m_CommandBuffers.size(); i++)
+        //{
+        //    // Start the command buffer
+        //    vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo()
+        //        .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
+        //        .setPInheritanceInfo(nullptr);
+        //
+        //    if (m_CommandBuffers[i].begin(&commandBufferBeginInfo) != vk::Result::eSuccess)
+        //        throw std::runtime_error("failed to begin recording command buffer!");
+        //
+        //    // Start a render pass
+        //    vk::Rect2D renderArea = vk::Rect2D()
+        //        .setOffset({ 0,0 })
+        //        .setExtent(swapchainExtent);
+        //
+        //    vk::ClearColorValue clearColorValue = vk::ClearColorValue()
+        //        .setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
+        //
+        //    vk::ClearColorValue clearPosValue = vk::ClearColorValue()
+        //        .setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
+        //
+        //    vk::ClearColorValue clearNormalValue = vk::ClearColorValue()
+        //        .setFloat32({ 0.737f, 0.737f, 1.0f, 1.0f });
+        //
+        //    std::array<vk::ClearValue, 4> clearColors{};
+        //    clearColors[0].setColor(clearColorValue);
+        //    clearColors[1].setColor(clearPosValue);
+        //    clearColors[2].setColor(clearNormalValue);
+        //    clearColors[3].setDepthStencil({ 1.0f, 0 });
+        //
+        //    vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
+        //        .setRenderPass(m_pRenderPass->m_RenderPass)
+        //        .setFramebuffer(m_pRenderPass->m_Framebuffers[i])
+        //        .setRenderArea(renderArea)
+        //        .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
+        //        .setPClearValues(clearColors.data());
+        //
+        //    m_CommandBuffers[i].beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
+        //    m_CommandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pRenderPipeline->m_GraphicsPipeline);
+        //
+        //    vk::Buffer vertexBuffers[] = { m_pVertexBuffer->GetBuffer() };
+        //    vk::DeviceSize offsets[] = { 0 };
+        //    m_CommandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
+        //    m_CommandBuffers[i].bindIndexBuffer(m_pIndexBuffer->GetBuffer(), 0, vk::IndexType::eUint32);
+        //
+        //    m_CommandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pRenderPipeline->m_PipelineLayout, 0, 1, &m_pRenderPipeline->m_DescriptorSets[i], 0, nullptr);
+        //
+        //    m_CommandBuffers[i].drawIndexed(static_cast<uint32_t>(m_pMesh->GetIndexCount()), 1, 0, 0, 0);
+        //    m_CommandBuffers[i].endRenderPass();
+        //    m_CommandBuffers[i].end();
+        //}
     }
 
     //void VulkanGraphicsModule::CreateCommandPools()
@@ -1005,27 +1063,27 @@ namespace Glory
 
     void VulkanGraphicsModule::CreateSyncObjects()
     {
-        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-
-        // Create sync objects
-        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_ImagesInFlight.resize(m_pSwapChain->GetImageCount(), VK_NULL_HANDLE);
-
-        vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
-        vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
-            .setFlags(vk::FenceCreateFlagBits::eSignaled);
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
-                deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
-                deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
-            {
-
-                throw std::runtime_error("failed to create sync objects for a frame!");
-            }
-        }
+        //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+        //
+        //// Create sync objects
+        //m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        //m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        //m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        //m_ImagesInFlight.resize(m_pSwapChain->GetImageCount(), VK_NULL_HANDLE);
+        //
+        //vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
+        //vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
+        //    .setFlags(vk::FenceCreateFlagBits::eSignaled);
+        //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        //{
+        //    if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
+        //        deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
+        //        deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
+        //    {
+        //
+        //        throw std::runtime_error("failed to create sync objects for a frame!");
+        //    }
+        //}
     }
 
     void VulkanGraphicsModule::UpdateUniformBuffer(uint32_t imageIndex)

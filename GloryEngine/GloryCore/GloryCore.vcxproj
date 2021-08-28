@@ -171,6 +171,7 @@
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="CommandData.h" />
+    <ClInclude Include="FrameStates.h" />
     <ClInclude Include="GraphicsCommandHandler.h" />
     <ClInclude Include="GraphicsCommandLibrary.h" />
     <ClInclude Include="Commands.h" />
@@ -212,6 +213,7 @@
     <ClInclude Include="FileLoaderModule.h" />
     <ClInclude Include="ShaderData.h" />
     <ClInclude Include="ShaderLoaderModule.h" />
+    <ClInclude Include="TestCommandHandler.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Thread.h" />
     <ClInclude Include="ThreadManager.h" />
@@ -222,12 +224,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
-    <ClCompile Include="CommandData.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DebugConsoleInput.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="FrameStates.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="GPUMemory.cpp" />
@@ -259,6 +261,7 @@
     <ClCompile Include="FileLoaderModule.cpp" />
     <ClCompile Include="ShaderData.cpp" />
     <ClCompile Include="ShaderLoaderModule.cpp" />
+    <ClCompile Include="TestCommandHandler.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="ThreadManager.cpp" />

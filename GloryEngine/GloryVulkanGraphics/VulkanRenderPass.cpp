@@ -3,6 +3,7 @@
 #include "VulkanDeviceManager.h"
 #include "Device.h"
 #include <Game.h>
+#include "VulkanFrameStates.h"
 
 namespace Glory
 {
@@ -24,6 +25,16 @@ namespace Glory
         m_SwapChainFramebuffers.clear();
 
         deviceData.LogicalDevice.destroyRenderPass(m_RenderPass);
+    }
+
+    vk::RenderPass VulkanRenderPass::GetRenderPass()
+    {
+        return m_RenderPass;
+    }
+
+    vk::Framebuffer VulkanRenderPass::GetCurrentFrameBuffer()
+    {
+        return m_SwapChainFramebuffers[VulkanFrameStates::GetCurrentImageIndex()];
     }
 
     void VulkanRenderPass::Initialize()

@@ -13,6 +13,9 @@
     <Filter Include="Buffers">
       <UniqueIdentifier>{7403910c-2bc0-42e4-9e10-6f6abd9fc0cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CommandHandlers">
+      <UniqueIdentifier>{f7d62eac-ec14-4f85-91c4-78c8f57c506e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VulkanGraphicsModule.cpp">
@@ -61,6 +64,14 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="ShaderCrossCompiler.cpp" />
+    <ClCompile Include="RenderPassCommandHandlers.cpp">
+      <Filter>CommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanCommandBuffers.cpp" />
+    <ClCompile Include="VulkanFrameStates.cpp" />
+    <ClCompile Include="PipelineCommandHandlers.cpp">
+      <Filter>CommandHandlers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanGraphicsModule.h">
@@ -118,5 +129,13 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="ShaderCrossCompiler.h" />
+    <ClInclude Include="RenderPassCommandHandlers.h">
+      <Filter>CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanCommandBuffers.h" />
+    <ClInclude Include="VulkanFrameStates.h" />
+    <ClInclude Include="PipelineCommandHandlers.h">
+      <Filter>CommandHandlers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

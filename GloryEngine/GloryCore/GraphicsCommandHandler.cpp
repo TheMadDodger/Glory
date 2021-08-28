@@ -15,5 +15,5 @@ namespace Glory
 		return typeid(void);
 	}
 
-	void BaseGraphicsCommandHandler::Invoke(const BaseGraphicsCommand* data) {}
+	void BaseGraphicsCommandHandler::Invoke(const std::any& commandData) {}
 }

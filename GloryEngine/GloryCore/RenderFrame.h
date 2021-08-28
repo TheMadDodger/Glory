@@ -7,12 +7,11 @@ namespace Glory
 {
 	struct RenderFrame
 	{
-		template<typename T>
-		void Enqueue(T data)
-		{
-			CommandQueue.push_back(CommandData(typeid(T), data));
-		}
+	public:
+		RenderFrame();
 
-		std::vector<CommandData> CommandQueue;
+		void Enqueue(const std::any& data);
+
+		std::vector<std::any> CommandQueue;
 	};
 }

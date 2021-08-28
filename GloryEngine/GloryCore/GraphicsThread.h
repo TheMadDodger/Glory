@@ -11,6 +11,9 @@ namespace Glory
 		virtual ~GraphicsThread();
 
 		void Start();
+		void Stop();
+
+		RenderQueue* GetRenderQueue();
 
 	private:
 		void Run();

@@ -32,6 +32,7 @@ namespace Glory
 		uint32_t GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
 		vk::CommandPool GetGraphicsCommandPool();
+		vk::CommandPool GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
 		const vk::PhysicalDeviceProperties& GetDeviceProperties() const;
 		vk::Format FindSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
 		vk::Format FindDepthFormat();
@@ -45,6 +46,7 @@ namespace Glory
 		bool CheckSupport(VulkanGraphicsModule* pGraphicsModule, std::vector<const char*> extensions);
 
 		void CreateGraphicsCommandPool();
+		vk::CommandPool CreateGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
 
 	private:
 		friend class VulkanDeviceManager;
@@ -59,6 +61,7 @@ namespace Glory
 		LogicalDeviceData m_LogicalDeviceData;
 		std::vector<const char*> m_DeviceExtensions;
 		vk::CommandPool m_GraphicsCommandPool;
+		std::map<vk::CommandPoolCreateFlags, vk::CommandPool> m_GraphicsCommandPools;
 		vk::PhysicalDeviceFeatures m_Features;
 		vk::PhysicalDeviceProperties m_DeviceProperties;
 	};

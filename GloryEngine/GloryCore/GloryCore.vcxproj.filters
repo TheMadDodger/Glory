@@ -52,6 +52,12 @@
     <Filter Include="Modules\Graphics\Rendering\Commands">
       <UniqueIdentifier>{3cc24a7f-4599-4e39-a80a-825bad334403}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\Graphics\Resources">
+      <UniqueIdentifier>{e58cf65a-c28c-4fd4-a4e2-18b94bbbdc92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Graphics\Data">
+      <UniqueIdentifier>{147ef25a-7191-465e-a134-ceeb7e70673e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -99,12 +105,6 @@
     <ClInclude Include="Debug.h">
       <Filter>Console</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsMemoryManager.h">
-      <Filter>Modules\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="GPUMemory.h">
-      <Filter>Modules\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Modules\Graphics\Geometry</Filter>
     </ClInclude>
@@ -117,20 +117,11 @@
     <ClInclude Include="Buffer.h">
       <Filter>Modules\Graphics\Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Modules\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="ImageLoaderModule.h">
       <Filter>Modules\ResourceLoading\Textures</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEnums.h">
-      <Filter>Modules\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="ImageData.h">
       <Filter>Modules\ResourceLoading\Textures</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Modules\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoaderModule.h">
       <Filter>Modules\ResourceLoading\Models</Filter>
@@ -155,9 +146,6 @@
     </ClInclude>
     <ClInclude Include="ResourceLoaderModule.h">
       <Filter>Modules\ResourceLoading\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Modules\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="ShaderData.h">
       <Filter>Modules\ResourceLoading\Shaders</Filter>
@@ -204,6 +192,30 @@
     <ClInclude Include="CommandData.h">
       <Filter>Modules\Graphics\Rendering\Commands</Filter>
     </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUMemory.h">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEnums.h">
+      <Filter>Modules\Graphics\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsMemoryManager.h">
+      <Filter>Modules\Graphics\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="TestCommandHandler.h">
+      <Filter>Modules\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameStates.h">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -242,29 +254,17 @@
     <ClCompile Include="Debug.cpp">
       <Filter>Console</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsMemoryManager.cpp">
-      <Filter>Modules\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="GPUMemory.cpp">
-      <Filter>Modules\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>Modules\Graphics\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="Buffer.cpp">
       <Filter>Modules\Graphics\Geometry</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Modules\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="ImageLoaderModule.cpp">
       <Filter>Modules\ResourceLoading\Textures</Filter>
     </ClCompile>
     <ClCompile Include="ImageData.cpp">
       <Filter>Modules\ResourceLoading\Textures</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Modules\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="ModelLoaderModule.cpp">
       <Filter>Modules\ResourceLoading\Models</Filter>
@@ -289,9 +289,6 @@
     </ClCompile>
     <ClCompile Include="ResourceLoaderModule.cpp">
       <Filter>Modules\ResourceLoading\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Modules\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="ShaderData.cpp">
       <Filter>Modules\ResourceLoading\Shaders</Filter>
@@ -332,6 +329,26 @@
     <ClCompile Include="GraphicsCommandLibrary.cpp">
       <Filter>Modules\Graphics\Rendering\Commands</Filter>
     </ClCompile>
-    <ClCompile Include="CommandData.cpp" />
+    <ClCompile Include="Material.cpp">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUMemory.cpp">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsMemoryManager.cpp">
+      <Filter>Modules\Graphics\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="TestCommandHandler.cpp">
+      <Filter>Modules\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameStates.cpp">
+      <Filter>Modules\Graphics\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

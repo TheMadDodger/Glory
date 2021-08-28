@@ -16,6 +16,7 @@
 #include "VulkanGraphicsPipeline.h"
 #include "DeferredRenderPassTest.h"
 #include "DeferredPipelineTest.h"
+#include "VulkanCommandBuffers.h"
 
 namespace Glory
 {
@@ -41,6 +42,12 @@ namespace Glory
 		vk::Instance GetInstance();
 
 		VulkanDeviceManager* GetDeviceManager();
+		SwapChain* GetSwapChain();
+		VulkanCommandBuffers* GetVulkanCommandBuffers();
+
+
+		VulkanRenderPass* GetVulkanRenderPass();
+		VulkanGraphicsPipeline* GetVulkanGraphicsPipeline();
 
 		const std::vector<const char*>& GetExtensions() const;
 		const std::vector<const char*>& GetValidationLayers() const;
@@ -55,10 +62,13 @@ namespace Glory
 		static vk::ImageView CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
 
 	private:
-		virtual void Initialize() override;
-		virtual void Cleanup() override;
-		virtual void Update() override;
-		virtual void Draw() override;
+		virtual void OnInitialize() override;
+		virtual void OnCleanup() override;
+		virtual void OnUpdate() override;
+		virtual void OnDraw() override;
+
+		virtual void RegisterCommands() override;
+		virtual FrameStates* CreateFrameStates() override;
 
 	private:
 		void InitializeValidationLayers();
@@ -95,23 +105,26 @@ namespace Glory
 		VulkanDeviceManager* m_pDeviceManager;
 		SwapChain* m_pSwapChain;
 		DepthImage* m_pDepthImage;
+		VulkanCommandBuffers* m_pCommandBuffers;
+		
+		
+		
+		
+		
+		
+		
 		VulkanRenderPass* m_pMainRenderPass;
 		VulkanGraphicsPipeline* m_pGraphicsPipeline;
+
+
+
+
+
 		DeferredRenderPassTest* m_pRenderPass;
 		DeferredPipelineTest* m_pRenderPipeline;
 
 		vk::DescriptorPool m_DescriptorPool;
 		std::vector<vk::DescriptorSet> m_DescriptorSets;
-
-		// TEMPORARY
-		std::vector<vk::CommandBuffer> m_CommandBuffers;
-
-		const size_t MAX_FRAMES_IN_FLIGHT = 2;
-		std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
-		std::vector<vk::Semaphore> m_RenderFinishedSemaphores;
-		std::vector<vk::Fence> m_InFlightFences;
-		std::vector<vk::Fence> m_ImagesInFlight;
-		size_t m_CurrentFrame = 0;
 
 		VulkanBuffer* m_pVertexBuffer;
 		VulkanBuffer* m_pIndexBuffer;
