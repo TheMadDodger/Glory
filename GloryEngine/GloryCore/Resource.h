@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "UUID.h"
 
 namespace Glory
 {
@@ -8,5 +9,8 @@ namespace Glory
     public:
         Resource();
         virtual ~Resource();
+
+    private:
+        UUID m_ID;
     };
 }

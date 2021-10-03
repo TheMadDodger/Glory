@@ -3,7 +3,7 @@
 
 namespace Glory
 {
-	EntitySystems::EntitySystems() : m_pJobPool(Jobs::JobManager::Run<int>())
+	EntitySystems::EntitySystems()// : m_pJobPool(Jobs::JobManager::Run<int>())
 	{
 	}
 
@@ -15,8 +15,8 @@ namespace Glory
 
 	bool EntitySystems::IsUpdating()
 	{
-		bool isUpdating = m_pJobPool->HasTasksInQueue();
-		return isUpdating;
+		//bool isUpdating = m_pJobPool->HasTasksInQueue();
+		return false;
 	}
 
 	void EntitySystems::OnUpdate()

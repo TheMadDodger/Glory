@@ -1,4 +1,5 @@
 #pragma once
+#include "GPUResource.h"
 
 /*
 * Need to merge the shader and shader data class into one class
@@ -8,7 +9,7 @@
 
 namespace Glory
 {
-	class Shader
+	class Shader : public GPUResource
 	{
 	public:
 		Shader();

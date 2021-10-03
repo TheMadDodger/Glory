@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-    RenderQueue::RenderQueue(uint8_t queueLimit) : QUEUE_LIMIT(queueLimit)
+    RenderQueue::RenderQueue(uint8_t queueLimit) : QUEUE_LIMIT(queueLimit), m_Exit(false)
     {
     }
 
@@ -22,7 +22,8 @@ namespace Glory
     void RenderQueue::GetNextFrame(std::function<void(const RenderFrame&)> callback)
     {
         std::unique_lock<std::mutex> lock(m_QueueMutex);
-        m_QueueCondition.wait(lock, [&]() { return !m_pRenderQueue.empty(); });
+        m_QueueCondition.wait(lock, [&]() { return !m_pRenderQueue.empty() || m_Exit; });
+        if (m_Exit) return;
         const RenderFrame& frame = m_pRenderQueue.front();
         callback(frame);
         m_pRenderQueue.pop();
@@ -35,5 +36,13 @@ namespace Glory
         size_t queueSize = m_pRenderQueue.size();
         lock.unlock();
         return queueSize >= QUEUE_LIMIT;
+    }
+
+    void RenderQueue::Stop()
+    {
+        std::unique_lock<std::mutex> lock(m_QueueMutex);
+        m_Exit = true;
+        lock.unlock();
+        m_QueueCondition.notify_one();
     }
 }

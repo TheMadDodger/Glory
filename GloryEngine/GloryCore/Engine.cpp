@@ -90,6 +90,13 @@ namespace Glory
 		Console::Cleanup();
 
 		m_pGameThread->Stop();
+		m_pGraphicsThread->Stop();
+
+		m_pJobManager->Kill();
+		delete m_pJobManager;
+		m_pJobManager = nullptr;
+
+		m_pThreadManager->Destroy();
 
 		// We need to cleanup in reverse
 		// This makes sure things like graphics get cleaned up before we close the window
@@ -99,18 +106,17 @@ namespace Glory
 			delete m_pAllModules[(size_t)i];
 		}
 		m_pWindowModule = nullptr;
+		m_pScenesModule = nullptr;
+		m_pRenderModule = nullptr;
+		m_pGraphicsModule = nullptr;
 
 		m_pAllModules.clear();
 		m_pOptionalModules.clear();
+		m_pPriorityInitializationModules.clear();
 
-		m_pJobManager->Kill();
-		m_pThreadManager->Destroy();
-
-		delete m_pJobManager;
-		m_pJobManager = nullptr;
-
-		delete m_pThreadManager;
-		m_pThreadManager = nullptr;
+		delete m_pMainThread;
+		delete m_pGameThread;
+		delete m_pGraphicsThread;
 	}
 
 	void Engine::Initialize()
@@ -139,6 +145,7 @@ namespace Glory
 
 		m_pGameThread->Bind<ScenesModule>(m_pScenesModule);
 		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
+		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
 
 		m_pGraphicsThread->Start();
 		m_pGameThread->Start();

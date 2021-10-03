@@ -24,6 +24,9 @@ namespace Glory
 			delete m_pThreads[i];
 		}
 		m_pThreads.clear();
+		
+		delete m_pInstance;
+		m_pInstance = nullptr;
 	}
 
 	Thread* ThreadManager::CreateThread(std::function<void()> func)

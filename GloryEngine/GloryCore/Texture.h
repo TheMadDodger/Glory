@@ -1,12 +1,13 @@
 #pragma once
 #include "ImageData.h"
 #include "GraphicsEnums.h"
+#include "GPUResource.h"
 
 namespace Glory
 {
 	class Buffer;
 
-	class Texture
+	class Texture : public GPUResource
 	{
 	public:
 		Texture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings = SamplerSettings());

@@ -55,6 +55,7 @@ namespace Glory
 
 	void SDLWindowModule::OnCleanup()
 	{
+		SDL_Quit();
 	}
 
 	void SDLWindowModule::OnMainUpdate()

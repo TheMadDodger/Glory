@@ -1,9 +1,10 @@
 #pragma once
 #include <stdint.h>
+#include "GPUResource.h"
 
 namespace Glory
 {
-	class Buffer
+	class Buffer : public GPUResource
 	{
 	public:
 		Buffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags);

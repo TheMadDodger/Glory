@@ -40,3 +40,19 @@ GraphicsModule:
 	- Has no update loop
 	- Takes in commands and sends them to the GPU based on the platform implementation
 	- Does not do ANYTHING by itself!!! (hence why is has no update loop)
+
+
+Dumping objects ->
+{220} normal block at 0x00E93520, 8 bytes long.
+ Data: <        > D4 F7 CD 00 00 00 00 00 
+{217} normal block at 0x00E8FFB0, 4 bytes long.
+ Data: <P_  > 50 5F E7 00 
+{212} normal block at 0x00E934E8, 8 bytes long.
+ Data: <      @ > C0 A9 E8 00 F9 D9 40 00 
+{159} normal block at 0x00E8A780, 16 bytes long.
+ Data: <        P       > D8 0A E8 00 20 FF E8 00 50 FF E8 00 80 FF E8 00 
+{158} normal block at 0x00E8F2B8, 8 bytes long.
+ Data: <` I     > 60 C0 49 00 00 00 00 00 
+{153} normal block at 0x00E8F398, 8 bytes long.
+ Data: <D I     > 44 C0 49 00 00 00 00 00 
+Object dump complete.

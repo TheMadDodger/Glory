@@ -10,6 +10,12 @@ namespace Glory
 
 	Registry::~Registry()
 	{
+		m_AllEntityIDs.clear();
+		m_DeadEntityIndices.clear();
+		m_EntityComponents.clear();
+		m_UnusedComponentIndices.clear();
+		m_ComponentsPerEntity.clear();
+		m_ComponentsPerType.clear();
 	}
 
 	EntityID Registry::CreateEntity()

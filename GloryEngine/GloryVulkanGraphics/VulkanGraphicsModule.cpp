@@ -85,11 +85,6 @@ namespace Glory
         return m_Layers;
     }
 
-    Buffer* VulkanGraphicsModule::CreateVertexBuffer_Internal(uint32_t bufferSize)
-    {
-        return nullptr;
-    }
-
     void VulkanGraphicsModule::OnInitialize()
     {
         //ShaderLoaderModule* pShaderLoader = Game::GetGame().GetEngine()->GetModule<ShaderLoaderModule>();

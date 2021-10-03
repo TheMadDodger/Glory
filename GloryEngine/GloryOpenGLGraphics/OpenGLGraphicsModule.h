@@ -21,10 +21,7 @@ namespace Glory
 	protected:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
-		virtual void OnThreadedInitialize() override;
-
-	private:
-		virtual Buffer* CreateVertexBuffer_Internal(uint32_t bufferSize) override;
+		virtual void ThreadedInitialize() override;
 
 	private:
 		GLMesh* m_pMesh;

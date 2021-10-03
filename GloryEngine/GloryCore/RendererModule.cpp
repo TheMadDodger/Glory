@@ -33,20 +33,9 @@ namespace Glory
 		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);
 	}
 
-	void RendererModule::ThreadedInitialize()
-	{
-		m_pEngine->GetGraphicsModule()->OnThreadedInitialize();
-	}
+	void RendererModule::ThreadedInitialize() {}
 
-	//void RendererModule::Initialize()
-	//{
-	//
-	//}
-	//
-	//void RendererModule::Cleanup()
-	//{
-	//	m_ObjectsToRender.clear();
-	//}
+	void RendererModule::ThreadedCleanup() {}
 
 	//void RendererModule::OnDraw()
 	//{

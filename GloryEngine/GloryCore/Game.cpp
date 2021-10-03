@@ -87,10 +87,7 @@ namespace Glory
 	{
 	}
 
-	Game::~Game()
-	{
-		Destroy();
-	}
+	Game::~Game() {}
 
 	void Game::Initialize()
 	{

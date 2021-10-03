@@ -29,6 +29,7 @@ namespace Glory
 		
 	private:
 		void ThreadedInitialize();
+		void ThreadedCleanup();
 
 	private:
 		RenderFrame m_CurrentPreparingFrame;

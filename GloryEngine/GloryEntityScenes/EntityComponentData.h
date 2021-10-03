@@ -10,6 +10,7 @@ namespace Glory
 	{
 	public:
 		EntityComponentData(EntityID entity) : m_Entity(entity) {}
+		virtual ~EntityComponentData() {}
 
 		template<typename T, typename... Args>
 		static EntityComponentData Construct(EntityID entity, Args&&... args)

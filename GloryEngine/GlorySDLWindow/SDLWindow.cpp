@@ -68,6 +68,7 @@ namespace Glory
 
 	SDLWindow::~SDLWindow()
 	{
+		m_pWindow = NULL;
 	}
 
 	void SDLWindow::Open()

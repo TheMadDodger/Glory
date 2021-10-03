@@ -182,7 +182,8 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameSettings.h" />
     <ClInclude Include="GameState.h" />
-    <ClInclude Include="GPUMemory.h" />
+    <ClInclude Include="GPUResource.h" />
+    <ClInclude Include="GPUResourceManager.h" />
     <ClInclude Include="GraphicsEnums.h" />
     <ClInclude Include="GraphicsMemoryManager.h" />
     <ClInclude Include="GraphicsThread.h" />
@@ -217,6 +218,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Thread.h" />
     <ClInclude Include="ThreadManager.h" />
+    <ClInclude Include="UUID.h" />
     <ClInclude Include="VertexDefinitions.h" />
     <ClInclude Include="VertexHelpers.h" />
     <ClInclude Include="Window.h" />
@@ -233,9 +235,11 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="GameThread.cpp" />
-    <ClCompile Include="GPUMemory.cpp" />
+    <ClCompile Include="GPUResource.cpp" />
+    <ClCompile Include="GPUResourceManager.cpp" />
     <ClCompile Include="GraphicsMemoryManager.cpp" />
     <ClCompile Include="GraphicsThread.cpp" />
+    <ClCompile Include="UUID.cpp" />
     <ClCompile Include="ImageLoaderModule.cpp" />
     <ClCompile Include="ImportSettings.cpp" />
     <ClCompile Include="Job.cpp" />

@@ -189,7 +189,7 @@
     <ClInclude Include="Texture.h">
       <Filter>Modules\Graphics\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="GPUMemory.h">
+    <ClInclude Include="GPUResource.h">
       <Filter>Modules\Graphics\Resources</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEnums.h">
@@ -217,6 +217,12 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="MainThread.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUResourceManager.h">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="UUID.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -332,7 +338,7 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Modules\Graphics\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="GPUMemory.cpp">
+    <ClCompile Include="GPUResource.cpp">
       <Filter>Modules\Graphics\Resources</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsMemoryManager.cpp">
@@ -354,6 +360,12 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="MainThread.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUResourceManager.cpp">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="UUID.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>

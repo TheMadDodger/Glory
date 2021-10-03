@@ -6,12 +6,18 @@
 
 namespace Glory
 {
-	GraphicsThread::GraphicsThread() : m_pRenderQueue(nullptr), m_pThread(nullptr)
+	GraphicsThread::GraphicsThread() : m_pRenderQueue(nullptr), m_pThread(nullptr), m_Exit(false)
 	{
 	}
 
 	GraphicsThread::~GraphicsThread()
 	{
+		m_RenderBinds.clear();
+		m_InitializationBinds.clear();
+		m_CleanupBinds.clear();
+
+		m_pThread = nullptr;
+
 		delete m_pRenderQueue;
 		m_pRenderQueue = nullptr;
 	}
@@ -24,7 +30,14 @@ namespace Glory
 
 	void GraphicsThread::Stop()
 	{
-		
+		for (size_t i = 0; i < m_CleanupBinds.size(); i++)
+		{
+			m_CleanupBinds[i]();
+		}
+
+		// Kill the thread
+		m_Exit = true;
+		m_pRenderQueue->Stop();
 	}
 
 	RenderQueue* GraphicsThread::GetRenderQueue()
@@ -41,6 +54,7 @@ namespace Glory
 
 		while (true)
 		{
+			if (m_Exit) break;
 			m_pRenderQueue->GetNextFrame([&](const RenderFrame& frame) { OnRenderFrame(frame); });
 		}
 	}

@@ -27,13 +27,11 @@ namespace Glory
             pGraphics->Swap();
         }
 
-
-
-
     private:
         std::vector<RenderData> m_ObjectsToRender;
     };
 }
+
 int main()
 {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -44,9 +42,9 @@ int main()
         windowCreateInfo.Width = 1280;
         windowCreateInfo.Height = 720;
         windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL; //SDL_WINDOW_VULKAN;
-
-        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader() };
-
+        
+        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), /*new Glory::ASSIMPModule(),*/ new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader()};
+        
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);
         createInfo.pScenesModule = new Glory::EntitySceneScenesModule();
@@ -55,12 +53,12 @@ int main()
         createInfo.OptionalModuleCount = static_cast<uint32_t>(optionalModules.size());
         createInfo.pOptionalModules = optionalModules.data();
         Glory::Engine* pEngine = Glory::Engine::CreateEngine(createInfo);
-
+        
         Glory::GameSettings gameSettings;
         gameSettings.pEngine = pEngine;
         gameSettings.pGameState = new Glory::GameState();
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
-
+        
         pGame.RunGame();
         pGame.Destroy();
     }

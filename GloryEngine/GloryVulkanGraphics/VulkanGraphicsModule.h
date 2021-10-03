@@ -52,8 +52,6 @@ namespace Glory
 		const std::vector<const char*>& GetExtensions() const;
 		const std::vector<const char*>& GetValidationLayers() const;
 
-		Buffer* CreateVertexBuffer_Internal(uint32_t bufferSize) override;
-
 		// Temporary will need to be moved
 		static vk::CommandBuffer BeginSingleTimeCommands();
 		static void EndSingleTimeCommands(vk::CommandBuffer commandBuffer);

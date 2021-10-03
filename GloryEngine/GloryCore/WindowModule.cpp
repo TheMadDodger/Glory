@@ -44,6 +44,7 @@ namespace Glory
             delete m_pWindows[i];
         }
         m_pWindows.clear();
+        m_pMainWindow = nullptr;
 
         OnCleanup();
     }

@@ -23,16 +23,11 @@ namespace Glory
     public: // Getters
         FrameStates* GetFrameStates();
 
-    public: // Module functions
-        Buffer* CreateVertexBuffer(uint32_t bufferSize);
-
-    protected: // Internal functions
-        virtual Buffer* CreateVertexBuffer_Internal(uint32_t bufferSize) = 0;
-
     protected:
         virtual void OnInitialize() = 0;
-        virtual void OnThreadedInitialize() {}
         virtual void OnCleanup() = 0;
+        virtual void ThreadedInitialize() {}
+        virtual void ThreadedCleanup() {}
 
         virtual FrameStates* CreateFrameStates();
 
@@ -41,8 +36,7 @@ namespace Glory
         virtual void Cleanup() override;
 
     private:
-        friend class RendererModule;
-        RenderFrame m_PreparingFrame;
+        friend class GraphicsThread;
         FrameStates* m_pFrameStates;
     };
 }

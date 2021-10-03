@@ -10,7 +10,10 @@ namespace Glory
 
 	GameThread::~GameThread()
 	{
-
+		m_TickBinds.clear();
+		m_DrawBinds.clear();
+		m_pThread = nullptr;
+		m_pEngine = nullptr;
 	}
 
 	void GameThread::Start()
@@ -20,17 +23,27 @@ namespace Glory
 
 	void GameThread::Stop()
 	{
-
+		std::unique_lock<std::mutex> lock(m_ExitMutex);
+		m_Exit = true;
+		lock.unlock();
 	}
 
 	void GameThread::Run()
 	{
 		while (true)
 		{
+			std::unique_lock<std::mutex> lock(m_ExitMutex);
+			bool exit = m_Exit;
+			lock.unlock();
+
+			if (exit) break;
+
 			if (m_pEngine->GetGraphicsThread()->GetRenderQueue()->IsFull()) continue;
 			Tick();
 			Paint();
 		}
+
+		int a = 0;
 	}
 
 	void GameThread::Tick()

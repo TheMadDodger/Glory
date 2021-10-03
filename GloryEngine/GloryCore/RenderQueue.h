@@ -18,10 +18,13 @@ namespace Glory
 
 		bool IsFull();
 
+		void Stop();
+
 	private:
 		std::queue<RenderFrame> m_pRenderQueue;
 		std::condition_variable m_QueueCondition;
 		std::mutex m_QueueMutex;
+		bool m_Exit;
 		const uint8_t QUEUE_LIMIT;
 	};
 }

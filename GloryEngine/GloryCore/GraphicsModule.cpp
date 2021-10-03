@@ -10,6 +10,7 @@ namespace Glory
 	GraphicsModule::~GraphicsModule()
 	{
 		delete m_pFrameStates;
+		m_pFrameStates = nullptr;
 	}
 
 	const std::type_info& GraphicsModule::GetModuleType()
@@ -20,13 +21,6 @@ namespace Glory
 	FrameStates* GraphicsModule::GetFrameStates()
 	{
 		return m_pFrameStates;
-	}
-
-	Buffer* GraphicsModule::CreateVertexBuffer(uint32_t bufferSize)
-	{
-		Buffer* pVertexBuffer = CreateVertexBuffer_Internal(bufferSize);
-		// Store it somewhere
-		return pVertexBuffer;
 	}
 
 	FrameStates* GraphicsModule::CreateFrameStates()

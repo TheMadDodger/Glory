@@ -34,6 +34,7 @@ namespace Glory
 
 	private: // Memory stuff
 		friend class MainThread;
+		friend class Engine;
 		std::vector<Window*> m_pWindows;
 		Window* m_pMainWindow;
 		WindowCreateInfo m_MainWindowCreateInfo;

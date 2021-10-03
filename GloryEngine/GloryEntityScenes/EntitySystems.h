@@ -16,12 +16,7 @@ namespace Glory
 		bool IsUpdating();
 
 	private:
-		friend class Registry;
-		std::vector<EntitySystem*> m_pEntitySystems;
-		Jobs::JobPool<int>* m_pJobPool;
-
 		void OnUpdate();
-
 		void OnDraw();
 
 		template<typename C, typename T>
@@ -39,5 +34,10 @@ namespace Glory
 			m_pEntitySystems.push_back((EntitySystem*)pSystem);
 			return pSystem;
 		}
+
+	private:
+		friend class Registry;
+		std::vector<EntitySystem*> m_pEntitySystems;
+		//Jobs::JobPool<int>* m_pJobPool;
 	};
 }

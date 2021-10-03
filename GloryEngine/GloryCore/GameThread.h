@@ -33,5 +33,7 @@ namespace Glory
 		Engine* m_pEngine;
 		std::vector<std::function<void()>> m_TickBinds;
 		std::vector<std::function<void()>> m_DrawBinds;
+		bool m_Exit;
+		std::mutex m_ExitMutex;
 	};
 }
