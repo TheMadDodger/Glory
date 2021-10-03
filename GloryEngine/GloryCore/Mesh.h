@@ -2,6 +2,7 @@
 #include "VertexDefinitions.h"
 #include <vector>
 #include "MeshData.h"
+#include "Buffer.h"
 
 namespace Glory
 {
@@ -12,8 +13,11 @@ namespace Glory
 		virtual ~Mesh();
 
 		virtual void CreateBindingAndAttributeData() = 0;
+		virtual void Bind() = 0;
 		uint32_t GetVertexCount() const;
 		uint32_t GetIndexCount() const;
+
+		void SetBuffers(Buffer* pVertexBuffer, Buffer* pIndexBuffer);
 
 	protected:
 		void GetNextOffset(const AttributeType& atributeType, uint32_t& offest);
@@ -25,5 +29,8 @@ namespace Glory
 		const size_t m_VertexCount;
 		const size_t m_IndexCount;
 		const std::vector<AttributeType> m_AttributeTypes;
+
+		Buffer* m_pVertexBuffer;
+		Buffer* m_pIndexBuffer;
 	};
 }

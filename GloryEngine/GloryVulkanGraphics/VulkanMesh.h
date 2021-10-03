@@ -15,6 +15,7 @@ namespace Glory
         const vk::VertexInputAttributeDescription* GetVertexInputAttributeDescriptions();
 
         virtual void CreateBindingAndAttributeData() override;
+        virtual void Bind() override;
 
     private:
         void CreateBindingDescription();

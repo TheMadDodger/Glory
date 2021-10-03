@@ -32,7 +32,7 @@ namespace Glory
 
     void WindowModule::Initialize()
     {
-        Initialize_Internal();
+        OnInitialize();
         m_pMainWindow = CreateNewWindow(m_MainWindowCreateInfo);
     }
 
@@ -45,20 +45,15 @@ namespace Glory
         }
         m_pWindows.clear();
 
-        Cleanup_Internal();
+        OnCleanup();
     }
 
-    void WindowModule::Update()
+    void WindowModule::MainUpdate()
     {
         for (size_t i = 0; i < m_pWindows.size(); i++)
         {
             m_pWindows[i]->PollEvents();
         }
-        Update_Internal();
-    }
-
-    void WindowModule::Draw()
-    {
-        Draw_Internal();
+        OnMainUpdate();
     }
 }

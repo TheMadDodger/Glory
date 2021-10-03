@@ -18,6 +18,13 @@ namespace Glory::Jobs
 		m_pJobPools.clear();
 	}
 
+	JobManager* JobManager::GetInstance()
+	{
+		if (m_pInstance != nullptr) return m_pInstance;
+		m_pInstance = new JobManager();
+		return m_pInstance;
+	}
+	
 	void JobManager::Kill()
 	{
 		for (size_t i = 0; i < m_pJobPools.size(); i++)

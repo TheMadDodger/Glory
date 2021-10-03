@@ -10,12 +10,14 @@ namespace Glory::Jobs
 		template<typename ret, typename ...args>
 		static JobPool<ret, args...>* Run(size_t numJobsPerThread = 1)
 		{
-			return m_pInstance->CreateJobPool<ret, args...>();
+			return GetInstance()->CreateJobPool<ret, args...>();
 		}
 
 	private:
 		JobManager();
 		virtual ~JobManager();
+
+		static JobManager* GetInstance();
 
 		void Kill();
 

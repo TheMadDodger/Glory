@@ -47,6 +47,13 @@ namespace Glory
 		for (size_t i = 0; i < m_ComponentsPerEntity[entity].size(); i++)
 			m_UnusedComponentIndices.push_back(m_ComponentsPerEntity[entity][i]);
 
+		for (size_t i = 0; i < m_ComponentsPerEntity[entity].size(); i++)
+		{
+			size_t index = m_ComponentsPerEntity[entity][i];
+			std::type_index type = m_EntityComponents[index].GetType();
+			std::remove(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), index);
+		}
+
 		m_ComponentsPerEntity[entity].clear();
 	}
 
@@ -77,5 +84,23 @@ namespace Glory
 		{
 			func(this, entity, &m_EntityComponents[index]);
 		});
+	}
+
+	void Registry::ForEach(const std::type_index& type, std::function<void(Registry*, EntityID, EntityComponentData*)> func)
+	{
+		std::for_each(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), [&](size_t index)
+		{
+			func(this, m_EntityComponents[index].m_Entity, &m_EntityComponents[index]);
+		});
+	}
+
+	void Registry::Update()
+	{
+		m_Systems.OnUpdate();
+	}
+
+	void Registry::Draw()
+	{
+		m_Systems.OnDraw();
 	}
 }

@@ -24,6 +24,7 @@
     <ProjectGuid>{fb63e484-c6fe-4a5d-9591-6fe30a28a0ba}</ProjectGuid>
     <RootNamespace>GloryEntities</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <ProjectName>GloryEntities</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -175,6 +176,8 @@
     <ClCompile Include="EntityComponent.cpp" />
     <ClCompile Include="EntityGameObject.cpp" />
     <ClCompile Include="EntityScene.cpp" />
+    <ClCompile Include="EntitySystem.cpp" />
+    <ClCompile Include="EntitySystems.cpp" />
     <ClCompile Include="GloryEntitiesModule.cpp" />
     <ClCompile Include="Registry.cpp" />
   </ItemGroup>
@@ -185,6 +188,8 @@
     <ClInclude Include="EntityGameObject.h" />
     <ClInclude Include="EntityID.h" />
     <ClInclude Include="EntityScene.h" />
+    <ClInclude Include="EntitySystem.h" />
+    <ClInclude Include="EntitySystems.h" />
     <ClInclude Include="GloryEntitiesModule.h" />
     <ClInclude Include="Registry.h" />
   </ItemGroup>

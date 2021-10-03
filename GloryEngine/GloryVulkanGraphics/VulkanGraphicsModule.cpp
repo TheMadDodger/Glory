@@ -17,7 +17,6 @@
 #include "ShaderCrossCompiler.h"
 #include "RenderPassCommandHandlers.h"
 #include "VulkanFrameStates.h"
-#include <GraphicsCommandLibrary.h>
 #include "PipelineCommandHandlers.h"
 
 namespace Glory
@@ -341,83 +340,68 @@ namespace Glory
 //        m_Instance.destroy();
 //    }
 
-    void VulkanGraphicsModule::OnUpdate()
-    {
-    }
-
-    void VulkanGraphicsModule::OnDraw()
-    {
-        StartFrame();
-
-        //EnqueueCommand(TestCommand("Yo Mama"));
-        
-        auto extent = m_pSwapChain->GetExtent();
-        BeginRenderPassCommand renderPassBegin = BeginRenderPassCommand({ 0,0 }, { extent.width, extent.height });
-        renderPassBegin.ClearValues.push_back(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        EnqueueCommand(renderPassBegin);
-        EnqueueCommand(BindPipelineCommand());
-        EnqueueCommand(EndRenderPassCommand());
-
-        EndFrame();
-
-        //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        //deviceData.LogicalDevice.waitForFences(1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
-        //
-        //// Aqcuire swap chain image
-        //uint32_t imageIndex;
-        //deviceData.LogicalDevice.acquireNextImageKHR(m_pSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
-        //
-        //// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-        //if (m_ImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
-        //    deviceData.LogicalDevice.waitForFences(1, &m_ImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-        //}
-        //// Mark the image as now being in use by this frame
-        //m_ImagesInFlight[imageIndex] = m_InFlightFences[m_CurrentFrame];
-        //
-        //UpdateUniformBuffer(imageIndex);
-        //
-        //// Submit command buffer
-        //vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
-        //vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-        //
-        //vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
-        //vk::SubmitInfo submitInfo = vk::SubmitInfo()
-        //    .setWaitSemaphoreCount(1)
-        //    .setPWaitSemaphores(waitSemaphores)
-        //    .setPWaitDstStageMask(waitStages)
-        //    .setCommandBufferCount(1)
-        //    .setPCommandBuffers(&m_CommandBuffers[imageIndex])
-        //    .setSignalSemaphoreCount(1)
-        //    .setPSignalSemaphores(signalSemaphores);
-        //
-        //deviceData.LogicalDevice.resetFences(1, &m_InFlightFences[m_CurrentFrame]);
-        //
-        //if (deviceData.GraphicsQueue.submit(1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != vk::Result::eSuccess)
-        //    throw std::runtime_error("failed to submit draw command buffer!");
-        //
-        //vk::SwapchainKHR swapChains[] = { m_pSwapChain->GetSwapChain() };
-        //vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
-        //    .setWaitSemaphoreCount(1)
-        //    .setPWaitSemaphores(signalSemaphores)
-        //    .setSwapchainCount(1)
-        //    .setPSwapchains(swapChains)
-        //    .setPImageIndices(&imageIndex)
-        //    .setPResults(nullptr);
-        //
-        //if (deviceData.PresentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
-        //    throw std::runtime_error("failed to present!");
-        //
-        //deviceData.PresentQueue.waitIdle();
-        //
-        //m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-    }
-
-    void VulkanGraphicsModule::RegisterCommands()
-    {
-        GraphicsCommands::RegisterCommandHandler<BeginRenderPassCommandHandler>(this);
-        GraphicsCommands::RegisterCommandHandler<EndRenderPassCommandHandler>(this);
-        GraphicsCommands::RegisterCommandHandler<BindPipelineCommandHandler>(this);
-    }
+    //void VulkanGraphicsModule::OnDraw()
+    //{
+    //    //EnqueueCommand(TestCommand("Yo Mama"));
+    //    
+    //    //auto extent = m_pSwapChain->GetExtent();
+    //    //BeginRenderPassCommand renderPassBegin = BeginRenderPassCommand({ 0,0 }, { extent.width, extent.height });
+    //    //renderPassBegin.ClearValues.push_back(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    //    //EnqueueCommand(renderPassBegin);
+    //    //EnqueueCommand(BindPipelineCommand());
+    //    //EnqueueCommand(EndRenderPassCommand());
+    //
+    //    //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
+    //    //deviceData.LogicalDevice.waitForFences(1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+    //    //
+    //    //// Aqcuire swap chain image
+    //    //uint32_t imageIndex;
+    //    //deviceData.LogicalDevice.acquireNextImageKHR(m_pSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+    //    //
+    //    //// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+    //    //if (m_ImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+    //    //    deviceData.LogicalDevice.waitForFences(1, &m_ImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+    //    //}
+    //    //// Mark the image as now being in use by this frame
+    //    //m_ImagesInFlight[imageIndex] = m_InFlightFences[m_CurrentFrame];
+    //    //
+    //    //UpdateUniformBuffer(imageIndex);
+    //    //
+    //    //// Submit command buffer
+    //    //vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+    //    //vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    //    //
+    //    //vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+    //    //vk::SubmitInfo submitInfo = vk::SubmitInfo()
+    //    //    .setWaitSemaphoreCount(1)
+    //    //    .setPWaitSemaphores(waitSemaphores)
+    //    //    .setPWaitDstStageMask(waitStages)
+    //    //    .setCommandBufferCount(1)
+    //    //    .setPCommandBuffers(&m_CommandBuffers[imageIndex])
+    //    //    .setSignalSemaphoreCount(1)
+    //    //    .setPSignalSemaphores(signalSemaphores);
+    //    //
+    //    //deviceData.LogicalDevice.resetFences(1, &m_InFlightFences[m_CurrentFrame]);
+    //    //
+    //    //if (deviceData.GraphicsQueue.submit(1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != vk::Result::eSuccess)
+    //    //    throw std::runtime_error("failed to submit draw command buffer!");
+    //    //
+    //    //vk::SwapchainKHR swapChains[] = { m_pSwapChain->GetSwapChain() };
+    //    //vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
+    //    //    .setWaitSemaphoreCount(1)
+    //    //    .setPWaitSemaphores(signalSemaphores)
+    //    //    .setSwapchainCount(1)
+    //    //    .setPSwapchains(swapChains)
+    //    //    .setPImageIndices(&imageIndex)
+    //    //    .setPResults(nullptr);
+    //    //
+    //    //if (deviceData.PresentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
+    //    //    throw std::runtime_error("failed to present!");
+    //    //
+    //    //deviceData.PresentQueue.waitIdle();
+    //    //
+    //    //m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    //}
 
     FrameStates* VulkanGraphicsModule::CreateFrameStates()
     {

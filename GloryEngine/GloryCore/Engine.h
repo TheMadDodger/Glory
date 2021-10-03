@@ -4,12 +4,19 @@
 #include "GraphicsModule.h"
 #include "ThreadManager.h"
 #include "JobManager.h"
+#include "GameThread.h"
+#include "GraphicsThread.h"
+#include "ScenesModule.h"
+#include "RendererModule.h"
+#include "MainThread.h"
 
 namespace Glory
 {
 	struct EngineCreateInfo
 	{
 		WindowModule* pWindowModule;
+		ScenesModule* pScenesModule;
+		RendererModule* pRenderModule;
 		GraphicsModule* pGraphicsModule;
 
 		uint32_t OptionalModuleCount;
@@ -25,8 +32,10 @@ namespace Glory
 	public:
 		static Engine* CreateEngine(const EngineCreateInfo& createInfo);
 
-		WindowModule* GetWindowModule();
-		GraphicsModule* GetGraphicsModule();
+		WindowModule* GetWindowModule() const;
+		ScenesModule* GetScenesModule() const;
+		RendererModule* GetRendererModule() const;
+		GraphicsModule* GetGraphicsModule() const;
 
 		template<class T>
 		T* GetModule()
@@ -37,6 +46,9 @@ namespace Glory
 
 		Module* GetModule(const std::type_info& type);
 
+		GameThread* GetGameThread() const;
+		GraphicsThread* GetGraphicsThread() const;
+
 	private:
 		Engine(const EngineCreateInfo& createInfo);
 		virtual ~Engine();
@@ -44,13 +56,14 @@ namespace Glory
 	private:
 		void Initialize();
 		void Update();
-		void Draw();
 
 	private:
 		friend class Game;
 
 		// Required modules
 		WindowModule* m_pWindowModule;
+		ScenesModule* m_pScenesModule;
+		RendererModule* m_pRenderModule;
 		GraphicsModule* m_pGraphicsModule;
 
 		// Optional modules
@@ -64,5 +77,10 @@ namespace Glory
 		// Threading
 		ThreadManager* m_pThreadManager;
 		Jobs::JobManager* m_pJobManager;
+
+		// Main threads
+		MainThread* m_pMainThread;
+		GameThread* m_pGameThread;
+		GraphicsThread* m_pGraphicsThread;
 	};
 }

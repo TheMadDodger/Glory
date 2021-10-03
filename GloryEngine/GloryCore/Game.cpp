@@ -44,7 +44,7 @@ namespace Glory
 			m_Game.m_pGameState->OnUserEndStep();
 
 			m_Game.m_pGameState->OnUserBeginDraw();
-			m_pEngine->Draw();
+			
 			m_Game.m_pGameState->OnUserEndDraw();
 		}
 
@@ -78,7 +78,8 @@ namespace Glory
 		m_Game.m_bIsRunning = false;
 	}
 
-	Game::Game(const GameSettings& pGameSettings) : m_pGameState(pGameSettings.pGameState), m_pEngine(pGameSettings.pEngine), m_bInitialized(false), m_bIsRunning(false)
+	Game::Game(const GameSettings& pGameSettings) : m_pGameState(pGameSettings.pGameState), m_pEngine(pGameSettings.pEngine),
+		m_bInitialized(false), m_bIsRunning(false)
 	{
 	}
 

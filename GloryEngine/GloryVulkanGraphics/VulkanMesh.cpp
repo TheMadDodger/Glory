@@ -32,6 +32,11 @@ namespace Glory
         CreateVertexInputAttributeDescriptions();
     }
 
+    void VulkanMesh::Bind()
+    {
+        // TODO
+    }
+
     void VulkanMesh::CreateBindingDescription()
     {
         // Vertex binding and attributes

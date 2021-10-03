@@ -47,21 +47,17 @@ namespace Glory
 		}
 	}
 
-	void SDLWindowModule::Initialize_Internal()
+	void SDLWindowModule::OnInitialize()
 	{
 		if (SDL_Init(SDL_INIT_VIDEO) != 0)
 			throw new SDLErrorException(SDL_GetError());
 	}
 
-	void SDLWindowModule::Cleanup_Internal()
+	void SDLWindowModule::OnCleanup()
 	{
 	}
 
-	void SDLWindowModule::Update_Internal()
-	{
-	}
-
-	void SDLWindowModule::Draw_Internal()
+	void SDLWindowModule::OnMainUpdate()
 	{
 	}
 }

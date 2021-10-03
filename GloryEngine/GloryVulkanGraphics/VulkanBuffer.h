@@ -18,6 +18,9 @@ namespace Glory
 		vk::Buffer GetBuffer();
 		vk::DeviceMemory GetDeviceMemory();
 
+		virtual void Bind() override;
+		virtual void Unbind() override;
+
 	private:
 		vk::Buffer m_Buffer;
 		vk::DeviceMemory m_BufferMemory;

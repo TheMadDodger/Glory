@@ -7,18 +7,13 @@ namespace Glory
 
 	Thread* ThreadManager::Run(std::function<void()> func)
 	{
-		return m_pInstance->CreateThread(func);
+		return GetInstance()->CreateThread(func);
 	}
 
 	const size_t& ThreadManager::NumHardwareThread()
 	{
-		if (m_pInstance->m_HardwareThreads == 0) return 4;
-		return m_pInstance->m_HardwareThreads;
-	}
-
-	void ThreadManager::Initialize()
-	{
-		m_HardwareThreads = std::thread::hardware_concurrency();
+		if (GetInstance()->m_HardwareThreads == 0) return 4;
+		return GetInstance()->m_HardwareThreads;
 	}
 
 	void ThreadManager::Destroy()
@@ -72,9 +67,17 @@ namespace Glory
 		lock.unlock();
 	}
 
+	ThreadManager* ThreadManager::GetInstance()
+	{
+		if (m_pInstance != nullptr) return m_pInstance;
+		m_pInstance = new ThreadManager();
+		return m_pInstance;
+	}
+
 	ThreadManager::ThreadManager() : m_HardwareThreads(0)
 	{
 		m_pInstance = this;
+		m_HardwareThreads = std::thread::hardware_concurrency();
 	}
 
 	ThreadManager::~ThreadManager()

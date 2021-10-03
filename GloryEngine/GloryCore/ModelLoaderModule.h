@@ -26,7 +26,5 @@ namespace Glory
 	protected:
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
-		virtual void Update() override {};
-		virtual void Draw() override {};
 	};
 }

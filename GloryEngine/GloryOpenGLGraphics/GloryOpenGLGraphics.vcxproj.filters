@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Module">
+      <UniqueIdentifier>{dcff92cf-bb93-4a67-9e82-e8d7079d75cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buffers">
+      <UniqueIdentifier>{a89488f8-3fbc-450c-8820-9b0959449745}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLGraphicsModule.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="GLMesh.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="GLBuffer.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="GLShader.h" />
+    <ClInclude Include="GLConverter.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="OpenGLGraphicsModule.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="GLMesh.cpp">
+      <Filter>Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="GLBuffer.cpp">
+      <Filter>Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="GLShader.cpp" />
+    <ClCompile Include="GLConverter.cpp" />
+  </ItemGroup>
+</Project>

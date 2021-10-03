@@ -10,12 +10,22 @@ namespace Glory
 		return pEngine;
 	}
 
-	WindowModule* Engine::GetWindowModule()
+	WindowModule* Engine::GetWindowModule() const
 	{
 		return m_pWindowModule;
 	}
 
-	GraphicsModule* Engine::GetGraphicsModule()
+	ScenesModule* Engine::GetScenesModule() const
+	{
+		return m_pScenesModule;
+	}
+
+	RendererModule* Engine::GetRendererModule() const
+	{
+		return m_pRenderModule;
+	}
+
+	GraphicsModule* Engine::GetGraphicsModule() const
 	{
 		return m_pGraphicsModule;
 	}
@@ -31,9 +41,21 @@ namespace Glory
 		return *it;
 	}
 
+	GameThread* Engine::GetGameThread() const
+	{
+		return m_pGameThread;
+	}
+
+	GraphicsThread* Engine::GetGraphicsThread() const
+	{
+		return m_pGraphicsThread;
+	}
+
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
-		m_pThreadManager(new ThreadManager()), m_pJobManager(new Jobs::JobManager())
+		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
+		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
+		m_pGameThread(nullptr), m_pGraphicsThread(nullptr)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -50,6 +72,8 @@ namespace Glory
 		// Fill in the all modules vector with the required modules first
 		// In order of importance
 		m_pAllModules.push_back(m_pWindowModule);
+		m_pAllModules.push_back(m_pScenesModule);
+		m_pAllModules.push_back(m_pRenderModule);
 		m_pAllModules.push_back(m_pGraphicsModule);
 
 		// Add optional modules
@@ -64,6 +88,8 @@ namespace Glory
 	Engine::~Engine()
 	{
 		Console::Cleanup();
+
+		m_pGameThread->Stop();
 
 		// We need to cleanup in reverse
 		// This makes sure things like graphics get cleaned up before we close the window
@@ -93,6 +119,7 @@ namespace Glory
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{
+			m_pPriorityInitializationModules[i]->m_pEngine = this;
 			m_pPriorityInitializationModules[i]->Initialize();
 		}
 		
@@ -100,27 +127,26 @@ namespace Glory
 		{
 			auto it = std::find(m_pPriorityInitializationModules.begin(), m_pPriorityInitializationModules.end(), m_pAllModules[i]);
 			if (it != m_pPriorityInitializationModules.end()) continue;
+			m_pAllModules[i]->m_pEngine = this;
 			m_pAllModules[i]->Initialize();
 		}
 
-		m_pThreadManager->Initialize();
+		m_pMainThread = new MainThread();
+		m_pGameThread = new GameThread(this);
+		m_pGraphicsThread = new GraphicsThread();
+
+		m_pMainThread->Bind<WindowModule>(m_pWindowModule);
+
+		m_pGameThread->Bind<ScenesModule>(m_pScenesModule);
+		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
+
+		m_pGraphicsThread->Start();
+		m_pGameThread->Start();
 	}
 
 	void Engine::Update()
 	{
 		Console::Update();
-
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->Update();
-		}
-	}
-
-	void Engine::Draw()
-	{
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->Draw();
-		}
+		m_pMainThread->Update();
 	}
 }

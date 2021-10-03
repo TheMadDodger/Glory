@@ -33,6 +33,12 @@
     <ClCompile Include="Entity.cpp">
       <Filter>Module</Filter>
     </ClCompile>
+    <ClCompile Include="EntitySystem.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="EntitySystems.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GloryEntitiesModule.h">
@@ -58,6 +64,12 @@
     </ClInclude>
     <ClInclude Include="EntityID.h">
       <Filter>ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="EntitySystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="EntitySystems.h">
+      <Filter>Systems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

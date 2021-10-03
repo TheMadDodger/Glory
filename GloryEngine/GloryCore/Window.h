@@ -21,6 +21,10 @@ namespace Glory
 		virtual void GetDrawableSize(int* width, int* height);
 		virtual void GetWindowSize(int* width, int* height);
 		virtual void GetWindowPosition(int* x, int* y) = 0;
+		virtual void SetupForOpenGL() = 0;
+		virtual void CleanupOpenGL() = 0;
+		virtual void GLSwapWindow() = 0;
+		virtual void MakeGLContextCurrent() = 0;
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);

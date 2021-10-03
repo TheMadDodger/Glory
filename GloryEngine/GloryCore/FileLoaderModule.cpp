@@ -45,6 +45,7 @@ namespace Glory
 		buffer.resize(fileSize);
 		file.seekg(0);
 		file.read(buffer.data(), fileSize);
+		if (importSettings.AddNullTerminateAtEnd) buffer.push_back('\0');
 		file.close();
 		return true;
 	}

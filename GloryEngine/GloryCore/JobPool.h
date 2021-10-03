@@ -26,6 +26,7 @@ namespace Glory::Jobs
 		void StartQueue() { m_pJobQueue->Lock(); }
 		void QueueJob(std::function<ret(args...)> job, args... arguments) { m_pJobQueue->Push(job, arguments...); }
 		void EndQueue() { m_pJobQueue->UnLock(); }
+		bool HasTasksInQueue() { return m_pJobQueue->Size() > 0; }
 
 	private:
 		JobPool(size_t poolID, size_t numJobsPerThread = 1) : JobPoolBase(poolID, numJobsPerThread), m_pJobQueue(nullptr) {}

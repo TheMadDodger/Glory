@@ -64,10 +64,6 @@ namespace Glory
 	private:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
-		virtual void OnUpdate() override;
-		virtual void OnDraw() override;
-
-		virtual void RegisterCommands() override;
 		virtual FrameStates* CreateFrameStates() override;
 
 	private:

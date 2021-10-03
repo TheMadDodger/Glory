@@ -1,7 +1,6 @@
 #pragma once
-#include "GraphicsCommands.h"
-#include "CommandData.h"
 #include <queue>
+#include "RenderData.h"
 
 namespace Glory
 {
@@ -9,9 +8,6 @@ namespace Glory
 	{
 	public:
 		RenderFrame();
-
-		void Enqueue(const std::any& data);
-
-		std::vector<std::any> CommandQueue;
+		std::vector<RenderData> ObjectsToRender;
 	};
 }

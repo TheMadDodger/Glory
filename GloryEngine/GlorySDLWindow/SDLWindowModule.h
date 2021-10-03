@@ -14,9 +14,8 @@ namespace Glory
 		virtual void OpenMessageBox(const std::string& message) override;
 
 	protected:
-		virtual void Initialize_Internal() override;
-		virtual void Cleanup_Internal() override;
-		virtual void Update_Internal() override;
-		virtual void Draw_Internal() override;
+		virtual void OnInitialize() override;
+		virtual void OnCleanup() override;
+		virtual void OnMainUpdate() override;
     };
 }

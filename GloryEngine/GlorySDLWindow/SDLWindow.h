@@ -11,6 +11,10 @@ namespace Glory
 		virtual void GetDrawableSize(int* width, int* height) override;
 		virtual void GetWindowSize(int* width, int* height) override;
 		virtual void GetWindowPosition(int* x, int* y) override;
+		virtual void SetupForOpenGL() override;
+		virtual void CleanupOpenGL() override;
+		virtual void GLSwapWindow() override;
+		virtual void MakeGLContextCurrent() override;
 		SDL_Window* GetSDLWindow();
 
 	private:
@@ -26,5 +30,6 @@ namespace Glory
 	private:
 		friend class SDLWindowModule;
 		SDL_Window* m_pWindow;
+		SDL_GLContext m_GLSDLContext;
 	};
 }

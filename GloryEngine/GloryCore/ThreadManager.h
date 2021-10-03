@@ -14,7 +14,6 @@ namespace Glory
 		static const size_t& NumHardwareThread();
 
 	private:
-		void Initialize();
 		void Destroy();
 
 		Thread* CreateThread(std::function<void()> func);
@@ -24,6 +23,8 @@ namespace Glory
 		Thread* PopIdleThread();
 
 		void OnThreadIdle(Thread* pThread);
+
+		static ThreadManager* GetInstance();
 
 		ThreadManager();
 		virtual ~ThreadManager();

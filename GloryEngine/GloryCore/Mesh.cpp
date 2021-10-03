@@ -21,6 +21,12 @@ namespace Glory
         return m_IndexCount;
     }
 
+    void Mesh::SetBuffers(Buffer* pVertexBuffer, Buffer* pIndexBuffer)
+    {
+        m_pVertexBuffer = pVertexBuffer;
+        m_pIndexBuffer = pIndexBuffer;
+    }
+
     void Mesh::GetNextOffset(const AttributeType& atributeType, uint32_t& offest)
     {
         switch (atributeType)

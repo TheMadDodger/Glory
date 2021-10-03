@@ -23,18 +23,17 @@ namespace Glory
 		virtual Window* CreateWindow_Internal(const WindowCreateInfo& createInfo) = 0;
 
 	protected:
-		virtual void Initialize_Internal() = 0;
-		virtual void Cleanup_Internal() = 0;
-		virtual void Update_Internal() = 0;
-		virtual void Draw_Internal() = 0;
+		virtual void OnInitialize() = 0;
+		virtual void OnCleanup() = 0;
+		virtual void OnMainUpdate() = 0;
 
 	private:
-		virtual void Initialize();
-		virtual void Cleanup();
-		virtual void Update();
-		virtual void Draw();
+		virtual void Initialize() override;
+		virtual void Cleanup() override;
+		virtual void MainUpdate();
 
 	private: // Memory stuff
+		friend class MainThread;
 		std::vector<Window*> m_pWindows;
 		Window* m_pMainWindow;
 		WindowCreateInfo m_MainWindowCreateInfo;

@@ -30,7 +30,5 @@ namespace Glory
 	protected:
 		virtual void Initialize() override {};
 		virtual void Cleanup() override {};
-		virtual void Update() override {};
-		virtual void Draw() override {};
 	};
 }

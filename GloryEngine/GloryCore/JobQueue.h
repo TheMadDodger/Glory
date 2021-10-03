@@ -67,6 +67,14 @@ namespace Glory::Jobs
 			return func;
 		}
 
+		size_t Size()
+		{
+			std::unique_lock<std::mutex> lock(m_QueueMutex);
+			size_t size = m_Queue.size();
+			lock.unlock();
+			return size;
+		}
+
 	private:
 		std::mutex m_QueueMutex;
 		std::unique_lock<std::mutex> m_PushLock;

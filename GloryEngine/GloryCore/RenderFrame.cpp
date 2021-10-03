@@ -2,12 +2,7 @@
 
 namespace Glory
 {
-    RenderFrame::RenderFrame() : CommandQueue(std::vector<std::any>())
+    RenderFrame::RenderFrame() : ObjectsToRender(std::vector<RenderData>())
     {
-    }
-
-    void RenderFrame::Enqueue(const std::any& data)
-    {
-        CommandQueue.push_back(data);
     }
 }

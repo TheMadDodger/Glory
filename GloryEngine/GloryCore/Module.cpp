@@ -2,12 +2,17 @@
 
 namespace Glory
 {
-    Module::Module()
+    Module::Module() : m_pEngine(nullptr)
     {
     }
 
     Module::~Module()
     {
+    }
+
+    Engine* Module::GetEngine()
+    {
+        return m_pEngine;
     }
 
     bool Module::HasPriority()

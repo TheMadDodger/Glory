@@ -115,4 +115,14 @@ namespace Glory
     {
         return m_BufferMemory;
     }
+
+    void VulkanBuffer::Bind()
+    {
+        assert(false);
+    }
+
+    void VulkanBuffer::Unbind()
+    {
+        assert(false);
+    }
 }

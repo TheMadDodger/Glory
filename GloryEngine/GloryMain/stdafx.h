@@ -25,3 +25,8 @@
 #include <FileLoaderModule.h>
 #include <ShaderLoaderModule.h>
 #include <GLSLShaderLoader.h>
+#include <EntitySceneScenesModule.h>
+#include <OpenGLGraphicsModule.h>
+#include <GL/glew.h>
+
+#pragma comment (lib,"opengl32.lib")

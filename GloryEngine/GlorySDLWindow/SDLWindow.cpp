@@ -32,12 +32,39 @@ namespace Glory
 		SDL_GetWindowPosition(m_pWindow, x, y);
 	}
 
+	void SDLWindow::SetupForOpenGL()
+	{
+		// Create OpenGL context 
+		m_GLSDLContext = SDL_GL_CreateContext(m_pWindow);
+		if (m_GLSDLContext == nullptr)
+		{
+			std::cerr << "Could not ceate SDL GL Context: " << SDL_GetError() << std::endl;
+			return;
+		}
+	}
+
+	void SDLWindow::CleanupOpenGL()
+	{
+		SDL_GL_DeleteContext(m_GLSDLContext);
+		m_GLSDLContext = nullptr;
+	}
+
+	void SDLWindow::GLSwapWindow()
+	{
+		SDL_GL_SwapWindow(m_pWindow);
+	}
+
+	void SDLWindow::MakeGLContextCurrent()
+	{
+		SDL_GL_MakeCurrent(m_pWindow, m_GLSDLContext);
+	}
+
 	SDL_Window* SDLWindow::GetSDLWindow()
 	{
 		return m_pWindow;
 	}
 
-	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr) {}
+	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr), m_GLSDLContext(NULL) {}
 
 	SDLWindow::~SDLWindow()
 	{

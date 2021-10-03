@@ -2,7 +2,6 @@
 #include "ThreadManager.h"
 #include "Game.h"
 #include "Engine.h"
-#include "GraphicsCommandLibrary.h"
 #include "FrameStates.h"
 
 namespace Glory
@@ -19,7 +18,7 @@ namespace Glory
 
 	void GraphicsThread::Start()
 	{
-		m_pRenderQueue = new RenderQueue();
+		m_pRenderQueue = new RenderQueue(2);
 		m_pThread = ThreadManager::Run(std::bind(&GraphicsThread::Run, this));
 	}
 
@@ -35,6 +34,11 @@ namespace Glory
 
 	void GraphicsThread::Run()
 	{
+		for (size_t i = 0; i < m_InitializationBinds.size(); i++)
+		{
+			m_InitializationBinds[i]();
+		}
+
 		while (true)
 		{
 			m_pRenderQueue->GetNextFrame([&](const RenderFrame& frame) { OnRenderFrame(frame); });
@@ -43,14 +47,22 @@ namespace Glory
 
 	void GraphicsThread::OnRenderFrame(const RenderFrame& frame)
 	{
-		// Tell the frame states a frame render started
 		FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();
 		pFrameStates->OnFrameStart();
-		for (size_t i = 0; i < frame.CommandQueue.size(); ++i)
+		for (size_t i = 0; i < m_RenderBinds.size(); i++)
 		{
-			GraphicsCommands::RunCommand(frame.CommandQueue[i]);
+			m_RenderBinds[i](frame);
 		}
 		pFrameStates->OnFrameEnd();
-		// Tell the frame states a frame render finished
+
+		//// Tell the frame states a frame render started
+		//FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();
+		//pFrameStates->OnFrameStart();
+		//for (size_t i = 0; i < frame.CommandQueue.size(); ++i)
+		//{
+		//	GraphicsCommands::RunCommand(frame.CommandQueue[i]);
+		//}
+		//pFrameStates->OnFrameEnd();
+		//// Tell the frame states a frame render finished
 	}
 }

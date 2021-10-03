@@ -7,6 +7,7 @@ namespace Glory
     struct FileImportSettings : ImportSettings
     {
         int Flags;
+        bool AddNullTerminateAtEnd;
     };
 
     class FileLoaderModule : public ResourceLoaderModule<FileData, FileImportSettings>
@@ -24,7 +25,5 @@ namespace Glory
     protected:
         virtual void Initialize() override {};
         virtual void Cleanup() override {};
-        virtual void Update() override {};
-        virtual void Draw() override {};
     };
 }

@@ -4,6 +4,7 @@
 #include <map>
 #include "EntityComponentData.h"
 #include <functional>
+#include "EntitySystems.h"
 
 namespace Glory
 {
@@ -27,11 +28,14 @@ namespace Glory
 				m_UnusedComponentIndices.erase(m_UnusedComponentIndices.begin());
 				m_EntityComponents[index] = componentData;
 				m_ComponentsPerEntity[entity].push_back(index);
+				m_ComponentsPerType[typeid(T)].push_back(index);
 				return componentData.GetData<T>();
 			}
 
 			// Add as a new component
-			m_ComponentsPerEntity[entity].push_back(m_EntityComponents.size());
+			size_t index = m_EntityComponents.size();
+			m_ComponentsPerEntity[entity].push_back(index);
+			m_ComponentsPerType[typeid(T)].push_back(index);
 			m_EntityComponents.push_back(componentData);
 			return componentData.GetData<T>();
 		}
@@ -67,6 +71,8 @@ namespace Glory
 				size_t index = m_ComponentsPerEntity[entity][i];
 				if (m_EntityComponents[index].GetType() != typeid(T)) continue;
 				m_UnusedComponentIndices.push_back(index);
+				m_ComponentsPerEntity[entity].erase(m_ComponentsPerEntity[entity].begin() + index);
+				std::remove(m_ComponentsPerType[typeid(T)].begin(), m_ComponentsPerType[typeid(T)].end(), index);
 			}
 		}
 
@@ -79,6 +85,23 @@ namespace Glory
 		void ForEach(std::function<void(Registry*, EntityID)> func);
 		void ForEachComponent(EntityID entity, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
 
+		template<typename C, typename T>
+		EntitySystem* RegisterSystem()
+		{
+			return m_Systems.Register<C, T>(this);
+		}
+
+		template<typename T>
+		void ForEach(std::function<void(Registry*, EntityID, EntityComponentData*)> func)
+		{
+			ForEach(typeid(T), func);
+		}
+
+		void ForEach(const std::type_index& type, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
+
+		void Update();
+		void Draw();
+
 	private:
 		//std::vector<Entity> m_AllEntities;
 		std::vector<EntityID> m_AllEntityIDs;
@@ -87,5 +110,7 @@ namespace Glory
 		std::vector<EntityComponentData> m_EntityComponents;
 		std::vector<size_t> m_UnusedComponentIndices;
 		std::map<EntityID, std::vector<size_t>> m_ComponentsPerEntity;
+		std::map<std::type_index, std::vector<size_t>> m_ComponentsPerType;
+		EntitySystems m_Systems;
 	};
 }
