@@ -22,9 +22,9 @@ namespace Glory
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
 		virtual void ThreadedInitialize() override;
+		virtual GPUResourceManager* CreateGPUResourceManager() override;
 
 	private:
-		GLMesh* m_pMesh;
 		GLuint m_ShaderProgram;
 	};
 }

@@ -14,6 +14,7 @@ namespace Glory
 		if (m_VertexArrayID == 0) return;
 		glDeleteVertexArrays(1, &m_VertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+		m_VertexArrayID = 0;
 	}
 
 	void GLMesh::CreateBindingAndAttributeData()

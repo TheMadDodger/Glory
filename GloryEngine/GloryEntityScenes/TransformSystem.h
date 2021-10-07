@@ -25,6 +25,8 @@ namespace Glory
         virtual void OnDraw(Registry* pRegistry, EntityID entity, Triangle& pComponent) override
         {
             RenderData renderData;
+            renderData.m_MeshIndex = 0;
+            renderData.m_pModel = pComponent.m_pModelData;
             Game::GetGame().GetEngine()->GetRendererModule()->Submit(renderData);
         }
 	};

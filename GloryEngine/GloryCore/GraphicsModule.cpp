@@ -3,7 +3,7 @@
 
 namespace Glory
 {
-	GraphicsModule::GraphicsModule() : m_pFrameStates(nullptr)
+	GraphicsModule::GraphicsModule() : m_pFrameStates(nullptr), m_pResourceManager(nullptr)
 	{
 	}
 
@@ -11,6 +11,9 @@ namespace Glory
 	{
 		delete m_pFrameStates;
 		m_pFrameStates = nullptr;
+
+		delete m_pResourceManager;
+		m_pResourceManager = nullptr;
 	}
 
 	const std::type_info& GraphicsModule::GetModuleType()
@@ -23,6 +26,11 @@ namespace Glory
 		return m_pFrameStates;
 	}
 
+	GPUResourceManager* GraphicsModule::GetResourceManager()
+	{
+		return m_pResourceManager;
+	}
+
 	FrameStates* GraphicsModule::CreateFrameStates()
 	{
 		return new FrameStates(this);
@@ -31,6 +39,7 @@ namespace Glory
 	void GraphicsModule::Initialize()
 	{
 		m_pFrameStates = CreateFrameStates();
+		m_pResourceManager = CreateGPUResourceManager();
 		OnInitialize();
 		m_pFrameStates->Initialize();
 	}

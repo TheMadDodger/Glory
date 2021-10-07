@@ -23,6 +23,7 @@
     </ClInclude>
     <ClInclude Include="GLShader.h" />
     <ClInclude Include="GLConverter.h" />
+    <ClInclude Include="OGLResourceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OpenGLGraphicsModule.cpp">
@@ -36,5 +37,6 @@
     </ClCompile>
     <ClCompile Include="GLShader.cpp" />
     <ClCompile Include="GLConverter.cpp" />
+    <ClCompile Include="OGLResourceManager.cpp" />
   </ItemGroup>
 </Project>

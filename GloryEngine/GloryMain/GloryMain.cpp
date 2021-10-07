@@ -22,7 +22,10 @@ namespace Glory
             pGraphics->Clear();
             for (size_t i = 0; i < frame.ObjectsToRender.size(); i++)
             {
-                pGraphics->DrawMesh(nullptr);
+                RenderData renderData = frame.ObjectsToRender[i];
+                if (renderData.m_pModel == nullptr) continue;
+                MeshData* pMesh = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
+                pGraphics->DrawMesh(pMesh);
             }
             pGraphics->Swap();
         }

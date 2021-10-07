@@ -1,7 +1,7 @@
 #pragma once
 #include "Module.h"
-#include "Buffer.h"
-#include "GraphicsThread.h"
+#include "GPUResourceManager.h"
+
 
 namespace Glory
 {
@@ -22,6 +22,7 @@ namespace Glory
 
     public: // Getters
         FrameStates* GetFrameStates();
+        GPUResourceManager* GetResourceManager();
 
     protected:
         virtual void OnInitialize() = 0;
@@ -30,6 +31,7 @@ namespace Glory
         virtual void ThreadedCleanup() {}
 
         virtual FrameStates* CreateFrameStates();
+        virtual GPUResourceManager* CreateGPUResourceManager() = 0;
 
     private:
         virtual void Initialize() override;
@@ -38,5 +40,6 @@ namespace Glory
     private:
         friend class GraphicsThread;
         FrameStates* m_pFrameStates;
+        GPUResourceManager* m_pResourceManager;
     };
 }

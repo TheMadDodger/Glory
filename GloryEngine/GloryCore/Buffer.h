@@ -27,6 +27,6 @@ namespace Glory
 		uint32_t m_MemoryFlags;
 
 	private:
-		friend class VulkanGraphicsModule;
+		friend class GPUResourceManager;
 	};
 }

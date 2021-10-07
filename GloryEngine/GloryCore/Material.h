@@ -1,5 +1,4 @@
 #pragma once
-#include "GPUResource.h"
 
 /* Material should hold information about all the shaders linked to it
 * This involves:
@@ -27,7 +26,7 @@
 
 namespace Glory
 {
-	class Material : public GPUResource
+	class Material
 	{
 	};
 }

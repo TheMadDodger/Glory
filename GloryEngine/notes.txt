@@ -1,4 +1,4 @@
-Threading
+Threading: DONE
 	GameThread:
 	- Will run as long as the render queue is not full
 	- 2 Phases:
@@ -11,7 +11,7 @@ Threading
 		2. Post Processing
 		3. This completely depends on the renderer and may even be a scriptable pipeline?
 
-Modules:
+Modules: DONE
 	- Modules could choose what thread they run on
 	- Some modules may not require an update per frame
 	- Modules know nothing about other modules
@@ -22,8 +22,8 @@ ScenesModule:
 	- Contains all the objects within a loaded scene
 	- In charge of handling serialization and deserialization of scenes
 	- Runs on the game thread in 2 phases:
-		1. Update the loaded scene(s) and all its objects
-		2. Send all objects to the RenderModule
+		1. Update the loaded scene(s) and all their objects
+		2. Submit all objects that need to be rendered to the RenderModule
 	- When both phases are done it notifies the RenderModule that the frame is finished
 	- Does not know anything about the rendering implementation!
 
@@ -32,15 +32,30 @@ RenderModule:
 	- Keeps track of a RenderFrame
 	- RenderFrame stores Objects that need to be rendered and their render settings
 	- Does not know anything about the graphics API or platform!
-	- Once a frame is ready it sends commands to the GraphicsModule 
+	- Once a frame is ready it sends commands to the GraphicsModule
 
 GraphicsModule:
 	- Has a built in resource manager to manage resources that exist in GPU memory
 	- Needs to be able to take resources from the core engine and convert them to GPU resources
 	- Has no update loop
 	- Takes in commands and sends them to the GPU based on the platform implementation
-	- Does not do ANYTHING by itself!!! (hence why is has no update loop)
+	- Does not do ANYTHING by itself!!! (hence why it has no update loop)
 
+EntitySystems:
+	- Add a callback for when the game starts and for when the component is added?
+
+MaterialData:
+	- Data version of the material, only holds the information about the shader
+	- Array of ShaderData pointers
+	- Property data, properties will be read through shaderc reflection
+
+Material:
+	- Created via a MaterialData object
+	- Each API implementation implements its own Material
+	- Holds an array of pointers to Shader objects
+	- Functions for setting basic shader resources like world, view and projection matrices
+	- Has a single function to set all other resources/properties
+	- Caches values of properties/resources and sends them to the GPU when the material is used
 
 Dumping objects ->
 {220} normal block at 0x00E93520, 8 bytes long.

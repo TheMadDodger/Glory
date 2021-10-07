@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <ModelData.h>
 
 namespace Glory
 {
@@ -17,6 +18,9 @@ namespace Glory
 
 	struct Triangle
 	{
-		Triangle() {}
+		Triangle() : m_pModelData(nullptr) {}
+		Triangle(ModelData* pModelData) : m_pModelData(pModelData) {}
+
+		ModelData* m_pModelData;
 	};
 }

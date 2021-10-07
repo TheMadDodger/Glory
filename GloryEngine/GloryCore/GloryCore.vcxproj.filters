@@ -108,16 +108,10 @@
     <ClInclude Include="Debug.h">
       <Filter>Console</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Modules\Graphics\Geometry</Filter>
-    </ClInclude>
     <ClInclude Include="VertexDefinitions.h">
       <Filter>Modules\Graphics\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="VertexHelpers.h">
-      <Filter>Modules\Graphics\Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Buffer.h">
       <Filter>Modules\Graphics\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="ImageLoaderModule.h">
@@ -225,6 +219,12 @@
     <ClInclude Include="UUID.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -262,12 +262,6 @@
     </ClCompile>
     <ClCompile Include="Debug.cpp">
       <Filter>Console</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Modules\Graphics\Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Buffer.cpp">
-      <Filter>Modules\Graphics\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="ImageLoaderModule.cpp">
       <Filter>Modules\ResourceLoading\Textures</Filter>
@@ -367,6 +361,12 @@
     </ClCompile>
     <ClCompile Include="UUID.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>Modules\Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Modules\Graphics\Resources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

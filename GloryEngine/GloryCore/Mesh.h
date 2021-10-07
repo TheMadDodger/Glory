@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	class Mesh
+	class Mesh : public GPUResource
 	{
 	public:
 		Mesh(size_t vertexCount, size_t indexCount, InputRate inputRate, size_t binding, size_t stride, const std::vector<AttributeType>& attributeTypes);

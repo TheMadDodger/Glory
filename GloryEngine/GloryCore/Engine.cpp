@@ -87,8 +87,6 @@ namespace Glory
 
 	Engine::~Engine()
 	{
-		Console::Cleanup();
-
 		m_pGameThread->Stop();
 		m_pGraphicsThread->Stop();
 
@@ -117,6 +115,8 @@ namespace Glory
 		delete m_pMainThread;
 		delete m_pGameThread;
 		delete m_pGraphicsThread;
+
+		Console::Cleanup();
 	}
 
 	void Engine::Initialize()

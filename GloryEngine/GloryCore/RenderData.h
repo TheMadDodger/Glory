@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "ModelData.h"
+#include "Material.h"
 
 namespace Glory
 {
@@ -19,6 +20,6 @@ namespace Glory
 		glm::mat4 m_ViewProjection;
 		
 		// Material ?
-
+		Material* m_pMaterial;
 	};
 }

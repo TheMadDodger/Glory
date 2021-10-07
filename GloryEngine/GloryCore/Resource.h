@@ -10,6 +10,8 @@ namespace Glory
         Resource();
         virtual ~Resource();
 
+        const UUID& GetUUID() const;
+
     private:
         UUID m_ID;
     };

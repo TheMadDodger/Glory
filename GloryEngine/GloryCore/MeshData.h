@@ -1,10 +1,11 @@
 #pragma once
 #include <vector>
 #include "VertexDefinitions.h"
+#include "Resource.h"
 
 namespace Glory
 {
-	class MeshData
+	class MeshData : public Resource
 	{
 	public:
 		MeshData(size_t vertexCount, size_t vertexSize, const std::vector<float>& vertices, size_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes);
