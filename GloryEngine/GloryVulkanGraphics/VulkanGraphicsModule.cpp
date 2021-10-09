@@ -14,7 +14,6 @@
 #include <FileLoaderModule.h>
 #include "VulkanShader.h"
 #include <ShaderLoaderModule.h>
-#include "ShaderCrossCompiler.h"
 #include "RenderPassCommandHandlers.h"
 #include "VulkanFrameStates.h"
 #include "PipelineCommandHandlers.h"

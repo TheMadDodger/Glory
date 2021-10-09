@@ -45,6 +45,9 @@
     <ClInclude Include="Systems.h">
       <Filter>Systems</Filter>
     </ClInclude>
+    <ClInclude Include="MeshRenderSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Registry.cpp">
@@ -69,6 +72,9 @@
       <Filter>Module</Filter>
     </ClCompile>
     <ClCompile Include="TransformSystem.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRenderSystem.cpp">
       <Filter>Systems</Filter>
     </ClCompile>
   </ItemGroup>

@@ -2,6 +2,13 @@
 #include "Entity.h"
 #include "Systems.h"
 #include <VertexHelpers.h>
+#include <FileLoaderModule.h>
+#include <ios>
+#include <Material.h>
+#include "ModelLoaderModule.h"
+#include "ImageLoaderModule.h"
+#include "MeshRenderSystem.h"
+#include <Engine.h>
 
 namespace Glory
 {
@@ -13,26 +20,33 @@ namespace Glory
 	{
 	}
 
-	void EntitySceneScenesModule::Initialize()
+	void EntitySceneScenesModule::Initialize() {}
+
+	void EntitySceneScenesModule::PostInitialize()
 	{
-		// teeeeeeeeeest
-		std::vector<float> vertices = {
-			0.0f, -0.5f, 1.0f, 0.0f, 0.0f,
-			0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-			-0.5f, 0.5f, 0.0f, 0.0f, 1.0f
-		};
+		// dis is a test pls ignore
 
-		std::vector<uint32_t> indices = {
-			0, 1, 2
-		};
-		MeshData* pMeshData = new MeshData(3, sizeof(Vertex), vertices, 3, indices, { AttributeType::Float2, AttributeType::Float3 });
-		ModelData* pModelData = new ModelData();
-		pModelData->AddMesh(pMeshData);
+		ModelData* pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load("./Models/viking_room.obj");
+		ImageData* pTexture = (ImageData*)m_pEngine->GetModule<ImageLoaderModule>()->Load("./Resources/viking_room_1.png");
 
-		Entity& entity = m_Scene.CreateEntity();
-		entity.AddComponent<Triangle>(pModelData);
+		FileImportSettings importSettings;
+		importSettings.Flags = (int)std::ios::ate;
+		importSettings.AddNullTerminateAtEnd = true;
+		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/texturetest.vert", importSettings);
+		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/texturetest.frag", importSettings);
+		
+		std::vector<FileData*> pShaderFiles = { pVert, pFrag };
+		std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
+		
+		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
+		pMaterialData->SetTexture(pTexture);
+
+		m_Entity = m_Scene.CreateEntity();
+		m_Entity.AddComponent<MeshFilter>(pModel);
+		MeshRenderer& meshRenderer = m_Entity.AddComponent<MeshRenderer>(pMaterialData);
+
 		m_Scene.m_Registry.RegisterSystem<TransformSystem>();
-		m_Scene.m_Registry.RegisterSystem<TriangleSystem>();
+		m_Scene.m_Registry.RegisterSystem<MeshRenderSystem>();
 	}
 
 	void EntitySceneScenesModule::Cleanup()

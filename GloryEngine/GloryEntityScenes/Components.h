@@ -1,6 +1,10 @@
 #pragma once
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <ModelData.h>
+#include <MaterialData.h>
 
 namespace Glory
 {
@@ -16,11 +20,16 @@ namespace Glory
 		glm::mat4 MatTransform;
 	};
 
-	struct Triangle
+	struct MeshFilter
 	{
-		Triangle() : m_pModelData(nullptr) {}
-		Triangle(ModelData* pModelData) : m_pModelData(pModelData) {}
-
+		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData) {}
 		ModelData* m_pModelData;
+	};
+
+	struct MeshRenderer
+	{
+		MeshRenderer(MaterialData* pMaterial) : m_pMaterials({ pMaterial }) {}
+		MeshRenderer() : m_pMaterials(std::vector<MaterialData*>()) {}
+		std::vector<MaterialData*> m_pMaterials;
 	};
 }

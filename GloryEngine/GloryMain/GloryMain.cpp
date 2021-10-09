@@ -25,6 +25,11 @@ namespace Glory
                 RenderData renderData = frame.ObjectsToRender[i];
                 if (renderData.m_pModel == nullptr) continue;
                 MeshData* pMesh = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
+                Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
+                UniformBufferObjectTest ubo = renderData.m_UBO;
+                pMaterial->SetUBO(renderData.m_UBO);
+                pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
+                pMaterial->SetProperties();
                 pGraphics->DrawMesh(pMesh);
             }
             pGraphics->Swap();
@@ -46,7 +51,7 @@ int main()
         windowCreateInfo.Height = 720;
         windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL; //SDL_WINDOW_VULKAN;
         
-        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), /*new Glory::ASSIMPModule(),*/ new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader()};
+        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader()};
         
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);

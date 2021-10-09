@@ -4,7 +4,7 @@
     <Filter Include="Module">
       <UniqueIdentifier>{dcff92cf-bb93-4a67-9e82-e8d7079d75cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Buffers">
+    <Filter Include="Resources">
       <UniqueIdentifier>{a89488f8-3fbc-450c-8820-9b0959449745}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -16,27 +16,47 @@
       <Filter>Module</Filter>
     </ClInclude>
     <ClInclude Include="GLMesh.h">
-      <Filter>Buffers</Filter>
+      <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="GLBuffer.h">
-      <Filter>Buffers</Filter>
+      <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="GLShader.h" />
     <ClInclude Include="GLConverter.h" />
-    <ClInclude Include="OGLResourceManager.h" />
+    <ClInclude Include="GLTexture.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="GLShader.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="OGLMaterial.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="OGLResourceManager.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OpenGLGraphicsModule.cpp">
       <Filter>Module</Filter>
     </ClCompile>
     <ClCompile Include="GLMesh.cpp">
-      <Filter>Buffers</Filter>
+      <Filter>Resources</Filter>
     </ClCompile>
     <ClCompile Include="GLBuffer.cpp">
-      <Filter>Buffers</Filter>
+      <Filter>Resources</Filter>
     </ClCompile>
-    <ClCompile Include="GLShader.cpp" />
     <ClCompile Include="GLConverter.cpp" />
-    <ClCompile Include="OGLResourceManager.cpp" />
+    <ClCompile Include="GLTexture.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="GLShader.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="OGLMaterial.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="OGLResourceManager.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

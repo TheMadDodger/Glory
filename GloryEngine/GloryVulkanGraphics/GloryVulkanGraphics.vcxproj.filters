@@ -63,7 +63,6 @@
     <ClCompile Include="DeferredPipelineTest.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderCrossCompiler.cpp" />
     <ClCompile Include="RenderPassCommandHandlers.cpp">
       <Filter>CommandHandlers</Filter>
     </ClCompile>
@@ -128,7 +127,6 @@
     <ClInclude Include="DeferredPipelineTest.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderCrossCompiler.h" />
     <ClInclude Include="RenderPassCommandHandlers.h">
       <Filter>CommandHandlers</Filter>
     </ClInclude>

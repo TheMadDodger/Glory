@@ -9,13 +9,14 @@ namespace Glory
 	class Entity
 	{
 	public:
+		Entity();
 		Entity(EntityID entityHandle, EntityScene* pScene);
 
 	public:
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
 		{
-			return m_pEntityScene->m_Registry.AddComponent<T>(m_EntityID, std::forward<Args&&...>(args)...);
+			return m_pEntityScene->m_Registry.AddComponent<T>(m_EntityID, std::forward<Args>(args)...);
 		}
 
 		template<typename T>

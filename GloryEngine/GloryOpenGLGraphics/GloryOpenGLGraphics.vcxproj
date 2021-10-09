@@ -172,6 +172,8 @@
     <ClInclude Include="GLConverter.h" />
     <ClInclude Include="GLMesh.h" />
     <ClInclude Include="GLShader.h" />
+    <ClInclude Include="GLTexture.h" />
+    <ClInclude Include="OGLMaterial.h" />
     <ClInclude Include="OGLResourceManager.h" />
     <ClInclude Include="OpenGLGraphicsModule.h" />
   </ItemGroup>
@@ -180,6 +182,8 @@
     <ClCompile Include="GLConverter.cpp" />
     <ClCompile Include="GLMesh.cpp" />
     <ClCompile Include="GLShader.cpp" />
+    <ClCompile Include="GLTexture.cpp" />
+    <ClCompile Include="OGLMaterial.cpp" />
     <ClCompile Include="OGLResourceManager.cpp" />
     <ClCompile Include="OpenGLGraphicsModule.cpp" />
   </ItemGroup>

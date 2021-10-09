@@ -1,5 +1,8 @@
 #pragma once
 #include "GPUResource.h"
+#include "FileData.h"
+#include "GraphicsEnums.h"
+#include <string>
 
 /*
 * Need to merge the shader and shader data class into one class
@@ -12,11 +15,18 @@ namespace Glory
 	class Shader : public GPUResource
 	{
 	public:
-		Shader();
+		Shader(FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
 		virtual ~Shader();
 
-	public:
+	protected:
+		virtual void Initialize() = 0;
+
+	protected:
+		FileData* m_pShaderFileData;
+		const ShaderType m_ShaderType;
+		const std::string m_Function;
 
 	private:
+		friend class GPUResourceManager;
 	};
 }

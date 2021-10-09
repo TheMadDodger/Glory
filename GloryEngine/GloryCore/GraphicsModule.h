@@ -2,7 +2,6 @@
 #include "Module.h"
 #include "GPUResourceManager.h"
 
-
 namespace Glory
 {
     class FrameStates;
@@ -18,6 +17,7 @@ namespace Glory
     public: // Commands
         virtual void Clear() = 0;
         virtual void Swap() = 0;
+        virtual Material* UseMaterial(MaterialData* pMaterialData) = 0;
         virtual void DrawMesh(MeshData* pMeshData) = 0;
 
     public: // Getters

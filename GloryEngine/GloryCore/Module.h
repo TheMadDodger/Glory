@@ -18,6 +18,7 @@ namespace Glory
 
 	protected:
 		virtual void Initialize() = 0;
+		virtual void PostInitialize() {};
 		virtual void Cleanup() = 0;
 		
 		//virtual void Update() = 0;

@@ -6,7 +6,7 @@
 namespace Glory
 {
 	GLShader::GLShader(FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
-		: m_pShaderFileData(pShaderFileData), m_ShaderType(shaderType), m_Function(function), m_ShaderID(NULL)
+		: Shader(pShaderFileData, shaderType, function), m_ShaderID(NULL)
 	{
 	}
 
@@ -20,7 +20,8 @@ namespace Glory
 	{
 		const char* shaderSource = m_pShaderFileData->Data();
 
-		m_ShaderID = glCreateShader(GLConverter::GetShaderStageFlag(m_ShaderType));
+		m_GLShaderType = GLConverter::GetShaderStageFlag(m_ShaderType);
+		m_ShaderID = glCreateShader(m_GLShaderType);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glShaderSource(m_ShaderID, 1, &shaderSource, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());

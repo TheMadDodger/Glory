@@ -175,6 +175,7 @@
     <ClInclude Include="EntitySceneScenesModule.h" />
     <ClInclude Include="EntitySystem.h" />
     <ClInclude Include="EntitySystems.h" />
+    <ClInclude Include="MeshRenderSystem.h" />
     <ClInclude Include="Registry.h" />
     <ClInclude Include="Systems.h" />
     <ClInclude Include="TransformSystem.h" />
@@ -186,6 +187,7 @@
     <ClCompile Include="EntitySceneScenesModule.cpp" />
     <ClCompile Include="EntitySystem.cpp" />
     <ClCompile Include="EntitySystems.cpp" />
+    <ClCompile Include="MeshRenderSystem.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="TransformSystem.cpp" />
   </ItemGroup>

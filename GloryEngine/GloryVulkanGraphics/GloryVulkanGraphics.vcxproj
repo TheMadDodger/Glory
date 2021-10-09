@@ -99,7 +99,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;$(solutiondir)bin\spirv-cross\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -118,7 +118,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;$(solutiondir)bin\spirv-cross\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -137,7 +137,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;$(solutiondir)bin\spirv-cross\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -156,7 +156,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;$(solutiondir)bin\spirv-cross\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)GloryCore;$(VULKAN_SDK)\Third-Party\Include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -174,7 +174,6 @@
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="PipelineCommandHandlers.cpp" />
     <ClCompile Include="RenderPassCommandHandlers.cpp" />
-    <ClCompile Include="ShaderCrossCompiler.cpp" />
     <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="VulkanCommandBuffers.cpp" />
     <ClCompile Include="VulkanDeviceManager.cpp" />
@@ -198,7 +197,6 @@
     <ClInclude Include="PipelineCommandHandlers.h" />
     <ClInclude Include="QueueFamilyIndices.h" />
     <ClInclude Include="RenderPassCommandHandlers.h" />
-    <ClInclude Include="ShaderCrossCompiler.h" />
     <ClInclude Include="SwapChain.h" />
     <ClInclude Include="VulkanCommandBuffers.h" />
     <ClInclude Include="VulkanDeviceManager.h" />

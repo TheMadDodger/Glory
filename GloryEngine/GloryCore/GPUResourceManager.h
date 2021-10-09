@@ -1,11 +1,13 @@
 #pragma once
+#include <map>
+#include <vector>
 #include "UUID.h"
 #include "GPUResource.h"
 #include "Buffer.h"
-#include <map>
-#include <vector>
 #include "Mesh.h"
-#include "MeshData.h"
+#include "Shader.h"
+#include "Material.h"
+#include "Texture.h"
 
 namespace Glory
 {
@@ -18,12 +20,18 @@ namespace Glory
 	public:
 		Buffer* CreateBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags);
 		Mesh* CreateMesh(MeshData* pMeshData);
+		Shader* CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
+		Material* CreateMaterial(MaterialData* pMaterialData);
+		Texture* CreateTexture(ImageData* pImageData);
 
 	protected: // Internal functions
 		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags) = 0;
 		virtual Mesh* CreateMesh_Internal(MeshData* pMeshData) = 0;
+		virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
+		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
+		virtual Texture* CreateTexture_Internal(ImageData* pImageData) = 0;
 
 	private: // Resource lookups
 		template<class T>

@@ -61,6 +61,9 @@
     <Filter Include="Modules\Renderer">
       <UniqueIdentifier>{5fbff929-34ef-4893-ba3d-1fbcb6616ba8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\ResourceLoading\Material">
+      <UniqueIdentifier>{4e487239-014f-464d-ab6f-3b2ac0f9ceaa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -225,6 +228,15 @@
     <ClInclude Include="Buffer.h">
       <Filter>Modules\Graphics\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="MaterialData.h">
+      <Filter>Modules\ResourceLoading\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialPropertyData.h">
+      <Filter>Modules\ResourceLoading\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderCrossCompiler.h">
+      <Filter>Modules\ResourceLoading\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -367,6 +379,15 @@
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>Modules\Graphics\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialData.cpp">
+      <Filter>Modules\ResourceLoading\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialPropertyData.cpp">
+      <Filter>Modules\ResourceLoading\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderCrossCompiler.cpp">
+      <Filter>Modules\ResourceLoading\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

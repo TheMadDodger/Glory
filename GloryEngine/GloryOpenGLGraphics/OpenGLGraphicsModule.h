@@ -16,6 +16,7 @@ namespace Glory
 	public: // Commands
 		virtual void Clear() override;
 		virtual void Swap() override;
+		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
 		virtual void DrawMesh(MeshData* pMeshData) override;
 
 	protected:
@@ -23,8 +24,5 @@ namespace Glory
 		virtual void OnCleanup() override;
 		virtual void ThreadedInitialize() override;
 		virtual GPUResourceManager* CreateGPUResourceManager() override;
-
-	private:
-		GLuint m_ShaderProgram;
 	};
 }

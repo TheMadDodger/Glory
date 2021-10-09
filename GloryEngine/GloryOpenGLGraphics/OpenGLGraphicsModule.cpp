@@ -30,6 +30,7 @@ namespace Glory
 	{
 		Window* pMainWindow = GetEngine()->GetWindowModule()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
+		GetEngine()->GetWindowModule()->GetMainWindow()->MakeGLContextCurrent();
 
 		// Init GLEW
 		glewExperimental = GL_TRUE;
@@ -75,47 +76,6 @@ namespace Glory
 		int width, height;
 		pMainWindow->GetWindowSize(&width, &height);
 		glViewport(0, 0, width, height);
-		
-		FileImportSettings importSettings;
-		importSettings.Flags = (int)std::ios::ate;
-		importSettings.AddNullTerminateAtEnd = true;
-		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/vertexbuffertest.vert", importSettings);
-		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/triangle.frag", importSettings);
-		
-		GLShader* pVertShader = new GLShader(pVert, ShaderType::ST_Vertex, "");
-		pVertShader->Initialize();
-		GLShader* pFragShader = new GLShader(pFrag, ShaderType::ST_Fragment, "");
-		pFragShader->Initialize();
-		
-		int success;
-		char infoLog[512];
-		
-		m_ShaderProgram = glCreateProgram();
-		LogGLError(glGetError());
-		glAttachShader(m_ShaderProgram, pVertShader->m_ShaderID);
-		LogGLError(glGetError());
-		glAttachShader(m_ShaderProgram, pFragShader->m_ShaderID);
-		LogGLError(glGetError());
-		glLinkProgram(m_ShaderProgram);
-		LogGLError(glGetError());
-		
-		glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &success);
-		LogGLError(glGetError());
-		if (!success)
-		{
-			glGetProgramInfoLog(m_ShaderProgram, 512, NULL, infoLog);
-			LogGLError(glGetError());
-			Debug::LogError(infoLog);
-		}
-		
-		glUseProgram(m_ShaderProgram);
-		LogGLError(glGetError());
-		
-		delete pVertShader;
-		delete pFragShader;
-		
-		delete pVert;
-		delete pFrag;
 	}
 
 	GPUResourceManager* OpenGLGraphicsModule::CreateGPUResourceManager()
@@ -134,8 +94,6 @@ namespace Glory
 
 	void OpenGLGraphicsModule::Clear()
 	{
-		GetEngine()->GetWindowModule()->GetMainWindow()->MakeGLContextCurrent();
-
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		LogGLError(glGetError());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -148,13 +106,18 @@ namespace Glory
 		pMainWindow->GLSwapWindow();
 	}
 
+	Material* OpenGLGraphicsModule::UseMaterial(MaterialData* pMaterialData)
+	{
+		Material* pMaterial = GetResourceManager()->CreateMaterial(pMaterialData);
+		pMaterial->Use();
+		return pMaterial;
+	}
+
 	void OpenGLGraphicsModule::DrawMesh(MeshData* pMeshData)
 	{
 		Mesh* pMesh = GetResourceManager()->CreateMesh(pMeshData);
-		glUseProgram(m_ShaderProgram);
-		LogGLError(glGetError());
 		pMesh->Bind();
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, pMesh->GetIndexCount(), GL_UNSIGNED_INT, NULL);
 		LogGLError(glGetError());
 	}
 }

@@ -2,6 +2,10 @@
 
 namespace Glory
 {
+	Entity::Entity() : m_EntityID(NULL), m_pEntityScene(nullptr)
+	{
+	}
+
 	Entity::Entity(EntityID entityHandle, EntityScene* pScene) : m_EntityID(entityHandle), m_pEntityScene(pScene)
 	{
 	}

@@ -61,7 +61,7 @@ namespace Glory
 			case Glory::AttributeType::Float2:
 				glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, m_Stride, (void*)offset);
 				OpenGLGraphicsModule::LogGLError(glGetError());
-				offset += 3 * sizeof(GLfloat);
+				offset += 2 * sizeof(GLfloat);
 				break;
 			case Glory::AttributeType::Float3:
 				glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, m_Stride, (void*)offset);
