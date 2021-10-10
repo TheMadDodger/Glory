@@ -29,9 +29,10 @@ namespace Glory
 		Mesh* pMesh = GetResource<Mesh>(pMeshData);
 		if (pMesh) return pMesh;
 
-		uint32_t bufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
-		Buffer* pVertexBuffer = CreateVertexBuffer(bufferSize);
-		Buffer* pIndexBuffer = CreateIndexBuffer(bufferSize);
+		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
+		uint32_t indexBufferSize = pMeshData->IndexCount() * sizeof(uint32_t);
+		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
+		Buffer* pIndexBuffer = CreateIndexBuffer(indexBufferSize);
 		pVertexBuffer->Assign(pMeshData->Vertices());
 		pIndexBuffer->Assign(pMeshData->Indices());
 		pMesh = CreateMesh_Internal(pMeshData);

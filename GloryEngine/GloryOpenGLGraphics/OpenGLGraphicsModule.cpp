@@ -23,14 +23,22 @@ namespace Glory
 
 	void OpenGLGraphicsModule::OnCleanup()
 	{
+	}
+
+	void OpenGLGraphicsModule::ThreadedCleanup()
+	{
+		GraphicsModule::ThreadedCleanup();
 		GetEngine()->GetWindowModule()->GetMainWindow()->CleanupOpenGL();
+		LogGLError(glGetError());
 	}
 
 	void OpenGLGraphicsModule::ThreadedInitialize()
 	{
 		Window* pMainWindow = GetEngine()->GetWindowModule()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
+		LogGLError(glGetError());
 		GetEngine()->GetWindowModule()->GetMainWindow()->MakeGLContextCurrent();
+		LogGLError(glGetError());
 
 		// Init GLEW
 		glewExperimental = GL_TRUE;
@@ -76,6 +84,7 @@ namespace Glory
 		int width, height;
 		pMainWindow->GetWindowSize(&width, &height);
 		glViewport(0, 0, width, height);
+		LogGLError(glGetError());
 	}
 
 	GPUResourceManager* OpenGLGraphicsModule::CreateGPUResourceManager()

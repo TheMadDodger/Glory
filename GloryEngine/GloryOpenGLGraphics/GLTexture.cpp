@@ -11,6 +11,9 @@ namespace Glory
 
 	GLTexture::~GLTexture()
 	{
+		glDeleteTextures(1, &m_TextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		m_TextureID = NULL;
 	}
 
 	GLuint GLTexture::GetGLImageType() const

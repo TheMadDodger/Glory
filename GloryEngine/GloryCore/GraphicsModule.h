@@ -28,7 +28,7 @@ namespace Glory
         virtual void OnInitialize() = 0;
         virtual void OnCleanup() = 0;
         virtual void ThreadedInitialize() {}
-        virtual void ThreadedCleanup() {}
+        virtual void ThreadedCleanup();
 
         virtual FrameStates* CreateFrameStates();
         virtual GPUResourceManager* CreateGPUResourceManager() = 0;

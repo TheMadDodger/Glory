@@ -11,9 +11,6 @@ namespace Glory
 	{
 		delete m_pFrameStates;
 		m_pFrameStates = nullptr;
-
-		delete m_pResourceManager;
-		m_pResourceManager = nullptr;
 	}
 
 	const std::type_info& GraphicsModule::GetModuleType()
@@ -29,6 +26,12 @@ namespace Glory
 	GPUResourceManager* GraphicsModule::GetResourceManager()
 	{
 		return m_pResourceManager;
+	}
+
+	void GraphicsModule::ThreadedCleanup()
+	{
+		delete m_pResourceManager;
+		m_pResourceManager = nullptr;
 	}
 
 	FrameStates* GraphicsModule::CreateFrameStates()

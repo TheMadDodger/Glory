@@ -30,11 +30,6 @@ namespace Glory
 
 	void GraphicsThread::Stop()
 	{
-		for (size_t i = 0; i < m_CleanupBinds.size(); i++)
-		{
-			m_CleanupBinds[i]();
-		}
-
 		// Kill the thread
 		m_Exit = true;
 		m_pRenderQueue->Stop();
@@ -56,6 +51,11 @@ namespace Glory
 		{
 			if (m_Exit) break;
 			m_pRenderQueue->GetNextFrame([&](const RenderFrame& frame) { OnRenderFrame(frame); });
+		}
+
+		for (size_t i = 0; i < m_CleanupBinds.size(); i++)
+		{
+			m_CleanupBinds[i]();
 		}
 	}
 
