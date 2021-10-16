@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "PropertyDrawer.h"
 //#include "AssetReferencePropertyDrawer.h"
 //

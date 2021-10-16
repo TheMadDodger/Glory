@@ -17,6 +17,8 @@ namespace Glory
 		virtual void MakeGLContextCurrent() override;
 		SDL_Window* GetSDLWindow();
 
+		SDL_GLContext GetSDLGLConext() const;
+
 	private:
 		SDLWindow(const WindowCreateInfo& createInfo);
 		virtual ~SDLWindow();

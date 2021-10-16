@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "Tumbnail.h"
 //#include "TumbnailGenerator.h"
 //#include <AssetManager.h>

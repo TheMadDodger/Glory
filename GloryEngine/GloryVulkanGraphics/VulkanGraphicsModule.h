@@ -45,7 +45,6 @@ namespace Glory
 		SwapChain* GetSwapChain();
 		VulkanCommandBuffers* GetVulkanCommandBuffers();
 
-
 		VulkanRenderPass* GetVulkanRenderPass();
 		VulkanGraphicsPipeline* GetVulkanGraphicsPipeline();
 
@@ -59,10 +58,17 @@ namespace Glory
 		static void CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
 		static vk::ImageView CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
 
+	public: // Commands
+		virtual void Clear() override;
+		virtual void Swap() override;
+		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
+		virtual void DrawMesh(MeshData* pMeshData) override;
+
 	private:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
 		virtual FrameStates* CreateFrameStates() override;
+		virtual GPUResourceManager* CreateGPUResourceManager() override;
 
 	private:
 		void InitializeValidationLayers();

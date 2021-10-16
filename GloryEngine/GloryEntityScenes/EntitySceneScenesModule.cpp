@@ -20,7 +20,12 @@ namespace Glory
 	{
 	}
 
-	void EntitySceneScenesModule::Initialize() {}
+	void EntitySceneScenesModule::Initialize()
+	{
+		// Register engine components
+		m_Scene.m_Registry.RegisterSystem<TransformSystem>();
+		m_Scene.m_Registry.RegisterSystem<MeshRenderSystem>();
+	}
 
 	void EntitySceneScenesModule::PostInitialize()
 	{
@@ -28,7 +33,7 @@ namespace Glory
 
 		ModelData* pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load("./Models/viking_room.obj");
 		ImageData* pTexture = (ImageData*)m_pEngine->GetModule<ImageLoaderModule>()->Load("./Resources/viking_room_1.png");
-
+		
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)std::ios::ate;
 		importSettings.AddNullTerminateAtEnd = true;
@@ -40,13 +45,10 @@ namespace Glory
 		
 		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
 		pMaterialData->SetTexture(pTexture);
-
+		
 		m_Entity = m_Scene.CreateEntity();
 		m_Entity.AddComponent<MeshFilter>(pModel);
 		MeshRenderer& meshRenderer = m_Entity.AddComponent<MeshRenderer>(pMaterialData);
-
-		m_Scene.m_Registry.RegisterSystem<TransformSystem>();
-		m_Scene.m_Registry.RegisterSystem<MeshRenderSystem>();
 	}
 
 	void EntitySceneScenesModule::Cleanup()

@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #include "EditorVulkanRenderImpl.h"
+#include <Game.h>
 
 namespace Glory::Editor
 {

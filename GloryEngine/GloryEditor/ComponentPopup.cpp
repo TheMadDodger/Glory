@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "ComponentPopup.h"
 //#include <TransformComponent.h>
 //

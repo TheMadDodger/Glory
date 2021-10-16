@@ -1,4 +1,11 @@
 #pragma once
+#include "EditorWindow.h"
+#include <vector>
+#include <list>
+#include <string>
+#include <algorithm>
+#include <imgui.h>
+#include <typeinfo>
 
 namespace Glory::Editor
 {

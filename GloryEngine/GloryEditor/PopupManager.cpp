@@ -1,4 +1,8 @@
-#include "stdafx.h"
+#include <imgui.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <functional>
 #include "PopupManager.h"
 
 namespace Glory::Editor

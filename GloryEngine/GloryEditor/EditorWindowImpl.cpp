@@ -1,4 +1,5 @@
-#include "stdafx.h"
+#include <SDLWindowModule.h>
+#include <Game.h>
 #include "EditorWindowImpl.h"
 
 namespace Glory::Editor

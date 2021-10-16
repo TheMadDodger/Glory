@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <imgui.h>
 #include "ContentBrowser.h"
 #include "Selection.h"
 #include "Tumbnail.h"

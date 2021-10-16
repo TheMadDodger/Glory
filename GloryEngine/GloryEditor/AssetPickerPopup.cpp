@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "AssetPickerPopup.h"
 //
 //namespace Spartan::Editor

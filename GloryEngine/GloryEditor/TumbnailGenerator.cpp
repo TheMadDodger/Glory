@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "TumbnailGenerator.h"
 //
 //namespace Spartan::Editor

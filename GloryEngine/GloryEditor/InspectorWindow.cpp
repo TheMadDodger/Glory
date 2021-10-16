@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <imgui.h>
 #include "InspectorWindow.h"
 #include "Selection.h"
 #include "Editor.h"

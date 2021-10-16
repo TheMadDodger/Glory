@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "EditorRenderImpl.h"
 
 namespace Glory::Editor

@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorRenderImpl.h"
 #include "EditorPlatform.h"
+#include "imgui_impl_vulkan.h"
 #include <Device.h>
 
 namespace Glory::Editor

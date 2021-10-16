@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <imgui.h>
 #include "EditorPreferencesWindow.h"
 
 namespace Glory::Editor

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "SceneViewCamera.h"
 //#include <InputManager.h>
 //#include <TransformComponent.h>

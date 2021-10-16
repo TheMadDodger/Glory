@@ -10,11 +10,11 @@
     <Filter Include="Graphics">
       <UniqueIdentifier>{d812bac3-26d9-4b51-8cc0-876c0b490b4e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Buffers">
-      <UniqueIdentifier>{7403910c-2bc0-42e4-9e10-6f6abd9fc0cb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CommandHandlers">
       <UniqueIdentifier>{f7d62eac-ec14-4f85-91c4-78c8f57c506e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{7403910c-2bc0-42e4-9e10-6f6abd9fc0cb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,13 +31,10 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="VulkanMesh.cpp">
-      <Filter>Buffers</Filter>
+      <Filter>Resources</Filter>
     </ClCompile>
     <ClCompile Include="VulkanBuffer.cpp">
-      <Filter>Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanTexture.cpp">
-      <Filter>Graphics</Filter>
+      <Filter>Resources</Filter>
     </ClCompile>
     <ClCompile Include="VulkanImageSampler.cpp">
       <Filter>Graphics</Filter>
@@ -49,9 +46,6 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="DepthImage.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanShader.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="VulkanGraphicsPipeline.cpp">
@@ -70,6 +64,15 @@
     <ClCompile Include="VulkanFrameStates.cpp" />
     <ClCompile Include="PipelineCommandHandlers.cpp">
       <Filter>CommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTexture.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanShader.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanResourceManager.cpp">
+      <Filter>Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,13 +98,10 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="VulkanMesh.h">
-      <Filter>Buffers</Filter>
+      <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="VulkanBuffer.h">
-      <Filter>Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanTexture.h">
-      <Filter>Graphics</Filter>
+      <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="VulkanImageSampler.h">
       <Filter>Graphics</Filter>
@@ -113,9 +113,6 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="DepthImage.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanShader.h">
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="VulkanGraphicsPipeline.h">
@@ -134,6 +131,15 @@
     <ClInclude Include="VulkanFrameStates.h" />
     <ClInclude Include="PipelineCommandHandlers.h">
       <Filter>CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTexture.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanShader.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanResourceManager.h">
+      <Filter>Resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

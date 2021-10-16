@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "GameObjectEditor.h"
 //#include "BaseComponent.h"
 //#include "ComponentPopup.h"

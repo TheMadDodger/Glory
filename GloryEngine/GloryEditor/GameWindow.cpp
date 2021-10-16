@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "GameWindow.h"
 //#include "EditorApp.h"
 //#include <RenderTexture.h>

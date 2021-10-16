@@ -1,5 +1,6 @@
-#include "stdafx.h"
 #include "MenuBar.h"
+#include <algorithm>
+#include <imgui.h>
 
 namespace Glory::Editor
 {

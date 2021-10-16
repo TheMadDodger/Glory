@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "AudioTumbnailGenerator.h"
 //
 //namespace Spartan::Editor

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "MainEditor.h"
 #include "EditorWindow.h"
 #include "GameWindow.h"
@@ -12,6 +11,7 @@
 #include "Game.h"
 #include "Window.h"
 #include "PopupManager.h"
+#include <imgui.h>
 
 namespace Glory::Editor
 {

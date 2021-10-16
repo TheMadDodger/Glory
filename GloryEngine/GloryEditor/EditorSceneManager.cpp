@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "EditorSceneManager.h"
 //#include "ContentBrowser.h"
 //#include "EditorApp.h"

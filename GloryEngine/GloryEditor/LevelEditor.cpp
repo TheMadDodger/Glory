@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "LevelEditor.h"
 //#include "GameObject.h"
 //#include "Components.h"

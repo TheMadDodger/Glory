@@ -70,6 +70,11 @@ namespace Glory
 		return m_pWindow;
 	}
 
+	SDL_GLContext SDLWindow::GetSDLGLConext() const
+	{
+		return m_GLSDLContext;
+	}
+
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr), m_GLSDLContext(NULL) {}
 
 	SDLWindow::~SDLWindow()

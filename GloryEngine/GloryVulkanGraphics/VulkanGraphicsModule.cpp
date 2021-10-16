@@ -17,6 +17,7 @@
 #include "RenderPassCommandHandlers.h"
 #include "VulkanFrameStates.h"
 #include "PipelineCommandHandlers.h"
+#include "VulkanResourceManager.h"
 
 namespace Glory
 {
@@ -400,6 +401,11 @@ namespace Glory
     FrameStates* VulkanGraphicsModule::CreateFrameStates()
     {
         return new VulkanFrameStates(this);
+    }
+
+    GPUResourceManager* VulkanGraphicsModule::CreateGPUResourceManager()
+    {
+        return new VulkanResourceManager();
     }
 
     //void VulkanGraphicsModule::Draw()
@@ -1252,5 +1258,25 @@ namespace Glory
         }
 
         return imageView;
+    }
+
+    void VulkanGraphicsModule::Clear()
+    {
+
+    }
+
+    void VulkanGraphicsModule::Swap()
+    {
+
+    }
+
+    Material* VulkanGraphicsModule::UseMaterial(MaterialData* pMaterialData)
+    {
+        return nullptr;
+    }
+
+    void VulkanGraphicsModule::DrawMesh(MeshData* pMeshData)
+    {
+
     }
 }

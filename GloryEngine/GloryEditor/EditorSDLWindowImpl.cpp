@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "imgui_impl_sdl.h"
 #include "EditorSDLWindowImpl.h"
 #include <SDLWindow.h>
 
@@ -16,8 +16,7 @@ namespace Glory::Editor
 	void EditorSDLWindowImpl::SetupForOpenGL()
 	{
 		SDLWindow* pSDLWindow = (SDLWindow*)m_pMainWindow;
-		// NOT SUPPRTED YET!
-		ImGui_ImplSDL2_InitForOpenGL(pSDLWindow->GetSDLWindow(), NULL);
+		ImGui_ImplSDL2_InitForOpenGL(pSDLWindow->GetSDLWindow(), pSDLWindow->GetSDLGLConext());
 	}
 
 	void EditorSDLWindowImpl::SetupForVulkan()

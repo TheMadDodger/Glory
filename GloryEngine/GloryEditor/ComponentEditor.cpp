@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "ComponentEditor.h"
 //#include "SerializedProperty.h"
 //#include "PropertyDrawer.h"

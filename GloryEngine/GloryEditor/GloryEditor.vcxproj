@@ -18,35 +18,123 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\GloryEditor\AssetPickerPopup.cpp" />
+    <ClCompile Include="..\GloryEditor\AssetReferencePropertyDrawer.cpp" />
+    <ClCompile Include="..\GloryEditor\AudioTumbnailGenerator.cpp" />
+    <ClCompile Include="..\GloryEditor\BehaviorTreeEditor.cpp" />
+    <ClCompile Include="..\GloryEditor\ComponentEditor.cpp" />
+    <ClCompile Include="..\GloryEditor\ComponentPopup.cpp" />
+    <ClCompile Include="..\GloryEditor\ContentBrowser.cpp" />
+    <ClCompile Include="..\GloryEditor\Editor.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorApplication.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorPlatform.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorPreferencesWindow.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorRenderImpl.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorSceneManager.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorSDLWindowImpl.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorVulkanRenderImpl.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorWindow.cpp" />
+    <ClCompile Include="..\GloryEditor\EditorWindowImpl.cpp" />
+    <ClCompile Include="..\GloryEditor\FontTumbnailGenerator.cpp" />
+    <ClCompile Include="..\GloryEditor\GameObjectEditor.cpp" />
+    <ClCompile Include="..\GloryEditor\GameWindow.cpp" />
+    <ClCompile Include="..\GloryEditor\GloryEditor.cpp" />
+    <ClCompile Include="..\GloryEditor\imgui_impl_sdl.cpp" />
+    <ClCompile Include="..\GloryEditor\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\GloryEditor\InspectorWindow.cpp" />
+    <ClCompile Include="..\GloryEditor\LevelEditor.cpp" />
+    <ClCompile Include="..\GloryEditor\MainEditor.cpp" />
+    <ClCompile Include="..\GloryEditor\MenuBar.cpp" />
+    <ClCompile Include="..\GloryEditor\PopupManager.cpp" />
+    <ClCompile Include="..\GloryEditor\PropertyDrawer.cpp" />
+    <ClCompile Include="..\GloryEditor\SceneGraphWindow.cpp" />
+    <ClCompile Include="..\GloryEditor\SceneViewCamera.cpp" />
+    <ClCompile Include="..\GloryEditor\SceneWindow.cpp" />
+    <ClCompile Include="..\GloryEditor\ScriptableObjectEditor.cpp" />
+    <ClCompile Include="..\GloryEditor\Selection.cpp" />
+    <ClCompile Include="..\GloryEditor\SkeletonEditorComponent.cpp" />
+    <ClCompile Include="..\GloryEditor\SkeletonObject.cpp" />
+    <ClCompile Include="..\GloryEditor\StandardPropertyDrawers.cpp" />
+    <ClCompile Include="..\GloryEditor\TextureTumbnailGenerator.cpp" />
+    <ClCompile Include="..\GloryEditor\Tumbnail.cpp" />
+    <ClCompile Include="..\GloryEditor\TumbnailGenerator.cpp" />
+    <ClCompile Include="EditorOpenGLRenderImply.cpp" />
+    <ClCompile Include="imgui_impl_opengl3.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\GloryEditor\AssetPickerPopup.h" />
+    <ClInclude Include="..\GloryEditor\AssetReferencePropertyDrawer.h" />
+    <ClInclude Include="..\GloryEditor\AudioTumbnailGenerator.h" />
+    <ClInclude Include="..\GloryEditor\BehaviorTreeEditor.h" />
+    <ClInclude Include="..\GloryEditor\ComponentEditor.h" />
+    <ClInclude Include="..\GloryEditor\ComponentPopup.h" />
+    <ClInclude Include="..\GloryEditor\ContentBrowser.h" />
+    <ClInclude Include="..\GloryEditor\Editor.h" />
+    <ClInclude Include="..\GloryEditor\EditorApplication.h" />
+    <ClInclude Include="..\GloryEditor\EditorPlatform.h" />
+    <ClInclude Include="..\GloryEditor\EditorPreferencesWindow.h" />
+    <ClInclude Include="..\GloryEditor\EditorRenderImpl.h" />
+    <ClInclude Include="..\GloryEditor\EditorSceneManager.h" />
+    <ClInclude Include="..\GloryEditor\EditorSDLWindowImpl.h" />
+    <ClInclude Include="..\GloryEditor\EditorVulkanRenderImpl.h" />
+    <ClInclude Include="..\GloryEditor\EditorWindow.h" />
+    <ClInclude Include="..\GloryEditor\EditorWindowImpl.h" />
+    <ClInclude Include="..\GloryEditor\FontTumbnailGenerator.h" />
+    <ClInclude Include="..\GloryEditor\GameObjectEditor.h" />
+    <ClInclude Include="..\GloryEditor\GameWindow.h" />
+    <ClInclude Include="..\GloryEditor\imgui_impl_sdl.h" />
+    <ClInclude Include="..\GloryEditor\imgui_impl_vulkan.h" />
+    <ClInclude Include="..\GloryEditor\InspectorWindow.h" />
+    <ClInclude Include="..\GloryEditor\LevelEditor.h" />
+    <ClInclude Include="..\GloryEditor\MainEditor.h" />
+    <ClInclude Include="..\GloryEditor\MenuBar.h" />
+    <ClInclude Include="..\GloryEditor\PopupManager.h" />
+    <ClInclude Include="..\GloryEditor\PropertyDrawer.h" />
+    <ClInclude Include="..\GloryEditor\SceneGraphWindow.h" />
+    <ClInclude Include="..\GloryEditor\SceneViewCamera.h" />
+    <ClInclude Include="..\GloryEditor\SceneWindow.h" />
+    <ClInclude Include="..\GloryEditor\ScriptableObjectEditor.h" />
+    <ClInclude Include="..\GloryEditor\Selection.h" />
+    <ClInclude Include="..\GloryEditor\SkeletonEditorComponent.h" />
+    <ClInclude Include="..\GloryEditor\SkeletonObject.h" />
+    <ClInclude Include="..\GloryEditor\StandardPropertyDrawers.h" />
+    <ClInclude Include="..\GloryEditor\stdafx.h" />
+    <ClInclude Include="..\GloryEditor\TextureTumbnailGenerator.h" />
+    <ClInclude Include="..\GloryEditor\Tumbnail.h" />
+    <ClInclude Include="..\GloryEditor\TumbnailGenerator.h" />
+    <ClInclude Include="EditorOpenGLRenderImpl.h" />
+    <ClInclude Include="imgui_impl_opengl3.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{18c1b9fb-50ad-49bd-b3dc-4f0ace81a05f}</ProjectGuid>
+    <ProjectGuid>{3faa2259-6a05-4465-8511-38874ce6031d}</ProjectGuid>
     <RootNamespace>GloryEditor</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -72,31 +160,39 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\Engine\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\Engine\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\Engine\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\Engine\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include\;$(VULKAN_SDK)\Third-Party\include;$(solutiondir)ImGui\;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Third-Party\Bin32;$(solutiondir)bin\ImGui\$(configuration)\$(platform)\;$(VULKAN_SDK)\Lib32\;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;ImGui.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-cd.lib;spirv-cross-cored.lib;spirv-cross-cppd.lib;spirv-cross-glsld.lib;spirv-cross-hlsld.lib;spirv-cross-msld.lib;spirv-cross-reflectd.lib;spirv-cross-utild.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -105,33 +201,36 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Third-Party\Bin32;;$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;ImGui.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include\;$(VULKAN_SDK)\Third-Party\include;$(solutiondir)ImGui\;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(solutiondir)bin\ImGui\$(configuration)\$(platform)\;$(VULKAN_SDK)\Lib32\;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\;$(VULKAN_SDK)\Third-Party\Bin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;ImGui.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-cd.lib;spirv-cross-cored.lib;spirv-cross-cppd.lib;spirv-cross-glsld.lib;spirv-cross-hlsld.lib;spirv-cross-msld.lib;spirv-cross-reflectd.lib;spirv-cross-utild.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,102 +239,21 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>;$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\;$(VULKAN_SDK)\Third-Party\Bin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;ImGui.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="AssetPickerPopup.cpp" />
-    <ClCompile Include="AssetReferencePropertyDrawer.cpp" />
-    <ClCompile Include="AudioTumbnailGenerator.cpp" />
-    <ClCompile Include="BehaviorTreeEditor.cpp" />
-    <ClCompile Include="ComponentEditor.cpp" />
-    <ClCompile Include="ComponentPopup.cpp" />
-    <ClCompile Include="ContentBrowser.cpp" />
-    <ClCompile Include="Editor.cpp" />
-    <ClCompile Include="EditorApplication.cpp" />
-    <ClCompile Include="EditorPreferencesWindow.cpp" />
-    <ClCompile Include="EditorRenderImpl.cpp" />
-    <ClCompile Include="EditorSceneManager.cpp" />
-    <ClCompile Include="EditorSDLWindowImpl.cpp" />
-    <ClCompile Include="EditorVulkanRenderImpl.cpp" />
-    <ClCompile Include="EditorWindow.cpp" />
-    <ClCompile Include="EditorWindowImpl.cpp" />
-    <ClCompile Include="FontTumbnailGenerator.cpp" />
-    <ClCompile Include="GameObjectEditor.cpp" />
-    <ClCompile Include="GameWindow.cpp" />
-    <ClCompile Include="GloryEditor.cpp" />
-    <ClCompile Include="imgui_impl_sdl.cpp" />
-    <ClCompile Include="imgui_impl_vulkan.cpp" />
-    <ClCompile Include="EditorPlatform.cpp" />
-    <ClCompile Include="InspectorWindow.cpp" />
-    <ClCompile Include="LevelEditor.cpp" />
-    <ClCompile Include="MainEditor.cpp" />
-    <ClCompile Include="MenuBar.cpp" />
-    <ClCompile Include="PopupManager.cpp" />
-    <ClCompile Include="PropertyDrawer.cpp" />
-    <ClCompile Include="SceneGraphWindow.cpp" />
-    <ClCompile Include="SceneViewCamera.cpp" />
-    <ClCompile Include="SceneWindow.cpp" />
-    <ClCompile Include="ScriptableObjectEditor.cpp" />
-    <ClCompile Include="Selection.cpp" />
-    <ClCompile Include="SkeletonEditorComponent.cpp" />
-    <ClCompile Include="SkeletonObject.cpp" />
-    <ClCompile Include="StandardPropertyDrawers.cpp" />
-    <ClCompile Include="TextureTumbnailGenerator.cpp" />
-    <ClCompile Include="Tumbnail.cpp" />
-    <ClCompile Include="TumbnailGenerator.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="AssetPickerPopup.h" />
-    <ClInclude Include="AssetReferencePropertyDrawer.h" />
-    <ClInclude Include="AudioTumbnailGenerator.h" />
-    <ClInclude Include="BehaviorTreeEditor.h" />
-    <ClInclude Include="ComponentEditor.h" />
-    <ClInclude Include="ComponentPopup.h" />
-    <ClInclude Include="ContentBrowser.h" />
-    <ClInclude Include="Editor.h" />
-    <ClInclude Include="EditorApplication.h" />
-    <ClInclude Include="EditorPreferencesWindow.h" />
-    <ClInclude Include="EditorRenderImpl.h" />
-    <ClInclude Include="EditorSceneManager.h" />
-    <ClInclude Include="EditorSDLWindowImpl.h" />
-    <ClInclude Include="EditorVulkanRenderImpl.h" />
-    <ClInclude Include="EditorWindow.h" />
-    <ClInclude Include="EditorWindowImpl.h" />
-    <ClInclude Include="FontTumbnailGenerator.h" />
-    <ClInclude Include="GameObjectEditor.h" />
-    <ClInclude Include="GameWindow.h" />
-    <ClInclude Include="imgui_impl_sdl.h" />
-    <ClInclude Include="imgui_impl_vulkan.h" />
-    <ClInclude Include="EditorPlatform.h" />
-    <ClInclude Include="InspectorWindow.h" />
-    <ClInclude Include="LevelEditor.h" />
-    <ClInclude Include="MainEditor.h" />
-    <ClInclude Include="MenuBar.h" />
-    <ClInclude Include="PopupManager.h" />
-    <ClInclude Include="PropertyDrawer.h" />
-    <ClInclude Include="SceneGraphWindow.h" />
-    <ClInclude Include="SceneViewCamera.h" />
-    <ClInclude Include="SceneWindow.h" />
-    <ClInclude Include="ScriptableObjectEditor.h" />
-    <ClInclude Include="Selection.h" />
-    <ClInclude Include="SkeletonEditorComponent.h" />
-    <ClInclude Include="SkeletonObject.h" />
-    <ClInclude Include="StandardPropertyDrawers.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="TextureTumbnailGenerator.h" />
-    <ClInclude Include="Tumbnail.h" />
-    <ClInclude Include="TumbnailGenerator.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorRenderImpl.h"
 #include "EditorWindowImpl.h"
+#include <imgui.h>
 
 namespace Glory::Editor
 {

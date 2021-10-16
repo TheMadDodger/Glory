@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "StandardPropertyDrawers.h"
 //
 //namespace Spartan::Editor

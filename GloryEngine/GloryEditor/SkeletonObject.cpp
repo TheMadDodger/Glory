@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "SkeletonObject.h"
 //#include "SkeletonEditorComponent.h"
 //#include "Skeleton.h"

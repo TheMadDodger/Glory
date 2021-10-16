@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "SceneGraphWindow.h"
 //#include <SceneManager.h>
 //#include <GameScene.h>

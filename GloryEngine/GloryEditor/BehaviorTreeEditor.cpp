@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "BehaviorTreeEditor.h"
 //
 //namespace Spartan::Editor

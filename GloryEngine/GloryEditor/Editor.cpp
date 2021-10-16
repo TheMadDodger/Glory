@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "Editor.h"
 //
 //namespace Spartan::Editor

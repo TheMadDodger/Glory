@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #include "EditorApplication.h"
+#include <imgui.h>
 //#include "EditorWindow.h"
 
 namespace Glory::Editor

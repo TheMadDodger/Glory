@@ -1,4 +1,3 @@
-#include "stdafx.h"
 //#include "ScriptableObjectEditor.h"
 //#include "PropertyDrawer.h"
 //
