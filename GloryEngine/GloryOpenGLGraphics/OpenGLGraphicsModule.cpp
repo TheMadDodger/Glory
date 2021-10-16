@@ -85,6 +85,13 @@ namespace Glory
 		pMainWindow->GetWindowSize(&width, &height);
 		glViewport(0, 0, width, height);
 		LogGLError(glGetError());
+
+		GLint last_texture, last_array_buffer, last_vertex_array;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
+
+		glCreateShader(GL_VERTEX_SHADER);
 	}
 
 	GPUResourceManager* OpenGLGraphicsModule::CreateGPUResourceManager()

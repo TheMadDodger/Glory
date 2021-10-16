@@ -28,6 +28,14 @@ namespace Glory
 		return pFile;
 	}
 
+	FileData* FileLoaderModule::LoadResource(const void* buffer, size_t length, const FileImportSettings& importSettings)
+	{
+		FileData* pFile = new FileData();
+		pFile->m_Data.resize(length);
+		memcpy(&pFile->m_Data[0], buffer, length);
+		return pFile;
+	}
+
 	bool FileLoaderModule::ReadFile(const std::string& path, std::vector<char>& buffer, const FileImportSettings& importSettings)
 	{
 		//auto f = std::ios::ate | std::ios::binary;

@@ -169,6 +169,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AssetDatabase.h" />
+    <ClInclude Include="AssetGroup.h" />
+    <ClInclude Include="AssetLocation.h" />
+    <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="FrameStates.h" />
     <ClInclude Include="GameThread.h" />
@@ -228,6 +232,10 @@
     <ClInclude Include="WindowModule.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetDatabase.cpp" />
+    <ClCompile Include="AssetGroup.cpp" />
+    <ClCompile Include="AssetLocation.cpp" />
+    <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Console.cpp" />

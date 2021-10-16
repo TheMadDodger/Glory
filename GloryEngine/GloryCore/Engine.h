@@ -9,6 +9,8 @@
 #include "ScenesModule.h"
 #include "RendererModule.h"
 #include "MainThread.h"
+#include "ResourceLoaderModule.h"
+#include <typeindex>
 
 namespace Glory
 {
@@ -44,6 +46,15 @@ namespace Glory
 			return (T*)pModule;
 		}
 
+		template<class T>
+		LoaderModule* GetLoaderModule()
+		{
+			LoaderModule* pModule = GetLoaderModule(typeid(T));
+			return pModule;
+		}
+
+		LoaderModule* GetLoaderModule(const std::type_info& resourceType);
+
 		Module* GetModule(const std::type_info& type);
 
 		GameThread* GetGameThread() const;
@@ -73,6 +84,9 @@ namespace Glory
 		std::vector<Module*> m_pAllModules;
 
 		std::vector<Module*> m_pPriorityInitializationModules;
+
+		std::vector<LoaderModule*> m_pLoaderModules;
+		std::map<std::type_index, size_t> m_TypeToLoader;
 
 		// Threading
 		ThreadManager* m_pThreadManager;

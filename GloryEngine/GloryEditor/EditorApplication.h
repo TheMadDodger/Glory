@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorPlatform.h"
 #include "MainEditor.h"
+#include <Game.h>
 
 namespace Glory::Editor
 {
@@ -11,14 +12,14 @@ namespace Glory::Editor
 		virtual ~EditorApplication();
 
 		template<class Window, class Renderer>
-		void Initialize()
+		void Initialize(Game& game)
 		{
 			auto window = (EditorWindowImpl*)(new Window());
 			auto renderer = (EditorRenderImpl*)(new Renderer());
 			m_pPlatform = new EditorPlatform(window, renderer);
 			window->m_pEditorPlatform = m_pPlatform;
 			renderer->m_pEditorPlatform = m_pPlatform;
-			m_pPlatform->Initialize();
+			m_pPlatform->Initialize(game);
 			m_pMainEditor = new MainEditor();
 			m_pMainEditor->Initialize();
 		}

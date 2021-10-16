@@ -4,7 +4,7 @@
 
 #define _CRTDBG_MAP_ALLOC
 
-//#define EDITOR
+#define EDITOR
 
 namespace Glory
 {
@@ -21,7 +21,7 @@ namespace Glory
         virtual void Render(const RenderFrame& frame) override
         {
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
-            pGraphics->Clear();
+            //pGraphics->Clear();
             for (size_t i = 0; i < frame.ObjectsToRender.size(); i++)
             {
                 RenderData renderData = frame.ObjectsToRender[i];
@@ -34,7 +34,7 @@ namespace Glory
                 pMaterial->SetProperties();
                 pGraphics->DrawMesh(pMesh);
             }
-            pGraphics->Swap();
+            //pGraphics->Swap();
         }
 
     private:
@@ -60,7 +60,7 @@ int main()
         windowCreateInfo.WindowName = "Glory Editor";
         windowCreateInfo.Width = 2560;
         windowCreateInfo.Height = 1300;
-        windowCreateInfo.WindowFlags = SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE;
+        windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
         std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader() };
 
@@ -80,7 +80,7 @@ int main()
         pGame.Initialize();
 
         EditorApplication editorApp;
-        editorApp.Initialize<EditorSDLWindowImpl, EditorOpenGLRenderImpl>();
+        editorApp.Initialize<EditorSDLWindowImpl, EditorOpenGLRenderImpl>(pGame);
         editorApp.Run();
         editorApp.Destroy();
 

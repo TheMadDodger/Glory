@@ -18,7 +18,12 @@ namespace Glory
 	ModelData* ModelLoaderModule::LoadResource(const std::string& path, const ModelImportSettings& importSettings)
 	{
 		ModelData* pModel = LoadModel(path, importSettings);
-		//pTexture->BuildTexture();
+		return pModel;
+	}
+
+	ModelData* ModelLoaderModule::LoadResource(const void* buffer, size_t length, const ModelImportSettings& importSettings)
+	{
+		ModelData* pModel = LoadModel(buffer, length, importSettings);
 		return pModel;
 	}
 }

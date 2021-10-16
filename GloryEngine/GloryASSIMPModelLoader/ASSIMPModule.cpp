@@ -51,6 +51,30 @@ namespace Glory
 		return pModel;
 	}
 
+    ModelData* ASSIMPModule::LoadModel(const void* buffer, size_t length, const ModelImportSettings& importSettings)
+    {
+        Assimp::Importer importer;
+
+        const aiScene* pScene = importer.ReadFileFromMemory(buffer, length, aiProcess_CalcTangentSpace |
+            aiProcess_Triangulate |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_SortByPType, importSettings.m_Extension.c_str());
+
+        if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
+        {
+            Debug::LogError("ASSIMP: Could not import file from memeory Error: " + std::string(importer.GetErrorString()));
+            return nullptr;
+        }
+        //directory = file.substr(0, file.find_last_of('/'));
+
+        ModelData* pModel = new ModelData();
+        ProcessNode(pScene->mRootNode, pScene, pModel);
+
+        importer.FreeScene();
+
+        return pModel;
+    }
+
     void ASSIMPModule::ProcessNode(aiNode* node, const aiScene* scene, ModelData* pModel)
     {
         // process all the node's meshes (if any)

@@ -27,9 +27,12 @@ namespace Glory::Editor
 	{
 		while (true)
 		{
-			if (m_pPlatform->BeginRender()) break;
+			if (m_pPlatform->PollEvents()) break;
+			m_pPlatform->BeginRender();
+			m_pPlatform->WaitIdle();
 			RenderEditor();
 			m_pPlatform->EndRender();
+			m_pPlatform->WaitIdle();
 		}
 	}
 

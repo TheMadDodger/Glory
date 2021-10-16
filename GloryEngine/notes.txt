@@ -61,10 +61,31 @@ Material:
 	- Has a single function to set all other resources/properties
 	- Caches values of properties/resources and sends them to the GPU when the material is used
 
+AssetDatabase:
+	- Links asset UUIDs to the location of the asset
+	- Does not load assets
+	- Can locate an asset within a file
+	- Difference between editor location and application location
+	- Can be loaded from a file, maybe bson?
+	- Can be written to a file from the editor
+	- During build, assets are grouped into AssetGroups and exported, AssetDatabase is exported as a single file
 
+AssetManager:
+	- Keeps track of all loaded assets in memory
+	- If an asset is not loaded yet it uses a resource loader to load it
+	- Can unload asset groups?
 
-
-
+AssetGroup:
+	- A group of assets stored in a single resource file
+	- The user can specify what assets should be grouped together to increase loading performance
+	- Can be loaded directly from a file
+	- File structure (binary):
+		1. Size of AssetGroup
+		2. Ordered per type of asset?
+		3. For every asset
+		-> Size
+		-> Data
+		4. End
 
 MATERIAL OLD NOTES:
 	/* Material should hold information about all the shaders linked to it

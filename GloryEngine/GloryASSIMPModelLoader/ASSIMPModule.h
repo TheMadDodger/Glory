@@ -18,6 +18,7 @@ namespace Glory
 
     private:
         virtual ModelData* LoadModel(const std::string& path, const ModelImportSettings& importSettings) override;
+        virtual ModelData* LoadModel(const void* buffer, size_t length, const ModelImportSettings& importSettings) override;
         void ProcessNode(aiNode* node, const aiScene* scene, ModelData* pModel);
         MeshData* ProcessMesh(aiMesh* mesh);
     };

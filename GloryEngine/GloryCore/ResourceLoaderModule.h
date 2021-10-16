@@ -5,7 +5,10 @@
 
 namespace Glory
 {
-	struct ImportSettings {};
+	struct ImportSettings
+	{
+		std::string m_Extension;
+	};
 
 	/// <summary>
 	/// Resource loaders only take care of loading resources, not managing them!
@@ -17,6 +20,7 @@ namespace Glory
 		virtual ~LoaderModule();
 
 		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) = 0;
+		virtual Resource* Load(const void* buffer, size_t length, const ImportSettings& importSettings = ImportSettings()) = 0;
 		virtual const std::type_info& GetResourceType() = 0;
 
 	protected:
@@ -40,6 +44,12 @@ namespace Glory
 			return (Resource*)pResource;
 		}
 
+		virtual Resource* Load(const void* buffer, size_t length, const ImportSettings& importSettings = ImportSettings()) override
+		{
+			T* pResource = LoadResource(buffer, length, (const S&)importSettings);
+			return (Resource*)pResource;
+		}
+
 		virtual const std::type_info& GetResourceType() override
 		{
 			return typeid(T);
@@ -47,6 +57,7 @@ namespace Glory
 
 	protected:
 		virtual T* LoadResource(const std::string& path, const S& importSettings) = 0;
+		virtual T* LoadResource(const void* buffer, size_t length, const S& importSettings) = 0;
 
 	protected:
 		virtual void Initialize() = 0;

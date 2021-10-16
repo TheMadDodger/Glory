@@ -9,4 +9,9 @@ namespace Glory
 	Object::~Object()
 	{
 	}
+
+	const UUID& Object::GetUUID() const
+	{
+		return m_ID;
+	}
 }

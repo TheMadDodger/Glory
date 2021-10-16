@@ -1,4 +1,5 @@
 #pragma once
+#include "UUID.h"
 
 /* *IDEA FOR DETECTING OBJECT INHERITENCE AND OBJECT TYPE*
 * The Object class keeps track of an array of all the inherited classes,
@@ -20,5 +21,9 @@ namespace Glory
 		Object();
 		virtual ~Object();
 
+		const UUID& GetUUID() const;
+
+	private:
+		UUID m_ID;
 	};
 }

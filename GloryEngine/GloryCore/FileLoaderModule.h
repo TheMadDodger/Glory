@@ -19,6 +19,7 @@ namespace Glory
     protected:
         const std::type_info& GetModuleType() override;
         FileData* LoadResource(const std::string& path, const FileImportSettings& importSettings);
+        FileData* LoadResource(const void* buffer, size_t length, const FileImportSettings& importSettings);
 
         virtual bool ReadFile(const std::string& path, std::vector<char>& buffer, const FileImportSettings& importSettings);
 

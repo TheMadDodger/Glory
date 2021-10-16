@@ -39,6 +39,11 @@ namespace Glory
 		//return pShaderData;
 	}
 
+	ShaderData* ShaderLoaderModule::LoadResource(const void* buffer, size_t length, const ShaderImportSettings& importSettings)
+	{
+		return nullptr;
+	}
+
 	//void ShaderLoaderModule::Initialize()
 	//{
 	//	m_DirectiveCallbacks["include"] = [&](ShaderData* pShaderData, const std::string& path, int lineIndex, std::string& line, const std::string& directive, const std::string& args)

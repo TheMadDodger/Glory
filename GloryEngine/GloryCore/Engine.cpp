@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Console.h"
 #include <algorithm>
+#include "AssetManager.h"
 
 namespace Glory
 {
@@ -28,6 +29,13 @@ namespace Glory
 	GraphicsModule* Engine::GetGraphicsModule() const
 	{
 		return m_pGraphicsModule;
+	}
+
+	LoaderModule* Engine::GetLoaderModule(const std::type_info& resourceType)
+	{
+		if (m_TypeToLoader.find(resourceType) == m_TypeToLoader.end()) return nullptr;
+		size_t loaderIndex = m_TypeToLoader[resourceType];
+		return m_pLoaderModules[loaderIndex];
 	}
 
 	Module* Engine::GetModule(const std::type_info& type)
@@ -111,6 +119,8 @@ namespace Glory
 		m_pAllModules.clear();
 		m_pOptionalModules.clear();
 		m_pPriorityInitializationModules.clear();
+		m_TypeToLoader.clear();
+		m_pLoaderModules.clear();
 
 		delete m_pMainThread;
 		delete m_pGameThread;
@@ -121,6 +131,7 @@ namespace Glory
 
 	void Engine::Initialize()
 	{
+		AssetManager::Initialize();
 		Console::Initialize();
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
@@ -131,6 +142,13 @@ namespace Glory
 		
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
+			LoaderModule* pLoaderModule = dynamic_cast<LoaderModule*>(m_pAllModules[i]);
+			if (pLoaderModule)
+			{
+				m_TypeToLoader[pLoaderModule->GetResourceType()] = m_pLoaderModules.size();
+				m_pLoaderModules.push_back(pLoaderModule);
+			}
+
 			auto it = std::find(m_pPriorityInitializationModules.begin(), m_pPriorityInitializationModules.end(), m_pAllModules[i]);
 			if (it != m_pPriorityInitializationModules.end()) continue;
 			m_pAllModules[i]->m_pEngine = this;

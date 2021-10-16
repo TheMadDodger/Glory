@@ -9,9 +9,4 @@ namespace Glory
 	Resource::~Resource()
 	{
 	}
-
-	const UUID& Resource::GetUUID() const
-	{
-		return m_ID;
-	}
 }

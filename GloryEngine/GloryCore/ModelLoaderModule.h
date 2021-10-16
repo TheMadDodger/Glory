@@ -6,7 +6,6 @@ namespace Glory
 {
 	struct ModelImportSettings : ImportSettings
 	{
-
 	};
 
 	class ModelLoaderModule : public ResourceLoaderModule<ModelData, ModelImportSettings>
@@ -19,9 +18,11 @@ namespace Glory
 
 	protected:
 		virtual ModelData* LoadModel(const std::string& path, const ModelImportSettings& importSettings) = 0;
+		virtual ModelData* LoadModel(const void* buffer, size_t length, const ModelImportSettings& importSettings) = 0;
 
 	private:
 		virtual ModelData* LoadResource(const std::string& path, const ModelImportSettings& importSettings) override;
+		virtual ModelData* LoadResource(const void* buffer, size_t length, const ModelImportSettings& importSettings) override;
 
 	protected:
 		virtual void Initialize() = 0;

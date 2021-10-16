@@ -15,6 +15,7 @@ namespace Glory
 	public:
 		void EnqueueFrame(const RenderFrame& frame);
 		void GetNextFrame(std::function<void(const RenderFrame&)> callback);
+		void IsEmpty();
 
 		bool IsFull();
 

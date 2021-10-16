@@ -15,34 +15,53 @@ namespace Glory::Editor
 		m_pRenderImpl = nullptr;
 	}
 
-	void EditorPlatform::Initialize()
+	void EditorPlatform::Initialize(Game& game)
 	{
 		m_pWindowImpl->Initialize();
-		m_pRenderImpl->Initialize();
 		SetupDearImGuiContext();
+		m_pRenderImpl->Initialize();
 		m_pRenderImpl->SetupBackend();
 		m_pRenderImpl->UploadImGUIFonts();
+
+		game.GetEngine()->GetGraphicsThread()->BindRenderOnly<EditorPlatform>(this);
 	}
 
-	bool EditorPlatform::BeginRender()
+	bool EditorPlatform::PollEvents()
 	{
-		if (m_pWindowImpl->PollEvents()) return true;
-		m_pRenderImpl->BeforeRender();
-		NewFrame();
-		return false;
+		return m_pWindowImpl->PollEvents();
+	}
+
+	void EditorPlatform::BeginRender()
+	{
+		std::unique_lock<std::mutex> lock(m_Mutex);
+		m_RenderState = Begin;
+		lock.unlock();
 	}
 
 	void EditorPlatform::EndRender()
 	{
-		Render();
+		std::unique_lock<std::mutex> lock(m_Mutex);
+		m_RenderState = End;
+		lock.unlock();
 	}
 
 	void EditorPlatform::Destroy()
 	{
 		m_pRenderImpl->Shutdown();
 		m_pWindowImpl->Shutdown();
-		ImGui::DestroyContext();
 		m_pRenderImpl->Cleanup();
+		ImGui::DestroyContext();
+	}
+
+	void EditorPlatform::WaitIdle()
+	{
+		while (true)
+		{
+			std::unique_lock<std::mutex> lock(m_Mutex);
+			EditorRenderState renderState = m_RenderState;
+			lock.unlock();
+			if (renderState == Idle) return;
+		}
 	}
 
 	EditorWindowImpl* EditorPlatform::GetWindowImpl()
@@ -82,12 +101,41 @@ namespace Glory::Editor
 
 	void EditorPlatform::NewFrame()
 	{
-		m_pWindowImpl->NewFrame();
 		m_pRenderImpl->NewFrame();
+		m_pWindowImpl->NewFrame();
 		ImGui::NewFrame();
 	}
 
-	void EditorPlatform::Render()
+	void EditorPlatform::Render(const RenderFrame&)
+	{
+		std::unique_lock<std::mutex> lock(m_Mutex);
+
+		switch (m_RenderState)
+		{
+		case Glory::Editor::Idle:
+			return;
+		case Glory::Editor::Begin:
+			HandleBeginRender();
+			m_RenderState = Idle;
+			break;
+		case Glory::Editor::End:
+			HandleEndRender();
+			m_RenderState = Idle;
+			break;
+		default:
+			break;
+		}
+
+		lock.unlock();
+	}
+
+	void EditorPlatform::HandleBeginRender()
+	{
+		m_pRenderImpl->BeforeRender();
+		NewFrame();
+	}
+
+	void EditorPlatform::HandleEndRender()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		// Rendering

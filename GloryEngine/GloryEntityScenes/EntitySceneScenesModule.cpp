@@ -22,7 +22,7 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
-		// Register engine components
+		// Register engine systems
 		m_Scene.m_Registry.RegisterSystem<TransformSystem>();
 		m_Scene.m_Registry.RegisterSystem<MeshRenderSystem>();
 	}
@@ -31,11 +31,25 @@ namespace Glory
 	{
 		// dis is a test pls ignore
 
-		ModelData* pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load("./Models/viking_room.obj");
-		ImageData* pTexture = (ImageData*)m_pEngine->GetModule<ImageLoaderModule>()->Load("./Resources/viking_room_1.png");
-		
+		return;
+
 		FileImportSettings importSettings;
-		importSettings.Flags = (int)std::ios::ate;
+		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
+
+		ModelImportSettings modelImportSettings;
+		modelImportSettings.m_Extension = "obj";
+
+		FileData* pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/viking_room.obj", importSettings);
+		ModelData* pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
+		delete pFile;
+
+		ImageImportSettings imageImportSettings;
+		imageImportSettings.m_Extension = "png";
+
+		pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Resources/viking_room_1.png", importSettings);
+		ImageData* pTexture = (ImageData*)m_pEngine->GetModule<ImageLoaderModule>()->Load(pFile->Data(), pFile->Size());
+		delete pFile;
+
 		importSettings.AddNullTerminateAtEnd = true;
 		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/texturetest.vert", importSettings);
 		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/texturetest.frag", importSettings);

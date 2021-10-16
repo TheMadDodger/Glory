@@ -64,6 +64,9 @@
     <Filter Include="Modules\ResourceLoading\Material">
       <UniqueIdentifier>{4e487239-014f-464d-ab6f-3b2ac0f9ceaa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AssetManagement">
+      <UniqueIdentifier>{694eccec-9f59-4f10-b1a6-ad043752c2d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreExceptions.h">
@@ -237,6 +240,18 @@
     <ClInclude Include="ShaderCrossCompiler.h">
       <Filter>Modules\ResourceLoading\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="AssetDatabase.h">
+      <Filter>AssetManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.h">
+      <Filter>AssetManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetGroup.h">
+      <Filter>AssetManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetLocation.h">
+      <Filter>AssetManagement</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -388,6 +403,18 @@
     </ClCompile>
     <ClCompile Include="ShaderCrossCompiler.cpp">
       <Filter>Modules\ResourceLoading\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetDatabase.cpp">
+      <Filter>AssetManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>AssetManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetGroup.cpp">
+      <Filter>AssetManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetLocation.cpp">
+      <Filter>AssetManagement</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

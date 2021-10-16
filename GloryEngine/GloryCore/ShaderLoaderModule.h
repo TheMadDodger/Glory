@@ -26,6 +26,7 @@ namespace Glory
 
 	private:
 		virtual ShaderData* LoadResource(const std::string& path, const ShaderImportSettings& importSettings) override;
+		virtual ShaderData* LoadResource(const void* buffer, size_t length, const ShaderImportSettings& importSettings) override;
 
 	protected:
 		virtual void Initialize() override {};
