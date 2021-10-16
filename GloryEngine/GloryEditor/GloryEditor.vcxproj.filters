@@ -236,9 +236,6 @@
     <ClInclude Include="..\GloryEditor\MenuBar.h">
       <Filter>Editor</Filter>
     </ClInclude>
-    <ClInclude Include="..\GloryEditor\stdafx.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
     <ClInclude Include="..\GloryEditor\imgui_impl_sdl.h">
       <Filter>ImGui</Filter>
     </ClInclude>

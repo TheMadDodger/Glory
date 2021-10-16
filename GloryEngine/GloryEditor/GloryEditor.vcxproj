@@ -99,7 +99,6 @@
     <ClInclude Include="..\GloryEditor\SkeletonEditorComponent.h" />
     <ClInclude Include="..\GloryEditor\SkeletonObject.h" />
     <ClInclude Include="..\GloryEditor\StandardPropertyDrawers.h" />
-    <ClInclude Include="..\GloryEditor\stdafx.h" />
     <ClInclude Include="..\GloryEditor\TextureTumbnailGenerator.h" />
     <ClInclude Include="..\GloryEditor\Tumbnail.h" />
     <ClInclude Include="..\GloryEditor\TumbnailGenerator.h" />
