@@ -20,8 +20,9 @@ project "GloryASSIMPModelLoader"
 
 	includedirs
 	{
-		"$(SolutionDir)GloryCore",
-		"%(vulkan_sdk)\third-party\include",
+		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.assimp}",
+		"%{vulkan_sdk}\third-party\include"
 	}
 
 	filter "system:windows"

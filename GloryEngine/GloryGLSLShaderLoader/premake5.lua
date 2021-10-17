@@ -20,8 +20,8 @@ project "GloryGLSLShaderLoader"
 
 	includedirs
 	{
-		"%(vulkan_sdk)\third-party\include",
-		"$(SolutionDir)bin\assimp\include"
+		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.shaderc}",
 	}
 
 	filter "system:windows"

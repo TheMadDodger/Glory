@@ -21,8 +21,9 @@ project "GloryOpenGLGraphics"
 
 	includedirs
 	{
-		"%(vulkan_sdk)\third-party\include",
-		"$(SolutionDir)bin\assimp\include"
+		"%{vulkan_sdk}\third-party\include",
+		"%{IncludeDir.GLEW}",
+		"%{GloryIncludeDir.core}"
 	}
 
 	filter "system:windows"

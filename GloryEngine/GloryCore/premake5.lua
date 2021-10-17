@@ -40,8 +40,8 @@ project "GloryCore"
 
 	includedirs
 	{
-		"%(vulkan_sdk)\third-party\include",
-		"$(SolutionDir)bin\assimp\include"
+		"%{vulkan_sdk}\third-party\include"
+		"%{IncludeDir.spirv_cross}"
 	}
 
 	filter "system:windows"

@@ -20,8 +20,7 @@ project "ImGui"
 
 	includedirs
 	{
-		"%(vulkan_sdk)\third-party\include",
-		"$(SolutionDir)bin\assimp\include"
+		
 	}
 
 	filter "system:windows"

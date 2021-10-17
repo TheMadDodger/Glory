@@ -21,8 +21,8 @@ project "GlorySDLWindow"
 
 	includedirs
 	{
-		"%(vulkan_sdk)\third-party\include",
-		"$(SolutionDir)bin\assimp\include"
+		"%{vulkan_sdk}\third-party\include",
+		"%{GloryIncludeDir.core}"
 	}
 
 	filter "system:windows"

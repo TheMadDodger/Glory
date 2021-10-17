@@ -21,9 +21,8 @@ project "GloryBasicRenderer"
 
 	includedirs
 	{
-		"$(SolutionDir)GloryCore",
-		"%(vulkan_sdk)\third-party\include",
-		"$(SolutionDir)bin\assimp\include"
+		"%{GloryIncludeDir.core}",
+		"%{vulkan_sdk}\third-party\include"
 	}
 
 	filter "system:windows"

@@ -24,8 +24,28 @@ project "GloryMain"
 
 	includedirs
 	{
-		"%(vulkan_sdk)\third-party\include",
-		"$(SolutionDir)bin\assimp\include"
+		"%{vulkan_sdk}\include",
+		"%{vulkan_sdk}\third-party\include",
+
+		"%{IncludeDir.assimp}",
+		"%{IncludeDir.GLEW}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.SDL_Image}",
+		"%{IncludeDir.shaderc}",
+		"%{IncludeDir.spirv_cross}",
+		"%{IncludeDir.yaml_cpp}",
+
+		"%{GloryIncludeDir.assimp}",
+		"%{GloryIncludeDir.entityscenes}",
+		"%{GloryIncludeDir.basicrenderer}",
+		"%{GloryIncludeDir.glslloader}",
+		"%{GloryIncludeDir.opengl}",
+		"%{GloryIncludeDir.sdlimage}",
+		"%{GloryIncludeDir.sdlwindow}",
+		"%{GloryIncludeDir.vulkan}",
+		"%{GloryIncludeDir.ImGui}",
+		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.editor}"
 	}
 
 	filter "system:windows"
