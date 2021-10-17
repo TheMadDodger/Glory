@@ -9,9 +9,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Module</Filter>
-    </ClInclude>
     <ClInclude Include="OpenGLGraphicsModule.h">
       <Filter>Module</Filter>
     </ClInclude>
@@ -21,7 +18,6 @@
     <ClInclude Include="GLBuffer.h">
       <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="GLConverter.h" />
     <ClInclude Include="GLTexture.h">
       <Filter>Resources</Filter>
     </ClInclude>
@@ -34,6 +30,9 @@
     <ClInclude Include="OGLResourceManager.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="GLConverter.h">
+      <Filter>Module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OpenGLGraphicsModule.cpp">
@@ -45,7 +44,6 @@
     <ClCompile Include="GLBuffer.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
-    <ClCompile Include="GLConverter.cpp" />
     <ClCompile Include="GLTexture.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
@@ -57,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="OGLResourceManager.cpp">
       <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="GLConverter.cpp">
+      <Filter>Module</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

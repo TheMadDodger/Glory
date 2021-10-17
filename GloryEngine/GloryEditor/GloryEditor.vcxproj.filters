@@ -162,9 +162,6 @@
     <ClCompile Include="..\GloryEditor\SceneWindow.cpp">
       <Filter>Windows</Filter>
     </ClCompile>
-    <ClCompile Include="..\GloryEditor\GloryEditor.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
     <ClCompile Include="imgui_impl_opengl3.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>

@@ -167,7 +167,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
     <ClInclude Include="GLBuffer.h" />
     <ClInclude Include="GLConverter.h" />
     <ClInclude Include="GLMesh.h" />

@@ -39,7 +39,6 @@
     <ClCompile Include="..\GloryEditor\FontTumbnailGenerator.cpp" />
     <ClCompile Include="..\GloryEditor\GameObjectEditor.cpp" />
     <ClCompile Include="..\GloryEditor\GameWindow.cpp" />
-    <ClCompile Include="..\GloryEditor\GloryEditor.cpp" />
     <ClCompile Include="..\GloryEditor\imgui_impl_sdl.cpp" />
     <ClCompile Include="..\GloryEditor\imgui_impl_vulkan.cpp" />
     <ClCompile Include="..\GloryEditor\InspectorWindow.cpp" />
