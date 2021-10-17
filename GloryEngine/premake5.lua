@@ -67,6 +67,16 @@ IncludeDir["shaderc"]			= "%{SubmodoleDirs.shaderc}/include"
 IncludeDir["spirv_cross"]		= "%{SubmodoleDirs.spirv_cross}/include"
 IncludeDir["yaml_cpp"]			= "%{SubmodoleDirs.yaml_cpp}/include"
 
+LibDirs = {}
+LibDirs["assimp"]		= "%{SubmodoleDirs.assimp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["glory"]		= "%{SubmodoleDirs.glory}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["GLEW"]			= "%{SubmodoleDirs.GLEW}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["ImGui"]		= "%{SubmodoleDirs.ImGui}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["SDL_Image"]	= "%{SubmodoleDirs.SDL_Image}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["shaderc"]		= "%{SubmodoleDirs.shaderc}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["spirv_cross"]	= "%{SubmodoleDirs.spirv_cross}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["yaml_cpp"]		= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+
 group "Dependencies"
 	
 group ""

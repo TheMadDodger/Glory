@@ -48,6 +48,18 @@ project "GloryMain"
 		"%{GloryIncludeDir.editor}"
 	}
 
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.assimp}",
+		"%{LibDirs.GLEW}",
+		"%{LibDirs.ImGui}",
+		"%{LibDirs.SDL_Image}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}"
+	}
+
 	links
 	{
 		"vulkan-1",
