@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	GameThread::GameThread(Engine* pEngine) : m_pEngine(pEngine), m_pThread(nullptr)
+	GameThread::GameThread(Engine* pEngine) : m_pEngine(pEngine), m_pThread(nullptr), m_Exit(false)
 	{
 	}
 

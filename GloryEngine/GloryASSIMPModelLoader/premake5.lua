@@ -26,7 +26,7 @@ project "GloryASSIMPModelLoader"
 	}
 
 	filter "system:windows"
-		systemversion "latest"
+		systemversion "10.0.19041.0"
 		toolset "v142"
 
 		defines
