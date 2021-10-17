@@ -36,9 +36,6 @@ namespace Glory
             }
             //pGraphics->Swap();
         }
-
-    private:
-        std::vector<RenderData> m_ObjectsToRender;
     };
 }
 

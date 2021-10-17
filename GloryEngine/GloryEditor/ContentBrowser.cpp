@@ -9,7 +9,7 @@ namespace Glory::Editor
 {
     int ContentBrowser::m_IconSize = 64;
 
-	ContentBrowser::ContentBrowser() : EditorWindowTemplate("Content Browser", 1600.0f, 600.0f)
+	ContentBrowser::ContentBrowser() : EditorWindowTemplate("Content Browser", 1600.0f, 600.0f), m_I(0)
 	{
 		m_Resizeable = true;
         //m_RootAssetPath = BaseGame::GetAssetRootPath();
@@ -23,10 +23,10 @@ namespace Glory::Editor
 	void ContentBrowser::OnGUI()
 	{
         // NB: Future columns API should allow automatic horizontal borders.
-        //ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
-        //DirectoryBrowser();
-        //ImGui::SameLine();
-        //FileBrowser();
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
+        DirectoryBrowser();
+        ImGui::SameLine();
+        FileBrowser();
 	}
 
     void ContentBrowser::ProcessDirectory(std::filesystem::path path)

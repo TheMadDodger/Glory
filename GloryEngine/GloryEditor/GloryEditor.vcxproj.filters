@@ -171,6 +171,9 @@
     <ClCompile Include="EditorOpenGLRenderImply.cpp">
       <Filter>Backend\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="EditorAssetLoader.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GloryEditor\EditorRenderImpl.h">
@@ -295,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="EditorOpenGLRenderImpl.h">
       <Filter>Backend\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorAssetLoader.h">
+      <Filter>Content</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

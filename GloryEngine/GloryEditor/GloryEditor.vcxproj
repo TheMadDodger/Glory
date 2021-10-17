@@ -59,6 +59,7 @@
     <ClCompile Include="..\GloryEditor\TextureTumbnailGenerator.cpp" />
     <ClCompile Include="..\GloryEditor\Tumbnail.cpp" />
     <ClCompile Include="..\GloryEditor\TumbnailGenerator.cpp" />
+    <ClCompile Include="EditorAssetLoader.cpp" />
     <ClCompile Include="EditorOpenGLRenderImply.cpp" />
     <ClCompile Include="imgui_impl_opengl3.cpp" />
   </ItemGroup>
@@ -102,6 +103,7 @@
     <ClInclude Include="..\GloryEditor\TextureTumbnailGenerator.h" />
     <ClInclude Include="..\GloryEditor\Tumbnail.h" />
     <ClInclude Include="..\GloryEditor\TumbnailGenerator.h" />
+    <ClInclude Include="EditorAssetLoader.h" />
     <ClInclude Include="EditorOpenGLRenderImpl.h" />
     <ClInclude Include="imgui_impl_opengl3.h" />
   </ItemGroup>
@@ -186,7 +188,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -205,7 +207,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -224,7 +226,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -243,7 +245,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
