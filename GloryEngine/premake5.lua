@@ -1,6 +1,6 @@
 workspace "GloryEngine"
 	platforms {
-		"x86",
+		"Win32",
 		"x64"
 	}
 

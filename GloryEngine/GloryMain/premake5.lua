@@ -2,7 +2,7 @@ project "GloryMain"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
-	staticruntime "On"
+	staticruntime "Off"
 
 	targetdir ("Build/%{cfg.buildcfg}/%{cfg.platform}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
@@ -63,7 +63,7 @@ project "GloryMain"
 	links
 	{
 		"vulkan-1",
-		"glew",
+		"glew32",
 		"GloryCore",
 		"GlorySDLWindow",
 		"GloryVulkanGraphics",
@@ -88,7 +88,6 @@ project "GloryMain"
 		"spirv-cross-msl",
 		"spirv-cross-reflect",
 		"spirv-cross-util",
-		"yaml-cpp"
 	}
 
 	filter "system:windows"
@@ -100,14 +99,14 @@ project "GloryMain"
 			"_CONSOLE"
 		}
 
-	filter "platforms:x86"
+	filter "platforms:Win32"
 		architecture "x86"
 		defines "WIN32"
 
 		libdirs
 		{
-			"%{vulkan_SDK}/Lib32",
-			"%{vulkan_SDK}/Third-Party/Bin32"
+			"%{vulkan_sdk}/Lib32",
+			"%{vulkan_sdk}/Third-Party/Bin32"
 		}
 
 	filter "platforms:x64"
@@ -115,8 +114,8 @@ project "GloryMain"
 
 		libdirs
 		{
-			"%{vulkan_SDK}/Lib",
-			"%{vulkan_SDK}/Third-Party/Bin"
+			"%{vulkan_sdk}/Lib",
+			"%{vulkan_sdk}/Third-Party/Bin"
 		}
 
 	filter "configurations:Debug"
@@ -127,3 +126,8 @@ project "GloryMain"
 		defines "NDEBUG"
 		optimize "On"
 
+	filter {"system:windows", "configurations:Release" }
+		buildoptions "/MDd"
+
+	filter {"system:windows", "configurations:Release" }
+		buildoptions "/MD"

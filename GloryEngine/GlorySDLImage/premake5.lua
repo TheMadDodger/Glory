@@ -2,7 +2,7 @@ project "GlorySDLImage"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
-	staticruntime "On"
+	staticruntime "Off"
 
 	targetdir ("%{engineoutdir}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
@@ -35,7 +35,7 @@ project "GlorySDLImage"
 			"_LIB"
 		}
 
-	filter "platforms:x86"
+	filter "platforms:Win32"
 		architecture "x86"
 		defines "WIN32"
 
@@ -50,3 +50,8 @@ project "GlorySDLImage"
 		defines "NDEBUG"
 		optimize "On"
 
+	filter {"system:windows", "configurations:Release" }
+		buildoptions "/MDd"
+
+	filter {"system:windows", "configurations:Release" }
+		buildoptions "/MD"
