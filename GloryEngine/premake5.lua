@@ -48,7 +48,7 @@ GloryIncludeDir["vulkan"]			= "../GloryVulkanGraphics"
 GloryIncludeDir["ImGui"]			= "../ImGui"
 
 SubmodoleDirs = {}
-SubmodoleDirs["assimp"]			= "../bin/yaml-cpp"
+SubmodoleDirs["assimp"]			= "../bin/assimp"
 SubmodoleDirs["glory"]			= "../bin/Engine"
 SubmodoleDirs["GLEW"]			= "../bin/GLEW"
 SubmodoleDirs["ImGui"]			= "../bin/ImGui"
