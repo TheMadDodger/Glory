@@ -106,7 +106,7 @@ project "GloryMain"
 
 		libdirs
 		{
-			"%{vulkan_SDK}/Lib32"
+			"%{vulkan_SDK}/Lib32",
 			"%{vulkan_SDK}/Third-Party/Bin32"
 		}
 
@@ -115,7 +115,7 @@ project "GloryMain"
 
 		libdirs
 		{
-			"%{vulkan_SDK}/Lib"
+			"%{vulkan_SDK}/Lib",
 			"%{vulkan_SDK}/Third-Party/Bin"
 		}
 
