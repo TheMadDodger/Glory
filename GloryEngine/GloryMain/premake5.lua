@@ -104,8 +104,20 @@ project "GloryMain"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			"%{vulkan_SDK}/Lib32"
+			"%{vulkan_SDK}/Third-Party/Bin32"
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			"%{vulkan_SDK}/Lib"
+			"%{vulkan_SDK}/Third-Party/Bin"
+		}
 
 	filter "configurations:Debug"
 		defines "_DEBUG"
