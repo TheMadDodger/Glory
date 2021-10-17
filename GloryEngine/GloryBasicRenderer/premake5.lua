@@ -15,14 +15,14 @@ project "GloryBasicRenderer"
 
 	vpaths
 	{
-		["Header Files"] = { "framework.h", "pch.h" }
+		["Header Files"] = { "framework.h", "pch.h" },
 		["Source Files"] = { "GloryBasicRenderer.cpp", "pch.cpp" }
 	}
 
 	includedirs
 	{
 		"%{GloryIncludeDir.core}",
-		"%{vulkan_sdk}\third-party\include"
+		"%{vulkan_sdk}/third-party/include"
 	}
 
 	filter "system:windows"

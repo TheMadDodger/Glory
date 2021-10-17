@@ -18,14 +18,14 @@ project "GloryMain"
 
 	vpaths
 	{
-		["Header Files"] = { "stdafx.h" }
+		["Header Files"] = { "stdafx.h" },
 		["Source Files"] = { "GloryMain.cpp", "stdafx.cpp" }
 	}
 
 	includedirs
 	{
-		"%{vulkan_sdk}\include",
-		"%{vulkan_sdk}\third-party\include",
+		"%{vulkan_sdk}/include",
+		"%{vulkan_sdk}/third-party/include",
 
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.GLEW}",
@@ -50,32 +50,32 @@ project "GloryMain"
 
 	links
 	{
-		"vulkan-1"
-		"glew"
-		"GloryCore"
-		"GlorySDLWindow"
-		"GloryVulkanGraphics"
-		"GloryOpenGLGraphics"
-		"GlorySDLImage"
-		"GloryASSIMPModelLoader"
-		"GloryGLSLShaderLoader"
-		"GloryEntityScenes"
-		"assimp-vc141-mt"
-		"SDL2"
-		"SDL2_image"
-		"shaderc"
-		"shaderc_combined"
-		"shaderc_shared"
-		"ImGui"
-		"GloryEditor"
-		"spirv-cross-c"
-		"spirv-cross-core"
-		"spirv-cross-cpp"
-		"spirv-cross-glsl"
-		"spirv-cross-hlsl"
-		"spirv-cross-msl"
-		"spirv-cross-reflect"
-		"spirv-cross-util"
+		"vulkan-1",
+		"glew",
+		"GloryCore",
+		"GlorySDLWindow",
+		"GloryVulkanGraphics",
+		"GloryOpenGLGraphics",
+		"GlorySDLImage",
+		"GloryASSIMPModelLoader",
+		"GloryGLSLShaderLoader",
+		"GloryEntityScenes",
+		"assimp-vc141-mt",
+		"SDL2",
+		"SDL2_image",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"ImGui",
+		"GloryEditor",
+		"spirv-cross-c",
+		"spirv-cross-core",
+		"spirv-cross-cpp",
+		"spirv-cross-glsl",
+		"spirv-cross-hlsl",
+		"spirv-cross-msl",
+		"spirv-cross-reflect",
+		"spirv-cross-util",
 		"yaml-cpp"
 	}
 

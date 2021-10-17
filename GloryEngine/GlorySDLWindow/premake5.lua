@@ -15,13 +15,13 @@ project "GlorySDLWindow"
 
 	vpaths
 	{
-		["Core"] = { "SDLWindow.h", "SDLWindow.cpp", "SDLWindowExceptions.h" }
+		["Core"] = { "SDLWindow.h", "SDLWindow.cpp", "SDLWindowExceptions.h" },
 		["Module"] = { "SDLWindowModule.h", "SDLWindowModule.cpp" }
 	}
 
 	includedirs
 	{
-		"%{vulkan_sdk}\third-party\include",
+		"%{vulkan_sdk}/third-party/include",
 		"%{GloryIncludeDir.core}"
 	}
 

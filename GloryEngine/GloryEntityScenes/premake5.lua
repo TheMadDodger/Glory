@@ -15,15 +15,15 @@ project "GloryEntityScenes"
 
 	vpaths
 	{
-		["ECS"] = { "EntityComponentData.h", "EntityID.h", "Registry.h", "Registry.cpp" }
-		["Module"] = { "Components.h", "Components.cpp", "Entity.h", "Entity.cpp", "EntityScene.h", "EntityScene.cpp", "EntitySceneScenesModule.h", "EntitySceneScenesModule.cpp" }
+		["ECS"] = { "EntityComponentData.h", "EntityID.h", "Registry.h", "Registry.cpp" },
+		["Module"] = { "Components.h", "Components.cpp", "Entity.h", "Entity.cpp", "EntityScene.h", "EntityScene.cpp", "EntitySceneScenesModule.h", "EntitySceneScenesModule.cpp" },
 		["Systems"] = { "EntitySystem.h", "EntitySystem.cpp", "EntitySystems.h", "EntitySystems.cpp", "MeshRenderSystem.h", "MeshRenderSystem.cpp", "Systems.h", "TransformSystem.h", "TransformSystem.cpp" }
 	}
 
 	includedirs
 	{
 		"%{GloryIncludeDir.core}",
-		"%{vulkan_sdk}\third-party\include"
+		"%{vulkan_sdk}/third-party/include"
 	}
 
 	filter "system:windows"

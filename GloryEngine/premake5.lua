@@ -33,7 +33,7 @@ leak_detector = "C:/Program Files (x86)/Visual Leak Detector/include"
 outputdir = "%{cfg.buildcfg}/%{cfg.platform}"
 engineoutdir = "../bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"
 
-IncludeDir = {}
+GloryIncludeDir = {}
 GloryIncludeDir["assimp"]			= "../GloryASSIMPModelLoader"
 GloryIncludeDir["basicrenderer"]	= "../GloryBasicRenderer"
 GloryIncludeDir["core"]				= "../GloryCore"
@@ -57,6 +57,7 @@ SubmodoleDirs["shaderc"]		= "../bin/shaderc"
 SubmodoleDirs["spirv_cross"]	= "../bin/spirv-cross"
 SubmodoleDirs["yaml_cpp"]		= "../bin/yaml-cpp"
 
+IncludeDir = {}
 IncludeDir["assimp"]			= "%{SubmodoleDirs.assimp}/include"
 IncludeDir["glory"]				= "%{SubmodoleDirs.glory}/include"
 IncludeDir["GLEW"]				= "%{SubmodoleDirs.GLEW}/include"

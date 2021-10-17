@@ -22,7 +22,7 @@ project "GloryASSIMPModelLoader"
 	{
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.assimp}",
-		"%{vulkan_sdk}\third-party\include"
+		"%{vulkan_sdk}/third-party/include"
 	}
 
 	filter "system:windows"
