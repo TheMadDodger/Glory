@@ -1,3 +1,7 @@
 [submodule "GloryEngine/submodules/assimp"]
 	path = GloryEngine/submodules/assimp
 	url = https://github.com/assimp/assimp
+[submodule "GloryEngine/submodules/ImGui"]
+	path = GloryEngine/submodules/ImGui
+	url = https://github.com/ocornut/imgui
+	branch = docking

@@ -15,7 +15,6 @@ workspace "GloryEngine"
 	startproject "GlorySDLImage"
 	startproject "GlorySDLWindow"
 	startproject "GloryVulkanGraphics"
-	startproject "ImGui"
 	
 	configurations
 	{
@@ -49,10 +48,9 @@ GloryIncludeDir["ImGui"]			= "../ImGui"
 
 SubmodoleDirs = {}
 SubmodoleDirs["assimp"]			= "../submodules/assimp"
-SubmodoleDirs["zlib"]			= "../submodules/assimp/contrib/zlib"
+SubmodoleDirs["ImGui"]			= "../submodules/ImGui"
+SubmodoleDirs["GLEW"]			= "../third-party/GLEW"
 SubmodoleDirs["glory"]			= "../bin/Engine"
-SubmodoleDirs["GLEW"]			= "../bin/GLEW"
-SubmodoleDirs["ImGui"]			= "../bin/ImGui"
 SubmodoleDirs["SDL_Image"]		= "../bin/SDL_Image"
 SubmodoleDirs["shaderc"]		= "../bin/shaderc"
 SubmodoleDirs["spirv_cross"]	= "../bin/spirv-cross"
@@ -60,10 +58,9 @@ SubmodoleDirs["yaml_cpp"]		= "../bin/yaml-cpp"
 
 IncludeDir = {}
 IncludeDir["assimp"]			= "%{SubmodoleDirs.assimp}/include"
-IncludeDir["zlib"]				= "%{SubmodoleDirs.zlib}"
 IncludeDir["glory"]				= "%{SubmodoleDirs.glory}/include"
 IncludeDir["GLEW"]				= "%{SubmodoleDirs.GLEW}/include"
-IncludeDir["ImGui"]				= "%{SubmodoleDirs.ImGui}/include"
+IncludeDir["ImGui"]				= "%{SubmodoleDirs.ImGui}"
 IncludeDir["SDL_Image"]			= "%{SubmodoleDirs.SDL_Image}/include"
 IncludeDir["shaderc"]			= "%{SubmodoleDirs.shaderc}/include"
 IncludeDir["spirv_cross"]		= "%{SubmodoleDirs.spirv_cross}/include"
@@ -80,7 +77,7 @@ LibDirs["spirv_cross"]	= "%{SubmodoleDirs.spirv_cross}/lib/%{cfg.buildcfg}/%{cfg
 LibDirs["yaml_cpp"]		= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 
 group "Dependencies"
-	--include "third-party/zlibstatic"
+	include "third-party/ImGui"
 	include "third-party/assimp"
 group ""
 
@@ -95,4 +92,3 @@ include "GloryOpenGLGraphics"
 include "GlorySDLImage"
 include "GlorySDLWindow"
 include "GloryVulkanGraphics"
-include "ImGui"
