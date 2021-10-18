@@ -72,7 +72,7 @@ project "GloryMain"
 		"GloryASSIMPModelLoader",
 		"GloryGLSLShaderLoader",
 		"GloryEntityScenes",
-		"assimp-vc141-mt",
+		"assimp",
 		"SDL2",
 		"SDL2_image",
 		"shaderc",

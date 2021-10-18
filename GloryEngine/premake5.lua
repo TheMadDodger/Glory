@@ -48,7 +48,7 @@ GloryIncludeDir["vulkan"]			= "../GloryVulkanGraphics"
 GloryIncludeDir["ImGui"]			= "../ImGui"
 
 SubmodoleDirs = {}
-SubmodoleDirs["assimp"]			= "../bin/assimp"
+SubmodoleDirs["assimp"]			= "../submodules/assimp"
 SubmodoleDirs["glory"]			= "../bin/Engine"
 SubmodoleDirs["GLEW"]			= "../bin/GLEW"
 SubmodoleDirs["ImGui"]			= "../bin/ImGui"
@@ -78,7 +78,7 @@ LibDirs["spirv_cross"]	= "%{SubmodoleDirs.spirv_cross}/lib/%{cfg.buildcfg}/%{cfg
 LibDirs["yaml_cpp"]		= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 
 group "Dependencies"
-	
+	include "third-party/assimp"
 group ""
 
 include "GloryASSIMPModelLoader"
