@@ -31,7 +31,7 @@ namespace Glory
 	{
 		// dis is a test pls ignore
 
-		return;
+		//return;
 
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);

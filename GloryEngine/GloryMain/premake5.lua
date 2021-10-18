@@ -119,15 +119,11 @@ project "GloryMain"
 		}
 
 	filter "configurations:Debug"
+		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
 
 	filter "configurations:Release"
+		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-	filter {"system:windows", "configurations:Release" }
-		buildoptions "/MDd"
-
-	filter {"system:windows", "configurations:Release" }
-		buildoptions "/MD"

@@ -4,7 +4,7 @@
 
 #define _CRTDBG_MAP_ALLOC
 
-#define EDITOR
+//#define EDITOR
 
 namespace Glory
 {
@@ -21,7 +21,7 @@ namespace Glory
         virtual void Render(const RenderFrame& frame) override
         {
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
-            //pGraphics->Clear();
+            pGraphics->Clear();
             for (size_t i = 0; i < frame.ObjectsToRender.size(); i++)
             {
                 RenderData renderData = frame.ObjectsToRender[i];
@@ -34,7 +34,7 @@ namespace Glory
                 pMaterial->SetProperties();
                 pGraphics->DrawMesh(pMesh);
             }
-            //pGraphics->Swap();
+            pGraphics->Swap();
         }
 
     private:

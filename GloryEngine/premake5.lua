@@ -49,6 +49,7 @@ GloryIncludeDir["ImGui"]			= "../ImGui"
 
 SubmodoleDirs = {}
 SubmodoleDirs["assimp"]			= "../submodules/assimp"
+SubmodoleDirs["zlib"]			= "../submodules/assimp/contrib/zlib"
 SubmodoleDirs["glory"]			= "../bin/Engine"
 SubmodoleDirs["GLEW"]			= "../bin/GLEW"
 SubmodoleDirs["ImGui"]			= "../bin/ImGui"
@@ -59,6 +60,7 @@ SubmodoleDirs["yaml_cpp"]		= "../bin/yaml-cpp"
 
 IncludeDir = {}
 IncludeDir["assimp"]			= "%{SubmodoleDirs.assimp}/include"
+IncludeDir["zlib"]				= "%{SubmodoleDirs.zlib}"
 IncludeDir["glory"]				= "%{SubmodoleDirs.glory}/include"
 IncludeDir["GLEW"]				= "%{SubmodoleDirs.GLEW}/include"
 IncludeDir["ImGui"]				= "%{SubmodoleDirs.ImGui}/include"
@@ -78,6 +80,7 @@ LibDirs["spirv_cross"]	= "%{SubmodoleDirs.spirv_cross}/lib/%{cfg.buildcfg}/%{cfg
 LibDirs["yaml_cpp"]		= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 
 group "Dependencies"
+	--include "third-party/zlibstatic"
 	include "third-party/assimp"
 group ""
 

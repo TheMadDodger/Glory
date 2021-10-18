@@ -1,14 +1,13 @@
 ProjectDir = "../%{SubmodoleDirs.assimp}"
 
 os.copyfile("config/config.h", "../../submodules/assimp/include/assimp/config.h")
---os.copyfile("config/zconf.h", "../../submodules/assimp/contrib/zlib/zconf.h")
+os.copyfile("config/zconf.h", "../../submodules/assimp/contrib/zlib/zconf.h")
 os.copyfile("config/revision.h", "../../submodules/assimp/revision.h")
 
 project "assimp"
 	location "%{ProjectDir}"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
-
 
 	targetdir ("%{ProjectDir}/lib/%{outputdir}")
 	objdir ("%{ProjectDir}/%{outputdir}")
@@ -70,7 +69,9 @@ project "assimp"
         "%{ProjectDir}/code/PostProcessing/ValidateDataStructure.cpp",
         "%{ProjectDir}/code/PostProcessing/MakeVerboseFormat.cpp",
         "%{ProjectDir}/code/Material/MaterialSystem.cpp",
-        "%{ProjectDir}/contrib/irrXML/*",
+
+        "%{ProjectDir}/contrib/zlib/*.h",
+        "%{ProjectDir}/contrib/zlib/*.c",
 	}
 
 	sysincludedirs
@@ -98,8 +99,8 @@ project "assimp"
     {
         "_CRT_SECURE_NO_WARNINGS",
         -- "SWIG",
-        "ASSIMP_BUILD_NO_OWN_ZLIB",
-
+        --"ASSIMP_BUILD_NO_OWN_ZLIB",
+        "ASSIMP_BUILD_NO_M3D_IMPORTER",
         "ASSIMP_BUILD_NO_X_IMPORTER",
         "ASSIMP_BUILD_NO_3DS_IMPORTER",
         "ASSIMP_BUILD_NO_MD3_IMPORTER",
@@ -195,8 +196,10 @@ project "assimp"
 
 	filter "configurations:Debug"
 		runtime "Debug"
-		symbols "on"
+		defines "_DEBUG"
+		symbols "On"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		defines "NDEBUG"
+		optimize "On"
