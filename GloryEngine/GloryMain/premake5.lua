@@ -1,5 +1,4 @@
 project "GloryMain"
-	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -93,7 +92,7 @@ project "GloryMain"
 	postbuildcommands
 	{
 		("{COPY} %{LibDirs.SDL_image}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
-		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 	}
 
 	filter "system:windows"
@@ -115,6 +114,11 @@ project "GloryMain"
 			"%{vulkan_sdk}/Third-Party/Bin32"
 		}
 
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
 
@@ -124,12 +128,19 @@ project "GloryMain"
 			"%{vulkan_sdk}/Third-Party/Bin"
 		}
 
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+		}
+
 	filter "configurations:Debug"
+		kind "ConsoleApp"
 		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
 
 	filter "configurations:Release"
+		kind "ConsoleApp"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"

@@ -66,3 +66,6 @@ GloryEngine/GloryEntityScenes/Debug/
 *.filters
 GloryEngine/Build/
 *.user
+GloryEngine/GloryEditor/Release/
+GloryEngine/GloryEntityScenes/Release/
+GloryEngine/GloryOpenGLGraphics/Release/
