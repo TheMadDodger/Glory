@@ -22,7 +22,7 @@ project "GlorySDLImage"
 	{
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.GLEW}",
-		"%{IncludeDir.SDL_Image}",
+		"%{IncludeDir.SDL_image}",
 		"%{GloryIncludeDir.core}"
 	}
 

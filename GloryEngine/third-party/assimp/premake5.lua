@@ -4,17 +4,18 @@ os.copyfile("config/config.h", "../../submodules/assimp/include/assimp/config.h"
 os.copyfile("config/zconf.h", "../../submodules/assimp/contrib/zlib/zconf.h")
 os.copyfile("config/revision.h", "../../submodules/assimp/revision.h")
 
-project "assimp"
+project "assimpstatic"
 	location "%{ASSIMPDir}"
-	kind "StaticLib"
+    kind "StaticLib"
 	language "C++"
+	targetname "assimp"
 
 	targetdir ("%{ASSIMPDir}/lib/%{outputdir}")
 	objdir ("%{ASSIMPDir}/%{outputdir}")
 
 	files
-	{
-		"%{ASSIMPDir}/include/**",
+    {
+	    "%{ASSIMPDir}/include/**",
         "%{ASSIMPDir}/code/common/Assimp.cpp",
         "%{ASSIMPDir}/code/common/AssertHandler.h",
         "%{ASSIMPDir}/code/common/AssertHandler.cpp",
@@ -72,9 +73,9 @@ project "assimp"
 
         "%{ASSIMPDir}/contrib/zlib/*.h",
         "%{ASSIMPDir}/contrib/zlib/*.c",
-	}
+    }
 
-	sysincludedirs
+    sysincludedirs
     {
         "%{ASSIMPDir}",
         "%{ASSIMPDir}/include",
@@ -183,23 +184,23 @@ project "assimp"
         --"ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS",
     }
 
-	filter "system:windows"
-		systemversion "latest"
-		cppdialect "C++17"
-		staticruntime "off"
+    filter "system:windows"
+	    systemversion "latest"
+	    cppdialect "C++17"
+	    staticruntime "off"
 
-	filter "system:linux"
-		pic "On"
-		systemversion "latest"
-		cppdialect "C++17"
-		staticruntime "off"
+    filter "system:linux"
+	    pic "On"
+	    systemversion "latest"
+	    cppdialect "C++17"
+	    staticruntime "off"
 
-	filter "configurations:Debug"
-		runtime "Debug"
-		defines "_DEBUG"
-		symbols "On"
+    filter "configurations:Debug"
+	    runtime "Debug"
+	    defines "_DEBUG"
+	    symbols "On"
 
-	filter "configurations:Release"
-		runtime "Release"
-		defines "NDEBUG"
-		optimize "On"
+    filter "configurations:Release"
+	    runtime "Release"
+	    defines "NDEBUG"
+	    optimize "On"

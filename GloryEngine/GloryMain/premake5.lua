@@ -4,7 +4,7 @@ project "GloryMain"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("Build/%{cfg.buildcfg}/%{cfg.platform}")
+	targetdir ("../Build/%{cfg.buildcfg}/%{cfg.platform}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	pchheader "stdafx.h"
@@ -30,7 +30,7 @@ project "GloryMain"
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.SDL_Image}",
+		"%{IncludeDir.SDL_image}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
@@ -54,7 +54,7 @@ project "GloryMain"
 		"%{LibDirs.assimp}",
 		"%{LibDirs.GLEW}",
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.SDL_Image}",
+		"%{LibDirs.SDL_image}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}"
@@ -88,6 +88,12 @@ project "GloryMain"
 		"spirv-cross-msl",
 		"spirv-cross-reflect",
 		"spirv-cross-util",
+	}
+
+	postbuildcommands
+	{
+		("{COPY} %{LibDirs.SDL_image}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
 	}
 
 	filter "system:windows"

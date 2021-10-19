@@ -64,3 +64,5 @@ GloryEngine/GloryEntityScenes/Debug/
 *.sln
 *.vcxproj
 *.filters
+GloryEngine/Build/
+*.user
