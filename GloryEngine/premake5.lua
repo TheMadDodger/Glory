@@ -50,11 +50,11 @@ SubmodoleDirs = {}
 SubmodoleDirs["assimp"]				= "../submodules/assimp"
 SubmodoleDirs["ImGui"]				= "../submodules/ImGui"
 SubmodoleDirs["GLEW"]				= "../third-party/GLEW"
-SubmodoleDirs["SDL_image"]			= "../bin/SDL_Image"
+SubmodoleDirs["SDL_image"]			= "../third-party/SDL_Image"
+SubmodoleDirs["shaderc"]			= "../third-party/shaderc"
+SubmodoleDirs["spirv_cross"]		= "../third-party/spirv-cross"
+SubmodoleDirs["yaml_cpp"]			= "../third-party/yaml-cpp"
 SubmodoleDirs["glory"]				= "../bin/Engine"
-SubmodoleDirs["shaderc"]			= "../bin/shaderc"
-SubmodoleDirs["spirv_cross"]		= "../bin/spirv-cross"
-SubmodoleDirs["yaml_cpp"]			= "../bin/yaml-cpp"
 
 IncludeDir = {}
 IncludeDir["assimp"]				= "%{SubmodoleDirs.assimp}/include"
@@ -79,7 +79,6 @@ LibDirs["yaml_cpp"]					= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.p
 group "Dependencies"
 	include "third-party/ImGui"
 	include "third-party/assimp"
-	--include "third-party/assimp/dll"
 group ""
 
 include "GloryASSIMPModelLoader"
