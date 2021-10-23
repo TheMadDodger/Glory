@@ -10,7 +10,9 @@ namespace Glory
 
 	bool Console::m_Writing = false;
 	bool Console::m_Reading = false;
+#ifdef _DEBUG
 	DebugConsoleInput* Console::m_pDebugConsole = nullptr;
+#endif
 	int Console::m_CommandHistoryInsertIndex = -1;
 	int Console::m_ConsoleInsertIndex = -1;
 	int Console::m_CurrentCommandHistorySize = 0;
@@ -21,8 +23,10 @@ namespace Glory
 	void Console::Initialize()
 	{
 		m_pInstance = new Console();
+#ifdef _DEBUG
 		m_pDebugConsole = new DebugConsoleInput();
 		m_pDebugConsole->Initialize();
+#endif
 		RegisterCommand(new ConsoleCommand("printhistory", Console::PrintHistory));
 	}
 
@@ -35,9 +39,11 @@ namespace Glory
 		m_pCommands.clear();
 
 		Parser::Destroy();
+#ifdef _DEBUG
 		m_pDebugConsole->Stop();
 		delete m_pDebugConsole;
 		m_pDebugConsole = nullptr;
+#endif
 		delete m_pInstance;
 		m_pInstance = nullptr;
 	}

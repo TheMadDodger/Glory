@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ASSIMPModule.h"
 #include <assimp/postprocess.h>
 #include <Debug.h>

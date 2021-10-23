@@ -61,3 +61,11 @@ GloryEngine/GloryEditor/Debug/
 GloryEngine/GloryEntities/Debug/
 GloryEngine/GloryOpenGLGraphics/Debug/
 GloryEngine/GloryEntityScenes/Debug/
+*.sln
+*.vcxproj
+*.filters
+GloryEngine/Build/
+*.user
+GloryEngine/GloryEditor/Release/
+GloryEngine/GloryEntityScenes/Release/
+GloryEngine/GloryOpenGLGraphics/Release/
