@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	ShaderLoaderModule::ShaderLoaderModule()
+	ShaderLoaderModule::ShaderLoaderModule() : ResourceLoaderModule("frag,vert,spv")
 	{
 	}
 
@@ -18,6 +18,15 @@ namespace Glory
 	const std::type_info& ShaderLoaderModule::GetModuleType()
 	{
 		return typeid(ShaderLoaderModule);
+	}
+
+	ShaderImportSettings ShaderLoaderModule::ReadImportSettings_Internal(YAML::Node& node)
+	{
+		return ShaderImportSettings();
+	}
+
+	void ShaderLoaderModule::WriteImportSettings_Internal(const ShaderImportSettings& importSettings, YAML::Emitter& out)
+	{
 	}
 
 	std::vector<uint32_t>& ShaderLoaderModule::GetData(ShaderData* pShaderData)
@@ -42,6 +51,14 @@ namespace Glory
 	ShaderData* ShaderLoaderModule::LoadResource(const void* buffer, size_t length, const ShaderImportSettings& importSettings)
 	{
 		return nullptr;
+	}
+
+	ShaderImportSettings::ShaderImportSettings()
+	{
+	}
+
+	ShaderImportSettings::ShaderImportSettings(const std::string& extension) : ImportSettings(extension)
+	{
 	}
 
 	//void ShaderLoaderModule::Initialize()

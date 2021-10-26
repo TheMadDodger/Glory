@@ -2,6 +2,7 @@
 #include "EditorPlatform.h"
 #include "MainEditor.h"
 #include <Game.h>
+#include <EditorAssetLoader.h>
 
 namespace Glory::Editor
 {
@@ -22,10 +23,16 @@ namespace Glory::Editor
 			m_pPlatform->Initialize(game);
 			m_pMainEditor = new MainEditor();
 			m_pMainEditor->Initialize();
+
+			m_pEditorInstance = this;
 		}
 
 		void Destroy();
 		void Run();
+
+		EditorPlatform* GetEditorPlatform();
+
+		static EditorApplication* GetInstance();
 
 	private:
 		void RenderEditor();
@@ -33,5 +40,6 @@ namespace Glory::Editor
 	private:
 		EditorPlatform* m_pPlatform;
 		MainEditor* m_pMainEditor;
+		static EditorApplication* m_pEditorInstance;
 	};
 }

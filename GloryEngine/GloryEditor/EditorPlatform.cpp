@@ -1,4 +1,5 @@
 #include "EditorPlatform.h"
+#include "EditorAssets.h"
 
 namespace Glory::Editor
 {
@@ -21,9 +22,15 @@ namespace Glory::Editor
 		SetupDearImGuiContext();
 		m_pRenderImpl->Initialize();
 		m_pRenderImpl->SetupBackend();
+		LoadFonts();
 		m_pRenderImpl->UploadImGUIFonts();
 
+		game.GetEngine()->GetGraphicsThread()->BindInitializeOnly<EditorPlatform>(this);
 		game.GetEngine()->GetGraphicsThread()->BindRenderOnly<EditorPlatform>(this);
+	}
+
+	void EditorPlatform::ThreadedInitialize()
+	{
 	}
 
 	bool EditorPlatform::PollEvents()
@@ -51,6 +58,8 @@ namespace Glory::Editor
 		m_pWindowImpl->Shutdown();
 		m_pRenderImpl->Cleanup();
 		ImGui::DestroyContext();
+
+		EditorAssets::Destroy();
 	}
 
 	void EditorPlatform::WaitIdle()
@@ -108,6 +117,8 @@ namespace Glory::Editor
 
 	void EditorPlatform::Render(const RenderFrame&)
 	{
+		EditorAssets::Initialize();
+
 		std::unique_lock<std::mutex> lock(m_Mutex);
 
 		switch (m_RenderState)
@@ -159,5 +170,12 @@ namespace Glory::Editor
 		// Present Main Platform Window
 		if (!main_is_minimized)
 			m_pRenderImpl->FramePresent();
+	}
+
+	void EditorPlatform::LoadFonts()
+	{
+		auto& io = ImGui::GetIO();
+		ImFont* pFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/PT_Sans/PTSans-Regular.ttf", 18.0f);
+		io.FontDefault = pFont;
 	}
 }

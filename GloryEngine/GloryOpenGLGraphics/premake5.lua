@@ -23,6 +23,7 @@ project "GloryOpenGLGraphics"
 	{
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.GLEW}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}"
 	}
 

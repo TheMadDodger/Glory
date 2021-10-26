@@ -6,7 +6,9 @@ namespace Glory::Editor
 	std::vector<EditorWindow*> EditorWindow::m_pClosingEditorWindows = std::vector<EditorWindow*>();
 	std::list<size_t> EditorWindow::m_IDs = std::list<size_t>();
 
-	EditorWindow::EditorWindow(const std::string& windowName, float windowWidth, float windowHeight) : m_WindowName(windowName), m_WindowDimensions(windowWidth, windowHeight), m_IsOpen(true), m_Resizeable(true)
+	EditorWindow::EditorWindow(const std::string& windowName, float windowWidth, float windowHeight)
+		: m_WindowName(windowName), m_WindowDimensions(windowWidth, windowHeight),
+		m_IsOpen(true), m_Resizeable(true), m_WindowFlags(ImGuiWindowFlags_::ImGuiWindowFlags_None)
 	{
 	}
 
@@ -23,7 +25,7 @@ namespace Glory::Editor
 	{
 		OnPaint();
 
-		ImGuiWindowFlags window_flags = m_Resizeable? 0 : ImGuiWindowFlags_::ImGuiWindowFlags_NoResize;
+		ImGuiWindowFlags window_flags = m_WindowFlags | (m_Resizeable? 0 : ImGuiWindowFlags_::ImGuiWindowFlags_NoResize);
 		ImGui::SetNextWindowSize(m_WindowDimensions);
 
 		std::string windowString = m_WindowName + "##" + std::to_string(m_WindowID);

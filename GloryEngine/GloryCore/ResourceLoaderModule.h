@@ -1,12 +1,23 @@
 #pragma once
 #include "Module.h"
 #include "Resource.h"
+#include "ResourceType.h"
 #include <string>
+#include <yaml-cpp/yaml.h>
+#include <any>
+
+#define YAML_READ(startNode, node, key, out, type) node = startNode[#key]; \
+if (node.IsDefined()) out = node.as<type>()
+
+#define YAML_WRITE(emitter, key, value) emitter << YAML::Key << #key << YAML::Value << value;
 
 namespace Glory
 {
 	struct ImportSettings
 	{
+		ImportSettings();
+		ImportSettings(const std::string& extension);
+
 		std::string m_Extension;
 	};
 
@@ -23,6 +34,11 @@ namespace Glory
 		virtual Resource* Load(const void* buffer, size_t length, const ImportSettings& importSettings = ImportSettings()) = 0;
 		virtual const std::type_info& GetResourceType() = 0;
 
+		virtual std::any ReadImportSettings(YAML::Node& node) = 0;
+		virtual void WriteImportSettings(const std::any& importSettings, YAML::Emitter& out) = 0;
+
+		virtual std::any CreateDefaultImportSettings(const std::string& extension) = 0;
+
 	protected:
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
@@ -35,7 +51,11 @@ namespace Glory
 	class ResourceLoaderModule : public LoaderModule
 	{
 	public:
-		ResourceLoaderModule() {}
+		ResourceLoaderModule(const std::string& extensions)
+		{
+			ResourceType::RegisterResource<T>(extensions);
+		}
+
 		virtual ~ResourceLoaderModule() {}
 
 		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) override
@@ -55,9 +75,32 @@ namespace Glory
 			return typeid(T);
 		}
 
+		virtual std::any ReadImportSettings(YAML::Node& node) override
+		{
+			return ReadImportSettings_Internal(node);
+		}
+
+		virtual void WriteImportSettings(const std::any& importSettings, YAML::Emitter& out) override
+		{
+			S convertedSettings = std::any_cast<S>(importSettings);
+			WriteImportSettings_Internal(convertedSettings, out);
+		}
+
+		virtual std::any CreateDefaultImportSettings(const std::string& extension) override
+		{
+			return CreateDefaultImportSettings_Internal(extension);
+		}
+
 	protected:
 		virtual T* LoadResource(const std::string& path, const S& importSettings) = 0;
 		virtual T* LoadResource(const void* buffer, size_t length, const S& importSettings) = 0;
+		virtual S ReadImportSettings_Internal(YAML::Node& node) = 0;
+		virtual void WriteImportSettings_Internal(const S& importSettings, YAML::Emitter& out) = 0;
+
+		virtual S CreateDefaultImportSettings_Internal(const std::string& extension)
+		{
+			return S(extension);
+		}
 
 	protected:
 		virtual void Initialize() = 0;

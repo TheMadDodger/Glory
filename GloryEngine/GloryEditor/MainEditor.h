@@ -1,4 +1,5 @@
 #pragma once
+#include <EditorAssetLoader.h>
 
 namespace Glory::Editor
 {
@@ -14,5 +15,9 @@ namespace Glory::Editor
 
 	private:
 		void CreateDefaultMainMenuBar();
+		void SetDarkThemeColors();
+
+	private:
+		EditorAssetLoader* m_pAssetLoader;
 	};
 }

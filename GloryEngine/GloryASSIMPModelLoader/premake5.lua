@@ -22,6 +22,7 @@ project "GloryASSIMPModelLoader"
 	{
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.assimp}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{vulkan_sdk}/third-party/include"
 	}
 

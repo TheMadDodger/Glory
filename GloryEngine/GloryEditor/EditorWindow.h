@@ -63,6 +63,7 @@ namespace Glory::Editor
 		static std::list<size_t> m_IDs;
 		bool m_IsOpen;
 		bool m_Resizeable;
+		int m_WindowFlags;
 		size_t m_WindowID;
 	};
 

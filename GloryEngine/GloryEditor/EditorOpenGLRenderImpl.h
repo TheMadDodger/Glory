@@ -23,6 +23,8 @@ namespace Glory::Editor
         virtual void FrameRender(ImDrawData* pDrawData) override;
         virtual void FramePresent() override;
 
+        virtual void* GetTextureID(Texture* pTexture) override;
+
     private:
         const int MINIMAGECOUNT = 2;
     };

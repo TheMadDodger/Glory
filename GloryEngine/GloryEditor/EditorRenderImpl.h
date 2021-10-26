@@ -1,5 +1,6 @@
 #pragma once
 #include <imgui.h>
+#include <Texture.h>
 
 namespace Glory::Editor
 {
@@ -10,6 +11,8 @@ namespace Glory::Editor
 	public:
 		EditorRenderImpl();
 		virtual ~EditorRenderImpl();
+
+		virtual void* GetTextureID(Texture* pTexture) = 0;
 
 	protected:
 		virtual void Setup() = 0;

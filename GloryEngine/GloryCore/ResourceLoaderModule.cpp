@@ -14,4 +14,7 @@ namespace Glory
 	{
 		return true;
 	}
+
+	ImportSettings::ImportSettings() : m_Extension("") {}
+	ImportSettings::ImportSettings(const std::string& extension) : m_Extension(extension) {}
 }

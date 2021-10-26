@@ -31,10 +31,22 @@ namespace Glory
 		return m_pGraphicsModule;
 	}
 
+	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
+	{
+		return nullptr;
+	}
+
 	LoaderModule* Engine::GetLoaderModule(const std::type_info& resourceType)
 	{
 		if (m_TypeToLoader.find(resourceType) == m_TypeToLoader.end()) return nullptr;
 		size_t loaderIndex = m_TypeToLoader[resourceType];
+		return m_pLoaderModules[loaderIndex];
+	}
+
+	LoaderModule* Engine::GetLoaderModule(size_t typeHash)
+	{
+		if (m_TypeHashToLoader.find(typeHash) == m_TypeHashToLoader.end()) return nullptr;
+		size_t loaderIndex = m_TypeHashToLoader[typeHash];
 		return m_pLoaderModules[loaderIndex];
 	}
 
@@ -120,6 +132,7 @@ namespace Glory
 		m_pOptionalModules.clear();
 		m_pPriorityInitializationModules.clear();
 		m_TypeToLoader.clear();
+		m_TypeHashToLoader.clear();
 		m_pLoaderModules.clear();
 
 		delete m_pMainThread;
@@ -145,8 +158,12 @@ namespace Glory
 			LoaderModule* pLoaderModule = dynamic_cast<LoaderModule*>(m_pAllModules[i]);
 			if (pLoaderModule)
 			{
-				m_TypeToLoader[pLoaderModule->GetResourceType()] = m_pLoaderModules.size();
+				size_t index = m_pLoaderModules.size();
 				m_pLoaderModules.push_back(pLoaderModule);
+				std::type_index type = pLoaderModule->GetResourceType();
+				m_TypeToLoader[type] = index;
+				size_t typeHash = ResourceType::GetHash(type);
+				m_TypeHashToLoader[typeHash] = index;
 			}
 
 			auto it = std::find(m_pPriorityInitializationModules.begin(), m_pPriorityInitializationModules.end(), m_pAllModules[i]);

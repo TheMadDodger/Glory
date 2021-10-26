@@ -3,7 +3,7 @@
 
 namespace Glory
 {
-	ImageLoaderModule::ImageLoaderModule()
+	ImageLoaderModule::ImageLoaderModule() : ResourceLoaderModule("png,jpg,bmp")
 	{
 	}
 
@@ -30,4 +30,18 @@ namespace Glory
 	{
 		return typeid(ImageLoaderModule);
 	}
+
+	ImageImportSettings ImageLoaderModule::ReadImportSettings_Internal(YAML::Node& node)
+	{
+		return ImageImportSettings();
+	}
+
+	void ImageLoaderModule::WriteImportSettings_Internal(const ImageImportSettings& importSettings, YAML::Emitter& out)
+	{
+	}
+
+	ImageImportSettings::ImageImportSettings() {}
+
+	ImageImportSettings::ImageImportSettings(const std::string& extension)
+		: ImportSettings(extension) {}
 }

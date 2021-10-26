@@ -1,5 +1,6 @@
 #include "EditorVulkanRenderImpl.h"
 #include <Game.h>
+#include <GLTexture.h>
 
 namespace Glory::Editor
 {
@@ -15,6 +16,11 @@ namespace Glory::Editor
 	EditorVulkanRenderImpl::EditorVulkanRenderImpl() {}
 
 	EditorVulkanRenderImpl::~EditorVulkanRenderImpl() {}
+
+	void* EditorVulkanRenderImpl::GetTextureID(Texture* pTexture)
+	{
+		return nullptr;
+	}
 
 	void EditorVulkanRenderImpl::Setup()
 	{

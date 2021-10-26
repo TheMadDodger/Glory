@@ -23,6 +23,7 @@ project "GloryEntityScenes"
 	includedirs
 	{
 		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{vulkan_sdk}/third-party/include"
 	}
 

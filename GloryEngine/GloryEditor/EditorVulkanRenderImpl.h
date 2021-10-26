@@ -12,6 +12,8 @@ namespace Glory::Editor
         EditorVulkanRenderImpl();
         virtual ~EditorVulkanRenderImpl();
 
+        virtual void* GetTextureID(Texture* pTexture) override;
+
     private:
         void SetupVulkanWindow(VkInstance instance, ImGui_ImplVulkanH_Window* wd, VkSurfaceKHR surface, int width, int height);
         void CreateDescriptorPool(VkDevice device);

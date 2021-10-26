@@ -4,6 +4,8 @@
 
 namespace Glory::Editor
 {
+	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
+
 	EditorApplication::EditorApplication() : m_pMainEditor(nullptr), m_pPlatform(nullptr)
 	{
 	}
@@ -34,6 +36,16 @@ namespace Glory::Editor
 			m_pPlatform->EndRender();
 			m_pPlatform->WaitIdle();
 		}
+	}
+
+	EditorPlatform* EditorApplication::GetEditorPlatform()
+	{
+		return m_pPlatform;
+	}
+
+	EditorApplication* EditorApplication::GetInstance()
+	{
+		return m_pEditorInstance;
 	}
 
 	void EditorApplication::RenderEditor()

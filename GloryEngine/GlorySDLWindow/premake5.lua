@@ -22,6 +22,7 @@ project "GlorySDLWindow"
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
+		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}"
 	}
 

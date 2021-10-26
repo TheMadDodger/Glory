@@ -5,7 +5,8 @@
 namespace Glory
 {
 	GLTexture::GLTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
-		: Texture(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings)
+		: Texture(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings),
+		m_TextureID(0), m_GLImageType(0)
 	{
 	}
 

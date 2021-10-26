@@ -20,6 +20,7 @@ namespace Glory::Editor
 		virtual ~EditorPlatform();
 
 		void Initialize(Game& game);
+		void ThreadedInitialize();
 		bool PollEvents();
 		void BeginRender();
 		void EndRender();
@@ -38,6 +39,7 @@ namespace Glory::Editor
 
 		void HandleBeginRender();
 		void HandleEndRender();
+		void LoadFonts();
 
 	private:
 		friend class GraphicsThread;

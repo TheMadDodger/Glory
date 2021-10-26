@@ -5,3 +5,6 @@
 	path = GloryEngine/submodules/ImGui
 	url = https://github.com/ocornut/imgui
 	branch = docking
+[submodule "GloryEngine/submodules/yaml-cpp"]
+	path = GloryEngine/submodules/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp

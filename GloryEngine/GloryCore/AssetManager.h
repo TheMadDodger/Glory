@@ -28,6 +28,7 @@ namespace Glory
 			}
 
 			pResource = pModule->Load(pAssetLocation->m_Path);
+			
 			m_pLoadedAssets[uuid] = pResource;
 			return pResource;
 		}

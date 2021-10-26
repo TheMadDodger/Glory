@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include <JobManager.h>
 #include "RendererModule.h"
+#include <ResourceMeta.h>
 
 #define _CRTDBG_MAP_ALLOC
 
-//#define EDITOR
+#define EDITOR
 
 namespace Glory
 {
@@ -21,19 +22,19 @@ namespace Glory
         virtual void Render(const RenderFrame& frame) override
         {
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
-            pGraphics->Clear();
-            for (size_t i = 0; i < frame.ObjectsToRender.size(); i++)
-            {
-                RenderData renderData = frame.ObjectsToRender[i];
-                if (renderData.m_pModel == nullptr) continue;
-                MeshData* pMesh = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
-                Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
-                UniformBufferObjectTest ubo = renderData.m_UBO;
-                pMaterial->SetUBO(renderData.m_UBO);
-                pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
-                pMaterial->SetProperties();
-                pGraphics->DrawMesh(pMesh);
-            }
+            //pGraphics->Clear();
+            //for (size_t i = 0; i < frame.ObjectsToRender.size(); i++)
+            //{
+            //    RenderData renderData = frame.ObjectsToRender[i];
+            //    if (renderData.m_pModel == nullptr) continue;
+            //    MeshData* pMesh = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
+            //    Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
+            //    UniformBufferObjectTest ubo = renderData.m_UBO;
+            //    pMaterial->SetUBO(renderData.m_UBO);
+            //    pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
+            //    pMaterial->SetProperties();
+            //    pGraphics->DrawMesh(pMesh);
+            //}
             pGraphics->Swap();
         }
     };
@@ -53,13 +54,17 @@ int main()
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     {
+        Glory::ResourceMeta meta ("test.yaml");
+        //meta.Load("test.yaml");
+
+
         Glory::WindowCreateInfo windowCreateInfo;
         windowCreateInfo.WindowName = "Glory Editor";
         windowCreateInfo.Width = 2560;
         windowCreateInfo.Height = 1300;
         windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
-        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader() };
+        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), /*new Glory::ASSIMPModule(),*/ new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader()};
 
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);

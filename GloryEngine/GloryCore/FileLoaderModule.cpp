@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	FileLoaderModule::FileLoaderModule()
+	FileLoaderModule::FileLoaderModule() : ResourceLoaderModule("txt")
 	{
 	}
 
@@ -57,4 +57,25 @@ namespace Glory
 		file.close();
 		return true;
 	}
+
+	FileImportSettings FileLoaderModule::ReadImportSettings_Internal(YAML::Node& node)
+	{
+		FileImportSettings importSettings;
+		YAML::Node nextNode;
+		YAML_READ(node, nextNode, Flags, importSettings.Flags, int);
+		YAML_READ(node, nextNode, AddNullTerminateAtEnd, importSettings.AddNullTerminateAtEnd, bool);
+		return importSettings;
+	}
+
+	void FileLoaderModule::WriteImportSettings_Internal(const FileImportSettings& importSettings, YAML::Emitter& out)
+	{
+		YAML_WRITE(out, Flags, importSettings.Flags);
+		YAML_WRITE(out, AddNullTerminateAtEnd, importSettings.AddNullTerminateAtEnd);
+	}
+
+	FileImportSettings::FileImportSettings()
+		: Flags(std::ios::ate), AddNullTerminateAtEnd(false) {}
+
+	FileImportSettings::FileImportSettings(const std::string& extension)
+		: Flags(std::ios::ate), AddNullTerminateAtEnd(false), ImportSettings(extension) {}
 }

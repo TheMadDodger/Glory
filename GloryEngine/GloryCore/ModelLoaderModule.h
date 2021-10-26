@@ -6,6 +6,8 @@ namespace Glory
 {
 	struct ModelImportSettings : ImportSettings
 	{
+		ModelImportSettings();
+		ModelImportSettings(const std::string& extension);
 	};
 
 	class ModelLoaderModule : public ResourceLoaderModule<ModelData, ModelImportSettings>
@@ -19,6 +21,9 @@ namespace Glory
 	protected:
 		virtual ModelData* LoadModel(const std::string& path, const ModelImportSettings& importSettings) = 0;
 		virtual ModelData* LoadModel(const void* buffer, size_t length, const ModelImportSettings& importSettings) = 0;
+
+		virtual ModelImportSettings ReadImportSettings_Internal(YAML::Node& node) override;
+		virtual void WriteImportSettings_Internal(const ModelImportSettings& importSettings, YAML::Emitter& out) override;
 
 	private:
 		virtual ModelData* LoadResource(const std::string& path, const ModelImportSettings& importSettings) override;

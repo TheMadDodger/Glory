@@ -78,6 +78,7 @@ project "GloryMain"
 		"shaderc_combined",
 		"shaderc_shared",
 		"ImGui",
+		"yaml-cpp",
 		"GloryEditor",
 		"spirv-cross-c",
 		"spirv-cross-core",

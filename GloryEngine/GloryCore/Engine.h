@@ -10,7 +10,7 @@
 #include "RendererModule.h"
 #include "MainThread.h"
 #include "ResourceLoaderModule.h"
-#include <typeindex>
+#include "ResourceType.h"
 
 namespace Glory
 {
@@ -53,7 +53,10 @@ namespace Glory
 			return pModule;
 		}
 
+		LoaderModule* GetLoaderModule(const std::string& extension);
+
 		LoaderModule* GetLoaderModule(const std::type_info& resourceType);
+		LoaderModule* GetLoaderModule(size_t typeHash);
 
 		Module* GetModule(const std::type_info& type);
 
@@ -87,6 +90,7 @@ namespace Glory
 
 		std::vector<LoaderModule*> m_pLoaderModules;
 		std::map<std::type_index, size_t> m_TypeToLoader;
+		std::map<size_t, size_t> m_TypeHashToLoader;
 
 		// Threading
 		ThreadManager* m_pThreadManager;

@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{F7988B5F-6303-40D6-AC41-F17B18EB1D2B}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{368b9278-b0db-4fc7-9367-afaf75185386}</ProjectGuid>
     <RootNamespace>GloryMain</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -29,44 +29,38 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\GloryCore\MACROS.props" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\GloryCore\MACROS.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -74,107 +68,185 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)build\$(Configuration)\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)build\$(Configuration)\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
+    <OutDir>..\Build\Debug\Win32\</OutDir>
+    <IntDir>Debug\Win32\</IntDir>
+    <TargetName>GloryMain</TargetName>
+    <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)build\$(Configuration)\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
+    <OutDir>..\Build\Debug\x64\</OutDir>
+    <IntDir>Debug\x64\</IntDir>
+    <TargetName>GloryMain</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\Build\Release\Win32\</OutDir>
+    <IntDir>Release\Win32\</IntDir>
+    <TargetName>GloryMain</TargetName>
+    <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)build\$(Configuration)\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\$(Platform)\</IntDir>
+    <OutDir>..\Build\Release\x64\</OutDir>
+    <IntDir>Release\x64\</IntDir>
+    <TargetName>GloryMain</TargetName>
+    <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)GloryEditor;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;glew32.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GloryOpenGLGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;GloryEntityScenes.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;ImGui.lib;GloryEditor.lib;spirv-cross-cd.lib;spirv-cross-cored.lib;spirv-cross-cppd.lib;spirv-cross-glsld.lib;spirv-cross-hlsld.lib;spirv-cross-msld.lib;spirv-cross-reflectd.lib;spirv-cross-utild.lib;yaml-cppd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\GLEW\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\yaml-cpp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\ImGui\$(Configuration)\$(platform)\;$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)GloryEditor;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;glew32.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GloryOpenGLGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;GloryEntityScenes.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;ImGui.lib;GloryEditor.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\GLEW\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\yaml-cpp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\ImGui\$(Configuration)\$(platform)\;$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Debug\Win32;..\submodules\assimp\lib\Debug\Win32;..\third-party\GLEW\lib\Debug\Win32;..\submodules\ImGui\lib\Debug\Win32;..\third-party\SDL_Image\lib\Debug\Win32;..\third-party\shaderc\lib\Debug\Win32;..\third-party\spirv-cross\lib\Debug\Win32;..\submodules\yaml-cpp\lib\Debug\Win32;C:\VulkanSDK\1.2.182.0\Lib32;C:\VulkanSDK\1.2.182.0\Third-Party\Bin32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\third-party\SDL_Image\lib\Debug\Win32\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Debug\Win32\*.dll ..\Build\Debug\Win32 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Debug\Win32\*.dll ..\Build\Debug\Win32 &gt; nul)
+IF EXIST ..\third-party\GLEW\lib\Debug\Win32\*.dll\ (xcopy /Q /E /Y /I ..\third-party\GLEW\lib\Debug\Win32\*.dll ..\Build\Debug\Win32 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\GLEW\lib\Debug\Win32\*.dll ..\Build\Debug\Win32 &gt; nul)
+IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll\ (xcopy /Q /E /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll ..\Build\Debug\Win32 &gt; nul) ELSE (xcopy /Q /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll ..\Build\Debug\Win32 &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)GloryEditor;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;glew32.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GloryOpenGLGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;GloryEntityScenes.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;ImGui.lib;GloryEditor.lib;spirv-cross-cd.lib;spirv-cross-cored.lib;spirv-cross-cppd.lib;spirv-cross-glsld.lib;spirv-cross-hlsld.lib;spirv-cross-msld.lib;spirv-cross-reflectd.lib;spirv-cross-utild.lib;yaml-cppd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\GLEW\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\yaml-cpp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\ImGui\$(Configuration)\$(platform)\;$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Debug\x64;..\submodules\assimp\lib\Debug\x64;..\third-party\GLEW\lib\Debug\x64;..\submodules\ImGui\lib\Debug\x64;..\third-party\SDL_Image\lib\Debug\x64;..\third-party\shaderc\lib\Debug\x64;..\third-party\spirv-cross\lib\Debug\x64;..\submodules\yaml-cpp\lib\Debug\x64;C:\VulkanSDK\1.2.182.0\Lib;C:\VulkanSDK\1.2.182.0\Third-Party\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\third-party\SDL_Image\lib\Debug\x64\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Debug\x64\*.dll ..\Build\Debug\x64 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Debug\x64\*.dll ..\Build\Debug\x64 &gt; nul)
+IF EXIST ..\third-party\GLEW\lib\Debug\x64\*.dll\ (xcopy /Q /E /Y /I ..\third-party\GLEW\lib\Debug\x64\*.dll ..\Build\Debug\x64 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\GLEW\lib\Debug\x64\*.dll ..\Build\Debug\x64 &gt; nul)
+IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll\ (xcopy /Q /E /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll ..\Build\Debug\x64 &gt; nul) ELSE (xcopy /Q /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll ..\Build\Debug\x64 &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\include;$(SolutionDir)bin\GLEW\include;$(SolutionDir)bin\assimp\include;$(solutiondir)bin\shaderc\include;$(solutiondir)bin\spirv-cross\include;$(solutiondir)bin\yaml-cpp\include;$(solutiondir)GloryCore;$(solutiondir)GlorySDLWindow;$(solutiondir)GloryVulkanGraphics;$(solutiondir)GloryOpenGLGraphics;$(solutiondir)GlorySDLImage;$(solutiondir)GloryASSIMPModelLoader;$(solutiondir)GloryGLSLShaderLoader;$(solutiondir)GloryEntityScenes;$(solutiondir)GloryEditor;$(solutiondir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;glew32.lib;GloryCore.lib;GlorySDLWindow.lib;GloryVulkanGraphics.lib;GloryOpenGLGraphics.lib;GlorySDLImage.lib;GloryASSIMPModelLoader.lib;GloryGLSLShaderLoader.lib;GloryEntityScenes.lib;assimp-vc141-mt.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;ImGui.lib;GloryEditor.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\GLEW\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\yaml-cpp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\ImGui\$(Configuration)\$(platform)\;$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories);$(solutiondir)bin\Engine\$(configuration)\$(platform);$(SolutionDir)bin\SDL_Image\lib\$(platform)\;$(SolutionDir)bin\assimp\lib\$(Configuration)\$(platform)\;$(SolutionDir)bin\shaderc\lib\$(configuration)\$(platform)\;$(solutiondir)bin\spirv-cross\lib\$(configuration)\$(platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Release\Win32;..\submodules\assimp\lib\Release\Win32;..\third-party\GLEW\lib\Release\Win32;..\submodules\ImGui\lib\Release\Win32;..\third-party\SDL_Image\lib\Release\Win32;..\third-party\shaderc\lib\Release\Win32;..\third-party\spirv-cross\lib\Release\Win32;..\submodules\yaml-cpp\lib\Release\Win32;C:\VulkanSDK\1.2.182.0\Lib32;C:\VulkanSDK\1.2.182.0\Third-Party\Bin32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\third-party\SDL_Image\lib\Release\Win32\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Release\Win32\*.dll ..\Build\Release\Win32 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Release\Win32\*.dll ..\Build\Release\Win32 &gt; nul)
+IF EXIST ..\third-party\GLEW\lib\Release\Win32\*.dll\ (xcopy /Q /E /Y /I ..\third-party\GLEW\lib\Release\Win32\*.dll ..\Build\Release\Win32 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\GLEW\lib\Release\Win32\*.dll ..\Build\Release\Win32 &gt; nul)
+IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll\ (xcopy /Q /E /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll ..\Build\Release\Win32 &gt; nul) ELSE (xcopy /Q /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll ..\Build\Release\Win32 &gt; nul)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Release\x64;..\submodules\assimp\lib\Release\x64;..\third-party\GLEW\lib\Release\x64;..\submodules\ImGui\lib\Release\x64;..\third-party\SDL_Image\lib\Release\x64;..\third-party\shaderc\lib\Release\x64;..\third-party\spirv-cross\lib\Release\x64;..\submodules\yaml-cpp\lib\Release\x64;C:\VulkanSDK\1.2.182.0\Lib;C:\VulkanSDK\1.2.182.0\Third-Party\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\third-party\SDL_Image\lib\Release\x64\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Release\x64\*.dll ..\Build\Release\x64 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Release\x64\*.dll ..\Build\Release\x64 &gt; nul)
+IF EXIST ..\third-party\GLEW\lib\Release\x64\*.dll\ (xcopy /Q /E /Y /I ..\third-party\GLEW\lib\Release\x64\*.dll ..\Build\Release\x64 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\GLEW\lib\Release\x64\*.dll ..\Build\Release\x64 &gt; nul)
+IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll\ (xcopy /Q /E /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll ..\Build\Release\x64 &gt; nul) ELSE (xcopy /Q /Y /I C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll ..\Build\Release\x64 &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GloryMain.cpp" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h" />
+    <ClCompile Include="GloryMain.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GloryCore\GloryCore.vcxproj">
+      <Project>{DB59865F-47C4-3AD6-9002-EC7BFCAB182B}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GlorySDLWindow\GlorySDLWindow.vcxproj">
+      <Project>{4DE2D4AF-39B0-C8B5-2244-39DC0EB1A41A}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GloryVulkanGraphics\GloryVulkanGraphics.vcxproj">
+      <Project>{D4CB63DA-402D-41E8-C99A-879A35FB77A7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GloryOpenGLGraphics\GloryOpenGLGraphics.vcxproj">
+      <Project>{88DB9B06-F43C-7914-7DAA-BFC6E90AB0D3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GlorySDLImage\GlorySDLImage.vcxproj">
+      <Project>{98A23988-0463-B5BE-CD9D-FE3B391DFA9A}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GloryASSIMPModelLoader\GloryASSIMPModelLoader.vcxproj">
+      <Project>{079BA823-F394-D175-DC01-6886C89A37E2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GloryGLSLShaderLoader\GloryGLSLShaderLoader.vcxproj">
+      <Project>{32551006-9EC1-CB00-67B5-635ED3E0ED68}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GloryEntityScenes\GloryEntityScenes.vcxproj">
+      <Project>{9007C55E-FC1D-C3F4-4595-4E16B1EA937C}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\submodules\ImGui\ImGui.vcxproj">
+      <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\submodules\yaml-cpp\yaml-cpp.vcxproj">
+      <Project>{88F1A057-74BE-FB62-9DD7-E90A890331F1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\GloryEditor\GloryEditor.vcxproj">
+      <Project>{79DF625E-E594-DB53-6E89-D52ADA3DD257}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

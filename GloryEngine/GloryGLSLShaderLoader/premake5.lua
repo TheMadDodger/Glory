@@ -22,6 +22,7 @@ project "GloryGLSLShaderLoader"
 	{
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.shaderc}",
+		"%{IncludeDir.yaml_cpp}",
 	}
 
 	filter "system:windows"

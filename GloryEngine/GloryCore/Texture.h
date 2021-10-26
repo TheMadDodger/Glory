@@ -2,6 +2,7 @@
 #include "ImageData.h"
 #include "GraphicsEnums.h"
 #include "GPUResource.h"
+#include <any>
 
 namespace Glory
 {

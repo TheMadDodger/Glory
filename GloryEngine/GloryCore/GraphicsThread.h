@@ -24,6 +24,12 @@ namespace Glory
 		}
 
 		template<typename T>
+		void BindInitializeOnly(T* pModule)
+		{
+			m_InitializationBinds.push_back(std::bind(&T::ThreadedInitialize, pModule));
+		}
+
+		template<typename T>
 		void BindRenderOnly(T* pModule)
 		{
 			m_RenderBinds.push_back(std::bind(&T::Render, pModule, std::placeholders::_1));

@@ -69,3 +69,5 @@ GloryEngine/Build/
 GloryEngine/GloryEditor/Release/
 GloryEngine/GloryEntityScenes/Release/
 GloryEngine/GloryOpenGLGraphics/Release/
+GloryEngine/GloryMain/EditorAssets/
+GloryEngine/GloryMain/Assets/

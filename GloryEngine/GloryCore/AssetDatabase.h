@@ -1,6 +1,7 @@
 #pragma once
 #include "UUID.h"
 #include "AssetLocation.h"
+#include "ResourceMeta.h"
 #include <unordered_map>
 
 namespace Glory
@@ -9,6 +10,8 @@ namespace Glory
 	{
 	public:
 		static const AssetLocation* GetAssetLocation(UUID uuid);
+		static bool AssetExists(UUID uuid);
+		static void InsertAsset(const std::string& path, const ResourceMeta& meta);
 
 	private:
 		static void Initialize();
@@ -23,5 +26,6 @@ namespace Glory
 
 	private:
 		static std::unordered_map<UUID, AssetLocation> m_AssetLocations;
+		static std::vector<ResourceMeta> m_Metas;
 	};
 }

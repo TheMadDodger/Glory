@@ -2,7 +2,7 @@
 #include <ThreadManager.h>
 #include <filesystem>
 
-namespace Glory
+namespace Glory::Editor
 {
 	class EditorAssetLoader
 	{
@@ -12,14 +12,13 @@ namespace Glory
 
 	private:
 		void Initialize();
-		void Run();
+		void LoadAll();
 
-		void ProcessDirectory(const std::string& path);
+		void ProcessDirectory(const std::string& path, bool recursive = true);
 		void ProcessFile(const std::filesystem::path& filePath);
 
 	private:
 		friend class MainEditor;
 		Thread* m_pThread;
-
 	};
 }
