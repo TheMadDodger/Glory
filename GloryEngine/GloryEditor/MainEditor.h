@@ -1,5 +1,6 @@
 #pragma once
 #include <EditorAssetLoader.h>
+#include "ProjectPopup.h"
 
 namespace Glory::Editor
 {
@@ -19,5 +20,6 @@ namespace Glory::Editor
 
 	private:
 		EditorAssetLoader* m_pAssetLoader;
+		ProjectPopup* m_pProjectPopup;
 	};
 }

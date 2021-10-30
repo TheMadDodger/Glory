@@ -37,26 +37,26 @@ namespace Glory::Editor
 		m_OpeningPopupNames.clear();
 
 		std::for_each(m_Popups.begin(), m_Popups.end(), [&](const Popup& popup)
+		{
+			if (ImGui::BeginPopup(popup.m_PopupName.c_str()))
 			{
-				if (ImGui::BeginPopup(popup.m_PopupName.c_str()))
-				{
-					ImGui::Text(popup.m_PopupName.c_str());
-					ImGui::Text(popup.m_PopupDescription.c_str());
+				ImGui::Text(popup.m_PopupName.c_str());
+				ImGui::Text(popup.m_PopupDescription.c_str());
 
-					for (size_t i = 0; i < popup.m_Buttons.size(); i++)
+				for (size_t i = 0; i < popup.m_Buttons.size(); i++)
+				{
+					if (ImGui::Button(popup.m_Buttons[i].c_str()))
 					{
-						if (ImGui::Button(popup.m_Buttons[i].c_str()))
+						if (i < popup.m_ButtonFuncs.size())
 						{
-							if (i < popup.m_ButtonFuncs.size())
-							{
-								popup.m_ButtonFuncs[i]();
-							}
+							popup.m_ButtonFuncs[i]();
 						}
-						ImGui::SameLine();
 					}
-					ImGui::EndPopup();
+					ImGui::SameLine();
 				}
-			});
+				ImGui::EndPopup();
+			}
+		});
 	}
 
 	PopupManager::PopupManager()

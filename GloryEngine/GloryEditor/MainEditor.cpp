@@ -13,10 +13,11 @@
 #include "PopupManager.h"
 #include "EditorAssets.h"
 #include <imgui.h>
+#include "ProjectSpace.h"
 
 namespace Glory::Editor
 {
-	MainEditor::MainEditor() : m_pAssetLoader(new EditorAssetLoader())
+	MainEditor::MainEditor() : m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup())
 	{
 	}
 
@@ -39,10 +40,14 @@ namespace Glory::Editor
 		m_pAssetLoader->LoadAll();
 
 		SetDarkThemeColors();
+
+		m_pProjectPopup->Initialize();
+		m_pProjectPopup->Open();
 	}
 
 	void MainEditor::Destroy()
 	{
+		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
 	}
 
@@ -65,6 +70,7 @@ namespace Glory::Editor
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
         EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
+		m_pProjectPopup->OnGui();
 	}
 
 	void MainEditor::CreateDefaultMainMenuBar()
