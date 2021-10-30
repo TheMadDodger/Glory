@@ -54,10 +54,6 @@ int main()
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     {
-        Glory::ResourceMeta meta ("test.yaml");
-        //meta.Load("test.yaml");
-
-
         Glory::WindowCreateInfo windowCreateInfo;
         windowCreateInfo.WindowName = "Glory Editor";
         windowCreateInfo.Width = 2560;

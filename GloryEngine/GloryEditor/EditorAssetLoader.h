@@ -17,6 +17,8 @@ namespace Glory::Editor
 		void ProcessDirectory(const std::string& path, bool recursive = true);
 		void ProcessFile(const std::filesystem::path& filePath);
 
+		void RemoveDeletedAssets();
+
 	private:
 		friend class MainEditor;
 		Thread* m_pThread;

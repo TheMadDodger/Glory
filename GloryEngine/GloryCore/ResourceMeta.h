@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <fstream>
 #include <yaml-cpp/yaml.h>
 #include "ResourceLoaderModule.h"
 #include "ModelLoaderModule.h"
@@ -10,8 +11,9 @@ namespace Glory
 	class ResourceMeta
 	{
 	public:
-		ResourceMeta(const std::string& path);
-		ResourceMeta(const std::string& path, UUID uuid, size_t hash);
+		ResourceMeta();
+		ResourceMeta(const std::string& path, const std::string& extension);
+		ResourceMeta(const std::string& path, const std::string& extension, UUID uuid, size_t hash);
 		virtual ~ResourceMeta();
 
 		//void test()
@@ -28,17 +30,47 @@ namespace Glory
 		//	importSettings = pLoader->ReadImportSettings_Internal(m_Node);
 		//}
 
+		void Write(LoaderModule* pLoader) const;
+		void Write(YAML::Emitter& emitter, LoaderModule* pLoader) const;
+		void Write(YAML::Emitter& emitter, LoaderModule* pLoader, const std::any& importSettings) const;
+		void Read();
+
+		const std::string& Path() const;
+		const std::string& Extension() const;
+		UUID ID() const;
+		size_t Hash() const;
+		const std::any& ImportSettings() const;
+		bool Exists() const;
+		
+	private:
 		uint64_t ReadUUID() const;
 		size_t ReadHash() const;
 
-		void Write(LoaderModule* pLoader, const std::string& extension);
-		void Read();
-
 	private:
+		friend class AssetDatabase;
 		YAML::Node m_Node;
 
 		std::string m_Path;
+		std::string m_Extension;
 		UUID m_UUID;
 		size_t m_TypeHash;
+		std::any m_ImportSettings;
+	};
+}
+
+namespace std
+{
+	template<>
+	struct hash<Glory::ResourceMeta>
+	{
+		std::size_t operator()(const Glory::ResourceMeta& meta) const
+		{
+			std::ifstream inStream(meta.Path());
+			std::stringstream buffer;
+			buffer << inStream.rdbuf();
+			inStream.close();
+			std::string str = buffer.str();
+			return std::hash<std::string>()(str);
+		}
 	};
 }

@@ -1,6 +1,6 @@
 //#include "TumbnailGenerator.h"
 //
-//namespace Spartan::Editor
+//namespace Glory::Editor
 //{
 //	BaseTumbnailGenerator::BaseTumbnailGenerator()
 //	{

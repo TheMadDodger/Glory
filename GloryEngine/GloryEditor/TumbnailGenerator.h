@@ -1,8 +1,8 @@
 //#pragma once
 //#include "Tumbnail.h"
-//#include "MetaData.h"
+//#include "ResourceType.h"
 //
-//namespace Spartan::Editor
+//namespace Glory::Editor
 //{
 //	class BaseTumbnailGenerator
 //	{
@@ -10,8 +10,8 @@
 //		BaseTumbnailGenerator();
 //		virtual ~BaseTumbnailGenerator();
 //
-//		virtual TextureData* GetTumbnail(const Spartan::Serialization::MetaData& metaData) = 0;
-//		virtual TextureData* GetTumbnail();
+//		virtual ImageData* GetTumbnail(ResourceType* pResourceType) = 0;
+//		virtual Texture* GetTumbnail();
 //
 //	protected:
 //		virtual const std::type_info& GetAssetType() = 0;
@@ -21,19 +21,6 @@
 //		friend class Tumbnail;
 //	};
 //
-//	class ExtensionTumbnail : public BaseTumbnailGenerator
-//	{
-//	public:
-//		ExtensionTumbnail(const std::string& extension);
-//		virtual ~ExtensionTumbnail();
-//
-//	protected:
-//		virtual const std::string& GetExtension() const;
-//
-//	private:
-//		const std::string m_Extension;
-//	};
-//
 //	template<class T>
 //	class TumbnailGenerator : public BaseTumbnailGenerator
 //	{
@@ -41,6 +28,6 @@
 //		TumbnailGenerator() {}
 //		virtual ~TumbnailGenerator() {}
 //		const std::type_info& GetAssetType() override { return typeid(T); }
-//		virtual TextureData* GetTumbnail(const Spartan::Serialization::MetaData& metaData) = 0;
+//		virtual ImageData* GetTumbnail() = 0;
 //	};
 //}

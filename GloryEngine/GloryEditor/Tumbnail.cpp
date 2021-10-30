@@ -2,10 +2,10 @@
 //#include "TumbnailGenerator.h"
 //#include <AssetManager.h>
 //
-//namespace Spartan::Editor
+//namespace Glory::Editor
 //{
 //	std::vector<BaseTumbnailGenerator*> Tumbnail::m_pGenerators;
-//	std::map<GUID, TextureData*, Spartan::Serialization::GUIDComparer> Tumbnail::m_pTumbnails;
+//	std::map<UUID, TextureData*> Tumbnail::m_pTumbnails;
 //	TextureData* Tumbnail::m_pFolderTumbnail = nullptr;
 //
 //	TextureData* Tumbnail::GetFolderTumbnail()

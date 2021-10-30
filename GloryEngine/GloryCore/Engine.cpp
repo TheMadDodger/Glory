@@ -107,6 +107,8 @@ namespace Glory
 
 	Engine::~Engine()
 	{
+		AssetManager::Destroy();
+
 		m_pGameThread->Stop();
 		m_pGraphicsThread->Stop();
 
@@ -144,7 +146,6 @@ namespace Glory
 
 	void Engine::Initialize()
 	{
-		AssetManager::Initialize();
 		Console::Initialize();
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
@@ -171,6 +172,8 @@ namespace Glory
 			m_pAllModules[i]->m_pEngine = this;
 			m_pAllModules[i]->Initialize();
 		}
+
+		AssetManager::Initialize();
 
 		m_pMainThread = new MainThread();
 		m_pGameThread = new GameThread(this);

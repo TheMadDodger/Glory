@@ -3,16 +3,16 @@
 namespace Glory
 {
 	AssetLocation::AssetLocation()
-		: m_Path(""), m_Index(0), m_IsSubAsset(false), m_pResourceMeta(nullptr)
+		: m_Path(""), m_Index(0), m_IsSubAsset(false)
 	{
 	}
 
-	AssetLocation::AssetLocation(const std::string& path, size_t index, ResourceMeta* pMeta)
-		: m_Path(path), m_Index(index), m_IsSubAsset(true), m_pResourceMeta(pMeta)
+	AssetLocation::AssetLocation(const std::string& path, size_t index, const ResourceMeta& pMeta)
+		: m_Path(path), m_Index(index), m_IsSubAsset(true)
 	{
 	}
 
-	AssetLocation::AssetLocation(const std::string& fullPath, ResourceMeta* pMeta) : m_pResourceMeta(pMeta)
+	AssetLocation::AssetLocation(const std::string& fullPath, const ResourceMeta& pMeta)
 	{
 		int seperatorIndex = fullPath.find(':');
 		if (seperatorIndex == std::string::npos)
