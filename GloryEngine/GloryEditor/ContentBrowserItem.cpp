@@ -1,6 +1,11 @@
-#include "ContentBrowserItem.h"
 #include <stack>
 #include <imgui.h>
+#include <ProjectSpace.h>
+#include <EditorApplication.h>
+#include <AssetDatabase.h>
+#include "ContentBrowserItem.h"
+#include "EditorAssets.h"
+#include "Tumbnail.h"
 
 namespace Glory::Editor
 {
@@ -73,6 +78,8 @@ namespace Glory::Editor
 
 	void ContentBrowserItem::Refresh()
 	{
+		if (ProjectSpace::GetOpenProject() == nullptr) return;
+
 		if (m_pParent == nullptr && m_pHistory.size() <= 0) m_pHistory.push_back(this);
 
 		m_CachedPath = BuildPath();
@@ -129,7 +136,7 @@ namespace Glory::Editor
 	{
 		std::filesystem::path finalPath = "";
 		if (m_pParent == nullptr)
-			finalPath = "./";
+			finalPath = ProjectSpace::GetOpenProject()->RootPath();
 		else
 			finalPath = m_pParent->m_CachedPath;
 
@@ -174,6 +181,8 @@ namespace Glory::Editor
 
 	void ContentBrowserItem::DrawFileBrowser(int iconSize)
 	{
+		if (!m_pSelectedFolder) return;
+
 		ImVec2 windowSize = ImGui::GetWindowSize();
 
 		float width = windowSize.x;
@@ -200,6 +209,8 @@ namespace Glory::Editor
 
 	void ContentBrowserItem::DrawCurrentPath()
 	{
+		if (!m_pSelectedFolder) return;
+
 		std::vector<ContentBrowserItem*> pPathTrace;
 		pPathTrace.push_back(m_pSelectedFolder);
 		ContentBrowserItem* pParent = m_pSelectedFolder->m_pParent;
@@ -228,9 +239,12 @@ namespace Glory::Editor
 
 	void ContentBrowserItem::DrawFileItem(int iconSize)
 	{
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
 		if (m_IsFolder)
 		{
-			ImGui::ImageButton(/*(void*)Tumbnail::GetFolderTumbnail()->GetID()*/ NULL, ImVec2((float)iconSize, (float)iconSize));
+			Texture* pFolderTexture = EditorAssets::GetTexture("folder");
+
+			ImGui::ImageButton(pRenderImpl->GetTextureID(pFolderTexture), ImVec2((float)iconSize, (float)iconSize));
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 			{
 				m_pSelectedFolder = this;
@@ -242,10 +256,13 @@ namespace Glory::Editor
 			return;
 		}
 
-		//Spartan::Serialization::MetaData metaData = Spartan::Serialization::MetaData::Read(path.string());
-		//TextureData* pTexture = Tumbnail::GetTumbnail(metaData);
+		std::filesystem::path assetPath = ProjectSpace::GetOpenProject()->RootPath();
+		assetPath.append("Assets");
+		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
+		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
+		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
-		ImGui::ImageButton(/*pTexture ? (void*)pTexture->GetID() : NULL*/ NULL, ImVec2((float)iconSize, (float)iconSize));
+		ImGui::ImageButton(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)iconSize, (float)iconSize));
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
 		{

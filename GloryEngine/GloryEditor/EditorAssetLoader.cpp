@@ -1,13 +1,18 @@
 #include "EditorAssetLoader.h"
 #include <AssetDatabase.h>
+#include "ProjectSpace.h"
 #include <yaml-cpp/yaml.h>
-
 
 namespace Glory::Editor
 {
 	EditorAssetLoader::EditorAssetLoader() : m_pThread(nullptr) {}
 
 	EditorAssetLoader::~EditorAssetLoader() {}
+
+	void EditorAssetLoader::LoadAssets()
+	{
+		LoadAll();
+	}
 
 	void EditorAssetLoader::Initialize()
 	{
@@ -18,9 +23,10 @@ namespace Glory::Editor
 
 	void EditorAssetLoader::LoadAll()
 	{
-		std::string rootPath = "./Assets";
-		ProcessDirectory(rootPath, true);
+		std::filesystem::path assetPath = ProjectSpace::GetOpenProject()->RootPath();
+		assetPath.append("Assets");
 
+		ProcessDirectory(assetPath.string(), true);
 		RemoveDeletedAssets();
 	}
 
@@ -41,18 +47,15 @@ namespace Glory::Editor
 
 	void EditorAssetLoader::ProcessFile(const std::filesystem::path& filePath)
 	{
-		//AssetDatabase* pInstance = GetInstance();
-
 		auto ext = filePath.extension();
 		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
 		if (ext.compare(metaExtension) == 0) return; // No need to process meta files
-		auto metaFilePath = filePath;
-		metaFilePath = metaFilePath.replace_extension(metaExtension);
+		std::filesystem::path metaFilePath = filePath.string() + metaExtension.string();
 
 		// Make the path relative to the asset/resource path!
-		std::string pathToFile = filePath.string();
-		int assetsIndex = pathToFile.find("Assets");
-		std::string relativePathToFile = pathToFile.substr(assetsIndex + 6);
+		std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
+		assetsPath.append("Assets");
+		std::string relativePathToFile = filePath.lexically_relative(assetsPath).string();
 
 		if (std::filesystem::exists(metaFilePath))
 		{
@@ -106,7 +109,8 @@ namespace Glory::Editor
 		std::vector<UUID> toDeleteAssets;
 		AssetDatabase::ForEachAssetLocation([&](UUID uuid, const AssetLocation& assetLocation)
 		{
-			std::filesystem::path path("./Assets" + assetLocation.m_Path);
+			std::filesystem::path path = Game::GetAssetPath();
+			path.append(assetLocation.m_Path);
 			if (std::filesystem::exists(path)) return;
 			toDeleteAssets.push_back(uuid);
 		});

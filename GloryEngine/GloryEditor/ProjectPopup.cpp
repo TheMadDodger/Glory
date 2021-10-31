@@ -151,19 +151,20 @@ namespace Glory::Editor
         }
 
         static ImGuiTableFlags flags =
-            ImGuiTableFlags_Resizable
-            | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
+            //ImGuiTableFlags_Resizable
+            ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
             | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
             | ImGuiTableFlags_SizingFixedFit;
 
         if (ImGui::BeginTable("Project Hub", 1, flags, ImVec2(0, 0), 0.0f))
         {
             ImGui::TableSetupColumn("Project Name", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 0);
+            //ImGui::TableSetupColumn("Project Date", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
             //ImGui::TableSetupColumn("Project Path", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
 
             ImGui::TableHeadersRow();
 
-            ImGui::PushButtonRepeat(true);
+            //ImGui::PushButtonRepeat(true);
 
             for (size_t row_n = 0; row_n < m_Projects.size(); row_n++)
             {
@@ -200,7 +201,7 @@ namespace Glory::Editor
 
                 ImGui::PopID();
             }
-            ImGui::PopButtonRepeat();
+            //ImGui::PopButtonRepeat();
             ImGui::EndTable();
 
             if (m_OpenErrorPopup) ImGui::OpenPopup("Project Not Found");

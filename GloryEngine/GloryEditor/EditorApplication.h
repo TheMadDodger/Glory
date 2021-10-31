@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorPlatform.h"
 #include "MainEditor.h"
+#include "ProjectSpace.h"
 #include <Game.h>
 #include <EditorAssetLoader.h>
 
@@ -15,6 +16,15 @@ namespace Glory::Editor
 		template<class Window, class Renderer>
 		void Initialize(Game& game)
 		{
+			game.OverrideAssetPathFunc([]()
+			{
+				ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+				if (pProject == nullptr) return std::string("./Assets");
+				std::filesystem::path path = pProject->RootPath();
+				path.append("Assets");
+				return path.string();
+			});
+
 			auto window = (EditorWindowImpl*)(new Window());
 			auto renderer = (EditorRenderImpl*)(new Renderer());
 			m_pPlatform = new EditorPlatform(window, renderer);
@@ -31,6 +41,7 @@ namespace Glory::Editor
 		void Run();
 
 		EditorPlatform* GetEditorPlatform();
+		MainEditor* GetMainEditor();
 
 		static EditorApplication* GetInstance();
 

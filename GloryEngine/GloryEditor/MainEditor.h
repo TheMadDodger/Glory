@@ -14,6 +14,8 @@ namespace Glory::Editor
 		void Destroy();
 		void Paint();
 
+		EditorAssetLoader* GetAssetLoader();
+
 	private:
 		void CreateDefaultMainMenuBar();
 		void SetDarkThemeColors();

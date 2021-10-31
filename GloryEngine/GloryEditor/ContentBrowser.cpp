@@ -9,6 +9,7 @@
 #include "EditorRenderImpl.h"
 
 #include <GLTexture.h>
+#include <ProjectSpace.h>
 
 namespace Glory::Editor
 {
@@ -18,7 +19,6 @@ namespace Glory::Editor
         m_I(0), m_SearchBuffer("\0"), m_Refresh(false), m_pRootItem(nullptr)
 	{
 		m_Resizeable = true;
-        m_RootAssetPath = "./Assets";
         m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
 	}
 
@@ -60,10 +60,9 @@ namespace Glory::Editor
 
     void ContentBrowser::DirectoryBrowser()
     {
-        auto assetRootPath = m_RootAssetPath;
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::BeginChild("DirectoryBrowser", ImVec2(0, 0), false, window_flags);
-        m_pRootItem->DrawDirectoryBrowser();
+        if (m_pRootItem) m_pRootItem->DrawDirectoryBrowser();
         ImGui::EndChild();
     }
 
@@ -139,6 +138,8 @@ namespace Glory::Editor
 
     void ContentBrowser::RefreshContentBrowser()
     {
+        if (ProjectSpace::GetOpenProject() == nullptr) return;
+
         if (m_Refresh) return;
         if (m_pRootItem == nullptr) m_pRootItem = new ContentBrowserItem("Assets", true, nullptr);
         m_pRootItem->Refresh();

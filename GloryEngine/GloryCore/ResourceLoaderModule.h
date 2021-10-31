@@ -1,10 +1,11 @@
 #pragma once
-#include "Module.h"
-#include "Resource.h"
-#include "ResourceType.h"
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include <any>
+#include <filesystem>
+#include "Module.h"
+#include "Resource.h"
+#include "ResourceType.h"
 
 #define YAML_READ(startNode, node, key, out, type) node = startNode[#key]; \
 if (node.IsDefined()) out = node.as<type>()
@@ -30,6 +31,7 @@ namespace Glory
 		LoaderModule();
 		virtual ~LoaderModule();
 
+		virtual Resource* LoadUsingAny(const std::string& path, const std::any& importSettings) = 0;
 		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) = 0;
 		virtual Resource* Load(const void* buffer, size_t length, const ImportSettings& importSettings = ImportSettings()) = 0;
 		virtual const std::type_info& GetResourceType() = 0;
@@ -58,6 +60,20 @@ namespace Glory
 
 		virtual ~ResourceLoaderModule() {}
 
+		virtual Resource* LoadUsingAny(const std::string& path, const std::any& importSettings) override
+		{
+			if (importSettings.type() != typeid(S))
+			{
+				std::filesystem::path filePath = path;
+				std::any defaultSettings = CreateDefaultImportSettings(filePath.extension().string());
+				S convertedSettings = std::any_cast<S>(defaultSettings);
+				return (Resource*)LoadResource(path, convertedSettings);
+			}
+
+			S convertedSettings = std::any_cast<S>(importSettings);
+			return (Resource*)LoadResource(path, convertedSettings);
+		}
+
 		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) override
 		{
 			T* pResource = LoadResource(path, (const S&)importSettings);
@@ -82,6 +98,14 @@ namespace Glory
 
 		virtual void WriteImportSettings(const std::any& importSettings, YAML::Emitter& out) override
 		{
+			if (importSettings.type() != typeid(S))
+			{
+				std::any defaultSettings = CreateDefaultImportSettings("");
+				S convertedSettings = std::any_cast<S>(defaultSettings);
+				WriteImportSettings_Internal(convertedSettings, out);
+				return;
+			}
+
 			S convertedSettings = std::any_cast<S>(importSettings);
 			WriteImportSettings_Internal(convertedSettings, out);
 		}

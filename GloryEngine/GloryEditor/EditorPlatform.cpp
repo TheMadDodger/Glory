@@ -117,7 +117,7 @@ namespace Glory::Editor
 
 	void EditorPlatform::Render(const RenderFrame&)
 	{
-		EditorAssets::Initialize();
+		EditorAssets::LoadAssets();
 
 		std::unique_lock<std::mutex> lock(m_Mutex);
 

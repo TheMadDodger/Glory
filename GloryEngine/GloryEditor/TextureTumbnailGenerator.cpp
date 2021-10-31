@@ -1,20 +1,18 @@
-//#include "TextureTumbnailGenerator.h"
-//#include "AssetManager.h"
-//
-//namespace Spartan::Editor
-//{
-//	TextureTumbnailGenerator::TextureTumbnailGenerator()
-//	{
-//	}
-//
-//	TextureTumbnailGenerator::~TextureTumbnailGenerator()
-//	{
-//	}
-//
-//	TextureData* TextureTumbnailGenerator::GetTumbnail(const Spartan::Serialization::MetaData& metaData)
-//	{
-//		Content* pAsset = AssetManager::GetAsset(metaData.m_GUID);
-//		if (pAsset == nullptr) return nullptr;
-//		return (TextureData*)pAsset;
-//	}
-//}
+#include "TextureTumbnailGenerator.h"
+#include "AssetManager.h"
+
+namespace Glory::Editor
+{
+	TextureTumbnailGenerator::TextureTumbnailGenerator()
+	{
+	}
+
+	TextureTumbnailGenerator::~TextureTumbnailGenerator()
+	{
+	}
+
+	ImageData* TextureTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
+	{
+		return AssetManager::GetAsset<ImageData>(pResourceType->ID());
+	}
+}

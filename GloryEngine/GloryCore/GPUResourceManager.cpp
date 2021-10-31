@@ -83,4 +83,9 @@ namespace Glory
 		m_IDResources[pImageData->GetUUID()] = pTexture;
 		return pTexture;
 	}
+
+	bool GPUResourceManager::ResourceExists(Resource* pResource)
+	{
+		return m_IDResources.find(pResource->GetUUID()) != m_IDResources.end();
+	}
 }

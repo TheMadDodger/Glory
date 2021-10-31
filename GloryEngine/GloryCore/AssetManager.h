@@ -27,10 +27,15 @@ namespace Glory
 				throw new std::exception("Not implemented yet");
 			}
 
-			pResource = pModule->Load(pAssetLocation->m_Path);
+			std::filesystem::path path = Game::GetAssetPath();
+			path.append(pAssetLocation->m_Path);
+
+			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
+
+			pResource = pModule->LoadUsingAny(path.string(), pMeta->ImportSettings());
 			
 			m_pLoadedAssets[uuid] = pResource;
-			return pResource;
+			return (T*)pResource;
 		}
 
 	private:

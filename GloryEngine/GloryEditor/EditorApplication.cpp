@@ -43,6 +43,11 @@ namespace Glory::Editor
 		return m_pPlatform;
 	}
 
+	MainEditor* EditorApplication::GetMainEditor()
+	{
+		return m_pMainEditor;
+	}
+
 	EditorApplication* EditorApplication::GetInstance()
 	{
 		return m_pEditorInstance;
@@ -50,14 +55,8 @@ namespace Glory::Editor
 
 	void EditorApplication::RenderEditor()
 	{
-		//ImGui::Begin("Test");
-		//
-		//ImGui::End();
-
 		m_pMainEditor->Paint();
 
-		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-		//if (show_demo_window)
 		ImGui::ShowDemoWindow();
 	}
 }

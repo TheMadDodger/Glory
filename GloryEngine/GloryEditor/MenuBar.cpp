@@ -28,18 +28,18 @@ namespace Glory::Editor
 		m_MenuBarHeight = size.y;
 
 		std::for_each(m_MenuItems.begin(), m_MenuItems.end(), [](const MenuBar::MenuItem& childItem)
+		{
+			if (childItem.m_HasFunc)
 			{
-				if (childItem.m_HasFunc)
-				{
-					if (ImGui::MenuItem(childItem.m_Name.c_str()))
-						childItem.m_Func();
-				}
-				else if (ImGui::BeginMenu(childItem.m_Name.c_str()))
-				{
-					MenusRecursive(childItem);
-					ImGui::EndMenu();
-				}
-			});
+				if (ImGui::MenuItem(childItem.m_Name.c_str()))
+					childItem.m_Func();
+			}
+			else if (ImGui::BeginMenu(childItem.m_Name.c_str()))
+			{
+				MenusRecursive(childItem);
+				ImGui::EndMenu();
+			}
+		});
 		ImGui::EndMainMenuBar();
 	}
 

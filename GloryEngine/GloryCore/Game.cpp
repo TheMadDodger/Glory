@@ -78,6 +78,16 @@ namespace Glory
 		m_Game.m_bIsRunning = false;
 	}
 
+	void Game::OverrideAssetPathFunc(std::function<std::string()> func)
+	{
+		m_AssetPathFunc = func;
+	}
+
+	std::string Game::GetAssetPath()
+	{
+		return m_Game.m_AssetPathFunc();
+	}
+
 	Game::Game(const GameSettings& pGameSettings) : m_pGameState(pGameSettings.pGameState), m_pEngine(pGameSettings.pEngine),
 		m_bInitialized(false), m_bIsRunning(false)
 	{
@@ -92,6 +102,8 @@ namespace Glory
 	void Game::Initialize()
 	{
 		if (m_bInitialized) return;
+		m_AssetPathFunc = []() { return "./Assets"; };
+
 		m_pEngine->Initialize();
 		m_bInitialized = true;
 		m_bIsRunning = true;

@@ -10,6 +10,8 @@ namespace Glory::Editor
 		EditorAssetLoader();
 		virtual ~EditorAssetLoader();
 
+		void LoadAssets();
+
 	private:
 		void Initialize();
 		void LoadAll();

@@ -1,14 +1,18 @@
 #pragma once
 #include <ImageLoaderModule.h>
 #include <GraphicsModule.h>
+#include <mutex>
+#include <unordered_map>
+#include <vector>
 
 namespace Glory::Editor
 {
 	class EditorAssets
 	{
 	public:
-		static void Initialize();
+		static void LoadAssets();
 		static void Destroy();
+		static void EnqueueTextureCreation(ImageData* pImage);
 
 		static Texture* GetTexture(const std::string& key);
 
@@ -23,5 +27,7 @@ namespace Glory::Editor
 		static bool m_IsInitialized;
 		static std::vector<ImageData*> m_pEditorImages;
 		static std::unordered_map<std::string, Texture*> m_pTextures;
+		static std::mutex m_QueueLock;
+		static std::vector<ImageData*> m_pTextureCreationQueue;
 	};
 }

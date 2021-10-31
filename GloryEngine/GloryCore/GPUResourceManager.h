@@ -24,6 +24,8 @@ namespace Glory
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Texture* CreateTexture(ImageData* pImageData);
 
+		bool ResourceExists(Resource* pResource);
+
 	protected: // Internal functions
 		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;

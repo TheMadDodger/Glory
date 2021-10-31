@@ -25,6 +25,7 @@ namespace Glory
 	private:
 		static void Initialize();
 		static void Destroy();
+		static void Clear();
 		static void ExportEditor(YAML::Emitter& out);
 		static void ExportBuild(YAML::Emitter& out);
 

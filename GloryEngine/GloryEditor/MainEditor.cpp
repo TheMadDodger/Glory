@@ -1,3 +1,4 @@
+#include <imgui.h>
 #include "MainEditor.h"
 #include "EditorWindow.h"
 #include "GameWindow.h"
@@ -12,8 +13,9 @@
 #include "Window.h"
 #include "PopupManager.h"
 #include "EditorAssets.h"
-#include <imgui.h>
 #include "ProjectSpace.h"
+#include "Tumbnail.h"
+#include "TextureTumbnailGenerator.h"
 
 namespace Glory::Editor
 {
@@ -37,12 +39,12 @@ namespace Glory::Editor
 
 		CreateDefaultMainMenuBar();
 
-		m_pAssetLoader->LoadAll();
-
 		SetDarkThemeColors();
 
 		m_pProjectPopup->Initialize();
 		m_pProjectPopup->Open();
+
+		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 	}
 
 	void MainEditor::Destroy()
@@ -71,6 +73,11 @@ namespace Glory::Editor
         EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
 		m_pProjectPopup->OnGui();
+	}
+
+	EditorAssetLoader* MainEditor::GetAssetLoader()
+	{
+		return m_pAssetLoader;
 	}
 
 	void MainEditor::CreateDefaultMainMenuBar()

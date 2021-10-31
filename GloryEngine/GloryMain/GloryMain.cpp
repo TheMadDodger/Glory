@@ -35,7 +35,7 @@ namespace Glory
             //    pMaterial->SetProperties();
             //    pGraphics->DrawMesh(pMesh);
             //}
-            pGraphics->Swap();
+            //pGraphics->Swap();
         }
     };
 }

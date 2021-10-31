@@ -18,6 +18,9 @@ namespace Glory
 
 		static void Quit();
 
+		void OverrideAssetPathFunc(std::function<std::string()> func);
+		static std::string GetAssetPath();
+
 	private:
 		Game(const GameSettings& pGameState);
 		Game();
@@ -31,5 +34,6 @@ namespace Glory
 
 		static Game m_Game;
 		static bool m_bGameCreated;
+		std::function<std::string()> m_AssetPathFunc;
 	};
 }

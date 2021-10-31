@@ -1,7 +1,9 @@
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
+#include <AssetDatabase.h>
 #include "ProjectSpace.h"
+#include "EditorApplication.h"
 
 namespace Glory::Editor
 {
@@ -64,7 +66,27 @@ namespace Glory::Editor
 		return projectFilePath.string();
 	}
 
-	ProjectSpace::ProjectSpace(const std::string& path) : m_ProjectPath(path)
+	ProjectSpace* ProjectSpace::CurrentProject()
+	{
+		return m_pCurrentProject;
+	}
+
+	std::string ProjectSpace::Name()
+	{
+		return m_ProjectName;
+	}
+
+	std::string ProjectSpace::RootPath()
+	{
+		return m_ProjectRootPath;
+	}
+
+	std::string ProjectSpace::ProjectPath()
+	{
+		return m_ProjectFilePath;
+	}
+
+	ProjectSpace::ProjectSpace(const std::string& path) : m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string())
 	{
 	}
 
@@ -74,11 +96,24 @@ namespace Glory::Editor
 
 	void ProjectSpace::Open()
 	{
-		YAML::Node node = YAML::LoadFile(m_ProjectPath);
+		CreateFolder("Assets");
+		YAML::Node node = YAML::LoadFile(m_ProjectFilePath);
 		m_ProjectName = node["ProjectName"].as<std::string>();
+
+		AssetDatabase::Load();
+		EditorApplication::GetInstance()->GetMainEditor()->GetAssetLoader()->LoadAssets();
 	}
 
 	void ProjectSpace::Close()
 	{
+		AssetDatabase::Save();
+	}
+
+	void ProjectSpace::CreateFolder(const std::string& name)
+	{
+		std::filesystem::path path = m_ProjectRootPath;
+		path.append(name);
+		if (std::filesystem::exists(path)) return;
+		std::filesystem::create_directories(path);
 	}
 }

@@ -77,18 +77,25 @@ namespace Glory
 		YAML::Emitter out;
 		ExportEditor(out);
 
-		std::string path = "./Assets/AssetDatabase.yaml";
-		std::ofstream outStream(path);
+		std::filesystem::path databasePath = Game::GetAssetPath();
+		databasePath = databasePath.parent_path();
+		databasePath.append("Assets.db");
+
+		std::ofstream outStream(databasePath);
 		outStream << out.c_str();
 		outStream.close();
 	}
 
 	void AssetDatabase::Load()
 	{
-		std::string path = "./Assets/AssetDatabase.yaml";
+		std::filesystem::path databasePath = Game::GetAssetPath();
+		databasePath = databasePath.parent_path();
+		databasePath.append("Assets.db");
 
-		if (!std::filesystem::exists(path)) return;
-		YAML::Node node = YAML::LoadFile(path);
+		if (!std::filesystem::exists(databasePath)) return;
+		Clear();
+
+		YAML::Node node = YAML::LoadFile(databasePath.string());
 		for (size_t i = 0; i < node.size(); i++)
 		{
 			YAML::Node element = node[i];
@@ -160,8 +167,14 @@ namespace Glory
 
 	void AssetDatabase::Destroy()
 	{
-		Save();
+		Clear();
+	}
+
+	void AssetDatabase::Clear()
+	{
 		m_AssetLocations.clear();
+		m_PathToUUID.clear();
+		m_Metas.clear();
 	}
 
 	void AssetDatabase::ExportEditor(YAML::Emitter& out)
