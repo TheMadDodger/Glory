@@ -7,6 +7,7 @@ namespace Glory
     {
     public:
         Resource();
+        Resource(UUID uuid);
         virtual ~Resource();
     };
 }

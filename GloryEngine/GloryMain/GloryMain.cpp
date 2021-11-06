@@ -60,7 +60,7 @@ int main()
         windowCreateInfo.Height = 1300;
         windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
-        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), /*new Glory::ASSIMPModule(),*/ new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader()};
+        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader()};
 
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);

@@ -6,6 +6,10 @@ namespace Glory
 	{
 	}
 
+	Object::Object(UUID uuid) : m_ID(uuid)
+	{
+	}
+
 	Object::~Object()
 	{
 	}

@@ -19,6 +19,7 @@ namespace Glory
 	{
 	public:
 		Object();
+		Object(UUID uuid);
 		virtual ~Object();
 
 		const UUID& GetUUID() const;
