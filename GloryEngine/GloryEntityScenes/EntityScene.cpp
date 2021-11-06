@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Components.h"
 #include "Systems.h"
+#include "EntitySceneObject.h"
 
 namespace Glory
 {
@@ -23,12 +24,11 @@ namespace Glory
 	{
 	}
 
-	Entity& EntityScene::CreateEntity()
+	Entity EntityScene::CreateEntity()
 	{
 		EntityID entityID = m_Registry.CreateEntity();
 		m_Registry.AddComponent<Transform>(entityID, glm::vec3(), glm::vec3(), glm::vec3());
-		m_Entities.push_back(Entity(entityID, this));
-		return m_Entities[m_Entities.size() - 1];
+		return Entity(entityID, this);
 	}
 
 	void EntityScene::Initialize()
@@ -47,5 +47,17 @@ namespace Glory
 	{
 		m_Registry.Draw();
 		//while (m_Scene.m_Registry.IsUpdating()) {}
+	}
+
+	SceneObject* EntityScene::CreateObject(const std::string& name)
+	{
+		Entity entity = CreateEntity();
+		return new EntitySceneObject(entity, name);
+	}
+
+	SceneObject* EntityScene::CreateObject(const std::string& name, UUID uuid)
+	{
+		Entity entity = CreateEntity();
+		return new EntitySceneObject(entity, name, uuid);
 	}
 }

@@ -8,6 +8,7 @@
 #include "Systems.h"
 #include "ModelLoaderModule.h"
 #include "ImageLoaderModule.h"
+#include "EntitySceneObject.h"
 
 namespace Glory
 {
@@ -37,6 +38,7 @@ namespace Glory
 	{
 		// dis is a test pls ignore
 		EntityScene* pScene = (EntityScene*)CreateEmptyScene();
+		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
 
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
@@ -65,7 +67,7 @@ namespace Glory
 		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
 		pMaterialData->SetTexture(pTexture);
 		
-		Entity entity = pScene->CreateEntity();
+		Entity entity = pObject->GetEntityHandle();
 		entity.AddComponent<MeshFilter>(pModel);
 		MeshRenderer& meshRenderer = entity.AddComponent<MeshRenderer>(pMaterialData);
 	}

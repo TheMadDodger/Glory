@@ -70,6 +70,9 @@ namespace Glory
 
 	bool Registry::IsValid(EntityID entity)
 	{
+		size_t index = entity - 1;
+		if (index >= m_AllEntityIDs.size()) return false;
+
 		return entity != 0
 			&& std::find(m_DeadEntityIndices.begin(), m_DeadEntityIndices.end(), entity - 1) == m_DeadEntityIndices.end();
 	}

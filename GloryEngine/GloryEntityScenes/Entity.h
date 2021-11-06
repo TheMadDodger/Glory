@@ -41,6 +41,8 @@ namespace Glory
 		bool IsValid();
 		void ForEachComponent(std::function<void(Registry*, EntityID, EntityComponentData*)> func);
 
+		void Destroy();
+
 	private:
 		EntityID m_EntityID;
 		EntityScene* m_pEntityScene;

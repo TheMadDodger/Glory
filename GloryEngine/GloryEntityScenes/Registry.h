@@ -117,7 +117,6 @@ namespace Glory
 		void Draw();
 
 	private:
-		//std::vector<Entity> m_AllEntities;
 		std::vector<EntityID> m_AllEntityIDs;
 		std::vector<size_t> m_DeadEntityIndices;
 
