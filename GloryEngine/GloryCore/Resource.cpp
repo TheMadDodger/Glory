@@ -6,6 +6,10 @@ namespace Glory
 	{
 	}
 
+	Resource::Resource(UUID uuid) : Object(uuid)
+	{
+	}
+
 	Resource::~Resource()
 	{
 	}

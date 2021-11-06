@@ -14,12 +14,9 @@ namespace Glory
 	private:
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
-		virtual void Cleanup() override;
-		virtual void Tick() override;
-		virtual void OnPaint() override;
+		virtual void OnCleanup() override;
 
-	private:
-		EntityScene m_Scene;
-		Entity m_Entity;
+		virtual GScene* CreateScene(const std::string& sceneName) override;
+		virtual GScene* CreateScene(const std::string& sceneName, UUID uuid) override;
 	};
 }
