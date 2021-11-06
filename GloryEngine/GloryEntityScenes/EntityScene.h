@@ -16,16 +16,18 @@ namespace Glory
 		EntityScene(const std::string& sceneName, UUID uuid);
 		virtual ~EntityScene();
 
-		Entity& CreateEntity();
+		Entity CreateEntity();
 
 	private:
 		virtual void Initialize() override;
 		virtual void OnTick() override;
 		virtual void OnPaint() override;
 
+		virtual SceneObject* CreateObject(const std::string& name) override;
+		virtual SceneObject* CreateObject(const std::string& name, UUID uuid) override;
+
 	private:
 		friend class Entity;
-		std::vector<Entity> m_Entities;
 		Registry m_Registry;
 	};
 }

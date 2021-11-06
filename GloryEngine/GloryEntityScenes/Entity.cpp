@@ -24,4 +24,9 @@ namespace Glory
 	{
 		m_pEntityScene->m_Registry.ForEachComponent(m_EntityID, func);
 	}
+
+	void Entity::Destroy()
+	{
+		m_pEntityScene->m_Registry.DestroyEntity(m_EntityID);
+	}
 }
