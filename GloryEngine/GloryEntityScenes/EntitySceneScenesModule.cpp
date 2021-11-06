@@ -37,6 +37,16 @@ namespace Glory
 	{
 		// dis is a test pls ignore
 		EntityScene* pScene = (EntityScene*)CreateEmptyScene();
+		Entity entity = pScene->CreateEntity();
+		pScene = (EntityScene*)CreateEmptyScene();
+		entity = pScene->CreateEntity();
+		entity = pScene->CreateEntity();
+		pScene = (EntityScene*)CreateEmptyScene();
+		entity = pScene->CreateEntity();
+		entity = pScene->CreateEntity();
+		entity = pScene->CreateEntity();
+
+		return;
 
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
@@ -65,7 +75,7 @@ namespace Glory
 		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
 		pMaterialData->SetTexture(pTexture);
 		
-		Entity entity = pScene->CreateEntity();
+		entity = pScene->CreateEntity();
 		entity.AddComponent<MeshFilter>(pModel);
 		MeshRenderer& meshRenderer = entity.AddComponent<MeshRenderer>(pMaterialData);
 	}

@@ -17,4 +17,9 @@ namespace Glory
 	GScene::~GScene()
 	{
 	}
+
+	const std::string& GScene::Name()
+	{
+		return m_SceneName;
+	}
 }

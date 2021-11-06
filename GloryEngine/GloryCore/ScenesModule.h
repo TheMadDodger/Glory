@@ -11,6 +11,10 @@ namespace Glory
 
         GScene* CreateEmptyScene();
 
+        size_t OpenScenesCount();
+        GScene* GetOpenScene(size_t index);
+        GScene* GetActiveScene();
+
     protected:
         virtual void Initialize() = 0;
         virtual void Cleanup() override;

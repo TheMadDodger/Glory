@@ -1,8 +1,7 @@
 #include "SceneGraphWindow.h"
-//#include <SceneManager.h>
-//#include <GameScene.h>
 #include "Selection.h"
 #include "EditorSceneManager.h"
+#include "Game.h"
 
 namespace Glory::Editor
 {
@@ -16,9 +15,15 @@ namespace Glory::Editor
 
 	void SceneGraphWindow::OnGUI()
 	{
-		//GameScene* pScene = SceneManager::GetInstance()->GetActiveScene();
-		
-		//m_I = 0;
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+
+		GScene* pActiveScene = pScenesModule->GetActiveScene();
+
+		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+		{
+			GScene* pScene = pScenesModule->GetOpenScene(i);
+			SceneDropdown(i, pScene, pScene == pActiveScene);
+		}
 		//
 		//if (ImGui::IsItemClicked(1))
 		//{
@@ -32,37 +37,35 @@ namespace Glory::Editor
 		//	ImGui::EndPopup();
 		//}
 		//
-		//for (size_t i = 0; i < EditorSceneManager::OpenSceneCount(); i++)
-		//{
-		//	GameScene* pActive = EditorSceneManager::GetActiveScene();
-		//	GameScene* pScene = EditorSceneManager::GetOpenSceneAt(i);
-		//	bool isActive = pActive == pScene;
-		//	SceneDropdown(pScene, isActive);
-		//}
 	}
 
-	//void SceneGraphWindow::SceneDropdown(GameScene* pScene, bool isActive)
-	//{
-	//	if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-	//	if (ImGui::TreeNode(pScene->GetName().c_str()))
-	//	{
-	//		if (isActive) ImGui::PopStyleColor();
-	//		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
-	//
-	//		for (size_t i = 0; i < pScene->GetChildCount(); i++)
-	//		{
-	//			ChildrenList(pScene->GetChild(i));
-	//		}
-	//
-	//		ImGui::PopStyleVar();
-	//		ImGui::TreePop();
-	//	}
-	//	else
-	//	{
-	//		if (isActive) ImGui::PopStyleColor();
-	//	}
-	//}
-	//
+	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)
+	{
+		std::hash<std::string> hasher;
+		size_t hash = hasher((pScene->Name())) + index;
+
+		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+		if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+		if (ImGui::TreeNodeEx((void*)hash, node_flags, pScene->Name().data()))
+		{
+			if (isActive) ImGui::PopStyleColor();
+			ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
+	
+			//for (size_t i = 0; i < pScene->GetChildCount(); i++)
+			//{
+			//	ChildrenList(pScene->GetChild(i));
+			//}
+	
+			ImGui::PopStyleVar();
+			ImGui::TreePop();
+		}
+		else
+		{
+			if (isActive) ImGui::PopStyleColor();
+		}
+	}
+	
 	//void SceneGraphWindow::ChildrenList(Spartan::GameObject* pChild)
 	//{
 	//	// Disable the default open on single-click behavior and pass in Selected flag according to our selection state.
@@ -123,7 +126,7 @@ namespace Glory::Editor
 	//		++m_I;
 	//	}
 	//}
-	//
+	
 	//void SceneGraphWindow::ObjectMenu()
 	//{
 	//	Spartan::GameObject *pCreatedObj = nullptr;
