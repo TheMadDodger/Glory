@@ -4,14 +4,17 @@ namespace Glory
 {
 	EntitySceneObject::EntitySceneObject(Entity entity) : m_Entity(entity)
 	{
+		APPEND_TYPE(EntitySceneObject);
 	}
 
 	EntitySceneObject::EntitySceneObject(Entity entity, const std::string& name) : SceneObject(name), m_Entity(entity)
 	{
+		APPEND_TYPE(EntitySceneObject);
 	}
 
 	EntitySceneObject::EntitySceneObject(Entity entity, const std::string& name, UUID uuid) : SceneObject(name, uuid), m_Entity(entity)
 	{
+		APPEND_TYPE(EntitySceneObject);
 	}
 
 	EntitySceneObject::~EntitySceneObject()

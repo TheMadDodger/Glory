@@ -14,7 +14,7 @@ namespace Glory::Editor
 		virtual void OnGUI() override;
 
 		void SceneDropdown(size_t index, GScene* pScene, bool isActive);
-		//void ChildrenList(Spartan::GameObject* pChild);
+		void ChildrenList(size_t index, SceneObject* pScene);
 		//void ObjectMenu();
 
 	private:

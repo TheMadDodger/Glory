@@ -4,6 +4,7 @@ namespace Glory
 {
 	ModelData::ModelData() : m_pMeshes(std::vector<MeshData*>())
 	{
+		APPEND_TYPE(ModelData);
 	}
 
 	ModelData::~ModelData()

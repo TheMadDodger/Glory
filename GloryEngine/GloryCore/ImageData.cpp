@@ -4,6 +4,7 @@ namespace Glory
 {
 	ImageData::ImageData() : m_Width(0), m_Height(0), m_PixelFormat(PixelFormat::PF_R8G8B8Srgb), m_BytesPerPixel(0)
 	{
+		APPEND_TYPE(ImageData);
 	}
 
 	ImageData::~ImageData()

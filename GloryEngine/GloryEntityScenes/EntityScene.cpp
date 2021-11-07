@@ -10,14 +10,17 @@ namespace Glory
 {
 	EntityScene::EntityScene() : GScene("New Scene") //: m_pJobPool(nullptr)
 	{
+		APPEND_TYPE(EntityScene);
 	}
 
 	EntityScene::EntityScene(const std::string& sceneName) : GScene(sceneName)
 	{
+		APPEND_TYPE(EntityScene);
 	}
 
 	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : GScene(sceneName, uuid)
 	{
+		APPEND_TYPE(EntityScene);
 	}
 
 	EntityScene::~EntityScene()

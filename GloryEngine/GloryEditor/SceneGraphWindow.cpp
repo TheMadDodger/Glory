@@ -2,6 +2,7 @@
 #include "Selection.h"
 #include "EditorSceneManager.h"
 #include "Game.h"
+#include "Selection.h"
 
 namespace Glory::Editor
 {
@@ -44,88 +45,105 @@ namespace Glory::Editor
 		std::hash<std::string> hasher;
 		size_t hash = hasher((pScene->Name())) + index;
 
-		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		bool selected = Selection::IsObjectSelected(pScene);
+		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
+			| ImGuiTreeNodeFlags_SpanAvailWidth | (selected ? ImGuiTreeNodeFlags_Selected : 0);
 
 		if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-		if (ImGui::TreeNodeEx((void*)hash, node_flags, pScene->Name().data()))
+		bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, pScene->Name().data());
+		if (isActive) ImGui::PopStyleColor();
+
+		if (ImGui::IsItemClicked())
 		{
-			if (isActive) ImGui::PopStyleColor();
+			Selection::SetActiveObject(pScene);
+		}
+
+		if (nodeOpen)
+		{
 			ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
-	
-			//for (size_t i = 0; i < pScene->GetChildCount(); i++)
-			//{
-			//	ChildrenList(pScene->GetChild(i));
-			//}
+
+			for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
+			{
+				SceneObject* pObject = pScene->GetSceneObject(i);
+				ChildrenList(i, pObject);
+			}
 	
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
-		}
-		else
-		{
-			if (isActive) ImGui::PopStyleColor();
+			return;
 		}
 	}
 	
-	//void SceneGraphWindow::ChildrenList(Spartan::GameObject* pChild)
-	//{
-	//	// Disable the default open on single-click behavior and pass in Selected flag according to our selection state.
-	//	ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | (pChild->IsSelected() ? ImGuiTreeNodeFlags_Selected : 0);
-	//
-	//	auto childrenOfChild = pChild->GetChildren();
-	//	if (!childrenOfChild.empty())
-	//	{
-	//		bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)m_I, node_flags, pChild->GetName());
-	//		if (ImGui::IsItemClicked())
-	//		{
-	//			//if (m_CurrentSelectedObject != pChild)
-	//				//ComponentParameterManager::GetInstance()->Clear();
-	//
-	//			Selection::SetActiveObject(pChild);
-	//		}
-	//		if (ImGui::IsItemClicked(1))
-	//		{
-	//			m_CurrentRightClickedObject = pChild;
-	//			ImGui::OpenPopup("object_menu_popup" + m_I);
-	//		}
-	//		if (ImGui::BeginPopup("object_menu_popup" + m_I))
-	//		{
-	//			ObjectMenu();
-	//			ImGui::EndPopup();
-	//		}
-	//		++m_I;
-	//		// Node
-	//		if (node_open)
-	//		{
-	//			for (auto pChildOfChild : childrenOfChild)
-	//			{
-	//				ChildrenList(pChildOfChild);
-	//			}
-	//
-	//			ImGui::TreePop();
-	//		}
-	//	}
-	//	else
-	//	{
-	//		// Leaf: The only reason we have a TreeNode at all is to allow selection of the leaf. Otherwise we can use BulletText() or TreeAdvanceToLabelPos()+Text().
-	//		node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
-	//		ImGui::TreeNodeEx((void*)(intptr_t)m_I, node_flags, pChild->GetName());
-	//		if (ImGui::IsItemClicked())
-	//		{
-	//			Selection::SetActiveObject(pChild);
-	//		}
-	//		if (ImGui::IsItemClicked(1))
-	//		{
-	//			m_CurrentRightClickedObject = pChild;
-	//			ImGui::OpenPopup("object_menu_popup" + m_I);
-	//		}
-	//		if (ImGui::BeginPopup("object_menu_popup" + m_I))
-	//		{
-	//			ObjectMenu();
-	//			ImGui::EndPopup();
-	//		}
-	//		++m_I;
-	//	}
-	//}
+	void SceneGraphWindow::ChildrenList(size_t index, SceneObject* pObject)
+	{
+		// Disable the default open on single-click behavior and pass in Selected flag according to our selection state.
+
+		bool selected = Selection::IsObjectSelected(pObject);
+		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
+			| ImGuiTreeNodeFlags_SpanAvailWidth | (selected ? ImGuiTreeNodeFlags_Selected : 0);
+
+		std::hash<std::string> hasher;
+		size_t hash = hasher((pObject->Name() + std::to_string(index)));
+
+		//auto childrenOfChild = pChild->GetChildren();
+		//if (!childrenOfChild.empty())
+		//{
+			bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, pObject->Name().data());
+			if (ImGui::IsItemClicked())
+			{
+				//if (m_CurrentSelectedObject != pChild)
+					//ComponentParameterManager::GetInstance()->Clear();
+	
+				Selection::SetActiveObject(pObject);
+			}
+			if (ImGui::IsItemClicked(1))
+			{
+				//m_CurrentRightClickedObject = pChild;
+				//ImGui::OpenPopup("object_menu_popup" + index);
+			}
+			if (ImGui::BeginPopup("object_menu_popup" + index))
+			{
+				//ObjectMenu();
+				//ImGui::EndPopup();
+			}
+
+			if (node_open)
+			{
+				ImGui::TreePop();
+			}
+
+			// Node
+			//if (node_open)
+			//{
+			//	for (auto pChildOfChild : childrenOfChild)
+			//	{
+			//		ChildrenList(pChildOfChild);
+			//	}
+			//
+			//	ImGui::TreePop();
+			//}
+		//}
+		//else
+		//{
+		//	node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
+		//	ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, pChild->GetName());
+		//	if (ImGui::IsItemClicked())
+		//	{
+		//		Selection::SetActiveObject(pChild);
+		//	}
+		//	if (ImGui::IsItemClicked(1))
+		//	{
+		//		m_CurrentRightClickedObject = pChild;
+		//		ImGui::OpenPopup("object_menu_popup" + m_I);
+		//	}
+		//	if (ImGui::BeginPopup("object_menu_popup" + m_I))
+		//	{
+		//		ObjectMenu();
+		//		ImGui::EndPopup();
+		//	}
+		//	++m_I;
+		//}
+	}
 	
 	//void SceneGraphWindow::ObjectMenu()
 	//{

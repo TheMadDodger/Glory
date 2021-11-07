@@ -15,8 +15,8 @@ namespace Glory::Editor
 		void CreateEditor();
 
 	private:
-		//SEObject* m_pCurrentObject;
-		//Editor* m_pEditor;
+		Object* m_pCurrentObject;
+		Editor* m_pEditor;
 
 		bool m_Locked;
 	};

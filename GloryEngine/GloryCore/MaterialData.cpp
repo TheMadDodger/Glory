@@ -5,7 +5,7 @@ namespace Glory
 	MaterialData::MaterialData(const std::vector<FileData*>& shaderFiles, const std::vector<ShaderType>& shaderTypes)
 		: m_pShaderFiles(shaderFiles), m_ShaderTypes(shaderTypes)
 	{
-		
+		APPEND_TYPE(MaterialData);
 	}
 
 	MaterialData::~MaterialData()

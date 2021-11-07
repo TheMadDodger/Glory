@@ -13,6 +13,7 @@ namespace Glory
 
     public:
         const std::string& Name();
+        void SetName(const std::string& name);
 
     protected:
         virtual void Initialize() = 0;

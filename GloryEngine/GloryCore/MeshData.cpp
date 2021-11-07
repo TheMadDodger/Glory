@@ -5,6 +5,7 @@ namespace Glory
 	MeshData::MeshData(size_t vertexCount, size_t vertexSize, const std::vector<float>& vertices, size_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(vertices), m_Indices(indices), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
+		APPEND_TYPE(MeshData);
 	}
 
 	MeshData::~MeshData()

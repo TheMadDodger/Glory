@@ -16,6 +16,8 @@
 #include "ProjectSpace.h"
 #include "Tumbnail.h"
 #include "TextureTumbnailGenerator.h"
+#include "Editor.h"
+#include "SceneObjectEditor.h"
 
 namespace Glory::Editor
 {
@@ -45,6 +47,7 @@ namespace Glory::Editor
 		m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
+		Editor::RegisterEditor<SceneObjectEditor>();
 	}
 
 	void MainEditor::Destroy()
@@ -83,7 +86,7 @@ namespace Glory::Editor
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
 		MenuBar::AddMenuItem("File/New/Scene", NULL);
-		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<Editor::EditorPreferencesWindow>(); });
+		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); });
 		MenuBar::AddMenuItem("File/Save Project", []() {/*AssetDatabase::SaveAssets();*/ });
 		MenuBar::AddMenuItem("Play/Start", [&]() {/*this->EnterPlayMode();*/ });
 		MenuBar::AddMenuItem("Play/Pauze", [&]() {/*m_PlayModePaused = !m_PlayModePaused;*/ });
@@ -91,15 +94,15 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Exit", [&]() {
 			std::vector<std::string> buttons = { "Cancel", "Exit" };
-			std::vector<std::function<void()>> buttonFuncs = { [&]() { Editor::PopupManager::CloseCurrentPopup(); }, [&]() {/*m_IsRunning = false;*/ } };
+			std::vector<std::function<void()>> buttonFuncs = { [&]() { PopupManager::CloseCurrentPopup(); }, [&]() {/*m_IsRunning = false;*/ } };
 			PopupManager::OpenPopup("Exit", "Are you sure you want to exit? All unsaved changes will be lost!",
 				buttons, buttonFuncs); });
 
-		MenuBar::AddMenuItem("Window/Scene View", []() { Editor::EditorWindow::GetWindow<Editor::SceneWindow>(); });
-		MenuBar::AddMenuItem("Window/Game View", []() { Editor::EditorWindow::GetWindow<Editor::GameWindow>(); });
-		MenuBar::AddMenuItem("Window/Scene Graph", []() { Editor::EditorWindow::GetWindow<Editor::SceneGraphWindow>(); });
-		MenuBar::AddMenuItem("Window/Inspector", []() { Editor::EditorWindow::GetWindow<Editor::InspectorWindow>(true); });
-		MenuBar::AddMenuItem("Window/Content Browser", []() { Editor::EditorWindow::GetWindow<Editor::ContentBrowser>(); });
+		MenuBar::AddMenuItem("Window/Scene View", []() { EditorWindow::GetWindow<SceneWindow>(); });
+		MenuBar::AddMenuItem("Window/Game View", []() { EditorWindow::GetWindow<GameWindow>(); });
+		MenuBar::AddMenuItem("Window/Scene Graph", []() { EditorWindow::GetWindow<SceneGraphWindow>(); });
+		MenuBar::AddMenuItem("Window/Inspector", []() { EditorWindow::GetWindow<InspectorWindow>(true); });
+		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<ContentBrowser>(); });
 	}
 
 	void MainEditor::SetDarkThemeColors()

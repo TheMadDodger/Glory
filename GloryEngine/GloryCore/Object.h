@@ -1,5 +1,6 @@
 #pragma once
 #include "UUID.h"
+#include <typeindex>
 
 /* *IDEA FOR DETECTING OBJECT INHERITENCE AND OBJECT TYPE*
 * The Object class keeps track of an array of all the inherited classes,
@@ -12,6 +13,7 @@
 * you check if that type is present in the array.
 */
 
+#define APPEND_TYPE(x) PushInheritence<x>()
 
 namespace Glory
 {
@@ -23,6 +25,18 @@ namespace Glory
 		virtual ~Object();
 
 		const UUID& GetUUID() const;
+
+		size_t TypeCount();
+		bool GetType(size_t index, std::type_index& type);
+
+	protected:
+		std::vector<std::type_index> m_Inheritence;
+
+		template<class T>
+		void PushInheritence()
+		{
+			m_Inheritence.insert(m_Inheritence.begin(), typeid(T));
+		}
 
 	private:
 		UUID m_ID;
