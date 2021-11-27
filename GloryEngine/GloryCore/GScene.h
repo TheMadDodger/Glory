@@ -14,6 +14,7 @@ namespace Glory
 
     public:
         SceneObject* CreateEmptyObject();
+        SceneObject* CreateEmptyObject(const std::string& name, UUID uuid);
         size_t SceneObjectsCount();
         SceneObject* GetSceneObject(size_t index);
         const std::string& Name();

@@ -1,8 +1,8 @@
 #pragma once
 #include <Object.h>
-#include <EntityComponentData.h>
+#include "EntityComponentData.h"
 
-namespace Glory::Editor
+namespace Glory
 {
 	class EntityComponentObject : public Object
 	{

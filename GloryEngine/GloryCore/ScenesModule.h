@@ -9,7 +9,7 @@ namespace Glory
     public:
         virtual const std::type_info& GetModuleType() override;
 
-        GScene* CreateEmptyScene();
+        GScene* CreateEmptyScene(const std::string& name = "Empty Scene");
 
         size_t OpenScenesCount();
         GScene* GetOpenScene(size_t index);
@@ -22,6 +22,8 @@ namespace Glory
 
         virtual GScene* CreateScene(const std::string& sceneName) = 0;
         virtual GScene* CreateScene(const std::string& sceneName, UUID uuid) = 0;
+
+        static SceneObject* CreateObject(GScene* pScene, const std::string& name, UUID uuid);
 
     private:
         void Tick();

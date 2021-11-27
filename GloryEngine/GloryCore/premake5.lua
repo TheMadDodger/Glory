@@ -35,7 +35,8 @@ project "GloryCore"
 		["Modules/ResourceLoading/Textures"] = { "ImageData.h", "ImageData.cpp", "ImageLoaderModule.h", "ImageLoaderModule.cpp" },
 		["Modules/Scenes"] = { "ScenesModule.h", "ScenesModule.cpp" },
 		["Modules/Window"] = { "Window.h", "Window.cpp", "WindowModule.h", "WindowModule.cpp" },
-		["Threading"] = { "Thread.h", "Thread.cpp", "ThreadManager.h", "ThreadManager.cpp" }
+		["Threading"] = { "Thread.h", "Thread.cpp", "ThreadManager.h", "ThreadManager.cpp" },
+		["Serialization"] = { "Serializer.h", "Serializer.cpp" },
 	}
 
 	includedirs

@@ -9,6 +9,11 @@
 #include "ModelLoaderModule.h"
 #include "ImageLoaderModule.h"
 #include "EntitySceneObject.h"
+#include "Serializer.h"
+#include "EntitySceneSerializer.h"
+#include "EntitySceneObjectSerializer.h"
+#include "TransformSerializer.h"
+#include <fstream>
 
 namespace Glory
 {
@@ -30,8 +35,48 @@ namespace Glory
 		return new EntityScene(sceneName, uuid);
 	}
 
+	EntitySceneObject* EntitySceneScenesModule::CreateDeserializedObject(GScene* pScene, const std::string& name, UUID uuid)
+	{
+		return (EntitySceneObject*)CreateObject(pScene, name, uuid);
+	}
+
 	void EntitySceneScenesModule::Initialize()
 	{
+		Serializer::RegisterSerializer<EntitySceneSerializer>();
+		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
+		Serializer::RegisterSerializer<TransformSerializer>();
+
+		YAML::Emitter out;
+
+		out << YAML::BeginMap;
+
+		size_t hash = ResourceType::GetHash(typeid(Object));
+		out << YAML::Key << "Object";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(GScene));
+		out << YAML::Key << "GScene";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(EntityScene));
+		out << YAML::Key << "EntityScene";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(SceneObject));
+		out << YAML::Key << "SceneObject";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(EntitySceneObject));
+		out << YAML::Key << "EntitySceneObject";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(EntityComponentObject));
+		out << YAML::Key << "EntityComponentObject";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(Transform));
+		out << YAML::Key << "Transform";
+		out << YAML::Value << hash;
+
+		out << YAML::EndMap;
+
+		std::ofstream outStream("hashes.txt");
+		outStream << out.c_str();
+		outStream.close();
 	}
 
 	void EntitySceneScenesModule::PostInitialize()
@@ -39,6 +84,18 @@ namespace Glory
 		// dis is a test pls ignore
 		EntityScene* pScene = (EntityScene*)CreateEmptyScene();
 		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
 
 		return;
 

@@ -2,6 +2,7 @@
 #include "Console.h"
 #include <algorithm>
 #include "AssetManager.h"
+#include "Serializer.h"
 
 namespace Glory
 {
@@ -142,6 +143,7 @@ namespace Glory
 		delete m_pGraphicsThread;
 
 		Console::Cleanup();
+		Serializer::Cleanup();
 	}
 
 	void Engine::Initialize()

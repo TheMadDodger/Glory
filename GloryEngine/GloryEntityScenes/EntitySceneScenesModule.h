@@ -2,6 +2,7 @@
 #include <ScenesModule.h>
 #include "EntityScene.h"
 #include "Entity.h"
+#include "EntitySceneObject.h"
 
 namespace Glory
 {
@@ -18,5 +19,10 @@ namespace Glory
 
 		virtual GScene* CreateScene(const std::string& sceneName) override;
 		virtual GScene* CreateScene(const std::string& sceneName, UUID uuid) override;
+
+		static EntitySceneObject* CreateDeserializedObject(GScene* pScene, const std::string& name, UUID uuid);
+
+	private:
+		friend class EntitySceneObjectSerializer;
 	};
 }

@@ -31,6 +31,14 @@ namespace Glory
 		return pObject;
 	}
 
+	SceneObject* GScene::CreateEmptyObject(const std::string& name, UUID uuid)
+	{
+		SceneObject* pObject = CreateObject(name, uuid);
+		pObject->Initialize();
+		m_pSceneObjects.push_back(pObject);
+		return pObject;
+	}
+
 	size_t GScene::SceneObjectsCount()
 	{
 		return m_pSceneObjects.size();
