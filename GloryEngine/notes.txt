@@ -87,6 +87,11 @@ AssetGroup:
 		-> Data
 		4. End
 
+Editor Extensions:
+	- Editor uses extensions to be able to display scenes, custom components, etc
+	- EntityScene needs its own editor extension to display the scenes and its components
+	- Extensions are a separate project and lib to keep editor and engine code separate
+
 MATERIAL OLD NOTES:
 	/* Material should hold information about all the shaders linked to it
 * This involves:

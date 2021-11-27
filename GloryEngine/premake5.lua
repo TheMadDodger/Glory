@@ -75,6 +75,7 @@ LibDirs["SDL_image"]				= "%{SubmodoleDirs.SDL_image}/lib/%{cfg.buildcfg}/%{cfg.
 LibDirs["shaderc"]					= "%{SubmodoleDirs.shaderc}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["spirv_cross"]				= "%{SubmodoleDirs.spirv_cross}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["yaml_cpp"]					= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["extensions"]				= "%{SubmodoleDirs.glory}/%{cfg.buildcfg}/%{cfg.platform}/Extensions"
 
 group "Dependencies"
 	include "third-party/ImGui"
@@ -93,3 +94,7 @@ include "GloryOpenGLGraphics"
 include "GlorySDLImage"
 include "GlorySDLWindow"
 include "GloryVulkanGraphics"
+
+group "Editor Extensions"
+	include "EntityScenesEditorExtension"
+group ""

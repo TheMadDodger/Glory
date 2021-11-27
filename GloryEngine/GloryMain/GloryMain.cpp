@@ -46,6 +46,7 @@ namespace Glory
 #include <EditorVulkanRenderImpl.h>
 #include <EditorOpenGLRenderImpl.h>
 #include <EditorApplication.h>
+#include <EntityScenesEditorExtension.h>
 
 using namespace Glory::Editor;
 
@@ -77,7 +78,13 @@ int main()
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
         pGame.Initialize();
 
-        EditorApplication editorApp;
+        std::vector<Glory::Editor::BaseEditorExtension*> editorExtensions = { new Glory::Editor::EntityScenesEditorExtension() };
+
+        Glory::EditorCreateInfo editorCreateInfo;
+        editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(editorExtensions.size());
+        editorCreateInfo.pExtensions = editorExtensions.data();
+
+        EditorApplication editorApp(editorCreateInfo);
         editorApp.Initialize<EditorSDLWindowImpl, EditorOpenGLRenderImpl>(pGame);
         editorApp.Run();
         editorApp.Destroy();

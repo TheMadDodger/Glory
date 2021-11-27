@@ -1,13 +1,21 @@
 #include "EditorApplication.h"
 #include <imgui.h>
-//#include "EditorWindow.h"
 
 namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
 
-	EditorApplication::EditorApplication() : m_pMainEditor(nullptr), m_pPlatform(nullptr)
+	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo) : m_pMainEditor(nullptr), m_pPlatform(nullptr)
 	{
+		// Copy the optional modules into the optional modules vector
+		if (createInfo.ExtensionsCount > 0 && createInfo.pExtensions != nullptr)
+		{
+			m_pExtensions.resize(createInfo.ExtensionsCount);
+			for (size_t i = 0; i < createInfo.ExtensionsCount; i++)
+			{
+				m_pExtensions[i] = createInfo.pExtensions[i];
+			}
+		}
 	}
 
 	EditorApplication::~EditorApplication()
@@ -17,6 +25,14 @@ namespace Glory::Editor
 
 		delete m_pPlatform;
 		m_pPlatform = nullptr;
+	}
+
+	void EditorApplication::InitializeExtensions()
+	{
+		for (size_t i = 0; i < m_pExtensions.size(); i++)
+		{
+			m_pExtensions[i]->RegisterEditors();
+		}
 	}
 
 	void EditorApplication::Destroy()

@@ -33,4 +33,9 @@ namespace Glory
 		type = m_Inheritence[index];
 		return true;
 	}
+
+	void Object::PushInheritence(const std::type_index& type)
+	{
+		m_Inheritence.insert(m_Inheritence.begin(), type);
+	}
 }

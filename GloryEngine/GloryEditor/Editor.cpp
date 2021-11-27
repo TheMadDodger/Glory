@@ -6,6 +6,8 @@ namespace Glory::Editor
 	std::vector<Editor*> Editor::m_pRegisteredEditors = std::vector<Editor*>();
 	std::vector<Editor*> Editor::m_pActiveEditors = std::vector<Editor*>();
 
+	void Editor::Initialize() {}
+
 	Editor* Editor::CreateEditor(Object* pObject)
 	{
 		for (size_t i = 0; i < pObject->TypeCount(); i++)
@@ -22,6 +24,7 @@ namespace Glory::Editor
 			Editor* pEditor = *it;
 			Editor* newEditor = pEditor->Create();
 			newEditor->m_pTarget = pObject;
+			newEditor->Initialize();
 			m_pActiveEditors.push_back(newEditor);
 			return newEditor;
 		}
@@ -36,6 +39,11 @@ namespace Glory::Editor
 			if (m_pActiveEditors[i] == pEditor) return i;
 		}
 		return 0;
+	}
+
+	std::string Editor::Name()
+	{
+		return "Editor";
 	}
 
 	Editor::Editor() : m_pTarget(nullptr)

@@ -35,8 +35,10 @@ namespace Glory
 		template<class T>
 		void PushInheritence()
 		{
-			m_Inheritence.insert(m_Inheritence.begin(), typeid(T));
+			PushInheritence(typeid(T));
 		}
+
+		void PushInheritence(const std::type_index& type);
 
 	private:
 		UUID m_ID;

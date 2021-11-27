@@ -47,7 +47,7 @@ namespace Glory::Editor
 		m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
-		Editor::RegisterEditor<SceneObjectEditor>();
+		//Editor::RegisterEditor<SceneObjectEditor>();
 	}
 
 	void MainEditor::Destroy()

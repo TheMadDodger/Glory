@@ -44,7 +44,9 @@ project "GloryMain"
 		"%{GloryIncludeDir.vulkan}",
 		"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.core}",
-		"%{GloryIncludeDir.editor}"
+		"%{GloryIncludeDir.editor}",
+
+		"../EntityScenesEditorExtension",
 	}
 
 	libdirs
@@ -56,7 +58,8 @@ project "GloryMain"
 		"%{LibDirs.SDL_image}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
-		"%{LibDirs.yaml_cpp}"
+		"%{LibDirs.yaml_cpp}",
+		"%{LibDirs.extensions}",
 	}
 
 	links
@@ -88,6 +91,9 @@ project "GloryMain"
 		"spirv-cross-msl",
 		"spirv-cross-reflect",
 		"spirv-cross-util",
+
+
+		"EntityScenesEditorExtension",
 	}
 
 	postbuildcommands

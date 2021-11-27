@@ -4,13 +4,14 @@
 #include "ProjectSpace.h"
 #include <Game.h>
 #include <EditorAssetLoader.h>
+#include <EditorCreateInfo.h>
 
 namespace Glory::Editor
 {
 	class EditorApplication
 	{
 	public:
-		EditorApplication();
+		EditorApplication(const EditorCreateInfo& createInfo);
 		virtual ~EditorApplication();
 
 		template<class Window, class Renderer>
@@ -33,9 +34,12 @@ namespace Glory::Editor
 			m_pPlatform->Initialize(game);
 			m_pMainEditor = new MainEditor();
 			m_pMainEditor->Initialize();
-
 			m_pEditorInstance = this;
+
+			InitializeExtensions();
 		}
+
+		void InitializeExtensions();
 
 		void Destroy();
 		void Run();
@@ -51,6 +55,7 @@ namespace Glory::Editor
 	private:
 		EditorPlatform* m_pPlatform;
 		MainEditor* m_pMainEditor;
+		std::vector<BaseEditorExtension*> m_pExtensions;
 		static EditorApplication* m_pEditorInstance;
 	};
 }

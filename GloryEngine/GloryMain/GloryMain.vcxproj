@@ -100,7 +100,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CONSOLE;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;..\EntityScenesEditorExtension;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -112,7 +112,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\bin\Engine\lib\Debug\Win32;..\submodules\assimp\lib\Debug\Win32;..\third-party\GLEW\lib\Debug\Win32;..\submodules\ImGui\lib\Debug\Win32;..\third-party\SDL_Image\lib\Debug\Win32;..\third-party\shaderc\lib\Debug\Win32;..\third-party\spirv-cross\lib\Debug\Win32;..\submodules\yaml-cpp\lib\Debug\Win32;C:\VulkanSDK\1.2.182.0\Lib32;C:\VulkanSDK\1.2.182.0\Third-Party\Bin32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Debug\Win32;..\submodules\assimp\lib\Debug\Win32;..\third-party\GLEW\lib\Debug\Win32;..\submodules\ImGui\lib\Debug\Win32;..\third-party\SDL_Image\lib\Debug\Win32;..\third-party\shaderc\lib\Debug\Win32;..\third-party\spirv-cross\lib\Debug\Win32;..\submodules\yaml-cpp\lib\Debug\Win32;..\bin\Engine\Debug\Win32\Extensions;C:\VulkanSDK\1.2.182.0\Lib32;C:\VulkanSDK\1.2.182.0\Third-Party\Bin32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST ..\third-party\SDL_Image\lib\Debug\Win32\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Debug\Win32\*.dll ..\Build\Debug\Win32 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Debug\Win32\*.dll ..\Build\Debug\Win32 &gt; nul)
@@ -126,7 +126,7 @@ IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll\ (xcopy /Q /E /Y /I C:\V
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;..\EntityScenesEditorExtension;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -138,7 +138,7 @@ IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll\ (xcopy /Q /E /Y /I C:\V
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\bin\Engine\lib\Debug\x64;..\submodules\assimp\lib\Debug\x64;..\third-party\GLEW\lib\Debug\x64;..\submodules\ImGui\lib\Debug\x64;..\third-party\SDL_Image\lib\Debug\x64;..\third-party\shaderc\lib\Debug\x64;..\third-party\spirv-cross\lib\Debug\x64;..\submodules\yaml-cpp\lib\Debug\x64;C:\VulkanSDK\1.2.182.0\Lib;C:\VulkanSDK\1.2.182.0\Third-Party\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Debug\x64;..\submodules\assimp\lib\Debug\x64;..\third-party\GLEW\lib\Debug\x64;..\submodules\ImGui\lib\Debug\x64;..\third-party\SDL_Image\lib\Debug\x64;..\third-party\shaderc\lib\Debug\x64;..\third-party\spirv-cross\lib\Debug\x64;..\submodules\yaml-cpp\lib\Debug\x64;..\bin\Engine\Debug\x64\Extensions;C:\VulkanSDK\1.2.182.0\Lib;C:\VulkanSDK\1.2.182.0\Third-Party\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST ..\third-party\SDL_Image\lib\Debug\x64\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Debug\x64\*.dll ..\Build\Debug\x64 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Debug\x64\*.dll ..\Build\Debug\x64 &gt; nul)
@@ -152,7 +152,7 @@ IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll\ (xcopy /Q /E /Y /I C:\Vul
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CONSOLE;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;..\EntityScenesEditorExtension;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -167,7 +167,7 @@ IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll\ (xcopy /Q /E /Y /I C:\Vul
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\bin\Engine\lib\Release\Win32;..\submodules\assimp\lib\Release\Win32;..\third-party\GLEW\lib\Release\Win32;..\submodules\ImGui\lib\Release\Win32;..\third-party\SDL_Image\lib\Release\Win32;..\third-party\shaderc\lib\Release\Win32;..\third-party\spirv-cross\lib\Release\Win32;..\submodules\yaml-cpp\lib\Release\Win32;C:\VulkanSDK\1.2.182.0\Lib32;C:\VulkanSDK\1.2.182.0\Third-Party\Bin32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Release\Win32;..\submodules\assimp\lib\Release\Win32;..\third-party\GLEW\lib\Release\Win32;..\submodules\ImGui\lib\Release\Win32;..\third-party\SDL_Image\lib\Release\Win32;..\third-party\shaderc\lib\Release\Win32;..\third-party\spirv-cross\lib\Release\Win32;..\submodules\yaml-cpp\lib\Release\Win32;..\bin\Engine\Release\Win32\Extensions;C:\VulkanSDK\1.2.182.0\Lib32;C:\VulkanSDK\1.2.182.0\Third-Party\Bin32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST ..\third-party\SDL_Image\lib\Release\Win32\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Release\Win32\*.dll ..\Build\Release\Win32 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Release\Win32\*.dll ..\Build\Release\Win32 &gt; nul)
@@ -181,7 +181,7 @@ IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll\ (xcopy /Q /E /Y /I C:\V
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.182.0\include;C:\VulkanSDK\1.2.182.0\third-party\include;..\submodules\assimp\include;..\third-party\GLEW\include;..\submodules\ImGui;..\third-party\SDL_Image\include;..\third-party\shaderc\include;..\third-party\spirv-cross\include;..\submodules\yaml-cpp\include;..\GloryASSIMPModelLoader;..\GloryEntityScenes;..\GloryBasicRenderer;..\GloryGLSLShaderLoader;..\GloryOpenGLGraphics;..\GlorySDLImage;..\GlorySDLWindow;..\GloryVulkanGraphics;..\ImGui;..\GloryCore;..\GloryEditor;..\EntityScenesEditorExtension;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -196,7 +196,7 @@ IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin32\*.dll\ (xcopy /Q /E /Y /I C:\V
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>vulkan-1.lib;glew32.lib;assimp.lib;SDL2.lib;SDL2_image.lib;shaderc.lib;shaderc_combined.lib;shaderc_shared.lib;spirv-cross-c.lib;spirv-cross-core.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-hlsl.lib;spirv-cross-msl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\bin\Engine\lib\Release\x64;..\submodules\assimp\lib\Release\x64;..\third-party\GLEW\lib\Release\x64;..\submodules\ImGui\lib\Release\x64;..\third-party\SDL_Image\lib\Release\x64;..\third-party\shaderc\lib\Release\x64;..\third-party\spirv-cross\lib\Release\x64;..\submodules\yaml-cpp\lib\Release\x64;C:\VulkanSDK\1.2.182.0\Lib;C:\VulkanSDK\1.2.182.0\Third-Party\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\bin\Engine\lib\Release\x64;..\submodules\assimp\lib\Release\x64;..\third-party\GLEW\lib\Release\x64;..\submodules\ImGui\lib\Release\x64;..\third-party\SDL_Image\lib\Release\x64;..\third-party\shaderc\lib\Release\x64;..\third-party\spirv-cross\lib\Release\x64;..\submodules\yaml-cpp\lib\Release\x64;..\bin\Engine\Release\x64\Extensions;C:\VulkanSDK\1.2.182.0\Lib;C:\VulkanSDK\1.2.182.0\Third-Party\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST ..\third-party\SDL_Image\lib\Release\x64\*.dll\ (xcopy /Q /E /Y /I ..\third-party\SDL_Image\lib\Release\x64\*.dll ..\Build\Release\x64 &gt; nul) ELSE (xcopy /Q /Y /I ..\third-party\SDL_Image\lib\Release\x64\*.dll ..\Build\Release\x64 &gt; nul)
@@ -246,6 +246,9 @@ IF EXIST C:\VulkanSDK\1.2.182.0\Third-Party\Bin\*.dll\ (xcopy /Q /E /Y /I C:\Vul
     </ProjectReference>
     <ProjectReference Include="..\GloryEditor\GloryEditor.vcxproj">
       <Project>{79DF625E-E594-DB53-6E89-D52ADA3DD257}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\EntityScenesEditorExtension\EntityScenesEditorExtension.vcxproj">
+      <Project>{47D2D6D4-B3DF-04BB-3CC6-00A6A8D2D071}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
