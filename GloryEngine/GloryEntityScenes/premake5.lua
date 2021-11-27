@@ -16,9 +16,9 @@ project "GloryEntityScenes"
 	vpaths
 	{
 		["ECS"] = { "EntityComponentData.h", "EntityID.h", "Registry.h", "Registry.cpp" },
-		["Module"] = { "Components.h", "Components.cpp", "Entity.h", "Entity.cpp", "EntityScene.h", "EntityScene.cpp", "EntitySceneScenesModule.h", "EntitySceneScenesModule.cpp" },
-		["Systems"] = { "EntitySystem.h", "EntitySystem.cpp", "EntitySystems.h", "EntitySystems.cpp", "MeshRenderSystem.h", "MeshRenderSystem.cpp", "Systems.h", "TransformSystem.h", "TransformSystem.cpp" }
-		["Serializers"] = { "EntitySceneSerializer.h", "EntitySceneSerializer.cpp", "EntitySceneObjectSerializer.h", "EntitySceneObjectSerializer.cpp" }
+		["Module"] = { "Components.h", "Components.cpp", "Entity.h", "Entity.cpp", "EntityScene.h", "EntityScene.cpp", "EntitySceneScenesModule.h", "EntitySceneScenesModule.cpp", "EntityComponentObject.h", "EntityComponentObject.cpp", "EntitySceneObject.h", "EntitySceneObject.cpp" },
+		["Systems"] = { "EntitySystem.h", "EntitySystem.cpp", "EntitySystems.h", "EntitySystems.cpp", "MeshRenderSystem.h", "MeshRenderSystem.cpp", "Systems.h", "TransformSystem.h", "TransformSystem.cpp" },
+		["Serializers"] = { "EntitySceneSerializer.h", "EntitySceneSerializer.cpp", "EntitySceneObjectSerializer.h", "EntitySceneObjectSerializer.cpp", "EntityComponentSerializer.h", "TransformSerializer.h", "TransformSerializer.cpp" }
 	}
 
 	includedirs
