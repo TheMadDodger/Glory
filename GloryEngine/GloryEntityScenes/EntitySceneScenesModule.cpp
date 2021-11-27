@@ -97,8 +97,6 @@ namespace Glory
 		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
 		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
 
-		return;
-
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
 		
