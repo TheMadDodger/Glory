@@ -17,7 +17,6 @@
 #include "Tumbnail.h"
 #include "TextureTumbnailGenerator.h"
 #include "Editor.h"
-#include "SceneObjectEditor.h"
 
 namespace Glory::Editor
 {
@@ -47,7 +46,6 @@ namespace Glory::Editor
 		m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
-		//Editor::RegisterEditor<SceneObjectEditor>();
 	}
 
 	void MainEditor::Destroy()
