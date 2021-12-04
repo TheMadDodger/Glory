@@ -19,6 +19,26 @@ namespace Glory
 		return false;
 	}
 
+	void EntitySystems::OnComponentAdded(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData)
+	{
+		for (size_t i = 0; i < m_pEntitySystems.size(); i++)
+		{
+			EntitySystem* pSystem = m_pEntitySystems[i];
+			if (pSystem->m_ComponentType != pComponentData->GetType()) continue;
+			pSystem->ComponentAdded(pRegisrty, entity, pComponentData);
+		}
+	}
+
+	void EntitySystems::OnComponentRemoved(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData)
+	{
+		for (size_t i = 0; i < m_pEntitySystems.size(); i++)
+		{
+			EntitySystem* pSystem = m_pEntitySystems[i];
+			if (pSystem->m_ComponentType != pComponentData->GetType()) continue;
+			pSystem->ComponentRemoved(pRegisrty, entity, pComponentData);
+		}
+	}
+
 	void EntitySystems::OnUpdate()
 	{
 		//m_pJobPool->StartQueue();
