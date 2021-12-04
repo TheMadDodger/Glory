@@ -14,12 +14,14 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void Submit(const RenderData& renderData);
+		void Submit(const CoreCamera& camera);
 
 		void StartFrame();
 		void EndFrame();
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
+		virtual void OnSubmit(const CoreCamera& renderData) {}
 
 	protected:
 		friend class GraphicsThread;

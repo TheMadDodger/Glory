@@ -17,7 +17,7 @@ namespace Glory
 	Entity& EntityScene::CreateEntity()
 	{
 		EntityID entityID = m_Registry.CreateEntity();
-		m_Registry.AddComponent<Transform>(entityID, glm::vec3(), glm::vec3(), glm::vec3());
+		m_Registry.AddComponent<Transform>(entityID);
 		m_Entities.push_back(Entity(entityID, this));
 		return m_Entities[m_Entities.size() - 1];
 	}

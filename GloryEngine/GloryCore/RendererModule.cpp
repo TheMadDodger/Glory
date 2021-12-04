@@ -23,6 +23,12 @@ namespace Glory
 		OnSubmit(renderData);
 	}
 
+	void RendererModule::Submit(const CoreCamera& camera)
+	{
+		m_CurrentPreparingFrame.ActiveCameras.push_back(camera);
+		OnSubmit(camera);
+	}
+
 	void RendererModule::StartFrame()
 	{
 		m_CurrentPreparingFrame = RenderFrame();

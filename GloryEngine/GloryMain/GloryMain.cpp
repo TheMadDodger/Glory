@@ -22,23 +22,30 @@ namespace Glory
         {
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
             pGraphics->Clear();
-            for (size_t i = 0; i < frame.ObjectsToRender.size(); i++)
+            for (size_t i = 0; i < frame.ActiveCameras.size(); i++)
             {
-                RenderData renderData = frame.ObjectsToRender[i];
-                if (renderData.m_pModel == nullptr) continue;
-                MeshData* pMesh = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
-                Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
-                UniformBufferObjectTest ubo = renderData.m_UBO;
-                pMaterial->SetUBO(renderData.m_UBO);
-                pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
-                pMaterial->SetProperties();
-                pGraphics->DrawMesh(pMesh);
+                //pGraphics->Clear();
+                for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
+                {
+                    RenderData renderData = frame.ObjectsToRender[j];
+                    if (renderData.m_pModel == nullptr) continue;
+                    MeshData* pMesh = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
+                    Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
+                    //UniformBufferObjectTest ubo = renderData.m_UBO;
+
+                    UniformBufferObjectTest ubo;
+                    ubo.model = renderData.m_World;
+                    ubo.view = frame.ActiveCameras[i].m_View;
+                    ubo.proj = frame.ActiveCameras[i].m_Projection;
+
+                    pMaterial->SetUBO(ubo);
+                    pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
+                    pMaterial->SetProperties();
+                    pGraphics->DrawMesh(pMesh);
+                }
             }
             pGraphics->Swap();
         }
-
-    private:
-        std::vector<RenderData> m_ObjectsToRender;
     };
 }
 

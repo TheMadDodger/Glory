@@ -13,8 +13,9 @@ namespace Glory
 
     void Glory::TransformSystem::OnUpdate(Registry* pRegistry, EntityID entity, Transform& pComponent)
     {
-        pComponent.MatTransform = glm::scale(glm::identity<glm::mat4>(), pComponent.Scale);
-        //pComponent.MatTransform = glm::rotate(pComponent.MatTransform, pComponent.Rotation);
-        pComponent.MatTransform = glm::translate(pComponent.MatTransform, pComponent.Position);
+        glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), pComponent.Scale);
+        glm::mat4 rotation = glm::toMat4(pComponent.Rotation);
+        glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), pComponent.Position);
+        pComponent.MatTransform = translation * rotation * scale;
     }
 }

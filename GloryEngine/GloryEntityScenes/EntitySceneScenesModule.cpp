@@ -8,6 +8,9 @@
 #include "ModelLoaderModule.h"
 #include "ImageLoaderModule.h"
 #include "MeshRenderSystem.h"
+#include "CameraSystem.h"
+#include "LookAtSystem.h"
+#include "SpinSystem.h"
 #include <Engine.h>
 
 namespace Glory
@@ -25,6 +28,9 @@ namespace Glory
 		// Register engine systems
 		m_Scene.m_Registry.RegisterSystem<TransformSystem>();
 		m_Scene.m_Registry.RegisterSystem<MeshRenderSystem>();
+		m_Scene.m_Registry.RegisterSystem<CameraSystem>();
+		m_Scene.m_Registry.RegisterSystem<LookAtSystem>();
+		m_Scene.m_Registry.RegisterSystem<SpinSystem>();
 	}
 
 	void EntitySceneScenesModule::PostInitialize()
@@ -60,8 +66,13 @@ namespace Glory
 		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
 		pMaterialData->SetTexture(pTexture);
 		
+		Entity& entity = m_Scene.CreateEntity();
+		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		entity.AddComponent<Camera>();
+
 		m_Entity = m_Scene.CreateEntity();
 		m_Entity.AddComponent<MeshFilter>(pModel);
+		m_Entity.AddComponent<Spin>(1.0f);
 		MeshRenderer& meshRenderer = m_Entity.AddComponent<MeshRenderer>(pMaterialData);
 	}
 
