@@ -22,4 +22,10 @@ namespace Glory
 		glm::vec3 Color;
 		glm::vec2 TexCoord;
 	};
+
+	struct Vertex3DTex
+	{
+		glm::vec3 Pos;
+		glm::vec2 TexCoord;
+	};
 }

@@ -71,9 +71,20 @@ namespace Glory
 		entity.AddComponent<Camera>();
 
 		m_Entity = m_Scene.CreateEntity();
+		m_Entity.GetComponent<Transform>().Position = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_Entity.AddComponent<MeshFilter>(pModel);
 		m_Entity.AddComponent<Spin>(1.0f);
-		MeshRenderer& meshRenderer = m_Entity.AddComponent<MeshRenderer>(pMaterialData);
+		m_Entity.AddComponent<MeshRenderer>(pMaterialData);
+
+		modelImportSettings.m_Extension = "obj";
+		pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/viking_room.obj", importSettings);
+		pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
+		delete pFile;
+
+		Entity& entity2 = m_Scene.CreateEntity();
+		entity2.AddComponent<MeshFilter>(pModel);
+		entity2.AddComponent<Spin>(10.0f);
+		entity2.AddComponent<MeshRenderer>(pMaterialData);
 	}
 
 	void EntitySceneScenesModule::Cleanup()

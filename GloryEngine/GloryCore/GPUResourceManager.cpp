@@ -83,4 +83,28 @@ namespace Glory
 		m_IDResources[pImageData->GetUUID()] = pTexture;
 		return pTexture;
 	}
+
+	Texture* GPUResourceManager::CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
+	{
+		Texture* pTexture = CreateTexture_Internal(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
+		pTexture->Create();
+		m_IDResources[UUID()] = pTexture;
+		return pTexture;
+	}
+
+	RenderTexture* GPUResourceManager::CreateRenderTexture(int width, int height, bool hasDepthBuffer)
+	{
+		RenderTexture* pRenderTexture = CreateRenderTexture_Internal(width, height, hasDepthBuffer);
+		pRenderTexture->Initialize();
+		m_IDResources[UUID()] = pRenderTexture;
+		return pRenderTexture;
+	}
+
+	void GPUResourceManager::Destroy(UUID id)
+	{
+		auto it = m_IDResources.find(id);
+		if (it == m_IDResources.end()) return;
+		delete m_IDResources[id];
+		m_IDResources.erase(it);
+	}
 }

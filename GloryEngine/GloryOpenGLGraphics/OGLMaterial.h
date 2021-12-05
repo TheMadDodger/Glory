@@ -12,10 +12,12 @@ namespace Glory
         virtual ~OGLMaterial();
 
         virtual void Use() override;
+        void SetTexture(const std::string& name, GLuint id);
 
     private:
         virtual void Initialize() override;
         virtual void SetProperties() override;
+        virtual void SetPropertiesNoUBO() override;
 
     private:
         GLuint CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex);

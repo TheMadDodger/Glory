@@ -17,6 +17,7 @@ namespace Glory
 		glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		glm::vec3 skew;
 		glm::vec4 perspective;
-		glm::decompose(world, transform.Scale, transform.Rotation, transform.Position, skew, perspective);
+		glm::vec3 position;
+		glm::decompose(world, transform.Scale, transform.Rotation, position, skew, perspective);
 	}
 }

@@ -7,7 +7,8 @@ namespace Glory
 {
 	void CameraSystem::OnComponentAdded(Registry* pRegistry, EntityID entity, Camera& pComponent)
 	{
-		Window* pWindow = Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow();
+		Engine* pEngine = Game::GetGame().GetEngine();
+		Window* pWindow = pEngine->GetWindowModule()->GetMainWindow();
 
 		int width, height;
 		pWindow->GetDrawableSize(&width, &height);

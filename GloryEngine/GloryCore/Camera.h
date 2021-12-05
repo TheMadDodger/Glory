@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "RenderTexture.h"
 #include <glm/glm.hpp>
 
 namespace Glory
@@ -10,5 +11,6 @@ namespace Glory
 
 		glm::mat4 m_View;
 		glm::mat4 m_Projection;
+		RenderTexture* m_pRenderTexture;
 	};
 }

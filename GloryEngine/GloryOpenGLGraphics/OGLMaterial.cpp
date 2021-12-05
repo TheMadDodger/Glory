@@ -62,6 +62,11 @@ namespace Glory
 		SetTexture("texSampler", (GLTexture*)m_pTexture);
 	}
 
+	void OGLMaterial::SetPropertiesNoUBO()
+	{
+		SetTexture("ScreenTexture", (GLTexture*)m_pTexture);
+	}
+
 	GLuint OGLMaterial::CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex)
 	{
 		GLuint uniformBlockIndex = glGetUniformBlockIndex(m_ProgramID, name.data());
@@ -107,12 +112,35 @@ namespace Glory
 	void OGLMaterial::SetTexture(const std::string& name, GLTexture* pTexture)
 	{
 		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		glUniform1i(texLocation, m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindTexture(pTexture->GetGLImageType(), pTexture->GetID());
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glActiveTexture(GL_TEXTURE0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		++m_TextureCounter;
+	}
+
+	void OGLMaterial::SetTexture(const std::string& name, GLuint id)
+	{
+		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1i(texLocation, m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindTexture(GL_TEXTURE_2D, id);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glActiveTexture(GL_TEXTURE0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		++m_TextureCounter;
 	}

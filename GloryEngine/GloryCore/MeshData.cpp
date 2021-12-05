@@ -7,6 +7,13 @@ namespace Glory
 	{
 	}
 
+	MeshData::MeshData(size_t vertexCount, size_t vertexSize, float* vertices, size_t indexCount, uint32_t* indices, const std::vector<AttributeType>& attributes) :
+		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(std::vector<float>(vertexCount)), m_Indices(std::vector<uint32_t>(indexCount)), m_Attributes(attributes), m_VertexSize(vertexSize)
+	{
+		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
+		memcpy(&m_Indices[0], indices, sizeof(uint32_t) * indexCount);
+	}
+
 	MeshData::~MeshData()
 	{
 		m_Vertices.clear();
