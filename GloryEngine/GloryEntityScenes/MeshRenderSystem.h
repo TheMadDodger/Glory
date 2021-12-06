@@ -1,5 +1,5 @@
 #pragma once
-#include "EntitySystem.h"
+#include "EntitySystemTemplate.h"
 #include "Components.h"
 #include <RenderData.h>
 

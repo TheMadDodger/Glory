@@ -95,6 +95,8 @@ namespace Glory
 
 	void Registry::ForEach(const std::type_index& type, std::function<void(Registry*, EntityID, EntityComponentData*)> func)
 	{
+		if (m_ComponentsPerType.find(type) == m_ComponentsPerType.end() || m_ComponentsPerType[type].size() <= 0) return;
+
 		std::for_each(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), [&](size_t index)
 		{
 			func(this, m_EntityComponents[index].m_Entity, &m_EntityComponents[index]);

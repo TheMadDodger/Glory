@@ -68,7 +68,7 @@ namespace Glory
 		
 		Entity& entity = m_Scene.CreateEntity();
 		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		entity.AddComponent<Camera>();
+		entity.AddComponent<CameraComponent>();
 
 		m_Entity = m_Scene.CreateEntity();
 		m_Entity.GetComponent<Transform>().Position = glm::vec3(1.0f, 0.0f, 0.0f);

@@ -41,18 +41,16 @@ namespace Glory
 	//	Perspective,
 	//};
 
-	struct Camera
+	struct CameraComponent
 	{
-		Camera() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f) {}
-		Camera(float halfFOV, float near, float far) : m_HalfFOV(halfFOV), m_Near(near), m_Far(far) {}
+		CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_pCamera(nullptr) {}
+		CameraComponent(float halfFOV, float near, float far) : m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_pCamera(nullptr) {}
 		
 		float m_HalfFOV;
 		float m_Near;
 		float m_Far;
 
-		CoreCamera m_Camera;
-
-		//CameraPerspective m_Perspective;
+		Camera* m_pCamera;
 	};
 
 	struct LookAt

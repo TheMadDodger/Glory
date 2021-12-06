@@ -9,7 +9,9 @@ namespace Glory
 	{
 	public:
 		RenderFrame();
+
+	public:
 		std::vector<RenderData> ObjectsToRender;
-		std::vector<CoreCamera> ActiveCameras;
+		std::vector<Camera*> ActiveCameras;
 	};
 }

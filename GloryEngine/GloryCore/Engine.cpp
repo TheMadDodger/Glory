@@ -155,6 +155,11 @@ namespace Glory
 			m_pAllModules[i]->Initialize();
 		}
 
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			m_pAllModules[i]->PostInitialize();
+		}
+
 		m_pMainThread = new MainThread();
 		m_pGameThread = new GameThread(this);
 		m_pGraphicsThread = new GraphicsThread();
@@ -167,11 +172,6 @@ namespace Glory
 
 		m_pGraphicsThread->Start();
 		m_pGameThread->Start();
-
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->PostInitialize();
-		}
 	}
 
 	void Engine::Update()

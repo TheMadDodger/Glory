@@ -1,6 +1,7 @@
 #include "RendererModule.h"
-#include <algorithm>
 #include "Engine.h"
+#include "CameraManager.h"
+#include <algorithm>
 
 namespace Glory
 {
@@ -23,10 +24,10 @@ namespace Glory
 		OnSubmit(renderData);
 	}
 
-	void RendererModule::Submit(const CoreCamera& camera)
+	void RendererModule::Submit(Camera* pCamera)
 	{
-		m_CurrentPreparingFrame.ActiveCameras.push_back(camera);
-		OnSubmit(camera);
+		m_CurrentPreparingFrame.ActiveCameras.push_back(pCamera);
+		OnSubmit(pCamera);
 	}
 
 	void RendererModule::StartFrame()
@@ -39,17 +40,25 @@ namespace Glory
 		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);
 	}
 
+	void RendererModule::Render(const RenderFrame& frame)
+	{
+		for (size_t i = 0; i < frame.ActiveCameras.size(); i++)
+		{
+			RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(frame.ActiveCameras[i], m_pEngine);
+			pRenderTexture->Bind();
+			m_pEngine->GetGraphicsModule()->Clear();
+
+			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
+			{
+				OnRender(frame.ActiveCameras[i], frame.ObjectsToRender[j]);
+			}
+
+			pRenderTexture->UnBind();
+			OnFinalRender(pRenderTexture);
+		}
+	}
+
 	void RendererModule::ThreadedInitialize() {}
 
 	void RendererModule::ThreadedCleanup() {}
-
-	//void RendererModule::OnDraw()
-	//{
-	//	std::for_each(m_ObjectsToRender.begin(), m_ObjectsToRender.end(), [&](const RenderData& renderData)
-	//	{
-	//		// Send to graphics module
-	//	});
-	//
-	//	m_ObjectsToRender.clear();
-	//}
 }
