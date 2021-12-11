@@ -13,6 +13,8 @@ namespace Glory
 		GLuint GetGLImageType() const;
 		GLuint GetID() const;
 
+		void InitializeEmpty();
+
 	private:
 		virtual void Create(ImageData* pImageData) override;
 		virtual void Create() override;

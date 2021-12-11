@@ -32,6 +32,7 @@ namespace Glory
 				m_EntityComponents[index] = componentData;
 				m_ComponentsPerEntity[entity].push_back(index);
 				m_ComponentsPerType[typeid(T)].push_back(index);
+				m_Systems.OnComponentAdded(this, entity, &m_EntityComponents[index]);
 				return componentData.GetData<T>();
 			}
 
@@ -40,6 +41,7 @@ namespace Glory
 			m_ComponentsPerEntity[entity].push_back(index);
 			m_ComponentsPerType[typeid(T)].push_back(index);
 			m_EntityComponents.push_back(componentData);
+			m_Systems.OnComponentAdded(this, entity, &m_EntityComponents[index]);
 			return componentData.GetData<T>();
 		}
 
@@ -76,6 +78,7 @@ namespace Glory
 			{
 				size_t index = m_ComponentsPerEntity[entity][i];
 				if (m_EntityComponents[index].GetType() != typeid(T)) continue;
+				m_Systems.OnComponentRemoved(this, entity, &m_EntityComponents[index]);
 				m_UnusedComponentIndices.push_back(index);
 				m_ComponentsPerEntity[entity].erase(m_ComponentsPerEntity[entity].begin() + index);
 				std::remove(m_ComponentsPerType[typeid(T)].begin(), m_ComponentsPerType[typeid(T)].end(), index);

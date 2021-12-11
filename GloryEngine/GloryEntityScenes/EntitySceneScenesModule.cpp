@@ -9,10 +9,15 @@
 #include "ModelLoaderModule.h"
 #include "ImageLoaderModule.h"
 #include "EntitySceneObject.h"
+#include "MeshRenderSystem.h"
+#include "CameraSystem.h"
+#include "LookAtSystem.h"
+#include "SpinSystem.h"
+#include <Engine.h>
 
 namespace Glory
 {
-	EntitySceneScenesModule::EntitySceneScenesModule()
+	EntitySceneScenesModule::EntitySceneScenesModule() : m_Scene("Test")
 	{
 	}
 
@@ -32,6 +37,12 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
+		// Register engine systems
+		m_Scene.m_Registry.RegisterSystem<TransformSystem>();
+		m_Scene.m_Registry.RegisterSystem<MeshRenderSystem>();
+		m_Scene.m_Registry.RegisterSystem<CameraSystem>();
+		m_Scene.m_Registry.RegisterSystem<LookAtSystem>();
+		m_Scene.m_Registry.RegisterSystem<SpinSystem>();
 	}
 
 	void EntitySceneScenesModule::PostInitialize()
@@ -67,12 +78,34 @@ namespace Glory
 		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
 		pMaterialData->SetTexture(pTexture);
 		
-		Entity entity = pObject->GetEntityHandle();
-		entity.AddComponent<MeshFilter>(pModel);
-		MeshRenderer& meshRenderer = entity.AddComponent<MeshRenderer>(pMaterialData);
+		Entity& entity = m_Scene.CreateEntity();
+		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		entity.AddComponent<CameraComponent>();
+
+		m_Entity = m_Scene.CreateEntity();
+		m_Entity.GetComponent<Transform>().Position = glm::vec3(1.0f, 0.0f, 0.0f);
+		m_Entity.AddComponent<MeshFilter>(pModel);
+		m_Entity.AddComponent<Spin>(1.0f);
+		m_Entity.AddComponent<MeshRenderer>(pMaterialData);
+
+		modelImportSettings.m_Extension = "obj";
+		pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/viking_room.obj", importSettings);
+		pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
+		delete pFile;
+
+		Entity& entity2 = m_Scene.CreateEntity();
+		entity2.AddComponent<MeshFilter>(pModel);
+		entity2.AddComponent<Spin>(10.0f);
+		entity2.AddComponent<MeshRenderer>(pMaterialData);
 	}
 
 	void EntitySceneScenesModule::OnCleanup()
 	{
 	}
+
+	//void EntitySceneScenesModule::Tick()
+	//{
+	//	m_Scene.m_Registry.Update();
+	//	//while (m_Scene.m_Registry.IsUpdating()) {}
+	//}
 }

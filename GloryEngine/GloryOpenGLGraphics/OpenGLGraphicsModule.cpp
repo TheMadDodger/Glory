@@ -124,6 +124,8 @@ namespace Glory
 
 	Material* OpenGLGraphicsModule::UseMaterial(MaterialData* pMaterialData)
 	{
+		glUseProgram(NULL);
+		LogGLError(glGetError());
 		Material* pMaterial = GetResourceManager()->CreateMaterial(pMaterialData);
 		pMaterial->Use();
 		return pMaterial;
@@ -135,5 +137,7 @@ namespace Glory
 		pMesh->Bind();
 		glDrawElements(GL_TRIANGLES, pMesh->GetIndexCount(), GL_UNSIGNED_INT, NULL);
 		LogGLError(glGetError());
+		glBindVertexArray(NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 }

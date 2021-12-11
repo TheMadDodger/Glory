@@ -25,4 +25,8 @@ namespace Glory
 	{
 		m_pTexture = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pImageData);
 	}
+	void Material::SetTexture(Texture* pTexture)
+	{
+		m_pTexture = pTexture;
+	}
 }

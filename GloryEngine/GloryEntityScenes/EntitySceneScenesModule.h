@@ -18,5 +18,9 @@ namespace Glory
 
 		virtual GScene* CreateScene(const std::string& sceneName) override;
 		virtual GScene* CreateScene(const std::string& sceneName, UUID uuid) override;
+
+	private:
+		Entity m_Entity;
+		EntityScene m_Scene;
 	};
 }

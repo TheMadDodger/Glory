@@ -14,6 +14,7 @@ namespace Glory
 
 		virtual void Use() = 0;
 		virtual void SetProperties() = 0;
+		virtual void SetPropertiesNoUBO() = 0;
 
 		//virtual void SetTexture(const std::string& name, TextureData* pTexture);
 		//virtual void SetTexture(const std::string& name, const GLuint& textureID);
@@ -21,6 +22,7 @@ namespace Glory
 	public: // Property setters
 		void SetUBO(UniformBufferObjectTest ubo);
 		void SetTexture(ImageData* pImageData);
+		void SetTexture(Texture* pTexture);
 
 	protected:
 		virtual void Initialize() = 0;

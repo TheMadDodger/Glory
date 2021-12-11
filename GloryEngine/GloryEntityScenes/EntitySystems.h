@@ -16,6 +16,8 @@ namespace Glory
 		bool IsUpdating();
 
 	private:
+		void OnComponentAdded(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData);
+		void OnComponentRemoved(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData);
 		void OnUpdate();
 		void OnDraw();
 

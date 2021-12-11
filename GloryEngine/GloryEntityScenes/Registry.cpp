@@ -57,6 +57,7 @@ namespace Glory
 		{
 			size_t index = m_ComponentsPerEntity[entity][i];
 			std::type_index type = m_EntityComponents[index].GetType();
+			m_Systems.OnComponentRemoved(this, entity, &m_EntityComponents[index]);
 			std::remove(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), index);
 		}
 
@@ -97,7 +98,7 @@ namespace Glory
 
 	void Registry::ForEach(const std::type_index& type, std::function<void(Registry*, EntityID, EntityComponentData*)> func)
 	{
-		if (m_ComponentsPerType.find(type) == m_ComponentsPerType.end()) return;
+		if (m_ComponentsPerType.find(type) == m_ComponentsPerType.end() || m_ComponentsPerType[type].size() <= 0) return;
 
 		std::for_each(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), [&](size_t index)
 		{

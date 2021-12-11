@@ -8,6 +8,7 @@
 #include "Shader.h"
 #include "Material.h"
 #include "Texture.h"
+#include "RenderTexture.h"
 
 namespace Glory
 {
@@ -23,6 +24,10 @@ namespace Glory
 		Shader* CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Texture* CreateTexture(ImageData* pImageData);
+		Texture* CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings);
+		RenderTexture* CreateRenderTexture(int width, int height, bool hasDepthBuffer);
+
+		void Destroy(UUID id);
 
 		bool ResourceExists(Resource* pResource);
 
@@ -34,6 +39,8 @@ namespace Glory
 		virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
 		virtual Texture* CreateTexture_Internal(ImageData* pImageData) = 0;
+		virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) = 0;
+		virtual RenderTexture* CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer) = 0;
 
 	private: // Resource lookups
 		template<class T>

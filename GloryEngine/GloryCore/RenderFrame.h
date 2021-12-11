@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 #include "RenderData.h"
+#include "Camera.h"
 
 namespace Glory
 {
@@ -8,6 +9,9 @@ namespace Glory
 	{
 	public:
 		RenderFrame();
+
+	public:
 		std::vector<RenderData> ObjectsToRender;
+		std::vector<Camera*> ActiveCameras;
 	};
 }
