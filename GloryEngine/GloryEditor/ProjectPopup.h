@@ -2,6 +2,12 @@
 #include <string>
 #include <vector>
 
+namespace std::filesystem
+{
+	class path;
+}
+
+
 namespace Glory::Editor
 {
 	struct Project
@@ -34,7 +40,7 @@ namespace Glory::Editor
 		bool m_OpenFileDialogPopup;
 		bool m_OpenNewProjectPopup;
 
-		std::filesystem::path m_BrowsingPath;
+		std::string m_BrowsingPath;
 
 		std::vector<Project> m_Projects;
 		size_t m_RemovingIndex;

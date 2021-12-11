@@ -139,14 +139,14 @@ namespace Glory::Editor
         if (ImGui::Button("ADD", ImVec2(buttonWidth, 0.0f)))
         {
             m_BrowsingPath = m_DefaultProjectsFolder;
-            strcpy(m_PathText, m_BrowsingPath.string().data());
+            strcpy(m_PathText, m_BrowsingPath.data());
             m_OpenFileDialogPopup = true;
         }
         ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
         if (ImGui::Button("NEW", ImVec2(buttonWidth, 0.0f)))
         {
             m_BrowsingPath = m_DefaultProjectsFolder;
-            strcpy(m_PathText, m_BrowsingPath.string().data());
+            strcpy(m_PathText, m_BrowsingPath.data());
             m_OpenNewProjectPopup = true;
         }
 
@@ -270,24 +270,26 @@ namespace Glory::Editor
             std::filesystem::path path(m_PathText);
             if (std::filesystem::exists(path))
             {
-                m_BrowsingPath = path;
+                m_BrowsingPath = path.string();
             }
         }
 
-        for (auto it = m_BrowsingPath.begin(); it != m_BrowsingPath.end(); it++)
+        std::filesystem::path browsingPath = m_BrowsingPath;
+
+        for (auto it = browsingPath.begin(); it != browsingPath.end(); it++)
         {
             auto subPath = *it;
             std::string name = subPath.string();
             if (name == "" || name == "\\" || name == "/") continue;
             if (ImGui::Button(name.data()))
             {
-                std::string pathString = m_BrowsingPath.string();
+                std::string pathString = m_BrowsingPath;
                 int index = pathString.find(name) + name.size();
                 pathString = pathString.substr(0, index);
                 if (name == "C:") m_BrowsingPath = "C:/";
                 else m_BrowsingPath = pathString;
 
-                strcpy(m_PathText, m_BrowsingPath.string().data());
+                strcpy(m_PathText, m_BrowsingPath.data());
 
                 return;
             }
@@ -346,8 +348,8 @@ namespace Glory::Editor
                     }
                     else
                     {
-                        m_BrowsingPath = entry.path();
-                        strcpy(m_PathText, m_BrowsingPath.string().data());
+                        m_BrowsingPath = entry.path().string();
+                        strcpy(m_PathText, m_BrowsingPath.data());
                     }
                 }
 
