@@ -36,8 +36,12 @@ namespace Glory
 
 	void EntityScene::Initialize()
 	{
+		// Register engine systems
 		m_Registry.RegisterSystem<TransformSystem>();
 		m_Registry.RegisterSystem<MeshRenderSystem>();
+		m_Registry.RegisterSystem<CameraSystem>();
+		m_Registry.RegisterSystem<LookAtSystem>();
+		m_Registry.RegisterSystem<SpinSystem>();
 	}
 
 	void EntityScene::OnTick()

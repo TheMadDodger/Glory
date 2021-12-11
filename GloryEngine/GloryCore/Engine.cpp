@@ -71,6 +71,12 @@ namespace Glory
 		return m_pGraphicsThread;
 	}
 
+	void Engine::StartThreads()
+	{
+		m_pGraphicsThread->Start();
+		m_pGameThread->Start();
+	}
+
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
@@ -189,9 +195,6 @@ namespace Glory
 		m_pGameThread->Bind<ScenesModule>(m_pScenesModule);
 		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
-
-		m_pGraphicsThread->Start();
-		m_pGameThread->Start();
 	}
 
 	void Engine::Update()

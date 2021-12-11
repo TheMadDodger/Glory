@@ -7,6 +7,7 @@
 #include <MaterialData.h>
 #include <Camera.h>
 #include <glm/gtx/quaternion.hpp>
+#include <CameraRef.h>
 
 namespace Glory
 {
@@ -43,14 +44,14 @@ namespace Glory
 
 	struct CameraComponent
 	{
-		CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_pCamera(nullptr) {}
-		CameraComponent(float halfFOV, float near, float far) : m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_pCamera(nullptr) {}
+		CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f) {}
+		CameraComponent(float halfFOV, float near, float far) : m_HalfFOV(halfFOV), m_Near(near), m_Far(far) {}
 		
 		float m_HalfFOV;
 		float m_Near;
 		float m_Far;
 
-		Camera* m_pCamera;
+		CameraRef m_Camera;
 	};
 
 	struct LookAt

@@ -21,7 +21,7 @@ namespace Glory
 		return m_pTexture;
 	}
 
-	RenderTexture::RenderTexture(size_t width, size_t height, bool hasDepthBuffer) : m_Width(width), m_Height(height), m_HasDepthBuffer(hasDepthBuffer)
+	RenderTexture::RenderTexture(size_t width, size_t height, bool hasDepthBuffer) : m_Width(width), m_Height(height), m_HasDepthBuffer(hasDepthBuffer), m_pTexture(nullptr)
 	{
 	}
 

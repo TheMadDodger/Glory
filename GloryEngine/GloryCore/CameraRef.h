@@ -1,12 +1,15 @@
 #pragma once
-#include <glm/glm.hpp>
-#include "Object.h"
+#include "UUID.h"
 #include "RenderTexture.h"
+#include <glm/glm.hpp>
 
 namespace Glory
 {
-	class Camera : public Object
+	struct CameraRef
 	{
+	public:
+		CameraRef();
+
 	public:
 		void SetResolution(int width, int height);
 		void SetPerspectiveProjection(int width, int height, float halfFOV, float near, float far);
@@ -16,18 +19,13 @@ namespace Glory
 		const glm::mat4& GetProjection() const;
 		RenderTexture* GetRenderTexture();
 
+		void Free();
+
 	private:
-		Camera(int width, int height);
+		CameraRef(UUID uuid);
 
 	private:
 		friend class CameraManager;
-		bool m_IsInUse;
-		bool m_TextureIsDirty;
-
-		glm::mat4 m_View;
-		glm::mat4 m_Projection;
-		glm::ivec2 m_Resolution;
-
-		RenderTexture* m_pRenderTexture;
+		UUID m_CameraID;
 	};
 }

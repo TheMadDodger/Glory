@@ -14,26 +14,23 @@ namespace Glory
 		int width, height;
 		pWindow->GetDrawableSize(&width, &height);
 
-		pComponent.m_pCamera = CameraManager::GetNewOrUnusedCamera();
-		pComponent.m_pCamera->SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
+		pComponent.m_Camera = CameraManager::GetNewOrUnusedCamera();
+		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
 	}
 
 	void CameraSystem::OnComponentRemoved(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
-		if (pComponent.m_pCamera == nullptr) return;
-		CameraManager::SetUnused(pComponent.m_pCamera);
+		pComponent.m_Camera.Free();
 	}
 
 	void CameraSystem::OnUpdate(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
-		if (pComponent.m_pCamera == nullptr) return;
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
-		pComponent.m_pCamera->SetView(transform.MatTransform);
+		pComponent.m_Camera.SetView(transform.MatTransform);
 	}
 
 	void CameraSystem::OnDraw(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
-		if (pComponent.m_pCamera == nullptr) return;
-		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_pCamera);
+		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_Camera);
 	}
 }

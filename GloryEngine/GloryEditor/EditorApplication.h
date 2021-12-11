@@ -42,7 +42,7 @@ namespace Glory::Editor
 		void InitializeExtensions();
 
 		void Destroy();
-		void Run();
+		void Run(Game& game);
 
 		EditorPlatform* GetEditorPlatform();
 		MainEditor* GetMainEditor();

@@ -24,10 +24,10 @@ namespace Glory
 		OnSubmit(renderData);
 	}
 
-	void RendererModule::Submit(Camera* pCamera)
+	void RendererModule::Submit(CameraRef camera)
 	{
-		m_CurrentPreparingFrame.ActiveCameras.push_back(pCamera);
-		OnSubmit(pCamera);
+		m_CurrentPreparingFrame.ActiveCameras.push_back(camera);
+		OnSubmit(camera);
 	}
 
 	void RendererModule::StartFrame()

@@ -29,6 +29,7 @@ namespace Glory
 		Mesh* pMesh = GetResource<Mesh>(pMeshData);
 		if (pMesh) return pMesh;
 
+
 		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
 		uint32_t indexBufferSize = pMeshData->IndexCount() * sizeof(uint32_t);
 		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
@@ -36,6 +37,7 @@ namespace Glory
 		pVertexBuffer->Assign(pMeshData->Vertices());
 		pIndexBuffer->Assign(pMeshData->Indices());
 		pMesh = CreateMesh_Internal(pMeshData);
+		pMesh->m_UUID = pMeshData->GetUUID();
 		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
 		pMesh->CreateBindingAndAttributeData();
 		m_IDResources[pMeshData->GetUUID()] = pMesh;
@@ -48,6 +50,7 @@ namespace Glory
 		if (pShader) return pShader;
 
 		pShader = CreateShader_Internal(pShaderFile, shaderType, function);
+		pShader->m_UUID = pShaderFile->GetUUID();
 		pShader->Initialize();
 		m_IDResources[pShaderFile->GetUUID()] = pShader;
 		return pShader;
@@ -59,7 +62,7 @@ namespace Glory
 		if (pMaterial) return pMaterial;
 
 		pMaterial = CreateMaterial_Internal(pMaterialData);
-
+		pMaterial->m_UUID = pMaterialData->GetUUID();
 		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
 		{
 			FileData* pShaderFile = pMaterialData->GetShaderAt(i);
@@ -79,6 +82,7 @@ namespace Glory
 		if (pTexture) return pTexture;
 
 		pTexture = CreateTexture_Internal(pImageData);
+		pTexture->m_UUID = pImageData->GetUUID();
 		pTexture->Create(pImageData);
 		m_IDResources[pImageData->GetUUID()] = pTexture;
 		return pTexture;
@@ -87,21 +91,27 @@ namespace Glory
 	Texture* GPUResourceManager::CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
 	{
 		Texture* pTexture = CreateTexture_Internal(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
+		UUID id = UUID();
+		pTexture->m_UUID = id;
 		pTexture->Create();
-		m_IDResources[UUID()] = pTexture;
+
+		m_IDResources[id] = pTexture;
 		return pTexture;
 	}
 
 	RenderTexture* GPUResourceManager::CreateRenderTexture(int width, int height, bool hasDepthBuffer)
 	{
 		RenderTexture* pRenderTexture = CreateRenderTexture_Internal(width, height, hasDepthBuffer);
+		UUID id = UUID();
+		pRenderTexture->m_UUID = id;
 		pRenderTexture->Initialize();
-		m_IDResources[UUID()] = pRenderTexture;
+		m_IDResources[id] = pRenderTexture;
 		return pRenderTexture;
 	}
 
-	void GPUResourceManager::Destroy(UUID id)
+	void GPUResourceManager::Free(GPUResource* pResource)
 	{
+		UUID id = pResource->m_UUID;
 		auto it = m_IDResources.find(id);
 		if (it == m_IDResources.end()) return;
 		delete m_IDResources[id];

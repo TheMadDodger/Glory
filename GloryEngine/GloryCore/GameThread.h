@@ -18,8 +18,10 @@ namespace Glory
 		template<typename T>
 		void Bind(T* pModule)
 		{
+			std::unique_lock lock(m_BindMutex);
 			m_TickBinds.push_back(std::bind(&T::Tick, pModule));
 			m_DrawBinds.push_back(std::bind(&T::Paint, pModule));
+			lock.unlock();
 		}
 
 	private:
@@ -35,5 +37,6 @@ namespace Glory
 		std::vector<std::function<void()>> m_DrawBinds;
 		bool m_Exit;
 		std::mutex m_ExitMutex;
+		std::mutex m_BindMutex;
 	};
 }

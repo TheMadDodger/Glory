@@ -56,9 +56,11 @@ namespace Glory
 
 	void GameThread::Paint()
 	{
+		m_pEngine->GetRendererModule()->StartFrame();
 		for (size_t i = 0; i < m_DrawBinds.size(); i++)
 		{
 			m_DrawBinds[i]();
 		}
+		m_pEngine->GetRendererModule()->EndFrame();
 	}
 }

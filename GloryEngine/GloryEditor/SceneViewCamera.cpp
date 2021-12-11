@@ -1,112 +1,77 @@
 //#include "SceneViewCamera.h"
-//#include <InputManager.h>
-//#include <TransformComponent.h>
-//#include <CameraComponent.h>
+//#include <CameraManager.h>
 //
-//namespace Spartan::Editor
+//namespace Glory::Editor
 //{
-//    SceneViewCamera* SceneViewCamera::m_pInstance;
-//
-//    SceneViewCamera::SceneViewCamera() : BasicCamera()
-//    {
-//        m_pInstance = this;
-//    }
+//    SceneViewCamera::SceneViewCamera() {} // : m_EyePosition(glm::vec3()), m_Rotation(1.0f, 0.0f, 0.0f, 0.0f) {}
 //
 //    SceneViewCamera::~SceneViewCamera()
 //    {
 //    }
 //
-//    void SceneViewCamera::Initialize(const GameContext& gameContext)
+//    void SceneViewCamera::Initialize()
 //    {
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-LEFTSHIFT", InputType::Down, -1, NULL, SDL_SCANCODE_LSHIFT));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-RIGHTSHIFT", InputType::Down, -1, NULL, SDL_SCANCODE_RSHIFT));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-LEFT", InputType::Down, 'a', NULL, SDL_SCANCODE_LEFT));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-RIGHT", InputType::Down, 'd', NULL, SDL_SCANCODE_RIGHT));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-FORWARD", InputType::Down, 'w', NULL, SDL_SCANCODE_UP));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-BACKWARD", InputType::Down, 's', NULL, SDL_SCANCODE_DOWN));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-UP", InputType::Down, 'q'));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-DOWN", InputType::Down, 'e'));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-ASCEND", InputType::Down, -1, NULL, SDL_SCANCODE_SPACE));
-//        gameContext.pInput->AddInputAction(InputAction("EDITOR-DESCEND", InputType::Down, -1, NULL, SDL_SCANCODE_LCTRL));
-//
-//        GetCameraComponent()->SetPerspective(60.0f * M_PI / 180.0f, 0.1f, 9999.0f);
-//
-//        m_LastFrameMouse = gameContext.pInput->GetMouseScreenPosition();
+//        //m_Camera = CameraManager::GetNewOrUnusedCamera();
 //    }
 //
-//    void SceneViewCamera::Update(const GameContext& gameContext)
+//    void SceneViewCamera::Update()
 //    {
-//        auto fastMode = gameContext.pInput->IsActionTriggered("EDITOR-LEFTSHIFT") || gameContext.pInput->IsActionTriggered("EDITOR-RIGHTSHIFT");
-//        auto movementSpeed = fastMode ? m_FastMovementSpeed : m_MovementSpeed;
-//
-//        float deltaTime = gameContext.pTime->GetDeltaTime() / 1000.0f;
-//
-//        auto pos = GetTransform()->Position;
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-LEFT"))
-//        {
-//            GetTransform()->Position = pos + (GetTransform()->Rotation.GetLeft() * movementSpeed * deltaTime);
-//        }
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-RIGHT"))
-//        {
-//            GetTransform()->Position = pos + (GetTransform()->Rotation.GetRight() * movementSpeed * deltaTime);
-//        }
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-FORWARD"))
-//        {
-//            GetTransform()->Position = pos + (GetTransform()->Rotation.GetBack() * movementSpeed * deltaTime);
-//        }
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-BACKWARD"))
-//        {
-//            GetTransform()->Position = pos + (GetTransform()->Rotation.GetForward() * movementSpeed * deltaTime);
-//        }
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-UP"))
-//        {
-//            GetTransform()->Position = pos + (GetTransform()->Rotation.GetUp() * movementSpeed * deltaTime);
-//        }
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-DOWN"))
-//        {
-//            GetTransform()->Position = pos + (GetTransform()->Rotation.GetDown() * movementSpeed * deltaTime);
-//        }
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-ASCEND"))
-//        {
-//            GetTransform()->Position = pos + (Vector3::Up() * movementSpeed * deltaTime);
-//        }
-//
-//        if (gameContext.pInput->IsActionTriggered("EDITOR-DESCEND"))
-//        {
-//            GetTransform()->Position = pos + (Vector3::Down() * movementSpeed * deltaTime);
-//        }
-//
-//        auto newMousePos = gameContext.pInput->GetMouseScreenPosition();
-//        auto mouseDelta = newMousePos - m_LastFrameMouse;
-//        if (m_Looking)
-//        {
-//            m_Yaw = m_Yaw + mouseDelta.x * m_FreeLookSensitivity;
-//            m_Pitch = m_Pitch - mouseDelta.y * m_FreeLookSensitivity;
-//        }
-//        m_LastFrameMouse = newMousePos;
-//
-//        GetTransform()->Rotation = Matrix4X4::CreateRotationMatrix(Vector3(m_Pitch, m_Yaw, 0.0f));
-//        
-//        float axis = gameContext.pInput->GetMouseWheelMovement().y;
-//        auto zoomSensitivity = fastMode ? m_FastZoomSensitivity : m_ZoomSensitivity;
-//        if (axis > 0) GetTransform()->Position = pos + (GetTransform()->Rotation.GetBack() * movementSpeed * deltaTime);
-//        else if (axis < 0) GetTransform()->Position = pos + (GetTransform()->Rotation.GetForward() * movementSpeed * deltaTime);
-//        
-//        if (gameContext.pInput->IsMouseButtonDown(SDL_BUTTON_RIGHT))
-//        {
-//            StartLooking();
-//        }
-//        else
-//        {
-//            StopLooking();
-//        }
+//        //ImGuiIO& io = ImGui::GetIO();
+//        //io.KeyShift;
+//        //
+//        //bool fastMode = io.KeyShift;
+//        //float movementSpeed = fastMode ? m_FastMovementSpeed : m_MovementSpeed;
+//        //
+//        //float deltaTime = io.DeltaTime;
+//        //
+//        //glm::vec3 pos = m_EyePosition;
+//        //
+//        //bool leftKey = ImGui::IsKeyDown('A');
+//        //bool rightKey = ImGui::IsKeyDown('D');
+//        //bool forwardKey = ImGui::IsKeyDown('W');
+//        //bool backwardKey = ImGui::IsKeyDown('S');
+//        //bool upKey = ImGui::IsKeyDown('Q');
+//        //bool downKey = ImGui::IsKeyDown('E');
+//        //
+//        //glm::vec3 left = glm::rotate(m_Rotation, glm::vec3(-1.0f, 0.0f, 0.0f));
+//        //glm::vec3 right = glm::rotate(m_Rotation, glm::vec3(1.0f, 0.0f, 0.0f));
+//        //glm::vec3 forward = glm::rotate(m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+//        //glm::vec3 backward = glm::rotate(m_Rotation, glm::vec3(0.0f, 0.0f, -1.0f));
+//        //glm::vec3 up = glm::vec3(0.0, 1.0f, 0.0f);
+//        //glm::vec3 down = glm::vec3(0.0, -1.0f, 0.0f);
+//        //
+//        //if (leftKey) m_EyePosition = pos + left * movementSpeed * deltaTime;
+//        //if (rightKey) m_EyePosition = pos + right * movementSpeed * deltaTime;
+//        //if (forwardKey) m_EyePosition = pos + forward * movementSpeed * deltaTime;
+//        //if (backwardKey) m_EyePosition = pos + backward * movementSpeed * deltaTime;
+//        //if (upKey) m_EyePosition = pos + up * movementSpeed * deltaTime;
+//        //if (downKey) m_EyePosition = pos + down * movementSpeed * deltaTime;
+//        //
+//        //ImVec2 mouseDelta = io.MouseDelta;
+//        //
+//        //if (m_Looking)
+//        //{
+//        //    m_Yaw = m_Yaw + mouseDelta.x * m_FreeLookSensitivity;
+//        //    m_Pitch = m_Pitch - mouseDelta.y * m_FreeLookSensitivity;
+//        //}
+//        //
+//        ////GetTransform()->Rotation = Matrix4X4::CreateRotationMatrix(Vector3(m_Pitch, m_Yaw, 0.0f));
+//        //float axis = io.MouseWheel;
+//        //auto zoomSensitivity = fastMode ? m_FastZoomSensitivity : m_ZoomSensitivity;
+//        //if (axis > 0) m_EyePosition = pos + backward * movementSpeed * deltaTime;
+//        //else if (axis < 0) m_EyePosition = pos + forward * movementSpeed * deltaTime;
+//        //
+//        //if (io.MouseDown[1])
+//        //{
+//        //    StartLooking();
+//        //}
+//        //else
+//        //{
+//        //    StopLooking();
+//        //}
+//        //
+//        //glm::mat4 view = glm::translate(glm::identity<glm::mat4>(), m_EyePosition);
+//        //m_Camera.SetView(view);
 //    }
 //
 //    void SceneViewCamera::StartLooking()
@@ -117,15 +82,5 @@
 //    void SceneViewCamera::StopLooking()
 //    {
 //        m_Looking = false;
-//    }
-//
-//    SceneViewCamera* SceneViewCamera::GetSceneCamera()
-//    {
-//        return m_pInstance;
-//    }
-//
-//    void SceneViewCamera::Destroy()
-//    {
-//        delete m_pInstance;
 //    }
 //}

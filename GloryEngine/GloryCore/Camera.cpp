@@ -4,9 +4,16 @@
 
 namespace Glory
 {
-	Camera::Camera() : m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr)
+	Camera::Camera(int width, int height) : m_Resolution(width, height), m_TextureIsDirty(true), m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr)
 	{
 
+	}
+
+	void Camera::SetResolution(int width, int height)
+	{
+		if (m_Resolution.x == width && m_Resolution.y == height) return;
+		m_Resolution = glm::ivec2(width, height);
+		m_TextureIsDirty = true;
 	}
 
 	void Camera::SetPerspectiveProjection(int width, int height, float halfFOV, float near, float far)

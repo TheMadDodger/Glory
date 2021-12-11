@@ -79,7 +79,8 @@ namespace Glory
 		m_GLFrameBufferID = NULL;
 		m_GLDepthBufferID = NULL;
 
-		//delete m_pTexture;
+		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager();
+		pResourceManager->Free(m_pTexture);
 
 		Initialize();
 	}

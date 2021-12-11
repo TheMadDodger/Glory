@@ -27,7 +27,7 @@ namespace Glory
 		Texture* CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings);
 		RenderTexture* CreateRenderTexture(int width, int height, bool hasDepthBuffer);
 
-		void Destroy(UUID id);
+		void Free(GPUResource* pResource);
 
 		bool ResourceExists(Resource* pResource);
 

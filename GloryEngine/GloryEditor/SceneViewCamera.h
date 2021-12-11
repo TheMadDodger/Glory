@@ -1,9 +1,12 @@
 //#pragma once
-//#include <BasicCamera.h>
+//#include <CameraRef.h>
+//#include <imgui.h>
+//#include <glm/glm.hpp>
+//#include <glm/gtx/quaternion.hpp>
 //
-//namespace Spartan::Editor
+//namespace Glory::Editor
 //{
-//    class SceneViewCamera : public Spartan::BasicCamera
+//    struct SceneViewCamera
 //    {
 //    public:
 //        SceneViewCamera();
@@ -12,14 +15,12 @@
 //        void StartLooking();
 //        void StopLooking();
 //
-//        static SceneViewCamera* GetSceneCamera();
-//        static void Destroy();
+//    private:
+//        void Initialize();
+//        void Update();
 //
 //    private:
-//        virtual void Initialize(const GameContext& gameContext) override;
-//        virtual void Update(const GameContext& gameContext) override;
-//
-//    private:
+//        friend class SceneWindow;
 //        /// Normal speed of camera movement.
 //        float m_MovementSpeed = 10.f;
 //
@@ -41,8 +42,9 @@
 //        float m_Yaw = 0.0f;
 //        float m_Pitch = 0.0f;
 //
-//        Vector2 m_LastFrameMouse;
+//        CameraRef m_Camera;
 //
-//        static SceneViewCamera* m_pInstance;
+//        glm::vec3 m_EyePosition;
+//        glm::quat m_Rotation;
 //    };
 //}

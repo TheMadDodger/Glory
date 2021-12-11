@@ -1,7 +1,8 @@
 #pragma once
 #include "Module.h"
-#include <vector>
 #include "RenderFrame.h"
+#include <vector>
+#include "CameraRef.h"
 
 namespace Glory
 {
@@ -14,20 +15,20 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void Submit(const RenderData& renderData);
-		void Submit(Camera* pCamera);
+		void Submit(CameraRef camera);
 
 		void StartFrame();
 		void EndFrame();
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
-		virtual void OnSubmit(Camera* pCamera) {}
+		virtual void OnSubmit(CameraRef camera) {}
 
 	protected:
 		friend class GraphicsThread;
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
-		virtual void OnRender(Camera* pCamera, const RenderData& renderData) = 0;
+		virtual void OnRender(CameraRef camera, const RenderData& renderData) = 0;
 		// Temporary
 		virtual void OnFinalRender(RenderTexture* pRenderTexture) = 0;
 		

@@ -41,8 +41,9 @@ namespace Glory::Editor
 		m_pPlatform->Destroy();
 	}
 
-	void EditorApplication::Run()
+	void EditorApplication::Run(Game& game)
 	{
+		game.GetEngine()->StartThreads();
 		while (true)
 		{
 			if (m_pPlatform->PollEvents()) break;
@@ -71,7 +72,7 @@ namespace Glory::Editor
 
 	void EditorApplication::RenderEditor()
 	{
-		m_pMainEditor->Paint();
+		m_pMainEditor->PaintEditor();
 
 		ImGui::ShowDemoWindow();
 	}

@@ -63,6 +63,8 @@ namespace Glory
 		GameThread* GetGameThread() const;
 		GraphicsThread* GetGraphicsThread() const;
 
+		void StartThreads();
+
 	private:
 		Engine(const EngineCreateInfo& createInfo);
 		virtual ~Engine();

@@ -37,7 +37,7 @@ namespace Glory
         {
         }
 
-        virtual void OnRender(Camera* pCamera, const RenderData& renderData) override
+        virtual void OnRender(CameraRef camera, const RenderData& renderData) override
         {
             MeshData* pMeshData = nullptr;
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
@@ -47,8 +47,8 @@ namespace Glory
 
             UniformBufferObjectTest ubo;
             ubo.model = renderData.m_World;
-            ubo.view = pCamera->GetView();
-            ubo.proj = pCamera->GetProjection();
+            ubo.view = camera.GetView();
+            ubo.proj = camera.GetProjection();
 
             pMaterial->SetUBO(ubo);
             pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
@@ -58,6 +58,7 @@ namespace Glory
 
         virtual void OnFinalRender(RenderTexture* pRenderTexture) override
         {
+#ifndef EDITOR
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 
             Window* pWindow = m_pEngine->GetWindowModule()->GetMainWindow();
@@ -100,6 +101,7 @@ namespace Glory
             OpenGLGraphicsModule::LogGLError(glGetError());
             
             glEnable(GL_DEPTH_TEST);
+#endif
         }
 
         void CreateMesh()
@@ -197,7 +199,7 @@ int main()
 
         EditorApplication editorApp(editorCreateInfo);
         editorApp.Initialize<EditorSDLWindowImpl, EditorOpenGLRenderImpl>(pGame);
-        editorApp.Run();
+        editorApp.Run(pGame);
         editorApp.Destroy();
 
         pGame.Destroy();

@@ -1,4 +1,5 @@
 #pragma once
+#include "UUID.h"
 
 namespace Glory
 {
@@ -7,5 +8,9 @@ namespace Glory
 	public:
 		GPUResource();
 		virtual ~GPUResource();
+
+	private:
+		friend class GPUResourceManager;
+		UUID m_UUID;
 	};
 }

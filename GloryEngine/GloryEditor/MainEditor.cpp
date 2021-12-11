@@ -9,7 +9,6 @@
 #include "MenuBar.h"
 #include "PopupManager.h"
 #include "EditorPreferencesWindow.h"
-#include "Game.h"
 #include "Window.h"
 #include "PopupManager.h"
 #include "EditorAssets.h"
@@ -17,6 +16,8 @@
 #include "Tumbnail.h"
 #include "TextureTumbnailGenerator.h"
 #include "Editor.h"
+#include <Game.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {
@@ -46,6 +47,8 @@ namespace Glory::Editor
 		m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
+
+		Game::GetGame().GetEngine()->GetGameThread()->Bind(this);
 	}
 
 	void MainEditor::Destroy()
@@ -67,7 +70,7 @@ namespace Glory::Editor
         }
     }
 
-	void MainEditor::Paint()
+	void MainEditor::PaintEditor()
 	{
 		MenuBar::OnGUI();
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
@@ -134,5 +137,15 @@ namespace Glory::Editor
 		colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 		colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+	}
+
+	void MainEditor::Tick()
+	{
+		EditorWindow::GameThreadTickWindows();
+	}
+
+	void MainEditor::Paint()
+	{
+		EditorWindow::GameThreadPaintWindows();
 	}
 }

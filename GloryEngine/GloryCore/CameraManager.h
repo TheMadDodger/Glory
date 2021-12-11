@@ -1,6 +1,7 @@
 #pragma once
 #include "Camera.h"
 #include "Engine.h"
+#include "CameraRef.h"
 #include <unordered_map>
 
 namespace Glory
@@ -8,9 +9,10 @@ namespace Glory
 	class CameraManager
 	{
 	public:
-		static Camera* GetNewOrUnusedCamera();
+		static CameraRef GetNewOrUnusedCamera();
 		static void SetUnused(Camera* pCamera);
-		static RenderTexture* GetRenderTextureForCamera(Camera* pCamera, Engine* pEngine);
+		static RenderTexture* GetRenderTextureForCamera(CameraRef camera, Engine* pEngine);
+		static Camera* GetCamera(UUID uuid);
 
 	private:
 		CameraManager();

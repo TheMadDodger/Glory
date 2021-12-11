@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	GPUResource::GPUResource()
+	GPUResource::GPUResource() : m_UUID(UUID())
 	{
 	}
 
