@@ -11,10 +11,7 @@
 
 namespace Glory::Editor
 {
-	SceneWindow::SceneWindow() : EditorWindowTemplate("Scene", 1280.0f, 720.0f)
-	{
-		//m_pRenderTexture = RenderTexture::CreateRenderTexture(1280, 720, true);
-	}
+	SceneWindow::SceneWindow() : EditorWindowTemplate("Scene", 1280.0f, 720.0f) {}
 
 	SceneWindow::~SceneWindow()
 	{
@@ -22,42 +19,31 @@ namespace Glory::Editor
 
 	void SceneWindow::OnOpen()
 	{
-		m_SceneCamera = CameraManager::GetNewOrUnusedCamera();
-		m_SceneCamera.SetResolution(m_WindowDimensions.x, m_WindowDimensions.y);
-		m_SceneCamera.SetPerspectiveProjection(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
-		glm::mat4 matrix = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		m_SceneCamera.SetView(matrix);
+		ImGuiIO& io = ImGui::GetIO();
+
+		m_SceneCamera.Initialize();
+		m_SceneCamera.m_Camera.SetResolution(m_WindowDimensions.x, m_WindowDimensions.y);
+		m_SceneCamera.m_Camera.SetPerspectiveProjection(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 	}
 
 	void SceneWindow::OnClose()
 	{
-		m_SceneCamera.Free();
+		m_SceneCamera.Cleanup();
 	}
 
 	void SceneWindow::OnPaint()
 	{
-		//m_SceneCamera.Update();
-
-		//m_pRenderTexture->Use();
-		//BaseGame::GetGame()->GetGameContext().pRenderer->ClearBackground();
-		//GameScene* pCurrentScene = EditorSceneManager::GetActiveScene();
-		//if (pCurrentScene == nullptr) return;
-		//
-		//CameraComponent* pPreviousCamera = pCurrentScene->GetActiveCamera();
-		//pCurrentScene->SetActiveCamera(SceneViewCamera::GetSceneCamera()->GetCameraComponent());
-		//EditorApp::GetEditorApp()->RenderScene();
-		//pCurrentScene->SetActiveCamera(pPreviousCamera);
-		//m_pRenderTexture->StopUse();
+		
 	}
 
 	void SceneWindow::OnGUI()
 	{
-		//if (ImGui::IsWindowFocused()) EditorApp::GetEditorApp()->UpdateGameObject(SceneViewCamera::GetSceneCamera());
+		if (ImGui::IsWindowFocused()) m_SceneCamera.Update();
 
-		m_SceneCamera.SetResolution(m_WindowDimensions.x, m_WindowDimensions.y);
-		m_SceneCamera.SetPerspectiveProjection(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Camera.SetResolution(m_WindowDimensions.x, m_WindowDimensions.y);
+		m_SceneCamera.m_Camera.SetPerspectiveProjection(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 		
-		RenderTexture* pSceneTexture = m_SceneCamera.GetRenderTexture();
+		RenderTexture* pSceneTexture = m_SceneCamera.m_Camera.GetRenderTexture();
 		if (pSceneTexture == nullptr) return;
 		Texture* pTexture = pSceneTexture->GetTexture();
 		
@@ -74,6 +60,6 @@ namespace Glory::Editor
 
 	void SceneWindow::GameThreadPaint()
 	{
-		Game::GetGame().GetEngine()->GetRendererModule()->Submit(m_SceneCamera);
+		Game::GetGame().GetEngine()->GetRendererModule()->Submit(m_SceneCamera.m_Camera);
 	}
 }

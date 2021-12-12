@@ -40,15 +40,15 @@ namespace Glory
 		// dis is a test pls ignore
 		EntityScene* pScene = (EntityScene*)CreateEmptyScene();
 		EntitySceneObject* pObject1 = (EntitySceneObject*)pScene->CreateEmptyObject();
-		EntitySceneObject* pObject2 = (EntitySceneObject*)pScene->CreateEmptyObject();
+		//EntitySceneObject* pObject2 = (EntitySceneObject*)pScene->CreateEmptyObject();
 
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
 		
 		ModelImportSettings modelImportSettings;
-		modelImportSettings.m_Extension = "obj";
+		modelImportSettings.m_Extension = "fbx";
 		
-		FileData* pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/viking_room.obj", importSettings);
+		FileData* pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/monkeh.fbx", importSettings);
 		ModelData* pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
 		delete pFile;
 		
@@ -73,11 +73,24 @@ namespace Glory
 		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		entity.AddComponent<CameraComponent>();
 
-		Entity& entity2 = pObject2->GetEntityHandle();
-		entity2.GetComponent<Transform>().Position = glm::vec3(1.0f, 0.0f, 0.0f);
-		entity2.AddComponent<MeshFilter>(pModel);
-		entity2.AddComponent<MeshRenderer>(pMaterialData);
-		entity2.AddComponent<Spin>(1.0f);
+		//entity = pObject2->GetEntityHandle();
+		//entity.GetComponent<Transform>().Position = glm::vec3(1.0f, 0.0f, 0.0f);
+		//entity.AddComponent<MeshFilter>(pModel);
+		//entity.AddComponent<MeshRenderer>(pMaterialData);
+
+		for (int i = -10; i < 10; i++)
+		{
+			for (int j = -10; j < 10; j++)
+			{
+				EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+				Entity& entity1 = pObject->GetEntityHandle();
+				entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.0f, j * 5.0f);
+				entity1.AddComponent<MeshFilter>(pModel);
+				entity1.AddComponent<MeshRenderer>(pMaterialData);
+			}
+		}
+
+		//entity2.AddComponent<Spin>(1.0f);
 
 		//modelImportSettings.m_Extension = "obj";
 		//pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/viking_room.obj", importSettings);

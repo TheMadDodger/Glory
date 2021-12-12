@@ -1,6 +1,6 @@
 #pragma once
 #include "EditorWindow.h"
-#include <CameraRef.h>
+#include "SceneViewCamera.h"
 
 namespace Glory::Editor
 {
@@ -19,6 +19,6 @@ namespace Glory::Editor
         virtual void GameThreadPaint() override;
 
     private:
-        CameraRef m_SceneCamera;
+        SceneViewCamera m_SceneCamera;
     };
 }

@@ -34,6 +34,7 @@ namespace Glory
 	{
 		// Initialize stuff
 		Initialize();
+		m_pEngine->StartThreads();
 
 		m_Game.m_pGameState->OnUserStart();
 
