@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "CameraManager.h"
 #include <algorithm>
+#include "DisplayManager.h"
 
 namespace Glory
 {
@@ -44,21 +45,35 @@ namespace Glory
 	{
 		for (size_t i = 0; i < frame.ActiveCameras.size(); i++)
 		{
-			RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(frame.ActiveCameras[i], m_pEngine);
+			CameraRef camera = frame.ActiveCameras[i];
+
+			RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(camera, m_pEngine);
 			pRenderTexture->Bind();
 			m_pEngine->GetGraphicsModule()->Clear();
 
 			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
 			{
-				OnRender(frame.ActiveCameras[i], frame.ObjectsToRender[j]);
+				OnRender(camera, frame.ObjectsToRender[j]);
 			}
 
 			pRenderTexture->UnBind();
-			OnFinalRender(pRenderTexture);
+
+
+			int displayIndex = camera.GetDisplayIndex();
+			if (displayIndex == -1) continue;
+			RenderTexture* pDisplayRenderTexture = DisplayManager::GetDisplayRenderTexture(displayIndex);
+			if (pDisplayRenderTexture == nullptr) continue;
+
+			pDisplayRenderTexture->Bind();
+			OnDoScreenRender(pRenderTexture);
+			pDisplayRenderTexture->UnBind();
 		}
 	}
 
-	void RendererModule::ThreadedInitialize() {}
+	void RendererModule::ThreadedInitialize()
+	{
+		DisplayManager::Initialize(m_pEngine);
+	}
 
 	void RendererModule::ThreadedCleanup() {}
 }

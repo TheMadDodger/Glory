@@ -193,8 +193,8 @@ namespace Glory
 		m_pMainThread->Bind<WindowModule>(m_pWindowModule);
 
 		m_pGameThread->Bind<ScenesModule>(m_pScenesModule);
-		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
+		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 	}
 
 	void Engine::Update()

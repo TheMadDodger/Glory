@@ -14,6 +14,7 @@ namespace Glory::Editor
     void SceneViewCamera::Initialize()
     {
         m_Camera = CameraManager::GetNewOrUnusedCamera();
+		m_Camera.SetDisplayIndex(-1);
     }
 
 	void SceneViewCamera::Cleanup()

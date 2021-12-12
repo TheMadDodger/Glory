@@ -44,12 +44,14 @@ namespace Glory
 
 	struct CameraComponent
 	{
-		CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f) {}
-		CameraComponent(float halfFOV, float near, float far) : m_HalfFOV(halfFOV), m_Near(near), m_Far(far) {}
+		CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_DisplayIndex(0) {}
+		CameraComponent(float halfFOV, float near, float far, int displayIndex) : m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_DisplayIndex(displayIndex) {}
 		
 		float m_HalfFOV;
 		float m_Near;
 		float m_Far;
+		
+		int m_DisplayIndex;
 
 		CameraRef m_Camera;
 	};

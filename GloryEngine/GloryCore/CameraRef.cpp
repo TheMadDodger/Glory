@@ -32,6 +32,13 @@ namespace Glory
 		pCamera->SetView(view);
 	}
 
+	void CameraRef::SetDisplayIndex(int index)
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetDisplayIndex(index);
+	}
+
 	const glm::mat4& CameraRef::GetView() const
 	{
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
@@ -46,7 +53,14 @@ namespace Glory
 		return pCamera->GetProjection();
 	}
 
-	RenderTexture* CameraRef::GetRenderTexture()
+	int CameraRef::GetDisplayIndex() const
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return -1;
+		return pCamera->GetDisplayIndex();
+	}
+
+	RenderTexture* CameraRef::GetRenderTexture() const
 	{
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
 		if (pCamera == nullptr) return nullptr;

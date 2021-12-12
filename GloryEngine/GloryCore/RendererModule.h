@@ -29,8 +29,7 @@ namespace Glory
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData) = 0;
-		// Temporary
-		virtual void OnFinalRender(RenderTexture* pRenderTexture) = 0;
+		virtual void OnDoScreenRender(RenderTexture* pRenderTexture) = 0;
 		
 	private:
 		void ThreadedInitialize();

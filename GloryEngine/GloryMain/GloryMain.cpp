@@ -56,9 +56,8 @@ namespace Glory
             pGraphics->DrawMesh(pMeshData);
         }
 
-        virtual void OnFinalRender(RenderTexture* pRenderTexture) override
+        virtual void OnDoScreenRender(RenderTexture* pRenderTexture) override
         {
-#ifndef EDITOR
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 
             Window* pWindow = m_pEngine->GetWindowModule()->GetMainWindow();
@@ -71,8 +70,8 @@ namespace Glory
             glDisable(GL_DEPTH_TEST);
             
             pGraphics->Clear();
-            glBindFramebuffer(GL_FRAMEBUFFER, NULL);
-            OpenGLGraphicsModule::LogGLError(glGetError());
+            //glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+            //OpenGLGraphicsModule::LogGLError(glGetError());
             glViewport(0, 0, width, height);
             OpenGLGraphicsModule::LogGLError(glGetError());
             
@@ -95,13 +94,12 @@ namespace Glory
             OpenGLGraphicsModule::LogGLError(glGetError());
             
             // Reset render textures and materials
-            glBindFramebuffer(GL_FRAMEBUFFER, NULL);
-            glViewport(0, 0, width, height);
+            //glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+            //glViewport(0, 0, width, height);
             glUseProgram(NULL);
             OpenGLGraphicsModule::LogGLError(glGetError());
             
             glEnable(GL_DEPTH_TEST);
-#endif
         }
 
         void CreateMesh()

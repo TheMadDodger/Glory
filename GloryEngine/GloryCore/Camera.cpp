@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	Camera::Camera(int width, int height) : m_Resolution(width, height), m_TextureIsDirty(true), m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr)
+	Camera::Camera(int width, int height) : m_DisplayIndex(0), m_Resolution(width, height), m_TextureIsDirty(true), m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr)
 	{
 
 	}
@@ -26,6 +26,11 @@ namespace Glory
 		m_View = view;
 	}
 
+	void Camera::SetDisplayIndex(int index)
+	{
+		m_DisplayIndex = index;
+	}
+
 	const glm::mat4& Camera::GetView() const
 	{
 		return m_View;
@@ -36,7 +41,12 @@ namespace Glory
 		return m_Projection;
 	}
 
-	RenderTexture* Camera::GetRenderTexture()
+	int Camera::GetDisplayIndex() const
+	{
+		return m_DisplayIndex;
+	}
+
+	RenderTexture* Camera::GetRenderTexture() const
 	{
 		return m_pRenderTexture;
 	}

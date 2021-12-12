@@ -40,7 +40,6 @@ namespace Glory
 		// dis is a test pls ignore
 		EntityScene* pScene = (EntityScene*)CreateEmptyScene();
 		EntitySceneObject* pObject1 = (EntitySceneObject*)pScene->CreateEmptyObject();
-		//EntitySceneObject* pObject2 = (EntitySceneObject*)pScene->CreateEmptyObject();
 
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
@@ -73,10 +72,9 @@ namespace Glory
 		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		entity.AddComponent<CameraComponent>();
 
-		//entity = pObject2->GetEntityHandle();
-		//entity.GetComponent<Transform>().Position = glm::vec3(1.0f, 0.0f, 0.0f);
-		//entity.AddComponent<MeshFilter>(pModel);
-		//entity.AddComponent<MeshRenderer>(pMaterialData);
+		entity = ((EntitySceneObject*)pScene->CreateEmptyObject())->GetEntityHandle();
+		entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 1);
 
 		for (int i = -10; i < 10; i++)
 		{
@@ -89,18 +87,6 @@ namespace Glory
 				entity1.AddComponent<MeshRenderer>(pMaterialData);
 			}
 		}
-
-		//entity2.AddComponent<Spin>(1.0f);
-
-		//modelImportSettings.m_Extension = "obj";
-		//pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/viking_room.obj", importSettings);
-		//pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
-		//delete pFile;
-
-		//Entity& entity2 = pObject2->GetEntityHandle();
-		//entity2.AddComponent<MeshFilter>(pModel);
-		//entity2.AddComponent<Spin>(10.0f);
-		//entity2.AddComponent<MeshRenderer>(pMaterialData);
 	}
 
 	void EntitySceneScenesModule::OnCleanup()

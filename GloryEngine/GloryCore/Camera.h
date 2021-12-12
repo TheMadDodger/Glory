@@ -11,10 +11,12 @@ namespace Glory
 		void SetResolution(int width, int height);
 		void SetPerspectiveProjection(int width, int height, float halfFOV, float near, float far);
 		void SetView(const glm::mat4& view);
+		void SetDisplayIndex(int index);
 
 		const glm::mat4& GetView() const;
 		const glm::mat4& GetProjection() const;
-		RenderTexture* GetRenderTexture();
+		int GetDisplayIndex() const;
+		RenderTexture* GetRenderTexture() const;
 
 	private:
 		Camera(int width, int height);
@@ -29,5 +31,7 @@ namespace Glory
 		glm::ivec2 m_Resolution;
 
 		RenderTexture* m_pRenderTexture;
+
+		int m_DisplayIndex;
 	};
 }

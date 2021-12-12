@@ -27,6 +27,7 @@ namespace Glory
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(transform.MatTransform);
+		pComponent.m_Camera.SetDisplayIndex(pComponent.m_DisplayIndex);
 	}
 
 	void CameraSystem::OnDraw(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
