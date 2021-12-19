@@ -2,6 +2,7 @@
 #include <ScenesModule.h>
 #include "EntityScene.h"
 #include "Entity.h"
+#include <MaterialData.h>
 
 namespace Glory
 {
@@ -10,6 +11,8 @@ namespace Glory
 	public:
 		EntitySceneScenesModule();
 		virtual ~EntitySceneScenesModule();
+
+		MaterialData* m_pMaterialData;
 
 	private:
 		virtual void Initialize() override;

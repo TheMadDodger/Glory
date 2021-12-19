@@ -17,7 +17,8 @@ namespace Glory::Editor
 
 			auto it = std::find_if(m_pRegisteredEditors.begin(), m_pRegisteredEditors.end(), [&](Editor* pEditor)
 			{
-				return pEditor->GetEditedType() == type;
+				std::type_index editorType = pEditor->GetEditedType();
+				return editorType == type;
 			});
 
 			if (it == m_pRegisteredEditors.end()) continue;

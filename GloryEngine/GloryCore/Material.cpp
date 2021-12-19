@@ -11,6 +11,18 @@ namespace Glory
 	{
 	}
 
+	void Material::SetProperties()
+	{
+		m_pMaterialData->CopyProperties(m_FrameProperties);
+
+		if (m_pMaterialData == nullptr) return;
+		for (size_t i = 0; i < m_FrameProperties.size(); i++)
+		{
+			MaterialPropertyData* pPropertyData = &m_FrameProperties[i];
+			SetProperty(pPropertyData);
+		}
+	}
+
 	void Material::AddShader(Shader* pShader)
 	{
 		m_pShaders.push_back(pShader);
@@ -21,12 +33,20 @@ namespace Glory
 		m_UBO = ubo;
 	}
 
-	void Material::SetTexture(ImageData* pImageData)
+	void Material::SetProperty(MaterialPropertyData* pProperty)
 	{
-		m_pTexture = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pImageData);
-	}
-	void Material::SetTexture(Texture* pTexture)
-	{
-		m_pTexture = pTexture;
+		const std::type_index& type = pProperty->Type();
+
+		if (type == typeid(float))
+		{
+			float value = std::any_cast<float>(pProperty->Data());
+			SetFloat(pProperty->Name(), value);
+		}
+		else if (type == typeid(ImageData*))
+		{
+			ImageData* pImage = std::any_cast<ImageData*>(pProperty->Data());
+			Texture* pTexture = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pImage);
+			SetTexture(pProperty->Name(), pTexture);
+		}
 	}
 }

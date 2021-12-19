@@ -9,5 +9,10 @@ namespace Glory
         Resource();
         Resource(UUID uuid);
         virtual ~Resource();
+
+        const std::string& Name();
+
+    private:
+        std::string m_Name;
     };
 }
