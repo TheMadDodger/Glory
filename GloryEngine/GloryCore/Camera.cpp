@@ -7,7 +7,7 @@ namespace Glory
 	Camera::Camera(int width, int height)
 		: m_DisplayIndex(0), m_Resolution(width, height), m_TextureIsDirty(true),
 		m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr),
-		m_ClearColor(glm::vec4(0.0f)), m_Priority(0)
+		m_ClearColor(glm::vec4(0.0f)), m_Priority(0), m_LayerMask(0)
 	{
 
 	}
@@ -39,6 +39,11 @@ namespace Glory
 		m_Priority = priority;
 	}
 
+	void Camera::SetLayerMask(const LayerMask& layerMask)
+	{
+		m_LayerMask = layerMask;
+	}
+
 	void Camera::SetClearColor(const glm::vec4& clearColor)
 	{
 		m_ClearColor = clearColor;
@@ -67,6 +72,11 @@ namespace Glory
 	const glm::vec4& Camera::GetClearColor() const
 	{
 		return m_ClearColor;
+	}
+
+	const LayerMask& Camera::GetLayerMask() const
+	{
+		return m_LayerMask;
 	}
 
 	RenderTexture* Camera::GetRenderTexture() const

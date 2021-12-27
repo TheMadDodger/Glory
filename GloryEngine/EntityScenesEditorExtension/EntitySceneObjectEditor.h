@@ -14,6 +14,8 @@ namespace Glory::Editor
 
 	private:
 		void Initialize();
+		void NameGUI();
+		void ComponentGUI();
 
 	private:
 		std::vector<Editor*> m_pComponentEditors;
@@ -22,6 +24,7 @@ namespace Glory::Editor
 		char m_NameBuff[MAXNAMESIZE];
 		bool m_AddingComponent;
 
+		SceneObject* m_pObject;
 		std::vector<EntityComponentObject*> m_pComponents;
     };
 }

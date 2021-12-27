@@ -20,6 +20,13 @@ namespace Glory
         MeshFilter& meshFilter = pRegistry->GetComponent<MeshFilter>(entity);
         Transform& transform = pRegistry->GetComponent<Transform>(entity);
 
+        LayerMask mask;
+        if (pRegistry->HasComponent<LayerComponent>(entity))
+        {
+            LayerComponent& layer = pRegistry->GetComponent<LayerComponent>(entity);
+            mask = layer.m_pLayer != nullptr ? layer.m_pLayer->m_Mask : 0;
+        }
+
         for (size_t i = 0; i < meshFilter.m_pModelData->GetMeshCount(); i++)
         {
             if (i >= pComponent.m_pMaterials.size())
@@ -33,6 +40,7 @@ namespace Glory
             renderData.m_pModel = meshFilter.m_pModelData;
             renderData.m_pMaterial = pComponent.m_pMaterials[i];
             renderData.m_World = transform.MatTransform;
+            renderData.m_LayerMask = mask;
             Game::GetGame().GetEngine()->GetRendererModule()->Submit(renderData);
         }
     }

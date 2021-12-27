@@ -67,6 +67,8 @@ namespace Glory
 
 			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
 			{
+				LayerMask mask = camera.GetLayerMask();
+				if (mask != 0 && (mask & frame.ObjectsToRender[j].m_LayerMask) == 0) continue;
 				OnRender(camera, frame.ObjectsToRender[j]);
 			}
 

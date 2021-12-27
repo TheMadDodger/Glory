@@ -83,6 +83,7 @@ namespace Glory
 				EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
 				Entity& entity1 = pObject->GetEntityHandle();
 				entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.0f, j * 5.0f);
+				entity1.AddComponent<LayerComponent>();
 				entity1.AddComponent<MeshFilter>(pModel);
 				entity1.AddComponent<MeshRenderer>(pMaterialData);
 			}

@@ -1,6 +1,7 @@
 #include <fstream>
 #include <filesystem>
 #include "AssetDatabase.h"
+#include "LayerManager.h"
 
 namespace Glory
 {
@@ -74,6 +75,8 @@ namespace Glory
 
 	void AssetDatabase::Save()
 	{
+		LayerManager::Save();
+
 		YAML::Emitter out;
 		ExportEditor(out);
 
@@ -88,6 +91,8 @@ namespace Glory
 
 	void AssetDatabase::Load()
 	{
+		LayerManager::Load();
+
 		std::filesystem::path databasePath = Game::GetAssetPath();
 		databasePath = databasePath.parent_path();
 		databasePath.append("Assets.db");
@@ -162,7 +167,7 @@ namespace Glory
 
 	void AssetDatabase::Initialize()
 	{
-		Load();
+		//Load();
 	}
 
 	void AssetDatabase::Destroy()

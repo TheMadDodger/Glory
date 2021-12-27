@@ -1,7 +1,7 @@
 #include "Engine.h"
 #include "Console.h"
-#include <algorithm>
 #include "AssetManager.h"
+#include <algorithm>
 
 namespace Glory
 {

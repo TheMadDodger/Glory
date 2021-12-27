@@ -5,11 +5,11 @@
 
 namespace Glory::Editor
 {
-    class CameraComponentEditor : public EntityComponentEditor<CameraComponentEditor, CameraComponent>
+    class LayerComponentEditor : public EntityComponentEditor<LayerComponentEditor, LayerComponent>
     {
     public:
-        CameraComponentEditor();
-        virtual ~CameraComponentEditor();
+        LayerComponentEditor();
+        virtual ~LayerComponentEditor();
 
         virtual void Initialize() override;
 

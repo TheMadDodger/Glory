@@ -51,6 +51,13 @@ namespace Glory
 		pCamera->SetPriority(priority);
 	}
 
+	void CameraRef::SetLayerMask(const LayerMask& layerMask)
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetLayerMask(layerMask);
+	}
+
 	void CameraRef::SetClearColor(const glm::vec4& clearColor)
 	{
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
@@ -91,6 +98,13 @@ namespace Glory
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
 		if (pCamera == nullptr) return glm::vec4(0.0f);
 		return pCamera->GetClearColor();
+	}
+
+	const LayerMask& CameraRef::GetLayerMask() const
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return 0;
+		return pCamera->GetLayerMask();
 	}
 
 	RenderTexture* CameraRef::GetRenderTexture() const
