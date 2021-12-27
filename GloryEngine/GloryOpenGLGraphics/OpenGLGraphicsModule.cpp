@@ -108,9 +108,9 @@ namespace Glory
 		}
 	}
 
-	void OpenGLGraphicsModule::Clear()
+	void OpenGLGraphicsModule::Clear(glm::vec4 color)
 	{
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(color.r, color.g, color.b, color.a);
 		LogGLError(glGetError());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		LogGLError(glGetError());

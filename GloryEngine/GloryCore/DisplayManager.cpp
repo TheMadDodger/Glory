@@ -8,6 +8,16 @@ namespace Glory
 	{
 		return index >= MAX_DISPLAYS ? nullptr : m_pRenderTextures[index];
 	}
+
+	void DisplayManager::ClearAllDisplays(Engine* pEngine)
+	{
+		for (size_t i = 0; i < MAX_DISPLAYS; i++)
+		{
+			m_pRenderTextures[i]->Bind();
+			pEngine->GetGraphicsModule()->Clear();
+			m_pRenderTextures[i]->UnBind();
+		}
+	}
 	
 	DisplayManager::~DisplayManager()
 	{

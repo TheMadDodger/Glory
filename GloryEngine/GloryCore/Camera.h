@@ -12,10 +12,14 @@ namespace Glory
 		void SetPerspectiveProjection(int width, int height, float halfFOV, float near, float far);
 		void SetView(const glm::mat4& view);
 		void SetDisplayIndex(int index);
+		void SetPriority(int priority);
+		void SetClearColor(const glm::vec4& clearColor);
 
 		const glm::mat4& GetView() const;
 		const glm::mat4& GetProjection() const;
 		int GetDisplayIndex() const;
+		int GetPriority() const;
+		const glm::vec4& GetClearColor() const;
 		RenderTexture* GetRenderTexture() const;
 
 	private:
@@ -30,8 +34,11 @@ namespace Glory
 		glm::mat4 m_Projection;
 		glm::ivec2 m_Resolution;
 
+		glm::vec4 m_ClearColor;
+
 		RenderTexture* m_pRenderTexture;
 
 		int m_DisplayIndex;
+		int m_Priority;
 	};
 }

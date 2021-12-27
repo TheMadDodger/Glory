@@ -68,8 +68,7 @@ namespace Glory
             CreateMesh();
             
             glDisable(GL_DEPTH_TEST);
-            
-            pGraphics->Clear();
+
             //glBindFramebuffer(GL_FRAMEBUFFER, NULL);
             //OpenGLGraphicsModule::LogGLError(glGetError());
             glViewport(0, 0, width, height);

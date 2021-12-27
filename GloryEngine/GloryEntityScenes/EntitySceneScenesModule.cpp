@@ -74,11 +74,11 @@ namespace Glory
 
 		entity = ((EntitySceneObject*)pScene->CreateEmptyObject())->GetEntityHandle();
 		entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 1);
+		entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
 
-		for (int i = -10; i < 10; i++)
+		for (int i = -4; i < 4; i++)
 		{
-			for (int j = -10; j < 10; j++)
+			for (int j = -4; j < 4; j++)
 			{
 				EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
 				Entity& entity1 = pObject->GetEntityHandle();

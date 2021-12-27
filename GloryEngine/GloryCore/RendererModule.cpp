@@ -27,6 +27,18 @@ namespace Glory
 
 	void RendererModule::Submit(CameraRef camera)
 	{
+		auto it = std::find_if(m_CurrentPreparingFrame.ActiveCameras.begin(), m_CurrentPreparingFrame.ActiveCameras.end(), [camera](const CameraRef& other)
+		{
+			return camera.GetPriority() < other.GetPriority();
+		});
+
+		if (it != m_CurrentPreparingFrame.ActiveCameras.end())
+		{
+			m_CurrentPreparingFrame.ActiveCameras.insert(it, camera);
+			OnSubmit(camera);
+			return;
+		}
+
 		m_CurrentPreparingFrame.ActiveCameras.push_back(camera);
 		OnSubmit(camera);
 	}
@@ -43,13 +55,15 @@ namespace Glory
 
 	void RendererModule::Render(const RenderFrame& frame)
 	{
+		DisplayManager::ClearAllDisplays(m_pEngine);
+
 		for (size_t i = 0; i < frame.ActiveCameras.size(); i++)
 		{
 			CameraRef camera = frame.ActiveCameras[i];
 
 			RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(camera, m_pEngine);
 			pRenderTexture->Bind();
-			m_pEngine->GetGraphicsModule()->Clear();
+			m_pEngine->GetGraphicsModule()->Clear(camera.GetClearColor());
 
 			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
 			{
@@ -57,7 +71,6 @@ namespace Glory
 			}
 
 			pRenderTexture->UnBind();
-
 
 			int displayIndex = camera.GetDisplayIndex();
 			if (displayIndex == -1) continue;
