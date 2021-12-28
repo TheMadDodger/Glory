@@ -17,8 +17,8 @@ project "GloryEntityScenes"
 	{
 		["ECS"] = { "EntityComponentData.h", "EntityID.h", "Registry.h", "Registry.cpp" },
 		["Module"] = { "Components.h", "Components.cpp", "Entity.h", "Entity.cpp", "EntityScene.h", "EntityScene.cpp", "EntitySceneScenesModule.h", "EntitySceneScenesModule.cpp", "EntityComponentObject.h", "EntityComponentObject.cpp", "EntitySceneObject.h", "EntitySceneObject.cpp" },
-		["Serializers"] = { "EntitySceneSerializer.h", "EntitySceneSerializer.cpp", "EntitySceneObjectSerializer.h", "EntitySceneObjectSerializer.cpp", "EntityComponentSerializer.h", "TransformSerializer.h", "TransformSerializer.cpp" }
-		["Systems"] = { "EntitySystem.h", "EntitySystem.cpp", "EntitySystems.h", "EntitySystems.cpp", "MeshRenderSystem.h", "MeshRenderSystem.cpp", "Systems.h", "TransformSystem.h", "TransformSystem.cpp", "CameraSystem.h", "CameraSystem.cpp", "LookAtSystem.h", "LookAtSystem.cpp", "SpinSystem.h", "SpinSystem.cpp" }
+		["Serializers"] = { "EntitySceneSerializer.h", "EntitySceneSerializer.cpp", "EntitySceneObjectSerializer.h", "EntitySceneObjectSerializer.cpp", "EntityComponentSerializer.h", "TransformSerializer.h", "TransformSerializer.cpp" },
+		["Systems"] = { "EntitySystem.h", "EntitySystem.cpp", "EntitySystems.h", "EntitySystems.cpp", "MeshRenderSystem.h", "MeshRenderSystem.cpp", "Systems.h", "TransformSystem.h", "TransformSystem.cpp", "CameraSystem.h", "CameraSystem.cpp", "LookAtSystem.h", "LookAtSystem.cpp", "SpinSystem.h", "SpinSystem.cpp" },
 	}
 
 	includedirs

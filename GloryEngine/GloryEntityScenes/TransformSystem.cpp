@@ -13,9 +13,15 @@ namespace Glory
 
     void Glory::TransformSystem::OnUpdate(Registry* pRegistry, EntityID entity, Transform& pComponent)
     {
+        glm::mat4 startTransform = glm::identity<glm::mat4>();
+        if (pComponent.Parent != nullptr)
+        {
+            startTransform = pComponent.Parent->MatTransform;
+        }
+
         glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), pComponent.Scale);
         glm::mat4 rotation = glm::toMat4(pComponent.Rotation);
         glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), pComponent.Position);
-        pComponent.MatTransform = translation * rotation * scale;
+        pComponent.MatTransform = startTransform * translation * rotation * scale;
     }
 }

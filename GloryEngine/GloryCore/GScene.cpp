@@ -28,6 +28,7 @@ namespace Glory
 		SceneObject* pObject = CreateObject("Empty Object");
 		pObject->Initialize();
 		m_pSceneObjects.push_back(pObject);
+		OnObjectAdded(pObject);
 		return pObject;
 	}
 
@@ -36,6 +37,7 @@ namespace Glory
 		SceneObject* pObject = CreateObject(name, uuid);
 		pObject->Initialize();
 		m_pSceneObjects.push_back(pObject);
+		OnObjectAdded(pObject);
 		return pObject;
 	}
 

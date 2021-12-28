@@ -47,7 +47,7 @@ namespace Glory::Editor
 		memcpy(m_NameBuff, name, nameString.length() + 1);
 		m_NameBuff[nameString.length()] = '\0';
 
-		UUID uuid = pObject->GetUUID();
+		UUID uuid = m_pObject->GetUUID();
 		std::string uuidString = std::to_string(uuid);
 		ImGui::Text(uuidString.data());
 		ImGui::Text("Name");

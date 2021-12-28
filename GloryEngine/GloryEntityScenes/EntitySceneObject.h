@@ -12,6 +12,9 @@ namespace Glory
         EntitySceneObject(Entity entity, const std::string& name, UUID uuid);
         virtual ~EntitySceneObject();
 
+        virtual SceneObject* GetParent() override;
+        virtual void SetParent(SceneObject* pParent) override;
+
         Entity GetEntityHandle();
 
     private:
@@ -19,5 +22,6 @@ namespace Glory
 
     private:
         Entity m_Entity;
+        EntitySceneObject* m_pParent;
     };
 }

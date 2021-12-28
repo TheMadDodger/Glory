@@ -22,6 +22,8 @@ namespace Glory
 		glm::vec3 Scale;
 
 		glm::mat4 MatTransform;
+
+		Transform* Parent;
 	};
 
 	struct MeshFilter

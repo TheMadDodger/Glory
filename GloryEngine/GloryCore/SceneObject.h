@@ -12,6 +12,9 @@ namespace Glory
         SceneObject(const std::string& name, UUID uuid);
         virtual ~SceneObject();
 
+        virtual SceneObject* GetParent() = 0;
+        virtual void SetParent(SceneObject* pParent) = 0;
+
     public:
         const std::string& Name();
         void SetName(const std::string& name);
