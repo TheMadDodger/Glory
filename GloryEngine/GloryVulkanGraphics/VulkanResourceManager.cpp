@@ -44,4 +44,12 @@ namespace Glory
 	{
 		return nullptr;
 	}
+	Texture* VulkanResourceManager::CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
+	{
+		return nullptr;
+	}
+	RenderTexture* VulkanResourceManager::CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer)
+	{
+		return nullptr;
+	}
 }

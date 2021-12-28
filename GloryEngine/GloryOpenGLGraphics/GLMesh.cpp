@@ -39,6 +39,7 @@ namespace Glory
 	void GLMesh::Bind()
 	{
 		glBindVertexArray(m_VertexArrayID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void GLMesh::SetupAttributes()

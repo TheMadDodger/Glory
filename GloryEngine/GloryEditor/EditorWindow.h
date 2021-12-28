@@ -37,16 +37,39 @@ namespace Glory::Editor
 			}
 			else pWindow->m_WindowID = m_pActiveEditorWindows.size();
 
+			pWindow->OnOpen();
 			return pWindow;
+		}
+
+		static void GameThreadTickWindows()
+		{
+			for (size_t i = 0; i < m_pActiveEditorWindows.size(); i++)
+			{
+				m_pActiveEditorWindows[i]->GameThreadTick();
+			}
+		}
+
+		static void GameThreadPaintWindows()
+		{
+			for (size_t i = 0; i < m_pActiveEditorWindows.size(); i++)
+			{
+				m_pActiveEditorWindows[i]->GameThreadPaint();
+			}
 		}
 
 		virtual const std::type_info& GetType() = 0;
 
 		void Close();
 
+		virtual void OnOpen() {}
+		virtual void OnClose() {}
+
 	protected:
-		virtual void OnPaint() {};
+		virtual void OnPaint() {}
 		virtual void OnGUI() = 0;
+
+		virtual void GameThreadTick() {}
+		virtual void GameThreadPaint() {}
 
 	private:
 		void RenderGUI();

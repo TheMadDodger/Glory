@@ -45,9 +45,7 @@ namespace Glory
 
 	void ScenesModule::Paint()
 	{
-		m_pEngine->GetRendererModule()->StartFrame();
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
-		m_pEngine->GetRendererModule()->EndFrame();
 	}
 
 	SceneObject* ScenesModule::CreateObject(GScene* pScene, const std::string& name, UUID uuid)

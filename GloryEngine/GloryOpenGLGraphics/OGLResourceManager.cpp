@@ -5,6 +5,7 @@
 #include "GLShader.h"
 #include "OGLMaterial.h"
 #include "GLTexture.h"
+#include "OGLRenderTexture.h"
 
 namespace Glory
 {
@@ -54,5 +55,15 @@ namespace Glory
 	Texture* OGLResourceManager::CreateTexture_Internal(ImageData* pImageData)
 	{
 		return new GLTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), ImageType::IT_2D, 0, 0, ImageAspect::IA_Color);
+	}
+
+	Texture* OGLResourceManager::CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
+	{
+		return new GLTexture(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
+	}
+
+	RenderTexture* OGLResourceManager::CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer)
+	{
+		return new OGLRenderTexture(width, height, hasDepthBuffer);
 	}
 }

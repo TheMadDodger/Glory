@@ -4,7 +4,7 @@
 
 namespace Glory::Editor
 {
-	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false)
+	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)
 	{
 	}
 
@@ -17,9 +17,32 @@ namespace Glory::Editor
 	void EntitySceneObjectEditor::OnGUI()
 	{
 		if (!m_Initialized) Initialize();
-		SceneObject* pObject = (SceneObject*)m_pTarget;
+		m_pObject = (SceneObject*)m_pTarget;
 
-		const std::string& nameString = pObject->Name();
+		NameGUI();
+		ComponentGUI();
+	}
+
+	void EntitySceneObjectEditor::Initialize()
+	{
+		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
+		m_pComponents.clear();
+
+		m_pComponentEditors.clear();
+		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
+		{
+				EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData);
+			m_pComponents.push_back(pComponentObject);
+			Editor* pEditor = Editor::CreateEditor(pComponentObject);
+			if (pEditor) m_pComponentEditors.push_back(pEditor);
+		});
+		m_Initialized = true;
+	}
+
+	void EntitySceneObjectEditor::NameGUI()
+	{
+		const std::string& nameString = m_pObject->Name();
 		const char* name = nameString.c_str();
 		memcpy(m_NameBuff, name, nameString.length() + 1);
 		m_NameBuff[nameString.length()] = '\0';
@@ -30,10 +53,13 @@ namespace Glory::Editor
 		ImGui::Text("Name");
 		ImGui::SameLine();
 		ImGui::InputText("##Name", m_NameBuff, MAXNAMESIZE);
-		pObject->SetName(m_NameBuff);
+		m_pObject->SetName(m_NameBuff);
+	}
 
+	void EntitySceneObjectEditor::ComponentGUI()
+	{
 		int index = 0;
-
+		const std::string& nameString = m_pObject->Name();
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [&](Editor* pEditor)
 		{
 			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
@@ -69,22 +95,5 @@ namespace Glory::Editor
 			//	Initialize();
 			//}
 		}
-	}
-
-	void EntitySceneObjectEditor::Initialize()
-	{
-		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
-		m_pComponents.clear();
-
-		m_pComponentEditors.clear();
-		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
-		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
-		{
-				EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData);
-			m_pComponents.push_back(pComponentObject);
-			Editor* pEditor = Editor::CreateEditor(pComponentObject);
-			if (pEditor) m_pComponentEditors.push_back(pEditor);
-		});
-		m_Initialized = true;
 	}
 }

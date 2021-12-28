@@ -1,6 +1,6 @@
 #pragma once
 #include "EditorWindow.h"
-//#include <RenderTexture.h>
+#include "SceneViewCamera.h"
 
 namespace Glory::Editor
 {
@@ -10,11 +10,15 @@ namespace Glory::Editor
         SceneWindow();
         virtual ~SceneWindow();
 
+        virtual void OnOpen() override;
+        virtual void OnClose() override;
+
     private:
         virtual void OnPaint() override;
         virtual void OnGUI() override;
+        virtual void GameThreadPaint() override;
 
     private:
-        //RenderTexture* m_pRenderTexture;
+        SceneViewCamera m_SceneCamera;
     };
 }

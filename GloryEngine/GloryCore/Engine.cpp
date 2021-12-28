@@ -1,8 +1,8 @@
 #include "Engine.h"
 #include "Console.h"
-#include <algorithm>
 #include "AssetManager.h"
 #include "Serializer.h"
+#include <algorithm>
 
 namespace Glory
 {
@@ -70,6 +70,12 @@ namespace Glory
 	GraphicsThread* Engine::GetGraphicsThread() const
 	{
 		return m_pGraphicsThread;
+	}
+
+	void Engine::StartThreads()
+	{
+		m_pGraphicsThread->Start();
+		m_pGameThread->Start();
 	}
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
@@ -177,6 +183,11 @@ namespace Glory
 
 		AssetManager::Initialize();
 
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			m_pAllModules[i]->PostInitialize();
+		}
+
 		m_pMainThread = new MainThread();
 		m_pGameThread = new GameThread(this);
 		m_pGraphicsThread = new GraphicsThread();
@@ -184,16 +195,8 @@ namespace Glory
 		m_pMainThread->Bind<WindowModule>(m_pWindowModule);
 
 		m_pGameThread->Bind<ScenesModule>(m_pScenesModule);
-		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
-
-		m_pGraphicsThread->Start();
-		m_pGameThread->Start();
-
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->PostInitialize();
-		}
+		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 	}
 
 	void Engine::Update()

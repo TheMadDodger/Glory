@@ -14,6 +14,7 @@
 #include "EntitySceneObjectSerializer.h"
 #include "TransformSerializer.h"
 #include <fstream>
+#include <Engine.h>
 
 namespace Glory
 {
@@ -83,27 +84,15 @@ namespace Glory
 	{
 		// dis is a test pls ignore
 		EntityScene* pScene = (EntityScene*)CreateEmptyScene();
-		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-		pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		EntitySceneObject* pObject1 = (EntitySceneObject*)pScene->CreateEmptyObject();
 
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
 		
 		ModelImportSettings modelImportSettings;
-		modelImportSettings.m_Extension = "obj";
+		modelImportSettings.m_Extension = "fbx";
 		
-		FileData* pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/viking_room.obj", importSettings);
+		FileData* pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/monkeh.fbx", importSettings);
 		ModelData* pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
 		delete pFile;
 		
@@ -124,9 +113,26 @@ namespace Glory
 		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
 		pMaterialData->SetTexture(pTexture);
 		
-		Entity entity = pObject->GetEntityHandle();
-		entity.AddComponent<MeshFilter>(pModel);
-		MeshRenderer& meshRenderer = entity.AddComponent<MeshRenderer>(pMaterialData);
+		Entity& entity = pObject1->GetEntityHandle();
+		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		entity.AddComponent<CameraComponent>();
+
+		entity = ((EntitySceneObject*)pScene->CreateEmptyObject())->GetEntityHandle();
+		entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
+
+		for (int i = -4; i < 4; i++)
+		{
+			for (int j = -4; j < 4; j++)
+			{
+				EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+				Entity& entity1 = pObject->GetEntityHandle();
+				entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.0f, j * 5.0f);
+				entity1.AddComponent<LayerComponent>();
+				entity1.AddComponent<MeshFilter>(pModel);
+				entity1.AddComponent<MeshRenderer>(pMaterialData);
+			}
+		}
 	}
 
 	void EntitySceneScenesModule::OnCleanup()

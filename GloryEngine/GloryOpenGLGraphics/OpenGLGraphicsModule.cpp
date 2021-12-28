@@ -108,9 +108,9 @@ namespace Glory
 		}
 	}
 
-	void OpenGLGraphicsModule::Clear()
+	void OpenGLGraphicsModule::Clear(glm::vec4 color)
 	{
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(color.r, color.g, color.b, color.a);
 		LogGLError(glGetError());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		LogGLError(glGetError());
@@ -124,6 +124,8 @@ namespace Glory
 
 	Material* OpenGLGraphicsModule::UseMaterial(MaterialData* pMaterialData)
 	{
+		glUseProgram(NULL);
+		LogGLError(glGetError());
 		Material* pMaterial = GetResourceManager()->CreateMaterial(pMaterialData);
 		pMaterial->Use();
 		return pMaterial;
@@ -135,5 +137,7 @@ namespace Glory
 		pMesh->Bind();
 		glDrawElements(GL_TRIANGLES, pMesh->GetIndexCount(), GL_UNSIGNED_INT, NULL);
 		LogGLError(glGetError());
+		glBindVertexArray(NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 }

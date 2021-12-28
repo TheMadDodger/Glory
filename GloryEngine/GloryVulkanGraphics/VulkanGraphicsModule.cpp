@@ -1260,7 +1260,7 @@ namespace Glory
         return imageView;
     }
 
-    void VulkanGraphicsModule::Clear()
+    void VulkanGraphicsModule::Clear(glm::vec4 color)
     {
 
     }

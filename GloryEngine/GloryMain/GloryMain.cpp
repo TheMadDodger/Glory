@@ -1,6 +1,8 @@
 #include "stdafx.h"
-#include <JobManager.h>
 #include "RendererModule.h"
+#include <JobManager.h>
+#include <VertexHelpers.h>
+#include <OGLMaterial.h>
 #include <ResourceMeta.h>
 
 #define _CRTDBG_MAP_ALLOC
@@ -17,26 +19,134 @@ namespace Glory
 
     protected:
         friend class GraphicsThread;
-        virtual void Initialize() {}
-        virtual void Cleanup() {}
-        virtual void Render(const RenderFrame& frame) override
+        virtual void Initialize()
+        {
+            FileImportSettings importSettings;
+            importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
+            importSettings.AddNullTerminateAtEnd = true;
+            FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.vert", importSettings);
+            FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.frag", importSettings);
+
+            std::vector<FileData*> pShaderFiles = { pVert, pFrag };
+            std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
+
+            m_pScreenMaterial = new MaterialData(pShaderFiles, shaderTypes);
+        }
+
+        virtual void Cleanup()
+        {
+        }
+
+        virtual void OnRender(CameraRef camera, const RenderData& renderData) override
+        {
+            MeshData* pMeshData = nullptr;
+            GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+            if (renderData.m_pModel == nullptr) return;
+            pMeshData = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
+            Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
+
+            UniformBufferObjectTest ubo;
+            ubo.model = renderData.m_World;
+            ubo.view = camera.GetView();
+            ubo.proj = camera.GetProjection();
+
+            pMaterial->SetUBO(ubo);
+            pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
+            pMaterial->SetProperties();
+            pGraphics->DrawMesh(pMeshData);
+        }
+
+        virtual void OnDoScreenRender(RenderTexture* pRenderTexture) override
         {
             GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
-            pGraphics->Clear();
-            for (size_t i = 0; i < frame.ObjectsToRender.size(); i++)
-            {
-                RenderData renderData = frame.ObjectsToRender[i];
-                if (renderData.m_pModel == nullptr) continue;
-                MeshData* pMesh = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
-                Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
-                UniformBufferObjectTest ubo = renderData.m_UBO;
-                pMaterial->SetUBO(renderData.m_UBO);
-                pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
-                pMaterial->SetProperties();
-                pGraphics->DrawMesh(pMesh);
-            }
-            //pGraphics->Swap();
+
+            Window* pWindow = m_pEngine->GetWindowModule()->GetMainWindow();
+
+            int width, height;
+            pWindow->GetDrawableSize(&width, &height);
+
+            CreateMesh();
+            
+            glDisable(GL_DEPTH_TEST);
+
+            //glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+            //OpenGLGraphicsModule::LogGLError(glGetError());
+            glViewport(0, 0, width, height);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            
+            // Set material
+            OGLMaterial* pMaterial = (OGLMaterial*)pGraphics->UseMaterial(m_pScreenMaterial);
+            GLTexture* pTexture = (GLTexture*)pRenderTexture->GetTexture();
+            pMaterial->SetTexture("ScreenTexture", pTexture->GetID());
+            
+            // Draw the screen mesh
+            glBindVertexArray(m_ScreenQuadVertexArrayID);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            
+            // Draw the triangles !
+            glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            
+            pGraphics->Swap();
+            
+            glBindVertexArray(NULL);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            
+            // Reset render textures and materials
+            //glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+            //glViewport(0, 0, width, height);
+            glUseProgram(NULL);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            
+            glEnable(GL_DEPTH_TEST);
         }
+
+        void CreateMesh()
+        {
+            if (m_HasMesh) return;
+
+            static const GLfloat g_quad_vertex_buffer_data[] = {
+            -1.0f, -1.0f, 0.0f,
+             1.0f, -1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+             1.0f, -1.0f, 0.0f,
+             1.0f,  1.0f, 0.0f,
+            };
+
+            glGenVertexArrays(1, &m_ScreenQuadVertexArrayID);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            glBindVertexArray(m_ScreenQuadVertexArrayID);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+
+            glGenBuffers(1, &m_ScreenQuadVertexbufferID);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            glBindBuffer(GL_ARRAY_BUFFER, m_ScreenQuadVertexbufferID);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+
+            glBindBuffer(GL_ARRAY_BUFFER, NULL);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+
+            glEnableVertexAttribArray(0);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+
+            glBindVertexArray(NULL);
+            OpenGLGraphicsModule::LogGLError(glGetError());
+            m_HasMesh = true;
+        }
+
+    private:
+        MaterialData* m_pScreenMaterial;
+
+        GLuint m_ScreenQuadVertexArrayID;
+        GLuint m_ScreenQuadVertexbufferID;
+
+        bool m_HasMesh = false;
     };
 }
 
@@ -86,7 +196,7 @@ int main()
 
         EditorApplication editorApp(editorCreateInfo);
         editorApp.Initialize<EditorSDLWindowImpl, EditorOpenGLRenderImpl>(pGame);
-        editorApp.Run();
+        editorApp.Run(pGame);
         editorApp.Destroy();
 
         pGame.Destroy();

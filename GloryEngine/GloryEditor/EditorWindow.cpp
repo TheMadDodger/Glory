@@ -18,6 +18,7 @@ namespace Glory::Editor
 
 	void EditorWindow::Close()
 	{
+		OnClose();
 		m_pClosingEditorWindows.push_back(this);
 	}
 

@@ -42,7 +42,7 @@ namespace Glory
 			return;
 		}
 
-		if (SDL_GL_SetSwapInterval(1) < 0)
+		if (SDL_GL_SetSwapInterval(0) < 0)
 		{
 			std::cerr << "Could not set SDL GL Swap interval: " << SDL_GetError() << std::endl;
 			return;

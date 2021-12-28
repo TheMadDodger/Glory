@@ -1,11 +1,14 @@
 #include "GameWindow.h"
-//#include "EditorApp.h"
-//#include <RenderTexture.h>
+#include <DisplayManager.h>
+#include <EditorApplication.h>
+#include <imgui.h>
+#include "ImGuiHelpers.h"
 
 namespace Glory::Editor
 {
-	GameWindow::GameWindow() : EditorWindowTemplate("Game", 1280.0f, 720.0f)
+	GameWindow::GameWindow() : EditorWindowTemplate("Game", 1280.0f, 720.0f), m_DisplayIndex(0)
 	{
+		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 	}
 
 	GameWindow::~GameWindow()
@@ -14,21 +17,77 @@ namespace Glory::Editor
 
 	void GameWindow::OnPaint()
 	{
-		//BaseGame::GetGame()->GetGameContext().pRenderer->ClearBackground();
-		//EditorApp::GetEditorApp()->RenderScene();
+		
 	}
 
 	void GameWindow::OnGUI()
 	{
-		//GLsizei w = (GLsizei)m_WindowDimensions.x;
-		//GLsizei h = (GLsizei)m_WindowDimensions.y;
-		//float aspect = (float)w / (float)h;
-		//
-		//ImVec2 pos = ImGui::GetCursorScreenPos();
-		//float width = ImGui::GetWindowWidth();
-		//float height = width / aspect;
-		//ImGui::GetWindowDrawList()->AddImage(
-		//	(void*)RenderTexture::GetDefaultRenderTexture()->GetTextureID(), ImVec2(pos.x, pos.y),
-		//	ImVec2(pos.x + width, pos.y + height), ImVec2(0, 1), ImVec2(1, 0));
+		MenuBar();
+		View();
+	}
+
+	void GameWindow::MenuBar()
+	{
+		if (ImGui::BeginMenuBar())
+		{
+			std::string selectedName = "Display " + std::to_string(m_DisplayIndex);
+			if (ImGui::BeginMenu(selectedName.data()))
+			{
+				for (size_t i = 0; i < DisplayManager::MAX_DISPLAYS; i++)
+				{
+					std::string name = "Display " + std::to_string(i);
+					bool selected = m_DisplayIndex == i;
+					if (ImGui::MenuItem(name.data(), NULL, selected))
+					{
+						m_DisplayIndex = i;
+					}
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
+	}
+
+	void GameWindow::View()
+	{
+		RenderTexture* pDisplayTexture = DisplayManager::GetDisplayRenderTexture(m_DisplayIndex);
+		if (pDisplayTexture == nullptr) return;
+		Texture* pTexture = pDisplayTexture->GetTexture();
+
+		size_t width, height;
+		pDisplayTexture->GetDimensions(width, height);
+		float textureAspect = (float)width / (float)height;
+
+		ImVec2 pos = ImGui::GetWindowPos();
+		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+		pos = pos + vMin;
+		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+		vMax = vMax - vMin;
+		float maxWidth = vMax.x;
+		float maxHeight = vMax.y;
+
+		float actualHeight = maxWidth / textureAspect;
+
+		if (actualHeight > maxHeight)
+		{
+			float diff = actualHeight - maxHeight;
+			float widthOffset = diff * textureAspect;
+			maxWidth -= widthOffset;
+			actualHeight = maxWidth / textureAspect;
+		}
+
+		ImVec2 halfMax = vMax / 2.0f;
+		ImVec2 center = pos + halfMax;
+
+		ImVec2 halfOffsets = ImVec2(maxWidth / 2.0f, actualHeight / 2.0f);
+
+		//ImGui::GetForegroundDrawList()->AddRect(center, center + halfMax, IM_COL32(255, 255, 0, 255));
+		//ImGui::GetForegroundDrawList()->AddRect(center, center - halfMax, IM_COL32(255, 255, 0, 255));
+
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+
+		ImGui::GetWindowDrawList()->AddImage(
+			pRenderImpl->GetTextureID(pTexture), center - halfOffsets,
+			center + halfOffsets, ImVec2(0, 1), ImVec2(1, 0));
 	}
 }

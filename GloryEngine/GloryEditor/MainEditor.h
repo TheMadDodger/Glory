@@ -1,6 +1,7 @@
 #pragma once
-#include <EditorAssetLoader.h>
 #include "ProjectPopup.h"
+#include <EditorAssetLoader.h>
+#include <GameThread.h>
 
 namespace Glory::Editor
 {
@@ -12,7 +13,7 @@ namespace Glory::Editor
 
 		void Initialize();
 		void Destroy();
-		void Paint();
+		void PaintEditor();
 
 		EditorAssetLoader* GetAssetLoader();
 
@@ -20,7 +21,11 @@ namespace Glory::Editor
 		void CreateDefaultMainMenuBar();
 		void SetDarkThemeColors();
 
+		void Tick();
+		void Paint();
+
 	private:
+		friend class Glory::GameThread;
 		EditorAssetLoader* m_pAssetLoader;
 		ProjectPopup* m_pProjectPopup;
 	};

@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderQueue.h"
 #include "Thread.h"
+#include "Camera.h"
 
 namespace Glory
 {
