@@ -13,6 +13,11 @@
 * you check if that type is present in the array.
 */
 
+#define YAML_READ(startNode, node, key, out, type) node = startNode[#key]; \
+if (node.IsDefined()) out = node.as<type>()
+
+#define YAML_WRITE(emitter, key, value) emitter << YAML::Key << #key << YAML::Value << value;
+
 #define APPEND_TYPE(x) PushInheritence<x>()
 
 namespace Glory

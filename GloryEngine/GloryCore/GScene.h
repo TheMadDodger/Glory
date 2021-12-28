@@ -14,6 +14,7 @@ namespace Glory
 
     public:
         SceneObject* CreateEmptyObject();
+        SceneObject* CreateEmptyObject(const std::string& name, UUID uuid);
         size_t SceneObjectsCount();
         SceneObject* GetSceneObject(size_t index);
         const std::string& Name();
@@ -26,7 +27,9 @@ namespace Glory
         virtual SceneObject* CreateObject(const std::string& name) = 0;
         virtual SceneObject* CreateObject(const std::string& name, UUID uuid) = 0;
 
-    private:
+        virtual void OnObjectAdded(SceneObject* pObject) {};
+
+    protected:
         friend class ScenesModule;
         std::string m_SceneName;
         std::vector<SceneObject*> m_pSceneObjects;

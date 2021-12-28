@@ -15,7 +15,7 @@ project "EntityScenesEditorExtension"
 
 	vpaths
 	{
-		["Extension"] = { "EntityScenesEditorExtension.h", "EntityScenesEditorExtension.cpp", "EntityComponentObject.h", "EntityComponentObject.cpp" },
+		["Extension"] = { "EntityScenesEditorExtension.h", "EntityScenesEditorExtension.cpp" },
 		["Editors"] = { "EntitySceneObjectEditor.h", "EntitySceneObjectEditor.cpp", "DefaultComponentEditor.h", "DefaultComponentEditor.cpp", "EntityComponentEditor.h", "TransformComponentEditor.h", "TransformComponentEditor.cpp" },
 	}
 

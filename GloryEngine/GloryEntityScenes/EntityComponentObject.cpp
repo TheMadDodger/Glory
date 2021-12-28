@@ -1,6 +1,6 @@
 #include "EntityComponentObject.h"
 
-namespace Glory::Editor
+namespace Glory
 {
 	EntityComponentObject::EntityComponentObject() : m_pComponentData(nullptr)
 	{

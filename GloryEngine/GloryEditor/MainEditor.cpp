@@ -19,6 +19,7 @@
 #include "Editor.h"
 #include <Game.h>
 #include <Engine.h>
+#include <Serializer.h>
 
 namespace Glory::Editor
 {
@@ -89,6 +90,24 @@ namespace Glory::Editor
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
 		MenuBar::AddMenuItem("File/New/Scene", NULL);
+		MenuBar::AddMenuItem("File/Save Scene", []()
+			{
+				GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(0);
+
+				YAML::Emitter out;
+				Serializer::SerializeObject(pScene, out);
+
+				std::ofstream outStream("test.gscene");
+				outStream << out.c_str();
+				outStream.close();
+			});
+
+		MenuBar::AddMenuItem("File/Load Scene", []()
+			{
+				YAML::Node node = YAML::LoadFile("test.gscene");
+				Serializer::DeserializeObject(node);
+			});
+
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); });
 		MenuBar::AddMenuItem("File/Save Project", []() {/*AssetDatabase::SaveAssets();*/ });
 		MenuBar::AddMenuItem("Play/Start", [&]() {/*this->EnterPlayMode();*/ });

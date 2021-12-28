@@ -29,4 +29,9 @@ namespace Glory
 	{
 		m_pEntityScene->m_Registry.DestroyEntity(m_EntityID);
 	}
+
+	EntityID Entity::GetEntityID()
+	{
+		return m_EntityID;
+	}
 }

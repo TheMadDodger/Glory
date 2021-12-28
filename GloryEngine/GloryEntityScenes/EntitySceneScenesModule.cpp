@@ -9,6 +9,11 @@
 #include "ModelLoaderModule.h"
 #include "ImageLoaderModule.h"
 #include "EntitySceneObject.h"
+#include "Serializer.h"
+#include "EntitySceneSerializer.h"
+#include "EntitySceneObjectSerializer.h"
+#include "TransformSerializer.h"
+#include <fstream>
 #include <Engine.h>
 
 namespace Glory
@@ -31,8 +36,48 @@ namespace Glory
 		return new EntityScene(sceneName, uuid);
 	}
 
+	EntitySceneObject* EntitySceneScenesModule::CreateDeserializedObject(GScene* pScene, const std::string& name, UUID uuid)
+	{
+		return (EntitySceneObject*)CreateObject(pScene, name, uuid);
+	}
+
 	void EntitySceneScenesModule::Initialize()
 	{
+		Serializer::RegisterSerializer<EntitySceneSerializer>();
+		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
+		Serializer::RegisterSerializer<TransformSerializer>();
+
+		YAML::Emitter out;
+
+		out << YAML::BeginMap;
+
+		size_t hash = ResourceType::GetHash(typeid(Object));
+		out << YAML::Key << "Object";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(GScene));
+		out << YAML::Key << "GScene";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(EntityScene));
+		out << YAML::Key << "EntityScene";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(SceneObject));
+		out << YAML::Key << "SceneObject";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(EntitySceneObject));
+		out << YAML::Key << "EntitySceneObject";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(EntityComponentObject));
+		out << YAML::Key << "EntityComponentObject";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(Transform));
+		out << YAML::Key << "Transform";
+		out << YAML::Value << hash;
+
+		out << YAML::EndMap;
+
+		std::ofstream outStream("hashes.txt");
+		outStream << out.c_str();
+		outStream.close();
 	}
 
 	void EntitySceneScenesModule::PostInitialize()
@@ -76,18 +121,32 @@ namespace Glory
 		entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
 
-		for (int i = -4; i < 4; i++)
-		{
-			for (int j = -4; j < 4; j++)
-			{
-				EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
-				Entity& entity1 = pObject->GetEntityHandle();
-				entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.0f, j * 5.0f);
-				entity1.AddComponent<LayerComponent>();
-				entity1.AddComponent<MeshFilter>(pModel);
-				entity1.AddComponent<MeshRenderer>(pMaterialData);
-			}
-		}
+		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		Entity& entity1 = pObject->GetEntityHandle();
+		entity1.GetComponent<Transform>().Position = glm::vec3(0.0f, 0.0f, 0.0f);
+		entity1.AddComponent<MeshFilter>(pModel);
+		entity1.AddComponent<MeshRenderer>(pMaterialData);
+
+		EntitySceneObject* pObject2 = (EntitySceneObject*)pScene->CreateEmptyObject();
+		Entity& entity2 = pObject2->GetEntityHandle();
+		entity2.GetComponent<Transform>().Position = glm::vec3(10.0f, 0.0f, 0.0f);
+		entity2.AddComponent<MeshFilter>(pModel);
+		entity2.AddComponent<MeshRenderer>(pMaterialData);
+
+		pObject2->SetParent(pObject);
+
+		//for (int i = -4; i < 4; i++)
+		//{
+		//	for (int j = -4; j < 4; j++)
+		//	{
+		//		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		//		Entity& entity1 = pObject->GetEntityHandle();
+		//		entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.0f, j * 5.0f);
+		//		entity1.AddComponent<LayerComponent>();
+		//		entity1.AddComponent<MeshFilter>(pModel);
+		//		entity1.AddComponent<MeshRenderer>(pMaterialData);
+		//	}
+		//}
 	}
 
 	void EntitySceneScenesModule::OnCleanup()

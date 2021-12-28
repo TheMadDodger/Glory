@@ -8,9 +8,9 @@ namespace Glory
 		return typeid(ScenesModule);
 	}
 
-	GScene* ScenesModule::CreateEmptyScene()
+	GScene* ScenesModule::CreateEmptyScene(const std::string& name)
 	{
-		GScene* pScene = CreateScene("New Scene");
+		GScene* pScene = CreateScene(name);
 		pScene->Initialize();
 		m_pOpenScenes.push_back(pScene);
 		return pScene;
@@ -46,5 +46,10 @@ namespace Glory
 	void ScenesModule::Paint()
 	{
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
+	}
+
+	SceneObject* ScenesModule::CreateObject(GScene* pScene, const std::string& name, UUID uuid)
+	{
+		return pScene->CreateObject(name, uuid);
 	}
 }

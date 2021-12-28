@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Console.h"
 #include "AssetManager.h"
+#include "Serializer.h"
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -153,6 +154,7 @@ namespace Glory
 		delete m_pGraphicsThread;
 
 		Console::Cleanup();
+		Serializer::Cleanup();
 	}
 
 	void Engine::Initialize()

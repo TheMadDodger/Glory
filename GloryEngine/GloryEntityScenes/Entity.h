@@ -43,6 +43,8 @@ namespace Glory
 
 		void Destroy();
 
+		EntityID GetEntityID();
+
 	private:
 		EntityID m_EntityID;
 		EntityScene* m_pEntityScene;

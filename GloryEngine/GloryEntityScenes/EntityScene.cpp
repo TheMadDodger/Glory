@@ -34,6 +34,12 @@ namespace Glory
 		return Entity(entityID, this);
 	}
 
+	EntitySceneObject* EntityScene::GetEntitySceneObjectFromEntityID(EntityID entity)
+	{
+		if (m_EntityIDToObject.find(entity) == m_EntityIDToObject.end()) return nullptr;
+		return m_EntityIDToObject[entity];
+	}
+
 	void EntityScene::Initialize()
 	{
 		// Register engine systems
@@ -66,5 +72,12 @@ namespace Glory
 	{
 		Entity entity = CreateEntity();
 		return new EntitySceneObject(entity, name, uuid);
+	}
+
+	void EntityScene::OnObjectAdded(SceneObject* pObject)
+	{
+		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
+		EntityID entity = pEntityObject->GetEntityHandle().GetEntityID();
+		m_EntityIDToObject[entity] = pEntityObject;
 	}
 }

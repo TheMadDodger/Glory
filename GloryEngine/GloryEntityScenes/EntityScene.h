@@ -7,6 +7,7 @@
 namespace Glory
 {
 	class Entity;
+	class EntitySceneObject;
 
 	class EntityScene : public GScene
 	{
@@ -18,6 +19,8 @@ namespace Glory
 
 		Entity CreateEntity();
 
+		EntitySceneObject* GetEntitySceneObjectFromEntityID(EntityID entity);
+
 	private:
 		virtual void Initialize() override;
 		virtual void OnTick() override;
@@ -26,8 +29,11 @@ namespace Glory
 		virtual SceneObject* CreateObject(const std::string& name) override;
 		virtual SceneObject* CreateObject(const std::string& name, UUID uuid) override;
 
+		virtual void OnObjectAdded(SceneObject* pObject) override;
+
 	private:
 		friend class Entity;
 		Registry m_Registry;
+		std::unordered_map<EntityID, EntitySceneObject*> m_EntityIDToObject;
 	};
 }

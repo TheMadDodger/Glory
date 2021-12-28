@@ -1,6 +1,6 @@
 #pragma once
 #include <Editor.h>
-#include "EntityComponentObject.h"
+#include <EntityComponentObject.h>
 
 namespace Glory::Editor
 {
