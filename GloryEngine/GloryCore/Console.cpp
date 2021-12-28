@@ -1,5 +1,5 @@
 #include "Console.h"
-#include "DebugConsoleInput.h"
+//#include "DebugConsoleInput.h"
 #include <iostream>
 #include <iomanip>
 #include "Commands.h"
@@ -7,12 +7,10 @@
 namespace Glory
 {
 	std::vector<BaseConsoleCommand*> Console::m_pCommands = std::vector<BaseConsoleCommand*>();
+	std::vector<IConsole*> Console::m_pConsoles = std::vector<IConsole*>();
 
 	bool Console::m_Writing = false;
 	bool Console::m_Reading = false;
-#ifdef _DEBUG
-	DebugConsoleInput* Console::m_pDebugConsole = nullptr;
-#endif
 	int Console::m_CommandHistoryInsertIndex = -1;
 	int Console::m_ConsoleInsertIndex = -1;
 	int Console::m_CurrentCommandHistorySize = 0;
@@ -23,10 +21,6 @@ namespace Glory
 	void Console::Initialize()
 	{
 		m_pInstance = new Console();
-#ifdef _DEBUG
-		m_pDebugConsole = new DebugConsoleInput();
-		m_pDebugConsole->Initialize();
-#endif
 		RegisterCommand(new ConsoleCommand("printhistory", Console::PrintHistory));
 	}
 
@@ -39,11 +33,14 @@ namespace Glory
 		m_pCommands.clear();
 
 		Parser::Destroy();
-#ifdef _DEBUG
-		m_pDebugConsole->Stop();
-		delete m_pDebugConsole;
-		m_pDebugConsole = nullptr;
-#endif
+
+		for (size_t i = 0; i < m_pConsoles.size(); i++)
+		{
+			m_pConsoles[i]->OnConsoleClose();
+			delete m_pConsoles[i];
+		}
+		m_pConsoles.clear();
+
 		delete m_pInstance;
 		m_pInstance = nullptr;
 	}
@@ -129,9 +126,11 @@ namespace Glory
 		std::string finalLine = line;
 		if (addTimestamp) finalLine = TimeStamp() + finalLine;
 		AddLineToConsole(finalLine);
-#if _DEBUG
-		m_pDebugConsole->Write(finalLine);
-#endif
+
+		for (size_t i = 0; i < m_pConsoles.size(); i++)
+		{
+			m_pConsoles[i]->Write(finalLine);
+		}
 	}
 
 	void Console::ForEachCommandInHistory(std::function<void(const std::string&)> callback)
@@ -154,6 +153,14 @@ namespace Glory
 
 			--currentIndex;
 			if (currentIndex < 0) currentIndex = MAX_HISTORY_SIZE - 1;
+		}
+	}
+
+	void Console::SetNextColor(const glm::vec4& color)
+	{
+		for (size_t i = 0; i < m_pConsoles.size(); i++)
+		{
+			m_pConsoles[i]->SetNextColor(color);
 		}
 	}
 

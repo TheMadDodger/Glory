@@ -64,6 +64,7 @@ namespace Glory
 		GraphicsThread* GetGraphicsThread() const;
 
 		void StartThreads();
+		void Update();
 
 	private:
 		Engine(const EngineCreateInfo& createInfo);
@@ -71,7 +72,6 @@ namespace Glory
 
 	private:
 		void Initialize();
-		void Update();
 
 	private:
 		friend class Game;

@@ -6,6 +6,7 @@
 #include "InspectorWindow.h"
 #include "SceneGraphWindow.h"
 #include "ContentBrowser.h"
+#include "EditorConsoleWindow.h"
 #include "MenuBar.h"
 #include "PopupManager.h"
 #include "EditorPreferencesWindow.h"
@@ -38,6 +39,7 @@ namespace Glory::Editor
 		EditorWindow::GetWindow<InspectorWindow>();
 		EditorWindow::GetWindow<SceneGraphWindow>();
 		EditorWindow::GetWindow<ContentBrowser>();
+		EditorWindow::GetWindow<EditorConsoleWindow>();
 
 		CreateDefaultMainMenuBar();
 
@@ -142,6 +144,7 @@ namespace Glory::Editor
 	void MainEditor::Tick()
 	{
 		EditorWindow::GameThreadTickWindows();
+		Game::GetGame().GetEngine()->Update();
 	}
 
 	void MainEditor::Paint()

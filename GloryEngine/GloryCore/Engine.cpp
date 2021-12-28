@@ -3,6 +3,11 @@
 #include "AssetManager.h"
 #include <algorithm>
 
+#ifdef _DEBUG
+#include "WindowsDebugConsole.h"
+#endif // _DEBUG
+
+
 namespace Glory
 {
 	Engine* Engine::CreateEngine(const EngineCreateInfo& createInfo)
@@ -153,6 +158,10 @@ namespace Glory
 	void Engine::Initialize()
 	{
 		Console::Initialize();
+
+#ifdef _DEBUG
+		Console::RegisterConsole<WindowsDebugConsole>();
+#endif
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{

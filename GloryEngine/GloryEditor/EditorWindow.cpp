@@ -63,6 +63,7 @@ namespace Glory::Editor
 	{
 		std::for_each(m_pActiveEditorWindows.begin(), m_pActiveEditorWindows.end(), [&](EditorWindow* pWindow)
 			{
+				pWindow->OnClose();
 				delete pWindow;
 			});
 

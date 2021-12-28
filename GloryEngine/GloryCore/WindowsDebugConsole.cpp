@@ -1,17 +1,17 @@
-#include "DebugConsoleInput.h"
+#include "WindowsDebugConsole.h"
 #include "Commands.h"
 #include <algorithm>
 #include <iostream>
 #include "Console.h"
-//#include <WinBase.h>
 //#include <consoleapi2.h>
+//#include <WinBase.h>
 
 namespace Glory
 {
 #ifdef _DEBUG
 	inline int ConsoleThreadFunc(void* pConsoleObject)
 	{
-		DebugConsoleInput* pConsole = (DebugConsoleInput*)pConsoleObject;
+		WindowsDebugConsole* pConsole = (WindowsDebugConsole*)pConsoleObject;
 
 		while (pConsole->Running())
 		{
@@ -21,18 +21,18 @@ namespace Glory
 		return 0;
 	}
 
-	DebugConsoleInput::DebugConsoleInput() : m_Running(false), m_pConsoleThread() {}
+	WindowsDebugConsole::WindowsDebugConsole() : m_Running(false), m_pConsoleThread() {}
 
-	DebugConsoleInput::~DebugConsoleInput() {}
+	WindowsDebugConsole::~WindowsDebugConsole() {}
 
-	void DebugConsoleInput::Initialize()
+	void WindowsDebugConsole::Initialize()
 	{
 		m_Running = true;
 		m_pConsoleThread = std::thread(ConsoleThreadFunc, this); //SDL_CreateThread(ConsoleThreadFunc, "ConsoleThread", this);
 		m_pConsoleThread.detach();
 	}
 
-	void DebugConsoleInput::WaitForInput()
+	void WindowsDebugConsole::WaitForInput()
 	{
 		std::string line = "";
 		std::getline(std::cin, line);
@@ -40,30 +40,30 @@ namespace Glory
 		Console::QueueCommand(line);
 	}
 
-	bool DebugConsoleInput::Running()
+	bool WindowsDebugConsole::Running()
 	{
 		return m_Running;
 	}
 
-	void DebugConsoleInput::Stop()
+	void WindowsDebugConsole::OnConsoleClose()
 	{
 		if (m_pConsoleThread.joinable()) m_pConsoleThread.join();
 		m_Running = false;
 	}
 
-	void DebugConsoleInput::SetConsoleColor(unsigned int color)
+	void WindowsDebugConsole::SetNextColor(const glm::vec4& color)
 	{
 		//HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 		//SetConsoleTextAttribute(hStdOut, color);
 	}
 
-	void DebugConsoleInput::ResetConsoleColor()
+	void WindowsDebugConsole::ResetNextColor()
 	{
 		//HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 		//SetConsoleTextAttribute(hStdOut, 15);
 	}
 
-	void DebugConsoleInput::Write(const std::string& line)
+	void WindowsDebugConsole::Write(const std::string& line)
 	{
 		std::cout << line << std::endl;
 	}
