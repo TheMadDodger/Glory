@@ -26,8 +26,9 @@ namespace Glory
 	SceneObject* GScene::CreateEmptyObject()
 	{
 		SceneObject* pObject = CreateObject("Empty Object");
-		pObject->Initialize();
+		pObject->m_pScene = this;
 		m_pSceneObjects.push_back(pObject);
+		pObject->Initialize();
 		OnObjectAdded(pObject);
 		return pObject;
 	}
@@ -35,8 +36,9 @@ namespace Glory
 	SceneObject* GScene::CreateEmptyObject(const std::string& name, UUID uuid)
 	{
 		SceneObject* pObject = CreateObject(name, uuid);
-		pObject->Initialize();
+		pObject->m_pScene = this;
 		m_pSceneObjects.push_back(pObject);
+		pObject->Initialize();
 		OnObjectAdded(pObject);
 		return pObject;
 	}

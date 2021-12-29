@@ -19,5 +19,10 @@ namespace Glory::Editor
 
 	private:
 		//GameObject* m_CurrentRightClickedObject;
+
+		struct DNDPayload
+		{
+			SceneObject* pObject;
+		};
 	};
 }

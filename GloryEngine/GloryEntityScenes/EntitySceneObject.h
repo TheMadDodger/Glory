@@ -13,12 +13,12 @@ namespace Glory
         virtual ~EntitySceneObject();
 
         virtual SceneObject* GetParent() override;
-        virtual void SetParent(SceneObject* pParent) override;
 
         Entity GetEntityHandle();
 
     private:
         virtual void Initialize() override;
+        virtual void OnSetParent(SceneObject* pParent) override;
 
     private:
         Entity m_Entity;

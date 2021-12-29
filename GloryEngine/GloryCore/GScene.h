@@ -31,6 +31,7 @@ namespace Glory
 
     protected:
         friend class ScenesModule;
+        friend class SceneObject;
         std::string m_SceneName;
         std::vector<SceneObject*> m_pSceneObjects;
     };

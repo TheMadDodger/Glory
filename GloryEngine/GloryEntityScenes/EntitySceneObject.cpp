@@ -4,17 +4,17 @@
 
 namespace Glory
 {
-	EntitySceneObject::EntitySceneObject(Entity entity) : m_Entity(entity)
+	EntitySceneObject::EntitySceneObject(Entity entity) : m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(EntitySceneObject);
 	}
 
-	EntitySceneObject::EntitySceneObject(Entity entity, const std::string& name) : SceneObject(name), m_Entity(entity)
+	EntitySceneObject::EntitySceneObject(Entity entity, const std::string& name) : SceneObject(name), m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(EntitySceneObject);
 	}
 
-	EntitySceneObject::EntitySceneObject(Entity entity, const std::string& name, UUID uuid) : SceneObject(name, uuid), m_Entity(entity)
+	EntitySceneObject::EntitySceneObject(Entity entity, const std::string& name, UUID uuid) : SceneObject(name, uuid), m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(EntitySceneObject);
 	}
@@ -29,7 +29,7 @@ namespace Glory
 		return m_pParent;
 	}
 
-	void EntitySceneObject::SetParent(SceneObject* pParent)
+	void EntitySceneObject::OnSetParent(SceneObject* pParent)
 	{
 		if (!m_Entity.HasComponent<Transform>())
 		{

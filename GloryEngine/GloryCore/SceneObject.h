@@ -4,6 +4,8 @@
 
 namespace Glory
 {
+    class GScene;
+
     class SceneObject : public Object
     {
     public:
@@ -13,17 +15,29 @@ namespace Glory
         virtual ~SceneObject();
 
         virtual SceneObject* GetParent() = 0;
-        virtual void SetParent(SceneObject* pParent) = 0;
+
+        size_t ChildCount();
+        SceneObject* GetChild(size_t index);
+        void SetSiblingIndex(size_t index);
+        void SetBeforeObject(SceneObject* pObject);
+        void SetAfterObject(SceneObject* pObject);
+        size_t GetSiblingIndex();
+
+        void SetScene(GScene* pScene);
 
     public:
         const std::string& Name();
         void SetName(const std::string& name);
+        void SetParent(SceneObject* pParent);
 
     protected:
         virtual void Initialize() = 0;
+        virtual void OnSetParent(SceneObject* pParent) = 0;
 
     private:
         friend class GScene;
         std::string m_Name;
+        GScene* m_pScene;
+        std::vector<SceneObject*> m_pChildren;
     };
 }
