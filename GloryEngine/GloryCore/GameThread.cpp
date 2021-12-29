@@ -39,8 +39,10 @@ namespace Glory
 			if (exit) break;
 
 			if (m_pEngine->GetGraphicsThread()->GetRenderQueue()->IsFull()) continue;
+			m_pEngine->GameThreadFrameStart();
 			Tick();
 			Paint();
+			m_pEngine->GameThreadFrameEnd();
 		}
 
 		int a = 0;

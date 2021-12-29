@@ -178,6 +178,7 @@ int main()
         createInfo.pScenesModule = new Glory::EntitySceneScenesModule();
         createInfo.pRenderModule = new Glory::NoRendering();
         createInfo.pGraphicsModule = new Glory::OpenGLGraphicsModule();
+        createInfo.pTimerModule = new Glory::TimerModule();
         createInfo.OptionalModuleCount = static_cast<uint32_t>(optionalModules.size());
         createInfo.pOptionalModules = optionalModules.data();
         Glory::Engine* pEngine = Glory::Engine::CreateEngine(createInfo);
