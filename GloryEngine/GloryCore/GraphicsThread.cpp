@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	GraphicsThread::GraphicsThread() : m_pRenderQueue(nullptr), m_pThread(nullptr), m_Exit(false)
+	GraphicsThread::GraphicsThread(Engine* pEngine) : m_pRenderQueue(nullptr), m_pThread(nullptr), m_Exit(false), m_pEngine(pEngine)
 	{
 	}
 
@@ -61,6 +61,7 @@ namespace Glory
 
 	void GraphicsThread::OnRenderFrame(const RenderFrame& frame)
 	{
+		m_pEngine->GraphicsThreadFrameStart();
 		FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();
 		pFrameStates->OnFrameStart();
 		for (size_t i = 0; i < m_RenderBinds.size(); i++)
@@ -68,6 +69,7 @@ namespace Glory
 			m_RenderBinds[i](frame);
 		}
 		pFrameStates->OnFrameEnd();
+		m_pEngine->GraphicsThreadFrameEnd();
 
 		//// Tell the frame states a frame render started
 		//FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();

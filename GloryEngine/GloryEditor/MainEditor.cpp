@@ -7,6 +7,7 @@
 #include "SceneGraphWindow.h"
 #include "ContentBrowser.h"
 #include "EditorConsoleWindow.h"
+#include "PerformanceMetrics.h"
 #include "MenuBar.h"
 #include "PopupManager.h"
 #include "EditorPreferencesWindow.h"
@@ -41,6 +42,7 @@ namespace Glory::Editor
 		EditorWindow::GetWindow<SceneGraphWindow>();
 		EditorWindow::GetWindow<ContentBrowser>();
 		EditorWindow::GetWindow<EditorConsoleWindow>();
+		EditorWindow::GetWindow<PerformanceMetrics>();
 
 		CreateDefaultMainMenuBar();
 
