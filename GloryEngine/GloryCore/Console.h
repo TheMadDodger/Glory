@@ -17,6 +17,7 @@ namespace Glory
 		static void ForEachCommandInHistory(std::function<void(const std::string&)> callback);
 
 		static void SetNextColor(const glm::vec4& color);
+		static void Update();
 
 		template<class T>
 		static void RegisterConsole()
@@ -46,7 +47,6 @@ namespace Glory
 	private:
 		static void Initialize();
 		static void Cleanup();
-		static void Update();
 		static bool PrintHistory();
 
 		static void AddCommandToHistory(const std::string& command);

@@ -165,7 +165,6 @@ namespace Glory::Editor
 	void MainEditor::Tick()
 	{
 		EditorWindow::GameThreadTickWindows();
-		Game::GetGame().GetEngine()->Update();
 	}
 
 	void MainEditor::Paint()

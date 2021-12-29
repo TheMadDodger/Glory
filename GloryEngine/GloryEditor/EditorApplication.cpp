@@ -1,5 +1,6 @@
 #include "EditorApplication.h"
 #include <imgui.h>
+#include <Console.h>
 
 namespace Glory::Editor
 {
@@ -46,6 +47,7 @@ namespace Glory::Editor
 		game.GetEngine()->StartThreads();
 		while (true)
 		{
+			Console::Update();
 			if (m_pPlatform->PollEvents()) break;
 			m_pPlatform->BeginRender();
 			m_pPlatform->WaitIdle();
