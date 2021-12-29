@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	RendererModule::RendererModule()
+	RendererModule::RendererModule() : m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0)
 	{
 	}
 
@@ -53,6 +53,16 @@ namespace Glory
 		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);
 	}
 
+	int RendererModule::LastSubmittedObjectCount()
+	{
+		return m_LastSubmittedObjectCount;
+	}
+
+	int RendererModule::LastSubmittedCameraCount()
+	{
+		return m_LastSubmittedCameraCount;
+	}
+
 	void RendererModule::Render(const RenderFrame& frame)
 	{
 		DisplayManager::ClearAllDisplays(m_pEngine);
@@ -83,6 +93,9 @@ namespace Glory
 			OnDoScreenRender(pRenderTexture);
 			pDisplayRenderTexture->UnBind();
 		}
+
+		m_LastSubmittedObjectCount = frame.ObjectsToRender.size();
+		m_LastSubmittedCameraCount = frame.ActiveCameras.size();
 	}
 
 	void RendererModule::ThreadedInitialize()

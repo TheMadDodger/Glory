@@ -20,6 +20,9 @@ namespace Glory
 		void StartFrame();
 		void EndFrame();
 
+		int LastSubmittedObjectCount();
+		int LastSubmittedCameraCount();
+
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
@@ -38,5 +41,7 @@ namespace Glory
 
 	private:
 		RenderFrame m_CurrentPreparingFrame;
+		int m_LastSubmittedObjectCount;
+		int m_LastSubmittedCameraCount;
 	};
 }

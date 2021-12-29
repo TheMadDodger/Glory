@@ -3,7 +3,7 @@
 
 namespace Glory
 {
-	GraphicsModule::GraphicsModule() : m_pFrameStates(nullptr), m_pResourceManager(nullptr)
+	GraphicsModule::GraphicsModule() : m_pFrameStates(nullptr), m_pResourceManager(nullptr), m_CurrentDrawCalls(0), m_LastDrawCalls(0)
 	{
 	}
 
@@ -16,6 +16,17 @@ namespace Glory
 	const std::type_info& GraphicsModule::GetModuleType()
 	{
 		return typeid(GraphicsModule);
+	}
+
+	int GraphicsModule::GetLastDrawCalls()
+	{
+		return m_LastDrawCalls;
+	}
+
+	void GraphicsModule::DrawMesh(MeshData* pMeshData)
+	{
+		++m_CurrentDrawCalls;
+		OnDrawMesh(pMeshData);
 	}
 
 	FrameStates* GraphicsModule::GetFrameStates()
@@ -50,5 +61,15 @@ namespace Glory
 	void GraphicsModule::Cleanup()
 	{
 		OnCleanup();
+	}
+
+	void GraphicsModule::OnGraphicsThreadFrameStart()
+	{
+		m_CurrentDrawCalls = 0;
+	}
+
+	void GraphicsModule::OnGraphicsThreadFrameEnd()
+	{
+		m_LastDrawCalls = m_CurrentDrawCalls;
 	}
 }

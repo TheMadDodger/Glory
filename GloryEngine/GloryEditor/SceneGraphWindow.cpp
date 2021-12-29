@@ -211,11 +211,11 @@ namespace Glory::Editor
 			//m_CurrentRightClickedObject = pChild;
 			//ImGui::OpenPopup("object_menu_popup" + index);
 		}
-		if (ImGui::BeginPopup("object_menu_popup" + id))
-		{
-			//ObjectMenu();
-			//ImGui::EndPopup();
-		}
+		//if (ImGui::BeginPopup("object_menu_popup" + id))
+		//{
+		//	//ObjectMenu();
+		//	//ImGui::EndPopup();
+		//}
 
 		if (node_open)
 		{

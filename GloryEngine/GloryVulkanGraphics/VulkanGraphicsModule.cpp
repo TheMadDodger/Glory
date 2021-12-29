@@ -1275,7 +1275,7 @@ namespace Glory
         return nullptr;
     }
 
-    void VulkanGraphicsModule::DrawMesh(MeshData* pMeshData)
+    void VulkanGraphicsModule::OnDrawMesh(MeshData* pMeshData)
     {
 
     }
