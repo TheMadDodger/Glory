@@ -31,6 +31,11 @@ namespace Glory
 		return m_pGraphicsModule;
 	}
 
+	TimerModule* Engine::GetTimerModule() const
+	{
+		return m_pTimerModule;
+	}
+
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
 	{
 		return nullptr;
@@ -81,7 +86,7 @@ namespace Glory
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
-		m_pGameThread(nullptr), m_pGraphicsThread(nullptr)
+		m_pTimerModule(createInfo.pTimerModule), m_pGameThread(nullptr), m_pGraphicsThread(nullptr)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -101,6 +106,7 @@ namespace Glory
 		m_pAllModules.push_back(m_pScenesModule);
 		m_pAllModules.push_back(m_pRenderModule);
 		m_pAllModules.push_back(m_pGraphicsModule);
+		m_pAllModules.push_back(m_pTimerModule);
 
 		// Add optional modules
 		size_t currentSize = m_pAllModules.size();
@@ -188,7 +194,7 @@ namespace Glory
 
 		m_pMainThread = new MainThread();
 		m_pGameThread = new GameThread(this);
-		m_pGraphicsThread = new GraphicsThread();
+		m_pGraphicsThread = new GraphicsThread(this);
 
 		m_pMainThread->Bind<WindowModule>(m_pWindowModule);
 
@@ -201,5 +207,37 @@ namespace Glory
 	{
 		Console::Update();
 		m_pMainThread->Update();
+	}
+
+	void Engine::GameThreadFrameStart()
+	{
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			m_pAllModules[i]->OnGameThreadFrameStart();
+		}
+	}
+
+	void Engine::GameThreadFrameEnd()
+	{
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			m_pAllModules[i]->OnGameThreadFrameEnd();
+		}
+	}
+
+	void Engine::GraphicsThreadFrameStart()
+	{
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			m_pAllModules[i]->OnGraphicsThreadFrameStart();
+		}
+	}
+
+	void Engine::GraphicsThreadFrameEnd()
+	{
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			m_pAllModules[i]->OnGraphicsThreadFrameEnd();
+		}
 	}
 }

@@ -21,6 +21,14 @@ namespace Glory
 		virtual void PostInitialize() {};
 		virtual void Cleanup() = 0;
 		
+		virtual void OnBeginFrame() {};
+		virtual void OnEndFrame() {};
+
+		virtual void OnGameThreadFrameStart() {};
+		virtual void OnGameThreadFrameEnd() {};
+		virtual void OnGraphicsThreadFrameStart() {};
+		virtual void OnGraphicsThreadFrameEnd() {};
+
 		//virtual void Update() = 0;
 		//virtual void Draw() = 0;
 

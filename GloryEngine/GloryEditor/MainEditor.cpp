@@ -6,6 +6,7 @@
 #include "InspectorWindow.h"
 #include "SceneGraphWindow.h"
 #include "ContentBrowser.h"
+#include "PerformanceMetrics.h"
 #include "MenuBar.h"
 #include "PopupManager.h"
 #include "EditorPreferencesWindow.h"
@@ -38,6 +39,7 @@ namespace Glory::Editor
 		EditorWindow::GetWindow<InspectorWindow>();
 		EditorWindow::GetWindow<SceneGraphWindow>();
 		EditorWindow::GetWindow<ContentBrowser>();
+		EditorWindow::GetWindow<PerformanceMetrics>();
 
 		CreateDefaultMainMenuBar();
 
