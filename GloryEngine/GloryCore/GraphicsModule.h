@@ -15,6 +15,8 @@ namespace Glory
         virtual const std::type_info& GetModuleType() override;
 
         int GetLastDrawCalls();
+        int GetLastVertexCount();
+        int GetLastTriangleCount();
 
     public: // Commands
         virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) = 0;
@@ -51,8 +53,11 @@ namespace Glory
         FrameStates* m_pFrameStates;
         GPUResourceManager* m_pResourceManager;
 
-
         int m_CurrentDrawCalls;
         int m_LastDrawCalls;
+        int m_LastVertices;
+        int m_CurrentVertices;
+        int m_LastTriangles;
+        int m_CurrentTriangles;
     };
 }
