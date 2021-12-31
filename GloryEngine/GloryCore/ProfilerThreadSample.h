@@ -12,6 +12,10 @@ namespace Glory
 		ProfilerThreadSample(const std::string& name);
 		virtual ~ProfilerThreadSample();
 
+		const std::string& Name();
+		size_t SampleCount();
+		ProfilerSample* GetSample(size_t index);
+
 	private:
 		void BeginSample(const std::string& name);
 		void EndSample();

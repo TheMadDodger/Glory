@@ -15,6 +15,21 @@ namespace Glory
 	{
 	}
 
+	const std::string& ProfilerThreadSample::Name()
+	{
+		return m_Name;
+	}
+
+	size_t ProfilerThreadSample::SampleCount()
+	{
+		return m_Samples.size();
+	}
+
+	ProfilerSample* ProfilerThreadSample::GetSample(size_t index)
+	{
+		return &m_Samples[index];
+	}
+
 	void ProfilerThreadSample::BeginSample(const std::string& name)
 	{
 		// Check if last sample is complete

@@ -35,4 +35,19 @@ namespace Glory
 		m_SampleEnd = std::chrono::steady_clock::now();
 		m_Complete = true;
 	}
+
+	const std::string& ProfilerSample::Name()
+	{
+		return m_Name;
+	}
+
+	size_t ProfilerSample::SubSampleCount()
+	{
+		return m_SubSamples.size();
+	}
+
+	ProfilerSample* ProfilerSample::GetSubSample(size_t index)
+	{
+		return &m_SubSamples[index];
+	}
 }

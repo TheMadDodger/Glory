@@ -18,6 +18,7 @@
 #include "Tumbnail.h"
 #include "TextureTumbnailGenerator.h"
 #include "Editor.h"
+#include "ProfilerWindow.h"
 #include <Game.h>
 #include <Engine.h>
 #include <Serializer.h>
@@ -127,6 +128,9 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Scene Graph", []() { EditorWindow::GetWindow<SceneGraphWindow>(); });
 		MenuBar::AddMenuItem("Window/Inspector", []() { EditorWindow::GetWindow<InspectorWindow>(true); });
 		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<ContentBrowser>(); });
+		MenuBar::AddMenuItem("Window/Console", []() { EditorWindow::GetWindow<EditorConsoleWindow>(); });
+		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); });
+		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); });
 	}
 
 	void MainEditor::SetDarkThemeColors()
