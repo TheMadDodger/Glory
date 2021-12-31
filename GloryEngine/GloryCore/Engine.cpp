@@ -36,6 +36,11 @@ namespace Glory
 		return m_pTimerModule;
 	}
 
+	ProfilerModule* Engine::GetProfilerModule() const
+	{
+		return m_pProfilerModule;
+	}
+
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
 	{
 		return nullptr;
@@ -86,7 +91,8 @@ namespace Glory
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
-		m_pTimerModule(createInfo.pTimerModule), m_pGameThread(nullptr), m_pGraphicsThread(nullptr)
+		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()),
+		m_pGameThread(nullptr), m_pGraphicsThread(nullptr)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -115,6 +121,8 @@ namespace Glory
 		{
 			m_pAllModules[currentSize + i] = m_pOptionalModules[i];
 		}
+
+		m_pAllModules.push_back(m_pProfilerModule);
 	}
 
 	Engine::~Engine()

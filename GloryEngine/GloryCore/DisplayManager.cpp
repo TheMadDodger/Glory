@@ -1,4 +1,5 @@
 #include "DisplayManager.h"
+#include "EngineProfiler.h"
 
 namespace Glory
 {
@@ -11,12 +12,14 @@ namespace Glory
 
 	void DisplayManager::ClearAllDisplays(Engine* pEngine)
 	{
+		Profiler::BeginSample("DisplayManager::ClearAllDisplays");
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
 			m_pRenderTextures[i]->Bind();
 			pEngine->GetGraphicsModule()->Clear();
 			m_pRenderTextures[i]->UnBind();
 		}
+		Profiler::EndSample();
 	}
 	
 	DisplayManager::~DisplayManager()
