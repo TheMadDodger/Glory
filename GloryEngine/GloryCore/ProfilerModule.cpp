@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	ProfilerModule::ProfilerModule() : m_SampleCollectingEnabled(true), m_IsRecording(true), m_CurrentSampleRecordSize(0), m_CurrentSampleWrite(-1)
+	ProfilerModule::ProfilerModule() : m_SampleCollectingEnabled(false), m_IsRecording(false), m_CurrentSampleRecordSize(0), m_CurrentSampleWrite(-1)
 	{
 	}
 
