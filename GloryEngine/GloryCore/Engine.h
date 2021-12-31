@@ -11,6 +11,7 @@
 #include "MainThread.h"
 #include "ResourceLoaderModule.h"
 #include "TimerModule.h"
+#include "ProfilerModule.h"
 #include "ResourceType.h"
 
 namespace Glory
@@ -21,7 +22,6 @@ namespace Glory
 		ScenesModule* pScenesModule;
 		RendererModule* pRenderModule;
 		GraphicsModule* pGraphicsModule;
-		TimerModule* pTimerModule;
 
 		uint32_t OptionalModuleCount;
 		Module** pOptionalModules;
@@ -41,6 +41,7 @@ namespace Glory
 		RendererModule* GetRendererModule() const;
 		GraphicsModule* GetGraphicsModule() const;
 		TimerModule* GetTimerModule() const;
+		ProfilerModule* GetProfilerModule() const;
 
 		template<class T>
 		T* GetModule()
@@ -93,6 +94,7 @@ namespace Glory
 		RendererModule* m_pRenderModule;
 		GraphicsModule* m_pGraphicsModule;
 		TimerModule* m_pTimerModule;
+		ProfilerModule* m_pProfilerModule;
 
 		// Optional modules
 		std::vector<Module*> m_pOptionalModules;
