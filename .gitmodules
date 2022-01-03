@@ -8,3 +8,6 @@
 [submodule "GloryEngine/submodules/yaml-cpp"]
 	path = GloryEngine/submodules/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp
+[submodule "GloryEngine/submodules/implot"]
+	path = GloryEngine/submodules/implot
+	url = https://github.com/epezent/implot.git

@@ -1,6 +1,7 @@
 #include "EditorApplication.h"
 #include <imgui.h>
 #include <Console.h>
+#include <implot.h>
 
 namespace Glory::Editor
 {
@@ -77,5 +78,6 @@ namespace Glory::Editor
 		m_pMainEditor->PaintEditor();
 
 		ImGui::ShowDemoWindow();
+		ImPlot::ShowDemoWindow();
 	}
 }

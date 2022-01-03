@@ -20,12 +20,14 @@ namespace Glory
 		std::thread::id currentThreadID = std::this_thread::get_id();
 		m_ThreadIDToProfile[currentThreadID] = name;
 		m_CurrentThreadSamples.emplace(name, ProfilerThreadSample(name));
+		m_CurrentThreadSamples[name].m_Start = std::chrono::steady_clock::now();
 	}
 
 	void ProfilerModule::EndThread()
 	{
 		std::thread::id currentThreadID = std::this_thread::get_id();
 		std::string threadName = m_ThreadIDToProfile[currentThreadID];
+		m_CurrentThreadSamples[threadName].m_End = std::chrono::steady_clock::now();
 		if (m_RecordCallback) m_RecordCallback(m_CurrentThreadSamples[threadName]);
 		m_CurrentThreadSamples[threadName].Clear();
 	}

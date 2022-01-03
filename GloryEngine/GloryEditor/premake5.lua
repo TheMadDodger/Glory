@@ -42,6 +42,7 @@ project "GloryEditor"
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.implot}",
 		"%{IncludeDir.SDL_Image}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
