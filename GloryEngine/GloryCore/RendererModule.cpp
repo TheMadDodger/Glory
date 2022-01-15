@@ -104,7 +104,11 @@ namespace Glory
 	void RendererModule::ThreadedInitialize()
 	{
 		DisplayManager::Initialize(m_pEngine);
+		OnThreadedInitialize();
 	}
 
-	void RendererModule::ThreadedCleanup() {}
+	void RendererModule::ThreadedCleanup()
+	{
+		OnThreadedCleanup();
+	}
 }
