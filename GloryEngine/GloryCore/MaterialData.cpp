@@ -1,7 +1,15 @@
 #include "MaterialData.h"
+#include <algorithm>
 
 namespace Glory
 {
+	std::hash<std::string> MaterialData::m_Hasher = std::hash<std::string>();
+
+	MaterialData::MaterialData()
+	{
+		APPEND_TYPE(MaterialData);
+	}
+
 	MaterialData::MaterialData(const std::vector<FileData*>& shaderFiles, const std::vector<ShaderType>& shaderTypes)
 		: m_pShaderFiles(shaderFiles), m_ShaderTypes(shaderTypes)
 	{
@@ -29,13 +37,49 @@ namespace Glory
 		return m_ShaderTypes[index];
 	}
 
-	void MaterialData::SetTexture(ImageData* pTexture)
+	void MaterialData::AddProperty(const MaterialPropertyData& prop)
 	{
-		m_pTexture = pTexture;
+		size_t hash = m_Hasher(prop.Name());
+		size_t index = m_Properties.size();
+		m_Properties.push_back(prop);
+		m_HashToPropertyIndex[hash] = index;
 	}
 
-	ImageData* MaterialData::GetTexture()
+	size_t MaterialData::PropertyCount() const
 	{
-		return m_pTexture;
+		return m_Properties.size();
+	}
+
+	MaterialPropertyData* MaterialData::GetPropertyAt(size_t index)
+	{
+		return &m_Properties[index];
+	}
+
+	MaterialPropertyData MaterialData::CopyPropertyAt(size_t index)
+	{
+		std::unique_lock lock(m_PropertiesAccessMutex);
+		return MaterialPropertyData(m_Properties[index]);
+	}
+
+	void MaterialData::CopyProperties(std::vector<MaterialPropertyData>& destination)
+	{
+		std::unique_lock lock(m_PropertiesAccessMutex);
+		destination.clear();
+		std::for_each(m_Properties.begin(), m_Properties.end(), [&](const MaterialPropertyData& propertyData)
+		{
+			destination.push_back(MaterialPropertyData(propertyData));
+		});
+		lock.unlock();
+	}
+
+	void MaterialData::PasteProperties(const std::vector<MaterialPropertyData>& destination)
+	{
+		std::unique_lock lock(m_PropertiesAccessMutex);
+		m_Properties.clear();
+		std::for_each(destination.begin(), destination.end(), [&](const MaterialPropertyData& propertyData)
+		{
+			m_Properties.push_back(MaterialPropertyData(propertyData));
+		});
+		lock.unlock();
 	}
 }

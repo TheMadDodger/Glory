@@ -19,6 +19,9 @@
 #include "Editor.h"
 #include <Game.h>
 #include <Engine.h>
+#include <MaterialEditor.h>
+#include "StandardPropertyDrawers.h"
+#include <MaterialInstanceEditor.h>
 
 namespace Glory::Editor
 {
@@ -34,12 +37,9 @@ namespace Glory::Editor
 
 	void MainEditor::Initialize()
 	{
-		EditorWindow::GetWindow<GameWindow>();
-		EditorWindow::GetWindow<SceneWindow>();
-		EditorWindow::GetWindow<InspectorWindow>();
-		EditorWindow::GetWindow<SceneGraphWindow>();
-		EditorWindow::GetWindow<ContentBrowser>();
-		EditorWindow::GetWindow<PerformanceMetrics>();
+		RegisterWindows();
+		RegisterPropertyDrawers();
+		RegisterEditors();
 
 		CreateDefaultMainMenuBar();
 
@@ -57,6 +57,7 @@ namespace Glory::Editor
 	{
 		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
+		PropertyDrawer::Cleanup();
 	}
 
     static void HelpMarker(const char* desc)
@@ -149,5 +150,31 @@ namespace Glory::Editor
 	void MainEditor::Paint()
 	{
 		EditorWindow::GameThreadPaintWindows();
+	}
+
+	void MainEditor::RegisterWindows()
+	{
+		EditorWindow::GetWindow<GameWindow>();
+		EditorWindow::GetWindow<SceneWindow>();
+		EditorWindow::GetWindow<InspectorWindow>();
+		EditorWindow::GetWindow<SceneGraphWindow>();
+		EditorWindow::GetWindow<ContentBrowser>();
+	}
+
+	void MainEditor::RegisterPropertyDrawers()
+	{
+		PropertyDrawer::RegisterPropertyDrawer<FloatDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<IntDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<BoolDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<DoubleDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<Vector2Drawer>();
+		PropertyDrawer::RegisterPropertyDrawer<Vector3Drawer>();
+		PropertyDrawer::RegisterPropertyDrawer<Vector4Drawer>();
+	}
+
+	void MainEditor::RegisterEditors()
+	{
+		Editor::RegisterEditor<MaterialEditor>();
+		Editor::RegisterEditor<MaterialInstanceEditor>();
 	}
 }

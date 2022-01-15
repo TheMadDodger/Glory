@@ -3,6 +3,7 @@
 #include "Debug.h"
 #include "GLShader.h"
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Glory
 {
@@ -55,16 +56,113 @@ namespace Glory
 		}
 	}
 
-	void OGLMaterial::SetProperties()
+	void OGLMaterial::SetPropertiesExtra()
 	{
 		if (m_UBOID == NULL) m_UBOID = CreateUniformBuffer("UniformBufferObject", sizeof(UniformBufferObjectTest), 0);
 		SetUniformBuffer(m_UBOID, (void*)&m_UBO, sizeof(UniformBufferObjectTest));
-		SetTexture("texSampler", (GLTexture*)m_pTexture);
 	}
 
-	void OGLMaterial::SetPropertiesNoUBO()
+	void OGLMaterial::SetFloat(const std::string& name, float value) const
 	{
-		SetTexture("ScreenTexture", (GLTexture*)m_pTexture);
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1f(ID, value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetInt(const std::string& name, int value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1i(ID, value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetIntArray(const std::string& name, int size, int* value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1iv(ID, size, value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetBool(const std::string& name, bool value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1i(ID, (int)value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetVec2(const std::string& name, const glm::vec2& value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform2f(ID, value.x, value.y);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetVec3(const std::string& name, const glm::vec3& value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform3f(ID, value.x, value.y, value.z);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetVec4(const std::string& name, const glm::vec4& value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform4f(ID, value.x, value.y, value.z, value.w);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetDouble(const std::string& name, double value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1d(ID, value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetMatrix3(const std::string& name, const glm::mat3& value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		const float* pSource = (const float*)glm::value_ptr(value);
+		glUniformMatrix3fv(ID, 1, GL_FALSE, pSource);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetMatrix4(const std::string& name, const glm::mat4& value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		const float* pSource = (const float*)glm::value_ptr(value);
+		glUniformMatrix4fv(ID, 1, GL_FALSE, pSource);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetTexture(const std::string& name, Texture* pTexture)
+	{
+		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1i(texLocation, m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		GLTexture* pGLTexture = (GLTexture*)pTexture;
+		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindTexture(GL_TEXTURE_2D, pGLTexture->GetID());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glActiveTexture(GL_TEXTURE0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		++m_TextureCounter;
 	}
 
 	GLuint OGLMaterial::CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex)
@@ -73,7 +171,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		if (uniformBlockIndex == GL_INVALID_INDEX)
 		{
-			Debug::LogError("Material::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
+			Debug::LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
 			return 0;
 		}
 
@@ -109,23 +207,23 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OGLMaterial::SetTexture(const std::string& name, GLTexture* pTexture)
-	{
-		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform1i(texLocation, m_TextureCounter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindTexture(pTexture->GetGLImageType(), pTexture->GetID());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glActiveTexture(GL_TEXTURE0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		++m_TextureCounter;
-	}
+	//void OGLMaterial::SetTexture(const std::string& name, GLTexture* pTexture)
+	//{
+	//	GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	glUniform1i(texLocation, m_TextureCounter);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//
+	//	glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	glBindTexture(pTexture->GetGLImageType(), pTexture->GetID());
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//
+	//	glActiveTexture(GL_TEXTURE0);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//
+	//	++m_TextureCounter;
+	//}
 
 	void OGLMaterial::SetTexture(const std::string& name, GLuint id)
 	{

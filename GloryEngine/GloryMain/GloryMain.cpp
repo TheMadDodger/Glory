@@ -51,8 +51,8 @@ namespace Glory
             ubo.proj = camera.GetProjection();
 
             pMaterial->SetUBO(ubo);
-            pMaterial->SetTexture(renderData.m_pMaterial->GetTexture());
             pMaterial->SetProperties();
+            pMaterial->SetPropertiesExtra();
             pGraphics->DrawMesh(pMeshData);
         }
 

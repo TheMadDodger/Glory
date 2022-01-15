@@ -1,6 +1,7 @@
 #include "GPUResourceManager.h"
 #include "EngineProfiler.h"
 #include <algorithm>
+#include "MaterialInstanceData.h"
 
 namespace Glory
 {
@@ -40,10 +41,10 @@ namespace Glory
 		pVertexBuffer->Assign(pMeshData->Vertices());
 		pIndexBuffer->Assign(pMeshData->Indices());
 		pMesh = CreateMesh_Internal(pMeshData);
-		pMesh->m_UUID = pMeshData->GetUUID();
+		pMesh->m_UUID = pMeshData->GetGPUUUID();
 		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
 		pMesh->CreateBindingAndAttributeData();
-		m_IDResources[pMeshData->GetUUID()] = pMesh;
+		m_IDResources[pMeshData->GetGPUUUID()] = pMesh;
 		Profiler::EndSample();
 		return pMesh;
 	}
@@ -55,9 +56,9 @@ namespace Glory
 
 		Profiler::BeginSample("GPUResourceManager::CreateShader");
 		pShader = CreateShader_Internal(pShaderFile, shaderType, function);
-		pShader->m_UUID = pShaderFile->GetUUID();
+		pShader->m_UUID = pShaderFile->GetGPUUUID();
 		pShader->Initialize();
-		m_IDResources[pShaderFile->GetUUID()] = pShader;
+		m_IDResources[pShaderFile->GetGPUUUID()] = pShader;
 		Profiler::EndSample();
 		return pShader;
 	}
@@ -65,11 +66,16 @@ namespace Glory
 	Material* GPUResourceManager::CreateMaterial(MaterialData* pMaterialData)
 	{
 		Material* pMaterial = GetResource<Material>(pMaterialData);
-		if (pMaterial) return pMaterial;
+		if (pMaterial)
+		{
+			pMaterial->m_pMaterialData = pMaterialData;
+			return pMaterial;
+		}
 
 		Profiler::BeginSample("GPUResourceManager::CreateMaterial");
 		pMaterial = CreateMaterial_Internal(pMaterialData);
-		pMaterial->m_UUID = pMaterialData->GetUUID();
+		pMaterial->m_pMaterialData = pMaterialData;
+		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
 		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
 		{
 			FileData* pShaderFile = pMaterialData->GetShaderAt(i);
@@ -79,7 +85,7 @@ namespace Glory
 		}
 
 		pMaterial->Initialize();
-		m_IDResources[pMaterialData->GetUUID()] = pMaterial;
+		m_IDResources[pMaterialData->GetGPUUUID()] = pMaterial;
 		Profiler::EndSample();
 		return pMaterial;
 	}
@@ -91,9 +97,9 @@ namespace Glory
 
 		Profiler::BeginSample("GPUResourceManager::CreateTexture");
 		pTexture = CreateTexture_Internal(pImageData);
-		pTexture->m_UUID = pImageData->GetUUID();
+		pTexture->m_UUID = pImageData->GetGPUUUID();
 		pTexture->Create(pImageData);
-		m_IDResources[pImageData->GetUUID()] = pTexture;
+		m_IDResources[pImageData->GetGPUUUID()] = pTexture;
 		Profiler::EndSample();
 		return pTexture;
 	}
@@ -136,6 +142,6 @@ namespace Glory
 
 	bool GPUResourceManager::ResourceExists(Resource* pResource)
 	{
-		return m_IDResources.find(pResource->GetUUID()) != m_IDResources.end();
+		return m_IDResources.find(pResource->GetGPUUUID()) != m_IDResources.end();
 	}
 }

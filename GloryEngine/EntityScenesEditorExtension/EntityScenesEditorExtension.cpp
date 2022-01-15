@@ -4,6 +4,14 @@
 #include "CameraComponentEditor.h"
 #include "LayerComponentEditor.h"
 #include "DefaultComponentEditor.h"
+#include "MeshRendererComponentEditor.h"
+
+
+#include "EntitySceneScenesModule.h"
+
+#include <Game.h>
+#include <Engine.h>
+#include <Selection.h>
 
 namespace Glory::Editor
 {
@@ -21,6 +29,9 @@ namespace Glory::Editor
 		Editor::RegisterEditor<TransformComponentEditor>();
 		Editor::RegisterEditor<CameraComponentEditor>();
 		Editor::RegisterEditor<LayerComponentEditor>();
+		Editor::RegisterEditor<MeshRendererComponentEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
+
+		Selection::SetActiveObject(((EntitySceneScenesModule*)Game::GetGame().GetEngine()->GetScenesModule())->m_pMaterialData);
 	}
 }

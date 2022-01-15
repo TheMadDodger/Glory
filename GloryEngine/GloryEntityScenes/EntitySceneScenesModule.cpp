@@ -10,6 +10,7 @@
 #include "ImageLoaderModule.h"
 #include "EntitySceneObject.h"
 #include <Engine.h>
+#include <MaterialInstanceData.h>
 
 namespace Glory
 {
@@ -65,8 +66,10 @@ namespace Glory
 		std::vector<FileData*> pShaderFiles = { pVert, pFrag };
 		std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
 		
-		MaterialData* pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
-		pMaterialData->SetTexture(pTexture);
+		m_pMaterialData = new MaterialData(pShaderFiles, shaderTypes);
+
+		m_pMaterialData->AddProperty(MaterialPropertyData("_u_fragScalar", 1.0f));
+		m_pMaterialData->AddProperty(MaterialPropertyData("texSampler", pTexture));
 		
 		Entity& entity = pObject1->GetEntityHandle();
 		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -85,7 +88,9 @@ namespace Glory
 				entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.0f, j * 5.0f);
 				entity1.AddComponent<LayerComponent>();
 				entity1.AddComponent<MeshFilter>(pModel);
-				entity1.AddComponent<MeshRenderer>(pMaterialData);
+
+				MaterialInstanceData* pMaterial = new MaterialInstanceData(m_pMaterialData);
+				entity1.AddComponent<MeshRenderer>(pMaterial);
 			}
 		}
 	}

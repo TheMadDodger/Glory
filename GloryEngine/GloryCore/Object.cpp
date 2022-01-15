@@ -22,6 +22,11 @@ namespace Glory
 		return m_ID;
 	}
 
+	const UUID& Object::GetGPUUUID() const
+	{
+		return GetUUID();
+	}
+
 	size_t Object::TypeCount()
 	{
 		return m_Inheritence.size();

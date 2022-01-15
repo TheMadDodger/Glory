@@ -46,7 +46,7 @@ namespace Glory
 		template<class T>
 		T* GetResource(Resource* pResource)
 		{
-			const UUID& uuid = pResource->GetUUID();
+			const UUID& uuid = pResource->GetGPUUUID();
 			auto it = m_IDResources.find(uuid);
 			if (it == m_IDResources.end()) return nullptr;
 			return (T*)m_IDResources[uuid];
