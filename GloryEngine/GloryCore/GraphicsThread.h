@@ -5,10 +5,12 @@
 
 namespace Glory
 {
+	class Engine;
+
 	class GraphicsThread
 	{
 	public:
-		GraphicsThread();
+		GraphicsThread(Engine* pEngine);
 		virtual ~GraphicsThread();
 
 		void Start();
@@ -51,6 +53,7 @@ namespace Glory
 	private:
 		Thread* m_pThread;
 		RenderQueue* m_pRenderQueue;
+		Engine* m_pEngine;
 		std::vector<std::function<void(const RenderFrame&)>> m_RenderBinds;
 		std::vector<std::function<void()>> m_InitializationBinds;
 		std::vector<std::function<void()>> m_CleanupBinds;

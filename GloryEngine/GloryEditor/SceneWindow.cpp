@@ -22,8 +22,8 @@ namespace Glory::Editor
 		ImGuiIO& io = ImGui::GetIO();
 
 		m_SceneCamera.Initialize();
-		m_SceneCamera.m_Camera.SetResolution(m_WindowDimensions.x, m_WindowDimensions.y);
-		m_SceneCamera.m_Camera.SetPerspectiveProjection(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Camera.SetResolution((int)m_WindowDimensions.x, (int)m_WindowDimensions.y);
+		m_SceneCamera.m_Camera.SetPerspectiveProjection((int)m_WindowDimensions.x, (int)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 	}
 
 	void SceneWindow::OnClose()
@@ -40,8 +40,8 @@ namespace Glory::Editor
 	{
 		if (ImGui::IsWindowFocused()) m_SceneCamera.Update();
 
-		m_SceneCamera.m_Camera.SetResolution(m_WindowDimensions.x, m_WindowDimensions.y);
-		m_SceneCamera.m_Camera.SetPerspectiveProjection(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Camera.SetResolution((int)m_WindowDimensions.x, (int)m_WindowDimensions.y);
+		m_SceneCamera.m_Camera.SetPerspectiveProjection((int)m_WindowDimensions.x, (int)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 		
 		RenderTexture* pSceneTexture = m_SceneCamera.m_Camera.GetRenderTexture();
 		if (pSceneTexture == nullptr) return;

@@ -1,5 +1,6 @@
 #include "ScenesModule.h"
 #include "Engine.h"
+#include "EngineProfiler.h"
 
 namespace Glory
 {
@@ -10,9 +11,11 @@ namespace Glory
 
 	GScene* ScenesModule::CreateEmptyScene()
 	{
+		Profiler::BeginSample("ScenesModule::CreateEmptyScene");
 		GScene* pScene = CreateScene("New Scene");
 		pScene->Initialize();
 		m_pOpenScenes.push_back(pScene);
+		Profiler::EndSample();
 		return pScene;
 	}
 
@@ -40,11 +43,15 @@ namespace Glory
 
 	void ScenesModule::Tick()
 	{
+		Profiler::BeginSample("ScenesModule::Tick");
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnTick(); });
+		Profiler::EndSample();
 	}
 
 	void ScenesModule::Paint()
 	{
+		Profiler::BeginSample("ScenesModule::Paint");
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
+		Profiler::EndSample();
 	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "LayerMask.h"
 #include "ModelData.h"
 #include "MaterialData.h"
 
@@ -25,5 +26,6 @@ namespace Glory
 		
 		// Material
 		MaterialData* m_pMaterial;
+		LayerMask m_LayerMask;
 	};
 }

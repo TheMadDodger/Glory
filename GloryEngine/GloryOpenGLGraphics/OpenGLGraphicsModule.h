@@ -14,7 +14,7 @@ namespace Glory
 		static void LogGLError(const GLenum& err, bool bIncludeTimeStamp = true);
 
 	public: // Commands
-		virtual void Clear() override;
+		virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) override;
 		virtual void Swap() override;
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
 		virtual void DrawMesh(MeshData* pMeshData) override;

@@ -18,15 +18,15 @@ namespace Glory::Editor
 			return m_pComponentObject->GetData<TComponent>();
 		}
 
+		virtual void Initialize() override
+		{
+			m_pComponentObject = (EntityComponentObject*)m_pTarget;
+		}
+
 	private:
 		virtual const std::type_index& GetEditedType() override
 		{
 			return typeid(TComponent);
-		}
-
-		virtual void Initialize() override
-		{
-			m_pComponentObject = (EntityComponentObject*)m_pTarget;
 		}
 
 	private:

@@ -11,6 +11,8 @@ namespace Glory
 		static RenderTexture* GetDisplayRenderTexture(size_t index);
 		static const int MAX_DISPLAYS = 10;
 
+		static void ClearAllDisplays(Engine* pEngine);
+
 	private:
 		DisplayManager();
 		virtual ~DisplayManager();

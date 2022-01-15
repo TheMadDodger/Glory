@@ -6,6 +6,7 @@
 #include "InspectorWindow.h"
 #include "SceneGraphWindow.h"
 #include "ContentBrowser.h"
+#include "PerformanceMetrics.h"
 #include "MenuBar.h"
 #include "PopupManager.h"
 #include "EditorPreferencesWindow.h"

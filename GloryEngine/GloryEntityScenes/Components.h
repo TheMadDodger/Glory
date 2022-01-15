@@ -8,6 +8,7 @@
 #include <Camera.h>
 #include <glm/gtx/quaternion.hpp>
 #include <CameraRef.h>
+#include <Layer.h>
 
 namespace Glory
 {
@@ -44,14 +45,20 @@ namespace Glory
 
 	struct CameraComponent
 	{
-		CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_DisplayIndex(0) {}
-		CameraComponent(float halfFOV, float near, float far, int displayIndex) : m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_DisplayIndex(displayIndex) {}
+		CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_DisplayIndex(0), m_Priority(0), m_ClearColor(glm::vec4(0.0f)), m_LayerMask(0), m_LastHash(0) {}
+		CameraComponent(float halfFOV, float near, float far, int displayIndex = 0, int priority = 0, const glm::vec4& clearColor = glm::vec4(0.0f))
+			: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_DisplayIndex(displayIndex), m_Priority(priority), m_ClearColor(clearColor), m_LayerMask(0), m_LastHash(0) {}
 		
 		float m_HalfFOV;
 		float m_Near;
 		float m_Far;
 		
 		int m_DisplayIndex;
+		int m_Priority;
+		LayerMask m_LayerMask;
+		glm::vec4 m_ClearColor;
+
+		size_t m_LastHash;
 
 		CameraRef m_Camera;
 	};
@@ -72,6 +79,14 @@ namespace Glory
 		Spin(float speed) : m_Speed(speed) {}
 
 		float m_Speed;
+	};
+
+	struct LayerComponent
+	{
+		LayerComponent() : m_pLayer(nullptr) {}
+		LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
+
+		const Layer* m_pLayer;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));

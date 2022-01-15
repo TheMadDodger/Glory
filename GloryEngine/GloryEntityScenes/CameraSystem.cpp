@@ -1,7 +1,7 @@
 #include "CameraSystem.h"
+#include "Registry.h"
 #include <Window.h>
 #include <Game.h>
-#include "Registry.h"
 #include <CameraManager.h>
 
 namespace Glory
@@ -16,6 +16,7 @@ namespace Glory
 
 		pComponent.m_Camera = CameraManager::GetNewOrUnusedCamera();
 		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
+		pComponent.m_LastHash = CalcHash(pComponent);
 	}
 
 	void CameraSystem::OnComponentRemoved(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
@@ -27,11 +28,37 @@ namespace Glory
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(transform.MatTransform);
+
+		size_t hash = CalcHash(pComponent);
+		if (pComponent.m_LastHash == hash) return;
+		pComponent.m_LastHash = hash;
+
 		pComponent.m_Camera.SetDisplayIndex(pComponent.m_DisplayIndex);
+		pComponent.m_Camera.SetPriority(pComponent.m_Priority);
+		pComponent.m_Camera.SetLayerMask(pComponent.m_LayerMask);
+		pComponent.m_Camera.SetClearColor(pComponent.m_ClearColor);
+
+		Engine* pEngine = Game::GetGame().GetEngine();
+		Window* pWindow = pEngine->GetWindowModule()->GetMainWindow();
+
+		int width, height;
+		pWindow->GetDrawableSize(&width, &height);
+		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
 	}
 
 	void CameraSystem::OnDraw(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_Camera);
+	}
+
+	size_t CameraSystem::CalcHash(CameraComponent& pComponent)
+	{
+		float value = (float)pComponent.m_ClearColor.x + (float)pComponent.m_ClearColor.y
+			+ (float)pComponent.m_ClearColor.z + (float)pComponent.m_ClearColor.w
+			+ (float)pComponent.m_DisplayIndex + (float)pComponent.m_Far
+			+ (float)pComponent.m_Near + (float)pComponent.m_HalfFOV
+			+ (float)pComponent.m_Priority + (float)pComponent.m_LayerMask;
+
+		return std::hash<float>()(value);
 	}
 }

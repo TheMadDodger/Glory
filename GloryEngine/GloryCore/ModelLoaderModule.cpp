@@ -1,4 +1,5 @@
 #include "ModelLoaderModule.h"
+#include "EngineProfiler.h"
 
 namespace Glory
 {
@@ -26,13 +27,17 @@ namespace Glory
 
 	ModelData* ModelLoaderModule::LoadResource(const std::string& path, const ModelImportSettings& importSettings)
 	{
+		Profiler::BeginSample("ModelLoaderModule::LoadResource(path)");
 		ModelData* pModel = LoadModel(path, importSettings);
+		Profiler::EndSample();
 		return pModel;
 	}
 
 	ModelData* ModelLoaderModule::LoadResource(const void* buffer, size_t length, const ModelImportSettings& importSettings)
 	{
+		Profiler::BeginSample("ModelLoaderModule::LoadResource(buffer)");
 		ModelData* pModel = LoadModel(buffer, length, importSettings);
+		Profiler::EndSample();
 		return pModel;
 	}
 
