@@ -192,7 +192,7 @@ namespace Glory::Editor
 			switch (m_InspectorMode)
 			{
 			case Glory::Editor::Timeline:
-				// TODO!
+				InspectorTimelineGUI();
 				break;
 			case Glory::Editor::Hierarchy:
 				InspectorTableGUI();
@@ -241,6 +241,53 @@ namespace Glory::Editor
 				ThreadSampleTableGUI(it->second[m_CurrentlyInspectingSampleIndex]);
 			}
 
+			ImGui::EndTable();
+		}
+	}
+
+	void ProfilerWindow::InspectorTimelineGUI()
+	{
+		static ImGuiTableFlags flags =
+			//ImGuiTableFlags_Resizable
+			ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
+			| ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
+			| ImGuiTableFlags_SizingFixedFit;
+
+		static float start = 0;
+		static float end = 100;
+
+		if (ImGui::BeginTable("Timeline", 2, flags, ImVec2(0, 0), 0.0f))
+		{
+			ImGui::TableSetupColumn("Thread", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 0);
+			ImGui::TableSetupColumn("Timeline", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.0f, 1);
+			//ImGui::TableSetupColumn("Project Path", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
+
+			ImGui::TableHeadersRow();
+
+			for (size_t row_n = 0; row_n < 10; row_n++)
+			{
+				ImGui::PushID(row_n);
+				ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
+
+				ImGui::TableSetColumnIndex(0);
+				ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+
+				if (ImGui::Selectable("", false, selectable_flags, ImVec2(0, 0.0f)))
+				{
+					
+				}
+
+				ImGui::Text("Test %d", row_n);
+
+				ImGui::TableSetColumnIndex(1);
+				if (ImPlot::BeginPlot("Test Plot"))
+				{
+
+					ImPlot::EndPlot();
+				}
+
+				ImGui::PopID();
+			}
 			ImGui::EndTable();
 		}
 	}

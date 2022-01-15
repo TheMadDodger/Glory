@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <list>
 #include <mutex>
+#include <ProfilerTimeline.h>
 
 namespace Glory::Editor
 {
@@ -34,6 +35,8 @@ namespace Glory::Editor
         void ThreadSampleTableGUI(ProfilerThreadSample sample);
         void SampleTableGUI(ProfilerSample* pSample);
 
+        void InspectorTimelineGUI();
+
     private:
         int m_CurrentlyInspectingSampleIndex;
         InspectorMode m_InspectorMode = InspectorMode::Timeline;
@@ -48,5 +51,7 @@ namespace Glory::Editor
         static std::unordered_map<std::string, int> m_WriteIndices;
 
         static std::mutex m_RecordMutex;
+
+        ProfilerTimeline mySequence;
     };
 }
