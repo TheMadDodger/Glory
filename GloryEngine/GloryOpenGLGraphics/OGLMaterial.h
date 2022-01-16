@@ -26,10 +26,12 @@ namespace Glory
     public: // Set shader vars
         virtual void SetFloat(const std::string& name, float value) const override;
         virtual void SetInt(const std::string& name, int value) const override;
+        virtual void SetUInt(const std::string& name, uint32_t value) const override;
         virtual void SetIntArray(const std::string& name, int size, int* value) const override;
         virtual void SetBool(const std::string& name, bool value) const override;
         virtual void SetVec2(const std::string& name, const glm::vec2& value) const override;
         virtual void SetVec3(const std::string& name, const glm::vec3& value) const override;
+        virtual void SetUVec3(const std::string& name, const glm::uvec3& value) const override;
         virtual void SetVec4(const std::string& name, const glm::vec4& value) const override;
         virtual void SetDouble(const std::string& name, double value) const override;
         virtual void SetMatrix3(const std::string& name, const glm::mat3& value) const override;

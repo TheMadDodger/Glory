@@ -76,6 +76,8 @@ namespace Glory
 			pRenderTexture->Bind();
 			m_pEngine->GetGraphicsModule()->Clear(camera.GetClearColor());
 
+			OnStartCameraRender(camera);
+
 			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
 			{
 				LayerMask mask = camera.GetLayerMask();
@@ -85,6 +87,7 @@ namespace Glory
 				Profiler::EndSample();
 			}
 
+			OnEndCameraRender(camera);
 			pRenderTexture->UnBind();
 
 			int displayIndex = camera.GetDisplayIndex();

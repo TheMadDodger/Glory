@@ -21,6 +21,9 @@ project "GloryClusteredRenderer"
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.GLEW}",
+		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.core}"
 	}
 

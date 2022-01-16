@@ -33,7 +33,10 @@ namespace Glory
 
 		virtual void OnThreadedInitialize() {}
 		virtual void OnThreadedCleanup() {}
-		
+
+		virtual void OnStartCameraRender(CameraRef camera) = 0;
+		virtual void OnEndCameraRender(CameraRef camera) = 0;
+
 	private:
 		void ThreadedInitialize();
 		void ThreadedCleanup();

@@ -18,10 +18,10 @@ namespace Glory
 		m_pBuffers.clear();
 	}
 
-	Buffer* GPUResourceManager::CreateBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags)
+	Buffer* GPUResourceManager::CreateBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex)
 	{
 		Profiler::BeginSample("GPUResourceManager::CreateBuffer");
-		Buffer* pBuffer = CreateBuffer_Internal(bufferSize, usageFlag, memoryFlags);
+		Buffer* pBuffer = CreateBuffer_Internal(bufferSize, usageFlag, memoryFlags, bindIndex);
 		pBuffer->CreateBuffer();
 		m_pBuffers.push_back(pBuffer);
 		Profiler::EndSample();

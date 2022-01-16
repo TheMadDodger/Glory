@@ -6,6 +6,9 @@ namespace Glory
 {
 	class OGLRenderTexture : public RenderTexture
 	{
+	public:
+		GLuint GetDepthBuffer();
+
 	private:
 		OGLRenderTexture(int width, int height, bool hasDepthBuffer);
 		virtual ~OGLRenderTexture();

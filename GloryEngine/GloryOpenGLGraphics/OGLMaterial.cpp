@@ -78,6 +78,14 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
+	void OGLMaterial::SetUInt(const std::string& name, uint32_t value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1ui(ID, value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
 	void OGLMaterial::SetIntArray(const std::string& name, int size, int* value) const
 	{
 		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
@@ -107,6 +115,14 @@ namespace Glory
 		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glUniform3f(ID, value.x, value.y, value.z);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLMaterial::SetUVec3(const std::string& name, const glm::uvec3& value) const
+	{
+		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform3ui(ID, value.x, value.y, value.z);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
@@ -157,6 +173,24 @@ namespace Glory
 		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindTexture(GL_TEXTURE_2D, pGLTexture->GetID());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glActiveTexture(GL_TEXTURE0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		++m_TextureCounter;
+	}
+
+	void OGLMaterial::SetTexture(const std::string& name, GLuint id)
+	{
+		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1i(texLocation, m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindTexture(GL_TEXTURE_2D, id);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glActiveTexture(GL_TEXTURE0);
@@ -224,22 +258,4 @@ namespace Glory
 	//
 	//	++m_TextureCounter;
 	//}
-
-	void OGLMaterial::SetTexture(const std::string& name, GLuint id)
-	{
-		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform1i(texLocation, m_TextureCounter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindTexture(GL_TEXTURE_2D, id);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glActiveTexture(GL_TEXTURE0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		++m_TextureCounter;
-	}
 }

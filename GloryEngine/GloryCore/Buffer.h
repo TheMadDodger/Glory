@@ -7,7 +7,7 @@ namespace Glory
 	class Buffer : public GPUResource
 	{
 	public:
-		Buffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags);
+		Buffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, size_t bindIndex);
 		virtual ~Buffer();
 
 		virtual void Assign(const void* data) = 0;
@@ -25,6 +25,7 @@ namespace Glory
 		uint32_t m_BufferSize;
 		uint32_t m_UsageFlag;
 		uint32_t m_MemoryFlags;
+		uint32_t m_BindIndex;
 
 	private:
 		friend class GPUResourceManager;

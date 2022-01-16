@@ -9,14 +9,15 @@ namespace Glory
 	class Camera : public Object
 	{
 	public:
-		void SetResolution(int width, int height);
-		void SetPerspectiveProjection(int width, int height, float halfFOV, float near, float far);
+		void SetResolution(size_t width, size_t height);
+		void SetPerspectiveProjection(size_t width, size_t height, float halfFOV, float near, float far);
 		void SetView(const glm::mat4& view);
 		void SetDisplayIndex(int index);
 		void SetPriority(int priority);
 		void SetLayerMask(const LayerMask& layerMask);
 		void SetClearColor(const glm::vec4& clearColor);
 
+		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;
 		const glm::mat4& GetProjection() const;
 		int GetDisplayIndex() const;
@@ -25,8 +26,11 @@ namespace Glory
 		const LayerMask& GetLayerMask() const;
 		RenderTexture* GetRenderTexture() const;
 
+		float GetNear() const;
+		float GetFar() const;
+
 	private:
-		Camera(int width, int height);
+		Camera(size_t width, size_t height);
 
 	private:
 		friend class CameraManager;
@@ -34,11 +38,13 @@ namespace Glory
 		bool m_TextureIsDirty;
 		int m_DisplayIndex;
 		int m_Priority;
+		float m_Near;
+		float m_Far;
 		LayerMask m_LayerMask;
 
 		glm::mat4 m_View;
 		glm::mat4 m_Projection;
-		glm::ivec2 m_Resolution;
+		glm::uvec2 m_Resolution;
 
 		glm::vec4 m_ClearColor;
 
