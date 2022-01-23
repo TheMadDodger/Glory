@@ -53,6 +53,7 @@ namespace Glory
 			{
 				pCamera->m_pRenderTexture->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
 				pCamera->m_TextureIsDirty = false;
+				pEngine->GetRendererModule()->OnCameraResize(camera);
 			}
 			Profiler::EndSample();
 			return pCamera->m_pRenderTexture;

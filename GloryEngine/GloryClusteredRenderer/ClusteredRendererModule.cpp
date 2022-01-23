@@ -5,16 +5,10 @@
 #include <FileLoaderModule.h>
 #include <CameraManager.h>
 
-
-
-
-#include <OGLRenderTexture.h>
-
 namespace Glory
 {
 	ClusteredRendererModule::ClusteredRendererModule()
-		: m_pClusterShaderFile(nullptr), m_pClusterShaderMaterial(nullptr), m_pClusterShaderMaterialData(nullptr),
-		m_pClusterSSBO(nullptr), m_pScreenToViewSSBO(nullptr), m_ClusterGenerated(false)
+		: m_pClusterShaderFile(nullptr), m_pClusterShaderMaterial(nullptr), m_pClusterShaderMaterialData(nullptr), m_pScreenToViewSSBO(nullptr)
 	{
 	}
 
@@ -30,6 +24,20 @@ namespace Glory
 		createInfo.Attachments.push_back(Attachment("Position", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 		createInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 		return pResourceManager->CreateRenderTexture(createInfo);
+	}
+
+	void ClusteredRendererModule::OnCameraResize(CameraRef camera)
+	{
+		// When the camera rendertexture resizes we need to generate a new grid of clusters for that camera
+		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		glm::uvec2 resolution = camera.GetResolution();
+		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+
+		Buffer* pClusterSSBO = nullptr;
+		if (!camera.GetUserData<Buffer>("ClusterSSBO", pClusterSSBO)) return; // Should not happen but just in case
+		GenerateClusterSSBO(pClusterSSBO, camera, gridSize, resolution);
 	}
 
 	void ClusteredRendererModule::PostInitialize()
@@ -83,17 +91,8 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		m_pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB) * NUMCLUSTERS, GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 1);
-		m_pClusterSSBO->Assign(NULL);
-
 		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 2);
 		m_pScreenToViewSSBO->Assign(NULL);
-
-		m_pActiveClustersSSBO = pResourceManager->CreateBuffer(sizeof(bool) * NUMCLUSTERS, GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 1);
-		m_pActiveClustersSSBO->Assign(NULL);
-
-		m_pActiveUniqueClustersSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUMCLUSTERS + 1), GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 2);
-		m_pActiveUniqueClustersSSBO->Assign(NULL);
 
 		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
 		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
@@ -125,7 +124,7 @@ namespace Glory
 		pGraphics->DrawMesh(pMeshData);
 	}
 
-	void ClusteredRendererModule::OnDoScreenRender(size_t width, size_t height, RenderTexture* pRenderTexture)
+	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, size_t width, size_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 
@@ -139,15 +138,19 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		// Set material
-		OGLMaterial* pMaterial = (OGLMaterial*)pGraphics->UseMaterial(m_pScreenMaterial);
-		GLTexture* pTexture = (GLTexture*)pRenderTexture->GetTextureAttachment(0);
-
-		OGLRenderTexture* pGLRenderTexture = (OGLRenderTexture*)pRenderTexture;
-		GLTexture* pGLTexture = (GLTexture*)pGLRenderTexture->GetTextureAttachment("Depth");
+		Material* pMaterial = pGraphics->UseMaterial(m_pScreenMaterial);
 
 		pRenderTexture->BindAll(pMaterial);
 
-		//pMaterial->SetTexture("Color", pGLTexture->GetID());
+		glm::uvec2 resolution = camera.GetResolution();
+		size_t gcd = GetGCD(resolution.x, resolution.y);
+		glm::uvec2 aspectFrac = resolution / gcd;
+		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+		pMaterial->SetFloat("zNear", camera.GetNear());
+		pMaterial->SetFloat("zFar", camera.GetFar());
+		pMaterial->SetUInt("tileSizeInPx", resolution.x / gridSize.x);
+		pMaterial->SetUVec3("numClusters", gridSize);
+		pMaterial->SetVec2("screenResolution", resolution);
 
 		// Draw the screen mesh
 		glBindVertexArray(m_ScreenQuadVertexArrayID);
@@ -176,27 +179,29 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		if (!m_ClusterGenerated)
+		Buffer* pClusterSSBO = nullptr;
+		if (!camera.GetUserData<Buffer>("ClusterSSBO", pClusterSSBO))
 		{
 			glm::uvec2 resolution = camera.GetResolution();
+			glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
-			m_SizeX = (unsigned int)std::ceilf(resolution.x / (float)m_GridSizeX);
-			ScreenToView screenToView;
-			screenToView.inverseProjection = glm::inverse(camera.GetProjection());
-			screenToView.screenDimensions = resolution;
-			screenToView.tileSizes = glm::uvec4(m_GridSizeX, m_GridSizeY, m_GridSizeZ, m_SizeX);
+			Buffer* pActiveClustersSSBO = nullptr;
+			Buffer* pActiveUniqueClustersSSBO = nullptr;
 
-			m_pScreenToViewSSBO->Assign((void*)&screenToView);
+			pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB) * NUM_CLUSTERS, GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 1);
+			pClusterSSBO->Assign(NULL);
 
-			m_pClusterShaderMaterial->Use();
-			m_pClusterSSBO->Bind();
-			m_pScreenToViewSSBO->Bind();
-			m_pClusterShaderMaterial->SetFloat("zNear", camera.GetNear());
-			m_pClusterShaderMaterial->SetFloat("zFar", camera.GetFar());
-			pGraphics->DispatchCompute(m_GridSizeX, m_GridSizeY, m_GridSizeZ);
-			m_pClusterSSBO->Unbind();
-			m_pScreenToViewSSBO->Unbind();
-			m_ClusterGenerated = true;
+			pActiveClustersSSBO = pResourceManager->CreateBuffer(sizeof(bool) * NUM_CLUSTERS, GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 1);
+			pActiveClustersSSBO->Assign(NULL);
+
+			pActiveUniqueClustersSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS + 1), GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 2);
+			pActiveUniqueClustersSSBO->Assign(NULL);
+
+			camera.SetUserData("ClusterSSBO", pClusterSSBO);
+			camera.SetUserData("ActiveClustersSSBO", pActiveClustersSSBO);
+			camera.SetUserData("ActiveUniqueClustersSSBO", pActiveUniqueClustersSSBO);
+
+			GenerateClusterSSBO(pClusterSSBO, camera, gridSize, resolution);
 		}
 	}
 
@@ -205,29 +210,35 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		glm::uvec2 resolution = camera.GetResolution();
-		OGLRenderTexture* pRenderTexture = (OGLRenderTexture*)CameraManager::GetRenderTextureForCamera(camera, m_pEngine);
-		GLTexture* pGLTexture = (GLTexture*)pRenderTexture->GetTextureAttachment("Depth");
-		m_DepthBuffer = pGLTexture->GetID();
+		RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(camera, m_pEngine);
+		Texture* pDepthTexture = pRenderTexture->GetTextureAttachment("Depth");
 
-		glm::uvec3 numClusters = glm::uvec3(m_GridSizeX, m_GridSizeY, m_GridSizeZ);
+		glm::uvec2 resolution = camera.GetResolution();
+		size_t gcd = GetGCD(resolution.x, resolution.y);
+		glm::uvec2 aspectFrac = resolution / gcd;
+		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+
+		Buffer* pActiveClustersSSBO = nullptr;
+		Buffer* pActiveUniqueClustersSSBO = nullptr;
+		if (!camera.GetUserData("ActiveClustersSSBO", pActiveClustersSSBO)) return;
+		if (!camera.GetUserData("ActiveUniqueClustersSSBO", pActiveUniqueClustersSSBO)) return;
 
 		m_pMarkActiveClustersMaterial->Use();
-		m_pActiveClustersSSBO->Bind();
+		pActiveClustersSSBO->Bind();
 		m_pMarkActiveClustersMaterial->SetFloat("zNear", camera.GetNear());
 		m_pMarkActiveClustersMaterial->SetFloat("zFar", camera.GetFar());
-		m_pMarkActiveClustersMaterial->SetUInt("tileSizeInPx", resolution.x / m_GridSizeX);
-		m_pMarkActiveClustersMaterial->SetUVec3("numClusters", numClusters);
-		((OGLMaterial*)m_pMarkActiveClustersMaterial)->SetTexture("depth", m_DepthBuffer);
+		m_pMarkActiveClustersMaterial->SetUInt("tileSizeInPx", resolution.x / gridSize.x);
+		m_pMarkActiveClustersMaterial->SetUVec3("numClusters", gridSize);
+		m_pMarkActiveClustersMaterial->SetTexture("Depth", pDepthTexture);
 		pGraphics->DispatchCompute(resolution.x, resolution.y, 1);
-		m_pActiveClustersSSBO->Unbind();
+		pActiveClustersSSBO->Unbind();
 
 		m_pCompactClustersMaterial->Use();
-		m_pActiveClustersSSBO->Bind();
-		m_pActiveUniqueClustersSSBO->Bind();
-		pGraphics->DispatchCompute(NUMCLUSTERS, 1, 1);
-		m_pActiveClustersSSBO->Unbind();
-		m_pActiveUniqueClustersSSBO->Unbind();
+		pActiveClustersSSBO->Bind();
+		pActiveUniqueClustersSSBO->Bind();
+		pGraphics->DispatchCompute(NUM_CLUSTERS, 1, 1);
+		pActiveClustersSSBO->Unbind();
+		pActiveUniqueClustersSSBO->Unbind();
 	}
 
 
@@ -272,5 +283,32 @@ namespace Glory
 
 	void ClusteredRendererModule::CalculateActiveClusters()
 	{
+	}
+
+	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
+	{
+		if (b == 0)
+			return a;
+		return GetGCD(b, a % b);
+	}
+
+	void ClusteredRendererModule::GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera, const glm::uvec3& gridSize, const glm::uvec2& resolution)
+	{
+		size_t sizeX = (size_t)std::ceilf(resolution.x / (float)gridSize.x);
+		ScreenToView screenToView;
+		screenToView.inverseProjection = glm::inverse(camera.GetProjection());
+		screenToView.screenDimensions = resolution;
+		screenToView.tileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
+
+		m_pScreenToViewSSBO->Assign((void*)&screenToView);
+
+		m_pClusterShaderMaterial->Use();
+		pBuffer->Bind();
+		m_pScreenToViewSSBO->Bind();
+		m_pClusterShaderMaterial->SetFloat("zNear", camera.GetNear());
+		m_pClusterShaderMaterial->SetFloat("zFar", camera.GetFar());
+		m_pEngine->GetGraphicsModule()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
+		pBuffer->Unbind();
+		m_pScreenToViewSSBO->Unbind();
 	}
 }

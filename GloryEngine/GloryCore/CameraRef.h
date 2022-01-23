@@ -21,6 +21,7 @@ namespace Glory
 		void SetClearColor(const glm::vec4& clearColor);
 		void SetOutputTexture(RenderTexture* pTexture);
 		void EnableOutput(bool enable);
+		void SetUserData(const std::string& name, void* data);
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;
@@ -32,6 +33,14 @@ namespace Glory
 		RenderTexture* GetRenderTexture() const;
 		RenderTexture* GetOutputTexture() const;
 		bool HasOutput() const;
+
+		template<typename T>
+		bool GetUserData(const std::string& name, T*& data)
+		{
+			Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+			if (pCamera == nullptr) return false;
+			return pCamera->GetUserData(name, data);
+		}
 
 		float GetNear() const;
 		float GetFar() const;

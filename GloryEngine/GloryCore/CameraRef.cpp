@@ -79,6 +79,13 @@ namespace Glory
 		pCamera->EnableOutput(enable);
 	}
 
+	void CameraRef::SetUserData(const std::string& name, void* data)
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetUserData(name, data);
+	}
+
 	const glm::uvec2& CameraRef::GetResolution() const
 	{
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);

@@ -7,7 +7,7 @@ uniform float zFar;
 uniform uint tileSizeInPx; // How many pixels a rectangular cluster takes in x and y
 uniform uvec3 numClusters; // The fixed number of clusters in x y and z axes
 
-layout(binding = 0) uniform sampler2D depth;
+layout(binding = 0) uniform sampler2D Depth;
 
 //Output
 layout(std430, binding = 1) buffer clusterActiveSSBO
@@ -17,6 +17,7 @@ layout(std430, binding = 1) buffer clusterActiveSSBO
 
 uint getClusterIndex(vec3 pixelCoord);
 uint getDepthSlice(float z);
+float linearDepth(float depthSample);
 
 //We will evaluate the whole screen in one compute shader
 //so each thread is equivalent to a pixel
@@ -25,7 +26,7 @@ void main()
     //Getting the depth value
     vec2 pixelID = vec2(gl_WorkGroupID.x, gl_WorkGroupID.y);
     vec2 screenCord = pixelID.xy / gl_NumWorkGroups.xy;
-    float z = texture2D(depth, screenCord).r;
+    float z = texture2D(Depth, screenCord).r;
 
     //Getting the linear cluster index value
     uint clusterID = getClusterIndex(vec3(pixelID.xy, z));
@@ -34,7 +35,6 @@ void main()
 
 uint getClusterIndex(vec3 pixelCoord)
 {
-    // Uses equation (3) from Building a Cluster Grid section
     uint clusterZVal = getDepthSlice(pixelCoord.z);
 
     uvec3 clusters = uvec3(uvec2(pixelCoord.xy / tileSizeInPx), clusterZVal);
@@ -44,12 +44,16 @@ uint getClusterIndex(vec3 pixelCoord)
     return clusterIndex;
 }
 
-uint getDepthSlice(float z)
+uint getDepthSlice(float depth)
 {
-    float logZ = log(z);
-    float logNear = log(zNear);
-    float numSlices = numClusters.z;
-    float logFarNear = log(zFar / zNear);
-    float result = logZ* (numSlices / logFarNear) - ((numSlices * logNear) / logFarNear);
-    return uint(result);
+    float scale = 1.0;
+    float bias = 0.0;
+    return uint(max(log2(linearDepth(depth)) * scale + bias, 0.0));
+}
+
+float linearDepth(float depthSample)
+{
+    float depthRange = 2.0 * depthSample - 1.0;
+    float linear = 2.0 * zNear * zFar / (zFar + zNear - depthRange * (zFar - zNear));
+    return linear;
 }

@@ -49,6 +49,7 @@ namespace Glory
 		virtual ~ClusteredRendererModule();
 
 		virtual RenderTexture* CreateCameraRenderTexture(size_t width, size_t height) override;
+		virtual void OnCameraResize(CameraRef camera) override;
 
 	private:
 		virtual void Initialize() override;
@@ -59,17 +60,20 @@ namespace Glory
 		virtual void OnThreadedCleanup() override;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData) override;
-		virtual void OnDoScreenRender(size_t width, size_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDoScreenRender(CameraRef camera, size_t width, size_t height, RenderTexture* pRenderTexture) override;
 
 		virtual void OnStartCameraRender(CameraRef camera) override;
 		virtual void OnEndCameraRender(CameraRef camera) override;
 
 	private:
 		void CreateMesh();
-
 		void CalculateActiveClusters();
+		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
+
+		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera, const glm::uvec3& gridSize, const glm::uvec2& resolution);
 
 	private:
+		// Compute shaders
 		FileData* m_pClusterShaderFile;
 		MaterialData* m_pClusterShaderMaterialData;
 		Material* m_pClusterShaderMaterial;
@@ -82,25 +86,14 @@ namespace Glory
 		MaterialData* m_pCompactClustersMaterialData;
 		Material* m_pCompactClustersMaterial;
 
-		Buffer* m_pClusterSSBO;
+		// Data for clustering
 		Buffer* m_pScreenToViewSSBO;
-		Buffer* m_pActiveClustersSSBO;
-		Buffer* m_pActiveUniqueClustersSSBO;
-		bool m_ClusterGenerated;
-
 		static const size_t m_GridSizeX = 16;
 		static const size_t m_GridSizeY = 9;
-		static const size_t m_GridSizeZ = 24;
-		static const size_t NUMCLUSTERS = m_GridSizeX * m_GridSizeY * m_GridSizeZ;
-		size_t m_SizeX = 24;
+		static const size_t NUM_DEPTH_SLICES = 24;
+		static const size_t NUM_CLUSTERS = m_GridSizeX * m_GridSizeY * NUM_DEPTH_SLICES;
 
-		GLuint m_DepthBuffer;
-
-
-
-
-
-
+		// Screen rendering
 		MaterialData* m_pScreenMaterial;
 
 		GLuint m_ScreenQuadVertexArrayID;

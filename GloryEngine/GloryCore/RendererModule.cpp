@@ -109,7 +109,7 @@ namespace Glory
 
 				Profiler::BeginSample("RendererModule::OnRender > Output Rendering");
 				pOutputTexture->Bind();
-				OnDoScreenRender(width, height, pRenderTexture);
+				OnDoScreenRender(camera, width, height, pRenderTexture);
 				pOutputTexture->UnBind();
 				Profiler::EndSample();
 			}
@@ -126,7 +126,7 @@ namespace Glory
 
 			Profiler::BeginSample("RendererModule::OnRender > Display Rendering");
 			pDisplayRenderTexture->Bind();
-			OnDoScreenRender(width, height, pRenderTexture);
+			OnDoScreenRender(camera, width, height, pRenderTexture);
 			pDisplayRenderTexture->UnBind();
 			Profiler::EndSample();
 		}
@@ -140,6 +140,8 @@ namespace Glory
 		createInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 		return pResourceManager->CreateRenderTexture(createInfo);
 	}
+
+	void RendererModule::OnCameraResize(CameraRef camera) {}
 
 	void RendererModule::ThreadedInitialize()
 	{

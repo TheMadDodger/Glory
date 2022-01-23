@@ -63,6 +63,11 @@ namespace Glory
 		m_OutputEnabled = enable;
 	}
 
+	void Camera::SetUserData(const std::string& name, void* data)
+	{
+		m_UserDatas[name] = data;
+	}
+
 	const glm::uvec2& Camera::GetResolution() const
 	{
 		return m_Resolution;
