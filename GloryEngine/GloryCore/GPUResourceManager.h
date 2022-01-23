@@ -25,7 +25,7 @@ namespace Glory
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Texture* CreateTexture(ImageData* pImageData);
 		Texture* CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings);
-		RenderTexture* CreateRenderTexture(int width, int height, bool hasDepthBuffer);
+		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
 
 		void Free(GPUResource* pResource);
 
@@ -40,7 +40,7 @@ namespace Glory
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
 		virtual Texture* CreateTexture_Internal(ImageData* pImageData) = 0;
 		virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) = 0;
-		virtual RenderTexture* CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer) = 0;
+		virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) = 0;
 
 	private: // Resource lookups
 		template<class T>

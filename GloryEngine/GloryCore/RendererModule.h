@@ -16,9 +16,12 @@ namespace Glory
 
 		void Submit(const RenderData& renderData);
 		void Submit(CameraRef camera);
+		void Submit(CameraRef camera, RenderTexture* pTexture);
 
 		void StartFrame();
 		void EndFrame();
+
+		virtual RenderTexture* CreateCameraRenderTexture(size_t width, size_t height);
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
@@ -29,13 +32,14 @@ namespace Glory
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData) = 0;
-		virtual void OnDoScreenRender(RenderTexture* pRenderTexture) = 0;
+		virtual void OnDoScreenRender(size_t width, size_t height, RenderTexture* pRenderTexture) = 0;
 
 		virtual void OnThreadedInitialize() {}
 		virtual void OnThreadedCleanup() {}
 
 		virtual void OnStartCameraRender(CameraRef camera) = 0;
 		virtual void OnEndCameraRender(CameraRef camera) = 0;
+
 
 	private:
 		void ThreadedInitialize();

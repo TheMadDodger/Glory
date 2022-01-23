@@ -48,6 +48,8 @@ namespace Glory
 		ClusteredRendererModule();
 		virtual ~ClusteredRendererModule();
 
+		virtual RenderTexture* CreateCameraRenderTexture(size_t width, size_t height) override;
+
 	private:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
@@ -57,7 +59,7 @@ namespace Glory
 		virtual void OnThreadedCleanup() override;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData) override;
-		virtual void OnDoScreenRender(RenderTexture* pRenderTexture) override;
+		virtual void OnDoScreenRender(size_t width, size_t height, RenderTexture* pRenderTexture) override;
 
 		virtual void OnStartCameraRender(CameraRef camera) override;
 		virtual void OnEndCameraRender(CameraRef camera) override;

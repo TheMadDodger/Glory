@@ -40,7 +40,7 @@ namespace Glory
 	{
 		// dis is a test pls ignore
 		EntityScene* pScene = (EntityScene*)CreateEmptyScene();
-		EntitySceneObject* pObject1 = (EntitySceneObject*)pScene->CreateEmptyObject();
+		//EntitySceneObject* pObject1 = (EntitySceneObject*)pScene->CreateEmptyObject();
 
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
@@ -48,9 +48,13 @@ namespace Glory
 		ModelImportSettings modelImportSettings;
 		modelImportSettings.m_Extension = "fbx";
 		
-		FileData* pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/monkeh.fbx", importSettings);
+		FileData* pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/Sphere.fbx", importSettings);
 		ModelData* pModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
 		delete pFile;
+
+		//pFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Models/BigPlane.fbx", importSettings);
+		//ModelData* pPlaneModel = (ModelData*)m_pEngine->GetModule<ModelLoaderModule>()->Load(pFile->Data(), pFile->Size(), modelImportSettings);
+		//delete pFile;
 		
 		ImageImportSettings imageImportSettings;
 		imageImportSettings.m_Extension = "png";
@@ -71,13 +75,29 @@ namespace Glory
 		m_pMaterialData->AddProperty(MaterialPropertyData("_u_fragScalar", 1.0f));
 		m_pMaterialData->AddProperty(MaterialPropertyData("texSampler", pTexture));
 		
+		//EntitySceneObject* pPlaneObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		//Entity& planeEntity = pPlaneObject->GetEntityHandle();
+		//planeEntity.AddComponent<MeshFilter>(pPlaneModel);
+		//planeEntity.AddComponent<MeshRenderer>(m_pMaterialData);
+		//Transform& transform = planeEntity.GetComponent<Transform>();
+		//transform.Rotation = glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(-90.0f)));
+
 		//Entity& entity = pObject1->GetEntityHandle();
 		//entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		//entity.AddComponent<CameraComponent>();
-		//
+		//entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
+		
 		//entity = ((EntitySceneObject*)pScene->CreateEmptyObject())->GetEntityHandle();
 		//entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		//entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
+
+		//EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		//Entity& entity1 = pObject->GetEntityHandle();
+		//entity1.GetComponent<Transform>().Position = glm::vec3(5.0f, 0.0f, 0.0f);
+		//entity1.AddComponent<LayerComponent>();
+		//entity1.AddComponent<MeshFilter>(pModel);
+		////MaterialInstanceData* pMaterial = new MaterialInstanceData(m_pMaterialData);
+		//entity1.AddComponent<MeshRenderer>(m_pMaterialData);
+		////entity1.AddComponent<Spin>(0.1f);
 
 		for (int i = -4; i < 4; i++)
 		{
@@ -88,9 +108,10 @@ namespace Glory
 				entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.0f, j * 5.0f);
 				entity1.AddComponent<LayerComponent>();
 				entity1.AddComponent<MeshFilter>(pModel);
-
+		
 				MaterialInstanceData* pMaterial = new MaterialInstanceData(m_pMaterialData);
 				entity1.AddComponent<MeshRenderer>(pMaterial);
+				entity1.AddComponent<Spin>(0.1f);
 			}
 		}
 	}

@@ -62,8 +62,8 @@ namespace Glory
 		return new GLTexture(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
 	}
 
-	RenderTexture* OGLResourceManager::CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer)
+	RenderTexture* OGLResourceManager::CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo)
 	{
-		return new OGLRenderTexture(width, height, hasDepthBuffer);
+		return new OGLRenderTexture(createInfo);
 	}
 }

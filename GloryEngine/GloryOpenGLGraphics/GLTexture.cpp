@@ -27,22 +27,6 @@ namespace Glory
 		return m_TextureID;
 	}
 
-	void GLTexture::InitializeEmpty()
-	{
-		// Initialize texture
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
 	void GLTexture::Create(ImageData* pImageData)
 	{
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
@@ -115,9 +99,30 @@ namespace Glory
 
 		GLuint format = GLConverter::GetGLFormat(m_PixelFormat);
 
+		GLuint internalFormat = GL_RGBA;
+
+		if (m_PixelFormat == PixelFormat::PF_Depth16 || m_PixelFormat == PixelFormat::PF_Depth24 || m_PixelFormat == PixelFormat::PF_Depth32)
+		{
+			format = GL_DEPTH_COMPONENT;
+			internalFormat = GLConverter::GetGLFormat(m_PixelFormat);
+		}
+
 		glGenTextures(1, &m_TextureID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindTexture(m_GLImageType, m_TextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		// Initialize texture
+		glTexImage2D(m_GLImageType, 0, internalFormat, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(m_GLImageType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(m_GLImageType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 

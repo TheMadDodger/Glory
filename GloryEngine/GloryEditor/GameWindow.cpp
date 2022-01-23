@@ -52,7 +52,7 @@ namespace Glory::Editor
 	{
 		RenderTexture* pDisplayTexture = DisplayManager::GetDisplayRenderTexture(m_DisplayIndex);
 		if (pDisplayTexture == nullptr) return;
-		Texture* pTexture = pDisplayTexture->GetTexture();
+		Texture* pTexture = pDisplayTexture->GetTextureAttachment(0);
 
 		size_t width, height;
 		pDisplayTexture->GetDimensions(width, height);

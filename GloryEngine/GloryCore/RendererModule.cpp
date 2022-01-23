@@ -49,6 +49,10 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
+	void RendererModule::Submit(CameraRef camera, RenderTexture* pTexture)
+	{
+	}
+
 	void RendererModule::StartFrame()
 	{
 		Profiler::BeginSample("RendererModule::StartFrame");
@@ -90,18 +94,51 @@ namespace Glory
 			OnEndCameraRender(camera);
 			pRenderTexture->UnBind();
 
+			RenderTexture* pOutputTexture = camera.GetOutputTexture();
+			if (camera.HasOutput())
+			{
+				const glm::uvec2& resolution = camera.GetResolution();
+				if (pOutputTexture == nullptr)
+				{
+					pOutputTexture = DisplayManager::CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+					camera.SetOutputTexture(pOutputTexture);
+				}
+				size_t width, height;
+				pOutputTexture->GetDimensions(width, height);
+				if (width != resolution.x || height != resolution.y) pOutputTexture->Resize(resolution.x, resolution.y);
+
+				Profiler::BeginSample("RendererModule::OnRender > Output Rendering");
+				pOutputTexture->Bind();
+				OnDoScreenRender(width, height, pRenderTexture);
+				pOutputTexture->UnBind();
+				Profiler::EndSample();
+			}
+
 			int displayIndex = camera.GetDisplayIndex();
 			if (displayIndex == -1) continue;
 			RenderTexture* pDisplayRenderTexture = DisplayManager::GetDisplayRenderTexture(displayIndex);
 			if (pDisplayRenderTexture == nullptr) continue;
 
+			Window* pWindow = m_pEngine->GetWindowModule()->GetMainWindow();
+			
+			int width, height;
+			pWindow->GetDrawableSize(&width, &height);
+
 			Profiler::BeginSample("RendererModule::OnRender > Display Rendering");
 			pDisplayRenderTexture->Bind();
-			OnDoScreenRender(pRenderTexture);
+			OnDoScreenRender(width, height, pRenderTexture);
 			pDisplayRenderTexture->UnBind();
 			Profiler::EndSample();
 		}
 		Profiler::EndSample();
+	}
+
+	RenderTexture* RendererModule::CreateCameraRenderTexture(size_t width, size_t height)
+	{
+		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
+		RenderTextureCreateInfo createInfo(width, height, true);
+		createInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		return pResourceManager->CreateRenderTexture(createInfo);
 	}
 
 	void RendererModule::ThreadedInitialize()

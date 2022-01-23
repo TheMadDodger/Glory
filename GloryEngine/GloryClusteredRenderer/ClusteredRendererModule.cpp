@@ -22,6 +22,16 @@ namespace Glory
 	{
 	}
 
+	RenderTexture* ClusteredRendererModule::CreateCameraRenderTexture(size_t width, size_t height)
+	{
+		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
+		RenderTextureCreateInfo createInfo(width, height, true);
+		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		createInfo.Attachments.push_back(Attachment("Position", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		createInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		return pResourceManager->CreateRenderTexture(createInfo);
+	}
+
 	void ClusteredRendererModule::PostInitialize()
 	{
 		FileImportSettings importSettings;
@@ -115,14 +125,9 @@ namespace Glory
 		pGraphics->DrawMesh(pMeshData);
 	}
 
-	void ClusteredRendererModule::OnDoScreenRender(RenderTexture* pRenderTexture)
+	void ClusteredRendererModule::OnDoScreenRender(size_t width, size_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
-
-		Window* pWindow = m_pEngine->GetWindowModule()->GetMainWindow();
-
-		int width, height;
-		pWindow->GetDrawableSize(&width, &height);
 
 		CreateMesh();
 
@@ -135,12 +140,14 @@ namespace Glory
 
 		// Set material
 		OGLMaterial* pMaterial = (OGLMaterial*)pGraphics->UseMaterial(m_pScreenMaterial);
-		GLTexture* pTexture = (GLTexture*)pRenderTexture->GetTexture();
+		GLTexture* pTexture = (GLTexture*)pRenderTexture->GetTextureAttachment(0);
 
 		OGLRenderTexture* pGLRenderTexture = (OGLRenderTexture*)pRenderTexture;
-		GLuint depthBuffer = pGLRenderTexture->GetDepthBuffer();
+		GLTexture* pGLTexture = (GLTexture*)pGLRenderTexture->GetTextureAttachment("Depth");
 
-		pMaterial->SetTexture("ScreenTexture", depthBuffer);
+		pRenderTexture->BindAll(pMaterial);
+
+		//pMaterial->SetTexture("Color", pGLTexture->GetID());
 
 		// Draw the screen mesh
 		glBindVertexArray(m_ScreenQuadVertexArrayID);
@@ -200,7 +207,8 @@ namespace Glory
 
 		glm::uvec2 resolution = camera.GetResolution();
 		OGLRenderTexture* pRenderTexture = (OGLRenderTexture*)CameraManager::GetRenderTextureForCamera(camera, m_pEngine);
-		m_DepthBuffer = pRenderTexture->GetDepthBuffer();
+		GLTexture* pGLTexture = (GLTexture*)pRenderTexture->GetTextureAttachment("Depth");
+		m_DepthBuffer = pGLTexture->GetID();
 
 		glm::uvec3 numClusters = glm::uvec3(m_GridSizeX, m_GridSizeY, m_GridSizeZ);
 

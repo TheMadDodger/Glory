@@ -7,7 +7,8 @@ namespace Glory
 	Camera::Camera(size_t width, size_t height)
 		: m_DisplayIndex(0), m_Resolution(width, height), m_TextureIsDirty(true),
 		m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr),
-		m_ClearColor(glm::vec4(0.0f)), m_Priority(0), m_LayerMask(0), m_Near(0.0f), m_Far(0.0f)
+		m_ClearColor(glm::vec4(0.0f)), m_Priority(0), m_LayerMask(0), m_Near(0.0f), m_Far(0.0f),
+		m_pOutputTexture(nullptr), m_OutputEnabled(false)
 	{
 
 	}
@@ -52,6 +53,16 @@ namespace Glory
 		m_ClearColor = clearColor;
 	}
 
+	void Camera::SetOutputTexture(RenderTexture* pTexture)
+	{
+		m_pOutputTexture = pTexture;
+	}
+
+	void Camera::EnableOutput(bool enable)
+	{
+		m_OutputEnabled = enable;
+	}
+
 	const glm::uvec2& Camera::GetResolution() const
 	{
 		return m_Resolution;
@@ -91,10 +102,22 @@ namespace Glory
 	{
 		return m_pRenderTexture;
 	}
+
+	RenderTexture* Camera::GetOutputTexture() const
+	{
+		return m_pOutputTexture;
+	}
+
+	bool Camera::HasOutput() const
+	{
+		return m_OutputEnabled;
+	}
+
 	float Camera::GetNear() const
 	{
 		return m_Near;
 	}
+
 	float Camera::GetFar() const
 	{
 		return m_Far;

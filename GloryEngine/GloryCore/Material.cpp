@@ -21,6 +21,10 @@ namespace Glory
 			MaterialPropertyData* pPropertyData = &m_FrameProperties[i];
 			SetProperty(pPropertyData);
 		}
+
+		//SetMatrix4("mvp", m_UBO.model);
+		//SetMatrix4("view", m_UBO.view);
+		//SetMatrix4("proj", m_UBO.proj);
 	}
 
 	void Material::AddShader(Shader* pShader)

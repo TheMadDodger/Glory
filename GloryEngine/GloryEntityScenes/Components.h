@@ -6,7 +6,8 @@
 #include <ModelData.h>
 #include <MaterialData.h>
 #include <Camera.h>
-#include <glm/gtx/quaternion.hpp>
+//#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <CameraRef.h>
 #include <Layer.h>
 

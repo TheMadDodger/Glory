@@ -65,6 +65,20 @@ namespace Glory
 		pCamera->SetClearColor(clearColor);
 	}
 
+	void CameraRef::SetOutputTexture(RenderTexture* pTexture)
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetOutputTexture(pTexture);
+	}
+
+	void CameraRef::EnableOutput(bool enable)
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->EnableOutput(enable);
+	}
+
 	const glm::uvec2& CameraRef::GetResolution() const
 	{
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
@@ -119,6 +133,20 @@ namespace Glory
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
 		if (pCamera == nullptr) return nullptr;
 		return pCamera->GetRenderTexture();
+	}
+
+	RenderTexture* CameraRef::GetOutputTexture() const
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return nullptr;
+		return pCamera->GetOutputTexture();
+	}
+
+	bool CameraRef::HasOutput() const
+	{
+		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+		if (pCamera == nullptr) return false;
+		return pCamera->HasOutput();
 	}
 
 	void CameraRef::Free()

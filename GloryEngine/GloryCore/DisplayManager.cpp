@@ -21,6 +21,13 @@ namespace Glory
 		}
 		Profiler::EndSample();
 	}
+
+	RenderTexture* DisplayManager::CreateOutputTexture(Engine* pEngine, size_t width, size_t height)
+	{
+		RenderTextureCreateInfo createInfo(width, height, false);
+		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		return pEngine->GetGraphicsModule()->GetResourceManager()->CreateRenderTexture(createInfo);
+	}
 	
 	DisplayManager::~DisplayManager()
 	{
@@ -31,10 +38,12 @@ namespace Glory
 		int width, height;
 		pEngine->GetWindowModule()->GetMainWindow()->GetDrawableSize(&width, &height);
 
+		RenderTextureCreateInfo createInfo(width, height, false);
+		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
-			m_pRenderTextures[i] = pEngine->GetGraphicsModule()->GetResourceManager()->CreateRenderTexture(width, height, false);
-
+			m_pRenderTextures[i] = pEngine->GetGraphicsModule()->GetResourceManager()->CreateRenderTexture(createInfo);
 			m_pRenderTextures[i]->Bind();
 			pEngine->GetGraphicsModule()->Clear();
 			m_pRenderTextures[i]->UnBind();

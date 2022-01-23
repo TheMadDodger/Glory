@@ -50,8 +50,8 @@ namespace Glory::Editor
 		int display_w, display_h;
 		m_pEditorPlatform->GetWindowImpl()->GetMainWindow()->GetDrawableSize(&display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
-		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-		glClear(GL_COLOR_BUFFER_BIT);
+		//glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+		//glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	void EditorOpenGLRenderImpl::FrameRender(ImDrawData* pDrawData)

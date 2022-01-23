@@ -190,6 +190,11 @@ namespace Glory
         PF_Astc12x12UnormBlock,
         PF_Astc12x12SrgbBlock,
 
+        PF_Depth16,
+        PF_Depth24,
+        PF_Depth32,
+
+
         // NOT SUPPORTED FOR NOW
         PF_G8B8G8R8422Unorm = 1000156000,
         PF_B8G8R8G8422Unorm,

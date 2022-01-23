@@ -19,6 +19,8 @@ namespace Glory
 		void SetPriority(int priority);
 		void SetLayerMask(const LayerMask& layerMask);
 		void SetClearColor(const glm::vec4& clearColor);
+		void SetOutputTexture(RenderTexture* pTexture);
+		void EnableOutput(bool enable);
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;
@@ -28,6 +30,8 @@ namespace Glory
 		const glm::vec4& GetClearColor() const;
 		const LayerMask& GetLayerMask() const;
 		RenderTexture* GetRenderTexture() const;
+		RenderTexture* GetOutputTexture() const;
+		bool HasOutput() const;
 
 		float GetNear() const;
 		float GetFar() const;

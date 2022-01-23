@@ -48,7 +48,7 @@ namespace Glory
 	{
 		return nullptr;
 	}
-	RenderTexture* VulkanResourceManager::CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer)
+	RenderTexture* VulkanResourceManager::CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo)
 	{
 		return nullptr;
 	}

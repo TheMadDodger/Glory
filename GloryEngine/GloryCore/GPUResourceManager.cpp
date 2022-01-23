@@ -117,10 +117,10 @@ namespace Glory
 		return pTexture;
 	}
 
-	RenderTexture* GPUResourceManager::CreateRenderTexture(int width, int height, bool hasDepthBuffer)
+	RenderTexture* GPUResourceManager::CreateRenderTexture(const RenderTextureCreateInfo& createInfo)
 	{
 		Profiler::BeginSample("GPUResourceManager::CreateRenderTexture");
-		RenderTexture* pRenderTexture = CreateRenderTexture_Internal(width, height, hasDepthBuffer);
+		RenderTexture* pRenderTexture = CreateRenderTexture_Internal(createInfo);
 		UUID id = UUID();
 		pRenderTexture->m_UUID = id;
 		pRenderTexture->Initialize();

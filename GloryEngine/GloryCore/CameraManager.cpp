@@ -58,10 +58,9 @@ namespace Glory
 			return pCamera->m_pRenderTexture;
 		}
 
-		int width = pCamera->m_Resolution.x;
-		int height = pCamera->m_Resolution.y;
-		GPUResourceManager* pResourceManager = pEngine->GetGraphicsModule()->GetResourceManager();
-		pCamera->m_pRenderTexture = pResourceManager->CreateRenderTexture(width, height, true);
+		size_t width = pCamera->m_Resolution.x;
+		size_t height = pCamera->m_Resolution.y;
+		pCamera->m_pRenderTexture = pEngine->GetRendererModule()->CreateCameraRenderTexture(width, height);
 		pCamera->m_TextureIsDirty = false;
 		Profiler::EndSample();
 		return pCamera->m_pRenderTexture;
