@@ -75,16 +75,20 @@ namespace Glory
 		m_pMaterialData->AddProperty(MaterialPropertyData("texSampler", pTexture));
 		
 		EntitySceneObject* pPlaneObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		pPlaneObject->SetName("Plane");
 		Entity& planeEntity = pPlaneObject->GetEntityHandle();
 		planeEntity.AddComponent<MeshFilter>(pPlaneModel);
 		planeEntity.AddComponent<MeshRenderer>(m_pMaterialData);
 		Transform& transform = planeEntity.GetComponent<Transform>();
 		transform.Rotation = glm::quat(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
 
-		EntitySceneObject* pObject1 = (EntitySceneObject*)pScene->CreateEmptyObject();
-		Entity& entity = pObject1->GetEntityHandle();
-		entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
+		//EntitySceneObject* pObject1 = (EntitySceneObject*)pScene->CreateEmptyObject();
+		//pObject1->SetName("Camera 1");
+		//Entity& entity = pObject1->GetEntityHandle();
+		//entity.GetComponent<Transform>().Position = glm::vec3(0.0f, -2.0f, 0.0f);
+		////entity.AddComponent<LookAt>(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		//entity.AddComponent<CameraComponent>(45.0f, 0.1f, 3000.0f, 0, -5);
+		//entity.AddComponent<Spin>(0.1f);
 		
 		//entity = ((EntitySceneObject*)pScene->CreateEmptyObject())->GetEntityHandle();
 		//entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -104,6 +108,7 @@ namespace Glory
 			for (int j = -4; j < 4; j++)
 			{
 				EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+				pObject->SetName("Sphere");
 				Entity& entity1 = pObject->GetEntityHandle();
 				entity1.GetComponent<Transform>().Position = glm::vec3(i * 5.0f, 0.5f, j * 5.0f);
 				entity1.AddComponent<LayerComponent>();
@@ -112,6 +117,30 @@ namespace Glory
 				MaterialInstanceData* pMaterial = new MaterialInstanceData(m_pMaterialData);
 				entity1.AddComponent<MeshRenderer>(pMaterial);
 				entity1.AddComponent<Spin>(0.1f);
+			}
+		}
+
+		//EntitySceneObject* pLightObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+		//pLightObject->SetName("Light");
+		//Entity& lightEntity = pLightObject->GetEntityHandle();
+		//lightEntity.GetComponent<Transform>().Position = glm::vec3(0.0f, 5.0f, 0.0f);
+		//lightEntity.AddComponent<LightComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 50.0f);
+
+		for (size_t x = 0; x < 60; x++)
+		{
+			for (size_t y = 0; y < 50; y++)
+			{
+				float xPos = ((float)x - 15.0f) * 20.0f;
+				float yPos = ((float)y - 15.0f) * 20.0f;
+		
+				EntitySceneObject* pLightObject = (EntitySceneObject*)pScene->CreateEmptyObject();
+				pLightObject->SetName("Light");
+				Entity& lightEntity = pLightObject->GetEntityHandle();
+				lightEntity.GetComponent<Transform>().Position = glm::vec3(xPos, 2.f, yPos);
+				float randomColorX = (float)(rand() % 255) / 255.0f + 0.1f;
+				float randomColorY = (float)(rand() % 255) / 255.0f + 0.1f;
+				float randomColorZ = (float)(rand() % 255) / 255.0f + 0.1f;
+				lightEntity.AddComponent<LightComponent>(glm::vec4(randomColorX, randomColorY, randomColorZ, 1.0f), 1.0f, 40.0f);
 			}
 		}
 	}

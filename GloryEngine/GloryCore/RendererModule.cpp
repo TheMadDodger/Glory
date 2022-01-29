@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	RendererModule::RendererModule() 
+	RendererModule::RendererModule()
 	{
 	}
 
@@ -53,6 +53,14 @@ namespace Glory
 	{
 	}
 
+	void RendererModule::Submit(const PointLight& light)
+	{
+		Profiler::BeginSample("RendererModule::Submit(light)");
+		m_CurrentPreparingFrame.ActiveLights.push_back(light);
+		OnSubmit(light);
+		Profiler::EndSample();
+	}
+
 	void RendererModule::StartFrame()
 	{
 		Profiler::BeginSample("RendererModule::StartFrame");
@@ -80,7 +88,7 @@ namespace Glory
 			pRenderTexture->Bind();
 			m_pEngine->GetGraphicsModule()->Clear(camera.GetClearColor());
 
-			OnStartCameraRender(camera);
+			OnStartCameraRender(camera, frame.ActiveLights);
 
 			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
 			{
@@ -91,7 +99,7 @@ namespace Glory
 				Profiler::EndSample();
 			}
 
-			OnEndCameraRender(camera);
+			OnEndCameraRender(camera, frame.ActiveLights);
 			pRenderTexture->UnBind();
 
 			RenderTexture* pOutputTexture = camera.GetOutputTexture();
@@ -109,7 +117,7 @@ namespace Glory
 
 				Profiler::BeginSample("RendererModule::OnRender > Output Rendering");
 				pOutputTexture->Bind();
-				OnDoScreenRender(camera, width, height, pRenderTexture);
+				OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
 				pOutputTexture->UnBind();
 				Profiler::EndSample();
 			}
@@ -126,7 +134,7 @@ namespace Glory
 
 			Profiler::BeginSample("RendererModule::OnRender > Display Rendering");
 			pDisplayRenderTexture->Bind();
-			OnDoScreenRender(camera, width, height, pRenderTexture);
+			OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
 			pDisplayRenderTexture->UnBind();
 			Profiler::EndSample();
 		}

@@ -40,7 +40,7 @@ namespace Glory
 	{
 		glBindBuffer(m_UsageFlag, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferSubData(m_UsageFlag, offset, m_BufferSize, data);
+		glBufferSubData(m_UsageFlag, offset, size, data);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindBuffer(m_UsageFlag, NULL);
 	}

@@ -2,6 +2,7 @@
 #include <queue>
 #include "RenderData.h"
 #include "CameraRef.h"
+#include "LightData.h"
 
 namespace Glory
 {
@@ -13,5 +14,6 @@ namespace Glory
 	public:
 		std::vector<RenderData> ObjectsToRender;
 		std::vector<CameraRef> ActiveCameras;
+		std::vector<PointLight> ActiveLights;
 	};
 }

@@ -227,7 +227,7 @@ int main()
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);
         createInfo.pScenesModule = new Glory::EntitySceneScenesModule();
-        createInfo.pRenderModule = new Glory::NoRendering();
+        createInfo.pRenderModule = new Glory::ClusteredRendererModule();
         createInfo.pGraphicsModule = new Glory::OpenGLGraphicsModule();
         createInfo.OptionalModuleCount = static_cast<uint32_t>(optionalModules.size());
         createInfo.pOptionalModules = optionalModules.data();

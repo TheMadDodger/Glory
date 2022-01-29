@@ -100,11 +100,21 @@ namespace Glory
 		return pCamera->GetView();
 	}
 
+	const glm::mat4& CameraRef::GetViewInverse() const
+	{
+		return glm::inverse(GetView());
+	}
+
 	const glm::mat4& CameraRef::GetProjection() const
 	{
 		Camera* pCamera = CameraManager::GetCamera(m_CameraID);
 		if (pCamera == nullptr) return glm::mat4();
 		return pCamera->GetProjection();
+	}
+
+	const glm::mat4& CameraRef::GetProjectionInverse() const
+	{
+		return glm::inverse(GetProjection());
 	}
 
 	int CameraRef::GetDisplayIndex() const

@@ -31,15 +31,24 @@ namespace Glory
 {
 	struct VolumeTileAABB
 	{
-		glm::vec4 minPoint;
-		glm::vec4 maxPoint;
+		glm::vec4 MinPoint;
+		glm::vec4 MaxPoint;
 	};
 
 	struct ScreenToView
 	{
-		glm::mat4 inverseProjection;
-		glm::uvec4 tileSizes;
-		glm::uvec2 screenDimensions;
+		glm::mat4 ProjectionInverse;
+		glm::mat4 ViewInverse;
+		glm::uvec4 TileSizes;
+		glm::uvec2 ScreenDimensions;
+		float Scale;
+		float Bias;
+	};
+
+	struct LightGrid
+	{
+		uint32_t Offset;
+		uint32_t Count;
 	};
 
 	class ClusteredRendererModule : public RendererModule
@@ -59,15 +68,14 @@ namespace Glory
 		virtual void OnThreadedInitialize() override;
 		virtual void OnThreadedCleanup() override;
 
-		virtual void OnRender(CameraRef camera, const RenderData& renderData) override;
-		virtual void OnDoScreenRender(CameraRef camera, size_t width, size_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
+		virtual void OnDoScreenRender(CameraRef camera, const std::vector<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture) override;
 
-		virtual void OnStartCameraRender(CameraRef camera) override;
-		virtual void OnEndCameraRender(CameraRef camera) override;
+		virtual void OnStartCameraRender(CameraRef camera, const std::vector<PointLight>& lights) override;
+		virtual void OnEndCameraRender(CameraRef camera, const std::vector<PointLight>& lights) override;
 
 	private:
 		void CreateMesh();
-		void CalculateActiveClusters();
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera, const glm::uvec3& gridSize, const glm::uvec2& resolution);
@@ -86,12 +94,19 @@ namespace Glory
 		MaterialData* m_pCompactClustersMaterialData;
 		Material* m_pCompactClustersMaterial;
 
+		FileData* m_pClusterCullLightShaderFile;
+		MaterialData* m_pClusterCullLightMaterialData;
+		Material* m_pClusterCullLightMaterial;
+
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO;
+		Buffer* m_pLightsSSBO;
+
 		static const size_t m_GridSizeX = 16;
 		static const size_t m_GridSizeY = 9;
 		static const size_t NUM_DEPTH_SLICES = 24;
 		static const size_t NUM_CLUSTERS = m_GridSizeX * m_GridSizeY * NUM_DEPTH_SLICES;
+		static const size_t MAX_LIGHTS_PER_TILE = 50;
 
 		// Screen rendering
 		MaterialData* m_pScreenMaterial;

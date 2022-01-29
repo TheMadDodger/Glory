@@ -25,7 +25,9 @@ namespace Glory
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;
+		const glm::mat4& GetViewInverse() const;
 		const glm::mat4& GetProjection() const;
+		const glm::mat4& GetProjectionInverse() const;
 		int GetDisplayIndex() const;
 		int GetPriority() const;
 		const glm::vec4& GetClearColor() const;

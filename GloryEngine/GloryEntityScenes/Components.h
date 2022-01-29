@@ -10,6 +10,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <CameraRef.h>
 #include <Layer.h>
+#include <LightData.h>
 
 namespace Glory
 {
@@ -88,6 +89,16 @@ namespace Glory
 		LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
 
 		const Layer* m_pLayer;
+	};
+
+	struct LightComponent
+	{
+		LightComponent() : m_Color(1.0f), m_Intensity(10.0f), m_Range(100.0f) {}
+		LightComponent(const glm::vec4& color, float intensity, float range) : m_Color(color), m_Intensity(intensity), m_Range(range) {}
+
+		glm::vec4 m_Color;
+		float m_Intensity;
+		float m_Range;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
