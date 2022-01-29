@@ -17,15 +17,18 @@ project "GloryCore"
 	{
 		["Asset Management"] = { "AssetDatabase.h", "AssetDatabase.cpp", "AssetGroup.h", "AssetGroup.cpp", "AssetLocation.h", "AssetLocation.cpp", "AssetManager.h", "AssetManager.cpp", "ResourceMeta.h", "ResourceMeta.cpp", "ResourceType.h", "ResourceType.cpp" },
 		["Console"] = { "Commands.h", "Commands.cpp", "Console.h", "Console.cpp", "Debug.h", "Debug.cpp", "DebugConsoleInput.h", "DebugConsoleInput.cpp" },
-		["Core"] = { "CoreExceptions.h", "Engine.h", "Engine.cpp", "Game.h", "Game.cpp", "GameSettings.h", "GameState.h", "GameState.cpp", "GameThread.h", "GameThread.cpp", "GloryCore.h", "GraphicsThread.h", "GraphicsThread.cpp", "MainThread.h", "MainThread.cpp", "Object.h", "Object.cpp", "UUID.h", "UUID.cpp", "YAML_GLM.h", "YAML_GLM.cpp" },
+		["Core"] = { "CoreExceptions.h", "Engine.h", "Engine.cpp", "Game.h", "Game.cpp", "GameSettings.h", "GameState.h", "GameState.cpp", "GameThread.h", "GameThread.cpp", "GloryCore.h", "GraphicsThread.h", "GraphicsThread.cpp", "MainThread.h", "MainThread.cpp", "Object.h", "Object.cpp", "UUID.h", "UUID.cpp" },
 		["Job System"] = { "Job.h", "Job.cpp", "JobManager.h", "JobManager.cpp", "JobPool.h", "JobPool.cpp", "JobQueue.h", "JobQueue.cpp" },
 		["Modules"] = { "Module.h", "Module.cpp" },
+		["Modules/Time"] = { "TimerModule.h", "TimerModule.cpp", "GameTime.h", "GameTime.cpp" },
 		["Modules/Graphics"] = { "GraphicsModule.h", "GraphicsModule.cpp" },
 		["Modules/Graphics/Data"] = { "GraphicsEnums.h", "GraphicsMemoryManager.h", "GraphicsMemoryManager.cpp" },
 		["Modules/Graphics/Geometry"] = { "VertexDefinitions.h", "VertexHelpers.h" },
 		["Modules/Graphics/Rendering"] = { "FrameState.h", "FrameState.cpp", "RenderFrame.h", "RenderFrame.cpp", "RenderQueue.h", "RenderQueue.cpp" },
-		["Modules/Graphics/Resources"] = { "Buffer.h", "Buffer.cpp", "GPUResource.h", "GPUResource.cpp", "GPUResourceManager.h", "GPUResourceManager.cpp", "Material.h", "Material.cpp", "Mesh.h", "Mesh.cpp", "Shader.h", "Shader.cpp", "Texture.h", "Texture.cpp" },
+		["Modules/Graphics/Resources"] = { "Buffer.h", "Buffer.cpp", "GPUResource.h", "GPUResource.cpp", "GPUResourceManager.h", "GPUResourceManager.cpp", "Material.h", "Material.cpp", "Mesh.h", "Mesh.cpp", "Shader.h", "Shader.cpp", "Texture.h", "Texture.cpp", "RenderTexture.h", "RenderTexture.cpp" },
 		["Modules/Renderer"] = { "RenderData.h", "RendererModule.h", "RendererModule.cpp", "FrameStates.h", "FrameStates.cpp" },
+		["Modules/Renderer/Camera"] = { "Camera.h", "Camera.cpp", "CameraManager.h", "CameraManager.cpp", "DisplayManager.h", "DisplayManager.cpp", "CameraRef.h", "CameraRef.cpp" },
+		["Modules/Renderer/Layers"] = { "Layer.h", "Layer.cpp", "LayerManager.h", "LayerManager.cpp", "LayerMask.h", "LayerMask.cpp" },
 		["Modules/ResourceLoading"] = {  },
 		["Modules/ResourceLoading/Base"] = { "ImportSettings.h", "ImportSettings.cpp", "Resource.h", "Resource.cpp", "ResourceLoaderModule.h", "ResourceLoaderModule.cpp" },
 		["Modules/ResourceLoading/File"] = { "FileData.h", "FileData.cpp", "FileLoaderModule.h", "FileLoaderModule.cpp" },
@@ -33,10 +36,10 @@ project "GloryCore"
 		["Modules/ResourceLoading/Models"] = { "MeshData.h", "MeshData.cpp", "ModelData.h", "ModelData.cpp", "ModelLoaderModule.h", "ModelLoaderModule.cpp" },
 		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.h", "ShaderCrossCompiler.cpp", "ShaderData.h", "ShaderData.cpp", "ShaderLoaderModule.h", "ShaderLoaderModule.cpp" },
 		["Modules/ResourceLoading/Textures"] = { "ImageData.h", "ImageData.cpp", "ImageLoaderModule.h", "ImageLoaderModule.cpp" },
-		["Modules/Scenes"] = { "ScenesModule.h", "ScenesModule.cpp", "GScene.h", "GScene.cpp", "SceneObject.h", "SceneObject.cpp" },
+		["Modules/Scenes"] = { "ScenesModule.h", "ScenesModule.cpp", "SceneObject.h", "SceneObject.cpp", "GScene.h", "GScene.cpp" },
 		["Modules/Window"] = { "Window.h", "Window.cpp", "WindowModule.h", "WindowModule.cpp" },
 		["Threading"] = { "Thread.h", "Thread.cpp", "ThreadManager.h", "ThreadManager.cpp" },
-		["Serialization"] = { "Serializer.h", "Serializer.cpp" },
+		["Analysis"] = { "EngineProfiler.h", "EngineProfiler.cpp", "ProfilerModule.h", "ProfilerModule.cpp", "ProfilerSample.h", "ProfilerSample.cpp", "ProfilerThreadSample.h", "ProfilerThreadSample.cpp" },
 	}
 
 	includedirs

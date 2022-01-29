@@ -5,8 +5,8 @@
 
 namespace Glory
 {
-    VulkanBuffer::VulkanBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags) :
-        Buffer(bufferSize, usageFlag, memoryFlags)
+    VulkanBuffer::VulkanBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex) :
+        Buffer(bufferSize, usageFlag, memoryFlags, bindIndex)
 	{
 	}
 

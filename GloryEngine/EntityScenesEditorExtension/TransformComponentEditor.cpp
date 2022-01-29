@@ -23,6 +23,7 @@ namespace Glory::Editor
 		}
 		ImGui::InputFloat3("Scale", (float*)&transform.Scale);
 	}
+
 	std::string TransformComponentEditor::Name()
 	{
 		return "Transform";

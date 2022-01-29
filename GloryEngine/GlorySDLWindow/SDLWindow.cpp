@@ -34,7 +34,10 @@ namespace Glory
 
 	void SDLWindow::SetupForOpenGL()
 	{
-		// Create OpenGL context 
+		// Create OpenGL context
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 		m_GLSDLContext = SDL_GL_CreateContext(m_pWindow);
 		if (m_GLSDLContext == nullptr)
 		{

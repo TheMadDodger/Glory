@@ -10,6 +10,8 @@
 #include "RendererModule.h"
 #include "MainThread.h"
 #include "ResourceLoaderModule.h"
+#include "TimerModule.h"
+#include "ProfilerModule.h"
 #include "ResourceType.h"
 
 namespace Glory
@@ -38,6 +40,8 @@ namespace Glory
 		ScenesModule* GetScenesModule() const;
 		RendererModule* GetRendererModule() const;
 		GraphicsModule* GetGraphicsModule() const;
+		TimerModule* GetTimerModule() const;
+		ProfilerModule* GetProfilerModule() const;
 
 		template<class T>
 		T* GetModule()
@@ -74,13 +78,23 @@ namespace Glory
 		void Update();
 
 	private:
+		void GameThreadFrameStart();
+		void GameThreadFrameEnd();
+		void GraphicsThreadFrameStart();
+		void GraphicsThreadFrameEnd();
+
+	private:
 		friend class Game;
+		friend class GameThread;
+		friend class GraphicsThread;
 
 		// Required modules
 		WindowModule* m_pWindowModule;
 		ScenesModule* m_pScenesModule;
 		RendererModule* m_pRenderModule;
 		GraphicsModule* m_pGraphicsModule;
+		TimerModule* m_pTimerModule;
+		ProfilerModule* m_pProfilerModule;
 
 		// Optional modules
 		std::vector<Module*> m_pOptionalModules;

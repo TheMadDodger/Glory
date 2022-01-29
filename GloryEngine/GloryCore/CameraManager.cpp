@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "Engine.h"
 #include "WindowModule.h"
+#include "EngineProfiler.h"
 
 namespace Glory
 {
@@ -11,6 +12,7 @@ namespace Glory
 
 	CameraRef CameraManager::GetNewOrUnusedCamera()
 	{
+		Profiler::BeginSample("CameraManager::GetNewOrUnusedCamera");
 		int width, height;
 		Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow()->GetDrawableSize(&width, &height);
 
@@ -21,6 +23,7 @@ namespace Glory
 			Camera& pCamera = m_Cameras[index];
 			pCamera.SetResolution(width, height);
 			pCamera.m_IsInUse = true;
+			Profiler::EndSample();
 			return CameraRef(pCamera.GetUUID());
 		}
 
@@ -28,6 +31,7 @@ namespace Glory
 		m_Cameras.push_back(Camera(width, height));
 		UUID id = m_Cameras[index].GetUUID();
 		m_IDToCamera[id] = index;
+		Profiler::EndSample();
 		return CameraRef(m_Cameras[index].GetUUID());
 	}
 
@@ -40,6 +44,7 @@ namespace Glory
 
 	RenderTexture* CameraManager::GetRenderTextureForCamera(CameraRef camera, Engine* pEngine)
 	{
+		Profiler::BeginSample("CameraManager::GetRenderTextureForCamera");
 		Camera* pCamera = GetCamera(camera.m_CameraID);
 		if (pCamera == nullptr) return nullptr;
 		if (pCamera->m_pRenderTexture)
@@ -48,15 +53,17 @@ namespace Glory
 			{
 				pCamera->m_pRenderTexture->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
 				pCamera->m_TextureIsDirty = false;
+				pEngine->GetRendererModule()->OnCameraResize(camera);
 			}
+			Profiler::EndSample();
 			return pCamera->m_pRenderTexture;
 		}
 
-		int width = pCamera->m_Resolution.x;
-		int height = pCamera->m_Resolution.y;
-		GPUResourceManager* pResourceManager = pEngine->GetGraphicsModule()->GetResourceManager();
-		pCamera->m_pRenderTexture = pResourceManager->CreateRenderTexture(width, height, true);
+		size_t width = pCamera->m_Resolution.x;
+		size_t height = pCamera->m_Resolution.y;
+		pCamera->m_pRenderTexture = pEngine->GetRendererModule()->CreateCameraRenderTexture(width, height);
 		pCamera->m_TextureIsDirty = false;
+		Profiler::EndSample();
 		return pCamera->m_pRenderTexture;
 	}
 

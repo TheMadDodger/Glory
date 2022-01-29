@@ -18,6 +18,7 @@ namespace Glory
 		virtual void Swap() override;
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
 		virtual void DrawMesh(MeshData* pMeshData) override;
+		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;
 
 	protected:
 		virtual void OnInitialize() override;

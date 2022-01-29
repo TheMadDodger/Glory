@@ -19,6 +19,7 @@ namespace Glory
         virtual void Swap() = 0;
         virtual Material* UseMaterial(MaterialData* pMaterialData) = 0;
         virtual void DrawMesh(MeshData* pMeshData) = 0;
+        virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) = 0;
 
     public: // Getters
         FrameStates* GetFrameStates();

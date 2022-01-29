@@ -615,6 +615,15 @@ namespace Glory
             break;
         case Glory::PixelFormat::PF_R12X4UnormPack16KHR:
             break;
+        case Glory::PixelFormat::PF_Depth16:
+            return GL_DEPTH_COMPONENT16;
+            break;
+        case Glory::PixelFormat::PF_Depth24:
+            return GL_DEPTH_COMPONENT24;
+            break;
+        case Glory::PixelFormat::PF_Depth32:
+            return GL_DEPTH_COMPONENT32;
+            break;
         default:
             break;
         }

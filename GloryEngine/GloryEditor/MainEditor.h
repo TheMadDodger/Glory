@@ -24,6 +24,10 @@ namespace Glory::Editor
 		void Tick();
 		void Paint();
 
+		void RegisterWindows();
+		void RegisterPropertyDrawers();
+		void RegisterEditors();
+
 	private:
 		friend class Glory::GameThread;
 		EditorAssetLoader* m_pAssetLoader;

@@ -48,6 +48,7 @@ namespace Glory
 		m_Registry.RegisterSystem<CameraSystem>();
 		m_Registry.RegisterSystem<LookAtSystem>();
 		m_Registry.RegisterSystem<SpinSystem>();
+		m_Registry.RegisterSystem<LightSystem>();
 	}
 
 	void EntityScene::OnTick()

@@ -13,11 +13,11 @@ namespace Glory
         virtual Mesh* CreateMesh_Internal(MeshData* pMeshData) override;
         virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) override;
         virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) override;
-        virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags) override;
+        virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex) override;
         virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) override;
         virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) override;
         virtual Texture* CreateTexture_Internal(ImageData* pImageData) override;
         virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) override;
-        virtual RenderTexture* CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer) override;
+        virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) override;
     };
 }

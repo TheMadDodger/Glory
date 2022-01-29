@@ -19,13 +19,13 @@ namespace Glory
 		virtual ~GPUResourceManager();
 
 	public:
-		Buffer* CreateBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags);
+		Buffer* CreateBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex);
 		Mesh* CreateMesh(MeshData* pMeshData);
 		Shader* CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Texture* CreateTexture(ImageData* pImageData);
 		Texture* CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings);
-		RenderTexture* CreateRenderTexture(int width, int height, bool hasDepthBuffer);
+		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
 
 		void Free(GPUResource* pResource);
 
@@ -34,19 +34,19 @@ namespace Glory
 	protected: // Internal functions
 		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
-		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags) = 0;
+		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex) = 0;
 		virtual Mesh* CreateMesh_Internal(MeshData* pMeshData) = 0;
 		virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
 		virtual Texture* CreateTexture_Internal(ImageData* pImageData) = 0;
 		virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) = 0;
-		virtual RenderTexture* CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer) = 0;
+		virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) = 0;
 
 	private: // Resource lookups
 		template<class T>
 		T* GetResource(Resource* pResource)
 		{
-			const UUID& uuid = pResource->GetUUID();
+			const UUID& uuid = pResource->GetGPUUUID();
 			auto it = m_IDResources.find(uuid);
 			if (it == m_IDResources.end()) return nullptr;
 			return (T*)m_IDResources[uuid];

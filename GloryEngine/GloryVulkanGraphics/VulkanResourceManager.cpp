@@ -25,7 +25,7 @@ namespace Glory
 		return nullptr;
 	}
 
-	Buffer* VulkanResourceManager::CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags)
+	Buffer* VulkanResourceManager::CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex)
 	{
 		return nullptr;
 	}
@@ -48,7 +48,7 @@ namespace Glory
 	{
 		return nullptr;
 	}
-	RenderTexture* VulkanResourceManager::CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer)
+	RenderTexture* VulkanResourceManager::CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo)
 	{
 		return nullptr;
 	}

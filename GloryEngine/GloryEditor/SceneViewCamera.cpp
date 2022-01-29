@@ -74,9 +74,9 @@ namespace Glory::Editor
 
 		glm::mat4 rotation = glm::toMat4(m_Rotation);
 		glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), m_EyePosition);
-		glm::mat4 trasnform = translation * rotation;
+		glm::mat4 transform = translation * rotation;
 
-		glm::mat4 view = glm::inverse(trasnform);
+		glm::mat4 view = glm::inverse(transform);
 		m_Camera.SetView(view);
     }
 

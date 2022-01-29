@@ -29,17 +29,17 @@ namespace Glory
 
 	Buffer* OGLResourceManager::CreateVertexBuffer(uint32_t bufferSize)
 	{
-		return CreateBuffer(bufferSize, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		return CreateBuffer(bufferSize, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
 	}
 
 	Buffer* OGLResourceManager::CreateIndexBuffer(uint32_t bufferSize)
 	{
-		return CreateBuffer(bufferSize, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+		return CreateBuffer(bufferSize, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
 	}
 
-	Buffer* OGLResourceManager::CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags)
+	Buffer* OGLResourceManager::CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex)
 	{
-		return new GLBuffer(bufferSize, usageFlag, memoryFlags);
+		return new GLBuffer(bufferSize, usageFlag, memoryFlags, bindIndex);
 	}
 
 	Shader* OGLResourceManager::CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function)
@@ -62,8 +62,8 @@ namespace Glory
 		return new GLTexture(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
 	}
 
-	RenderTexture* OGLResourceManager::CreateRenderTexture_Internal(int width, int height, bool hasDepthBuffer)
+	RenderTexture* OGLResourceManager::CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo)
 	{
-		return new OGLRenderTexture(width, height, hasDepthBuffer);
+		return new OGLRenderTexture(createInfo);
 	}
 }

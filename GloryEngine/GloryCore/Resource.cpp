@@ -15,4 +15,9 @@ namespace Glory
 	Resource::~Resource()
 	{
 	}
+
+	const std::string& Resource::Name()
+	{
+		return m_Name;
+	}
 }

@@ -30,6 +30,7 @@ namespace Glory
 		virtual ~Object();
 
 		const UUID& GetUUID() const;
+		virtual const UUID& GetGPUUUID() const;
 
 		size_t TypeCount();
 		bool GetType(size_t index, std::type_index& type);
