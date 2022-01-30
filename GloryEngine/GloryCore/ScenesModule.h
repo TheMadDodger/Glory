@@ -1,11 +1,16 @@
 #pragma once
 #include "Module.h"
 #include "GScene.h"
+#include <mutex>
 
 namespace Glory
 {
     class ScenesModule : public Module
     {
+    public:
+        ScenesModule();
+        virtual ~ScenesModule();
+
     public:
         virtual const std::type_info& GetModuleType() override;
 
@@ -13,7 +18,11 @@ namespace Glory
 
         size_t OpenScenesCount();
         GScene* GetOpenScene(size_t index);
+        GScene* GetOpenScene(UUID uuid);
         GScene* GetActiveScene();
+        void CloseAllScenes();
+        void OpenScene(const std::string& path, UUID uuid = UUID());
+        void CloseScene(UUID uuid);
 
     protected:
         virtual void Initialize() = 0;
@@ -35,5 +44,6 @@ namespace Glory
     protected:
         std::vector<GScene*> m_pOpenScenes;
         size_t m_ActiveSceneIndex;
+        std::mutex m_OpenScenesLock;
     };
 }

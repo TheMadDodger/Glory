@@ -30,6 +30,7 @@ namespace Glory::Editor
 		LoadImage(pGraphics, pLoader, "./EditorAssets/up.png", "up");
 		LoadImage(pGraphics, pLoader, "./EditorAssets/folder.png", "folder");
 		LoadImage(pGraphics, pLoader, "./EditorAssets/file.png", "file");
+		LoadImage(pGraphics, pLoader, "./EditorAssets/scene.png", "scene");
 		m_IsInitialized = true;
 	}
 

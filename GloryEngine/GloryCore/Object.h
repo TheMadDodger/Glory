@@ -46,7 +46,7 @@ namespace Glory
 
 		void PushInheritence(const std::type_index& type);
 
-	private:
+	protected:
 		UUID m_ID;
 	};
 }

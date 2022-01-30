@@ -10,6 +10,8 @@ namespace Glory::Editor
 	{
 	}
 
+	void BaseTumbnailGenerator::OnFileDoubleClick(UUID uuid) {}
+
 	const std::string& BaseTumbnailGenerator::GetExtension()
 	{
 		return "";

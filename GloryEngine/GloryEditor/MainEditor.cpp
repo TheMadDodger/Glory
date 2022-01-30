@@ -16,6 +16,7 @@
 #include "ProjectSpace.h"
 #include "Tumbnail.h"
 #include "TextureTumbnailGenerator.h"
+#include "SceneTumbnailGenerator.h"
 #include "Editor.h"
 #include <Game.h>
 #include <Engine.h>
@@ -23,6 +24,8 @@
 #include "StandardPropertyDrawers.h"
 #include <MaterialInstanceEditor.h>
 #include <Serializer.h>
+#include "EditorSceneManager.h"
+#include <AssetDatabase.h>
 
 namespace Glory::Editor
 {
@@ -50,6 +53,7 @@ namespace Glory::Editor
 		m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
+		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
 
 		Game::GetGame().GetEngine()->GetGameThread()->Bind(this);
 	}
@@ -90,27 +94,22 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", NULL);
-		MenuBar::AddMenuItem("File/Save Scene", []()
-			{
-				GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(0);
-
-				YAML::Emitter out;
-				Serializer::SerializeObject(pScene, out);
-
-				std::ofstream outStream("test.gscene");
-				outStream << out.c_str();
-				outStream.close();
-			});
-
+		MenuBar::AddMenuItem("File/New/Scene", EditorSceneManager::NewScene);
+		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes);
 		MenuBar::AddMenuItem("File/Load Scene", []()
 			{
-				YAML::Node node = YAML::LoadFile("test.gscene");
-				Serializer::DeserializeObject(node);
+				//YAML::Node node = YAML::LoadFile("test.gscene");
+				//Serializer::DeserializeObject(node);
 			});
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); });
-		MenuBar::AddMenuItem("File/Save Project", []() {/*AssetDatabase::SaveAssets();*/ });
+		MenuBar::AddMenuItem("File/Save Project", AssetDatabase::Save);
+		MenuBar::AddMenuItem("File/Create/Empty Object", []()
+			{
+				GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
+				if (!pActiveScene) return;
+				pActiveScene->CreateEmptyObject();
+			});
 		MenuBar::AddMenuItem("Play/Start", [&]() {/*this->EnterPlayMode();*/ });
 		MenuBar::AddMenuItem("Play/Pauze", [&]() {/*m_PlayModePaused = !m_PlayModePaused;*/ });
 		MenuBar::AddMenuItem("Play/Stop", [&]() {/*this->ExitPlayMode();*/ });

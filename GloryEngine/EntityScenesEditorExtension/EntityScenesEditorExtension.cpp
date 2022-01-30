@@ -7,13 +7,6 @@
 #include "MeshRendererComponentEditor.h"
 #include "LightComponentEditor.h"
 
-
-#include "EntitySceneScenesModule.h"
-
-#include <Game.h>
-#include <Engine.h>
-#include <Selection.h>
-
 namespace Glory::Editor
 {
 	EntityScenesEditorExtension::EntityScenesEditorExtension()
@@ -33,7 +26,5 @@ namespace Glory::Editor
 		Editor::RegisterEditor<MeshRendererComponentEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<LightComponentEditor>();
-
-		Selection::SetActiveObject(((EntitySceneScenesModule*)Game::GetGame().GetEngine()->GetScenesModule())->m_pMaterialData);
 	}
 }

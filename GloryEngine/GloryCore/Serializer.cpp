@@ -81,6 +81,14 @@ namespace Glory
 		return pSerializer->Deserialize(pParent, object);
 	}
 
+	Object* Serializer::DeserializeObjectOfType(std::type_index type, YAML::Node& object)
+	{
+		size_t typeHash = ResourceType::GetHash(type);
+		Serializer* pSerializer = GetSerializer(typeHash);
+		if (pSerializer == nullptr) return nullptr;
+		return pSerializer->Deserialize(nullptr, object);
+	}
+
 	Serializer::Serializer()
 	{
 	}

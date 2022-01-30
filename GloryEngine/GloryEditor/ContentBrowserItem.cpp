@@ -6,6 +6,7 @@
 #include "ContentBrowserItem.h"
 #include "EditorAssets.h"
 #include "Tumbnail.h"
+#include "TumbnailGenerator.h"
 
 namespace Glory::Editor
 {
@@ -272,7 +273,9 @@ namespace Glory::Editor
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
-			//OnFileDoubleClick(path);
+			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
+			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(pMeta->Hash());
+			pGenerator->OnFileDoubleClick(uuid);
 		}
 
 		ImGui::Text(m_CachedPath.filename().replace_extension().string().c_str());

@@ -27,5 +27,6 @@ namespace Glory
 
 	private:
 		friend class EntitySceneObjectSerializer;
+		friend class EntitySceneSerializer;
 	};
 }
