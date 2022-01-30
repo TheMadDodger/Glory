@@ -61,14 +61,14 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
-	void RendererModule::StartFrame()
+	void RendererModule::OnGameThreadFrameStart()
 	{
 		Profiler::BeginSample("RendererModule::StartFrame");
 		m_CurrentPreparingFrame = RenderFrame();
 		Profiler::EndSample();
 	}
 
-	void RendererModule::EndFrame()
+	void RendererModule::OnGameThreadFrameEnd()
 	{
 		Profiler::BeginSample("RendererModule::EndFrame");
 		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);

@@ -8,6 +8,7 @@ namespace Glory::Editor
 {
 	enum EditorRenderState
 	{
+		Initializing,
 		Idle,
 		Begin,
 		End,
@@ -22,11 +23,9 @@ namespace Glory::Editor
 		void Initialize(Game& game);
 		void ThreadedInitialize();
 		bool PollEvents();
-		void BeginRender();
-		void EndRender();
 		void Destroy();
 
-		void WaitIdle();
+		void Wait(const EditorRenderState& waitState);
 
 		EditorWindowImpl* GetWindowImpl();
 		EditorRenderImpl* GetRenderImpl();
@@ -35,14 +34,16 @@ namespace Glory::Editor
 		void SetupDearImGuiContext();
 
 		void NewFrame();
-		void Render(const RenderFrame&);
 
-		void HandleBeginRender();
-		void HandleEndRender();
+		void GraphicsThreadBeginRender();
+		void GraphicsThreadEndRender();
 		void LoadFonts();
+
+		void SetState(const EditorRenderState& state);
 
 	private:
 		friend class GraphicsThread;
+		friend class EditorApplication;
 		EditorWindowImpl* m_pWindowImpl;
 		EditorRenderImpl* m_pRenderImpl;
 

@@ -90,9 +90,9 @@ namespace Glory
 		//entity.AddComponent<CameraComponent>(45.0f, 0.1f, 3000.0f, 0, -5);
 		//entity.AddComponent<Spin>(0.1f);
 		
-		//entity = ((EntitySceneObject*)pScene->CreateEmptyObject())->GetEntityHandle();
-		//entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		//entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
+		Entity entity = ((EntitySceneObject*)pScene->CreateEmptyObject())->GetEntityHandle();
+		entity.AddComponent<LookAt>(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		entity.AddComponent<CameraComponent>(45.0f, 0.1f, 10.0f, 0, -5);
 
 		//EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject();
 		//Entity& entity1 = pObject->GetEntityHandle();

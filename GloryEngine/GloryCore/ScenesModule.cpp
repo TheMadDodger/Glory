@@ -41,14 +41,14 @@ namespace Glory
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
 	}
 
-	void ScenesModule::Tick()
+	void ScenesModule::Update()
 	{
 		Profiler::BeginSample("ScenesModule::Tick");
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnTick(); });
 		Profiler::EndSample();
 	}
 
-	void ScenesModule::Paint()
+	void ScenesModule::Draw()
 	{
 		Profiler::BeginSample("ScenesModule::Paint");
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });

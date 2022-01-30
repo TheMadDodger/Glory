@@ -16,6 +16,5 @@ namespace Glory
 	protected:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
-		virtual void OnMainUpdate() override;
     };
 }

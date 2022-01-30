@@ -20,8 +20,8 @@ namespace Glory
 		void Submit(CameraRef camera, RenderTexture* pTexture);
 		void Submit(const PointLight& light);
 
-		void StartFrame();
-		void EndFrame();
+		void OnGameThreadFrameStart();
+		void OnGameThreadFrameEnd();
 
 		virtual RenderTexture* CreateCameraRenderTexture(size_t width, size_t height);
 		virtual void OnCameraResize(CameraRef camera);
@@ -48,6 +48,7 @@ namespace Glory
 		static const uint32_t MAX_LIGHTS = 3000;
 
 	private:
+		// Run on Graphics Thread
 		void ThreadedInitialize();
 		void ThreadedCleanup();
 		void Render(const RenderFrame& frame);

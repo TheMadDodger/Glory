@@ -15,7 +15,7 @@ namespace Glory
 	public:
 		void EnqueueFrame(const RenderFrame& frame);
 		void GetNextFrame(std::function<void(const RenderFrame&)> callback);
-		void IsEmpty();
+		//void IsEmpty();
 
 		bool IsFull();
 
@@ -23,7 +23,7 @@ namespace Glory
 
 	private:
 		std::queue<RenderFrame> m_pRenderQueue;
-		std::condition_variable m_QueueCondition;
+		//std::condition_variable m_QueueCondition;
 		std::mutex m_QueueMutex;
 		bool m_Exit;
 		const uint8_t QUEUE_LIMIT;

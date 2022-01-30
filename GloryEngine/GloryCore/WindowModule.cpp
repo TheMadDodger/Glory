@@ -49,12 +49,11 @@ namespace Glory
         OnCleanup();
     }
 
-    void WindowModule::MainUpdate()
+    void WindowModule::PollEvents()
     {
         for (size_t i = 0; i < m_pWindows.size(); i++)
         {
             m_pWindows[i]->PollEvents();
         }
-        OnMainUpdate();
     }
 }

@@ -1,5 +1,6 @@
 #include "EditorApplication.h"
 #include <imgui.h>
+#include <Console.h>
 
 namespace Glory::Editor
 {
@@ -43,15 +44,38 @@ namespace Glory::Editor
 
 	void EditorApplication::Run(Game& game)
 	{
+		//game.GetEngine()->Initialize();
 		game.GetEngine()->StartThreads();
+		m_pPlatform->SetState(Idle);
 		while (true)
 		{
+			// Start a frame
+			game.GetEngine()->GameThreadFrameStart();
+			// Update console
+			Console::Update();
+
+			// Poll window events
 			if (m_pPlatform->PollEvents()) break;
-			m_pPlatform->BeginRender();
-			m_pPlatform->WaitIdle();
+
+			// Update editor
+			m_pMainEditor->Update();
+
+			// Update engine (this also does the render loop)
+			game.GetEngine()->ModulesLoop();
+
+			// End the current frame
+			game.GetEngine()->GameThreadFrameEnd();
+
+			// We need to wait for the frame to start its rendering
+			m_pPlatform->Wait(Begin);
+			// Render the editor (imgui calls)
 			RenderEditor();
-			m_pPlatform->EndRender();
-			m_pPlatform->WaitIdle();
+			// Now we notify the editor platform it can perform rendering
+			m_pPlatform->SetState(Idle);
+			// Wait for the end of rendering
+			m_pPlatform->Wait(End);
+			// Sync
+			m_pPlatform->SetState(Idle);
 		}
 	}
 
@@ -73,7 +97,6 @@ namespace Glory::Editor
 	void EditorApplication::RenderEditor()
 	{
 		m_pMainEditor->PaintEditor();
-
 		ImGui::ShowDemoWindow();
 	}
 }

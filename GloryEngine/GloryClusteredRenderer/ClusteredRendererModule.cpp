@@ -205,8 +205,6 @@ namespace Glory
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
 
-		pGraphics->Swap();
-
 		glBindVertexArray(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 

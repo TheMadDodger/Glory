@@ -29,8 +29,8 @@ namespace Glory
 		virtual void OnGraphicsThreadFrameStart() {};
 		virtual void OnGraphicsThreadFrameEnd() {};
 
-		//virtual void Update() = 0;
-		//virtual void Draw() = 0;
+		virtual void Update() {};
+		virtual void Draw() {};
 
 		virtual bool HasPriority();
 

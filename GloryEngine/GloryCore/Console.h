@@ -18,6 +18,8 @@ namespace Glory
 		static void WriteLine(const std::string& line, bool addTimestamp = true);
 		static void ForEachCommandInHistory(std::function<void(const std::string&)> callback);
 
+		static void Update();
+
 	private:
 		Console();
 		virtual ~Console();
@@ -25,7 +27,6 @@ namespace Glory
 	private:
 		static void Initialize();
 		static void Cleanup();
-		static void Update();
 		static bool PrintHistory();
 
 		static void AddCommandToHistory(const std::string& command);

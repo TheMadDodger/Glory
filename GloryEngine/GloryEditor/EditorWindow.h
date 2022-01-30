@@ -41,21 +41,7 @@ namespace Glory::Editor
 			return pWindow;
 		}
 
-		static void GameThreadTickWindows()
-		{
-			for (size_t i = 0; i < m_pActiveEditorWindows.size(); i++)
-			{
-				m_pActiveEditorWindows[i]->GameThreadTick();
-			}
-		}
-
-		static void GameThreadPaintWindows()
-		{
-			for (size_t i = 0; i < m_pActiveEditorWindows.size(); i++)
-			{
-				m_pActiveEditorWindows[i]->GameThreadPaint();
-			}
-		}
+		static void UpdateWindows();
 
 		virtual const std::type_info& GetType() = 0;
 
@@ -65,11 +51,10 @@ namespace Glory::Editor
 		virtual void OnClose() {}
 
 	protected:
-		virtual void OnPaint() {}
 		virtual void OnGUI() = 0;
 
-		virtual void GameThreadTick() {}
-		virtual void GameThreadPaint() {}
+		virtual void Update() {}
+		virtual void Draw() {}
 
 	private:
 		void RenderGUI();

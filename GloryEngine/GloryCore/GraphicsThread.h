@@ -45,10 +45,18 @@ namespace Glory
 			m_CleanupBinds.push_back(std::bind(&T::ThreadedCleanup, pModule));
 		}
 
+		template<typename T>
+		void BindBeginAndEndRender(T* pModule)
+		{
+			m_BeginRenderBinds.push_back(std::bind(&T::GraphicsThreadBeginRender, pModule));
+			m_EndRenderBinds.push_back(std::bind(&T::GraphicsThreadEndRender, pModule));
+		}
+
 	private:
 		void Run();
 
 		void OnRenderFrame(const RenderFrame& frame);
+		void OnRender();
 
 	private:
 		Thread* m_pThread;
@@ -57,6 +65,8 @@ namespace Glory
 		std::vector<std::function<void(const RenderFrame&)>> m_RenderBinds;
 		std::vector<std::function<void()>> m_InitializationBinds;
 		std::vector<std::function<void()>> m_CleanupBinds;
+		std::vector<std::function<void()>> m_BeginRenderBinds;
+		std::vector<std::function<void()>> m_EndRenderBinds;
 		bool m_Exit;
 	};
 }

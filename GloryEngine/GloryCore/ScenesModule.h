@@ -24,8 +24,8 @@ namespace Glory
         virtual GScene* CreateScene(const std::string& sceneName, UUID uuid) = 0;
 
     private:
-        void Tick();
-        void Paint();
+        virtual void Update() override;
+        virtual void Draw() override;
 
     private:
         friend class GameThread;

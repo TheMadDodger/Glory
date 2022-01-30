@@ -4,11 +4,9 @@
 #include "GraphicsModule.h"
 #include "ThreadManager.h"
 #include "JobManager.h"
-#include "GameThread.h"
 #include "GraphicsThread.h"
 #include "ScenesModule.h"
 #include "RendererModule.h"
-#include "MainThread.h"
 #include "ResourceLoaderModule.h"
 #include "TimerModule.h"
 #include "ProfilerModule.h"
@@ -64,22 +62,22 @@ namespace Glory
 
 		Module* GetModule(const std::type_info& type);
 
-		GameThread* GetGameThread() const;
 		GraphicsThread* GetGraphicsThread() const;
 
 		void StartThreads();
+		void ModulesLoop();
+		void GameThreadFrameStart();
+		void GameThreadFrameEnd();
 
 	private:
 		Engine(const EngineCreateInfo& createInfo);
 		virtual ~Engine();
 
 	private:
-		void Initialize();
 		void Update();
+		void Initialize();
 
 	private:
-		void GameThreadFrameStart();
-		void GameThreadFrameEnd();
 		void GraphicsThreadFrameStart();
 		void GraphicsThreadFrameEnd();
 
@@ -112,9 +110,7 @@ namespace Glory
 		ThreadManager* m_pThreadManager;
 		Jobs::JobManager* m_pJobManager;
 
-		// Main threads
-		MainThread* m_pMainThread;
-		GameThread* m_pGameThread;
+		// Threads
 		GraphicsThread* m_pGraphicsThread;
 	};
 }

@@ -57,8 +57,4 @@ namespace Glory
 	{
 		SDL_Quit();
 	}
-
-	void SDLWindowModule::OnMainUpdate()
-	{
-	}
 }
