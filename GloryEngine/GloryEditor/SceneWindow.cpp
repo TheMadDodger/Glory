@@ -32,11 +32,6 @@ namespace Glory::Editor
 		m_SceneCamera.Cleanup();
 	}
 
-	void SceneWindow::OnPaint()
-	{
-		
-	}
-
 	void SceneWindow::OnGUI()
 	{
 		if (ImGui::IsWindowFocused()) m_SceneCamera.Update();
@@ -59,7 +54,7 @@ namespace Glory::Editor
 			ImVec2(pos.x + width, pos.y + height), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
-	void SceneWindow::GameThreadPaint()
+	void SceneWindow::Draw()
 	{
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(m_SceneCamera.m_Camera);
 	}

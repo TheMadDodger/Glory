@@ -14,9 +14,8 @@ namespace Glory::Editor
         virtual void OnClose() override;
 
     private:
-        virtual void OnPaint() override;
         virtual void OnGUI() override;
-        virtual void GameThreadPaint() override;
+        virtual void Draw() override;
 
     private:
         SceneViewCamera m_SceneCamera;

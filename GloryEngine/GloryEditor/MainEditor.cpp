@@ -54,8 +54,6 @@ namespace Glory::Editor
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
-
-		Game::GetGame().GetEngine()->GetGameThread()->Bind(this);
 	}
 
 	void MainEditor::Destroy()
@@ -160,14 +158,9 @@ namespace Glory::Editor
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 	}
 
-	void MainEditor::Tick()
+	void MainEditor::Update()
 	{
-		EditorWindow::GameThreadTickWindows();
-	}
-
-	void MainEditor::Paint()
-	{
-		EditorWindow::GameThreadPaintWindows();
+		EditorWindow::UpdateWindows();
 	}
 
 	void MainEditor::RegisterWindows()

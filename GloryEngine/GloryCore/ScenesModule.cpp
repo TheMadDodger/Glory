@@ -102,7 +102,7 @@ namespace Glory
 		lock.unlock();
 	}
 
-	void ScenesModule::Tick()
+	void ScenesModule::Update()
 	{
 		Profiler::BeginSample("ScenesModule::Tick");
 		std::unique_lock<std::mutex> lock(m_OpenScenesLock);
@@ -111,7 +111,7 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
-	void ScenesModule::Paint()
+	void ScenesModule::Draw()
 	{
 		Profiler::BeginSample("ScenesModule::Paint");
 		std::unique_lock<std::mutex> lock(m_OpenScenesLock);

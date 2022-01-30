@@ -15,11 +15,6 @@ namespace Glory::Editor
 	{
 	}
 
-	void GameWindow::OnPaint()
-	{
-		
-	}
-
 	void GameWindow::OnGUI()
 	{
 		MenuBar();

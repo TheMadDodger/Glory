@@ -17,7 +17,7 @@ project "GloryCore"
 	{
 		["Asset Management"] = { "AssetDatabase.h", "AssetDatabase.cpp", "AssetGroup.h", "AssetGroup.cpp", "AssetLocation.h", "AssetLocation.cpp", "AssetManager.h", "AssetManager.cpp", "ResourceMeta.h", "ResourceMeta.cpp", "ResourceType.h", "ResourceType.cpp" },
 		["Console"] = { "Commands.h", "Commands.cpp", "Console.h", "Console.cpp", "Debug.h", "Debug.cpp", "DebugConsoleInput.h", "DebugConsoleInput.cpp" },
-		["Core"] = { "CoreExceptions.h", "Engine.h", "Engine.cpp", "Game.h", "Game.cpp", "GameSettings.h", "GameState.h", "GameState.cpp", "GameThread.h", "GameThread.cpp", "GloryCore.h", "GraphicsThread.h", "GraphicsThread.cpp", "MainThread.h", "MainThread.cpp", "Object.h", "Object.cpp", "UUID.h", "UUID.cpp" },
+		["Core"] = { "CoreExceptions.h", "Engine.h", "Engine.cpp", "Game.h", "Game.cpp", "GameSettings.h", "GameState.h", "GameState.cpp", "GloryCore.h", "GraphicsThread.h", "GraphicsThread.cpp", "Object.h", "Object.cpp", "UUID.h", "UUID.cpp" },
 		["Job System"] = { "Job.h", "Job.cpp", "JobManager.h", "JobManager.cpp", "JobPool.h", "JobPool.cpp", "JobQueue.h", "JobQueue.cpp" },
 		["Modules"] = { "Module.h", "Module.cpp" },
 		["Modules/Time"] = { "TimerModule.h", "TimerModule.cpp", "GameTime.h", "GameTime.cpp" },

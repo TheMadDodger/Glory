@@ -35,8 +35,8 @@ namespace Glory
         static SceneObject* CreateObject(GScene* pScene, const std::string& name, UUID uuid);
 
     private:
-        void Tick();
-        void Paint();
+        virtual void Update() override;
+        virtual void Draw() override;
 
     private:
         friend class GameThread;
