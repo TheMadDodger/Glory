@@ -37,6 +37,5 @@ namespace Glory
         friend class ScenesModule;
         std::string m_SceneName;
         std::vector<SceneObject*> m_pSceneObjects;
-        std::mutex m_SceneAccessLock;
     };
 }

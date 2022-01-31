@@ -20,16 +20,13 @@ namespace Glory
 
 	GScene::~GScene()
 	{
-		std::unique_lock<std::mutex> lock(m_SceneAccessLock);
 		std::for_each(m_pSceneObjects.begin(), m_pSceneObjects.end(), [](SceneObject* pObject) { delete pObject; });
-		lock.unlock();
 	}
 
 	SceneObject* GScene::CreateEmptyObject()
 	{
 		SceneObject* pObject = CreateObject("Empty Object");
 		pObject->Initialize();
-		std::unique_lock<std::mutex> lock(m_SceneAccessLock);
 		m_pSceneObjects.push_back(pObject);
 		OnObjectAdded(pObject);
 		return pObject;
@@ -39,7 +36,6 @@ namespace Glory
 	{
 		SceneObject* pObject = CreateObject(name, uuid);
 		pObject->Initialize();
-		std::unique_lock<std::mutex> lock(m_SceneAccessLock);
 		m_pSceneObjects.push_back(pObject);
 		OnObjectAdded(pObject);
 		return pObject;
@@ -47,26 +43,22 @@ namespace Glory
 
 	size_t GScene::SceneObjectsCount()
 	{
-		std::unique_lock<std::mutex> lock(m_SceneAccessLock);
 		return m_pSceneObjects.size();
 	}
 
 	SceneObject* GScene::GetSceneObject(size_t index)
 	{
-		std::unique_lock<std::mutex> lock(m_SceneAccessLock);
 		if (index >= m_pSceneObjects.size()) return nullptr;
 		return m_pSceneObjects[index];
 	}
 
 	const std::string& GScene::Name()
 	{
-		std::unique_lock<std::mutex> lock(m_SceneAccessLock);
 		return m_SceneName;
 	}
 
 	void GScene::SetUUID(UUID uuid)
 	{
-		std::unique_lock<std::mutex> lock(m_SceneAccessLock);
 		m_ID = uuid;
 	}
 }

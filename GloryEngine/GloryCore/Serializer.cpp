@@ -28,16 +28,26 @@ namespace Glory
 
 	Serializer* Serializer::GetSerializer(size_t typeHash)
 	{
-		auto it = std::find_if(m_pRegisteredSerializers.begin(), m_pRegisteredSerializers.end(), [&](Serializer* pSerializer)
+		for (size_t i = 0; i < m_pRegisteredSerializers.size(); i++)
 		{
+			Serializer* pSerializer = m_pRegisteredSerializers[i];
 			std::type_index type = pSerializer->GetSerializedType();
 			size_t hash = ResourceType::GetHash(type);
-			return hash == typeHash;
-		});
+			if (hash == typeHash) return pSerializer;
+		}
 
-		if (it == m_pRegisteredSerializers.end()) return nullptr;
-		Serializer* pSerializer = *it;
-		return pSerializer;
+		return nullptr;
+
+		//auto it = std::find_if(m_pRegisteredSerializers.begin(), m_pRegisteredSerializers.end(), [&](Serializer* pSerializer)
+		//{
+		//	std::type_index type = pSerializer->GetSerializedType();
+		//	size_t hash = ResourceType::GetHash(type);
+		//	return hash == typeHash;
+		//});
+		//
+		//if (it == m_pRegisteredSerializers.end()) return nullptr;
+		//Serializer* pSerializer = *it;
+		//return pSerializer;
 	}
 
 	size_t Serializer::GetID(Serializer* pSerializer)

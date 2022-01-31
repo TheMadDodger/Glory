@@ -275,6 +275,7 @@ namespace Glory::Editor
 		{
 			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
 			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(pMeta->Hash());
+			if (!pGenerator) return;
 			pGenerator->OnFileDoubleClick(uuid);
 		}
 

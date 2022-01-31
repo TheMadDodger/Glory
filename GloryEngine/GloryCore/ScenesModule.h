@@ -44,6 +44,5 @@ namespace Glory
     protected:
         std::vector<GScene*> m_pOpenScenes;
         size_t m_ActiveSceneIndex;
-        std::mutex m_OpenScenesLock;
     };
 }

@@ -44,7 +44,7 @@ namespace Glory
 		static Object* DeserializeObject(Object* pParent, YAML::Node& object);
 		static Object* DeserializeObjectOfType(std::type_index type, YAML::Node& object);
 
-		virtual const std::type_index& GetSerializedType() = 0;
+		virtual std::type_index GetSerializedType() = 0;
 
 	protected:
 		Serializer();
@@ -66,7 +66,7 @@ namespace Glory
 	class SerializerTemplate : public Serializer
 	{
 	public:
-		virtual const std::type_index& GetSerializedType() override
+		virtual std::type_index GetSerializedType() override
 		{
 			return typeid(TObject);
 		}
