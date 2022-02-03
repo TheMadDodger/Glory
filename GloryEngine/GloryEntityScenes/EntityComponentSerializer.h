@@ -40,6 +40,7 @@ namespace Glory
 
 			TComponent& component = entity.AddComponent<TComponent>();
 			Deserialize(component, object);
+			return nullptr;
 		}
 	};
 }

@@ -26,4 +26,11 @@ namespace Glory
         glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), pComponent.Position);
         pComponent.MatTransform = startTransform * translation * rotation * scale;
     }
+
+    void TransformSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, Transform& pComponent)
+    {
+        properties.push_back(BasicTemplatedSerializedProperty("Position", &pComponent.Position));
+        properties.push_back(BasicTemplatedSerializedProperty("Rotation", &pComponent.Rotation));
+        properties.push_back(BasicTemplatedSerializedProperty("Scale", &pComponent.Scale));
+    }
 }

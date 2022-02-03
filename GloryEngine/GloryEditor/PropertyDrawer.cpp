@@ -27,6 +27,11 @@ namespace Glory::Editor
 		return false;
 	}
 
+	bool PropertyDrawer::Draw(const SerializedProperty& serializedProperty) const
+	{
+		return Draw(serializedProperty.Name(), serializedProperty.MemberPointer(), serializedProperty.Flags());
+	}
+
 	bool PropertyDrawer::DrawProperty(const std::string& label, void* data, size_t typeHash, uint32_t flags)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
@@ -61,6 +66,11 @@ namespace Glory::Editor
 
 		PropertyDrawer* drawer = *it;
 		return drawer->Draw(label, data, flags);
+	}
+
+	bool PropertyDrawer::DrawProperty(const SerializedProperty& serializedProperty)
+	{
+		return DrawProperty(serializedProperty.Name(), serializedProperty.MemberPointer(), serializedProperty.TypeHash(), serializedProperty.Flags());
 	}
 
 	size_t PropertyDrawer::GetPropertyTypeHash() const

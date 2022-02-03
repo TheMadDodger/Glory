@@ -32,7 +32,7 @@ namespace Glory::Editor
 		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
 		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
 		{
-				EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData);
+			EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData, pRegistry);
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
 			if (pEditor) m_pComponentEditors.push_back(pEditor);

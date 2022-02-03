@@ -95,6 +95,8 @@ namespace Glory
 		void ForEach(std::function<void(Registry*, EntityID)> func);
 		void ForEachComponent(EntityID entity, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
 
+		EntityComponentData* GetEntityComponentDataAt(EntityID entity, size_t index);
+
 		template<typename C, typename T>
 		EntitySystem* RegisterSystem()
 		{
@@ -118,6 +120,7 @@ namespace Glory
 		void Update();
 		bool IsUpdating();
 		void Draw();
+		EntitySystems* GetSystems();
 
 	private:
 		std::vector<EntityID> m_AllEntityIDs;

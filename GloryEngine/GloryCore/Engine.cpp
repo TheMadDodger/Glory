@@ -2,6 +2,7 @@
 #include "Console.h"
 #include "AssetManager.h"
 #include "Serializer.h"
+#include "PropertySerializer.h"
 #include <algorithm>
 
 namespace Glory
@@ -155,10 +156,13 @@ namespace Glory
 
 		Console::Cleanup();
 		Serializer::Cleanup();
+		PropertySerializer::Cleanup();
 	}
 
 	void Engine::Initialize()
 	{
+		RegisterStandardSerializers();
+
 		Console::Initialize();
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
@@ -198,6 +202,21 @@ namespace Glory
 		m_pGraphicsThread = new GraphicsThread(this);
 		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
 		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
+	}
+
+	void Engine::RegisterStandardSerializers()
+	{
+		STANDARD_SERIALIZER(int);
+		STANDARD_SERIALIZER(float);
+		STANDARD_SERIALIZER(double);
+		STANDARD_SERIALIZER(bool);
+		STANDARD_SERIALIZER(long);
+		STANDARD_SERIALIZER(uint32_t);
+		STANDARD_SERIALIZER(uint64_t);
+		STANDARD_SERIALIZER(glm::vec3);
+		STANDARD_SERIALIZER(glm::vec4);
+		STANDARD_SERIALIZER(glm::quat);
+		STANDARD_SERIALIZER(LayerMask);
 	}
 
 	void Engine::Update()

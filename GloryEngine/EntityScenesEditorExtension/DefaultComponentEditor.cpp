@@ -1,5 +1,6 @@
 #include "DefaultComponentEditor.h"
 #include <imgui.h>
+#include <PropertyDrawer.h>
 
 namespace Glory::Editor
 {
@@ -13,6 +14,16 @@ namespace Glory::Editor
 
 	void DefaultComponentEditor::OnGUI()
 	{
-		ImGui::Text("Katarn stole the component!");
+		for (size_t i = 0; i < m_Properties.size(); i++)
+		{
+			PropertyDrawer::DrawProperty(m_Properties[i]);
+		}
+	}
+
+	void DefaultComponentEditor::Initialize()
+	{
+		EntityComponentObject* pEntityComponentObject = (EntityComponentObject*)m_pTarget;
+		m_Properties.clear();
+		pEntityComponentObject->GetRegistry()->GetSystems()->AcquireSerializedProperties(pEntityComponentObject->GetComponentData(), m_Properties);
 	}
 }

@@ -182,6 +182,8 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<Vector2Drawer>();
 		PropertyDrawer::RegisterPropertyDrawer<Vector3Drawer>();
 		PropertyDrawer::RegisterPropertyDrawer<Vector4Drawer>();
+		PropertyDrawer::RegisterPropertyDrawer<QuatDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()

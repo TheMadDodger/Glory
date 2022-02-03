@@ -2,6 +2,7 @@
 #include "EntitySystem.h"
 #include <vector>
 #include <JobManager.h>
+#include <SerializedProperty.h>
 
 namespace Glory
 {
@@ -14,12 +15,16 @@ namespace Glory
 		virtual ~EntitySystems();
 
 		bool IsUpdating();
+		void AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties);
+		bool CreateComponent(EntityID entity, std::type_index type);
+		bool CreateComponent(EntityID entity, size_t typeHash);
 
 	private:
 		void OnComponentAdded(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData);
 		void OnComponentRemoved(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData);
 		void OnUpdate();
 		void OnDraw();
+
 
 		template<typename C, typename T>
 		EntitySystem* Register(Registry* pRegistry)

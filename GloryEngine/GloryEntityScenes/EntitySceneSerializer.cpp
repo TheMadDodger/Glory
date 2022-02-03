@@ -33,7 +33,8 @@ namespace Glory
 		YAML::Node node;
 		YAML_READ(object, node, Name, name, std::string);
 
-		GScene* pScene = new EntityScene(name);
+		EntityScene* pScene = new EntityScene(name);
+		pScene->Initialize();
 		node = object["Entities"];
 
 		for (size_t i = 0; i < node.size(); i++)

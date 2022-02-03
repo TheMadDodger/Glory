@@ -51,6 +51,17 @@ namespace Glory
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_Camera);
 	}
 
+	void CameraSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, CameraComponent& pComponent)
+	{
+		properties.push_back(BasicTemplatedSerializedProperty("Half FOV", &pComponent.m_HalfFOV));
+		properties.push_back(BasicTemplatedSerializedProperty("Near", &pComponent.m_Near));
+		properties.push_back(BasicTemplatedSerializedProperty("Far", &pComponent.m_Far));
+		properties.push_back(BasicTemplatedSerializedProperty("Display Index", &pComponent.m_DisplayIndex));
+		properties.push_back(BasicTemplatedSerializedProperty("Priority", &pComponent.m_Priority));
+		properties.push_back(BasicTemplatedSerializedProperty("Layer Mask", &pComponent.m_LayerMask));
+		properties.push_back(BasicTemplatedSerializedProperty("Clear Color", &pComponent.m_ClearColor));
+	}
+
 	size_t CameraSystem::CalcHash(CameraComponent& pComponent)
 	{
 		float value = (float)pComponent.m_ClearColor.x + (float)pComponent.m_ClearColor.y

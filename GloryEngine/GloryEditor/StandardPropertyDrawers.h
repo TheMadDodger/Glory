@@ -1,6 +1,7 @@
 #pragma once
 #include "PropertyDrawer.h"
 #include <glm/glm.hpp>
+#include <LayerMask.h>
 
 namespace Glory::Editor
 {
@@ -44,5 +45,17 @@ namespace Glory::Editor
 	{
 	public:
 		virtual bool OnGUI(const std::string& label, glm::vec4* data, uint32_t flags) const override;
+	};
+
+	class QuatDrawer : public PropertyDrawerTemplate<glm::quat>
+	{
+	public:
+		virtual bool OnGUI(const std::string& label, glm::quat* data, uint32_t flags) const override;
+	};
+
+	class LayerMaskDrawer : public PropertyDrawerTemplate<LayerMask>
+	{
+	public:
+		virtual bool OnGUI(const std::string& label, LayerMask* data, uint32_t flags) const override;
 	};
 }

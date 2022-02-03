@@ -69,7 +69,7 @@ namespace Glory
 
 	struct LookAt
 	{
-		LookAt() {}
+		LookAt() : m_Eye(0.0f), m_Center(0.0f), m_Up({0.0f, 1.0f, 0.0f}) {}
 		LookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) : m_Eye(eye), m_Center(center), m_Up(up) {}
 
 		glm::vec3 m_Eye;

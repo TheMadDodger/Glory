@@ -96,4 +96,35 @@ namespace Glory
 				});
 		}
 	}
+
+	void EntitySystems::AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties)
+	{
+		auto it = std::find_if(m_pEntitySystems.begin(), m_pEntitySystems.end(), [&](EntitySystem* pSystem)
+		{
+			return pSystem->m_ComponentType == pComponentData->GetType();
+		});
+
+		if (it == m_pEntitySystems.end()) return;
+		EntitySystem* pSystem = *it;
+		pSystem->AcquireSerializedProperties(pComponentData, properties);
+	}
+
+	bool EntitySystems::CreateComponent(EntityID entity, std::type_index type)
+	{
+		return CreateComponent(entity, ResourceType::GetHash(type));
+	}
+
+	bool EntitySystems::CreateComponent(EntityID entity, size_t typeHash)
+	{
+		auto it = std::find_if(m_pEntitySystems.begin(), m_pEntitySystems.end(), [&](EntitySystem* pSystem)
+		{
+			size_t componentTypeHash = ResourceType::GetHash(pSystem->m_ComponentType);
+			return componentTypeHash == typeHash;
+		});
+
+		if (it == m_pEntitySystems.end()) return false;
+		EntitySystem* pSystem = *it;
+		pSystem->CreateComponent(entity);
+		return true;
+	}
 }

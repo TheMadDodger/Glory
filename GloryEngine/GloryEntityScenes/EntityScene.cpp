@@ -40,6 +40,11 @@ namespace Glory
 		return m_EntityIDToObject[entity];
 	}
 
+	Registry* EntityScene::GetRegistry()
+	{
+		return &m_Registry;
+	}
+
 	void EntityScene::Initialize()
 	{
 		// Register engine systems

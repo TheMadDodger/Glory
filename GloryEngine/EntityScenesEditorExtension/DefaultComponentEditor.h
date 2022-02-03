@@ -1,6 +1,9 @@
 #pragma once
 #include <Editor.h>
 #include <EntityComponentObject.h>
+#include <SerializedProperty.h>
+#include <EntitySystems.h>
+#include <Registry.h>
 
 namespace Glory::Editor
 {
@@ -12,5 +15,9 @@ namespace Glory::Editor
 
 	private:
 		virtual void OnGUI() override;
+		virtual void Initialize() override;
+
+	private:
+		std::vector<SerializedProperty> m_Properties;
 	};
 }

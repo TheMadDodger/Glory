@@ -1,6 +1,8 @@
 #include "StandardPropertyDrawers.h"
 #include <imgui.h>
 #include <PropertyFlags.h>
+#include <glm/gtc/quaternion.hpp>
+#include <LayerManager.h>
 
 namespace Glory::Editor
 {
@@ -105,4 +107,51 @@ namespace Glory::Editor
 
 		return ImGui::InputFloat4(label.data(), (float*)data);
 	}
+
+    bool QuatDrawer::OnGUI(const std::string& label, glm::quat* data, uint32_t flags) const
+    {
+        glm::vec3 euler = glm::eulerAngles(*data) / 3.141592f * 180.0f;
+        if (ImGui::InputFloat3("Rotation", (float*)&euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            glm::quat q = glm::quat(euler * 3.141592f / 180.0f);
+            data->x = q.x;
+            data->y = q.y;
+            data->z = q.z;
+            data->w = q.w;
+            return true;
+        }
+    }
+
+    bool LayerMaskDrawer::OnGUI(const std::string& label, LayerMask* data, uint32_t flags) const
+    {
+        std::vector<std::string> layerOptions;
+        std::string layerText;
+
+        layerOptions.clear();
+        LayerManager::GetAllLayerNames(layerOptions);
+        layerText = LayerManager::LayerMaskToString(*data);
+
+        if (ImGui::BeginCombo("Layer Mask", layerText.data()))
+        {
+            for (size_t i = 0; i < layerOptions.size(); i++)
+            {
+                const Layer* pLayer = LayerManager::GetLayerAtIndex(i - 1);
+
+                bool selected = pLayer == nullptr ? *data == 0 : (*data & pLayer->m_Mask) > 0;
+                if (ImGui::Selectable(layerOptions[i].data(), selected))
+                {
+                    if (pLayer == nullptr)
+                        *data = 0;
+                    else
+                        *data ^= pLayer->m_Mask;
+
+                    layerText = LayerManager::LayerMaskToString(*data);
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+
+        return true;
+    }
 }

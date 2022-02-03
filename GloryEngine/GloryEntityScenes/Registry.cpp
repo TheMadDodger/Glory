@@ -96,6 +96,14 @@ namespace Glory
 		});
 	}
 
+	EntityComponentData* Registry::GetEntityComponentDataAt(EntityID entity, size_t index)
+	{
+		if (m_ComponentsPerEntity.find(entity) == m_ComponentsPerEntity.end()) return nullptr;
+		if (m_ComponentsPerEntity[entity].size() <= index) return nullptr;
+		size_t componentIndex = m_ComponentsPerEntity[entity][index];
+		return &m_EntityComponents[componentIndex];
+	}
+
 	void Registry::ForEach(const std::type_index& type, std::function<void(Registry*, EntityID, EntityComponentData*)> func)
 	{
 		if (m_ComponentsPerType.find(type) == m_ComponentsPerType.end() || m_ComponentsPerType[type].size() <= 0) return;
@@ -121,5 +129,10 @@ namespace Glory
 	void Registry::Draw()
 	{
 		m_Systems.OnDraw();
+	}
+
+	EntitySystems* Registry::GetSystems()
+	{
+		return &m_Systems;
 	}
 }

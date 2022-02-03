@@ -20,6 +20,7 @@ namespace Glory
 		Entity CreateEntity();
 
 		EntitySceneObject* GetEntitySceneObjectFromEntityID(EntityID entity);
+		Registry* GetRegistry();
 
 	private:
 		virtual void Initialize() override;
@@ -33,6 +34,7 @@ namespace Glory
 
 	private:
 		friend class Entity;
+		friend class EntitySceneSerializer;
 		Registry m_Registry;
 		std::unordered_map<EntityID, EntitySceneObject*> m_EntityIDToObject;
 	};

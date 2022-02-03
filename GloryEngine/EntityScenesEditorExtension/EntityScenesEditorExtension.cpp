@@ -20,11 +20,11 @@ namespace Glory::Editor
 	void EntityScenesEditorExtension::RegisterEditors()
 	{
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
-		Editor::RegisterEditor<TransformComponentEditor>();
-		Editor::RegisterEditor<CameraComponentEditor>();
-		Editor::RegisterEditor<LayerComponentEditor>();
-		Editor::RegisterEditor<MeshRendererComponentEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
-		Editor::RegisterEditor<LightComponentEditor>();
+		//Editor::RegisterEditor<TransformComponentEditor>();
+		//Editor::RegisterEditor<CameraComponentEditor>();
+		//Editor::RegisterEditor<LayerComponentEditor>();
+		//Editor::RegisterEditor<MeshRendererComponentEditor>();
+		//Editor::RegisterEditor<LightComponentEditor>();
 	}
 }
