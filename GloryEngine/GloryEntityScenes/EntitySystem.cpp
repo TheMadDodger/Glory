@@ -7,4 +7,24 @@ namespace Glory
 	EntitySystem::~EntitySystem()
 	{
 	}
+
+	bool EntitySystem::Hidden()
+	{
+		return m_Hidden;
+	}
+
+	std::string EntitySystem::GetPath()
+	{
+		return "";
+	}
+
+	std::string EntitySystem::Name()
+	{
+		return "Unknown Component";
+	}
+
+	std::type_index EntitySystem::GetComponentType() const
+	{
+		return m_ComponentType;
+	}
 }

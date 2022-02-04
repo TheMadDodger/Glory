@@ -45,6 +45,8 @@ namespace Glory
 
 		EntityID GetEntityID();
 
+		EntityScene* GetScene();
+
 	private:
 		EntityID m_EntityID;
 		EntityScene* m_pEntityScene;

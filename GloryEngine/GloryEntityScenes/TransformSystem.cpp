@@ -6,6 +6,7 @@ namespace Glory
 {
     TransformSystem::TransformSystem(Registry* pRegistry) : EntitySystemTemplate(pRegistry)
     {
+        m_Hidden = true;
     }
 
     TransformSystem::~TransformSystem()
@@ -32,5 +33,10 @@ namespace Glory
         properties.push_back(BasicTemplatedSerializedProperty("Position", &pComponent.Position));
         properties.push_back(BasicTemplatedSerializedProperty("Rotation", &pComponent.Rotation));
         properties.push_back(BasicTemplatedSerializedProperty("Scale", &pComponent.Scale));
+    }
+
+    std::string TransformSystem::Name()
+    {
+        return "Transform";
     }
 }

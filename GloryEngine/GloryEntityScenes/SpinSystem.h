@@ -12,5 +12,7 @@ namespace Glory
 
 	private:
 		virtual void OnDraw(Registry* pRegistry, EntityID entity, Spin& pComponent) override;
+		virtual void OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, Spin& pComponent) override;
+		virtual std::string Name() override;
 	};
 }

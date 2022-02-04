@@ -47,9 +47,10 @@ namespace Glory
 			OnDraw(pRegistry, entity, pComponentData->GetData<T>());
 		}
 
-		virtual void AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties) override
+		virtual std::string AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties) override
 		{
 			OnAcquireSerializedProperties(properties, pComponentData->GetData<T>());
+			return Name();
 		}
 	};
 }

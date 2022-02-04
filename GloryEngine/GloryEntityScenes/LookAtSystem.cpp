@@ -12,4 +12,16 @@ namespace Glory
 		glm::vec4 perspective;
 		glm::decompose(matrix, transform.Scale, transform.Rotation, transform.Position, skew, perspective);
 	}
+
+	void LookAtSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, LookAt& pComponent)
+	{
+		properties.push_back(BasicTemplatedSerializedProperty("Eye Position", &pComponent.m_Eye));
+		properties.push_back(BasicTemplatedSerializedProperty("Target Center", &pComponent.m_Center));
+		properties.push_back(BasicTemplatedSerializedProperty("Up Vector", &pComponent.m_Up));
+	}
+
+	std::string LookAtSystem::Name()
+	{
+		return "Look At";
+	}
 }

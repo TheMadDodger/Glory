@@ -75,6 +75,15 @@ namespace Glory
 		hash = ResourceType::GetHash(typeid(Transform));
 		out << YAML::Key << "Transform";
 		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(std::vector<float>));
+		out << YAML::Key << "std::vector<float>";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(std::vector<int>));
+		out << YAML::Key << "std::vector<int>";
+		out << YAML::Value << hash;
+		hash = ResourceType::GetHash(typeid(std::vector<SerializedProperty>));
+		out << YAML::Key << "std::vector<SerializedProperty>";
+		out << YAML::Value << hash;
 
 		out << YAML::EndMap;
 

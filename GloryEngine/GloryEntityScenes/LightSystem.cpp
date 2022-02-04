@@ -1,6 +1,7 @@
 #include "LightSystem.h"
 #include <Game.h>
 #include <Engine.h>
+#include <PropertyFlags.h>
 
 namespace Glory
 {
@@ -27,5 +28,21 @@ namespace Glory
 		pointLight.range = pComponent.m_Range;
 
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pointLight);
+	}
+
+	void LightSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, LightComponent& pComponent)
+	{
+		glm::vec4 m_Color;
+		float m_Intensity;
+		float m_Range;
+
+		properties.push_back(BasicTemplatedSerializedProperty("Color", &pComponent.m_Color, Vec4Flags::Color));
+		properties.push_back(BasicTemplatedSerializedProperty("Intensity", &pComponent.m_Intensity));
+		properties.push_back(BasicTemplatedSerializedProperty("Range", &pComponent.m_Range));
+	}
+
+	std::string LightSystem::Name()
+	{
+		return "Light";
 	}
 }

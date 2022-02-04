@@ -62,6 +62,11 @@ namespace Glory
 		properties.push_back(BasicTemplatedSerializedProperty("Clear Color", &pComponent.m_ClearColor));
 	}
 
+	std::string CameraSystem::Name()
+	{
+		return "Camera";
+	}
+
 	size_t CameraSystem::CalcHash(CameraComponent& pComponent)
 	{
 		float value = (float)pComponent.m_ClearColor.x + (float)pComponent.m_ClearColor.y

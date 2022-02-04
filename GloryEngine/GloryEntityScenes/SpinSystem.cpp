@@ -22,4 +22,14 @@ namespace Glory
 		//glm::vec3 position;
 		//glm::decompose(world, transform.Scale, transform.Rotation, transform.Position, skew, perspective);
 	}
+
+	void SpinSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, Spin& pComponent)
+	{
+		properties.push_back(BasicTemplatedSerializedProperty("Speed", &pComponent.m_Speed));
+	}
+
+	std::string SpinSystem::Name()
+	{
+		return "Spin";
+	}
 }

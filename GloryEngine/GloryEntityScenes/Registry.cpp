@@ -46,6 +46,28 @@ namespace Glory
 		m_DeadEntityIndices.push_back(index);
 	}
 
+	void Registry::RemoveComponent(EntityID entity, size_t index)
+	{
+		std::unique_lock<std::mutex> lock(m_EntityComponentsLock);
+		if (!IsValid(entity))
+		{
+			lock.unlock();
+			return;
+		}
+
+		if (m_ComponentsPerEntity[entity].size() <= index) return;
+
+		size_t componentIndex = m_ComponentsPerEntity[entity][index];
+		EntityComponentData* pComponent = &m_EntityComponents[componentIndex];
+		std::type_index type = pComponent->GetType();
+		m_Systems.OnComponentRemoved(this, entity, pComponent);
+		m_UnusedComponentIndices.push_back(componentIndex);
+		m_ComponentsPerEntity[entity].erase(m_ComponentsPerEntity[entity].begin() + index);
+		auto it = std::remove(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), componentIndex);
+		m_ComponentsPerType[type].erase(it);
+		lock.unlock();
+	}
+
 	void Registry::Clear(EntityID entity)
 	{
 		if (!IsValid(entity)) return;

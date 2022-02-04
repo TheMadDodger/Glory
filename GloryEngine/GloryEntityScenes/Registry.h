@@ -81,10 +81,13 @@ namespace Glory
 				m_Systems.OnComponentRemoved(this, entity, &m_EntityComponents[index]);
 				m_UnusedComponentIndices.push_back(index);
 				m_ComponentsPerEntity[entity].erase(m_ComponentsPerEntity[entity].begin() + index);
-				std::remove(m_ComponentsPerType[typeid(T)].begin(), m_ComponentsPerType[typeid(T)].end(), index);
+				auto it = std::remove(m_ComponentsPerType[typeid(T)].begin(), m_ComponentsPerType[typeid(T)].end(), index);
+				m_ComponentsPerType[typeid(T)].erase(it);
 			}
 			lock.unlock();
 		}
+
+		void RemoveComponent(EntityID entity, size_t index);
 
 		void Clear(EntityID entity);
 

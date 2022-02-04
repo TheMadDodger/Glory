@@ -30,6 +30,7 @@ namespace Glory
 
 	struct MeshFilter
 	{
+		MeshFilter() : m_pModelData(nullptr) {}
 		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData) {}
 		ModelData* m_pModelData;
 	};

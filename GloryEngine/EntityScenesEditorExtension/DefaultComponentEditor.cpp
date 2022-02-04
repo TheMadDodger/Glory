@@ -24,6 +24,11 @@ namespace Glory::Editor
 	{
 		EntityComponentObject* pEntityComponentObject = (EntityComponentObject*)m_pTarget;
 		m_Properties.clear();
-		pEntityComponentObject->GetRegistry()->GetSystems()->AcquireSerializedProperties(pEntityComponentObject->GetComponentData(), m_Properties);
+		m_Name = pEntityComponentObject->GetRegistry()->GetSystems()->AcquireSerializedProperties(pEntityComponentObject->GetComponentData(), m_Properties);
+	}
+
+	std::string DefaultComponentEditor::Name()
+	{
+		return m_Name;
 	}
 }

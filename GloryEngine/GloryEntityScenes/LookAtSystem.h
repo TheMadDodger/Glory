@@ -12,5 +12,7 @@ namespace Glory
 
 	private:
 		virtual void OnUpdate(Registry* pRegistry, EntityID entity, LookAt& pComponent) override;
+		virtual void OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, LookAt& pComponent) override;
+		virtual std::string Name() override;
 	};
 }
