@@ -8,6 +8,7 @@ namespace Glory
 	std::unordered_map<UUID, AssetLocation> AssetDatabase::m_AssetLocations;
 	std::unordered_map<std::string, UUID> AssetDatabase::m_PathToUUID;
 	std::unordered_map<UUID, ResourceMeta> AssetDatabase::m_Metas;
+	std::unordered_map<size_t, std::vector<UUID>> AssetDatabase::m_AssetsByType;
 
 	const AssetLocation* AssetDatabase::GetAssetLocation(UUID uuid)
 	{
@@ -55,6 +56,7 @@ namespace Glory
 		m_Metas[uuid] = meta;
 		m_AssetLocations[uuid] = AssetLocation(path, m_Metas[m_Metas.size() - 1]);
 		m_PathToUUID[path] = uuid;
+		m_AssetsByType[meta.Hash()].push_back(uuid);
 	}
 
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath)
@@ -163,6 +165,20 @@ namespace Glory
 		m_AssetLocations.erase(uuid);
 		m_Metas.erase(uuid);
 		m_PathToUUID.erase(path);
+	}
+
+	const std::vector<UUID>& AssetDatabase::GetAllAssetsOfType(size_t typeHash)
+	{
+		if (m_AssetsByType.find(typeHash) == m_AssetsByType.end()) return std::vector<UUID>();
+		return m_AssetsByType[typeHash];
+	}
+
+	std::string AssetDatabase::GetAssetName(UUID uuid)
+	{
+		// Will need to be different for build and editor since assets are grouped together in a single file when built
+		const AssetLocation* pLocation = GetAssetLocation(uuid);
+		std::filesystem::path path(pLocation->m_Path);
+		return path.filename().replace_extension("").string();
 	}
 
 	void AssetDatabase::Initialize()

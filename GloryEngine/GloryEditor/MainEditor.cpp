@@ -26,10 +26,12 @@
 #include <Serializer.h>
 #include "EditorSceneManager.h"
 #include <AssetDatabase.h>
+#include "AssetReferencePropertyDrawer.h"
 
 namespace Glory::Editor
 {
-	MainEditor::MainEditor() : m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup())
+	MainEditor::MainEditor()
+		: m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup())
 	{
 	}
 
@@ -37,6 +39,12 @@ namespace Glory::Editor
 	{
 		delete m_pAssetLoader;
 		m_pAssetLoader = nullptr;
+
+		delete m_pProjectPopup;
+		m_pProjectPopup = nullptr;
+
+		delete m_AssetPickerPopup;
+		m_AssetPickerPopup = nullptr;
 	}
 
 	void MainEditor::Initialize()
@@ -83,6 +91,7 @@ namespace Glory::Editor
         EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
 		m_pProjectPopup->OnGui();
+		m_AssetPickerPopup->OnGUI();
 	}
 
 	EditorAssetLoader* MainEditor::GetAssetLoader()
@@ -184,6 +193,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<Vector4Drawer>();
 		PropertyDrawer::RegisterPropertyDrawer<QuatDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()

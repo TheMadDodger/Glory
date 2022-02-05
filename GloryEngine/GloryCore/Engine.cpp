@@ -4,6 +4,7 @@
 #include "Serializer.h"
 #include "PropertySerializer.h"
 #include <algorithm>
+#include "AssetReferencePropertySerializer.h"
 
 namespace Glory
 {
@@ -206,6 +207,7 @@ namespace Glory
 
 	void Engine::RegisterStandardSerializers()
 	{
+		// Standard
 		STANDARD_SERIALIZER(int);
 		STANDARD_SERIALIZER(float);
 		STANDARD_SERIALIZER(double);
@@ -217,6 +219,9 @@ namespace Glory
 		STANDARD_SERIALIZER(glm::vec4);
 		STANDARD_SERIALIZER(glm::quat);
 		STANDARD_SERIALIZER(LayerMask);
+
+		// Special
+		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
 	}
 
 	void Engine::Update()

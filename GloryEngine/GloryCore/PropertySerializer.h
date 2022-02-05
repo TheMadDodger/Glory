@@ -26,10 +26,10 @@ namespace Glory
 		static void SerializeProperty(const SerializedProperty& serializedProperty, YAML::Emitter& out);
 		static void DeserializeProperty(const SerializedProperty& serializedProperty, YAML::Node& object);
 
-		virtual std::type_index GetSerializedType() = 0;
+		virtual size_t GetSerializedTypeHash() const;
 
 	protected:
-		PropertySerializer();
+		PropertySerializer(size_t typeHash);
 		virtual ~PropertySerializer();
 
 	protected:
@@ -42,18 +42,17 @@ namespace Glory
 
 	private:
 		static std::vector<PropertySerializer*> m_pRegisteredSerializers;
+		size_t m_TypeHash;
 	};
 
 	template<typename T>
 	class SimpleTemplatedPropertySerializer : public PropertySerializer
 	{
 	public:
-		SimpleTemplatedPropertySerializer() {}
+		SimpleTemplatedPropertySerializer() : PropertySerializer(ResourceType::GetHash<T>()) {}
 		virtual ~SimpleTemplatedPropertySerializer() {}
 
 	private:
-		virtual std::type_index GetSerializedType() override { return typeid(T); }
-
 		virtual void Serialize(const SerializedProperty& serializedProperty, YAML::Emitter& out) override
 		{
 			T value = *(T*)serializedProperty.MemberPointer();

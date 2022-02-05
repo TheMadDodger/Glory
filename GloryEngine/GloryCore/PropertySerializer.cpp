@@ -9,8 +9,7 @@ namespace Glory
 		for (size_t i = 0; i < m_pRegisteredSerializers.size(); i++)
 		{
 			PropertySerializer* pSerializer = m_pRegisteredSerializers[i];
-			std::type_index type = pSerializer->GetSerializedType();
-			size_t hash = ResourceType::GetHash(type);
+			size_t hash = pSerializer->GetSerializedTypeHash();
 			if (hash == typeHash) return pSerializer;
 		}
 
@@ -31,7 +30,7 @@ namespace Glory
 		return 0;
 	}
 
-	PropertySerializer::PropertySerializer()
+	PropertySerializer::PropertySerializer(size_t typeHash) : m_TypeHash(typeHash)
 	{
 	}
 
@@ -51,6 +50,11 @@ namespace Glory
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(serializedProperty);
 		if (pSerializer == nullptr) return;
 		pSerializer->Deserialize(serializedProperty, object);
+	}
+
+	size_t PropertySerializer::GetSerializedTypeHash() const
+	{
+		return m_TypeHash;
 	}
 
 	void PropertySerializer::Cleanup()

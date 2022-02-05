@@ -11,6 +11,7 @@ namespace Glory
 
     void MeshFilterSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, MeshFilter& pComponent)
     {
+        properties.push_back(AssetReferencePropertyTemplate<ModelData>("Model", &pComponent.m_pModelData));
     }
 
     std::string Glory::MeshFilterSystem::Name()

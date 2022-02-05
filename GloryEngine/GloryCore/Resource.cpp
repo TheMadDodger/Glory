@@ -20,4 +20,8 @@ namespace Glory
 	{
 		return m_Name;
 	}
+	void Resource::SetName(const std::string& name)
+	{
+		m_Name = name;
+	}
 }

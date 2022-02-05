@@ -18,6 +18,11 @@ namespace Glory
 		return m_TypeHash;
 	}
 
+	size_t SerializedProperty::ElementTypeHash() const
+	{
+		return m_ElementTypeHash;
+	}
+
 	uint32_t SerializedProperty::Flags() const
 	{
 		return m_Flags;
@@ -26,5 +31,25 @@ namespace Glory
 	void* SerializedProperty::MemberPointer() const
 	{
 		return m_pMember;
+	}
+
+	size_t SerializedProperty::ArrayElementsCount()
+	{
+		return m_ArrayElementsCount;
+	}
+
+	SerializedProperty SerializedProperty::GetArrayElementAt(size_t index)
+	{
+		std::string name = "Element" + std::to_string(index);
+		char* pStart = (char*)m_pMember;
+		char* pNewMeber = pStart + (index * m_ElementByteSize);
+		return SerializedProperty(name, pNewMeber, m_ElementTypeHash, m_Flags);
+	}
+
+	Object* SerializedProperty::ObjectReference() const
+	{
+		// POINTER BLACK MAGIC!!!!! Kappa
+		Object** pObjectMember = (Object**)m_pMember;
+		return *pObjectMember;
 	}
 }
