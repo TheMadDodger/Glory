@@ -49,14 +49,26 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
-	void RendererModule::StartFrame()
+	void RendererModule::Submit(CameraRef camera, RenderTexture* pTexture)
+	{
+	}
+
+	void RendererModule::Submit(const PointLight& light)
+	{
+		Profiler::BeginSample("RendererModule::Submit(light)");
+		m_CurrentPreparingFrame.ActiveLights.push_back(light);
+		OnSubmit(light);
+		Profiler::EndSample();
+	}
+
+	void RendererModule::OnGameThreadFrameStart()
 	{
 		Profiler::BeginSample("RendererModule::StartFrame");
 		m_CurrentPreparingFrame = RenderFrame();
 		Profiler::EndSample();
 	}
 
-	void RendererModule::EndFrame()
+	void RendererModule::OnGameThreadFrameEnd()
 	{
 		Profiler::BeginSample("RendererModule::EndFrame");
 		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);
@@ -86,6 +98,8 @@ namespace Glory
 			pRenderTexture->Bind();
 			m_pEngine->GetGraphicsModule()->Clear(camera.GetClearColor());
 
+			OnStartCameraRender(camera, frame.ActiveLights);
+
 			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
 			{
 				LayerMask mask = camera.GetLayerMask();
@@ -95,16 +109,42 @@ namespace Glory
 				Profiler::EndSample();
 			}
 
+			OnEndCameraRender(camera, frame.ActiveLights);
 			pRenderTexture->UnBind();
+
+			RenderTexture* pOutputTexture = camera.GetOutputTexture();
+			if (camera.HasOutput())
+			{
+				const glm::uvec2& resolution = camera.GetResolution();
+				if (pOutputTexture == nullptr)
+				{
+					pOutputTexture = DisplayManager::CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+					camera.SetOutputTexture(pOutputTexture);
+				}
+				size_t width, height;
+				pOutputTexture->GetDimensions(width, height);
+				if (width != resolution.x || height != resolution.y) pOutputTexture->Resize(resolution.x, resolution.y);
+
+				Profiler::BeginSample("RendererModule::OnRender > Output Rendering");
+				pOutputTexture->Bind();
+				OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
+				pOutputTexture->UnBind();
+				Profiler::EndSample();
+			}
 
 			int displayIndex = camera.GetDisplayIndex();
 			if (displayIndex == -1) continue;
 			RenderTexture* pDisplayRenderTexture = DisplayManager::GetDisplayRenderTexture(displayIndex);
 			if (pDisplayRenderTexture == nullptr) continue;
 
+			Window* pWindow = m_pEngine->GetWindowModule()->GetMainWindow();
+			
+			int width, height;
+			pWindow->GetDrawableSize(&width, &height);
+
 			Profiler::BeginSample("RendererModule::OnRender > Display Rendering");
 			pDisplayRenderTexture->Bind();
-			OnDoScreenRender(pRenderTexture);
+			OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
 			pDisplayRenderTexture->UnBind();
 			Profiler::EndSample();
 		}
@@ -114,10 +154,24 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
+	RenderTexture* RendererModule::CreateCameraRenderTexture(size_t width, size_t height)
+	{
+		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
+		RenderTextureCreateInfo createInfo(width, height, true);
+		createInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		return pResourceManager->CreateRenderTexture(createInfo);
+	}
+
+	void RendererModule::OnCameraResize(CameraRef camera) {}
+
 	void RendererModule::ThreadedInitialize()
 	{
 		DisplayManager::Initialize(m_pEngine);
+		OnThreadedInitialize();
 	}
 
-	void RendererModule::ThreadedCleanup() {}
+	void RendererModule::ThreadedCleanup()
+	{
+		OnThreadedCleanup();
+	}
 }

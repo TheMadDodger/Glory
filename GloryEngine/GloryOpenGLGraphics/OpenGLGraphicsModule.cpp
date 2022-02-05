@@ -140,4 +140,10 @@ namespace Glory
 		glBindVertexArray(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
+
+	void OpenGLGraphicsModule::DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z)
+	{
+		glDispatchCompute((GLuint)num_groups_x, (GLuint)num_groups_y, (GLuint)num_groups_z);
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	}
 }

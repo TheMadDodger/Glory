@@ -81,10 +81,13 @@ namespace Glory
 				m_Systems.OnComponentRemoved(this, entity, &m_EntityComponents[index]);
 				m_UnusedComponentIndices.push_back(index);
 				m_ComponentsPerEntity[entity].erase(m_ComponentsPerEntity[entity].begin() + index);
-				std::remove(m_ComponentsPerType[typeid(T)].begin(), m_ComponentsPerType[typeid(T)].end(), index);
+				auto it = std::remove(m_ComponentsPerType[typeid(T)].begin(), m_ComponentsPerType[typeid(T)].end(), index);
+				m_ComponentsPerType[typeid(T)].erase(it);
 			}
 			lock.unlock();
 		}
+
+		void RemoveComponent(EntityID entity, size_t index);
 
 		void Clear(EntityID entity);
 
@@ -94,6 +97,8 @@ namespace Glory
 
 		void ForEach(std::function<void(Registry*, EntityID)> func);
 		void ForEachComponent(EntityID entity, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
+
+		EntityComponentData* GetEntityComponentDataAt(EntityID entity, size_t index);
 
 		template<typename C, typename T>
 		EntitySystem* RegisterSystem()
@@ -118,6 +123,7 @@ namespace Glory
 		void Update();
 		bool IsUpdating();
 		void Draw();
+		EntitySystems* GetSystems();
 
 	private:
 		std::vector<EntityID> m_AllEntityIDs;

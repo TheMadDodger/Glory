@@ -50,7 +50,11 @@ namespace Glory
 		while (true)
 		{
 			if (m_Exit) break;
-			m_pRenderQueue->GetNextFrame([&](const RenderFrame& frame) { OnRenderFrame(frame); });
+			m_pRenderQueue->GetNextFrame(
+				[&](const RenderFrame& frame)
+				{
+					OnRenderFrame(frame);
+				});
 		}
 
 		for (size_t i = 0; i < m_CleanupBinds.size(); i++)
@@ -61,6 +65,7 @@ namespace Glory
 
 	void GraphicsThread::OnRenderFrame(const RenderFrame& frame)
 	{
+		for (size_t i = 0; i < m_BeginRenderBinds.size(); i++) m_BeginRenderBinds[i]();
 		m_pEngine->GraphicsThreadFrameStart();
 		FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();
 		pFrameStates->OnFrameStart();
@@ -70,15 +75,6 @@ namespace Glory
 		}
 		pFrameStates->OnFrameEnd();
 		m_pEngine->GraphicsThreadFrameEnd();
-
-		//// Tell the frame states a frame render started
-		//FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();
-		//pFrameStates->OnFrameStart();
-		//for (size_t i = 0; i < frame.CommandQueue.size(); ++i)
-		//{
-		//	GraphicsCommands::RunCommand(frame.CommandQueue[i]);
-		//}
-		//pFrameStates->OnFrameEnd();
-		//// Tell the frame states a frame render finished
+		for (size_t i = 0; i < m_EndRenderBinds.size(); i++) m_EndRenderBinds[i]();
 	}
 }

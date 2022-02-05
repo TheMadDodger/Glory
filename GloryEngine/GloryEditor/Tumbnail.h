@@ -20,9 +20,9 @@ namespace Glory::Editor
 		}
 
 		static void Destroy();
+		static BaseTumbnailGenerator* GetGenerator(size_t hashCode);
 
 	private:
-		static BaseTumbnailGenerator* GetGenerator(size_t hashCode);
 		static void AddGenerator(BaseTumbnailGenerator* pGenerator);
 
 	private:

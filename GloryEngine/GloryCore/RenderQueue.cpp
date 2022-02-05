@@ -16,18 +16,25 @@ namespace Glory
         m_pRenderQueue.push(frame);
         lock.unlock();
 
-        m_QueueCondition.notify_one();
+        //m_QueueCondition.notify_one();
     }
 
     void RenderQueue::GetNextFrame(std::function<void(const RenderFrame&)> callback)
     {
         std::unique_lock<std::mutex> lock(m_QueueMutex);
-        m_QueueCondition.wait(lock, [&]() { return !m_pRenderQueue.empty() || m_Exit; });
+        //m_QueueCondition.wait(lock, [&]() { return !m_pRenderQueue.empty() || m_Exit; });
         if (m_Exit) return;
+
+        if (m_pRenderQueue.empty())
+        {
+            lock.unlock();
+            return;
+        }
+
         const RenderFrame& frame = m_pRenderQueue.front();
+        lock.unlock();
         callback(frame);
         m_pRenderQueue.pop();
-        lock.unlock();
     }
 
     bool RenderQueue::IsFull()
@@ -43,6 +50,6 @@ namespace Glory
         std::unique_lock<std::mutex> lock(m_QueueMutex);
         m_Exit = true;
         lock.unlock();
-        m_QueueCondition.notify_one();
+        //m_QueueCondition.notify_one();
     }
 }

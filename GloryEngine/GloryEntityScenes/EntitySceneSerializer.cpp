@@ -1,6 +1,7 @@
 #include "EntitySceneSerializer.h"
 #include "EntitySceneObject.h"
 #include <Game.h>
+#include "EntitySceneScenesModule.h"
 
 namespace Glory
 {
@@ -12,7 +13,7 @@ namespace Glory
 	{
 	}
 
-	void EntitySceneSerializer::Serialize(EntityScene* pScene, YAML::Emitter& out)
+	void EntitySceneSerializer::Serialize(GScene* pScene, YAML::Emitter& out)
 	{
 		out << YAML::Key << "Name";
 		out << YAML::Value << pScene->Name();
@@ -32,7 +33,8 @@ namespace Glory
 		YAML::Node node;
 		YAML_READ(object, node, Name, name, std::string);
 
-		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->CreateEmptyScene(name);
+		EntityScene* pScene = new EntityScene(name);
+		pScene->Initialize();
 		node = object["Entities"];
 
 		for (size_t i = 0; i < node.size(); i++)

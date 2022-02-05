@@ -34,4 +34,9 @@ namespace Glory
 	{
 		return m_EntityID;
 	}
+
+	EntityScene* Entity::GetScene()
+	{
+		return m_pEntityScene;
+	}
 }

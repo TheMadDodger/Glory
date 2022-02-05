@@ -58,4 +58,9 @@ namespace Glory
 	{
 		return m_SceneName;
 	}
+
+	void GScene::SetUUID(UUID uuid)
+	{
+		m_ID = uuid;
+	}
 }

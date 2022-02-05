@@ -15,4 +15,13 @@ namespace Glory
 	Resource::~Resource()
 	{
 	}
+
+	const std::string& Resource::Name()
+	{
+		return m_Name;
+	}
+	void Resource::SetName(const std::string& name)
+	{
+		m_Name = name;
+	}
 }

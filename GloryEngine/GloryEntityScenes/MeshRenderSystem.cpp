@@ -27,6 +27,7 @@ namespace Glory
             mask = layer.m_pLayer != nullptr ? layer.m_pLayer->m_Mask : 0;
         }
 
+        if (meshFilter.m_pModelData == nullptr) return;
         for (size_t i = 0; i < meshFilter.m_pModelData->GetMeshCount(); i++)
         {
             if (i >= pComponent.m_pMaterials.size())
@@ -43,5 +44,15 @@ namespace Glory
             renderData.m_LayerMask = mask;
             Game::GetGame().GetEngine()->GetRendererModule()->Submit(renderData);
         }
+    }
+
+    void MeshRenderSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, MeshRenderer& pComponent)
+    {
+        //properties.push_back(BasicTemplatedSerializedProperty("", &pComponent.))
+    }
+
+    std::string MeshRenderSystem::Name()
+    {
+        return "Mesh Renderer";
     }
 }

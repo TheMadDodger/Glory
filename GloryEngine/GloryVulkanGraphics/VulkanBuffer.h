@@ -7,7 +7,7 @@ namespace Glory
 	class VulkanBuffer : public Buffer
 	{
 	public:
-		VulkanBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags);
+		VulkanBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex = 0);
 		virtual ~VulkanBuffer();
 
 		virtual void CreateBuffer() override;

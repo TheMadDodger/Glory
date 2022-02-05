@@ -5,7 +5,7 @@
 namespace Glory::Editor
 {
 	EditorPlatform::EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl)
-		: m_pWindowImpl(pWindowImpl), m_pRenderImpl(pRenderImpl)
+		: m_pWindowImpl(pWindowImpl), m_pRenderImpl(pRenderImpl), m_RenderState(Initializing)
 	{
 	}
 
@@ -27,7 +27,7 @@ namespace Glory::Editor
 		m_pRenderImpl->UploadImGUIFonts();
 
 		game.GetEngine()->GetGraphicsThread()->BindInitializeOnly<EditorPlatform>(this);
-		game.GetEngine()->GetGraphicsThread()->BindRenderOnly<EditorPlatform>(this);
+		game.GetEngine()->GetGraphicsThread()->BindBeginAndEndRender<EditorPlatform>(this);
 	}
 
 	void EditorPlatform::ThreadedInitialize()
@@ -37,20 +37,6 @@ namespace Glory::Editor
 	bool EditorPlatform::PollEvents()
 	{
 		return m_pWindowImpl->PollEvents();
-	}
-
-	void EditorPlatform::BeginRender()
-	{
-		std::unique_lock<std::mutex> lock(m_Mutex);
-		m_RenderState = Begin;
-		lock.unlock();
-	}
-
-	void EditorPlatform::EndRender()
-	{
-		std::unique_lock<std::mutex> lock(m_Mutex);
-		m_RenderState = End;
-		lock.unlock();
 	}
 
 	void EditorPlatform::Destroy()
@@ -64,14 +50,14 @@ namespace Glory::Editor
 		EditorAssets::Destroy();
 	}
 
-	void EditorPlatform::WaitIdle()
+	void EditorPlatform::Wait(const EditorRenderState& waitState)
 	{
 		while (true)
 		{
 			std::unique_lock<std::mutex> lock(m_Mutex);
 			EditorRenderState renderState = m_RenderState;
 			lock.unlock();
-			if (renderState == Idle) return;
+			if (renderState == waitState) return;
 		}
 	}
 
@@ -118,39 +104,26 @@ namespace Glory::Editor
 		ImGui::NewFrame();
 	}
 
-	void EditorPlatform::Render(const RenderFrame&)
+	void EditorPlatform::GraphicsThreadBeginRender()
 	{
 		EditorAssets::LoadAssets();
 
-		std::unique_lock<std::mutex> lock(m_Mutex);
+		Wait(Idle);
 
-		switch (m_RenderState)
-		{
-		case Glory::Editor::Idle:
-			return;
-		case Glory::Editor::Begin:
-			HandleBeginRender();
-			m_RenderState = Idle;
-			break;
-		case Glory::Editor::End:
-			HandleEndRender();
-			m_RenderState = Idle;
-			break;
-		default:
-			break;
-		}
-
-		lock.unlock();
-	}
-
-	void EditorPlatform::HandleBeginRender()
-	{
 		m_pRenderImpl->BeforeRender();
 		NewFrame();
+
+		std::unique_lock<std::mutex> lock(m_Mutex);
+		m_RenderState = Begin;
+		lock.unlock();
+
+		Wait(Idle);
 	}
 
-	void EditorPlatform::HandleEndRender()
+	void EditorPlatform::GraphicsThreadEndRender()
 	{
+		Wait(Idle);
+
 		ImGuiIO& io = ImGui::GetIO();
 		// Rendering
 		ImGui::Render();
@@ -173,6 +146,12 @@ namespace Glory::Editor
 		// Present Main Platform Window
 		if (!main_is_minimized)
 			m_pRenderImpl->FramePresent();
+
+		std::unique_lock<std::mutex> lock(m_Mutex);
+		m_RenderState = End;
+		lock.unlock();
+
+		Wait(Idle);
 	}
 
 	void EditorPlatform::LoadFonts()
@@ -180,5 +159,12 @@ namespace Glory::Editor
 		auto& io = ImGui::GetIO();
 		ImFont* pFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/PT_Sans/PTSans-Regular.ttf", 18.0f);
 		io.FontDefault = pFont;
+	}
+
+	void EditorPlatform::SetState(const EditorRenderState& state)
+	{
+		std::unique_lock<std::mutex> lock(m_Mutex);
+		m_RenderState = state;
+		lock.unlock();
 	}
 }

@@ -405,7 +405,8 @@ namespace Glory
 
     GPUResourceManager* VulkanGraphicsModule::CreateGPUResourceManager()
     {
-        return new VulkanResourceManager();
+        return nullptr;
+        //return new VulkanResourceManager();
     }
 
     //void VulkanGraphicsModule::Draw()

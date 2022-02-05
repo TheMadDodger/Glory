@@ -12,6 +12,8 @@ namespace Glory::Editor
 
 		virtual ImageData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
 
+		virtual void OnFileDoubleClick(UUID uuid);
+
 	protected:
 		virtual const std::type_info& GetAssetType() = 0;
 		virtual const std::string& GetExtension();

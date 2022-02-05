@@ -1,6 +1,7 @@
 #pragma once
 #include "Resource.h"
 #include "SceneObject.h"
+#include <mutex>
 
 namespace Glory
 {
@@ -28,6 +29,9 @@ namespace Glory
         virtual SceneObject* CreateObject(const std::string& name, UUID uuid) = 0;
 
         virtual void OnObjectAdded(SceneObject* pObject) {};
+
+    private:
+        void SetUUID(UUID uuid);
 
     protected:
         friend class ScenesModule;

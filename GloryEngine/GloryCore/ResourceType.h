@@ -27,10 +27,10 @@ namespace Glory
 			return GetResourceType(typeid(T));
 		}
 
-		static void RegisterResource(const std::type_index& type, const std::string& extensions);
-		static size_t GetHash(const std::type_index& type);
+		static void RegisterResource(std::type_index type, const std::string& extensions);
+		static size_t GetHash(std::type_index type);
 		static ResourceType* GetResourceType(const std::string& extension);
-		static ResourceType* GetResourceType(const std::type_index& type);
+		static ResourceType* GetResourceType(std::type_index type);
 		static ResourceType* GetResourceType(size_t hash);
 
 	public:

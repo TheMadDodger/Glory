@@ -6,6 +6,8 @@
 #include "ContentBrowserItem.h"
 #include "EditorAssets.h"
 #include "Tumbnail.h"
+#include "TumbnailGenerator.h"
+#include "Selection.h"
 
 namespace Glory::Editor
 {
@@ -267,12 +269,15 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
 		{
 			//Content* pAsset = AssetManager::GetAsset(metaData.m_GUID);
-			//Selection::SetActiveObject(pAsset);
+			Selection::SetActiveObject(nullptr);
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
-			//OnFileDoubleClick(path);
+			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
+			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(pMeta->Hash());
+			if (!pGenerator) return;
+			pGenerator->OnFileDoubleClick(uuid);
 		}
 
 		ImGui::Text(m_CachedPath.filename().replace_extension().string().c_str());

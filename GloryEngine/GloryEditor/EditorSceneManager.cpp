@@ -1,88 +1,76 @@
-//#include "EditorSceneManager.h"
-//#include "ContentBrowser.h"
-//#include "EditorApp.h"
-//
-//namespace Spartan
-//{
-//	namespace Editor
-//	{
-//		GameScene* EditorSceneManager::m_pActivateScene = nullptr;
-//		std::vector<GameScene*> EditorSceneManager::m_pOpenScenes = std::vector<GameScene*>();
-//		std::vector<std::string> EditorSceneManager::m_LoadedScenePaths = std::vector<std::string>();
-//
-//		void EditorSceneManager::Initialize()
-//		{
-//			std::function<void(const std::filesystem::path&)> onFileDoubleClick = [](const std::filesystem::path& path)
-//			{
-//
-//			};
-//			Editor::ContentBrowser::OnFileDoubleClick.Subscribe("EditorSceneLoader_onFileDoubleClick", onFileDoubleClick);
-//
-//			// TODO: Check if there was a last opened scene and load that one instead of the default one?
-//			LoadDefaultScene();
-//		}
-//
-//		void EditorSceneManager::Update()
-//		{
-//			for (auto pScene : m_pOpenScenes)
-//			{
-//				EditorApp::EditorUpdateScene(pScene);
-//			}
-//		}
-//
-//		void EditorSceneManager::Draw()
-//		{
-//			for (auto pScene : m_pOpenScenes)
-//			{
-//				EditorApp::EditorDrawScene(pScene);
-//			}
-//		}
-//
-//		size_t EditorSceneManager::OpenSceneCount()
-//		{
-//			return m_pOpenScenes.size();
-//		}
-//
-//		GameScene* EditorSceneManager::GetOpenSceneAt(size_t index)
-//		{
-//			if (index < 0 || index >= OpenSceneCount()) return nullptr;
-//			return m_pOpenScenes[index];
-//		}
-//
-//		void EditorSceneManager::Cleanup()
-//		{
-//			Editor::ContentBrowser::OnFileDoubleClick.Unsubscribe("EditorSceneLoader_onFileDoubleClick");
-//
-//			for (auto pScene : m_pOpenScenes)
-//			{
-//				delete pScene;
-//			}
-//
-//			m_pOpenScenes.clear();
-//			m_pActivateScene = nullptr;
-//			m_LoadedScenePaths.clear();
-//		}
-//
-//		void EditorSceneManager::LoadDefaultScene()
-//		{
-//			GameScene* pDefaultScene = new GameScene("Unnamed Scene");
-//			m_pActivateScene = pDefaultScene;
-//			AddGameScene(pDefaultScene, "");
-//			pDefaultScene->CreateDefaultObjects();
-//		}
-//
-//		GameScene* EditorSceneManager::GetActiveScene()
-//		{
-//			return m_pActivateScene;
-//		}
-//
-//		void EditorSceneManager::AddGameScene(GameScene* pScene, const std::string& path)
-//		{
-//			m_pOpenScenes.push_back(pScene);
-//			m_LoadedScenePaths.push_back(path);
-//		}
-//
-//		EditorSceneManager::EditorSceneManager() {}
-//		EditorSceneManager::~EditorSceneManager() {}
-//	}
-//}
+#include "EditorSceneManager.h"
+#include <Game.h>
+#include <Engine.h>
+#include <ScenesModule.h>
+#include <AssetDatabase.h>
+#include <Serializer.h>
+
+namespace Glory::Editor
+{
+	std::vector<UUID> EditorSceneManager::m_OpenedSceneIDs;
+
+	void EditorSceneManager::NewScene()
+	{
+		CloseAll();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		GScene* pScene = pScenesModule->CreateEmptyScene();
+		m_OpenedSceneIDs.push_back(pScene->GetUUID());
+	}
+
+	void EditorSceneManager::OpenScene(UUID uuid, bool additive)
+	{
+		if (additive && IsSceneOpen(uuid))
+			CloseScene(uuid);
+		if (!additive) CloseAll();
+
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		const AssetLocation* pLocation = AssetDatabase::GetAssetLocation(uuid);
+		std::string path = Game::GetGame().GetAssetPath() + "\\" + pLocation->m_Path;
+		pScenesModule->OpenScene(path, uuid);
+		m_OpenedSceneIDs.push_back(uuid);
+	}
+
+	void EditorSceneManager::SaveOpenScenes()
+	{
+		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [](UUID uuid)
+		{
+			const AssetLocation* pLocation = AssetDatabase::GetAssetLocation(uuid);
+			if (pLocation == nullptr) // new scene
+			{
+				// TODO: Need to bring up a file browser here
+				return;
+			}
+
+			GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
+			YAML::Emitter out;
+			Serializer::SerializeObject(pScene, out);
+			std::string path = Game::GetGame().GetAssetPath() + "\\" + pLocation->m_Path;
+			std::ofstream outStream(path);
+			outStream << out.c_str();
+			outStream.close();
+		});
+	}
+
+	void EditorSceneManager::CloseScene(UUID uuid)
+	{
+		// TODO: Check if scene has changes
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		pScenesModule->CloseScene(uuid);
+		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
+		if (it == m_OpenedSceneIDs.end()) return;
+		m_OpenedSceneIDs.erase(it);
+	}
+
+	bool EditorSceneManager::IsSceneOpen(UUID uuid)
+	{
+		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
+		return it != m_OpenedSceneIDs.end();
+	}
+
+	void EditorSceneManager::CloseAll()
+	{
+		m_OpenedSceneIDs.clear();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		pScenesModule->CloseAllScenes();
+	}
+}

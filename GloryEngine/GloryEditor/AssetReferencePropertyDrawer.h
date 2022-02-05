@@ -1,12 +1,15 @@
-//#pragma once
-//#include "PropertyDrawer.h"
-//#include "AssetReference.h"
-//
-//namespace Spartan::Editor
-//{
-//	class AssetReferencePropertyDrawer : public PropertyDrawerTemplate<Spartan::Serialization::BaseAssetReference>
-//	{
-//	public:
-//		virtual bool OnGUI(Serialization::SerializedProperty& prop) const override;
-//	};
-//}
+#pragma once
+#include "PropertyDrawer.h"
+
+namespace Glory::Editor
+{
+	class AssetReferencePropertyDrawer : public PropertyDrawer
+	{
+	public:
+		AssetReferencePropertyDrawer() : PropertyDrawer(SerializedType::ST_Asset) {}
+
+	protected:
+		virtual bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const override;
+		virtual bool Draw(const std::string& label, std::any& data, uint32_t flags) const override;
+	};
+}

@@ -8,7 +8,7 @@ namespace Glory
 	std::unordered_map<size_t, size_t> ResourceType::m_HashToType;
 	std::hash<std::type_index> ResourceType::m_Hasher;
 
-	void ResourceType::RegisterResource(const std::type_index& type, const std::string& extensions)
+	void ResourceType::RegisterResource(std::type_index type, const std::string& extensions)
 	{
 		size_t typeHash = m_Hasher(type);
 		size_t index = m_ResourceTypes.size();
@@ -17,7 +17,7 @@ namespace Glory
 		ReadExtensions(index, extensions);
 	}
 
-	size_t ResourceType::GetHash(const std::type_index& type)
+	size_t ResourceType::GetHash(std::type_index type)
 	{
 		return m_Hasher(type);
 	}
@@ -29,7 +29,7 @@ namespace Glory
 		return &m_ResourceTypes[index];
 	}
 
-	ResourceType* ResourceType::GetResourceType(const std::type_index& type)
+	ResourceType* ResourceType::GetResourceType(std::type_index type)
 	{
 		return GetResourceType(m_Hasher(type));
 	}

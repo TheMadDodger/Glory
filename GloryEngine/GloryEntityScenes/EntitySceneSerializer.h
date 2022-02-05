@@ -4,14 +4,14 @@
 
 namespace Glory
 {
-	class EntitySceneSerializer : public SerializerTemplate<EntityScene>
+	class EntitySceneSerializer : public SerializerTemplate<GScene>
 	{
 	public:
 		EntitySceneSerializer();
 		virtual ~EntitySceneSerializer();
 
 	private:
-		virtual void Serialize(EntityScene* pScene, YAML::Emitter& out) override;
+		virtual void Serialize(GScene* pScene, YAML::Emitter& out) override;
 		virtual Object* Deserialize(Object* pParent, YAML::Node& object) override;
 	};
 }

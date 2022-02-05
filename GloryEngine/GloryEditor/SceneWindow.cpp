@@ -24,16 +24,12 @@ namespace Glory::Editor
 		m_SceneCamera.Initialize();
 		m_SceneCamera.m_Camera.SetResolution((int)m_WindowDimensions.x, (int)m_WindowDimensions.y);
 		m_SceneCamera.m_Camera.SetPerspectiveProjection((int)m_WindowDimensions.x, (int)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Camera.EnableOutput(true);
 	}
 
 	void SceneWindow::OnClose()
 	{
 		m_SceneCamera.Cleanup();
-	}
-
-	void SceneWindow::OnPaint()
-	{
-		
 	}
 
 	void SceneWindow::OnGUI()
@@ -43,9 +39,9 @@ namespace Glory::Editor
 		m_SceneCamera.m_Camera.SetResolution((int)m_WindowDimensions.x, (int)m_WindowDimensions.y);
 		m_SceneCamera.m_Camera.SetPerspectiveProjection((int)m_WindowDimensions.x, (int)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 		
-		RenderTexture* pSceneTexture = m_SceneCamera.m_Camera.GetRenderTexture();
+		RenderTexture* pSceneTexture = m_SceneCamera.m_Camera.GetOutputTexture();
 		if (pSceneTexture == nullptr) return;
-		Texture* pTexture = pSceneTexture->GetTexture();
+		Texture* pTexture = pSceneTexture->GetTextureAttachment(0);
 		
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
 		float aspect = m_WindowDimensions.x / m_WindowDimensions.y;
@@ -58,7 +54,7 @@ namespace Glory::Editor
 			ImVec2(pos.x + width, pos.y + height), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
-	void SceneWindow::GameThreadPaint()
+	void SceneWindow::Draw()
 	{
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(m_SceneCamera.m_Camera);
 	}

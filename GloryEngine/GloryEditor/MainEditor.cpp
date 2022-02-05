@@ -17,15 +17,23 @@
 #include "ProjectSpace.h"
 #include "Tumbnail.h"
 #include "TextureTumbnailGenerator.h"
+#include "SceneTumbnailGenerator.h"
 #include "Editor.h"
 #include "ProfilerWindow.h"
 #include <Game.h>
 #include <Engine.h>
+#include <MaterialEditor.h>
+#include "StandardPropertyDrawers.h"
+#include <MaterialInstanceEditor.h>
 #include <Serializer.h>
+#include "EditorSceneManager.h"
+#include <AssetDatabase.h>
+#include "AssetReferencePropertyDrawer.h"
 
 namespace Glory::Editor
 {
-	MainEditor::MainEditor() : m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup())
+	MainEditor::MainEditor()
+		: m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup())
 	{
 	}
 
@@ -33,17 +41,19 @@ namespace Glory::Editor
 	{
 		delete m_pAssetLoader;
 		m_pAssetLoader = nullptr;
+
+		delete m_pProjectPopup;
+		m_pProjectPopup = nullptr;
+
+		delete m_AssetPickerPopup;
+		m_AssetPickerPopup = nullptr;
 	}
 
 	void MainEditor::Initialize()
 	{
-		EditorWindow::GetWindow<GameWindow>();
-		EditorWindow::GetWindow<SceneWindow>();
-		EditorWindow::GetWindow<InspectorWindow>();
-		EditorWindow::GetWindow<SceneGraphWindow>();
-		EditorWindow::GetWindow<ContentBrowser>();
-		EditorWindow::GetWindow<EditorConsoleWindow>();
-		EditorWindow::GetWindow<PerformanceMetrics>();
+		RegisterWindows();
+		RegisterPropertyDrawers();
+		RegisterEditors();
 
 		CreateDefaultMainMenuBar();
 
@@ -53,14 +63,14 @@ namespace Glory::Editor
 		m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
-
-		Game::GetGame().GetEngine()->GetGameThread()->Bind(this);
+		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
 	}
 
 	void MainEditor::Destroy()
 	{
 		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
+		PropertyDrawer::Cleanup();
 	}
 
     static void HelpMarker(const char* desc)
@@ -83,6 +93,7 @@ namespace Glory::Editor
         EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
 		m_pProjectPopup->OnGui();
+		m_AssetPickerPopup->OnGUI();
 	}
 
 	EditorAssetLoader* MainEditor::GetAssetLoader()
@@ -92,27 +103,23 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", NULL);
-		MenuBar::AddMenuItem("File/Save Scene", []()
-			{
-				GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(0);
-
-				YAML::Emitter out;
-				Serializer::SerializeObject(pScene, out);
-
-				std::ofstream outStream("test.gscene");
-				outStream << out.c_str();
-				outStream.close();
-			});
-
+		MenuBar::AddMenuItem("File/New/Scene", EditorSceneManager::NewScene);
+		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes);
 		MenuBar::AddMenuItem("File/Load Scene", []()
-			{
-				YAML::Node node = YAML::LoadFile("test.gscene");
-				Serializer::DeserializeObject(node);
-			});
+		{
+			//YAML::Node node = YAML::LoadFile("test.gscene");
+			//Serializer::DeserializeObject(node);
+		});
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); });
-		MenuBar::AddMenuItem("File/Save Project", []() {/*AssetDatabase::SaveAssets();*/ });
+		MenuBar::AddMenuItem("File/Save Project", AssetDatabase::Save);
+		MenuBar::AddMenuItem("File/Create/Empty Object", []()
+		{
+			GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
+			if (!pActiveScene) return;
+			pActiveScene->CreateEmptyObject();
+		});
+
 		MenuBar::AddMenuItem("Play/Start", [&]() {/*this->EnterPlayMode();*/ });
 		MenuBar::AddMenuItem("Play/Pauze", [&]() {/*m_PlayModePaused = !m_PlayModePaused;*/ });
 		MenuBar::AddMenuItem("Play/Stop", [&]() {/*this->ExitPlayMode();*/ });
@@ -166,13 +173,37 @@ namespace Glory::Editor
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 	}
 
-	void MainEditor::Tick()
+	void MainEditor::Update()
 	{
-		EditorWindow::GameThreadTickWindows();
+		EditorWindow::UpdateWindows();
 	}
 
-	void MainEditor::Paint()
+	void MainEditor::RegisterWindows()
 	{
-		EditorWindow::GameThreadPaintWindows();
+		EditorWindow::GetWindow<GameWindow>();
+		EditorWindow::GetWindow<SceneWindow>();
+		EditorWindow::GetWindow<InspectorWindow>();
+		EditorWindow::GetWindow<SceneGraphWindow>();
+		EditorWindow::GetWindow<ContentBrowser>();
+	}
+
+	void MainEditor::RegisterPropertyDrawers()
+	{
+		PropertyDrawer::RegisterPropertyDrawer<FloatDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<IntDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<BoolDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<DoubleDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<Vector2Drawer>();
+		PropertyDrawer::RegisterPropertyDrawer<Vector3Drawer>();
+		PropertyDrawer::RegisterPropertyDrawer<Vector4Drawer>();
+		PropertyDrawer::RegisterPropertyDrawer<QuatDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
+	}
+
+	void MainEditor::RegisterEditors()
+	{
+		Editor::RegisterEditor<MaterialEditor>();
+		Editor::RegisterEditor<MaterialInstanceEditor>();
 	}
 }

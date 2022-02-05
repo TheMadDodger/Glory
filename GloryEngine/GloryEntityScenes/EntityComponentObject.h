@@ -8,7 +8,7 @@ namespace Glory
 	{
 	public:
 		EntityComponentObject();
-		EntityComponentObject(EntityComponentData* pComponentData);
+		EntityComponentObject(EntityComponentData* pComponentData, Registry* pRegistry);
 		virtual ~EntityComponentObject();
 
 		template<typename T>
@@ -17,7 +17,11 @@ namespace Glory
 			return m_pComponentData->GetData<T>();
 		}
 
+		EntityComponentData* GetComponentData() const;
+		Registry* GetRegistry() const;
+
 	private:
 		EntityComponentData* m_pComponentData;
+		Registry* m_pRegistry;
 	};
 }

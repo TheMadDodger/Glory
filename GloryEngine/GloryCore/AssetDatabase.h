@@ -22,6 +22,10 @@ namespace Glory
 		static void ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback);
 		static void RemoveAsset(UUID uuid);
 
+		static const std::vector<UUID>& GetAllAssetsOfType(size_t typeHash);
+
+		static std::string GetAssetName(UUID uuid);
+
 	private:
 		static void Initialize();
 		static void Destroy();
@@ -38,5 +42,6 @@ namespace Glory
 		static std::unordered_map<UUID, AssetLocation> m_AssetLocations;
 		static std::unordered_map<std::string, UUID> m_PathToUUID;
 		static std::unordered_map<UUID, ResourceMeta> m_Metas;
+		static std::unordered_map<size_t, std::vector<UUID>> m_AssetsByType;
 	};
 }

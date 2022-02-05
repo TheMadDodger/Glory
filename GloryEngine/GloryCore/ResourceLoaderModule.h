@@ -57,21 +57,29 @@ namespace Glory
 
 		virtual Resource* LoadUsingAny(const std::string& path, const std::any& importSettings) override
 		{
+			std::filesystem::path filePath = path;
+			std::string name = filePath.filename().replace_extension("").string();
 			if (importSettings.type() != typeid(S))
 			{
-				std::filesystem::path filePath = path;
 				std::any defaultSettings = CreateDefaultImportSettings(filePath.extension().string());
 				S convertedSettings = std::any_cast<S>(defaultSettings);
-				return (Resource*)LoadResource(path, convertedSettings);
+				Resource* pResource = (Resource*)LoadResource(path, convertedSettings);
+				pResource->SetName(name);
+				return pResource;
 			}
 
 			S convertedSettings = std::any_cast<S>(importSettings);
-			return (Resource*)LoadResource(path, convertedSettings);
+			Resource* pResource = (Resource*)LoadResource(path, convertedSettings);
+			pResource->SetName(name);
+			return pResource;
 		}
 
 		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) override
 		{
+			std::filesystem::path filePath = path;
+			std::string name = filePath.filename().replace_extension("").string();
 			T* pResource = LoadResource(path, (const S&)importSettings);
+			pResource->SetName(name);
 			return (Resource*)pResource;
 		}
 

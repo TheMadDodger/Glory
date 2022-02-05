@@ -32,7 +32,7 @@ namespace Glory::Editor
 		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
 		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
 		{
-				EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData);
+			EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData, pRegistry);
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
 			if (pEditor) m_pComponentEditors.push_back(pEditor);
@@ -58,6 +58,10 @@ namespace Glory::Editor
 
 	void EntitySceneObjectEditor::ComponentGUI()
 	{
+		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
+		EntityID entityID = entity.GetEntityID();
+		Registry* pRegistry = entity.GetScene()->GetRegistry();
+
 		int index = 0;
 		const std::string& nameString = m_pObject->Name();
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [&](Editor* pEditor)
@@ -70,6 +74,12 @@ namespace Glory::Editor
 
 			bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, pEditor->Name().data());
 
+			if (ImGui::IsItemClicked(1))
+			{
+				m_RightClickedComponentIndex = index;
+				ImGui::OpenPopup("ComponentRightClick");
+			}
+
 			if (nodeOpen)
 			{
 				pEditor->OnGUI();
@@ -81,19 +91,32 @@ namespace Glory::Editor
 
 		if (ImGui::Button("Add Component"))
 		{
-			//ComponentPopup::Open();
-			//m_AddingComponent = true;
+			EntityComponentPopup::Open(pRegistry);
+			m_AddingComponent = true;
 		}
 
 		if (m_AddingComponent)
 		{
-			//BaseComponent* pToAddComp = ComponentPopup::GetLastSelectedComponent();
-			//if (pToAddComp)
-			//{
-			//	pObject->AddComponent(pToAddComp);
-			//	m_AddingComponent = false;
-			//	Initialize();
-			//}
+			size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
+			if (toAddTypeHash)
+			{
+				pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
+				m_AddingComponent = false;
+				Initialize();
+			}
+		}
+
+		m_ComponentPopup.OnGUI();
+
+		if (ImGui::BeginPopup("ComponentRightClick"))
+		{
+			if (ImGui::MenuItem("Remove"))
+			{
+				pRegistry->RemoveComponent(entityID, m_RightClickedComponentIndex);
+				Initialize();
+			}
+
+			ImGui::EndPopup();
 		}
 	}
 }

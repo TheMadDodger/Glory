@@ -17,7 +17,7 @@ namespace Glory
 		virtual void Deserialize(TComponent& component, YAML::Node& object) = 0;
 
 	private:
-		virtual const std::type_index& GetSerializedType() override
+		virtual std::type_index GetSerializedType() override
 		{
 			return typeid(TComponent);
 		}
@@ -40,6 +40,7 @@ namespace Glory
 
 			TComponent& component = entity.AddComponent<TComponent>();
 			Deserialize(component, object);
+			return nullptr;
 		}
 	};
 }

@@ -16,6 +16,15 @@ namespace Glory::Editor
 	{
 	}
 
+	void EditorWindow::UpdateWindows()
+	{
+		for (size_t i = 0; i < m_pActiveEditorWindows.size(); i++)
+		{
+			m_pActiveEditorWindows[i]->Update();
+			m_pActiveEditorWindows[i]->Draw();
+		}
+	}
+
 	void EditorWindow::Close()
 	{
 		OnClose();
@@ -24,8 +33,6 @@ namespace Glory::Editor
 
 	void EditorWindow::RenderGUI()
 	{
-		OnPaint();
-
 		ImGuiWindowFlags window_flags = m_WindowFlags | (m_Resizeable? 0 : ImGuiWindowFlags_::ImGuiWindowFlags_NoResize);
 		ImGui::SetNextWindowSize(m_WindowDimensions);
 

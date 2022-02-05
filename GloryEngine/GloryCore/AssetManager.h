@@ -18,9 +18,14 @@ namespace Glory
 			Resource* pResource = FindResource(uuid);
 			if (pResource) return static_cast<T*>(pResource);
 
+			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
 			const AssetLocation* pAssetLocation = AssetDatabase::GetAssetLocation(uuid);
 			if (!pAssetLocation) return nullptr;
 			LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule<T>();
+			if (pModule == nullptr)
+				pModule = Game::GetGame().GetEngine()->GetLoaderModule(pMeta->Hash());
+
+			if (pModule == nullptr) return nullptr; // sad
 
 			if (pAssetLocation->m_IsSubAsset)
 			{
@@ -30,10 +35,9 @@ namespace Glory
 			std::filesystem::path path = Game::GetAssetPath();
 			path.append(pAssetLocation->m_Path);
 
-			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
 
 			pResource = pModule->LoadUsingAny(path.string(), pMeta->ImportSettings());
-			
+			pResource->m_ID = uuid;
 			m_pLoadedAssets[uuid] = pResource;
 			return (T*)pResource;
 		}

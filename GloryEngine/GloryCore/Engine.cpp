@@ -2,7 +2,9 @@
 #include "Console.h"
 #include "AssetManager.h"
 #include "Serializer.h"
+#include "PropertySerializer.h"
 #include <algorithm>
+#include "AssetReferencePropertySerializer.h"
 
 #ifdef _DEBUG
 #include "WindowsDebugConsole.h"
@@ -77,11 +79,6 @@ namespace Glory
 		return *it;
 	}
 
-	GameThread* Engine::GetGameThread() const
-	{
-		return m_pGameThread;
-	}
-
 	GraphicsThread* Engine::GetGraphicsThread() const
 	{
 		return m_pGraphicsThread;
@@ -90,15 +87,13 @@ namespace Glory
 	void Engine::StartThreads()
 	{
 		m_pGraphicsThread->Start();
-		m_pGameThread->Start();
 	}
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
-		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()),
-		m_pGameThread(nullptr), m_pGraphicsThread(nullptr)
+		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pGraphicsThread(nullptr)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -135,7 +130,6 @@ namespace Glory
 	{
 		AssetManager::Destroy();
 
-		m_pGameThread->Stop();
 		m_pGraphicsThread->Stop();
 
 		m_pJobManager->Kill();
@@ -163,16 +157,18 @@ namespace Glory
 		m_TypeHashToLoader.clear();
 		m_pLoaderModules.clear();
 
-		delete m_pMainThread;
-		delete m_pGameThread;
 		delete m_pGraphicsThread;
+		m_pGraphicsThread = nullptr;
 
 		Console::Cleanup();
 		Serializer::Cleanup();
+		PropertySerializer::Cleanup();
 	}
 
 	void Engine::Initialize()
 	{
+		RegisterStandardSerializers();
+
 		Console::Initialize();
 
 #ifdef _DEBUG
@@ -206,26 +202,53 @@ namespace Glory
 
 		AssetManager::Initialize();
 
+		// Run Post Initialize
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->PostInitialize();
 		}
 
-		m_pMainThread = new MainThread();
-		m_pGameThread = new GameThread(this);
+		// Bind rendering to Graphics Thread
 		m_pGraphicsThread = new GraphicsThread(this);
-
-		m_pMainThread->Bind<WindowModule>(m_pWindowModule);
-
-		m_pGameThread->Bind<ScenesModule>(m_pScenesModule);
 		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
 		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 	}
 
+	void Engine::RegisterStandardSerializers()
+	{
+		// Standard
+		STANDARD_SERIALIZER(int);
+		STANDARD_SERIALIZER(float);
+		STANDARD_SERIALIZER(double);
+		STANDARD_SERIALIZER(bool);
+		STANDARD_SERIALIZER(long);
+		STANDARD_SERIALIZER(uint32_t);
+		STANDARD_SERIALIZER(uint64_t);
+		STANDARD_SERIALIZER(glm::vec3);
+		STANDARD_SERIALIZER(glm::vec4);
+		STANDARD_SERIALIZER(glm::quat);
+		STANDARD_SERIALIZER(LayerMask);
+
+		// Special
+		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
+	}
+
 	void Engine::Update()
 	{
+		GameThreadFrameStart();
 		Console::Update();
-		m_pMainThread->Update();
+		m_pWindowModule->PollEvents();
+		ModulesLoop();
+		GameThreadFrameEnd();
+	}
+
+	void Engine::ModulesLoop()
+	{
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			m_pAllModules[i]->Update();
+			m_pAllModules[i]->Draw();
+		}
 	}
 
 	void Engine::GameThreadFrameStart()

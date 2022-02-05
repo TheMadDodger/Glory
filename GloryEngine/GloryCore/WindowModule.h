@@ -25,12 +25,11 @@ namespace Glory
 	protected:
 		virtual void OnInitialize() = 0;
 		virtual void OnCleanup() = 0;
-		virtual void OnMainUpdate() = 0;
 
 	private:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
-		virtual void MainUpdate();
+		virtual void PollEvents();
 
 	private: // Memory stuff
 		friend class MainThread;

@@ -6,9 +6,11 @@
 #include <ModelData.h>
 #include <MaterialData.h>
 #include <Camera.h>
-#include <glm/gtx/quaternion.hpp>
+//#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <CameraRef.h>
 #include <Layer.h>
+#include <LightData.h>
 
 namespace Glory
 {
@@ -28,6 +30,7 @@ namespace Glory
 
 	struct MeshFilter
 	{
+		MeshFilter() : m_pModelData(nullptr) {}
 		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData) {}
 		ModelData* m_pModelData;
 	};
@@ -67,7 +70,7 @@ namespace Glory
 
 	struct LookAt
 	{
-		LookAt() {}
+		LookAt() : m_Eye(0.0f), m_Center(0.0f), m_Up({0.0f, 1.0f, 0.0f}) {}
 		LookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) : m_Eye(eye), m_Center(center), m_Up(up) {}
 
 		glm::vec3 m_Eye;
@@ -89,6 +92,16 @@ namespace Glory
 		LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
 
 		const Layer* m_pLayer;
+	};
+
+	struct LightComponent
+	{
+		LightComponent() : m_Color(1.0f), m_Intensity(10.0f), m_Range(100.0f) {}
+		LightComponent(const glm::vec4& color, float intensity, float range) : m_Color(color), m_Intensity(intensity), m_Range(range) {}
+
+		glm::vec4 m_Color;
+		float m_Intensity;
+		float m_Range;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
