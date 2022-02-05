@@ -7,6 +7,7 @@
 #include "EditorAssets.h"
 #include "Tumbnail.h"
 #include "TumbnailGenerator.h"
+#include "Selection.h"
 
 namespace Glory::Editor
 {
@@ -268,7 +269,7 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
 		{
 			//Content* pAsset = AssetManager::GetAsset(metaData.m_GUID);
-			//Selection::SetActiveObject(pAsset);
+			Selection::SetActiveObject(nullptr);
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))

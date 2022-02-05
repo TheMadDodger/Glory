@@ -16,22 +16,22 @@ project "GloryEditor"
 	vpaths
 	{
 		["Backend"] = {  },
-		["Backend/Base"] = { "EditorRenderImpl.h", "EditorRenderImpl.cpp", "EditorWindowImpl.h", "EditorWindowImpl.cpp" },
-		["Backend/OpenGL"] = { "EditorOpenGLRenderImpl.h", "EditorOpenGLRenderImpl.cpp" },
-		["Extensions"] = { "BaseEditorExtension.h", "BaseEditorExtension.cpp" },
-		["Backend/SDL"] = { "EditorSDLWindowImpl.h", "EditorSDLWindowImpl.cpp" },
-		["Backend/Vulkan"] = { "EditorVulkanRenderImpl.h", "EditorVulkanRenderImpl.cpp" },
+		["Backend/Base"] = { "EditorRenderImpl.*", "EditorWindowImpl.*" },
+		["Backend/OpenGL"] = { "EditorOpenGLRenderImpl.*" },
+		["Extensions"] = { "BaseEditorExtension.*" },
+		["Backend/SDL"] = { "EditorSDLWindowImpl.*" },
+		["Backend/Vulkan"] = { "EditorVulkanRenderImpl.*" },
 		["Content"] = {  },
-		["Content/Editors"] = { "BehaviorTreeEditor.h", "BehaviorTreeEditor.cpp", "ComponentEditor.h", "ComponentEditor.cpp", "Editor.h", "Editor.cpp", "SceneObjectEditor.h", "SceneObjectEditor.cpp", "ScriptableObjectEditor.h", "ScriptableObjectEditor.cpp" },
-		["Content/PropertyDrawers"] = { "AssetReferencePropertyDrawer.h", "AssetReferencePropertyDrawer.cpp", "PropertyDrawer.h", "PropertyDrawer.cpp", "StandardPropertyDrawers.h", "StandardPropertyDrawers.cpp" },
-		["Content/Tumbnails"] = { "AudioTumbnailGenerator.h", "AudioTumbnailGenerator.cpp", "FontTumbnailGenerator.h", "FontTumbnailGenerator.cpp", "TextureTumbnailGenerator.h", "TextureTumbnailGenerator.cpp", "Tumbnail.h", "Tumbnail.cpp", "TumbnailGenerator.h", "TumbnailGenerator.cpp" },
-		["Editor"] = { "EditorApplication.h", "EditorApplication.cpp", "EditorPlatform.h", "EditorPlatform.cpp", "MainEditor.h", "MainEditor.cpp", "MenuBar.h", "MenuBar.cpp", "EditorAssets.h", "EditorAssets.cpp", "EditorAssetsLoader.h", "EditorAssetsLoader.cpp", "ProjectSpace.h", "ProjectSpace.cpp", "EditorAssetLoader.h", "EditorAssetLoader.cpp", "Selection.h", "Selection.cpp", "EditorCreateInfo.h", "EditorCreateInfo.cpp" },
-		["ImGui"] = { "imgui_impl_opengl3.h", "imgui_impl_opengl3.cpp", "imgui_impl_sdl.h", "imgui_impl_sdl.cpp", "imgui_impl_vulkan.h", "imgui_impl_vulkan.cpp" },
-		["OLD"] = { "AssetPickerPopup.h", "AssetPickerPopup.cpp", "ComponentPopup.h", "ComponentPopup.cpp", "EditorSceneManager.h", "EditorSceneManager.cpp", "LevelEditor.h", "LevelEditor.cpp", "SkeletonEditorComponent.h", "SkeletonEditorComponent.cpp", "SkeletonObject.h", "SkeletonObject.cpp" },
-		["Popups"] = { "PopupManager.h", "PopupManager.cpp", "ProjectPopup.h", "ProjectPopup.cpp" },
-		["Windows"] = { "EditorPreferencesWindow.h", "EditorPreferencesWindow.cpp", "EditorWindow.h", "EditorWindow.cpp", "GameWindow.h", "GameWindow.cpp", "InspectorWindow.h", "InspectorWindow.cpp", "SceneGraphWindow.h", "SceneGraphWindow.cpp" },
-		["Windows/SceneView"] = { "SceneWindow.h", "SceneWindow.cpp", "SceneViewCamera.h", "SceneViewCamera.cpp" },
-		["Windows/ContentBrowser"] = { "ContentBrowser.h", "ContentBrowser.cpp", "ContentBrowserItem.h", "ContentBrowserItem.cpp" }
+		["Content/Editors"] = { "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
+		["Content/PropertyDrawers"] = { "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*" },
+		["Content/Tumbnails"] = { "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
+		["Editor"] = { "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*" },
+		["ImGui"] = { "imgui_impl_opengl3.*", "imgui_impl_sdl.*", "imgui_impl_vulkan.*" },
+		["Helpers"] = { "ImGuiHelpers.*" },
+		["Popups"] = { "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
+		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "PerformanceMetrics.*" },
+		["Windows/SceneView"] = { "SceneWindow.*", "SceneViewCamera.*" },
+		["Windows/ContentBrowser"] = { "ContentBrowser.*", "ContentBrowserItem.*" }
 	}
 
 	includedirs

@@ -15,8 +15,8 @@ project "EntityScenesEditorExtension"
 
 	vpaths
 	{
-		["Extension"] = { "EntityScenesEditorExtension.h", "EntityScenesEditorExtension.cpp" },
-		["Editors"] = { "EntitySceneObjectEditor.h", "EntitySceneObjectEditor.cpp", "DefaultComponentEditor.h", "DefaultComponentEditor.cpp", "EntityComponentEditor.h", "TransformComponentEditor.h", "TransformComponentEditor.cpp" },
+		["Extension"] = { "EntityScenesEditorExtension.*" },
+		["Editors"] = { "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "CameraComponentEditor.*", "EntityComponentPopup.*", "LayerComponentEditor.*", "MeshRendererComponentEditor.*" },
 	}
 
 	includedirs
