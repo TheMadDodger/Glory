@@ -48,8 +48,9 @@ project "GloryCore"
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
+		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{IncludeDir.yaml_cpp}"
+		"%{IncludeDir.yaml_cpp}",
 	}
 
 	filter "system:windows"

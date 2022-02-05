@@ -2,6 +2,7 @@
 #include "EditorPlatform.h"
 #include "MainEditor.h"
 #include "ProjectSpace.h"
+#include "EditorShaderProcessor.h"
 #include <Game.h>
 #include <EditorAssetLoader.h>
 #include <EditorCreateInfo.h>
@@ -37,6 +38,8 @@ namespace Glory::Editor
 			m_pEditorInstance = this;
 
 			InitializeExtensions();
+
+			m_pShaderProcessor = new EditorShaderProcessor();
 		}
 
 		void InitializeExtensions();
@@ -56,6 +59,7 @@ namespace Glory::Editor
 		EditorPlatform* m_pPlatform;
 		MainEditor* m_pMainEditor;
 		std::vector<BaseEditorExtension*> m_pExtensions;
+		EditorShaderProcessor* m_pShaderProcessor;
 		static EditorApplication* m_pEditorInstance;
 	};
 }

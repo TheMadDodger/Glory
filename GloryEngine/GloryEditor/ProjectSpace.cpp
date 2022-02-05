@@ -66,11 +66,6 @@ namespace Glory::Editor
 		return projectFilePath.string();
 	}
 
-	ProjectSpace* ProjectSpace::CurrentProject()
-	{
-		return m_pCurrentProject;
-	}
-
 	std::string ProjectSpace::Name()
 	{
 		return m_ProjectName;
@@ -86,7 +81,13 @@ namespace Glory::Editor
 		return m_ProjectFilePath;
 	}
 
-	ProjectSpace::ProjectSpace(const std::string& path) : m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string())
+	std::string ProjectSpace::CachePath()
+	{
+		return m_CachePath;
+	}
+
+	ProjectSpace::ProjectSpace(const std::string& path)
+		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()), m_CachePath(std::filesystem::path(path).parent_path().string() + "\\Cache\\")
 	{
 	}
 
@@ -97,6 +98,7 @@ namespace Glory::Editor
 	void ProjectSpace::Open()
 	{
 		CreateFolder("Assets");
+		CreateFolder("Cache");
 		YAML::Node node = YAML::LoadFile(m_ProjectFilePath);
 		m_ProjectName = node["ProjectName"].as<std::string>();
 

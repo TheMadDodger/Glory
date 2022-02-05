@@ -40,6 +40,9 @@ namespace Glory::Editor
 	{
 		m_pMainEditor->Destroy();
 		m_pPlatform->Destroy();
+		m_pShaderProcessor->Stop();
+		delete m_pShaderProcessor;
+		m_pShaderProcessor = nullptr;
 	}
 
 	void EditorApplication::Run(Game& game)
@@ -47,6 +50,8 @@ namespace Glory::Editor
 		//game.GetEngine()->Initialize();
 		game.GetEngine()->StartThreads();
 		m_pPlatform->SetState(Idle);
+		m_pShaderProcessor->Start();
+
 		while (true)
 		{
 			// Start a frame
