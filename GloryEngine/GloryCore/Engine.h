@@ -68,7 +68,6 @@ namespace Glory
 		void ModulesLoop();
 		void GameThreadFrameStart();
 		void GameThreadFrameEnd();
-		void Update();
 
 	private:
 		Engine(const EngineCreateInfo& createInfo);

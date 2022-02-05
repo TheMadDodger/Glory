@@ -19,10 +19,10 @@ namespace Glory
         int GetLastTriangleCount();
 
     public: // Commands
+        void DrawMesh(MeshData* pMeshData);
         virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) = 0;
         virtual void Swap() = 0;
         virtual Material* UseMaterial(MaterialData* pMaterialData) = 0;
-        virtual void DrawMesh(MeshData* pMeshData) = 0;
         virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) = 0;
 
     public: // Getters
