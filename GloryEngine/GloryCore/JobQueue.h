@@ -22,6 +22,11 @@ namespace Glory::Jobs
 			m_QueueCondition.notify_all();
 		}
 
+		void ManualNotifyOne()
+		{
+			m_QueueCondition.notify_one();
+		}
+
 		void Lock()
 		{
 			m_PushLock.lock();

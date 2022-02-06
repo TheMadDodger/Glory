@@ -24,7 +24,7 @@ namespace Glory
 		if (!object.IsDefined()) return;
 		Object** pObjectMember = (Object**)serializedProperty.MemberPointer();
 		UUID uuid = object.as<uint64_t>();
-		Resource* pResource = AssetManager::GetAsset<Resource>(uuid);
+		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
 		*pObjectMember = pResource;
 	}
 }

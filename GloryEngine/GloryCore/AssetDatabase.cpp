@@ -5,74 +5,76 @@
 
 namespace Glory
 {
-	std::unordered_map<UUID, AssetLocation> AssetDatabase::m_AssetLocations;
-	std::unordered_map<std::string, UUID> AssetDatabase::m_PathToUUID;
-	std::unordered_map<UUID, ResourceMeta> AssetDatabase::m_Metas;
-	std::unordered_map<size_t, std::vector<UUID>> AssetDatabase::m_AssetsByType;
+	ThreadedUMap<UUID, AssetLocation> AssetDatabase::m_AssetLocations;
+	ThreadedUMap<std::string, UUID> AssetDatabase::m_PathToUUID;
+	ThreadedUMap<UUID, ResourceMeta> AssetDatabase::m_Metas;
+	ThreadedUMap<size_t, std::vector<UUID>> AssetDatabase::m_AssetsByType;
 
-	const AssetLocation* AssetDatabase::GetAssetLocation(UUID uuid)
+	bool AssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
-		if (m_AssetLocations.find(uuid) == m_AssetLocations.end())
+		if (!m_AssetLocations.Contains(uuid))
 		{
 			//throw new std::exception("Asset not found!");
-			return nullptr;
+			return false;
 		}
 
-		const AssetLocation* pLocation = &m_AssetLocations[uuid];
-		return pLocation;
+		location = m_AssetLocations[uuid];
+		return true;
 	}
 
-	const ResourceMeta* AssetDatabase::GetResourceMeta(UUID uuid)
+	bool AssetDatabase::GetResourceMeta(UUID uuid, ResourceMeta& meta)
 	{
-		if (m_Metas.find(uuid) == m_Metas.end())
+		if (!m_Metas.Contains(uuid))
 		{
 			//throw new std::exception("Asset not found!");
-			return nullptr;
+			return false;
 		}
 
-		const ResourceMeta* pMeta = &m_Metas[uuid];
-		return pMeta;
+		meta = m_Metas[uuid];
+		return true;
 	}
 
 	UUID AssetDatabase::GetAssetUUID(const std::string& path)
 	{
-		if (m_PathToUUID.find(path) == m_PathToUUID.end()) return 0;
+		if (!m_PathToUUID.Contains(path)) return 0;
 		return m_PathToUUID[path];
 	}
 
 	bool AssetDatabase::AssetExists(UUID uuid)
 	{
-		return m_AssetLocations.find(uuid) != m_AssetLocations.end();
+		return m_AssetLocations.Contains(uuid);
 	}
 
 	bool AssetDatabase::AssetExists(const std::string& path)
 	{
-		return m_PathToUUID.find(path) != m_PathToUUID.end();
+		return m_PathToUUID.Contains(path);
 	}
 
 	void AssetDatabase::InsertAsset(const std::string& path, const ResourceMeta& meta)
 	{
 		uint64_t uuid = meta.ID();
-		m_Metas[uuid] = meta;
-		m_AssetLocations[uuid] = AssetLocation(path, m_Metas[m_Metas.size() - 1]);
-		m_PathToUUID[path] = uuid;
-		m_AssetsByType[meta.Hash()].push_back(uuid);
+		m_Metas.Set(uuid, meta);
+		m_AssetLocations.Set(uuid, AssetLocation(path, m_Metas[m_Metas.Size() - 1]));
+		m_PathToUUID.Set(path, uuid);
+		m_AssetsByType.Do(meta.Hash(), [&](std::vector<UUID>* assets) { assets->push_back(uuid); });
 	}
 
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath)
 	{
-		if (m_AssetLocations.find(uuid) == m_AssetLocations.end())
+		if (!m_AssetLocations.Contains(uuid))
 		{
 			return;
 		}
 
-		AssetLocation* pLocation = &m_AssetLocations[uuid];
-		pLocation->m_Path = newPath;
-		m_PathToUUID.erase(pLocation->m_Path);
-		m_PathToUUID[pLocation->m_Path] = uuid;
+		AssetLocation location = m_AssetLocations[uuid];
+		location.m_Path = newPath;
+		m_PathToUUID.Erase(location.m_Path);
+		m_PathToUUID.Set(location.m_Path, uuid);
+		m_AssetLocations.Set(uuid, location);
 
-		ResourceMeta* pMeta = &m_Metas[uuid];
-		pMeta->m_Path = newMetaPath;
+		ResourceMeta meta = m_Metas[uuid];
+		meta.m_Path = newMetaPath;
+		m_Metas.Set(uuid, meta);
 	}
 
 	void AssetDatabase::Save()
@@ -149,35 +151,33 @@ namespace Glory
 
 	void AssetDatabase::ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback)
 	{
-		for (auto it = m_AssetLocations.begin(); it != m_AssetLocations.end(); it++)
-		{
-			callback(it->first, it->second);
-		}
+		m_AssetLocations.ForEach(callback);
 	}
 
 	void AssetDatabase::RemoveAsset(UUID uuid)
 	{
-		if (m_AssetLocations.find(uuid) == m_AssetLocations.end())
+		if (!m_AssetLocations.Contains(uuid))
 			return;
 
-		AssetLocation* pLocation = &m_AssetLocations[uuid];
-		std::string path = pLocation->m_Path;
-		m_AssetLocations.erase(uuid);
-		m_Metas.erase(uuid);
-		m_PathToUUID.erase(path);
+		AssetLocation location = m_AssetLocations[uuid];
+		std::string path = location.m_Path;
+		m_AssetLocations.Erase(uuid);
+		m_Metas.Erase(uuid);
+		m_PathToUUID.Erase(path);
 	}
 
-	const std::vector<UUID>& AssetDatabase::GetAllAssetsOfType(size_t typeHash)
+	const std::vector<UUID> AssetDatabase::GetAllAssetsOfType(size_t typeHash)
 	{
-		if (m_AssetsByType.find(typeHash) == m_AssetsByType.end()) return std::vector<UUID>();
+		if (!m_AssetsByType.Contains(typeHash)) return std::vector<UUID>();
 		return m_AssetsByType[typeHash];
 	}
 
 	std::string AssetDatabase::GetAssetName(UUID uuid)
 	{
 		// Will need to be different for build and editor since assets are grouped together in a single file when built
-		const AssetLocation* pLocation = GetAssetLocation(uuid);
-		std::filesystem::path path(pLocation->m_Path);
+		AssetLocation location;
+		if (!GetAssetLocation(uuid, location)) return "";
+		std::filesystem::path path(location.m_Path);
 		return path.filename().replace_extension("").string();
 	}
 
@@ -193,23 +193,21 @@ namespace Glory
 
 	void AssetDatabase::Clear()
 	{
-		m_AssetLocations.clear();
-		m_PathToUUID.clear();
-		m_Metas.clear();
+		m_AssetLocations.Clear();
+		m_PathToUUID.Clear();
+		m_Metas.Clear();
 	}
 
 	void AssetDatabase::ExportEditor(YAML::Emitter& out)
 	{
 		out << YAML::BeginSeq;
-		for (auto it = m_AssetLocations.begin(); it != m_AssetLocations.end(); it++)
+
+		m_AssetLocations.ForEach([&](const UUID& uuid, const AssetLocation& location)
 		{
-			UUID uuid = it->first;
-			AssetLocation location = it->second;
+			if (!m_Metas.Contains(uuid))
+				return;
 
-			if (m_Metas.find(uuid) == m_Metas.end())
-				continue;
-
-			const ResourceMeta& meta = m_Metas.at(uuid);
+			ResourceMeta meta = m_Metas[uuid];
 
 			size_t versionHash = std::hash<ResourceMeta>()(meta);
 
@@ -226,7 +224,8 @@ namespace Glory
 			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(hash);
 			meta.Write(out, pLoader);
 			out << YAML::EndMap;
-		}
+		});
+
 		out << YAML::EndSeq;
 	}
 

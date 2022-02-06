@@ -274,8 +274,9 @@ namespace Glory::Editor
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
-			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
-			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(pMeta->Hash());
+			ResourceMeta meta;
+			AssetDatabase::GetResourceMeta(uuid, meta);
+			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(meta.Hash());
 			if (!pGenerator) return;
 			pGenerator->OnFileDoubleClick(uuid);
 		}

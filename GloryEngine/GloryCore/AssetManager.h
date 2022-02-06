@@ -4,46 +4,32 @@
 #include "AssetGroup.h"
 #include "Game.h"
 #include "AssetDatabase.h"
+#include "ThreadedVar.h"
+#include "JobManager.h"
 #include <unordered_map>
 #include <vector>
 
 namespace Glory
 {
+	struct CallbackData
+	{
+		CallbackData();
+		CallbackData(UUID uuid, Resource* pResource);
+
+		UUID m_UUID;
+		Resource* m_pResource;
+	};
+
 	class AssetManager
 	{
 	public:
-		template<class T>
-		static T* GetAsset(UUID uuid)
-		{
-			Resource* pResource = FindResource(uuid);
-			if (pResource) return static_cast<T*>(pResource);
-
-			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
-			const AssetLocation* pAssetLocation = AssetDatabase::GetAssetLocation(uuid);
-			if (!pAssetLocation) return nullptr;
-			LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule<T>();
-			if (pModule == nullptr)
-				pModule = Game::GetGame().GetEngine()->GetLoaderModule(pMeta->Hash());
-
-			if (pModule == nullptr) return nullptr; // sad
-
-			if (pAssetLocation->m_IsSubAsset)
-			{
-				throw new std::exception("Not implemented yet");
-			}
-
-			std::filesystem::path path = Game::GetAssetPath();
-			path.append(pAssetLocation->m_Path);
-
-
-			pResource = pModule->LoadUsingAny(path.string(), pMeta->ImportSettings());
-			pResource->m_ID = uuid;
-			m_pLoadedAssets[uuid] = pResource;
-			return (T*)pResource;
-		}
+		static void GetAsset(UUID uuid, std::function<void(Resource*)> callback);
+		static Resource* GetAssetImmediate(UUID uuid);
 
 	private:
 		static Resource* FindResource(UUID uuid);
+		static bool LoadResourceJob(UUID uuid);
+		static Resource* LoadAsset(UUID uuid);
 
 	private:
 		AssetManager();
@@ -51,11 +37,15 @@ namespace Glory
 
 		static void Initialize();
 		static void Destroy();
+		static void RunCallbacks();
 
 	private:
 		friend class Engine;
-		static std::unordered_map<UUID, Resource*> m_pLoadedAssets;
-		static std::vector<AssetGroup*> m_LoadedAssetGroups;
-		static std::unordered_map<std::string, size_t> m_PathToGroupIndex;
+		static ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
+		static ThreadedUMap<std::string, size_t> m_PathToGroupIndex;
+		static ThreadedVector<AssetGroup*> m_LoadedAssetGroups;
+		static ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;
+		static ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> m_AssetLoadedCallbacks;
+		static Jobs::JobPool<bool, UUID>* m_pResourceLoadingPool;
 	};
 }

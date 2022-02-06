@@ -24,8 +24,9 @@ namespace Glory::Editor
 		if (!additive) CloseAll();
 
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
-		const AssetLocation* pLocation = AssetDatabase::GetAssetLocation(uuid);
-		std::string path = Game::GetGame().GetAssetPath() + "\\" + pLocation->m_Path;
+		AssetLocation location;
+		AssetDatabase::GetAssetLocation(uuid, location);
+		std::string path = Game::GetGame().GetAssetPath() + "\\" + location.m_Path;
 		pScenesModule->OpenScene(path, uuid);
 		m_OpenedSceneIDs.push_back(uuid);
 	}
@@ -34,8 +35,8 @@ namespace Glory::Editor
 	{
 		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [](UUID uuid)
 		{
-			const AssetLocation* pLocation = AssetDatabase::GetAssetLocation(uuid);
-			if (pLocation == nullptr) // new scene
+			AssetLocation location;
+			if (!AssetDatabase::GetAssetLocation(uuid, location)) // new scene
 			{
 				// TODO: Need to bring up a file browser here
 				return;
@@ -44,7 +45,7 @@ namespace Glory::Editor
 			GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
 			YAML::Emitter out;
 			Serializer::SerializeObject(pScene, out);
-			std::string path = Game::GetGame().GetAssetPath() + "\\" + pLocation->m_Path;
+			std::string path = Game::GetGame().GetAssetPath() + "\\" + location.m_Path;
 			std::ofstream outStream(path);
 			outStream << out.c_str();
 			outStream.close();

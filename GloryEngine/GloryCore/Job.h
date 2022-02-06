@@ -10,7 +10,7 @@ namespace Glory::Jobs
 	class Job
 	{
 	public:
-		Job(JobQueue<ret, args...>* pJobQueue) : m_pJobQueue(pJobQueue) {}
+		Job(JobQueue<ret, args...>* pJobQueue) : m_pJobQueue(pJobQueue), m_Exit(false) {}
 		virtual ~Job()
 		{
 
