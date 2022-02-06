@@ -94,8 +94,10 @@ namespace Glory::Editor
 			std::string name = AssetDatabase::GetAssetName(uuid);
 			if (ImGui::MenuItem(name.c_str()))
 			{
-				Resource* pResource = AssetManager::GetAsset<Resource>(uuid);
-				AssetSelected(pResource);
+				AssetManager::GetAsset(uuid, [&](Resource* pResource)
+					{
+						AssetSelected(pResource);
+					});
 			}
 		});
 	}

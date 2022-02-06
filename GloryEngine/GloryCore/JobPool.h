@@ -25,6 +25,13 @@ namespace Glory::Jobs
 	public:
 		void StartQueue() { m_pJobQueue->Lock(); }
 		void QueueJob(std::function<ret(args...)> job, args... arguments) { m_pJobQueue->Push(job, arguments...); }
+		void QueueSingleJob(std::function<ret(args...)> job, args... arguments)
+		{
+			m_pJobQueue->Lock();
+			m_pJobQueue->Push(job, arguments...);
+			m_pJobQueue->UnLock();
+			m_pJobQueue->ManualNotifyOne();
+		}
 		void EndQueue() { m_pJobQueue->UnLock(); }
 		bool HasTasksInQueue() { return m_pJobQueue->Size() > 0; }
 
