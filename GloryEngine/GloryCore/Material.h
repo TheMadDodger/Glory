@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "RenderData.h"
 #include "Texture.h"
+#include "Buffer.h"
 
 namespace Glory
 {
@@ -20,6 +21,7 @@ namespace Glory
 		void SetUBO(UniformBufferObjectTest ubo);
 		void SetProperty(MaterialPropertyData* pProperty);
 
+		// All of these need to go, properties should be set using the material data/material instance data class linked to this material
 		virtual void SetFloat(const std::string& name, float value) const = 0;
 		virtual void SetInt(const std::string& name, int value) const = 0;
 		virtual void SetUInt(const std::string& name, uint32_t value) const = 0;
@@ -39,12 +41,17 @@ namespace Glory
 		virtual void Initialize() = 0;
 		void AddShader(Shader* pShader);
 
+		virtual Buffer* CreatePropertiesBuffer(size_t size) = 0;
+
 	protected:
 		MaterialData* m_pMaterialData;
 		std::vector<Shader*> m_pShaders;
 		UniformBufferObjectTest m_UBO;
 
 		std::vector<MaterialPropertyData> m_FrameProperties;
+		std::vector<char> m_PropertyData;
+
+		Buffer* m_pPropertiesBuffer;
 
 	private:
 		friend class GPUResourceManager;

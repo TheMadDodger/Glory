@@ -19,6 +19,8 @@ namespace Glory
         ShaderSourceLoaderModule();
         virtual ~ShaderSourceLoaderModule();
 
+        static bool GetShaderTypeFromString(const std::string& typeString, ShaderType& shaderType);
+
     protected:
         const std::type_info& GetModuleType() override;
         ShaderSourceData* LoadResource(const std::string& path, const ShaderSourceImportSettings& importSettings);
@@ -39,12 +41,9 @@ namespace Glory
         void AppendLine(const std::string& line, std::vector<char>& buffer);
 
     private: // Symbol callbacks
-        bool TypeSymbol(const std::string& path, ShaderSourceData* pShaderSource, const std::string& argument);
 
     private:
         std::map<std::string, std::function<bool(const std::string&, ShaderSourceData*, const std::string&)>> m_SymbolCallbacks;
-
-
-        std::map<std::string, ShaderType> m_ShaderTypes;
+        static std::map<std::string, ShaderType> m_ShaderTypes;
     };
 }

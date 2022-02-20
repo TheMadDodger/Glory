@@ -4,6 +4,8 @@
 #include "GLShader.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <Game.h>
+#include <Engine.h>
 
 namespace Glory
 {
@@ -60,6 +62,12 @@ namespace Glory
 	{
 		if (m_UBOID == NULL) m_UBOID = CreateUniformBuffer("UniformBufferObject", sizeof(UniformBufferObjectTest), 0);
 		SetUniformBuffer(m_UBOID, (void*)&m_UBO, sizeof(UniformBufferObjectTest));
+	}
+
+	Buffer* OGLMaterial::CreatePropertiesBuffer(size_t size)
+	{
+		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
+			->CreateBuffer(size, GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW, 0);
 	}
 
 	void OGLMaterial::SetFloat(const std::string& name, float value) const

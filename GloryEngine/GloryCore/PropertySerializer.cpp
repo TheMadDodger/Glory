@@ -52,6 +52,13 @@ namespace Glory
 		pSerializer->Deserialize(serializedProperty, object);
 	}
 
+	void PropertySerializer::DeserializeProperty(std::any& out, size_t typeHash, YAML::Node& object)
+	{
+		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(typeHash);
+		if (pSerializer == nullptr) return;
+		pSerializer->Deserialize(out, object);
+	}
+
 	size_t PropertySerializer::GetSerializedTypeHash() const
 	{
 		return m_TypeHash;

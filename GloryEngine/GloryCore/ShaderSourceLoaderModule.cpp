@@ -5,26 +5,29 @@
 
 namespace Glory
 {
+	std::map<std::string, ShaderType> ShaderSourceLoaderModule::m_ShaderTypes = {
+		{ "compute", ShaderType::ST_Compute },
+		{ "comp", ShaderType::ST_Compute },
+		{ "fragment", ShaderType::ST_Fragment },
+		{ "frag", ShaderType::ST_Fragment },
+		{ "geometry", ShaderType::ST_Geomtery },
+		{ "geom", ShaderType::ST_Geomtery },
+		{ "tesscontrol", ShaderType::ST_TessControl },
+		{ "tc", ShaderType::ST_TessControl },
+		{ "tesselationcontrol", ShaderType::ST_TessControl },
+		{ "teseval", ShaderType::ST_TessEval },
+		{ "te", ShaderType::ST_TessEval },
+		{ "tesselationevaluation", ShaderType::ST_TessEval },
+		{ "vertex", ShaderType::ST_Vertex },
+		{ "vert", ShaderType::ST_Vertex },
+	};
+
 	ShaderSourceLoaderModule::ShaderSourceLoaderModule() : ResourceLoaderModule("shader")
 	{
-		m_ShaderTypes = {
-			{ "compute", ShaderType::ST_Compute },
-			{ "comp", ShaderType::ST_Compute },
-			{ "fragment", ShaderType::ST_Fragment },
-			{ "frag", ShaderType::ST_Fragment },
-			{ "geometry", ShaderType::ST_Geomtery },
-			{ "geom", ShaderType::ST_Geomtery },
-			{ "tesscontrol", ShaderType::ST_TessControl },
-			{ "tc", ShaderType::ST_TessControl },
-			{ "tesselationcontrol", ShaderType::ST_TessControl },
-			{ "teseval", ShaderType::ST_TessEval },
-			{ "te", ShaderType::ST_TessEval },
-			{ "tesselationevaluation", ShaderType::ST_TessEval },
-			{ "vertex", ShaderType::ST_Vertex },
-			{ "vert", ShaderType::ST_Vertex },
+		m_SymbolCallbacks["type"] = [&](const std::string& path, ShaderSourceData* pShaderSource, const std::string& argument)
+		{
+			return GetShaderTypeFromString(argument, pShaderSource->m_ShaderType);
 		};
-		
-		m_SymbolCallbacks["type"] = [&](const std::string& path, ShaderSourceData* pShaderSource, const std::string& argument) {return TypeSymbol(path, pShaderSource, argument); };
 	}
 
 	ShaderSourceLoaderModule::~ShaderSourceLoaderModule()
@@ -135,10 +138,10 @@ namespace Glory
 		buffer.push_back('\n');
 	}
 
-	bool ShaderSourceLoaderModule::TypeSymbol(const std::string& path, ShaderSourceData* pShaderSource, const std::string& argument)
+	bool ShaderSourceLoaderModule::GetShaderTypeFromString(const std::string& typeString, ShaderType& shaderType)
 	{
-		if (m_ShaderTypes.find(argument) == m_ShaderTypes.end()) return false;
-		pShaderSource->m_ShaderType = m_ShaderTypes[argument];
+		if (m_ShaderTypes.find(typeString) == m_ShaderTypes.end()) return false;
+		shaderType = m_ShaderTypes[typeString];
 		return true;
 	}
 

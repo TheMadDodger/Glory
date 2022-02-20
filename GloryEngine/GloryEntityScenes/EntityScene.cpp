@@ -6,6 +6,12 @@
 #include "Systems.h"
 #include "EntitySceneObject.h"
 
+
+
+
+#include <Game.h>
+#include <Engine.h>
+
 namespace Glory
 {
 	EntityScene::EntityScene() : GScene("New Scene") //: m_pJobPool(nullptr)
@@ -55,6 +61,8 @@ namespace Glory
 		m_Registry.RegisterSystem<LookAtSystem>();
 		m_Registry.RegisterSystem<SpinSystem>();
 		m_Registry.RegisterSystem<LightSystem>();
+
+		Game::GetGame().GetEngine()->GetLoaderModule<MaterialData>()->Load("./test_instance.gmat");
 	}
 
 	void EntityScene::OnTick()

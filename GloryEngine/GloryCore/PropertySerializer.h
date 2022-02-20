@@ -25,6 +25,7 @@ namespace Glory
 
 		static void SerializeProperty(const SerializedProperty& serializedProperty, YAML::Emitter& out);
 		static void DeserializeProperty(const SerializedProperty& serializedProperty, YAML::Node& object);
+		static void DeserializeProperty(std::any& out, size_t typeHash, YAML::Node& object);
 
 		virtual size_t GetSerializedTypeHash() const;
 
@@ -35,6 +36,7 @@ namespace Glory
 	protected:
 		virtual void Serialize(const SerializedProperty& serializedProperty, YAML::Emitter& out) = 0;
 		virtual void Deserialize(const SerializedProperty& serializedProperty, YAML::Node& object) = 0;
+		virtual void Deserialize(std::any& out, YAML::Node& object) = 0;
 
 	private:
 		friend class Engine;
@@ -66,6 +68,12 @@ namespace Glory
 			T* pMember = (T*)serializedProperty.MemberPointer();
 			T data = object.as<T>();
 			*pMember = data;
+		}
+
+		virtual void Deserialize(std::any& out, YAML::Node& object) override
+		{
+			if (!object.IsDefined()) return;
+			out = object.as<T>();
 		}
 	};
 }

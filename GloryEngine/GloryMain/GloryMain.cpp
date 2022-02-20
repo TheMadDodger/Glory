@@ -160,6 +160,7 @@ namespace Glory
 #include <EditorOpenGLRenderImpl.h>
 #include <EditorApplication.h>
 #include <EntityScenesEditorExtension.h>
+#include <MaterialLoaderModule.h>
 
 using namespace Glory::Editor;
 
@@ -178,6 +179,7 @@ int main()
             new Glory::SDLImageLoaderModule(),
             new Glory::ASSIMPModule(),
             new Glory::FileLoaderModule(),
+            new Glory::MaterialLoaderModule(),
             new Glory::ShaderSourceLoaderModule(),
             new Glory::GLSLShaderLoader(),
         };

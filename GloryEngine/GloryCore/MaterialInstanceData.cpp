@@ -8,6 +8,8 @@ namespace Glory
 	{
 		APPEND_TYPE(MaterialInstanceData);
 
+		if (!pBaseMaterial) return;
+
 		pBaseMaterial->CopyProperties(m_Properties);
 
 		m_PropertyOverridesEnable.resize(m_Properties.size(), false);
