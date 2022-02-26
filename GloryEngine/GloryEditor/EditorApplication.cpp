@@ -103,7 +103,7 @@ namespace Glory::Editor
 	void EditorApplication::RenderEditor()
 	{
 		m_pMainEditor->PaintEditor();
-		ImGui::ShowDemoWindow();
-		ImPlot::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
+		//ImPlot::ShowDemoWindow();
 	}
 }

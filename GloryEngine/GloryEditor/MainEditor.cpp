@@ -31,6 +31,8 @@
 #include "AssetReferencePropertyDrawer.h"
 #include <ImGuizmo.h>
 #include <Gizmos.h>
+#include "ObjectMenu.h"
+#include "ObjectMenuCallbacks.h"
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
@@ -60,6 +62,7 @@ namespace Glory::Editor
 		RegisterEditors();
 
 		CreateDefaultMainMenuBar();
+		CreateDefaultObjectMenu();
 
 		SetDarkThemeColors();
 
@@ -96,6 +99,7 @@ namespace Glory::Editor
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
         EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
+		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
 		m_AssetPickerPopup->OnGUI();
 	}
@@ -107,7 +111,7 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", EditorSceneManager::NewScene);
+		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); });
 		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes);
 		MenuBar::AddMenuItem("File/Load Scene", []()
 		{
@@ -186,6 +190,19 @@ namespace Glory::Editor
 		colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 		colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+	}
+
+	void MainEditor::CreateDefaultObjectMenu()
+	{
+		ObjectMenu::AddMenuItem("Set As Active Scene", SetActiveSceneCallback, T_Scene);
+		ObjectMenu::AddMenuItem("Remove Scene", RemoveSceneCallback, T_Scene);
+		ObjectMenu::AddMenuItem("Reload Scene", ReloadSceneCallback, T_Scene);
+		ObjectMenu::AddMenuItem("Copy", CopyObjectCallback, T_Resource | T_SceneObject | T_Scene);
+		ObjectMenu::AddMenuItem("Paste", PasteObjectCallback, T_SceneObject | T_Resource | T_ContentBrowser | T_Hierarchy | T_Scene);
+		ObjectMenu::AddMenuItem("Duplicate", DeleteObjectCallback, T_SceneObject | T_Resource);
+		ObjectMenu::AddMenuItem("Delete", DeleteObjectCallback, T_SceneObject | T_Resource);
+		ObjectMenu::AddMenuItem("Create/Empty Object", CreateEmptyObjectCallback, T_SceneObject | T_Scene | T_Hierarchy);
+		ObjectMenu::AddMenuItem("Create/New Scene", CreateNewSceneCallback, T_Hierarchy);
 	}
 
 	void MainEditor::Update()

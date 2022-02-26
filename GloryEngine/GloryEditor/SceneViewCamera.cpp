@@ -120,7 +120,7 @@ namespace Glory::Editor
 		m_Far = far;
 
 		m_IsOrthographic = false;
-		m_Camera.SetPerspectiveProjection(m_Width, m_Width, m_HalfFOV, m_Near, m_Far);
+		m_Camera.SetPerspectiveProjection(m_Width, m_Height, m_HalfFOV, m_Near, m_Far);
 	}
 	void SceneViewCamera::SetOrthographic(float width, float height, float near, float far)
 	{
@@ -130,6 +130,6 @@ namespace Glory::Editor
 		m_Far = far;
 
 		m_IsOrthographic = true;
-		m_Camera.SetOrthographicProjection(m_Width * m_OrthoZoom, m_Width * m_OrthoZoom, m_Near, m_Far);
+		m_Camera.SetOrthographicProjection(m_Width * m_OrthoZoom, m_Height * m_OrthoZoom, m_Near, m_Far);
 	}
 }

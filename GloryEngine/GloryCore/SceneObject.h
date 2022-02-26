@@ -24,6 +24,7 @@ namespace Glory
         size_t GetSiblingIndex();
 
         void SetScene(GScene* pScene);
+        GScene* GetScene() const;
 
     public:
         const std::string& Name();

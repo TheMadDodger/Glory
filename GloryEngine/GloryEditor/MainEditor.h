@@ -20,6 +20,7 @@ namespace Glory::Editor
 	private:
 		void CreateDefaultMainMenuBar();
 		void SetDarkThemeColors();
+		void CreateDefaultObjectMenu();
 
 		void Update();
 

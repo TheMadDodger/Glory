@@ -100,7 +100,7 @@ namespace Glory
 
 	glm::mat4 Camera::GetFinalView() const
 	{
-		return m_View * m_ViewOffset;
+		return m_ViewOffset * m_View;
 	}
 
 	float* Camera::GetViewPointer()

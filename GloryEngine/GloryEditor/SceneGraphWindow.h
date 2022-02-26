@@ -1,5 +1,6 @@
 #pragma once
 #include <ScenesModule.h>
+#include <Object.h>
 #include "EditorWindow.h"
 
 namespace Glory::Editor
@@ -15,11 +16,8 @@ namespace Glory::Editor
 
 		void SceneDropdown(size_t index, GScene* pScene, bool isActive);
 		void ChildrenList(size_t index, SceneObject* pScene);
-		//void ObjectMenu();
 
 	private:
-		//GameObject* m_CurrentRightClickedObject;
-
 		struct DNDPayload
 		{
 			SceneObject* pObject;

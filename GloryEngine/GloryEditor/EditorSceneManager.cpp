@@ -9,12 +9,13 @@ namespace Glory::Editor
 {
 	std::vector<UUID> EditorSceneManager::m_OpenedSceneIDs;
 
-	void EditorSceneManager::NewScene()
+	GScene* EditorSceneManager::NewScene(bool additive)
 	{
-		CloseAll();
+		if (!additive) CloseAll();
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
 		GScene* pScene = pScenesModule->CreateEmptyScene();
 		m_OpenedSceneIDs.push_back(pScene->GetUUID());
+		return pScene;
 	}
 
 	void EditorSceneManager::OpenScene(UUID uuid, bool additive)

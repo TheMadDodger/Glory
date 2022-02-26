@@ -106,6 +106,11 @@ namespace Glory
 		m_pScene->m_pSceneObjects.push_back(this);
 	}
 
+	GScene* SceneObject::GetScene() const
+	{
+		return m_pScene;
+	}
+
 	const std::string& SceneObject::Name()
 	{
 		return m_Name;

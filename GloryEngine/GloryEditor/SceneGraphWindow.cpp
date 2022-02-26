@@ -3,6 +3,7 @@
 #include "EditorSceneManager.h"
 #include "Game.h"
 #include "Selection.h"
+#include "ObjectMenu.h"
 #include <ImGuiHelpers.h>
 
 namespace Glory::Editor
@@ -45,18 +46,10 @@ namespace Glory::Editor
 			ImGui::EndDragDropTarget();
 		}
 
-		//if (ImGui::IsItemClicked(1))
-		//{
-		//	m_CurrentRightClickedObject = nullptr;
-		//	ImGui::OpenPopup("object_menu_popup");
-		//}
-		//
-		//if (ImGui::BeginPopup("object_menu_popup"))
-		//{
-		//	ObjectMenu();
-		//	ImGui::EndPopup();
-		//}
-		//
+		if (ImGui::IsItemClicked(1))
+		{
+			ObjectMenu::Open(nullptr, ObjectMenuType::T_Hierarchy);
+		}
 	}
 
 	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)
@@ -91,6 +84,10 @@ namespace Glory::Editor
 		if (ImGui::IsItemClicked())
 		{
 			Selection::SetActiveObject(pScene);
+		}
+		else if (ImGui::IsItemClicked(1))
+		{
+			ObjectMenu::Open(pScene, T_Scene);
 		}
 
 		if (nodeOpen)
@@ -201,21 +198,12 @@ namespace Glory::Editor
 
 		if (ImGui::IsItemClicked())
 		{
-			//if (m_CurrentSelectedObject != pChild)
-				//ComponentParameterManager::GetInstance()->Clear();
-
 			Selection::SetActiveObject(pObject);
 		}
 		if (ImGui::IsItemClicked(1))
 		{
-			//m_CurrentRightClickedObject = pChild;
-			//ImGui::OpenPopup("object_menu_popup" + index);
+			ObjectMenu::Open(pObject, T_SceneObject);
 		}
-		//if (ImGui::BeginPopup("object_menu_popup" + id))
-		//{
-		//	//ObjectMenu();
-		//	//ImGui::EndPopup();
-		//}
 
 		if (node_open)
 		{
@@ -256,175 +244,5 @@ namespace Glory::Editor
 			}
 			ImGui::EndDragDropTarget();
 		}
-
-		// Node
-		//if (node_open)
-		//{
-		//	for (auto pChildOfChild : childrenOfChild)
-		//	{
-		//		ChildrenList(pChildOfChild);
-		//	}
-		//
-		//	ImGui::TreePop();
-		//}
-		//}
-		//else
-		//{
-		//	node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
-		//	ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, pChild->GetName());
-		//	if (ImGui::IsItemClicked())
-		//	{
-		//		Selection::SetActiveObject(pChild);
-		//	}
-		//	if (ImGui::IsItemClicked(1))
-		//	{
-		//		m_CurrentRightClickedObject = pChild;
-		//		ImGui::OpenPopup("object_menu_popup" + m_I);
-		//	}
-		//	if (ImGui::BeginPopup("object_menu_popup" + m_I))
-		//	{
-		//		ObjectMenu();
-		//		ImGui::EndPopup();
-		//	}
-		//	++m_I;
-		//}
 	}
-
-	//void SceneGraphWindow::ObjectMenu()
-	//{
-	//	Spartan::GameObject *pCreatedObj = nullptr;
-	//	ImGui::MenuItem("Object Menu", NULL, false, false);
-	//
-	//	if (ImGui::MenuItem("Copy", "Ctrl+C"))
-	//	{
-	//
-	//	}
-	//
-	//	if (ImGui::MenuItem("Paste", "Ctrl+V"))
-	//	{
-	//
-	//	}
-	//
-	//	if (ImGui::MenuItem("Duplicate"))
-	//	{
-	//
-	//	}
-	//
-	//	if (ImGui::MenuItem("Delete"))
-	//	{
-	//		if (m_CurrentRightClickedObject)
-	//		{
-	//			auto pParent = m_CurrentRightClickedObject->GetParent();
-	//			//if (pParent)
-	//				//pParent->RemoveChild(m_CurrentRightClickedObject, true);
-	//			//else
-	//				//RemoveChild(m_CurrentRightClickedObject, true);
-	//
-	//			Selection::Clear();
-	//		}
-	//	}
-	//
-	//	if (ImGui::BeginMenu("Create"))
-	//	{
-	//		if (ImGui::MenuItem("Empty"))
-	//		{
-	//			pCreatedObj = new GameObject("Empty Game Object");
-	//		}
-	//		if (ImGui::BeginMenu("Geometry"))
-	//		{
-	//			if (ImGui::MenuItem("Box"))
-	//			{
-	//
-	//			}
-	//			if (ImGui::MenuItem("Circle"))
-	//			{
-	//
-	//			}
-	//			if (ImGui::MenuItem("Skinned Mesh"))
-	//			{
-	//
-	//			}
-	//			ImGui::EndMenu();
-	//		}
-	//		if (ImGui::BeginMenu("Effects"))
-	//		{
-	//			if (ImGui::MenuItem("Particle Emitter"))
-	//			{
-	//
-	//			}
-	//			if (ImGui::MenuItem("Camera"))
-	//			{
-	//
-	//			}
-	//			ImGui::EndMenu();
-	//		}
-	//		if (ImGui::BeginMenu("UI"))
-	//		{
-	//			if (ImGui::MenuItem("UI Container"))
-	//			{
-	//
-	//			}
-	//			if (ImGui::MenuItem("UI Button"))
-	//			{
-	//
-	//			}
-	//			ImGui::EndMenu();
-	//		}
-	//		if (ImGui::BeginMenu("Animation"))
-	//		{
-	//			if (ImGui::MenuItem("Rig"))
-	//			{
-	//				//pCreatedObj = new SkeletonObject(new Skeleton());
-	//			}
-	//			if (ImGui::MenuItem("Bone"))
-	//			{
-	//				//pCreatedObj = new Bone(100.0f, 0.872664625f);
-	//			}
-	//			ImGui::EndMenu();
-	//		}
-	//		ImGui::EndMenu();
-	//	}
-	//
-	//	//if (pCreatedObj)
-	//	//{
-	//	//	if (m_CurrentRightClickedObject)
-	//	//	{
-	//	//		auto skeleton = dynamic_cast<SkeletonObject*>(m_CurrentRightClickedObject);
-	//	//		auto parentBone = dynamic_cast<Bone*>(m_CurrentRightClickedObject);
-	//	//		auto bone = static_cast<Bone*>(pCreatedObj);
-	//	//
-	//	//		if (skeleton)
-	//	//		{
-	//	//			if (bone)
-	//	//			{
-	//	//				skeleton->GetSkeleton()->AddBone(bone);
-	//	//				AddChild(bone);
-	//	//			}
-	//	//			else
-	//	//			{
-	//	//				// Only bones are allowed as children on a skeleton!
-	//	//				delete pCreatedObj;
-	//	//			}
-	//	//		}
-	//	//		else if (parentBone)
-	//	//		{
-	//	//			if (bone)
-	//	//			{
-	//	//				parentBone->AddChildBone(bone);
-	//	//				parentBone->AddChild(bone);
-	//	//			}
-	//	//			else
-	//	//			{
-	//	//				// Only bones are allowed as children on a skeleton!
-	//	//				delete pCreatedObj;
-	//	//			}
-	//	//		}
-	//	//		else
-	//	//		{
-	//	//			m_CurrentRightClickedObject->AddChild(pCreatedObj);
-	//	//		}
-	//	//	}
-	//	//	else AddChild(pCreatedObj);
-	//	//}
-	//}
 }

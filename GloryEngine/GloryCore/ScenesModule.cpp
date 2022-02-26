@@ -50,6 +50,13 @@ namespace Glory
 		return m_pOpenScenes[m_ActiveSceneIndex];
 	}
 
+	void ScenesModule::SetActiveScene(GScene* pScene)
+	{
+		auto it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pScene);
+		if (it == m_pOpenScenes.end()) return;
+		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+	}
+
 	void ScenesModule::CloseAllScenes()
 	{
 		Cleanup();

@@ -6,7 +6,7 @@ namespace Glory::Editor
 	class EditorSceneManager
 	{
 	public:
-		static void NewScene();
+		static GScene* NewScene(bool additive = false);
 		static void OpenScene(UUID uuid, bool additive);
 		static void SaveOpenScenes();
 
