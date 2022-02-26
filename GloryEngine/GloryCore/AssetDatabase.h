@@ -3,14 +3,15 @@
 #include "AssetLocation.h"
 #include "ResourceMeta.h"
 #include <unordered_map>
+#include "ThreadedVar.h"
 
 namespace Glory
 {
 	class AssetDatabase
 	{
 	public:
-		static const AssetLocation* GetAssetLocation(UUID uuid);
-		static const ResourceMeta* GetResourceMeta(UUID uuid);
+		static bool GetAssetLocation(UUID uuid, AssetLocation& location);
+		static bool GetResourceMeta(UUID uuid, ResourceMeta& meta);
 		static UUID GetAssetUUID(const std::string& path);
 		static bool AssetExists(UUID uuid);
 		static bool AssetExists(const std::string& path);
@@ -22,7 +23,7 @@ namespace Glory
 		static void ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback);
 		static void RemoveAsset(UUID uuid);
 
-		static const std::vector<UUID>& GetAllAssetsOfType(size_t typeHash);
+		static const std::vector<UUID> GetAllAssetsOfType(size_t typeHash);
 
 		static std::string GetAssetName(UUID uuid);
 
@@ -39,9 +40,9 @@ namespace Glory
 		virtual ~AssetDatabase();
 
 	private:
-		static std::unordered_map<UUID, AssetLocation> m_AssetLocations;
-		static std::unordered_map<std::string, UUID> m_PathToUUID;
-		static std::unordered_map<UUID, ResourceMeta> m_Metas;
-		static std::unordered_map<size_t, std::vector<UUID>> m_AssetsByType;
+		static ThreadedUMap<UUID, AssetLocation> m_AssetLocations;
+		static ThreadedUMap<std::string, UUID> m_PathToUUID;
+		static ThreadedUMap<UUID, ResourceMeta> m_Metas;
+		static ThreadedUMap<size_t, std::vector<UUID>> m_AssetsByType;
 	};
 }

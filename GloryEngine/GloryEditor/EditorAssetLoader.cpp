@@ -65,8 +65,9 @@ namespace Glory::Editor
 			UUID uuid = meta.ID();
 			if (AssetDatabase::AssetExists(uuid))
 			{
-				const AssetLocation* pLocation = AssetDatabase::GetAssetLocation(uuid);
-				if (relativePathToFile != pLocation->m_Path)
+				AssetLocation location;
+				AssetDatabase::GetAssetLocation(uuid, location);
+				if (relativePathToFile != location.m_Path)
 				{
 					AssetDatabase::UpdateAssetPath(uuid, relativePathToFile, metaFilePath.string());
 				}
@@ -91,8 +92,9 @@ namespace Glory::Editor
 		UUID uuid = AssetDatabase::GetAssetUUID(relativePathToFile);
 		if (uuid != 0)
 		{
-			const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
-			pMeta->Write(pLoader);
+			ResourceMeta meta;
+			AssetDatabase::GetResourceMeta(uuid, meta);
+			meta.Write(pLoader);
 			return;
 		}
 

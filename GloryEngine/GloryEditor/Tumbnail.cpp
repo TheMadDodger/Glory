@@ -21,12 +21,13 @@ namespace Glory::Editor
 			return EditorAssets::GetTexture("file");
 		}
 
-		const ResourceMeta* pMeta = AssetDatabase::GetResourceMeta(uuid);
+		ResourceMeta meta;
+		AssetDatabase::GetResourceMeta(uuid, meta);
 
-		BaseTumbnailGenerator* pGenerator = GetGenerator(pMeta->Hash());
+		BaseTumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
 		if (pGenerator == nullptr)
 			return EditorAssets::GetTexture("file");
-		ImageData* pImage = pGenerator->GetTumbnail(pMeta);
+		ImageData* pImage = pGenerator->GetTumbnail(&meta);
 		m_pTumbnails[uuid] = pImage;
 		EditorAssets::EnqueueTextureCreation(pImage);
 		return EditorAssets::GetTexture("file");

@@ -13,6 +13,6 @@ namespace Glory::Editor
 
 	ImageData* TextureTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
 	{
-		return AssetManager::GetAsset<ImageData>(pResourceType->ID());
+		return (ImageData*)AssetManager::GetAssetImmediate(pResourceType->ID());
 	}
 }

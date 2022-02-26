@@ -39,7 +39,7 @@ project "GloryCore"
 		["Modules/ResourceLoading/Textures"] = { "ImageData.*", "ImageLoaderModule.*" },
 		["Modules/Scenes"] = { "ScenesModule.*", "SceneObject.*", "GScene.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
-		["Threading"] = { "Thread.*", "ThreadManager.*" },
+		["Threading"] = { "Thread.*", "ThreadManager.*", "ThreadedVar.*" },
 		["Analysis"] = { "EngineProfiler.*", "ProfilerModule.*", "ProfilerSample.*", "ProfilerThreadSample.*" },
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
 		["Serialization"] = { "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*" },

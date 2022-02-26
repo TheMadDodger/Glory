@@ -133,10 +133,11 @@ namespace Glory
 		m_pGraphicsThread->Stop();
 
 		m_pJobManager->Kill();
-		delete m_pJobManager;
-		m_pJobManager = nullptr;
 
 		m_pThreadManager->Destroy();
+
+		delete m_pJobManager;
+		m_pJobManager = nullptr;
 
 		// We need to cleanup in reverse
 		// This makes sure things like graphics get cleaned up before we close the window
@@ -244,6 +245,8 @@ namespace Glory
 
 	void Engine::ModulesLoop()
 	{
+		AssetManager::RunCallbacks();
+
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->Update();
