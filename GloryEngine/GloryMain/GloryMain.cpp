@@ -5,6 +5,7 @@
 #include <OGLMaterial.h>
 #include <ResourceMeta.h>
 #include <ClusteredRendererModule.h>
+#include <ShaderSourceLoaderModule.h>
 
 #define _CRTDBG_MAP_ALLOC
 
@@ -159,6 +160,7 @@ namespace Glory
 #include <EditorOpenGLRenderImpl.h>
 #include <EditorApplication.h>
 #include <EntityScenesEditorExtension.h>
+#include <MaterialLoaderModule.h>
 
 using namespace Glory::Editor;
 
@@ -173,7 +175,14 @@ int main()
         windowCreateInfo.Height = 1300;
         windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
-        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader()};
+        std::vector<Glory::Module*> optionalModules = {
+            new Glory::SDLImageLoaderModule(),
+            new Glory::ASSIMPModule(),
+            new Glory::FileLoaderModule(),
+            new Glory::MaterialLoaderModule(),
+            new Glory::ShaderSourceLoaderModule(),
+            new Glory::GLSLShaderLoader(),
+        };
 
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);
@@ -222,7 +231,13 @@ int main()
         windowCreateInfo.Height = 720;
         windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL; //SDL_WINDOW_VULKAN;
 
-        std::vector<Glory::Module*> optionalModules = { new Glory::SDLImageLoaderModule(), new Glory::ASSIMPModule(), new Glory::FileLoaderModule(), new Glory::GLSLShaderLoader() };
+        std::vector<Glory::Module*> optionalModules = {
+            new Glory::SDLImageLoaderModule(),
+            new Glory::ASSIMPModule(),
+            new Glory::FileLoaderModule(),
+            new Glory::ShaderSourceLoaderModule(),
+            new Glory::GLSLShaderLoader(),
+        };
 
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);

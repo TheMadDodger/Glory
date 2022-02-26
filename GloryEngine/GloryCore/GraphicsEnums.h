@@ -368,6 +368,7 @@ namespace Glory
 
     enum class ShaderType
     {
+        ST_Unknown,
         ST_Vertex,
         ST_Fragment,
         ST_Geomtery,

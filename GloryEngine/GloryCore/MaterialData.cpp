@@ -82,4 +82,12 @@ namespace Glory
 		});
 		lock.unlock();
 	}
+
+	bool MaterialData::GetPropertyIndex(const std::string& name, size_t& index) const
+	{
+		size_t hash = m_Hasher(name);
+		if (m_HashToPropertyIndex.find(hash) == m_HashToPropertyIndex.end()) return false;
+		index = m_HashToPropertyIndex.at(hash);
+		return true;
+	}
 }

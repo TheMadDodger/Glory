@@ -17,6 +17,7 @@ namespace Glory
     private:
         virtual void Initialize() override;
         virtual void SetPropertiesExtra() override;
+        virtual Buffer* CreatePropertiesBuffer(size_t size) override;
 
     private:
         GLuint CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex);

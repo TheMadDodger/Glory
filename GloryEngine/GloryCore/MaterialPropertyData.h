@@ -11,6 +11,7 @@ namespace Glory
 	public:
 		MaterialPropertyData();
 		MaterialPropertyData(const MaterialPropertyData& other);
+		MaterialPropertyData(const std::string& name);
 		MaterialPropertyData(const std::string& name, const std::any& data, uint32_t flags = 0);
 
 		const std::string& Name() const;
@@ -19,6 +20,7 @@ namespace Glory
 		std::any& Data();
 
 	private:
+		friend class MaterialLoaderModule;
 		const std::string m_PropertyName;
 		uint32_t m_Flags;
 		std::any m_PropertyData;

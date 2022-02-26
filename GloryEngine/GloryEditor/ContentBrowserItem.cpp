@@ -3,6 +3,7 @@
 #include <ProjectSpace.h>
 #include <EditorApplication.h>
 #include <AssetDatabase.h>
+#include <AssetManager.h>
 #include "ContentBrowserItem.h"
 #include "EditorAssets.h"
 #include "Tumbnail.h"
@@ -268,8 +269,8 @@ namespace Glory::Editor
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
 		{
-			//Content* pAsset = AssetManager::GetAsset(metaData.m_GUID);
-			Selection::SetActiveObject(nullptr);
+			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
+			Selection::SetActiveObject(pAsset);
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))

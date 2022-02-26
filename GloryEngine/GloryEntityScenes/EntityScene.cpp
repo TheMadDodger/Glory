@@ -6,6 +6,12 @@
 #include "Systems.h"
 #include "EntitySceneObject.h"
 
+
+
+
+#include <Game.h>
+#include <Engine.h>
+
 namespace Glory
 {
 	EntityScene::EntityScene() : GScene("New Scene") //: m_pJobPool(nullptr)

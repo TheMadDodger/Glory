@@ -29,8 +29,10 @@ namespace Glory
          
         virtual void CopyProperties(std::vector<MaterialPropertyData>& destination);
         virtual void PasteProperties(const std::vector<MaterialPropertyData>& destination);
+        bool GetPropertyIndex(const std::string& name, size_t& index) const;
 
     protected:
+        friend class MaterialLoaderModule;
         std::vector<FileData*> m_pShaderFiles;
         std::vector<ShaderType> m_ShaderTypes;
 

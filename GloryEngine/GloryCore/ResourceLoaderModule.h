@@ -64,13 +64,13 @@ namespace Glory
 				std::any defaultSettings = CreateDefaultImportSettings(filePath.extension().string());
 				S convertedSettings = std::any_cast<S>(defaultSettings);
 				Resource* pResource = (Resource*)LoadResource(path, convertedSettings);
-				pResource->SetName(name);
+				if (pResource) pResource->SetName(name);
 				return pResource;
 			}
 
 			S convertedSettings = std::any_cast<S>(importSettings);
 			Resource* pResource = (Resource*)LoadResource(path, convertedSettings);
-			pResource->SetName(name);
+			if (pResource) pResource->SetName(name);
 			return pResource;
 		}
 
@@ -79,7 +79,7 @@ namespace Glory
 			std::filesystem::path filePath = path;
 			std::string name = filePath.filename().replace_extension("").string();
 			T* pResource = LoadResource(path, (const S&)importSettings);
-			pResource->SetName(name);
+			if (pResource) pResource->SetName(name);
 			return (Resource*)pResource;
 		}
 
