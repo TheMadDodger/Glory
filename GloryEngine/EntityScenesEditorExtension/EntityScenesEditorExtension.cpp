@@ -1,6 +1,7 @@
 #include "EntityScenesEditorExtension.h"
 #include "EntitySceneObjectEditor.h"
 #include "DefaultComponentEditor.h"
+#include "TransformEditor.h"
 
 namespace Glory::Editor
 {
@@ -16,5 +17,6 @@ namespace Glory::Editor
 	{
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
+		Editor::RegisterEditor<TransformEditor>();
 	}
 }

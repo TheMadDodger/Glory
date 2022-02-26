@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorWindow.h"
 #include "SceneViewCamera.h"
+#include <ImGuizmo.h>
 
 namespace Glory::Editor
 {
@@ -13,11 +14,15 @@ namespace Glory::Editor
         virtual void OnOpen() override;
         virtual void OnClose() override;
 
+        static void EnableOrthographicView(bool enable);
+        static bool IsOrthographicEnabled();
+
     private:
         virtual void OnGUI() override;
         virtual void Draw() override;
 
     private:
         SceneViewCamera m_SceneCamera;
+        static bool m_Orthographic;
     };
 }

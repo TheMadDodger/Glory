@@ -1,6 +1,7 @@
 #include "EditorPlatform.h"
 #include "EditorAssets.h"
 #include <implot.h>
+#include <ImGuizmo.h>
 
 namespace Glory::Editor
 {
@@ -102,6 +103,8 @@ namespace Glory::Editor
 		m_pRenderImpl->NewFrame();
 		m_pWindowImpl->NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
+		ImGuizmo::Enable(true);
 	}
 
 	void EditorPlatform::GraphicsThreadBeginRender()

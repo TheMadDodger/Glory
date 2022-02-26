@@ -12,6 +12,7 @@ namespace Glory
 	public:
 		void SetResolution(size_t width, size_t height);
 		void SetPerspectiveProjection(size_t width, size_t height, float halfFOV, float near, float far);
+		void SetOrthographicProjection(float width, float height, float near, float far);
 		void SetView(const glm::mat4& view);
 		void SetDisplayIndex(int index);
 		void SetPriority(int priority);
@@ -23,7 +24,13 @@ namespace Glory
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;
+		const glm::mat4& GetViewOffset() const;
 		const glm::mat4& GetProjection() const;
+		glm::mat4 GetFinalView() const;
+
+		float* GetViewPointer();
+		float* GetProjectionPointer();
+
 		int GetDisplayIndex() const;
 		int GetPriority() const;
 		const glm::vec4& GetClearColor() const;
@@ -56,6 +63,7 @@ namespace Glory
 		LayerMask m_LayerMask;
 
 		glm::mat4 m_View;
+		glm::mat4 m_ViewOffset;
 		glm::mat4 m_Projection;
 		glm::uvec2 m_Resolution;
 
