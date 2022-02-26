@@ -61,8 +61,6 @@ namespace Glory
 		m_Registry.RegisterSystem<LookAtSystem>();
 		m_Registry.RegisterSystem<SpinSystem>();
 		m_Registry.RegisterSystem<LightSystem>();
-
-		Game::GetGame().GetEngine()->GetLoaderModule<MaterialData>()->Load("./test_instance.gmat");
 	}
 
 	void EntityScene::OnTick()
