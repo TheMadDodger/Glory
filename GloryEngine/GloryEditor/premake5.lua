@@ -25,13 +25,16 @@ project "GloryEditor"
 		["Content/Editors"] = { "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
 		["Content/PropertyDrawers"] = { "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*" },
 		["Content/Tumbnails"] = { "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
-		["Editor"] = { "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*" },
+		["Editor"] = { "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*", "Gizmos.*" },
+		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*" },
+		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
 		["ImGui"] = { "imgui_impl_opengl3.*", "imgui_impl_sdl.*", "imgui_impl_vulkan.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
-		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "PerformanceMetrics.*" },
+		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
 		["Windows/SceneView"] = { "SceneWindow.*", "SceneViewCamera.*" },
-		["Windows/ContentBrowser"] = { "ContentBrowser.*", "ContentBrowserItem.*" }
+		["Windows/ContentBrowser"] = { "ContentBrowser.*", "ContentBrowserItem.*" },
+		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" }
 	}
 
 	includedirs
