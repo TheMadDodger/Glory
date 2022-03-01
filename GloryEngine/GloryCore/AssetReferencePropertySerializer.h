@@ -10,7 +10,7 @@ namespace Glory
         virtual ~AssetReferencePropertySerializer();
 
     private:
-        virtual void Serialize(const SerializedProperty& serializedProperty, YAML::Emitter& out) override;
-        virtual void Deserialize(const SerializedProperty& serializedProperty, YAML::Node& object) override;
+        virtual void Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out) override;
+        virtual void Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object) override;
     };
 }

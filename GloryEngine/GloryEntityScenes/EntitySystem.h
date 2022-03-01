@@ -19,8 +19,8 @@ namespace Glory
 
 		virtual void Update(Registry* pRegistry, EntityID entity, EntityComponentData* pComponentData) = 0;
 		virtual void Draw(Registry* pRegistry, EntityID entity, EntityComponentData* pComponentData) = 0;
-		virtual std::string AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties) = 0;
-		virtual void CreateComponent(EntityID entity) = 0;
+		virtual std::string AcquireSerializedProperties(UUID uuid, EntityComponentData* pComponentData, std::vector<SerializedProperty*>& properties) = 0;
+		virtual void CreateComponent(EntityID entity, UUID uuid) = 0;
 
 		bool Hidden();
 		virtual std::string GetPath();

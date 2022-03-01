@@ -46,8 +46,11 @@ namespace Glory
         }
     }
 
-    void MeshRenderSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, MeshRenderer& pComponent)
+    void MeshRenderSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, MeshRenderer& pComponent)
     {
+        //properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Eye Position"), 0, &pComponent.m_Eye));
+
+
         //properties.push_back(BasicTemplatedSerializedProperty("", &pComponent.))
     }
 

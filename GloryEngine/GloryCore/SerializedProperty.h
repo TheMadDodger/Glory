@@ -54,11 +54,16 @@ namespace Glory
 			m_ElementTypeHash = ResourceType::GetHash<T>();
 		}
 
-		BasicTemplatedSerializedProperty(const std::string& name, T* pMember, uint32_t flags = 0)
+		BasicTemplatedSerializedProperty(const std::string& name, uint32_t flags, T* pMember)
 			: SerializedProperty(name, pMember, ResourceType::GetHash<T>(), flags)
 		{
 			m_ElementByteSize = sizeof(T);
 			m_ElementTypeHash = ResourceType::GetHash<T>();
+		}
+
+		void Update(T* pMember)
+		{
+			m_pMember = pMember;
 		}
 	};
 
@@ -71,25 +76,37 @@ namespace Glory
 		{
 			m_ElementTypeHash = ResourceType::GetHash<T>();
 		}
-		AssetReferencePropertyTemplate(const std::string& name, T** pMember, uint32_t flags = 0)
+		AssetReferencePropertyTemplate(const std::string& name, uint32_t flags, T** pMember)
 			: SerializedProperty(name, pMember, SerializedType::ST_Asset, flags)
 		{
 			m_ElementTypeHash = ResourceType::GetHash<T>();
 		}
+
+		void Update(T** pMember)
+		{
+			m_pMember = pMember;
+		}
 	};
 
 	//template<typename T>
-	//class SerializedContainerProperty : public SerializedProperty
+	//class SimpleSerializedContainerProperty : public SerializedProperty
 	//{
 	//public:
-	//	SerializedContainerProperty()
+	//	SimpleSerializedContainerProperty()
 	//		: SerializedProperty("invalid", nullptr, ResourceType::GetHash<std::vector<SerializedProperty>>())
 	//	{
 	//		m_ElementByteSize = sizeof(T);
 	//		m_ElementTypeHash = ResourceType::GetHash<T>();
 	//	}
 	//
-	//	SerializedContainerProperty(const std::string& name, std::vector<T>* pMember, uint32_t flags = 0)
-	//		: SerializedProperty(name, pMember, ResourceType::GetHash<std::vector<SerializedProperty>>(), flags) {}
+	//	SimpleSerializedContainerProperty(const std::string& name, std::vector<T>* pMember, uint32_t flags = 0)
+	//		: SerializedProperty(name, pMember, ResourceType::GetHash<std::vector<SerializedProperty>>(), flags)
+	//	{
+	//		m_ArrayElementsCount = pMember->size();
+	//		for (size_t i = 0; i < m_ArrayElementsCount; i++)
+	//		{
+	//			m_SerializedArray.push_back(SerializedProperty("Element" + std::to_string(i), &pMember[i], ResourceType::GetHash<T>(), flags);
+	//		}
+	//	}
 	//};
 }

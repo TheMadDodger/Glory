@@ -3,6 +3,7 @@
 #include <Window.h>
 #include <Game.h>
 #include <CameraManager.h>
+#include <SerializedPropertyManager.h>
 
 namespace Glory
 {
@@ -51,15 +52,15 @@ namespace Glory
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_Camera);
 	}
 
-	void CameraSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, CameraComponent& pComponent)
+	void CameraSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, CameraComponent& pComponent)
 	{
-		properties.push_back(BasicTemplatedSerializedProperty("Half FOV", &pComponent.m_HalfFOV));
-		properties.push_back(BasicTemplatedSerializedProperty("Near", &pComponent.m_Near));
-		properties.push_back(BasicTemplatedSerializedProperty("Far", &pComponent.m_Far));
-		properties.push_back(BasicTemplatedSerializedProperty("Display Index", &pComponent.m_DisplayIndex));
-		properties.push_back(BasicTemplatedSerializedProperty("Priority", &pComponent.m_Priority));
-		properties.push_back(BasicTemplatedSerializedProperty("Layer Mask", &pComponent.m_LayerMask));
-		properties.push_back(BasicTemplatedSerializedProperty("Clear Color", &pComponent.m_ClearColor));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Half FOV"), 0, &pComponent.m_HalfFOV));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Near"), 0, &pComponent.m_Near));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Far"), 0, &pComponent.m_Far));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<int>>(uuid, std::string("Display Index"), 0, &pComponent.m_DisplayIndex));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<int>>(uuid, std::string("Priority"), 0, &pComponent.m_Priority));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<LayerMask>>(uuid, std::string("Layer Mask"), 0, &pComponent.m_LayerMask));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec4>>(uuid, std::string("Clear Color"), 0, &pComponent.m_ClearColor));
 	}
 
 	std::string CameraSystem::Name()

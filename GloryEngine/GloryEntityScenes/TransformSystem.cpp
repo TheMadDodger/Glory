@@ -1,6 +1,7 @@
 #include "TransformSystem.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <SerializedPropertyManager.h>
 
 namespace Glory
 {
@@ -28,11 +29,11 @@ namespace Glory
         pComponent.MatTransform = startTransform * translation * rotation * scale;
     }
 
-    void TransformSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, Transform& pComponent)
+    void TransformSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, Transform& pComponent)
     {
-        properties.push_back(BasicTemplatedSerializedProperty("Position", &pComponent.Position));
-        properties.push_back(BasicTemplatedSerializedProperty("Rotation", &pComponent.Rotation));
-        properties.push_back(BasicTemplatedSerializedProperty("Scale", &pComponent.Scale));
+        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Position"), 0, &pComponent.Position));
+        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::quat>>(uuid, std::string("Rotation"), 0, &pComponent.Rotation));
+        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Scale"), 0, &pComponent.Scale));
     }
 
     std::string TransformSystem::Name()

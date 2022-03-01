@@ -1,6 +1,7 @@
 #include "LookAtSystem.h"
 #include "Registry.h"
 #include <glm/gtx/matrix_decompose.hpp>
+#include <SerializedPropertyManager.h>
 
 namespace Glory
 {
@@ -13,11 +14,11 @@ namespace Glory
 		glm::decompose(matrix, transform.Scale, transform.Rotation, transform.Position, skew, perspective);
 	}
 
-	void LookAtSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, LookAt& pComponent)
+	void LookAtSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, LookAt& pComponent)
 	{
-		properties.push_back(BasicTemplatedSerializedProperty("Eye Position", &pComponent.m_Eye));
-		properties.push_back(BasicTemplatedSerializedProperty("Target Center", &pComponent.m_Center));
-		properties.push_back(BasicTemplatedSerializedProperty("Up Vector", &pComponent.m_Up));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Eye Position"), 0, &pComponent.m_Eye));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Target Center"), 0, &pComponent.m_Center));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Up Vector"), 0, &pComponent.m_Up));
 	}
 
 	std::string LookAtSystem::Name()

@@ -20,6 +20,8 @@ namespace Glory
 		EntityComponentData* GetComponentData() const;
 		Registry* GetRegistry() const;
 
+		UUID GetComponentUUID() const;
+
 	private:
 		EntityComponentData* m_pComponentData;
 		Registry* m_pRegistry;

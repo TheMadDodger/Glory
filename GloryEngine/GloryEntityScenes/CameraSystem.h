@@ -15,7 +15,7 @@ namespace Glory
         virtual void OnComponentRemoved(Registry* pRegistry, EntityID entity, CameraComponent& pComponent) override;
         virtual void OnUpdate(Registry* pRegistry, EntityID entity, CameraComponent& pComponent) override;
         virtual void OnDraw(Registry* pRegistry, EntityID entity, CameraComponent& pComponent) override;
-        virtual void OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, CameraComponent& pComponent) override;
+        virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, CameraComponent& pComponent) override;
         virtual std::string Name();
 
         size_t CalcHash(CameraComponent& pComponent);
