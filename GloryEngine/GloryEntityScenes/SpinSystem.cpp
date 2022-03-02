@@ -2,6 +2,7 @@
 #include "Registry.h"
 #include <chrono>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <SerializedPropertyManager.h>
 
 namespace Glory
 {
@@ -23,9 +24,9 @@ namespace Glory
 		//glm::decompose(world, transform.Scale, transform.Rotation, transform.Position, skew, perspective);
 	}
 
-	void SpinSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, Spin& pComponent)
+	void SpinSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, Spin& pComponent)
 	{
-		properties.push_back(BasicTemplatedSerializedProperty("Speed", &pComponent.m_Speed));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Speed"), &pComponent.m_Speed, 0));
 	}
 
 	std::string SpinSystem::Name()

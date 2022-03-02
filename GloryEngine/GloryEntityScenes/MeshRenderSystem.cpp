@@ -3,9 +3,17 @@
 #include <Game.h>
 #include <Debug.h>
 #include <Game.h>
+#include <SerializedArrayProperty.h>
+#include <AssetReferencePropertyTemplate.h>
+#include <SerializedPropertyManager.h>
 
 namespace Glory
 {
+    void MeshRenderSystem::OnComponentAdded(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent)
+    {
+        pComponent.m_pMaterials.resize(5, nullptr);
+    }
+
     void MeshRenderSystem::OnDraw(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent)
     {
         //ubo.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 10.0f);
@@ -30,7 +38,7 @@ namespace Glory
         if (meshFilter.m_pModelData == nullptr) return;
         for (size_t i = 0; i < meshFilter.m_pModelData->GetMeshCount(); i++)
         {
-            if (i >= pComponent.m_pMaterials.size())
+            if (i >= pComponent.m_pMaterials.size() || pComponent.m_pMaterials[i] == nullptr)
             {
                 Debug::LogWarning("MeshRenderer: Missing Materials on MeshRenderer!");
                 continue;
@@ -46,9 +54,11 @@ namespace Glory
         }
     }
 
-    void MeshRenderSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, MeshRenderer& pComponent)
+    void MeshRenderSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, MeshRenderer& pComponent)
     {
-        //properties.push_back(BasicTemplatedSerializedProperty("", &pComponent.))
+        properties.push_back(
+            SerializedPropertyManager::GetProperty<SerializedArrayProperty<MaterialData*, MaterialData, AssetReferencePropertyTemplate<MaterialData>>>(uuid, "Materials", &pComponent.m_pMaterials, 0)
+        );
     }
 
     std::string MeshRenderSystem::Name()

@@ -44,6 +44,6 @@ namespace Glory::Editor
 
 	private:
 		EntityComponentObject* m_pComponentObject;
-		std::vector<SerializedProperty> m_Properties;
+		std::vector<SerializedProperty*> m_Properties;
 	};
 }

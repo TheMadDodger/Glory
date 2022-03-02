@@ -36,7 +36,7 @@ namespace Glory
 	Entity EntityScene::CreateEntity()
 	{
 		EntityID entityID = m_Registry.CreateEntity();
-		m_Registry.AddComponent<Transform>(entityID);
+		m_Registry.AddComponent<Transform>(entityID, UUID());
 		return Entity(entityID, this);
 	}
 

@@ -20,11 +20,11 @@ namespace Glory
 
 		//static PropertySerializer* GetSerializer(Object* pObject);
 		static PropertySerializer* GetSerializer(size_t typeHash);
-		static PropertySerializer* GetSerializer(const SerializedProperty& serializedProperty);
+		static PropertySerializer* GetSerializer(const SerializedProperty* serializedProperty);
 		static size_t GetID(PropertySerializer* pSerializer);
 
-		static void SerializeProperty(const SerializedProperty& serializedProperty, YAML::Emitter& out);
-		static void DeserializeProperty(const SerializedProperty& serializedProperty, YAML::Node& object);
+		static void SerializeProperty(const SerializedProperty* serializedProperty, YAML::Emitter& out);
+		static void DeserializeProperty(const SerializedProperty* serializedProperty, YAML::Node& object);
 		static void DeserializeProperty(std::any& out, size_t typeHash, YAML::Node& object);
 
 		virtual size_t GetSerializedTypeHash() const;
@@ -34,8 +34,8 @@ namespace Glory
 		virtual ~PropertySerializer();
 
 	protected:
-		virtual void Serialize(const SerializedProperty& serializedProperty, YAML::Emitter& out) = 0;
-		virtual void Deserialize(const SerializedProperty& serializedProperty, YAML::Node& object) = 0;
+		virtual void Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out) = 0;
+		virtual void Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object) = 0;
 		virtual void Deserialize(std::any& out, YAML::Node& object) = 0;
 
 	private:
@@ -55,17 +55,17 @@ namespace Glory
 		virtual ~SimpleTemplatedPropertySerializer() {}
 
 	private:
-		virtual void Serialize(const SerializedProperty& serializedProperty, YAML::Emitter& out) override
+		virtual void Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out) override
 		{
-			T value = *(T*)serializedProperty.MemberPointer();
-			out << YAML::Key << serializedProperty.Name();
+			T value = *(T*)serializedProperty->MemberPointer();
+			out << YAML::Key << serializedProperty->Name();
 			out << YAML::Value << value;
 		}
 
-		virtual void Deserialize(const SerializedProperty& serializedProperty, YAML::Node& object) override
+		virtual void Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object) override
 		{
 			if (!object.IsDefined()) return;
-			T* pMember = (T*)serializedProperty.MemberPointer();
+			T* pMember = (T*)serializedProperty->MemberPointer();
 			T data = object.as<T>();
 			*pMember = data;
 		}

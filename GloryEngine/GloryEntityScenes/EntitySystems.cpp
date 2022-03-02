@@ -97,7 +97,7 @@ namespace Glory
 		}
 	}
 
-	std::string EntitySystems::AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties)
+	std::string EntitySystems::AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty*>& properties)
 	{
 		auto it = std::find_if(m_pEntitySystems.begin(), m_pEntitySystems.end(), [&](EntitySystem* pSystem)
 		{
@@ -106,15 +106,15 @@ namespace Glory
 
 		if (it == m_pEntitySystems.end()) return "Unknown Component";
 		EntitySystem* pSystem = *it;
-		return pSystem->AcquireSerializedProperties(pComponentData, properties);
+		return pSystem->AcquireSerializedProperties(pComponentData->GetComponentUUID(), pComponentData, properties);
 	}
 
-	bool EntitySystems::CreateComponent(EntityID entity, std::type_index type)
+	bool EntitySystems::CreateComponent(EntityID entity, std::type_index type, UUID uuid)
 	{
-		return CreateComponent(entity, ResourceType::GetHash(type));
+		return CreateComponent(entity, ResourceType::GetHash(type), uuid);
 	}
 
-	bool EntitySystems::CreateComponent(EntityID entity, size_t typeHash)
+	bool EntitySystems::CreateComponent(EntityID entity, size_t typeHash, UUID uuid)
 	{
 		auto it = std::find_if(m_pEntitySystems.begin(), m_pEntitySystems.end(), [&](EntitySystem* pSystem)
 		{
@@ -124,7 +124,7 @@ namespace Glory
 
 		if (it == m_pEntitySystems.end()) return false;
 		EntitySystem* pSystem = *it;
-		pSystem->CreateComponent(entity);
+		pSystem->CreateComponent(entity, uuid);
 		return true;
 	}
 
