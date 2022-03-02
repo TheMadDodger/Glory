@@ -9,13 +9,13 @@ namespace Glory
 	class SerializedPropertyManager
 	{
 	public:
-		template<typename T, typename... Args>
-		static SerializedProperty* GetProperty(UUID uuid, const std::string& propertyName, uint32_t flags, Args&&... args)
+		template<typename T, typename TMem, typename... Args>
+		static SerializedProperty* GetProperty(UUID uuid, const std::string& propertyName, TMem* pMember, uint32_t flags, Args&&... args)
 		{
 			if (m_ManagedProperties.find(uuid) == m_ManagedProperties.end()
 				|| m_ManagedProperties[uuid].find(propertyName) == m_ManagedProperties[uuid].end())
 			{
-				T* pNewProperty = new T(propertyName, flags, args...);
+				T* pNewProperty = new T(uuid, propertyName, pMember, flags, args...);
 				m_ManagedProperties[uuid][propertyName] = pNewProperty;
 				return (SerializedProperty*)pNewProperty;
 			}
@@ -29,7 +29,7 @@ namespace Glory
 				return nullptr;
 			}
 
-			pCastedProperty->Update(args...);
+			pCastedProperty->Update(pMember, args...);
 			return pCastedProperty;
 		}
 

@@ -26,7 +26,7 @@ namespace Glory
 
 	void SpinSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, Spin& pComponent)
 	{
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Speed"), 0, &pComponent.m_Speed));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Speed"), &pComponent.m_Speed, 0));
 	}
 
 	std::string SpinSystem::Name()

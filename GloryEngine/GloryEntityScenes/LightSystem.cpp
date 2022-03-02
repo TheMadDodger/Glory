@@ -33,9 +33,9 @@ namespace Glory
 
 	void LightSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, LightComponent& pComponent)
 	{
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec4>>(uuid, std::string("Color"), Vec4Flags::Color, &pComponent.m_Color));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Intensity"), 0, &pComponent.m_Intensity));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Range"), 0, &pComponent.m_Range));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec4>>(uuid, std::string("Color"), &pComponent.m_Color, Vec4Flags::Color));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Intensity"), &pComponent.m_Intensity, 0));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Range"), &pComponent.m_Range, 0));
 	}
 
 	std::string LightSystem::Name()

@@ -15,13 +15,13 @@ namespace Glory::Editor
 	{
 	}
 
-	bool PropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool PropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const
 	{
 		ImGui::Text(label.data());
 		return false;
 	}
 
-	bool PropertyDrawer::Draw(const std::string& label, std::any& data, uint32_t flags) const
+	bool PropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const
 	{
 		ImGui::Text(label.data());
 		return false;
@@ -29,10 +29,10 @@ namespace Glory::Editor
 
 	bool PropertyDrawer::Draw(const SerializedProperty* serializedProperty) const
 	{
-		return Draw(serializedProperty->Name(), serializedProperty->MemberPointer(), serializedProperty->ElementTypeHash(), serializedProperty->Flags());
+		return Draw(serializedProperty, serializedProperty->Name(), serializedProperty->MemberPointer(), serializedProperty->ElementTypeHash(), serializedProperty->Flags());
 	}
 
-	bool PropertyDrawer::DrawProperty(const std::string& label, void* data, size_t typeHash, size_t elementTypeHash, uint32_t flags)
+	bool PropertyDrawer::DrawProperty(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, size_t elementTypeHash, uint32_t flags)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 			{
@@ -46,7 +46,7 @@ namespace Glory::Editor
 		}
 
 		PropertyDrawer* drawer = *it;
-		return drawer->Draw(label, data, elementTypeHash, flags);
+		return drawer->Draw(serializedProperty, label, data, elementTypeHash, flags);
 	}
 
 	bool PropertyDrawer::DrawProperty(const std::string& label, std::any& data, uint32_t flags)
@@ -65,12 +65,12 @@ namespace Glory::Editor
 		}
 
 		PropertyDrawer* drawer = *it;
-		return drawer->Draw(label, data, flags);
+		return drawer->Draw(nullptr, label, data, flags);
 	}
 
 	bool PropertyDrawer::DrawProperty(const SerializedProperty* serializedProperty)
 	{
-		return DrawProperty(serializedProperty->Name(), serializedProperty->MemberPointer(), serializedProperty->TypeHash(), serializedProperty->ElementTypeHash(), serializedProperty->Flags());
+		return DrawProperty(serializedProperty, serializedProperty->Name(), serializedProperty->MemberPointer(), serializedProperty->TypeHash(), serializedProperty->ElementTypeHash(), serializedProperty->Flags());
 	}
 
 	size_t PropertyDrawer::GetPropertyTypeHash() const

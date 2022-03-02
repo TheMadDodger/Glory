@@ -31,9 +31,9 @@ namespace Glory
 
     void TransformSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, Transform& pComponent)
     {
-        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Position"), 0, &pComponent.Position));
-        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::quat>>(uuid, std::string("Rotation"), 0, &pComponent.Rotation));
-        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Scale"), 0, &pComponent.Scale));
+        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Position"), &pComponent.Position, 0));
+        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::quat>>(uuid, std::string("Rotation"), &pComponent.Rotation, 0));
+        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Scale"), &pComponent.Scale, 0));
     }
 
     std::string TransformSystem::Name()

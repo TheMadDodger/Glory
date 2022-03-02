@@ -16,9 +16,9 @@ namespace Glory
 
 	void LookAtSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, LookAt& pComponent)
 	{
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Eye Position"), 0, &pComponent.m_Eye));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Target Center"), 0, &pComponent.m_Center));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Up Vector"), 0, &pComponent.m_Up));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Eye Position"), &pComponent.m_Eye, 0));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Target Center"), &pComponent.m_Center, 0));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Up Vector"), &pComponent.m_Up, 0));
 	}
 
 	std::string LookAtSystem::Name()

@@ -27,6 +27,7 @@
 #include "EditorSceneManager.h"
 #include <AssetDatabase.h>
 #include "AssetReferencePropertyDrawer.h"
+#include "ArrayPropertyDrawer.h"
 
 namespace Glory::Editor
 {
@@ -194,6 +195,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<QuatDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()
