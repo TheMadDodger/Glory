@@ -15,9 +15,9 @@ namespace Glory
 		virtual ~EntitySystems();
 
 		bool IsUpdating();
-		std::string AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties);
-		bool CreateComponent(EntityID entity, std::type_index type);
-		bool CreateComponent(EntityID entity, size_t typeHash);
+		std::string AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty*>& properties);
+		bool CreateComponent(EntityID entity, std::type_index type, UUID uuid = UUID());
+		bool CreateComponent(EntityID entity, size_t typeHash, UUID uuid = UUID());
 
 		size_t SystemCount();
 		EntitySystem* GetSystem(size_t index);

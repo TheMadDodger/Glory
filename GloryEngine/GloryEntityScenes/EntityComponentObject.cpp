@@ -28,4 +28,8 @@ namespace Glory
 	{
 		return m_pRegistry;
 	}
+	UUID EntityComponentObject::GetComponentUUID() const
+	{
+		return m_pComponentData->GetComponentUUID();
+	}
 }

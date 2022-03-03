@@ -11,7 +11,7 @@ namespace Glory
 		virtual ~MeshFilterSystem();
 
 	private:
-		virtual void OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, MeshFilter& pComponent) override;
+		virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, MeshFilter& pComponent) override;
 		virtual std::string Name() override;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
-#include <SceneObject.h>
 #include "Entity.h"
+#include "EntityComponentObject.h"
+#include <SceneObject.h>
 
 namespace Glory
 {

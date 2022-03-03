@@ -18,12 +18,12 @@ namespace Glory
 		void DestroyEntity(EntityID entity);
 
 		template<typename T, typename... Args>
-		T& AddComponent(EntityID entity, Args&&... args)
+		T& AddComponent(EntityID entity, UUID uuid, Args&&... args)
 		{
 			if (HasComponent<T>(entity))
 				throw new std::runtime_error("Entity already has component!");
 
-			EntityComponentData componentData = EntityComponentData::Construct<T>(entity, std::forward<Args>(args)...);
+			EntityComponentData componentData = EntityComponentData::Construct<T>(entity, uuid, std::forward<Args>(args)...);
 			if (m_UnusedComponentIndices.size() > 0)
 			{
 				// Replace an existing component that is no longer used
