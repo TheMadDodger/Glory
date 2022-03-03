@@ -10,11 +10,8 @@ namespace Glory::Editor
 		ImGui::SameLine();
 
 		Resource** pResourceMember = (Resource**)data;
-
-		Resource* pValue = dynamic_cast<Resource*>(*pResourceMember);
-
 		std::string assetName = "";
-		if (*pResourceMember == nullptr || pValue->Name().data() == nullptr) assetName = "Noone";
+		if (*pResourceMember == nullptr) assetName = "Noone";
 		else
 		{
 			assetName = (*pResourceMember)->Name();

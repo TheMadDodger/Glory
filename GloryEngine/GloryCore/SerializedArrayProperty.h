@@ -1,6 +1,7 @@
 #pragma once
 #include "SerializedProperty.h"
 #include "SerializedPropertyManager.h"
+#include "Resource.h"
 
 namespace Glory
 {
@@ -21,13 +22,12 @@ namespace Glory
 		SerializedArrayProperty(UUID objectUUID, const std::string& name, std::vector<T>* pMember, uint32_t flags, Args&&... args)
 			: BaseSerializedArrayProperty(objectUUID, name, pMember, flags), m_pMember(pMember), m_ElementTypeHash(ResourceType::GetHash<BaseT>())
 		{
+			T* pSubMember = pMember->data();
 			for (size_t i = 0; i < pMember->size(); i++)
 			{
 				std::string propName = name + "_Element" + std::to_string(i);
-
-				T* pSubMember = reinterpret_cast<T*>(&pMember[0]);
 				m_pSerializedArray.push_back(SerializedPropertyManager::GetProperty<TPropElem, T>(objectUUID, propName, pSubMember, flags, std::forward<Args>(args)...));
-
+				++pSubMember;
 			}
 		}
 
