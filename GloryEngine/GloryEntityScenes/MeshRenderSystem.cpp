@@ -11,7 +11,6 @@ namespace Glory
 {
     void MeshRenderSystem::OnComponentAdded(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent)
     {
-        pComponent.m_pMaterials.resize(5, nullptr);
     }
 
     void MeshRenderSystem::OnDraw(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent)

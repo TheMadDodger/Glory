@@ -13,6 +13,7 @@ namespace Glory
 
 		virtual size_t ArraySize() const = 0;
 		virtual SerializedProperty* GetArrayElementAt(size_t index) const = 0;
+		virtual void Resize(size_t newSize) = 0;
 	};
 
 	template<typename T, typename BaseT, typename TPropElem, typename... Args>
@@ -41,9 +42,38 @@ namespace Glory
 			return m_pSerializedArray[index];
 		}
 
+		virtual void Resize(size_t newSize) override
+		{
+			if (newSize < m_pMember->size() || m_pMember->size() == 0)
+			{
+				m_pMember->resize(newSize);
+				Update(m_pMember);
+				return;
+			}
+			
+			std::vector<T> original = *m_pMember;
+			for (size_t i = 0; i < newSize; i++)
+			{
+				if (i < m_pMember->size()) continue;
+				T value = original[original.size() - 1];
+				m_pMember->push_back(value);
+			}
+
+			Update(m_pMember);
+		}
+
 		void Update(std::vector<T>* pMember)
 		{
 			m_pMember = pMember;
+
+			m_pSerializedArray.clear();
+			T* pSubMember = pMember->data();
+			for (size_t i = 0; i < pMember->size(); i++)
+			{
+				std::string propName = m_PropertyName + "_Element" + std::to_string(i);
+				m_pSerializedArray.push_back(SerializedPropertyManager::GetProperty<TPropElem, T>(m_ObjectUUID, propName, pSubMember, m_Flags));
+				++pSubMember;
+			}
 		}
 
 	private:
