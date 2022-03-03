@@ -43,4 +43,12 @@ namespace Glory
 			PropertySerializer::DeserializeProperty(pChildProperty, childNode);
 		}
 	}
+
+	void ArrayPropertySerializers::Deserialize(std::any& out, YAML::Node& object)
+	{
+		if (!object.IsDefined()) return;
+		if (!object.IsMap()) return;
+
+
+	}
 }

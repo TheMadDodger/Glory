@@ -1,5 +1,6 @@
 #pragma once
 #include "PropertySerializer.h"
+#include "SerializedProperty.h"
 
 namespace Glory
 {
