@@ -20,6 +20,7 @@ namespace Glory
         virtual size_t ShaderCount() const;
         virtual FileData* GetShaderAt(size_t index) const;
         virtual const ShaderType& GetShaderTypeAt(size_t index) const;
+        void RemoveShaderAt(size_t index);
          
         void AddProperty(const MaterialPropertyData& prop);
          

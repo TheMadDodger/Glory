@@ -37,6 +37,12 @@ namespace Glory
 		return m_ShaderTypes[index];
 	}
 
+	void MaterialData::RemoveShaderAt(size_t index)
+	{
+		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
+		m_ShaderTypes.erase(m_ShaderTypes.begin() + index);
+	}
+
 	void MaterialData::AddProperty(const MaterialPropertyData& prop)
 	{
 		size_t hash = m_Hasher(prop.Name());
