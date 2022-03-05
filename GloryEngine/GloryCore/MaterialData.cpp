@@ -37,6 +37,12 @@ namespace Glory
 		return m_ShaderTypes[index];
 	}
 
+	void MaterialData::RemoveShaderAt(size_t index)
+	{
+		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
+		m_ShaderTypes.erase(m_ShaderTypes.begin() + index);
+	}
+
 	void MaterialData::AddProperty(const MaterialPropertyData& prop)
 	{
 		size_t hash = m_Hasher(prop.Name());
@@ -81,5 +87,13 @@ namespace Glory
 			m_Properties.push_back(MaterialPropertyData(propertyData));
 		});
 		lock.unlock();
+	}
+
+	bool MaterialData::GetPropertyIndex(const std::string& name, size_t& index) const
+	{
+		size_t hash = m_Hasher(name);
+		if (m_HashToPropertyIndex.find(hash) == m_HashToPropertyIndex.end()) return false;
+		index = m_HashToPropertyIndex.at(hash);
+		return true;
 	}
 }

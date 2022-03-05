@@ -27,4 +27,11 @@ namespace Glory
 		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
 		*pObjectMember = pResource;
 	}
+
+	void AssetReferencePropertySerializer::Deserialize(std::any& out, YAML::Node& object)
+	{
+		if (!object.IsDefined()) return;
+		UUID uuid = object.as<uint64_t>();
+		out = AssetManager::GetAssetImmediate(uuid);
+	}
 }

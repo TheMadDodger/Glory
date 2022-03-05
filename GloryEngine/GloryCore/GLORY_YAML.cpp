@@ -7,4 +7,10 @@ namespace YAML
 		out << mask.m_Mask;
 		return out;
 	}
+
+	Emitter& operator<<(Emitter& out, const Glory::ShaderType& type)
+	{
+		out << SHADERTYPE_TOSTRING[type];
+		return out;
+	}
 }

@@ -20,6 +20,7 @@ namespace Glory
         virtual size_t ShaderCount() const;
         virtual FileData* GetShaderAt(size_t index) const;
         virtual const ShaderType& GetShaderTypeAt(size_t index) const;
+        void RemoveShaderAt(size_t index);
          
         void AddProperty(const MaterialPropertyData& prop);
          
@@ -29,8 +30,10 @@ namespace Glory
          
         virtual void CopyProperties(std::vector<MaterialPropertyData>& destination);
         virtual void PasteProperties(const std::vector<MaterialPropertyData>& destination);
+        bool GetPropertyIndex(const std::string& name, size_t& index) const;
 
     protected:
+        friend class MaterialLoaderModule;
         std::vector<FileData*> m_pShaderFiles;
         std::vector<ShaderType> m_ShaderTypes;
 
