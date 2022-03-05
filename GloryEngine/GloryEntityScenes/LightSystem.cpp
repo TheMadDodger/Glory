@@ -2,6 +2,7 @@
 #include <Game.h>
 #include <Engine.h>
 #include <PropertyFlags.h>
+#include <SerializedPropertyManager.h>
 
 namespace Glory
 {
@@ -30,11 +31,11 @@ namespace Glory
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pointLight);
 	}
 
-	void LightSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, LightComponent& pComponent)
+	void LightSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, LightComponent& pComponent)
 	{
-		properties.push_back(BasicTemplatedSerializedProperty("Color", &pComponent.m_Color, Vec4Flags::Color));
-		properties.push_back(BasicTemplatedSerializedProperty("Intensity", &pComponent.m_Intensity));
-		properties.push_back(BasicTemplatedSerializedProperty("Range", &pComponent.m_Range));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec4>>(uuid, std::string("Color"), &pComponent.m_Color, Vec4Flags::Color));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Intensity"), &pComponent.m_Intensity, 0));
+		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Range"), &pComponent.m_Range, 0));
 	}
 
 	std::string LightSystem::Name()

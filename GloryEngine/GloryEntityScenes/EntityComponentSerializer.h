@@ -13,7 +13,7 @@ namespace Glory
 		virtual ~EntityComponentSerializer() {}
 
 	protected:
-		virtual void Serialize(TComponent& component, YAML::Emitter& out) = 0;
+		virtual void Serialize(UUID uuid, TComponent& component, YAML::Emitter& out) = 0;
 		virtual void Deserialize(TComponent& component, YAML::Node& object) = 0;
 
 	private:
@@ -24,7 +24,7 @@ namespace Glory
 
 		virtual void Serialize(EntityComponentObject* pObject, YAML::Emitter& out) override
 		{
-			Serialize(pObject->GetData<TComponent>(), out);
+			Serialize(pObject->GetUUID(), pObject->GetData<TComponent>(), out);
 		}
 
 		virtual Object* Deserialize(Object* pParent, YAML::Node& object) override

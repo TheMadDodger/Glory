@@ -12,8 +12,10 @@ namespace Glory
         virtual ~MeshRenderSystem() {}
 
     private:
+        virtual void OnComponentAdded(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent) override;
+
         virtual void OnDraw(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent) override;
-        virtual void OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, MeshRenderer& pComponent) override;
+        virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, MeshRenderer& pComponent) override;
         virtual std::string Name() override;
     };
 }

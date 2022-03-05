@@ -1,4 +1,6 @@
 #include "MeshFilterSystem.h"
+#include <AssetReferencePropertyTemplate.h>
+#include <SerializedPropertyManager.h>
 
 namespace Glory
 {
@@ -9,9 +11,9 @@ namespace Glory
     {
     }
 
-    void MeshFilterSystem::OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, MeshFilter& pComponent)
+    void MeshFilterSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, MeshFilter& pComponent)
     {
-        properties.push_back(AssetReferencePropertyTemplate<ModelData>("Model", &pComponent.m_pModelData));
+        properties.push_back(SerializedPropertyManager::GetProperty<AssetReferencePropertyTemplate<ModelData>>(uuid, std::string("Model"), &pComponent.m_pModelData, 0));
     }
 
     std::string Glory::MeshFilterSystem::Name()

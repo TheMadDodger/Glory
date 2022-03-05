@@ -3,8 +3,10 @@
 #include "AssetManager.h"
 #include "Serializer.h"
 #include "PropertySerializer.h"
-#include <algorithm>
 #include "AssetReferencePropertySerializer.h"
+#include "ArrayPropertySerializers.h"
+#include "SerializedPropertyManager.h"
+#include <algorithm>
 
 namespace Glory
 {
@@ -159,6 +161,7 @@ namespace Glory
 		Console::Cleanup();
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
+		SerializedPropertyManager::Clear();
 	}
 
 	void Engine::Initialize()
@@ -223,6 +226,7 @@ namespace Glory
 
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
+		PropertySerializer::RegisterSerializer<ArrayPropertySerializers>();
 	}
 
 	void Engine::Update()

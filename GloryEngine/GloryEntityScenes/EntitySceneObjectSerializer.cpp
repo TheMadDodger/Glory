@@ -2,6 +2,7 @@
 #include "EntityComponentObject.h"
 #include "EntitySceneScenesModule.h"
 #include <PropertySerializer.h>
+#include "Components.h"
 
 namespace Glory
 {
@@ -24,12 +25,12 @@ namespace Glory
 			EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData, pRegistry);
 			out << YAML::BeginMap;
 			out << YAML::Key << "UUID";
-			out << YAML::Value << pComponentObject->GetUUID();
+			out << YAML::Value << pComponentObject->GetComponentUUID();
 			out << YAML::Key << "TypeHash";
 			std::type_index type = pComponentData->GetType();
 			out << YAML::Value << ResourceType::GetHash(type);
 
-			std::vector<SerializedProperty> properties;
+			std::vector<SerializedProperty*> properties;
 			pRegistry->GetSystems()->AcquireSerializedProperties(pComponentData, properties);
 			for (size_t i = 0; i < properties.size(); i++)
 			{
@@ -62,23 +63,23 @@ namespace Glory
 			YAML::Node nextObject = node[i];
 			YAML::Node subNode;
 			UUID compUUID;
-			size_t typeHash;
+			size_t typeHash = 0;
 			YAML_READ(nextObject, subNode, UUID, compUUID, uint64_t);
 			YAML_READ(nextObject, subNode, TypeHash, typeHash, size_t);
 
 			Entity entityHandle = pObject->GetEntityHandle();
 			EntityID entity = entityHandle.GetEntityID();
 
-			pScene->GetRegistry()->GetSystems()->CreateComponent(entity, typeHash);
+			pScene->GetRegistry()->GetSystems()->CreateComponent(entity, typeHash, compUUID);
 			EntityComponentData* pComponentData = pScene->GetRegistry()->GetEntityComponentDataAt(entity, currentComponentIndex);
 			if (!pComponentData) continue;
-			std::vector<SerializedProperty> properties;
+			std::vector<SerializedProperty*> properties;
 			pScene->GetRegistry()->GetSystems()->AcquireSerializedProperties(pComponentData, properties);
 
 			for (size_t i = 0; i < properties.size(); i++)
 			{
-				const SerializedProperty& serializedProperty = properties[i];
-				YAML::Node dataNode = nextObject[serializedProperty.Name()];
+				const SerializedProperty* serializedProperty = properties[i];
+				YAML::Node dataNode = nextObject[serializedProperty->Name()];
 				PropertySerializer::DeserializeProperty(serializedProperty, dataNode);
 			}
 			++currentComponentIndex;

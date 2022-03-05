@@ -11,18 +11,18 @@ namespace Glory
 	{
 	}
 
-	void AssetReferencePropertySerializer::Serialize(const SerializedProperty& serializedProperty, YAML::Emitter& out)
+	void AssetReferencePropertySerializer::Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out)
 	{
-		Object* pObject = serializedProperty.ObjectReference();
+		Object* pObject = serializedProperty->ObjectReference();
 		UUID uuid = pObject != nullptr ? pObject->GetUUID() : 0;
-		out << YAML::Key << serializedProperty.Name();
+		out << YAML::Key << serializedProperty->Name();
 		out << YAML::Value << (uint64_t)uuid;
 	}
 
-	void AssetReferencePropertySerializer::Deserialize(const SerializedProperty& serializedProperty, YAML::Node& object)
+	void AssetReferencePropertySerializer::Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
-		Object** pObjectMember = (Object**)serializedProperty.MemberPointer();
+		Object** pObjectMember = (Object**)serializedProperty->MemberPointer();
 		UUID uuid = object.as<uint64_t>();
 		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
 		*pObjectMember = pResource;

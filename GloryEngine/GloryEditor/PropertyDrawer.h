@@ -15,9 +15,9 @@ namespace Glory::Editor
 	public:
 		PropertyDrawer(size_t typeHash);
 		virtual ~PropertyDrawer();
-		virtual bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const;
-		virtual bool Draw(const std::string& label, std::any& data, uint32_t flags) const;
-		bool Draw(const SerializedProperty& serializedProperty) const;
+		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const;
+		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const;
+		bool Draw(const SerializedProperty* serializedProperty) const;
 
 		template<class T>
 		static void RegisterPropertyDrawer()
@@ -25,9 +25,9 @@ namespace Glory::Editor
 			m_PropertyDrawers.push_back(new T());
 		}
 
-		static bool DrawProperty(const std::string& label, void* data, size_t typeHash, size_t elementTypeHash, uint32_t flags);
+		static bool DrawProperty(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, size_t elementTypeHash, uint32_t flags);
 		static bool DrawProperty(const std::string& label, std::any& data, uint32_t flags);
-		static bool DrawProperty(const SerializedProperty& serializedProperty);
+		static bool DrawProperty(const SerializedProperty* serializedProperty);
 
 	public:
 		size_t GetPropertyTypeHash() const;
@@ -48,12 +48,12 @@ namespace Glory::Editor
 		PropertyDrawerTemplate() : PropertyDrawer(ResourceType::GetHash<PropertyType>()) {}
 
 	protected:
-		virtual bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const override
+		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const override
 		{
 			return OnGUI(label, (PropertyType*)data, flags);
 		}
 
-		virtual bool Draw(const std::string& label, std::any& data, uint32_t flags) const override
+		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const override
 		{
 			PropertyType pPropertyData = std::any_cast<PropertyType>(data);
 			bool result = OnGUI(label, &pPropertyData, flags);

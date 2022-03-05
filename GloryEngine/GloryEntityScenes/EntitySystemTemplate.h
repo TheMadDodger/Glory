@@ -18,12 +18,12 @@ namespace Glory
 		virtual void OnUpdate(Registry* pRegistry, EntityID entity, T& pComponent) {}
 		virtual void OnDraw(Registry* pRegistry, EntityID entity, T& pComponent) {}
 
-		virtual void OnAcquireSerializedProperties(std::vector<SerializedProperty>& properties, T& pComponent) {}
+		virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, T& pComponent) {}
 
-		virtual void CreateComponent(EntityID entity) override
+		virtual void CreateComponent(EntityID entity, UUID uuid = UUID()) override
 		{
 			if (m_pRegistry->HasComponent<T>(entity)) return;
-			m_pRegistry->AddComponent<T>(entity);
+			m_pRegistry->AddComponent<T>(entity, uuid);
 		}
 
 	private:
@@ -47,9 +47,9 @@ namespace Glory
 			OnDraw(pRegistry, entity, pComponentData->GetData<T>());
 		}
 
-		virtual std::string AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty>& properties) override
+		virtual std::string AcquireSerializedProperties(UUID uuid, EntityComponentData* pComponentData, std::vector<SerializedProperty*>& properties) override
 		{
-			OnAcquireSerializedProperties(properties, pComponentData->GetData<T>());
+			OnAcquireSerializedProperties(uuid, properties, pComponentData->GetData<T>());
 			return Name();
 		}
 	};
