@@ -2,8 +2,9 @@
 #include "UUID.h"
 #include "AssetLocation.h"
 #include "ResourceMeta.h"
-#include <unordered_map>
+#include "AssetCallbacks.h"
 #include "ThreadedVar.h"
+#include <unordered_map>
 
 namespace Glory
 {
@@ -44,5 +45,6 @@ namespace Glory
 		static ThreadedUMap<std::string, UUID> m_PathToUUID;
 		static ThreadedUMap<UUID, ResourceMeta> m_Metas;
 		static ThreadedUMap<size_t, std::vector<UUID>> m_AssetsByType;
+		static AssetCallbacks m_Callbacks;
 	};
 }

@@ -99,6 +99,8 @@ namespace Glory::Editor
 	{
 		CreateFolder("Assets");
 		CreateFolder("Cache");
+		CreateFolder("Cache/ShaderSource");
+		CreateFolder("Cache/CompiledShaders");
 		YAML::Node node = YAML::LoadFile(m_ProjectFilePath);
 		m_ProjectName = node["ProjectName"].as<std::string>();
 

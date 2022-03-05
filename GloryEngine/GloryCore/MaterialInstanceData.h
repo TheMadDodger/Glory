@@ -11,7 +11,7 @@ namespace Glory
 
 	public:
         virtual size_t ShaderCount() const override;
-        virtual FileData* GetShaderAt(size_t index) const override;
+        virtual ShaderSourceData* GetShaderAt(size_t index) const override;;
         virtual const ShaderType& GetShaderTypeAt(size_t index) const override;
 
 		MaterialData* GetBaseMaterial() const;

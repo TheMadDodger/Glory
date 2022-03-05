@@ -2,6 +2,9 @@
 
 namespace Glory::Editor
 {
+	EditorShaderData::EditorShaderData(UUID uuid) : m_UUID(uuid) {}
+	EditorShaderData::~EditorShaderData() {}
+
 	std::vector<uint32_t>::const_iterator EditorShaderData::Begin()
 	{
 		return m_ShaderData.begin();
@@ -12,13 +15,18 @@ namespace Glory::Editor
 		return m_ShaderData.end();
 	}
 
-	const uint32_t* EditorShaderData::Data()
+	const uint32_t* EditorShaderData::Data() const
 	{
 		return m_ShaderData.data();
 	}
 
-	size_t EditorShaderData::Size()
+	size_t EditorShaderData::Size() const
 	{
 		return m_ShaderData.size();
+	}
+
+	UUID EditorShaderData::GetUUID() const
+	{
+		return m_UUID;
 	}
 }

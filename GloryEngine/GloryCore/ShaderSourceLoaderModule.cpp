@@ -1,6 +1,7 @@
 #include "ShaderSourceLoaderModule.h"
 #include "Debug.h"
 #include "EngineProfiler.h"
+#include "ShaderManager.h"
 #include <fstream>
 
 namespace Glory

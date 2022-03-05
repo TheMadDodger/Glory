@@ -1,11 +1,12 @@
 #pragma once
 #include "Resource.h"
 #include "FileData.h"
+#include "ShaderSourceData.h"
+#include "Texture.h"
+#include "MaterialPropertyData.h"
 #include <vector>
 #include <unordered_map>
 #include "GraphicsEnums.h"
-#include "Texture.h"
-#include "MaterialPropertyData.h"
 #include <mutex>
 
 namespace Glory
@@ -14,11 +15,11 @@ namespace Glory
     {
     public:
         MaterialData();
-        MaterialData(const std::vector<FileData*>& shaderFiles, const std::vector<ShaderType>& shaderTypes);
+        MaterialData(const std::vector<ShaderSourceData*>& shaderFiles);
         virtual ~MaterialData();
 
         virtual size_t ShaderCount() const;
-        virtual FileData* GetShaderAt(size_t index) const;
+        virtual ShaderSourceData* GetShaderAt(size_t index) const;
         virtual const ShaderType& GetShaderTypeAt(size_t index) const;
         void RemoveShaderAt(size_t index);
          
@@ -34,8 +35,7 @@ namespace Glory
 
     protected:
         friend class MaterialLoaderModule;
-        std::vector<FileData*> m_pShaderFiles;
-        std::vector<ShaderType> m_ShaderTypes;
+        std::vector<ShaderSourceData*> m_pShaderFiles;
 
         static std::hash<std::string> m_Hasher;
         std::vector<MaterialPropertyData> m_Properties;

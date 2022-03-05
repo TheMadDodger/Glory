@@ -127,6 +127,7 @@ namespace Glory
 		glUseProgram(NULL);
 		LogGLError(glGetError());
 		Material* pMaterial = GetResourceManager()->CreateMaterial(pMaterialData);
+		if (!pMaterial) return nullptr;
 		pMaterial->Use();
 		return pMaterial;
 	}

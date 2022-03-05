@@ -4,6 +4,7 @@
 #include <ResourceType.h>
 #include <GLORY_YAML.h>
 #include <Selection.h>
+#include <AssetDatabase.h>
 
 namespace Glory::Editor
 {
@@ -60,10 +61,11 @@ namespace Glory::Editor
 
 			for (size_t row_n = 0; row_n < shaderCount; row_n++)
 			{
-				FileData* pShaderFile = pMaterial->GetShaderAt(row_n);
+				ShaderSourceData* pShaderSourceData = pMaterial->GetShaderAt(row_n);
+				std::string name = pShaderSourceData->Name();
 				ShaderType shaderType = pMaterial->GetShaderTypeAt(row_n);
+				if (name == "") name = "UNKNOWN SHADER";
 
-				const std::string& name = pShaderFile->Name();
 				const std::string shaderTypeString = YAML::SHADERTYPE_TOFULLSTRING[shaderType];
 
 				std::string label = shaderTypeString + ": " + name;
@@ -77,7 +79,7 @@ namespace Glory::Editor
 
 				if (ImGui::Selectable(std::to_string(row_n).c_str(), false, selectable_flags, ImVec2(0, rowHeight)) && ImGui::IsMouseDoubleClicked(0))
 				{
-					Selection::SetActiveObject(pShaderFile);
+					Selection::SetActiveObject(pShaderSourceData);
 				}
 
 				if (ImGui::TableSetColumnIndex(1))

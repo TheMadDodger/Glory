@@ -5,7 +5,7 @@
 namespace Glory
 {
 	Material::Material(MaterialData* pMaterialData)
-		: m_pMaterialData(pMaterialData), m_pPropertiesBuffer(nullptr)
+		: m_pMaterialData(pMaterialData), m_pPropertiesBuffer(nullptr), m_Complete(false)
 	{
 	}
 
@@ -38,6 +38,11 @@ namespace Glory
 	void Material::AddShader(Shader* pShader)
 	{
 		m_pShaders.push_back(pShader);
+	}
+
+	void Material::Clear()
+	{
+		m_pShaders.clear();
 	}
 
 	void Material::SetUBO(UniformBufferObjectTest ubo)

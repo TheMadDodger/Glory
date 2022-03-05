@@ -10,8 +10,8 @@ namespace Glory
 		APPEND_TYPE(MaterialData);
 	}
 
-	MaterialData::MaterialData(const std::vector<FileData*>& shaderFiles, const std::vector<ShaderType>& shaderTypes)
-		: m_pShaderFiles(shaderFiles), m_ShaderTypes(shaderTypes)
+	MaterialData::MaterialData(const std::vector<ShaderSourceData*>& shaderFiles)
+		: m_pShaderFiles(shaderFiles)
 	{
 		APPEND_TYPE(MaterialData);
 	}
@@ -19,7 +19,6 @@ namespace Glory
 	MaterialData::~MaterialData()
 	{
 		m_pShaderFiles.clear();
-		m_ShaderTypes.clear();
 	}
 
 	size_t MaterialData::ShaderCount() const
@@ -27,20 +26,19 @@ namespace Glory
 		return m_pShaderFiles.size();
 	}
 
-	FileData* MaterialData::GetShaderAt(size_t index) const
+	ShaderSourceData* MaterialData::GetShaderAt(size_t index) const
 	{
 		return m_pShaderFiles[index];
 	}
 
 	const ShaderType& MaterialData::GetShaderTypeAt(size_t index) const
 	{
-		return m_ShaderTypes[index];
+		return m_pShaderFiles[index]->GetShaderType();
 	}
 
 	void MaterialData::RemoveShaderAt(size_t index)
 	{
 		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
-		m_ShaderTypes.erase(m_ShaderTypes.begin() + index);
 	}
 
 	void MaterialData::AddProperty(const MaterialPropertyData& prop)

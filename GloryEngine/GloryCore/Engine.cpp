@@ -6,6 +6,7 @@
 #include "AssetReferencePropertySerializer.h"
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
+#include "ShaderManager.h"
 #include <algorithm>
 
 namespace Glory
@@ -162,6 +163,7 @@ namespace Glory
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
+		ShaderManager::Cleanup();
 	}
 
 	void Engine::Initialize()

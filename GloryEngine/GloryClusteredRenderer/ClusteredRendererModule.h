@@ -82,19 +82,19 @@ namespace Glory
 
 	private:
 		// Compute shaders
-		FileData* m_pClusterShaderFile;
+		ShaderSourceData* m_pClusterShaderData;
 		MaterialData* m_pClusterShaderMaterialData;
 		Material* m_pClusterShaderMaterial;
 		
-		FileData* m_pMarkActiveClustersShaderFile;
+		ShaderSourceData* m_pMarkActiveClustersShaderData;
 		MaterialData* m_pMarkActiveClustersMaterialData;
 		Material* m_pMarkActiveClustersMaterial;
 
-		FileData* m_pCompactClustersShaderFile;
+		ShaderSourceData* m_pCompactClustersShaderData;
 		MaterialData* m_pCompactClustersMaterialData;
 		Material* m_pCompactClustersMaterial;
 
-		FileData* m_pClusterCullLightShaderFile;
+		ShaderSourceData* m_pClusterCullLightShaderData;
 		MaterialData* m_pClusterCullLightMaterialData;
 		Material* m_pClusterCullLightMaterial;
 

@@ -3,6 +3,7 @@
 #include "Serializer.h"
 #include "PropertySerializer.h"
 #include "AssetManager.h"
+#include "ShaderManager.h"
 
 namespace Glory
 {
@@ -84,13 +85,12 @@ namespace Glory
 
 			AssetLocation location;
 			if (!AssetDatabase::GetAssetLocation(shaderUUID, location)) continue;
-
+			
 			std::string path = Game::GetAssetPath() + '\\' + location.m_Path;
-			FileData* pFileData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path, FileImportSettings("shader"));
-			if (!pFileData) continue;
+			ShaderSourceData* pShaderSourceData = AssetManager::GetAssetImmediate<ShaderSourceData>(shaderUUID);
+			if (!pShaderSourceData) continue;
 
-			pMaterialData->m_pShaderFiles.push_back(pFileData);
-			pMaterialData->m_ShaderTypes.push_back(shaderType);
+			pMaterialData->m_pShaderFiles.push_back(pShaderSourceData);
 		}
 	}
 
