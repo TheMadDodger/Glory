@@ -5,6 +5,7 @@
 #include <GLORY_YAML.h>
 #include <Selection.h>
 #include <AssetDatabase.h>
+#include <AssetPickerPopup.h>
 
 namespace Glory::Editor
 {
@@ -105,7 +106,14 @@ namespace Glory::Editor
 
 		if (ImGui::Button("Add Shader", ImVec2(width, 0.0f)))
 		{
-
+			AssetPickerPopup::Open(ResourceType::GetHash<ShaderSourceData>(), [&](Resource* pResource)
+			{
+				if (!pResource) return;
+				MaterialData* pMaterial = (MaterialData*)m_pTarget;
+				ShaderSourceData* pShaderSource = (ShaderSourceData*)pResource;
+				pMaterial->AddShader(pShaderSource);
+				pMaterial->ReloadResourcesFromShader();
+			});
 		}
 	}
 

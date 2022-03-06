@@ -41,6 +41,13 @@ namespace Glory
 		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
 	}
 
+	void MaterialData::AddShader(ShaderSourceData* pShaderSourceData)
+	{
+		auto it = std::find(m_pShaderFiles.begin(), m_pShaderFiles.end(), pShaderSourceData);
+		if (it != m_pShaderFiles.end()) return;
+		m_pShaderFiles.push_back(pShaderSourceData);
+	}
+
 	void MaterialData::AddProperty(const MaterialPropertyData& prop)
 	{
 		size_t hash = m_Hasher(prop.Name());
@@ -93,5 +100,19 @@ namespace Glory
 		if (m_HashToPropertyIndex.find(hash) == m_HashToPropertyIndex.end()) return false;
 		index = m_HashToPropertyIndex.at(hash);
 		return true;
+	}
+
+	void MaterialData::ReloadResourcesFromShader()
+	{
+		for (size_t i = 0; i < m_pShaderFiles.size(); i++)
+		{
+			ShaderSourceData* pShaderSource = m_pShaderFiles[i];
+			const spirv_cross::ShaderResources resources = pShaderSource->GetResources();
+			for (size_t i = 0; i < resources.sampled_images.size(); i++)
+			{
+				spirv_cross::Resource sampler = resources.sampled_images[i];
+				 sampler.name;
+			}
+		}
 	}
 }

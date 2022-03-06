@@ -73,7 +73,6 @@ project "GloryMain"
 		"GloryOpenGLGraphics",
 		"GlorySDLImage",
 		"GloryASSIMPModelLoader",
-		"GloryGLSLShaderLoader",
 		"GloryEntityScenes",
 		"GloryClusteredRenderer",
 		"assimp",

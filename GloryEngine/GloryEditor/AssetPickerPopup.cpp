@@ -9,12 +9,21 @@ namespace Glory::Editor
 	bool AssetPickerPopup::m_Open = false;
 	Resource** AssetPickerPopup::m_pResourcePointer = nullptr;
 	size_t AssetPickerPopup::m_TypeHash = 0;
+	std::function<void(Resource*)> AssetPickerPopup::m_Callback = NULL;
 
 	void AssetPickerPopup::Open(size_t typeHash, Resource** pResource)
 	{
 		m_Open = true;
 		m_TypeHash = typeHash;
 		m_pResourcePointer = pResource;
+	}
+
+	void AssetPickerPopup::Open(size_t typeHash, std::function<void(Resource*)> callback)
+	{
+		m_Callback = callback;
+		m_Open = true;
+		m_TypeHash = typeHash;
+		m_pResourcePointer = nullptr;
 	}
 
 	void AssetPickerPopup::OnGUI()
@@ -104,10 +113,18 @@ namespace Glory::Editor
 
 	void AssetPickerPopup::AssetSelected(Resource* pAsset)
 	{
-		*m_pResourcePointer = pAsset;
 		m_PossibleAssets.clear();
 		m_FilteredAssets.clear();
-		m_pResourcePointer = nullptr;
 		ImGui::CloseCurrentPopup();
+
+		if (m_Callback != NULL)
+		{
+			m_Callback(pAsset);
+			m_Callback = NULL;
+			return;
+		}
+
+		*m_pResourcePointer = pAsset;
+		m_pResourcePointer = nullptr;
 	}
 }

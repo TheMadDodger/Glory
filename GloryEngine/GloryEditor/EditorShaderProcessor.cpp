@@ -109,6 +109,8 @@ namespace Glory::Editor
 			EditorShaderData* pShaderData = std::filesystem::exists(cachedShaderSourceFile) ? LoadCache(pShaderSource, cachedShaderSourceFile)
 				: CompileAndCache(pShaderSource, cachedShaderSourceFile);
 
+			ProcessReflection(pShaderData, pShaderSource);
+
 			std::string path = ShaderManager::GetCompiledShaderPath(pShaderData->GetUUID());
 			CompileForCurrentPlatform(pShaderData, path);
 
@@ -189,6 +191,14 @@ namespace Glory::Editor
 		std::ofstream stream(path);
 		stream.write(source.data(), source.size());
 		stream.close();
+	}
+
+	void EditorShaderProcessor::ProcessReflection(EditorShaderData* pEditorShader, ShaderSourceData* pShaderSource)
+	{
+		spirv_cross::Compiler compiler(pEditorShader->Data(), pEditorShader->Size());
+		compiler.compile();
+		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
+		//pShaderSource->SetShaderResources(resources);
 	}
 
 	void EditorShaderProcessor::AssetRegisteredCallback(UUID uuid, const ResourceMeta& meta, Resource* pResource)

@@ -23,6 +23,8 @@ project "GlorySDLWindow"
 	{
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.shaderc}",
+		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}"
 	}
 

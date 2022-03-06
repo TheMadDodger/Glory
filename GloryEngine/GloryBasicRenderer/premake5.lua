@@ -22,6 +22,8 @@ project "GloryBasicRenderer"
 	includedirs
 	{
 		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.shaderc}",
+		"%{IncludeDir.spirv_cross}",
 		"%{vulkan_sdk}/third-party/include"
 	}
 

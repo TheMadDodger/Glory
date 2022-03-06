@@ -28,6 +28,7 @@ namespace Glory::Editor
 
 	private:
 		void CompileForCurrentPlatform(EditorShaderData* pEditorShader, const std::string& path);
+		void ProcessReflection(EditorShaderData* pEditorShader, ShaderSourceData* pShaderSource);
 
 		static void AssetRegisteredCallback(UUID uuid, const ResourceMeta& meta, Resource* pResource);
 

@@ -22,6 +22,7 @@ namespace Glory
         virtual ShaderSourceData* GetShaderAt(size_t index) const;
         virtual const ShaderType& GetShaderTypeAt(size_t index) const;
         void RemoveShaderAt(size_t index);
+        void AddShader(ShaderSourceData* pShaderSourceData);
          
         void AddProperty(const MaterialPropertyData& prop);
          
@@ -32,6 +33,8 @@ namespace Glory
         virtual void CopyProperties(std::vector<MaterialPropertyData>& destination);
         virtual void PasteProperties(const std::vector<MaterialPropertyData>& destination);
         bool GetPropertyIndex(const std::string& name, size_t& index) const;
+
+        void ReloadResourcesFromShader();
 
     protected:
         friend class MaterialLoaderModule;

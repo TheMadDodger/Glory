@@ -24,6 +24,8 @@ project "GloryClusteredRenderer"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.GLEW}",
 		"%{GloryIncludeDir.opengl}",
+		"%{IncludeDir.shaderc}",
+		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}"
 	}
 

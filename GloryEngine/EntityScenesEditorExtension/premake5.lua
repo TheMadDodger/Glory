@@ -25,7 +25,8 @@ project "EntityScenesEditorExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
-
+		"%{IncludeDir.shaderc}",
+		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.entityscenes}",
