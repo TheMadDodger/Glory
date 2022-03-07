@@ -14,6 +14,7 @@ namespace Glory
 	public:
 		SerializedProperty();
 		SerializedProperty(UUID objectUUID, const std::string& name, size_t typeHash, void* pMember, uint32_t flags = 0);
+		virtual ~SerializedProperty();
 
 		const std::string& Name() const;
 		uint32_t Flags() const;

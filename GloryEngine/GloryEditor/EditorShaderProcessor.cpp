@@ -109,6 +109,8 @@ namespace Glory::Editor
 			EditorShaderData* pShaderData = std::filesystem::exists(cachedShaderSourceFile) ? LoadCache(pShaderSource, cachedShaderSourceFile)
 				: CompileAndCache(pShaderSource, cachedShaderSourceFile);
 
+			if (pShaderData == nullptr) continue;
+
 			ProcessReflection(pShaderData, pShaderSource);
 
 			std::string path = ShaderManager::GetCompiledShaderPath(pShaderData->GetUUID());

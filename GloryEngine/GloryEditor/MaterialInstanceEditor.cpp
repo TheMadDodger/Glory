@@ -12,27 +12,26 @@ namespace Glory::Editor
 	{
 		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
 
-		std::vector<MaterialPropertyData> properties;
 		std::vector<bool> overrideStates;
-		pMaterial->CopyProperties(properties);
 		pMaterial->CopyOverrideStates(overrideStates);
 
-		for (size_t i = 0; i < properties.size(); i++)
+		std::vector<char>& buffer = pMaterial->GetBufferReference();
+
+		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
 		{
 			std::string label = "##override_" + std::to_string(i);
 
 			bool enable = overrideStates[i];
+			const MaterialPropertyInfo& info = pMaterial->GetPropertyInfoAt(i);
+
 			ImGui::Checkbox(label.data(), &enable);
 			ImGui::BeginDisabled(!enable);
 			ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-			MaterialPropertyData* pProperty = &properties[i];
-			size_t hash = ResourceType::GetHash(pProperty->Type());
-			PropertyDrawer::DrawProperty(pProperty->Name(), pProperty->Data(), pProperty->Flags());
+			PropertyDrawer::DrawProperty(info.DisplayName(), buffer, info.TypeHash(), info.Offset(), info.Size(), info.Flags());
 			ImGui::EndDisabled();
 			overrideStates[i] = enable;
 		}
 
-		pMaterial->PasteProperties(properties);
 		pMaterial->PasteOverrideStates(overrideStates);
 	}
 }

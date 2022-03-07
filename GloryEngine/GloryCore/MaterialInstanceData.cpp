@@ -10,16 +10,8 @@ namespace Glory
 
 		if (!pBaseMaterial) return;
 
-		pBaseMaterial->CopyProperties(m_Properties);
-
-		m_PropertyOverridesEnable.resize(m_Properties.size(), false);
-
-		for (size_t i = 0; i < m_Properties.size(); i++)
-		{
-			MaterialPropertyData* pProperty = &m_Properties[i];
-			size_t hash = m_Hasher(pProperty->Name());
-			m_HashToPropertyIndex.emplace(hash, i);
-		}
+		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
+		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
 	}
 
 	MaterialInstanceData::~MaterialInstanceData()
@@ -52,34 +44,6 @@ namespace Glory
 		return m_pBaseMaterial->GetUUID();
 	}
 
-	void MaterialInstanceData::CopyProperties(std::vector<MaterialPropertyData>& destination)
-	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
-		destination.clear();
-
-		for (size_t i = 0; i < m_Properties.size(); i++)
-		{
-			if (m_PropertyOverridesEnable[i])
-			{
-				destination.push_back(MaterialPropertyData(m_Properties[i]));
-				continue;
-			}
-			destination.push_back(m_pBaseMaterial->CopyPropertyAt(i));
-		}
-		lock.unlock();
-	}
-
-	void MaterialInstanceData::PasteProperties(const std::vector<MaterialPropertyData>& destination)
-	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
-		m_Properties.clear();
-		std::for_each(destination.begin(), destination.end(), [&](const MaterialPropertyData& propertyData)
-		{
-			m_Properties.push_back(MaterialPropertyData(propertyData));
-		});
-		lock.unlock();
-	}
-
 	void MaterialInstanceData::CopyOverrideStates(std::vector<bool>& destination)
 	{
 		std::unique_lock lock(m_PropertiesAccessMutex);
@@ -94,5 +58,38 @@ namespace Glory
 		if (m_PropertyOverridesEnable.size() != destination.size()) m_PropertyOverridesEnable.resize(destination.size());
 		m_PropertyOverridesEnable.assign(destination.begin(), destination.end());
 		lock.unlock();
+	}
+
+	size_t MaterialInstanceData::PropertyInfoCount() const
+	{
+		return m_pBaseMaterial->PropertyInfoCount();
+	}
+
+	const MaterialPropertyInfo& MaterialInstanceData::GetPropertyInfoAt(size_t index) const
+	{
+		return m_pBaseMaterial->GetPropertyInfoAt(index);
+	}
+
+	size_t MaterialInstanceData::GetCurrentBufferOffset() const
+	{
+		return m_pBaseMaterial->GetCurrentBufferOffset();
+	}
+
+	std::vector<char>& MaterialInstanceData::GetBufferReference()
+	{
+		std::vector<char>& baseBuffer = m_pBaseMaterial->GetBufferReference();
+		m_PropertyBuffer.resize(baseBuffer.size());
+		for (size_t i = 0; i < m_pBaseMaterial->PropertyInfoCount(); i++)
+		{
+			const MaterialPropertyInfo& propertyInfo = m_pBaseMaterial->GetPropertyInfoAt(i);
+			if (m_PropertyOverridesEnable[i]) continue;
+			memcpy(&m_PropertyBuffer[propertyInfo.Offset()], &baseBuffer[propertyInfo.Offset()], propertyInfo.Size());
+		}
+		return m_PropertyBuffer;
+	}
+
+	bool MaterialInstanceData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
+	{
+		return m_pBaseMaterial->GetPropertyInfoIndex(name, index);
 	}
 }

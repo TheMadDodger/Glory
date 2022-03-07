@@ -27,6 +27,11 @@ namespace Glory::Editor
 		return false;
 	}
 
+	bool PropertyDrawer::Draw(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags) const
+	{
+		return false;
+	}
+
 	bool PropertyDrawer::Draw(const SerializedProperty* serializedProperty) const
 	{
 		return Draw(serializedProperty, serializedProperty->Name(), serializedProperty->MemberPointer(), serializedProperty->ElementTypeHash(), serializedProperty->Flags());
@@ -71,6 +76,23 @@ namespace Glory::Editor
 	bool PropertyDrawer::DrawProperty(const SerializedProperty* serializedProperty)
 	{
 		return DrawProperty(serializedProperty, serializedProperty->Name(), serializedProperty->MemberPointer(), serializedProperty->TypeHash(), serializedProperty->ElementTypeHash(), serializedProperty->Flags());
+	}
+
+	bool PropertyDrawer::DrawProperty(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags)
+	{
+		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		{
+			return propertyDrawer->GetPropertyTypeHash() == typeHash;
+		});
+
+		if (it == m_PropertyDrawers.end())
+		{
+			//ImGui::Text(prop.m_Name.c_str());
+			return false;
+		}
+
+		PropertyDrawer* drawer = *it;
+		return drawer->Draw(label, buffer, typeHash, offset, size, flags);
 	}
 
 	size_t PropertyDrawer::GetPropertyTypeHash() const

@@ -11,6 +11,8 @@ namespace Glory
 		BaseSerializedArrayProperty(UUID objectUUID, const std::string& name, void* pMember, uint32_t flags)
 			: SerializedProperty(objectUUID, name, ST_Array, pMember, flags) {}
 
+		virtual ~BaseSerializedArrayProperty() {}
+
 		virtual size_t ArraySize() const = 0;
 		virtual SerializedProperty* GetArrayElementAt(size_t index) const = 0;
 		virtual void Resize(size_t newSize) = 0;
@@ -30,6 +32,12 @@ namespace Glory
 				m_pSerializedArray.push_back(SerializedPropertyManager::GetProperty<TPropElem, T>(objectUUID, propName, pSubMember, flags, std::forward<Args>(args)...));
 				++pSubMember;
 			}
+		}
+
+		virtual ~SerializedArrayProperty()
+		{
+			m_pMember = nullptr;
+			m_pSerializedArray.clear();
 		}
 
 		virtual size_t ArraySize() const override

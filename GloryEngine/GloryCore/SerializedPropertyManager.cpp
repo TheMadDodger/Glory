@@ -1,19 +1,19 @@
 #include "SerializedPropertyManager.h"
+#include <algorithm>
 
 namespace Glory
 {
 	std::map<UUID, std::map<std::string, SerializedProperty*>> SerializedPropertyManager::m_ManagedProperties;
+	std::vector<SerializedProperty*> SerializedPropertyManager::m_AllProperties;
 
 	void SerializedPropertyManager::Clear()
 	{
-		for (auto it1 = m_ManagedProperties.begin(); it1 != m_ManagedProperties.end(); it1++)
-		{
-			for (auto it2 = it1->second.begin(); it2 != it1->second.end(); it2++)
-			{
-				delete it2->second;
-			}
-		}
 		m_ManagedProperties.clear();
+		std::for_each(m_AllProperties.begin(), m_AllProperties.end(), [](SerializedProperty* pProperty)
+			{
+				delete pProperty;
+			});
+		m_AllProperties.clear();
 	}
 
 	SerializedPropertyManager::SerializedPropertyManager() {}

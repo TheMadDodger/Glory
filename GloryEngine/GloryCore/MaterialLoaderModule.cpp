@@ -109,9 +109,11 @@ namespace Glory
 			
 			node = propertyNode["Value"];
 
-			MaterialPropertyData materialProp(name);
-			PropertySerializer::DeserializeProperty(materialProp.m_PropertyData, typeHash, node);
-			pMaterialData->AddProperty(materialProp);
+			const BasicTypeData* typeData = ResourceType::GetBasicTypeData(typeHash);
+
+			size_t offset = pMaterialData->GetCurrentBufferOffset();
+			pMaterialData->AddProperty(name, name, typeHash, typeData != nullptr ? typeData->m_Size : 4);
+			PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
 		}
 	}
 
@@ -127,15 +129,17 @@ namespace Glory
 			YAML_READ(propertyNode, node, Name, name, std::string);
 
 			size_t propertyIndex = 0;
-			if (!pMaterialData->GetPropertyIndex(name, propertyIndex)) continue;
+			if (!pMaterialData->GetPropertyInfoIndex(name, propertyIndex)) continue;
 			pMaterialData->m_PropertyOverridesEnable[propertyIndex] = true;
 
-			MaterialPropertyData* pPropertyData = &pMaterialData->m_Properties[propertyIndex];
-			size_t typeHash = ResourceType::GetHash(pPropertyData->Type());
+			const MaterialPropertyInfo& propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
 
 			node = propertyNode["Value"];
-			MaterialPropertyData materialProp(name);
-			PropertySerializer::DeserializeProperty(pPropertyData->m_PropertyData, typeHash, node);
+
+			size_t typeHash = propertyInfo.TypeHash();
+			size_t offset = propertyInfo.Offset();
+			size_t size = propertyInfo.Size();
+			PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
 		}
 	}
 

@@ -78,6 +78,7 @@ namespace Glory
 		void Initialize();
 
 		void RegisterStandardSerializers();
+		void RegisterBasicTypes();
 
 	private:
 		void GraphicsThreadFrameStart();

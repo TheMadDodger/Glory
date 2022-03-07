@@ -168,6 +168,7 @@ namespace Glory
 
 	void Engine::Initialize()
 	{
+		RegisterBasicTypes();
 		RegisterStandardSerializers();
 
 		Console::Initialize();
@@ -229,6 +230,18 @@ namespace Glory
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
 		PropertySerializer::RegisterSerializer<ArrayPropertySerializers>();
+	}
+
+	void Engine::RegisterBasicTypes()
+	{
+		ResourceType::RegisterType<int>();
+		ResourceType::RegisterType<float>();
+		ResourceType::RegisterType<double>();
+		ResourceType::RegisterType<long>();
+		ResourceType::RegisterType<glm::vec2>();
+		ResourceType::RegisterType<glm::vec3>();
+		ResourceType::RegisterType<glm::vec4>();
+		ResourceType::RegisterType<glm::quat>();
 	}
 
 	void Engine::Update()

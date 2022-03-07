@@ -17,6 +17,7 @@ namespace Glory
 			{
 				T* pNewProperty = new T(uuid, propertyName, pMember, flags, args...);
 				m_ManagedProperties[uuid][propertyName] = pNewProperty;
+				m_AllProperties.push_back(pNewProperty);
 				return (SerializedProperty*)pNewProperty;
 			}
 
@@ -37,6 +38,7 @@ namespace Glory
 
 	private:
 		static std::map<UUID, std::map<std::string, SerializedProperty*>> m_ManagedProperties;
+		static std::vector<SerializedProperty*> m_AllProperties;
 
 	private:
 		SerializedPropertyManager();

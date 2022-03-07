@@ -119,16 +119,10 @@ namespace Glory::Editor
 
 	void MaterialEditor::PropertiesGUI(MaterialData* pMaterial)
 	{
-		std::vector<MaterialPropertyData> properties;
-		pMaterial->CopyProperties(properties);
-
-		for (size_t i = 0; i < properties.size(); i++)
+		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
 		{
-			MaterialPropertyData* pProperty = &properties[i];
-			size_t hash = ResourceType::GetHash(pProperty->Type());
-			PropertyDrawer::DrawProperty(pProperty->Name(), pProperty->Data(), pProperty->Flags());
+			const MaterialPropertyInfo& info = pMaterial->GetPropertyInfoAt(i);
+			PropertyDrawer::DrawProperty(info.DisplayName(), pMaterial->GetBufferReference(), info.TypeHash(), info.Offset(), info.Size(), info.Flags());
 		}
-
-		pMaterial->PasteProperties(properties);
 	}
 }
