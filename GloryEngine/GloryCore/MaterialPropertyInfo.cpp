@@ -3,7 +3,14 @@
 namespace Glory
 {
 	MaterialPropertyInfo::MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, size_t offset, uint32_t flags)
-		: m_PropertyDisplayName(displayName), m_PropertyShaderName(shaderName), m_TypeHash(typeHash), m_Size(size), m_Offset(offset), m_Flags(flags)
+		: m_PropertyDisplayName(displayName), m_PropertyShaderName(shaderName), m_TypeHash(typeHash),
+		m_Size(size), m_Offset(offset), m_IsResource(false), m_Flags(flags)
+	{
+	}
+
+	MaterialPropertyInfo::MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, uint32_t flags)
+		: m_PropertyDisplayName(displayName), m_PropertyShaderName(shaderName), m_TypeHash(typeHash),
+		m_Size(sizeof(UUID)), m_Offset(0), m_IsResource(true), m_Flags(flags)
 	{
 	}
 
@@ -35,6 +42,11 @@ namespace Glory
 	const size_t MaterialPropertyInfo::EndOffset() const
 	{
 		return m_Offset + m_Size;
+	}
+
+	bool MaterialPropertyInfo::IsResource() const
+	{
+		return m_IsResource;
 	}
 
 	uint32_t MaterialPropertyInfo::Flags() const

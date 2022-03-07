@@ -36,6 +36,8 @@ namespace Glory
 
 	void EntitySceneScenesModule::PostInitialize()
 	{
+		size_t hash = ResourceType::GetHash<ImageData>();
+		int a = 0;
 	}
 
 	void EntitySceneScenesModule::OnCleanup()

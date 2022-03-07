@@ -42,6 +42,8 @@ namespace Glory
 			return GetResourceType(typeid(T));
 		}
 
+		static bool IsResource(size_t typeHash);
+
 		static void RegisterResource(std::type_index type, const std::string& extensions);
 		static void RegisterType(const std::type_info& type, size_t size);
 		static size_t GetHash(std::type_index type);

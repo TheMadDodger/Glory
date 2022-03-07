@@ -12,6 +12,7 @@ namespace Glory
 
 		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
 		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
+		m_pResources.resize(pBaseMaterial->ResourceCount());
 	}
 
 	MaterialInstanceData::~MaterialInstanceData()
@@ -65,7 +66,7 @@ namespace Glory
 		return m_pBaseMaterial->PropertyInfoCount();
 	}
 
-	const MaterialPropertyInfo& MaterialInstanceData::GetPropertyInfoAt(size_t index) const
+	MaterialPropertyInfo* MaterialInstanceData::GetPropertyInfoAt(size_t index)
 	{
 		return m_pBaseMaterial->GetPropertyInfoAt(index);
 	}
@@ -81,9 +82,10 @@ namespace Glory
 		m_PropertyBuffer.resize(baseBuffer.size());
 		for (size_t i = 0; i < m_pBaseMaterial->PropertyInfoCount(); i++)
 		{
-			const MaterialPropertyInfo& propertyInfo = m_pBaseMaterial->GetPropertyInfoAt(i);
+			MaterialPropertyInfo* propertyInfo = m_pBaseMaterial->GetPropertyInfoAt(i);
+			if (propertyInfo->IsResource()) continue;
 			if (m_PropertyOverridesEnable[i]) continue;
-			memcpy(&m_PropertyBuffer[propertyInfo.Offset()], &baseBuffer[propertyInfo.Offset()], propertyInfo.Size());
+			memcpy(&m_PropertyBuffer[propertyInfo->Offset()], &baseBuffer[propertyInfo->Offset()], propertyInfo->Size());
 		}
 		return m_PropertyBuffer;
 	}
@@ -91,5 +93,26 @@ namespace Glory
 	bool MaterialInstanceData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
 	{
 		return m_pBaseMaterial->GetPropertyInfoIndex(name, index);
+	}
+
+	Resource** MaterialInstanceData::GetResourcePointer(size_t index)
+	{
+		size_t propertyIndex = GetPropertyIndexFromResourceIndex(index);
+		return m_PropertyOverridesEnable[propertyIndex] ? &m_pResources[index] : m_pBaseMaterial->GetResourcePointer(index);
+	}
+
+	size_t MaterialInstanceData::GetPropertyIndexFromResourceIndex(size_t index) const
+	{
+		return m_pBaseMaterial->GetPropertyIndexFromResourceIndex(index);
+	}
+
+	size_t MaterialInstanceData::GetResourcePropertyCount() const
+	{
+		return m_pBaseMaterial->GetResourcePropertyCount();
+	}
+
+	MaterialPropertyInfo* MaterialInstanceData::GetResourcePropertyInfo(size_t index)
+	{
+		return m_pBaseMaterial->GetResourcePropertyInfo(index);
 	}
 }

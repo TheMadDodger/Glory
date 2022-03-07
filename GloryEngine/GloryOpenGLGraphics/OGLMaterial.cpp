@@ -180,7 +180,7 @@ namespace Glory
 		GLTexture* pGLTexture = (GLTexture*)pTexture;
 		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindTexture(GL_TEXTURE_2D, pGLTexture->GetID());
+		glBindTexture(GL_TEXTURE_2D, pGLTexture ? pGLTexture->GetID() : 0);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glActiveTexture(GL_TEXTURE0);

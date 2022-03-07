@@ -6,6 +6,7 @@
 #include <Selection.h>
 #include <AssetDatabase.h>
 #include <AssetPickerPopup.h>
+#include <AssetReferencePropertyTemplate.h>
 
 namespace Glory::Editor
 {
@@ -119,10 +120,18 @@ namespace Glory::Editor
 
 	void MaterialEditor::PropertiesGUI(MaterialData* pMaterial)
 	{
+		size_t resourceCounter = 0;
 		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
 		{
-			const MaterialPropertyInfo& info = pMaterial->GetPropertyInfoAt(i);
-			PropertyDrawer::DrawProperty(info.DisplayName(), pMaterial->GetBufferReference(), info.TypeHash(), info.Offset(), info.Size(), info.Flags());
+			MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(i);
+
+			if (info->IsResource())
+			{
+				SerializedProperty serializedProperty = SerializedProperty(0, info->DisplayName(), SerializedType::ST_Asset, info->TypeHash(), pMaterial->GetResourcePointer(resourceCounter), info->Flags());
+				PropertyDrawer::DrawProperty(&serializedProperty);
+				++resourceCounter;
+			}
+			else PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
 		}
 	}
 }

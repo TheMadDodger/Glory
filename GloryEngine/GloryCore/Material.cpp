@@ -16,6 +16,17 @@ namespace Glory
 	void Material::SetProperties()
 	{
 		if (m_pMaterialData == nullptr) return;
+
+		for (size_t i = 0; i < m_pMaterialData->GetResourcePropertyCount(); i++)
+		{
+			MaterialPropertyInfo* pPropertyInfo = m_pMaterialData->GetResourcePropertyInfo(i);
+			const std::string& shaderName = pPropertyInfo->ShaderName();
+			Resource* pResource = *m_pMaterialData->GetResourcePointer(i);
+			ImageData* pImageData = static_cast<ImageData*>(pResource);
+			Texture* pTexture = pImageData != nullptr ? Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pImageData) : nullptr;
+			SetTexture(shaderName, pTexture);
+		}
+
 		std::vector<char>& propertyBuffer = m_pMaterialData->GetBufferReference();
 		if (propertyBuffer.empty()) return;
 		if (m_pPropertiesBuffer == nullptr) m_pPropertiesBuffer = CreatePropertiesBuffer(propertyBuffer.size());

@@ -6,12 +6,13 @@ namespace Glory
 	std::hash<std::string> MaterialData::m_Hasher = std::hash<std::string>();
 
 	MaterialData::MaterialData()
+		: m_CurrentOffset(0)
 	{
 		APPEND_TYPE(MaterialData);
 	}
 
 	MaterialData::MaterialData(const std::vector<ShaderSourceData*>& shaderFiles)
-		: m_pShaderFiles(shaderFiles)
+		: m_pShaderFiles(shaderFiles), m_CurrentOffset(0)
 	{
 		APPEND_TYPE(MaterialData);
 	}
@@ -48,15 +49,26 @@ namespace Glory
 		m_pShaderFiles.push_back(pShaderSourceData);
 	}
 
-	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, uint32_t flags)
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags)
 	{
 		size_t hash = m_Hasher(displayName);
 		size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
-		size_t offset = index > 0 ? m_PropertyInfos[lastIndex].EndOffset() : 0;
-		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, offset, flags));
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
+		m_CurrentOffset = m_PropertyInfos[index].EndOffset();
 		m_PropertyInfos[index].Reserve(m_PropertyBuffer);
 		m_HashToPropertyInfoIndex[hash] = index;
+	}
+
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, Resource* pResource, uint32_t flags)
+	{
+		size_t hash = m_Hasher(displayName);
+		size_t index = m_PropertyInfos.size();
+		size_t lastIndex = index - 1;
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, flags));
+		m_ResourcePropertyInfoIndices.push_back(index);
+		m_HashToPropertyInfoIndex[hash] = index;
+		m_pResources.push_back(pResource);
 	}
 
 	size_t MaterialData::PropertyInfoCount() const
@@ -64,9 +76,9 @@ namespace Glory
 		return m_PropertyInfos.size();
 	}
 
-	const MaterialPropertyInfo& MaterialData::GetPropertyInfoAt(size_t index) const
+	MaterialPropertyInfo* MaterialData::GetPropertyInfoAt(size_t index)
 	{
-		return m_PropertyInfos[index];
+		return &m_PropertyInfos[index];
 	}
 
 	size_t MaterialData::GetCurrentBufferOffset() const
@@ -91,6 +103,32 @@ namespace Glory
 		if (m_HashToPropertyInfoIndex.find(hash) == m_HashToPropertyInfoIndex.end()) return false;
 		index = m_HashToPropertyInfoIndex.at(hash);
 		return true;
+	}
+
+	size_t MaterialData::ResourceCount() const
+	{
+		return m_pResources.size();
+	}
+
+	Resource** MaterialData::GetResourcePointer(size_t index)
+	{
+		return &m_pResources[index];
+	}
+
+	size_t MaterialData::GetResourcePropertyCount() const
+	{
+		return m_ResourcePropertyInfoIndices.size();
+	}
+
+	MaterialPropertyInfo* MaterialData::GetResourcePropertyInfo(size_t index)
+	{
+		size_t propertyIndex = m_ResourcePropertyInfoIndices[index];
+		return &m_PropertyInfos[index];
+	}
+
+	size_t MaterialData::GetPropertyIndexFromResourceIndex(size_t index) const
+	{
+		return m_ResourcePropertyInfoIndices[index];
 	}
 
 	void MaterialData::ReloadResourcesFromShader()

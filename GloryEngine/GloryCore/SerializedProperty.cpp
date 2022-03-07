@@ -8,6 +8,9 @@ namespace Glory
 	SerializedProperty::SerializedProperty(UUID objectUUID, const std::string& name, size_t typeHash, void* pMember, uint32_t flags)
 		: m_ObjectUUID(objectUUID), m_PropertyName(name), m_pMember(pMember), m_TypeHash(typeHash), m_Flags(flags) {}
 
+	SerializedProperty::SerializedProperty(UUID objectUUID, const std::string& name, size_t typeHash, size_t elementTypeHash, void* pMember, uint32_t flags)
+		: m_ObjectUUID(objectUUID), m_PropertyName(name), m_pMember(pMember), m_TypeHash(typeHash), m_ElementTypeHash(elementTypeHash), m_Flags(flags) {}
+
 	SerializedProperty::~SerializedProperty()
 	{
 		m_pMember = nullptr;

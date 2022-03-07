@@ -16,6 +16,11 @@ namespace Glory
 
 	std::hash<std::type_index> ResourceType::m_Hasher;
 
+	bool ResourceType::IsResource(size_t typeHash)
+	{
+		return m_HashToType.find(typeHash) != m_HashToType.end();
+	}
+
 	void ResourceType::RegisterResource(std::type_index type, const std::string& extensions)
 	{
 		size_t typeHash = m_Hasher(type);

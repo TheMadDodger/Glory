@@ -98,6 +98,7 @@ namespace Glory
 	{
 		YAML::Node propertiesNode = rootNode["Properties"];
 		if (!propertiesNode.IsSequence()) return;
+
 		for (size_t i = 0; i < propertiesNode.size(); i++)
 		{
 			YAML::Node propertyNode = propertiesNode[i];
@@ -112,8 +113,19 @@ namespace Glory
 			const BasicTypeData* typeData = ResourceType::GetBasicTypeData(typeHash);
 
 			size_t offset = pMaterialData->GetCurrentBufferOffset();
-			pMaterialData->AddProperty(name, name, typeHash, typeData != nullptr ? typeData->m_Size : 4);
-			PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
+
+			bool isResource = ResourceType::IsResource(typeHash);
+			if (!isResource)
+			{
+				pMaterialData->AddProperty(name, name, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
+				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
+			}
+			else
+			{
+				UUID id = node.as<uint64_t>();
+				Resource* pResource = AssetManager::GetAssetImmediate(id);
+				pMaterialData->AddProperty(name, name, typeHash, pResource);
+			}
 		}
 	}
 
@@ -121,6 +133,8 @@ namespace Glory
 	{
 		YAML::Node propertiesNode = rootNode["Overrides"];
 		if (!propertiesNode.IsSequence()) return;
+
+		size_t resourceCounter = 0;
 		for (size_t i = 0; i < propertiesNode.size(); i++)
 		{
 			YAML::Node propertyNode = propertiesNode[i];
@@ -132,14 +146,23 @@ namespace Glory
 			if (!pMaterialData->GetPropertyInfoIndex(name, propertyIndex)) continue;
 			pMaterialData->m_PropertyOverridesEnable[propertyIndex] = true;
 
-			const MaterialPropertyInfo& propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
+			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
 
 			node = propertyNode["Value"];
 
-			size_t typeHash = propertyInfo.TypeHash();
-			size_t offset = propertyInfo.Offset();
-			size_t size = propertyInfo.Size();
-			PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
+			if (!propertyInfo->m_IsResource)
+			{
+				size_t typeHash = propertyInfo->TypeHash();
+				size_t offset = propertyInfo->Offset();
+				size_t size = propertyInfo->Size();
+				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
+			}
+			else
+			{
+				UUID id = node.as<uint64_t>();
+				if(pMaterialData->m_pResources.size() > resourceCounter) pMaterialData->m_pResources[resourceCounter] = AssetManager::GetAssetImmediate(id);
+				++resourceCounter;
+			}
 		}
 	}
 

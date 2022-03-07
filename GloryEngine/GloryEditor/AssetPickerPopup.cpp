@@ -29,7 +29,12 @@ namespace Glory::Editor
 	void AssetPickerPopup::OnGUI()
 	{
 		if (m_Open)
+		{
 			ImGui::OpenPopup("AssetPickerPopup");
+			m_Filter = "";
+			m_FilteredAssets.clear();
+			m_PossibleAssets.clear();
+		}
 		m_Open = false;
 
 		if (m_TypeHash == 0) return;
