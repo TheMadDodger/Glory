@@ -40,7 +40,6 @@ project "GloryMain"
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.basicrenderer}",
 		"%{GloryIncludeDir.clusteredrenderer}",
-		"%{GloryIncludeDir.glslloader}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.sdlimage}",
 		"%{GloryIncludeDir.sdlwindow}",

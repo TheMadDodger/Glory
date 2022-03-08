@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	ImageLoaderModule::ImageLoaderModule() : ResourceLoaderModule("png,jpg,bmp")
+	ImageLoaderModule::ImageLoaderModule() : ResourceLoaderModule(".png,.jpg,.bmp")
 	{
 	}
 

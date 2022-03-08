@@ -33,6 +33,8 @@ namespace Glory::Editor
 
 		void SortChildren();
 
+		static std::filesystem::path GetCurrentPath();
+
 	private:
 		static void EraseExcessHistory();
 

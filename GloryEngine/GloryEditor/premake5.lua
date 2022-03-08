@@ -56,7 +56,6 @@ project "GloryEditor"
 		"%{GloryIncludeDir.assimp}",
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.basicrenderer}",
-		"%{GloryIncludeDir.glslloader}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.sdlimage}",
 		"%{GloryIncludeDir.sdlwindow}",

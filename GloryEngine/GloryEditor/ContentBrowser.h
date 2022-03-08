@@ -10,6 +10,11 @@ namespace Glory::Editor
 		ContentBrowser();
 		virtual ~ContentBrowser();
 
+		static std::filesystem::path GetCurrentPath();
+
+		virtual void OnOpen() override;
+		virtual void OnClose() override;
+
 	private:
 		virtual void OnGUI() override;
 
@@ -27,7 +32,6 @@ namespace Glory::Editor
 		std::hash<std::string> m_Hasher;
 		char m_SearchBuffer[100];
 
-		bool m_Refresh;
 		ContentBrowserItem* m_pRootItem;
 	};
 }

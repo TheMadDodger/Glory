@@ -11,7 +11,7 @@ namespace Glory
 	MaterialImportSettings::MaterialImportSettings(const std::string& name)
 		: ImportSettings(name) {}
 
-	MaterialLoaderModule::MaterialLoaderModule() : ResourceLoaderModule("gmat")
+	MaterialLoaderModule::MaterialLoaderModule() : ResourceLoaderModule(".gmat")
 	{
 	}
 
@@ -51,6 +51,19 @@ namespace Glory
 		return isInstance ? LoadMaterialInstanceData(rootNode, importSettings) : LoadMaterialData(rootNode, importSettings);
 	}
 
+	void MaterialLoaderModule::SaveResource(const std::string& path, MaterialData* pResource)
+	{
+		MaterialInstanceData* pMaterialInstance = dynamic_cast<MaterialInstanceData*>(pResource);
+		YAML::Emitter out;
+
+		if (pMaterialInstance) SaveMaterialInstanceData(pMaterialInstance, out);
+		else SaveMaterialData(pResource, out);
+
+		std::ofstream outStream(path);
+		outStream << out.c_str();
+		outStream.close();
+	}
+
 	MaterialData* MaterialLoaderModule::LoadMaterialData(YAML::Node& rootNode, const MaterialImportSettings& importSettings)
 	{
 		MaterialData* pMaterialData = new MaterialData();
@@ -68,6 +81,18 @@ namespace Glory
 		MaterialInstanceData* pMaterialInstanceData = new MaterialInstanceData(pMaterialData);
 		ReadPropertyOverrides(rootNode, pMaterialInstanceData);
 		return pMaterialInstanceData;
+	}
+
+	void MaterialLoaderModule::SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out)
+	{
+		out << YAML::BeginMap;
+		WriteShaders(out, pMaterialData);
+		out << YAML::EndMap;
+	}
+
+	void MaterialLoaderModule::SaveMaterialInstanceData(MaterialInstanceData* pMaterialData, YAML::Emitter& out)
+	{
+
 	}
 	
 	void MaterialLoaderModule::ReadShaders(YAML::Node& rootNode, MaterialData* pMaterialData)
@@ -164,6 +189,19 @@ namespace Glory
 				++resourceCounter;
 			}
 		}
+	}
+
+	void MaterialLoaderModule::WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData)
+	{
+		out << YAML::Key << "Shaders";
+		out << YAML::Value << YAML::BeginMap;
+		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
+		{
+			ShaderSourceData* pShaderSourceData = pMaterialData->GetShaderAt(i);
+			YAML_WRITE(out, UUID, pShaderSourceData->GetUUID());
+			YAML_WRITE(out, Type, pShaderSourceData->GetShaderType());
+		}
+		out << YAML::EndMap;
 	}
 
 	void MaterialLoaderModule::Initialize()

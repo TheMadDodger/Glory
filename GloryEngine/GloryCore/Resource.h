@@ -15,6 +15,7 @@ namespace Glory
 
     private:
         friend class AssetManager;
+        friend class AssetDatabase;
         std::string m_Name;
     };
 }

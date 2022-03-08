@@ -1,7 +1,9 @@
 #include <fstream>
 #include <filesystem>
 #include "AssetDatabase.h"
+#include "AssetManager.h"
 #include "LayerManager.h"
+#include "Serializer.h"
 
 namespace Glory
 {
@@ -149,6 +151,64 @@ namespace Glory
 
 			InsertAsset(path, meta);
 		}
+	}
+
+	void AssetDatabase::CreateAsset(Resource* pResource, const std::string& path)
+	{
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(extension.string());
+		if (!pModule)
+		{
+			// Shouldnt happen but uuuuuuuuuh
+			Debug::LogError("Failed to save asset, asset type not supported!");
+			return;
+		}
+		pModule->Save(path, pResource);
+		ImportAsset(path, pResource);
+	}
+
+	void AssetDatabase::ImportAsset(const std::string& path, Resource* pLoadedResource)
+	{
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(extension.string());
+		if (!pModule)
+		{
+			// Not supperted!
+			Debug::LogError("Failed to import file, asset type not supported!");
+			return;
+		}
+
+		if (!pLoadedResource)
+		{
+			std::any importSettings = pModule->CreateDefaultImportSettings(extension.string());
+			pLoadedResource = pModule->LoadUsingAny(path, importSettings);
+		}
+
+		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
+		std::filesystem::path metaFilePath = path + metaExtension.string();
+		// Generate a meta file
+		const ResourceType* pType = ResourceType::GetResourceType(extension.string());
+
+		if (!pType)
+		{
+			// Not supperted!
+			Debug::LogError("Failed to import file, could not determine ResourceType!");
+			return;
+		}
+
+		ResourceMeta meta(metaFilePath.string(), extension.string(), UUID(), pType->Hash());
+		meta.Write(pModule);
+		meta.Read();
+		pLoadedResource->m_ID = meta.ID();
+		pLoadedResource->m_Name = fileName.string();
+		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
+		AssetManager::m_pLoadedAssets.Set(pLoadedResource->m_ID, pLoadedResource);
+		InsertAsset(relativePath.string(), meta);
 	}
 
 	void AssetDatabase::ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback)

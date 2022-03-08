@@ -29,6 +29,7 @@ namespace Glory
 		virtual Resource* LoadUsingAny(const std::string& path, const std::any& importSettings) = 0;
 		virtual Resource* Load(const std::string& path, const ImportSettings& importSettings = ImportSettings()) = 0;
 		virtual Resource* Load(const void* buffer, size_t length, const ImportSettings& importSettings = ImportSettings()) = 0;
+		virtual void Save(const std::string& path, Resource* pResource) = 0;
 		virtual const std::type_info& GetResourceType() = 0;
 
 		virtual std::any ReadImportSettings(YAML::Node& node) = 0;
@@ -89,6 +90,11 @@ namespace Glory
 			return (Resource*)pResource;
 		}
 
+		virtual void Save(const std::string& path, Resource* pResource) override
+		{
+			SaveResource(path, (T*)pResource);
+		}
+
 		virtual const std::type_info& GetResourceType() override
 		{
 			return typeid(T);
@@ -121,6 +127,7 @@ namespace Glory
 	protected:
 		virtual T* LoadResource(const std::string& path, const S& importSettings) = 0;
 		virtual T* LoadResource(const void* buffer, size_t length, const S& importSettings) = 0;
+		virtual void SaveResource(const std::string& path, T* pResource) {}
 		virtual S ReadImportSettings_Internal(YAML::Node& node) = 0;
 		virtual void WriteImportSettings_Internal(const S& importSettings, YAML::Emitter& out) = 0;
 

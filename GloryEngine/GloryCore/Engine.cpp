@@ -54,7 +54,9 @@ namespace Glory
 
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
 	{
-		return nullptr;
+		const ResourceType* pResourceType = ResourceType::GetResourceType(extension);
+		if (!pResourceType) return nullptr;
+		return GetLoaderModule(pResourceType->Hash());
 	}
 
 	LoaderModule* Engine::GetLoaderModule(const std::type_info& resourceType)

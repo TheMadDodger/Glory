@@ -50,6 +50,7 @@ namespace Glory
 
 	private:
 		friend class Engine;
+		friend class AssetDatabase;
 		static ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
 		static ThreadedUMap<std::string, size_t> m_PathToGroupIndex;
 		static ThreadedVector<AssetGroup*> m_LoadedAssetGroups;

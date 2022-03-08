@@ -3,7 +3,7 @@
 
 namespace Glory
 {
-	ModelLoaderModule::ModelLoaderModule() : ResourceLoaderModule("obj,fbx")
+	ModelLoaderModule::ModelLoaderModule() : ResourceLoaderModule(".obj,.fbx")
 	{
 	}
 

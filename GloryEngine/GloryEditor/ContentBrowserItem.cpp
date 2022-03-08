@@ -9,6 +9,7 @@
 #include "Tumbnail.h"
 #include "TumbnailGenerator.h"
 #include "Selection.h"
+#include "ObjectMenu.h"
 
 namespace Glory::Editor
 {
@@ -255,6 +256,11 @@ namespace Glory::Editor
 				m_pHistory.push_back(this);
 				SetOpen();
 			}
+
+			if (ImGui::IsItemClicked(1))
+			{
+				ObjectMenu::Open(nullptr, ObjectMenuType::T_Folder);
+			}
 			ImGui::Text(m_Name.data());
 			return;
 		}
@@ -267,12 +273,6 @@ namespace Glory::Editor
 
 		ImGui::ImageButton(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)iconSize, (float)iconSize));
 
-		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
-		{
-			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
-			Selection::SetActiveObject(pAsset);
-		}
-
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
 			ResourceMeta meta;
@@ -280,6 +280,18 @@ namespace Glory::Editor
 			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(meta.Hash());
 			if (!pGenerator) return;
 			pGenerator->OnFileDoubleClick(uuid);
+		}
+
+		if (ImGui::IsItemClicked(0))
+		{
+			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
+			Selection::SetActiveObject(pAsset);
+		}
+
+		if (ImGui::IsItemClicked(1))
+		{
+			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
+			ObjectMenu::Open(pAsset, ObjectMenuType::T_Resource);
 		}
 
 		ImGui::Text(m_CachedPath.filename().replace_extension().string().c_str());
@@ -304,6 +316,11 @@ namespace Glory::Editor
 			if (!pA->m_IsFolder && pB->m_IsFolder) return false;
 			return pA->m_Name < pB->m_Name;
 		});
+	}
+
+	std::filesystem::path ContentBrowserItem::GetCurrentPath()
+	{
+		return m_pSelectedFolder != nullptr ? m_pSelectedFolder->BuildPath() : ProjectSpace::GetOpenProject()->RootPath();
 	}
 
 	void ContentBrowserItem::EraseExcessHistory()

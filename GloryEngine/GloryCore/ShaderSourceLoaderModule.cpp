@@ -23,7 +23,7 @@ namespace Glory
 		{ "vert", ShaderType::ST_Vertex },
 	};
 
-	ShaderSourceLoaderModule::ShaderSourceLoaderModule() : ResourceLoaderModule("shader")
+	ShaderSourceLoaderModule::ShaderSourceLoaderModule() : ResourceLoaderModule(".shader")
 	{
 		m_SymbolCallbacks["type"] = [&](const std::string& path, ShaderSourceData* pShaderSource, const std::string& argument)
 		{

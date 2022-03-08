@@ -21,6 +21,9 @@ namespace Glory
 		static void Save();
 		static void Load();
 
+		static void CreateAsset(Resource* pResource, const std::string& path);
+		static void ImportAsset(const std::string& path, Resource* pLoadedResource = nullptr);
+
 		static void ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback);
 		static void RemoveAsset(UUID uuid);
 

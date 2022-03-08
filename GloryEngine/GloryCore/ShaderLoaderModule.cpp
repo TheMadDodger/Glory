@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	ShaderLoaderModule::ShaderLoaderModule() : ResourceLoaderModule("frag,vert,spv")
+	ShaderLoaderModule::ShaderLoaderModule() : ResourceLoaderModule(".frag,.vert,.spv")
 	{
 	}
 

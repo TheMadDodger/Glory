@@ -31,7 +31,7 @@ namespace Glory
 	{
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
-		ResourceType::RegisterResource<GScene>("gscene");
+		ResourceType::RegisterResource<GScene>(".gscene");
 	}
 
 	void EntitySceneScenesModule::PostInitialize()

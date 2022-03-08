@@ -5,9 +5,27 @@
 #include <Game.h>
 #include <Engine.h>
 #include <AssetDatabase.h>
+#include <ContentBrowser.h>
 
 namespace Glory::Editor
 {
+	std::filesystem::path GetUnqiueFilePath(const std::filesystem::path& start)
+	{
+		std::filesystem::path currentPath = start;
+		std::filesystem::path extenstion = start.extension();
+		std::filesystem::path fileName = currentPath.filename();
+		fileName = fileName.replace_extension("");
+		size_t counter = 0;
+		while (std::filesystem::exists(currentPath))
+		{
+			++counter;
+			currentPath.replace_filename(fileName.string() + std::to_string(counter));
+			currentPath.replace_extension(extenstion);
+		}
+
+		return currentPath;
+	}
+
 	OBJECTMENU_CALLBACK(CopyObjectCallback)
 	{
 		switch (currentMenu)
@@ -109,5 +127,15 @@ namespace Glory::Editor
 		if (!AssetDatabase::AssetExists(uuid)) return;
 		EditorSceneManager::CloseScene(uuid);
 		EditorSceneManager::OpenScene(uuid, true);
+	}
+
+	OBJECTMENU_CALLBACK(CreateNewMaterialCallback)
+	{
+		std::filesystem::path path = ContentBrowser::GetCurrentPath();
+		path = path.append("NewMaterial.gmat");
+		path = GetUnqiueFilePath(path);
+		MaterialData* pMaterialData = new MaterialData();
+		AssetDatabase::CreateAsset(pMaterialData, path.string());
+		AssetDatabase::Save();
 	}
 }
