@@ -6,12 +6,13 @@ namespace Glory
 	std::hash<std::string> MaterialData::m_Hasher = std::hash<std::string>();
 
 	MaterialData::MaterialData()
+		: m_CurrentOffset(0)
 	{
 		APPEND_TYPE(MaterialData);
 	}
 
-	MaterialData::MaterialData(const std::vector<FileData*>& shaderFiles, const std::vector<ShaderType>& shaderTypes)
-		: m_pShaderFiles(shaderFiles), m_ShaderTypes(shaderTypes)
+	MaterialData::MaterialData(const std::vector<ShaderSourceData*>& shaderFiles)
+		: m_pShaderFiles(shaderFiles), m_CurrentOffset(0)
 	{
 		APPEND_TYPE(MaterialData);
 	}
@@ -19,7 +20,6 @@ namespace Glory
 	MaterialData::~MaterialData()
 	{
 		m_pShaderFiles.clear();
-		m_ShaderTypes.clear();
 	}
 
 	size_t MaterialData::ShaderCount() const
@@ -27,67 +27,121 @@ namespace Glory
 		return m_pShaderFiles.size();
 	}
 
-	FileData* MaterialData::GetShaderAt(size_t index) const
+	ShaderSourceData* MaterialData::GetShaderAt(size_t index) const
 	{
 		return m_pShaderFiles[index];
 	}
 
 	const ShaderType& MaterialData::GetShaderTypeAt(size_t index) const
 	{
-		return m_ShaderTypes[index];
+		return m_pShaderFiles[index]->GetShaderType();
 	}
 
-	void MaterialData::AddProperty(const MaterialPropertyData& prop)
+	void MaterialData::RemoveShaderAt(size_t index)
 	{
-		size_t hash = m_Hasher(prop.Name());
-		size_t index = m_Properties.size();
-		m_Properties.push_back(prop);
-		m_HashToPropertyIndex[hash] = index;
+		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
 	}
 
-	size_t MaterialData::PropertyCount() const
+	void MaterialData::AddShader(ShaderSourceData* pShaderSourceData)
 	{
-		return m_Properties.size();
+		auto it = std::find(m_pShaderFiles.begin(), m_pShaderFiles.end(), pShaderSourceData);
+		if (it != m_pShaderFiles.end()) return;
+		m_pShaderFiles.push_back(pShaderSourceData);
 	}
 
-	MaterialPropertyData* MaterialData::GetPropertyAt(size_t index)
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags)
 	{
-		return &m_Properties[index];
+		size_t hash = m_Hasher(displayName);
+		size_t index = m_PropertyInfos.size();
+		size_t lastIndex = index - 1;
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
+		m_CurrentOffset = m_PropertyInfos[index].EndOffset();
+		m_PropertyInfos[index].Reserve(m_PropertyBuffer);
+		m_HashToPropertyInfoIndex[hash] = index;
 	}
 
-	MaterialPropertyData MaterialData::CopyPropertyAt(size_t index)
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, Resource* pResource, uint32_t flags)
 	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
-		return MaterialPropertyData(m_Properties[index]);
+		size_t hash = m_Hasher(displayName);
+		size_t index = m_PropertyInfos.size();
+		size_t lastIndex = index - 1;
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, flags));
+		m_ResourcePropertyInfoIndices.push_back(index);
+		m_HashToPropertyInfoIndex[hash] = index;
+		m_pResources.push_back(pResource);
 	}
 
-	void MaterialData::CopyProperties(std::vector<MaterialPropertyData>& destination)
+	size_t MaterialData::PropertyInfoCount() const
 	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
-		destination.clear();
-		std::for_each(m_Properties.begin(), m_Properties.end(), [&](const MaterialPropertyData& propertyData)
-		{
-			destination.push_back(MaterialPropertyData(propertyData));
-		});
-		lock.unlock();
+		return m_PropertyInfos.size();
 	}
 
-	void MaterialData::PasteProperties(const std::vector<MaterialPropertyData>& destination)
+	MaterialPropertyInfo* MaterialData::GetPropertyInfoAt(size_t index)
 	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
-		m_Properties.clear();
-		std::for_each(destination.begin(), destination.end(), [&](const MaterialPropertyData& propertyData)
-		{
-			m_Properties.push_back(MaterialPropertyData(propertyData));
-		});
-		lock.unlock();
+		return &m_PropertyInfos[index];
 	}
 
-	bool MaterialData::GetPropertyIndex(const std::string& name, size_t& index) const
+	size_t MaterialData::GetCurrentBufferOffset() const
+	{
+		size_t size = m_PropertyInfos.size();
+		return size > 0 ? m_PropertyInfos[size - 1].EndOffset() : 0;
+	}
+
+	std::vector<char>& MaterialData::GetBufferReference()
+	{
+		return m_PropertyBuffer;
+	}
+
+	std::vector<char>& MaterialData::GetFinalBufferReference()
+	{
+		return m_PropertyBuffer;
+	}
+
+	bool MaterialData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
 	{
 		size_t hash = m_Hasher(name);
-		if (m_HashToPropertyIndex.find(hash) == m_HashToPropertyIndex.end()) return false;
-		index = m_HashToPropertyIndex.at(hash);
+		if (m_HashToPropertyInfoIndex.find(hash) == m_HashToPropertyInfoIndex.end()) return false;
+		index = m_HashToPropertyInfoIndex.at(hash);
 		return true;
+	}
+
+	size_t MaterialData::ResourceCount() const
+	{
+		return m_pResources.size();
+	}
+
+	Resource** MaterialData::GetResourcePointer(size_t index)
+	{
+		return &m_pResources[index];
+	}
+
+	size_t MaterialData::GetResourcePropertyCount() const
+	{
+		return m_ResourcePropertyInfoIndices.size();
+	}
+
+	MaterialPropertyInfo* MaterialData::GetResourcePropertyInfo(size_t index)
+	{
+		size_t propertyIndex = m_ResourcePropertyInfoIndices[index];
+		return &m_PropertyInfos[index];
+	}
+
+	size_t MaterialData::GetPropertyIndexFromResourceIndex(size_t index) const
+	{
+		return m_ResourcePropertyInfoIndices[index];
+	}
+
+	void MaterialData::ReloadResourcesFromShader()
+	{
+		for (size_t i = 0; i < m_pShaderFiles.size(); i++)
+		{
+			ShaderSourceData* pShaderSource = m_pShaderFiles[i];
+			const spirv_cross::ShaderResources resources = pShaderSource->GetResources();
+			for (size_t i = 0; i < resources.sampled_images.size(); i++)
+			{
+				spirv_cross::Resource sampler = resources.sampled_images[i];
+				 sampler.name;
+			}
+		}
 	}
 }

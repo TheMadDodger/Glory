@@ -19,7 +19,6 @@ namespace Glory
 
 	public: // Property setters
 		void SetUBO(UniformBufferObjectTest ubo);
-		void SetProperty(MaterialPropertyData* pProperty);
 
 		// All of these need to go, properties should be set using the material data/material instance data class linked to this material
 		virtual void SetFloat(const std::string& name, float value) const = 0;
@@ -43,15 +42,15 @@ namespace Glory
 
 		virtual Buffer* CreatePropertiesBuffer(size_t size) = 0;
 
+		void Clear();
+
 	protected:
 		MaterialData* m_pMaterialData;
 		std::vector<Shader*> m_pShaders;
 		UniformBufferObjectTest m_UBO;
 
-		std::vector<MaterialPropertyData> m_FrameProperties;
-		std::vector<char> m_PropertyData;
-
 		Buffer* m_pPropertiesBuffer;
+		bool m_Complete;
 
 	private:
 		friend class GPUResourceManager;

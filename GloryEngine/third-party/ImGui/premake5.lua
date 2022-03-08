@@ -21,7 +21,7 @@ project "ImGui"
         
     includedirs
     {
-        "%{ImGuiDir}"
+        "%{ImGuiDir}",
     }
 
     defines

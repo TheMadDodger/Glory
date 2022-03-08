@@ -17,6 +17,7 @@ namespace Glory::Editor
 		virtual ~PropertyDrawer();
 		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const;
 		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const;
+		virtual bool Draw(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags) const;
 		bool Draw(const SerializedProperty* serializedProperty) const;
 
 		template<class T>
@@ -28,6 +29,7 @@ namespace Glory::Editor
 		static bool DrawProperty(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, size_t elementTypeHash, uint32_t flags);
 		static bool DrawProperty(const std::string& label, std::any& data, uint32_t flags);
 		static bool DrawProperty(const SerializedProperty* serializedProperty);
+		static bool DrawProperty(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags);
 
 	public:
 		size_t GetPropertyTypeHash() const;
@@ -59,6 +61,17 @@ namespace Glory::Editor
 			bool result = OnGUI(label, &pPropertyData, flags);
 			data = pPropertyData;
 			return result;
+		}
+
+		virtual bool Draw(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags) const override
+		{
+			PropertyType value;
+			memcpy((void*)&value, (void*)&buffer[offset], size);
+			PropertyType originalValue = value;
+			OnGUI(label, &value, flags);
+			if (originalValue == value) return false;
+			memcpy((void*)&buffer[offset], (void*)&value, size);
+			return true;
 		}
 
 		virtual bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const = 0;

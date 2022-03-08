@@ -66,25 +66,29 @@ namespace Glory
 	Material* GPUResourceManager::CreateMaterial(MaterialData* pMaterialData)
 	{
 		Material* pMaterial = GetResource<Material>(pMaterialData);
-		if (pMaterial)
+		if (pMaterial && pMaterial->m_Complete)
 		{
 			pMaterial->m_pMaterialData = pMaterialData;
 			return pMaterial;
 		}
 
 		Profiler::BeginSample("GPUResourceManager::CreateMaterial");
-		pMaterial = CreateMaterial_Internal(pMaterialData);
+		if (pMaterial) pMaterial->Clear();
+		else pMaterial = CreateMaterial_Internal(pMaterialData);
 		pMaterial->m_pMaterialData = pMaterialData;
 		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
 		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
 		{
-			FileData* pShaderFile = pMaterialData->GetShaderAt(i);
+			ShaderSourceData* pShaderSourceData = pMaterialData->GetShaderAt(i);
+			FileData* pCompiledShaderSource = pShaderSourceData != nullptr ? pShaderSourceData->GetCompiledShader() : nullptr;
+			if (!pCompiledShaderSource) return nullptr;
 			const ShaderType& shaderType = pMaterialData->GetShaderTypeAt(i);
-			Shader* pShader = CreateShader(pShaderFile, shaderType, "main");
+			Shader* pShader = CreateShader(pCompiledShaderSource, shaderType, "main");
 			pMaterial->AddShader(pShader);
 		}
 
 		pMaterial->Initialize();
+		pMaterial->m_Complete = true;
 		m_IDResources[pMaterialData->GetGPUUUID()] = pMaterial;
 		Profiler::EndSample();
 		return pMaterial;

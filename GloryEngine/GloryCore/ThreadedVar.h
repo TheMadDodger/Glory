@@ -56,6 +56,17 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
+		void ForEachClear(std::function<void(const _Ty& value)> callback)
+		{
+			m_Mutex.lock();
+			for (size_t i = 0; i < m_Data.size(); i++)
+			{
+				callback(m_Data[i]);
+			}
+			m_Data.clear();
+			m_Mutex.unlock();
+		}
+
 		size_t Size() const
 		{
 			m_Mutex.lock();
@@ -79,6 +90,20 @@ namespace Glory
 			result = it != m_Data.end();
 			m_Mutex.unlock();
 			return result;
+		}
+
+		void Do(size_t index, std::function<void(_Ty* value)> callback)
+		{
+			m_Mutex.lock();
+			callback(&m_Data[index]);
+			m_Mutex.unlock();
+		}
+
+		void Do(size_t index, std::function<void(const _Ty& value)> callback)
+		{
+			m_Mutex.lock();
+			callback(m_Data[index]);
+			m_Mutex.unlock();
 		}
 
 	private:

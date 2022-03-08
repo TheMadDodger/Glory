@@ -11,17 +11,25 @@ namespace Glory
 
 	public:
         virtual size_t ShaderCount() const override;
-        virtual FileData* GetShaderAt(size_t index) const override;
+        virtual ShaderSourceData* GetShaderAt(size_t index) const override;;
         virtual const ShaderType& GetShaderTypeAt(size_t index) const override;
 
 		MaterialData* GetBaseMaterial() const;
 
 		virtual const UUID& GetGPUUUID() const;
 
-		virtual void CopyProperties(std::vector<MaterialPropertyData>& destination) override;
-		virtual void PasteProperties(const std::vector<MaterialPropertyData>& destination) override;
 		void CopyOverrideStates(std::vector<bool>& destination);
 		void PasteOverrideStates(std::vector<bool>& destination);
+
+		virtual size_t PropertyInfoCount() const override;
+		virtual MaterialPropertyInfo* GetPropertyInfoAt(size_t index) override;
+		virtual size_t GetCurrentBufferOffset() const override;
+		virtual std::vector<char>& GetBufferReference() override;
+		virtual bool GetPropertyInfoIndex(const std::string& name, size_t& index) const override;
+		virtual Resource** GetResourcePointer(size_t index) override;
+		virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const override;
+		virtual size_t GetResourcePropertyCount() const override;
+		virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index) override;
 
 	private:
 		friend class MaterialLoaderModule;

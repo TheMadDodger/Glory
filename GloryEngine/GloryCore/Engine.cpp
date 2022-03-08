@@ -6,6 +6,7 @@
 #include "AssetReferencePropertySerializer.h"
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
+#include "ShaderManager.h"
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -167,10 +168,12 @@ namespace Glory
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
+		ShaderManager::Cleanup();
 	}
 
 	void Engine::Initialize()
 	{
+		RegisterBasicTypes();
 		RegisterStandardSerializers();
 
 		Console::Initialize();
@@ -236,6 +239,18 @@ namespace Glory
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
 		PropertySerializer::RegisterSerializer<ArrayPropertySerializers>();
+	}
+
+	void Engine::RegisterBasicTypes()
+	{
+		ResourceType::RegisterType<int>();
+		ResourceType::RegisterType<float>();
+		ResourceType::RegisterType<double>();
+		ResourceType::RegisterType<long>();
+		ResourceType::RegisterType<glm::vec2>();
+		ResourceType::RegisterType<glm::vec3>();
+		ResourceType::RegisterType<glm::vec4>();
+		ResourceType::RegisterType<glm::quat>();
 	}
 
 	void Engine::Update()

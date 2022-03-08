@@ -74,6 +74,7 @@ namespace Glory
 		Resource* pResource = pModule->LoadUsingAny(path.string(), meta.ImportSettings());
 		pResource->m_ID = uuid;
 		m_pLoadedAssets.Set(uuid, pResource);
+		AssetDatabase::m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pResource);
 		return pResource;
 	}
 
@@ -110,6 +111,8 @@ namespace Glory
 
 	void AssetManager::RunCallbacks()
 	{
+		AssetDatabase::m_Callbacks.RunCallbacks();
+
 		CallbackData callbackData;
 		while (m_ResourceLoadedCallbacks.Pop(callbackData))
 		{

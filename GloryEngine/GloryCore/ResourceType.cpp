@@ -3,10 +3,23 @@
 
 namespace Glory
 {
+	BasicTypeData::BasicTypeData(const std::string& name, size_t typeHash, size_t size)
+		: m_Name(name), m_TypeHash(typeHash), m_Size(size) {}
+
 	std::vector<ResourceType> ResourceType::m_ResourceTypes;
 	std::unordered_map<std::string, size_t> ResourceType::m_ExtensionToType;
 	std::unordered_map<size_t, size_t> ResourceType::m_HashToType;
+
+	std::vector<BasicTypeData> ResourceType::m_BasicTypes;
+	std::unordered_map<size_t, size_t> ResourceType::m_HashToBasicType;
+	std::unordered_map<std::string, size_t> ResourceType::m_NameToBasicType;
+
 	std::hash<std::type_index> ResourceType::m_Hasher;
+
+	bool ResourceType::IsResource(size_t typeHash)
+	{
+		return m_HashToType.find(typeHash) != m_HashToType.end();
+	}
 
 	void ResourceType::RegisterResource(std::type_index type, const std::string& extensions)
 	{
@@ -15,6 +28,16 @@ namespace Glory
 		m_ResourceTypes.push_back(ResourceType(typeHash, extensions));
 		m_HashToType[typeHash] = index;
 		ReadExtensions(index, extensions);
+	}
+
+	void ResourceType::RegisterType(const std::type_info& type, size_t size)
+	{
+		size_t hash = GetHash(type);
+		size_t index = m_BasicTypes.size();
+		std::string name = type.name();
+		m_HashToBasicType[hash] = index;
+		m_NameToBasicType[name] = index;
+		m_BasicTypes.push_back(BasicTypeData(type.name(), hash, size));
 	}
 
 	size_t ResourceType::GetHash(std::type_index type)
@@ -39,6 +62,20 @@ namespace Glory
 		if (m_HashToType.find(hash) == m_HashToType.end()) return nullptr;
 		size_t index = m_HashToType[hash];
 		return &m_ResourceTypes[index];
+	}
+
+	const BasicTypeData* ResourceType::GetBasicTypeData(size_t typeHash)
+	{
+		if (m_HashToBasicType.find(typeHash) == m_HashToBasicType.end()) return nullptr;
+		size_t index = m_HashToBasicType[typeHash];
+		return &m_BasicTypes[index];
+	}
+	
+	const BasicTypeData* ResourceType::GetBasicTypeData(const std::string& name)
+	{
+		if (m_NameToBasicType.find(name) == m_NameToBasicType.end()) return nullptr;
+		size_t index = m_NameToBasicType[name];
+		return &m_BasicTypes[index];
 	}
 
 	ResourceType::ResourceType(size_t typeHash, const std::string& extensions)

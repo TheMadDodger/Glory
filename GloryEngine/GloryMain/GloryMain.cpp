@@ -181,7 +181,6 @@ int main()
             new Glory::FileLoaderModule(),
             new Glory::MaterialLoaderModule(),
             new Glory::ShaderSourceLoaderModule(),
-            new Glory::GLSLShaderLoader(),
         };
 
         Glory::EngineCreateInfo createInfo;
@@ -236,7 +235,6 @@ int main()
             new Glory::ASSIMPModule(),
             new Glory::FileLoaderModule(),
             new Glory::ShaderSourceLoaderModule(),
-            new Glory::GLSLShaderLoader(),
         };
 
         Glory::EngineCreateInfo createInfo;

@@ -24,8 +24,10 @@ namespace Glory
 		static size_t GetID(PropertySerializer* pSerializer);
 
 		static void SerializeProperty(const SerializedProperty* serializedProperty, YAML::Emitter& out);
+		static void SerializeProperty(const std::string& name, const std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Emitter& out);
 		static void DeserializeProperty(const SerializedProperty* serializedProperty, YAML::Node& object);
 		static void DeserializeProperty(std::any& out, size_t typeHash, YAML::Node& object);
+		static void DeserializeProperty(std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Node& object);
 
 		virtual size_t GetSerializedTypeHash() const;
 
@@ -35,8 +37,10 @@ namespace Glory
 
 	protected:
 		virtual void Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out) = 0;
+		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Emitter& out);
 		virtual void Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object) = 0;
 		virtual void Deserialize(std::any& out, YAML::Node& object) = 0;
+		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, YAML::Node& object);
 
 	private:
 		friend class Engine;
@@ -62,6 +66,14 @@ namespace Glory
 			out << YAML::Value << value;
 		}
 
+		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Emitter& out) override
+		{
+			T value;
+			memcpy((void*)&value, (void*)&buffer[offset], size);
+			out << YAML::Key << name;
+			out << YAML::Value << value;
+		}
+
 		virtual void Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object) override
 		{
 			if (!object.IsDefined()) return;
@@ -74,6 +86,13 @@ namespace Glory
 		{
 			if (!object.IsDefined()) return;
 			out = object.as<T>();
+		}
+
+		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, YAML::Node& object) override
+		{
+			if (!object.IsDefined()) return;
+			T value = object.as<T>();
+			memcpy((void*)&buffer[offset], (void*)&value, size);
 		}
 	};
 }

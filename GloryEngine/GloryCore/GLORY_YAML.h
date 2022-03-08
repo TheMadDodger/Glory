@@ -38,6 +38,15 @@ namespace YAML
 		{ Glory::ShaderType::ST_TessEval, "TessEval" },
 	};
 
+	inline std::map<Glory::ShaderType, std::string> SHADERTYPE_TOFULLSTRING = {
+		{ Glory::ShaderType::ST_Compute, "Compute" },
+		{ Glory::ShaderType::ST_Fragment, "Fragment" },
+		{ Glory::ShaderType::ST_Vertex, "Vertex" },
+		{ Glory::ShaderType::ST_Geomtery, "Geometry" },
+		{ Glory::ShaderType::ST_TessControl, "TessControl" },
+		{ Glory::ShaderType::ST_TessEval, "TessEval" },
+	};
+
 	template<>
 	struct convert<Glory::ShaderType>
 	{

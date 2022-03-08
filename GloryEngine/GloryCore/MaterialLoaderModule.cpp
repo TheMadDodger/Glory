@@ -3,6 +3,7 @@
 #include "Serializer.h"
 #include "PropertySerializer.h"
 #include "AssetManager.h"
+#include "ShaderManager.h"
 
 namespace Glory
 {
@@ -84,13 +85,12 @@ namespace Glory
 
 			AssetLocation location;
 			if (!AssetDatabase::GetAssetLocation(shaderUUID, location)) continue;
-
+			
 			std::string path = Game::GetAssetPath() + '\\' + location.m_Path;
-			FileData* pFileData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path, FileImportSettings("shader"));
-			if (!pFileData) continue;
+			ShaderSourceData* pShaderSourceData = AssetManager::GetAssetImmediate<ShaderSourceData>(shaderUUID);
+			if (!pShaderSourceData) continue;
 
-			pMaterialData->m_pShaderFiles.push_back(pFileData);
-			pMaterialData->m_ShaderTypes.push_back(shaderType);
+			pMaterialData->m_pShaderFiles.push_back(pShaderSourceData);
 		}
 	}
 
@@ -98,6 +98,7 @@ namespace Glory
 	{
 		YAML::Node propertiesNode = rootNode["Properties"];
 		if (!propertiesNode.IsSequence()) return;
+
 		for (size_t i = 0; i < propertiesNode.size(); i++)
 		{
 			YAML::Node propertyNode = propertiesNode[i];
@@ -109,9 +110,22 @@ namespace Glory
 			
 			node = propertyNode["Value"];
 
-			MaterialPropertyData materialProp(name);
-			PropertySerializer::DeserializeProperty(materialProp.m_PropertyData, typeHash, node);
-			pMaterialData->AddProperty(materialProp);
+			const BasicTypeData* typeData = ResourceType::GetBasicTypeData(typeHash);
+
+			size_t offset = pMaterialData->GetCurrentBufferOffset();
+
+			bool isResource = ResourceType::IsResource(typeHash);
+			if (!isResource)
+			{
+				pMaterialData->AddProperty(name, name, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
+				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
+			}
+			else
+			{
+				UUID id = node.as<uint64_t>();
+				Resource* pResource = AssetManager::GetAssetImmediate(id);
+				pMaterialData->AddProperty(name, name, typeHash, pResource);
+			}
 		}
 	}
 
@@ -119,6 +133,8 @@ namespace Glory
 	{
 		YAML::Node propertiesNode = rootNode["Overrides"];
 		if (!propertiesNode.IsSequence()) return;
+
+		size_t resourceCounter = 0;
 		for (size_t i = 0; i < propertiesNode.size(); i++)
 		{
 			YAML::Node propertyNode = propertiesNode[i];
@@ -127,15 +143,26 @@ namespace Glory
 			YAML_READ(propertyNode, node, Name, name, std::string);
 
 			size_t propertyIndex = 0;
-			if (!pMaterialData->GetPropertyIndex(name, propertyIndex)) continue;
+			if (!pMaterialData->GetPropertyInfoIndex(name, propertyIndex)) continue;
 			pMaterialData->m_PropertyOverridesEnable[propertyIndex] = true;
 
-			MaterialPropertyData* pPropertyData = &pMaterialData->m_Properties[propertyIndex];
-			size_t typeHash = ResourceType::GetHash(pPropertyData->Type());
+			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
 
 			node = propertyNode["Value"];
-			MaterialPropertyData materialProp(name);
-			PropertySerializer::DeserializeProperty(pPropertyData->m_PropertyData, typeHash, node);
+
+			if (!propertyInfo->m_IsResource)
+			{
+				size_t typeHash = propertyInfo->TypeHash();
+				size_t offset = propertyInfo->Offset();
+				size_t size = propertyInfo->Size();
+				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
+			}
+			else
+			{
+				UUID id = node.as<uint64_t>();
+				if(pMaterialData->m_pResources.size() > resourceCounter) pMaterialData->m_pResources[resourceCounter] = AssetManager::GetAssetImmediate(id);
+				++resourceCounter;
+			}
 		}
 	}
 

@@ -8,7 +8,7 @@
 namespace Glory
 {
 	ClusteredRendererModule::ClusteredRendererModule()
-		: m_pClusterShaderFile(nullptr), m_pClusterShaderMaterial(nullptr), m_pClusterShaderMaterialData(nullptr), m_pScreenToViewSSBO(nullptr)
+		: m_pClusterShaderData(nullptr), m_pClusterShaderMaterial(nullptr), m_pClusterShaderMaterialData(nullptr), m_pScreenToViewSSBO(nullptr)
 	{
 	}
 
@@ -44,22 +44,33 @@ namespace Glory
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
 		importSettings.AddNullTerminateAtEnd = true;
-		m_pClusterShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/ClusterShader.shader", importSettings);
-		m_pClusterShaderMaterialData = new MaterialData({ m_pClusterShaderFile }, { ShaderType::ST_Compute });
-		m_pMarkActiveClustersShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/MarkActiveClusters.shader", importSettings);
-		m_pMarkActiveClustersMaterialData = new MaterialData({ m_pMarkActiveClustersShaderFile }, { ShaderType::ST_Compute });
-		m_pCompactClustersShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/BuildCompactClusterList.shader", importSettings);
-		m_pCompactClustersMaterialData = new MaterialData({ m_pCompactClustersShaderFile }, { ShaderType::ST_Compute });
-		m_pClusterCullLightShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/ClusterCullLight.shader", importSettings);
-		m_pClusterCullLightMaterialData = new MaterialData({ m_pClusterCullLightShaderFile }, { ShaderType::ST_Compute });
+
+		// Cluster generator shader
+		FileData* pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/ClusterShader.shader", importSettings);
+		m_pClusterShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
+		m_pClusterShaderMaterialData = new MaterialData({ m_pClusterShaderData });
+
+		// Active cluster marker shader
+		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/MarkActiveClusters.shader", importSettings);
+		m_pMarkActiveClustersShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
+		m_pMarkActiveClustersMaterialData = new MaterialData({ m_pMarkActiveClustersShaderData });
+
+		// Compact active clusters shader
+		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/BuildCompactClusterList.shader", importSettings);
+		m_pCompactClustersShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
+		m_pCompactClustersMaterialData = new MaterialData({ m_pCompactClustersShaderData });
+
+		// Light culling shader
+		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/ClusterCullLight.shader", importSettings);
+		m_pClusterCullLightShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
+		m_pClusterCullLightMaterialData = new MaterialData({ m_pClusterCullLightShaderData });
+
 
 		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.vert", importSettings);
 		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.frag", importSettings);
 
-		std::vector<FileData*> pShaderFiles = { pVert, pFrag };
-		std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
-
-		m_pScreenMaterial = new MaterialData(pShaderFiles, shaderTypes);
+		std::vector<ShaderSourceData*> pShaderFiles = { new ShaderSourceData(ShaderType::ST_Vertex, pVert), new ShaderSourceData(ShaderType::ST_Fragment, pFrag) };
+		m_pScreenMaterial = new MaterialData(pShaderFiles);
 	}
 
 	void ClusteredRendererModule::Initialize()
@@ -68,17 +79,17 @@ namespace Glory
 
 	void ClusteredRendererModule::Cleanup()
 	{
-		delete m_pClusterShaderFile;
-		m_pClusterShaderFile = nullptr;
+		delete m_pClusterShaderData;
+		m_pClusterShaderData = nullptr;
 		
-		delete m_pMarkActiveClustersShaderFile;
-		m_pMarkActiveClustersShaderFile = nullptr;
+		delete m_pMarkActiveClustersShaderData;
+		m_pMarkActiveClustersShaderData = nullptr;
 		
-		delete m_pCompactClustersShaderFile;
-		m_pCompactClustersShaderFile = nullptr;
+		delete m_pCompactClustersShaderData;
+		m_pCompactClustersShaderData = nullptr;
 		
-		delete m_pClusterCullLightShaderFile;
-		m_pClusterCullLightShaderFile = nullptr;
+		delete m_pClusterCullLightShaderData;
+		m_pClusterCullLightShaderData = nullptr;
 
 		delete m_pClusterShaderMaterialData;
 		m_pClusterShaderMaterialData = nullptr;
@@ -126,6 +137,7 @@ namespace Glory
 		if (renderData.m_pModel == nullptr) return;
 		pMeshData = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
 		Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
+		if (!pMaterial) return;
 
 		UniformBufferObjectTest ubo;
 		ubo.model = renderData.m_World;

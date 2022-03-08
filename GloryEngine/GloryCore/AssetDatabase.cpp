@@ -9,6 +9,7 @@ namespace Glory
 	ThreadedUMap<std::string, UUID> AssetDatabase::m_PathToUUID;
 	ThreadedUMap<UUID, ResourceMeta> AssetDatabase::m_Metas;
 	ThreadedUMap<size_t, std::vector<UUID>> AssetDatabase::m_AssetsByType;
+	AssetCallbacks AssetDatabase::m_Callbacks;
 
 	bool AssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
@@ -57,6 +58,7 @@ namespace Glory
 		m_AssetLocations.Set(uuid, AssetLocation(path, m_Metas[m_Metas.Size() - 1]));
 		m_PathToUUID.Set(path, uuid);
 		m_AssetsByType.Do(meta.Hash(), [&](std::vector<UUID>* assets) { assets->push_back(uuid); });
+		m_Callbacks.EnqueueCallback(CallbackType::CT_AssetRegistered, uuid, nullptr);
 	}
 
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath)
@@ -183,11 +185,13 @@ namespace Glory
 
 	void AssetDatabase::Initialize()
 	{
+		m_Callbacks.Initialize();
 		//Load();
 	}
 
 	void AssetDatabase::Destroy()
 	{
+		m_Callbacks.Cleanup();
 		Clear();
 	}
 

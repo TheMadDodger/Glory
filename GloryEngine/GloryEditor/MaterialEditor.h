@@ -10,5 +10,9 @@ namespace Glory::Editor
 		MaterialEditor();
 		virtual ~MaterialEditor();
 		virtual void OnGUI() override;
+
+	private:
+		void ShaderGUI(MaterialData* pMaterial);
+		void PropertiesGUI(MaterialData* pMaterial);
 	};
 }

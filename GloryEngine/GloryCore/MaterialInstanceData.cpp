@@ -10,16 +10,9 @@ namespace Glory
 
 		if (!pBaseMaterial) return;
 
-		pBaseMaterial->CopyProperties(m_Properties);
-
-		m_PropertyOverridesEnable.resize(m_Properties.size(), false);
-
-		for (size_t i = 0; i < m_Properties.size(); i++)
-		{
-			MaterialPropertyData* pProperty = &m_Properties[i];
-			size_t hash = m_Hasher(pProperty->Name());
-			m_HashToPropertyIndex.emplace(hash, i);
-		}
+		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
+		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
+		m_pResources.resize(pBaseMaterial->ResourceCount());
 	}
 
 	MaterialInstanceData::~MaterialInstanceData()
@@ -32,7 +25,7 @@ namespace Glory
 		return m_pBaseMaterial->ShaderCount();
 	}
 
-	FileData* MaterialInstanceData::GetShaderAt(size_t index) const
+	ShaderSourceData* MaterialInstanceData::GetShaderAt(size_t index) const
 	{
 		return m_pBaseMaterial->GetShaderAt(index);
 	}
@@ -52,34 +45,6 @@ namespace Glory
 		return m_pBaseMaterial->GetUUID();
 	}
 
-	void MaterialInstanceData::CopyProperties(std::vector<MaterialPropertyData>& destination)
-	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
-		destination.clear();
-
-		for (size_t i = 0; i < m_Properties.size(); i++)
-		{
-			if (m_PropertyOverridesEnable[i])
-			{
-				destination.push_back(MaterialPropertyData(m_Properties[i]));
-				continue;
-			}
-			destination.push_back(m_pBaseMaterial->CopyPropertyAt(i));
-		}
-		lock.unlock();
-	}
-
-	void MaterialInstanceData::PasteProperties(const std::vector<MaterialPropertyData>& destination)
-	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
-		m_Properties.clear();
-		std::for_each(destination.begin(), destination.end(), [&](const MaterialPropertyData& propertyData)
-		{
-			m_Properties.push_back(MaterialPropertyData(propertyData));
-		});
-		lock.unlock();
-	}
-
 	void MaterialInstanceData::CopyOverrideStates(std::vector<bool>& destination)
 	{
 		std::unique_lock lock(m_PropertiesAccessMutex);
@@ -94,5 +59,60 @@ namespace Glory
 		if (m_PropertyOverridesEnable.size() != destination.size()) m_PropertyOverridesEnable.resize(destination.size());
 		m_PropertyOverridesEnable.assign(destination.begin(), destination.end());
 		lock.unlock();
+	}
+
+	size_t MaterialInstanceData::PropertyInfoCount() const
+	{
+		return m_pBaseMaterial->PropertyInfoCount();
+	}
+
+	MaterialPropertyInfo* MaterialInstanceData::GetPropertyInfoAt(size_t index)
+	{
+		return m_pBaseMaterial->GetPropertyInfoAt(index);
+	}
+
+	size_t MaterialInstanceData::GetCurrentBufferOffset() const
+	{
+		return m_pBaseMaterial->GetCurrentBufferOffset();
+	}
+
+	std::vector<char>& MaterialInstanceData::GetBufferReference()
+	{
+		std::vector<char>& baseBuffer = m_pBaseMaterial->GetBufferReference();
+		m_PropertyBuffer.resize(baseBuffer.size());
+		for (size_t i = 0; i < m_pBaseMaterial->PropertyInfoCount(); i++)
+		{
+			MaterialPropertyInfo* propertyInfo = m_pBaseMaterial->GetPropertyInfoAt(i);
+			if (propertyInfo->IsResource()) continue;
+			if (m_PropertyOverridesEnable[i]) continue;
+			memcpy(&m_PropertyBuffer[propertyInfo->Offset()], &baseBuffer[propertyInfo->Offset()], propertyInfo->Size());
+		}
+		return m_PropertyBuffer;
+	}
+
+	bool MaterialInstanceData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
+	{
+		return m_pBaseMaterial->GetPropertyInfoIndex(name, index);
+	}
+
+	Resource** MaterialInstanceData::GetResourcePointer(size_t index)
+	{
+		size_t propertyIndex = GetPropertyIndexFromResourceIndex(index);
+		return m_PropertyOverridesEnable[propertyIndex] ? &m_pResources[index] : m_pBaseMaterial->GetResourcePointer(index);
+	}
+
+	size_t MaterialInstanceData::GetPropertyIndexFromResourceIndex(size_t index) const
+	{
+		return m_pBaseMaterial->GetPropertyIndexFromResourceIndex(index);
+	}
+
+	size_t MaterialInstanceData::GetResourcePropertyCount() const
+	{
+		return m_pBaseMaterial->GetResourcePropertyCount();
+	}
+
+	MaterialPropertyInfo* MaterialInstanceData::GetResourcePropertyInfo(size_t index)
+	{
+		return m_pBaseMaterial->GetResourcePropertyInfo(index);
 	}
 }

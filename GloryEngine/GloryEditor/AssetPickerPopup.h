@@ -1,5 +1,6 @@
 #pragma once
 #include <Resource.h>
+#include <functional>
 
 namespace Glory::Editor
 {
@@ -7,6 +8,7 @@ namespace Glory::Editor
 	{
 	public:
 		static void Open(size_t typeHash, Resource** pResource);
+		static void Open(size_t typeHash, std::function<void(Resource*)> callback);
 		void OnGUI();
 
 	private:
@@ -28,5 +30,6 @@ namespace Glory::Editor
 		std::string m_Filter;
 		std::vector<UUID> m_FilteredAssets;
 		std::vector<UUID> m_PossibleAssets;
+		static std::function<void(Resource*)> m_Callback;
 	};
 }

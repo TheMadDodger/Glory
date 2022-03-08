@@ -67,7 +67,7 @@ namespace Glory
 	Buffer* OGLMaterial::CreatePropertiesBuffer(size_t size)
 	{
 		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
-			->CreateBuffer(size, GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW, 0);
+			->CreateBuffer(size, GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW, 1);
 	}
 
 	void OGLMaterial::SetFloat(const std::string& name, float value) const
@@ -180,7 +180,7 @@ namespace Glory
 		GLTexture* pGLTexture = (GLTexture*)pTexture;
 		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindTexture(GL_TEXTURE_2D, pGLTexture->GetID());
+		glBindTexture(GL_TEXTURE_2D, pGLTexture ? pGLTexture->GetID() : 0);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glActiveTexture(GL_TEXTURE0);
