@@ -19,7 +19,7 @@ namespace Glory::Editor
 
 		if (ImGui::Button(assetName.c_str()))
 		{
-			AssetPickerPopup::Open(typeHash, pResourceMember);
+			AssetPickerPopup::Open(typeHash, pResourceMember, true);
 		}
 
 		return true;

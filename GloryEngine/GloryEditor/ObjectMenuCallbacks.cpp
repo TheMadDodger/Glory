@@ -6,6 +6,7 @@
 #include <Engine.h>
 #include <AssetDatabase.h>
 #include <ContentBrowser.h>
+#include <MaterialInstanceData.h>
 
 namespace Glory::Editor
 {
@@ -135,6 +136,19 @@ namespace Glory::Editor
 		path = path.append("NewMaterial.gmat");
 		path = GetUnqiueFilePath(path);
 		MaterialData* pMaterialData = new MaterialData();
+		AssetDatabase::CreateAsset(pMaterialData, path.string());
+		AssetDatabase::Save();
+	}
+
+	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback)
+	{
+		MaterialData* pMaterial = (MaterialData*)pObject;
+		if (dynamic_cast<MaterialInstanceData*>(pMaterial)) pMaterial = nullptr;
+		std::filesystem::path path = ContentBrowser::GetCurrentPath();
+		std::string fileName = pMaterial ? pMaterial->Name() + "Instance.gminst" : "NewMaterialInstance.gminst";
+		path = path.append(fileName);
+		path = GetUnqiueFilePath(path);
+		MaterialInstanceData* pMaterialData = new MaterialInstanceData(pMaterial);
 		AssetDatabase::CreateAsset(pMaterialData, path.string());
 		AssetDatabase::Save();
 	}

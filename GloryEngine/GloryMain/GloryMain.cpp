@@ -6,6 +6,8 @@
 #include <ResourceMeta.h>
 #include <ClusteredRendererModule.h>
 #include <ShaderSourceLoaderModule.h>
+#include <MaterialLoaderModule.h>
+#include <MaterialInstanceLoaderModule.h>
 
 #define _CRTDBG_MAP_ALLOC
 
@@ -160,7 +162,6 @@ namespace Glory
 #include <EditorOpenGLRenderImpl.h>
 #include <EditorApplication.h>
 #include <EntityScenesEditorExtension.h>
-#include <MaterialLoaderModule.h>
 
 using namespace Glory::Editor;
 
@@ -180,6 +181,7 @@ int main()
             new Glory::ASSIMPModule(),
             new Glory::FileLoaderModule(),
             new Glory::MaterialLoaderModule(),
+            new Glory::MaterialInstanceLoaderModule(),
             new Glory::ShaderSourceLoaderModule(),
         };
 
@@ -234,6 +236,8 @@ int main()
             new Glory::SDLImageLoaderModule(),
             new Glory::ASSIMPModule(),
             new Glory::FileLoaderModule(),
+            new Glory::MaterialLoaderModule(),
+            new Glory::MaterialInstanceLoaderModule(),
             new Glory::ShaderSourceLoaderModule(),
         };
 

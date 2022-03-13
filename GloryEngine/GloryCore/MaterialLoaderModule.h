@@ -30,21 +30,12 @@ namespace Glory
 
 	private:
 		MaterialData* LoadMaterialData(YAML::Node& rootNode, const MaterialImportSettings& importSettings);
-		MaterialInstanceData* LoadMaterialInstanceData(YAML::Node& rootNode, const MaterialImportSettings& importSettings);
 
 		void SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out);
-		void SaveMaterialInstanceData(MaterialInstanceData* pMaterialData, YAML::Emitter& out);
-
 		void ReadShaders(YAML::Node& rootNode, MaterialData* pMaterialData);
 		void ReadPropertyData(YAML::Node& rootNode, MaterialData* pMaterialData);
-		void ReadPropertyOverrides(YAML::Node& rootNode, MaterialInstanceData* pMaterialData);
-
-
-
-
 		void WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData);
-		//void WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData);
-		//void WritePropertyOverrides(YAML::Emitter& out, MaterialInstanceData* pMaterialData);
+		void WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData);
 
 	protected:
 		virtual void Initialize() override;

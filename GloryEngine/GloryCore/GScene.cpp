@@ -3,11 +3,6 @@
 
 namespace Glory
 {
-	GScene::GScene() : m_SceneName("New Scene")
-	{
-		APPEND_TYPE(GScene);
-	}
-
 	GScene::GScene(const std::string& sceneName) : m_SceneName(sceneName)
 	{
 		APPEND_TYPE(GScene);

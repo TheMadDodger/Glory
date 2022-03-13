@@ -8,7 +8,6 @@ namespace Glory
     class GScene : public Resource
     {
     public:
-        GScene();
         GScene(const std::string& sceneName = "New Scene");
         GScene(const std::string& sceneName, UUID uuid);
         virtual ~GScene();
@@ -21,12 +20,12 @@ namespace Glory
         const std::string& Name();
 
     protected:
-        virtual void Initialize() = 0;
-        virtual void OnTick() = 0;
-        virtual void OnPaint() = 0;
+        virtual void Initialize() {};
+        virtual void OnTick() {};
+        virtual void OnPaint() {};
 
-        virtual SceneObject* CreateObject(const std::string& name) = 0;
-        virtual SceneObject* CreateObject(const std::string& name, UUID uuid) = 0;
+        virtual SceneObject* CreateObject(const std::string& name) { return nullptr; };
+        virtual SceneObject* CreateObject(const std::string& name, UUID uuid) { return nullptr; };
 
         virtual void OnObjectAdded(SceneObject* pObject) {};
 

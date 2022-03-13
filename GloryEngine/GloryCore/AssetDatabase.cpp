@@ -76,9 +76,22 @@ namespace Glory
 		m_PathToUUID.Set(location.m_Path, uuid);
 		m_AssetLocations.Set(uuid, location);
 
-		ResourceMeta meta = m_Metas[uuid];
-		meta.m_Path = newMetaPath;
-		m_Metas.Set(uuid, meta);
+		m_Metas.Do(uuid, [&](ResourceMeta* pMeta) { pMeta->m_Path = newMetaPath; });
+		//ResourceMeta meta = m_Metas[uuid];
+		//meta.m_Path = newMetaPath;
+		//m_Metas.Set(uuid, meta);
+	}
+
+	void AssetDatabase::IncrementAssetVersion(UUID uuid)
+	{
+		if (!m_Metas.Contains(uuid)) return;
+		m_Metas.Do(uuid, [&](ResourceMeta* pMeta)
+		{
+			++pMeta->m_SerializedVersion;
+			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(pMeta->Hash());
+			if (!pLoader) return;
+			pMeta->Write(pLoader);
+		});
 	}
 
 	void AssetDatabase::Save()
@@ -129,9 +142,9 @@ namespace Glory
 			std::string extension = "";
 			YAML_READ(element, data, Extension, extension, std::string);
 
-			std::filesystem::path metaFilePath("./Assets" + path);
+			std::filesystem::path metaFilePath(path);
 			std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
-			metaFilePath = metaFilePath.replace_extension(metaExtension);
+			metaFilePath += std::filesystem::path(".gmeta");
 			ResourceMeta meta(metaFilePath.string(), extension, uuid, hash);
 			YAML::Node importSettingsNode = element["ImportSettings"];
 			meta.m_ImportSettings = ImportSettings();
@@ -201,6 +214,8 @@ namespace Glory
 			return;
 		}
 
+		const std::string assetPath = Game::GetAssetPath();
+		metaFilePath = metaFilePath.lexically_relative(assetPath);
 		ResourceMeta meta(metaFilePath.string(), extension.string(), UUID(), pType->Hash());
 		meta.Write(pModule);
 		meta.Read();
@@ -209,6 +224,19 @@ namespace Glory
 		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
 		AssetManager::m_pLoadedAssets.Set(pLoadedResource->m_ID, pLoadedResource);
 		InsertAsset(relativePath.string(), meta);
+	}
+
+	void AssetDatabase::SaveAsset(Resource* pResource)
+	{
+		ResourceMeta meta;
+		if (!pResource || !GetResourceMeta(pResource->GetUUID(), meta)) return;
+		AssetLocation location;
+		if (!GetAssetLocation(pResource->GetUUID(), location)) return;
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(meta.m_TypeHash);
+		std::filesystem::path path = Game::GetAssetPath();
+		path.append(location.m_Path);
+		pModule->Save(path.string(), pResource);
+		IncrementAssetVersion(pResource->GetUUID());
 	}
 
 	void AssetDatabase::ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback)
@@ -228,10 +256,13 @@ namespace Glory
 		m_PathToUUID.Erase(path);
 	}
 
-	const std::vector<UUID> AssetDatabase::GetAllAssetsOfType(size_t typeHash)
+	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out)
 	{
-		if (!m_AssetsByType.Contains(typeHash)) return std::vector<UUID>();
-		return m_AssetsByType[typeHash];
+		if (!m_AssetsByType.Contains(typeHash)) return;
+		size_t size = out.size();
+		out.resize(size + m_AssetsByType[typeHash].size());
+		size_t copySize = sizeof(UUID) * m_AssetsByType[typeHash].size();
+		memcpy(&out[size], &m_AssetsByType[typeHash][0], copySize);
 	}
 
 	std::string AssetDatabase::GetAssetName(UUID uuid)

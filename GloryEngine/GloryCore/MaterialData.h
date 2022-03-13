@@ -23,7 +23,7 @@ namespace Glory
         virtual ShaderSourceData* GetShaderAt(size_t index) const;
         virtual const ShaderType& GetShaderTypeAt(size_t index) const;
         void RemoveShaderAt(size_t index);
-        void AddShader(ShaderSourceData* pShaderSourceData);
+        bool AddShader(ShaderSourceData* pShaderSourceData);
 
         void AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
         void AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, Resource* pResource, uint32_t flags = 0);
@@ -39,11 +39,11 @@ namespace Glory
         virtual size_t GetResourcePropertyCount() const;
         virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index);
         virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
-
-        void ReloadResourcesFromShader();
+        void ClearProperties();
 
     protected:
         friend class MaterialLoaderModule;
+        friend class MaterialInstanceLoaderModule;
         std::vector<ShaderSourceData*> m_pShaderFiles;
 
         static std::hash<std::string> m_Hasher;

@@ -4,12 +4,15 @@
 
 namespace Glory
 {
+	MaterialInstanceData::MaterialInstanceData() : m_pBaseMaterial(nullptr)
+	{
+	}
+
 	MaterialInstanceData::MaterialInstanceData(MaterialData* pBaseMaterial) : m_pBaseMaterial(pBaseMaterial)
 	{
 		APPEND_TYPE(MaterialInstanceData);
 
 		if (!pBaseMaterial) return;
-
 		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
 		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
 		m_pResources.resize(pBaseMaterial->ResourceCount());
@@ -22,6 +25,7 @@ namespace Glory
 
 	size_t MaterialInstanceData::ShaderCount() const
 	{
+		if (!m_pBaseMaterial) return 0;
 		return m_pBaseMaterial->ShaderCount();
 	}
 
@@ -38,6 +42,21 @@ namespace Glory
 	MaterialData* MaterialInstanceData::GetBaseMaterial() const
 	{
 		return m_pBaseMaterial;
+	}
+
+	void MaterialInstanceData::SetBaseMaterial(MaterialData* pMaterial)
+	{
+		m_pBaseMaterial = pMaterial;
+
+		if (m_pBaseMaterial == nullptr)
+		{
+			m_PropertyOverridesEnable.clear();
+			m_PropertyBuffer.clear();
+			m_pResources.clear();
+			return;
+		}
+
+		ReloadProperties();
 	}
 
 	const UUID& MaterialInstanceData::GetGPUUUID() const
@@ -63,6 +82,7 @@ namespace Glory
 
 	size_t MaterialInstanceData::PropertyInfoCount() const
 	{
+		if (!m_pBaseMaterial) return 0;
 		return m_pBaseMaterial->PropertyInfoCount();
 	}
 
@@ -73,11 +93,13 @@ namespace Glory
 
 	size_t MaterialInstanceData::GetCurrentBufferOffset() const
 	{
+		if (!m_pBaseMaterial) return 0;
 		return m_pBaseMaterial->GetCurrentBufferOffset();
 	}
 
 	std::vector<char>& MaterialInstanceData::GetBufferReference()
 	{
+		if (!m_pBaseMaterial) return m_PropertyBuffer;
 		std::vector<char>& baseBuffer = m_pBaseMaterial->GetBufferReference();
 		m_PropertyBuffer.resize(baseBuffer.size());
 		for (size_t i = 0; i < m_pBaseMaterial->PropertyInfoCount(); i++)
@@ -92,7 +114,7 @@ namespace Glory
 
 	bool MaterialInstanceData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
 	{
-		return m_pBaseMaterial->GetPropertyInfoIndex(name, index);
+		return m_pBaseMaterial ? m_pBaseMaterial->GetPropertyInfoIndex(name, index) : false;
 	}
 
 	Resource** MaterialInstanceData::GetResourcePointer(size_t index)
@@ -114,5 +136,13 @@ namespace Glory
 	MaterialPropertyInfo* MaterialInstanceData::GetResourcePropertyInfo(size_t index)
 	{
 		return m_pBaseMaterial->GetResourcePropertyInfo(index);
+	}
+
+	void MaterialInstanceData::ReloadProperties()
+	{
+		if (!m_pBaseMaterial || m_PropertyBuffer.size() == m_pBaseMaterial->GetBufferReference().size()) return;
+		m_PropertyOverridesEnable.resize(m_pBaseMaterial->PropertyInfoCount(), false);
+		m_PropertyBuffer.resize(m_pBaseMaterial->GetBufferReference().size());
+		m_pResources.resize(m_pBaseMaterial->ResourceCount());
 	}
 }

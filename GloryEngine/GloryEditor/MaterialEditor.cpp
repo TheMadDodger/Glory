@@ -1,5 +1,6 @@
 #include "MaterialEditor.h"
 #include "PropertyDrawer.h"
+#include "EditorShaderProcessor.h"
 #include <imgui.h>
 #include <ResourceType.h>
 #include <GLORY_YAML.h>
@@ -78,7 +79,6 @@ namespace Glory::Editor
 				ImGui::TableSetColumnIndex(0);
 				ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 
-
 				if (ImGui::Selectable(std::to_string(row_n).c_str(), false, selectable_flags, ImVec2(0, rowHeight)) && ImGui::IsMouseDoubleClicked(0))
 				{
 					Selection::SetActiveObject(pShaderSourceData);
@@ -103,6 +103,7 @@ namespace Glory::Editor
 		if (toRemoveShaderIndex != -1)
 		{
 			pMaterial->RemoveShaderAt((size_t)toRemoveShaderIndex);
+			UpdateMaterial(pMaterial);
 		}
 
 		if (ImGui::Button("Add Shader", ImVec2(width, 0.0f)))
@@ -112,8 +113,8 @@ namespace Glory::Editor
 				if (!pResource) return;
 				MaterialData* pMaterial = (MaterialData*)m_pTarget;
 				ShaderSourceData* pShaderSource = (ShaderSourceData*)pResource;
-				pMaterial->AddShader(pShaderSource);
-				pMaterial->ReloadResourcesFromShader();
+				if (!pMaterial->AddShader(pShaderSource)) return;
+				UpdateMaterial(pMaterial);
 			});
 		}
 	}
@@ -133,5 +134,18 @@ namespace Glory::Editor
 			}
 			else PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
 		}
+	}
+
+	void MaterialEditor::UpdateMaterial(MaterialData* pMaterial)
+	{
+		pMaterial->ClearProperties();
+		for (size_t i = 0; i < pMaterial->ShaderCount(); i++)
+		{
+			ShaderSourceData* pShader = pMaterial->GetShaderAt(i);
+			EditorShaderData* pShaderData = EditorShaderProcessor::GetShaderSource(pShader);
+			if (!pShaderData) continue;
+			pShaderData->LoadIntoMaterial(pMaterial);
+		}
+		AssetDatabase::SaveAsset(pMaterial);
 	}
 }

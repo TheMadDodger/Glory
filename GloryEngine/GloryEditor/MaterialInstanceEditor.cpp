@@ -1,6 +1,7 @@
 #include "MaterialInstanceEditor.h"
 #include "PropertyDrawer.h"
 #include <imgui.h>
+#include <AssetPickerPopup.h>
 
 namespace Glory::Editor
 {
@@ -11,6 +12,22 @@ namespace Glory::Editor
 	void MaterialInstanceEditor::OnGUI()
 	{
 		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
+
+		MaterialData* pBaseMaterial = pMaterial->GetBaseMaterial();
+		ImGui::Text("Material: %s", pBaseMaterial ? pBaseMaterial->Name().c_str() : "None");
+		ImGui::SameLine();
+		if (ImGui::Button("Change"))
+		{
+			AssetPickerPopup::Open(ResourceType::GetHash<MaterialData>(), [&](Resource* pResource)
+			{
+				if (!pResource) return;
+				MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
+				MaterialData* pBaseMaterial = (MaterialData*)pResource;
+				pMaterial->SetBaseMaterial(pBaseMaterial);
+			}, ResourceType::GetHash<MaterialInstanceData>());
+		}
+
+		if (!pMaterial->GetBaseMaterial()) return;
 
 		std::vector<bool> overrideStates;
 		pMaterial->CopyOverrideStates(overrideStates);
@@ -42,5 +59,12 @@ namespace Glory::Editor
 		}
 
 		pMaterial->PasteOverrideStates(overrideStates);
+	}
+
+	void MaterialInstanceEditor::Initialize()
+	{
+		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
+		if (!pMaterial) return;
+		pMaterial->ReloadProperties();
 	}
 }

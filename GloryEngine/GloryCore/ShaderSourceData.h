@@ -20,9 +20,6 @@ namespace Glory
         FileData* GetCompiledShader() const;
 
         void SetCompiledShader(FileData* pCompiledShader);
-        void SetShaderResources(const spirv_cross::ShaderResources& resources);
-
-        const spirv_cross::ShaderResources& GetResources() const;
 
     private:
 		friend class ShaderSourceLoaderModule;
@@ -30,6 +27,5 @@ namespace Glory
         std::vector<char> m_OriginalSource;
         FileData* m_pPlatformCompiledShader;
         ShaderType m_ShaderType;
-        spirv_cross::ShaderResources m_Resources;
 	};
 }

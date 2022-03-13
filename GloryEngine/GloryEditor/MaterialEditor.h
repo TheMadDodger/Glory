@@ -14,5 +14,7 @@ namespace Glory::Editor
 	private:
 		void ShaderGUI(MaterialData* pMaterial);
 		void PropertiesGUI(MaterialData* pMaterial);
+
+		static void UpdateMaterial(MaterialData* pMaterial);
 	};
 }

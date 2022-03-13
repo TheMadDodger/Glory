@@ -12,7 +12,7 @@ namespace Glory
 	{
 	public:
 		ResourceMeta();
-		ResourceMeta(const std::string& path, const std::string& extension);
+		ResourceMeta(const std::filesystem::path& path, const std::string& extension);
 		ResourceMeta(const std::string& path, const std::string& extension, UUID uuid, size_t hash);
 		virtual ~ResourceMeta();
 
@@ -38,13 +38,16 @@ namespace Glory
 		const std::string& Path() const;
 		const std::string& Extension() const;
 		UUID ID() const;
+		size_t BaseHash() const;
 		size_t Hash() const;
+		size_t SerializedVersion() const;
 		const std::any& ImportSettings() const;
 		bool Exists() const;
 		
 	private:
 		uint64_t ReadUUID() const;
 		size_t ReadHash() const;
+		size_t ReadSerializedVersion() const;
 
 	private:
 		friend class AssetDatabase;
@@ -54,6 +57,7 @@ namespace Glory
 		std::string m_Extension;
 		UUID m_UUID;
 		size_t m_TypeHash;
+		size_t m_SerializedVersion;
 		std::any m_ImportSettings;
 	};
 }

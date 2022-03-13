@@ -16,7 +16,7 @@ namespace Glory
         const PixelFormat& GetFormat();
         uint8_t GetBytesPerPixel();
         uint32_t GetByteSize();
-        virtual const float* GetPixels() = 0;
+        virtual const float* GetPixels();
 
     protected:
         uint32_t m_Width;
@@ -24,7 +24,7 @@ namespace Glory
         PixelFormat m_PixelFormat;
         uint8_t m_BytesPerPixel;
 
-        virtual void BuildTexture() = 0;
+        virtual void BuildTexture();
 
     private:
         friend class ImageLoaderModule;

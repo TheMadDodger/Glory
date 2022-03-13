@@ -21,13 +21,14 @@ namespace Glory
 		return m_HashToType.find(typeHash) != m_HashToType.end();
 	}
 
-	void ResourceType::RegisterResource(std::type_index type, const std::string& extensions)
+	ResourceType* ResourceType::RegisterResource(std::type_index type, const std::string& extensions)
 	{
 		size_t typeHash = m_Hasher(type);
 		size_t index = m_ResourceTypes.size();
 		m_ResourceTypes.push_back(ResourceType(typeHash, extensions));
 		m_HashToType[typeHash] = index;
 		ReadExtensions(index, extensions);
+		return &m_ResourceTypes[index];
 	}
 
 	void ResourceType::RegisterType(const std::type_info& type, size_t size)
@@ -76,6 +77,31 @@ namespace Glory
 		if (m_NameToBasicType.find(name) == m_NameToBasicType.end()) return nullptr;
 		size_t index = m_NameToBasicType[name];
 		return &m_BasicTypes[index];
+	}
+
+	size_t ResourceType::SubTypeCount(ResourceType* pResourceType)
+	{
+		return pResourceType->m_SubTypes.size();
+	}
+
+	ResourceType* ResourceType::GetSubType(ResourceType* pResourceType, size_t index)
+	{
+		if (index >= pResourceType->m_SubTypes.size()) return nullptr;
+		size_t subTypeHash = pResourceType->m_SubTypes[index];
+		return GetResourceType(subTypeHash);
+	}
+
+	size_t ResourceType::GetAllResourceTypesThatHaveSubType(size_t hash, std::vector<ResourceType*>& out)
+	{
+		size_t result = 0;
+		for (size_t i = 0; i < m_ResourceTypes.size(); i++)
+		{
+			if (std::find(m_ResourceTypes[i].m_SubTypes.begin(), m_ResourceTypes[i].m_SubTypes.end(), hash)
+				== m_ResourceTypes[i].m_SubTypes.end()) continue;
+			out.push_back(&m_ResourceTypes[i]);
+			++result;
+		}
+		return result;
 	}
 
 	ResourceType::ResourceType(size_t typeHash, const std::string& extensions)

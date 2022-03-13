@@ -21,7 +21,15 @@ namespace Glory
 		template<class T>
 		static void RegisterResource(const std::string& extensions)
 		{
-			RegisterResource(typeid(T), extensions);
+			ResourceType* pResourceType = RegisterResource(typeid(T), extensions);
+			T t = T();
+			for (size_t i = 0; i < t.TypeCount(); i++)
+			{
+				std::type_index type = typeid(Object);
+				if (!t.GetType(i, type)) continue;
+				size_t hash = m_Hasher(type);
+				pResourceType->m_SubTypes.push_back(hash);
+			}
 		}
 
 		template<typename T>
@@ -43,8 +51,7 @@ namespace Glory
 		}
 
 		static bool IsResource(size_t typeHash);
-
-		static void RegisterResource(std::type_index type, const std::string& extensions);
+		static ResourceType* RegisterResource(std::type_index type, const std::string& extensions);
 		static void RegisterType(const std::type_info& type, size_t size);
 		static size_t GetHash(std::type_index type);
 		static ResourceType* GetResourceType(const std::string& extension);
@@ -52,6 +59,10 @@ namespace Glory
 		static ResourceType* GetResourceType(size_t hash);
 		static const BasicTypeData* GetBasicTypeData(size_t typeHash);
 		static const BasicTypeData* GetBasicTypeData(const std::string& name);
+
+		static size_t SubTypeCount(ResourceType* pResourceType);
+		static ResourceType* GetSubType(ResourceType* pResourceType, size_t index);
+		static size_t GetAllResourceTypesThatHaveSubType(size_t hash, std::vector<ResourceType*>& out);
 
 	public:
 		virtual ~ResourceType();
@@ -78,5 +89,6 @@ namespace Glory
 
 		const size_t m_TypeHash;
 		const std::string m_Extensions;
+		std::vector<size_t> m_SubTypes;
 	};
 }
