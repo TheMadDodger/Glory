@@ -21,10 +21,13 @@ namespace Glory
 
 		if (m_AssetLoadedCallbacks.Contains(uuid))
 		{
-			m_AssetLoadedCallbacks.Do(uuid, [&](std::vector<std::function<void(Resource*)>>* callbacks)
+			if (callback != NULL)
 			{
-				callbacks->push_back(callback);
-			});
+				m_AssetLoadedCallbacks.Do(uuid, [&](std::vector<std::function<void(Resource*)>>* callbacks)
+				{
+					callbacks->push_back(callback);
+				});
+			}
 			return;
 		}
 		else m_AssetLoadedCallbacks.Set(uuid, { callback });

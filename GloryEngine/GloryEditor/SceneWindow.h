@@ -24,5 +24,6 @@ namespace Glory::Editor
     private:
         SceneViewCamera m_SceneCamera;
         static bool m_Orthographic;
+        bool m_DrawGrid;
     };
 }

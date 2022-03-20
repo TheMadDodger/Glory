@@ -27,7 +27,12 @@ namespace Glory::Editor
 		BaseTumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
 		if (pGenerator == nullptr)
 			return EditorAssets::GetTexture("file");
+
 		ImageData* pImage = pGenerator->GetTumbnail(&meta);
+
+		if (pImage == nullptr)
+			return EditorAssets::GetTexture("file");
+
 		m_pTumbnails[uuid] = pImage;
 		EditorAssets::EnqueueTextureCreation(pImage);
 		return EditorAssets::GetTexture("file");

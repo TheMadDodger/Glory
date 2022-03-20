@@ -162,6 +162,7 @@ namespace Glory
 #include <EditorOpenGLRenderImpl.h>
 #include <EditorApplication.h>
 #include <EntityScenesEditorExtension.h>
+#include <yaml-cpp/yaml.h>
 
 using namespace Glory::Editor;
 

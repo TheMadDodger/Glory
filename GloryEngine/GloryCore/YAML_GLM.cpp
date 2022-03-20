@@ -2,6 +2,13 @@
 
 namespace YAML
 {
+	Emitter& operator<<(Emitter& out, const glm::vec2& v)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
+		return out;
+	}
+
 	Emitter& operator<<(Emitter& out, const glm::vec3& v)
 	{
 		out << YAML::Flow;

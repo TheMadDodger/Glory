@@ -40,7 +40,7 @@
 namespace Glory::Editor
 {
 	MainEditor::MainEditor()
-		: m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup())
+		: m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_Settings("./EditorSettings.yaml")
 	{
 	}
 
@@ -58,6 +58,8 @@ namespace Glory::Editor
 
 	void MainEditor::Initialize()
 	{
+		m_Settings.Load(Game::GetGame().GetEngine());
+
 		RegisterWindows();
 		RegisterPropertyDrawers();
 		RegisterEditors();
@@ -76,6 +78,8 @@ namespace Glory::Editor
 
 	void MainEditor::Destroy()
 	{
+		m_Settings.Save(Game::GetGame().GetEngine());
+
 		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
 		PropertyDrawer::Cleanup();

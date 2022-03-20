@@ -16,7 +16,10 @@ namespace Glory::Editor
 	bool SceneWindow::m_Orthographic = false;
 
 	SceneWindow::SceneWindow()
-		: EditorWindowTemplate("Scene", 1280.0f, 720.0f) {}
+		: EditorWindowTemplate("Scene", 1280.0f, 720.0f), m_DrawGrid(true)
+	{
+		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
+	}
 
 	SceneWindow::~SceneWindow()
 	{
@@ -51,6 +54,20 @@ namespace Glory::Editor
 
 	void SceneWindow::OnGUI()
 	{
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("Test"))
+			{
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::MenuItem("Grid", NULL, m_DrawGrid))
+			{
+				m_DrawGrid = !m_DrawGrid;
+			}
+			ImGui::EndMenuBar();
+		}
+
 		if (ImGui::IsWindowFocused()) m_SceneCamera.Update();
 
 		m_SceneCamera.m_Camera.SetResolution((int)m_WindowDimensions.x, (int)m_WindowDimensions.y);
@@ -83,13 +100,13 @@ namespace Glory::Editor
 		viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
 		viewManipulateTop = ImGui::GetWindowPos().y;
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
-		m_WindowFlags = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0;
+		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar | (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0);
 
 		const glm::mat4& cameraView = m_SceneCamera.m_Camera.GetFinalView();
 		const glm::mat4& cameraProjection = m_SceneCamera.m_Camera.GetProjection();
 
 		glm::mat4 identityMatrix = glm::identity<glm::mat4>();
-		ImGuizmo::DrawGrid((float*)&cameraView, (float*)&cameraProjection, (float*)&identityMatrix, 100.f);
+		if (m_DrawGrid) ImGuizmo::DrawGrid((float*)&cameraView, (float*)&cameraProjection, (float*)&identityMatrix, 100.f);
 
 		//ImGuizmo::DrawCubes((float*)&cameraView, (float*)&cameraProjection, (float*)&identityMatrix, 1);
 

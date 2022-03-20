@@ -30,9 +30,9 @@ namespace Glory
 		static Object* DeserializeObject(YAML::Node& object);
 
 		template<class T>
-		static T* DeserializeObjectOfType(YAML::Node& object)
+		static T* DeserializeObjectOfType(YAML::Node& object, const std::string& name = "")
 		{
-			return (T*)DeserializeObjectOfType(typeid(T), object);
+			return (T*)DeserializeObjectOfType(typeid(T), object, name);
 		}
 
 		template<class T>
@@ -42,7 +42,7 @@ namespace Glory
 		}
 
 		static Object* DeserializeObject(Object* pParent, YAML::Node& object);
-		static Object* DeserializeObjectOfType(std::type_index type, YAML::Node& object);
+		static Object* DeserializeObjectOfType(std::type_index type, YAML::Node& object, const std::string& name = "");
 
 		virtual std::type_index GetSerializedType() = 0;
 
@@ -52,7 +52,7 @@ namespace Glory
 
 	protected:
 		virtual void Serialize(Object* pObject, YAML::Emitter& out) = 0;
-		virtual Object* Deserialize(Object* pParent, YAML::Node& object) = 0;
+		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string& name = "") = 0;
 
 	private:
 		friend class Engine;

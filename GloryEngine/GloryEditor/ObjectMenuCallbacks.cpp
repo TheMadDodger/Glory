@@ -218,21 +218,8 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(RenameItemCallback)
 	{
 		std::string itemToRename = "";
-
-		switch (currentMenu)
-		{
-		case T_Folder:
-		{
-			std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
-			itemToRename = path.filename().replace_extension("").string();
-			break;
-		}
-
-		case T_Resource:
-			itemToRename = ((Resource*)pObject)->Name();
-			break;
-		}
-
+		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+		itemToRename = path.filename().replace_extension("").string();
 		ContentBrowser::BeginRename(itemToRename, currentMenu == T_Folder);
 	}
 

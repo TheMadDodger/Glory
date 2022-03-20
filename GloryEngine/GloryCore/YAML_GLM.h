@@ -5,9 +5,31 @@
 
 namespace YAML
 {
+	Emitter& operator<<(Emitter& out, const glm::vec2& v);
 	Emitter& operator<<(Emitter& out, const glm::vec3& v);
 	Emitter& operator<<(Emitter& out, const glm::vec4& v);
 	Emitter& operator<<(Emitter& out, const glm::quat& q);
+
+	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+		}
+
+		static bool decode(const Node& node, glm::vec2& v)
+		{
+			if (!node.IsSequence() || node.size() < 2)
+				return false;
+
+			v.x = node[0].as<float>();
+			v.y = node[1].as<float>();
+			return true;
+		}
+	};
 
 	template<>
 	struct convert<glm::vec3>
@@ -71,7 +93,7 @@ namespace YAML
 
 		static bool decode(const Node& node, glm::quat& q)
 		{
-			if (!node.IsSequence() || node.size() < 3)
+			if (!node.IsSequence() || node.size() < 4)
 				return false;
 
 			q.x = node[0].as<float>();
