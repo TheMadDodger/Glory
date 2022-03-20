@@ -87,6 +87,12 @@ namespace Glory
 		return new EntitySceneObject(entity, name, uuid);
 	}
 
+	void EntityScene::OnDeleteObject(SceneObject* pObject)
+	{
+		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
+		pEntityObject->GetEntityHandle().Destroy();
+	}
+
 	void EntityScene::OnObjectAdded(SceneObject* pObject)
 	{
 		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;

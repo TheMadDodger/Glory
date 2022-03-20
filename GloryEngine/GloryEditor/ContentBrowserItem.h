@@ -13,6 +13,7 @@ namespace Glory::Editor
 		virtual ~ContentBrowserItem();
 
 		static ContentBrowserItem* GetSelectedFolder();
+		static void SetSelectedFolder(ContentBrowserItem* pItem);
 
 		bool HasParent();
 		void Up();
@@ -35,8 +36,15 @@ namespace Glory::Editor
 
 		static std::filesystem::path GetCurrentPath();
 
+		ContentBrowserItem* GetChildByName(const std::string& name, bool folder);
+		void BeginRename();
+
+		static const std::string& GetHighlightedPath();
+
 	private:
 		static void EraseExcessHistory();
+
+		void DrawName();
 
 	private:
 		std::string m_Name;
@@ -46,9 +54,14 @@ namespace Glory::Editor
 		ContentBrowserItem* m_pParent;
 		std::vector<ContentBrowserItem*> m_pChildren;
 
+		bool m_StartEditingName;
+		bool m_EditingName;
+		char m_NameBuffer[1000];
+
 		static std::hash<std::string> m_PathHasher;
 		static ContentBrowserItem* m_pSelectedFolder;
 		static std::vector<ContentBrowserItem*> m_pHistory;
 		static size_t m_HistoryIndex;
+		static std::string m_HighlightedPath;
 	};
 }

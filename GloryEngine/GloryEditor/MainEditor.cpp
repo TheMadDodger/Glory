@@ -206,6 +206,8 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/New Scene", CreateNewSceneCallback, T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/Material", CreateNewMaterialCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Material Instance", CreateNewMaterialInstanceCallback, T_ContentBrowser | T_Resource);
+		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
+		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder);
 	}
 
 	void MainEditor::Update()

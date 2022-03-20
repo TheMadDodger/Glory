@@ -29,6 +29,7 @@ namespace Glory
 
 		virtual SceneObject* CreateObject(const std::string& name) override;
 		virtual SceneObject* CreateObject(const std::string& name, UUID uuid) override;
+		virtual void OnDeleteObject(SceneObject* pObject) override;
 
 		virtual void OnObjectAdded(SceneObject* pObject) override;
 

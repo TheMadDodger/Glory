@@ -78,6 +78,22 @@ namespace Glory::Editor
         m_pRootItem = nullptr;
     }
 
+    void ContentBrowser::BeginRename(const std::string& name, bool folder)
+    {
+        ContentBrowserItem* pCurrentFolder = ContentBrowserItem::GetSelectedFolder();
+        ContentBrowserItem* pChildToRename = pCurrentFolder->GetChildByName(name, folder);
+        if (pChildToRename == nullptr) return;
+        pChildToRename->BeginRename();
+    }
+
+    void ContentBrowser::LoadProject()
+    {
+        ContentBrowser* pWindow = GetWindow<ContentBrowser>();
+        pWindow->m_pRootItem = new ContentBrowserItem("Assets", true, nullptr);
+        ContentBrowserItem::SetSelectedFolder(pWindow->m_pRootItem);
+        pWindow->RefreshContentBrowser();
+    }
+
     void ContentBrowser::DirectoryBrowser()
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
@@ -163,9 +179,10 @@ namespace Glory::Editor
     void ContentBrowser::RefreshContentBrowser()
     {
         if (ProjectSpace::GetOpenProject() == nullptr) return;
-        if (m_pRootItem == nullptr) return;
-        m_pRootItem->Refresh();
-        m_pRootItem->SortChildren();
+        ContentBrowserItem* pSelected = ContentBrowserItem::GetSelectedFolder();
+        if (pSelected == nullptr) return;
+        pSelected->Refresh();
+        pSelected->SortChildren();
         m_pRootItem->RefreshSelected(m_pRootItem);
     }
 }

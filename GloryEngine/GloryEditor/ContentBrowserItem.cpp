@@ -17,14 +17,15 @@ namespace Glory::Editor
 	ContentBrowserItem* ContentBrowserItem::m_pSelectedFolder = nullptr;
 	std::vector<ContentBrowserItem*> ContentBrowserItem::m_pHistory;
 	size_t ContentBrowserItem::m_HistoryIndex = 1;
+	std::string ContentBrowserItem::m_HighlightedPath;
 
 	ContentBrowserItem::ContentBrowserItem()
-		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_pChildren(std::vector<ContentBrowserItem*>())
+		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>())
 	{
 	}
 
 	ContentBrowserItem::ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent)
-		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_pChildren(std::vector<ContentBrowserItem*>())
+		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>())
 	{}
 
 	ContentBrowserItem::~ContentBrowserItem()
@@ -40,6 +41,11 @@ namespace Glory::Editor
 	ContentBrowserItem* ContentBrowserItem::GetSelectedFolder()
 	{
 		return m_pSelectedFolder;
+	}
+
+	void ContentBrowserItem::SetSelectedFolder(ContentBrowserItem* pItem)
+	{
+		m_pSelectedFolder = pItem;
 	}
 
 	bool ContentBrowserItem::HasParent()
@@ -259,9 +265,11 @@ namespace Glory::Editor
 
 			if (ImGui::IsItemClicked(1))
 			{
+				m_HighlightedPath = m_CachedPath.string();
 				ObjectMenu::Open(nullptr, ObjectMenuType::T_Folder);
 			}
-			ImGui::Text(m_Name.data());
+
+			DrawName();
 			return;
 		}
 
@@ -290,11 +298,12 @@ namespace Glory::Editor
 
 		if (ImGui::IsItemClicked(1))
 		{
+			m_HighlightedPath = m_CachedPath.string();
 			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
 			ObjectMenu::Open(pAsset, ObjectMenuType::T_Resource);
 		}
 
-		ImGui::Text(m_CachedPath.filename().replace_extension().string().c_str());
+		DrawName();
 	}
 
 	bool ContentBrowserItem::IsValid()
@@ -323,6 +332,27 @@ namespace Glory::Editor
 		return m_pSelectedFolder != nullptr ? m_pSelectedFolder->BuildPath() : ProjectSpace::GetOpenProject()->RootPath();
 	}
 
+	ContentBrowserItem* ContentBrowserItem::GetChildByName(const std::string& name, bool folder)
+	{
+		auto it = std::find_if(m_pChildren.begin(), m_pChildren.end(), [&](ContentBrowserItem* pChild) {return pChild->m_Name.find(name) != std::string::npos && pChild->m_IsFolder == folder; });
+		if (it == m_pChildren.end()) return nullptr;
+		return *it;
+	}
+
+	void ContentBrowserItem::BeginRename()
+	{
+		m_StartEditingName = true;
+		m_EditingName = true;
+		std::string name = m_CachedPath.filename().replace_extension().string();
+		memcpy(m_NameBuffer, name.data(), name.length());
+		m_NameBuffer[name.length()] = '\0';
+	}
+
+	const std::string& ContentBrowserItem::GetHighlightedPath()
+	{
+		return m_HighlightedPath;
+	}
+
 	void ContentBrowserItem::EraseExcessHistory()
 	{
 		if (m_HistoryIndex <= 1) return;
@@ -330,5 +360,40 @@ namespace Glory::Editor
 		if (it >= m_pHistory.end()) return;
 		m_pHistory.erase(it, m_pHistory.end());
 		m_HistoryIndex = 1;
+	}
+
+	void ContentBrowserItem::DrawName()
+	{
+		if (m_EditingName || m_StartEditingName)
+		{
+			ImGui::InputText("##ItemRenaming", m_NameBuffer, 1000);
+			if (m_StartEditingName)
+			{
+				ImGui::SetKeyboardFocusHere(-1);
+			}
+			if (!m_StartEditingName && !ImGui::IsItemActive())
+			{
+				m_EditingName = false;
+				std::filesystem::path extension = m_CachedPath.extension();
+				std::string newName = std::filesystem::path(m_NameBuffer).replace_extension(extension).string();
+				if (newName == "" || newName == m_Name) return;
+				m_Name = newName;
+				m_NameBuffer[0] = '\0';
+
+				std::filesystem::path newPath = BuildPath();
+				if (m_CachedPath == newPath) return;
+
+				std::filesystem::rename(m_CachedPath, newPath);
+				if(!m_IsFolder) std::filesystem::rename(m_CachedPath.string() + ".gmeta", newPath.string() + ".gmeta");
+
+				std::filesystem::path assetPath = Game::GetAssetPath();
+				AssetDatabase::UpdateAssetPaths(m_CachedPath.lexically_relative(assetPath).string(), newPath.lexically_relative(assetPath).string());
+				AssetDatabase::Save();
+				m_CachedPath = newPath;
+				Refresh();
+			}
+			m_StartEditingName = false;
+		}
+		else ImGui::Text(m_CachedPath.filename().replace_extension().string().c_str());
 	}
 }

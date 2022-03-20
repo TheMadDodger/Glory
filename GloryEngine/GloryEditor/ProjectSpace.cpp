@@ -4,6 +4,7 @@
 #include <AssetDatabase.h>
 #include "ProjectSpace.h"
 #include "EditorApplication.h"
+#include <ContentBrowser.h>
 
 namespace Glory::Editor
 {
@@ -106,6 +107,7 @@ namespace Glory::Editor
 
 		AssetDatabase::Load();
 		EditorApplication::GetInstance()->GetMainEditor()->GetAssetLoader()->LoadAssets();
+		ContentBrowser::LoadProject();
 	}
 
 	void ProjectSpace::Close()

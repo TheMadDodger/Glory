@@ -54,6 +54,14 @@ namespace Glory
 		return m_SceneName;
 	}
 
+	void GScene::DeleteObject(SceneObject* pObject)
+	{
+		OnDeleteObject(pObject);
+		auto it = std::find(m_pSceneObjects.begin(), m_pSceneObjects.end(), pObject);
+		m_pSceneObjects.erase(it);
+		delete pObject;
+	}
+
 	void GScene::SetUUID(UUID uuid)
 	{
 		m_ID = uuid;

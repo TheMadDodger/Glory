@@ -2,11 +2,13 @@
 #include "SceneGraphWindow.h"
 #include "Selection.h"
 #include "EditorSceneManager.h"
+#include "PopupManager.h"
 #include <Game.h>
 #include <Engine.h>
 #include <AssetDatabase.h>
 #include <ContentBrowser.h>
 #include <MaterialInstanceData.h>
+#include <ContentBrowser.h>
 
 namespace Glory::Editor
 {
@@ -53,7 +55,47 @@ namespace Glory::Editor
 
 	OBJECTMENU_CALLBACK(DeleteObjectCallback)
 	{
+		switch (currentMenu)
+		{
+		case T_SceneObject:
+		{
+			SceneObject* pSceneObject = (SceneObject*)pObject;
+			GScene* pScene = pSceneObject->GetScene();
+			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
+			pScene->DeleteObject(pSceneObject);
+			break;
+		}
 
+		case T_Resource:
+		{
+			Resource* pResource = (Resource*)pObject;
+			std::vector<std::string> buttons = {
+				"No",
+				"Yes",
+			};
+			std::vector<std::function<void()>> callbacks = {
+				[]() { PopupManager::CloseCurrentPopup(); },
+				[&]() { DeleteResource(); },
+			};
+			PopupManager::OpenModal("Delete " + pResource->Name(), "Are you sure you want to delete \"" + pResource->Name() + "\"?\nThis action cannot be undone!", buttons, callbacks);
+			break;
+		}
+
+		case T_Folder:
+		{
+			std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+			std::vector<std::string> buttons = {
+				"No",
+				"Yes",
+			};
+			std::vector<std::function<void()>> callbacks = {
+				[]() { PopupManager::CloseCurrentPopup(); },
+				[&]() { DeleteFolder(); },
+			};
+			PopupManager::OpenModal("Delete Folder", "Are you sure you want to delete the folder \"" + path.filename().string() + "\" and all assets underneath?\nThis action cannot be undone!", buttons, callbacks);
+			break;
+		}
+		}
 	}
 
 	OBJECTMENU_CALLBACK(CreateEmptyObjectCallback)
@@ -138,6 +180,10 @@ namespace Glory::Editor
 		MaterialData* pMaterialData = new MaterialData();
 		AssetDatabase::CreateAsset(pMaterialData, path.string());
 		AssetDatabase::Save();
+
+		ContentBrowserItem::GetSelectedFolder()->Refresh();
+		ContentBrowserItem::GetSelectedFolder()->SortChildren();
+		ContentBrowser::BeginRename(path.filename().string(), false);
 	}
 
 	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback)
@@ -151,5 +197,70 @@ namespace Glory::Editor
 		MaterialInstanceData* pMaterialData = new MaterialInstanceData(pMaterial);
 		AssetDatabase::CreateAsset(pMaterialData, path.string());
 		AssetDatabase::Save();
+
+		ContentBrowserItem::GetSelectedFolder()->Refresh();
+		ContentBrowserItem::GetSelectedFolder()->SortChildren();
+		ContentBrowser::BeginRename(fileName, false);
+	}
+
+	OBJECTMENU_CALLBACK(CreateNewFolderCallback)
+	{
+		std::filesystem::path path = ContentBrowserItem::GetCurrentPath();
+		path = GetUnqiueFilePath(path.append("New Folder"));
+		if (!std::filesystem::create_directory(path)) return;
+		path.filename();
+
+		ContentBrowserItem::GetSelectedFolder()->Refresh();
+		ContentBrowserItem::GetSelectedFolder()->SortChildren();
+		ContentBrowser::BeginRename(path.filename().string(), true);
+	}
+
+	OBJECTMENU_CALLBACK(RenameItemCallback)
+	{
+		std::string itemToRename = "";
+
+		switch (currentMenu)
+		{
+		case T_Folder:
+		{
+			std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+			itemToRename = path.filename().replace_extension("").string();
+			break;
+		}
+
+		case T_Resource:
+			itemToRename = ((Resource*)pObject)->Name();
+			break;
+		}
+
+		ContentBrowser::BeginRename(itemToRename, currentMenu == T_Folder);
+	}
+
+	void DeleteFolder()
+	{
+		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());
+		if (!std::filesystem::remove_all(path)) return;
+		AssetDatabase::DeleteAssets(relativePath.string());
+		AssetDatabase::Save();
+		ContentBrowserItem::GetSelectedFolder()->Refresh();
+		ContentBrowserItem::GetSelectedFolder()->SortChildren();
+		PopupManager::CloseCurrentPopup();
+	}
+
+	void DeleteResource()
+	{
+		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());
+		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
+		if (uuid == 0) return;
+		if (!std::filesystem::remove(path)) return;
+		std::filesystem::path metaPath = path.string() + ".gmeta";
+		std::filesystem::remove(metaPath);
+		AssetDatabase::DeleteAsset(uuid);
+		AssetDatabase::Save();
+		ContentBrowserItem::GetSelectedFolder()->Refresh();
+		ContentBrowserItem::GetSelectedFolder()->SortChildren();
+		PopupManager::CloseCurrentPopup();
 	}
 }

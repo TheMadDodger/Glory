@@ -17,7 +17,11 @@ namespace Glory
 		static bool AssetExists(UUID uuid);
 		static bool AssetExists(const std::string& path);
 		static void InsertAsset(const std::string& path, const ResourceMeta& meta);
+		static void UpdateAssetPath(UUID uuid, const std::string& newPath);
 		static void UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath);
+		static void UpdateAssetPaths(const std::string& oldPath, const std::string& newPath);
+		static void DeleteAsset(UUID uuid);
+		static void DeleteAssets(const std::string& path);
 		static void IncrementAssetVersion(UUID uuid);
 		static void Save();
 		static void Load();

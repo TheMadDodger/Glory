@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorWindow.h"
 #include <ContentBrowserItem.h>
+#include <Resource.h>
 
 namespace Glory::Editor
 {
@@ -14,6 +15,10 @@ namespace Glory::Editor
 
 		virtual void OnOpen() override;
 		virtual void OnClose() override;
+
+		static void BeginRename(const std::string& name, bool folder);
+
+		static void LoadProject();
 
 	private:
 		virtual void OnGUI() override;

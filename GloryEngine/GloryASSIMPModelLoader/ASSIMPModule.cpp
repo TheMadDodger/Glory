@@ -99,6 +99,12 @@ namespace Glory
         size_t arraySize = 0;
         //vector<Texture> textures;
 
+        if (mesh->mNormals == nullptr)
+        {
+            Debug::LogError("Mesh has no normals");
+            return nullptr;
+        }
+
         for (unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
             if (i == 0)

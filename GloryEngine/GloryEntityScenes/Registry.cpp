@@ -134,6 +134,7 @@ namespace Glory
 		{
 			EntityComponentData* pData = &m_EntityComponents[index];
 			EntityID entity = pData->m_Entity;
+			if (!IsValid(entity)) return;
 			func(this, entity, pData);
 		});
 	}

@@ -107,7 +107,7 @@ void main()
 	float l = float(count) / 100.0;
 	vec3 indicatorColor = mix(GoodColor, BadColor, l);
 
-	vec3 diffuseColor = vec3(0.0, 0.0, 0.0); //= color * 0.1;
+	vec3 diffuseColor = color * 0.1;
 	for (uint i = 0; i < count; i++)
 	{
 		uint indexListIndex = offset + i;
