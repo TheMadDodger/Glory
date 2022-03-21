@@ -47,6 +47,7 @@ project "GloryEditor"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
+		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.SDL_Image}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
@@ -60,7 +61,7 @@ project "GloryEditor"
 		"%{GloryIncludeDir.sdlimage}",
 		"%{GloryIncludeDir.sdlwindow}",
 		"%{GloryIncludeDir.vulkan}",
-		"%{GloryIncludeDir.ImGui}"
+		"%{GloryIncludeDir.ImGui}",
 	}
 
 	filter "system:windows"

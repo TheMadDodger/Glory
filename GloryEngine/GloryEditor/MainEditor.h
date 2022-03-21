@@ -35,5 +35,7 @@ namespace Glory::Editor
 		ProjectPopup* m_pProjectPopup;
 		AssetPickerPopup* m_AssetPickerPopup;
 		EditorSettings m_Settings;
+
+		static size_t m_SaveSceneIndex;
 	};
 }

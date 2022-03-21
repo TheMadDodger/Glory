@@ -31,6 +31,7 @@ project "GloryMain"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
+		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.SDL_image}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
@@ -59,6 +60,7 @@ project "GloryMain"
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
+		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.SDL_image}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
@@ -87,6 +89,7 @@ project "GloryMain"
 		"ImGui",
 		"ImGuizmo",
 		"implot",
+		"ImFileDialog",
 		"yaml-cpp",
 		"GloryEditor",
 

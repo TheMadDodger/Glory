@@ -1,4 +1,5 @@
 #include "EditorSceneManager.h"
+#include "FileDialog.h"
 #include <Game.h>
 #include <Engine.h>
 #include <ScenesModule.h>
@@ -39,17 +40,24 @@ namespace Glory::Editor
 			AssetLocation location;
 			if (!AssetDatabase::GetAssetLocation(uuid, location)) // new scene
 			{
-				// TODO: Need to bring up a file browser here
+				FileDialog::Save("SceneSaveDialog", "Save scene", "Glory Scene (*.gscene){.gscene}", Game::GetAssetPath(), [&](const std::string& result)
+				{
+					if (result == "") return;
+					Save(uuid, Game::GetGame().GetAssetPath() + "\\" + result);
+				});
 				return;
 			}
 
-			GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
-			YAML::Emitter out;
-			Serializer::SerializeObject(pScene, out);
-			std::string path = Game::GetGame().GetAssetPath() + "\\" + location.m_Path;
-			std::ofstream outStream(path);
-			outStream << out.c_str();
-			outStream.close();
+			if (location.m_Path == "") return;
+			Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.m_Path);
+		});
+	}
+
+	void EditorSceneManager::SaveOpenScenesAs()
+	{
+		FileDialog::Open("SceneSaveDialog", "Save scene", "Glory Scene (*.gscene){.gscene}", false, Game::GetAssetPath(), [&](const std::string& result)
+		{
+			if (result == "") return;
 		});
 	}
 
@@ -74,5 +82,25 @@ namespace Glory::Editor
 		m_OpenedSceneIDs.clear();
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
 		pScenesModule->CloseAllScenes();
+	}
+
+	size_t EditorSceneManager::OpenSceneCount()
+	{
+		return m_OpenedSceneIDs.size();
+	}
+
+	UUID EditorSceneManager::GetOpenSceneUUID(size_t index)
+	{
+		return m_OpenedSceneIDs[index];
+	}
+
+	void EditorSceneManager::Save(UUID uuid, const std::string& path)
+	{
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
+		YAML::Emitter out;
+		Serializer::SerializeObject(pScene, out);
+		std::ofstream outStream(path);
+		outStream << out.c_str();
+		outStream.close();
 	}
 }

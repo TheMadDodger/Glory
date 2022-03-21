@@ -34,11 +34,14 @@
 #include <Gizmos.h>
 #include "ObjectMenu.h"
 #include "ObjectMenuCallbacks.h"
+#include <FileDialog.h>
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
 namespace Glory::Editor
 {
+	size_t MainEditor::m_SaveSceneIndex = 0;
+
 	MainEditor::MainEditor()
 		: m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_Settings("./EditorSettings.yaml")
 	{
@@ -107,6 +110,7 @@ namespace Glory::Editor
 		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
 		m_AssetPickerPopup->OnGUI();
+		FileDialog::Update();
 	}
 
 	EditorAssetLoader* MainEditor::GetAssetLoader()
@@ -118,6 +122,7 @@ namespace Glory::Editor
 	{
 		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); });
 		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes);
+		MenuBar::AddMenuItem("File/Save Scene As", EditorSceneManager::SaveOpenScenesAs);
 		MenuBar::AddMenuItem("File/Load Scene", []()
 		{
 			//YAML::Node node = YAML::LoadFile("test.gscene");
