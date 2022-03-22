@@ -223,6 +223,18 @@ namespace Glory::Editor
 		ContentBrowser::BeginRename(itemToRename, currentMenu == T_Folder);
 	}
 
+	OBJECTMENU_CALLBACK(SaveScene)
+	{
+		GScene* pScene = (GScene*)pObject;
+		EditorSceneManager::SaveScene(pScene->GetUUID());
+	}
+
+	OBJECTMENU_CALLBACK(SaveSceneAs)
+	{
+		GScene* pScene = (GScene*)pObject;
+		EditorSceneManager::SaveSceneAs(pScene->GetUUID());
+	}
+
 	void DeleteFolder()
 	{
 		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();

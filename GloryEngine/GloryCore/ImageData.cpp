@@ -31,7 +31,7 @@ namespace Glory
 		return m_Width * m_Height * m_BytesPerPixel;
 	}
 
-	const float* ImageData::GetPixels()
+	const void* ImageData::GetPixels()
 	{
 		return nullptr;
 	}

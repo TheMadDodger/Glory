@@ -3,12 +3,12 @@
 
 namespace Glory
 {
-	GScene::GScene(const std::string& sceneName) : m_SceneName(sceneName)
+	GScene::GScene(const std::string& sceneName) : Resource(sceneName)
 	{
 		APPEND_TYPE(GScene);
 	}
 
-	GScene::GScene(const std::string& sceneName, UUID uuid) : Resource(uuid), m_SceneName(sceneName)
+	GScene::GScene(const std::string& sceneName, UUID uuid) : Resource(uuid, sceneName)
 	{
 		APPEND_TYPE(GScene);
 	}
@@ -47,11 +47,6 @@ namespace Glory
 	{
 		if (index >= m_pSceneObjects.size()) return nullptr;
 		return m_pSceneObjects[index];
-	}
-
-	const std::string& GScene::Name()
-	{
-		return m_SceneName;
 	}
 
 	void GScene::DeleteObject(SceneObject* pObject)

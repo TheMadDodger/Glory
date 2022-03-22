@@ -17,7 +17,6 @@ namespace Glory
         SceneObject* CreateEmptyObject(const std::string& name, UUID uuid);
         size_t SceneObjectsCount();
         SceneObject* GetSceneObject(size_t index);
-        const std::string& Name();
         void DeleteObject(SceneObject* pObject);
 
     protected:
@@ -37,7 +36,6 @@ namespace Glory
     protected:
         friend class ScenesModule;
         friend class SceneObject;
-        std::string m_SceneName;
         std::vector<SceneObject*> m_pSceneObjects;
     };
 }

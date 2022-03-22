@@ -9,6 +9,7 @@
 namespace Glory::Editor
 {
 	std::vector<UUID> EditorSceneManager::m_OpenedSceneIDs;
+	UUID EditorSceneManager::m_CurrentlySavingScene = 0;
 
 	GScene* EditorSceneManager::NewScene(bool additive)
 	{
@@ -38,26 +39,10 @@ namespace Glory::Editor
 		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [](UUID uuid)
 		{
 			AssetLocation location;
-			if (!AssetDatabase::GetAssetLocation(uuid, location)) // new scene
-			{
-				FileDialog::Save("SceneSaveDialog", "Save scene", "Glory Scene (*.gscene){.gscene}", Game::GetAssetPath(), [&](const std::string& result)
-				{
-					if (result == "") return;
-					Save(uuid, Game::GetGame().GetAssetPath() + "\\" + result);
-				});
-				return;
-			}
+			if (!AssetDatabase::GetAssetLocation(uuid, location)) return; // new scene
 
 			if (location.m_Path == "") return;
 			Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.m_Path);
-		});
-	}
-
-	void EditorSceneManager::SaveOpenScenesAs()
-	{
-		FileDialog::Open("SceneSaveDialog", "Save scene", "Glory Scene (*.gscene){.gscene}", false, Game::GetAssetPath(), [&](const std::string& result)
-		{
-			if (result == "") return;
 		});
 	}
 
@@ -94,7 +79,44 @@ namespace Glory::Editor
 		return m_OpenedSceneIDs[index];
 	}
 
-	void EditorSceneManager::Save(UUID uuid, const std::string& path)
+	void EditorSceneManager::SaveScene(UUID uuid)
+	{
+		if (!IsSceneOpen(uuid)) return;
+		AssetLocation location;
+		if (!AssetDatabase::GetAssetLocation(uuid, location))
+		{
+			SaveSceneAs(uuid);
+			return; // new scene
+		}
+
+		if (location.m_Path == "") return;
+		Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.m_Path);
+	}
+
+	void EditorSceneManager::SaveSceneAs(UUID uuid)
+	{
+		m_CurrentlySavingScene = uuid;
+		FileDialog::Save("SceneSaveDialog", "Save scene", "Glory Scene (*.gscene){.gscene}", Game::GetAssetPath(), [&](const std::string& result)
+		{
+			if (result == "") return;
+
+			std::filesystem::path relativePath = result;
+			relativePath = relativePath.lexically_relative(Game::GetAssetPath());
+			UUID existingAsset = AssetDatabase::GetAssetUUID(relativePath.string());
+
+			if (existingAsset != 0)
+			{
+				Save(m_CurrentlySavingScene, result);
+				CloseScene(m_CurrentlySavingScene);
+				OpenScene(existingAsset, true);
+				return;
+			}
+
+			Save(m_CurrentlySavingScene, result, true);
+		});
+	}
+
+	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
 		YAML::Emitter out;
@@ -102,5 +124,18 @@ namespace Glory::Editor
 		std::ofstream outStream(path);
 		outStream << out.c_str();
 		outStream.close();
+
+		if (newScene)
+		{
+			AssetDatabase::ImportNewScene(path, pScene);
+			UUID newUUID = pScene->GetUUID();
+
+			//std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
+			//std::replace(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid, newUUID);
+			pScene->SetName(AssetDatabase::GetAssetName(newUUID));
+			CloseScene(uuid);
+			CloseScene(newUUID);
+			OpenScene(newUUID, true);
+		}
 	}
 }

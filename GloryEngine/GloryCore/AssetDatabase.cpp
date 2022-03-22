@@ -311,6 +311,28 @@ namespace Glory
 		InsertAsset(relativePath.string(), meta);
 	}
 
+	void AssetDatabase::ImportNewScene(const std::string& path, GScene* pScene)
+	{
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
+		std::filesystem::path metaFilePath = path + metaExtension.string();
+		// Generate a meta file
+		const ResourceType* pType = ResourceType::GetResourceType<GScene>();
+
+		const std::string assetPath = Game::GetAssetPath();
+		metaFilePath = metaFilePath.lexically_relative(assetPath);
+		ResourceMeta meta(metaFilePath.string(), extension.string(), UUID(), pType->Hash());
+		meta.Write(nullptr);
+		meta.Read();
+		pScene->m_ID = meta.ID();
+		pScene->m_Name = fileName.string();
+		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
+		AssetManager::m_pLoadedAssets.Set(pScene->m_ID, pScene);
+		InsertAsset(relativePath.string(), meta);
+	}
+
 	void AssetDatabase::SaveAsset(Resource* pResource)
 	{
 		ResourceMeta meta;

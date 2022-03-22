@@ -8,6 +8,8 @@ namespace Glory
     public:
         Resource();
         Resource(UUID uuid);
+        Resource(const std::string& name);
+        Resource(UUID uuid, const std::string& name);
         virtual ~Resource();
 
         const std::string& Name();

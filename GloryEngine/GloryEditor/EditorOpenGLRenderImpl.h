@@ -25,6 +25,8 @@ namespace Glory::Editor
 
         virtual void* GetTextureID(Texture* pTexture) override;
 
+        void LogGLError(const unsigned int& err, bool bIncludeTimeStamp);
+
     private:
         const int MINIMAGECOUNT = 2;
     };

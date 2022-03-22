@@ -23,6 +23,8 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback);
 	OBJECTMENU_CALLBACK(CreateNewFolderCallback);
 	OBJECTMENU_CALLBACK(RenameItemCallback);
+	OBJECTMENU_CALLBACK(SaveScene);
+	OBJECTMENU_CALLBACK(SaveSceneAs);
 
 	void DeleteFolder();
 	void DeleteResource();

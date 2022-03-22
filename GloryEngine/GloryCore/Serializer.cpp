@@ -65,8 +65,8 @@ namespace Glory
 		if (pSerializer == nullptr) return;
 
 		out << YAML::BeginMap;
-		out << YAML::Key << "UUID";
-		out << YAML::Value << pObject->GetUUID();
+		//out << YAML::Key << "UUID";
+		//out << YAML::Value << pObject->GetUUID();
 		out << YAML::Key << "TypeHash";
 		std::type_index type = typeid(Object);
 		pObject->GetType(0, type);

@@ -16,7 +16,7 @@ namespace Glory
         const PixelFormat& GetFormat();
         uint8_t GetBytesPerPixel();
         uint32_t GetByteSize();
-        virtual const float* GetPixels();
+        virtual const void* GetPixels();
 
     protected:
         uint32_t m_Width;

@@ -77,6 +77,8 @@ namespace Glory::Editor
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
+
+		FileDialog::Initialize();
 	}
 
 	void MainEditor::Destroy()
@@ -122,7 +124,6 @@ namespace Glory::Editor
 	{
 		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); });
 		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes);
-		MenuBar::AddMenuItem("File/Save Scene As", EditorSceneManager::SaveOpenScenesAs);
 		MenuBar::AddMenuItem("File/Load Scene", []()
 		{
 			//YAML::Node node = YAML::LoadFile("test.gscene");
@@ -204,6 +205,8 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultObjectMenu()
 	{
+		ObjectMenu::AddMenuItem("Save Scene", SaveScene, T_Scene);
+		ObjectMenu::AddMenuItem("Save Scene As", SaveSceneAs, T_Scene);
 		ObjectMenu::AddMenuItem("Set As Active Scene", SetActiveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Remove Scene", RemoveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Reload Scene", ReloadSceneCallback, T_Scene);
