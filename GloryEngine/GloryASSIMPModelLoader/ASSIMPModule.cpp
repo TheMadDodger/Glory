@@ -111,7 +111,9 @@ namespace Glory
             {
                 attributes.push_back(AttributeType::Float3);
                 attributes.push_back(AttributeType::Float3);
-                vertexSize = sizeof(float) * 6;
+                attributes.push_back(AttributeType::Float3);
+                attributes.push_back(AttributeType::Float3);
+                vertexSize = sizeof(float) * 12;
 
                 //vertexSize += sizeof(Vector3) * 2;
             }
@@ -124,6 +126,14 @@ namespace Glory
             vertexData.push_back(mesh->mNormals[i].x);
             vertexData.push_back(mesh->mNormals[i].y);
             vertexData.push_back(mesh->mNormals[i].z);
+
+            // Tangents and Bitangents
+            vertexData.push_back(mesh->mTangents[i].x);
+            vertexData.push_back(mesh->mTangents[i].y);
+            vertexData.push_back(mesh->mTangents[i].z);
+            vertexData.push_back(mesh->mBitangents[i].x);
+            vertexData.push_back(mesh->mBitangents[i].y);
+            vertexData.push_back(mesh->mBitangents[i].z);
 
             if (mesh->mTextureCoords[0])
             {
