@@ -75,7 +75,7 @@ namespace Glory::Editor
 		}
 		
 		ImVec2 mouseDelta = io.MouseDelta;
-		
+
 		glm::mat4 transform = viewInverse;
 		view = glm::inverse(transform);
 

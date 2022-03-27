@@ -43,15 +43,12 @@ namespace Glory::Editor
 	size_t MainEditor::m_SaveSceneIndex = 0;
 
 	MainEditor::MainEditor()
-		: m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_Settings("./EditorSettings.yaml")
+		: m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_Settings("./EditorSettings.yaml")
 	{
 	}
 
 	MainEditor::~MainEditor()
 	{
-		delete m_pAssetLoader;
-		m_pAssetLoader = nullptr;
-
 		delete m_pProjectPopup;
 		m_pProjectPopup = nullptr;
 
@@ -83,6 +80,8 @@ namespace Glory::Editor
 
 	void MainEditor::Destroy()
 	{
+		EditorAssetLoader::Stop();
+
 		m_Settings.Save(Game::GetGame().GetEngine());
 
 		ProjectSpace::CloseProject();
@@ -113,11 +112,6 @@ namespace Glory::Editor
 		m_pProjectPopup->OnGui();
 		m_AssetPickerPopup->OnGUI();
 		FileDialog::Update();
-	}
-
-	EditorAssetLoader* MainEditor::GetAssetLoader()
-	{
-		return m_pAssetLoader;
 	}
 
 	void MainEditor::CreateDefaultMainMenuBar()

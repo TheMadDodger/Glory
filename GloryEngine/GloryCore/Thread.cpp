@@ -7,7 +7,12 @@ namespace Glory
 		return THREAD_INDEX;
 	}
 
-	Thread::Thread(size_t index, std::function<void(Thread*)> idleCallback) : THREAD_INDEX(index), m_Exit(false), m_IdleCallback(idleCallback)
+	bool Thread::IsIdle() const
+	{
+		return m_Idle;
+	}
+
+	Thread::Thread(size_t index, std::function<void(Thread*)> idleCallback) : THREAD_INDEX(index), m_Exit(false), m_IdleCallback(idleCallback), m_Idle(true)
 	{
 	}
 
@@ -37,6 +42,7 @@ namespace Glory
 			m_QueueCondition.wait(lock, [&]() {return !m_FunctionQueue.empty() || m_Exit; });
 
 			if (m_Exit) break;
+			m_Idle = false;
 
 			m_CurrentFunc = m_FunctionQueue.front();
 			m_FunctionQueue.pop();
@@ -46,6 +52,7 @@ namespace Glory
 
 			lock.lock();
 			if (m_FunctionQueue.empty()) m_IdleCallback(this);
+			m_Idle = true;
 			lock.unlock();
 		}
 	}

@@ -4,6 +4,8 @@
 
 namespace Glory
 {
+	ThreadedVector<std::string> Debug::m_LoggedKeys;
+
 	void Debug::Log(const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp)
 	{
 		switch (logLevel)
@@ -75,6 +77,13 @@ namespace Glory
 		// Open message box
 		Game::GetGame().GetEngine()->GetWindowModule()->OpenMessageBox("FATAL ERROR: " + message);
 		Game::GetGame().Quit();
+	}
+
+	void Debug::LogOnce(const std::string& key, const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp)
+	{
+		if (m_LoggedKeys.Contains(key)) return;
+		m_LoggedKeys.push_back(key);
+		Log(message, logLevel, bIncludeTimeStamp);
 	}
 
 	Debug::Debug()

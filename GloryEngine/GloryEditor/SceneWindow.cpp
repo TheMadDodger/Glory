@@ -79,30 +79,28 @@ namespace Glory::Editor
 		Texture* pTexture = pSceneTexture->GetTextureAttachment(0);
 		
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
-		float aspect = m_WindowDimensions.x / m_WindowDimensions.y;
 		
-		ImVec2 pos = ImGui::GetCursorScreenPos();
-		float width = ImGui::GetWindowWidth();
+		ImVec2 screenPos = ImGui::GetCursorScreenPos();
+		ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+		float aspect = (regionAvail.x) / (regionAvail.y);
+		float width = regionAvail.x;
 		float height = width / aspect;
-		ImGui::GetWindowDrawList()->AddImage(
-			pRenderImpl->GetTextureID(pTexture), ImVec2(pos.x, pos.y),
-			ImVec2(pos.x + width, pos.y + height), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::Image(pRenderImpl->GetTextureID(pTexture), ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGuizmo::SetDrawlist();
-		float windowWidth = (float)ImGui::GetWindowWidth();
-		float windowHeight = (float)ImGui::GetWindowHeight();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+		ImGuizmo::SetRect(screenPos.x, screenPos.y, width, height);
 
 		ImGuiIO& io = ImGui::GetIO();
 		float viewManipulateRight = io.DisplaySize.x;
 		float viewManipulateTop = 0;
 
-		viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
+		viewManipulateRight = ImGui::GetWindowPos().x + width;
 		viewManipulateTop = ImGui::GetWindowPos().y;
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar | (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0);
 
-		const glm::mat4& cameraView = m_SceneCamera.m_Camera.GetFinalView();
+		const glm::mat4& cameraView = m_SceneCamera.m_Camera.GetView();
 		const glm::mat4& cameraProjection = m_SceneCamera.m_Camera.GetProjection();
 
 		glm::mat4 identityMatrix = glm::identity<glm::mat4>();
@@ -113,7 +111,7 @@ namespace Glory::Editor
 		Gizmos::DrawGizmos(cameraView, cameraProjection);
 
 		float camDistance = 8.f;
-		ImGuizmo::ViewManipulate(m_SceneCamera.m_Camera.GetViewPointer(), camDistance, ImVec2(viewManipulateRight - 256, viewManipulateTop), ImVec2(256, 256), 0x10101010);
+		ImGuizmo::ViewManipulate(m_SceneCamera.m_Camera.GetViewPointer(), camDistance, ImVec2(viewManipulateRight - 256, viewManipulateTop + 64), ImVec2(256, 256), 0x10101010);
 	}
 
 	void SceneWindow::Draw()

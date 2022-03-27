@@ -66,8 +66,8 @@ namespace Glory
 		m_pClusterCullLightMaterialData = new MaterialData({ m_pClusterCullLightShaderData });
 
 
-		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.vert", importSettings);
-		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.frag", importSettings);
+		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer_Vert.shader", importSettings);
+		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer_Frag.shader", importSettings);
 
 		std::vector<ShaderSourceData*> pShaderFiles = { new ShaderSourceData(ShaderType::ST_Vertex, pVert), new ShaderSourceData(ShaderType::ST_Fragment, pFrag) };
 		m_pScreenMaterial = new MaterialData(pShaderFiles);
@@ -139,14 +139,13 @@ namespace Glory
 		Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
 		if (!pMaterial) return;
 
-		UniformBufferObjectTest ubo;
-		ubo.model = renderData.m_World;
-		ubo.view = camera.GetView();
-		ubo.proj = camera.GetProjection();
+		ModelViewProjection mvp;
+		mvp.Model = renderData.m_World;
+		mvp.View = camera.GetView();
+		mvp.Projection = camera.GetProjection();
 
-		pMaterial->SetUBO(ubo);
 		pMaterial->SetProperties();
-		pMaterial->SetPropertiesExtra();
+		pMaterial->SetMVP(mvp);
 		pGraphics->DrawMesh(pMeshData);
 	}
 

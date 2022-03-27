@@ -15,7 +15,7 @@ namespace Glory::Editor
 
 	MaterialEditor::~MaterialEditor() {}
 
-	void MaterialEditor::OnGUI()
+	bool MaterialEditor::OnGUI()
 	{
 		MaterialData* pMaterial = (MaterialData*)m_pTarget;
 
@@ -30,12 +30,14 @@ namespace Glory::Editor
 		ImGui::Spacing();
 		ImGui::Spacing();
 
+		bool change = false;
 		node = ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
 		if (node)
 		{
-			PropertiesGUI(pMaterial);
+			change = PropertiesGUI(pMaterial);
 			ImGui::TreePop();
 		}
+		return change;
 	}
 
 	void MaterialEditor::ShaderGUI(MaterialData* pMaterial)
@@ -115,12 +117,15 @@ namespace Glory::Editor
 				ShaderSourceData* pShaderSource = (ShaderSourceData*)pResource;
 				if (!pMaterial->AddShader(pShaderSource)) return;
 				UpdateMaterial(pMaterial);
+
 			});
 		}
 	}
 
-	void MaterialEditor::PropertiesGUI(MaterialData* pMaterial)
+	bool MaterialEditor::PropertiesGUI(MaterialData* pMaterial)
 	{
+		bool change = false;
+
 		size_t resourceCounter = 0;
 		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
 		{
@@ -129,11 +134,12 @@ namespace Glory::Editor
 			if (info->IsResource())
 			{
 				SerializedProperty serializedProperty = SerializedProperty(0, info->DisplayName(), SerializedType::ST_Asset, info->TypeHash(), pMaterial->GetResourcePointer(resourceCounter), info->Flags());
-				PropertyDrawer::DrawProperty(&serializedProperty);
+				change |= PropertyDrawer::DrawProperty(&serializedProperty);
 				++resourceCounter;
 			}
-			else PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
+			else change |= PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
 		}
+		return change;
 	}
 
 	void MaterialEditor::UpdateMaterial(MaterialData* pMaterial)

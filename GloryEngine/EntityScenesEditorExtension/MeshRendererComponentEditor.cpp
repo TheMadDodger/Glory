@@ -12,7 +12,7 @@ namespace Glory::Editor
 	{
 	}
 
-	void MeshRendererComponentEditor::OnGUI()
+	bool MeshRendererComponentEditor::OnGUI()
 	{
 		MeshRenderer& meshRenderer = GetTargetComponent();
 
@@ -20,6 +20,8 @@ namespace Glory::Editor
 		{
 			Selection::SetActiveObject(meshRenderer.m_pMaterials[0]);
 		}
+
+		return false;
 	}
 
 	std::string MeshRendererComponentEditor::Name()

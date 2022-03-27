@@ -67,7 +67,7 @@ namespace Glory
 		size_t hash = m_Hasher(displayName);
 		size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
-		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, flags));
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_pResources.size(), flags));
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
 		m_pResources.push_back(pResource);

@@ -9,25 +9,35 @@
 namespace Glory::Editor
 {
 	ProjectSpace* ProjectSpace::m_pCurrentProject = nullptr;
+	std::mutex ProjectSpace::m_ProjectLock;
 
 	void ProjectSpace::OpenProject(const std::string& path)
 	{
 		CloseProject();
+		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		m_pCurrentProject = new ProjectSpace(path);
+		lock.unlock();
 		m_pCurrentProject->Open();
+		EditorAssetLoader::Start();
 	}
 
 	void ProjectSpace::CloseProject()
 	{
 		if (m_pCurrentProject == nullptr) return;
+		EditorAssetLoader::Stop();
 		m_pCurrentProject->Close();
+		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		delete m_pCurrentProject;
 		m_pCurrentProject = nullptr;
+		lock.unlock();
 	}
 
 	ProjectSpace* ProjectSpace::GetOpenProject()
 	{
-		return m_pCurrentProject;
+		std::unique_lock<std::mutex> lock(m_ProjectLock);
+		ProjectSpace* pProject = m_pCurrentProject;
+		lock.unlock();
+		return pProject;
 	}
 
 	bool ProjectSpace::ProjectExists(const std::string& path)
@@ -98,15 +108,16 @@ namespace Glory::Editor
 
 	void ProjectSpace::Open()
 	{
+		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		CreateFolder("Assets");
 		CreateFolder("Cache");
 		CreateFolder("Cache/ShaderSource");
 		CreateFolder("Cache/CompiledShaders");
 		YAML::Node node = YAML::LoadFile(m_ProjectFilePath);
 		m_ProjectName = node["ProjectName"].as<std::string>();
+		lock.unlock();
 
 		AssetDatabase::Load();
-		EditorApplication::GetInstance()->GetMainEditor()->GetAssetLoader()->LoadAssets();
 		ContentBrowser::LoadProject();
 	}
 

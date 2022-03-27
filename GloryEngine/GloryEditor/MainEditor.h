@@ -16,8 +16,6 @@ namespace Glory::Editor
 		void Destroy();
 		void PaintEditor();
 
-		EditorAssetLoader* GetAssetLoader();
-
 	private:
 		void CreateDefaultMainMenuBar();
 		void SetDarkThemeColors();
@@ -31,7 +29,6 @@ namespace Glory::Editor
 
 	private:
 		friend class EditorApplication;
-		EditorAssetLoader* m_pAssetLoader;
 		ProjectPopup* m_pProjectPopup;
 		AssetPickerPopup* m_AssetPickerPopup;
 		EditorSettings m_Settings;

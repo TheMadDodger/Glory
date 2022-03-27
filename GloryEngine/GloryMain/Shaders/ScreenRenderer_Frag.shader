@@ -85,7 +85,7 @@ const vec3 BadColor = vec3(1.0, 0.0, 0.0);
 void main()
 {
 	vec3 color = texture2D(Color, Coord).xyz;
-	vec3 normal = texture2D(Normal, Coord).xyz;
+	vec3 normal = texture2D(Normal, Coord).xyz * 2.0 - 1.0;
 	float depth = texture2D(Depth, Coord).r;
 	vec3 fragPosition = WorldPosFromDepth(depth);
 

@@ -14,13 +14,13 @@ namespace Glory::Editor
 		m_pComponents.clear();
 	}
 
-	void EntitySceneObjectEditor::OnGUI()
+	bool EntitySceneObjectEditor::OnGUI()
 	{
 		if (!m_Initialized) Initialize();
 		m_pObject = (SceneObject*)m_pTarget;
 
-		NameGUI();
-		ComponentGUI();
+		bool change = NameGUI();
+		return ComponentGUI() || change;
 	}
 
 	void EntitySceneObjectEditor::Initialize()
@@ -40,7 +40,7 @@ namespace Glory::Editor
 		m_Initialized = true;
 	}
 
-	void EntitySceneObjectEditor::NameGUI()
+	bool EntitySceneObjectEditor::NameGUI()
 	{
 		const std::string& nameString = m_pObject->Name();
 		const char* name = nameString.c_str();
@@ -52,12 +52,15 @@ namespace Glory::Editor
 		ImGui::Text(uuidString.data());
 		ImGui::Text("Name");
 		ImGui::SameLine();
-		ImGui::InputText("##Name", m_NameBuff, MAXNAMESIZE);
+		bool change = ImGui::InputText("##Name", m_NameBuff, MAXNAMESIZE);
 		m_pObject->SetName(m_NameBuff);
+		return change;
 	}
 
-	void EntitySceneObjectEditor::ComponentGUI()
+	bool EntitySceneObjectEditor::ComponentGUI()
 	{
+		bool change = false;
+
 		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
 		EntityID entityID = entity.GetEntityID();
 		Registry* pRegistry = entity.GetScene()->GetRegistry();
@@ -82,7 +85,7 @@ namespace Glory::Editor
 
 			if (nodeOpen)
 			{
-				pEditor->OnGUI();
+				change |= pEditor->OnGUI();
 				ImGui::TreePop();
 			}
 
@@ -103,6 +106,7 @@ namespace Glory::Editor
 				pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
 				m_AddingComponent = false;
 				Initialize();
+				change = true;
 			}
 		}
 
@@ -114,9 +118,12 @@ namespace Glory::Editor
 			{
 				pRegistry->RemoveComponent(entityID, m_RightClickedComponentIndex);
 				Initialize();
+				change = true;
 			}
 
 			ImGui::EndPopup();
 		}
+
+		return change;
 	}
 }

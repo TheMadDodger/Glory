@@ -5,6 +5,7 @@
 #include <ScenesModule.h>
 #include <AssetDatabase.h>
 #include <Serializer.h>
+#include <Selection.h>
 
 namespace Glory::Editor
 {
@@ -49,6 +50,7 @@ namespace Glory::Editor
 	void EditorSceneManager::CloseScene(UUID uuid)
 	{
 		// TODO: Check if scene has changes
+		Selection::SetActiveObject(nullptr);
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
 		pScenesModule->CloseScene(uuid);
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);

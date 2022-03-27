@@ -11,12 +11,12 @@ namespace Glory::Editor
 	public:
 		EntitySceneObjectEditor();
 		virtual ~EntitySceneObjectEditor();
-		virtual void OnGUI() override;
+		virtual bool OnGUI() override;
 
 	private:
 		void Initialize();
-		void NameGUI();
-		void ComponentGUI();
+		bool NameGUI();
+		bool ComponentGUI();
 
 	private:
 		std::vector<Editor*> m_pComponentEditors;

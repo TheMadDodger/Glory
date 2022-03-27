@@ -39,7 +39,8 @@ namespace Glory
         {
             if (i >= pComponent.m_pMaterials.size() || pComponent.m_pMaterials[i] == nullptr)
             {
-                Debug::LogWarning("MeshRenderer: Missing Materials on MeshRenderer!");
+                std::string key = std::to_string(entity) + "_MISSING_MATERIAL";
+                Debug::LogOnce(key, "MeshRenderer: Missing Materials on MeshRenderer!", Debug::LogLevel::Warning);
                 continue;
             }
 

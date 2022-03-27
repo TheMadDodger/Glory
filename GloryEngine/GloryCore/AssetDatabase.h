@@ -29,7 +29,7 @@ namespace Glory
 		static void CreateAsset(Resource* pResource, const std::string& path);
 		static void ImportAsset(const std::string& path, Resource* pLoadedResource = nullptr);
 		static void ImportNewScene(const std::string& path, GScene* pScene);
-		static void SaveAsset(Resource* pResource);
+		static void SaveAsset(Resource* pResource, bool markUndirty = true);
 
 		static void ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback);
 		static void RemoveAsset(UUID uuid);
@@ -37,6 +37,10 @@ namespace Glory
 		static void GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out);
 
 		static std::string GetAssetName(UUID uuid);
+
+		static void SetDirty(Object* pResource);
+		static void SetDirty(UUID uuid);
+		static void SaveDirtyAssets();
 
 	private:
 		static void Initialize();
@@ -56,5 +60,6 @@ namespace Glory
 		static ThreadedUMap<UUID, ResourceMeta> m_Metas;
 		static ThreadedUMap<size_t, std::vector<UUID>> m_AssetsByType;
 		static AssetCallbacks m_Callbacks;
+		static ThreadedVector<UUID> m_UnsavedAssets;
 	};
 }

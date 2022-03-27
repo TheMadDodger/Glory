@@ -12,12 +12,14 @@ namespace Glory::Editor
 	{
 	}
 
-	void DefaultComponentEditor::OnGUI()
+	bool DefaultComponentEditor::OnGUI()
 	{
+		bool change = false;
 		for (size_t i = 0; i < m_Properties.size(); i++)
 		{
-			PropertyDrawer::DrawProperty(m_Properties[i]);
+			change |= PropertyDrawer::DrawProperty(m_Properties[i]);
 		}
+		return change;
 	}
 
 	void DefaultComponentEditor::Initialize()

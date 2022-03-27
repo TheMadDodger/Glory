@@ -8,9 +8,9 @@ namespace Glory
 	{
 	}
 
-	MaterialPropertyInfo::MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, uint32_t flags)
+	MaterialPropertyInfo::MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t offset, uint32_t flags)
 		: m_PropertyDisplayName(displayName), m_PropertyShaderName(shaderName), m_TypeHash(typeHash),
-		m_Size(sizeof(UUID)), m_Offset(0), m_IsResource(true), m_Flags(flags)
+		m_Size(sizeof(UUID)), m_Offset(offset), m_IsResource(true), m_Flags(flags)
 	{
 	}
 

@@ -12,6 +12,7 @@ namespace Glory
 	ThreadedUMap<UUID, ResourceMeta> AssetDatabase::m_Metas;
 	ThreadedUMap<size_t, std::vector<UUID>> AssetDatabase::m_AssetsByType;
 	AssetCallbacks AssetDatabase::m_Callbacks;
+	ThreadedVector<UUID> AssetDatabase::m_UnsavedAssets;
 
 	bool AssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
@@ -70,10 +71,7 @@ namespace Glory
 
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath)
 	{
-		if (!m_AssetLocations.Contains(uuid))
-		{
-			return;
-		}
+		if (!m_AssetLocations.Contains(uuid)) return;
 
 		AssetLocation location = m_AssetLocations[uuid];
 		location.m_Path = newPath;
@@ -107,13 +105,13 @@ namespace Glory
 		std::vector<std::string> relevantAssetPaths;
 		std::vector<UUID> relevantAssets;
 		m_PathToUUID.ForEach([&](const std::string& key, const UUID& uuid)
-			{
-				std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
-				absoluteAssetPath = absoluteAssetPath.append(key);
-				if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) return;
-				relevantAssetPaths.push_back(key);
-				relevantAssets.push_back(uuid);
-			});
+		{
+			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
+			absoluteAssetPath = absoluteAssetPath.append(key);
+			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) return;
+			relevantAssetPaths.push_back(key);
+			relevantAssets.push_back(uuid);
+		});
 
 		for (size_t i = 0; i < relevantAssets.size(); i++)
 		{
@@ -181,6 +179,8 @@ namespace Glory
 
 	void AssetDatabase::Save()
 	{
+		SaveDirtyAssets();
+
 		LayerManager::Save();
 
 		YAML::Emitter out;
@@ -333,7 +333,7 @@ namespace Glory
 		InsertAsset(relativePath.string(), meta);
 	}
 
-	void AssetDatabase::SaveAsset(Resource* pResource)
+	void AssetDatabase::SaveAsset(Resource* pResource, bool markUndirty)
 	{
 		ResourceMeta meta;
 		if (!pResource || !GetResourceMeta(pResource->GetUUID(), meta)) return;
@@ -344,6 +344,8 @@ namespace Glory
 		path.append(location.m_Path);
 		pModule->Save(path.string(), pResource);
 		IncrementAssetVersion(pResource->GetUUID());
+		if (markUndirty)
+			m_UnsavedAssets.Erase(pResource->GetUUID());
 	}
 
 	void AssetDatabase::ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback)
@@ -381,6 +383,27 @@ namespace Glory
 		return path.filename().replace_extension("").string();
 	}
 
+	void AssetDatabase::SetDirty(Object* pResource)
+	{
+		SetDirty(pResource->GetUUID());
+	}
+
+	void AssetDatabase::SetDirty(UUID uuid)
+	{
+		if (m_UnsavedAssets.Contains(uuid)) return;
+		m_UnsavedAssets.push_back(uuid);
+	}
+
+	void AssetDatabase::SaveDirtyAssets()
+	{
+		m_UnsavedAssets.ForEachClear([&](const UUID& uuid)
+		{
+			Resource* pResource = AssetManager::FindResource(uuid);
+			if (!pResource) return;
+			SaveAsset(pResource, false);
+		});
+	}
+
 	void AssetDatabase::Initialize()
 	{
 		m_Callbacks.Initialize();
@@ -398,6 +421,7 @@ namespace Glory
 		m_AssetLocations.Clear();
 		m_PathToUUID.Clear();
 		m_Metas.Clear();
+		m_AssetsByType.Clear();
 	}
 
 	void AssetDatabase::ExportEditor(YAML::Emitter& out)

@@ -5,25 +5,32 @@
 
 namespace Glory::Editor
 {
-	EditorAssetLoader::EditorAssetLoader() : m_pThread(nullptr) {}
+	Thread* EditorAssetLoader::m_pThread = nullptr;
+	bool EditorAssetLoader::m_Exit = false;
+
+	EditorAssetLoader::EditorAssetLoader() {}
 
 	EditorAssetLoader::~EditorAssetLoader() {}
 
-	void EditorAssetLoader::LoadAssets()
+	void EditorAssetLoader::Start()
 	{
-		LoadAll();
+		m_Exit = false;
+		m_pThread = ThreadManager::Run(EditorAssetLoader::Run);
 	}
 
-	void EditorAssetLoader::Initialize()
+	void EditorAssetLoader::Stop()
 	{
-		//m_pThread = ThreadManager::Run(std::bind(&EditorAssetLoader::Run, this));
-
-
+		m_Exit = true;
+		while(m_pThread != nullptr && !m_pThread->IsIdle()) {}
+		m_pThread = nullptr;
 	}
 
 	void EditorAssetLoader::LoadAll()
 	{
-		std::filesystem::path assetPath = ProjectSpace::GetOpenProject()->RootPath();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+
+		std::filesystem::path assetPath = pProject->RootPath();
 		assetPath.append("Assets");
 
 		ProcessDirectory(assetPath.string(), true);
@@ -53,7 +60,9 @@ namespace Glory::Editor
 		std::filesystem::path metaFilePath = filePath.string() + metaExtension.string();
 
 		// Make the path relative to the asset/resource path!
-		std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		std::filesystem::path assetsPath = pProject->RootPath();
 		assetsPath.append("Assets");
 		std::string relativePathToFile = filePath.lexically_relative(assetsPath).string();
 
@@ -119,6 +128,15 @@ namespace Glory::Editor
 		for (size_t i = 0; i < toDeleteAssets.size(); i++)
 		{
 			AssetDatabase::RemoveAsset(toDeleteAssets[i]);
+		}
+	}
+
+	void EditorAssetLoader::Run()
+	{
+		while (!m_Exit)
+		{
+			if (m_Exit) return;
+			LoadAll();
 		}
 	}
 }

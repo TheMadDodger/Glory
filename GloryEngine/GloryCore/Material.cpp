@@ -4,8 +4,10 @@
 
 namespace Glory
 {
+	Buffer* Material::m_pMVPBuffer = nullptr;
+
 	Material::Material(MaterialData* pMaterialData)
-		: m_pMaterialData(pMaterialData), m_pPropertiesBuffer(nullptr), m_Complete(false), m_UBO()
+		: m_pMaterialData(pMaterialData), m_pPropertiesBuffer(nullptr), m_Complete(false)
 	{
 	}
 
@@ -34,6 +36,15 @@ namespace Glory
 		m_pPropertiesBuffer->Bind();
 	}
 
+	void Material::SetMVP(const ModelViewProjection& mvp)
+	{
+		if (m_pMVPBuffer == nullptr)
+			m_pMVPBuffer = CreateMVPBuffer();
+
+		m_pMVPBuffer->Assign((const void*)&mvp);
+		m_pMVPBuffer->Bind();
+	}
+
 	void Material::AddShader(Shader* pShader)
 	{
 		m_pShaders.push_back(pShader);
@@ -42,10 +53,5 @@ namespace Glory
 	void Material::Clear()
 	{
 		m_pShaders.clear();
-	}
-
-	void Material::SetUBO(UniformBufferObjectTest ubo)
-	{
-		m_UBO = ubo;
 	}
 }

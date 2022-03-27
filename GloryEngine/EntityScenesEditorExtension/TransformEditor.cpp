@@ -26,11 +26,11 @@ namespace Glory::Editor
 		m_LastTransform = m_Transform;
 	}
 
-	void TransformEditor::OnGUI()
+	bool TransformEditor::OnGUI()
 	{
 		UpdateTransform();
-		EntityComponentEditor::OnGUI();
-		Gizmos::DrawGizmo(&m_Transform);
+		bool change = EntityComponentEditor::OnGUI();
+		return Gizmos::DrawGizmo(&m_Transform) || change;
 	}
 
 	std::string TransformEditor::Name()

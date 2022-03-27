@@ -9,7 +9,7 @@ namespace Glory::Editor
 
 	MaterialInstanceEditor::~MaterialInstanceEditor() {}
 
-	void MaterialInstanceEditor::OnGUI()
+	bool MaterialInstanceEditor::OnGUI()
 	{
 		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
 
@@ -27,13 +27,14 @@ namespace Glory::Editor
 			}, ResourceType::GetHash<MaterialInstanceData>());
 		}
 
-		if (!pMaterial->GetBaseMaterial()) return;
+		if (!pMaterial->GetBaseMaterial()) return false;
 
 		std::vector<bool> overrideStates;
 		pMaterial->CopyOverrideStates(overrideStates);
 
 		std::vector<char>& buffer = pMaterial->GetBufferReference();
 
+		bool change = false;
 		size_t resourceCounter = 0;
 		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
 		{
@@ -49,16 +50,17 @@ namespace Glory::Editor
 			if (info->IsResource())
 			{
 				SerializedProperty serializedProperty = SerializedProperty(0, info->DisplayName(), SerializedType::ST_Asset, info->TypeHash(), pMaterial->GetResourcePointer(resourceCounter), info->Flags());
-				PropertyDrawer::DrawProperty(&serializedProperty);
+				change |= PropertyDrawer::DrawProperty(&serializedProperty);
 				++resourceCounter;
 			}
-			else PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
+			else change |= PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
 
 			ImGui::EndDisabled();
 			overrideStates[i] = enable;
 		}
 
 		pMaterial->PasteOverrideStates(overrideStates);
+		return change;
 	}
 
 	void MaterialInstanceEditor::Initialize()

@@ -17,7 +17,9 @@ namespace Glory::Editor
 			assetName = (*pResourceMember)->Name();
 		}
 
-		if (ImGui::Button(assetName.c_str()))
+		std::string buttonLabel = assetName + "##" + serializedProperty->Name();
+
+		if (ImGui::Button(buttonLabel.c_str()))
 		{
 			AssetPickerPopup::Open(typeHash, pResourceMember, true);
 		}

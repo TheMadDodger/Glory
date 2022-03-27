@@ -11,7 +11,7 @@ namespace Glory::Editor
         virtual ~MeshRendererComponentEditor();
 
     private:
-        virtual void OnGUI() override;
+        virtual bool OnGUI() override;
         virtual std::string Name() override;
 	};
 }

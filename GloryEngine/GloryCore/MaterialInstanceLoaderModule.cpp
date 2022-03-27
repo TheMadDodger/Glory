@@ -76,15 +76,14 @@ namespace Glory
 
 		out << YAML::Key << "Overrides";
 		out << YAML::Value << YAML::BeginSeq;
-		size_t resourceIndex = 0;
 		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(); i++)
 		{
 			MaterialPropertyInfo* pInfo = pMaterialData->GetPropertyInfoAt(i);
 			size_t propertyIndex = 0;
 			if (!pMaterialData->GetPropertyInfoIndex(pInfo->m_PropertyDisplayName, propertyIndex)) continue;
+			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
 			if (!pMaterialData->m_PropertyOverridesEnable[i]) continue;
 
-			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
 
 			out << YAML::BeginMap;
 			YAML_WRITE(out, DisplayName, pInfo->m_PropertyDisplayName);
@@ -97,8 +96,8 @@ namespace Glory
 			}
 			else
 			{
+				size_t resourceIndex = propertyInfo->Offset();
 				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
-				++resourceIndex;
 				Resource* pResource = *pMaterialData->GetResourcePointer(index);
 				UUID id = pResource ? pResource->GetUUID() : 0;
 				out << YAML::Key << "Value" << YAML::Value << id;
@@ -113,7 +112,6 @@ namespace Glory
 		YAML::Node propertiesNode = rootNode["Overrides"];
 		if (!propertiesNode.IsSequence()) return;
 
-		size_t resourceCounter = 0;
 		for (size_t i = 0; i < propertiesNode.size(); i++)
 		{
 			YAML::Node propertyNode = propertiesNode[i];
@@ -139,8 +137,8 @@ namespace Glory
 			else
 			{
 				UUID id = node.as<uint64_t>();
-				if(pMaterialData->m_pResources.size() > resourceCounter) pMaterialData->m_pResources[resourceCounter] = AssetManager::GetAssetImmediate(id);
-				++resourceCounter;
+				size_t resourceIndex = propertyInfo->Offset();
+				if(pMaterialData->m_pResources.size() > resourceIndex) pMaterialData->m_pResources[resourceIndex] = AssetManager::GetAssetImmediate(id);
 			}
 		}
 	}

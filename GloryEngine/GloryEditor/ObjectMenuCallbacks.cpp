@@ -68,7 +68,6 @@ namespace Glory::Editor
 
 		case T_Resource:
 		{
-			Resource* pResource = (Resource*)pObject;
 			std::vector<std::string> buttons = {
 				"No",
 				"Yes",
@@ -77,7 +76,10 @@ namespace Glory::Editor
 				[]() { PopupManager::CloseCurrentPopup(); },
 				[&]() { DeleteResource(); },
 			};
-			PopupManager::OpenModal("Delete " + pResource->Name(), "Are you sure you want to delete \"" + pResource->Name() + "\"?\nThis action cannot be undone!", buttons, callbacks);
+
+			std::filesystem::path file = ContentBrowserItem::GetHighlightedPath();
+			std::string name = file.filename().replace_extension().string();
+			PopupManager::OpenModal("Delete " + name, "Are you sure you want to delete \"" + name + "\"?\nThis action cannot be undone!", buttons, callbacks);
 			break;
 		}
 

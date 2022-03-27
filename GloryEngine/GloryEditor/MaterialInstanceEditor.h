@@ -11,7 +11,7 @@ namespace Glory::Editor
         virtual ~MaterialInstanceEditor();
 
     private:
-        virtual void OnGUI() override;
+        virtual bool OnGUI() override;
         virtual void Initialize() override;
     };
 }

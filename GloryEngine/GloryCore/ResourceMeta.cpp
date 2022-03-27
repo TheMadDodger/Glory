@@ -94,6 +94,9 @@ namespace Glory
 	{
 		std::filesystem::path fullPath = Game::GetAssetPath();
 		fullPath = fullPath.append(m_Path);
+		
+		if (!std::filesystem::exists(fullPath) || std::filesystem::is_directory(fullPath)) return;
+
 		m_Node = YAML::LoadFile(fullPath.string());
 		m_UUID = ReadUUID();
 		m_TypeHash = ReadHash();
