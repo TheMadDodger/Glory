@@ -8,9 +8,9 @@
 
 namespace Glory
 {
-	VulkanTexture::VulkanTexture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType,
+	VulkanTexture::VulkanTexture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType,
         uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
-        : Texture(width, height, format, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings), m_pSampler(nullptr)
+        : Texture(width, height, format, internalFormat, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings), m_pSampler(nullptr)
 	{
 	}
 

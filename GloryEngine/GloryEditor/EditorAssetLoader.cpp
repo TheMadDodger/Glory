@@ -33,8 +33,12 @@ namespace Glory::Editor
 		std::filesystem::path assetPath = pProject->RootPath();
 		assetPath.append("Assets");
 
-		ProcessDirectory(assetPath.string(), true);
+		ProcessDirectory(assetPath.string(), false);
 		RemoveDeletedAssets();
+
+		assetPath = pProject->RootPath();
+		assetPath.append("ModuleAssets");
+		ProcessDirectory(assetPath.string(), true);
 	}
 
 	void EditorAssetLoader::ProcessDirectory(const std::string& path, bool recursive)

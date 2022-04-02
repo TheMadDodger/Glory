@@ -50,6 +50,7 @@ namespace Glory
             renderData.m_pMaterial = pComponent.m_pMaterials[i];
             renderData.m_World = transform.MatTransform;
             renderData.m_LayerMask = mask;
+            renderData.m_ObjectID = entity;
             Game::GetGame().GetEngine()->GetRendererModule()->Submit(renderData);
         }
     }

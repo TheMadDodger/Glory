@@ -3,6 +3,7 @@
 #include "GraphicsEnums.h"
 #include "GPUResource.h"
 #include <any>
+#include <glm/glm.hpp>
 
 namespace Glory
 {
@@ -11,7 +12,7 @@ namespace Glory
 	class Texture : public GPUResource
 	{
 	public:
-		Texture(uint32_t width, uint32_t height, const PixelFormat& format, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings = SamplerSettings());
+		Texture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings = SamplerSettings());
 		virtual ~Texture();
 
 		virtual void Create(ImageData* pImageData) = 0;
@@ -27,6 +28,7 @@ namespace Glory
 		uint32_t m_Height;
 		ImageAspect m_ImageAspectFlags;
 		SamplerSettings m_SamplerSettings;
+		PixelFormat m_InternalFormat;
 		PixelFormat m_PixelFormat;
 	};
 }

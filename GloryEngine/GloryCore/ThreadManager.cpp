@@ -43,7 +43,7 @@ namespace Glory
 	{
 		//if (m_pThreads.size() >= m_MaxThreads) return false;
 
-		int index = m_pThreads.size();
+		size_t index = m_pThreads.size();
 
 		std::function<void(Thread*)> func = std::bind(&ThreadManager::OnThreadIdle, this, std::placeholders::_1);
 		Thread* newThread = new Thread(index, func);

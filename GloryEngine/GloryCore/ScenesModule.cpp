@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "EngineProfiler.h"
 #include "Serializer.h"
+#include "CameraManager.h"
 
 namespace Glory
 {
@@ -91,6 +92,22 @@ namespace Glory
 
 		it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pActiveScene);
 		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+	}
+
+	void ScenesModule::SetHoveringObject(uint32_t objectID)
+	{
+		std::unique_lock<std::mutex> lock(m_HoveringLock);
+		m_pHoveringObject = GetSceneObjectFromObjectID(objectID);
+		lock.unlock();
+	}
+
+	SceneObject* ScenesModule::GetHoveringObject()
+	{
+		SceneObject* pObject = nullptr;
+		std::unique_lock<std::mutex> lock(m_HoveringLock);
+		pObject = m_pHoveringObject;
+		lock.unlock();
+		return pObject;
 	}
 
 	void ScenesModule::Cleanup()

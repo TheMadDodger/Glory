@@ -36,12 +36,12 @@ namespace Glory
 		m_pPropertiesBuffer->Bind();
 	}
 
-	void Material::SetMVP(const ModelViewProjection& mvp)
+	void Material::SetObjectData(const ObjectData& data)
 	{
 		if (m_pMVPBuffer == nullptr)
 			m_pMVPBuffer = CreateMVPBuffer();
 
-		m_pMVPBuffer->Assign((const void*)&mvp);
+		m_pMVPBuffer->Assign((const void*)&data);
 		m_pMVPBuffer->Bind();
 	}
 

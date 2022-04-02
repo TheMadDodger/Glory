@@ -41,5 +41,10 @@ namespace Glory
 		return m_PixelFormat;
 	}
 
+	const PixelFormat& ImageData::GetInternalFormat()
+	{
+		return m_InternalFormat;
+	}
+
 	void ImageData::BuildTexture() {}
 }

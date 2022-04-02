@@ -9,7 +9,7 @@ namespace Glory::Editor
 	{
 	public:
 		ContentBrowserItem();
-		ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent);
+		ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable);
 		virtual ~ContentBrowserItem();
 
 		static ContentBrowserItem* GetSelectedFolder();
@@ -39,6 +39,8 @@ namespace Glory::Editor
 		ContentBrowserItem* GetChildByName(const std::string& name, bool folder);
 		void BeginRename();
 
+		bool IsEditable() const;
+
 		static const std::string& GetHighlightedPath();
 
 	private:
@@ -57,6 +59,7 @@ namespace Glory::Editor
 		bool m_StartEditingName;
 		bool m_EditingName;
 		char m_NameBuffer[1000];
+		bool m_Editable;
 
 		static std::hash<std::string> m_PathHasher;
 		static ContentBrowserItem* m_pSelectedFolder;

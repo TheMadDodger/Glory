@@ -85,8 +85,16 @@ namespace Glory
 		return m_LastSubmittedCameraCount;
 	}
 
+	void RendererModule::SetNextFramePick(const glm::ivec2& coord, CameraRef camera)
+	{
+		m_PickPos = coord;
+		m_PickCamera = camera;
+	}
+
 	void RendererModule::Render(const RenderFrame& frame)
 	{
+		ReadHoveringObject();
+
 		Profiler::BeginSample("RendererModule::Render");
 		DisplayManager::ClearAllDisplays(m_pEngine);
 
@@ -154,12 +162,30 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
+	void RendererModule::ReadHoveringObject()
+	{
+		Profiler::BeginSample("RendererModule::Pick");
+		RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(m_PickCamera, m_pEngine, false);
+		if (pRenderTexture == nullptr) return;
+		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
+		if (pTexture == nullptr) return;
+		uint32_t objectID = pRenderTexture->ReadPixel(m_PickPos);
+		m_pEngine->GetScenesModule()->SetHoveringObject(objectID);
+		Profiler::EndSample();
+	}
+
 	RenderTexture* RendererModule::CreateCameraRenderTexture(size_t width, size_t height)
 	{
 		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
 		RenderTextureCreateInfo createInfo(width, height, true);
-		createInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		GetCameraRenderTextureAttachments(createInfo.Attachments);
+		createInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RI, PixelFormat::PF_R32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, false));
 		return pResourceManager->CreateRenderTexture(createInfo);
+	}
+
+	void RendererModule::GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments)
+	{
+		attachments.push_back(Attachment("color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 	}
 
 	void RendererModule::OnCameraResize(CameraRef camera) {}

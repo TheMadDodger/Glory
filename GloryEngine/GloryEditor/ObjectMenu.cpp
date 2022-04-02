@@ -29,8 +29,9 @@ namespace Glory::Editor
 		if (m_Open)
 		{
 			BuildMenu();
-			ImGui::OpenPopup("object_menu_popup");
 			m_Open = false;
+			if (m_BuiltMenu.size() <= 0) return;
+			ImGui::OpenPopup("object_menu_popup");
 		}
 
 		if (ImGui::BeginPopup("object_menu_popup"))

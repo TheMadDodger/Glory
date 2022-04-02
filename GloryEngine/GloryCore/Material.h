@@ -15,7 +15,7 @@ namespace Glory
 
 		virtual void Use() = 0;
 		void SetProperties();
-		void SetMVP(const ModelViewProjection& mvp);
+		void SetObjectData(const ObjectData& data);
 
 	public: // Property setters
 		// All of these need to go, properties should be set using the material data/material instance data class linked to this material

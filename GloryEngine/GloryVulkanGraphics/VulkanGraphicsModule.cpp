@@ -655,7 +655,7 @@ namespace Glory
         samplerSettings.MaxLOD = 0.0f;
 
         vk::ImageUsageFlags imageUsageFlags = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
-        m_pTexture = new VulkanTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), ImageType::IT_2D, (uint32_t)imageUsageFlags, (uint32_t)vk::SharingMode::eExclusive, ImageAspect::IA_Color, samplerSettings);
+        m_pTexture = new VulkanTexture(pImageData->GetWidth(), pImageData->GetHeight(), PixelFormat::PF_RGBA, pImageData->GetFormat(), ImageType::IT_2D, (uint32_t)imageUsageFlags, (uint32_t)vk::SharingMode::eExclusive, ImageAspect::IA_Color, samplerSettings);
         m_pTexture->Create(pImageData);
     }
 

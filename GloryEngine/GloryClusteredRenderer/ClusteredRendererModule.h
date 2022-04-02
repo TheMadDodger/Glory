@@ -57,7 +57,7 @@ namespace Glory
 		ClusteredRendererModule();
 		virtual ~ClusteredRendererModule();
 
-		virtual RenderTexture* CreateCameraRenderTexture(size_t width, size_t height) override;
+		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments) override;
 		virtual void OnCameraResize(CameraRef camera) override;
 
 	private:

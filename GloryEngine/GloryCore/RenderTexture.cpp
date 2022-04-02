@@ -5,8 +5,8 @@
 
 namespace Glory
 {
-	Attachment::Attachment(const std::string& name, const PixelFormat pixelFormat, const Glory::ImageType& imageType, const Glory::ImageAspect& imageAspect)
-		: Name(name), Format(pixelFormat), ImageType(imageType), ImageAspect(imageAspect)
+	Attachment::Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat, const Glory::ImageType& imageType, const Glory::ImageAspect& imageAspect, bool autoBind)
+		: Name(name), InternalFormat(internalFormat), Format(pixelFormat), ImageType(imageType), ImageAspect(imageAspect), m_AutoBind(autoBind)
 	{
 	}
 
@@ -43,12 +43,23 @@ namespace Glory
 		auto it = m_NameToTextureIndex.begin();
 		for (size_t i = 0; i < m_CreateInfo.Attachments.size(); i++)
 		{
+			if (!m_CreateInfo.Attachments[i].m_AutoBind) continue;
 			std::string name = (*it).first;
 			pMaterial->SetTexture(name, m_pTextures[i]);
 			++it;
 		}
 
 		if (m_CreateInfo.HasDepth) pMaterial->SetTexture("Depth", GetTextureAttachment("Depth"));
+	}
+
+	size_t RenderTexture::AttachmentCount() const
+	{
+		return m_pTextures.size();
+	}
+
+	const std::string RenderTexture::AttachmentName(size_t index) const
+	{
+		return m_Names[index];
 	}
 
 	RenderTexture::RenderTexture(const RenderTextureCreateInfo& createInfo)
@@ -69,9 +80,10 @@ namespace Glory
 		for (size_t i = 0; i < m_CreateInfo.Attachments.size(); i++)
 		{
 			Attachment attachment = m_CreateInfo.Attachments[i];
-			Texture* pTexture = pResourceManager->CreateTexture(m_Width, m_Height, attachment.Format, attachment.ImageType, 0, 0, attachment.ImageAspect, SamplerSettings());
+			Texture* pTexture = pResourceManager->CreateTexture(m_Width, m_Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, 0, 0, attachment.ImageAspect, SamplerSettings());
 			m_pTextures[i] = pTexture;
 			m_NameToTextureIndex[attachment.Name] = i;
+			m_Names.push_back(attachment.Name);
 		}
 
 		if (!m_CreateInfo.HasDepth) return;
@@ -79,8 +91,9 @@ namespace Glory
 
 		//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_Width, m_Height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
 
-		Texture* pDepthTexture = pResourceManager->CreateTexture(m_Width, m_Height, PixelFormat::PF_Depth24, ImageType::IT_2D, 0, 0, ImageAspect::IA_Depth, SamplerSettings());
+		Texture* pDepthTexture = pResourceManager->CreateTexture(m_Width, m_Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth24, ImageType::IT_2D, 0, 0, ImageAspect::IA_Depth, SamplerSettings());
 		m_pTextures[depthIndex] = pDepthTexture;
 		m_NameToTextureIndex["Depth"] = depthIndex;
+		m_Names.push_back("Depth");
 	}
 }

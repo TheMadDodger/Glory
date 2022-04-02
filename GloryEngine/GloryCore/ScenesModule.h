@@ -1,7 +1,9 @@
 #pragma once
 #include "Module.h"
 #include "GScene.h"
+#include "CameraRef.h"
 #include <mutex>
+#include <glm/glm.hpp>
 
 namespace Glory
 {
@@ -25,6 +27,9 @@ namespace Glory
         void OpenScene(const std::string& path, UUID uuid = UUID());
         void CloseScene(UUID uuid);
 
+        void SetHoveringObject(uint32_t objectID);
+        SceneObject* GetHoveringObject();
+
     protected:
         virtual void Initialize() = 0;
         virtual void Cleanup() override;
@@ -34,6 +39,8 @@ namespace Glory
         virtual GScene* CreateScene(const std::string& sceneName, UUID uuid) = 0;
 
         static SceneObject* CreateObject(GScene* pScene, const std::string& name, UUID uuid);
+
+        virtual SceneObject* GetSceneObjectFromObjectID(uint32_t objectID) = 0;
 
     private:
         virtual void Update() override;
@@ -45,5 +52,7 @@ namespace Glory
     protected:
         std::vector<GScene*> m_pOpenScenes;
         size_t m_ActiveSceneIndex;
+        std::mutex m_HoveringLock;
+        SceneObject* m_pHoveringObject;
     };
 }

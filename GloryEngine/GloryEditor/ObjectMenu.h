@@ -12,8 +12,12 @@ namespace Glory::Editor
 		T_Scene = 0x04,
 		T_SceneView = 0x08,
 		T_Resource = 0x10,
-		T_ContentBrowser = 0x20,
-		T_Folder = 0x40,
+		T_ModuleResource = 0x20,
+		T_AnyResource = T_Resource | T_ModuleResource,
+		T_ContentBrowser = 0x40,
+		T_Folder = 0x80,
+		T_ModuleFolder = 0x100,
+		T_AnyFolder = T_Folder | T_ModuleFolder,
 	};
 
 	typedef unsigned int ObjectMenuTypeFlags;

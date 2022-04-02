@@ -20,12 +20,12 @@ namespace Glory::Editor
 	std::string ContentBrowserItem::m_HighlightedPath;
 
 	ContentBrowserItem::ContentBrowserItem()
-		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>())
+		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>()), m_Editable(true)
 	{
 	}
 
-	ContentBrowserItem::ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent)
-		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>())
+	ContentBrowserItem::ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable)
+		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>()), m_Editable(isEditable)
 	{}
 
 	ContentBrowserItem::~ContentBrowserItem()
@@ -117,7 +117,7 @@ namespace Glory::Editor
 			if (actualIndex >= m_pChildren.size())
 			{
 				size_t childIndex = m_pChildren.size();
-				m_pChildren.push_back(new ContentBrowserItem(lastDir.string(), directory, this));
+				m_pChildren.push_back(new ContentBrowserItem(lastDir.string(), directory, this, m_Editable));
 				ContentBrowserItem* pNewChild = m_pChildren[childIndex];
 				pNewChild->Refresh();
 				pNewChild->SortChildren();
@@ -266,7 +266,7 @@ namespace Glory::Editor
 			if (ImGui::IsItemClicked(1))
 			{
 				m_HighlightedPath = m_CachedPath.string();
-				ObjectMenu::Open(nullptr, ObjectMenuType::T_Folder);
+				ObjectMenu::Open(nullptr, m_Editable ? ObjectMenuType::T_Folder : ObjectMenuType::T_ModuleFolder);
 			}
 
 			DrawName();
@@ -300,7 +300,7 @@ namespace Glory::Editor
 		{
 			m_HighlightedPath = m_CachedPath.string();
 			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
-			ObjectMenu::Open(pAsset, ObjectMenuType::T_Resource);
+			ObjectMenu::Open(pAsset, m_Editable ? ObjectMenuType::T_Resource : ObjectMenuType::T_ModuleResource);
 		}
 
 		DrawName();
@@ -346,6 +346,11 @@ namespace Glory::Editor
 		std::string name = m_CachedPath.filename().replace_extension().string();
 		memcpy(m_NameBuffer, name.data(), name.length());
 		m_NameBuffer[name.length()] = '\0';
+	}
+
+	bool ContentBrowserItem::IsEditable() const
+	{
+		return m_Editable;
 	}
 
 	const std::string& ContentBrowserItem::GetHighlightedPath()

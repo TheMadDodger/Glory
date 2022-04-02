@@ -92,6 +92,17 @@ namespace Glory
 			return result;
 		}
 
+		template<class _Pr>
+		bool Contains(_Pr pred)
+		{
+			bool result = false;
+			m_Mutex.lock();
+			auto it = std::find_if(m_Data.begin(), m_Data.end(), pred);
+			result = (it != m_Data.end());
+			m_Mutex.unlock();
+			return result;
+		}
+
 		void Erase(const _Ty& val)
 		{
 			m_Mutex.lock();

@@ -16,13 +16,10 @@ namespace Glory
 	{
 	}
 
-	RenderTexture* ClusteredRendererModule::CreateCameraRenderTexture(size_t width, size_t height)
+	void ClusteredRendererModule::GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments)
 	{
-		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
-		RenderTextureCreateInfo createInfo(width, height, true);
-		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
-		createInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
-		return pResourceManager->CreateRenderTexture(createInfo);
+		attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 	}
 
 	void ClusteredRendererModule::OnCameraResize(CameraRef camera)
@@ -139,13 +136,14 @@ namespace Glory
 		Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
 		if (!pMaterial) return;
 
-		ModelViewProjection mvp;
-		mvp.Model = renderData.m_World;
-		mvp.View = camera.GetView();
-		mvp.Projection = camera.GetProjection();
+		ObjectData object;
+		object.Model = renderData.m_World;
+		object.View = camera.GetView();
+		object.Projection = camera.GetProjection();
+		object.ObjectID = renderData.m_ObjectID;
 
 		pMaterial->SetProperties();
-		pMaterial->SetMVP(mvp);
+		pMaterial->SetObjectData(object);
 		pGraphics->DrawMesh(pMeshData);
 	}
 

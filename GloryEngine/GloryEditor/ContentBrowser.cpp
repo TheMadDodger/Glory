@@ -14,7 +14,7 @@ namespace Glory::Editor
     int ContentBrowser::m_IconSize = 128;
 
 	ContentBrowser::ContentBrowser() : EditorWindowTemplate("Content Browser", 1600.0f, 600.0f),
-        m_I(0), m_SearchBuffer("\0"), m_pRootItem(nullptr)
+        m_I(0), m_SearchBuffer("\0"), m_pRootItems(std::vector<ContentBrowserItem*>())
 	{
 		m_Resizeable = true;
         m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
@@ -27,9 +27,11 @@ namespace Glory::Editor
 
 	ContentBrowser::~ContentBrowser()
 	{
-        if (!m_pRootItem) return;
-        delete m_pRootItem;
-        m_pRootItem = nullptr;
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            delete m_pRootItems[i];
+        }
+        m_pRootItems.clear();
 	}
 
     std::filesystem::path ContentBrowser::GetCurrentPath()
@@ -67,15 +69,23 @@ namespace Glory::Editor
 
     void ContentBrowser::OnOpen()
     {
-        m_pRootItem = new ContentBrowserItem("Assets", true, nullptr);
-        RefreshContentBrowser();
+        m_pRootItems.push_back(new ContentBrowserItem("Assets", true, nullptr, true));
+        m_pRootItems.push_back(new ContentBrowserItem("ModuleAssets", true, nullptr, false));
+        LoadItems();
+
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            m_pRootItems[i]->RefreshSelected(m_pRootItems[i]);
+        }
     }
 
     void ContentBrowser::OnClose()
     {
-        if (!m_pRootItem) return;
-        delete m_pRootItem;
-        m_pRootItem = nullptr;
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            delete m_pRootItems[i];
+        }
+        m_pRootItems.clear();
     }
 
     void ContentBrowser::BeginRename(const std::string& name, bool folder)
@@ -83,14 +93,15 @@ namespace Glory::Editor
         ContentBrowserItem* pCurrentFolder = ContentBrowserItem::GetSelectedFolder();
         ContentBrowserItem* pChildToRename = pCurrentFolder->GetChildByName(name, folder);
         if (pChildToRename == nullptr) return;
+        if (!pCurrentFolder->IsEditable() || !pChildToRename->IsEditable()) return;
         pChildToRename->BeginRename();
     }
 
     void ContentBrowser::LoadProject()
     {
         ContentBrowser* pWindow = GetWindow<ContentBrowser>();
-        pWindow->m_pRootItem = new ContentBrowserItem("Assets", true, nullptr);
-        ContentBrowserItem::SetSelectedFolder(pWindow->m_pRootItem);
+        ContentBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
+        pWindow->LoadItems();
         pWindow->RefreshContentBrowser();
     }
 
@@ -98,7 +109,10 @@ namespace Glory::Editor
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::BeginChild("DirectoryBrowser", ImVec2(0, 0), false, window_flags);
-        if (m_pRootItem) m_pRootItem->DrawDirectoryBrowser();
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            m_pRootItems[i]->DrawDirectoryBrowser();
+        }
         ImGui::EndChild();
     }
 
@@ -171,7 +185,9 @@ namespace Glory::Editor
         ImVec2 min = ImGui::GetWindowContentRegionMin();
         ImVec2 max = ImGui::GetWindowContentRegionMax();
         ImVec2 pos = ImGui::GetWindowPos();
-        if (ImGui::IsMouseHoveringRect(pos + min, pos + max) && ImGui::IsMouseClicked(1)) ObjectMenu::Open(nullptr, ObjectMenuType::T_ContentBrowser);
+
+        ContentBrowserItem* pSelected = ContentBrowserItem::GetSelectedFolder();
+        if (pSelected->IsEditable() && ImGui::IsMouseHoveringRect(pos + min, pos + max) && ImGui::IsMouseClicked(1)) ObjectMenu::Open(nullptr, ObjectMenuType::T_ContentBrowser);
         ContentBrowserItem::DrawFileBrowser(m_IconSize);
         ImGui::EndChild();
     }
@@ -183,6 +199,15 @@ namespace Glory::Editor
         if (pSelected == nullptr) return;
         pSelected->Refresh();
         pSelected->SortChildren();
-        m_pRootItem->RefreshSelected(m_pRootItem);
+    }
+
+
+    void ContentBrowser::LoadItems()
+    {
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            m_pRootItems[i]->Refresh();
+            m_pRootItems[i]->SortChildren();
+        }
     }
 }

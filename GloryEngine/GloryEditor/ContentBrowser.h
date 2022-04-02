@@ -31,12 +31,14 @@ namespace Glory::Editor
 		void FileBrowser();
 		void RefreshContentBrowser();
 
+		void LoadItems();
+
 	private:
 		int m_I;
 		static int m_IconSize;
 		std::hash<std::string> m_Hasher;
 		char m_SearchBuffer[100];
 
-		ContentBrowserItem* m_pRootItem;
+		std::vector<ContentBrowserItem*> m_pRootItems;
 	};
 }

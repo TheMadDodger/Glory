@@ -2,9 +2,9 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <AssetDatabase.h>
+#include <ContentBrowser.h>
 #include "ProjectSpace.h"
 #include "EditorApplication.h"
-#include <ContentBrowser.h>
 
 namespace Glory::Editor
 {
@@ -110,6 +110,7 @@ namespace Glory::Editor
 	{
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		CreateFolder("Assets");
+		ImportModuleAssets(false);
 		CreateFolder("Cache");
 		CreateFolder("Cache/ShaderSource");
 		CreateFolder("Cache/CompiledShaders");
@@ -132,5 +133,13 @@ namespace Glory::Editor
 		path.append(name);
 		if (std::filesystem::exists(path)) return;
 		std::filesystem::create_directories(path);
+	}
+
+	void ProjectSpace::ImportModuleAssets(bool overwrite)
+	{
+		std::filesystem::path path = "./ModuleAssets/";
+		std::filesystem::path moduleAssetsPath = RootPath() + "\\ModuleAssets\\";
+		if (!overwrite && std::filesystem::exists(moduleAssetsPath)) return;
+		std::filesystem::copy(path, moduleAssetsPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
 	}
 }

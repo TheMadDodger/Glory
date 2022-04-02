@@ -14,6 +14,7 @@ namespace Glory::Editor
 		static bool ProjectExists(const std::string& path, const std::string& name);
 		static std::string NewProject(const std::string& path, const std::string& name);
 		void CreateFolder(const std::string& name);
+		void ImportModuleAssets(bool overwrite);
 
 		std::string Name();
 		std::string RootPath();

@@ -5,6 +5,25 @@ namespace Glory
 	enum class PixelFormat
 	{
         PF_Undefined,
+
+        // Basic format
+        PF_R,
+        PF_RG,
+        PF_RGB,
+        PF_BGR,
+        PF_RGBA,
+        PF_BGRA,
+        PF_RI,
+        PF_RGI,
+        PF_RGBI,
+        PF_BGRI,
+        PF_RGBAI,
+        PF_BGRAI,
+        PF_Stencil,
+        PF_Depth,
+        PF_DepthStencil,
+
+        // Internal format
         PF_R4G4UnormPack8,
         PF_R4G4B4A4UnormPack16,
         PF_B4G4R4A4UnormPack16,

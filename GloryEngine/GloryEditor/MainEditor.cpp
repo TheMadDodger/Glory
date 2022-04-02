@@ -204,9 +204,9 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Set As Active Scene", SetActiveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Remove Scene", RemoveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Reload Scene", ReloadSceneCallback, T_Scene);
-		ObjectMenu::AddMenuItem("Copy", CopyObjectCallback, T_Resource | T_SceneObject | T_Scene);
+		ObjectMenu::AddMenuItem("Copy", CopyObjectCallback, T_AnyResource | T_SceneObject | T_Scene);
 		ObjectMenu::AddMenuItem("Paste", PasteObjectCallback, T_SceneObject | T_Resource | T_ContentBrowser | T_Hierarchy | T_Scene);
-		ObjectMenu::AddMenuItem("Duplicate", DuplicateObjectCallback, T_SceneObject | T_Resource);
+		ObjectMenu::AddMenuItem("Duplicate", DuplicateObjectCallback, T_SceneObject | T_AnyResource);
 		ObjectMenu::AddMenuItem("Delete", DeleteObjectCallback, T_SceneObject | T_Resource | T_Folder);
 		ObjectMenu::AddMenuItem("Create/Empty Object", CreateEmptyObjectCallback, T_SceneObject | T_Scene | T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/New Scene", CreateNewSceneCallback, T_Hierarchy);

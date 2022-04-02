@@ -27,6 +27,18 @@ namespace Glory
 		return (EntitySceneObject*)CreateObject(pScene, name, uuid);
 	}
 
+	SceneObject* EntitySceneScenesModule::GetSceneObjectFromObjectID(uint32_t objectID)
+	{
+		for (size_t i = 0; i < m_pOpenScenes.size(); i++)
+		{
+			EntityScene* pEntityScene = (EntityScene*)m_pOpenScenes[i];
+			EntitySceneObject* pEntityObject = pEntityScene->GetEntitySceneObjectFromEntityID(objectID);
+			if (pEntityObject) return pEntityObject;
+		}
+
+		return nullptr;
+	}
+
 	void EntitySceneScenesModule::Initialize()
 	{
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
