@@ -14,7 +14,7 @@ namespace Glory::Editor
 		LayerManager::GetAllLayerNames(m_LayerOptions);
 	}
 
-	void Glory::Editor::LayerComponentEditor::OnGUI()
+	bool Glory::Editor::LayerComponentEditor::OnGUI()
 	{
 		LayerComponent& layer = GetTargetComponent();
 
@@ -39,10 +39,11 @@ namespace Glory::Editor
 			ImGui::EndCombo();
 		}
 
-		if (newIndex == index) return;
+		if (newIndex == index) return false;
 		index = newIndex - 1;
 		pLayer = LayerManager::GetLayerAtIndex(index);
 		layer.m_pLayer = pLayer;
+		return true;
 	}
 
 	std::string LayerComponentEditor::Name()

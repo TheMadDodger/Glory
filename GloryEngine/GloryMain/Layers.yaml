@@ -1,6 +1,3 @@
 - Name: World
-  Mask: 1
 - Name: UI
-  Mask: 2
 - Name: Effects
-  Mask: 4

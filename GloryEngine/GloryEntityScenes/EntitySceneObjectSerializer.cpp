@@ -44,7 +44,7 @@ namespace Glory
 		out << YAML::EndSeq;
 	}
 
-	Object* EntitySceneObjectSerializer::Deserialize(Object* pParent, YAML::Node& object)
+	Object* EntitySceneObjectSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string&)
 	{
 		YAML::Node node;
 		std::string name;

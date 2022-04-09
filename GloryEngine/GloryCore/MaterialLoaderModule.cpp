@@ -11,7 +11,7 @@ namespace Glory
 	MaterialImportSettings::MaterialImportSettings(const std::string& name)
 		: ImportSettings(name) {}
 
-	MaterialLoaderModule::MaterialLoaderModule() : ResourceLoaderModule("gmat")
+	MaterialLoaderModule::MaterialLoaderModule() : ResourceLoaderModule(".gmat")
 	{
 	}
 
@@ -36,19 +36,23 @@ namespace Glory
 	MaterialData* MaterialLoaderModule::LoadResource(const std::string& path, const MaterialImportSettings& importSettings)
 	{
 		YAML::Node rootNode = YAML::LoadFile(path);
-		YAML::Node node;
-		bool isInstance = false;
-		YAML_READ(rootNode, node, IsInstance, isInstance, bool);
-		return isInstance ? LoadMaterialInstanceData(rootNode, importSettings) : LoadMaterialData(rootNode, importSettings);
+		return LoadMaterialData(rootNode, importSettings);
 	}
 
 	MaterialData* MaterialLoaderModule::LoadResource(const void* buffer, size_t length, const MaterialImportSettings& importSettings)
 	{
 		YAML::Node rootNode = YAML::Load((const char*)buffer);
-		YAML::Node node;
-		bool isInstance = false;
-		YAML_READ(rootNode, node, IsInstance, isInstance, bool);
-		return isInstance ? LoadMaterialInstanceData(rootNode, importSettings) : LoadMaterialData(rootNode, importSettings);
+		return LoadMaterialData(rootNode, importSettings);
+	}
+
+	void MaterialLoaderModule::SaveResource(const std::string& path, MaterialData* pResource)
+	{
+		MaterialInstanceData* pMaterialInstance = dynamic_cast<MaterialInstanceData*>(pResource);
+		YAML::Emitter out;
+		SaveMaterialData(pResource, out);
+		std::ofstream outStream(path);
+		outStream << out.c_str();
+		outStream.close();
 	}
 
 	MaterialData* MaterialLoaderModule::LoadMaterialData(YAML::Node& rootNode, const MaterialImportSettings& importSettings)
@@ -59,15 +63,12 @@ namespace Glory
 		return pMaterialData;
 	}
 
-	MaterialInstanceData* MaterialLoaderModule::LoadMaterialInstanceData(YAML::Node& rootNode, const MaterialImportSettings& importSettings)
+	void MaterialLoaderModule::SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out)
 	{
-		YAML::Node node;
-		UUID baseMaterial = 0;
-		YAML_READ(rootNode, node, BaseMaterial, baseMaterial, uint64_t);
-		MaterialData* pMaterialData = AssetManager::GetAssetImmediate<MaterialData>(baseMaterial);
-		MaterialInstanceData* pMaterialInstanceData = new MaterialInstanceData(pMaterialData);
-		ReadPropertyOverrides(rootNode, pMaterialInstanceData);
-		return pMaterialInstanceData;
+		out << YAML::BeginMap;
+		WriteShaders(out, pMaterialData);
+		WritePropertyData(out, pMaterialData);
+		out << YAML::EndMap;
 	}
 	
 	void MaterialLoaderModule::ReadShaders(YAML::Node& rootNode, MaterialData* pMaterialData)
@@ -103,9 +104,11 @@ namespace Glory
 		{
 			YAML::Node propertyNode = propertiesNode[i];
 			YAML::Node node;
-			std::string name;
 			size_t typeHash = 0;
-			YAML_READ(propertyNode, node, Name, name, std::string);
+			std::string displayName;
+			std::string shaderName;
+			YAML_READ(propertyNode, node, DisplayName, displayName, std::string);
+			YAML_READ(propertyNode, node, ShaderName, shaderName, std::string);
 			YAML_READ(propertyNode, node, TypeHash, typeHash, size_t);
 			
 			node = propertyNode["Value"];
@@ -117,53 +120,67 @@ namespace Glory
 			bool isResource = ResourceType::IsResource(typeHash);
 			if (!isResource)
 			{
-				pMaterialData->AddProperty(name, name, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
+				pMaterialData->AddProperty(displayName, shaderName, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
 				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
 			}
 			else
 			{
 				UUID id = node.as<uint64_t>();
 				Resource* pResource = AssetManager::GetAssetImmediate(id);
-				pMaterialData->AddProperty(name, name, typeHash, pResource);
+				pMaterialData->AddProperty(displayName, shaderName, typeHash, pResource);
 			}
 		}
 	}
 
-	void MaterialLoaderModule::ReadPropertyOverrides(YAML::Node& rootNode, MaterialInstanceData* pMaterialData)
+	void MaterialLoaderModule::WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData)
 	{
-		YAML::Node propertiesNode = rootNode["Overrides"];
-		if (!propertiesNode.IsSequence()) return;
-
-		size_t resourceCounter = 0;
-		for (size_t i = 0; i < propertiesNode.size(); i++)
+		out << YAML::Key << "Shaders";
+		out << YAML::Value << YAML::BeginSeq;
+		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
 		{
-			YAML::Node propertyNode = propertiesNode[i];
-			YAML::Node node;
+			out << YAML::BeginMap;
+			ShaderSourceData* pShaderSourceData = pMaterialData->GetShaderAt(i);
+			YAML_WRITE(out, UUID, pShaderSourceData->GetUUID());
+			YAML_WRITE(out, Type, pShaderSourceData->GetShaderType());
+			out << YAML::EndMap;
+		}
+		out << YAML::EndSeq;
+	}
+
+	void MaterialLoaderModule::WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData)
+	{
+		out << YAML::Key << "Properties";
+		out << YAML::Value << YAML::BeginSeq;
+
+		size_t resourceIndex = 0;
+		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(); i++)
+		{
+			out << YAML::BeginMap;
+
+			MaterialPropertyInfo* pPropertyInfo = pMaterialData->GetPropertyInfoAt(i);
 			std::string name;
-			YAML_READ(propertyNode, node, Name, name, std::string);
+			YAML_WRITE(out, DisplayName, pPropertyInfo->DisplayName());
+			YAML_WRITE(out, ShaderName, pPropertyInfo->ShaderName());
+			YAML_WRITE(out, TypeHash, pPropertyInfo->TypeHash());
 
-			size_t propertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(name, propertyIndex)) continue;
-			pMaterialData->m_PropertyOverridesEnable[propertyIndex] = true;
-
-			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
-
-			node = propertyNode["Value"];
-
-			if (!propertyInfo->m_IsResource)
+			bool isResource = ResourceType::IsResource(pPropertyInfo->m_TypeHash);
+			if (!isResource)
 			{
-				size_t typeHash = propertyInfo->TypeHash();
-				size_t offset = propertyInfo->Offset();
-				size_t size = propertyInfo->Size();
-				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
+				PropertySerializer::SerializeProperty("Value", pMaterialData->GetBufferReference(), pPropertyInfo->m_TypeHash, pPropertyInfo->m_Offset, pPropertyInfo->m_Size, out);
 			}
 			else
 			{
-				UUID id = node.as<uint64_t>();
-				if(pMaterialData->m_pResources.size() > resourceCounter) pMaterialData->m_pResources[resourceCounter] = AssetManager::GetAssetImmediate(id);
-				++resourceCounter;
+				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
+				++resourceIndex;
+				Resource* pResource = *pMaterialData->GetResourcePointer(index);
+				UUID id = pResource ? pResource->GetUUID() : 0;
+				out << YAML::Key << "Value" << YAML::Value << id;
 			}
+
+			out << YAML::EndMap;
 		}
+
+		out << YAML::EndSeq;
 	}
 
 	void MaterialLoaderModule::Initialize()

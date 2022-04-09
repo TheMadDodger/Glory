@@ -31,8 +31,20 @@ namespace Glory
 		return m_Width * m_Height * m_BytesPerPixel;
 	}
 
+	const void* ImageData::GetPixels()
+	{
+		return nullptr;
+	}
+
 	const PixelFormat& ImageData::GetFormat()
 	{
 		return m_PixelFormat;
 	}
+
+	const PixelFormat& ImageData::GetInternalFormat()
+	{
+		return m_InternalFormat;
+	}
+
+	void ImageData::BuildTexture() {}
 }

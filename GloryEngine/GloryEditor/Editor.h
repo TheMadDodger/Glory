@@ -16,7 +16,7 @@ namespace Glory::Editor
 
 		virtual const std::type_index& GetEditedType() = 0;
 		virtual void Initialize();
-		virtual void OnGUI() = 0;
+		virtual bool OnGUI() = 0;
 
 		static Editor* CreateEditor(Object* pObject);
 

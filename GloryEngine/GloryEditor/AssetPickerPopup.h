@@ -7,8 +7,8 @@ namespace Glory::Editor
 	class AssetPickerPopup
 	{
 	public:
-		static void Open(size_t typeHash, Resource** pResource);
-		static void Open(size_t typeHash, std::function<void(Resource*)> callback);
+		static void Open(size_t typeHash, Resource** pResource, bool includeSubAssets = false);
+		static void Open(size_t typeHash, std::function<void(Resource*)> callback, bool includeSubAssets = false);
 		void OnGUI();
 
 	private:
@@ -26,6 +26,7 @@ namespace Glory::Editor
 		static bool m_Open;
 		static Resource** m_pResourcePointer;
 		static size_t m_TypeHash;
+		static bool m_IncludeSubAssets;
 		char m_FilterBuffer[200];
 		std::string m_Filter;
 		std::vector<UUID> m_FilteredAssets;

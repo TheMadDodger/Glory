@@ -13,9 +13,9 @@ namespace Glory
 		m_pSurface = nullptr;
 	}
 
-	const float* SDLImageData::GetPixels()
+	const void* SDLImageData::GetPixels()
 	{
-		return (const float*)m_pSurface->pixels;
+		return m_pSurface->pixels;
 	}
 
 	void SDLImageData::BuildTexture()
@@ -24,6 +24,7 @@ namespace Glory
 		m_Height = static_cast<uint32_t>(m_pSurface->h);
 
 		m_PixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
+		m_InternalFormat = Glory::PixelFormat::PF_RGB;
 		m_BytesPerPixel = m_pSurface->format->BytesPerPixel;
 
 		switch (m_BytesPerPixel)
@@ -31,21 +32,25 @@ namespace Glory
 		case 3:
 			if (m_pSurface->format->Rmask == 0x000000ff)
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
+				m_PixelFormat = Glory::PixelFormat::PF_RGB;
+				m_InternalFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
 			}
 			else
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_B8G8R8Srgb;
+				m_PixelFormat = Glory::PixelFormat::PF_RGB;
+				m_InternalFormat = Glory::PixelFormat::PF_B8G8R8Srgb;
 			}
 			break;
 		case 4:
 			if (m_pSurface->format->Rmask == 0x000000ff)
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_R8G8B8A8Srgb;
+				m_PixelFormat = Glory::PixelFormat::PF_RGBA;
+				m_InternalFormat = Glory::PixelFormat::PF_R8G8B8A8Srgb;
 			}
 			else
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_B8G8R8A8Srgb;
+				m_PixelFormat = Glory::PixelFormat::PF_RGBA;
+				m_InternalFormat = Glory::PixelFormat::PF_B8G8R8A8Srgb;
 			}
 			break;
 		default:

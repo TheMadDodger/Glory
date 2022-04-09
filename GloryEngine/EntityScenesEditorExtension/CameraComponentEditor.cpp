@@ -22,16 +22,17 @@ namespace Glory::Editor
 		m_LayerText = LayerManager::LayerMaskToString(camera.m_LayerMask);
 	}
 
-	void CameraComponentEditor::OnGUI()
+	bool CameraComponentEditor::OnGUI()
 	{
 		CameraComponent& camera = GetTargetComponent();
 
-		ImGui::InputFloat("Half FOV", &camera.m_HalfFOV);
-		ImGui::InputFloat("Near Plane", &camera.m_Near);
-		ImGui::InputFloat("Far Plane", &camera.m_Far);
-		ImGui::InputInt("Display Index", &camera.m_DisplayIndex);
-		ImGui::InputInt("Priority", &camera.m_Priority);
-		ImGui::InputFloat4("Clear Color", (float*)&camera.m_ClearColor);
+		bool change = false;
+		change |= ImGui::InputFloat("Half FOV", &camera.m_HalfFOV);
+		change |= ImGui::InputFloat("Near Plane", &camera.m_Near);
+		change |= ImGui::InputFloat("Far Plane", &camera.m_Far);
+		change |= ImGui::InputInt("Display Index", &camera.m_DisplayIndex);
+		change |= ImGui::InputInt("Priority", &camera.m_Priority);
+		change |= ImGui::InputFloat4("Clear Color", (float*)&camera.m_ClearColor);
 
 		if (ImGui::BeginCombo("Layer Mask", m_LayerText.data()))
 		{
@@ -48,11 +49,13 @@ namespace Glory::Editor
 						camera.m_LayerMask ^= pLayer->m_Mask;
 
 					m_LayerText = LayerManager::LayerMaskToString(camera.m_LayerMask);
+					change = true;
 				}
 			}
 
 			ImGui::EndCombo();
 		}
+		return change;
 	}
 
 	std::string CameraComponentEditor::Name()

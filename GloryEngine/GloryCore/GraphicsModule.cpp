@@ -3,9 +3,8 @@
 
 namespace Glory
 {
-	GraphicsModule::GraphicsModule() : m_pFrameStates(nullptr), m_pResourceManager(nullptr)
-	{
-	}
+	GraphicsModule::GraphicsModule() : m_pFrameStates(nullptr), m_pResourceManager(nullptr), m_CurrentDrawCalls(0), m_LastDrawCalls(0),
+		m_LastVertices(0), m_CurrentVertices(0), m_LastTriangles(0), m_CurrentTriangles(0) {}
 
 	GraphicsModule::~GraphicsModule()
 	{
@@ -16,6 +15,30 @@ namespace Glory
 	const std::type_info& GraphicsModule::GetModuleType()
 	{
 		return typeid(GraphicsModule);
+	}
+
+	int GraphicsModule::GetLastDrawCalls()
+	{
+		return m_LastDrawCalls;
+	}
+
+	int GraphicsModule::GetLastVertexCount()
+	{
+		return m_LastVertices;
+	}
+
+	int GraphicsModule::GetLastTriangleCount()
+	{
+		return m_LastTriangles;
+	}
+
+	void GraphicsModule::DrawMesh(MeshData* pMeshData)
+	{
+		int vertexCount = pMeshData->VertexCount();
+		m_CurrentVertices += vertexCount;
+		m_CurrentTriangles += vertexCount / 3;
+		++m_CurrentDrawCalls;
+		OnDrawMesh(pMeshData);
 	}
 
 	FrameStates* GraphicsModule::GetFrameStates()
@@ -50,5 +73,19 @@ namespace Glory
 	void GraphicsModule::Cleanup()
 	{
 		OnCleanup();
+	}
+
+	void GraphicsModule::OnGraphicsThreadFrameStart()
+	{
+		m_CurrentDrawCalls = 0;
+		m_CurrentVertices = 0;
+		m_CurrentTriangles = 0;
+	}
+
+	void GraphicsModule::OnGraphicsThreadFrameEnd()
+	{
+		m_LastDrawCalls = m_CurrentDrawCalls;
+		m_LastVertices = m_CurrentVertices;
+		m_LastTriangles = m_CurrentTriangles;
 	}
 }

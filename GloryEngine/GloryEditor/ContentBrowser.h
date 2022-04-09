@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorWindow.h"
 #include <ContentBrowserItem.h>
+#include <Resource.h>
 
 namespace Glory::Editor
 {
@@ -9,6 +10,15 @@ namespace Glory::Editor
 	public:
 		ContentBrowser();
 		virtual ~ContentBrowser();
+
+		static std::filesystem::path GetCurrentPath();
+
+		virtual void OnOpen() override;
+		virtual void OnClose() override;
+
+		static void BeginRename(const std::string& name, bool folder);
+
+		static void LoadProject();
 
 	private:
 		virtual void OnGUI() override;
@@ -21,13 +31,14 @@ namespace Glory::Editor
 		void FileBrowser();
 		void RefreshContentBrowser();
 
+		void LoadItems();
+
 	private:
 		int m_I;
 		static int m_IconSize;
 		std::hash<std::string> m_Hasher;
 		char m_SearchBuffer[100];
 
-		bool m_Refresh;
-		ContentBrowserItem* m_pRootItem;
+		std::vector<ContentBrowserItem*> m_pRootItems;
 	};
 }

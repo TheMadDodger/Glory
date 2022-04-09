@@ -48,5 +48,8 @@ namespace Glory
 
 	protected:
 		UUID m_ID;
+
+	private:
+		friend class AssetDatabase;
 	};
 }

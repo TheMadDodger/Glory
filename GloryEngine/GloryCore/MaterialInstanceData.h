@@ -6,6 +6,7 @@ namespace Glory
 	class MaterialInstanceData : public MaterialData
 	{
 	public:
+		MaterialInstanceData();
 		MaterialInstanceData(MaterialData* pBaseMaterial);
 		virtual ~MaterialInstanceData();
 
@@ -15,6 +16,7 @@ namespace Glory
         virtual const ShaderType& GetShaderTypeAt(size_t index) const override;
 
 		MaterialData* GetBaseMaterial() const;
+		void SetBaseMaterial(MaterialData* pMaterial);
 
 		virtual const UUID& GetGPUUUID() const;
 
@@ -31,8 +33,10 @@ namespace Glory
 		virtual size_t GetResourcePropertyCount() const override;
 		virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index) override;
 
+		void ReloadProperties();
+
 	private:
-		friend class MaterialLoaderModule;
+		friend class MaterialInstanceLoaderModule;
 		MaterialData* m_pBaseMaterial;
 		std::vector<bool> m_PropertyOverridesEnable;
 	};

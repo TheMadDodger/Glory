@@ -6,23 +6,24 @@ namespace Glory::Editor
 {
 	class EditorAssetLoader
 	{
-	public:
+	private:
 		EditorAssetLoader();
 		virtual ~EditorAssetLoader();
 
-		void LoadAssets();
+	private:
+		static void Start();
+		static void Stop();
+		static void LoadAll();
+
+		static void ProcessDirectory(const std::string& path, bool recursive = true);
+		static void ProcessFile(const std::filesystem::path& filePath);
+		static void RemoveDeletedAssets();
+		static void Run();
 
 	private:
-		void Initialize();
-		void LoadAll();
-
-		void ProcessDirectory(const std::string& path, bool recursive = true);
-		void ProcessFile(const std::filesystem::path& filePath);
-
-		void RemoveDeletedAssets();
-
-	private:
+		friend class ProjectSpace;
 		friend class MainEditor;
-		Thread* m_pThread;
+		static Thread* m_pThread;
+		static bool m_Exit;
 	};
 }

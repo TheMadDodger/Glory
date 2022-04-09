@@ -15,6 +15,11 @@ namespace Glory::Editor
         void StartLooking();
         void StopLooking();
 
+        void SetPerspective(float width, float height, float halfFOV, float near, float far);
+        void SetOrthographic(float width, float height, float near, float far);
+
+        //float GetOrthoZoom();
+
     private:
         void Initialize();
         void Cleanup();
@@ -37,6 +42,14 @@ namespace Glory::Editor
         /// Amount to zoom the camera when using the mouse wheel (fast mode).
         float m_FastZoomSensitivity = 50.f;
 
+        bool m_IsOrthographic = false;
+        float m_HalfFOV = 60.0f;
+        float m_Width = 1.0f;
+        float m_Height = 1.0f;
+        float m_Near = 0.1f;
+        float m_Far = 3000.0f;
+        float m_OrthoZoom = 0.1f;
+
         /// Set to true when free looking (on right mouse button).
         bool m_Looking = false;
 
@@ -44,8 +57,5 @@ namespace Glory::Editor
         float m_Pitch = 0.0f;
 
         CameraRef m_Camera;
-
-        glm::vec3 m_EyePosition;
-        glm::quat m_Rotation;
     };
 }

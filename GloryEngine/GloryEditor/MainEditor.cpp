@@ -6,6 +6,7 @@
 #include "InspectorWindow.h"
 #include "SceneGraphWindow.h"
 #include "ContentBrowser.h"
+#include "EditorConsoleWindow.h"
 #include "PerformanceMetrics.h"
 #include "MenuBar.h"
 #include "PopupManager.h"
@@ -18,6 +19,7 @@
 #include "TextureTumbnailGenerator.h"
 #include "SceneTumbnailGenerator.h"
 #include "Editor.h"
+#include "ProfilerWindow.h"
 #include <Game.h>
 #include <Engine.h>
 #include <MaterialEditor.h>
@@ -28,19 +30,25 @@
 #include <AssetDatabase.h>
 #include "AssetReferencePropertyDrawer.h"
 #include "ArrayPropertyDrawer.h"
+#include <ImGuizmo.h>
+#include <Gizmos.h>
+#include "ObjectMenu.h"
+#include "ObjectMenuCallbacks.h"
+#include <FileDialog.h>
+
+#define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
 namespace Glory::Editor
 {
+	size_t MainEditor::m_SaveSceneIndex = 0;
+
 	MainEditor::MainEditor()
-		: m_pAssetLoader(new EditorAssetLoader()), m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup())
+		: m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_Settings("./EditorSettings.yaml")
 	{
 	}
 
 	MainEditor::~MainEditor()
 	{
-		delete m_pAssetLoader;
-		m_pAssetLoader = nullptr;
-
 		delete m_pProjectPopup;
 		m_pProjectPopup = nullptr;
 
@@ -50,11 +58,14 @@ namespace Glory::Editor
 
 	void MainEditor::Initialize()
 	{
+		m_Settings.Load(Game::GetGame().GetEngine());
+
 		RegisterWindows();
 		RegisterPropertyDrawers();
 		RegisterEditors();
 
 		CreateDefaultMainMenuBar();
+		CreateDefaultObjectMenu();
 
 		SetDarkThemeColors();
 
@@ -63,10 +74,16 @@ namespace Glory::Editor
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
+
+		FileDialog::Initialize();
 	}
 
 	void MainEditor::Destroy()
 	{
+		EditorAssetLoader::Stop();
+
+		m_Settings.Save(Game::GetGame().GetEngine());
+
 		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
 		PropertyDrawer::Cleanup();
@@ -91,18 +108,15 @@ namespace Glory::Editor
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
         EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
+		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
 		m_AssetPickerPopup->OnGUI();
-	}
-
-	EditorAssetLoader* MainEditor::GetAssetLoader()
-	{
-		return m_pAssetLoader;
+		FileDialog::Update();
 	}
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", EditorSceneManager::NewScene);
+		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); });
 		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes);
 		MenuBar::AddMenuItem("File/Load Scene", []()
 		{
@@ -134,6 +148,20 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Scene Graph", []() { EditorWindow::GetWindow<SceneGraphWindow>(); });
 		MenuBar::AddMenuItem("Window/Inspector", []() { EditorWindow::GetWindow<InspectorWindow>(true); });
 		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<ContentBrowser>(); });
+		MenuBar::AddMenuItem("Window/Console", []() { EditorWindow::GetWindow<EditorConsoleWindow>(); });
+		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); });
+		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); });
+
+		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); });
+		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); });
+
+		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE);
+		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE);
+		GIZMO_MENU("Gizmos/Operation/Scale", Gizmos::m_DefaultOperation, ImGuizmo::SCALE);
+		GIZMO_MENU("Gizmos/Operation/Universal", Gizmos::m_DefaultOperation, ImGuizmo::UNIVERSAL);
+
+		GIZMO_MENU("Gizmos/Mode/Local", Gizmos::m_DefaultMode, ImGuizmo::LOCAL);
+		GIZMO_MENU("Gizmos/Mode/World", Gizmos::m_DefaultMode, ImGuizmo::WORLD);
 	}
 
 	void MainEditor::SetDarkThemeColors()
@@ -167,6 +195,25 @@ namespace Glory::Editor
 		colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 		colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+	}
+
+	void MainEditor::CreateDefaultObjectMenu()
+	{
+		ObjectMenu::AddMenuItem("Save Scene", SaveScene, T_Scene);
+		ObjectMenu::AddMenuItem("Save Scene As", SaveSceneAs, T_Scene);
+		ObjectMenu::AddMenuItem("Set As Active Scene", SetActiveSceneCallback, T_Scene);
+		ObjectMenu::AddMenuItem("Remove Scene", RemoveSceneCallback, T_Scene);
+		ObjectMenu::AddMenuItem("Reload Scene", ReloadSceneCallback, T_Scene);
+		ObjectMenu::AddMenuItem("Copy", CopyObjectCallback, T_AnyResource | T_SceneObject | T_Scene);
+		ObjectMenu::AddMenuItem("Paste", PasteObjectCallback, T_SceneObject | T_Resource | T_ContentBrowser | T_Hierarchy | T_Scene);
+		ObjectMenu::AddMenuItem("Duplicate", DuplicateObjectCallback, T_SceneObject | T_AnyResource);
+		ObjectMenu::AddMenuItem("Delete", DeleteObjectCallback, T_SceneObject | T_Resource | T_Folder);
+		ObjectMenu::AddMenuItem("Create/Empty Object", CreateEmptyObjectCallback, T_SceneObject | T_Scene | T_Hierarchy);
+		ObjectMenu::AddMenuItem("Create/New Scene", CreateNewSceneCallback, T_Hierarchy);
+		ObjectMenu::AddMenuItem("Create/Material", CreateNewMaterialCallback, T_ContentBrowser | T_Resource);
+		ObjectMenu::AddMenuItem("Create/Material Instance", CreateNewMaterialInstanceCallback, T_ContentBrowser | T_Resource);
+		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
+		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder);
 	}
 
 	void MainEditor::Update()

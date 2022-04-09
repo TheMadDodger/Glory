@@ -26,6 +26,16 @@ namespace Glory
 		m_Far = far;
 
 		m_Projection = glm::perspective(glm::radians(halfFOV), (float)width / (float)height, near, far);
+		m_ViewOffset = glm::identity<glm::mat4>();
+	}
+
+	void Camera::SetOrthographicProjection(float width, float height, float near, float far)
+	{
+		m_Near = near;
+		m_Far = far;
+
+		m_Projection = glm::ortho<float>(0.0f, width, 0.0f, height, near, far);
+		m_ViewOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(width / 2.0f, height / 2.0f, 0.0f));
 	}
 
 	void Camera::SetView(const glm::mat4& view)
@@ -78,9 +88,29 @@ namespace Glory
 		return m_View;
 	}
 
+	const glm::mat4& Camera::GetViewOffset() const
+	{
+		return m_ViewOffset;
+	}
+
 	const glm::mat4& Camera::GetProjection() const
 	{
 		return m_Projection;
+	}
+
+	glm::mat4 Camera::GetFinalView() const
+	{
+		return m_ViewOffset * m_View;
+	}
+
+	float* Camera::GetViewPointer()
+	{
+		return &m_View[0][0];
+	}
+
+	float* Camera::GetProjectionPointer()
+	{
+		return &m_Projection[0][0];
 	}
 
 	int Camera::GetDisplayIndex() const

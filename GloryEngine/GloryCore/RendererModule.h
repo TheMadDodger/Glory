@@ -24,7 +24,13 @@ namespace Glory
 		void OnGameThreadFrameEnd();
 
 		virtual RenderTexture* CreateCameraRenderTexture(size_t width, size_t height);
+		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& atachments);
 		virtual void OnCameraResize(CameraRef camera);
+
+		int LastSubmittedObjectCount();
+		int LastSubmittedCameraCount();
+
+		void SetNextFramePick(const glm::ivec2& coord, CameraRef camera);
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
@@ -53,7 +59,13 @@ namespace Glory
 		void ThreadedCleanup();
 		void Render(const RenderFrame& frame);
 
+		void ReadHoveringObject();
+
 	private:
 		RenderFrame m_CurrentPreparingFrame;
+		int m_LastSubmittedObjectCount;
+		int m_LastSubmittedCameraCount;
+		glm::ivec2 m_PickPos;
+		CameraRef m_PickCamera;
 	};
 }

@@ -6,7 +6,7 @@ namespace Glory::Editor
 	class EditorSceneManager
 	{
 	public:
-		static void NewScene();
+		static GScene* NewScene(bool additive = false);
 		static void OpenScene(UUID uuid, bool additive);
 		static void SaveOpenScenes();
 
@@ -15,7 +15,17 @@ namespace Glory::Editor
 
 		static void CloseAll();
 
+		static size_t OpenSceneCount();
+		static UUID GetOpenSceneUUID(size_t index);
+
+		static void SaveScene(UUID uuid);
+		static void SaveSceneAs(UUID uuid);
+
+	private:
+		static void Save(UUID uuid, const std::string& path, bool newScene = false);
+
 	private:
 		static std::vector<UUID> m_OpenedSceneIDs;
+		static UUID m_CurrentlySavingScene;
 	};
 }

@@ -7,7 +7,7 @@ namespace Glory::Editor
 	std::vector<MenuBar::MenuItem> MenuBar::m_MenuItems = std::vector<MenuItem>();
 	float MenuBar::m_MenuBarHeight = 0.0f;
 
-	void MenuBar::AddMenuItem(std::string path, std::function<void()> func)
+	void MenuBar::AddMenuItem(std::string path, std::function<void()> func, std::function<bool()> selectedFunc)
 	{
 		std::vector<std::string> items = DisectPath(path);
 
@@ -19,6 +19,7 @@ namespace Glory::Editor
 
 		currentItem->m_Func = func;
 		currentItem->m_HasFunc = true;
+		currentItem->m_SelectedFunc = selectedFunc;
 	}
 
 	void MenuBar::OnGUI()
@@ -84,7 +85,10 @@ namespace Glory::Editor
 			{
 				if (childItem.m_HasFunc)
 				{
-					if (ImGui::MenuItem(childItem.m_Name.c_str()))
+					bool selected = false;
+					if (childItem.m_SelectedFunc != NULL) selected = childItem.m_SelectedFunc();
+
+					if (ImGui::MenuItem(childItem.m_Name.c_str(), nullptr, selected))
 						childItem.m_Func();
 				}
 				else if (ImGui::BeginMenu(childItem.m_Name.c_str()))
@@ -103,11 +107,12 @@ namespace Glory::Editor
 	{
 	}
 
-	MenuBar::MenuItem::MenuItem(const std::string& name) : m_Name(name), m_HasFunc(false), m_Func()
+	MenuBar::MenuItem::MenuItem(const std::string& name) : m_Name(name), m_HasFunc(false), m_Func(NULL), m_SelectedFunc(NULL)
 	{
 	}
 
-	MenuBar::MenuItem::MenuItem(const std::string& name, std::function<void()> func) : m_Name(name), m_HasFunc(true), m_Func(func)
+	MenuBar::MenuItem::MenuItem(const std::string& name, std::function<void()> func, std::function<bool()> selectedFunc)
+		: m_Name(name), m_HasFunc(true), m_Func(func), m_SelectedFunc(selectedFunc)
 	{
 	}
 }

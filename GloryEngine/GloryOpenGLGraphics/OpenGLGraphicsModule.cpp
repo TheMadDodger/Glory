@@ -132,7 +132,7 @@ namespace Glory
 		return pMaterial;
 	}
 
-	void OpenGLGraphicsModule::DrawMesh(MeshData* pMeshData)
+	void OpenGLGraphicsModule::OnDrawMesh(MeshData* pMeshData)
 	{
 		Mesh* pMesh = GetResourceManager()->CreateMesh(pMeshData);
 		pMesh->Bind();

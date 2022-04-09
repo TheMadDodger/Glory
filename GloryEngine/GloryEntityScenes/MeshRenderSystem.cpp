@@ -39,7 +39,8 @@ namespace Glory
         {
             if (i >= pComponent.m_pMaterials.size() || pComponent.m_pMaterials[i] == nullptr)
             {
-                Debug::LogWarning("MeshRenderer: Missing Materials on MeshRenderer!");
+                std::string key = std::to_string(entity) + "_MISSING_MATERIAL";
+                Debug::LogOnce(key, "MeshRenderer: Missing Materials on MeshRenderer!", Debug::LogLevel::Warning);
                 continue;
             }
 
@@ -49,6 +50,7 @@ namespace Glory
             renderData.m_pMaterial = pComponent.m_pMaterials[i];
             renderData.m_World = transform.MatTransform;
             renderData.m_LayerMask = mask;
+            renderData.m_ObjectID = entity;
             Game::GetGame().GetEngine()->GetRendererModule()->Submit(renderData);
         }
     }

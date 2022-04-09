@@ -9,8 +9,8 @@ namespace Glory
 	struct MaterialPropertyInfo
 	{
 	public:
-		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, size_t offset, uint32_t flags = 0);
-		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, uint32_t flags = 0);
+		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, size_t offset, uint32_t flags);
+		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t offset, uint32_t flags);
 
 		const std::string& DisplayName() const;
 		const std::string& ShaderName() const;
@@ -45,6 +45,7 @@ namespace Glory
 
 	private:
 		friend class MaterialLoaderModule;
+		friend class MaterialInstanceLoaderModule;
 		std::string m_PropertyDisplayName;
 		std::string m_PropertyShaderName;
 		size_t m_TypeHash;

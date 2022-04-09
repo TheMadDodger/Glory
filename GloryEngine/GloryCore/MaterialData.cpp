@@ -1,5 +1,6 @@
 #include "MaterialData.h"
 #include <algorithm>
+#include "ResourceType.h"
 
 namespace Glory
 {
@@ -42,11 +43,12 @@ namespace Glory
 		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
 	}
 
-	void MaterialData::AddShader(ShaderSourceData* pShaderSourceData)
+	bool MaterialData::AddShader(ShaderSourceData* pShaderSourceData)
 	{
 		auto it = std::find(m_pShaderFiles.begin(), m_pShaderFiles.end(), pShaderSourceData);
-		if (it != m_pShaderFiles.end()) return;
+		if (it != m_pShaderFiles.end()) return false;
 		m_pShaderFiles.push_back(pShaderSourceData);
+		return true;
 	}
 
 	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags)
@@ -65,7 +67,7 @@ namespace Glory
 		size_t hash = m_Hasher(displayName);
 		size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
-		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, flags));
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_pResources.size(), flags));
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
 		m_pResources.push_back(pResource);
@@ -83,8 +85,7 @@ namespace Glory
 
 	size_t MaterialData::GetCurrentBufferOffset() const
 	{
-		size_t size = m_PropertyInfos.size();
-		return size > 0 ? m_PropertyInfos[size - 1].EndOffset() : 0;
+		return m_CurrentOffset;
 	}
 
 	std::vector<char>& MaterialData::GetBufferReference()
@@ -131,17 +132,13 @@ namespace Glory
 		return m_ResourcePropertyInfoIndices[index];
 	}
 
-	void MaterialData::ReloadResourcesFromShader()
+	void MaterialData::ClearProperties()
 	{
-		for (size_t i = 0; i < m_pShaderFiles.size(); i++)
-		{
-			ShaderSourceData* pShaderSource = m_pShaderFiles[i];
-			const spirv_cross::ShaderResources resources = pShaderSource->GetResources();
-			for (size_t i = 0; i < resources.sampled_images.size(); i++)
-			{
-				spirv_cross::Resource sampler = resources.sampled_images[i];
-				 sampler.name;
-			}
-		}
+		m_PropertyBuffer.clear();
+		m_PropertyInfos.clear();
+		m_ResourcePropertyInfoIndices.clear();
+		m_pResources.clear();
+		m_HashToPropertyInfoIndex.clear();
+		m_CurrentOffset = 0;
 	}
 }

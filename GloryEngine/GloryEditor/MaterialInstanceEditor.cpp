@@ -1,6 +1,7 @@
 #include "MaterialInstanceEditor.h"
 #include "PropertyDrawer.h"
 #include <imgui.h>
+#include <AssetPickerPopup.h>
 
 namespace Glory::Editor
 {
@@ -8,15 +9,32 @@ namespace Glory::Editor
 
 	MaterialInstanceEditor::~MaterialInstanceEditor() {}
 
-	void MaterialInstanceEditor::OnGUI()
+	bool MaterialInstanceEditor::OnGUI()
 	{
 		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
+
+		MaterialData* pBaseMaterial = pMaterial->GetBaseMaterial();
+		ImGui::Text("Material: %s", pBaseMaterial ? pBaseMaterial->Name().c_str() : "None");
+		ImGui::SameLine();
+		if (ImGui::Button("Change"))
+		{
+			AssetPickerPopup::Open(ResourceType::GetHash<MaterialData>(), [&](Resource* pResource)
+			{
+				if (!pResource) return;
+				MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
+				MaterialData* pBaseMaterial = (MaterialData*)pResource;
+				pMaterial->SetBaseMaterial(pBaseMaterial);
+			}, ResourceType::GetHash<MaterialInstanceData>());
+		}
+
+		if (!pMaterial->GetBaseMaterial()) return false;
 
 		std::vector<bool> overrideStates;
 		pMaterial->CopyOverrideStates(overrideStates);
 
 		std::vector<char>& buffer = pMaterial->GetBufferReference();
 
+		bool change = false;
 		size_t resourceCounter = 0;
 		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
 		{
@@ -32,15 +50,23 @@ namespace Glory::Editor
 			if (info->IsResource())
 			{
 				SerializedProperty serializedProperty = SerializedProperty(0, info->DisplayName(), SerializedType::ST_Asset, info->TypeHash(), pMaterial->GetResourcePointer(resourceCounter), info->Flags());
-				PropertyDrawer::DrawProperty(&serializedProperty);
+				change |= PropertyDrawer::DrawProperty(&serializedProperty);
 				++resourceCounter;
 			}
-			else PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
+			else change |= PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
 
 			ImGui::EndDisabled();
 			overrideStates[i] = enable;
 		}
 
 		pMaterial->PasteOverrideStates(overrideStates);
+		return change;
+	}
+
+	void MaterialInstanceEditor::Initialize()
+	{
+		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
+		if (!pMaterial) return;
+		pMaterial->ReloadProperties();
 	}
 }

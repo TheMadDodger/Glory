@@ -9,21 +9,24 @@ namespace Glory::Editor
 	bool AssetPickerPopup::m_Open = false;
 	Resource** AssetPickerPopup::m_pResourcePointer = nullptr;
 	size_t AssetPickerPopup::m_TypeHash = 0;
+	bool AssetPickerPopup::m_IncludeSubAssets = false;
 	std::function<void(Resource*)> AssetPickerPopup::m_Callback = NULL;
 
-	void AssetPickerPopup::Open(size_t typeHash, Resource** pResource)
+	void AssetPickerPopup::Open(size_t typeHash, Resource** pResource, bool includeSubAssets)
 	{
 		m_Open = true;
 		m_TypeHash = typeHash;
 		m_pResourcePointer = pResource;
+		m_IncludeSubAssets = includeSubAssets;
 	}
 
-	void AssetPickerPopup::Open(size_t typeHash, std::function<void(Resource*)> callback)
+	void AssetPickerPopup::Open(size_t typeHash, std::function<void(Resource*)> callback, bool includeSubAssets)
 	{
 		m_Callback = callback;
 		m_Open = true;
 		m_TypeHash = typeHash;
 		m_pResourcePointer = nullptr;
+		m_IncludeSubAssets = includeSubAssets;
 	}
 
 	void AssetPickerPopup::OnGUI()
@@ -93,7 +96,16 @@ namespace Glory::Editor
 	void AssetPickerPopup::LoadAssets()
 	{
 		m_PossibleAssets.clear();
-		m_PossibleAssets = AssetDatabase::GetAllAssetsOfType(m_TypeHash);
+		AssetDatabase::GetAllAssetsOfType(m_TypeHash, m_PossibleAssets);
+
+		if (!m_IncludeSubAssets) return;
+		std::vector<ResourceType*> pTypes;
+		ResourceType::GetAllResourceTypesThatHaveSubType(m_TypeHash, pTypes);
+		for (size_t i = 0; i < pTypes.size(); i++)
+		{
+			if (pTypes[i]->Hash() == m_TypeHash) continue;
+			AssetDatabase::GetAllAssetsOfType(pTypes[i]->Hash(), m_PossibleAssets);
+		}
 	}
 
 	void AssetPickerPopup::DrawItems(const std::vector<UUID>& items)
@@ -109,9 +121,9 @@ namespace Glory::Editor
 			if (ImGui::MenuItem(name.c_str()))
 			{
 				AssetManager::GetAsset(uuid, [&](Resource* pResource)
-					{
-						AssetSelected(pResource);
-					});
+				{
+					AssetSelected(pResource);
+				});
 			}
 		});
 	}

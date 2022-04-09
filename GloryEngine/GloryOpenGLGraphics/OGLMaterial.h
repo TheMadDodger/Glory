@@ -16,13 +16,8 @@ namespace Glory
 
     private:
         virtual void Initialize() override;
-        virtual void SetPropertiesExtra() override;
         virtual Buffer* CreatePropertiesBuffer(size_t size) override;
-
-    private:
-        GLuint CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex);
-        void SetUniformBuffer(GLuint bufferID, void* data, GLuint size);
-        //void SetTexture(const std::string& name, GLTexture* pTexture);
+        virtual Buffer* CreateMVPBuffer() override;
 
     public: // Set shader vars
         virtual void SetFloat(const std::string& name, float value) const override;

@@ -27,3 +27,11 @@ namespace Glory
         return result;
     }
 }
+
+namespace glm
+{
+    inline ImVec4 ToImVec4(const glm::vec4& vec)
+    {
+        return ImVec4(vec.x, vec.y, vec.z, vec.w);
+    }
+}

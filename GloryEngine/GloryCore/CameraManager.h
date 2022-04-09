@@ -11,7 +11,7 @@ namespace Glory
 	public:
 		static CameraRef GetNewOrUnusedCamera();
 		static void SetUnused(Camera* pCamera);
-		static RenderTexture* GetRenderTextureForCamera(CameraRef camera, Engine* pEngine);
+		static RenderTexture* GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, bool createIfNotExist = true);
 		static Camera* GetCamera(UUID uuid);
 
 	private:

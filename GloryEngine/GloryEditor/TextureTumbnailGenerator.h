@@ -10,5 +10,9 @@ namespace Glory::Editor
 		virtual ~TextureTumbnailGenerator();
 
 		virtual ImageData* GetTumbnail(const ResourceMeta* pResourceType) override;
+
+	private:
+		std::vector<UUID> m_AlreadyRequestedTumbnails;
+		std::map<UUID, ImageData*> m_pLoadedImages;
 	};
 }

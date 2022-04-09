@@ -14,7 +14,7 @@ namespace Glory::Editor
 		~DefaultComponentEditor();
 
 	private:
-		virtual void OnGUI() override;
+		virtual bool OnGUI() override;
 		virtual void Initialize() override;
 		virtual std::string Name() override;
 

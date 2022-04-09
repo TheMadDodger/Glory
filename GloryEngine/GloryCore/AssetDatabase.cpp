@@ -1,7 +1,9 @@
 #include <fstream>
 #include <filesystem>
 #include "AssetDatabase.h"
+#include "AssetManager.h"
 #include "LayerManager.h"
+#include "Serializer.h"
 
 namespace Glory
 {
@@ -10,6 +12,7 @@ namespace Glory
 	ThreadedUMap<UUID, ResourceMeta> AssetDatabase::m_Metas;
 	ThreadedUMap<size_t, std::vector<UUID>> AssetDatabase::m_AssetsByType;
 	AssetCallbacks AssetDatabase::m_Callbacks;
+	ThreadedVector<UUID> AssetDatabase::m_UnsavedAssets;
 
 	bool AssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
@@ -61,12 +64,14 @@ namespace Glory
 		m_Callbacks.EnqueueCallback(CallbackType::CT_AssetRegistered, uuid, nullptr);
 	}
 
+	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath)
+	{
+		UpdateAssetPath(uuid, newPath, newPath + ".gmeta");
+	}
+
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath)
 	{
-		if (!m_AssetLocations.Contains(uuid))
-		{
-			return;
-		}
+		if (!m_AssetLocations.Contains(uuid)) return;
 
 		AssetLocation location = m_AssetLocations[uuid];
 		location.m_Path = newPath;
@@ -74,13 +79,108 @@ namespace Glory
 		m_PathToUUID.Set(location.m_Path, uuid);
 		m_AssetLocations.Set(uuid, location);
 
-		ResourceMeta meta = m_Metas[uuid];
-		meta.m_Path = newMetaPath;
-		m_Metas.Set(uuid, meta);
+		m_Metas.Do(uuid, [&](ResourceMeta* pMeta) { pMeta->m_Path = newMetaPath; });
+
+		Resource* pResource = AssetManager::FindResource(uuid);
+
+		std::filesystem::path path = newPath;
+		if (pResource) pResource->SetName(path.filename().replace_extension().string());
+		//ResourceMeta meta = m_Metas[uuid];
+		//meta.m_Path = newMetaPath;
+		//m_Metas.Set(uuid, meta);
+	}
+
+	void AssetDatabase::UpdateAssetPaths(const std::string& oldPath, const std::string& newPath)
+	{
+		UUID id = AssetDatabase::GetAssetUUID(oldPath);
+		if (id != 0)
+		{
+			UpdateAssetPath(id, newPath);
+			return;
+		}
+
+		std::filesystem::path absolutePath = Game::GetAssetPath();
+		absolutePath = absolutePath.append(oldPath);
+
+		std::vector<std::string> relevantAssetPaths;
+		std::vector<UUID> relevantAssets;
+		m_PathToUUID.ForEach([&](const std::string& key, const UUID& uuid)
+		{
+			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
+			absoluteAssetPath = absoluteAssetPath.append(key);
+			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) return;
+			relevantAssetPaths.push_back(key);
+			relevantAssets.push_back(uuid);
+		});
+
+		for (size_t i = 0; i < relevantAssets.size(); i++)
+		{
+			UUID uuid = relevantAssets[i];
+			std::string path = relevantAssetPaths[i];
+			size_t index = path.find(oldPath);
+			size_t length = oldPath.length();
+			path = path.replace(index, length, newPath);
+			UpdateAssetPath(uuid, path);
+		}
+	}
+
+	void AssetDatabase::DeleteAsset(UUID uuid)
+	{
+		AssetLocation location;
+		ResourceMeta meta;
+		if (!GetAssetLocation(uuid, location)) return;
+		if (!GetResourceMeta(uuid, meta)) return;
+		m_Metas.Erase(uuid);
+		m_AssetLocations.Erase(uuid);
+		m_PathToUUID.Erase(location.m_Path);
+		m_AssetsByType.Do(meta.Hash(), [&](std::vector<UUID>* assets)
+		{
+			auto it = std::find(assets->begin(), assets->end(), uuid);
+			if (it == assets->end()) return;
+			assets->erase(it);
+		});
+		m_Callbacks.EnqueueCallback(CallbackType::CT_AssetDeleted, uuid, nullptr);
+	}
+
+	void AssetDatabase::DeleteAssets(const std::string& path)
+	{
+		std::filesystem::path absolutePath = Game::GetAssetPath();
+		absolutePath = absolutePath.append(path);
+
+		std::vector<std::string> relevantAssetPaths;
+		std::vector<UUID> relevantAssets;
+		m_PathToUUID.ForEach([&](const std::string& key, const UUID& uuid)
+		{
+			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
+			absoluteAssetPath = absoluteAssetPath.append(key);
+			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) return;
+			relevantAssetPaths.push_back(key);
+			relevantAssets.push_back(uuid);
+		});
+
+		for (size_t i = 0; i < relevantAssets.size(); i++)
+		{
+			UUID uuid = relevantAssets[i];
+			DeleteAsset(uuid);
+		}
+	}
+
+	void AssetDatabase::IncrementAssetVersion(UUID uuid)
+	{
+		if (!m_Metas.Contains(uuid)) return;
+		m_Metas.Do(uuid, [&](ResourceMeta* pMeta)
+		{
+			++pMeta->m_SerializedVersion;
+			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(pMeta->Hash());
+			if (!pLoader) return;
+			pMeta->Write(pLoader);
+		});
 	}
 
 	void AssetDatabase::Save()
 	{
+		SaveDirtyAssets();
+
 		LayerManager::Save();
 
 		YAML::Emitter out;
@@ -127,9 +227,9 @@ namespace Glory
 			std::string extension = "";
 			YAML_READ(element, data, Extension, extension, std::string);
 
-			std::filesystem::path metaFilePath("./Assets" + path);
+			std::filesystem::path metaFilePath(path);
 			std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
-			metaFilePath = metaFilePath.replace_extension(metaExtension);
+			metaFilePath += std::filesystem::path(".gmeta");
 			ResourceMeta meta(metaFilePath.string(), extension, uuid, hash);
 			YAML::Node importSettingsNode = element["ImportSettings"];
 			meta.m_ImportSettings = ImportSettings();
@@ -151,6 +251,103 @@ namespace Glory
 		}
 	}
 
+	void AssetDatabase::CreateAsset(Resource* pResource, const std::string& path)
+	{
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(extension.string());
+		if (!pModule)
+		{
+			// Shouldnt happen but uuuuuuuuuh
+			Debug::LogError("Failed to save asset, asset type not supported!");
+			return;
+		}
+		pModule->Save(path, pResource);
+		ImportAsset(path, pResource);
+	}
+
+	void AssetDatabase::ImportAsset(const std::string& path, Resource* pLoadedResource)
+	{
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(extension.string());
+		if (!pModule)
+		{
+			// Not supperted!
+			Debug::LogError("Failed to import file, asset type not supported!");
+			return;
+		}
+
+		if (!pLoadedResource)
+		{
+			std::any importSettings = pModule->CreateDefaultImportSettings(extension.string());
+			pLoadedResource = pModule->LoadUsingAny(path, importSettings);
+		}
+
+		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
+		std::filesystem::path metaFilePath = path + metaExtension.string();
+		// Generate a meta file
+		const ResourceType* pType = ResourceType::GetResourceType(extension.string());
+
+		if (!pType)
+		{
+			// Not supperted!
+			Debug::LogError("Failed to import file, could not determine ResourceType!");
+			return;
+		}
+
+		const std::string assetPath = Game::GetAssetPath();
+		metaFilePath = metaFilePath.lexically_relative(assetPath);
+		ResourceMeta meta(metaFilePath.string(), extension.string(), UUID(), pType->Hash());
+		meta.Write(pModule);
+		meta.Read();
+		pLoadedResource->m_ID = meta.ID();
+		pLoadedResource->m_Name = fileName.string();
+		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
+		AssetManager::m_pLoadedAssets.Set(pLoadedResource->m_ID, pLoadedResource);
+		InsertAsset(relativePath.string(), meta);
+	}
+
+	void AssetDatabase::ImportNewScene(const std::string& path, GScene* pScene)
+	{
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
+		std::filesystem::path metaFilePath = path + metaExtension.string();
+		// Generate a meta file
+		const ResourceType* pType = ResourceType::GetResourceType<GScene>();
+
+		const std::string assetPath = Game::GetAssetPath();
+		metaFilePath = metaFilePath.lexically_relative(assetPath);
+		ResourceMeta meta(metaFilePath.string(), extension.string(), UUID(), pType->Hash());
+		meta.Write(nullptr);
+		meta.Read();
+		pScene->m_ID = meta.ID();
+		pScene->m_Name = fileName.string();
+		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
+		AssetManager::m_pLoadedAssets.Set(pScene->m_ID, pScene);
+		InsertAsset(relativePath.string(), meta);
+	}
+
+	void AssetDatabase::SaveAsset(Resource* pResource, bool markUndirty)
+	{
+		ResourceMeta meta;
+		if (!pResource || !GetResourceMeta(pResource->GetUUID(), meta)) return;
+		AssetLocation location;
+		if (!GetAssetLocation(pResource->GetUUID(), location)) return;
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(meta.m_TypeHash);
+		std::filesystem::path path = Game::GetAssetPath();
+		path.append(location.m_Path);
+		pModule->Save(path.string(), pResource);
+		IncrementAssetVersion(pResource->GetUUID());
+		if (markUndirty)
+			m_UnsavedAssets.Erase(pResource->GetUUID());
+	}
+
 	void AssetDatabase::ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback)
 	{
 		m_AssetLocations.ForEach(callback);
@@ -168,10 +365,13 @@ namespace Glory
 		m_PathToUUID.Erase(path);
 	}
 
-	const std::vector<UUID> AssetDatabase::GetAllAssetsOfType(size_t typeHash)
+	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out)
 	{
-		if (!m_AssetsByType.Contains(typeHash)) return std::vector<UUID>();
-		return m_AssetsByType[typeHash];
+		if (!m_AssetsByType.Contains(typeHash)) return;
+		size_t size = out.size();
+		out.resize(size + m_AssetsByType[typeHash].size());
+		size_t copySize = sizeof(UUID) * m_AssetsByType[typeHash].size();
+		memcpy(&out[size], &m_AssetsByType[typeHash][0], copySize);
 	}
 
 	std::string AssetDatabase::GetAssetName(UUID uuid)
@@ -183,14 +383,35 @@ namespace Glory
 		return path.filename().replace_extension("").string();
 	}
 
+	void AssetDatabase::SetDirty(Object* pResource)
+	{
+		SetDirty(pResource->GetUUID());
+	}
+
+	void AssetDatabase::SetDirty(UUID uuid)
+	{
+		if (m_UnsavedAssets.Contains(uuid)) return;
+		m_UnsavedAssets.push_back(uuid);
+	}
+
+	void AssetDatabase::SaveDirtyAssets()
+	{
+		m_UnsavedAssets.ForEachClear([&](const UUID& uuid)
+		{
+			Resource* pResource = AssetManager::FindResource(uuid);
+			if (!pResource) return;
+			SaveAsset(pResource, false);
+		});
+	}
+
 	void AssetDatabase::Initialize()
 	{
 		m_Callbacks.Initialize();
-		//Load();
 	}
 
 	void AssetDatabase::Destroy()
 	{
+		Save();
 		m_Callbacks.Cleanup();
 		Clear();
 	}
@@ -200,6 +421,7 @@ namespace Glory
 		m_AssetLocations.Clear();
 		m_PathToUUID.Clear();
 		m_Metas.Clear();
+		m_AssetsByType.Clear();
 	}
 
 	void AssetDatabase::ExportEditor(YAML::Emitter& out)

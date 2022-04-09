@@ -15,11 +15,9 @@ namespace Glory
 
 		virtual void Use() = 0;
 		void SetProperties();
-		virtual void SetPropertiesExtra() = 0;
+		void SetObjectData(const ObjectData& data);
 
 	public: // Property setters
-		void SetUBO(UniformBufferObjectTest ubo);
-
 		// All of these need to go, properties should be set using the material data/material instance data class linked to this material
 		virtual void SetFloat(const std::string& name, float value) const = 0;
 		virtual void SetInt(const std::string& name, int value) const = 0;
@@ -41,15 +39,16 @@ namespace Glory
 		void AddShader(Shader* pShader);
 
 		virtual Buffer* CreatePropertiesBuffer(size_t size) = 0;
+		virtual Buffer* CreateMVPBuffer() = 0;
 
 		void Clear();
 
 	protected:
 		MaterialData* m_pMaterialData;
 		std::vector<Shader*> m_pShaders;
-		UniformBufferObjectTest m_UBO;
 
 		Buffer* m_pPropertiesBuffer;
+		static Buffer* m_pMVPBuffer;
 		bool m_Complete;
 
 	private:

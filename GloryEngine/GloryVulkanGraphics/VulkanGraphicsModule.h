@@ -62,13 +62,13 @@ namespace Glory
 		virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) override;
 		virtual void Swap() override;
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
-		virtual void DrawMesh(MeshData* pMeshData) override;
 
 	private:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
 		virtual FrameStates* CreateFrameStates() override;
 		virtual GPUResourceManager* CreateGPUResourceManager() override;
+		virtual void OnDrawMesh(MeshData* pMeshData) override;
 
 	private:
 		void InitializeValidationLayers();

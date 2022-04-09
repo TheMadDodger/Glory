@@ -25,6 +25,9 @@ namespace Glory
 		virtual void CleanupOpenGL() = 0;
 		virtual void GLSwapWindow() = 0;
 		virtual void MakeGLContextCurrent() = 0;
+		virtual void Resize(int width, int height) = 0;
+		virtual void GetPosition(int* x, int* y) = 0;
+		virtual void SetPosition(int x, int y) = 0;
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);

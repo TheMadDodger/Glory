@@ -28,12 +28,14 @@ namespace Glory::Editor
 			m_pComponentObject->GetRegistry()->GetSystems()->AcquireSerializedProperties(m_pComponentObject->GetComponentData(), m_Properties);
 		}
 
-		virtual void OnGUI() override
+		virtual bool OnGUI() override
 		{
+			bool change = false;
 			for (size_t i = 0; i < m_Properties.size(); i++)
 			{
-				PropertyDrawer::DrawProperty(m_Properties[i]);
+				change |= PropertyDrawer::DrawProperty(m_Properties[i]);
 			}
+			return change;
 		}
 
 	private:

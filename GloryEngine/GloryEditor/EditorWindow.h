@@ -16,14 +16,14 @@ namespace Glory::Editor
 		virtual ~EditorWindow();
 
 		template<typename T>
-		static EditorWindow* GetWindow(bool alwaysOpenNew = false)
+		static T* GetWindow(bool alwaysOpenNew = false)
 		{
 			if (!alwaysOpenNew)
 			{
 				for (size_t i = 0; i < m_pActiveEditorWindows.size(); ++i)
 				{
 					if (m_pActiveEditorWindows[i]->GetType() == typeid(T))
-						return m_pActiveEditorWindows[i];
+						return (T*)m_pActiveEditorWindows[i];
 				}
 			}
 

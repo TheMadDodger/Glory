@@ -15,6 +15,10 @@ namespace Glory
 
 		virtual const std::type_info& GetModuleType() override;
 
+		WindowCreateInfo* GetMainWindowCreateInfo();
+
+		virtual void GetCurrentScreenResolution(uint32_t& width, uint32_t& height) = 0;
+
 	public: // Module functions
 		Window* CreateNewWindow(const WindowCreateInfo& createInfo);
 		virtual void OpenMessageBox(const std::string& message);

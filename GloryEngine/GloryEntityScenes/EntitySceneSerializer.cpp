@@ -15,8 +15,6 @@ namespace Glory
 
 	void EntitySceneSerializer::Serialize(GScene* pScene, YAML::Emitter& out)
 	{
-		out << YAML::Key << "Name";
-		out << YAML::Value << pScene->Name();
 		out << YAML::Key << "Entities";
 		out << YAML::Value << YAML::BeginSeq;
 		for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
@@ -27,12 +25,9 @@ namespace Glory
 		out << YAML::EndSeq;
 	}
 
-	Object* EntitySceneSerializer::Deserialize(Object* pParent, YAML::Node& object)
+	Object* EntitySceneSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string& name)
 	{
-		std::string name;
 		YAML::Node node;
-		YAML_READ(object, node, Name, name, std::string);
-
 		EntityScene* pScene = new EntityScene(name);
 		pScene->Initialize();
 		node = object["Entities"];

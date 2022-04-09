@@ -1,5 +1,7 @@
 #include "EditorPlatform.h"
 #include "EditorAssets.h"
+#include <implot.h>
+#include <ImGuizmo.h>
 
 namespace Glory::Editor
 {
@@ -43,6 +45,7 @@ namespace Glory::Editor
 		m_pRenderImpl->Shutdown();
 		m_pWindowImpl->Shutdown();
 		m_pRenderImpl->Cleanup();
+		ImPlot::DestroyContext();
 		ImGui::DestroyContext();
 
 		EditorAssets::Destroy();
@@ -73,6 +76,7 @@ namespace Glory::Editor
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
+		ImPlot::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -99,6 +103,8 @@ namespace Glory::Editor
 		m_pRenderImpl->NewFrame();
 		m_pWindowImpl->NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
+		ImGuizmo::Enable(true);
 	}
 
 	void EditorPlatform::GraphicsThreadBeginRender()

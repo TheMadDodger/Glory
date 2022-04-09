@@ -5,7 +5,7 @@
 
 namespace Glory
 {
-	FileLoaderModule::FileLoaderModule() : ResourceLoaderModule("txt")
+	FileLoaderModule::FileLoaderModule() : ResourceLoaderModule(".txt")
 	{
 	}
 

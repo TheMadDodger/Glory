@@ -17,6 +17,44 @@ namespace Glory::Editor
 	ThreadedUMap<UUID, std::function<void(FileData*)>> EditorShaderProcessor::m_WaitingCallbacks;
 	ThreadedVector<std::function<void(FileData*)>> EditorShaderProcessor::m_Callbacks;
 
+	std::map<spirv_cross::SPIRType::BaseType, std::vector<size_t>> EditorShaderProcessor::m_SpirBaseTypeToHash = {
+		// Int
+		{ spirv_cross::SPIRType::BaseType::Int,
+		{ ResourceType::GetHash<int32_t>(), ResourceType::GetHash<glm::ivec2>(), ResourceType::GetHash<glm::ivec3>(), ResourceType::GetHash<glm::ivec4>() } },
+
+		// UInt
+		{ spirv_cross::SPIRType::BaseType::UInt,
+		{ ResourceType::GetHash<uint32_t>(), ResourceType::GetHash<glm::uvec2>(), ResourceType::GetHash<glm::uvec3>(), ResourceType::GetHash<glm::uvec4>() } },
+		
+		// I64
+		{ spirv_cross::SPIRType::BaseType::Int64,
+		{ ResourceType::GetHash<int64_t>(), ResourceType::GetHash<glm::i64vec2>(), ResourceType::GetHash<glm::i64vec3>(), ResourceType::GetHash<glm::i64vec4>() } },
+
+		// U64
+		{ spirv_cross::SPIRType::BaseType::UInt64,
+		{ ResourceType::GetHash<uint64_t>(), ResourceType::GetHash<glm::u64vec2>(), ResourceType::GetHash<glm::u64vec3>(), ResourceType::GetHash<glm::u64vec4>() } },
+
+		// Float
+		{ spirv_cross::SPIRType::BaseType::Float,
+		{ ResourceType::GetHash<float>(), ResourceType::GetHash<glm::vec2>(), ResourceType::GetHash<glm::vec3>(), ResourceType::GetHash<glm::vec4>() } },
+
+		// Bool
+		{ spirv_cross::SPIRType::BaseType::Boolean,
+		{ ResourceType::GetHash<bool>(), ResourceType::GetHash<glm::bvec2>(), ResourceType::GetHash<glm::bvec3>(), ResourceType::GetHash<glm::bvec4>() } },
+
+		// Double
+		{ spirv_cross::SPIRType::BaseType::Double, { ResourceType::GetHash<double>() } },
+
+		// Short
+		{ spirv_cross::SPIRType::BaseType::Short, { ResourceType::GetHash<short>() } },
+
+		// UShort
+		{ spirv_cross::SPIRType::BaseType::UShort, { ResourceType::GetHash<unsigned short>() } },
+
+		// Unknown
+		{ spirv_cross::SPIRType::BaseType::Unknown, { 0 } },
+	};
+
 	EditorShaderData* EditorShaderProcessor::GetShaderSource(ShaderSourceData* pShaderSource)
 	{
 		UUID uuid = pShaderSource->GetUUID();
@@ -111,7 +149,7 @@ namespace Glory::Editor
 
 			if (pShaderData == nullptr) continue;
 
-			ProcessReflection(pShaderData, pShaderSource);
+			ProcessReflection(pShaderData);
 
 			std::string path = ShaderManager::GetCompiledShaderPath(pShaderData->GetUUID());
 			CompileForCurrentPlatform(pShaderData, path);
@@ -171,11 +209,11 @@ namespace Glory::Editor
 		std::ifstream fileStream(path, std::ios::binary);
 		if (!fileStream.is_open()) return nullptr;
 
-		EditorShaderData* pShaderData = new EditorShaderData(pShaderSource->GetUUID());
 		fileStream.seekg(0, std::ios::end);
 		size_t size = (size_t)fileStream.tellg();
 		fileStream.seekg(0, std::ios::beg);
 
+		EditorShaderData* pShaderData = new EditorShaderData(pShaderSource->GetUUID());
 		pShaderData->m_ShaderData.resize(size / sizeof(uint32_t));
 		fileStream.read((char*)pShaderData->m_ShaderData.data(), size);
 		fileStream.close();
@@ -195,12 +233,35 @@ namespace Glory::Editor
 		stream.close();
 	}
 
-	void EditorShaderProcessor::ProcessReflection(EditorShaderData* pEditorShader, ShaderSourceData* pShaderSource)
+	void EditorShaderProcessor::ProcessReflection(EditorShaderData* pEditorShader)
 	{
 		spirv_cross::Compiler compiler(pEditorShader->Data(), pEditorShader->Size());
 		compiler.compile();
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
-		//pShaderSource->SetShaderResources(resources);
+
+		for (size_t i = 0; i < resources.sampled_images.size(); i++)
+		{
+			spirv_cross::Resource sampler = resources.sampled_images[i];
+			pEditorShader->m_SamplerNames.push_back(sampler.name);
+		}
+
+		for (size_t i = 0; i < resources.storage_buffers.size(); i++)
+		{
+			spirv_cross::Resource storageBuffer = resources.storage_buffers[i];
+			if (storageBuffer.name != "propertiesSSBO") continue;
+			const spirv_cross::SPIRType& base_type = compiler.get_type(storageBuffer.base_type_id);
+			const spirv_cross::SPIRType& type = compiler.get_type(storageBuffer.type_id);
+
+			if (base_type.basetype != spirv_cross::SPIRType::Struct) break;
+			for (size_t j = 0; j < base_type.member_types.size(); j++)
+			{
+				spirv_cross::TypeID memberType = base_type.member_types[j];
+				const spirv_cross::SPIRType& type = compiler.get_type(memberType);
+				const std::string& name = compiler.get_member_name(storageBuffer.base_type_id, j);
+				size_t hash = type.vecsize - 1 < m_SpirBaseTypeToHash[type.basetype].size() ? m_SpirBaseTypeToHash[type.basetype][type.vecsize - 1] : 0;
+				pEditorShader->m_PropertyInfos.push_back(EditorShaderData::PropertyInfo(name, hash));
+			}
+		}
 	}
 
 	void EditorShaderProcessor::AssetRegisteredCallback(UUID uuid, const ResourceMeta& meta, Resource* pResource)

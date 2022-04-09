@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <mutex>
 
 namespace Glory::Editor
 {
@@ -13,6 +14,7 @@ namespace Glory::Editor
 		static bool ProjectExists(const std::string& path, const std::string& name);
 		static std::string NewProject(const std::string& path, const std::string& name);
 		void CreateFolder(const std::string& name);
+		void ImportModuleAssets(bool overwrite);
 
 		std::string Name();
 		std::string RootPath();
@@ -28,6 +30,7 @@ namespace Glory::Editor
 
 	private:
 		static ProjectSpace* m_pCurrentProject;
+		static std::mutex m_ProjectLock;
 		std::string m_ProjectFilePath;
 		std::string m_ProjectRootPath;
 		std::string m_CachePath;

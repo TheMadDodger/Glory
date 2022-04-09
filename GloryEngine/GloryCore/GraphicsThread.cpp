@@ -40,6 +40,19 @@ namespace Glory
 		return m_pRenderQueue;
 	}
 
+	void GraphicsThread::Execute(std::function<void(void*)> func, void* pData)
+	{
+		UUID uuid = UUID();
+
+		ExecuteData data = ExecuteData();
+		data.m_Func = func;
+		data.m_pData = pData;
+		data.m_UUID = uuid;
+		m_Executes.push_back(data);
+
+		//while (m_Executes.Contains([&](const ExecuteData& otherData) { return otherData.m_UUID == uuid; })) {}
+	}
+
 	void GraphicsThread::Run()
 	{
 		for (size_t i = 0; i < m_InitializationBinds.size(); i++)
@@ -49,12 +62,15 @@ namespace Glory
 
 		while (true)
 		{
+			m_Executes.ForEachClear([](const ExecuteData& data) {data.m_Func(data.m_pData); });
+
 			if (m_Exit) break;
+
 			m_pRenderQueue->GetNextFrame(
-				[&](const RenderFrame& frame)
-				{
-					OnRenderFrame(frame);
-				});
+			[&](const RenderFrame& frame)
+			{
+				OnRenderFrame(frame);
+			});
 		}
 
 		for (size_t i = 0; i < m_CleanupBinds.size(); i++)

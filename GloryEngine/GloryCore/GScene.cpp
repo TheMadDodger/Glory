@@ -3,17 +3,12 @@
 
 namespace Glory
 {
-	GScene::GScene() : m_SceneName("New Scene")
+	GScene::GScene(const std::string& sceneName) : Resource(sceneName)
 	{
 		APPEND_TYPE(GScene);
 	}
 
-	GScene::GScene(const std::string& sceneName) : m_SceneName(sceneName)
-	{
-		APPEND_TYPE(GScene);
-	}
-
-	GScene::GScene(const std::string& sceneName, UUID uuid) : Resource(uuid), m_SceneName(sceneName)
+	GScene::GScene(const std::string& sceneName, UUID uuid) : Resource(uuid, sceneName)
 	{
 		APPEND_TYPE(GScene);
 	}
@@ -26,8 +21,9 @@ namespace Glory
 	SceneObject* GScene::CreateEmptyObject()
 	{
 		SceneObject* pObject = CreateObject("Empty Object");
-		pObject->Initialize();
+		pObject->m_pScene = this;
 		m_pSceneObjects.push_back(pObject);
+		pObject->Initialize();
 		OnObjectAdded(pObject);
 		return pObject;
 	}
@@ -35,8 +31,9 @@ namespace Glory
 	SceneObject* GScene::CreateEmptyObject(const std::string& name, UUID uuid)
 	{
 		SceneObject* pObject = CreateObject(name, uuid);
-		pObject->Initialize();
+		pObject->m_pScene = this;
 		m_pSceneObjects.push_back(pObject);
+		pObject->Initialize();
 		OnObjectAdded(pObject);
 		return pObject;
 	}
@@ -52,9 +49,12 @@ namespace Glory
 		return m_pSceneObjects[index];
 	}
 
-	const std::string& GScene::Name()
+	void GScene::DeleteObject(SceneObject* pObject)
 	{
-		return m_SceneName;
+		OnDeleteObject(pObject);
+		auto it = std::find(m_pSceneObjects.begin(), m_pSceneObjects.end(), pObject);
+		m_pSceneObjects.erase(it);
+		delete pObject;
 	}
 
 	void GScene::SetUUID(UUID uuid)

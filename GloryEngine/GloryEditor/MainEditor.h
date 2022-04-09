@@ -1,6 +1,7 @@
 #pragma once
 #include "ProjectPopup.h"
 #include "AssetPickerPopup.h"
+#include "EditorSettings.h"
 #include <EditorAssetLoader.h>
 
 namespace Glory::Editor
@@ -15,11 +16,10 @@ namespace Glory::Editor
 		void Destroy();
 		void PaintEditor();
 
-		EditorAssetLoader* GetAssetLoader();
-
 	private:
 		void CreateDefaultMainMenuBar();
 		void SetDarkThemeColors();
+		void CreateDefaultObjectMenu();
 
 		void Update();
 
@@ -29,8 +29,10 @@ namespace Glory::Editor
 
 	private:
 		friend class EditorApplication;
-		EditorAssetLoader* m_pAssetLoader;
 		ProjectPopup* m_pProjectPopup;
 		AssetPickerPopup* m_AssetPickerPopup;
+		EditorSettings m_Settings;
+
+		static size_t m_SaveSceneIndex;
 	};
 }

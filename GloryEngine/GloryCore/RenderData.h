@@ -6,11 +6,12 @@
 
 namespace Glory
 {
-	struct UniformBufferObjectTest
+	struct ObjectData
 	{
-		glm::mat4 model;
-		glm::mat4 view;
-		glm::mat4 proj;
+		glm::mat4 Model;
+		glm::mat4 View;
+		glm::mat4 Projection;
+		uint32_t ObjectID;
 	};
 
 	struct RenderData
@@ -19,6 +20,7 @@ namespace Glory
 		// Mesh
 		ModelData* m_pModel;
 		size_t m_MeshIndex;
+		uint32_t m_ObjectID;
 
 		// World matrices
 		glm::mat4 m_World;

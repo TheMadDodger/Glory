@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "ThreadedVar.h"
 
 namespace Glory
 {
@@ -38,8 +39,12 @@ namespace Glory
 		static void LogError(const std::string& message, bool bIncludeTimeStamp = true);
 		static void LogFatalError(const std::string& message, bool bIncludeTimeStamp = true);
 
+		static void LogOnce(const std::string& key, const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp = true);
+
 	private:
 		Debug();
 		virtual ~Debug();
+
+		static ThreadedVector<std::string> m_LoggedKeys;
 	};
 }

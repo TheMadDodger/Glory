@@ -16,13 +16,10 @@ namespace Glory
 	{
 	}
 
-	RenderTexture* ClusteredRendererModule::CreateCameraRenderTexture(size_t width, size_t height)
+	void ClusteredRendererModule::GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments)
 	{
-		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
-		RenderTextureCreateInfo createInfo(width, height, true);
-		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
-		createInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
-		return pResourceManager->CreateRenderTexture(createInfo);
+		attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 	}
 
 	void ClusteredRendererModule::OnCameraResize(CameraRef camera)
@@ -66,8 +63,8 @@ namespace Glory
 		m_pClusterCullLightMaterialData = new MaterialData({ m_pClusterCullLightShaderData });
 
 
-		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.vert", importSettings);
-		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer.frag", importSettings);
+		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer_Vert.shader", importSettings);
+		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer_Frag.shader", importSettings);
 
 		std::vector<ShaderSourceData*> pShaderFiles = { new ShaderSourceData(ShaderType::ST_Vertex, pVert), new ShaderSourceData(ShaderType::ST_Fragment, pFrag) };
 		m_pScreenMaterial = new MaterialData(pShaderFiles);
@@ -139,14 +136,14 @@ namespace Glory
 		Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
 		if (!pMaterial) return;
 
-		UniformBufferObjectTest ubo;
-		ubo.model = renderData.m_World;
-		ubo.view = camera.GetView();
-		ubo.proj = camera.GetProjection();
+		ObjectData object;
+		object.Model = renderData.m_World;
+		object.View = camera.GetView();
+		object.Projection = camera.GetProjection();
+		object.ObjectID = renderData.m_ObjectID;
 
-		pMaterial->SetUBO(ubo);
 		pMaterial->SetProperties();
-		pMaterial->SetPropertiesExtra();
+		pMaterial->SetObjectData(object);
 		pGraphics->DrawMesh(pMeshData);
 	}
 

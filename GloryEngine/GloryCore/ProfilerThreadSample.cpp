@@ -3,16 +3,31 @@
 
 namespace Glory
 {
-	ProfilerThreadSample::ProfilerThreadSample() : m_Name("")
+	ProfilerThreadSample::ProfilerThreadSample() : m_Name(""), m_Start(std::chrono::steady_clock::now())
 	{
 	}
 
-	ProfilerThreadSample::ProfilerThreadSample(const std::string& name) : m_Name(name)
+	ProfilerThreadSample::ProfilerThreadSample(const std::string& name) : m_Name(name), m_Start(std::chrono::steady_clock::now())
 	{
 	}
 
 	ProfilerThreadSample::~ProfilerThreadSample()
 	{
+	}
+
+	const std::string& ProfilerThreadSample::Name() const
+	{
+		return m_Name;
+	}
+
+	size_t ProfilerThreadSample::SampleCount() const
+	{
+		return m_Samples.size();
+	}
+
+	ProfilerSample* ProfilerThreadSample::GetSample(size_t index)
+	{
+		return &m_Samples[index];
 	}
 
 	void ProfilerThreadSample::BeginSample(const std::string& name)
@@ -35,7 +50,8 @@ namespace Glory
 			return;
 		}
 
-		(&m_Samples[m_Samples.size() - 1])->EndSample();
+		ProfilerSample* pSample = &m_Samples[m_Samples.size() - 1];
+		pSample->EndSample();
 	}
 
 	void ProfilerThreadSample::Clear()

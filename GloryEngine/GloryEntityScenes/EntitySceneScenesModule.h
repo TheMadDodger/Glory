@@ -25,6 +25,8 @@ namespace Glory
 
 		static EntitySceneObject* CreateDeserializedObject(GScene* pScene, const std::string& name, UUID uuid);
 
+		virtual SceneObject* GetSceneObjectFromObjectID(uint32_t objectID) override;
+
 	private:
 		friend class EntitySceneObjectSerializer;
 		friend class EntitySceneSerializer;

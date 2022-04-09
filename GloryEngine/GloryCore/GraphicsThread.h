@@ -2,6 +2,7 @@
 #include "RenderQueue.h"
 #include "Thread.h"
 #include "Camera.h"
+#include "ThreadedVar.h"
 
 namespace Glory
 {
@@ -52,13 +53,20 @@ namespace Glory
 			m_EndRenderBinds.push_back(std::bind(&T::GraphicsThreadEndRender, pModule));
 		}
 
+		void Execute(std::function<void(void*)> func, void* pData);
+
 	private:
 		void Run();
-
 		void OnRenderFrame(const RenderFrame& frame);
-		void OnRender();
 
 	private:
+		struct ExecuteData
+		{
+			UUID m_UUID;
+			std::function<void(void*)> m_Func;
+			void* m_pData;
+		};
+
 		Thread* m_pThread;
 		RenderQueue* m_pRenderQueue;
 		Engine* m_pEngine;
@@ -67,6 +75,7 @@ namespace Glory
 		std::vector<std::function<void()>> m_CleanupBinds;
 		std::vector<std::function<void()>> m_BeginRenderBinds;
 		std::vector<std::function<void()>> m_EndRenderBinds;
+		ThreadedVector<ExecuteData> m_Executes;
 		bool m_Exit;
 	};
 }

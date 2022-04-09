@@ -7,6 +7,14 @@ namespace Glory
 	SDLWindowModule::SDLWindowModule(const WindowCreateInfo& mainWindowCreateInfo) : WindowModule(mainWindowCreateInfo) {}
 	SDLWindowModule::~SDLWindowModule() {}
 
+	void SDLWindowModule::GetCurrentScreenResolution(uint32_t& width, uint32_t& height)
+	{
+		SDL_DisplayMode DM;
+		SDL_GetCurrentDisplayMode(0, &DM);
+		width = DM.w;
+		height = DM.h;
+	}
+
 	Window* SDLWindowModule::CreateWindow_Internal(const WindowCreateInfo& createInfo)
 	{
 		return new SDLWindow(createInfo);

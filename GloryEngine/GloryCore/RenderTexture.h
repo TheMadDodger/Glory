@@ -14,13 +14,15 @@ namespace Glory
 
 	struct Attachment
 	{
-		Attachment(const std::string& name, const PixelFormat pixelFormat, const ImageType& imageType, const ImageAspect& imageAspect);
+		Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat, const ImageType& imageType, const ImageAspect& imageAspect, bool autoBind = true);
 
 		//PixelFormat::PF_R8G8B8A8Srgb
 		std::string Name;
+		PixelFormat InternalFormat;
 		PixelFormat Format;
 		ImageType ImageType;
 		ImageAspect ImageAspect;
+		bool m_AutoBind;
 	};
 
 	struct RenderTextureCreateInfo
@@ -47,6 +49,11 @@ namespace Glory
 
 		void BindAll(Material* pMaterial);
 
+		size_t AttachmentCount() const;
+		const std::string AttachmentName(size_t index) const;
+
+		virtual uint32_t ReadPixel(const glm::ivec2& coord) = 0;
+
 	protected:
 		RenderTexture(const RenderTextureCreateInfo& createInfo);
 		virtual ~RenderTexture();
@@ -63,6 +70,7 @@ namespace Glory
 		size_t m_Height;
 		std::vector<Texture*> m_pTextures;
 		std::map<std::string, size_t> m_NameToTextureIndex;
+		std::vector<std::string> m_Names;
 		const RenderTextureCreateInfo m_CreateInfo;
 	};
 }

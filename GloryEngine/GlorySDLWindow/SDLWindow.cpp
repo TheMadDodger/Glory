@@ -78,6 +78,23 @@ namespace Glory
 		return m_GLSDLContext;
 	}
 
+	void SDLWindow::Resize(int width, int height)
+	{
+		m_Width = width;
+		m_Height = height;
+		SDL_SetWindowSize(m_pWindow, width, height);
+	}
+	
+	void SDLWindow::GetPosition(int* width, int* height)
+	{
+		SDL_GetWindowPosition(m_pWindow, width, height);
+	}
+	
+	void SDLWindow::SetPosition(int width, int height)
+	{
+		SDL_SetWindowPosition(m_pWindow, width, height);
+	}
+
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr), m_GLSDLContext(NULL) {}
 
 	SDLWindow::~SDLWindow()

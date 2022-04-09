@@ -42,14 +42,14 @@ namespace Glory
 		pCamera->m_IsInUse = false;
 	}
 
-	RenderTexture* CameraManager::GetRenderTextureForCamera(CameraRef camera, Engine* pEngine)
+	RenderTexture* CameraManager::GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, bool createIfNotExist)
 	{
 		Profiler::BeginSample("CameraManager::GetRenderTextureForCamera");
 		Camera* pCamera = GetCamera(camera.m_CameraID);
 		if (pCamera == nullptr) return nullptr;
 		if (pCamera->m_pRenderTexture)
 		{
-			if (pCamera->m_TextureIsDirty)
+			if (createIfNotExist && pCamera->m_TextureIsDirty)
 			{
 				pCamera->m_pRenderTexture->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
 				pCamera->m_TextureIsDirty = false;
@@ -58,6 +58,8 @@ namespace Glory
 			Profiler::EndSample();
 			return pCamera->m_pRenderTexture;
 		}
+
+		if (!createIfNotExist) return nullptr;
 
 		size_t width = pCamera->m_Resolution.x;
 		size_t height = pCamera->m_Resolution.y;

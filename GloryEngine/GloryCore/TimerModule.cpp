@@ -32,10 +32,10 @@ namespace Glory
 	{
 		std::chrono::time_point<std::chrono::steady_clock> currentTime = std::chrono::steady_clock::now();
 		std::chrono::duration<float> time = currentTime - m_AppStart;
-		return std::chrono::duration_cast<seconds>(time).count() * unscaled ? 1.0f : m_TimeScale;
+		return std::chrono::duration_cast<seconds>(time).count() * (unscaled ? 1.0f : m_TimeScale);
 	}
 
-	TimerModule::TimerModule() {}
+	TimerModule::TimerModule() : m_AppStart(std::chrono::steady_clock::now()) {}
 
 	TimerModule::~TimerModule() {}
 

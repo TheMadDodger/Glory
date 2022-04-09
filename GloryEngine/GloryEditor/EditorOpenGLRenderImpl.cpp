@@ -2,6 +2,7 @@
 #include <Game.h>
 #include <GL/glew.h>
 #include <GLTexture.h>
+#include <ImFileDialog.h>
 
 namespace Glory::Editor
 {
@@ -69,5 +70,14 @@ namespace Glory::Editor
 		if (pTexture == nullptr) return 0;
 		GLTexture* pGLTexture = (GLTexture*)pTexture;
 		return (void*)pGLTexture->GetID();
+	}
+
+	void EditorOpenGLRenderImpl::LogGLError(const unsigned int& err, bool bIncludeTimeStamp)
+	{
+		if (err != GL_NO_ERROR)
+		{
+			const char* error = (const char*)glewGetErrorString(err);
+			Debug::LogWarning(error, bIncludeTimeStamp);
+		}
 	}
 }

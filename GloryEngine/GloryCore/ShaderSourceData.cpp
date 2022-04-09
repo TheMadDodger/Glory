@@ -42,14 +42,4 @@ namespace Glory
     {
         m_pPlatformCompiledShader = pShaderFile;
     }
-
-    void ShaderSourceData::SetShaderResources(const spirv_cross::ShaderResources& resources)
-    {
-        m_Resources = resources;
-    }
-
-    const spirv_cross::ShaderResources& ShaderSourceData::GetResources() const
-    {
-        return m_Resources;
-    }
 }

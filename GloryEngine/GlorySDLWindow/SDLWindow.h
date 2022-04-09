@@ -15,8 +15,11 @@ namespace Glory
 		virtual void CleanupOpenGL() override;
 		virtual void GLSwapWindow() override;
 		virtual void MakeGLContextCurrent() override;
-		SDL_Window* GetSDLWindow();
+		virtual void Resize(int width, int height) override;
+		virtual void GetPosition(int* x, int* y) override;
+		virtual void SetPosition(int x, int y) override;
 
+		SDL_Window* GetSDLWindow();
 		SDL_GLContext GetSDLGLConext() const;
 
 	private:

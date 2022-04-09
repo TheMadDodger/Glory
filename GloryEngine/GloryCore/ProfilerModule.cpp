@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	ProfilerModule::ProfilerModule() : m_SampleCollectingEnabled(false), m_IsRecording(false), m_CurrentSampleRecordSize(0), m_CurrentSampleWrite(-1)
+	ProfilerModule::ProfilerModule() : m_SampleCollectingEnabled(false)
 	{
 	}
 
@@ -10,18 +10,25 @@ namespace Glory
 	{
 	}
 
+	void ProfilerModule::RegisterRecordCallback(std::function<void(const ProfilerThreadSample&)> callback)
+	{
+		m_RecordCallback = callback;
+	}
+
 	void ProfilerModule::BeginThread(const std::string& name)
 	{
 		std::thread::id currentThreadID = std::this_thread::get_id();
 		m_ThreadIDToProfile[currentThreadID] = name;
 		m_CurrentThreadSamples.emplace(name, ProfilerThreadSample(name));
+		m_CurrentThreadSamples[name].m_Start = std::chrono::steady_clock::now();
 	}
 
 	void ProfilerModule::EndThread()
 	{
 		std::thread::id currentThreadID = std::this_thread::get_id();
 		std::string threadName = m_ThreadIDToProfile[currentThreadID];
-		StoreSampleRecord(m_CurrentThreadSamples[threadName]);
+		m_CurrentThreadSamples[threadName].m_End = std::chrono::steady_clock::now();
+		if (m_RecordCallback) m_RecordCallback(m_CurrentThreadSamples[threadName]);
 		m_CurrentThreadSamples[threadName].Clear();
 	}
 
@@ -44,17 +51,6 @@ namespace Glory
 	void ProfilerModule::EnableSampleCollecting(bool enabled)
 	{
 		m_SampleCollectingEnabled = enabled;
-	}
-
-	void ProfilerModule::StartRecording()
-	{
-		m_CurrentSampleRecordSize = 0;
-		m_IsRecording = true;
-	}
-
-	void ProfilerModule::EndRecording()
-	{
-		m_IsRecording = false;
 	}
 
 	const std::type_info& ProfilerModule::GetModuleType()
@@ -88,19 +84,5 @@ namespace Glory
 	void ProfilerModule::OnGraphicsThreadFrameEnd()
 	{
 		EndThread();
-	}
-
-	void ProfilerModule::StoreSampleRecord(const ProfilerThreadSample& sample)
-	{
-		if (!m_IsRecording) return;
-		//std::unique_lock<std::mutex> lock(m_RecordMutex);
-
-		++m_CurrentSampleWrite;
-		if (m_CurrentSampleWrite >= MAX_SAMPLE_RECORDS) m_CurrentSampleWrite = 0;
-		if (m_CurrentSampleRecordSize < MAX_SAMPLE_RECORDS) ++m_CurrentSampleRecordSize;
-		m_SampleRecords[m_CurrentSampleWrite].m_Name = sample.m_Name;
-		m_SampleRecords[m_CurrentSampleWrite].m_Samples = sample.m_Samples;
-
-		//lock.unlock();
 	}
 }

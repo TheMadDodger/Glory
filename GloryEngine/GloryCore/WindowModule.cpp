@@ -20,6 +20,11 @@ namespace Glory
         return typeid(WindowModule);
     }
 
+    WindowCreateInfo* WindowModule::GetMainWindowCreateInfo()
+    {
+        return &m_MainWindowCreateInfo;
+    }
+
     Window* WindowModule::CreateNewWindow(const WindowCreateInfo& createInfo)
     {
         Window* pWindow = CreateWindow_Internal(createInfo);

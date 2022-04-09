@@ -1,11 +1,12 @@
 #include "SceneViewCamera.h"
 #include <CameraManager.h>
 #include <SDL2/SDL.h>
+#include <ImGuizmo.h>
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory::Editor
 {
-    SceneViewCamera::SceneViewCamera()
-		: m_EyePosition(glm::vec3(2.0f, 2.0f, 2.0f)), m_Rotation(glm::quat_identity<float, glm::defaultp>()) {}
+    SceneViewCamera::SceneViewCamera() {}
 
     SceneViewCamera::~SceneViewCamera()
     {
@@ -26,6 +27,11 @@ namespace Glory::Editor
 
     void SceneViewCamera::Update()
     {
+		glm::mat4 view = m_Camera.GetView();
+		glm::mat4 viewInverse = m_Camera.GetViewInverse();
+
+		glm::vec3 position(viewInverse[3][0], viewInverse[3][1], viewInverse[3][2]);
+
         ImGuiIO& io = ImGui::GetIO();
 		io.KeyShift;
 		
@@ -41,42 +47,57 @@ namespace Glory::Editor
 		bool upKey = ImGui::IsKeyDown(SDL_SCANCODE_Q);
 		bool downKey = ImGui::IsKeyDown(SDL_SCANCODE_E);
 		
-		glm::vec3 left = glm::rotate(m_Rotation, glm::vec3(-1.0f, 0.0f, 0.0f));
-		glm::vec3 right = glm::rotate(m_Rotation, glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::vec3 forward = glm::rotate(m_Rotation, glm::vec3(0.0f, 0.0f, -1.0f));
-		glm::vec3 backward = glm::rotate(m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::vec3 up = glm::vec3(0.0, -1.0f, 0.0f);
-		glm::vec3 down = glm::vec3(0.0, 1.0f, 0.0f);
+		glm::vec3 right(viewInverse[0][0], viewInverse[0][1], viewInverse[0][2]);
+		glm::vec3 left = -right;
+		glm::vec3 forward(viewInverse[2][0], viewInverse[2][1], viewInverse[2][2]);
+		glm::vec3 backward = -forward;
+		glm::vec3 referenceUp = glm::vec3(0.0, 1.0f, 0.0f);
+		glm::vec3 referenceDown = glm::vec3(0.0, -1.0f, 0.0f);
 		
-		if (leftKey) m_EyePosition = m_EyePosition + left * movementSpeed * deltaTime;
-		if (rightKey) m_EyePosition = m_EyePosition + right * movementSpeed * deltaTime;
-		if (forwardKey) m_EyePosition = m_EyePosition + forward * movementSpeed * deltaTime;
-		if (backwardKey) m_EyePosition = m_EyePosition + backward * movementSpeed * deltaTime;
-		if (upKey) m_EyePosition = m_EyePosition + up * movementSpeed * deltaTime;
-		if (downKey) m_EyePosition = m_EyePosition + down * movementSpeed * deltaTime;
-		
-		ImVec2 mouseDelta = io.MouseDelta;
-		
-		if (m_Looking)
-		{
-		    m_Yaw = m_Yaw - mouseDelta.x * m_FreeLookSensitivity;
-		    m_Pitch = m_Pitch - mouseDelta.y * m_FreeLookSensitivity;
-		}
-
-		m_Rotation = glm::quat(glm::vec3(glm::radians(m_Pitch), glm::radians(m_Yaw), 0.0f));
+		if (leftKey) position += left * movementSpeed * deltaTime;
+		if (rightKey) position += right * movementSpeed * deltaTime;
+		if (forwardKey) position -= forward * movementSpeed * deltaTime;
+		if (backwardKey) position -= backward * movementSpeed * deltaTime;
+		if (upKey) position += referenceDown * movementSpeed * deltaTime;
+		if (downKey) position += referenceUp * movementSpeed * deltaTime;
 
 		float axis = io.MouseWheel;
 		auto zoomSensitivity = fastMode ? m_FastZoomSensitivity : m_ZoomSensitivity;
-		if (axis > 0) m_EyePosition = m_EyePosition + forward * movementSpeed * deltaTime;
-		else if (axis < 0) m_EyePosition = m_EyePosition + backward * movementSpeed * deltaTime;
+		if (axis > 0)
+		{
+			if (!m_IsOrthographic) position += forward * movementSpeed * deltaTime;
+			else m_OrthoZoom -= movementSpeed * deltaTime;
+		}
+		else if (axis < 0)
+		{
+			if (!m_IsOrthographic) position += backward * movementSpeed * deltaTime;
+			else m_OrthoZoom += movementSpeed * deltaTime;
+		}
 		
+		ImVec2 mouseDelta = io.MouseDelta;
+
+		glm::mat4 transform = viewInverse;
+		view = glm::inverse(transform);
+
 		m_Looking = io.MouseDown[1];
+		if (m_Looking)
+		{
+			glm::mat4 rx, ry, roll;
 
-		glm::mat4 rotation = glm::toMat4(m_Rotation);
-		glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), m_EyePosition);
-		glm::mat4 transform = translation * rotation;
+			rx = glm::rotate(glm::identity<glm::mat4>(), -mouseDelta.x * m_FreeLookSensitivity * deltaTime, referenceUp);
+			ry = glm::rotate(glm::identity<glm::mat4>(), -mouseDelta.y * m_FreeLookSensitivity * deltaTime, right);
 
-		glm::mat4 view = glm::inverse(transform);
+			roll = rx * ry;
+
+			glm::vec4 newDirV4 = glm::vec4(forward, 1.0f);
+			newDirV4 = roll * newDirV4;
+			glm::vec3 newDir = glm::vec3(newDirV4);
+			newDir = glm::normalize(newDir);
+
+			transform = glm::lookAt(position, position - newDir, referenceUp);
+			view = transform;
+		}
+
 		m_Camera.SetView(view);
     }
 
@@ -89,4 +110,26 @@ namespace Glory::Editor
     {
         m_Looking = false;
     }
+
+	void SceneViewCamera::SetPerspective(float width, float height, float halfFOV, float near, float far)
+	{
+		m_HalfFOV = halfFOV;
+		m_Width = width;
+		m_Height = height;
+		m_Near = near;
+		m_Far = far;
+
+		m_IsOrthographic = false;
+		m_Camera.SetPerspectiveProjection(m_Width, m_Height, m_HalfFOV, m_Near, m_Far);
+	}
+	void SceneViewCamera::SetOrthographic(float width, float height, float near, float far)
+	{
+		m_Width = width;
+		m_Height = height;
+		m_Near = near;
+		m_Far = far;
+
+		m_IsOrthographic = true;
+		m_Camera.SetOrthographicProjection(m_Width * m_OrthoZoom, m_Height * m_OrthoZoom, m_Near, m_Far);
+	}
 }

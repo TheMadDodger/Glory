@@ -9,6 +9,7 @@ namespace Glory
 	{
 	public:
 		const size_t& GetThreadIndex();
+		bool IsIdle() const;
 
 	private:
 		Thread(size_t index, std::function<void(Thread*)> idleCallback);
@@ -31,5 +32,6 @@ namespace Glory
 		std::function<void(Thread*)> m_IdleCallback;
 
 		bool m_Exit;
+		bool m_Idle;
 	};
 }

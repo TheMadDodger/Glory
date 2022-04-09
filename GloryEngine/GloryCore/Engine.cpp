@@ -9,6 +9,11 @@
 #include "ShaderManager.h"
 #include <algorithm>
 
+#ifdef _DEBUG
+#include "WindowsDebugConsole.h"
+#endif // _DEBUG
+
+
 namespace Glory
 {
 	Engine* Engine::CreateEngine(const EngineCreateInfo& createInfo)
@@ -49,7 +54,9 @@ namespace Glory
 
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
 	{
-		return nullptr;
+		const ResourceType* pResourceType = ResourceType::GetResourceType(extension);
+		if (!pResourceType) return nullptr;
+		return GetLoaderModule(pResourceType->Hash());
 	}
 
 	LoaderModule* Engine::GetLoaderModule(const std::type_info& resourceType)
@@ -172,6 +179,10 @@ namespace Glory
 		RegisterStandardSerializers();
 
 		Console::Initialize();
+
+#ifdef _DEBUG
+		Console::RegisterConsole<WindowsDebugConsole>();
+#endif
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{

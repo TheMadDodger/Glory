@@ -2,6 +2,9 @@
 #include <GameTime.h>
 #include <imgui.h>
 #include <TimerModule.h>
+#include <Game.h>
+#include <Engine.h>
+#include <GraphicsModule.h>
 
 namespace Glory::Editor
 {
@@ -23,6 +26,12 @@ namespace Glory::Editor
 		ImGui::Text("Average Frame Time: %.3f ms - Framerate: %.1f", m_LastFrameTime, m_LastFramerate);
 		ImGui::Text("Average Game Time: %.3f ms - Average Graphics Time: %.3f ms", m_LastGameThreadFrameTime, m_LastGraphicsThreadFrameTime);
 		ImGui::Text("Frame Count: %d - Game Frame Count: %d", Time::GetTotalFrames(), Time::GetTotalGameFrames());
+
+		GraphicsModule* pGraphics = Game::GetGame().GetEngine()->GetGraphicsModule();
+		ImGui::Text("Draw Calls: %d - Vertices: %d - Triangles: %d", pGraphics->GetLastDrawCalls(), pGraphics->GetLastVertexCount(), pGraphics->GetLastTriangleCount());
+
+		RendererModule* pRenderer = Game::GetGame().GetEngine()->GetRendererModule();
+		ImGui::Text("Active Objects: %d - Active Cameras: %d", pRenderer->LastSubmittedObjectCount(), pRenderer->LastSubmittedCameraCount());
 	}
 
 	void PerformanceMetrics::Refresh()

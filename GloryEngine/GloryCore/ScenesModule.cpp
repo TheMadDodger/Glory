@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "EngineProfiler.h"
 #include "Serializer.h"
+#include "CameraManager.h"
 
 namespace Glory
 {
@@ -50,6 +51,13 @@ namespace Glory
 		return m_pOpenScenes[m_ActiveSceneIndex];
 	}
 
+	void ScenesModule::SetActiveScene(GScene* pScene)
+	{
+		auto it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pScene);
+		if (it == m_pOpenScenes.end()) return;
+		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+	}
+
 	void ScenesModule::CloseAllScenes()
 	{
 		Cleanup();
@@ -58,7 +66,8 @@ namespace Glory
 	void ScenesModule::OpenScene(const std::string& path, UUID uuid)
 	{
 		YAML::Node node = YAML::LoadFile(path);
-		GScene* pScene = (GScene*)Serializer::DeserializeObjectOfType<GScene>(node);
+		std::filesystem::path filePath = path;
+		GScene* pScene = (GScene*)Serializer::DeserializeObjectOfType<GScene>(node, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 		pScene->SetUUID(uuid);
 		m_pOpenScenes.push_back(pScene);
@@ -83,6 +92,22 @@ namespace Glory
 
 		it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pActiveScene);
 		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+	}
+
+	void ScenesModule::SetHoveringObject(uint32_t objectID)
+	{
+		std::unique_lock<std::mutex> lock(m_HoveringLock);
+		m_pHoveringObject = GetSceneObjectFromObjectID(objectID);
+		lock.unlock();
+	}
+
+	SceneObject* ScenesModule::GetHoveringObject()
+	{
+		SceneObject* pObject = nullptr;
+		std::unique_lock<std::mutex> lock(m_HoveringLock);
+		pObject = m_pHoveringObject;
+		lock.unlock();
+		return pObject;
 	}
 
 	void ScenesModule::Cleanup()

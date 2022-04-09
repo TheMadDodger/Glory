@@ -3,35 +3,44 @@
 #include "Selection.h"
 #include "Tumbnail.h"
 #include "EditorAssets.h"
-//#include <MetaData.h>
-//#include "AssetManager.h"
 #include "EditorApplication.h"
 #include "EditorRenderImpl.h"
-
-#include <GLTexture.h>
-#include <ProjectSpace.h>
+#include "ObjectMenu.h"
+#include "ImGuiHelpers.h"
+#include <AssetCallbacks.h>
 
 namespace Glory::Editor
 {
     int ContentBrowser::m_IconSize = 128;
 
 	ContentBrowser::ContentBrowser() : EditorWindowTemplate("Content Browser", 1600.0f, 600.0f),
-        m_I(0), m_SearchBuffer("\0"), m_Refresh(false), m_pRootItem(nullptr)
+        m_I(0), m_SearchBuffer("\0"), m_pRootItems(std::vector<ContentBrowserItem*>())
 	{
 		m_Resizeable = true;
         m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
+
+        AssetCallbacks::RegisterCallback(CallbackType::CT_AssetRegistered, [&](UUID uuid, const ResourceMeta& meta, Resource* pResource)
+        {
+            //RefreshContentBrowser();
+        });
 	}
 
 	ContentBrowser::~ContentBrowser()
 	{
-        delete m_pRootItem;
-        m_pRootItem = nullptr;
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            delete m_pRootItems[i];
+        }
+        m_pRootItems.clear();
 	}
+
+    std::filesystem::path ContentBrowser::GetCurrentPath()
+    {
+        return ContentBrowserItem::GetCurrentPath();
+    }
 
 	void ContentBrowser::OnGUI()
 	{
-        RefreshContentBrowser();
-
         const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing() + 4.0f;
         static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable;// | ImGuiTableFlags_BordersOuter;// | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody;
 
@@ -58,11 +67,52 @@ namespace Glory::Editor
         }
 	}
 
+    void ContentBrowser::OnOpen()
+    {
+        m_pRootItems.push_back(new ContentBrowserItem("Assets", true, nullptr, true));
+        m_pRootItems.push_back(new ContentBrowserItem("ModuleAssets", true, nullptr, false));
+        LoadItems();
+
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            m_pRootItems[i]->RefreshSelected(m_pRootItems[i]);
+        }
+    }
+
+    void ContentBrowser::OnClose()
+    {
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            delete m_pRootItems[i];
+        }
+        m_pRootItems.clear();
+    }
+
+    void ContentBrowser::BeginRename(const std::string& name, bool folder)
+    {
+        ContentBrowserItem* pCurrentFolder = ContentBrowserItem::GetSelectedFolder();
+        ContentBrowserItem* pChildToRename = pCurrentFolder->GetChildByName(name, folder);
+        if (pChildToRename == nullptr) return;
+        if (!pCurrentFolder->IsEditable() || !pChildToRename->IsEditable()) return;
+        pChildToRename->BeginRename();
+    }
+
+    void ContentBrowser::LoadProject()
+    {
+        ContentBrowser* pWindow = GetWindow<ContentBrowser>();
+        ContentBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
+        pWindow->LoadItems();
+        pWindow->RefreshContentBrowser();
+    }
+
     void ContentBrowser::DirectoryBrowser()
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::BeginChild("DirectoryBrowser", ImVec2(0, 0), false, window_flags);
-        if (m_pRootItem) m_pRootItem->DrawDirectoryBrowser();
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            m_pRootItems[i]->DrawDirectoryBrowser();
+        }
         ImGui::EndChild();
     }
 
@@ -132,6 +182,12 @@ namespace Glory::Editor
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::BeginChild("FileBrowser", ImVec2(0, 0), true, window_flags);
+        ImVec2 min = ImGui::GetWindowContentRegionMin();
+        ImVec2 max = ImGui::GetWindowContentRegionMax();
+        ImVec2 pos = ImGui::GetWindowPos();
+
+        ContentBrowserItem* pSelected = ContentBrowserItem::GetSelectedFolder();
+        if (pSelected->IsEditable() && ImGui::IsMouseHoveringRect(pos + min, pos + max) && ImGui::IsMouseClicked(1)) ObjectMenu::Open(nullptr, ObjectMenuType::T_ContentBrowser);
         ContentBrowserItem::DrawFileBrowser(m_IconSize);
         ImGui::EndChild();
     }
@@ -139,12 +195,19 @@ namespace Glory::Editor
     void ContentBrowser::RefreshContentBrowser()
     {
         if (ProjectSpace::GetOpenProject() == nullptr) return;
+        ContentBrowserItem* pSelected = ContentBrowserItem::GetSelectedFolder();
+        if (pSelected == nullptr) return;
+        pSelected->Refresh();
+        pSelected->SortChildren();
+    }
 
-        if (m_Refresh) return;
-        if (m_pRootItem == nullptr) m_pRootItem = new ContentBrowserItem("Assets", true, nullptr);
-        m_pRootItem->Refresh();
-        m_pRootItem->SortChildren();
-        m_pRootItem->RefreshSelected(m_pRootItem);
-        m_Refresh = true;
+
+    void ContentBrowser::LoadItems()
+    {
+        for (size_t i = 0; i < m_pRootItems.size(); i++)
+        {
+            m_pRootItems[i]->Refresh();
+            m_pRootItems[i]->SortChildren();
+        }
     }
 }

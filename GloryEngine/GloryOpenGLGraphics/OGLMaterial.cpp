@@ -58,16 +58,16 @@ namespace Glory
 		}
 	}
 
-	void OGLMaterial::SetPropertiesExtra()
-	{
-		if (m_UBOID == NULL) m_UBOID = CreateUniformBuffer("UniformBufferObject", sizeof(UniformBufferObjectTest), 0);
-		SetUniformBuffer(m_UBOID, (void*)&m_UBO, sizeof(UniformBufferObjectTest));
-	}
-
 	Buffer* OGLMaterial::CreatePropertiesBuffer(size_t size)
 	{
 		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
 			->CreateBuffer(size, GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW, 1);
+	}
+
+	Buffer* OGLMaterial::CreateMVPBuffer()
+	{
+		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
+			->CreateBuffer(sizeof(ObjectData), GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW, 2);
 	}
 
 	void OGLMaterial::SetFloat(const std::string& name, float value) const
@@ -207,47 +207,37 @@ namespace Glory
 		++m_TextureCounter;
 	}
 
-	GLuint OGLMaterial::CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex)
-	{
-		GLuint uniformBlockIndex = glGetUniformBlockIndex(m_ProgramID, name.data());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		if (uniformBlockIndex == GL_INVALID_INDEX)
-		{
-			Debug::LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
-			return 0;
-		}
-
-		// Manually bind the uniform block
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniformBlockBinding(m_ProgramID, uniformBlockIndex, bindingIndex);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		// Uniform buffer object for lights
-		GLuint bufferID;
-		glGenBuffers(1, &bufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(GL_UNIFORM_BUFFER, bufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferData(GL_UNIFORM_BUFFER, bufferSize, NULL, GL_DYNAMIC_DRAW);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockIndex, bufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		m_UniformBufferObjects.push_back(bufferID);
-		return bufferID;
-	}
-
-	void OGLMaterial::SetUniformBuffer(GLuint bufferID, void* data, GLuint size)
-	{
-		glBindBuffer(GL_UNIFORM_BUFFER, bufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
+	//GLuint OGLMaterial::CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex)
+	//{
+	//	GLuint uniformBlockIndex = glGetUniformBlockIndex(m_ProgramID, name.data());
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	if (uniformBlockIndex == GL_INVALID_INDEX)
+	//	{
+	//		Debug::LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
+	//		return 0;
+	//	}
+	//
+	//	// Manually bind the uniform block
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	glUniformBlockBinding(m_ProgramID, uniformBlockIndex, bindingIndex);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//
+	//	// Uniform buffer object for lights
+	//	GLuint bufferID;
+	//	glGenBuffers(1, &bufferID);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	glBindBuffer(GL_UNIFORM_BUFFER, bufferID);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	glBufferData(GL_UNIFORM_BUFFER, bufferSize, NULL, GL_DYNAMIC_DRAW);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockIndex, bufferID);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	//	OpenGLGraphicsModule::LogGLError(glGetError());
+	//
+	//	m_UniformBufferObjects.push_back(bufferID);
+	//	return bufferID;
+	//}
 
 	//void OGLMaterial::SetTexture(const std::string& name, GLTexture* pTexture)
 	//{
