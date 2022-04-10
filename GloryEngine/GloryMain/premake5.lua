@@ -25,6 +25,7 @@ project "GloryMain"
 	{
 		"%{vulkan_sdk}/include",
 		"%{vulkan_sdk}/third-party/include",
+		"%{mono_install}/include/mono-2.0",
 
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.GLEW}",
@@ -48,6 +49,7 @@ project "GloryMain"
 		"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
+		"%{GloryIncludeDir.mono}",
 
 		"../EntityScenesEditorExtension",
 	}
@@ -72,6 +74,14 @@ project "GloryMain"
 	{
 		"vulkan-1",
 		"glew32",
+
+		"assimp",
+		"SDL2",
+		"SDL2_image",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+
 		"GloryCore",
 		"GlorySDLWindow",
 		"GloryVulkanGraphics",
@@ -80,12 +90,8 @@ project "GloryMain"
 		"GloryASSIMPModelLoader",
 		"GloryEntityScenes",
 		"GloryClusteredRenderer",
-		"assimp",
-		"SDL2",
-		"SDL2_image",
-		"shaderc",
-		"shaderc_combined",
-		"shaderc_shared",
+		"GloryMono",
+
 		"ImGui",
 		"ImGuizmo",
 		"implot",
@@ -100,6 +106,7 @@ project "GloryMain"
 	{
 		("{COPY} %{LibDirs.SDL_image}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} %{SubmodoleDirs.glory}/%{cfg.buildcfg}/%{cfg.platform}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 	}
 
 	filter "system:windows"
@@ -118,12 +125,21 @@ project "GloryMain"
 		libdirs
 		{
 			"%{vulkan_sdk}/Lib32",
-			"%{vulkan_sdk}/Third-Party/Bin32"
+			"%{vulkan_sdk}/Third-Party/Bin32",
+			"%{mono_installx86}/lib",
+		}
+
+		links
+		{
+			"mono-2.0-sgen",
+			"MonoPosixHelper",
 		}
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} \"%{mono_installx86}/bin/*.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ../Build/%{cfg.buildcfg}/%{cfg.platform}/mono/4.5/"),
 		}
 
 	filter "platforms:x64"
@@ -132,12 +148,20 @@ project "GloryMain"
 		libdirs
 		{
 			"%{vulkan_sdk}/Lib",
-			"%{vulkan_sdk}/Third-Party/Bin"
+			"%{vulkan_sdk}/Third-Party/Bin",
+			"%{mono_install}/lib",
+		}
+
+		links
+		{
+			"mono-2.0-sgen",
+			"MonoPosixHelper",
 		}
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} %{mono_install}/bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		}
 
 	filter "configurations:Debug"

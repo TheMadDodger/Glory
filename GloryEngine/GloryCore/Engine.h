@@ -11,6 +11,7 @@
 #include "TimerModule.h"
 #include "ProfilerModule.h"
 #include "ResourceType.h"
+#include "GloryCore.h"
 
 namespace Glory
 {

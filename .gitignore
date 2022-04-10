@@ -76,3 +76,7 @@ GloryEngine/EntityScenesEditorExtension/Debug/
 GloryEngine/EntityScenesEditorExtension/Release/
 GloryEngine/GloryClusteredRenderer/Debug/
 GloryEngine/GloryClusteredRenderer/Release/
+GloryEngine/GloryCS/Debug/
+*.csproj
+GloryEngine/GloryMono/Debug/
+GloryEngine/GloryMain/mono/
