@@ -7,6 +7,7 @@
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
+#include <GloryMono.h>
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -171,6 +172,7 @@ namespace Glory
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
 		ShaderManager::Cleanup();
+		GloryMono::Cleanup();
 	}
 
 	void Engine::Initialize()
@@ -221,6 +223,8 @@ namespace Glory
 		m_pGraphicsThread = new GraphicsThread(this);
 		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
 		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
+
+		GloryMono::Initialize();
 	}
 
 	void Engine::RegisterStandardSerializers()

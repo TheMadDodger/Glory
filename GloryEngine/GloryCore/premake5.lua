@@ -47,10 +47,12 @@ project "GloryCore"
 
 	includedirs
 	{
+		"%{mono_install}/include/mono-2.0",
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.mono}",
 	}
 
 	defines

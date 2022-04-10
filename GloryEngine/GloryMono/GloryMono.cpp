@@ -2,6 +2,12 @@
 
 namespace Glory
 {
+	MonoDomain*		GloryMono::m_pMonoDomain;
+	MonoAssembly*	GloryMono::m_pMonoAssembly;
+	MonoImage*		GloryMono::m_pMonoImage;
+	MonoObject*		GloryMono::m_pMonoObject;
+	uint32_t		GloryMono::m_MonoObjectGCHandle;
+
 	void GloryMono::Initialize()
 	{
 		mono_set_dirs(".", "");
@@ -11,7 +17,7 @@ namespace Glory
 
 		m_pMonoImage = mono_assembly_get_image(m_pMonoAssembly);
 
-		//mono_add_internal_call("Glory.RandomWord::GetRandomWord()", &RandomWord::GetRandomWord);
+		mono_add_internal_call("Glory.RandomWord::GetWord()", &RandomWord::GetWord);
 
 		MonoClass* pMainClass = mono_class_from_name(m_pMonoImage, "Glory", "GloryCSMain");
 		MonoMethodDesc* pMainFuncDesc = mono_method_desc_new(".GloryCSMain:main()", false);
@@ -21,7 +27,6 @@ namespace Glory
 		m_pMonoObject = mono_runtime_invoke(pMainFunc, nullptr, nullptr, &pExObject);
 		m_MonoObjectGCHandle = mono_gchandle_new(m_pMonoObject, false);
 		mono_method_desc_free(pMainFuncDesc);
-		int a = 0;
 	}
 
 	void GloryMono::Cleanup()
@@ -36,8 +41,8 @@ namespace Glory
 		m_pMonoImage = nullptr;
 	}
 
-	MonoString* RandomWord::GetRandomWord()
+	MonoString* RandomWord::GetWord()
 	{
-		return mono_string_new(mono_domain_get(), "Hello World");
+		return mono_string_new(mono_domain_get(), "Hello World 42069");
 	}
 }

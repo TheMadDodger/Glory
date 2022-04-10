@@ -107,6 +107,7 @@ project "GloryMain"
 		("{COPY} %{LibDirs.SDL_image}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} %{SubmodoleDirs.glory}/%{cfg.buildcfg}/%{cfg.platform}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} %{SubmodoleDirs.glory}/%{cfg.buildcfg}/%{cfg.platform}/*.dll ./"),
 	}
 
 	filter "system:windows"
@@ -138,8 +139,9 @@ project "GloryMain"
 		postbuildcommands
 		{
 			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
-			("{COPY} \"%{mono_installx86}/bin/*.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} \"%{mono_installx86}/bin/mono-2.0-sgen.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ../Build/%{cfg.buildcfg}/%{cfg.platform}/mono/4.5/"),
+			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ./mono/4.5/"),
 		}
 
 	filter "platforms:x64"
@@ -161,7 +163,9 @@ project "GloryMain"
 		postbuildcommands
 		{
 			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
-			("{COPY} %{mono_install}/bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} \"%{mono_install}/bin/mono-2.0-sgen.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} \"%{mono_install}/lib/mono/4.5/*\" ../Build/%{cfg.buildcfg}/%{cfg.platform}/mono/4.5/"),
+			("{COPY} \"%{mono_install}/lib/mono/4.5/*\" ./mono/4.5/"),
 		}
 
 	filter "configurations:Debug"

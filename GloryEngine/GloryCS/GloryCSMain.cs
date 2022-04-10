@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Glory
 {
@@ -10,7 +7,13 @@ namespace Glory
     {
         public static void main()
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine(RandomWord.GetWord());
         }
+    }
+
+    public class RandomWord
+    {
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string GetWord();
     }
 }

@@ -9,8 +9,6 @@
 #include <MaterialLoaderModule.h>
 #include <MaterialInstanceLoaderModule.h>
 
-#include <GloryMono.h>
-
 #define _CRTDBG_MAP_ALLOC
 
 #define EDITOR
@@ -173,11 +171,6 @@ int main()
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     {
-        //Glory::GloryMono monoboi;
-        //monoboi.Initialize();
-        //
-        //monoboi.Cleanup();
-
         Glory::WindowCreateInfo windowCreateInfo;
         windowCreateInfo.WindowName = "Glory Editor";
         windowCreateInfo.Width = 2560;
