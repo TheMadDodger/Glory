@@ -17,3 +17,6 @@
 [submodule "GloryEngine/submodules/ImFileDialog"]
 	path = GloryEngine/submodules/ImFileDialog
 	url = https://github.com/dfranx/ImFileDialog
+[submodule "GloryEngine/submodules/ticpp"]
+	path = GloryEngine/submodules/ticpp
+	url = https://github.com/TheMadDodger/ticpp
