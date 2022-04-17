@@ -5,6 +5,7 @@
 #include "AssetCallbacks.h"
 #include "ThreadedVar.h"
 #include <unordered_map>
+#include "GScene.h"
 
 namespace Glory
 {

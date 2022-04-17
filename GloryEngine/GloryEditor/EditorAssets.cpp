@@ -1,5 +1,6 @@
 #include "EditorAssets.h"
 #include <Game.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {

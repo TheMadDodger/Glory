@@ -3,6 +3,7 @@
 #include "Thread.h"
 #include "Camera.h"
 #include "ThreadedVar.h"
+#include <functional>
 
 namespace Glory
 {

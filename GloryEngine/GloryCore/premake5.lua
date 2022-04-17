@@ -39,6 +39,7 @@ project "GloryCore"
 		["Modules/ResourceLoading/Textures"] = { "ImageData.*", "ImageLoaderModule.*" },
 		["Modules/Scenes"] = { "ScenesModule.*", "SceneObject.*", "GScene.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
+		["Modules/Scripting"] = { "Script.*", "ScriptingModule.*", "ScriptLoaderModule.*" },
 		["Threading"] = { "Thread.*", "ThreadManager.*", "ThreadedVar.*" },
 		["Analysis"] = { "EngineProfiler.*", "ProfilerModule.*", "ProfilerSample.*", "ProfilerThreadSample.*" },
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
@@ -52,7 +53,6 @@ project "GloryCore"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{GloryIncludeDir.mono}",
 	}
 
 	defines

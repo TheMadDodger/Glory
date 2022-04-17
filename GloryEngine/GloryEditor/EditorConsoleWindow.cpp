@@ -64,7 +64,7 @@ namespace Glory::Editor
         // Command-line
         bool reclaim_focus = false;
         ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;// | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
         if (ImGui::InputText("##Input", m_InputBuffer, MAXINPUTLENGTH, input_text_flags))
         {
             std::string convertedInput = m_InputBuffer;

@@ -37,6 +37,8 @@ project "assimpstatic"
         "%{ASSIMPDir}/code/common/Version.cpp",
         "%{ASSIMPDir}/code/common/VertexTriangleAdjacency.cpp",
         "%{ASSIMPDir}/code/common/material.cpp",
+        "%{ASSIMPDir}/code/common/IOSystem.cpp",
+        "%{ASSIMPDir}/code/common/Compression.cpp",
         "%{ASSIMPDir}/code/CApi/CInterfaceIOWrapper.cpp",
         "%{ASSIMPDir}/code/AssetLib/Obj/ObjFileImporter.cpp",
         "%{ASSIMPDir}/code/AssetLib/Obj/ObjFileMtlImporter.cpp",
@@ -153,6 +155,8 @@ project "assimpstatic"
         
         "ASSIMP_BUILD_NO_STEP_EXPORTER",
         "ASSIMP_BUILD_NO_SIB_IMPORTER",
+        "ASSIMP_BUILD_NO_IQM_IMPORTER",
+        "ASSIMP_BUILD_NO_IQM_EXPORTER",
 
         -- "ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS",
         -- "ASSIMP_BUILD_NO_FLIPUVS_PROCESS",

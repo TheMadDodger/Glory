@@ -52,7 +52,7 @@ namespace Glory::Editor
 
 		int toRemoveShaderIndex = -1;
 
-		float width = ImGui::GetContentRegionAvailWidth();
+		float width = ImGui::GetContentRegionAvail().x;
 		float removeButtonWidth = 100.0f;
 
 		if (ImGui::BeginTable("Loaded Shaders Table", 4, flags, ImVec2(0.0f, totalHeight), 0.0f))

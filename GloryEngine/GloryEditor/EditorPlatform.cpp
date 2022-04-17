@@ -2,6 +2,7 @@
 #include "EditorAssets.h"
 #include <implot.h>
 #include <ImGuizmo.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {

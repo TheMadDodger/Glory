@@ -1,5 +1,6 @@
 #include "AssetManager.h"
 #include "AssetDatabase.h"
+#include "Engine.h"
 
 namespace Glory
 {

@@ -1,5 +1,6 @@
 #include "CoreExceptions.h"
 #include "Game.h"
+#include "Engine.h"
 
 namespace Glory
 {
@@ -89,8 +90,13 @@ namespace Glory
 		return m_Game.m_AssetPathFunc();
 	}
 
+	const ApplicationType& Game::GetApplicationType() const
+	{
+		return m_ApplicationType;
+	}
+
 	Game::Game(const GameSettings& pGameSettings) : m_pGameState(pGameSettings.pGameState), m_pEngine(pGameSettings.pEngine),
-		m_bInitialized(false), m_bIsRunning(false)
+		m_bInitialized(false), m_bIsRunning(false), m_ApplicationType(pGameSettings.ApplicationType)
 	{
 	}
 

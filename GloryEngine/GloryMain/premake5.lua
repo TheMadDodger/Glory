@@ -37,6 +37,7 @@ project "GloryMain"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ticpp}",
 
 		"%{GloryIncludeDir.assimp}",
 		"%{GloryIncludeDir.entityscenes}",
@@ -52,6 +53,7 @@ project "GloryMain"
 		"%{GloryIncludeDir.mono}",
 
 		"../EntityScenesEditorExtension",
+		"../MonoEditorExtension",
 	}
 
 	libdirs
@@ -67,6 +69,7 @@ project "GloryMain"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+		"%{LibDirs.ticpp}",
 		"%{LibDirs.extensions}",
 	}
 
@@ -81,6 +84,7 @@ project "GloryMain"
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
+		"TiCPP",
 
 		"GloryCore",
 		"GlorySDLWindow",
@@ -90,7 +94,7 @@ project "GloryMain"
 		"GloryASSIMPModelLoader",
 		"GloryEntityScenes",
 		"GloryClusteredRenderer",
-		"GloryMono",
+		"GloryMonoScripting",
 
 		"ImGui",
 		"ImGuizmo",
@@ -100,6 +104,7 @@ project "GloryMain"
 		"GloryEditor",
 
 		"EntityScenesEditorExtension",
+		"MonoEditorExtension",
 	}
 
 	postbuildcommands

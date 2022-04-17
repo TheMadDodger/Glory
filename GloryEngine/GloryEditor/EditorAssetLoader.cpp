@@ -1,7 +1,8 @@
 #include "EditorAssetLoader.h"
-#include <AssetDatabase.h>
 #include "ProjectSpace.h"
+#include <AssetDatabase.h>
 #include <yaml-cpp/yaml.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {

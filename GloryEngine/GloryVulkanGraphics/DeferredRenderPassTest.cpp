@@ -1,8 +1,9 @@
 #include "DeferredRenderPassTest.h"
 #include "VulkanDeviceManager.h"
-#include <Game.h>
 #include "Device.h"
 #include "VulkanExceptions.h"
+#include <Game.h>
+#include <Engine.h>
 
 namespace Glory
 {

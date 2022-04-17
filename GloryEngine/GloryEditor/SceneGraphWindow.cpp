@@ -1,9 +1,10 @@
 #include "SceneGraphWindow.h"
 #include "Selection.h"
 #include "EditorSceneManager.h"
-#include "Game.h"
 #include "Selection.h"
 #include "ObjectMenu.h"
+#include <Game.h>
+#include <Engine.h>
 #include <ImGuiHelpers.h>
 
 namespace Glory::Editor

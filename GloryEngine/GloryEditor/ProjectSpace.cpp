@@ -10,6 +10,7 @@ namespace Glory::Editor
 {
 	ProjectSpace* ProjectSpace::m_pCurrentProject = nullptr;
 	std::mutex ProjectSpace::m_ProjectLock;
+	std::unordered_map<ProjectCallback, std::vector<std::function<void(ProjectSpace*)>>> ProjectSpace::m_ProjectCallbacks;
 
 	void ProjectSpace::OpenProject(const std::string& path)
 	{
@@ -97,6 +98,11 @@ namespace Glory::Editor
 		return m_CachePath;
 	}
 
+	void ProjectSpace::RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback)
+	{
+		m_ProjectCallbacks[callbackType].push_back(callback);
+	}
+
 	ProjectSpace::ProjectSpace(const std::string& path)
 		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()), m_CachePath(std::filesystem::path(path).parent_path().string() + "\\Cache\\")
 	{
@@ -116,6 +122,12 @@ namespace Glory::Editor
 		CreateFolder("Cache/CompiledShaders");
 		YAML::Node node = YAML::LoadFile(m_ProjectFilePath);
 		m_ProjectName = node["ProjectName"].as<std::string>();
+
+		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnOpen].size(); i++)
+		{
+			m_ProjectCallbacks[ProjectCallback::OnOpen][i](this);
+		}
+
 		lock.unlock();
 
 		AssetDatabase::Load();
@@ -124,6 +136,11 @@ namespace Glory::Editor
 
 	void ProjectSpace::Close()
 	{
+		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnClose].size(); i++)
+		{
+			m_ProjectCallbacks[ProjectCallback::OnClose][i](this);
+		}
+
 		AssetDatabase::Save();
 	}
 

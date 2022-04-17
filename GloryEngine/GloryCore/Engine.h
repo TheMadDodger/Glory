@@ -12,6 +12,7 @@
 #include "ProfilerModule.h"
 #include "ResourceType.h"
 #include "GloryCore.h"
+#include "ScriptingModule.h"
 
 namespace Glory
 {
@@ -21,6 +22,9 @@ namespace Glory
 		ScenesModule* pScenesModule;
 		RendererModule* pRenderModule;
 		GraphicsModule* pGraphicsModule;
+
+		uint32_t ScriptingModulesCount;
+		ScriptingModule** pScriptingModules;
 
 		uint32_t OptionalModuleCount;
 		Module** pOptionalModules;
@@ -47,6 +51,18 @@ namespace Glory
 		{
 			Module* pModule = GetModule(typeid(T));
 			return (T*)pModule;
+		}
+
+		template<class T>
+		T* GetScriptingModule()
+		{
+			for (size_t i = 0; i < m_pScriptingModules.size(); i++)
+			{
+				T* pScriptingModule = dynamic_cast<T*>(m_pScriptingModules[i]);
+				if (pScriptingModule) return pScriptingModule;
+			}
+
+			return nullptr;
 		}
 
 		template<class T>
@@ -97,6 +113,7 @@ namespace Glory
 		GraphicsModule* m_pGraphicsModule;
 		TimerModule* m_pTimerModule;
 		ProfilerModule* m_pProfilerModule;
+		std::vector<ScriptingModule*> m_pScriptingModules;
 
 		// Optional modules
 		std::vector<Module*> m_pOptionalModules;

@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include "LayerManager.h"
 #include "Serializer.h"
+#include "Engine.h"
 
 namespace Glory
 {

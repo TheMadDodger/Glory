@@ -3,6 +3,7 @@
 #include "Debug.h"
 #include <GL/glew.h>
 #include <Game.h>
+#include <Engine.h>
 
 namespace Glory
 {

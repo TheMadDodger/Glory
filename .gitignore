@@ -80,3 +80,7 @@ GloryEngine/GloryCS/Debug/
 *.csproj
 GloryEngine/GloryMono/Debug/
 GloryEngine/GloryMain/mono/
+GloryEngine/MonoEditorExtension/Debug/
+GloryEngine/GloryMonoScripting/Debug/
+GloryEngine/GloryCS/obj/
+GloryEngine/GloryCS/bin/

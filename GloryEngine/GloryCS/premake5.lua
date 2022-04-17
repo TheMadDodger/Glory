@@ -7,6 +7,8 @@ project "GloryCS"
 	targetdir ("%{engineoutdir}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
+	framework "netstandard2.1"
+
 	files
 	{
 		"*.cs",
@@ -26,7 +28,7 @@ project "GloryCS"
 	}
 
 	filter "system:windows"
-		dotnetframework "4.7.2"
+		--dotnetframework "4.7.2"
 
 		defines
 		{

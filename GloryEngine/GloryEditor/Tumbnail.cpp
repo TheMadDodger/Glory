@@ -1,5 +1,6 @@
 #include <AssetManager.h>
 #include <EditorAssets.h>
+#include <Engine.h>
 #include "Tumbnail.h"
 #include "TumbnailGenerator.h"
 

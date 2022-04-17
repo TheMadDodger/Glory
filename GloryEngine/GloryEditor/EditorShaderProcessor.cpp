@@ -7,6 +7,7 @@
 #include <spirv_glsl.hpp>
 #include <FileLoaderModule.h>
 #include <AssetCallbacks.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {

@@ -7,7 +7,6 @@
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
-#include <GloryMono.h>
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -128,6 +127,17 @@ namespace Glory
 		{
 			m_pAllModules[currentSize + i] = m_pOptionalModules[i];
 		}
+		
+		m_pScriptingModules.resize(createInfo.ScriptingModulesCount);
+		if (m_pScriptingModules.size() > 0) memcpy(&m_pScriptingModules[0], createInfo.pScriptingModules, createInfo.ScriptingModulesCount * sizeof(ScriptingModule*));
+
+		currentSize = m_pAllModules.size();
+		m_pAllModules.resize(currentSize + m_pScriptingModules.size() * 2);
+		for (size_t i = 0; i < m_pScriptingModules.size(); ++i)
+		{
+			m_pAllModules[currentSize + i] = m_pScriptingModules[i];
+			m_pAllModules[currentSize + m_pScriptingModules.size() + i] = m_pScriptingModules[i]->CreateLoaderModule();
+		}
 
 		m_pAllModules.push_back(m_pProfilerModule);
 	}
@@ -172,7 +182,6 @@ namespace Glory
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
 		ShaderManager::Cleanup();
-		GloryMono::Cleanup();
 	}
 
 	void Engine::Initialize()
@@ -223,8 +232,6 @@ namespace Glory
 		m_pGraphicsThread = new GraphicsThread(this);
 		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
 		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
-
-		GloryMono::Initialize();
 	}
 
 	void Engine::RegisterStandardSerializers()

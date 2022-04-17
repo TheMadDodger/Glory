@@ -1,10 +1,10 @@
-project "GloryMono"
+project "MonoEditorExtension"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineoutdir}")
+	targetdir ("%{engineoutdir}/Extensions")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
@@ -19,13 +19,20 @@ project "GloryMono"
 
 	includedirs
 	{
-		"%{GloryIncludeDir.core}",
-		"%{mono_install}/include/mono-2.0"
-	}
+		"%{vulkan_sdk}/third-party/include",
 
-	defines
-	{
-		"GLORY_EXPORT_LIB"
+		"%{IncludeDir.ticpp}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.shaderc}",
+		"%{IncludeDir.spirv_cross}",
+		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.editor}",
+		"%{GloryIncludeDir.entityscenes}",
+		"%{GloryIncludeDir.ImGui}",
+		"%{GloryIncludeDir.mono}",
+
+		"%{mono_install}/include/mono-2.0",
 	}
 
 	filter "system:windows"

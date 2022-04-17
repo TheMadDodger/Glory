@@ -1,10 +1,11 @@
 #include "VulkanTexture.h"
 #include "VulkanBuffer.h"
 #include "VulkanGraphicsModule.h"
-#include <Game.h>
 #include "Device.h"
 #include "VulkanBuffer.h"
 #include "VulkanStructsConverter.h"
+#include <Game.h>
+#include <Engine.h>
 
 namespace Glory
 {

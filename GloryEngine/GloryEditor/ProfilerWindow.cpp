@@ -1,6 +1,7 @@
 #include "ProfilerWindow.h"
 #include <ProfilerModule.h>
 #include <Game.h>
+#include <Engine.h>
 #include <imgui.h>
 #include <implot.h>
 #include <GameTime.h>

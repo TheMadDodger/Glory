@@ -1,9 +1,16 @@
 #pragma once
 #include <string>
 #include <mutex>
+#include <functional>
 
 namespace Glory::Editor
 {
+	enum ProjectCallback
+	{
+		OnOpen,
+		OnClose,
+	};
+
 	class ProjectSpace
 	{
 	public:
@@ -21,6 +28,8 @@ namespace Glory::Editor
 		std::string ProjectPath();
 		std::string CachePath();
 
+		static void RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback);
+
 	private:
 		ProjectSpace(const std::string& path);
 		virtual ~ProjectSpace();
@@ -30,6 +39,7 @@ namespace Glory::Editor
 
 	private:
 		static ProjectSpace* m_pCurrentProject;
+		static std::unordered_map<ProjectCallback, std::vector<std::function<void(ProjectSpace*)>>> m_ProjectCallbacks;
 		static std::mutex m_ProjectLock;
 		std::string m_ProjectFilePath;
 		std::string m_ProjectRootPath;

@@ -8,6 +8,7 @@
 #include <ShaderSourceLoaderModule.h>
 #include <MaterialLoaderModule.h>
 #include <MaterialInstanceLoaderModule.h>
+#include <GloryMonoScipting.h>
 
 #define _CRTDBG_MAP_ALLOC
 
@@ -162,6 +163,7 @@ namespace Glory
 #include <EditorOpenGLRenderImpl.h>
 #include <EditorApplication.h>
 #include <EntityScenesEditorExtension.h>
+#include <MonoEditorExtension.h>
 #include <yaml-cpp/yaml.h>
 
 using namespace Glory::Editor;
@@ -186,6 +188,10 @@ int main()
             new Glory::ShaderSourceLoaderModule(),
         };
 
+        std::vector<Glory::ScriptingModule*> scriptingModules = {
+            new Glory::GloryMonoScipting(),
+        };
+
         Glory::EngineCreateInfo createInfo;
         createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);
         createInfo.pScenesModule = new Glory::EntitySceneScenesModule();
@@ -193,15 +199,22 @@ int main()
         createInfo.pGraphicsModule = new Glory::OpenGLGraphicsModule();
         createInfo.OptionalModuleCount = static_cast<uint32_t>(optionalModules.size());
         createInfo.pOptionalModules = optionalModules.data();
+        createInfo.ScriptingModulesCount = static_cast<uint32_t>(scriptingModules.size());
+        createInfo.pScriptingModules = scriptingModules.data();
         Glory::Engine* pEngine = Glory::Engine::CreateEngine(createInfo);
 
         Glory::GameSettings gameSettings;
         gameSettings.pEngine = pEngine;
         gameSettings.pGameState = new Glory::GameState();
+        gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
         pGame.Initialize();
 
-        std::vector<Glory::Editor::BaseEditorExtension*> editorExtensions = { new Glory::Editor::EntityScenesEditorExtension() };
+        std::vector<Glory::Editor::BaseEditorExtension*> editorExtensions= 
+        {
+            new Glory::Editor::EntityScenesEditorExtension(),
+            new Glory::Editor::MonoEditorExtension()
+        };
 
         Glory::EditorCreateInfo editorCreateInfo;
         editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(editorExtensions.size());

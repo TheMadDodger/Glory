@@ -52,6 +52,7 @@ project "GloryEditor"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ticpp}",
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.assimp}",

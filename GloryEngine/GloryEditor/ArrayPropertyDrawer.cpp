@@ -14,7 +14,7 @@ namespace Glory::Editor
 
 		BaseSerializedArrayProperty* serializedArrayProperty = (BaseSerializedArrayProperty*)serializedProperty;
 
-		float width = ImGui::GetContentRegionAvailWidth();
+		float width = ImGui::GetContentRegionAvail().x;
 		float inputWidth = 10.0f;
 		width -= inputWidth;
 

@@ -1,5 +1,6 @@
 #include "EditorVulkanRenderImpl.h"
 #include <Game.h>
+#include <Engine.h>
 #include <GLTexture.h>
 
 namespace Glory::Editor
