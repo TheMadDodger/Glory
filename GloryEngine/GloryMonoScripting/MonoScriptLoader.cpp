@@ -1,4 +1,5 @@
 #include "MonoScriptLoader.h"
+#include <Engine.h>
 
 namespace Glory
 {
@@ -36,7 +37,9 @@ namespace Glory
 	{
 		return nullptr;
 	}
+
 	void MonoScriptLoader::SaveResource(const std::string& path, MonoScript* pResource)
 	{
+		m_pEngine->GetLoaderModule<FileData>()->Save(path, pResource);
 	}
 }

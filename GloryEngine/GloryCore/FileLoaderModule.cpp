@@ -42,6 +42,23 @@ namespace Glory
 		return pFile;
 	}
 
+	void FileLoaderModule::SaveResource(const std::string& path, FileData* pResource)
+	{
+		Profiler::BeginSample("FileLoaderModule::SaveResource");
+		std::ofstream file(path);
+
+		if (!file.is_open())
+		{
+			Debug::LogError("Could not open file: " + path);
+			Profiler::EndSample();
+			return;
+		}
+
+		file.write(pResource->m_Data.data(), pResource->Size());
+		file.close();
+		Profiler::EndSample();
+	}
+
 	bool FileLoaderModule::ReadFile(const std::string& path, std::vector<char>& buffer, const FileImportSettings& importSettings)
 	{
 		Profiler::BeginSample("FileLoaderModule::ReadFile");

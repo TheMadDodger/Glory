@@ -7,6 +7,7 @@
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
+#include "ScriptingBinder.h"
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -218,9 +219,12 @@ namespace Glory
 			if (it != m_pPriorityInitializationModules.end()) continue;
 			m_pAllModules[i]->m_pEngine = this;
 			m_pAllModules[i]->Initialize();
+			
 		}
 
 		AssetManager::Initialize();
+
+		ScriptingBinder::Initialize(this);
 
 		// Run Post Initialize
 		for (size_t i = 0; i < m_pAllModules.size(); i++)

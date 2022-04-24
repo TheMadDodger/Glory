@@ -36,6 +36,7 @@ namespace Glory
 		static void RemoveAsset(UUID uuid);
 
 		static void GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out);
+		static void GetAllAssetsOfType(size_t typeHash, std::vector<std::string>& out);
 
 		static std::string GetAssetName(UUID uuid);
 

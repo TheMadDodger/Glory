@@ -14,6 +14,8 @@ namespace Glory
 		void Initialize();
 		void Destroy();
 
+		MonoImage* GetMonoImage();
+
 	private:
 		MonoDomain* m_pDomain;
 		const std::string m_Name;

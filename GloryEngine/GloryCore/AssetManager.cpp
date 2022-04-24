@@ -76,6 +76,12 @@ namespace Glory
 		path.append(assetLocation.m_Path);
 
 		Resource* pResource = pModule->LoadUsingAny(path.string(), meta.ImportSettings());
+		if (pResource == nullptr)
+		{
+			Debug::LogError("Failed to load asset: " + std::to_string(uuid) + " at path: " + path.string());
+			return nullptr;
+		}
+
 		pResource->m_ID = uuid;
 		m_pLoadedAssets.Set(uuid, pResource);
 		AssetDatabase::m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pResource);

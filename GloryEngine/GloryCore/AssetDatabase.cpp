@@ -375,6 +375,20 @@ namespace Glory
 		memcpy(&out[size], &m_AssetsByType[typeHash][0], copySize);
 	}
 
+	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<std::string>& out)
+	{
+		if (!m_AssetsByType.Contains(typeHash)) return;
+		size_t size = out.size();
+		out.resize(size + m_AssetsByType[typeHash].size());
+		for (size_t i = 0; i < m_AssetsByType[typeHash].size(); i++)
+		{
+			UUID uuid = m_AssetsByType[typeHash][i];
+			AssetLocation location;
+			GetAssetLocation(uuid, location);
+			out.push_back(location.m_Path);
+		}
+	}
+
 	std::string AssetDatabase::GetAssetName(UUID uuid)
 	{
 		// Will need to be different for build and editor since assets are grouped together in a single file when built

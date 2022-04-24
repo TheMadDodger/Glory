@@ -19,7 +19,10 @@ project "GloryMonoScripting"
 
 	includedirs
 	{
+		"%{vulkan_sdk}/third-party/include",
+
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.spirv_cross}",
 
 		"%{GloryIncludeDir.core}",
 

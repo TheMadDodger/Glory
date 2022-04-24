@@ -1,9 +1,10 @@
 #pragma once
 #include "Resource.h"
+#include "FileData.h"
 
 namespace Glory
 {
-    class Script : public Resource
+    class Script : public FileData
     {
     public:
         Script();

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>name</RootNamespace>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    </PropertyGroup>
+    <ItemGroup>
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="AppLogger">
+            <HintPath>..\..\..\Glorious\TEST\CSharpTest\AppLogger\bin\Debug\netcoreapp3.1\AppLogger.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+</Project>

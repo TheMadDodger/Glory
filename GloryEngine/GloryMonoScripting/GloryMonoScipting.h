@@ -21,6 +21,9 @@ namespace Glory
         virtual void PostInitialize() override;
         virtual void Cleanup() override;
 
+        void GetScriptBindings(std::vector<ScriptBinding>& bindings) override;
+        void Bind(const ScriptBinding& binding) override;
+
     private:
         MonoDomain* m_pDomain;
         std::vector<AssemblyBinding> m_Assemblies;

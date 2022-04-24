@@ -57,7 +57,7 @@ namespace Glory::Editor
 	{
 		switch (currentMenu)
 		{
-		case T_SceneObject:
+		case ObjectMenuType::T_SceneObject:
 		{
 			SceneObject* pSceneObject = (SceneObject*)pObject;
 			GScene* pScene = pSceneObject->GetScene();
@@ -66,7 +66,7 @@ namespace Glory::Editor
 			break;
 		}
 
-		case T_Resource:
+		case ObjectMenuType::T_Resource:
 		{
 			std::vector<std::string> buttons = {
 				"No",
@@ -83,7 +83,7 @@ namespace Glory::Editor
 			break;
 		}
 
-		case T_Folder:
+		case ObjectMenuType::T_Folder:
 		{
 			std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
 			std::vector<std::string> buttons = {
@@ -114,7 +114,7 @@ namespace Glory::Editor
 
 		switch (currentMenu)
 		{
-		case T_Scene:
+		case ObjectMenuType::T_Scene:
 		{
 			Selection::SetActiveObject(nullptr);
 			GScene* pScene = (GScene*)pObject;
@@ -124,7 +124,7 @@ namespace Glory::Editor
 			break;
 		}
 
-		case T_SceneObject:
+		case ObjectMenuType::T_SceneObject:
 		{
 			Selection::SetActiveObject(nullptr);
 			SceneObject* pSceneObject = (SceneObject*)pObject;
@@ -222,7 +222,7 @@ namespace Glory::Editor
 		std::string itemToRename = "";
 		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
 		itemToRename = path.filename().replace_extension("").string();
-		ContentBrowser::BeginRename(itemToRename, currentMenu == T_Folder);
+		ContentBrowser::BeginRename(itemToRename, currentMenu == ObjectMenuType::T_Folder);
 	}
 
 	OBJECTMENU_CALLBACK(SaveScene)

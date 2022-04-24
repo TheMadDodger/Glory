@@ -105,6 +105,7 @@ namespace Glory
 		friend class Game;
 		friend class GameThread;
 		friend class GraphicsThread;
+		friend class ScriptingBinder;
 
 		// Required modules
 		WindowModule* m_pWindowModule;

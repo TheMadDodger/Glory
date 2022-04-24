@@ -26,4 +26,9 @@ namespace Glory
 	void AssemblyBinding::Destroy()
 	{
 	}
+
+	MonoImage* AssemblyBinding::GetMonoImage()
+	{
+		return m_pImage;
+	}
 }
