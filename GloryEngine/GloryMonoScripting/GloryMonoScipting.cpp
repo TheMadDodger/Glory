@@ -1,5 +1,6 @@
 #include "GloryMonoScipting.h"
 #include "DebugBinder.h"
+#include "MathBinder.h"
 #include <mono/metadata/assembly.h>
 #include <Game.h>
 #include <mono/metadata/debug-helpers.h>
@@ -78,6 +79,7 @@ namespace Glory
 	void GloryMonoScipting::GetScriptBindings(std::vector<ScriptBinding>& bindings)
 	{
 		DebugBinder::CreateBindings(bindings);
+		MathBinder::CreateBindings(bindings);
 	}
 
 	void GloryMonoScipting::Bind(const ScriptBinding& binding)

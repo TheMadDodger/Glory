@@ -1,4 +1,5 @@
 #include "DebugBinder.h"
+#include "GloryMonoScipting.h"
 
 namespace Glory
 {
@@ -39,12 +40,12 @@ namespace Glory
 
 	void DebugBinder::CreateBindings(std::vector<ScriptBinding>& bindings)
 	{
-		bindings.push_back(ScriptBinding("C#", "GloryEngine.Debug::Log(string,GloryEngine.LogLevel,bool)", &DebugBinder::Log));
-		bindings.push_back(ScriptBinding("C#", "GloryEngine.Debug::LogInfo(string,bool)", &DebugBinder::LogInfo));
-		bindings.push_back(ScriptBinding("C#", "GloryEngine.Debug::LogNotice(string,bool)", &DebugBinder::LogNotice));
-		bindings.push_back(ScriptBinding("C#", "GloryEngine.Debug::LogWarning(string,bool)", &DebugBinder::LogWarning));
-		bindings.push_back(ScriptBinding("C#", "GloryEngine.Debug::LogError(string,bool)", &DebugBinder::LogError));
-		bindings.push_back(ScriptBinding("C#", "GloryEngine.Debug::LogFatalError(string,bool)", &DebugBinder::LogFatalError));
-		bindings.push_back(ScriptBinding("C#", "GloryEngine.Debug::LogOnce(string,string,GloryEngine.LogLevel,bool)", &DebugBinder::LogOnce));
+		BIND("GloryEngine.Debug::Log(string,GloryEngine.LogLevel,bool)", DebugBinder::Log);
+		BIND("GloryEngine.Debug::LogInfo(string,bool)", DebugBinder::LogInfo);
+		BIND("GloryEngine.Debug::LogNotice(string,bool)", DebugBinder::LogNotice);
+		BIND("GloryEngine.Debug::LogWarning(string,bool)", DebugBinder::LogWarning);
+		BIND("GloryEngine.Debug::LogError(string,bool)", DebugBinder::LogError);
+		BIND("GloryEngine.Debug::LogFatalError(string,bool)", DebugBinder::LogFatalError);
+		BIND("GloryEngine.Debug::LogOnce(string,string,GloryEngine.LogLevel,bool)", DebugBinder::LogOnce);
 	}
 }

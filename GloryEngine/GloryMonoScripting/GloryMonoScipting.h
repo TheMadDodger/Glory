@@ -5,6 +5,8 @@
 #include "AssemblyBinding.h"
 #include "MonoScriptLoader.h"
 
+#define BIND(x, y) bindings.push_back(ScriptBinding("C#", x, &y))
+
 namespace Glory
 {
 	class GloryMonoScipting : public ScriptingModuleTemplate<MonoScript, MonoScriptLoader>
