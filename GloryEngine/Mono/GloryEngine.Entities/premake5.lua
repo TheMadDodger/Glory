@@ -1,13 +1,13 @@
-project "GloryCS"
+project "GloryEngine.Entities"
 	kind "SharedLib"
 	language "C#"
 	staticruntime "Off"
-	namespace ("Glory")
+	namespace ("GloryEngine.Entities")
 
-	targetdir ("%{engineoutdir}")
+	targetdir ("../%{engineoutdir}/Mono")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
-
-	framework "netstandard2.1"
+	
+	dotnetframework "4.7.1"
 
 	files
 	{
@@ -22,14 +22,17 @@ project "GloryCS"
 	{
 	}
 
+	links
+	{
+		"GloryEngine.Core",
+	}
+
 	defines
 	{
 		"TRACE"
 	}
 
 	filter "system:windows"
-		--dotnetframework "4.7.2"
-
 		defines
 		{
 			"_LIB"

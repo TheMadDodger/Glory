@@ -128,4 +128,5 @@ group ""
 
 group "Mono"
 	include "Mono/GloryEngine.Core"
+	include "Mono/GloryEngine.Entities"
 group ""
