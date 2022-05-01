@@ -16,7 +16,6 @@ workspace "GloryEngine"
 	startproject "GlorySDLWindow"
 	startproject "GloryVulkanGraphics"
 	startproject "GloryMonoScripting"
-	startproject "GloryCS"
 	
 	configurations
 	{
@@ -121,9 +120,12 @@ include "GlorySDLImage"
 include "GlorySDLWindow"
 include "GloryVulkanGraphics"
 include "GloryMonoScripting"
-include "GloryCS"
 
 group "Editor Extensions"
 	include "EntityScenesEditorExtension"
 	include "MonoEditorExtension"
+group ""
+
+group "Mono"
+	include "Mono/GloryEngine.Core"
 group ""
