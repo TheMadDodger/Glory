@@ -38,7 +38,7 @@ namespace Glory
 		Debug::LogOnce(mono_string_to_utf8(key), mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
 	}
 
-	void DebugBinder::CreateBindings(std::vector<ScriptBinding>& bindings)
+	void DebugBinder::CreateBindings(std::vector<InternalCall>& internalCalls)
 	{
 		BIND("GloryEngine.Debug::Log(string,GloryEngine.LogLevel,bool)", DebugBinder::Log);
 		BIND("GloryEngine.Debug::LogInfo(string,bool)", DebugBinder::LogInfo);

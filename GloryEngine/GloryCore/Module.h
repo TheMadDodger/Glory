@@ -1,6 +1,6 @@
 #pragma once
 #include "Object.h"
-#include "ScriptBinding.h"
+#include "ScriptExtensions.h"
 #include <typeinfo>
 
 namespace Glory
@@ -34,8 +34,6 @@ namespace Glory
 		virtual void Draw() {};
 
 		virtual bool HasPriority();
-
-		virtual void GetScriptBindings(std::vector<ScriptBinding>& bindings) {};
 
 	protected:
 		Engine* m_pEngine;

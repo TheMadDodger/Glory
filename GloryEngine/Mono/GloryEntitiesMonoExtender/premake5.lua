@@ -1,10 +1,10 @@
-project "GloryMonoScripting"
-	kind "StaticLib"
+project "GloryEntitiesMonoExtender"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineoutdir}")
+	targetdir ("../%{engineoutdir}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
@@ -15,26 +15,30 @@ project "GloryMonoScripting"
 
 	vpaths
 	{
-		["Core"] = { "GloryMono.*", "GloryMonoScipting.*" },
-		["Binders"] = { "DebugBinder.*", "MathBinder.*", "AssemblyBinding.*" },
-		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" }
+		
 	}
 
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
 
-		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.spirv_cross}",
+		"../%{IncludeDir.yaml_cpp}",
+		"../%{IncludeDir.spirv_cross}",
 
-		"%{GloryIncludeDir.core}",
+		"../%{GloryIncludeDir.core}",
 
 		"%{mono_install}/include/mono-2.0",
 	}
 
+	links
+	{
+		"GloryCore",
+		"yaml-cpp",
+	}
+
 	defines
 	{
-		"GLORY_EXPORT_LIB"
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"

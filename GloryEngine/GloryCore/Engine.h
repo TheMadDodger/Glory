@@ -45,6 +45,7 @@ namespace Glory
 		GraphicsModule* GetGraphicsModule() const;
 		TimerModule* GetTimerModule() const;
 		ProfilerModule* GetProfilerModule() const;
+		ScriptingExtender* GetScriptingExtender() const;
 
 		template<class T>
 		T* GetModule()
@@ -105,7 +106,7 @@ namespace Glory
 		friend class Game;
 		friend class GameThread;
 		friend class GraphicsThread;
-		friend class ScriptingBinder;
+		friend class ScriptingExtender;
 
 		// Required modules
 		WindowModule* m_pWindowModule;
@@ -114,6 +115,7 @@ namespace Glory
 		GraphicsModule* m_pGraphicsModule;
 		TimerModule* m_pTimerModule;
 		ProfilerModule* m_pProfilerModule;
+		ScriptingExtender* m_pScriptingExtender;
 		std::vector<ScriptingModule*> m_pScriptingModules;
 
 		// Optional modules

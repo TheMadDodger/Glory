@@ -19,13 +19,15 @@ namespace Glory
 		virtual void Initialize() {};
 		virtual void Cleanup() {};
 
-		virtual void Bind(const ScriptBinding& binding) = 0;
+		virtual void InitializeScripting() = 0;
+		virtual void LoadLib(const ScriptingLib& library) = 0;
+		virtual void Bind(const InternalCall& internalCall) = 0;
 
 	private:
 		virtual const std::type_info& GetModuleType() override;
 
 	private:
-		friend class ScriptingBinder;
+		friend class ScriptingExtender;
 		const std::string m_ScriptingLanguage;
 	};
 

@@ -7,7 +7,8 @@
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
-#include "ScriptingBinder.h"
+#include "ScriptExtensions.h"
+#include "ScriptingExtender.h"
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -51,6 +52,11 @@ namespace Glory
 	ProfilerModule* Engine::GetProfilerModule() const
 	{
 		return m_pProfilerModule;
+	}
+
+	ScriptingExtender* Engine::GetScriptingExtender() const
+	{
+		return m_pScriptingExtender;
 	}
 
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
@@ -99,7 +105,8 @@ namespace Glory
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
-		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pGraphicsThread(nullptr)
+		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pGraphicsThread(nullptr),
+		m_pScriptingExtender(new ScriptingExtender())
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -178,6 +185,9 @@ namespace Glory
 		delete m_pGraphicsThread;
 		m_pGraphicsThread = nullptr;
 
+		delete m_pScriptingExtender;
+		m_pScriptingExtender = nullptr;
+
 		Console::Cleanup();
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
@@ -224,7 +234,7 @@ namespace Glory
 
 		AssetManager::Initialize();
 
-		ScriptingBinder::Initialize(this);
+		m_pScriptingExtender->Initialize(this);
 
 		// Run Post Initialize
 		for (size_t i = 0; i < m_pAllModules.size(); i++)

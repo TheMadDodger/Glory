@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <vector>
-#include <ScriptBinding.h>
+#include "ScriptExtensions.h"
 
 namespace Glory
 {
@@ -14,6 +14,6 @@ namespace Glory
 	class MathBinder
 	{
 	public:
-		static void CreateBindings(std::vector<ScriptBinding>& bindings);
+		static void CreateBindings(std::vector<InternalCall>& internalCalls);
 	};
 }

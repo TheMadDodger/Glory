@@ -33,7 +33,7 @@ namespace Glory
 		return ToVec2Wrapper(ToGLMVec2(a) / ToGLMVec2(b));
 	}
 
-	void MathBinder::CreateBindings(std::vector<ScriptBinding>& bindings)
+	void MathBinder::CreateBindings(std::vector<InternalCall>& internalCalls)
 	{
 		BIND("GloryEngine.Vector2::op_Addition(GloryEngine.Vector2,GloryEngine.Vector2)", VectorAddOverload);
 		BIND("GloryEngine.Vector2::op_Subtraction(GloryEngine.Vector2,GloryEngine.Vector2)", VectorSubtractOverload);

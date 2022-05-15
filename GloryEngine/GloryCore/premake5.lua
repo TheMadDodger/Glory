@@ -15,9 +15,9 @@ project "GloryCore"
 
 	vpaths
 	{
-		["Asset Management"] = { "AssetDatabase.*", "AssetGroup.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*" },
-		["Console"] = { "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*" },
-		["Core"] = { "CoreExceptions.*", "Engine.*", "Game.*", "GameSettings.*", "GameState.*", "GloryCore.*", "GraphicsThread.*", "Object.*", "UUID.*" },
+		["Asset Management"] = { "AssetDatabase.*", "AssetGroup.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*", "ShaderManager.*", "AssetCallbacks.*" },
+		["Console"] = { "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
+		["Core"] = { "CoreExceptions.*", "Engine.*", "Game.*", "GameSettings.*", "GameState.*", "GloryCore.*", "GraphicsThread.*", "Object.*", "UUID.*", "Glory.*" },
 		["Job System"] = { "Job.*", "JobManager.*", "JobPool.*", "JobQueue.*" },
 		["Modules"] = { "Module.*" },
 		["Modules/Time"] = { "TimerModule.*", "GameTime.*" },
@@ -33,17 +33,17 @@ project "GloryCore"
 		["Modules/ResourceLoading"] = {  },
 		["Modules/ResourceLoading/Base"] = { "ImportSettings.*", "Resource.*", "ResourceLoaderModule.*" },
 		["Modules/ResourceLoading/File"] = { "FileData.*", "FileLoaderModule.*" },
-		["Modules/ResourceLoading/Material"] = { "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*" },
+		["Modules/ResourceLoading/Material"] = { "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*", "MaterialInstanceLoaderModule.*", "MaterialLoaderModule.*", "MaterialPropertyInfo.*" },
 		["Modules/ResourceLoading/Models"] = { "MeshData.*", "ModelData.*", "ModelLoaderModule.*" },
-		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderData.*", "ShaderLoaderModule.*" },
+		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderData.*", "ShaderLoaderModule.*", "ShaderSourceData.*", "ShaderSourceLoaderModule.*" },
 		["Modules/ResourceLoading/Textures"] = { "ImageData.*", "ImageLoaderModule.*" },
 		["Modules/Scenes"] = { "ScenesModule.*", "SceneObject.*", "GScene.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
-		["Modules/Scripting"] = { "Script.*", "ScriptingModule.*", "ScriptLoaderModule.*" },
+		["Modules/Scripting"] = { "Script.*", "ScriptingModule.*", "ScriptLoaderModule.*", "ScriptBinding.*", "ScriptingBinder.*", "IScriptExtender.*" },
 		["Threading"] = { "Thread.*", "ThreadManager.*", "ThreadedVar.*" },
 		["Analysis"] = { "EngineProfiler.*", "ProfilerModule.*", "ProfilerSample.*", "ProfilerThreadSample.*" },
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
-		["Serialization"] = { "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*" },
+		["Serialization"] = { "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "SerializedTypes.*", "ArrayPropertySerializers.*", "AnyConverter.*", "AssetReferencePropertyTemplate.*" },
 	}
 
 	includedirs
@@ -57,7 +57,7 @@ project "GloryCore"
 
 	defines
 	{
-		"GLORY_EXPORT_LIB"
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"

@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace GloryEngine
 {
-    class Behaviour : Object
+    class Object
     {
-        
     }
 }
