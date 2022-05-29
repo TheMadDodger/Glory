@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GloryEngine
 {
-    class Object
+    public class Object
     {
     }
 }

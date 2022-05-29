@@ -30,9 +30,5 @@ namespace Glory
         virtual std::string Language() override;
         virtual void GetInternalCalls(std::vector<InternalCall>& internalCalls) override;
         virtual void GetLibs(std::vector<ScriptingLib>& libs) override;
-
-    private:
-        MonoDomain* m_pDomain;
-        std::vector<AssemblyBinding> m_Assemblies;
 	};
 }

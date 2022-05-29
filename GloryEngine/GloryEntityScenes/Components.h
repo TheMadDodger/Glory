@@ -11,6 +11,7 @@
 #include <CameraRef.h>
 #include <Layer.h>
 #include <LightData.h>
+#include <Script.h>
 
 namespace Glory
 {
@@ -102,6 +103,14 @@ namespace Glory
 		glm::vec4 m_Color;
 		float m_Intensity;
 		float m_Range;
+	};
+
+	struct ScriptedComponent
+	{
+		ScriptedComponent() : m_pScript(nullptr) {}
+		ScriptedComponent(Script* pScript) : m_pScript(pScript) {}
+
+		Script* m_pScript;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
