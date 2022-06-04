@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "Engine.h"
 #include "AnyConverter.h"
+#include "AssetManager.h"
 
 namespace Glory
 {
@@ -24,8 +25,8 @@ namespace Glory
 		{
 			MaterialPropertyInfo* pPropertyInfo = m_pMaterialData->GetResourcePropertyInfo(i);
 			const std::string& shaderName = pPropertyInfo->ShaderName();
-			Resource* pResource = *m_pMaterialData->GetResourcePointer(i);
-			ImageData* pImageData = static_cast<ImageData*>(pResource);
+			UUID uuid = *m_pMaterialData->GetResourceUUIDPointer(i);
+			ImageData* pImageData = AssetManager::GetOrLoadAsset<ImageData>(uuid);
 			Texture* pTexture = pImageData != nullptr ? Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pImageData) : nullptr;
 			SetTexture(shaderName, pTexture);
 		}

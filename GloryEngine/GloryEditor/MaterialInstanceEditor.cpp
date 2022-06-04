@@ -49,7 +49,7 @@ namespace Glory::Editor
 
 			if (info->IsResource())
 			{
-				SerializedProperty serializedProperty = SerializedProperty(0, info->DisplayName(), SerializedType::ST_Asset, info->TypeHash(), pMaterial->GetResourcePointer(resourceCounter), info->Flags());
+				SerializedProperty serializedProperty = SerializedProperty(0, info->DisplayName(), SerializedType::ST_Asset, info->TypeHash(), pMaterial->GetResourceUUIDPointer(resourceCounter), info->Flags());
 				change |= PropertyDrawer::DrawProperty(&serializedProperty);
 				++resourceCounter;
 			}

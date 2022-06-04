@@ -62,15 +62,15 @@ namespace Glory
 		m_HashToPropertyInfoIndex[hash] = index;
 	}
 
-	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, Resource* pResource, uint32_t flags)
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, UUID resourceUUID, uint32_t flags)
 	{
 		size_t hash = m_Hasher(displayName);
 		size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
-		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_pResources.size(), flags));
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_Resources.size(), flags));
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
-		m_pResources.push_back(pResource);
+		m_Resources.push_back(resourceUUID);
 	}
 
 	size_t MaterialData::PropertyInfoCount() const
@@ -108,12 +108,12 @@ namespace Glory
 
 	size_t MaterialData::ResourceCount() const
 	{
-		return m_pResources.size();
+		return m_Resources.size();
 	}
 
-	Resource** MaterialData::GetResourcePointer(size_t index)
+	UUID* MaterialData::GetResourceUUIDPointer(size_t index)
 	{
-		return &m_pResources[index];
+		return &m_Resources[index];
 	}
 
 	size_t MaterialData::GetResourcePropertyCount() const
@@ -137,7 +137,7 @@ namespace Glory
 		m_PropertyBuffer.clear();
 		m_PropertyInfos.clear();
 		m_ResourcePropertyInfoIndices.clear();
-		m_pResources.clear();
+		m_Resources.clear();
 		m_HashToPropertyInfoIndex.clear();
 		m_CurrentOffset = 0;
 	}

@@ -15,7 +15,7 @@ namespace Glory
 		if (!pBaseMaterial) return;
 		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
 		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
-		m_pResources.resize(pBaseMaterial->ResourceCount());
+		m_Resources.resize(pBaseMaterial->ResourceCount());
 	}
 
 	MaterialInstanceData::~MaterialInstanceData()
@@ -52,7 +52,7 @@ namespace Glory
 		{
 			m_PropertyOverridesEnable.clear();
 			m_PropertyBuffer.clear();
-			m_pResources.clear();
+			m_Resources.clear();
 			return;
 		}
 
@@ -117,10 +117,10 @@ namespace Glory
 		return m_pBaseMaterial ? m_pBaseMaterial->GetPropertyInfoIndex(name, index) : false;
 	}
 
-	Resource** MaterialInstanceData::GetResourcePointer(size_t index)
+	UUID* MaterialInstanceData::GetResourceUUIDPointer(size_t index)
 	{
 		size_t propertyIndex = GetPropertyIndexFromResourceIndex(index);
-		return m_PropertyOverridesEnable[propertyIndex] ? &m_pResources[index] : m_pBaseMaterial->GetResourcePointer(index);
+		return m_PropertyOverridesEnable[propertyIndex] ? &m_Resources[index] : m_pBaseMaterial->GetResourceUUIDPointer(index);
 	}
 
 	size_t MaterialInstanceData::GetPropertyIndexFromResourceIndex(size_t index) const
@@ -143,6 +143,6 @@ namespace Glory
 		if (!m_pBaseMaterial || m_PropertyBuffer.size() == m_pBaseMaterial->GetBufferReference().size()) return;
 		m_PropertyOverridesEnable.resize(m_pBaseMaterial->PropertyInfoCount(), false);
 		m_PropertyBuffer.resize(m_pBaseMaterial->GetBufferReference().size());
-		m_pResources.resize(m_pBaseMaterial->ResourceCount());
+		m_Resources.resize(m_pBaseMaterial->ResourceCount());
 	}
 }
