@@ -27,6 +27,11 @@ namespace Glory
 		return &m_Assemblies[name];
 	}
 
+	MonoObject* MonoLibManager::InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, MonoObject** pExceptionObject, void** args)
+	{
+		return mono_runtime_invoke(pMethod, pObject, args, pExceptionObject);
+	}
+
 	MonoLibManager::MonoLibManager()
 	{
 	}

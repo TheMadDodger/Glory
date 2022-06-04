@@ -9,6 +9,7 @@ namespace Glory::Editor
 		ImGui::TextUnformatted(label.c_str());
 		ImGui::SameLine();
 
+		// TODO: Use GUID instead of resource pointer to prevent crash, also allows assets to be loaded while scene is already open
 		Resource** pResourceMember = (Resource**)data;
 		std::string assetName = "";
 		if (*pResourceMember == nullptr) assetName = "Noone";

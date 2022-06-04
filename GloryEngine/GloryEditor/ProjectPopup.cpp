@@ -265,7 +265,7 @@ namespace Glory::Editor
             | ImGuiTableFlags_SizingFixedFit;
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if (ImGui::InputText("", m_PathText, 100))
+        if (ImGui::InputText("##", m_PathText, 100))
         {
             std::filesystem::path path(m_PathText);
             if (std::filesystem::exists(path))

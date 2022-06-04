@@ -9,6 +9,7 @@ namespace Glory
 	{
 		MonoObject* m_pObject;
 		uint32_t m_GCHandle;
+		std::map<MonoClass*, MonoObject*> m_pObjects;
 	};
 
 	class MonoObjectManager
@@ -24,6 +25,6 @@ namespace Glory
 	private:
 		MonoObjectManager();
 		virtual ~MonoObjectManager();
-		static std::map<Object*, std::map<MonoClass*, MonoObject*>> m_Objects;
+		static std::map<Object*, ObjectInstanceData> m_Objects;
 	};
 }

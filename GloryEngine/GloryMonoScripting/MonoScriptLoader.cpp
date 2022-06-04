@@ -30,12 +30,12 @@ namespace Glory
 
 	MonoScript* MonoScriptLoader::LoadResource(const std::string& path, const ScriptImportSettings& importSettings)
 	{
-		return nullptr;
+		return new MonoScript();
 	}
 
 	MonoScript* MonoScriptLoader::LoadResource(const void* buffer, size_t length, const ScriptImportSettings& importSettings)
 	{
-		return nullptr;
+		return new MonoScript();
 	}
 
 	void MonoScriptLoader::SaveResource(const std::string& path, MonoScript* pResource)

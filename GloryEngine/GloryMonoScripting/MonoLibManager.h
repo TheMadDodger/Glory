@@ -12,6 +12,8 @@ namespace Glory
 		static void Cleanup();
 		static AssemblyBinding* GetAssembly(const std::string& name);
 
+		static MonoObject* InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, MonoObject** pExceptionObject, void** args);
+
 	private:
 		MonoLibManager();
 		virtual ~MonoLibManager();

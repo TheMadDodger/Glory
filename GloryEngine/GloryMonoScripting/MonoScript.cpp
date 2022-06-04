@@ -16,15 +16,29 @@ namespace Glory
 
 	void MonoScript::Invoke(Object* pObject, const std::string& method)
 	{
-		if (m_pMonoClass == nullptr) LoadClass("Assembly-CSharp", "");
-		MonoObject* pMonoObject = MonoObjectManager::GetObject(m_pMonoClass, pObject);
-		mono_class_get_method_from_name(m_pMonoClass, method.c_str(), 0);
+		AssemblyClass* pClass = LoadClass("GloryEngine.Core.dll", "GloryEngine", "Behaviour");
+		if (pClass == nullptr) return;
+		MonoObject* pMonoObject = LoadObject(pObject);
+		std::string fullMethodName = ".::" + method;
+		MonoMethod* pMethod = pClass->GetMethod(fullMethodName);
+		if (pMethod == nullptr) return;
+		MonoObject* pException = nullptr;
+		MonoLibManager::InvokeMethod(pMethod, pMonoObject, &pException, nullptr);
 	}
 
-	void MonoScript::LoadClass(const std::string& lib, const std::string& namespaceName)
+	AssemblyClass* MonoScript::LoadClass(const std::string& lib, const std::string& namespaceName, const std::string& className)
 	{
 		std::string name = Name();
 		AssemblyBinding* pAssembly = MonoLibManager::GetAssembly(lib);
-		m_pMonoClass = pAssembly->GetClass(namespaceName, name);
+		if (pAssembly == nullptr) return nullptr;
+		AssemblyClass* pClass = pAssembly->GetClass(namespaceName, className);
+		m_pMonoClass = pClass->m_pClass;
+		return pClass;
+	}
+
+	MonoObject* MonoScript::LoadObject(Object* pObject)
+	{
+		if (m_pMonoClass == nullptr) return nullptr;
+		return MonoObjectManager::GetObject(m_pMonoClass, pObject);
 	}
 }

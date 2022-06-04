@@ -61,6 +61,7 @@ namespace Glory
 		m_Registry.RegisterSystem<LookAtSystem>();
 		m_Registry.RegisterSystem<SpinSystem>();
 		m_Registry.RegisterSystem<LightSystem>();
+		m_Registry.RegisterSystem<ScriptedSystem>();
 	}
 
 	void EntityScene::OnTick()

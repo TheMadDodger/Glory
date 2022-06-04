@@ -6,3 +6,4 @@
 #include "LookAtSystem.h"
 #include "SpinSystem.h"
 #include "LightSystem.h"
+#include "ScriptedSystem.h"

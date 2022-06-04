@@ -1,6 +1,7 @@
 #include "AssemblyBinding.h"
 #include <mono/metadata/assembly.h>
 #include <Debug.h>
+#include <mono/metadata/debug-helpers.h>
 
 namespace Glory
 {
@@ -33,17 +34,26 @@ namespace Glory
 		return m_pImage;
 	}
 
-	MonoClass* AssemblyBinding::GetClass(const std::string& namespaceName, const std::string& className)
+	AssemblyClass* AssemblyBinding::GetClass(const std::string& namespaceName, const std::string& className)
 	{
-		if (m_Namespaces.find(namespaceName) == m_Namespaces.end() || m_Namespaces[namespaceName].m_pClasses.find(className) == m_Namespaces[namespaceName].m_pClasses.end())
+		if (m_Namespaces.find(namespaceName) == m_Namespaces.end() || m_Namespaces[namespaceName].m_Classes.find(className) == m_Namespaces[namespaceName].m_Classes.end())
 		{
 			return LoadClass(namespaceName, className);
 		}
-
-		return m_Namespaces[namespaceName].m_pClasses[className];
+		return &m_Namespaces[namespaceName].m_Classes[className];
 	}
 
-	MonoClass* AssemblyBinding::LoadClass(const std::string& namespaceName, const std::string& className)
+	bool AssemblyBinding::GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c)
+	{
+		if (m_Namespaces.find(namespaceName) == m_Namespaces.end() || m_Namespaces[namespaceName].m_Classes.find(className) == m_Namespaces[namespaceName].m_Classes.end())
+		{
+			if (LoadClass(namespaceName, className) == nullptr) return false;
+		}
+		c = m_Namespaces[namespaceName].m_Classes[className];
+		return true;
+	}
+
+	AssemblyClass* AssemblyBinding::LoadClass(const std::string& namespaceName, const std::string& className)
 	{
 		MonoClass* pClass = mono_class_from_name(m_pImage, namespaceName.c_str(), className.c_str());
 		if (pClass == nullptr)
@@ -51,7 +61,28 @@ namespace Glory
 			Debug::LogError("Failed to load mono class");
 			return nullptr;
 		}
-		m_Namespaces[namespaceName].m_pClasses[className] = pClass;
-		return pClass;
+		m_Namespaces[namespaceName].m_Classes[className] = AssemblyClass(className, pClass);
+		return &m_Namespaces[namespaceName].m_Classes[className];
+	}
+
+	AssemblyClass::AssemblyClass() : m_Name(""), m_pClass(nullptr) {}
+
+	AssemblyClass::AssemblyClass(const std::string& name, MonoClass* pClass) : m_Name(name), m_pClass(pClass) {}
+
+	MonoMethod* AssemblyClass::GetMethod(const std::string& name)
+	{
+		if (m_pMethods.find(name) == m_pMethods.end())
+		{
+			return LoadMethod(name);
+		}
+		return m_pMethods[name];
+	}
+
+	MonoMethod* AssemblyClass::LoadMethod(const std::string& name)
+	{
+		MonoMethodDesc* pMainFuncDesc = mono_method_desc_new(name.c_str(), false);
+		MonoMethod* pMethod = mono_method_desc_search_in_class(pMainFuncDesc, m_pClass);
+		mono_method_desc_free(pMainFuncDesc);
+		return pMethod;
 	}
 }

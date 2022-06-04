@@ -4,19 +4,19 @@
 
 namespace Glory
 {
-    std::map<Object*, std::map<MonoClass*, MonoObject*>> MonoObjectManager::m_Objects;
+    std::map<Object*, ObjectInstanceData> MonoObjectManager::m_Objects;
 
     MonoObject* MonoObjectManager::GetObject(MonoClass* pClass, Object* pObject)
     {
-        if (m_Objects.find(pObject) == m_Objects.end() || m_Objects[pObject].find(pClass) == m_Objects[pObject].end())
+        if (m_Objects.find(pObject) == m_Objects.end() || m_Objects[pObject].m_pObjects.find(pClass) == m_Objects[pObject].m_pObjects.end())
             return CreateObject(pClass, pObject);
-        return m_Objects[pObject][pClass];
+        return m_Objects[pObject].m_pObjects[pClass];
     }
 
     void MonoObjectManager::DestroyObject(MonoClass* pClass, Object* pObject)
     {
-        if (m_Objects.find(pObject) == m_Objects.end() || m_Objects[pObject].find(pClass) == m_Objects[pObject].end()) return;
-        MonoObject* pMonoObject = m_Objects[pObject][pClass];
+        if (m_Objects.find(pObject) == m_Objects.end() || m_Objects[pObject].m_pObjects.find(pClass) == m_Objects[pObject].m_pObjects.end()) return;
+        MonoObject* pMonoObject = m_Objects[pObject].m_pObjects[pClass];
     }
 
     void MonoObjectManager::Cleanup()
@@ -27,7 +27,7 @@ namespace Glory
     {
         MonoDomain* pDomain = MonoManager::GetDomain();
         MonoObject* pMonoObject = mono_object_new(pDomain, pClass);
-        m_Objects[pObject][pClass] = pMonoObject;
+        m_Objects[pObject].m_pObjects[pClass] = pMonoObject;
         return pMonoObject;
     }
 

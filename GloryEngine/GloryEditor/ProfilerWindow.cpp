@@ -273,7 +273,7 @@ namespace Glory::Editor
 				ImGui::TableSetColumnIndex(0);
 				ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 
-				if (ImGui::Selectable("", false, selectable_flags, ImVec2(0, 0.0f)))
+				if (ImGui::Selectable("##", false, selectable_flags, ImVec2(0, 0.0f)))
 				{
 					
 				}
