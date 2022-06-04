@@ -107,10 +107,10 @@ namespace Glory
 
 	struct ScriptedComponent
 	{
-		ScriptedComponent() : m_pScript(nullptr) {}
-		ScriptedComponent(Script* pScript) : m_pScript(pScript) {}
+		ScriptedComponent() : m_Script(0) {}
+		ScriptedComponent(Script* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0) {}
 
-		Script* m_pScript;
+		UUID m_Script;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
