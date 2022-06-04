@@ -126,8 +126,7 @@ namespace Glory
 			else
 			{
 				UUID id = node.as<uint64_t>();
-				Resource* pResource = AssetManager::GetAssetImmediate(id);
-				pMaterialData->AddProperty(displayName, shaderName, typeHash, pResource);
+				pMaterialData->AddProperty(displayName, shaderName, typeHash, id);
 			}
 		}
 	}
@@ -172,9 +171,8 @@ namespace Glory
 			{
 				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
 				++resourceIndex;
-				Resource* pResource = *pMaterialData->GetResourcePointer(index);
-				UUID id = pResource ? pResource->GetUUID() : 0;
-				out << YAML::Key << "Value" << YAML::Value << id;
+				UUID uuid = *pMaterialData->GetResourceUUIDPointer(index);
+				out << YAML::Key << "Value" << YAML::Value << uuid;
 			}
 
 			out << YAML::EndMap;

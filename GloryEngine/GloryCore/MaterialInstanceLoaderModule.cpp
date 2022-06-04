@@ -98,9 +98,8 @@ namespace Glory
 			{
 				size_t resourceIndex = propertyInfo->Offset();
 				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
-				Resource* pResource = *pMaterialData->GetResourcePointer(index);
-				UUID id = pResource ? pResource->GetUUID() : 0;
-				out << YAML::Key << "Value" << YAML::Value << id;
+				UUID uuid = *pMaterialData->GetResourceUUIDPointer(index);
+				out << YAML::Key << "Value" << YAML::Value << uuid;
 			}
 			out << YAML::EndMap;
 		}
@@ -138,7 +137,7 @@ namespace Glory
 			{
 				UUID id = node.as<uint64_t>();
 				size_t resourceIndex = propertyInfo->Offset();
-				if(pMaterialData->m_pResources.size() > resourceIndex) pMaterialData->m_pResources[resourceIndex] = AssetManager::GetAssetImmediate(id);
+				if (pMaterialData->m_Resources.size() > resourceIndex) pMaterialData->m_Resources[resourceIndex] = id;
 			}
 		}
 	}

@@ -35,7 +35,7 @@ namespace Glory::Editor
 	{
 		for (size_t i = 0; i < m_SamplerNames.size(); i++)
 		{
-			pMaterial->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceType::GetHash<ImageData>(), nullptr);
+			pMaterial->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceType::GetHash<ImageData>(), 0);
 		}
 
 		if (pMaterial->GetCurrentBufferOffset() > 0) return; // Already added from other shader
