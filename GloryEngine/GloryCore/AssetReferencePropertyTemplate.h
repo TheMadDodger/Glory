@@ -12,13 +12,13 @@ namespace Glory
 		{
 			m_ElementTypeHash = ResourceType::GetHash<T>();
 		}
-		AssetReferencePropertyTemplate(UUID objectUUID, const std::string& name, T** pMember, uint32_t flags)
+		AssetReferencePropertyTemplate(UUID objectUUID, const std::string& name, UUID* pMember, uint32_t flags)
 			: SerializedProperty(objectUUID, name, ST_Asset, pMember, flags)
 		{
 			m_ElementTypeHash = ResourceType::GetHash<T>();
 		}
 
-		void Update(T** pMember)
+		void Update(UUID* pMember)
 		{
 			m_pMember = pMember;
 		}

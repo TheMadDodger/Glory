@@ -24,6 +24,15 @@ namespace Glory
 	{
 	public:
 		static void GetAsset(UUID uuid, std::function<void(Resource*)> callback);
+		static Resource* GetOrLoadAsset(UUID uuid);
+
+		template<class T>
+		static T* GetOrLoadAsset(UUID uuid)
+		{
+			Resource* pResource = GetOrLoadAsset(uuid);
+			if (!pResource) return nullptr;
+			return (T*)pResource;
+		}
 
 		template<class T>
 		static T* GetAssetImmediate(UUID uuid)

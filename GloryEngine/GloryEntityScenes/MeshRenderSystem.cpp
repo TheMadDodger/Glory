@@ -6,6 +6,7 @@
 #include <SerializedArrayProperty.h>
 #include <AssetReferencePropertyTemplate.h>
 #include <SerializedPropertyManager.h>
+#include <AssetManager.h>
 
 namespace Glory
 {
@@ -34,20 +35,31 @@ namespace Glory
             mask = layer.m_pLayer != nullptr ? layer.m_pLayer->m_Mask : 0;
         }
 
-        if (meshFilter.m_pModelData == nullptr) return;
-        for (size_t i = 0; i < meshFilter.m_pModelData->GetMeshCount(); i++)
+        ModelData* pModelData = AssetManager::GetOrLoadAsset<ModelData>(meshFilter.m_pModelData);
+        if (pModelData == nullptr) return;
+        for (size_t i = 0; i < pModelData->GetMeshCount(); i++)
         {
-            if (i >= pComponent.m_pMaterials.size() || pComponent.m_pMaterials[i] == nullptr)
+            if (i >= pComponent.m_pMaterials.size() || !AssetDatabase::AssetExists(pComponent.m_pMaterials[i]))
             {
+                // TODO: Set some default material
                 std::string key = std::to_string(entity) + "_MISSING_MATERIAL";
                 Debug::LogOnce(key, "MeshRenderer: Missing Materials on MeshRenderer!", Debug::LogLevel::Warning);
                 continue;
             }
 
+            UUID materialUUID = pComponent.m_pMaterials[i];
+            MaterialData* pMaterial = AssetManager::GetOrLoadAsset<MaterialData>(materialUUID);
+
+            if (pMaterial == nullptr)
+            {
+                // TODO: Set some default material
+                return;
+            }
+
             RenderData renderData;
             renderData.m_MeshIndex = i;
-            renderData.m_pModel = meshFilter.m_pModelData;
-            renderData.m_pMaterial = pComponent.m_pMaterials[i];
+            renderData.m_pModel = pModelData;
+            renderData.m_pMaterial = pMaterial;
             renderData.m_World = transform.MatTransform;
             renderData.m_LayerMask = mask;
             renderData.m_ObjectID = entity;
@@ -58,7 +70,7 @@ namespace Glory
     void MeshRenderSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, MeshRenderer& pComponent)
     {
         properties.push_back(
-            SerializedPropertyManager::GetProperty<SerializedArrayProperty<MaterialData*, MaterialData, AssetReferencePropertyTemplate<MaterialData>>>(uuid, "Materials", &pComponent.m_pMaterials, 0)
+            SerializedPropertyManager::GetProperty<SerializedArrayProperty<UUID, MaterialData, AssetReferencePropertyTemplate<MaterialData>>>(uuid, "Materials", &pComponent.m_pMaterials, 0)
         );
     }
 

@@ -1,6 +1,7 @@
 #include "AssetReferencePropertyDrawer.h"
 #include "AssetPickerPopup.h"
 #include <imgui.h>
+#include <AssetDatabase.h>
 
 namespace Glory::Editor
 {
@@ -9,20 +10,21 @@ namespace Glory::Editor
 		ImGui::TextUnformatted(label.c_str());
 		ImGui::SameLine();
 
-		// TODO: Use GUID instead of resource pointer to prevent crash, also allows assets to be loaded while scene is already open
-		Resource** pResourceMember = (Resource**)data;
+		UUID* pUUIDMember = (UUID*)data;
 		std::string assetName = "";
-		if (*pResourceMember == nullptr) assetName = "Noone";
+		AssetDatabase::AssetExists(*pUUIDMember);
+
+		if (!AssetDatabase::AssetExists(*pUUIDMember)) assetName = "Noone";
 		else
 		{
-			assetName = (*pResourceMember)->Name();
+			assetName = AssetDatabase::GetAssetName(*pUUIDMember);
 		}
 
 		std::string buttonLabel = assetName + "##" + serializedProperty->Name();
 
 		if (ImGui::Button(buttonLabel.c_str()))
 		{
-			AssetPickerPopup::Open(typeHash, pResourceMember, true);
+			AssetPickerPopup::Open(typeHash, pUUIDMember, true);
 		}
 
 		return true;

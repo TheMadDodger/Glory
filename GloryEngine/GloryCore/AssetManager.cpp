@@ -36,6 +36,16 @@ namespace Glory
 		m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
 	}
 
+	Resource* AssetManager::GetOrLoadAsset(UUID uuid)
+	{
+		Resource* pResource = FindResource(uuid);
+		if (pResource) return pResource;
+		if (m_AssetLoadedCallbacks.Contains(uuid)) return nullptr;
+		m_AssetLoadedCallbacks.Set(uuid, { [](Resource*) {} });
+		m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
+		return nullptr;
+	}
+
 	Resource* AssetManager::GetAssetImmediate(UUID uuid)
 	{
 		Resource* pResource = FindResource(uuid);
