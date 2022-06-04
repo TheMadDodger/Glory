@@ -16,10 +16,10 @@ namespace Glory::Editor
 	{
 		MeshRenderer& meshRenderer = GetTargetComponent();
 
-		if (ImGui::Button("Select material"))
-		{
-			Selection::SetActiveObject(meshRenderer.m_pMaterials[0]);
-		}
+		//if (ImGui::Button("Select material"))
+		//{
+		//	Selection::SetActiveObject(meshRenderer.m_pMaterials[0]);
+		//}
 
 		return false;
 	}

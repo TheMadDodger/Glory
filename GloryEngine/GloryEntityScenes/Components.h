@@ -30,16 +30,16 @@ namespace Glory
 
 	struct MeshFilter
 	{
-		MeshFilter() : m_pModelData(nullptr) {}
-		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData) {}
-		ModelData* m_pModelData;
+		MeshFilter() : m_pModelData(0) {}
+		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData != nullptr ? pModelData->GetUUID() : 0) {}
+		UUID m_pModelData;
 	};
 
 	struct MeshRenderer
 	{
-		MeshRenderer(MaterialData* pMaterial) : m_pMaterials({ pMaterial }) {}
-		MeshRenderer() : m_pMaterials(std::vector<MaterialData*>()) {}
-		std::vector<MaterialData*> m_pMaterials;
+		MeshRenderer(MaterialData* pMaterial) : m_pMaterials({ pMaterial != nullptr ? pMaterial->GetUUID() : 0 }) {}
+		MeshRenderer() : m_pMaterials(std::vector<UUID>()) {}
+		std::vector<UUID> m_pMaterials;
 	};
 
 	//enum CameraPerspective

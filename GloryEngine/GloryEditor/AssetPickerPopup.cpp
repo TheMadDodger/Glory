@@ -7,16 +7,16 @@
 namespace Glory::Editor
 {
 	bool AssetPickerPopup::m_Open = false;
-	Resource** AssetPickerPopup::m_pResourcePointer = nullptr;
+	UUID* AssetPickerPopup::m_pUUIDPointer = nullptr;
 	size_t AssetPickerPopup::m_TypeHash = 0;
 	bool AssetPickerPopup::m_IncludeSubAssets = false;
 	std::function<void(Resource*)> AssetPickerPopup::m_Callback = NULL;
 
-	void AssetPickerPopup::Open(size_t typeHash, Resource** pResource, bool includeSubAssets)
+	void AssetPickerPopup::Open(size_t typeHash, UUID* pUUID, bool includeSubAssets)
 	{
 		m_Open = true;
 		m_TypeHash = typeHash;
-		m_pResourcePointer = pResource;
+		m_pUUIDPointer = pUUID;
 		m_IncludeSubAssets = includeSubAssets;
 	}
 
@@ -25,7 +25,7 @@ namespace Glory::Editor
 		m_Callback = callback;
 		m_Open = true;
 		m_TypeHash = typeHash;
-		m_pResourcePointer = nullptr;
+		m_pUUIDPointer = nullptr;
 		m_IncludeSubAssets = includeSubAssets;
 	}
 
@@ -112,7 +112,7 @@ namespace Glory::Editor
 	{
 		if (ImGui::MenuItem("Noone"))
 		{
-			AssetSelected(nullptr);
+			AssetSelected(0);
 		}
 
 		std::for_each(items.begin(), items.end(), [&](UUID uuid)
@@ -120,15 +120,16 @@ namespace Glory::Editor
 			std::string name = AssetDatabase::GetAssetName(uuid);
 			if (ImGui::MenuItem(name.c_str()))
 			{
-				AssetManager::GetAsset(uuid, [&](Resource* pResource)
-				{
-					AssetSelected(pResource);
-				});
+				AssetSelected(uuid);
+				//AssetManager::GetAsset(uuid, [&](Resource* pResource)
+				//{
+				//	AssetSelected(pResource);
+				//});
 			}
 		});
 	}
 
-	void AssetPickerPopup::AssetSelected(Resource* pAsset)
+	void AssetPickerPopup::AssetSelected(UUID uuid)
 	{
 		m_PossibleAssets.clear();
 		m_FilteredAssets.clear();
@@ -136,12 +137,13 @@ namespace Glory::Editor
 
 		if (m_Callback != NULL)
 		{
-			m_Callback(pAsset);
+			Resource* pResource = AssetManager::GetAssetImmediate(uuid);
+			m_Callback(pResource);
 			m_Callback = NULL;
 			return;
 		}
 
-		*m_pResourcePointer = pAsset;
-		m_pResourcePointer = nullptr;
+		*m_pUUIDPointer = uuid;
+		m_pUUIDPointer = nullptr;
 	}
 }

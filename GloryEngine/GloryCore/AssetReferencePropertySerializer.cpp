@@ -13,8 +13,7 @@ namespace Glory
 
 	void AssetReferencePropertySerializer::Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out)
 	{
-		Object* pObject = serializedProperty->ObjectReference();
-		UUID uuid = pObject != nullptr ? pObject->GetUUID() : 0;
+		UUID uuid = *(UUID*)serializedProperty->MemberPointer();
 		out << YAML::Key << serializedProperty->Name();
 		out << YAML::Value << (uint64_t)uuid;
 	}
@@ -22,16 +21,16 @@ namespace Glory
 	void AssetReferencePropertySerializer::Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
-		Object** pObjectMember = (Object**)serializedProperty->MemberPointer();
+		UUID* pUUIDMember = (UUID*)serializedProperty->MemberPointer();
 		UUID uuid = object.as<uint64_t>();
-		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
-		*pObjectMember = pResource;
+		*pUUIDMember = uuid;
+		AssetManager::GetAsset(uuid, [](Resource*) {});
 	}
 
 	void AssetReferencePropertySerializer::Deserialize(std::any& out, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
 		UUID uuid = object.as<uint64_t>();
-		out = AssetManager::GetAssetImmediate(uuid);
+		out = uuid;
 	}
 }

@@ -26,59 +26,59 @@ namespace Glory::Editor
 
 	void FileDialog::Initialize()
 	{
-		ifd::FileDialog::Instance().CreateTexture = [&](const std::string& path, uint8_t* data, int w, int h, char fmt) -> void*
-		{
-			bool exists = true;
-			
-			if (m_pImages.find(path) == m_pImages.end())
-			{
-				m_pImages[path] = new FileDialogImage(data, w, h, fmt);
-				exists = false;
-			}
-
-			GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager();
-			EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
-
-			FileDialogImage* pImage = m_pImages[path];
-			if (exists)
-			{
-				if (pResourceManager->ResourceExists(pImage))
-				{
-					Texture* pTexture = pResourceManager->CreateTexture(pImage);
-					return pRenderImpl->GetTextureID(pTexture);
-				}
-				return 0;
-			}
-			EditorAssets::EnqueueTextureCreation(pImage);
-			return 0;
-
-			//GLuint tex;
-			//glGenTextures(1, &tex);
-			//LogGLError(glGetError(), true);
-			//glBindTexture(GL_TEXTURE_2D, tex);
-			//LogGLError(glGetError(), true);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			//LogGLError(glGetError(), true);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			//LogGLError(glGetError(), true);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			//LogGLError(glGetError(), true);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			//LogGLError(glGetError(), true);
-			//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
-			//LogGLError(glGetError(), true);
-			//glGenerateMipmap(GL_TEXTURE_2D);
-			//LogGLError(glGetError(), true);
-			//glBindTexture(GL_TEXTURE_2D, 0);
-			//LogGLError(glGetError(), true);
-
-			//return 0;//(void*)tex;
-		};
-		ifd::FileDialog::Instance().DeleteTexture = [&](void* tex) {
-			//GLuint texID = (GLuint)tex;
-			//glDeleteTextures(1, &texID);
-			//LogGLError(glGetError(), true);
-		};
+		//ifd::FileDialog::Instance().CreateTexture = [&](const std::string& path, uint8_t* data, int w, int h, char fmt) -> void*
+		//{
+		//	bool exists = true;
+		//	
+		//	if (m_pImages.find(path) == m_pImages.end())
+		//	{
+		//		m_pImages[path] = new FileDialogImage(data, w, h, fmt);
+		//		exists = false;
+		//	}
+		//
+		//	GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager();
+		//	EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		//
+		//	FileDialogImage* pImage = m_pImages[path];
+		//	if (exists)
+		//	{
+		//		if (pResourceManager->ResourceExists(pImage))
+		//		{
+		//			Texture* pTexture = pResourceManager->CreateTexture(pImage);
+		//			return pRenderImpl->GetTextureID(pTexture);
+		//		}
+		//		return 0;
+		//	}
+		//	EditorAssets::EnqueueTextureCreation(pImage);
+		//	return 0;
+		//
+		//	//GLuint tex;
+		//	//glGenTextures(1, &tex);
+		//	//LogGLError(glGetError(), true);
+		//	//glBindTexture(GL_TEXTURE_2D, tex);
+		//	//LogGLError(glGetError(), true);
+		//	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		//	//LogGLError(glGetError(), true);
+		//	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//	//LogGLError(glGetError(), true);
+		//	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//	//LogGLError(glGetError(), true);
+		//	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		//	//LogGLError(glGetError(), true);
+		//	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+		//	//LogGLError(glGetError(), true);
+		//	//glGenerateMipmap(GL_TEXTURE_2D);
+		//	//LogGLError(glGetError(), true);
+		//	//glBindTexture(GL_TEXTURE_2D, 0);
+		//	//LogGLError(glGetError(), true);
+		//
+		//	//return 0;//(void*)tex;
+		//};
+		//ifd::FileDialog::Instance().DeleteTexture = [&](void* tex) {
+		//	//GLuint texID = (GLuint)tex;
+		//	//glDeleteTextures(1, &texID);
+		//	//LogGLError(glGetError(), true);
+		//};
 	}
 
 	void FileDialog::Update()
