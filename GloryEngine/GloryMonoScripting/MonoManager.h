@@ -9,11 +9,11 @@ namespace Glory
 	{
 	public:
 		static MonoDomain* GetDomain();
+		static void LoadLib(const ScriptingLib& lib);
 
 	private:
 		static void Initialize(const std::string& assemblyDir = ".", const std::string& configDir = "");
 		static void Cleanup();
-		static void LoadLib(const ScriptingLib& lib);
 
 	private:
 		MonoManager();

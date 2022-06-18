@@ -24,10 +24,9 @@ namespace Glory::Editor
         static void OnCreateScript(Object* pObject, const ObjectMenuType& menuType);
         static void OnOpenCSharpProject(Object* pObject, const ObjectMenuType& menuType);
 
-        static void UpdateCSharpProjectFile();
-
-        static void ReloadCSharpDocument(const std::string& projectPath);
-        static void CreateCSharpDocument(const std::string& projectPath);
+        static void GeneratePremakeFile(ProjectSpace* pProject);
+        static void GenerateBatchFile(ProjectSpace* pProject);
+        static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);
 
     private:
         GloryMonoScipting* m_pScriptingModule;

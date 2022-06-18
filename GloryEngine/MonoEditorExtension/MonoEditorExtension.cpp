@@ -9,6 +9,13 @@
 #include <MonoScript.h>
 #include <windows.h>
 #include <Tumbnail.h>
+#include <MonoManager.h>
+#include <tchar.h>
+
+#include <locale>
+#include <codecvt>
+#include <string>
+#include <MonoLibManager.h>
 
 namespace Glory::Editor
 {
@@ -28,8 +35,9 @@ namespace Glory::Editor
 		std::filesystem::path projectPath = pProject->RootPath();
 		projectPath = projectPath.append(pProject->Name() + ".csproj");
 
-		ReloadCSharpDocument(projectPath.string());
-		UpdateCSharpProjectFile();
+		GeneratePremakeFile(pProject);
+		GenerateBatchFile(pProject);
+		RunGenerateProjectFilesBatch(pProject);
 
 		std::string windowName = pProject->Name() + " - Microsoft Visual Studio";
 		HWND handle = FindWindowA(NULL, windowName.c_str());
@@ -64,7 +72,8 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::OnProjectOpen(ProjectSpace* pProject)
 	{
-		
+		std::string name = pProject->Name() + ".dll";
+		MonoManager::LoadLib(ScriptingLib("C#", name));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)
@@ -88,99 +97,121 @@ namespace Glory::Editor
 		OpenCSharpProject();
 	}
 
-	void MonoEditorExtension::UpdateCSharpProjectFile()
+	void MonoEditorExtension::GeneratePremakeFile(ProjectSpace* pProject)
 	{
-		size_t hash = ResourceType::GetHash<MonoScript>();
-		std::vector<UUID> scriptFilePaths;
-		AssetDatabase::GetAllAssetsOfType(hash, scriptFilePaths);
+		std::string projectName = pProject->Name();
+		// TODO: Make this setable in engine settings later
+		std::string dotNetFramework = "4.7.1";
 
-		ticpp::Element* pRootNode = m_SolutionDocument.FirstChildElement();
-		ticpp::Element* pFirstSibling = pRootNode->FirstChildElement();
-		ticpp::Element* pSibling = pFirstSibling->NextSiblingElement("ItemGroup", false);
-		pSibling->Clear();
-
-		for (size_t i = 0; i < scriptFilePaths.size(); i++)
+		std::filesystem::path cachePath = pProject->CachePath();
+		std::filesystem::path luaPath = cachePath.append("Premake").append("premake5.lua");
+		std::ofstream luaStream(luaPath);
+		std::filesystem::path editorPath = std::filesystem::current_path();
+		std::filesystem::path premakePath = editorPath.append("premake").append("premake5.exe");
+		editorPath = std::filesystem::current_path();
+		luaStream << "workspace \"" << projectName << "\"" << std::endl;
+		luaStream << "	platforms { \"Win32\", \"x64\" }" << std::endl;
+		luaStream << "	configurations { \"Debug\", \"Release\" }" << std::endl;
+		luaStream << "	flags { \"MultiProcessorCompile\" }" << std::endl;
+		luaStream << "project \"Sponza\"" << std::endl;
+		luaStream << "	kind \"SharedLib\"" << std::endl;
+		luaStream << "	language \"C#\"" << std::endl;
+		luaStream << "	staticruntime \"Off\"" << std::endl;
+		luaStream << "	namespace (\"" << projectName << "\")" << std::endl;
+		luaStream << "	dotnetframework \"" << dotNetFramework << "\"" << std::endl;
+		luaStream << "	targetdir \"" << "Library/Assembly" << "\"" << std::endl;
+		luaStream << "	objdir \"" << "Library/OBJ" << "\"" << std::endl;
+		luaStream << "	files \"" << "Assets/**.cs" << "\"" << std::endl;
+		luaStream << "	defines \"" << "TRACE" << "\"" << std::endl;
+		luaStream << "	libdirs " << std::endl;
+		luaStream << "	{" << std::endl;
+		luaStream << "		" << editorPath << std::endl;
+		luaStream << "	}" << std::endl;
+		luaStream << "	links " << std::endl;
+		luaStream << "	{" << std::endl;
+		MonoLibManager::ForEachAssembly([&](AssemblyBinding* pAssembly)
 		{
-			ticpp::Element* pCompileElement = new ticpp::Element("Compile");
-			pSibling->LinkEndChild(pCompileElement);
+			luaStream << "		\"" << pAssembly->Name() << "\"," << std::endl;
+		});
+		luaStream << "		\"END\"" << std::endl;
+		luaStream << "	}" << std::endl;
+		luaStream << "	filter \"" << "platforms:Win32" << "\"" << std::endl;
+		luaStream << "		architecture \"" << "x86" << "\"" << std::endl;
+		luaStream << "		defines \"" << "WIN32" << "\"" << std::endl;
+		luaStream << "	filter \"" << "platforms:x64" << "\"" << std::endl;
+		luaStream << "		architecture \"" << "x64" << "\"" << std::endl;
+		luaStream << "	filter \"" << "configurations:Debug" << "\"" << std::endl;
+		luaStream << "		runtime \"" << "Debug" << "\"" << std::endl;
+		luaStream << "		defines \"" << "DEBUG" << "\"" << std::endl;
+		luaStream << "		symbols \"" << "On" << "\"" << std::endl;
+		luaStream << "	filter \"" << "configurations:Release" << "\"" << std::endl;
+		luaStream << "		runtime \"" << "Release" << "\"" << std::endl;
+		luaStream << "		defines \"" << "NDEBUG" << "\"" << std::endl;
+		luaStream << "		optimize \"" << "On" << "\"" << std::endl;
+		luaStream.close();
 
-			UUID uuid = scriptFilePaths[i];
-			AssetLocation location;
-			if (!AssetDatabase::GetAssetLocation(uuid, location)) continue;
+		std::filesystem::path tempLuaPath = pProject->RootPath();
+		tempLuaPath = tempLuaPath.append("premake5.lua");
+		std::filesystem::copy(luaPath, tempLuaPath, std::filesystem::copy_options::overwrite_existing);
+	}
 
-			std::filesystem::path path = std::filesystem::path("Assets").append(location.m_Path);
-			pCompileElement->SetAttribute("Include", path.string());
+	void MonoEditorExtension::GenerateBatchFile(ProjectSpace* pProject)
+	{
+		std::filesystem::path cachePath = pProject->CachePath();
+		std::filesystem::path batchPath = cachePath.append("Premake").append("generateprojectfiles.bat");
+		std::ofstream batchStream(batchPath);
+		std::filesystem::path editorPath = std::filesystem::current_path();
+		std::filesystem::path premakePath = editorPath.append("premake").append("premake5.exe");
+		batchStream << "@echo off" << std::endl;
+		batchStream << "pushd ..\\..\\" << std::endl;
+		batchStream << "call " << premakePath << " vs2019" << std::endl;
+		batchStream << "popd";
+		batchStream.close();
+	}
+
+	void MonoEditorExtension::RunGenerateProjectFilesBatch(ProjectSpace* pProject)
+	{
+		STARTUPINFO si;
+		PROCESS_INFORMATION pi;
+		ZeroMemory(&si, sizeof(si));
+		si.cb = sizeof(si);
+		ZeroMemory(&pi, sizeof(pi));
+
+		LPTSTR applicationName = _tcsdup(TEXT("c:\\Windows\\System32\\cmd.exe"));
+		LPTSTR commandLine = _tcsdup(TEXT("/c generateprojectfiles.bat"));
+
+		std::filesystem::path cachePath = pProject->CachePath();
+		std::filesystem::path batchRootPath = cachePath.append("Premake");
+		std::wstring pathWString = batchRootPath.wstring();
+		LPCWSTR lpcWPath = pathWString.c_str();
+
+		// Start the child process. 
+		if (!CreateProcess(applicationName,   // No module name (use command line)
+			commandLine,        // Command line
+			NULL,           // Process handle not inheritable
+			NULL,           // Thread handle not inheritable
+			FALSE,          // Set handle inheritance to FALSE
+			0,              // No creation flags
+			NULL,           // Use parent's environment block
+			lpcWPath,       // Use current projects starting directory 
+			&si,            // Pointer to STARTUPINFO structure
+			&pi)			// Pointer to PROCESS_INFORMATION structure
+			)
+		{
+			printf("CreateProcess failed (%d).\n", GetLastError());
+			return;
 		}
 
-		// TODO: Relink dlls
+		// Wait until child process exits.
+		WaitForSingleObject(pi.hProcess, INFINITE);
 
-		m_SolutionDocument.SaveFile();
-	}
+		// Close process and thread handles. 
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 
-	void MonoEditorExtension::ReloadCSharpDocument(const std::string& projectPath)
-	{
-		if (!std::filesystem::exists(projectPath)) CreateCSharpDocument(projectPath);
-		m_SolutionDocument = ticpp::Document(projectPath);
-		m_SolutionDocument.LoadFile();
-	}
-	void MonoEditorExtension::CreateCSharpDocument(const std::string& projectPath)
-	{
-		std::filesystem::copy_file("./EditorAssets/Mono/CSProjTemplate.txt", projectPath);
-
-		//ticpp::Element* root = new ticpp::Element("Project");
-		//m_SolutionDocument.LinkEndChild(root);
-		//root->SetAttribute("Sdk", "Microsoft.NET.Sdk");
-		//
-		//ticpp::Element* propertyGroup = new ticpp::Element("PropertyGroup");
-		//root->LinkEndChild(propertyGroup);
-		//
-		//ticpp::Element* outputType = new ticpp::Element("OutputType");
-		//propertyGroup->LinkEndChild(outputType);
-		//
-		//ticpp::Text* text = new ticpp::Text("Library");
-		//outputType->LinkEndChild(text);
-		//
-		//ticpp::Element* appDesignerFolder = new ticpp::Element("AppDesignerFolder");
-		//propertyGroup->LinkEndChild(appDesignerFolder);
-		//
-		//text = new ticpp::Text("Properties");
-		//appDesignerFolder->LinkEndChild(text);
-		//
-		//ticpp::Element* element = new ticpp::Element("RootNamespace");
-		//propertyGroup->LinkEndChild(element);
-		//
-		//text = new ticpp::Text(pProject->Name());
-		//element->LinkEndChild(text);
-		//
-		//element = new ticpp::Element("TargetFramework");
-		//propertyGroup->LinkEndChild(element);
-		//
-		//text = new ticpp::Text("netstandard2.1");
-		//element->LinkEndChild(text);
-		//
-		//element = new ticpp::Element("EnableDefaultCompileItems");
-		//propertyGroup->LinkEndChild(element);
-		//
-		//text = new ticpp::Text("false");
-		//element->LinkEndChild(text);
-		//
-		//ticpp::Element* filesItemGroup = new ticpp::Element("ItemGroup");
-		//root->LinkEndChild(filesItemGroup);
-		//
-		//
-		//ticpp::Element* itemGroup = new ticpp::Element("ItemGroup");
-		//root->LinkEndChild(itemGroup);
-		//
-		//ticpp::Element* reference = new ticpp::Element("Reference");
-		//itemGroup->LinkEndChild(reference);
-		//reference->SetAttribute("Include", "AppLogger");
-		//
-		//element = new ticpp::Element("HintPath");
-		//reference->LinkEndChild(element);
-		//
-		//// TODO: scan for csharp dlls from other modules
-		//text = new ticpp::Text("..\\..\\..\\Glorious\\TEST\\CSharpTest\\AppLogger\\bin\\Debug\\netcoreapp3.1\\AppLogger.dll");
-		//element->LinkEndChild(text);
+		std::filesystem::path tempLuaPath = pProject->RootPath();
+		tempLuaPath = tempLuaPath.append("premake5.lua");
+		std::filesystem::remove(tempLuaPath);
 	}
 }
 

@@ -9,5 +9,19 @@ namespace GloryEngine.Entities
 {
     public class EntityBehaviour : Behaviour
     {
+        #region Fields
+
+        private Entity _entity;
+
+        #endregion
+
+        #region Initialization
+
+        public void Initialize()
+        {
+            
+        }
+
+        #endregion
     }
 }

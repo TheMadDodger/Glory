@@ -6,6 +6,12 @@ namespace Glory
 	{
 		APPEND_TYPE(Script);
 	}
+
+	Script::Script(FileData* pFileData) : FileData(pFileData)
+	{
+		APPEND_TYPE(Script);
+	}
+
 	Script::~Script()
 	{
 	}

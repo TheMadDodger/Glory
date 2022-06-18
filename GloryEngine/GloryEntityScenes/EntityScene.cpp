@@ -6,25 +6,19 @@
 #include "Systems.h"
 #include "EntitySceneObject.h"
 
-
-
-
-#include <Game.h>
-#include <Engine.h>
-
 namespace Glory
 {
-	EntityScene::EntityScene() : GScene("New Scene") //: m_pJobPool(nullptr)
+	EntityScene::EntityScene() : GScene("New Scene"), m_Registry(this) //: m_pJobPool(nullptr)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName) : GScene(sceneName)
+	EntityScene::EntityScene(const std::string& sceneName) : GScene(sceneName), m_Registry(this)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : GScene(sceneName, uuid)
+	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : GScene(sceneName, uuid), m_Registry(this)
 	{
 		APPEND_TYPE(EntityScene);
 	}

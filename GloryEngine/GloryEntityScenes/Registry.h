@@ -8,11 +8,14 @@
 
 namespace Glory
 {
+	class EntityScene;
 	class Registry
 	{
 	public:
-		Registry();
+		Registry(EntityScene* pScene);
 		virtual ~Registry();
+
+		EntityScene* GetEntityScene();
 
 		EntityID CreateEntity();
 		void DestroyEntity(EntityID entity);
@@ -136,5 +139,6 @@ namespace Glory
 		std::map<std::type_index, std::vector<size_t>> m_ComponentsPerType;
 
 		EntitySystems m_Systems;
+		EntityScene* m_pScene;
 	};
 }

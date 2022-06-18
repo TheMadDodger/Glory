@@ -14,6 +14,11 @@ namespace Glory
 
 		static MonoObject* InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, MonoObject** pExceptionObject, void** args);
 
+		static void GetAllClasses();
+
+		static size_t AssemblyCount();
+		static void ForEachAssembly(std::function<void(AssemblyBinding*)> callback);
+
 	private:
 		MonoLibManager();
 		virtual ~MonoLibManager();

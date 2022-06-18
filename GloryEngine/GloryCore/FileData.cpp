@@ -4,6 +4,12 @@ namespace Glory
 {
 	FileData::FileData() : m_Data(std::vector<char>())
 	{
+		APPEND_TYPE(FileData);
+	}
+
+	FileData::FileData(FileData* pFileData) : m_Data(pFileData->m_Data)
+	{
+		APPEND_TYPE(FileData);
 	}
 
 	FileData::~FileData()

@@ -53,6 +53,11 @@ namespace Glory
 		return true;
 	}
 
+	const std::string& AssemblyBinding::Name()
+	{
+		return m_Name;
+	}
+
 	AssemblyClass* AssemblyBinding::LoadClass(const std::string& namespaceName, const std::string& className)
 	{
 		MonoClass* pClass = mono_class_from_name(m_pImage, namespaceName.c_str(), className.c_str());
@@ -61,6 +66,13 @@ namespace Glory
 			Debug::LogError("Failed to load mono class");
 			return nullptr;
 		}
+
+		if (mono_class_init(pClass) == false)
+		{
+			Debug::LogError("AssemblyBinding::LoadClass > Failed to initialize a MonoClass!");
+			return nullptr;
+		}
+
 		m_Namespaces[namespaceName].m_Classes[className] = AssemblyClass(className, pClass);
 		return &m_Namespaces[namespaceName].m_Classes[className];
 	}

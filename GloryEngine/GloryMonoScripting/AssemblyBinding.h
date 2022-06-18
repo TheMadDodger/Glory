@@ -42,6 +42,8 @@ namespace Glory
 		AssemblyClass* GetClass(const std::string& namespaceName, const std::string& className);
 		bool GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c);
 
+		const std::string& Name();
+
 	private:
 		AssemblyClass* LoadClass(const std::string& namespaceName, const std::string& className);
 

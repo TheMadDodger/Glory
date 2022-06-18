@@ -8,8 +8,6 @@
 #include "MonoLibManager.h"
 #include "MonoManager.h"
 
-#include <Debug.h>
-
 namespace Glory
 {
 	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("C#")
@@ -41,15 +39,18 @@ namespace Glory
 
 	void GloryMonoScipting::InitializeScripting()
 	{
-		AssemblyBinding* pAssembly = MonoLibManager::GetAssembly("GloryEngine.Core.dll");
-		MonoClass* pMainClass = mono_class_from_name(pAssembly->GetMonoImage(), "Glory", "GloryCSMain");
-		MonoMethodDesc* pMainFuncDesc = mono_method_desc_new(".GloryMain:main()", false);
-		MonoMethod* pMainFunc = mono_method_desc_search_in_class(pMainFuncDesc, pMainClass);
-		// Exception object
-		MonoObject* pExObject = nullptr;
-		MonoObject* pMonoObject = mono_runtime_invoke(pMainFunc, nullptr, nullptr, &pExObject);
-		uint32_t monoObjectGCHandle = mono_gchandle_new(pMonoObject, false);
-		mono_method_desc_free(pMainFuncDesc);
+		//AssemblyBinding* pAssembly = MonoLibManager::GetAssembly("GloryEngine.Core.dll");
+		//MonoClass* pMainClass = mono_class_from_name(pAssembly->GetMonoImage(), "Glory", "GloryCSMain");
+		//mono_bool result = mono_class_init(pMainClass);
+		//MonoObject* pMonoObject1 = mono_object_new(mono_domain_get(), pMainClass);
+		//
+		//MonoMethodDesc* pMainFuncDesc = mono_method_desc_new(".GloryMain:main()", false);
+		//MonoMethod* pMainFunc = mono_method_desc_search_in_class(pMainFuncDesc, pMainClass);
+		//// Exception object
+		//MonoObject* pExObject = nullptr;
+		//MonoObject* pMonoObject = mono_runtime_invoke(pMainFunc, nullptr, nullptr, &pExObject);
+		//uint32_t monoObjectGCHandle = mono_gchandle_new(pMonoObject, false);
+		//mono_method_desc_free(pMainFuncDesc);
 	}
 
 	void GloryMonoScipting::Cleanup()

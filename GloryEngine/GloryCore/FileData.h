@@ -8,6 +8,7 @@ namespace Glory
     {
     public:
         FileData();
+        FileData(FileData* pFileData);
         virtual ~FileData();
 
         size_t Size();

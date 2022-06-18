@@ -1,10 +1,11 @@
 #include "Entity.h"
 #include "Registry.h"
 #include <algorithm>
+#include "EntityScene.h"
 
 namespace Glory
 {
-	Registry::Registry()
+	Registry::Registry(EntityScene* pScene) : m_pScene(pScene)
 	{
 	}
 
@@ -16,6 +17,11 @@ namespace Glory
 		m_UnusedComponentIndices.clear();
 		m_ComponentsPerEntity.clear();
 		m_ComponentsPerType.clear();
+	}
+
+	EntityScene* Registry::GetEntityScene()
+	{
+		return m_pScene;
 	}
 
 	EntityID Registry::CreateEntity()

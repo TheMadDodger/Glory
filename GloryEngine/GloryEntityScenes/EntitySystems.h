@@ -28,7 +28,6 @@ namespace Glory
 		void OnUpdate();
 		void OnDraw();
 
-
 		template<typename C, typename T>
 		EntitySystem* Register(Registry* pRegistry)
 		{

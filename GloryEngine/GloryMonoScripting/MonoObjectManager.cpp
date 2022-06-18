@@ -25,8 +25,14 @@ namespace Glory
 
     MonoObject* MonoObjectManager::CreateObject(MonoClass* pClass, Object* pObject)
     {
-        MonoDomain* pDomain = MonoManager::GetDomain();
+        MonoDomain* pDomain = mono_domain_get();
         MonoObject* pMonoObject = mono_object_new(pDomain, pClass);
+        if (pMonoObject == nullptr)
+        {
+            Debug::LogError("MonoObjectManager::CreateObject > Failed to create MonoObject from class");
+            return nullptr;
+        }
+        mono_runtime_object_init(pMonoObject);
         m_Objects[pObject].m_pObjects[pClass] = pMonoObject;
         return pMonoObject;
     }
