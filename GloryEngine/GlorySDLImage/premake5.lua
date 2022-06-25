@@ -1,5 +1,5 @@
 project "GlorySDLImage"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -21,10 +21,31 @@ project "GlorySDLImage"
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
-		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.SDL_image}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}"
+	}
+
+	libdirs
+	{
+		"%{vulkan_sdk}/third-party/lib",
+		"%{LibDirs.glory}",
+		"%{LibDirs.SDL_image}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"GloryCore",
+		"SDL2",
+		"SDL2_image",
+		"yaml-cpp",
+		"GloryEditor",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"
@@ -40,8 +61,28 @@ project "GlorySDLImage"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			"%{vulkan_sdk}/Third-Party/Bin32"
+		}
+
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			"%{vulkan_sdk}/Third-Party/Bin"
+		}
+
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+		}
 
 	filter "configurations:Debug"
 		runtime "Debug"

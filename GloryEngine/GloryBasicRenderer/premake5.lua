@@ -1,5 +1,5 @@
 project "GloryBasicRenderer"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -25,6 +25,11 @@ project "GloryBasicRenderer"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{vulkan_sdk}/third-party/include"
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"

@@ -120,6 +120,7 @@ namespace Glory::Editor
             data->w = q.w;
             return true;
         }
+        return false;
     }
 
     bool LayerMaskDrawer::OnGUI(const std::string& label, LayerMask* data, uint32_t flags) const

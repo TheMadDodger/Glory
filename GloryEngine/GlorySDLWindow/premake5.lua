@@ -1,5 +1,5 @@
 project "GlorySDLWindow"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -28,6 +28,29 @@ project "GlorySDLWindow"
 		"%{GloryIncludeDir.core}"
 	}
 
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"GloryCore",
+		"SDL2",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"yaml-cpp",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
+	}
+
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v142"
@@ -41,8 +64,28 @@ project "GlorySDLWindow"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			"%{vulkan_sdk}/Third-Party/Bin32"
+		}
+
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			"%{vulkan_sdk}/Third-Party/Bin"
+		}
+
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+		}
 
 	filter "configurations:Debug"
 		runtime "Debug"

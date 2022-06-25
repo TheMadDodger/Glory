@@ -1,5 +1,5 @@
 project "EntityScenesEditorExtension"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -31,6 +31,11 @@ project "EntityScenesEditorExtension"
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.ImGui}"
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"

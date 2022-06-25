@@ -15,6 +15,8 @@ workspace "GloryEngine"
 	startproject "GlorySDLImage"
 	startproject "GlorySDLWindow"
 	startproject "GloryVulkanGraphics"
+	startproject "Glorious"
+	startproject "GloryEngineBuilder"
 	
 	configurations
 	{
@@ -111,6 +113,11 @@ include "GloryOpenGLGraphics"
 include "GlorySDLImage"
 include "GlorySDLWindow"
 include "GloryVulkanGraphics"
+
+group "Engine"
+	include "GloryEngineBuilder"
+	include "Glorious"
+group ""
 
 group "Editor Extensions"
 	include "EntityScenesEditorExtension"

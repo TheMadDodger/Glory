@@ -1,5 +1,5 @@
-project "GloryClusteredRenderer"
-	kind "SharedLib"
+project "GloryEngineBuilder"
+	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -15,38 +15,16 @@ project "GloryClusteredRenderer"
 
 	vpaths
 	{
-		["Module"] = { "ClusteredRendererModule.*" }
+		
 	}
 
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
-		"%{IncludeDir.yaml_cpp}",
-		--"%{IncludeDir.GLEW}",
-		--"%{GloryIncludeDir.opengl}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{GloryIncludeDir.core}"
-	}
-
-	libdirs
-	{
-		"%{LibDirs.glory}",
-		--"%{LibDirs.GLEW}", -- but why?
-		"%{LibDirs.shaderc}",
-		"%{LibDirs.spirv_cross}",
-		"%{LibDirs.yaml_cpp}",
-	}
-	
-	links
-	{
-		"GloryCore",
-		--"glew32",
-		--"GloryOpenGLGraphics", -- pls remove dis
-		"shaderc",
-		"shaderc_combined",
-		"shaderc_shared",
-		"yaml-cpp",
+		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.core}",
 	}
 
 	defines

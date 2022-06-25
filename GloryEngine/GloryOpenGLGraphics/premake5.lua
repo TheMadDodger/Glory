@@ -1,5 +1,5 @@
 project "GloryOpenGLGraphics"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -27,6 +27,30 @@ project "GloryOpenGLGraphics"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}"
+	}
+
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.GLEW}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"glew32",
+		"GloryCore",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"yaml-cpp",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"

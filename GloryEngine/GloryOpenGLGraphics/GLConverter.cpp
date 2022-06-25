@@ -1,4 +1,5 @@
 #include "GLConverter.h"
+#include "GloryOGL.h"
 
 namespace Glory
 {

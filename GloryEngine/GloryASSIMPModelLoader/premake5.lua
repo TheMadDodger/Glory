@@ -1,5 +1,5 @@
 project "GloryASSIMPModelLoader"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -24,6 +24,25 @@ project "GloryASSIMPModelLoader"
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{vulkan_sdk}/third-party/include"
+	}
+
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.assimp}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"GloryCore",
+		"assimp",
+		"yaml-cpp",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"

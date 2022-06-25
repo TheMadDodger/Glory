@@ -1,5 +1,5 @@
 project "GloryEntityScenes"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -28,6 +28,29 @@ project "GloryEntityScenes"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{vulkan_sdk}/third-party/include"
+	}
+
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.assimp}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"GloryCore",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"yaml-cpp",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
 	}
 
 	filter "system:windows"

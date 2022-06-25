@@ -1,5 +1,6 @@
 #include "GLBuffer.h"
-#include "OpenGLGraphicsModule.h"	
+#include "OpenGLGraphicsModule.h"
+#include "GloryOGL.h"
 
 namespace Glory
 {
