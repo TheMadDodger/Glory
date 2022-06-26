@@ -1,4 +1,5 @@
 #include "Module.h"
+#include "GloryContext.h"
 
 namespace Glory
 {

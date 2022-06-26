@@ -7,6 +7,7 @@
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
+#include "GloryContext.h"
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -174,6 +175,8 @@ namespace Glory
 
 	void Engine::Initialize()
 	{
+		GloryContext::GetContext()->Initialize();
+
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
 

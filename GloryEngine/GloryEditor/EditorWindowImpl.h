@@ -1,5 +1,6 @@
 #pragma once
 #include <Window.h>
+#include <imgui.h>
 
 namespace Glory::Editor
 {
@@ -11,6 +12,7 @@ namespace Glory::Editor
 		EditorWindowImpl();
 		virtual ~EditorWindowImpl();
 
+		virtual void SetContext(ImGuiContext* pImguiConext) = 0;
 		void Initialize();
 
 		virtual void Shutdown() = 0;

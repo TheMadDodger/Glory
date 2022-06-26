@@ -34,6 +34,8 @@ namespace Glory
 		Engine* LoadEngine(const Glory::WindowCreateInfo& defaultWindow);
 		void Unload();
 
+		const std::string& GetSetModule(const std::string& key);
+
 	private:
 		void LoadModules(YAML::Node& modules);
 		void LoadModule(const std::string& moduleName);
@@ -43,10 +45,11 @@ namespace Glory
 		T* LoadRequiredModule(YAML::Node& node, const std::string& key, T** value)
 		{
 			YAML::Node indexNode = node[key];
-			int index = indexNode.as<int>();
+			size_t index = indexNode.as<size_t>();
 			Module* pModule = m_pModules[index];
 			T* pT = (T*)pModule;
 			*value = pT;
+			m_SetModules[key] = index;
 			return pT;
 		}
 
@@ -55,5 +58,7 @@ namespace Glory
 		std::vector<Module*> m_pModules;
 		std::vector<HMODULE> m_Libs;
 		std::vector<Module*> m_pOptionalModules;
+		std::vector<std::string> m_LoadedModuleNames;
+		std::map<std::string, size_t> m_SetModules;
 	};
 }

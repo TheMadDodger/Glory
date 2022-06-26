@@ -2,6 +2,8 @@
 #include <vector>
 #include <Game.h>
 #include <BaseEditorExtension.h>
+#include <EditorWindowImpl.h>
+#include <EditorRenderImpl.h>
 
 namespace Glory
 {
@@ -11,5 +13,8 @@ namespace Glory
 
 		uint32_t ExtensionsCount;
 		Editor::BaseEditorExtension** pExtensions;
+
+		Editor::EditorWindowImpl* pWindowImpl;
+		Editor::EditorRenderImpl* pRenderImpl;
 	};
 }

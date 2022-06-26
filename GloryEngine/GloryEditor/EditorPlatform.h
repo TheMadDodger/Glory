@@ -49,6 +49,7 @@ namespace Glory::Editor
 
 		std::mutex m_Mutex;
 		EditorRenderState m_RenderState;
+		ImGuiContext* m_pImguiConext;
 
 		const ImVec4 CLEARCOLOR = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	};

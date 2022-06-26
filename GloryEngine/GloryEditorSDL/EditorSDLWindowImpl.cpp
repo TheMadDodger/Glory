@@ -4,9 +4,19 @@
 
 namespace Glory::Editor
 {
+	GLORY_API void LoadBackend(EditorCreateInfo& editorCreateInfo)
+	{
+		editorCreateInfo.pWindowImpl = new EditorSDLWindowImpl();
+	}
+
 	EditorSDLWindowImpl::EditorSDLWindowImpl() {}
 
 	EditorSDLWindowImpl::~EditorSDLWindowImpl() {}
+
+	void EditorSDLWindowImpl::SetContext(ImGuiContext* pImguiConext)
+	{
+		ImGui::SetCurrentContext(pImguiConext);
+	}
 
 	void EditorSDLWindowImpl::Shutdown()
 	{

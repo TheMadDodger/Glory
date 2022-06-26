@@ -17,10 +17,7 @@ project "GloryEditor"
 	{
 		["Backend"] = {  },
 		["Backend/Base"] = { "EditorRenderImpl.*", "EditorWindowImpl.*" },
-		["Backend/OpenGL"] = { "EditorOpenGLRenderImpl.*" },
 		["Extensions"] = { "BaseEditorExtension.*" },
-		["Backend/SDL"] = { "EditorSDLWindowImpl.*" },
-		["Backend/Vulkan"] = { "EditorVulkanRenderImpl.*" },
 		["Content"] = {  },
 		["Content/Editors"] = { "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
 		["Content/PropertyDrawers"] = { "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*" },
@@ -28,7 +25,6 @@ project "GloryEditor"
 		["Editor"] = { "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*", "Gizmos.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
-		["ImGui"] = { "imgui_impl_opengl3.*", "imgui_impl_sdl.*", "imgui_impl_vulkan.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
 		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
@@ -39,11 +35,11 @@ project "GloryEditor"
 
 	includedirs
 	{
-		"%{vulkan_sdk}/include",
+		--"%{vulkan_sdk}/include",
 		"%{vulkan_sdk}/third-party/include",
 
 		"%{IncludeDir.assimp}",
-		"%{IncludeDir.GLEW}",
+		--"%{IncludeDir.GLEW}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
@@ -54,13 +50,13 @@ project "GloryEditor"
 		"%{IncludeDir.yaml_cpp}",
 
 		"%{GloryIncludeDir.core}",
-		"%{GloryIncludeDir.assimp}",
-		"%{GloryIncludeDir.entityscenes}",
-		"%{GloryIncludeDir.basicrenderer}",
-		"%{GloryIncludeDir.opengl}",
-		"%{GloryIncludeDir.sdlimage}",
-		"%{GloryIncludeDir.sdlwindow}",
-		"%{GloryIncludeDir.vulkan}",
+		--"%{GloryIncludeDir.assimp}",
+		--"%{GloryIncludeDir.entityscenes}",
+		--"%{GloryIncludeDir.basicrenderer}",
+		--"%{GloryIncludeDir.opengl}",
+		--"%{GloryIncludeDir.sdlimage}",
+		--"%{GloryIncludeDir.sdlwindow}",
+		--"%{GloryIncludeDir.vulkan}",
 		"%{GloryIncludeDir.ImGui}",
 	}
 

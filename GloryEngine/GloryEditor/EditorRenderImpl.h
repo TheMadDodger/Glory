@@ -15,6 +15,7 @@ namespace Glory::Editor
 		virtual void* GetTextureID(Texture* pTexture) = 0;
 
 	protected:
+		virtual void SetContext(ImGuiContext* pImguiConext) = 0;
 		virtual void Setup() = 0;
 		virtual void SetupBackend() = 0;
 		virtual void UploadImGUIFonts() = 0;

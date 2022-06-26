@@ -10,6 +10,11 @@ namespace Glory::Editor
 
 	EditorOpenGLRenderImpl::~EditorOpenGLRenderImpl() {}
 
+	void EditorOpenGLRenderImpl::SetContext(ImGuiContext* pImguiConext)
+	{
+		ImGui::SetCurrentContext(pImguiConext);
+	}
+
 	void EditorOpenGLRenderImpl::Setup()
 	{
 		m_pEditorPlatform->GetWindowImpl()->SetupForOpenGL();
@@ -79,5 +84,10 @@ namespace Glory::Editor
 			const char* error = (const char*)glewGetErrorString(err);
 			Debug::LogWarning(error, bIncludeTimeStamp);
 		}
+	}
+
+	GLORY_API void LoadBackend(EditorCreateInfo& editorCreateInfo)
+	{
+		editorCreateInfo.pRenderImpl = new EditorOpenGLRenderImpl();
 	}
 }

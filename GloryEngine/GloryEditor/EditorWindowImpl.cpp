@@ -1,4 +1,3 @@
-#include <SDLWindowModule.h>
 #include <Game.h>
 #include "EditorWindowImpl.h"
 

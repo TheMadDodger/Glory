@@ -18,34 +18,26 @@ namespace Glory::Editor
 		template<class Window, class Renderer>
 		void Initialize(Game& game)
 		{
-			game.OverrideAssetPathFunc([]()
-			{
-				ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-				if (pProject == nullptr) return std::string("./Assets");
-				std::filesystem::path path = pProject->RootPath();
-				path.append("Assets");
-				return path.string();
-			});
+			game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
 
 			auto window = (EditorWindowImpl*)(new Window());
 			auto renderer = (EditorRenderImpl*)(new Renderer());
 			m_pPlatform = new EditorPlatform(window, renderer);
 			window->m_pEditorPlatform = m_pPlatform;
 			renderer->m_pEditorPlatform = m_pPlatform;
-			m_pPlatform->Initialize(game);
-			m_pMainEditor = new MainEditor();
-			m_pMainEditor->Initialize();
-			m_pEditorInstance = this;
-
-			InitializeExtensions();
-
-			m_pShaderProcessor = new EditorShaderProcessor();
+			
+			InitializePlatform(game);
 		}
+
+		void Initialize(Game& game);
 
 		void InitializeExtensions();
 
 		void Destroy();
 		void Run(Game& game);
+
+		void SetWindowImpl(EditorWindowImpl* pWindowImpl);
+		void SetRendererImpl(EditorRenderImpl* pRendererImpl);
 
 		EditorPlatform* GetEditorPlatform();
 		MainEditor* GetMainEditor();
@@ -54,8 +46,14 @@ namespace Glory::Editor
 
 	private:
 		void RenderEditor();
+		void InitializePlatform(Game& game);
+
+		static std::string AssetPathOverrider();
 
 	private:
+		EditorWindowImpl* m_pTempWindowImpl;
+		EditorRenderImpl* m_pTempRenderImpl;
+
 		EditorPlatform* m_pPlatform;
 		MainEditor* m_pMainEditor;
 		std::vector<BaseEditorExtension*> m_pExtensions;

@@ -5,6 +5,7 @@
 namespace Glory
 {
 	class Engine;
+	class GloryContext;
 
 	class Module : public Object
 	{

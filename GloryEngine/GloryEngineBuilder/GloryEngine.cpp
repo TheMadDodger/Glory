@@ -4,10 +4,11 @@
 #include <BuiltInModules.h>
 #include <Console.h>
 #include <WindowsDebugConsole.h>
+#include <GloryContext.h>
 
 namespace Glory
 {
-	typedef Module*(__cdecl* LoadModuleProc)();
+	typedef Module*(__cdecl* LoadModuleProc)(GloryContext*);
 
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath) : m_CFGPath(cfgPath)
 	{
@@ -24,6 +25,8 @@ namespace Glory
 #ifdef _DEBUG
 		Console::RegisterConsole<WindowsDebugConsole>();
 #endif
+
+		GloryContext::CreateContext();
 
 		YAML::Node node = YAML::LoadFile(m_CFGPath.string());
 		YAML::Node modules = node["Modules"];
@@ -46,6 +49,13 @@ namespace Glory
 		Console::Cleanup();
 	}
 
+	const std::string& EngineLoader::GetSetModule(const std::string& key)
+	{
+		if (m_SetModules.find(key) == m_SetModules.end()) return "";
+		size_t index = m_SetModules[key];
+		return m_LoadedModuleNames[index];
+	}
+
 	void EngineLoader::LoadModules(YAML::Node& modules)
 	{
 		for (size_t i = 0; i < modules.size(); i++)
@@ -58,6 +68,7 @@ namespace Glory
 
 	void EngineLoader::LoadModule(const std::string& moduleName)
 	{
+		m_LoadedModuleNames.push_back(moduleName);
 		Debug::LogInfo("Loading module: " + moduleName + "...");
 
 		std::filesystem::path modulePath = "./Modules";
@@ -81,7 +92,8 @@ namespace Glory
 			return;
 		}
 
-		Module* pModule = (loadProc)();
+		GloryContext* pContext = GloryContext::GetContext();
+		Module* pModule = (loadProc)(pContext);
 		if (pModule == nullptr)
 		{
 			FreeLibrary(lib);

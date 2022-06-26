@@ -2,9 +2,14 @@
 #include "EditorRenderImpl.h"
 #include "EditorPlatform.h"
 #include "imgui_impl_opengl3.h"
+#include <GloryOGL.h>
+#include <Glory.h>
+#include <EditorCreateInfo.h>
 
 namespace Glory::Editor
 {
+    extern "C" GLORY_API void LoadBackend(EditorCreateInfo& editorCreateInfo);
+
     class EditorOpenGLRenderImpl : public EditorRenderImpl
     {
     public:
@@ -12,6 +17,7 @@ namespace Glory::Editor
         virtual ~EditorOpenGLRenderImpl();
 
     private:
+        virtual void SetContext(ImGuiContext* pImguiConext) override;
         virtual void Setup() override;
         virtual void SetupBackend() override;
         virtual void UploadImGUIFonts() override;

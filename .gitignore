@@ -79,3 +79,6 @@ GloryEngine/GloryClusteredRenderer/Release/
 GloryEngine/Glorious/Debug/
 GloryEngine/GloryEngineBuilder/Debug/
 GloryEngine/GloryMain/Modules/
+GloryEngine/GloryEditorOGL/Debug/
+GloryEngine/GloryEditorSDL/Debug/
+GloryEngine/GloryEditorVulkan/Debug/

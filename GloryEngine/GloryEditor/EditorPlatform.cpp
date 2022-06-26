@@ -22,6 +22,8 @@ namespace Glory::Editor
 	{
 		m_pWindowImpl->Initialize();
 		SetupDearImGuiContext();
+		m_pWindowImpl->SetContext(m_pImguiConext);
+		m_pRenderImpl->SetContext(m_pImguiConext);
 		m_pRenderImpl->Initialize();
 		m_pRenderImpl->SetupBackend();
 		LoadFonts();
@@ -75,7 +77,7 @@ namespace Glory::Editor
 	void EditorPlatform::SetupDearImGuiContext()
 	{
 		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
+		m_pImguiConext = ImGui::CreateContext();
 		ImPlot::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls

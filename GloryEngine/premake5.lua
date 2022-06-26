@@ -17,6 +17,9 @@ workspace "GloryEngine"
 	startproject "GloryVulkanGraphics"
 	startproject "Glorious"
 	startproject "GloryEngineBuilder"
+	startproject "GloryEditorSDL"
+	startproject "GloryEditorOGL"
+	startproject "GloryEditorVulkan"
 	
 	configurations
 	{
@@ -33,6 +36,7 @@ vulkan_sdk = "C:/VulkanSDK/1.2.182.0"
 leak_detector = "C:/Program Files (x86)/Visual Leak Detector/include"
 outputdir = "%{cfg.buildcfg}/%{cfg.platform}"
 engineoutdir = "../bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"
+editorOutDir = "%{engineoutdir}/Editor"
 modulesOutDir = "%{engineoutdir}/Modules"
 moduleOutDir = "%{modulesOutDir}/%{prj.name}"
 
@@ -81,7 +85,7 @@ IncludeDir["yaml_cpp"]				= "%{SubmodoleDirs.yaml_cpp}/include"
 
 LibDirs = {}
 LibDirs["assimp"]					= "%{SubmodoleDirs.assimp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
-LibDirs["glory"]					= "%{SubmodoleDirs.glory}/lib/%{cfg.buildcfg}/%{cfg.platform}"
+LibDirs["glory"]					= "%{SubmodoleDirs.glory}/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["GLEW"]						= "%{SubmodoleDirs.GLEW}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["ImGui"]					= "%{SubmodoleDirs.ImGui}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["ImGuizmo"]					= "%{SubmodoleDirs.ImGuizmo}/lib/%{cfg.buildcfg}/%{cfg.platform}"
@@ -122,7 +126,9 @@ group "Application"
 group ""
 
 group "Editor Backends"
-
+	include "GloryEditorSDL"
+	include "GloryEditorOGL"
+	include "GloryEditorVulkan"
 group ""
 
 group "Editor Extensions"

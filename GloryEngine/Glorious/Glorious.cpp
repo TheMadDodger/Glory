@@ -2,6 +2,7 @@
 //
 
 #include "pch.h"
+#include "EditorLoader.h"
 #include <Engine.h>
 #include <Game.h>
 #include <GameSettings.h>
@@ -12,8 +13,6 @@
 #include <SDL2/SDL_video.h>
 #include <EditorCreateInfo.h>
 #include <EditorApplication.h>
-#include <EditorOpenGLRenderImpl.h>
-#include <EditorSDLWindowImpl.h>
 
 typedef void(__cdecl* LoadExtensionProc)(Glory::Engine*);
 
@@ -36,8 +35,8 @@ int main()
         //createInfo.ScriptingModulesCount = static_cast<uint32_t>(scriptingModules.size());
         //createInfo.pScriptingModules = scriptingModules.data();
 
-        Glory::EngineLoader loader("./Engine.yaml");
-        Glory::Engine* pEngine = loader.LoadEngine(windowCreateInfo);
+        Glory::EngineLoader engineLoader("./Engine.yaml");
+        Glory::Engine* pEngine = engineLoader.LoadEngine(windowCreateInfo);
 
         Glory::GameSettings gameSettings;
         gameSettings.pEngine = pEngine;
@@ -46,24 +45,28 @@ int main()
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
         pGame.Initialize();
 
+        Glory::EditorLoader editorLoader;
+        Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(pGame, engineLoader);
+
+        Glory::Editor::EditorApplication application(editorCreateInfo);
+        application.Initialize(pGame);
+
         //std::vector<Glory::Editor::BaseEditorExtension*> editorExtensions =
         //{
         //    new Glory::Editor::EntityScenesEditorExtension(),
         //    new Glory::Editor::MonoEditorExtension()
         //};
 
-        Glory::EditorCreateInfo editorCreateInfo{};
+        //Glory::EditorCreateInfo editorCreateInfo{};
         //editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(editorExtensions.size());
         //editorCreateInfo.pExtensions = editorExtensions.data();
 
-        //Glory::Editor::EditorApplication editorApp(editorCreateInfo);
-        //editorApp.Initialize<Glory::Editor::EditorSDLWindowImpl, Glory::Editor::EditorOpenGLRenderImpl>(pGame);
-        //editorApp.Run(pGame);
-        //editorApp.Destroy();
+        application.Run(pGame);
 
+        application.Destroy();
         pGame.Destroy();
-
-        loader.Unload();
+        engineLoader.Unload();
+        editorLoader.Unload();
     }
 
     _CrtDumpMemoryLeaks();

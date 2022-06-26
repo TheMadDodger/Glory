@@ -19,17 +19,17 @@ namespace Glory
 		m_TextureID = NULL;
 	}
 
-	GLuint GLTexture::GetGLImageType() const
+	GLORY_API GLuint GLTexture::GetGLImageType() const
 	{
 		return m_GLImageType;
 	}
 
-	GLuint GLTexture::GetID() const
+	GLORY_API GLuint GLTexture::GetID() const
 	{
 		return m_TextureID;
 	}
 
-	void GLTexture::Create(ImageData* pImageData)
+	GLORY_API void GLTexture::Create(ImageData* pImageData)
 	{
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
 
@@ -61,7 +61,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void GLTexture::Create()
+	GLORY_API void GLTexture::Create()
 	{
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
 
@@ -87,7 +87,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void GLTexture::CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
+	GLORY_API void GLTexture::CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
 	{
 	}
 }
