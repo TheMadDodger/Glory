@@ -101,6 +101,7 @@ project "Glorious"
 	{
 		("{COPY} %{LibDirs.SDL_image}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} %{modulesOutDir} ../Build/%{cfg.buildcfg}/%{cfg.platform}/Modules"),
 	}
 
 	filter "system:windows"

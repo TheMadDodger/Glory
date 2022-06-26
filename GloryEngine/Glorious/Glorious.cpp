@@ -22,47 +22,29 @@ int main()
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     {
-        //Glory::WindowCreateInfo windowCreateInfo;
-        //windowCreateInfo.WindowName = "Glory Editor";
-        //windowCreateInfo.Width = 2560;
-        //windowCreateInfo.Height = 1300;
+        Glory::WindowCreateInfo windowCreateInfo;
+        windowCreateInfo.WindowName = "Glory Editor";
+        windowCreateInfo.Width = 2560;
+        windowCreateInfo.Height = 1300;
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-
-        //std::vector<Glory::Module*> optionalModules = {
-        //    new Glory::SDLImageLoaderModule(),
-        //    new Glory::ASSIMPModule(),
-        //    new Glory::FileLoaderModule(),
-        //    new Glory::MaterialLoaderModule(),
-        //    new Glory::MaterialInstanceLoaderModule(),
-        //    new Glory::ShaderSourceLoaderModule(),
-        //};
+        windowCreateInfo.WindowFlags = 2 | 32;
 
         //std::vector<Glory::ScriptingModule*> scriptingModules = {
         //    new Glory::GloryMonoScipting(),
         //};
-
-        //createInfo.pWindowModule = new Glory::SDLWindowModule(windowCreateInfo);
-        //createInfo.pScenesModule = new Glory::EntitySceneScenesModule();
-        //createInfo.pRenderModule = new Glory::ClusteredRendererModule();
-        //createInfo.pGraphicsModule = new Glory::OpenGLGraphicsModule();
-        //createInfo.OptionalModuleCount = static_cast<uint32_t>(optionalModules.size());
-        //createInfo.pOptionalModules = optionalModules.data();
+        // 
         //createInfo.ScriptingModulesCount = static_cast<uint32_t>(scriptingModules.size());
         //createInfo.pScriptingModules = scriptingModules.data();
 
-        //Glory::EngineCreateInfo createInfo;
-        //Glory::Engine* pEngine = Glory::Engine::CreateEngine(createInfo);
-        //
-        //HMODULE lib = LoadLibraryA("./GloryEntitiesMonoExtender.dll");
-        //LoadExtensionProc loadProc = (LoadExtensionProc)GetProcAddress(lib, "LoadExtension");
-        //(loadProc)(pEngine);
-        //
-        //Glory::GameSettings gameSettings;
-        //gameSettings.pEngine = pEngine;
-        //gameSettings.pGameState = new Glory::GameState();
-        ////gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
-        //Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
-        //pGame.Initialize();
+        Glory::EngineLoader loader("./Engine.yaml");
+        Glory::Engine* pEngine = loader.LoadEngine(windowCreateInfo);
+
+        Glory::GameSettings gameSettings;
+        gameSettings.pEngine = pEngine;
+        gameSettings.pGameState = new Glory::GameState();
+        //gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
+        Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
+        pGame.Initialize();
 
         //std::vector<Glory::Editor::BaseEditorExtension*> editorExtensions =
         //{
@@ -70,7 +52,7 @@ int main()
         //    new Glory::Editor::MonoEditorExtension()
         //};
 
-        //Glory::EditorCreateInfo editorCreateInfo;
+        Glory::EditorCreateInfo editorCreateInfo{};
         //editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(editorExtensions.size());
         //editorCreateInfo.pExtensions = editorExtensions.data();
 
@@ -79,19 +61,7 @@ int main()
         //editorApp.Run(pGame);
         //editorApp.Destroy();
 
-        //pGame.Destroy();
-        //
-        //FreeLibrary(lib);
-
-        Glory::EngineLoader loader("./Engine.yaml");
-        Glory::Engine* pEngine = loader.LoadEngine();
-
-        Glory::GameSettings gameSettings;
-        gameSettings.pEngine = pEngine;
-        gameSettings.pGameState = new Glory::GameState();
-        //gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
-        Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
-        pGame.Initialize();
+        pGame.Destroy();
 
         loader.Unload();
     }

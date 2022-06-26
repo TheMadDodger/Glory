@@ -10,6 +10,9 @@ namespace Glory
 	class Console
 	{
 	public:
+		static void Initialize();
+		static void Cleanup();
+
 		static void RegisterCommand(BaseConsoleCommand* pCommand);
 		static void QueueCommand(const std::string& command);
 		static void ExecuteCommand(const std::string& command, bool addToHistory = true);
@@ -45,8 +48,6 @@ namespace Glory
 		virtual ~Console();
 
 	private:
-		static void Initialize();
-		static void Cleanup();
 		static bool PrintHistory();
 
 		static void AddCommandToHistory(const std::string& command);

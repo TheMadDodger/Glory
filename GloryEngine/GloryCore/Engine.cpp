@@ -166,7 +166,6 @@ namespace Glory
 		delete m_pGraphicsThread;
 		m_pGraphicsThread = nullptr;
 
-		Console::Cleanup();
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
@@ -177,12 +176,6 @@ namespace Glory
 	{
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
-
-		Console::Initialize();
-
-#ifdef _DEBUG
-		Console::RegisterConsole<WindowsDebugConsole>();
-#endif
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{

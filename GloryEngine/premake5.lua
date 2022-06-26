@@ -33,6 +33,8 @@ vulkan_sdk = "C:/VulkanSDK/1.2.182.0"
 leak_detector = "C:/Program Files (x86)/Visual Leak Detector/include"
 outputdir = "%{cfg.buildcfg}/%{cfg.platform}"
 engineoutdir = "../bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"
+modulesOutDir = "%{engineoutdir}/Modules"
+moduleOutDir = "%{modulesOutDir}/%{prj.name}"
 
 GloryIncludeDir = {}
 GloryIncludeDir["assimp"]				= "../GloryASSIMPModelLoader"
@@ -114,9 +116,13 @@ include "GlorySDLImage"
 include "GlorySDLWindow"
 include "GloryVulkanGraphics"
 
-group "Engine"
+group "Application"
 	include "GloryEngineBuilder"
 	include "Glorious"
+group ""
+
+group "Editor Backends"
+
 group ""
 
 group "Editor Extensions"

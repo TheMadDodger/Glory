@@ -1276,6 +1276,10 @@ namespace Glory
         return nullptr;
     }
 
+    void VulkanGraphicsModule::DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z)
+    {
+    }
+
     void VulkanGraphicsModule::OnDrawMesh(MeshData* pMeshData)
     {
 

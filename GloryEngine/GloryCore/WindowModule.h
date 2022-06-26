@@ -8,6 +8,7 @@ namespace Glory
     class WindowModule : public Module
     {
 	public:
+		WindowModule();
 		WindowModule(const WindowCreateInfo& mainWindowCreateInfo);
 		virtual ~WindowModule();
 
@@ -16,6 +17,7 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		WindowCreateInfo* GetMainWindowCreateInfo();
+		void SetMainWindowCreateInfo(const WindowCreateInfo& mainWindowCreateInfo);
 
 		virtual void GetCurrentScreenResolution(uint32_t& width, uint32_t& height) = 0;
 
