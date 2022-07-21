@@ -66,7 +66,6 @@ int main()
         application.Destroy();
         pGame.Destroy();
         engineLoader.Unload();
-        editorLoader.Unload();
     }
 
     _CrtDumpMemoryLeaks();
