@@ -26,7 +26,6 @@ project "GloryClusteredRenderer"
 		--"%{GloryIncludeDir.opengl}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{GloryIncludeDir.core}"
 	}
 
 	libdirs

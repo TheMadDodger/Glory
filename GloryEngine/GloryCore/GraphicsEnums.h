@@ -395,4 +395,35 @@ namespace Glory
         ST_TessEval,
         ST_Compute,
     };
+
+    enum class BufferBindingTarget
+    {
+        B_ARRAY,
+        B_ATOMIC_COUNTER,
+        B_COPY_READ,
+        B_COPY_WRITE,
+        B_DISPATCH_INDIRECT,
+        B_DRAW_INDIRECT,
+        B_ELEMENT_ARRAY,
+        B_PIXEL_PACK,
+        B_PIXEL_UNPACK,
+        B_QUERY,
+        B_SHADER_STORAGE,
+        B_TEXTURE,
+        B_TRANSFORM_FEEDBACK,
+        B_UNIFORM,
+    };
+
+    enum class MemoryUsage
+    {
+        MU_STREAM_DRAW,
+        MU_STREAM_READ,
+        MU_STREAM_COPY,
+        MU_STATIC_DRAW,
+        MU_STATIC_READ,
+        MU_STATIC_COPY,
+        MU_DYNAMIC_DRAW,
+        MU_DYNAMIC_READ,
+        MU_DYNAMIC_COPY,
+    };
 }

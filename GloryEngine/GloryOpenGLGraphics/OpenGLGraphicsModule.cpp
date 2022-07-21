@@ -28,6 +28,13 @@ namespace Glory
 
 	void OpenGLGraphicsModule::ThreadedCleanup()
 	{
+		glDeleteVertexArrays(1, &m_ScreenQuadVertexArrayID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glDeleteBuffers(1, &m_ScreenQuadVertexbufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		m_ScreenQuadVertexArrayID = 0;
+		m_ScreenQuadVertexbufferID = 0;
+
 		GraphicsModule::ThreadedCleanup();
 		GetEngine()->GetWindowModule()->GetMainWindow()->CleanupOpenGL();
 		LogGLError(glGetError());
@@ -93,6 +100,39 @@ namespace Glory
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
 
 		glCreateShader(GL_VERTEX_SHADER);
+
+		static float vertices[] = {
+		-1.0f, -1.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f,
+		};
+
+		glGenVertexArrays(1, &m_ScreenQuadVertexArrayID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindVertexArray(m_ScreenQuadVertexArrayID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glGenBuffers(1, &m_ScreenQuadVertexbufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(GL_ARRAY_BUFFER, m_ScreenQuadVertexbufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindBuffer(GL_ARRAY_BUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glEnableVertexAttribArray(0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindVertexArray(NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	GPUResourceManager* OpenGLGraphicsModule::CreateGPUResourceManager()
@@ -127,6 +167,7 @@ namespace Glory
 	{
 		glUseProgram(NULL);
 		LogGLError(glGetError());
+		if (pMaterialData == nullptr) return nullptr;
 		Material* pMaterial = GetResourceManager()->CreateMaterial(pMaterialData);
 		if (!pMaterial) return nullptr;
 		pMaterial->Use();
@@ -137,15 +178,41 @@ namespace Glory
 	{
 		Mesh* pMesh = GetResourceManager()->CreateMesh(pMeshData);
 		pMesh->Bind();
-		glDrawElements(GL_TRIANGLES, pMesh->GetIndexCount(), GL_UNSIGNED_INT, NULL);
+
+		size_t indexCount = pMesh->GetIndexCount();
+		if (indexCount == 0) glDrawArrays(GL_TRIANGLES, 0, 6);
+		else glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, NULL);
 		LogGLError(glGetError());
 		glBindVertexArray(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLGraphicsModule::DrawScreenQuad()
+	{
+		glBindVertexArray(m_ScreenQuadVertexArrayID);
+		LogGLError(glGetError());
+
+		// Draw the triangles !
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+		LogGLError(glGetError());
 	}
 
 	void OpenGLGraphicsModule::DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z)
 	{
 		glDispatchCompute((GLuint)num_groups_x, (GLuint)num_groups_y, (GLuint)num_groups_z);
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	}
+
+	void OpenGLGraphicsModule::EnableDepthTest(bool enable)
+	{
+		if (enable)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+	}
+
+	void OpenGLGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
+	{
+		glViewport(0, 0, width, height);
 	}
 }
