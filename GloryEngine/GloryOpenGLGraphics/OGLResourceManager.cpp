@@ -29,15 +29,17 @@ namespace Glory
 
 	Buffer* OGLResourceManager::CreateVertexBuffer(uint32_t bufferSize)
 	{
-		return CreateBuffer(bufferSize, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
+		//return CreateBuffer(bufferSize, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
+		return CreateBuffer(bufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 	}
 
 	Buffer* OGLResourceManager::CreateIndexBuffer(uint32_t bufferSize)
 	{
-		return CreateBuffer(bufferSize, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
+		//return CreateBuffer(bufferSize, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
+		return CreateBuffer(bufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 	}
 
-	Buffer* OGLResourceManager::CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex)
+	Buffer* OGLResourceManager::CreateBuffer_Internal(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex)
 	{
 		return new GLBuffer(bufferSize, usageFlag, memoryFlags, bindIndex);
 	}

@@ -2,6 +2,11 @@
 
 namespace Glory
 {
+    const std::map<BufferBindingTarget, vk::BufferUsageFlags> VKConverter::TO_BUFFERUSAGE
+    {
+
+    };
+
     vk::ImageViewType VKConverter::GetVulkanImageViewType(const ImageType& imageType)
     {
         switch (imageType)

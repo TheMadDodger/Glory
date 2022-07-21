@@ -2,10 +2,11 @@
 #include "Game.h"
 #include "VulkanGraphicsModule.h"
 #include "Device.h"
+#include "VulkanStructsConverter.h"
 
 namespace Glory
 {
-    VulkanBuffer::VulkanBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex) :
+    VulkanBuffer::VulkanBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex) :
         Buffer(bufferSize, usageFlag, memoryFlags, bindIndex)
 	{
 	}
@@ -25,7 +26,7 @@ namespace Glory
 	{
         m_BufferCreateInfo = vk::BufferCreateInfo();
         m_BufferCreateInfo.size = (vk::DeviceSize)m_BufferSize;
-        m_BufferCreateInfo.usage = (vk::BufferUsageFlags)m_UsageFlag; //vk::BufferUsageFlagBits::eVertexBuffer;
+        m_BufferCreateInfo.usage = VKConverter::TO_BUFFERUSAGE.at(m_UsageFlag); //vk::BufferUsageFlagBits::eVertexBuffer;
         m_BufferCreateInfo.sharingMode = vk::SharingMode::eExclusive;
 
         VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();

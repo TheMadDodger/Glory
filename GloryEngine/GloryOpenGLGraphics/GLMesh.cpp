@@ -19,13 +19,29 @@ namespace Glory
 
 	void GLMesh::CreateBindingAndAttributeData()
 	{
+		//glGenVertexArrays(1, &m_ScreenQuadVertexArrayID);
+		//glBindVertexArray(m_ScreenQuadVertexArrayID);
+		//
+		//glGenBuffers(1, &m_ScreenQuadVertexbufferID);
+		//glBindBuffer(GL_ARRAY_BUFFER, m_ScreenQuadVertexbufferID);
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		//
+		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		//
+		//glBindBuffer(GL_ARRAY_BUFFER, NULL);
+		//
+		//glEnableVertexAttribArray(0);
+		//
+		//glBindVertexArray(NULL);
+
+
 		glGenVertexArrays(1, &m_VertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindVertexArray(m_VertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		m_pVertexBuffer->Bind();
-		m_pIndexBuffer->Bind();
+		if (m_pIndexBuffer) m_pIndexBuffer->Bind();
 
 		SetupAttributes();
 
@@ -33,7 +49,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		m_pVertexBuffer->Unbind();
-		m_pIndexBuffer->Unbind();
+		if (m_pIndexBuffer) m_pIndexBuffer->Unbind();
 	}
 
 	void GLMesh::Bind()
@@ -47,7 +63,6 @@ namespace Glory
 		size_t offset = 0;
 		for (size_t i = 0; i < m_AttributeTypes.size(); i++)
 		{
-			glEnableVertexAttribArray(i);
 			OpenGLGraphicsModule::LogGLError(glGetError());
 
 			AttributeType attribute = m_AttributeTypes[i];
@@ -117,6 +132,8 @@ namespace Glory
 			default:
 				break;
 			}
+
+			glEnableVertexAttribArray(i);
 		}
 	}
 }

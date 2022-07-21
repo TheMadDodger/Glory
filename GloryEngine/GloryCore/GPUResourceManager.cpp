@@ -18,8 +18,9 @@ namespace Glory
 		m_pBuffers.clear();
 	}
 
-	Buffer* GPUResourceManager::CreateBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex)
+	Buffer* GPUResourceManager::CreateBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex)
 	{
+		if (bufferSize == 0) return nullptr;
 		Profiler::BeginSample("GPUResourceManager::CreateBuffer");
 		Buffer* pBuffer = CreateBuffer_Internal(bufferSize, usageFlag, memoryFlags, bindIndex);
 		pBuffer->CreateBuffer();
@@ -39,10 +40,30 @@ namespace Glory
 		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
 		Buffer* pIndexBuffer = CreateIndexBuffer(indexBufferSize);
 		pVertexBuffer->Assign(pMeshData->Vertices());
-		pIndexBuffer->Assign(pMeshData->Indices());
+		if (pIndexBuffer) pIndexBuffer->Assign(pMeshData->Indices());
 		pMesh = CreateMesh_Internal(pMeshData);
 		pMesh->m_UUID = pMeshData->GetGPUUUID();
 		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
+		pMesh->CreateBindingAndAttributeData();
+		m_IDResources[pMeshData->GetGPUUUID()] = pMesh;
+		Profiler::EndSample();
+		return pMesh;
+	}
+
+	Mesh* GPUResourceManager::CreateMeshNoIndexBuffer(MeshData* pMeshData)
+	{
+		Mesh* pMesh = GetResource<Mesh>(pMeshData);
+		if (pMesh) return pMesh;
+
+		Profiler::BeginSample("GPUResourceManager::CreateMeshNoIndexBuffer");
+		pMesh = CreateMesh_Internal(pMeshData);
+		pMesh->m_UUID = pMeshData->GetGPUUUID();
+		pMesh->Bind();
+		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
+		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
+		pVertexBuffer->Bind();
+		pVertexBuffer->Assign(pMeshData->Vertices());
+		pMesh->SetBuffers(pVertexBuffer, nullptr);
 		pMesh->CreateBindingAndAttributeData();
 		m_IDResources[pMeshData->GetGPUUUID()] = pMesh;
 		Profiler::EndSample();

@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	Buffer::Buffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, size_t bindIndex) :
+	Buffer::Buffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, size_t bindIndex) :
 		m_BufferSize(bufferSize), m_UsageFlag(usageFlag), m_MemoryFlags(memoryFlags), m_BindIndex(bindIndex)
 	{
 	}

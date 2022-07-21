@@ -669,25 +669,25 @@ namespace Glory
 
         uint32_t bufferSize = pMeshData->VertexSize() * pMeshData->VertexCount();
         vk::MemoryPropertyFlags stagingFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-        VulkanBuffer* pStagingBuffer = new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+        VulkanBuffer* pStagingBuffer = nullptr;//new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
         pStagingBuffer->CreateBuffer();
         pStagingBuffer->Assign(verticeArray);
 
         vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
         vk::BufferUsageFlags usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
-        VulkanBuffer* pVertexBuffer = new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+        VulkanBuffer* pVertexBuffer = nullptr;//new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
         pVertexBuffer->CreateBuffer();
         pVertexBuffer->CopyFrom(pStagingBuffer, bufferSize);
         m_pVertexBuffer = pVertexBuffer;
         delete pStagingBuffer;
 
         uint32_t indexBufferSize = sizeof(uint32_t) * pMeshData->IndexCount();
-        pStagingBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+        pStagingBuffer = nullptr;//new VulkanBuffer(indexBufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
         pStagingBuffer->CreateBuffer();
         pStagingBuffer->Assign(pMeshData->Indices());
 
         usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
-        VulkanBuffer* pIndexBuffer = new VulkanBuffer(indexBufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+        VulkanBuffer* pIndexBuffer = nullptr;//new VulkanBuffer(indexBufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
         pIndexBuffer->CreateBuffer();
         pIndexBuffer->CopyFrom(pStagingBuffer, indexBufferSize);
         m_pIndexBuffer = pIndexBuffer;

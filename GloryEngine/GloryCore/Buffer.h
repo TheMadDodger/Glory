@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "GraphicsEnums.h"
 #include "GPUResource.h"
 
 namespace Glory
@@ -7,7 +8,7 @@ namespace Glory
 	class Buffer : public GPUResource
 	{
 	public:
-		Buffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, size_t bindIndex);
+		Buffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, size_t bindIndex);
 		virtual ~Buffer();
 
 		virtual void Assign(const void* data) = 0;
@@ -23,8 +24,8 @@ namespace Glory
 
 	protected:
 		uint32_t m_BufferSize;
-		uint32_t m_UsageFlag;
-		uint32_t m_MemoryFlags;
+		BufferBindingTarget m_UsageFlag;
+		MemoryUsage m_MemoryFlags;
 		uint32_t m_BindIndex;
 
 	private:

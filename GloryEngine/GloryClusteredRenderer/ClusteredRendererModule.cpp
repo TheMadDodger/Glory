@@ -109,10 +109,10 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 2);
+		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
 		m_pScreenToViewSSBO->Assign(NULL);
 
-		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW, 3);
+		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
 
 		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
@@ -151,8 +151,6 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 
-		CreateMesh();
-
 		Buffer* pClusterSSBO = nullptr;
 		Buffer* pLightIndexSSBO = nullptr;
 		Buffer* pLightGridSSBO = nullptr;
@@ -160,14 +158,10 @@ namespace Glory
 		if (!camera.GetUserData("LightIndexSSBO", pLightIndexSSBO)) return;
 		if (!camera.GetUserData("LightGridSSBO", pLightGridSSBO)) return;
 
-		glDisable(GL_DEPTH_TEST);
+		pGraphics->EnableDepthTest(false);
+		pGraphics->SetViewport(0, 0, width, height);
 
-		//glBindFramebuffer(GL_FRAMEBUFFER, NULL);
-		//OpenGLGraphicsModule::LogGLError(glGetError());
-		glViewport(0, 0, width, height);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		size_t count = std::min(lights.size(), MAX_LIGHTS);
+		size_t count = std::fmin(lights.size(), MAX_LIGHTS);
 		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(PointLight));
 
 		glm::uvec2 resolution = camera.GetResolution();
@@ -200,13 +194,8 @@ namespace Glory
 		pLightIndexSSBO->Bind();
 		pLightGridSSBO->Bind();
 
-		// Draw the screen mesh
-		glBindVertexArray(m_ScreenQuadVertexArrayID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
 		// Draw the triangles !
-		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		pGraphics->DrawScreenQuad();
 
 		pClusterSSBO->Unbind();
 		m_pScreenToViewSSBO->Unbind();
@@ -214,16 +203,9 @@ namespace Glory
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
 
-		glBindVertexArray(NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
 		// Reset render textures and materials
-		//glBindFramebuffer(GL_FRAMEBUFFER, NULL);
-		//glViewport(0, 0, width, height);
-		glUseProgram(NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glEnable(GL_DEPTH_TEST);
+		pGraphics->UseMaterial(nullptr);
+		pGraphics->EnableDepthTest(true);
 	}
 
 	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const std::vector<PointLight>& lights)
@@ -242,19 +224,19 @@ namespace Glory
 			Buffer* pLightIndexSSBO = nullptr;
 			Buffer* pLightGridSSBO = nullptr;
 
-			pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB) * NUM_CLUSTERS, GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 1);
+			pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
 			pClusterSSBO->Assign(NULL);
 
-			pActiveClustersSSBO = pResourceManager->CreateBuffer(sizeof(bool) * NUM_CLUSTERS, GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 1);
+			pActiveClustersSSBO = pResourceManager->CreateBuffer(sizeof(bool) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
 			pActiveClustersSSBO->Assign(NULL);
 
-			pActiveUniqueClustersSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS + 1), GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 2);
+			pActiveUniqueClustersSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
 			pActiveUniqueClustersSSBO->Assign(NULL);
 
-			pLightIndexSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS * MAX_LIGHTS_PER_TILE + 1), GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 4);
+			pLightIndexSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS * MAX_LIGHTS_PER_TILE + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 4);
 			pLightIndexSSBO->Assign(NULL);
 			
-			pLightGridSSBO = pResourceManager->CreateBuffer(sizeof(LightGrid) * NUM_CLUSTERS, GL_SHADER_STORAGE_BUFFER, GL_STATIC_COPY, 5);
+			pLightGridSSBO = pResourceManager->CreateBuffer(sizeof(LightGrid) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 5);
 			pLightGridSSBO->Assign(NULL);
 
 			camera.SetUserData("ClusterSSBO", pClusterSSBO);
@@ -306,7 +288,7 @@ namespace Glory
 		//pActiveClustersSSBO->Unbind();
 		//pActiveUniqueClustersSSBO->Unbind();
 
-		size_t count = std::min(lights.size(), MAX_LIGHTS);
+		size_t count = std::fmin(lights.size(), MAX_LIGHTS);
 		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(PointLight));
 
 		float zNear = camera.GetNear();
@@ -336,45 +318,6 @@ namespace Glory
 		m_pLightsSSBO->Unbind();
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
-	}
-
-	void ClusteredRendererModule::CreateMesh()
-	{
-		if (m_HasMesh) return;
-
-		static const GLfloat g_quad_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f,
-		};
-
-		glGenVertexArrays(1, &m_ScreenQuadVertexArrayID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindVertexArray(m_ScreenQuadVertexArrayID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glGenBuffers(1, &m_ScreenQuadVertexbufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(GL_ARRAY_BUFFER, m_ScreenQuadVertexbufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glBindBuffer(GL_ARRAY_BUFFER, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glEnableVertexAttribArray(0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glBindVertexArray(NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		m_HasMesh = true;
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
