@@ -22,16 +22,14 @@ project "GloryClusteredRenderer"
 	{
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.yaml_cpp}",
-		--"%{IncludeDir.GLEW}",
-		--"%{GloryIncludeDir.opengl}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
+		"%{GloryIncludeDir.core}",
 	}
 
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		--"%{LibDirs.GLEW}", -- but why?
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",

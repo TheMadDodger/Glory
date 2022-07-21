@@ -110,7 +110,7 @@ namespace Glory
 		LoadRequiredModule<WindowModule>(engineInfo, "Window", &engineCreateInfo.pWindowModule)->SetMainWindowCreateInfo(defaultWindow);
 		LoadRequiredModule<ScenesModule>(engineInfo, "Scenes", &engineCreateInfo.pScenesModule);
 		engineCreateInfo.pRenderModule = new NullRenderer();
-		//LoadRequiredModule<RendererModule>(engineInfo, "Renderer", &engineCreateInfo.pRenderModule);
+		LoadRequiredModule<RendererModule>(engineInfo, "Renderer", &engineCreateInfo.pRenderModule);
 		LoadRequiredModule<GraphicsModule>(engineInfo, "Graphics", &engineCreateInfo.pGraphicsModule);
 
 		YAML::Node optionalModulesNode = engineInfo["Optional"];

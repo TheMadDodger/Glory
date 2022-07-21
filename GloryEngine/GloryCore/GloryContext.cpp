@@ -31,6 +31,11 @@ namespace Glory
 		return m_pContext->m_Game;
 	}
 
+	CameraManager* GloryContext::GetCameraManager()
+	{
+		return &m_pContext->m_CameraManager;
+	}
+
 	Glory::GloryContext::GloryContext() : m_Game(nullptr)
 	{
 	}

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "DisplayManager.h"
 #include "EngineProfiler.h"
+#include "GloryContext.h"
 
 namespace Glory
 {
@@ -102,7 +103,7 @@ namespace Glory
 		{
 			CameraRef camera = frame.ActiveCameras[i];
 
-			RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(camera, m_pEngine);
+			RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(camera, m_pEngine);
 			pRenderTexture->Bind();
 			m_pEngine->GetGraphicsModule()->Clear(camera.GetClearColor());
 
@@ -165,7 +166,7 @@ namespace Glory
 	void RendererModule::ReadHoveringObject()
 	{
 		Profiler::BeginSample("RendererModule::Pick");
-		RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(m_PickCamera, m_pEngine, false);
+		RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(m_PickCamera, m_pEngine, false);
 		if (pRenderTexture == nullptr) return;
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;

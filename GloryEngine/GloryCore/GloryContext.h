@@ -1,5 +1,6 @@
 #pragma once
 #include "Game.h"
+#include "CameraManager.h"
 
 namespace Glory
 {
@@ -12,6 +13,7 @@ namespace Glory
 		void Initialize();
 
 		static Game* GetGame();
+		static CameraManager* GetCameraManager();
 
 	private:
 		GloryContext();
@@ -20,5 +22,6 @@ namespace Glory
 	private:
 		static GloryContext* m_pContext;
 		Game* m_Game;
+		CameraManager m_CameraManager;
 	};
 }

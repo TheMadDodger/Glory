@@ -6,9 +6,9 @@
 
 namespace Glory
 {
-	std::vector<Camera> CameraManager::m_Cameras;
-	std::vector<size_t> CameraManager::m_UnusedCameraIndices;
-	std::unordered_map<UUID, size_t> CameraManager::m_IDToCamera;
+	//std::vector<Camera> CameraManager::m_Cameras;
+	//std::vector<size_t> CameraManager::m_UnusedCameraIndices;
+	//std::unordered_map<UUID, size_t> CameraManager::m_IDToCamera;
 
 	CameraRef CameraManager::GetNewOrUnusedCamera()
 	{

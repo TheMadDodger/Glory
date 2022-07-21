@@ -45,7 +45,7 @@ namespace Glory
 		template<typename T>
 		bool GetUserData(const std::string& name, T*& data)
 		{
-			Camera* pCamera = CameraManager::GetCamera(m_CameraID);
+			Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
 			if (pCamera == nullptr) return false;
 			return pCamera->GetUserData(name, data);
 		}
