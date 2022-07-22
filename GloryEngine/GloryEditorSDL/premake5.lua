@@ -4,7 +4,7 @@ project "GloryEditorSDL"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GlorySDLWindow/EditorBackend")
+	targetdir ("%{modulesOutDir}/GlorySDLWindow/Editor/Backend")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files

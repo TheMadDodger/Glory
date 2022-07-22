@@ -7,7 +7,7 @@ Modules:
 - GlorySDLImage
 Engine:
  Window: 0
- Scenes: 1
+ SceneManagement: 1
  Renderer: 2
  Graphics: 3
  Optional: [4,5]

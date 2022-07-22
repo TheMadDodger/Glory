@@ -4,7 +4,7 @@ project "EntityScenesEditorExtension"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineoutdir}/Extensions")
+	targetdir ("%{modulesOutDir}/GloryEntityScenes/Editor/Extension")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
@@ -31,6 +31,33 @@ project "EntityScenesEditorExtension"
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.ImGui}"
+	}
+
+	libdirs
+	{
+		"%{LibDirs.ImGui}",
+		"%{LibDirs.LibDirs}",
+		"%{LibDirs.implot}",
+		"%{LibDirs.glory}",
+		"%{LibDirs.glory}/Modules/GloryEntityScenes",
+		"%{LibDirs.assimp}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"GloryCore",
+		"GloryEditor",
+		"GloryEntityScenes",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"ImGui",
+		"ImGuizmo",
+		"implot",
+		"yaml-cpp",
 	}
 
 	defines

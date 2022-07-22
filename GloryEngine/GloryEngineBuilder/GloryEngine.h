@@ -7,24 +7,6 @@
 
 namespace Glory
 {
-    class NullRenderer : public RendererModule
-    {
-    public:
-        NullRenderer() {}
-        virtual ~NullRenderer() {}
-    
-    protected:
-        friend class GraphicsThread;
-
-		virtual void Initialize() override {}
-		virtual void Cleanup() override {}
-		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override {}
-		virtual void OnDoScreenRender(CameraRef camera, const std::vector<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture) override {}
-
-		virtual void OnStartCameraRender(CameraRef camera, const std::vector<PointLight>& lights) override {}
-		virtual void OnEndCameraRender(CameraRef camera, const std::vector<PointLight>& lights) override {}
-    };
-
 	class EngineLoader
 	{
 	public:
@@ -35,6 +17,9 @@ namespace Glory
 		void Unload();
 
 		const std::string& GetSetModule(const std::string& key);
+
+		const size_t ModuleCount() const;
+		const Module* GetModule(size_t index) const;
 
 	private:
 		void LoadModules(YAML::Node& modules);

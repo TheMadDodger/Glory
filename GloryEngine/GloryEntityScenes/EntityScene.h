@@ -2,6 +2,7 @@
 #include <vector>
 #include <JobManager.h>
 #include <GScene.h>
+#include <Glory.h>
 #include "Registry.h"
 
 namespace Glory
@@ -17,10 +18,10 @@ namespace Glory
 		EntityScene(const std::string& sceneName, UUID uuid);
 		virtual ~EntityScene();
 
-		Entity CreateEntity();
+		GLORY_API Entity CreateEntity();
 
-		EntitySceneObject* GetEntitySceneObjectFromEntityID(EntityID entity);
-		Registry* GetRegistry();
+		GLORY_API EntitySceneObject* GetEntitySceneObjectFromEntityID(EntityID entity);
+		GLORY_API Registry* GetRegistry();
 
 	private:
 		virtual void Initialize() override;

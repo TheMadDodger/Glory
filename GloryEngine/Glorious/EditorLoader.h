@@ -17,8 +17,14 @@ namespace Glory
 
 	private:
 		void LoadModuleMetadata(Glory::EditorCreateInfo& editorCreateInfo, const std::string& name);
+		void LoadBackend(Glory::EditorCreateInfo& editorCreateInfo, const ModuleMetaData& metaData);
+		void LoadExtensions(const ModuleMetaData& metaData);
+
+		void LoadBackendDLL(const std::filesystem::path& dllPath, const std::string& name, Glory::EditorCreateInfo& editorCreateInfo);
+		void LoadExtensionDLL(const std::filesystem::path& dllPath, const std::string& name);
 
 	private:
 		std::vector<HMODULE> m_Libs;
+		std::vector<Editor::BaseEditorExtension*> m_pExtensions;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
-#include "Object.h"
 #include <typeinfo>
+#include "Object.h"
+#include "ModuleMetaData.h"
 
 namespace Glory
 {
@@ -16,6 +17,9 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() = 0;
 
 		Engine* GetEngine();
+
+		const ModuleMetaData& GetMetaData() const;
+		void SetMetaData(const std::filesystem::path& path);
 
 	protected:
 		virtual void Initialize() = 0;
@@ -40,5 +44,6 @@ namespace Glory
 
 	private:
 		friend class Engine;
+		ModuleMetaData m_MetaData;
 	};
 }

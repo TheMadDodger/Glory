@@ -20,3 +20,8 @@ namespace Glory::Editor
 		Editor::RegisterEditor<TransformEditor>();
 	}
 }
+
+GLORY_API void LoadExtension(std::vector<Glory::Editor::BaseEditorExtension*>& pExtensions)
+{
+	pExtensions.push_back(new Glory::Editor::EntityScenesEditorExtension());
+}

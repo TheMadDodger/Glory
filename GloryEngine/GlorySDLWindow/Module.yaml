@@ -1,3 +1,5 @@
 Name: "SDL Window"
 Type: Window
-EditorBackend: GloryEditorSDL
+Editor:
+ Backend: GloryEditorSDL
+ Extensions: []

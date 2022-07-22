@@ -4,7 +4,7 @@ project "GloryEditorOGL"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GloryOpenGLGraphics/EditorBackend")
+	targetdir ("%{modulesOutDir}/GloryOpenGLGraphics/Editor/Backend")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files

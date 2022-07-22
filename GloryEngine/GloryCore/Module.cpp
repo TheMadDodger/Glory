@@ -20,4 +20,15 @@ namespace Glory
     {
         return false;
     }
+
+    const ModuleMetaData& Module::GetMetaData() const
+    {
+        return m_MetaData;
+    }
+
+    void Module::SetMetaData(const std::filesystem::path& path)
+    {
+        m_MetaData = ModuleMetaData(path);
+        m_MetaData.Read();
+    }
 }

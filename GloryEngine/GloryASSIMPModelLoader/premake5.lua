@@ -10,7 +10,8 @@ project "GloryASSIMPModelLoader"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -43,6 +44,11 @@ project "GloryASSIMPModelLoader"
 	defines
 	{
 		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
 	}
 
 	filter "system:windows"

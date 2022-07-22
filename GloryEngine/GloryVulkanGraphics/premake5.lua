@@ -10,7 +10,8 @@ project "GloryVulkanGraphics"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -53,6 +54,11 @@ project "GloryVulkanGraphics"
 	defines
 	{
 		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
 	}
 
 	filter "system:windows"

@@ -22,68 +22,35 @@ project "Glorious"
 
 	includedirs
 	{
-		--"%{vulkan_sdk}/include",
 		"%{vulkan_sdk}/third-party/include",
-
-		--"%{IncludeDir.assimp}",
-		--"%{IncludeDir.GLEW}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
 		"%{IncludeDir.ImFileDialog}",
-		--"%{IncludeDir.SDL_image}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
-
-		--"%{GloryIncludeDir.assimp}",
-		--"%{GloryIncludeDir.entityscenes}",
-		--"%{GloryIncludeDir.basicrenderer}",
-		--"%{GloryIncludeDir.clusteredrenderer}",
-		--"%{GloryIncludeDir.opengl}",
-		--"%{GloryIncludeDir.sdlimage}",
-		--"%{GloryIncludeDir.sdlwindow}",
-		--"%{GloryIncludeDir.vulkan}",
-		--"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"../GloryEngineBuilder"
-
-		--"../EntityScenesEditorExtension",
 	}
 
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		--"%{LibDirs.assimp}",
-		--"%{LibDirs.GLEW}",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.ImFileDialog}",
-		--"%{LibDirs.SDL_image}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-		--"%{LibDirs.extensions}",
 	}
 
 	links
 	{
-		--"vulkan-1",
-		--"glew32",
 		"GloryCore",
 		"GloryEngineBuilder",
-		--"GlorySDLWindow",
-		--"GloryVulkanGraphics",
-		--"GloryOpenGLGraphics",
-		--"GlorySDLImage",
-		--"GloryASSIMPModelLoader",
-		--"GloryEntityScenes",
-		--"GloryClusteredRenderer",
-		--"assimp",
-		--"SDL2",
-		--"SDL2_image",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
@@ -93,8 +60,6 @@ project "Glorious"
 		"ImFileDialog",
 		"yaml-cpp",
 		"GloryEditor",
-		
-		--"EntityScenesEditorExtension",
 	}
 
 	postbuildcommands

@@ -3,6 +3,7 @@
 #include <vector>
 #include <JobManager.h>
 #include <SerializedProperty.h>
+#include <Glory.h>
 
 namespace Glory
 {
@@ -11,23 +12,22 @@ namespace Glory
 	class EntitySystems
 	{
 	public:
-		EntitySystems();
-		virtual ~EntitySystems();
+		GLORY_API EntitySystems();
+		GLORY_API virtual ~EntitySystems();
 
-		bool IsUpdating();
-		std::string AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty*>& properties);
-		bool CreateComponent(EntityID entity, std::type_index type, UUID uuid = UUID());
-		bool CreateComponent(EntityID entity, size_t typeHash, UUID uuid = UUID());
+		GLORY_API bool IsUpdating();
+		GLORY_API std::string AcquireSerializedProperties(EntityComponentData* pComponentData, std::vector<SerializedProperty*>& properties);
+		GLORY_API bool CreateComponent(EntityID entity, std::type_index type, UUID uuid = UUID());
+		GLORY_API bool CreateComponent(EntityID entity, size_t typeHash, UUID uuid = UUID());
 
-		size_t SystemCount();
-		EntitySystem* GetSystem(size_t index);
+		GLORY_API size_t SystemCount();
+		GLORY_API EntitySystem* GetSystem(size_t index);
 
 	private:
 		void OnComponentAdded(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData);
 		void OnComponentRemoved(Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData);
 		void OnUpdate();
 		void OnDraw();
-
 
 		template<typename C, typename T>
 		EntitySystem* Register(Registry* pRegistry)

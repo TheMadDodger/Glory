@@ -10,7 +10,8 @@ project "GlorySDLImage"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -46,6 +47,11 @@ project "GlorySDLImage"
 	defines
 	{
 		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
 	}
 
 	filter "system:windows"

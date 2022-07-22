@@ -56,6 +56,16 @@ namespace Glory
 		return m_LoadedModuleNames[index];
 	}
 
+	const size_t EngineLoader::ModuleCount() const
+	{
+		return m_pModules.size();
+	}
+
+	const Module* EngineLoader::GetModule(size_t index) const
+	{
+		return m_pModules[index];
+	}
+
 	void EngineLoader::LoadModules(YAML::Node& modules)
 	{
 		for (size_t i = 0; i < modules.size(); i++)
@@ -103,13 +113,16 @@ namespace Glory
 		}
 		m_pModules.push_back(pModule);
 		m_Libs.push_back(lib);
+
+		Debug::LogInfo("Loading module metadata: " + moduleName + "...");
+		std::filesystem::path metaPath = modulePath.append("Module.yaml");
+		pModule->SetMetaData(metaPath);
 	}
 
 	void EngineLoader::PopulateEngineInfo(YAML::Node& engineInfo, EngineCreateInfo& engineCreateInfo, const Glory::WindowCreateInfo& defaultWindow)
 	{
 		LoadRequiredModule<WindowModule>(engineInfo, "Window", &engineCreateInfo.pWindowModule)->SetMainWindowCreateInfo(defaultWindow);
-		LoadRequiredModule<ScenesModule>(engineInfo, "Scenes", &engineCreateInfo.pScenesModule);
-		engineCreateInfo.pRenderModule = new NullRenderer();
+		LoadRequiredModule<ScenesModule>(engineInfo, "SceneManagement", &engineCreateInfo.pScenesModule);
 		LoadRequiredModule<RendererModule>(engineInfo, "Renderer", &engineCreateInfo.pRenderModule);
 		LoadRequiredModule<GraphicsModule>(engineInfo, "Graphics", &engineCreateInfo.pGraphicsModule);
 

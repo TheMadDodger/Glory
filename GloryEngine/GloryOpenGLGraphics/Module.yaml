@@ -1,3 +1,5 @@
 Name: "OpenGL Graphics"
-Type: Window
-EditorBackend: GloryEditorOGL
+Type: Graphics
+Editor:
+ Backend: GloryEditorOGL
+ Extensions: []

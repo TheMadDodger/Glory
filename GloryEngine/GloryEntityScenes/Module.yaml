@@ -1,0 +1,4 @@
+Name: "Entity Scenes"
+Type: SceneManagement
+Editor:
+ Extensions: [EntityScenesEditorExtension]

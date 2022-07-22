@@ -10,7 +10,8 @@ project "GloryBasicRenderer"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -30,6 +31,11 @@ project "GloryBasicRenderer"
 	defines
 	{
 		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
 	}
 
 	filter "system:windows"

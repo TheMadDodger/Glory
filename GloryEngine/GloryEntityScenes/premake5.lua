@@ -10,7 +10,8 @@ project "GloryEntityScenes"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -51,6 +52,11 @@ project "GloryEntityScenes"
 	defines
 	{
 		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} Module.yaml %{moduleOutDir}"),
 	}
 
 	filter "system:windows"

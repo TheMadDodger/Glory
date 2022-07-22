@@ -4,7 +4,7 @@ project "GloryEditorVulkan"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GloryVulkanGraphics/EditorBackend")
+	targetdir ("%{modulesOutDir}/GloryVulkanGraphics/Editor/Backend")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
