@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Editor.h"
+#include "EditorContext.h"
 
 namespace Glory::Editor
 {

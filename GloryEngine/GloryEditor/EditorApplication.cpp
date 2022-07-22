@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
+#include <EditorContext.h>
 
 namespace Glory::Editor
 {
@@ -45,6 +46,8 @@ namespace Glory::Editor
 
 	void EditorApplication::InitializeExtensions()
 	{
+		EditorContext::GetContext()->Initialize();
+		
 		for (size_t i = 0; i < m_pExtensions.size(); i++)
 		{
 			m_pExtensions[i]->RegisterEditors();
@@ -58,6 +61,8 @@ namespace Glory::Editor
 		m_pShaderProcessor->Stop();
 		delete m_pShaderProcessor;
 		m_pShaderProcessor = nullptr;
+
+		EditorContext::DestroyContext();
 	}
 
 	void EditorApplication::Run(Game& game)

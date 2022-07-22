@@ -60,11 +60,12 @@ namespace Glory
 	private:
 		friend class Engine;
 		friend class AssetDatabase;
-		static ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
-		static ThreadedUMap<std::string, size_t> m_PathToGroupIndex;
-		static ThreadedVector<AssetGroup*> m_LoadedAssetGroups;
-		static ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;
-		static ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> m_AssetLoadedCallbacks;
-		static Jobs::JobPool<bool, UUID>* m_pResourceLoadingPool;
+		friend class GloryContext;
+		ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
+		ThreadedUMap<std::string, size_t> m_PathToGroupIndex;
+		ThreadedVector<AssetGroup*> m_LoadedAssetGroups;
+		ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;
+		ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> m_AssetLoadedCallbacks;
+		Jobs::JobPool<bool, UUID>* m_pResourceLoadingPool;
 	};
 }

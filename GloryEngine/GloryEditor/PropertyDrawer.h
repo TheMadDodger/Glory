@@ -5,7 +5,9 @@
 #include <ResourceType.h>
 #include <any>
 #include "SerializedProperty.h"
+#include "EditorContext.h"
 
+#define PROPERTY_DRAWERS Glory::Editor::EditorContext::GetContext()->m_PropertyDrawers
 #define PROPERTY_DRAWER(x) Glory::Editor::PropertyDrawer::RegisterPropertyDrawer<x>()
 
 namespace Glory::Editor
@@ -23,7 +25,7 @@ namespace Glory::Editor
 		template<class T>
 		static void RegisterPropertyDrawer()
 		{
-			m_PropertyDrawers.push_back(new T());
+			PROPERTY_DRAWERS.push_back(new T());
 		}
 
 		static bool DrawProperty(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, size_t elementTypeHash, uint32_t flags);
@@ -39,7 +41,6 @@ namespace Glory::Editor
 
 	private:
 		friend class MainEditor;
-		static std::vector<PropertyDrawer*> m_PropertyDrawers;
 		size_t m_TypeHash;
 	};
 

@@ -1,6 +1,11 @@
 #pragma once
 #include <Object.h>
 #include <typeindex>
+#include "GloryEditor.h"
+#include "EditorContext.h"
+
+#define REGISTERED_EDITORS EditorContext::GetEditors()->m_pRegisteredEditors
+#define ACTIVE_EDITORS EditorContext::GetEditors()->m_pActiveEditors
 
 namespace Glory::Editor
 {
@@ -11,7 +16,7 @@ namespace Glory::Editor
 		static void RegisterEditor()
 		{
 			Editor* pEditor = new T();
-			m_pRegisteredEditors.push_back(pEditor);
+			REGISTERED_EDITORS.push_back(pEditor);
 		}
 
 		virtual const std::type_index& GetEditedType() = 0;
@@ -36,10 +41,6 @@ namespace Glory::Editor
 		friend class InspectorWindow;
 		static void Cleanup();
 		virtual Editor* Create() = 0;
-
-	private:
-		static std::vector<Editor*> m_pRegisteredEditors;
-		static std::vector<Editor*> m_pActiveEditors;
 	};
 
 	template<class TEditor, class TObject>

@@ -171,6 +171,7 @@ namespace Glory
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
 		ShaderManager::Cleanup();
+		GloryContext::DestroyContext();
 	}
 
 	void Engine::Initialize()

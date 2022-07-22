@@ -2,11 +2,12 @@
 #include "EditorLoader.h"
 #include "EditorWindowImpl.h"
 #include "EditorRenderImpl.h"
+#include <EditorContext.h>
 
 namespace Glory
 {
 	typedef void(__cdecl* LoadBackendProc)(EditorCreateInfo&);
-	typedef void(__cdecl* LoadExtensionProc)(std::vector<Editor::BaseEditorExtension*>&);
+	typedef void(__cdecl* LoadExtensionProc)(Editor::EditorContext*, std::vector<Editor::BaseEditorExtension*>&);
 
 	EditorLoader::EditorLoader()
 	{
@@ -18,6 +19,7 @@ namespace Glory
 
 	Glory::EditorCreateInfo EditorLoader::LoadEditor(Game& game, EngineLoader& engineLoader)
 	{
+		Editor::EditorContext::CreateContext();
 		Glory::EditorCreateInfo editorCreateInfo{};
 		for (size_t i = 0; i < engineLoader.ModuleCount(); i++)
 		{
@@ -141,7 +143,7 @@ namespace Glory
 			return;
 		}
 
-		(loadProc)(m_pExtensions);
+		(loadProc)(Editor::EditorContext::GetContext(), m_pExtensions);
 		m_Libs.push_back(lib);
 	}
 }

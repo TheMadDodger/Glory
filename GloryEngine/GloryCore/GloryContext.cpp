@@ -1,4 +1,6 @@
 #include "GloryContext.h"
+#include "AssetManager.h"
+#include "AssetDatabase.h"
 
 namespace Glory
 {
@@ -9,6 +11,13 @@ namespace Glory
 		if (m_pContext != nullptr) return m_pContext;
 		m_pContext = new GloryContext();
 		return m_pContext;
+	}
+
+	void GloryContext::DestroyContext()
+	{
+		if (!m_pContext) return;
+		delete m_pContext;
+		m_pContext = nullptr;
 	}
 
 	void GloryContext::SetContext(GloryContext* pContext)
@@ -36,11 +45,25 @@ namespace Glory
 		return &m_pContext->m_CameraManager;
 	}
 
-	Glory::GloryContext::GloryContext() : m_Game(nullptr)
+	AssetDatabase* GloryContext::GetAssetDatabase()
+	{
+		return m_pContext->m_pAssetDatabase;
+	}
+
+	AssetManager* GloryContext::GetAssetManager()
+	{
+		return m_pContext->m_pAssetManager;
+	}
+
+	Glory::GloryContext::GloryContext() : m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager())
 	{
 	}
 
 	Glory::GloryContext::~GloryContext()
 	{
+		delete m_pAssetDatabase;
+		m_pAssetDatabase = nullptr;
+		delete m_pAssetManager;
+		m_pAssetManager = nullptr;
 	}
 }

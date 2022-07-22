@@ -4,24 +4,34 @@
 
 namespace Glory
 {
+	class AssetDatabase;
+	class AssetManager;
+
 	class GloryContext
 	{
 	public:
-		static GloryContext* CreateContext();
-		static void SetContext(GloryContext* pContext);
-		static GloryContext* GetContext();
-		void Initialize();
-
 		static Game* GetGame();
 		static CameraManager* GetCameraManager();
+		static AssetDatabase* GetAssetDatabase();
+		static AssetManager* GetAssetManager();
+		static void SetContext(GloryContext* pContext);
+		static GloryContext* GetContext();
+		static GloryContext* CreateContext();
+
+	private:
+		static void DestroyContext();
+		void Initialize();
 
 	private:
 		GloryContext();
 		virtual ~GloryContext();
 
 	private:
+		friend class Engine;
 		static GloryContext* m_pContext;
 		Game* m_Game;
 		CameraManager m_CameraManager;
+		AssetDatabase* m_pAssetDatabase;
+		AssetManager* m_pAssetManager;
 	};
 }
