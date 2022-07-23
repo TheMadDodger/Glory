@@ -3,8 +3,9 @@
 #include <Glory.h>
 #include <vector>
 #include <EditorContext.h>
+#include <GloryContext.h>
 
-extern "C" GLORY_API void LoadExtension(Glory::Editor::EditorContext* pContext, std::vector<Glory::Editor::BaseEditorExtension*>& pExtensions);
+extern "C" GLORY_API void LoadExtension(Glory::GloryContext* pContext, Glory::Editor::EditorContext* pEditorContext, std::vector<Glory::Editor::BaseEditorExtension*>& pExtensions);
 
 namespace Glory::Editor
 {

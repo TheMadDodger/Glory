@@ -3,11 +3,12 @@
 #include "EditorWindowImpl.h"
 #include "EditorRenderImpl.h"
 #include <EditorContext.h>
+#include <GloryContext.h>
 
 namespace Glory
 {
 	typedef void(__cdecl* LoadBackendProc)(EditorCreateInfo&);
-	typedef void(__cdecl* LoadExtensionProc)(Editor::EditorContext*, std::vector<Editor::BaseEditorExtension*>&);
+	typedef void(__cdecl* LoadExtensionProc)(GloryContext*, Editor::EditorContext*, std::vector<Editor::BaseEditorExtension*>&);
 
 	EditorLoader::EditorLoader()
 	{
@@ -143,7 +144,7 @@ namespace Glory
 			return;
 		}
 
-		(loadProc)(Editor::EditorContext::GetContext(), m_pExtensions);
+		(loadProc)(GloryContext::GetContext(), Editor::EditorContext::GetContext(), m_pExtensions);
 		m_Libs.push_back(lib);
 	}
 }

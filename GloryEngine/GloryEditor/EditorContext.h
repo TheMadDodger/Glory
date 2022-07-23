@@ -6,6 +6,7 @@ namespace Glory::Editor
 {
 	class Editor;
 	class PropertyDrawer;
+	class Gizmos;
 
 	class Editors
 	{
@@ -27,6 +28,7 @@ namespace Glory::Editor
 		static void SetContext(EditorContext* pContext);
 		static EditorContext* GetContext();
 		static EditorContext* CreateContext();
+		static Gizmos* GetGizmos();
 
 	private:
 		EditorContext();
@@ -42,6 +44,7 @@ namespace Glory::Editor
 		friend class Editor;
 		static EditorContext* m_pContext;
 		Editors* m_Editors;
+		Gizmos* m_pGizmos;
 		std::vector<PropertyDrawer*> m_PropertyDrawers;
 		ImGuiContext* m_pIMGUIContext;
 	};

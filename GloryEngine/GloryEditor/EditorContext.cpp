@@ -1,4 +1,5 @@
 #include "EditorContext.h"
+#include "Gizmos.h"
 
 namespace Glory::Editor
 {
@@ -9,6 +10,11 @@ namespace Glory::Editor
 		if (m_pContext != nullptr) return m_pContext;
 		m_pContext = new EditorContext();
 		return m_pContext;
+	}
+
+	Gizmos* EditorContext::GetGizmos()
+	{
+		return GetContext()->m_pGizmos;
 	}
 
 	void EditorContext::DestroyContext()
@@ -39,7 +45,7 @@ namespace Glory::Editor
 		return GetContext()->m_Editors;
 	}
 
-	EditorContext::EditorContext() : m_Editors(new Editors), m_pIMGUIContext(nullptr)
+	EditorContext::EditorContext() : m_Editors(new Editors), m_pIMGUIContext(nullptr), m_pGizmos(new Gizmos())
 	{
 	}
 
@@ -47,6 +53,9 @@ namespace Glory::Editor
 	{
 		delete m_Editors;
 		m_Editors = nullptr;
+
+		delete m_pGizmos;
+		m_pGizmos = nullptr;
 	}
 
 	Editors::Editors()

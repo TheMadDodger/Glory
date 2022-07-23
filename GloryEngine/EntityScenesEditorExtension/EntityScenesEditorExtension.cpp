@@ -21,8 +21,9 @@ namespace Glory::Editor
 	}
 }
 
-GLORY_API void LoadExtension(Glory::Editor::EditorContext* pContext, std::vector<Glory::Editor::BaseEditorExtension*>& pExtensions)
+GLORY_API void LoadExtension(Glory::GloryContext* pContext, Glory::Editor::EditorContext* pEditorContext, std::vector<Glory::Editor::BaseEditorExtension*>& pExtensions)
 {
-	Glory::Editor::EditorContext::SetContext(pContext);
+	Glory::GloryContext::SetContext(pContext);
+	Glory::Editor::EditorContext::SetContext(pEditorContext);
 	pExtensions.push_back(new Glory::Editor::EntityScenesEditorExtension());
 }

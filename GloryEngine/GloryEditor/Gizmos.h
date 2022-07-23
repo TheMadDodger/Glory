@@ -15,24 +15,23 @@ namespace Glory::Editor
 	class Gizmos
 	{
 	public:
+		Gizmos();
+		virtual ~Gizmos();
+
 		static bool DrawGizmo(glm::mat4* transfrom);
 
 		static ImGuizmo::OPERATION m_DefaultOperation;
 		static ImGuizmo::MODE m_DefaultMode;
 
 	private:
-		Gizmos();
-		virtual ~Gizmos();
-
 		static void DrawGizmos(const glm::mat4& cameraView, const glm::mat4& cameraProjection);
 		static void Clear();
 
 	private:
 		friend class MainEditor;
 		friend class SceneWindow;
-		static std::vector<IGizmo*> m_pGizmos;
-		static std::vector<bool> m_ManipulatedGizmos;
-
+		std::vector<IGizmo*> m_pGizmos;
+		std::vector<bool> m_ManipulatedGizmos;
 	};
 
 	class IGizmo

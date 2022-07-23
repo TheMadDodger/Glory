@@ -2,13 +2,11 @@
 
 namespace Glory
 {
-	std::vector<PropertySerializer*> PropertySerializer::m_pRegisteredSerializers;
-
 	PropertySerializer* PropertySerializer::GetSerializer(size_t typeHash)
 	{
-		for (size_t i = 0; i < m_pRegisteredSerializers.size(); i++)
+		for (size_t i = 0; i < SERIALIZERS.size(); i++)
 		{
-			PropertySerializer* pSerializer = m_pRegisteredSerializers[i];
+			PropertySerializer* pSerializer = SERIALIZERS[i];
 			size_t hash = pSerializer->GetSerializedTypeHash();
 			if (hash == typeHash) return pSerializer;
 		}
@@ -23,9 +21,9 @@ namespace Glory
 
 	size_t PropertySerializer::GetID(PropertySerializer* pSerializer)
 	{
-		for (size_t i = 0; i < m_pRegisteredSerializers.size(); i++)
+		for (size_t i = 0; i < SERIALIZERS.size(); i++)
 		{
-			if (m_pRegisteredSerializers[i] == pSerializer) return i;
+			if (SERIALIZERS[i] == pSerializer) return i;
 		}
 		return 0;
 	}
@@ -84,7 +82,7 @@ namespace Glory
 
 	void PropertySerializer::Cleanup()
 	{
-		std::for_each(m_pRegisteredSerializers.begin(), m_pRegisteredSerializers.end(), [](PropertySerializer* pSerializer) { delete pSerializer; });
-		m_pRegisteredSerializers.clear();
+		std::for_each(SERIALIZERS.begin(), SERIALIZERS.end(), [](PropertySerializer* pSerializer) { delete pSerializer; });
+		SERIALIZERS.clear();
 	}
 }

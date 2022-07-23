@@ -1,6 +1,8 @@
 #include "GloryContext.h"
 #include "AssetManager.h"
 #include "AssetDatabase.h"
+#include "ResourceType.h"
+#include "Serializer.h"
 
 namespace Glory
 {
@@ -55,7 +57,18 @@ namespace Glory
 		return m_pContext->m_pAssetManager;
 	}
 
-	Glory::GloryContext::GloryContext() : m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager())
+	ResourceTypes* GloryContext::GetResourceTypes()
+	{
+		return m_pContext->m_pResourceTypes;
+	}
+
+	Serializers* GloryContext::GetSerializers()
+	{
+		return m_pContext->m_pSerializers;
+	}
+
+	Glory::GloryContext::GloryContext()
+		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()), m_pSerializers(new Serializers())
 	{
 	}
 
@@ -65,5 +78,9 @@ namespace Glory
 		m_pAssetDatabase = nullptr;
 		delete m_pAssetManager;
 		m_pAssetManager = nullptr;
+		delete m_pResourceTypes;
+		m_pResourceTypes = nullptr;
+		delete m_pSerializers;
+		m_pSerializers = nullptr;
 	}
 }
