@@ -5,14 +5,14 @@ namespace Glory::Editor
 {
 	EditorContext* EditorContext::m_pContext = nullptr;
 
-	EditorContext* EditorContext::CreateContext()
+	GLORY_EDITOR_API EditorContext* EditorContext::CreateContext()
 	{
 		if (m_pContext != nullptr) return m_pContext;
 		m_pContext = new EditorContext();
 		return m_pContext;
 	}
 
-	Gizmos* EditorContext::GetGizmos()
+	GLORY_EDITOR_API Gizmos* EditorContext::GetGizmos()
 	{
 		return GetContext()->m_pGizmos;
 	}
@@ -24,12 +24,12 @@ namespace Glory::Editor
 		m_pContext = nullptr;
 	}
 
-	void EditorContext::SetContext(EditorContext* pContext)
+	GLORY_EDITOR_API void EditorContext::SetContext(EditorContext* pContext)
 	{
 		m_pContext = pContext;
 	}
 
-	EditorContext* EditorContext::GetContext()
+	GLORY_EDITOR_API EditorContext* EditorContext::GetContext()
 	{
 		if (ImGui::GetCurrentContext() == nullptr) ImGui::SetCurrentContext(m_pContext->m_pIMGUIContext);
 		return m_pContext;

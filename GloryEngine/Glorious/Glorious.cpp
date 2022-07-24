@@ -8,11 +8,8 @@
 #include <GameSettings.h>
 #include <windows.h>
 #include <GloryEngine.h>
-
-// SHOULDNT BE HERE!
-#include <SDL2/SDL_video.h>
-#include <EditorCreateInfo.h>
 #include <EditorApplication.h>
+#include <EditorCreateInfo.h>
 
 typedef void(__cdecl* LoadExtensionProc)(Glory::Engine*);
 

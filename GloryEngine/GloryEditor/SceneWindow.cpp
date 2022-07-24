@@ -4,13 +4,13 @@
 #include "EditorApplication.h"
 #include "EditorRenderImpl.h"
 #include "Gizmos.h"
+#include "Selection.h"
 #include <CameraManager.h>
 #include <Game.h>
 #include <Engine.h>
 #include <RendererModule.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui_internal.h>
-#include <Selection.h>
 #include <GloryContext.h>
 
 namespace Glory::Editor

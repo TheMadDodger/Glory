@@ -1,8 +1,8 @@
 #include "FileDialog.h"
 #include "EditorAssets.h"
+#include "EditorApplication.h"
 #include <ImFileDialog.h>
 #include <Game.h>
-#include <EditorApplication.h>
 
 namespace Glory::Editor
 {

@@ -3,17 +3,17 @@
 #include "MainEditor.h"
 #include "ProjectSpace.h"
 #include "EditorShaderProcessor.h"
+#include "EditorAssetLoader.h"
+#include "EditorCreateInfo.h"
 #include <Game.h>
-#include <EditorAssetLoader.h>
-#include <EditorCreateInfo.h>
 
 namespace Glory::Editor
 {
 	class EditorApplication
 	{
 	public:
-		EditorApplication(const EditorCreateInfo& createInfo);
-		virtual ~EditorApplication();
+		GLORY_EDITOR_API EditorApplication(const EditorCreateInfo& createInfo);
+		virtual GLORY_EDITOR_API ~EditorApplication();
 
 		template<class Window, class Renderer>
 		void Initialize(Game& game)
@@ -29,24 +29,24 @@ namespace Glory::Editor
 			InitializePlatform(game);
 		}
 
-		void Initialize(Game& game);
+		GLORY_EDITOR_API void Initialize(Game& game);
 
-		void InitializeExtensions();
 
-		void Destroy();
-		void Run(Game& game);
+		GLORY_EDITOR_API void Destroy();
+		GLORY_EDITOR_API void Run(Game& game);
 
-		void SetWindowImpl(EditorWindowImpl* pWindowImpl);
-		void SetRendererImpl(EditorRenderImpl* pRendererImpl);
+		GLORY_EDITOR_API void SetWindowImpl(EditorWindowImpl* pWindowImpl);
+		GLORY_EDITOR_API void SetRendererImpl(EditorRenderImpl* pRendererImpl);
 
-		EditorPlatform* GetEditorPlatform();
-		MainEditor* GetMainEditor();
+		GLORY_EDITOR_API EditorPlatform* GetEditorPlatform();
+		GLORY_EDITOR_API MainEditor* GetMainEditor();
 
-		static EditorApplication* GetInstance();
+		static GLORY_EDITOR_API EditorApplication* GetInstance();
 
 	private:
 		void RenderEditor();
 		void InitializePlatform(Game& game);
+		void InitializeExtensions();
 
 		static std::string AssetPathOverrider();
 

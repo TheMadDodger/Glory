@@ -1,14 +1,14 @@
 #include "EditorApplication.h"
+#include "EditorContext.h"
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
-#include <EditorContext.h>
 
 namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
 
-	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
+	GLORY_EDITOR_API EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
 		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl), m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr)
 	{
 		// Copy the optional modules into the optional modules vector
@@ -22,7 +22,7 @@ namespace Glory::Editor
 		}
 	}
 
-	EditorApplication::~EditorApplication()
+	GLORY_EDITOR_API EditorApplication::~EditorApplication()
 	{
 		delete m_pMainEditor;
 		m_pMainEditor = nullptr;
@@ -31,7 +31,7 @@ namespace Glory::Editor
 		m_pPlatform = nullptr;
 	}
 
-	void EditorApplication::Initialize(Game& game)
+	GLORY_EDITOR_API void EditorApplication::Initialize(Game& game)
 	{
 		game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
 
@@ -54,7 +54,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorApplication::Destroy()
+	GLORY_EDITOR_API void EditorApplication::Destroy()
 	{
 		m_pMainEditor->Destroy();
 		m_pPlatform->Destroy();
@@ -65,7 +65,7 @@ namespace Glory::Editor
 		EditorContext::DestroyContext();
 	}
 
-	void EditorApplication::Run(Game& game)
+	GLORY_EDITOR_API void EditorApplication::Run(Game& game)
 	{
 		//game.GetEngine()->Initialize();
 		game.GetEngine()->StartThreads();
@@ -104,27 +104,27 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorApplication::SetWindowImpl(EditorWindowImpl* pWindowImpl)
+	GLORY_EDITOR_API void EditorApplication::SetWindowImpl(EditorWindowImpl* pWindowImpl)
 	{
 		m_pTempWindowImpl = pWindowImpl;
 	}
 
-	void EditorApplication::SetRendererImpl(EditorRenderImpl* pRendererImpl)
+	GLORY_EDITOR_API void EditorApplication::SetRendererImpl(EditorRenderImpl* pRendererImpl)
 	{
 		m_pTempRenderImpl = pRendererImpl;
 	}
 
-	EditorPlatform* EditorApplication::GetEditorPlatform()
+	GLORY_EDITOR_API EditorPlatform* EditorApplication::GetEditorPlatform()
 	{
 		return m_pPlatform;
 	}
 
-	MainEditor* EditorApplication::GetMainEditor()
+	GLORY_EDITOR_API MainEditor* EditorApplication::GetMainEditor()
 	{
 		return m_pMainEditor;
 	}
 
-	EditorApplication* EditorApplication::GetInstance()
+	GLORY_EDITOR_API EditorApplication* EditorApplication::GetInstance()
 	{
 		return m_pEditorInstance;
 	}

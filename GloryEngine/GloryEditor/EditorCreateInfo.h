@@ -1,15 +1,16 @@
 #pragma once
 #include <vector>
 #include <Game.h>
-#include <BaseEditorExtension.h>
-#include <EditorWindowImpl.h>
-#include <EditorRenderImpl.h>
+#include "BaseEditorExtension.h"
+#include "EditorWindowImpl.h"
+#include "EditorRenderImpl.h"
+#include "GloryEditor.h"
 
 namespace Glory
 {
 	struct EditorCreateInfo
 	{
-		EditorCreateInfo();
+		GLORY_EDITOR_API EditorCreateInfo();
 
 		uint32_t ExtensionsCount;
 		Editor::BaseEditorExtension** pExtensions;

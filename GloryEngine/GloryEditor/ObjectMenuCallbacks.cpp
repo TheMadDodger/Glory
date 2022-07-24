@@ -3,12 +3,12 @@
 #include "Selection.h"
 #include "EditorSceneManager.h"
 #include "PopupManager.h"
+#include <AssetDatabase.h>
+#include "ContentBrowser.h"
+#include "ContentBrowser.h"
 #include <Game.h>
 #include <Engine.h>
-#include <AssetDatabase.h>
-#include <ContentBrowser.h>
 #include <MaterialInstanceData.h>
-#include <ContentBrowser.h>
 
 namespace Glory::Editor
 {

@@ -1,7 +1,7 @@
 #include "MaterialInstanceEditor.h"
 #include "PropertyDrawer.h"
+#include "AssetPickerPopup.h"
 #include <imgui.h>
-#include <AssetPickerPopup.h>
 
 namespace Glory::Editor
 {

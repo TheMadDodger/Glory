@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <imgui.h>
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
@@ -25,10 +26,10 @@ namespace Glory::Editor
 	class EditorContext
 	{
 	public:
-		static void SetContext(EditorContext* pContext);
-		static EditorContext* GetContext();
-		static EditorContext* CreateContext();
-		static Gizmos* GetGizmos();
+		static GLORY_EDITOR_API void SetContext(EditorContext* pContext);
+		static GLORY_EDITOR_API EditorContext* GetContext();
+		static GLORY_EDITOR_API EditorContext* CreateContext();
+		static GLORY_EDITOR_API Gizmos* GetGizmos();
 
 	private:
 		EditorContext();

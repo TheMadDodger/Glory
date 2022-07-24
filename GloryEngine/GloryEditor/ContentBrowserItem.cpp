@@ -1,9 +1,9 @@
 #include <stack>
 #include <imgui.h>
-#include <ProjectSpace.h>
-#include <EditorApplication.h>
 #include <AssetDatabase.h>
 #include <AssetManager.h>
+#include "ProjectSpace.h"
+#include "EditorApplication.h"
 #include "ContentBrowserItem.h"
 #include "EditorAssets.h"
 #include "Tumbnail.h"
