@@ -52,6 +52,7 @@ project "GlorySDLImage"
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} %{LibDirs.SDL_image}/*.dll %{moduleOutDir}/Dependencies"),
 	}
 
 	filter "system:windows"
@@ -74,7 +75,7 @@ project "GlorySDLImage"
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+			--("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
 		}
 
 	filter "platforms:x64"
@@ -87,7 +88,7 @@ project "GlorySDLImage"
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+			--("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
 		}
 
 	filter "configurations:Debug"

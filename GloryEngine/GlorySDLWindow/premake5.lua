@@ -77,7 +77,7 @@ project "GlorySDLWindow"
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll %{moduleOutDir}/Dependencies")
 		}
 
 	filter "platforms:x64"
@@ -90,7 +90,7 @@ project "GlorySDLWindow"
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll %{moduleOutDir}/Dependencies")
 		}
 
 	filter "configurations:Debug"

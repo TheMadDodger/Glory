@@ -19,7 +19,7 @@ namespace Glory
 		Engine* GetEngine();
 
 		const ModuleMetaData& GetMetaData() const;
-		void SetMetaData(const std::filesystem::path& path);
+		void SetMetaData(const ModuleMetaData& metaData);
 
 	protected:
 		virtual void Initialize() = 0;

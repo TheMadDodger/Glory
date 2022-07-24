@@ -82,3 +82,7 @@ GloryEngine/GloryMain/Modules/
 GloryEngine/GloryEditorOGL/Debug/
 GloryEngine/GloryEditorSDL/Debug/
 GloryEngine/GloryEditorVulkan/Debug/
+GloryEngine/GloryEditorOGL/Release/
+GloryEngine/GloryEditorSDL/Release/
+GloryEngine/GloryEditorVulkan/Release/
+GloryEngine/GloryEngineBuilder/Release/

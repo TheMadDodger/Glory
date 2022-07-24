@@ -79,12 +79,40 @@ namespace Glory
 	void EngineLoader::LoadModule(const std::string& moduleName)
 	{
 		m_LoadedModuleNames.push_back(moduleName);
-		Debug::LogInfo("Loading module: " + moduleName + "...");
 
 		std::filesystem::path modulePath = "./Modules";
 		std::filesystem::path dllPath = modulePath.append(moduleName);
 		dllPath = dllPath.append(moduleName).replace_extension(".dll");
 
+		Debug::LogInfo("Loading module metadata: " + moduleName + "...");
+		std::filesystem::path metaPath = modulePath;
+		metaPath = metaPath.append("Module.yaml");
+		ModuleMetaData metaData(metaPath);
+		metaData.Read();
+
+		const std::vector<std::string>& dependencies = metaData.Dependencies();
+		size_t dependencyCount = dependencies.size();
+		if (dependencyCount > 0)
+		{
+			Debug::LogInfo("Loading dependencies for module: " + moduleName + "...");
+			for (size_t i = 0; i < dependencyCount; i++)
+			{
+				std::string dependency = dependencies[i];
+				Debug::LogInfo("Loading dependency: " + dependency + "...");
+				std::filesystem::path dependencyPath = modulePath;
+				dependencyPath = dependencyPath.append("Dependencies").append(dependency).replace_extension(".dll");
+				HMODULE dependencyLib = LoadLibrary(dependencyPath.c_str());
+				if (dependencyLib == NULL)
+				{
+					Debug::LogFatalError("Failed to load dependency: " + dependency + ": The dll was not found!");
+					m_pModules.push_back(nullptr);
+					return;
+				}
+				m_Libs.push_back(dependencyLib);
+			}
+		}
+
+		Debug::LogInfo("Loading module: " + moduleName + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
@@ -111,12 +139,11 @@ namespace Glory
 			m_pModules.push_back(nullptr);
 			return;
 		}
+
 		m_pModules.push_back(pModule);
 		m_Libs.push_back(lib);
 
-		Debug::LogInfo("Loading module metadata: " + moduleName + "...");
-		std::filesystem::path metaPath = modulePath.append("Module.yaml");
-		pModule->SetMetaData(metaPath);
+		pModule->SetMetaData(metaData);
 	}
 
 	void EngineLoader::PopulateEngineInfo(YAML::Node& engineInfo, EngineCreateInfo& engineCreateInfo, const Glory::WindowCreateInfo& defaultWindow)

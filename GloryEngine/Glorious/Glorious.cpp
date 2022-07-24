@@ -11,8 +11,6 @@
 #include <EditorApplication.h>
 #include <EditorCreateInfo.h>
 
-typedef void(__cdecl* LoadExtensionProc)(Glory::Engine*);
-
 int main()
 {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -47,16 +45,6 @@ int main()
 
         Glory::Editor::EditorApplication application(editorCreateInfo);
         application.Initialize(pGame);
-
-        //std::vector<Glory::Editor::BaseEditorExtension*> editorExtensions =
-        //{
-        //    new Glory::Editor::EntityScenesEditorExtension(),
-        //    new Glory::Editor::MonoEditorExtension()
-        //};
-
-        //Glory::EditorCreateInfo editorCreateInfo{};
-        //editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(editorExtensions.size());
-        //editorCreateInfo.pExtensions = editorExtensions.data();
 
         application.Run(pGame);
 

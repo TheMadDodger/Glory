@@ -64,9 +64,8 @@ project "Glorious"
 
 	postbuildcommands
 	{
-		("{COPY} %{LibDirs.SDL_image}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
-		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} %{modulesOutDir} ../Build/%{cfg.buildcfg}/%{cfg.platform}/Modules"),
+		("{COPY} %{LibDirs.glory}/GloryEditor.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 	}
 
 	filter "system:windows"
@@ -88,11 +87,6 @@ project "Glorious"
 			"%{vulkan_sdk}/Third-Party/Bin32"
 		}
 
-		postbuildcommands
-		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
-		}
-
 	filter "platforms:x64"
 		architecture "x64"
 
@@ -100,11 +94,6 @@ project "Glorious"
 		{
 			"%{vulkan_sdk}/Lib",
 			"%{vulkan_sdk}/Third-Party/Bin"
-		}
-
-		postbuildcommands
-		{
-			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}")
 		}
 
 	filter "configurations:Debug"

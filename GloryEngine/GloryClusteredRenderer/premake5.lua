@@ -39,8 +39,6 @@ project "GloryClusteredRenderer"
 	links
 	{
 		"GloryCore",
-		--"glew32",
-		--"GloryOpenGLGraphics", -- pls remove dis
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",

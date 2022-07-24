@@ -1,4 +1,5 @@
 Name: "SDL Image"
 Type: ImageLoader
+Dependencies: ["zlib1","libjpeg-9","libpng16-16","libtiff-5","libwebp-7","SDL2_image"]
 Editor:
  Extensions: []

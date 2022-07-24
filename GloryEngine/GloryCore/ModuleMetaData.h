@@ -30,6 +30,7 @@ namespace Glory
 		const ModuleType& Type() const;
 		const std::string& EditorBackend() const;
 		const std::vector<std::string>& EditorExtensions() const;
+		const std::vector<std::string>& Dependencies() const;
 
 	private:
 		std::filesystem::path m_Path;
@@ -37,6 +38,7 @@ namespace Glory
 		ModuleType m_Type;
 		std::string m_EditorBackend;
 		std::vector<std::string> m_EditorExtensions;
+		std::vector<std::string> m_Dependencies;
 
 		static std::map<std::string, ModuleType> STRINGTOMODULETYPE;
 	};

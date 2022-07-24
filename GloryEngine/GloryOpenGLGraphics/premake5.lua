@@ -57,6 +57,7 @@ project "GloryOpenGLGraphics"
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} %{LibDirs.GLEW}/*.dll %{moduleOutDir}/Dependencies"),
 	}
 
 	filter "system:windows"

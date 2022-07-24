@@ -60,6 +60,9 @@ namespace Glory
 		YAML_READ_REQUIRED(rootNode, node, Type, type, std::string, "Missing Type property in Module.yaml at path: " + m_Path.string());
 		if (STRINGTOMODULETYPE.find(type) != STRINGTOMODULETYPE.end()) m_Type = STRINGTOMODULETYPE[type];
 
+		YAML::Node dependenciesNode = rootNode["Dependencies"];
+		READ_ARRAY(dependenciesNode, std::string, m_Dependencies);
+
 		YAML::Node editorNode = rootNode["Editor"];
 		if (!editorNode.IsDefined()) return;
 		YAML_READ(editorNode, node, Backend, m_EditorBackend, std::string);
@@ -90,5 +93,10 @@ namespace Glory
 	const std::vector<std::string>& ModuleMetaData::EditorExtensions() const
 	{
 		return m_EditorExtensions;
+	}
+
+	const std::vector<std::string>& ModuleMetaData::Dependencies() const
+	{
+		return m_Dependencies;
 	}
 }
