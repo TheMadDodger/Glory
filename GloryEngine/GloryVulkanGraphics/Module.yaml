@@ -1,3 +1,4 @@
 Name: "Vulkan Graphics"
 Type: Graphics
-EditorBackend: GloryEditorVulkan
+Editor:
+ Backend: GloryEditorVulkan
