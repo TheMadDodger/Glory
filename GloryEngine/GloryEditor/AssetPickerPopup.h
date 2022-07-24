@@ -1,15 +1,16 @@
 #pragma once
 #include <Resource.h>
 #include <functional>
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
 	class AssetPickerPopup
 	{
 	public:
-		static void Open(size_t typeHash, UUID* pResource, bool includeSubAssets = false);
-		static void Open(size_t typeHash, std::function<void(Resource*)> callback, bool includeSubAssets = false);
-		void OnGUI();
+		static GLORY_EDITOR_API void Open(size_t typeHash, UUID* pResource, bool includeSubAssets = false);
+		static GLORY_EDITOR_API void Open(size_t typeHash, std::function<void(Resource*)> callback, bool includeSubAssets = false);
+		GLORY_EDITOR_API void OnGUI();
 
 	private:
 		AssetPickerPopup();

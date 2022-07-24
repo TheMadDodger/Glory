@@ -10,14 +10,14 @@ namespace Glory::Editor
 	std::string FileDialog::m_CurrentBrowserKey;
 	std::map<std::string, FileDialogImage*> FileDialog::m_pImages;
 
-	void FileDialog::Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingDir, std::function<void(const std::string&)> callback)
+	GLORY_EDITOR_API void FileDialog::Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingDir, std::function<void(const std::string&)> callback)
 	{
 		m_CurrentBrowserKey = key;
 		m_Callback = callback;
 		ifd::FileDialog::Instance().Save(key, title, filter, startingDir);
 	}
 
-	void FileDialog::Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect, const std::string& startingDir, std::function<void(const std::string&)> callback)
+	GLORY_EDITOR_API void FileDialog::Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect, const std::string& startingDir, std::function<void(const std::string&)> callback)
 	{
 		m_CurrentBrowserKey = key;
 		m_Callback = callback;

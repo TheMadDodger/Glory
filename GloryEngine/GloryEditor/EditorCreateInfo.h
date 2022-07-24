@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <Game.h>
+#include <GloryContext.h>
 #include "BaseEditorExtension.h"
 #include "EditorWindowImpl.h"
 #include "EditorRenderImpl.h"
@@ -17,5 +18,6 @@ namespace Glory
 
 		Editor::EditorWindowImpl* pWindowImpl;
 		Editor::EditorRenderImpl* pRenderImpl;
+		GloryContext* pContext;
 	};
 }

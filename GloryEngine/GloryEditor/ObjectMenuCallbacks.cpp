@@ -12,7 +12,7 @@
 
 namespace Glory::Editor
 {
-	std::filesystem::path GetUnqiueFilePath(const std::filesystem::path& start)
+	GLORY_EDITOR_API std::filesystem::path GetUnqiueFilePath(const std::filesystem::path& start)
 	{
 		std::filesystem::path currentPath = start;
 		std::filesystem::path extenstion = start.extension();
@@ -237,7 +237,7 @@ namespace Glory::Editor
 		EditorSceneManager::SaveSceneAs(pScene->GetUUID());
 	}
 
-	void DeleteFolder()
+	GLORY_EDITOR_API void DeleteFolder()
 	{
 		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
 		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());
@@ -249,7 +249,7 @@ namespace Glory::Editor
 		PopupManager::CloseCurrentPopup();
 	}
 
-	void DeleteResource()
+	GLORY_EDITOR_API void DeleteResource()
 	{
 		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
 		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());

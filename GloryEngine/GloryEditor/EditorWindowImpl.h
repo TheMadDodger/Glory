@@ -1,6 +1,7 @@
 #pragma once
 #include <Window.h>
 #include <imgui.h>
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
@@ -9,11 +10,11 @@ namespace Glory::Editor
 	class EditorWindowImpl
 	{
 	public:
-		EditorWindowImpl();
-		virtual ~EditorWindowImpl();
+		GLORY_EDITOR_API EditorWindowImpl();
+		virtual GLORY_EDITOR_API ~EditorWindowImpl();
 
 		virtual void SetContext(ImGuiContext* pImguiConext) = 0;
-		void Initialize();
+		GLORY_EDITOR_API void Initialize();
 
 		virtual void Shutdown() = 0;
 
@@ -22,7 +23,7 @@ namespace Glory::Editor
 		virtual void SetupForD3D() = 0;
 		virtual void SetupForMetal() = 0;
 
-		Window* GetMainWindow();
+		GLORY_EDITOR_API Window* GetMainWindow();
 
 	protected:
 		virtual bool PollEvents() = 0;

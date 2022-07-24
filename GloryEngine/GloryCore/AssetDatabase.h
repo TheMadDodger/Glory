@@ -6,6 +6,9 @@
 #include "ThreadedVar.h"
 #include <unordered_map>
 
+#define ASSET_DATABASE Glory::GloryContext::GetAssetDatabase()
+#define ASSET_MANAGER Glory::GloryContext::GetAssetManager()
+
 namespace Glory
 {
 	class AssetDatabase
@@ -52,6 +55,7 @@ namespace Glory
 	private:
 		friend class AssetManager;
 		friend class GloryContext;
+		friend class AssetCallbacks;
 		AssetDatabase();
 		virtual ~AssetDatabase();
 

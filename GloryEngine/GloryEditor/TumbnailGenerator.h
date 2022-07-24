@@ -7,16 +7,16 @@ namespace Glory::Editor
 	class BaseTumbnailGenerator
 	{
 	public:
-		BaseTumbnailGenerator();
-		virtual ~BaseTumbnailGenerator();
+		GLORY_EDITOR_API BaseTumbnailGenerator();
+		virtual GLORY_EDITOR_API ~BaseTumbnailGenerator();
 
 		virtual ImageData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
 
-		virtual void OnFileDoubleClick(UUID uuid);
+		virtual GLORY_EDITOR_API void OnFileDoubleClick(UUID uuid);
 
 	protected:
 		virtual const std::type_info& GetAssetType() = 0;
-		virtual const std::string& GetExtension();
+		virtual GLORY_EDITOR_API const std::string& GetExtension();
 
 	private:
 		friend class Tumbnail;

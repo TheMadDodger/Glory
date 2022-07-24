@@ -2,17 +2,17 @@
 
 namespace Glory::Editor
 {
-	BaseTumbnailGenerator::BaseTumbnailGenerator()
+	GLORY_EDITOR_API BaseTumbnailGenerator::BaseTumbnailGenerator()
 	{
 	}
 
-	BaseTumbnailGenerator::~BaseTumbnailGenerator()
+	GLORY_EDITOR_API BaseTumbnailGenerator::~BaseTumbnailGenerator()
 	{
 	}
 
-	void BaseTumbnailGenerator::OnFileDoubleClick(UUID uuid) {}
+	GLORY_EDITOR_API void BaseTumbnailGenerator::OnFileDoubleClick(UUID uuid) {}
 
-	const std::string& BaseTumbnailGenerator::GetExtension()
+	GLORY_EDITOR_API const std::string& BaseTumbnailGenerator::GetExtension()
 	{
 		return "";
 	}

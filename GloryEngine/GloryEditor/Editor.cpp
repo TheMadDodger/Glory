@@ -3,65 +3,73 @@
 
 namespace Glory::Editor
 {
-	void Editor::Initialize() {}
+	std::vector<Editor*> Editor::m_pRegisteredEditors;
+	std::vector<Editor*> Editor::m_pActiveEditors;
 
-	Editor* Editor::CreateEditor(Object* pObject)
+	GLORY_EDITOR_API void Editor::RegisterEditor(Editor* pEditor)
+	{
+		m_pRegisteredEditors.push_back(pEditor);
+	}
+
+	GLORY_EDITOR_API void Editor::Initialize() {}
+
+	GLORY_EDITOR_API Editor* Editor::CreateEditor(Object* pObject)
 	{
 		for (size_t i = 0; i < pObject->TypeCount(); i++)
 		{
 			std::type_index type = typeid(Object);
 			if (!pObject->GetType(i, type)) continue;
 
-			auto it = std::find_if(REGISTERED_EDITORS.begin(), REGISTERED_EDITORS.end(), [&](Editor* pEditor)
+			auto it = std::find_if(m_pRegisteredEditors.begin(), m_pRegisteredEditors.end(), [&](Editor* pEditor)
 			{
 				std::type_index editorType = pEditor->GetEditedType();
 				return editorType == type;
 			});
 
-			if (it == REGISTERED_EDITORS.end()) continue;
+			if (it == m_pRegisteredEditors.end()) continue;
 			Editor* pEditor = *it;
 			Editor* newEditor = pEditor->Create();
 			newEditor->m_pTarget = pObject;
 			newEditor->Initialize();
-			ACTIVE_EDITORS.push_back(newEditor);
+			m_pActiveEditors.push_back(newEditor);
 			return newEditor;
 		}
 
 		return nullptr;
 	}
 
-	size_t Editor::GetID(Editor* pEditor)
+	GLORY_EDITOR_API size_t Editor::GetID(Editor* pEditor)
 	{
-		for (size_t i = 0; i < ACTIVE_EDITORS.size(); i++)
+		for (size_t i = 0; i < m_pActiveEditors.size(); i++)
 		{
-			if (ACTIVE_EDITORS[i] == pEditor) return i;
+			if (m_pActiveEditors[i] == pEditor) return i;
 		}
 		return 0;
 	}
 
-	std::string Editor::Name()
+	GLORY_EDITOR_API std::string Editor::Name()
 	{
 		return "Editor";
 	}
 
-	Editor::Editor() : m_pTarget(nullptr)
+	GLORY_EDITOR_API Editor::Editor() : m_pTarget(nullptr)
 	{
 	}
 
-	Editor::~Editor()
+	GLORY_EDITOR_API Editor::~Editor()
 	{
 	}
 
 	void Editor::Cleanup()
 	{
-		std::for_each(REGISTERED_EDITORS.begin(), REGISTERED_EDITORS.end(), [](Editor* pEditor) { delete pEditor; });
-		std::for_each(ACTIVE_EDITORS.begin(), ACTIVE_EDITORS.end(), [](Editor* pEditor) { delete pEditor; });
-		REGISTERED_EDITORS.clear();
-		ACTIVE_EDITORS.clear();
+		std::for_each(m_pRegisteredEditors.begin(), m_pRegisteredEditors.end(), [](Editor* pEditor) { delete pEditor; });
+		std::for_each(m_pActiveEditors.begin(), m_pActiveEditors.end(), [](Editor* pEditor) { delete pEditor; });
+		m_pRegisteredEditors.clear();
+		m_pActiveEditors.clear();
 	}
 
 	template<class TEditor, class TObject>
-	inline void EditorTemplate<TEditor, TObject>::CompilerTest()
+	inline GLORY_EDITOR_API void EditorTemplate<TEditor, TObject>::CompilerTest()
 	{
 		Editor* pObject = new TEditor();
 		Object* pObject = new TObject();

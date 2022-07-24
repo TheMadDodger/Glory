@@ -2,10 +2,11 @@
 #include <BaseEditorExtension.h>
 #include <Glory.h>
 #include <vector>
-#include <EditorContext.h>
+#include <imgui_internal.h>
 #include <GloryContext.h>
 
-extern "C" GLORY_API void LoadExtension(Glory::GloryContext* pContext, Glory::Editor::EditorContext* pEditorContext, std::vector<Glory::Editor::BaseEditorExtension*>& pExtensions);
+extern "C" GLORY_API Glory::Editor::BaseEditorExtension* LoadExtension();
+extern "C" GLORY_API void SetContext(Glory::GloryContext * pContext, ImGuiContext* pImGUIContext);
 
 namespace Glory::Editor
 {

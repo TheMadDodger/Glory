@@ -13,20 +13,19 @@ namespace Glory::Editor
 	class EditorShaderProcessor
 	{
 	public:
-		static EditorShaderData* GetShaderSource(ShaderSourceData* pShaderSource);
+		static GLORY_EDITOR_API EditorShaderData* GetShaderSource(ShaderSourceData* pShaderSource);
 
 	private:
 		EditorShaderProcessor();
 		virtual ~EditorShaderProcessor();
 
+		EditorShaderData* CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
+		EditorShaderData* LoadCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
+
 		void Start();
 		void Stop();
 		void ThreadLoop();
 
-		EditorShaderData* CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
-		EditorShaderData* LoadCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
-
-	private:
 		void CompileForCurrentPlatform(EditorShaderData* pEditorShader, const std::string& path);
 		void ProcessReflection(EditorShaderData* pEditorShader);
 

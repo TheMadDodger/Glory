@@ -2,18 +2,8 @@
 #include "AssetDatabase.h"
 #include "GloryContext.h"
 
-#define ASSET_DATABASE Glory::GloryContext::GetAssetDatabase()
-#define ASSET_MANAGER Glory::GloryContext::GetAssetManager()
-
 namespace Glory
 {
-	//ThreadedUMap<UUID, Resource*> AssetManager::m_pLoadedAssets;
-	//ThreadedUMap<std::string, size_t> AssetManager::m_PathToGroupIndex;
-	//ThreadedVector<AssetGroup*> AssetManager::m_LoadedAssetGroups;
-	//Jobs::JobPool<bool, UUID>* AssetManager::m_pResourceLoadingPool = nullptr;
-	//ThreadedQueue<CallbackData> AssetManager::m_ResourceLoadedCallbacks;
-	//ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> AssetManager::m_AssetLoadedCallbacks;
-
 	void AssetManager::GetAsset(UUID uuid, std::function<void(Resource*)> callback)
 	{
 		Resource* pResource = FindResource(uuid);

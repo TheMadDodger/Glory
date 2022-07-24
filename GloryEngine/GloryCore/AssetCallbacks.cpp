@@ -1,13 +1,14 @@
 #include "AssetCallbacks.h"
 #include "AssetDatabase.h"
+#include "GloryContext.h"
 
 namespace Glory
 {
-	ThreadedVector<std::vector<ASSET_CALLBACK>> AssetCallbacks::m_RegisteredCallbacks;
+	//ThreadedVector<std::vector<ASSET_CALLBACK>> AssetCallbacks::m_RegisteredCallbacks;
 
 	void AssetCallbacks::RegisterCallback(const CallbackType& type, ASSET_CALLBACK callback)
 	{
-		m_RegisteredCallbacks.Do((size_t)type, [&](std::vector<ASSET_CALLBACK>* callbacks) { callbacks->push_back(callback); });
+		ASSET_DATABASE->m_Callbacks.m_RegisteredCallbacks.Do((size_t)type, [&](std::vector<ASSET_CALLBACK>* callbacks) { callbacks->push_back(callback); });
 	}
 
 	void AssetCallbacks::Initialize()

@@ -1,5 +1,4 @@
 #include "EditorApplication.h"
-#include "EditorContext.h"
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
@@ -20,6 +19,8 @@ namespace Glory::Editor
 				m_pExtensions[i] = createInfo.pExtensions[i];
 			}
 		}
+
+		GloryContext::SetContext(createInfo.pContext);
 	}
 
 	GLORY_EDITOR_API EditorApplication::~EditorApplication()
@@ -46,11 +47,10 @@ namespace Glory::Editor
 
 	void EditorApplication::InitializeExtensions()
 	{
-		EditorContext::GetContext()->Initialize();
-		
 		for (size_t i = 0; i < m_pExtensions.size(); i++)
 		{
 			m_pExtensions[i]->RegisterEditors();
+			m_pExtensions[i]->SetCurrentContext();
 		}
 	}
 
@@ -61,8 +61,6 @@ namespace Glory::Editor
 		m_pShaderProcessor->Stop();
 		delete m_pShaderProcessor;
 		m_pShaderProcessor = nullptr;
-
-		EditorContext::DestroyContext();
 	}
 
 	GLORY_EDITOR_API void EditorApplication::Run(Game& game)

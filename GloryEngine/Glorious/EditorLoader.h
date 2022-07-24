@@ -14,7 +14,6 @@ namespace Glory
 		Glory::EditorCreateInfo LoadEditor(Game& game, EngineLoader& engineLoader);
 		void Unload();
 
-
 	private:
 		void LoadModuleMetadata(Glory::EditorCreateInfo& editorCreateInfo, const std::string& name);
 		void LoadBackend(Glory::EditorCreateInfo& editorCreateInfo, const ModuleMetaData& metaData);

@@ -6,9 +6,6 @@
 #include "Serializer.h"
 #include "GloryContext.h"
 
-#define ASSET_DATABASE Glory::GloryContext::GetAssetDatabase()
-#define ASSET_MANAGER Glory::GloryContext::GetAssetManager()
-
 namespace Glory
 {
 	//ThreadedUMap<UUID, AssetLocation> AssetDatabase::m_AssetLocations;

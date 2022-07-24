@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <vector>
+#include "GloryEditor.h"
 
 namespace ImGuizmo
 {
@@ -15,10 +16,10 @@ namespace Glory::Editor
 	class Gizmos
 	{
 	public:
-		Gizmos();
-		virtual ~Gizmos();
+		GLORY_EDITOR_API Gizmos();
+		virtual GLORY_EDITOR_API ~Gizmos();
 
-		static bool DrawGizmo(glm::mat4* transfrom);
+		static GLORY_EDITOR_API bool DrawGizmo(glm::mat4* transfrom);
 
 		static ImGuizmo::OPERATION m_DefaultOperation;
 		static ImGuizmo::MODE m_DefaultMode;
@@ -30,8 +31,8 @@ namespace Glory::Editor
 	private:
 		friend class MainEditor;
 		friend class SceneWindow;
-		std::vector<IGizmo*> m_pGizmos;
-		std::vector<bool> m_ManipulatedGizmos;
+		static std::vector<IGizmo*> m_pGizmos;
+		static std::vector<bool> m_ManipulatedGizmos;
 	};
 
 	class IGizmo
@@ -40,8 +41,8 @@ namespace Glory::Editor
 		virtual bool OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection) = 0;
 
 	protected:
-		IGizmo();
-		virtual ~IGizmo();
+		GLORY_EDITOR_API IGizmo();
+		virtual GLORY_EDITOR_API ~IGizmo();
 
 	private:
 		friend class Gizmos;
@@ -50,11 +51,11 @@ namespace Glory::Editor
 	class DefaultGizmo : public IGizmo
 	{
 	public:
-		DefaultGizmo(glm::mat4* pTransform);
-		virtual ~DefaultGizmo();
+		GLORY_EDITOR_API DefaultGizmo(glm::mat4* pTransform);
+		virtual GLORY_EDITOR_API ~DefaultGizmo();
 
 	private:
-		virtual bool OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection) override;
+		virtual GLORY_EDITOR_API bool OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection) override;
 
 	private:
 		glm::mat4* m_pTransform;

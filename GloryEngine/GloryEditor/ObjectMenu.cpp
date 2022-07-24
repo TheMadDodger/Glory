@@ -12,14 +12,14 @@ namespace Glory::Editor
 	ObjectMenuType ObjectMenu::m_CurrentMenuType = T_Undefined;
 	bool ObjectMenu::m_Open = false;
 
-	void ObjectMenu::Open(Object* pObject, ObjectMenuType forceMenuType)
+	GLORY_EDITOR_API void ObjectMenu::Open(Object* pObject, ObjectMenuType forceMenuType)
 	{
 		m_pObject = pObject;
 		m_CurrentMenuType = forceMenuType;
 		m_Open = true;
 	}
 
-	void ObjectMenu::AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus)
+	GLORY_EDITOR_API void ObjectMenu::AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus)
 	{
 		m_MenuItems.push_back(ObjectMenuItemData(path, func, (ObjectMenuType)relevantMenus));
 	}

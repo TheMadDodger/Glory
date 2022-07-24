@@ -47,7 +47,7 @@ namespace Glory
 	private:
 		friend class AssetDatabase;
 		friend class AssetManager;
-		static ThreadedVector<std::vector<ASSET_CALLBACK>> m_RegisteredCallbacks;
+		ThreadedVector<std::vector<ASSET_CALLBACK>> m_RegisteredCallbacks;
 		ThreadedVector<EnqueuedCallback> m_EnqueuedCallbacks;
 	};
 }

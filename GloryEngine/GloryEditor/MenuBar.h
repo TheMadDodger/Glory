@@ -9,7 +9,7 @@ namespace Glory::Editor
 	class MenuBar
 	{
 	public:
-		static void AddMenuItem(std::string path, std::function<void()> func, std::function<bool()> selectedFunc = NULL);
+		static GLORY_EDITOR_API void AddMenuItem(std::string path, std::function<void()> func, std::function<bool()> selectedFunc = NULL);
 
 	private:
 		static void OnGUI();
