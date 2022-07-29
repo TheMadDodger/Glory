@@ -3,6 +3,7 @@
 #include "AssetDatabase.h"
 #include "ResourceType.h"
 #include "Serializer.h"
+#include "DisplayManager.h"
 
 namespace Glory
 {
@@ -67,8 +68,13 @@ namespace Glory
 		return m_pContext->m_pSerializers;
 	}
 
+	DisplayManager* GloryContext::GetDisplayManager()
+	{
+		return m_pContext->m_pDisplayManager;
+	}
+
 	Glory::GloryContext::GloryContext()
-		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()), m_pSerializers(new Serializers())
+		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()), m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager())
 	{
 	}
 

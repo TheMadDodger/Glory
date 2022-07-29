@@ -8,6 +8,7 @@ namespace Glory
 	class AssetManager;
 	class ResourceTypes;
 	class Serializers;
+	class DisplayManager;
 
 	class GloryContext
 	{
@@ -18,6 +19,7 @@ namespace Glory
 		static AssetManager* GetAssetManager();
 		static ResourceTypes* GetResourceTypes();
 		static Serializers* GetSerializers();
+		static DisplayManager* GetDisplayManager();
 		static void SetContext(GloryContext* pContext);
 		static GloryContext* GetContext();
 		static GloryContext* CreateContext();
@@ -39,5 +41,6 @@ namespace Glory
 		AssetManager* m_pAssetManager;
 		ResourceTypes* m_pResourceTypes;
 		Serializers* m_pSerializers;
+		DisplayManager* m_pDisplayManager;
 	};
 }
