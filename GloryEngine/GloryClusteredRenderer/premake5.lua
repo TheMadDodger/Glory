@@ -53,6 +53,8 @@ project "GloryClusteredRenderer"
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

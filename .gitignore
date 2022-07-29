@@ -86,3 +86,6 @@ GloryEngine/GloryEditorOGL/Release/
 GloryEngine/GloryEditorSDL/Release/
 GloryEngine/GloryEditorVulkan/Release/
 GloryEngine/GloryEngineBuilder/Release/
+GloryEngine/Glorious/Modules/
+GloryEngine/Glorious/EditorAssets/
+GloryEngine/Glorious/Release/

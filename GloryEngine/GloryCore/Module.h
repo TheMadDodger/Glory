@@ -21,6 +21,10 @@ namespace Glory
 		const ModuleMetaData& GetMetaData() const;
 		void SetMetaData(const ModuleMetaData& metaData);
 
+		const std::filesystem::path& GetPath() const;
+
+		bool GetResourcePath(const std::string& resource, std::filesystem::path& path) const;
+
 	protected:
 		virtual void Initialize() = 0;
 		virtual void PostInitialize() {};
@@ -41,6 +45,7 @@ namespace Glory
 
 	protected:
 		Engine* m_pEngine;
+		std::filesystem::path m_ModulePath;
 
 	private:
 		friend class Engine;
