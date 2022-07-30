@@ -78,7 +78,11 @@ namespace Glory
 		std::filesystem::path path = Game::GetAssetPath();
 		path.append(assetLocation.m_Path);
 
+		if (!std::filesystem::exists(path))
+			path = assetLocation.m_Path;
+
 		Resource* pResource = pModule->LoadUsingAny(path.string(), meta.ImportSettings());
+		if (pResource == nullptr) return nullptr;
 		pResource->m_ID = uuid;
 		ASSET_MANAGER->m_pLoadedAssets.Set(uuid, pResource);
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pResource);

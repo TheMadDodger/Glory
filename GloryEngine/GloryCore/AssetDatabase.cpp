@@ -8,13 +8,6 @@
 
 namespace Glory
 {
-	//ThreadedUMap<UUID, AssetLocation> AssetDatabase::m_AssetLocations;
-	//ThreadedUMap<std::string, UUID> AssetDatabase::m_PathToUUID;
-	//ThreadedUMap<UUID, ResourceMeta> AssetDatabase::m_Metas;
-	//ThreadedUMap<size_t, std::vector<UUID>> AssetDatabase::m_AssetsByType;
-	//AssetCallbacks AssetDatabase::m_Callbacks;
-	//ThreadedVector<UUID> AssetDatabase::m_UnsavedAssets;
-
 	bool AssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
 		if (!ASSET_DATABASE->m_AssetLocations.Contains(uuid))
@@ -41,8 +34,10 @@ namespace Glory
 
 	UUID AssetDatabase::GetAssetUUID(const std::string& path)
 	{
-		if (!ASSET_DATABASE->m_PathToUUID.Contains(path)) return 0;
-		return ASSET_DATABASE->m_PathToUUID[path];
+		std::string fixedPath = path;
+		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+		if (!ASSET_DATABASE->m_PathToUUID.Contains(fixedPath)) return 0;
+		return ASSET_DATABASE->m_PathToUUID[fixedPath];
 	}
 
 	bool AssetDatabase::AssetExists(UUID uuid)
@@ -52,39 +47,49 @@ namespace Glory
 
 	bool AssetDatabase::AssetExists(const std::string& path)
 	{
-		return ASSET_DATABASE->m_PathToUUID.Contains(path);
+		std::string fixedPath = path;
+		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+		return ASSET_DATABASE->m_PathToUUID.Contains(fixedPath);
 	}
 
 	void AssetDatabase::InsertAsset(const std::string& path, const ResourceMeta& meta)
 	{
+		std::string fixedPath = path;
+		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
 		uint64_t uuid = meta.ID();
 		ASSET_DATABASE->m_Metas.Set(uuid, meta);
-		ASSET_DATABASE->m_AssetLocations.Set(uuid, AssetLocation(path, ASSET_DATABASE->m_Metas[ASSET_DATABASE->m_Metas.Size() - 1]));
-		ASSET_DATABASE->m_PathToUUID.Set(path, uuid);
+		ASSET_DATABASE->m_AssetLocations.Set(uuid, AssetLocation(fixedPath, ASSET_DATABASE->m_Metas[ASSET_DATABASE->m_Metas.Size() - 1]));
+		ASSET_DATABASE->m_PathToUUID.Set(fixedPath, uuid);
 		ASSET_DATABASE->m_AssetsByType.Do(meta.Hash(), [&](std::vector<UUID>* assets) { assets->push_back(uuid); });
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetRegistered, uuid, nullptr);
 	}
 
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath)
 	{
-		UpdateAssetPath(uuid, newPath, newPath + ".gmeta");
+		std::string fixedPath = newPath;
+		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+		UpdateAssetPath(uuid, fixedPath, fixedPath + ".gmeta");
 	}
 
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath)
 	{
 		if (!ASSET_DATABASE->m_AssetLocations.Contains(uuid)) return;
 
+		std::string fixedNewPath = newPath;
+		std::replace(fixedNewPath.begin(), fixedNewPath.end(), '/', '\\');
+		std::string fixedNewMetaPath = newMetaPath;
+		std::replace(fixedNewMetaPath.begin(), fixedNewMetaPath.end(), '/', '\\');
 		AssetLocation location = ASSET_DATABASE->m_AssetLocations[uuid];
-		location.m_Path = newPath;
+		location.m_Path = fixedNewPath;
 		ASSET_DATABASE->m_PathToUUID.Erase(location.m_Path);
 		ASSET_DATABASE->m_PathToUUID.Set(location.m_Path, uuid);
 		ASSET_DATABASE->m_AssetLocations.Set(uuid, location);
 
-		ASSET_DATABASE->m_Metas.Do(uuid, [&](ResourceMeta* pMeta) { pMeta->m_Path = newMetaPath; });
+		ASSET_DATABASE->m_Metas.Do(uuid, [&](ResourceMeta* pMeta) { pMeta->m_Path = fixedNewMetaPath; });
 
 		Resource* pResource = AssetManager::FindResource(uuid);
 
-		std::filesystem::path path = newPath;
+		std::filesystem::path path = fixedNewPath;
 		if (pResource) pResource->SetName(path.filename().replace_extension().string());
 		//ResourceMeta meta = m_Metas[uuid];
 		//meta.m_Path = newMetaPath;
@@ -93,15 +98,19 @@ namespace Glory
 
 	void AssetDatabase::UpdateAssetPaths(const std::string& oldPath, const std::string& newPath)
 	{
-		UUID id = AssetDatabase::GetAssetUUID(oldPath);
+		std::string fixedNewPath = newPath;
+		std::replace(fixedNewPath.begin(), fixedNewPath.end(), '/', '\\');
+		std::string fixedOldPath = oldPath;
+		std::replace(fixedOldPath.begin(), fixedOldPath.end(), '/', '\\');
+		UUID id = AssetDatabase::GetAssetUUID(fixedOldPath);
 		if (id != 0)
 		{
-			UpdateAssetPath(id, newPath);
+			UpdateAssetPath(id, fixedNewPath);
 			return;
 		}
 
 		std::filesystem::path absolutePath = Game::GetAssetPath();
-		absolutePath = absolutePath.append(oldPath);
+		absolutePath = absolutePath.append(fixedOldPath);
 
 		std::vector<std::string> relevantAssetPaths;
 		std::vector<UUID> relevantAssets;
@@ -118,9 +127,9 @@ namespace Glory
 		{
 			UUID uuid = relevantAssets[i];
 			std::string path = relevantAssetPaths[i];
-			size_t index = path.find(oldPath);
-			size_t length = oldPath.length();
-			path = path.replace(index, length, newPath);
+			size_t index = path.find(fixedOldPath);
+			size_t length = fixedOldPath.length();
+			path = path.replace(index, length, fixedNewPath);
 			UpdateAssetPath(uuid, path);
 		}
 	}
@@ -145,8 +154,11 @@ namespace Glory
 
 	void AssetDatabase::DeleteAssets(const std::string& path)
 	{
+		std::string fixedPath = path;
+		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+
 		std::filesystem::path absolutePath = Game::GetAssetPath();
-		absolutePath = absolutePath.append(path);
+		absolutePath = absolutePath.append(fixedPath);
 
 		std::vector<std::string> relevantAssetPaths;
 		std::vector<UUID> relevantAssets;

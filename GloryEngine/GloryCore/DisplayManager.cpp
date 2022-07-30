@@ -4,8 +4,6 @@
 
 namespace Glory
 {
-	//RenderTexture* DisplayManager::m_pRenderTextures[MAX_DISPLAYS];
-
 	RenderTexture* DisplayManager::GetDisplayRenderTexture(size_t index)
 	{
 		return index >= MAX_DISPLAYS ? nullptr : DISPLAYMANAGR->m_pRenderTextures[index];
@@ -30,7 +28,7 @@ namespace Glory
 		return pEngine->GetGraphicsModule()->GetResourceManager()->CreateRenderTexture(createInfo);
 	}
 	
-	DisplayManager::DisplayManager()
+	DisplayManager::DisplayManager() : m_pRenderTextures()
 	{
 	}
 

@@ -69,8 +69,12 @@ namespace Glory::Editor
 
     void ContentBrowser::OnOpen()
     {
+        
         m_pRootItems.push_back(new ContentBrowserItem("Assets", true, nullptr, true));
-        m_pRootItems.push_back(new ContentBrowserItem("ModuleAssets", true, nullptr, false));
+        m_pRootItems.push_back(new ContentBrowserItem("Modules", true, nullptr, false, "\\Assets\\", []() { return "./"; }));
+        m_pRootItems[1]->AddIgnoreDirectory("\\Editor");
+        m_pRootItems[1]->AddIgnoreDirectory("\\Resources");
+        m_pRootItems[1]->AddIgnoreDirectory("\\Dependencies");
         LoadItems();
 
         for (size_t i = 0; i < m_pRootItems.size(); i++)
