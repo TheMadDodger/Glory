@@ -212,6 +212,37 @@ namespace Glory
         { PixelFormat::PF_Depth32,                   GL_DEPTH_COMPONENT32 },
     };
 
+    const std::map<BufferBindingTarget, GLuint> GLConverter::TO_GLBUFFERTARGET
+    {
+        { BufferBindingTarget::B_ARRAY,               GL_ARRAY_BUFFER              },
+        { BufferBindingTarget::B_ATOMIC_COUNTER,      GL_ATOMIC_COUNTER_BUFFER     },
+        { BufferBindingTarget::B_COPY_READ,           GL_COPY_READ_BUFFER          },
+        { BufferBindingTarget::B_COPY_WRITE,          GL_COPY_WRITE_BUFFER         },
+        { BufferBindingTarget::B_DISPATCH_INDIRECT,   GL_DISPATCH_INDIRECT_BUFFER  },
+        { BufferBindingTarget::B_DRAW_INDIRECT,       GL_DRAW_INDIRECT_BUFFER      },
+        { BufferBindingTarget::B_ELEMENT_ARRAY,       GL_ELEMENT_ARRAY_BUFFER      },
+        { BufferBindingTarget::B_PIXEL_PACK,          GL_PIXEL_PACK_BUFFER         },
+        { BufferBindingTarget::B_PIXEL_UNPACK,        GL_PIXEL_UNPACK_BUFFER       },
+        { BufferBindingTarget::B_QUERY,               GL_QUERY_BUFFER              },
+        { BufferBindingTarget::B_SHADER_STORAGE,      GL_SHADER_STORAGE_BUFFER     },
+        { BufferBindingTarget::B_TEXTURE,             GL_TEXTURE_BUFFER            },
+        { BufferBindingTarget::B_TRANSFORM_FEEDBACK,  GL_TRANSFORM_FEEDBACK_BUFFER },
+        { BufferBindingTarget::B_UNIFORM,             GL_UNIFORM_BUFFER            },
+    };
+
+    const std::map<MemoryUsage, GLuint> GLConverter::TO_GLBUFFERUSAGE =
+    {
+        { MemoryUsage::MU_STREAM_DRAW,  GL_STREAM_DRAW  },
+        { MemoryUsage::MU_STREAM_READ,  GL_STREAM_READ  },
+        { MemoryUsage::MU_STREAM_COPY,  GL_STREAM_COPY  },
+        { MemoryUsage::MU_STATIC_DRAW,  GL_STATIC_DRAW  },
+        { MemoryUsage::MU_STATIC_READ,  GL_STATIC_READ  },
+        { MemoryUsage::MU_STATIC_COPY,  GL_STATIC_COPY  },
+        { MemoryUsage::MU_DYNAMIC_DRAW, GL_DYNAMIC_DRAW },
+        { MemoryUsage::MU_DYNAMIC_READ, GL_DYNAMIC_READ },
+        { MemoryUsage::MU_DYNAMIC_COPY, GL_DYNAMIC_COPY },
+    };
+
     GLuint GLConverter::GetGLImageType(const ImageType& imageType)
     {
         switch (imageType)

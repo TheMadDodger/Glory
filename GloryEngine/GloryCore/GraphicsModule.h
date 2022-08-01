@@ -20,10 +20,13 @@ namespace Glory
 
     public: // Commands
         void DrawMesh(MeshData* pMeshData);
+        virtual void DrawScreenQuad() = 0;
         virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) = 0;
         virtual void Swap() = 0;
         virtual Material* UseMaterial(MaterialData* pMaterialData) = 0;
         virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) = 0;
+        virtual void EnableDepthTest(bool enable) = 0;
+        virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) = 0;
 
     public: // Getters
         FrameStates* GetFrameStates();

@@ -257,7 +257,8 @@ namespace Glory
         vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
         for (size_t i = 0; i < imageCount; i++)
         {
-            m_pUniformBufers[i] = new VulkanBuffer(sizeof(UniformBufferObject), (uint32_t)vk::BufferUsageFlagBits::eUniformBuffer, (uint32_t)memoryFlags);
+            //m_pUniformBufers[i] = new VulkanBuffer(sizeof(UniformBufferObject), (uint32_t)vk::BufferUsageFlagBits::eUniformBuffer, (uint32_t)memoryFlags);
+            //m_pUniformBufers[i] = new VulkanBuffer(sizeof(UniformBufferObject), BufferBindingTarget::B_UNIFORM, (uint32_t)memoryFlags);
             m_pUniformBufers[i]->CreateBuffer();
         }
 

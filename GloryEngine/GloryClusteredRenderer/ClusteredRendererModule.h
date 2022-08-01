@@ -5,28 +5,6 @@
 #include <FileData.h>
 #include <glm/glm.hpp>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include <GL/glew.h>
-#include <OpenGLGraphicsModule.h>
-#include <OGLMaterial.h>
-#include <GLTexture.h>
-
 namespace Glory
 {
 	struct VolumeTileAABB
@@ -75,7 +53,6 @@ namespace Glory
 		virtual void OnEndCameraRender(CameraRef camera, const std::vector<PointLight>& lights) override;
 
 	private:
-		void CreateMesh();
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera, const glm::uvec3& gridSize, const glm::uvec2& resolution);
@@ -110,10 +87,5 @@ namespace Glory
 
 		// Screen rendering
 		MaterialData* m_pScreenMaterial;
-
-		GLuint m_ScreenQuadVertexArrayID;
-		GLuint m_ScreenQuadVertexbufferID;
-
-		bool m_HasMesh = false;
 	};
 }

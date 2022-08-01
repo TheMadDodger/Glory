@@ -18,7 +18,10 @@ namespace Glory
 		virtual void Swap() override;
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
 		virtual void OnDrawMesh(MeshData* pMeshData) override;
+		virtual void DrawScreenQuad() override;
 		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;
+		virtual void EnableDepthTest(bool enable) override;
+		virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) override;
 
 	protected:
 		virtual void OnInitialize() override;
@@ -26,5 +29,9 @@ namespace Glory
 		virtual void ThreadedCleanup() override;
 		virtual void ThreadedInitialize() override;
 		virtual GPUResourceManager* CreateGPUResourceManager() override;
+
+	private:
+		GLuint m_ScreenQuadVertexArrayID;
+		GLuint m_ScreenQuadVertexbufferID;
 	};
 }

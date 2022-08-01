@@ -37,7 +37,7 @@ namespace Glory
         uint32_t imageSize = pImage->GetByteSize();
 
         vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-        VulkanBuffer* pTextureStagingBuffer = new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
+        VulkanBuffer* pTextureStagingBuffer = nullptr;//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
         pTextureStagingBuffer->CreateBuffer();
         pTextureStagingBuffer->Assign(pImage->GetPixels());
 

@@ -1,9 +1,10 @@
 #include "GLBuffer.h"
 #include "OpenGLGraphicsModule.h"	
+#include "GLConverter.h"
 
 namespace Glory
 {
-	GLBuffer::GLBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, size_t bindIndex) :
+	GLBuffer::GLBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, size_t bindIndex) :
 		Buffer(bufferSize, usageFlag, memoryFlags, bindIndex)
 	{
 	}
@@ -28,21 +29,26 @@ namespace Glory
 
 		//GL_STATIC_DRAW
 
-		glBindBuffer(m_UsageFlag, m_BufferID);
+		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		GLuint usage = GLConverter::TO_GLBUFFERUSAGE.at(m_MemoryFlags);
+
+		glBindBuffer(target, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferData(m_UsageFlag, m_BufferSize, data, m_MemoryFlags);
+		glBufferData(target, m_BufferSize, data, usage);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(m_UsageFlag, NULL);
+		glBindBuffer(target, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void GLBuffer::Assign(const void* data, uint32_t offset, uint32_t size)
 	{
-		glBindBuffer(m_UsageFlag, m_BufferID);
+		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+
+		glBindBuffer(target, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferSubData(m_UsageFlag, offset, size, data);
+		glBufferSubData(target, offset, size, data);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(m_UsageFlag, NULL);
+		glBindBuffer(target, NULL);
 	}
 
 	void GLBuffer::CopyFrom(Buffer* source, uint32_t size)
@@ -52,17 +58,19 @@ namespace Glory
 
 	void GLBuffer::Bind()
 	{
-		glBindBuffer(m_UsageFlag, m_BufferID);
+		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		glBindBuffer(target, m_BufferID);
 
 		if (m_BindIndex)
 		{
-			glBindBufferBase(m_UsageFlag, (GLuint)m_BindIndex, m_BufferID);
+			glBindBufferBase(target, (GLuint)m_BindIndex, m_BufferID);
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
 	}
 
 	void GLBuffer::Unbind()
 	{
-		glBindBuffer(m_UsageFlag, NULL);
+		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		glBindBuffer(target, NULL);
 	}
 }

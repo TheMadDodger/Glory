@@ -19,8 +19,9 @@ namespace Glory
 		virtual ~GPUResourceManager();
 
 	public:
-		Buffer* CreateBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex);
+		Buffer* CreateBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex);
 		Mesh* CreateMesh(MeshData* pMeshData);
+		Mesh* CreateMeshNoIndexBuffer(MeshData* pMeshData);
 		Shader* CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Texture* CreateTexture(ImageData* pImageData);
@@ -34,7 +35,7 @@ namespace Glory
 	protected: // Internal functions
 		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
-		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, uint32_t bindIndex) = 0;
+		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex) = 0;
 		virtual Mesh* CreateMesh_Internal(MeshData* pMeshData) = 0;
 		virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;

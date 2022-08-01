@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
 #include <GraphicsEnums.h>
+#include <map>
 
 namespace Glory
 {
@@ -17,6 +18,9 @@ namespace Glory
 		static vk::SamplerCreateInfo GetVulkanSamplerInfo(const SamplerSettings& settings);
 		static vk::Format GetVulkanFormat(const PixelFormat& format);
 		static vk::ShaderStageFlagBits GetShaderStageFlag(const ShaderType& shaderType);
+
+		static const std::map<BufferBindingTarget, vk::BufferUsageFlags> TO_BUFFERUSAGE;
+		//static const std::map<MemoryUsage, GLuint> TO_GLBUFFERUSAGE;
 
 	private:
 		VKConverter() {}

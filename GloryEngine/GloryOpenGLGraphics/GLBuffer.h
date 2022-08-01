@@ -7,7 +7,7 @@ namespace Glory
 	class GLBuffer : public Buffer
 	{
 	public:
-		GLBuffer(uint32_t bufferSize, uint32_t usageFlag, uint32_t memoryFlags, size_t bindIndex);
+		GLBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, size_t bindIndex);
 		virtual ~GLBuffer();
 
 		virtual void CreateBuffer() override;
