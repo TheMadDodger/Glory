@@ -2,13 +2,11 @@
 ## A modular game engine and editor.
 
 Glory is an under development, modular game engine and editor, written in C++.
-Many features are still missing, and it is not yet in a usable state, but it is getting there.
-If you want the most up-to-date development code for the engine, head on to the [dynamic-modules](https://github.com/TheMadDodger/Glory/tree/dynamic_modules) branch for dynamic module loading features, or to the [scripting/csharp](https://github.com/TheMadDodger/Glory/tree/scripting/csharp) branch for the scripting implementation. They should get merged relatively soon. It should be noted that these branches will likely not build for you.
+It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling), comes with a clustered renderer supporting 3000+ dynamic lights, is fully customizable and is platform independant thanks to its modularity.
 
 ![Glory Editor](https://i.imgur.com/5YlgbGP.png)
 
 ## Features
-
 - Extremely expandable due to modular design
 - Customizable editor made using ImGui
 - Scripting in any language your hearth desires (WIP on scripting branch)
@@ -17,6 +15,7 @@ If you want the most up-to-date development code for the engine, head on to the 
 - Use any graphics API
 - Project HUB
 - Runtime shader compilation and in the future cross platform shader compilation
+- Built-in [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling)
 
 ## Built-in Modules
 - Clustered Renderer
@@ -57,6 +56,9 @@ Install the [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) before running the 
 Edit the `vulkan_sdk` value in the `premake5.lua` file in the `GloryEngine` folder to point to where you installed the vulkan SDK.
 Run the `generateprojects.bat` file under `GloryEngine/scripts` to run the premake scripts and generate the visual studio project files.
 Open `GloryEngine.sln` and build the whole solution, you can run the temporary `GloryMain` project to open the editor.
+
+## In-Development code
+If you want the most up-to-date development code for the engine, head on to the [dynamic-modules](https://github.com/TheMadDodger/Glory/tree/dynamic_modules) branch for dynamic module loading features, or to the [scripting/csharp](https://github.com/TheMadDodger/Glory/tree/scripting/csharp) branch for the scripting implementation. They should get merged relatively soon. It should be noted that these branches will likely not build for you.
 
 ## License
 
