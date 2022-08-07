@@ -94,8 +94,14 @@ namespace Glory::Editor
 		}
 	}
 
-	FileDialogImage::FileDialogImage(uint8_t* data, int w, int h, char fmt) : m_pData(data), m_Width(w), m_Height(h), m_Format(fmt)
+	FileDialogImage::FileDialogImage(uint8_t* data, int w, int h, char fmt) : m_Format(fmt), m_pData(data)
 	{
+		m_Width = static_cast<uint32_t>(w);
+		m_Height = static_cast<uint32_t>(h);
+
+		m_PixelFormat = m_Format == 0 ? Glory::PixelFormat::PF_B8G8R8A8Srgb : Glory::PixelFormat::PF_R8G8B8A8Srgb;
+		m_InternalFormat = Glory::PixelFormat::PF_BGRA;
+		m_BytesPerPixel = 1;
 	}
 
 	FileDialogImage::~FileDialogImage()
@@ -109,10 +115,5 @@ namespace Glory::Editor
 
 	void FileDialogImage::BuildTexture()
 	{
-		m_Width = static_cast<uint32_t>(m_Width);
-		m_Height = static_cast<uint32_t>(m_Height);
-
-		m_PixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
-		m_BytesPerPixel = 1;
 	}
 }

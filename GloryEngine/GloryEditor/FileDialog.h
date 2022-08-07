@@ -21,8 +21,6 @@ namespace Glory::Editor
 
 	private:
 		uint8_t* m_pData;
-		int m_Width;
-		int m_Height;
 		char m_Format;
 	};
 
