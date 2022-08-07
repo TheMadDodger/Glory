@@ -37,6 +37,7 @@ namespace Glory
 		if (!m_SampleCollectingEnabled) return;
 		std::thread::id currentThreadID = std::this_thread::get_id();
 		std::string threadName = m_ThreadIDToProfile[currentThreadID];
+		if (threadName == "") return;
 		m_CurrentThreadSamples[threadName].BeginSample(name);
 	}
 
@@ -45,6 +46,7 @@ namespace Glory
 		if (!m_SampleCollectingEnabled) return;
 		std::thread::id currentThreadID = std::this_thread::get_id();
 		std::string threadName = m_ThreadIDToProfile[currentThreadID];
+		if (threadName == "") return;
 		m_CurrentThreadSamples[threadName].EndSample();
 	}
 

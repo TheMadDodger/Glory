@@ -39,7 +39,7 @@ namespace Glory::Editor
 
     private:
         int m_CurrentlyInspectingSampleIndex;
-        InspectorMode m_InspectorMode = InspectorMode::Timeline;
+        InspectorMode m_InspectorMode = InspectorMode::Hierarchy;
 
         static bool m_IsRecording;
         static const size_t MAX_SAMPLE_RECORDS = 100;
