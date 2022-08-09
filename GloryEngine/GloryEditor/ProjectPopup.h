@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "GloryEditor.h"
 
 namespace std::filesystem
 {
@@ -19,20 +20,20 @@ namespace Glory::Editor
 	class ProjectPopup
 	{
 	public:
-		ProjectPopup();
-		virtual ~ProjectPopup();
+		GLORY_EDITOR_API ProjectPopup();
+		virtual GLORY_EDITOR_API ~ProjectPopup();
 
-		void Initialize();
-		void Load();
-		void Save();
-
-		void Open();
-		void OnGui();
-
-		void OnHubGui();
-		void OnProjectNotFoundGui();
-		void OnFileDialogPopupGui();
-		void OnNewProjectPopupGui();
+		GLORY_EDITOR_API void Initialize();
+		GLORY_EDITOR_API void Load();
+		GLORY_EDITOR_API void Save();
+		 
+		GLORY_EDITOR_API void Open();
+		GLORY_EDITOR_API void OnGui();
+		 
+		GLORY_EDITOR_API void OnHubGui();
+		GLORY_EDITOR_API void OnProjectNotFoundGui();
+		GLORY_EDITOR_API void OnFileDialogPopupGui();
+		GLORY_EDITOR_API void OnNewProjectPopupGui();
 
 	private:
 		bool m_Open;

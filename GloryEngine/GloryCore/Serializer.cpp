@@ -4,8 +4,6 @@
 
 namespace Glory
 {
-	std::vector<Serializer*> Serializer::m_pRegisteredSerializers = std::vector<Serializer*>();
-
 	Serializer* Serializer::GetSerializer(Object* pObject)
 	{
 		for (size_t i = 0; i < pObject->TypeCount(); i++)
@@ -13,12 +11,12 @@ namespace Glory
 			std::type_index type = typeid(Object);
 			if (!pObject->GetType(i, type)) continue;
 
-			auto it = std::find_if(m_pRegisteredSerializers.begin(), m_pRegisteredSerializers.end(), [&](Serializer* pSerializer)
+			auto it = std::find_if(SERIALIZERS.begin(), SERIALIZERS.end(), [&](Serializer* pSerializer)
 			{
 				return pSerializer->GetSerializedType() == type;
 			});
 
-			if (it == m_pRegisteredSerializers.end()) continue;
+			if (it == SERIALIZERS.end()) continue;
 			Serializer* pSerializer = *it;
 			return pSerializer;
 		}
@@ -28,9 +26,9 @@ namespace Glory
 
 	Serializer* Serializer::GetSerializer(size_t typeHash)
 	{
-		for (size_t i = 0; i < m_pRegisteredSerializers.size(); i++)
+		for (size_t i = 0; i < SERIALIZERS.size(); i++)
 		{
-			Serializer* pSerializer = m_pRegisteredSerializers[i];
+			Serializer* pSerializer = SERIALIZERS[i];
 			std::type_index type = pSerializer->GetSerializedType();
 			size_t hash = ResourceType::GetHash(type);
 			if (hash == typeHash) return pSerializer;
@@ -52,9 +50,9 @@ namespace Glory
 
 	size_t Serializer::GetID(Serializer* pSerializer)
 	{
-		for (size_t i = 0; i < m_pRegisteredSerializers.size(); i++)
+		for (size_t i = 0; i < SERIALIZERS.size(); i++)
 		{
-			if (m_pRegisteredSerializers[i] == pSerializer) return i;
+			if (SERIALIZERS[i] == pSerializer) return i;
 		}
 		return 0;
 	}
@@ -109,13 +107,19 @@ namespace Glory
 
 	void Serializer::Cleanup()
 	{
-		std::for_each(m_pRegisteredSerializers.begin(), m_pRegisteredSerializers.end(), [](Serializer* pSerializer) { delete pSerializer; });
-		m_pRegisteredSerializers.clear();
+		std::for_each(SERIALIZERS.begin(), SERIALIZERS.end(), [](Serializer* pSerializer) { delete pSerializer; });
+		SERIALIZERS.clear();
 	}
 
 	template<class TObject>
 	inline void SerializerTemplate<TObject>::CompilerTest()
 	{
 		Object* pObject = new TObject();
+	}
+	Serializers::Serializers()
+	{
+	}
+	Serializers::~Serializers()
+	{
 	}
 }

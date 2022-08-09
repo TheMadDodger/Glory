@@ -1,9 +1,9 @@
 #include <stack>
 #include <imgui.h>
-#include <ProjectSpace.h>
-#include <EditorApplication.h>
 #include <AssetDatabase.h>
 #include <AssetManager.h>
+#include "ProjectSpace.h"
+#include "EditorApplication.h"
 #include "ContentBrowserItem.h"
 #include "EditorAssets.h"
 #include "Tumbnail.h"
@@ -24,8 +24,9 @@ namespace Glory::Editor
 	{
 	}
 
-	ContentBrowserItem::ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable)
-		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>()), m_Editable(isEditable)
+	ContentBrowserItem::ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable, const std::string& directoryFilter, std::function<std::filesystem::path()> rootPathFunc)
+		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false),
+		m_pChildren(std::vector<ContentBrowserItem*>()), m_Editable(isEditable), m_RootPathFunc(rootPathFunc), m_DirectoryFilter(directoryFilter)
 	{}
 
 	ContentBrowserItem::~ContentBrowserItem()
@@ -101,6 +102,7 @@ namespace Glory::Editor
 			size_t actualIndex = index;
 			bool directory = entry.is_directory();
 			std::filesystem::path path = entry.path();
+			std::string pathString = path.string();
 
 			if (!directory)
 			{
@@ -108,7 +110,20 @@ namespace Glory::Editor
 				auto ext = path.extension();
 				std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
 				if (ext.compare(metaExtension) == 0) continue;
+				// Ignore files that fail the directory mask
+				if (m_DirectoryFilter != "" && pathString.find(m_DirectoryFilter) == std::string::npos) continue;
 			}
+
+			bool ignored = false;
+			for (size_t i = 0; i < m_IgnoreDirectories.size(); i++)
+			{
+				const std::string& ignoreDirectory = m_IgnoreDirectories[i];
+				if (pathString.find(ignoreDirectory) == std::string::npos) continue;
+				ignored = true;
+				break;
+			}
+
+			if (ignored) continue;
 
 			++index;
 			std::filesystem::path::iterator lastDirIT = path.end();
@@ -117,7 +132,8 @@ namespace Glory::Editor
 			if (actualIndex >= m_pChildren.size())
 			{
 				size_t childIndex = m_pChildren.size();
-				m_pChildren.push_back(new ContentBrowserItem(lastDir.string(), directory, this, m_Editable));
+				m_pChildren.push_back(new ContentBrowserItem(lastDir.string(), directory, this, m_Editable, m_DirectoryFilter, m_RootPathFunc));
+				m_pChildren[childIndex]->AddIgnoreDirectories(m_IgnoreDirectories);
 				ContentBrowserItem* pNewChild = m_pChildren[childIndex];
 				pNewChild->Refresh();
 				pNewChild->SortChildren();
@@ -146,7 +162,7 @@ namespace Glory::Editor
 	{
 		std::filesystem::path finalPath = "";
 		if (m_pParent == nullptr)
-			finalPath = ProjectSpace::GetOpenProject()->RootPath();
+			finalPath = m_RootPathFunc();
 		else
 			finalPath = m_pParent->m_CachedPath;
 
@@ -276,6 +292,7 @@ namespace Glory::Editor
 		std::filesystem::path assetPath = ProjectSpace::GetOpenProject()->RootPath();
 		assetPath.append("Assets");
 		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
+		if (relativePath == "") relativePath = m_CachedPath;
 		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
@@ -358,6 +375,16 @@ namespace Glory::Editor
 		return m_HighlightedPath;
 	}
 
+	void ContentBrowserItem::AddIgnoreDirectory(const std::string& directory)
+	{
+		m_IgnoreDirectories.push_back(directory);
+	}
+
+	void ContentBrowserItem::AddIgnoreDirectories(const std::vector<std::string>& directories)
+	{
+		m_IgnoreDirectories = directories;
+	}
+
 	void ContentBrowserItem::EraseExcessHistory()
 	{
 		if (m_HistoryIndex <= 1) return;
@@ -400,5 +427,13 @@ namespace Glory::Editor
 			m_StartEditingName = false;
 		}
 		else ImGui::Text(m_CachedPath.filename().replace_extension().string().c_str());
+	}
+
+	std::filesystem::path ContentBrowserItem::DefaultRootPathFunc()
+	{
+		std::string projectRootPath = "";
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (pProject != nullptr) projectRootPath = pProject->RootPath();
+		return projectRootPath;
 	}
 }

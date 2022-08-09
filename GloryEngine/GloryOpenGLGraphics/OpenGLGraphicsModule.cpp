@@ -6,6 +6,7 @@
 #include <ios>
 #include "GLShader.h"
 #include "OGLResourceManager.h"
+#include "GloryOGL.h"
 
 namespace Glory
 {

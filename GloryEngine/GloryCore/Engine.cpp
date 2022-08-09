@@ -7,6 +7,7 @@
 #include "ArrayPropertySerializers.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
+#include "GloryContext.h"
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -166,23 +167,19 @@ namespace Glory
 		delete m_pGraphicsThread;
 		m_pGraphicsThread = nullptr;
 
-		Console::Cleanup();
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
 		ShaderManager::Cleanup();
+		GloryContext::DestroyContext();
 	}
 
 	void Engine::Initialize()
 	{
+		GloryContext::GetContext()->Initialize();
+
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
-
-		Console::Initialize();
-
-#ifdef _DEBUG
-		Console::RegisterConsole<WindowsDebugConsole>();
-#endif
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{

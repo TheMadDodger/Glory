@@ -1,21 +1,22 @@
 #pragma once
+#include <SceneObject.h>
+#include <Glory.h>
 #include "Entity.h"
 #include "EntityComponentObject.h"
-#include <SceneObject.h>
 
 namespace Glory
 {
     class EntitySceneObject : public SceneObject
     {
     public:
-        EntitySceneObject(Entity entity);
-        EntitySceneObject(Entity entity, const std::string& name);
-        EntitySceneObject(Entity entity, const std::string& name, UUID uuid);
-        virtual ~EntitySceneObject();
+        GLORY_API EntitySceneObject(Entity entity);
+        GLORY_API EntitySceneObject(Entity entity, const std::string& name);
+        GLORY_API EntitySceneObject(Entity entity, const std::string& name, UUID uuid);
+        GLORY_API virtual ~EntitySceneObject();
 
-        virtual SceneObject* GetParent() override;
+        GLORY_API virtual SceneObject* GetParent() override;
 
-        Entity GetEntityHandle();
+        GLORY_API Entity GetEntityHandle();
 
     private:
         virtual void Initialize() override;

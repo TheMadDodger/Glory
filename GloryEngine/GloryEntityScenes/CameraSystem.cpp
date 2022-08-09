@@ -4,6 +4,7 @@
 #include <Game.h>
 #include <CameraManager.h>
 #include <SerializedPropertyManager.h>
+#include <GloryContext.h>
 
 namespace Glory
 {
@@ -15,7 +16,7 @@ namespace Glory
 		int width, height;
 		pWindow->GetDrawableSize(&width, &height);
 
-		pComponent.m_Camera = CameraManager::GetNewOrUnusedCamera();
+		pComponent.m_Camera = GloryContext::GetCameraManager()->GetNewOrUnusedCamera();
 		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
 		pComponent.m_LastHash = CalcHash(pComponent);
 	}

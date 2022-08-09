@@ -4,24 +4,25 @@
 #include <UUID.h>
 #include <spirv_cross.hpp>
 #include <MaterialData.h>
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
 	class EditorShaderData
 	{
 	public:
-		EditorShaderData(UUID uuid);
-		virtual ~EditorShaderData();
+		GLORY_EDITOR_API EditorShaderData(UUID uuid);
+		virtual GLORY_EDITOR_API ~EditorShaderData();
 
 	public:
-		std::vector<uint32_t>::const_iterator Begin();
-		std::vector<uint32_t>::const_iterator End();
+		GLORY_EDITOR_API std::vector<uint32_t>::const_iterator Begin();
+		GLORY_EDITOR_API std::vector<uint32_t>::const_iterator End();
 
-		const uint32_t* Data() const;
-		size_t Size() const;
-		UUID GetUUID() const;
+		GLORY_EDITOR_API const uint32_t* Data() const;
+		GLORY_EDITOR_API size_t Size() const;
+		GLORY_EDITOR_API UUID GetUUID() const;
 
-		void LoadIntoMaterial(MaterialData* pMaterial);
+		GLORY_EDITOR_API void LoadIntoMaterial(MaterialData* pMaterial);
 
 	private:
 		friend class EditorShaderProcessor;
@@ -30,7 +31,7 @@ namespace Glory::Editor
 
 		struct PropertyInfo
 		{
-			PropertyInfo(const std::string& name, size_t typeHash);
+			GLORY_EDITOR_API PropertyInfo(const std::string& name, size_t typeHash);
 			std::string m_Name;
 			size_t m_TypeHash;
 		};

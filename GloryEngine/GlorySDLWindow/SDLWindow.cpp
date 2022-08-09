@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	void SDLWindow::GetVulkanSurface(void* instance, void* surface)
+	GLORY_API void SDLWindow::GetVulkanSurface(void* instance, void* surface)
 	{
 		if (!SDL_Vulkan_CreateSurface(m_pWindow, static_cast<VkInstance>(instance), (VkSurfaceKHR*)surface))
 		{
@@ -17,22 +17,22 @@ namespace Glory
 		}
 	}
 
-	void SDLWindow::GetDrawableSize(int* width, int* height)
+	GLORY_API void SDLWindow::GetDrawableSize(int* width, int* height)
 	{
 		SDL_GL_GetDrawableSize(m_pWindow, width, height);
 	}
 
-	void SDLWindow::GetWindowSize(int* width, int* height)
+	GLORY_API void SDLWindow::GetWindowSize(int* width, int* height)
 	{
 		SDL_GetWindowSize(m_pWindow, width, height);
 	}
 
-	void SDLWindow::GetWindowPosition(int* x, int* y)
+	GLORY_API void SDLWindow::GetWindowPosition(int* x, int* y)
 	{
 		SDL_GetWindowPosition(m_pWindow, x, y);
 	}
 
-	void SDLWindow::SetupForOpenGL()
+	GLORY_API void SDLWindow::SetupForOpenGL()
 	{
 		// Create OpenGL context
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -52,18 +52,18 @@ namespace Glory
 		}
 	}
 
-	void SDLWindow::CleanupOpenGL()
+	GLORY_API void SDLWindow::CleanupOpenGL()
 	{
 		SDL_GL_DeleteContext(m_GLSDLContext);
 		m_GLSDLContext = nullptr;
 	}
 
-	void SDLWindow::GLSwapWindow()
+	GLORY_API void SDLWindow::GLSwapWindow()
 	{
 		SDL_GL_SwapWindow(m_pWindow);
 	}
 
-	void SDLWindow::MakeGLContextCurrent()
+	GLORY_API void SDLWindow::MakeGLContextCurrent()
 	{
 		SDL_GL_MakeCurrent(m_pWindow, m_GLSDLContext);
 	}
@@ -78,19 +78,19 @@ namespace Glory
 		return m_GLSDLContext;
 	}
 
-	void SDLWindow::Resize(int width, int height)
+	GLORY_API void SDLWindow::Resize(int width, int height)
 	{
 		m_Width = width;
 		m_Height = height;
 		SDL_SetWindowSize(m_pWindow, width, height);
 	}
 	
-	void SDLWindow::GetPosition(int* width, int* height)
+	GLORY_API void SDLWindow::GetPosition(int* width, int* height)
 	{
 		SDL_GetWindowPosition(m_pWindow, width, height);
 	}
 	
-	void SDLWindow::SetPosition(int width, int height)
+	GLORY_API void SDLWindow::SetPosition(int width, int height)
 	{
 		SDL_SetWindowPosition(m_pWindow, width, height);
 	}
@@ -102,7 +102,7 @@ namespace Glory
 		m_pWindow = NULL;
 	}
 
-	void SDLWindow::Open()
+	GLORY_API void SDLWindow::Open()
 	{
 		// Create an SDL window that supports Vulkan rendering.
 		m_pWindow = SDL_CreateWindow(m_WindowName.c_str(), SDL_WINDOWPOS_CENTERED,
@@ -111,12 +111,12 @@ namespace Glory
 		if (m_pWindow == NULL) throw new SDLErrorException(SDL_GetError());
 	}
 
-	void SDLWindow::Close()
+	GLORY_API void SDLWindow::Close()
 	{
 		SDL_DestroyWindow(m_pWindow);
 	}
 
-	void SDLWindow::PollEvents()
+	GLORY_API void SDLWindow::PollEvents()
 	{
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
@@ -134,7 +134,7 @@ namespace Glory
 		}
 	}
 
-	void SDLWindow::GetVulkanRequiredExtensions(std::vector<const char*>& extensions)
+	GLORY_API void SDLWindow::GetVulkanRequiredExtensions(std::vector<const char*>& extensions)
 	{
 		uint32_t extensionCount;
 		if (!SDL_Vulkan_GetInstanceExtensions(m_pWindow, &extensionCount, NULL))

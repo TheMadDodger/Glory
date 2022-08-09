@@ -10,7 +10,7 @@
 
 namespace Glory::Editor
 {
-	ProjectPopup::ProjectPopup()
+    GLORY_EDITOR_API ProjectPopup::ProjectPopup()
         : m_Open(false), m_OpenErrorPopup(false), m_OpenFileDialogPopup(false), m_OpenNewProjectPopup(false),
         m_Width(800.0f), m_Height(600.0f)
 	{
@@ -32,11 +32,11 @@ namespace Glory::Editor
             std::filesystem::create_directories(m_DefaultProjectsFolder);
 	}
 
-	ProjectPopup::~ProjectPopup()
+    GLORY_EDITOR_API ProjectPopup::~ProjectPopup()
 	{
 	}
 
-    void ProjectPopup::Initialize()
+    GLORY_EDITOR_API void ProjectPopup::Initialize()
     {
         wchar_t* p;
         if (S_OK != SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &p))
@@ -58,7 +58,7 @@ namespace Glory::Editor
         Load();
     }
 
-    void ProjectPopup::Load()
+    GLORY_EDITOR_API void ProjectPopup::Load()
     {
         m_Projects.clear();
         std::filesystem::path path("Projects.list");
@@ -74,7 +74,7 @@ namespace Glory::Editor
         }
     }
 
-    void ProjectPopup::Save()
+    GLORY_EDITOR_API void ProjectPopup::Save()
     {
         std::filesystem::path path("Projects.list");
         YAML::Emitter out;
@@ -99,12 +99,12 @@ namespace Glory::Editor
         Load();
     }
 
-	void ProjectPopup::Open()
+    GLORY_EDITOR_API void ProjectPopup::Open()
 	{
 		m_Open = true;
 	}
 
-	void ProjectPopup::OnGui()
+    GLORY_EDITOR_API void ProjectPopup::OnGui()
 	{
 		if (m_Open)
 			ImGui::OpenPopup("Project Hub");
@@ -124,7 +124,7 @@ namespace Glory::Editor
         style.WindowMinSize = minWindowSize;
 	}
 
-    void ProjectPopup::OnHubGui()
+    GLORY_EDITOR_API void ProjectPopup::OnHubGui()
     {
         ImVec2 size = ImGui::GetWindowSize();
         m_Width = size.x;
@@ -233,7 +233,7 @@ namespace Glory::Editor
         }
     }
 
-    void ProjectPopup::OnProjectNotFoundGui()
+    GLORY_EDITOR_API void ProjectPopup::OnProjectNotFoundGui()
     {
         ImGui::Text("The project could not be found, would you like to remove it from the list?");
         ImVec2 size = ImGui::GetContentRegionAvail();
@@ -256,7 +256,7 @@ namespace Glory::Editor
         }
     }
 
-    void ProjectPopup::OnFileDialogPopupGui()
+    GLORY_EDITOR_API void ProjectPopup::OnFileDialogPopupGui()
     {
         static ImGuiTableFlags flags =
             ImGuiTableFlags_Resizable
@@ -362,7 +362,7 @@ namespace Glory::Editor
         }
     }
 
-    void ProjectPopup::OnNewProjectPopupGui()
+    GLORY_EDITOR_API void ProjectPopup::OnNewProjectPopupGui()
     {
         float x = ImGui::CalcTextSize("Project Name").x + 20.0f;
 

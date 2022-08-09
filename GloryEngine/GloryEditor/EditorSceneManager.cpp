@@ -1,18 +1,18 @@
 #include "EditorSceneManager.h"
 #include "FileDialog.h"
+#include "Selection.h"
 #include <Game.h>
 #include <Engine.h>
 #include <ScenesModule.h>
 #include <AssetDatabase.h>
 #include <Serializer.h>
-#include <Selection.h>
 
 namespace Glory::Editor
 {
 	std::vector<UUID> EditorSceneManager::m_OpenedSceneIDs;
 	UUID EditorSceneManager::m_CurrentlySavingScene = 0;
 
-	GScene* EditorSceneManager::NewScene(bool additive)
+	GLORY_EDITOR_API GScene* EditorSceneManager::NewScene(bool additive)
 	{
 		if (!additive) CloseAll();
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
@@ -21,7 +21,7 @@ namespace Glory::Editor
 		return pScene;
 	}
 
-	void EditorSceneManager::OpenScene(UUID uuid, bool additive)
+	GLORY_EDITOR_API void EditorSceneManager::OpenScene(UUID uuid, bool additive)
 	{
 		if (additive && IsSceneOpen(uuid))
 			CloseScene(uuid);
@@ -35,7 +35,7 @@ namespace Glory::Editor
 		m_OpenedSceneIDs.push_back(uuid);
 	}
 
-	void EditorSceneManager::SaveOpenScenes()
+	GLORY_EDITOR_API void EditorSceneManager::SaveOpenScenes()
 	{
 		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [](UUID uuid)
 		{
@@ -47,7 +47,7 @@ namespace Glory::Editor
 		});
 	}
 
-	void EditorSceneManager::CloseScene(UUID uuid)
+	GLORY_EDITOR_API void EditorSceneManager::CloseScene(UUID uuid)
 	{
 		// TODO: Check if scene has changes
 		Selection::SetActiveObject(nullptr);
@@ -58,30 +58,30 @@ namespace Glory::Editor
 		m_OpenedSceneIDs.erase(it);
 	}
 
-	bool EditorSceneManager::IsSceneOpen(UUID uuid)
+	GLORY_EDITOR_API bool EditorSceneManager::IsSceneOpen(UUID uuid)
 	{
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		return it != m_OpenedSceneIDs.end();
 	}
 
-	void EditorSceneManager::CloseAll()
+	GLORY_EDITOR_API void EditorSceneManager::CloseAll()
 	{
 		m_OpenedSceneIDs.clear();
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
 		pScenesModule->CloseAllScenes();
 	}
 
-	size_t EditorSceneManager::OpenSceneCount()
+	GLORY_EDITOR_API size_t EditorSceneManager::OpenSceneCount()
 	{
 		return m_OpenedSceneIDs.size();
 	}
 
-	UUID EditorSceneManager::GetOpenSceneUUID(size_t index)
+	GLORY_EDITOR_API UUID EditorSceneManager::GetOpenSceneUUID(size_t index)
 	{
 		return m_OpenedSceneIDs[index];
 	}
 
-	void EditorSceneManager::SaveScene(UUID uuid)
+	GLORY_EDITOR_API void EditorSceneManager::SaveScene(UUID uuid)
 	{
 		if (!IsSceneOpen(uuid)) return;
 		AssetLocation location;
@@ -95,7 +95,7 @@ namespace Glory::Editor
 		Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.m_Path);
 	}
 
-	void EditorSceneManager::SaveSceneAs(UUID uuid)
+	GLORY_EDITOR_API void EditorSceneManager::SaveSceneAs(UUID uuid)
 	{
 		m_CurrentlySavingScene = uuid;
 		FileDialog::Save("SceneSaveDialog", "Save scene", "Glory Scene (*.gscene){.gscene}", Game::GetAssetPath(), [&](const std::string& result)

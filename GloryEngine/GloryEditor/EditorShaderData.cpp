@@ -3,35 +3,35 @@
 
 namespace Glory::Editor
 {
-	EditorShaderData::EditorShaderData(UUID uuid) : m_UUID(uuid) {}
-	EditorShaderData::~EditorShaderData() {}
+	GLORY_EDITOR_API EditorShaderData::EditorShaderData(UUID uuid) : m_UUID(uuid) {}
+	GLORY_EDITOR_API EditorShaderData::~EditorShaderData() {}
 
-	std::vector<uint32_t>::const_iterator EditorShaderData::Begin()
+	GLORY_EDITOR_API std::vector<uint32_t>::const_iterator EditorShaderData::Begin()
 	{
 		return m_ShaderData.begin();
 	}
 
-	std::vector<uint32_t>::const_iterator EditorShaderData::End()
+	GLORY_EDITOR_API std::vector<uint32_t>::const_iterator EditorShaderData::End()
 	{
 		return m_ShaderData.end();
 	}
 
-	const uint32_t* EditorShaderData::Data() const
+	GLORY_EDITOR_API const uint32_t* EditorShaderData::Data() const
 	{
 		return m_ShaderData.data();
 	}
 
-	size_t EditorShaderData::Size() const
+	GLORY_EDITOR_API size_t EditorShaderData::Size() const
 	{
 		return m_ShaderData.size();
 	}
 
-	UUID EditorShaderData::GetUUID() const
+	GLORY_EDITOR_API UUID EditorShaderData::GetUUID() const
 	{
 		return m_UUID;
 	}
 
-	void EditorShaderData::LoadIntoMaterial(MaterialData* pMaterial)
+	GLORY_EDITOR_API void EditorShaderData::LoadIntoMaterial(MaterialData* pMaterial)
 	{
 		for (size_t i = 0; i < m_SamplerNames.size(); i++)
 		{
@@ -47,7 +47,7 @@ namespace Glory::Editor
 		}
 	}
 
-	EditorShaderData::PropertyInfo::PropertyInfo(const std::string& name, size_t typeHash) : m_Name(name), m_TypeHash(typeHash)
+	GLORY_EDITOR_API EditorShaderData::PropertyInfo::PropertyInfo(const std::string& name, size_t typeHash) : m_Name(name), m_TypeHash(typeHash)
 	{
 	}
 }

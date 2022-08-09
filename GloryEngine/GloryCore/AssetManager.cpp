@@ -1,15 +1,9 @@
 #include "AssetManager.h"
 #include "AssetDatabase.h"
+#include "GloryContext.h"
 
 namespace Glory
 {
-	ThreadedUMap<UUID, Resource*> AssetManager::m_pLoadedAssets;
-	ThreadedUMap<std::string, size_t> AssetManager::m_PathToGroupIndex;
-	ThreadedVector<AssetGroup*> AssetManager::m_LoadedAssetGroups;
-	Jobs::JobPool<bool, UUID>* AssetManager::m_pResourceLoadingPool = nullptr;
-	ThreadedQueue<CallbackData> AssetManager::m_ResourceLoadedCallbacks;
-	ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> AssetManager::m_AssetLoadedCallbacks;
-
 	void AssetManager::GetAsset(UUID uuid, std::function<void(Resource*)> callback)
 	{
 		Resource* pResource = FindResource(uuid);
@@ -19,29 +13,29 @@ namespace Glory
 			return;
 		}
 
-		if (m_AssetLoadedCallbacks.Contains(uuid))
+		if (ASSET_MANAGER->m_AssetLoadedCallbacks.Contains(uuid))
 		{
 			if (callback != NULL)
 			{
-				m_AssetLoadedCallbacks.Do(uuid, [&](std::vector<std::function<void(Resource*)>>* callbacks)
+				ASSET_MANAGER->m_AssetLoadedCallbacks.Do(uuid, [&](std::vector<std::function<void(Resource*)>>* callbacks)
 				{
 					callbacks->push_back(callback);
 				});
 			}
 			return;
 		}
-		else m_AssetLoadedCallbacks.Set(uuid, { callback });
+		else ASSET_MANAGER->m_AssetLoadedCallbacks.Set(uuid, { callback });
 
-		m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
+		ASSET_MANAGER->m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
 	}
 
 	Resource* AssetManager::GetOrLoadAsset(UUID uuid)
 	{
 		Resource* pResource = FindResource(uuid);
 		if (pResource) return pResource;
-		if (m_AssetLoadedCallbacks.Contains(uuid)) return nullptr;
-		m_AssetLoadedCallbacks.Set(uuid, { [](Resource*) {} });
-		m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
+		if (ASSET_MANAGER->m_AssetLoadedCallbacks.Contains(uuid)) return nullptr;
+		ASSET_MANAGER->m_AssetLoadedCallbacks.Set(uuid, { [](Resource*) {} });
+		ASSET_MANAGER->m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
 		return nullptr;
 	}
 
@@ -54,14 +48,14 @@ namespace Glory
 
 	Resource* AssetManager::FindResource(UUID uuid)
 	{
-		if (!m_pLoadedAssets.Contains(uuid)) return nullptr;
-		return m_pLoadedAssets[uuid];
+		if (!ASSET_MANAGER->m_pLoadedAssets.Contains(uuid)) return nullptr;
+		return ASSET_MANAGER->m_pLoadedAssets[uuid];
 	}
 
 	bool AssetManager::LoadResourceJob(UUID uuid)
 	{
 		Resource* pResource = LoadAsset(uuid);
-		m_ResourceLoadedCallbacks.push(CallbackData(uuid, pResource));
+		ASSET_MANAGER->m_ResourceLoadedCallbacks.push(CallbackData(uuid, pResource));
 		return pResource;
 	}
 
@@ -84,10 +78,14 @@ namespace Glory
 		std::filesystem::path path = Game::GetAssetPath();
 		path.append(assetLocation.m_Path);
 
+		if (!std::filesystem::exists(path))
+			path = assetLocation.m_Path;
+
 		Resource* pResource = pModule->LoadUsingAny(path.string(), meta.ImportSettings());
+		if (pResource == nullptr) return nullptr;
 		pResource->m_ID = uuid;
-		m_pLoadedAssets.Set(uuid, pResource);
-		AssetDatabase::m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pResource);
+		ASSET_MANAGER->m_pLoadedAssets.Set(uuid, pResource);
+		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pResource);
 		return pResource;
 	}
 
@@ -99,44 +97,44 @@ namespace Glory
 	{
 		AssetDatabase::Initialize();
 
-		m_pResourceLoadingPool = Jobs::JobManager::Run<bool, UUID>();
+		ASSET_MANAGER->m_pResourceLoadingPool = Jobs::JobManager::Run<bool, UUID>();
 	}
 
 	void AssetManager::Destroy()
 	{
-		m_pLoadedAssets.ForEach([](const UUID& key, Resource* value)
+		ASSET_MANAGER->m_pLoadedAssets.ForEach([](const UUID& key, Resource* value)
 		{
 			delete value;
 		});
 
-		m_LoadedAssetGroups.ForEach([](AssetGroup* value)
+		ASSET_MANAGER->m_LoadedAssetGroups.ForEach([](AssetGroup* value)
 		{
 			delete value;
 		});
 
-		m_pLoadedAssets.Clear();
-		m_LoadedAssetGroups.Clear();
-		m_PathToGroupIndex.Clear();
+		ASSET_MANAGER->m_pLoadedAssets.Clear();
+		ASSET_MANAGER->m_LoadedAssetGroups.Clear();
+		ASSET_MANAGER->m_PathToGroupIndex.Clear();
 		AssetDatabase::Destroy();
 
-		m_pResourceLoadingPool = nullptr;
+		ASSET_MANAGER->m_pResourceLoadingPool = nullptr;
 	}
 
 	void AssetManager::RunCallbacks()
 	{
-		AssetDatabase::m_Callbacks.RunCallbacks();
+		ASSET_DATABASE->m_Callbacks.RunCallbacks();
 
 		CallbackData callbackData;
-		while (m_ResourceLoadedCallbacks.Pop(callbackData))
+		while (ASSET_MANAGER->m_ResourceLoadedCallbacks.Pop(callbackData))
 		{
-			m_AssetLoadedCallbacks.Do(callbackData.m_UUID, [&](const std::vector<std::function<void(Resource*)>>& callbacks)
+			ASSET_MANAGER->m_AssetLoadedCallbacks.Do(callbackData.m_UUID, [&](const std::vector<std::function<void(Resource*)>>& callbacks)
 			{
 				for (size_t i = 0; i < callbacks.size(); i++)
 				{
 					callbacks[i](callbackData.m_pResource);
 				}
 			});
-			m_AssetLoadedCallbacks.Erase(callbackData.m_UUID);
+			ASSET_MANAGER->m_AssetLoadedCallbacks.Erase(callbackData.m_UUID);
 		}
 	}
 

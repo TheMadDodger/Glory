@@ -30,7 +30,7 @@ namespace Glory
 		//	importSettings = pLoader->ReadImportSettings_Internal(m_Node);
 		//}
 
-		void Write(LoaderModule* pLoader) const;
+		void Write(LoaderModule* pLoader, bool relativePath = true) const;
 		void Write(YAML::Emitter& emitter, LoaderModule* pLoader) const;
 		void Write(YAML::Emitter& emitter, LoaderModule* pLoader, const std::any& importSettings) const;
 		void Read();

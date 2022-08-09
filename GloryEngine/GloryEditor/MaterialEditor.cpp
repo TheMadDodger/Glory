@@ -1,12 +1,12 @@
 #include "MaterialEditor.h"
 #include "PropertyDrawer.h"
 #include "EditorShaderProcessor.h"
+#include "AssetPickerPopup.h"
+#include "Selection.h"
 #include <imgui.h>
 #include <ResourceType.h>
 #include <GLORY_YAML.h>
-#include <Selection.h>
 #include <AssetDatabase.h>
-#include <AssetPickerPopup.h>
 #include <AssetReferencePropertyTemplate.h>
 
 namespace Glory::Editor

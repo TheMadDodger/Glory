@@ -1,5 +1,5 @@
 project "GloryEditor"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -17,10 +17,7 @@ project "GloryEditor"
 	{
 		["Backend"] = {  },
 		["Backend/Base"] = { "EditorRenderImpl.*", "EditorWindowImpl.*" },
-		["Backend/OpenGL"] = { "EditorOpenGLRenderImpl.*" },
 		["Extensions"] = { "BaseEditorExtension.*" },
-		["Backend/SDL"] = { "EditorSDLWindowImpl.*" },
-		["Backend/Vulkan"] = { "EditorVulkanRenderImpl.*" },
 		["Content"] = {  },
 		["Content/Editors"] = { "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
 		["Content/PropertyDrawers"] = { "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*" },
@@ -28,7 +25,6 @@ project "GloryEditor"
 		["Editor"] = { "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*", "Gizmos.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
-		["ImGui"] = { "imgui_impl_opengl3.*", "imgui_impl_sdl.*", "imgui_impl_vulkan.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
 		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
@@ -39,29 +35,49 @@ project "GloryEditor"
 
 	includedirs
 	{
-		"%{vulkan_sdk}/include",
 		"%{vulkan_sdk}/third-party/include",
-
-		"%{IncludeDir.assimp}",
-		"%{IncludeDir.GLEW}",
+		
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
 		"%{IncludeDir.ImFileDialog}",
-		"%{IncludeDir.SDL_Image}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
 
 		"%{GloryIncludeDir.core}",
-		"%{GloryIncludeDir.assimp}",
-		"%{GloryIncludeDir.entityscenes}",
-		"%{GloryIncludeDir.basicrenderer}",
-		"%{GloryIncludeDir.opengl}",
-		"%{GloryIncludeDir.sdlimage}",
-		"%{GloryIncludeDir.sdlwindow}",
-		"%{GloryIncludeDir.vulkan}",
 		"%{GloryIncludeDir.ImGui}",
+	}
+	
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImFileDialog}",
+		"%{LibDirs.ImGuizmo}",
+		"%{LibDirs.implot}",
+		"%{LibDirs.yaml_cpp}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+	}
+	
+	links
+	{
+		"GloryCore",
+		"yaml-cpp",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"ImGui",
+		"ImGuizmo",
+		"implot",
+		"ImFileDialog",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS",
+		"GLORY_EDITOR_EXPORTS"
 	}
 
 	filter "system:windows"
@@ -84,8 +100,32 @@ project "GloryEditor"
 		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
+		
+		links
+		{
+			"spirv-cross-cd",
+			"spirv-cross-cored",
+			"spirv-cross-cppd",
+			"spirv-cross-glsld",
+			"spirv-cross-hlsld",
+			"spirv-cross-msld",
+			"spirv-cross-reflectd",
+			"spirv-cross-utild",
+		}
 
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+		
+		links
+		{
+			"spirv-cross-c",
+			"spirv-cross-core",
+			"spirv-cross-cpp",
+			"spirv-cross-glsl",
+			"spirv-cross-hlsl",
+			"spirv-cross-msl",
+			"spirv-cross-reflect",
+			"spirv-cross-util",
+		}

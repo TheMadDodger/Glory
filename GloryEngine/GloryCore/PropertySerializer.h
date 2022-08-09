@@ -3,6 +3,10 @@
 #include "SerializedProperty.h"
 #include "YAML_GLM.h"
 #include "GLORY_YAML.h"
+#include "GloryContext.h"
+#include "Serializer.h"
+
+#define SERIALIZERS Glory::GloryContext::GetSerializers()->m_pRegisteredPropertySerializers
 #define STANDARD_SERIALIZER(x) PropertySerializer::RegisterSerializer<SimpleTemplatedPropertySerializer<x>>()
 
 namespace Glory
@@ -15,7 +19,7 @@ namespace Glory
 		static void RegisterSerializer()
 		{
 			PropertySerializer* pSerializer = new T();
-			m_pRegisteredSerializers.push_back(pSerializer);
+			SERIALIZERS.push_back(pSerializer);
 		}
 
 		//static PropertySerializer* GetSerializer(Object* pObject);
@@ -47,7 +51,6 @@ namespace Glory
 		static void Cleanup();
 
 	private:
-		static std::vector<PropertySerializer*> m_pRegisteredSerializers;
 		size_t m_TypeHash;
 	};
 

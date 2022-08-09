@@ -1,4 +1,10 @@
 #include <imgui.h>
+#include <Game.h>
+#include <Engine.h>
+#include <ImGuizmo.h>
+#include <Serializer.h>
+#include <AssetDatabase.h>
+
 #include "MainEditor.h"
 #include "EditorWindow.h"
 #include "GameWindow.h"
@@ -20,21 +26,16 @@
 #include "SceneTumbnailGenerator.h"
 #include "Editor.h"
 #include "ProfilerWindow.h"
-#include <Game.h>
-#include <Engine.h>
-#include <MaterialEditor.h>
+#include "MaterialEditor.h"
 #include "StandardPropertyDrawers.h"
-#include <MaterialInstanceEditor.h>
-#include <Serializer.h>
+#include "MaterialInstanceEditor.h"
 #include "EditorSceneManager.h"
-#include <AssetDatabase.h>
 #include "AssetReferencePropertyDrawer.h"
 #include "ArrayPropertyDrawer.h"
-#include <ImGuizmo.h>
-#include <Gizmos.h>
+#include "Gizmos.h"
 #include "ObjectMenu.h"
 #include "ObjectMenuCallbacks.h"
-#include <FileDialog.h>
+#include "FileDialog.h"
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 

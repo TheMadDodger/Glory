@@ -25,6 +25,7 @@ namespace Glory
 
 	void Console::Cleanup()
 	{
+		if (m_pInstance == nullptr) return;
 		for (auto pCommand : m_pCommands)
 		{
 			delete pCommand;
@@ -46,6 +47,7 @@ namespace Glory
 
 	void Console::Update()
 	{
+		if (m_pInstance == nullptr) return;
 		if (m_Writing) return;
 		if (m_pInstance->m_CommandQueue.empty()) return;
 
@@ -67,6 +69,7 @@ namespace Glory
 
 	void Console::AddCommandToHistory(const std::string& command)
 	{
+		if (m_pInstance == nullptr) return;
 		++m_CommandHistoryInsertIndex;
 		if (m_CommandHistoryInsertIndex >= MAX_HISTORY_SIZE) m_CommandHistoryInsertIndex = 0;
 		if (m_CurrentCommandHistorySize < MAX_HISTORY_SIZE) ++m_CurrentCommandHistorySize;
@@ -75,6 +78,7 @@ namespace Glory
 
 	void Console::AddLineToConsole(const std::string& line)
 	{
+		if (m_pInstance == nullptr) return;
 		++m_ConsoleInsertIndex;
 		if (m_ConsoleInsertIndex >= MAX_CONSOLE_SIZE) m_ConsoleInsertIndex = 0;
 		if (m_CurrentConsoleSize < MAX_CONSOLE_SIZE) ++m_CurrentConsoleSize;
@@ -88,6 +92,7 @@ namespace Glory
 
 	void Console::QueueCommand(const std::string& command)
 	{
+		if (m_pInstance == nullptr) return;
 		// If m_Reading is true this function is called from another thread, this thread will need to wait untill we are done reading on the main thread!
 		while (m_Reading)
 		{
@@ -134,6 +139,7 @@ namespace Glory
 
 	void Console::ForEachCommandInHistory(std::function<void(const std::string&)> callback)
 	{
+		if (m_pInstance == nullptr) return;
 		if (m_CurrentCommandHistorySize < MAX_HISTORY_SIZE)
 		{
 			for (int i = m_CommandHistoryInsertIndex; i >= 0; --i)

@@ -1,51 +1,44 @@
 #pragma once
-#include "EditorWindow.h"
 #include <vector>
 #include <list>
 #include <string>
 #include <algorithm>
 #include <imgui.h>
 #include <typeinfo>
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
 	class EditorWindow
 	{
 	public:
-		EditorWindow(const std::string& windowName, float windowWidth, float windowHeight);
-		virtual ~EditorWindow();
+		GLORY_EDITOR_API EditorWindow(const std::string& windowName, float windowWidth, float windowHeight);
+		virtual GLORY_EDITOR_API ~EditorWindow();
 
 		template<typename T>
 		static T* GetWindow(bool alwaysOpenNew = false)
 		{
+			const std::type_info& type = typeid(T);
+			EditorWindow* pWindow = nullptr;
 			if (!alwaysOpenNew)
 			{
-				for (size_t i = 0; i < m_pActiveEditorWindows.size(); ++i)
-				{
-					if (m_pActiveEditorWindows[i]->GetType() == typeid(T))
-						return (T*)m_pActiveEditorWindows[i];
-				}
+				pWindow = FindEditorWindow(type);
+				if (pWindow) return (T*)pWindow;
 			}
 
-			auto pWindow = new T();
-			m_pActiveEditorWindows.push_back(pWindow);
-			
-			if (m_IDs.size() > 0)
-			{
-				pWindow->m_WindowID = m_IDs.front();
-				m_IDs.pop_front();
-			}
-			else pWindow->m_WindowID = m_pActiveEditorWindows.size();
-
-			pWindow->OnOpen();
-			return pWindow;
+			pWindow = new T();
+			OpenEditorWindow(pWindow);
+			return (T*)pWindow;
 		}
 
-		static void UpdateWindows();
+		static GLORY_EDITOR_API EditorWindow* FindEditorWindow(const std::type_info& type);
+		static GLORY_EDITOR_API void OpenEditorWindow(EditorWindow* pWindow);
+
+		static GLORY_EDITOR_API void UpdateWindows();
 
 		virtual const std::type_info& GetType() = 0;
 
-		void Close();
+		GLORY_EDITOR_API void Close();
 
 		virtual void OnOpen() {}
 		virtual void OnClose() {}

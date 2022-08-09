@@ -1,0 +1,4 @@
+Name: "ASSIMP Loader"
+Type: ModelLoader
+Editor:
+ Extensions: []

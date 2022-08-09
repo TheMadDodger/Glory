@@ -3,7 +3,6 @@
 #include "GraphicsEnums.h"
 #include <string>
 #include <vector>
-#include <spirv_cross.hpp>
 
 namespace Glory
 {

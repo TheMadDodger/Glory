@@ -6,6 +6,9 @@
 #include "ThreadedVar.h"
 #include <unordered_map>
 
+#define ASSET_DATABASE Glory::GloryContext::GetAssetDatabase()
+#define ASSET_MANAGER Glory::GloryContext::GetAssetManager()
+
 namespace Glory
 {
 	class AssetDatabase
@@ -51,15 +54,17 @@ namespace Glory
 
 	private:
 		friend class AssetManager;
+		friend class GloryContext;
+		friend class AssetCallbacks;
 		AssetDatabase();
 		virtual ~AssetDatabase();
 
 	private:
-		static ThreadedUMap<UUID, AssetLocation> m_AssetLocations;
-		static ThreadedUMap<std::string, UUID> m_PathToUUID;
-		static ThreadedUMap<UUID, ResourceMeta> m_Metas;
-		static ThreadedUMap<size_t, std::vector<UUID>> m_AssetsByType;
-		static AssetCallbacks m_Callbacks;
-		static ThreadedVector<UUID> m_UnsavedAssets;
+		ThreadedUMap<UUID, AssetLocation> m_AssetLocations;
+		ThreadedUMap<std::string, UUID> m_PathToUUID;
+		ThreadedUMap<UUID, ResourceMeta> m_Metas;
+		ThreadedUMap<size_t, std::vector<UUID>> m_AssetsByType;
+		AssetCallbacks m_Callbacks;
+		ThreadedVector<UUID> m_UnsavedAssets;
 	};
 }

@@ -2,8 +2,9 @@
 #include <vector>
 #include <list>
 #include <map>
-#include "EntityComponentData.h"
 #include <functional>
+#include <Glory.h>
+#include "EntityComponentData.h"
 #include "EntitySystems.h"
 
 namespace Glory
@@ -11,14 +12,14 @@ namespace Glory
 	class Registry
 	{
 	public:
-		Registry();
-		virtual ~Registry();
+		GLORY_API Registry();
+		GLORY_API virtual ~Registry();
 
-		EntityID CreateEntity();
-		void DestroyEntity(EntityID entity);
+		GLORY_API EntityID CreateEntity();
+		GLORY_API void DestroyEntity(EntityID entity);
 
 		template<typename T, typename... Args>
-		T& AddComponent(EntityID entity, UUID uuid, Args&&... args)
+		GLORY_API T& AddComponent(EntityID entity, UUID uuid, Args&&... args)
 		{
 			if (HasComponent<T>(entity))
 				throw new std::runtime_error("Entity already has component!");
@@ -46,7 +47,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		bool HasComponent(EntityID entity)
+		GLORY_API bool HasComponent(EntityID entity)
 		{
 			std::unique_lock<std::mutex> lock(m_EntityComponentsLock);
 			return std::find_if(m_ComponentsPerEntity[entity].begin(), m_ComponentsPerEntity[entity].end(),
@@ -54,7 +55,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		T& GetComponent(EntityID entity)
+		GLORY_API T& GetComponent(EntityID entity)
 		{
 			std::unique_lock<std::mutex> lock(m_EntityComponentsLock);
 			auto it = std::find_if(m_ComponentsPerEntity[entity].begin(), m_ComponentsPerEntity[entity].end(),
@@ -71,7 +72,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		void RemoveComponent(EntityID entity)
+		GLORY_API void RemoveComponent(EntityID entity)
 		{
 			std::unique_lock<std::mutex> lock(m_EntityComponentsLock);
 			for (size_t i = 0; i < m_ComponentsPerEntity[entity].size(); i++)
@@ -87,43 +88,43 @@ namespace Glory
 			lock.unlock();
 		}
 
-		void RemoveComponent(EntityID entity, size_t index);
+		GLORY_API void RemoveComponent(EntityID entity, size_t index);
 
-		void Clear(EntityID entity);
+		GLORY_API void Clear(EntityID entity);
 
-		size_t Alive();
+		GLORY_API size_t Alive();
 
-		bool IsValid(EntityID entity);
+		GLORY_API bool IsValid(EntityID entity);
 
-		void ForEach(std::function<void(Registry*, EntityID)> func);
-		void ForEachComponent(EntityID entity, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
+		GLORY_API void ForEach(std::function<void(Registry*, EntityID)> func);
+		GLORY_API void ForEachComponent(EntityID entity, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
 
-		EntityComponentData* GetEntityComponentDataAt(EntityID entity, size_t index);
+		GLORY_API EntityComponentData* GetEntityComponentDataAt(EntityID entity, size_t index);
 
 		template<typename C, typename T>
-		EntitySystem* RegisterSystem()
+		GLORY_API EntitySystem* RegisterSystem()
 		{
 			return m_Systems.Register<C, T>(this);
 		}
 
 		template<typename T>
-		EntitySystem* RegisterSystem()
+		GLORY_API EntitySystem* RegisterSystem()
 		{
 			return m_Systems.Register<T>(this);
 		}
 
 		template<typename T>
-		void ForEach(std::function<void(Registry*, EntityID, EntityComponentData*)> func)
+		GLORY_API void ForEach(std::function<void(Registry*, EntityID, EntityComponentData*)> func)
 		{
 			ForEach(typeid(T), func);
 		}
 
-		void ForEach(const std::type_index& type, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
+		GLORY_API void ForEach(const std::type_index& type, std::function<void(Registry*, EntityID, EntityComponentData*)> func);
 
-		void Update();
-		bool IsUpdating();
-		void Draw();
-		EntitySystems* GetSystems();
+		GLORY_API void Update();
+		GLORY_API bool IsUpdating();
+		GLORY_API void Draw();
+		GLORY_API EntitySystems* GetSystems();
 
 	private:
 		std::vector<EntityID> m_AllEntityIDs;

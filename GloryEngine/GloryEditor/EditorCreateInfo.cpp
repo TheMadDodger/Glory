@@ -2,7 +2,8 @@
 
 namespace Glory
 {
-	EditorCreateInfo::EditorCreateInfo() : ExtensionsCount(0), pExtensions(nullptr)
+	GLORY_EDITOR_API EditorCreateInfo::EditorCreateInfo()
+		: ExtensionsCount(0), pExtensions(nullptr), pWindowImpl(nullptr), pRenderImpl(nullptr)
 	{
 	}
 }

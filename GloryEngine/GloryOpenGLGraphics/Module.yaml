@@ -1,0 +1,6 @@
+Name: "OpenGL Graphics"
+Type: Graphics
+Dependencies: ["glew32"]
+Editor:
+ Backend: GloryEditorOGL
+ Extensions: []

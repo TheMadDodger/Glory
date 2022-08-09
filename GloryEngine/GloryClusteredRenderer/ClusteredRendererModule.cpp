@@ -4,6 +4,7 @@
 #include <GPUResourceManager.h>
 #include <FileLoaderModule.h>
 #include <CameraManager.h>
+#include <GloryContext.h>
 
 namespace Glory
 {
@@ -43,28 +44,35 @@ namespace Glory
 		importSettings.AddNullTerminateAtEnd = true;
 
 		// Cluster generator shader
-		FileData* pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/ClusterShader.shader", importSettings);
+		std::filesystem::path path;;
+		GetResourcePath("Shaders/Compute/ClusterShader.shader", path);
+		FileData* pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
 		m_pClusterShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
 		m_pClusterShaderMaterialData = new MaterialData({ m_pClusterShaderData });
 
 		// Active cluster marker shader
-		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/MarkActiveClusters.shader", importSettings);
+		GetResourcePath("Shaders/Compute/MarkActiveClusters.shader", path);
+		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
 		m_pMarkActiveClustersShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
 		m_pMarkActiveClustersMaterialData = new MaterialData({ m_pMarkActiveClustersShaderData });
 
 		// Compact active clusters shader
-		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/BuildCompactClusterList.shader", importSettings);
+		GetResourcePath("Shaders/Compute/BuildCompactClusterList.shader", path);
+		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
 		m_pCompactClustersShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
 		m_pCompactClustersMaterialData = new MaterialData({ m_pCompactClustersShaderData });
 
 		// Light culling shader
-		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("./Shaders/Compute/ClusterCullLight.shader", importSettings);
+		GetResourcePath("Shaders/Compute/ClusterCullLight.shader", path);
+		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
 		m_pClusterCullLightShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
 		m_pClusterCullLightMaterialData = new MaterialData({ m_pClusterCullLightShaderData });
 
-
-		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer_Vert.shader", importSettings);
-		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load("./Shaders/ScreenRenderer_Frag.shader", importSettings);
+		// Screen shaders
+		GetResourcePath("Shaders/ScreenRenderer_Vert.shader", path);
+		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+		GetResourcePath("Shaders/ScreenRenderer_Frag.shader", path);
+		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 
 		std::vector<ShaderSourceData*> pShaderFiles = { new ShaderSourceData(ShaderType::ST_Vertex, pVert), new ShaderSourceData(ShaderType::ST_Fragment, pFrag) };
 		m_pScreenMaterial = new MaterialData(pShaderFiles);
@@ -254,7 +262,7 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		RenderTexture* pRenderTexture = CameraManager::GetRenderTextureForCamera(camera, m_pEngine);
+		RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(camera, m_pEngine);
 		Texture* pDepthTexture = pRenderTexture->GetTextureAttachment("Depth");
 
 		glm::uvec2 resolution = camera.GetResolution();

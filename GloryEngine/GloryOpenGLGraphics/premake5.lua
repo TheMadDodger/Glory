@@ -1,16 +1,17 @@
 project "GloryOpenGLGraphics"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineoutdir}")
+	targetdir ("%{moduleOutDir}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -27,6 +28,38 @@ project "GloryOpenGLGraphics"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}"
+	}
+
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.GLEW}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"glew32",
+		"GloryCore",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"yaml-cpp",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} %{LibDirs.GLEW}/*.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

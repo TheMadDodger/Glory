@@ -5,12 +5,13 @@
 
 namespace Glory::Editor
 {
-	ImGuizmo::OPERATION Gizmos::m_DefaultOperation = ImGuizmo::TRANSLATE;
-	ImGuizmo::MODE Gizmos::m_DefaultMode = ImGuizmo::LOCAL;
-	std::vector<IGizmo*> Gizmos::m_pGizmos = std::vector<IGizmo*>();
+	std::vector<IGizmo*> Gizmos::m_pGizmos;
 	std::vector<bool> Gizmos::m_ManipulatedGizmos;
 
-	bool Gizmos::DrawGizmo(glm::mat4* transfrom)
+	ImGuizmo::OPERATION Gizmos::m_DefaultOperation = ImGuizmo::TRANSLATE;
+	ImGuizmo::MODE Gizmos::m_DefaultMode = ImGuizmo::LOCAL;
+
+	GLORY_EDITOR_API bool Gizmos::DrawGizmo(glm::mat4* transfrom)
 	{
 		size_t index = m_pGizmos.size();
 		m_pGizmos.push_back(new DefaultGizmo(transfrom));
@@ -35,22 +36,22 @@ namespace Glory::Editor
 		m_pGizmos.clear();
 	}
 
-	Gizmos::Gizmos() {}
-	Gizmos::~Gizmos() {}
+	GLORY_EDITOR_API Gizmos::Gizmos() {}
+	GLORY_EDITOR_API Gizmos::~Gizmos() {}
 
-	IGizmo::IGizmo() {}
-	IGizmo::~IGizmo() {}
+	GLORY_EDITOR_API IGizmo::IGizmo() {}
+	GLORY_EDITOR_API IGizmo::~IGizmo() {}
 
-	DefaultGizmo::DefaultGizmo(glm::mat4* pTransform) : m_pTransform(pTransform)
+	GLORY_EDITOR_API DefaultGizmo::DefaultGizmo(glm::mat4* pTransform) : m_pTransform(pTransform)
 	{
 	}
 
-	DefaultGizmo::~DefaultGizmo()
+	GLORY_EDITOR_API DefaultGizmo::~DefaultGizmo()
 	{
 		m_pTransform = nullptr;
 	}
 
-	bool DefaultGizmo::OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection)
+	GLORY_EDITOR_API bool DefaultGizmo::OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection)
 	{
 		return ImGuizmo::Manipulate((const float*)&cameraView, (const float*)&cameraProjection, Gizmos::m_DefaultOperation, Gizmos::m_DefaultMode, (float*)m_pTransform, NULL, NULL);//, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 	}

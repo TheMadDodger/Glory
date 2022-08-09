@@ -2,9 +2,9 @@
 
 namespace Glory::Editor
 {
-	EditorRenderImpl::EditorRenderImpl() {}
+	GLORY_EDITOR_API EditorRenderImpl::EditorRenderImpl() {}
 
-	EditorRenderImpl::~EditorRenderImpl() {}
+	GLORY_EDITOR_API EditorRenderImpl::~EditorRenderImpl() {}
 
 	void EditorRenderImpl::Initialize()
 	{

@@ -1,19 +1,18 @@
 #pragma once
 #include <ScenesModule.h>
+#include <MaterialData.h>
+#include <Glory.h>
 #include "EntityScene.h"
 #include "Entity.h"
 #include "EntitySceneObject.h"
-#include <MaterialData.h>
 
 namespace Glory
 {
 	class EntitySceneScenesModule : public ScenesModule
 	{
 	public:
-		EntitySceneScenesModule();
-		virtual ~EntitySceneScenesModule();
-
-		MaterialData* m_pMaterialData;
+		GLORY_API EntitySceneScenesModule();
+		GLORY_API virtual ~EntitySceneScenesModule();
 
 	private:
 		virtual void Initialize() override;

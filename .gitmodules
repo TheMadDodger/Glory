@@ -16,4 +16,4 @@
 	url = https://github.com/CedricGuillemet/ImGuizmo
 [submodule "GloryEngine/submodules/ImFileDialog"]
 	path = GloryEngine/submodules/ImFileDialog
-	url = https://github.com/dfranx/ImFileDialog
+	url = https://github.com/TheMadDodger/ImFileDialog

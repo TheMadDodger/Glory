@@ -1,16 +1,17 @@
 project "GloryASSIMPModelLoader"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineoutdir}")
+	targetdir ("%{moduleOutDir}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -24,6 +25,32 @@ project "GloryASSIMPModelLoader"
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{vulkan_sdk}/third-party/include"
+	}
+
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.assimp}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"GloryCore",
+		"assimp",
+		"yaml-cpp",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

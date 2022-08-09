@@ -6,6 +6,7 @@ namespace Glory
     class SDLWindowModule : public WindowModule
     {
 	public:
+		SDLWindowModule();
 		SDLWindowModule(const WindowCreateInfo& mainWindowCreateInfo);
 		virtual ~SDLWindowModule();
 

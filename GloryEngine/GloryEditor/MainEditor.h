@@ -2,7 +2,7 @@
 #include "ProjectPopup.h"
 #include "AssetPickerPopup.h"
 #include "EditorSettings.h"
-#include <EditorAssetLoader.h>
+#include "EditorAssetLoader.h"
 
 namespace Glory::Editor
 {
