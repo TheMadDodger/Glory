@@ -55,10 +55,9 @@ Install the [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) before running the 
 
 Edit the `vulkan_sdk` value in the `premake5.lua` file in the `GloryEngine` folder to point to where you installed the vulkan SDK.
 Run the `generateprojects.bat` file under `GloryEngine/scripts` to run the premake scripts and generate the visual studio project files.
-Open `GloryEngine.sln` and build the whole solution, you can run the temporary `GloryMain` project to open the editor.
-
-## In-Development code
-If you want the most up-to-date development code for the engine, head on to the [dynamic-modules](https://github.com/TheMadDodger/Glory/tree/dynamic_modules) branch for dynamic module loading features, or to the [scripting/csharp](https://github.com/TheMadDodger/Glory/tree/scripting/csharp) branch for the scripting implementation. They should get merged relatively soon. It should be noted that these branches will likely not build for you.
+Open `GloryEngine.sln` and build the whole solution.
+In order to run the editor through visual studio, you must copy `EditorAssets` and `Modules` folders inside the build folder to GloryEngine/Glorious.
+Run the editor by launching Glorious.
 
 ## License
 
