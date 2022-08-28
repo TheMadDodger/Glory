@@ -4,10 +4,11 @@
 #include "imgui_impl_opengl3.h"
 #include "ImFileDialog.h"
 #include "ProjectManager.h"
+#include "ProjectLock.h"
 
 namespace Glory::EditorLauncher
 {
-	LauncherHub::LauncherHub(ImGuiImpl* pHubWindow) : m_pImGuiImpl(pHubWindow), m_OpenErrorPopup(false), m_OpenNewProjectPopup(false), m_ProjectFolder("")
+	LauncherHub::LauncherHub(ImGuiImpl* pHubWindow) : m_pImGuiImpl(pHubWindow), m_OpenErrorPopup(false), m_OpenNewProjectPopup(false), m_OpenProjectOpenError(false), m_ProjectFolder("")
 	{
 	}
 
@@ -138,7 +139,13 @@ namespace Glory::EditorLauncher
                     }
                     else
                     {
-                        ProjectManager::OpenProject(row_n);
+                        ProjectLock lock(item->Path);
+                        if (!lock.CanLock())
+                        {
+                            // Open a popup
+                            m_OpenProjectOpenError = true;
+                        }
+                        else ProjectManager::OpenProject(row_n);
                     }
                 }
 
@@ -174,6 +181,26 @@ namespace Glory::EditorLauncher
             ImGui::EndPopup();
         }
         else DrawFileDialog();
+
+        if (m_OpenProjectOpenError) ImGui::OpenPopup("Error Opening Project");
+        HubWindow* pHubWindow = m_pImGuiImpl->GetHubWindow();
+
+        int w, h;
+        SDL_GetWindowSize(pHubWindow->GetSDLWindow(), &w, &h);
+        ImGui::SetNextWindowPos(ImVec2(w / 2.0f, h / 2.0f), ImGuiCond_Always, ImVec2(.5f, .5f));
+        if (ImGui::BeginPopupModal("Error Opening Project", &m_OpenProjectOpenError, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::PushTextWrapPos(300.0f);
+            ImGui::TextWrapped("Could not open the project because it is already opened by another Editor!");
+            ImGui::PopTextWrapPos();
+            float width = ImGui::GetContentRegionAvail().x;
+            if (ImGui::Button("OK", ImVec2(width, 0.0f)))
+            {
+                ImGui::CloseCurrentPopup();
+                m_OpenProjectOpenError = false;
+            }
+            ImGui::EndPopup();
+        }
     }
 
     void LauncherHub::DrawFileDialog()

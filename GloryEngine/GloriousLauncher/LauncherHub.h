@@ -31,6 +31,7 @@ namespace Glory::EditorLauncher
 
 		bool m_OpenErrorPopup;
 		bool m_OpenNewProjectPopup;
+		bool m_OpenProjectOpenError;
 
 		char m_PathText[100];
 		char m_ProjectNameText[100] = "New Project";

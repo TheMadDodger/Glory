@@ -13,6 +13,11 @@ namespace Glory::EditorLauncher
         long long timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
         pProject->LastEdit = timestamp;
 
+        std::stringstream stream;
+        stream << "cd Editor && start Glorious.exe " << "-projectPath=" << "\"" << pProject->Path << "\"";
+
+        system(stream.str().c_str());
+
         Save();
     }
 

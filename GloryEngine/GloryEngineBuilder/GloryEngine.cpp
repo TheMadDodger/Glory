@@ -12,6 +12,11 @@ namespace Glory
 
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath) : m_CFGPath(cfgPath)
 	{
+		Console::Initialize();
+
+#ifdef _DEBUG
+		Console::RegisterConsole<WindowsDebugConsole>();
+#endif
 	}
 
 	EngineLoader::~EngineLoader()
@@ -20,11 +25,11 @@ namespace Glory
 
 	Engine* EngineLoader::LoadEngine(const Glory::WindowCreateInfo& defaultWindow)
 	{
-		Console::Initialize();
-
-#ifdef _DEBUG
-		Console::RegisterConsole<WindowsDebugConsole>();
-#endif
+		if (!std::filesystem::exists(m_CFGPath))
+		{
+			Debug::LogError("Missing Engine.yaml file in project directory!");
+			return nullptr;
+		}
 
 		GloryContext::CreateContext();
 

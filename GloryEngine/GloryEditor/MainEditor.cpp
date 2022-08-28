@@ -71,7 +71,9 @@ namespace Glory::Editor
 		SetDarkThemeColors();
 
 		m_pProjectPopup->Initialize();
-		m_pProjectPopup->Open();
+
+		//if (ProjectSpace::GetOpenProject() == nullptr)
+		//	m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();

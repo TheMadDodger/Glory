@@ -3,8 +3,12 @@
 
 #include "pch.h"
 #include "EditorLoader.h"
+#include "CommandLine.h"
+#include "ProjectLock.h"
+#include <Console.h>
+#include <ProjectSpace.h>
 
-int main()
+int main(int argc, char* argv[])
 {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
@@ -23,8 +27,32 @@ int main()
         //createInfo.ScriptingModulesCount = static_cast<uint32_t>(scriptingModules.size());
         //createInfo.pScriptingModules = scriptingModules.data();
 
-        Glory::EngineLoader engineLoader("./Engine.yaml");
+        Glory::CommandLine commandLine(argc, argv);
+
+        std::string projectPath;
+        if (!commandLine.GetValue("projectPath", projectPath))
+        {
+            Glory::Debug::LogError("Missing project path in launch arguments!");
+            return -1;
+        }
+
+        if (!std::filesystem::exists(projectPath))
+        {
+            Glory::Debug::LogError("Invalid project path!");
+            return -1;
+        }
+
+        Glory::Editor::ProjectLock lock(projectPath);
+        if (!lock.Lock()) return -1;
+
+        std::filesystem::path engineConfPath = projectPath;
+        engineConfPath = engineConfPath.parent_path();
+        engineConfPath.append("Engine.yaml");
+
+        Glory::EngineLoader engineLoader(engineConfPath);
         Glory::Engine* pEngine = engineLoader.LoadEngine(windowCreateInfo);
+        
+        if (pEngine == nullptr) return -1;
 
         Glory::GameSettings gameSettings;
         gameSettings.pEngine = pEngine;
@@ -32,15 +60,17 @@ int main()
         //gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
         pGame.Initialize();
-
+        
         Glory::EditorLoader editorLoader;
         Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(pGame, engineLoader);
-
+        
         Glory::Editor::EditorApplication application(editorCreateInfo);
         application.Initialize(pGame);
 
-        application.Run(pGame);
+        Glory::Editor::ProjectSpace::OpenProject(projectPath);
 
+        application.Run(pGame);
+        
         application.Destroy();
         pGame.Destroy();
         engineLoader.Unload();
