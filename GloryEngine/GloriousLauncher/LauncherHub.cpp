@@ -5,10 +5,16 @@
 #include "ImFileDialog.h"
 #include "ProjectManager.h"
 #include "ProjectLock.h"
+#include "EditorManager.h"
 
 namespace Glory::EditorLauncher
 {
-	LauncherHub::LauncherHub(ImGuiImpl* pHubWindow) : m_pImGuiImpl(pHubWindow), m_OpenErrorPopup(false), m_OpenNewProjectPopup(false), m_OpenProjectOpenError(false), m_ProjectFolder("")
+    std::map<HubMenu, const char*> MENUTOSTRING = {
+        { HubMenu::ProjectList, "Projects" },
+        { HubMenu::EditorList, "Installs" },
+    };
+
+	LauncherHub::LauncherHub(ImGuiImpl* pHubWindow) : m_pImGuiImpl(pHubWindow), m_OpenErrorPopup(false), m_OpenNewProjectPopup(false), m_OpenProjectOpenError(false), m_OpenMissingEditorError(false), m_ProjectFolder("")
 	{
 	}
 
@@ -18,6 +24,11 @@ namespace Glory::EditorLauncher
 
 	void LauncherHub::Run()
 	{
+        ImGuiIO& io = ImGui::GetIO();
+        m_pDefaultFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Regular.ttf", 18.0f);
+        m_pBoldLargeFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Bold.ttf", 32.0f);
+        io.FontDefault = m_pDefaultFont;
+
         InitializeFileDialog();
 
         ProjectManager::Load();
@@ -69,138 +80,13 @@ namespace Glory::EditorLauncher
         ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
         ImGui::Begin("Hub Window", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
 
-        ImVec2 size = ImGui::GetWindowSize();
-        //m_Width = size.x;
-        //m_Height = size.y;
-
-        float regionWidth = ImGui::GetContentRegionAvail().x;
-
-        float buttonWidth = 150.0f;
-
-        ImGui::Text("Projects");
-        ImGui::SameLine(regionWidth - buttonWidth * 2.0f);
-        if (ImGui::Button("ADD", ImVec2(buttonWidth, 0.0f)))
-        {
-            m_FileBrowserCallback = [&](const std::string& path)
-            {
-                if (!std::filesystem::exists(path))
-                {
-                    return;
-                }
-                ProjectManager::AddProject(path);
-            };
-            ifd::FileDialog::Instance().Open(FILEDIALOG_ID, "Open a project", "Project file (*.gproj){.gproj},.*", false);//, m_DefaultProjectsFolder);
-        }
-        ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
-        if (ImGui::Button("NEW", ImVec2(buttonWidth, 0.0f)))
-        {
-            m_BrowsingPath = m_DefaultProjectsFolder;
-            strcpy(m_PathText, m_BrowsingPath.data());
-            m_OpenNewProjectPopup = true;
-        }
-
-        static ImGuiTableFlags flags =
-            //ImGuiTableFlags_Resizable
-            ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
-            | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
-            | ImGuiTableFlags_SizingFixedFit;
-
-        if (ImGui::BeginTable("Project Hub", 2, flags, ImVec2(0, 0), 0.0f))
-        {
-            ImGui::TableSetupColumn("Project Name", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 0);
-            ImGui::TableSetupColumn("Modified", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
-            //ImGui::TableSetupColumn("Project Path", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
-
-            ImGui::TableHeadersRow();
-
-            //ImGui::PushButtonRepeat(true);
-
-            for (size_t row_n = 0; row_n < ProjectManager::ProjectCount(); row_n++)
-            {
-                const Project* const item = ProjectManager::GetProject(row_n);
-
-                ImGui::PushID(row_n);
-                ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
-
-                ImGui::TableSetColumnIndex(0);
-                ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-
-                std::string projectNameString(item->Name);
-                projectNameString += '\n';
-                projectNameString += "------------------------\n";
-                projectNameString += item->Path;
-
-                if (ImGui::Selectable(projectNameString.data(), false, selectable_flags, ImVec2(0, 0.0f)))
-                {
-                    if (!std::filesystem::exists(item->Path))
-                    {
-                        m_RemovingIndex = row_n;
-                        m_OpenErrorPopup = true;
-                    }
-                    else
-                    {
-                        ProjectLock lock(item->Path);
-                        if (!lock.CanLock())
-                        {
-                            // Open a popup
-                            m_OpenProjectOpenError = true;
-                        }
-                        else ProjectManager::OpenProject(row_n);
-                    }
-                }
-
-                if (ImGui::TableSetColumnIndex(1))
-                {
-                    long long timestamp = item->LastEdit;
-                    std::string lastEdit = FormatTimestamp(timestamp);
-                    ImGui::TextUnformatted(lastEdit.c_str());
-                }
-
-                ImGui::PopID();
-            }
-            ImGui::EndTable();
-        }
+        DrawLeftPanel();
+        DrawRightPanel();
 
         ImGui::End();
 
 
-        if (m_OpenErrorPopup) ImGui::OpenPopup("Project Not Found");
-        ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
-        if (ImGui::BeginPopupModal("Project Not Found", &m_OpenErrorPopup, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            OnProjectNotFoundGui();
-            ImGui::EndPopup();
-        }
-
-        if (m_OpenNewProjectPopup) ImGui::OpenPopup("New Project");
-
-        ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
-        if (ImGui::BeginPopupModal("New Project", &m_OpenNewProjectPopup, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            OnNewProjectPopupGui();
-            ImGui::EndPopup();
-        }
-        else DrawFileDialog();
-
-        if (m_OpenProjectOpenError) ImGui::OpenPopup("Error Opening Project");
-        HubWindow* pHubWindow = m_pImGuiImpl->GetHubWindow();
-
-        int w, h;
-        SDL_GetWindowSize(pHubWindow->GetSDLWindow(), &w, &h);
-        ImGui::SetNextWindowPos(ImVec2(w / 2.0f, h / 2.0f), ImGuiCond_Always, ImVec2(.5f, .5f));
-        if (ImGui::BeginPopupModal("Error Opening Project", &m_OpenProjectOpenError, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::PushTextWrapPos(300.0f);
-            ImGui::TextWrapped("Could not open the project because it is already opened by another Editor!");
-            ImGui::PopTextWrapPos();
-            float width = ImGui::GetContentRegionAvail().x;
-            if (ImGui::Button("OK", ImVec2(width, 0.0f)))
-            {
-                ImGui::CloseCurrentPopup();
-                m_OpenProjectOpenError = false;
-            }
-            ImGui::EndPopup();
-        }
+        DrawPopups();
     }
 
     void LauncherHub::DrawFileDialog()
@@ -363,5 +249,339 @@ namespace Glory::EditorLauncher
         projectPath.append(m_ProjectFolder == "" ? name : m_ProjectFolder);
         projectPath.append(name).replace_extension(".gproj");
         return projectPath;
+    }
+
+    void LauncherHub::DrawLeftPanel()
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::PushFont(m_pBoldLargeFont);
+        ImGui::BeginChild("LeftPanel", ImVec2(250.0f, 0.0f), true);
+        ImGui::BeginChild("LeftPanelHeader", ImVec2(0.0f, 50.0f), false);
+
+        ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();
+        float size = m_pBoldLargeFont->FontSize;
+        float cursorPosY = ImGui::GetCursorPosY();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - (size / 2.0f) + (contentRegionAvail.y / 2.0f));
+        ImGui::TextUnformatted("Glory");
+        ImGui::SetCursorPosY(cursorPosY);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + contentRegionAvail.x - contentRegionAvail.y);
+
+        if (ImGui::Button("S", ImVec2(contentRegionAvail.y, contentRegionAvail.y)))
+        {
+
+        }
+        ImGui::EndChild();
+        ImGui::BeginChild("LeftPanelBody", ImVec2(0.0f, 0.0f), false);
+
+        for (size_t i = 0; i < HubMenu::MAX; i++)
+        {
+            HubMenu menu = (HubMenu)i;
+            bool selected = m_CurrentMenu == menu;
+            ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_SelectableTextAlign, ImVec2(0.1f, 0.5f));
+            if (ImGui::Selectable(MENUTOSTRING[menu], selected, 0, ImVec2(0.0f, 50.0f)))
+            {
+                m_CurrentMenu = menu;
+            }
+            ImGui::PopStyleVar();
+        }
+        ImGui::PopFont();
+
+        ImGui::EndChild();
+        ImGui::EndChild();
+    }
+
+    void LauncherHub::DrawRightPanel()
+    {
+        ImGui::SameLine();
+        ImGui::BeginChild("RightPanel", ImVec2(), true);
+
+        switch (m_CurrentMenu)
+        {
+        case Glory::EditorLauncher::ProjectList:
+            DrawProjectList();
+            break;
+        case Glory::EditorLauncher::EditorList:
+            DrawInstalledEditorsList();
+            break;
+        case Glory::EditorLauncher::MAX:
+            break;
+        default:
+            break;
+        }
+        ImGui::EndChild();
+    }
+
+    void LauncherHub::DrawProjectList()
+    {
+        float regionWidth = ImGui::GetContentRegionAvail().x;
+
+        float buttonWidth = 150.0f;
+
+        ImGui::Text("Projects");
+        ImGui::SameLine(regionWidth - buttonWidth * 2.0f);
+        if (ImGui::Button("ADD", ImVec2(buttonWidth, 0.0f)))
+        {
+            m_FileBrowserCallback = [&](const std::string& path)
+            {
+                if (!std::filesystem::exists(path))
+                {
+                    return;
+                }
+                ProjectManager::AddProject(path);
+            };
+            ifd::FileDialog::Instance().Open(FILEDIALOG_ID, "Open a project", "Project file (*.gproj){.gproj},.*", false);//, m_DefaultProjectsFolder);
+        }
+        ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
+        if (ImGui::Button("NEW", ImVec2(buttonWidth, 0.0f)))
+        {
+            m_BrowsingPath = m_DefaultProjectsFolder;
+            strcpy(m_PathText, m_BrowsingPath.data());
+            m_OpenNewProjectPopup = true;
+        }
+
+        static ImGuiTableFlags flags =
+            //ImGuiTableFlags_Resizable
+            ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
+            | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
+            | ImGuiTableFlags_SizingFixedFit;
+
+        if (ImGui::BeginTable("Project Hub", 3, flags, ImVec2(0, 0), 0.0f))
+        {
+            ImGui::TableSetupColumn("Project Name", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 0);
+            ImGui::TableSetupColumn("Modified", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
+            ImGui::TableSetupColumn("Editor Version", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 200.0f, 2);
+            //ImGui::TableSetupColumn("Project Path", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
+
+            ImGui::TableHeadersRow();
+
+            //ImGui::PushButtonRepeat(true);
+
+            for (size_t row_n = 0; row_n < ProjectManager::ProjectCount(); row_n++)
+            {
+                const Project* item = ProjectManager::GetProject(row_n);
+
+                bool editorInstalled = EditorManager::IsInstalled(item->SelectedVersion);
+
+                ImGui::PushID(row_n);
+                ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
+
+                ImGui::TableSetColumnIndex(0);
+                ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+
+                std::string projectNameString(item->Name);
+                projectNameString += '\n';
+                projectNameString += "------------------------\n";
+                projectNameString += item->Path;
+
+                if (ImGui::Selectable(projectNameString.data(), false, selectable_flags, ImVec2(0, 0.0f)))
+                {
+                    if (!std::filesystem::exists(item->Path))
+                    {
+                        m_RemovingIndex = row_n;
+                        m_OpenErrorPopup = true;
+                    }
+                    else
+                    {
+                        if (!editorInstalled)
+                        {
+                            m_OpenMissingEditorError = true;
+                        }
+                        else
+                        {
+                            ProjectLock lock(item->Path);
+                            if (!lock.CanLock())
+                            {
+                                // Open a popup
+                                m_OpenProjectOpenError = true;
+                            }
+                            else ProjectManager::OpenProject(row_n);
+                        }
+                    }
+                }
+
+                if (ImGui::TableSetColumnIndex(1))
+                {
+                    long long timestamp = item->LastEdit;
+                    std::string lastEdit = FormatTimestamp(timestamp);
+                    ImGui::TextUnformatted(lastEdit.c_str());
+                }
+
+                if (ImGui::TableSetColumnIndex(2))
+                {
+                    if (ImGui::BeginCombo("##CurrentVersion", item->SelectedVersion.GetVersionString().c_str()))
+                    {
+                        for (size_t i = 0; i < EditorManager::EditorCount(); i++)
+                        {
+                            const EditorInfo& editorInfo = EditorManager::GetEditorInfo(i);
+                            bool selected = editorInfo.Version.HardCompare(item->SelectedVersion) == 0;
+                            if (ImGui::Selectable(editorInfo.Version.GetVersionString().c_str(), selected))
+                            {
+                                item->SelectedVersion = editorInfo.Version;
+                            }
+                        }
+                        if (!EditorManager::IsInstalled(item->Version))
+                        {
+                            bool selected = item->Version.HardCompare(item->SelectedVersion) == 0;
+                            std::string missingEditor = item->Version.GetVersionString() + " !";
+                            if (ImGui::Selectable(missingEditor.c_str(), selected))
+                            {
+                                item->SelectedVersion = item->Version;
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
+
+                    if (!editorInstalled)
+                    {
+                        ImGui::SameLine();
+                        ImGui::TextUnformatted("!");
+                    }
+                }
+
+                ImGui::PopID();
+            }
+            ImGui::EndTable();
+        }
+    }
+
+    void LauncherHub::DrawInstalledEditorsList()
+    {
+        float regionWidth = ImGui::GetContentRegionAvail().x;
+
+        float buttonWidth = 150.0f;
+
+        ImGui::Text("Installs");
+        ImGui::SameLine(regionWidth - buttonWidth * 2.0f);
+        if (ImGui::Button("Locate", ImVec2(buttonWidth, 0.0f)))
+        {
+            m_FileBrowserCallback = [&](const std::string& path)
+            {
+                if (!std::filesystem::exists(path))
+                {
+                    return;
+                }
+            };
+            ifd::FileDialog::Instance().Open(FILEDIALOG_ID, "Open GloryEditor.dll", "GloryEditor (GloryEditor.dll){GloryEditor.gproj}", false);//, m_DefaultProjectsFolder);
+        }
+        ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
+        if (ImGui::Button("Install Editor", ImVec2(buttonWidth, 0.0f)))
+        {
+            
+        }
+
+        static ImGuiTableFlags flags =
+            //ImGuiTableFlags_Resizable
+            ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
+            | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
+            | ImGuiTableFlags_SizingFixedFit;
+
+        if (ImGui::BeginTable("Installed Editors", 1, flags, ImVec2(0, 0), 0.0f))
+        {
+            //ImGui::TableSetupColumn("Editor", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 0);
+            //ImGui::TableSetupColumn("Settings", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
+            //ImGui::TableSetupColumn("Project Path", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
+
+            //ImGui::TableHeadersRow();
+
+            //ImGui::PushButtonRepeat(true);
+
+            for (size_t row_n = 0; row_n < EditorManager::EditorCount(); row_n++)
+            {
+                const EditorInfo& editorInfo = EditorManager::GetEditorInfo(row_n);
+
+                ImGui::PushID(row_n);
+                ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
+
+                ImGui::TableSetColumnIndex(0);
+                ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+
+                std::string editorString("Version ");
+                editorString += editorInfo.Version.GetVersionString();
+                editorString += '\n';
+                editorString += "-----------------------------------------------------------------\n";
+                editorString += std::filesystem::absolute(editorInfo.RootPath).string();
+
+                if (ImGui::Selectable(editorString.data(), false, selectable_flags, ImVec2(0, 0.0f)))
+                {
+                    
+                }
+
+                //if (ImGui::TableSetColumnIndex(1))
+                //{
+                //    if (ImGui::Button("S"))
+                //    {
+                //
+                //    }
+                //}
+
+                ImGui::PopID();
+            }
+            ImGui::EndTable();
+        }
+
+
+        for (size_t i = 0; i < EditorManager::EditorCount(); i++)
+        {
+            const EditorInfo& editorInfo = EditorManager::GetEditorInfo(i);
+            
+        }
+    }
+
+    void LauncherHub::DrawPopups()
+    {
+        if (m_OpenErrorPopup) ImGui::OpenPopup("Project Not Found");
+        ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
+        if (ImGui::BeginPopupModal("Project Not Found", &m_OpenErrorPopup, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            OnProjectNotFoundGui();
+            ImGui::EndPopup();
+        }
+
+        if (m_OpenNewProjectPopup) ImGui::OpenPopup("New Project");
+
+        ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
+        if (ImGui::BeginPopupModal("New Project", &m_OpenNewProjectPopup, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            OnNewProjectPopupGui();
+            ImGui::EndPopup();
+        }
+        else DrawFileDialog();
+
+        if (m_OpenProjectOpenError) ImGui::OpenPopup("Error Opening Project");
+        HubWindow* pHubWindow = m_pImGuiImpl->GetHubWindow();
+
+        int w, h;
+        SDL_GetWindowSize(pHubWindow->GetSDLWindow(), &w, &h);
+        ImGui::SetNextWindowPos(ImVec2(w / 2.0f, h / 2.0f), ImGuiCond_Always, ImVec2(.5f, .5f));
+        if (ImGui::BeginPopupModal("Error Opening Project", &m_OpenProjectOpenError, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::PushTextWrapPos(300.0f);
+            ImGui::TextWrapped("Could not open the project because it is already opened by another Editor!");
+            ImGui::PopTextWrapPos();
+            float width = ImGui::GetContentRegionAvail().x;
+            if (ImGui::Button("OK", ImVec2(width, 0.0f)))
+            {
+                ImGui::CloseCurrentPopup();
+                m_OpenProjectOpenError = false;
+            }
+            ImGui::EndPopup();
+        }
+        
+        if (m_OpenMissingEditorError) ImGui::OpenPopup("Missing Editor");
+        SDL_GetWindowSize(pHubWindow->GetSDLWindow(), &w, &h);
+        ImGui::SetNextWindowPos(ImVec2(w / 2.0f, h / 2.0f), ImGuiCond_Always, ImVec2(.5f, .5f));
+        if (ImGui::BeginPopupModal("Missing Editor", &m_OpenMissingEditorError, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::PushTextWrapPos(300.0f);
+            ImGui::TextWrapped("Could not open the project because you do not have the correct editor installed!\nSelect another editor from the drop down or install the correct editor.");
+            ImGui::PopTextWrapPos();
+            float width = ImGui::GetContentRegionAvail().x;
+            if (ImGui::Button("OK", ImVec2(width, 0.0f)))
+            {
+                ImGui::CloseCurrentPopup();
+                m_OpenMissingEditorError = false;
+            }
+            ImGui::EndPopup();
+        }
     }
 }

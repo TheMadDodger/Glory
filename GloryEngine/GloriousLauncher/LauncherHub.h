@@ -3,6 +3,14 @@
 
 namespace Glory::EditorLauncher
 {
+	enum HubMenu : int
+	{
+		ProjectList,
+		EditorList,
+
+		MAX,
+	};
+
 	class LauncherHub
 	{
 	public:
@@ -24,6 +32,12 @@ namespace Glory::EditorLauncher
 		bool ProjectExists(const std::string& path, const std::string& name);
 		std::filesystem::path GetProjectPath(const std::string& path, const std::string& name);
 
+		void DrawLeftPanel();
+		void DrawRightPanel();
+		void DrawProjectList();
+		void DrawInstalledEditorsList();
+		void DrawPopups();
+
 	private:
 		ImGuiImpl* m_pImGuiImpl;
 
@@ -32,6 +46,7 @@ namespace Glory::EditorLauncher
 		bool m_OpenErrorPopup;
 		bool m_OpenNewProjectPopup;
 		bool m_OpenProjectOpenError;
+		bool m_OpenMissingEditorError;
 
 		char m_PathText[100];
 		char m_ProjectNameText[100] = "New Project";
@@ -43,5 +58,11 @@ namespace Glory::EditorLauncher
 		const char* FILEDIALOG_ID = "FileDialog";
 
 		std::function<void(const std::string&)> m_FileBrowserCallback;
+
+		HubMenu m_CurrentMenu = HubMenu::ProjectList;
+
+
+		ImFont* m_pDefaultFont;
+		ImFont* m_pBoldLargeFont;
 	};
 }

@@ -1,20 +1,32 @@
 #include "pch.h"
 #include "ProjectManager.h"
+#include "EditorManager.h"
 
 namespace Glory::EditorLauncher
 {
 	std::vector<Project> ProjectManager::m_Projects;
 
+    const Glory::VersionValue DEFAULT_VERSION[] = {
+        {"Major", "0"},
+        {"Minor", "0"},
+        {"Build", "0"},
+    };
+
     void ProjectManager::OpenProject(size_t index)
     {
         Project* pProject = &m_Projects[index];
+        const std::filesystem::path editorPath = EditorManager::GetEditorLocation(pProject->SelectedVersion);
+        if (!std::filesystem::exists(editorPath)) return;
 
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         long long timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
         pProject->LastEdit = timestamp;
+        pProject->Version.FromString(pProject->SelectedVersion.GetVersionString());
+
+        std::string editorPathString = std::filesystem::absolute(editorPath).string();
 
         std::stringstream stream;
-        stream << "cd Editor && start Glorious.exe " << "-projectPath=" << "\"" << pProject->Path << "\"";
+        stream << "cd " << editorPathString << " && start Glorious.exe " << "-projectPath=" << "\"" << pProject->Path << "\"";
 
         system(stream.str().c_str());
 
@@ -55,7 +67,7 @@ namespace Glory::EditorLauncher
         return m_Projects.size();
     }
 
-    const Project* const ProjectManager::GetProject(size_t index)
+    const Project* ProjectManager::GetProject(size_t index)
     {
         return &m_Projects[index];
     }
@@ -72,6 +84,20 @@ namespace Glory::EditorLauncher
             Project project;
             project.Name = element["ProjectName"].as<std::string>();
             project.Path = element["ProjectPath"].as<std::string>();
+
+            std::filesystem::path projectVersionPath = project.Path;
+            projectVersionPath = projectVersionPath.parent_path();
+            projectVersionPath.append("ProjectVersion.txt");
+            std::ifstream ifstream(projectVersionPath);
+            if (ifstream.is_open())
+            {
+                std::string versionString;
+                std::getline(ifstream, versionString);
+                project.Version = Version(DEFAULT_VERSION, 3);
+                project.Version.FromString(versionString);
+                project.SelectedVersion = project.Version;
+            }
+
             if (element["LastEdit"].IsDefined()) project.LastEdit = element["LastEdit"].as<long long>();
             else
             {
@@ -107,7 +133,7 @@ namespace Glory::EditorLauncher
         outStream << out.c_str();
         outStream.close();
 
-        Load();
+        //Load();
 	}
 
 	ProjectManager::ProjectManager()

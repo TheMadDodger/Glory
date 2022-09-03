@@ -22,6 +22,7 @@ project "GloriousLauncher"
 
 	includedirs
 	{
+		"%{GloryIncludeDir.core}",
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImFileDialog}",
@@ -31,6 +32,8 @@ project "GloriousLauncher"
 
 	libdirs
 	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
@@ -39,6 +42,7 @@ project "GloriousLauncher"
 
 	links
 	{
+		"GloryCore",
 		"ImGui",
 		"ImFileDialog",
 		"yaml-cpp",

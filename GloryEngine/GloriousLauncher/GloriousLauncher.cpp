@@ -2,12 +2,15 @@
 #include "HubWindow.h"
 #include "ImGuiImpl.h"
 #include "LauncherHub.h"
+#include "EditorManager.h"
 
 int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     {
+        Glory::EditorLauncher::EditorManager::GetInstalledEditors();
+
         Glory::EditorLauncher::HubWindow window("Glorious Hub");
         window.Initialize();
         

@@ -6,6 +6,7 @@
 namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
+	const Glory::Version EditorApplication::Version(VERSION_DATA, 3);
 
 	GLORY_EDITOR_API EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
 		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl), m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr)

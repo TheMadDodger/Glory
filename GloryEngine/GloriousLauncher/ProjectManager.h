@@ -1,4 +1,5 @@
 #pragma once
+#include <Versioning.h>
 
 namespace Glory::EditorLauncher
 {
@@ -6,6 +7,8 @@ namespace Glory::EditorLauncher
 	{
 		std::string Name;
 		std::string Path;
+		Glory::Version Version;
+		mutable Glory::Version SelectedVersion;
 		long long LastEdit;
 	};
 
@@ -24,7 +27,7 @@ namespace Glory::EditorLauncher
 		static void AddProject(const std::string& path);
 
 		static size_t ProjectCount();
-		static const Project* const GetProject(size_t index);
+		static const Project* GetProject(size_t index);
 
 		static void Load();
 		static void Save();
