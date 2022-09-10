@@ -148,5 +148,6 @@ namespace Glory::Editor
 		std::ofstream fileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
 		std::string versionString = Glory::Editor::Version.GetVersionString();
 		fileStream.write(versionString.c_str(), versionString.size());
+		fileStream.close();
 	}
 }

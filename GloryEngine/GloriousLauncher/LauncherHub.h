@@ -1,5 +1,6 @@
 #pragma once
 #include "ImGuiImpl.h"
+#include "NewProjectWindow.h"
 
 namespace Glory::EditorLauncher
 {
@@ -18,6 +19,11 @@ namespace Glory::EditorLauncher
 		virtual ~LauncherHub();
 
 		void Run();
+
+		static ImFont* DefaultFont;
+		static ImFont* BoldLargeFont;
+
+		static std::function<void(const std::string&)> FileBrowserCallback;
 
 	private:
 		void InitializeFileDialog();
@@ -57,12 +63,8 @@ namespace Glory::EditorLauncher
 
 		const char* FILEDIALOG_ID = "FileDialog";
 
-		std::function<void(const std::string&)> m_FileBrowserCallback;
-
 		HubMenu m_CurrentMenu = HubMenu::ProjectList;
 
-
-		ImFont* m_pDefaultFont;
-		ImFont* m_pBoldLargeFont;
+		NewProjectWindow m_pNewProjectWindow;
 	};
 }

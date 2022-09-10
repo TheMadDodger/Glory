@@ -1,4 +1,5 @@
 #pragma once
+#include "ModuleManager.h"
 #include <Versioning.h>
 
 namespace Glory::EditorLauncher
@@ -12,10 +13,22 @@ namespace Glory::EditorLauncher
 		long long LastEdit;
 	};
 
+	struct EngineSettings
+	{
+		int RenderModule;
+		int GraphicsModule;
+		int WindowModule;
+		int ScenesModule;
+		std::vector<int> OptionalModules;
+	};
+
 	struct ProjectCreateSettings
 	{
 		std::string Name;
 		std::string Path;
+
+		EngineSettings EngineSettings;
+		Version EditorVersion;
 	};
 
 	class ProjectManager
@@ -31,6 +44,11 @@ namespace Glory::EditorLauncher
 
 		static void Load();
 		static void Save();
+
+	private:
+		static void WriteModule(const ModuleType& moduleType, int index, YAML::Emitter& emitter);
+		static void WriteEngineConfig(const ProjectCreateSettings& createSettings);
+		static void WriteProjectFile(const ProjectCreateSettings& createSettings);
 
 	private:
 		ProjectManager();

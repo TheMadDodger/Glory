@@ -51,7 +51,9 @@ project "GloriousLauncher"
 
 	postbuildcommands
 	{
-		
+		("{COPY} ./Fonts ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}/Fonts"),
+		("{COPY} %{LibDirs.GLEW}/*.dll ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} imgui.ini ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}"),
 	}
 
 	filter "system:windows"
@@ -72,12 +74,22 @@ project "GloriousLauncher"
 			"%{vulkan_sdk}/Third-Party/Bin32"
 		}
 
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin32/*.dll ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}")
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
 
 		libdirs
 		{
 			"%{vulkan_sdk}/Third-Party/Bin"
+		}
+
+		postbuildcommands
+		{
+			("{COPY} %{vulkan_sdk}/Third-Party/Bin/*.dll ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}")
 		}
 
 	filter "configurations:Debug"

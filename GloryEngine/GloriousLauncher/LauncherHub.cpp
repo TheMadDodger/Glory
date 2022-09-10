@@ -14,6 +14,11 @@ namespace Glory::EditorLauncher
         { HubMenu::EditorList, "Installs" },
     };
 
+    ImFont* LauncherHub::DefaultFont = nullptr;
+    ImFont* LauncherHub::BoldLargeFont = nullptr;
+
+    std::function<void(const std::string&)> LauncherHub::FileBrowserCallback;
+
 	LauncherHub::LauncherHub(ImGuiImpl* pHubWindow) : m_pImGuiImpl(pHubWindow), m_OpenErrorPopup(false), m_OpenNewProjectPopup(false), m_OpenProjectOpenError(false), m_OpenMissingEditorError(false), m_ProjectFolder("")
 	{
 	}
@@ -25,9 +30,9 @@ namespace Glory::EditorLauncher
 	void LauncherHub::Run()
 	{
         ImGuiIO& io = ImGui::GetIO();
-        m_pDefaultFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Regular.ttf", 18.0f);
-        m_pBoldLargeFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Bold.ttf", 32.0f);
-        io.FontDefault = m_pDefaultFont;
+        DefaultFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Regular.ttf", 18.0f);
+        BoldLargeFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Bold.ttf", 32.0f);
+        io.FontDefault = DefaultFont;
 
         InitializeFileDialog();
 
@@ -80,8 +85,11 @@ namespace Glory::EditorLauncher
         ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
         ImGui::Begin("Hub Window", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
 
-        DrawLeftPanel();
-        DrawRightPanel();
+        if (!m_pNewProjectWindow.Draw())
+        {
+            DrawLeftPanel();
+            DrawRightPanel();
+        }
 
         ImGui::End();
 
@@ -95,7 +103,7 @@ namespace Glory::EditorLauncher
             if (ifd::FileDialog::Instance().HasResult()) {
                 std::string res = ifd::FileDialog::Instance().GetResult().u8string();
                 printf("OPEN[%s]\n", res.c_str());
-                m_FileBrowserCallback(res);
+                FileBrowserCallback(res);
             }
             ifd::FileDialog::Instance().Close();
         }
@@ -177,7 +185,7 @@ namespace Glory::EditorLauncher
         ImGui::SetNextItemWidth(100.0f);
         if (ImGui::Button("Browse"))
         {
-            m_FileBrowserCallback = [&](const std::string& path)
+            FileBrowserCallback = [&](const std::string& path)
             {
                 std::filesystem::path fullPath = path;
                 std::filesystem::path fileName = fullPath.filename();
@@ -254,12 +262,12 @@ namespace Glory::EditorLauncher
     void LauncherHub::DrawLeftPanel()
     {
         ImGuiIO& io = ImGui::GetIO();
-        ImGui::PushFont(m_pBoldLargeFont);
+        ImGui::PushFont(BoldLargeFont);
         ImGui::BeginChild("LeftPanel", ImVec2(250.0f, 0.0f), true);
         ImGui::BeginChild("LeftPanelHeader", ImVec2(0.0f, 50.0f), false);
 
         ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();
-        float size = m_pBoldLargeFont->FontSize;
+        float size = BoldLargeFont->FontSize;
         float cursorPosY = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - (size / 2.0f) + (contentRegionAvail.y / 2.0f));
         ImGui::TextUnformatted("Glory");
@@ -321,7 +329,7 @@ namespace Glory::EditorLauncher
         ImGui::SameLine(regionWidth - buttonWidth * 2.0f);
         if (ImGui::Button("ADD", ImVec2(buttonWidth, 0.0f)))
         {
-            m_FileBrowserCallback = [&](const std::string& path)
+            FileBrowserCallback = [&](const std::string& path)
             {
                 if (!std::filesystem::exists(path))
                 {
@@ -334,9 +342,11 @@ namespace Glory::EditorLauncher
         ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
         if (ImGui::Button("NEW", ImVec2(buttonWidth, 0.0f)))
         {
-            m_BrowsingPath = m_DefaultProjectsFolder;
-            strcpy(m_PathText, m_BrowsingPath.data());
-            m_OpenNewProjectPopup = true;
+            //m_BrowsingPath = m_DefaultProjectsFolder;
+            //strcpy(m_PathText, m_BrowsingPath.data());
+            //m_OpenNewProjectPopup = true;
+
+            m_pNewProjectWindow.Open();
         }
 
         static ImGuiTableFlags flags =
@@ -454,7 +464,7 @@ namespace Glory::EditorLauncher
         ImGui::SameLine(regionWidth - buttonWidth * 2.0f);
         if (ImGui::Button("Locate", ImVec2(buttonWidth, 0.0f)))
         {
-            m_FileBrowserCallback = [&](const std::string& path)
+            FileBrowserCallback = [&](const std::string& path)
             {
                 if (!std::filesystem::exists(path))
                 {

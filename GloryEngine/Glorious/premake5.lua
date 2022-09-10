@@ -66,6 +66,9 @@ project "Glorious"
 	{
 		("{COPY} %{modulesOutDir} ../Build/%{cfg.buildcfg}/%{cfg.platform}/Modules"),
 		("{COPY} %{LibDirs.glory}/GloryEditor.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} ./EditorAssets ../Build/%{cfg.buildcfg}/%{cfg.platform}/EditorAssets"),
+		("{COPY} imgui.ini ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} ../Build/%{cfg.buildcfg}/%{cfg.platform} ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}/Editor/Any"),
 	}
 
 	filter "system:windows"
