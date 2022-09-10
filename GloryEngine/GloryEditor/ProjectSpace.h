@@ -15,6 +15,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool ProjectExists(const std::string& path, const std::string& name);
 		static GLORY_EDITOR_API std::string NewProject(const std::string& path, const std::string& name);
 		GLORY_EDITOR_API void CreateFolder(const std::string& name);
+		static GLORY_EDITOR_API void Save();
+		GLORY_EDITOR_API void SaveProject();
 
 		GLORY_EDITOR_API std::string Name();
 		GLORY_EDITOR_API std::string RootPath();

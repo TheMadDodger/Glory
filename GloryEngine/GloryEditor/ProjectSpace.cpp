@@ -133,4 +133,21 @@ namespace Glory::Editor
 		if (std::filesystem::exists(path)) return;
 		std::filesystem::create_directories(path);
 	}
+
+	void ProjectSpace::Save()
+	{
+		ProjectSpace* pProject = GetOpenProject();
+		if (pProject == nullptr) return;
+		pProject->SaveProject();
+	}
+
+	void ProjectSpace::SaveProject()
+	{
+		std::filesystem::path projectVersionTxtPath = m_ProjectRootPath;
+		projectVersionTxtPath.append("ProjectVersion.txt");
+		std::ofstream fileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
+		std::string versionString = Glory::Editor::Version.GetVersionString();
+		fileStream.write(versionString.c_str(), versionString.size());
+		fileStream.close();
+	}
 }

@@ -71,7 +71,9 @@ namespace Glory::Editor
 		SetDarkThemeColors();
 
 		m_pProjectPopup->Initialize();
-		m_pProjectPopup->Open();
+
+		//if (ProjectSpace::GetOpenProject() == nullptr)
+		//	m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
@@ -126,7 +128,7 @@ namespace Glory::Editor
 		});
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); });
-		MenuBar::AddMenuItem("File/Save Project", AssetDatabase::Save);
+		MenuBar::AddMenuItem("File/Save Project", []() { AssetDatabase::Save(); ProjectSpace::Save(); });
 		MenuBar::AddMenuItem("File/Create/Empty Object", []()
 		{
 			GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();

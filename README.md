@@ -16,6 +16,8 @@ It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profilin
 - Project HUB
 - Runtime shader compilation and in the future cross platform shader compilation
 - Built-in [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling)
+- Launcher/Hub with support for multiple editor installations (similar to Unity)
+- Built-in version system
 
 ## Built-in Modules
 - Clustered Renderer
@@ -56,8 +58,12 @@ Install the [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) before running the 
 Edit the `vulkan_sdk` value in the `premake5.lua` file in the `GloryEngine` folder to point to where you installed the vulkan SDK.
 Run the `generateprojects.bat` file under `GloryEngine/scripts` to run the premake scripts and generate the visual studio project files.
 Open `GloryEngine.sln` and build the whole solution.
-In order to run the editor through visual studio, you must copy `EditorAssets` and `Modules` folders inside the build folder to GloryEngine/Glorious.
-Run the editor by launching Glorious.
+In order to run the editor through visual studio, you must copy `Modules` folders inside the build folder to `GloryEngine/Glorious`,
+and add `-projectPath=[path to your gproj file]` as launch argument in the build options.
+Run the editor by running Glorious.
+
+Run the luncher/hub by running GloriousLauncher, make sure to copy an editor build to a sub folder inside `GloryEngine/GloriousLauncher/Editor` or the Hub will fail to open any projects.
+This gets copied for you to the Build folder, if you run the GloriousLauncher.exe manually everything should work without any extra steps.
 
 ## License
 

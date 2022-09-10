@@ -1,8 +1,5 @@
 #include "pch.h"
 #include "EditorLoader.h"
-#include "EditorWindowImpl.h"
-#include "EditorRenderImpl.h"
-#include <GloryContext.h>
 
 namespace Glory
 {

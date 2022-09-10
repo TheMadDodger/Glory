@@ -6,6 +6,7 @@
 #include "EditorAssetLoader.h"
 #include "EditorCreateInfo.h"
 #include <Game.h>
+#include <Versioning.h>
 
 namespace Glory::Editor
 {
@@ -42,6 +43,8 @@ namespace Glory::Editor
 		GLORY_EDITOR_API MainEditor* GetMainEditor();
 
 		static GLORY_EDITOR_API EditorApplication* GetInstance();
+
+		static const Glory::Version Version;
 
 	private:
 		void RenderEditor();

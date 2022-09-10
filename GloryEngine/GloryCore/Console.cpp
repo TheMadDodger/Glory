@@ -19,6 +19,7 @@ namespace Glory
 
 	void Console::Initialize()
 	{
+		if (m_pInstance != nullptr) return;
 		m_pInstance = new Console();
 		RegisterCommand(new ConsoleCommand("printhistory", Console::PrintHistory));
 	}
