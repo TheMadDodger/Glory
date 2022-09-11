@@ -16,7 +16,7 @@ It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profilin
 - Project HUB
 - Runtime shader compilation and in the future cross platform shader compilation
 - Built-in [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling)
-- Launcher/Hub with support for multiple editor installations (similar to Unity)
+- [Launcher/Hub](https://github.com/TheMadDodger/Glory/wiki/Editor-Launcher-Hub) with support for multiple editor installations (similar to Unity)
 - Built-in version system
 
 ## Built-in Modules
