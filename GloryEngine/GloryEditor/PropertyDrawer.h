@@ -6,6 +6,7 @@
 #include <any>
 #include "SerializedProperty.h"
 #include "GloryEditor.h"
+#include "PropertyAction.h"
 
 #define PROPERTY_DRAWER(x) Glory::Editor::PropertyDrawer::RegisterPropertyDrawer<x>()
 
@@ -56,14 +57,26 @@ namespace Glory::Editor
 	protected:
 		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const override
 		{
-			return OnGUI(label, (PropertyType*)data, flags);
+			PropertyType oldValue = *(PropertyType*)data;
+			if (OnGUI(label, (PropertyType*)data, flags))
+			{
+				PropertyType newValue = *(PropertyType*)data;
+				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
+				return true;
+			}
+			return false;
 		}
 
 		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const override
 		{
 			PropertyType pPropertyData = std::any_cast<PropertyType>(data);
+			PropertyType oldValue = pPropertyData;
 			bool result = OnGUI(label, &pPropertyData, flags);
-			data = pPropertyData;
+			if (result)
+			{
+				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, pPropertyData));
+				data = pPropertyData;
+			}
 			return result;
 		}
 
@@ -72,7 +85,10 @@ namespace Glory::Editor
 			PropertyType value;
 			memcpy((void*)&value, (void*)&buffer[offset], size);
 			PropertyType originalValue = value;
-			OnGUI(label, &value, flags);
+			if (OnGUI(label, &value, flags))
+			{
+				Undo::AddAction(new PropertyAction<PropertyType>(label, originalValue, value));
+			}
 			if (originalValue == value) return false;
 			memcpy((void*)&buffer[offset], (void*)&value, size);
 			return true;

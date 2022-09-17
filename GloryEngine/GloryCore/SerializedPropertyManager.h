@@ -2,7 +2,10 @@
 #include "SerializedProperty.h"
 #include "Object.h"
 #include "Debug.h"
+#include "GloryContext.h"
 #include <map>
+
+#define PROPERTY_MANAGER GloryContext::GetContext()->GetSerializedPropertyManager()
 
 namespace Glory
 {
@@ -12,16 +15,16 @@ namespace Glory
 		template<typename T, typename TMem, typename... Args>
 		static SerializedProperty* GetProperty(UUID uuid, const std::string& propertyName, TMem* pMember, uint32_t flags, Args&&... args)
 		{
-			if (m_ManagedProperties.find(uuid) == m_ManagedProperties.end()
-				|| m_ManagedProperties[uuid].find(propertyName) == m_ManagedProperties[uuid].end())
+			if (PROPERTY_MANAGER->m_ManagedProperties.find(uuid) == PROPERTY_MANAGER->m_ManagedProperties.end()
+				|| PROPERTY_MANAGER->m_ManagedProperties[uuid].find(propertyName) == PROPERTY_MANAGER->m_ManagedProperties[uuid].end())
 			{
 				T* pNewProperty = new T(uuid, propertyName, pMember, flags, args...);
-				m_ManagedProperties[uuid][propertyName] = pNewProperty;
-				m_AllProperties.push_back(pNewProperty);
+				PROPERTY_MANAGER->m_ManagedProperties[uuid][propertyName] = pNewProperty;
+				PROPERTY_MANAGER->m_AllProperties.push_back(pNewProperty);
 				return (SerializedProperty*)pNewProperty;
 			}
 
-			SerializedProperty* pProperty = m_ManagedProperties[uuid][propertyName];
+			SerializedProperty* pProperty = PROPERTY_MANAGER->m_ManagedProperties[uuid][propertyName];
 			T* pCastedProperty = (T*)pProperty;
 			if (!pCastedProperty)
 			{
@@ -34,13 +37,16 @@ namespace Glory
 			return pCastedProperty;
 		}
 
+		static SerializedProperty* FindProperty(UUID uuid, const std::string& propertyName);
+
 		static void Clear();
 
 	private:
-		static std::map<UUID, std::map<std::string, SerializedProperty*>> m_ManagedProperties;
-		static std::vector<SerializedProperty*> m_AllProperties;
+		std::map<UUID, std::map<std::string, SerializedProperty*>> m_ManagedProperties;
+		std::vector<SerializedProperty*> m_AllProperties;
 
 	private:
+		friend class GloryContext;
 		SerializedPropertyManager();
 		virtual ~SerializedPropertyManager();
 	};

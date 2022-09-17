@@ -36,6 +36,7 @@
 #include "ObjectMenu.h"
 #include "ObjectMenuCallbacks.h"
 #include "FileDialog.h"
+#include "Undo.h"
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
@@ -157,6 +158,9 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); });
 		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); });
+
+		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo);
+		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo);
 
 		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE);
 		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE);

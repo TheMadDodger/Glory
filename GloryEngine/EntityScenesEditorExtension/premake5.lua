@@ -16,7 +16,8 @@ project "EntityScenesEditorExtension"
 	vpaths
 	{
 		["Extension"] = { "EntityScenesEditorExtension.*" },
-		["Editors"] = { "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "CameraComponentEditor.*", "EntityComponentPopup.*", "LayerComponentEditor.*", "MeshRendererComponentEditor.*" },
+		["Editors"] = { "TransformEditor.*", "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "CameraComponentEditor.*", "EntityComponentPopup.*", "LayerComponentEditor.*", "MeshRendererComponentEditor.*" },
+		["Actions"] = { "AddComponentAction.*" }
 	}
 
 	includedirs

@@ -25,10 +25,11 @@ namespace Glory::Editor
 		virtual bool OnGUI() = 0;
 
 		static GLORY_EDITOR_API Editor* CreateEditor(Object* pObject);
-
 		static GLORY_EDITOR_API size_t GetID(Editor* pEditor);
-
 		virtual GLORY_EDITOR_API std::string Name();
+		static GLORY_EDITOR_API std::vector<Editor*> FindEditors(UUID uuid);
+		static GLORY_EDITOR_API void ReleaseEditor(Editor* pEditor);
+		GLORY_EDITOR_API Object* GetTarget() const;
 
 	protected:
 		Object* m_pTarget;

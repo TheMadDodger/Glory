@@ -1,6 +1,7 @@
 #include "EntitySceneObjectEditor.h"
 #include <imgui.h>
 #include <string>
+#include "AddComponentAction.h"
 
 namespace Glory::Editor
 {
@@ -12,6 +13,9 @@ namespace Glory::Editor
 	{
 		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
 		m_pComponents.clear();
+
+		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
+		m_pComponentEditors.clear();
 	}
 
 	bool EntitySceneObjectEditor::OnGUI()
@@ -23,12 +27,19 @@ namespace Glory::Editor
 		return ComponentGUI() || change;
 	}
 
+	void EntitySceneObjectEditor::Refresh()
+	{
+		Initialize();
+	}
+
 	void EntitySceneObjectEditor::Initialize()
 	{
 		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
 		m_pComponents.clear();
 
+		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
 		m_pComponentEditors.clear();
+
 		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
 		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
 		{
@@ -103,7 +114,12 @@ namespace Glory::Editor
 			size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
 			if (toAddTypeHash)
 			{
+				Undo::StartRecord("Add Component", m_pTarget->GetUUID());
 				pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
+				size_t index = m_pComponentEditors.size();
+				EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, index);
+				Undo::AddAction(new AddComponentAction(toAddTypeHash, pComponentData->GetComponentUUID(), index));
+				Undo::StopRecord();
 				m_AddingComponent = false;
 				Initialize();
 				change = true;

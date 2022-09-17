@@ -1,21 +1,23 @@
 #include "TransformEditor.h"
-#include <Gizmos.h>
+#include "Undo.h"
+#include "GizmoAction.h"
 #include <glm/gtx/quaternion.hpp>
 
 namespace Glory::Editor
 {
-	TransformEditor::TransformEditor() : m_Transform(glm::mat4()), m_LastTransform(glm::mat4())
+	TransformEditor::TransformEditor() : m_Transform(glm::mat4()), m_LastTransform(glm::mat4()), m_pGizmo(nullptr)
 	{
 	}
 
 	TransformEditor::~TransformEditor()
 	{
+		m_pGizmo->OnManualManipulate = NULL;
+		Gizmos::FreeGizmo(m_pTarget->GetUUID());
 	}
 
 	void TransformEditor::Initialize()
 	{
 		EntityComponentEditor::Initialize();
-
 		Transform& transform = GetTargetComponent();
 
 		glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), transform.Scale);
@@ -24,13 +26,27 @@ namespace Glory::Editor
 		glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), transform.Position);
 		m_Transform = translation * rotation * scale;
 		m_LastTransform = m_Transform;
+		m_pGizmo = Gizmos::GetGizmo<DefaultGizmo>(m_pTarget->GetUUID(), m_Transform);
+		m_pGizmo->OnManualManipulate = [&](const glm::mat4& newTransform)
+		{
+			m_Transform = newTransform;
+			UpdateTransform();
+		};
 	}
 
 	bool TransformEditor::OnGUI()
 	{
 		UpdateTransform();
 		bool change = EntityComponentEditor::OnGUI();
-		return Gizmos::DrawGizmo(&m_Transform) || change;
+		glm::mat4 newTransform;
+		if (!m_pGizmo->WasManipulated(newTransform)) return change;
+
+		Undo::StartRecord("Transform");
+		Undo::AddAction(new GizmoAction(m_pTarget->GetUUID(), m_Transform, newTransform));
+		Undo::StopRecord();
+		m_Transform = newTransform;
+		UpdateTransform();
+		return true;
 	}
 
 	std::string TransformEditor::Name()

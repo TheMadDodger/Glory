@@ -52,6 +52,30 @@ namespace Glory::Editor
 		return "Editor";
 	}
 
+	GLORY_EDITOR_API std::vector<Editor*> Editor::FindEditors(UUID uuid)
+	{
+		std::vector<Editor*> result;
+		std::for_each(m_pActiveEditors.begin(), m_pActiveEditors.end(), [&](Editor* pEditor)
+		{
+			if (pEditor->m_pTarget->GetUUID() != uuid) return;
+			result.push_back(pEditor);
+		});
+		return result;
+	}
+
+	void Editor::ReleaseEditor(Editor* pEditor)
+	{
+		auto it = std::find(m_pActiveEditors.begin(), m_pActiveEditors.end(), pEditor);
+		if (it == m_pActiveEditors.end()) return;
+		m_pActiveEditors.erase(it);
+		delete pEditor;
+	}
+
+	Object* Editor::GetTarget() const
+	{
+		return m_pTarget;
+	}
+
 	GLORY_EDITOR_API Editor::Editor() : m_pTarget(nullptr)
 	{
 	}

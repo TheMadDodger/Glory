@@ -3,9 +3,11 @@
 #include "Selection.h"
 #include "EditorSceneManager.h"
 #include "PopupManager.h"
+#include "Undo.h"
+#include "ContentBrowser.h"
+#include "ContentBrowser.h"
+#include "CreateObjectAction.h"
 #include <AssetDatabase.h>
-#include "ContentBrowser.h"
-#include "ContentBrowser.h"
 #include <Game.h>
 #include <Engine.h>
 #include <MaterialInstanceData.h>
@@ -107,7 +109,10 @@ namespace Glory::Editor
 			Selection::SetActiveObject(nullptr);
 			GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
+			Undo::StartRecord("Create Empty Object");
 			SceneObject* pNewObject = pActiveScene->CreateEmptyObject();
+			Undo::AddAction(new CreateObjectAction(pNewObject));
+			Undo::StopRecord();
 			Selection::SetActiveObject(pNewObject);
 			return;
 		}
@@ -119,7 +124,10 @@ namespace Glory::Editor
 			Selection::SetActiveObject(nullptr);
 			GScene* pScene = (GScene*)pObject;
 			if (pScene == nullptr) return;
+			Undo::StartRecord("Create Empty Object");
 			SceneObject* pNewObject = pScene->CreateEmptyObject();
+			Undo::AddAction(new CreateObjectAction(pNewObject));
+			Undo::StopRecord();
 			Selection::SetActiveObject(pNewObject);
 			break;
 		}
@@ -131,8 +139,11 @@ namespace Glory::Editor
 			if (pSceneObject == nullptr) return;
 			GScene* pScene = pSceneObject->GetScene();
 			if (pScene == nullptr) return;
+			Undo::StartRecord("Create Empty Object");
 			SceneObject* pNewObject = pScene->CreateEmptyObject();
+			Undo::AddAction(new CreateObjectAction(pNewObject));
 			pNewObject->SetParent(pSceneObject);
+			Undo::StopRecord();
 			Selection::SetActiveObject(pNewObject);
 			break;
 		}

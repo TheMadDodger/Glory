@@ -38,6 +38,7 @@ namespace Glory::Editor
 	{
 		if (!m_pCurrentObject)
 		{
+			if (m_pEditor) Editor::ReleaseEditor(m_pEditor);
 			m_pEditor = nullptr;
 			return;
 		}

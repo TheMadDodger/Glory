@@ -8,7 +8,7 @@ namespace Glory
 	}
 
 	EntityComponentObject::EntityComponentObject(EntityComponentData* pComponentData, Registry* pRegistry)
-		: m_pComponentData(pComponentData), m_pRegistry(pRegistry)
+		: m_pComponentData(pComponentData), m_pRegistry(pRegistry), Object(pComponentData->GetComponentUUID())
 	{
 		APPEND_TYPE(EntityComponentObject);
 		PushInheritence(pComponentData->GetType());
