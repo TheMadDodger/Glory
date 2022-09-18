@@ -1,7 +1,8 @@
 #include "EntitySceneObjectEditor.h"
+#include "AddComponentAction.h"
 #include <imgui.h>
 #include <string>
-#include "AddComponentAction.h"
+#include <SceneObjectNameAction.h>
 
 namespace Glory::Editor
 {
@@ -53,10 +54,10 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::NameGUI()
 	{
-		const std::string& nameString = m_pObject->Name();
-		const char* name = nameString.c_str();
-		memcpy(m_NameBuff, name, nameString.length() + 1);
-		m_NameBuff[nameString.length()] = '\0';
+		std::string originalName = m_pObject->Name();
+		const char* name = originalName.c_str();
+		memcpy(m_NameBuff, name, originalName.length() + 1);
+		m_NameBuff[originalName.length()] = '\0';
 
 		UUID uuid = m_pObject->GetUUID();
 		std::string uuidString = std::to_string(uuid);
@@ -65,6 +66,13 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		bool change = ImGui::InputText("##Name", m_NameBuff, MAXNAMESIZE);
 		m_pObject->SetName(m_NameBuff);
+		if (change)
+		{
+			Undo::StartRecord("Change Name", m_pObject->GetUUID());
+			Undo::AddAction(new SceneObjectNameAction(originalName, m_pObject->Name()));
+			Undo::StopRecord();
+		}
+
 		return change;
 	}
 

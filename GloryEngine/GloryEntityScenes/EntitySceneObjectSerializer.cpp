@@ -18,6 +18,8 @@ namespace Glory
 	{
 		out << YAML::Key << "Name";
 		out << YAML::Value << pObject->Name();
+		out << YAML::Key << "UUID";
+		out << YAML::Value << pObject->GetUUID();
 		out << YAML::Key << "Components";
 		out << YAML::Value << YAML::BeginSeq;
 		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)

@@ -7,6 +7,7 @@
 #include "ContentBrowser.h"
 #include "ContentBrowser.h"
 #include "CreateObjectAction.h"
+#include "DeleteSceneObjectAction.h"
 #include <AssetDatabase.h>
 #include <Game.h>
 #include <Engine.h>
@@ -64,7 +65,10 @@ namespace Glory::Editor
 			SceneObject* pSceneObject = (SceneObject*)pObject;
 			GScene* pScene = pSceneObject->GetScene();
 			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
+			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
+			Undo::AddAction(new DeleteSceneObjectAction(pSceneObject));
 			pScene->DeleteObject(pSceneObject);
+			Undo::StopRecord();
 			break;
 		}
 
