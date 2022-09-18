@@ -1,6 +1,10 @@
 #include "EntitySceneObjectEditor.h"
+#include "AddComponentAction.h"
+#include "RemoveComponentAction.h"
 #include <imgui.h>
 #include <string>
+#include <SceneObjectNameAction.h>
+#include <Undo.h>
 
 namespace Glory::Editor
 {
@@ -12,6 +16,9 @@ namespace Glory::Editor
 	{
 		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
 		m_pComponents.clear();
+
+		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
+		m_pComponentEditors.clear();
 	}
 
 	bool EntitySceneObjectEditor::OnGUI()
@@ -23,12 +30,19 @@ namespace Glory::Editor
 		return ComponentGUI() || change;
 	}
 
+	void EntitySceneObjectEditor::Refresh()
+	{
+		Initialize();
+	}
+
 	void EntitySceneObjectEditor::Initialize()
 	{
 		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
 		m_pComponents.clear();
 
+		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
 		m_pComponentEditors.clear();
+
 		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
 		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
 		{
@@ -42,10 +56,10 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::NameGUI()
 	{
-		const std::string& nameString = m_pObject->Name();
-		const char* name = nameString.c_str();
-		memcpy(m_NameBuff, name, nameString.length() + 1);
-		m_NameBuff[nameString.length()] = '\0';
+		std::string originalName = m_pObject->Name();
+		const char* name = originalName.c_str();
+		memcpy(m_NameBuff, name, originalName.length() + 1);
+		m_NameBuff[originalName.length()] = '\0';
 
 		UUID uuid = m_pObject->GetUUID();
 		std::string uuidString = std::to_string(uuid);
@@ -54,6 +68,13 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		bool change = ImGui::InputText("##Name", m_NameBuff, MAXNAMESIZE);
 		m_pObject->SetName(m_NameBuff);
+		if (change)
+		{
+			Undo::StartRecord("Change Name", m_pObject->GetUUID());
+			Undo::AddAction(new SceneObjectNameAction(originalName, m_pObject->Name()));
+			Undo::StopRecord();
+		}
+
 		return change;
 	}
 
@@ -103,7 +124,12 @@ namespace Glory::Editor
 			size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
 			if (toAddTypeHash)
 			{
+				Undo::StartRecord("Add Component", m_pTarget->GetUUID());
 				pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
+				size_t index = m_pComponentEditors.size();
+				EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, index);
+				Undo::AddAction(new AddComponentAction(toAddTypeHash, pComponentData->GetComponentUUID(), index));
+				Undo::StopRecord();
 				m_AddingComponent = false;
 				Initialize();
 				change = true;
@@ -116,7 +142,13 @@ namespace Glory::Editor
 		{
 			if (ImGui::MenuItem("Remove"))
 			{
+				EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, m_RightClickedComponentIndex);
+				Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
+				EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+				EntityScene* pScene = (EntityScene*)pObject->GetScene();
+				Undo::AddAction(new RemoveComponentAction(pScene, pComponentData, m_RightClickedComponentIndex));
 				pRegistry->RemoveComponent(entityID, m_RightClickedComponentIndex);
+				Undo::StopRecord();
 				Initialize();
 				change = true;
 			}

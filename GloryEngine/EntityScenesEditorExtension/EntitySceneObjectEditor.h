@@ -13,6 +13,8 @@ namespace Glory::Editor
 		virtual ~EntitySceneObjectEditor();
 		virtual bool OnGUI() override;
 
+		void Refresh();
+
 	private:
 		void Initialize();
 		bool NameGUI();

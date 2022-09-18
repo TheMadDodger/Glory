@@ -3,9 +3,12 @@
 #include "Selection.h"
 #include "EditorSceneManager.h"
 #include "PopupManager.h"
+#include "Undo.h"
+#include "ContentBrowser.h"
+#include "ContentBrowser.h"
+#include "CreateObjectAction.h"
+#include "DeleteSceneObjectAction.h"
 #include <AssetDatabase.h>
-#include "ContentBrowser.h"
-#include "ContentBrowser.h"
 #include <Game.h>
 #include <Engine.h>
 #include <MaterialInstanceData.h>
@@ -62,7 +65,10 @@ namespace Glory::Editor
 			SceneObject* pSceneObject = (SceneObject*)pObject;
 			GScene* pScene = pSceneObject->GetScene();
 			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
+			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
+			Undo::AddAction(new DeleteSceneObjectAction(pSceneObject));
 			pScene->DeleteObject(pSceneObject);
+			Undo::StopRecord();
 			break;
 		}
 
@@ -108,6 +114,9 @@ namespace Glory::Editor
 			GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
 			SceneObject* pNewObject = pActiveScene->CreateEmptyObject();
+			Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
+			Undo::AddAction(new CreateObjectAction(pNewObject));
+			Undo::StopRecord();
 			Selection::SetActiveObject(pNewObject);
 			return;
 		}
@@ -120,6 +129,9 @@ namespace Glory::Editor
 			GScene* pScene = (GScene*)pObject;
 			if (pScene == nullptr) return;
 			SceneObject* pNewObject = pScene->CreateEmptyObject();
+			Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
+			Undo::AddAction(new CreateObjectAction(pNewObject));
+			Undo::StopRecord();
 			Selection::SetActiveObject(pNewObject);
 			break;
 		}
@@ -132,7 +144,10 @@ namespace Glory::Editor
 			GScene* pScene = pSceneObject->GetScene();
 			if (pScene == nullptr) return;
 			SceneObject* pNewObject = pScene->CreateEmptyObject();
+			Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
+			Undo::AddAction(new CreateObjectAction(pNewObject));
 			pNewObject->SetParent(pSceneObject);
+			Undo::StopRecord();
 			Selection::SetActiveObject(pNewObject);
 			break;
 		}

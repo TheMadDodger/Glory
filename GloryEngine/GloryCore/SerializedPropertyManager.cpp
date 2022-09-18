@@ -3,17 +3,23 @@
 
 namespace Glory
 {
-	std::map<UUID, std::map<std::string, SerializedProperty*>> SerializedPropertyManager::m_ManagedProperties;
-	std::vector<SerializedProperty*> SerializedPropertyManager::m_AllProperties;
+	SerializedProperty* SerializedPropertyManager::FindProperty(UUID uuid, const std::string& propertyName)
+	{
+		if (PROPERTY_MANAGER->m_ManagedProperties.find(uuid) == PROPERTY_MANAGER->m_ManagedProperties.end()
+			|| PROPERTY_MANAGER->m_ManagedProperties[uuid].find(propertyName) == PROPERTY_MANAGER->m_ManagedProperties[uuid].end()) return nullptr;
+
+		SerializedProperty* pProperty = PROPERTY_MANAGER->m_ManagedProperties[uuid][propertyName];
+		return pProperty;
+	}
 
 	void SerializedPropertyManager::Clear()
 	{
-		m_ManagedProperties.clear();
-		std::for_each(m_AllProperties.begin(), m_AllProperties.end(), [](SerializedProperty* pProperty)
-			{
-				delete pProperty;
-			});
-		m_AllProperties.clear();
+		PROPERTY_MANAGER->m_ManagedProperties.clear();
+		std::for_each(PROPERTY_MANAGER->m_AllProperties.begin(), PROPERTY_MANAGER->m_AllProperties.end(), [](SerializedProperty* pProperty)
+		{
+			delete pProperty;
+		});
+		PROPERTY_MANAGER->m_AllProperties.clear();
 	}
 
 	SerializedPropertyManager::SerializedPropertyManager() {}

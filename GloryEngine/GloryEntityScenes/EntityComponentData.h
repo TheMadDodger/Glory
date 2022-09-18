@@ -31,12 +31,18 @@ namespace Glory
 		template<typename T>
 		GLORY_API T& GetData()
 		{
+			const std::type_info& type = typeid(T);
 			return std::any_cast<T&>(m_Data);
 		}
 
 		GLORY_API UUID GetComponentUUID() const
 		{
 			return m_UUID;
+		}
+
+		GLORY_API EntityComponentData& operator=(const EntityComponentData& other)
+		{
+			return *this;
 		}
 
 	private:

@@ -68,6 +68,21 @@ namespace Glory
 		lock.unlock();
 	}
 
+	void Registry::ChangeComponentIndex(EntityID entity, size_t index, size_t newIndex)
+	{
+		if (m_ComponentsPerEntity.find(entity) == m_ComponentsPerEntity.end()) return;
+		if (index > m_ComponentsPerEntity[entity].size() || newIndex > m_ComponentsPerEntity[entity].size()) return;
+		size_t componentIndex = m_ComponentsPerEntity[entity][index];
+		m_ComponentsPerEntity[entity].insert(m_ComponentsPerEntity[entity].begin() + newIndex, componentIndex);
+		m_ComponentsPerEntity[entity].erase(m_ComponentsPerEntity[entity].end() - 1);
+	}
+
+	size_t Registry::ComponentCount(EntityID entity)
+	{
+		if (m_ComponentsPerEntity.find(entity) == m_ComponentsPerEntity.end()) return 0;
+		return m_ComponentsPerEntity[entity].size();
+	}
+
 	void Registry::Clear(EntityID entity)
 	{
 		if (!IsValid(entity)) return;
@@ -80,7 +95,8 @@ namespace Glory
 			size_t index = m_ComponentsPerEntity[entity][i];
 			std::type_index type = m_EntityComponents[index].GetType();
 			m_Systems.OnComponentRemoved(this, entity, &m_EntityComponents[index]);
-			std::remove(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), index);
+			auto it = std::remove(m_ComponentsPerType[type].begin(), m_ComponentsPerType[type].end(), index);
+			m_ComponentsPerType[type].erase(it);
 		}
 
 		m_ComponentsPerEntity[entity].clear();

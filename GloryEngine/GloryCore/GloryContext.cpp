@@ -4,6 +4,7 @@
 #include "ResourceType.h"
 #include "Serializer.h"
 #include "DisplayManager.h"
+#include "SerializedPropertyManager.h"
 
 namespace Glory
 {
@@ -73,8 +74,13 @@ namespace Glory
 		return m_pContext->m_pDisplayManager;
 	}
 
+	SerializedPropertyManager* GloryContext::GetSerializedPropertyManager()
+	{
+		return m_pContext->m_pSerializedPropertyManager;
+	}
+
 	Glory::GloryContext::GloryContext()
-		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()), m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager())
+		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()), m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pSerializedPropertyManager(new SerializedPropertyManager())
 	{
 	}
 
@@ -88,5 +94,9 @@ namespace Glory
 		m_pResourceTypes = nullptr;
 		delete m_pSerializers;
 		m_pSerializers = nullptr;
+		delete m_pDisplayManager;
+		m_pDisplayManager = nullptr;
+		delete m_pSerializedPropertyManager;
+		m_pSerializedPropertyManager = nullptr;
 	}
 }

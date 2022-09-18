@@ -9,6 +9,7 @@ namespace Glory
 	class ResourceTypes;
 	class Serializers;
 	class DisplayManager;
+	class SerializedPropertyManager;
 
 	class GloryContext
 	{
@@ -20,6 +21,7 @@ namespace Glory
 		static ResourceTypes* GetResourceTypes();
 		static Serializers* GetSerializers();
 		static DisplayManager* GetDisplayManager();
+		static SerializedPropertyManager* GetSerializedPropertyManager();
 		static void SetContext(GloryContext* pContext);
 		static GloryContext* GetContext();
 		static GloryContext* CreateContext();
@@ -34,6 +36,7 @@ namespace Glory
 
 	private:
 		friend class Engine;
+		friend class Object;
 		static GloryContext* m_pContext;
 		Game* m_Game;
 		CameraManager m_CameraManager;
@@ -42,5 +45,9 @@ namespace Glory
 		ResourceTypes* m_pResourceTypes;
 		Serializers* m_pSerializers;
 		DisplayManager* m_pDisplayManager;
+
+		std::vector<Object*> m_pAllObjects;
+
+		SerializedPropertyManager* m_pSerializedPropertyManager;
 	};
 }

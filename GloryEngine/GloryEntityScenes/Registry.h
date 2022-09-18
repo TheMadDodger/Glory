@@ -30,7 +30,10 @@ namespace Glory
 				// Replace an existing component that is no longer used
 				size_t index = m_UnusedComponentIndices[0];
 				m_UnusedComponentIndices.erase(m_UnusedComponentIndices.begin());
-				m_EntityComponents[index] = componentData;
+				//m_EntityComponents[index] = componentData;
+				m_EntityComponents[index].m_Data = componentData.m_Data;
+				m_EntityComponents[index].m_Entity = componentData.m_Entity;
+				m_EntityComponents[index].m_UUID = componentData.m_UUID;
 				m_ComponentsPerEntity[entity].push_back(index);
 				m_ComponentsPerType[typeid(T)].push_back(index);
 				m_Systems.OnComponentAdded(this, entity, &m_EntityComponents[index]);
@@ -89,6 +92,9 @@ namespace Glory
 		}
 
 		GLORY_API void RemoveComponent(EntityID entity, size_t index);
+
+		GLORY_API void ChangeComponentIndex(EntityID entity, size_t index, size_t newIndex);
+		GLORY_API size_t ComponentCount(EntityID entity);
 
 		GLORY_API void Clear(EntityID entity);
 

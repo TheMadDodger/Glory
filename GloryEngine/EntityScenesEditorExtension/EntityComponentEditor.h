@@ -30,11 +30,13 @@ namespace Glory::Editor
 
 		virtual bool OnGUI() override
 		{
+			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID());
 			bool change = false;
 			for (size_t i = 0; i < m_Properties.size(); i++)
 			{
 				change |= PropertyDrawer::DrawProperty(m_Properties[i]);
 			}
+			Undo::StopRecord();
 			return change;
 		}
 

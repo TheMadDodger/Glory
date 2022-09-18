@@ -102,6 +102,12 @@ namespace Glory
 
 	void SceneObject::SetScene(GScene* pScene)
 	{
+		if (m_pScene)
+		{
+			auto it = std::find(m_pScene->m_pSceneObjects.begin(), m_pScene->m_pSceneObjects.end(), this);
+			if (it != m_pScene->m_pSceneObjects.end()) m_pScene->m_pSceneObjects.erase(it);
+		}
+
 		m_pScene = pScene;
 		m_pScene->m_pSceneObjects.push_back(this);
 	}
