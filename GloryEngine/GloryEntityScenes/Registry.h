@@ -93,6 +93,9 @@ namespace Glory
 
 		GLORY_API void RemoveComponent(EntityID entity, size_t index);
 
+		GLORY_API void ChangeComponentIndex(EntityID entity, size_t index, size_t newIndex);
+		GLORY_API size_t ComponentCount(EntityID entity);
+
 		GLORY_API void Clear(EntityID entity);
 
 		GLORY_API size_t Alive();

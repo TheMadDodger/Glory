@@ -16,8 +16,6 @@ namespace Glory::Editor
         virtual void OnRedo(const ActionRecord& actionRecord);
 
     private:
-        SceneObject* m_pSceneObject;
-        GScene* m_pScene;
-        UUID m_ObjectID;
+        UUID m_SceneID;
     };
 }

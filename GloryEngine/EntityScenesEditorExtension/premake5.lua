@@ -17,7 +17,7 @@ project "EntityScenesEditorExtension"
 	{
 		["Extension"] = { "EntityScenesEditorExtension.*" },
 		["Editors"] = { "TransformEditor.*", "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "CameraComponentEditor.*", "EntityComponentPopup.*", "LayerComponentEditor.*", "MeshRendererComponentEditor.*" },
-		["Actions"] = { "AddComponentAction.*" }
+		["Actions"] = { "AddComponentAction.*", "RemoveComponentAction.*" }
 	}
 
 	includedirs

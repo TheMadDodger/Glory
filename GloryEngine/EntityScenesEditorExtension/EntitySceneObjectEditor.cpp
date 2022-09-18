@@ -1,8 +1,10 @@
 #include "EntitySceneObjectEditor.h"
 #include "AddComponentAction.h"
+#include "RemoveComponentAction.h"
 #include <imgui.h>
 #include <string>
 #include <SceneObjectNameAction.h>
+#include <Undo.h>
 
 namespace Glory::Editor
 {
@@ -140,7 +142,13 @@ namespace Glory::Editor
 		{
 			if (ImGui::MenuItem("Remove"))
 			{
+				EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, m_RightClickedComponentIndex);
+				Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
+				EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+				EntityScene* pScene = (EntityScene*)pObject->GetScene();
+				Undo::AddAction(new RemoveComponentAction(pScene, pComponentData, m_RightClickedComponentIndex));
 				pRegistry->RemoveComponent(entityID, m_RightClickedComponentIndex);
+				Undo::StopRecord();
 				Initialize();
 				change = true;
 			}

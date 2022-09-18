@@ -1,11 +1,14 @@
 #include "CreateObjectAction.h"
 #include <GScene.h>
+#include <Game.h>
+#include <Engine.h>
+#include <ScenesModule.h>
 
 namespace Glory::Editor
 {
-	CreateObjectAction::CreateObjectAction(SceneObject* pSceneObject) : m_pSceneObject(pSceneObject), m_pScene(nullptr), m_ObjectID()
+	CreateObjectAction::CreateObjectAction(SceneObject* pSceneObject) : m_SceneID(pSceneObject->GetScene()->GetUUID())
 	{
-
+		
 	}
 
 	CreateObjectAction::~CreateObjectAction()
@@ -14,14 +17,19 @@ namespace Glory::Editor
 
 	void CreateObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		m_ObjectID = m_pSceneObject->GetUUID();
-		m_pScene = m_pSceneObject->GetScene();
-		m_pSceneObject->GetScene()->DeleteObject(m_pSceneObject);
-		m_pSceneObject = nullptr;
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		GScene* pScene = pScenesModule->GetOpenScene(m_SceneID);
+		if (pScene == nullptr) return;
+		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
+		if (pObject == nullptr) return;
+		pScene->DeleteObject(pObject);
 	}
 
 	void CreateObjectAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		m_pSceneObject = m_pScene->CreateEmptyObject("Empty Object", m_ObjectID);
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		GScene* pScene = pScenesModule->GetOpenScene(m_SceneID);
+		if (pScene == nullptr) return;
+		pScene->CreateEmptyObject("Empty Object", actionRecord.ObjectID);
 	}
 }
