@@ -12,11 +12,7 @@ namespace Glory
 
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath) : m_CFGPath(cfgPath)
 	{
-		Console::Initialize();
-
-#ifdef _DEBUG
-		Console::RegisterConsole<WindowsDebugConsole>();
-#endif
+		
 	}
 
 	EngineLoader::~EngineLoader()

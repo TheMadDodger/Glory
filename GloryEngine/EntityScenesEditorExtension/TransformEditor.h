@@ -18,6 +18,7 @@ namespace Glory::Editor
         virtual std::string Name() override;
 
         void UpdateTransform();
+        void PrintData(Transform& transform);
 
     private:
         glm::mat4 m_Transform;

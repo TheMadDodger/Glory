@@ -5,6 +5,8 @@
 #include "Serializer.h"
 #include "DisplayManager.h"
 #include "SerializedPropertyManager.h"
+#include "Console.h"
+#include "WindowsDebugConsole.h"
 
 namespace Glory
 {
@@ -14,6 +16,12 @@ namespace Glory
 	{
 		if (m_pContext != nullptr) return m_pContext;
 		m_pContext = new GloryContext();
+
+		Console::Initialize();
+
+#ifdef _DEBUG
+		Console::RegisterConsole<WindowsDebugConsole>();
+#endif
 		return m_pContext;
 	}
 
@@ -79,8 +87,15 @@ namespace Glory
 		return m_pContext->m_pSerializedPropertyManager;
 	}
 
+	Console* GloryContext::GetConsole()
+	{
+		return m_pContext->m_pConsole;
+	}
+
 	Glory::GloryContext::GloryContext()
-		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()), m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pSerializedPropertyManager(new SerializedPropertyManager())
+		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
+		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pSerializedPropertyManager(new SerializedPropertyManager()),
+		m_pConsole(new Console())
 	{
 	}
 
@@ -98,5 +113,7 @@ namespace Glory
 		m_pDisplayManager = nullptr;
 		delete m_pSerializedPropertyManager;
 		m_pSerializedPropertyManager = nullptr;
+		delete m_pConsole;
+		m_pConsole = nullptr;
 	}
 }

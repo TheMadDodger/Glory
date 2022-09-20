@@ -1,6 +1,7 @@
 #pragma once
 #include "Game.h"
 #include "CameraManager.h"
+#include "ThreadedVar.h"
 
 namespace Glory
 {
@@ -10,6 +11,7 @@ namespace Glory
 	class Serializers;
 	class DisplayManager;
 	class SerializedPropertyManager;
+	class Console;
 
 	class GloryContext
 	{
@@ -22,6 +24,7 @@ namespace Glory
 		static Serializers* GetSerializers();
 		static DisplayManager* GetDisplayManager();
 		static SerializedPropertyManager* GetSerializedPropertyManager();
+		static Console* GetConsole();
 		static void SetContext(GloryContext* pContext);
 		static GloryContext* GetContext();
 		static GloryContext* CreateContext();
@@ -45,9 +48,9 @@ namespace Glory
 		ResourceTypes* m_pResourceTypes;
 		Serializers* m_pSerializers;
 		DisplayManager* m_pDisplayManager;
-
-		std::vector<Object*> m_pAllObjects;
-
 		SerializedPropertyManager* m_pSerializedPropertyManager;
+		Console* m_pConsole;
+
+		ThreadedVector<Object*> m_pAllObjects;
 	};
 }

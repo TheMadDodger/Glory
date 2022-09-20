@@ -2,6 +2,7 @@
 #include "Undo.h"
 #include "GizmoAction.h"
 #include <glm/gtx/quaternion.hpp>
+#include <sstream>
 
 namespace Glory::Editor
 {
@@ -27,6 +28,7 @@ namespace Glory::Editor
 		m_Transform = translation * rotation * scale;
 		m_LastTransform = m_Transform;
 		m_pGizmo = Gizmos::GetGizmo<DefaultGizmo>(m_pTarget->GetUUID(), m_Transform);
+
 		m_pGizmo->OnManualManipulate = [&](const glm::mat4& newTransform)
 		{
 			m_Transform = newTransform;
@@ -36,16 +38,15 @@ namespace Glory::Editor
 
 	bool TransformEditor::OnGUI()
 	{
-		UpdateTransform();
 		bool change = EntityComponentEditor::OnGUI();
-		glm::mat4 newTransform;
-		if (!m_pGizmo->WasManipulated(newTransform)) return change;
+		UpdateTransform();
+		if (change) m_pGizmo->UpdateTransform(m_Transform);
+		glm::mat4 oldTransform;
+		if (!m_pGizmo->WasManipulated(oldTransform, m_Transform)) return change;
 
 		Undo::StartRecord("Transform");
-		Undo::AddAction(new GizmoAction(m_pTarget->GetUUID(), m_Transform, newTransform));
+		Undo::AddAction(new GizmoAction(m_pTarget->GetUUID(), oldTransform, m_Transform));
 		Undo::StopRecord();
-		m_Transform = newTransform;
-		UpdateTransform();
 		return true;
 	}
 
@@ -57,6 +58,7 @@ namespace Glory::Editor
 	void TransformEditor::UpdateTransform()
 	{
 		Transform& transform = GetTargetComponent();
+
 		if (m_LastTransform == m_Transform)
 		{
 			glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), transform.Scale);
@@ -83,9 +85,24 @@ namespace Glory::Editor
 		forward /= scale.z;
 
 		transform.Position = position;
-		transform.Rotation = glm::conjugate(glm::toQuat(glm::lookAt(glm::vec3(), forward, up)));
+		transform.Rotation = glm::conjugate(glm::quatLookAt(-forward, up));
 		transform.Scale = scale;
 
 		m_LastTransform = m_Transform;
+	}
+
+	void TransformEditor::PrintData(Transform& transform)
+	{
+		Debug::LogInfo("Transform Data Start");
+		std::stringstream stream;
+		stream << "Position: " << transform.Position.x << ", " << transform.Position.y << ", " << transform.Position.z;
+		Debug::LogInfo(stream.str());
+		stream = std::stringstream();
+		stream << "Rotation: " << transform.Rotation.x << ", " << transform.Rotation.y << ", " << transform.Rotation.z << ", " << transform.Rotation.w;
+		Debug::LogInfo(stream.str());
+		stream = std::stringstream();
+		stream << "Scale: " << transform.Scale.x << ", " << transform.Scale.y << ", " << transform.Scale.z;
+		Debug::LogInfo(stream.str());
+		Debug::LogInfo("Transform Data End");
 	}
 }

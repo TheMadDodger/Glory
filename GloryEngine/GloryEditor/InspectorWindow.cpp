@@ -22,6 +22,7 @@ namespace Glory::Editor
 		
 		if (pSelectedObject != m_pCurrentObject && !m_Locked)
 		{
+			if (m_pEditor) Editor::ReleaseEditor(m_pEditor);
 			m_pCurrentObject = pSelectedObject;
 			CreateEditor();
 		}
