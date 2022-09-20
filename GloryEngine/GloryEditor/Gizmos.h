@@ -56,8 +56,9 @@ namespace Glory::Editor
 	public:
 		virtual void OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection) = 0;
 
-		virtual bool WasManipulated(glm::mat4& newTransform) = 0;
+		virtual bool WasManipulated(glm::mat4& oldTransform, glm::mat4& newTransform) = 0;
 		virtual void ManualManipulate(const glm::mat4& newTransform) = 0;
+		virtual void UpdateTransform(const glm::mat4& newTransform) = 0;
 
 	protected:
 		GLORY_EDITOR_API IGizmo();
@@ -73,16 +74,18 @@ namespace Glory::Editor
 		GLORY_EDITOR_API DefaultGizmo(glm::mat4 pTransform);
 		virtual GLORY_EDITOR_API ~DefaultGizmo();
 
-		virtual bool WasManipulated(glm::mat4& newTransform) override;
+		virtual bool WasManipulated(glm::mat4& oldTransform, glm::mat4& newTransform) override;
 		virtual void ManualManipulate(const glm::mat4& newTransform) override;
+		virtual void UpdateTransform(const glm::mat4& newTransform) override;
 
-		std::function<void(const glm::mat4& newTransform)> OnManualManipulate;
+		std::function<void(const glm::mat4&)> OnManualManipulate;
 
 	private:
 		virtual void OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection) override;
 
 	private:
 		glm::mat4 m_Transform;
+		glm::mat4 m_OldTransform;
 		bool m_IsManipulating;
 		bool m_WasManipulated;
 	};

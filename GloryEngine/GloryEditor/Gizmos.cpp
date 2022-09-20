@@ -63,7 +63,7 @@ namespace Glory::Editor
 	GLORY_EDITOR_API IGizmo::IGizmo() {}
 	GLORY_EDITOR_API IGizmo::~IGizmo() {}
 
-	GLORY_EDITOR_API DefaultGizmo::DefaultGizmo(glm::mat4 transform) : m_Transform(transform), m_IsManipulating(false), m_WasManipulated(false)
+	GLORY_EDITOR_API DefaultGizmo::DefaultGizmo(glm::mat4 transform) : m_Transform(transform), m_OldTransform(transform), m_IsManipulating(false), m_WasManipulated(false)
 	{
 	}
 
@@ -86,15 +86,24 @@ namespace Glory::Editor
 		}
 	}
 
-	bool DefaultGizmo::WasManipulated(glm::mat4& newTransform)
+	bool DefaultGizmo::WasManipulated(glm::mat4& oldTransform, glm::mat4& newTransform)
 	{
 		newTransform = m_Transform;
+		oldTransform = m_OldTransform;
+		if (m_WasManipulated) m_OldTransform = m_Transform;
 		return m_WasManipulated;
 	}
 
 	void DefaultGizmo::ManualManipulate(const glm::mat4& newTransform)
 	{
 		m_Transform = newTransform;
-		if (OnManualManipulate != NULL) OnManualManipulate(newTransform);
+		m_OldTransform = m_Transform;
+		if (OnManualManipulate != NULL) OnManualManipulate(m_Transform);
+	}
+
+	void DefaultGizmo::UpdateTransform(const glm::mat4& newTransform)
+	{
+		m_Transform = newTransform;
+		m_OldTransform = m_Transform;
 	}
 }

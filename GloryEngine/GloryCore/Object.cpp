@@ -22,9 +22,7 @@ namespace Glory
 	{
 		m_Inheritence.clear();
 		GloryContext* pContext = GloryContext::GetContext();
-		auto it = std::find(pContext->m_pAllObjects.begin(), pContext->m_pAllObjects.end(), this);
-		if (it == pContext->m_pAllObjects.end()) return;
-		pContext->m_pAllObjects.erase(it);
+		pContext->m_pAllObjects.Erase(this);
 	}
 
 	const UUID& Object::GetUUID() const
@@ -52,9 +50,9 @@ namespace Glory
 	Object* Object::FindObject(UUID id)
 	{
 		GloryContext* pContext = GloryContext::GetContext();
-		auto it = std::find_if(pContext->m_pAllObjects.begin(), pContext->m_pAllObjects.end(), [&](Object* pObject) { return id == pObject->m_ID; });
-		if (it == pContext->m_pAllObjects.end()) return nullptr;
-		return *it;
+		Object* pObject = nullptr;
+		if (!pContext->m_pAllObjects.Find([&](Object* pObject) { return id == pObject->m_ID; }, pObject)) return nullptr;
+		return pObject;
 	}
 
 	void Object::PushInheritence(const std::type_index& type)

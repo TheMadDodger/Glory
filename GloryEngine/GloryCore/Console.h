@@ -1,9 +1,12 @@
 #pragma once
 #include "Commands.h"
 #include "IConsole.h"
+#include "GloryContext.h"
 #include <thread>
 #include <queue>
 #include <functional>
+
+#define CONSOLE_INSTANCE GloryContext::GetContext()->GetConsole()
 
 namespace Glory
 {
@@ -26,21 +29,21 @@ namespace Glory
 		static void RegisterConsole()
 		{
 			IConsole* pConsole = new T();
-			m_pConsoles.push_back(pConsole);
+			CONSOLE_INSTANCE->m_pConsoles.push_back(pConsole);
 			pConsole->Initialize();
 		}
 
 		static void RegisterConsole(IConsole* pConsole)
 		{
-			m_pConsoles.push_back(pConsole);
+			CONSOLE_INSTANCE->m_pConsoles.push_back(pConsole);
 			pConsole->Initialize();
 		}
 
 		static void RemoveConsole(IConsole* pConsole)
 		{
-			auto it = std::find(m_pConsoles.begin(), m_pConsoles.end(), pConsole);
-			if (it == m_pConsoles.end()) return;
-			m_pConsoles.erase(it);
+			auto it = std::find(CONSOLE_INSTANCE->m_pConsoles.begin(), CONSOLE_INSTANCE->m_pConsoles.end(), pConsole);
+			if (it == CONSOLE_INSTANCE->m_pConsoles.end()) return;
+			CONSOLE_INSTANCE->m_pConsoles.erase(it);
 		}
 
 	private:
@@ -61,20 +64,21 @@ namespace Glory
 	private:
 		friend class Engine;
 		friend class Debug;
-		static std::vector<BaseConsoleCommand*> m_pCommands;
-		static std::vector<IConsole*> m_pConsoles;
-		static const int MAX_HISTORY_SIZE = 10;
-		static const int MAX_CONSOLE_SIZE = 2;
-		static int m_CommandHistoryInsertIndex;
-		static int m_CurrentCommandHistorySize;
-		static int m_ConsoleInsertIndex;
-		static int m_CurrentConsoleSize;
-		static bool m_Writing;
-		static bool m_Reading;
-		static Console* m_pInstance;
+		friend class GloryContext;
+		std::vector<BaseConsoleCommand*> m_pCommands;
+		std::vector<IConsole*> m_pConsoles;
+		int m_CommandHistoryInsertIndex = -1;
+		int m_CurrentCommandHistorySize = 0;
+		int m_ConsoleInsertIndex = -1;
+		int m_CurrentConsoleSize = 0;
+		bool m_Writing = false;
+		bool m_Reading = false;
 
 		std::vector<std::string> m_CommandHistory;
 		std::vector<std::string> m_ConsoleLines;
 		std::queue<std::string> m_CommandQueue;
+
+		static const int MAX_HISTORY_SIZE = 10;
+		static const int MAX_CONSOLE_SIZE = 2;
 	};
 }

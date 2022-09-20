@@ -111,6 +111,15 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
+		template<class _Pr>
+		bool Find(_Pr pred, _Ty& out)
+		{
+			auto it = std::find_if(m_Data.begin(), m_Data.end(), pred);
+			if (it == m_Data.end()) return false;
+			out = *it;
+			return true;
+		}
+
 		void Do(size_t index, std::function<void(_Ty* value)> callback)
 		{
 			m_Mutex.lock();
