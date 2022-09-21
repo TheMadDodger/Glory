@@ -141,6 +141,8 @@ namespace Glory::Editor
 			}
 
 			m_pChildren[actualIndex]->Change(lastDir.string(), directory);
+			m_pChildren[actualIndex]->Refresh();
+			m_pChildren[actualIndex]->SortChildren();
 		}
 
 		std::vector<ContentBrowserItem*>::iterator it = m_pChildren.begin() + index;
