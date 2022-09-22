@@ -27,8 +27,6 @@ namespace Glory
 			return nullptr;
 		}
 
-		GloryContext::CreateContext();
-
 		YAML::Node node = YAML::LoadFile(m_CFGPath.string());
 		YAML::Node modules = node["Modules"];
 		LoadModules(modules);

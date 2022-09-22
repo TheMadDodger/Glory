@@ -27,23 +27,33 @@ int main(int argc, char* argv[])
         //createInfo.ScriptingModulesCount = static_cast<uint32_t>(scriptingModules.size());
         //createInfo.pScriptingModules = scriptingModules.data();
 
+        Glory::GloryContext::CreateContext();
+
         Glory::CommandLine commandLine(argc, argv);
 
         std::string projectPath;
         if (!commandLine.GetValue("projectPath", projectPath))
         {
             Glory::Debug::LogError("Missing project path in launch arguments!");
+            Glory::GloryContext::DestroyContext();
             return -1;
         }
 
         if (!std::filesystem::exists(projectPath))
         {
             Glory::Debug::LogError("Invalid project path!");
+            Glory::GloryContext::DestroyContext();
             return -1;
         }
 
         Glory::Editor::ProjectLock lock(projectPath);
-        if (!lock.Lock()) return -1;
+        if (!lock.Lock())
+        {
+            Glory::Debug::LogError("Project already open in another editor!");
+            Glory::GloryContext::DestroyContext();
+            return -1;
+        }
+
 
         std::filesystem::path engineConfPath = projectPath;
         engineConfPath = engineConfPath.parent_path();
@@ -52,7 +62,12 @@ int main(int argc, char* argv[])
         Glory::EngineLoader engineLoader(engineConfPath);
         Glory::Engine* pEngine = engineLoader.LoadEngine(windowCreateInfo);
         
-        if (pEngine == nullptr) return -1;
+        if (pEngine == nullptr)
+        {
+            Glory::Debug::LogError("The projects engine configuration could not be loaded!");
+            Glory::GloryContext::DestroyContext();
+            return -1;
+        }
 
         Glory::GameSettings gameSettings;
         gameSettings.pEngine = pEngine;

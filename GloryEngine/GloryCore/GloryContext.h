@@ -28,9 +28,9 @@ namespace Glory
 		static void SetContext(GloryContext* pContext);
 		static GloryContext* GetContext();
 		static GloryContext* CreateContext();
+		static void DestroyContext();
 
 	private:
-		static void DestroyContext();
 		void Initialize();
 
 	private:

@@ -9,6 +9,7 @@ namespace Glory::EditorLauncher
     void EditorManager::GetInstalledEditors()
     {
         std::filesystem::path searchPath = "./Editor";
+        if (!std::filesystem::exists(searchPath)) return;
         for (const auto& entry : std::filesystem::directory_iterator(searchPath))
         {
             if (!entry.is_directory()) continue;
