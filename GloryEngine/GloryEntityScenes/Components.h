@@ -12,6 +12,7 @@
 #include <Layer.h>
 #include <LightData.h>
 #include <Script.h>
+#include "Entity.h"
 
 namespace Glory
 {
@@ -26,7 +27,7 @@ namespace Glory
 
 		glm::mat4 MatTransform;
 
-		Transform* Parent;
+		Entity Parent;
 	};
 
 	struct MeshFilter

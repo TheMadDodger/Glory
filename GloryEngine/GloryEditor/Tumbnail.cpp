@@ -1,6 +1,7 @@
 #include <AssetManager.h>
-#include <EditorAssets.h>
 #include <Engine.h>
+#include "EditorAssets.h"
+#include "EditorAssets.h"
 #include "Tumbnail.h"
 #include "TumbnailGenerator.h"
 
@@ -44,7 +45,7 @@ namespace Glory::Editor
 		m_pGenerators.push_back(pGenerator);
 	}
 
-	void Tumbnail::Destroy()
+	GLORY_EDITOR_API void Tumbnail::Destroy()
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
 		{
@@ -53,7 +54,7 @@ namespace Glory::Editor
 		m_pGenerators.clear();
 	}
 
-	BaseTumbnailGenerator* Tumbnail::GetGenerator(size_t hashCode)
+	GLORY_EDITOR_API BaseTumbnailGenerator* Tumbnail::GetGenerator(size_t hashCode)
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
 		{

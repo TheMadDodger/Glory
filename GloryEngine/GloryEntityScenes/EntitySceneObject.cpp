@@ -41,7 +41,7 @@ namespace Glory
 
 		if (pParent == nullptr)
 		{
-			transform.Parent = nullptr;
+			transform.Parent = Entity();
 			m_pParent = nullptr;
 			return;
 		}
@@ -55,9 +55,7 @@ namespace Glory
 		}
 
 		m_pParent = pEntityParent;
-
-		Transform& parentTransform = parentHandle.GetComponent<Transform>();
-		transform.Parent = &parentTransform;
+		transform.Parent = parentHandle;
 	}
 
 	Entity EntitySceneObject::GetEntityHandle()

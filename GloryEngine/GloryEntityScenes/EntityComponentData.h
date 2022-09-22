@@ -4,17 +4,18 @@
 #include <any>
 #include <UUID.h>
 #include "EntityID.h"
+#include <Glory.h>
 
 namespace Glory
 {
 	class EntityComponentData
 	{
 	public:
-		EntityComponentData(EntityID entity, UUID uuid) : m_Entity(entity), m_UUID(uuid) {}
-		virtual ~EntityComponentData() {}
+		GLORY_API EntityComponentData(EntityID entity, UUID uuid) : m_Entity(entity), m_UUID(uuid) {}
+		GLORY_API virtual ~EntityComponentData() {}
 
 		template<typename T, typename... Args>
-		static EntityComponentData Construct(EntityID entity, UUID uuid, Args&&... args)
+		GLORY_API static EntityComponentData Construct(EntityID entity, UUID uuid, Args&&... args)
 		{
 			T data = T(args...);
 			EntityComponentData componentData = EntityComponentData(entity, uuid);
@@ -22,20 +23,26 @@ namespace Glory
 			return componentData;
 		}
 
-		std::type_index GetType()
+		GLORY_API std::type_index GetType()
 		{
 			return m_Data.type();
 		}
 
 		template<typename T>
-		T& GetData()
+		GLORY_API T& GetData()
 		{
+			const std::type_info& type = typeid(T);
 			return std::any_cast<T&>(m_Data);
 		}
 
-		UUID GetComponentUUID() const
+		GLORY_API UUID GetComponentUUID() const
 		{
 			return m_UUID;
+		}
+
+		GLORY_API EntityComponentData& operator=(const EntityComponentData& other)
+		{
+			return *this;
 		}
 
 	private:

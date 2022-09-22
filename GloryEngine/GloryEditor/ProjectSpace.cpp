@@ -2,7 +2,7 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <AssetDatabase.h>
-#include <ContentBrowser.h>
+#include "ContentBrowser.h"
 #include "ProjectSpace.h"
 #include "EditorApplication.h"
 
@@ -12,7 +12,7 @@ namespace Glory::Editor
 	std::mutex ProjectSpace::m_ProjectLock;
 	std::unordered_map<ProjectCallback, std::vector<std::function<void(ProjectSpace*)>>> ProjectSpace::m_ProjectCallbacks;
 
-	void ProjectSpace::OpenProject(const std::string& path)
+	GLORY_EDITOR_API void ProjectSpace::OpenProject(const std::string& path)
 	{
 		CloseProject();
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
@@ -22,7 +22,7 @@ namespace Glory::Editor
 		EditorAssetLoader::Start();
 	}
 
-	void ProjectSpace::CloseProject()
+	GLORY_EDITOR_API void ProjectSpace::CloseProject()
 	{
 		if (m_pCurrentProject == nullptr) return;
 		EditorAssetLoader::Stop();
@@ -33,7 +33,7 @@ namespace Glory::Editor
 		lock.unlock();
 	}
 
-	ProjectSpace* ProjectSpace::GetOpenProject()
+	GLORY_EDITOR_API ProjectSpace* ProjectSpace::GetOpenProject()
 	{
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		ProjectSpace* pProject = m_pCurrentProject;
@@ -41,12 +41,12 @@ namespace Glory::Editor
 		return pProject;
 	}
 
-	bool ProjectSpace::ProjectExists(const std::string& path)
+	GLORY_EDITOR_API bool ProjectSpace::ProjectExists(const std::string& path)
 	{
 		return std::filesystem::exists(path);
 	}
 
-	bool ProjectSpace::ProjectExists(const std::string& path, const std::string& name)
+	GLORY_EDITOR_API bool ProjectSpace::ProjectExists(const std::string& path, const std::string& name)
 	{
 		std::filesystem::path projectPath(path);
 		projectPath.append(name);
@@ -54,7 +54,7 @@ namespace Glory::Editor
 		return ProjectExists(projectPath.string());
 	}
 
-	std::string ProjectSpace::NewProject(const std::string& path, const std::string& name)
+	GLORY_EDITOR_API std::string ProjectSpace::NewProject(const std::string& path, const std::string& name)
 	{
 		std::filesystem::path projectPath(path);
 		projectPath.append(name);
@@ -78,22 +78,22 @@ namespace Glory::Editor
 		return projectFilePath.string();
 	}
 
-	std::string ProjectSpace::Name()
+	GLORY_EDITOR_API std::string ProjectSpace::Name()
 	{
 		return m_ProjectName;
 	}
 
-	std::string ProjectSpace::RootPath()
+	GLORY_EDITOR_API std::string ProjectSpace::RootPath()
 	{
 		return m_ProjectRootPath;
 	}
 
-	std::string ProjectSpace::ProjectPath()
+	GLORY_EDITOR_API std::string ProjectSpace::ProjectPath()
 	{
 		return m_ProjectFilePath;
 	}
 
-	std::string ProjectSpace::CachePath()
+	GLORY_EDITOR_API std::string ProjectSpace::CachePath()
 	{
 		return m_CachePath;
 	}
@@ -116,7 +116,6 @@ namespace Glory::Editor
 	{
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		CreateFolder("Assets");
-		ImportModuleAssets(false);
 		CreateFolder("Cache");
 		CreateFolder("Cache/ShaderSource");
 		CreateFolder("Cache/CompiledShaders");
@@ -152,11 +151,20 @@ namespace Glory::Editor
 		std::filesystem::create_directories(path);
 	}
 
-	void ProjectSpace::ImportModuleAssets(bool overwrite)
+	void ProjectSpace::Save()
 	{
-		std::filesystem::path path = "./ModuleAssets/";
-		std::filesystem::path moduleAssetsPath = RootPath() + "\\ModuleAssets\\";
-		if (!overwrite && std::filesystem::exists(moduleAssetsPath)) return;
-		std::filesystem::copy(path, moduleAssetsPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+		ProjectSpace* pProject = GetOpenProject();
+		if (pProject == nullptr) return;
+		pProject->SaveProject();
+	}
+
+	void ProjectSpace::SaveProject()
+	{
+		std::filesystem::path projectVersionTxtPath = m_ProjectRootPath;
+		projectVersionTxtPath.append("ProjectVersion.txt");
+		std::ofstream fileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
+		std::string versionString = Glory::Editor::Version.GetVersionString();
+		fileStream.write(versionString.c_str(), versionString.size());
+		fileStream.close();
 	}
 }

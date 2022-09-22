@@ -1,5 +1,6 @@
 #include "CoreExceptions.h"
 #include "Game.h"
+#include "GloryContext.h"
 #include "Engine.h"
 
 namespace Glory
@@ -25,6 +26,13 @@ namespace Glory
 	{
 		if (!m_bGameCreated)
 		{
+			Game* pGame = GloryContext::GetGame();
+			if (pGame != nullptr)
+			{
+				m_Game = *pGame;
+				m_bGameCreated = true;
+				return m_Game;
+			}
 			throw new GameDoesNotExistException();
 		}
 

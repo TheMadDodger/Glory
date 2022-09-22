@@ -1,8 +1,11 @@
 #pragma once
-#include "Object.h"
 #include <typeindex>
 #include <yaml-cpp/yaml.h>
 #include "YAML_GLM.h"
+#include "GloryContext.h"
+#include "Object.h"
+
+#define SERIALIZERS Glory::GloryContext::GetSerializers()->m_pRegisteredSerializers
 
 namespace Glory
 {
@@ -13,7 +16,7 @@ namespace Glory
 		static void RegisterSerializer()
 		{
 			Serializer* pSerializer = new T();
-			m_pRegisteredSerializers.push_back(pSerializer);
+			SERIALIZERS.push_back(pSerializer);
 		}
 
 		static Serializer* GetSerializer(Object* pObject);
@@ -59,7 +62,21 @@ namespace Glory
 		static void Cleanup();
 
 	private:
-		static std::vector<Serializer*> m_pRegisteredSerializers;
+	};
+
+	class PropertySerializer;
+
+	class Serializers
+	{
+	public:
+		Serializers();
+		virtual ~Serializers();
+
+	private:
+		friend class Serializer;
+		friend class PropertySerializer;
+		std::vector<Serializer*> m_pRegisteredSerializers;
+		std::vector<PropertySerializer*> m_pRegisteredPropertySerializers;
 	};
 
 	template<class TObject>

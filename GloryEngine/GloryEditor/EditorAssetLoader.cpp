@@ -37,12 +37,11 @@ namespace Glory::Editor
 		ProcessDirectory(assetPath.string(), true);
 		RemoveDeletedAssets();
 
-		assetPath = pProject->RootPath();
-		assetPath.append("ModuleAssets");
-		ProcessDirectory(assetPath.string(), true);
+		assetPath = "./Modules/";
+		ProcessDirectory(assetPath.string(), true, "\\Assets\\");
 	}
 
-	void EditorAssetLoader::ProcessDirectory(const std::string& path, bool recursive)
+	void EditorAssetLoader::ProcessDirectory(const std::string& path, bool recursive, const std::string& folderFilter)
 	{
 		if (!std::filesystem::is_directory(path)) return;
 
@@ -50,9 +49,12 @@ namespace Glory::Editor
 		{
 			if (entry.is_directory())
 			{
-				if (recursive) ProcessDirectory(entry.path().string());
+				if (recursive) ProcessDirectory(entry.path().string(), true, folderFilter);
 				continue;
 			}
+
+			std::string pathString = entry.path().string();
+			if (folderFilter != "" && pathString.find(folderFilter) == std::string::npos) continue;
 			ProcessFile(entry.path());
 		}
 	}
@@ -70,6 +72,12 @@ namespace Glory::Editor
 		std::filesystem::path assetsPath = pProject->RootPath();
 		assetsPath.append("Assets");
 		std::string relativePathToFile = filePath.lexically_relative(assetsPath).string();
+		bool relativePath = true;
+		if (relativePathToFile == "")
+		{
+			relativePathToFile = filePath.string();
+			relativePath = false;
+		}
 
 		if (std::filesystem::exists(metaFilePath))
 		{
@@ -113,7 +121,7 @@ namespace Glory::Editor
 
 		// Generate a meta file
 		ResourceMeta meta(metaFilePath.string(), ext.string(), UUID(), hash);
-		meta.Write(pLoader);
+		meta.Write(pLoader, relativePath);
 		meta.Read();
 
 		AssetDatabase::InsertAsset(relativePathToFile, meta);
@@ -126,6 +134,8 @@ namespace Glory::Editor
 		{
 			std::filesystem::path path = Game::GetAssetPath();
 			path.append(assetLocation.m_Path);
+			if (std::filesystem::exists(path)) return;
+			path = assetLocation.m_Path;
 			if (std::filesystem::exists(path)) return;
 			toDeleteAssets.push_back(uuid);
 		});

@@ -2,6 +2,7 @@
 #include <map>
 #include "ImageData.h"
 #include "Texture.h"
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
@@ -10,7 +11,7 @@ namespace Glory::Editor
 	class Tumbnail
 	{
 	public:
-		static Texture* GetTumbnail(UUID uuid);
+		static GLORY_EDITOR_API Texture* GetTumbnail(UUID uuid);
 
 		template<class T>
 		static void AddGenerator()
@@ -19,8 +20,8 @@ namespace Glory::Editor
 			AddGenerator(pGenerator);
 		}
 
-		static void Destroy();
-		static BaseTumbnailGenerator* GetGenerator(size_t hashCode);
+		static GLORY_EDITOR_API void Destroy();
+		static GLORY_EDITOR_API BaseTumbnailGenerator* GetGenerator(size_t hashCode);
 
 	private:
 		static void AddGenerator(BaseTumbnailGenerator* pGenerator);

@@ -1,6 +1,6 @@
 #pragma once
 #include "EditorWindow.h"
-#include <ContentBrowserItem.h>
+#include "ContentBrowserItem.h"
 #include <Resource.h>
 
 namespace Glory::Editor

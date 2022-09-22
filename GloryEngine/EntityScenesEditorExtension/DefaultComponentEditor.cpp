@@ -1,6 +1,7 @@
 #include "DefaultComponentEditor.h"
 #include <imgui.h>
 #include <PropertyDrawer.h>
+#include <Undo.h>
 
 namespace Glory::Editor
 {
@@ -14,11 +15,13 @@ namespace Glory::Editor
 
 	bool DefaultComponentEditor::OnGUI()
 	{
+		Undo::StartRecord("Property Change", m_pTarget->GetUUID());
 		bool change = false;
 		for (size_t i = 0; i < m_Properties.size(); i++)
 		{
 			change |= PropertyDrawer::DrawProperty(m_Properties[i]);
 		}
+		Undo::StopRecord();
 		return change;
 	}
 

@@ -23,15 +23,16 @@ namespace Glory::Editor
 			return pImage;
 		}
 
+		m_AlreadyRequestedTumbnails.push_back(id);
+
 		AssetManager::GetAsset(id, [&](Resource* pResource)
 		{
 			UUID uuid = pResource->GetUUID();
 			auto it = std::find(m_AlreadyRequestedTumbnails.begin(), m_AlreadyRequestedTumbnails.end(), uuid);
-			m_AlreadyRequestedTumbnails.erase(it);
 			m_pLoadedImages[uuid] = (ImageData*)pResource;
+			if (it == m_AlreadyRequestedTumbnails.end()) return;
+			m_AlreadyRequestedTumbnails.erase(it);
 		});
-
-		m_AlreadyRequestedTumbnails.push_back(id);
 		return nullptr;
 	}
 }

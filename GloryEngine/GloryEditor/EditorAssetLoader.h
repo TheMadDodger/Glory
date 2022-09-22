@@ -15,7 +15,7 @@ namespace Glory::Editor
 		static void Stop();
 		static void LoadAll();
 
-		static void ProcessDirectory(const std::string& path, bool recursive = true);
+		static void ProcessDirectory(const std::string& path, bool recursive = true, const std::string& folderFilter = "");
 		static void ProcessFile(const std::filesystem::path& filePath);
 		static void RemoveDeletedAssets();
 		static void Run();

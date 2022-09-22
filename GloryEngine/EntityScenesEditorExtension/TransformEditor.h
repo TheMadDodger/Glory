@@ -1,6 +1,7 @@
 #pragma once
 #include "EntityComponentEditor.h"
 #include <Components.h>
+#include <Gizmos.h>
 
 namespace Glory::Editor
 {
@@ -17,9 +18,12 @@ namespace Glory::Editor
         virtual std::string Name() override;
 
         void UpdateTransform();
+        void PrintData(Transform& transform);
 
     private:
         glm::mat4 m_Transform;
         glm::mat4 m_LastTransform;
+
+        DefaultGizmo* m_pGizmo;
 	};
 }

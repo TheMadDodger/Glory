@@ -35,6 +35,8 @@ namespace Glory
 		size_t TypeCount();
 		bool GetType(size_t index, std::type_index& type);
 
+		static Object* FindObject(UUID id);
+
 	protected:
 		std::vector<std::type_index> m_Inheritence;
 

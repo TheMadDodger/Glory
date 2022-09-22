@@ -1,6 +1,7 @@
 #pragma once
 #include <Object.h>
 #include <functional>
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
@@ -45,8 +46,8 @@ namespace Glory::Editor
 	class ObjectMenu
 	{
 	public:
-		static void Open(Object* pObject, ObjectMenuType forceMenuType);
-		static void AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus = ObjectMenuType::T_Undefined);
+		static GLORY_EDITOR_API void Open(Object* pObject, ObjectMenuType forceMenuType);
+		static GLORY_EDITOR_API void AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus = ObjectMenuType::T_Undefined);
 
 	private:
 		static void OnGUI();

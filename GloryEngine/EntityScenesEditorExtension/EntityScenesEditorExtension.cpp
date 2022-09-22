@@ -20,3 +20,14 @@ namespace Glory::Editor
 		Editor::RegisterEditor<TransformEditor>();
 	}
 }
+
+GLORY_API Glory::Editor::BaseEditorExtension* LoadExtension()
+{
+	return new Glory::Editor::EntityScenesEditorExtension();
+}
+
+GLORY_API void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
+{
+	Glory::GloryContext::SetContext(pContext);
+	ImGui::SetCurrentContext(pImGUIContext);
+}

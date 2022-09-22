@@ -6,6 +6,7 @@
 #include "OGLMaterial.h"
 #include "GLTexture.h"
 #include "OGLRenderTexture.h"
+#include "GloryOGL.h"
 
 namespace Glory
 {

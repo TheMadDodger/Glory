@@ -1,14 +1,14 @@
 #pragma once
 #include "ObjectMenu.h"
+#include "GloryEditor.h"
 #include <Object.h>
 #include <filesystem>
 
-#define OBJECTMENU_CALLBACK(name) void name(Object* pObject, const ObjectMenuType& currentMenu)
+#define OBJECTMENU_CALLBACK(name) GLORY_EDITOR_API void name(Object* pObject, const ObjectMenuType& currentMenu)
 
 namespace Glory::Editor
 {
-	std::filesystem::path GetUnqiueFilePath(const std::filesystem::path& start);
-
+	GLORY_EDITOR_API std::filesystem::path GetUnqiueFilePath(const std::filesystem::path& start);
 
 	OBJECTMENU_CALLBACK(CopyObjectCallback);
 	OBJECTMENU_CALLBACK(PasteObjectCallback);
@@ -26,6 +26,6 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(SaveScene);
 	OBJECTMENU_CALLBACK(SaveSceneAs);
 
-	void DeleteFolder();
-	void DeleteResource();
+	GLORY_EDITOR_API void DeleteFolder();
+	GLORY_EDITOR_API void DeleteResource();
 }

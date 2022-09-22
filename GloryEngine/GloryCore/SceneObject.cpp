@@ -102,6 +102,12 @@ namespace Glory
 
 	void SceneObject::SetScene(GScene* pScene)
 	{
+		if (m_pScene)
+		{
+			auto it = std::find(m_pScene->m_pSceneObjects.begin(), m_pScene->m_pSceneObjects.end(), this);
+			if (it != m_pScene->m_pSceneObjects.end()) m_pScene->m_pSceneObjects.erase(it);
+		}
+
 		m_pScene = pScene;
 		m_pScene->m_pSceneObjects.push_back(this);
 	}
@@ -109,6 +115,15 @@ namespace Glory
 	GScene* SceneObject::GetScene() const
 	{
 		return m_pScene;
+	}
+
+	void SceneObject::DestroyOwnChildren()
+	{
+		for (size_t i = 0; i < m_pChildren.size(); i++)
+		{
+			m_pScene->DeleteObject(m_pChildren[i]);
+		}
+		m_pChildren.clear();
 	}
 
 	const std::string& SceneObject::Name()

@@ -62,6 +62,7 @@ namespace Glory
 		virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) override;
 		virtual void Swap() override;
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
+		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;
 
 	private:
 		virtual void OnInitialize() override;

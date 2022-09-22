@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <ImGuizmo.h>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <GloryContext.h>
 
 namespace Glory::Editor
 {
@@ -14,7 +15,7 @@ namespace Glory::Editor
 
     void SceneViewCamera::Initialize()
     {
-        m_Camera = CameraManager::GetNewOrUnusedCamera();
+        m_Camera = GloryContext::GetCameraManager()->GetNewOrUnusedCamera();
 		m_Camera.SetDisplayIndex(-1);
 		m_Camera.SetPriority(-69420);
 		m_Camera.SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));

@@ -17,6 +17,7 @@ namespace Glory
 
 	bool Entity::IsValid()
 	{
+		if (!m_pEntityScene) return false;
 		return m_pEntityScene->m_Registry.IsValid(m_EntityID);
 	}
 

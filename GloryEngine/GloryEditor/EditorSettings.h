@@ -11,7 +11,6 @@ namespace Glory::Editor
 		void Load(Engine* pEngine);
 		void Save(Engine* pEngine);
 
-
 	private:
 		void LoadSettingsFile(Engine* pEngine);
 		void LoadDefaultSettings(Engine* pEngine);

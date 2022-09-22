@@ -9,7 +9,10 @@ namespace Glory
 		: m_Path(""), m_Extension(""), m_Node(), m_UUID(UUID()), m_TypeHash(0), m_SerializedVersion(0) {}
 
 	ResourceMeta::ResourceMeta(const std::filesystem::path& path, const std::string& extension)
-		: m_Path(path.lexically_relative(Game::GetAssetPath()).string()), m_Extension(extension), m_Node(YAML::LoadFile(path.string())), m_TypeHash(0), m_SerializedVersion(0) {}
+		: m_Path(path.lexically_relative(Game::GetAssetPath()).string()), m_Extension(extension), m_Node(YAML::LoadFile(path.string())), m_TypeHash(0), m_SerializedVersion(0)
+	{
+		if (m_Path == "") m_Path = path.string();
+	}
 	
 	ResourceMeta::ResourceMeta(const std::string& path, const std::string& extension, UUID uuid, size_t hash)
 		: m_Path(path), m_Extension(extension), m_UUID(uuid), m_TypeHash(hash), m_SerializedVersion(0) {}
@@ -49,10 +52,11 @@ namespace Glory
 		return node.as<size_t>();
 	}
 
-	void ResourceMeta::Write(LoaderModule* pLoader) const
+	void ResourceMeta::Write(LoaderModule* pLoader, bool relativePath) const
 	{
 		std::filesystem::path fullPath = Game::GetAssetPath();
 		fullPath = fullPath.append(m_Path);
+		if (!relativePath) fullPath = m_Path;
 		YAML::Emitter emitter;
 		emitter << YAML::BeginMap;
 		if (m_ImportSettings.has_value())
@@ -95,6 +99,8 @@ namespace Glory
 	{
 		std::filesystem::path fullPath = Game::GetAssetPath();
 		fullPath = fullPath.append(m_Path);
+		if (!std::filesystem::exists(fullPath))
+			fullPath = m_Path;
 		
 		if (!std::filesystem::exists(fullPath) || std::filesystem::is_directory(fullPath)) return;
 

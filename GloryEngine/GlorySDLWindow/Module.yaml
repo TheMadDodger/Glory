@@ -1,0 +1,6 @@
+Name: "SDL Window"
+Type: Window
+Dependencies: ["SDL2"]
+Editor:
+ Backend: GloryEditorSDL
+ Extensions: []

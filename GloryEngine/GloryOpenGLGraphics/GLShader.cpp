@@ -2,6 +2,7 @@
 #include "OpenGLGraphicsModule.h"
 #include <Debug.h>
 #include "GLConverter.h"
+#include "GloryOGL.h"
 
 namespace Glory
 {

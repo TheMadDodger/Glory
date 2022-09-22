@@ -1,4 +1,5 @@
 #pragma once
+#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
@@ -17,9 +18,9 @@ namespace Glory::Editor
 		};
 
 	public:
-		static void OpenPopup(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs);
-		static void OpenModal(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs);
-		static void CloseCurrentPopup();
+		static GLORY_EDITOR_API void OpenPopup(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs);
+		static GLORY_EDITOR_API void OpenModal(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs);
+		static GLORY_EDITOR_API void CloseCurrentPopup();
 
 	private:
 		friend class MainEditor;

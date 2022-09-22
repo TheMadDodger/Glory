@@ -1,0 +1,5 @@
+Name: "Mono Scripting"
+Type: Scripting
+Dependencies: []
+Editor:
+ Extensions: ["GloryEntitiesMonoExtender"]

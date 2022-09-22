@@ -1,4 +1,5 @@
 #include "Module.h"
+#include "GloryContext.h"
 
 namespace Glory
 {
@@ -18,5 +19,30 @@ namespace Glory
     bool Module::HasPriority()
     {
         return false;
+    }
+
+    const ModuleMetaData& Module::GetMetaData() const
+    {
+        return m_MetaData;
+    }
+
+    void Module::SetMetaData(const ModuleMetaData& metaData)
+    {
+        m_MetaData = metaData;
+        std::filesystem::path path = m_MetaData.Path();
+        m_ModulePath = path.parent_path();
+        int a = 0;
+    }
+
+    const std::filesystem::path& Module::GetPath() const
+    {
+        return m_ModulePath;
+    }
+
+    bool Module::GetResourcePath(const std::string& resource, std::filesystem::path& path) const
+    {
+        path = m_ModulePath;
+        path.append("Resources").append(resource);
+        return std::filesystem::exists(path);
     }
 }

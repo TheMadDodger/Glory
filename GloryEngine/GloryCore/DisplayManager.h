@@ -3,6 +3,8 @@
 #include <vector>
 #include "Engine.h"
 
+#define DISPLAYMANAGR Glory::GloryContext::GetDisplayManager()
+
 namespace Glory
 {
 	class DisplayManager
@@ -24,6 +26,7 @@ namespace Glory
 
 	private:
 		friend class RendererModule;
-		static RenderTexture* m_pRenderTextures[MAX_DISPLAYS];
+		friend class GloryContext;
+		RenderTexture* m_pRenderTextures[MAX_DISPLAYS];
 	};
 }

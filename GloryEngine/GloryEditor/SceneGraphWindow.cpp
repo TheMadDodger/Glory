@@ -3,9 +3,9 @@
 #include "EditorSceneManager.h"
 #include "Selection.h"
 #include "ObjectMenu.h"
+#include "ImGuiHelpers.h"
 #include <Game.h>
 #include <Engine.h>
-#include <ImGuiHelpers.h>
 
 namespace Glory::Editor
 {

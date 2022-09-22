@@ -1,16 +1,17 @@
 project "GloryVulkanGraphics"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineoutdir}")
+	targetdir ("%{moduleOutDir}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -32,6 +33,36 @@ project "GloryVulkanGraphics"
 		"%{GloryIncludeDir.core}"
 	}
 
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}",
+	}
+
+	links
+	{
+		"vulkan-1",
+		"GloryCore",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"yaml-cpp",
+	}
+
+	defines
+	{
+		"GLORY_EXPORTS"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+	}
+
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v142"
@@ -45,8 +76,18 @@ project "GloryVulkanGraphics"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			"%{vulkan_sdk}/Lib32",
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			"%{vulkan_sdk}/Lib",
+		}
 
 	filter "configurations:Debug"
 		runtime "Debug"

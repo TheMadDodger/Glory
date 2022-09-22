@@ -1,6 +1,10 @@
 #pragma once
 #include <Object.h>
 #include <typeindex>
+#include "GloryEditor.h"
+
+//#define REGISTERED_EDITORS EditorContext::GetEditors()->m_pRegisteredEditors
+//#define ACTIVE_EDITORS EditorContext::GetEditors()->m_pActiveEditors
 
 namespace Glory::Editor
 {
@@ -11,25 +15,28 @@ namespace Glory::Editor
 		static void RegisterEditor()
 		{
 			Editor* pEditor = new T();
-			m_pRegisteredEditors.push_back(pEditor);
+			RegisterEditor(pEditor);
 		}
 
+		static GLORY_EDITOR_API void RegisterEditor(Editor* pEditor);
+
 		virtual const std::type_index& GetEditedType() = 0;
-		virtual void Initialize();
+		virtual GLORY_EDITOR_API void Initialize();
 		virtual bool OnGUI() = 0;
 
-		static Editor* CreateEditor(Object* pObject);
-
-		static size_t GetID(Editor* pEditor);
-
-		virtual std::string Name();
+		static GLORY_EDITOR_API Editor* CreateEditor(Object* pObject);
+		static GLORY_EDITOR_API size_t GetID(Editor* pEditor);
+		virtual GLORY_EDITOR_API std::string Name();
+		static GLORY_EDITOR_API std::vector<Editor*> FindEditors(UUID uuid);
+		static GLORY_EDITOR_API void ReleaseEditor(Editor* pEditor);
+		GLORY_EDITOR_API Object* GetTarget() const;
 
 	protected:
 		Object* m_pTarget;
 
 	protected:
-		Editor();
-		virtual ~Editor();
+		GLORY_EDITOR_API Editor();
+		virtual GLORY_EDITOR_API ~Editor();
 
 	private:
 		friend class EditorApp;
@@ -37,7 +44,6 @@ namespace Glory::Editor
 		static void Cleanup();
 		virtual Editor* Create() = 0;
 
-	private:
 		static std::vector<Editor*> m_pRegisteredEditors;
 		static std::vector<Editor*> m_pActiveEditors;
 	};
@@ -58,6 +64,6 @@ namespace Glory::Editor
 		}
 
 		// This function ensures that T is of type Object by causing a compiler error if it isn't
-		void CompilerTest();
+		void GLORY_EDITOR_API CompilerTest();
 	};
 }

@@ -77,18 +77,27 @@ namespace Glory
 		static void ReadExtensions(size_t index, const std::string& extensions);
 
 	private:
-		static std::vector<ResourceType> m_ResourceTypes;
-		static std::unordered_map<std::string, size_t> m_ExtensionToType;
-		static std::unordered_map<size_t, size_t> m_HashToType;
-
-		static std::vector<BasicTypeData> m_BasicTypes;
-		static std::unordered_map<size_t, size_t> m_HashToBasicType;
-		static std::unordered_map<std::string, size_t> m_NameToBasicType;
-		
 		static std::hash<std::type_index> m_Hasher;
 
 		const size_t m_TypeHash;
 		const std::string m_Extensions;
 		std::vector<size_t> m_SubTypes;
+	};
+
+	class ResourceTypes
+	{
+	public:
+		ResourceTypes();
+		virtual ~ResourceTypes();
+
+	private:
+		friend class ResourceType;
+		std::vector<ResourceType> m_ResourceTypes;
+		std::unordered_map<std::string, size_t> m_ExtensionToType;
+		std::unordered_map<size_t, size_t> m_HashToType;
+
+		std::vector<BasicTypeData> m_BasicTypes;
+		std::unordered_map<size_t, size_t> m_HashToBasicType;
+		std::unordered_map<std::string, size_t> m_NameToBasicType;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorRenderImpl.h"
 #include "EditorWindowImpl.h"
+#include "GloryEditor.h"
 #include <imgui.h>
 #include <Game.h>
 
@@ -27,8 +28,8 @@ namespace Glory::Editor
 
 		void Wait(const EditorRenderState& waitState);
 
-		EditorWindowImpl* GetWindowImpl();
-		EditorRenderImpl* GetRenderImpl();
+		GLORY_EDITOR_API EditorWindowImpl* GetWindowImpl();
+		GLORY_EDITOR_API EditorRenderImpl* GetRenderImpl();
 
 		void GraphicsThreadBeginRender();
 		void GraphicsThreadEndRender();
@@ -50,6 +51,7 @@ namespace Glory::Editor
 
 		std::mutex m_Mutex;
 		EditorRenderState m_RenderState;
+		ImGuiContext* m_pImguiConext;
 
 		const ImVec4 CLEARCOLOR = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	};

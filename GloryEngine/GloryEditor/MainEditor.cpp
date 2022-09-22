@@ -1,4 +1,10 @@
 #include <imgui.h>
+#include <Game.h>
+#include <Engine.h>
+#include <ImGuizmo.h>
+#include <Serializer.h>
+#include <AssetDatabase.h>
+
 #include "MainEditor.h"
 #include "EditorWindow.h"
 #include "GameWindow.h"
@@ -20,21 +26,17 @@
 #include "SceneTumbnailGenerator.h"
 #include "Editor.h"
 #include "ProfilerWindow.h"
-#include <Game.h>
-#include <Engine.h>
-#include <MaterialEditor.h>
+#include "MaterialEditor.h"
 #include "StandardPropertyDrawers.h"
-#include <MaterialInstanceEditor.h>
-#include <Serializer.h>
+#include "MaterialInstanceEditor.h"
 #include "EditorSceneManager.h"
-#include <AssetDatabase.h>
 #include "AssetReferencePropertyDrawer.h"
 #include "ArrayPropertyDrawer.h"
-#include <ImGuizmo.h>
-#include <Gizmos.h>
+#include "Gizmos.h"
 #include "ObjectMenu.h"
 #include "ObjectMenuCallbacks.h"
-#include <FileDialog.h>
+#include "FileDialog.h"
+#include "Undo.h"
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
@@ -70,7 +72,9 @@ namespace Glory::Editor
 		SetDarkThemeColors();
 
 		m_pProjectPopup->Initialize();
-		m_pProjectPopup->Open();
+
+		//if (ProjectSpace::GetOpenProject() == nullptr)
+		//	m_pProjectPopup->Open();
 
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
@@ -125,7 +129,7 @@ namespace Glory::Editor
 		});
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); });
-		MenuBar::AddMenuItem("File/Save Project", AssetDatabase::Save);
+		MenuBar::AddMenuItem("File/Save Project", []() { AssetDatabase::Save(); ProjectSpace::Save(); });
 		MenuBar::AddMenuItem("File/Create/Empty Object", []()
 		{
 			GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
@@ -154,6 +158,9 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); });
 		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); });
+
+		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo);
+		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo);
 
 		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE);
 		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE);

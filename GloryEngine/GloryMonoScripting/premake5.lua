@@ -1,16 +1,17 @@
 project "GloryMonoScripting"
-	kind "StaticLib"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineoutdir}")
+	targetdir ("%{moduleOutDir}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"Module.yaml"
 	}
 
 	vpaths
@@ -23,18 +24,43 @@ project "GloryMonoScripting"
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
-
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.spirv_cross}",
-
 		"%{GloryIncludeDir.core}",
-
 		"%{mono_install}/include/mono-2.0",
+	}
+
+	libdirs
+	{
+		"%{LibDirs.glory}",
+		"%{LibDirs.shaderc}",
+		"%{LibDirs.spirv_cross}",
+		"%{LibDirs.yaml_cpp}",
+		"%{mono_install}/lib",
+	}
+
+	links
+	{
+		"GloryCore",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"yaml-cpp",
+		"mono-2.0-sgen",
+		"libmono-static-sgen",
 	}
 
 	defines
 	{
-		"GLORY_EXPORT_LIB"
+		"GLORY_EXPORTS"
+	}
+
+	postbuildcommands
+	{
+		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+		--("{COPY} %{LibDirs.GLEW}/*.dll %{moduleOutDir}/Dependencies"),
 	}
 
 	filter "system:windows"

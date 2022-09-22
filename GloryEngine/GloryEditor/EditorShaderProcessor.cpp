@@ -56,7 +56,7 @@ namespace Glory::Editor
 		{ spirv_cross::SPIRType::BaseType::Unknown, { 0 } },
 	};
 
-	EditorShaderData* EditorShaderProcessor::GetShaderSource(ShaderSourceData* pShaderSource)
+	GLORY_EDITOR_API EditorShaderData* EditorShaderProcessor::GetShaderSource(ShaderSourceData* pShaderSource)
 	{
 		UUID uuid = pShaderSource->GetUUID();
 		std::unique_lock<std::mutex> lock(m_QueueLock);

@@ -57,7 +57,8 @@ project "GloryCore"
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLORY_CORE_EXPORTS",
 	}
 
 	filter "system:windows"

@@ -12,7 +12,7 @@ namespace Glory::Editor
 	bool AssetPickerPopup::m_IncludeSubAssets = false;
 	std::function<void(Resource*)> AssetPickerPopup::m_Callback = NULL;
 
-	void AssetPickerPopup::Open(size_t typeHash, UUID* pUUID, bool includeSubAssets)
+	GLORY_EDITOR_API void AssetPickerPopup::Open(size_t typeHash, UUID* pUUID, bool includeSubAssets)
 	{
 		m_Open = true;
 		m_TypeHash = typeHash;
@@ -20,7 +20,7 @@ namespace Glory::Editor
 		m_IncludeSubAssets = includeSubAssets;
 	}
 
-	void AssetPickerPopup::Open(size_t typeHash, std::function<void(Resource*)> callback, bool includeSubAssets)
+	GLORY_EDITOR_API void AssetPickerPopup::Open(size_t typeHash, std::function<void(Resource*)> callback, bool includeSubAssets)
 	{
 		m_Callback = callback;
 		m_Open = true;
@@ -29,7 +29,7 @@ namespace Glory::Editor
 		m_IncludeSubAssets = includeSubAssets;
 	}
 
-	void AssetPickerPopup::OnGUI()
+	GLORY_EDITOR_API void AssetPickerPopup::OnGUI()
 	{
 		if (m_Open)
 		{

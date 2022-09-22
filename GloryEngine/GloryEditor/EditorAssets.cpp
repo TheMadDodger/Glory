@@ -10,7 +10,7 @@ namespace Glory::Editor
 	std::mutex EditorAssets::m_QueueLock;
 	std::vector<ImageData*> EditorAssets::m_pTextureCreationQueue;
 
-	void EditorAssets::LoadAssets()
+	GLORY_EDITOR_API void EditorAssets::LoadAssets()
 	{
 		GraphicsModule* pGraphics = Game::GetGame().GetEngine()->GetGraphicsModule();
 
@@ -35,7 +35,7 @@ namespace Glory::Editor
 		m_IsInitialized = true;
 	}
 
-	void EditorAssets::Destroy()
+	GLORY_EDITOR_API void EditorAssets::Destroy()
 	{
 		for (size_t i = 0; i < m_pEditorImages.size(); i++)
 		{
@@ -45,14 +45,14 @@ namespace Glory::Editor
 		m_pTextures.clear();
 	}
 
-	void EditorAssets::EnqueueTextureCreation(ImageData* pImage)
+	GLORY_EDITOR_API void EditorAssets::EnqueueTextureCreation(ImageData* pImage)
 	{
 		std::unique_lock<std::mutex> lock(m_QueueLock);
 		m_pTextureCreationQueue.push_back(pImage);
 		lock.unlock();
 	}
 
-	Texture* EditorAssets::GetTexture(const std::string& key)
+	GLORY_EDITOR_API Texture* EditorAssets::GetTexture(const std::string& key)
 	{
 		auto it = m_pTextures.find(key);
 		if (it == m_pTextures.end()) return nullptr;

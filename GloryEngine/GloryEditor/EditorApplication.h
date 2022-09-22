@@ -3,59 +3,60 @@
 #include "MainEditor.h"
 #include "ProjectSpace.h"
 #include "EditorShaderProcessor.h"
+#include "EditorAssetLoader.h"
+#include "EditorCreateInfo.h"
 #include <Game.h>
-#include <EditorAssetLoader.h>
-#include <EditorCreateInfo.h>
+#include <Versioning.h>
 
 namespace Glory::Editor
 {
 	class EditorApplication
 	{
 	public:
-		EditorApplication(const EditorCreateInfo& createInfo);
-		virtual ~EditorApplication();
+		GLORY_EDITOR_API EditorApplication(const EditorCreateInfo& createInfo);
+		virtual GLORY_EDITOR_API ~EditorApplication();
 
 		template<class Window, class Renderer>
 		void Initialize(Game& game)
 		{
-			game.OverrideAssetPathFunc([]()
-			{
-				ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-				if (pProject == nullptr) return std::string("./Assets");
-				std::filesystem::path path = pProject->RootPath();
-				path.append("Assets");
-				return path.string();
-			});
+			game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
 
 			auto window = (EditorWindowImpl*)(new Window());
 			auto renderer = (EditorRenderImpl*)(new Renderer());
 			m_pPlatform = new EditorPlatform(window, renderer);
 			window->m_pEditorPlatform = m_pPlatform;
 			renderer->m_pEditorPlatform = m_pPlatform;
-			m_pPlatform->Initialize(game);
-			m_pMainEditor = new MainEditor();
-			m_pMainEditor->Initialize();
-			m_pEditorInstance = this;
-
-			InitializeExtensions();
-
-			m_pShaderProcessor = new EditorShaderProcessor();
+			
+			InitializePlatform(game);
 		}
 
-		void InitializeExtensions();
+		GLORY_EDITOR_API void Initialize(Game& game);
 
-		void Destroy();
-		void Run(Game& game);
 
-		EditorPlatform* GetEditorPlatform();
-		MainEditor* GetMainEditor();
+		GLORY_EDITOR_API void Destroy();
+		GLORY_EDITOR_API void Run(Game& game);
 
-		static EditorApplication* GetInstance();
+		GLORY_EDITOR_API void SetWindowImpl(EditorWindowImpl* pWindowImpl);
+		GLORY_EDITOR_API void SetRendererImpl(EditorRenderImpl* pRendererImpl);
+
+		GLORY_EDITOR_API EditorPlatform* GetEditorPlatform();
+		GLORY_EDITOR_API MainEditor* GetMainEditor();
+
+		static GLORY_EDITOR_API EditorApplication* GetInstance();
+
+		static const Glory::Version Version;
 
 	private:
 		void RenderEditor();
+		void InitializePlatform(Game& game);
+		void InitializeExtensions();
+
+		static std::string AssetPathOverrider();
 
 	private:
+		EditorWindowImpl* m_pTempWindowImpl;
+		EditorRenderImpl* m_pTempRenderImpl;
+
 		EditorPlatform* m_pPlatform;
 		MainEditor* m_pMainEditor;
 		std::vector<BaseEditorExtension*> m_pExtensions;

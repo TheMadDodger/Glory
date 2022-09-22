@@ -1,7 +1,7 @@
-#include "GameWindow.h"
 #include <DisplayManager.h>
-#include <EditorApplication.h>
 #include <imgui.h>
+#include "GameWindow.h"
+#include "EditorApplication.h"
 #include "ImGuiHelpers.h"
 
 namespace Glory::Editor

@@ -10,7 +10,7 @@ namespace Glory::Editor
 	std::vector<PopupManager::Popup> PopupManager::m_Popups = std::vector<Popup>();
 	std::vector<std::string> PopupManager::m_OpeningPopupNames = std::vector<std::string>();
 
-	void PopupManager::OpenPopup(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
+	GLORY_EDITOR_API void PopupManager::OpenPopup(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
 	{
 		m_OpeningPopupNames.push_back(name);
 
@@ -23,7 +23,7 @@ namespace Glory::Editor
 		m_Popups.push_back(Popup(name, description, buttons, buttonFuncs));
 	}
 
-	void PopupManager::OpenModal(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
+	GLORY_EDITOR_API void PopupManager::OpenModal(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
 	{
 		m_OpeningPopupNames.push_back(name);
 
@@ -36,7 +36,7 @@ namespace Glory::Editor
 		m_Popups.push_back(Popup(name, description, buttons, buttonFuncs, true));
 	}
 
-	void PopupManager::CloseCurrentPopup()
+	GLORY_EDITOR_API void PopupManager::CloseCurrentPopup()
 	{
 		ImGui::CloseCurrentPopup();
 	}

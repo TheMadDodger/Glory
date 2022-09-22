@@ -1,13 +1,12 @@
 #include "DisplayManager.h"
 #include "EngineProfiler.h"
+#include "GloryContext.h"
 
 namespace Glory
 {
-	RenderTexture* DisplayManager::m_pRenderTextures[MAX_DISPLAYS];
-
 	RenderTexture* DisplayManager::GetDisplayRenderTexture(size_t index)
 	{
-		return index >= MAX_DISPLAYS ? nullptr : m_pRenderTextures[index];
+		return index >= MAX_DISPLAYS ? nullptr : DISPLAYMANAGR->m_pRenderTextures[index];
 	}
 
 	void DisplayManager::ClearAllDisplays(Engine* pEngine)
@@ -15,9 +14,9 @@ namespace Glory
 		Profiler::BeginSample("DisplayManager::ClearAllDisplays");
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
-			m_pRenderTextures[i]->Bind();
+			DISPLAYMANAGR->m_pRenderTextures[i]->Bind();
 			pEngine->GetGraphicsModule()->Clear();
-			m_pRenderTextures[i]->UnBind();
+			DISPLAYMANAGR->m_pRenderTextures[i]->UnBind();
 		}
 		Profiler::EndSample();
 	}
@@ -29,6 +28,10 @@ namespace Glory
 		return pEngine->GetGraphicsModule()->GetResourceManager()->CreateRenderTexture(createInfo);
 	}
 	
+	DisplayManager::DisplayManager() : m_pRenderTextures()
+	{
+	}
+
 	DisplayManager::~DisplayManager()
 	{
 	}
@@ -43,10 +46,10 @@ namespace Glory
 
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
-			m_pRenderTextures[i] = pEngine->GetGraphicsModule()->GetResourceManager()->CreateRenderTexture(createInfo);
-			m_pRenderTextures[i]->Bind();
+			DISPLAYMANAGR->m_pRenderTextures[i] = pEngine->GetGraphicsModule()->GetResourceManager()->CreateRenderTexture(createInfo);
+			DISPLAYMANAGR->m_pRenderTextures[i]->Bind();
 			pEngine->GetGraphicsModule()->Clear();
-			m_pRenderTextures[i]->UnBind();
+			DISPLAYMANAGR->m_pRenderTextures[i]->UnBind();
 		}
 	}
 }

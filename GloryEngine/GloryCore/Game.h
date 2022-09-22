@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "GameSettings.h"
 #include "Window.h"
+#include "Glory.h"
 
 namespace Glory
 {

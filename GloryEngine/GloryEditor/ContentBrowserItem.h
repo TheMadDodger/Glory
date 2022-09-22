@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <functional>
 
 namespace Glory::Editor
 {
@@ -9,7 +10,7 @@ namespace Glory::Editor
 	{
 	public:
 		ContentBrowserItem();
-		ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable);
+		ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable, const std::string& directoryFilter = "", std::function<std::filesystem::path()> rootPathFunc = DefaultRootPathFunc);
 		virtual ~ContentBrowserItem();
 
 		static ContentBrowserItem* GetSelectedFolder();
@@ -42,19 +43,26 @@ namespace Glory::Editor
 		bool IsEditable() const;
 
 		static const std::string& GetHighlightedPath();
+		void AddIgnoreDirectory(const std::string& directory);
+		void AddIgnoreDirectories(const std::vector<std::string>& directories);
 
 	private:
 		static void EraseExcessHistory();
 
 		void DrawName();
 
+		static std::filesystem::path DefaultRootPathFunc();
+
 	private:
 		std::string m_Name;
 		bool m_IsFolder;
 		bool m_SetOpen;
+		std::function<std::filesystem::path()> m_RootPathFunc;
 		std::filesystem::path m_CachedPath;
 		ContentBrowserItem* m_pParent;
 		std::vector<ContentBrowserItem*> m_pChildren;
+		std::vector<std::string> m_IgnoreDirectories;
+		std::string m_DirectoryFilter;
 
 		bool m_StartEditingName;
 		bool m_EditingName;

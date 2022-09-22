@@ -1,6 +1,7 @@
 #pragma once
 #include <Serializer.h>
 #include "EntitySceneObject.h"
+#include "GloryEntityScenes.h"
 
 namespace Glory
 {
@@ -9,6 +10,9 @@ namespace Glory
 	public:
 		EntitySceneObjectSerializer();
 		virtual ~EntitySceneObjectSerializer();
+
+		static GLORY_API void SerializeComponent(Registry* pRegistry, EntityComponentData* pComponentData, YAML::Emitter& out);
+		static GLORY_API void DeserializeComponent(EntityScene* pScene, EntitySceneObject* pObject, size_t componentIndex, YAML::Node& object);
 
 	private:
 		virtual void Serialize(EntitySceneObject* pObject, YAML::Emitter& out) override;

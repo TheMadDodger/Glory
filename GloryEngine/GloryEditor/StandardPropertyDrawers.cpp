@@ -1,4 +1,6 @@
 #include "StandardPropertyDrawers.h"
+#include "Undo.h"
+#include "PropertyAction.h"
 #include <imgui.h>
 #include <PropertyFlags.h>
 #include <glm/gtc/quaternion.hpp>
@@ -8,7 +10,8 @@ namespace Glory::Editor
 {
 	bool FloatDrawer::OnGUI(const std::string& label, float* data, uint32_t flags) const
 	{
-		return ImGui::InputFloat(label.data(), data);
+        float oldValue = *data;
+        return ImGui::InputFloat(label.data(), data);
 	}
 
 	bool IntDrawer::OnGUI(const std::string& label, int* data, uint32_t flags) const
@@ -56,11 +59,12 @@ namespace Glory::Editor
                 ImGui::OpenPopup(colorPickerLabel.data());
                 backup_color = color;
             }
+            bool change = false;
             if (ImGui::BeginPopup(colorPickerLabel.data()))
             {
                 ImGui::Text(label.data());
                 ImGui::Separator();
-                ImGui::ColorPicker4(pickerLabel.data(), (float*)&color, misc_flags | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+                change = ImGui::ColorPicker4(pickerLabel.data(), (float*)&color, misc_flags | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
                 ImGui::SameLine();
 
                 ImGui::BeginGroup(); // Lock X position
@@ -102,7 +106,7 @@ namespace Glory::Editor
                 data->z = color.z;
                 data->w = color.w;
             }
-			return true;
+			return change;
 		}
 
 		return ImGui::InputFloat4(label.data(), (float*)data);
@@ -120,6 +124,7 @@ namespace Glory::Editor
             data->w = q.w;
             return true;
         }
+        return false;
     }
 
     bool LayerMaskDrawer::OnGUI(const std::string& label, LayerMask* data, uint32_t flags) const
@@ -131,6 +136,7 @@ namespace Glory::Editor
         LayerManager::GetAllLayerNames(layerOptions);
         layerText = LayerManager::LayerMaskToString(*data);
 
+        LayerMask originalMask = *data;
         if (ImGui::BeginCombo("Layer Mask", layerText.data()))
         {
             for (size_t i = 0; i < layerOptions.size(); i++)
@@ -152,6 +158,6 @@ namespace Glory::Editor
             ImGui::EndCombo();
         }
 
-        return true;
+        return originalMask != *data;
     }
 }
