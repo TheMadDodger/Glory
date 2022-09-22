@@ -20,11 +20,6 @@ namespace Glory
 
 	SceneObject::~SceneObject()
 	{
-		for (size_t i = 0; i < m_pChildren.size(); i++)
-		{
-			m_pScene->DeleteObject(m_pChildren[i]);
-		}
-		m_pChildren.clear();
 	}
 
 	size_t SceneObject::ChildCount()
@@ -120,6 +115,15 @@ namespace Glory
 	GScene* SceneObject::GetScene() const
 	{
 		return m_pScene;
+	}
+
+	void SceneObject::DestroyOwnChildren()
+	{
+		for (size_t i = 0; i < m_pChildren.size(); i++)
+		{
+			m_pScene->DeleteObject(m_pChildren[i]);
+		}
+		m_pChildren.clear();
 	}
 
 	const std::string& SceneObject::Name()

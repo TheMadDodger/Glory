@@ -21,7 +21,6 @@ namespace Glory
 
 	EntitySceneObject::~EntitySceneObject()
 	{
-		SetParent(nullptr);
 		m_Entity.Destroy();
 	}
 

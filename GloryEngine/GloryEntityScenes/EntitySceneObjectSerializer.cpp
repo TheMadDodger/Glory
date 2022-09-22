@@ -70,10 +70,14 @@ namespace Glory
 
 	void EntitySceneObjectSerializer::Serialize(EntitySceneObject* pObject, YAML::Emitter& out)
 	{
+		SceneObject* pParent = pObject->GetParent();
+
 		out << YAML::Key << "Name";
 		out << YAML::Value << pObject->Name();
 		out << YAML::Key << "UUID";
 		out << YAML::Value << pObject->GetUUID();
+		out << YAML::Key << "ParentUUID";
+		out << YAML::Value << (pParent ? pParent->GetUUID() : 0);
 		out << YAML::Key << "Components";
 		out << YAML::Value << YAML::BeginSeq;
 		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
@@ -88,12 +92,21 @@ namespace Glory
 		YAML::Node node;
 		std::string name;
 		UUID uuid;
+		UUID parentUuid;
 		YAML_READ(object, node, Name, name, std::string);
 		YAML_READ(object, node, UUID, uuid, uint64_t);
+		YAML_READ(object, node, ParentUUID, parentUuid, uint64_t);
 
 		EntityScene* pScene = (EntityScene*)pParent;
 		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject(name, uuid);
 		node = object["Components"];
+
+		if (parentUuid != NULL)
+		{
+			SceneObject* pParent = pScene->FindSceneObject(parentUuid);
+			if (pParent == nullptr) pScene->DelayedSetParent(pObject, parentUuid);
+			else pObject->SetParent(pParent);
+		}
 
 		size_t currentComponentIndex = 0;
 

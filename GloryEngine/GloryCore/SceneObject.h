@@ -26,6 +26,7 @@ namespace Glory
         void SetScene(GScene* pScene);
         GScene* GetScene() const;
 
+
     public:
         const std::string& Name();
         void SetName(const std::string& name);
@@ -34,6 +35,7 @@ namespace Glory
     protected:
         virtual void Initialize() = 0;
         virtual void OnSetParent(SceneObject* pParent) = 0;
+        void DestroyOwnChildren();
 
     private:
         friend class GScene;

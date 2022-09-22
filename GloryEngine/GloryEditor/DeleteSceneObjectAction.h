@@ -1,6 +1,7 @@
 #pragma once
 #include "Undo.h"
 #include <SceneObject.h>
+#include <Serializer.h>
 
 namespace Glory::Editor
 {
@@ -13,6 +14,8 @@ namespace Glory::Editor
 	private:
 		virtual void OnUndo(const ActionRecord& actionRecord);
 		virtual void OnRedo(const ActionRecord& actionRecord);
+
+		void SerializeRecursive(SceneObject* pDeletedObject, YAML::Emitter& out);
 
 	private:
 		std::string m_SerializedObject;
