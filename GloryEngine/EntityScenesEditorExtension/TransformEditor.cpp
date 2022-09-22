@@ -26,8 +26,14 @@ namespace Glory::Editor
 		//glm::mat4 rotation = glm::eulerAngleXYX(90.0f, 90.0f, 0.0f);
 		glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), transform.Position);
 		m_Transform = translation * rotation * scale;
+
+		if (transform.Parent.IsValid())
+		{
+			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+			m_Transform = parentTransform.MatTransform * m_Transform;
+		}
 		m_LastTransform = m_Transform;
-		m_pGizmo = Gizmos::GetGizmo<DefaultGizmo>(m_pTarget->GetUUID(), m_Transform);
+		m_pGizmo = Gizmos::GetGizmo<DefaultGizmo>(m_pTarget->GetUUID(), transform.MatTransform);
 
 		m_pGizmo->OnManualManipulate = [&](const glm::mat4& newTransform)
 		{
@@ -66,14 +72,27 @@ namespace Glory::Editor
 			//glm::mat4 rotation = glm::eulerAngleXYX(90.0f, 90.0f, 0.0f);
 			glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), transform.Position);
 			m_Transform = translation * rotation * scale;
+
+			if (transform.Parent.IsValid())
+			{
+				Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+				m_Transform = parentTransform.MatTransform * m_Transform;
+			}
 			m_LastTransform = m_Transform;
 			return;
 		}
 
-		glm::vec3 right(m_Transform[0][0], m_Transform[0][1], m_Transform[0][2]);
-		glm::vec3 up(m_Transform[1][0], m_Transform[1][1], m_Transform[1][2]);
-		glm::vec3 forward(m_Transform[2][0], m_Transform[2][1], m_Transform[2][2]);
-		glm::vec3 position(m_Transform[3][0], m_Transform[3][1], m_Transform[3][2]);
+		glm::mat4 localTransform = m_Transform;
+
+		if (transform.Parent.IsValid())
+		{
+			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+			localTransform = glm::inverse(parentTransform.MatTransform) * localTransform;
+		}
+		glm::vec3 right(localTransform[0][0], localTransform[0][1], localTransform[0][2]);
+		glm::vec3 up(localTransform[1][0], localTransform[1][1], localTransform[1][2]);
+		glm::vec3 forward(localTransform[2][0], localTransform[2][1], localTransform[2][2]);
+		glm::vec3 position(localTransform[3][0], localTransform[3][1], localTransform[3][2]);
 
 		glm::vec3 scale;
 		scale.x = glm::length(right);

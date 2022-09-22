@@ -18,9 +18,6 @@ namespace Glory::Editor
 	class Gizmos
 	{
 	public:
-		GLORY_EDITOR_API Gizmos();
-		virtual GLORY_EDITOR_API ~Gizmos();
-
 		//static GLORY_EDITOR_API bool DrawGizmo(glm::mat4* transfrom);
 		template<class T, typename ...Args>
 		static T* GetGizmo(UUID uuid, Args&&... args)
@@ -39,6 +36,9 @@ namespace Glory::Editor
 		static ImGuizmo::MODE m_DefaultMode;
 
 	private:
+		GLORY_EDITOR_API Gizmos();
+		virtual GLORY_EDITOR_API ~Gizmos();
+
 		static void DrawGizmos(const glm::mat4& cameraView, const glm::mat4& cameraProjection);
 		static void Clear();
 
@@ -47,6 +47,7 @@ namespace Glory::Editor
 	private:
 		friend class MainEditor;
 		friend class SceneWindow;
+		friend class GloryContext;
 		static std::map<UUID, IGizmo*> m_pGizmos;
 		//static std::vector<bool> m_ManipulatedGizmos;
 	};
