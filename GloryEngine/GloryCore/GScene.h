@@ -26,7 +26,7 @@ namespace Glory
 
         virtual SceneObject* CreateObject(const std::string& name) { return nullptr; };
         virtual SceneObject* CreateObject(const std::string& name, UUID uuid) { return nullptr; };
-        virtual void OnDeleteObject(SceneObject* pObject) { };
+        virtual void OnDeleteObject(SceneObject* pObject) {};
 
         virtual void OnObjectAdded(SceneObject* pObject) {};
 
