@@ -37,6 +37,7 @@ namespace Glory
 			YAML::Node nextObject = node[i];
 			Serializer::DeserializeObject(pScene, nextObject);
 		}
+		pScene->HandleDelayedParents();
 
 		return pScene;
 	}
