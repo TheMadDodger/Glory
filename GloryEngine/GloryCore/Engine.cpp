@@ -261,12 +261,16 @@ namespace Glory
 		GameThreadFrameEnd();
 	}
 
-	void Engine::ModulesLoop()
+	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
 	{
 		AssetManager::RunCallbacks();
 
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
+			Module* pModule = m_pAllModules[i];
+
+			if (pLoopHandler != nullptr && pLoopHandler->HandleModuleLoop(pModule)) continue;
+
 			m_pAllModules[i]->Update();
 			m_pAllModules[i]->Draw();
 		}
@@ -286,6 +290,16 @@ namespace Glory
 		{
 			m_pAllModules[i]->OnGameThreadFrameEnd();
 		}
+	}
+
+	void Engine::CallModuleUpdate(Module* pModule)
+	{
+		pModule->Update();
+	}
+
+	void Engine::CallModuleDraw(Module* pModule)
+	{
+		pModule->Draw();
 	}
 
 	void Engine::GraphicsThreadFrameStart()

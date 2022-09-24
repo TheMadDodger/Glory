@@ -73,6 +73,7 @@ namespace Glory::Editor
 			m_ActionRecords[i].Actions.clear();
 		}
 		m_ActionRecords.clear();
+		m_RewindIndex = 0;
 	}
 
 	void Undo::DoUndo()
@@ -111,6 +112,29 @@ namespace Glory::Editor
 	{
 		if (m_IsBusy) return false;
 		return m_RewindIndex > 0;
+	}
+
+	size_t Undo::GetHistorySize()
+	{
+		return m_ActionRecords.size();
+	}
+
+	void Undo::ClearHistoryFrom(size_t index)
+	{
+		size_t currentSize = m_ActionRecords.size();
+		if (index >= currentSize) return;
+		for (size_t i = index; i < m_ActionRecords.size(); i++)
+		{
+			for (size_t j = 0; j < m_ActionRecords[i].Actions.size(); j++)
+			{
+				delete m_ActionRecords[i].Actions[j];
+			}
+			m_ActionRecords[i].Actions.clear();
+		}
+		m_ActionRecords.erase(m_ActionRecords.begin() + index, m_ActionRecords.end());
+
+		if (currentSize - m_RewindIndex <= index) return;
+		m_RewindIndex = 0;
 	}
 
 	void Undo::ClearRewind()

@@ -5,11 +5,21 @@
 #include "EditorShaderProcessor.h"
 #include "EditorAssetLoader.h"
 #include "EditorCreateInfo.h"
-#include <Game.h>
 #include <Versioning.h>
+#include "EditorPlayer.h"
+#include "EditorModuleLoopHandler.h"
+#include <Game.h>
 
 namespace Glory::Editor
 {
+	enum class Mode
+	{
+		M_Edit,
+		M_EnteringPlay,
+		M_Play,
+		M_ExitingPlay,
+	};
+
 	class EditorApplication
 	{
 	public:
@@ -43,6 +53,9 @@ namespace Glory::Editor
 		GLORY_EDITOR_API MainEditor* GetMainEditor();
 
 		static GLORY_EDITOR_API EditorApplication* GetInstance();
+		static GLORY_EDITOR_API const Mode& CurrentMode();
+		static GLORY_EDITOR_API void StartPlay();
+		static GLORY_EDITOR_API void StopPlay();
 
 		static const Glory::Version Version;
 
@@ -59,8 +72,11 @@ namespace Glory::Editor
 
 		EditorPlatform* m_pPlatform;
 		MainEditor* m_pMainEditor;
+		EditorPlayer* m_pPlayer;
 		std::vector<BaseEditorExtension*> m_pExtensions;
 		EditorShaderProcessor* m_pShaderProcessor;
+		EditorModuleLoopHandler* m_pModulesLoopHandler;
 		static EditorApplication* m_pEditorInstance;
+		static Mode m_Mode;
 	};
 }

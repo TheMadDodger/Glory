@@ -4,6 +4,7 @@
 #include <ImGuizmo.h>
 #include <Serializer.h>
 #include <AssetDatabase.h>
+#include "EditorApplication.h"
 
 #include "MainEditor.h"
 #include "EditorWindow.h"
@@ -137,9 +138,9 @@ namespace Glory::Editor
 			pActiveScene->CreateEmptyObject();
 		});
 
-		MenuBar::AddMenuItem("Play/Start", [&]() {/*this->EnterPlayMode();*/ });
+		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay);
 		MenuBar::AddMenuItem("Play/Pauze", [&]() {/*m_PlayModePaused = !m_PlayModePaused;*/ });
-		MenuBar::AddMenuItem("Play/Stop", [&]() {/*this->ExitPlayMode();*/ });
+		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay);
 
 		MenuBar::AddMenuItem("File/Exit", [&]() {
 			std::vector<std::string> buttons = { "Cancel", "Exit" };

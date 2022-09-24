@@ -1,5 +1,7 @@
 #pragma once
 #include <GScene.h>
+#include <yaml-cpp/yaml.h>
+#include <vector>
 #include "GloryEditor.h"
 
 namespace Glory::Editor
@@ -9,6 +11,7 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API GScene* NewScene(bool additive = false);
 		static GLORY_EDITOR_API void OpenScene(UUID uuid, bool additive);
+		static GLORY_EDITOR_API void OpenScene(GScene* pScene, UUID uuid = 0);
 		static GLORY_EDITOR_API void SaveOpenScenes();
 
 		static GLORY_EDITOR_API void CloseScene(UUID uuid);
@@ -21,6 +24,9 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void SaveScene(UUID uuid);
 		static GLORY_EDITOR_API void SaveSceneAs(UUID uuid);
+
+		static GLORY_EDITOR_API void SerializeOpenScenes(YAML::Emitter& out);
+		static GLORY_EDITOR_API void OpenAllFromNode(YAML::Node& node);
 
 	private:
 		static void Save(UUID uuid, const std::string& path, bool newScene = false);

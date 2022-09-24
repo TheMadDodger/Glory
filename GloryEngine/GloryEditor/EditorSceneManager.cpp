@@ -35,6 +35,16 @@ namespace Glory::Editor
 		m_OpenedSceneIDs.push_back(uuid);
 	}
 
+	GLORY_EDITOR_API void EditorSceneManager::OpenScene(GScene* pScene, UUID uuid)
+	{
+		if (IsSceneOpen(uuid))
+			CloseScene(uuid);
+
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		pScenesModule->AddOpenScene(pScene, uuid);
+		m_OpenedSceneIDs.push_back(uuid);
+	}
+
 	GLORY_EDITOR_API void EditorSceneManager::SaveOpenScenes()
 	{
 		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [](UUID uuid)
@@ -116,6 +126,42 @@ namespace Glory::Editor
 
 			Save(m_CurrentlySavingScene, result, true);
 		});
+	}
+
+	void EditorSceneManager::SerializeOpenScenes(YAML::Emitter& out)
+	{
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		out << YAML::BeginSeq;
+		for (size_t i = 0; i < m_OpenedSceneIDs.size(); i++)
+		{
+			UUID uuid = m_OpenedSceneIDs[i];
+			GScene* pScene = pScenesModule->GetOpenScene(uuid);
+			out << YAML::BeginMap;
+			out << YAML::Key << "Name";
+			out << YAML::Value << pScene->Name();
+			out << YAML::Key << "UUID";
+			out << YAML::Value << pScene->GetUUID();
+			out << YAML::Key << "Scene";
+			out << YAML::Value;
+			Serializer::SerializeObject(pScene, out);
+			out << YAML::EndMap;
+		}
+		out << YAML::EndSeq;
+	}
+
+	GLORY_EDITOR_API void EditorSceneManager::OpenAllFromNode(YAML::Node& node)
+	{
+		for (size_t i = 0; i < node.size(); i++)
+		{
+			YAML::Node sceneDataNode = node[i];
+			YAML::Node nameNode = sceneDataNode["Name"];
+			std::string name = nameNode.as<std::string>();
+			YAML::Node uuidNode = sceneDataNode["UUID"];
+			UUID uuid = uuidNode.as<uint64_t>();
+			YAML::Node sceneNode = sceneDataNode["Scene"];
+			GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(sceneNode, name);
+			OpenScene(pScene, uuid);
+		}
 	}
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
