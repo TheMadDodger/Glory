@@ -67,9 +67,16 @@ namespace Glory
 	{
 		YAML::Node node = YAML::LoadFile(path);
 		std::filesystem::path filePath = path;
-		GScene* pScene = (GScene*)Serializer::DeserializeObjectOfType<GScene>(node, filePath.filename().replace_extension().string());
+		GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(node, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 		pScene->SetUUID(uuid);
+		m_pOpenScenes.push_back(pScene);
+	}
+
+	void ScenesModule::AddOpenScene(GScene* pScene, UUID uuid)
+	{
+		if (pScene == nullptr) return;
+		if (uuid) pScene->SetUUID(uuid);
 		m_pOpenScenes.push_back(pScene);
 	}
 

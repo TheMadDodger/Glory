@@ -46,7 +46,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool CanUndo();
 		static GLORY_EDITOR_API bool CanRedo();
 
-	private:
+		static GLORY_EDITOR_API size_t GetHistorySize();
+		static GLORY_EDITOR_API void ClearHistoryFrom(size_t index);
 		static GLORY_EDITOR_API void ClearRewind();
 
 	private:

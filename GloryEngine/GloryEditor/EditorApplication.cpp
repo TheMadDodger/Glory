@@ -7,9 +7,12 @@ namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
 	const Glory::Version EditorApplication::Version(VERSION_DATA, 3);
+	Mode EditorApplication::m_Mode = Mode::M_Edit;
 
 	GLORY_EDITOR_API EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
-		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl), m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr)
+		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl),
+		m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr), m_pPlayer(nullptr),
+		m_pModulesLoopHandler(new EditorModuleLoopHandler())
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.ExtensionsCount > 0 && createInfo.pExtensions != nullptr)
@@ -31,6 +34,9 @@ namespace Glory::Editor
 
 		delete m_pPlatform;
 		m_pPlatform = nullptr;
+
+		delete m_pModulesLoopHandler;
+		m_pModulesLoopHandler = nullptr;
 	}
 
 	GLORY_EDITOR_API void EditorApplication::Initialize(Game& game)
@@ -62,6 +68,9 @@ namespace Glory::Editor
 		m_pShaderProcessor->Stop();
 		delete m_pShaderProcessor;
 		m_pShaderProcessor = nullptr;
+
+		delete m_pPlayer;
+		m_pPlayer = nullptr;
 	}
 
 	GLORY_EDITOR_API void EditorApplication::Run(Game& game)
@@ -85,7 +94,7 @@ namespace Glory::Editor
 			m_pMainEditor->Update();
 
 			// Update engine (this also does the render loop)
-			game.GetEngine()->ModulesLoop();
+			game.GetEngine()->ModulesLoop(m_pModulesLoopHandler);
 
 			// End the current frame
 			game.GetEngine()->GameThreadFrameEnd();
@@ -128,6 +137,27 @@ namespace Glory::Editor
 		return m_pEditorInstance;
 	}
 
+	const Mode& EditorApplication::CurrentMode()
+	{
+		return m_Mode;
+	}
+
+	void EditorApplication::StartPlay()
+	{
+		if (m_Mode != Mode::M_Edit) return;
+		m_Mode = Mode::M_EnteringPlay;
+		m_pEditorInstance->m_pPlayer->Start();
+		m_Mode = Mode::M_Play;
+	}
+
+	void EditorApplication::StopPlay()
+	{
+		if (m_Mode != Mode::M_Play) return;
+		m_Mode = Mode::M_ExitingPlay;
+		m_pEditorInstance->m_pPlayer->Stop();
+		m_Mode = Mode::M_Edit;
+	}
+
 	void EditorApplication::RenderEditor()
 	{
 		m_pMainEditor->PaintEditor();
@@ -145,6 +175,7 @@ namespace Glory::Editor
 		InitializeExtensions();
 
 		m_pShaderProcessor = new EditorShaderProcessor();
+		m_pPlayer = new EditorPlayer();
 	}
 
 	std::string EditorApplication::AssetPathOverrider()
