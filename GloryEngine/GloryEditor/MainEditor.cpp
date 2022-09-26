@@ -139,8 +139,9 @@ namespace Glory::Editor
 		});
 
 		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay);
-		MenuBar::AddMenuItem("Play/Pauze", [&]() {/*m_PlayModePaused = !m_PlayModePaused;*/ });
 		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay);
+		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause);
+		MenuBar::AddMenuItem("Play/Next Frame", EditorApplication::TickFrame);
 
 		MenuBar::AddMenuItem("File/Exit", [&]() {
 			std::vector<std::string> buttons = { "Cancel", "Exit" };

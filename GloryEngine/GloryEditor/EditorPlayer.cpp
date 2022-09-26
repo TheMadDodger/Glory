@@ -1,4 +1,5 @@
 #include "EditorPlayer.h"
+#include "EditorApplication.h"
 #include "EditorSceneManager.h"
 #include "Selection.h"
 #include "Undo.h"
@@ -7,6 +8,13 @@
 
 namespace Glory::Editor
 {
+	std::vector<IEditorLoopHandler*> EditorPlayer::m_pSceneLoopHandlers;
+
+	void EditorPlayer::RegisterLoopHandler(IEditorLoopHandler* pEditorLoopHandler)
+	{
+		m_pSceneLoopHandlers.push_back(pEditorLoopHandler);
+	}
+
 	void EditorPlayer::Start()
 	{
 		Object* pSelected = Selection::GetActiveObject();
@@ -22,6 +30,9 @@ namespace Glory::Editor
 
 	void EditorPlayer::Stop()
 	{
+		m_IsPaused = false;
+		m_FrameRequested = false;
+
 		//Object* pSelected = Selection::GetActiveObject();
 		//UUID toSelect = 0;
 		//if (pSelected != nullptr) toSelect = pSelected->GetUUID();
@@ -47,7 +58,45 @@ namespace Glory::Editor
 		//m_SelectedObjectBeforeStart = 0;
 	}
 
-	EditorPlayer::EditorPlayer() : m_SerializedScenes(""), m_UndoHistoryIndex(0)
+	void EditorPlayer::TogglePauze()
+	{
+		m_IsPaused = !m_IsPaused;
+		m_FrameRequested = false;
+	}
+
+	void EditorPlayer::TickFrame()
+	{
+		if (!m_IsPaused) return;
+		m_FrameRequested = true;
+	}
+
+	bool EditorPlayer::HandleModuleLoop(Module* pModule)
+	{
+		const ModuleMetaData& metaData = pModule->GetMetaData();
+		if (metaData.Type() != ModuleType::MT_SceneManagement) return false;
+
+		if (EditorApplication::CurrentMode() == EditorMode::M_Play)
+		{
+			if (!m_IsPaused || m_FrameRequested) pModule->GetEngine()->CallModuleUpdate(pModule);
+			m_FrameRequested = false;
+		}
+		else
+		{
+			auto it = std::find_if(m_pSceneLoopHandlers.begin(), m_pSceneLoopHandlers.end(), [&](IEditorLoopHandler* pEditorLoopHandler)
+			{
+				const std::string& moduleName = pEditorLoopHandler->ModuleName();
+				return moduleName == metaData.Name();
+			});
+			if (it == m_pSceneLoopHandlers.end()) return false;
+			IEditorLoopHandler* pEditorLoopHandler = *it;
+			pEditorLoopHandler->HandleUpdate(pModule);
+		}
+
+		pModule->GetEngine()->CallModuleDraw(pModule);
+		return true;
+	}
+
+	EditorPlayer::EditorPlayer() : m_SerializedScenes(""), m_UndoHistoryIndex(0), m_IsPaused(false), m_FrameRequested(false)
 	{
 	}
 
