@@ -81,10 +81,11 @@ namespace Glory
 
 	struct Spin
 	{
-		Spin() : m_Speed(10.0f) {}
-		Spin(float speed) : m_Speed(speed) {}
+		Spin() : m_Speed(10.0f), m_Time(0.0f) {}
+		Spin(float speed) : m_Speed(speed), m_Time(0.0f) {}
 
 		float m_Speed;
+		float m_Time;
 	};
 
 	struct LayerComponent

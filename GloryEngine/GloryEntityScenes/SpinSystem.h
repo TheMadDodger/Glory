@@ -11,7 +11,7 @@ namespace Glory
 		virtual ~SpinSystem() {}
 
 	private:
-		virtual void OnDraw(Registry* pRegistry, EntityID entity, Spin& pComponent) override;
+		virtual void OnUpdate(Registry* pRegistry, EntityID entity, Spin& pComponent) override;
 		virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, Spin& pComponent) override;
 		virtual std::string Name() override;
 	};
