@@ -39,9 +39,6 @@ namespace Glory::Editor
 		void Destroy();
 
 	private:
-		void SetupDearImGuiContext();
-
-	private:
 		friend class EditorPlatform;
 		friend class EditorApplication;
 	};

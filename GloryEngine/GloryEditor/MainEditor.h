@@ -3,6 +3,7 @@
 #include "AssetPickerPopup.h"
 #include "EditorSettings.h"
 #include "EditorAssetLoader.h"
+#include <imgui_internal.h>
 
 namespace Glory::Editor
 {
@@ -27,6 +28,10 @@ namespace Glory::Editor
 		void RegisterPropertyDrawers();
 		void RegisterEditors();
 
+		void Dockspace();
+		void ToolbarUI();
+		void DrawUserEditor();
+
 	private:
 		friend class EditorApplication;
 		ProjectPopup* m_pProjectPopup;
@@ -34,5 +39,9 @@ namespace Glory::Editor
 		EditorSettings m_Settings;
 
 		static size_t m_SaveSceneIndex;
+
+		static float MENUBAR_SIZE;
+
+		const float TOOLBAR_SIZE = 50;
 	};
 }
