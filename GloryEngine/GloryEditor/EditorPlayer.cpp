@@ -96,8 +96,73 @@ namespace Glory::Editor
 		return true;
 	}
 
+	void EditorPlayer::DrawToolchain(float& cursor, const ImVec2& maxButtonSize)
+	{
+		ImGui::SameLine(cursor);
+		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+		ImVec4 hoverColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered);
+		
+		int styleColorCount = 0;
+
+		switch (EditorApplication::CurrentMode())
+		{
+		case EditorMode::M_Edit:
+
+			break;
+		case EditorMode::M_Play:
+			ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, activeColor);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeColor);
+			styleColorCount = 3;
+			break;
+		case EditorMode::M_EnteringPlay:
+			ImGui::PushStyleColor(ImGuiCol_Button, hoverColor);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverColor);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, hoverColor);
+			styleColorCount = 3;
+			break;
+		case EditorMode::M_ExitingPlay:
+
+			break;
+		default:
+			break;
+		}
+
+		if (ImGui::Button(">|##Play", maxButtonSize))
+		{
+			EditorApplication::TogglePlay();
+		}
+		ImGui::PopStyleColor(styleColorCount);
+
+		cursor += maxButtonSize.x;
+		ImGui::SameLine(cursor);
+
+		styleColorCount = 0;
+		if (m_IsPaused)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, activeColor);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeColor);
+			styleColorCount = 3;
+		}
+
+		if (ImGui::Button("||##Pause", maxButtonSize))
+		{
+			EditorApplication::TogglePause();
+		}
+		ImGui::PopStyleColor(styleColorCount);
+
+		cursor += maxButtonSize.x;
+		ImGui::SameLine(cursor);
+		if (ImGui::Button(">##TickFrame", maxButtonSize))
+		{
+			EditorApplication::TickFrame();
+		}
+	}
+
 	EditorPlayer::EditorPlayer() : m_SerializedScenes(""), m_UndoHistoryIndex(0), m_IsPaused(false), m_FrameRequested(false)
 	{
+		Toolbar::AddToolChain(ToolChainPosition::Center, this);
 	}
 
 	EditorPlayer::~EditorPlayer()
