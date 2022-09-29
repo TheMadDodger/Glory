@@ -25,6 +25,10 @@ namespace Glory::Editor
 		m_pGizmos.emplace(uuid, pGizmo);
 	}
 
+	void Gizmos::DrawToolchain(float& cursor, const ImVec2& maxButtonSize)
+	{
+	}
+
 	GLORY_EDITOR_API IGizmo* Gizmos::FindGizmo(UUID uuid)
 	{
 		if (m_pGizmos.find(uuid) == m_pGizmos.end()) return nullptr;
@@ -57,7 +61,10 @@ namespace Glory::Editor
 		m_pGizmos.clear();
 	}
 
-	GLORY_EDITOR_API Gizmos::Gizmos() {}
+	GLORY_EDITOR_API Gizmos::Gizmos()
+	{
+		Toolbar::AddToolChain(ToolChainPosition::Left, this);
+	}
 	GLORY_EDITOR_API Gizmos::~Gizmos() {}
 
 	GLORY_EDITOR_API IGizmo::IGizmo() {}

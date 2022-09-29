@@ -138,6 +138,19 @@ namespace Glory::Editor
 		return m_Mode;
 	}
 
+	void EditorApplication::TogglePlay()
+	{
+		switch (m_Mode)
+		{
+		case Glory::Editor::EditorMode::M_Edit:
+			StartPlay();
+			break;
+		case Glory::Editor::EditorMode::M_Play:
+			StopPlay();
+			break;
+		}
+	}
+
 	void EditorApplication::StartPlay()
 	{
 		if (m_Mode != EditorMode::M_Edit) return;

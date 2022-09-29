@@ -4,6 +4,7 @@
 #include <UUID.h>
 #include <functional>
 #include "GloryEditor.h"
+#include "Toolbar.h"
 
 namespace ImGuizmo
 {
@@ -15,7 +16,7 @@ namespace Glory::Editor
 {
 	class IGizmo;
 
-	class Gizmos
+	class Gizmos : public IToolChain
 	{
 	public:
 		//static GLORY_EDITOR_API bool DrawGizmo(glm::mat4* transfrom);
@@ -44,12 +45,13 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void AddGizmo(UUID uuid, IGizmo* pGizmo);
 
+		virtual void DrawToolchain(float& cursor, const ImVec2& maxButtonSize);
+
 	private:
 		friend class MainEditor;
 		friend class SceneWindow;
 		friend class GloryContext;
 		static std::map<UUID, IGizmo*> m_pGizmos;
-		//static std::vector<bool> m_ManipulatedGizmos;
 	};
 
 	class IGizmo

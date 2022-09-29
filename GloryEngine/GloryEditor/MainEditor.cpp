@@ -45,9 +45,10 @@ namespace Glory::Editor
 {
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
+	const float MainEditor::TOOLBAR_SIZE = 50.0f;
 
 	MainEditor::MainEditor()
-		: m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_Settings("./EditorSettings.yaml")
+		: m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), m_Settings("./EditorSettings.yaml")
 	{
 	}
 
@@ -58,6 +59,9 @@ namespace Glory::Editor
 
 		delete m_AssetPickerPopup;
 		m_AssetPickerPopup = nullptr;
+
+		delete m_pToolbar;
+		m_pToolbar = nullptr;
 	}
 
 	void MainEditor::Initialize()
@@ -111,9 +115,8 @@ namespace Glory::Editor
 	void MainEditor::PaintEditor()
 	{
 		MenuBar::OnGUI();
-
 		Dockspace();
-		ToolbarUI();
+		m_pToolbar->Paint();
 		DrawUserEditor();
 	}
 
@@ -143,30 +146,6 @@ namespace Glory::Editor
 		ImGui::DockSpace(dockMain);
 		ImGui::End();
 		ImGui::PopStyleVar(3);
-	}
-
-	void MainEditor::ToolbarUI()
-	{
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + MENUBAR_SIZE));
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, TOOLBAR_SIZE));
-		ImGui::SetNextWindowViewport(viewport->ID);
-
-		ImGuiWindowFlags window_flags = 0
-			| ImGuiWindowFlags_NoDocking
-			| ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoScrollbar
-			| ImGuiWindowFlags_NoSavedSettings
-			;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-		ImGui::Begin("TOOLBAR", NULL, window_flags);
-		ImGui::PopStyleVar();
-
-		ImGui::Button("Toolbar goes here", ImVec2(0, 37));
-
-		ImGui::End();
 	}
 
 	void MainEditor::DrawUserEditor()

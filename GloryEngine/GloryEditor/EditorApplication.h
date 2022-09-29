@@ -53,6 +53,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API EditorApplication* GetInstance();
 		static GLORY_EDITOR_API const EditorMode& CurrentMode();
+		static GLORY_EDITOR_API void TogglePlay();
 		static GLORY_EDITOR_API void StartPlay();
 		static GLORY_EDITOR_API void StopPlay();
 		static GLORY_EDITOR_API void TogglePause();

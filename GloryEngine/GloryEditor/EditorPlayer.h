@@ -1,13 +1,14 @@
 #pragma once
 #include "IEditorLoopHandler.h"
+#include "GloryEditor.h"
+#include "Toolbar.h"
 #include <IModuleLoopHandler.h>
 #include <GScene.h>
 #include <vector>
-#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
-	class EditorPlayer : public IModuleLoopHandler
+	class EditorPlayer : public IModuleLoopHandler, IToolChain
 	{
 	public:
 		static GLORY_EDITOR_API void RegisterLoopHandler(IEditorLoopHandler* pEditorSceneLoopHandler);
@@ -19,6 +20,7 @@ namespace Glory::Editor
 		void TickFrame();
 
 		virtual bool HandleModuleLoop(Module* pModule) override;
+		virtual void DrawToolchain(float& cursor, const ImVec2& maxButtonSize);
 
 	private:
 		friend class EditorApplication;
