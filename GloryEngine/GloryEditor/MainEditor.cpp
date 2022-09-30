@@ -86,6 +86,8 @@ namespace Glory::Editor
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
 
 		FileDialog::Initialize();
+
+		Gizmos::Initialize();
 	}
 
 	void MainEditor::Destroy()
@@ -97,6 +99,8 @@ namespace Glory::Editor
 		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
 		PropertyDrawer::Cleanup();
+
+		Gizmos::Cleanup();
 	}
 
     static void HelpMarker(const char* desc)

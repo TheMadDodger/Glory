@@ -12,6 +12,8 @@ namespace Glory::Editor
 	ImGuizmo::OPERATION Gizmos::m_DefaultOperation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE Gizmos::m_DefaultMode = ImGuizmo::LOCAL;
 
+	GizmosToolChain* Gizmos::m_pToolChain = nullptr;
+
 	//GLORY_EDITOR_API bool Gizmos::DrawGizmo(glm::mat4* transfrom)
 	//{
 	//	size_t index = m_pGizmos.size();
@@ -23,10 +25,6 @@ namespace Glory::Editor
 	void Gizmos::AddGizmo(UUID uuid, IGizmo* pGizmo)
 	{
 		m_pGizmos.emplace(uuid, pGizmo);
-	}
-
-	void Gizmos::DrawToolchain(float& cursor, const ImVec2& maxButtonSize)
-	{
 	}
 
 	GLORY_EDITOR_API IGizmo* Gizmos::FindGizmo(UUID uuid)
@@ -61,10 +59,18 @@ namespace Glory::Editor
 		m_pGizmos.clear();
 	}
 
-	GLORY_EDITOR_API Gizmos::Gizmos()
+	void Gizmos::Initialize()
 	{
-		Toolbar::AddToolChain(ToolChainPosition::Left, this);
+		m_pToolChain = new GizmosToolChain();
 	}
+
+	void Gizmos::Cleanup()
+	{
+		delete m_pToolChain;
+		m_pToolChain = nullptr;
+	}
+
+	GLORY_EDITOR_API Gizmos::Gizmos() {}
 	GLORY_EDITOR_API Gizmos::~Gizmos() {}
 
 	GLORY_EDITOR_API IGizmo::IGizmo() {}

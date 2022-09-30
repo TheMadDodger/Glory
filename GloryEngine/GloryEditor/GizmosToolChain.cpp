@@ -1,0 +1,92 @@
+#include "GizmosToolChain.h"
+#include "Toolbar.h"
+#include "Gizmos.h"
+
+namespace Glory::Editor
+{
+	const ImGuizmo::OPERATION GizmosToolChain::OPERATIONS[] = {
+		ImGuizmo::TRANSLATE,
+		ImGuizmo::ROTATE,
+		ImGuizmo::SCALE,
+		ImGuizmo::UNIVERSAL,
+	};
+	const size_t GizmosToolChain::OPERATIONS_COUNT = 4;
+
+	const ImGuizmo::MODE GizmosToolChain::MODES[] = {
+		ImGuizmo::LOCAL,
+		ImGuizmo::WORLD
+	};
+	const size_t GizmosToolChain::MODES_COUNT = 2;
+
+	GizmosToolChain::GizmosToolChain()
+	{
+		Toolbar::AddToolChain(ToolChainPosition::Left, this);
+	}
+
+	GizmosToolChain::~GizmosToolChain()
+	{
+	}
+
+	void GizmosToolChain::DrawToolchain(float& cursor, const ImVec2& maxButtonSize)
+	{
+		DrawOperations(cursor, maxButtonSize);
+		cursor += 5.0f;
+		DrawModes(cursor, maxButtonSize);
+	}
+
+	void GizmosToolChain::DrawOperations(float& cursor, const ImVec2& maxButtonSize)
+	{
+		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+		int styleColorCount = 0;
+		for (size_t i = 0; i < OPERATIONS_COUNT; i++)
+		{
+			ImGuizmo::OPERATION op = OPERATIONS[i];
+			bool selected = Gizmos::m_DefaultOperation == op;
+			styleColorCount = 0;
+			if (selected)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, activeColor);
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeColor);
+				styleColorCount = 3;
+			}
+
+			ImGui::SameLine(cursor);
+			std::string label = "##OP_" + std::to_string(i);
+			if (ImGui::Button(label.c_str(), maxButtonSize))
+			{
+				Gizmos::m_DefaultOperation = op;
+			}
+			ImGui::PopStyleColor(styleColorCount);
+			cursor += maxButtonSize.x;
+		}
+	}
+
+	void GizmosToolChain::DrawModes(float& cursor, const ImVec2& maxButtonSize)
+	{
+		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+		int styleColorCount = 0;
+		for (size_t i = 0; i < MODES_COUNT; i++)
+		{
+			ImGuizmo::MODE mode = MODES[i];
+			bool selected = Gizmos::m_DefaultMode == mode;
+			styleColorCount = 0;
+			if (selected)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, activeColor);
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeColor);
+				styleColorCount = 3;
+			}
+
+			ImGui::SameLine(cursor);
+			std::string label = "##MODE_" + std::to_string(i);
+			if (ImGui::Button(label.c_str(), maxButtonSize))
+			{
+				Gizmos::m_DefaultMode = mode;
+			}
+			ImGui::PopStyleColor(styleColorCount);
+			cursor += maxButtonSize.x;
+		}
+	}
+}
