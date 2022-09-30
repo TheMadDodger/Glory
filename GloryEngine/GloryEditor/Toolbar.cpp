@@ -84,7 +84,8 @@ namespace Glory::Editor
 		//	if (i < 9) ImGui::SameLine(0.0f, 0.0f);
 		//}
 
-		DrawSubBar(0.0f, ToolChainPosition::Left);
+		float start = ImGui::GetStyle().WindowPadding.x;
+		DrawSubBar(start, ToolChainPosition::Left);
 		ImGui::EndChild();
 	}
 

@@ -5,6 +5,7 @@
 #include <functional>
 #include "GloryEditor.h"
 #include "Toolbar.h"
+#include "GizmosToolChain.h"
 
 namespace ImGuizmo
 {
@@ -16,7 +17,7 @@ namespace Glory::Editor
 {
 	class IGizmo;
 
-	class Gizmos : public IToolChain
+	class Gizmos
 	{
 	public:
 		//static GLORY_EDITOR_API bool DrawGizmo(glm::mat4* transfrom);
@@ -36,6 +37,9 @@ namespace Glory::Editor
 		static ImGuizmo::OPERATION m_DefaultOperation;
 		static ImGuizmo::MODE m_DefaultMode;
 
+		static void Initialize();
+		static void Cleanup();
+
 	private:
 		GLORY_EDITOR_API Gizmos();
 		virtual GLORY_EDITOR_API ~Gizmos();
@@ -45,13 +49,12 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void AddGizmo(UUID uuid, IGizmo* pGizmo);
 
-		virtual void DrawToolchain(float& cursor, const ImVec2& maxButtonSize);
-
 	private:
 		friend class MainEditor;
 		friend class SceneWindow;
 		friend class GloryContext;
 		static std::map<UUID, IGizmo*> m_pGizmos;
+		static GizmosToolChain* m_pToolChain;
 	};
 
 	class IGizmo
