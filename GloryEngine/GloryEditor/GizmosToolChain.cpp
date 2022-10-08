@@ -1,6 +1,10 @@
 #include "GizmosToolChain.h"
 #include "Toolbar.h"
 #include "Gizmos.h"
+#include "EditorAssets.h"
+#include "EditorRenderImpl.h"
+#include "EditorApplication.h"
+#include <ImGuizmo.h>
 
 namespace Glory::Editor
 {
@@ -10,11 +14,21 @@ namespace Glory::Editor
 		ImGuizmo::SCALE,
 		ImGuizmo::UNIVERSAL,
 	};
+	const std::string GizmosToolChain::OPERATION_TEXTURES[] = {
+		EditorAssetNames::GizmoMove,
+		EditorAssetNames::GizmoRotate,
+		EditorAssetNames::GizmoScale,
+		EditorAssetNames::GizmoUniversal,
+	};
 	const size_t GizmosToolChain::OPERATIONS_COUNT = 4;
 
 	const ImGuizmo::MODE GizmosToolChain::MODES[] = {
 		ImGuizmo::LOCAL,
 		ImGuizmo::WORLD
+	};
+	const std::string GizmosToolChain::MODE_TEXTURES[] = {
+		EditorAssetNames::GizmoLocal,
+		EditorAssetNames::GizmoWorld
 	};
 	const size_t GizmosToolChain::MODES_COUNT = 2;
 
@@ -36,6 +50,8 @@ namespace Glory::Editor
 
 	void GizmosToolChain::DrawOperations(float& cursor, const ImVec2& maxButtonSize)
 	{
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+
 		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 		int styleColorCount = 0;
 		for (size_t i = 0; i < OPERATIONS_COUNT; i++)
@@ -53,6 +69,9 @@ namespace Glory::Editor
 
 			ImGui::SameLine(cursor);
 			std::string label = "##OP_" + std::to_string(i);
+			Texture* pTexture = EditorAssets::GetTexture(OPERATION_TEXTURES[i]);
+
+			//if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize))
 			if (ImGui::Button(label.c_str(), maxButtonSize))
 			{
 				Gizmos::m_DefaultOperation = op;
