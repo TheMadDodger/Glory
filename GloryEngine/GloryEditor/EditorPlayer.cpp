@@ -5,6 +5,8 @@
 #include "Undo.h"
 #include "SelectAction.h"
 #include "DeselectAction.h"
+#include "EditorAssets.h"
+#include "EditorApplication.h"
 
 namespace Glory::Editor
 {
@@ -128,7 +130,10 @@ namespace Glory::Editor
 			break;
 		}
 
-		if (ImGui::Button(">|##Play", maxButtonSize))
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		Texture* pTexture = EditorAssets::GetTexture(EditorAssetNames::Play);
+		//if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize))
+		if (ImGui::Button("##Play", maxButtonSize))
 		{
 			EditorApplication::TogglePlay();
 		}
@@ -146,7 +151,9 @@ namespace Glory::Editor
 			styleColorCount = 3;
 		}
 
-		if (ImGui::Button("||##Pause", maxButtonSize))
+		pTexture = EditorAssets::GetTexture(EditorAssetNames::Pause);
+		//if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize))
+		if (ImGui::Button("##Pause", maxButtonSize))
 		{
 			EditorApplication::TogglePause();
 		}
@@ -154,7 +161,9 @@ namespace Glory::Editor
 
 		cursor += maxButtonSize.x;
 		ImGui::SameLine(cursor);
-		if (ImGui::Button(">##TickFrame", maxButtonSize))
+		pTexture = EditorAssets::GetTexture(EditorAssetNames::Step);
+		//if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize))
+		if (ImGui::Button("##Step", maxButtonSize))
 		{
 			EditorApplication::TickFrame();
 		}

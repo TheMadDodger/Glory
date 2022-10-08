@@ -1,6 +1,12 @@
 #pragma once
 #include "IToolChain.h"
-#include <ImGuizmo.h>
+#include <string>
+
+namespace ImGuizmo
+{
+	enum OPERATION;
+	enum MODE;
+}
 
 namespace Glory::Editor
 {
@@ -18,9 +24,11 @@ namespace Glory::Editor
 
 	private:
 		static const ImGuizmo::OPERATION OPERATIONS[];
+		static const std::string OPERATION_TEXTURES[];
 		static const size_t OPERATIONS_COUNT;
 
 		static const ImGuizmo::MODE MODES[];
+		static const std::string MODE_TEXTURES[];
 		static const size_t MODES_COUNT;
 	};
 }
