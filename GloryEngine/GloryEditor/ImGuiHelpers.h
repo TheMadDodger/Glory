@@ -26,6 +26,14 @@ namespace Glory
         result.y /= factor;
         return result;
     }
+
+    inline ImVec2 operator*(const ImVec2& v, float factor)
+    {
+        ImVec2 result = ImVec2(v);
+        result.x *= factor;
+        result.y *= factor;
+        return result;
+    }
 }
 
 namespace glm

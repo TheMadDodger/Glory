@@ -4,6 +4,7 @@
 #include "EditorAssets.h"
 #include "EditorRenderImpl.h"
 #include "EditorApplication.h"
+#include "ImGuiHelpers.h"
 #include <ImGuizmo.h>
 
 namespace Glory::Editor
@@ -71,8 +72,7 @@ namespace Glory::Editor
 			std::string label = "##OP_" + std::to_string(i);
 			Texture* pTexture = EditorAssets::GetTexture(OPERATION_TEXTURES[i]);
 
-			//if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize))
-			if (ImGui::Button(label.c_str(), maxButtonSize))
+			if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize * 0.8f))
 			{
 				Gizmos::m_DefaultOperation = op;
 			}
@@ -83,6 +83,8 @@ namespace Glory::Editor
 
 	void GizmosToolChain::DrawModes(float& cursor, const ImVec2& maxButtonSize)
 	{
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+
 		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 		int styleColorCount = 0;
 		for (size_t i = 0; i < MODES_COUNT; i++)
@@ -100,7 +102,9 @@ namespace Glory::Editor
 
 			ImGui::SameLine(cursor);
 			std::string label = "##MODE_" + std::to_string(i);
-			if (ImGui::Button(label.c_str(), maxButtonSize))
+			Texture* pTexture = EditorAssets::GetTexture(MODE_TEXTURES[i]);
+
+			if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize * 0.8f))
 			{
 				Gizmos::m_DefaultMode = mode;
 			}

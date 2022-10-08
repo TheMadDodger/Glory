@@ -50,6 +50,8 @@ namespace Glory::Editor
 		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Play.png", EditorAssetNames::Play);
 		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Pause.png", EditorAssetNames::Pause);
 		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Step.png", EditorAssetNames::Step);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/World.png", EditorAssetNames::GizmoWorld);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Local.png", EditorAssetNames::GizmoLocal);
 		m_IsInitialized = true;
 	}
 
