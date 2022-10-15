@@ -1,6 +1,5 @@
 #include "MonoManager.h"
 #include "MonoLibManager.h"
-#include <mono/metadata/assembly.h>
 
 namespace Glory
 {

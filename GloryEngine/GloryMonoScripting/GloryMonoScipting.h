@@ -1,10 +1,8 @@
 #pragma once
-#include <ScriptingModule.h>
-#include <mono/jit/jit.h>
 #include "MonoScript.h"
 #include "AssemblyBinding.h"
 #include "MonoScriptLoader.h"
-#include <ScriptingExtender.h>
+#include "GloryMono.h"
 
 #define BIND(x, y) internalCalls.push_back(InternalCall("C#", x, &y))
 

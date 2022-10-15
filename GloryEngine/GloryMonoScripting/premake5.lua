@@ -36,7 +36,6 @@ project "GloryMonoScripting"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-		"%{mono_install}/lib",
 	}
 
 	links
@@ -47,7 +46,8 @@ project "GloryMonoScripting"
 		"shaderc_shared",
 		"yaml-cpp",
 		"mono-2.0-sgen",
-		"libmono-static-sgen",
+		"MonoPosixHelper",
+		--"libmono-static-sgen",
 	}
 
 	defines
@@ -60,7 +60,6 @@ project "GloryMonoScripting"
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 		("{COPY} ./Assets %{moduleOutDir}/Assets"),
 		("{COPY} ./Resources %{moduleOutDir}/Resources"),
-		--("{COPY} %{LibDirs.GLEW}/*.dll %{moduleOutDir}/Dependencies"),
 	}
 
 	filter "system:windows"
@@ -76,8 +75,32 @@ project "GloryMonoScripting"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			"%{mono_installx86}/lib",
+		}
+
+		postbuildcommands
+		{
+			("{COPY} \"%{mono_installx86}/bin/mono-2.0-sgen.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ../Build/%{cfg.buildcfg}/%{cfg.platform}/mono/4.5/"),
+			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ./mono/4.5/"),
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			"%{mono_install}/lib",
+		}
+
+		postbuildcommands
+		{
+			("{COPY} \"%{mono_install}/bin/mono-2.0-sgen.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+			("{COPY} \"%{mono_install}/lib/mono/4.5/*\" ../Build/%{cfg.buildcfg}/%{cfg.platform}/mono/4.5/"),
+			("{COPY} \"%{mono_install}/lib/mono/4.5/*\" ./mono/4.5/"),
+		}
 
 	filter "configurations:Debug"
 		runtime "Debug"

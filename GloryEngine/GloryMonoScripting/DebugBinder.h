@@ -1,6 +1,6 @@
 #pragma once
 #include "ScriptExtensions.h"
-#include <mono/metadata/object.h>
+#include "GloryMono.h"
 #include <Debug.h>
 
 namespace Glory

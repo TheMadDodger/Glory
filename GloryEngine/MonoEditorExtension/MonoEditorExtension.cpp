@@ -7,20 +7,19 @@
 #include <fstream>
 #include <AssetDatabase.h>
 #include <MonoScript.h>
-#include <windows.h>
 #include <Tumbnail.h>
 #include <MonoManager.h>
-#include <tchar.h>
 
-#include <locale>
-#include <codecvt>
 #include <string>
 #include <MonoLibManager.h>
 
+#include <tchar.h>
+#include <locale>
+#include <codecvt>
+#include <windows.h>
+
 namespace Glory::Editor
 {
-	ticpp::Document MonoEditorExtension::m_SolutionDocument;
-
 	MonoEditorExtension::MonoEditorExtension()
 	{
 	}

@@ -1,12 +1,9 @@
 #include "GloryMonoScipting.h"
 #include "DebugBinder.h"
 #include "MathBinder.h"
-#include <mono/metadata/assembly.h>
-#include <Game.h>
-#include <mono/metadata/debug-helpers.h>
-#include <ScriptExtensions.h>
 #include "MonoLibManager.h"
 #include "MonoManager.h"
+#include <Game.h>
 
 namespace Glory
 {
@@ -21,7 +18,7 @@ namespace Glory
 
 	void GloryMonoScipting::Initialize()
 	{
-		m_pEngine->GetScriptingExtender()->RegisterExtender(this);
+		m_pEngine->GetScriptingExtender()->RegisterExtender((IScriptExtender*)this);
 
 		//if (Game::GetGame().GetApplicationType() == ApplicationType::AT_Editor) return;
 		MonoManager::Initialize();

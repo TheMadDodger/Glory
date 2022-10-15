@@ -2,7 +2,6 @@
 #include <BaseEditorExtension.h>
 #include <ProjectSpace.h>
 #include <GloryMonoScipting.h>
-#include <ticpp.h>
 #include <ObjectMenu.h>
 
 namespace Glory::Editor
@@ -30,6 +29,5 @@ namespace Glory::Editor
 
     private:
         GloryMonoScipting* m_pScriptingModule;
-        static ticpp::Document m_SolutionDocument;
     };
 }

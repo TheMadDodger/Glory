@@ -1,6 +1,6 @@
 #pragma once
-#include <mono/jit/jit.h>
 #include <string>
+#include "GloryMono.h"
 #include "GloryMonoScipting.h"
 
 namespace Glory

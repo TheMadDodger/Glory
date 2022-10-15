@@ -1,7 +1,7 @@
 #pragma once
-#include <mono/jit/jit.h>
 #include <string>
 #include <ScriptingExtender.h>
+#include "GloryMono.h"
 
 namespace Glory
 {

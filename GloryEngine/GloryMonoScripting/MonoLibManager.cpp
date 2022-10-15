@@ -49,7 +49,6 @@ namespace Glory
 		{
 			callback(&it.second);
 		}
-
 	}
 
 	MonoLibManager::MonoLibManager()
