@@ -114,7 +114,6 @@ group "Dependencies"
 	include "submodules/ImFileDialog"
 	include "third-party/assimp"
 	include "third-party/yaml-cpp"
-	include "submodules/ticpp"
 group ""
 
 include "GloryASSIMPModelLoader"
