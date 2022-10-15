@@ -4,6 +4,7 @@
 #include <ImGuizmo.h>
 #include <Serializer.h>
 #include <AssetDatabase.h>
+#include "EditorApplication.h"
 
 #include "MainEditor.h"
 #include "EditorWindow.h"
@@ -36,16 +37,18 @@
 #include "ObjectMenu.h"
 #include "ObjectMenuCallbacks.h"
 #include "FileDialog.h"
-#include "Undo.h"
+#include "ImGuiHelpers.h"
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
 namespace Glory::Editor
 {
 	size_t MainEditor::m_SaveSceneIndex = 0;
+	float MainEditor::MENUBAR_SIZE = 0.0f;
+	const float MainEditor::TOOLBAR_SIZE = 50.0f;
 
 	MainEditor::MainEditor()
-		: m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_Settings("./EditorSettings.yaml")
+		: m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), m_Settings("./EditorSettings.yaml")
 	{
 	}
 
@@ -56,6 +59,9 @@ namespace Glory::Editor
 
 		delete m_AssetPickerPopup;
 		m_AssetPickerPopup = nullptr;
+
+		delete m_pToolbar;
+		m_pToolbar = nullptr;
 	}
 
 	void MainEditor::Initialize()
@@ -80,6 +86,8 @@ namespace Glory::Editor
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
 
 		FileDialog::Initialize();
+
+		Gizmos::Initialize();
 	}
 
 	void MainEditor::Destroy()
@@ -91,6 +99,8 @@ namespace Glory::Editor
 		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
 		PropertyDrawer::Cleanup();
+
+		Gizmos::Cleanup();
 	}
 
     static void HelpMarker(const char* desc)
@@ -109,8 +119,42 @@ namespace Glory::Editor
 	void MainEditor::PaintEditor()
 	{
 		MenuBar::OnGUI();
-        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-        EditorWindow::RenderWindows();
+		Dockspace();
+		m_pToolbar->Paint();
+		DrawUserEditor();
+	}
+
+	void MainEditor::Dockspace()
+	{
+		const float toolbarSize = 50;
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos + ImVec2(0, toolbarSize));
+		ImGui::SetNextWindowSize(viewport->Size - ImVec2(0, toolbarSize));
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGuiWindowFlags window_flags = 0
+			| ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking
+			| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::Begin("Master DockSpace", NULL, window_flags);
+		ImGuiID dockMain = ImGui::GetID("MyDockspace");
+
+		// Save off menu bar height for later.
+		MENUBAR_SIZE = ImGui::GetCurrentWindow()->MenuBarHeight();
+
+		ImGui::DockSpace(dockMain);
+		ImGui::End();
+		ImGui::PopStyleVar(3);
+	}
+
+	void MainEditor::DrawUserEditor()
+	{
+		EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
 		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
@@ -137,9 +181,10 @@ namespace Glory::Editor
 			pActiveScene->CreateEmptyObject();
 		});
 
-		MenuBar::AddMenuItem("Play/Start", [&]() {/*this->EnterPlayMode();*/ });
-		MenuBar::AddMenuItem("Play/Pauze", [&]() {/*m_PlayModePaused = !m_PlayModePaused;*/ });
-		MenuBar::AddMenuItem("Play/Stop", [&]() {/*this->ExitPlayMode();*/ });
+		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay);
+		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay);
+		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause);
+		MenuBar::AddMenuItem("Play/Next Frame", EditorApplication::TickFrame);
 
 		MenuBar::AddMenuItem("File/Exit", [&]() {
 			std::vector<std::string> buttons = { "Cancel", "Exit" };

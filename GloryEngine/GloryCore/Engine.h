@@ -11,6 +11,7 @@
 #include "TimerModule.h"
 #include "ProfilerModule.h"
 #include "ResourceType.h"
+#include "IModuleLoopHandler.h"
 #include "GloryCore.h"
 #include "ScriptingModule.h"
 
@@ -83,9 +84,12 @@ namespace Glory
 		GraphicsThread* GetGraphicsThread() const;
 
 		void StartThreads();
-		void ModulesLoop();
+		void ModulesLoop(IModuleLoopHandler* pLoopHandler = nullptr);
 		void GameThreadFrameStart();
 		void GameThreadFrameEnd();
+
+		void CallModuleUpdate(Module* pModule);
+		void CallModuleDraw(Module* pModule);
 
 	private:
 		Engine(const EngineCreateInfo& createInfo);

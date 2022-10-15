@@ -12,6 +12,8 @@ namespace Glory::Editor
 	ImGuizmo::OPERATION Gizmos::m_DefaultOperation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE Gizmos::m_DefaultMode = ImGuizmo::LOCAL;
 
+	GizmosToolChain* Gizmos::m_pToolChain = nullptr;
+
 	//GLORY_EDITOR_API bool Gizmos::DrawGizmo(glm::mat4* transfrom)
 	//{
 	//	size_t index = m_pGizmos.size();
@@ -55,6 +57,17 @@ namespace Glory::Editor
 			delete pGizmo;
 		}
 		m_pGizmos.clear();
+	}
+
+	void Gizmos::Initialize()
+	{
+		m_pToolChain = new GizmosToolChain();
+	}
+
+	void Gizmos::Cleanup()
+	{
+		delete m_pToolChain;
+		m_pToolChain = nullptr;
 	}
 
 	GLORY_EDITOR_API Gizmos::Gizmos() {}

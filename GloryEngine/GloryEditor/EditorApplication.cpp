@@ -7,9 +7,11 @@ namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
 	const Glory::Version EditorApplication::Version(VERSION_DATA, 3);
+	EditorMode EditorApplication::m_Mode = EditorMode::M_Edit;
 
 	GLORY_EDITOR_API EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
-		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl), m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr)
+		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl),
+		m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr), m_pPlayer(nullptr)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.ExtensionsCount > 0 && createInfo.pExtensions != nullptr)
@@ -30,7 +32,7 @@ namespace Glory::Editor
 		m_pMainEditor = nullptr;
 
 		delete m_pPlatform;
-		m_pPlatform = nullptr;
+		m_pPlatform = nullptr;;
 	}
 
 	GLORY_EDITOR_API void EditorApplication::Initialize(Game& game)
@@ -62,6 +64,9 @@ namespace Glory::Editor
 		m_pShaderProcessor->Stop();
 		delete m_pShaderProcessor;
 		m_pShaderProcessor = nullptr;
+
+		delete m_pPlayer;
+		m_pPlayer = nullptr;
 	}
 
 	GLORY_EDITOR_API void EditorApplication::Run(Game& game)
@@ -85,7 +90,7 @@ namespace Glory::Editor
 			m_pMainEditor->Update();
 
 			// Update engine (this also does the render loop)
-			game.GetEngine()->ModulesLoop();
+			game.GetEngine()->ModulesLoop(m_pPlayer);
 
 			// End the current frame
 			game.GetEngine()->GameThreadFrameEnd();
@@ -128,6 +133,56 @@ namespace Glory::Editor
 		return m_pEditorInstance;
 	}
 
+	const EditorMode& EditorApplication::CurrentMode()
+	{
+		return m_Mode;
+	}
+
+	void EditorApplication::TogglePlay()
+	{
+		switch (m_Mode)
+		{
+		case Glory::Editor::EditorMode::M_Edit:
+			StartPlay();
+			break;
+		case Glory::Editor::EditorMode::M_Play:
+			StopPlay();
+			break;
+		}
+	}
+
+	void EditorApplication::StartPlay()
+	{
+		if (m_Mode != EditorMode::M_Edit) return;
+		m_Mode = EditorMode::M_EnteringPlay;
+		m_pEditorInstance->m_pPlayer->Start();
+		m_Mode = EditorMode::M_Play;
+	}
+
+	void EditorApplication::StopPlay()
+	{
+		if (m_Mode != EditorMode::M_Play) return;
+		m_Mode = EditorMode::M_ExitingPlay;
+		m_pEditorInstance->m_pPlayer->Stop();
+		m_Mode = EditorMode::M_Edit;
+	}
+
+	GLORY_EDITOR_API void EditorApplication::TogglePause()
+	{
+		m_pEditorInstance->m_pPlayer->TogglePauze();
+	}
+
+	GLORY_EDITOR_API void EditorApplication::TickFrame()
+	{
+		if (m_Mode != EditorMode::M_Play) return;
+		m_pEditorInstance->m_pPlayer->TickFrame();
+	}
+
+	GLORY_EDITOR_API bool EditorApplication::IsPaused()
+	{
+		return m_pEditorInstance->m_pPlayer->m_IsPaused;
+	}
+
 	void EditorApplication::RenderEditor()
 	{
 		m_pMainEditor->PaintEditor();
@@ -145,6 +200,7 @@ namespace Glory::Editor
 		InitializeExtensions();
 
 		m_pShaderProcessor = new EditorShaderProcessor();
+		m_pPlayer = new EditorPlayer();
 	}
 
 	std::string EditorApplication::AssetPathOverrider()

@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-    RenderFrame::RenderFrame() : ObjectsToRender(std::vector<RenderData>())
+    RenderFrame::RenderFrame() : ObjectsToRender(std::vector<RenderData>()), ActiveLights(std::vector<PointLight>())
     {
     }
 }

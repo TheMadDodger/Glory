@@ -25,6 +25,7 @@ project "GloryEditor"
 		["Editor"] = { "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*", "Gizmos.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
+		["Editor/Playmode"] = { "EditorPlayer.*", "IEditorLoopHandler.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
 		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
@@ -33,6 +34,7 @@ project "GloryEditor"
 		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" },
 		["Undo"] = { "Undo.*" },
 		["Undo/Actions"] = { "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectAction.*", "DeselectAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
+		["Toolbar"] = { "Toolbar.*", "IToolChain.*" }
 	}
 
 	includedirs

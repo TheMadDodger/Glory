@@ -4,6 +4,17 @@
 
 namespace Glory::Editor
 {
+	const std::string EditorAssetNames::GizmoMove = "gizmo-move";
+	const std::string EditorAssetNames::GizmoRotate = "gizmo-rotate";
+	const std::string EditorAssetNames::GizmoScale = "gizmo-scale";
+	const std::string EditorAssetNames::GizmoUniversal = "gizmo-universal";
+	const std::string EditorAssetNames::GizmoWorld = "gizmo-world";
+	const std::string EditorAssetNames::GizmoLocal = "gizmo-local";
+	const std::string EditorAssetNames::Play = "play";
+	const std::string EditorAssetNames::Pause = "pause";
+	const std::string EditorAssetNames::Step = "step";
+
+
 	bool EditorAssets::m_IsInitialized = false;
 	std::vector<ImageData*> EditorAssets::m_pEditorImages;
 	std::unordered_map<std::string, Texture*> EditorAssets::m_pTextures;
@@ -32,6 +43,16 @@ namespace Glory::Editor
 		LoadImage(pGraphics, pLoader, "./EditorAssets/folder.png", "folder");
 		LoadImage(pGraphics, pLoader, "./EditorAssets/file.png", "file");
 		LoadImage(pGraphics, pLoader, "./EditorAssets/scene.png", "scene");
+
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Move.png", EditorAssetNames::GizmoMove);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Rotate.png", EditorAssetNames::GizmoRotate);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Scale.png", EditorAssetNames::GizmoScale);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Universal.png", EditorAssetNames::GizmoUniversal);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Play.png", EditorAssetNames::Play);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Pause.png", EditorAssetNames::Pause);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Step.png", EditorAssetNames::Step);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/World.png", EditorAssetNames::GizmoWorld);
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Toolbar/Local.png", EditorAssetNames::GizmoLocal);
 		m_IsInitialized = true;
 	}
 
@@ -68,4 +89,7 @@ namespace Glory::Editor
 
 	EditorAssets::EditorAssets() {}
 	EditorAssets::~EditorAssets() {}
+
+	EditorAssetNames::EditorAssetNames() {}
+	EditorAssetNames::~EditorAssetNames() {}
 }

@@ -2,6 +2,7 @@
 #include "EditorAssets.h"
 #include <implot.h>
 #include <ImGuizmo.h>
+#include <imgui_internal.h>
 #include <Engine.h>
 
 namespace Glory::Editor
@@ -25,8 +26,7 @@ namespace Glory::Editor
 		SetupDearImGuiContext();
 		m_pWindowImpl->SetContext(m_pImguiConext);
 		m_pRenderImpl->SetContext(m_pImguiConext);
-		m_pRenderImpl->Initialize();
-		m_pRenderImpl->SetupBackend();
+		
 		LoadFonts();
 		m_pRenderImpl->UploadImGUIFonts();
 
@@ -36,6 +36,8 @@ namespace Glory::Editor
 
 	void EditorPlatform::ThreadedInitialize()
 	{
+		m_pRenderImpl->Initialize();
+		m_pRenderImpl->SetupBackend();
 	}
 
 	bool EditorPlatform::PollEvents()
@@ -80,11 +82,11 @@ namespace Glory::Editor
 		IMGUI_CHECKVERSION();
 		m_pImguiConext = ImGui::CreateContext();
 		ImPlot::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		ImGuiIO& io = m_pImguiConext->IO;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
@@ -130,7 +132,7 @@ namespace Glory::Editor
 	{
 		Wait(Idle);
 
-		ImGuiIO& io = ImGui::GetIO();
+		ImGuiIO& io = m_pImguiConext->IO;
 		// Rendering
 		ImGui::Render();
 
