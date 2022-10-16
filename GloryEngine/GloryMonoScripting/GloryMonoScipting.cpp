@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("C#")
+	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp")
 	{
 	}
 
@@ -21,7 +21,7 @@ namespace Glory
 		m_pEngine->GetScriptingExtender()->RegisterExtender((IScriptExtender*)this);
 
 		//if (Game::GetGame().GetApplicationType() == ApplicationType::AT_Editor) return;
-		MonoManager::Initialize();
+		MonoManager::Initialize("./Modules/GloryMonoScripting/Dependencies");
 	}
 	
 	void GloryMonoScipting::SetMonoDirs(const std::string& assemblyDir, const std::string& configDir)
@@ -79,6 +79,6 @@ namespace Glory
 
 	void GloryMonoScipting::GetLibs(std::vector<ScriptingLib>& libs)
 	{
-		libs.push_back(ScriptingLib("C#", "GloryEngine.Core.dll"));
+		libs.push_back(ScriptingLib("csharp", "GloryEngine.Core.dll"));
 	}
 }

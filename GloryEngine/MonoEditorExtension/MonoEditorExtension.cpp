@@ -72,7 +72,7 @@ namespace Glory::Editor
 	void MonoEditorExtension::OnProjectOpen(ProjectSpace* pProject)
 	{
 		std::string name = pProject->Name() + ".dll";
-		MonoManager::LoadLib(ScriptingLib("C#", name));
+		MonoManager::LoadLib(ScriptingLib("csharp", name));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)

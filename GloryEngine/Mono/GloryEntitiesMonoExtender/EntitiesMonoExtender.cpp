@@ -7,7 +7,7 @@ namespace Glory
 {
 	std::string EntitiesMonoExtender::Language()
 	{
-		return "C#";
+		return "csharp";
 	}
 
 	void EntitiesMonoExtender::GetInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -16,7 +16,7 @@ namespace Glory
 
 	void EntitiesMonoExtender::GetLibs(std::vector<ScriptingLib>& libs)
 	{
-		libs.push_back(ScriptingLib("C#", "GloryEngine.Entities.dll"));
+		libs.push_back(ScriptingLib("csharp", "GloryEngine.Entities.dll"));
 	}
 
 	void LoadExtension(Engine* pEngine)

@@ -682,6 +682,9 @@ enum aiComponent
 #define AI_CONFIG_FBX_CONVERT_TO_M \
     "AI_CONFIG_FBX_CONVERT_TO_M"
 
+#define AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER \
+    "AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER"
+
 // ---------------------------------------------------------------------------
 /** @brief  Set the vertex animation keyframe to be imported
  *

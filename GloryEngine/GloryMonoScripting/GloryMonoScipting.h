@@ -4,7 +4,7 @@
 #include "MonoScriptLoader.h"
 #include "GloryMono.h"
 
-#define BIND(x, y) internalCalls.push_back(InternalCall("C#", x, &y))
+#define BIND(x, y) internalCalls.push_back(InternalCall("csharp", x, &y))
 
 namespace Glory
 {
