@@ -1,6 +1,7 @@
 #pragma once
 #include <Script.h>
 #include <mono/jit/jit.h>
+#include <Glory.h>
 #include "AssemblyBinding.h"
 
 namespace Glory
@@ -8,11 +9,11 @@ namespace Glory
     class MonoScript : public Script
     {
     public:
-        MonoScript();
-        MonoScript(FileData* pFileData);
-        virtual ~MonoScript();
+        GLORY_API MonoScript();
+        GLORY_API MonoScript(FileData* pFileData);
+        virtual GLORY_API ~MonoScript();
 
-        virtual void Invoke(Object* pObject, const std::string& method, void** args) override;
+        virtual void GLORY_API Invoke(Object* pObject, const std::string& method, void** args) override;
 
     private:
         virtual bool IsBehaviour() override;

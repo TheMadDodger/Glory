@@ -53,8 +53,8 @@ project "GlorySDLImage"
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 		("{COPY} %{LibDirs.SDL_image}/*.dll %{moduleOutDir}/Dependencies"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+		--("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

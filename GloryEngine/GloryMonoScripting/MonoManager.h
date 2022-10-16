@@ -8,8 +8,8 @@ namespace Glory
 	class MonoManager
 	{
 	public:
-		static MonoDomain* GetDomain();
-		static void LoadLib(const ScriptingLib& lib);
+		static GLORY_API MonoDomain* GetDomain();
+		static GLORY_API void LoadLib(const ScriptingLib& lib);
 
 	private:
 		static void Initialize(const std::string& assemblyDir = ".", const std::string& configDir = "");

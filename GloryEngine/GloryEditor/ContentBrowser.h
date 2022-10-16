@@ -11,16 +11,13 @@ namespace Glory::Editor
 		ContentBrowser();
 		virtual ~ContentBrowser();
 
-		static std::filesystem::path GetCurrentPath();
-
-		virtual void OnOpen() override;
-		virtual void OnClose() override;
-
-		static void BeginRename(const std::string& name, bool folder);
-
-		static void LoadProject();
+		static GLORY_EDITOR_API std::filesystem::path GetCurrentPath();
+		static GLORY_EDITOR_API void BeginRename(const std::string& name, bool folder);
+		static GLORY_EDITOR_API void LoadProject();
 
 	private:
+		virtual void OnOpen() override;
+		virtual void OnClose() override;
 		virtual void OnGUI() override;
 
 	private:

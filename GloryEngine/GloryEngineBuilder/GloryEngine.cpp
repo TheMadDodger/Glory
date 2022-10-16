@@ -67,7 +67,8 @@ namespace Glory
 
 	void EngineLoader::LoadModules(YAML::Node& modules)
 	{
-		for (size_t i = 0; i < modules.size(); i++)
+		size_t modulesCount = modules.size();
+		for (size_t i = 0; i < modulesCount; i++)
 		{
 			YAML::Node moduleNode = modules[i];
 			std::string moduleName = moduleNode.as<std::string>();
@@ -99,11 +100,12 @@ namespace Glory
 				std::string dependency = dependencies[i];
 				Debug::LogInfo("Loading dependency: " + dependency + "...");
 				std::filesystem::path dependencyPath = modulePath;
-				dependencyPath = dependencyPath.append("Dependencies").append(dependency).replace_extension(".dll");
+				dependencyPath = dependencyPath.append("Dependencies").append(dependency);
+				dependencyPath = dependencyPath.string() + ".dll";
 				HMODULE dependencyLib = LoadLibrary(dependencyPath.c_str());
 				if (dependencyLib == NULL)
 				{
-					Debug::LogFatalError("Failed to load dependency: " + dependency + ": The dll was not found!");
+					Debug::LogError("Failed to load dependency: " + dependency + ": The dll was not found!");
 					m_pModules.push_back(nullptr);
 					return;
 				}
@@ -151,6 +153,7 @@ namespace Glory
 		LoadRequiredModule<ScenesModule>(engineInfo, "SceneManagement", &engineCreateInfo.pScenesModule);
 		LoadRequiredModule<RendererModule>(engineInfo, "Renderer", &engineCreateInfo.pRenderModule);
 		LoadRequiredModule<GraphicsModule>(engineInfo, "Graphics", &engineCreateInfo.pGraphicsModule);
+		LoadScriptingModules(engineInfo, "Scripting", engineCreateInfo);
 
 		YAML::Node optionalModulesNode = engineInfo["Optional"];
 		for (size_t i = 0; i < optionalModulesNode.size(); i++)
@@ -168,5 +171,20 @@ namespace Glory
 
 		engineCreateInfo.OptionalModuleCount = static_cast<uint32_t>(m_pOptionalModules.size());
 		engineCreateInfo.pOptionalModules = m_pOptionalModules.data();
+	}
+
+	void EngineLoader::LoadScriptingModules(YAML::Node& node, const std::string& key, EngineCreateInfo& engineCreateInfo)
+	{
+		YAML::Node scriptingModulesNode = node[key];
+		for (size_t i = 0; i < scriptingModulesNode.size(); i++)
+		{
+			YAML::Node indexNode = scriptingModulesNode[i];
+			int index = indexNode.as<int>();
+			Module* pModule = m_pModules[index];
+			m_pScriptingModules.push_back((ScriptingModule*)pModule);
+		}
+
+		engineCreateInfo.ScriptingModulesCount = static_cast<uint32_t>(m_pScriptingModules.size());
+		engineCreateInfo.pScriptingModules = m_pScriptingModules.data();
 	}
 }

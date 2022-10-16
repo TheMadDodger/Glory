@@ -27,7 +27,6 @@ project "GloryMonoScripting"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
-		"%{mono_install}/include/mono-2.0",
 	}
 
 	libdirs
@@ -79,12 +78,17 @@ project "GloryMonoScripting"
 		{
 			"%{mono_installx86}/lib",
 		}
-
+		
+		includedirs
+		{
+			"%{mono_installx86}/include/mono-2.0",
+		}
+		
 		postbuildcommands
 		{
-			("{COPY} \"%{mono_installx86}/bin/mono-2.0-sgen.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
-			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ../Build/%{cfg.buildcfg}/%{cfg.platform}/mono/4.5/"),
-			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ./mono/4.5/"),
+			("{COPY} \"%{mono_installx86}/bin/mono-2.0-sgen.dll\" %{moduleOutDir}/Dependencies"),
+			("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" %{moduleOutDir}/Dependencies/mono/4.5/"),
+			--("{COPY} \"%{mono_installx86}/lib/mono/4.5/*\" ./mono/4.5/"),
 		}
 
 	filter "platforms:x64"
@@ -94,12 +98,17 @@ project "GloryMonoScripting"
 		{
 			"%{mono_install}/lib",
 		}
+		
+		includedirs
+		{
+			"%{mono_install}/include/mono-2.0",
+		}
 
 		postbuildcommands
 		{
-			("{COPY} \"%{mono_install}/bin/mono-2.0-sgen.dll\" ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
-			("{COPY} \"%{mono_install}/lib/mono/4.5/*\" ../Build/%{cfg.buildcfg}/%{cfg.platform}/mono/4.5/"),
-			("{COPY} \"%{mono_install}/lib/mono/4.5/*\" ./mono/4.5/"),
+			("{COPY} \"%{mono_install}/bin/mono-2.0-sgen.dll\" %{moduleOutDir}/Dependencies"),
+			("{COPY} \"%{mono_install}/lib/mono/4.5/*\" %{moduleOutDir}/Dependencies/mono/4.5/"),
+			--("{COPY} \"%{mono_install}/lib/mono/4.5/*\" ./mono/4.5/"),
 		}
 
 	filter "configurations:Debug"

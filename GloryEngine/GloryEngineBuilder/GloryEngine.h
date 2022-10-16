@@ -38,11 +38,14 @@ namespace Glory
 			return pT;
 		}
 
+		void LoadScriptingModules(YAML::Node& node, const std::string& key, EngineCreateInfo& engineCreateInfo);
+
 	private:
 		std::filesystem::path m_CFGPath;
 		std::vector<Module*> m_pModules;
 		std::vector<HMODULE> m_Libs;
 		std::vector<Module*> m_pOptionalModules;
+		std::vector<ScriptingModule*> m_pScriptingModules;
 		std::vector<std::string> m_LoadedModuleNames;
 		std::map<std::string, size_t> m_SetModules;
 	};

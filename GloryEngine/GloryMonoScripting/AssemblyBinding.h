@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <array>
+#include <Glory.h>
 
 namespace Glory
 {
@@ -31,23 +32,24 @@ namespace Glory
 	class AssemblyBinding
 	{
 	public:
-		AssemblyBinding();
-		AssemblyBinding(MonoDomain* pDomain, const std::string& name);
-		virtual ~AssemblyBinding();
+		GLORY_API AssemblyBinding();
+		GLORY_API AssemblyBinding(MonoDomain* pDomain, const std::string& name);
+		virtual GLORY_API ~AssemblyBinding();
 
-		void Initialize();
-		void Destroy();
+		GLORY_API MonoImage* GetMonoImage();
+		GLORY_API AssemblyClass* GetClass(const std::string& namespaceName, const std::string& className);
+		GLORY_API bool GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c);
 
-		MonoImage* GetMonoImage();
-		AssemblyClass* GetClass(const std::string& namespaceName, const std::string& className);
-		bool GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c);
-
-		const std::string& Name();
+		GLORY_API const std::string& Name();
 
 	private:
 		AssemblyClass* LoadClass(const std::string& namespaceName, const std::string& className);
 
+		void Initialize();
+		void Destroy();
+
 	private:
+		friend class MonoLibManager;
 		MonoDomain* m_pDomain;
 		const std::string m_Name;
 		MonoAssembly* m_pAssembly;

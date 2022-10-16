@@ -6,7 +6,6 @@ workspace "GloryEngine"
 	}
 
 	startproject "GloryASSIMPModelLoader"
-	startproject "GloryBasicRenderer"
 	startproject "GloryClusteredRenderer"
 	startproject "GloryCore"
 	startproject "GloryEditor"
@@ -46,7 +45,6 @@ moduleOutDir = "%{modulesOutDir}/%{prj.name}"
 
 GloryIncludeDir = {}
 GloryIncludeDir["assimp"]				= "../GloryASSIMPModelLoader"
-GloryIncludeDir["basicrenderer"]		= "../GloryBasicRenderer"
 GloryIncludeDir["clusteredrenderer"]	= "../GloryClusteredRenderer"
 GloryIncludeDir["core"]					= "../GloryCore"
 GloryIncludeDir["editor"]				= "../GloryEditor"
@@ -117,7 +115,6 @@ group "Dependencies"
 group ""
 
 include "GloryASSIMPModelLoader"
-include "GloryBasicRenderer"
 include "GloryClusteredRenderer"
 include "GloryCore"
 include "GloryEditor"
