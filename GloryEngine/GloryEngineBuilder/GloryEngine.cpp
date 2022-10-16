@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	typedef Module*(__cdecl* LoadModuleProc)(GloryContext*);
+	typedef Module*(__cdecl* OnLoadModuleProc)(GloryContext*);
 
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath) : m_CFGPath(cfgPath)
 	{
@@ -120,11 +120,11 @@ namespace Glory
 			return;
 		}
 
-		LoadModuleProc loadProc = (LoadModuleProc)GetProcAddress(lib, "LoadModule");
+		OnLoadModuleProc loadProc = (OnLoadModuleProc)GetProcAddress(lib, "OnLoadModule");
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load module: " + moduleName + ": Missing LoadModule function!");
+			Debug::LogError("Failed to load module: " + moduleName + ": Missing OnLoadModule function!");
 			m_pModules.push_back(nullptr);
 			return;
 		}
@@ -134,7 +134,7 @@ namespace Glory
 		if (pModule == nullptr)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load module: " + moduleName + ": LoadModule returned nullptr!");
+			Debug::LogError("Failed to load module: " + moduleName + ": OnLoadModule returned nullptr!");
 			m_pModules.push_back(nullptr);
 			return;
 		}

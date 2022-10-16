@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
         Glory::GameSettings gameSettings;
         gameSettings.pEngine = pEngine;
         gameSettings.pGameState = new Glory::GameState();
-        //gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
+        gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
         pGame.Initialize();
         
