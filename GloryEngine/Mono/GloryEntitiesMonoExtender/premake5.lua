@@ -4,7 +4,7 @@ project "GloryEntitiesMonoExtender"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("../%{engineoutdir}")
+	targetdir ("../%{modulesOutDir}/GloryEntityScenes/Scripting/csharp")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
@@ -33,6 +33,7 @@ project "GloryEntitiesMonoExtender"
 	links
 	{
 		"GloryCore",
+		"GloryMonoScripting",
 		"yaml-cpp",
 	}
 

@@ -1,5 +1,8 @@
 Name: "Mono Scripting"
 Type: Scripting
 Dependencies: ["mono-2.0-sgen"]
+Scripting: 
+- Language: "csharp"
+  Extension: "GloryEntitiesMonoExtender"
 Editor:
- Extensions: ["GloryEntitiesMonoExtender"]
+ Extensions: ["MonoEditorExtension"]

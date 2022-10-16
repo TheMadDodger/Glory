@@ -18,6 +18,17 @@
 #include <codecvt>
 #include <windows.h>
 
+GLORY_API Glory::Editor::BaseEditorExtension* LoadExtension()
+{
+	return new Glory::Editor::MonoEditorExtension();
+}
+
+GLORY_API void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
+{
+	Glory::GloryContext::SetContext(pContext);
+	ImGui::SetCurrentContext(pImGUIContext);
+}
+
 namespace Glory::Editor
 {
 	MonoEditorExtension::MonoEditorExtension()
@@ -72,7 +83,9 @@ namespace Glory::Editor
 	void MonoEditorExtension::OnProjectOpen(ProjectSpace* pProject)
 	{
 		std::string name = pProject->Name() + ".dll";
-		MonoManager::LoadLib(ScriptingLib("csharp", name));
+		std::filesystem::path path = pProject->ProjectPath();
+		path = path.parent_path().append("Library/Assembly").append(name);
+		MonoManager::LoadLib(ScriptingLib("csharp", path.string()));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)

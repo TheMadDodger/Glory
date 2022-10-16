@@ -3,6 +3,7 @@
 #include <vector>
 #include <filesystem>
 #include <map>
+#include <yaml-cpp/yaml.h>
 
 namespace Glory
 {
@@ -15,6 +16,12 @@ namespace Glory
 		MT_Loader,
 		MT_Scripting,
 		MT_Other,
+	};
+
+	struct ModuleScriptingExtension
+	{
+		std::string m_Language;
+		std::string m_ExtensionFile;
 	};
 
 	class ModuleMetaData
@@ -34,12 +41,16 @@ namespace Glory
 		const std::vector<std::string>& Dependencies() const;
 
 	private:
+		void ReadScriptingExtenderd(YAML::Node& node);
+
+	private:
 		std::filesystem::path m_Path;
 		std::string m_Name;
 		ModuleType m_Type;
 		std::string m_EditorBackend;
 		std::vector<std::string> m_EditorExtensions;
 		std::vector<std::string> m_Dependencies;
+		std::vector<ModuleScriptingExtension> m_ScriptingExtensions;
 
 		static std::map<std::string, ModuleType> STRINGTOMODULETYPE;
 	};

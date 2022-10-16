@@ -79,6 +79,6 @@ namespace Glory
 
 	void GloryMonoScipting::GetLibs(std::vector<ScriptingLib>& libs)
 	{
-		libs.push_back(ScriptingLib("csharp", "GloryEngine.Core.dll"));
+		libs.push_back(ScriptingLib("csharp", "Modules/GloryMonoScripting/GloryEngine.Core.dll"));
 	}
 }

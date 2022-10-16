@@ -3,6 +3,10 @@
 #include <ProjectSpace.h>
 #include <GloryMonoScipting.h>
 #include <ObjectMenu.h>
+#include <Glory.h>
+
+extern "C" GLORY_API Glory::Editor::BaseEditorExtension * LoadExtension();
+extern "C" GLORY_API void SetContext(Glory::GloryContext * pContext, ImGuiContext * pImGUIContext);
 
 namespace Glory::Editor
 {

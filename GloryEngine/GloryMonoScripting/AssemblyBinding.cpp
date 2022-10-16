@@ -22,11 +22,16 @@ namespace Glory
 	void AssemblyBinding::Initialize()
 	{
 		m_pAssembly = mono_domain_assembly_open(m_pDomain, m_Name.c_str());
+		if (m_pAssembly == nullptr) return;
 		m_pImage = mono_assembly_get_image(m_pAssembly);
 	}
 
 	void AssemblyBinding::Destroy()
 	{
+		if (m_pImage) mono_image_close(m_pImage);
+		if (m_pAssembly) mono_assembly_close(m_pAssembly);
+		m_pAssembly = nullptr;
+		m_pImage = nullptr;
 	}
 
 	MonoImage* AssemblyBinding::GetMonoImage()

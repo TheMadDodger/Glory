@@ -52,8 +52,8 @@ namespace Glory::Editor
 	{
 		for (size_t i = 0; i < m_pExtensions.size(); i++)
 		{
-			m_pExtensions[i]->RegisterEditors();
 			m_pExtensions[i]->SetCurrentContext();
+			m_pExtensions[i]->RegisterEditors();
 		}
 	}
 

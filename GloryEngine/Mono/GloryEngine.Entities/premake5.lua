@@ -4,11 +4,11 @@ project "GloryEngine.Entities"
 	staticruntime "Off"
 	namespace ("GloryEngine.Entities")
 
-	targetdir ("../%{engineoutdir}/Mono")
+	targetdir ("../%{engineoutdir}/Mono/GloryEngine.Entities")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 	
 	dotnetframework "4.7.1"
-
+	
 	files
 	{
 		"*.cs",
@@ -30,6 +30,11 @@ project "GloryEngine.Entities"
 	defines
 	{
 		"TRACE"
+	}
+	
+	postbuildcommands
+	{
+		("{COPY} GloryEngine.Entities.dll \"../../../../../%{modulesOutDir}/GloryEntityScenes/Scripting/csharp/\""),
 	}
 
 	filter "system:windows"

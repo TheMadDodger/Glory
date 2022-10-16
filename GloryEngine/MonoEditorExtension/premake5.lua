@@ -63,6 +63,11 @@ project "MonoEditorExtension"
 		"MonoPosixHelper",
 	}
 
+	defines
+	{
+		"GLORY_EXPORTS"
+	}
+
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v142"
