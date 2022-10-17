@@ -21,7 +21,7 @@ namespace Glory
 
 	void MonoScript::Invoke(Object* pObject, const std::string& method, void** args)
 	{
-		AssemblyClass* pClass = LoadClass("Sponza.dll", m_NamespaceName, m_ClassName);
+		AssemblyClass* pClass = LoadClass(MonoLibManager::GetMainAssemblyName(), m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 		MonoObject* pMonoObject = LoadObject(pObject);
 		if (pMonoObject == nullptr) return;

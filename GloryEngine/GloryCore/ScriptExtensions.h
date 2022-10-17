@@ -13,19 +13,25 @@ namespace Glory
 
 	private:
 		friend class ScriptingExtender;
-		std::string m_Language;
+		const std::string m_Language;
 	};
 
 	class ScriptingLib : public ScriptExtension
 	{
 	public:
-		ScriptingLib(const std::string& language, const std::string& libraryName);
+		ScriptingLib(const std::string& language, const std::string& libraryName, const std::string& location, bool reloadable, bool isMainLib = false);
 		virtual ~ScriptingLib();
 
 		const std::string& LibraryName() const;
+		const std::string& Location() const;
+		bool Reloadable() const;
+		bool IsMainLib() const;
 
 	private:
-		std::string m_LibraryName;
+		const std::string m_LibraryName;
+		const std::string m_Location;
+		const bool m_Reloadable;
+		const bool m_MainLib;
 	};
 
 	class InternalCall : public ScriptExtension

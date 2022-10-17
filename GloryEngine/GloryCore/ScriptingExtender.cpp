@@ -13,6 +13,9 @@ namespace Glory
 			if (i < m_pManagedExtenders.size()) LoadExtender(m_pManagedExtenders[i]);
 		}
 
+		m_CurrentAppendingLanguage = "";
+		m_pCurrentAppendingModule = nullptr;
+
 		for (size_t i = 0; i < pEngine->m_pScriptingModules.size(); i++)
 		{
 			ScriptingModule* pScriptingModule = pEngine->m_pScriptingModules[i];
@@ -30,13 +33,45 @@ namespace Glory
 				if (internalCall.m_Language != language) continue;
 				pScriptingModule->Bind(internalCall);
 			}
+
 			pScriptingModule->InitializeScripting();
 		}
 	}
 
-	void ScriptingExtender::RegisterExtender(IScriptExtender* pExtender)
+	void ScriptingExtender::RegisterExtender(Module* pOwner, IScriptExtender* pExtender)
 	{
 		m_pExtenders.push_back(pExtender);
+		m_pOwners[pExtender] = pOwner;
+	}
+
+	void ScriptingExtender::RegisterManagedExtender(Module* pOwner, IScriptExtender* pExtender)
+	{
+		m_pManagedExtenders.push_back(pExtender);
+		m_pOwners[pExtender] = pOwner;
+	}
+
+	void ScriptingExtender::AddInternalLib(const std::string& name)
+	{
+		if (m_CurrentAppendingLanguage == "" || m_pCurrentAppendingModule == nullptr)
+		{
+			Debug::LogError("Cannot add internal libs outside of IScriptExtender::GetLibs call!");
+			return;
+		}
+
+		const ModuleMetaData& metaData = m_pCurrentAppendingModule->GetMetaData();
+		std::filesystem::path pathToLib = metaData.Path();
+		pathToLib = pathToLib.parent_path().append("Scripting").append(m_CurrentAppendingLanguage);
+		m_Libs.push_back(ScriptingLib(m_CurrentAppendingLanguage, name, pathToLib.string(), false));
+	}
+
+	size_t ScriptingExtender::InternalLibCount() const
+	{
+		return m_Libs.size();
+	}
+
+	const ScriptingLib& ScriptingExtender::GetInternalLib(size_t index) const
+	{
+		return m_Libs[index];
 	}
 
 	ScriptingExtender::ScriptingExtender()
@@ -56,7 +91,10 @@ namespace Glory
 
 	void ScriptingExtender::LoadExtender(IScriptExtender* pExtender)
 	{
+		m_CurrentAppendingLanguage = pExtender->Language();
+		m_pCurrentAppendingModule = m_pOwners[pExtender];
+
 		pExtender->GetInternalCalls(m_InternalCalls);
-		pExtender->GetLibs(m_Libs);
+		pExtender->GetLibs(this);
 	}
 }

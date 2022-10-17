@@ -4,7 +4,7 @@ project "GloryEngine.Core"
 	staticruntime "Off"
 	namespace ("GloryEngine")
 
-	targetdir ("../%{modulesOutDir}/GloryMonoScripting")
+	targetdir ("../%{modulesOutDir}/GloryMonoScripting/Scripting/csharp")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 	
 	dotnetframework "4.7.1"

@@ -14,6 +14,7 @@
 #include "IModuleLoopHandler.h"
 #include "GloryCore.h"
 #include "ScriptingModule.h"
+#include "IScriptExtender.h"
 
 namespace Glory
 {
@@ -111,6 +112,9 @@ namespace Glory
 		friend class GameThread;
 		friend class GraphicsThread;
 		friend class ScriptingExtender;
+
+		// Original crate info
+		const EngineCreateInfo m_CreateInfo;
 
 		// Required modules
 		WindowModule* m_pWindowModule;

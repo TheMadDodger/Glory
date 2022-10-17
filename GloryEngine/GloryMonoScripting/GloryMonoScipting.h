@@ -27,6 +27,6 @@ namespace Glory
 
         virtual std::string Language() override;
         virtual void GetInternalCalls(std::vector<InternalCall>& internalCalls) override;
-        virtual void GetLibs(std::vector<ScriptingLib>& libs) override;
+        virtual void GetLibs(ScriptingExtender* pScriptingExtender) override;
 	};
 }

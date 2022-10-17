@@ -8,9 +8,9 @@ namespace GloryEngine
 {
     public class Behaviour : Object
     {
-        public void Update()
-        {
-            Debug.LogInfo("Update was called!");
-        }
+        //public void Update()
+        //{
+        //    Debug.LogInfo("Update was called!");
+        //}
     }
 }

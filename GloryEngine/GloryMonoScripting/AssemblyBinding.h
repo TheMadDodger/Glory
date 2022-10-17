@@ -4,6 +4,7 @@
 #include <map>
 #include <array>
 #include <Glory.h>
+#include <ScriptExtensions.h>
 
 namespace Glory
 {
@@ -32,8 +33,7 @@ namespace Glory
 	class AssemblyBinding
 	{
 	public:
-		GLORY_API AssemblyBinding();
-		GLORY_API AssemblyBinding(MonoDomain* pDomain, const std::string& name);
+		GLORY_API AssemblyBinding(MonoDomain* pDomain, const ScriptingLib& name);
 		virtual GLORY_API ~AssemblyBinding();
 
 		GLORY_API MonoImage* GetMonoImage();
@@ -41,6 +41,7 @@ namespace Glory
 		GLORY_API bool GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c);
 
 		GLORY_API const std::string& Name();
+		GLORY_API const std::string& Location();
 
 	private:
 		AssemblyClass* LoadClass(const std::string& namespaceName, const std::string& className);
@@ -51,7 +52,7 @@ namespace Glory
 	private:
 		friend class MonoLibManager;
 		MonoDomain* m_pDomain;
-		const std::string m_Name;
+		const ScriptingLib m_Lib;
 		MonoAssembly* m_pAssembly;
 		MonoImage* m_pImage;
 		std::map<std::string, AssemblyNamespace> m_Namespaces;

@@ -4,6 +4,7 @@
 #include <typeinfo>
 #include "Object.h"
 #include "ModuleMetaData.h"
+#include "IScriptExtender.h"
 
 namespace Glory
 {
@@ -26,6 +27,8 @@ namespace Glory
 		const std::filesystem::path& GetPath() const;
 
 		bool GetResourcePath(const std::string& resource, std::filesystem::path& path) const;
+
+		void AddScriptingExtender(IScriptExtender* pScriptExtender);
 
 	protected:
 		virtual void Initialize() = 0;
@@ -53,5 +56,6 @@ namespace Glory
 		friend class Engine;
 		friend class ScriptingBinder;
 		ModuleMetaData m_MetaData;
+		std::vector<IScriptExtender*> m_pScriptingExtender;
 	};
 }

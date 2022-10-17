@@ -18,7 +18,7 @@ namespace Glory
 
 	void GloryMonoScipting::Initialize()
 	{
-		m_pEngine->GetScriptingExtender()->RegisterExtender((IScriptExtender*)this);
+		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
 
 		//if (Game::GetGame().GetApplicationType() == ApplicationType::AT_Editor) return;
 		MonoManager::Initialize("./Modules/GloryMonoScripting/Dependencies");
@@ -77,8 +77,8 @@ namespace Glory
 		MathBinder::CreateBindings(internalCalls);
 	}
 
-	void GloryMonoScipting::GetLibs(std::vector<ScriptingLib>& libs)
+	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)
 	{
-		libs.push_back(ScriptingLib("csharp", "Modules/GloryMonoScripting/GloryEngine.Core.dll"));
+		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll");
 	}
 }

@@ -107,7 +107,7 @@ namespace Glory
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
 		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pGraphicsThread(nullptr),
-		m_pScriptingExtender(new ScriptingExtender())
+		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -222,11 +222,16 @@ namespace Glory
 				m_TypeHashToLoader[typeHash] = index;
 			}
 
+			for (size_t j = 0; j < m_pAllModules[i]->m_pScriptingExtender.size(); i++)
+			{
+				IScriptExtender* pScriptExtender = m_pAllModules[i]->m_pScriptingExtender[j];
+				m_pScriptingExtender->RegisterManagedExtender(m_pAllModules[i], pScriptExtender);
+			}
+
 			auto it = std::find(m_pPriorityInitializationModules.begin(), m_pPriorityInitializationModules.end(), m_pAllModules[i]);
 			if (it != m_pPriorityInitializationModules.end()) continue;
 			m_pAllModules[i]->m_pEngine = this;
 			m_pAllModules[i]->Initialize();
-			
 		}
 
 		AssetManager::Initialize();

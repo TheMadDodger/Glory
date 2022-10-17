@@ -2,16 +2,12 @@
 #include <mono/metadata/assembly.h>
 #include <Debug.h>
 #include <mono/metadata/debug-helpers.h>
+#include <filesystem>
 
 namespace Glory
 {
-	AssemblyBinding::AssemblyBinding()
-		: m_pDomain(nullptr), m_Name(""), m_pAssembly(nullptr), m_pImage(nullptr)
-	{
-	}
-
-	AssemblyBinding::AssemblyBinding(MonoDomain* pDomain, const std::string& name)
-		: m_pDomain(pDomain), m_Name(name), m_pAssembly(nullptr), m_pImage(nullptr)
+	AssemblyBinding::AssemblyBinding(MonoDomain* pDomain, const ScriptingLib& lib)
+		: m_pDomain(pDomain), m_Lib(lib), m_pAssembly(nullptr), m_pImage(nullptr)
 	{
 	}
 
@@ -21,7 +17,9 @@ namespace Glory
 
 	void AssemblyBinding::Initialize()
 	{
-		m_pAssembly = mono_domain_assembly_open(m_pDomain, m_Name.c_str());
+		std::filesystem::path path = m_Lib.Location();
+		path.append(m_Lib.LibraryName());
+		m_pAssembly = mono_domain_assembly_open(m_pDomain, path.string().c_str());
 		if (m_pAssembly == nullptr) return;
 		m_pImage = mono_assembly_get_image(m_pAssembly);
 	}
@@ -60,7 +58,12 @@ namespace Glory
 
 	const std::string& AssemblyBinding::Name()
 	{
-		return m_Name;
+		return m_Lib.LibraryName();
+	}
+
+	GLORY_API const std::string& AssemblyBinding::Location()
+	{
+		return m_Lib.Location();
 	}
 
 	AssemblyClass* AssemblyBinding::LoadClass(const std::string& namespaceName, const std::string& className)

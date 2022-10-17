@@ -26,7 +26,7 @@ namespace Glory
 
 	void ScriptedSystem::OnDraw(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		if (pComponent.m_Script) return;
+		if (!pComponent.m_Script) return;
 		Script* pScript = AssetManager::GetOrLoadAsset<Script>(pComponent.m_Script);
 		if (pScript == nullptr) return;
 		EntitySceneObject* pObject = pRegistry->GetEntityScene()->GetEntitySceneObjectFromEntityID(entity);

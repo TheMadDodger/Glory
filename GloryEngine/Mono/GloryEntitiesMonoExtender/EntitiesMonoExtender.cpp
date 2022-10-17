@@ -14,14 +14,14 @@ namespace Glory
 	{
 	}
 
-	void EntitiesMonoExtender::GetLibs(std::vector<ScriptingLib>& libs)
+	void EntitiesMonoExtender::GetLibs(ScriptingExtender* pScriptingExtender)
 	{
-		libs.push_back(ScriptingLib("csharp", "GloryEngine.Entities.dll"));
+		pScriptingExtender->AddInternalLib("GloryEngine.Entities.dll");
 	}
 
-	void LoadExtension(Engine* pEngine)
+	IScriptExtender* OnLoadExtension(Glory::GloryContext* pContext)
 	{
-		ScriptingExtender* pExtender = pEngine->GetScriptingExtender();
-		pExtender->RegisterExtender<EntitiesMonoExtender>();
+		GloryContext::SetContext(pContext);
+		return new EntitiesMonoExtender();
 	}
 }

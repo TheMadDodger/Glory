@@ -98,13 +98,18 @@ namespace Glory::Editor
 		return m_CachePath;
 	}
 
+	GLORY_EDITOR_API std::string ProjectSpace::LibraryPath()
+	{
+		return m_LibraryPath;
+	}
+
 	void ProjectSpace::RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback)
 	{
 		m_ProjectCallbacks[callbackType].push_back(callback);
 	}
 
 	ProjectSpace::ProjectSpace(const std::string& path)
-		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()), m_CachePath(std::filesystem::path(path).parent_path().string() + "\\Cache\\")
+		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()), m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string())
 	{
 	}
 

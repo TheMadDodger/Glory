@@ -78,14 +78,15 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::OnProjectClose(ProjectSpace* pProject)
 	{
+		
 	}
 
 	void MonoEditorExtension::OnProjectOpen(ProjectSpace* pProject)
 	{
 		std::string name = pProject->Name() + ".dll";
 		std::filesystem::path path = pProject->ProjectPath();
-		path = path.parent_path().append("Library/Assembly").append(name);
-		MonoManager::LoadLib(ScriptingLib("csharp", path.string()));
+		path = path.parent_path().append("Library/Assembly");
+		MonoManager::LoadLib(ScriptingLib("csharp", name, path.string(), true, true));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)
@@ -93,8 +94,6 @@ namespace Glory::Editor
 		std::filesystem::path path = ContentBrowserItem::GetCurrentPath();
 		path = GetUnqiueFilePath(path.append("New CSharp Script.cs"));
 
-		//std::ofstream outStream(path);
-		//outStream.close();
 		MonoScript* pMonoScript = new MonoScript();
 		AssetDatabase::CreateAsset(pMonoScript, path.string());
 		AssetDatabase::Save();
@@ -109,8 +108,27 @@ namespace Glory::Editor
 		OpenCSharpProject();
 	}
 
+	void MonoEditorExtension::CopyEngineAssemblies(ProjectSpace* pProject)
+	{
+		std::filesystem::path assembliesPath = pProject->LibraryPath();
+		assembliesPath.append("Assembly");
+
+		ScriptingExtender* pScriptingExtender = Game::GetGame().GetEngine()->GetScriptingExtender();
+		for (size_t i = 0; i < pScriptingExtender->InternalLibCount(); i++)
+		{
+			const ScriptingLib& lib = pScriptingExtender->GetInternalLib(i);
+			std::filesystem::path path = lib.Location();
+			path.append(lib.LibraryName());
+			std::filesystem::path newPath = assembliesPath;
+			newPath.append(lib.LibraryName());
+			std::filesystem::copy_file(path, newPath, std::filesystem::copy_options::overwrite_existing);
+		}
+	}
+
 	void MonoEditorExtension::GeneratePremakeFile(ProjectSpace* pProject)
 	{
+		ScriptingExtender* pScriptingExtender = Game::GetGame().GetEngine()->GetScriptingExtender();
+
 		std::string projectName = pProject->Name();
 		// TODO: Make this setable in engine settings later
 		std::string dotNetFramework = "4.7.1";
@@ -137,15 +155,26 @@ namespace Glory::Editor
 		luaStream << "	defines \"" << "TRACE" << "\"" << std::endl;
 		luaStream << "	libdirs " << std::endl;
 		luaStream << "	{" << std::endl;
-		luaStream << "		" << editorPath << std::endl;
+		size_t scriptingExtenderCount = pScriptingExtender->InternalLibCount();
+		for (size_t i = 0; i < scriptingExtenderCount; i++)
+		{
+			const ScriptingLib& lib = pScriptingExtender->GetInternalLib(i);
+			std::filesystem::path path = editorPath;
+			path.append(lib.Location());
+			luaStream << "		" << path;
+			if (i != scriptingExtenderCount - 1) luaStream << ",";
+			luaStream << std::endl;
+		}
 		luaStream << "	}" << std::endl;
 		luaStream << "	links " << std::endl;
 		luaStream << "	{" << std::endl;
-		MonoLibManager::ForEachAssembly([&](AssemblyBinding* pAssembly)
+		for (size_t i = 0; i < scriptingExtenderCount; i++)
 		{
-			luaStream << "		\"" << pAssembly->Name() << "\"," << std::endl;
-		});
-		luaStream << "		\"END\"" << std::endl;
+			const ScriptingLib& lib = pScriptingExtender->GetInternalLib(i);
+			luaStream << "		\"" << lib.LibraryName() << "\"";
+			if (i != scriptingExtenderCount - 1) luaStream << ",";
+			luaStream << std::endl;
+		}
 		luaStream << "	}" << std::endl;
 		luaStream << "	filter \"" << "platforms:Win32" << "\"" << std::endl;
 		luaStream << "		architecture \"" << "x86" << "\"" << std::endl;

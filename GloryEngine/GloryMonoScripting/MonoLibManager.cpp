@@ -3,13 +3,15 @@
 namespace Glory
 {
 	std::map<std::string, AssemblyBinding> MonoLibManager::m_Assemblies;
+	std::string MonoLibManager::m_MainAssemblyName;
 
 	void MonoLibManager::LoadLib(MonoDomain* pDomain, const ScriptingLib& lib)
 	{
 		std::string name = lib.LibraryName();
 		size_t index = m_Assemblies.size();
-		m_Assemblies.emplace(name, AssemblyBinding(pDomain, lib.LibraryName()));
-		m_Assemblies[name].Initialize();
+		m_Assemblies.emplace(name, AssemblyBinding(pDomain, lib));
+		if (lib.IsMainLib()) m_MainAssemblyName = lib.LibraryName();
+		m_Assemblies.at(name).Initialize();
 	}
 
 	void MonoLibManager::Cleanup()
@@ -24,7 +26,17 @@ namespace Glory
 	AssemblyBinding* MonoLibManager::GetAssembly(const std::string& name)
 	{
 		if (m_Assemblies.find(name) == m_Assemblies.end()) return nullptr;
-		return &m_Assemblies[name];
+		return &m_Assemblies.at(name);
+	}
+
+	GLORY_API AssemblyBinding* MonoLibManager::GetMainAssembly()
+	{
+		return &m_Assemblies.at(m_MainAssemblyName);
+	}
+
+	GLORY_API const std::string& MonoLibManager::GetMainAssemblyName()
+	{
+		return m_MainAssemblyName;
 	}
 
 	MonoObject* MonoLibManager::InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, MonoObject** pExceptionObject, void** args)

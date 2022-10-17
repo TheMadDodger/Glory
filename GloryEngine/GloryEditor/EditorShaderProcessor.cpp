@@ -95,7 +95,7 @@ namespace Glory::Editor
 		{
 			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 			if (pProject == nullptr) return std::string("");
-			std::string cachePath = pProject->CachePath() + "CompiledShaders\\";
+			std::string cachePath = pProject->CachePath() + "\\CompiledShaders\\";
 			return cachePath;
 		});
 

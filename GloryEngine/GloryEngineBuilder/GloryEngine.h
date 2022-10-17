@@ -24,6 +24,7 @@ namespace Glory
 	private:
 		void LoadModules(YAML::Node& modules);
 		void LoadModule(const std::string& moduleName);
+		void LoadScriptingExtender(const ModuleScriptingExtension* const extension, Module* pModule, const ModuleMetaData& metaData);
 		void PopulateEngineInfo(YAML::Node& engineInfo, EngineCreateInfo& engineCreateInfo, const Glory::WindowCreateInfo& defaultWindow);
 
 		template<class T>
@@ -46,6 +47,7 @@ namespace Glory
 		std::vector<HMODULE> m_Libs;
 		std::vector<Module*> m_pOptionalModules;
 		std::vector<ScriptingModule*> m_pScriptingModules;
+		std::vector<IScriptExtender*> m_pScriptingExtenders;
 		std::vector<std::string> m_LoadedModuleNames;
 		std::map<std::string, size_t> m_SetModules;
 	};

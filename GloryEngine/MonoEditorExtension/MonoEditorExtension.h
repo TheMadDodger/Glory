@@ -27,6 +27,7 @@ namespace Glory::Editor
         static void OnCreateScript(Object* pObject, const ObjectMenuType& menuType);
         static void OnOpenCSharpProject(Object* pObject, const ObjectMenuType& menuType);
 
+        static void CopyEngineAssemblies(ProjectSpace* pProject);
         static void GeneratePremakeFile(ProjectSpace* pProject);
         static void GenerateBatchFile(ProjectSpace* pProject);
         static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);

@@ -69,7 +69,7 @@ namespace Glory
 		YAML::Node extensionsNode = editorNode["Extensions"];
 		READ_ARRAY(extensionsNode, std::string, m_EditorExtensions);
 
-		ReadScriptingExtenderd(rootNode);
+		ReadScriptingExtender(rootNode);
 	}
 
 	const std::filesystem::path& ModuleMetaData::Path() const
@@ -102,7 +102,13 @@ namespace Glory
 		return m_Dependencies;
 	}
 
-	void ModuleMetaData::ReadScriptingExtenderd(YAML::Node& node)
+	const ModuleScriptingExtension* const ModuleMetaData::ScriptExtenderForLanguage(const std::string& language) const
+	{
+		if (m_ScriptingExtensions.find(language) == m_ScriptingExtensions.end()) return nullptr;
+		return &m_ScriptingExtensions.at(language);
+	}
+
+	void ModuleMetaData::ReadScriptingExtender(YAML::Node& node)
 	{
 		YAML::Node scriptingNode = node["Scripting"];
 		if (!scriptingNode.IsDefined() || !scriptingNode.IsSequence()) return;
@@ -113,7 +119,7 @@ namespace Glory
 			YAML::Node readNode;
 			YAML_READ(subNode, readNode, Language, scriptingExtension.m_Language, std::string);
 			YAML_READ(subNode, readNode, Extension, scriptingExtension.m_ExtensionFile, std::string);
-			m_ScriptingExtensions.push_back(scriptingExtension);
+			m_ScriptingExtensions.emplace(scriptingExtension.m_Language, scriptingExtension);
 		}
 	}
 }

@@ -39,9 +39,10 @@ namespace Glory
 		const std::string& EditorBackend() const;
 		const std::vector<std::string>& EditorExtensions() const;
 		const std::vector<std::string>& Dependencies() const;
+		const ModuleScriptingExtension* const ScriptExtenderForLanguage(const std::string& language) const;
 
 	private:
-		void ReadScriptingExtenderd(YAML::Node& node);
+		void ReadScriptingExtender(YAML::Node& node);
 
 	private:
 		std::filesystem::path m_Path;
@@ -50,7 +51,7 @@ namespace Glory
 		std::string m_EditorBackend;
 		std::vector<std::string> m_EditorExtensions;
 		std::vector<std::string> m_Dependencies;
-		std::vector<ModuleScriptingExtension> m_ScriptingExtensions;
+		std::map<std::string, ModuleScriptingExtension> m_ScriptingExtensions;
 
 		static std::map<std::string, ModuleType> STRINGTOMODULETYPE;
 	};
