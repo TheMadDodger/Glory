@@ -93,9 +93,19 @@ namespace Glory
 		m_AssetPathFunc = func;
 	}
 
+	void Game::OverrideSettingsPathFunc(std::function<std::string()> func)
+	{
+		m_SettingsPathFunc = func;
+	}
+
 	std::string Game::GetAssetPath()
 	{
 		return m_Game.m_AssetPathFunc();
+	}
+
+	std::string Game::GetSettingsPath()
+	{
+		return m_Game.m_SettingsPathFunc();
 	}
 
 	const ApplicationType& Game::GetApplicationType() const
@@ -118,6 +128,7 @@ namespace Glory
 	{
 		if (m_bInitialized) return;
 		m_AssetPathFunc = []() { return "./Assets"; };
+		m_SettingsPathFunc = []() { return "./"; };
 
 		m_pEngine->Initialize();
 		m_bInitialized = true;

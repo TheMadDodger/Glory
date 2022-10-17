@@ -65,7 +65,7 @@ namespace Glory::EditorLauncher
 
         std::filesystem::path projectVersionPath = project.Path;
         projectVersionPath = projectVersionPath.parent_path();
-        projectVersionPath.append("ProjectVersion.txt");
+        projectVersionPath.append("ProjectSettings").append("ProjectVersion.txt");
         std::ifstream ifstream(projectVersionPath);
         if (ifstream.is_open())
         {
@@ -111,7 +111,7 @@ namespace Glory::EditorLauncher
 
             std::filesystem::path projectVersionPath = project.Path;
             projectVersionPath = projectVersionPath.parent_path();
-            projectVersionPath.append("ProjectVersion.txt");
+            projectVersionPath.append("ProjectSettings").append("ProjectVersion.txt");
             std::ifstream ifstream(projectVersionPath);
             if (ifstream.is_open())
             {
@@ -188,6 +188,12 @@ namespace Glory::EditorLauncher
             int index = createSettings.EngineSettings.OptionalModules[i];
             WriteModule(ModuleType::MT_Other, index, emitter);
         }
+        for (size_t i = 0; i < createSettings.EngineSettings.ScriptingModules.size(); i++)
+        {
+            int index = createSettings.EngineSettings.ScriptingModules[i];
+            WriteModule(ModuleType::MT_Scripting, index, emitter);
+        }
+
         emitter << YAML::EndSeq;
         emitter << YAML::Key << "Engine";
         emitter << YAML::Value << YAML::BeginMap;
@@ -208,11 +214,21 @@ namespace Glory::EditorLauncher
             emitter << startIndex + i;
         }
         emitter << YAML::EndSeq;
+        emitter << YAML::Key << "Scripting";
+        emitter << YAML::Value << YAML::BeginSeq;
+        startIndex += createSettings.EngineSettings.OptionalModules.size();
+        for (size_t i = 0; i < createSettings.EngineSettings.ScriptingModules.size(); i++)
+        {
+            emitter << startIndex + i;
+        }
+        emitter << YAML::EndSeq;
         emitter << YAML::EndMap;
         emitter << YAML::EndMap;
 
         std::filesystem::path engineConfPath = createSettings.Path;
         engineConfPath = engineConfPath.parent_path();
+        engineConfPath.append("ProjectSettings");
+        std::filesystem::create_directory(engineConfPath);
         engineConfPath.append("Engine.yaml");
         std::ofstream out(engineConfPath);
         out << emitter.c_str();
@@ -236,7 +252,7 @@ namespace Glory::EditorLauncher
 
         std::filesystem::path projectVersionPath = createSettings.Path;
         projectVersionPath = engineConfPath.parent_path();
-        projectVersionPath.append("ProjectVersion.txt");
+        projectVersionPath.append("ProjectSettings").append("ProjectVersion.txt");
         std::ofstream fileStream(projectVersionPath, std::ofstream::out | std::ofstream::trunc);
         std::string versionString = createSettings.EditorVersion.GetVersionString();
         fileStream.write(versionString.c_str(), versionString.size());

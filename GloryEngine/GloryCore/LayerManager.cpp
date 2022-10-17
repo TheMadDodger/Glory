@@ -23,8 +23,7 @@ namespace Glory
 		m_Layers.clear();
 		m_NameToLayer.clear();
 
-		std::filesystem::path layersPath = Game::GetAssetPath();
-		layersPath = layersPath.parent_path();
+		std::filesystem::path layersPath = Game::GetSettingsPath();
 		layersPath.append("Layers.yaml");
 
 		if (!std::filesystem::exists(layersPath))
@@ -73,8 +72,7 @@ namespace Glory
 
 		emitter << YAML::EndSeq;
 
-		std::filesystem::path layersPath = Game::GetAssetPath();
-		layersPath = layersPath.parent_path();
+		std::filesystem::path layersPath = Game::GetSettingsPath();
 		layersPath.append("Layers.yaml");
 
 		std::ofstream outStream(layersPath.string());

@@ -92,6 +92,9 @@ namespace Glory::EditorLauncher
 			case ProjectValidationResult::EVR_DuplicateModules:
 				errorText = "Engine: Duplicate optional modules";
 				break;
+			case ProjectValidationResult::EVR_DuplicateScriptingModules:
+				errorText = "Engine: Duplicate scripting modules";
+				break;
 			case ProjectValidationResult::EVR_AlreadyExists:
 				errorText = "General: Project already exists at path";
 				break;
@@ -107,7 +110,6 @@ namespace Glory::EditorLauncher
 		{
 			Close();
 		}
-		
 
 		ImGui::EndChild();
 	}
@@ -210,7 +212,7 @@ namespace Glory::EditorLauncher
 
 			// TODO: Load default engine settings?
 			m_EngineSettings = {};
-			m_EngineSettings.RenderModule = 1;
+			m_EngineSettings.ScriptingModules.push_back(0);
 			m_EngineSettings.OptionalModules.push_back(0);
 			m_EngineSettings.OptionalModules.push_back(1);
 		}
@@ -281,43 +283,8 @@ namespace Glory::EditorLauncher
 		DrawModuleSelector("Renderer", ModuleType::MT_Renderer, m_EngineSettings.RenderModule, regionAvail.x - maxItemSize, maxItemSize);
 		DrawModuleSelector("Scene Management", ModuleType::MT_SceneManagement, m_EngineSettings.ScenesModule, regionAvail.x - maxItemSize, maxItemSize);
 
-		std::vector<int> copy = m_EngineSettings.OptionalModules;
-
-		ImGui::Spacing();
-		ImGui::Text("Optional Modules");
-		ImGui::SameLine(regionAvail.x - 25.0f);
-		if (ImGui::Button("+", ImVec2(25.0f, 25.0f)))
-		{
-			m_EngineSettings.OptionalModules.push_back(0);
-		}
-
-		int toRemoveIndex = -1;
-		for (size_t i = 0; i < m_EngineSettings.OptionalModules.size(); i++)
-		{
-			std::string label = "Optional Module " + std::to_string(i + 1);
-			bool valid = DrawModuleSelector(label.c_str(), ModuleType::MT_Other, m_EngineSettings.OptionalModules[i], regionAvail.x - maxItemSize, maxItemSize - 25.0f - 8.0f, false);
-
-			label = "-##RemoveModule" + std::to_string(i);
-			ImGui::SameLine();
-			if (ImGui::Button(label.c_str(), ImVec2(25.0f, 25.0f)))
-			{
-				toRemoveIndex = i;
-			}
-
-			if (!valid)
-			{
-				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This cannot be None!");
-			}
-		}
-
-		if (toRemoveIndex >= 0) m_EngineSettings.OptionalModules.erase(m_EngineSettings.OptionalModules.begin() + toRemoveIndex);
-
-		std::vector<int> sorted = m_EngineSettings.OptionalModules;
-		std::sort(sorted.begin(), sorted.end());
-		if (std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
-		{
-			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Cannot have multiple instances of the same Module!");
-		}
+		DrawScriptingModulesArray(regionAvail, maxItemSize);
+		DrawOptionalModulesArray(regionAvail, maxItemSize);
 
 		ImGui::EndDisabled();
 
@@ -344,7 +311,16 @@ namespace Glory::EditorLauncher
 			if (!ValidateModule(ModuleType::MT_Other, m_EngineSettings.OptionalModules[i])) return ProjectValidationResult::EVR_MissingModules;
 		}
 
-		std::vector<int> sorted = m_EngineSettings.OptionalModules;
+		for (size_t i = 0; i < m_EngineSettings.ScriptingModules.size(); i++)
+		{
+			if (!ValidateModule(ModuleType::MT_Scripting, m_EngineSettings.ScriptingModules[i])) return ProjectValidationResult::EVR_MissingModules;
+		}
+
+		std::vector<int> sorted = m_EngineSettings.ScriptingModules;
+		std::sort(sorted.begin(), sorted.end());
+		if (std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end()) return ProjectValidationResult::EVR_DuplicateScriptingModules;
+
+		sorted = m_EngineSettings.OptionalModules;
 		std::sort(sorted.begin(), sorted.end());
 		if (std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end()) return ProjectValidationResult::EVR_DuplicateModules;
 
@@ -399,6 +375,84 @@ namespace Glory::EditorLauncher
 		}
 
 		return valid;
+	}
+
+	void NewProjectWindow::DrawOptionalModulesArray(ImVec2 regionAvail, float maxItemSize)
+	{
+		ImGui::Spacing();
+		ImGui::Text("Optional Modules");
+		ImGui::SameLine(regionAvail.x - 25.0f);
+		if (ImGui::Button("+##AddOptionalModule", ImVec2(25.0f, 25.0f)))
+		{
+			m_EngineSettings.OptionalModules.push_back(0);
+		}
+
+		int toRemoveIndex = -1;
+		for (size_t i = 0; i < m_EngineSettings.OptionalModules.size(); i++)
+		{
+			std::string label = "Optional Module " + std::to_string(i + 1);
+			bool valid = DrawModuleSelector(label.c_str(), ModuleType::MT_Other, m_EngineSettings.OptionalModules[i], regionAvail.x - maxItemSize, maxItemSize - 25.0f - 8.0f, false);
+
+			label = "-##RemoveModule" + std::to_string(i);
+			ImGui::SameLine();
+			if (ImGui::Button(label.c_str(), ImVec2(25.0f, 25.0f)))
+			{
+				toRemoveIndex = i;
+			}
+
+			if (!valid)
+			{
+				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This cannot be None!");
+			}
+		}
+
+		if (toRemoveIndex >= 0) m_EngineSettings.OptionalModules.erase(m_EngineSettings.OptionalModules.begin() + toRemoveIndex);
+
+		std::vector<int> sorted = m_EngineSettings.OptionalModules;
+		std::sort(sorted.begin(), sorted.end());
+		if (std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
+		{
+			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Cannot have multiple instances of the same Module!");
+		}
+	}
+
+	void NewProjectWindow::DrawScriptingModulesArray(ImVec2 regionAvail, float maxItemSize)
+	{
+		ImGui::Spacing();
+		ImGui::Text("Scripting Modules");
+		ImGui::SameLine(regionAvail.x - 25.0f);
+		if (ImGui::Button("+##AddScriptingModule", ImVec2(25.0f, 25.0f)))
+		{
+			m_EngineSettings.ScriptingModules.push_back(0);
+		}
+
+		int toRemoveIndex = -1;
+		for (size_t i = 0; i < m_EngineSettings.ScriptingModules.size(); i++)
+		{
+			std::string label = "Optional Module " + std::to_string(i + 1);
+			bool valid = DrawModuleSelector(label.c_str(), ModuleType::MT_Scripting, m_EngineSettings.ScriptingModules[i], regionAvail.x - maxItemSize, maxItemSize - 25.0f - 8.0f, false);
+
+			label = "-##RemoveModule" + std::to_string(i);
+			ImGui::SameLine();
+			if (ImGui::Button(label.c_str(), ImVec2(25.0f, 25.0f)))
+			{
+				toRemoveIndex = i;
+			}
+
+			if (!valid)
+			{
+				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This cannot be None!");
+			}
+		}
+
+		if (toRemoveIndex >= 0) m_EngineSettings.ScriptingModules.erase(m_EngineSettings.ScriptingModules.begin() + toRemoveIndex);
+
+		std::vector<int> sorted = m_EngineSettings.ScriptingModules;
+		std::sort(sorted.begin(), sorted.end());
+		if (std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
+		{
+			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Cannot have multiple instances of the same Module!");
+		}
 	}
 
 	bool NewProjectWindow::ProjectExists(const std::string& path, const std::string& name)

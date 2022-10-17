@@ -134,7 +134,10 @@ namespace Glory::Editor
 		std::string dotNetFramework = "4.7.1";
 
 		std::filesystem::path cachePath = pProject->CachePath();
-		std::filesystem::path luaPath = cachePath.append("Premake").append("premake5.lua");
+		std::filesystem::path luaPath = cachePath;
+		luaPath.append("Premake");
+		if (!std::filesystem::exists(luaPath)) std::filesystem::create_directory(luaPath);
+		luaPath.append("premake5.lua");
 		std::ofstream luaStream(luaPath);
 		std::filesystem::path editorPath = std::filesystem::current_path();
 		std::filesystem::path premakePath = editorPath.append("premake").append("premake5.exe");
@@ -143,7 +146,7 @@ namespace Glory::Editor
 		luaStream << "	platforms { \"Win32\", \"x64\" }" << std::endl;
 		luaStream << "	configurations { \"Debug\", \"Release\" }" << std::endl;
 		luaStream << "	flags { \"MultiProcessorCompile\" }" << std::endl;
-		luaStream << "project \"Sponza\"" << std::endl;
+		luaStream << "project \"" << projectName << "\"" << std::endl;
 		luaStream << "	kind \"SharedLib\"" << std::endl;
 		luaStream << "	language \"C#\"" << std::endl;
 		luaStream << "	staticruntime \"Off\"" << std::endl;
@@ -193,7 +196,7 @@ namespace Glory::Editor
 
 		std::filesystem::path tempLuaPath = pProject->RootPath();
 		tempLuaPath = tempLuaPath.append("premake5.lua");
-		std::filesystem::copy(luaPath, tempLuaPath, std::filesystem::copy_options::overwrite_existing);
+		std::filesystem::copy_file(luaPath, tempLuaPath, std::filesystem::copy_options::overwrite_existing);
 	}
 
 	void MonoEditorExtension::GenerateBatchFile(ProjectSpace* pProject)

@@ -211,4 +211,12 @@ namespace Glory::Editor
 		path.append("Assets");
 		return path.string();
 	}
+
+	std::string EditorApplication::SettingsPathOverrider()
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (pProject == nullptr) return std::string("./");
+		std::filesystem::path path = pProject->SettingsPath();
+		return path.string();
+	}
 }

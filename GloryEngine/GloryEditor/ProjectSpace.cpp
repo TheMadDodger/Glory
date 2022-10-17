@@ -95,12 +95,20 @@ namespace Glory::Editor
 
 	GLORY_EDITOR_API std::string ProjectSpace::CachePath()
 	{
+		if (!std::filesystem::exists(m_CachePath)) std::filesystem::create_directory(m_CachePath);
 		return m_CachePath;
 	}
 
 	GLORY_EDITOR_API std::string ProjectSpace::LibraryPath()
 	{
+		if (!std::filesystem::exists(m_LibraryPath)) std::filesystem::create_directory(m_LibraryPath);
 		return m_LibraryPath;
+	}
+	
+	GLORY_EDITOR_API std::string ProjectSpace::SettingsPath()
+	{
+		if (!std::filesystem::exists(m_SettingsPath)) std::filesystem::create_directory(m_SettingsPath);
+		return m_SettingsPath;
 	}
 
 	void ProjectSpace::RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback)
@@ -109,7 +117,9 @@ namespace Glory::Editor
 	}
 
 	ProjectSpace::ProjectSpace(const std::string& path)
-		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()), m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string())
+		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()),
+		m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string()),
+		m_SettingsPath(std::filesystem::path(path).parent_path().append("ProjectSettings").string())
 	{
 	}
 
@@ -165,7 +175,7 @@ namespace Glory::Editor
 
 	void ProjectSpace::SaveProject()
 	{
-		std::filesystem::path projectVersionTxtPath = m_ProjectRootPath;
+		std::filesystem::path projectVersionTxtPath = m_SettingsPath;
 		projectVersionTxtPath.append("ProjectVersion.txt");
 		std::ofstream fileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
 		std::string versionString = Glory::Editor::Version.GetVersionString();

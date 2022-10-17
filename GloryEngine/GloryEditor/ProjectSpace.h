@@ -30,6 +30,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API std::string ProjectPath();
 		GLORY_EDITOR_API std::string CachePath();
 		GLORY_EDITOR_API std::string LibraryPath();
+		GLORY_EDITOR_API std::string SettingsPath();
 
 		static GLORY_EDITOR_API void RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback);
 
@@ -48,6 +49,7 @@ namespace Glory::Editor
 		std::string m_ProjectRootPath;
 		std::string m_CachePath;
 		std::string m_LibraryPath;
+		std::string m_SettingsPath;
 		std::string m_ProjectName;
 	};
 }
