@@ -20,12 +20,11 @@ namespace Glory
 
     private:
         AssemblyClass* LoadClass(const std::string& lib, const std::string& namespaceName, const std::string& className);
-        MonoObject* LoadObject(Object* pObject);
+        MonoObject* LoadObject(Object* pObject, MonoClass* pClass);
 
     private:
         friend class MonoScriptLoader;
         std::string m_NamespaceName;
         std::string m_ClassName;
-        MonoClass* m_pMonoClass;
     };
 }

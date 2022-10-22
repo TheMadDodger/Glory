@@ -25,7 +25,7 @@ namespace Glory
 			}
 			return;
 		}
-		else ASSET_MANAGER->m_AssetLoadedCallbacks.Set(uuid, { callback });
+		else if (callback != NULL) ASSET_MANAGER->m_AssetLoadedCallbacks.Set(uuid, { callback });
 
 		ASSET_MANAGER->m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
 	}
@@ -45,6 +45,18 @@ namespace Glory
 		Resource* pResource = FindResource(uuid);
 		if (pResource) return pResource;
 		return LoadAsset(uuid);
+	}
+
+	void AssetManager::ReloadAsset(UUID uuid)
+	{
+		UnloadAsset(uuid);
+		GetAsset(uuid, NULL);
+	}
+
+	void AssetManager::UnloadAsset(UUID uuid)
+	{
+		if (!ASSET_MANAGER->m_pLoadedAssets.Contains(uuid)) return;
+		ASSET_MANAGER->m_pLoadedAssets.DoErase(uuid, [](Resource** pResource) { if (*pResource) delete *pResource; });
 	}
 
 	Resource* AssetManager::FindResource(UUID uuid)

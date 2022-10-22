@@ -4,6 +4,7 @@
 #include <GloryMonoScipting.h>
 #include <ObjectMenu.h>
 #include <Glory.h>
+#include <ResourceMeta.h>
 
 extern "C" GLORY_API Glory::Editor::BaseEditorExtension * LoadExtension();
 extern "C" GLORY_API void SetContext(Glory::GloryContext * pContext, ImGuiContext * pImGUIContext);
@@ -31,6 +32,12 @@ namespace Glory::Editor
         static void GeneratePremakeFile(ProjectSpace* pProject);
         static void GenerateBatchFile(ProjectSpace* pProject);
         static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);
+
+        static void CompileProject();
+        static void ReloadAssembly();
+
+
+        static void AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*);
 
     private:
         GloryMonoScipting* m_pScriptingModule;

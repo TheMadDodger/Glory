@@ -97,6 +97,17 @@ namespace Glory
 		//m_Metas.Set(uuid, meta);
 	}
 
+	void AssetDatabase::UpdateAsset(UUID uuid, long lastSaved)
+	{
+		ASSET_DATABASE->m_LastSavedRecords.Set(uuid, lastSaved);
+		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetUpdated, uuid, nullptr);
+	}
+
+	long AssetDatabase::GetLastSavedRecord(UUID uuid)
+	{
+		return ASSET_DATABASE->m_LastSavedRecords[uuid];
+	}
+
 	void AssetDatabase::UpdateAssetPaths(const std::string& oldPath, const std::string& newPath)
 	{
 		std::string fixedNewPath = newPath;
@@ -234,6 +245,8 @@ namespace Glory
 			YAML_READ(element, data, Index, index, size_t);
 			size_t versionHash = 0;
 			YAML_READ(element, data, VersionHash, versionHash, size_t);
+			long lastSaved = 0;
+			YAML_READ(element, data, LastSaved, lastSaved, long);
 			UUID uuid = 0;
 			YAML_READ(element, data, UUID, uuid, uint64_t);
 			size_t hash = 0;
@@ -261,6 +274,7 @@ namespace Glory
 				else meta.m_ImportSettings = pLoader->ReadImportSettings(importSettingsNode);
 			}
 
+			ASSET_DATABASE->m_LastSavedRecords.Set(uuid, lastSaved);
 			InsertAsset(path, meta);
 		}
 	}
@@ -450,6 +464,7 @@ namespace Glory
 		ASSET_DATABASE->m_PathToUUID.Clear();
 		ASSET_DATABASE->m_Metas.Clear();
 		ASSET_DATABASE->m_AssetsByType.Clear();
+		ASSET_DATABASE->m_LastSavedRecords.Clear();
 	}
 
 	void AssetDatabase::ExportEditor(YAML::Emitter& out)
@@ -464,6 +479,7 @@ namespace Glory
 			ResourceMeta meta = ASSET_DATABASE->m_Metas[uuid];
 
 			size_t versionHash = std::hash<ResourceMeta>()(meta);
+			long lastSaved = ASSET_DATABASE->m_LastSavedRecords[uuid];
 
 			out << YAML::BeginMap;
 			out << YAML::Key << "Path";
@@ -474,6 +490,8 @@ namespace Glory
 			out << YAML::Value << location.m_Index;
 			out << YAML::Key << "VersionHash";
 			out << YAML::Value << versionHash;
+			out << YAML::Key << "LastSaved";
+			out << YAML::Value << lastSaved;
 			size_t hash = meta.Hash();
 			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(hash);
 			meta.Write(out, pLoader);

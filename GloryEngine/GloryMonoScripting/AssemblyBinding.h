@@ -33,7 +33,7 @@ namespace Glory
 	class AssemblyBinding
 	{
 	public:
-		GLORY_API AssemblyBinding(MonoDomain* pDomain, const ScriptingLib& name);
+		GLORY_API AssemblyBinding(const ScriptingLib& name);
 		virtual GLORY_API ~AssemblyBinding();
 
 		GLORY_API MonoImage* GetMonoImage();
@@ -46,12 +46,11 @@ namespace Glory
 	private:
 		AssemblyClass* LoadClass(const std::string& namespaceName, const std::string& className);
 
-		void Initialize();
+		void Initialize(MonoDomain* pDomain);
 		void Destroy();
 
 	private:
 		friend class MonoLibManager;
-		MonoDomain* m_pDomain;
 		const ScriptingLib m_Lib;
 		MonoAssembly* m_pAssembly;
 		MonoImage* m_pImage;

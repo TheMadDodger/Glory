@@ -9,6 +9,7 @@ namespace Glory
 	{
 	public:
 		static GLORY_API void LoadLib(MonoDomain* pDomain, const ScriptingLib& lib);
+		static GLORY_API void ReloadAll(MonoDomain* pDomain);
 		static GLORY_API AssemblyBinding* GetAssembly(const std::string& name);
 		static GLORY_API AssemblyBinding* GetMainAssembly();
 		static GLORY_API const std::string& GetMainAssemblyName();

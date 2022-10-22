@@ -62,6 +62,7 @@ namespace Glory
 
 		static size_t SubTypeCount(ResourceType* pResourceType);
 		static ResourceType* GetSubType(ResourceType* pResourceType, size_t index);
+		static size_t GetSubTypeHash(ResourceType* pResourceType, size_t index);
 		static size_t GetAllResourceTypesThatHaveSubType(size_t hash, std::vector<ResourceType*>& out);
 
 	public:

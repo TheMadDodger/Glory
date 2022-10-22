@@ -5,7 +5,7 @@
 
 namespace Glory
 {
-	MonoScript::MonoScript() : m_pMonoClass(nullptr)
+	MonoScript::MonoScript()
 	{
 		APPEND_TYPE(MonoScript);
 	}
@@ -23,7 +23,7 @@ namespace Glory
 	{
 		AssemblyClass* pClass = LoadClass(MonoLibManager::GetMainAssemblyName(), m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
-		MonoObject* pMonoObject = LoadObject(pObject);
+		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 		std::string fullMethodName = ".::" + method;
 		MonoMethod* pMethod = pClass->GetMethod(fullMethodName);
@@ -44,13 +44,11 @@ namespace Glory
 		if (pAssembly == nullptr) return nullptr;
 		AssemblyClass* pClass = pAssembly->GetClass(namespaceName, className);
 		if (pClass == nullptr) return nullptr;
-		m_pMonoClass = pClass->m_pClass;
 		return pClass;
 	}
 
-	MonoObject* MonoScript::LoadObject(Object* pObject)
+	MonoObject* MonoScript::LoadObject(Object* pObject, MonoClass* pClass)
 	{
-		if (m_pMonoClass == nullptr) return nullptr;
-		return MonoObjectManager::GetObject(m_pMonoClass, pObject);
+		return MonoObjectManager::GetObject(pClass, pObject);
 	}
 }

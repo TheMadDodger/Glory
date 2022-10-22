@@ -14,8 +14,8 @@ namespace Glory
 	{
 		CT_AssetRegistered,
 		CT_AssetLoaded,
-
 		CT_AssetDeleted,
+		CT_AssetUpdated,
 
 		CT_MAX,
 	};

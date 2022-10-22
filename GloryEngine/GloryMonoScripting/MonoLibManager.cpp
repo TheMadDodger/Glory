@@ -9,9 +9,22 @@ namespace Glory
 	{
 		std::string name = lib.LibraryName();
 		size_t index = m_Assemblies.size();
-		m_Assemblies.emplace(name, AssemblyBinding(pDomain, lib));
+		m_Assemblies.emplace(name, AssemblyBinding(lib));
 		if (lib.IsMainLib()) m_MainAssemblyName = lib.LibraryName();
-		m_Assemblies.at(name).Initialize();
+		m_Assemblies.at(name).Initialize(pDomain);
+	}
+
+	GLORY_API void MonoLibManager::ReloadAll(MonoDomain* pDomain)
+	{
+		for (auto it = m_Assemblies.begin(); it != m_Assemblies.end(); it++)
+		{
+			it->second.Destroy();
+		}
+
+		for (auto it = m_Assemblies.begin(); it != m_Assemblies.end(); it++)
+		{
+			it->second.Initialize(pDomain);
+		}
 	}
 
 	void MonoLibManager::Cleanup()

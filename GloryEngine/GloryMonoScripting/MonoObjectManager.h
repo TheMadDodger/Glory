@@ -23,6 +23,7 @@ namespace Glory
 		static MonoObject* CreateObject(MonoClass* pClass, Object* pObject);
 
 	private:
+		friend class MonoManager;
 		MonoObjectManager();
 		virtual ~MonoObjectManager();
 		static std::map<Object*, ObjectInstanceData> m_Objects;

@@ -21,6 +21,7 @@ namespace Glory
 
     void MonoObjectManager::Cleanup()
     {
+        m_Objects.clear();
     }
 
     MonoObject* MonoObjectManager::CreateObject(MonoClass* pClass, Object* pObject)

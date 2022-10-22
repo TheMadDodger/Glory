@@ -9,6 +9,7 @@
 #include <MonoScript.h>
 #include <Tumbnail.h>
 #include <MonoManager.h>
+#include <AssetManager.h>
 
 #include <string>
 #include <MonoLibManager.h>
@@ -17,6 +18,7 @@
 #include <locale>
 #include <codecvt>
 #include <windows.h>
+#include <MenuBar.h>
 
 GLORY_API Glory::Editor::BaseEditorExtension* LoadExtension()
 {
@@ -73,7 +75,11 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/Script/C#", MonoEditorExtension::OnCreateScript, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		ObjectMenu::AddMenuItem("Open C# Project", MonoEditorExtension::OnOpenCSharpProject, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 
+		MenuBar::AddMenuItem("File/Compile C# Project", CompileProject);
+
 		Tumbnail::AddGenerator<MonoScriptTumbnail>();
+
+		AssetCallbacks::RegisterCallback(CallbackType::CT_AssetUpdated, AssetCallback);
 	}
 
 	void MonoEditorExtension::OnProjectClose(ProjectSpace* pProject)
@@ -256,6 +262,39 @@ namespace Glory::Editor
 		std::filesystem::path tempLuaPath = pProject->RootPath();
 		tempLuaPath = tempLuaPath.append("premake5.lua");
 		std::filesystem::remove(tempLuaPath);
+	}
+
+	void MonoEditorExtension::CompileProject()
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		std::filesystem::path projectPath = pProject->RootPath();
+		projectPath = projectPath.append(pProject->Name() + ".csproj");
+
+		std::string cmd = "\"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/devenv\" " + projectPath.string() + " /Build";
+		system(cmd.c_str());
+		ReloadAssembly();
+	}
+
+	void MonoEditorExtension::ReloadAssembly()
+	{
+		MonoManager::Reload();
+	}
+
+	void MonoEditorExtension::AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*)
+	{
+		size_t typeHash = meta.Hash();
+		size_t scriptHash = ResourceType::GetHash<Script>();
+		ResourceType* pResourcerType = ResourceType::GetResourceType(typeHash);
+
+		size_t subTypesCount = ResourceType::SubTypeCount(pResourcerType);
+		for (size_t i = 0; i < subTypesCount; i++)
+		{
+			size_t subHash = ResourceType::GetSubTypeHash(pResourcerType, i);
+			if (scriptHash != subHash) continue;
+			AssetManager::ReloadAsset(uuid);
+			CompileProject();
+			return;
+		}
 	}
 }
 

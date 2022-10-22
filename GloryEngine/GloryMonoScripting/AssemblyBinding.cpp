@@ -3,31 +3,50 @@
 #include <Debug.h>
 #include <mono/metadata/debug-helpers.h>
 #include <filesystem>
+#include <fstream>
 
 namespace Glory
 {
-	AssemblyBinding::AssemblyBinding(MonoDomain* pDomain, const ScriptingLib& lib)
-		: m_pDomain(pDomain), m_Lib(lib), m_pAssembly(nullptr), m_pImage(nullptr)
+	AssemblyBinding::AssemblyBinding(const ScriptingLib& lib)
+		: m_Lib(lib), m_pAssembly(nullptr), m_pImage(nullptr)
 	{
 	}
 
 	AssemblyBinding::~AssemblyBinding()
 	{
+		m_pAssembly = nullptr;
+		m_pImage = nullptr;
 	}
 
-	void AssemblyBinding::Initialize()
+	void AssemblyBinding::Initialize(MonoDomain* pDomain)
 	{
 		std::filesystem::path path = m_Lib.Location();
-		path.append(m_Lib.LibraryName());
-		m_pAssembly = mono_domain_assembly_open(m_pDomain, path.string().c_str());
-		if (m_pAssembly == nullptr) return;
+		const std::string& name = m_Lib.LibraryName();
+		path.append(name);
+		//mono_domain_assembly_open()
+		std::ifstream fileStream;
+		fileStream.open(path.string(), std::ios::in | std::ios::ate | std::ios::binary);
+		std::streampos size = fileStream.tellg();
+		fileStream.seekg(0, std::ios::beg);
+		char* data = new char[size];
+		fileStream.read(data, size);
+		fileStream.close();
+		MonoImageOpenStatus status;
+		m_pImage = mono_image_open_from_data_with_name(data, size, true, &status, false, path.string().c_str());
+		if (m_pImage == nullptr) return;
+		if (status != MONO_IMAGE_OK) return;
+
+		m_pAssembly = mono_image_get_assembly(m_pImage);
+		if (!m_pAssembly) m_pAssembly = mono_assembly_load_from_full(m_pImage, path.string().c_str(), &status, false);
+		if (status != MONO_IMAGE_OK) return;
+		mono_image_close(m_pImage);
 		m_pImage = mono_assembly_get_image(m_pAssembly);
+		delete[] data;
 	}
 
 	void AssemblyBinding::Destroy()
 	{
-		if (m_pImage) mono_image_close(m_pImage);
-		if (m_pAssembly) mono_assembly_close(m_pAssembly);
+		m_Namespaces.clear();
 		m_pAssembly = nullptr;
 		m_pImage = nullptr;
 	}

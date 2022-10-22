@@ -44,6 +44,9 @@ namespace Glory
 
 		static Resource* GetAssetImmediate(UUID uuid);
 
+		static void ReloadAsset(UUID uuid);
+		static void UnloadAsset(UUID uuid);
+
 	private:
 		static Resource* FindResource(UUID uuid);
 		static bool LoadResourceJob(UUID uuid);
