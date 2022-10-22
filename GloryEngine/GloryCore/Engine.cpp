@@ -222,7 +222,7 @@ namespace Glory
 				m_TypeHashToLoader[typeHash] = index;
 			}
 
-			for (size_t j = 0; j < m_pAllModules[i]->m_pScriptingExtender.size(); i++)
+			for (size_t j = 0; j < m_pAllModules[i]->m_pScriptingExtender.size(); j++)
 			{
 				IScriptExtender* pScriptExtender = m_pAllModules[i]->m_pScriptingExtender[j];
 				m_pScriptingExtender->RegisterManagedExtender(m_pAllModules[i], pScriptExtender);
