@@ -10,7 +10,7 @@ namespace Glory::Jobs
 	class Job
 	{
 	public:
-		Job(JobQueue<ret, args...>* pJobQueue) : m_pJobQueue(pJobQueue), m_Exit(false) {}
+		Job(JobQueue<ret, args...>* pJobQueue) : m_pJobQueue(pJobQueue), m_Exit(false), m_Running(false) {}
 		virtual ~Job()
 		{
 
@@ -29,8 +29,14 @@ namespace Glory::Jobs
 			lock.unlock();
 		}
 
+		bool IsRunning()
+		{
+			return m_Running;
+		}
+
 		void JobThread()
 		{
+			m_Running = true;
 			while (true)
 			{
 				std::pair<std::function<ret(args...)>, std::tuple<args...>> job = m_pJobQueue->GetNextJob(m_Exit);
@@ -38,6 +44,7 @@ namespace Glory::Jobs
 				if (m_Exit)
 				{
 					lock.unlock();
+					m_Running = false;
 					return;
 				}
 				lock.unlock();
@@ -54,5 +61,6 @@ namespace Glory::Jobs
 		std::function<ret(args...)> m_CurrentJob;
 		std::mutex m_ExitMutex;
 		bool m_Exit;
+		bool m_Running;
 	};
 }

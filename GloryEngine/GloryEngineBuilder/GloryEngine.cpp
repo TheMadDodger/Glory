@@ -45,8 +45,6 @@ namespace Glory
 			FreeLibrary(m_Libs[i]);
 		}
 		m_Libs.clear();
-
-		Console::Cleanup();
 	}
 
 	const std::string& EngineLoader::GetSetModule(const std::string& key)

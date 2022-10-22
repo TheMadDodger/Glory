@@ -16,6 +16,8 @@ namespace Glory
 
 	private:
 		friend class GloryContext;
+		void Cleanup();
+
 		CameraManager();
 		virtual ~CameraManager();
 

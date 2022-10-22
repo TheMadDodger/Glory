@@ -36,7 +36,7 @@ namespace Glory
 	/// This class describes the engine a GloryGame object will run on.
 	/// It holds the required modules used to run the game, as well as optional modules.
 	/// </summary>
-	class Engine : public Object
+	class Engine
 	{
 	public:
 		static Engine* CreateEngine(const EngineCreateInfo& createInfo);

@@ -115,5 +115,7 @@ namespace Glory
 		m_pSerializedPropertyManager = nullptr;
 		delete m_pConsole;
 		m_pConsole = nullptr;
+
+		m_CameraManager.Cleanup();
 	}
 }

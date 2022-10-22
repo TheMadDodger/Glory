@@ -33,6 +33,8 @@ namespace Glory
 		// Kill the thread
 		m_Exit = true;
 		m_pRenderQueue->Stop();
+
+		while (!m_pThread->IsIdle()) {}
 	}
 
 	RenderQueue* GraphicsThread::GetRenderQueue()

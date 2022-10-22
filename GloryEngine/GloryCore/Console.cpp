@@ -26,20 +26,7 @@ namespace Glory
 
 	void Console::Cleanup()
 	{
-		for (auto pCommand : CONSOLE_INSTANCE->m_pCommands)
-		{
-			delete pCommand;
-		}
-		CONSOLE_INSTANCE->m_pCommands.clear();
-
-		Parser::Destroy();
-
-		for (size_t i = 0; i < CONSOLE_INSTANCE->m_pConsoles.size(); i++)
-		{
-			CONSOLE_INSTANCE->m_pConsoles[i]->OnConsoleClose();
-			delete CONSOLE_INSTANCE->m_pConsoles[i];
-		}
-		CONSOLE_INSTANCE->m_pConsoles.clear();
+		
 	}
 
 	void Console::Update()
@@ -232,6 +219,21 @@ namespace Glory
 
 	Console::~Console()
 	{
+		for (auto pCommand : m_pCommands)
+		{
+			delete pCommand;
+		}
+		m_pCommands.clear();
+
+		Parser::Destroy();
+
+		for (size_t i = 0; i < CONSOLE_INSTANCE->m_pConsoles.size(); i++)
+		{
+			m_pConsoles[i]->OnConsoleClose();
+			delete m_pConsoles[i];
+		}
+		m_pConsoles.clear();
+
 		m_CommandHistory.clear();
 		m_ConsoleLines.clear();
 	}

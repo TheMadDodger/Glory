@@ -17,11 +17,10 @@ namespace Glory
 
 	void MonoManager::Cleanup()
 	{
-		mono_domain_unload(m_pDomain);
-		mono_domain_finalize(m_pDomain, 2000);
-
+		MonoObjectManager::Cleanup();
 		MonoLibManager::Cleanup();
 		if (m_pMainDomain) mono_jit_cleanup(m_pMainDomain);
+		m_pMainDomain = nullptr;
 		m_pDomain = nullptr;
 	}
 

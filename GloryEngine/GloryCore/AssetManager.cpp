@@ -50,7 +50,10 @@ namespace Glory
 	void AssetManager::ReloadAsset(UUID uuid)
 	{
 		UnloadAsset(uuid);
-		GetAsset(uuid, NULL);
+		GetAsset(uuid, [&](Resource* pResource)
+		{
+			ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetReloaded, uuid, pResource);
+		});
 	}
 
 	void AssetManager::UnloadAsset(UUID uuid)

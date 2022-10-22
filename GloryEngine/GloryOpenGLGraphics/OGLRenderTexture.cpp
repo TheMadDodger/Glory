@@ -15,6 +15,7 @@ namespace Glory
 	OGLRenderTexture::~OGLRenderTexture()
 	{
 		if (m_GLFrameBufferID != NULL) glDeleteFramebuffers(1, &m_GLFrameBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		m_GLFrameBufferID = NULL;
 	}
 
