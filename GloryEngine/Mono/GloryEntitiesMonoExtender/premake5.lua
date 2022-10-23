@@ -21,20 +21,26 @@ project "GloryEntitiesMonoExtender"
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
-
 		"../%{IncludeDir.yaml_cpp}",
 		"../%{IncludeDir.spirv_cross}",
-
 		"../%{GloryIncludeDir.core}",
+		"../%{GloryIncludeDir.entityscenes}",
+		"../%{GloryIncludeDir.mono}",
+	}
 
-		"%{mono_install}/include/mono-2.0",
+	libdirs
+	{
+		"../%{LibDirs.glory}",
 	}
 
 	links
 	{
 		"GloryCore",
+		"GloryEntityScenes",
 		"GloryMonoScripting",
 		"yaml-cpp",
+		"mono-2.0-sgen",
+		"MonoPosixHelper",
 	}
 
 	defines
@@ -55,8 +61,28 @@ project "GloryEntitiesMonoExtender"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			"%{mono_installx86}/lib",
+		}
+		
+		includedirs
+		{
+			"%{mono_installx86}/include/mono-2.0",
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			"%{mono_install}/lib",
+		}
+		
+		includedirs
+		{
+			"%{mono_install}/include/mono-2.0",
+		}
 
 	filter "configurations:Debug"
 		runtime "Debug"

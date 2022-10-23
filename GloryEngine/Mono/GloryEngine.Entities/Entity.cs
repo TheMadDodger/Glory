@@ -3,20 +3,28 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
-    struct Entity
+    public struct Entity
     {
-        #region Fields
+		#region Props
 
-        private UInt32 _entityID;
+		public UInt32 EntityID => _entityID;
+
+		#endregion
+
+		#region Fields
+
+		private UInt32 _entityID;
+		private UInt64 _sceneID;
 
         #endregion
 
         #region Constructor
 
-        public Entity(UInt32 id)
+        public Entity(UInt32 id, UInt64 sceneID)
         {
             _entityID = id;
-        }
+			_sceneID = sceneID;
+		}
 
 		#endregion
 

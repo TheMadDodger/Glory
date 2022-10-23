@@ -1,5 +1,5 @@
 #include "EntitiesMonoExtender.h"
-#include "EntitiesMonoExtender.h"
+#include "EntityBindings.h"
 #include <ScriptingExtender.h>
 #include <Engine.h>
 
@@ -12,6 +12,7 @@ namespace Glory
 
 	void EntitiesMonoExtender::GetInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
+		EntityBindings::GetInternallCalls(internalCalls);
 	}
 
 	void EntitiesMonoExtender::GetLibs(ScriptingExtender* pScriptingExtender)

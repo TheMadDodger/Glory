@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <Glory.h>
 #include "GloryMono.h"
 #include "GloryMonoScipting.h"
 
@@ -15,8 +16,9 @@ namespace Glory
 	class MonoObjectManager
 	{
 	public:
-		static MonoObject* MonoObjectManager::GetObject(MonoClass* pClass, Object* pObject);
-		static void DestroyObject(MonoClass* pClass, Object* pObject);
+		static GLORY_API MonoObject* MonoObjectManager::GetObject(MonoClass* pClass, Object* pObject);
+		static GLORY_API Object* MonoObjectManager::GetObject(MonoObject* pMonoObject);
+		static GLORY_API void DestroyObject(MonoClass* pClass, Object* pObject);
 
 	private:
 		static void Cleanup();
@@ -27,5 +29,6 @@ namespace Glory
 		MonoObjectManager();
 		virtual ~MonoObjectManager();
 		static std::map<Object*, ObjectInstanceData> m_Objects;
+		static std::map<MonoObject*, Object*> m_pMonoToObject;
 	};
 }
