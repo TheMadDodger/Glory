@@ -10,15 +10,15 @@ namespace Glory
 	{
 	}
 
-	//void Entity::Clear()
-	//{
-	//	m_pEntityScene->m_Registry.Clear(m_EntityID);
-	//}
+	void Entity::Clear()
+	{
+		m_pEntityScene->m_Registry.Clear(m_EntityID);
+	}
 
 	bool Entity::IsValid()
 	{
 		if (!m_pEntityScene) return false;
-		return m_pEntityScene->m_Registry.IsValid(m_EntityID);
+		return (&m_pEntityScene->m_Registry)->IsValid(m_EntityID);
 	}
 
 	//void Entity::ForEachComponent(std::function<void(Registry*, EntityID, EntityComponentData*)> func)

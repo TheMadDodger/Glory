@@ -36,7 +36,6 @@ namespace Glory
 	Entity EntityScene::CreateEntity()
 	{
 		EntityID entityID = m_Registry.CreateEntity<Transform>();
-		m_Registry.AddComponent<Transform>(entityID, UUID());
 		return Entity(entityID, this);
 	}
 
@@ -89,8 +88,7 @@ namespace Glory
 
 	void EntityScene::OnDeleteObject(SceneObject* pObject)
 	{
-		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
-		pEntityObject->GetEntityHandle().Destroy();
+		
 	}
 
 	void EntityScene::OnObjectAdded(SceneObject* pObject)

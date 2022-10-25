@@ -59,9 +59,6 @@ GloryIncludeDir["ImGuizmo"]				= "../ImGuizmo"
 GloryIncludeDir["implot"]				= "../implot"
 GloryIncludeDir["ImFileDialog"]			= "../ImFileDialog"
 
-GloryIncludeDir["ECS"]					= "C:/Users/Sparta/Documents/GloryECS/GloryECS/GloryECSStatic"
-GloryIncludeDir["Reflect"]				= "C:/Users/Sparta/Documents/GloryECS/GloryECS/GloryReflection"
-
 SubmodoleDirs = {}
 SubmodoleDirs["assimp"]				= "../submodules/assimp"
 SubmodoleDirs["ImGui"]				= "../submodules/ImGui"
@@ -74,6 +71,9 @@ SubmodoleDirs["SDL_image"]			= "../third-party/SDL_Image"
 SubmodoleDirs["shaderc"]			= "../third-party/shaderc"
 SubmodoleDirs["spirv_cross"]		= "../third-party/spirv-cross"
 SubmodoleDirs["glory"]				= "../bin/Engine"
+SubmodoleDirs["GloryECS"]			= "../submodules/GloryECS/GloryECS"
+SubmodoleDirs["ECS"]				= "%{SubmodoleDirs.GloryECS}/GloryECSStatic"
+SubmodoleDirs["Reflect"]			= "%{SubmodoleDirs.GloryECS}/GloryReflectStatic"
 
 IncludeDir = {}
 IncludeDir["assimp"]				= "%{SubmodoleDirs.assimp}/include"
@@ -87,6 +87,8 @@ IncludeDir["SDL_image"]				= "%{SubmodoleDirs.SDL_image}/include"
 IncludeDir["shaderc"]				= "%{SubmodoleDirs.shaderc}/include"
 IncludeDir["spirv_cross"]			= "%{SubmodoleDirs.spirv_cross}/include"
 IncludeDir["yaml_cpp"]				= "%{SubmodoleDirs.yaml_cpp}/include"
+IncludeDir["ECS"]					= "%{SubmodoleDirs.ECS}"
+IncludeDir["Reflect"]				= "%{SubmodoleDirs.Reflect}"
 
 LibDirs = {}
 LibDirs["assimp"]					= "%{SubmodoleDirs.assimp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
@@ -101,9 +103,7 @@ LibDirs["shaderc"]					= "%{SubmodoleDirs.shaderc}/lib/%{cfg.buildcfg}/%{cfg.pla
 LibDirs["spirv_cross"]				= "%{SubmodoleDirs.spirv_cross}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["yaml_cpp"]					= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["extensions"]				= "%{SubmodoleDirs.glory}/%{cfg.buildcfg}/%{cfg.platform}/Extensions"
-
-LibDirs["ECS"]						= "C:/Users/Sparta/Documents/GloryECS/GloryECS/Debug"
-LibDirs["Reflect"]					= "C:/Users/Sparta/Documents/GloryECS/GloryECS/Debug"
+LibDirs["GloryECS"]					= "%{SubmodoleDirs.GloryECS}/Build/Lib/%{cfg.buildcfg}/%{cfg.platform}/Extensions"
 
 stb_image							= "../../third-party/stb_image"
 
