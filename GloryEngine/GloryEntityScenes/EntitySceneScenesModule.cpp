@@ -2,6 +2,8 @@
 #include "EntitySceneSerializer.h"
 #include "EntitySceneObjectSerializer.h"
 
+#include "Components.h"
+
 namespace Glory
 {
 	EntitySceneScenesModule::EntitySceneScenesModule()

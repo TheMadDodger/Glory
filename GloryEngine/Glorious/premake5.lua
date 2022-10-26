@@ -32,7 +32,9 @@ project "Glorious"
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
-		"../GloryEngineBuilder"
+		"../GloryEngineBuilder",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -45,6 +47,8 @@ project "Glorious"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -60,6 +64,8 @@ project "Glorious"
 		"ImFileDialog",
 		"yaml-cpp",
 		"GloryEditor",
+		
+		"GloryReflectStatic",
 	}
 
 	postbuildcommands

@@ -50,6 +50,8 @@ project "GloryMain"
 		"%{GloryIncludeDir.editor}",
 
 		"../EntityScenesEditorExtension",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs

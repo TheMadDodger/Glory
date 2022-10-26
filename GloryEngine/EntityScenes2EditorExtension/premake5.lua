@@ -1,10 +1,10 @@
-project "GloryEditorOGL"
+project "EntityScenes2EditorExtension"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GloryOpenGLGraphics/Editor/Backend")
+	targetdir ("%{modulesOutDir}/GloryEntityScenes2/Editor/Extension")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	files
@@ -15,62 +15,64 @@ project "GloryEditorOGL"
 
 	vpaths
 	{
-		
+		["Extension"] = { "EntityScenesEditorExtension.*" },
+		["Editors"] = { "TransformEditor.*", "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "CameraComponentEditor.*", "EntityComponentPopup.*", "LayerComponentEditor.*", "MeshRendererComponentEditor.*" },
+		["Actions"] = { "AddComponentAction.*", "RemoveComponentAction.*" }
 	}
 
 	includedirs
 	{
 		"%{vulkan_sdk}/third-party/include",
+
+		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.ImFileDialog}",
-		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
-		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.editor}",
-		
-		"%{IncludeDir.Reflect}",
+		"%{GloryIncludeDir.entityscenes2}",
+		"%{GloryIncludeDir.ImGui}",
+
+		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Reflect}"
 	}
 
 	libdirs
 	{
-		"%{LibDirs.glory}",
-		"%{LibDirs.GLEW}",
-		"%{LibDirs.glory}/Modules/GloryOpenGLGraphics",
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.ImFileDialog}",
-		"%{LibDirs.ImGuizmo}",
+		"%{LibDirs.LibDirs}",
 		"%{LibDirs.implot}",
-		"%{LibDirs.yaml_cpp}",
+		"%{LibDirs.glory}",
+		"%{LibDirs.glory}/Modules/GloryEntityScenes2",
+		"%{LibDirs.assimp}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
-		
+		"%{LibDirs.yaml_cpp}",
+
 		"%{LibDirs.GloryECS}",
 	}
 
 	links
 	{
 		"GloryCore",
-		"glew32",
-		"yaml-cpp",
 		"GloryEditor",
-		"GloryOpenGLGraphics",
+		"GloryEntityScenes2",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
 		"ImGui",
 		"ImGuizmo",
 		"implot",
-		"ImFileDialog",
-		
-		"GloryReflectStatic",
+		"yaml-cpp",
+
+		"GloryECSStatic",
+		"GloryReflectStatic"
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLORY_UUID_DEFINED",
 	}
 
 	filter "system:windows"

@@ -3,6 +3,11 @@
 #include "CameraManager.h"
 #include "ThreadedVar.h"
 
+namespace GloryReflect
+{
+	class Reflect;
+}
+
 namespace Glory
 {
 	class AssetDatabase;
@@ -50,7 +55,7 @@ namespace Glory
 		DisplayManager* m_pDisplayManager;
 		SerializedPropertyManager* m_pSerializedPropertyManager;
 		Console* m_pConsole;
-
+		GloryReflect::Reflect* m_pReflection;
 		ThreadedVector<Object*> m_pAllObjects;
 	};
 }

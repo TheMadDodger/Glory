@@ -144,4 +144,5 @@ group ""
 
 group "Editor Extensions"
 	include "EntityScenesEditorExtension"
+	include "EntityScenes2EditorExtension"
 group ""

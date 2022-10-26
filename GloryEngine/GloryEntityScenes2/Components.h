@@ -17,6 +17,37 @@
 
 namespace Glory
 {
+	struct RecursionTest;
+
+	struct RecursionTest3
+	{
+		REFLECTABLE(RecursionTest3,
+			(float)	Float,
+			(int)	Int,
+			(bool)	Bool
+		)
+	};
+
+	struct RecursionTest2
+	{
+		REFLECTABLE(RecursionTest2,
+			(float)	Float,
+			(int)	Int,
+			(bool)	Bool,
+			(Glory::RecursionTest3)	RecursionValue
+		)
+	};
+
+	struct RecursionTest
+	{
+		REFLECTABLE(RecursionTest,
+			(float)	Float,
+			(int)	Int,
+			(bool)	Bool,
+			(Glory::RecursionTest2)	RecursionValue
+		)
+	};
+
 	struct Transform
 	{
 		Transform();
@@ -25,7 +56,9 @@ namespace Glory
 		REFLECTABLE(Transform,
 			(glm::vec3)	Position,
 			(glm::quat)	Rotation,
-			(glm::vec3)	Scale)
+			(glm::vec3)	Scale,
+			(Glory::RecursionTest)	RecursionTestValue
+		)
 
 		glm::mat4 MatTransform;
 

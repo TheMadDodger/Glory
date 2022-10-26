@@ -27,6 +27,8 @@ project "GloryEditorSDL"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.sdlwindow}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -35,6 +37,8 @@ project "GloryEditorSDL"
 		"%{LibDirs.glory}/Modules/GlorySDLWindow",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -45,6 +49,8 @@ project "GloryEditorSDL"
 		"ImGui",
 		"GloryEditor",
 		"GlorySDLWindow",
+		
+		"GloryReflectStatic",
 	}
 
 	defines

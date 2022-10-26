@@ -32,9 +32,6 @@ project "EntityScenesEditorExtension"
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.ImGui}",
-
-		"%{GloryIncludeDir.ECS}",
-		"%{GloryIncludeDir.Reflect}"
 	}
 
 	libdirs
@@ -48,9 +45,6 @@ project "EntityScenesEditorExtension"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.ECS}",
-		"%{LibDirs.Reflect}",
 	}
 
 	links
@@ -65,9 +59,6 @@ project "EntityScenesEditorExtension"
 		"ImGuizmo",
 		"implot",
 		"yaml-cpp",
-
-		"GloryECSStatic",
-		"GloryReflection"
 	}
 
 	defines

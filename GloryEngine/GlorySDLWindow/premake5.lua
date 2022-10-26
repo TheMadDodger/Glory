@@ -26,7 +26,9 @@ project "GlorySDLWindow"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{GloryIncludeDir.core}"
+		"%{GloryIncludeDir.core}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -35,6 +37,8 @@ project "GlorySDLWindow"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -45,6 +49,8 @@ project "GlorySDLWindow"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
+		
+		"GloryReflectStatic",
 	}
 
 	defines
