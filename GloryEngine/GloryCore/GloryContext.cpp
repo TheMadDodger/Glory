@@ -7,6 +7,7 @@
 #include "SerializedPropertyManager.h"
 #include "Console.h"
 #include "WindowsDebugConsole.h"
+#include <Reflection.h>
 
 namespace Glory
 {
@@ -35,6 +36,7 @@ namespace Glory
 	void GloryContext::SetContext(GloryContext* pContext)
 	{
 		m_pContext = pContext;
+		GloryReflect::Reflect::SetReflectInstance(m_pContext->m_pReflection);
 	}
 
 	GloryContext* GloryContext::GetContext()
@@ -95,7 +97,7 @@ namespace Glory
 	Glory::GloryContext::GloryContext()
 		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
 		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pSerializedPropertyManager(new SerializedPropertyManager()),
-		m_pConsole(new Console())
+		m_pConsole(new Console()), m_pReflection(GloryReflect::Reflect::CreateReflectInstance())
 	{
 	}
 
@@ -115,5 +117,7 @@ namespace Glory
 		m_pSerializedPropertyManager = nullptr;
 		delete m_pConsole;
 		m_pConsole = nullptr;
+
+		GloryReflect::Reflect::DestroyReflectInstance();
 	}
 }

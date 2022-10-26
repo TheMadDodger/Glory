@@ -24,7 +24,9 @@ project "GloryASSIMPModelLoader"
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{vulkan_sdk}/third-party/include"
+		"%{vulkan_sdk}/third-party/include",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -32,6 +34,8 @@ project "GloryASSIMPModelLoader"
 		"%{LibDirs.glory}",
 		"%{LibDirs.assimp}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -39,6 +43,8 @@ project "GloryASSIMPModelLoader"
 		"GloryCore",
 		"assimp",
 		"yaml-cpp",
+		
+		"GloryReflectStatic",
 	}
 
 	defines

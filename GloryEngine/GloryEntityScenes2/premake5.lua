@@ -60,7 +60,7 @@ project "GloryEntityScenes2"
 	defines
 	{
 		"GLORY_EXPORTS",
-		"UUID_DEFINED"
+		"GLORY_UUID_DEFINED"
 	}
 	
 	postbuildcommands

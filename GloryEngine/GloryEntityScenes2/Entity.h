@@ -38,6 +38,8 @@ namespace Glory
 			m_pEntityScene->m_Registry.RemoveComponent<T>(m_EntityID);
 		}
 
+		GLORY_API EntityView* GetEntityView();
+
 		GLORY_API void Clear();
 		GLORY_API bool IsValid();
 		//GLORY_API void ForEachComponent(std::function<void(EntityRegistry*, EntityID, EntityComponentData*)> func);

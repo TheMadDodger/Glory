@@ -4,6 +4,7 @@
 #include <vector>
 #include <ResourceType.h>
 #include <any>
+#include <Reflection.h>
 #include "SerializedProperty.h"
 #include "GloryEditor.h"
 #include "PropertyAction.h"
@@ -20,6 +21,7 @@ namespace Glory::Editor
 		virtual GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags) const;
+		virtual GLORY_EDITOR_API bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const;
 		GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty) const;
 
 		template<class T>
@@ -34,6 +36,9 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::any& data, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const SerializedProperty* serializedProperty);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, size_t typeHash, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags, const std::string& labelID = "");
+		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags, const std::string& labelID = "");
 
 	public:
 		GLORY_EDITOR_API size_t GetPropertyTypeHash() const;
@@ -56,6 +61,18 @@ namespace Glory::Editor
 
 	protected:
 		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const override
+		{
+			PropertyType oldValue = *(PropertyType*)data;
+			if (OnGUI(label, (PropertyType*)data, flags))
+			{
+				PropertyType newValue = *(PropertyType*)data;
+				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
+				return true;
+			}
+			return false;
+		}
+
+		virtual bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const override
 		{
 			PropertyType oldValue = *(PropertyType*)data;
 			if (OnGUI(label, (PropertyType*)data, flags))

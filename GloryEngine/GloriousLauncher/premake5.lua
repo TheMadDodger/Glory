@@ -28,6 +28,8 @@ project "GloriousLauncher"
 		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.GLEW}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -38,6 +40,8 @@ project "GloriousLauncher"
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
 		"%{LibDirs.GLEW}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -47,6 +51,8 @@ project "GloriousLauncher"
 		"ImFileDialog",
 		"yaml-cpp",
 		"glew32",
+		
+		"GloryReflectStatic",
 	}
 
 	postbuildcommands

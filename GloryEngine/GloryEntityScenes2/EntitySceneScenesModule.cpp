@@ -43,6 +43,11 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
+		GloryReflect::Reflect::RegisterType<Transform>();
+		GloryReflect::Reflect::RegisterType<RecursionTest>();
+		GloryReflect::Reflect::RegisterType<RecursionTest2>();
+		GloryReflect::Reflect::RegisterType<RecursionTest3>();
+
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		//Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
 		ResourceType::RegisterResource<GScene>(".gscene");

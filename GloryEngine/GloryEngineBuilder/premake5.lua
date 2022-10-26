@@ -25,6 +25,8 @@ project "GloryEngineBuilder"
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	defines

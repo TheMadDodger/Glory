@@ -26,6 +26,8 @@ project "GloryEditorVulkan"
 		"%{IncludeDir.ImGui}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -34,6 +36,8 @@ project "GloryEditorVulkan"
 		"%{LibDirs.glory}/Modules/GloryVulkanGraphics",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -44,6 +48,8 @@ project "GloryEditorVulkan"
 		"ImGui",
 		"GloryEditor",
 		"GloryVulkanGraphics",
+		
+		"GloryReflectStatic",
 	}
 
 	defines

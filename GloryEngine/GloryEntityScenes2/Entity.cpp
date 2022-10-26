@@ -10,6 +10,11 @@ namespace Glory
 	{
 	}
 
+	EntityView* Entity::GetEntityView()
+	{
+		return m_pEntityScene->m_Registry.GetEntityView(m_EntityID);
+	}
+
 	void Entity::Clear()
 	{
 		m_pEntityScene->m_Registry.Clear(m_EntityID);
