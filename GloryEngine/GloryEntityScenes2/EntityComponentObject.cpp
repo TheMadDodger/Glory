@@ -8,7 +8,7 @@ namespace Glory
 	}
 
 	EntityComponentObject::EntityComponentObject(GloryECS::EntityID entityID, UUID componentID, size_t componentType, GloryECS::EntityRegistry* pRegistry)
-		: m_EntityID(entityID), m_pRegistry(pRegistry), Object(componentID)
+		: m_EntityID(entityID), m_ComponentType(componentType), m_pRegistry(pRegistry), Object(componentID)
 	{
 		APPEND_TYPE(EntityComponentObject);
 		GloryECS::BaseTypeView* pTypeView = m_pRegistry->GetTypeView(componentType);
@@ -25,5 +25,15 @@ namespace Glory
 	GloryECS::EntityRegistry* EntityComponentObject::GetRegistry() const
 	{
 		return m_pRegistry;
+	}
+
+	const GloryECS::EntityID EntityComponentObject::EntityID() const
+	{
+		return m_EntityID;
+	}
+
+	const size_t EntityComponentObject::ComponentType() const
+	{
+		return m_ComponentType;
 	}
 }

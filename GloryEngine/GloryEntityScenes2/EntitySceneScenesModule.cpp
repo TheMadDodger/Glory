@@ -1,8 +1,8 @@
 #include "EntitySceneScenesModule.h"
 #include "EntitySceneSerializer.h"
 #include "EntitySceneObjectSerializer.h"
-
 #include "Components.h"
+#include <TypeFlags.h>
 
 namespace Glory
 {
@@ -43,7 +43,8 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
-		GloryReflect::Reflect::RegisterType<Transform>();
+		GloryReflect::Reflect::RegisterType<Transform>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<CameraComponent>(TypeFlag::TF_Component);
 		GloryReflect::Reflect::RegisterType<RecursionTest>();
 		GloryReflect::Reflect::RegisterType<RecursionTest2>();
 		GloryReflect::Reflect::RegisterType<RecursionTest3>();
