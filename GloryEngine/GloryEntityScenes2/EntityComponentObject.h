@@ -21,6 +21,8 @@ namespace Glory
 		}
 
 		GLORY_API GloryECS::EntityRegistry* GetRegistry() const;
+		GLORY_API const GloryECS::EntityID EntityID() const;
+		GLORY_API const size_t ComponentType() const;
 
 	private:
 		GloryECS::EntityID m_EntityID;

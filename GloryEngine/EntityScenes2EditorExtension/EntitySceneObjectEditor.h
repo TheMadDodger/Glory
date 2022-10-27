@@ -30,7 +30,7 @@ namespace Glory::Editor
 		SceneObject* m_pObject;
 		std::vector<EntityComponentObject*> m_pComponents;
 
-		//EntityComponentPopup m_ComponentPopup;
+		EntityComponentPopup m_ComponentPopup;
 
 		size_t m_RightClickedComponentIndex = 0;
     };

@@ -25,18 +25,12 @@ namespace Glory::Editor
 		{
 			m_pComponentObject = (EntityComponentObject*)m_pTarget;
 			m_Properties.clear();
-			//m_pComponentObject->GetRegistry()->GetSystems()->AcquireSerializedProperties(m_pComponentObject->GetComponentData(), m_Properties);
 		}
 
 		virtual bool OnGUI() override
 		{
 			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID());
 			bool change = false;
-			//for (size_t i = 0; i < m_Properties.size(); i++)
-			//{
-			//	change |= PropertyDrawer::DrawProperty(m_Properties[i]);
-			//}
-
 			TComponent& component = GetTargetComponent();
 			size_t hash = ResourceType::GetHash<TComponent>();
 
@@ -49,7 +43,7 @@ namespace Glory::Editor
 					size_t offset = pFieldData->Offset();
 					void* pAddress = (void*)((char*)(&component) + offset);
 					std::string labelSuffix = std::to_string(m_pComponentObject->GetUUID());
-					PropertyDrawer::DrawProperty(pFieldData, pAddress, 0, labelSuffix);
+					change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, 0, labelSuffix);
 				}
 			}
 

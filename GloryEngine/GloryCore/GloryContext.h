@@ -35,6 +35,21 @@ namespace Glory
 		static GloryContext* CreateContext();
 		static void DestroyContext();
 
+		template<class T>
+		static void AddUserContext(T* pUserContext)
+		{
+			AddUserContext(ResourceType::GetHash(typeid(T)), (void*)pUserContext);
+		}
+
+		template<class T>
+		static T* GetUserContext()
+		{
+			return (T*)GetUserContext(ResourceType::GetHash(typeid(T)));
+		}
+
+		static void AddUserContext(size_t hash, void* pUserContext);
+		static void* GetUserContext(size_t hash);
+
 	private:
 		void Initialize();
 
@@ -57,5 +72,6 @@ namespace Glory
 		Console* m_pConsole;
 		GloryReflect::Reflect* m_pReflection;
 		ThreadedVector<Object*> m_pAllObjects;
+		std::map<size_t, void*> m_pUserContexts;
 	};
 }

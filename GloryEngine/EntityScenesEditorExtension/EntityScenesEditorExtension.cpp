@@ -6,6 +6,8 @@
 #include <EditorPlayer.h>
 #include <Components.h>
 
+//#include <Reflection.h>
+
 namespace Glory::Editor
 {
 	const std::vector<std::type_index> EntityScenesEditorExtension::m_ComponentsToUpdateInEditor =
@@ -25,6 +27,8 @@ namespace Glory::Editor
 
 	void EntityScenesEditorExtension::RegisterEditors()
 	{
+		//GloryReflect::Reflect::RegisterType<Transform>();
+
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();

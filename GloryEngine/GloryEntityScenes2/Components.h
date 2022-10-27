@@ -50,8 +50,8 @@ namespace Glory
 
 	struct Transform
 	{
-		Transform();
-		Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
+		GLORY_API Transform();
+		GLORY_API Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 
 		REFLECTABLE(Transform,
 			(glm::vec3)	Position,
@@ -85,25 +85,26 @@ namespace Glory
 	////	Perspective,
 	////};
 	//
-	//struct CameraComponent
-	//{
-	//	CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_DisplayIndex(0), m_Priority(0), m_ClearColor(glm::vec4(0.0f)), m_LayerMask(0), m_LastHash(0) {}
-	//	CameraComponent(float halfFOV, float near, float far, int displayIndex = 0, int priority = 0, const glm::vec4& clearColor = glm::vec4(0.0f))
-	//		: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_DisplayIndex(displayIndex), m_Priority(priority), m_ClearColor(clearColor), m_LayerMask(0), m_LastHash(0) {}
-	//	
-	//	float m_HalfFOV;
-	//	float m_Near;
-	//	float m_Far;
-	//	
-	//	int m_DisplayIndex;
-	//	int m_Priority;
-	//	LayerMask m_LayerMask;
-	//	glm::vec4 m_ClearColor;
-	//
-	//	size_t m_LastHash;
-	//
-	//	CameraRef m_Camera;
-	//};
+	struct CameraComponent
+	{
+		GLORY_API CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_DisplayIndex(0), m_Priority(0), m_ClearColor(glm::vec4(0.0f)), m_LayerMask(0), m_LastHash(0) {}
+		GLORY_API CameraComponent(float halfFOV, float near, float far, int displayIndex = 0, int priority = 0, const glm::vec4& clearColor = glm::vec4(0.0f))
+			: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_DisplayIndex(displayIndex), m_Priority(priority), m_ClearColor(clearColor), m_LayerMask(0), m_LastHash(0) {}
+		
+		REFLECTABLE(CameraComponent,
+			(float)	m_HalfFOV,
+			(float)	m_Near,
+			(float)	m_Far,
+			(int)	m_DisplayIndex,
+			(int)	m_Priority,
+			(LayerMask)	m_LayerMask,
+			(glm::vec4)	m_ClearColor
+		)
+	
+		size_t m_LastHash;
+	
+		CameraRef m_Camera;
+	};
 	//
 	//struct LookAt
 	//{

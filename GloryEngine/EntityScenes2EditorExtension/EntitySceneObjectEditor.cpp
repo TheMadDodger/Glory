@@ -120,31 +120,32 @@ namespace Glory::Editor
 			++index;
 		});
 
-		//if (ImGui::Button("Add Component"))
-		//{
-		//	EntityComponentPopup::Open(pRegistry);
-		//	m_AddingComponent = true;
-		//}
-		//
-		//if (m_AddingComponent)
-		//{
-		//	size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
-		//	if (toAddTypeHash)
-		//	{
-		//		Undo::StartRecord("Add Component", m_pTarget->GetUUID());
-		//		pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
-		//		size_t index = m_pComponentEditors.size();
-		//		EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, index);
-		//		Undo::AddAction(new AddComponentAction(toAddTypeHash, pComponentData->GetComponentUUID(), index));
-		//		Undo::StopRecord();
-		//		m_AddingComponent = false;
-		//		Initialize();
-		//		change = true;
-		//	}
-		//}
-		//
-		//m_ComponentPopup.OnGUI();
-		//
+		if (ImGui::Button("Add Component"))
+		{
+			EntityComponentPopup::Open(pRegistry);
+			m_AddingComponent = true;
+		}
+		
+		if (m_AddingComponent)
+		{
+			size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
+			if (toAddTypeHash)
+			{
+				Undo::StartRecord("Add Component", m_pTarget->GetUUID());
+				pRegistry->CreateComponent(entityID, toAddTypeHash, UUID());
+				//pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
+				//size_t index = m_pComponentEditors.size();
+				//EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, index);
+				//Undo::AddAction(new AddComponentAction(toAddTypeHash, pComponentData->GetComponentUUID(), index));
+				Undo::StopRecord();
+				m_AddingComponent = false;
+				Initialize();
+				change = true;
+			}
+		}
+		
+		m_ComponentPopup.OnGUI();
+		
 		//if (ImGui::BeginPopup("ComponentRightClick"))
 		//{
 		//	if (ImGui::MenuItem("Remove"))
