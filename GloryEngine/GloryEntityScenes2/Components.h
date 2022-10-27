@@ -65,26 +65,32 @@ namespace Glory
 		Entity Parent;
 	};
 
-	//struct MeshFilter
+	struct MeshFilter
+	{
+		MeshFilter() : m_pModelData(0) {}
+		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData != nullptr ? pModelData->GetUUID() : 0) {}
+		
+		REFLECTABLE(MeshFilter,
+			(UUID)	m_pModelData
+		)
+	};
+	
+	struct MeshRenderer
+	{
+		MeshRenderer(MaterialData* pMaterial) : m_pMaterials({ pMaterial != nullptr ? pMaterial->GetUUID() : 0 }) {}
+		MeshRenderer() : m_pMaterials(std::vector<UUID>()) {}
+
+		REFLECTABLE(MeshRenderer,
+			(std::vector<UUID>)	m_pMaterials
+		)
+	};
+	
+	//enum CameraPerspective
 	//{
-	//	MeshFilter() : m_pModelData(0) {}
-	//	MeshFilter(ModelData* pModelData) : m_pModelData(pModelData != nullptr ? pModelData->GetUUID() : 0) {}
-	//	UUID m_pModelData;
+	//	Orthographic,
+	//	Perspective,
 	//};
-	//
-	//struct MeshRenderer
-	//{
-	//	MeshRenderer(MaterialData* pMaterial) : m_pMaterials({ pMaterial != nullptr ? pMaterial->GetUUID() : 0 }) {}
-	//	MeshRenderer() : m_pMaterials(std::vector<UUID>()) {}
-	//	std::vector<UUID> m_pMaterials;
-	//};
-	//
-	////enum CameraPerspective
-	////{
-	////	Orthographic,
-	////	Perspective,
-	////};
-	//
+	
 	struct CameraComponent
 	{
 		GLORY_API CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_DisplayIndex(0), m_Priority(0), m_ClearColor(glm::vec4(0.0f)), m_LayerMask(0), m_LastHash(0) {}
@@ -105,43 +111,49 @@ namespace Glory
 	
 		CameraRef m_Camera;
 	};
-	//
-	//struct LookAt
-	//{
-	//	LookAt() : m_Eye(0.0f), m_Center(0.0f), m_Up({0.0f, 1.0f, 0.0f}) {}
-	//	LookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) : m_Eye(eye), m_Center(center), m_Up(up) {}
-	//
-	//	glm::vec3 m_Eye;
-	//	glm::vec3 m_Center;
-	//	glm::vec3 m_Up;
-	//};
-	//
-	//struct Spin
-	//{
-	//	Spin() : m_Speed(10.0f), m_Time(0.0f) {}
-	//	Spin(float speed) : m_Speed(speed), m_Time(0.0f) {}
-	//
-	//	float m_Speed;
-	//	float m_Time;
-	//};
-	//
-	//struct LayerComponent
-	//{
-	//	LayerComponent() : m_pLayer(nullptr) {}
-	//	LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
-	//
-	//	const Layer* m_pLayer;
-	//};
-	//
-	//struct LightComponent
-	//{
-	//	LightComponent() : m_Color(1.0f), m_Intensity(10.0f), m_Range(100.0f) {}
-	//	LightComponent(const glm::vec4& color, float intensity, float range) : m_Color(color), m_Intensity(intensity), m_Range(range) {}
-	//
-	//	glm::vec4 m_Color;
-	//	float m_Intensity;
-	//	float m_Range;
-	//};
+	
+	struct LookAt
+	{
+		LookAt() : m_Eye(0.0f), m_Center(0.0f), m_Up({0.0f, 1.0f, 0.0f}) {}
+		LookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) : m_Eye(eye), m_Center(center), m_Up(up) {}
+	
+		glm::vec3 m_Eye;
+		glm::vec3 m_Center;
+		glm::vec3 m_Up;
+	};
+	
+	struct Spin
+	{
+		Spin() : m_Speed(10.0f), m_Time(0.0f) {}
+		Spin(float speed) : m_Speed(speed), m_Time(0.0f) {}
+
+		REFLECTABLE(Spin,
+			(float)	m_Speed,
+			(float)	m_Time
+		)
+	};
+	
+	struct LayerComponent
+	{
+		LayerComponent() : m_pLayer(nullptr) {}
+		LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
+
+		REFLECTABLE(LayerComponent,
+			(const Layer*)	m_pLayer
+		)
+	};
+	
+	struct LightComponent
+	{
+		LightComponent() : m_Color(1.0f), m_Intensity(10.0f), m_Range(100.0f) {}
+		LightComponent(const glm::vec4& color, float intensity, float range) : m_Color(color), m_Intensity(intensity), m_Range(range) {}
+
+		REFLECTABLE(LightComponent,
+			(glm::vec4)	m_Color,
+			(float)	m_Intensity,
+			(float)	m_Range
+		)
+	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	//

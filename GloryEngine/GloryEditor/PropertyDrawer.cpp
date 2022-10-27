@@ -148,9 +148,6 @@ namespace Glory::Editor
 		}
 
 		PropertyDrawer* drawer = *it;
-		size_t offset = pFieldData->Offset();
-		void* pAddress = (void*)((char*)(data) + offset);
-
 		std::string finalLabel = pFieldData->Name() + std::string("##") + newLabelSuffix;
 		return drawer->Draw(finalLabel, data, typeHash, flags);
 	}

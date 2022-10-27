@@ -23,7 +23,7 @@ namespace Glory
 	bool Entity::IsValid()
 	{
 		if (!m_pEntityScene) return false;
-		return (&m_pEntityScene->m_Registry)->IsValid(m_EntityID);
+		return m_pEntityScene->m_Registry.IsValid(m_EntityID);
 	}
 
 	//void Entity::ForEachComponent(std::function<void(Registry*, EntityID, EntityComponentData*)> func)
@@ -33,6 +33,7 @@ namespace Glory
 
 	void Entity::Destroy()
 	{
+		if (!m_pEntityScene->IsValid()) return;
 		m_pEntityScene->m_Registry.DestroyEntity(m_EntityID);
 	}
 

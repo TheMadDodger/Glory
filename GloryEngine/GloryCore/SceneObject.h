@@ -26,7 +26,6 @@ namespace Glory
         void SetScene(GScene* pScene);
         GScene* GetScene() const;
 
-
     public:
         const std::string& Name();
         void SetName(const std::string& name);
