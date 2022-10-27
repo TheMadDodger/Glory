@@ -14,28 +14,29 @@
 
 namespace Glory
 {
-	EntityScene::EntityScene() : GScene("New Scene") //: m_pJobPool(nullptr)
+	EntityScene::EntityScene() : m_Valid(true), GScene("New Scene") //: m_pJobPool(nullptr)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName) : GScene(sceneName)
+	EntityScene::EntityScene(const std::string& sceneName) : m_Valid(true), GScene(sceneName)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : GScene(sceneName, uuid)
+	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : m_Valid(true), GScene(sceneName, uuid)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
 	EntityScene::~EntityScene()
 	{
+		m_Valid = false;
 	}
 
-	Entity EntityScene::CreateEntity()
+	Entity EntityScene::CreateEntity(UUID uuid)
 	{
-		EntityID entityID = m_Registry.CreateEntity<Transform>();
+		EntityID entityID = m_Registry.CreateEntity<Transform>(uuid);
 		return Entity(entityID, this);
 	}
 
@@ -50,16 +51,21 @@ namespace Glory
 		return &m_Registry;
 	}
 
+	GLORY_API bool EntityScene::IsValid() const
+	{
+		return m_Valid;
+	}
+
 	void EntityScene::Initialize()
 	{
 		// Register engine systems
 		m_Registry.RegisterComponent<Transform>();
-		//m_Registry.RegisterSystem<MeshRenderSystem>();
-		//m_Registry.RegisterSystem<MeshFilterSystem>();
+		m_Registry.RegisterComponent<MeshRenderer>();
+		m_Registry.RegisterComponent<MeshFilter>();
 		m_Registry.RegisterComponent<CameraComponent>();
-		//m_Registry.RegisterSystem<LookAtSystem>();
-		//m_Registry.RegisterSystem<SpinSystem>();
-		//m_Registry.RegisterSystem<LightSystem>();
+		m_Registry.RegisterComponent<LookAt>();
+		m_Registry.RegisterComponent<Spin>();
+		m_Registry.RegisterComponent<LightComponent>();
 	}
 
 	void EntityScene::OnTick()
@@ -76,13 +82,14 @@ namespace Glory
 
 	SceneObject* EntityScene::CreateObject(const std::string& name)
 	{
-		Entity entity = CreateEntity();
-		return new EntitySceneObject(entity, name);
+		UUID uuid = UUID();
+		Entity entity = CreateEntity(uuid);
+		return new EntitySceneObject(entity, name, uuid);
 	}
 
 	SceneObject* EntityScene::CreateObject(const std::string& name, UUID uuid)
 	{
-		Entity entity = CreateEntity();
+		Entity entity = CreateEntity(uuid);
 		return new EntitySceneObject(entity, name, uuid);
 	}
 

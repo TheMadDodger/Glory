@@ -20,10 +20,12 @@ namespace Glory
 		EntityScene(const std::string& sceneName, UUID uuid);
 		virtual ~EntityScene();
 
-		GLORY_API Entity CreateEntity();
+		GLORY_API Entity CreateEntity(UUID uuid);
 
 		GLORY_API EntitySceneObject* GetEntitySceneObjectFromEntityID(EntityID entity);
 		GLORY_API EntityRegistry* GetRegistry();
+
+		GLORY_API bool IsValid() const;
 
 	private:
 		virtual void Initialize() override;
@@ -40,6 +42,7 @@ namespace Glory
 		friend class Entity;
 		friend class EntitySceneSerializer;
 		EntityRegistry m_Registry;
+		bool m_Valid;
 		std::unordered_map<EntityID, EntitySceneObject*> m_EntityIDToObject;
 	};
 }
