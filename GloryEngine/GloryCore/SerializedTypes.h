@@ -4,11 +4,12 @@ namespace Glory
 {
 	enum SerializedType : size_t
 	{
-		ST_Value,
-		ST_String,
-		ST_Object,
-		ST_Asset,
-		ST_Array,
-		ST_Struct,
+		ST_Value = 0,
+		ST_String = 1,
+		ST_Object = 2,
+		ST_Asset = 3,
+		ST_Struct = 4,
+
+		ST_Array = 99, // Registered for us in the Reflect library as hash 99
 	};
 }

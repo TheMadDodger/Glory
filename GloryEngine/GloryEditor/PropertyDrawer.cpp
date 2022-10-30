@@ -130,26 +130,28 @@ namespace Glory::Editor
 		newLabelSuffix += "." + std::string(pFieldData->Name());
 
 		size_t typeHash = pFieldData->Type();
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-		if (pTypeData)
-		{
-			return DrawProperty(pFieldData->Name(), pTypeData, data, flags, newLabelSuffix);
-		}
+		size_t elementTypeHash = pFieldData->ArrayElementType();
 
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
 			return propertyDrawer->GetPropertyTypeHash() == typeHash;
 		});
 
-		if (it == m_PropertyDrawers.end())
+		if (it != m_PropertyDrawers.end())
 		{
-			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
-			return false;
+			PropertyDrawer* drawer = *it;
+			std::string finalLabel = pFieldData->Name() + std::string("##") + newLabelSuffix;
+			return drawer->Draw(finalLabel, data, elementTypeHash, flags);
 		}
 
-		PropertyDrawer* drawer = *it;
-		std::string finalLabel = pFieldData->Name() + std::string("##") + newLabelSuffix;
-		return drawer->Draw(finalLabel, data, typeHash, flags);
+		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		if (pTypeData)
+		{
+			return DrawProperty(pFieldData->Name(), pTypeData, data, flags, newLabelSuffix);
+		}
+
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
+		return false;
 	}
 
 	GLORY_EDITOR_API bool PropertyDrawer::DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags, const std::string& labelID)
@@ -174,6 +176,17 @@ namespace Glory::Editor
 
 		ImGui::TreePop();
 		return change;
+	}
+
+	GLORY_EDITOR_API PropertyDrawer* PropertyDrawer::GetPropertyDrawer(size_t typeHash)
+	{
+		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		{
+			return propertyDrawer->GetPropertyTypeHash() == typeHash;
+		});
+
+		if (it == m_PropertyDrawers.end()) return nullptr;
+		return *it;
 	}
 
 	GLORY_EDITOR_API size_t PropertyDrawer::GetPropertyTypeHash() const

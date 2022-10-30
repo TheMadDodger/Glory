@@ -24,7 +24,8 @@ namespace Glory
 		REFLECTABLE(RecursionTest3,
 			(float)	Float,
 			(int)	Int,
-			(bool)	Bool
+			(bool)	Bool,
+			(std::vector<float>)	RecursionArray
 		)
 	};
 
@@ -34,7 +35,8 @@ namespace Glory
 			(float)	Float,
 			(int)	Int,
 			(bool)	Bool,
-			(Glory::RecursionTest3)	RecursionValue
+			(RecursionTest3)	RecursionValue,
+			(std::vector<RecursionTest3>)	RecursionArray
 		)
 	};
 
@@ -44,7 +46,8 @@ namespace Glory
 			(float)	Float,
 			(int)	Int,
 			(bool)	Bool,
-			(Glory::RecursionTest2)	RecursionValue
+			(RecursionTest2)	RecursionValue,
+			(std::vector<RecursionTest2>)	RecursionArray
 		)
 	};
 
@@ -57,7 +60,9 @@ namespace Glory
 			(glm::vec3)	Position,
 			(glm::quat)	Rotation,
 			(glm::vec3)	Scale,
-			(Glory::RecursionTest)	RecursionTestValue
+			(RecursionTest)	RecursionTestValue,
+			(std::vector<float>)	FloatArray,
+			(std::vector<RecursionTest>)	RecursionArray
 		)
 
 		glm::mat4 MatTransform;
