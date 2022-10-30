@@ -250,6 +250,8 @@ namespace Glory
 		ResourceType::RegisterType<glm::vec3>();
 		ResourceType::RegisterType<glm::vec4>();
 		ResourceType::RegisterType<glm::quat>();
+
+		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
 	}
 
 	void Engine::Update()
