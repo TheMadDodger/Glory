@@ -43,6 +43,7 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
+		GloryReflect::Reflect::RegisterType<MeshMaterial>();
 		GloryReflect::Reflect::RegisterType<RecursionTest3>();
 		GloryReflect::Reflect::RegisterType<RecursionTest2>();
 		GloryReflect::Reflect::RegisterType<RecursionTest>();
@@ -54,6 +55,7 @@ namespace Glory
 		GloryReflect::Reflect::RegisterType<Spin>(TypeFlag::TF_Component);
 		GloryReflect::Reflect::RegisterType<LayerComponent>(TypeFlag::TF_Component);
 		GloryReflect::Reflect::RegisterType<LightComponent>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<LookAt>(TypeFlag::TF_Component);
 
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();

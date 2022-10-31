@@ -1,5 +1,6 @@
 #include "ArrayPropertySerializers.h"
 #include "SerializedArrayProperty.h"
+#include <Reflection.h>
 
 namespace Glory
 {
@@ -44,11 +45,74 @@ namespace Glory
 		}
 	}
 
+	void ArrayPropertySerializers::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	{
+		void* pArrayAddress = pFieldData->GetAddress(data);
+
+		size_t elementTypeHash = pFieldData->ArrayElementType();
+		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(elementTypeHash);
+
+		size_t size = GloryReflect::Reflect::ArraySize(pArrayAddress, elementTypeHash);
+
+		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(elementTypeHash);
+
+		out << YAML::Key << pFieldData->Name();
+		out << YAML::Value << YAML::BeginSeq;
+		for (size_t i = 0; i < size; i++)
+		{
+			void* pElementAddress = GloryReflect::Reflect::ElementAddress(pArrayAddress, elementTypeHash, i);
+
+			if (pSerializer)
+			{
+				const GloryReflect::FieldData* pFieldData = pElementTypeData->GetFieldData(0);
+				const GloryReflect::FieldData fieldData(elementTypeHash, "", pFieldData->TypeName(), 0, pFieldData->Size());
+				pSerializer->Serialize(&fieldData, pElementAddress, out);
+				continue;
+			}
+
+			out << YAML::BeginMap;
+			PropertySerializer::SerializeProperty(pElementTypeData, pElementAddress, out);
+			out << YAML::EndMap;
+		}
+		out << YAML::EndSeq;
+	}
+
 	void ArrayPropertySerializers::Deserialize(std::any& out, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
 		if (!object.IsMap()) return;
 
 
+	}
+
+	void ArrayPropertySerializers::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	{
+		void* pArrayAddress = pFieldData->GetAddress(data);
+
+		size_t elementTypeHash = pFieldData->ArrayElementType();
+		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(elementTypeHash);
+
+		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(elementTypeHash);
+
+		YAML::Node arrayNode = object;
+
+		size_t size = arrayNode.size();
+		GloryReflect::Reflect::ResizeArray(pArrayAddress, elementTypeHash, size);
+		for (size_t i = 0; i < size; i++)
+		{
+			YAML::Node elementNode = arrayNode[i];
+
+			void* pElementAddress = GloryReflect::Reflect::ElementAddress(pArrayAddress, elementTypeHash, i);
+
+			if (pSerializer)
+			{
+				const GloryReflect::FieldData* pFieldData = pElementTypeData->GetFieldData(0);
+				const GloryReflect::FieldData fieldData(elementTypeHash, "", pFieldData->TypeName(), 0, pFieldData->Size());
+				pSerializer->Deserialize(&fieldData, pElementAddress, elementNode);
+				continue;
+			}
+
+			PropertySerializer::DeserializeProperty(pElementTypeData, pElementAddress, elementNode);
+		}
 	}
 }

@@ -22,6 +22,8 @@ namespace Glory::Editor
 
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pTypeView->ComponentTypeHash());
 
+			if (pTypeData == nullptr) continue;
+
 			std::vector<std::string> disectedPath = DisectPath(pTypeData->TypeName());
 		
 			if (disectedPath.size() <= 0) disectedPath.push_back(pTypeData->TypeName());

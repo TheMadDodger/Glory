@@ -44,7 +44,7 @@ namespace Glory
 		PropertySerializer(size_t typeHash);
 		virtual ~PropertySerializer();
 
-	protected:
+	public:
 		virtual void Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out) = 0;
 		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Emitter& out);
 		virtual void Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out);
@@ -86,9 +86,18 @@ namespace Glory
 
 		virtual void Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out) override
 		{
+			const std::string& name = pFieldData->Name();
+
 			T value;
 			pFieldData->Get(data, &value);
-			out << YAML::Key << pFieldData->Name();
+
+			if (name == "")
+			{
+				out << value;
+				return;
+			}
+
+			out << YAML::Key << name;
 			out << YAML::Value << value;
 		}
 
