@@ -252,6 +252,8 @@ namespace Glory
 		ResourceType::RegisterType<glm::quat>();
 
 		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
+
+		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}
 
 	void Engine::Update()

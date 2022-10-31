@@ -1,5 +1,6 @@
 #include "AssetReferencePropertySerializer.h"
 #include "AssetManager.h"
+#include "AssetReference.h"
 
 namespace Glory
 {
@@ -18,6 +19,25 @@ namespace Glory
 		out << YAML::Value << (uint64_t)uuid;
 	}
 
+	void AssetReferencePropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	{
+		void* pAssetRefAddress = pFieldData->GetAddress(data);
+
+		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)pAssetRefAddress;
+		UUID uuid = pReferenceMember->AssetUUID();
+
+		const std::string& name = pFieldData->Name();
+
+		if (name == "")
+		{
+			out << (uint64_t)uuid;
+			return;
+		}
+
+		out << YAML::Key << name;
+		out << YAML::Value << (uint64_t)uuid;
+	}
+
 	void AssetReferencePropertySerializer::Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
@@ -32,5 +52,15 @@ namespace Glory
 		if (!object.IsDefined()) return;
 		UUID uuid = object.as<uint64_t>();
 		out = uuid;
+	}
+
+	void AssetReferencePropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	{
+		void* pAssetRefAddress = pFieldData->GetAddress(data);
+
+		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)pAssetRefAddress;
+		UUID uuid = object.as<uint64_t>();
+
+		pReferenceMember->SetUUID(uuid);
 	}
 }
