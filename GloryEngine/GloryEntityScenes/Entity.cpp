@@ -10,6 +10,11 @@ namespace Glory
 	{
 	}
 
+	EntityView* Entity::GetEntityView()
+	{
+		return m_pEntityScene->m_Registry.GetEntityView(m_EntityID);
+	}
+
 	void Entity::Clear()
 	{
 		m_pEntityScene->m_Registry.Clear(m_EntityID);
@@ -21,13 +26,14 @@ namespace Glory
 		return m_pEntityScene->m_Registry.IsValid(m_EntityID);
 	}
 
-	void Entity::ForEachComponent(std::function<void(Registry*, EntityID, EntityComponentData*)> func)
-	{
-		m_pEntityScene->m_Registry.ForEachComponent(m_EntityID, func);
-	}
+	//void Entity::ForEachComponent(std::function<void(Registry*, EntityID, EntityComponentData*)> func)
+	//{
+	//	m_pEntityScene->m_Registry.ForEachComponent(m_EntityID, func);
+	//}
 
 	void Entity::Destroy()
 	{
+		if (!m_pEntityScene->IsValid()) return;
 		m_pEntityScene->m_Registry.DestroyEntity(m_EntityID);
 	}
 

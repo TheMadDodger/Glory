@@ -6,7 +6,7 @@
 #include <EditorPlayer.h>
 #include <Components.h>
 
-//#include <Reflection.h>
+#include <Reflection.h>
 
 namespace Glory::Editor
 {
@@ -27,8 +27,6 @@ namespace Glory::Editor
 
 	void EntityScenesEditorExtension::RegisterEditors()
 	{
-		//GloryReflect::Reflect::RegisterType<Transform>();
-
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
@@ -48,23 +46,23 @@ namespace Glory::Editor
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
 			EntityScene* pEntityScene = (EntityScene*)pScene;
-			Registry* pRegistry = pEntityScene->GetRegistry();
-
-			EntitySystems* pSystems = pRegistry->GetSystems();
-
-			for (size_t i = 0; i < pSystems->SystemCount(); i++)
-			{
-				EntitySystem* pSystem = pSystems->GetSystem(i);
-				std::type_index componentType = pSystem->GetComponentType();
-				auto it = std::find(m_ComponentsToUpdateInEditor.begin(), m_ComponentsToUpdateInEditor.end(), componentType);
-				if (it == m_ComponentsToUpdateInEditor.end()) continue;
-
-				pRegistry->ForEach(componentType,
-					[pSystem](Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData)
-					{
-						pSystem->Update(pRegisrty, entity, pComponentData);
-					});
-			}
+			//Registry* pRegistry = pEntityScene->GetRegistry();
+			//
+			//EntitySystems* pSystems = pRegistry->GetSystems();
+			//
+			//for (size_t i = 0; i < pSystems->SystemCount(); i++)
+			//{
+			//	EntitySystem* pSystem = pSystems->GetSystem(i);
+			//	std::type_index componentType = pSystem->GetComponentType();
+			//	auto it = std::find(m_ComponentsToUpdateInEditor.begin(), m_ComponentsToUpdateInEditor.end(), componentType);
+			//	if (it == m_ComponentsToUpdateInEditor.end()) continue;
+			//
+			//	pRegistry->ForEach(componentType,
+			//		[pSystem](Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData)
+			//		{
+			//			pSystem->Update(pRegisrty, entity, pComponentData);
+			//		});
+			//}
 		}
 	}
 }
