@@ -3,7 +3,7 @@
 #include <EntityComponentObject.h>
 #include <EntitySystems.h>
 #include <PropertyDrawer.h>
-#include <Registry.h>
+#include <TypeData.h>
 #include "Editor.h"
 
 namespace Glory::Editor
@@ -25,17 +25,28 @@ namespace Glory::Editor
 		{
 			m_pComponentObject = (EntityComponentObject*)m_pTarget;
 			m_Properties.clear();
-			m_pComponentObject->GetRegistry()->GetSystems()->AcquireSerializedProperties(m_pComponentObject->GetComponentData(), m_Properties);
 		}
 
 		virtual bool OnGUI() override
 		{
 			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID());
 			bool change = false;
-			for (size_t i = 0; i < m_Properties.size(); i++)
+			TComponent& component = GetTargetComponent();
+			size_t hash = ResourceType::GetHash<TComponent>();
+
+			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(hash);
+			if (pTypeData)
 			{
-				change |= PropertyDrawer::DrawProperty(m_Properties[i]);
+				for (size_t i = 0; i < pTypeData->FieldCount(); i++)
+				{
+					const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
+					size_t offset = pFieldData->Offset();
+					void* pAddress = (void*)((char*)(&component) + offset);
+					std::string labelSuffix = std::to_string(m_pComponentObject->GetUUID());
+					change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, 0, labelSuffix);
+				}
 			}
+
 			Undo::StopRecord();
 			return change;
 		}

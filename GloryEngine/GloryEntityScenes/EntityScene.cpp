@@ -14,29 +14,29 @@
 
 namespace Glory
 {
-	EntityScene::EntityScene() : GScene("New Scene") //: m_pJobPool(nullptr)
+	EntityScene::EntityScene() : m_Valid(true), GScene("New Scene") //: m_pJobPool(nullptr)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName) : GScene(sceneName)
+	EntityScene::EntityScene(const std::string& sceneName) : m_Valid(true), GScene(sceneName)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : GScene(sceneName, uuid)
+	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : m_Valid(true), GScene(sceneName, uuid)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
 	EntityScene::~EntityScene()
 	{
+		m_Valid = false;
 	}
 
-	Entity EntityScene::CreateEntity()
+	Entity EntityScene::CreateEntity(UUID uuid)
 	{
-		EntityID entityID = m_Registry.CreateEntity();
-		m_Registry.AddComponent<Transform>(entityID, UUID());
+		EntityID entityID = m_Registry.CreateEntity<Transform>(uuid);
 		return Entity(entityID, this);
 	}
 
@@ -46,51 +46,56 @@ namespace Glory
 		return m_EntityIDToObject[entity];
 	}
 
-	Registry* EntityScene::GetRegistry()
+	EntityRegistry* EntityScene::GetRegistry()
 	{
 		return &m_Registry;
+	}
+
+	GLORY_API bool EntityScene::IsValid() const
+	{
+		return m_Valid;
 	}
 
 	void EntityScene::Initialize()
 	{
 		// Register engine systems
-		m_Registry.RegisterSystem<TransformSystem>();
-		m_Registry.RegisterSystem<MeshRenderSystem>();
-		m_Registry.RegisterSystem<MeshFilterSystem>();
-		m_Registry.RegisterSystem<CameraSystem>();
-		m_Registry.RegisterSystem<LookAtSystem>();
-		m_Registry.RegisterSystem<SpinSystem>();
-		m_Registry.RegisterSystem<LightSystem>();
+		m_Registry.RegisterComponent<Transform>();
+		m_Registry.RegisterComponent<MeshRenderer>();
+		m_Registry.RegisterComponent<MeshFilter>();
+		m_Registry.RegisterComponent<CameraComponent>();
+		m_Registry.RegisterComponent<LookAt>();
+		m_Registry.RegisterComponent<Spin>();
+		m_Registry.RegisterComponent<LightComponent>();
 	}
 
 	void EntityScene::OnTick()
 	{
-		m_Registry.Update();
+		//m_Registry.Update();
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
 	void EntityScene::OnPaint()
 	{
-		m_Registry.Draw();
+		//m_Registry.Draw();
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
 	SceneObject* EntityScene::CreateObject(const std::string& name)
 	{
-		Entity entity = CreateEntity();
-		return new EntitySceneObject(entity, name);
+		UUID uuid = UUID();
+		Entity entity = CreateEntity(uuid);
+		return new EntitySceneObject(entity, name, uuid);
 	}
 
 	SceneObject* EntityScene::CreateObject(const std::string& name, UUID uuid)
 	{
-		Entity entity = CreateEntity();
+		Entity entity = CreateEntity(uuid);
 		return new EntitySceneObject(entity, name, uuid);
 	}
 
 	void EntityScene::OnDeleteObject(SceneObject* pObject)
 	{
-		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
-		pEntityObject->GetEntityHandle().Destroy();
+		
 	}
 
 	void EntityScene::OnObjectAdded(SceneObject* pObject)

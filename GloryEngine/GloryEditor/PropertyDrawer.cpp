@@ -156,6 +156,14 @@ namespace Glory::Editor
 
 	GLORY_EDITOR_API bool PropertyDrawer::DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags, const std::string& labelID)
 	{
+		if (pTypeData->FieldCount() == 1 && pTypeData->GetFieldData(0)->Type() == ST_Enum && std::string(pTypeData->GetFieldData(0)->Name()) == "m_value")
+		{
+			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(0);
+			size_t offset = pFieldData->Offset();
+			void* pAddress = (void*)((char*)(data)+offset);
+			return PropertyDrawer::DrawProperty(label, pFieldData, pAddress, 0, labelID);
+		}
+
 		bool change = false;
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -176,6 +184,36 @@ namespace Glory::Editor
 
 		ImGui::TreePop();
 		return change;
+	}
+
+	GLORY_EDITOR_API bool PropertyDrawer::DrawProperty(const std::string& label, const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags, const std::string& labelID)
+	{
+		std::string newLabelSuffix = labelID;
+		newLabelSuffix += "." + label;
+
+		size_t typeHash = pFieldData->Type();
+		size_t elementTypeHash = pFieldData->ArrayElementType();
+
+		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		{
+			return propertyDrawer->GetPropertyTypeHash() == typeHash;
+		});
+
+		if (it != m_PropertyDrawers.end())
+		{
+			PropertyDrawer* drawer = *it;
+			std::string finalLabel = label + std::string("##") + newLabelSuffix;
+			return drawer->Draw(finalLabel, data, elementTypeHash, flags);
+		}
+
+		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		if (pTypeData)
+		{
+			return DrawProperty(label, pTypeData, data, flags, newLabelSuffix);
+		}
+
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), label.c_str());
+		return false;
 	}
 
 	GLORY_EDITOR_API PropertyDrawer* PropertyDrawer::GetPropertyDrawer(size_t typeHash)

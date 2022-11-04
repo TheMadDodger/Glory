@@ -1,5 +1,8 @@
 #include "EntityComponentPopup.h"
 #include <imgui.h>
+#include <algorithm>
+#include <Reflection.h>
+#include <TypeFlags.h>
 
 namespace Glory::Editor
 {
@@ -7,33 +10,33 @@ namespace Glory::Editor
 	size_t EntityComponentPopup::m_LastSelectedComponentTypeHash = 0;
 	std::vector<ComponentMenuItem> EntityComponentPopup::m_MenuItems;
 
-	void EntityComponentPopup::Open(Registry* pRegistry)
+	void EntityComponentPopup::Open(GloryECS::EntityRegistry* pRegistry)
 	{
 		m_Open = true;
-
 		m_MenuItems.clear();
 
-		size_t compCount = 0;
-		EntitySystems* pSystems = pRegistry->GetSystems();
-		for (size_t i = 0; i < pSystems->SystemCount(); i++)
+		for (auto it = pRegistry->GetTypeViewIterator(); it != pRegistry->GetTypeViewIteratorEnd(); it++)
 		{
-			EntitySystem* pSystem = pSystems->GetSystem(i);
-			if (pSystem->Hidden()) continue;
-			std::vector<std::string> disectedPath = DisectPath(pSystem->GetPath());
+			size_t typeHash = it->first;
+			GloryECS::BaseTypeView* pTypeView = it->second;
 
-			if (disectedPath.size() <= 0) disectedPath.push_back(pSystem->Name());
+			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pTypeView->ComponentTypeHash());
+
+			if (pTypeData == nullptr) continue;
+
+			std::vector<std::string> disectedPath = DisectPath(pTypeData->TypeName());
+		
+			if (disectedPath.size() <= 0) disectedPath.push_back(pTypeData->TypeName());
 			if (disectedPath[0] == "")
-				disectedPath[0] = pSystem->Name();
-
+				disectedPath[0] = pTypeData->TypeName();
+		
 			ComponentMenuItem* current = GetMenuItem(m_MenuItems, disectedPath[0]);
 			for (size_t j = 1; j < disectedPath.size(); j++)
 			{
 				const std::string& subItem = disectedPath[j];
 				current = GetMenuItem(current->m_Children, subItem);
 			}
-
-			std::type_index type = pSystem->GetComponentType();
-			size_t typeHash = ResourceType::GetHash(type);
+		
 			current->m_ComponentTypeHash = typeHash;
 		}
 	}

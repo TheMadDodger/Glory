@@ -1,8 +1,8 @@
 #include "EntitySceneScenesModule.h"
 #include "EntitySceneSerializer.h"
 #include "EntitySceneObjectSerializer.h"
-
 #include "Components.h"
+#include <TypeFlags.h>
 
 namespace Glory
 {
@@ -43,6 +43,18 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
+		GloryReflect::Reflect::RegisterEnum<CameraPerspective>();
+		GloryReflect::Reflect::RegisterType<MeshMaterial>();
+
+		GloryReflect::Reflect::RegisterType<Transform>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<MeshFilter>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<MeshRenderer>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<CameraComponent>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<Spin>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<LayerComponent>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<LightComponent>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<LookAt>(TypeFlag::TF_Component);
+
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
 		ResourceType::RegisterResource<GScene>(".gscene");

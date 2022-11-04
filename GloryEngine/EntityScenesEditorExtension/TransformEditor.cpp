@@ -3,6 +3,7 @@
 #include "GizmoAction.h"
 #include <glm/gtx/quaternion.hpp>
 #include <sstream>
+#include <TypeData.h>
 
 namespace Glory::Editor
 {
