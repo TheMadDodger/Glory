@@ -1,0 +1,15 @@
+Modules:
+- GlorySDLWindow
+- GloryEntityScenes
+- GloryClusteredRenderer
+- GloryOpenGLGraphics
+- GloryASSIMPModelLoader
+- GlorySDLImage
+- GloryMonoScripting
+Engine:
+ Window: 0
+ SceneManagement: 1
+ Renderer: 2
+ Graphics: 3
+ Optional: [4,5]
+ Scripting: [6]

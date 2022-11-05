@@ -93,3 +93,7 @@ GloryEngine/GloriousLauncher/Debug/
 GloryEngine/GloriousLauncher/Editor/
 GloryEngine/GloryEntityScenes2/Debug/
 GloryEngine/EntityScenes2EditorExtension/Debug/
+GloryEngine/Sponza/Cache
+GloryEngine/Sponza/Library
+GloryEngine/Sponza/Project.lock
+*.csproj

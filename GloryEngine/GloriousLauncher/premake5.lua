@@ -103,6 +103,7 @@ project "GloriousLauncher"
 		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
+		debugdir "../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}"
 
 	filter "configurations:Release"
 		kind "ConsoleApp"
