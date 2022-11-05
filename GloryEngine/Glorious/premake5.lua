@@ -116,7 +116,7 @@ project "Glorious"
 		defines "_DEBUG"
 		symbols "On"
 		debugdir "../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"
-		debugargs { "-projectPath=\"../../../../Sponza/Sponza.gproj\"" }
+		debugargs { "-projectPath=\"../../../../Demos/Sponza/Sponza.gproj\"" }
 
 		links
 		{
