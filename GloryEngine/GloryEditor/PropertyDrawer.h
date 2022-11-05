@@ -37,8 +37,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool DrawProperty(const SerializedProperty* serializedProperty);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, size_t typeHash, uint32_t flags);
-		static GLORY_EDITOR_API bool DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags, const std::string& labelID = "");
-		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags, const std::string& labelID = "");
+		static GLORY_EDITOR_API bool DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags);
 
 		static GLORY_EDITOR_API PropertyDrawer* GetPropertyDrawer(size_t typeHash);
 

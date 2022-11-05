@@ -26,8 +26,12 @@ namespace Glory::Editor
 		if (!m_Initialized) Initialize();
 		m_pObject = (SceneObject*)m_pTarget;
 
+		const std::string uuidString = std::to_string(m_pObject->GetUUID());
+		ImGui::PushID(uuidString.c_str());
 		bool change = NameGUI();
-		return ComponentGUI() || change;
+		change |= ComponentGUI();
+		ImGui::PopID();
+		return change;
 	}
 
 	void EntitySceneObjectEditor::Refresh()
@@ -48,10 +52,10 @@ namespace Glory::Editor
 		EntityID entityID = entity.GetEntityID();
 		EntityView* pEntityView = entity.GetEntityView();
 
-		for (auto it = pEntityView->GetIterator(); it != pEntityView->GetIteratorEnd(); it++)
+		for (size_t i = 0; i < pEntityView->ComponentCount(); i++)
 		{
-			UUID uuid = it->first;
-			size_t componentType = it->second;
+			UUID uuid = pEntityView->ComponentUUIDAt(i);
+			size_t componentType = pEntityView->ComponentTypeAt(i);
 			EntityComponentObject* pComponentObject = new EntityComponentObject(entityID, uuid, componentType, entity.GetScene()->GetRegistry());
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
@@ -87,6 +91,7 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::ComponentGUI()
 	{
+		ImGui::PushID("Components");
 		bool change = false;
 
 		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
@@ -103,22 +108,23 @@ namespace Glory::Editor
 			std::hash<std::string> hasher;
 			size_t hash = hasher(id);
 
-			bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, pEditor->Name().data());
+			ImGui::PushID(id.c_str());
+			if (ImGui::TreeNodeEx((void*)hash, node_flags, pEditor->Name().data()))
+			{
+				change |= pEditor->OnGUI();
+				ImGui::TreePop();
+			}
 
 			if (ImGui::IsItemClicked(1))
 			{
 				m_RightClickedComponentIndex = index;
 				ImGui::OpenPopup("ComponentRightClick");
 			}
-
-			if (nodeOpen)
-			{
-				change |= pEditor->OnGUI();
-				ImGui::TreePop();
-			}
+			ImGui::PopID();
 
 			++index;
 		});
+		ImGui::PopID();
 
 		if (ImGui::Button("Add Component"))
 		{
@@ -163,7 +169,6 @@ namespace Glory::Editor
 		//
 		//	ImGui::EndPopup();
 		//}
-
 		return change;
 	}
 }
