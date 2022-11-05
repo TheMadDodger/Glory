@@ -1,18 +1,18 @@
-#include "ArrayPropertySerializers.h"
+#include "ArrayPropertySerializer.h"
 #include "SerializedArrayProperty.h"
 #include <Reflection.h>
 
 namespace Glory
 {
-	ArrayPropertySerializers::ArrayPropertySerializers() : PropertySerializer(SerializedType::ST_Array)
+	ArrayPropertySerializer::ArrayPropertySerializer() : PropertySerializer(SerializedType::ST_Array)
 	{
 	}
 
-	ArrayPropertySerializers::~ArrayPropertySerializers()
+	ArrayPropertySerializer::~ArrayPropertySerializer()
 	{
 	}
 
-	void ArrayPropertySerializers::Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out)
+	void ArrayPropertySerializer::Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out)
 	{
 		BaseSerializedArrayProperty* serializedArrayProperty = (BaseSerializedArrayProperty*)serializedProperty;
 
@@ -26,7 +26,7 @@ namespace Glory
 		out << YAML::EndMap;
 	}
 
-	void ArrayPropertySerializers::Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object)
+	void ArrayPropertySerializer::Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
 		if (!object.IsMap()) return;
@@ -45,7 +45,7 @@ namespace Glory
 		}
 	}
 
-	void ArrayPropertySerializers::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	void ArrayPropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
 	{
 		void* pArrayAddress = pFieldData->GetAddress(data);
 
@@ -77,7 +77,7 @@ namespace Glory
 		out << YAML::EndSeq;
 	}
 
-	void ArrayPropertySerializers::Deserialize(std::any& out, YAML::Node& object)
+	void ArrayPropertySerializer::Deserialize(std::any& out, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
 		if (!object.IsMap()) return;
@@ -85,7 +85,7 @@ namespace Glory
 
 	}
 
-	void ArrayPropertySerializers::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	void ArrayPropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
 	{
 		void* pArrayAddress = pFieldData->GetAddress(data);
 
