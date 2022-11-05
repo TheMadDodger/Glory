@@ -1,0 +1,31 @@
+TypeHash: 3294947155
+Entities:
+  - TypeHash: 3083728904
+    Name: Empty Object
+    UUID: 582617872497414118
+    ParentUUID: 0
+    Components:
+      - UUID: 582617872497414118
+        TypeName: Transform
+        TypeHash: 3246206669
+        Position: [0, 0, 0]
+        Rotation: [0, 0, 0, 1]
+        Scale: [1, 1, 1]
+      - UUID: 3021004409714052552
+        TypeName: MeshRenderer
+        TypeHash: 196355731
+        m_pMaterials:
+          - m_MaterialReference: 12310060936730104416
+          - m_MaterialReference: 12097914131954477231
+          - m_MaterialReference: 13944401581212950653
+          - m_MaterialReference: 11184601656502026585
+          - m_MaterialReference: 2067120908685993502
+          - m_MaterialReference: 16781332625119740619
+          - m_MaterialReference: 0
+          - m_MaterialReference: 0
+          - m_MaterialReference: 0
+          - m_MaterialReference: 0
+      - UUID: 14204220380946886435
+        TypeName: MeshFilter
+        TypeHash: 1249198182
+        m_pModelData: 6415630451540791124

@@ -1,0 +1,23 @@
+TypeHash: 3294947155
+Entities:
+  - TypeHash: 3083728904
+    Name: Empty Object
+    UUID: 1767882957739590182
+    ParentUUID: 0
+    Components:
+      - UUID: 1767882957739590182
+        TypeName: Transform
+        TypeHash: 3246206669
+        Position: [5, 5, 5]
+        Rotation: [0, 0, 0, 1]
+        Scale: [2, 0.100000001, 6]
+      - UUID: 12613125689935742997
+        TypeName: CameraComponent
+        TypeHash: 1777037639
+        m_HalfFOV: 90
+        m_Near: 0.100000001
+        m_Far: 300000
+        m_DisplayIndex: 1
+        m_Priority: 5
+        m_LayerMask: 0
+        m_ClearColor: [0, 0, 0, 1]

@@ -3,7 +3,7 @@ project "Glorious"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("../Build/%{cfg.buildcfg}/%{cfg.platform}")
+	targetdir ("../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}")
 	objdir ("%{cfg.buildcfg}/%{cfg.platform}")
 
 	pchheader "pch.h"
@@ -73,7 +73,12 @@ project "Glorious"
 		("{COPY} %{modulesOutDir} ../Build/%{cfg.buildcfg}/%{cfg.platform}/Modules"),
 		("{COPY} %{LibDirs.glory}/GloryEditor.dll ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} ./EditorAssets ../Build/%{cfg.buildcfg}/%{cfg.platform}/EditorAssets"),
+		("{COPY} ./EditorAssets ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}/EditorAssets"),
+		("{COPY} EditorSettings.yaml ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} EditorSettings.yaml ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} imgui.ini ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} imgui.ini ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}/Glorious.exe ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} ../Build/%{cfg.buildcfg}/%{cfg.platform} ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}/Editor/Any"),
 	}
 
@@ -110,6 +115,8 @@ project "Glorious"
 		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
+		debugdir "../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"
+		debugargs { "-projectPath=\"../../../../Sponza/Sponza.gproj\"" }
 
 		links
 		{
