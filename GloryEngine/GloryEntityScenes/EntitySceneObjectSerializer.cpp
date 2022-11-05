@@ -80,10 +80,11 @@ namespace Glory
 		Entity entity = pObject->GetEntityHandle();
 		EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
 		EntityView* pEntityView = entity.GetEntityView();
-		for (auto it = pEntityView->GetIterator(); it != pEntityView->GetIteratorEnd(); it++)
+
+		for (size_t i = 0; i < pEntityView->ComponentCount(); i++)
 		{
-			UUID componentUUID = it->first;
-			size_t typeHash = it->second;
+			UUID componentUUID = pEntityView->ComponentUUIDAt(i);
+			size_t typeHash = pEntityView->ComponentTypeAt(i);
 			BaseTypeView* pTypeView = pRegistry->GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity.GetEntityID());
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);

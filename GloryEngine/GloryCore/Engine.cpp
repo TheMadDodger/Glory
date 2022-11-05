@@ -4,8 +4,9 @@
 #include "Serializer.h"
 #include "PropertySerializer.h"
 #include "AssetReferencePropertySerializer.h"
-#include "ArrayPropertySerializers.h"
-#include "EnumPropertySerializers.h"
+#include "ArrayPropertySerializer.h"
+#include "EnumPropertySerializer.h"
+#include "StructPropertySerializer.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
 #include "GloryContext.h"
@@ -238,8 +239,9 @@ namespace Glory
 
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
-		PropertySerializer::RegisterSerializer<ArrayPropertySerializers>();
-		PropertySerializer::RegisterSerializer<EnumPropertySerializers>();
+		PropertySerializer::RegisterSerializer<ArrayPropertySerializer>();
+		PropertySerializer::RegisterSerializer<EnumPropertySerializer>();
+		PropertySerializer::RegisterSerializer<StructPropertySerializer>();
 	}
 
 	void Engine::RegisterBasicTypes()

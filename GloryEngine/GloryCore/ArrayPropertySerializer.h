@@ -3,11 +3,11 @@
 
 namespace Glory
 {
-    class ArrayPropertySerializers : public PropertySerializer
+    class ArrayPropertySerializer : public PropertySerializer
     {
     public:
-        ArrayPropertySerializers();
-        virtual ~ArrayPropertySerializers();
+        ArrayPropertySerializer();
+        virtual ~ArrayPropertySerializer();
 
     private:
         virtual void Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out) override;

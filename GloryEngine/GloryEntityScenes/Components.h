@@ -26,9 +26,9 @@ namespace Glory
 		GLORY_API Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 
 		REFLECTABLE(Transform,
-			(glm::vec3)	Position,
-			(glm::quat)	Rotation,
-			(glm::vec3)	Scale
+			(glm::vec3)	(Position),
+			(glm::quat)	(Rotation),
+			(glm::vec3) (Scale)
 		)
 
 		glm::mat4 MatTransform;
@@ -42,7 +42,7 @@ namespace Glory
 		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData != nullptr ? pModelData->GetUUID() : 0) {}
 		
 		REFLECTABLE(MeshFilter,
-			(AssetReference<ModelData>)	m_pModelData
+			(AssetReference<ModelData>)	(m_pModelData)
 		)
 	};
 	
@@ -52,7 +52,7 @@ namespace Glory
 		MeshMaterial(UUID uuid) : m_MaterialReference(uuid) {}
 
 		REFLECTABLE(MeshMaterial,
-			(AssetReference<MaterialData>)	m_MaterialReference
+			(AssetReference<MaterialData>) (m_MaterialReference)
 		)
 	};
 
@@ -62,7 +62,7 @@ namespace Glory
 		MeshRenderer() : m_pMaterials(std::vector<MeshMaterial>()) {}
 
 		REFLECTABLE(MeshRenderer,
-			(std::vector<MeshMaterial>)	m_pMaterials
+			(std::vector<MeshMaterial>)	(m_pMaterials)
 		)
 	};
 	
@@ -73,13 +73,13 @@ namespace Glory
 			: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_DisplayIndex(displayIndex), m_Priority(priority), m_ClearColor(clearColor), m_LayerMask(0), m_LastHash(0) {}
 		
 		REFLECTABLE(CameraComponent,
-			(float)	m_HalfFOV,
-			(float)	m_Near,
-			(float)	m_Far,
-			(int)	m_DisplayIndex,
-			(int)	m_Priority,
-			(LayerMask)	m_LayerMask,
-			(glm::vec4)	m_ClearColor
+			(float)	(m_HalfFOV),
+			(float)	(m_Near),
+			(float)	(m_Far),
+			(int)	(m_DisplayIndex),
+			(int)	(m_Priority),
+			(LayerMask)	(m_LayerMask),
+			(glm::vec4)	(m_ClearColor)
 		)
 	
 		size_t m_LastHash;
@@ -93,9 +93,9 @@ namespace Glory
 		LookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) : m_Eye(eye), m_Center(center), m_Up(up) {}
 	
 		REFLECTABLE(LookAt,
-			(glm::vec3)	m_Eye,
-			(glm::vec3)	m_Center,
-			(glm::vec3)	m_Up
+			(glm::vec3)	(m_Eye),
+			(glm::vec3)	(m_Center),
+			(glm::vec3)	(m_Up)
 		)
 	};
 	
@@ -105,8 +105,8 @@ namespace Glory
 		Spin(float speed) : m_Speed(speed), m_Time(0.0f) {}
 
 		REFLECTABLE(Spin,
-			(float)	m_Speed,
-			(float)	m_Time
+			(float)	(m_Speed),
+			(float)	(m_Time)
 		)
 	};
 	
@@ -116,7 +116,7 @@ namespace Glory
 		LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
 
 		REFLECTABLE(LayerComponent,
-			(const Layer*)	m_pLayer
+			(const Layer*)	(m_pLayer)
 		)
 	};
 	
@@ -126,9 +126,9 @@ namespace Glory
 		LightComponent(const glm::vec4& color, float intensity, float range) : m_Color(color), m_Intensity(intensity), m_Range(range) {}
 
 		REFLECTABLE(LightComponent,
-			(glm::vec4)	m_Color,
-			(float)	m_Intensity,
-			(float)	m_Range
+			(glm::vec4)	(m_Color),
+			(float)	(m_Intensity),
+			(float)	(m_Range)
 		)
 	};
 

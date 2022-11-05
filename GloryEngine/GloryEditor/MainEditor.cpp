@@ -39,6 +39,7 @@
 #include "FileDialog.h"
 #include "ImGuiHelpers.h"
 #include "EnumPropertyDrawer.h"
+#include "StructPropertyDrawer.h"
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
@@ -297,6 +298,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<EnumPropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<StructPropertyDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()
