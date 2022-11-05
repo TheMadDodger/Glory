@@ -124,11 +124,8 @@ namespace Glory::Editor
 		return drawer->Draw(label, data, typeHash, flags);
 	}
 
-	GLORY_EDITOR_API bool PropertyDrawer::DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags, const std::string& labelID)
+	GLORY_EDITOR_API bool PropertyDrawer::DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags)
 	{
-		std::string newLabelSuffix = labelID;
-		newLabelSuffix += "." + std::string(pFieldData->Name());
-
 		size_t typeHash = pFieldData->Type();
 		size_t elementTypeHash = pFieldData->ArrayElementType();
 
@@ -140,41 +137,43 @@ namespace Glory::Editor
 		if (it != m_PropertyDrawers.end())
 		{
 			PropertyDrawer* drawer = *it;
-			std::string finalLabel = pFieldData->Name() + std::string("##") + newLabelSuffix;
-			return drawer->Draw(finalLabel, data, elementTypeHash, flags);
+			return drawer->Draw(pFieldData->Name(), data, elementTypeHash, flags);
 		}
 
 		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 		if (pTypeData)
 		{
-			return DrawProperty(pFieldData->Name(), pTypeData, data, flags, newLabelSuffix);
+			return DrawProperty(pFieldData->Name(), pTypeData, data, flags);
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
 		return false;
 	}
 
-	GLORY_EDITOR_API bool PropertyDrawer::DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags, const std::string& labelID)
+	GLORY_EDITOR_API bool PropertyDrawer::DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags)
 	{
 		bool change = false;
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
 		std::hash<std::string> hasher;
-		size_t hash = hasher(labelID);
+		size_t hash = hasher(label);
 
-		bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, label.data());
+		ImGui::PushID(label.c_str());
 
-		if (!nodeOpen) return false;
-		for (size_t i = 0; i < pTypeData->FieldCount(); i++)
+		if (ImGui::TreeNodeEx("header", node_flags, label.data()))
 		{
-			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-			size_t offset = pFieldData->Offset();
-			void* pAddress = (void*)((char*)(data)+offset);
-			change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, 0, labelID);
+			for (size_t i = 0; i < pTypeData->FieldCount(); i++)
+			{
+				const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
+				size_t offset = pFieldData->Offset();
+				void* pAddress = (void*)((char*)(data)+offset);
+				change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, 0);
+			}
+			ImGui::TreePop();
 		}
+		ImGui::PopID();
 
-		ImGui::TreePop();
 		return change;
 	}
 

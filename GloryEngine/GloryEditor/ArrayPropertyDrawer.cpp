@@ -75,6 +75,7 @@ namespace Glory::Editor
 
 		ImGui::SetNextItemWidth(width);
 
+		ImGui::PushID(label.c_str());
 		std::string nodeLabel = "##" + label;
 		bool node = ImGui::TreeNodeEx(nodeLabel.c_str(), 0);
 		ImGui::SameLine(0, 0);
@@ -83,8 +84,7 @@ namespace Glory::Editor
 
 		size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
 		int newSize = (int)size;
-		std::string sizeInputLabel = nodeLabel + "_Size";
-		if (ImGui::InputInt(sizeInputLabel.c_str(), &newSize, 0, 0, ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue) && size != (size_t)newSize)
+		if (ImGui::InputInt("##size", &newSize, 0, 0, ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue) && size != (size_t)newSize)
 		{
 			if (newSize <= 0) newSize = 0;
 			GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
@@ -100,20 +100,22 @@ namespace Glory::Editor
 			for (size_t i = 0; i < newSize; i++)
 			{
 				void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, i);
-				std::string newLabel = "Element_" + std::to_string(i);
-				std::string labelID = label + "Element_" + std::to_string(i);
+				std::string elementLabel = "Element_" + std::to_string(i);
+				ImGui::PushID(elementLabel.c_str());
 				if (pPropertyDrawer)
 				{
-					change != pPropertyDrawer->Draw(newLabel + "##" + labelID, pAddress, typeHash, flags);
+					change != pPropertyDrawer->Draw(elementLabel, pAddress, typeHash, flags);
+					ImGui::PopID();
 					continue;
 				}
 
-				change != PropertyDrawer::DrawProperty(newLabel, pElementTypeData, pAddress, flags, labelID);
+				change != PropertyDrawer::DrawProperty(elementLabel, pElementTypeData, pAddress, flags);
+				ImGui::PopID();
 			}
 
 			ImGui::TreePop();
 		}
-
+		ImGui::PopID();
 		return change;
 	}
 }

@@ -16,22 +16,19 @@ namespace Glory::Editor
 
 		const GloryReflect::TypeData* pStructTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
-		if (pPropertyDrawer) return PropertyDrawer::DrawProperty(label, pStructTypeData, data, flags, label);
+		if (pPropertyDrawer) return PropertyDrawer::DrawProperty(label, pStructTypeData, data, flags);
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
-		std::hash<std::string> hasher;
-		size_t hash = hasher("root");
-
 		ImGui::PushID(label.c_str());
-		if (ImGui::TreeNodeEx((void*)hash, node_flags, label.data()))
+		if (ImGui::TreeNodeEx("node", node_flags, label.data()))
 		{
 			for (size_t i = 0; i < pStructTypeData->FieldCount(); i++)
 			{
 				const GloryReflect::FieldData* pFieldData = pStructTypeData->GetFieldData(i);
 				size_t offset = pFieldData->Offset();
 				void* pAddress = (void*)((char*)(data)+offset);
-				change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, flags, label);
+				change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, flags);
 			}
 			ImGui::TreePop();
 		}

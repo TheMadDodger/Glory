@@ -16,7 +16,7 @@ namespace Glory::Editor
 
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
-		if(pPropertyDrawer) return PropertyDrawer::DrawProperty(label, pEnumTypeData, data, flags, label);
+		if(pPropertyDrawer) return PropertyDrawer::DrawProperty(label, pEnumTypeData, data, flags);
 
 		GloryReflect::EnumType *pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
 		if (!pEnumType)
