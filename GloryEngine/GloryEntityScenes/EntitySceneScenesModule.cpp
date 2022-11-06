@@ -6,12 +6,17 @@
 
 namespace Glory
 {
-	EntitySceneScenesModule::EntitySceneScenesModule()
+	EntitySceneScenesModule::EntitySceneScenesModule() : m_pComponentTypesInstance(nullptr)
 	{
 	}
 
 	EntitySceneScenesModule::~EntitySceneScenesModule()
 	{
+	}
+
+	GloryECS::ComponentTypes* EntitySceneScenesModule::ComponentTypesInstance() const
+	{
+		return m_pComponentTypesInstance;
 	}
 
 	GScene* EntitySceneScenesModule::CreateScene(const std::string& sceneName)
@@ -43,6 +48,18 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
+		m_pComponentTypesInstance = GloryECS::ComponentTypes::CreateInstance();
+
+		// Register engine components
+		GloryECS::ComponentTypes::RegisterComponent<Transform>();
+		GloryECS::ComponentTypes::RegisterComponent<MeshRenderer>();
+		GloryECS::ComponentTypes::RegisterComponent<MeshFilter>();
+		GloryECS::ComponentTypes::RegisterComponent<CameraComponent>();
+		GloryECS::ComponentTypes::RegisterComponent<LookAt>();
+		GloryECS::ComponentTypes::RegisterComponent<Spin>();
+		GloryECS::ComponentTypes::RegisterComponent<LightComponent>();
+
+		// Register component types
 		GloryReflect::Reflect::RegisterEnum<CameraPerspective>();
 		GloryReflect::Reflect::RegisterType<MeshMaterial>();
 
@@ -55,6 +72,7 @@ namespace Glory
 		GloryReflect::Reflect::RegisterType<LightComponent>(TypeFlag::TF_Component);
 		GloryReflect::Reflect::RegisterType<LookAt>(TypeFlag::TF_Component);
 
+		// Register serializers
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
@@ -68,5 +86,7 @@ namespace Glory
 
 	void EntitySceneScenesModule::OnCleanup()
 	{
+		GloryECS::ComponentTypes::DestroyInstance();
+		m_pComponentTypesInstance = nullptr;
 	}
 }

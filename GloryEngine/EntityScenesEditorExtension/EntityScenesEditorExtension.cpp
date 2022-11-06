@@ -42,10 +42,20 @@ namespace Glory::Editor
 	void EntityScenesEditorExtension::HandleUpdate(Module* pModule)
 	{
 		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
+		GloryECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
+		GloryECS::ComponentTypes::SetInstance(pComponentTypes);
+
 		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
 			EntityScene* pEntityScene = (EntityScene*)pScene;
+			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
+			for (size_t i = 0; i < m_ComponentsToUpdateInEditor.size(); i++)
+			{
+				size_t hash = ResourceType::GetHash(m_ComponentsToUpdateInEditor[i]);
+				pRegistry->InvokeAll(hash, GloryECS::InvocationType::Update);
+			}
+
 			//Registry* pRegistry = pEntityScene->GetRegistry();
 			//
 			//EntitySystems* pSystems = pRegistry->GetSystems();

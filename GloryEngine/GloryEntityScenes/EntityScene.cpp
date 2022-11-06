@@ -5,12 +5,7 @@
 #include "Components.h"
 #include "Systems.h"
 #include "EntitySceneObject.h"
-
-
-
-
-#include <Game.h>
-#include <Engine.h>
+#include "Systems.h"
 
 namespace Glory
 {
@@ -58,24 +53,39 @@ namespace Glory
 
 	void EntityScene::Initialize()
 	{
-		// Register engine systems
-		m_Registry.RegisterComponent<Transform>();
-		m_Registry.RegisterComponent<MeshRenderer>();
-		m_Registry.RegisterComponent<MeshFilter>();
-		m_Registry.RegisterComponent<CameraComponent>();
-		m_Registry.RegisterComponent<LookAt>();
-		m_Registry.RegisterComponent<Spin>();
-		m_Registry.RegisterComponent<LightComponent>();
+		// Register Invocations
+		// Camera
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::Update, CameraSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::Draw, CameraSystem::OnDraw);
+
+		// Light
+		m_Registry.RegisterInvokaction<LightComponent>(GloryECS::InvocationType::Draw, LightSystem::OnDraw);
+
+		// LookAt
+		m_Registry.RegisterInvokaction<LookAt>(GloryECS::InvocationType::Update, LookAtSystem::OnUpdate);
+
+		// MeshRenderer
+		m_Registry.RegisterInvokaction<MeshRenderer>(GloryECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+
+		// Spin
+		m_Registry.RegisterInvokaction<Spin>(GloryECS::InvocationType::Update, SpinSystem::OnUpdate);
+
+		// Transform
+		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Update, TransformSystem::OnUpdate);
+
 	}
 
 	void EntityScene::OnTick()
 	{
-		//m_Registry.Update();
+		m_Registry.InvokeAll(GloryECS::InvocationType::Update);
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
 	void EntityScene::OnPaint()
 	{
+		m_Registry.InvokeAll(GloryECS::InvocationType::Draw);
 		//m_Registry.Draw();
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}

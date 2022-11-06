@@ -3,68 +3,78 @@ Entities:
   - TypeHash: 3083728904
     Name: Sponza
     UUID: 15464334281906018928
+    ParentUUID: 0
     Components:
       - UUID: 15464334281906018928
+        TypeName: Transform
         TypeHash: 3246206669
         Position: [0, 0, 0]
         Rotation: [0, 0, 0, 1]
         Scale: [0.100000001, 0.100000001, 0.100000001]
-      - UUID: 9511229849698189755
+      - UUID: 291397129573704200
+        TypeName: MeshRenderer
         TypeHash: 196355731
-        Materials:
-          Materials_Element0: 11466190625901780264
-          Materials_Element1: 15888846774429834738
-          Materials_Element2: 15807204728680519318
-          Materials_Element3: 5435400219544926367
-          Materials_Element4: 5512620605558357874
-          Materials_Element5: 11184601656502026585
-          Materials_Element6: 12259864827464564605
-          Materials_Element7: 2067120908685993502
-          Materials_Element8: 3696908535920517257
-          Materials_Element9: 14449454895531762629
-          Materials_Element10: 15672064195992175109
-          Materials_Element11: 2149126069163265897
-          Materials_Element12: 12488566683547842023
-          Materials_Element13: 16781332625119740619
-          Materials_Element14: 2466132427646561347
-          Materials_Element15: 1887650209508677350
-          Materials_Element16: 12310060936730104416
-          Materials_Element17: 12097914131954477231
-          Materials_Element18: 15031119109931530163
-          Materials_Element19: 14905697140036626744
-          Materials_Element20: 16368550536739427456
-          Materials_Element21: 2459860768475436098
-          Materials_Element22: 2498040056946344786
-          Materials_Element23: 13944401581212950653
-          Materials_Element24: 1547198388543712619
-      - UUID: 11407734508325287475
+        m_pMaterials:
+          - m_MaterialReference: 11466190625901780264
+          - m_MaterialReference: 15888846774429834738
+          - m_MaterialReference: 15807204728680519318
+          - m_MaterialReference: 5435400219544926367
+          - m_MaterialReference: 5512620605558357874
+          - m_MaterialReference: 11184601656502026585
+          - m_MaterialReference: 12259864827464564605
+          - m_MaterialReference: 2067120908685993502
+          - m_MaterialReference: 3696908535920517257
+          - m_MaterialReference: 14449454895531762629
+          - m_MaterialReference: 15672064195992175109
+          - m_MaterialReference: 2149126069163265897
+          - m_MaterialReference: 12488566683547842023
+          - m_MaterialReference: 16781332625119740619
+          - m_MaterialReference: 2466132427646561347
+          - m_MaterialReference: 1887650209508677350
+          - m_MaterialReference: 12310060936730104416
+          - m_MaterialReference: 12097914131954477231
+          - m_MaterialReference: 15031119109931530163
+          - m_MaterialReference: 14905697140036626744
+          - m_MaterialReference: 16368550536739427456
+          - m_MaterialReference: 2459860768475436098
+          - m_MaterialReference: 2498040056946344786
+          - m_MaterialReference: 13944401581212950653
+          - m_MaterialReference: 1547198388543712619
+      - UUID: 5235681424698645340
+        TypeName: MeshFilter
         TypeHash: 1249198182
-        Model: 2871247263641046888
+        m_pModelData: 2871247263641046888
   - TypeHash: 3083728904
     Name: Light
     UUID: 8675748886831743542
+    ParentUUID: 0
     Components:
       - UUID: 8675748886831743542
+        TypeName: Transform
         TypeHash: 3246206669
         Position: [-61.8018646, 20.9188213, 6.97744942]
         Rotation: [0, -0, -0, 1]
         Scale: [1, 1, 1]
-      - UUID: 16530946506373553507
+      - UUID: 6065150249091042874
+        TypeName: LightComponent
         TypeHash: 3313657466
-        Color: [1, 1, 1, 1]
-        Intensity: 1
-        Range: 250
+        m_Color: [1, 1, 1, 1]
+        m_Intensity: 1
+        m_Range: 250
   - TypeHash: 3083728904
     Name: Light2
     UUID: 3495770030496987094
+    ParentUUID: 0
     Components:
       - UUID: 3495770030496987094
+        TypeName: Transform
         TypeHash: 3246206669
         Position: [13.4802742, 9.70086575, -12.5148573]
         Rotation: [-0, -1, 0, 0]
         Scale: [1, 1, 1]
-      - UUID: 11577976275741765627
+      - UUID: 3445670531198145833
+        TypeName: LightComponent
         TypeHash: 3313657466
-        Color: [1, 1, 1, 1]
-        Intensity: 1
-        Range: 50
+        m_Color: [1, 1, 1, 1]
+        m_Intensity: 1
+        m_Range: 50

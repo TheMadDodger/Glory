@@ -28,26 +28,6 @@
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Materials\Material_Instance1.gminst
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 15888846774429834738
-  Hash: 1477354262
-  SerializedVersion: 0
-  Extension: .gminst
-  ImportSettings:
-    {}
-- Path: Materials\Material_Instance10.gminst
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 15672064195992175109
-  Hash: 1477354262
-  SerializedVersion: 0
-  Extension: .gminst
-  ImportSettings:
-    {}
 - Path: Materials\Material_Instance20.gminst
   IsSubAsset: false
   Index: 0
@@ -68,21 +48,31 @@
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Materials\Material_Instance12.gminst
+- Path: Materials\Material_Instance10.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 12488566683547842023
+  UUID: 15672064195992175109
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Materials\Material_Instance14.gminst
+- Path: Materials\Material_Instance1.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 2466132427646561347
+  UUID: 15888846774429834738
+  Hash: 1477354262
+  SerializedVersion: 0
+  Extension: .gminst
+  ImportSettings:
+    {}
+- Path: Materials\Material_Instance12.gminst
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 12488566683547842023
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
@@ -98,21 +88,21 @@
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Materials\Material_Instance15.gminst
+- Path: Materials\Material_Instance14.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 1887650209508677350
+  UUID: 2466132427646561347
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Materials\Material_Instance16.gminst
+- Path: Materials\Material_Instance15.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 12310060936730104416
+  UUID: 1887650209508677350
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
@@ -126,6 +116,16 @@
   Hash: 948733667
   SerializedVersion: 0
   Extension: .jpg
+  ImportSettings:
+    {}
+- Path: Materials\Material_Instance16.gminst
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 12310060936730104416
+  Hash: 1477354262
+  SerializedVersion: 0
+  Extension: .gminst
   ImportSettings:
     {}
 - Path: Materials\Material_Instance17.gminst
@@ -158,16 +158,6 @@
   Extension: .jpg
   ImportSettings:
     {}
-- Path: Materials\Material_Instance19.gminst
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 14905697140036626744
-  Hash: 1477354262
-  SerializedVersion: 0
-  Extension: .gminst
-  ImportSettings:
-    {}
 - Path: Textures\Color\Color_20.png
   IsSubAsset: false
   Index: 0
@@ -178,11 +168,11 @@
   Extension: .png
   ImportSettings:
     {}
-- Path: Materials\Material_Instance2.gminst
+- Path: Materials\Material_Instance19.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 15807204728680519318
+  UUID: 14905697140036626744
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
@@ -198,6 +188,16 @@
   Extension: .jpg
   ImportSettings:
     {}
+- Path: Materials\Material_Instance2.gminst
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 15807204728680519318
+  Hash: 1477354262
+  SerializedVersion: 0
+  Extension: .gminst
+  ImportSettings:
+    {}
 - Path: .\Modules\GloryASSIMPModelLoader\Assets\Textures\VikingRoom1.png
   IsSubAsset: false
   Index: 0
@@ -208,14 +208,14 @@
   Extension: .png
   ImportSettings:
     {}
-- Path: Materials\Material_Instance21.gminst
+- Path: Textures\Color\Color_21.jpg
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 2459860768475436098
-  Hash: 1477354262
+  UUID: 997819397894337760
+  Hash: 948733667
   SerializedVersion: 0
-  Extension: .gminst
+  Extension: .jpg
   ImportSettings:
     {}
 - Path: Materials\Material_Instance24.gminst
@@ -228,14 +228,14 @@
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Textures\Color\Color_21.jpg
+- Path: Materials\Material_Instance21.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 997819397894337760
-  Hash: 948733667
+  UUID: 2459860768475436098
+  Hash: 1477354262
   SerializedVersion: 0
-  Extension: .jpg
+  Extension: .gminst
   ImportSettings:
     {}
 - Path: Textures\Normal\Normal_15.jpg
@@ -268,26 +268,6 @@
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Materials\Material_Instance9.gminst
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 14449454895531762629
-  Hash: 1477354262
-  SerializedVersion: 0
-  Extension: .gminst
-  ImportSettings:
-    {}
-- Path: Textures\Color\Color_02.png
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 12940197918077747768
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .png
-  ImportSettings:
-    {}
 - Path: Materials\Material_Instance3.gminst
   IsSubAsset: false
   Index: 0
@@ -308,21 +288,31 @@
   Extension: .jpg
   ImportSettings:
     {}
-- Path: Materials\Material_Instance4.gminst
+- Path: Textures\Color\Color_02.png
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 5512620605558357874
+  UUID: 12940197918077747768
+  Hash: 948733667
+  SerializedVersion: 0
+  Extension: .png
+  ImportSettings:
+    {}
+- Path: Materials\Material_Instance9.gminst
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 14449454895531762629
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Materials\Material_Instance5.gminst
+- Path: Materials\Material_Instance4.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 11184601656502026585
+  UUID: 5512620605558357874
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
@@ -338,14 +328,14 @@
   Extension: .shader
   ImportSettings:
     {}
-- Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\BigPlane.fbx
+- Path: Materials\Material_Instance5.gminst
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  UUID: 1809820625028867060
-  Hash: 213427075
+  UUID: 11184601656502026585
+  Hash: 1477354262
   SerializedVersion: 0
-  Extension: .fbx
+  Extension: .gminst
   ImportSettings:
     {}
 - Path: Textures\Color\Color_06.jpg
@@ -358,6 +348,16 @@
   Extension: .jpg
   ImportSettings:
     {}
+- Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\BigPlane.fbx
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 1809820625028867060
+  Hash: 213427075
+  SerializedVersion: 0
+  Extension: .fbx
+  ImportSettings:
+    {}
 - Path: Materials\Material_Instance6.gminst
   IsSubAsset: false
   Index: 0
@@ -366,16 +366,6 @@
   Hash: 1477354262
   SerializedVersion: 0
   Extension: .gminst
-  ImportSettings:
-    {}
-- Path: Textures\Color\Color_09.jpg
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 13832964293291405482
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .jpg
   ImportSettings:
     {}
 - Path: Materials\Material_Instance7.gminst
@@ -398,6 +388,16 @@
   Extension: .png
   ImportSettings:
     {}
+- Path: Textures\Color\Color_09.jpg
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 13832964293291405482
+  Hash: 948733667
+  SerializedVersion: 0
+  Extension: .jpg
+  ImportSettings:
+    {}
 - Path: Materials\Material_Instance8.gminst
   IsSubAsset: false
   Index: 0
@@ -408,14 +408,6 @@
   Extension: .gminst
   ImportSettings:
     {}
-- Path: Scenes\Test.gscene
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 3707822097635858948
-  Hash: 1336563431
-  SerializedVersion: 0
-  Extension: .gscene
 - Path: Materials\Monkeh.gmat
   IsSubAsset: false
   Index: 0
@@ -436,24 +428,6 @@
   Extension: .fbx
   ImportSettings:
     {}
-- Path: Scenes\Sponza.gscene
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 12737398322962661278
-  Hash: 1336563431
-  SerializedVersion: 0
-  Extension: .gscene
-- Path: Textures\Color\Color_01.jpg
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 16486180262177399002
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .jpg
-  ImportSettings:
-    {}
 - Path: Textures\Normal\Normal_03.jpg
   IsSubAsset: false
   Index: 0
@@ -464,6 +438,24 @@
   Extension: .jpg
   ImportSettings:
     {}
+- Path: Textures\Color\Color_01.jpg
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 16486180262177399002
+  Hash: 948733667
+  SerializedVersion: 0
+  Extension: .jpg
+  ImportSettings:
+    {}
+- Path: Scenes\Sponza.gscene
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 12737398322962661278
+  Hash: 1336563431
+  SerializedVersion: 0
+  Extension: .gscene
 - Path: Textures\Normal\Normal_06.jpg
   IsSubAsset: false
   Index: 0
@@ -492,16 +484,6 @@
   Extension: .shader
   ImportSettings:
     {}
-- Path: Textures\Color\Color_0.png
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 1855881840462114938
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .png
-  ImportSettings:
-    {}
 - Path: Textures\Color\Color_17.jpg
   IsSubAsset: false
   Index: 0
@@ -512,21 +494,21 @@
   Extension: .jpg
   ImportSettings:
     {}
+- Path: Textures\Color\Color_0.png
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 1855881840462114938
+  Hash: 948733667
+  SerializedVersion: 0
+  Extension: .png
+  ImportSettings:
+    {}
 - Path: Textures\Color\Color_03.jpg
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
   UUID: 17237974390259840017
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .jpg
-  ImportSettings:
-    {}
-- Path: Textures\Color\Color_04.jpg
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 8665547347118670184
   Hash: 948733667
   SerializedVersion: 0
   Extension: .jpg
@@ -540,6 +522,16 @@
   Hash: 948733667
   SerializedVersion: 0
   Extension: .png
+  ImportSettings:
+    {}
+- Path: Textures\Color\Color_04.jpg
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 8665547347118670184
+  Hash: 948733667
+  SerializedVersion: 0
+  Extension: .jpg
   ImportSettings:
     {}
 - Path: Textures\Color\Color_05.jpg
@@ -822,6 +814,14 @@
   Extension: .jpg
   ImportSettings:
     {}
+- Path: Scripts\NewScript.cs
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2166136261
+  UUID: 7937209862723571193
+  Hash: 3636289800
+  SerializedVersion: 0
+  Extension: .cs
 - Path: Textures\Normal\Normal_22.jpg
   IsSubAsset: false
   Index: 0
@@ -832,14 +832,6 @@
   Extension: .jpg
   ImportSettings:
     {}
-- Path: Scripts\NewScript.cs
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 7937209862723571193
-  Hash: 3636289800
-  SerializedVersion: 0
-  Extension: .cs
 - Path: Textures\Normal\Normal_23.jpg
   IsSubAsset: false
   Index: 0
@@ -925,22 +917,6 @@
   Index: 0
   VersionHash: 2166136261
   UUID: 17525689166372006367
-  Hash: 1336563431
-  SerializedVersion: 0
-  Extension: .gscene
-- Path: Scenes\Test1.gscene
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 814112852505425419
-  Hash: 1336563431
-  SerializedVersion: 0
-  Extension: .gscene
-- Path: Scenes\Test2.gscene
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  UUID: 4715801160580223037
   Hash: 1336563431
   SerializedVersion: 0
   Extension: .gscene
