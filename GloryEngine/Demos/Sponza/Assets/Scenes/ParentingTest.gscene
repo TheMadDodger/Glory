@@ -6,51 +6,62 @@ Entities:
     ParentUUID: 0
     Components:
       - UUID: 619697863609837654
+        TypeName: Transform
         TypeHash: 3246206669
         Position: [-5.16806555, 2.46972132, -0.333712012]
         Rotation: [0, 0, 0, 1]
         Scale: [1.00000107, 1, 1.00000107]
-      - UUID: 3460791093036614987
+      - UUID: 5878839014597927352
+        TypeName: MeshRenderer
         TypeHash: 196355731
-        Materials:
-          Materials_Element0: 6439595880252257041
-      - UUID: 7171395861705761284
+        m_pMaterials:
+          - m_MaterialReference: 6439595880252257041
+      - UUID: 16032014602404844854
+        TypeName: MeshFilter
         TypeHash: 1249198182
-        Model: 5501465473105436222
-      - UUID: 1633920638217017271
+        m_pModelData: 5501465473105436222
+      - UUID: 4005013934882352798
+        TypeName: Spin
         TypeHash: 3648538273
-        Speed: 10
+        m_Speed: 10
+        m_Time: 0
   - TypeHash: 3083728904
     Name: Suzy 2
     UUID: 17686343968058694442
     ParentUUID: 619697863609837654
     Components:
       - UUID: 17686343968058694442
+        TypeName: Transform
         TypeHash: 3246206669
         Position: [-4.52805805, 2.5414257, -2.90222645]
-        Rotation: [-4.30721733e-16, -0.93598175, -1.62005838e-16, -0.352048695]
-        Scale: [0.999999225, 1, 0.999999225]
-      - UUID: 17948530134360488167
+        Rotation: [-4.3072168e-16, -0.93598175, -1.62005864e-16, -0.352048576]
+        Scale: [0.999998808, 1, 0.999998808]
+      - UUID: 9695472923388147168
+        TypeName: MeshFilter
         TypeHash: 1249198182
-        Model: 458782366599078358
-      - UUID: 17128817778432038285
+        m_pModelData: 6415630451540791124
+      - UUID: 13004217213203378906
+        TypeName: MeshRenderer
         TypeHash: 196355731
-        Materials:
-          Materials_Element0: 6439595880252257041
+        m_pMaterials:
+          - m_MaterialReference: 6439595880252257041
   - TypeHash: 3083728904
     Name: Suzy 3
     UUID: 17363592528336326898
     ParentUUID: 17686343968058694442
     Components:
       - UUID: 17363592528336326898
+        TypeName: Transform
         TypeHash: 3246206669
-        Position: [3.87667513, -4.76837158e-07, -8.97506237]
-        Rotation: [4.43856261e-22, -0.388318986, 1.33093419e-22, 0.921525002]
-        Scale: [1.00000024, 1, 1.00000024]
-      - UUID: 11888834658090828192
+        Position: [3.87667561, -4.76837158e-07, -8.97506332]
+        Rotation: [4.81416744e-22, -0.388318956, 1.2233222e-22, 0.921525061]
+        Scale: [1.00000012, 1, 1.00000012]
+      - UUID: 2195526001315172175
+        TypeName: MeshRenderer
         TypeHash: 196355731
-        Materials:
-          Materials_Element0: 6439595880252257041
-      - UUID: 11236368696293602749
+        m_pMaterials:
+          - m_MaterialReference: 6439595880252257041
+      - UUID: 16023783028508625784
+        TypeName: MeshFilter
         TypeHash: 1249198182
-        Model: 5501465473105436222
+        m_pModelData: 5501465473105436222
