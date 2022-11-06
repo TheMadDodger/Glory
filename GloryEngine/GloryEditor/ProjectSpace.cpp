@@ -14,9 +14,10 @@ namespace Glory::Editor
 
 	GLORY_EDITOR_API void ProjectSpace::OpenProject(const std::string& path)
 	{
+		std::string absolutePath = std::filesystem::absolute(path).string();
 		CloseProject();
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
-		m_pCurrentProject = new ProjectSpace(path);
+		m_pCurrentProject = new ProjectSpace(absolutePath);
 		lock.unlock();
 		m_pCurrentProject->Open();
 		EditorAssetLoader::Start();

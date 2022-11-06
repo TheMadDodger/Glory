@@ -81,6 +81,7 @@ namespace Glory
 		LoaderModule* GetLoaderModule(size_t typeHash);
 
 		Module* GetModule(const std::type_info& type);
+		Module* GetModule(const std::string& name);
 
 		GraphicsThread* GetGraphicsThread() const;
 

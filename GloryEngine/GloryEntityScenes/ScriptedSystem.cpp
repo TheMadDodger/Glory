@@ -1,45 +1,52 @@
 #include "ScriptedSystem.h"
 #include "EntityScene.h"
-#include "EntitySceneObject.h"
 #include <AssetReferencePropertyTemplate.h>
 #include <SerializedPropertyManager.h>
 #include <AssetManager.h>
 
 namespace Glory
 {
-	void ScriptedSystem::OnComponentAdded(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-	}
-
-	void ScriptedSystem::OnComponentRemoved(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
-	{
-	}
-
-	void ScriptedSystem::OnUpdate(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
-	{
-		if (!pComponent.m_Script) return;
-		Script* pScript = AssetManager::GetOrLoadAsset<Script>(pComponent.m_Script);
+		UUID uuid = pComponent.m_Script.AssetUUID();
+		if (!uuid) return;
+		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
-		EntitySceneObject* pObject = pRegistry->GetEntityScene()->GetEntitySceneObjectFromEntityID(entity);
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
+		pScript->Invoke(pObject, "Start()", nullptr);
+	}
+
+	void ScriptedSystem::OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	{
+		UUID uuid = pComponent.m_Script.AssetUUID();
+		if (!uuid) return;
+		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
+		if (pScript == nullptr) return;
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
+		pScript->Invoke(pObject, "Stop()", nullptr);
+	}
+
+	void ScriptedSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	{
+		UUID uuid = pComponent.m_Script.AssetUUID();
+		if (!uuid) return;
+		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
+		if (pScript == nullptr) return;
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 		pScript->Invoke(pObject, "Update()", nullptr);
 	}
 
-	void ScriptedSystem::OnDraw(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		if (!pComponent.m_Script) return;
-		Script* pScript = AssetManager::GetOrLoadAsset<Script>(pComponent.m_Script);
+		UUID uuid = pComponent.m_Script.AssetUUID();
+		if (!uuid) return;
+		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
-		EntitySceneObject* pObject = pRegistry->GetEntityScene()->GetEntitySceneObjectFromEntityID(entity);
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 		pScript->Invoke(pObject, "Draw()", nullptr);
-	}
-
-	void ScriptedSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, ScriptedComponent& pComponent)
-	{
-		properties.push_back(SerializedPropertyManager::GetProperty<AssetReferencePropertyTemplate<Script>>(uuid, "Script", &pComponent.m_Script, 0));
-	}
-
-	std::string ScriptedSystem::Name()
-	{
-		return "Script";
 	}
 }

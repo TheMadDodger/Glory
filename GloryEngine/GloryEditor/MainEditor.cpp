@@ -282,6 +282,7 @@ namespace Glory::Editor
 		EditorWindow::GetWindow<InspectorWindow>();
 		EditorWindow::GetWindow<SceneGraphWindow>();
 		EditorWindow::GetWindow<ContentBrowser>();
+		EditorWindow::GetWindow<EditorConsoleWindow>();
 	}
 
 	void MainEditor::RegisterPropertyDrawers()

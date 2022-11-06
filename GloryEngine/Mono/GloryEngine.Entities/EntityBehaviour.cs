@@ -18,10 +18,10 @@ namespace GloryEngine.Entities
             private set { }
         }
 
-        public Transform Transform
-        {
-
-        }
+        //public Transform Transform
+        //{
+        //
+        //}
 
         #endregion
 

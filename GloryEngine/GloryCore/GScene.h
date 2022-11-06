@@ -32,6 +32,9 @@ namespace Glory
 
         void HandleDelayedParents();
 
+        virtual void Start() {}
+        virtual void Stop() {}
+
     protected:
         virtual void Initialize() {};
         virtual void OnTick() {};

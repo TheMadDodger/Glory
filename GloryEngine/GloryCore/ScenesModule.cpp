@@ -71,6 +71,7 @@ namespace Glory
 		if (pScene == nullptr) return;
 		pScene->SetUUID(uuid);
 		m_pOpenScenes.push_back(pScene);
+		OnSceneOpen(uuid);
 	}
 
 	void ScenesModule::AddOpenScene(GScene* pScene, UUID uuid)
@@ -78,6 +79,7 @@ namespace Glory
 		if (pScene == nullptr) return;
 		if (uuid) pScene->SetUUID(uuid);
 		m_pOpenScenes.push_back(pScene);
+		OnSceneOpen(uuid);
 	}
 
 	void ScenesModule::CloseScene(UUID uuid)
@@ -87,6 +89,7 @@ namespace Glory
 		size_t index = it - m_pOpenScenes.begin();
 		GScene* pActiveScene = m_pOpenScenes[m_ActiveSceneIndex];
 
+		OnSceneClose(uuid);
 		GScene* pScene = *it;
 		delete pScene;
 		m_pOpenScenes.erase(it);
@@ -101,7 +104,7 @@ namespace Glory
 		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
 	}
 
-	void ScenesModule::SetHoveringObject(uint32_t objectID)
+	void ScenesModule::SetHoveringObject(uint64_t objectID)
 	{
 		std::unique_lock<std::mutex> lock(m_HoveringLock);
 		m_pHoveringObject = GetSceneObjectFromObjectID(objectID);

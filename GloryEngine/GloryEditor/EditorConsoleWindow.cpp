@@ -13,11 +13,6 @@ namespace Glory::Editor
 	void EditorConsoleWindow::OnOpen()
 	{
 		Console::RegisterConsole(this);
-
-        Debug::LogInfo("This is an info log!");
-        Debug::LogNotice("This is a notice log!");
-        Debug::LogWarning("This is a warning log!");
-        Debug::LogError("This is an error log!");
 	}
 
 	void EditorConsoleWindow::OnClose()

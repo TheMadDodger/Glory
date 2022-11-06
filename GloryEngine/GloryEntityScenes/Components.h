@@ -138,7 +138,9 @@ namespace Glory
 		ScriptedComponent() : m_Script(0) {}
 		ScriptedComponent(Script* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0) {}
 
-		UUID m_Script;
+		REFLECTABLE(ScriptedComponent,
+			(AssetReference<Script>) (m_Script)
+		)
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));

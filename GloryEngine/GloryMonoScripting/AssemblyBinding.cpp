@@ -23,7 +23,12 @@ namespace Glory
 		std::filesystem::path path = m_Lib.Location();
 		const std::string& name = m_Lib.LibraryName();
 		path.append(name);
-		//mono_domain_assembly_open()
+		if (!std::filesystem::exists(path))
+		{
+			Debug::LogError("Missing assembly");
+			return;
+		}
+
 		std::ifstream fileStream;
 		fileStream.open(path.string(), std::ios::in | std::ios::ate | std::ios::binary);
 		std::streampos size = fileStream.tellg();

@@ -78,6 +78,8 @@ project "Glorious"
 		("{COPY} EditorSettings.yaml ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} imgui.ini ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} imgui.ini ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"),
+		("{COPY} ../third-party/premake ../Build/%{cfg.buildcfg}/%{cfg.platform}/premake"),
+		("{COPY} ../third-party/premake ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}/premake"),
 		("{COPY} ../Bin/Engine/%{cfg.buildcfg}/%{cfg.platform}/Glorious.exe ../Build/%{cfg.buildcfg}/%{cfg.platform}"),
 		("{COPY} ../Build/%{cfg.buildcfg}/%{cfg.platform} ../Build/Launcher/%{cfg.buildcfg}/%{cfg.platform}/Editor/Any"),
 	}

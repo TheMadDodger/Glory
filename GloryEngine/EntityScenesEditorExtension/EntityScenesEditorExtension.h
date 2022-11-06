@@ -4,14 +4,14 @@
 #include <vector>
 #include <imgui_internal.h>
 #include <GloryContext.h>
-#include <IEditorLoopHandler.h>
+#include <IPlayModeHandler.h>
 
 extern "C" GLORY_API Glory::Editor::BaseEditorExtension* LoadExtension();
 extern "C" GLORY_API void SetContext(Glory::GloryContext * pContext, ImGuiContext* pImGUIContext);
 
 namespace Glory::Editor
 {
-    class EntityScenesEditorExtension : public BaseEditorExtension, IEditorLoopHandler
+    class EntityScenesEditorExtension : public BaseEditorExtension, IPlayModeHandler
     {
     public:
         EntityScenesEditorExtension();
@@ -21,6 +21,8 @@ namespace Glory::Editor
         virtual void RegisterEditors() override;
 
         virtual const char* ModuleName() override;
+        virtual void HandleStart(Module* pModule) override;
+        virtual void HandleStop(Module* pModule) override;
         virtual void HandleUpdate(Module* pModule) override;
 
     private:

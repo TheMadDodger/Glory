@@ -27,6 +27,9 @@ project "GloryMonoScripting"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
+
+		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -35,6 +38,8 @@ project "GloryMonoScripting"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -46,12 +51,15 @@ project "GloryMonoScripting"
 		"yaml-cpp",
 		"mono-2.0-sgen",
 		"MonoPosixHelper",
-		--"libmono-static-sgen",
+
+		"GloryECSStatic",
+		"GloryReflectStatic",
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLORY_UUID_DEFINED"
 	}
 
 	postbuildcommands

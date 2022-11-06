@@ -1,7 +1,6 @@
 #pragma once
 #include <Object.h>
 #include <EntityComponentObject.h>
-#include <EntitySystems.h>
 #include <PropertyDrawer.h>
 #include <TypeData.h>
 #include "Editor.h"
@@ -37,7 +36,7 @@ namespace Glory::Editor
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(hash);
 			if (pTypeData)
 			{
-				for (size_t i = 0; i < pTypeData->FieldCount(); i++)
+				for (int i = 0; i < pTypeData->FieldCount(); i++)
 				{
 					const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
 					size_t offset = pFieldData->Offset();

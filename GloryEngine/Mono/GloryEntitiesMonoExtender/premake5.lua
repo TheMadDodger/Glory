@@ -26,11 +26,16 @@ project "GloryEntitiesMonoExtender"
 		"../%{GloryIncludeDir.core}",
 		"../%{GloryIncludeDir.entityscenes}",
 		"../%{GloryIncludeDir.mono}",
+
+		"../%{IncludeDir.ECS}",
+		"../%{IncludeDir.Reflect}"
 	}
 
 	libdirs
 	{
 		"../%{LibDirs.glory}",
+
+		"../%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -41,11 +46,15 @@ project "GloryEntitiesMonoExtender"
 		"yaml-cpp",
 		"mono-2.0-sgen",
 		"MonoPosixHelper",
+
+		"GloryECSStatic",
+		"GloryReflectStatic"
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLORY_UUID_DEFINED"
 	}
 
 	filter "system:windows"

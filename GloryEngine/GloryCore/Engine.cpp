@@ -94,6 +94,17 @@ namespace Glory
 		return *it;
 	}
 
+	Module* Engine::GetModule(const std::string& name)
+	{
+		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetMetaData().Name() == name;
+		});
+
+		if (it == m_pAllModules.end()) return nullptr;
+		return *it;
+	}
+
 	GraphicsThread* Engine::GetGraphicsThread() const
 	{
 		return m_pGraphicsThread;

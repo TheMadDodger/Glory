@@ -32,6 +32,9 @@ project "MonoEditorExtension"
 		"%{GloryIncludeDir.mono}",
 		
 		"%{mono_install}/include/mono-2.0",
+
+		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Reflect}"
 	}
 	
 	libdirs
@@ -45,6 +48,8 @@ project "MonoEditorExtension"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+
+		"%{LibDirs.GloryECS}",
 	}
 	
 	links
@@ -61,11 +66,15 @@ project "MonoEditorExtension"
 		"yaml-cpp",
 		"mono-2.0-sgen",
 		"MonoPosixHelper",
+
+		"GloryECSStatic",
+		"GloryReflectStatic"
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLORY_UUID_DEFINED"
 	}
 
 	filter "system:windows"

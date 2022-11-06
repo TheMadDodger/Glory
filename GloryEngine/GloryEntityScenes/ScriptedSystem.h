@@ -1,21 +1,23 @@
 #pragma once
-#include "EntitySystemTemplate.h"
 #include "Components.h"
+
+namespace GloryECS
+{
+    class EntityRegistry;
+}
 
 namespace Glory
 {
-    class ScriptedSystem : public EntitySystemTemplate<ScriptedComponent>
+    class ScriptedSystem
     {
     public:
-        ScriptedSystem(Registry* pRegistry) : EntitySystemTemplate(pRegistry) {}
-        virtual ~ScriptedSystem() {}
+        static void OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
 
     private:
-        virtual void OnComponentAdded(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent) override;
-        virtual void OnComponentRemoved(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent) override;
-        virtual void OnUpdate(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent) override;
-        virtual void OnDraw(Registry* pRegistry, EntityID entity, ScriptedComponent& pComponent) override;
-        virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, ScriptedComponent& pComponent) override;
-        virtual std::string Name();
+        ScriptedSystem() {}
+        virtual ~ScriptedSystem() {}
     };
 }

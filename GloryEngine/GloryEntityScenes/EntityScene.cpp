@@ -14,7 +14,6 @@ namespace Glory
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName) : GScene(sceneName), m_Registry(this)
 	EntityScene::EntityScene(const std::string& sceneName) : m_Valid(true), GScene(sceneName)
 	{
 		APPEND_TYPE(EntityScene);
@@ -76,6 +75,12 @@ namespace Glory
 		// Transform
 		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Update, TransformSystem::OnUpdate);
 
+		// Scripted
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Update, ScriptedSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Draw, ScriptedSystem::OnDraw);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Start, ScriptedSystem::OnStart);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Stop, ScriptedSystem::OnStop);
+
 	}
 
 	void EntityScene::OnTick()
@@ -87,7 +92,6 @@ namespace Glory
 	void EntityScene::OnPaint()
 	{
 		m_Registry.InvokeAll(GloryECS::InvocationType::Draw);
-		//m_Registry.Draw();
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
@@ -114,5 +118,15 @@ namespace Glory
 		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
 		EntityID entity = pEntityObject->GetEntityHandle().GetEntityID();
 		m_EntityIDToObject[entity] = pEntityObject;
+	}
+
+	void EntityScene::Start()
+	{
+		m_Registry.InvokeAll(InvocationType::Start);
+	}
+
+	void EntityScene::Stop()
+	{
+		m_Registry.InvokeAll(InvocationType::Stop);
 	}
 }

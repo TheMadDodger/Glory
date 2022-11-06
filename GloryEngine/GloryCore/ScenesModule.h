@@ -28,8 +28,10 @@ namespace Glory
         void AddOpenScene(GScene* pScene, UUID uuid = 0);
         void CloseScene(UUID uuid);
 
-        void SetHoveringObject(uint32_t objectID);
+        void SetHoveringObject(uint64_t objectID);
         SceneObject* GetHoveringObject();
+
+        virtual SceneObject* GetSceneObjectFromObjectID(uint64_t objectID) = 0;
 
     protected:
         virtual void Initialize() = 0;
@@ -41,7 +43,9 @@ namespace Glory
 
         static SceneObject* CreateObject(GScene* pScene, const std::string& name, UUID uuid);
 
-        virtual SceneObject* GetSceneObjectFromObjectID(uint32_t objectID) = 0;
+
+        virtual void OnSceneOpen(UUID uuid) {}
+        virtual void OnSceneClose(UUID uuid) {}
 
     private:
         virtual void Update() override;

@@ -38,6 +38,9 @@ namespace Glory
 
 		virtual void OnObjectAdded(SceneObject* pObject) override;
 
+		virtual void Start() override;
+		virtual void Stop() override;
+
 	private:
 		friend class Entity;
 		friend class EntitySceneSerializer;
