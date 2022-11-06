@@ -4,8 +4,8 @@
 #include <ImGuizmo.h>
 #include <Serializer.h>
 #include <AssetDatabase.h>
-#include "EditorApplication.h"
 
+#include "EditorApplication.h"
 #include "MainEditor.h"
 #include "EditorWindow.h"
 #include "GameWindow.h"
@@ -38,6 +38,8 @@
 #include "ObjectMenuCallbacks.h"
 #include "FileDialog.h"
 #include "ImGuiHelpers.h"
+#include "EnumPropertyDrawer.h"
+#include "StructPropertyDrawer.h"
 
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
@@ -295,6 +297,8 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<EnumPropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<StructPropertyDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()

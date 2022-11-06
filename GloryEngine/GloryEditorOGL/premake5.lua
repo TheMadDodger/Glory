@@ -30,6 +30,8 @@ project "GloryEditorOGL"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.editor}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -44,6 +46,8 @@ project "GloryEditorOGL"
 		"%{LibDirs.yaml_cpp}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -60,6 +64,8 @@ project "GloryEditorOGL"
 		"ImGuizmo",
 		"implot",
 		"ImFileDialog",
+		
+		"GloryReflectStatic",
 	}
 
 	defines

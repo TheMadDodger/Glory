@@ -24,7 +24,9 @@ project "GlorySDLImage"
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.SDL_image}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{GloryIncludeDir.core}"
+		"%{GloryIncludeDir.core}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -33,6 +35,8 @@ project "GlorySDLImage"
 		"%{LibDirs.glory}",
 		"%{LibDirs.SDL_image}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -42,6 +46,8 @@ project "GlorySDLImage"
 		"SDL2_image",
 		"yaml-cpp",
 		"GloryEditor",
+		
+		"GloryReflectStatic",
 	}
 
 	defines

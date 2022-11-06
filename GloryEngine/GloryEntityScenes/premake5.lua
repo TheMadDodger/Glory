@@ -28,7 +28,10 @@ project "GloryEntityScenes"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{vulkan_sdk}/third-party/include"
+		"%{vulkan_sdk}/third-party/include",
+
+		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -38,6 +41,8 @@ project "GloryEntityScenes"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -47,11 +52,15 @@ project "GloryEntityScenes"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
+
+		"GloryECSStatic",
+		"GloryReflectStatic",
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLORY_UUID_DEFINED"
 	}
 	
 	postbuildcommands

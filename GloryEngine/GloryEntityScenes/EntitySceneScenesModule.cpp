@@ -1,15 +1,22 @@
 #include "EntitySceneScenesModule.h"
 #include "EntitySceneSerializer.h"
 #include "EntitySceneObjectSerializer.h"
+#include "Components.h"
+#include <TypeFlags.h>
 
 namespace Glory
 {
-	EntitySceneScenesModule::EntitySceneScenesModule()
+	EntitySceneScenesModule::EntitySceneScenesModule() : m_pComponentTypesInstance(nullptr)
 	{
 	}
 
 	EntitySceneScenesModule::~EntitySceneScenesModule()
 	{
+	}
+
+	GloryECS::ComponentTypes* EntitySceneScenesModule::ComponentTypesInstance() const
+	{
+		return m_pComponentTypesInstance;
 	}
 
 	GScene* EntitySceneScenesModule::CreateScene(const std::string& sceneName)
@@ -41,6 +48,31 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
+		m_pComponentTypesInstance = GloryECS::ComponentTypes::CreateInstance();
+
+		// Register engine components
+		GloryECS::ComponentTypes::RegisterComponent<Transform>();
+		GloryECS::ComponentTypes::RegisterComponent<MeshRenderer>();
+		GloryECS::ComponentTypes::RegisterComponent<MeshFilter>();
+		GloryECS::ComponentTypes::RegisterComponent<CameraComponent>();
+		GloryECS::ComponentTypes::RegisterComponent<LookAt>();
+		GloryECS::ComponentTypes::RegisterComponent<Spin>();
+		GloryECS::ComponentTypes::RegisterComponent<LightComponent>();
+
+		// Register component types
+		GloryReflect::Reflect::RegisterEnum<CameraPerspective>();
+		GloryReflect::Reflect::RegisterType<MeshMaterial>();
+
+		GloryReflect::Reflect::RegisterType<Transform>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<MeshFilter>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<MeshRenderer>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<CameraComponent>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<Spin>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<LayerComponent>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<LightComponent>(TypeFlag::TF_Component);
+		GloryReflect::Reflect::RegisterType<LookAt>(TypeFlag::TF_Component);
+
+		// Register serializers
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
@@ -54,5 +86,7 @@ namespace Glory
 
 	void EntitySceneScenesModule::OnCleanup()
 	{
+		GloryECS::ComponentTypes::DestroyInstance();
+		m_pComponentTypesInstance = nullptr;
 	}
 }

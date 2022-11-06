@@ -1,5 +1,6 @@
 #include "AssetReferencePropertyDrawer.h"
 #include "AssetPickerPopup.h"
+#include "AssetReference.h"
 #include <imgui.h>
 #include <AssetDatabase.h>
 
@@ -34,5 +35,33 @@ namespace Glory::Editor
 	{
 		// TODO
 		return false;
+	}
+
+	bool AssetReferencePropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	{
+		ImGui::TextUnformatted(label.c_str());
+		ImGui::SameLine();
+
+		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)data;
+		UUID uuid = pReferenceMember->AssetUUID();
+		std::string assetName = "";
+		bool exists = AssetDatabase::AssetExists(uuid);
+
+		typeHash = pReferenceMember->TypeHash();
+
+		if (!exists) assetName = "Noone";
+		else
+		{
+			assetName = AssetDatabase::GetAssetName(uuid);
+		}
+
+		std::string buttonLabel = assetName + "##" + label;
+
+		if (ImGui::Button(buttonLabel.c_str()))
+		{
+			AssetPickerPopup::Open(typeHash, pReferenceMember->AssetUUIDMember(), true);
+		}
+
+		return true;
 	}
 }

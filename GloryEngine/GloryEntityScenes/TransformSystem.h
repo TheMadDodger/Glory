@@ -1,18 +1,20 @@
 #pragma once
-#include "EntitySystemTemplate.h"
 #include "Components.h"
+
+namespace GloryECS
+{
+    class EntityRegistry;
+}
 
 namespace Glory
 {
-    class TransformSystem : public EntitySystemTemplate<Transform>
+    class TransformSystem
     {
     public:
-        TransformSystem(Registry* pRegistry);
-        virtual ~TransformSystem();
+        static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
 
     private:
-        virtual void OnUpdate(Registry* pRegistry, EntityID entity, Transform& pComponent) override;
-        virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, Transform& pComponent) override;
-        virtual std::string Name();
+        TransformSystem();
+        virtual ~TransformSystem();
     };
 }

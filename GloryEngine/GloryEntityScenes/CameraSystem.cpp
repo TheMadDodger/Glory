@@ -1,14 +1,23 @@
 #include "CameraSystem.h"
-#include "Registry.h"
+#include <EntityRegistry.h>
 #include <Window.h>
 #include <Game.h>
 #include <CameraManager.h>
 #include <SerializedPropertyManager.h>
 #include <GloryContext.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {
-	void CameraSystem::OnComponentAdded(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	CameraSystem::CameraSystem()
+	{
+	}
+
+	CameraSystem::~CameraSystem()
+	{
+	}
+
+	void CameraSystem::OnComponentAdded(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Engine* pEngine = Game::GetGame().GetEngine();
 		Window* pWindow = pEngine->GetWindowModule()->GetMainWindow();
@@ -21,12 +30,12 @@ namespace Glory
 		pComponent.m_LastHash = CalcHash(pComponent);
 	}
 
-	void CameraSystem::OnComponentRemoved(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnComponentRemoved(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		pComponent.m_Camera.Free();
 	}
 
-	void CameraSystem::OnUpdate(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(transform.MatTransform);
@@ -48,20 +57,9 @@ namespace Glory
 		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
 	}
 
-	void CameraSystem::OnDraw(Registry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_Camera);
-	}
-
-	void CameraSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, CameraComponent& pComponent)
-	{
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Half FOV"), &pComponent.m_HalfFOV, 0));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Near"), &pComponent.m_Near, 0));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Far"), &pComponent.m_Far, 0));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<int>>(uuid, std::string("Display Index"), &pComponent.m_DisplayIndex, 0));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<int>>(uuid, std::string("Priority"), &pComponent.m_Priority, 0));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<LayerMask>>(uuid, std::string("Layer Mask"), &pComponent.m_LayerMask, 0));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec4>>(uuid, std::string("Clear Color"), &pComponent.m_ClearColor, 0));
 	}
 
 	std::string CameraSystem::Name()

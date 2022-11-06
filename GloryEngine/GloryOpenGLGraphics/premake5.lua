@@ -27,7 +27,9 @@ project "GloryOpenGLGraphics"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{GloryIncludeDir.core}"
+		"%{GloryIncludeDir.core}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -37,6 +39,8 @@ project "GloryOpenGLGraphics"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -47,6 +51,8 @@ project "GloryOpenGLGraphics"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
+		
+		"GloryReflectStatic",
 	}
 
 	defines

@@ -453,7 +453,6 @@ namespace Glory
 
 	void AssetDatabase::Destroy()
 	{
-		Save();
 		ASSET_DATABASE->m_Callbacks.Cleanup();
 		Clear();
 	}

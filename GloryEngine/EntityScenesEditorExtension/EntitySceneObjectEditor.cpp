@@ -26,8 +26,12 @@ namespace Glory::Editor
 		if (!m_Initialized) Initialize();
 		m_pObject = (SceneObject*)m_pTarget;
 
+		const std::string uuidString = std::to_string(m_pObject->GetUUID());
+		ImGui::PushID(uuidString.c_str());
 		bool change = NameGUI();
-		return ComponentGUI() || change;
+		change |= ComponentGUI();
+		ImGui::PopID();
+		return change;
 	}
 
 	void EntitySceneObjectEditor::Refresh()
@@ -44,13 +48,20 @@ namespace Glory::Editor
 		m_pComponentEditors.clear();
 
 		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
-		pObject->GetEntityHandle().ForEachComponent([&](Registry* pRegistry, EntityID entityID, EntityComponentData* pComponentData)
+		Entity entity = pObject->GetEntityHandle();
+		EntityID entityID = entity.GetEntityID();
+		EntityView* pEntityView = entity.GetEntityView();
+
+		for (size_t i = 0; i < pEntityView->ComponentCount(); i++)
 		{
-			EntityComponentObject* pComponentObject = new EntityComponentObject(pComponentData, pRegistry);
+			UUID uuid = pEntityView->ComponentUUIDAt(i);
+			size_t componentType = pEntityView->ComponentTypeAt(i);
+			EntityComponentObject* pComponentObject = new EntityComponentObject(entityID, uuid, componentType, entity.GetScene()->GetRegistry());
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
 			if (pEditor) m_pComponentEditors.push_back(pEditor);
-		});
+		}
+
 		m_Initialized = true;
 	}
 
@@ -80,11 +91,12 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::ComponentGUI()
 	{
+		ImGui::PushID("Components");
 		bool change = false;
 
 		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
 		EntityID entityID = entity.GetEntityID();
-		Registry* pRegistry = entity.GetScene()->GetRegistry();
+		GloryECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
 
 		int index = 0;
 		const std::string& nameString = m_pObject->Name();
@@ -96,66 +108,67 @@ namespace Glory::Editor
 			std::hash<std::string> hasher;
 			size_t hash = hasher(id);
 
-			bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, pEditor->Name().data());
+			ImGui::PushID(id.c_str());
+			if (ImGui::TreeNodeEx((void*)hash, node_flags, pEditor->Name().data()))
+			{
+				change |= pEditor->OnGUI();
+				ImGui::TreePop();
+			}
 
 			if (ImGui::IsItemClicked(1))
 			{
 				m_RightClickedComponentIndex = index;
 				ImGui::OpenPopup("ComponentRightClick");
 			}
-
-			if (nodeOpen)
-			{
-				change |= pEditor->OnGUI();
-				ImGui::TreePop();
-			}
+			ImGui::PopID();
 
 			++index;
 		});
+		ImGui::PopID();
 
 		if (ImGui::Button("Add Component"))
 		{
 			EntityComponentPopup::Open(pRegistry);
 			m_AddingComponent = true;
 		}
-
+		
 		if (m_AddingComponent)
 		{
 			size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
 			if (toAddTypeHash)
 			{
 				Undo::StartRecord("Add Component", m_pTarget->GetUUID());
-				pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
-				size_t index = m_pComponentEditors.size();
-				EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, index);
-				Undo::AddAction(new AddComponentAction(toAddTypeHash, pComponentData->GetComponentUUID(), index));
+				pRegistry->CreateComponent(entityID, toAddTypeHash, UUID());
+				//pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
+				//size_t index = m_pComponentEditors.size();
+				//EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, index);
+				//Undo::AddAction(new AddComponentAction(toAddTypeHash, pComponentData->GetComponentUUID(), index));
 				Undo::StopRecord();
 				m_AddingComponent = false;
 				Initialize();
 				change = true;
 			}
 		}
-
+		
 		m_ComponentPopup.OnGUI();
-
-		if (ImGui::BeginPopup("ComponentRightClick"))
-		{
-			if (ImGui::MenuItem("Remove"))
-			{
-				EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, m_RightClickedComponentIndex);
-				Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
-				EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
-				EntityScene* pScene = (EntityScene*)pObject->GetScene();
-				Undo::AddAction(new RemoveComponentAction(pScene, pComponentData, m_RightClickedComponentIndex));
-				pRegistry->RemoveComponent(entityID, m_RightClickedComponentIndex);
-				Undo::StopRecord();
-				Initialize();
-				change = true;
-			}
-
-			ImGui::EndPopup();
-		}
-
+		
+		//if (ImGui::BeginPopup("ComponentRightClick"))
+		//{
+		//	if (ImGui::MenuItem("Remove"))
+		//	{
+		//		EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, m_RightClickedComponentIndex);
+		//		Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
+		//		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+		//		EntityScene* pScene = (EntityScene*)pObject->GetScene();
+		//		Undo::AddAction(new RemoveComponentAction(pScene, pComponentData, m_RightClickedComponentIndex));
+		//		pRegistry->RemoveComponent(entityID, m_RightClickedComponentIndex);
+		//		Undo::StopRecord();
+		//		Initialize();
+		//		change = true;
+		//	}
+		//
+		//	ImGui::EndPopup();
+		//}
 		return change;
 	}
 }

@@ -52,6 +52,8 @@ project "GloryEditor"
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ImGui}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 	
 	libdirs
@@ -64,6 +66,8 @@ project "GloryEditor"
 		"%{LibDirs.yaml_cpp}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 	
 	links
@@ -77,12 +81,14 @@ project "GloryEditor"
 		"ImGuizmo",
 		"implot",
 		"ImFileDialog",
+		
+		"GloryReflectStatic",
 	}
 
 	defines
 	{
 		"GLORY_EXPORTS",
-		"GLORY_EDITOR_EXPORTS"
+		"GLORY_EDITOR_EXPORTS",
 	}
 
 	filter "system:windows"

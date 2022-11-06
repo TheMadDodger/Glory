@@ -3,7 +3,9 @@
 #include <JobManager.h>
 #include <GScene.h>
 #include <Glory.h>
-#include "Registry.h"
+#include <EntityRegistry.h>
+
+using namespace GloryECS;
 
 namespace Glory
 {
@@ -18,10 +20,12 @@ namespace Glory
 		EntityScene(const std::string& sceneName, UUID uuid);
 		virtual ~EntityScene();
 
-		GLORY_API Entity CreateEntity();
+		GLORY_API Entity CreateEntity(UUID uuid);
 
 		GLORY_API EntitySceneObject* GetEntitySceneObjectFromEntityID(EntityID entity);
-		GLORY_API Registry* GetRegistry();
+		GLORY_API EntityRegistry* GetRegistry();
+
+		GLORY_API bool IsValid() const;
 
 	private:
 		virtual void Initialize() override;
@@ -37,7 +41,8 @@ namespace Glory
 	private:
 		friend class Entity;
 		friend class EntitySceneSerializer;
-		Registry m_Registry;
+		EntityRegistry m_Registry;
+		bool m_Valid;
 		std::unordered_map<EntityID, EntitySceneObject*> m_EntityIDToObject;
 	};
 }

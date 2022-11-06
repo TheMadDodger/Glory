@@ -4,7 +4,9 @@
 #include "Serializer.h"
 #include "PropertySerializer.h"
 #include "AssetReferencePropertySerializer.h"
-#include "ArrayPropertySerializers.h"
+#include "ArrayPropertySerializer.h"
+#include "EnumPropertySerializer.h"
+#include "StructPropertySerializer.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
 #include "ScriptExtensions.h"
@@ -267,7 +269,9 @@ namespace Glory
 
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
-		PropertySerializer::RegisterSerializer<ArrayPropertySerializers>();
+		PropertySerializer::RegisterSerializer<ArrayPropertySerializer>();
+		PropertySerializer::RegisterSerializer<EnumPropertySerializer>();
+		PropertySerializer::RegisterSerializer<StructPropertySerializer>();
 	}
 
 	void Engine::RegisterBasicTypes()
@@ -280,6 +284,10 @@ namespace Glory
 		ResourceType::RegisterType<glm::vec3>();
 		ResourceType::RegisterType<glm::vec4>();
 		ResourceType::RegisterType<glm::quat>();
+
+		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
+
+		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}
 
 	void Engine::Update()

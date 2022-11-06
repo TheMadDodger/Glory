@@ -1,18 +1,20 @@
 #pragma once
-#include "EntitySystemTemplate.h"
 #include "Components.h"
+
+namespace GloryECS
+{
+	class EntityRegistry;
+}
 
 namespace Glory
 {
-	class LookAtSystem : public EntitySystemTemplate<LookAt>
+	class LookAtSystem
 	{
 	public:
-		LookAtSystem(Registry* pRegistry) : EntitySystemTemplate(pRegistry) {}
-		virtual ~LookAtSystem() {}
+		static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, LookAt& pComponent);
 
 	private:
-		virtual void OnUpdate(Registry* pRegistry, EntityID entity, LookAt& pComponent) override;
-		virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, LookAt& pComponent) override;
-		virtual std::string Name() override;
+		LookAtSystem();
+		virtual ~LookAtSystem();
 	};
 }

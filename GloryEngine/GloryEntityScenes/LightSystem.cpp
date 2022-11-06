@@ -3,22 +3,11 @@
 #include <Engine.h>
 #include <PropertyFlags.h>
 #include <SerializedPropertyManager.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {
-	void LightSystem::OnComponentAdded(Registry* pRegistry, EntityID entity, LightComponent& pComponent)
-	{
-	}
-
-	void LightSystem::OnComponentRemoved(Registry* pRegistry, EntityID entity, LightComponent& pComponent)
-	{
-	}
-
-	void LightSystem::OnUpdate(Registry* pRegistry, EntityID entity, LightComponent& pComponent)
-	{
-	}
-
-	void LightSystem::OnDraw(Registry* pRegistry, EntityID entity, LightComponent& pComponent)
+	void LightSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, LightComponent& pComponent)
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		PointLight pointLight;
@@ -31,15 +20,11 @@ namespace Glory
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pointLight);
 	}
 
-	void LightSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, LightComponent& pComponent)
+	LightSystem::LightSystem()
 	{
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec4>>(uuid, std::string("Color"), &pComponent.m_Color, Vec4Flags::Color));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Intensity"), &pComponent.m_Intensity, 0));
-		properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<float>>(uuid, std::string("Range"), &pComponent.m_Range, 0));
 	}
 
-	std::string LightSystem::Name()
+	LightSystem::~LightSystem()
 	{
-		return "Light";
 	}
 }

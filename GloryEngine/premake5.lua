@@ -73,6 +73,9 @@ SubmodoleDirs["SDL_image"]			= "../third-party/SDL_Image"
 SubmodoleDirs["shaderc"]			= "../third-party/shaderc"
 SubmodoleDirs["spirv_cross"]		= "../third-party/spirv-cross"
 SubmodoleDirs["glory"]				= "../bin/Engine"
+SubmodoleDirs["GloryECS"]			= "../submodules/GloryECS/GloryECS"
+SubmodoleDirs["ECS"]				= "%{SubmodoleDirs.GloryECS}/GloryECSStatic"
+SubmodoleDirs["Reflect"]			= "%{SubmodoleDirs.GloryECS}/GloryReflectStatic"
 
 IncludeDir = {}
 IncludeDir["assimp"]				= "%{SubmodoleDirs.assimp}/include"
@@ -86,7 +89,8 @@ IncludeDir["SDL_image"]				= "%{SubmodoleDirs.SDL_image}/include"
 IncludeDir["shaderc"]				= "%{SubmodoleDirs.shaderc}/include"
 IncludeDir["spirv_cross"]			= "%{SubmodoleDirs.spirv_cross}/include"
 IncludeDir["yaml_cpp"]				= "%{SubmodoleDirs.yaml_cpp}/include"
-IncludeDir["ticpp"]					= "%{SubmodoleDirs.ticpp}"
+IncludeDir["ECS"]					= "%{SubmodoleDirs.ECS}"
+IncludeDir["Reflect"]				= "%{SubmodoleDirs.Reflect}"
 
 LibDirs = {}
 LibDirs["assimp"]					= "%{SubmodoleDirs.assimp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
@@ -102,6 +106,7 @@ LibDirs["spirv_cross"]				= "%{SubmodoleDirs.spirv_cross}/lib/%{cfg.buildcfg}/%{
 LibDirs["yaml_cpp"]					= "%{SubmodoleDirs.yaml_cpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["ticpp"]					= "%{SubmodoleDirs.ticpp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["extensions"]				= "%{SubmodoleDirs.glory}/%{cfg.buildcfg}/%{cfg.platform}/Extensions"
+LibDirs["GloryECS"]					= "%{SubmodoleDirs.GloryECS}/Build/Lib/%{cfg.buildcfg}/%{cfg.platform}/Extensions"
 
 stb_image							= "../../third-party/stb_image"
 
@@ -112,6 +117,8 @@ group "Dependencies"
 	include "submodules/ImFileDialog"
 	include "third-party/assimp"
 	include "third-party/yaml-cpp"
+	include "submodules/GloryECS/GloryECS/GloryECSStatic"
+	include "submodules/GloryECS/GloryECS/GloryReflectStatic"
 group ""
 
 include "GloryASSIMPModelLoader"

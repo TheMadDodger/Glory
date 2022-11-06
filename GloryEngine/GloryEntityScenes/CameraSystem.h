@@ -1,23 +1,26 @@
 #pragma once
-#include "EntitySystemTemplate.h"
 #include "Components.h"
+
+namespace GloryECS
+{
+    class EntityRegistry;
+}
 
 namespace Glory
 {
-    class CameraSystem : public EntitySystemTemplate<CameraComponent>
+    class CameraSystem
     {
-    public:
-        CameraSystem(Registry* pRegistry) : EntitySystemTemplate(pRegistry) {}
-        virtual ~CameraSystem() {}
-
     private:
-        virtual void OnComponentAdded(Registry* pRegistry, EntityID entity, CameraComponent& pComponent) override;
-        virtual void OnComponentRemoved(Registry* pRegistry, EntityID entity, CameraComponent& pComponent) override;
-        virtual void OnUpdate(Registry* pRegistry, EntityID entity, CameraComponent& pComponent) override;
-        virtual void OnDraw(Registry* pRegistry, EntityID entity, CameraComponent& pComponent) override;
-        virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, CameraComponent& pComponent) override;
-        virtual std::string Name();
+        CameraSystem();
+        virtual ~CameraSystem();
 
-        size_t CalcHash(CameraComponent& pComponent);
+    public:
+        static void OnComponentAdded(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static void OnComponentRemoved(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static std::string Name();
+
+        static size_t CalcHash(CameraComponent& pComponent);
     };
 }

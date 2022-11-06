@@ -2,19 +2,19 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <SerializedPropertyManager.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {
-    TransformSystem::TransformSystem(Registry* pRegistry) : EntitySystemTemplate(pRegistry)
+    TransformSystem::TransformSystem()
     {
-        m_Hidden = true;
     }
 
     TransformSystem::~TransformSystem()
     {
     }
 
-    void Glory::TransformSystem::OnUpdate(Registry* pRegistry, EntityID entity, Transform& pComponent)
+    void Glory::TransformSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent)
     {
         glm::mat4 startTransform = glm::identity<glm::mat4>();
         if (pComponent.Parent.IsValid())
@@ -27,17 +27,5 @@ namespace Glory
         glm::mat4 rotation = glm::inverse(glm::mat4_cast(pComponent.Rotation));
         glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), pComponent.Position);
         pComponent.MatTransform = startTransform * translation * rotation * scale;
-    }
-
-    void TransformSystem::OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, Transform& pComponent)
-    {
-        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Position"), &pComponent.Position, 0));
-        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::quat>>(uuid, std::string("Rotation"), &pComponent.Rotation, 0));
-        properties.push_back(SerializedPropertyManager::GetProperty<BasicTemplatedSerializedProperty<glm::vec3>>(uuid, std::string("Scale"), &pComponent.Scale, 0));
-    }
-
-    std::string TransformSystem::Name()
-    {
-        return "Transform";
     }
 }

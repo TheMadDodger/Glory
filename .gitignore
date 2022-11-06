@@ -88,7 +88,6 @@ GloryEngine/Glorious/Release/
 GloryEngine/GloriousLauncher/Debug/
 GloryEngine/GloriousLauncher/Editor/
 GloryEngine/GloryCS/Debug/
-*.csproj
 GloryEngine/GloryMono/Debug/
 GloryEngine/GloryMain/mono/
 GloryEngine/MonoEditorExtension/Debug/
@@ -101,3 +100,11 @@ GloryEngine/Mono/GloryEngine.Core/Debug/
 GloryEngine/Mono/GloryEngine.Entities/Debug/
 GloryEngine/Mono/GloryEntitiesMonoExtender/Debug/
 GloryEngine/GloryMonoScripting/mono/
+GloryEngine/GloryEntityScenes2/Debug/
+GloryEngine/EntityScenes2EditorExtension/Debug/
+
+# Demo projects
+Cache
+Library
+Project.lock
+*.csproj

@@ -1,0 +1,14 @@
+Shaders:
+  - UUID: 14778255856269579699
+    Type: Frag
+  - UUID: 435377197738799911
+    Type: Vert
+Properties:
+  - DisplayName: normalSampler
+    ShaderName: normalSampler
+    TypeHash: 948733667
+    Value: 0
+  - DisplayName: texSampler
+    ShaderName: texSampler
+    TypeHash: 948733667
+    Value: 0

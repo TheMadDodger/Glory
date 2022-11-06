@@ -5,32 +5,34 @@
 #include "Components.h"
 #include "Systems.h"
 #include "EntitySceneObject.h"
+#include "Systems.h"
 
 namespace Glory
 {
-	EntityScene::EntityScene() : GScene("New Scene"), m_Registry(this) //: m_pJobPool(nullptr)
+	EntityScene::EntityScene() : m_Valid(true), GScene("New Scene") //: m_pJobPool(nullptr)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
 	EntityScene::EntityScene(const std::string& sceneName) : GScene(sceneName), m_Registry(this)
+	EntityScene::EntityScene(const std::string& sceneName) : m_Valid(true), GScene(sceneName)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : GScene(sceneName, uuid), m_Registry(this)
+	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : m_Valid(true), GScene(sceneName, uuid)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
 	EntityScene::~EntityScene()
 	{
+		m_Valid = false;
 	}
 
-	Entity EntityScene::CreateEntity()
+	Entity EntityScene::CreateEntity(UUID uuid)
 	{
-		EntityID entityID = m_Registry.CreateEntity();
-		m_Registry.AddComponent<Transform>(entityID, UUID());
+		EntityID entityID = m_Registry.CreateEntity<Transform>(uuid);
 		return Entity(entityID, this);
 	}
 
@@ -40,52 +42,71 @@ namespace Glory
 		return m_EntityIDToObject[entity];
 	}
 
-	Registry* EntityScene::GetRegistry()
+	EntityRegistry* EntityScene::GetRegistry()
 	{
 		return &m_Registry;
 	}
 
+	GLORY_API bool EntityScene::IsValid() const
+	{
+		return m_Valid;
+	}
+
 	void EntityScene::Initialize()
 	{
-		// Register engine systems
-		m_Registry.RegisterSystem<TransformSystem>();
-		m_Registry.RegisterSystem<MeshRenderSystem>();
-		m_Registry.RegisterSystem<MeshFilterSystem>();
-		m_Registry.RegisterSystem<CameraSystem>();
-		m_Registry.RegisterSystem<LookAtSystem>();
-		m_Registry.RegisterSystem<SpinSystem>();
-		m_Registry.RegisterSystem<LightSystem>();
-		m_Registry.RegisterSystem<ScriptedSystem>();
+		// Register Invocations
+		// Camera
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::Update, CameraSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::Draw, CameraSystem::OnDraw);
+
+		// Light
+		m_Registry.RegisterInvokaction<LightComponent>(GloryECS::InvocationType::Draw, LightSystem::OnDraw);
+
+		// LookAt
+		m_Registry.RegisterInvokaction<LookAt>(GloryECS::InvocationType::Update, LookAtSystem::OnUpdate);
+
+		// MeshRenderer
+		m_Registry.RegisterInvokaction<MeshRenderer>(GloryECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+
+		// Spin
+		m_Registry.RegisterInvokaction<Spin>(GloryECS::InvocationType::Update, SpinSystem::OnUpdate);
+
+		// Transform
+		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Update, TransformSystem::OnUpdate);
+
 	}
 
 	void EntityScene::OnTick()
 	{
-		m_Registry.Update();
+		m_Registry.InvokeAll(GloryECS::InvocationType::Update);
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
 	void EntityScene::OnPaint()
 	{
-		m_Registry.Draw();
+		m_Registry.InvokeAll(GloryECS::InvocationType::Draw);
+		//m_Registry.Draw();
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
 	SceneObject* EntityScene::CreateObject(const std::string& name)
 	{
-		Entity entity = CreateEntity();
-		return new EntitySceneObject(entity, name);
+		UUID uuid = UUID();
+		Entity entity = CreateEntity(uuid);
+		return new EntitySceneObject(entity, name, uuid);
 	}
 
 	SceneObject* EntityScene::CreateObject(const std::string& name, UUID uuid)
 	{
-		Entity entity = CreateEntity();
+		Entity entity = CreateEntity(uuid);
 		return new EntitySceneObject(entity, name, uuid);
 	}
 
 	void EntityScene::OnDeleteObject(SceneObject* pObject)
 	{
-		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
-		pEntityObject->GetEntityHandle().Destroy();
+		
 	}
 
 	void EntityScene::OnObjectAdded(SceneObject* pObject)

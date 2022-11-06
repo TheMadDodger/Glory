@@ -31,7 +31,10 @@ project "EntityScenesEditorExtension"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.entityscenes}",
-		"%{GloryIncludeDir.ImGui}"
+		"%{GloryIncludeDir.ImGui}",
+
+		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Reflect}"
 	}
 
 	libdirs
@@ -45,6 +48,8 @@ project "EntityScenesEditorExtension"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -59,11 +64,15 @@ project "EntityScenesEditorExtension"
 		"ImGuizmo",
 		"implot",
 		"yaml-cpp",
+
+		"GloryECSStatic",
+		"GloryReflectStatic"
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLORY_UUID_DEFINED",
 	}
 
 	filter "system:windows"

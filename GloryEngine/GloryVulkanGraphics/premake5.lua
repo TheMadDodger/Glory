@@ -30,7 +30,9 @@ project "GloryVulkanGraphics"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{GloryIncludeDir.core}"
+		"%{GloryIncludeDir.core}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
@@ -39,6 +41,8 @@ project "GloryVulkanGraphics"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
+		
+		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -49,6 +53,8 @@ project "GloryVulkanGraphics"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
+		
+		"GloryReflectStatic",
 	}
 
 	defines

@@ -53,6 +53,8 @@ project "GloryCore"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
+		
+		"%{IncludeDir.Reflect}",
 	}
 
 	defines

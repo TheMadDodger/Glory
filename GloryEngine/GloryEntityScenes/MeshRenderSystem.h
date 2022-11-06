@@ -1,21 +1,21 @@
 #pragma once
-#include "EntitySystemTemplate.h"
 #include "Components.h"
 #include <RenderData.h>
 
+namespace GloryECS
+{
+    class EntityRegistry;
+}
+
 namespace Glory
 {
-    class MeshRenderSystem : public EntitySystemTemplate<MeshRenderer>
+    class MeshRenderSystem
     {
     public:
-        MeshRenderSystem(Registry* pRegistry) : EntitySystemTemplate(pRegistry) {}
-        virtual ~MeshRenderSystem() {}
+        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, MeshRenderer& pComponent);
 
     private:
-        virtual void OnComponentAdded(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent) override;
-
-        virtual void OnDraw(Registry* pRegistry, EntityID entity, MeshRenderer& pComponent) override;
-        virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, MeshRenderer& pComponent) override;
-        virtual std::string Name() override;
+        MeshRenderSystem() {}
+        virtual ~MeshRenderSystem() {}
     };
 }

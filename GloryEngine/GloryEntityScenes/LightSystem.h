@@ -1,21 +1,20 @@
 #pragma once
-#include "EntitySystemTemplate.h"
 #include "Components.h"
+
+namespace GloryECS
+{
+    class EntityRegistry;
+}
 
 namespace Glory
 {
-	class LightSystem : public EntitySystemTemplate<LightComponent>
+	class LightSystem
 	{
     public:
-        LightSystem(Registry* pRegistry) : EntitySystemTemplate(pRegistry) {}
-        virtual ~LightSystem() {}
+        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, LightComponent& pComponent);
 
     private:
-        virtual void OnComponentAdded(Registry* pRegistry, EntityID entity, LightComponent& pComponent) override;
-        virtual void OnComponentRemoved(Registry* pRegistry, EntityID entity, LightComponent& pComponent) override;
-        virtual void OnUpdate(Registry* pRegistry, EntityID entity, LightComponent& pComponent) override;
-        virtual void OnDraw(Registry* pRegistry, EntityID entity, LightComponent& pComponent) override;
-        virtual void OnAcquireSerializedProperties(UUID uuid, std::vector<SerializedProperty*>& properties, LightComponent& pComponent) override;
-        virtual std::string Name() override;
+        LightSystem();
+        virtual ~LightSystem();
 	};
 }

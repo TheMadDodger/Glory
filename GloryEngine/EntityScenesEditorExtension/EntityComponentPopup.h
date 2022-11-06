@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <Registry.h>
+#include <EntityRegistry.h>
 
 namespace Glory::Editor
 {
@@ -18,7 +18,7 @@ namespace Glory::Editor
 	class EntityComponentPopup
 	{
 	public:
-		static void Open(Registry* pRegistry);
+		static void Open(GloryECS::EntityRegistry* pRegistry);
 
 		void OnGUI();
 		static size_t GetLastSelectedComponentTypeHash();
