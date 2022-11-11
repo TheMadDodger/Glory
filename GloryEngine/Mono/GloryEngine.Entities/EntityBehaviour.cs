@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
@@ -18,16 +17,23 @@ namespace GloryEngine.Entities
             private set { }
         }
 
-        //public Transform Transform
-        //{
-        //
-        //}
+        public Transform Transform
+        {
+            get
+            {
+                if (_transform != null) return _transform;
+                _transform = GetComponent<Transform>();
+                return _transform;
+            }
+            private set { }
+        }
 
         #endregion
 
         #region Fields
 
         private Entity _entity = new Entity(0, 0);
+        private Transform _transform = null;
 
         #endregion
 
@@ -40,7 +46,16 @@ namespace GloryEngine.Entities
 
         #endregion
 
-        #region Internal Methods
+        #region Methods
+
+        T GetComponent<T>() where T : EntityComponent, new()
+        {
+            return Entity.GetComponent<T>();
+        }
+
+        #endregion
+
+        #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern Entity GetEntityHandle();

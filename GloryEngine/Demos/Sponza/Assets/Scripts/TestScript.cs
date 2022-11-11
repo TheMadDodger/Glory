@@ -6,20 +6,20 @@ namespace Sponza
 {
     public class Test : EntityBehaviour
     {
-        private int _updateCounter = 0;
-        private int _drawCounter = 0;
+        float _angularSpeed = 10;
+        float _time = 0;
 
         public void Update()
         {
-            Debug.LogInfo(string.Format("Update() has been called {0} times!", _updateCounter));
-            ++_updateCounter;
+            Transform transform = Transform;
+            Vector3 rotation = transform.LocalRotationEuler;
+            _time += Time.DeltaTime;
+            rotation.y = _angularSpeed * _time;
+            transform.LocalRotationEuler = rotation;
         }
 
         public void Draw()
         {
-            //Debug.LogInfo(string.Format("Draw() has been called {0} times!", _drawCounter));
-            Debug.LogInfo(string.Format("Hello World! Draw() has been called {0} times!", _drawCounter));
-            ++_drawCounter;
         }
     }
 }

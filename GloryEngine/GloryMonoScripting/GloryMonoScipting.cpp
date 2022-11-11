@@ -1,6 +1,6 @@
 #include "GloryMonoScipting.h"
-#include "DebugBinder.h"
-#include "MathBinder.h"
+#include "CoreCSAPI.h"
+#include "MathCSAPI.h"
 #include "MonoLibManager.h"
 #include "MonoManager.h"
 #include <Game.h>
@@ -73,8 +73,8 @@ namespace Glory
 
 	void GloryMonoScipting::GetInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
-		DebugBinder::CreateBindings(internalCalls);
-		MathBinder::CreateBindings(internalCalls);
+		CoreCSAPI::AddInternalCalls(internalCalls);
+		MathCSAPI::AddInternalCalls(internalCalls);
 	}
 
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)

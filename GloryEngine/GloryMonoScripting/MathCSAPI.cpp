@@ -1,8 +1,15 @@
-#include "MathBinder.h"
+#include "MathCSAPI.h"
 #include "GloryMonoScipting.h"
 
 namespace Glory
 {
+#pragma region Vector2
+	struct Vec2Wrapper
+	{
+		float x;
+		float y;
+	};
+
 	glm::vec2 ToGLMVec2(Vec2Wrapper v)
 	{
 		return glm::vec2(v.x, v.y);
@@ -32,8 +39,9 @@ namespace Glory
 	{
 		return ToVec2Wrapper(ToGLMVec2(a) / ToGLMVec2(b));
 	}
+#pragma endregion
 
-	void MathBinder::CreateBindings(std::vector<InternalCall>& internalCalls)
+	void MathCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
 		BIND("GloryEngine.Vector2::op_Addition(GloryEngine.Vector2,GloryEngine.Vector2)", VectorAddOverload);
 		BIND("GloryEngine.Vector2::op_Subtraction(GloryEngine.Vector2,GloryEngine.Vector2)", VectorSubtractOverload);

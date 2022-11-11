@@ -7,53 +7,62 @@ namespace GloryEngine.Entities
     {
 		#region Props
 
-		public UInt32 EntityID => _entityID;
+		public UInt64 EntityID => _entityID;
 
 		#endregion
 
 		#region Fields
 
-		private UInt32 _entityID;
+		private UInt64 _entityID;
 		private UInt64 _sceneID;
 
         #endregion
 
         #region Constructor
 
-        public Entity(UInt32 id, UInt64 sceneID)
+        public Entity(UInt64 id, UInt64 sceneID)
         {
             _entityID = id;
 			_sceneID = sceneID;
-		}
+        }
 
-		#endregion
+        #endregion
 
-		#region Methods
+        #region Methods
 
-		//T AddComponent<T>()
-		//{
-		//	return m_pEntityScene->m_Registry.AddComponent<T>(m_EntityID, std::forward<Args>(args)...);
-		//}
+        public T GetComponent<T>() where T : EntityComponent, new()
+        {
+            return EntityComponentManager.GetComponent<T>(ref this);
+        }
 
-		//template<typename T>
-		//bool HasComponent()
-		//{
-		//	return m_pEntityScene->m_Registry.HasComponent<T>(m_EntityID);
-		//}
+        #endregion
 
-		//template<typename T>
-		//T& GetComponent()
-		//{
-		//	return m_pEntityScene->m_Registry.GetComponent<T>(m_EntityID);
-		//}
+        #region API Methods
 
-		//template<typename T>
-		//void RemoveComponent()
-		//{
-		//	m_pEntityScene->m_Registry.RemoveComponent<T>(m_EntityID);
-		//}
+        //T AddComponent<T>()
+        //{
+        //	return m_pEntityScene->m_Registry.AddComponent<T>(m_EntityID, std::forward<Args>(args)...);
+        //}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
+        //template<typename T>
+        //bool HasComponent()
+        //{
+        //	return m_pEntityScene->m_Registry.HasComponent<T>(m_EntityID);
+        //}
+
+        //template<typename T>
+        //T& GetComponent()
+        //{
+        //	return m_pEntityScene->m_Registry.GetComponent<T>(m_EntityID);
+        //}
+
+        //template<typename T>
+        //void RemoveComponent()
+        //{
+        //	m_pEntityScene->m_Registry.RemoveComponent<T>(m_EntityID);
+        //}
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Clear();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
