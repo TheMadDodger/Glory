@@ -16,8 +16,11 @@
 
 #include <AssetReference.h>
 #include <Reflection.h>
+#include <map>
 
 REFLECTABLE_ENUM(CameraPerspective, Orthographic, Perspective)
+
+#define PROPERTY_BUFFER_SIZE 2048;
 
 namespace Glory
 {
@@ -133,14 +136,31 @@ namespace Glory
 		)
 	};
 
+	struct ScriptData
+	{
+		ScriptData() : m_ScriptType(0) {}
+		ScriptData(size_t scriptType) : m_ScriptType(scriptType) {}
+
+		std::map<std::string, char*> m_Data;
+
+		REFLECTABLE(ScriptData,
+			(size_t)(m_ScriptType)
+		)
+	};
+
 	struct ScriptedComponent
 	{
-		ScriptedComponent() : m_Script(0) {}
-		ScriptedComponent(Script* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0) {}
+		ScriptedComponent() : m_Script(0), m_ScriptData() {}
+		ScriptedComponent(Script* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0), m_ScriptData() {}
 
 		REFLECTABLE(ScriptedComponent,
 			(AssetReference<Script>) (m_Script)
-		)
+		);
+
+		std::vector<ScriptProperty> m_ScriptProperties;
+		std::vector<ScriptProperty> m_ScriptChildProperties;
+
+		YAML::Node m_ScriptData;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));

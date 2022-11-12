@@ -5,6 +5,10 @@
 #include <ResourceType.h>
 #include <any>
 #include <Reflection.h>
+#include <ScriptProperty.h>
+#include <yaml-cpp/yaml.h>
+#include <YAML_GLM.h>
+#include <GLORY_YAML.h>
 #include "SerializedProperty.h"
 #include "GloryEditor.h"
 #include "PropertyAction.h"
@@ -22,6 +26,7 @@ namespace Glory::Editor
 		virtual GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const;
+		virtual GLORY_EDITOR_API bool Draw(const std::string& label, YAML::Node& node, size_t typeHash, uint32_t flags) const;
 		GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty) const;
 
 		template<class T>
@@ -39,6 +44,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, size_t typeHash, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags);
 
 		static GLORY_EDITOR_API PropertyDrawer* GetPropertyDrawer(size_t typeHash);
 
@@ -111,6 +117,21 @@ namespace Glory::Editor
 			if (originalValue == value) return false;
 			memcpy((void*)&buffer[offset], (void*)&value, size);
 			return true;
+		}
+
+		virtual bool Draw(const std::string& label, YAML::Node& node, size_t typeHash, uint32_t flags) const override
+		{
+			PropertyType oldValue = PropertyType();
+			if (node.IsDefined()) oldValue = node.as<PropertyType>();
+			else node = oldValue;
+			PropertyType newValue = oldValue;
+			if (OnGUI(label, &newValue, flags))
+			{
+				node = newValue;
+				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
+				return true;
+			}
+			return false;
 		}
 
 		virtual bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const = 0;

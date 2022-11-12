@@ -14,7 +14,7 @@ namespace Glory
 	{
 	}
 
-	void EntitySceneObjectSerializer::SerializeComponent(GloryECS::EntityRegistry* pRegistry, UUID componentUUID, void* pAddress, const GloryReflect::TypeData* pTypeData, YAML::Emitter& out)
+	void EntitySceneObjectSerializer::SerializeComponent(GloryECS::EntityID entityID, GloryECS::EntityRegistry* pRegistry, UUID componentUUID, void* pAddress, const GloryReflect::TypeData* pTypeData, YAML::Emitter& out)
 	{
 		out << YAML::BeginMap;
 		out << YAML::Key << "UUID";
@@ -23,6 +23,16 @@ namespace Glory
 		out << YAML::Value << pTypeData->TypeName();
 		out << YAML::Key << "TypeHash";
 		out << YAML::Value << pTypeData->TypeHash();
+
+		Serializer* pSerializer = Serializer::GetSerializer(pTypeData->TypeHash());
+		if (pSerializer)
+		{
+			EntityComponentObject componentObject(entityID, componentUUID, pTypeData->TypeHash(), pRegistry);
+			pSerializer->Serialize(&componentObject, out);
+			out << YAML::EndMap;
+			return;
+		}
+
 		for (size_t i = 0; i < pTypeData->FieldCount(); i++)
 		{
 			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
@@ -88,7 +98,7 @@ namespace Glory
 			BaseTypeView* pTypeView = pRegistry->GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity.GetEntityID());
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-			SerializeComponent(pRegistry, componentUUID, pAddress, pTypeData, out);
+			SerializeComponent(entity.GetEntityID(), pRegistry, componentUUID, pAddress, pTypeData, out);
 		}
 		out << YAML::EndSeq;
 	}
@@ -137,6 +147,15 @@ namespace Glory
 			if (typeHash != transformTypeHash) pComponentAddress = pRegistry->CreateComponent(entity, typeHash, compUUID);
 			else pComponentAddress = pRegistry->GetComponentAddress(entity, compUUID);
 
+			Serializer* pSerializer = Serializer::GetSerializer(typeHash);
+			if (pSerializer)
+			{
+				EntityComponentObject componentObject(entity, compUUID, typeHash, pRegistry);
+				pSerializer->Deserialize(pObject, nextObject);
+				pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
+				continue;
+			}
+
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 			for (size_t i = 0; i < pTypeData->FieldCount(); i++)
 			{
@@ -151,6 +170,8 @@ namespace Glory
 				}
 				PropertySerializer::DeserializeProperty(pFieldData, pComponentAddress, subNode);
 			}
+
+			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 
 			//pScene->GetRegistry()->GetSystems()->CreateComponent(entity, typeHash, compUUID);
 			//EntityComponentData* pComponentData = pScene->GetRegistry()->GetEntityComponentDataAt(entity, currentComponentIndex);

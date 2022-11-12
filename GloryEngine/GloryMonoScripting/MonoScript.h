@@ -15,6 +15,13 @@ namespace Glory
 
         virtual void GLORY_API Invoke(Object* pObject, const std::string& method, void** args) override;
 
+        virtual void SetValue(Object* pObject, const std::string& name, void* value) override;
+        virtual void GetValue(Object* pObject, const std::string& name, void* value) override;
+
+        virtual void LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data) override;
+        virtual void SetPropertyValues(Object* pObject, YAML::Node& node) override;
+        virtual void GetPropertyValues(Object* pObject, YAML::Node& node) override;
+
     private:
         virtual bool IsBehaviour() override;
 

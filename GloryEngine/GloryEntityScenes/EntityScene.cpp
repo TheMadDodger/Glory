@@ -76,10 +76,12 @@ namespace Glory
 		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Update, TransformSystem::OnUpdate);
 
 		// Scripted
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnAdd, ScriptedSystem::OnAdd);
 		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Update, ScriptedSystem::OnUpdate);
 		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Draw, ScriptedSystem::OnDraw);
 		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Start, ScriptedSystem::OnStart);
 		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Stop, ScriptedSystem::OnStop);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
 
 	}
 

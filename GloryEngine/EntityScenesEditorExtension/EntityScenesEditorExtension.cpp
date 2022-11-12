@@ -7,6 +7,7 @@
 #include <Components.h>
 
 #include <Reflection.h>
+#include "ScriptedComponentEditor.h"
 
 namespace Glory::Editor
 {
@@ -30,6 +31,7 @@ namespace Glory::Editor
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
+		Editor::RegisterEditor<ScriptedComponentEditor>();
 
 		EditorPlayer::RegisterLoopHandler(this);
 	}

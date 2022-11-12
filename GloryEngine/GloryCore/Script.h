@@ -1,6 +1,8 @@
 #pragma once
 #include "Resource.h"
 #include "FileData.h"
+#include "ScriptProperty.h"
+#include <yaml-cpp/yaml.h>
 
 namespace Glory
 {
@@ -15,7 +17,11 @@ namespace Glory
 
         virtual bool IsBehaviour() = 0;
 
-        //virtual size_t Size() = 0;
-        //virtual const char* Data() = 0;
+        virtual void SetValue(Object* pObject, const std::string& name, void* value) = 0;
+        virtual void GetValue(Object* pObject, const std::string& name, void* value) = 0;
+
+        virtual void LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data) = 0;
+        virtual void SetPropertyValues(Object* pObject, YAML::Node& node) = 0;
+        virtual void GetPropertyValues(Object* pObject, YAML::Node& node) = 0;
     };
 }

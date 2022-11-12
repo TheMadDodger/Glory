@@ -25,7 +25,7 @@ namespace Glory::Editor
 
 		if (ImGui::Button(buttonLabel.c_str()))
 		{
-			AssetPickerPopup::Open(typeHash, pUUIDMember, true);
+			AssetPickerPopup::Open(typeHash, pUUIDMember, nullptr, true);
 		}
 
 		return true;
@@ -59,9 +59,11 @@ namespace Glory::Editor
 
 		if (ImGui::Button(buttonLabel.c_str()))
 		{
-			AssetPickerPopup::Open(typeHash, pReferenceMember->AssetUUIDMember(), true);
+			AssetPickerPopup::Open(typeHash, pReferenceMember->AssetUUIDMember(), pReferenceMember->IsDirty(), true);
 		}
 
-		return true;
+		bool isDirty = *pReferenceMember->IsDirty();
+		*pReferenceMember->IsDirty() = false;
+		return isDirty;
 	}
 }

@@ -8,7 +8,7 @@ namespace Glory::Editor
 	class AssetPickerPopup
 	{
 	public:
-		static GLORY_EDITOR_API void Open(size_t typeHash, UUID* pResource, bool includeSubAssets = false);
+		static GLORY_EDITOR_API void Open(size_t typeHash, UUID* pResource, bool* pHasChanged, bool includeSubAssets = false);
 		static GLORY_EDITOR_API void Open(size_t typeHash, std::function<void(Resource*)> callback, bool includeSubAssets = false);
 		GLORY_EDITOR_API void OnGUI();
 
@@ -26,6 +26,7 @@ namespace Glory::Editor
 		friend class MainEditor;
 		static bool m_Open;
 		static UUID* m_pUUIDPointer;
+		static bool* m_pHasChangedPointer;
 		static size_t m_TypeHash;
 		static bool m_IncludeSubAssets;
 		char m_FilterBuffer[200];

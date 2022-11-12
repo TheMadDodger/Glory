@@ -46,7 +46,18 @@ namespace Glory::Editor
 			}
 
 			Undo::StopRecord();
+
+			if (change) Validate();
 			return change;
+		}
+
+	protected:
+		void Validate()
+		{
+			TComponent& component = GetTargetComponent();
+			GloryECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
+			GloryECS::TypeView<TComponent>* pTypeView = pRegistry->GetTypeView<TComponent>();
+			pTypeView->Invoke(InvocationType::OnValidate, pRegistry, m_pComponentObject->EntityID(), &component);
 		}
 
 	private:

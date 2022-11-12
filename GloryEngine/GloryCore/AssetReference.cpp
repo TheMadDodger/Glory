@@ -34,4 +34,9 @@ namespace Glory
 	{
 		return AssetManager::GetOrLoadAsset(m_AssetUUID);
 	}
+
+	bool* AssetReferenceBase::IsDirty()
+	{
+		return &m_IsDirty;
+	}
 }

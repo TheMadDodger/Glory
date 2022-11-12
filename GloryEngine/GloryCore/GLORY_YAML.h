@@ -17,6 +17,7 @@ namespace YAML
 		{
 			Node node;
 			node = mask.m_Mask;
+			return node;
 		}
 
 		static bool decode(const Node& node, Glory::LayerMask& mask)
@@ -54,6 +55,7 @@ namespace YAML
 		{
 			Node node;
 			node = SHADERTYPE_TOSTRING[type];
+			return node;
 		}
 
 		static bool decode(const Node& node, Glory::ShaderType& type)

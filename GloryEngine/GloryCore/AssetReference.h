@@ -16,11 +16,13 @@ namespace Glory
 		UUID* AssetUUIDMember();
 		void SetUUID(UUID uuid);
 		Resource* GetResource();
+		bool* IsDirty();
 
 		virtual const size_t TypeHash() = 0;
 
 	protected:
 		UUID m_AssetUUID;
+		bool m_IsDirty;
 	};
 
 	template<class T>

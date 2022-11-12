@@ -4,9 +4,18 @@
 #include <mono/metadata/debug-helpers.h>
 #include <filesystem>
 #include <fstream>
+#include <mono/metadata/attrdefs.h>
+#include <ResourceType.h>
 
 namespace Glory
 {
+	std::map<std::string, size_t> m_MonoTypeToHash = {
+		{"System.Single", ResourceType::GetHash<float>()},
+		{"System.Double", ResourceType::GetHash<double>()},
+		{"System.Int32", ResourceType::GetHash<int>()},
+		{"System.Boolean", ResourceType::GetHash<bool>()},
+	};
+
 	AssemblyBinding::AssemblyBinding(const ScriptingLib& lib)
 		: m_Lib(lib), m_pAssembly(nullptr), m_pImage(nullptr)
 	{
@@ -111,7 +120,10 @@ namespace Glory
 
 	AssemblyClass::AssemblyClass() : m_Name(""), m_pClass(nullptr) {}
 
-	AssemblyClass::AssemblyClass(const std::string& name, MonoClass* pClass) : m_Name(name), m_pClass(pClass) {}
+	AssemblyClass::AssemblyClass(const std::string& name, MonoClass* pClass) : m_Name(name), m_pClass(pClass)
+	{
+		LoadFields();
+	}
 
 	MonoMethod* AssemblyClass::GetMethod(const std::string& name)
 	{
@@ -122,11 +134,121 @@ namespace Glory
 		return m_pMethods[name];
 	}
 
+	const AssemblyClassField* AssemblyClass::GetField(const std::string& name) const
+	{
+		if (m_NameToFieldIndex.find(name) == m_NameToFieldIndex.end()) return nullptr;
+		const size_t& index = m_NameToFieldIndex.at(name);
+		return &m_Fields[index];
+	}
+
+	const AssemblyClassField* AssemblyClass::GetField(size_t index) const
+	{
+		if (index >= m_Fields.size()) return nullptr;
+		return &m_Fields[index];
+	}
+
+	const size_t AssemblyClass::NumFields() const
+	{
+		return m_Fields.size();
+	}
+
 	MonoMethod* AssemblyClass::LoadMethod(const std::string& name)
 	{
 		MonoMethodDesc* pMainFuncDesc = mono_method_desc_new(name.c_str(), false);
 		MonoMethod* pMethod = mono_method_desc_search_in_class(pMainFuncDesc, m_pClass);
 		mono_method_desc_free(pMainFuncDesc);
 		return pMethod;
+	}
+
+	void AssemblyClass::LoadFields()
+	{
+		void* iter = NULL;
+		MonoClassField* pField = nullptr;
+		while ((pField = mono_class_get_fields(m_pClass, &iter)) != nullptr)
+		{
+			size_t index = m_Fields.size();
+			m_Fields.push_back(AssemblyClassField(pField));
+			m_NameToFieldIndex.emplace(m_Fields[index].Name(), index);
+
+			//MonoCustomAttrInfo* pAttributeInfo = mono_custom_attrs_from_field(pClass, pField);
+		}
+	}
+
+	Attributes::Attributes() {}
+	Attributes::~Attributes() {}
+
+	AssemblyClassField::AssemblyClassField() :
+		m_pMonoField(NULL), m_pType(NULL), m_Name(NULL),
+		m_Flags(NULL), m_Visibility(Visibility(0)),
+		m_TypeName(NULL),
+		m_SizeAllignment(0),
+		m_TypeHash(0),
+		m_Size(0),
+		m_IsStatic(false)
+	{
+	}
+	AssemblyClassField::AssemblyClassField(MonoClassField* pField) :
+		m_pMonoField(pField), m_pType(mono_field_get_type(pField)), m_Name(mono_field_get_name(pField)),
+		m_Flags(mono_field_get_flags(pField)), m_Visibility(Visibility(m_Flags & MONO_FIELD_ATTR_FIELD_ACCESS_MASK)),
+		m_TypeName(mono_type_get_name(m_pType)),
+		m_SizeAllignment(0),
+		m_Size(mono_type_size(m_pType, &m_SizeAllignment)),
+		m_TypeHash(m_MonoTypeToHash[m_TypeName]),
+		m_IsStatic((m_Flags & MONO_FIELD_ATTR_STATIC) == MONO_FIELD_ATTR_STATIC)
+	{
+	}
+
+	AssemblyClassField::~AssemblyClassField()
+	{
+	}
+
+	void AssemblyClassField::SetValue(MonoObject* pObject, void* value) const
+	{
+		mono_field_set_value(pObject, m_pMonoField, value);
+	}
+
+	void AssemblyClassField::GetValue(MonoObject* pObject, void* value) const
+	{
+		mono_field_get_value(pObject, m_pMonoField, value);
+	}
+
+	MonoClassField* AssemblyClassField::ClassField() const
+	{
+		return m_pMonoField;
+	}
+
+	MonoType* AssemblyClassField::FieldType() const
+	{
+		return m_pType;
+	}
+
+	const char* AssemblyClassField::Name() const
+	{
+		return m_Name;
+	}
+
+	const Visibility& AssemblyClassField::FielddVisibility() const
+	{
+		return m_Visibility;
+	}
+
+	const char* AssemblyClassField::TypeName() const
+	{
+		return m_TypeName;
+	}
+
+	const int AssemblyClassField::Size() const
+	{
+		return m_Size;
+	}
+
+	const size_t AssemblyClassField::TypeHash() const
+	{
+		return m_TypeHash;
+	}
+
+	const bool AssemblyClassField::IsStatic() const
+	{
+		return m_IsStatic;
 	}
 }

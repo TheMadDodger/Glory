@@ -2,6 +2,7 @@
 #include "EntitySceneSerializer.h"
 #include "EntitySceneObjectSerializer.h"
 #include "Components.h"
+#include "ScriptedComponentSerializer.h"
 #include <TypeFlags.h>
 
 namespace Glory
@@ -77,6 +78,7 @@ namespace Glory
 		// Register serializers
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
+		Serializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 	}
 

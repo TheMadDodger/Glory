@@ -8,15 +8,17 @@ namespace Glory::Editor
 {
 	bool AssetPickerPopup::m_Open = false;
 	UUID* AssetPickerPopup::m_pUUIDPointer = nullptr;
+	bool* AssetPickerPopup::m_pHasChangedPointer = nullptr;
 	size_t AssetPickerPopup::m_TypeHash = 0;
 	bool AssetPickerPopup::m_IncludeSubAssets = false;
 	std::function<void(Resource*)> AssetPickerPopup::m_Callback = NULL;
 
-	GLORY_EDITOR_API void AssetPickerPopup::Open(size_t typeHash, UUID* pUUID, bool includeSubAssets)
+	GLORY_EDITOR_API void AssetPickerPopup::Open(size_t typeHash, UUID* pUUID, bool* pHasChanged, bool includeSubAssets)
 	{
 		m_Open = true;
 		m_TypeHash = typeHash;
 		m_pUUIDPointer = pUUID;
+		m_pHasChangedPointer = pHasChanged;
 		m_IncludeSubAssets = includeSubAssets;
 	}
 
@@ -26,6 +28,7 @@ namespace Glory::Editor
 		m_Open = true;
 		m_TypeHash = typeHash;
 		m_pUUIDPointer = nullptr;
+		m_pHasChangedPointer = nullptr;
 		m_IncludeSubAssets = includeSubAssets;
 	}
 
@@ -144,6 +147,8 @@ namespace Glory::Editor
 		}
 
 		*m_pUUIDPointer = uuid;
+		if (m_pHasChangedPointer) *m_pHasChangedPointer = true;
 		m_pUUIDPointer = nullptr;
+		m_pHasChangedPointer = nullptr;
 	}
 }

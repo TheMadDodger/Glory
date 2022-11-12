@@ -2,12 +2,57 @@
 #include <mono/jit/jit.h>
 #include <string>
 #include <map>
+#include <vector>
 #include <array>
+#include <string>
 #include <Glory.h>
 #include <ScriptExtensions.h>
 
 namespace Glory
 {
+	enum class Visibility
+	{
+		VISIBILITY_PRIVATE = 1,
+		VISIBILITY_PROTECTED_AND_INTERNAL,
+		VISIBILITY_INTERNAL,
+		VISIBILITY_PROTECTED,
+		VISIBILITY_PROTECTED_OR_INTERNAL,
+		VISIBILITY_PUBLIC,
+	};
+
+	struct AssemblyClassField
+	{
+	public:
+		AssemblyClassField();
+		AssemblyClassField(MonoClassField* pField);
+		virtual ~AssemblyClassField();
+
+	public:
+		void SetValue(MonoObject* pObject, void* value) const;
+		void GetValue(MonoObject* pObject, void* value) const;
+
+		MonoClassField* ClassField() const;
+		MonoType* FieldType() const;
+		const char* Name() const;
+		const Visibility& FielddVisibility() const;
+		const char* TypeName() const;
+		const int Size() const;
+		const size_t TypeHash() const;
+		const bool IsStatic() const;
+
+	private:
+		MonoClassField* m_pMonoField;
+		MonoType* m_pType;
+		uint32_t m_Flags;
+		const char* m_Name;
+		Visibility m_Visibility;
+		const char* m_TypeName;
+		int m_Size;
+		int m_SizeAllignment;
+		size_t m_TypeHash;
+		bool m_IsStatic;
+	};
+
 	struct AssemblyClass
 	{
 	public:
@@ -19,9 +64,17 @@ namespace Glory
 		std::map<std::string, MonoMethod*> m_pMethods;
 
 		MonoMethod* GetMethod(const std::string& name);
+		const AssemblyClassField* GetField(const std::string& name) const;
+		const AssemblyClassField* GetField(const size_t index) const;
+		const size_t NumFields() const;
 
 	private:
 		MonoMethod* LoadMethod(const std::string& name);
+
+		void LoadFields();
+
+		std::vector<AssemblyClassField> m_Fields;
+		std::map<std::string, size_t> m_NameToFieldIndex;
 	};
 
 	struct AssemblyNamespace
@@ -55,5 +108,15 @@ namespace Glory
 		MonoAssembly* m_pAssembly;
 		MonoImage* m_pImage;
 		std::map<std::string, AssemblyNamespace> m_Namespaces;
+	};
+
+	class Attributes
+	{
+	public:
+		Attributes();
+		~Attributes();
+
+	private:
+		std::map<std::string, MonoClass*> m_AttributeClasses;
 	};
 }

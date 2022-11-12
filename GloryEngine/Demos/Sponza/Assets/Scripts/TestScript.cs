@@ -6,16 +6,19 @@ namespace Sponza
 {
     public class Test : EntityBehaviour
     {
-        float _angularSpeed = 10;
-        float _time = 0;
+        public float _angularSpeed = 10;
+        public int _anInt = 10;
+        public double _aDouble = 0.0;
+        public bool _aBool = false;
+        public float _time = 0;
 
         public void Update()
         {
             Transform transform = Transform;
-            Vector3 rotation = transform.LocalRotationEuler;
+            Vector3 position = transform.LocalPosition;
             _time += Time.DeltaTime;
-            rotation.y = _angularSpeed * _time;
-            transform.LocalRotationEuler = rotation;
+            position.x = _angularSpeed * _time;
+            transform.LocalPosition = position;
         }
 
         public void Draw()
