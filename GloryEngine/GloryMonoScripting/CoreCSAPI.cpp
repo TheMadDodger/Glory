@@ -111,18 +111,6 @@ namespace Glory
 #pragma endregion
 
 #pragma region Layer Management
-
-	struct LayerWrapper
-	{
-	public:
-		LayerWrapper(const Layer* pLayer) : Mask(pLayer->m_Mask),
-			Name(mono_string_new(MonoManager::GetDomain(), pLayer->m_Name.c_str()))
-		{ }
-
-		LayerMask Mask;
-		MonoString* Name;
-	};
-
 	void LayerManager_AddLayer(MonoString* name)
 	{
 		const std::string nameStr = mono_string_to_utf8(name);

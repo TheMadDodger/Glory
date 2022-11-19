@@ -15,6 +15,7 @@
 #include "Entity.h"
 
 #include <AssetReference.h>
+#include <LayerRef.h>
 #include <Reflection.h>
 #include <map>
 
@@ -116,11 +117,11 @@ namespace Glory
 	
 	struct LayerComponent
 	{
-		LayerComponent() : m_pLayer(nullptr) {}
-		LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
+		LayerComponent() : m_Layer("") {}
+		LayerComponent(const Layer* pLayer) : m_Layer(pLayer->m_Name) {}
 
 		REFLECTABLE(LayerComponent,
-			(const Layer*)	(m_pLayer)
+			(LayerRef)	(m_Layer)
 		)
 	};
 	
@@ -133,18 +134,6 @@ namespace Glory
 			(glm::vec4)	(m_Color),
 			(float)	(m_Intensity),
 			(float)	(m_Range)
-		)
-	};
-
-	struct ScriptData
-	{
-		ScriptData() : m_ScriptType(0) {}
-		ScriptData(size_t scriptType) : m_ScriptType(scriptType) {}
-
-		std::map<std::string, char*> m_Data;
-
-		REFLECTABLE(ScriptData,
-			(size_t)(m_ScriptType)
 		)
 	};
 

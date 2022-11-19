@@ -3,6 +3,8 @@
 #include <EntitySceneObject.h>
 #include <ComponentTypes.h>
 #include <Components.h>
+#include <CoreCSAPI.h>
+#include <LayerManager.h>
 
 namespace Glory
 {
@@ -22,7 +24,7 @@ namespace Glory
 		EntityScene* pEntityScene = GetEntityScene(pEntityHandle);
 		EntityView* pEntityView = pEntityScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
 		size_t hash = pEntityView->ComponentType(componentID);
-		return pEntityScene->GetRegistry()->GetComponent<Transform>(pEntityHandle->m_EntityID);
+		return pEntityScene->GetRegistry()->GetComponent<T>(pEntityHandle->m_EntityID);
 	}
 
 	bool IsValid(MonoEntityHandle* pMonoEntityHandle)
@@ -126,14 +128,139 @@ namespace Glory
 	}
 #pragma endregion
 
+#pragma region MeshFilter
+
+
+
+#pragma endregion
+
+#pragma region MeshRenderer
+
+
+
+#pragma endregion
+
+#pragma region CameraComponent
+
+	float CameraComponent_GetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_HalfFOV;
+	}
+
+	void CameraComponent_SetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID, float halfFov)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		cameraComp.m_HalfFOV = halfFov;
+	}
+
+	float CameraComponent_GetNear(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_Near;
+	}
+
+	void CameraComponent_SetNear(MonoEntityHandle* pEntityHandle, UUID componentID, float near)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		cameraComp.m_Near = near;
+	}
+
+	float CameraComponent_GetFar(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_Far;
+	}
+
+	void CameraComponent_SetFar(MonoEntityHandle* pEntityHandle, UUID componentID, float far)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		cameraComp.m_Far = far;
+	}
+
+	int CameraComponent_GetDisplayIndex(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_DisplayIndex;
+	}
+
+	void CameraComponent_SetDisplayIndex(MonoEntityHandle* pEntityHandle, UUID componentID, int displayIndex)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		cameraComp.m_DisplayIndex = displayIndex;
+	}
+
+	int CameraComponent_GetPriority(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_Priority;
+	}
+
+	void CameraComponent_SetPriority(MonoEntityHandle* pEntityHandle, UUID componentID, int priority)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		cameraComp.m_Priority = priority;
+	}
+
+	LayerMask CameraComponent_GetLayerMask(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_LayerMask;
+	}
+
+	void CameraComponent_SetLayerMask(MonoEntityHandle* pEntityHandle, UUID componentID, LayerMask* pLayerMask)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		cameraComp.m_LayerMask.m_Mask = pLayerMask->m_Mask;
+	}
+
+	glm::vec4 CameraComponent_GetClearColor(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_ClearColor;
+	}
+
+	void CameraComponent_SetClearColor(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec4* clearCol)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		cameraComp.m_ClearColor = *clearCol;
+	}
+
+	uint64_t CameraComponent_GetCameraID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		return cameraComp.m_Camera.GetUUID();
+	}
+
+#pragma endregion
+
+#pragma region Layer Component
+
+	LayerWrapper LayerComponent_GetLayer(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
+		return LayerWrapper(layerComp.m_Layer.Layer());
+	}
+
+	void LayerComponent_SetLayer(MonoEntityHandle* pEntityHandle, UUID componentID, LayerWrapper* layer)
+	{
+		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
+		const Layer* pLayer = LayerManager::GetLayerByName(mono_string_to_utf8(layer->Name));
+		layerComp.m_Layer.m_LayerName = pLayer ? pLayer->m_Name : "";
+	}
+
+#pragma endregion
+
 #pragma region Binding
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
 	{
+		// Entity
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Entity::IsValid()", IsValid));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.EntityBehaviour::GetEntityHandle()", GetEntityHandle));
 
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.EntityComponentManager::Component_GetComponentID", Component_GetComponentID));
 
+		// Transform
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetLocalPosition", Transform_GetLocalPosition));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalPosition", Transform_SetLocalPosition));
 
@@ -145,6 +272,34 @@ namespace Glory
 
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetLocalScale", Transform_GetLocalScale));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalScale", Transform_SetLocalScale));
+
+		// Camera
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetHalfFOV", CameraComponent_GetHalfFOV));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetHalfFOV", CameraComponent_SetHalfFOV));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetNear", CameraComponent_GetNear));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetNear", CameraComponent_SetNear));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetFar", CameraComponent_GetFar));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetFar", CameraComponent_SetFar));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetDisplayIndex", CameraComponent_GetDisplayIndex));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetDisplayIndex", CameraComponent_SetDisplayIndex));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetPriority", CameraComponent_GetPriority));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetPriority", CameraComponent_SetPriority));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetLayerMask", CameraComponent_GetLayerMask));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetLayerMask", CameraComponent_SetLayerMask));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetClearColor", CameraComponent_GetClearColor));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetClearColor", CameraComponent_SetClearColor));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetCameraID", CameraComponent_GetCameraID));
+
+		// Layer
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LayerComponent::LayerComponent_GetLayer", LayerComponent_GetLayer));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LayerComponent::LayerComponent_SetLayer", LayerComponent_SetLayer));
 	}
 
 	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)

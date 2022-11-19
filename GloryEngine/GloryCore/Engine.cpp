@@ -17,6 +17,7 @@
 #ifdef _DEBUG
 #include "WindowsDebugConsole.h"
 #endif // _DEBUG
+#include "LayerRef.h"
 
 
 namespace Glory
@@ -277,6 +278,7 @@ namespace Glory
 		STANDARD_SERIALIZER(glm::vec4);
 		STANDARD_SERIALIZER(glm::quat);
 		STANDARD_SERIALIZER(LayerMask);
+		STANDARD_SERIALIZER(LayerRef);
 
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
@@ -297,6 +299,7 @@ namespace Glory
 		ResourceType::RegisterType<glm::quat>();
 
 		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
+		GloryReflect::Reflect::RegisterBasicType<LayerRef>("LayerRef");
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}

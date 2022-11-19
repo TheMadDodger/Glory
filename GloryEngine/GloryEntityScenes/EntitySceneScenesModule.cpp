@@ -59,6 +59,7 @@ namespace Glory
 		GloryECS::ComponentTypes::RegisterComponent<LookAt>();
 		GloryECS::ComponentTypes::RegisterComponent<Spin>();
 		GloryECS::ComponentTypes::RegisterComponent<LightComponent>();
+		GloryECS::ComponentTypes::RegisterComponent<LayerComponent>();
 		GloryECS::ComponentTypes::RegisterComponent<ScriptedComponent>();
 
 		// Register component types

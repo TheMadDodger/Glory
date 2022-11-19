@@ -83,6 +83,8 @@ namespace Glory
 		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Stop, ScriptedSystem::OnStop);
 		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
 
+		// TEMPORARY
+		m_Registry.RegisterInvokaction<LayerComponent>(GloryECS::InvocationType::OnAdd, [](EntityRegistry*, EntityID, LayerComponent&) {});
 	}
 
 	void EntityScene::OnTick()
