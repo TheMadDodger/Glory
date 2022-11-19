@@ -296,6 +296,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<Vector4Drawer>();
 		PropertyDrawer::RegisterPropertyDrawer<QuatDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<LayerRefDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<EnumPropertyDrawer>();

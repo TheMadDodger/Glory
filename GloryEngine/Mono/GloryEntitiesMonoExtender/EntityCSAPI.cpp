@@ -141,7 +141,6 @@ namespace Glory
 #pragma endregion
 
 #pragma region CameraComponent
-
 	float CameraComponent_GetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
@@ -231,11 +230,9 @@ namespace Glory
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_Camera.GetUUID();
 	}
-
 #pragma endregion
 
 #pragma region Layer Component
-
 	LayerWrapper LayerComponent_GetLayer(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
@@ -248,7 +245,44 @@ namespace Glory
 		const Layer* pLayer = LayerManager::GetLayerByName(mono_string_to_utf8(layer->Name));
 		layerComp.m_Layer.m_LayerName = pLayer ? pLayer->m_Name : "";
 	}
+#pragma endregion
 
+#pragma region Light Component
+	glm::vec4 LightComponent_GetColor(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		return lightComp.m_Color;
+	}
+	
+	void LightComponent_SetColor(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec4* color)
+	{
+		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		lightComp.m_Color = *color;
+	}
+
+	float LightComponent_GetIntensity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		return lightComp.m_Intensity;
+	}
+
+	void LightComponent_SetIntensity(MonoEntityHandle* pEntityHandle, UUID componentID, float intensity)
+	{
+		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		lightComp.m_Intensity = intensity;
+	}
+
+	float LightComponent_GetRange(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		return lightComp.m_Range;
+	}
+
+	void LightComponent_SetRange(MonoEntityHandle* pEntityHandle, UUID componentID, float range)
+	{
+		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		lightComp.m_Range = range;
+	}
 #pragma endregion
 
 #pragma region Binding
@@ -300,6 +334,16 @@ namespace Glory
 		// Layer
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LayerComponent::LayerComponent_GetLayer", LayerComponent_GetLayer));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LayerComponent::LayerComponent_SetLayer", LayerComponent_SetLayer));
+
+		// Light
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_GetColor", LightComponent_GetColor));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_SetColor", LightComponent_SetColor));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_GetIntensity", LightComponent_GetIntensity));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_SetIntensity", LightComponent_SetIntensity));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_GetRange", LightComponent_GetRange));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_SetRange", LightComponent_SetRange));
 	}
 
 	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)
