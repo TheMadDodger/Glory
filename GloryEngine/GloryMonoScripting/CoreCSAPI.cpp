@@ -3,6 +3,7 @@
 #include <GameTime.h>
 #include <LayerManager.h>
 #include "MonoManager.h"
+#include <EngineProfiler.h>
 
 namespace Glory
 {
@@ -153,6 +154,20 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Profiler
+
+	void Profiler_BeginSample(MonoString* name)
+	{
+		const std::string nameStr = mono_string_to_utf8(name);
+		Profiler::BeginSample(nameStr);
+	}
+
+	void Profiler_EndSample()
+	{
+		Profiler::EndSample();
+	}
+
+#pragma endregion
 
 
 
@@ -189,6 +204,9 @@ namespace Glory
 		BIND("GloryEngine.LayerManager::LayerMaskToString", LayerManager_LayerMaskToString);
 		BIND("GloryEngine.LayerManager::GetLayerIndex", LayerManager_GetLayerIndex);
 		BIND("GloryEngine.LayerManager::GetLayerAtIndex", LayerManager_GetLayerAtIndex);
+
+		BIND("GloryEngine.Profiler::BeginSample", Profiler_BeginSample);
+		BIND("GloryEngine.Profiler::EndSample", Profiler_EndSample);
 	}
 
 	CoreCSAPI::CoreCSAPI() {}
