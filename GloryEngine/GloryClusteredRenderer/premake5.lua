@@ -16,7 +16,7 @@ project "GloryClusteredRenderer"
 
 	vpaths
 	{
-		["Module"] = { "ClusteredRendererModule.*" }
+		["Module"] = { "GloryClusteredRenderer.*", "ClusteredRendererModule.*" }
 	}
 
 	includedirs

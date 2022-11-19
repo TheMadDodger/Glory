@@ -16,8 +16,6 @@ namespace Glory
 
 		static GLORY_API MonoObject* InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, MonoObject** pExceptionObject, void** args);
 
-		static GLORY_API void GetAllClasses();
-
 		static GLORY_API size_t AssemblyCount();
 		static GLORY_API void ForEachAssembly(std::function<void(AssemblyBinding*)> callback);
 

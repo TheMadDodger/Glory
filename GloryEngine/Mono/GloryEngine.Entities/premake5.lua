@@ -11,7 +11,7 @@ project "GloryEngine.Entities"
 	
 	files
 	{
-		"*.cs",
+		"**.cs",
 	}
 
 	vpaths

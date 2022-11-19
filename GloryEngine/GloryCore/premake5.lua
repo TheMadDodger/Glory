@@ -16,10 +16,10 @@ project "GloryCore"
 	vpaths
 	{
 		["Asset Management"] = { "AssetDatabase.*", "AssetGroup.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*", "ShaderManager.*", "AssetCallbacks.*" },
-		["Console"] = { "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
-		["Core"] = { "CoreExceptions.*", "Engine.*", "Game.*", "GameSettings.*", "GameState.*", "GloryCore.*", "GraphicsThread.*", "Object.*", "UUID.*", "Glory.*" },
+		["Console"] = { "CommandLine.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
+		["Core"] = { "Versioning.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "CoreExceptions.*", "Engine.*", "Game.*", "GameSettings.*", "GameState.*", "GloryCore.*", "GraphicsThread.*", "Object.*", "UUID.*", "Glory.*" },
 		["Job System"] = { "Job.*", "JobManager.*", "JobPool.*", "JobQueue.*" },
-		["Modules"] = { "Module.*" },
+		["Modules/Base"] = { "Module.*", "ModuleMetaData.*", "IModuleLoopHandler.*" },
 		["Modules/Time"] = { "TimerModule.*", "GameTime.*" },
 		["Modules/Graphics"] = { "GraphicsModule.*" },
 		["Modules/Graphics/Data"] = { "GraphicsEnums.*", "GraphicsMemoryManager.*" },
@@ -43,7 +43,8 @@ project "GloryCore"
 		["Threading"] = { "Thread.*", "ThreadManager.*", "ThreadedVar.*" },
 		["Analysis"] = { "EngineProfiler.*", "ProfilerModule.*", "ProfilerSample.*", "ProfilerThreadSample.*" },
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
-		["Serialization"] = { "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "SerializedTypes.*", "ArrayPropertySerializers.*", "AnyConverter.*", "AssetReferencePropertyTemplate.*" },
+		["Serialization"] = { "StructPropertySerializer.*", "AssetReference.*", "AssetRef.*", "LayerRef.*", "EnumPropertySerializer.*", "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "SerializedTypes.*", "ArrayPropertySerializer.*", "AssetReferencePropertyTemplate.*" },
+		["Scripting"] = { "ScriptExtensions.*", "ScriptingExtender.*", "ScriptProperty.*" }
 	}
 
 	includedirs

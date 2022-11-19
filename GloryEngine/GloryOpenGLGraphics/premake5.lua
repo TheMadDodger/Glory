@@ -16,7 +16,7 @@ project "GloryOpenGLGraphics"
 
 	vpaths
 	{
-		["Module"] = { "GLConverter.h", "GLConverter.cpp", "OpenGLGraphicsModule.h", "OpenGLGraphicsModule.cpp" },
+		["Module"] = { "GloryOGL.*", "GLConverter.h", "GLConverter.cpp", "OpenGLGraphicsModule.h", "OpenGLGraphicsModule.cpp" },
 		["Resources"] = { "GLBuffer.h", "GLBuffer.cpp", "GLMesh.h", "GLMesh.cpp", "GLShader.h", "GLShader.cpp", "GLTexture.h", "GLTexture.cpp", "OGLMaterial.h", "OGLMaterial.cpp", "OGLResourceManager.h", "OGLResourceManager.cpp", "OGLRenderTexture.h", "OGLRenderTexture.cpp" }
 	}
 

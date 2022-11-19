@@ -19,8 +19,6 @@ namespace Glory
 	void GloryMonoScipting::Initialize()
 	{
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
-
-		//if (Game::GetGame().GetApplicationType() == ApplicationType::AT_Editor) return;
 		MonoManager::Initialize("./Modules/GloryMonoScripting/Dependencies");
 	}
 	

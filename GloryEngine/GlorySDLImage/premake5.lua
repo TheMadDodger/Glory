@@ -16,7 +16,7 @@ project "GlorySDLImage"
 
 	vpaths
 	{
-		["Module"] = { "SDLImageLoaderModule.h", "SDLImageLoaderModule.cpp", "SDLTexture2D.h", "SDLTexture2D.cpp" }
+		["Module"] = { "GlorySDLImage.*", "SDLImageLoaderModule.h", "SDLImageLoaderModule.cpp", "SDLTexture2D.h", "SDLTexture2D.cpp" }
 	}
 
 	includedirs

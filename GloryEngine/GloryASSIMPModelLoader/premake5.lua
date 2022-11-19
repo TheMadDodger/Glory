@@ -16,7 +16,7 @@ project "GloryASSIMPModelLoader"
 
 	vpaths
 	{
-		["Module"] = { "ASSIMPModule.h", "ASSIMPModule.cpp" }
+		["Module"] = { "GloryClusteredRenderer.*", "ASSIMPModule.h", "ASSIMPModule.cpp" }
 	}
 
 	includedirs
