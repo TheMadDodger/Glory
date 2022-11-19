@@ -2,6 +2,8 @@
 #include "MonoLibManager.h"
 #include "MonoObjectManager.h"
 
+#include <mono/metadata/mono-debug.h>
+
 namespace Glory
 {
 	MonoDomain* MonoManager::m_pMainDomain = nullptr;
@@ -13,6 +15,13 @@ namespace Glory
 		m_pMainDomain = mono_jit_init_version("GloryMain", "v4.0.30319");
 		m_pDomain = mono_domain_create_appdomain("GloryMain-1", NULL);
 		mono_domain_set(m_pDomain, false);
+
+		//static const char* options[] = {
+		//  "--soft-breakpoints",
+		//  "--debugger-agent=transport=dt_socket,address=127.0.0.1:55555"
+		//};
+		//mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
+		//mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 	}
 
 	void MonoManager::Cleanup()

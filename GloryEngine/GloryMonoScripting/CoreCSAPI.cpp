@@ -1,6 +1,8 @@
 #include "CoreCSAPI.h"
 #include "GloryMonoScipting.h"
 #include <GameTime.h>
+#include <LayerManager.h>
+#include "MonoManager.h"
 
 namespace Glory
 {
@@ -108,11 +110,66 @@ namespace Glory
 	}
 #pragma endregion
 
+#pragma region Layer Management
+
+	struct LayerWrapper
+	{
+	public:
+		LayerWrapper(const Layer* pLayer) : Mask(pLayer->m_Mask),
+			Name(mono_string_new(MonoManager::GetDomain(), pLayer->m_Name.c_str()))
+		{ }
+
+		LayerMask Mask;
+		MonoString* Name;
+	};
+
+	void LayerManager_AddLayer(MonoString* name)
+	{
+		const std::string nameStr = mono_string_to_utf8(name);
+		LayerManager::AddLayer(nameStr);
+	}
+
+	void LayerManager_Load()
+	{
+		LayerManager::Load();
+	}
+
+	void LayerManager_Save()
+	{
+		LayerManager::Save();
+	}
+
+	LayerWrapper LayerManager_GetLayerByName(MonoString* name)
+	{
+		const std::string nameStr = mono_string_to_utf8(name);
+		const Layer* layer = LayerManager::GetLayerByName(nameStr);
+		return LayerWrapper(layer);
+	}
+
+	MonoString* LayerManager_LayerMaskToString(LayerMask* layerMask)
+	{
+		const std::string str = LayerManager::LayerMaskToString(*layerMask);
+		return mono_string_new(MonoManager::GetDomain(), str.c_str());
+	}
+
+	int LayerManager_GetLayerIndex(Layer* pLayer)
+	{
+		return LayerManager::GetLayerIndex(pLayer);
+	}
+
+	LayerWrapper LayerManager_GetLayerAtIndex(int index)
+	{
+		const Layer* layer = LayerManager::GetLayerAtIndex(index);
+		return LayerWrapper(layer);
+	}
+
+#pragma endregion
 
 
 
 
 #pragma region Binding
+
 	void CoreCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
 		BIND("GloryEngine.Debug::Log(string,GloryEngine.LogLevel,bool)", Log);
@@ -136,9 +193,18 @@ namespace Glory
 		BIND("GloryEngine.Time::Time_GetTotalGameFrames", Time_GetTotalGameFrames);
 		BIND("GloryEngine.Time::Time_GetTimeScale", Time_GetTimeScale);
 		BIND("GloryEngine.Time::Time_SetTimeScale", Time_SetTimeScale);
+
+		BIND("GloryEngine.LayerManager::AddLayer", LayerManager_AddLayer);
+		BIND("GloryEngine.LayerManager::Load", LayerManager_Load);
+		BIND("GloryEngine.LayerManager::Save", LayerManager_Save);
+		BIND("GloryEngine.LayerManager::GetLayerByName", LayerManager_GetLayerByName);
+		BIND("GloryEngine.LayerManager::LayerMaskToString", LayerManager_LayerMaskToString);
+		BIND("GloryEngine.LayerManager::GetLayerIndex", LayerManager_GetLayerIndex);
+		BIND("GloryEngine.LayerManager::GetLayerAtIndex", LayerManager_GetLayerAtIndex);
 	}
 
 	CoreCSAPI::CoreCSAPI() {}
 	CoreCSAPI::~CoreCSAPI() {}
+
 #pragma endregion
 }

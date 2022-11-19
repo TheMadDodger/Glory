@@ -100,12 +100,12 @@ namespace Glory
 
 	std::string Game::GetAssetPath()
 	{
-		return m_Game.m_AssetPathFunc();
+		return GetGame().m_AssetPathFunc();
 	}
 
 	std::string Game::GetSettingsPath()
 	{
-		return m_Game.m_SettingsPathFunc();
+		return GetGame().m_SettingsPathFunc();
 	}
 
 	const ApplicationType& Game::GetApplicationType() const

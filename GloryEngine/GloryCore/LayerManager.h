@@ -2,6 +2,9 @@
 #include "Layer.h"
 #include <vector>
 #include <unordered_map>
+#include "GloryContext.h"
+
+#define LAYER_MANAGER GloryContext::GetLayerManager()
 
 namespace Glory
 {
@@ -27,8 +30,9 @@ namespace Glory
 		virtual ~LayerManager();
 
 	private:
+		friend class GloryContext;
 		friend class Engine;
-		static std::vector<Layer> m_Layers;
-		static std::unordered_map<std::string, size_t> m_NameToLayer;
+		std::vector<Layer> m_Layers;
+		std::unordered_map<std::string, size_t> m_NameToLayer;
 	};
 }

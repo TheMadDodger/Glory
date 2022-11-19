@@ -29,12 +29,6 @@ namespace Glory::Editor
 			return;
 		}
 
-		//scriptComponent.m_ScriptData = YAML::Node(YAML::NodeType::Sequence);
-		//YAML::Node dataNode{ YAML::NodeType::Map };
-		//dataNode.force_insert("Name", "_angularSpeed");
-		//dataNode.force_insert("Value", 1.0f);
-		//scriptComponent.m_ScriptData.push_back(dataNode);
-
 		m_pScript->LoadScriptProperties(scriptComponent.m_ScriptProperties, scriptComponent.m_ScriptData);
 	}
 

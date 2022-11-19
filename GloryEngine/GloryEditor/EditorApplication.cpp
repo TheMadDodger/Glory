@@ -38,6 +38,7 @@ namespace Glory::Editor
 	GLORY_EDITOR_API void EditorApplication::Initialize(Game& game)
 	{
 		game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
+		game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
 
 		m_pPlatform = new EditorPlatform(m_pTempWindowImpl, m_pTempRenderImpl);
 		m_pTempWindowImpl->m_pEditorPlatform = m_pPlatform;
