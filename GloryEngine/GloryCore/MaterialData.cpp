@@ -141,4 +141,27 @@ namespace Glory
 		m_HashToPropertyInfoIndex.clear();
 		m_CurrentOffset = 0;
 	}
+
+	void MaterialData::SetTexture(const std::string& name, ImageData* value)
+	{
+		size_t index;
+		if (!GetPropertyInfoIndex(name, index)) return;
+		EnableProperty(index);
+
+	}
+
+	bool MaterialData::GetTexture(const std::string& name, ImageData** value)
+	{
+		size_t index;
+		if (!GetPropertyInfoIndex(name, index)) return false;
+	}
+
+	void MaterialData::EnableProperty(size_t)
+	{
+	}
+
+	std::vector<char>& MaterialData::GetPropertyBuffer(size_t)
+	{
+		return m_PropertyBuffer;
+	}
 }

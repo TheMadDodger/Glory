@@ -40,10 +40,37 @@ namespace Glory
         virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index);
         virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
         void ClearProperties();
+        
+    public: // Properties
+        // Setters
+        template<typename T>
+        void Set(const std::string& name, const T& value)
+        {
+            size_t index;
+            if (!GetPropertyInfoIndex(name, index)) return;
+            EnableProperty(index);
+            m_PropertyInfos[index].Write<T>(GetPropertyBuffer(index), value);
+        }
+        virtual void SetTexture(const std::string& name, ImageData* value);
+
+        // Getters
+        template<typename T>
+        bool Get(const std::string& name, T& value)
+        {
+            size_t index;
+            if (!GetPropertyInfoIndex(name, index)) return false;
+            return m_PropertyInfos[index].Read<T>(GetPropertyBuffer(index), value);
+        }
+        virtual bool GetTexture(const std::string& name, ImageData** value);
+
+    protected:
+        virtual void EnableProperty(size_t index);
+        virtual std::vector<char>& GetPropertyBuffer(size_t index);
 
     protected:
         friend class MaterialLoaderModule;
         friend class MaterialInstanceLoaderModule;
+        friend class MaterialInstanceData;
         std::vector<ShaderSourceData*> m_pShaderFiles;
 
         static std::hash<std::string> m_Hasher;

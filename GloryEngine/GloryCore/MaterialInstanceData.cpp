@@ -145,4 +145,15 @@ namespace Glory
 		m_PropertyBuffer.resize(m_pBaseMaterial->GetBufferReference().size());
 		m_Resources.resize(m_pBaseMaterial->ResourceCount());
 	}
+
+	void MaterialInstanceData::EnableProperty(size_t index)
+	{
+		m_PropertyOverridesEnable[index] = true;
+	}
+
+	std::vector<char>& MaterialInstanceData::GetPropertyBuffer(size_t index)
+	{
+		if (!m_PropertyOverridesEnable[index]) return m_pBaseMaterial->m_PropertyBuffer;
+		return m_PropertyBuffer;
+	}
 }

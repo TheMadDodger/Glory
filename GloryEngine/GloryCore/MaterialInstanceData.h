@@ -36,6 +36,10 @@ namespace Glory
 		void ReloadProperties();
 
 	private:
+		virtual void EnableProperty(size_t index) override;
+		virtual std::vector<char>& GetPropertyBuffer(size_t index) override;
+
+	private:
 		friend class MaterialInstanceLoaderModule;
 		MaterialData* m_pBaseMaterial;
 		std::vector<bool> m_PropertyOverridesEnable;

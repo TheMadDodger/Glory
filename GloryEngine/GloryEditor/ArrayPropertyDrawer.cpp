@@ -104,12 +104,12 @@ namespace Glory::Editor
 				ImGui::PushID(elementLabel.c_str());
 				if (pPropertyDrawer)
 				{
-					change != pPropertyDrawer->Draw(elementLabel, pAddress, typeHash, flags);
+					change |= pPropertyDrawer->Draw(elementLabel, pAddress, typeHash, flags);
 					ImGui::PopID();
 					continue;
 				}
 
-				change != PropertyDrawer::DrawProperty(elementLabel, pElementTypeData, pAddress, flags);
+				change |= PropertyDrawer::DrawProperty(elementLabel, pElementTypeData, pAddress, flags);
 				ImGui::PopID();
 			}
 

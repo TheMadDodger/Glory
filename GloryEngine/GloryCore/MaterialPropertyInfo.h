@@ -22,12 +22,12 @@ namespace Glory
 		uint32_t Flags() const;
 
 		template<typename T>
-		bool Read(const std::vector<char> buffer, const T& data) const
+		bool Read(const std::vector<char> buffer, T& data) const
 		{
 			if (m_IsResource) return false;
 			if (sizeof(T) > m_Size) return false;
 			if (buffer.size() <= m_Offset + m_Size) return false;
-			memcpy((void*)&outData, &buffer[m_Offset], m_Size);
+			memcpy((void*)&data, &buffer[m_Offset], m_Size);
 			return true;
 		}
 
@@ -37,10 +37,11 @@ namespace Glory
 			if (m_IsResource) return false;
 			if (sizeof(T) > m_Size) return false;
 			if (buffer.size() <= m_Offset + m_Size) buffer.resize(m_Offset + m_Size);
-			memcpy(&buffer[m_Offset], (void*)data, m_Size);
+			memcpy(&buffer[m_Offset], (void*)&data, m_Size);
 			return true;
 		}
 
+		bool Write(std::vector<char>& buffer, const void* data);
 		void Reserve(std::vector<char>& buffer);
 
 	private:
