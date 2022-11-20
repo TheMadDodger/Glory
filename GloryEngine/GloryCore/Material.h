@@ -32,7 +32,6 @@ namespace Glory
 		virtual void SetMatrix3(const std::string& name, const glm::mat3& value) const = 0;
 		virtual void SetMatrix4(const std::string& name, const glm::mat4& value) const = 0;
 		virtual void SetTexture(const std::string& name, Texture* value) = 0;
-		//virtual void SetTexture(const std::string& name, const GLuint& textureID) = 0;
 
 	protected:
 		virtual void Initialize() = 0;

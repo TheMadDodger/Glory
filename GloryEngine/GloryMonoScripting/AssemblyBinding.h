@@ -38,6 +38,7 @@ namespace Glory
 		const char* TypeName() const;
 		const int Size() const;
 		const size_t TypeHash() const;
+		const size_t ElementTypeHash() const;
 		const bool IsStatic() const;
 
 	private:
@@ -50,6 +51,7 @@ namespace Glory
 		int m_Size;
 		int m_SizeAllignment;
 		size_t m_TypeHash;
+		size_t m_ElementTypeHash;
 		bool m_IsStatic;
 	};
 

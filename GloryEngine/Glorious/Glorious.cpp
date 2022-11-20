@@ -20,13 +20,6 @@ int main(int argc, char* argv[])
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
         windowCreateInfo.WindowFlags = 2 | 32;
 
-        //std::vector<Glory::ScriptingModule*> scriptingModules = {
-        //    new Glory::GloryMonoScipting(),
-        //};
-        // 
-        //createInfo.ScriptingModulesCount = static_cast<uint32_t>(scriptingModules.size());
-        //createInfo.pScriptingModules = scriptingModules.data();
-
         Glory::GloryContext::CreateContext();
 
         Glory::CommandLine commandLine(argc, argv);

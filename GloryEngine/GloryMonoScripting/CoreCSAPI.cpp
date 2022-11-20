@@ -1,9 +1,10 @@
 #include "CoreCSAPI.h"
 #include "GloryMonoScipting.h"
+#include "MonoManager.h"
 #include <GameTime.h>
 #include <LayerManager.h>
-#include "MonoManager.h"
 #include <EngineProfiler.h>
+#include <AssetManager.h>
 
 namespace Glory
 {
@@ -169,6 +170,39 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Objects API
+
+	MonoString* Object_GetName(UUID uuid)
+	{
+		Object* pObject = Object::FindObject(uuid);
+		if (!pObject) return nullptr;
+		return mono_string_new(MonoManager::GetDomain(), pObject->Name().c_str());
+	}
+
+	void Object_SetName(UUID uuid, MonoString* name)
+	{
+		Object* pObject = Object::FindObject(uuid);
+		if (!pObject) return;
+		const std::string nameStr = mono_string_to_utf8(name);
+		pObject->SetName(nameStr);
+	}
+
+	MonoString* Resource_GetName(UUID uuid)
+	{
+		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
+		if (!pResource) return nullptr;
+		return mono_string_new(MonoManager::GetDomain(), pResource->Name().c_str());
+	}
+
+	void Resource_SetName(UUID uuid, MonoString* name)
+	{
+		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
+		if (!pResource) return;
+		const std::string nameStr = mono_string_to_utf8(name);
+		pResource->SetName(nameStr);
+	}
+
+#pragma endregion
 
 
 #pragma region Binding
@@ -207,6 +241,12 @@ namespace Glory
 
 		BIND("GloryEngine.Profiler::BeginSample", Profiler_BeginSample);
 		BIND("GloryEngine.Profiler::EndSample", Profiler_EndSample);
+
+		BIND("GloryEngine.Resource::Object_GetName", Object_GetName);
+		BIND("GloryEngine.Resource::Object_SetName", Object_SetName);
+
+		BIND("GloryEngine.Resource::Resource_SetName", Resource_SetName);
+		BIND("GloryEngine.Resource::Resource_GetName", Resource_GetName);
 	}
 
 	CoreCSAPI::CoreCSAPI() {}

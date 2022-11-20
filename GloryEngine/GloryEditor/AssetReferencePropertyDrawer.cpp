@@ -1,5 +1,5 @@
 #include "AssetReferencePropertyDrawer.h"
-#include "AssetPickerPopup.h"
+#include "AssetPicker.h"
 #include "AssetReference.h"
 #include <imgui.h>
 #include <AssetDatabase.h>
@@ -8,27 +8,8 @@ namespace Glory::Editor
 {
 	bool AssetReferencePropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const
 	{
-		ImGui::TextUnformatted(label.c_str());
-		ImGui::SameLine();
-
 		UUID* pUUIDMember = (UUID*)data;
-		std::string assetName = "";
-		AssetDatabase::AssetExists(*pUUIDMember);
-
-		if (!AssetDatabase::AssetExists(*pUUIDMember)) assetName = "Noone";
-		else
-		{
-			assetName = AssetDatabase::GetAssetName(*pUUIDMember);
-		}
-
-		std::string buttonLabel = assetName + "##" + serializedProperty->Name();
-
-		if (ImGui::Button(buttonLabel.c_str()))
-		{
-			AssetPickerPopup::Open(typeHash, pUUIDMember, nullptr, true);
-		}
-
-		return true;
+		return AssetPicker::ResourceDropdown(label, typeHash, pUUIDMember);
 	}
 
 	bool AssetReferencePropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const
@@ -39,31 +20,19 @@ namespace Glory::Editor
 
 	bool AssetReferencePropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
 	{
-		ImGui::TextUnformatted(label.c_str());
-		ImGui::SameLine();
-
 		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)data;
-		UUID uuid = pReferenceMember->AssetUUID();
-		std::string assetName = "";
-		bool exists = AssetDatabase::AssetExists(uuid);
+		return AssetPicker::ResourceDropdown(label, pReferenceMember->TypeHash(), pReferenceMember->AssetUUIDMember());
+	}
 
-		typeHash = pReferenceMember->TypeHash();
-
-		if (!exists) assetName = "Noone";
-		else
+	bool AssetReferencePropertyDrawer::Draw(const std::string& label, YAML::Node& node, size_t typeHash, uint32_t flags) const
+	{
+		UUID uuid = node.as<uint64_t>();
+		if (AssetPicker::ResourceDropdown(label, typeHash, &uuid))
 		{
-			assetName = AssetDatabase::GetAssetName(uuid);
+			node = (uint64_t)uuid;
+			return true;
 		}
 
-		std::string buttonLabel = assetName + "##" + label;
-
-		if (ImGui::Button(buttonLabel.c_str()))
-		{
-			AssetPickerPopup::Open(typeHash, pReferenceMember->AssetUUIDMember(), pReferenceMember->IsDirty(), true);
-		}
-
-		bool isDirty = *pReferenceMember->IsDirty();
-		*pReferenceMember->IsDirty() = false;
-		return isDirty;
+		return false;
 	}
 }

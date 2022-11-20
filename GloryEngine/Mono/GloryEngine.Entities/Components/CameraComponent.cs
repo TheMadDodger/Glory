@@ -9,47 +9,47 @@ namespace GloryEngine.Entities
 
 		public float HalfFOV
 		{
-			get => CameraComponent_GetHalfFOV(ref _entity, _componentID);
-			set => CameraComponent_SetHalfFOV(ref _entity, _componentID, value);
+			get => CameraComponent_GetHalfFOV(ref _entity, _objectID);
+			set => CameraComponent_SetHalfFOV(ref _entity, _objectID, value);
 		}
 
 		public float Near
 		{
-			get => CameraComponent_GetNear(ref _entity, _componentID);
-			set => CameraComponent_SetNear(ref _entity, _componentID, value);
+			get => CameraComponent_GetNear(ref _entity, _objectID);
+			set => CameraComponent_SetNear(ref _entity, _objectID, value);
 		}
 
 		public float Far
 		{
-			get => CameraComponent_GetFar(ref _entity, _componentID);
-			set => CameraComponent_SetFar(ref _entity, _componentID, value);
+			get => CameraComponent_GetFar(ref _entity, _objectID);
+			set => CameraComponent_SetFar(ref _entity, _objectID, value);
 		}
 
 		public int DisplayIndex
 		{
-			get => CameraComponent_GetDisplayIndex(ref _entity, _componentID);
-			set => CameraComponent_SetDisplayIndex(ref _entity, _componentID, value);
+			get => CameraComponent_GetDisplayIndex(ref _entity, _objectID);
+			set => CameraComponent_SetDisplayIndex(ref _entity, _objectID, value);
 		}
 
 		public int Priority
 		{
-			get => CameraComponent_GetPriority(ref _entity, _componentID);
-			set => CameraComponent_SetPriority(ref _entity, _componentID, value);
+			get => CameraComponent_GetPriority(ref _entity, _objectID);
+			set => CameraComponent_SetPriority(ref _entity, _objectID, value);
 		}
 
 		public LayerMask LayerMask
 		{
-			get => CameraComponent_GetLayerMask(ref _entity, _componentID);
-			set => CameraComponent_SetLayerMask(ref _entity, _componentID, ref value);
+			get => CameraComponent_GetLayerMask(ref _entity, _objectID);
+			set => CameraComponent_SetLayerMask(ref _entity, _objectID, ref value);
 		}
 
 		public Vector4 ClearColor
 		{
-			get => CameraComponent_GetClearColor(ref _entity, _componentID);
-			set => CameraComponent_SetClearColor(ref _entity, _componentID, ref value);
+			get => CameraComponent_GetClearColor(ref _entity, _objectID);
+			set => CameraComponent_SetClearColor(ref _entity, _objectID, ref value);
 		}
 
-		public Camera Camera => new Camera(CameraComponent_GetCameraID(ref _entity, _componentID));
+		public Camera Camera => new Camera(CameraComponent_GetCameraID(ref _entity, _objectID));
 
 		#endregion
 

@@ -8,13 +8,14 @@ namespace GloryEngine.Entities
 		#region Props
 
 		public UInt64 EntityID => _entityID;
+		public UInt64 SceneID => _sceneID;
 
 		#endregion
 
 		#region Fields
 
-		private UInt64 _entityID;
-		private UInt64 _sceneID;
+		private readonly UInt64 _entityID;
+		private readonly UInt64 _sceneID;
 
         #endregion
 

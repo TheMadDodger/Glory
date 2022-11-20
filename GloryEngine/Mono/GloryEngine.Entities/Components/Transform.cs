@@ -9,26 +9,26 @@ namespace GloryEngine.Entities
 
         public Vector3 LocalPosition
         {
-            get => Transform_GetLocalPosition(ref _entity, _componentID);
-            set => Transform_SetLocalPosition(ref _entity, _componentID, ref value);
+            get => Transform_GetLocalPosition(ref _entity, _objectID);
+            set => Transform_SetLocalPosition(ref _entity, _objectID, ref value);
         }
 
         public Quaternion LocalRotation
         {
-            get => Transform_GetLocalRotation(ref _entity, _componentID);
-            set => Transform_SetLocalRotation(ref _entity, _componentID, ref value);
+            get => Transform_GetLocalRotation(ref _entity, _objectID);
+            set => Transform_SetLocalRotation(ref _entity, _objectID, ref value);
         }
 
         public Vector3 LocalRotationEuler
         {
-            get => Transform_GetLocalRotationEuler(ref _entity, _componentID);
-            set => Transform_SetLocalRotationEuler(ref _entity, _componentID, ref value);
+            get => Transform_GetLocalRotationEuler(ref _entity, _objectID);
+            set => Transform_SetLocalRotationEuler(ref _entity, _objectID, ref value);
         }
 
         public Vector3 LocalScale
         {
-            get => Transform_GetLocalScale(ref _entity, _componentID);
-            set => Transform_SetLocalScale(ref _entity, _componentID, ref value);
+            get => Transform_GetLocalScale(ref _entity, _objectID);
+            set => Transform_SetLocalScale(ref _entity, _objectID, ref value);
         }
 
         #endregion

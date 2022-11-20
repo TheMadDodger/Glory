@@ -9,21 +9,21 @@ namespace GloryEngine.Entities
 
 		public Vector4 Color
         {
-			get => LightComponent_GetColor(ref _entity, _componentID);
-			set => LightComponent_SetColor(ref _entity, _componentID, ref value);
+			get => LightComponent_GetColor(ref _entity, _objectID);
+			set => LightComponent_SetColor(ref _entity, _objectID, ref value);
 
 		}
 
 		public float Intensity
         {
-			get => LightComponent_GetIntensity(ref _entity, _componentID);
-			set => LightComponent_SetIntensity(ref _entity, _componentID, value);
+			get => LightComponent_GetIntensity(ref _entity, _objectID);
+			set => LightComponent_SetIntensity(ref _entity, _objectID, value);
 		}
 
 		public float Range
         {
-			get => LightComponent_GetRange(ref _entity, _componentID);
-			set => LightComponent_SetRange(ref _entity, _componentID, value);
+			get => LightComponent_GetRange(ref _entity, _objectID);
+			set => LightComponent_SetRange(ref _entity, _objectID, value);
 		}
 
 		#endregion

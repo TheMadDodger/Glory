@@ -186,6 +186,7 @@ namespace Glory::Editor
 	bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)
 	{
 		size_t typeHash = scriptProperty.m_TypeHash;
+		size_t elementTypeHash = scriptProperty.m_ElementTypeHash;
 
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
@@ -195,7 +196,7 @@ namespace Glory::Editor
 		if (it != m_PropertyDrawers.end())
 		{
 			PropertyDrawer* drawer = *it;
-			return drawer->Draw(scriptProperty.m_Name, node[scriptProperty.m_Name], typeHash, flags);
+			return drawer->Draw(scriptProperty.m_Name, node[scriptProperty.m_Name], elementTypeHash, flags);
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), scriptProperty.m_Name);

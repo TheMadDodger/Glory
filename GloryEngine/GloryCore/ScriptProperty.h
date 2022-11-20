@@ -7,6 +7,7 @@ namespace Glory
 	{
 		const char* m_Name;
 		size_t m_TypeHash;
+		size_t m_ElementTypeHash;
 		const char* m_TypeName;
 		size_t m_Size;
 		SerializedType ValueType;

@@ -2,7 +2,7 @@
 
 namespace GloryEngine.Entities
 {
-    public class EntityComponent
+    public class EntityComponent : Object
     {
         #region Props
 
@@ -24,7 +24,6 @@ namespace GloryEngine.Entities
         #region Fields
 
         protected Entity _entity;
-        protected UInt64 _componentID;
         private Transform _transform = null;
 
         #endregion
@@ -34,7 +33,7 @@ namespace GloryEngine.Entities
         protected EntityComponent()
         {
             _entity = new Entity(0, 0);
-            _componentID = 0;
+            _objectID = 0;
         }
 
         #endregion
@@ -49,7 +48,7 @@ namespace GloryEngine.Entities
         public void Initialize(Entity entity, UInt64 componentID)
         {
             _entity = entity;
-            _componentID = componentID;
+            _objectID = componentID;
         }
 
         #endregion

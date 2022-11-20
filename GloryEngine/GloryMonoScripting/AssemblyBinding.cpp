@@ -1,11 +1,19 @@
 #include "AssemblyBinding.h"
+#include "MonoAssetManager.h"
 #include <mono/metadata/assembly.h>
-#include <Debug.h>
 #include <mono/metadata/debug-helpers.h>
+#include <Debug.h>
 #include <filesystem>
 #include <fstream>
 #include <mono/metadata/attrdefs.h>
 #include <ResourceType.h>
+
+#include <SerializedTypes.h>
+#include <ModelData.h>
+#include <ImageData.h>
+#include <MaterialData.h>
+#include <MaterialInstanceData.h>
+
 
 namespace Glory
 {
@@ -14,6 +22,17 @@ namespace Glory
 		{"System.Double", ResourceType::GetHash<double>()},
 		{"System.Int32", ResourceType::GetHash<int>()},
 		{"System.Boolean", ResourceType::GetHash<bool>()},
+		{"GloryEngine.Material", SerializedType::ST_Asset},
+		{"GloryEngine.MaterialInstance", SerializedType::ST_Asset},
+		{"GloryEngine.Model", SerializedType::ST_Asset},
+		{"GloryEngine.Image", SerializedType::ST_Asset},
+	};
+
+	std::map<std::string, size_t> m_MonoTypeToElementHash = {
+		{"GloryEngine.Material", ResourceType::GetHash<MaterialData>()},
+		{"GloryEngine.MaterialInstance", ResourceType::GetHash<MaterialInstanceData>()},
+		{"GloryEngine.Model", ResourceType::GetHash<ModelData>()},
+		{"GloryEngine.Image", ResourceType::GetHash<ImageData>()},
 	};
 
 	AssemblyBinding::AssemblyBinding(const ScriptingLib& lib)
@@ -56,6 +75,11 @@ namespace Glory
 		mono_image_close(m_pImage);
 		m_pImage = mono_assembly_get_image(m_pAssembly);
 		delete[] data;
+
+		if (m_Lib.LibraryName() == "GloryEngine.Core.dll")
+		{
+			MonoAssetManager::Initialize(m_pImage);
+		}
 	}
 
 	void AssemblyBinding::Destroy()
@@ -183,6 +207,7 @@ namespace Glory
 		m_TypeName(NULL),
 		m_SizeAllignment(0),
 		m_TypeHash(0),
+		m_ElementTypeHash(0),
 		m_Size(0),
 		m_IsStatic(false)
 	{
@@ -194,6 +219,7 @@ namespace Glory
 		m_SizeAllignment(0),
 		m_Size(mono_type_size(m_pType, &m_SizeAllignment)),
 		m_TypeHash(m_MonoTypeToHash[m_TypeName]),
+		m_ElementTypeHash(m_MonoTypeToElementHash.find(m_TypeName) != m_MonoTypeToElementHash.end() ? m_MonoTypeToElementHash[m_TypeName] : m_TypeHash),
 		m_IsStatic((m_Flags & MONO_FIELD_ATTR_STATIC) == MONO_FIELD_ATTR_STATIC)
 	{
 	}
@@ -245,6 +271,11 @@ namespace Glory
 	const size_t AssemblyClassField::TypeHash() const
 	{
 		return m_TypeHash;
+	}
+	
+	const size_t AssemblyClassField::ElementTypeHash() const
+	{
+		return m_ElementTypeHash;
 	}
 
 	const bool AssemblyClassField::IsStatic() const

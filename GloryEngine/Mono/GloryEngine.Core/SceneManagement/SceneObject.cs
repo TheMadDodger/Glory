@@ -6,14 +6,6 @@ namespace GloryEngine.SceneManagement
     {
         #region Props
 
-        public extern string Name
-        {
-            [MethodImpl(MethodImplOptions.InternalCall)]
-            get;
-            [MethodImpl(MethodImplOptions.InternalCall)]
-            set;
-        }
-
         public extern Scene Scene
         {
             [MethodImpl(MethodImplOptions.InternalCall)]

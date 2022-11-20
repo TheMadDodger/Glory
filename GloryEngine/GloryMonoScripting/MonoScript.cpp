@@ -4,6 +4,7 @@
 #include <AssetDatabase.h>
 #include <Reflection.h>
 #include <PropertySerializer.h>
+#include "MonoAssetManager.h"
 
 namespace Glory
 {
@@ -76,6 +77,7 @@ namespace Glory
 			prop.m_Name = pField->Name();
 			prop.m_TypeName = pField->TypeName();
 			prop.m_TypeHash = pField->TypeHash();
+			prop.m_ElementTypeHash = pField->ElementTypeHash();
 			prop.m_ChildrenCount = 0;
 			prop.m_ChildrenOffset = 0;
 			prop.m_Size = pField->Size();
@@ -86,11 +88,32 @@ namespace Glory
 
 			YAML::Emitter e;
 			e << YAML::BeginMap;
-			GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), value, 0);
-				pField->GetValue(pDummyObject, value);
+
+			switch (pField->TypeHash())
+			{
+			case ST_Asset:
+			{
+				UUID uuid = 0;
+				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &uuid, 0);
+				MonoObject* pMonoObject;
+				pField->GetValue(pDummyObject, &pMonoObject);
+				if (pMonoObject)
+				{
+					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_objectID");
+					mono_field_get_value(pMonoObject, pIDField, &uuid);
+				}
 				PropertySerializer::SerializeProperty(&prop, e);
-			});
+				break;
+			}
+
+			default:
+				GloryReflect::Reflect::CreateAsTemporary(pField->ElementTypeHash(), [&](void* value) {
+					SerializedProperty prop(0, pField->Name(), pField->ElementTypeHash(), value, 0);
+					pField->GetValue(pDummyObject, value);
+					PropertySerializer::SerializeProperty(&prop, e);
+				});
+				break;
+			}
 			e << YAML::EndMap;
 			YAML::Node newNode = YAML::Load(e.c_str());
 			data[pField->Name()] = newNode[pField->Name()];
@@ -112,11 +135,27 @@ namespace Glory
 
 			YAML::Node valueNode = node[pField->Name()];
 			if (!valueNode.IsDefined()) continue;
-			GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), value, 0);
+
+			switch (pField->TypeHash())
+			{
+			case ST_Asset:
+			{
+				UUID uuid = 0;
+				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &uuid, 0);
 				PropertySerializer::DeserializeProperty(&prop, valueNode);
-				pField->SetValue(pMonoObject, value);
-			});
+				MonoObject* pAssetObject = MonoAssetManager::MakeMonoAssetObject(uuid, pField->TypeName());
+				pField->SetValue(pMonoObject, pAssetObject);
+				break;
+			}
+
+			default:
+				GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
+					SerializedProperty prop(0, pField->Name(), pField->TypeHash(), value, 0);
+					PropertySerializer::DeserializeProperty(&prop, valueNode);
+					pField->SetValue(pMonoObject, value);
+				});
+				break;
+			}
 		}
 	}
 
@@ -135,11 +174,35 @@ namespace Glory
 			const AssemblyClassField* pField = pClass->GetField(i);
 			if (pField->FielddVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
 
-			GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), value, 0);
-				pField->GetValue(pMonoObject, value);
+
+			switch (pField->TypeHash())
+			{
+			case ST_Asset:
+			{
+				UUID uuid = 0;
+				MonoObject* pMonoResourceObject = nullptr;
+				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &uuid, 0);
+				pField->GetValue(pMonoObject, &pMonoResourceObject);
+
+				if (pMonoResourceObject)
+				{
+					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoResourceObject), "_objectID");
+					mono_field_get_value(pMonoResourceObject, pIDField, &uuid);
+				}
+
 				PropertySerializer::SerializeProperty(&prop, emitter);
-			});
+
+				break;
+			}
+
+			default:
+				GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
+					SerializedProperty prop(0, pField->Name(), pField->TypeHash(), value, 0);
+					pField->GetValue(pMonoObject, value);
+					PropertySerializer::SerializeProperty(&prop, emitter);
+				});
+				break;
+			}
 		}
 		emitter << YAML::EndMap;
 		node = YAML::Load(emitter.c_str());

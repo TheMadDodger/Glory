@@ -13,5 +13,6 @@ namespace Glory::Editor
 		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const override;
 		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const override;
 		virtual bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const override;
+		virtual bool Draw(const std::string& label, YAML::Node& node, size_t typeHash, uint32_t flags) const;
 	};
 }

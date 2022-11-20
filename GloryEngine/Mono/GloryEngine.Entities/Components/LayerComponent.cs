@@ -9,8 +9,8 @@ namespace GloryEngine.Entities
 
         public Layer Layer
         {
-            get => LayerComponent_GetLayer(ref _entity, _componentID);
-            set => LayerComponent_SetLayer(ref _entity, _componentID, ref value);
+            get => LayerComponent_GetLayer(ref _entity, _objectID);
+            set => LayerComponent_SetLayer(ref _entity, _objectID, ref value);
         }
 
         #endregion
