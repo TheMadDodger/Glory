@@ -5,6 +5,7 @@
 #include <Components.h>
 #include <CoreCSAPI.h>
 #include <LayerManager.h>
+#include <MonoAssetManager.h>
 
 namespace Glory
 {
@@ -130,13 +131,24 @@ namespace Glory
 
 #pragma region MeshFilter
 
+	MonoObject* MeshFilter_GetModel(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		MeshFilter& meshFilter = GetComponent<MeshFilter>(pEntityHandle, componentID);
+		UUID uuid = meshFilter.m_pModelData.AssetUUID();
+		return MonoAssetManager::MakeMonoAssetObject<ModelData>(uuid);
+	}
 
+	void MeshFilter_SetModel(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
+	{
+		MeshFilter& meshFilter = GetComponent<MeshFilter>(pEntityHandle, componentID);
+		meshFilter.m_pModelData.SetUUID(modelID);
+	}
 
 #pragma endregion
 
 #pragma region MeshRenderer
 
-
+	
 
 #pragma endregion
 
@@ -344,6 +356,10 @@ namespace Glory
 
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_GetRange", LightComponent_GetRange));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_SetRange", LightComponent_SetRange));
+
+		// MeshFilter
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshFilter::MeshFilter_GetModel", MeshFilter_GetModel));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshFilter::MeshFilter_SetModel", MeshFilter_SetModel));
 	}
 
 	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)

@@ -12,10 +12,10 @@ namespace Glory
 		GLORY_API static MonoObject* MakeMonoAssetObject(UUID uuid)
 		{
 			std::string name = typeid(AssetType).name();
-			name = name.erase(0, strlen("class "));
+			name = name.erase(0, strlen("class Glory::"));
 			size_t dataIndex = name.find("Data");
 			name = name.erase(dataIndex, strlen("Data"));
-			MakeMonoAssetObject(uuid, "GloryEngine." + name);
+			return MakeMonoAssetObject(uuid, "GloryEngine." + name);
 		}
 
 		GLORY_API static MonoObject* MakeMonoAssetObject(UUID uuid, const std::string& type);
