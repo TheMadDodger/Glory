@@ -204,11 +204,70 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Materials
+
+	template<typename T>
+	void Material_Set(UUID matID, MonoString* propName, T value)
+	{
+		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
+		if (!pMaterial)
+		{
+			Debug::LogError("Material does not exist!");
+			return;
+		}
+		const std::string propNameStr = mono_string_to_utf8(propName);
+		pMaterial->Set<T>(propNameStr, value);
+	}
+
+	template<typename T>
+	bool Material_Get(UUID matID, MonoString* propName, T value)
+	{
+		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
+		if (!pMaterial)
+		{
+			Debug::LogError("Material does not exist!");
+			return false;
+		}
+		const std::string propNameStr = mono_string_to_utf8(propName);
+		return pMaterial->Get<T>(propNameStr, value);
+	}
+
+	void Material_SetTexture(UUID matID, MonoString* propName, UUID value)
+	{
+		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
+		if (!pMaterial)
+		{
+			Debug::LogError("Material does not exist!");
+			return;
+		}
+		const std::string propNameStr = mono_string_to_utf8(propName);
+		ImageData* pImage = value ? AssetManager::GetAssetImmediate<ImageData>(value) : nullptr;
+		pMaterial->SetTexture(propNameStr, pImage);
+	}
+
+	bool Material_GetTexture(UUID matID, MonoString* propName, UUID& value)
+	{
+		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
+		if (!pMaterial)
+		{
+			Debug::LogError("Material does not exist!");
+			return false;
+		}
+		const std::string propNameStr = mono_string_to_utf8(propName);
+		ImageData* pImage = nullptr;
+		if (!pMaterial->GetTexture(propNameStr, &pImage)) return false;
+		value = pImage ? pImage->GetUUID() : 0;
+		return true;
+	}
+
+#pragma endregion
+
 
 #pragma region Binding
 
 	void CoreCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
+		// Debug
 		BIND("GloryEngine.Debug::Log(string,GloryEngine.LogLevel,bool)", Log);
 		BIND("GloryEngine.Debug::LogInfo(string,bool)", LogInfo);
 		BIND("GloryEngine.Debug::LogNotice(string,bool)", LogNotice);
@@ -217,6 +276,7 @@ namespace Glory
 		BIND("GloryEngine.Debug::LogFatalError(string,bool)", LogFatalError);
 		BIND("GloryEngine.Debug::LogOnce(string,string,GloryEngine.LogLevel,bool)", LogOnce);
 
+		// Time
 		BIND("GloryEngine.Time::Time_GetDeltaTime", Time_GetDeltaTime);
 		BIND("GloryEngine.Time::Time_GetGameDeltaTime", Time_GetGameDeltaTime);
 		BIND("GloryEngine.Time::Time_GetGraphicsDeltaTime", Time_GetGraphicsDeltaTime);
@@ -228,9 +288,10 @@ namespace Glory
 		BIND("GloryEngine.Time::Time_GetFrameRate", Time_GetFrameRate);
 		BIND("GloryEngine.Time::Time_GetTotalFrames", Time_GetTotalFrames);
 		BIND("GloryEngine.Time::Time_GetTotalGameFrames", Time_GetTotalGameFrames);
-		BIND("GloryEngine.Time::Time_GetTimeScale", Time_GetTimeScale);
 		BIND("GloryEngine.Time::Time_SetTimeScale", Time_SetTimeScale);
+		BIND("GloryEngine.Time::Time_GetTimeScale", Time_GetTimeScale);
 
+		// Layers
 		BIND("GloryEngine.LayerManager::AddLayer", LayerManager_AddLayer);
 		BIND("GloryEngine.LayerManager::Load", LayerManager_Load);
 		BIND("GloryEngine.LayerManager::Save", LayerManager_Save);
@@ -239,14 +300,50 @@ namespace Glory
 		BIND("GloryEngine.LayerManager::GetLayerIndex", LayerManager_GetLayerIndex);
 		BIND("GloryEngine.LayerManager::GetLayerAtIndex", LayerManager_GetLayerAtIndex);
 
+		// Profiler
 		BIND("GloryEngine.Profiler::BeginSample", Profiler_BeginSample);
 		BIND("GloryEngine.Profiler::EndSample", Profiler_EndSample);
 
-		BIND("GloryEngine.Resource::Object_GetName", Object_GetName);
+		// Objects
 		BIND("GloryEngine.Resource::Object_SetName", Object_SetName);
+		BIND("GloryEngine.Resource::Object_GetName", Object_GetName);
 
+		// Resources
 		BIND("GloryEngine.Resource::Resource_SetName", Resource_SetName);
 		BIND("GloryEngine.Resource::Resource_GetName", Resource_GetName);
+
+		// Materials
+		BIND("GloryEngine.Material::Material_SetFloat", Material_Set<float>);
+		BIND("GloryEngine.Material::Material_GetFloat", Material_Get<float>);
+		BIND("GloryEngine.Material::Material_SetDouble", Material_Set<double>);
+		BIND("GloryEngine.Material::Material_GetDouble", Material_Get<double>);
+		BIND("GloryEngine.Material::Material_SetInt", Material_Set<int>);
+		BIND("GloryEngine.Material::Material_GetInt", Material_Get<int>);
+		BIND("GloryEngine.Material::Material_SetUInt", Material_Set<unsigned int>);
+		BIND("GloryEngine.Material::Material_GetUInt", Material_Get<unsigned int>);
+		BIND("GloryEngine.Material::Material_SetBool", Material_Set<bool>);
+		BIND("GloryEngine.Material::Material_GetBool", Material_Get<bool>);
+		BIND("GloryEngine.Material::Material_SetVec2", Material_Set<glm::vec2>);
+		BIND("GloryEngine.Material::Material_GetVec2", Material_Get<glm::vec2>);
+		BIND("GloryEngine.Material::Material_SetVec3", Material_Set<glm::vec3>);
+		BIND("GloryEngine.Material::Material_GetVec3", Material_Get<glm::vec3>);
+		BIND("GloryEngine.Material::Material_SetVec4", Material_Set<glm::vec4>);
+		BIND("GloryEngine.Material::Material_GetVec4", Material_Get<glm::vec4>);
+		BIND("GloryEngine.Material::Material_SetIVec2", Material_Set<glm::ivec2>);
+		BIND("GloryEngine.Material::Material_GetIVec2", Material_Get<glm::ivec2>);
+		BIND("GloryEngine.Material::Material_SetIVec3", Material_Set<glm::ivec3>);
+		BIND("GloryEngine.Material::Material_GetIVec3", Material_Get<glm::ivec3>);
+		BIND("GloryEngine.Material::Material_SetIVec4", Material_Set<glm::ivec4>);
+		BIND("GloryEngine.Material::Material_GetIVec4", Material_Get<glm::ivec4>);
+		BIND("GloryEngine.Material::Material_SetUVec2", Material_Set<glm::uvec2>);
+		BIND("GloryEngine.Material::Material_GetUVec2", Material_Get<glm::uvec2>);
+		BIND("GloryEngine.Material::Material_SetUVec3", Material_Set<glm::uvec3>);
+		BIND("GloryEngine.Material::Material_GetUVec3", Material_Get<glm::uvec3>);
+		BIND("GloryEngine.Material::Material_SetUVec4", Material_Set<glm::uvec4>);
+		BIND("GloryEngine.Material::Material_GetUVec4", Material_Get<glm::uvec4>);
+
+		BIND("GloryEngine.Material::Material_SetTexture", Material_SetTexture);
+		BIND("GloryEngine.Material::Material_GetTexture", Material_GetTexture);
 	}
 
 	CoreCSAPI::CoreCSAPI() {}

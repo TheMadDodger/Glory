@@ -249,7 +249,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < resources.storage_buffers.size(); i++)
 		{
 			spirv_cross::Resource storageBuffer = resources.storage_buffers[i];
-			if (storageBuffer.name != "propertiesSSBO") continue;
+			if (storageBuffer.name != "PropertiesSSBO") continue;
 			const spirv_cross::SPIRType& base_type = compiler.get_type(storageBuffer.base_type_id);
 			const spirv_cross::SPIRType& type = compiler.get_type(storageBuffer.type_id);
 

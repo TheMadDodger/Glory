@@ -26,7 +26,7 @@ namespace Glory
 		{
 			if (m_IsResource) return false;
 			if (sizeof(T) > m_Size) return false;
-			if (buffer.size() <= m_Offset + m_Size) return false;
+			if (buffer.size() > m_Offset + m_Size) return false;
 			memcpy((void*)&data, &buffer[m_Offset], m_Size);
 			return true;
 		}

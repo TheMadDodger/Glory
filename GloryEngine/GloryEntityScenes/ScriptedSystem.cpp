@@ -26,6 +26,7 @@ namespace Glory
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
+		pScript->SetPropertyValues(pObject, pComponent.m_ScriptData);
 
 		pScript->Invoke(pObject, "Start()", nullptr);
 	}
