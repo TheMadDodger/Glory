@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-#include <JobManager.h>
 #include <GScene.h>
 #include <Glory.h>
 #include <EntityRegistry.h>

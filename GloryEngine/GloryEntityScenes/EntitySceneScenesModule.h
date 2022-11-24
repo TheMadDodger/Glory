@@ -1,6 +1,5 @@
 #pragma once
 #include <ScenesModule.h>
-#include <MaterialData.h>
 #include <Glory.h>
 #include "EntityScene.h"
 #include "Entity.h"

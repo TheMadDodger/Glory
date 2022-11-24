@@ -1,42 +1,48 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace GloryEngine.SceneManagement
 {
-    class SceneObject : Object
+    public class SceneObject : Object
     {
         #region Props
 
         public extern Scene Scene
         {
-            [MethodImpl(MethodImplOptions.InternalCall)]
             get;
-            [MethodImpl(MethodImplOptions.InternalCall)]
             set;
         }
 
         public extern uint SiblingIndex
         {
-            [MethodImpl(MethodImplOptions.InternalCall)]
             get;
-            [MethodImpl(MethodImplOptions.InternalCall)]
             set;
         }
 
         public extern uint ChildCount
         {
-            [MethodImpl(MethodImplOptions.InternalCall)]
             get;
-            [MethodImpl(MethodImplOptions.InternalCall)]
             private set;
         }
 
         public SceneObject Parent
         {
-            [MethodImpl(MethodImplOptions.InternalCall)]
             get;
-            [MethodImpl(MethodImplOptions.InternalCall)]
             set;
         }
+
+        public override string Name
+        {
+            get => SceneObject_GetName(_objectID);
+            set => SceneObject_SetName(_objectID, value);
+        }
+
+        #endregion
+
+        #region Constructor
+
+        public SceneObject() { }
+        public SceneObject(UInt64 objectID) : base(objectID) { }
 
         #endregion
 
@@ -44,6 +50,11 @@ namespace GloryEngine.SceneManagement
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern SceneObject GetChild(uint index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static string SceneObject_GetName(UInt64 objectID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void SceneObject_SetName(UInt64 objectID, string name);
 
         #endregion
     }

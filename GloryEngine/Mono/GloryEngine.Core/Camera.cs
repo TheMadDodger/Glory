@@ -27,6 +27,6 @@ namespace GloryEngine
             _cameraID = id;
         }
 
-        #endregion
-    }
+		#endregion
+	}
 }

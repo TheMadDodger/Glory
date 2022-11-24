@@ -1,13 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GloryEngine;
+using GloryEngine.SceneManagement;
 
-namespace GloryEngine.EntityScenes
+namespace GloryEngine.Entities
 {
-    class EntityScene
+    public class EntityScene : Scene
     {
+        #region Methods
+
+        protected override SceneObject CreateSceneObject(UInt64 objectID)
+            => new EntitySceneObject(objectID);
+
+        #endregion
     }
 }

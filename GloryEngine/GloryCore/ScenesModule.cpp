@@ -2,7 +2,6 @@
 #include "Engine.h"
 #include "EngineProfiler.h"
 #include "Serializer.h"
-#include "CameraManager.h"
 
 namespace Glory
 {

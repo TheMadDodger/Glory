@@ -9,6 +9,7 @@
 namespace Glory
 {
 #pragma region Debug
+
 	void Log(MonoString* message, Debug::LogLevel logLevel, MonoBoolean bIncludeTimeStamp)
 	{
 		Debug::Log(mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
@@ -43,9 +44,11 @@ namespace Glory
 	{
 		Debug::LogOnce(mono_string_to_utf8(key), mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
 	}
+
 #pragma endregion
 
 #pragma region Game Time
+
 	float Time_GetDeltaTime()
 	{
 		return Time::GetDeltaTime<float, std::ratio<1, 1>>();
@@ -110,6 +113,7 @@ namespace Glory
 	{
 		return Time::SetTimeScale(scale);
 	}
+
 #pragma endregion
 
 #pragma region Layer Management
@@ -262,6 +266,123 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Scenes
+
+	UUID Scene_NewEmptyObject(UUID sceneID)
+	{
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
+		if(!pScene) return 0;
+		SceneObject* pNewObject = pScene->CreateEmptyObject();
+		return pNewObject->GetUUID();
+	}
+
+	UUID Scene_NewEmptyObjectWithName(UUID sceneID, MonoString* name)
+	{
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
+		if (!pScene) return 0;
+		const std::string nameStr = mono_string_to_utf8(name);
+		SceneObject* pNewObject = pScene->CreateEmptyObject(nameStr, UUID());
+		return pNewObject->GetUUID();
+	}
+
+	size_t Scene_ObjectsCount(UUID sceneID)
+	{
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
+		if (!pScene) return 0;
+		return pScene->SceneObjectsCount();
+	}
+
+	UUID Scene_GetSceneObject(UUID sceneID, size_t index)
+	{
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
+		if (!pScene) return 0;
+		SceneObject* pNewObject = pScene->GetSceneObject(index);
+		return pNewObject ? pNewObject->GetUUID() : 0;
+	}
+
+	void Scene_Destroy(UUID sceneID, UUID objectID)
+	{
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
+		if (!pScene) return;
+		SceneObject* pObject = pScene->GetSceneObject(objectID);
+		if (!pObject) return;
+		pScene->DeleteObject(pObject);
+	}
+
+#pragma endregion
+
+#pragma region Scene Management
+
+	UUID SceneManager_CreateEmptyScene(MonoString* name)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->CreateEmptyScene(mono_string_to_utf8(name));
+		return pScene ? pScene->GetUUID() : 0;
+	}
+
+	size_t SceneManager_OpenScenesCount()
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		return pScenes->OpenScenesCount();
+	}
+
+	UUID SceneManager_GetOpenScene(size_t index)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->GetOpenScene(index);
+		return pScene ? pScene->GetUUID() : 0;
+	}
+
+	UUID SceneManager_GetOpenSceneByUUID(UUID sceneID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		return pScene ? pScene->GetUUID() : 0;
+	}
+
+	UUID SceneManager_GetActiveScene()
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->GetActiveScene();
+		return pScene ? pScene->GetUUID() : 0;
+	}
+
+	void SceneManager_SetActiveScene(UUID sceneID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return;
+		pScenes->SetActiveScene(pScene);
+	}
+
+	void SceneManager_CloseAllScenes()
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return;
+		pScenes->CloseAllScenes();
+	}
+
+	void SceneManager_OpenScene(MonoString* path)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return;
+		pScenes->OpenScene(mono_string_to_utf8(path));
+	}
+
+	void SceneManager_CloseScene(UUID sceneID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return;
+		pScenes->CloseScene(sceneID);
+	}
+
+#pragma endregion
 
 #pragma region Binding
 
@@ -345,6 +466,24 @@ namespace Glory
 
 		BIND("GloryEngine.Material::Material_SetTexture", Material_SetTexture);
 		BIND("GloryEngine.Material::Material_GetTexture", Material_GetTexture);
+
+		// Scenes
+		BIND("GloryEngine.Scene::Scene_NewEmptyObject", Scene_NewEmptyObject);
+		BIND("GloryEngine.Scene::Scene_NewEmptyObjectWithName", Scene_NewEmptyObjectWithName);
+		BIND("GloryEngine.Scene::Scene_ObjectsCount", Scene_ObjectsCount);
+		BIND("GloryEngine.Scene::Scene_GetSceneObject", Scene_GetSceneObject);
+		BIND("GloryEngine.Scene::Scene_Destroy", Scene_Destroy);
+
+		// Scene Manager
+		BIND("GloryEngine.SceneManager::SceneManager_CreateEmptyScene", SceneManager_CreateEmptyScene);
+		BIND("GloryEngine.SceneManager::SceneManager_OpenScenesCount", SceneManager_OpenScenesCount);
+		BIND("GloryEngine.SceneManager::SceneManager_GetOpenScene", SceneManager_GetOpenScene);
+		BIND("GloryEngine.SceneManager::SceneManager_GetOpenSceneByUUID", SceneManager_GetOpenScene);
+		BIND("GloryEngine.SceneManager::SceneManager_GetActiveScene", SceneManager_GetActiveScene);
+		BIND("GloryEngine.SceneManager::SceneManager_SetActiveScene", SceneManager_SetActiveScene);
+		BIND("GloryEngine.SceneManager::SceneManager_CloseAllScenes", SceneManager_CloseAllScenes);
+		BIND("GloryEngine.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
+		BIND("GloryEngine.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
 	}
 
 	CoreCSAPI::CoreCSAPI() {}

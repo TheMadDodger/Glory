@@ -5,6 +5,7 @@
 #include <string>
 #include <SceneObjectNameAction.h>
 #include <Undo.h>
+#include <algorithm>
 
 namespace Glory::Editor
 {

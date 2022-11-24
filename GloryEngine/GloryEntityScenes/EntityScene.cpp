@@ -1,11 +1,9 @@
 #include <glm/glm.hpp>
-#include <JobManager.h>
 #include "EntityScene.h"
 #include "Entity.h"
 #include "Components.h"
 #include "Systems.h"
 #include "EntitySceneObject.h"
-#include "Systems.h"
 
 namespace Glory
 {

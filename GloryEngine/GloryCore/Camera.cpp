@@ -157,4 +157,9 @@ namespace Glory
 	{
 		return m_Far;
 	}
+
+	UUID Camera::GetUUID() const
+	{
+		return m_UUID;
+	}
 }

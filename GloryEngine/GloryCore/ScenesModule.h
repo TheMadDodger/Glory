@@ -3,7 +3,6 @@
 #include "GScene.h"
 #include "CameraRef.h"
 #include <mutex>
-#include <glm/glm.hpp>
 
 namespace Glory
 {
@@ -42,7 +41,6 @@ namespace Glory
         virtual GScene* CreateScene(const std::string& sceneName, UUID uuid) = 0;
 
         static SceneObject* CreateObject(GScene* pScene, const std::string& name, UUID uuid);
-
 
         virtual void OnSceneOpen(UUID uuid) {}
         virtual void OnSceneClose(UUID uuid) {}
