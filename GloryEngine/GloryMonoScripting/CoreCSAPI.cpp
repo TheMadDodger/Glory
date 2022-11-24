@@ -133,16 +133,16 @@ namespace Glory
 	{
 		const std::string nameStr = mono_string_to_utf8(name);
 		const Layer* layer = LayerManager::GetLayerByName(nameStr);
-		return LayerWrapper(layer);
+		return { layer };
 	}
 
-	MonoString* LayerManager_LayerMaskToString(LayerMask* layerMask)
+	MonoString* LayerManager_LayerMaskToString(const LayerMask* layerMask)
 	{
 		const std::string str = LayerManager::LayerMaskToString(*layerMask);
 		return mono_string_new(MonoManager::GetDomain(), str.c_str());
 	}
 
-	int LayerManager_GetLayerIndex(Layer* pLayer)
+	int LayerManager_GetLayerIndex(const Layer* pLayer)
 	{
 		return LayerManager::GetLayerIndex(pLayer);
 	}
@@ -150,7 +150,7 @@ namespace Glory
 	LayerWrapper LayerManager_GetLayerAtIndex(int index)
 	{
 		const Layer* layer = LayerManager::GetLayerAtIndex(index);
-		return LayerWrapper(layer);
+		return { layer };
 	}
 
 #pragma endregion
@@ -234,7 +234,7 @@ namespace Glory
 
 	void Material_SetTexture(UUID matID, MonoString* propName, UUID value)
 	{
-		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
+		const auto pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
 		{
 			Debug::LogError("Material does not exist!");
@@ -247,7 +247,7 @@ namespace Glory
 
 	bool Material_GetTexture(UUID matID, MonoString* propName, UUID& value)
 	{
-		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
+		const auto pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
 		{
 			Debug::LogError("Material does not exist!");
@@ -323,6 +323,7 @@ namespace Glory
 		BIND("GloryEngine.Material::Material_GetUInt", Material_Get<unsigned int>);
 		BIND("GloryEngine.Material::Material_SetBool", Material_Set<bool>);
 		BIND("GloryEngine.Material::Material_GetBool", Material_Get<bool>);
+
 		BIND("GloryEngine.Material::Material_SetVec2", Material_Set<glm::vec2>);
 		BIND("GloryEngine.Material::Material_GetVec2", Material_Get<glm::vec2>);
 		BIND("GloryEngine.Material::Material_SetVec3", Material_Set<glm::vec3>);

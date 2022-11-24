@@ -1,6 +1,5 @@
 #pragma once
 #include "Resource.h"
-#include "FileData.h"
 #include "ShaderSourceData.h"
 #include "Texture.h"
 #include "MaterialPropertyData.h"
@@ -19,26 +18,26 @@ namespace Glory
         MaterialData(const std::vector<ShaderSourceData*>& shaderFiles);
         virtual ~MaterialData();
 
-        virtual size_t ShaderCount() const;
-        virtual ShaderSourceData* GetShaderAt(size_t index) const;
-        virtual const ShaderType& GetShaderTypeAt(size_t index) const;
+        [[nodiscard]]virtual size_t ShaderCount() const;
+        [[nodiscard]]virtual ShaderSourceData* GetShaderAt(size_t index) const;
+        [[nodiscard]]virtual const ShaderType& GetShaderTypeAt(size_t index) const;
         void RemoveShaderAt(size_t index);
         bool AddShader(ShaderSourceData* pShaderSourceData);
 
         void AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
         void AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, UUID resourceUUID, uint32_t flags = 0);
 
-        virtual size_t PropertyInfoCount() const;
+        [[nodiscard]]virtual size_t PropertyInfoCount() const;
         virtual MaterialPropertyInfo* GetPropertyInfoAt(size_t index);
-        virtual size_t GetCurrentBufferOffset() const;
+        [[nodiscard]]virtual size_t GetCurrentBufferOffset() const;
         virtual std::vector<char>& GetBufferReference();
         virtual std::vector<char>& GetFinalBufferReference();
         virtual bool GetPropertyInfoIndex(const std::string& name, size_t& index) const;
-        size_t ResourceCount() const;
+        [[nodiscard]]size_t ResourceCount() const;
         virtual UUID* GetResourceUUIDPointer(size_t index);
-        virtual size_t GetResourcePropertyCount() const;
+        [[nodiscard]]virtual size_t GetResourcePropertyCount() const;
         virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index);
-        virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
+        [[nodiscard]]virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
         void ClearProperties();
         
     public: // Properties
@@ -51,7 +50,6 @@ namespace Glory
             EnableProperty(index);
             m_PropertyInfos[index].Write<T>(GetPropertyBuffer(index), value);
         }
-        virtual void SetTexture(const std::string& name, ImageData* value);
 
         // Getters
         template<typename T>
@@ -61,6 +59,8 @@ namespace Glory
             if (!GetPropertyInfoIndex(name, index)) return false;
             return m_PropertyInfos[index].Read<T>(GetPropertyBuffer(index), value);
         }
+
+        virtual void SetTexture(const std::string& name, ImageData* value);
         virtual bool GetTexture(const std::string& name, ImageData** value);
 
     protected:

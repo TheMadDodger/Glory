@@ -1,6 +1,7 @@
 #include "MaterialData.h"
+#include "AssetManager.h"
+
 #include <algorithm>
-#include "ResourceType.h"
 
 namespace Glory
 {
@@ -45,7 +46,7 @@ namespace Glory
 
 	bool MaterialData::AddShader(ShaderSourceData* pShaderSourceData)
 	{
-		auto it = std::find(m_pShaderFiles.begin(), m_pShaderFiles.end(), pShaderSourceData);
+		const auto it = std::find(m_pShaderFiles.begin(), m_pShaderFiles.end(), pShaderSourceData);
 		if (it != m_pShaderFiles.end()) return false;
 		m_pShaderFiles.push_back(pShaderSourceData);
 		return true;
@@ -53,10 +54,10 @@ namespace Glory
 
 	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags)
 	{
-		size_t hash = m_Hasher(displayName);
-		size_t index = m_PropertyInfos.size();
+		const size_t hash = m_Hasher(displayName);
+		const size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
-		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
+		m_PropertyInfos.emplace_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
 		m_CurrentOffset = m_PropertyInfos[index].EndOffset();
 		m_PropertyInfos[index].Reserve(m_PropertyBuffer);
 		m_HashToPropertyInfoIndex[hash] = index;
@@ -64,8 +65,8 @@ namespace Glory
 
 	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, UUID resourceUUID, uint32_t flags)
 	{
-		size_t hash = m_Hasher(displayName);
-		size_t index = m_PropertyInfos.size();
+		const size_t hash = m_Hasher(displayName);
+		const size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
 		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_Resources.size(), flags));
 		m_ResourcePropertyInfoIndices.push_back(index);
@@ -147,13 +148,21 @@ namespace Glory
 		size_t index;
 		if (!GetPropertyInfoIndex(name, index)) return;
 		EnableProperty(index);
-
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
+		if (!pPropertyInfo->IsResource()) return;
+		const size_t resourceIndex = pPropertyInfo->Offset();
+		m_Resources[resourceIndex] = value ? value->GetUUID() : 0;
 	}
 
 	bool MaterialData::GetTexture(const std::string& name, ImageData** value)
 	{
 		size_t index;
 		if (!GetPropertyInfoIndex(name, index)) return false;
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
+		if (!pPropertyInfo->IsResource()) return false;
+		const size_t resourceIndex = pPropertyInfo->Offset();
+		*value = AssetManager::GetAssetImmediate<ImageData>(m_Resources[resourceIndex]);
+		return true;
 	}
 
 	void MaterialData::EnableProperty(size_t)

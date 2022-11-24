@@ -64,6 +64,36 @@ namespace GloryEngine
             return Material_GetBool(_objectID, propertyName, out value);
         }
 
+        public void SetVec2(string propertyName, Vector2 value)
+        {
+            Material_SetVec2(_objectID, propertyName, value);
+        }
+
+        public bool GeVec2(string propertyName, out Vector2 value)
+        {
+            return Material_GetVec2(_objectID, propertyName, out value);
+        }
+
+        public void SetVec3(string propertyName, Vector3 value)
+        {
+            Material_SetVec3(_objectID, propertyName, value);
+        }
+
+        public bool GeVec3(string propertyName, out Vector3 value)
+        {
+            return Material_GetVec3(_objectID, propertyName, out value);
+        }
+
+        public void SetVec4(string propertyName, Vector4 value)
+        {
+            Material_SetVec4(_objectID, propertyName, value);
+        }
+
+        public bool GeVec4(string propertyName, out Vector4 value)
+        {
+            return Material_GetVec4(_objectID, propertyName, out value);
+        }
+
         public void SetTexture(string propertyName, Image value)
         {
             Material_SetTexture(_objectID, propertyName, value != null ? value.ID : 0);
@@ -109,8 +139,20 @@ namespace GloryEngine
         private static extern bool Material_GetBool(UInt64 materialID, string propertyName, out bool value);
 
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void Material_SetVec2(UInt64 materialID, string propertyName, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool Material_GetVec2(UInt64 materialID, string propertyName, out Vector2 value);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void Material_SetVec3(UInt64 materialID, string propertyName, Vector3 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool Material_GetVec3(UInt64 materialID, string propertyName, out Vector3 value);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void Material_SetVec4(UInt64 materialID, string propertyName, Vector4 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool Material_GetVec4(UInt64 materialID, string propertyName, out Vector4 value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void Material_SetTexture(UInt64 materialID, string propertyName, UInt64 value);
