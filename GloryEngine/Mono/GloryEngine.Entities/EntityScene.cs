@@ -8,7 +8,7 @@ namespace GloryEngine.Entities
         #region Methods
 
         protected override SceneObject CreateSceneObject(UInt64 objectID)
-            => new EntitySceneObject(objectID);
+            => new EntitySceneObject(objectID, _objectID);
 
         #endregion
     }

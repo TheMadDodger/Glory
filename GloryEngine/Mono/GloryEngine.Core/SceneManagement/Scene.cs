@@ -18,6 +18,13 @@ namespace GloryEngine.SceneManagement
 
         #endregion
 
+        #region Constructor
+
+        public Scene() : base() { }
+        public Scene(UInt64 sceneID) : base(sceneID) { }
+
+        #endregion
+
         #region Methods
 
         public SceneObject NewEmptyObject()
@@ -42,6 +49,15 @@ namespace GloryEngine.SceneManagement
             return sceneObject;
         }
 
+        public SceneObject GetSceneObject(UInt64 objectID)
+        {
+            if (objectID == 0) return null;
+            if (_sceneObjects.ContainsKey(objectID)) return _sceneObjects[objectID];
+            SceneObject sceneObject = CreateSceneObject(objectID);
+            _sceneObjects.Add(objectID, sceneObject);
+            return sceneObject;
+        }
+
         public void Destroy(SceneObject sceneObject)
         {
             if (sceneObject == null) return;
@@ -49,7 +65,7 @@ namespace GloryEngine.SceneManagement
             _sceneObjects.Remove(sceneObject.ID);
         }
 
-        virtual protected SceneObject CreateSceneObject(UInt64 objectID) => new SceneObject(objectID);
+        virtual protected SceneObject CreateSceneObject(UInt64 objectID) => new SceneObject(objectID, _objectID);
 
         private SceneObject GetNewObject(UInt64 objectID)
         {

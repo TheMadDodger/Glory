@@ -384,6 +384,101 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Scene Objects
+
+	MonoString* SceneObject_GetName(UUID objectID, UUID sceneID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return nullptr;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return nullptr;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		return pSceneObject ? mono_string_new(MonoManager::GetDomain(), pSceneObject->Name().c_str()) : nullptr;
+	}
+
+	void SceneObject_SetName(UUID objectID, UUID sceneID, MonoString* name)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return;
+		pSceneObject->SetName(mono_string_to_utf8(name));
+	}
+
+	size_t SceneObject_GetSiblingIndex(UUID objectID, UUID sceneID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return 0;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return 0;
+		return pSceneObject->GetSiblingIndex();
+	}
+
+	void SceneObject_SetSiblingIndex(UUID objectID, UUID sceneID, size_t index)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return;
+		pSceneObject->SetSiblingIndex(index);
+	}
+
+	size_t SceneObject_GetChildCount(UUID objectID, UUID sceneID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return 0;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return 0;
+		return pSceneObject->ChildCount();
+	}
+
+	UUID SceneObject_GetChild(UUID objectID, UUID sceneID, size_t index)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return 0;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return 0;
+		SceneObject* pChild = pSceneObject->GetChild(index);
+		return pChild ? pChild->GetUUID() : 0;
+	}
+
+	UUID SceneObject_GetParent(UUID objectID, UUID sceneID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return 0;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return 0;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return 0;
+		SceneObject* pParent = pSceneObject->GetParent();
+		return pParent ? pParent->GetUUID() : 0;
+	}
+
+	void SceneObject_SetParent(UUID objectID, UUID sceneID, UUID parentID)
+	{
+		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		if (!pScenes) return;
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return;
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return;
+		SceneObject* pParent = pScene->FindSceneObject(parentID);
+		if (!pParent) return;
+		pSceneObject->SetParent(pParent);
+	}
+
+#pragma endregion 
+
 #pragma region Binding
 
 	void CoreCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -484,6 +579,16 @@ namespace Glory
 		BIND("GloryEngine.SceneManager::SceneManager_CloseAllScenes", SceneManager_CloseAllScenes);
 		BIND("GloryEngine.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
 		BIND("GloryEngine.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
+
+		// Scene Objects
+		BIND("GloryEngine.SceneObject::SceneObject_GetName", SceneObject_GetName);
+		BIND("GloryEngine.SceneObject::SceneObject_SetName", SceneObject_SetName);
+		BIND("GloryEngine.SceneObject::SceneObject_GetSiblingIndex", SceneObject_GetSiblingIndex);
+		BIND("GloryEngine.SceneObject::SceneObject_SetSiblingIndex", SceneObject_SetSiblingIndex);
+		BIND("GloryEngine.SceneObject::SceneObject_GetChildCount", SceneObject_GetChildCount);
+		BIND("GloryEngine.SceneObject::SceneObject_GetChild", SceneObject_GetChild);
+		BIND("GloryEngine.SceneObject::SceneObject_GetParent", SceneObject_GetParent);
+		BIND("GloryEngine.SceneObject::SceneObject_SetParent", SceneObject_SetParent);
 	}
 
 	CoreCSAPI::CoreCSAPI() {}
