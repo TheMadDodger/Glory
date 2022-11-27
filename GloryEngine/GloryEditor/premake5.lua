@@ -27,13 +27,13 @@ project "GloryEditor"
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
-		["Popups"] = { "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
+		["Popups"] = { "AssetPicker.*", "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
 		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
 		["Windows/SceneView"] = { "SceneWindow.*", "SceneViewCamera.*" },
 		["Windows/ContentBrowser"] = { "ContentBrowser.*", "ContentBrowserItem.*" },
 		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" },
 		["Undo"] = { "Undo.*" },
-		["Undo/Actions"] = { "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectAction.*", "DeselectAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
+		["Undo/Actions"] = { "SetParentAction.*", "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectAction.*", "DeselectAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*" }
 	}
 

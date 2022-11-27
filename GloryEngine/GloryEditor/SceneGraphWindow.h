@@ -1,6 +1,5 @@
 #pragma once
 #include <ScenesModule.h>
-#include <Object.h>
 #include "EditorWindow.h"
 
 namespace Glory::Editor

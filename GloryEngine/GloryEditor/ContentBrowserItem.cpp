@@ -220,19 +220,20 @@ namespace Glory::Editor
 
 		//ImGui::ImageButton(NULL, ImVec2(64.0f, 64.0f));
 
-		ImGui::Columns(columns, NULL, false);
+		ImGui::BeginColumns("FileBrowser", columns, false);
 
 		for (size_t i = 0; i < m_pSelectedFolder->m_pChildren.size(); i++)
 		{
 			ContentBrowserItem* pChild = m_pSelectedFolder->m_pChildren[i];
 
-			int columnIndex = (i % columns) - 1;
+			const int columnIndex = (i % columns) - 1;
 			ImGui::SetColumnWidth(columnIndex, (float)iconSize + 22.0f);
 			pChild->DrawFileItem(iconSize);
 			int mod = i % columns;
 			if (mod != 0) ImGui::SameLine();
 			ImGui::NextColumn();
 		}
+		ImGui::EndColumns();
 	}
 
 	void ContentBrowserItem::DrawCurrentPath()
