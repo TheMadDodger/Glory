@@ -36,9 +36,11 @@ namespace Glory
 	{
 		SceneObject* pParent = GetParent();
 
-		std::vector<SceneObject*>* targetVector = &m_pChildren;
+		std::vector<SceneObject*>* targetVector = nullptr;
 		if (pParent == nullptr)
 			targetVector = &m_pScene->m_pSceneObjects;
+		else
+			targetVector = &pParent->m_pChildren;
 
 		auto it = std::find(targetVector->begin(), targetVector->end(), this);
 		if (it == targetVector->end()) return;
@@ -92,12 +94,14 @@ namespace Glory
 	size_t SceneObject::GetSiblingIndex()
 	{
 		SceneObject* pParent = GetParent();
-		std::vector<SceneObject*> targetVector = m_pChildren;
+		std::vector<SceneObject*>* targetVector = nullptr;
 		if (pParent == nullptr)
-			targetVector = m_pScene->m_pSceneObjects;
+			targetVector = &m_pScene->m_pSceneObjects;
+		else
+			targetVector = &pParent->m_pChildren;
 
-		auto it = std::find(targetVector.begin(), targetVector.end(), this);
-		return it - targetVector.begin();
+		auto it = std::find(targetVector->begin(), targetVector->end(), this);
+		return it - targetVector->begin();
 	}
 
 	void SceneObject::SetScene(GScene* pScene)

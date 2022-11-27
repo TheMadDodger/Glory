@@ -69,7 +69,7 @@ namespace Glory::Editor
 
 		bool change = false;
 
-		float width = ImGui::GetContentRegionAvailWidth();
+		float width = ImGui::GetContentRegionAvail().x;
 		float inputWidth = 10.0f;
 		width -= inputWidth;
 

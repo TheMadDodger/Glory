@@ -1,11 +1,14 @@
 #include "SceneGraphWindow.h"
 #include "Selection.h"
 #include "EditorSceneManager.h"
-#include "Selection.h"
 #include "ObjectMenu.h"
 #include "ImGuiHelpers.h"
+
 #include <Game.h>
 #include <Engine.h>
+
+#include "Undo.h"
+#include "SetParentAction.h"
 
 namespace Glory::Editor
 {
@@ -21,11 +24,11 @@ namespace Glory::Editor
 	{
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
 
-		GScene* pActiveScene = pScenesModule->GetActiveScene();
+		const GScene* pActiveScene = pScenesModule->GetActiveScene();
 
-		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-		ImVec2 size = vMax - vMin;
+		const ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+		const ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+		const ImVec2 size = vMax - vMin;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
@@ -41,8 +44,14 @@ namespace Glory::Editor
 		{
 			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
 			{
-				DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+
+				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
+				const UUID newParent = 0;
 				payload.pObject->SetParent(nullptr);
+				Undo::AddAction(new SetParentAction(oldParent, newParent));
+				Undo::StopRecord();
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -55,18 +64,18 @@ namespace Glory::Editor
 
 	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)
 	{
-		std::hash<std::string> hasher;
-		size_t hash = hasher((pScene->Name() + std::to_string(pScene->GetUUID())));
+		const std::hash<std::string> hasher{};
+		const size_t hash = hasher((pScene->Name() + std::to_string(pScene->GetUUID())));
 
 		bool selected = Selection::IsObjectSelected(pScene);
-		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
+		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
 			| ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Selected;
 
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.07f, 0.0720f, 0.074f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.07f, 0.0720f, 0.074f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.15f, 0.1525f, 0.1505f, 1.0f));
 		if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-		bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, pScene->Name().data());
+		const bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, pScene->Name().data());
 		if (isActive) ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
@@ -76,8 +85,14 @@ namespace Glory::Editor
 		{
 			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
 			{
-				DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+
+				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
+				const UUID newParent = 0;
 				payload.pObject->SetParent(nullptr);
+				Undo::AddAction(new SetParentAction(oldParent, newParent));
+				Undo::StopRecord();
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -116,15 +131,15 @@ namespace Glory::Editor
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
 			| ImGuiTreeNodeFlags_SpanAvailWidth | (selected ? ImGuiTreeNodeFlags_Selected : 0);
 
-		UUID id = pObject->GetUUID();
+		const UUID id = pObject->GetUUID();
 
-		std::hash<std::string> hasher;
-		std::string nameAndIDMinus1 = pObject->Name() + std::to_string(id - 1);
-		std::string nameAndID = pObject->Name() + std::to_string(id);
-		std::string nameAndIDPlus1 = pObject->Name() + std::to_string(id + 1);
-		size_t hash = hasher(nameAndID);
+		constexpr std::hash<std::string> hasher{};
+		const std::string nameAndIDMinus1 = pObject->Name() + std::to_string(id - 1);
+		const std::string nameAndID = pObject->Name() + std::to_string(id);
+		const std::string nameAndIDPlus1 = pObject->Name() + std::to_string(id + 1);
+		const size_t hash = hasher(nameAndID);
 
-		size_t childCount = pObject->ChildCount();
+		const size_t childCount = pObject->ChildCount();
 
 		if (index == 0)
 		{
@@ -133,7 +148,7 @@ namespace Glory::Editor
 			{
 				if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
 				{
-					DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+					const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
 					SceneObject* pParent = pObject->GetParent();
 					bool canParent = true;
 					while (pParent)
@@ -150,8 +165,13 @@ namespace Glory::Editor
 					pParent = pObject->GetParent();
 					if (canParent)
 					{
+						Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+						const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
+						const UUID newParent = pParent ? pParent->GetUUID() : 0;
 						payload.pObject->SetParent(pParent);
+						Undo::AddAction(new SetParentAction(oldParent, newParent));
 						payload.pObject->SetBeforeObject(pObject);
+						Undo::StopRecord();
 					}
 				}
 				ImGui::EndDragDropTarget();
@@ -160,7 +180,7 @@ namespace Glory::Editor
 
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, pObject->Name().data());
+		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, pObject->Name().data());
 		ImGui::PopStyleVar();
 
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
@@ -178,7 +198,7 @@ namespace Glory::Editor
 		{
 			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
 			{
-				DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
 
 				SceneObject* pParent = pObject->GetParent();
 				bool canParent = true;
@@ -192,7 +212,15 @@ namespace Glory::Editor
 
 					pParent = pParent->GetParent();
 				}
-				if (canParent) payload.pObject->SetParent(pObject);
+				if (canParent)
+				{
+					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
+					const UUID newParent = pObject ? pObject->GetUUID() : 0;
+					payload.pObject->SetParent(pObject);
+					Undo::AddAction(new SetParentAction(oldParent, newParent));
+					Undo::StopRecord();
+				}
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -222,7 +250,7 @@ namespace Glory::Editor
 		{
 			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
 			{
-				DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
 				SceneObject* pParent = pObject->GetParent();
 				bool canParent = true;
 				while (pParent)
@@ -239,8 +267,13 @@ namespace Glory::Editor
 				pParent = pObject->GetParent();
 				if (canParent)
 				{
+					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
+					const UUID newParent = pParent ? pParent->GetUUID() : 0;
 					payload.pObject->SetParent(pParent);
-					payload.pObject->SetAfterObject(pObject);
+					Undo::AddAction(new SetParentAction(oldParent, newParent));
+					payload.pObject->SetBeforeObject(pObject);
+					Undo::StopRecord();
 				}
 			}
 			ImGui::EndDragDropTarget();
