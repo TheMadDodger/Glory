@@ -477,7 +477,7 @@ namespace Glory
 		pSceneObject->SetParent(pParent);
 	}
 
-#pragma endregion 
+#pragma endregion
 
 #pragma region Binding
 
