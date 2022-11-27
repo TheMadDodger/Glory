@@ -12,6 +12,9 @@
 #include "ProfilerModule.h"
 #include "ResourceType.h"
 #include "IModuleLoopHandler.h"
+#include "GloryCore.h"
+#include "ScriptingModule.h"
+#include "IScriptExtender.h"
 
 namespace Glory
 {
@@ -22,6 +25,9 @@ namespace Glory
 		RendererModule* pRenderModule;
 		GraphicsModule* pGraphicsModule;
 
+		uint32_t ScriptingModulesCount;
+		ScriptingModule** pScriptingModules;
+
 		uint32_t OptionalModuleCount;
 		Module** pOptionalModules;
 	};
@@ -30,7 +36,7 @@ namespace Glory
 	/// This class describes the engine a GloryGame object will run on.
 	/// It holds the required modules used to run the game, as well as optional modules.
 	/// </summary>
-	class Engine : public Object
+	class Engine
 	{
 	public:
 		static Engine* CreateEngine(const EngineCreateInfo& createInfo);
@@ -41,12 +47,25 @@ namespace Glory
 		GraphicsModule* GetGraphicsModule() const;
 		TimerModule* GetTimerModule() const;
 		ProfilerModule* GetProfilerModule() const;
+		ScriptingExtender* GetScriptingExtender() const;
 
 		template<class T>
 		T* GetModule()
 		{
 			Module* pModule = GetModule(typeid(T));
 			return (T*)pModule;
+		}
+
+		template<class T>
+		T* GetScriptingModule()
+		{
+			for (size_t i = 0; i < m_pScriptingModules.size(); i++)
+			{
+				T* pScriptingModule = dynamic_cast<T*>(m_pScriptingModules[i]);
+				if (pScriptingModule) return pScriptingModule;
+			}
+
+			return nullptr;
 		}
 
 		template<class T>
@@ -62,6 +81,7 @@ namespace Glory
 		LoaderModule* GetLoaderModule(size_t typeHash);
 
 		Module* GetModule(const std::type_info& type);
+		Module* GetModule(const std::string& name);
 
 		GraphicsThread* GetGraphicsThread() const;
 
@@ -92,6 +112,10 @@ namespace Glory
 		friend class Game;
 		friend class GameThread;
 		friend class GraphicsThread;
+		friend class ScriptingExtender;
+
+		// Original crate info
+		const EngineCreateInfo m_CreateInfo;
 
 		// Required modules
 		WindowModule* m_pWindowModule;
@@ -100,6 +124,8 @@ namespace Glory
 		GraphicsModule* m_pGraphicsModule;
 		TimerModule* m_pTimerModule;
 		ProfilerModule* m_pProfilerModule;
+		ScriptingExtender* m_pScriptingExtender;
+		std::vector<ScriptingModule*> m_pScriptingModules;
 
 		// Optional modules
 		std::vector<Module*> m_pOptionalModules;

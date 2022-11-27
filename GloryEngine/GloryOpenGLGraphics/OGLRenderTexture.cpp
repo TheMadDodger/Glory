@@ -3,6 +3,7 @@
 #include "Debug.h"
 #include <GL/glew.h>
 #include <Game.h>
+#include <Engine.h>
 #include "GloryOGL.h"
 
 namespace Glory
@@ -14,6 +15,7 @@ namespace Glory
 	OGLRenderTexture::~OGLRenderTexture()
 	{
 		if (m_GLFrameBufferID != NULL) glDeleteFramebuffers(1, &m_GLFrameBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		m_GLFrameBufferID = NULL;
 	}
 

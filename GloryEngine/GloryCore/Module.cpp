@@ -45,4 +45,9 @@ namespace Glory
         path.append("Resources").append(resource);
         return std::filesystem::exists(path);
     }
+
+    void Module::AddScriptingExtender(IScriptExtender* pScriptExtender)
+    {
+        m_pScriptingExtender.push_back(pScriptExtender);
+    }
 }

@@ -50,7 +50,7 @@ namespace Glory::Editor
 	const float MainEditor::TOOLBAR_SIZE = 50.0f;
 
 	MainEditor::MainEditor()
-		: m_pProjectPopup(new ProjectPopup()), m_AssetPickerPopup(new AssetPickerPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), m_Settings("./EditorSettings.yaml")
+		: m_pProjectPopup(new ProjectPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), m_Settings("./EditorSettings.yaml")
 	{
 	}
 
@@ -58,9 +58,6 @@ namespace Glory::Editor
 	{
 		delete m_pProjectPopup;
 		m_pProjectPopup = nullptr;
-
-		delete m_AssetPickerPopup;
-		m_AssetPickerPopup = nullptr;
 
 		delete m_pToolbar;
 		m_pToolbar = nullptr;
@@ -160,7 +157,6 @@ namespace Glory::Editor
 		PopupManager::OnGUI();
 		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
-		m_AssetPickerPopup->OnGUI();
 		FileDialog::Update();
 	}
 
@@ -282,6 +278,7 @@ namespace Glory::Editor
 		EditorWindow::GetWindow<InspectorWindow>();
 		EditorWindow::GetWindow<SceneGraphWindow>();
 		EditorWindow::GetWindow<ContentBrowser>();
+		EditorWindow::GetWindow<EditorConsoleWindow>();
 	}
 
 	void MainEditor::RegisterPropertyDrawers()
@@ -295,6 +292,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<Vector4Drawer>();
 		PropertyDrawer::RegisterPropertyDrawer<QuatDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<LayerRefDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<EnumPropertyDrawer>();

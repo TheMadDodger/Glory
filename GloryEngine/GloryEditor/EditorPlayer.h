@@ -1,5 +1,5 @@
 #pragma once
-#include "IEditorLoopHandler.h"
+#include "IPlayModeHandler.h"
 #include "GloryEditor.h"
 #include "Toolbar.h"
 #include <IModuleLoopHandler.h>
@@ -11,7 +11,7 @@ namespace Glory::Editor
 	class EditorPlayer : public IModuleLoopHandler, IToolChain
 	{
 	public:
-		static GLORY_EDITOR_API void RegisterLoopHandler(IEditorLoopHandler* pEditorSceneLoopHandler);
+		static GLORY_EDITOR_API void RegisterLoopHandler(IPlayModeHandler* pEditorSceneLoopHandler);
 
 	private:
 		void Start();
@@ -32,6 +32,6 @@ namespace Glory::Editor
 		UUID m_SelectedObjectBeforeStart;
 		bool m_IsPaused;
 		bool m_FrameRequested;
-		static std::vector<IEditorLoopHandler*> m_pSceneLoopHandlers;
+		static std::vector<IPlayModeHandler*> m_pSceneLoopHandlers;
 	};
 }

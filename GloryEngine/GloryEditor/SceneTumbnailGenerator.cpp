@@ -2,6 +2,7 @@
 #include "EditorAssets.h"
 #include "AssetDatabase.h"
 #include "EditorSceneManager.h"
+#include <Engine.h>
 
 namespace Glory::Editor
 {

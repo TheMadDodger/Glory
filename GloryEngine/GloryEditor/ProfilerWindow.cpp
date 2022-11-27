@@ -1,6 +1,7 @@
 #include "ProfilerWindow.h"
 #include <ProfilerModule.h>
 #include <Game.h>
+#include <Engine.h>
 #include <imgui.h>
 #include <implot.h>
 #include <GameTime.h>
@@ -272,7 +273,7 @@ namespace Glory::Editor
 				ImGui::TableSetColumnIndex(0);
 				ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 
-				if (ImGui::Selectable("", false, selectable_flags, ImVec2(0, 0.0f)))
+				if (ImGui::Selectable("##", false, selectable_flags, ImVec2(0, 0.0f)))
 				{
 					
 				}

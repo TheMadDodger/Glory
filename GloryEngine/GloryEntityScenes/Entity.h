@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <functional>
 #include <Glory.h>
-#include "EntityID.h"
+#include <EntityID.h>
 #include "EntityScene.h"
 
 namespace Glory

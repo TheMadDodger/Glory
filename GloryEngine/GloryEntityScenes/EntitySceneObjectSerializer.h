@@ -12,7 +12,7 @@ namespace Glory
 		EntitySceneObjectSerializer();
 		virtual ~EntitySceneObjectSerializer();
 
-		static GLORY_API void SerializeComponent(GloryECS::EntityRegistry* pRegistry, UUID componentUUID, void* pAddress, const GloryReflect::TypeData* pTypeData, YAML::Emitter& out);
+		static GLORY_API void SerializeComponent(GloryECS::EntityID entityID, GloryECS::EntityRegistry* pRegistry, UUID componentUUID, void* pAddress, const GloryReflect::TypeData* pTypeData, YAML::Emitter& out);
 		static GLORY_API void DeserializeComponent(EntityScene* pScene, EntitySceneObject* pObject, size_t componentIndex, YAML::Node& object);
 
 	private:

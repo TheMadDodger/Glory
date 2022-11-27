@@ -1,7 +1,7 @@
 #include "MeshRenderSystem.h"
 #include <Game.h>
+#include <Engine.h>
 #include <Debug.h>
-#include <Game.h>
 #include <SerializedArrayProperty.h>
 #include <AssetReferencePropertyTemplate.h>
 #include <SerializedPropertyManager.h>
@@ -28,7 +28,7 @@ namespace Glory
         if (pRegistry->HasComponent<LayerComponent>(entity))
         {
             LayerComponent& layer = pRegistry->GetComponent<LayerComponent>(entity);
-            mask = layer.m_pLayer != nullptr ? layer.m_pLayer->m_Mask : 0;
+            mask = layer.m_Layer.Layer() != nullptr ? layer.m_Layer.Layer()->m_Mask : 0;
         }
 
         ModelData* pModelData = AssetManager::GetOrLoadAsset<ModelData>(meshFilter.m_pModelData.AssetUUID());

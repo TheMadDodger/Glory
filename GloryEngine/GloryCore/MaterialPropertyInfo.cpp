@@ -54,6 +54,14 @@ namespace Glory
 		return m_Flags;
 	}
 
+	bool MaterialPropertyInfo::Write(std::vector<char>& buffer, const void* data)
+	{
+		if (m_IsResource) return false;
+		if (buffer.size() <= m_Offset + m_Size) buffer.resize(m_Offset + m_Size);
+		memcpy(&buffer[m_Offset], data, m_Size);
+		return true;
+	}
+
 	void MaterialPropertyInfo::Reserve(std::vector<char>& buffer)
 	{
 		buffer.resize(m_Offset + m_Size);

@@ -1,13 +1,14 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <unordered_map>
-#include "Object.h"
+
+#include "CameraRef.h"
 #include "RenderTexture.h"
 #include "LayerMask.h"
 
 namespace Glory
 {
-	class Camera : public Object
+	class Camera
 	{
 	public:
 		void SetResolution(size_t width, size_t height);
@@ -48,6 +49,7 @@ namespace Glory
 
 		float GetNear() const;
 		float GetFar() const;
+		UUID GetUUID() const;
 
 	private:
 		Camera(size_t width, size_t height);
@@ -74,5 +76,7 @@ namespace Glory
 		bool m_OutputEnabled;
 
 		std::unordered_map<std::string, void*> m_UserDatas;
+
+		UUID m_UUID;
 	};
 }

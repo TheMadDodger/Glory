@@ -1,6 +1,7 @@
 #include "MaterialInstanceEditor.h"
 #include "PropertyDrawer.h"
-#include "AssetPickerPopup.h"
+#include "AssetPicker.h"
+#include "AssetManager.h"
 #include <imgui.h>
 
 namespace Glory::Editor
@@ -14,17 +15,15 @@ namespace Glory::Editor
 		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
 
 		MaterialData* pBaseMaterial = pMaterial->GetBaseMaterial();
-		ImGui::Text("Material: %s", pBaseMaterial ? pBaseMaterial->Name().c_str() : "None");
-		ImGui::SameLine();
-		if (ImGui::Button("Change"))
+		//ImGui::Text("Material: %s", pBaseMaterial ? pBaseMaterial->Name().c_str() : "None");
+		//ImGui::SameLine();
+		UUID baseMaterialID = pBaseMaterial ? pBaseMaterial->GetUUID() : 0;
+		bool change = false;
+		if (AssetPicker::ResourceDropdown("Base Material", ResourceType::GetHash<MaterialData>(), &baseMaterialID))
 		{
-			AssetPickerPopup::Open(ResourceType::GetHash<MaterialData>(), [&](Resource* pResource)
-			{
-				if (!pResource) return;
-				MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
-				MaterialData* pBaseMaterial = (MaterialData*)pResource;
-				pMaterial->SetBaseMaterial(pBaseMaterial);
-			}, ResourceType::GetHash<MaterialInstanceData>());
+			change = true;
+			MaterialData* pBaseMaterial = AssetDatabase::AssetExists(baseMaterialID) ? (MaterialData*)AssetManager::GetAssetImmediate(baseMaterialID) : nullptr;
+			pMaterial->SetBaseMaterial(pBaseMaterial);
 		}
 
 		if (!pMaterial->GetBaseMaterial()) return false;
@@ -34,7 +33,6 @@ namespace Glory::Editor
 
 		std::vector<char>& buffer = pMaterial->GetBufferReference();
 
-		bool change = false;
 		size_t resourceCounter = 0;
 		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
 		{

@@ -10,12 +10,14 @@ namespace Glory::Editor
 {
 	ProjectSpace* ProjectSpace::m_pCurrentProject = nullptr;
 	std::mutex ProjectSpace::m_ProjectLock;
+	std::unordered_map<ProjectCallback, std::vector<std::function<void(ProjectSpace*)>>> ProjectSpace::m_ProjectCallbacks;
 
 	GLORY_EDITOR_API void ProjectSpace::OpenProject(const std::string& path)
 	{
+		std::string absolutePath = std::filesystem::absolute(path).string();
 		CloseProject();
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
-		m_pCurrentProject = new ProjectSpace(path);
+		m_pCurrentProject = new ProjectSpace(absolutePath);
 		lock.unlock();
 		m_pCurrentProject->Open();
 		EditorAssetLoader::Start();
@@ -94,11 +96,31 @@ namespace Glory::Editor
 
 	GLORY_EDITOR_API std::string ProjectSpace::CachePath()
 	{
+		if (!std::filesystem::exists(m_CachePath)) std::filesystem::create_directory(m_CachePath);
 		return m_CachePath;
 	}
 
+	GLORY_EDITOR_API std::string ProjectSpace::LibraryPath()
+	{
+		if (!std::filesystem::exists(m_LibraryPath)) std::filesystem::create_directory(m_LibraryPath);
+		return m_LibraryPath;
+	}
+	
+	GLORY_EDITOR_API std::string ProjectSpace::SettingsPath()
+	{
+		if (!std::filesystem::exists(m_SettingsPath)) std::filesystem::create_directory(m_SettingsPath);
+		return m_SettingsPath;
+	}
+
+	void ProjectSpace::RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback)
+	{
+		m_ProjectCallbacks[callbackType].push_back(callback);
+	}
+
 	ProjectSpace::ProjectSpace(const std::string& path)
-		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()), m_CachePath(std::filesystem::path(path).parent_path().string() + "\\Cache\\")
+		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()),
+		m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string()),
+		m_SettingsPath(std::filesystem::path(path).parent_path().append("ProjectSettings").string())
 	{
 	}
 
@@ -115,6 +137,12 @@ namespace Glory::Editor
 		CreateFolder("Cache/CompiledShaders");
 		YAML::Node node = YAML::LoadFile(m_ProjectFilePath);
 		m_ProjectName = node["ProjectName"].as<std::string>();
+
+		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnOpen].size(); i++)
+		{
+			m_ProjectCallbacks[ProjectCallback::OnOpen][i](this);
+		}
+
 		lock.unlock();
 
 		AssetDatabase::Load();
@@ -123,6 +151,11 @@ namespace Glory::Editor
 
 	void ProjectSpace::Close()
 	{
+		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnClose].size(); i++)
+		{
+			m_ProjectCallbacks[ProjectCallback::OnClose][i](this);
+		}
+
 		AssetDatabase::Save();
 	}
 
@@ -143,7 +176,7 @@ namespace Glory::Editor
 
 	void ProjectSpace::SaveProject()
 	{
-		std::filesystem::path projectVersionTxtPath = m_ProjectRootPath;
+		std::filesystem::path projectVersionTxtPath = m_SettingsPath;
 		projectVersionTxtPath.append("ProjectVersion.txt");
 		std::ofstream fileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
 		std::string versionString = Glory::Editor::Version.GetVersionString();

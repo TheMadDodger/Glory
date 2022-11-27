@@ -5,4 +5,4 @@
 
 #pragma comment (lib,"opengl32.lib")
 
-extern "C" GLORY_API Glory::Module* LoadModule(Glory::GloryContext * pContext);
+extern "C" GLORY_API Glory::Module* OnLoadModule(Glory::GloryContext * pContext);

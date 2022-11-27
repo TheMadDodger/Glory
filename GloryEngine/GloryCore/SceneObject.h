@@ -27,8 +27,6 @@ namespace Glory
         GScene* GetScene() const;
 
     public:
-        const std::string& Name();
-        void SetName(const std::string& name);
         void SetParent(SceneObject* pParent);
 
     protected:
@@ -38,7 +36,6 @@ namespace Glory
 
     private:
         friend class GScene;
-        std::string m_Name;
         GScene* m_pScene;
         std::vector<SceneObject*> m_pChildren;
     };

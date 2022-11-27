@@ -29,6 +29,7 @@ namespace Glory::Editor
 		void Initialize(Game& game)
 		{
 			game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
+			game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
 
 			auto window = (EditorWindowImpl*)(new Window());
 			auto renderer = (EditorRenderImpl*)(new Renderer());
@@ -68,6 +69,7 @@ namespace Glory::Editor
 		void InitializeExtensions();
 
 		static std::string AssetPathOverrider();
+		static std::string SettingsPathOverrider();
 
 	private:
 		EditorWindowImpl* m_pTempWindowImpl;

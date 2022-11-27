@@ -179,6 +179,22 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
+		void DoErase(const _Kty& key, std::function<void(_Ty* value)> callback)
+		{
+			m_Mutex.lock();
+			callback(&m_Data[key]);
+			m_Data.erase(key);
+			m_Mutex.unlock();
+		}
+
+		void Replace(const _Kty& key, std::function<const _Ty&(_Ty* value)> callback)
+		{
+			m_Mutex.lock();
+			const _Ty& newValue = callback(&m_Data[key]);
+			m_Data[key] = newValue;
+			m_Mutex.unlock();
+		}
+
 		void Do(const _Kty& key, std::function<void(const _Ty& value)> callback)
 		{
 			m_Mutex.lock();

@@ -41,12 +41,12 @@ namespace Glory::Editor
 		
 		float deltaTime = io.DeltaTime;
 		
-		bool leftKey = ImGui::IsKeyDown(SDL_SCANCODE_A);
-		bool rightKey = ImGui::IsKeyDown(SDL_SCANCODE_D);
-		bool forwardKey = ImGui::IsKeyDown(SDL_SCANCODE_W);
-		bool backwardKey = ImGui::IsKeyDown(SDL_SCANCODE_S);
-		bool upKey = ImGui::IsKeyDown(SDL_SCANCODE_Q);
-		bool downKey = ImGui::IsKeyDown(SDL_SCANCODE_E);
+		bool leftKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_A);
+		bool rightKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_D);
+		bool forwardKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_W);
+		bool backwardKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_S);
+		bool upKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_Q);
+		bool downKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_E);
 		
 		glm::vec3 right(viewInverse[0][0], viewInverse[0][1], viewInverse[0][2]);
 		glm::vec3 left = -right;

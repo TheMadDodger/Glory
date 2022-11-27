@@ -160,4 +160,37 @@ namespace Glory::Editor
 
         return originalMask != *data;
     }
+
+    bool LayerRefDrawer::OnGUI(const std::string& label, LayerRef* data, uint32_t flags) const
+    {
+        const Layer* pLayer = data->Layer();
+        int index = LayerManager::GetLayerIndex(pLayer) + 1;
+        int newIndex = index;
+        
+        std::vector<std::string> options;
+        LayerManager::GetAllLayerNames(options);
+
+        ImGui::Text("Layer");
+        ImGui::SameLine();
+        if (ImGui::BeginCombo("##Layer", options[index].data()))
+        {
+        	for (size_t i = 0; i < options.size(); i++)
+        	{
+        		bool selected = i == index;
+        		if (ImGui::Selectable(options[i].data(), selected))
+        			newIndex = i;
+        
+        		if (selected)
+        			ImGui::SetItemDefaultFocus();
+        	}
+        
+        	ImGui::EndCombo();
+        }
+        
+        if (newIndex == index) return false;
+        index = newIndex - 1;
+        pLayer = LayerManager::GetLayerAtIndex(index);
+        data->m_LayerName = pLayer ? pLayer->m_Name : "";
+        return true;
+    }
 }

@@ -6,6 +6,7 @@
 #include "DisplayManager.h"
 #include "SerializedPropertyManager.h"
 #include "Console.h"
+#include "LayerManager.h"
 #include "WindowsDebugConsole.h"
 #include <Reflection.h>
 
@@ -94,6 +95,11 @@ namespace Glory
 		return m_pContext->m_pConsole;
 	}
 
+	LayerManager* GloryContext::GetLayerManager()
+	{
+		return m_pContext->m_pLayerManager;
+	}
+
 	void GloryContext::AddUserContext(size_t hash, void* pUserContext)
 	{
 		m_pContext->m_pUserContexts.emplace(hash, pUserContext);
@@ -107,7 +113,7 @@ namespace Glory
 	Glory::GloryContext::GloryContext()
 		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
 		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pSerializedPropertyManager(new SerializedPropertyManager()),
-		m_pConsole(new Console()), m_pReflection(GloryReflect::Reflect::CreateReflectInstance())
+		m_pConsole(new Console()), m_pLayerManager(new LayerManager()), m_pReflection(GloryReflect::Reflect::CreateReflectInstance())
 	{
 	}
 
@@ -128,6 +134,7 @@ namespace Glory
 		delete m_pConsole;
 		m_pConsole = nullptr;
 
+		m_CameraManager.Cleanup();
 		GloryReflect::Reflect::DestroyReflectInstance();
 	}
 }

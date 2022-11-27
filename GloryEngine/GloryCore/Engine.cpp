@@ -9,12 +9,15 @@
 #include "StructPropertySerializer.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
+#include "ScriptExtensions.h"
+#include "ScriptingExtender.h"
 #include "GloryContext.h"
 #include <algorithm>
 
 #ifdef _DEBUG
 #include "WindowsDebugConsole.h"
 #endif // _DEBUG
+#include "LayerRef.h"
 
 
 namespace Glory
@@ -55,6 +58,11 @@ namespace Glory
 		return m_pProfilerModule;
 	}
 
+	ScriptingExtender* Engine::GetScriptingExtender() const
+	{
+		return m_pScriptingExtender;
+	}
+
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
 	{
 		const ResourceType* pResourceType = ResourceType::GetResourceType(extension);
@@ -87,6 +95,17 @@ namespace Glory
 		return *it;
 	}
 
+	Module* Engine::GetModule(const std::string& name)
+	{
+		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetMetaData().Name() == name;
+		});
+
+		if (it == m_pAllModules.end()) return nullptr;
+		return *it;
+	}
+
 	GraphicsThread* Engine::GetGraphicsThread() const
 	{
 		return m_pGraphicsThread;
@@ -101,7 +120,8 @@ namespace Glory
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
-		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pGraphicsThread(nullptr)
+		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pGraphicsThread(nullptr),
+		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -129,6 +149,17 @@ namespace Glory
 		for (size_t i = 0; i < m_pOptionalModules.size(); i++)
 		{
 			m_pAllModules[currentSize + i] = m_pOptionalModules[i];
+		}
+		
+		m_pScriptingModules.resize(createInfo.ScriptingModulesCount);
+		if (m_pScriptingModules.size() > 0) memcpy(&m_pScriptingModules[0], createInfo.pScriptingModules, createInfo.ScriptingModulesCount * sizeof(ScriptingModule*));
+
+		currentSize = m_pAllModules.size();
+		m_pAllModules.resize(currentSize + m_pScriptingModules.size() * 2);
+		for (size_t i = 0; i < m_pScriptingModules.size(); ++i)
+		{
+			m_pAllModules[currentSize + i] = m_pScriptingModules[i];
+			m_pAllModules[currentSize + m_pScriptingModules.size() + i] = m_pScriptingModules[i]->CreateLoaderModule();
 		}
 
 		m_pAllModules.push_back(m_pProfilerModule);
@@ -169,6 +200,9 @@ namespace Glory
 		delete m_pGraphicsThread;
 		m_pGraphicsThread = nullptr;
 
+		delete m_pScriptingExtender;
+		m_pScriptingExtender = nullptr;
+
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
 		SerializedPropertyManager::Clear();
@@ -202,6 +236,12 @@ namespace Glory
 				m_TypeHashToLoader[typeHash] = index;
 			}
 
+			for (size_t j = 0; j < m_pAllModules[i]->m_pScriptingExtender.size(); j++)
+			{
+				IScriptExtender* pScriptExtender = m_pAllModules[i]->m_pScriptingExtender[j];
+				m_pScriptingExtender->RegisterManagedExtender(m_pAllModules[i], pScriptExtender);
+			}
+
 			auto it = std::find(m_pPriorityInitializationModules.begin(), m_pPriorityInitializationModules.end(), m_pAllModules[i]);
 			if (it != m_pPriorityInitializationModules.end()) continue;
 			m_pAllModules[i]->m_pEngine = this;
@@ -209,6 +249,8 @@ namespace Glory
 		}
 
 		AssetManager::Initialize();
+
+		m_pScriptingExtender->Initialize(this);
 
 		// Run Post Initialize
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
@@ -236,6 +278,7 @@ namespace Glory
 		STANDARD_SERIALIZER(glm::vec4);
 		STANDARD_SERIALIZER(glm::quat);
 		STANDARD_SERIALIZER(LayerMask);
+		STANDARD_SERIALIZER(LayerRef);
 
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
@@ -256,6 +299,7 @@ namespace Glory
 		ResourceType::RegisterType<glm::quat>();
 
 		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
+		GloryReflect::Reflect::RegisterBasicType<LayerRef>("LayerRef");
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}

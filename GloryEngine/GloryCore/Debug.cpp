@@ -1,6 +1,7 @@
 #include "Debug.h"
 #include "Console.h"
 #include "Game.h"
+#include "Engine.h"
 
 namespace Glory
 {

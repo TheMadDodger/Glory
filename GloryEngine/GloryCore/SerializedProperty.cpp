@@ -28,7 +28,7 @@ namespace Glory
 
 	size_t SerializedProperty::ElementTypeHash() const
 	{
-		return m_ElementTypeHash;
+		return m_ElementTypeHash != 0 ? m_ElementTypeHash : m_TypeHash;
 	}
 
 	uint32_t SerializedProperty::Flags() const

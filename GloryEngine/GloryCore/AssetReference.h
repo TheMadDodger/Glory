@@ -33,8 +33,8 @@ namespace Glory
 
 		virtual const size_t TypeHash() override
 		{
-			static const size_t TYPE_HASH = ResourceType::GetHash<T>();
-			return TYPE_HASH;
+			static const size_t typeHash = ResourceType::GetHash<T>();
+			return typeHash;
 		}
 
 		T* Get()

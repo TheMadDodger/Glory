@@ -16,7 +16,7 @@ project "GlorySDLImage"
 
 	vpaths
 	{
-		["Module"] = { "SDLImageLoaderModule.h", "SDLImageLoaderModule.cpp", "SDLTexture2D.h", "SDLTexture2D.cpp" }
+		["Module"] = { "GlorySDLImage.*", "SDLImageLoaderModule.h", "SDLImageLoaderModule.cpp", "SDLTexture2D.h", "SDLTexture2D.cpp" }
 	}
 
 	includedirs
@@ -59,8 +59,8 @@ project "GlorySDLImage"
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 		("{COPY} %{LibDirs.SDL_image}/*.dll %{moduleOutDir}/Dependencies"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+		--("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

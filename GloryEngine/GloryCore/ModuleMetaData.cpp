@@ -1,4 +1,3 @@
-#include <yaml-cpp/yaml.h>
 #include "ModuleMetaData.h"
 #include "Debug.h"
 
@@ -28,6 +27,7 @@ namespace Glory
 		{ "Renderer", ModuleType::MT_Renderer },
 		{ "Graphics", ModuleType::MT_Graphics },
 		{ "Loader", ModuleType::MT_Loader },
+		{ "Scripting", ModuleType::MT_Scripting },
 		{ "Other", ModuleType::MT_Other },
 	};
 
@@ -68,6 +68,8 @@ namespace Glory
 		YAML_READ(editorNode, node, Backend, m_EditorBackend, std::string);
 		YAML::Node extensionsNode = editorNode["Extensions"];
 		READ_ARRAY(extensionsNode, std::string, m_EditorExtensions);
+
+		ReadScriptingExtender(rootNode);
 	}
 
 	const std::filesystem::path& ModuleMetaData::Path() const
@@ -98,5 +100,26 @@ namespace Glory
 	const std::vector<std::string>& ModuleMetaData::Dependencies() const
 	{
 		return m_Dependencies;
+	}
+
+	const ModuleScriptingExtension* const ModuleMetaData::ScriptExtenderForLanguage(const std::string& language) const
+	{
+		if (m_ScriptingExtensions.find(language) == m_ScriptingExtensions.end()) return nullptr;
+		return &m_ScriptingExtensions.at(language);
+	}
+
+	void ModuleMetaData::ReadScriptingExtender(YAML::Node& node)
+	{
+		YAML::Node scriptingNode = node["Scripting"];
+		if (!scriptingNode.IsDefined() || !scriptingNode.IsSequence()) return;
+		for (size_t i = 0; i < scriptingNode.size(); i++)
+		{
+			ModuleScriptingExtension scriptingExtension;
+			YAML::Node subNode = scriptingNode[i];
+			YAML::Node readNode;
+			YAML_READ(subNode, readNode, Language, scriptingExtension.m_Language, std::string);
+			YAML_READ(subNode, readNode, Extension, scriptingExtension.m_ExtensionFile, std::string);
+			m_ScriptingExtensions.emplace(scriptingExtension.m_Language, scriptingExtension);
+		}
 	}
 }

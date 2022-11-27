@@ -17,6 +17,7 @@ namespace Glory
 	class DisplayManager;
 	class SerializedPropertyManager;
 	class Console;
+	class LayerManager;
 
 	class GloryContext
 	{
@@ -30,6 +31,7 @@ namespace Glory
 		static DisplayManager* GetDisplayManager();
 		static SerializedPropertyManager* GetSerializedPropertyManager();
 		static Console* GetConsole();
+		static LayerManager* GetLayerManager();
 		static void SetContext(GloryContext* pContext);
 		static GloryContext* GetContext();
 		static GloryContext* CreateContext();
@@ -70,6 +72,7 @@ namespace Glory
 		DisplayManager* m_pDisplayManager;
 		SerializedPropertyManager* m_pSerializedPropertyManager;
 		Console* m_pConsole;
+		LayerManager* m_pLayerManager;
 		GloryReflect::Reflect* m_pReflection;
 		ThreadedVector<Object*> m_pAllObjects;
 		std::map<size_t, void*> m_pUserContexts;

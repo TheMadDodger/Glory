@@ -2,6 +2,7 @@
 #include "PropertyDrawer.h"
 #include <glm/glm.hpp>
 #include <LayerMask.h>
+#include <LayerRef.h>
 
 namespace Glory::Editor
 {
@@ -57,5 +58,11 @@ namespace Glory::Editor
 	{
 	public:
 		virtual bool OnGUI(const std::string& label, LayerMask* data, uint32_t flags) const override;
+	};
+
+	class LayerRefDrawer : public PropertyDrawerTemplate<LayerRef>
+	{
+	public:
+		virtual bool OnGUI(const std::string& label, LayerRef* data, uint32_t flags) const override;
 	};
 }

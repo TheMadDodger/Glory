@@ -3,17 +3,17 @@
 
 namespace Glory
 {
-	SceneObject::SceneObject() : m_Name("Empty Object"), m_pScene(nullptr)
+	SceneObject::SceneObject() : Object("Empty Object"), m_pScene(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
-	SceneObject::SceneObject(const std::string& name) : m_Name(name), m_pScene(nullptr)
+	SceneObject::SceneObject(const std::string& name) : Object(name), m_pScene(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
-	SceneObject::SceneObject(const std::string& name, UUID uuid) : m_Name(name), Object(uuid), m_pScene(nullptr)
+	SceneObject::SceneObject(const std::string& name, UUID uuid) : Object(uuid, name), m_pScene(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
@@ -124,16 +124,6 @@ namespace Glory
 			m_pScene->DeleteObject(m_pChildren[i]);
 		}
 		m_pChildren.clear();
-	}
-
-	const std::string& SceneObject::Name()
-	{
-		return m_Name;
-	}
-
-	void SceneObject::SetName(const std::string& name)
-	{
-		m_Name = name;
 	}
 
 	void SceneObject::SetParent(SceneObject* pParent)

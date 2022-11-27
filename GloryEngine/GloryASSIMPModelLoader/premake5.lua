@@ -16,7 +16,7 @@ project "GloryASSIMPModelLoader"
 
 	vpaths
 	{
-		["Module"] = { "ASSIMPModule.h", "ASSIMPModule.cpp" }
+		["Module"] = { "GloryClusteredRenderer.*", "ASSIMPModule.h", "ASSIMPModule.cpp" }
 	}
 
 	includedirs
@@ -56,7 +56,7 @@ project "GloryASSIMPModelLoader"
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

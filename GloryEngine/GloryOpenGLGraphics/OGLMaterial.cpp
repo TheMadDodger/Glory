@@ -11,7 +11,7 @@
 namespace Glory
 {
 	OGLMaterial::OGLMaterial(MaterialData* pMaterialData)
-		: Material(pMaterialData), m_ProgramID(NULL), m_UBOID(NULL)
+		: Material(pMaterialData), m_ProgramID(NULL), m_UBOID(NULL), m_TextureCounter(0)
 	{
 	}
 
@@ -76,88 +76,6 @@ namespace Glory
 		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glUniform1f(ID, value);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetInt(const std::string& name, int value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform1i(ID, value);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetUInt(const std::string& name, uint32_t value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform1ui(ID, value);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetIntArray(const std::string& name, int size, int* value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform1iv(ID, size, value);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetBool(const std::string& name, bool value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform1i(ID, (int)value);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetVec2(const std::string& name, const glm::vec2& value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform2f(ID, value.x, value.y);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetVec3(const std::string& name, const glm::vec3& value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform3f(ID, value.x, value.y, value.z);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetUVec3(const std::string& name, const glm::uvec3& value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform3ui(ID, value.x, value.y, value.z);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetVec4(const std::string& name, const glm::vec4& value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform4f(ID, value.x, value.y, value.z, value.w);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetDouble(const std::string& name, double value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glUniform1d(ID, value);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::SetMatrix3(const std::string& name, const glm::mat3& value) const
-	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		const float* pSource = (const float*)glm::value_ptr(value);
-		glUniformMatrix3fv(ID, 1, GL_FALSE, pSource);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 

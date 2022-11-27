@@ -3,6 +3,7 @@
 #include <implot.h>
 #include <ImGuizmo.h>
 #include <imgui_internal.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {

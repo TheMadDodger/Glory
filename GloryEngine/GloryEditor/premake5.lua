@@ -20,12 +20,12 @@ project "GloryEditor"
 		["Extensions"] = { "BaseEditorExtension.*" },
 		["Content"] = {  },
 		["Content/Editors"] = { "GloryEditor.*", "GloryEditorVersion.*", "FileDialog.*", "EditorSettings.*", "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
-		["Content/PropertyDrawers"] = { "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*" },
+		["Content/PropertyDrawers"] = { "StructPropertyDrawer.*", "EnumPropertyDrawer.*", "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*" },
 		["Content/Tumbnails"] = { "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
 		["Editor"] = { "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*", "Gizmos.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
-		["Editor/Playmode"] = { "EditorPlayer.*", "IEditorLoopHandler.*" },
+		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
 		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
@@ -34,7 +34,7 @@ project "GloryEditor"
 		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" },
 		["Undo"] = { "Undo.*" },
 		["Undo/Actions"] = { "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectAction.*", "DeselectAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
-		["Toolbar"] = { "Toolbar.*", "IToolChain.*" }
+		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*" }
 	}
 
 	includedirs
@@ -48,6 +48,7 @@ project "GloryEditor"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ticpp}",
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ImGui}",

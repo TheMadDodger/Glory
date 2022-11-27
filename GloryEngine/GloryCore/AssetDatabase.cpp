@@ -5,6 +5,7 @@
 #include "LayerManager.h"
 #include "Serializer.h"
 #include "GloryContext.h"
+#include "Engine.h"
 
 namespace Glory
 {
@@ -94,6 +95,17 @@ namespace Glory
 		//ResourceMeta meta = m_Metas[uuid];
 		//meta.m_Path = newMetaPath;
 		//m_Metas.Set(uuid, meta);
+	}
+
+	void AssetDatabase::UpdateAsset(UUID uuid, long lastSaved)
+	{
+		ASSET_DATABASE->m_LastSavedRecords.Set(uuid, lastSaved);
+		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetUpdated, uuid, nullptr);
+	}
+
+	long AssetDatabase::GetLastSavedRecord(UUID uuid)
+	{
+		return ASSET_DATABASE->m_LastSavedRecords[uuid];
 	}
 
 	void AssetDatabase::UpdateAssetPaths(const std::string& oldPath, const std::string& newPath)
@@ -233,6 +245,8 @@ namespace Glory
 			YAML_READ(element, data, Index, index, size_t);
 			size_t versionHash = 0;
 			YAML_READ(element, data, VersionHash, versionHash, size_t);
+			long lastSaved = 0;
+			YAML_READ(element, data, LastSaved, lastSaved, long);
 			UUID uuid = 0;
 			YAML_READ(element, data, UUID, uuid, uint64_t);
 			size_t hash = 0;
@@ -260,6 +274,7 @@ namespace Glory
 				else meta.m_ImportSettings = pLoader->ReadImportSettings(importSettingsNode);
 			}
 
+			ASSET_DATABASE->m_LastSavedRecords.Set(uuid, lastSaved);
 			InsertAsset(path, meta);
 		}
 	}
@@ -387,6 +402,20 @@ namespace Glory
 		memcpy(&out[size], &ASSET_DATABASE->m_AssetsByType[typeHash][0], copySize);
 	}
 
+	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<std::string>& out)
+	{
+		if (!ASSET_DATABASE->m_AssetsByType.Contains(typeHash)) return;
+		size_t size = out.size();
+		out.resize(size + ASSET_DATABASE->m_AssetsByType[typeHash].size());
+		for (size_t i = 0; i < ASSET_DATABASE->m_AssetsByType[typeHash].size(); i++)
+		{
+			UUID uuid = ASSET_DATABASE->m_AssetsByType[typeHash][i];
+			AssetLocation location;
+			GetAssetLocation(uuid, location);
+			out.push_back(location.m_Path);
+		}
+	}
+
 	std::string AssetDatabase::GetAssetName(UUID uuid)
 	{
 		// Will need to be different for build and editor since assets are grouped together in a single file when built
@@ -434,6 +463,7 @@ namespace Glory
 		ASSET_DATABASE->m_PathToUUID.Clear();
 		ASSET_DATABASE->m_Metas.Clear();
 		ASSET_DATABASE->m_AssetsByType.Clear();
+		ASSET_DATABASE->m_LastSavedRecords.Clear();
 	}
 
 	void AssetDatabase::ExportEditor(YAML::Emitter& out)
@@ -448,6 +478,7 @@ namespace Glory
 			ResourceMeta meta = ASSET_DATABASE->m_Metas[uuid];
 
 			size_t versionHash = std::hash<ResourceMeta>()(meta);
+			long lastSaved = ASSET_DATABASE->m_LastSavedRecords[uuid];
 
 			out << YAML::BeginMap;
 			out << YAML::Key << "Path";
@@ -458,6 +489,8 @@ namespace Glory
 			out << YAML::Value << location.m_Index;
 			out << YAML::Key << "VersionHash";
 			out << YAML::Value << versionHash;
+			out << YAML::Key << "LastSaved";
+			out << YAML::Value << lastSaved;
 			size_t hash = meta.Hash();
 			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(hash);
 			meta.Write(out, pLoader);

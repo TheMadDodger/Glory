@@ -1,6 +1,7 @@
 #include "CoreExceptions.h"
 #include "Game.h"
 #include "GloryContext.h"
+#include "Engine.h"
 
 namespace Glory
 {
@@ -92,13 +93,28 @@ namespace Glory
 		m_AssetPathFunc = func;
 	}
 
+	void Game::OverrideSettingsPathFunc(std::function<std::string()> func)
+	{
+		m_SettingsPathFunc = func;
+	}
+
 	std::string Game::GetAssetPath()
 	{
-		return m_Game.m_AssetPathFunc();
+		return GetGame().m_AssetPathFunc();
+	}
+
+	std::string Game::GetSettingsPath()
+	{
+		return GetGame().m_SettingsPathFunc();
+	}
+
+	const ApplicationType& Game::GetApplicationType() const
+	{
+		return m_ApplicationType;
 	}
 
 	Game::Game(const GameSettings& pGameSettings) : m_pGameState(pGameSettings.pGameState), m_pEngine(pGameSettings.pEngine),
-		m_bInitialized(false), m_bIsRunning(false)
+		m_bInitialized(false), m_bIsRunning(false), m_ApplicationType(pGameSettings.ApplicationType)
 	{
 	}
 
@@ -112,6 +128,7 @@ namespace Glory
 	{
 		if (m_bInitialized) return;
 		m_AssetPathFunc = []() { return "./Assets"; };
+		m_SettingsPathFunc = []() { return "./"; };
 
 		m_pEngine->Initialize();
 		m_bInitialized = true;

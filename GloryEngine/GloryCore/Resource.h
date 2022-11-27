@@ -12,13 +12,9 @@ namespace Glory
         Resource(UUID uuid, const std::string& name);
         virtual ~Resource();
 
-        const std::string& Name();
-        void SetName(const std::string& name);
-
     private:
         friend class AssetManager;
         friend class AssetDatabase;
         friend class LoaderModule;
-        std::string m_Name;
     };
 }

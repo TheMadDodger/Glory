@@ -49,13 +49,13 @@ namespace Glory
 
 		virtual std::type_index GetSerializedType() = 0;
 
+		virtual void Serialize(Object* pObject, YAML::Emitter& out) = 0;
+		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string& name = "") = 0;
+
 	protected:
 		Serializer();
 		virtual ~Serializer();
 
-	protected:
-		virtual void Serialize(Object* pObject, YAML::Emitter& out) = 0;
-		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string& name = "") = 0;
 
 	private:
 		friend class Engine;

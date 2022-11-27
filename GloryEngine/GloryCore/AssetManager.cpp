@@ -1,6 +1,7 @@
 #include "AssetManager.h"
 #include "AssetDatabase.h"
 #include "GloryContext.h"
+#include "Engine.h"
 
 namespace Glory
 {
@@ -24,7 +25,7 @@ namespace Glory
 			}
 			return;
 		}
-		else ASSET_MANAGER->m_AssetLoadedCallbacks.Set(uuid, { callback });
+		else if (callback != NULL) ASSET_MANAGER->m_AssetLoadedCallbacks.Set(uuid, { callback });
 
 		ASSET_MANAGER->m_pResourceLoadingPool->QueueSingleJob(AssetManager::LoadResourceJob, uuid);
 	}
@@ -44,6 +45,21 @@ namespace Glory
 		Resource* pResource = FindResource(uuid);
 		if (pResource) return pResource;
 		return LoadAsset(uuid);
+	}
+
+	void AssetManager::ReloadAsset(UUID uuid)
+	{
+		UnloadAsset(uuid);
+		GetAsset(uuid, [&](Resource* pResource)
+		{
+			ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetReloaded, uuid, pResource);
+		});
+	}
+
+	void AssetManager::UnloadAsset(UUID uuid)
+	{
+		if (!ASSET_MANAGER->m_pLoadedAssets.Contains(uuid)) return;
+		ASSET_MANAGER->m_pLoadedAssets.DoErase(uuid, [](Resource** pResource) { if (*pResource) delete *pResource; });
 	}
 
 	Resource* AssetManager::FindResource(UUID uuid)
@@ -82,7 +98,12 @@ namespace Glory
 			path = assetLocation.m_Path;
 
 		Resource* pResource = pModule->LoadUsingAny(path.string(), meta.ImportSettings());
-		if (pResource == nullptr) return nullptr;
+		if (pResource == nullptr)
+		{
+			Debug::LogError("Failed to load asset: " + std::to_string(uuid) + " at path: " + path.string());
+			return nullptr;
+		}
+
 		pResource->m_ID = uuid;
 		ASSET_MANAGER->m_pLoadedAssets.Set(uuid, pResource);
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pResource);

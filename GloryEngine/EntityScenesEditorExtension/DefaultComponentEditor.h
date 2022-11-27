@@ -2,7 +2,6 @@
 #include <Editor.h>
 #include <EntityComponentObject.h>
 #include <SerializedProperty.h>
-#include <EntitySystems.h>
 
 namespace Glory::Editor
 {

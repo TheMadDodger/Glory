@@ -20,6 +20,8 @@ namespace Glory::EditorLauncher
 		int WindowModule;
 		int ScenesModule;
 		std::vector<int> OptionalModules;
+		std::vector<int> ScriptingModules;
+
 	};
 
 	struct ProjectCreateSettings

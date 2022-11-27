@@ -15,11 +15,11 @@ project "GloryCore"
 
 	vpaths
 	{
-		["Asset Management"] = { "AssetDatabase.*", "AssetGroup.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*" },
-		["Console"] = { "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*" },
-		["Core"] = { "CoreExceptions.*", "Engine.*", "Game.*", "GameSettings.*", "GameState.*", "GloryCore.*", "GraphicsThread.*", "Object.*", "UUID.*" },
+		["Asset Management"] = { "AssetDatabase.*", "AssetGroup.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*", "ShaderManager.*", "AssetCallbacks.*" },
+		["Console"] = { "CommandLine.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
+		["Core"] = { "Versioning.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "CoreExceptions.*", "Engine.*", "Game.*", "GameSettings.*", "GameState.*", "GloryCore.*", "GraphicsThread.*", "Object.*", "UUID.*", "Glory.*" },
 		["Job System"] = { "Job.*", "JobManager.*", "JobPool.*", "JobQueue.*" },
-		["Modules"] = { "Module.*" },
+		["Modules/Base"] = { "Module.*", "ModuleMetaData.*", "IModuleLoopHandler.*" },
 		["Modules/Time"] = { "TimerModule.*", "GameTime.*" },
 		["Modules/Graphics"] = { "GraphicsModule.*" },
 		["Modules/Graphics/Data"] = { "GraphicsEnums.*", "GraphicsMemoryManager.*" },
@@ -33,20 +33,23 @@ project "GloryCore"
 		["Modules/ResourceLoading"] = {  },
 		["Modules/ResourceLoading/Base"] = { "ImportSettings.*", "Resource.*", "ResourceLoaderModule.*" },
 		["Modules/ResourceLoading/File"] = { "FileData.*", "FileLoaderModule.*" },
-		["Modules/ResourceLoading/Material"] = { "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*" },
+		["Modules/ResourceLoading/Material"] = { "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*", "MaterialInstanceLoaderModule.*", "MaterialLoaderModule.*", "MaterialPropertyInfo.*" },
 		["Modules/ResourceLoading/Models"] = { "MeshData.*", "ModelData.*", "ModelLoaderModule.*" },
-		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderData.*", "ShaderLoaderModule.*" },
+		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderData.*", "ShaderLoaderModule.*", "ShaderSourceData.*", "ShaderSourceLoaderModule.*" },
 		["Modules/ResourceLoading/Textures"] = { "ImageData.*", "ImageLoaderModule.*" },
 		["Modules/Scenes"] = { "ScenesModule.*", "SceneObject.*", "GScene.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
+		["Modules/Scripting"] = { "Script.*", "ScriptingModule.*", "ScriptLoaderModule.*", "ScriptBinding.*", "ScriptingBinder.*", "IScriptExtender.*" },
 		["Threading"] = { "Thread.*", "ThreadManager.*", "ThreadedVar.*" },
 		["Analysis"] = { "EngineProfiler.*", "ProfilerModule.*", "ProfilerSample.*", "ProfilerThreadSample.*" },
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
-		["Serialization"] = { "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*" },
+		["Serialization"] = { "StructPropertySerializer.*", "AssetReference.*", "AssetRef.*", "LayerRef.*", "EnumPropertySerializer.*", "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "SerializedTypes.*", "ArrayPropertySerializer.*", "AssetReferencePropertyTemplate.*" },
+		["Scripting"] = { "ScriptExtensions.*", "ScriptingExtender.*", "ScriptProperty.*" }
 	}
 
 	includedirs
 	{
+		"%{mono_install}/include/mono-2.0",
 		"%{vulkan_sdk}/third-party/include",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",

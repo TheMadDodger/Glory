@@ -7,6 +7,7 @@
 #include <spirv_glsl.hpp>
 #include <FileLoaderModule.h>
 #include <AssetCallbacks.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {
@@ -94,7 +95,7 @@ namespace Glory::Editor
 		{
 			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 			if (pProject == nullptr) return std::string("");
-			std::string cachePath = pProject->CachePath() + "CompiledShaders\\";
+			std::string cachePath = pProject->CachePath() + "\\CompiledShaders\\";
 			return cachePath;
 		});
 
@@ -248,7 +249,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < resources.storage_buffers.size(); i++)
 		{
 			spirv_cross::Resource storageBuffer = resources.storage_buffers[i];
-			if (storageBuffer.name != "propertiesSSBO") continue;
+			if (storageBuffer.name != "PropertiesSSBO") continue;
 			const spirv_cross::SPIRType& base_type = compiler.get_type(storageBuffer.base_type_id);
 			const spirv_cross::SPIRType& type = compiler.get_type(storageBuffer.type_id);
 

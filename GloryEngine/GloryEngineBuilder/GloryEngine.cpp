@@ -8,7 +8,8 @@
 
 namespace Glory
 {
-	typedef Module*(__cdecl* LoadModuleProc)(GloryContext*);
+	typedef Module*(__cdecl* OnLoadModuleProc)(GloryContext*);
+	typedef IScriptExtender*(__cdecl* OnLoadExtensionProc)(GloryContext*);
 
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath) : m_CFGPath(cfgPath)
 	{
@@ -44,8 +45,6 @@ namespace Glory
 			FreeLibrary(m_Libs[i]);
 		}
 		m_Libs.clear();
-
-		Console::Cleanup();
 	}
 
 	const std::string& EngineLoader::GetSetModule(const std::string& key)
@@ -67,7 +66,8 @@ namespace Glory
 
 	void EngineLoader::LoadModules(YAML::Node& modules)
 	{
-		for (size_t i = 0; i < modules.size(); i++)
+		size_t modulesCount = modules.size();
+		for (size_t i = 0; i < modulesCount; i++)
 		{
 			YAML::Node moduleNode = modules[i];
 			std::string moduleName = moduleNode.as<std::string>();
@@ -79,7 +79,7 @@ namespace Glory
 	{
 		m_LoadedModuleNames.push_back(moduleName);
 
-		std::filesystem::path modulePath = "./Modules";
+		std::filesystem::path modulePath = "Modules";
 		std::filesystem::path dllPath = modulePath.append(moduleName);
 		dllPath = dllPath.append(moduleName).replace_extension(".dll");
 
@@ -99,11 +99,12 @@ namespace Glory
 				std::string dependency = dependencies[i];
 				Debug::LogInfo("Loading dependency: " + dependency + "...");
 				std::filesystem::path dependencyPath = modulePath;
-				dependencyPath = dependencyPath.append("Dependencies").append(dependency).replace_extension(".dll");
+				dependencyPath = dependencyPath.append("Dependencies").append(dependency);
+				dependencyPath = dependencyPath.string() + ".dll";
 				HMODULE dependencyLib = LoadLibrary(dependencyPath.c_str());
 				if (dependencyLib == NULL)
 				{
-					Debug::LogFatalError("Failed to load dependency: " + dependency + ": The dll was not found!");
+					Debug::LogError("Failed to load dependency: " + dependency + ": The dll was not found!");
 					m_pModules.push_back(nullptr);
 					return;
 				}
@@ -120,11 +121,11 @@ namespace Glory
 			return;
 		}
 
-		LoadModuleProc loadProc = (LoadModuleProc)GetProcAddress(lib, "LoadModule");
+		OnLoadModuleProc loadProc = (OnLoadModuleProc)GetProcAddress(lib, "OnLoadModule");
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load module: " + moduleName + ": Missing LoadModule function!");
+			Debug::LogError("Failed to load module: " + moduleName + ": Missing OnLoadModule function!");
 			m_pModules.push_back(nullptr);
 			return;
 		}
@@ -134,7 +135,7 @@ namespace Glory
 		if (pModule == nullptr)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load module: " + moduleName + ": LoadModule returned nullptr!");
+			Debug::LogError("Failed to load module: " + moduleName + ": OnLoadModule returned nullptr!");
 			m_pModules.push_back(nullptr);
 			return;
 		}
@@ -145,12 +146,47 @@ namespace Glory
 		pModule->SetMetaData(metaData);
 	}
 
+	void EngineLoader::LoadScriptingExtender(const ModuleScriptingExtension* const extension, Module* pModule, const ModuleMetaData& metaData)
+	{
+		std::filesystem::path pathToExtension = metaData.Path();
+		pathToExtension = pathToExtension.parent_path().append("Scripting").append(extension->m_Language).append(extension->m_ExtensionFile).replace_extension(".dll");
+
+		Debug::LogInfo("Loading scripting extender " + extension->m_ExtensionFile + " for language " + extension->m_Language + "...");
+		HMODULE lib = LoadLibrary(pathToExtension.wstring().c_str());
+		if (lib == NULL)
+		{
+			Debug::LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": The extension was not found!");
+			return;
+		}
+
+		OnLoadExtensionProc loadProc = (OnLoadExtensionProc)GetProcAddress(lib, "OnLoadExtension");
+		if (loadProc == NULL)
+		{
+			FreeLibrary(lib);
+			Debug::LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": Missing OnLoadExtension function!");
+			return;
+		}
+
+		IScriptExtender* pScriptExtender = loadProc(GloryContext::GetContext());
+		if (pScriptExtender == nullptr)
+		{
+			FreeLibrary(lib);
+			Debug::LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": OnLoadExtension returned nullptr!");
+			return;
+		}
+
+		pModule->AddScriptingExtender(pScriptExtender);
+		m_pScriptingExtenders.push_back(pScriptExtender);
+		m_Libs.push_back(lib);
+	}
+
 	void EngineLoader::PopulateEngineInfo(YAML::Node& engineInfo, EngineCreateInfo& engineCreateInfo, const Glory::WindowCreateInfo& defaultWindow)
 	{
 		LoadRequiredModule<WindowModule>(engineInfo, "Window", &engineCreateInfo.pWindowModule)->SetMainWindowCreateInfo(defaultWindow);
 		LoadRequiredModule<ScenesModule>(engineInfo, "SceneManagement", &engineCreateInfo.pScenesModule);
 		LoadRequiredModule<RendererModule>(engineInfo, "Renderer", &engineCreateInfo.pRenderModule);
 		LoadRequiredModule<GraphicsModule>(engineInfo, "Graphics", &engineCreateInfo.pGraphicsModule);
+		LoadScriptingModules(engineInfo, "Scripting", engineCreateInfo);
 
 		YAML::Node optionalModulesNode = engineInfo["Optional"];
 		for (size_t i = 0; i < optionalModulesNode.size(); i++)
@@ -168,5 +204,31 @@ namespace Glory
 
 		engineCreateInfo.OptionalModuleCount = static_cast<uint32_t>(m_pOptionalModules.size());
 		engineCreateInfo.pOptionalModules = m_pOptionalModules.data();
+	}
+
+	void EngineLoader::LoadScriptingModules(YAML::Node& node, const std::string& key, EngineCreateInfo& engineCreateInfo)
+	{
+		YAML::Node scriptingModulesNode = node[key];
+		for (size_t i = 0; i < scriptingModulesNode.size(); i++)
+		{
+			YAML::Node indexNode = scriptingModulesNode[i];
+			int index = indexNode.as<int>();
+			Module* pModule = m_pModules[index];
+			ScriptingModule* pScriptingModule = (ScriptingModule*)pModule;
+			m_pScriptingModules.push_back((ScriptingModule*)pModule);
+
+			for (size_t i = 0; i < m_pModules.size(); i++)
+			{
+				Module* pModule = m_pModules[i];
+				if (!pModule) continue;
+				const ModuleMetaData& metaData = pModule->GetMetaData();
+				const ModuleScriptingExtension* const extender = metaData.ScriptExtenderForLanguage(pScriptingModule->ScriptingLanguage());
+				if (extender == nullptr) continue;
+				LoadScriptingExtender(extender, pModule, metaData);
+			}
+		}
+
+		engineCreateInfo.ScriptingModulesCount = static_cast<uint32_t>(m_pScriptingModules.size());
+		engineCreateInfo.pScriptingModules = m_pScriptingModules.data();
 	}
 }

@@ -27,6 +27,8 @@ namespace Glory
 	public:
 		Object();
 		Object(UUID uuid);
+		Object(const std::string& name);
+		Object(UUID uuid, const std::string& name);
 		virtual ~Object();
 
 		const UUID& GetUUID() const;
@@ -36,6 +38,9 @@ namespace Glory
 		bool GetType(size_t index, std::type_index& type);
 
 		static Object* FindObject(UUID id);
+
+		const std::string& Name();
+		void SetName(const std::string& name);
 
 	protected:
 		std::vector<std::type_index> m_Inheritence;
@@ -50,6 +55,7 @@ namespace Glory
 
 	protected:
 		UUID m_ID;
+		std::string m_Name;
 
 	private:
 		friend class AssetDatabase;

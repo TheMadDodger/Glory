@@ -3,6 +3,7 @@
 #include "VulkanDeviceManager.h"
 #include "Device.h"
 #include <Game.h>
+#include <Engine.h>
 
 namespace Glory
 {

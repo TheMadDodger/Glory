@@ -81,9 +81,15 @@ namespace Glory
 
 	ResourceType* ResourceType::GetSubType(ResourceType* pResourceType, size_t index)
 	{
-		if (index >= pResourceType->m_SubTypes.size()) return nullptr;
-		size_t subTypeHash = pResourceType->m_SubTypes[index];
+		size_t subTypeHash = GetSubTypeHash(pResourceType, index);
+		if (subTypeHash == 0) return nullptr;
 		return GetResourceType(subTypeHash);
+	}
+
+	size_t ResourceType::GetSubTypeHash(ResourceType* pResourceType, size_t index)
+	{
+		if (index >= pResourceType->m_SubTypes.size()) return 0;
+		return pResourceType->m_SubTypes[index];
 	}
 
 	size_t ResourceType::GetAllResourceTypesThatHaveSubType(size_t hash, std::vector<ResourceType*>& out)

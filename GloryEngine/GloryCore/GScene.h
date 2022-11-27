@@ -32,17 +32,18 @@ namespace Glory
 
         void HandleDelayedParents();
 
+        virtual void Start() {}
+        virtual void Stop() {}
+
     protected:
-        virtual void Initialize() {};
-        virtual void OnTick() {};
-        virtual void OnPaint() {};
+        virtual void Initialize() {}
+        virtual void OnTick() {}
+        virtual void OnPaint() {}
 
-        virtual SceneObject* CreateObject(const std::string& name) { return nullptr; };
-        virtual SceneObject* CreateObject(const std::string& name, UUID uuid) { return nullptr; };
-        virtual void OnDeleteObject(SceneObject* pObject) {};
-
-        virtual void OnObjectAdded(SceneObject* pObject) {};
-
+        virtual SceneObject* CreateObject(const std::string& name) { return nullptr; }
+        virtual SceneObject* CreateObject(const std::string& name, UUID uuid) { return nullptr; }
+        virtual void OnDeleteObject(SceneObject* pObject) {}
+        virtual void OnObjectAdded(SceneObject* pObject) {}
         virtual void OnDelayedSetParent(const DelayedParentData& data);
 
     private:

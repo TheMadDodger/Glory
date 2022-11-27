@@ -5,6 +5,7 @@
 #include "AssetCallbacks.h"
 #include "ThreadedVar.h"
 #include <unordered_map>
+#include "GScene.h"
 
 #define ASSET_DATABASE Glory::GloryContext::GetAssetDatabase()
 #define ASSET_MANAGER Glory::GloryContext::GetAssetManager()
@@ -22,6 +23,8 @@ namespace Glory
 		static void InsertAsset(const std::string& path, const ResourceMeta& meta);
 		static void UpdateAssetPath(UUID uuid, const std::string& newPath);
 		static void UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath);
+		static void UpdateAsset(UUID uuid, long lastSaved);
+		static long GetLastSavedRecord(UUID uuid);
 		static void UpdateAssetPaths(const std::string& oldPath, const std::string& newPath);
 		static void DeleteAsset(UUID uuid);
 		static void DeleteAssets(const std::string& path);
@@ -38,6 +41,7 @@ namespace Glory
 		static void RemoveAsset(UUID uuid);
 
 		static void GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out);
+		static void GetAllAssetsOfType(size_t typeHash, std::vector<std::string>& out);
 
 		static std::string GetAssetName(UUID uuid);
 
@@ -66,5 +70,6 @@ namespace Glory
 		ThreadedUMap<size_t, std::vector<UUID>> m_AssetsByType;
 		AssetCallbacks m_Callbacks;
 		ThreadedVector<UUID> m_UnsavedAssets;
+		ThreadedUMap<UUID, long> m_LastSavedRecords;
 	};
 }

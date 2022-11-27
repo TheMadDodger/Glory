@@ -13,4 +13,10 @@ namespace YAML
 		out << SHADERTYPE_TOSTRING[type];
 		return out;
 	}
+
+	Emitter& operator<<(Emitter& out, const Glory::LayerRef& layerRef)
+	{
+		out << layerRef.m_LayerName;
+		return out;
+	}
 }

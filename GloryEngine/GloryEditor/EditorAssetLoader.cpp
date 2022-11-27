@@ -1,7 +1,8 @@
 #include "EditorAssetLoader.h"
-#include <AssetDatabase.h>
 #include "ProjectSpace.h"
+#include <AssetDatabase.h>
 #include <yaml-cpp/yaml.h>
+#include <Engine.h>
 
 namespace Glory::Editor
 {
@@ -60,6 +61,7 @@ namespace Glory::Editor
 
 	void EditorAssetLoader::ProcessFile(const std::filesystem::path& filePath)
 	{
+		// Meta file check
 		auto ext = filePath.extension();
 		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
 		if (ext.compare(metaExtension) == 0) return; // No need to process meta files
@@ -78,6 +80,7 @@ namespace Glory::Editor
 			relativePath = false;
 		}
 
+		// Process meta file if it exists
 		if (std::filesystem::exists(metaFilePath))
 		{
 			// Both file and meta file exists we need to check if it also exists in the database!
@@ -91,6 +94,16 @@ namespace Glory::Editor
 				if (relativePathToFile != location.m_Path)
 				{
 					AssetDatabase::UpdateAssetPath(uuid, relativePathToFile, metaFilePath.string());
+				}
+
+				// Check if file was saved
+				std::filesystem::file_time_type lastSaveTime = std::filesystem::last_write_time(filePath);
+				long duration = lastSaveTime.time_since_epoch().count();
+				long previousDuration = AssetDatabase::GetLastSavedRecord(uuid);
+				if (duration != previousDuration)
+				{
+					// Asset was updated
+					AssetDatabase::UpdateAsset(uuid, duration);
 				}
 				return;
 			}

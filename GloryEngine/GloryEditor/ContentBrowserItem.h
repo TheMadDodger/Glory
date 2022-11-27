@@ -9,51 +9,51 @@ namespace Glory::Editor
 	class ContentBrowserItem
 	{
 	public:
+		static GLORY_EDITOR_API ContentBrowserItem* GetSelectedFolder();
+		static GLORY_EDITOR_API void SetSelectedFolder(ContentBrowserItem* pItem);
+
+		GLORY_EDITOR_API bool HasParent();
+		GLORY_EDITOR_API void Up();
+		static GLORY_EDITOR_API void HistoryUp();
+		static GLORY_EDITOR_API void HistoryDown();
+
+		GLORY_EDITOR_API void Change(const std::string& name, bool isFolder);
+		GLORY_EDITOR_API void Refresh();
+		GLORY_EDITOR_API void RefreshSelected(ContentBrowserItem* pRoot);
+		GLORY_EDITOR_API std::filesystem::path BuildPath();
+
+		GLORY_EDITOR_API void DrawDirectoryBrowser();
+		GLORY_EDITOR_API void DrawFileItem(int iconSize);
+		GLORY_EDITOR_API bool IsValid();
+		GLORY_EDITOR_API void SetOpen();
+
+		GLORY_EDITOR_API void SortChildren();
+
+		static GLORY_EDITOR_API std::filesystem::path GetCurrentPath();
+
+		GLORY_EDITOR_API ContentBrowserItem* GetChildByName(const std::string& name, bool folder);
+		GLORY_EDITOR_API void BeginRename();
+
+		bool IsEditable() const;
+
+		static GLORY_EDITOR_API const std::string& GetHighlightedPath();
+		GLORY_EDITOR_API void AddIgnoreDirectory(const std::string& directory);
+		GLORY_EDITOR_API void AddIgnoreDirectories(const std::vector<std::string>& directories);
+
+	private:
 		ContentBrowserItem();
 		ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable, const std::string& directoryFilter = "", std::function<std::filesystem::path()> rootPathFunc = DefaultRootPathFunc);
 		virtual ~ContentBrowserItem();
 
-		static ContentBrowserItem* GetSelectedFolder();
-		static void SetSelectedFolder(ContentBrowserItem* pItem);
-
-		bool HasParent();
-		void Up();
-		static void HistoryUp();
-		static void HistoryDown();
-
-		void Change(const std::string& name, bool isFolder);
-		void Refresh();
-		void RefreshSelected(ContentBrowserItem* pRoot);
-		std::filesystem::path BuildPath();
-
-		void DrawDirectoryBrowser();
+		static void EraseExcessHistory();
+		static std::filesystem::path DefaultRootPathFunc();
 		static void DrawFileBrowser(int iconSize);
 		static void DrawCurrentPath();
-		void DrawFileItem(int iconSize);
-		bool IsValid();
-		void SetOpen();
-
-		void SortChildren();
-
-		static std::filesystem::path GetCurrentPath();
-
-		ContentBrowserItem* GetChildByName(const std::string& name, bool folder);
-		void BeginRename();
-
-		bool IsEditable() const;
-
-		static const std::string& GetHighlightedPath();
-		void AddIgnoreDirectory(const std::string& directory);
-		void AddIgnoreDirectories(const std::vector<std::string>& directories);
-
-	private:
-		static void EraseExcessHistory();
 
 		void DrawName();
 
-		static std::filesystem::path DefaultRootPathFunc();
-
 	private:
+		friend class ContentBrowser;
 		std::string m_Name;
 		bool m_IsFolder;
 		bool m_SetOpen;

@@ -215,4 +215,9 @@ namespace Glory
 		if (pCamera == nullptr) return 0.0f;
 		return pCamera->GetFar();
 	}
+
+	UUID CameraRef::GetUUID() const
+	{
+		return m_CameraID;
+	}
 }

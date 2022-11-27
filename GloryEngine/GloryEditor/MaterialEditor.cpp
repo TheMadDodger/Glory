@@ -1,12 +1,13 @@
 #include "MaterialEditor.h"
 #include "PropertyDrawer.h"
 #include "EditorShaderProcessor.h"
-#include "AssetPickerPopup.h"
+#include "AssetPicker.h"
 #include "Selection.h"
 #include <imgui.h>
 #include <ResourceType.h>
 #include <GLORY_YAML.h>
 #include <AssetDatabase.h>
+#include <AssetManager.h>
 #include <AssetReferencePropertyTemplate.h>
 
 namespace Glory::Editor
@@ -52,7 +53,7 @@ namespace Glory::Editor
 
 		int toRemoveShaderIndex = -1;
 
-		float width = ImGui::GetContentRegionAvailWidth();
+		float width = ImGui::GetContentRegionAvail().x;
 		float removeButtonWidth = 100.0f;
 
 		if (ImGui::BeginTable("Loaded Shaders Table", 4, flags, ImVec2(0.0f, totalHeight), 0.0f))
@@ -108,17 +109,14 @@ namespace Glory::Editor
 			UpdateMaterial(pMaterial);
 		}
 
-		if (ImGui::Button("Add Shader", ImVec2(width, 0.0f)))
+		UUID addShaderID = 0;
+		if (AssetPicker::ResourceButton("Add Shader", width, ResourceType::GetHash<ShaderSourceData>(), &addShaderID))
 		{
-			AssetPickerPopup::Open(ResourceType::GetHash<ShaderSourceData>(), [&](Resource* pResource)
-			{
-				if (!pResource) return;
-				MaterialData* pMaterial = (MaterialData*)m_pTarget;
-				ShaderSourceData* pShaderSource = (ShaderSourceData*)pResource;
-				if (!pMaterial->AddShader(pShaderSource)) return;
-				UpdateMaterial(pMaterial);
-
-			});
+			if (!AssetDatabase::AssetExists(addShaderID)) return;
+			MaterialData* pMaterial = (MaterialData*)m_pTarget;
+			ShaderSourceData* pShaderSource = (ShaderSourceData*)AssetManager::GetAssetImmediate(addShaderID);
+			if (!pMaterial->AddShader(pShaderSource)) return;
+			UpdateMaterial(pMaterial);
 		}
 	}
 

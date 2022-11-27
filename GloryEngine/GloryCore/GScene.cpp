@@ -76,7 +76,7 @@ namespace Glory
 	void GScene::DelayedSetParent(SceneObject* pObjectToParent, UUID parentID)
 	{
 		if (pObjectToParent == nullptr || parentID == NULL) return;
-		m_DelayedParents.push_back(DelayedParentData(pObjectToParent, parentID));
+		m_DelayedParents.emplace_back(DelayedParentData(pObjectToParent, parentID));
 	}
 
 	void GScene::HandleDelayedParents()

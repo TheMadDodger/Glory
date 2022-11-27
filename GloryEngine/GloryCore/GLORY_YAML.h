@@ -4,11 +4,33 @@
 #include <algorithm>
 #include "LayerManager.h"
 #include "ShaderSourceLoaderModule.h"
+#include "LayerRef.h"
 
 namespace YAML
 {
 	Emitter& operator<<(Emitter& out, const Glory::LayerMask &mask);
 	Emitter& operator<<(Emitter& out, const Glory::ShaderType &type);
+	Emitter& operator<<(Emitter& out, const Glory::LayerRef &layerRef);
+
+	template<>
+	struct convert<Glory::LayerRef>
+	{
+		static Node encode(const Glory::LayerRef& layerRef)
+		{
+			Node node;
+			node = layerRef.m_LayerName;
+			return node;
+		}
+
+		static bool decode(const Node& node, Glory::LayerRef& layerRef)
+		{
+			if (!node.IsScalar())
+				return false;
+
+			layerRef = node.as<std::string>();
+			return true;
+		}
+	};
 
 	template<>
 	struct convert<Glory::LayerMask>
@@ -17,6 +39,7 @@ namespace YAML
 		{
 			Node node;
 			node = mask.m_Mask;
+			return node;
 		}
 
 		static bool decode(const Node& node, Glory::LayerMask& mask)
@@ -54,6 +77,7 @@ namespace YAML
 		{
 			Node node;
 			node = SHADERTYPE_TOSTRING[type];
+			return node;
 		}
 
 		static bool decode(const Node& node, Glory::ShaderType& type)

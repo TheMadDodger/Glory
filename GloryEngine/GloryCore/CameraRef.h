@@ -52,6 +52,7 @@ namespace Glory
 
 		float GetNear() const;
 		float GetFar() const;
+		UUID GetUUID() const;
 
 		void Free();
 

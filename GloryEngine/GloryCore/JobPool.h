@@ -69,6 +69,11 @@ namespace Glory::Jobs
 				m_pJobs[i]->Kill();
 			}
 			m_pJobQueue->ManualNotify();
+
+			for (size_t i = 0; i < m_pJobs.size(); i++)
+			{
+				while (m_pJobs[i]->IsRunning()) {};
+			}
 		}
 
 	private:

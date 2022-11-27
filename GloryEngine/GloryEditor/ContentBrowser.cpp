@@ -179,7 +179,7 @@ namespace Glory::Editor
         ImGui::Text(searchText);
         ImGui::SameLine(regionWidth - width - padding);
         ImGui::SetNextItemWidth(width);
-        ImGui::InputText("", m_SearchBuffer, 100);
+        ImGui::InputText("##Search", m_SearchBuffer, 100);
     }
 
     void ContentBrowser::FileBrowser()

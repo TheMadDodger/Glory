@@ -51,7 +51,7 @@ namespace Glory::Editor
 		{
 			ImGui::Text("Add Component Menu");
 
-			ImGui::InputText("", m_FilterBuffer, 200);
+			ImGui::InputText("##", m_FilterBuffer, 200);
 
 			if (m_Filter != std::string(m_FilterBuffer))
 			{

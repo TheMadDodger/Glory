@@ -9,13 +9,11 @@ namespace Glory::Editor
 	public:
 		GLORY_EDITOR_API BaseTumbnailGenerator();
 		virtual GLORY_EDITOR_API ~BaseTumbnailGenerator();
-
-		virtual ImageData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
-
+		virtual GLORY_EDITOR_API ImageData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
 		virtual GLORY_EDITOR_API void OnFileDoubleClick(UUID uuid);
 
 	protected:
-		virtual const std::type_info& GetAssetType() = 0;
+		virtual GLORY_EDITOR_API const std::type_info& GetAssetType() = 0;
 		virtual GLORY_EDITOR_API const std::string& GetExtension();
 
 	private:

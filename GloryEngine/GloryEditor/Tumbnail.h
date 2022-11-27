@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "GloryEditor.h"
 
+
 namespace Glory::Editor
 {
 	class BaseTumbnailGenerator;
@@ -24,7 +25,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API BaseTumbnailGenerator* GetGenerator(size_t hashCode);
 
 	private:
-		static void AddGenerator(BaseTumbnailGenerator* pGenerator);
+		static GLORY_EDITOR_API void AddGenerator(BaseTumbnailGenerator* pGenerator);
 
 	private:
 		static std::vector<BaseTumbnailGenerator*> m_pGenerators;

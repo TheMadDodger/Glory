@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-#include <JobManager.h>
 #include <GScene.h>
 #include <Glory.h>
 #include <EntityRegistry.h>
@@ -37,6 +35,9 @@ namespace Glory
 		virtual void OnDeleteObject(SceneObject* pObject) override;
 
 		virtual void OnObjectAdded(SceneObject* pObject) override;
+
+		virtual void Start() override;
+		virtual void Stop() override;
 
 	private:
 		friend class Entity;

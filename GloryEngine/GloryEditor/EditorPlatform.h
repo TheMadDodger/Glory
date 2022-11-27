@@ -31,13 +31,14 @@ namespace Glory::Editor
 		GLORY_EDITOR_API EditorWindowImpl* GetWindowImpl();
 		GLORY_EDITOR_API EditorRenderImpl* GetRenderImpl();
 
+		void GraphicsThreadBeginRender();
+		void GraphicsThreadEndRender();
+
 	private:
 		void SetupDearImGuiContext();
 
 		void NewFrame();
 
-		void GraphicsThreadBeginRender();
-		void GraphicsThreadEndRender();
 		void LoadFonts();
 
 		void SetState(const EditorRenderState& state);

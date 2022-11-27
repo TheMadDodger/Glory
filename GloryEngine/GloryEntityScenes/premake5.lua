@@ -16,10 +16,10 @@ project "GloryEntityScenes"
 
 	vpaths
 	{
-		["ECS"] = { "EntityComponentData.*", "EntityID.*", "Registry.*" },
-		["Module"] = { "Components.*", "Entity.*", "EntityScene.*", "EntitySceneScenesModule.*", "EntityComponentObject.*", "EntitySceneObject.*" },
-		["Serializers"] = { "EntitySceneSerializer.*", "EntitySceneObjectSerializer.*", "EntityComponentSerializer.*" },
-		["Systems"] = { "EntitySystem.*", "EntitySystems.*", "EntitySystemTemplate.*", "MeshRenderSystem.*", "Systems.*", "TransformSystem.*", "CameraSystem.*", "LookAtSystem.*", "SpinSystem.*", "LightSystem.*", "MeshFilterSystem.*" },
+		["Module"] = { "GloryEntityScenes.*", "Components.*", "Entity.*", "EntityScene.*", "EntitySceneScenesModule.*", "EntityComponentObject.*", "EntitySceneObject.*" },
+		["Serializers"] = { "ScriptedComponentSerializer.*", "EntitySceneSerializer.*", "EntitySceneObjectSerializer.*", "EntityComponentSerializer.*" },
+		["Systems"] = { "ScriptedSystem.*", "MeshRenderSystem.*", "Systems.*", "TransformSystem.*", "CameraSystem.*", "LookAtSystem.*", "SpinSystem.*", "LightSystem.*", "MeshFilterSystem.*" },
+		["Helpers"] = { "ComponentTypes.*" },
 	}
 
 	includedirs
@@ -66,6 +66,8 @@ project "GloryEntityScenes"
 	postbuildcommands
 	{
 		("{COPY} Module.yaml %{moduleOutDir}"),
+		--("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

@@ -20,13 +20,6 @@ int main(int argc, char* argv[])
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
         windowCreateInfo.WindowFlags = 2 | 32;
 
-        //std::vector<Glory::ScriptingModule*> scriptingModules = {
-        //    new Glory::GloryMonoScipting(),
-        //};
-        // 
-        //createInfo.ScriptingModulesCount = static_cast<uint32_t>(scriptingModules.size());
-        //createInfo.pScriptingModules = scriptingModules.data();
-
         Glory::GloryContext::CreateContext();
 
         Glory::CommandLine commandLine(argc, argv);
@@ -57,7 +50,7 @@ int main(int argc, char* argv[])
 
         std::filesystem::path engineConfPath = projectPath;
         engineConfPath = engineConfPath.parent_path();
-        engineConfPath.append("Engine.yaml");
+        engineConfPath.append("ProjectSettings").append("Engine.yaml");
 
         Glory::EngineLoader engineLoader(engineConfPath);
         Glory::Engine* pEngine = engineLoader.LoadEngine(windowCreateInfo);
@@ -72,7 +65,7 @@ int main(int argc, char* argv[])
         Glory::GameSettings gameSettings;
         gameSettings.pEngine = pEngine;
         gameSettings.pGameState = new Glory::GameState();
-        //gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
+        gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
         pGame.Initialize();
         

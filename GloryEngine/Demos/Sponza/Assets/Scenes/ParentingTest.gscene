@@ -11,20 +11,19 @@ Entities:
         Position: [-5.16806555, 2.46972132, -0.333712012]
         Rotation: [0, 0, 0, 1]
         Scale: [1.00000107, 1, 1.00000107]
-      - UUID: 5878839014597927352
+      - UUID: 17273555782380781402
         TypeName: MeshRenderer
         TypeHash: 196355731
         m_pMaterials:
           - m_MaterialReference: 6439595880252257041
-      - UUID: 16032014602404844854
+      - UUID: 3532656770078464861
         TypeName: MeshFilter
         TypeHash: 1249198182
         m_pModelData: 5501465473105436222
-      - UUID: 4005013934882352798
-        TypeName: Spin
-        TypeHash: 3648538273
-        m_Speed: 10
-        m_Time: 0
+      - UUID: 389236924376368812
+        TypeName: ScriptedComponent
+        TypeHash: 727558036
+        m_Script: 16575844677113431238
   - TypeHash: 3083728904
     Name: Suzy 2
     UUID: 17686343968058694442
@@ -36,11 +35,11 @@ Entities:
         Position: [-4.52805805, 2.5414257, -2.90222645]
         Rotation: [-4.3072168e-16, -0.93598175, -1.62005864e-16, -0.352048576]
         Scale: [0.999998808, 1, 0.999998808]
-      - UUID: 9695472923388147168
+      - UUID: 1259959451638318847
         TypeName: MeshFilter
         TypeHash: 1249198182
         m_pModelData: 6415630451540791124
-      - UUID: 13004217213203378906
+      - UUID: 9575731893387562197
         TypeName: MeshRenderer
         TypeHash: 196355731
         m_pMaterials:
@@ -56,12 +55,12 @@ Entities:
         Position: [3.87667561, -4.76837158e-07, -8.97506332]
         Rotation: [4.81416744e-22, -0.388318956, 1.2233222e-22, 0.921525061]
         Scale: [1.00000012, 1, 1.00000012]
-      - UUID: 2195526001315172175
+      - UUID: 10690720951528480814
         TypeName: MeshRenderer
         TypeHash: 196355731
         m_pMaterials:
           - m_MaterialReference: 6439595880252257041
-      - UUID: 16023783028508625784
+      - UUID: 6549985664741907128
         TypeName: MeshFilter
         TypeHash: 1249198182
         m_pModelData: 5501465473105436222

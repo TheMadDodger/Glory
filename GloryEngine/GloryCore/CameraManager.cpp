@@ -76,6 +76,13 @@ namespace Glory
 		return &m_Cameras[index];
 	}
 
+	void CameraManager::Cleanup()
+	{
+		m_Cameras.clear();
+		m_UnusedCameraIndices.clear();
+		m_IDToCamera.clear();
+	}
+
 	CameraManager::CameraManager() {}
 
 	CameraManager::~CameraManager() {}

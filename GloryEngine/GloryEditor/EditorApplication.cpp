@@ -38,6 +38,7 @@ namespace Glory::Editor
 	GLORY_EDITOR_API void EditorApplication::Initialize(Game& game)
 	{
 		game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
+		game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
 
 		m_pPlatform = new EditorPlatform(m_pTempWindowImpl, m_pTempRenderImpl);
 		m_pTempWindowImpl->m_pEditorPlatform = m_pPlatform;
@@ -52,8 +53,8 @@ namespace Glory::Editor
 	{
 		for (size_t i = 0; i < m_pExtensions.size(); i++)
 		{
-			m_pExtensions[i]->RegisterEditors();
 			m_pExtensions[i]->SetCurrentContext();
+			m_pExtensions[i]->RegisterEditors();
 		}
 	}
 
@@ -209,6 +210,14 @@ namespace Glory::Editor
 		if (pProject == nullptr) return std::string("./Assets");
 		std::filesystem::path path = pProject->RootPath();
 		path.append("Assets");
+		return path.string();
+	}
+
+	std::string EditorApplication::SettingsPathOverrider()
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (pProject == nullptr) return std::string("./");
+		std::filesystem::path path = pProject->SettingsPath();
 		return path.string();
 	}
 }

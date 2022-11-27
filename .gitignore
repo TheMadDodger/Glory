@@ -37,7 +37,6 @@
 GloryEngine/GloryCore/Debug/
 GloryEngine/GlorySDLWindow/Debug/
 GloryEngine/GloryMain/Debug/
-GloryCore/Debug/
 GloryEngine/GloryVulkanGraphics/Debug/
 GloryEngine/GlorySDLImage/Debug/Win32/
 GloryEngine/bin/Engine/
@@ -69,8 +68,6 @@ GloryEngine/Build/
 GloryEngine/GloryEditor/Release/
 GloryEngine/GloryEntityScenes/Release/
 GloryEngine/GloryOpenGLGraphics/Release/
-GloryEngine/GloryMain/EditorAssets/
-GloryEngine/GloryMain/Assets/
 Projects.list
 GloryEngine/EntityScenesEditorExtension/Debug/
 GloryEngine/EntityScenesEditorExtension/Release/
@@ -87,10 +84,22 @@ GloryEngine/GloryEditorSDL/Release/
 GloryEngine/GloryEditorVulkan/Release/
 GloryEngine/GloryEngineBuilder/Release/
 GloryEngine/Glorious/Modules/
-GloryEngine/Glorious/EditorAssets/
 GloryEngine/Glorious/Release/
 GloryEngine/GloriousLauncher/Debug/
 GloryEngine/GloriousLauncher/Editor/
+GloryEngine/GloryCS/Debug/
+GloryEngine/GloryMono/Debug/
+GloryEngine/GloryMain/mono/
+GloryEngine/MonoEditorExtension/Debug/
+GloryEngine/GloryMonoScripting/Debug/
+GloryEngine/GloryCS/obj/
+GloryEngine/GloryCS/bin/
+GloryEngine/GloryMonoScriptingCS/bin/
+GloryEngine/GloryMonoScriptingCS/obj/
+GloryEngine/Mono/GloryEngine.Core/Debug/
+GloryEngine/Mono/GloryEngine.Entities/Debug/
+GloryEngine/Mono/GloryEntitiesMonoExtender/Debug/
+GloryEngine/GloryMonoScripting/mono/
 GloryEngine/GloryEntityScenes2/Debug/
 GloryEngine/EntityScenes2EditorExtension/Debug/
 

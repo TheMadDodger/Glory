@@ -7,6 +7,7 @@
 #include <Components.h>
 
 #include <Reflection.h>
+#include "ScriptedComponentEditor.h"
 
 namespace Glory::Editor
 {
@@ -30,13 +31,44 @@ namespace Glory::Editor
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
+		Editor::RegisterEditor<ScriptedComponentEditor>();
 
 		EditorPlayer::RegisterLoopHandler(this);
 	}
 
-	const const char* EntityScenesEditorExtension::ModuleName()
+	const char* EntityScenesEditorExtension::ModuleName()
 	{
 		return "Entity Scenes";
+	}
+
+	void EntityScenesEditorExtension::HandleStart(Module* pModule)
+	{
+		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
+		GloryECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
+		GloryECS::ComponentTypes::SetInstance(pComponentTypes);
+
+		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+		{
+			GScene* pScene = pScenesModule->GetOpenScene(i);
+			EntityScene* pEntityScene = (EntityScene*)pScene;
+			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
+			pRegistry->InvokeAll(GloryECS::InvocationType::Start);
+		}
+	}
+
+	void EntityScenesEditorExtension::HandleStop(Module* pModule)
+	{
+		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
+		GloryECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
+		GloryECS::ComponentTypes::SetInstance(pComponentTypes);
+
+		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+		{
+			GScene* pScene = pScenesModule->GetOpenScene(i);
+			EntityScene* pEntityScene = (EntityScene*)pScene;
+			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
+			pRegistry->InvokeAll(GloryECS::InvocationType::Stop);
+		}
 	}
 
 	void EntityScenesEditorExtension::HandleUpdate(Module* pModule)
@@ -55,24 +87,6 @@ namespace Glory::Editor
 				size_t hash = ResourceType::GetHash(m_ComponentsToUpdateInEditor[i]);
 				pRegistry->InvokeAll(hash, GloryECS::InvocationType::Update);
 			}
-
-			//Registry* pRegistry = pEntityScene->GetRegistry();
-			//
-			//EntitySystems* pSystems = pRegistry->GetSystems();
-			//
-			//for (size_t i = 0; i < pSystems->SystemCount(); i++)
-			//{
-			//	EntitySystem* pSystem = pSystems->GetSystem(i);
-			//	std::type_index componentType = pSystem->GetComponentType();
-			//	auto it = std::find(m_ComponentsToUpdateInEditor.begin(), m_ComponentsToUpdateInEditor.end(), componentType);
-			//	if (it == m_ComponentsToUpdateInEditor.end()) continue;
-			//
-			//	pRegistry->ForEach(componentType,
-			//		[pSystem](Registry* pRegisrty, EntityID entity, EntityComponentData* pComponentData)
-			//		{
-			//			pSystem->Update(pRegisrty, entity, pComponentData);
-			//		});
-			//}
 		}
 	}
 }

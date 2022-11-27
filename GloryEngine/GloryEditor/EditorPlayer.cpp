@@ -11,9 +11,9 @@
 
 namespace Glory::Editor
 {
-	std::vector<IEditorLoopHandler*> EditorPlayer::m_pSceneLoopHandlers;
+	std::vector<IPlayModeHandler*> EditorPlayer::m_pSceneLoopHandlers;
 
-	void EditorPlayer::RegisterLoopHandler(IEditorLoopHandler* pEditorLoopHandler)
+	void EditorPlayer::RegisterLoopHandler(IPlayModeHandler* pEditorLoopHandler)
 	{
 		m_pSceneLoopHandlers.push_back(pEditorLoopHandler);
 	}
@@ -29,10 +29,28 @@ namespace Glory::Editor
 		m_SerializedScenes = out.c_str();
 
 		if (pSelected) Selection::SetActiveObject(pSelected);
+
+		Engine* pEngine = Game::GetGame().GetEngine();
+		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
+		{
+			IPlayModeHandler* pPlayModeHandler = m_pSceneLoopHandlers[i];
+			Module* pModule = pEngine->GetModule(pPlayModeHandler->ModuleName());
+			if (!pModule) continue;
+			pPlayModeHandler->HandleStart(pModule);
+		}
 	}
 
 	void EditorPlayer::Stop()
 	{
+		Engine* pEngine = Game::GetGame().GetEngine();
+		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
+		{
+			IPlayModeHandler* pPlayModeHandler = m_pSceneLoopHandlers[i];
+			Module* pModule = pEngine->GetModule(pPlayModeHandler->ModuleName());
+			if (!pModule) continue;
+			pPlayModeHandler->HandleStop(pModule);
+		}
+
 		m_IsPaused = false;
 		m_FrameRequested = false;
 
@@ -85,13 +103,13 @@ namespace Glory::Editor
 		}
 		else
 		{
-			auto it = std::find_if(m_pSceneLoopHandlers.begin(), m_pSceneLoopHandlers.end(), [&](IEditorLoopHandler* pEditorLoopHandler)
+			auto it = std::find_if(m_pSceneLoopHandlers.begin(), m_pSceneLoopHandlers.end(), [&](IPlayModeHandler* pEditorLoopHandler)
 			{
 				const std::string& moduleName = pEditorLoopHandler->ModuleName();
 				return moduleName == metaData.Name();
 			});
 			if (it == m_pSceneLoopHandlers.end()) return false;
-			IEditorLoopHandler* pEditorLoopHandler = *it;
+			IPlayModeHandler* pEditorLoopHandler = *it;
 			pEditorLoopHandler->HandleUpdate(pModule);
 		}
 

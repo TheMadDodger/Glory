@@ -34,6 +34,12 @@ namespace Glory
 
 	void EditorLoader::Unload()
 	{
+		for (size_t i = 0; i < m_pExtensions.size(); i++)
+		{
+			delete m_pExtensions[i];
+		}
+		m_pExtensions.clear();
+
 		for (size_t i = 0; i < m_Libs.size(); i++)
 		{
 			FreeLibrary(m_Libs[i]);

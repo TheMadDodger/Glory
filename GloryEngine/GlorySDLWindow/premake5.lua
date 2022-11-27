@@ -17,7 +17,7 @@ project "GlorySDLWindow"
 	vpaths
 	{
 		["Core"] = { "SDLWindow.h", "SDLWindow.cpp", "SDLWindowExceptions.h" },
-		["Module"] = { "SDLWindowModule.h", "SDLWindowModule.cpp" }
+		["Module"] = { "GlorySDLWindow.*", "SDLWindowModule.h", "SDLWindowModule.cpp" }
 	}
 
 	includedirs

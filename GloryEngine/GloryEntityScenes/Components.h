@@ -11,12 +11,17 @@
 #include <CameraRef.h>
 #include <Layer.h>
 #include <LightData.h>
+#include <Script.h>
 #include "Entity.h"
 
 #include <AssetReference.h>
+#include <LayerRef.h>
 #include <Reflection.h>
+#include <map>
 
 REFLECTABLE_ENUM(CameraPerspective, Orthographic, Perspective)
+
+#define PROPERTY_BUFFER_SIZE 2048;
 
 namespace Glory
 {
@@ -112,11 +117,11 @@ namespace Glory
 	
 	struct LayerComponent
 	{
-		LayerComponent() : m_pLayer(nullptr) {}
-		LayerComponent(const Layer* pLayer) : m_pLayer(pLayer) {}
+		LayerComponent() : m_Layer("") {}
+		LayerComponent(const Layer* pLayer) : m_Layer(pLayer->m_Name) {}
 
 		REFLECTABLE(LayerComponent,
-			(const Layer*)	(m_pLayer)
+			(LayerRef)	(m_Layer)
 		)
 	};
 	
@@ -130,6 +135,21 @@ namespace Glory
 			(float)	(m_Intensity),
 			(float)	(m_Range)
 		)
+	};
+
+	struct ScriptedComponent
+	{
+		ScriptedComponent() : m_Script(0), m_ScriptData() {}
+		ScriptedComponent(Script* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0), m_ScriptData() {}
+
+		REFLECTABLE(ScriptedComponent,
+			(AssetReference<Script>) (m_Script)
+		);
+
+		std::vector<ScriptProperty> m_ScriptProperties;
+		std::vector<ScriptProperty> m_ScriptChildProperties;
+
+		YAML::Node m_ScriptData;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
