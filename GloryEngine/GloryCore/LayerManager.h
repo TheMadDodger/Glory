@@ -19,7 +19,7 @@ namespace Glory
 		static std::string LayerMaskToString(const LayerMask& layerMask);
 
 		static int GetLayerIndex(const Layer* pLayer);
-		static void GetAllLayerNames(std::vector<std::string>& names);
+		static void GetAllLayerNames(std::vector<std::string_view>& names);
 		static const Layer* GetLayerAtIndex(int index);
 
 	private:

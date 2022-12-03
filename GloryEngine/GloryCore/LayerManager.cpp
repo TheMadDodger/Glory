@@ -106,7 +106,7 @@ namespace Glory
 		return LAYER_MANAGER->m_NameToLayer[pLayer->m_Name];
 	}
 
-	void LayerManager::GetAllLayerNames(std::vector<std::string>& names)
+	void LayerManager::GetAllLayerNames(std::vector<std::string_view>& names)
 	{
 		names.push_back("Default"); // Layer 0
 		for (size_t i = 0; i < LAYER_MANAGER->m_Layers.size(); i++)

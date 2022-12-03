@@ -47,7 +47,7 @@ namespace Glory::Editor
 				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
 
 				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
+				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
 				const UUID newParent = 0;
 				payload.pObject->SetParent(nullptr);
 				Undo::AddAction(new SetParentAction(oldParent, newParent));
@@ -88,7 +88,7 @@ namespace Glory::Editor
 				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
 
 				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
+				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
 				const UUID newParent = 0;
 				payload.pObject->SetParent(nullptr);
 				Undo::AddAction(new SetParentAction(oldParent, newParent));
@@ -166,8 +166,8 @@ namespace Glory::Editor
 					if (canParent)
 					{
 						Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-						const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
-						const UUID newParent = pParent ? pParent->GetUUID() : 0;
+						const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+						const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
 						payload.pObject->SetParent(pParent);
 						Undo::AddAction(new SetParentAction(oldParent, newParent));
 						payload.pObject->SetBeforeObject(pObject);
@@ -215,8 +215,8 @@ namespace Glory::Editor
 				if (canParent)
 				{
 					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
-					const UUID newParent = pObject ? pObject->GetUUID() : 0;
+					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+					const UUID newParent = pObject ? pObject->GetUUID() : UUID(0);
 					payload.pObject->SetParent(pObject);
 					Undo::AddAction(new SetParentAction(oldParent, newParent));
 					Undo::StopRecord();
@@ -268,8 +268,8 @@ namespace Glory::Editor
 				if (canParent)
 				{
 					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : 0;
-					const UUID newParent = pParent ? pParent->GetUUID() : 0;
+					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+					const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
 					payload.pObject->SetParent(pParent);
 					Undo::AddAction(new SetParentAction(oldParent, newParent));
 					payload.pObject->SetBeforeObject(pObject);
