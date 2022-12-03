@@ -17,7 +17,7 @@ namespace Glory::Editor
 		MaterialData* pBaseMaterial = pMaterial->GetBaseMaterial();
 		//ImGui::Text("Material: %s", pBaseMaterial ? pBaseMaterial->Name().c_str() : "None");
 		//ImGui::SameLine();
-		UUID baseMaterialID = pBaseMaterial ? pBaseMaterial->GetUUID() : 0;
+		UUID baseMaterialID = pBaseMaterial ? pBaseMaterial->GetUUID() : UUID(0);
 		bool change = false;
 		if (AssetPicker::ResourceDropdown("Base Material", ResourceType::GetHash<MaterialData>(), &baseMaterialID))
 		{

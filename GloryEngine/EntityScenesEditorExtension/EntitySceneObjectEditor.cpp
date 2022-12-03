@@ -6,6 +6,7 @@
 #include <SceneObjectNameAction.h>
 #include <Undo.h>
 #include <algorithm>
+#include <EditorUI.h>
 
 namespace Glory::Editor
 {
@@ -76,9 +77,7 @@ namespace Glory::Editor
 		UUID uuid = m_pObject->GetUUID();
 		std::string uuidString = std::to_string(uuid);
 		ImGui::Text(uuidString.data());
-		ImGui::Text("Name");
-		ImGui::SameLine();
-		bool change = ImGui::InputText("##Name", m_NameBuff, MAXNAMESIZE);
+		bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE);
 		m_pObject->SetName(m_NameBuff);
 		if (change)
 		{
