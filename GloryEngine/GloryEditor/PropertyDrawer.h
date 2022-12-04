@@ -62,6 +62,42 @@ namespace Glory::Editor
 	};
 
 	template<typename PropertyType>
+	class SimplePropertyDrawerTemplate : public PropertyDrawer
+	{
+	public:
+		SimplePropertyDrawerTemplate() : PropertyDrawer(ResourceType::GetHash<PropertyType>()) {}
+
+	protected:
+		virtual bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const override
+		{
+			PropertyType oldValue = *(PropertyType*)data;
+			if (OnGUI(label, (PropertyType*)data, flags))
+			{
+				PropertyType newValue = *(PropertyType*)data;
+				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
+				return true;
+			}
+			return false;
+		}
+
+		virtual bool Draw(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags) const override
+		{
+			PropertyType value;
+			memcpy((void*)&value, (void*)&buffer[offset], size);
+			PropertyType originalValue = value;
+			if (OnGUI(label, &value, flags))
+			{
+				Undo::AddAction(new PropertyAction<PropertyType>(label, originalValue, value));
+			}
+			if (originalValue == value) return false;
+			memcpy((void*)&buffer[offset], (void*)&value, size);
+			return true;
+		}
+
+		virtual bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const = 0;
+	};
+
+	template<typename PropertyType>
 	class PropertyDrawerTemplate : public PropertyDrawer
 	{
 	public:

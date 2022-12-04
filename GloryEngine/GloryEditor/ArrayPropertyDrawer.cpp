@@ -1,7 +1,9 @@
 #include "ArrayPropertyDrawer.h"
+#include "ListView.h"
 #include <SerializedArrayProperty.h>
 #include <imgui.h>
 #include <Reflection.h>
+#include <FontAwesome/IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -75,47 +77,79 @@ namespace Glory::Editor
 
 		ImGui::SetNextItemWidth(width);
 
-		ImGui::PushID(label.c_str());
-		std::string nodeLabel = "##" + label;
-		bool node = ImGui::TreeNodeEx(nodeLabel.c_str(), 0);
-		ImGui::SameLine(0, 0);
-		ImGui::TextUnformatted(label.c_str());
-		ImGui::SameLine(width);
+		ListView listView{ label.data() };
 
 		size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
-		int newSize = (int)size;
-		if (ImGui::InputInt("##size", &newSize, 0, 0, ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue) && size != (size_t)newSize)
-		{
-			if (newSize <= 0) newSize = 0;
-			GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
-			change = true;
-		}
-
 		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
 
-		if (node)
-		{
-			for (size_t i = 0; i < newSize; i++)
+		listView.OnDrawElement = [&](size_t index) {
+			void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, index);
+			if (pPropertyDrawer)
 			{
-				void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, i);
-				std::string elementLabel = "Element_" + std::to_string(i);
-				ImGui::PushID(elementLabel.c_str());
-				if (pPropertyDrawer)
-				{
-					change |= pPropertyDrawer->Draw(elementLabel, pAddress, typeHash, flags);
-					ImGui::PopID();
-					continue;
-				}
-
-				change |= PropertyDrawer::DrawProperty(elementLabel, pElementTypeData, pAddress, flags);
-				ImGui::PopID();
+				change |= pPropertyDrawer->Draw(ICON_FA_CIRCLE " Element " + std::to_string(index), pAddress, typeHash, flags);
+				return;
 			}
+			
+			change |= PropertyDrawer::DrawProperty(ICON_FA_CIRCLE " Element " + std::to_string(index), pElementTypeData, pAddress, flags);
+		};
 
-			ImGui::TreePop();
-		}
-		ImGui::PopID();
+		listView.OnAdd = [&]() {
+			GloryReflect::Reflect::ResizeArray(data, typeHash, size + 1);
+		};
+
+		listView.OnRemove = [&](int index) {
+			// Do nothing for now because GloryReflect is missing a feature for this
+			// TODO: Implement
+		};
+
+		listView.OnResize = [&](size_t newSize) {
+			GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
+		};
+
+		return listView.Draw(size);
+
+		//ImGui::PushID(label.c_str());
+		//std::string nodeLabel = "##" + label;
+		//bool node = ImGui::TreeNodeEx(nodeLabel.c_str(), 0);
+		//ImGui::SameLine(0, 0);
+		//ImGui::TextUnformatted(label.c_str());
+		//ImGui::SameLine(width);
+		//
+		//size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
+		//int newSize = (int)size;
+		//if (ImGui::InputInt("##size", &newSize, 0, 0, ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue) && size != (size_t)newSize)
+		//{
+		//	if (newSize <= 0) newSize = 0;
+		//	GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
+		//	change = true;
+		//}
+		//
+		//const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		//
+		//PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
+		//
+		//if (node)
+		//{
+		//	for (size_t i = 0; i < newSize; i++)
+		//	{
+		//		void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, i);
+		//		std::string elementLabel = "Element_" + std::to_string(i);
+		//		ImGui::PushID(elementLabel.c_str());
+		//		if (pPropertyDrawer)
+		//		{
+		//			change |= pPropertyDrawer->Draw(elementLabel, pAddress, typeHash, flags);
+		//			ImGui::PopID();
+		//			continue;
+		//		}
+		//
+		//		change |= PropertyDrawer::DrawProperty(elementLabel, pElementTypeData, pAddress, flags);
+		//		ImGui::PopID();
+		//	}
+		//
+		//	ImGui::TreePop();
+		//}
+		//ImGui::PopID();
 		return change;
 	}
 }

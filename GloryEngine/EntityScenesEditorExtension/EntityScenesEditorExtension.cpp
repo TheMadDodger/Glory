@@ -8,6 +8,7 @@
 
 #include <Reflection.h>
 #include "ScriptedComponentEditor.h"
+#include "MeshMaterialPropertyDrawer.h"
 
 namespace Glory::Editor
 {
@@ -34,6 +35,8 @@ namespace Glory::Editor
 		Editor::RegisterEditor<ScriptedComponentEditor>();
 
 		EditorPlayer::RegisterLoopHandler(this);
+
+		PropertyDrawer::RegisterPropertyDrawer<MeshMaterialPropertyDrawer>();
 	}
 
 	const char* EntityScenesEditorExtension::ModuleName()
@@ -91,12 +94,12 @@ namespace Glory::Editor
 	}
 }
 
-GLORY_API Glory::Editor::BaseEditorExtension* LoadExtension()
+Glory::Editor::BaseEditorExtension* LoadExtension()
 {
 	return new Glory::Editor::EntityScenesEditorExtension();
 }
 
-GLORY_API void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
+void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
 {
 	Glory::GloryContext::SetContext(pContext);
 	ImGui::SetCurrentContext(pImGUIContext);

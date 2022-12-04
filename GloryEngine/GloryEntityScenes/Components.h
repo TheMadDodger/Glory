@@ -56,6 +56,16 @@ namespace Glory
 		MeshMaterial() : m_MaterialReference(0) {}
 		MeshMaterial(UUID uuid) : m_MaterialReference(uuid) {}
 
+		bool operator==(const MeshMaterial&& other)
+		{
+			return other.m_MaterialReference.AssetUUID() == other.m_MaterialReference.AssetUUID();
+		}
+
+		bool operator==(MeshMaterial& other)
+		{
+			return other.m_MaterialReference.AssetUUID() == other.m_MaterialReference.AssetUUID();
+		}
+
 		REFLECTABLE(MeshMaterial,
 			(AssetReference<MaterialData>) (m_MaterialReference)
 		)

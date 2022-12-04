@@ -15,7 +15,7 @@ namespace Glory
 		m_AssetUUID = 0;
 	}
 
-	const UUID AssetReferenceBase::AssetUUID()
+	const UUID AssetReferenceBase::AssetUUID() const
 	{
 		return m_AssetUUID;
 	}

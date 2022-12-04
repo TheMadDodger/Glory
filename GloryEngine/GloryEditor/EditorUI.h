@@ -2,6 +2,13 @@
 #include "GloryEditor.h"
 #include <string_view>
 #include <glm/glm.hpp>
+#include <functional>
+
+namespace Glory
+{
+	struct LayerMask;
+	struct LayerRef;
+}
 
 namespace Glory::Editor
 {
@@ -26,8 +33,14 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API bool InputText(const std::string_view& label, char* value, size_t bufferSize);
 
-		static GLORY_EDITOR_API bool InputDropdown(const std::vector<std::string_view>& options, size_t* index, const std::string_view& value);
+		static GLORY_EDITOR_API bool InputDropdown(const std::string_view& label, const std::vector<std::string_view>& options, size_t* index, const std::string_view& value);
+		static GLORY_EDITOR_API bool InputDropdown(const std::string_view& label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, const std::string_view& value);
 
+		static GLORY_EDITOR_API bool InputLayerMask(const std::string_view& label, LayerMask* data);
+		static GLORY_EDITOR_API bool InputLeyerRef(const std::string_view& label, LayerRef* data);
 
+		static GLORY_EDITOR_API bool Header(const std::string_view& label);
+
+		static GLORY_EDITOR_API void EmptyDropdown(const std::string_view& label, const std::string_view& value, std::function<void()> callback, float& start, float& width, const float borderPadding = 0.0f);
 	};
 }

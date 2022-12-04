@@ -1,8 +1,12 @@
 #include "AssetPicker.h"
+#include "EditorUI.h"
 #include <imgui.h>
 #include <algorithm>
 #include <AssetDatabase.h>
 #include <AssetManager.h>
+#include <Engine.h>
+
+#include "FontAwesome/IconsFontAwesome6.h"
 
 namespace Glory::Editor
 {
@@ -11,7 +15,7 @@ namespace Glory::Editor
 	std::vector<UUID> AssetPicker::m_FilteredAssets;
 	std::vector<UUID> AssetPicker::m_PossibleAssets;
 
-	bool AssetPicker::ResourceDropdown(const std::string& label, size_t resourceType, UUID* value, bool includeSubAssets)
+	bool AssetPicker::ResourceDropdown(const std::string& label, size_t resourceType, UUID* value, bool includeSubAssets, const float borderPadding)
 	{
 		ImGui::PushID(label.c_str());
 		std::string assetName = "";
@@ -19,20 +23,25 @@ namespace Glory::Editor
 		if (assetName == "") assetName = "Noone";
 
 		bool openPopup = false;
-		if (ImGui::BeginCombo(label.c_str(), assetName.c_str()))
+		float start, width;
+		EditorUI::EmptyDropdown(label, assetName, [&]
 		{
 			m_PossibleAssets.clear();
 			m_FilteredAssets.clear();
 			openPopup = true;
-			ImGui::EndCombo();
-		}
+		}, start, width, borderPadding);
 
 		if (openPopup)
-		{
 			ImGui::OpenPopup("AssetPicker");
-		}
 		openPopup = false;
 
+		const ImVec2 cursor = ImGui::GetCursorPos();
+		const ImVec2 windowPos = ImGui::GetWindowPos();
+		Window* pWindow = Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow();
+		int mainWindowWidth, mainWindowHeight;
+		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
+		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });
+		ImGui::SetNextWindowSize({ width, mainWindowHeight - windowPos.y - cursor.y - 10.0f });
 		bool change = DrawPopup(value, resourceType, includeSubAssets);
 		ImGui::PopID();
 		return change;
@@ -101,8 +110,11 @@ namespace Glory::Editor
 			if (m_PossibleAssets.size() == 0)
 				LoadAssets(typeHash, includeSubAssets);
 
-			ImGui::Text("Asset Picker");
-			ImGui::InputText("##", m_FilterBuffer, 200);
+			//ImGui::Text("Asset Picker");
+			ImGui::TextUnformatted(ICON_FA_MAGNIFYING_GLASS);
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+			ImGui::InputText("##search", m_FilterBuffer, 200);
 
 			if (m_Filter != std::string(m_FilterBuffer))
 			{

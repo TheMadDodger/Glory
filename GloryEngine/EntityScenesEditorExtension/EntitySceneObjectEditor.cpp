@@ -7,9 +7,24 @@
 #include <Undo.h>
 #include <algorithm>
 #include <EditorUI.h>
+#include <string_view>
+#include <ResourceType.h>
+
+#include <Components.h>
+
+#include "FontAwesome/IconsFontAwesome6.h"
 
 namespace Glory::Editor
 {
+	const std::map<size_t, std::string_view> COMPONENT_ICONS = {
+		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
+		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
+		{ ResourceType::GetHash<MeshRenderer>(), ICON_FA_CUBES },
+		{ ResourceType::GetHash<CameraComponent>(), ICON_FA_VIDEO },
+		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
+		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
+	};
+
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)
 	{
 	}
@@ -31,6 +46,7 @@ namespace Glory::Editor
 		const std::string uuidString = std::to_string(m_pObject->GetUUID());
 		ImGui::PushID(uuidString.c_str());
 		bool change = NameGUI();
+		ImGui::Spacing();
 		change |= ComponentGUI();
 		ImGui::PopID();
 		return change;
@@ -69,29 +85,44 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::NameGUI()
 	{
+		ImGui::PushID("Object");
+
+		ImGui::TextDisabled("Entity Object");
+		ImGui::Separator();
+
 		std::string originalName = m_pObject->Name();
 		const char* name = originalName.c_str();
 		memcpy(m_NameBuff, name, originalName.length() + 1);
 		m_NameBuff[originalName.length()] = '\0';
 
-		UUID uuid = m_pObject->GetUUID();
+		const UUID uuid = m_pObject->GetUUID();
 		std::string uuidString = std::to_string(uuid);
+		ImGui::Text("UUID:");
+		const float textWitdh = ImGui::CalcTextSize(uuidString.data()).x;
+		ImGui::SameLine();
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
 		ImGui::Text(uuidString.data());
-		bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE);
-		m_pObject->SetName(m_NameBuff);
+		const bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE);
 		if (change)
 		{
+			m_pObject->SetName(m_NameBuff);
 			Undo::StartRecord("Change Name", m_pObject->GetUUID());
 			Undo::AddAction(new SceneObjectNameAction(originalName, m_pObject->Name()));
 			Undo::StopRecord();
 		}
 
+		ImGui::PopID();
 		return change;
 	}
 
 	bool EntitySceneObjectEditor::ComponentGUI()
 	{
 		ImGui::PushID("Components");
+
+		ImGui::TextDisabled("Components");
+		ImGui::Separator();
+
 		bool change = false;
 
 		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
@@ -102,18 +133,20 @@ namespace Glory::Editor
 		const std::string& nameString = m_pObject->Name();
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [&](Editor* pEditor)
 		{
-			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
-
 			std::string id = nameString + std::to_string(index);
 			std::hash<std::string> hasher;
 			size_t hash = hasher(id);
 
-			ImGui::PushID(id.c_str());
-			if (ImGui::TreeNodeEx((void*)hash, node_flags, pEditor->Name().data()))
-			{
+			std::string_view icon = "";
+			const size_t componentHash = m_pComponents[index]->ComponentType();
+			if(COMPONENT_ICONS.find(componentHash) != COMPONENT_ICONS.end())
+				icon = COMPONENT_ICONS.at(componentHash);
+
+			ImGui::PushID(index);
+
+			std::string label = std::string(icon) + "	" + pEditor->Name();
+			if (EditorUI::Header(label))
 				change |= pEditor->OnGUI();
-				ImGui::TreePop();
-			}
 
 			if (ImGui::IsItemClicked(1))
 			{
@@ -122,11 +155,15 @@ namespace Glory::Editor
 			}
 			ImGui::PopID();
 
+			ImGui::Spacing();
+
 			++index;
 		});
 		ImGui::PopID();
 
-		if (ImGui::Button("Add Component"))
+		ImGui::Separator();
+		const float buttonWidth = ImGui::GetContentRegionAvail().x;
+		if (ImGui::Button("Add Component", { buttonWidth, 0.0f }))
 		{
 			EntityComponentPopup::Open(pRegistry);
 			m_AddingComponent = true;

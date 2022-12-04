@@ -6,16 +6,16 @@ namespace Glory::Editor
     class BasePropertyAction : public IAction
     {
     public:
-        BasePropertyAction(const std::string& propertyName);
-        ~BasePropertyAction();
+        GLORY_EDITOR_API BasePropertyAction(const std::string& propertyName);
+        GLORY_EDITOR_API virtual ~BasePropertyAction();
 
     protected:
         virtual void SetOldValue(void* pMemberPoiner) = 0;
         virtual void SetNewValue(void* pMemberPoiner) = 0;
 
     private:
-        virtual void OnUndo(const ActionRecord& actionRecord);
-        virtual void OnRedo(const ActionRecord& actionRecord);
+        virtual GLORY_EDITOR_API void OnUndo(const ActionRecord& actionRecord);
+        virtual GLORY_EDITOR_API void OnRedo(const ActionRecord& actionRecord);
 
     private:
         const std::string& m_PropertyName;
@@ -25,8 +25,8 @@ namespace Glory::Editor
     class PropertyAction : public BasePropertyAction
     {
     public:
-        PropertyAction(const std::string& propertyName, T& oldValue, T& newValue) : m_OldValue(oldValue), m_NewValue(newValue), BasePropertyAction(propertyName) {}
-        virtual ~PropertyAction() {}
+        GLORY_EDITOR_API PropertyAction(const std::string& propertyName, T& oldValue, T& newValue) : m_OldValue(oldValue), m_NewValue(newValue), BasePropertyAction(propertyName) {}
+        GLORY_EDITOR_API virtual ~PropertyAction() {}
 
     private:
         virtual void SetOldValue(void* pMemberPoiner)

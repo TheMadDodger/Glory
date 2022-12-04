@@ -1,11 +1,12 @@
 #include "EditorUI.h"
 #include <imgui.h>
+#include <LayerManager.h>
+#include <LayerRef.h>
 
 namespace Glory::Editor
 {
 	bool Glory::Editor::EditorUI::InputFloat(const std::string_view& label, float* value, const float min, const float max, const float steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -13,10 +14,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragFloat("##value", value, steps, min, max, "%.3f");
@@ -27,7 +28,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat2(const std::string_view& label, glm::vec2* value, const float min, const float max, const float steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -35,10 +35,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragFloat2("##value", (float*)value, steps, min, max, "%.3f");
@@ -49,7 +49,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat3(const std::string_view& label, glm::vec3* value, const float min, const float max, const float steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -57,10 +56,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragFloat3("##value", (float*)value, steps, min, max, "%.3f");
@@ -71,7 +70,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat4(const std::string_view& label, glm::vec4* value, const float min, const float max, const float steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -79,10 +77,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragFloat4("##value", (float*)value, steps, min, max, "%.3f");
@@ -93,7 +91,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt(const std::string_view& label, int* value, const int min, const int max, const int steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -101,10 +98,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragInt("##value", value, steps, min, max);
@@ -115,7 +112,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt2(const std::string_view& label, glm::ivec2* value, const int min, const int max, const int steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -123,10 +119,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragInt2("##value", (int*)value, steps, min, max);
@@ -137,7 +133,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt3(const std::string_view& label, glm::ivec3* value, const int min, const int max, const int steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -145,10 +140,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragInt3("##value", (int*)value, steps, min, max);
@@ -159,7 +154,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt4(const std::string_view& label, glm::ivec4* value, const int min, const int max, const int steps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -167,10 +161,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::DragInt4("##value", (int*)value, steps, min, max);
@@ -181,7 +175,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputDouble(const std::string_view& label, double* value, const double slowSteps, const double fastSteps)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -189,10 +182,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::InputDouble("##value", value, slowSteps, fastSteps);
@@ -203,7 +196,6 @@ namespace Glory::Editor
 
 	bool EditorUI::CheckBox(const std::string_view& label, bool* value)
 	{
-		const float padding = 20.0f;
 		const ImVec2 textSize = ImGui::CalcTextSize(label.data());
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -211,7 +203,7 @@ namespace Glory::Editor
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 		const float size = 24.0f;
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - size - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - size, cursorPos.y });
 		const bool change = ImGui::Checkbox("##value", value);
 		ImGui::PopID();
 		return change;
@@ -288,7 +280,6 @@ namespace Glory::Editor
 
 	bool EditorUI::InputText(const std::string_view& label, char* value, size_t bufferSize)
 	{
-		const float padding = 20.0f;
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
 		ImGui::TextUnformatted(label.data());
@@ -296,10 +287,10 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth - padding, 100.0f);
+		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width - padding, cursorPos.y });
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
 		const bool change = ImGui::InputText("##value", value, bufferSize);
@@ -308,8 +299,212 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputDropdown(const std::vector<std::string_view>& options, size_t* index, const std::string_view& value)
+	bool EditorUI::InputDropdown(const std::string_view& label, const std::vector<std::string_view>& options, size_t* index, const std::string_view& value)
 	{
-		return false;
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::PushID(label.data());
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		bool change = false;
+		ImGui::PushItemWidth(width);
+		if (ImGui::BeginCombo("##combo", value.data()))
+		{
+			for (size_t i = 0; i < options.size(); i++)
+			{
+				bool isSelected = *index == i;
+				if (ImGui::Selectable(options[i].data(), isSelected))
+				{
+					*index = i;
+					change = true;
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+
+		ImGui::PopID();
+		return change;
+	}
+
+	bool EditorUI::InputDropdown(const std::string_view& label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, const std::string_view& value)
+	{
+		assert(options.size() == selected.size());
+
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::PushID(label.data());
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		bool change = false;
+		ImGui::PushItemWidth(width);
+		if(ImGui::BeginCombo("##combo", value.data()))
+		{
+			for (size_t i = 0; i < options.size(); i++)
+			{
+				bool isSelected = selected[i];
+				if (ImGui::Selectable(options[i].data(), isSelected))
+				{
+					selected[i] != selected[i];
+					change = true;
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+
+		ImGui::PopID();
+		return change;
+	}
+
+	bool EditorUI::InputLayerMask(const std::string_view& label, LayerMask* data)
+	{
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::PushID(label.data());
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		std::vector<std::string_view> layerOptions;
+		std::string layerText;
+
+		LayerManager::GetAllLayerNames(layerOptions);
+		layerText = LayerManager::LayerMaskToString(*data);
+
+		LayerMask originalMask = *data;
+		ImGui::PushItemWidth(width);
+		if(ImGui::BeginCombo("##mask", layerText.data()))
+		{
+			for (size_t i = 0; i < layerOptions.size(); i++)
+			{
+				const Layer* pLayer = LayerManager::GetLayerAtIndex(i - 1);
+
+				bool selected = pLayer == nullptr ? *data == 0 : (*data & pLayer->m_Mask) > 0;
+				if (ImGui::Selectable(layerOptions[i].data(), selected))
+				{
+					if (pLayer == nullptr)
+						*data = 0;
+					else
+						*data ^= pLayer->m_Mask;
+
+					layerText = LayerManager::LayerMaskToString(*data);
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::PopID();
+		return originalMask != *data;
+	}
+
+	bool EditorUI::InputLeyerRef(const std::string_view& label, LayerRef* data)
+	{
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::PushID(label.data());
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		const Layer* pLayer = data->Layer();
+		int index = LayerManager::GetLayerIndex(pLayer) + 1;
+		int newIndex = index;
+
+		std::vector<std::string_view> options;
+		LayerManager::GetAllLayerNames(options);
+
+		ImGui::PushItemWidth(width);
+		if (ImGui::BeginCombo("##layer", options[index].data()))
+		{
+			for (size_t i = 0; i < options.size(); i++)
+			{
+				bool selected = i == index;
+				if (ImGui::Selectable(options[i].data(), selected))
+					newIndex = i;
+
+				if (selected)
+					ImGui::SetItemDefaultFocus();
+			}
+
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+		ImGui::PopID();
+
+		if (newIndex == index) return false;
+		index = newIndex - 1;
+		pLayer = LayerManager::GetLayerAtIndex(index);
+		data->m_LayerName = pLayer ? pLayer->m_Name : "";
+		return true;
+	}
+
+	bool EditorUI::Header(const std::string_view& label)
+	{
+		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader;
+
+		std::hash<std::string_view> hasher;
+		size_t hash = hasher(label);
+
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.5f));
+		const bool headerOpen = ImGui::TreeNodeEx("##header", node_flags, label.data());
+		ImGui::PopStyleColor(3);
+		return headerOpen;
+	}
+
+	void EditorUI::EmptyDropdown(const std::string_view& label, const std::string_view& value, std::function<void()> callback, float& start, float& width, const float borderPadding)
+	{
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		width = std::max(maxWidth, 100.0f) - borderPadding;
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		start = cursorPos.x + availableWidth - width;
+		ImGui::SetCursorPos({ start, cursorPos.y });
+
+		std::vector<std::string_view> options;
+		LayerManager::GetAllLayerNames(options);
+
+		ImGui::PushItemWidth(width);
+		if (ImGui::BeginCombo("##dropdown", value.data()))
+		{
+			callback();
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
 	}
 }

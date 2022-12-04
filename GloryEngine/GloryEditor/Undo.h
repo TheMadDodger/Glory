@@ -25,8 +25,8 @@ namespace Glory::Editor
 	class IAction
 	{
 	protected:
-		virtual void OnUndo(const ActionRecord& actionRecord) = 0;
-		virtual void OnRedo(const ActionRecord& actionRecord) = 0;
+		virtual GLORY_EDITOR_API void OnUndo(const ActionRecord& actionRecord) = 0;
+		virtual GLORY_EDITOR_API void OnRedo(const ActionRecord& actionRecord) = 0;
 
 	private:
 		friend class Undo;

@@ -6,8 +6,8 @@
 #include <Glory.h>
 #include <ResourceMeta.h>
 
-extern "C" GLORY_API Glory::Editor::BaseEditorExtension * LoadExtension();
-extern "C" GLORY_API void SetContext(Glory::GloryContext * pContext, ImGuiContext * pImGUIContext);
+extern "C" GLORY_EDITOR_EXTENSION_API Glory::Editor::BaseEditorExtension * LoadExtension();
+extern "C" GLORY_EDITOR_EXTENSION_API void SetContext(Glory::GloryContext * pContext, ImGuiContext * pImGUIContext);
 
 namespace Glory::Editor
 {
