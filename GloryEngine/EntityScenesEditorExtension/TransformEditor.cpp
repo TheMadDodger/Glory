@@ -2,7 +2,6 @@
 #include "Undo.h"
 #include "GizmoAction.h"
 #include <glm/gtx/quaternion.hpp>
-#include <sstream>
 #include <TypeData.h>
 
 namespace Glory::Editor
@@ -109,20 +108,5 @@ namespace Glory::Editor
 		transform.Scale = scale;
 
 		m_LastTransform = m_Transform;
-	}
-
-	void TransformEditor::PrintData(Transform& transform)
-	{
-		Debug::LogInfo("Transform Data Start");
-		std::stringstream stream;
-		stream << "Position: " << transform.Position.x << ", " << transform.Position.y << ", " << transform.Position.z;
-		Debug::LogInfo(stream.str());
-		stream = std::stringstream();
-		stream << "Rotation: " << transform.Rotation.x << ", " << transform.Rotation.y << ", " << transform.Rotation.z << ", " << transform.Rotation.w;
-		Debug::LogInfo(stream.str());
-		stream = std::stringstream();
-		stream << "Scale: " << transform.Scale.x << ", " << transform.Scale.y << ", " << transform.Scale.z;
-		Debug::LogInfo(stream.str());
-		Debug::LogInfo("Transform Data End");
 	}
 }

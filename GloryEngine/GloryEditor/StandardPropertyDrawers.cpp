@@ -68,67 +68,11 @@ namespace Glory::Editor
 
     bool LayerMaskDrawer::OnGUI(const std::string& label, LayerMask* data, uint32_t flags) const
     {
-        std::vector<std::string_view> layerOptions;
-        std::string layerText;
-
-        LayerManager::GetAllLayerNames(layerOptions);
-        layerText = LayerManager::LayerMaskToString(*data);
-
-        LayerMask originalMask = *data;
-        if (ImGui::BeginCombo("Layer Mask", layerText.data()))
-        {
-            for (size_t i = 0; i < layerOptions.size(); i++)
-            {
-                const Layer* pLayer = LayerManager::GetLayerAtIndex(i - 1);
-
-                bool selected = pLayer == nullptr ? *data == 0 : (*data & pLayer->m_Mask) > 0;
-                if (ImGui::Selectable(layerOptions[i].data(), selected))
-                {
-                    if (pLayer == nullptr)
-                        *data = 0;
-                    else
-                        *data ^= pLayer->m_Mask;
-
-                    layerText = LayerManager::LayerMaskToString(*data);
-                }
-            }
-
-            ImGui::EndCombo();
-        }
-
-        return originalMask != *data;
+        return EditorUI::InputLayerMask(label, data);
     }
 
     bool LayerRefDrawer::OnGUI(const std::string& label, LayerRef* data, uint32_t flags) const
     {
-        const Layer* pLayer = data->Layer();
-        int index = LayerManager::GetLayerIndex(pLayer) + 1;
-        int newIndex = index;
-        
-        std::vector<std::string_view> options;
-        LayerManager::GetAllLayerNames(options);
-
-        ImGui::Text("Layer");
-        ImGui::SameLine();
-        if (ImGui::BeginCombo("##Layer", options[index].data()))
-        {
-        	for (size_t i = 0; i < options.size(); i++)
-        	{
-        		bool selected = i == index;
-        		if (ImGui::Selectable(options[i].data(), selected))
-        			newIndex = i;
-        
-        		if (selected)
-        			ImGui::SetItemDefaultFocus();
-        	}
-        
-        	ImGui::EndCombo();
-        }
-        
-        if (newIndex == index) return false;
-        index = newIndex - 1;
-        pLayer = LayerManager::GetLayerAtIndex(index);
-        data->m_LayerName = pLayer ? pLayer->m_Name : "";
-        return true;
+		return EditorUI::InputLeyerRef(label, data);
     }
 }

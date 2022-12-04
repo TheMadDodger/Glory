@@ -9,6 +9,8 @@
 #include "EditorApplication.h"
 #include "ImGuiHelpers.h"
 
+#include "FontAwesome/IconsFontAwesome6.h"
+
 namespace Glory::Editor
 {
 	std::vector<IPlayModeHandler*> EditorPlayer::m_pSceneLoopHandlers;
@@ -150,8 +152,7 @@ namespace Glory::Editor
 		}
 
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
-		Texture* pTexture = EditorAssets::GetTexture(EditorAssetNames::Play);
-		if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize * 0.85f))
+		if (ImGui::Button(ICON_FA_PLAY, maxButtonSize))
 		{
 			EditorApplication::TogglePlay();
 		}
@@ -169,8 +170,7 @@ namespace Glory::Editor
 			styleColorCount = 3;
 		}
 
-		pTexture = EditorAssets::GetTexture(EditorAssetNames::Pause);
-		if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize * 0.8f))
+		if (ImGui::Button(ICON_FA_PAUSE, maxButtonSize))
 		{
 			EditorApplication::TogglePause();
 		}
@@ -178,8 +178,7 @@ namespace Glory::Editor
 
 		cursor += maxButtonSize.x;
 		ImGui::SameLine(cursor);
-		pTexture = EditorAssets::GetTexture(EditorAssetNames::Step);
-		if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize * 0.8f))
+		if (ImGui::Button(ICON_FA_FORWARD_STEP, maxButtonSize))
 		{
 			EditorApplication::TickFrame();
 		}

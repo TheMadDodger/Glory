@@ -7,31 +7,33 @@
 #include "ImGuiHelpers.h"
 #include <ImGuizmo.h>
 
+#include "FontAwesome/IconsFontAwesome6.h"
+
 namespace Glory::Editor
 {
-	const ImGuizmo::OPERATION GizmosToolChain::OPERATIONS[] = {
+	const ImGuizmo::OPERATION OPERATIONS[] = {
 		ImGuizmo::TRANSLATE,
 		ImGuizmo::ROTATE,
 		ImGuizmo::SCALE,
 		ImGuizmo::UNIVERSAL,
 	};
-	const std::string GizmosToolChain::OPERATION_TEXTURES[] = {
-		EditorAssetNames::GizmoMove,
-		EditorAssetNames::GizmoRotate,
-		EditorAssetNames::GizmoScale,
-		EditorAssetNames::GizmoUniversal,
+	const std::string_view OPERATION_ICONS[] = {
+		ICON_FA_UP_DOWN_LEFT_RIGHT,
+		ICON_FA_ARROWS_ROTATE,
+		ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER,
+		ICON_FA_ARROW_DOWN_UP_ACROSS_LINE,
 	};
-	const size_t GizmosToolChain::OPERATIONS_COUNT = 4;
+	const size_t OPERATIONS_COUNT = 4;
 
-	const ImGuizmo::MODE GizmosToolChain::MODES[] = {
+	const ImGuizmo::MODE MODES[] = {
 		ImGuizmo::LOCAL,
 		ImGuizmo::WORLD
 	};
-	const std::string GizmosToolChain::MODE_TEXTURES[] = {
-		EditorAssetNames::GizmoLocal,
-		EditorAssetNames::GizmoWorld
+	const std::string_view MODE_ICONS[] = {
+		ICON_FA_LOCATION_DOT,
+		ICON_FA_GLOBE
 	};
-	const size_t GizmosToolChain::MODES_COUNT = 2;
+	const size_t MODES_COUNT = 2;
 
 	GizmosToolChain::GizmosToolChain()
 	{
@@ -69,10 +71,8 @@ namespace Glory::Editor
 			}
 
 			ImGui::SameLine(cursor);
-			std::string label = "##OP_" + std::to_string(i);
-			Texture* pTexture = EditorAssets::GetTexture(OPERATION_TEXTURES[i]);
 
-			if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize * 0.8f))
+			if (ImGui::Button(OPERATION_ICONS[i].data(), maxButtonSize))
 			{
 				Gizmos::m_DefaultOperation = op;
 			}
@@ -101,10 +101,8 @@ namespace Glory::Editor
 			}
 
 			ImGui::SameLine(cursor);
-			std::string label = "##MODE_" + std::to_string(i);
-			Texture* pTexture = EditorAssets::GetTexture(MODE_TEXTURES[i]);
 
-			if (ImGui::ImageButton(pRenderImpl->GetTextureID(pTexture), maxButtonSize * 0.8f))
+			if (ImGui::Button(MODE_ICONS[i].data(), maxButtonSize))
 			{
 				Gizmos::m_DefaultMode = mode;
 			}

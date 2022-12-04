@@ -20,12 +20,12 @@
 #include <windows.h>
 #include <MenuBar.h>
 
-GLORY_API Glory::Editor::BaseEditorExtension* LoadExtension()
+Glory::Editor::BaseEditorExtension* LoadExtension()
 {
 	return new Glory::Editor::MonoEditorExtension();
 }
 
-GLORY_API void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
+void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
 {
 	Glory::GloryContext::SetContext(pContext);
 	ImGui::SetCurrentContext(pImGUIContext);

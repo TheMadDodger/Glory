@@ -11,15 +11,7 @@ namespace Glory::Editor
 	class EditorAssetNames
 	{
 	public:
-		static const std::string GizmoMove;
-		static const std::string GizmoRotate;
-		static const std::string GizmoScale;
-		static const std::string GizmoUniversal;
-		static const std::string GizmoWorld;
-		static const std::string GizmoLocal;
-		static const std::string Play;
-		static const std::string Pause;
-		static const std::string Step;
+		
 
 	private:
 		EditorAssetNames();

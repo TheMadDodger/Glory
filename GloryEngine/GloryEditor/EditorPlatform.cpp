@@ -5,6 +5,9 @@
 #include <imgui_internal.h>
 #include <Engine.h>
 
+#include "FontAwesome/IconsFontAwesome6.h"
+#include "FontAwesome/IconsFontAwesome6Brand.h"
+
 namespace Glory::Editor
 {
 	EditorPlatform::EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl)
@@ -167,6 +170,17 @@ namespace Glory::Editor
 		auto& io = ImGui::GetIO();
 		ImFont* pFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/PT_Sans/PTSans-Regular.ttf", 18.0f);
 		io.FontDefault = pFont;
+
+		static const ImWchar iconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+		static const ImWchar brandIconRanges[] = { ICON_MIN_FAB, ICON_MAX_FAB, 0 };
+
+		ImFontConfig config;
+		config.DstFont = pFont;
+		config.MergeMode = true;
+		config.PixelSnapH = true;
+		config.GlyphMinAdvanceX = 14.0f;
+		ImFont* pIconFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/FA/" FONT_ICON_FILE_NAME_FAS, 14.0f, &config, iconRanges);
+		ImFont* pIconBrandsFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/FA/" FONT_ICON_FILE_NAME_FAB, 14.0f, &config, brandIconRanges);
 	}
 
 	void EditorPlatform::SetState(const EditorRenderState& state)

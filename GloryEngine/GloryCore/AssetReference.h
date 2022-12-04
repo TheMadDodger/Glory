@@ -12,7 +12,7 @@ namespace Glory
 		AssetReferenceBase(UUID uuid);
 		virtual ~AssetReferenceBase();
 
-		const UUID AssetUUID();
+		const UUID AssetUUID() const;
 		UUID* AssetUUIDMember();
 		void SetUUID(UUID uuid);
 		Resource* GetResource();
