@@ -1,12 +1,12 @@
-ImPlotDir = "../%{SubmodoleDirs.implot}"
+ImPlotDir = "%{SubmodoleDirs.implot}"
 
 project "implot"
 	location "%{ImPlotDir}"
 	kind "StaticLib"
 	language "C++"
 
-	targetdir ("$(ProjectDir)/lib/%{outputdir}")
-	objdir ("$(ProjectDir)/%{outputdir}")
+	targetdir ("$(ProjectDir)/lib/%{outputDir}")
+	objdir ("$(ProjectDir)/%{outputDir}")
 
 	files
 	{

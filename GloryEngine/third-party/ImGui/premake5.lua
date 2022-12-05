@@ -1,12 +1,12 @@
-ImGuiDir = "../%{SubmodoleDirs.ImGui}"
+ImGuiDir = "%{SubmodoleDirs.ImGui}"
 
 project "ImGui"
 	location "%{ImGuiDir}"
 	kind "StaticLib"
 	language "C++"
 
-	targetdir ("$(ProjectDir)/lib/%{outputdir}")
-	objdir ("$(ProjectDir)/%{outputdir}")
+	targetdir ("$(ProjectDir)/lib/%{outputDir}")
+	objdir ("$(ProjectDir)/%{outputDir}")
 
 	files
 	{

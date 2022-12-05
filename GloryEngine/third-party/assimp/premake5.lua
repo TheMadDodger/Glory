@@ -1,8 +1,8 @@
-ASSIMPDir = "../%{SubmodoleDirs.assimp}"
+ASSIMPDir = "%{SubmodoleDirs.assimp}"
 
-os.copyfile("config/config.h", "../../submodules/assimp/include/assimp/config.h")
-os.copyfile("config/zconf.h", "../../submodules/assimp/contrib/zlib/zconf.h")
-os.copyfile("config/revision.h", "../../submodules/assimp/revision.h")
+os.copyfile("config/config.h", "%{rootDir}/submodules/assimp/include/assimp/config.h")
+os.copyfile("config/zconf.h", "%{rootDir}/submodules/assimp/contrib/zlib/zconf.h")
+os.copyfile("config/revision.h", "%{rootDir}/submodules/assimp/revision.h")
 
 project "assimpstatic"
 	location "%{ASSIMPDir}"
@@ -10,8 +10,8 @@ project "assimpstatic"
 	language "C++"
 	targetname "assimp"
 
-	targetdir ("%{ASSIMPDir}/lib/%{outputdir}")
-	objdir ("%{ASSIMPDir}/%{outputdir}")
+	targetdir ("%{ASSIMPDir}/lib/%{outputDir}")
+	objdir ("%{ASSIMPDir}/%{outputDir}")
 
 	files
     {
