@@ -1,14 +1,14 @@
-YAMLDir = "../%{SubmodoleDirs.yaml_cpp}"
+YAMLDir = "%{SubmodoleDirs.yaml_cpp}"
 
-os.copyfile("dll.h", "../../submodules/yaml-cpp/include/yaml-cpp/dll.h")
+os.copyfile("dll.h", "%{YAMLDir}/include/yaml-cpp/dll.h")
 
 project "yaml-cpp"
 	location "%{YAMLDir}"
 	kind "StaticLib"
 	language "C++"
 
-	targetdir ("$(ProjectDir)/lib/%{outputdir}")
-	objdir ("$(ProjectDir)/%{outputdir}")
+	targetdir ("$(ProjectDir)/lib/%{outputDir}")
+	objdir ("$(ProjectDir)/%{outputDir}")
 
 	files
 	{
