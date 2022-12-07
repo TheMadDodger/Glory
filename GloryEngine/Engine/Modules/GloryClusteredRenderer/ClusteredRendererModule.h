@@ -47,10 +47,10 @@ namespace Glory
 		virtual void OnThreadedCleanup() override;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
-		virtual void OnDoScreenRender(CameraRef camera, const std::vector<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture) override;
 
-		virtual void OnStartCameraRender(CameraRef camera, const std::vector<PointLight>& lights) override;
-		virtual void OnEndCameraRender(CameraRef camera, const std::vector<PointLight>& lights) override;
+		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
+		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
 
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates

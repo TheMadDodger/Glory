@@ -155,7 +155,7 @@ namespace Glory
 		pGraphics->DrawMesh(pMeshData);
 	}
 
-	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const std::vector<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture)
+	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 
@@ -216,7 +216,7 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
-	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const std::vector<PointLight>& lights)
+	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -257,7 +257,7 @@ namespace Glory
 		}
 	}
 
-	void ClusteredRendererModule::OnEndCameraRender(CameraRef camera, const std::vector<PointLight>& lights)
+	void ClusteredRendererModule::OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();

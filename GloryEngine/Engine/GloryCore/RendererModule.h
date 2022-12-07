@@ -42,13 +42,13 @@ namespace Glory
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
-		virtual void OnDoScreenRender(CameraRef camera, const std::vector<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture) = 0;
+		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture) = 0;
 
 		virtual void OnThreadedInitialize() {}
 		virtual void OnThreadedCleanup() {}
 
-		virtual void OnStartCameraRender(CameraRef camera, const std::vector<PointLight>& lights) = 0;
-		virtual void OnEndCameraRender(CameraRef camera, const std::vector<PointLight>& lights) = 0;
+		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
+		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
 
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
