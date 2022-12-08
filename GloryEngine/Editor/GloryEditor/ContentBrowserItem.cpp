@@ -215,25 +215,20 @@ namespace Glory::Editor
 
 		float width = windowSize.x;
 
-		int columns = (int)(width / (iconSize + 22.0f)) - 1;
+		int columns = (int)(width / (iconSize + 32.0f));
 		if (columns <= 0) columns = 1;
-
-		//ImGui::ImageButton(NULL, ImVec2(64.0f, 64.0f));
-
-		ImGui::BeginColumns("FileBrowser", columns, false);
 
 		for (size_t i = 0; i < m_pSelectedFolder->m_pChildren.size(); i++)
 		{
 			ContentBrowserItem* pChild = m_pSelectedFolder->m_pChildren[i];
 
 			const int columnIndex = (i % columns) - 1;
-			ImGui::SetColumnWidth(columnIndex, (float)iconSize + 22.0f);
+			ImGui::PushID(pChild->m_CachedPath.c_str());
 			pChild->DrawFileItem(iconSize);
-			int mod = i % columns;
+			ImGui::PopID();
+			int mod = (i + 1) % columns;
 			if (mod != 0) ImGui::SameLine();
-			ImGui::NextColumn();
 		}
-		ImGui::EndColumns();
 	}
 
 	void ContentBrowserItem::DrawCurrentPath()
@@ -268,12 +263,29 @@ namespace Glory::Editor
 
 	void ContentBrowserItem::DrawFileItem(int iconSize)
 	{
+		const ImVec4 buttonColor = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+		const ImVec4 buttonInactiveColor = { buttonColor.x, buttonColor.y, buttonColor.z, 0.0f };
+
+		const float padding = 10.0f;
+		const float textHeight = ImGui::CalcTextSize("LABEL").y;
+		const ImVec2 itemSize = { iconSize + padding * 2.0F, iconSize + padding * 3.0f + textHeight };
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::BeginChild("##file", itemSize, false, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		ImGui::PopStyleVar(2);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
 		if (m_IsFolder)
 		{
 			Texture* pFolderTexture = EditorAssets::GetTexture("folder");
 
-			ImGui::ImageButton(pRenderImpl->GetTextureID(pFolderTexture), ImVec2((float)iconSize, (float)iconSize));
+			ImGui::PushStyleColor(ImGuiCol_Button, buttonInactiveColor);
+			ImGui::Button("##fileItem", itemSize);
+			ImGui::PopStyleColor();
+			ImGui::SetItemAllowOverlap();
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 			{
 				m_pSelectedFolder = this;
@@ -288,7 +300,11 @@ namespace Glory::Editor
 				ObjectMenu::Open(nullptr, m_Editable ? ObjectMenuType::T_Folder : ObjectMenuType::T_ModuleFolder);
 			}
 
-			DrawName();
+			ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
+			ImGui::Image(pRenderImpl->GetTextureID(pFolderTexture), ImVec2((float)iconSize, (float)iconSize));
+
+			DrawName(padding);
+			ImGui::EndChild();
 			return;
 		}
 
@@ -299,14 +315,23 @@ namespace Glory::Editor
 		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
-		ImGui::ImageButton(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)iconSize, (float)iconSize));
+		UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
+
+		ImGui::PushStyleColor(ImGuiCol_Button, selectedID == uuid ? buttonColor : buttonInactiveColor);
+		ImGui::Button("##fileItem", itemSize);
+		ImGui::PopStyleColor();
+		ImGui::SetItemAllowOverlap();
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
 			ResourceMeta meta;
 			AssetDatabase::GetResourceMeta(uuid, meta);
 			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(meta.Hash());
-			if (!pGenerator) return;
+			if (!pGenerator)
+			{
+				ImGui::EndChild();
+				return;
+			}
 			pGenerator->OnFileDoubleClick(uuid);
 		}
 
@@ -323,7 +348,10 @@ namespace Glory::Editor
 			ObjectMenu::Open(pAsset, m_Editable ? ObjectMenuType::T_Resource : ObjectMenuType::T_ModuleResource);
 		}
 
-		DrawName();
+		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
+		ImGui::Image(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)iconSize, (float)iconSize));
+		DrawName(padding);
+		ImGui::EndChild();
 	}
 
 	bool ContentBrowserItem::IsValid()
@@ -397,10 +425,20 @@ namespace Glory::Editor
 		m_HistoryIndex = 1;
 	}
 
-	void ContentBrowserItem::DrawName()
+	void ContentBrowserItem::DrawName(float padding)
 	{
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+
+		const float availableWidth = ImGui::GetContentRegionAvail().x - padding;
+		const std::string text = m_CachedPath.filename().replace_extension().string();
+		const float textWidth = ImGui::CalcTextSize(text.data()).x;
+		const int wraps = textWidth / (availableWidth - 8.0f);
+
+		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y - wraps * padding / 1.2f });
+
 		if (m_EditingName || m_StartEditingName)
 		{
+			ImGui::SetNextItemWidth(availableWidth - padding);
 			ImGui::InputText("##ItemRenaming", m_NameBuffer, 1000);
 			if (m_StartEditingName)
 			{
@@ -429,7 +467,12 @@ namespace Glory::Editor
 			}
 			m_StartEditingName = false;
 		}
-		else ImGui::Text(m_CachedPath.filename().replace_extension().string().c_str());
+		else
+		{
+			ImGui::PushTextWrapPos(availableWidth);
+			ImGui::TextWrapped(text.data());
+			ImGui::PopTextWrapPos();
+		}
 	}
 
 	std::filesystem::path ContentBrowserItem::DefaultRootPathFunc()
