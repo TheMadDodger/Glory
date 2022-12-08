@@ -50,6 +50,10 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void ClearHistoryFrom(size_t index);
 		static GLORY_EDITOR_API void ClearRewind();
 
+		static GLORY_EDITOR_API const ActionRecord* RecordAt(const size_t index);
+		static GLORY_EDITOR_API const size_t CurrentRewindIndex();
+		static GLORY_EDITOR_API void JumpTo(size_t historyRewindIndex);
+
 	private:
 		Undo();
 		virtual ~Undo();

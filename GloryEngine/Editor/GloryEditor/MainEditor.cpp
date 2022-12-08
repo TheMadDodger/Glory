@@ -14,6 +14,7 @@
 #include "SceneGraphWindow.h"
 #include "ContentBrowser.h"
 #include "EditorConsoleWindow.h"
+#include "HistoryWindow.h"
 #include "PerformanceMetrics.h"
 #include "MenuBar.h"
 #include "PopupManager.h"
@@ -204,6 +205,7 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo);
 		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo);
+		MenuBar::AddMenuItem("Edit/History", []() { EditorWindow::GetWindow<HistoryWindow>(); });
 
 		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE);
 		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE);

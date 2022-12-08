@@ -28,7 +28,7 @@ project "GloryEditor"
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "AssetPicker.*", "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
-		["Windows"] = { "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
+		["Windows"] = { "HistoryWindow.*", "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
 		["Windows/SceneView"] = { "SceneWindow.*", "SceneViewCamera.*" },
 		["Windows/ContentBrowser"] = { "ContentBrowser.*", "ContentBrowserItem.*" },
 		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" },

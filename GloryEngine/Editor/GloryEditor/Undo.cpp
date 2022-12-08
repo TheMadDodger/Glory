@@ -28,6 +28,8 @@ namespace Glory::Editor
 
 	void Undo::StopRecord()
 	{
+		if (m_IsBusy) return;
+
 		if (m_RecordingName == "")
 		{
 			Debug::LogError("Recording not yet started, call StartRecord to start recording!");
@@ -64,11 +66,11 @@ namespace Glory::Editor
 
 	void Undo::Clear()
 	{
-		for (size_t i = 0; i < m_ActionRecords.size(); i++)
+		for (size_t i = 0; i < m_ActionRecords.size(); ++i)
 		{
-			for (size_t i = 0; i < m_ActionRecords[i].Actions.size(); i++)
+			for (size_t j = 0; j < m_ActionRecords[i].Actions.size(); ++j)
 			{
-				delete m_ActionRecords[i].Actions[i];
+				delete m_ActionRecords[i].Actions[j];
 			}
 			m_ActionRecords[i].Actions.clear();
 		}
@@ -152,6 +154,29 @@ namespace Glory::Editor
 
 		m_ActionRecords.erase(m_ActionRecords.end() - m_RewindIndex, m_ActionRecords.end());
 		m_RewindIndex = 0;
+	}
+
+	const ActionRecord* Undo::RecordAt(const size_t index)
+	{
+		return &m_ActionRecords[index];
+	}
+
+	const size_t Undo::CurrentRewindIndex()
+	{
+		return m_RewindIndex;
+	}
+
+	void Undo::JumpTo(size_t historyRewindIndex)
+	{
+		if (historyRewindIndex > m_ActionRecords.size()) return;
+		size_t last = m_ActionRecords.size() - 1;
+		int diff = m_RewindIndex - historyRewindIndex;
+
+		for (size_t i = 0; i < std::abs(diff); i++)
+		{
+			if (diff < 0) DoUndo();
+			else DoRedo();
+		}
 	}
 
 	Undo::Undo()
