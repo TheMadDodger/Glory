@@ -50,7 +50,7 @@ namespace Glory::Editor
 		static void DrawFileBrowser(int iconSize);
 		static void DrawCurrentPath();
 
-		void DrawName();
+		void DrawName(float padding);
 
 	private:
 		friend class ContentBrowser;
