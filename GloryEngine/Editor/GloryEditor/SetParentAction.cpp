@@ -4,8 +4,8 @@
 
 namespace Glory::Editor
 {
-	SetParentAction::SetParentAction(UUID oldParent, UUID newParent)
-		: m_OldParent(oldParent), m_NewParent(newParent) {}
+	SetParentAction::SetParentAction(UUID oldParent, UUID newParent, size_t siblingIndex)
+		: m_OldParent(oldParent), m_NewParent(newParent), m_SiblingIndex(siblingIndex) {}
 
 	void SetParentAction::OnUndo(const ActionRecord& actionRecord)
 	{
@@ -13,6 +13,7 @@ namespace Glory::Editor
 		if (!pObject) return;
 		SceneObject* pParent = (SceneObject*)Object::FindObject(m_OldParent);
 		pObject->SetParent(pParent);
+		pObject->SetSiblingIndex(m_SiblingIndex);
 	}
 
 	void SetParentAction::OnRedo(const ActionRecord& actionRecord)

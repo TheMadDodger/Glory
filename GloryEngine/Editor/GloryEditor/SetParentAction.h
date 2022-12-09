@@ -6,7 +6,7 @@ namespace Glory::Editor
 	class SetParentAction : public IAction
 	{
 	public:
-		SetParentAction(UUID oldParent, UUID newParent);
+		SetParentAction(UUID oldParent, UUID newParent, size_t siblingIndex);
 		virtual ~SetParentAction() = default;
 
 	private:
@@ -14,7 +14,8 @@ namespace Glory::Editor
 		void OnRedo(const ActionRecord& actionRecord) override;
 
 	private:
-		UUID m_OldParent;
-		UUID m_NewParent;
+		const UUID m_OldParent;
+		const UUID m_NewParent;
+		const size_t m_SiblingIndex;
 	};
 }
