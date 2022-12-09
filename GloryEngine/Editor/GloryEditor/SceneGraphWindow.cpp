@@ -9,6 +9,7 @@
 
 #include "Undo.h"
 #include "SetParentAction.h"
+#include "SetSiblingIndexAction.h"
 
 namespace Glory::Editor
 {
@@ -49,8 +50,9 @@ namespace Glory::Editor
 				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
 				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
 				const UUID newParent = 0;
+				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
 				payload.pObject->SetParent(nullptr);
-				Undo::AddAction(new SetParentAction(oldParent, newParent));
+				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 				Undo::StopRecord();
 			}
 			ImGui::EndDragDropTarget();
@@ -90,8 +92,9 @@ namespace Glory::Editor
 				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
 				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
 				const UUID newParent = 0;
+				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
 				payload.pObject->SetParent(nullptr);
-				Undo::AddAction(new SetParentAction(oldParent, newParent));
+				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 				Undo::StopRecord();
 			}
 			ImGui::EndDragDropTarget();
@@ -168,9 +171,12 @@ namespace Glory::Editor
 						Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
 						const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
 						const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
+						const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
+						const size_t siblingIndex = pObject->GetSiblingIndex();
 						payload.pObject->SetParent(pParent);
-						Undo::AddAction(new SetParentAction(oldParent, newParent));
-						payload.pObject->SetBeforeObject(pObject);
+						payload.pObject->SetSiblingIndex(siblingIndex);
+						Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+						Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
 						Undo::StopRecord();
 					}
 				}
@@ -217,8 +223,9 @@ namespace Glory::Editor
 					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
 					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
 					const UUID newParent = pObject ? pObject->GetUUID() : UUID(0);
+					const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
 					payload.pObject->SetParent(pObject);
-					Undo::AddAction(new SetParentAction(oldParent, newParent));
+					Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 					Undo::StopRecord();
 				}
 			}
@@ -270,9 +277,12 @@ namespace Glory::Editor
 					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
 					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
 					const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
+					const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
+					const size_t siblingIndex = pObject->GetSiblingIndex();
 					payload.pObject->SetParent(pParent);
-					Undo::AddAction(new SetParentAction(oldParent, newParent));
-					payload.pObject->SetBeforeObject(pObject);
+					payload.pObject->SetSiblingIndex(siblingIndex);
+					Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+					Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
 					Undo::StopRecord();
 				}
 			}
