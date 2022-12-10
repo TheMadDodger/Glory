@@ -42,6 +42,8 @@ namespace Glory
 		const std::string& Name();
 		void SetName(const std::string& name);
 
+		virtual void* GetRootDataAddress();
+
 	protected:
 		std::vector<std::type_index> m_Inheritence;
 

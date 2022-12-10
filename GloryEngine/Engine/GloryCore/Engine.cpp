@@ -297,9 +297,11 @@ namespace Glory
 		ResourceType::RegisterType<glm::vec3>();
 		ResourceType::RegisterType<glm::vec4>();
 		ResourceType::RegisterType<glm::quat>();
+		ResourceType::RegisterType<LayerMask>();
 
 		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
 		GloryReflect::Reflect::RegisterBasicType<LayerRef>("LayerRef");
+		GloryReflect::Reflect::RegisterBasicType<LayerMask>();
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}

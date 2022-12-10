@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <Reflection.h>
 
 namespace Glory
 {
@@ -13,8 +14,9 @@ namespace Glory
 		LayerMask& operator |=(const LayerMask& other);
 		LayerMask& operator ^=(const LayerMask& other);
 		LayerMask operator &(const LayerMask& other);
-		uint64_t m_Mask;
 
 		static LayerMask FromString(const std::string& names);
+
+		REFLECTABLE(LayerMask, (uint64_t)(m_Mask))
 	};
 }

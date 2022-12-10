@@ -1,11 +1,15 @@
 #include "PropertyDrawer.h"
 #include "AssetReferencePropertyDrawer.h"
+#include "ValueChangeAction.h"
 #include <imgui.h>
 #include <algorithm>
 
 namespace Glory::Editor
 {
 	std::vector<PropertyDrawer*> PropertyDrawer::m_PropertyDrawers = std::vector<PropertyDrawer*>();
+	const GloryReflect::TypeData* PropertyDrawer::m_pRootTypeData = nullptr;
+	std::vector<const GloryReflect::FieldData*> PropertyDrawer::m_pCurrentFieldDataStack;
+	std::filesystem::path PropertyDrawer::m_CurrentPropertyPath = "";
 
 	PropertyDrawer::PropertyDrawer(size_t typeHash) : m_TypeHash(typeHash)
 	{
@@ -132,8 +136,12 @@ namespace Glory::Editor
 
 	bool PropertyDrawer::DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags)
 	{
+		m_pCurrentFieldDataStack.push_back(pFieldData);
 		size_t typeHash = pFieldData->Type();
 		size_t elementTypeHash = pFieldData->ArrayElementType();
+
+		std::string_view name = pFieldData->Name();
+		m_CurrentPropertyPath.append(name);
 
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
@@ -143,21 +151,33 @@ namespace Glory::Editor
 		if (it != m_PropertyDrawers.end())
 		{
 			PropertyDrawer* drawer = *it;
-			return drawer->Draw(pFieldData->Name(), data, elementTypeHash, flags);
+			const bool change = drawer->Draw(pFieldData->Name(), data, elementTypeHash, flags);
+			m_pCurrentFieldDataStack.pop_back();
+			return change;
 		}
 
 		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 		if (pTypeData)
 		{
-			return DrawProperty(pFieldData->Name(), pTypeData, data, flags);
+			const bool change = DrawProperty(pFieldData->Name(), pTypeData, data, flags);
+			m_pCurrentFieldDataStack.pop_back();
+			return change;
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
+		m_pCurrentFieldDataStack.pop_back();
 		return false;
 	}
 
 	bool PropertyDrawer::DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags)
 	{
+		const bool setRootType = !m_pRootTypeData;
+		if (setRootType)
+		{
+			m_pRootTypeData = pTypeData;
+			m_CurrentPropertyPath = "";
+		}
+
 		bool change = false;
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -180,6 +200,8 @@ namespace Glory::Editor
 		}
 		ImGui::PopID();
 
+		if (setRootType)
+			m_pRootTypeData = nullptr;
 		return change;
 	}
 
@@ -212,6 +234,31 @@ namespace Glory::Editor
 
 		if (it == m_PropertyDrawers.end()) return nullptr;
 		return *it;
+	}
+
+	const std::filesystem::path& PropertyDrawer::GetCurrentPropertyPath()
+	{
+		return m_CurrentPropertyPath;
+	}
+
+	const GloryReflect::TypeData* PropertyDrawer::GetRootTypeData()
+	{
+		return m_pRootTypeData;
+	}
+
+	const std::vector<const GloryReflect::FieldData*>& PropertyDrawer::GetCurrentFieldStack()
+	{
+		return m_pCurrentFieldDataStack;
+	}
+
+	void PropertyDrawer::PushFieldType(const GloryReflect::FieldData* pField)
+	{
+		m_pCurrentFieldDataStack.push_back(pField);
+	}
+
+	void PropertyDrawer::PopFieldType()
+	{
+		m_pCurrentFieldDataStack.pop_back();
 	}
 
 	size_t PropertyDrawer::GetPropertyTypeHash() const
