@@ -12,6 +12,7 @@
 #include "SerializedProperty.h"
 #include "GloryEditor.h"
 #include "PropertyAction.h"
+#include "ValueChangeAction.h"
 
 #define PROPERTY_DRAWER(x) Glory::Editor::PropertyDrawer::RegisterPropertyDrawer<x>()
 
@@ -48,6 +49,12 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API PropertyDrawer* GetPropertyDrawer(size_t typeHash);
 
+		static GLORY_EDITOR_API const std::filesystem::path& GetCurrentPropertyPath();
+		static GLORY_EDITOR_API const GloryReflect::TypeData* GetRootTypeData();
+		static GLORY_EDITOR_API const std::vector<const GloryReflect::FieldData*>& GetCurrentFieldStack();
+		static GLORY_EDITOR_API void PushFieldType(const GloryReflect::FieldData* pField);
+		static GLORY_EDITOR_API void PopFieldType();
+
 	public:
 		GLORY_EDITOR_API size_t GetPropertyTypeHash() const;
 
@@ -59,6 +66,9 @@ namespace Glory::Editor
 		size_t m_TypeHash;
 
 		static std::vector<PropertyDrawer*> m_PropertyDrawers;
+		static const GloryReflect::TypeData* m_pRootTypeData;
+		static std::vector<const GloryReflect::FieldData*> m_pCurrentFieldDataStack;
+		static std::filesystem::path m_CurrentPropertyPath;
 	};
 
 	template<typename PropertyType>
@@ -74,7 +84,10 @@ namespace Glory::Editor
 			if (OnGUI(label, (PropertyType*)data, flags))
 			{
 				PropertyType newValue = *(PropertyType*)data;
-				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
+				ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+				pAction->SetOldValue(&oldValue);
+				pAction->SetNewValue(&newValue);
+				Undo::AddAction(pAction);
 				return true;
 			}
 			return false;
@@ -122,7 +135,11 @@ namespace Glory::Editor
 			if (OnGUI(label, (PropertyType*)data, flags))
 			{
 				PropertyType newValue = *(PropertyType*)data;
-				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
+				ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+				pAction->SetOldValue(&oldValue);
+				pAction->SetNewValue(&newValue);
+				Undo::AddAction(pAction);
+
 				return true;
 			}
 			return false;
@@ -164,7 +181,12 @@ namespace Glory::Editor
 			if (OnGUI(label, &newValue, flags))
 			{
 				node = newValue;
-				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
+				const std::vector<const GloryReflect::FieldData*>& pFieldStack = PropertyDrawer::GetCurrentFieldStack();
+				//ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentFieldData(), PropertyDrawer::GetCurrentPropertyPath(), pFieldStack);
+				//pAction->SetOldValue(&oldValue);
+				//pAction->SetNewValue(&newValue);
+				//Undo::AddAction(pAction);
+
 				return true;
 			}
 			return false;

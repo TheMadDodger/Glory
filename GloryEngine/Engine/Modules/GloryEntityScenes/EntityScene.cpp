@@ -29,7 +29,7 @@ namespace Glory
 
 	Entity EntityScene::CreateEntity(UUID uuid)
 	{
-		EntityID entityID = m_Registry.CreateEntity<Transform>(uuid);
+		EntityID entityID = m_Registry.CreateEntity<Transform>(UUID());
 		return Entity(entityID, this);
 	}
 

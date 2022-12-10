@@ -36,4 +36,9 @@ namespace Glory
 	{
 		return m_ComponentType;
 	}
+
+	void* EntityComponentObject::GetRootDataAddress()
+	{
+		return m_pRegistry->GetComponentAddress(m_EntityID, GetUUID());
+	}
 }

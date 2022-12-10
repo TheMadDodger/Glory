@@ -85,17 +85,26 @@ namespace Glory::Editor
 
 		listView.OnDrawElement = [&](size_t index) {
 			void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, index);
+			const std::vector<const GloryReflect::FieldData*>& fieldStack = PropertyDrawer::GetCurrentFieldStack();
+
+			PropertyDrawer::PushFieldType(fieldStack[fieldStack.size() - 1]->GetArrayElementFieldData(index));
 			if (pPropertyDrawer)
 			{
 				change |= pPropertyDrawer->Draw(ICON_FA_CIRCLE " Element " + std::to_string(index), pAddress, typeHash, flags);
+				PropertyDrawer::PopFieldType();
 				return;
 			}
 			
 			change |= PropertyDrawer::DrawProperty(ICON_FA_CIRCLE " Element " + std::to_string(index), pElementTypeData, pAddress, flags);
+			PropertyDrawer::PopFieldType();
 		};
 
 		listView.OnAdd = [&]() {
+			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+			pAction->SetOldValue(data);
 			GloryReflect::Reflect::ResizeArray(data, typeHash, size + 1);
+			pAction->SetNewValue(data);
+			Undo::AddAction(pAction);
 		};
 
 		listView.OnRemove = [&](int index) {
@@ -104,7 +113,11 @@ namespace Glory::Editor
 		};
 
 		listView.OnResize = [&](size_t newSize) {
+			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+			pAction->SetOldValue(data);
 			GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
+			pAction->SetNewValue(data);
+			Undo::AddAction(pAction);
 		};
 
 		return listView.Draw(size);

@@ -78,6 +78,11 @@ namespace Glory
 		m_Name = name;
 	}
 
+	void* Object::GetRootDataAddress()
+	{
+		return (void*)this;
+	}
+
 	void Object::PushInheritence(const std::type_index& type)
 	{
 		m_Inheritence.insert(m_Inheritence.begin(), type);

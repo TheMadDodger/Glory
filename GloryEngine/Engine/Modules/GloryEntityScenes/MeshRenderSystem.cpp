@@ -17,7 +17,6 @@ namespace Glory
 
         if (!pRegistry->HasComponent<MeshFilter>(entity))
         {
-            Debug::LogError("MeshRenderer: Missing MeshFilter on Entity!");
             return;
         }
 
