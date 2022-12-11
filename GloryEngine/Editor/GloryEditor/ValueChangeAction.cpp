@@ -20,7 +20,7 @@ namespace Glory::Editor
 		const GloryReflect::FieldData* pField = m_pFieldStack[m_pFieldStack.size() - 1];
 
 		// Rewind offset so Get() reads from the correct address
-		void* pAddress = (void*)((char*)(pObject)-pField->Offset());
+		void* pAddress = rewind ? (void*)((char*)(pObject)-pField->Offset()) : pObject;
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		PropertySerializer::SerializeProperty(pField, pAddress, out);
@@ -33,7 +33,7 @@ namespace Glory::Editor
 		const GloryReflect::FieldData* pField = m_pFieldStack[m_pFieldStack.size() - 1];
 
 		// Rewind offset so Get() reads from the correct address
-		void* pAddress = (void*)((char*)(pObject)-pField->Offset());
+		void* pAddress = rewind ? (void*)((char*)(pObject)-pField->Offset()) : pObject;
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		PropertySerializer::SerializeProperty(pField, pAddress, out);

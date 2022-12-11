@@ -20,7 +20,7 @@ namespace Glory
 		virtual const size_t TypeHash() = 0;
 
 	protected:
-		UUID m_AssetUUID;
+		REFLECTABLE(AssetReferenceBase, (UUID) (m_AssetUUID))
 	};
 
 	template<class T>

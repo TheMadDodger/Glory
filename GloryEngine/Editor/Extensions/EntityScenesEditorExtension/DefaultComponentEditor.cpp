@@ -44,7 +44,6 @@ namespace Glory::Editor
 	void DefaultComponentEditor::Initialize()
 	{
 		EntityComponentObject* pEntityComponentObject = (EntityComponentObject*)m_pTarget;
-		m_Properties.clear();
 		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pEntityComponentObject->ComponentType());
 		m_Name = pTypeData->TypeName();
 	}

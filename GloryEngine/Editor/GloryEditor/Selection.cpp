@@ -7,8 +7,9 @@
 namespace Glory::Editor
 {
 	std::vector<Object*> Selection::m_pSelectedObjects = std::vector<Object*>();
+	std::map<UUID, std::function<void()>> Selection::m_SelectionChangeCallback;
 
-	GLORY_EDITOR_API void Selection::SetActiveObject(Object* pObject)
+	void Selection::SetActiveObject(Object* pObject)
 	{
 		Undo::StartRecord("Selection Changed");
 		for (size_t i = 0; i < m_pSelectedObjects.size(); i++)
@@ -21,21 +22,23 @@ namespace Glory::Editor
 		if (pObject == nullptr)
 		{
 			Undo::StopRecord();
+			TriggerSelectionChangeCallback();
 			return;
 		}
 
 		Undo::AddAction(new SelectAction(pObject->GetUUID()));
 		m_pSelectedObjects.push_back(pObject);
 		Undo::StopRecord();
+		TriggerSelectionChangeCallback();
 	}
 
-	GLORY_EDITOR_API Object* Selection::GetActiveObject()
+	Object* Selection::GetActiveObject()
 	{
 		if (m_pSelectedObjects.size() <= 0) return nullptr;
 		return m_pSelectedObjects[0];
 	}
 
-	GLORY_EDITOR_API void Selection::Clear()
+	void Selection::Clear()
 	{
 		Undo::StartRecord("Selection Changed");
 		for (size_t i = 0; i < m_pSelectedObjects.size(); i++)
@@ -44,12 +47,33 @@ namespace Glory::Editor
 		}
 		m_pSelectedObjects.clear();
 		Undo::StopRecord();
+		TriggerSelectionChangeCallback();
 	}
 
-	GLORY_EDITOR_API bool Selection::IsObjectSelected(Object* pObject)
+	bool Selection::IsObjectSelected(Object* pObject)
 	{
 		auto it = std::find(m_pSelectedObjects.begin(), m_pSelectedObjects.end(), pObject);
 		return it != m_pSelectedObjects.end();
+	}
+
+	UUID Selection::SubscribeToSelectionChange(std::function<void()> callback)
+	{
+		UUID uuid = UUID();
+		m_SelectionChangeCallback.emplace(uuid, callback);
+		return uuid;
+	}
+
+	void Selection::UnsubscribeToSelectionChange(UUID uuid)
+	{
+		m_SelectionChangeCallback.erase(uuid);
+	}
+
+	void Selection::TriggerSelectionChangeCallback()
+	{
+		for (auto it = m_SelectionChangeCallback.begin(); it != m_SelectionChangeCallback.end(); ++it)
+		{
+			it->second();
+		}
 	}
 
 	void Selection::AddObjectToSelection(Object* pObject)
@@ -59,6 +83,7 @@ namespace Glory::Editor
 		Undo::AddAction(new SelectAction(pObject->GetUUID()));
 		m_pSelectedObjects.push_back(pObject);
 		Undo::StopRecord();
+		TriggerSelectionChangeCallback();
 	}
 
 	void Selection::RemoveObjectFromSelection(Object* pObject)
@@ -72,6 +97,7 @@ namespace Glory::Editor
 		Undo::AddAction(new DeselectAction(pObject->GetUUID()));
 		m_pSelectedObjects.erase(it);
 		Undo::StopRecord();
+		TriggerSelectionChangeCallback();
 	}
 
 	void Selection::AddObjectToSelection(UUID objectID)

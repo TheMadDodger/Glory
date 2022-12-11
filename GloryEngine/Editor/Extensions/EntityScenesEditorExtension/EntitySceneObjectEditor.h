@@ -31,7 +31,5 @@ namespace Glory::Editor
 		std::vector<EntityComponentObject*> m_pComponents;
 
 		EntityComponentPopup m_ComponentPopup;
-
-		size_t m_RightClickedComponentIndex = 0;
     };
 }

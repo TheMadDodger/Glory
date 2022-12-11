@@ -23,7 +23,6 @@ namespace Glory::Editor
 		virtual void Initialize() override
 		{
 			m_pComponentObject = (EntityComponentObject*)m_pTarget;
-			m_Properties.clear();
 		}
 
 		virtual bool OnGUI() override
@@ -66,8 +65,7 @@ namespace Glory::Editor
 			return typeid(TComponent);
 		}
 
-	private:
+	protected:
 		EntityComponentObject* m_pComponentObject;
-		std::vector<SerializedProperty*> m_Properties;
 	};
 }

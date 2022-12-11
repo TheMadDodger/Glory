@@ -1,6 +1,7 @@
 #pragma once
 #include <Object.h>
 #include <vector>
+#include <functional>
 #include "GloryEditor.h"
 
 namespace Glory::Editor
@@ -16,9 +17,15 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API Object* GetActiveObject();
 		static GLORY_EDITOR_API void Clear();
 		static GLORY_EDITOR_API bool IsObjectSelected(Object* pObject);
+		static GLORY_EDITOR_API UUID SubscribeToSelectionChange(std::function<void()> callback);
+		static GLORY_EDITOR_API void UnsubscribeToSelectionChange(UUID uuid);
+
+	private:
+		static void TriggerSelectionChangeCallback();
 
 	private:
 		static std::vector<Object*> m_pSelectedObjects;
+		static std::map<UUID, std::function<void()>> m_SelectionChangeCallback;
 
 	private:
 		Selection();
