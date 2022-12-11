@@ -13,6 +13,7 @@
 #include "GloryEditor.h"
 #include "PropertyAction.h"
 #include "ValueChangeAction.h"
+#include "NodeValueChangeAction.h"
 
 #define PROPERTY_DRAWER(x) Glory::Editor::PropertyDrawer::RegisterPropertyDrawer<x>()
 
@@ -181,12 +182,7 @@ namespace Glory::Editor
 			if (OnGUI(label, &newValue, flags))
 			{
 				node = newValue;
-				const std::vector<const GloryReflect::FieldData*>& pFieldStack = PropertyDrawer::GetCurrentFieldStack();
-				//ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentFieldData(), PropertyDrawer::GetCurrentPropertyPath(), pFieldStack);
-				//pAction->SetOldValue(&oldValue);
-				//pAction->SetNewValue(&newValue);
-				//Undo::AddAction(pAction);
-
+				Undo::AddAction(new NodeValueChangeAction(PropertyDrawer::GetCurrentPropertyPath(), YAML::Node(oldValue), YAML::Node(newValue)));
 				return true;
 			}
 			return false;

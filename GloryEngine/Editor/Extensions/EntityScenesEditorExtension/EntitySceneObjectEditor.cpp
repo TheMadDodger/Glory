@@ -129,6 +129,9 @@ namespace Glory::Editor
 		EntityID entityID = entity.GetEntityID();
 		GloryECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
 
+		bool removeComponent = false;
+		size_t toRemoveComponent = 0;
+
 		int index = 0;
 		const std::string& nameString = m_pObject->Name();
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [&](Editor* pEditor)
@@ -145,14 +148,26 @@ namespace Glory::Editor
 			ImGui::PushID(index);
 
 			std::string label = std::string(icon) + "	" + pEditor->Name();
-			if (EditorUI::Header(label))
-				change |= pEditor->OnGUI();
+			const bool open = EditorUI::Header(label);
 
 			if (ImGui::IsItemClicked(1))
 			{
-				m_RightClickedComponentIndex = index;
 				ImGui::OpenPopup("ComponentRightClick");
 			}
+
+			if(open) change |= pEditor->OnGUI();
+
+			if (ImGui::BeginPopup("ComponentRightClick"))
+			{
+				if (ImGui::MenuItem("Remove"))
+				{
+					removeComponent = true;
+					toRemoveComponent = index;
+				}
+
+				ImGui::EndPopup();
+			}
+
 			ImGui::PopID();
 
 			ImGui::Spacing();
@@ -169,17 +184,28 @@ namespace Glory::Editor
 			m_AddingComponent = true;
 		}
 		
+		if (removeComponent)
+		{
+			Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
+			EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+			EntityScene* pScene = (EntityScene*)pObject->GetScene();
+			Undo::AddAction(new RemoveComponentAction(pRegistry, entityID, toRemoveComponent));
+			pRegistry->RemoveComponentAt(entityID, toRemoveComponent);
+			Undo::StopRecord();
+			Initialize();
+			change = true;
+		}
+
 		if (m_AddingComponent)
 		{
 			size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
 			if (toAddTypeHash)
 			{
 				Undo::StartRecord("Add Component", m_pTarget->GetUUID());
-				pRegistry->CreateComponent(entityID, toAddTypeHash, UUID());
-				//pRegistry->GetSystems()->CreateComponent(entityID, toAddTypeHash);
-				//size_t index = m_pComponentEditors.size();
-				//EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, index);
-				//Undo::AddAction(new AddComponentAction(toAddTypeHash, pComponentData->GetComponentUUID(), index));
+				UUID uuid = UUID();
+				size_t index = m_pComponentEditors.size();
+				pRegistry->CreateComponent(entityID, toAddTypeHash, uuid);
+				Undo::AddAction(new AddComponentAction(toAddTypeHash, uuid, index));
 				Undo::StopRecord();
 				m_AddingComponent = false;
 				Initialize();
@@ -188,24 +214,6 @@ namespace Glory::Editor
 		}
 		
 		m_ComponentPopup.OnGUI();
-		
-		//if (ImGui::BeginPopup("ComponentRightClick"))
-		//{
-		//	if (ImGui::MenuItem("Remove"))
-		//	{
-		//		EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entityID, m_RightClickedComponentIndex);
-		//		Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
-		//		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
-		//		EntityScene* pScene = (EntityScene*)pObject->GetScene();
-		//		Undo::AddAction(new RemoveComponentAction(pScene, pComponentData, m_RightClickedComponentIndex));
-		//		pRegistry->RemoveComponent(entityID, m_RightClickedComponentIndex);
-		//		Undo::StopRecord();
-		//		Initialize();
-		//		change = true;
-		//	}
-		//
-		//	ImGui::EndPopup();
-		//}
 		return change;
 	}
 }

@@ -43,36 +43,48 @@ namespace Glory
 
 	void EntitySceneObjectSerializer::DeserializeComponent(EntityScene* pScene, EntitySceneObject* pObject, size_t componentIndex, YAML::Node& object)
 	{
-		//YAML::Node subNode;
-		//UUID compUUID;
-		//size_t typeHash = 0;
-		//YAML_READ(object, subNode, UUID, compUUID, uint64_t);
-		//YAML_READ(object, subNode, TypeHash, typeHash, size_t);
-		//
-		//Entity entityHandle = pObject->GetEntityHandle();
-		//EntityID entity = entityHandle.GetEntityID();
-		//
-		//Registry* pRegistry = pScene->GetRegistry();
-		//EntitySystems* pSystems = pRegistry->GetSystems();
-		//
-		//size_t newComponentIndex = pRegistry->ComponentCount(entity);
-		//
-		//pSystems->CreateComponent(entity, typeHash, compUUID);
-		//if (newComponentIndex != componentIndex)
-		//	pRegistry->ChangeComponentIndex(entity, newComponentIndex, componentIndex);
-		//
-		//EntityComponentData* pComponentData = pRegistry->GetEntityComponentDataAt(entity, componentIndex);
-		//
-		//if (!pComponentData) return;
-		//std::vector<SerializedProperty*> properties;
-		//pSystems->AcquireSerializedProperties(pComponentData, properties);
-		//
-		//for (size_t i = 0; i < properties.size(); i++)
-		//{
-		//	const SerializedProperty* serializedProperty = properties[i];
-		//	YAML::Node dataNode = object[serializedProperty->Name()];
-		//	PropertySerializer::DeserializeProperty(serializedProperty, dataNode);
-		//}
+		YAML::Node nextObject = object;
+		YAML::Node subNode;
+		UUID compUUID;
+		size_t typeHash = 0;
+		std::string typeName = "";
+		YAML_READ(nextObject, subNode, UUID, compUUID, uint64_t);
+		YAML_READ(nextObject, subNode, TypeName, typeName, std::string);
+		YAML_READ(nextObject, subNode, TypeHash, typeHash, size_t);
+
+		Entity entityHandle = pObject->GetEntityHandle();
+		EntityID entity = entityHandle.GetEntityID();
+		EntityRegistry* pRegistry = pScene->GetRegistry();
+
+		void* pComponentAddress = pRegistry->CreateComponent(entity, typeHash, compUUID);
+		EntityView* pEntityView = pRegistry->GetEntityView(entity);
+		pEntityView->SetComponentIndex(pEntityView->ComponentCount() - 1, componentIndex);
+
+		Serializer* pSerializer = Serializer::GetSerializer(typeHash);
+		if (pSerializer)
+		{
+			EntityComponentObject componentObject(entity, compUUID, typeHash, pRegistry);
+			pSerializer->Deserialize(pObject, nextObject);
+			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
+			return;
+		}
+
+		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		for (size_t i = 0; i < pTypeData->FieldCount(); i++)
+		{
+			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
+			subNode = nextObject[pFieldData->Name()];
+			if (!subNode.IsDefined())
+			{
+				std::string legacyConversion = pFieldData->Name();
+				legacyConversion = legacyConversion.substr(1);
+				subNode = nextObject[legacyConversion];
+				if (!subNode.IsDefined()) continue;
+			}
+			PropertySerializer::DeserializeProperty(pFieldData, pComponentAddress, subNode);
+		}
+
+		pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 	}
 
 	void EntitySceneObjectSerializer::Serialize(EntitySceneObject* pObject, YAML::Emitter& out)
@@ -172,19 +184,6 @@ namespace Glory
 			}
 
 			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
-
-			//pScene->GetRegistry()->GetSystems()->CreateComponent(entity, typeHash, compUUID);
-			//EntityComponentData* pComponentData = pScene->GetRegistry()->GetEntityComponentDataAt(entity, currentComponentIndex);
-			//if (!pComponentData) continue;
-			//std::vector<SerializedProperty*> properties;
-			//pScene->GetRegistry()->GetSystems()->AcquireSerializedProperties(pComponentData, properties);
-			//
-			//for (size_t i = 0; i < properties.size(); i++)
-			//{
-			//	const SerializedProperty* serializedProperty = properties[i];
-			//	YAML::Node dataNode = nextObject[serializedProperty->Name()];
-			//	PropertySerializer::DeserializeProperty(serializedProperty, dataNode);
-			//}
 			++currentComponentIndex;
 		}
 

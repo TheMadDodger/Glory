@@ -152,14 +152,15 @@ namespace Glory
 		ScriptedComponent() : m_Script(0), m_ScriptData() {}
 		ScriptedComponent(Script* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0), m_ScriptData() {}
 
+		// Script data MUST be at offset 0 otherwise undo/redo actions will read the wrong address
+		YAML::Node m_ScriptData;
+
 		REFLECTABLE(ScriptedComponent,
 			(AssetReference<Script>) (m_Script)
 		);
 
 		std::vector<ScriptProperty> m_ScriptProperties;
 		std::vector<ScriptProperty> m_ScriptChildProperties;
-
-		YAML::Node m_ScriptData;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
