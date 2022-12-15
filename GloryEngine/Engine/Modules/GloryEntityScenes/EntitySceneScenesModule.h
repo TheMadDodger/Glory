@@ -15,6 +15,13 @@ namespace Glory
 
 		GLORY_API GloryECS::ComponentTypes* ComponentTypesInstance() const;
 
+		template<typename T>
+		void RegisterComponent(bool allowMultiple = false, const uint64_t customFlags = 0)
+		{
+			GloryECS::ComponentTypes::RegisterComponent<T>(allowMultiple, customFlags);
+			GloryReflect::Reflect::RegisterType<T>();
+		}
+
 	private:
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;

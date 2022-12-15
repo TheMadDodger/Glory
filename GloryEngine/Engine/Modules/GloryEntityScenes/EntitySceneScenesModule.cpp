@@ -51,32 +51,24 @@ namespace Glory
 	{
 		m_pComponentTypesInstance = GloryECS::ComponentTypes::CreateInstance();
 
-		// Register engine components
-		GloryECS::ComponentTypes::RegisterComponent<Transform>();
-		GloryECS::ComponentTypes::RegisterComponent<MeshRenderer>();
-		GloryECS::ComponentTypes::RegisterComponent<MeshFilter>();
-		GloryECS::ComponentTypes::RegisterComponent<CameraComponent>();
-		GloryECS::ComponentTypes::RegisterComponent<LookAt>();
-		GloryECS::ComponentTypes::RegisterComponent<Spin>();
-		GloryECS::ComponentTypes::RegisterComponent<LightComponent>();
-		GloryECS::ComponentTypes::RegisterComponent<LayerComponent>();
-		GloryECS::ComponentTypes::RegisterComponent<ScriptedComponent>();
-
-		// Register component types
+		/* Register component types */
 		GloryReflect::Reflect::RegisterEnum<CameraPerspective>();
 		GloryReflect::Reflect::RegisterType<MeshMaterial>();
 
-		GloryReflect::Reflect::RegisterType<Transform>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<MeshFilter>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<MeshRenderer>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<CameraComponent>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<Spin>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<LayerComponent>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<LightComponent>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<LookAt>(TypeFlag::TF_Component);
-		GloryReflect::Reflect::RegisterType<ScriptedComponent>(TypeFlag::TF_Component);
+		/* Register engine components */
+		RegisterComponent<Transform>();
+		RegisterComponent<LayerComponent>();
+		RegisterComponent<CameraComponent>();
+		RegisterComponent<MeshFilter>();
+		RegisterComponent<MeshRenderer>();
+		RegisterComponent<LightComponent>();
+		RegisterComponent<ScriptedComponent>();
 
-		// Register serializers
+		/* Temporary components for testing */
+		RegisterComponent<Spin>();
+		RegisterComponent<LookAt>();
+
+		/* Register serializers */
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
 		Serializer::RegisterSerializer<ScriptedComponentSerailizer>();
@@ -85,8 +77,6 @@ namespace Glory
 
 	void EntitySceneScenesModule::PostInitialize()
 	{
-		size_t hash = ResourceType::GetHash<ImageData>();
-		int a = 0;
 	}
 
 	void EntitySceneScenesModule::OnCleanup()

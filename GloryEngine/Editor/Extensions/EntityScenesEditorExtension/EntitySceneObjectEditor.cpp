@@ -23,6 +23,7 @@ namespace Glory::Editor
 		{ ResourceType::GetHash<CameraComponent>(), ICON_FA_VIDEO },
 		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
+		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)
@@ -159,11 +160,14 @@ namespace Glory::Editor
 
 			if (ImGui::BeginPopup("ComponentRightClick"))
 			{
-				if (ImGui::MenuItem("Remove"))
+				const bool removeAllowed = index != 0;
+				if (ImGui::MenuItem("Remove", "", false, removeAllowed))
 				{
 					removeComponent = true;
 					toRemoveComponent = index;
 				}
+				if (!removeAllowed && ImGui::IsItemHovered())
+					ImGui::SetTooltip("You cannot remove the Transform of an entity");
 
 				ImGui::EndPopup();
 			}
@@ -180,7 +184,7 @@ namespace Glory::Editor
 		const float buttonWidth = ImGui::GetContentRegionAvail().x;
 		if (ImGui::Button("Add Component", { buttonWidth, 0.0f }))
 		{
-			EntityComponentPopup::Open(pRegistry);
+			EntityComponentPopup::Open(entityID, pRegistry);
 			m_AddingComponent = true;
 		}
 		

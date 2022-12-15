@@ -126,7 +126,10 @@ namespace Glory
 		YAML_READ(object, node, ParentUUID, parentUuid, uint64_t);
 
 		EntityScene* pScene = (EntityScene*)pParent;
-		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject(name, uuid);
+
+		UUID transformUUID = object["Components"][0]["UUID"].as<uint64_t>();
+
+		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject(name, uuid, transformUUID);
 		node = object["Components"];
 
 		if (parentUuid != NULL)

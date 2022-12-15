@@ -90,12 +90,12 @@ namespace Glory::Editor
 			PropertyDrawer::PushFieldType(fieldStack[fieldStack.size() - 1]->GetArrayElementFieldData(index));
 			if (pPropertyDrawer)
 			{
-				change |= pPropertyDrawer->Draw(ICON_FA_CIRCLE " Element " + std::to_string(index), pAddress, typeHash, flags);
+				change |= pPropertyDrawer->Draw("Element " + std::to_string(index), pAddress, typeHash, flags);
 				PropertyDrawer::PopFieldType();
 				return;
 			}
 			
-			change |= PropertyDrawer::DrawProperty(ICON_FA_CIRCLE " Element " + std::to_string(index), pElementTypeData, pAddress, flags);
+			change |= PropertyDrawer::DrawProperty("Element " + std::to_string(index), pElementTypeData, pAddress, flags);
 			PropertyDrawer::PopFieldType();
 		};
 

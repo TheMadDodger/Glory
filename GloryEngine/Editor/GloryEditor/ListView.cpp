@@ -1,5 +1,6 @@
 #include "ListView.h"
 #include <imgui.h>
+#include "EditorUI.h"
 
 #include "FontAwesome/IconsFontAwesome6.h"
 
@@ -17,7 +18,7 @@ namespace Glory::Editor
 
 		const ImVec2 startPos = ImGui::GetCursorPos();
 		const ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-		const bool open = ImGui::TreeNodeEx(m_Label, ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed);
+		const bool open = ImGui::TreeNodeEx(EditorUI::MakeCleanName(m_Label).data(), ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed);
 		const float buttonSize = 24.0f;
 		ImGui::SetCursorPos({ startPos.x + regionAvail.x - buttonSize + 4.0f, startPos.y });
 		int size = elementCount;
