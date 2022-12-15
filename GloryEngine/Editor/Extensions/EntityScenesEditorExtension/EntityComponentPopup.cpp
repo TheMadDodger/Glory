@@ -10,17 +10,19 @@ namespace Glory::Editor
 	size_t EntityComponentPopup::m_LastSelectedComponentTypeHash = 0;
 	std::vector<ComponentMenuItem> EntityComponentPopup::m_MenuItems;
 
-	void EntityComponentPopup::Open(GloryECS::EntityRegistry* pRegistry)
+	void EntityComponentPopup::Open(GloryECS::EntityID entity, GloryECS::EntityRegistry* pRegistry)
 	{
 		m_Open = true;
 		m_MenuItems.clear();
 
-		for (auto it = pRegistry->GetTypeViewIterator(); it != pRegistry->GetTypeViewIteratorEnd(); it++)
+		for (size_t i = 0; i < GloryECS::ComponentTypes::ComponentCount(); ++i)
 		{
-			size_t typeHash = it->first;
-			GloryECS::BaseTypeView* pTypeView = it->second;
+			const GloryECS::ComponentType* componentType = GloryECS::ComponentTypes::GetComponentTypeAt(i);
+			size_t typeHash = componentType->m_TypeHash;
 
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pTypeView->ComponentTypeHash());
+			if (!componentType->m_AllowMultiple && pRegistry->HasComponent(entity, typeHash)) continue;
+
+			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 
 			if (pTypeData == nullptr) continue;
 

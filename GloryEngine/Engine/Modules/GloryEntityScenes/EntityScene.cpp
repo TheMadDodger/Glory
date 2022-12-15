@@ -27,9 +27,9 @@ namespace Glory
 		m_Valid = false;
 	}
 
-	Entity EntityScene::CreateEntity(UUID uuid)
+	Entity EntityScene::CreateEntity(UUID uuid, UUID transUUID)
 	{
-		EntityID entityID = m_Registry.CreateEntity<Transform>(UUID());
+		EntityID entityID = m_Registry.CreateEntity<Transform>(transUUID);
 		return Entity(entityID, this);
 	}
 
@@ -100,13 +100,13 @@ namespace Glory
 	SceneObject* EntityScene::CreateObject(const std::string& name)
 	{
 		UUID uuid = UUID();
-		Entity entity = CreateEntity(uuid);
+		Entity entity = CreateEntity(uuid, UUID());
 		return new EntitySceneObject(entity, name, uuid);
 	}
 
-	SceneObject* EntityScene::CreateObject(const std::string& name, UUID uuid)
+	SceneObject* EntityScene::CreateObject(const std::string& name, UUID uuid, UUID uuid2)
 	{
-		Entity entity = CreateEntity(uuid);
+		Entity entity = CreateEntity(uuid, uuid2);
 		return new EntitySceneObject(entity, name, uuid);
 	}
 

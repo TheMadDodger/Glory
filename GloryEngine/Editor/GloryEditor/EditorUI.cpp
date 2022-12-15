@@ -5,7 +5,10 @@
 
 namespace Glory::Editor
 {
-	bool Glory::Editor::EditorUI::InputFloat(const std::string_view& label, float* value, const float min, const float max, const float steps)
+	size_t Glory::Editor::EditorUI::m_BufferWriteIndex = 0;
+	char Glory::Editor::EditorUI::m_CleanNameBuffer[BUFFERLENGTH] = "\0";
+
+	bool Glory::Editor::EditorUI::InputFloat(std::string_view label, float* value, const float min, const float max, const float steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -26,7 +29,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputFloat2(const std::string_view& label, glm::vec2* value, const float min, const float max, const float steps)
+	bool EditorUI::InputFloat2(std::string_view label, glm::vec2* value, const float min, const float max, const float steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -47,7 +50,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputFloat3(const std::string_view& label, glm::vec3* value, const float min, const float max, const float steps)
+	bool EditorUI::InputFloat3(std::string_view label, glm::vec3* value, const float min, const float max, const float steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -68,7 +71,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputFloat4(const std::string_view& label, glm::vec4* value, const float min, const float max, const float steps)
+	bool EditorUI::InputFloat4(std::string_view label, glm::vec4* value, const float min, const float max, const float steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -89,7 +92,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt(const std::string_view& label, int* value, const int min, const int max, const int steps)
+	bool EditorUI::InputInt(std::string_view label, int* value, const int min, const int max, const int steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -110,7 +113,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt2(const std::string_view& label, glm::ivec2* value, const int min, const int max, const int steps)
+	bool EditorUI::InputInt2(std::string_view label, glm::ivec2* value, const int min, const int max, const int steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -131,7 +134,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt3(const std::string_view& label, glm::ivec3* value, const int min, const int max, const int steps)
+	bool EditorUI::InputInt3(std::string_view label, glm::ivec3* value, const int min, const int max, const int steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -152,7 +155,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt4(const std::string_view& label, glm::ivec4* value, const int min, const int max, const int steps)
+	bool EditorUI::InputInt4(std::string_view label, glm::ivec4* value, const int min, const int max, const int steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -173,7 +176,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputDouble(const std::string_view& label, double* value, const double slowSteps, const double fastSteps)
+	bool EditorUI::InputDouble(std::string_view label, double* value, const double slowSteps, const double fastSteps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -194,7 +197,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::CheckBox(const std::string_view& label, bool* value)
+	bool EditorUI::CheckBox(std::string_view label, bool* value)
 	{
 		const ImVec2 textSize = ImGui::CalcTextSize(label.data());
 		ImGui::PushID(label.data());
@@ -209,7 +212,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputColor(const std::string_view& label, glm::vec4* value, const bool hdr)
+	bool EditorUI::InputColor(std::string_view label, glm::vec4* value, const bool hdr)
 	{
 		ImGui::PushID(label.data());
 
@@ -278,7 +281,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputText(const std::string_view& label, char* value, size_t bufferSize)
+	bool EditorUI::InputText(std::string_view label, char* value, size_t bufferSize)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -299,7 +302,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputDropdown(const std::string_view& label, const std::vector<std::string_view>& options, size_t* index, const std::string_view& value)
+	bool EditorUI::InputDropdown(std::string_view label, const std::vector<std::string_view>& options, size_t* index, std::string_view value)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -335,7 +338,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputDropdown(const std::string_view& label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, const std::string_view& value)
+	bool EditorUI::InputDropdown(std::string_view label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, std::string_view value)
 	{
 		assert(options.size() == selected.size());
 
@@ -373,7 +376,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputLayerMask(const std::string_view& label, LayerMask* data)
+	bool EditorUI::InputLayerMask(std::string_view label, LayerMask* data)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -421,7 +424,7 @@ namespace Glory::Editor
 		return originalMask != *data;
 	}
 
-	bool EditorUI::InputLeyerRef(const std::string_view& label, LayerRef* data)
+	bool EditorUI::InputLeyerRef(std::string_view label, LayerRef* data)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -467,7 +470,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool EditorUI::Header(const std::string_view& label)
+	bool EditorUI::Header(std::string_view label)
 	{
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader;
 
@@ -482,7 +485,7 @@ namespace Glory::Editor
 		return headerOpen;
 	}
 
-	void EditorUI::EmptyDropdown(const std::string_view& label, const std::string_view& value, std::function<void()> callback, float& start, float& width, const float borderPadding)
+	void EditorUI::EmptyDropdown(std::string_view label, std::string_view value, std::function<void()> callback, float& start, float& width, const float borderPadding)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::TextUnformatted(label.data());
@@ -506,5 +509,60 @@ namespace Glory::Editor
 			ImGui::EndCombo();
 		}
 		ImGui::PopItemWidth();
+	}
+
+	std::string_view EditorUI::MakeCleanName(std::string_view label)
+	{
+		m_CleanNameBuffer[0] = '\0';
+		m_BufferWriteIndex = 0;
+
+		size_t startIndex = 0;
+		if (label._Starts_with("m_p"))
+			startIndex = 3;
+		else if (label._Starts_with("m_"))
+			startIndex = 2;
+		else if (label._Starts_with("_"))
+			startIndex = 1;
+
+		char lastChar = '\0';
+		bool charWasEdited = false;
+		for (size_t i = startIndex; i < label.size(); i++)
+		{
+			const bool editedCache = charWasEdited;
+			charWasEdited = false;
+			if (label[i] == '_')
+			{
+				lastChar = label[i];
+				continue;
+			}
+			const bool isAlpha = std::isalpha(label[i]);
+			const bool isDigit = std::isdigit(label[i]);
+
+			if (!isAlpha && !isDigit) continue;
+			if (lastChar == '\0')
+			{
+				lastChar = std::toupper(label[i]);
+				m_CleanNameBuffer[m_BufferWriteIndex] = lastChar;
+				++m_BufferWriteIndex;
+				charWasEdited = true;
+				continue;
+			}
+
+			if ((editedCache || std::islower(lastChar)) && (std::isupper(label[i]) || lastChar == '_'))
+			{
+				charWasEdited = true;
+				lastChar = std::toupper(label[i]);
+				m_CleanNameBuffer[m_BufferWriteIndex] = ' ';
+				m_CleanNameBuffer[m_BufferWriteIndex + 1] = lastChar;
+				m_BufferWriteIndex += 2;
+				continue;
+			}
+			lastChar = label[i];
+			m_CleanNameBuffer[m_BufferWriteIndex] = label[i];
+			++m_BufferWriteIndex;
+		}
+		m_CleanNameBuffer[m_BufferWriteIndex] = '\0';
+		++m_BufferWriteIndex;
+		return m_CleanNameBuffer;
 	}
 }

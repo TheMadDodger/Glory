@@ -30,9 +30,9 @@ namespace Glory
 		return pObject;
 	}
 
-	SceneObject* GScene::CreateEmptyObject(const std::string& name, UUID uuid)
+	SceneObject* GScene::CreateEmptyObject(const std::string& name, UUID uuid, UUID uuid2)
 	{
-		SceneObject* pObject = CreateObject(name, uuid);
+		SceneObject* pObject = CreateObject(name, uuid, uuid2);
 		pObject->m_pScene = this;
 		m_pSceneObjects.push_back(pObject);
 		pObject->Initialize();

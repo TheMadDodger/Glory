@@ -22,7 +22,7 @@ namespace Glory
 
     public:
         SceneObject* CreateEmptyObject();
-        SceneObject* CreateEmptyObject(const std::string& name, UUID uuid);
+        SceneObject* CreateEmptyObject(const std::string& name, UUID uuid, UUID uuid2 = UUID());
         size_t SceneObjectsCount();
         SceneObject* GetSceneObject(size_t index);
         void DeleteObject(SceneObject* pObject);
@@ -41,7 +41,7 @@ namespace Glory
         virtual void OnPaint() {}
 
         virtual SceneObject* CreateObject(const std::string& name) { return nullptr; }
-        virtual SceneObject* CreateObject(const std::string& name, UUID uuid) { return nullptr; }
+        virtual SceneObject* CreateObject(const std::string& name, UUID uuid, UUID uuid2 = 0) { return nullptr; }
         virtual void OnDeleteObject(SceneObject* pObject) {}
         virtual void OnObjectAdded(SceneObject* pObject) {}
         virtual void OnDelayedSetParent(const DelayedParentData& data);

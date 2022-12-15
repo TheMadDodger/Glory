@@ -18,7 +18,7 @@ namespace Glory
 		EntityScene(const std::string& sceneName, UUID uuid);
 		virtual ~EntityScene();
 
-		GLORY_API Entity CreateEntity(UUID uuid);
+		GLORY_API Entity CreateEntity(UUID uuid, UUID transUUID);
 
 		GLORY_API EntitySceneObject* GetEntitySceneObjectFromEntityID(EntityID entity);
 		GLORY_API EntityRegistry* GetRegistry();
@@ -31,7 +31,7 @@ namespace Glory
 		virtual void OnPaint() override;
 
 		virtual SceneObject* CreateObject(const std::string& name) override;
-		virtual SceneObject* CreateObject(const std::string& name, UUID uuid) override;
+		virtual SceneObject* CreateObject(const std::string& name, UUID uuid, UUID uuid2) override;
 		virtual void OnDeleteObject(SceneObject* pObject) override;
 
 		virtual void OnObjectAdded(SceneObject* pObject) override;

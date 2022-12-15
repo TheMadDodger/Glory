@@ -24,7 +24,7 @@ namespace Glory::Editor
 
 		bool openPopup = false;
 		float start, width;
-		EditorUI::EmptyDropdown(label, assetName, [&]
+		EditorUI::EmptyDropdown(EditorUI::MakeCleanName(label), assetName, [&]
 		{
 			m_PossibleAssets.clear();
 			m_FilteredAssets.clear();

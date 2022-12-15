@@ -5,7 +5,7 @@ Entities:
     UUID: 15464334281906018928
     ParentUUID: 0
     Components:
-      - UUID: 15464334281906018928
+      - UUID: 15464334281906018929
         TypeName: Transform
         TypeHash: 3246206669
         Position: [0, 0, 0]
@@ -49,7 +49,7 @@ Entities:
     UUID: 8675748886831743542
     ParentUUID: 0
     Components:
-      - UUID: 8675748886831743542
+      - UUID: 8675748886831743543
         TypeName: Transform
         TypeHash: 3246206669
         Position: [-61.8018646, 20.9188213, 6.97744942]
@@ -66,7 +66,7 @@ Entities:
     UUID: 3495770030496987094
     ParentUUID: 0
     Components:
-      - UUID: 3495770030496987094
+      - UUID: 3495770030496987098
         TypeName: Transform
         TypeHash: 3246206669
         Position: [13.4802742, 9.70086575, -12.5148573]
