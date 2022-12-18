@@ -4,6 +4,7 @@
 #include <vector>
 #include <string_view>
 #include <functional>
+#include <yaml-cpp/yaml.h>
 #include "GloryEditor.h"
 
 namespace Glory::Editor
@@ -38,17 +39,19 @@ namespace Glory::Editor
 		 * @param action The name of the action the shortcut should trigger.
 		 * @param key The main key that triggers the action.
 		 * @param mods The modifiers that need to be active on the key to trigger the action. */
-		static GLORY_EDITOR_API void SetShortcut(const char* action, ImGuiKey key, ImGuiModFlags mods);
+		static GLORY_EDITOR_API void SetShortcut(std::string_view action, ImGuiKey key, ImGuiModFlags mods);
 
 		static GLORY_EDITOR_API std::string GetShortcutString(std::string_view action);
+
+		static GLORY_EDITOR_API const std::map<std::string_view, Shortcut>::iterator Begin();
+		static GLORY_EDITOR_API const std::map<std::string_view, Shortcut>::iterator End();
+
+		static GLORY_EDITOR_API void SaveShortcuts(YAML::Emitter& out);
+		static GLORY_EDITOR_API void LoadShortcuts(YAML::Node& node);
 
 	private:
 		/* @brief Clears all shortcuts and actions, used for cleanup. */
 		static void Clear();
-
-		static void SaveShortcuts();
-		/* @brief Loads the user defined shortcuts. */
-		static void LoadShortcuts();
 
 		/* @brief Check for triggered shortcuts this frame. */
 		static void Update();

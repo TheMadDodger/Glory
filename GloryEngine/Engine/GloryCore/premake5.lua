@@ -10,7 +10,8 @@ project "GloryCore"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"premake5.lua"
 	}
 
 	vpaths

@@ -32,7 +32,7 @@ namespace Glory::Editor
 		return &m_Shortcuts.at(action);
 	}
 
-	void Shortcuts::SetShortcut(const char* action, ImGuiKey key, ImGuiModFlags mods)
+	void Shortcuts::SetShortcut(std::string_view action, ImGuiKey key, ImGuiModFlags mods)
 	{
 		if (m_Shortcuts.find(action) == m_Shortcuts.end()) return;
 		m_Shortcuts[action].m_Key = key;
@@ -60,17 +60,51 @@ namespace Glory::Editor
 		return shortcutString;
 	}
 
+	const std::map<std::string_view, Shortcut>::iterator Shortcuts::Begin()
+	{
+		return m_Shortcuts.begin();
+	}
+
+	const std::map<std::string_view, Shortcut>::iterator Shortcuts::End()
+	{
+		return m_Shortcuts.end();
+	}
+
+	void Shortcuts::SaveShortcuts(YAML::Emitter& out)
+	{
+		out << YAML::Key << "Shortcuts";
+		out << YAML::BeginSeq;
+		for (auto itor = m_Shortcuts.begin(); itor != m_Shortcuts.end(); ++itor)
+		{
+			out << YAML::BeginMap;
+			out << YAML::Key << "Name";
+			out << YAML::Value << itor->first.data();
+			out << YAML::Key << "Key";
+			out << YAML::Value << int(itor->second.m_Key);
+			out << YAML::Key << "Mods";
+			out << YAML::Value << int(itor->second.m_Mods);
+			out << YAML::EndMap;
+		}
+		out << YAML::EndSeq;
+	}
+
+	void Shortcuts::LoadShortcuts(YAML::Node& node)
+	{
+		YAML::Node shortcutsNode = node["Shortcuts"];
+		if (!shortcutsNode.IsDefined() || !shortcutsNode.IsSequence()) return;
+		for (size_t i = 0; i < shortcutsNode.size(); i++)
+		{
+			YAML::Node shortcutNode = shortcutsNode[i];
+			std::string name = shortcutNode["Name"].as<std::string>();
+			ImGuiKey key = ImGuiKey(shortcutNode["Key"].as<int>());
+			ImGuiModFlags mods = shortcutNode["Mods"].as<int>();
+			Shortcuts::SetShortcut(name, key, mods);
+		}
+	}
+
 	void Shortcuts::Clear()
 	{
 		m_Shortcuts.clear();
-	}
-
-	void Shortcuts::SaveShortcuts()
-	{
-	}
-
-	void Shortcuts::LoadShortcuts()
-	{
 	}
 
 	void Shortcuts::Update()

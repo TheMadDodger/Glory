@@ -11,7 +11,8 @@ project "GloryClusteredRenderer"
 	{
 		"**.h",
 		"**.cpp",
-		"Module.yaml"
+		"Module.yaml",
+		"premake5.lua"
 	}
 
 	vpaths

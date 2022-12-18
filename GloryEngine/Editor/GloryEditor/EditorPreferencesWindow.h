@@ -11,10 +11,14 @@ namespace Glory::Editor
 
 	private:
 		virtual void OnGUI() override;
+		void OnClose() override;
 		void UpdateTheme();
 		void AppearanceTab();
 
+		void Shortcuts();
+
 	private:
 		static int m_ThemeIndex;
+		std::string_view m_RebindingShortcut;
 	};
 }

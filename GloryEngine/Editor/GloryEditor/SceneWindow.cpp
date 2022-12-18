@@ -75,11 +75,6 @@ namespace Glory::Editor
 	{
 		if (ImGui::BeginMenuBar())
 		{
-			if (ImGui::BeginMenu("Test"))
-			{
-				ImGui::EndMenu();
-			}
-
 			if (ImGui::MenuItem("Grid", NULL, m_DrawGrid))
 			{
 				m_DrawGrid = !m_DrawGrid;

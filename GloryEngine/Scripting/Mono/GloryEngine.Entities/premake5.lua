@@ -12,6 +12,7 @@ project "GloryEngine.Entities"
 	files
 	{
 		"**.cs",
+		"premake5.lua"
 	}
 
 	vpaths
