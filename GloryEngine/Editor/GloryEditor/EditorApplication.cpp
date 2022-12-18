@@ -72,7 +72,6 @@ namespace Glory::Editor
 
 	GLORY_EDITOR_API void EditorApplication::Run(Game& game)
 	{
-		//game.GetEngine()->Initialize();
 		game.GetEngine()->StartThreads();
 		m_pPlatform->SetState(Idle);
 		m_pShaderProcessor->Start();

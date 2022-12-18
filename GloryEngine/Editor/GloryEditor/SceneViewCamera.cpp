@@ -1,6 +1,5 @@
 #include "SceneViewCamera.h"
 #include <CameraManager.h>
-#include <SDL2/SDL.h>
 #include <ImGuizmo.h>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <GloryContext.h>
@@ -40,13 +39,13 @@ namespace Glory::Editor
 		float movementSpeed = fastMode ? m_FastMovementSpeed : m_MovementSpeed;
 		
 		float deltaTime = io.DeltaTime;
-		
-		bool leftKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_A);
-		bool rightKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_D);
-		bool forwardKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_W);
-		bool backwardKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_S);
-		bool upKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_Q);
-		bool downKey = ImGui::IsKeyDown((ImGuiKey)SDL_SCANCODE_E);
+
+		bool leftKey = ImGui::IsKeyDown(ImGuiKey_A);
+		bool rightKey = ImGui::IsKeyDown(ImGuiKey_D);
+		bool forwardKey = ImGui::IsKeyDown(ImGuiKey_W);
+		bool backwardKey = ImGui::IsKeyDown(ImGuiKey_S);
+		bool upKey = ImGui::IsKeyDown(ImGuiKey_Q);
+		bool downKey = ImGui::IsKeyDown(ImGuiKey_E);
 		
 		glm::vec3 right(viewInverse[0][0], viewInverse[0][1], viewInverse[0][2]);
 		glm::vec3 left = -right;

@@ -6,7 +6,8 @@
 
 namespace Glory
 {
-	GraphicsThread::GraphicsThread(Engine* pEngine) : m_pRenderQueue(nullptr), m_pThread(nullptr), m_Exit(false), m_pEngine(pEngine)
+	GraphicsThread::GraphicsThread(Engine* pEngine)
+		: m_pRenderQueue(nullptr), m_pThread(nullptr), m_Exit(false), m_pEngine(pEngine), m_Initialized(false)
 	{
 	}
 
@@ -26,6 +27,9 @@ namespace Glory
 	{
 		m_pRenderQueue = new RenderQueue(2);
 		m_pThread = ThreadManager::Run(std::bind(&GraphicsThread::Run, this));
+
+		/* Wait for the thread to initialize */
+		while (!m_Initialized) {}
 	}
 
 	void GraphicsThread::Stop()
@@ -61,6 +65,7 @@ namespace Glory
 		{
 			m_InitializationBinds[i]();
 		}
+		m_Initialized = true;
 
 		while (true)
 		{

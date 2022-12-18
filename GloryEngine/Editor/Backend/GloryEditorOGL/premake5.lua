@@ -10,7 +10,9 @@ project "GloryEditorOGL"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_opengl3.h",
+		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_opengl3.cpp"
 	}
 
 	vpaths
@@ -32,6 +34,8 @@ project "GloryEditorOGL"
 		"%{GloryIncludeDir.editor}",
 		
 		"%{IncludeDir.Reflect}",
+
+		"%{SubmodoleDirs.ImGui}/backends/",
 	}
 
 	libdirs

@@ -10,17 +10,19 @@ project "GloryEditorSDL"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_sdl.h",
+		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_sdl.cpp"
 	}
 
 	vpaths
 	{
-		
 	}
 
 	includedirs
 	{
 		"%{vulkanDir}/third-party/include",
+		"%{vulkanDir}/third-party/include/SDL2",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.spirv_cross}",
@@ -29,6 +31,8 @@ project "GloryEditorSDL"
 		"%{GloryIncludeDir.sdlwindow}",
 		
 		"%{IncludeDir.Reflect}",
+
+		"%{SubmodoleDirs.ImGui}/backends/",
 	}
 
 	libdirs
