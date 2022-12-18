@@ -78,5 +78,6 @@ namespace Glory
 		std::vector<std::function<void()>> m_EndRenderBinds;
 		ThreadedVector<ExecuteData> m_Executes;
 		bool m_Exit;
+		bool m_Initialized;
 	};
 }

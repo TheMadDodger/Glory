@@ -42,10 +42,42 @@
 #include "EnumPropertyDrawer.h"
 #include "StructPropertyDrawer.h"
 
+#include "Shortcuts.h"
+
 #define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
 
 namespace Glory::Editor
 {
+	static const char* Shortcut_File_NewScene = "Shortcut_File_NewScene";
+	static const char* Shortcut_File_SaveScene = "Shortcut_File_SaveScene";
+	static const char* Shortcut_File_LoadScene = "Shortcut_File_LoadScene";
+	static const char* Shortcut_File_Exit = "Shortcut_File_Exit";
+	static const char* Shortcut_File_Preferences = "Shortcut_File_Preferences";
+	static const char* Shortcut_File_SaveProject = "Shortcut_File_SaveProject";
+	static const char* Shortcut_Play_Start = "Shortcut_Play_Start";
+	static const char* Shortcut_Play_Stop = "Shortcut_Play_Stop";
+	static const char* Shortcut_Play_Pauze = "Shortcut_Play_Pauze";
+	static const char* Shortcut_Play_NextFrame = "Shortcut_Play_NextFrame";
+	static const char* Shortcut_Window_Scene = "Shortcut_Window_Scene";
+	static const char* Shortcut_Window_Game = "Shortcut_Window_Game";
+	static const char* Shortcut_Window_SceneGraph = "Shortcut_Window_SceneGraph";
+	static const char* Shortcut_Window_Inspector = "Shortcut_Window_Inspector";
+	static const char* Shortcut_Window_Content = "Shortcut_Window_Content";
+	static const char* Shortcut_Window_Console = "Shortcut_Window_Console";
+	static const char* Shortcut_Window_Performance = "Shortcut_Window_Performance";
+	static const char* Shortcut_Window_Profiler = "Shortcut_Window_Profiler";
+	static const char* Shortcut_View_Perspective = "Shortcut_View_Perspective";
+	static const char* Shortcut_View_Orthographic = "Shortcut_View_Orthographic";
+	static const char* Shortcut_Edit_Undo = "Shortcut_Edit_Undo";
+	static const char* Shortcut_Edit_Redo = "Shortcut_Edit_Redo";
+	static const char* Shortcut_Edit_History = "Shortcut_Edit_History";
+	static const char* Shortcut_Gizmos_Translate = "Shortcut_Gizmos_Translate";
+	static const char* Shortcut_Gizmos_Rotate = "Shortcut_Gizmos_Rotate";
+	static const char* Shortcut_Gizmos_Scale = "Shortcut_Gizmos_Scale";
+	static const char* Shortcut_Gizmos_Universal = "Shortcut_Gizmos_Universal";
+	static const char* Shortcut_Gizmos_Local = "Shortcut_Gizmos_Local";
+	static const char* Shortcut_Gizmos_World = "Shortcut_Gizmos_World";
+
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
 	const float MainEditor::TOOLBAR_SIZE = 50.0f;
@@ -95,6 +127,7 @@ namespace Glory::Editor
 		EditorAssetLoader::Stop();
 
 		m_Settings.Save(Game::GetGame().GetEngine());
+		Shortcuts::Clear();
 
 		ProjectSpace::CloseProject();
 		EditorWindow::Cleanup();
@@ -163,49 +196,49 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); });
-		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes);
+		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); }, NULL, Shortcut_File_NewScene);
+		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes, NULL, Shortcut_File_SaveScene);
 		MenuBar::AddMenuItem("File/Load Scene", []()
 		{
 			//YAML::Node node = YAML::LoadFile("test.gscene");
 			//Serializer::DeserializeObject(node);
-		});
+		}, NULL, Shortcut_File_LoadScene);
 
-		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); });
-		MenuBar::AddMenuItem("File/Save Project", []() { AssetDatabase::Save(); ProjectSpace::Save(); });
-		MenuBar::AddMenuItem("File/Create/Empty Object", []()
-		{
-			GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
-			if (!pActiveScene) return;
-			pActiveScene->CreateEmptyObject();
-		});
+		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
+		MenuBar::AddMenuItem("File/Save Project", []() { AssetDatabase::Save(); ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
+		//MenuBar::AddMenuItem("File/Create/Empty Object", []()
+		//{
+		//	GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
+		//	if (!pActiveScene) return;
+		//	pActiveScene->CreateEmptyObject();
+		//});
 
-		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay);
-		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay);
-		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause);
-		MenuBar::AddMenuItem("Play/Next Frame", EditorApplication::TickFrame);
+		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay, NULL, Shortcut_Play_Start);
+		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay, NULL, Shortcut_Play_Stop);
+		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause, NULL, Shortcut_Play_Pauze);
+		MenuBar::AddMenuItem("Play/Next Frame", EditorApplication::TickFrame, NULL, Shortcut_Play_NextFrame);
 
 		MenuBar::AddMenuItem("File/Exit", [&]() {
 			std::vector<std::string> buttons = { "Cancel", "Exit" };
 			std::vector<std::function<void()>> buttonFuncs = { [&]() { PopupManager::CloseCurrentPopup(); }, [&]() {/*m_IsRunning = false;*/ } };
 			PopupManager::OpenPopup("Exit", "Are you sure you want to exit? All unsaved changes will be lost!",
-				buttons, buttonFuncs); });
+				buttons, buttonFuncs); }, NULL, Shortcut_File_Exit);
 
-		MenuBar::AddMenuItem("Window/Scene View", []() { EditorWindow::GetWindow<SceneWindow>(); });
-		MenuBar::AddMenuItem("Window/Game View", []() { EditorWindow::GetWindow<GameWindow>(); });
-		MenuBar::AddMenuItem("Window/Scene Graph", []() { EditorWindow::GetWindow<SceneGraphWindow>(); });
-		MenuBar::AddMenuItem("Window/Inspector", []() { EditorWindow::GetWindow<InspectorWindow>(true); });
-		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<ContentBrowser>(); });
-		MenuBar::AddMenuItem("Window/Console", []() { EditorWindow::GetWindow<EditorConsoleWindow>(); });
-		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); });
-		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); });
+		MenuBar::AddMenuItem("Window/Scene View", []() { EditorWindow::GetWindow<SceneWindow>(); }, NULL, Shortcut_Window_Scene);
+		MenuBar::AddMenuItem("Window/Game View", []() { EditorWindow::GetWindow<GameWindow>(); }, NULL, Shortcut_Window_Game);
+		MenuBar::AddMenuItem("Window/Scene Graph", []() { EditorWindow::GetWindow<SceneGraphWindow>(); }, NULL, Shortcut_Window_SceneGraph);
+		MenuBar::AddMenuItem("Window/Inspector", []() { EditorWindow::GetWindow<InspectorWindow>(true); }, NULL, Shortcut_Window_Inspector);
+		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<ContentBrowser>(); }, NULL, Shortcut_Window_Content);
+		MenuBar::AddMenuItem("Window/Console", []() { EditorWindow::GetWindow<EditorConsoleWindow>(); }, NULL, Shortcut_Window_Console);
+		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); }, NULL, Shortcut_Window_Performance);
+		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); }, NULL, Shortcut_Window_Profiler);
 
-		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); });
-		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); });
+		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Perspective);
+		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Orthographic);
 
-		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo);
-		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo);
-		MenuBar::AddMenuItem("Edit/History", []() { EditorWindow::GetWindow<HistoryWindow>(); });
+		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
+		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo, NULL, Shortcut_Edit_Redo);
+		MenuBar::AddMenuItem("Edit/History", []() { EditorWindow::GetWindow<HistoryWindow>(); }, NULL, Shortcut_Edit_History);
 
 		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE);
 		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE);
@@ -214,6 +247,36 @@ namespace Glory::Editor
 
 		GIZMO_MENU("Gizmos/Mode/Local", Gizmos::m_DefaultMode, ImGuizmo::LOCAL);
 		GIZMO_MENU("Gizmos/Mode/World", Gizmos::m_DefaultMode, ImGuizmo::WORLD);
+
+		Shortcuts::SetShortcut(Shortcut_File_NewScene, ImGuiKey_N, ImGuiMod_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_File_SaveScene, ImGuiKey_S, ImGuiMod_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_File_LoadScene, ImGuiKey_O, ImGuiMod_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_File_Exit, ImGuiKey_Escape, ImGuiMod_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_File_Preferences, ImGuiKey_F2, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_File_SaveProject, ImGuiKey_S, ImGuiMod_Ctrl | ImGuiMod_Shift);
+		Shortcuts::SetShortcut(Shortcut_Play_Start, ImGuiKey_F5, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Play_Stop, ImGuiKey_F6, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Play_Pauze, ImGuiKey_F7, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Play_NextFrame, ImGuiKey_F8, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Scene, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Game, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_SceneGraph, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Inspector, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Content, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Console, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Performance, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Profiler, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_View_Perspective, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_View_Orthographic, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Edit_Undo, ImGuiKey_Z, ImGuiMod_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_Edit_Redo, ImGuiKey_Z, ImGuiMod_Ctrl | ImGuiMod_Shift);
+		Shortcuts::SetShortcut(Shortcut_Edit_History, ImGuiKey_H, ImGuiMod_Ctrl | ImGuiMod_Shift);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Translate, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Rotate, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Scale, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Universal, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Local, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_World, ImGuiKey_None, ImGuiMod_None);
 	}
 
 	void MainEditor::SetDarkThemeColors()
@@ -270,6 +333,7 @@ namespace Glory::Editor
 
 	void MainEditor::Update()
 	{
+		Shortcuts::Update();
 		EditorWindow::UpdateWindows();
 	}
 

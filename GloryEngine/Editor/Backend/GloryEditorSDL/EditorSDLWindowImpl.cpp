@@ -59,7 +59,7 @@ namespace Glory::Editor
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			ImGui_ImplSDL2_ProcessEvent(&event);
+			if (ImGui_ImplSDL2_ProcessEvent(&event)) continue;
 			if (event.type == SDL_QUIT)
 				return true;
 			if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(pSDLWindow->GetSDLWindow()))

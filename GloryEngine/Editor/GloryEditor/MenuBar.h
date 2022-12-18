@@ -9,7 +9,7 @@ namespace Glory::Editor
 	class MenuBar
 	{
 	public:
-		static GLORY_EDITOR_API void AddMenuItem(std::string path, std::function<void()> func, std::function<bool()> selectedFunc = NULL);
+		static GLORY_EDITOR_API void AddMenuItem(std::string path, std::function<void()> func, std::function<bool()> selectedFunc = NULL, std::string_view shortcutAction = "");
 
 	private:
 		static void OnGUI();
@@ -27,6 +27,7 @@ namespace Glory::Editor
 			bool m_HasFunc;
 			std::function<void()> m_Func;
 			std::function<bool()> m_SelectedFunc;
+			std::string_view m_Shortcut;
 		};
 
 		static MenuItem* GetMenuItem(std::vector<MenuItem>& menuItems, const std::string& name);

@@ -1,4 +1,5 @@
 #include "MenuBar.h"
+#include "Shortcuts.h"
 #include <algorithm>
 #include <imgui.h>
 
@@ -7,19 +8,21 @@ namespace Glory::Editor
 	std::vector<MenuBar::MenuItem> MenuBar::m_MenuItems = std::vector<MenuItem>();
 	float MenuBar::m_MenuBarHeight = 0.0f;
 
-	void MenuBar::AddMenuItem(std::string path, std::function<void()> func, std::function<bool()> selectedFunc)
+	void MenuBar::AddMenuItem(std::string path, std::function<void()> func, std::function<bool()> selectedFunc, std::string_view shortcutAction)
 	{
 		std::vector<std::string> items = DisectPath(path);
 
 		MenuItem* currentItem = GetMenuItem(m_MenuItems, items[0]);
 		std::for_each(items.begin() + 1, items.end(), [&](const std::string& item)
-			{
-				currentItem = GetMenuItem(currentItem->m_Children, item);
-			});
+		{
+			currentItem = GetMenuItem(currentItem->m_Children, item);
+		});
 
 		currentItem->m_Func = func;
 		currentItem->m_HasFunc = true;
 		currentItem->m_SelectedFunc = selectedFunc;
+		if (shortcutAction.empty()) return;
+		currentItem->m_Shortcut = Shortcuts::AddAction(shortcutAction.data(), currentItem->m_Func)->m_Name;
 	}
 
 	void MenuBar::OnGUI()
@@ -32,7 +35,8 @@ namespace Glory::Editor
 		{
 			if (childItem.m_HasFunc)
 			{
-				if (ImGui::MenuItem(childItem.m_Name.c_str()))
+				std::string_view shortcutString = Shortcuts::GetShortcutString(childItem.m_Shortcut);
+				if (ImGui::MenuItem(childItem.m_Name.c_str(), shortcutString.data()))
 					childItem.m_Func();
 			}
 			else if (ImGui::BeginMenu(childItem.m_Name.c_str()))
@@ -82,21 +86,22 @@ namespace Glory::Editor
 	void MenuBar::MenusRecursive(const MenuItem& menuItem)
 	{
 		std::for_each(menuItem.m_Children.begin(), menuItem.m_Children.end(), [](const MenuBar::MenuItem& childItem)
+		{
+			if (childItem.m_HasFunc)
 			{
-				if (childItem.m_HasFunc)
-				{
-					bool selected = false;
-					if (childItem.m_SelectedFunc != NULL) selected = childItem.m_SelectedFunc();
+				bool selected = false;
+				if (childItem.m_SelectedFunc != NULL) selected = childItem.m_SelectedFunc();
 
-					if (ImGui::MenuItem(childItem.m_Name.c_str(), nullptr, selected))
-						childItem.m_Func();
-				}
-				else if (ImGui::BeginMenu(childItem.m_Name.c_str()))
-				{
-					MenusRecursive(childItem);
-					ImGui::EndMenu();
-				}
-			});
+				std::string shortcutString = Shortcuts::GetShortcutString(childItem.m_Shortcut);
+				if (ImGui::MenuItem(childItem.m_Name.c_str(), shortcutString.data(), selected))
+					childItem.m_Func();
+			}
+			else if (ImGui::BeginMenu(childItem.m_Name.c_str()))
+			{
+				MenusRecursive(childItem);
+				ImGui::EndMenu();
+			}
+		});
 	}
 
 	MenuBar::MenuBar()
@@ -107,12 +112,13 @@ namespace Glory::Editor
 	{
 	}
 
-	MenuBar::MenuItem::MenuItem(const std::string& name) : m_Name(name), m_HasFunc(false), m_Func(NULL), m_SelectedFunc(NULL)
+	MenuBar::MenuItem::MenuItem(const std::string& name)
+		: m_Name(name), m_HasFunc(false), m_Func(NULL), m_SelectedFunc(NULL), m_Shortcut("")
 	{
 	}
 
 	MenuBar::MenuItem::MenuItem(const std::string& name, std::function<void()> func, std::function<bool()> selectedFunc)
-		: m_Name(name), m_HasFunc(true), m_Func(func), m_SelectedFunc(selectedFunc)
+		: m_Name(name), m_HasFunc(true), m_Func(func), m_SelectedFunc(selectedFunc), m_Shortcut("")
 	{
 	}
 }
