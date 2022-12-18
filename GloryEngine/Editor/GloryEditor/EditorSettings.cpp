@@ -4,6 +4,7 @@
 #include <Object.h>
 #include <fstream>
 #include <YAML_GLM.h>
+#include <Shortcuts.h>
 
 namespace Glory::Editor
 {
@@ -49,6 +50,7 @@ namespace Glory::Editor
         emitter << YAML::Value << glm::vec2(x, y);
         emitter << YAML::EndMap;
 
+        Shortcuts::SaveShortcuts(emitter);
         emitter << YAML::EndMap;
 
         std::ofstream outStream(m_EditorSettingsPath);
@@ -76,6 +78,8 @@ namespace Glory::Editor
             pMainWindow->Resize(pMainWindowSettings->Width, pMainWindowSettings->Height);
             pMainWindow->SetPosition(pos.x, pos.y);
         }
+
+        Shortcuts::LoadShortcuts(node);
     }
 
     void EditorSettings::LoadDefaultSettings(Engine* pEngine)

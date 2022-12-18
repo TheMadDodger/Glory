@@ -48,35 +48,35 @@
 
 namespace Glory::Editor
 {
-	static const char* Shortcut_File_NewScene = "Shortcut_File_NewScene";
-	static const char* Shortcut_File_SaveScene = "Shortcut_File_SaveScene";
-	static const char* Shortcut_File_LoadScene = "Shortcut_File_LoadScene";
-	static const char* Shortcut_File_Exit = "Shortcut_File_Exit";
-	static const char* Shortcut_File_Preferences = "Shortcut_File_Preferences";
-	static const char* Shortcut_File_SaveProject = "Shortcut_File_SaveProject";
-	static const char* Shortcut_Play_Start = "Shortcut_Play_Start";
-	static const char* Shortcut_Play_Stop = "Shortcut_Play_Stop";
-	static const char* Shortcut_Play_Pauze = "Shortcut_Play_Pauze";
-	static const char* Shortcut_Play_NextFrame = "Shortcut_Play_NextFrame";
-	static const char* Shortcut_Window_Scene = "Shortcut_Window_Scene";
-	static const char* Shortcut_Window_Game = "Shortcut_Window_Game";
-	static const char* Shortcut_Window_SceneGraph = "Shortcut_Window_SceneGraph";
-	static const char* Shortcut_Window_Inspector = "Shortcut_Window_Inspector";
-	static const char* Shortcut_Window_Content = "Shortcut_Window_Content";
-	static const char* Shortcut_Window_Console = "Shortcut_Window_Console";
-	static const char* Shortcut_Window_Performance = "Shortcut_Window_Performance";
-	static const char* Shortcut_Window_Profiler = "Shortcut_Window_Profiler";
-	static const char* Shortcut_View_Perspective = "Shortcut_View_Perspective";
-	static const char* Shortcut_View_Orthographic = "Shortcut_View_Orthographic";
-	static const char* Shortcut_Edit_Undo = "Shortcut_Edit_Undo";
-	static const char* Shortcut_Edit_Redo = "Shortcut_Edit_Redo";
-	static const char* Shortcut_Edit_History = "Shortcut_Edit_History";
-	static const char* Shortcut_Gizmos_Translate = "Shortcut_Gizmos_Translate";
-	static const char* Shortcut_Gizmos_Rotate = "Shortcut_Gizmos_Rotate";
-	static const char* Shortcut_Gizmos_Scale = "Shortcut_Gizmos_Scale";
-	static const char* Shortcut_Gizmos_Universal = "Shortcut_Gizmos_Universal";
-	static const char* Shortcut_Gizmos_Local = "Shortcut_Gizmos_Local";
-	static const char* Shortcut_Gizmos_World = "Shortcut_Gizmos_World";
+	static const char* Shortcut_File_NewScene			= "New Scene";
+	static const char* Shortcut_File_SaveScene			= "Save Scene";
+	static const char* Shortcut_File_LoadScene			= "Load Scene";
+	static const char* Shortcut_File_Exit				= "Quit";
+	static const char* Shortcut_File_Preferences		= "Preferences";
+	static const char* Shortcut_File_SaveProject		= "Save Project";
+	static const char* Shortcut_Play_Start				= "Enter Playmode";
+	static const char* Shortcut_Play_Stop				= "Stop Playmode";
+	static const char* Shortcut_Play_Pauze				= "Toggle Pauze Playmode";
+	static const char* Shortcut_Play_NextFrame			= "Playmode Next Frame";
+	static const char* Shortcut_Window_Scene			= "Open Scene View";
+	static const char* Shortcut_Window_Game				= "Open Game View";
+	static const char* Shortcut_Window_SceneGraph		= "Open Scene Graph";
+	static const char* Shortcut_Window_Inspector		= "Open New Inspector Window";
+	static const char* Shortcut_Window_Content			= "Open Content Browser";
+	static const char* Shortcut_Window_Console			= "Open Console";
+	static const char* Shortcut_Window_Performance		= "Open Performance Metrics";
+	static const char* Shortcut_Window_Profiler			= "Open Profiler";
+	static const char* Shortcut_View_Perspective		= "Switch To Perspective";
+	static const char* Shortcut_View_Orthographic		= "Switch To Orthographic";
+	static const char* Shortcut_Edit_Undo				= "Undo";
+	static const char* Shortcut_Edit_Redo				= "Redo";
+	static const char* Shortcut_Edit_History			= "Edit History";
+	static const char* Shortcut_Gizmos_Translate		= "Translate Gizmo";
+	static const char* Shortcut_Gizmos_Rotate			= "Rotate Gizmo";
+	static const char* Shortcut_Gizmos_Scale			= "Scale Gizmo";
+	static const char* Shortcut_Gizmos_Universal		= "Universal Gizmo";
+	static const char* Shortcut_Gizmos_Local			= "Transform Local";
+	static const char* Shortcut_Gizmos_World			= "Transform World";
 
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
@@ -98,8 +98,6 @@ namespace Glory::Editor
 
 	void MainEditor::Initialize()
 	{
-		m_Settings.Load(Game::GetGame().GetEngine());
-
 		RegisterWindows();
 		RegisterPropertyDrawers();
 		RegisterEditors();
@@ -120,6 +118,8 @@ namespace Glory::Editor
 		FileDialog::Initialize();
 
 		Gizmos::Initialize();
+
+		m_Settings.Load(Game::GetGame().GetEngine());
 	}
 
 	void MainEditor::Destroy()
@@ -258,25 +258,25 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Play_Stop, ImGuiKey_F6, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Play_Pauze, ImGuiKey_F7, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Play_NextFrame, ImGuiKey_F8, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_Scene, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_Game, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_SceneGraph, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_Inspector, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_Content, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_Console, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_Performance, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Window_Profiler, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_View_Perspective, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_View_Orthographic, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Scene, ImGuiKey_1, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Game, ImGuiKey_2, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_SceneGraph, ImGuiKey_3, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Inspector, ImGuiKey_4, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Content, ImGuiKey_5, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Console, ImGuiKey_6, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Performance, ImGuiKey_7, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_Profiler, ImGuiKey_8, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_View_Perspective, ImGuiKey_P, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_View_Orthographic, ImGuiKey_O, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Edit_Undo, ImGuiKey_Z, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Edit_Redo, ImGuiKey_Z, ImGuiMod_Ctrl | ImGuiMod_Shift);
 		Shortcuts::SetShortcut(Shortcut_Edit_History, ImGuiKey_H, ImGuiMod_Ctrl | ImGuiMod_Shift);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Translate, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Rotate, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Scale, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Universal, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Local, ImGuiKey_None, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_World, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Translate, ImGuiKey_G, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Rotate, ImGuiKey_R, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Scale, ImGuiKey_T, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Universal, ImGuiKey_Y, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_Local, ImGuiKey_L, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Gizmos_World, ImGuiKey_K, ImGuiMod_None);
 	}
 
 	void MainEditor::SetDarkThemeColors()

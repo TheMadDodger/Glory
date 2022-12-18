@@ -12,7 +12,8 @@ project "GloryEditorSDL"
 		"**.h",
 		"**.cpp",
 		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_sdl.h",
-		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_sdl.cpp"
+		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_sdl.cpp",
+		"premake5.lua"
 	}
 
 	vpaths

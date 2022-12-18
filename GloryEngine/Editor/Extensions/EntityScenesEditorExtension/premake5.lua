@@ -10,7 +10,8 @@ project "EntityScenesEditorExtension"
 	files
 	{
 		"**.h",
-		"**.cpp"
+		"**.cpp",
+		"premake5.lua"
 	}
 
 	vpaths
