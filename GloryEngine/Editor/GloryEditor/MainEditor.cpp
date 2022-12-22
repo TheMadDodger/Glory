@@ -44,7 +44,8 @@
 
 #include "Shortcuts.h"
 
-#define GIZMO_MENU(path, var, value) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; })
+#define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
+#define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
 
 namespace Glory::Editor
 {
@@ -71,12 +72,12 @@ namespace Glory::Editor
 	static const char* Shortcut_Edit_Undo				= "Undo";
 	static const char* Shortcut_Edit_Redo				= "Redo";
 	static const char* Shortcut_Edit_History			= "Edit History";
-	static const char* Shortcut_Gizmos_Translate		= "Translate Gizmo";
-	static const char* Shortcut_Gizmos_Rotate			= "Rotate Gizmo";
-	static const char* Shortcut_Gizmos_Scale			= "Scale Gizmo";
-	static const char* Shortcut_Gizmos_Universal		= "Universal Gizmo";
-	static const char* Shortcut_Gizmos_Local			= "Transform Local";
-	static const char* Shortcut_Gizmos_World			= "Transform World";
+
+	static const char* Shortcut_Copy					= "Copy";
+	static const char* Shortcut_Paste					= "Paste";
+	static const char* Shortcut_Duplicate				= "Duplicate";
+	static const char* Shortcut_Delete					= "Delete";
+	static const char* Shortcut_Rename					= "Rename";
 
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
@@ -124,6 +125,8 @@ namespace Glory::Editor
 
 	void MainEditor::Destroy()
 	{
+		ObjectMenu::Cleanup();
+
 		EditorAssetLoader::Stop();
 
 		m_Settings.Save(Game::GetGame().GetEngine());
@@ -240,13 +243,13 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo, NULL, Shortcut_Edit_Redo);
 		MenuBar::AddMenuItem("Edit/History", []() { EditorWindow::GetWindow<HistoryWindow>(); }, NULL, Shortcut_Edit_History);
 
-		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE);
-		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE);
-		GIZMO_MENU("Gizmos/Operation/Scale", Gizmos::m_DefaultOperation, ImGuizmo::SCALE);
-		GIZMO_MENU("Gizmos/Operation/Universal", Gizmos::m_DefaultOperation, ImGuizmo::UNIVERSAL);
+		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE, Gizmos::Shortcut_Gizmos_Translate);
+		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE, Gizmos::Shortcut_Gizmos_Rotate);
+		GIZMO_MENU("Gizmos/Operation/Scale", Gizmos::m_DefaultOperation, ImGuizmo::SCALE, Gizmos::Shortcut_Gizmos_Scale);
+		GIZMO_MENU("Gizmos/Operation/Universal", Gizmos::m_DefaultOperation, ImGuizmo::UNIVERSAL, Gizmos::Shortcut_Gizmos_Universal);
 
-		GIZMO_MENU("Gizmos/Mode/Local", Gizmos::m_DefaultMode, ImGuizmo::LOCAL);
-		GIZMO_MENU("Gizmos/Mode/World", Gizmos::m_DefaultMode, ImGuizmo::WORLD);
+		GIZMO_MODE_MENU("Gizmos/Mode/Local", Gizmos::m_DefaultMode, ImGuizmo::LOCAL, Gizmos::Shortcut_Gizmos_Local);
+		GIZMO_MODE_MENU("Gizmos/Mode/World", Gizmos::m_DefaultMode, ImGuizmo::WORLD, Gizmos::Shortcut_Gizmos_World);
 
 		Shortcuts::SetShortcut(Shortcut_File_NewScene, ImGuiKey_N, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_File_SaveScene, ImGuiKey_S, ImGuiMod_Ctrl);
@@ -271,12 +274,12 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Edit_Undo, ImGuiKey_Z, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Edit_Redo, ImGuiKey_Z, ImGuiMod_Ctrl | ImGuiMod_Shift);
 		Shortcuts::SetShortcut(Shortcut_Edit_History, ImGuiKey_H, ImGuiMod_Ctrl | ImGuiMod_Shift);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Translate, ImGuiKey_G, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Rotate, ImGuiKey_R, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Scale, ImGuiKey_T, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Universal, ImGuiKey_Y, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_Local, ImGuiKey_L, ImGuiMod_None);
-		Shortcuts::SetShortcut(Shortcut_Gizmos_World, ImGuiKey_K, ImGuiMod_None);
+		Shortcuts::SetShortcut(Gizmos::Shortcut_Gizmos_Translate, ImGuiKey_W, ImGuiMod_None);
+		Shortcuts::SetShortcut(Gizmos::Shortcut_Gizmos_Rotate, ImGuiKey_R, ImGuiMod_None);
+		Shortcuts::SetShortcut(Gizmos::Shortcut_Gizmos_Scale, ImGuiKey_S, ImGuiMod_None);
+		Shortcuts::SetShortcut(Gizmos::Shortcut_Gizmos_Universal, ImGuiKey_U, ImGuiMod_None);
+		Shortcuts::SetShortcut(Gizmos::Shortcut_Gizmos_Local, ImGuiKey_None, ImGuiMod_None);
+		Shortcuts::SetShortcut(Gizmos::Shortcut_Gizmos_World, ImGuiKey_None, ImGuiMod_None);
 	}
 
 	void MainEditor::SetDarkThemeColors()
@@ -314,21 +317,28 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultObjectMenu()
 	{
+		ObjectMenu::Initialize();
 		ObjectMenu::AddMenuItem("Save Scene", SaveScene, T_Scene);
 		ObjectMenu::AddMenuItem("Save Scene As", SaveSceneAs, T_Scene);
 		ObjectMenu::AddMenuItem("Set As Active Scene", SetActiveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Remove Scene", RemoveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Reload Scene", ReloadSceneCallback, T_Scene);
-		ObjectMenu::AddMenuItem("Copy", CopyObjectCallback, T_AnyResource | T_SceneObject | T_Scene);
-		ObjectMenu::AddMenuItem("Paste", PasteObjectCallback, T_SceneObject | T_Resource | T_ContentBrowser | T_Hierarchy | T_Scene);
-		ObjectMenu::AddMenuItem("Duplicate", DuplicateObjectCallback, T_SceneObject | T_AnyResource);
-		ObjectMenu::AddMenuItem("Delete", DeleteObjectCallback, T_SceneObject | T_Resource | T_Folder);
+		ObjectMenu::AddMenuItem("Copy", CopyObjectCallback, T_AnyResource | T_SceneObject | T_Scene, Shortcut_Copy);
+		ObjectMenu::AddMenuItem("Paste", PasteObjectCallback, T_SceneObject | T_Resource | T_ContentBrowser | T_Hierarchy | T_Scene, Shortcut_Paste);
+		ObjectMenu::AddMenuItem("Duplicate", DuplicateObjectCallback, T_SceneObject | T_AnyResource, Shortcut_Duplicate);
+		ObjectMenu::AddMenuItem("Delete", DeleteObjectCallback, T_SceneObject | T_Resource | T_Folder, Shortcut_Delete);
 		ObjectMenu::AddMenuItem("Create/Empty Object", CreateEmptyObjectCallback, T_SceneObject | T_Scene | T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/New Scene", CreateNewSceneCallback, T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/Material", CreateNewMaterialCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Material Instance", CreateNewMaterialInstanceCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
-		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder);
+		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
+
+		Shortcuts::SetShortcut(Shortcut_Copy, ImGuiKey_C, ImGuiModFlags_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_Paste, ImGuiKey_V, ImGuiModFlags_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_Duplicate, ImGuiKey_D, ImGuiModFlags_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_Delete, ImGuiKey_Delete, ImGuiModFlags_None);
+		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_R, ImGuiModFlags_Ctrl);
 	}
 
 	void MainEditor::Update()

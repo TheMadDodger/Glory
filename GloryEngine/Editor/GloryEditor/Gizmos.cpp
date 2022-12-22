@@ -14,6 +14,13 @@ namespace Glory::Editor
 
 	GizmosToolChain* Gizmos::m_pToolChain = nullptr;
 
+	const char* Gizmos::Shortcut_Gizmos_Translate = "Translate Gizmo";
+	const char* Gizmos::Shortcut_Gizmos_Rotate = "Rotate Gizmo";
+	const char* Gizmos::Shortcut_Gizmos_Scale = "Scale Gizmo";
+	const char* Gizmos::Shortcut_Gizmos_Universal = "Universal Gizmo";
+	const char* Gizmos::Shortcut_Gizmos_Local = "Transform Local";
+	const char* Gizmos::Shortcut_Gizmos_World = "Transform World";
+
 	//GLORY_EDITOR_API bool Gizmos::DrawGizmo(glm::mat4* transfrom)
 	//{
 	//	size_t index = m_pGizmos.size();
@@ -57,6 +64,21 @@ namespace Glory::Editor
 			delete pGizmo;
 		}
 		m_pGizmos.clear();
+	}
+
+	void Gizmos::ToggleMode()
+	{
+		switch (m_DefaultMode)
+		{
+		case ImGuizmo::LOCAL:
+			m_DefaultMode = ImGuizmo::WORLD;
+			break;
+		case ImGuizmo::WORLD:
+			m_DefaultMode = ImGuizmo::LOCAL;
+			break;
+		default:
+			break;
+		}
 	}
 
 	void Gizmos::Initialize()

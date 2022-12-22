@@ -3,6 +3,8 @@
 #include <GScene.h>
 #include <algorithm>
 #include <imgui.h>
+#include "Shortcuts.h"
+#include "AssetManager.h"
 
 namespace Glory::Editor
 {
@@ -12,16 +14,19 @@ namespace Glory::Editor
 	ObjectMenuType ObjectMenu::m_CurrentMenuType = T_Undefined;
 	bool ObjectMenu::m_Open = false;
 
-	GLORY_EDITOR_API void ObjectMenu::Open(Object* pObject, ObjectMenuType forceMenuType)
+	void ObjectMenu::Open(Object* pObject, ObjectMenuType forceMenuType)
 	{
 		m_pObject = pObject;
 		m_CurrentMenuType = forceMenuType;
 		m_Open = true;
 	}
 
-	GLORY_EDITOR_API void ObjectMenu::AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus)
+	void ObjectMenu::AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus, std::string_view shortcut)
 	{
+		const size_t index = m_MenuItems.size();
 		m_MenuItems.push_back(ObjectMenuItemData(path, func, (ObjectMenuType)relevantMenus));
+		if (!shortcut.empty())
+			Shortcuts::AddAction(shortcut.data(), std::bind(&ObjectMenuItemData::ShortcutCallback, m_MenuItems[index]));
 	}
 
 	void ObjectMenu::OnGUI()
@@ -84,13 +89,13 @@ namespace Glory::Editor
 		{
 			return menuItem.m_Name == name;
 		});
-	
+
 		if (it != menuItems.end())
 		{
 			ObjectMenuItem* p = &*it;
 			return p;
 		}
-	
+
 		menuItems.push_back(ObjectMenuItem(name));
 		ObjectMenuItem* newItem = &menuItems[menuItems.size() - 1];
 		return newItem;
@@ -113,6 +118,17 @@ namespace Glory::Editor
 		});
 	}
 
+	void ObjectMenu::Initialize()
+	{
+	}
+
+	void ObjectMenu::Cleanup()
+	{
+		m_pObject = nullptr;
+		m_MenuItems.clear();
+		m_BuiltMenu.clear();
+	}
+
 	ObjectMenu::ObjectMenu() {}
 	ObjectMenu::~ObjectMenu() {}
 
@@ -127,7 +143,7 @@ namespace Glory::Editor
 				++counter;
 				return;
 			}
-		
+
 			std::vector<std::string> items = DisectPath(item.m_Path);
 
 			ObjectMenuItem* currentItem = GetMenuItem(m_BuiltMenu, items[0]);
@@ -142,6 +158,37 @@ namespace Glory::Editor
 
 	ObjectMenuItemData::ObjectMenuItemData(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuType& relevantMenus)
 		: m_Path(path), m_RelevantMenus(relevantMenus), m_Func(func) {}
+
+	void ObjectMenuItemData::ShortcutCallback()
+	{
+		Object* pSelected = Selection::GetActiveObject();
+		if (!pSelected)
+		{
+			m_Func(pSelected, T_Undefined);
+			return;
+		}
+		for (size_t i = 0; i < pSelected->TypeCount(); i++)
+		{
+			std::type_index type = typeid(Object);
+			if (!pSelected->GetType(i, type)) continue;
+			if (type == typeid(Resource))
+			{
+				m_Func(pSelected, T_Resource);
+				return;
+			}
+			if (type == typeid(SceneObject))
+			{
+				m_Func(pSelected, T_SceneObject);
+				return;
+			}
+			if (type == typeid(GScene))
+			{
+				m_Func(pSelected, T_Scene);
+				return;
+			}
+		}
+		m_Func(pSelected, T_Undefined);
+	}
 
 	ObjectMenuItem::ObjectMenuItem(const std::string& name)
 		: m_Name(name), m_ItemIndex(-1), m_Children() {}

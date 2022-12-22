@@ -9,7 +9,7 @@ namespace Glory
 		GloryContext* pContext = GloryContext::GetContext();
 		pContext->m_pAllObjects.push_back(this);
 	}
-	
+
 	Object::Object(const std::string& name) : m_ID(UUID()), m_Name(name)
 	{
 		APPEND_TYPE(Object);
@@ -23,7 +23,7 @@ namespace Glory
 		GloryContext* pContext = GloryContext::GetContext();
 		pContext->m_pAllObjects.push_back(this);
 	}
-	
+
 	Object::Object(UUID uuid, const std::string& name) : m_ID(uuid), m_Name(name)
 	{
 		APPEND_TYPE(Object);
@@ -48,12 +48,12 @@ namespace Glory
 		return GetUUID();
 	}
 
-	size_t Object::TypeCount()
+	size_t Object::TypeCount() const
 	{
 		return m_Inheritence.size();
 	}
 
-	bool Object::GetType(size_t index, std::type_index& type)
+	bool Object::GetType(size_t index, std::type_index& type) const
 	{
 		if (index >= m_Inheritence.size()) return false;
 		type = m_Inheritence[index];

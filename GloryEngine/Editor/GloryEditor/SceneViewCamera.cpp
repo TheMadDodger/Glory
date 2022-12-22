@@ -3,6 +3,7 @@
 #include <ImGuizmo.h>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <GloryContext.h>
+#include <Shortcuts.h>
 
 namespace Glory::Editor
 {
@@ -34,10 +35,10 @@ namespace Glory::Editor
 
         ImGuiIO& io = ImGui::GetIO();
 		io.KeyShift;
-		
+
 		bool fastMode = io.KeyShift;
 		float movementSpeed = fastMode ? m_FastMovementSpeed : m_MovementSpeed;
-		
+
 		float deltaTime = io.DeltaTime;
 
 		bool leftKey = ImGui::IsKeyDown(ImGuiKey_A);
@@ -46,14 +47,14 @@ namespace Glory::Editor
 		bool backwardKey = ImGui::IsKeyDown(ImGuiKey_S);
 		bool upKey = ImGui::IsKeyDown(ImGuiKey_Q);
 		bool downKey = ImGui::IsKeyDown(ImGuiKey_E);
-		
+
 		glm::vec3 right(viewInverse[0][0], viewInverse[0][1], viewInverse[0][2]);
 		glm::vec3 left = -right;
 		glm::vec3 forward(viewInverse[2][0], viewInverse[2][1], viewInverse[2][2]);
 		glm::vec3 backward = -forward;
 		glm::vec3 referenceUp = glm::vec3(0.0, 1.0f, 0.0f);
 		glm::vec3 referenceDown = glm::vec3(0.0, -1.0f, 0.0f);
-		
+
 		if (leftKey) position += left * movementSpeed * deltaTime;
 		if (rightKey) position += right * movementSpeed * deltaTime;
 		if (forwardKey) position -= forward * movementSpeed * deltaTime;
@@ -73,7 +74,7 @@ namespace Glory::Editor
 			if (!m_IsOrthographic) position += backward * movementSpeed * deltaTime;
 			else m_OrthoZoom += movementSpeed * deltaTime;
 		}
-		
+
 		ImVec2 mouseDelta = io.MouseDelta;
 
 		glm::mat4 transform = viewInverse;
@@ -82,6 +83,14 @@ namespace Glory::Editor
 		m_Looking = io.MouseDown[1];
 		if (m_Looking)
 		{
+			/* Block camera keys from triggering shortcuts */
+			Shortcuts::AddBlockKeyForOneFrame(ImGuiKey_W);
+			Shortcuts::AddBlockKeyForOneFrame(ImGuiKey_A);
+			Shortcuts::AddBlockKeyForOneFrame(ImGuiKey_S);
+			Shortcuts::AddBlockKeyForOneFrame(ImGuiKey_D);
+			Shortcuts::AddBlockKeyForOneFrame(ImGuiKey_Q);
+			Shortcuts::AddBlockKeyForOneFrame(ImGuiKey_E);
+
 			glm::mat4 rx, ry, roll;
 
 			rx = glm::rotate(glm::identity<glm::mat4>(), -mouseDelta.x * m_FreeLookSensitivity * deltaTime, referenceUp);

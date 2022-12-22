@@ -9,7 +9,7 @@
 
 namespace Glory::Editor
 {
-	/* Defines a shortcut that will trigger an action */
+	/* @brief Defines a shortcut that will trigger an action */
 	struct Shortcut
 	{
 		Shortcut();
@@ -19,8 +19,10 @@ namespace Glory::Editor
 		const std::function<void()> m_Action;
 		ImGuiKey m_Key;
 		ImGuiModFlags m_Mods;
+		bool m_Blocked;
 	};
 
+	/* @brief Manager to handle all shortcuts and their set keys */
 	class Shortcuts
 	{
 	public:
@@ -41,13 +43,25 @@ namespace Glory::Editor
 		 * @param mods The modifiers that need to be active on the key to trigger the action. */
 		static GLORY_EDITOR_API void SetShortcut(std::string_view action, ImGuiKey key, ImGuiModFlags mods);
 
+		/* @brief Gets a formatted string of the shortcut (Mod1 + ModN + Key).
+		 * @param action The name of the action to get the shortcut string from. */
 		static GLORY_EDITOR_API std::string GetShortcutString(std::string_view action);
 
+		/* @brief Begin iterator of Shortcut map */
 		static GLORY_EDITOR_API const std::map<std::string_view, Shortcut>::iterator Begin();
+		/* @brief End iterator of Shortcut map */
 		static GLORY_EDITOR_API const std::map<std::string_view, Shortcut>::iterator End();
 
+		/* @brief Write user set shortcut keys to a yaml emitter.
+		 * @param out The emitter to write the keys to. */
 		static GLORY_EDITOR_API void SaveShortcuts(YAML::Emitter& out);
+		/* @brief Read user set shortcut keys from a yaml node.
+		 * @param node The yaml node to read the keys from.*/
 		static GLORY_EDITOR_API void LoadShortcuts(YAML::Node& node);
+
+		static GLORY_EDITOR_API void BlockActionForOneFrame(std::string_view action);
+		static GLORY_EDITOR_API void AddBlockKeyForOneFrame(ImGuiKey key);
+
 
 	private:
 		/* @brief Clears all shortcuts and actions, used for cleanup. */
@@ -62,5 +76,6 @@ namespace Glory::Editor
 	private:
 		friend class MainEditor;
 		static std::map<std::string_view, Shortcut> m_Shortcuts;
+		static std::vector<ImGuiKey> m_CurrentBlockedKeys;
 	};
 }

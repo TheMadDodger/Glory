@@ -1,6 +1,7 @@
 #pragma once
 #include <Object.h>
 #include <functional>
+#include <Selection.h>
 #include "GloryEditor.h"
 
 namespace Glory::Editor
@@ -31,6 +32,8 @@ namespace Glory::Editor
 		const std::string m_Path;
 		const ObjectMenuType m_RelevantMenus;
 		std::function<void(Object*, const ObjectMenuType&)> m_Func;
+
+		void ShortcutCallback();
 	};
 
 	struct ObjectMenuItem
@@ -47,7 +50,7 @@ namespace Glory::Editor
 	{
 	public:
 		static GLORY_EDITOR_API void Open(Object* pObject, ObjectMenuType forceMenuType);
-		static GLORY_EDITOR_API void AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus = ObjectMenuType::T_Undefined);
+		static GLORY_EDITOR_API void AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus, std::string_view shortcut = "");
 
 	private:
 		static void OnGUI();
@@ -56,14 +59,19 @@ namespace Glory::Editor
 		static ObjectMenuItem* GetMenuItem(std::vector<ObjectMenuItem>& menuItems, const std::string& name);
 		static void MenusRecursive(const ObjectMenuItem& menuItem);
 
-	private:
-		ObjectMenu();
-		virtual ~ObjectMenu();
+		static void Initialize();
+		static void Cleanup();
 
 		static void BuildMenu();
 
 	private:
+		ObjectMenu();
+		virtual ~ObjectMenu();
+
+
+	private:
 		friend class MainEditor;
+		friend class ObjectMenuItemData;
 		static Object* m_pObject;
 		static ObjectMenuType m_CurrentMenuType;
 		static std::vector<ObjectMenuItemData> m_MenuItems;
