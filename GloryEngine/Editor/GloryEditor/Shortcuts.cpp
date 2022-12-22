@@ -4,14 +4,14 @@
 namespace Glory::Editor
 {
 	std::map<std::string_view, Shortcut> Shortcuts::m_Shortcuts;
+	std::vector<ImGuiKey> Shortcuts::m_CurrentBlockedKeys;
 
 	Shortcut::Shortcut() :
-		m_Name("INVALID"), m_Action(NULL), m_Key(ImGuiKey_None), m_Mods(ImGuiModFlags_None)
-	{
-	}
+		m_Name("INVALID"), m_Action(NULL), m_Key(ImGuiKey_None), m_Mods(ImGuiModFlags_None), m_Blocked(false)
+	{}
 
 	Shortcut::Shortcut(const char* action, std::function<void()> callback)
-		: m_Name(action), m_Action(callback), m_Key(ImGuiKey_None), m_Mods(ImGuiModFlags_None)
+		: m_Name(action), m_Action(callback), m_Key(ImGuiKey_None), m_Mods(ImGuiModFlags_None), m_Blocked(false)
 	{}
 
 	const Shortcut* Shortcuts::AddAction(const char* action, std::function<void()> callback)
@@ -102,9 +102,21 @@ namespace Glory::Editor
 		}
 	}
 
+	void Shortcuts::BlockActionForOneFrame(std::string_view action)
+	{
+		if (m_Shortcuts.find(action) == m_Shortcuts.end()) return;
+		m_Shortcuts.at(action).m_Blocked = true;
+	}
+
+	void Shortcuts::AddBlockKeyForOneFrame(ImGuiKey key)
+	{
+		m_CurrentBlockedKeys.push_back(key);
+	}
+
 	void Shortcuts::Clear()
 	{
 		m_Shortcuts.clear();
+		m_CurrentBlockedKeys.clear();
 	}
 
 	void Shortcuts::Update()
@@ -113,12 +125,21 @@ namespace Glory::Editor
 
 		for (auto itor = m_Shortcuts.begin(); itor != m_Shortcuts.end(); ++itor)
 		{
+			const bool keyBlocked = std::find(m_CurrentBlockedKeys.begin(), m_CurrentBlockedKeys.end(), itor->second.m_Key) != m_CurrentBlockedKeys.end();
+
+			if (itor->second.m_Blocked || keyBlocked)
+			{
+				/* Reset blocked state */
+				itor->second.m_Blocked = false;
+				continue;
+			}
+
 			if (!ImGui::IsKeyPressed(itor->second.m_Key)) continue;
 			/* Mods need to be the exact same to prevent triggering multiple shortcuts. */
 			if (io.KeyMods != itor->second.m_Mods) continue;
 			itor->second.m_Action();
-			/* Can only trigger 1 action per frame! */
-			return;
 		}
+
+		m_CurrentBlockedKeys.clear();
 	}
 }

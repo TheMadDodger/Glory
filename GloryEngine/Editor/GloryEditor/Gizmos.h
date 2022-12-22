@@ -20,6 +20,14 @@ namespace Glory::Editor
 	class Gizmos
 	{
 	public:
+		static const char* Shortcut_Gizmos_Translate;
+		static const char* Shortcut_Gizmos_Rotate;
+		static const char* Shortcut_Gizmos_Scale;
+		static const char* Shortcut_Gizmos_Universal;
+		static const char* Shortcut_Gizmos_Local;
+		static const char* Shortcut_Gizmos_World;
+
+	public:
 		//static GLORY_EDITOR_API bool DrawGizmo(glm::mat4* transfrom);
 		template<class T, typename ...Args>
 		static T* GetGizmo(UUID uuid, Args&&... args)
@@ -36,6 +44,8 @@ namespace Glory::Editor
 
 		static ImGuizmo::OPERATION m_DefaultOperation;
 		static ImGuizmo::MODE m_DefaultMode;
+
+		static void ToggleMode();
 
 		static void Initialize();
 		static void Cleanup();

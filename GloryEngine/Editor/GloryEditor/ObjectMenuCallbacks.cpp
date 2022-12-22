@@ -36,7 +36,7 @@ namespace Glory::Editor
 	{
 		switch (currentMenu)
 		{
-			
+
 		}
 	}
 
@@ -103,6 +103,13 @@ namespace Glory::Editor
 			PopupManager::OpenModal("Delete Folder", "Are you sure you want to delete the folder \"" + path.filename().string() + "\" and all assets underneath?\nThis action cannot be undone!", buttons, callbacks);
 			break;
 		}
+
+		case ObjectMenuType::T_Scene:
+		{
+			RemoveSceneCallback(pObject, currentMenu);
+			break;
+		}
+
 		}
 	}
 
@@ -176,6 +183,11 @@ namespace Glory::Editor
 		GScene* pScene = (GScene*)pObject;
 		if (pScene == nullptr) return;
 		EditorSceneManager::CloseScene(pScene->GetUUID());
+
+		/* TODO: To prevent crashing the Undo history must be cleared :/
+		 * Need to add a RemoveSceneAction and serialize the whole scene in it
+		 * then bring it back on undo. */
+		Undo::Clear();
 	}
 
 	OBJECTMENU_CALLBACK(ReloadSceneCallback)

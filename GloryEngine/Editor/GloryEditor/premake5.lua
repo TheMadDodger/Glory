@@ -42,7 +42,7 @@ project "GloryEditor"
 	includedirs
 	{
 		"%{vulkanDir}/third-party/include",
-		
+
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
@@ -54,10 +54,10 @@ project "GloryEditor"
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ImGui}",
-		
+
 		"%{IncludeDir.Reflect}",
 	}
-	
+
 	libdirs
 	{
 		"%{LibDirs.glory}",
@@ -68,10 +68,10 @@ project "GloryEditor"
 		"%{LibDirs.yaml_cpp}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
-	
+
 	links
 	{
 		"GloryCore",
@@ -83,7 +83,7 @@ project "GloryEditor"
 		"ImGuizmo",
 		"implot",
 		"ImFileDialog",
-		
+
 		"GloryReflectStatic",
 	}
 
@@ -113,7 +113,7 @@ project "GloryEditor"
 		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
-		
+
 		links
 		{
 			"spirv-cross-cd",
@@ -130,7 +130,7 @@ project "GloryEditor"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-		
+
 		links
 		{
 			"spirv-cross-c",
