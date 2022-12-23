@@ -13,7 +13,7 @@ namespace Glory
 
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath) : m_CFGPath(cfgPath)
 	{
-		
+
 	}
 
 	EngineLoader::~EngineLoader()
@@ -186,6 +186,7 @@ namespace Glory
 		LoadRequiredModule<ScenesModule>(engineInfo, "SceneManagement", &engineCreateInfo.pScenesModule);
 		LoadRequiredModule<RendererModule>(engineInfo, "Renderer", &engineCreateInfo.pRenderModule);
 		LoadRequiredModule<GraphicsModule>(engineInfo, "Graphics", &engineCreateInfo.pGraphicsModule);
+		LoadRequiredModule<InputModule>(engineInfo, "Input", &engineCreateInfo.pInputModule);
 		LoadScriptingModules(engineInfo, "Scripting", engineCreateInfo);
 
 		YAML::Node optionalModulesNode = engineInfo["Optional"];

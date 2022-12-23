@@ -1,4 +1,4 @@
-project "GloryEntityScenes"
+project "GloryGainput"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
@@ -17,10 +17,7 @@ project "GloryEntityScenes"
 
 	vpaths
 	{
-		["Module"] = { "GloryEntityScenes.*", "Components.*", "Entity.*", "EntityScene.*", "EntitySceneScenesModule.*", "EntityComponentObject.*", "EntitySceneObject.*" },
-		["Serializers"] = { "ScriptedComponentSerializer.*", "EntitySceneSerializer.*", "EntitySceneObjectSerializer.*", "EntityComponentSerializer.*" },
-		["Systems"] = { "ScriptedSystem.*", "MeshRenderSystem.*", "Systems.*", "TransformSystem.*", "CameraSystem.*", "LookAtSystem.*", "SpinSystem.*", "LightSystem.*", "MeshFilterSystem.*" },
-		["Helpers"] = { "ComponentTypes.*" },
+		["Module"] = { "GloryGainput.*", "GainputModule.*" },
 	}
 
 	includedirs
@@ -31,14 +28,12 @@ project "GloryEntityScenes"
 		"%{IncludeDir.spirv_cross}",
 		"%{vulkanDir}/third-party/include",
 
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		"%{LibDirs.assimp}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
@@ -54,7 +49,6 @@ project "GloryEntityScenes"
 		"shaderc_shared",
 		"yaml-cpp",
 
-		"GloryECSStatic",
 		"GloryReflectStatic",
 	}
 

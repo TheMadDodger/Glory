@@ -59,7 +59,7 @@ namespace Glory
 		YAML::Node editorNode = node["EditorBackend"];
 		std::string type = typeNode.as<std::string>();
 		std::string edtorDLLName = editorNode.as<std::string>();
-		
+
 		std::filesystem::path dllPath = modulePath.append("Editor").append("Backend").append(edtorDLLName).replace_extension(".dll");
 
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());

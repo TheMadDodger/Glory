@@ -8,6 +8,7 @@
 #include "ScenesModule.h"
 #include "RendererModule.h"
 #include "ResourceLoaderModule.h"
+#include "InputModule.h"
 #include "TimerModule.h"
 #include "ProfilerModule.h"
 #include "ResourceType.h"
@@ -24,6 +25,7 @@ namespace Glory
 		ScenesModule* pScenesModule;
 		RendererModule* pRenderModule;
 		GraphicsModule* pGraphicsModule;
+		InputModule* pInputModule;
 
 		uint32_t ScriptingModulesCount;
 		ScriptingModule** pScriptingModules;
@@ -122,6 +124,7 @@ namespace Glory
 		ScenesModule* m_pScenesModule;
 		RendererModule* m_pRenderModule;
 		GraphicsModule* m_pGraphicsModule;
+		InputModule* m_pInputModule;
 		TimerModule* m_pTimerModule;
 		ProfilerModule* m_pProfilerModule;
 		ScriptingExtender* m_pScriptingExtender;
