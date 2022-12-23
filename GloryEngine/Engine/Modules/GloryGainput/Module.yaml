@@ -1,0 +1,7 @@
+Name: "Gainput"
+Type: Input
+#Scripting:
+#- Language: "csharp"
+#  Extension: "GloryGainputMonoAPI"
+#Editor:
+# Extensions: [GainputEditorExtension]

@@ -15,6 +15,7 @@ namespace Glory
 		MT_SceneManagement,
 		MT_Loader,
 		MT_Scripting,
+		MT_Input,
 		MT_Other,
 	};
 

@@ -34,7 +34,7 @@ namespace Glory
 		virtual void Initialize() = 0;
 		virtual void PostInitialize() {};
 		virtual void Cleanup() = 0;
-		
+
 		virtual void OnBeginFrame() {};
 		virtual void OnEndFrame() {};
 

@@ -120,8 +120,8 @@ namespace Glory
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
-		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pGraphicsThread(nullptr),
-		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
+		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pInputModule(createInfo.pInputModule),
+		m_pGraphicsThread(nullptr), m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
@@ -137,11 +137,12 @@ namespace Glory
 
 		// Fill in the all modules vector with the required modules first
 		// In order of importance
-		m_pAllModules.push_back(m_pWindowModule);
-		m_pAllModules.push_back(m_pScenesModule);
-		m_pAllModules.push_back(m_pRenderModule);
-		m_pAllModules.push_back(m_pGraphicsModule);
-		m_pAllModules.push_back(m_pTimerModule);
+		if (m_pWindowModule) m_pAllModules.push_back(m_pWindowModule);
+		if (m_pScenesModule) m_pAllModules.push_back(m_pScenesModule);
+		if (m_pRenderModule) m_pAllModules.push_back(m_pRenderModule);
+		if (m_pGraphicsModule) m_pAllModules.push_back(m_pGraphicsModule);
+		if (m_pInputModule) m_pAllModules.push_back(m_pInputModule);
+		if (m_pTimerModule) m_pAllModules.push_back(m_pTimerModule);
 
 		// Add optional modules
 		size_t currentSize = m_pAllModules.size();
@@ -150,7 +151,7 @@ namespace Glory
 		{
 			m_pAllModules[currentSize + i] = m_pOptionalModules[i];
 		}
-		
+
 		m_pScriptingModules.resize(createInfo.ScriptingModulesCount);
 		if (m_pScriptingModules.size() > 0) memcpy(&m_pScriptingModules[0], createInfo.pScriptingModules, createInfo.ScriptingModulesCount * sizeof(ScriptingModule*));
 
@@ -222,7 +223,7 @@ namespace Glory
 			m_pPriorityInitializationModules[i]->m_pEngine = this;
 			m_pPriorityInitializationModules[i]->Initialize();
 		}
-		
+
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			LoaderModule* pLoaderModule = dynamic_cast<LoaderModule*>(m_pAllModules[i]);

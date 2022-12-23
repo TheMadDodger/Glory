@@ -28,6 +28,7 @@ namespace Glory
 		{ "Graphics", ModuleType::MT_Graphics },
 		{ "Loader", ModuleType::MT_Loader },
 		{ "Scripting", ModuleType::MT_Scripting },
+		{ "Input", ModuleType::MT_Input },
 		{ "Other", ModuleType::MT_Other },
 	};
 

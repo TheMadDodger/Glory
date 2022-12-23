@@ -31,6 +31,7 @@ namespace Glory
 		T* LoadRequiredModule(YAML::Node& node, const std::string& key, T** value)
 		{
 			YAML::Node indexNode = node[key];
+			if (!indexNode.IsDefined() || !indexNode.IsScalar()) return nullptr;
 			size_t index = indexNode.as<size_t>();
 			Module* pModule = m_pModules[index];
 			T* pT = (T*)pModule;
