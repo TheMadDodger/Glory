@@ -376,6 +376,56 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputEnum(std::string_view label, size_t typeHash, size_t* value)
+	{
+		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+
+		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		if (!pEnumType)
+		{
+			ImGui::TextColored({ 1,0,0,1 }, label.data());
+			return false;
+		}
+
+		std::string valueString;
+		if (!pEnumType->ToString(value, valueString)) valueString = "none";
+
+
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::PushID(label.data());
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		bool change = false;
+		ImGui::PushItemWidth(width);
+		if (ImGui::BeginCombo("##combo", valueString.c_str()))
+		{
+			for (size_t i = 0; i < pEnumType->NumValues(); i++)
+			{
+				const std::string& name = pEnumType->GetName(i);
+				size_t outValue = 0;
+				pEnumType->FromString(name, (void*)&outValue);
+
+				if (ImGui::Selectable(name.c_str(), outValue == *value))
+				{
+					*value = outValue;
+					change = true;
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::PopID();
+
+		return change;
+	}
+
 	bool EditorUI::InputLayerMask(std::string_view label, LayerMask* data)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);

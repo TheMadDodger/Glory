@@ -5,6 +5,7 @@ namespace Glory
     WindowModule::WindowModule() : m_pMainWindow(nullptr), m_pWindows(std::vector<Window*>()), m_MainWindowCreateInfo()
     {
     }
+
     WindowModule::WindowModule(const WindowCreateInfo& mainWindowCreateInfo) : m_pMainWindow(nullptr), m_pWindows(std::vector<Window*>()), m_MainWindowCreateInfo(mainWindowCreateInfo)
     {
     }
@@ -33,8 +34,9 @@ namespace Glory
         m_MainWindowCreateInfo = mainWindowCreateInfo;
     }
 
-    Window* WindowModule::CreateNewWindow(const WindowCreateInfo& createInfo)
+    Window* WindowModule::CreateNewWindow(WindowCreateInfo& createInfo)
     {
+        createInfo.pWindowManager = this;
         Window* pWindow = CreateWindow_Internal(createInfo);
         pWindow->Open();
         m_pWindows.push_back(pWindow);

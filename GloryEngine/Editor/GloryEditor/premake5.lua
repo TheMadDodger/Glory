@@ -29,14 +29,16 @@ project "GloryEditor"
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "AssetPicker.*", "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
-		["Windows"] = { "HistoryWindow.*", "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
+		["Windows"] = { "ProjectSettingsWindow.*", "HistoryWindow.*", "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
 		["Windows/SceneView"] = { "SceneWindow.*", "SceneViewCamera.*" },
 		["Windows/ContentBrowser"] = { "ContentBrowser.*", "ContentBrowserItem.*" },
+		["Windows/ProjectSettings"] = { "ProjectSettingsWindow.*" },
 		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" },
 		["Undo"] = { "Undo.*" },
 		["Undo/Actions"] = { "NodeValueChangeAction.*", "ValueChangeAction.*", "SetSiblingIndexAction.*", "SetParentAction.*", "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectAction.*", "DeselectAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*" },
-		["UI"] = { "EditorUI.*", "ListView.*" }
+		["UI"] = { "EditorUI.*", "ListView.*" },
+		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.*" }
 	}
 
 	includedirs

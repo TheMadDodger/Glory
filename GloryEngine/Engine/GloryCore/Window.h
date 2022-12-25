@@ -2,11 +2,15 @@
 #include "Object.h"
 #include <string>
 #include <vector>
+#include "Input.h"
 
 namespace Glory
 {
+	class WindowModule;
+
 	struct WindowCreateInfo
 	{
+		WindowModule* pWindowManager;
 		std::string WindowName;
 		uint32_t Width;
 		uint32_t Height;
@@ -37,11 +41,14 @@ namespace Glory
 		virtual void Close() = 0;
 		virtual void PollEvents() = 0;
 
+		void ForwardInputEvent(InputEvent& input);
+
 	protected:
 		std::string m_WindowName;
 		uint32_t m_Width;
 		uint32_t m_Height;
 		uint32_t m_WindowFlags;
+		WindowModule* m_pWindowManager;
 
 	private:
 		friend class WindowModule;

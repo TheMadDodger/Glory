@@ -1,4 +1,6 @@
 #include "GainputModule.h"
+#include <Debug.h>
+#include <Engine.h>
 
 namespace Glory
 {

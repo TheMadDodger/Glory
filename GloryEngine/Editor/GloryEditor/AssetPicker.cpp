@@ -75,7 +75,7 @@ namespace Glory::Editor
 	{
 		m_FilteredAssets.clear();
 		if (m_Filter == "") return;
-	
+
 		size_t compCount = 0;
 		for (size_t i = 0; i < m_PossibleAssets.size(); i++)
 		{

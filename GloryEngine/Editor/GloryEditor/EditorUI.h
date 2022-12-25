@@ -3,6 +3,7 @@
 #include <string_view>
 #include <glm/glm.hpp>
 #include <functional>
+#include <ResourceType.h>
 
 namespace Glory
 {
@@ -35,6 +36,13 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API bool InputDropdown(std::string_view label, const std::vector<std::string_view>& options, size_t* index, std::string_view value);
 		static GLORY_EDITOR_API bool InputDropdown(std::string_view label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, std::string_view value);
+		static GLORY_EDITOR_API bool InputEnum(std::string_view label, size_t typeHash, size_t* value);
+
+		template<typename T>
+		static bool InputEnum(std::string_view label, T* value)
+		{
+			return InputEnum(label, ResourceType::GetHash<T>(), (size_t*)value);
+		}
 
 		static GLORY_EDITOR_API bool InputLayerMask(std::string_view label, LayerMask* data);
 		static GLORY_EDITOR_API bool InputLeyerRef(std::string_view label, LayerRef* data);

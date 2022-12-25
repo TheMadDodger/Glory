@@ -47,6 +47,7 @@ namespace Glory
 		ScenesModule* GetScenesModule() const;
 		RendererModule* GetRendererModule() const;
 		GraphicsModule* GetGraphicsModule() const;
+		InputModule* GetInputModule() const;
 		TimerModule* GetTimerModule() const;
 		ProfilerModule* GetProfilerModule() const;
 		ScriptingExtender* GetScriptingExtender() const;

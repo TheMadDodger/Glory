@@ -48,6 +48,11 @@ namespace Glory
 		return m_pGraphicsModule;
 	}
 
+	InputModule* Engine::GetInputModule() const
+	{
+		return m_pInputModule;
+	}
+
 	TimerModule* Engine::GetTimerModule() const
 	{
 		return m_pTimerModule;
@@ -303,6 +308,7 @@ namespace Glory
 		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
 		GloryReflect::Reflect::RegisterBasicType<LayerRef>("LayerRef");
 		GloryReflect::Reflect::RegisterBasicType<LayerMask>();
+		GloryReflect::Reflect::RegisterEnum<InputMappingType>();
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}

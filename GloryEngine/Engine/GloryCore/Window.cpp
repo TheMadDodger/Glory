@@ -1,11 +1,14 @@
 #include "Window.h"
 #include "CoreExceptions.h"
+#include "WindowModule.h"
+#include "Engine.h"
 
 namespace Glory
 {
 	Window::Window(const WindowCreateInfo& createInfo) :
 		m_WindowName(createInfo.WindowName), m_Width(createInfo.Width),
-		m_Height(createInfo.Height), m_WindowFlags(createInfo.WindowFlags)
+		m_Height(createInfo.Height), m_WindowFlags(createInfo.WindowFlags),
+		m_pWindowManager(createInfo.pWindowManager)
 	{
 	}
 
@@ -26,5 +29,11 @@ namespace Glory
 	{
 		*width = m_Width;
 		*height = m_Height;
+	}
+
+	void Window::ForwardInputEvent(InputEvent& input)
+	{
+		InputModule* pInput = m_pWindowManager->GetEngine()->GetInputModule();
+		pInput->OnInput(input);
 	}
 }

@@ -23,6 +23,9 @@ namespace Glory
 		GLORY_API SDL_Window* GetSDLWindow();
 		GLORY_API SDL_GLContext GetSDLGLConext() const;
 
+		GLORY_API bool PollEvent(SDL_Event* event);
+		GLORY_API void HandleEvent(SDL_Event& event);
+
 	private:
 		SDLWindow(const WindowCreateInfo& createInfo);
 		virtual ~SDLWindow();
