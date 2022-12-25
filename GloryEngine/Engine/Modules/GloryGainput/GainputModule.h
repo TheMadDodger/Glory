@@ -14,5 +14,8 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
 		virtual void Update() override;
+
+	private:
+		std::hash<std::string> m_Hasher;
 	};
 }

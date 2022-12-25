@@ -22,7 +22,7 @@ namespace Glory
 		virtual void GetCurrentScreenResolution(uint32_t& width, uint32_t& height) = 0;
 
 	public: // Module functions
-		Window* CreateNewWindow(const WindowCreateInfo& createInfo);
+		Window* CreateNewWindow(WindowCreateInfo& createInfo);
 		virtual void OpenMessageBox(const std::string& message);
 
 	protected: // Internal functions

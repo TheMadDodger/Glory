@@ -5,6 +5,7 @@
 #include "ContentBrowser.h"
 #include "ProjectSpace.h"
 #include "EditorApplication.h"
+#include "ProjectSettings.h"
 
 namespace Glory::Editor
 {
@@ -105,7 +106,7 @@ namespace Glory::Editor
 		if (!std::filesystem::exists(m_LibraryPath)) std::filesystem::create_directory(m_LibraryPath);
 		return m_LibraryPath;
 	}
-	
+
 	GLORY_EDITOR_API std::string ProjectSpace::SettingsPath()
 	{
 		if (!std::filesystem::exists(m_SettingsPath)) std::filesystem::create_directory(m_SettingsPath);
@@ -147,6 +148,8 @@ namespace Glory::Editor
 
 		AssetDatabase::Load();
 		ContentBrowser::LoadProject();
+
+		ProjectSettings::Load(this);
 	}
 
 	void ProjectSpace::Close()
@@ -157,6 +160,7 @@ namespace Glory::Editor
 		}
 
 		AssetDatabase::Save();
+		ProjectSettings::Save(this);
 	}
 
 	void ProjectSpace::CreateFolder(const std::string& name)

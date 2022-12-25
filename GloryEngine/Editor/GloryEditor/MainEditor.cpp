@@ -19,6 +19,7 @@
 #include "MenuBar.h"
 #include "PopupManager.h"
 #include "EditorPreferencesWindow.h"
+#include "ProjectSettingsWindow.h"
 #include "Window.h"
 #include "PopupManager.h"
 #include "EditorAssets.h"
@@ -67,6 +68,7 @@ namespace Glory::Editor
 	static const char* Shortcut_Window_Console			= "Open Console";
 	static const char* Shortcut_Window_Performance		= "Open Performance Metrics";
 	static const char* Shortcut_Window_Profiler			= "Open Profiler";
+	static const char* Shortcut_Window_ProjectSettings	= "Open Project Settings";
 	static const char* Shortcut_View_Perspective		= "Switch To Perspective";
 	static const char* Shortcut_View_Orthographic		= "Switch To Orthographic";
 	static const char* Shortcut_Edit_Undo				= "Undo";
@@ -235,6 +237,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Console", []() { EditorWindow::GetWindow<EditorConsoleWindow>(); }, NULL, Shortcut_Window_Console);
 		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); }, NULL, Shortcut_Window_Performance);
 		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); }, NULL, Shortcut_Window_Profiler);
+		MenuBar::AddMenuItem("Window/Project Settings", []() { EditorWindow::GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
 
 		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Perspective);
 		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Orthographic);
@@ -269,6 +272,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Window_Console, ImGuiKey_6, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Window_Performance, ImGuiKey_7, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Window_Profiler, ImGuiKey_8, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_Window_ProjectSettings, ImGuiKey_9, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_View_Perspective, ImGuiKey_P, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_View_Orthographic, ImGuiKey_O, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Edit_Undo, ImGuiKey_Z, ImGuiMod_Ctrl);
