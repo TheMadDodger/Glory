@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	PlayerInput::PlayerInput(size_t playerIndex) : m_PlayerIndex(playerIndex), m_CurrentInputMode(InputModes::None)
+	PlayerInput::PlayerInput(size_t playerIndex) : m_PlayerIndex(playerIndex), m_InputMode(InputModes::None.m_Name)
 	{
 	}
 

@@ -20,15 +20,18 @@ namespace Glory::Editor
 		const ImVec2 regionAvail = ImGui::GetContentRegionAvail();
 		const bool open = ImGui::TreeNodeEx(EditorUI::MakeCleanName(m_Label).data(), ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed);
 		const float buttonSize = 24.0f;
-		ImGui::SetCursorPos({ startPos.x + regionAvail.x - buttonSize + 4.0f, startPos.y });
-		int size = elementCount;
-		ImGui::SetNextItemWidth(buttonSize);
-		if (ImGui::InputInt("##size", &size, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
+		if (OnResize != NULL)
 		{
-			if (size <= 0) size = 0;
-			elementCount = size;
-			OnResize(elementCount);
-			change = true;
+			ImGui::SetCursorPos({ startPos.x + regionAvail.x - buttonSize + 4.0f, startPos.y });
+			int size = elementCount;
+			ImGui::SetNextItemWidth(buttonSize);
+			if (ImGui::InputInt("##size", &size, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				if (size <= 0) size = 0;
+				elementCount = size;
+				OnResize(elementCount);
+				change = true;
+			}
 		}
 
 		int toRemoveIndex = -1;
