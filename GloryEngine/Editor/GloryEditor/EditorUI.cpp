@@ -392,19 +392,26 @@ namespace Glory::Editor
 
 
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		float maxWidth = ImGui::GetContentRegionAvail().x;
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
+		if (!label.empty())
+		{
+			ImGui::TextUnformatted(label.data());
+			maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+		}
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
 		const float width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+		if (!label.empty())
+		{
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			ImGui::PushItemWidth(width);
+		}
 
 		bool change = false;
-		ImGui::PushItemWidth(width);
 		if (ImGui::BeginCombo("##combo", valueString.c_str()))
 		{
 			for (size_t i = 0; i < pEnumType->NumValues(); i++)
@@ -421,6 +428,7 @@ namespace Glory::Editor
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::SetItemAllowOverlap();
 		ImGui::PopID();
 
 		return change;
@@ -522,7 +530,7 @@ namespace Glory::Editor
 
 	bool EditorUI::Header(std::string_view label)
 	{
-		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader;
+		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
 
 		std::hash<std::string_view> hasher;
 		size_t hash = hasher(label);

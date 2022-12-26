@@ -192,12 +192,12 @@ namespace Glory
 		//{SDLK_RightParenthesis,  KeyRightParenthesis,			   },
 		{SDLK_DOLLAR,			   KeyDollar,					   },
 		//{SDLK_Ugrave,			   KeyUgrave,					   },
-		{SDLK_ASTERISK,		   KeyAsterisk,					   },
+		{SDLK_ASTERISK,		   KeyAsterisk,							},
 		{SDLK_COLON,			   KeyColon,					   },
 		{SDLK_EXCLAIM,			   KeyExclam,					   },
 
 		{SDLK_KP_LEFTBRACE,		   KeyBraceLeft,				   },
-		{ SDLK_KP_RIGHTBRACE,		   KeyBraceRight,				   },
+		{SDLK_KP_RIGHTBRACE,		   KeyBraceRight,				},
 		{SDLK_SYSREQ,			   KeySysRq,					   },
 	};
 
@@ -286,6 +286,9 @@ namespace Glory
 			Game::Quit();
 			break;
 		case SDL_KEYDOWN:
+		{
+			SDL_Keycode keycode = event.key.keysym.sym;
+			if (KEYBOARD_KEYMAP.find(keycode) == KEYBOARD_KEYMAP.end()) break;
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
 			inputEvent.KeyID = KEYBOARD_KEYMAP.at(event.key.keysym.sym);
 			inputEvent.State = InputState::KeyDown;
@@ -294,7 +297,11 @@ namespace Glory
 			inputEvent.Delta = 1.0f;
 			ForwardInputEvent(inputEvent);
 			break;
+		}
 		case SDL_KEYUP:
+		{
+			SDL_Keycode keycode = event.key.keysym.sym;
+			if (KEYBOARD_KEYMAP.find(keycode) == KEYBOARD_KEYMAP.end()) break;
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
 			inputEvent.KeyID = KEYBOARD_KEYMAP.at(event.key.keysym.sym);
 			inputEvent.State = InputState::KeyUp;
@@ -303,6 +310,7 @@ namespace Glory
 			inputEvent.Delta = -1.0f;
 			ForwardInputEvent(inputEvent);
 			break;
+		}
 		case SDL_MOUSEBUTTONDOWN:
 			inputEvent.InputDeviceType = InputDeviceType::Mouse;
 			inputEvent.KeyID = event.button.button;

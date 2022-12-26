@@ -10,7 +10,7 @@ namespace Glory
 		virtual ~PlayerInput();
 
 	private:
-		InputMode m_CurrentInputMode;
+		std::string_view m_InputMode;
 		size_t m_PlayerIndex;
 	};
 }

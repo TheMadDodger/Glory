@@ -17,8 +17,8 @@ namespace Glory
 	struct InputMode
 	{
 		InputMode(const char* name) : m_Name(name) {}
-
 		const char* m_Name;
+		std::vector<InputDeviceType> m_DeviceTypes;
 	};
 
 	struct InputModes
