@@ -176,14 +176,14 @@ namespace Glory
 
 #pragma region Objects API
 
-	MonoString* Object_GetName(UUID uuid)
+	MonoString* Object_GetName(uint64_t uuid)
 	{
 		Object* pObject = Object::FindObject(uuid);
 		if (!pObject) return nullptr;
 		return mono_string_new(MonoManager::GetDomain(), pObject->Name().c_str());
 	}
 
-	void Object_SetName(UUID uuid, MonoString* name)
+	void Object_SetName(uint64_t uuid, MonoString* name)
 	{
 		Object* pObject = Object::FindObject(uuid);
 		if (!pObject) return;
@@ -191,14 +191,14 @@ namespace Glory
 		pObject->SetName(nameStr);
 	}
 
-	MonoString* Resource_GetName(UUID uuid)
+	MonoString* Resource_GetName(uint64_t uuid)
 	{
 		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
 		if (!pResource) return nullptr;
 		return mono_string_new(MonoManager::GetDomain(), pResource->Name().c_str());
 	}
 
-	void Resource_SetName(UUID uuid, MonoString* name)
+	void Resource_SetName(uint64_t uuid, MonoString* name)
 	{
 		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
 		if (!pResource) return;
@@ -211,7 +211,7 @@ namespace Glory
 #pragma region Materials
 
 	template<typename T>
-	void Material_Set(UUID matID, MonoString* propName, T value)
+	void Material_Set(uint64_t matID, MonoString* propName, T value)
 	{
 		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
@@ -224,7 +224,7 @@ namespace Glory
 	}
 
 	template<typename T>
-	bool Material_Get(UUID matID, MonoString* propName, T value)
+	bool Material_Get(uint64_t matID, MonoString* propName, T value)
 	{
 		MaterialData* pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
@@ -236,7 +236,7 @@ namespace Glory
 		return pMaterial->Get<T>(propNameStr, value);
 	}
 
-	void Material_SetTexture(UUID matID, MonoString* propName, UUID value)
+	void Material_SetTexture(uint64_t matID, MonoString* propName, uint64_t value)
 	{
 		const auto pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
@@ -249,7 +249,7 @@ namespace Glory
 		pMaterial->SetTexture(propNameStr, pImage);
 	}
 
-	bool Material_GetTexture(UUID matID, MonoString* propName, UUID& value)
+	bool Material_GetTexture(uint64_t matID, MonoString* propName, uint64_t& value)
 	{
 		const auto pMaterial = AssetManager::GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
@@ -268,7 +268,7 @@ namespace Glory
 
 #pragma region Scenes
 
-	UUID Scene_NewEmptyObject(UUID sceneID)
+	uint64_t Scene_NewEmptyObject(uint64_t sceneID)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
 		if(!pScene) return 0;
@@ -276,23 +276,23 @@ namespace Glory
 		return pNewObject->GetUUID();
 	}
 
-	UUID Scene_NewEmptyObjectWithName(UUID sceneID, MonoString* name)
+	uint64_t Scene_NewEmptyObjectWithName(uint64_t sceneID, MonoString* name)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
 		if (!pScene) return 0;
 		const std::string nameStr = mono_string_to_utf8(name);
-		SceneObject* pNewObject = pScene->CreateEmptyObject(nameStr, UUID());
+		SceneObject* pNewObject = pScene->CreateEmptyObject(nameStr, uint64_t());
 		return pNewObject->GetUUID();
 	}
 
-	size_t Scene_ObjectsCount(UUID sceneID)
+	size_t Scene_ObjectsCount(uint64_t sceneID)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
 		if (!pScene) return 0;
 		return pScene->SceneObjectsCount();
 	}
 
-	UUID Scene_GetSceneObject(UUID sceneID, size_t index)
+	uint64_t Scene_GetSceneObject(uint64_t sceneID, size_t index)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
 		if (!pScene) return 0;
@@ -300,7 +300,7 @@ namespace Glory
 		return pNewObject ? pNewObject->GetUUID() : 0;
 	}
 
-	void Scene_Destroy(UUID sceneID, UUID objectID)
+	void Scene_Destroy(uint64_t sceneID, uint64_t objectID)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
 		if (!pScene) return;
@@ -313,7 +313,7 @@ namespace Glory
 
 #pragma region Scene Management
 
-	UUID SceneManager_CreateEmptyScene(MonoString* name)
+	uint64_t SceneManager_CreateEmptyScene(MonoString* name)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -328,7 +328,7 @@ namespace Glory
 		return pScenes->OpenScenesCount();
 	}
 
-	UUID SceneManager_GetOpenScene(size_t index)
+	uint64_t SceneManager_GetOpenScene(size_t index)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -336,7 +336,7 @@ namespace Glory
 		return pScene ? pScene->GetUUID() : 0;
 	}
 
-	UUID SceneManager_GetOpenSceneByUUID(UUID sceneID)
+	uint64_t SceneManager_GetOpenSceneByUUID(uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -344,7 +344,7 @@ namespace Glory
 		return pScene ? pScene->GetUUID() : 0;
 	}
 
-	UUID SceneManager_GetActiveScene()
+	uint64_t SceneManager_GetActiveScene()
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -352,7 +352,7 @@ namespace Glory
 		return pScene ? pScene->GetUUID() : 0;
 	}
 
-	void SceneManager_SetActiveScene(UUID sceneID)
+	void SceneManager_SetActiveScene(uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return;
@@ -375,7 +375,7 @@ namespace Glory
 		pScenes->OpenScene(mono_string_to_utf8(path));
 	}
 
-	void SceneManager_CloseScene(UUID sceneID)
+	void SceneManager_CloseScene(uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return;
@@ -386,7 +386,7 @@ namespace Glory
 
 #pragma region Scene Objects
 
-	MonoString* SceneObject_GetName(UUID objectID, UUID sceneID)
+	MonoString* SceneObject_GetName(uint64_t objectID, uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return nullptr;
@@ -396,7 +396,7 @@ namespace Glory
 		return pSceneObject ? mono_string_new(MonoManager::GetDomain(), pSceneObject->Name().c_str()) : nullptr;
 	}
 
-	void SceneObject_SetName(UUID objectID, UUID sceneID, MonoString* name)
+	void SceneObject_SetName(uint64_t objectID, uint64_t sceneID, MonoString* name)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return;
@@ -407,7 +407,7 @@ namespace Glory
 		pSceneObject->SetName(mono_string_to_utf8(name));
 	}
 
-	size_t SceneObject_GetSiblingIndex(UUID objectID, UUID sceneID)
+	size_t SceneObject_GetSiblingIndex(uint64_t objectID, uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -418,7 +418,7 @@ namespace Glory
 		return pSceneObject->GetSiblingIndex();
 	}
 
-	void SceneObject_SetSiblingIndex(UUID objectID, UUID sceneID, size_t index)
+	void SceneObject_SetSiblingIndex(uint64_t objectID, uint64_t sceneID, size_t index)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return;
@@ -429,7 +429,7 @@ namespace Glory
 		pSceneObject->SetSiblingIndex(index);
 	}
 
-	size_t SceneObject_GetChildCount(UUID objectID, UUID sceneID)
+	size_t SceneObject_GetChildCount(uint64_t objectID, uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -440,7 +440,7 @@ namespace Glory
 		return pSceneObject->ChildCount();
 	}
 
-	UUID SceneObject_GetChild(UUID objectID, UUID sceneID, size_t index)
+	uint64_t SceneObject_GetChild(uint64_t objectID, uint64_t sceneID, size_t index)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -452,7 +452,7 @@ namespace Glory
 		return pChild ? pChild->GetUUID() : 0;
 	}
 
-	UUID SceneObject_GetParent(UUID objectID, UUID sceneID)
+	uint64_t SceneObject_GetParent(uint64_t objectID, uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
@@ -464,7 +464,7 @@ namespace Glory
 		return pParent ? pParent->GetUUID() : 0;
 	}
 
-	void SceneObject_SetParent(UUID objectID, UUID sceneID, UUID parentID)
+	void SceneObject_SetParent(uint64_t objectID, uint64_t sceneID, uint64_t parentID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return;

@@ -18,7 +18,7 @@ project "GloryMonoScripting"
 	vpaths
 	{
 		["Core"] = { "GloryMono.*", "GloryMonoScipting.*" },
-		["API"] = { "CoreCSAPI.*", "MathCSAPI.*", "AssemblyBinding.*" },
+		["API"] = { "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*", "AssemblyBinding.*" },
 		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" },
 		["Mono"] = { "MonoAssetManager.*", "MonoLibManager.*", "MonoManager.*", "MonoObjectManager.*" }
 	}
@@ -57,7 +57,7 @@ project "GloryMonoScripting"
 		"GloryECSStatic",
 		"GloryReflectStatic",
 	}
-	
+
 	dependson
 	{
 		"Glorious"
@@ -93,12 +93,12 @@ project "GloryMonoScripting"
 		{
 			"%{monox86Dir}/lib",
 		}
-		
+
 		includedirs
 		{
 			"%{monox86Dir}/include/mono-2.0",
 		}
-		
+
 		postbuildcommands
 		{
 			("{COPY} \"%{monox86Dir}/bin/mono-2.0-sgen.dll\" %{moduleOutDir}/Dependencies"),
@@ -113,7 +113,7 @@ project "GloryMonoScripting"
 		{
 			"%{monoDir}/lib",
 		}
-		
+
 		includedirs
 		{
 			"%{monoDir}/include/mono-2.0",
