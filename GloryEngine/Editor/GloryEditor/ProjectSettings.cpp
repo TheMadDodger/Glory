@@ -32,6 +32,22 @@ namespace Glory::Editor
 		m_pAllSettings[size_t(type)]->OnGui();
 	}
 
+	void ProjectSettings::OnStartPlay()
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			m_pAllSettings[i]->OnStartPlay_Impl();
+		}
+	}
+
+	void ProjectSettings::OnStopPlay()
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			m_pAllSettings[i]->OnStopPlay_Impl();
+		}
+	}
+
 	ProjectSettings::ProjectSettings(const char* settingsFile)
 		: m_SettingsNode(), m_SettingsFile(settingsFile)
 	{

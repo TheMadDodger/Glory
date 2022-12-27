@@ -1,16 +1,31 @@
 #pragma once
-#include "Input.h"
+#include <string_view>
+#include <map>
+#include <vector>
 
 namespace Glory
 {
-	struct PlayerInput
+	class InputModule;
+	struct InputMap;
+
+	struct PlayerInputData
+	{
+		InputMap* m_InputMap;
+		std::map<std::string, char[4]> m_InputData;
+	};
+
+	class PlayerInput
 	{
 	public:
-		PlayerInput(size_t playerIndex);
+		PlayerInput(InputModule* pInputModule, size_t playerIndex);
 		virtual ~PlayerInput();
 
+		std::string_view InputMode();
+
 	private:
-		std::string_view m_InputMode;
+		InputModule* m_pInputModule;
 		size_t m_PlayerIndex;
+		std::string_view m_InputMode;
+		std::vector<PlayerInputData> m_InputData;
 	};
 }

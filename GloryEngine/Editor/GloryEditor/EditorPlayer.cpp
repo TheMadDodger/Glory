@@ -8,6 +8,7 @@
 #include "EditorAssets.h"
 #include "EditorApplication.h"
 #include "ImGuiHelpers.h"
+#include "ProjectSettings.h"
 
 #include "FontAwesome/IconsFontAwesome6.h"
 
@@ -22,6 +23,8 @@ namespace Glory::Editor
 
 	void EditorPlayer::Start()
 	{
+		ProjectSettings::OnStartPlay();
+
 		Object* pSelected = Selection::GetActiveObject();
 		if (pSelected != nullptr) m_SelectedObjectBeforeStart = pSelected->GetUUID();
 		Selection::Clear();
@@ -30,7 +33,7 @@ namespace Glory::Editor
 		EditorSceneManager::SerializeOpenScenes(out);
 		m_SerializedScenes = out.c_str();
 
-		if (pSelected) Selection::SetActiveObject(pSelected);
+		//if (pSelected) Selection::SetActiveObject(pSelected);
 
 		Engine* pEngine = Game::GetGame().GetEngine();
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
@@ -44,6 +47,8 @@ namespace Glory::Editor
 
 	void EditorPlayer::Stop()
 	{
+		ProjectSettings::OnStopPlay();
+
 		Engine* pEngine = Game::GetGame().GetEngine();
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
@@ -124,7 +129,7 @@ namespace Glory::Editor
 		ImGui::SameLine(cursor);
 		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 		ImVec4 hoverColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered);
-		
+
 		int styleColorCount = 0;
 
 		switch (EditorApplication::CurrentMode())
