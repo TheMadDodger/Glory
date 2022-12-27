@@ -11,9 +11,9 @@ namespace Glory
 		GLORY_API virtual ~GainputModule();
 
 	private:
-		virtual void Initialize() override;
-		virtual void Cleanup() override;
-		virtual void Update() override;
+		virtual void OnInitialize() override;
+		virtual void OnCleanup() override;
+		virtual void OnUpdate() override;
 
 	private:
 		std::hash<std::string> m_Hasher;

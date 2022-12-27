@@ -454,4 +454,14 @@ namespace Glory::Editor
 		SETTINGS_DEFAULT_KEY(inputModes, Key_InputModes, Sequence);
 		SETTINGS_DEFAULT_KEY(kayMaps, Key_InputMaps, Sequence);
 	}
+
+	void InputSettings::OnStartPlay_Impl()
+	{
+		Game::GetGame().GetEngine()->GetInputModule()->ReadInputData(m_SettingsNode);
+	}
+
+	void InputSettings::OnStopPlay_Impl()
+	{
+
+	}
 }

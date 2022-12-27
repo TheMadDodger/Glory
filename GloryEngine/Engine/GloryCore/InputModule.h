@@ -17,6 +17,13 @@ namespace Glory
 
 		size_t AddPlayer();
 
+		void ReadInputData(YAML::Node& node);
+
+		void SetPlayerInputMode(const size_t player, const std::string& inputMode);
+
+		const UUID GetDeviceUUID(const InputDeviceType deviceType, const size_t deviceID) const;
+		InputDevice* GetInputDevice(const UUID deviceID);
+
 	protected:
 		virtual void OnInitialize() {};
 		virtual void OnCleanup() {};
@@ -27,8 +34,17 @@ namespace Glory
 		virtual void Cleanup() override;
 		virtual void Update() override;
 
+		void ReadInputModes(YAML::Node& node);
+		void ReadInputMaps(YAML::Node& node);
+
 	private:
+		std::map<UUID, InputDevice> m_InputDevices;
+		UUID m_DefaultMouseDeviceIndex;
+		UUID m_DefaultKeyboardDeviceIndex;
+
 		std::vector<PlayerInput> m_Players;
-		std::map<std::string, std::map<InputMode, InputMap>> m_InputMaps;
+		std::map<std::string, InputMode> m_InputModes;
+		/* First map is by InputMap name, second by InputMode name */
+		std::map<std::string, std::map<std::string, InputMap>> m_InputMaps;
 	};
 }

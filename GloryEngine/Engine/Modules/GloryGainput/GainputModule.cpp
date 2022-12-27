@@ -12,15 +12,15 @@ namespace Glory
 	{
 	}
 
-	void GainputModule::Initialize()
+	void GainputModule::OnInitialize()
 	{
 	}
 
-	void GainputModule::Cleanup()
+	void GainputModule::OnCleanup()
 	{
 	}
 
-	void GainputModule::Update()
+	void GainputModule::OnUpdate()
 	{
 	}
 }

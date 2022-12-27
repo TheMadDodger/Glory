@@ -28,6 +28,9 @@ namespace Glory::Editor
 
 		static void Paint(ProjectSettingsType type);
 
+		static void OnStartPlay();
+		static void OnStopPlay();
+
     protected:
         ProjectSettings(const char* settingsFile);
         virtual ~ProjectSettings();
@@ -37,6 +40,9 @@ namespace Glory::Editor
 		virtual void OnSettingsLoaded() {}
 		void LoadSettings(ProjectSpace* pProject);
 		void SaveSettings(ProjectSpace* pProject);
+
+		virtual void OnStartPlay_Impl() {}
+		virtual void OnStopPlay_Impl() {}
 
     protected:
         YAML::Node m_SettingsNode;
@@ -81,5 +87,8 @@ namespace Glory::Editor
 	private:
 		virtual void OnGui() override;
 		virtual void OnSettingsLoaded() override;
+
+		virtual void OnStartPlay_Impl() override;
+		virtual void OnStopPlay_Impl() override;
 	};
 }
