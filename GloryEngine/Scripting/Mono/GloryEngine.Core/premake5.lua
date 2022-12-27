@@ -6,12 +6,17 @@ project "GloryEngine.Core"
 
 	targetdir ("%{modulesOutDir}/GloryMonoScripting/Scripting/csharp")
 	objdir ("%{outputDir}")
-	
+
 	dotnetframework "4.7.1"
 
 	files
 	{
-		"**.cs",
+		"*.cs",
+		"SceneManagement/*.cs",
+		"AssetManagement/*.cs",
+		"Layers/*.cs",
+		"Math/*.cs",
+		"Input/*.cs",
 		"premake5.lua"
 	}
 

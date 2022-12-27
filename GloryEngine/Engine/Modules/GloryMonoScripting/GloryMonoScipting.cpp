@@ -1,6 +1,7 @@
 #include "GloryMonoScipting.h"
 #include "CoreCSAPI.h"
 #include "MathCSAPI.h"
+#include "InputCSAPI.h"
 #include "MonoLibManager.h"
 #include "MonoManager.h"
 #include <Game.h>
@@ -13,7 +14,6 @@ namespace Glory
 
 	GloryMonoScipting::~GloryMonoScipting()
 	{
-		
 	}
 
 	void GloryMonoScipting::Initialize()
@@ -21,7 +21,7 @@ namespace Glory
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
 		MonoManager::Initialize("./Modules/GloryMonoScripting/Dependencies");
 	}
-	
+
 	void GloryMonoScipting::SetMonoDirs(const std::string& assemblyDir, const std::string& configDir)
 	{
 		mono_set_dirs(assemblyDir.c_str(), configDir.c_str());
@@ -29,7 +29,6 @@ namespace Glory
 
 	void GloryMonoScipting::PostInitialize()
 	{
-		
 	}
 
 	void GloryMonoScipting::InitializeScripting()
@@ -73,6 +72,7 @@ namespace Glory
 	{
 		CoreCSAPI::AddInternalCalls(internalCalls);
 		MathCSAPI::AddInternalCalls(internalCalls);
+		InputCSAPI::AddInternalCalls(internalCalls);
 	}
 
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)
