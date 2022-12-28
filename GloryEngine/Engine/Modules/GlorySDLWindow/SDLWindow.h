@@ -24,11 +24,13 @@ namespace Glory
 		GLORY_API SDL_GLContext GetSDLGLConext() const;
 
 		GLORY_API bool PollEvent(SDL_Event* event);
-		GLORY_API void HandleEvent(SDL_Event& event);
+		GLORY_API bool HandleInputEvents(SDL_Event& event);
 
 	private:
 		SDLWindow(const WindowCreateInfo& createInfo);
 		virtual ~SDLWindow();
+
+		void HandleAllEvents(SDL_Event& event);
 
 	private:
 		GLORY_API virtual void Open() override;

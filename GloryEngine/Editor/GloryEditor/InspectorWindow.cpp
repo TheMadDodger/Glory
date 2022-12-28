@@ -9,10 +9,7 @@
 namespace Glory::Editor
 {
 	InspectorWindow::InspectorWindow() : EditorWindowTemplate("Inspector", 300.0f, 680.0f), m_Locked(false), m_pCurrentObject(nullptr), m_pEditor(nullptr),
-		m_SelectionCallbackID(Selection::SubscribeToSelectionChange([&]() { OnSelectionChange(); }))
-	{
-
-	}
+		m_SelectionCallbackID(Selection::SubscribeToSelectionChange([&]() { OnSelectionChange(); })) {}
 
 	InspectorWindow::~InspectorWindow()
 	{
@@ -22,7 +19,7 @@ namespace Glory::Editor
 	void InspectorWindow::OnGUI()
 	{
 		Object* pSelectedObject = Selection::GetActiveObject();
-		
+
 		if (pSelectedObject != m_pCurrentObject && !m_Locked)
 		{
 			if (m_pEditor) Editor::ReleaseEditor(m_pEditor);

@@ -41,7 +41,7 @@ namespace Glory
 		virtual void Close() = 0;
 		virtual void PollEvents() = 0;
 
-		void ForwardInputEvent(InputEvent& input);
+		bool ForwardInputEvent(InputEvent& input);
 
 	protected:
 		std::string m_WindowName;

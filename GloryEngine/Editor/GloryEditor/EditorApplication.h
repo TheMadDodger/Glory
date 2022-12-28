@@ -36,12 +36,11 @@ namespace Glory::Editor
 			m_pPlatform = new EditorPlatform(window, renderer);
 			window->m_pEditorPlatform = m_pPlatform;
 			renderer->m_pEditorPlatform = m_pPlatform;
-			
+
 			InitializePlatform(game);
 		}
 
 		GLORY_EDITOR_API void Initialize(Game& game);
-
 
 		GLORY_EDITOR_API void Destroy();
 		GLORY_EDITOR_API void Run(Game& game);

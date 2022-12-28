@@ -214,10 +214,11 @@ namespace Glory::Editor
 						/* Icon */
 						std::string bindingString;
 						GloryReflect::Enum<InputDeviceType>().ToString(bindingData.DeviceType, bindingString);
-						bindingString += "/" + bindingData.Label;
-						if (ImGui::Selectable(bindingData.IsAxis ? ICON_FA_ARROW_RIGHT_ARROW_LEFT : ICON_FA_CIRCLE_DOWN, bindingString == value, ImGuiSelectableFlags_AllowItemOverlap))
+						std::filesystem::path bindingPath{ bindingString };
+						bindingPath = bindingPath.append(bindingData.IsAxis ? "Axis" : "Key").append(bindingData.Label);
+						if (ImGui::Selectable(bindingData.IsAxis ? ICON_FA_ARROW_RIGHT_ARROW_LEFT : ICON_FA_CIRCLE_DOWN, bindingPath.string() == value, ImGuiSelectableFlags_AllowItemOverlap))
 						{
-							value = bindingString;
+							value = bindingPath.string();
 							keyChosen = true;
 						}
 
@@ -254,6 +255,8 @@ namespace Glory::Editor
 			openPopup = true;
 		}, start, width);
 
+		const float scrollHeight = ImGui::GetScrollY();
+
 		if (openPopup)
 			ImGui::OpenPopup("BindingPicker");
 		openPopup = false;
@@ -263,8 +266,8 @@ namespace Glory::Editor
 		Window* pWindow = Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow();
 		int mainWindowWidth, mainWindowHeight;
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
-		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });
-		ImGui::SetNextWindowSize({ width, mainWindowHeight - windowPos.y - cursor.y - 10.0f });
+		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f - scrollHeight });
+		ImGui::SetNextWindowSize({ width, mainWindowHeight - windowPos.y - cursor.y - 10.0f + scrollHeight });
 		bool change = KeyPopup(value);
 		ImGui::PopID();
 		return change;
@@ -334,29 +337,45 @@ namespace Glory::Editor
 
 							if (EditorUI::Header(bindingName))
 							{
-								YAML::Node mappingTypeNode = bindingNode["MappingType"];
+								YAML::Node stateNode = bindingNode["State"];
 								YAML::Node multiplierNode = bindingNode["Multiplier"];
 								YAML::Node inputModeNode = bindingNode["InputMode"];
 								YAML::Node bindingKeyNode = bindingNode["Binding"];
-								std::string mappingTypeString = mappingTypeNode.as<std::string>();
+								YAML::Node mapDeltaToValueNode = bindingNode["MapDeltaToValue"];
+								std::string stateString = stateNode.as<std::string>();
 								std::string bindingString = bindingKeyNode.as<std::string>();
+
+								KeyBinding binding{ bindingString };
 
 								strcpy(TextBuffer, bindingName.c_str());
 								if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
 									BindingNameNode = std::string(TextBuffer);
 
-								InputMappingType mappingType = InputMappingType::Bool;
-								GloryReflect::Enum<InputMappingType>().FromString(mappingTypeString, mappingType);
-								if (EditorUI::InputEnum<InputMappingType>("Mapping Type", &mappingType))
+								if (actionMapping == InputMappingType::Bool && binding.m_DeviceType != InputDeviceType(-1) && !binding.m_IsAxis)
 								{
-									GloryReflect::Enum<InputMappingType>().ToString(mappingType, mappingTypeString);
-									mappingTypeNode = mappingTypeString;
+									InputState state = InputState::KeyDown;
+									GloryReflect::Enum<InputState>().FromString(stateString, state);
+									if (EditorUI::InputEnum<InputState>("Key State", &state, { size_t(InputState::Axis) }))
+									{
+										GloryReflect::Enum<InputState>().ToString(state, stateString);
+										stateNode = stateString;
+									}
 								}
 
-								float multiplier = multiplierNode.as<float>();
-								if (EditorUI::InputFloat("Multiplier", &multiplier))
+								if (actionMapping == InputMappingType::Float)
 								{
-									multiplierNode = multiplier;
+									bool mapToDelta = mapDeltaToValueNode.as<bool>();
+
+									if (EditorUI::CheckBox("Map Delta to Value", &mapToDelta))
+									{
+										mapDeltaToValueNode = mapToDelta;
+									}
+
+									float multiplier = multiplierNode.as<float>();
+									if (EditorUI::InputFloat("Multiplier", &multiplier))
+									{
+										multiplierNode = multiplier;
+									}
 								}
 
 								std::string inputMode = inputModeNode.as<std::string>();
@@ -391,7 +410,8 @@ namespace Glory::Editor
 						bindingsListView.OnAdd = [&]() {
 							YAML::Node newNode{ YAML::NodeType::Map };
 							newNode["Name"] = "New Binding";
-							newNode["MappingType"] = "Bool";
+							newNode["State"] = "KeyDown";
+							newNode["MapDeltaToValue"] = false;
 							newNode["Multiplier"] = 1.0f;
 							newNode["InputMode"] = "";
 							newNode["Binding"] = "";
@@ -458,10 +478,12 @@ namespace Glory::Editor
 	void InputSettings::OnStartPlay_Impl()
 	{
 		Game::GetGame().GetEngine()->GetInputModule()->ReadInputData(m_SettingsNode);
+		Game::GetGame().GetEngine()->GetInputModule()->InputBlocked() = false;
 	}
 
 	void InputSettings::OnStopPlay_Impl()
 	{
-
+		Game::GetGame().GetEngine()->GetInputModule()->InputBlocked() = true;
+		Game::GetGame().GetEngine()->GetInputModule()->ClearInputData();
 	}
 }

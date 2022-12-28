@@ -1,6 +1,8 @@
 #include "imgui_impl_sdl.h"
 #include "EditorSDLWindowImpl.h"
 #include <SDLWindow.h>
+#include <EditorWindow.h>
+#include <GameWindow.h>
 
 namespace Glory::Editor
 {
@@ -9,7 +11,7 @@ namespace Glory::Editor
 		editorCreateInfo.pWindowImpl = new EditorSDLWindowImpl();
 	}
 
-	EditorSDLWindowImpl::EditorSDLWindowImpl() {}
+	EditorSDLWindowImpl::EditorSDLWindowImpl() : m_AltIsDown(false) {}
 
 	EditorSDLWindowImpl::~EditorSDLWindowImpl() {}
 
@@ -59,7 +61,14 @@ namespace Glory::Editor
 		SDL_Event event;
 		while (pSDLWindow->PollEvent(&event))
 		{
-			pSDLWindow->HandleEvent(event);
+			if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_LALT)
+				m_AltIsDown = true;
+			else if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_LALT)
+				m_AltIsDown = false;
+
+			EditorWindow* gameWindow = EditorWindow::FindEditorWindow(typeid(GameWindow));
+			if (gameWindow && gameWindow->IsFocused() && !m_AltIsDown && pSDLWindow->HandleInputEvents(event)) continue;
+
 			if (ImGui_ImplSDL2_ProcessEvent(&event)) continue;
 			if (event.type == SDL_QUIT)
 				return true;

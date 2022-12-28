@@ -310,6 +310,7 @@ namespace Glory
 		GloryReflect::Reflect::RegisterBasicType<LayerMask>();
 		GloryReflect::Reflect::RegisterEnum<InputDeviceType>();
 		GloryReflect::Reflect::RegisterEnum<InputMappingType>();
+		GloryReflect::Reflect::RegisterEnum<InputState>();
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}

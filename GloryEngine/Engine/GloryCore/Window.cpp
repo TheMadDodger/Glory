@@ -31,9 +31,9 @@ namespace Glory
 		*height = m_Height;
 	}
 
-	void Window::ForwardInputEvent(InputEvent& input)
+	bool Window::ForwardInputEvent(InputEvent& input)
 	{
 		InputModule* pInput = m_pWindowManager->GetEngine()->GetInputModule();
-		pInput->OnInput(input);
+		return pInput->OnInput(input);
 	}
 }

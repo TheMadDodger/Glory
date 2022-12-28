@@ -6,7 +6,7 @@ namespace Glory
 	const char* Key_InputModes = "InputModes";
 
 	InputModule::InputModule()
-		: m_Players()
+		: m_Players(), m_InputBlocked(true)
 	{
 	}
 
@@ -19,11 +19,12 @@ namespace Glory
 		return typeid(InputModule);
 	}
 
-	void InputModule::OnInput(InputEvent& event)
+	bool InputModule::OnInput(InputEvent& event)
 	{
+		if (m_InputBlocked) return false;
 		UUID deviceUUID = GetDeviceUUID(event.InputDeviceType, event.SourceDeviceID);
 		/* Unknown device? */
-		if (deviceUUID == 0) return;
+		if (deviceUUID == 0) return false;
 		/* Not claimed by a player? */
 		InputDevice& inputDevice = m_InputDevices.at(deviceUUID);
 		if (inputDevice.m_PlayerIndex == -1)
@@ -33,8 +34,11 @@ namespace Glory
 				std::string_view inputMode = m_Players[i].InputMode();
 				//if()
 			}
-			return;
+			return false;
 		}
+
+		m_Players[inputDevice.m_PlayerIndex].HandleInputEvent(event);
+		return true;
 	}
 
 	size_t InputModule::AddPlayer()
@@ -48,11 +52,34 @@ namespace Glory
 	{
 		ReadInputModes(node[Key_InputModes]);
 		ReadInputMaps(node[Key_InputMaps]);
+
+
+		/* Temporary */
+		/* Claim the mouse and keyboard for player 1 */
+		m_InputDevices.at(m_DefaultKeyboardDeviceIndex).m_PlayerIndex = 0;
+		m_InputDevices.at(m_DefaultMouseDeviceIndex).m_PlayerIndex = 0;
+
+		/* Add an input map */
+		m_Players[0].m_InputMode = m_InputModes.at("Keyboard and Mouse").m_Name;
+		auto& maps = m_InputMaps.at("Interactions");
+		auto& otherMaps = m_InputMaps.at("Movement");
+		InputMap* pMap = &maps.at(std::string(m_Players[0].m_InputMode));
+		InputMap* pOtherMap = &otherMaps.at(std::string(m_Players[0].m_InputMode));
+		m_Players[0].m_InputData.push_back({ pMap });
+		m_Players[0].m_InputData.push_back({ pOtherMap });
+	}
+
+	void InputModule::ClearInputData()
+	{
+		m_Players.clear();
+		AddPlayer();
+
+		m_InputModes.clear();
+		m_InputMaps.clear();
 	}
 
 	void InputModule::SetPlayerInputMode(const size_t player, const std::string& inputMode)
 	{
-
 	}
 
 	const UUID InputModule::GetDeviceUUID(const InputDeviceType deviceType, const size_t deviceID) const
@@ -72,6 +99,11 @@ namespace Glory
 		return &m_InputDevices.at(deviceID);
 	}
 
+	bool& InputModule::InputBlocked()
+	{
+		return m_InputBlocked;
+	}
+
 	void InputModule::Initialize()
 	{
 		/* Add default devices */
@@ -80,14 +112,15 @@ namespace Glory
 		m_DefaultMouseDeviceIndex = UUID();
 		m_InputDevices.emplace(m_DefaultMouseDeviceIndex, InputDevice("Generic Mouse", InputDeviceType::Mouse, 0));
 
-		/* Temporary? */
-		/* Claim the mouse and keyboard for player 1 */
-		//m_InputDevices[m_DefaultKeyboardDeviceIndex].m_PlayerIndex = 0;
-		//m_InputDevices[m_DefaultMouseDeviceIndex].m_PlayerIndex = 0;
-
 		AddPlayer();
 
 		/* TODO: Load runtime input mappings */
+	}
+
+	void InputModule::PostInitialize()
+	{
+		/* Allow input */
+		m_InputBlocked = false;
 	}
 
 	void InputModule::Cleanup()
@@ -100,6 +133,14 @@ namespace Glory
 
 	void InputModule::Update()
 	{
+	}
+
+	void InputModule::OnGameThreadFrameStart()
+	{
+		for (size_t i = 0; i < m_Players.size(); i++)
+		{
+			m_Players[i].ClearActions();
+		}
 	}
 
 	void InputModule::ReadInputModes(YAML::Node& node)
@@ -130,6 +171,7 @@ namespace Glory
 		m_InputMaps.clear();
 
 		auto inputMappingEnum = GloryReflect::Enum<InputMappingType>();
+		auto keyStateEnum = GloryReflect::Enum<InputState>();
 
 		for (size_t i = 0; i < node.size(); i++)
 		{
@@ -174,20 +216,26 @@ namespace Glory
 
 					/* Add the binding */
 					YAML::Node bindingNameNode = bindingNode["Name"];
-					YAML::Node bindingMappingNode = bindingNode["MappingType"];
+					YAML::Node keyStateNode = bindingNode["State"];
 					YAML::Node bindingMultiplierNode = bindingNode["Multiplier"];
 					YAML::Node bindingBindingNode = bindingNode["Binding"];
+					YAML::Node mapDeltaToValueNode = bindingNode["MapDeltaToValue"];
 
 					const std::string bindingName = bindingNameNode.as<std::string>();
-					const std::string bindingMappingString = bindingMappingNode.as<std::string>();
-					InputMappingType bindingMappingType;
-					inputMappingEnum.FromString(bindingMappingString, bindingMappingType);
-					const float multiplier = bindingMultiplierNode.as<float>();
 					const std::string bindingPath = bindingBindingNode.as<std::string>();
+					const float multiplier = bindingMultiplierNode.as<float>();
+					const bool mapDeltaToValue = mapDeltaToValueNode.as<bool>();
 
-					inputAction.m_Bindings.emplace_back(InputBinding{
-						bindingName , bindingMappingType , multiplier, KeyBinding{bindingPath}
-						});
+					KeyBinding keyBinding{ bindingPath };
+
+					InputState keyState = InputState::Axis;
+					if (!keyBinding.m_IsAxis)
+					{
+						const std::string keyStateString = keyStateNode.as<std::string>();
+						keyStateEnum.FromString(keyStateString, keyState);
+					}
+
+					inputAction.m_Bindings.emplace_back(InputBinding{ bindingName , keyState , multiplier, mapDeltaToValue, keyBinding });
 				}
 			}
 		}

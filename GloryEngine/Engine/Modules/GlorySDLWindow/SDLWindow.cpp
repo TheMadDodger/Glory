@@ -272,19 +272,16 @@ namespace Glory
 		return m_GLSDLContext;
 	}
 
-	GLORY_API bool SDLWindow::PollEvent(SDL_Event* event)
+	bool SDLWindow::PollEvent(SDL_Event* event)
 	{
 		return SDL_PollEvent(event);
 	}
 
-	void SDLWindow::HandleEvent(SDL_Event& event)
+	bool SDLWindow::HandleInputEvents(SDL_Event& event)
 	{
 		InputEvent inputEvent;
-		switch (event.type) {
-
-		case SDL_QUIT:
-			Game::Quit();
-			break;
+		switch (event.type)
+		{
 		case SDL_KEYDOWN:
 		{
 			SDL_Keycode keycode = event.key.keysym.sym;
@@ -295,8 +292,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = 0;
 			inputEvent.Value = 1.0f;
 			inputEvent.Delta = 1.0f;
-			ForwardInputEvent(inputEvent);
-			break;
+			return ForwardInputEvent(inputEvent);
 		}
 		case SDL_KEYUP:
 		{
@@ -308,8 +304,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = 0;
 			inputEvent.Value = 0.0f;
 			inputEvent.Delta = -1.0f;
-			ForwardInputEvent(inputEvent);
-			break;
+			return ForwardInputEvent(inputEvent);
 		}
 		case SDL_MOUSEBUTTONDOWN:
 			inputEvent.InputDeviceType = InputDeviceType::Mouse;
@@ -318,8 +313,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 1.0f;
 			inputEvent.Delta = 1.0f;
-			ForwardInputEvent(inputEvent);
-			break;
+			return ForwardInputEvent(inputEvent);
 		case SDL_MOUSEBUTTONUP:
 			inputEvent.InputDeviceType = InputDeviceType::Mouse;
 			inputEvent.KeyID = event.button.button;
@@ -327,9 +321,10 @@ namespace Glory
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 0.0f;
 			inputEvent.Delta = -1.0f;
-			ForwardInputEvent(inputEvent);
-			break;
+			return ForwardInputEvent(inputEvent);
 		case SDL_MOUSEWHEEL:
+		{
+			bool consumed = false;
 			if (event.wheel.x != 0)
 			{
 				/* Axis event */
@@ -339,7 +334,7 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.wheel.which;
 				inputEvent.Value = event.wheel.x;
 				inputEvent.Delta = event.wheel.x;
-				ForwardInputEvent(inputEvent);
+				consumed |= ForwardInputEvent(inputEvent);
 			}
 
 			if (event.wheel.y != 0)
@@ -351,7 +346,7 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.wheel.which;
 				inputEvent.Value = event.wheel.y;
 				inputEvent.Delta = event.wheel.y;
-				ForwardInputEvent(inputEvent);
+				consumed |= ForwardInputEvent(inputEvent);
 
 				/* Button event */
 				inputEvent.InputDeviceType = InputDeviceType::Mouse;
@@ -360,14 +355,17 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.wheel.which;
 				inputEvent.Value = 1.0f;
 				inputEvent.Delta = 1.0f;
-				ForwardInputEvent(inputEvent);
+				consumed |= ForwardInputEvent(inputEvent);
 				inputEvent.State = InputState::KeyUp;
 				inputEvent.Value = 0.0f;
 				inputEvent.Delta = -1.0f;
-				ForwardInputEvent(inputEvent);
+				consumed |= ForwardInputEvent(inputEvent);
 			}
-			break;
+			return consumed;
+		}
 		case SDL_MOUSEMOTION:
+		{
+			bool consumed = false;
 			if (event.motion.xrel != 0.0f)
 			{
 				inputEvent.InputDeviceType = InputDeviceType::Mouse;
@@ -376,7 +374,7 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.motion.which;
 				inputEvent.Value = event.motion.x;
 				inputEvent.Delta = event.motion.xrel;
-				ForwardInputEvent(inputEvent);
+				consumed |= ForwardInputEvent(inputEvent);
 			}
 			if (event.motion.yrel != 0.0f)
 			{
@@ -386,13 +384,16 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.motion.which;
 				inputEvent.Value = event.motion.y;
 				inputEvent.Delta = event.motion.yrel;
-				ForwardInputEvent(inputEvent);
+				consumed |= ForwardInputEvent(inputEvent);
 			}
-			break;
+			return consumed;
+		}
 		default:
 			// Do nothing.
 			break;
 		}
+
+		return false;
 	}
 
 	void SDLWindow::Resize(int width, int height)
@@ -419,6 +420,19 @@ namespace Glory
 		m_pWindow = NULL;
 	}
 
+	void SDLWindow::HandleAllEvents(SDL_Event& event)
+	{
+		if (HandleInputEvents(event)) return;
+		switch (event.type)
+		{
+		case SDL_QUIT:
+			Game::Quit();
+			return;
+		default:
+			break;
+		}
+	}
+
 	void SDLWindow::Open()
 	{
 		// Create an SDL window that supports Vulkan rendering.
@@ -438,7 +452,7 @@ namespace Glory
 		SDL_Event event;
 		while (PollEvent(&event))
 		{
-			HandleEvent(event);
+			HandleAllEvents(event);
 		}
 	}
 
