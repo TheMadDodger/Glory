@@ -29,7 +29,7 @@ namespace Glory::Editor
 		SetupDearImGuiContext();
 		m_pWindowImpl->SetContext(m_pImguiConext);
 		m_pRenderImpl->SetContext(m_pImguiConext);
-		
+
 		LoadFonts();
 		m_pRenderImpl->UploadImGUIFonts();
 

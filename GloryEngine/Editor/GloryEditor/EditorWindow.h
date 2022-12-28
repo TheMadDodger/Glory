@@ -43,6 +43,8 @@ namespace Glory::Editor
 		virtual void OnOpen() {}
 		virtual void OnClose() {}
 
+		GLORY_EDITOR_API const bool IsFocused() const;
+
 	protected:
 		virtual void OnGUI() = 0;
 
@@ -66,6 +68,7 @@ namespace Glory::Editor
 		bool m_Resizeable;
 		int m_WindowFlags;
 		size_t m_WindowID;
+		bool m_IsFocused;
 	};
 
 	template<typename T>

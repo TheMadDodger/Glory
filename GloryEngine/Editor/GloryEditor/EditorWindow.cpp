@@ -55,6 +55,11 @@ namespace Glory::Editor
 		m_pClosingEditorWindows.push_back(this);
 	}
 
+	const bool EditorWindow::IsFocused() const
+	{
+		return m_IsFocused;
+	}
+
 	void EditorWindow::RenderGUI()
 	{
 		ImGuiWindowFlags window_flags = m_WindowFlags | (m_Resizeable? 0 : ImGuiWindowFlags_::ImGuiWindowFlags_NoResize);
@@ -64,9 +69,11 @@ namespace Glory::Editor
 
 		if (ImGui::Begin(windowString.c_str(), &m_IsOpen, window_flags))
 		{
+			m_IsFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
 			OnGUI();
 			m_WindowDimensions = ImGui::GetWindowSize();
 		}
+		else m_IsFocused = false;
 		ImGui::End();
 
 		if (!m_IsOpen) Close();

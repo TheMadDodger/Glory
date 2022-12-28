@@ -1,10 +1,10 @@
 #pragma once
 #include <Reflection.h>
-#include "PlayerInput.h"
 #include "KeyEnums.h"
 
 REFLECTABLE_ENUM_NS(Glory, InputDeviceType, Keyboard, Mouse, Gamepad)
 REFLECTABLE_ENUM_NS(Glory, InputMappingType, Bool, Float)
+REFLECTABLE_ENUM_NS(Glory, InputState, KeyPressed, KeyDown, KeyUp, Axis)
 
 namespace Glory
 {
@@ -28,13 +28,6 @@ namespace Glory
 		static InputMode None;
 	};
 
-	enum class InputState
-	{
-		KeyUp,
-		KeyDown,
-		Axis,
-	};
-
 	struct InputEvent
 	{
 		InputDeviceType InputDeviceType;
@@ -52,6 +45,8 @@ namespace Glory
 
 		KeyBinding& operator=(const KeyBinding&& other) noexcept;
 
+		bool CheckEvent(InputEvent& e);
+
 		std::string m_BindingPath;
 		InputDeviceType m_DeviceType;
 		size_t m_KeyID;
@@ -60,11 +55,12 @@ namespace Glory
 
 	struct InputBinding
 	{
-		InputBinding(const std::string name, const InputMappingType mappingType, const float multiplier, const KeyBinding keybinding);
+		InputBinding(const std::string name, const InputState inputState, const float multiplier, const bool mapDeltaToValue, const KeyBinding keybinding);
 
 		const std::string m_Name;
-		const InputMappingType m_MappingType;
+		const InputState m_State;
 		const float m_Multiplier;
+		const bool m_MapDeltaToValue;
 		KeyBinding m_KeyBinding;
 
 	private:

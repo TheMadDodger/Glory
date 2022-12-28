@@ -376,7 +376,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputEnum(std::string_view label, size_t typeHash, size_t* value)
+	bool EditorUI::InputEnum(std::string_view label, size_t typeHash, size_t* value, std::vector<size_t> excludeValues)
 	{
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 
@@ -418,8 +418,10 @@ namespace Glory::Editor
 			{
 				const std::string& name = pEnumType->GetName(i);
 				size_t outValue = 0;
+
 				pEnumType->FromString(name, (void*)&outValue);
 
+				if (std::find(excludeValues.begin(), excludeValues.end(), outValue) != excludeValues.end()) continue;
 				if (ImGui::Selectable(name.c_str(), outValue == *value))
 				{
 					*value = outValue;

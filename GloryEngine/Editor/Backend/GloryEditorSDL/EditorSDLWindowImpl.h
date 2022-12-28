@@ -27,5 +27,8 @@ namespace Glory::Editor
 
 		virtual bool PollEvents() override;
 		virtual void NewFrame() override;
+
+	private:
+		bool m_AltIsDown;
 	};
 }
