@@ -17,17 +17,29 @@ namespace Glory
 		bool OnInput(InputEvent& event);
 
 		size_t AddPlayer();
+		void RemovePlayer(size_t playerIndex);
 
 		void ReadInputData(YAML::Node& node);
 
 		void ClearInputData();
 
-		void SetPlayerInputMode(const size_t player, const std::string& inputMode);
+		void SetPlayerInputMode(const size_t playerIndex, const std::string& inputMode);
 
 		const UUID GetDeviceUUID(const InputDeviceType deviceType, const size_t deviceID) const;
 		InputDevice* GetInputDevice(const UUID deviceID);
 
+		InputMode* GetInputMode(const std::string& name);
+
 		bool& InputBlocked();
+
+		PlayerInput* GetPlayer(size_t playIndex);
+		float GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
+		float GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
+		bool GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
+
+		void FreeDevice(const UUID deviceId);
+
+		const UUID FindAvailableInputDevice(const InputDeviceType deviceType) const;
 
 	protected:
 		virtual void OnInitialize() {};

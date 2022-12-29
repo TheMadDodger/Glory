@@ -5,6 +5,7 @@
 REFLECTABLE_ENUM_NS(Glory, InputDeviceType, Keyboard, Mouse, Gamepad)
 REFLECTABLE_ENUM_NS(Glory, InputMappingType, Bool, Float)
 REFLECTABLE_ENUM_NS(Glory, InputState, KeyPressed, KeyDown, KeyUp, Axis)
+REFLECTABLE_ENUM_NS(Glory, AxisBlending, Jump, Lerp, SLerp)
 
 namespace Glory
 {
@@ -70,10 +71,12 @@ namespace Glory
 
 	struct InputAction
 	{
-		InputAction(const std::string, const InputMappingType mappingType);
+		InputAction(const std::string, const InputMappingType mappingType, const AxisBlending axisBlending, const float blendSpeed);
 
 		const std::string m_Name;
 		const InputMappingType m_MappingType;
+		const AxisBlending m_Blending;
+		const float m_BlendSpeed;
 		std::vector<InputBinding> m_Bindings;
 
 	private:

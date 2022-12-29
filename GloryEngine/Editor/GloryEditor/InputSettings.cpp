@@ -317,6 +317,9 @@ namespace Glory::Editor
 
 						YAML::Node actionMappingNode = actionNode["ActionMapping"];
 						std::string actionMappingString = actionMappingNode.as<std::string>();
+						YAML::Node axisBlendingNode = actionNode["AxisBlending"];
+						std::string axisBlendingString = axisBlendingNode.as<std::string>();
+						YAML::Node axisBlendingSpeedNode = actionNode["AxisBlendingSpeed"];
 
 						InputMappingType actionMapping = InputMappingType::Bool;
 						GloryReflect::Enum<InputMappingType>().FromString(actionMappingString, actionMapping);
@@ -324,6 +327,23 @@ namespace Glory::Editor
 						{
 							GloryReflect::Enum<InputMappingType>().ToString(actionMapping, actionMappingString);
 							actionMappingNode = actionMappingString;
+						}
+
+						if (actionMapping == InputMappingType::Float)
+						{
+							AxisBlending axisBlending = AxisBlending::Jump;
+							GloryReflect::Enum<AxisBlending>().FromString(axisBlendingString, axisBlending);
+							if (EditorUI::InputEnum<AxisBlending>("Axis Blending", &axisBlending))
+							{
+								GloryReflect::Enum<AxisBlending>().ToString(axisBlending, axisBlendingString);
+								axisBlendingNode = axisBlendingString;
+							}
+
+							float blendingSpeed = axisBlendingSpeedNode.as<float>();
+							if (EditorUI::InputFloat("Axis Blending Speed", &blendingSpeed, 0.0f))
+							{
+								axisBlendingSpeedNode = blendingSpeed;
+							}
 						}
 
 						YAML::Node bindingsNode = actionNode["Bindings"];
@@ -430,6 +450,8 @@ namespace Glory::Editor
 					YAML::Node newNode{ YAML::NodeType::Map };
 					newNode["Name"] = "New Action";
 					newNode["ActionMapping"] = "Bool";
+					newNode["AxisBlending"] = "Jump";
+					newNode["AxisBlendingSpeed"] = 5.0f;
 					newNode["Bindings"] = YAML::Node(YAML::NodeType::Sequence);
 					actionsNode.push_back(newNode);
 				};

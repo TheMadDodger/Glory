@@ -11,8 +11,8 @@ namespace Glory
 	InputMap::InputMap(const std::string name)
 		: m_Name(name), m_Actions(std::map<std::string, InputAction>()) {}
 
-	InputAction::InputAction(const std::string name, const InputMappingType mappingType)
-		: m_Name(name), m_MappingType(mappingType), m_Bindings(std::vector<InputBinding>()) {}
+	InputAction::InputAction(const std::string name, const InputMappingType mappingType, const AxisBlending axisBlending, const float blendSpeed)
+		: m_Name(name), m_MappingType(mappingType), m_Blending(axisBlending), m_BlendSpeed(blendSpeed), m_Bindings(std::vector<InputBinding>()) {}
 
 	KeyBinding::KeyBinding(const std::string bindingPath)
 		: m_BindingPath(bindingPath), m_DeviceType(InputDeviceType(-1)), m_KeyID(0), m_IsAxis(false)

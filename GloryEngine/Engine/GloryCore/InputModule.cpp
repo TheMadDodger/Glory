@@ -1,4 +1,5 @@
 #include "InputModule.h"
+#include "Debug.h"
 
 namespace Glory
 {
@@ -48,29 +49,24 @@ namespace Glory
 		return index;
 	}
 
+	void InputModule::RemovePlayer(size_t playerIndex)
+	{
+		/* TODO: Give players a UUID instead of an index */
+	}
+
 	void InputModule::ReadInputData(YAML::Node& node)
 	{
 		ReadInputModes(node[Key_InputModes]);
 		ReadInputMaps(node[Key_InputMaps]);
-
-
-		/* Temporary */
-		/* Claim the mouse and keyboard for player 1 */
-		m_InputDevices.at(m_DefaultKeyboardDeviceIndex).m_PlayerIndex = 0;
-		m_InputDevices.at(m_DefaultMouseDeviceIndex).m_PlayerIndex = 0;
-
-		/* Add an input map */
-		m_Players[0].m_InputMode = m_InputModes.at("Keyboard and Mouse").m_Name;
-		auto& maps = m_InputMaps.at("Interactions");
-		auto& otherMaps = m_InputMaps.at("Movement");
-		InputMap* pMap = &maps.at(std::string(m_Players[0].m_InputMode));
-		InputMap* pOtherMap = &otherMaps.at(std::string(m_Players[0].m_InputMode));
-		m_Players[0].m_InputData.push_back({ pMap });
-		m_Players[0].m_InputData.push_back({ pOtherMap });
 	}
 
 	void InputModule::ClearInputData()
 	{
+		for (size_t i = 0; i < m_Players.size(); i++)
+		{
+			m_Players[i].Unbind();
+		}
+
 		m_Players.clear();
 		AddPlayer();
 
@@ -78,8 +74,44 @@ namespace Glory
 		m_InputMaps.clear();
 	}
 
-	void InputModule::SetPlayerInputMode(const size_t player, const std::string& inputMode)
+	void InputModule::SetPlayerInputMode(const size_t playerIndex, const std::string& inputMode)
 	{
+		if (m_InputModes.find(inputMode) == m_InputModes.end())
+		{
+			Debug::LogError("SetPlayerInputMode: InputMode " + inputMode + " does not exist!");
+			return;
+		}
+
+		PlayerInput* player = GetPlayer(playerIndex);
+		if (!player)
+		{
+			Debug::LogError("SetPlayerInputMode: Player " + std::to_string(playerIndex) + " does not exist!");
+			return;
+		}
+
+		/* Unbind current input maps and free devices */
+		player->Unbind();
+
+		/* Add input maps */
+		for (auto itor = m_InputMaps.begin(); itor != m_InputMaps.end(); ++itor)
+		{
+			std::map<std::string, InputMap>& maps = itor->second;
+			if (maps.find(inputMode) == maps.end()) continue;
+			InputMap* inputMap = &maps.at(inputMode);
+			player->m_InputData.push_back({ inputMap });
+		}
+
+		/* Find and claim available devices */
+		for (size_t i = 0; i < m_InputModes.at(inputMode).m_DeviceTypes.size(); i++)
+		{
+			InputDeviceType deviceType = m_InputModes.at(inputMode).m_DeviceTypes[i];
+			const UUID deviceID = FindAvailableInputDevice(deviceType);
+			if (deviceID == 0) continue;
+			InputDevice* pDevice = GetInputDevice(deviceID);
+			pDevice->m_PlayerIndex = playerIndex;
+			player->m_ClaimedDevices.push_back(deviceID);
+			player->m_ClaimedDeviceTypes.push_back(deviceType);
+		}
 	}
 
 	const UUID InputModule::GetDeviceUUID(const InputDeviceType deviceType, const size_t deviceID) const
@@ -99,9 +131,56 @@ namespace Glory
 		return &m_InputDevices.at(deviceID);
 	}
 
+	InputMode* InputModule::GetInputMode(const std::string& name)
+	{
+		if (m_InputModes.find(name) == m_InputModes.end()) return nullptr;
+		return &m_InputModes.at(name);
+	}
+
 	bool& InputModule::InputBlocked()
 	{
 		return m_InputBlocked;
+	}
+
+	PlayerInput* InputModule::GetPlayer(size_t playIndex)
+	{
+		return playIndex >= m_Players.size() ? nullptr : &m_Players[playIndex];
+	}
+
+	float InputModule::GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName)
+	{
+		PlayerInput* player = GetPlayer(playerIndex);
+		return player ? player->GetAxis(inputMap, actionName) : 0.0f;
+	}
+
+	float InputModule::GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName)
+	{
+		PlayerInput* player = GetPlayer(playerIndex);
+		return player ? player->GetAxisDelta(inputMap, actionName) : 0.0f;
+	}
+
+	bool InputModule::GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName)
+	{
+		PlayerInput* player = GetPlayer(playerIndex);
+		return player ? player->GetBool(inputMap, actionName) : 0.0f;
+	}
+
+	void InputModule::FreeDevice(const UUID deviceId)
+	{
+		InputDevice* pDevice = GetInputDevice(deviceId);
+		if (!pDevice) return;
+		pDevice->m_PlayerIndex = -1;
+	}
+
+	const UUID InputModule::FindAvailableInputDevice(const InputDeviceType deviceType) const
+	{
+		for (auto itor = m_InputDevices.begin(); itor != m_InputDevices.end(); itor++)
+		{
+			if (itor->second.m_DeviceType != deviceType || itor->second.m_PlayerIndex != -1)
+				continue;
+			return itor->first;
+		}
+		return 0;
 	}
 
 	void InputModule::Initialize()
@@ -133,11 +212,16 @@ namespace Glory
 
 	void InputModule::Update()
 	{
+		OnUpdate();
+		for (size_t i = 0; i < m_Players.size(); i++)
+		{
+			m_Players[i].Update();
+		}
 	}
 
 	void InputModule::OnGameThreadFrameStart()
 	{
-		for (size_t i = 0; i < m_Players.size(); i++)
+		for (size_t i = 0; i < m_Players.size(); ++i)
 		{
 			m_Players[i].ClearActions();
 		}
@@ -172,6 +256,7 @@ namespace Glory
 
 		auto inputMappingEnum = GloryReflect::Enum<InputMappingType>();
 		auto keyStateEnum = GloryReflect::Enum<InputState>();
+		auto axisBlendingEnum = GloryReflect::Enum<AxisBlending>();
 
 		for (size_t i = 0; i < node.size(); i++)
 		{
@@ -190,11 +275,17 @@ namespace Glory
 				YAML::Node actionMapNode = actionsMapNode[j];
 				YAML::Node actionMapNameNode = actionMapNode["Name"];
 				YAML::Node actionMapActionMappingNode = actionMapNode["ActionMapping"];
+				YAML::Node actionMapAxisBlendingNode = actionMapNode["AxisBlending"];
+				YAML::Node actionMapAxisBlendingSpeedNode = actionMapNode["AxisBlendingSpeed"];
 				YAML::Node actionMapBindingsNode = actionMapNode["Bindings"];
 				const std::string actionMapName = actionMapNameNode.as<std::string>();
 				const std::string actionMapMappingString = actionMapActionMappingNode.as<std::string>();
+				const std::string actionMapAxisBlendingString = actionMapAxisBlendingNode.as<std::string>();
+				const float axisBlendingSpeed = actionMapAxisBlendingSpeedNode.as<float>();
 				InputMappingType actionMappingType;
 				inputMappingEnum.FromString(actionMapMappingString, actionMappingType);
+				AxisBlending axisBlending;
+				axisBlendingEnum.FromString(actionMapAxisBlendingString, axisBlending);
 
 				for (size_t k = 0; k < actionMapBindingsNode.size(); k++)
 				{
@@ -204,13 +295,13 @@ namespace Glory
 
 					const std::string bindingInputModeName = bindingInputModeNode.as<std::string>();
 					if (inputMaps.find(bindingInputModeName) == inputMaps.end())
-						inputMaps.emplace(bindingInputModeName, InputMap{ bindingInputModeName });
+						inputMaps.emplace(bindingInputModeName, InputMap{ inputMapName });
 
 					InputMap& inputMap = inputMaps.at(bindingInputModeName);
 
 					/* Get the InputAction */
 					if (inputMap.m_Actions.find(actionMapName) == inputMap.m_Actions.end())
-						inputMap.m_Actions.emplace(actionMapName, InputAction{ actionMapName, actionMappingType });
+						inputMap.m_Actions.emplace(actionMapName, InputAction{ actionMapName, actionMappingType, axisBlending, axisBlendingSpeed });
 
 					InputAction& inputAction = inputMap.m_Actions.at(actionMapName);
 

@@ -4,6 +4,7 @@
 #include <vector>
 #include <filesystem>
 #include "Input.h"
+#include "UUID.h"
 
 namespace Glory
 {
@@ -39,7 +40,10 @@ namespace Glory
 
 		InputMap* m_InputMap;
 		/* The current values of all axes */
-		std::map<std::string, float> m_AxisValue;
+		std::map<std::string, float> m_AxisValueLeft;
+		std::map<std::string, float> m_AxisValueRight;
+		std::map<std::string, float> m_AxisDesiredValueLeft;
+		std::map<std::string, float> m_AxisDesiredValueRight;
 		/* The axis deltas from the current frame */
 		std::map<std::string, float> m_AxisDeltas;
 		/* Actions that were triggered this frame */
@@ -47,7 +51,7 @@ namespace Glory
 		/* Used for KeyPressed actions */
 		std::map<std::string_view, bool> m_PressedStates;
 		/* When MapDeltaToValue is set the value should also be cleared */
-		std::vector<std::string_view> m_ToClearValues;
+		std::vector<std::string> m_ToClearValues;
 	};
 
 	class PlayerInput
@@ -63,9 +67,19 @@ namespace Glory
 		/* Clears all data from actions during the current frame */
 		void ClearActions();
 
+		const float GetAxis(const std::string& inputMap, const std::string& actionName);
+		const float GetAxisDelta(const std::string& inputMap, const std::string& actionName);
+		const bool GetBool(const std::string& inputMap, const std::string& actionName);
+
+		void Unbind();
+
+		void Update();
+
 	private:
 		void TriggerAction(PlayerInputData& inputData, InputAction& inputAction, InputBinding& inputBinding, InputEvent& e);
 		void MapOnFloat(PlayerInputData& inputData, InputAction& inputAction, InputBinding& inputBinding, InputEvent& e);
+
+		float Lerp(float a, float b, float t);
 
 	private:
 		friend class InputModule;
@@ -73,5 +87,7 @@ namespace Glory
 		size_t m_PlayerIndex;
 		std::string_view m_InputMode;
 		std::vector<PlayerInputData> m_InputData;
+		std::vector<UUID> m_ClaimedDevices;
+		std::vector<InputDeviceType> m_ClaimedDeviceTypes;
 	};
 }
