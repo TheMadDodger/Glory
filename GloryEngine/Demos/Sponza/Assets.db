@@ -229,17 +229,6 @@
   Extension: .jpg
   ImportSettings:
     {}
-- Path: .\Modules\GloryASSIMPModelLoader\Assets\Textures\VikingRoom1.png
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  LastSaved: 0
-  UUID: 4546702870173422908
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .png
-  ImportSettings:
-    {}
 - Path: Materials\Material_Instance21.gminst
   IsSubAsset: false
   Index: 0
@@ -427,17 +416,6 @@
   Extension: .gminst
   ImportSettings:
     {}
-- Path: .\Modules\GloryASSIMPModelLoader\Assets\Textures\VikingRoom.png
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  LastSaved: 0
-  UUID: 16502975731922088984
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .png
-  ImportSettings:
-    {}
 - Path: Materials\Material_Instance8.gminst
   IsSubAsset: false
   Index: 0
@@ -517,7 +495,7 @@
   IsSubAsset: false
   Index: 0
   VersionHash: 2166136261
-  LastSaved: -1811570802
+  LastSaved: 1721937249
   UUID: 16575844677113431238
   Hash: 3636289800
   SerializedVersion: 0
@@ -951,17 +929,6 @@
   Hash: 213427075
   SerializedVersion: 0
   Extension: .fbx
-  ImportSettings:
-    {}
-- Path: .\Modules\GloryASSIMPModelLoader\Assets\Textures\Chubz.PNG
-  IsSubAsset: false
-  Index: 0
-  VersionHash: 2166136261
-  LastSaved: 0
-  UUID: 9207583659615596279
-  Hash: 948733667
-  SerializedVersion: 0
-  Extension: .PNG
   ImportSettings:
     {}
 - Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_frag.shader

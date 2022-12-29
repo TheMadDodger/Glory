@@ -223,7 +223,7 @@ namespace Glory::EditorLauncher
 		ImGui::SameLine(regionAvail.x - maxItemSize);
 		ImGui::SetNextItemWidth(maxItemSize);
 		ImGui::InputText("##Project Name", m_ProjectNameText, 100);
-		
+
 		ImGui::Text("Project Path");
 		ImGui::SameLine(regionAvail.x - maxItemSize);
 		ImGui::SetNextItemWidth(400.0f);
@@ -282,6 +282,7 @@ namespace Glory::EditorLauncher
 		DrawModuleSelector("Graphics", ModuleType::MT_Graphics, m_EngineSettings.GraphicsModule, regionAvail.x - maxItemSize, maxItemSize);
 		DrawModuleSelector("Renderer", ModuleType::MT_Renderer, m_EngineSettings.RenderModule, regionAvail.x - maxItemSize, maxItemSize);
 		DrawModuleSelector("Scene Management", ModuleType::MT_SceneManagement, m_EngineSettings.ScenesModule, regionAvail.x - maxItemSize, maxItemSize);
+		DrawModuleSelector("Input", ModuleType::MT_Input, m_EngineSettings.InputModule, regionAvail.x - maxItemSize, maxItemSize);
 
 		DrawScriptingModulesArray(regionAvail, maxItemSize);
 		DrawOptionalModulesArray(regionAvail, maxItemSize);

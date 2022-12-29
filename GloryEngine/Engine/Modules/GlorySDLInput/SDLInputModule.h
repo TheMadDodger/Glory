@@ -4,11 +4,11 @@
 
 namespace Glory
 {
-	class GainputModule : public InputModule
+	class SDLInputModule : public InputModule
 	{
 	public:
-		GLORY_API GainputModule();
-		GLORY_API virtual ~GainputModule();
+		GLORY_API SDLInputModule();
+		GLORY_API virtual ~SDLInputModule();
 
 	private:
 		virtual void OnInitialize() override;
