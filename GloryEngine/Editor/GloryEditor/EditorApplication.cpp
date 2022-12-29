@@ -78,6 +78,9 @@ namespace Glory::Editor
 
 		while (true)
 		{
+			/* We must wait for graphics to initialize */
+			if (!game.GetEngine()->GetGraphicsThread()->IsInitialized()) continue;
+
 			// Start a frame
 			game.GetEngine()->GameThreadFrameStart();
 			// Update console

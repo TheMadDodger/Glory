@@ -4,6 +4,12 @@ namespace GloryEngine
 {
     public struct Vector3
     {
+        #region Props
+
+        public Vector3 Normalized => Vector3_GetNormalized(this);
+
+        #endregion
+
         #region Fields
 
         public float x;
@@ -35,9 +41,19 @@ namespace GloryEngine
             z = other.z;
         }
 
+        public Vector3(Vector4 other)
+        {
+            x = other.x;
+            y = other.y;
+            z = other.z;
+        }
+
         #endregion
 
         #region Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 Vector3_GetNormalized(Vector3 a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector3 operator +(Vector3 a, Vector3 b);

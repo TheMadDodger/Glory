@@ -78,3 +78,29 @@ Entities:
         m_Color: [1, 1, 1, 1]
         m_Intensity: 1
         m_Range: 50
+  - TypeHash: 3083728904
+    Name: Camera
+    UUID: 5957294133680032060
+    ParentUUID: 0
+    Components:
+      - UUID: 9229066519227096505
+        TypeName: Transform
+        TypeHash: 3246206669
+        Position: [-8.76715088, 24.4391365, 2.67541075]
+        Rotation: [0, 0, 0, 1]
+        Scale: [1.00000012, 1, 1.00000012]
+      - UUID: 14861024354119076956
+        TypeName: CameraComponent
+        TypeHash: 1777037639
+        m_HalfFOV: 90
+        m_Near: 0.100000001
+        m_Far: 3000
+        m_DisplayIndex: 0
+        m_Priority: 0
+        m_LayerMask: 0
+        m_ClearColor: [0, 0, 0, 0]
+      - UUID: 17911210136793907514
+        TypeName: ScriptedComponent
+        TypeHash: 727558036
+        m_Script: 6449810108664700435
+        ScriptData: {_freeLookSensitivity: 1}

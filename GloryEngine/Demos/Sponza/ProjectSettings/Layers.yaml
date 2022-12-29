@@ -1,3 +1,5 @@
-- Name: World
-- Name: UI
-- Name: Effects
+Layers:
+  - Name: World
+  - Name: UI
+  - Name: Effects
+EditorVersion: 0.1.0
