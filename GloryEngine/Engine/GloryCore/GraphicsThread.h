@@ -56,6 +56,8 @@ namespace Glory
 
 		void Execute(std::function<void(void*)> func, void* pData);
 
+		const bool IsInitialized() const;
+
 	private:
 		void Run();
 		void OnRenderFrame(const RenderFrame& frame);

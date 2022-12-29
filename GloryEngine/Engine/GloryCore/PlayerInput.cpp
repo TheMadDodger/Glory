@@ -70,8 +70,8 @@ namespace Glory
 			for (size_t j = 0; j < m_InputData[i].m_ToClearValues.size(); ++j)
 			{
 				const std::string& toClear = m_InputData[i].m_ToClearValues[j];
-				m_InputData[i].m_AxisValueRight[toClear] = 0.0f;
-				m_InputData[i].m_AxisValueLeft[toClear] = 0.0f;
+				m_InputData[i].m_AxisDesiredValueLeft[toClear] = 0.0f;
+				m_InputData[i].m_AxisDesiredValueRight[toClear] = 0.0f;
 			}
 			m_InputData[i].m_ToClearValues.clear();
 		}
@@ -201,11 +201,11 @@ namespace Glory
 		const float value = e.Value * inputBinding.m_Multiplier;
 		if (inputBinding.m_Multiplier > 0.0f) inputData.m_AxisDesiredValueRight[inputAction.m_Name] = value;
 		else if (inputBinding.m_Multiplier < 0.0f) inputData.m_AxisDesiredValueLeft[inputAction.m_Name] = value;
-		inputData.m_AxisDeltas[inputAction.m_Name] = e.Delta * std::abs(inputBinding.m_Multiplier);
+		inputData.m_AxisDeltas[inputAction.m_Name] += e.Delta * inputBinding.m_Multiplier;
 
 		if (inputBinding.m_MapDeltaToValue)
 		{
-			inputData.m_AxisDesiredValueLeft[inputAction.m_Name] = inputData.m_AxisDeltas[inputAction.m_Name];
+			inputData.m_AxisDesiredValueLeft[inputAction.m_Name] = 0;
 			inputData.m_AxisDesiredValueRight[inputAction.m_Name] = inputData.m_AxisDeltas[inputAction.m_Name];
 			/* TODO: Add a ShouldClearOnNewFrame bool for clearing values */
 			inputData.m_ToClearValues.push_back(inputAction.m_Name);

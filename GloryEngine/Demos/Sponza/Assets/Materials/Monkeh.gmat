@@ -1,7 +1,7 @@
 Shaders:
-  - UUID: 14778255856269579699
+  - UUID: 5258057404939636139
     Type: Frag
-  - UUID: 435377197738799911
+  - UUID: 1332659315065513959
     Type: Vert
 Properties:
   - DisplayName: normalSampler
@@ -11,4 +11,8 @@ Properties:
   - DisplayName: texSampler
     ShaderName: texSampler
     TypeHash: 948733667
-    Value: 11443876422989324620
+    Value: 10148233942574360669
+  - DisplayName: Float
+    ShaderName: Float
+    TypeHash: 3356228888
+    Value: 1

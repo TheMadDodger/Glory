@@ -27,9 +27,6 @@ namespace Glory
 	{
 		m_pRenderQueue = new RenderQueue(2);
 		m_pThread = ThreadManager::Run(std::bind(&GraphicsThread::Run, this));
-
-		/* Wait for the thread to initialize */
-		while (!m_Initialized) {}
 	}
 
 	void GraphicsThread::Stop()
@@ -57,6 +54,11 @@ namespace Glory
 		m_Executes.push_back(data);
 
 		//while (m_Executes.Contains([&](const ExecuteData& otherData) { return otherData.m_UUID == uuid; })) {}
+	}
+
+	const bool GraphicsThread::IsInitialized() const
+	{
+		return m_Initialized;
 	}
 
 	void GraphicsThread::Run()

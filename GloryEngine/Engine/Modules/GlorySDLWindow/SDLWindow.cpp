@@ -366,26 +366,21 @@ namespace Glory
 		case SDL_MOUSEMOTION:
 		{
 			bool consumed = false;
-			if (event.motion.xrel != 0.0f)
-			{
-				inputEvent.InputDeviceType = InputDeviceType::Mouse;
-				inputEvent.KeyID = MouseAxis::MouseAxisX;
-				inputEvent.State = InputState::Axis;
-				inputEvent.SourceDeviceID = event.motion.which;
-				inputEvent.Value = event.motion.x;
-				inputEvent.Delta = event.motion.xrel;
-				consumed |= ForwardInputEvent(inputEvent);
-			}
-			if (event.motion.yrel != 0.0f)
-			{
-				inputEvent.InputDeviceType = InputDeviceType::Mouse;
-				inputEvent.KeyID = MouseAxis::MouseAxisY;
-				inputEvent.State = InputState::Axis;
-				inputEvent.SourceDeviceID = event.motion.which;
-				inputEvent.Value = event.motion.y;
-				inputEvent.Delta = event.motion.yrel;
-				consumed |= ForwardInputEvent(inputEvent);
-			}
+			inputEvent.InputDeviceType = InputDeviceType::Mouse;
+			inputEvent.KeyID = MouseAxis::MouseAxisX;
+			inputEvent.State = InputState::Axis;
+			inputEvent.SourceDeviceID = event.motion.which;
+			inputEvent.Value = event.motion.x;
+			inputEvent.Delta = event.motion.xrel;
+			consumed |= ForwardInputEvent(inputEvent);
+
+			inputEvent.InputDeviceType = InputDeviceType::Mouse;
+			inputEvent.KeyID = MouseAxis::MouseAxisY;
+			inputEvent.State = InputState::Axis;
+			inputEvent.SourceDeviceID = event.motion.which;
+			inputEvent.Value = event.motion.y;
+			inputEvent.Delta = event.motion.yrel;
+			consumed |= ForwardInputEvent(inputEvent);
 			return consumed;
 		}
 		default:

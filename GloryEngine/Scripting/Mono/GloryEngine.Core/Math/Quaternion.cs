@@ -35,6 +35,16 @@ namespace GloryEngine
 
         #region Methods
 
+        public static Quaternion Euler(float x, float y, float z)
+            => Quaternion_Euler(x, y, z);
+
+        #endregion
+
+        #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern Quaternion Quaternion_Euler(float x, float y, float z);
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Quaternion operator +(Quaternion a, Quaternion b);
 
@@ -45,13 +55,7 @@ namespace GloryEngine
         public extern static Quaternion operator *(Quaternion a, Quaternion b);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Quaternion operator /(Quaternion a, Quaternion b);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Quaternion operator *(Quaternion a, float factor);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Quaternion operator /(Quaternion a, float factor);
 
         public override string ToString()
         {

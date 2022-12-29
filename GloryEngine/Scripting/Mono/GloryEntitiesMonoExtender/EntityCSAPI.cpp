@@ -6,6 +6,7 @@
 #include <CoreCSAPI.h>
 #include <LayerManager.h>
 #include <MonoAssetManager.h>
+#include <MathCSAPI.h>
 
 namespace Glory
 {
@@ -113,10 +114,10 @@ namespace Glory
 		return glm::eulerAngles(transform.Rotation);
 	}
 
-	void Transform_SetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* rotation)
+	void Transform_SetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID, Vec3Wrapper* rotation)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
-		transform.Rotation = glm::quat(*rotation);
+		transform.Rotation = glm::quat(ToGLMVec3(*rotation));
 	}
 
 	glm::vec3 Transform_GetLocalScale(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -137,16 +138,28 @@ namespace Glory
 		return glm::vec3(transform.MatTransform[2][0], transform.MatTransform[2][1], transform.MatTransform[2][2]);
 	}
 
+	glm::vec3 Transform_GetUp(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		return glm::vec3(transform.MatTransform[1][0], transform.MatTransform[1][1], transform.MatTransform[1][2]);
+	}
+
+	void Transform_SetForward(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* forward)
+	{
+		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		transform.Rotation = glm::conjugate(glm::quatLookAt(*forward, { 0.0f, 1.0f, 0.0f }));
+	}
+
 	glm::vec3 Transform_GetRight(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return glm::vec3(transform.MatTransform[0][0], transform.MatTransform[0][1], transform.MatTransform[0][2]);
 	}
 
-	glm::vec3 Transform_GetUp(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Mat4Wrapper Transform_GetWorld(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
-		return glm::vec3(transform.MatTransform[1][0], transform.MatTransform[1][1], transform.MatTransform[1][2]);
+		return ToMat4Wrapper(transform.MatTransform);
 	}
 
 #pragma endregion
@@ -394,6 +407,7 @@ namespace Glory
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalScale", Transform_SetLocalScale));
 
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetForward", Transform_GetForward));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetForward", Transform_SetForward));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetRight", Transform_GetRight));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetUp", Transform_GetUp));
 

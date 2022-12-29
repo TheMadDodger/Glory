@@ -52,8 +52,8 @@ namespace Glory::Editor
 		glm::vec3 left = -right;
 		glm::vec3 forward(viewInverse[2][0], viewInverse[2][1], viewInverse[2][2]);
 		glm::vec3 backward = -forward;
-		glm::vec3 referenceUp = glm::vec3(0.0, 1.0f, 0.0f);
-		glm::vec3 referenceDown = glm::vec3(0.0, -1.0f, 0.0f);
+		glm::vec3 referenceUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 referenceDown = glm::vec3(0.0f, -1.0f, 0.0f);
 
 		if (leftKey) position += left * movementSpeed * deltaTime;
 		if (rightKey) position += right * movementSpeed * deltaTime;
