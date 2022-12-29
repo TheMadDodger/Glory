@@ -186,5 +186,8 @@ namespace Glory::Editor
 		std::string versionString = Glory::Editor::Version.GetVersionString();
 		fileStream.write(versionString.c_str(), versionString.size());
 		fileStream.close();
+
+		AssetDatabase::Save();
+		ProjectSettings::Save(this);
 	}
 }

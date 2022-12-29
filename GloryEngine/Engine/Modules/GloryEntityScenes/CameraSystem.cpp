@@ -38,7 +38,7 @@ namespace Glory
 	void CameraSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
-		pComponent.m_Camera.SetView(transform.MatTransform);
+		pComponent.m_Camera.SetView(glm::inverse(transform.MatTransform));
 
 		size_t hash = CalcHash(pComponent);
 		if (pComponent.m_LastHash == hash) return;

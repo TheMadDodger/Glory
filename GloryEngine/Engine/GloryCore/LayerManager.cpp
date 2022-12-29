@@ -31,15 +31,22 @@ namespace Glory
 		}
 
 		YAML::Node node = YAML::LoadFile(layersPath.string());
-		if (!node.IsSequence())
+		if (!node.IsMap())
 		{
 			Debug::LogError("Could not load Layers.yaml!");
 			return;
 		}
 
-		for (size_t i = 0; i < node.size(); i++)
+		YAML::Node layersNode = node["Layers"];
+		if (!layersNode.IsSequence())
 		{
-			YAML::Node layerNode = node[i];
+			Debug::LogError("Could not load Layers.yaml!");
+			return;
+		}
+
+		for (size_t i = 0; i < layersNode.size(); i++)
+		{
+			YAML::Node layerNode = layersNode[i];
 			YAML::Node nameNode = layerNode["Name"];
 
 			if (!nameNode.IsDefined())
@@ -55,26 +62,31 @@ namespace Glory
 
 	void LayerManager::Save()
 	{
-		YAML::Emitter emitter;
-		emitter << YAML::BeginSeq;
-		
-		for (size_t i = 0; i < LAYER_MANAGER->m_Layers.size(); i++)
-		{
-			Layer* pLayer = &LAYER_MANAGER->m_Layers[i];
-			emitter << YAML::BeginMap;
-			emitter << YAML::Key << "Name";
-			emitter << YAML::Value << pLayer->m_Name;
-			emitter << YAML::EndMap;
-		}
+		/* Should be handled by the LayerSettings editor class */
 
-		emitter << YAML::EndSeq;
-
-		std::filesystem::path layersPath = Game::GetSettingsPath();
-		layersPath.append("Layers.yaml");
-
-		std::ofstream outStream(layersPath.string());
-		outStream << emitter.c_str();
-		outStream.close();
+		//YAML::Emitter emitter;
+		//emitter << YAML::BeginMap;
+		//emitter << YAML::Key << "Layers";
+		//emitter << YAML::Value << YAML::BeginSeq;
+		//
+		//for (size_t i = 0; i < LAYER_MANAGER->m_Layers.size(); i++)
+		//{
+		//	Layer* pLayer = &LAYER_MANAGER->m_Layers[i];
+		//	emitter << YAML::BeginMap;
+		//	emitter << YAML::Key << "Name";
+		//	emitter << YAML::Value << pLayer->m_Name;
+		//	emitter << YAML::EndMap;
+		//}
+		//
+		//emitter << YAML::EndSeq;
+		//emitter << YAML::EndMap;
+		//
+		//std::filesystem::path layersPath = Game::GetSettingsPath();
+		//layersPath.append("Layers.yaml");
+		//
+		//std::ofstream outStream(layersPath.string());
+		//outStream << emitter.c_str();
+		//outStream.close();
 	}
 
 	const Layer* LayerManager::GetLayerByName(const std::string& name)

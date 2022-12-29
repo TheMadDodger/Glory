@@ -1,4 +1,5 @@
 #include "ProjectSettings.h"
+#include "EditorApplication.h"
 #include <filesystem>
 #include <fstream>
 
@@ -68,7 +69,16 @@ namespace Glory::Editor
 		}
 
 		m_SettingsNode = YAML::LoadFile(path.string());
+		if (!m_SettingsNode.IsDefined() || !m_SettingsNode.IsMap())
+		{
+			m_SettingsNode = YAML::Node(YAML::NodeType::Map);
+			m_SettingsNode["EditorVersion"] = EditorApplication::Version.GetVersionString();
+		}
+
 		OnSettingsLoaded();
+
+		/* After migrations are done we can safely override the version */
+		m_SettingsNode["EditorVersion"] = EditorApplication::Version.GetVersionString();
 	}
 
 	void ProjectSettings::SaveSettings(ProjectSpace* pProject)

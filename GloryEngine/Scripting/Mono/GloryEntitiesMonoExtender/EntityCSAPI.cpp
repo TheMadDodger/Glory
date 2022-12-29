@@ -10,6 +10,7 @@
 namespace Glory
 {
 #pragma region Entity
+
 	EntityScene* GetEntityScene(MonoEntityHandle* pEntityHandle)
 	{
 		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return nullptr;
@@ -69,7 +70,7 @@ namespace Glory
 		if (pEntityScene == nullptr) return 0;
 		const size_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		EntityView* pEntityView = pEntityScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
-		
+
 		for (auto iter = pEntityView->GetIterator(); iter != pEntityView->GetIteratorEnd(); iter++)
 		{
 			if (iter->second != componentHash) continue;
@@ -77,9 +78,11 @@ namespace Glory
 		}
 		return 0;
 	}
+
 #pragma endregion
 
 #pragma region Transform
+
 	glm::vec3 Transform_GetLocalPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
@@ -127,6 +130,25 @@ namespace Glory
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Scale = *scale;
 	}
+
+	glm::vec3 Transform_GetForward(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		return glm::vec3(transform.MatTransform[2][0], transform.MatTransform[2][1], transform.MatTransform[2][2]);
+	}
+
+	glm::vec3 Transform_GetRight(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		return glm::vec3(transform.MatTransform[0][0], transform.MatTransform[0][1], transform.MatTransform[0][2]);
+	}
+
+	glm::vec3 Transform_GetUp(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		return glm::vec3(transform.MatTransform[1][0], transform.MatTransform[1][1], transform.MatTransform[1][2]);
+	}
+
 #pragma endregion
 
 #pragma region MeshFilter
@@ -188,7 +210,7 @@ namespace Glory
 		if (meshRenderer.m_pMaterials.size() <= index) return;
 		meshRenderer.m_pMaterials[index] = materialID;
 	}
-	
+
 	void MeshRenderer_ClearMaterials(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
@@ -198,6 +220,7 @@ namespace Glory
 #pragma endregion
 
 #pragma region CameraComponent
+
 	float CameraComponent_GetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
@@ -287,9 +310,11 @@ namespace Glory
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_Camera.GetUUID();
 	}
+
 #pragma endregion
 
 #pragma region Layer Component
+
 	LayerWrapper LayerComponent_GetLayer(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
@@ -302,15 +327,17 @@ namespace Glory
 		const Layer* pLayer = LayerManager::GetLayerByName(mono_string_to_utf8(layer->Name));
 		layerComp.m_Layer.m_LayerName = pLayer ? pLayer->m_Name : "";
 	}
+
 #pragma endregion
 
 #pragma region Light Component
+
 	glm::vec4 LightComponent_GetColor(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		return lightComp.m_Color;
 	}
-	
+
 	void LightComponent_SetColor(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec4* color)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
@@ -340,9 +367,11 @@ namespace Glory
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		lightComp.m_Range = range;
 	}
+
 #pragma endregion
 
 #pragma region Binding
+
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
 	{
 		// Entity
@@ -363,6 +392,10 @@ namespace Glory
 
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetLocalScale", Transform_GetLocalScale));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalScale", Transform_SetLocalScale));
+
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetForward", Transform_GetForward));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetRight", Transform_GetRight));
+		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetUp", Transform_GetUp));
 
 		// Camera
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetHalfFOV", CameraComponent_GetHalfFOV));
@@ -423,5 +456,6 @@ namespace Glory
 	MonoEntityHandle::MonoEntityHandle(uint64_t entityID, uint64_t sceneID) : m_EntityID(entityID), m_SceneID(sceneID)
 	{
 	}
+
 #pragma endregion
 }
