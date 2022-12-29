@@ -6,7 +6,7 @@ Modules:
   - GloryASSIMPModelLoader
   - GlorySDLImage
   - GloryMonoScripting
-  - GloryGainput
+  - GlorySDLInput
 Engine:
   Window: 0
   SceneManagement: 1

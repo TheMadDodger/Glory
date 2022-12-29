@@ -1,4 +1,4 @@
-project "GloryGainput"
+project "GlorySDLInput"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
@@ -17,7 +17,7 @@ project "GloryGainput"
 
 	vpaths
 	{
-		["Module"] = { "GloryGainput.*", "GainputModule.*" },
+		["Module"] = { "GlorySDLInput.*", "SDLInputModule.*" },
 	}
 
 	includedirs

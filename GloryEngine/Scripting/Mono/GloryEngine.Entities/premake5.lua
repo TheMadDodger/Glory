@@ -6,12 +6,13 @@ project "GloryEngine.Entities"
 
 	targetdir ("%{engineOutDir}/Mono/GloryEngine.Entities")
 	objdir ("%{outputDir}")
-	
+
 	dotnetframework "4.7.1"
-	
+
 	files
 	{
-		"**.cs",
+		"*.cs",
+		"Components/*.cs",
 		"premake5.lua"
 	}
 
@@ -32,7 +33,7 @@ project "GloryEngine.Entities"
 	{
 		"TRACE"
 	}
-	
+
 	postbuildcommands
 	{
 		("{COPY} GloryEngine.Entities.dll \"%{modulesOutDir}/GloryEntityScenes/Scripting/csharp/\""),

@@ -19,6 +19,7 @@ namespace Glory::EditorLauncher
 		int GraphicsModule;
 		int WindowModule;
 		int ScenesModule;
+		int InputModule;
 		std::vector<int> OptionalModules;
 		std::vector<int> ScriptingModules;
 
