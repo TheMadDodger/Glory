@@ -8,6 +8,8 @@
 
 namespace Glory
 {
+	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule, 0, 1);
+
 	ClusteredRendererModule::ClusteredRendererModule()
 		: m_pClusterShaderData(nullptr), m_pClusterShaderMaterial(nullptr), m_pClusterShaderMaterialData(nullptr), m_pScreenToViewSSBO(nullptr)
 	{
@@ -86,13 +88,13 @@ namespace Glory
 	{
 		delete m_pClusterShaderData;
 		m_pClusterShaderData = nullptr;
-		
+
 		delete m_pMarkActiveClustersShaderData;
 		m_pMarkActiveClustersShaderData = nullptr;
-		
+
 		delete m_pCompactClustersShaderData;
 		m_pCompactClustersShaderData = nullptr;
-		
+
 		delete m_pClusterCullLightShaderData;
 		m_pClusterCullLightShaderData = nullptr;
 
@@ -104,7 +106,7 @@ namespace Glory
 
 		delete m_pCompactClustersMaterialData;
 		m_pCompactClustersMaterialData = nullptr;
-		
+
 		delete m_pClusterCullLightMaterialData;
 		m_pClusterCullLightMaterialData = nullptr;
 
@@ -243,7 +245,7 @@ namespace Glory
 
 			pLightIndexSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS * MAX_LIGHTS_PER_TILE + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 4);
 			pLightIndexSSBO->Assign(NULL);
-			
+
 			pLightGridSSBO = pResourceManager->CreateBuffer(sizeof(LightGrid) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 5);
 			pLightGridSSBO->Assign(NULL);
 

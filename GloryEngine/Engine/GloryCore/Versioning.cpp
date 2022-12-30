@@ -13,9 +13,9 @@ namespace Glory
 	{
 	}
 
-	Version::Version(const VersionValue* values, size_t siize)
+	Version::Version(const VersionValue* values, size_t size)
 	{
-		for (size_t i = 0; i < siize; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			m_VersionValues.push_back(values[i]);
 			m_Pairs.emplace(values[i].Name, i);

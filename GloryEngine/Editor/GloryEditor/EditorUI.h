@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <functional>
 #include <ResourceType.h>
+#include <imgui.h>
 
 namespace Glory
 {
@@ -32,7 +33,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API bool InputColor(std::string_view label, glm::vec4* value, const bool hdr);
 
-		static GLORY_EDITOR_API bool InputText(std::string_view label, char* value, size_t bufferSize);
+		static GLORY_EDITOR_API bool InputText(std::string_view label, char* value, size_t bufferSize, ImGuiInputTextFlags flags = 0);
 
 		static GLORY_EDITOR_API bool InputDropdown(std::string_view label, const std::vector<std::string_view>& options, size_t* index, std::string_view value);
 		static GLORY_EDITOR_API bool InputDropdown(std::string_view label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, std::string_view value);

@@ -10,6 +10,8 @@ namespace Glory
 		GLORY_API SDLInputModule();
 		GLORY_API virtual ~SDLInputModule();
 
+		GLORY_MODULE_VERSION_H;
+
 	private:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;

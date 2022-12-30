@@ -4,6 +4,8 @@
 
 namespace Glory
 {
+	GLORY_MODULE_VERSION_CPP(SDLWindowModule, 0, 1);
+
 	SDLWindowModule::SDLWindowModule()
 	{
 	}

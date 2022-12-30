@@ -93,7 +93,6 @@ namespace Glory::EditorLauncher
 
         ImGui::End();
 
-
         DrawPopups();
     }
 
@@ -250,7 +249,7 @@ namespace Glory::EditorLauncher
     {
         return std::filesystem::exists(GetProjectPath(path, name));
     }
-    
+
     std::filesystem::path LauncherHub::GetProjectPath(const std::string& path, const std::string& name)
     {
         std::filesystem::path projectPath(path);
@@ -476,7 +475,7 @@ namespace Glory::EditorLauncher
         ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
         if (ImGui::Button("Install Editor", ImVec2(buttonWidth, 0.0f)))
         {
-            
+
         }
 
         static ImGuiTableFlags flags =
@@ -513,7 +512,7 @@ namespace Glory::EditorLauncher
 
                 if (ImGui::Selectable(editorString.data(), false, selectable_flags, ImVec2(0, 0.0f)))
                 {
-                    
+
                 }
 
                 //if (ImGui::TableSetColumnIndex(1))
@@ -533,7 +532,7 @@ namespace Glory::EditorLauncher
         for (size_t i = 0; i < EditorManager::EditorCount(); i++)
         {
             const EditorInfo& editorInfo = EditorManager::GetEditorInfo(i);
-            
+
         }
     }
 
@@ -576,7 +575,7 @@ namespace Glory::EditorLauncher
             }
             ImGui::EndPopup();
         }
-        
+
         if (m_OpenMissingEditorError) ImGui::OpenPopup("Missing Editor");
         SDL_GetWindowSize(pHubWindow->GetSDLWindow(), &w, &h);
         ImGui::SetNextWindowPos(ImVec2(w / 2.0f, h / 2.0f), ImGuiCond_Always, ImVec2(.5f, .5f));

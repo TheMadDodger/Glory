@@ -12,6 +12,8 @@ namespace Glory
         ASSIMPModule();
         virtual ~ASSIMPModule();
 
+        GLORY_MODULE_VERSION_H;
+
     private:
         virtual void Initialize() override;
         virtual void Cleanup() override;

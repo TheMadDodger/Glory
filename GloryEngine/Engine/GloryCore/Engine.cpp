@@ -366,6 +366,17 @@ namespace Glory
 		pModule->Draw();
 	}
 
+	const size_t Engine::ModulesCount() const
+	{
+		return m_pAllModules.size();
+	}
+
+	Module* Engine::GetModule(size_t index) const
+	{
+		if (index >= m_pAllModules.size()) return nullptr;
+		return m_pAllModules[index];
+	}
+
 	void Engine::GraphicsThreadFrameStart()
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)

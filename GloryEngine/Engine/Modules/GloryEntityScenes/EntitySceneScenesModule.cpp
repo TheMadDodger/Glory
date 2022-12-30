@@ -3,10 +3,13 @@
 #include "EntitySceneObjectSerializer.h"
 #include "Components.h"
 #include "ScriptedComponentSerializer.h"
+#include <PropertyFlags.h>
 #include <TypeFlags.h>
 
 namespace Glory
 {
+	GLORY_MODULE_VERSION_CPP(EntitySceneScenesModule, 0, 1);
+
 	EntitySceneScenesModule::EntitySceneScenesModule() : m_pComponentTypesInstance(nullptr)
 	{
 	}
@@ -63,6 +66,9 @@ namespace Glory
 		RegisterComponent<MeshRenderer>();
 		RegisterComponent<LightComponent>();
 		RegisterComponent<ScriptedComponent>();
+
+		const GloryReflect::FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
+		GloryReflect::Reflect::SetFieldFlags(pColorField, Vec4Flags::Color);
 
 		/* Temporary components for testing */
 		RegisterComponent<Spin>();

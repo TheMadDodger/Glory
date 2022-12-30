@@ -34,6 +34,8 @@ namespace Glory::Editor
 		void GraphicsThreadBeginRender();
 		void GraphicsThreadEndRender();
 
+		static ImFont* LargeFont;
+
 	private:
 		void SetupDearImGuiContext();
 

@@ -55,10 +55,9 @@ namespace Glory::Editor
 	{
 	public:
 		GeneralSettings();
-		//~GeneralSettings();
 
 	private:
-		virtual void OnGui() override {}
+		virtual void OnGui() override;
 	};
 
 	class EngineSettings : public ProjectSettings
@@ -67,7 +66,13 @@ namespace Glory::Editor
 		EngineSettings();
 
 	private:
-		virtual void OnGui() override {}
+		virtual void OnGui() override;
+
+		void DrawLeftPanel();
+		void DrawRightPanel();
+
+	private:
+		size_t m_MenuIndex;
 	};
 
 	class LayerSettings : public ProjectSettings
@@ -76,7 +81,7 @@ namespace Glory::Editor
 		LayerSettings();
 
 	private:
-		virtual void OnGui() override {}
+		virtual void OnGui() override;
 	};
 
 	class InputSettings : public ProjectSettings

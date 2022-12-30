@@ -10,6 +10,8 @@
 
 namespace Glory::Editor
 {
+	ImFont* EditorPlatform::LargeFont;
+
 	EditorPlatform::EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl)
 		: m_pWindowImpl(pWindowImpl), m_pRenderImpl(pRenderImpl), m_RenderState(Initializing)
 	{
@@ -181,6 +183,8 @@ namespace Glory::Editor
 		config.GlyphMinAdvanceX = 14.0f;
 		ImFont* pIconFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/FA/" FONT_ICON_FILE_NAME_FAS, 14.0f, &config, iconRanges);
 		ImFont* pIconBrandsFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/FA/" FONT_ICON_FILE_NAME_FAB, 14.0f, &config, brandIconRanges);
+
+		LargeFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/PT_Sans/PTSans-Regular.ttf", 24.0f);
 	}
 
 	void EditorPlatform::SetState(const EditorRenderState& state)

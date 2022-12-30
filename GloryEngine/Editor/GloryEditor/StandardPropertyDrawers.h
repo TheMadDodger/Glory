@@ -35,13 +35,13 @@ namespace Glory::Editor
 	public:
 		virtual bool OnGUI(const std::string& label, glm::vec2* data, uint32_t flags) const override;
 	};
-	
+
 	class Vector3Drawer : public PropertyDrawerTemplate<glm::vec3>
 	{
 	public:
 		virtual bool OnGUI(const std::string& label, glm::vec3* data, uint32_t flags) const override;
 	};
-	
+
 	class Vector4Drawer : public PropertyDrawerTemplate<glm::vec4>
 	{
 	public:

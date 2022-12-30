@@ -98,7 +98,12 @@ namespace Glory::Editor
 	{
 	}
 
-	EngineSettings::EngineSettings() : ProjectSettings("Engine.yaml")
+	void GeneralSettings::OnGui()
+	{
+		ImGui::TextUnformatted("Comming soon!");
+	}
+
+	EngineSettings::EngineSettings() : ProjectSettings("Engine.yaml"), m_MenuIndex(0)
 	{
 	}
 

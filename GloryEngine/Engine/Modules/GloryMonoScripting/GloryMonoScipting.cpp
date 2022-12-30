@@ -8,6 +8,8 @@
 
 namespace Glory
 {
+	GLORY_MODULE_VERSION_CPP(GloryMonoScipting, 0, 1);
+
 	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp")
 	{
 	}
