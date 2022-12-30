@@ -2,7 +2,7 @@
 #include <imgui.h>
 #include "EditorUI.h"
 
-#include "FontAwesome/IconsFontAwesome6.h"
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {

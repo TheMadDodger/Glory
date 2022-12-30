@@ -4,16 +4,24 @@
 #include "LauncherHub.h"
 #include "ProjectManager.h"
 #include "ImFileDialog.h"
+#include "TemplateManager.h"
 #include <imgui.h>
 
 namespace Glory::EditorLauncher
 {
-	std::map<NewProjectMenu, const char*> NEWPROJECTMENUTOSTRING = {
+	const std::map<NewProjectMenu, const char*> NEWPROJECTMENUTOSTRING = {
 		{ NewProjectMenu::General, "General" },
 		{ NewProjectMenu::Engine, "Engine" },
 	};
 
-	NewProjectWindow::NewProjectWindow() : m_IsOpen(false), m_SelectedEditorIndex(-1), m_Valid(false)
+	const std::map<std::string, const char*> TEMPLATE_ICONS = {
+		{ "Empty", ICON_FA_HANDS_HOLDING_CIRCLE },
+		{ "Default", ICON_FA_CUBES },
+	};
+
+	const char* UNKNOWN_TEMPLATE_ICON = ICON_FA_WAND_MAGIC_SPARKLES;
+
+	NewProjectWindow::NewProjectWindow() : m_IsOpen(false), m_SelectedEditorIndex(-1), m_Valid(false), m_SelectedTemplate(-1)
 	{
 	}
 
@@ -36,6 +44,10 @@ namespace Glory::EditorLauncher
 		m_BrowsingPath = m_DefaultProjectsFolder;
 		strcpy(m_PathText, m_BrowsingPath.data());
 		m_IsOpen = true;
+
+		m_SelectedEditorIndex = -1;
+		m_SelectedTemplate = -1;
+		TemplateManager::Clear();
 	}
 
 	void NewProjectWindow::Close()
@@ -67,6 +79,7 @@ namespace Glory::EditorLauncher
 			createSettings.Path = GetProjectPath(m_PathText, m_ProjectNameText).string();
 			createSettings.EngineSettings = m_EngineSettings;
 			createSettings.EditorVersion = editorInfo.Version;
+			createSettings.TemplateIndex = m_SelectedTemplate;
 
 			ProjectManager::CreateProject(createSettings);
 			Close();
@@ -97,6 +110,9 @@ namespace Glory::EditorLauncher
 				break;
 			case ProjectValidationResult::EVR_AlreadyExists:
 				errorText = "General: Project already exists at path";
+				break;
+			case ProjectValidationResult::EVR_NoTemplate:
+				errorText = "General: Select a template";
 				break;
 			default:
 				errorText = "Unknown reason";
@@ -136,7 +152,7 @@ namespace Glory::EditorLauncher
 			NewProjectMenu menu = (NewProjectMenu)i;
 			bool selected = m_CurrentMenu == menu;
 			ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_SelectableTextAlign, ImVec2(0.1f, 0.5f));
-			if (ImGui::Selectable(NEWPROJECTMENUTOSTRING[menu], selected, 0, ImVec2(0.0f, 50.0f)))
+			if (ImGui::Selectable(NEWPROJECTMENUTOSTRING.at(menu), selected, 0, ImVec2(0.0f, 50.0f)))
 			{
 				m_CurrentMenu = menu;
 			}
@@ -200,6 +216,8 @@ namespace Glory::EditorLauncher
 				if (ImGui::Selectable(editorInfo.Version.GetVersionString().c_str(), selected))
 				{
 					m_SelectedEditorIndex = i;
+					TemplateManager::LoadTemplates(editorInfo);
+					m_SelectedTemplate = TemplateManager::TemplateCount() > 0 ? 0 : -1;
 				}
 			}
 			ImGui::EndCombo();
@@ -266,6 +284,46 @@ namespace Glory::EditorLauncher
 			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Project name must be at least 3 characters long!");
 		}
 
+		ImGui::Separator();
+		ImGui::TextUnformatted("Template");
+
+		const float templateSize = 128.0f;
+		const float textHeight = ImGui::CalcTextSize("LABEL").y;
+		const float windowMargin = ImGui::GetStyle().WindowPadding.y;
+		ImGui::BeginChild("Templates", { 0.0f, templateSize + windowMargin * 2.0f });
+		for (size_t i = 0; i < TemplateManager::TemplateCount(); i++)
+		{
+			ImGui::PushID(i);
+			const ProjectTemplate* pTemplate = TemplateManager::GetTemplate(i);
+
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			ImGui::BeginChild("##template", { templateSize, templateSize }, false, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+			ImGui::PopStyleVar(2);
+
+			ImGui::PushFont(LauncherHub::IconFontHuge);
+
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			if (ImGui::Selectable("##templateButton", m_SelectedTemplate == i, ImGuiSelectableFlags_AllowItemOverlap, { templateSize, templateSize }))
+				m_SelectedTemplate = i;
+
+			const char* icon = TEMPLATE_ICONS.find(pTemplate->m_Name) != TEMPLATE_ICONS.end() ? TEMPLATE_ICONS.at(pTemplate->m_Name) : UNKNOWN_TEMPLATE_ICON;
+			const ImVec2 iconSize = ImGui::CalcTextSize(icon);
+			ImGui::SetCursorPos({ cursorPos.x + templateSize / 2.0f - iconSize.x / 2.0f, cursorPos.y + 20.0f });
+			ImGui::TextUnformatted(icon);
+			ImGui::PopFont();
+
+			const ImVec2 textSize = ImGui::CalcTextSize(pTemplate->m_Name.data());
+
+			ImGui::SetCursorPos({ cursorPos.x + templateSize / 2.0f - textSize.x / 2.0f, cursorPos.y + templateSize - textSize.y - 10.0f });
+			ImGui::TextUnformatted(pTemplate->m_Name.data());
+			ImGui::EndChild();
+
+			ImGui::PopID();
+			ImGui::SameLine();
+		}
+		ImGui::EndChild();
+
 		m_Valid = !exists && !tooShort;
 	}
 
@@ -324,6 +382,9 @@ namespace Glory::EditorLauncher
 		sorted = m_EngineSettings.OptionalModules;
 		std::sort(sorted.begin(), sorted.end());
 		if (std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end()) return ProjectValidationResult::EVR_DuplicateModules;
+
+		if (m_SelectedTemplate == -1 || m_SelectedTemplate >= TemplateManager::TemplateCount())
+			return ProjectValidationResult::EVR_NoTemplate;
 
 		return ProjectValidationResult::EVR_Success;
 	}

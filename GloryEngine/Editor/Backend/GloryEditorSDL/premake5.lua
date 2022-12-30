@@ -30,7 +30,8 @@ project "GloryEditorSDL"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.sdlwindow}",
-		
+
+		"%{IncludeDir.FA}",
 		"%{IncludeDir.Reflect}",
 
 		"%{SubmodoleDirs.ImGui}/backends/",
@@ -42,7 +43,7 @@ project "GloryEditorSDL"
 		"%{LibDirs.glory}/Modules/GlorySDLWindow",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -54,7 +55,7 @@ project "GloryEditorSDL"
 		"ImGui",
 		"GloryEditor",
 		"GlorySDLWindow",
-		
+
 		"GloryReflectStatic",
 	}
 

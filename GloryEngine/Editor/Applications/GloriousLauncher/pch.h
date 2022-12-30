@@ -17,6 +17,10 @@
 #include <iostream>
 #include <functional>
 
+/* Icon fonts */
+#include <IconsFontAwesome6.h>
+#include <IconsFontAwesome6Brand.h>
+
 #define _CRTDBG_MAP_ALLOC
 #define NOMINMAX
 

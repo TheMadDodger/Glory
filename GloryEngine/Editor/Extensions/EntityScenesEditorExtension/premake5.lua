@@ -34,6 +34,8 @@ project "EntityScenesEditorExtension"
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.ImGui}",
 
+		"%{IncludeDir.FA}",
+
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}"
 	}

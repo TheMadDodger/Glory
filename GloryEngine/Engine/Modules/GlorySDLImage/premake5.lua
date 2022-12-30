@@ -26,7 +26,7 @@ project "GlorySDLImage"
 		"%{IncludeDir.SDL_image}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
-		
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -36,7 +36,7 @@ project "GlorySDLImage"
 		"%{LibDirs.glory}",
 		"%{LibDirs.SDL_image}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -46,7 +46,7 @@ project "GlorySDLImage"
 		"SDL2",
 		"SDL2_image",
 		"yaml-cpp",
-		
+
 		"GloryReflectStatic",
 	}
 
@@ -54,7 +54,7 @@ project "GlorySDLImage"
 	{
 		"GLORY_EXPORTS"
 	}
-	
+
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),

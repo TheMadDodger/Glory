@@ -32,6 +32,7 @@ namespace Glory::EditorLauncher
 
 		EngineSettings EngineSettings;
 		Version EditorVersion;
+		size_t TemplateIndex;
 	};
 
 	class ProjectManager

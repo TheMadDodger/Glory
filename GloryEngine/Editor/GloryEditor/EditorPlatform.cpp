@@ -5,8 +5,8 @@
 #include <imgui_internal.h>
 #include <Engine.h>
 
-#include "FontAwesome/IconsFontAwesome6.h"
-#include "FontAwesome/IconsFontAwesome6Brand.h"
+#include <IconsFontAwesome6.h>
+#include <IconsFontAwesome6Brand.h>
 
 namespace Glory::Editor
 {

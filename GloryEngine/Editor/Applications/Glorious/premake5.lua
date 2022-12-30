@@ -18,7 +18,6 @@ project "Glorious"
 
 	vpaths
 	{
-		
 	}
 
 	includedirs
@@ -34,7 +33,8 @@ project "Glorious"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{engineDir}/GloryEngineBuilder",
-		
+		"%{IncludeDir.FA}",
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -48,7 +48,7 @@ project "Glorious"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -65,10 +65,10 @@ project "Glorious"
 		"ImFileDialog",
 		"yaml-cpp",
 		"GloryEditor",
-		
+
 		"GloryReflectStatic",
 	}
-	
+
 	dependson
 	{
 		"GloryASSIMPModelLoader",
@@ -97,7 +97,10 @@ project "Glorious"
 		("{COPY} %{premakeDir} %{editorBuildDir}/premake"),
 		("{COPY} %{premakeDir} %{engineOutDir}/premake"),
 		("{COPY} %{engineOutDir}/Glorious.exe %{editorBuildDir}"),
-		("{COPY} %{editorBuildDir} %{buildDir}/Launcher/Editor/Any"),
+		("{COPY} ./Templates %{editorBuildDir}/Templates"),
+		("{COPY} ./Templates %{engineOutDir}/Templates"),
+		("{COPY} %{IncludeDir.FA}/FA %{editorBuildDir}/EditorAssets/Fonts/FA"),
+		("{COPY} %{IncludeDir.FA}/FA %{engineOutDir}/EditorAssets/Fonts/FA"),
 	}
 
 	filter "system:windows"

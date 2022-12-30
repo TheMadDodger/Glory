@@ -10,7 +10,7 @@
 #include "ImGuiHelpers.h"
 #include "ProjectSettings.h"
 
-#include "FontAwesome/IconsFontAwesome6.h"
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {

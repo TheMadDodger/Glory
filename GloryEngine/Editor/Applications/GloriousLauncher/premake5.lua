@@ -18,7 +18,6 @@ project "GloriousLauncher"
 
 	vpaths
 	{
-		
 	}
 
 	includedirs
@@ -29,7 +28,8 @@ project "GloriousLauncher"
 		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.GLEW}",
-		
+		"%{IncludeDir.FA}",
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -41,7 +41,7 @@ project "GloriousLauncher"
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
 		"%{LibDirs.GLEW}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -52,8 +52,13 @@ project "GloriousLauncher"
 		"ImFileDialog",
 		"yaml-cpp",
 		"glew32",
-		
+
 		"GloryReflectStatic",
+	}
+
+	dependson
+	{
+		"Glorious",
 	}
 
 	postbuildcommands
@@ -61,6 +66,10 @@ project "GloriousLauncher"
 		("{COPY} ./Fonts %{buildDir}/Launcher/Fonts"),
 		("{COPY} %{LibDirs.GLEW}/*.dll %{buildDir}/Launcher"),
 		("{COPY} imgui.ini %{buildDir}/Launcher"),
+		("{COPY} %{IncludeDir.FA}/FA %{buildDir}/Launcher/Fonts/FA"),
+
+		-- Copy editor to launcher
+		("{COPY} %{editorBuildDir} %{buildDir}/Launcher/Editor/Any"),
 	}
 
 	filter "system:windows"

@@ -27,7 +27,7 @@ project "GloryClusteredRenderer"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
-		
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -37,10 +37,10 @@ project "GloryClusteredRenderer"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
-	
+
 	links
 	{
 		"GloryCore",
@@ -48,7 +48,7 @@ project "GloryClusteredRenderer"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
-		
+
 		"GloryReflectStatic",
 	}
 
@@ -56,7 +56,7 @@ project "GloryClusteredRenderer"
 	{
 		"GLORY_EXPORTS"
 	}
-	
+
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),

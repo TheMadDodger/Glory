@@ -29,7 +29,7 @@ project "GloryOpenGLGraphics"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
-		
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -40,7 +40,7 @@ project "GloryOpenGLGraphics"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -52,7 +52,7 @@ project "GloryOpenGLGraphics"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
-		
+
 		"GloryReflectStatic",
 	}
 
@@ -60,12 +60,13 @@ project "GloryOpenGLGraphics"
 	{
 		"GLORY_EXPORTS"
 	}
-	
+
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 		("{COPY} ./Assets %{moduleOutDir}/Assets"),
 		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+
 		("{COPY} %{LibDirs.GLEW}/*.dll %{moduleOutDir}/Dependencies"),
 	}
 

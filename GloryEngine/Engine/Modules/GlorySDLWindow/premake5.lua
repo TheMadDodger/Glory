@@ -28,7 +28,7 @@ project "GlorySDLWindow"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
-		
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -38,7 +38,7 @@ project "GlorySDLWindow"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -50,7 +50,7 @@ project "GlorySDLWindow"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
-		
+
 		"GloryReflectStatic",
 	}
 
@@ -58,7 +58,7 @@ project "GlorySDLWindow"
 	{
 		"GLORY_EXPORTS"
 	}
-	
+
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),

@@ -32,7 +32,7 @@ project "GloryVulkanGraphics"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
-		
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -42,7 +42,7 @@ project "GloryVulkanGraphics"
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -54,7 +54,7 @@ project "GloryVulkanGraphics"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
-		
+
 		"GloryReflectStatic",
 	}
 
@@ -62,7 +62,7 @@ project "GloryVulkanGraphics"
 	{
 		"GLORY_EXPORTS"
 	}
-	
+
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),

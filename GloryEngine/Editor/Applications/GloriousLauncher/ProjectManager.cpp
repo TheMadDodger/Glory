@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ProjectManager.h"
 #include "EditorManager.h"
+#include "TemplateManager.h"
 
 namespace Glory::EditorLauncher
 {
@@ -41,6 +42,8 @@ namespace Glory::EditorLauncher
         project.Version = createSettings.EditorVersion;
         project.SelectedVersion = createSettings.EditorVersion;
         m_Projects.push_back(project);
+
+        TemplateManager::InstantiateTemplate(std::filesystem::path(project.Path).parent_path(), project.Name, createSettings.TemplateIndex);
 
         WriteEngineConfig(createSettings);
         WriteProjectFile(createSettings);
@@ -182,6 +185,7 @@ namespace Glory::EditorLauncher
         WriteModule(ModuleType::MT_Graphics, createSettings.EngineSettings.GraphicsModule, emitter);
         WriteModule(ModuleType::MT_Renderer, createSettings.EngineSettings.RenderModule, emitter);
         WriteModule(ModuleType::MT_SceneManagement, createSettings.EngineSettings.ScenesModule, emitter);
+        WriteModule(ModuleType::MT_Input, createSettings.EngineSettings.InputModule, emitter);
 
         for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); i++)
         {
@@ -205,10 +209,12 @@ namespace Glory::EditorLauncher
         emitter << YAML::Value << 2;
         emitter << YAML::Key << "SceneManagement";
         emitter << YAML::Value << 3;
+        emitter << YAML::Key << "Input";
+        emitter << YAML::Value << 4;
 
         emitter << YAML::Key << "Optional";
         emitter << YAML::Value << YAML::BeginSeq;
-        int startIndex = 4;
+        int startIndex = 5;
         for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); i++)
         {
             emitter << startIndex + i;
