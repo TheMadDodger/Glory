@@ -16,7 +16,6 @@ project "GloryEntitiesMonoExtender"
 
 	vpaths
 	{
-		
 	}
 
 	includedirs
@@ -74,7 +73,7 @@ project "GloryEntitiesMonoExtender"
 		{
 			"%{monox86Dir}/lib",
 		}
-		
+
 		includedirs
 		{
 			"%{monox86Dir}/include/mono-2.0",
@@ -87,7 +86,7 @@ project "GloryEntitiesMonoExtender"
 		{
 			"%{monoDir}/lib",
 		}
-		
+
 		includedirs
 		{
 			"%{monoDir}/include/mono-2.0",

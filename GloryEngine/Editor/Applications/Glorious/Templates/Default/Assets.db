@@ -1,0 +1,66 @@
+- Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Cube.fbx
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 18019013
+  LastSaved: 722610487
+  UUID: 17698925783935164163
+  Hash: 213427075
+  SerializedVersion: 0
+  Extension: .fbx
+  ImportSettings:
+    {}
+- Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\BigPlane.fbx
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 1846110137
+  LastSaved: 722605482
+  UUID: 8783992904544072419
+  Hash: 213427075
+  SerializedVersion: 0
+  Extension: .fbx
+  ImportSettings:
+    {}
+- Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Monkeh.fbx
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 418204901
+  LastSaved: 722615485
+  UUID: 11814115858691116479
+  Hash: 213427075
+  SerializedVersion: 0
+  Extension: .fbx
+  ImportSettings:
+    {}
+- Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_vert.shader
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 987432879
+  LastSaved: 1789340188
+  UUID: 1355074015625322803
+  Hash: 2411618060
+  SerializedVersion: 0
+  Extension: .shader
+  ImportSettings:
+    {}
+- Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Sphere.fbx
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 2893562484
+  LastSaved: 722620487
+  UUID: 18373229927048301207
+  Hash: 213427075
+  SerializedVersion: 0
+  Extension: .fbx
+  ImportSettings:
+    {}
+- Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_frag.shader
+  IsSubAsset: false
+  Index: 0
+  VersionHash: 3117106851
+  LastSaved: 1516827580
+  UUID: 2412327054644352105
+  Hash: 2411618060
+  SerializedVersion: 0
+  Extension: .shader
+  ImportSettings:
+    {}

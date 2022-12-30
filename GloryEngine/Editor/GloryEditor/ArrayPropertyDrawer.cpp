@@ -3,7 +3,7 @@
 #include <SerializedArrayProperty.h>
 #include <imgui.h>
 #include <Reflection.h>
-#include <FontAwesome/IconsFontAwesome6.h>
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -94,7 +94,7 @@ namespace Glory::Editor
 				PropertyDrawer::PopFieldType();
 				return;
 			}
-			
+
 			change |= PropertyDrawer::DrawProperty("Element " + std::to_string(index), pElementTypeData, pAddress, flags);
 			PropertyDrawer::PopFieldType();
 		};

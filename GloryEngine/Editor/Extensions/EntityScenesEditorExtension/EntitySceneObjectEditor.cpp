@@ -12,7 +12,7 @@
 
 #include <Components.h>
 
-#include "FontAwesome/IconsFontAwesome6.h"
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -187,7 +187,7 @@ namespace Glory::Editor
 			EntityComponentPopup::Open(entityID, pRegistry);
 			m_AddingComponent = true;
 		}
-		
+
 		if (removeComponent)
 		{
 			Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
@@ -216,7 +216,7 @@ namespace Glory::Editor
 				change = true;
 			}
 		}
-		
+
 		m_ComponentPopup.OnGUI();
 		return change;
 	}

@@ -22,6 +22,7 @@ namespace Glory::EditorLauncher
 
 		static ImFont* DefaultFont;
 		static ImFont* BoldLargeFont;
+		static ImFont* IconFontHuge;
 
 		static std::function<void(const std::string&)> FileBrowserCallback;
 

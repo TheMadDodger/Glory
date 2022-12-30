@@ -21,7 +21,7 @@ project "MonoEditorExtension"
 	includedirs
 	{
 		"%{vulkanDir}/third-party/include",
-		
+
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
@@ -31,13 +31,15 @@ project "MonoEditorExtension"
 		"%{GloryIncludeDir.mono}",
 		"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.mono}",
-		
+
 		"%{monoDir}/include/mono-2.0",
+
+		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}"
 	}
-	
+
 	libdirs
 	{
 		"%{LibDirs.ImGui}",
@@ -52,7 +54,7 @@ project "MonoEditorExtension"
 
 		"%{LibDirs.GloryECS}",
 	}
-	
+
 	links
 	{
 		"GloryCore",
@@ -97,7 +99,7 @@ project "MonoEditorExtension"
 		{
 			"%{monox86Dir}/lib",
 		}
-		
+
 		includedirs
 		{
 			"%{monox86Dir}/include/mono-2.0",
@@ -110,7 +112,7 @@ project "MonoEditorExtension"
 		{
 			"%{monoDir}/lib",
 		}
-		
+
 		includedirs
 		{
 			"%{monoDir}/include/mono-2.0",

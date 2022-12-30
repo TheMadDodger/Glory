@@ -18,7 +18,7 @@ project "GloryEditorOGL"
 
 	vpaths
 	{
-		
+
 	}
 
 	includedirs
@@ -33,7 +33,8 @@ project "GloryEditorOGL"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.editor}",
-		
+
+		"%{IncludeDir.FA}",
 		"%{IncludeDir.Reflect}",
 
 		"%{SubmodoleDirs.ImGui}/backends/",
@@ -51,7 +52,7 @@ project "GloryEditorOGL"
 		"%{LibDirs.yaml_cpp}",
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -69,7 +70,7 @@ project "GloryEditorOGL"
 		"ImGuizmo",
 		"implot",
 		"ImFileDialog",
-		
+
 		"GloryReflectStatic",
 	}
 

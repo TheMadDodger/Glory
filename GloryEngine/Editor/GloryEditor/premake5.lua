@@ -57,6 +57,8 @@ project "GloryEditor"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ImGui}",
 
+		"%{IncludeDir.FA}",
+
 		"%{IncludeDir.Reflect}",
 	}
 

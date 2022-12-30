@@ -21,6 +21,7 @@ namespace Glory::EditorLauncher
 		EVR_MissingModules,
 		EVR_DuplicateModules,
 		EVR_DuplicateScriptingModules,
+		EVR_NoTemplate,
 	};
 
 	class NewProjectWindow
@@ -66,6 +67,8 @@ namespace Glory::EditorLauncher
 		NewProjectMenu m_CurrentMenu = NewProjectMenu::General;
 
 		EngineSettings m_EngineSettings;
+
+		int m_SelectedTemplate;
 
 		bool m_Valid;
 

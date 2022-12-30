@@ -22,7 +22,7 @@ workspace "GloryEngine"
 	startproject "GlorySDLInput"
 	--startproject "GloryEditorVulkan"
 	--startproject "GloryVulkanGraphics"
-	
+
 	configurations
 	{
 		"Debug",
@@ -97,6 +97,8 @@ IncludeDir["spirv_cross"]			= "%{SubmodoleDirs.spirv_cross}/include"
 IncludeDir["yaml_cpp"]				= "%{SubmodoleDirs.yaml_cpp}/include"
 IncludeDir["ECS"]					= "%{SubmodoleDirs.ECS}"
 IncludeDir["Reflect"]				= "%{SubmodoleDirs.Reflect}"
+
+IncludeDir["FA"]					= "%{rootDir}/third-party/FontAwesome"
 
 LibDirs = {}
 LibDirs["glory"]					= "%{engineOutDir}/%{cfg.buildcfg}/%{cfg.platform}"

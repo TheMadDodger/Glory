@@ -13,7 +13,7 @@ namespace Glory::EditorLauncher
 	{
 		Unlock();
 	}
-	
+
 	bool ProjectLock::Lock()
 	{
 		if (m_FileStream.is_open()) return false;
@@ -38,10 +38,10 @@ namespace Glory::EditorLauncher
 	bool ProjectLock::CanLock()
 	{
 		if (m_FileStream.is_open()) return false;
-		
+
 		if (!std::filesystem::exists(m_ProjectLockPath))
 			return true;
-		
+
 		std::error_code errorCode;
 		bool success = std::filesystem::remove(m_ProjectLockPath, errorCode);
 		return success;
