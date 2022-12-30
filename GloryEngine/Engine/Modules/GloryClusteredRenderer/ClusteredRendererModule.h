@@ -38,6 +38,8 @@ namespace Glory
 		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments) override;
 		virtual void OnCameraResize(CameraRef camera) override;
 
+		GLORY_MODULE_VERSION_H;
+
 	private:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
@@ -62,7 +64,7 @@ namespace Glory
 		ShaderSourceData* m_pClusterShaderData;
 		MaterialData* m_pClusterShaderMaterialData;
 		Material* m_pClusterShaderMaterial;
-		
+
 		ShaderSourceData* m_pMarkActiveClustersShaderData;
 		MaterialData* m_pMarkActiveClustersMaterialData;
 		Material* m_pMarkActiveClustersMaterial;

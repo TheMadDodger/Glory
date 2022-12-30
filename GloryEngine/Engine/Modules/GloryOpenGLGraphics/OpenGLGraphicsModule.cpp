@@ -10,7 +10,10 @@
 
 namespace Glory
 {
+	GLORY_MODULE_VERSION_CPP(OpenGLGraphicsModule, 0, 1);
+
 	OpenGLGraphicsModule::OpenGLGraphicsModule()
+		: m_ScreenQuadVertexArrayID(0), m_ScreenQuadVertexbufferID(0)
 	{
 	}
 

@@ -16,6 +16,8 @@ namespace Glory
 
         void SetMonoDirs(const std::string& assemblyDir, const std::string& configDir);
 
+        GLORY_MODULE_VERSION_H;
+
     private:
         virtual void Initialize() override;
         virtual void PostInitialize() override;

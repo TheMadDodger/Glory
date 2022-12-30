@@ -22,6 +22,8 @@ namespace Glory
 			GloryReflect::Reflect::RegisterType<T>();
 		}
 
+		GLORY_MODULE_VERSION_H;
+
 	private:
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;

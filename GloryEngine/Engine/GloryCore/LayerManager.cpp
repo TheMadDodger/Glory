@@ -133,6 +133,11 @@ namespace Glory
 		return &LAYER_MANAGER->m_Layers[index];
 	}
 
+	const size_t LayerManager::LayerCount()
+	{
+		return LAYER_MANAGER->m_Layers.size();
+	}
+
 	void LayerManager::CreateDefaultLayers()
 	{
 		AddLayer("World");

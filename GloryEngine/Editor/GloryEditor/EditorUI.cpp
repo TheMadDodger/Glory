@@ -1,5 +1,4 @@
 #include "EditorUI.h"
-#include <imgui.h>
 #include <LayerManager.h>
 #include <LayerRef.h>
 
@@ -216,25 +215,46 @@ namespace Glory::Editor
 	{
 		ImGui::PushID(label.data());
 
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const float colorIconWidth = ImGui::CalcTextSize("F").y * 1.38f;
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		ImGui::PushItemWidth(width - colorIconWidth - 7.8f);
+		glm::vec4 tempValue = *value;
+		tempValue *= 255.0f;
+		bool change = ImGui::DragFloat4("##value", (float*)&tempValue, 1.0f, 0, 255, "%.0f");
+		if (change)
+		{
+			*value = tempValue / 255.0f;
+		}
+		ImGui::PopItemWidth();
+
 		ImVec4 color = ImVec4(value->x, value->y, value->z, value->w);
 
 		ImGuiColorEditFlags misc_flags = (hdr ? ImGuiColorEditFlags_HDR : 0); //| /**(drag_and_drop ? 0 : ImGuiColorEditFlags_NoDragDrop)*/ | (alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) | (options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
 		static ImVec4 backup_color;
-		bool open_popup = ImGui::ColorButton(label.data(), color, misc_flags);
-		ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-		ImGui::Text(label.data());
+		ImGui::SameLine();
+		const bool open_popup = ImGui::ColorButton(label.data(), color, misc_flags, { colorIconWidth, colorIconWidth });
 
 		if (open_popup)
 		{
 			ImGui::OpenPopup("ColorPickerPopup");
 			backup_color = color;
 		}
-		bool change = false;
+
 		if (ImGui::BeginPopup("ColorPickerPopup"))
 		{
 			ImGui::Text(label.data());
 			ImGui::Separator();
-			change = ImGui::ColorPicker4("ColorPicker", (float*)&color, misc_flags | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+			change |= ImGui::ColorPicker4("ColorPicker", (float*)&color, misc_flags | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
 			ImGui::SameLine();
 
 			ImGui::BeginGroup(); // Lock X position
@@ -281,7 +301,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputText(std::string_view label, char* value, size_t bufferSize)
+	bool EditorUI::InputText(std::string_view label, char* value, size_t bufferSize, ImGuiInputTextFlags flags)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
@@ -296,7 +316,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
-		const bool change = ImGui::InputText("##value", value, bufferSize);
+		const bool change = ImGui::InputText("##value", value, bufferSize, flags);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;

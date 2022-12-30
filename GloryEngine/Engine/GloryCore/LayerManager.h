@@ -22,6 +22,8 @@ namespace Glory
 		static void GetAllLayerNames(std::vector<std::string_view>& names);
 		static const Layer* GetLayerAtIndex(int index);
 
+		static const size_t LayerCount();
+
 	private:
 		static void CreateDefaultLayers();
 

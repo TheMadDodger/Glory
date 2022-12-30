@@ -5,6 +5,8 @@
 
 namespace Glory
 {
+    GLORY_MODULE_VERSION_CPP(ASSIMPModule, 0, 1);
+
 	ASSIMPModule::ASSIMPModule()
 	{
 	}
@@ -15,12 +17,10 @@ namespace Glory
 
 	void ASSIMPModule::Initialize()
 	{
-		
 	}
 
 	void ASSIMPModule::Cleanup()
 	{
-		
 	}
 
 	ModelData* ASSIMPModule::LoadModel(const std::string& path, const ModelImportSettings& importSettings)
@@ -139,7 +139,7 @@ namespace Glory
             {
                 vertexData.push_back(mesh->mTextureCoords[0][i].x);
                 vertexData.push_back(1.0f - mesh->mTextureCoords[0][i].y);
-            
+
                 if (i == 0)
                 {
                     attributes.push_back(AttributeType::Float2);

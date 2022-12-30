@@ -21,7 +21,7 @@ namespace Glory
 	{
 	public:
 		Version();
-		Version(const VersionValue* values, size_t siize);
+		Version(const VersionValue* values, size_t size);
 		virtual ~Version();
 
 		const std::string& GetVersionString() const;

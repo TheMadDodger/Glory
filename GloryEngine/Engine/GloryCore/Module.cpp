@@ -50,4 +50,9 @@ namespace Glory
     {
         m_pScriptingExtender.push_back(pScriptExtender);
     }
+
+    const Version& Module::ModuleVersion() const
+    {
+        return CoreVersion;
+    }
 }

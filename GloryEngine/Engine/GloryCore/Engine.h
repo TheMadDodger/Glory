@@ -96,6 +96,9 @@ namespace Glory
 		void CallModuleUpdate(Module* pModule);
 		void CallModuleDraw(Module* pModule);
 
+		const size_t ModulesCount() const;
+		Module* GetModule(size_t index) const;
+
 	private:
 		Engine(const EngineCreateInfo& createInfo);
 		virtual ~Engine();
