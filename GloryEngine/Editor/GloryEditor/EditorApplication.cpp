@@ -1,15 +1,19 @@
 #include "EditorApplication.h"
+#include "QuitPopup.h"
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
+#include <ProjectSpace.h>
+#include <EditorSceneManager.h>
 
 namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
 	const Glory::Version EditorApplication::Version(VERSION_DATA, 3);
 	EditorMode EditorApplication::m_Mode = EditorMode::M_Edit;
+	bool EditorApplication::m_Running = false;
 
-	GLORY_EDITOR_API EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
+	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
 		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl),
 		m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr), m_pPlayer(nullptr)
 	{
@@ -26,7 +30,7 @@ namespace Glory::Editor
 		GloryContext::SetContext(createInfo.pContext);
 	}
 
-	GLORY_EDITOR_API EditorApplication::~EditorApplication()
+	EditorApplication::~EditorApplication()
 	{
 		delete m_pMainEditor;
 		m_pMainEditor = nullptr;
@@ -35,7 +39,7 @@ namespace Glory::Editor
 		m_pPlatform = nullptr;;
 	}
 
-	GLORY_EDITOR_API void EditorApplication::Initialize(Game& game)
+	void EditorApplication::Initialize(Game& game)
 	{
 		game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
 		game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
@@ -58,7 +62,7 @@ namespace Glory::Editor
 		}
 	}
 
-	GLORY_EDITOR_API void EditorApplication::Destroy()
+	void EditorApplication::Destroy()
 	{
 		m_pMainEditor->Destroy();
 		m_pPlatform->Destroy();
@@ -70,13 +74,14 @@ namespace Glory::Editor
 		m_pPlayer = nullptr;
 	}
 
-	GLORY_EDITOR_API void EditorApplication::Run(Game& game)
+	void EditorApplication::Run(Game& game)
 	{
 		game.GetEngine()->StartThreads();
 		m_pPlatform->SetState(Idle);
 		m_pShaderProcessor->Start();
 
-		while (true)
+		m_Running = true;
+		while (m_Running)
 		{
 			/* We must wait for graphics to initialize */
 			if (!game.GetEngine()->GetGraphicsThread()->IsInitialized()) continue;
@@ -87,7 +92,7 @@ namespace Glory::Editor
 			Console::Update();
 
 			// Poll window events
-			if (m_pPlatform->PollEvents()) break;
+			if (m_pPlatform->PollEvents()) TryToQuit();
 
 			// Update editor
 			m_pMainEditor->Update();
@@ -111,27 +116,32 @@ namespace Glory::Editor
 		}
 	}
 
-	GLORY_EDITOR_API void EditorApplication::SetWindowImpl(EditorWindowImpl* pWindowImpl)
+	void EditorApplication::Quit()
+	{
+		m_Running = false;
+	}
+
+	void EditorApplication::SetWindowImpl(EditorWindowImpl* pWindowImpl)
 	{
 		m_pTempWindowImpl = pWindowImpl;
 	}
 
-	GLORY_EDITOR_API void EditorApplication::SetRendererImpl(EditorRenderImpl* pRendererImpl)
+	void EditorApplication::SetRendererImpl(EditorRenderImpl* pRendererImpl)
 	{
 		m_pTempRenderImpl = pRendererImpl;
 	}
 
-	GLORY_EDITOR_API EditorPlatform* EditorApplication::GetEditorPlatform()
+	EditorPlatform* EditorApplication::GetEditorPlatform()
 	{
 		return m_pPlatform;
 	}
 
-	GLORY_EDITOR_API MainEditor* EditorApplication::GetMainEditor()
+	MainEditor* EditorApplication::GetMainEditor()
 	{
 		return m_pMainEditor;
 	}
 
-	GLORY_EDITOR_API EditorApplication* EditorApplication::GetInstance()
+	EditorApplication* EditorApplication::GetInstance()
 	{
 		return m_pEditorInstance;
 	}
@@ -170,18 +180,18 @@ namespace Glory::Editor
 		m_Mode = EditorMode::M_Edit;
 	}
 
-	GLORY_EDITOR_API void EditorApplication::TogglePause()
+	void EditorApplication::TogglePause()
 	{
 		m_pEditorInstance->m_pPlayer->TogglePauze();
 	}
 
-	GLORY_EDITOR_API void EditorApplication::TickFrame()
+	void EditorApplication::TickFrame()
 	{
 		if (m_Mode != EditorMode::M_Play) return;
 		m_pEditorInstance->m_pPlayer->TickFrame();
 	}
 
-	GLORY_EDITOR_API bool EditorApplication::IsPaused()
+	bool EditorApplication::IsPaused()
 	{
 		return m_pEditorInstance->m_pPlayer->m_IsPaused;
 	}
@@ -221,5 +231,24 @@ namespace Glory::Editor
 		if (pProject == nullptr) return std::string("./");
 		std::filesystem::path path = pProject->SettingsPath();
 		return path.string();
+	}
+
+	void EditorApplication::TryToQuit()
+	{
+		if (ProjectSpace::HasUnsavedChanges())
+		{
+			QuitPopup::Open("You have unsaved changes to your project.\nAre you sure you want to quit?\nSome changes might be lost!");
+			/* Show popup */
+			return;
+		}
+
+		if (EditorSceneManager::HasUnsavedChanges())
+		{
+			/* Show popup */
+			QuitPopup::Open("You have unsaved changes to an opened scene.\nAre you sure you want to quit?\nAll changes might be lost!");
+			return;
+		}
+
+		Quit();
 	}
 }

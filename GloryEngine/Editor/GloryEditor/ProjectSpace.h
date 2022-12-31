@@ -37,6 +37,8 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void SetAssetDirty(const char* key, bool dirty = true);
 
+		static GLORY_EDITOR_API bool HasUnsavedChanges();
+
 	private:
 		ProjectSpace(const std::string& path);
 		virtual ~ProjectSpace();

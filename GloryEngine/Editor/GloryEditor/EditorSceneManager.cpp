@@ -207,6 +207,11 @@ namespace Glory::Editor
 		return std::find(m_DirtySceneIDs.begin(), m_DirtySceneIDs.end(), pScene->GetUUID()) != m_DirtySceneIDs.end();
 	}
 
+	bool EditorSceneManager::HasUnsavedChanges()
+	{
+		return m_DirtySceneIDs.size() > 0;
+	}
+
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);

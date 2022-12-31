@@ -63,7 +63,7 @@ namespace Glory
 
 	void MonoScriptLoader::SaveResource(const std::string& path, MonoScript* pResource)
 	{
-		m_pEngine->GetLoaderModule<FileData>()->Save(path, pResource);
+		//m_pEngine->GetLoaderModule<FileData>()->Save(path, pResource);
 	}
 
 	std::string MonoScriptLoader::Find(const std::string& source, const std::string& toFind)
