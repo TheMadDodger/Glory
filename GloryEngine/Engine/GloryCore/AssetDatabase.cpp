@@ -104,7 +104,7 @@ namespace Glory
 	{
 		ASSET_DATABASE->m_LastSavedRecords.Set(uuid, lastSaved);
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetUpdated, uuid, nullptr);
-		SetAssetDirty(uuid);
+		SetDirty();
 	}
 
 	long AssetDatabase::GetLastSavedRecord(UUID uuid)
