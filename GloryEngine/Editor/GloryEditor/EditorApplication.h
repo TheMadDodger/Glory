@@ -59,6 +59,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void TogglePause();
 		static GLORY_EDITOR_API void TickFrame();
 		static GLORY_EDITOR_API bool IsPaused();
+		static GLORY_EDITOR_API void Quit();
+		static GLORY_EDITOR_API void TryToQuit();
 
 		static const Glory::Version Version;
 
@@ -69,6 +71,7 @@ namespace Glory::Editor
 
 		static std::string AssetPathOverrider();
 		static std::string SettingsPathOverrider();
+
 
 	private:
 		EditorWindowImpl* m_pTempWindowImpl;
@@ -81,5 +84,6 @@ namespace Glory::Editor
 		EditorShaderProcessor* m_pShaderProcessor;
 		static EditorApplication* m_pEditorInstance;
 		static EditorMode m_Mode;
+		static bool m_Running;
 	};
 }

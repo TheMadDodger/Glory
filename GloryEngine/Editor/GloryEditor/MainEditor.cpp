@@ -45,6 +45,7 @@
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
+#include "QuitPopup.h"
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -199,6 +200,7 @@ namespace Glory::Editor
 		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
 		FileDialog::Update();
+		QuitPopup::Draw();
 	}
 
 	void MainEditor::SetupTitleBar()
@@ -236,11 +238,13 @@ namespace Glory::Editor
 		//	pActiveScene->CreateEmptyObject();
 		//});
 
-		MenuBar::AddMenuItem("File/Exit", [&]() {
-			std::vector<std::string> buttons = { "Cancel", "Exit" };
-			std::vector<std::function<void()>> buttonFuncs = { [&]() { PopupManager::CloseCurrentPopup(); }, [&]() { exit(0); } };
-			PopupManager::OpenPopup("Exit", "Are you sure you want to exit? All unsaved changes will be lost!",
-				buttons, buttonFuncs); }, NULL, Shortcut_File_Exit);
+		//MenuBar::AddMenuItem("File/Exit", [&]() {
+		//	std::vector<std::string> buttons = { "Cancel", "Exit" };
+		//	std::vector<std::function<void()>> buttonFuncs = { [&]() { PopupManager::CloseCurrentPopup(); }, [&]() { exit(0); } };
+		//	PopupManager::OpenPopup("Exit", "Are you sure you want to exit? All unsaved changes will be lost!",
+		//		buttons, buttonFuncs); }, NULL, Shortcut_File_Exit);
+
+		MenuBar::AddMenuItem("File/Exit", EditorApplication::TryToQuit, NULL, Shortcut_File_Exit);
 
 		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
 		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo, NULL, Shortcut_Edit_Redo);

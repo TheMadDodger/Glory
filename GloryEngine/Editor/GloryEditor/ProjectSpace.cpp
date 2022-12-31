@@ -135,6 +135,13 @@ namespace Glory::Editor
 		TitleBar::SetText("ProjectChanges", pOpenProject->m_DirtyKeys.size() > 0 ? "*" : "");
 	}
 
+	bool ProjectSpace::HasUnsavedChanges()
+	{
+		ProjectSpace* pProject = GetOpenProject();
+		if (!pProject) return false;
+		return pProject->m_DirtyKeys.size() > 0;
+	}
+
 	ProjectSpace::ProjectSpace(const std::string& path)
 		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()),
 		m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string()),

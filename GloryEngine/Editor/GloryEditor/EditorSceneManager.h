@@ -32,6 +32,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void SetSceneDirty(GScene* pScene, bool dirty = true);
 
 		static GLORY_EDITOR_API bool IsSceneDirty(GScene* pScene);
+		static GLORY_EDITOR_API bool HasUnsavedChanges();
 
 	private:
 		static void Save(UUID uuid, const std::string& path, bool newScene = false);
