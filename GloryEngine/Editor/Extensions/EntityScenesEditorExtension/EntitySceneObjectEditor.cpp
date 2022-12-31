@@ -1,6 +1,7 @@
 #include "EntitySceneObjectEditor.h"
 #include "AddComponentAction.h"
 #include "RemoveComponentAction.h"
+#include "EditorSceneManager.h"
 #include <imgui.h>
 #include <string>
 #include <SceneObjectNameAction.h>
@@ -196,6 +197,7 @@ namespace Glory::Editor
 			Undo::AddAction(new RemoveComponentAction(pRegistry, entityID, toRemoveComponent));
 			pRegistry->RemoveComponentAt(entityID, toRemoveComponent);
 			Undo::StopRecord();
+
 			Initialize();
 			change = true;
 		}
@@ -211,6 +213,7 @@ namespace Glory::Editor
 				pRegistry->CreateComponent(entityID, toAddTypeHash, uuid);
 				Undo::AddAction(new AddComponentAction(toAddTypeHash, uuid, index));
 				Undo::StopRecord();
+
 				m_AddingComponent = false;
 				Initialize();
 				change = true;
@@ -218,6 +221,10 @@ namespace Glory::Editor
 		}
 
 		m_ComponentPopup.OnGUI();
+
+		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+		EntityScene* pScene = (EntityScene*)pObject->GetScene();
+		if (change) EditorSceneManager::SetSceneDirty(pScene);
 		return change;
 	}
 }

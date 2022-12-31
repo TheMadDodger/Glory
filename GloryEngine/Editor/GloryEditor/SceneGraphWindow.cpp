@@ -54,6 +54,8 @@ namespace Glory::Editor
 				payload.pObject->SetParent(nullptr);
 				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 				Undo::StopRecord();
+
+				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -77,7 +79,9 @@ namespace Glory::Editor
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.07f, 0.0720f, 0.074f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.15f, 0.1525f, 0.1505f, 1.0f));
 		if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-		const bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, pScene->Name().data());
+
+		const std::string label = pScene->Name() + (EditorSceneManager::IsSceneDirty(pScene) ? " *" : "");
+		const bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, label.data());
 		if (isActive) ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
@@ -96,6 +100,8 @@ namespace Glory::Editor
 				payload.pObject->SetParent(nullptr);
 				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 				Undo::StopRecord();
+
+				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -178,6 +184,8 @@ namespace Glory::Editor
 						Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 						Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
 						Undo::StopRecord();
+
+						EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
 					}
 				}
 				ImGui::EndDragDropTarget();
@@ -194,7 +202,7 @@ namespace Glory::Editor
 			// Set payload to carry the index of our item (could be anything)
 			DNDPayload payload{ pObject };
 			ImGui::SetDragDropPayload("DND_DEMO_CELL", &payload, sizeof(DNDPayload));
-		
+
 			// Display preview (could be anything, e.g. when dragging an image we could decide to display
 			// the filename and a small preview of the image, etc.)
 			ImGui::Text(pObject->Name().data());
@@ -227,6 +235,8 @@ namespace Glory::Editor
 					payload.pObject->SetParent(pObject);
 					Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 					Undo::StopRecord();
+
+					EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
 				}
 			}
 			ImGui::EndDragDropTarget();
@@ -284,6 +294,8 @@ namespace Glory::Editor
 					Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
 					Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
 					Undo::StopRecord();
+
+					EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
 				}
 			}
 			ImGui::EndDragDropTarget();

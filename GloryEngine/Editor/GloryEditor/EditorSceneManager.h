@@ -28,11 +28,17 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void SerializeOpenScenes(YAML::Emitter& out);
 		static GLORY_EDITOR_API void OpenAllFromNode(YAML::Node& node);
 
+		static GLORY_EDITOR_API void SetActiveScene(GScene* pScene);
+		static GLORY_EDITOR_API void SetSceneDirty(GScene* pScene, bool dirty = true);
+
+		static GLORY_EDITOR_API bool IsSceneDirty(GScene* pScene);
+
 	private:
 		static void Save(UUID uuid, const std::string& path, bool newScene = false);
 
 	private:
 		static std::vector<UUID> m_OpenedSceneIDs;
+		static std::vector<UUID> m_DirtySceneIDs;
 		static UUID m_CurrentlySavingScene;
 	};
 }

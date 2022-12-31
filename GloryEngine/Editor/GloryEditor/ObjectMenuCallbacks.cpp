@@ -174,7 +174,7 @@ namespace Glory::Editor
 	{
 		GScene* pScene = (GScene*)pObject;
 		if (pScene == nullptr) return;
-		Game::GetGame().GetEngine()->GetScenesModule()->SetActiveScene(pScene);
+		EditorSceneManager::SetActiveScene(pScene);
 	}
 
 	OBJECTMENU_CALLBACK(RemoveSceneCallback)
