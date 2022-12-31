@@ -20,6 +20,8 @@ namespace Glory
 		GLORY_API virtual void GetPosition(int* x, int* y) override;
 		GLORY_API virtual void SetPosition(int x, int y) override;
 
+		GLORY_API virtual void SetWindowTitle(const char* title) override;
+
 		GLORY_API SDL_Window* GetSDLWindow();
 		GLORY_API SDL_GLContext GetSDLGLConext() const;
 

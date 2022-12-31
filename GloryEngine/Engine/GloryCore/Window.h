@@ -33,6 +33,8 @@ namespace Glory
 		virtual void GetPosition(int* x, int* y) = 0;
 		virtual void SetPosition(int x, int y) = 0;
 
+		virtual void SetWindowTitle(const char* title) = 0;
+
 	protected:
 		Window(const WindowCreateInfo& createInfo);
 		virtual ~Window();

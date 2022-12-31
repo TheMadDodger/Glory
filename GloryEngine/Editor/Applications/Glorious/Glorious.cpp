@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
     {
         Glory::WindowCreateInfo windowCreateInfo;
-        windowCreateInfo.WindowName = "Glory Editor";
+        windowCreateInfo.WindowName = "Glorious";
         windowCreateInfo.Width = 2560;
         windowCreateInfo.Height = 1300;
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
         Glory::EngineLoader engineLoader(engineConfPath);
         Glory::Engine* pEngine = engineLoader.LoadEngine(windowCreateInfo);
-        
+
         if (pEngine == nullptr)
         {
             Glory::Debug::LogError("The projects engine configuration could not be loaded!");
@@ -68,17 +68,17 @@ int main(int argc, char* argv[])
         gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
         Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
         pGame.Initialize();
-        
+
         Glory::EditorLoader editorLoader;
         Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(pGame, engineLoader);
-        
+
         Glory::Editor::EditorApplication application(editorCreateInfo);
         application.Initialize(pGame);
 
         Glory::Editor::ProjectSpace::OpenProject(projectPath);
 
         application.Run(pGame);
-        
+
         application.Destroy();
         pGame.Destroy();
         engineLoader.Unload();

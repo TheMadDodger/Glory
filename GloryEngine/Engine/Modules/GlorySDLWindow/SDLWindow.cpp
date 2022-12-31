@@ -408,6 +408,11 @@ namespace Glory
 		SDL_SetWindowPosition(m_pWindow, width, height);
 	}
 
+	void SDLWindow::SetWindowTitle(const char* title)
+	{
+		SDL_SetWindowTitle(m_pWindow, title);
+	}
+
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr), m_GLSDLContext(NULL) {}
 
 	SDLWindow::~SDLWindow()

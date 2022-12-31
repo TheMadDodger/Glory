@@ -20,7 +20,7 @@ namespace Glory
 		static UUID GetAssetUUID(const std::string& path);
 		static bool AssetExists(UUID uuid);
 		static bool AssetExists(const std::string& path);
-		static void InsertAsset(const std::string& path, const ResourceMeta& meta);
+		static void InsertAsset(const std::string& path, const ResourceMeta& meta, bool setDirty = true);
 		static void UpdateAssetPath(UUID uuid, const std::string& newPath);
 		static void UpdateAssetPath(UUID uuid, const std::string& newPath, const std::string& newMetaPath);
 		static void UpdateAsset(UUID uuid, long lastSaved);
@@ -45,9 +45,12 @@ namespace Glory
 
 		static std::string GetAssetName(UUID uuid);
 
-		static void SetDirty(Object* pResource);
-		static void SetDirty(UUID uuid);
+		static void SetAssetDirty(Object* pResource);
+		static void SetAssetDirty(UUID uuid);
 		static void SaveDirtyAssets();
+
+		static void SetDirty(bool dirty = true);
+		static bool IsDirty();
 
 	private:
 		static void Initialize();
@@ -71,5 +74,6 @@ namespace Glory
 		AssetCallbacks m_Callbacks;
 		ThreadedVector<UUID> m_UnsavedAssets;
 		ThreadedUMap<UUID, long> m_LastSavedRecords;
+		bool m_IsDirty;
 	};
 }

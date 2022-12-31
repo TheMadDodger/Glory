@@ -53,7 +53,7 @@ namespace Glory
 		return ASSET_DATABASE->m_PathToUUID.Contains(fixedPath);
 	}
 
-	void AssetDatabase::InsertAsset(const std::string& path, const ResourceMeta& meta)
+	void AssetDatabase::InsertAsset(const std::string& path, const ResourceMeta& meta, bool setDirty)
 	{
 		std::string fixedPath = path;
 		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
@@ -63,6 +63,7 @@ namespace Glory
 		ASSET_DATABASE->m_PathToUUID.Set(fixedPath, uuid);
 		ASSET_DATABASE->m_AssetsByType.Do(meta.Hash(), [&](std::vector<UUID>* assets) { assets->push_back(uuid); });
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetRegistered, uuid, nullptr);
+		if (setDirty) SetAssetDirty(uuid);
 	}
 
 	void AssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath)
@@ -95,12 +96,15 @@ namespace Glory
 		//ResourceMeta meta = m_Metas[uuid];
 		//meta.m_Path = newMetaPath;
 		//m_Metas.Set(uuid, meta);
+
+		SetAssetDirty(uuid);
 	}
 
 	void AssetDatabase::UpdateAsset(UUID uuid, long lastSaved)
 	{
 		ASSET_DATABASE->m_LastSavedRecords.Set(uuid, lastSaved);
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetUpdated, uuid, nullptr);
+		SetAssetDirty(uuid);
 	}
 
 	long AssetDatabase::GetLastSavedRecord(UUID uuid)
@@ -162,6 +166,7 @@ namespace Glory
 			assets->erase(it);
 		});
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetDeleted, uuid, nullptr);
+		SetDirty();
 	}
 
 	void AssetDatabase::DeleteAssets(const std::string& path)
@@ -200,6 +205,7 @@ namespace Glory
 			if (!pLoader) return;
 			pMeta->Write(pLoader);
 		});
+		SetDirty();
 	}
 
 	void AssetDatabase::Save()
@@ -218,6 +224,8 @@ namespace Glory
 		std::ofstream outStream(databasePath);
 		outStream << out.c_str();
 		outStream.close();
+
+		SetDirty(false);
 	}
 
 	void AssetDatabase::Load()
@@ -275,7 +283,7 @@ namespace Glory
 			}
 
 			ASSET_DATABASE->m_LastSavedRecords.Set(uuid, lastSaved);
-			InsertAsset(path, meta);
+			InsertAsset(path, meta, false);
 		}
 	}
 
@@ -391,6 +399,8 @@ namespace Glory
 		ASSET_DATABASE->m_AssetLocations.Erase(uuid);
 		ASSET_DATABASE->m_Metas.Erase(uuid);
 		ASSET_DATABASE->m_PathToUUID.Erase(path);
+
+		SetDirty();
 	}
 
 	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out)
@@ -425,15 +435,17 @@ namespace Glory
 		return path.filename().replace_extension("").string();
 	}
 
-	void AssetDatabase::SetDirty(Object* pResource)
+	void AssetDatabase::SetAssetDirty(Object* pResource)
 	{
-		SetDirty(pResource->GetUUID());
+		SetAssetDirty(pResource->GetUUID());
 	}
 
-	void AssetDatabase::SetDirty(UUID uuid)
+	void AssetDatabase::SetAssetDirty(UUID uuid)
 	{
 		if (ASSET_DATABASE->m_UnsavedAssets.Contains(uuid)) return;
 		ASSET_DATABASE->m_UnsavedAssets.push_back(uuid);
+
+		SetDirty();
 	}
 
 	void AssetDatabase::SaveDirtyAssets()
@@ -444,6 +456,16 @@ namespace Glory
 			if (!pResource) return;
 			SaveAsset(pResource, false);
 		});
+	}
+
+	void AssetDatabase::SetDirty(bool dirty)
+	{
+		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetDirty, 0, nullptr);
+	}
+
+	bool AssetDatabase::IsDirty()
+	{
+		return ASSET_DATABASE->m_IsDirty || ASSET_DATABASE->m_UnsavedAssets.Size();
 	}
 
 	void AssetDatabase::Initialize()
@@ -464,6 +486,7 @@ namespace Glory
 		ASSET_DATABASE->m_Metas.Clear();
 		ASSET_DATABASE->m_AssetsByType.Clear();
 		ASSET_DATABASE->m_LastSavedRecords.Clear();
+		ASSET_DATABASE->m_IsDirty = false;
 	}
 
 	void AssetDatabase::ExportEditor(YAML::Emitter& out)
@@ -502,10 +525,10 @@ namespace Glory
 
 	void AssetDatabase::ExportBuild(YAML::Emitter& out)
 	{
-		
+
 	}
 
-	AssetDatabase::AssetDatabase() {}
+	AssetDatabase::AssetDatabase() : m_IsDirty(false) {}
 
 	AssetDatabase::~AssetDatabase() {}
 }

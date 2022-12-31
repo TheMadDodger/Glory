@@ -44,6 +44,7 @@
 #include "StructPropertyDrawer.h"
 
 #include "Shortcuts.h"
+#include "TitleBar.h"
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -101,6 +102,7 @@ namespace Glory::Editor
 
 	void MainEditor::Initialize()
 	{
+		SetupTitleBar();
 		RegisterWindows();
 		RegisterPropertyDrawers();
 		RegisterEditors();
@@ -199,6 +201,22 @@ namespace Glory::Editor
 		FileDialog::Update();
 	}
 
+	void MainEditor::SetupTitleBar()
+	{
+		TitleBar::AddSection("Application", "Glorious");
+		TitleBar::AddSection("ApplicationSpace", " ");
+		TitleBar::AddSection("Version", Version.GetVersionString().c_str());
+		TitleBar::AddSection("VersionSpace", " - ");
+
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		TitleBar::AddSection("Project", pProject ? pProject->Name().c_str() : "No Project open");
+		TitleBar::AddSection("ProjectChanges", "");
+		TitleBar::AddSection("ProjectSpace", " - ");
+		TitleBar::AddSection("Scene", "No Scene open");
+		TitleBar::AddSection("SceneChanges", "");
+		TitleBar::UpdateTitlebarText();
+	}
+
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
 		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); }, NULL, Shortcut_File_NewScene);
@@ -218,16 +236,15 @@ namespace Glory::Editor
 		//	pActiveScene->CreateEmptyObject();
 		//});
 
-		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay, NULL, Shortcut_Play_Start);
-		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay, NULL, Shortcut_Play_Stop);
-		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause, NULL, Shortcut_Play_Pauze);
-		MenuBar::AddMenuItem("Play/Next Frame", EditorApplication::TickFrame, NULL, Shortcut_Play_NextFrame);
-
 		MenuBar::AddMenuItem("File/Exit", [&]() {
 			std::vector<std::string> buttons = { "Cancel", "Exit" };
-			std::vector<std::function<void()>> buttonFuncs = { [&]() { PopupManager::CloseCurrentPopup(); }, [&]() {/*m_IsRunning = false;*/ } };
+			std::vector<std::function<void()>> buttonFuncs = { [&]() { PopupManager::CloseCurrentPopup(); }, [&]() { exit(0); } };
 			PopupManager::OpenPopup("Exit", "Are you sure you want to exit? All unsaved changes will be lost!",
 				buttons, buttonFuncs); }, NULL, Shortcut_File_Exit);
+
+		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
+		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo, NULL, Shortcut_Edit_Redo);
+		MenuBar::AddMenuItem("Edit/History", []() { EditorWindow::GetWindow<HistoryWindow>(); }, NULL, Shortcut_Edit_History);
 
 		MenuBar::AddMenuItem("Window/Scene View", []() { EditorWindow::GetWindow<SceneWindow>(); }, NULL, Shortcut_Window_Scene);
 		MenuBar::AddMenuItem("Window/Game View", []() { EditorWindow::GetWindow<GameWindow>(); }, NULL, Shortcut_Window_Game);
@@ -242,9 +259,10 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Perspective);
 		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Orthographic);
 
-		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
-		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo, NULL, Shortcut_Edit_Redo);
-		MenuBar::AddMenuItem("Edit/History", []() { EditorWindow::GetWindow<HistoryWindow>(); }, NULL, Shortcut_Edit_History);
+		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay, NULL, Shortcut_Play_Start);
+		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay, NULL, Shortcut_Play_Stop);
+		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause, NULL, Shortcut_Play_Pauze);
+		MenuBar::AddMenuItem("Play/Next Frame", EditorApplication::TickFrame, NULL, Shortcut_Play_NextFrame);
 
 		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE, Gizmos::Shortcut_Gizmos_Translate);
 		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE, Gizmos::Shortcut_Gizmos_Rotate);

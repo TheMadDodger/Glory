@@ -50,7 +50,7 @@ namespace Glory::Editor
 
 		if (m_pEditor)
 		{
-			if (m_pEditor->OnGUI()) AssetDatabase::SetDirty(pSelectedObject);
+			if (m_pEditor->OnGUI()) AssetDatabase::SetAssetDirty(pSelectedObject);
 		}
 	}
 

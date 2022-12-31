@@ -67,7 +67,7 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
-		size_t Size() const
+		size_t Size()
 		{
 			m_Mutex.lock();
 			size_t size = m_Data.size();

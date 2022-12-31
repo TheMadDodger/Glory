@@ -20,6 +20,7 @@ namespace Glory::Editor
 		static float MENUBAR_SIZE;
 
 	private:
+		void SetupTitleBar();
 		void CreateDefaultMainMenuBar();
 		void SetDarkThemeColors();
 		void CreateDefaultObjectMenu();

@@ -2,6 +2,7 @@
 #include <string>
 #include <mutex>
 #include <functional>
+#include <AssetDatabase.h>
 #include "GloryEditor.h"
 
 namespace Glory::Editor
@@ -34,12 +35,16 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback);
 
+		static GLORY_EDITOR_API void SetAssetDirty(const char* key, bool dirty = true);
+
 	private:
 		ProjectSpace(const std::string& path);
 		virtual ~ProjectSpace();
 
 		void Open();
 		void Close();
+
+		static void OnAssetDirty(UUID uuid, const ResourceMeta& meta, Resource* pResource);
 
 	private:
 		static ProjectSpace* m_pCurrentProject;
@@ -51,5 +56,7 @@ namespace Glory::Editor
 		std::string m_LibraryPath;
 		std::string m_SettingsPath;
 		std::string m_ProjectName;
+
+		std::vector<std::string> m_DirtyKeys;
 	};
 }

@@ -17,6 +17,7 @@ namespace Glory
 		CT_AssetDeleted,
 		CT_AssetUpdated,
 		CT_AssetReloaded,
+		CT_AssetDirty,
 
 		CT_MAX,
 	};
