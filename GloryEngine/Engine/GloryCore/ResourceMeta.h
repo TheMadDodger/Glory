@@ -12,38 +12,16 @@ namespace Glory
 	{
 	public:
 		ResourceMeta();
-		ResourceMeta(const std::filesystem::path& path, const std::string& extension);
-		ResourceMeta(const std::string& path, const std::string& extension, UUID uuid, size_t hash);
+		ResourceMeta(const std::string& extension, UUID uuid, size_t hash);
 		virtual ~ResourceMeta();
 
-		//void test()
-		//{
-		//	ModelLoaderModule* pLoader = Game::GetGame().GetEngine()->GetModule<ModelLoaderModule>();
-		//	ModelImportSettings importSettings;
-		//	//Read(pLoader, importSettings);
-		//}
-
-		//template<class T, typename S>
-		//uint64_t Read(ResourceLoaderModule<T,S>* pLoader, S& importSettings)
-		//{
-		//	uint64_t uuid = ReadUUID();
-		//	importSettings = pLoader->ReadImportSettings_Internal(m_Node);
-		//}
-
-		void Write(LoaderModule* pLoader, bool relativePath = true) const;
-		void Write(YAML::Emitter& emitter, LoaderModule* pLoader) const;
-		void Write(YAML::Emitter& emitter, LoaderModule* pLoader, const std::any& importSettings) const;
-		void Read();
-
-		const std::string& Path() const;
+		void Read(const YAML::Node& node);
 		const std::string& Extension() const;
 		UUID ID() const;
-		size_t BaseHash() const;
 		size_t Hash() const;
 		size_t SerializedVersion() const;
-		const std::any& ImportSettings() const;
-		bool Exists() const;
-		
+		void IncrementSerializedVersion();
+
 	private:
 		uint64_t ReadUUID() const;
 		size_t ReadHash() const;
@@ -52,29 +30,56 @@ namespace Glory
 	private:
 		friend class AssetDatabase;
 		YAML::Node m_Node;
-
-		std::string m_Path;
 		std::string m_Extension;
 		UUID m_UUID;
 		size_t m_TypeHash;
 		size_t m_SerializedVersion;
-		std::any m_ImportSettings;
 	};
 }
 
 namespace std
 {
+	//template<>
+	//struct hash<Glory::ResourceMeta>
+	//{
+	//	std::size_t operator()(const Glory::ResourceMeta& meta) const
+	//	{
+	//		std::ifstream inStream(meta.Path());
+	//		std::stringstream buffer;
+	//		buffer << inStream.rdbuf();
+	//		inStream.close();
+	//		std::string str = buffer.str();
+	//		return std::hash<std::string>()(str);
+	//	}
+	//};
+}
+
+#include <yaml-cpp/yaml.h>
+namespace YAML
+{
+	Emitter& operator<<(Emitter& out, const Glory::ResourceMeta& meta);
+
 	template<>
-	struct hash<Glory::ResourceMeta>
+	struct convert<Glory::ResourceMeta>
 	{
-		std::size_t operator()(const Glory::ResourceMeta& meta) const
+		static Node encode(const Glory::ResourceMeta& meta)
 		{
-			std::ifstream inStream(meta.Path());
-			std::stringstream buffer;
-			buffer << inStream.rdbuf();
-			inStream.close();
-			std::string str = buffer.str();
-			return std::hash<std::string>()(str);
+			Node node;
+			node = YAML::Node(YAML::NodeType::Map);
+			node["Extension"] = meta.Extension();
+			node["UUID"] = (uint64_t)meta.ID();
+			node["Hash"] = (uint64_t)meta.Hash();
+			node["SerializedVersion"] = (uint64_t)meta.SerializedVersion();
+			return node;
+		}
+
+		static bool decode(const Node& node, Glory::ResourceMeta& meta)
+		{
+			if (!node.IsMap())
+				return false;
+
+			meta.Read(node);
+			return true;
 		}
 	};
 }

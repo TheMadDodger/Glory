@@ -7,7 +7,7 @@ namespace Glory::Editor
 	const size_t LAYER_BUFFER_SIZE = 256;
 	char LAYER_BUFFER[LAYER_BUFFER_SIZE] = "\0";
 
-	void LayerSettings::OnGui()
+	bool LayerSettings::OnGui()
 	{
 		YAML::Node layersNode = m_SettingsNode["Layers"];
 
@@ -42,5 +42,11 @@ namespace Glory::Editor
 				LayerManager::Load();
 			}
 		}
+		return false;
+	}
+
+	void LayerSettings::OnSettingsLoaded()
+	{
+		LayerManager::Load();
 	}
 }

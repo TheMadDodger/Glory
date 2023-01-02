@@ -1,1 +1,852 @@
 ProjectName: Sponza
+Assets:
+  5258057404939636139:
+    Location:
+      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_frag.shader
+      IsSubAsset: false
+      Index: 0
+    Metadata:
+      Extension: .shader
+      UUID: 5258057404939636139
+      Hash: 2411618060
+      SerializedVersion: 0
+  1332659315065513959:
+    Location:
+      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_vert.shader
+      IsSubAsset: false
+      Index: 0
+    Metadata:
+      Extension: .shader
+      UUID: 1332659315065513959
+      Hash: 2411618060
+      SerializedVersion: 0
+  15292592356433829065:
+    Location:
+      Path: Materials\Material_.gmat
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gmat
+      UUID: 15292592356433829065
+      Hash: 3973929837
+      SerializedVersion: 1
+  11466190625901780264:
+    Location:
+      Path: Materials\Material_Instance.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 11466190625901780264
+      Hash: 1477354262
+      SerializedVersion: 1
+  15888846774429834738:
+    Location:
+      Path: Materials\Material_Instance1.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 15888846774429834738
+      Hash: 1477354262
+      SerializedVersion: 1
+  15672064195992175109:
+    Location:
+      Path: Materials\Material_Instance10.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 15672064195992175109
+      Hash: 1477354262
+      SerializedVersion: 1
+  2149126069163265897:
+    Location:
+      Path: Materials\Material_Instance11.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 2149126069163265897
+      Hash: 1477354262
+      SerializedVersion: 1
+  12488566683547842023:
+    Location:
+      Path: Materials\Material_Instance12.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 12488566683547842023
+      Hash: 1477354262
+      SerializedVersion: 1
+  16781332625119740619:
+    Location:
+      Path: Materials\Material_Instance13.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 16781332625119740619
+      Hash: 1477354262
+      SerializedVersion: 1
+  2466132427646561347:
+    Location:
+      Path: Materials\Material_Instance14.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 2466132427646561347
+      Hash: 1477354262
+      SerializedVersion: 1
+  1887650209508677350:
+    Location:
+      Path: Materials\Material_Instance15.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 1887650209508677350
+      Hash: 1477354262
+      SerializedVersion: 1
+  12310060936730104416:
+    Location:
+      Path: Materials\Material_Instance16.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 12310060936730104416
+      Hash: 1477354262
+      SerializedVersion: 1
+  12097914131954477231:
+    Location:
+      Path: Materials\Material_Instance17.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 12097914131954477231
+      Hash: 1477354262
+      SerializedVersion: 1
+  15031119109931530163:
+    Location:
+      Path: Materials\Material_Instance18.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 15031119109931530163
+      Hash: 1477354262
+      SerializedVersion: 1
+  14905697140036626744:
+    Location:
+      Path: Materials\Material_Instance19.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 14905697140036626744
+      Hash: 1477354262
+      SerializedVersion: 1
+  15807204728680519318:
+    Location:
+      Path: Materials\Material_Instance2.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 15807204728680519318
+      Hash: 1477354262
+      SerializedVersion: 1
+  16368550536739427456:
+    Location:
+      Path: Materials\Material_Instance20.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 16368550536739427456
+      Hash: 1477354262
+      SerializedVersion: 1
+  2459860768475436098:
+    Location:
+      Path: Materials\Material_Instance21.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 2459860768475436098
+      Hash: 1477354262
+      SerializedVersion: 1
+  2498040056946344786:
+    Location:
+      Path: Materials\Material_Instance22.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 2498040056946344786
+      Hash: 1477354262
+      SerializedVersion: 1
+  13944401581212950653:
+    Location:
+      Path: Materials\Material_Instance23.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 13944401581212950653
+      Hash: 1477354262
+      SerializedVersion: 1
+  1547198388543712619:
+    Location:
+      Path: Materials\Material_Instance24.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 1547198388543712619
+      Hash: 1477354262
+      SerializedVersion: 1
+  5435400219544926367:
+    Location:
+      Path: Materials\Material_Instance3.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 5435400219544926367
+      Hash: 1477354262
+      SerializedVersion: 1
+  5512620605558357874:
+    Location:
+      Path: Materials\Material_Instance4.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 5512620605558357874
+      Hash: 1477354262
+      SerializedVersion: 1
+  11184601656502026585:
+    Location:
+      Path: Materials\Material_Instance5.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 11184601656502026585
+      Hash: 1477354262
+      SerializedVersion: 1
+  12259864827464564605:
+    Location:
+      Path: Materials\Material_Instance6.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 12259864827464564605
+      Hash: 1477354262
+      SerializedVersion: 1
+  2067120908685993502:
+    Location:
+      Path: Materials\Material_Instance7.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 2067120908685993502
+      Hash: 1477354262
+      SerializedVersion: 1
+  3696908535920517257:
+    Location:
+      Path: Materials\Material_Instance8.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 3696908535920517257
+      Hash: 1477354262
+      SerializedVersion: 1
+  14449454895531762629:
+    Location:
+      Path: Materials\Material_Instance9.gminst
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gminst
+      UUID: 14449454895531762629
+      Hash: 1477354262
+      SerializedVersion: 2
+  6439595880252257041:
+    Location:
+      Path: Materials\Monkeh.gmat
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gmat
+      UUID: 6439595880252257041
+      Hash: 3973929837
+      SerializedVersion: 1
+  5501465473105436222:
+    Location:
+      Path: Models\monkeh.fbx
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .fbx
+      UUID: 5501465473105436222
+      Hash: 213427075
+      SerializedVersion: 0
+  2871247263641046888:
+    Location:
+      Path: Models\Sponza.fbx
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .fbx
+      UUID: 2871247263641046888
+      Hash: 213427075
+      SerializedVersion: 0
+  17525689166372006367:
+    Location:
+      Path: Scenes\ParentingTest.gscene
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gscene
+      UUID: 17525689166372006367
+      Hash: 1336563431
+      SerializedVersion: 0
+  12737398322962661278:
+    Location:
+      Path: Scenes\Sponza.gscene
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .gscene
+      UUID: 12737398322962661278
+      Hash: 1336563431
+      SerializedVersion: 0
+  6449810108664700435:
+    Location:
+      Path: Scripts\FlyCam.cs
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .cs
+      UUID: 6449810108664700435
+      Hash: 3636289800
+      SerializedVersion: 0
+  7937209862723571193:
+    Location:
+      Path: Scripts\NewScript.cs
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .cs
+      UUID: 7937209862723571193
+      Hash: 3636289800
+      SerializedVersion: 0
+  16575844677113431238:
+    Location:
+      Path: Scripts\TestScript.cs
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .cs
+      UUID: 16575844677113431238
+      Hash: 3636289800
+      SerializedVersion: 0
+  1855881840462114938:
+    Location:
+      Path: Textures\Color\Color_0.png
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .png
+      UUID: 1855881840462114938
+      Hash: 948733667
+      SerializedVersion: 0
+  16486180262177399002:
+    Location:
+      Path: Textures\Color\Color_01.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 16486180262177399002
+      Hash: 948733667
+      SerializedVersion: 0
+  12940197918077747768:
+    Location:
+      Path: Textures\Color\Color_02.png
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .png
+      UUID: 12940197918077747768
+      Hash: 948733667
+      SerializedVersion: 0
+  17237974390259840017:
+    Location:
+      Path: Textures\Color\Color_03.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 17237974390259840017
+      Hash: 948733667
+      SerializedVersion: 0
+  8665547347118670184:
+    Location:
+      Path: Textures\Color\Color_04.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 8665547347118670184
+      Hash: 948733667
+      SerializedVersion: 0
+  13095508170496382947:
+    Location:
+      Path: Textures\Color\Color_05.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 13095508170496382947
+      Hash: 948733667
+      SerializedVersion: 0
+  8765373049577728563:
+    Location:
+      Path: Textures\Color\Color_06.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 8765373049577728563
+      Hash: 948733667
+      SerializedVersion: 0
+  4190588356426450638:
+    Location:
+      Path: Textures\Color\Color_07.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 4190588356426450638
+      Hash: 948733667
+      SerializedVersion: 0
+  18169472862881252893:
+    Location:
+      Path: Textures\Color\Color_08.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 18169472862881252893
+      Hash: 948733667
+      SerializedVersion: 0
+  13832964293291405482:
+    Location:
+      Path: Textures\Color\Color_09.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 13832964293291405482
+      Hash: 948733667
+      SerializedVersion: 0
+  3987809279678242927:
+    Location:
+      Path: Textures\Color\Color_10.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 3987809279678242927
+      Hash: 948733667
+      SerializedVersion: 0
+  2643498100504238703:
+    Location:
+      Path: Textures\Color\Color_11.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 2643498100504238703
+      Hash: 948733667
+      SerializedVersion: 0
+  7218672533146128186:
+    Location:
+      Path: Textures\Color\Color_12.png
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .png
+      UUID: 7218672533146128186
+      Hash: 948733667
+      SerializedVersion: 0
+  7601360924795048212:
+    Location:
+      Path: Textures\Color\Color_13.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 7601360924795048212
+      Hash: 948733667
+      SerializedVersion: 0
+  10148233942574360669:
+    Location:
+      Path: Textures\Color\Color_14.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 10148233942574360669
+      Hash: 948733667
+      SerializedVersion: 0
+  4976033332207181:
+    Location:
+      Path: Textures\Color\Color_15.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 4976033332207181
+      Hash: 948733667
+      SerializedVersion: 0
+  12101885989665068352:
+    Location:
+      Path: Textures\Color\Color_16.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 12101885989665068352
+      Hash: 948733667
+      SerializedVersion: 0
+  5358361788648513693:
+    Location:
+      Path: Textures\Color\Color_17.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 5358361788648513693
+      Hash: 948733667
+      SerializedVersion: 0
+  2116292014953697862:
+    Location:
+      Path: Textures\Color\Color_18.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 2116292014953697862
+      Hash: 948733667
+      SerializedVersion: 0
+  804995545527906754:
+    Location:
+      Path: Textures\Color\Color_19.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 804995545527906754
+      Hash: 948733667
+      SerializedVersion: 0
+  15655606451279741710:
+    Location:
+      Path: Textures\Color\Color_20.png
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .png
+      UUID: 15655606451279741710
+      Hash: 948733667
+      SerializedVersion: 0
+  997819397894337760:
+    Location:
+      Path: Textures\Color\Color_21.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 997819397894337760
+      Hash: 948733667
+      SerializedVersion: 0
+  2376897628872190638:
+    Location:
+      Path: Textures\Color\Color_22.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 2376897628872190638
+      Hash: 948733667
+      SerializedVersion: 0
+  3205441835507307888:
+    Location:
+      Path: Textures\Color\Color_23.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 3205441835507307888
+      Hash: 948733667
+      SerializedVersion: 0
+  827610970166176057:
+    Location:
+      Path: Textures\Color\Color_24.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 827610970166176057
+      Hash: 948733667
+      SerializedVersion: 0
+  7662718723448835180:
+    Location:
+      Path: Textures\Normal\Normal_00.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 7662718723448835180
+      Hash: 948733667
+      SerializedVersion: 0
+  8310505727595138470:
+    Location:
+      Path: Textures\Normal\Normal_01.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 8310505727595138470
+      Hash: 948733667
+      SerializedVersion: 0
+  5816421992073505615:
+    Location:
+      Path: Textures\Normal\Normal_02.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 5816421992073505615
+      Hash: 948733667
+      SerializedVersion: 0
+  15056429005530918964:
+    Location:
+      Path: Textures\Normal\Normal_03.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 15056429005530918964
+      Hash: 948733667
+      SerializedVersion: 0
+  2011160926597431273:
+    Location:
+      Path: Textures\Normal\Normal_04.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 2011160926597431273
+      Hash: 948733667
+      SerializedVersion: 0
+  3433730457245465909:
+    Location:
+      Path: Textures\Normal\Normal_05.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 3433730457245465909
+      Hash: 948733667
+      SerializedVersion: 0
+  6649486027513813253:
+    Location:
+      Path: Textures\Normal\Normal_06.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 6649486027513813253
+      Hash: 948733667
+      SerializedVersion: 0
+  5715451918262814620:
+    Location:
+      Path: Textures\Normal\Normal_07.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 5715451918262814620
+      Hash: 948733667
+      SerializedVersion: 0
+  10171797901856397001:
+    Location:
+      Path: Textures\Normal\Normal_08.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 10171797901856397001
+      Hash: 948733667
+      SerializedVersion: 0
+  10097862280302688460:
+    Location:
+      Path: Textures\Normal\Normal_09.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 10097862280302688460
+      Hash: 948733667
+      SerializedVersion: 0
+  1870888407128423687:
+    Location:
+      Path: Textures\Normal\Normal_10.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 1870888407128423687
+      Hash: 948733667
+      SerializedVersion: 0
+  12634421653309758663:
+    Location:
+      Path: Textures\Normal\Normal_11.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 12634421653309758663
+      Hash: 948733667
+      SerializedVersion: 0
+  10789037163183366129:
+    Location:
+      Path: Textures\Normal\Normal_13.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 10789037163183366129
+      Hash: 948733667
+      SerializedVersion: 0
+  11443876422989324620:
+    Location:
+      Path: Textures\Normal\Normal_14.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 11443876422989324620
+      Hash: 948733667
+      SerializedVersion: 0
+  212298128982664327:
+    Location:
+      Path: Textures\Normal\Normal_15.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 212298128982664327
+      Hash: 948733667
+      SerializedVersion: 0
+  9868427914987384978:
+    Location:
+      Path: Textures\Normal\Normal_16.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 9868427914987384978
+      Hash: 948733667
+      SerializedVersion: 0
+  12109906826625766245:
+    Location:
+      Path: Textures\Normal\Normal_17.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 12109906826625766245
+      Hash: 948733667
+      SerializedVersion: 0
+  2793930428432260621:
+    Location:
+      Path: Textures\Normal\Normal_18.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 2793930428432260621
+      Hash: 948733667
+      SerializedVersion: 0
+  10305168231080988673:
+    Location:
+      Path: Textures\Normal\Normal_19.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 10305168231080988673
+      Hash: 948733667
+      SerializedVersion: 0
+  14680835522405682523:
+    Location:
+      Path: Textures\Normal\Normal_20.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 14680835522405682523
+      Hash: 948733667
+      SerializedVersion: 0
+  8369380832808064966:
+    Location:
+      Path: Textures\Normal\Normal_21.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 8369380832808064966
+      Hash: 948733667
+      SerializedVersion: 0
+  14690908120106831825:
+    Location:
+      Path: Textures\Normal\Normal_22.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 14690908120106831825
+      Hash: 948733667
+      SerializedVersion: 0
+  16227793578655187793:
+    Location:
+      Path: Textures\Normal\Normal_23.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 16227793578655187793
+      Hash: 948733667
+      SerializedVersion: 0
+  332370144985133730:
+    Location:
+      Path: Textures\Normal\Normal_24.jpg
+      Index: 0
+      IsSubAsset: false
+    Metadata:
+      Extension: .jpg
+      UUID: 332370144985133730
+      Hash: 948733667
+      SerializedVersion: 0

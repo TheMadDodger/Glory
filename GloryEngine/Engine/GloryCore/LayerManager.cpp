@@ -26,7 +26,6 @@ namespace Glory
 		if (!std::filesystem::exists(layersPath))
 		{
 			CreateDefaultLayers();
-			Save();
 			return;
 		}
 
@@ -58,35 +57,6 @@ namespace Glory
 			std::string name = nameNode.as<std::string>();
 			AddLayer(name);
 		}
-	}
-
-	void LayerManager::Save()
-	{
-		/* Should be handled by the LayerSettings editor class */
-
-		//YAML::Emitter emitter;
-		//emitter << YAML::BeginMap;
-		//emitter << YAML::Key << "Layers";
-		//emitter << YAML::Value << YAML::BeginSeq;
-		//
-		//for (size_t i = 0; i < LAYER_MANAGER->m_Layers.size(); i++)
-		//{
-		//	Layer* pLayer = &LAYER_MANAGER->m_Layers[i];
-		//	emitter << YAML::BeginMap;
-		//	emitter << YAML::Key << "Name";
-		//	emitter << YAML::Value << pLayer->m_Name;
-		//	emitter << YAML::EndMap;
-		//}
-		//
-		//emitter << YAML::EndSeq;
-		//emitter << YAML::EndMap;
-		//
-		//std::filesystem::path layersPath = Game::GetSettingsPath();
-		//layersPath.append("Layers.yaml");
-		//
-		//std::ofstream outStream(layersPath.string());
-		//outStream << emitter.c_str();
-		//outStream.close();
 	}
 
 	const Layer* LayerManager::GetLayerByName(const std::string& name)

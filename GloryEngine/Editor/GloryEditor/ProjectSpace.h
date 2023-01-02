@@ -2,7 +2,8 @@
 #include <string>
 #include <mutex>
 #include <functional>
-#include <AssetDatabase.h>
+#include <string>
+#include <yaml-cpp/yaml.h>
 #include "GloryEditor.h"
 
 namespace Glory::Editor
@@ -34,9 +35,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API std::string SettingsPath();
 
 		static GLORY_EDITOR_API void RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback);
-
 		static GLORY_EDITOR_API void SetAssetDirty(const char* key, bool dirty = true);
-
 		static GLORY_EDITOR_API bool HasUnsavedChanges();
 
 	private:
@@ -45,8 +44,6 @@ namespace Glory::Editor
 
 		void Open();
 		void Close();
-
-		static void OnAssetDirty(UUID uuid, const ResourceMeta& meta, Resource* pResource);
 
 	private:
 		static ProjectSpace* m_pCurrentProject;
@@ -58,7 +55,7 @@ namespace Glory::Editor
 		std::string m_LibraryPath;
 		std::string m_SettingsPath;
 		std::string m_ProjectName;
-
 		std::vector<std::string> m_DirtyKeys;
+		YAML::Node m_ProjectFileNode;
 	};
 }

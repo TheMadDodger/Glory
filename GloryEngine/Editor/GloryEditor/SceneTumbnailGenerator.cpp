@@ -1,6 +1,5 @@
 #include "SceneTumbnailGenerator.h"
 #include "EditorAssets.h"
-#include "AssetDatabase.h"
 #include "EditorSceneManager.h"
 #include <Engine.h>
 

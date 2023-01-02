@@ -2,8 +2,7 @@
 #include "EditorUI.h"
 #include <imgui.h>
 #include <algorithm>
-#include <AssetDatabase.h>
-#include <AssetManager.h>
+#include <EditorAssetDatabase.h>
 #include <Engine.h>
 
 #include <IconsFontAwesome6.h>
@@ -19,7 +18,7 @@ namespace Glory::Editor
 	{
 		ImGui::PushID(label.c_str());
 		std::string assetName = "";
-		assetName = AssetDatabase::GetAssetName(*value);
+		assetName = EditorAssetDatabase::GetAssetName(*value);
 		if (assetName == "") assetName = "Noone";
 
 		bool openPopup = false;
@@ -80,7 +79,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < m_PossibleAssets.size(); i++)
 		{
 			UUID uuid = m_PossibleAssets[i];
-			std::string name = AssetDatabase::GetAssetName(uuid);
+			std::string name = EditorAssetDatabase::GetAssetName(uuid);
 			if (name.find(m_Filter) == std::string::npos) continue;
 			m_FilteredAssets.push_back(m_PossibleAssets[i]);
 		}
@@ -89,7 +88,7 @@ namespace Glory::Editor
 	void AssetPicker::LoadAssets(size_t typeHash, bool includeSubAssets)
 	{
 		m_PossibleAssets.clear();
-		AssetDatabase::GetAllAssetsOfType(typeHash, m_PossibleAssets);
+		EditorAssetDatabase::GetAllAssetsOfType(typeHash, m_PossibleAssets);
 
 		if (!includeSubAssets) return;
 		std::vector<ResourceType*> pTypes;
@@ -97,7 +96,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pTypes.size(); i++)
 		{
 			if (pTypes[i]->Hash() == typeHash) continue;
-			AssetDatabase::GetAllAssetsOfType(pTypes[i]->Hash(), m_PossibleAssets);
+			EditorAssetDatabase::GetAllAssetsOfType(pTypes[i]->Hash(), m_PossibleAssets);
 		}
 	}
 
@@ -157,7 +156,7 @@ namespace Glory::Editor
 
 		std::for_each(items.begin(), items.end(), [&](UUID uuid)
 		{
-			std::string name = AssetDatabase::GetAssetName(uuid);
+			std::string name = EditorAssetDatabase::GetAssetName(uuid);
 			if (ImGui::MenuItem(name.c_str()))
 			{
 				*value = uuid;

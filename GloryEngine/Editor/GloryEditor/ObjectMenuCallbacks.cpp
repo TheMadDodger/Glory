@@ -4,10 +4,10 @@
 #include "EditorSceneManager.h"
 #include "PopupManager.h"
 #include "Undo.h"
-#include "ContentBrowser.h"
-#include "ContentBrowser.h"
+#include "FileBrowser.h"
 #include "CreateObjectAction.h"
 #include "DeleteSceneObjectAction.h"
+#include "EditorAssetDatabase.h"
 #include <AssetDatabase.h>
 #include <Game.h>
 #include <Engine.h>
@@ -15,7 +15,7 @@
 
 namespace Glory::Editor
 {
-	GLORY_EDITOR_API std::filesystem::path GetUnqiueFilePath(const std::filesystem::path& start)
+	std::filesystem::path GetUnqiueFilePath(const std::filesystem::path& start)
 	{
 		std::filesystem::path currentPath = start;
 		std::filesystem::path extenstion = start.extension();
@@ -83,7 +83,7 @@ namespace Glory::Editor
 				[&]() { DeleteResource(); },
 			};
 
-			std::filesystem::path file = ContentBrowserItem::GetHighlightedPath();
+			std::filesystem::path file = FileBrowserItem::GetHighlightedPath();
 			std::string name = file.filename().replace_extension().string();
 			PopupManager::OpenModal("Delete " + name, "Are you sure you want to delete \"" + name + "\"?\nThis action cannot be undone!", buttons, callbacks);
 			break;
@@ -91,7 +91,7 @@ namespace Glory::Editor
 
 		case ObjectMenuType::T_Folder:
 		{
-			std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+			std::filesystem::path path = FileBrowserItem::GetHighlightedPath();
 			std::vector<std::string> buttons = {
 				"No",
 				"Yes",
@@ -203,53 +203,51 @@ namespace Glory::Editor
 
 	OBJECTMENU_CALLBACK(CreateNewMaterialCallback)
 	{
-		std::filesystem::path path = ContentBrowser::GetCurrentPath();
+		std::filesystem::path path = FileBrowser::GetCurrentPath();
 		path = path.append("NewMaterial.gmat");
 		path = GetUnqiueFilePath(path);
 		MaterialData* pMaterialData = new MaterialData();
-		AssetDatabase::CreateAsset(pMaterialData, path.string());
-		AssetDatabase::Save();
+		EditorAssetDatabase::CreateAsset(pMaterialData, path.string());
 
-		ContentBrowserItem::GetSelectedFolder()->Refresh();
-		ContentBrowserItem::GetSelectedFolder()->SortChildren();
-		ContentBrowser::BeginRename(path.filename().string(), false);
+		FileBrowserItem::GetSelectedFolder()->Refresh();
+		FileBrowserItem::GetSelectedFolder()->SortChildren();
+		FileBrowser::BeginRename(path.filename().string(), false);
 	}
 
 	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback)
 	{
 		MaterialData* pMaterial = (MaterialData*)pObject;
 		if (dynamic_cast<MaterialInstanceData*>(pMaterial)) pMaterial = nullptr;
-		std::filesystem::path path = ContentBrowser::GetCurrentPath();
+		std::filesystem::path path = FileBrowser::GetCurrentPath();
 		std::string fileName = pMaterial ? pMaterial->Name() + "Instance.gminst" : "NewMaterialInstance.gminst";
 		path = path.append(fileName);
 		path = GetUnqiueFilePath(path);
 		MaterialInstanceData* pMaterialData = new MaterialInstanceData(pMaterial);
-		AssetDatabase::CreateAsset(pMaterialData, path.string());
-		AssetDatabase::Save();
+		EditorAssetDatabase::CreateAsset(pMaterialData, path.string());
 
-		ContentBrowserItem::GetSelectedFolder()->Refresh();
-		ContentBrowserItem::GetSelectedFolder()->SortChildren();
-		ContentBrowser::BeginRename(fileName, false);
+		FileBrowserItem::GetSelectedFolder()->Refresh();
+		FileBrowserItem::GetSelectedFolder()->SortChildren();
+		FileBrowser::BeginRename(fileName, false);
 	}
 
 	OBJECTMENU_CALLBACK(CreateNewFolderCallback)
 	{
-		std::filesystem::path path = ContentBrowserItem::GetCurrentPath();
+		std::filesystem::path path = FileBrowserItem::GetCurrentPath();
 		path = GetUnqiueFilePath(path.append("New Folder"));
 		if (!std::filesystem::create_directory(path)) return;
 		path.filename();
 
-		ContentBrowserItem::GetSelectedFolder()->Refresh();
-		ContentBrowserItem::GetSelectedFolder()->SortChildren();
-		ContentBrowser::BeginRename(path.filename().string(), true);
+		FileBrowserItem::GetSelectedFolder()->Refresh();
+		FileBrowserItem::GetSelectedFolder()->SortChildren();
+		FileBrowser::BeginRename(path.filename().string(), true);
 	}
 
 	OBJECTMENU_CALLBACK(RenameItemCallback)
 	{
 		std::string itemToRename = "";
-		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+		std::filesystem::path path = FileBrowserItem::GetHighlightedPath();
 		itemToRename = path.filename().replace_extension("").string();
-		ContentBrowser::BeginRename(itemToRename, currentMenu == ObjectMenuType::T_Folder);
+		FileBrowser::BeginRename(itemToRename, currentMenu == ObjectMenuType::T_Folder);
 	}
 
 	OBJECTMENU_CALLBACK(SaveScene)
@@ -264,31 +262,27 @@ namespace Glory::Editor
 		EditorSceneManager::SaveSceneAs(pScene->GetUUID());
 	}
 
-	GLORY_EDITOR_API void DeleteFolder()
+	void DeleteFolder()
 	{
-		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+		std::filesystem::path path = FileBrowserItem::GetHighlightedPath();
 		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());
 		if (!std::filesystem::remove_all(path)) return;
-		AssetDatabase::DeleteAssets(relativePath.string());
-		AssetDatabase::Save();
-		ContentBrowserItem::GetSelectedFolder()->Refresh();
-		ContentBrowserItem::GetSelectedFolder()->SortChildren();
+
+		EditorAssetDatabase::DeleteAssets(relativePath.string());
+		FileBrowserItem::GetSelectedFolder()->Refresh();
+		FileBrowserItem::GetSelectedFolder()->SortChildren();
 		PopupManager::CloseCurrentPopup();
 	}
 
-	GLORY_EDITOR_API void DeleteResource()
+	void DeleteResource()
 	{
-		std::filesystem::path path = ContentBrowserItem::GetHighlightedPath();
+		std::filesystem::path path = FileBrowserItem::GetHighlightedPath();
 		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());
-		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
-		if (uuid == 0) return;
 		if (!std::filesystem::remove(path)) return;
-		std::filesystem::path metaPath = path.string() + ".gmeta";
-		std::filesystem::remove(metaPath);
-		AssetDatabase::DeleteAsset(uuid);
-		AssetDatabase::Save();
-		ContentBrowserItem::GetSelectedFolder()->Refresh();
-		ContentBrowserItem::GetSelectedFolder()->SortChildren();
+
+		EditorAssetDatabase::DeleteAsset(relativePath.string());
+		FileBrowserItem::GetSelectedFolder()->Refresh();
+		FileBrowserItem::GetSelectedFolder()->SortChildren();
 		PopupManager::CloseCurrentPopup();
 	}
 }

@@ -1,9 +1,10 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
+#include "EditorAssetDatabase.h"
 #include <Game.h>
 #include <Engine.h>
 #include <ObjectMenuCallbacks.h>
-#include <ContentBrowser.h>
+#include <FileBrowser.h>
 #include <fstream>
 #include <AssetDatabase.h>
 #include <MonoScript.h>
@@ -84,11 +85,15 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::OnProjectClose(ProjectSpace* pProject)
 	{
-		
+
 	}
 
 	void MonoEditorExtension::OnProjectOpen(ProjectSpace* pProject)
 	{
+		GeneratePremakeFile(pProject);
+		GenerateBatchFile(pProject);
+		RunGenerateProjectFilesBatch(pProject);
+
 		std::string name = pProject->Name() + ".dll";
 		std::filesystem::path path = pProject->ProjectPath();
 		path = path.parent_path().append("Library/Assembly");
@@ -97,16 +102,15 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)
 	{
-		std::filesystem::path path = ContentBrowserItem::GetCurrentPath();
+		std::filesystem::path path = FileBrowserItem::GetCurrentPath();
 		path = GetUnqiueFilePath(path.append("New CSharp Script.cs"));
 
 		MonoScript* pMonoScript = new MonoScript();
-		AssetDatabase::CreateAsset(pMonoScript, path.string());
-		AssetDatabase::Save();
+		EditorAssetDatabase::CreateAsset(pMonoScript, path.string());
 
-		ContentBrowserItem::GetSelectedFolder()->Refresh();
-		ContentBrowserItem::GetSelectedFolder()->SortChildren();
-		ContentBrowser::BeginRename(path.filename().string(), false);
+		FileBrowserItem::GetSelectedFolder()->Refresh();
+		FileBrowserItem::GetSelectedFolder()->SortChildren();
+		FileBrowser::BeginRename(path.filename().string(), false);
 	}
 
 	void MonoEditorExtension::OnOpenCSharpProject(Object* pObject, const ObjectMenuType& menuType)
@@ -235,7 +239,7 @@ namespace Glory::Editor
 		std::wstring pathWString = batchRootPath.wstring();
 		LPCWSTR lpcWPath = pathWString.c_str();
 
-		// Start the child process. 
+		// Start the child process.
 		if (!CreateProcess(applicationName,   // No module name (use command line)
 			commandLine,        // Command line
 			NULL,           // Process handle not inheritable
@@ -243,7 +247,7 @@ namespace Glory::Editor
 			FALSE,          // Set handle inheritance to FALSE
 			0,              // No creation flags
 			NULL,           // Use parent's environment block
-			lpcWPath,       // Use current projects starting directory 
+			lpcWPath,       // Use current projects starting directory
 			&si,            // Pointer to STARTUPINFO structure
 			&pi)			// Pointer to PROCESS_INFORMATION structure
 			)
@@ -255,7 +259,7 @@ namespace Glory::Editor
 		// Wait until child process exits.
 		WaitForSingleObject(pi.hProcess, INFINITE);
 
-		// Close process and thread handles. 
+		// Close process and thread handles.
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 

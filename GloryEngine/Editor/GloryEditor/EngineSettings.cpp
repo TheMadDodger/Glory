@@ -5,10 +5,11 @@
 
 namespace Glory::Editor
 {
-	void EngineSettings::OnGui()
+	bool EngineSettings::OnGui()
 	{
         DrawLeftPanel();
         DrawRightPanel();
+        return false;
 	}
 
     void EngineSettings::DrawLeftPanel()

@@ -1,5 +1,5 @@
-#include <AssetManager.h>
 #include <Engine.h>
+#include "EditorAssetDatabase.h"
 #include "EditorAssets.h"
 #include "EditorAssets.h"
 #include "Tumbnail.h"
@@ -24,7 +24,7 @@ namespace Glory::Editor
 		}
 
 		ResourceMeta meta;
-		AssetDatabase::GetResourceMeta(uuid, meta);
+		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 
 		BaseTumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
 		if (pGenerator == nullptr)

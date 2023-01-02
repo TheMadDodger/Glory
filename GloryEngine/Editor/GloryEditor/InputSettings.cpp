@@ -26,8 +26,10 @@ namespace Glory::Editor
 
 	char FilterBuffer[200] = "\0";
 
-	void InputModesGui(YAML::Node& settings)
+	bool InputModesGui(YAML::Node& settings)
 	{
+		bool change = false;
+
 		YAML::Node inputModes = settings[Key_InputModes];
 
 		ListView listView = ListView("Input Modes");
@@ -41,7 +43,10 @@ namespace Glory::Editor
 			{
 				strcpy(TextBuffer, name.c_str());
 				if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
+				{
 					nameNode = std::string(TextBuffer);
+					change = true;
+				}
 
 				YAML::Node deviceTypesNode = inmputMode["DeviceTypes"];
 				ListView deviceTypesListView{ "Device Types" };
@@ -55,15 +60,18 @@ namespace Glory::Editor
 					{
 						GloryReflect::Enum<InputDeviceType>().ToString(deviceType, value);
 						deviceTypeNode = value;
+						change = true;
 					}
 				};
 
 				deviceTypesListView.OnAdd = [&]() {
 					deviceTypesNode.push_back("");
+					change = true;
 				};
 
 				deviceTypesListView.OnRemove = [&](int index) {
 					deviceTypesNode.remove(index);
+					change = true;
 				};
 
 				deviceTypesListView.Draw(deviceTypesNode.size());
@@ -75,13 +83,17 @@ namespace Glory::Editor
 			newNode["Name"] = "New Input Mode";
 			newNode["DeviceTypes"] = YAML::Node(YAML::NodeType::Sequence);
 			inputModes.push_back(newNode);
+			change = true;
 		};
 
 		listView.OnRemove = [&](int index) {
 			inputModes.remove(index);
+			change = true;
 		};
 
 		listView.Draw(inputModes.size());
+
+		return change;
 	}
 
 	struct InputBindingData
@@ -273,8 +285,10 @@ namespace Glory::Editor
 		return change;
 	}
 
-	void InputMapsGui(YAML::Node& settings)
+	bool InputMapsGui(YAML::Node& settings)
 	{
+		bool change = false;
+
 		std::vector<std::string> inputModeNamesTemp;
 		std::vector<std::string_view> inputModeNames;
 		YAML::Node inputModes = settings[Key_InputModes];
@@ -298,7 +312,10 @@ namespace Glory::Editor
 			{
 				strcpy(TextBuffer, name.c_str());
 				if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
+				{
 					nameNode = std::string(TextBuffer);
+					change = true;
+				}
 
 				YAML::Node actionsNode = inmputMode["Actions"];
 				ListView actionsListView{ "Actions" };
@@ -313,7 +330,10 @@ namespace Glory::Editor
 					{
 						strcpy(TextBuffer, actionName.c_str());
 						if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
+						{
 							actionNameNode = std::string(TextBuffer);
+							change = true;
+						}
 
 						YAML::Node actionMappingNode = actionNode["ActionMapping"];
 						std::string actionMappingString = actionMappingNode.as<std::string>();
@@ -327,6 +347,7 @@ namespace Glory::Editor
 						{
 							GloryReflect::Enum<InputMappingType>().ToString(actionMapping, actionMappingString);
 							actionMappingNode = actionMappingString;
+							change = true;
 						}
 
 						if (actionMapping == InputMappingType::Float)
@@ -337,12 +358,14 @@ namespace Glory::Editor
 							{
 								GloryReflect::Enum<AxisBlending>().ToString(axisBlending, axisBlendingString);
 								axisBlendingNode = axisBlendingString;
+								change = true;
 							}
 
 							float blendingSpeed = axisBlendingSpeedNode.as<float>();
 							if (EditorUI::InputFloat("Axis Blending Speed", &blendingSpeed, 0.0f))
 							{
 								axisBlendingSpeedNode = blendingSpeed;
+								change = true;
 							}
 						}
 
@@ -369,7 +392,10 @@ namespace Glory::Editor
 
 								strcpy(TextBuffer, bindingName.c_str());
 								if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
+								{
 									BindingNameNode = std::string(TextBuffer);
+									change = true;
+								}
 
 								if (actionMapping == InputMappingType::Bool && binding.m_DeviceType != InputDeviceType(-1) && !binding.m_IsAxis)
 								{
@@ -379,6 +405,7 @@ namespace Glory::Editor
 									{
 										GloryReflect::Enum<InputState>().ToString(state, stateString);
 										stateNode = stateString;
+										change = true;
 									}
 								}
 
@@ -389,12 +416,14 @@ namespace Glory::Editor
 									if (EditorUI::CheckBox("Map Delta to Value", &mapToDelta))
 									{
 										mapDeltaToValueNode = mapToDelta;
+										change = true;
 									}
 
 									float multiplier = multiplierNode.as<float>();
 									if (EditorUI::InputFloat("Multiplier", &multiplier))
 									{
 										multiplierNode = multiplier;
+										change = true;
 									}
 								}
 
@@ -418,11 +447,13 @@ namespace Glory::Editor
 								{
 									inputMode = inputModeNames[inputModeIndex];
 									inputModeNode = inputMode;
+									change = true;
 								}
 
 								if (KeyDrowdown("Binding", bindingString))
 								{
 									bindingKeyNode = bindingString;
+									change = true;
 								}
 							}
 						};
@@ -436,10 +467,12 @@ namespace Glory::Editor
 							newNode["InputMode"] = "";
 							newNode["Binding"] = "";
 							bindingsNode.push_back(newNode);
+							change = true;
 						};
 
 						bindingsListView.OnRemove = [&](int index) {
 							bindingsNode.remove(index);
+							change = true;
 						};
 
 						bindingsListView.Draw(bindingsNode.size());
@@ -454,10 +487,12 @@ namespace Glory::Editor
 					newNode["AxisBlendingSpeed"] = 5.0f;
 					newNode["Bindings"] = YAML::Node(YAML::NodeType::Sequence);
 					actionsNode.push_back(newNode);
+					change = true;
 				};
 
 				actionsListView.OnRemove = [&](int index) {
 					inputMaps.remove(index);
+					change = true;
 				};
 
 				actionsListView.Draw(actionsNode.size());
@@ -469,21 +504,27 @@ namespace Glory::Editor
 			newNode["Name"] = "New Input Map";
 			newNode["Actions"] = YAML::Node(YAML::NodeType::Sequence);
 			inputMaps.push_back(newNode);
+			change = true;
 		};
 
 		listView.OnRemove = [&](int index) {
 			inputMaps.remove(index);
+			change = true;
 		};
 
 		listView.Draw(inputMaps.size());
+
+		return change;
 	}
 
-	void InputSettings::OnGui()
+	bool InputSettings::OnGui()
 	{
+		bool change = false;
 		ImGui::BeginChild("Input Settings");
-		InputModesGui(m_SettingsNode);
-		InputMapsGui(m_SettingsNode);
+		change |= InputModesGui(m_SettingsNode);
+		change |= InputMapsGui(m_SettingsNode);
 		ImGui::EndChild();
+		return change;
 	}
 
 	void InputSettings::OnSettingsLoaded()

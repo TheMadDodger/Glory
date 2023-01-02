@@ -1,10 +1,10 @@
 #include <stack>
 #include <imgui.h>
-#include <AssetDatabase.h>
 #include <AssetManager.h>
+#include "EditorAssetDatabase.h"
 #include "ProjectSpace.h"
 #include "EditorApplication.h"
-#include "ContentBrowserItem.h"
+#include "FileBrowserItem.h"
 #include "EditorAssets.h"
 #include "Tumbnail.h"
 #include "TumbnailGenerator.h"
@@ -13,23 +13,23 @@
 
 namespace Glory::Editor
 {
-	std::hash<std::string> ContentBrowserItem::m_PathHasher;
-	ContentBrowserItem* ContentBrowserItem::m_pSelectedFolder = nullptr;
-	std::vector<ContentBrowserItem*> ContentBrowserItem::m_pHistory;
-	size_t ContentBrowserItem::m_HistoryIndex = 1;
-	std::string ContentBrowserItem::m_HighlightedPath;
+	std::hash<std::string> FileBrowserItem::m_PathHasher;
+	FileBrowserItem* FileBrowserItem::m_pSelectedFolder = nullptr;
+	std::vector<FileBrowserItem*> FileBrowserItem::m_pHistory;
+	size_t FileBrowserItem::m_HistoryIndex = 1;
+	std::string FileBrowserItem::m_HighlightedPath;
 
-	ContentBrowserItem::ContentBrowserItem()
-		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<ContentBrowserItem*>()), m_Editable(true)
+	FileBrowserItem::FileBrowserItem()
+		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<FileBrowserItem*>()), m_Editable(true)
 	{
 	}
 
-	ContentBrowserItem::ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable, const std::string& directoryFilter, std::function<std::filesystem::path()> rootPathFunc)
+	FileBrowserItem::FileBrowserItem(const std::string& name, bool isFolder, FileBrowserItem* pParent, bool isEditable, const std::string& directoryFilter, std::function<std::filesystem::path()> rootPathFunc)
 		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false),
-		m_pChildren(std::vector<ContentBrowserItem*>()), m_Editable(isEditable), m_RootPathFunc(rootPathFunc), m_DirectoryFilter(directoryFilter)
+		m_pChildren(std::vector<FileBrowserItem*>()), m_Editable(isEditable), m_RootPathFunc(rootPathFunc), m_DirectoryFilter(directoryFilter)
 	{}
 
-	ContentBrowserItem::~ContentBrowserItem()
+	FileBrowserItem::~FileBrowserItem()
 	{
 		for (size_t i = 0; i < m_pChildren.size(); i++)
 		{
@@ -39,22 +39,22 @@ namespace Glory::Editor
 		m_pParent = nullptr;
 	}
 
-	ContentBrowserItem* ContentBrowserItem::GetSelectedFolder()
+	FileBrowserItem* FileBrowserItem::GetSelectedFolder()
 	{
 		return m_pSelectedFolder;
 	}
 
-	void ContentBrowserItem::SetSelectedFolder(ContentBrowserItem* pItem)
+	void FileBrowserItem::SetSelectedFolder(FileBrowserItem* pItem)
 	{
 		m_pSelectedFolder = pItem;
 	}
 
-	bool ContentBrowserItem::HasParent()
+	bool FileBrowserItem::HasParent()
 	{
 		return m_pParent != nullptr;
 	}
 
-	void ContentBrowserItem::Up()
+	void FileBrowserItem::Up()
 	{
 		if (m_pParent == nullptr) return;
 		m_pSelectedFolder = m_pParent;
@@ -62,7 +62,7 @@ namespace Glory::Editor
 		m_pHistory.push_back(m_pParent);
 	}
 
-	void ContentBrowserItem::HistoryUp()
+	void FileBrowserItem::HistoryUp()
 	{
 		if (m_HistoryIndex >= m_pHistory.size() || m_pHistory.size() <= 1) return;
 		++m_HistoryIndex;
@@ -70,7 +70,7 @@ namespace Glory::Editor
 		m_pSelectedFolder = m_pHistory[index];
 	}
 
-	void ContentBrowserItem::HistoryDown()
+	void FileBrowserItem::HistoryDown()
 	{
 		if (m_HistoryIndex <= 1 || m_pHistory.size() <= 1) return;
 		--m_HistoryIndex;
@@ -78,7 +78,7 @@ namespace Glory::Editor
 		m_pSelectedFolder = m_pHistory[index];
 	}
 
-	void ContentBrowserItem::Change(const std::string& name, bool isFolder)
+	void FileBrowserItem::Change(const std::string& name, bool isFolder)
 	{
 		if (m_Name == name && m_IsFolder == isFolder) return;
 
@@ -87,7 +87,7 @@ namespace Glory::Editor
 		Refresh();
 	}
 
-	void ContentBrowserItem::Refresh()
+	void FileBrowserItem::Refresh()
 	{
 		if (ProjectSpace::GetOpenProject() == nullptr) return;
 
@@ -132,9 +132,9 @@ namespace Glory::Editor
 			if (actualIndex >= m_pChildren.size())
 			{
 				size_t childIndex = m_pChildren.size();
-				m_pChildren.push_back(new ContentBrowserItem(lastDir.string(), directory, this, m_Editable, m_DirectoryFilter, m_RootPathFunc));
+				m_pChildren.push_back(new FileBrowserItem(lastDir.string(), directory, this, m_Editable, m_DirectoryFilter, m_RootPathFunc));
 				m_pChildren[childIndex]->AddIgnoreDirectories(m_IgnoreDirectories);
-				ContentBrowserItem* pNewChild = m_pChildren[childIndex];
+				FileBrowserItem* pNewChild = m_pChildren[childIndex];
 				pNewChild->Refresh();
 				pNewChild->SortChildren();
 				continue;
@@ -145,13 +145,13 @@ namespace Glory::Editor
 			m_pChildren[actualIndex]->SortChildren();
 		}
 
-		std::vector<ContentBrowserItem*>::iterator it = m_pChildren.begin() + index;
+		std::vector<FileBrowserItem*>::iterator it = m_pChildren.begin() + index;
 		if (it >= m_pChildren.end()) return;
-		std::for_each(it, m_pChildren.end(), [](ContentBrowserItem* pChild) { delete pChild; });
+		std::for_each(it, m_pChildren.end(), [](FileBrowserItem* pChild) { delete pChild; });
 		m_pChildren.erase(it, m_pChildren.end());
 	}
 
-	void ContentBrowserItem::RefreshSelected(ContentBrowserItem* pRoot)
+	void FileBrowserItem::RefreshSelected(FileBrowserItem* pRoot)
 	{
 		if (m_pSelectedFolder != nullptr && m_pSelectedFolder->IsValid()) return;
 		m_pSelectedFolder = this;
@@ -160,7 +160,7 @@ namespace Glory::Editor
 		m_HistoryIndex = 1;
 	}
 
-	std::filesystem::path ContentBrowserItem::BuildPath()
+	std::filesystem::path FileBrowserItem::BuildPath()
 	{
 		std::filesystem::path finalPath = "";
 		if (m_pParent == nullptr)
@@ -172,7 +172,7 @@ namespace Glory::Editor
 		return finalPath;
 	}
 
-	void ContentBrowserItem::DrawDirectoryBrowser()
+	void FileBrowserItem::DrawDirectoryBrowser()
 	{
 		if (!m_IsFolder) return;
 
@@ -207,7 +207,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void ContentBrowserItem::DrawFileBrowser(int iconSize)
+	void FileBrowserItem::DrawFileBrowser(int iconSize)
 	{
 		if (!m_pSelectedFolder) return;
 
@@ -220,7 +220,7 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < m_pSelectedFolder->m_pChildren.size(); i++)
 		{
-			ContentBrowserItem* pChild = m_pSelectedFolder->m_pChildren[i];
+			FileBrowserItem* pChild = m_pSelectedFolder->m_pChildren[i];
 
 			const int columnIndex = (i % columns) - 1;
 			ImGui::PushID(pChild->m_CachedPath.c_str());
@@ -231,13 +231,13 @@ namespace Glory::Editor
 		}
 	}
 
-	void ContentBrowserItem::DrawCurrentPath()
+	void FileBrowserItem::DrawCurrentPath()
 	{
 		if (!m_pSelectedFolder) return;
 
-		std::vector<ContentBrowserItem*> pPathTrace;
+		std::vector<FileBrowserItem*> pPathTrace;
 		pPathTrace.push_back(m_pSelectedFolder);
-		ContentBrowserItem* pParent = m_pSelectedFolder->m_pParent;
+		FileBrowserItem* pParent = m_pSelectedFolder->m_pParent;
 		while (pParent != nullptr)
 		{
 			pPathTrace.push_back(pParent);
@@ -247,7 +247,7 @@ namespace Glory::Editor
 		std::reverse(pPathTrace.begin(), pPathTrace.end());
 		for (size_t i = 0; i < pPathTrace.size(); i++)
 		{
-			ContentBrowserItem* pItem = pPathTrace[i];
+			FileBrowserItem* pItem = pPathTrace[i];
 			size_t hash = m_PathHasher(pItem->m_CachedPath.string());
 			ImGui::PushID(hash);
 			if (ImGui::Button(pItem->m_Name.c_str()))
@@ -261,7 +261,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void ContentBrowserItem::DrawFileItem(int iconSize)
+	void FileBrowserItem::DrawFileItem(int iconSize)
 	{
 		const ImVec4 buttonColor = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 		const ImVec4 buttonInactiveColor = { buttonColor.x, buttonColor.y, buttonColor.z, 0.0f };
@@ -312,7 +312,7 @@ namespace Glory::Editor
 		assetPath.append("Assets");
 		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
 		if (relativePath == "") relativePath = m_CachedPath;
-		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
+		UUID uuid = EditorAssetDatabase::FindAssetUUID(relativePath.string());
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
 		UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
@@ -325,7 +325,7 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
 			ResourceMeta meta;
-			AssetDatabase::GetResourceMeta(uuid, meta);
+			EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(meta.Hash());
 			if (!pGenerator)
 			{
@@ -354,20 +354,20 @@ namespace Glory::Editor
 		ImGui::EndChild();
 	}
 
-	bool ContentBrowserItem::IsValid()
+	bool FileBrowserItem::IsValid()
 	{
 		return std::filesystem::exists(m_CachedPath);
 	}
 
-	void ContentBrowserItem::SetOpen()
+	void FileBrowserItem::SetOpen()
 	{
 		if (m_pParent != nullptr) m_pParent->SetOpen();
 		m_SetOpen = true;
 	}
 
-	void ContentBrowserItem::SortChildren()
+	void FileBrowserItem::SortChildren()
 	{
-		std::sort(m_pChildren.begin(), m_pChildren.end(), [&](ContentBrowserItem* pA, ContentBrowserItem* pB)
+		std::sort(m_pChildren.begin(), m_pChildren.end(), [&](FileBrowserItem* pA, FileBrowserItem* pB)
 		{
 			if (pA->m_IsFolder && !pB->m_IsFolder) return true;
 			if (!pA->m_IsFolder && pB->m_IsFolder) return false;
@@ -375,19 +375,19 @@ namespace Glory::Editor
 		});
 	}
 
-	std::filesystem::path ContentBrowserItem::GetCurrentPath()
+	std::filesystem::path FileBrowserItem::GetCurrentPath()
 	{
 		return m_pSelectedFolder != nullptr ? m_pSelectedFolder->BuildPath() : ProjectSpace::GetOpenProject()->RootPath();
 	}
 
-	ContentBrowserItem* ContentBrowserItem::GetChildByName(const std::string& name, bool folder)
+	FileBrowserItem* FileBrowserItem::GetChildByName(const std::string& name, bool folder)
 	{
-		auto it = std::find_if(m_pChildren.begin(), m_pChildren.end(), [&](ContentBrowserItem* pChild) {return pChild->m_Name.find(name) != std::string::npos && pChild->m_IsFolder == folder; });
+		auto it = std::find_if(m_pChildren.begin(), m_pChildren.end(), [&](FileBrowserItem* pChild) {return pChild->m_Name.find(name) != std::string::npos && pChild->m_IsFolder == folder; });
 		if (it == m_pChildren.end()) return nullptr;
 		return *it;
 	}
 
-	void ContentBrowserItem::BeginRename()
+	void FileBrowserItem::BeginRename()
 	{
 		m_StartEditingName = true;
 		m_EditingName = true;
@@ -396,36 +396,36 @@ namespace Glory::Editor
 		m_NameBuffer[name.length()] = '\0';
 	}
 
-	bool ContentBrowserItem::IsEditable() const
+	bool FileBrowserItem::IsEditable() const
 	{
 		return m_Editable;
 	}
 
-	const std::string& ContentBrowserItem::GetHighlightedPath()
+	const std::string& FileBrowserItem::GetHighlightedPath()
 	{
 		return m_HighlightedPath;
 	}
 
-	void ContentBrowserItem::AddIgnoreDirectory(const std::string& directory)
+	void FileBrowserItem::AddIgnoreDirectory(const std::string& directory)
 	{
 		m_IgnoreDirectories.push_back(directory);
 	}
 
-	void ContentBrowserItem::AddIgnoreDirectories(const std::vector<std::string>& directories)
+	void FileBrowserItem::AddIgnoreDirectories(const std::vector<std::string>& directories)
 	{
 		m_IgnoreDirectories = directories;
 	}
 
-	void ContentBrowserItem::EraseExcessHistory()
+	void FileBrowserItem::EraseExcessHistory()
 	{
 		if (m_HistoryIndex <= 1) return;
-		std::vector<ContentBrowserItem*>::iterator it = m_pHistory.end() - (m_HistoryIndex - 1);
+		std::vector<FileBrowserItem*>::iterator it = m_pHistory.end() - (m_HistoryIndex - 1);
 		if (it >= m_pHistory.end()) return;
 		m_pHistory.erase(it, m_pHistory.end());
 		m_HistoryIndex = 1;
 	}
 
-	void ContentBrowserItem::DrawName(float padding)
+	void FileBrowserItem::DrawName(float padding)
 	{
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 
@@ -457,11 +457,9 @@ namespace Glory::Editor
 				if (m_CachedPath == newPath) return;
 
 				std::filesystem::rename(m_CachedPath, newPath);
-				if(!m_IsFolder) std::filesystem::rename(m_CachedPath.string() + ".gmeta", newPath.string() + ".gmeta");
 
 				std::filesystem::path assetPath = Game::GetAssetPath();
-				AssetDatabase::UpdateAssetPaths(m_CachedPath.lexically_relative(assetPath).string(), newPath.lexically_relative(assetPath).string());
-				AssetDatabase::Save();
+				EditorAssetDatabase::UpdateAssetPaths(m_CachedPath.lexically_relative(assetPath).string(), newPath.lexically_relative(assetPath).string());
 				m_CachedPath = newPath;
 				Refresh();
 			}
@@ -475,7 +473,7 @@ namespace Glory::Editor
 		}
 	}
 
-	std::filesystem::path ContentBrowserItem::DefaultRootPathFunc()
+	std::filesystem::path FileBrowserItem::DefaultRootPathFunc()
 	{
 		std::string projectRootPath = "";
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();

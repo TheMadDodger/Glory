@@ -1,15 +1,15 @@
 #pragma once
 #include "EditorWindow.h"
-#include "ContentBrowserItem.h"
+#include "FileBrowserItem.h"
 #include <Resource.h>
 
 namespace Glory::Editor
 {
-	class ContentBrowser : public EditorWindowTemplate<ContentBrowser>
+	class FileBrowser : public EditorWindowTemplate<FileBrowser>
 	{
 	public:
-		ContentBrowser();
-		virtual ~ContentBrowser();
+		FileBrowser();
+		virtual ~FileBrowser();
 
 		static GLORY_EDITOR_API std::filesystem::path GetCurrentPath();
 		static GLORY_EDITOR_API void BeginRename(const std::string& name, bool folder);
@@ -25,7 +25,7 @@ namespace Glory::Editor
 		void FileBrowserMenu();
 		void DrawPathControls();
 		void DrawSearchBar();
-		void FileBrowser();
+		void DrawFileBrowser();
 		void RefreshContentBrowser();
 
 		void LoadItems();
@@ -36,6 +36,6 @@ namespace Glory::Editor
 		std::hash<std::string> m_Hasher;
 		char m_SearchBuffer[100];
 
-		std::vector<ContentBrowserItem*> m_pRootItems;
+		std::vector<FileBrowserItem*> m_pRootItems;
 	};
 }

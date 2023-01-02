@@ -1,10 +1,10 @@
 #include "EditorSceneManager.h"
 #include "FileDialog.h"
 #include "Selection.h"
+#include "EditorAssetDatabase.h"
 #include <Game.h>
 #include <Engine.h>
 #include <ScenesModule.h>
-#include <AssetDatabase.h>
 #include <Serializer.h>
 #include <TitleBar.h>
 
@@ -32,8 +32,8 @@ namespace Glory::Editor
 
 		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
 		AssetLocation location;
-		AssetDatabase::GetAssetLocation(uuid, location);
-		std::string path = Game::GetGame().GetAssetPath() + "\\" + location.m_Path;
+		EditorAssetDatabase::GetAssetLocation(uuid, location);
+		std::string path = Game::GetGame().GetAssetPath() + "\\" + location.Path;
 		pScenesModule->OpenScene(path, uuid);
 		m_OpenedSceneIDs.push_back(uuid);
 
@@ -59,10 +59,10 @@ namespace Glory::Editor
 		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [](UUID uuid)
 		{
 			AssetLocation location;
-			if (!AssetDatabase::GetAssetLocation(uuid, location)) return; // new scene
+			if (!EditorAssetDatabase::GetAssetLocation(uuid, location)) return; // new scene
 
-			if (location.m_Path == "") return;
-			Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.m_Path);
+			if (location.Path == "") return;
+			Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.Path);
 		});
 	}
 
@@ -110,14 +110,14 @@ namespace Glory::Editor
 	{
 		if (!IsSceneOpen(uuid)) return;
 		AssetLocation location;
-		if (!AssetDatabase::GetAssetLocation(uuid, location))
+		if (!EditorAssetDatabase::GetAssetLocation(uuid, location))
 		{
 			SaveSceneAs(uuid);
 			return; // new scene
 		}
 
-		if (location.m_Path == "") return;
-		Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.m_Path);
+		if (location.Path == "") return;
+		Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.Path);
 	}
 
 	void EditorSceneManager::SaveSceneAs(UUID uuid)
@@ -129,7 +129,7 @@ namespace Glory::Editor
 
 			std::filesystem::path relativePath = result;
 			relativePath = relativePath.lexically_relative(Game::GetAssetPath());
-			UUID existingAsset = AssetDatabase::GetAssetUUID(relativePath.string());
+			UUID existingAsset = EditorAssetDatabase::FindAssetUUID(relativePath.string());
 
 			if (existingAsset != 0)
 			{
@@ -220,20 +220,7 @@ namespace Glory::Editor
 		std::ofstream outStream(path);
 		outStream << out.c_str();
 		outStream.close();
-
-		if (newScene)
-		{
-			AssetDatabase::ImportNewScene(path, pScene);
-			UUID newUUID = pScene->GetUUID();
-
-			//std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
-			//std::replace(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid, newUUID);
-			pScene->SetName(AssetDatabase::GetAssetName(newUUID));
-			CloseScene(uuid);
-			CloseScene(newUUID);
-			OpenScene(newUUID, true);
-		}
-
+		if (newScene) EditorAssetDatabase::ImportNewScene(path, pScene);
 		SetSceneDirty(pScene, false);
 	}
 }
