@@ -62,6 +62,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void Quit();
 		static GLORY_EDITOR_API void TryToQuit();
 
+		static GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
+
 		static const Glory::Version Version;
 
 	private:

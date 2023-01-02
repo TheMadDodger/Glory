@@ -70,13 +70,25 @@ namespace Glory::Editor
 			if (gameWindow && gameWindow->IsFocused() && !m_AltIsDown && pSDLWindow->HandleInputEvents(event)) continue;
 
 			if (ImGui_ImplSDL2_ProcessEvent(&event)) continue;
-			if (event.type == SDL_QUIT)
+
+			switch (event.type)
 			{
-				/* Check for changes */
+			case SDL_WINDOWEVENT:
+				if (event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(pSDLWindow->GetSDLWindow()))
+					return true;
+				break;
+			case SDL_QUIT:
 				return true;
+			case SDL_DROPFILE:
+			{
+				std::string_view droppedFilePath = event.drop.file;
+				OnFileDragAndDrop(droppedFilePath);
+				SDL_free(event.drop.file);
+				break;
 			}
-			if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(pSDLWindow->GetSDLWindow()))
-				return true;
+			default:
+				break;
+			}
 		}
 
 		return false;

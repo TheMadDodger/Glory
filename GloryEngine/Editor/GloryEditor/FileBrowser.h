@@ -15,12 +15,16 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void BeginRename(const std::string& name, bool folder);
 		static GLORY_EDITOR_API void LoadProject();
 
+		static GLORY_EDITOR_API void OnFileDragAndDrop(const std::filesystem::path& path);
+
 	private:
 		virtual void OnOpen() override;
 		virtual void OnClose() override;
 		virtual void OnGUI() override;
 
 	private:
+		static void OnAsyncImport(Resource*);
+
 		void DirectoryBrowser();
 		void FileBrowserMenu();
 		void DrawPathControls();

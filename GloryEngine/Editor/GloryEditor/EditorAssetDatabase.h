@@ -5,6 +5,7 @@
 #include <yaml-cpp/yaml.h>
 #include <ResourceMeta.h>
 #include <AssetLocation.h>
+#include <JobManager.h>
 
 namespace Glory
 {
@@ -29,6 +30,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void IncrementAssetVersion(UUID uuid);
 		static GLORY_EDITOR_API void CreateAsset(Resource* pResource, const std::string& path);
 		static GLORY_EDITOR_API void ImportAsset(const std::string& path, Resource* pLoadedResource = nullptr);
+		static GLORY_EDITOR_API void ImportAssetAsync(const std::string& path);
 		static GLORY_EDITOR_API void ImportNewScene(const std::string& path, GScene* pScene);
 		static GLORY_EDITOR_API void SaveAsset(Resource* pResource, bool markUndirty = true);
 		static GLORY_EDITOR_API void RemoveAsset(UUID uuid);
@@ -46,12 +48,33 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API std::string GetAssetName(UUID uuid);
 		static GLORY_EDITOR_API void GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& result);
 
+		static GLORY_EDITOR_API void RegisterAsyncImportCallback(std::function<void(Resource*)> func);
+
 	private:
+		static void Initialize();
+		static void Cleanup();
+		static void Update();
+
+		static bool ImportJob(std::filesystem::path path);
+
+	private:
+		friend class MainEditor;
 		static YAML::Node m_DatabaseNode;
 
 		static ThreadedVector<UUID> m_UnsavedAssets;
+
+		struct ImportedResource
+		{
+			Resource* Resource;
+			std::filesystem::path Path;
+		};
+		static ThreadedVector<ImportedResource> m_ImportedResources;
 		static ThreadedUMap<UUID, long> m_LastSavedRecords;
 		static bool m_IsDirty;
+
+		static std::function<void(Resource*)> m_AsyncImportCallback;
+
+		static Jobs::JobPool<bool, std::filesystem::path>* m_pImportPool;
 
 	private:
 		EditorAssetDatabase() = delete;

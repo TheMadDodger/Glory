@@ -25,6 +25,7 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(RenameItemCallback);
 	OBJECTMENU_CALLBACK(SaveScene);
 	OBJECTMENU_CALLBACK(SaveSceneAs);
+	OBJECTMENU_CALLBACK(ReimportAssetCallback);
 
 	GLORY_EDITOR_API void DeleteFolder();
 	GLORY_EDITOR_API void DeleteResource();

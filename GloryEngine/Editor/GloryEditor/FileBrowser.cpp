@@ -9,6 +9,7 @@
 
 #include <imgui.h>
 #include <AssetCallbacks.h>
+#include <EditorAssetDatabase.h>
 
 namespace Glory::Editor
 {
@@ -70,6 +71,7 @@ namespace Glory::Editor
 
     void FileBrowser::OnOpen()
     {
+        EditorAssetDatabase::RegisterAsyncImportCallback(OnAsyncImport);
 
         m_pRootItems.push_back(new FileBrowserItem("Assets", true, nullptr, true));
         m_pRootItems.push_back(new FileBrowserItem("Modules", true, nullptr, false, "\\Assets\\", []() { return "./"; }));
@@ -86,6 +88,8 @@ namespace Glory::Editor
 
     void FileBrowser::OnClose()
     {
+        EditorAssetDatabase::RegisterAsyncImportCallback(NULL);
+
         for (size_t i = 0; i < m_pRootItems.size(); i++)
         {
             delete m_pRootItems[i];
@@ -108,6 +112,43 @@ namespace Glory::Editor
         FileBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
         pWindow->LoadItems();
         pWindow->RefreshContentBrowser();
+    }
+
+    void FileBrowser::OnAsyncImport(Resource*)
+    {
+        FileBrowser* pWindow = GetWindow<FileBrowser>();
+        std::filesystem::path currentPath = FileBrowserItem::GetCurrentPath();
+        FileBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
+        pWindow->LoadItems();
+        if (std::filesystem::exists(currentPath))
+        {
+            pWindow->m_pRootItems[0]->SetSelectedFolder(currentPath);
+        }
+        pWindow->RefreshContentBrowser();
+    }
+
+    void FileBrowser::OnFileDragAndDrop(const std::filesystem::path& path)
+    {
+        /* Ignore folders */
+        if (std::filesystem::is_directory(path)) return;
+
+        /* Is this file already part of the project? */
+        ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+        if (!pProject) return;
+        std::filesystem::path rootPath = pProject->RootPath();
+        std::filesystem::path relativePath = std::filesystem::relative(path, rootPath);
+        if (relativePath.empty() || relativePath.native()[0] != '.') return;
+
+        /* TODO: Prompt the user with a popup for import settings if relevant */
+
+        /* Copy the file to the current folder */
+        std::filesystem::path destination = FileBrowserItem::GetCurrentPath();
+        if (destination.string().find("./Modules") != std::string::npos) destination = rootPath.append("Assets");
+        destination.append(path.filename().string());
+        std::filesystem::copy(path, destination);
+
+        /* Import the asset */
+        EditorAssetDatabase::ImportAssetAsync(destination.string());
     }
 
     void FileBrowser::DirectoryBrowser()

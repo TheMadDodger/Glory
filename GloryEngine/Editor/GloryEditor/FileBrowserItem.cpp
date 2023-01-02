@@ -44,6 +44,18 @@ namespace Glory::Editor
 		return m_pSelectedFolder;
 	}
 
+	void FileBrowserItem::SetSelectedFolder(const std::filesystem::path& path)
+	{
+		const std::filesystem::path relative = path.lexically_relative(Game::GetAssetPath());
+		FileBrowserItem* pChild = this;
+		for (auto subPath : relative)
+		{
+			pChild = pChild->GetChildByName(subPath.string(), true);
+			if (!pChild) break;
+		}
+		SetSelectedFolder(pChild);
+	}
+
 	void FileBrowserItem::SetSelectedFolder(FileBrowserItem* pItem)
 	{
 		m_pSelectedFolder = pItem;
@@ -312,7 +324,7 @@ namespace Glory::Editor
 		assetPath.append("Assets");
 		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
 		if (relativePath == "") relativePath = m_CachedPath;
-		UUID uuid = EditorAssetDatabase::FindAssetUUID(relativePath.string());
+		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
 		UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
@@ -414,6 +426,11 @@ namespace Glory::Editor
 	void FileBrowserItem::AddIgnoreDirectories(const std::vector<std::string>& directories)
 	{
 		m_IgnoreDirectories = directories;
+	}
+
+	const std::string& FileBrowserItem::Name()
+	{
+		return m_Name;
 	}
 
 	void FileBrowserItem::EraseExcessHistory()
