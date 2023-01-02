@@ -13,7 +13,6 @@ namespace Glory
 	public:
 		static void AddLayer(const std::string& name);
 		static void Load();
-		static void Save();
 
 		static const Layer* GetLayerByName(const std::string& name);
 		static std::string LayerMaskToString(const LayerMask& layerMask);

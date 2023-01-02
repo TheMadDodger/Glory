@@ -26,7 +26,7 @@ namespace Glory::Editor
 		// UInt
 		{ spirv_cross::SPIRType::BaseType::UInt,
 		{ ResourceType::GetHash<uint32_t>(), ResourceType::GetHash<glm::uvec2>(), ResourceType::GetHash<glm::uvec3>(), ResourceType::GetHash<glm::uvec4>() } },
-		
+
 		// I64
 		{ spirv_cross::SPIRType::BaseType::Int64,
 		{ ResourceType::GetHash<int64_t>(), ResourceType::GetHash<glm::i64vec2>(), ResourceType::GetHash<glm::i64vec3>(), ResourceType::GetHash<glm::i64vec4>() } },
@@ -56,7 +56,7 @@ namespace Glory::Editor
 		{ spirv_cross::SPIRType::BaseType::Unknown, { 0 } },
 	};
 
-	GLORY_EDITOR_API EditorShaderData* EditorShaderProcessor::GetShaderSource(ShaderSourceData* pShaderSource)
+	EditorShaderData* EditorShaderProcessor::GetShaderSource(ShaderSourceData* pShaderSource)
 	{
 		UUID uuid = pShaderSource->GetUUID();
 		std::unique_lock<std::mutex> lock(m_QueueLock);

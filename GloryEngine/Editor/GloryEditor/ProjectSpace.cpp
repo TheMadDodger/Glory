@@ -1,11 +1,15 @@
+#include "ProjectSpace.h"
+
+#include "FileBrowser.h"
+#include "EditorApplication.h"
+#include "ProjectSettings.h"
+#include "EditorAssetDatabase.h"
+#include "TitleBar.h"
+
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
-#include "ContentBrowser.h"
-#include "ProjectSpace.h"
-#include "EditorApplication.h"
-#include "ProjectSettings.h"
-#include "TitleBar.h"
+#include <AssetDatabase.h>
 
 namespace Glory::Editor
 {
@@ -147,7 +151,6 @@ namespace Glory::Editor
 		m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string()),
 		m_SettingsPath(std::filesystem::path(path).parent_path().append("ProjectSettings").string())
 	{
-		AssetCallbacks::RegisterCallback(CallbackType::CT_AssetDirty, OnAssetDirty);
 	}
 
 	ProjectSpace::~ProjectSpace()
@@ -161,8 +164,8 @@ namespace Glory::Editor
 		CreateFolder("Cache");
 		CreateFolder("Cache/ShaderSource");
 		CreateFolder("Cache/CompiledShaders");
-		YAML::Node node = YAML::LoadFile(m_ProjectFilePath);
-		m_ProjectName = node["ProjectName"].as<std::string>();
+		m_ProjectFileNode = YAML::LoadFile(m_ProjectFilePath);
+		m_ProjectName = m_ProjectFileNode["ProjectName"].as<std::string>();
 
 		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnOpen].size(); i++)
 		{
@@ -171,9 +174,8 @@ namespace Glory::Editor
 
 		lock.unlock();
 
-		AssetDatabase::Load();
-		ContentBrowser::LoadProject();
-
+		EditorAssetDatabase::Load(m_ProjectFileNode);
+		FileBrowser::LoadProject();
 		ProjectSettings::Load(this);
 
 		TitleBar::SetText("Project", m_ProjectName.c_str());
@@ -186,17 +188,13 @@ namespace Glory::Editor
 			m_ProjectCallbacks[ProjectCallback::OnClose][i](this);
 		}
 
-		AssetDatabase::Save();
 		ProjectSettings::Save(this);
 
 		TitleBar::SetText("Project", "No Project open");
 		m_DirtyKeys.clear();
 		TitleBar::SetText("ProjectChanges", "");
-	}
 
-	void ProjectSpace::OnAssetDirty(UUID uuid, const ResourceMeta& meta, Resource* pResource)
-	{
-		SetAssetDirty("AssetDatabase", AssetDatabase::IsDirty());
+		AssetDatabase::Clear();
 	}
 
 	void ProjectSpace::CreateFolder(const std::string& name)
@@ -216,14 +214,25 @@ namespace Glory::Editor
 
 	void ProjectSpace::SaveProject()
 	{
+		/* Save project file */
+		YAML::Emitter projectOut;
+		projectOut << m_ProjectFileNode;
+		std::ofstream projectFileStream(m_ProjectFilePath);
+		projectFileStream << projectOut.c_str();
+		projectFileStream.close();
+
+		/* Save project version */
 		std::filesystem::path projectVersionTxtPath = m_SettingsPath;
 		projectVersionTxtPath.append("ProjectVersion.txt");
-		std::ofstream fileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
+		std::ofstream versionFileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
 		std::string versionString = Glory::Editor::Version.GetVersionString();
-		fileStream.write(versionString.c_str(), versionString.size());
-		fileStream.close();
+		versionFileStream.write(versionString.c_str(), versionString.size());
+		versionFileStream.close();
 
-		AssetDatabase::Save();
+		/* Save project settings */
 		ProjectSettings::Save(this);
+
+		m_DirtyKeys.clear();
+		TitleBar::SetText("ProjectChanges", "");
 	}
 }

@@ -3,7 +3,6 @@
 #include <Engine.h>
 #include <ImGuizmo.h>
 #include <Serializer.h>
-#include <AssetDatabase.h>
 
 #include "EditorApplication.h"
 #include "MainEditor.h"
@@ -12,7 +11,7 @@
 #include "SceneWindow.h"
 #include "InspectorWindow.h"
 #include "SceneGraphWindow.h"
-#include "ContentBrowser.h"
+#include "FileBrowser.h"
 #include "EditorConsoleWindow.h"
 #include "HistoryWindow.h"
 #include "PerformanceMetrics.h"
@@ -230,7 +229,7 @@ namespace Glory::Editor
 		}, NULL, Shortcut_File_LoadScene);
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
-		MenuBar::AddMenuItem("File/Save Project", []() { AssetDatabase::Save(); ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
+		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
 		//MenuBar::AddMenuItem("File/Create/Empty Object", []()
 		//{
 		//	GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
@@ -254,7 +253,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Game View", []() { EditorWindow::GetWindow<GameWindow>(); }, NULL, Shortcut_Window_Game);
 		MenuBar::AddMenuItem("Window/Scene Graph", []() { EditorWindow::GetWindow<SceneGraphWindow>(); }, NULL, Shortcut_Window_SceneGraph);
 		MenuBar::AddMenuItem("Window/Inspector", []() { EditorWindow::GetWindow<InspectorWindow>(true); }, NULL, Shortcut_Window_Inspector);
-		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<ContentBrowser>(); }, NULL, Shortcut_Window_Content);
+		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<FileBrowser>(); }, NULL, Shortcut_Window_Content);
 		MenuBar::AddMenuItem("Window/Console", []() { EditorWindow::GetWindow<EditorConsoleWindow>(); }, NULL, Shortcut_Window_Console);
 		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); }, NULL, Shortcut_Window_Performance);
 		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); }, NULL, Shortcut_Window_Profiler);
@@ -379,7 +378,7 @@ namespace Glory::Editor
 		EditorWindow::GetWindow<SceneWindow>();
 		EditorWindow::GetWindow<InspectorWindow>();
 		EditorWindow::GetWindow<SceneGraphWindow>();
-		EditorWindow::GetWindow<ContentBrowser>();
+		EditorWindow::GetWindow<FileBrowser>();
 		EditorWindow::GetWindow<EditorConsoleWindow>();
 	}
 

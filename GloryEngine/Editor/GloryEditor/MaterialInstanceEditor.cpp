@@ -2,6 +2,7 @@
 #include "PropertyDrawer.h"
 #include "AssetPicker.h"
 #include "AssetManager.h"
+#include "EditorAssetDatabase.h"
 #include <imgui.h>
 
 namespace Glory::Editor
@@ -22,7 +23,7 @@ namespace Glory::Editor
 		if (AssetPicker::ResourceDropdown("Base Material", ResourceType::GetHash<MaterialData>(), &baseMaterialID))
 		{
 			change = true;
-			MaterialData* pBaseMaterial = AssetDatabase::AssetExists(baseMaterialID) ? (MaterialData*)AssetManager::GetAssetImmediate(baseMaterialID) : nullptr;
+			MaterialData* pBaseMaterial = EditorAssetDatabase::AssetExists(baseMaterialID) ? (MaterialData*)AssetManager::GetAssetImmediate(baseMaterialID) : nullptr;
 			pMaterial->SetBaseMaterial(pBaseMaterial);
 		}
 

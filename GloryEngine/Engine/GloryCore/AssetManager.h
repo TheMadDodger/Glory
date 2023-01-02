@@ -47,8 +47,11 @@ namespace Glory
 		static void ReloadAsset(UUID uuid);
 		static void UnloadAsset(UUID uuid);
 
-	private:
 		static Resource* FindResource(UUID uuid);
+
+		static void AddLoadedResource(Resource* pResource);
+
+	private:
 		static bool LoadResourceJob(UUID uuid);
 		static Resource* LoadAsset(UUID uuid);
 

@@ -6,11 +6,11 @@
 
 namespace Glory::Editor
 {
-	class ContentBrowserItem
+	class FileBrowserItem
 	{
 	public:
-		static GLORY_EDITOR_API ContentBrowserItem* GetSelectedFolder();
-		static GLORY_EDITOR_API void SetSelectedFolder(ContentBrowserItem* pItem);
+		static GLORY_EDITOR_API FileBrowserItem* GetSelectedFolder();
+		static GLORY_EDITOR_API void SetSelectedFolder(FileBrowserItem* pItem);
 
 		GLORY_EDITOR_API bool HasParent();
 		GLORY_EDITOR_API void Up();
@@ -19,7 +19,7 @@ namespace Glory::Editor
 
 		GLORY_EDITOR_API void Change(const std::string& name, bool isFolder);
 		GLORY_EDITOR_API void Refresh();
-		GLORY_EDITOR_API void RefreshSelected(ContentBrowserItem* pRoot);
+		GLORY_EDITOR_API void RefreshSelected(FileBrowserItem* pRoot);
 		GLORY_EDITOR_API std::filesystem::path BuildPath();
 
 		GLORY_EDITOR_API void DrawDirectoryBrowser();
@@ -31,7 +31,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API std::filesystem::path GetCurrentPath();
 
-		GLORY_EDITOR_API ContentBrowserItem* GetChildByName(const std::string& name, bool folder);
+		GLORY_EDITOR_API FileBrowserItem* GetChildByName(const std::string& name, bool folder);
 		GLORY_EDITOR_API void BeginRename();
 
 		bool IsEditable() const;
@@ -41,9 +41,9 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void AddIgnoreDirectories(const std::vector<std::string>& directories);
 
 	private:
-		ContentBrowserItem();
-		ContentBrowserItem(const std::string& name, bool isFolder, ContentBrowserItem* pParent, bool isEditable, const std::string& directoryFilter = "", std::function<std::filesystem::path()> rootPathFunc = DefaultRootPathFunc);
-		virtual ~ContentBrowserItem();
+		FileBrowserItem();
+		FileBrowserItem(const std::string& name, bool isFolder, FileBrowserItem* pParent, bool isEditable, const std::string& directoryFilter = "", std::function<std::filesystem::path()> rootPathFunc = DefaultRootPathFunc);
+		virtual ~FileBrowserItem();
 
 		static void EraseExcessHistory();
 		static std::filesystem::path DefaultRootPathFunc();
@@ -53,14 +53,14 @@ namespace Glory::Editor
 		void DrawName(float padding);
 
 	private:
-		friend class ContentBrowser;
+		friend class FileBrowser;
 		std::string m_Name;
 		bool m_IsFolder;
 		bool m_SetOpen;
 		std::function<std::filesystem::path()> m_RootPathFunc;
 		std::filesystem::path m_CachedPath;
-		ContentBrowserItem* m_pParent;
-		std::vector<ContentBrowserItem*> m_pChildren;
+		FileBrowserItem* m_pParent;
+		std::vector<FileBrowserItem*> m_pChildren;
 		std::vector<std::string> m_IgnoreDirectories;
 		std::string m_DirectoryFilter;
 
@@ -70,8 +70,8 @@ namespace Glory::Editor
 		bool m_Editable;
 
 		static std::hash<std::string> m_PathHasher;
-		static ContentBrowserItem* m_pSelectedFolder;
-		static std::vector<ContentBrowserItem*> m_pHistory;
+		static FileBrowserItem* m_pSelectedFolder;
+		static std::vector<FileBrowserItem*> m_pHistory;
 		static size_t m_HistoryIndex;
 		static std::string m_HighlightedPath;
 	};

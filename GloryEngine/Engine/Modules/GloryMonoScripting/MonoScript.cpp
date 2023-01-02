@@ -205,6 +205,8 @@ namespace Glory
 			}
 		}
 		emitter << YAML::EndMap;
+
+		/* FIXME: Causes a memory leak for some reason */
 		node = YAML::Load(emitter.c_str());
 	}
 

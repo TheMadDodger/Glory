@@ -3,6 +3,7 @@
 #include "EditorShaderProcessor.h"
 #include "AssetPicker.h"
 #include "Selection.h"
+#include "EditorAssetDatabase.h"
 #include <imgui.h>
 #include <ResourceType.h>
 #include <GLORY_YAML.h>
@@ -112,7 +113,7 @@ namespace Glory::Editor
 		UUID addShaderID = 0;
 		if (AssetPicker::ResourceButton("Add Shader", width, ResourceType::GetHash<ShaderSourceData>(), &addShaderID))
 		{
-			if (!AssetDatabase::AssetExists(addShaderID)) return;
+			if (!EditorAssetDatabase::AssetExists(addShaderID)) return;
 			MaterialData* pMaterial = (MaterialData*)m_pTarget;
 			ShaderSourceData* pShaderSource = (ShaderSourceData*)AssetManager::GetAssetImmediate(addShaderID);
 			if (!pMaterial->AddShader(pShaderSource)) return;
@@ -150,6 +151,6 @@ namespace Glory::Editor
 			if (!pShaderData) continue;
 			pShaderData->LoadIntoMaterial(pMaterial);
 		}
-		AssetDatabase::SaveAsset(pMaterial);
+		EditorAssetDatabase::SaveAsset(pMaterial);
 	}
 }

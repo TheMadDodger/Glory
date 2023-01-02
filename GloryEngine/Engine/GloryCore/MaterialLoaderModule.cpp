@@ -87,7 +87,7 @@ namespace Glory
 			AssetLocation location;
 			if (!AssetDatabase::GetAssetLocation(shaderUUID, location)) continue;
 			
-			std::string path = Game::GetAssetPath() + '\\' + location.m_Path;
+			std::string path = Game::GetAssetPath() + '\\' + location.Path;
 			ShaderSourceData* pShaderSourceData = AssetManager::GetAssetImmediate<ShaderSourceData>(shaderUUID);
 			if (!pShaderSourceData) continue;
 

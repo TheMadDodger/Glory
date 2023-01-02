@@ -23,7 +23,7 @@ project "GloryEditor"
 		["Content/Editors"] = { "GloryEditor.*", "GloryEditorVersion.*", "FileDialog.*", "EditorSettings.*", "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
 		["Content/PropertyDrawers"] = { "StructPropertyDrawer.*", "EnumPropertyDrawer.*", "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*" },
 		["Content/Tumbnails"] = { "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
-		["Editor"] = { "QuitPopup.*", "TitleBar.*", "Shortcuts.*", "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "EditorAssetsLoader.*", "ProjectSpace.*", "EditorAssetLoader.*", "Selection.*", "EditorCreateInfo.*", "EditorSceneManager.*", "Gizmos.*" },
+		["Editor"] = { "QuitPopup.*", "TitleBar.*", "Shortcuts.*", "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "ProjectSpace.*", "Selection.*", "EditorCreateInfo.*", "Gizmos.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
@@ -31,14 +31,15 @@ project "GloryEditor"
 		["Popups"] = { "AssetPicker.*", "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
 		["Windows"] = { "ProjectSettingsWindow.*", "HistoryWindow.*", "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },
 		["Windows/SceneView"] = { "SceneWindow.*", "SceneViewCamera.*" },
-		["Windows/ContentBrowser"] = { "ContentBrowser.*", "ContentBrowserItem.*" },
+		["Windows/FileBrowser"] = { "FileBrowser.*", "FileBrowserItem.*" },
 		["Windows/ProjectSettings"] = { "ProjectSettingsWindow.*" },
 		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" },
 		["Undo"] = { "Undo.*" },
 		["Undo/Actions"] = { "NodeValueChangeAction.*", "ValueChangeAction.*", "SetSiblingIndexAction.*", "SetParentAction.*", "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectAction.*", "DeselectAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*" },
 		["UI"] = { "EditorUI.*", "ListView.*" },
-		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp" }
+		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp" },
+		["Asset Management"] = { "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*" }
 	}
 
 	includedirs

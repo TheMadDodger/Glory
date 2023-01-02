@@ -17,6 +17,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < 4; i++)
 		{
 			m_pAllSettings[i]->LoadSettings(pProject);
+			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
 		}
 	}
 
@@ -25,12 +26,16 @@ namespace Glory::Editor
 		for (size_t i = 0; i < 4; i++)
 		{
 			m_pAllSettings[i]->SaveSettings(pProject);
+			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
 		}
 	}
 
 	void ProjectSettings::Paint(ProjectSettingsType type)
 	{
-		m_pAllSettings[size_t(type)]->OnGui();
+		if (m_pAllSettings[size_t(type)]->OnGui())
+		{
+			ProjectSpace::SetAssetDirty(m_pAllSettings[size_t(type)]->m_SettingsFile);
+		}
 	}
 
 	void ProjectSettings::OnStartPlay()
@@ -98,9 +103,10 @@ namespace Glory::Editor
 	{
 	}
 
-	void GeneralSettings::OnGui()
+	bool GeneralSettings::OnGui()
 	{
 		ImGui::TextUnformatted("Comming soon!");
+		return false;
 	}
 
 	EngineSettings::EngineSettings() : ProjectSettings("Engine.yaml"), m_MenuIndex(0)

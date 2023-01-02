@@ -68,6 +68,12 @@ namespace Glory
 		return ASSET_MANAGER->m_pLoadedAssets[uuid];
 	}
 
+	void AssetManager::AddLoadedResource(Resource* pResource)
+	{
+		UnloadAsset(pResource->GetUUID());
+		ASSET_MANAGER->m_pLoadedAssets.Set(pResource->GetUUID(), pResource);
+	}
+
 	bool AssetManager::LoadResourceJob(UUID uuid)
 	{
 		Resource* pResource = LoadAsset(uuid);
@@ -86,18 +92,18 @@ namespace Glory
 
 		if (pModule == nullptr) return nullptr;
 
-		if (assetLocation.m_IsSubAsset)
+		if (assetLocation.IsSubAsset)
 		{
 			throw new std::exception("Not implemented yet");
 		}
 
 		std::filesystem::path path = Game::GetAssetPath();
-		path.append(assetLocation.m_Path);
+		path.append(assetLocation.Path);
 
 		if (!std::filesystem::exists(path))
-			path = assetLocation.m_Path;
+			path = assetLocation.Path;
 
-		Resource* pResource = pModule->LoadUsingAny(path.string(), meta.ImportSettings());
+		Resource* pResource = pModule->Load(path.string());
 		if (pResource == nullptr)
 		{
 			Debug::LogError("Failed to load asset: " + std::to_string(uuid) + " at path: " + path.string());
@@ -110,7 +116,7 @@ namespace Glory
 		return pResource;
 	}
 
-	AssetManager::AssetManager() {}
+	AssetManager::AssetManager() : m_pResourceLoadingPool(nullptr) {}
 
 	AssetManager::~AssetManager() {}
 

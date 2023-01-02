@@ -9,10 +9,6 @@ namespace GloryEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void AddLayer(string name);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Load();
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Save();
-		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Layer GetLayerByName(string name);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string LayerMaskToString(ref LayerMask layerMask);

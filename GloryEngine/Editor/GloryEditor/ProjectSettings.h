@@ -36,7 +36,7 @@ namespace Glory::Editor
         virtual ~ProjectSettings();
 
 	protected:
-        virtual void OnGui() = 0;
+        virtual bool OnGui() = 0;
 		virtual void OnSettingsLoaded() {}
 		void LoadSettings(ProjectSpace* pProject);
 		void SaveSettings(ProjectSpace* pProject);
@@ -57,7 +57,7 @@ namespace Glory::Editor
 		GeneralSettings();
 
 	private:
-		virtual void OnGui() override;
+		virtual bool OnGui() override;
 	};
 
 	class EngineSettings : public ProjectSettings
@@ -66,7 +66,7 @@ namespace Glory::Editor
 		EngineSettings();
 
 	private:
-		virtual void OnGui() override;
+		virtual bool OnGui() override;
 
 		void DrawLeftPanel();
 		void DrawRightPanel();
@@ -81,7 +81,8 @@ namespace Glory::Editor
 		LayerSettings();
 
 	private:
-		virtual void OnGui() override;
+		virtual bool OnGui() override;
+		virtual void OnSettingsLoaded() override;
 	};
 
 	class InputSettings : public ProjectSettings
@@ -90,7 +91,7 @@ namespace Glory::Editor
 		InputSettings();
 
 	private:
-		virtual void OnGui() override;
+		virtual bool OnGui() override;
 		virtual void OnSettingsLoaded() override;
 
 		virtual void OnStartPlay_Impl() override;

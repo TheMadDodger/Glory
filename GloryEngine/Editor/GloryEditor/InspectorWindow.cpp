@@ -1,8 +1,9 @@
-#include <imgui.h>
-#include <AssetDatabase.h>
 #include "InspectorWindow.h"
 #include "Selection.h"
+#include "EditorAssetDatabase.h"
 #include "Editor.h"
+
+#include <imgui.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -50,7 +51,7 @@ namespace Glory::Editor
 
 		if (m_pEditor)
 		{
-			if (m_pEditor->OnGUI()) AssetDatabase::SetAssetDirty(pSelectedObject);
+			if (m_pEditor->OnGUI()) EditorAssetDatabase::SetAssetDirty(pSelectedObject);
 		}
 	}
 

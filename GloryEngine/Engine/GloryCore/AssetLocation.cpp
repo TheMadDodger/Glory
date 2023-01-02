@@ -3,30 +3,49 @@
 namespace Glory
 {
 	AssetLocation::AssetLocation()
-		: m_Path(""), m_Index(0), m_IsSubAsset(false)
+		: Path(""), Index(0), IsSubAsset(false)
 	{
 	}
 
-	AssetLocation::AssetLocation(const std::string& path, size_t index, const ResourceMeta& pMeta)
-		: m_Path(path), m_Index(index), m_IsSubAsset(true)
+	AssetLocation::AssetLocation(const std::string& path, size_t index)
+		: Path(path), Index(index), IsSubAsset(true)
 	{
 	}
 
-	AssetLocation::AssetLocation(const std::string& fullPath, const ResourceMeta& pMeta)
+	AssetLocation::AssetLocation(const std::string& fullPath)
 	{
 		int seperatorIndex = fullPath.find(':');
 		if (seperatorIndex == std::string::npos)
 		{
-			m_Path = fullPath;
-			m_Index = 0;
-			m_IsSubAsset = false;
+			Path = fullPath;
+			Index = 0;
+			IsSubAsset = false;
 			return;
 		}
 
-		m_IsSubAsset = true;
-		m_Path = fullPath.substr(0, seperatorIndex);
+		IsSubAsset = true;
+		Path = fullPath.substr(0, seperatorIndex);
 		std::string indexString = fullPath.substr(seperatorIndex + 1);
 		std::istringstream reader(indexString);
-		reader >> m_Index;
+		reader >> Index;
+	}
+}
+
+namespace YAML
+{
+	Emitter& YAML::operator<<(Emitter& out, const Glory::AssetLocation& assetLoc)
+	{
+		out << YAML::BeginMap;
+
+		out << YAML::Key << "Path";
+		out << YAML::Value << assetLoc.Path;
+		out << YAML::Key << "Index";
+		out << YAML::Value << assetLoc.Index;
+		out << YAML::Key << "IsSubAsset";
+		out << YAML::Value << assetLoc.IsSubAsset;
+
+		out << YAML::EndMap;
+
+		return out;
 	}
 }
