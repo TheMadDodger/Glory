@@ -8,7 +8,7 @@
 #include "CreateObjectAction.h"
 #include "DeleteSceneObjectAction.h"
 #include "EditorAssetDatabase.h"
-#include <AssetDatabase.h>
+#include <AssetManager.h>
 #include <Game.h>
 #include <Engine.h>
 #include <MaterialInstanceData.h>
@@ -260,6 +260,16 @@ namespace Glory::Editor
 	{
 		GScene* pScene = (GScene*)pObject;
 		EditorSceneManager::SaveSceneAs(pScene->GetUUID());
+	}
+
+	OBJECTMENU_CALLBACK(ReimportAssetCallback)
+	{
+		Selection::SetActiveObject(nullptr);
+		std::filesystem::path file = FileBrowserItem::GetHighlightedPath();
+		UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
+		Resource* pLoadedResource = AssetManager::FindResource(uuid);
+		EditorAssetDatabase::RemoveAsset(uuid);
+		EditorAssetDatabase::ImportAsset(file.string(), pLoadedResource);
 	}
 
 	void DeleteFolder()

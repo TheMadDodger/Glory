@@ -234,5 +234,7 @@ namespace Glory::Editor
 
 		m_DirtyKeys.clear();
 		TitleBar::SetText("ProjectChanges", "");
+
+		EditorAssetDatabase::Reload();
 	}
 }

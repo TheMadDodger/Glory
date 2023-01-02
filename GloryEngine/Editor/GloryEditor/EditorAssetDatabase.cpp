@@ -2,13 +2,18 @@
 #include "AssetManager.h"
 #include <Engine.h>
 #include <ProjectSpace.h>
+#include <FileBrowser.h>
 
 namespace Glory::Editor
 {
 	YAML::Node EditorAssetDatabase::m_DatabaseNode;
 	ThreadedVector<UUID> EditorAssetDatabase::m_UnsavedAssets;
+	ThreadedVector<EditorAssetDatabase::ImportedResource> EditorAssetDatabase::m_ImportedResources;
 	ThreadedUMap<UUID, long> EditorAssetDatabase::m_LastSavedRecords;
+	std::function<void(Resource*)> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
+
+	Jobs::JobPool<bool, std::filesystem::path>* EditorAssetDatabase::m_pImportPool = nullptr;
 
 	void EditorAssetDatabase::Load(YAML::Node& projectNode)
 	{
@@ -31,6 +36,7 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::Reload()
 	{
+		AssetDatabase::Clear();
 		AssetDatabase::Load(m_DatabaseNode);
 	}
 
@@ -211,7 +217,10 @@ namespace Glory::Editor
 		std::filesystem::path extension = filePath.extension();
 		std::filesystem::path fileName = filePath.filename().replace_extension("");
 
-		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(extension.string());
+		std::string ext = extension.string();
+		std::for_each(ext.begin(), ext.end(), [](char& c) { c = std::tolower(c); });
+
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
 		if (!pModule)
 		{
 			// Not supperted!
@@ -221,14 +230,12 @@ namespace Glory::Editor
 
 		if (!pLoadedResource)
 		{
-			std::any importSettings = pModule->CreateDefaultImportSettings(extension.string());
-			pLoadedResource = pModule->LoadUsingAny(path, importSettings);
+			std::any importSettings = pModule->CreateDefaultImportSettings(ext);
+			pLoadedResource = pModule->Load(path);
 		}
 
-		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
-		std::filesystem::path metaFilePath = path + metaExtension.string();
 		// Generate a meta file
-		const ResourceType* pType = ResourceType::GetResourceType(extension.string());
+		const ResourceType* pType = ResourceType::GetResourceType(ext);
 
 		if (!pType)
 		{
@@ -238,13 +245,19 @@ namespace Glory::Editor
 		}
 
 		const std::string assetPath = Game::GetAssetPath();
-		metaFilePath = metaFilePath.lexically_relative(assetPath);
-		ResourceMeta meta(extension.string(), UUID(), pType->Hash());
+		ResourceMeta meta(extension.string(), pLoadedResource->GetUUID(), pType->Hash());
 
 		AssetDatabase::SetIDAndName(pLoadedResource, meta.ID(), fileName.string());
 		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
 		AssetManager::AddLoadedResource(pLoadedResource);
 		InsertAsset(relativePath.string(), meta);
+		AssetDatabase::Clear();
+		AssetDatabase::Load(m_DatabaseNode);
+	}
+
+	void EditorAssetDatabase::ImportAssetAsync(const std::string& path)
+	{
+		m_pImportPool->QueueSingleJob(ImportJob, path);
 	}
 
 	void EditorAssetDatabase::ImportNewScene(const std::string& path, GScene* pScene)
@@ -401,5 +414,57 @@ namespace Glory::Editor
 			if (meta.Hash() != typeHash) continue;
 			result.push_back(uuid);
 		}
+	}
+
+	void EditorAssetDatabase::RegisterAsyncImportCallback(std::function<void(Resource*)> func)
+	{
+		m_AsyncImportCallback = func;
+	}
+
+	void EditorAssetDatabase::Initialize()
+	{
+		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
+	}
+
+	void EditorAssetDatabase::Cleanup()
+	{
+		m_pImportPool = nullptr;
+		m_AsyncImportCallback = NULL;
+	}
+
+	void EditorAssetDatabase::Update()
+	{
+		m_ImportedResources.ForEachClear([](const ImportedResource& resource) {
+			ImportAsset(resource.Path.string(), resource.Resource);
+			if (m_AsyncImportCallback) m_AsyncImportCallback(resource.Resource);
+		});
+	}
+
+	bool EditorAssetDatabase::ImportJob(std::filesystem::path path)
+	{
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+
+		std::string ext = extension.string();
+		std::for_each(ext.begin(), ext.end(), [](char& c) { c = std::tolower(c); });
+
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
+		if (!pModule)
+		{
+			// Not supperted!
+			Debug::LogError("Failed to import file, asset type not supported!");
+			return false;
+		}
+
+		Resource* pResource = pModule->Load(path.string());
+		if (!pResource)
+		{
+			Debug::LogError("Failed to import file, the returned Resource is null!");
+			return false;
+		}
+
+		m_ImportedResources.push_back({ pResource, path });
+		return true;
 	}
 }

@@ -251,4 +251,9 @@ namespace Glory::Editor
 
 		Quit();
 	}
+
+	void EditorApplication::OnFileDragAndDrop(std::string_view path)
+	{
+		m_pEditorInstance->m_pMainEditor->OnFileDragAndDrop(path);
+	}
 }

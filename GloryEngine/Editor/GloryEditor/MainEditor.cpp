@@ -41,6 +41,7 @@
 #include "ImGuiHelpers.h"
 #include "EnumPropertyDrawer.h"
 #include "StructPropertyDrawer.h"
+#include "EditorAssetDatabase.h"
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
@@ -125,10 +126,13 @@ namespace Glory::Editor
 		Gizmos::Initialize();
 
 		m_Settings.Load(Game::GetGame().GetEngine());
+
+		EditorAssetDatabase::Initialize();
 	}
 
 	void MainEditor::Destroy()
 	{
+		EditorAssetDatabase::Cleanup();
 		ObjectMenu::Cleanup();
 
 		EditorAssetLoader::Stop();
@@ -200,6 +204,11 @@ namespace Glory::Editor
 		m_pProjectPopup->OnGui();
 		FileDialog::Update();
 		QuitPopup::Draw();
+	}
+
+	void MainEditor::OnFileDragAndDrop(std::string_view path)
+	{
+		FileBrowser::OnFileDragAndDrop(path);
 	}
 
 	void MainEditor::SetupTitleBar()
@@ -358,6 +367,7 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/Material Instance", CreateNewMaterialInstanceCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
+		ObjectMenu::AddMenuItem("Reimport", ReimportAssetCallback, T_Resource);
 
 		Shortcuts::SetShortcut(Shortcut_Copy, ImGuiKey_C, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Paste, ImGuiKey_V, ImGuiModFlags_Ctrl);
@@ -370,6 +380,7 @@ namespace Glory::Editor
 	{
 		Shortcuts::Update();
 		EditorWindow::UpdateWindows();
+		EditorAssetDatabase::Update();
 	}
 
 	void MainEditor::RegisterWindows()

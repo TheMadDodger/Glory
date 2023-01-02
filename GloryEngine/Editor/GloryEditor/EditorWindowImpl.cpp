@@ -1,21 +1,27 @@
 #include <Game.h>
 #include <Engine.h>
 #include "EditorWindowImpl.h"
+#include "EditorApplication.h"
 
 namespace Glory::Editor
 {
-	GLORY_EDITOR_API EditorWindowImpl::EditorWindowImpl() {}
+	EditorWindowImpl::EditorWindowImpl() {}
 
-	GLORY_EDITOR_API EditorWindowImpl::~EditorWindowImpl() {}
+	EditorWindowImpl::~EditorWindowImpl() {}
 
-	GLORY_EDITOR_API void EditorWindowImpl::Initialize()
+	void EditorWindowImpl::Initialize()
 	{
 		WindowModule* pWindowModule = Game::GetGame().GetEngine()->GetWindowModule();
 		m_pMainWindow = pWindowModule->GetMainWindow();
 	}
 
-	GLORY_EDITOR_API Window* EditorWindowImpl::GetMainWindow()
+	Window* EditorWindowImpl::GetMainWindow()
 	{
 		return m_pMainWindow;
+	}
+
+	void EditorWindowImpl::OnFileDragAndDrop(std::string_view path)
+	{
+		EditorApplication::OnFileDragAndDrop(path);
 	}
 }

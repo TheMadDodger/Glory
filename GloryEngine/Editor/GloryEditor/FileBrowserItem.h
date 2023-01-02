@@ -10,6 +10,7 @@ namespace Glory::Editor
 	{
 	public:
 		static GLORY_EDITOR_API FileBrowserItem* GetSelectedFolder();
+		GLORY_EDITOR_API void SetSelectedFolder(const std::filesystem::path& path);
 		static GLORY_EDITOR_API void SetSelectedFolder(FileBrowserItem* pItem);
 
 		GLORY_EDITOR_API bool HasParent();
@@ -39,6 +40,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API const std::string& GetHighlightedPath();
 		GLORY_EDITOR_API void AddIgnoreDirectory(const std::string& directory);
 		GLORY_EDITOR_API void AddIgnoreDirectories(const std::vector<std::string>& directories);
+		GLORY_EDITOR_API const std::string& Name();
 
 	private:
 		FileBrowserItem();
