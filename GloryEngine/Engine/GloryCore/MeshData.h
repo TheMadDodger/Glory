@@ -8,6 +8,7 @@ namespace Glory
 	class MeshData : public Resource
 	{
 	public:
+		MeshData();
 		MeshData(size_t vertexCount, size_t vertexSize, const std::vector<float>& vertices, size_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes);
 		MeshData(size_t vertexCount, size_t vertexSize, const float* vertices, size_t indexCount, const uint32_t* indices, const std::vector<AttributeType>& attributes);
 		MeshData(size_t vertexCount, size_t vertexSize, const float* vertices, const std::vector<AttributeType>& attributes);

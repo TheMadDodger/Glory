@@ -67,7 +67,18 @@ namespace Glory
 		friend class Engine;
 		friend class AssetDatabase;
 		friend class GloryContext;
+
+		struct LoadingLock
+		{
+			LoadingLock(UUID uuid);
+			~LoadingLock();
+
+			bool IsValid;
+			UUID m_UUID;
+		};
+
 		ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
+		ThreadedVector<UUID> m_pLoadingAssets;
 		ThreadedUMap<std::string, size_t> m_PathToGroupIndex;
 		ThreadedVector<AssetGroup*> m_LoadedAssetGroups;
 		ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;

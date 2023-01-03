@@ -43,11 +43,11 @@ namespace Glory
 
 	struct MeshFilter
 	{
-		MeshFilter() : m_pModelData(0) {}
-		MeshFilter(ModelData* pModelData) : m_pModelData(pModelData != nullptr ? pModelData->GetUUID() : 0) {}
+		MeshFilter() : m_Mesh(0) {}
+		MeshFilter(MeshData* pMeshData) : m_Mesh(pMeshData != nullptr ? pMeshData->GetUUID() : 0) {}
 
 		REFLECTABLE(MeshFilter,
-			(AssetReference<ModelData>)	(m_pModelData)
+			(AssetReference<MeshData>)	(m_Mesh)
 		)
 	};
 
@@ -73,11 +73,25 @@ namespace Glory
 
 	struct MeshRenderer
 	{
-		MeshRenderer(MaterialData* pMaterial) : m_pMaterials({ pMaterial != nullptr ? pMaterial->GetUUID() : 0 }) {}
-		MeshRenderer() : m_pMaterials(std::vector<MeshMaterial>()) {}
+		MeshRenderer(MeshData* pMesh, MaterialData* pMaterial)
+			: m_Mesh(pMesh != nullptr ? pMesh->GetUUID() : 0), m_Material(pMaterial != nullptr ? pMaterial->GetUUID() : 0) {}
+		MeshRenderer()
+			: m_Mesh(0), m_Material(0) {}
 
 		REFLECTABLE(MeshRenderer,
-			(std::vector<MeshMaterial>)	(m_pMaterials)
+			(AssetReference<MeshData>) (m_Mesh),
+			(AssetReference<MaterialData>)	(m_Material)
+		)
+	};
+
+	struct ModelRenderer
+	{
+		ModelRenderer(ModelData* pModel, MaterialData* pMaterial) : m_Model(pModel != nullptr ? pModel->GetUUID() : 0), m_Materials({ pMaterial != nullptr ? pMaterial->GetUUID() : 0 }) {}
+		ModelRenderer() : m_Model(0), m_Materials(std::vector<MeshMaterial>()) {}
+
+		REFLECTABLE(ModelRenderer,
+			(AssetReference<ModelData>)	(m_Model),
+			(std::vector<MeshMaterial>)	(m_Materials)
 		)
 	};
 

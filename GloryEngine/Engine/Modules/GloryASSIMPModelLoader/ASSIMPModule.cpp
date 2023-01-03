@@ -2,6 +2,7 @@
 #include <assimp/postprocess.h>
 #include <Debug.h>
 #include "VertexDefinitions.h"
+#include <sstream>
 
 namespace Glory
 {
@@ -81,7 +82,7 @@ namespace Glory
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(mesh);
-            pModel->AddMesh(pMeshData);
+            pModel->AddSubresource(pMeshData, pMeshData->Name());
         }
         // then do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -189,8 +190,10 @@ namespace Glory
 
         std::vector<float> verticesVector;
         verticesVector.assign(&vertices[0], &vertices[arraySize]);
+        std::stringstream stream;
+        stream << mesh->mName.C_Str() << " Material " << mesh->mMaterialIndex;
         MeshData* pMesh = new MeshData(mesh->mNumVertices, vertexSize, verticesVector, indices.size(), indices, attributes);
-        //pMesh->BuildMesh();
+        pMesh->SetName(stream.str());
         delete[] vertices;
         return pMesh;
     }

@@ -40,10 +40,9 @@ namespace Glory::Editor
 		AssetDatabase::Load(m_DatabaseNode);
 	}
 
-	void EditorAssetDatabase::InsertAsset(const std::string& path, const ResourceMeta& meta, bool setDirty)
+	void EditorAssetDatabase::InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty)
 	{
-		std::string fixedPath = path;
-		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+		std::replace(location.Path.begin(), location.Path.end(), '/', '\\');
 		uint64_t uuid = meta.ID();
 		const std::string key = std::to_string(uuid);
 		YAML::Node assetNode = m_DatabaseNode[key];
@@ -52,7 +51,7 @@ namespace Glory::Editor
 		if (assetNode.IsDefined() && assetNode.IsMap()) return;
 
 		YAML::Node insertedAsset{ YAML::NodeType::Map };
-		insertedAsset["Location"] = AssetLocation(path);
+		insertedAsset["Location"] = location;
 		insertedAsset["Metadata"] = meta;
 
 		m_DatabaseNode[key] = insertedAsset;
@@ -140,6 +139,7 @@ namespace Glory::Editor
 		std::filesystem::path absolutePath = Game::GetAssetPath();
 		absolutePath = absolutePath.append(fixedPath);
 
+		/* Find all assets on this path */
 		std::vector<UUID> relevantAssets;
 		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
 		{
@@ -150,9 +150,14 @@ namespace Glory::Editor
 			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
 			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
 			absoluteAssetPath = absoluteAssetPath.append(location.Path);
-			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
+			if (absoluteAssetPath != absolutePath.string()) continue;
+			relevantAssets.push_back(uuid);
+		}
+
+		for (size_t i = 0; i < relevantAssets.size(); i++)
+		{
+			UUID uuid = relevantAssets[i];
 			DeleteAsset(uuid);
-			return;
 		}
 	}
 
@@ -211,7 +216,7 @@ namespace Glory::Editor
 		ImportAsset(path, pResource);
 	}
 
-	void EditorAssetDatabase::ImportAsset(const std::string& path, Resource* pLoadedResource)
+	void EditorAssetDatabase::ImportAsset(const std::string& path, Resource* pLoadedResource, std::filesystem::path subPath)
 	{
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -228,29 +233,68 @@ namespace Glory::Editor
 			return;
 		}
 
+		const ResourceType* pType = nullptr;
 		if (!pLoadedResource)
 		{
 			std::any importSettings = pModule->CreateDefaultImportSettings(ext);
 			pLoadedResource = pModule->Load(path);
+
+			if (!pLoadedResource)
+			{
+				Debug::LogError("Failed to import file, could not load resource file!");
+				return;
+			}
 		}
 
-		// Generate a meta file
-		const ResourceType* pType = ResourceType::GetResourceType(ext);
+		if (pLoadedResource)
+		{
+			/* Try getting the resource type from the loaded resource */
+			std::type_index type = typeid(Resource);
+			for (size_t i = 0; i < pLoadedResource->TypeCount(); ++i)
+			{
+				if (!pLoadedResource->GetType(0, type)) continue;
+				pType = ResourceType::GetResourceType(type);
+				if (pType) break;
+			}
+		}
 
 		if (!pType)
 		{
-			// Not supperted!
-			Debug::LogError("Failed to import file, could not determine ResourceType!");
-			return;
+			/* Try to get the resource type from the extension */
+			pType = ResourceType::GetResourceType(ext);
+
+			if (!pType)
+			{
+				// Not supperted!
+				Debug::LogError("Failed to import file, could not determine ResourceType!");
+				return;
+			}
 		}
 
+		// Generate a meta file
 		const std::string assetPath = Game::GetAssetPath();
-		ResourceMeta meta(extension.string(), pLoadedResource->GetUUID(), pType->Hash());
 
-		AssetDatabase::SetIDAndName(pLoadedResource, meta.ID(), fileName.string());
+		std::filesystem::path namePath = fileName;
+		if (!subPath.empty()) namePath.append(subPath.string());
+		ResourceMeta meta(extension.string(), namePath.string(), pLoadedResource->GetUUID(), pType->Hash());
+
+		AssetDatabase::SetIDAndName(pLoadedResource, meta.ID(), meta.Name());
 		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
 		AssetManager::AddLoadedResource(pLoadedResource);
-		InsertAsset(relativePath.string(), meta);
+
+		AssetLocation location{ relativePath.string(), subPath.string() };
+		InsertAsset(location, meta);
+
+		/* Import sub resources */
+		for (size_t i = 0; i < pLoadedResource->SubResourceCount(); i++)
+		{
+			Resource* pSubResource = pLoadedResource->Subresource(i);
+			std::filesystem::path newSubPath = subPath;
+			newSubPath.append(pSubResource->Name());
+			ImportAsset(path, pSubResource, newSubPath);
+		}
+
+		if (!subPath.empty()) return;
 		AssetDatabase::Clear();
 		AssetDatabase::Load(m_DatabaseNode);
 	}
@@ -272,12 +316,13 @@ namespace Glory::Editor
 
 		const std::string assetPath = Game::GetAssetPath();
 		metaFilePath = metaFilePath.lexically_relative(assetPath);
-		ResourceMeta meta(extension.string(), pScene->GetUUID(), pType->Hash());
+		ResourceMeta meta(extension.string(), fileName.string(), pScene->GetUUID(), pType->Hash());
 
 		AssetDatabase::SetIDAndName(pScene, meta.ID(), fileName.string());
 		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
 		AssetManager::AddLoadedResource(pScene);
-		InsertAsset(relativePath.string(), meta);
+		AssetLocation location{ relativePath.string() };
+		InsertAsset(location, meta);
 	}
 
 	void EditorAssetDatabase::SaveAsset(Resource* pResource, bool markUndirty)
@@ -398,8 +443,12 @@ namespace Glory::Editor
 		const std::string key = std::to_string(uuid);
 		YAML::Node assetNode = m_DatabaseNode[key];
 		if (!assetNode.IsDefined() || !assetNode.IsMap()) return "";
+		ResourceMeta meta = assetNode["Metadata"].as<ResourceMeta>();
+		if (!meta.Name().empty()) return meta.Name();
 		AssetLocation location = assetNode["Location"].as<AssetLocation>();
-		return std::filesystem::path(location.Path).filename().replace_extension().string();
+		std::filesystem::path fileName = std::filesystem::path(location.Path).filename().replace_extension();
+		if (!location.SubresourcePath.empty()) fileName.append(location.SubresourcePath);
+		return fileName.string();
 	}
 
 	void EditorAssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& result)

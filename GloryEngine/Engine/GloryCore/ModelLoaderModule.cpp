@@ -5,6 +5,7 @@ namespace Glory
 {
 	ModelLoaderModule::ModelLoaderModule() : ResourceLoaderModule(".obj,.fbx,.gltf")
 	{
+		ResourceType::RegisterResource<MeshData>("");
 	}
 
 	ModelLoaderModule::~ModelLoaderModule()

@@ -268,7 +268,7 @@ namespace Glory::Editor
 		std::filesystem::path file = FileBrowserItem::GetHighlightedPath();
 		UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
 		Resource* pLoadedResource = AssetManager::FindResource(uuid);
-		if (!pLoadedResource) return;
+		if (pLoadedResource) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
 		EditorAssetDatabase::ImportAsset(file.string(), pLoadedResource);
 	}

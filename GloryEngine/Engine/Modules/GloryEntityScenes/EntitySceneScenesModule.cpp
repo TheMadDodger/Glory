@@ -64,6 +64,7 @@ namespace Glory
 		RegisterComponent<CameraComponent>();
 		RegisterComponent<MeshFilter>();
 		RegisterComponent<MeshRenderer>();
+		RegisterComponent<ModelRenderer>();
 		RegisterComponent<LightComponent>();
 		RegisterComponent<ScriptedComponent>();
 

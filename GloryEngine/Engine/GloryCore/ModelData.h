@@ -11,11 +11,8 @@ namespace Glory
 		ModelData();
 		virtual ~ModelData();
 
-		void AddMesh(MeshData* pMesh);
 		size_t GetMeshCount() const;
 		MeshData* GetMesh(size_t index) const;
-
-	private:
-		std::vector<MeshData*> m_pMeshes;
+		MeshData* GetMesh(std::string_view name) const;
 	};
 }
