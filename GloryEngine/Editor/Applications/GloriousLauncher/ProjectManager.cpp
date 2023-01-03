@@ -243,21 +243,22 @@ namespace Glory::EditorLauncher
 
     void ProjectManager::WriteProjectFile(const ProjectCreateSettings& createSettings)
     {
-        YAML::Emitter emitter;
-        emitter << YAML::BeginMap;
-        emitter << YAML::Key << "ProjectName";
-        emitter << YAML::Value << createSettings.Name;
-        emitter << YAML::EndMap;
+        YAML::Node projectFileNode{ YAML::NodeType::Map };
+        if (std::filesystem::exists(createSettings.Path))
+            projectFileNode = YAML::LoadFile(createSettings.Path);
 
-        std::filesystem::path engineConfPath = createSettings.Path;
-        engineConfPath = engineConfPath.parent_path();
-        engineConfPath.append(createSettings.Name + ".gproj");
-        std::ofstream out(engineConfPath);
+        projectFileNode["ProjectName"] = createSettings.Name;
+
+        YAML::Emitter emitter;
+        emitter << projectFileNode;
+
+        std::filesystem::path projectFilePath = createSettings.Path;
+        std::ofstream out(projectFilePath);
         out << emitter.c_str();
         out.close();
 
         std::filesystem::path projectVersionPath = createSettings.Path;
-        projectVersionPath = engineConfPath.parent_path();
+        projectVersionPath = projectFilePath.parent_path();
         projectVersionPath.append("ProjectSettings").append("ProjectVersion.txt");
         std::ofstream fileStream(projectVersionPath, std::ofstream::out | std::ofstream::trunc);
         std::string versionString = createSettings.EditorVersion.GetVersionString();

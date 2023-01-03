@@ -237,7 +237,7 @@ namespace Glory::Editor
 	{
 		if (ProjectSpace::HasUnsavedChanges())
 		{
-			QuitPopup::Open("You have unsaved changes to your project.\nAre you sure you want to quit?\nSome changes might be lost!");
+			QuitPopup::Open("You have unsaved changes to your project.\nAre you sure you want to quit?\nAll changes will be lost!");
 			/* Show popup */
 			return;
 		}
@@ -245,7 +245,7 @@ namespace Glory::Editor
 		if (EditorSceneManager::HasUnsavedChanges())
 		{
 			/* Show popup */
-			QuitPopup::Open("You have unsaved changes to an opened scene.\nAre you sure you want to quit?\nAll changes might be lost!");
+			QuitPopup::Open("You have unsaved changes to an opened scene.\nAre you sure you want to quit?\nAll changes will be lost!");
 			return;
 		}
 

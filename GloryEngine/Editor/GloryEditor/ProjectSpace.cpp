@@ -175,6 +175,7 @@ namespace Glory::Editor
 		lock.unlock();
 
 		EditorAssetDatabase::Load(m_ProjectFileNode);
+		EditorAssetDatabase::ImportModuleAssets();
 		FileBrowser::LoadProject();
 		ProjectSettings::Load(this);
 

@@ -50,12 +50,15 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void RegisterAsyncImportCallback(std::function<void(Resource*)> func);
 
+		static GLORY_EDITOR_API void ImportModuleAssets();
+
 	private:
 		static void Initialize();
 		static void Cleanup();
 		static void Update();
 
 		static bool ImportJob(std::filesystem::path path);
+		static void ImportModuleAssets(const std::filesystem::path& path);
 
 	private:
 		friend class MainEditor;

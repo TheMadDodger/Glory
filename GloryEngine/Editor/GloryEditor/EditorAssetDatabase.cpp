@@ -279,10 +279,10 @@ namespace Glory::Editor
 		ResourceMeta meta(extension.string(), namePath.string(), pLoadedResource->GetUUID(), pType->Hash());
 
 		AssetDatabase::SetIDAndName(pLoadedResource, meta.ID(), meta.Name());
-		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
+		std::filesystem::path relativePath = filePath.lexically_relative(assetPath);
 		AssetManager::AddLoadedResource(pLoadedResource);
 
-		AssetLocation location{ relativePath.string(), subPath.string() };
+		AssetLocation location{ relativePath.empty() ? path : relativePath.string(), subPath.string() };
 		InsertAsset(location, meta);
 
 		/* Import sub resources */
@@ -412,8 +412,12 @@ namespace Glory::Editor
 		std::string fixedPath = path;
 		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
 
-		std::filesystem::path absolutePath = Game::GetAssetPath();
-		absolutePath = absolutePath.append(fixedPath);
+		std::filesystem::path absolutePath = fixedPath;
+		if (!absolutePath.is_absolute() && fixedPath[0] != '.')
+		{
+			absolutePath = Game::GetAssetPath();
+			absolutePath = absolutePath.append(fixedPath);
+		}
 
 		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
 		{
@@ -422,8 +426,12 @@ namespace Glory::Editor
 			YAML::Node assetNode = m_DatabaseNode[key];
 
 			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
-			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
-			absoluteAssetPath = absoluteAssetPath.append(location.Path);
+			std::filesystem::path absoluteAssetPath = location.Path;
+			if (!absoluteAssetPath.is_absolute() && location.Path[0] != '.')
+			{
+				absoluteAssetPath = Game::GetAssetPath();
+				absoluteAssetPath.append(location.Path);
+			}
 			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
 			return uuid;
 		}
@@ -435,7 +443,7 @@ namespace Glory::Editor
 	{
 		const std::string key = std::to_string(uuid);
 		YAML::Node assetNode = m_DatabaseNode[key];
-		return !assetNode.IsDefined() && !assetNode.IsMap();
+		return assetNode.IsDefined() && assetNode.IsMap();
 	}
 
 	std::string EditorAssetDatabase::GetAssetName(UUID uuid)
@@ -468,6 +476,20 @@ namespace Glory::Editor
 	void EditorAssetDatabase::RegisterAsyncImportCallback(std::function<void(Resource*)> func)
 	{
 		m_AsyncImportCallback = func;
+	}
+
+	void EditorAssetDatabase::ImportModuleAssets()
+	{
+		for (size_t i = 0; i < Game::GetGame().GetEngine()->ModulesCount(); i++)
+		{
+			Module* pModule = Game::GetGame().GetEngine()->GetModule(i);
+			const ModuleMetaData& metaData = pModule->GetMetaData();
+			std::filesystem::path assetsPath = metaData.Path().parent_path();
+			if (!std::filesystem::exists(assetsPath)) continue;
+			assetsPath.append("Assets");
+			if (!std::filesystem::exists(assetsPath)) continue;
+			ImportModuleAssets(assetsPath);
+		}
 	}
 
 	void EditorAssetDatabase::Initialize()
@@ -515,5 +537,23 @@ namespace Glory::Editor
 
 		m_ImportedResources.push_back({ pResource, path });
 		return true;
+	}
+
+	void EditorAssetDatabase::ImportModuleAssets(const std::filesystem::path& path)
+	{
+		for (auto itor : std::filesystem::directory_iterator(path))
+		{
+			std::filesystem::path path = itor.path();
+			const std::string pathString = ".\\" + path.string();
+			if (!itor.is_directory())
+			{
+				/* Is it already imported? */
+				/* FIXME: This lookup is slow! */
+				if (FindAssetUUID(pathString)) continue;
+				ImportAsset(pathString);
+				continue;
+			}
+			ImportModuleAssets(path);
+		}
 	}
 }

@@ -1126,3 +1126,91 @@ Assets:
       UUID: 14499649956237154012
       Hash: 551870673
       SerializedVersion: 0
+  3169356356465831125:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\BigPlane.fbx
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: BigPlane
+      UUID: 3169356356465831125
+      Hash: 213427075
+      SerializedVersion: 0
+  10559655136505586474:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\BigPlane.fbx
+      SubresourcePath: Plane Material 0
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: BigPlane\Plane Material 0
+      UUID: 10559655136505586474
+      Hash: 551870673
+      SerializedVersion: 0
+  1773720010704080431:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Cube.fbx
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Cube
+      UUID: 1773720010704080431
+      Hash: 213427075
+      SerializedVersion: 0
+  213103403133370282:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Cube.fbx
+      SubresourcePath: Cube Material 0
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Cube\Cube Material 0
+      UUID: 213103403133370282
+      Hash: 551870673
+      SerializedVersion: 0
+  14603101567007500595:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Monkeh.fbx
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Monkeh
+      UUID: 14603101567007500595
+      Hash: 213427075
+      SerializedVersion: 0
+  2402609319592037262:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Monkeh.fbx
+      SubresourcePath: Suzanne Material 0
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Monkeh\Suzanne Material 0
+      UUID: 2402609319592037262
+      Hash: 551870673
+      SerializedVersion: 0
+  16463027274942641443:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Sphere.fbx
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sphere
+      UUID: 16463027274942641443
+      Hash: 213427075
+      SerializedVersion: 0
+  9627991267780794980:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Sphere.fbx
+      SubresourcePath: Icosphere Material 0
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sphere\Icosphere Material 0
+      UUID: 9627991267780794980
+      Hash: 551870673
+      SerializedVersion: 0

@@ -26,10 +26,10 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void Initialize();
 		GLORY_EDITOR_API void Load();
 		GLORY_EDITOR_API void Save();
-		 
+
 		GLORY_EDITOR_API void Open();
 		GLORY_EDITOR_API void OnGui();
-		 
+
 		GLORY_EDITOR_API void OnHubGui();
 		GLORY_EDITOR_API void OnProjectNotFoundGui();
 		GLORY_EDITOR_API void OnFileDialogPopupGui();
