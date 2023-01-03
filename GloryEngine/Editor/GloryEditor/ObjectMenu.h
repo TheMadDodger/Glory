@@ -71,7 +71,7 @@ namespace Glory::Editor
 
 	private:
 		friend class MainEditor;
-		friend class ObjectMenuItemData;
+		friend struct ObjectMenuItemData;
 		static Object* m_pObject;
 		static ObjectMenuType m_CurrentMenuType;
 		static std::vector<ObjectMenuItemData> m_MenuItems;

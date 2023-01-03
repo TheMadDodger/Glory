@@ -66,7 +66,7 @@ namespace Glory
 		size_t index = RESOURCE_TYPES->m_HashToBasicType[typeHash];
 		return &RESOURCE_TYPES->m_BasicTypes[index];
 	}
-	
+
 	const BasicTypeData* ResourceType::GetBasicTypeData(const std::string& name)
 	{
 		if (RESOURCE_TYPES->m_NameToBasicType.find(name) == RESOURCE_TYPES->m_NameToBasicType.end()) return nullptr;
@@ -122,6 +122,7 @@ namespace Glory
 
 	void ResourceType::ReadExtensions(size_t index, const std::string& extensions)
 	{
+		if (extensions.empty()) return;
 		std::stringstream stream(extensions);
 		std::string next = "";
 		while (std::getline(stream, next, ','))

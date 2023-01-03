@@ -32,6 +32,8 @@ namespace Glory
 
 	Resource* AssetManager::GetOrLoadAsset(UUID uuid)
 	{
+		if (ASSET_MANAGER->m_pLoadingAssets.Contains(uuid)) return nullptr;
+
 		Resource* pResource = FindResource(uuid);
 		if (pResource) return pResource;
 		if (ASSET_MANAGER->m_AssetLoadedCallbacks.Contains(uuid)) return nullptr;
@@ -42,6 +44,12 @@ namespace Glory
 
 	Resource* AssetManager::GetAssetImmediate(UUID uuid)
 	{
+		while (true)
+		{
+			LoadingLock lock{ uuid };
+			if (lock.IsValid) break;
+		}
+
 		Resource* pResource = FindResource(uuid);
 		if (pResource) return pResource;
 		return LoadAsset(uuid);
@@ -83,19 +91,43 @@ namespace Glory
 
 	Resource* AssetManager::LoadAsset(UUID uuid)
 	{
+		LoadingLock lock{ uuid };
+		if (!lock.IsValid) return nullptr;
+
 		ResourceMeta meta;
-		AssetDatabase::GetResourceMeta(uuid, meta);
+		if (!AssetDatabase::GetResourceMeta(uuid, meta)) return nullptr;
 		AssetLocation assetLocation;
 		if (!AssetDatabase::GetAssetLocation(uuid, assetLocation)) return nullptr;
+
+		UUID rootUUID = AssetDatabase::GetAssetUUID(assetLocation.Path);
+		if (rootUUID != uuid)
+		{
+			/* Load root resource */
+			Resource* pRootResource = FindResource(rootUUID);
+			if (!pRootResource)
+				pRootResource = LoadAsset(rootUUID);
+
+			if (!pRootResource) return nullptr;
+			Resource* pSubResource = pRootResource->SubresourceFromPath(assetLocation.SubresourcePath);
+			if (!pSubResource) return nullptr;
+
+			std::filesystem::path namePath = assetLocation.Path;
+			if (!assetLocation.SubresourcePath.empty()) namePath.append(assetLocation.SubresourcePath);
+			pSubResource->m_ID = uuid;
+			pSubResource->m_Name = meta.Name().empty() ? namePath.string() : meta.Name();
+			ASSET_MANAGER->m_pLoadedAssets.Set(uuid, pSubResource);
+			ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pSubResource);
+			return pSubResource;
+		}
 
 		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(meta.Hash());
 
 		if (pModule == nullptr) return nullptr;
 
-		if (assetLocation.IsSubAsset)
-		{
-			throw new std::exception("Not implemented yet");
-		}
+		//if (assetLocation.IsSubAsset)
+		//{
+		//	throw new std::exception("Not implemented yet");
+		//}
 
 		std::filesystem::path path = Game::GetAssetPath();
 		path.append(assetLocation.Path);
@@ -110,7 +142,10 @@ namespace Glory
 			return nullptr;
 		}
 
+		std::filesystem::path namePath = assetLocation.Path;
+		if (!assetLocation.SubresourcePath.empty()) namePath.append(assetLocation.SubresourcePath);
 		pResource->m_ID = uuid;
+		pResource->m_Name = meta.Name().empty() ? namePath.string() : meta.Name();
 		ASSET_MANAGER->m_pLoadedAssets.Set(uuid, pResource);
 		ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pResource);
 		return pResource;
@@ -173,5 +208,19 @@ namespace Glory
 	CallbackData::CallbackData(UUID uuid, Resource* pResource)
 		: m_UUID(uuid), m_pResource(pResource)
 	{
+	}
+
+	AssetManager::LoadingLock::LoadingLock(UUID uuid) : m_UUID(uuid), IsValid(false)
+	{
+		if (ASSET_MANAGER->m_pLoadingAssets.Contains(uuid)) return;
+		ASSET_MANAGER->m_pLoadingAssets.push_back(uuid);
+		IsValid = true;
+	}
+
+	AssetManager::LoadingLock::~LoadingLock()
+	{
+		if (!IsValid) return;
+		ASSET_MANAGER->m_pLoadingAssets.Erase(m_UUID);
+		IsValid = false;
 	}
 }

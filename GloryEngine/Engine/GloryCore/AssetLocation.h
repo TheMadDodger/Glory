@@ -8,12 +8,11 @@ namespace Glory
 	struct AssetLocation
 	{
 		AssetLocation();
-		AssetLocation(const std::string& path, size_t index);
-		AssetLocation(const std::string& fullPath);
+		AssetLocation(const std::string& path, const std::string& subresourcePath = "", size_t index = 0);
 
 		std::string Path;
+		std::string SubresourcePath;
 		size_t Index;
-		bool IsSubAsset;
 	};
 }
 
@@ -30,8 +29,8 @@ namespace YAML
 			Node node;
 			node = YAML::Node(YAML::NodeType::Map);
 			node["Path"] = assetLoc.Path;
+			node["SubresourcePath"] = assetLoc.SubresourcePath;
 			node["Index"] = assetLoc.Index;
-			node["IsSubAsset"] = assetLoc.IsSubAsset;
 			return node;
 		}
 
@@ -41,8 +40,8 @@ namespace YAML
 				return false;
 
 			assetLoc.Path = node["Path"].as<std::string>();
+			assetLoc.SubresourcePath = node["SubresourcePath"].as<std::string>();
 			assetLoc.Index = node["Index"].as<size_t>();
-			assetLoc.IsSubAsset = node["IsSubAsset"].as<bool>();
 			return true;
 		}
 	};

@@ -3,7 +3,7 @@ Assets:
   5258057404939636139:
     Location:
       Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_frag.shader
-      IsSubAsset: false
+      SubresourcePath: ""
       Index: 0
     Metadata:
       Extension: .shader
@@ -13,7 +13,7 @@ Assets:
   1332659315065513959:
     Location:
       Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_vert.shader
-      IsSubAsset: false
+      SubresourcePath: ""
       Index: 0
     Metadata:
       Extension: .shader
@@ -24,7 +24,7 @@ Assets:
     Location:
       Path: Materials\Material_.gmat
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gmat
       UUID: 15292592356433829065
@@ -34,7 +34,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 11466190625901780264
@@ -44,7 +44,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance1.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 15888846774429834738
@@ -54,7 +54,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance10.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 15672064195992175109
@@ -64,7 +64,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance11.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 2149126069163265897
@@ -74,7 +74,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance12.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 12488566683547842023
@@ -84,7 +84,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance13.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 16781332625119740619
@@ -94,7 +94,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance14.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 2466132427646561347
@@ -104,7 +104,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance15.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 1887650209508677350
@@ -114,7 +114,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance16.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 12310060936730104416
@@ -124,7 +124,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance17.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 12097914131954477231
@@ -134,7 +134,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance18.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 15031119109931530163
@@ -144,7 +144,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance19.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 14905697140036626744
@@ -154,7 +154,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance2.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 15807204728680519318
@@ -164,7 +164,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance20.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 16368550536739427456
@@ -174,7 +174,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance21.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 2459860768475436098
@@ -184,7 +184,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance22.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 2498040056946344786
@@ -194,7 +194,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance23.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 13944401581212950653
@@ -204,7 +204,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance24.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 1547198388543712619
@@ -214,7 +214,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance3.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 5435400219544926367
@@ -224,7 +224,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance4.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 5512620605558357874
@@ -234,7 +234,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance5.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 11184601656502026585
@@ -244,7 +244,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance6.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 12259864827464564605
@@ -254,7 +254,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance7.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 2067120908685993502
@@ -264,7 +264,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance8.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 3696908535920517257
@@ -274,7 +274,7 @@ Assets:
     Location:
       Path: Materials\Material_Instance9.gminst
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gminst
       UUID: 14449454895531762629
@@ -284,7 +284,7 @@ Assets:
     Location:
       Path: Materials\Monkeh.gmat
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gmat
       UUID: 6439595880252257041
@@ -294,27 +294,17 @@ Assets:
     Location:
       Path: Models\monkeh.fbx
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .fbx
       UUID: 5501465473105436222
-      Hash: 213427075
-      SerializedVersion: 0
-  2871247263641046888:
-    Location:
-      Path: Models\Sponza.fbx
-      Index: 0
-      IsSubAsset: false
-    Metadata:
-      Extension: .fbx
-      UUID: 2871247263641046888
       Hash: 213427075
       SerializedVersion: 0
   17525689166372006367:
     Location:
       Path: Scenes\ParentingTest.gscene
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gscene
       UUID: 17525689166372006367
@@ -324,7 +314,7 @@ Assets:
     Location:
       Path: Scenes\Sponza.gscene
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .gscene
       UUID: 12737398322962661278
@@ -334,7 +324,7 @@ Assets:
     Location:
       Path: Scripts\FlyCam.cs
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .cs
       UUID: 6449810108664700435
@@ -344,7 +334,7 @@ Assets:
     Location:
       Path: Scripts\NewScript.cs
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .cs
       UUID: 7937209862723571193
@@ -354,7 +344,7 @@ Assets:
     Location:
       Path: Scripts\TestScript.cs
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .cs
       UUID: 16575844677113431238
@@ -364,7 +354,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_0.png
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .png
       UUID: 1855881840462114938
@@ -374,7 +364,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_01.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 16486180262177399002
@@ -384,7 +374,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_02.png
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .png
       UUID: 12940197918077747768
@@ -394,7 +384,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_03.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 17237974390259840017
@@ -404,7 +394,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_04.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 8665547347118670184
@@ -414,7 +404,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_05.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 13095508170496382947
@@ -424,7 +414,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_06.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 8765373049577728563
@@ -434,7 +424,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_07.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 4190588356426450638
@@ -444,7 +434,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_08.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 18169472862881252893
@@ -454,7 +444,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_09.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 13832964293291405482
@@ -464,7 +454,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_10.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 3987809279678242927
@@ -474,7 +464,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_11.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 2643498100504238703
@@ -484,7 +474,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_12.png
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .png
       UUID: 7218672533146128186
@@ -494,7 +484,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_13.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 7601360924795048212
@@ -504,7 +494,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_14.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 10148233942574360669
@@ -514,7 +504,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_15.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 4976033332207181
@@ -524,7 +514,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_16.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 12101885989665068352
@@ -534,7 +524,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_17.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 5358361788648513693
@@ -544,7 +534,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_18.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 2116292014953697862
@@ -554,7 +544,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_19.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 804995545527906754
@@ -564,7 +554,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_20.png
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .png
       UUID: 15655606451279741710
@@ -574,7 +564,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_21.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 997819397894337760
@@ -584,7 +574,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_22.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 2376897628872190638
@@ -594,7 +584,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_23.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 3205441835507307888
@@ -604,7 +594,7 @@ Assets:
     Location:
       Path: Textures\Color\Color_24.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 827610970166176057
@@ -614,7 +604,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_00.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 7662718723448835180
@@ -624,7 +614,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_01.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 8310505727595138470
@@ -634,7 +624,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_02.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 5816421992073505615
@@ -644,7 +634,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_03.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 15056429005530918964
@@ -654,7 +644,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_04.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 2011160926597431273
@@ -664,7 +654,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_05.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 3433730457245465909
@@ -674,7 +664,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_06.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 6649486027513813253
@@ -684,7 +674,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_07.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 5715451918262814620
@@ -694,7 +684,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_08.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 10171797901856397001
@@ -704,7 +694,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_09.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 10097862280302688460
@@ -714,7 +704,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_10.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 1870888407128423687
@@ -724,7 +714,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_11.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 12634421653309758663
@@ -734,7 +724,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_13.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 10789037163183366129
@@ -744,7 +734,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_14.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 11443876422989324620
@@ -754,7 +744,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_15.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 212298128982664327
@@ -764,7 +754,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_16.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 9868427914987384978
@@ -774,7 +764,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_17.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 12109906826625766245
@@ -784,7 +774,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_18.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 2793930428432260621
@@ -794,7 +784,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_19.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 10305168231080988673
@@ -804,7 +794,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_20.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 14680835522405682523
@@ -814,7 +804,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_21.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 8369380832808064966
@@ -824,7 +814,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_22.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 14690908120106831825
@@ -834,7 +824,7 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_23.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 16227793578655187793
@@ -844,9 +834,295 @@ Assets:
     Location:
       Path: Textures\Normal\Normal_24.jpg
       Index: 0
-      IsSubAsset: false
+      SubresourcePath: ""
     Metadata:
       Extension: .jpg
       UUID: 332370144985133730
       Hash: 948733667
+      SerializedVersion: 0
+  12998359490760360359:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza
+      UUID: 12998359490760360359
+      Hash: 213427075
+      SerializedVersion: 0
+  14639395770542848228:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 0
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 0
+      UUID: 14639395770542848228
+      Hash: 551870673
+      SerializedVersion: 0
+  14925732115303115325:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 1
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 1
+      UUID: 14925732115303115325
+      Hash: 551870673
+      SerializedVersion: 0
+  1805177062301218884:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 2
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 2
+      UUID: 1805177062301218884
+      Hash: 551870673
+      SerializedVersion: 0
+  2101276356694730131:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 3
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 3
+      UUID: 2101276356694730131
+      Hash: 551870673
+      SerializedVersion: 0
+  3867615331169040073:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 4
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 4
+      UUID: 3867615331169040073
+      Hash: 551870673
+      SerializedVersion: 0
+  10931852327936540608:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 5
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 5
+      UUID: 10931852327936540608
+      Hash: 551870673
+      SerializedVersion: 0
+  14876674098383647591:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 6
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 6
+      UUID: 14876674098383647591
+      Hash: 551870673
+      SerializedVersion: 0
+  8959996216820488446:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 7
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 7
+      UUID: 8959996216820488446
+      Hash: 551870673
+      SerializedVersion: 0
+  5716493291577907187:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 8
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 8
+      UUID: 5716493291577907187
+      Hash: 551870673
+      SerializedVersion: 0
+  4740261818871045726:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 9
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 9
+      UUID: 4740261818871045726
+      Hash: 551870673
+      SerializedVersion: 0
+  16659276154009643007:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 10
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 10
+      UUID: 16659276154009643007
+      Hash: 551870673
+      SerializedVersion: 0
+  9719612124065874888:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 11
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 11
+      UUID: 9719612124065874888
+      Hash: 551870673
+      SerializedVersion: 0
+  18071494105274263855:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 12
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 12
+      UUID: 18071494105274263855
+      Hash: 551870673
+      SerializedVersion: 0
+  11167902047275766378:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 13
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 13
+      UUID: 11167902047275766378
+      Hash: 551870673
+      SerializedVersion: 0
+  15597988274286199677:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 14
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 14
+      UUID: 15597988274286199677
+      Hash: 551870673
+      SerializedVersion: 0
+  3923016999260126010:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 15
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 15
+      UUID: 3923016999260126010
+      Hash: 551870673
+      SerializedVersion: 0
+  11871020050944041453:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 16
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 16
+      UUID: 11871020050944041453
+      Hash: 551870673
+      SerializedVersion: 0
+  14108755142566058133:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 17
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 17
+      UUID: 14108755142566058133
+      Hash: 551870673
+      SerializedVersion: 0
+  9500122024863160913:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 18
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 18
+      UUID: 9500122024863160913
+      Hash: 551870673
+      SerializedVersion: 0
+  15143132147570670386:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 19
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 19
+      UUID: 15143132147570670386
+      Hash: 551870673
+      SerializedVersion: 0
+  3094203934294496108:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 20
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 20
+      UUID: 3094203934294496108
+      Hash: 551870673
+      SerializedVersion: 0
+  16675451351201820372:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 21
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 21
+      UUID: 16675451351201820372
+      Hash: 551870673
+      SerializedVersion: 0
+  6391817511707443681:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 22
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 22
+      UUID: 6391817511707443681
+      Hash: 551870673
+      SerializedVersion: 0
+  9721029250843454575:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 23
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 23
+      UUID: 9721029250843454575
+      Hash: 551870673
+      SerializedVersion: 0
+  14499649956237154012:
+    Location:
+      Path: Models\Sponza.fbx
+      SubresourcePath: Mesh_0 Material 24
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Sponza\Mesh_0 Material 24
+      UUID: 14499649956237154012
+      Hash: 551870673
       SerializedVersion: 0

@@ -3,32 +3,32 @@
 namespace Glory
 {
 	AssetLocation::AssetLocation()
-		: Path(""), Index(0), IsSubAsset(false)
+		: Path(""), SubresourcePath(""), Index(0)
 	{
 	}
 
-	AssetLocation::AssetLocation(const std::string& path, size_t index)
-		: Path(path), Index(index), IsSubAsset(true)
+	AssetLocation::AssetLocation(const std::string& path, const std::string& subresourcePath, size_t index)
+		: Path(path), SubresourcePath(subresourcePath), Index(index)
 	{
 	}
 
-	AssetLocation::AssetLocation(const std::string& fullPath)
-	{
-		int seperatorIndex = fullPath.find(':');
-		if (seperatorIndex == std::string::npos)
-		{
-			Path = fullPath;
-			Index = 0;
-			IsSubAsset = false;
-			return;
-		}
-
-		IsSubAsset = true;
-		Path = fullPath.substr(0, seperatorIndex);
-		std::string indexString = fullPath.substr(seperatorIndex + 1);
-		std::istringstream reader(indexString);
-		reader >> Index;
-	}
+	//AssetLocation::AssetLocation(const std::string& fullPath)
+	//{
+	//	int seperatorIndex = fullPath.find(':');
+	//	if (seperatorIndex == std::string::npos)
+	//	{
+	//		Path = fullPath;
+	//		Index = 0;
+	//		IsSubAsset = false;
+	//		return;
+	//	}
+	//
+	//	IsSubAsset = true;
+	//	Path = fullPath.substr(0, seperatorIndex);
+	//	std::string indexString = fullPath.substr(seperatorIndex + 1);
+	//	std::istringstream reader(indexString);
+	//	reader >> Index;
+	//}
 }
 
 namespace YAML
@@ -39,10 +39,10 @@ namespace YAML
 
 		out << YAML::Key << "Path";
 		out << YAML::Value << assetLoc.Path;
+		out << YAML::Key << "SubresourcePath";
+		out << YAML::Value << assetLoc.SubresourcePath;
 		out << YAML::Key << "Index";
 		out << YAML::Value << assetLoc.Index;
-		out << YAML::Key << "IsSubAsset";
-		out << YAML::Value << assetLoc.IsSubAsset;
 
 		out << YAML::EndMap;
 

@@ -123,6 +123,8 @@ namespace Glory::Editor
         if (std::filesystem::exists(currentPath))
         {
             pWindow->m_pRootItems[0]->SetSelectedFolder(currentPath);
+            if (FileBrowserItem::GetSelectedFolder() == nullptr)
+                FileBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
         }
         pWindow->RefreshContentBrowser();
     }

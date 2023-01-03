@@ -156,7 +156,7 @@ namespace Glory::Editor
 
 		std::for_each(items.begin(), items.end(), [&](UUID uuid)
 		{
-			std::string name = EditorAssetDatabase::GetAssetName(uuid);
+			const std::string name = EditorAssetDatabase::GetAssetName(uuid);
 			if (ImGui::MenuItem(name.c_str()))
 			{
 				*value = uuid;

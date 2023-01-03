@@ -19,7 +19,7 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API void Load(YAML::Node& projectNode);
 		static GLORY_EDITOR_API void Reload();
-		static GLORY_EDITOR_API void InsertAsset(const std::string& path, const ResourceMeta& meta, bool setDirty = true);
+		static GLORY_EDITOR_API void InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty = true);
 		static GLORY_EDITOR_API void UpdateAssetPath(UUID uuid, const std::string& newPath);
 		static GLORY_EDITOR_API void UpdateAsset(UUID uuid, long lastSaved);
 		static GLORY_EDITOR_API long GetLastSavedRecord(UUID uuid);
@@ -29,7 +29,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void DeleteAssets(const std::string& path);
 		static GLORY_EDITOR_API void IncrementAssetVersion(UUID uuid);
 		static GLORY_EDITOR_API void CreateAsset(Resource* pResource, const std::string& path);
-		static GLORY_EDITOR_API void ImportAsset(const std::string& path, Resource* pLoadedResource = nullptr);
+		static GLORY_EDITOR_API void ImportAsset(const std::string& path, Resource* pLoadedResource = nullptr, std::filesystem::path subPath = "");
 		static GLORY_EDITOR_API void ImportAssetAsync(const std::string& path);
 		static GLORY_EDITOR_API void ImportNewScene(const std::string& path, GScene* pScene);
 		static GLORY_EDITOR_API void SaveAsset(Resource* pResource, bool markUndirty = true);

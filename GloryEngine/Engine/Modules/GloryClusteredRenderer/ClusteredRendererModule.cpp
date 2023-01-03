@@ -140,9 +140,8 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 
-		MeshData* pMeshData = nullptr;
-		if (renderData.m_pModel == nullptr) return;
-		pMeshData = renderData.m_pModel->GetMesh(renderData.m_MeshIndex);
+		MeshData* pMeshData = renderData.m_pMesh;
+		if (pMeshData == nullptr) return;
 		Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
 		if (!pMaterial) return;
 
