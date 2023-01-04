@@ -6,7 +6,6 @@
 
 namespace Glory
 {
-#ifdef _DEBUG
 	class BaseConsoleCommand;
 
 	class WindowsDebugConsole : public IConsole
@@ -32,5 +31,4 @@ namespace Glory
 		std::thread m_pConsoleThread;
 		bool m_Running;
 	};
-#endif // _DEBUG
 }

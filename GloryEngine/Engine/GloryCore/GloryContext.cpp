@@ -21,9 +21,9 @@ namespace Glory
 
 		Console::Initialize();
 
-#ifdef _DEBUG
+		/* TODO: Do not register this console in the runtime unless enabled? */
 		Console::RegisterConsole<WindowsDebugConsole>();
-#endif
+
 		return m_pContext;
 	}
 

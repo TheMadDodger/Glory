@@ -37,8 +37,6 @@ namespace Glory
 		static void Destroy();
 
 		static void SetAsset(AssetLocation& assetLocation, const ResourceMeta& meta);
-		//static void ExportEditor(YAML::Emitter& out);
-		//static void ExportBuild(YAML::Emitter& out);
 
 	private:
 		friend class AssetManager;

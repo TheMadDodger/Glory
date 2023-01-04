@@ -12,13 +12,9 @@
 #include "ScriptExtensions.h"
 #include "ScriptingExtender.h"
 #include "GloryContext.h"
-#include <algorithm>
-
-#ifdef _DEBUG
 #include "WindowsDebugConsole.h"
-#endif // _DEBUG
 #include "LayerRef.h"
-
+#include <algorithm>
 
 namespace Glory
 {
