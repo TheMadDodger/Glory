@@ -25,7 +25,7 @@ namespace Glory
 		out << YAML::EndSeq;
 	}
 
-	Object* EntitySceneSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string& name)
+	Object* EntitySceneSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string& name, Flags flags)
 	{
 		YAML::Node node;
 		EntityScene* pScene = new EntityScene(name);
@@ -35,7 +35,7 @@ namespace Glory
 		for (size_t i = 0; i < node.size(); i++)
 		{
 			YAML::Node nextObject = node[i];
-			Serializer::DeserializeObject(pScene, nextObject);
+			Serializer::DeserializeObject(pScene, nextObject, flags);
 		}
 		pScene->HandleDelayedParents();
 

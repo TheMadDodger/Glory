@@ -32,7 +32,12 @@ namespace Glory::Editor
 				return popup.m_PopupName == name;
 			});
 
-		if (it != m_Popups.end()) return;
+		if (it != m_Popups.end())
+		{
+			Popup& popup = *it;
+			popup = Popup(name, description, buttons, buttonFuncs, true);
+			return;
+		}
 		m_Popups.push_back(Popup(name, description, buttons, buttonFuncs, true));
 	}
 

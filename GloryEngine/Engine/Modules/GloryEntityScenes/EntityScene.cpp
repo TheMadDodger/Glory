@@ -112,7 +112,6 @@ namespace Glory
 
 	void EntityScene::OnDeleteObject(SceneObject* pObject)
 	{
-		
 	}
 
 	void EntityScene::OnObjectAdded(SceneObject* pObject)

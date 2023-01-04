@@ -15,7 +15,7 @@ namespace Glory
 		out << YAML::Key << "ScriptData" << YAML::Value << component.m_ScriptData;
 	}
 
-	void ScriptedComponentSerailizer::Deserialize(ScriptedComponent& component, YAML::Node& object)
+	void ScriptedComponentSerailizer::Deserialize(ScriptedComponent& component, YAML::Node& object, Serializer::Flags flags)
 	{
 		const GloryReflect::TypeData* pTypeData = ScriptedComponent::GetTypeData();
 		for (size_t i = 0; i < pTypeData->FieldCount(); i++)

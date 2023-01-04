@@ -10,11 +10,11 @@ namespace Glory::Editor
 		{
 			Popup(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs, bool modal = false);
 
-			const std::string m_PopupName;
-			const std::string m_PopupDescription;
-			const std::vector<std::string> m_Buttons;
-			const std::vector<std::function<void()>> m_ButtonFuncs;
-			const bool m_Modal;
+			std::string m_PopupName;
+			std::string m_PopupDescription;
+			std::vector<std::string> m_Buttons;
+			std::vector<std::function<void()>> m_ButtonFuncs;
+			bool m_Modal;
 		};
 
 	public:

@@ -314,6 +314,21 @@ namespace Glory::Editor
 		AssetDatabase::Load(m_DatabaseNode);
 	}
 
+	void EditorAssetDatabase::ImportAssetsAsync(const std::string& path)
+	{
+		for (auto itor : std::filesystem::directory_iterator(path))
+		{
+			const std::filesystem::path dir = itor.path();
+			const std::string dirString = dir.string();
+			if (itor.is_directory())
+			{
+				ImportAssetsAsync(dirString);
+				continue;
+			}
+			ImportAssetAsync(dirString);
+		}
+	}
+
 	void EditorAssetDatabase::ImportAssetAsync(const std::string& path)
 	{
 		std::stringstream stream;

@@ -28,5 +28,5 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(ReimportAssetCallback);
 
 	GLORY_EDITOR_API void DeleteFolder();
-	GLORY_EDITOR_API void DeleteResource();
+	GLORY_EDITOR_API void DeleteResource(std::filesystem::path path = "");
 }
