@@ -38,6 +38,8 @@ namespace Glory::Editor
 			renderer->m_pEditorPlatform = m_pPlatform;
 
 			InitializePlatform(game);
+
+			Debug::LogInfo("Initialized editor application");
 		}
 
 		GLORY_EDITOR_API void Initialize(Game& game);

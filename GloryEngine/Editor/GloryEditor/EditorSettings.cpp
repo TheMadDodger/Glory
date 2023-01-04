@@ -56,6 +56,10 @@ namespace Glory::Editor
         std::ofstream outStream(m_EditorSettingsPath);
         outStream << emitter.c_str();
         outStream.close();
+
+        std::stringstream stream;
+        stream << "Saved editor settings to " << m_EditorSettingsPath.string();
+        Debug::LogInfo(stream.str());
     }
 
     void EditorSettings::LoadSettingsFile(Engine* pEngine)
@@ -80,6 +84,10 @@ namespace Glory::Editor
         }
 
         Shortcuts::LoadShortcuts(node);
+
+        std::stringstream stream;
+        stream << "Loaded editor settings from " << m_EditorSettingsPath.string();
+        Debug::LogInfo(stream.str());
     }
 
     void EditorSettings::LoadDefaultSettings(Engine* pEngine)
@@ -90,5 +98,7 @@ namespace Glory::Editor
         Window* pMainWindow = pWindowModule->GetMainWindow();
         pMainWindow->Resize(pMainWindowSettings->Width, pMainWindowSettings->Height);
         pMainWindow->SetPosition(0, 0);
+
+        Debug::LogInfo("Loaded default editor settings");
     }
 }

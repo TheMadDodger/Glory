@@ -167,6 +167,7 @@ namespace Glory::Editor
 	void EditorApplication::StartPlay()
 	{
 		if (m_Mode != EditorMode::M_Edit) return;
+		Debug::LogInfo("Entering play mode");
 		m_Mode = EditorMode::M_EnteringPlay;
 		m_pEditorInstance->m_pPlayer->Start();
 		m_Mode = EditorMode::M_Play;
@@ -175,6 +176,7 @@ namespace Glory::Editor
 	void EditorApplication::StopPlay()
 	{
 		if (m_Mode != EditorMode::M_Play) return;
+		Debug::LogInfo("Entering edit mode");
 		m_Mode = EditorMode::M_ExitingPlay;
 		m_pEditorInstance->m_pPlayer->Stop();
 		m_Mode = EditorMode::M_Edit;
@@ -214,6 +216,8 @@ namespace Glory::Editor
 
 		m_pShaderProcessor = new EditorShaderProcessor();
 		m_pPlayer = new EditorPlayer();
+
+		Debug::LogInfo("Initialized editor platform");
 	}
 
 	std::string EditorApplication::AssetPathOverrider()
@@ -254,6 +258,9 @@ namespace Glory::Editor
 
 	void EditorApplication::OnFileDragAndDrop(std::string_view path)
 	{
+		std::stringstream stream;
+		stream << "Drag and drop file received at " << path;
+		Debug::LogInfo(stream.str());
 		m_pEditorInstance->m_pMainEditor->OnFileDragAndDrop(path);
 	}
 }
