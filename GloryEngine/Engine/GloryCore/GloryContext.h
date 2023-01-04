@@ -52,6 +52,8 @@ namespace Glory
 		static void AddUserContext(size_t hash, void* pUserContext);
 		static void* GetUserContext(size_t hash);
 
+		std::map<UUID, UUID> m_UUIDRemapper;
+
 	private:
 		void Initialize();
 

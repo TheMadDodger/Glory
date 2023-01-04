@@ -294,7 +294,7 @@ namespace Glory::Editor
 		{
 			Texture* pFolderTexture = EditorAssets::GetTexture("folder");
 
-			ImGui::PushStyleColor(ImGuiCol_Button, buttonInactiveColor);
+			ImGui::PushStyleColor(ImGuiCol_Button, m_HighlightedPath == m_CachedPath.string() ? buttonColor : buttonInactiveColor);
 			ImGui::Button("##fileItem", itemSize);
 			ImGui::PopStyleColor();
 			ImGui::SetItemAllowOverlap();
@@ -306,8 +306,15 @@ namespace Glory::Editor
 				SetOpen();
 			}
 
+			if (ImGui::IsItemClicked(0))
+			{
+				Selection::SetActiveObject(nullptr);
+				m_HighlightedPath = m_CachedPath.string();
+			}
+
 			if (ImGui::IsItemClicked(1))
 			{
+				Selection::SetActiveObject(nullptr);
 				m_HighlightedPath = m_CachedPath.string();
 				ObjectMenu::Open(nullptr, m_Editable ? ObjectMenuType::T_Folder : ObjectMenuType::T_ModuleFolder);
 			}
@@ -329,7 +336,7 @@ namespace Glory::Editor
 
 		UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
 
-		ImGui::PushStyleColor(ImGuiCol_Button, selectedID == uuid ? buttonColor : buttonInactiveColor);
+		ImGui::PushStyleColor(ImGuiCol_Button, selectedID == uuid || m_HighlightedPath == m_CachedPath.string() ? buttonColor : buttonInactiveColor);
 		ImGui::Button("##fileItem", itemSize);
 		ImGui::PopStyleColor();
 		ImGui::SetItemAllowOverlap();
@@ -349,6 +356,7 @@ namespace Glory::Editor
 
 		if (ImGui::IsItemClicked(0))
 		{
+			m_HighlightedPath = m_CachedPath.string();
 			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
 			Selection::SetActiveObject(pAsset);
 		}

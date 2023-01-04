@@ -14,7 +14,7 @@ namespace Glory
 
 	protected:
 		virtual void Serialize(UUID uuid, TComponent& component, YAML::Emitter& out) = 0;
-		virtual void Deserialize(TComponent& component, YAML::Node& object) = 0;
+		virtual void Deserialize(TComponent& component, YAML::Node& object, Flags flags) = 0;
 
 	private:
 		virtual std::type_index GetSerializedType() override
@@ -27,19 +27,19 @@ namespace Glory
 			Serialize(pObject->GetUUID(), pObject->GetData<TComponent>(), out);
 		}
 
-		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string&) override
+		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string&, Flags flags) override
 		{
 			EntitySceneObject* pObject = (EntitySceneObject*)pParent;
 			Entity entity = pObject->GetEntityHandle();
 			if (entity.HasComponent<TComponent>())
 			{
 				TComponent& component = entity.GetComponent<TComponent>();
-				Deserialize(component, object);
+				Deserialize(component, object, flags);
 				return nullptr;
 			}
 
 			TComponent& component = entity.AddComponent<TComponent>();
-			Deserialize(component, object);
+			Deserialize(component, object, flags);
 			return nullptr;
 		}
 	};

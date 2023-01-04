@@ -2,6 +2,8 @@
 #include "FileDialog.h"
 #include "Selection.h"
 #include "EditorAssetDatabase.h"
+#include "CreateObjectAction.h"
+#include "Undo.h"
 #include <Game.h>
 #include <Engine.h>
 #include <ScenesModule.h>
@@ -185,6 +187,11 @@ namespace Glory::Editor
 		TitleBar::SetText("Scene", pScene ? pScene->Name().c_str() : "No Scene open");
 	}
 
+	GScene* EditorSceneManager::GetActiveScene()
+	{
+		return Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
+	}
+
 	void EditorSceneManager::SetSceneDirty(GScene* pScene, bool dirty)
 	{
 		if (!pScene) return;
@@ -210,6 +217,64 @@ namespace Glory::Editor
 	bool EditorSceneManager::HasUnsavedChanges()
 	{
 		return m_DirtySceneIDs.size() > 0;
+	}
+
+	void EditorSceneManager::DuplicateSceneObject(SceneObject* pObject)
+	{
+		if (!pObject) return;
+
+		/* Get correct parent to deserialize to */
+		SceneObject* pParent = pObject->GetParent();
+		GScene* pScene = pObject->GetScene();
+		if (!pScene) pScene = EditorSceneManager::GetActiveScene();
+		if (!pScene) pScene = EditorSceneManager::NewScene();
+
+		/* Serialize the objects entire heirarchy */
+		YAML::Emitter out;
+		out << YAML::BeginSeq;
+		SerializeObjects(pObject, out);
+		out << YAML::EndSeq;
+
+		/* Deserialize node into a new objects */
+		YAML::Node node = YAML::Load(out.c_str());
+		PasteSceneObject(pScene, pParent, node);
+	}
+
+	void EditorSceneManager::PasteSceneObject(GScene* pScene, SceneObject* pParent, YAML::Node& node)
+	{
+		/* Deserialize node into a new objects */
+		for (size_t i = 0; i < node.size(); i++)
+		{
+			YAML::Node objectNode = node[i];
+			if (i == 0 && pParent)
+			{
+				const UUID parentUUID = pParent->GetUUID();
+				objectNode["ParentUUID"] = (uint64_t)parentUUID;
+				Serializer::SetUUIDRemap(parentUUID, parentUUID);
+			}
+
+			SceneObject* pDupedObject = (SceneObject*)Serializer::DeserializeObject(pScene, objectNode, Serializer::Flags::GenerateNewUUIDs);
+			if (i == 0 && pDupedObject)
+			{
+				Undo::StartRecord("Duplicate", pDupedObject->GetUUID());
+				Undo::AddAction(new CreateObjectAction(pDupedObject));
+				Undo::StopRecord();
+			}
+		}
+
+		Serializer::ClearUUIDRemapCache();
+
+		/* Set scene dirty */
+		SetSceneDirty(pScene);
+	}
+
+	void EditorSceneManager::SerializeObjects(SceneObject* pObject, YAML::Emitter& out)
+	{
+		Serializer::SerializeObject(pObject, out);
+		for (size_t i = 0; i < pObject->ChildCount(); i++)
+		{
+			SerializeObjects(pObject->GetChild(i), out);
+		}
 	}
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)

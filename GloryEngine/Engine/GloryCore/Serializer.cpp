@@ -78,7 +78,7 @@ namespace Glory
 		return DeserializeObject(nullptr, object);
 	}
 
-	Object* Serializer::DeserializeObject(Object* pParent, YAML::Node& object)
+	Object* Serializer::DeserializeObject(Object* pParent, YAML::Node& object, Flags flags)
 	{
 		YAML::Node node;
 		size_t typeHash = 0;
@@ -86,7 +86,7 @@ namespace Glory
 
 		Serializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return nullptr;
-		return pSerializer->Deserialize(pParent, object);
+		return pSerializer->Deserialize(pParent, object, "", flags);
 	}
 
 	Object* Serializer::DeserializeObjectOfType(std::type_index type, YAML::Node& object, const std::string& name)
@@ -95,6 +95,16 @@ namespace Glory
 		Serializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return nullptr;
 		return pSerializer->Deserialize(nullptr, object, name);
+	}
+
+	void Serializer::ClearUUIDRemapCache()
+	{
+		GloryContext::GetContext()->m_UUIDRemapper.clear();
+	}
+
+	void Serializer::SetUUIDRemap(UUID oldUUID, UUID newUUID)
+	{
+		GloryContext::GetContext()->m_UUIDRemapper.emplace(oldUUID, newUUID);
 	}
 
 	Serializer::Serializer()

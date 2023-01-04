@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include "Shortcuts.h"
 #include "AssetManager.h"
+#include <FileBrowserItem.h>
 
 namespace Glory::Editor
 {
@@ -164,7 +165,17 @@ namespace Glory::Editor
 		Object* pSelected = Selection::GetActiveObject();
 		if (!pSelected)
 		{
-			m_Func(pSelected, T_Undefined);
+			const auto path = FileBrowserItem::GetHighlightedPath();
+			if (path.empty() || !std::filesystem::exists(path))
+			{
+				m_Func(pSelected, T_Undefined);
+				return;
+			}
+
+			if (std::filesystem::is_directory(path))
+				m_Func(pSelected, T_Folder);
+			else
+				m_Func(pSelected, T_Resource);
 			return;
 		}
 		for (size_t i = 0; i < pSelected->TypeCount(); i++)

@@ -115,8 +115,10 @@ namespace Glory
 		out << YAML::EndSeq;
 	}
 
-	Object* EntitySceneObjectSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string&)
+	Object* EntitySceneObjectSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string&, Flags flags)
 	{
+		std::map<UUID, UUID>& uuidRemapper = GloryContext::GetContext()->m_UUIDRemapper;
+
 		YAML::Node node;
 		std::string name;
 		UUID uuid;
@@ -125,9 +127,53 @@ namespace Glory
 		YAML_READ(object, node, UUID, uuid, uint64_t);
 		YAML_READ(object, node, ParentUUID, parentUuid, uint64_t);
 
+		if (flags & Serializer::Flags::GenerateNewUUIDs)
+		{
+			if (uuidRemapper.find(uuid) != uuidRemapper.end())
+			{
+				/* Use existing newly generated UUID */
+				uuid = uuidRemapper.at(uuid);
+			}
+			else
+			{
+				/* Generate new UUID */
+				UUID newUUID = UUID();
+				uuidRemapper.emplace(uuid, newUUID);
+				uuid = newUUID;
+			}
+
+			/* Remap parent */
+			if (parentUuid)
+			{
+				if (uuidRemapper.find(parentUuid) == uuidRemapper.end())
+				{
+					/* Generate new UUID for parent */
+					UUID newParentUuid = UUID();
+					uuidRemapper.emplace(parentUuid, newParentUuid);
+				}
+
+				parentUuid = uuidRemapper.at(parentUuid);
+			}
+		}
+
 		EntityScene* pScene = (EntityScene*)pParent;
 
 		UUID transformUUID = object["Components"][0]["UUID"].as<uint64_t>();
+		if (flags & Serializer::Flags::GenerateNewUUIDs)
+		{
+			if (uuidRemapper.find(transformUUID) != uuidRemapper.end())
+			{
+				/* Use existing newly generated UUID */
+				transformUUID = uuidRemapper.at(transformUUID);
+			}
+			else
+			{
+				/* Generate new UUID */
+				UUID newUUID = UUID();
+				uuidRemapper.emplace(transformUUID, newUUID);
+				transformUUID = newUUID;
+			}
+		}
 
 		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject(name, uuid, transformUUID);
 		node = object["Components"];
@@ -153,6 +199,22 @@ namespace Glory
 			YAML_READ(nextObject, subNode, UUID, compUUID, uint64_t);
 			YAML_READ(nextObject, subNode, TypeName, typeName, std::string);
 			YAML_READ(nextObject, subNode, TypeHash, typeHash, size_t);
+
+			if (flags & Serializer::Flags::GenerateNewUUIDs)
+			{
+				if (uuidRemapper.find(compUUID) != uuidRemapper.end())
+				{
+					/* Use existing newly generated UUID */
+					compUUID = uuidRemapper.at(compUUID);
+				}
+				else
+				{
+					/* Generate new UUID */
+					UUID newUUID = UUID();
+					uuidRemapper.emplace(compUUID, newUUID);
+					compUUID = newUUID;
+				}
+			}
 
 			Entity entityHandle = pObject->GetEntityHandle();
 			EntityID entity = entityHandle.GetEntityID();
@@ -190,6 +252,6 @@ namespace Glory
 			++currentComponentIndex;
 		}
 
-		return pScene;
+		return pObject;
 	}
 }

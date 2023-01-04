@@ -12,6 +12,12 @@ namespace Glory
 	class Serializer
 	{
 	public:
+		enum Flags
+		{
+			GenerateNewUUIDs = 1,
+		};
+
+	public:
 		template<class T>
 		static void RegisterSerializer()
 		{
@@ -44,18 +50,20 @@ namespace Glory
 			return (T*)DeserializeObject(pParent, object);
 		}
 
-		static Object* DeserializeObject(Object* pParent, YAML::Node& object);
+		static Object* DeserializeObject(Object* pParent, YAML::Node& object, Flags flags = Flags(0));
 		static Object* DeserializeObjectOfType(std::type_index type, YAML::Node& object, const std::string& name = "");
 
 		virtual std::type_index GetSerializedType() = 0;
 
 		virtual void Serialize(Object* pObject, YAML::Emitter& out) = 0;
-		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string& name = "") = 0;
+		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string& name = "", Flags flags = Flags(0)) = 0;
+
+		static void ClearUUIDRemapCache();
+		static void SetUUIDRemap(UUID oldUUID, UUID newUUID);
 
 	protected:
 		Serializer();
 		virtual ~Serializer();
-
 
 	private:
 		friend class Engine;

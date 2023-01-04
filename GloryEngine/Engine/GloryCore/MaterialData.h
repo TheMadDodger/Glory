@@ -39,7 +39,7 @@ namespace Glory
         virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index);
         [[nodiscard]]virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
         void ClearProperties();
-        
+
     public: // Properties
         // Setters
         template<typename T>

@@ -134,9 +134,16 @@ namespace Glory::Editor
 				continue;
 			}
 
-			if (!ImGui::IsKeyPressed(itor->second.m_Key)) continue;
+			if (!ImGui::IsKeyPressed(itor->second.m_Key))
+			{
+				continue;
+			}
 			/* Mods need to be the exact same to prevent triggering multiple shortcuts. */
-			if (io.KeyMods != itor->second.m_Mods) continue;
+			if (io.KeyMods != itor->second.m_Mods)
+			{
+				continue;
+			}
+
 			itor->second.m_Action();
 		}
 

@@ -8,6 +8,6 @@ namespace Glory
 	{
 	private:
 		virtual void Serialize(UUID uuid, ScriptedComponent& component, YAML::Emitter& out) override;
-		virtual void Deserialize(ScriptedComponent& component, YAML::Node& object) override;
+		virtual void Deserialize(ScriptedComponent& component, YAML::Node& object, Serializer::Flags flags) override;
 	};
 }
