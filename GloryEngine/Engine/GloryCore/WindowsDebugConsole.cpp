@@ -8,7 +8,6 @@
 
 namespace Glory
 {
-#ifdef _DEBUG
 	inline int ConsoleThreadFunc(void* pConsoleObject)
 	{
 		WindowsDebugConsole* pConsole = (WindowsDebugConsole*)pConsoleObject;
@@ -67,5 +66,4 @@ namespace Glory
 	{
 		std::cout << line << std::endl;
 	}
-#endif // _DEBUG
 }

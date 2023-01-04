@@ -14,7 +14,6 @@ namespace Glory
 		ReadLock readLock;
 		if (ASSET_DATABASE->m_AssetLocations.find(uuid) == ASSET_DATABASE->m_AssetLocations.end())
 		{
-			//throw new std::exception("Asset not found!");
 			return false;
 		}
 
@@ -27,7 +26,6 @@ namespace Glory
 		ReadLock readLock;
 		if (ASSET_DATABASE->m_Metas.find(uuid) == ASSET_DATABASE->m_Metas.end())
 		{
-			//throw new std::exception("Asset not found!");
 			return false;
 		}
 
@@ -73,33 +71,14 @@ namespace Glory
 		ASSET_DATABASE->m_AssetLocations.emplace(uuid, assetLocation);
 		ASSET_DATABASE->m_PathToUUID.emplace(assetLocation.Path, uuid);
 		ASSET_DATABASE->m_AssetsByType[meta.Hash()].push_back(uuid);
-		//ASSET_DATABASE->m_Callbacks.EnqueueCallback(CallbackType::CT_AssetRegistered, uuid, nullptr);
 	}
-
-	//void AssetDatabase::Save()
-	//{
-	//	SaveDirtyAssets();
-	//
-	//	YAML::Emitter out;
-	//	ExportEditor(out);
-	//
-	//	std::filesystem::path databasePath = Game::GetAssetPath();
-	//	databasePath = databasePath.parent_path();
-	//	databasePath.append("Assets.db");
-	//
-	//	std::ofstream outStream(databasePath);
-	//	outStream << out.c_str();
-	//	outStream.close();
-	//
-	//	SetDirty(false);
-	//}
 
 	void AssetDatabase::Load(YAML::Node& node)
 	{
 		ASSET_DATABASE->m_Initialized = false;
 		while (ASSET_DATABASE->m_IsReading)
 		{
-			system("NOP");
+			system("");
 		}
 
 		for (YAML::const_iterator itor = node.begin(); itor != node.end(); ++itor)
@@ -136,11 +115,6 @@ namespace Glory
 
 		ASSET_DATABASE->m_Initialized = true;
 	}
-
-	//void AssetDatabase::ForEachAssetLocation(std::function<void(UUID, const AssetLocation&)> callback)
-	//{
-	//	ASSET_DATABASE->m_AssetLocations.ForEach(callback);
-	//}
 
 	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out)
 	{
@@ -196,7 +170,7 @@ namespace Glory
 		ASSET_DATABASE->m_Initialized = false;
 		while (ASSET_DATABASE->m_IsReading)
 		{
-			system("NOP");
+			system("");
 		}
 
 		ASSET_DATABASE->m_AssetLocations.clear();
@@ -243,11 +217,6 @@ namespace Glory
 	//	});
 	//
 	//	out << YAML::EndSeq;
-	//}
-	//
-	//void AssetDatabase::ExportBuild(YAML::Emitter& out)
-	//{
-	//
 	//}
 
 	AssetDatabase::AssetDatabase()
