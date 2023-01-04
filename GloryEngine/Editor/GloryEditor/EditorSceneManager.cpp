@@ -222,5 +222,9 @@ namespace Glory::Editor
 		outStream.close();
 		if (newScene) EditorAssetDatabase::ImportNewScene(path, pScene);
 		SetSceneDirty(pScene, false);
+
+		std::stringstream stream;
+		stream << "Saved scene to: " << path;
+		Debug::LogInfo(stream.str());
 	}
 }

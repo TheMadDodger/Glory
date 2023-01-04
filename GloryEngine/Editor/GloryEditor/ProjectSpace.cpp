@@ -180,6 +180,10 @@ namespace Glory::Editor
 		ProjectSettings::Load(this);
 
 		TitleBar::SetText("Project", m_ProjectName.c_str());
+
+		std::stringstream stream;
+		stream << "Opened project at: " << m_ProjectFilePath;
+		Debug::LogInfo(stream.str());
 	}
 
 	void ProjectSpace::Close()
@@ -196,6 +200,8 @@ namespace Glory::Editor
 		TitleBar::SetText("ProjectChanges", "");
 
 		AssetDatabase::Clear();
+
+		Debug::LogInfo("Closed current project");
 	}
 
 	void ProjectSpace::CreateFolder(const std::string& name)
@@ -237,5 +243,9 @@ namespace Glory::Editor
 		TitleBar::SetText("ProjectChanges", "");
 
 		EditorAssetDatabase::Reload();
+
+		std::stringstream stream;
+		stream << "Project saved to: " << m_ProjectFilePath;
+		Debug::LogInfo(stream.str());
 	}
 }

@@ -19,6 +19,8 @@ namespace Glory::Editor
 			m_pAllSettings[i]->LoadSettings(pProject);
 			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
 		}
+
+		Debug::LogInfo("Loaded project settings");
 	}
 
 	void ProjectSettings::Save(ProjectSpace* pProject)
@@ -28,6 +30,8 @@ namespace Glory::Editor
 			m_pAllSettings[i]->SaveSettings(pProject);
 			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
 		}
+
+		Debug::LogInfo("Saved project settings");
 	}
 
 	void ProjectSettings::Paint(ProjectSettingsType type)

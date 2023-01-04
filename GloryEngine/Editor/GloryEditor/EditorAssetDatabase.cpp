@@ -32,12 +32,16 @@ namespace Glory::Editor
 			UUID key = itor->first.as<uint64_t>();
 			AssetDatabase::EnqueueCallback(CallbackType::CT_AssetRegistered, key, nullptr);
 		}
+
+		Debug::LogInfo("Loaded asset database");
 	}
 
 	void EditorAssetDatabase::Reload()
 	{
 		AssetDatabase::Clear();
 		AssetDatabase::Load(m_DatabaseNode);
+
+		Debug::LogInfo("Reloaded asset database");
 	}
 
 	void EditorAssetDatabase::InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty)
@@ -69,13 +73,14 @@ namespace Glory::Editor
 		std::string fixedNewPath = newPath;
 		std::replace(fixedNewPath.begin(), fixedNewPath.end(), '/', '\\');
 		AssetLocation location = assetNode["Location"].as<AssetLocation>();
+		const std::string oldPath = location.Path;
 		location.Path = fixedNewPath;
 		assetNode["Location"] = location;
 
-		Resource* pResource = AssetManager::FindResource(uuid);
+		std::stringstream stream;
+		stream << "Moved asset from " << oldPath << " to " << fixedNewPath;
+		Debug::LogInfo(stream.str());
 
-		std::filesystem::path path = fixedNewPath;
-		if (pResource) pResource->SetName(path.filename().replace_extension().string());
 		SetDirty();
 	}
 
@@ -128,6 +133,10 @@ namespace Glory::Editor
 
 		m_DatabaseNode.remove(key);
 		AssetDatabase::EnqueueCallback(CallbackType::CT_AssetDeleted, uuid, nullptr);
+
+		std::stringstream stream;
+		stream << "Deleted asset: " << uuid;
+		Debug::LogInfo(stream.str());
 		SetDirty();
 	}
 
@@ -285,6 +294,12 @@ namespace Glory::Editor
 		AssetLocation location{ relativePath.empty() ? path : relativePath.string(), subPath.string() };
 		InsertAsset(location, meta);
 
+		std::stringstream stream;
+		if (!subPath.empty())
+			stream << "Imported subasset " << subPath.string() << " at " << path;
+		else stream << "Imported asset at " << path;
+		Debug::LogInfo(stream.str());
+
 		/* Import sub resources */
 		for (size_t i = 0; i < pLoadedResource->SubResourceCount(); i++)
 		{
@@ -301,11 +316,18 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::ImportAssetAsync(const std::string& path)
 	{
+		std::stringstream stream;
+		stream << "Importing " << path << "...";
+		Debug::LogInfo(stream.str());
 		m_pImportPool->QueueSingleJob(ImportJob, path);
 	}
 
 	void EditorAssetDatabase::ImportNewScene(const std::string& path, GScene* pScene)
 	{
+		std::stringstream stream;
+		stream << "Importing new scene at " << path << "...";
+		Debug::LogInfo(stream.str());
+
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
 		std::filesystem::path fileName = filePath.filename().replace_extension("");
@@ -323,11 +345,16 @@ namespace Glory::Editor
 		AssetManager::AddLoadedResource(pScene);
 		AssetLocation location{ relativePath.string() };
 		InsertAsset(location, meta);
+
+		stream.clear();
+		stream << "Imported new scene: " << pScene->Name();
+		Debug::LogInfo(stream.str());
 	}
 
 	void EditorAssetDatabase::SaveAsset(Resource* pResource, bool markUndirty)
 	{
 		if (!pResource) return;
+
 		const UUID uuid = pResource->GetUUID();
 		const std::string key = std::to_string(uuid);
 		YAML::Node assetNode = m_DatabaseNode[key];
@@ -345,6 +372,10 @@ namespace Glory::Editor
 
 		if (markUndirty)
 			m_UnsavedAssets.Erase(pResource->GetUUID());
+
+		std::stringstream stream;
+		stream << "Saved asset to " << location.Path;
+		Debug::LogInfo(stream.str());
 	}
 
 	void EditorAssetDatabase::RemoveAsset(UUID uuid)
@@ -354,6 +385,10 @@ namespace Glory::Editor
 		if (!assetNode.IsDefined() || !assetNode.IsMap()) return;
 		m_DatabaseNode.remove(key);
 		SetDirty();
+
+		std::stringstream stream;
+		stream << "Removed asset " << uuid;
+		Debug::LogInfo(stream.str());
 	}
 
 	void EditorAssetDatabase::SetAssetDirty(Object* pResource)
@@ -494,11 +529,15 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::Initialize()
 	{
+		Debug::LogInfo("Initialized EditorAssetDatabase");
+
 		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
 	}
 
 	void EditorAssetDatabase::Cleanup()
 	{
+		Debug::LogInfo("Cleanup EditorAssetDatabase");
+
 		m_pImportPool = nullptr;
 		m_AsyncImportCallback = NULL;
 	}
@@ -541,6 +580,10 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::ImportModuleAssets(const std::filesystem::path& path)
 	{
+		std::stringstream stream;
+		stream << "Importing module assets at " << path << "...";
+		Debug::LogInfo(stream.str());
+
 		for (auto itor : std::filesystem::directory_iterator(path))
 		{
 			std::filesystem::path path = itor.path();

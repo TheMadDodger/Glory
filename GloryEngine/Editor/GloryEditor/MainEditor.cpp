@@ -128,6 +128,8 @@ namespace Glory::Editor
 		m_Settings.Load(Game::GetGame().GetEngine());
 
 		EditorAssetDatabase::Initialize();
+
+		Debug::LogInfo("Initialized editor");
 	}
 
 	void MainEditor::Destroy()
