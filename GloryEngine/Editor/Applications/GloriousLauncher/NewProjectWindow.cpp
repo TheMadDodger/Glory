@@ -5,7 +5,9 @@
 #include "ProjectManager.h"
 #include "ImFileDialog.h"
 #include "TemplateManager.h"
+
 #include <imgui.h>
+#include <ShlObj_core.h>
 
 namespace Glory::EditorLauncher
 {
@@ -23,6 +25,25 @@ namespace Glory::EditorLauncher
 
 	NewProjectWindow::NewProjectWindow() : m_IsOpen(false), m_SelectedEditorIndex(-1), m_Valid(false), m_SelectedTemplate(-1)
 	{
+		/* FIXME: Need a platform independant solution for this */
+		wchar_t* p;
+		if (S_OK != SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &p))
+		{
+			m_DefaultProjectsFolder = "C:/";
+			return;
+		}
+
+		std::filesystem::path result = p;
+		CoTaskMemFree(p);
+
+		result.append("Glorious\\Projects");
+
+		m_DefaultProjectsFolder = result.string();
+
+		if (!std::filesystem::exists(m_DefaultProjectsFolder))
+		{
+			std::filesystem::create_directories(m_DefaultProjectsFolder);
+		}
 	}
 
 	NewProjectWindow::~NewProjectWindow()

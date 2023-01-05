@@ -60,7 +60,7 @@ namespace Glory::EditorLauncher
 
 		std::string m_BrowsingPath;
 		std::string m_ProjectFolder;
-		std::string m_DefaultProjectsFolder = "%userprofile%\\Documents\\Glorious\\Projects";
+		std::string m_DefaultProjectsFolder;
 
 		const char* FILEDIALOG_ID = "FileDialog";
 

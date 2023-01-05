@@ -32,15 +32,21 @@ namespace Glory::Editor
 		const ImVec2 size = vMax - vMin;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
 		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
 			SceneDropdown(i, pScene, pScene == pActiveScene);
 		}
-		ImGui::PopStyleVar();
 
+		ImVec2 availableRegion = ImGui::GetContentRegionAvail();
+		if (availableRegion.y <= 0.0f)
+		{
+			ImGui::PopStyleVar();
+			return;
+		}
 
-		ImGui::InvisibleButton("WINDOWTARGET", size);
+		ImGui::InvisibleButton("WINDOWTARGET", { size.x, availableRegion.y });
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
@@ -64,6 +70,8 @@ namespace Glory::Editor
 		{
 			ObjectMenu::Open(nullptr, ObjectMenuType::T_Hierarchy);
 		}
+
+		ImGui::PopStyleVar();
 	}
 
 	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)

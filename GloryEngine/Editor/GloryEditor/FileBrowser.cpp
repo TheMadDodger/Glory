@@ -235,7 +235,7 @@ namespace Glory::Editor
         ImVec2 pos = ImGui::GetWindowPos();
 
         FileBrowserItem* pSelected = FileBrowserItem::GetSelectedFolder();
-        if (pSelected->IsEditable() && ImGui::IsMouseHoveringRect(pos + min, pos + max) && ImGui::IsMouseClicked(1)) ObjectMenu::Open(nullptr, ObjectMenuType::T_ContentBrowser);
+        if (pSelected->IsEditable() && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseClicked(1)) ObjectMenu::Open(nullptr, ObjectMenuType::T_ContentBrowser);
         FileBrowserItem::DrawFileBrowser(m_IconSize);
         ImGui::EndChild();
     }

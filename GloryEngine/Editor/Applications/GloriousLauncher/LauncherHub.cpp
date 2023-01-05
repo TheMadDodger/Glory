@@ -386,29 +386,25 @@ namespace Glory::EditorLauncher
         ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
         if (ImGui::Button("NEW", ImVec2(buttonWidth, 0.0f)))
         {
-            //m_BrowsingPath = m_DefaultProjectsFolder;
-            //strcpy(m_PathText, m_BrowsingPath.data());
-            //m_OpenNewProjectPopup = true;
-
+            m_BrowsingPath = m_DefaultProjectsFolder;
+            strcpy(m_PathText, m_BrowsingPath.data());
             m_pNewProjectWindow.Open();
         }
 
         static ImGuiTableFlags flags =
             //ImGuiTableFlags_Resizable
             ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
-            | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
+            | ImGuiTableFlags_ScrollY
             | ImGuiTableFlags_SizingFixedFit;
 
-        if (ImGui::BeginTable("Project Hub", 3, flags, ImVec2(0, 0), 0.0f))
+        const ImVec2 availableRegion = ImGui::GetContentRegionAvail();
+        if (ImGui::BeginTable("Project Hub", 3, flags, availableRegion))
         {
-            ImGui::TableSetupColumn("Project Name", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 0);
-            ImGui::TableSetupColumn("Modified", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
-            ImGui::TableSetupColumn("Editor Version", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 200.0f, 2);
-            //ImGui::TableSetupColumn("Project Path", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f, 1);
+            ImGui::TableSetupColumn("Project Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 1.0f, 0);
+            ImGui::TableSetupColumn("Modified", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.2f, 1);
+            ImGui::TableSetupColumn("Editor Version", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.2f, 2);
 
             ImGui::TableHeadersRow();
-
-            //ImGui::PushButtonRepeat(true);
 
             for (size_t row_n = 0; row_n < ProjectManager::ProjectCount(); row_n++)
             {
