@@ -12,7 +12,7 @@ namespace Glory
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		PointLight pointLight;
 		pointLight.enabled = 1;
-		pointLight.position = glm::vec4(transform.Position, 1.0f);
+		pointLight.position = transform.MatTransform[3];
 		pointLight.color = pComponent.m_Color;
 		pointLight.intensity = pComponent.m_Intensity;
 		pointLight.range = pComponent.m_Range;
