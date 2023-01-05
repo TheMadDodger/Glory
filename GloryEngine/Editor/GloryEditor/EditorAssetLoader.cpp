@@ -17,7 +17,7 @@ namespace Glory::Editor
 	void EditorAssetLoader::Start()
 	{
 		m_Exit = false;
-		//m_pThread = ThreadManager::Run(EditorAssetLoader::Run);
+		m_pThread = ThreadManager::Run(EditorAssetLoader::Run);
 	}
 
 	void EditorAssetLoader::Stop()
@@ -36,10 +36,10 @@ namespace Glory::Editor
 		assetPath.append("Assets");
 
 		ProcessDirectory(assetPath.string(), true);
-		RemoveDeletedAssets();
-
-		assetPath = "./Modules/";
-		ProcessDirectory(assetPath.string(), true, "\\Assets\\");
+		//RemoveDeletedAssets();
+		//
+		//assetPath = "./Modules/";
+		//ProcessDirectory(assetPath.string(), true, "\\Assets\\");
 	}
 
 	void EditorAssetLoader::ProcessDirectory(const std::string& path, bool recursive, const std::string& folderFilter)
@@ -62,13 +62,19 @@ namespace Glory::Editor
 
 	void EditorAssetLoader::ProcessFile(const std::filesystem::path& filePath)
 	{
-		// Meta file check
-		//auto ext = filePath.extension();
-		//std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
-		//if (ext.compare(metaExtension) == 0) return; // No need to process meta files
-		//std::filesystem::path metaFilePath = filePath.string() + metaExtension.string();
-		//
-		//// Make the path relative to the asset/resource path!
+		// Check if file was saved
+		std::filesystem::file_time_type lastSaveTime = std::filesystem::last_write_time(filePath);
+		long duration = lastSaveTime.time_since_epoch().count();
+		const UUID uuid = AssetDatabase::GetAssetUUID(filePath.string());
+		if (!uuid) return;
+		long previousDuration = EditorAssetDatabase::GetLastSavedRecord(uuid);
+		if (duration != previousDuration)
+		{
+			// Asset was updated
+			EditorAssetDatabase::UpdateAsset(uuid, duration);
+		}
+
+		// Make the path relative to the asset/resource path!
 		//ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		//if (!pProject) return;
 		//std::filesystem::path assetsPath = pProject->RootPath();

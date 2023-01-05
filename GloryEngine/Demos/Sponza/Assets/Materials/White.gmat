@@ -1,0 +1,10 @@
+Shaders:
+  - UUID: 11943354964569580546
+    Type: Vert
+  - UUID: 8165464999183620015
+    Type: Frag
+Properties:
+  - DisplayName: Color
+    ShaderName: Color
+    TypeHash: 1169234910
+    Value: [1, 1, 1, 1]
