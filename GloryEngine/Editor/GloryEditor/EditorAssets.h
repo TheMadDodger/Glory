@@ -11,7 +11,6 @@ namespace Glory::Editor
 	class EditorAssetNames
 	{
 	public:
-		
 
 	private:
 		EditorAssetNames();

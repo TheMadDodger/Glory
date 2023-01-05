@@ -11,6 +11,8 @@
 #include <AssetCallbacks.h>
 #include <EditorAssetDatabase.h>
 
+#include <IconsFontAwesome6.h>
+
 namespace Glory::Editor
 {
     int FileBrowser::m_IconSize = 128;
@@ -171,40 +173,33 @@ namespace Glory::Editor
         DrawPathControls();
         ImGui::SameLine();
         FileBrowserItem::DrawCurrentPath();
-        DrawSearchBar();
+        //DrawSearchBar();
         ImGui::EndChild();
     }
 
     void FileBrowser::DrawPathControls()
     {
-        ImVec2 size(14.0f, 14.0f);
+        const ImVec2 size(24.0f, 0.0f);
 
-        Texture* pBackTexture = EditorAssets::GetTexture("back");
-        Texture* pForwardTexture = EditorAssets::GetTexture("forward");
-        Texture* pUpTexture = EditorAssets::GetTexture("up");
-        Texture* pRefreshTexture = EditorAssets::GetTexture("refresh");
-
-        EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
-
-        if (ImGui::ImageButton(pRenderImpl->GetTextureID(pBackTexture), size, ImVec2(0,0), ImVec2(1,1), -1, ImVec4(0, 0, 0, 0), ImVec4(0.5, 0.5, 0.5, 1)))
+        if (ImGui::Button(ICON_FA_CARET_LEFT, size))
         {
             FileBrowserItem::HistoryUp();
         }
 
         ImGui::SameLine();
-        if (ImGui::ImageButton(pRenderImpl->GetTextureID(pForwardTexture), size))
+        if (ImGui::Button(ICON_FA_CARET_RIGHT, size))
         {
             FileBrowserItem::HistoryDown();
         }
 
         ImGui::SameLine();
-        if (ImGui::ImageButton(pRenderImpl->GetTextureID(pUpTexture), size))
+        if (ImGui::Button(ICON_FA_CARET_UP, size))
         {
             FileBrowserItem::GetSelectedFolder()->Up();
         }
 
         ImGui::SameLine();
-        if (ImGui::ImageButton(pRenderImpl->GetTextureID(pRefreshTexture), size))
+        if (ImGui::Button(ICON_FA_ARROWS_ROTATE, size))
         {
             RefreshContentBrowser();
         }
@@ -216,7 +211,7 @@ namespace Glory::Editor
         float width = 300.0f;
         float padding = 10.0f;
 
-        const char* searchText = "Search: ";
+        const char* searchText = ICON_FA_MAGNIFYING_GLASS " ";
         float textWidth = ImGui::CalcTextSize(searchText).x;
 
         ImGui::SameLine(regionWidth - width - textWidth - padding);

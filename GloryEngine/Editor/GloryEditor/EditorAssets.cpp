@@ -25,13 +25,10 @@ namespace Glory::Editor
 		if (m_IsInitialized) return;
 
 		LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule<ImageData>();
-		LoadImage(pGraphics, pLoader, "./EditorAssets/back.png", "back");
-		LoadImage(pGraphics, pLoader, "./EditorAssets/forward.png", "forward");
-		LoadImage(pGraphics, pLoader, "./EditorAssets/refresh.png", "refresh");
-		LoadImage(pGraphics, pLoader, "./EditorAssets/up.png", "up");
-		LoadImage(pGraphics, pLoader, "./EditorAssets/folder.png", "folder");
-		LoadImage(pGraphics, pLoader, "./EditorAssets/file.png", "file");
-		LoadImage(pGraphics, pLoader, "./EditorAssets/scene.png", "scene");
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Thumb/folder.png", "folder");
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Thumb/file.png", "file");
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Thumb/scene.png", "scene");
+		LoadImage(pGraphics, pLoader, "./EditorAssets/Thumb/audio.png", "audio");
 
 		m_IsInitialized = true;
 	}

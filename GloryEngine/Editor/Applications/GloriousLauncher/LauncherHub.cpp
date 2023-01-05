@@ -318,10 +318,10 @@ namespace Glory::EditorLauncher
         ImGui::SetCursorPosY(cursorPosY);
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + contentRegionAvail.x - contentRegionAvail.y);
 
-        if (ImGui::Button("S", ImVec2(contentRegionAvail.y, contentRegionAvail.y)))
-        {
-
-        }
+        //if (ImGui::Button(ICON_FA_GEAR, ImVec2(contentRegionAvail.y, contentRegionAvail.y)))
+        //{
+        //
+        //}
         ImGui::EndChild();
         ImGui::BeginChild("LeftPanelBody", ImVec2(0.0f, 0.0f), false);
 
