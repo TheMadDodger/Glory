@@ -77,6 +77,8 @@ namespace Glory::Editor
 		location.Path = fixedNewPath;
 		assetNode["Location"] = location;
 
+		assetNode["Metadata"]["Name"] = std::filesystem::path{ newPath }.filename().replace_extension().string();
+
 		std::stringstream stream;
 		stream << "Moved asset from " << oldPath << " to " << fixedNewPath;
 		Debug::LogInfo(stream.str());

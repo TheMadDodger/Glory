@@ -12,7 +12,9 @@ project "GlorySDLInput"
 		"**.h",
 		"**.cpp",
 		"Module.yaml",
-		"premake5.lua"
+		"premake5.lua",
+		"Assets/**.*",
+		"Resources/**.*",
 	}
 
 	vpaths

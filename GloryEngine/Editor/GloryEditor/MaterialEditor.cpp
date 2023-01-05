@@ -39,6 +39,9 @@ namespace Glory::Editor
 			change = PropertiesGUI(pMaterial);
 			ImGui::TreePop();
 		}
+
+		if (change)
+			EditorAssetDatabase::SetAssetDirty(pMaterial);
 		return change;
 	}
 
@@ -151,6 +154,6 @@ namespace Glory::Editor
 			if (!pShaderData) continue;
 			pShaderData->LoadIntoMaterial(pMaterial);
 		}
-		EditorAssetDatabase::SaveAsset(pMaterial);
+		EditorAssetDatabase::SetAssetDirty(pMaterial);
 	}
 }

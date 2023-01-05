@@ -59,6 +59,10 @@ namespace Glory::Editor
 		}
 
 		pMaterial->PasteOverrideStates(overrideStates);
+
+		if (change)
+			EditorAssetDatabase::SetAssetDirty(pMaterial);
+
 		return change;
 	}
 

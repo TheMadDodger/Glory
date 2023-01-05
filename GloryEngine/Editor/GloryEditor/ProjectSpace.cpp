@@ -193,8 +193,6 @@ namespace Glory::Editor
 			m_ProjectCallbacks[ProjectCallback::OnClose][i](this);
 		}
 
-		ProjectSettings::Save(this);
-
 		TitleBar::SetText("Project", "No Project open");
 		m_DirtyKeys.clear();
 		TitleBar::SetText("ProjectChanges", "");
@@ -242,6 +240,7 @@ namespace Glory::Editor
 		m_DirtyKeys.clear();
 		TitleBar::SetText("ProjectChanges", "");
 
+		EditorAssetDatabase::SaveDirtyAssets();
 		EditorAssetDatabase::Reload();
 
 		std::stringstream stream;

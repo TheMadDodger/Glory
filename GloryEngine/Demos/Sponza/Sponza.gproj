@@ -1,35 +1,16 @@
 ProjectName: Sponza
 Assets:
-  5258057404939636139:
-    Location:
-      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_frag.shader
-      SubresourcePath: ""
-      Index: 0
-    Metadata:
-      Extension: .shader
-      UUID: 5258057404939636139
-      Hash: 2411618060
-      SerializedVersion: 0
-  1332659315065513959:
-    Location:
-      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\DefaultLit_vert.shader
-      SubresourcePath: ""
-      Index: 0
-    Metadata:
-      Extension: .shader
-      UUID: 1332659315065513959
-      Hash: 2411618060
-      SerializedVersion: 0
   15292592356433829065:
     Location:
       Path: Materials\Material_.gmat
       Index: 0
       SubresourcePath: ""
     Metadata:
-      Extension: .gmat
+      Extension: ""
+      Name: ""
       UUID: 15292592356433829065
       Hash: 3973929837
-      SerializedVersion: 1
+      SerializedVersion: 10
   11466190625901780264:
     Location:
       Path: Materials\Material_Instance.gminst
@@ -282,33 +263,25 @@ Assets:
       SerializedVersion: 2
   6439595880252257041:
     Location:
-      Path: Materials\Monkeh.gmat
-      Index: 0
+      Path: Materials\White.gmat
       SubresourcePath: ""
+      Index: 0
     Metadata:
-      Extension: .gmat
+      Extension: ""
+      Name: ""
       UUID: 6439595880252257041
       Hash: 3973929837
-      SerializedVersion: 1
+      SerializedVersion: 6
   5501465473105436222:
     Location:
-      Path: Models\monkeh.fbx
+      Path: Models\Suzanne.fbx
       Index: 0
       SubresourcePath: ""
     Metadata:
       Extension: .fbx
       UUID: 5501465473105436222
+      Name: Suzanne
       Hash: 213427075
-      SerializedVersion: 0
-  17525689166372006367:
-    Location:
-      Path: Scenes\ParentingTest.gscene
-      Index: 0
-      SubresourcePath: ""
-    Metadata:
-      Extension: .gscene
-      UUID: 17525689166372006367
-      Hash: 1336563431
       SerializedVersion: 0
   12737398322962661278:
     Location:
@@ -1128,23 +1101,23 @@ Assets:
       SerializedVersion: 0
   3169356356465831125:
     Location:
-      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\BigPlane.fbx
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Plane.fbx
       SubresourcePath: ""
       Index: 0
     Metadata:
       Extension: .fbx
-      Name: BigPlane
+      Name: Plane
       UUID: 3169356356465831125
       Hash: 213427075
       SerializedVersion: 0
   10559655136505586474:
     Location:
-      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\BigPlane.fbx
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Plane.fbx
       SubresourcePath: Plane Material 0
       Index: 0
     Metadata:
       Extension: .fbx
-      Name: BigPlane\Plane Material 0
+      Name: Plane\Plane Material 0
       UUID: 10559655136505586474
       Hash: 551870673
       SerializedVersion: 0
@@ -1170,28 +1143,6 @@ Assets:
       UUID: 213103403133370282
       Hash: 551870673
       SerializedVersion: 0
-  14603101567007500595:
-    Location:
-      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Monkeh.fbx
-      SubresourcePath: ""
-      Index: 0
-    Metadata:
-      Extension: .fbx
-      Name: Monkeh
-      UUID: 14603101567007500595
-      Hash: 213427075
-      SerializedVersion: 0
-  2402609319592037262:
-    Location:
-      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Monkeh.fbx
-      SubresourcePath: Suzanne Material 0
-      Index: 0
-    Metadata:
-      Extension: .fbx
-      Name: Monkeh\Suzanne Material 0
-      UUID: 2402609319592037262
-      Hash: 551870673
-      SerializedVersion: 0
   16463027274942641443:
     Location:
       Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Sphere.fbx
@@ -1212,5 +1163,104 @@ Assets:
       Extension: .fbx
       Name: Sphere\Icosphere Material 0
       UUID: 9627991267780794980
+      Hash: 551870673
+      SerializedVersion: 0
+  14332710329823351065:
+    Location:
+      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\PhongTextured_frag.shader
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .shader
+      Name: PhongTextured_frag
+      UUID: 14332710329823351065
+      Hash: 2411618060
+      SerializedVersion: 0
+  3603492629802905897:
+    Location:
+      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\PhongTextured_vert.shader
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .shader
+      Name: PhongTextured_vert
+      UUID: 3603492629802905897
+      Hash: 2411618060
+      SerializedVersion: 0
+  8165464999183620015:
+    Location:
+      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\Phong_frag.shader
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .shader
+      Name: Phong_frag
+      UUID: 8165464999183620015
+      Hash: 2411618060
+      SerializedVersion: 0
+  11943354964569580546:
+    Location:
+      Path: .\Modules\GloryClusteredRenderer\Assets\Shaders\Phong_vert.shader
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .shader
+      Name: Phong_vert
+      UUID: 11943354964569580546
+      Hash: 2411618060
+      SerializedVersion: 0
+  6138225052262972999:
+    Location:
+      Path: Materials\Red.gminst
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: ""
+      Name: Red
+      UUID: 6138225052262972999
+      Hash: 1477354262
+      SerializedVersion: 1
+  5214604085360313620:
+    Location:
+      Path: Materials\Green.gminst
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: ""
+      Name: Green
+      UUID: 5214604085360313620
+      Hash: 1477354262
+      SerializedVersion: 1
+  9298100220466149446:
+    Location:
+      Path: Materials\Blue.gminst
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: ""
+      Name: Blue
+      UUID: 9298100220466149446
+      Hash: 1477354262
+      SerializedVersion: 1
+  143462516138296219:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Suzanne.fbx
+      SubresourcePath: ""
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Suzanne
+      UUID: 143462516138296219
+      Hash: 213427075
+      SerializedVersion: 0
+  11270266759803028812:
+    Location:
+      Path: .\Modules\GloryASSIMPModelLoader\Assets\Models\Suzanne.fbx
+      SubresourcePath: Suzanne Material 0
+      Index: 0
+    Metadata:
+      Extension: .fbx
+      Name: Suzanne\Suzanne Material 0
+      UUID: 11270266759803028812
       Hash: 551870673
       SerializedVersion: 0

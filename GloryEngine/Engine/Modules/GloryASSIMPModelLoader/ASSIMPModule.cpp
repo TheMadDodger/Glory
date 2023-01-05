@@ -106,19 +106,16 @@ namespace Glory
             return nullptr;
         }
 
+        attributes.push_back(AttributeType::Float3);
+        attributes.push_back(AttributeType::Float3);
+        attributes.push_back(AttributeType::Float3);
+        attributes.push_back(AttributeType::Float3);
+        attributes.push_back(AttributeType::Float2);
+        attributes.push_back(AttributeType::Float4);
+        vertexSize = sizeof(float) * 18;
+
         for (unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
-            if (i == 0)
-            {
-                attributes.push_back(AttributeType::Float3);
-                attributes.push_back(AttributeType::Float3);
-                attributes.push_back(AttributeType::Float3);
-                attributes.push_back(AttributeType::Float3);
-                vertexSize = sizeof(float) * 12;
-
-                //vertexSize += sizeof(Vector3) * 2;
-            }
-
             std::vector<float> vertexData;
             // process vertex positions, normals and texture coordinates
             vertexData.push_back(mesh->mVertices[i].x);
@@ -141,30 +138,32 @@ namespace Glory
                 vertexData.push_back(mesh->mTextureCoords[0][i].x);
                 vertexData.push_back(1.0f - mesh->mTextureCoords[0][i].y);
 
-                if (i == 0)
-                {
-                    attributes.push_back(AttributeType::Float2);
-                    vertexSize += sizeof(float) * 2;
-                }
+                //if (i == 0)
+                //{
+                //    attributes.push_back(AttributeType::Float2);
+                //    vertexSize += sizeof(float) * 2;
+                //}
+            }
+            else
+            {
+                vertexData.push_back(0.0f);
+                vertexData.push_back(0.0f);
             }
 
-            //if (mesh->HasTangentsAndBitangents())
-            //{
-            //    vertexData.push_back(mesh->mTangents[i].x);
-            //    vertexData.push_back(mesh->mTangents[i].y);
-            //    vertexData.push_back(mesh->mTangents[i].z);
-            //    vertexData.push_back(mesh->mBitangents[i].x);
-            //    vertexData.push_back(mesh->mBitangents[i].y);
-            //    vertexData.push_back(mesh->mBitangents[i].z);
-
-            //    if (i == 0)
-            //    {
-            //        attributes.push_back(MeshAttribute::ATangent);
-            //        attributes.push_back(MeshAttribute::ABiNormal);
-
-            //        vertexSize += sizeof(Vector3) * 2;
-            //    }
-            //}
+            if (mesh->mColors[0])
+            {
+                vertexData.push_back(mesh->mColors[0][i].r);
+                vertexData.push_back(mesh->mColors[0][i].g);
+                vertexData.push_back(mesh->mColors[0][i].b);
+                vertexData.push_back(mesh->mColors[0][i].a);
+            }
+            else
+            {
+                vertexData.push_back(1.0f);
+                vertexData.push_back(1.0f);
+                vertexData.push_back(1.0f);
+                vertexData.push_back(1.0f);
+            }
             if (i == 0)
             {
                 arraySize = mesh->mNumVertices * (vertexSize / sizeof(float));
@@ -174,11 +173,6 @@ namespace Glory
             //vertices[i] = RawVertex(vertexData);
             memcpy(&vertices[i * (vertexSize / sizeof(float))], &vertexData[0], vertexSize);
         }
-
-        /*for (size_t i = 0; i < mesh->mNumVertices * vertexSize; i++)
-        {
-            Utilities::Debug::LogInfo(std::to_string(vertices[i]));
-        }*/
 
         // process indices
         for (unsigned int i = 0; i < mesh->mNumFaces; i++)

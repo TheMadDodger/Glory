@@ -12,7 +12,9 @@ project "GloryASSIMPModelLoader"
 		"**.h",
 		"**.cpp",
 		"Module.yaml",
-		"premake5.lua"
+		"premake5.lua",
+		"Assets/**.*",
+		"Resources/**.*",
 	}
 
 	vpaths
@@ -26,7 +28,7 @@ project "GloryASSIMPModelLoader"
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{vulkanDir}/third-party/include",
-		
+
 		"%{IncludeDir.Reflect}",
 	}
 
@@ -35,7 +37,7 @@ project "GloryASSIMPModelLoader"
 		"%{LibDirs.glory}",
 		"%{LibDirs.assimp}",
 		"%{LibDirs.yaml_cpp}",
-		
+
 		"%{LibDirs.GloryECS}",
 	}
 
@@ -44,7 +46,7 @@ project "GloryASSIMPModelLoader"
 		"GloryCore",
 		"assimp",
 		"yaml-cpp",
-		
+
 		"GloryReflectStatic",
 	}
 
@@ -52,7 +54,7 @@ project "GloryASSIMPModelLoader"
 	{
 		"GLORY_EXPORTS"
 	}
-	
+
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),

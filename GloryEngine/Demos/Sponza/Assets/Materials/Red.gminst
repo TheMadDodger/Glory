@@ -1,0 +1,4 @@
+BaseMaterial: 6439595880252257041
+Overrides:
+  - DisplayName: Color
+    Value: [1, 0, 0, 1]
