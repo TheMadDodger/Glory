@@ -103,6 +103,8 @@ namespace Glory::Editor
 
 	void MainEditor::Initialize()
 	{
+		EditorAssetDatabase::Initialize();
+
 		SetupTitleBar();
 		RegisterWindows();
 		RegisterPropertyDrawers();
@@ -126,8 +128,6 @@ namespace Glory::Editor
 		Gizmos::Initialize();
 
 		m_Settings.Load(Game::GetGame().GetEngine());
-
-		EditorAssetDatabase::Initialize();
 
 		Debug::LogInfo("Initialized editor");
 	}

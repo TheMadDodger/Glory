@@ -1,6 +1,8 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
-#include "EditorAssetDatabase.h"
+
+#include <EditorAssetDatabase.h>
+#include <EditorAssetCallbacks.h>
 #include <Game.h>
 #include <Engine.h>
 #include <ObjectMenuCallbacks.h>
@@ -80,7 +82,7 @@ namespace Glory::Editor
 
 		Tumbnail::AddGenerator<MonoScriptTumbnail>();
 
-		AssetCallbacks::RegisterCallback(CallbackType::CT_AssetUpdated, AssetCallback);
+		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
 	}
 
 	void MonoEditorExtension::OnProjectClose(ProjectSpace* pProject)

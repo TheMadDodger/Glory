@@ -73,6 +73,7 @@ namespace Glory::Editor
 			std::filesystem::path Path;
 		};
 		static ThreadedVector<ImportedResource> m_ImportedResources;
+		static ThreadedUMap<std::string, UUID> m_PathToUUIDCache;
 		static ThreadedUMap<UUID, long> m_LastSavedRecords;
 		static bool m_IsDirty;
 
