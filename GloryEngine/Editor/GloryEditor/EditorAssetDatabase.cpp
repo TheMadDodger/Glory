@@ -1,5 +1,6 @@
 #include "EditorAssetDatabase.h"
 #include "AssetManager.h"
+#include "EditorAssetCallbacks.h"
 #include <Engine.h>
 #include <ProjectSpace.h>
 #include <FileBrowser.h>
@@ -9,6 +10,7 @@ namespace Glory::Editor
 	YAML::Node EditorAssetDatabase::m_DatabaseNode;
 	ThreadedVector<UUID> EditorAssetDatabase::m_UnsavedAssets;
 	ThreadedVector<EditorAssetDatabase::ImportedResource> EditorAssetDatabase::m_ImportedResources;
+	ThreadedUMap<std::string, UUID> EditorAssetDatabase::m_PathToUUIDCache;
 	ThreadedUMap<UUID, long> EditorAssetDatabase::m_LastSavedRecords;
 	std::function<void(Resource*)> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
@@ -27,13 +29,42 @@ namespace Glory::Editor
 
 		AssetDatabase::Load(m_DatabaseNode);
 
+		m_PathToUUIDCache.Clear();
 		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
 		{
-			UUID key = itor->first.as<uint64_t>();
-			AssetDatabase::EnqueueCallback(CallbackType::CT_AssetRegistered, key, nullptr);
+			const UUID uuid = itor->first.as<uint64_t>();
+			EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetRegistered, uuid, nullptr);
+
+			const std::string key = std::to_string(uuid);
+			YAML::Node assetNode = m_DatabaseNode[key];
+			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
+			if (!location.SubresourcePath.empty()) continue;
+
+			std::filesystem::path absolutePath = location.Path;
+			if (!absolutePath.is_absolute() && location.Path[0] != '.')
+			{
+				absolutePath = Game::GetAssetPath();
+				absolutePath = absolutePath.append(location.Path);
+			}
+
+			m_PathToUUIDCache.Set(absolutePath.string(), uuid);
 		}
 
 		Debug::LogInfo("Loaded asset database");
+
+		m_LastSavedRecords.Clear();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		std::filesystem::path path = pProject->CachePath();
+		path.append("LastSaved.yaml");
+		if (!std::filesystem::exists(path)) return;
+		YAML::Node savedRecordsNode = YAML::LoadFile(path.string());
+		if (!savedRecordsNode.IsDefined() || !savedRecordsNode.IsMap()) return;
+		for (YAML::const_iterator itor = savedRecordsNode.begin(); itor != savedRecordsNode.end(); ++itor)
+		{
+			const UUID uuid = itor->first.as<uint64_t>();
+			const long lastSaved = itor->second.as<long>();
+			m_LastSavedRecords.Set(uuid, lastSaved);
+		}
 	}
 
 	void EditorAssetDatabase::Reload()
@@ -60,7 +91,7 @@ namespace Glory::Editor
 
 		m_DatabaseNode[key] = insertedAsset;
 
-		AssetDatabase::EnqueueCallback(CallbackType::CT_AssetRegistered, uuid, nullptr);
+		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetRegistered, uuid, nullptr);
 		SetDirty();
 	}
 
@@ -76,8 +107,22 @@ namespace Glory::Editor
 		const std::string oldPath = location.Path;
 		location.Path = fixedNewPath;
 		assetNode["Location"] = location;
-
 		assetNode["Metadata"]["Name"] = std::filesystem::path{ newPath }.filename().replace_extension().string();
+
+		std::filesystem::path oldAbsolutePath = oldPath;
+		if (!oldAbsolutePath.is_absolute() && oldPath[0] != '.')
+		{
+			oldAbsolutePath = Game::GetAssetPath();
+			oldAbsolutePath = oldAbsolutePath.append(oldPath);
+		}
+		std::filesystem::path newAbsolutePath = newPath;
+		if (!newAbsolutePath.is_absolute() && newPath[0] != '.')
+		{
+			newAbsolutePath = Game::GetAssetPath();
+			newAbsolutePath = newAbsolutePath.append(newPath);
+		}
+		m_PathToUUIDCache.Erase(oldAbsolutePath.string());
+		m_PathToUUIDCache.Set(newAbsolutePath.string(), uuid);
 
 		std::stringstream stream;
 		stream << "Moved asset from " << oldPath << " to " << fixedNewPath;
@@ -89,7 +134,7 @@ namespace Glory::Editor
 	void EditorAssetDatabase::UpdateAsset(UUID uuid, long lastSaved)
 	{
 		m_LastSavedRecords.Set(uuid, lastSaved);
-		AssetDatabase::EnqueueCallback(CallbackType::CT_AssetUpdated, uuid, nullptr);
+		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetUpdated, uuid, nullptr);
 		SetDirty();
 	}
 
@@ -134,7 +179,7 @@ namespace Glory::Editor
 		if (!assetNode.IsDefined() || !assetNode.IsMap()) return;
 
 		m_DatabaseNode.remove(key);
-		AssetDatabase::EnqueueCallback(CallbackType::CT_AssetDeleted, uuid, nullptr);
+		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetDeleted, uuid, nullptr);
 
 		std::stringstream stream;
 		stream << "Deleted asset: " << uuid;
@@ -471,22 +516,25 @@ namespace Glory::Editor
 			absolutePath = absolutePath.append(fixedPath);
 		}
 
-		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
-		{
-			UUID uuid = itor->first.as<uint64_t>();
-			const std::string key = std::to_string(uuid);
-			YAML::Node assetNode = m_DatabaseNode[key];
+		if (!m_PathToUUIDCache.Contains(absolutePath.string())) return 0;
+		return m_PathToUUIDCache[absolutePath.string()];
 
-			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
-			std::filesystem::path absoluteAssetPath = location.Path;
-			if (!absoluteAssetPath.is_absolute() && location.Path[0] != '.')
-			{
-				absoluteAssetPath = Game::GetAssetPath();
-				absoluteAssetPath.append(location.Path);
-			}
-			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
-			return uuid;
-		}
+		//for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
+		//{
+		//	UUID uuid = itor->first.as<uint64_t>();
+		//	const std::string key = std::to_string(uuid);
+		//	YAML::Node assetNode = m_DatabaseNode[key];
+		//
+		//	const AssetLocation location = assetNode["Location"].as<AssetLocation>();
+		//	std::filesystem::path absoluteAssetPath = location.Path;
+		//	if (!absoluteAssetPath.is_absolute() && location.Path[0] != '.')
+		//	{
+		//		absoluteAssetPath = Game::GetAssetPath();
+		//		absoluteAssetPath.append(location.Path);
+		//	}
+		//	if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
+		//	return uuid;
+		//}
 
 		return 0;
 	}
@@ -546,9 +594,11 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::Initialize()
 	{
-		Debug::LogInfo("Initialized EditorAssetDatabase");
-
 		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
+		EditorAssetCallbacks::Initialize();
+
+		YAML::Node m_LastSavedNode;
+		Debug::LogInfo("Initialized EditorAssetDatabase");
 	}
 
 	void EditorAssetDatabase::Cleanup()
@@ -557,6 +607,27 @@ namespace Glory::Editor
 
 		m_pImportPool = nullptr;
 		m_AsyncImportCallback = NULL;
+
+		EditorAssetCallbacks::Cleanup();
+
+		YAML::Emitter out;
+		out << YAML::BeginMap;
+		m_LastSavedRecords.ForEach([&](const UUID& uuid, const long& value) {
+			out << YAML::Key << std::to_string(uuid);
+			out << YAML::Value << value;
+		});
+		out << YAML::EndMap;
+
+		m_PathToUUIDCache.Clear();
+		m_LastSavedRecords.Clear();
+
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		std::filesystem::path path = pProject->CachePath();
+		path.append("LastSaved.yaml");
+
+		std::ofstream outStream{ path };
+		outStream << out.c_str();
+		outStream.close();
 	}
 
 	void EditorAssetDatabase::Update()
@@ -565,6 +636,8 @@ namespace Glory::Editor
 			ImportAsset(resource.Path.string(), resource.Resource);
 			if (m_AsyncImportCallback) m_AsyncImportCallback(resource.Resource);
 		});
+
+		EditorAssetCallbacks::RunCallbacks();
 	}
 
 	bool EditorAssetDatabase::ImportJob(std::filesystem::path path)

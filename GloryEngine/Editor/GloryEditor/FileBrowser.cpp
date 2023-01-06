@@ -8,7 +8,7 @@
 #include "ImGuiHelpers.h"
 
 #include <imgui.h>
-#include <AssetCallbacks.h>
+#include <EditorAssetCallbacks.h>
 #include <EditorAssetDatabase.h>
 
 #include <IconsFontAwesome6.h>
@@ -23,7 +23,7 @@ namespace Glory::Editor
 		m_Resizeable = true;
         m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
 
-        AssetCallbacks::RegisterCallback(CallbackType::CT_AssetRegistered, [&](UUID uuid, const ResourceMeta& meta, Resource* pResource)
+        EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, [&](UUID uuid, const ResourceMeta& meta, Resource* pResource)
         {
             //RefreshContentBrowser();
         });

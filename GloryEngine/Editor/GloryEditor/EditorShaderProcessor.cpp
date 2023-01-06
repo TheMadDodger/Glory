@@ -6,7 +6,7 @@
 #include <AssetManager.h>
 #include <spirv_glsl.hpp>
 #include <FileLoaderModule.h>
-#include <AssetCallbacks.h>
+#include <EditorAssetCallbacks.h>
 #include <Engine.h>
 
 namespace Glory::Editor
@@ -99,7 +99,7 @@ namespace Glory::Editor
 			return cachePath;
 		});
 
-		AssetCallbacks::RegisterCallback(CallbackType::CT_AssetRegistered, AssetRegisteredCallback);
+		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, AssetRegisteredCallback);
 
 		//ShaderManager::OverrideMissingShaderHandlerFunc([&](UUID uuid, std::function<void(FileData*)> callback)
 		//{

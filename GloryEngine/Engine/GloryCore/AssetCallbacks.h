@@ -12,12 +12,8 @@ namespace Glory
 {
 	enum class CallbackType : unsigned int
 	{
-		CT_AssetRegistered,
 		CT_AssetLoaded,
-		CT_AssetDeleted,
-		CT_AssetUpdated,
 		CT_AssetReloaded,
-		CT_AssetDirty,
 
 		CT_MAX,
 	};

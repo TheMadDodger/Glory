@@ -39,7 +39,7 @@ project "GloryEditor"
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*" },
 		["UI"] = { "EditorUI.*", "ListView.*" },
 		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp" },
-		["Asset Management"] = { "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*" }
+		["Asset Management"] = { "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" }
 	}
 
 	includedirs
