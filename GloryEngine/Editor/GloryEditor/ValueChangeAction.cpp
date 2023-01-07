@@ -50,11 +50,14 @@ namespace Glory::Editor
 			const GloryReflect::FieldData* pField = m_pFieldStack[i];
 			if (pField->Type() == ST_Array)
 			{
-				// Get array address
+				/* Get array address */
+				pAddress = pField->GetAddress(pAddress);
+				/* Get array element address */
 				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pField->ArrayElementType(), 0);
 				continue;
 			}
 
+			/* Get field address */
 			pAddress = pField->GetAddress(pAddress);
 		}
 
@@ -71,11 +74,14 @@ namespace Glory::Editor
 			const GloryReflect::FieldData* pField = m_pFieldStack[i];
 			if (pField->Type() == ST_Array)
 			{
-				// Get array address
+				/* Get array address */
+				pAddress = pField->GetAddress(pAddress);
+				/* Get array element address */
 				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pField->ArrayElementType(), 0);
 				continue;
 			}
 
+			/* Get field address */
 			pAddress = pField->GetAddress(pAddress);
 		}
 
