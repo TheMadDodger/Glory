@@ -47,16 +47,15 @@ namespace Glory
 
 	void StructPropertySerializer::Deserialize(std::any& out, YAML::Node& object)
 	{
-		
 	}
 
 	void StructPropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
 	{
 		void* pStructAddress = pFieldData->GetAddress(data);
-		
+
 		size_t structTypeHash = pFieldData->ArrayElementType();
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(structTypeHash);
-		
+
 		const GloryReflect::TypeData* pStructTypeData = GloryReflect::Reflect::GetTyeData(structTypeHash);
 		if (pSerializer)
 		{
