@@ -16,7 +16,7 @@ namespace YAML
 
 	Emitter& operator<<(Emitter& out, const Glory::LayerRef& layerRef)
 	{
-		out << layerRef.m_LayerName;
+		out << layerRef.m_LayerIndex;
 		return out;
 	}
 }

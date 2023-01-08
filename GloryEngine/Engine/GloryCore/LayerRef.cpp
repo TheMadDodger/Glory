@@ -4,22 +4,22 @@
 
 namespace Glory
 {
-	LayerRef::LayerRef() : m_LayerName("") {}
-	LayerRef::LayerRef(const std::string& name) : m_LayerName(name) {}
+	LayerRef::LayerRef() : m_LayerIndex(0) {}
+	LayerRef::LayerRef(size_t layerIndex) : m_LayerIndex(layerIndex) {}
 
 	bool LayerRef::operator==(const LayerRef&& other)
 	{
-		return m_LayerName == other.m_LayerName;
+		return m_LayerIndex == other.m_LayerIndex;
 	}
 
 	bool LayerRef::operator==(LayerRef& other)
 	{
-		return m_LayerName == other.m_LayerName;
+		return m_LayerIndex == other.m_LayerIndex;
 	}
 
 	const Layer* LayerRef::Layer() const
 	{
-		return LayerManager::GetLayerByName(m_LayerName);
+		return LayerManager::GetLayerAtIndex(m_LayerIndex);
 	}
 
 	const GloryReflect::TypeData* LayerRef::GetTypeData()

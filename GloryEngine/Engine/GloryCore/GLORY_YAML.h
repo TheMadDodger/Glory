@@ -18,7 +18,7 @@ namespace YAML
 		static Node encode(const Glory::LayerRef& layerRef)
 		{
 			Node node;
-			node = layerRef.m_LayerName;
+			node = layerRef.m_LayerIndex;
 			return node;
 		}
 
@@ -27,7 +27,7 @@ namespace YAML
 			if (!node.IsScalar())
 				return false;
 
-			layerRef = node.as<std::string>();
+			layerRef = node.as<size_t>();
 			return true;
 		}
 	};

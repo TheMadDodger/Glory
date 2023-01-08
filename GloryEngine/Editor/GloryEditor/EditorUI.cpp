@@ -518,13 +518,12 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		const Layer* pLayer = data->Layer();
-		int index = LayerManager::GetLayerIndex(pLayer) + 1;
-		int newIndex = index;
+		int index = data->m_LayerIndex;
 
 		std::vector<std::string_view> options;
 		LayerManager::GetAllLayerNames(options);
 
+		bool change = false;
 		ImGui::PushItemWidth(width);
 		if (ImGui::BeginCombo("##layer", options[index].data()))
 		{
@@ -532,7 +531,10 @@ namespace Glory::Editor
 			{
 				bool selected = i == index;
 				if (ImGui::Selectable(options[i].data(), selected))
-					newIndex = i;
+				{
+					data->m_LayerIndex = i;
+					change = true;
+				}
 
 				if (selected)
 					ImGui::SetItemDefaultFocus();
@@ -542,12 +544,7 @@ namespace Glory::Editor
 		}
 		ImGui::PopItemWidth();
 		ImGui::PopID();
-
-		if (newIndex == index) return false;
-		index = newIndex - 1;
-		pLayer = LayerManager::GetLayerAtIndex(index);
-		data->m_LayerName = pLayer ? pLayer->m_Name : "";
-		return true;
+		return change;
 	}
 
 	bool EditorUI::Header(std::string_view label)

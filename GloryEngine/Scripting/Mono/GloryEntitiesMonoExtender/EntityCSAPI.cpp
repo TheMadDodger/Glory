@@ -381,7 +381,7 @@ namespace Glory
 	{
 		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
 		const Layer* pLayer = LayerManager::GetLayerByName(mono_string_to_utf8(layer->Name));
-		layerComp.m_Layer.m_LayerName = pLayer ? pLayer->m_Name : "";
+		layerComp.m_Layer = pLayer ? LayerManager::GetLayerIndex(pLayer) + 1 : 0;
 	}
 
 #pragma endregion
