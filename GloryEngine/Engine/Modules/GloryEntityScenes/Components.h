@@ -9,7 +9,7 @@
 //#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <CameraRef.h>
-#include <Layer.h>
+#include <LayerManager.h>
 #include <LightData.h>
 #include <Script.h>
 #include "Entity.h"
@@ -141,8 +141,8 @@ namespace Glory
 
 	struct LayerComponent
 	{
-		LayerComponent() : m_Layer("") {}
-		LayerComponent(const Layer* pLayer) : m_Layer(pLayer->m_Name) {}
+		LayerComponent() : m_Layer(0) {}
+		LayerComponent(const Layer* pLayer) : m_Layer(pLayer ? LayerManager::GetLayerIndex(pLayer) + 1 : 0) {}
 
 		REFLECTABLE(LayerComponent,
 			(LayerRef)	(m_Layer)

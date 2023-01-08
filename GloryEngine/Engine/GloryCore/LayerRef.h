@@ -12,15 +12,19 @@ namespace Glory
 
 	struct LayerRef
 	{
+	public:
 		LayerRef();
-		LayerRef(const std::string& name);
+		LayerRef(size_t layerIndex);
 
+		size_t m_LayerIndex;
+
+	public:
 		bool operator==(const LayerRef&& other);
 		bool operator==(LayerRef& other);
 
-		std::string m_LayerName;
 		const Layer* Layer() const;
 
 		static const GloryReflect::TypeData* GetTypeData();
+
 	};
 }
