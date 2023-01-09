@@ -108,6 +108,17 @@ namespace Glory::Editor
 		return m_OpenedSceneIDs[index];
 	}
 
+	GScene* EditorSceneManager::GetOpenScene(size_t index)
+	{
+		const UUID uuid = GetOpenSceneUUID(index);
+		return Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(index);
+	}
+
+	GScene* EditorSceneManager::GetOpenScene(UUID uuid)
+	{
+		return Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
+	}
+
 	void EditorSceneManager::SaveScene(UUID uuid)
 	{
 		if (!IsSceneOpen(uuid)) return;

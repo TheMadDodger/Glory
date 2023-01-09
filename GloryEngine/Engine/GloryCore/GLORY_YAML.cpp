@@ -19,4 +19,14 @@ namespace YAML
 		out << layerRef.m_LayerIndex;
 		return out;
 	}
+	Emitter& operator<<(Emitter& out, const Glory::SceneObjectRef& objectRef)
+	{
+		out << YAML::BeginMap;
+		out << YAML::Key << "SceneUUID";
+		out << YAML::Value << objectRef.SceneUUID();
+		out << YAML::Key << "ObjectUUID";
+		out << YAML::Value << objectRef.ObjectUUID();
+		out << YAML::EndMap;
+		return out;
+	}
 }

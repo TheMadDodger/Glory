@@ -5,12 +5,14 @@
 #include "LayerManager.h"
 #include "ShaderSourceLoaderModule.h"
 #include "LayerRef.h"
+#include "SceneObjectRef.h"
 
 namespace YAML
 {
 	Emitter& operator<<(Emitter& out, const Glory::LayerMask &mask);
 	Emitter& operator<<(Emitter& out, const Glory::ShaderType &type);
 	Emitter& operator<<(Emitter& out, const Glory::LayerRef &layerRef);
+	Emitter& operator<<(Emitter& out, const Glory::SceneObjectRef& objectRef);
 
 	template<>
 	struct convert<Glory::LayerRef>
@@ -48,6 +50,47 @@ namespace YAML
 				return false;
 
 			mask = node.as<uint64_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Glory::UUID>
+	{
+		static Node encode(const Glory::UUID& uuid)
+		{
+			Node node;
+			node = (uint64_t)uuid;
+			return node;
+		}
+
+		static bool decode(const Node& node, Glory::UUID& uuid)
+		{
+			if (!node.IsScalar())
+				return false;
+
+			uuid = node.as<uint64_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Glory::SceneObjectRef>
+	{
+		static Node encode(const Glory::SceneObjectRef& objectRef)
+		{
+			Node node{YAML::NodeType::Map};
+			node["SceneUUID"] = objectRef.SceneUUID();
+			node["ObjectUUID"] = objectRef.SceneUUID();
+			return node;
+		}
+
+		static bool decode(const Node& node, Glory::SceneObjectRef& objectRef)
+		{
+			if (!node.IsMap())
+				return false;
+
+			objectRef = { node["SceneUUID"].as<uint64_t>(), node["ObjectUUID"].as<uint64_t>() };
 			return true;
 		}
 	};
