@@ -15,6 +15,7 @@
 #include "WindowsDebugConsole.h"
 #include "LayerRef.h"
 #include <algorithm>
+#include "SceneObjectRef.h"
 
 namespace Glory
 {
@@ -281,6 +282,7 @@ namespace Glory
 		STANDARD_SERIALIZER(glm::quat);
 		STANDARD_SERIALIZER(LayerMask);
 		STANDARD_SERIALIZER(LayerRef);
+		STANDARD_SERIALIZER(SceneObjectRef);
 
 		// Special
 		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
@@ -300,6 +302,7 @@ namespace Glory
 		ResourceType::RegisterType<glm::vec4>();
 		ResourceType::RegisterType<glm::quat>();
 		ResourceType::RegisterType<LayerMask>();
+		ResourceType::RegisterType<SceneObjectRef>();
 
 		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
 		GloryReflect::Reflect::RegisterBasicType<LayerRef>("LayerRef");

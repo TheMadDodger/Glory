@@ -21,6 +21,8 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API size_t OpenSceneCount();
 		static GLORY_EDITOR_API UUID GetOpenSceneUUID(size_t index);
+		static GLORY_EDITOR_API GScene* GetOpenScene(size_t index);
+		static GLORY_EDITOR_API GScene* GetOpenScene(UUID uuid);
 
 		static GLORY_EDITOR_API void SaveScene(UUID uuid);
 		static GLORY_EDITOR_API void SaveSceneAs(UUID uuid);

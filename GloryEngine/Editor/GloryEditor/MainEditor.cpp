@@ -34,6 +34,7 @@
 #include "EditorSceneManager.h"
 #include "AssetReferencePropertyDrawer.h"
 #include "ArrayPropertyDrawer.h"
+#include "SceneObjectPropertyDrawer.h"
 #include "Gizmos.h"
 #include "ObjectMenu.h"
 #include "ObjectMenuCallbacks.h"
@@ -411,6 +412,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<EnumPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<StructPropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<SceneObjectPropertyDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()
