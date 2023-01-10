@@ -10,7 +10,7 @@ namespace Glory
 	struct BaseThreadedVar
 	{
 	protected:
-		std::mutex m_Mutex;
+		std::recursive_mutex m_Mutex;
 	};
 
 	template<typename _Ty>
