@@ -7,6 +7,9 @@ namespace GloryEngine.SceneManagement
     {
         #region Props
 
+        /// <summary>
+        /// The scene this object exists in
+        /// </summary>
         public virtual Scene Scene
         {
             get
@@ -18,14 +21,26 @@ namespace GloryEngine.SceneManagement
             private set { }
         }
 
+        /// <summary>
+        /// The index of the hierarchy order within the parent object
+        /// Or within the scene if no parent
+        /// </summary>
         public uint SiblingIndex
         {
             get => SceneObject_GetSiblingIndex(_objectID, _sceneID);
             set => SceneObject_SetSiblingIndex(_objectID, _sceneID, value);
         }
 
+        /// <summary>
+        /// Number of children parented to this object in the hierarchy
+        /// </summary>
         public uint ChildCount => SceneObject_GetChildCount(_objectID, _sceneID);
 
+        /// <summary>
+        /// The object this object is parented to in the hierarchy
+        /// Null if no parent
+        /// Set to null to unparent
+        /// </summary>
         public SceneObject Parent
         {
             get
@@ -36,6 +51,9 @@ namespace GloryEngine.SceneManagement
             set => SceneObject_SetParent(_objectID, _sceneID, value.ID);
         }
 
+        /// <summary>
+        /// Name of the object
+        /// </summary>
         public override string Name
         {
             get => SceneObject_GetName(_objectID, _sceneID);
@@ -53,7 +71,15 @@ namespace GloryEngine.SceneManagement
 
         #region Constructor
 
+        /// <summary>
+        /// Default constructor
+        /// Please use Scene.NewEmptyObject() instead
+        /// </summary>
         public SceneObject() { }
+        /// <summary>
+        /// Constructor with IDs
+        /// Please use Scene.NewEmptyObject() instead
+        /// </summary>
         public SceneObject(UInt64 objectID, UInt64 sceneID) : base(objectID) { _sceneID = sceneID; }
 
         #endregion
