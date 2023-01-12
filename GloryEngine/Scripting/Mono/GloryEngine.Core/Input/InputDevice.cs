@@ -3,13 +3,28 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Handle for an InputDevice
+    /// </summary>
     public struct InputDevice
     {
         #region Props
 
+        /// <summary>
+        /// Name of the InputDevice
+        /// </summary>
         public string Name => InputDevice_GetName(_deviceID);
+        /// <summary>
+        /// Type of the InputDevice
+        /// </summary>
         public InputDeviceType DeviceType => InputDevice_GetInputDeviceType(_deviceID);
+        /// <summary>
+        /// The index of the InputDevice
+        /// </summary>
         public uint DeviceID => InputDevice_GetDeviceID(_deviceID);
+        /// <summary>
+        /// The player that is currently using this device
+        /// </summary>
         public int PlayerIndex => InputDevice_GetPlayerIndex(_deviceID);
 
         #endregion

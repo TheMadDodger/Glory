@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// A handle for a camera
+    /// </summary>
     public struct Camera
     {
         #region Props

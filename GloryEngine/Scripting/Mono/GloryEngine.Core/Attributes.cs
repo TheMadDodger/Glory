@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GloryEngine
 {
     [System.AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     sealed class SerializeFieldAttribute : Attribute
     {
-        // See the attribute guidelines at 
+        // See the attribute guidelines at
         //  http://go.microsoft.com/fwlink/?LinkId=85236
         readonly string positionalString;
 

@@ -3,11 +3,20 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Handle for an Entity
+    /// </summary>
     public struct Entity
     {
 		#region Props
 
+        /// <summary>
+        /// ID of the Entity
+        /// </summary>
 		public UInt64 EntityID => _entityID;
+        /// <summary>
+        /// ID of the scene the Entity exists in
+        /// </summary>
 		public UInt64 SceneID => _sceneID;
 
 		#endregion
@@ -31,6 +40,11 @@ namespace GloryEngine.Entities
 
         #region Methods
 
+        /// <summary>
+        /// Gets a native component by type on the Entity that owns this component
+        /// </summary>
+        /// <typeparam name="T">Type of the native component to get</typeparam>
+        /// <returns>The component that matches the type, null if the Entity does not have the component</returns>
         public T GetComponent<T>() where T : EntityComponent, new()
         {
             return EntityComponentManager.GetComponent<T>(ref this);

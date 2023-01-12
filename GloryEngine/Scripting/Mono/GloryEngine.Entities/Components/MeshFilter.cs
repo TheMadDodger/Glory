@@ -7,6 +7,9 @@ namespace GloryEngine.Entities
     {
         #region Props
 
+        /// <summary>
+        /// Mesh of the MeshFilter
+        /// </summary>
         public Mesh Mesh
         {
             get => MeshFilter_GetMesh(ref _entity, _objectID);

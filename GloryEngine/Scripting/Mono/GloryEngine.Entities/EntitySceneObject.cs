@@ -7,6 +7,9 @@ namespace GloryEngine.Entities
     {
         #region Props
 
+        /// <summary>
+        /// The EntityScene this EntitySceneObject exists in
+        /// </summary>
         public override Scene Scene
         {
             get

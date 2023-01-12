@@ -13,6 +13,11 @@ namespace GloryEngine
 
         #region Methods
 
+        /// <summary>
+        /// Get a loaded resource by ID
+        /// </summary>
+        /// <param name="id">ID of the resource</param>
+        /// <returns></returns>
         public static Resource GetResource(UInt64 id)
         {
             if (!_resources.ContainsKey(id)) return null;

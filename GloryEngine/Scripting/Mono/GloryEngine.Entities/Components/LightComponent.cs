@@ -7,6 +7,9 @@ namespace GloryEngine.Entities
     {
 		#region Props
 
+		/// <summary>
+		/// Color of the light
+		/// </summary>
 		public Vector4 Color
         {
 			get => LightComponent_GetColor(ref _entity, _objectID);
@@ -14,12 +17,18 @@ namespace GloryEngine.Entities
 
 		}
 
+		/// <summary>
+		/// Intensity of the light
+		/// </summary>
 		public float Intensity
         {
 			get => LightComponent_GetIntensity(ref _entity, _objectID);
 			set => LightComponent_SetIntensity(ref _entity, _objectID, value);
 		}
 
+		/// <summary>
+		/// Range of the light
+		/// </summary>
 		public float Range
         {
 			get => LightComponent_GetRange(ref _entity, _objectID);

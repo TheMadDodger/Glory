@@ -7,6 +7,9 @@ namespace GloryEngine.Entities
     {
         #region Props
 
+        /// <summary>
+        /// The layer set on this component
+        /// </summary>
         public Layer Layer
         {
             get => LayerComponent_GetLayer(ref _entity, _objectID);

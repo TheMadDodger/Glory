@@ -7,12 +7,18 @@ namespace GloryEngine.Entities
     {
         #region Props
 
+        /// <summary>
+        /// Material to redner the Mesh with
+        /// </summary>
         public Material Material
         {
             get => MeshRenderer_GetMaterial(ref _entity, _objectID);
             set => MeshRenderer_SetMaterial(ref _entity, _objectID, value != null ? value.ID : 0);
         }
 
+        /// <summary>
+        /// The mesh to render
+        /// </summary>
         public Mesh Mesh
         {
             get => MeshRenderer_GetMesh(ref _entity, _objectID);

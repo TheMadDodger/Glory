@@ -7,38 +7,64 @@ namespace GloryEngine.Entities
     {
         #region Props
 
+        /// <summary>
+        /// The position of the Entity in parent space
+        /// </summary>
         public Vector3 LocalPosition
         {
             get => Transform_GetLocalPosition(ref _entity, _objectID);
             set => Transform_SetLocalPosition(ref _entity, _objectID, ref value);
         }
 
+        /// <summary>
+        /// The Quaternion rotation of the Entity in parent space
+        /// </summary>
         public Quaternion LocalRotation
         {
             get => Transform_GetLocalRotation(ref _entity, _objectID);
             set => Transform_SetLocalRotation(ref _entity, _objectID, ref value);
         }
 
+        /// <summary>
+        /// The Euler rotation of the Entity in parent space
+        /// </summary>
         public Vector3 LocalRotationEuler
         {
             get => Transform_GetLocalRotationEuler(ref _entity, _objectID);
             set => Transform_SetLocalRotationEuler(ref _entity, _objectID, ref value);
         }
 
+        /// <summary>
+        /// The scale of the Entity in parent space
+        /// </summary>
         public Vector3 LocalScale
         {
             get => Transform_GetLocalScale(ref _entity, _objectID);
             set => Transform_SetLocalScale(ref _entity, _objectID, ref value);
         }
 
+        /// <summary>
+        /// The direction the z axis of the Entity is facing
+        /// </summary>
         public Vector3 Forward
         {
             get => Transform_GetForward(ref _entity, _objectID);
             set => Transform_SetForward(ref _entity, _objectID, ref value);
         }
+
+        /// <summary>
+        /// The direction the x axis of the Entity is facing
+        /// </summary>
         public Vector3 Right => Transform_GetRight(ref _entity, _objectID);
+
+        /// <summary>
+        /// The direction the y axis of the Entity is facing
+        /// </summary>
         public Vector3 Up => Transform_GetUp(ref _entity, _objectID);
 
+        /// <summary>
+        /// Transform matrix of the Entity in world space
+        /// </summary>
         public Mat4 World => Transform_GetWorld(ref _entity, _objectID);
 
         #endregion
