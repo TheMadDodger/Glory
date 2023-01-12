@@ -48,28 +48,28 @@ namespace GloryEngine.SceneManagement
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 SceneManager_CreateEmptyScene(string name = "Empty Scene");
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern uint SceneManager_OpenScenesCount();
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 SceneManager_GetOpenScene(uint index);
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 SceneManager_GetOpenSceneByUUID(UInt64 sceneID);
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 SceneManager_GetActiveScene();
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_SetActiveScene(UInt64 sceneID);
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_CloseAllScenes();
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_OpenScene(string path);
-        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_CloseScene(UInt64 sceneID);
 

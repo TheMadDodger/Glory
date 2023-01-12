@@ -2,12 +2,21 @@
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Base class for native components
+    /// </summary>
     public class EntityComponent : Object
     {
         #region Props
 
+        /// <summary>
+        /// The Entity handle that owns this component
+        /// </summary>
         public Entity Entity => _entity;
 
+        /// <summary>
+        /// Transform component linked to the entity that owns this component
+        /// </summary>
         public Transform Transform
         {
             get
@@ -40,6 +49,11 @@ namespace GloryEngine.Entities
 
         #region Methods
 
+        /// <summary>
+        /// Gets a native component by type on the Entity that owns this component
+        /// </summary>
+        /// <typeparam name="T">Type of the native component to get</typeparam>
+        /// <returns>The component that matches the type, null if the Entity does not have the component</returns>
         public T GetComponent<T>() where T : EntityComponent, new()
         {
             return Entity.GetComponent<T>();

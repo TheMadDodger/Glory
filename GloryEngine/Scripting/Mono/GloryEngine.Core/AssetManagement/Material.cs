@@ -14,91 +14,199 @@ namespace GloryEngine
 
         #region Methods
 
+        /// <summary>
+        /// Set the value of a float property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Float value to set the property with</param>
         public void SetFloat(string propertyName, float value)
         {
             Material_SetFloat(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current float value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GetFloat(string propertyName, out float value)
         {
             return Material_GetFloat(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Set the value of a double property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">double value to set the property with</param>
         public void SetDouble(string propertyName, double value)
         {
             Material_SetDouble(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current double value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GetDouble(string propertyName, out double value)
         {
             return Material_GetDouble(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Set the value of an int property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Integer value to set the property with</param>
         public void SetInt(string propertyName, int value)
         {
             Material_SetInt(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current int value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GetInt(string propertyName, out int value)
         {
             return Material_GetInt(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Set the value of an unsigned int property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Unsigned integer value to set the property with</param>
         public void SetUInt(string propertyName, uint value)
         {
             Material_SetUInt(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current unsigned int value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GetUInt(string propertyName, out uint value)
         {
             return Material_GetUInt(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Set the value of a bool property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Boolean value to set the property with</param>
         public void SetBool(string propertyName, bool value)
         {
             Material_SetBool(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current bool value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GetBool(string propertyName, out bool value)
         {
             return Material_GetBool(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Set the value of a Vector2 property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Vector2 value to set the property with</param>
         public void SetVec2(string propertyName, Vector2 value)
         {
             Material_SetVec2(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current Vector2 value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GeVec2(string propertyName, out Vector2 value)
         {
             return Material_GetVec2(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Set the value of a Vector3 property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Vector3 value to set the property with</param>
         public void SetVec3(string propertyName, Vector3 value)
         {
             Material_SetVec3(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current Vector3 value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GeVec3(string propertyName, out Vector3 value)
         {
             return Material_GetVec3(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Set the value of a Vector4 property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Vector4 value to set the property with</param>
         public void SetVec4(string propertyName, Vector4 value)
         {
             Material_SetVec4(_objectID, propertyName, value);
         }
 
+        /// <summary>
+        /// Get the current Vector4 value of a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Value to write to</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GeVec4(string propertyName, out Vector4 value)
         {
             return Material_GetVec4(_objectID, propertyName, out value);
         }
 
+        /// <summary>
+        /// Bind a texture to a material property
+        /// If the property is not found nothing happens
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">Image to bind the property to</param>
         public void SetTexture(string propertyName, Image value)
         {
             Material_SetTexture(_objectID, propertyName, value != null ? value.ID : 0);
         }
 
+        /// <summary>
+        /// Get the texture currently bound to a property
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">The out image</param>
+        /// <returns>True if successfull, false if the property does not exist</returns>
         public bool GetTexture(string propertyName, out Image value)
         {
             value = null;

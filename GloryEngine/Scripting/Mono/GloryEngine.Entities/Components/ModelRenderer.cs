@@ -7,14 +7,23 @@ namespace GloryEngine.Entities
     {
         #region Props
 
+        /// <summary>
+        /// The first material in the material list
+        /// </summary>
         public Material Material
         {
             get => ModelRenderer_GetMaterial(ref _entity, _objectID);
             set => ModelRenderer_SetMaterial(ref _entity, _objectID, value != null ? value.ID : 0);
         }
 
+        /// <summary>
+        /// Number of materials on this component
+        /// </summary>
         public uint MaterialCount => ModelRenderer_GetMaterialCount(ref _entity, _objectID);
 
+        /// <summary>
+        /// The Model to render
+        /// </summary>
         public Model Model
         {
             get => ModelRenderer_GetModel(ref _entity, _objectID);
@@ -25,23 +34,40 @@ namespace GloryEngine.Entities
 
         #region Methods
 
+        /// <summary>
+        /// Get a material from the array
+        /// </summary>
+        /// <param name="index">Index of the material</param>
+        /// <returns>The Material object or null of out of bounds</returns>
         public Material GetMaterial(uint index)
         {
             return ModelRenderer_GetMaterialAt(ref _entity, _objectID, index);
         }
 
+        /// <summary>
+        /// Add a material to the array
+        /// </summary>
+        /// <param name="material">The Material to add</param>
         public void AddMaterial(Material material)
         {
             if (material == null) return;
             ModelRenderer_AddMaterial(ref _entity, _objectID, material.ID);
         }
 
+        /// <summary>
+        /// Set a material at a specific index in the array
+        /// </summary>
+        /// <param name="index">Index to set the material</param>
+        /// <param name="material">The Material to set</param>
         public void SetMaterial(uint index, Material material)
         {
             if (material == null) return;
             ModelRenderer_SetMaterialAt(ref _entity, _objectID, index, material.ID);
         }
 
+        /// <summary>
+        /// Clears the material array
+        /// </summary>
         public void ClearMaterials()
         {
             ModelRenderer_ClearMaterials(ref _entity, _objectID);

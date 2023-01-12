@@ -7,6 +7,11 @@ namespace GloryEngine
     {
         #region Props
 
+        /// <summary>
+        /// Name of the resource
+        /// For main assets this is the file name
+        /// For sub assets this is the generated name of the subasset
+        /// </summary>
         public override string Name
         {
             get => Resource_GetName(_objectID);

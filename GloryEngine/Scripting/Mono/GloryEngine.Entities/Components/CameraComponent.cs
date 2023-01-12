@@ -7,48 +7,73 @@ namespace GloryEngine.Entities
 	{
 		#region Props
 
+		/// <summary>
+		/// Half angle of the Field of View in degrees
+		/// </summary>
 		public float HalfFOV
 		{
 			get => CameraComponent_GetHalfFOV(ref _entity, _objectID);
 			set => CameraComponent_SetHalfFOV(ref _entity, _objectID, value);
 		}
 
+		/// <summary>
+		/// How close objects can get to the camera before they are clipped
+		/// </summary>
 		public float Near
 		{
 			get => CameraComponent_GetNear(ref _entity, _objectID);
 			set => CameraComponent_SetNear(ref _entity, _objectID, value);
 		}
 
+		/// <summary>
+		/// How far the camera should render before objects are clipped
+		/// </summary>
 		public float Far
 		{
 			get => CameraComponent_GetFar(ref _entity, _objectID);
 			set => CameraComponent_SetFar(ref _entity, _objectID, value);
 		}
 
+		/// <summary>
+		/// The index of the display this camera should render to
+		/// This is an internal display
+		/// </summary>
 		public int DisplayIndex
 		{
 			get => CameraComponent_GetDisplayIndex(ref _entity, _objectID);
 			set => CameraComponent_SetDisplayIndex(ref _entity, _objectID, value);
 		}
 
+		/// <summary>
+		/// Controls rendering order, ordered by high to low
+		/// </summary>
 		public int Priority
 		{
 			get => CameraComponent_GetPriority(ref _entity, _objectID);
 			set => CameraComponent_SetPriority(ref _entity, _objectID, value);
 		}
 
+		/// <summary>
+		/// Mask of layers this camera renders
+		/// </summary>
 		public LayerMask LayerMask
 		{
 			get => CameraComponent_GetLayerMask(ref _entity, _objectID);
 			set => CameraComponent_SetLayerMask(ref _entity, _objectID, ref value);
 		}
 
+		/// <summary>
+		/// The color the target is cleared with before rendering the camera to it
+		/// </summary>
 		public Vector4 ClearColor
 		{
 			get => CameraComponent_GetClearColor(ref _entity, _objectID);
 			set => CameraComponent_SetClearColor(ref _entity, _objectID, ref value);
 		}
 
+		/// <summary>
+		/// The Camera handle for this component
+		/// </summary>
 		public Camera Camera => new Camera(CameraComponent_GetCameraID(ref _entity, _objectID));
 
 		#endregion

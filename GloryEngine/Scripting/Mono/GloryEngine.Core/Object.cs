@@ -7,8 +7,14 @@ namespace GloryEngine
     {
         #region Props
 
+        /// <summary>
+        /// ID of the object
+        /// </summary>
         public UInt64 ID => _objectID;
 
+        /// <summary>
+        /// Name of the object
+        /// </summary>
         public virtual string Name
         {
             get => Object_GetName(_objectID);

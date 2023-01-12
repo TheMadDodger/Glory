@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace GloryEngine
 {
-    public class Behaviour : Object
-    {
-        //public void Update()
-        //{
-        //    Debug.LogInfo("Update was called!");
-        //}
-    }
+    /// <summary>
+    /// Base class for external scripting
+    /// </summary>
+    public class Behaviour : Object { }
 }

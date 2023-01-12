@@ -14,6 +14,11 @@ namespace GloryEngine.Entities
 
         #region Methods
 
+        /// <summary>
+        /// Gets a native component by type on an Entity
+        /// </summary>
+        /// <typeparam name="T">Type of the native component to get</typeparam>
+        /// <returns>The component that matches the type, null if the Entity does not have the component</returns>
         public static T GetComponent<T>(ref Entity entity) where T : EntityComponent, new()
         {
             UInt64 componentID = Component_GetComponentID(ref entity, typeof(T).Name);

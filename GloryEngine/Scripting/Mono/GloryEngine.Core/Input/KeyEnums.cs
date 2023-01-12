@@ -1,5 +1,8 @@
 ﻿namespace GloryEngine
 {
+	/// <summary>
+	/// Key codes for keyboard keys
+	/// </summary>
 	public enum KeyboardKey
 	{
 		KeyEscape,
@@ -194,6 +197,10 @@
 		KeyboardKeyCount
 	};
 
+	/// <summary>
+	/// Key codes for mouse buttons
+	/// Up to 19 buttons + scroll wheel up and down are supported
+	/// </summary>
 	public enum MouseButton
 	{
 		MouseButtonLeft,
@@ -220,6 +227,9 @@
 		MouseButtonCount,
 	};
 
+	/// <summary>
+	/// Key codes for mouse axis
+	/// </summary>
 	public enum MouseAxis
 	{
 		MouseAxisX,

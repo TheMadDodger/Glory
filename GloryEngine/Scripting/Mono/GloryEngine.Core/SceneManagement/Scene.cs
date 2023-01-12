@@ -8,6 +8,9 @@ namespace GloryEngine.SceneManagement
     {
         #region Props
 
+        /// <summary>
+        /// Number of objects that exists in this Scene
+        /// </summary>
         public uint ObjectsCount => Scene_ObjectsCount(_objectID);
 
         #endregion
@@ -27,18 +30,31 @@ namespace GloryEngine.SceneManagement
 
         #region Methods
 
+        /// <summary>
+        /// Create a new empty object in this scene
+        /// </summary>
+        /// <returns>The newly created object</returns>
         public SceneObject NewEmptyObject()
         {
             UInt64 objectID = Scene_NewEmptyObject(_objectID);
             return GetNewObject(objectID);
         }
 
+        /// <summary>
+        /// Create a new empty object with name in this scene
+        /// </summary>
+        /// <param name="name">Name to give to the object</param>
+        /// <returns>The newly created object</returns>
         public SceneObject NewEmptyObject(string name)
         {
             UInt64 objectID = Scene_NewEmptyObjectWithName(_objectID, name);
             return GetNewObject(objectID);
         }
 
+        /// <summary>
+        /// Get an object in the scene
+        /// </summary>
+        /// <param name="index">Index of the object</param>
         public SceneObject GetSceneObject(uint index)
         {
             UInt64 objectID = Scene_GetSceneObject(_objectID, index);
@@ -49,6 +65,11 @@ namespace GloryEngine.SceneManagement
             return sceneObject;
         }
 
+        /// <summary>
+        /// Get an object in the scene by ID
+        /// </summary>
+        /// <param name="objectID">ID of the object to get</param>
+        /// <returns></returns>
         public SceneObject GetSceneObject(UInt64 objectID)
         {
             if (objectID == 0) return null;
@@ -58,6 +79,10 @@ namespace GloryEngine.SceneManagement
             return sceneObject;
         }
 
+        /// <summary>
+        /// Destroy an object in the scene
+        /// </summary>
+        /// <param name="sceneObject">The object to destroy</param>
         public void Destroy(SceneObject sceneObject)
         {
             if (sceneObject == null) return;

@@ -2,10 +2,16 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// A handle for an InputMode
+    /// </summary>
     public struct InputMode
     {
         #region Props
 
+        /// <summary>
+        /// Number of devices that this InputMode requires
+        /// </summary>
         public uint DeviceCount => InputMode_GetDeviceCount(_name);
 
         #endregion
@@ -27,6 +33,11 @@ namespace GloryEngine
 
         #region Methods
 
+        /// <summary>
+        /// Get the device type that this InputMode needs
+        /// </summary>
+        /// <param name="index">Index of the device type</param>
+        /// <returns>The device type this InputMode needs at the specified index</returns>
         public InputDeviceType GetInputDeviceType(uint index) => InputMode_GetInputDeviceType(_name, index);
 
         #endregion
