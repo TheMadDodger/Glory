@@ -14,6 +14,7 @@
 #include <ImageData.h>
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
+#include <SceneObject.h>
 
 namespace Glory
 {
@@ -26,6 +27,7 @@ namespace Glory
 		{"GloryEngine.MaterialInstance", SerializedType::ST_Asset},
 		{"GloryEngine.Model", SerializedType::ST_Asset},
 		{"GloryEngine.Image", SerializedType::ST_Asset},
+		{"GloryEngine.SceneManagement.SceneObject", SerializedType::ST_Object},
 	};
 
 	std::map<std::string, size_t> m_MonoTypeToElementHash = {
