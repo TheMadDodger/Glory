@@ -413,6 +413,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<EnumPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<StructPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<SceneObjectPropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<SceneObjectRedirectPropertyDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()

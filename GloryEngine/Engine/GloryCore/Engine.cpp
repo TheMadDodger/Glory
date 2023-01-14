@@ -7,6 +7,7 @@
 #include "ArrayPropertySerializer.h"
 #include "EnumPropertySerializer.h"
 #include "StructPropertySerializer.h"
+#include "SceneObjectRefSerializer.h"
 #include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
 #include "ScriptExtensions.h"
@@ -14,8 +15,8 @@
 #include "GloryContext.h"
 #include "WindowsDebugConsole.h"
 #include "LayerRef.h"
-#include <algorithm>
 #include "SceneObjectRef.h"
+#include <algorithm>
 
 namespace Glory
 {
@@ -289,6 +290,7 @@ namespace Glory
 		PropertySerializer::RegisterSerializer<ArrayPropertySerializer>();
 		PropertySerializer::RegisterSerializer<EnumPropertySerializer>();
 		PropertySerializer::RegisterSerializer<StructPropertySerializer>();
+		PropertySerializer::RegisterSerializer<SceneObjectRefSerializer>();
 	}
 
 	void Engine::RegisterBasicTypes()

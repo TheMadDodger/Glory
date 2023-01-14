@@ -126,7 +126,7 @@ namespace Glory::Editor
 
 		if (it == m_PropertyDrawers.end())
 		{
-			//ImGui::Text(prop.m_Name.c_str());
+			ImGui::Text(label.c_str());
 			return false;
 		}
 
