@@ -254,7 +254,7 @@ namespace Glory
 		return m_Name;
 	}
 
-	const Visibility& AssemblyClassField::FielddVisibility() const
+	const Visibility& AssemblyClassField::FieldVisibility() const
 	{
 		return m_Visibility;
 	}

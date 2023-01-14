@@ -34,7 +34,7 @@ namespace Glory
 		MonoClassField* ClassField() const;
 		MonoType* FieldType() const;
 		const char* Name() const;
-		const Visibility& FielddVisibility() const;
+		const Visibility& FieldVisibility() const;
 		const char* TypeName() const;
 		const int Size() const;
 		const size_t TypeHash() const;

@@ -81,7 +81,7 @@ namespace YAML
 		{
 			Node node{YAML::NodeType::Map};
 			node["SceneUUID"] = objectRef.SceneUUID();
-			node["ObjectUUID"] = objectRef.SceneUUID();
+			node["ObjectUUID"] = objectRef.ObjectUUID();
 			return node;
 		}
 
