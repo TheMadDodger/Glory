@@ -71,7 +71,7 @@ namespace Glory
 		for (size_t i = 0; i < pClass->NumFields(); i++)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
-			if (pField->FielddVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
+			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
 
 			ScriptProperty prop;
 			prop.m_Name = pField->Name();
@@ -147,7 +147,7 @@ namespace Glory
 		for (size_t i = 0; i < pClass->NumFields(); i++)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
-			if (pField->FielddVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
+			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
 
 			YAML::Node valueNode = node[pField->Name()];
 			if (!valueNode.IsDefined()) continue;
@@ -165,18 +165,11 @@ namespace Glory
 			}
 			case ST_Object:
 			{
-				//SceneObjectRef objectRef;
-				//SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &objectRef, 0);
-				//MonoObject* pMonoObject;
-				//pField->GetValue(pDummyObject, &pMonoObject);
-				//if (pMonoObject)
-				//{
-				//	MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_objectID");
-				//	MonoClassField* pSceneIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_sceneID");
-				//	mono_field_get_value(pMonoObject, pIDField, objectRef.ObjectUUIDMember());
-				//	mono_field_get_value(pMonoObject, pSceneIDField, objectRef.SceneUUIDMember());
-				//}
-				//PropertySerializer::SerializeProperty(&prop, e);
+				SceneObjectRef objectRef;
+				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &objectRef, 0);
+				PropertySerializer::DeserializeProperty(&prop, valueNode);
+				MonoObject* pSceneObject = MonoObjectManager::GetSceneObject();
+				pField->SetValue(pMonoObject, pSceneObject);
 				break;
 			}
 
@@ -204,7 +197,7 @@ namespace Glory
 		for (size_t i = 0; i < pClass->NumFields(); i++)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
-			if (pField->FielddVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
+			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
 
 
 			switch (pField->TypeHash())
