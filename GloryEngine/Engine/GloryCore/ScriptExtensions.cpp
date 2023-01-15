@@ -15,8 +15,8 @@ namespace Glory
 		return m_Language;
 	}
 
-	ScriptingLib::ScriptingLib(const std::string& language, const std::string& libraryName, const std::string& location, bool reloadable, bool isMainLib)
-		: ScriptExtension(language), m_LibraryName(libraryName), m_Location(location), m_Reloadable(reloadable), m_MainLib(isMainLib)
+	ScriptingLib::ScriptingLib(const std::string& language, const std::string& libraryName, const std::string& location, bool reloadable, void* data, bool isMainLib)
+		: ScriptExtension(language), m_LibraryName(libraryName), m_Location(location), m_Reloadable(reloadable), m_Data(data), m_MainLib(isMainLib)
 	{
 
 	}
@@ -44,6 +44,11 @@ namespace Glory
 	bool ScriptingLib::IsMainLib() const
 	{
 		return m_MainLib;
+	}
+
+	const void* ScriptingLib::Data() const
+	{
+		return m_Data;
 	}
 
 	InternalCall::InternalCall(const std::string& language, const std::string& scriptMethod, const void* pRedirectMethod)

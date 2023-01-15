@@ -85,10 +85,12 @@ namespace Glory
 		std::map<std::string, AssemblyClass> m_Classes;
 	};
 
+	class IMonoLibManager;
+
 	class AssemblyBinding
 	{
 	public:
-		GLORY_API AssemblyBinding(const ScriptingLib& name);
+		GLORY_API AssemblyBinding(const ScriptingLib& name, IMonoLibManager* pLibManager);
 		virtual GLORY_API ~AssemblyBinding();
 
 		GLORY_API MonoImage* GetMonoImage();
@@ -110,6 +112,7 @@ namespace Glory
 		MonoAssembly* m_pAssembly;
 		MonoImage* m_pImage;
 		std::map<std::string, AssemblyNamespace> m_Namespaces;
+		IMonoLibManager* m_pLibManager;
 	};
 
 	class Attributes

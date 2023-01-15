@@ -18,7 +18,7 @@ namespace Glory
 		void RegisterExtender(Module* pOwner, IScriptExtender* pExtender);
 		void RegisterManagedExtender(Module* pOwner, IScriptExtender* pExtender);
 
-		void AddInternalLib(const std::string& name);
+		void AddInternalLib(const std::string& name, void* data);
 
 		size_t InternalLibCount() const;
 		const ScriptingLib& GetInternalLib(size_t index) const;
@@ -39,7 +39,6 @@ namespace Glory
 
 		std::vector<InternalCall> m_InternalCalls;
 		std::vector<ScriptingLib> m_Libs;
-
 
 		std::string m_CurrentAppendingLanguage;
 		Module* m_pCurrentAppendingModule;

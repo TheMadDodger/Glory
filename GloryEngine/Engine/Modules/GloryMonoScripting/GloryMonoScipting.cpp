@@ -4,18 +4,21 @@
 #include "InputCSAPI.h"
 #include "MonoLibManager.h"
 #include "MonoManager.h"
+#include "CoreLibManager.h"
 #include <Game.h>
 
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(GloryMonoScipting, 0, 1);
 
-	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp")
+	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp"), m_pCoreLibManager(new CoreLibManager())
 	{
 	}
 
 	GloryMonoScipting::~GloryMonoScipting()
 	{
+		delete m_pCoreLibManager;
+		m_pCoreLibManager = nullptr;
 	}
 
 	void GloryMonoScipting::Initialize()
@@ -79,6 +82,6 @@ namespace Glory
 
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)
 	{
-		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll");
+		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll", m_pCoreLibManager);
 	}
 }

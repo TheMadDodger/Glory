@@ -8,6 +8,8 @@
 
 namespace Glory
 {
+    class CoreLibManager;
+
 	class GloryMonoScipting : public ScriptingModuleTemplate<MonoScript, MonoScriptLoader>, IScriptExtender
 	{
     public:
@@ -30,5 +32,8 @@ namespace Glory
         virtual std::string Language() override;
         virtual void GetInternalCalls(std::vector<InternalCall>& internalCalls) override;
         virtual void GetLibs(ScriptingExtender* pScriptingExtender) override;
+
+    private:
+        CoreLibManager* m_pCoreLibManager;
 	};
 }

@@ -9,12 +9,14 @@ namespace Glory
 	{
 		std::string name = lib.LibraryName();
 		size_t index = m_Assemblies.size();
-		m_Assemblies.emplace(name, AssemblyBinding(lib));
+		const void* data = lib.Data();
+		IMonoLibManager* pLibManager = data ? (IMonoLibManager*)data : nullptr;
+		m_Assemblies.emplace(name, AssemblyBinding{ lib, pLibManager });
 		if (lib.IsMainLib()) m_MainAssemblyName = lib.LibraryName();
 		m_Assemblies.at(name).Initialize(pDomain);
 	}
 
-	GLORY_API void MonoLibManager::ReloadAll(MonoDomain* pDomain)
+	void MonoLibManager::ReloadAll(MonoDomain* pDomain)
 	{
 		for (auto it = m_Assemblies.begin(); it != m_Assemblies.end(); it++)
 		{
@@ -42,12 +44,12 @@ namespace Glory
 		return &m_Assemblies.at(name);
 	}
 
-	GLORY_API AssemblyBinding* MonoLibManager::GetMainAssembly()
+	AssemblyBinding* MonoLibManager::GetMainAssembly()
 	{
 		return &m_Assemblies.at(m_MainAssemblyName);
 	}
 
-	GLORY_API const std::string& MonoLibManager::GetMainAssemblyName()
+	const std::string& MonoLibManager::GetMainAssemblyName()
 	{
 		return m_MainAssemblyName;
 	}
