@@ -50,7 +50,7 @@ namespace Glory
 		m_pOwners[pExtender] = pOwner;
 	}
 
-	void ScriptingExtender::AddInternalLib(const std::string& name)
+	void ScriptingExtender::AddInternalLib(const std::string& name, void* data)
 	{
 		if (m_CurrentAppendingLanguage == "" || m_pCurrentAppendingModule == nullptr)
 		{
@@ -61,7 +61,7 @@ namespace Glory
 		const ModuleMetaData& metaData = m_pCurrentAppendingModule->GetMetaData();
 		std::filesystem::path pathToLib = metaData.Path();
 		pathToLib = pathToLib.parent_path().append("Scripting").append(m_CurrentAppendingLanguage);
-		m_Libs.push_back(ScriptingLib(m_CurrentAppendingLanguage, name, pathToLib.string(), false));
+		m_Libs.push_back(ScriptingLib(m_CurrentAppendingLanguage, name, pathToLib.string(), false, data));
 	}
 
 	size_t ScriptingExtender::InternalLibCount() const
@@ -74,7 +74,7 @@ namespace Glory
 		return m_Libs[index];
 	}
 
-	ScriptingExtender::ScriptingExtender()
+	ScriptingExtender::ScriptingExtender() : m_pCurrentAppendingModule(nullptr)
 	{
 	}
 

@@ -28,7 +28,7 @@ namespace Glory
 		virtual ~MonoAssetManager();
 
 	private:
-		friend class AssemblyBinding;
+		friend class CoreLibManager;
 		static MonoClass* m_pAssetManagerClass;
 		static MonoMethod* m_pGetResourceObjectMethod;
 		static MonoMethod* m_pMakeResourceMethod;

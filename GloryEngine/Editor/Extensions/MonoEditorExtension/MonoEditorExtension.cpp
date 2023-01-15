@@ -99,7 +99,8 @@ namespace Glory::Editor
 		std::string name = pProject->Name() + ".dll";
 		std::filesystem::path path = pProject->ProjectPath();
 		path = path.parent_path().append("Library/Assembly");
-		MonoManager::LoadLib(ScriptingLib("csharp", name, path.string(), true, true));
+		/* TODO: Lib manager for uuser assemblies */
+		MonoManager::LoadLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)

@@ -1,5 +1,6 @@
 #include "AssemblyBinding.h"
 #include "MonoAssetManager.h"
+#include "IMonoLibManager.h"
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/debug-helpers.h>
 #include <Debug.h>
@@ -13,7 +14,6 @@
 #include <ImageData.h>
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
-
 
 namespace Glory
 {
@@ -35,8 +35,8 @@ namespace Glory
 		{"GloryEngine.Image", ResourceType::GetHash<ImageData>()},
 	};
 
-	AssemblyBinding::AssemblyBinding(const ScriptingLib& lib)
-		: m_Lib(lib), m_pAssembly(nullptr), m_pImage(nullptr)
+	AssemblyBinding::AssemblyBinding(const ScriptingLib& lib, IMonoLibManager* pLibManager)
+		: m_Lib(lib), m_pAssembly(nullptr), m_pImage(nullptr), m_pLibManager(pLibManager)
 	{
 	}
 
@@ -44,6 +44,7 @@ namespace Glory
 	{
 		m_pAssembly = nullptr;
 		m_pImage = nullptr;
+		m_pLibManager = nullptr;
 	}
 
 	void AssemblyBinding::Initialize(MonoDomain* pDomain)
@@ -76,14 +77,12 @@ namespace Glory
 		m_pImage = mono_assembly_get_image(m_pAssembly);
 		delete[] data;
 
-		if (m_Lib.LibraryName() == "GloryEngine.Core.dll")
-		{
-			MonoAssetManager::Initialize(m_pImage);
-		}
+		if (m_pLibManager) m_pLibManager->Initialize(this);
 	}
 
 	void AssemblyBinding::Destroy()
 	{
+		if (m_pLibManager) m_pLibManager->Cleanup();
 		m_Namespaces.clear();
 		m_pAssembly = nullptr;
 		m_pImage = nullptr;
@@ -272,7 +271,7 @@ namespace Glory
 	{
 		return m_TypeHash;
 	}
-	
+
 	const size_t AssemblyClassField::ElementTypeHash() const
 	{
 		return m_ElementTypeHash;
