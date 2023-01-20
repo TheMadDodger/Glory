@@ -58,3 +58,4 @@ Cache
 Library
 Project.lock
 *.csproj
+*.aps
