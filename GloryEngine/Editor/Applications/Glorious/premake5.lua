@@ -11,8 +11,8 @@ project "Glorious"
 
 	files
 	{
-		"**.h",
-		"**.cpp",
+		"*.h",
+		"*.cpp",
 		"premake5.lua"
 	}
 
@@ -106,6 +106,8 @@ project "Glorious"
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v142"
+		files { 'windows.rc', '../Icon/windows.ico' }
+		vpaths { ['Resources/*'] = { 'windows.rc', '../Icon/windows.ico' } }
 
 		defines
 		{
