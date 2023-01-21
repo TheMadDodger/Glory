@@ -18,7 +18,7 @@ namespace Glory::Editor
 		if (!m_pSceneTumbnail)
 		{
 			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule<ImageData>();
-			m_pSceneTumbnail = (ImageData*)pLoader->Load("./EditorAssets/scene.png");
+			m_pSceneTumbnail = (ImageData*)pLoader->Load("./EditorAssets/Thumb/scene.png");
 		}
 
 		return m_pSceneTumbnail;
