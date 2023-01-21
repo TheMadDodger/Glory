@@ -186,7 +186,8 @@ namespace Glory
 
 				if (pMonoResourceObject)
 				{
-					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoResourceObject), "_objectID");
+					MonoClass* pMonoClass = mono_object_get_class(pMonoResourceObject);
+					MonoClassField* pIDField = mono_class_get_field_from_name(pMonoClass, "_objectID");
 					mono_field_get_value(pMonoResourceObject, pIDField, &uuid);
 				}
 

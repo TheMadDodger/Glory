@@ -8,7 +8,7 @@ namespace GloryEngine
         #region Props
 
         /// <summary>
-        /// ID of the object
+        /// ID of this object
         /// </summary>
         public UInt64 ID => _objectID;
 
@@ -25,6 +25,9 @@ namespace GloryEngine
 
         #region Fields
 
+        /// <summary>
+        /// ID of this object
+        /// </summary>
         protected UInt64 _objectID;
 
         #endregion

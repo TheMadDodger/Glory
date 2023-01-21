@@ -5,11 +5,7 @@ namespace GloryEngine.Entities
 {
     public class EntityScene : Scene
     {
-        #region Methods
-
-        protected override SceneObject CreateSceneObject(UInt64 objectID)
-            => new EntitySceneObject(objectID, _objectID);
-
-        #endregion
+        protected EntityScene() { }
+        protected EntityScene(UInt64 sceneID) : base(sceneID) { }
     }
 }

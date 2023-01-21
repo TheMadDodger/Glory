@@ -1,6 +1,8 @@
 #include "CoreCSAPI.h"
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
+#include "MonoSceneManager.h"
+
 #include <GameTime.h>
 #include <LayerManager.h>
 #include <EngineProfiler.h>
@@ -259,21 +261,27 @@ namespace Glory
 
 #pragma region Scenes
 
-	uint64_t Scene_NewEmptyObject(uint64_t sceneID)
+	MonoObject* Scene_NewEmptyObject(uint64_t sceneID)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(UUID(sceneID));
-		if(!pScene) return 0;
+		if(!pScene) return nullptr;
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		if (!pObjectManager) return nullptr;
 		SceneObject* pNewObject = pScene->CreateEmptyObject();
-		return pNewObject->GetUUID();
+		if (!pNewObject) return nullptr;
+		return pObjectManager->GetSceneObject(pNewObject);
 	}
 
-	uint64_t Scene_NewEmptyObjectWithName(uint64_t sceneID, MonoString* name)
+	MonoObject* Scene_NewEmptyObjectWithName(uint64_t sceneID, MonoString* name)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(UUID(sceneID));
-		if (!pScene) return 0;
+		if (!pScene) return nullptr;
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		if (!pObjectManager) return nullptr;
 		const std::string nameStr = mono_string_to_utf8(name);
-		SceneObject* pNewObject = pScene->CreateEmptyObject(nameStr, uint64_t());
-		return pNewObject->GetUUID();
+		SceneObject* pNewObject = pScene->CreateEmptyObject(nameStr, UUID());
+		if (!pNewObject) return nullptr;
+		return pObjectManager->GetSceneObject(pNewObject);
 	}
 
 	size_t Scene_ObjectsCount(uint64_t sceneID)
@@ -283,12 +291,26 @@ namespace Glory
 		return pScene->SceneObjectsCount();
 	}
 
-	uint64_t Scene_GetSceneObject(uint64_t sceneID, size_t index)
+	MonoObject* Scene_GetSceneObject(uint64_t sceneID, uint64_t objectID)
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(UUID(sceneID));
-		if (!pScene) return 0;
+		if (!pScene) return nullptr;
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		if (!pObjectManager) return nullptr;
+		SceneObject* pNewObject = pScene->FindSceneObject(UUID(objectID));
+		if (!pNewObject) return nullptr;
+		return pObjectManager->GetSceneObject(pNewObject);
+	}
+
+	MonoObject* Scene_GetSceneObjectAt(uint64_t sceneID, size_t index)
+	{
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(UUID(sceneID));
+		if (!pScene) return nullptr;
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		if (!pObjectManager) return nullptr;
 		SceneObject* pNewObject = pScene->GetSceneObject(index);
-		return pNewObject ? pNewObject->GetUUID() : 0;
+		if (!pNewObject) return nullptr;
+		return pObjectManager->GetSceneObject(pNewObject);
 	}
 
 	void Scene_Destroy(uint64_t sceneID, uint64_t objectID)
@@ -304,12 +326,12 @@ namespace Glory
 
 #pragma region Scene Management
 
-	uint64_t SceneManager_CreateEmptyScene(MonoString* name)
+	MonoObject* SceneManager_CreateEmptyScene(MonoString* name)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
-		if (!pScenes) return 0;
+		if (!pScenes) return nullptr;
 		GScene* pScene = pScenes->CreateEmptyScene(mono_string_to_utf8(name));
-		return pScene ? pScene->GetUUID() : 0;
+		return MonoSceneManager::GetSceneObject(pScene);
 	}
 
 	size_t SceneManager_OpenScenesCount()
@@ -319,28 +341,28 @@ namespace Glory
 		return pScenes->OpenScenesCount();
 	}
 
-	uint64_t SceneManager_GetOpenScene(size_t index)
+	MonoObject* SceneManager_GetOpenSceneAt(size_t index)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(index);
-		return pScene ? pScene->GetUUID() : 0;
+		return MonoSceneManager::GetSceneObject(pScene);
 	}
 
-	uint64_t SceneManager_GetOpenSceneByUUID(uint64_t sceneID)
+	MonoObject* SceneManager_GetOpenScene(uint64_t sceneID)
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
-		return pScene ? pScene->GetUUID() : 0;
+		return MonoSceneManager::GetSceneObject(pScene);
 	}
 
-	uint64_t SceneManager_GetActiveScene()
+	MonoObject* SceneManager_GetActiveScene()
 	{
 		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetScenesModule();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetActiveScene();
-		return pScene ? pScene->GetUUID() : 0;
+		return MonoSceneManager::GetSceneObject(pScene);
 	}
 
 	void SceneManager_SetActiveScene(uint64_t sceneID)
@@ -510,8 +532,8 @@ namespace Glory
 		BIND("GloryEngine.Profiler::EndSample", Profiler_EndSample);
 
 		// Objects
-		BIND("GloryEngine.Resource::Object_SetName", Object_SetName);
-		BIND("GloryEngine.Resource::Object_GetName", Object_GetName);
+		BIND("GloryEngine.Object::Object_SetName", Object_SetName);
+		BIND("GloryEngine.Object::Object_GetName", Object_GetName);
 
 		// Resources
 		BIND("GloryEngine.Resource::Resource_SetName", Resource_SetName);
@@ -552,32 +574,33 @@ namespace Glory
 		BIND("GloryEngine.Material::Material_GetTexture", Material_GetTexture);
 
 		// Scenes
-		BIND("GloryEngine.Scene::Scene_NewEmptyObject", Scene_NewEmptyObject);
-		BIND("GloryEngine.Scene::Scene_NewEmptyObjectWithName", Scene_NewEmptyObjectWithName);
-		BIND("GloryEngine.Scene::Scene_ObjectsCount", Scene_ObjectsCount);
-		BIND("GloryEngine.Scene::Scene_GetSceneObject", Scene_GetSceneObject);
-		BIND("GloryEngine.Scene::Scene_Destroy", Scene_Destroy);
+		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObject", Scene_NewEmptyObject);
+		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObjectWithName", Scene_NewEmptyObjectWithName);
+		BIND("GloryEngine.SceneManagement.Scene::Scene_ObjectsCount", Scene_ObjectsCount);
+		BIND("GloryEngine.SceneManagement.Scene::Scene_GetSceneObject", Scene_GetSceneObject);
+		BIND("GloryEngine.SceneManagement.Scene::Scene_GetSceneObjectAt", Scene_GetSceneObjectAt);
+		BIND("GloryEngine.SceneManagement.Scene::Scene_Destroy", Scene_Destroy);
 
 		// Scene Manager
-		BIND("GloryEngine.SceneManager::SceneManager_CreateEmptyScene", SceneManager_CreateEmptyScene);
-		BIND("GloryEngine.SceneManager::SceneManager_OpenScenesCount", SceneManager_OpenScenesCount);
-		BIND("GloryEngine.SceneManager::SceneManager_GetOpenScene", SceneManager_GetOpenScene);
-		BIND("GloryEngine.SceneManager::SceneManager_GetOpenSceneByUUID", SceneManager_GetOpenScene);
-		BIND("GloryEngine.SceneManager::SceneManager_GetActiveScene", SceneManager_GetActiveScene);
-		BIND("GloryEngine.SceneManager::SceneManager_SetActiveScene", SceneManager_SetActiveScene);
-		BIND("GloryEngine.SceneManager::SceneManager_CloseAllScenes", SceneManager_CloseAllScenes);
-		BIND("GloryEngine.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
-		BIND("GloryEngine.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CreateEmptyScene", SceneManager_CreateEmptyScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_OpenScenesCount", SceneManager_OpenScenesCount);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_GetOpenSceneAt", SceneManager_GetOpenSceneAt);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_GetOpenScene", SceneManager_GetOpenScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_GetActiveScene", SceneManager_GetActiveScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_SetActiveScene", SceneManager_SetActiveScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseAllScenes", SceneManager_CloseAllScenes);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
 
 		// Scene Objects
-		BIND("GloryEngine.SceneObject::SceneObject_GetName", SceneObject_GetName);
-		BIND("GloryEngine.SceneObject::SceneObject_SetName", SceneObject_SetName);
-		BIND("GloryEngine.SceneObject::SceneObject_GetSiblingIndex", SceneObject_GetSiblingIndex);
-		BIND("GloryEngine.SceneObject::SceneObject_SetSiblingIndex", SceneObject_SetSiblingIndex);
-		BIND("GloryEngine.SceneObject::SceneObject_GetChildCount", SceneObject_GetChildCount);
-		BIND("GloryEngine.SceneObject::SceneObject_GetChild", SceneObject_GetChild);
-		BIND("GloryEngine.SceneObject::SceneObject_GetParent", SceneObject_GetParent);
-		BIND("GloryEngine.SceneObject::SceneObject_SetParent", SceneObject_SetParent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetName", SceneObject_GetName);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetName", SceneObject_SetName);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetSiblingIndex", SceneObject_GetSiblingIndex);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetSiblingIndex", SceneObject_SetSiblingIndex);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetChildCount", SceneObject_GetChildCount);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetChild", SceneObject_GetChild);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetParent", SceneObject_GetParent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetParent", SceneObject_SetParent);
 	}
 
 	CoreCSAPI::CoreCSAPI() {}

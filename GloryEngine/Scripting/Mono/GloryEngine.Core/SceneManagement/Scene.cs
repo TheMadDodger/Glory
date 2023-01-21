@@ -23,8 +23,8 @@ namespace GloryEngine.SceneManagement
 
         #region Constructor
 
-        public Scene() : base() { }
-        public Scene(UInt64 sceneID) : base(sceneID) { }
+        protected Scene() : base() { }
+        protected Scene(UInt64 sceneID) : base(sceneID) { }
 
         #endregion
 
@@ -34,36 +34,20 @@ namespace GloryEngine.SceneManagement
         /// Create a new empty object in this scene
         /// </summary>
         /// <returns>The newly created object</returns>
-        public SceneObject NewEmptyObject()
-        {
-            UInt64 objectID = Scene_NewEmptyObject(_objectID);
-            return GetNewObject(objectID);
-        }
+        public SceneObject NewEmptyObject() => Scene_NewEmptyObject(_objectID);
 
         /// <summary>
         /// Create a new empty object with name in this scene
         /// </summary>
         /// <param name="name">Name to give to the object</param>
         /// <returns>The newly created object</returns>
-        public SceneObject NewEmptyObject(string name)
-        {
-            UInt64 objectID = Scene_NewEmptyObjectWithName(_objectID, name);
-            return GetNewObject(objectID);
-        }
+        public SceneObject NewEmptyObject(string name) => Scene_NewEmptyObjectWithName(_objectID, name);
 
         /// <summary>
         /// Get an object in the scene
         /// </summary>
         /// <param name="index">Index of the object</param>
-        public SceneObject GetSceneObject(uint index)
-        {
-            UInt64 objectID = Scene_GetSceneObject(_objectID, index);
-            if (objectID == 0) return null;
-            if (_sceneObjects.ContainsKey(objectID)) return _sceneObjects[objectID];
-            SceneObject sceneObject = CreateSceneObject(objectID);
-            _sceneObjects.Add(objectID, sceneObject);
-            return sceneObject;
-        }
+        public SceneObject GetSceneObjectAt(uint index) => Scene_GetSceneObjectAt(_objectID, index);
 
         /// <summary>
         /// Get an object in the scene by ID
@@ -74,7 +58,8 @@ namespace GloryEngine.SceneManagement
         {
             if (objectID == 0) return null;
             if (_sceneObjects.ContainsKey(objectID)) return _sceneObjects[objectID];
-            SceneObject sceneObject = CreateSceneObject(objectID);
+            SceneObject sceneObject = Scene_GetSceneObject(_objectID, objectID);
+            if (sceneObject == null) return null;
             _sceneObjects.Add(objectID, sceneObject);
             return sceneObject;
         }
@@ -83,21 +68,12 @@ namespace GloryEngine.SceneManagement
         /// Destroy an object in the scene
         /// </summary>
         /// <param name="sceneObject">The object to destroy</param>
-        public void Destroy(SceneObject sceneObject)
+        public bool Destroy(SceneObject sceneObject)
         {
-            if (sceneObject == null) return;
-            Scene_Destroy(_objectID, sceneObject.ID);
+            if (sceneObject == null) return false;
+            if (!Scene_Destroy(_objectID, sceneObject.ID)) return false;
             _sceneObjects.Remove(sceneObject.ID);
-        }
-
-        virtual protected SceneObject CreateSceneObject(UInt64 objectID) => new SceneObject(objectID, _objectID);
-
-        private SceneObject GetNewObject(UInt64 objectID)
-        {
-            if (objectID == 0) return null;
-            SceneObject sceneObject = CreateSceneObject(objectID);
-            _sceneObjects.Add(objectID, sceneObject);
-            return sceneObject;
+            return true;
         }
 
         #endregion
@@ -105,19 +81,22 @@ namespace GloryEngine.SceneManagement
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern UInt64 Scene_NewEmptyObject(UInt64 sceneID);
+        private static extern SceneObject Scene_NewEmptyObject(UInt64 sceneID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern UInt64 Scene_NewEmptyObjectWithName(UInt64 sceneID, string name);
+        private static extern SceneObject Scene_NewEmptyObjectWithName(UInt64 sceneID, string name);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern uint Scene_ObjectsCount(UInt64 sceneID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern UInt64 Scene_GetSceneObject(UInt64 sceneID, uint index);
+        private static extern SceneObject Scene_GetSceneObject(UInt64 sceneID, UInt64 objectID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void Scene_Destroy(UInt64 sceneID, UInt64 objectID);
+        private static extern SceneObject Scene_GetSceneObjectAt(UInt64 sceneID, uint index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool Scene_Destroy(UInt64 sceneID, UInt64 objectID);
 
         #endregion
     }

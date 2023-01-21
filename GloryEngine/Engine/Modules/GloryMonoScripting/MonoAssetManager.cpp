@@ -9,6 +9,7 @@ namespace Glory
 	MonoClass* MonoAssetManager::m_pAssetManagerClass = nullptr;
 	MonoMethod* MonoAssetManager::m_pGetResourceObjectMethod = nullptr;
 	MonoMethod* MonoAssetManager::m_pMakeResourceMethod = nullptr;
+	std::map<UUID, MonoObject*> MonoAssetManager::m_AssetCache;
 
 	MonoObject* MonoAssetManager::MakeMonoAssetObject(UUID uuid, const std::string& type)
 	{
@@ -19,10 +20,18 @@ namespace Glory
 			return nullptr;
 		}
 
-		MonoString* pMonoString = mono_string_new(MonoManager::GetDomain(), type.c_str());
-		void* args[2] = { &uuid, (void*)pMonoString };
-		MonoObject* pExcept;
-		return mono_runtime_invoke(m_pMakeResourceMethod, nullptr, args, &pExcept);
+		if (m_AssetCache.find(uuid) == m_AssetCache.end())
+		{
+			MonoString* pMonoString = mono_string_new(MonoManager::GetDomain(), type.c_str());
+			void* args[2] = { &uuid, (void*)pMonoString };
+			MonoObject* pExcept;
+			MonoObject* pAssetObject = mono_runtime_invoke(m_pMakeResourceMethod, nullptr, args, &pExcept);
+			/* TODO: Handle exception? */
+			if (!pAssetObject) return nullptr;
+			m_AssetCache.emplace(uuid, pAssetObject);
+		}
+
+		return m_AssetCache.at(uuid);
 	}
 
 	void MonoAssetManager::Initialize(MonoImage* pImage)

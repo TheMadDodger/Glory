@@ -83,6 +83,9 @@ namespace Glory
 		m_SceneObjectCache.clear();
 
 		m_Bound = false;
+
+		m_GetSceneObjectImpl = NULL;
+		m_GetSceneObjectManagerImpl = NULL;
 	}
 
 	void MonoSceneManager::CheckBound()

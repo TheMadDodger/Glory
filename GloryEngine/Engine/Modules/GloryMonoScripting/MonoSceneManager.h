@@ -26,7 +26,7 @@ namespace Glory
 		}
 
 	private:
-		static GLORY_API void Cleanup();
+		static void Cleanup();
 		static GLORY_API void CheckBound();
 
 	private:

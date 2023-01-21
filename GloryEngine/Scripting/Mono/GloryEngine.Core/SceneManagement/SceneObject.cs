@@ -15,14 +15,14 @@ namespace GloryEngine.SceneManagement
             get
             {
                 if (_scene == null)
-                    _scene = SceneManager.GetOpenScene<Scene>(_sceneID);
+                    _scene = SceneManager.GetOpenScene(_sceneID);
                 return _scene;
             }
             private set { }
         }
 
         /// <summary>
-        /// The index of the hierarchy order within the parent object
+        /// The index of the hierarchy order relative to the parent object
         /// Or within the scene if no parent
         /// </summary>
         public uint SiblingIndex
@@ -46,9 +46,9 @@ namespace GloryEngine.SceneManagement
             get
             {
                 UInt64 objectID = SceneObject_GetParent(_objectID, _sceneID);
-                return Scene.GetSceneObject(objectID);
+                return objectID != 0 ? Scene.GetSceneObject(objectID) : null;
             }
-            set => SceneObject_SetParent(_objectID, _sceneID, value.ID);
+            set => SceneObject_SetParent(_objectID, _sceneID, value != null ? value.ID : 0);
         }
 
         /// <summary>
@@ -71,16 +71,8 @@ namespace GloryEngine.SceneManagement
 
         #region Constructor
 
-        /// <summary>
-        /// Default constructor
-        /// Please use Scene.NewEmptyObject() instead
-        /// </summary>
-        public SceneObject() { }
-        /// <summary>
-        /// Constructor with IDs
-        /// Please use Scene.NewEmptyObject() instead
-        /// </summary>
-        public SceneObject(UInt64 objectID, UInt64 sceneID) : base(objectID) { _sceneID = sceneID; }
+        protected SceneObject() { }
+        protected SceneObject(UInt64 objectID, UInt64 sceneID) : base(objectID) { _sceneID = sceneID; }
 
         #endregion
 
