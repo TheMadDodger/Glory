@@ -48,5 +48,6 @@ namespace Glory
 	void EntityLibManager::Cleanup()
 	{
 		MonoEntitySceneManager::Cleanup();
+		MonoSceneManager::UnbindImplementation();
 	}
 }
