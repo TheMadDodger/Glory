@@ -2,6 +2,8 @@
 #include "MonoScriptObjectManager.h"
 #include "MonoLibManager.h"
 #include "MonoAssetManager.h"
+#include "MonoSceneManager.h"
+
 #include <AssetDatabase.h>
 #include <Reflection.h>
 #include <PropertySerializer.h>
@@ -168,8 +170,15 @@ namespace Glory
 				SceneObjectRef objectRef;
 				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &objectRef, 0);
 				PropertySerializer::DeserializeProperty(&prop, valueNode);
-				MonoObject* pSceneObject = MonoObjectManager::GetSceneObject();
-				pField->SetValue(pMonoObject, pSceneObject);
+
+				GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(objectRef.SceneUUID());
+				if (!pScene) continue;
+				MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+				if (!pObjectManager) continue;
+				SceneObject* pSceneObject = pScene->FindSceneObject(objectRef.ObjectUUID());
+				if (!pSceneObject) continue;
+				MonoObject* pMonoSceneObject = pObjectManager->GetSceneObject(pSceneObject);
+				pField->SetValue(pMonoObject, pMonoSceneObject);
 				break;
 			}
 
@@ -224,14 +233,14 @@ namespace Glory
 			{
 				SceneObjectRef objectRef;
 				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &objectRef, 0);
-				MonoObject* pMonoObject;
-				pField->GetValue(pMonoObject, &pMonoObject);
-				if (pMonoObject)
+				MonoObject* pMonoSceneObject;
+				pField->GetValue(pMonoObject, &pMonoSceneObject);
+				if (pMonoSceneObject)
 				{
-					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_objectID");
-					MonoClassField* pSceneIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_sceneID");
-					mono_field_get_value(pMonoObject, pIDField, objectRef.ObjectUUIDMember());
-					mono_field_get_value(pMonoObject, pSceneIDField, objectRef.SceneUUIDMember());
+					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoSceneObject), "_objectID");
+					MonoClassField* pSceneIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoSceneObject), "_sceneID");
+					mono_field_get_value(pMonoSceneObject, pIDField, objectRef.ObjectUUIDMember());
+					mono_field_get_value(pMonoSceneObject, pSceneIDField, objectRef.SceneUUIDMember());
 				}
 				PropertySerializer::SerializeProperty(&prop, emitter);
 				break;
