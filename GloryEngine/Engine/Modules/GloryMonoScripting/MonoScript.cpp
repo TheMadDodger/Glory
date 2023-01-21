@@ -1,10 +1,10 @@
 #include "MonoScript.h"
-#include "MonoObjectManager.h"
+#include "MonoScriptObjectManager.h"
 #include "MonoLibManager.h"
+#include "MonoAssetManager.h"
 #include <AssetDatabase.h>
 #include <Reflection.h>
 #include <PropertySerializer.h>
-#include "MonoAssetManager.h"
 
 namespace Glory
 {
@@ -63,7 +63,7 @@ namespace Glory
 		if (pClass == nullptr) return;
 
 		// Dummy object for default values
-		MonoObject* pDummyObject = MonoObjectManager::GetDummyObject(pClass->m_pClass);
+		MonoObject* pDummyObject = MonoScriptObjectManager::GetScriptDummyObject(pClass->m_pClass);
 		if (!data.IsDefined() || !data.IsMap())
 			data = YAML::Node(YAML::NodeType::Map);
 
@@ -227,6 +227,6 @@ namespace Glory
 
 	MonoObject* MonoScript::LoadObject(Object* pObject, MonoClass* pClass)
 	{
-		return MonoObjectManager::GetObject(pClass, pObject);
+		return MonoScriptObjectManager::GetScriptObject(pClass, pObject);
 	}
 }

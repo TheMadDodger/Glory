@@ -1,6 +1,7 @@
 #include "MonoManager.h"
 #include "MonoLibManager.h"
-#include "MonoObjectManager.h"
+#include "MonoSceneManager.h"
+#include "MonoScriptObjectManager.h"
 
 #include <mono/metadata/mono-debug.h>
 
@@ -26,8 +27,9 @@ namespace Glory
 
 	void MonoManager::Cleanup()
 	{
-		MonoObjectManager::Cleanup();
+		MonoScriptObjectManager::Cleanup();
 		MonoLibManager::Cleanup();
+		MonoSceneManager::Cleanup();
 		if (m_pMainDomain) mono_jit_cleanup(m_pMainDomain);
 		m_pMainDomain = nullptr;
 		m_pDomain = nullptr;
@@ -54,7 +56,7 @@ namespace Glory
 		mono_domain_finalize(m_pDomain, 2000);
 
 		// Load assemblies into this domain
-		MonoObjectManager::Cleanup();
+		MonoScriptObjectManager::Cleanup();
 		MonoLibManager::ReloadAll(pNewDomain);
 
 		m_pDomain = pNewDomain;

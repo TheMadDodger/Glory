@@ -1,7 +1,10 @@
 #include "EntitiesMonoExtender.h"
 #include "EntityCSAPI.h"
+#include "MonoEntitySceneManager.h"
+
 #include <ScriptingExtender.h>
 #include <Engine.h>
+#include <MonoSceneManager.h>
 
 namespace Glory
 {
@@ -38,11 +41,12 @@ namespace Glory
 
 	void EntityLibManager::Initialize(AssemblyBinding* pAssembly)
 	{
-
+		MonoSceneManager::BindImplemetation<MonoEntitySceneManager>();
+		MonoEntitySceneManager::Initialize(pAssembly);
 	}
 
 	void EntityLibManager::Cleanup()
 	{
-
+		MonoEntitySceneManager::Cleanup();
 	}
 }

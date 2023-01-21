@@ -16,6 +16,9 @@ project "GloryEntitiesMonoExtender"
 
 	vpaths
 	{
+		["API"] = { "EntityCSAPI.*" },
+		["Extenstion"] = { "EntitiesMonoExtender.*" },
+		["Memory"] = { "MonoEntityObjectManager.*", "MonoEntitySceneManager.*" },
 	}
 
 	includedirs

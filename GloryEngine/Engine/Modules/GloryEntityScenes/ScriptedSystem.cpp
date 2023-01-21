@@ -8,7 +8,7 @@ namespace Glory
 {
 	void ScriptedSystem::OnAdd(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		UUID uuid = pComponent.m_Script.AssetUUID();
+		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetAssetImmediate<Script>(uuid);
 		if (pScript == nullptr) return;
@@ -18,7 +18,7 @@ namespace Glory
 
 	void ScriptedSystem::OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		UUID uuid = pComponent.m_Script.AssetUUID();
+		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetAssetImmediate<Script>(uuid);
 		if (pScript == nullptr) return;
@@ -33,7 +33,7 @@ namespace Glory
 
 	void ScriptedSystem::OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		UUID uuid = pComponent.m_Script.AssetUUID();
+		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
@@ -44,7 +44,7 @@ namespace Glory
 
 	void ScriptedSystem::OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		UUID uuid = pComponent.m_Script.AssetUUID();
+		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetAssetImmediate<Script>(uuid);
 		if (pScript == nullptr) return;
@@ -59,7 +59,7 @@ namespace Glory
 
 	void ScriptedSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		UUID uuid = pComponent.m_Script.AssetUUID();
+		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
@@ -71,7 +71,7 @@ namespace Glory
 
 	void ScriptedSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
-		UUID uuid = pComponent.m_Script.AssetUUID();
+		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
