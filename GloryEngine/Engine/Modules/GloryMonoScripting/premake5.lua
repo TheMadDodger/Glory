@@ -22,7 +22,8 @@ project "GloryMonoScripting"
 		["Module"] = { "GloryMono.*", "GloryMonoScipting.*" },
 		["API"] = { "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*" },
 		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" },
-		["Mono"] = { "AssemblyBinding.*", "MonoAssetManager.*", "MonoLibManager.*", "MonoManager.*", "MonoObjectManager.*", "CoreLibManager.*", "IMonoLibManager.*" },
+		["Mono"] = { "AssemblyBinding.*", "MonoAssetManager.*", "MonoLibManager.*", "MonoManager.*", "CoreLibManager.*", "IMonoLibManager.*" },
+		["Memory"] = { "MonoSceneObjectManager.*", "MonoSceneManager.*", "MonoScriptObjectManager.*" }
 	}
 
 	includedirs
