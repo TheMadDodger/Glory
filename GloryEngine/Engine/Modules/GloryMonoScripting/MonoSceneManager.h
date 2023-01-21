@@ -16,6 +16,7 @@ namespace Glory
 		static GLORY_API MonoObject* GetSceneObject(GScene* pScene);
 		static GLORY_API MonoSceneObjectManager* GetSceneObjectManager(GScene* pScene);
 		static GLORY_API void DestroyScene(GScene* pScene);
+		static GLORY_API void UnbindImplementation();
 
 		template<class T>
 		static void BindImplemetation()
