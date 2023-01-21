@@ -23,6 +23,8 @@ namespace Glory
 	private:
 		static void Initialize(MonoImage* pImage);
 
+		/* TODO: Cleanup */
+
 	private:
 		MonoAssetManager();
 		virtual ~MonoAssetManager();
@@ -32,5 +34,6 @@ namespace Glory
 		static MonoClass* m_pAssetManagerClass;
 		static MonoMethod* m_pGetResourceObjectMethod;
 		static MonoMethod* m_pMakeResourceMethod;
+		static std::map<UUID, MonoObject*> m_AssetCache;
 	};
 }

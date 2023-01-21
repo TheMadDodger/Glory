@@ -1,14 +1,17 @@
 #pragma once
 #include <MonoSceneObjectManager.h>
+#include <GloryMono.h>
 
 namespace Glory
 {
 	class MonoEntityObjectManager : public MonoSceneObjectManager
 	{
 	public:
-		MonoEntityObjectManager(GScene* pScene) : MonoSceneObjectManager(pScene) {}
+		MonoEntityObjectManager(GScene* pScene);
+		virtual ~MonoEntityObjectManager();
 
-		SceneObject* GetSceneObject(MonoObject* pMonoObject) override;
-		void DestroySceneObject(MonoClass* pClass, Object* pObject) override;
+	private:
+		MonoObject* GetSceneObject_Impl(SceneObject* pObject) override;
+		void DestroySceneObject_Impl(MonoObject* pMonoObject) override;
 	};
 }

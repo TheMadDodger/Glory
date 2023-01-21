@@ -10,22 +10,14 @@ namespace GloryEngine.Entities
         /// <summary>
         /// The EntityScene this EntitySceneObject exists in
         /// </summary>
-        public override Scene Scene
-        {
-            get
-            {
-                if (_scene == null)
-                    _scene = SceneManager.GetOpenScene<EntityScene>(_sceneID);
-                return _scene;
-            }
-        }
+        public EntityScene EntityScene => Scene != null ? Scene as EntityScene : null;
 
         #endregion
 
         #region Constructor
 
-        public EntitySceneObject() { }
-        public EntitySceneObject(UInt64 objectID, UInt64 sceneID) : base(objectID, sceneID) { }
+        protected EntitySceneObject() { }
+        protected EntitySceneObject(UInt64 objectID, UInt64 sceneID) : base(objectID, sceneID) { }
 
         #endregion
     }

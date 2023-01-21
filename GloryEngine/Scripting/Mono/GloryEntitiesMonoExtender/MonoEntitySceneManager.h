@@ -5,6 +5,12 @@
 #include <GloryMono.h>
 #include <AssemblyBinding.h>
 
+#define GETTER(type, x) \
+static GLORY_API type* x() \
+{ \
+	return m_p##x; \
+}
+
 namespace Glory
 {
 	class MonoEntitySceneManager
@@ -12,6 +18,11 @@ namespace Glory
 	public:
 		static GLORY_API MonoObject* GetSceneObject(GScene* pScene);
 		static GLORY_API MonoSceneObjectManager* GetSceneObjectManager(GScene* pScene);
+
+		GETTER(MonoClass, EntitySceneClass);
+		GETTER(MonoClass, EntitySceneObjectClass);
+		GETTER(MonoMethod, EntitySceneConstructor);
+		GETTER(MonoMethod, EntitySceneObjectConstructor);
 
 	private:
 		static void Initialize(AssemblyBinding* pAssembly);
@@ -21,5 +32,13 @@ namespace Glory
 		friend class EntityLibManager;
 		/* No instances allowed */
 		MonoEntitySceneManager() = delete;
+
+	private:
+		static MonoClass* m_pEntitySceneClass;
+		static MonoClass* m_pEntitySceneObjectClass;
+		static MonoMethod* m_pEntitySceneConstructor;
+		static MonoMethod* m_pEntitySceneObjectConstructor;
 	};
 }
+
+#undef GETTER
