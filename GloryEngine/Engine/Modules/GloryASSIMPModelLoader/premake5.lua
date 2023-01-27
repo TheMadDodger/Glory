@@ -11,7 +11,7 @@ project "GloryASSIMPModelLoader"
 	{
 		"**.h",
 		"**.cpp",
-		"Data/**.yaml",
+		"Module.yaml",
 		"premake5.lua",
 		"Assets/**.*",
 		"Resources/**.*",
@@ -27,7 +27,7 @@ project "GloryASSIMPModelLoader"
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.Reflect}",
 	}
@@ -60,7 +60,7 @@ project "GloryASSIMPModelLoader"
 
 	postbuildcommands
 	{
-		("{COPY} ./Data/%{cfg.buildcfg}/Module.yaml %{moduleOutDir}"),
+		("{COPY} Module.yaml %{moduleOutDir}"),
 		("{COPY} %{DepDirs.assimp}/bin/%{cfg.buildcfg}/*.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Assets %{moduleOutDir}/Assets"),
 	}

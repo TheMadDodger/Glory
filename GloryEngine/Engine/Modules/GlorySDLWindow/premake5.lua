@@ -25,35 +25,39 @@ project "GlorySDLWindow"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
+		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.Reflect}",
+
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{GloryIncludeDir.core}",
 
-		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.SDL}",
+		"%{IncludeDir.SDL_config}",
 	}
 
 	libdirs
 	{
 		"%{LibDirs.glory}",
+		"%{LibDirs.GloryECS}",
+
 		"%{LibDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
-		"%{LibDirs.GloryECS}",
+		"%{DepDirs.SDL}",
 	}
 
 	links
 	{
 		"GloryCore",
-		"SDL2",
+		"GloryReflectStatic",
+
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
-
-		"GloryReflectStatic",
 	}
 
 	defines
@@ -63,9 +67,10 @@ project "GlorySDLWindow"
 
 	postbuildcommands
 	{
+		("{COPY} %{DepDirs.SDL}/*.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+		--("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"
@@ -83,12 +88,12 @@ project "GlorySDLWindow"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin32"
+			--"%{vulkanDir}/Third-Party/Bin32"
 		}
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkanDir}/Third-Party/Bin32/*.dll %{moduleOutDir}/Dependencies")
+			--("{COPY} %{vulkanDir}/Third-Party/Bin32/*.dll %{moduleOutDir}/Dependencies")
 		}
 
 	filter "platforms:x64"
@@ -96,12 +101,12 @@ project "GlorySDLWindow"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin"
+			--"%{vulkanDir}/Third-Party/Bin"
 		}
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkanDir}/Third-Party/Bin/*.dll %{moduleOutDir}/Dependencies")
+			--("{COPY} %{vulkanDir}/Third-Party/Bin/*.dll %{moduleOutDir}/Dependencies")
 		}
 
 	filter "configurations:Debug"
@@ -109,7 +114,11 @@ project "GlorySDLWindow"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "SDL2d"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "SDL2"

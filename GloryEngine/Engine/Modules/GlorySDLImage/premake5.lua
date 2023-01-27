@@ -24,28 +24,33 @@ project "GlorySDLImage"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.Reflect}",
+
+		"%{IncludeDir.SDL}",
+		"%{IncludeDir.SDL_config}",
+		"%{IncludeDir.glm}",
+
 		"%{IncludeDir.SDL_image}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{GloryIncludeDir.core}",
-
-		"%{IncludeDir.Reflect}",
 	}
 
 	libdirs
 	{
-		"%{vulkanDir}/third-party/lib",
 		"%{LibDirs.glory}",
-		"%{LibDirs.SDL_image}",
+		"%{LibDirs.GloryECS}",
+
 		"%{LibDirs.yaml_cpp}",
 
-		"%{LibDirs.GloryECS}",
+		"%{DepDirs.SDL}",
+
+		"%{vulkanDir}/third-party/lib",
+		"%{LibDirs.SDL_image}",
 	}
 
 	links
 	{
 		"GloryCore",
-		"SDL2",
 		"SDL2_image",
 		"yaml-cpp",
 
@@ -60,7 +65,7 @@ project "GlorySDLImage"
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} %{LibDirs.SDL_image}/*.dll %{moduleOutDir}/Dependencies"),
+		--("{COPY} %{LibDirs.SDL_image}/*.dll %{moduleOutDir}/Dependencies"),
 		--("{COPY} ./Assets %{moduleOutDir}/Assets"),
 		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
@@ -80,7 +85,7 @@ project "GlorySDLImage"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin32"
+			--"%{vulkanDir}/Third-Party/Bin32"
 		}
 
 		postbuildcommands
@@ -93,7 +98,7 @@ project "GlorySDLImage"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin"
+			--"%{vulkanDir}/Third-Party/Bin"
 		}
 
 		postbuildcommands
@@ -106,7 +111,11 @@ project "GlorySDLImage"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "SDL2d"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "SDL2"

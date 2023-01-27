@@ -22,7 +22,7 @@ project "Glorious"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",

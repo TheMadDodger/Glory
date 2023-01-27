@@ -25,7 +25,7 @@ project "GloryOpenGLGraphics"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",

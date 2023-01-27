@@ -28,7 +28,7 @@ project "GloryMonoScripting"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
