@@ -49,6 +49,9 @@ GloryEngine/Engine/**/Release
 GloryEngine/Editor/**/Release
 GloryEngine/Scripting/**/Release
 
+!GloryEngine/Engine/**/Data/Debug
+!GloryEngine/Engine/**/Data/Release
+
 # Generated editor files
 
 Projects.list

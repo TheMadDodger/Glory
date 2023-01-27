@@ -102,7 +102,6 @@ IncludeDir["FA"]					= "%{rootDir}/third-party/FontAwesome"
 
 LibDirs = {}
 LibDirs["glory"]					= "%{engineOutDir}/%{cfg.buildcfg}/%{cfg.platform}"
-LibDirs["assimp"]					= "%{SubmodoleDirs.assimp}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["GLEW"]						= "%{SubmodoleDirs.GLEW}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["ImGui"]					= "%{SubmodoleDirs.ImGui}/lib/%{cfg.buildcfg}/%{cfg.platform}"
 LibDirs["ImGuizmo"]					= "%{SubmodoleDirs.ImGuizmo}/lib/%{cfg.buildcfg}/%{cfg.platform}"
@@ -118,12 +117,15 @@ LibDirs["GloryECS"]					= "%{SubmodoleDirs.GloryECS}/Build/Lib/%{cfg.buildcfg}/%
 
 stb_image							= "%{rootDir}/third-party/stb_image"
 
+-- External dependencies
+DepDirs = {}
+DepDirs["assimp"]					= "%{SubmodoleDirs.assimp}/%{cfg.platform}"
+
 group "Dependencies"
 	include "third-party/ImGui"
 	include "third-party/ImGuizmo"
 	include "third-party/implot"
 	include "submodules/ImFileDialog"
-	include "third-party/assimp"
 	include "third-party/yaml-cpp"
 	include "submodules/GloryECS/GloryECS/GloryECSStatic"
 	include "submodules/GloryECS/GloryECS/GloryReflectStatic"
