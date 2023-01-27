@@ -11,7 +11,7 @@ project "GloryASSIMPModelLoader"
 	{
 		"**.h",
 		"**.cpp",
-		"Module.yaml",
+		"Data/**.yaml",
 		"premake5.lua",
 		"Assets/**.*",
 		"Resources/**.*",
@@ -35,18 +35,16 @@ project "GloryASSIMPModelLoader"
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		"%{LibDirs.assimp}",
 		"%{LibDirs.yaml_cpp}",
-
 		"%{LibDirs.GloryECS}",
+
+		"%{DepDirs.assimp}/lib/%{cfg.buildcfg}",
 	}
 
 	links
 	{
 		"GloryCore",
-		"assimp",
 		"yaml-cpp",
-
 		"GloryReflectStatic",
 	}
 
@@ -55,11 +53,16 @@ project "GloryASSIMPModelLoader"
 		"GLORY_EXPORTS"
 	}
 
+	prebuildcommands
+	{
+		("{DELETE} %{moduleOutDir}/Module.yaml"),
+	}
+
 	postbuildcommands
 	{
-		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} ./Data/%{cfg.buildcfg}/Module.yaml %{moduleOutDir}"),
+		("{COPY} %{DepDirs.assimp}/bin/%{cfg.buildcfg}/*.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"
@@ -83,7 +86,11 @@ project "GloryASSIMPModelLoader"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "assimp-vc143-mtd"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "assimp-vc143-mt"

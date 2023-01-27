@@ -1,4 +1,5 @@
 Name: "ASSIMP Loader"
 Type: ModelLoader
+Dependencies: ["assimp-vc143-mt"]
 Editor:
  Extensions: []
