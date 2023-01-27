@@ -25,4 +25,8 @@
 #define NOMINMAX
 
 #pragma comment (lib,"opengl32.lib")
+#if _DEBUG
+#pragma comment (lib,"SDL2d.lib")
+#elif
 #pragma comment (lib,"SDL2.lib")
+#endif

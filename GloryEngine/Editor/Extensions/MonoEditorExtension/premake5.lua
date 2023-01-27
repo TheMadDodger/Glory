@@ -20,7 +20,7 @@ project "MonoEditorExtension"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",

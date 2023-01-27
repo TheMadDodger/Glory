@@ -23,26 +23,30 @@ project "GloriousLauncher"
 	includedirs
 	{
 		"%{GloryIncludeDir.core}",
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.FA}",
 
-		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.SDL}",
+		"%{IncludeDir.SDL_config}",
 	}
 
 	libdirs
 	{
 		"%{LibDirs.glory}",
+		"%{LibDirs.GloryECS}",
+
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
-		"%{LibDirs.GLEW}",
 
-		"%{LibDirs.GloryECS}",
+		"%{LibDirs.GLEW}",
+		"%{DepDirs.SDL}",
 	}
 
 	links
@@ -64,6 +68,7 @@ project "GloriousLauncher"
 	postbuildcommands
 	{
 		("{COPY} ./Fonts %{buildDir}/Launcher/Fonts"),
+		("{COPY} %{DepDirs.SDL}/*.dll %{buildDir}/Launcher"),
 		("{COPY} %{LibDirs.GLEW}/*.dll %{buildDir}/Launcher"),
 		("{COPY} imgui.ini %{buildDir}/Launcher"),
 		("{COPY} %{IncludeDir.FA}/FA %{buildDir}/Launcher/Fonts/FA"),
@@ -89,12 +94,12 @@ project "GloriousLauncher"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin32"
+			--"%{vulkanDir}/Third-Party/Bin32"
 		}
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkanDir}/Third-Party/Bin32/*.dll %{buildDir}/Launcher")
+			--("{COPY} %{vulkanDir}/Third-Party/Bin32/*.dll %{buildDir}/Launcher")
 		}
 
 	filter "platforms:x64"
@@ -102,12 +107,12 @@ project "GloriousLauncher"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin"
+			--"%{vulkanDir}/Third-Party/Bin"
 		}
 
 		postbuildcommands
 		{
-			("{COPY} %{vulkanDir}/Third-Party/Bin/*.dll %{buildDir}/Launcher")
+			--("{COPY} %{vulkanDir}/Third-Party/Bin/*.dll %{buildDir}/Launcher")
 		}
 
 	filter "configurations:Debug"
@@ -117,8 +122,12 @@ project "GloriousLauncher"
 		symbols "On"
 		debugdir "%{buildDir}/Launcher"
 
+		links "SDL2d"
+
 	filter "configurations:Release"
 		kind "ConsoleApp"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "SDL2"

@@ -23,7 +23,7 @@ project "GloryEditorOGL"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.ImGui}",

@@ -31,7 +31,7 @@ project "GloryEntityScenes"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",

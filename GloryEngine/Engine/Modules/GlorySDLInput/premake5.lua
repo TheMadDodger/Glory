@@ -28,7 +28,7 @@ project "GlorySDLInput"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.Reflect}",
 	}

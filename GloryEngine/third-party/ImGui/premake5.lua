@@ -18,7 +18,7 @@ project "ImGui"
     {
         "%{ImGuiDir}"
     }
-        
+
     includedirs
     {
         "%{ImGuiDir}",

@@ -75,6 +75,8 @@ SubmodoleDirs["implot"]				= "%{rootDir}/submodules/implot"
 SubmodoleDirs["ImFileDialog"]		= "%{rootDir}/submodules/ImFileDialog"
 SubmodoleDirs["yaml_cpp"]			= "%{rootDir}/submodules/yaml-cpp"
 SubmodoleDirs["ticpp"]				= "%{rootDir}/submodules/ticpp"
+SubmodoleDirs["SDL"]				= "%{rootDir}/submodules/SDL"
+SubmodoleDirs["glm"]				= "%{rootDir}/submodules/glm"
 SubmodoleDirs["GLEW"]				= "%{rootDir}/third-party/GLEW"
 SubmodoleDirs["SDL_image"]			= "%{rootDir}/third-party/SDL_Image"
 SubmodoleDirs["shaderc"]			= "%{rootDir}/third-party/shaderc"
@@ -92,6 +94,7 @@ IncludeDir["ImGuizmo"]				= "%{SubmodoleDirs.ImGuizmo}"
 IncludeDir["implot"]				= "%{SubmodoleDirs.implot}"
 IncludeDir["ImFileDialog"]			= "%{SubmodoleDirs.ImFileDialog}"
 IncludeDir["SDL_image"]				= "%{SubmodoleDirs.SDL_image}/include"
+IncludeDir["glm"]					= "%{SubmodoleDirs.glm}"
 IncludeDir["shaderc"]				= "%{SubmodoleDirs.shaderc}/include"
 IncludeDir["spirv_cross"]			= "%{SubmodoleDirs.spirv_cross}/include"
 IncludeDir["yaml_cpp"]				= "%{SubmodoleDirs.yaml_cpp}/include"
@@ -120,6 +123,11 @@ stb_image							= "%{rootDir}/third-party/stb_image"
 -- External dependencies
 DepDirs = {}
 DepDirs["assimp"]					= "%{SubmodoleDirs.assimp}/%{cfg.platform}"
+DepDirs["SDL"]						= "%{SubmodoleDirs.SDL}/%{cfg.platform}/%{cfg.buildcfg}"
+
+DepIncludesDir = "%{rootDir}/submodules/includes/%{cfg.buildcfg}/%{cfg.platform}"
+
+IncludeDir["SDL"]					= "%{rootDir}/submodules/includes/%{cfg.buildcfg}/%{cfg.platform}"
 
 group "Dependencies"
 	include "third-party/ImGui"

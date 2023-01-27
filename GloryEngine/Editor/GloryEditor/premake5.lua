@@ -44,7 +44,7 @@ project "GloryEditor"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",

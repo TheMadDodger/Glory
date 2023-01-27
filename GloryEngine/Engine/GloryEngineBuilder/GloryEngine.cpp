@@ -101,10 +101,31 @@ namespace Glory
 				std::filesystem::path dependencyPath = modulePath;
 				dependencyPath = dependencyPath.append("Dependencies").append(dependency);
 				dependencyPath = dependencyPath.string() + ".dll";
+
+				if (!std::filesystem::exists(dependencyPath))
+				{
+#if _DEBUG
+					/* Search for debug lib instead */
+					std::filesystem::path debugPath = dependencyPath.filename().replace_extension().string() + 'd';
+					debugPath.replace_extension(".dll");
+					dependencyPath.replace_filename(debugPath);
+					if (!std::filesystem::exists(dependencyPath))
+					{
+						Debug::LogError("Failed to load dependency: " + dependency + ": The dll was not found!");
+						m_pModules.push_back(nullptr);
+						return;
+					}
+#elif
+					Debug::LogError("Failed to load dependency: " + dependency + ": The dll was not found!");
+					m_pModules.push_back(nullptr);
+					return;
+#endif
+				}
+
 				HMODULE dependencyLib = LoadLibrary(dependencyPath.c_str());
 				if (dependencyLib == NULL)
 				{
-					Debug::LogError("Failed to load dependency: " + dependency + ": The dll was not found!");
+					Debug::LogError("Failed to load dependency: " + dependency + ": There was an error while loading the dll!");
 					m_pModules.push_back(nullptr);
 					return;
 				}

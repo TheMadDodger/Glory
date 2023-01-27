@@ -22,8 +22,11 @@ project "GloryEditorSDL"
 
 	includedirs
 	{
-		"%{vulkanDir}/third-party/include",
-		"%{vulkanDir}/third-party/include/SDL2",
+		"%{IncludeDir.glm}",
+		--"%{vulkanDir}/third-party/include/SDL2",
+
+		"%{IncludeDir.SDL}",
+
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.spirv_cross}",
@@ -40,23 +43,24 @@ project "GloryEditorSDL"
 	libdirs
 	{
 		"%{LibDirs.glory}",
+		"%{LibDirs.GloryECS}",
 		"%{LibDirs.glory}/Modules/GlorySDLWindow",
+
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.yaml_cpp}",
 
-		"%{LibDirs.GloryECS}",
+		"%{DepDirs.SDL}",
 	}
 
 	links
 	{
 		"GloryCore",
-		"SDL2",
+		"GloryReflectStatic",
+		"GlorySDLWindow",
+
 		"yaml-cpp",
 		"ImGui",
 		"GloryEditor",
-		"GlorySDLWindow",
-
-		"GloryReflectStatic",
 	}
 
 	defines
@@ -79,7 +83,7 @@ project "GloryEditorSDL"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin32"
+			--"%{vulkanDir}/Third-Party/Bin32"
 		}
 
 	filter "platforms:x64"
@@ -87,7 +91,7 @@ project "GloryEditorSDL"
 
 		libdirs
 		{
-			"%{vulkanDir}/Third-Party/Bin"
+			--"%{vulkanDir}/Third-Party/Bin"
 		}
 
 	filter "configurations:Debug"
@@ -95,7 +99,11 @@ project "GloryEditorSDL"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "SDL2d"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "SDL2"

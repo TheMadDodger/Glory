@@ -21,3 +21,12 @@
 	path = GloryEngine/submodules/GloryECS
 	url = https://github.com/TheMadDodger/GloryECS
 	branch = glory
+[submodule "GloryEngine/submodules/SDL_image"]
+	path = GloryEngine/submodules/SDL_image
+	url = https://github.com/libsdl-org/SDL_image
+[submodule "GloryEngine/submodules/SDL"]
+	path = GloryEngine/submodules/SDL
+	url = https://github.com/libsdl-org/SDL
+[submodule "GloryEngine/submodules/glm"]
+	path = GloryEngine/submodules/glm
+	url = https://github.com/g-truc/glm
