@@ -28,6 +28,7 @@ project "GlorySDLImage"
 		"%{IncludeDir.Reflect}",
 
 		"%{IncludeDir.SDL}",
+		"%{DepIncludesDir}",
 		"%{IncludeDir.SDL_config}",
 		"%{IncludeDir.glm}",
 
@@ -43,6 +44,7 @@ project "GlorySDLImage"
 		"%{LibDirs.yaml_cpp}",
 
 		"%{DepDirs.SDL}",
+		"%{DepDirs.SDL_image}",
 
 		"%{vulkanDir}/third-party/lib",
 		"%{LibDirs.SDL_image}",
@@ -51,7 +53,6 @@ project "GlorySDLImage"
 	links
 	{
 		"GloryCore",
-		"SDL2_image",
 		"yaml-cpp",
 
 		"GloryReflectStatic",
@@ -65,7 +66,7 @@ project "GlorySDLImage"
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		--("{COPY} %{LibDirs.SDL_image}/*.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} %{DepDirs.SDL_image}/*.dll %{moduleOutDir}/Dependencies"),
 		--("{COPY} ./Assets %{moduleOutDir}/Assets"),
 		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
@@ -112,6 +113,7 @@ project "GlorySDLImage"
 		symbols "On"
 
 		links "SDL2d"
+		links "SDL2_imaged"
 
 	filter "configurations:Release"
 		runtime "Release"
@@ -119,3 +121,4 @@ project "GlorySDLImage"
 		optimize "On"
 
 		links "SDL2"
+		links "SDL2_image"

@@ -1,0 +1,25 @@
+Key Features:
+
+Architecture
+Modular
+Use only what you need and keep game size to a minimum.
+No more bloat in your code.
+
+Performance
+Blazing Fast
+Render thousands of dynamic lights with minimal performance impact at high framerates.
+
+Customizability
+Fully Customizable
+Write your own modules or extend the editor with your own extensions.
+Want to use a library? Implement using your own module.
+
+Development
+Iterate Faster
+Prototype and iterate on your games faster using C# code.
+The scripting API is simple and understandable.
+
+
+
+
+
