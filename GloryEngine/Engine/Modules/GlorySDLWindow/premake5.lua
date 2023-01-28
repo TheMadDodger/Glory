@@ -33,8 +33,7 @@ project "GlorySDLWindow"
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 
-		"%{IncludeDir.SDL}",
-		"%{IncludeDir.SDL_config}",
+		"%{DepIncludesDir}",
 	}
 
 	libdirs

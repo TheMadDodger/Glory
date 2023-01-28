@@ -31,7 +31,7 @@ project "GloriousLauncher"
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.SDL}",
+		"%{DepIncludesDir}",
 		"%{IncludeDir.SDL_config}",
 	}
 
