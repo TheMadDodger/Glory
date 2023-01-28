@@ -20,12 +20,18 @@ project "GloryAPI"
 
 	includedirs
 	{
-		"%{DepIncludesDirRoot}"
+		"%{GloryIncludeDir.core}",
+
+		"%{DepIncludesDirRoot}",
 	}
 
 	libdirs
 	{
-		"%{DepDirs.curl}"
+		"%{LibDirs.glory}",
+		"%{LibDirs.GloryECS}",
+
+		"%{DepDirs.curl}",
+		"%{LibDirs.yaml_cpp}",
 	}
 
 	defines
@@ -36,6 +42,13 @@ project "GloryAPI"
 	postbuildcommands
 	{
 		("{COPY} %{DepDirs.curl}/*.dll %{engineOutDir}"),
+	}
+
+	links
+	{
+		"GloryCore",
+		"yaml-cpp",
+		"GloryReflectStatic",
 	}
 
 	filter "system:windows"

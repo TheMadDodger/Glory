@@ -79,4 +79,9 @@ namespace Glory
 		}
 		return compareValue;
 	}
+
+	bool Version::IsValid() const
+	{
+		return !m_VersionValues.empty();
+	}
 }

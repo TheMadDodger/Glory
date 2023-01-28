@@ -34,6 +34,8 @@ namespace Glory
 
 		int HardCompare(const Version& other) const;
 
+		bool IsValid() const;
+
 	private:
 		std::vector<VersionValue> m_VersionValues;
 		std::map<std::string, size_t> m_Pairs;

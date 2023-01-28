@@ -29,25 +29,83 @@ elif [ "$OSTYPE" == "win32" ]; then
     cd curl
     mkdir Win32
     cd Win32
-    #-DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
-    cmake .. -A Win32 -DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
+    cmake .. -A Win32
     cmake --build . --config debug
     cmake --build . --config release
-    cd lib
-    cp curl_config.h ../../../includes/curl/curl_config.h
-    cd ../..
-
-    echo "Copying headers"
-    find include/curl -name \*.h -exec cp {} ../includes/curl/ \;
-
+    cd ..
     echo "Building x64 binaries"
     mkdir x64
     cd x64
-    cmake .. -A x64 -DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
+    cmake .. -A x64
     cmake --build . --config debug
     cmake --build . --config release
 
     cd ../..
+
+    echo "Building SDL"
+    mkdir includes/Debug/Win32/SDL2
+    mkdir includes/Debug/x64/SDL2
+    mkdir includes/Release/Win32/SDL2
+    mkdir includes/Release/x64/SDL2
+
+    cd SDL
+    echo "Building win32 binaries"
+    mkdir win32
+    cd Win32
+    cmake .. -A Win32
+    cmake --build . --config debug
+
+    echo "Copying includes"
+    find include -name \*.h -exec cp {} ../../includes/Debug/Win32/SDL2/ \;
+    find include-config-debug -name \*.h -exec cp {} ../../includes/Debug/Win32/SDL2/ \;
+
+    cmake --build . --config release
+
+    echo "Copying includes"
+    find include -name \*.h -exec cp {} ../../includes/Release/Win32/SDL2/ \;
+    find include-config-release -name \*.h -exec cp {} ../../includes/Release/Win32/SDL2/ \;
+
+    cd ..
+    echo "Building x64 binaries"
+    mkdir x64
+    cd x64
+    cmake .. -A x64
+    cmake --build . --config debug
+    find include -name \*.h -exec cp {} ../../includes/Debug/x64/SDL2/ \;
+    find include-config-debug -name \*.h -exec cp {} ../../includes/Debug/x64/SDL2/ \;
+
+    cmake --build . --config release
+    find include -name \*.h -exec cp {} ../../includes/Release/x64/SDL2/ \;
+    find include-config-release -name \*.h -exec cp {} ../../includes/Release/x64/SDL2/ \;
+
+    cd ../..
+
+    mkdir includes/SDL_image
+
+    echo "Building SDL_image"
+    cd SDL_image
+    echo "Building win32 binaries"
+    mkdir win32
+    cd Win32
+    cmake .. -A Win32 -DSDL2_INCLUDE_DIR=../../includes/Debug/Win32/SDL2 -DSDL2_LIBRARY=../../SDL/Win32/Debug/SDL2d.lib -DSDL2_MAIN_LIBRARY=../../SDL/Win32/Debug/SDL2maind.lib
+    cmake --build . --config debug
+    cmake .. -A Win32 -DSDL2_INCLUDE_DIR=../../includes/Release/Win32/SDL2 -DSDL2_LIBRARY=../../SDL/Win32/Release/SDL2.lib -DSDL2_MAIN_LIBRARY=../../SDL/Win32/Release/SDL2main.lib
+    cmake --build . --config release
+
+    cd ..
+    echo "Building x64 binaries"
+    mkdir x64
+    cd x64
+
+    cmake .. -A x64 -DSDL2_INCLUDE_DIR=../../includes/Debug/x64/SDL2 -DSDL2_LIBRARY=../../SDL/x64/Debug/SDL2d.lib -DSDL2_MAIN_LIBRARY=../../SDL/x64/Debug/SDL2maind.lib
+    cmake --build . --config debug
+    cmake .. -A x64 -DSDL2_INCLUDE_DIR=../../includes/Release/x64/SDL2 -DSDL2_LIBRARY=../../SDL/x64/Release/SDL2.lib -DSDL2_MAIN_LIBRARY=../../SDL/x64/Release/SDL2main.lib
+    cmake --build . --config release
+
+    cd ..
+    cp SDL_image.h ../includes/SDL_image/SDL_image.h
+
+    cd ..
 
     mkdir includes/curl
 
@@ -57,7 +115,6 @@ elif [ "$OSTYPE" == "win32" ]; then
     echo "Building win32 binaries"
     mkdir Win32
     cd Win32
-    #-DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
     cmake .. -A Win32 -DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
     cmake --build . --config debug
     cmake --build . --config release

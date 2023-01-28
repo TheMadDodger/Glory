@@ -1,24 +1,67 @@
 #include "GloryAPI.h"
 
+#include <Debug.h>
 #include <curl/curl.h>
 #include <string>
 #include <iostream>
+#include <future>
+
+#define VERIFY_CURL()\
+if (!curl)\
+{\
+    Debug::LogError("GloryAPI: Cannot make API request: curl is not initialized!");\
+    return;\
+}\
+
+#define RUN(ret, f)\
+Run([&]() -> bool {\
+    static bool isDone = true;\
+    static std::future<ret> async;\
+    if (isDone)\
+    {\
+        async = std::async(f); \
+        isDone = false; \
+    }\
+    \
+    if (async.wait_for(std::chrono::microseconds(1)) == std::future_status::ready)\
+    {\
+        Version version = async.get(); \
+        isDone = true; \
+        callbackStore(version); \
+        return true; \
+    }\
+    return false;\
+})
+
+
+/* TODO: Replace with actual URL once we have it */
+#define GLORY_VERSION_API_URL "https://randomuser.me/api/"
 
 namespace Glory
 {
-    CURL* _curl = nullptr;
-    const char* _apiUrl = "https://randomuser.me/api/";
+    CURL* curl = nullptr;
+    std::vector<std::function<bool()>> requests;
 
+    VersionValue defaultVersionValues[] = {
+        {"Major", TOSTRING(0)},
+        {"Minor", TOSTRING(0)},
+        {"Build", TOSTRING(0)},
+    };
 
     bool GloryAPI::Initialize()
     {
-        _curl = curl_easy_init();
-        return _curl;
+        curl = curl_easy_init();
+        return curl;
     }
 
     void GloryAPI::Cleanup()
     {
-        curl_easy_cleanup(_curl);
+        curl_easy_cleanup(curl);
+    }
+
+    void GloryAPI::Run(std::function<bool()> func)
+    {
+        requests.push_back(func);
     }
 
     size_t GloryAPI::WriteCallback(void* contents, size_t size, size_t nmemb, void* userp)
@@ -27,35 +70,59 @@ namespace Glory
         return size * nmemb;
     }
 
-    void GloryAPI::Test()
+    void GloryAPI::FetchEditorVersion(std::function<void(const Version&)> callback)
     {
-        /* TODO: Make async */
+        VERIFY_CURL();
 
+        static std::function<void(const Version&)> callbackStore;
+        callbackStore = callback;
+
+        RUN(Version, FetchEditorVersion_Impl);
+    }
+
+    void GloryAPI::RunRequests()
+    {
+        std::vector<size_t> toRemoveIndices;
+        for (size_t i = requests.size(); i > 0; --i)
+        {
+            if (requests[i - 1]())
+                toRemoveIndices.push_back(i - 1);
+        }
+
+        for (size_t i = 0; i < toRemoveIndices.size(); ++i)
+        {
+            requests.erase(requests.begin() + i);
+        }
+    }
+
+    Version GloryAPI::FetchEditorVersion_Impl()
+    {
         std::string readBuffer;
-        if (!_curl) return;
+        if (!curl) return {};
 
         CURLcode res;
 
-        curl_easy_setopt(_curl, CURLOPT_URL, "https://randomuser.me/api/");
+        curl_easy_setopt(curl, CURLOPT_URL, GLORY_VERSION_API_URL);
         /* Peer has no certificate so skip peer verification */
-        curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         /* We do want to verify the host for security */
-        curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYHOST, 2L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
         /* Set method to GET */
-        curl_easy_setopt(_curl, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
         /* Overwrite the write function */
-        curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(_curl, CURLOPT_WRITEDATA, &readBuffer);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
-        res = curl_easy_perform(_curl);
+        res = curl_easy_perform(curl);
 
-        if (res != CURLE_OK)
-        {
-            std::cout << "Curl Error: " << curl_easy_strerror(res);
-            return;
-        }
+        if (res != CURLE_OK) return {};
 
-        std::cout << "Curl Response: " << readBuffer << std::endl;
+        //std::cout << "Curl Response: " << readBuffer << std::endl;
+
+        /* TODO: Parse response and get version */
+        Version version{ defaultVersionValues, 3 };
+        version.FromString("0.1.1");
+        return version;
     }
 }

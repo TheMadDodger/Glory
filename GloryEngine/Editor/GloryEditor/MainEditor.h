@@ -21,6 +21,7 @@ namespace Glory::Editor
 		static float MENUBAR_SIZE;
 
 		GLORY_EDITOR_API EditorSettings& Settings();
+		static void VersionOutdated(const Glory::Version& latestVersion);
 
 	private:
 		void SetupTitleBar();
