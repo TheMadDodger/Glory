@@ -48,6 +48,8 @@
 #include "TitleBar.h"
 #include "QuitPopup.h"
 
+#include "VersionPopup.h"
+
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
 
@@ -204,6 +206,7 @@ namespace Glory::Editor
 		m_pProjectPopup->OnGui();
 		FileDialog::Update();
 		QuitPopup::Draw();
+		VersionPopup::Draw();
 	}
 
 	void MainEditor::OnFileDragAndDrop(std::string_view path)
@@ -214,6 +217,11 @@ namespace Glory::Editor
 	EditorSettings& MainEditor::Settings()
 	{
 		return m_Settings;
+	}
+	
+	void MainEditor::VersionOutdated(const Glory::Version& latestVersion)
+	{
+		VersionPopup::Open(latestVersion);
 	}
 
 	void MainEditor::SetupTitleBar()

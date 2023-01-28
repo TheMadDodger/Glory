@@ -76,6 +76,7 @@ namespace Glory::Editor
 		static std::string AssetPathOverrider();
 		static std::string SettingsPathOverrider();
 
+		static void VersionCheck(const Glory::Version& latestVersion);
 
 	private:
 		EditorWindowImpl* m_pTempWindowImpl;

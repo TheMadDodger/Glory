@@ -1,6 +1,10 @@
 #pragma once
 #include "visibility.h"
 
+#include <functional>
+#include <Versioning.h>
+#include <vector>
+
 namespace Glory
 {
 	class GloryAPI
@@ -8,10 +12,21 @@ namespace Glory
 	public:
 		GLORY_API_API static bool Initialize();
 		GLORY_API_API static void Cleanup();
+		GLORY_API_API static void RunRequests();
 
-		GLORY_API_API static void Test();
+	public: /* API Calls */
+		/*
+		 * @brief Fetch latest editor version
+		 * @param callback The callback that will be called once the API request succeeds
+		 */
+		GLORY_API_API static void FetchEditorVersion(std::function<void(const Version&)> callback);
 
 	private:
-		GLORY_API_API static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp);
+		static Version FetchEditorVersion_Impl();
+
+	private:
+
+		static void Run(std::function<bool()> func);
+		static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp);
 	};
 }

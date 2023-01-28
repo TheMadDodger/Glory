@@ -90,7 +90,7 @@ namespace Glory::Editor
 
 	void EditorApplication::Run(Game& game)
 	{
-		GloryAPI::Test();
+		GloryAPI::FetchEditorVersion(VersionCheck);
 
 		game.GetEngine()->StartThreads();
 		if(m_pPlatform) m_pPlatform->SetState(Idle);
@@ -148,6 +148,8 @@ namespace Glory::Editor
 			m_pPlatform->Wait(Begin);
 			// Render the editor (imgui calls)
 			RenderEditor();
+			/* Run API callbacks */
+			GloryAPI::RunRequests();
 			// Now we notify the editor platform it can perform rendering
 			m_pPlatform->SetState(Idle);
 			// Wait for the end of rendering
@@ -274,6 +276,13 @@ namespace Glory::Editor
 		if (pProject == nullptr) return std::string("./");
 		std::filesystem::path path = pProject->SettingsPath();
 		return path.string();
+	}
+
+	void EditorApplication::VersionCheck(const Glory::Version& latestVersion)
+	{
+		if (!latestVersion.IsValid()) return;
+		if (latestVersion.HardCompare(Version))
+			MainEditor::VersionOutdated(latestVersion);
 	}
 
 	void EditorApplication::TryToQuit()
