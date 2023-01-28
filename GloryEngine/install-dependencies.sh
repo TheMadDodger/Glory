@@ -23,6 +23,32 @@ elif [ "$OSTYPE" == "msys" ]; then
 elif [ "$OSTYPE" == "win32" ]; then
     echo "32 bit windows is not supported"
     exit
+    mkdir includes/curl
+
+    echo "Building curl"
+    cd curl
+
+    echo "Building win32 binaries"
+    mkdir win32
+    cd Win32
+    cmake .. -A Win32
+    cmake --build . --config debug
+    cmake --build . --config release
+    cd lib
+    cp curl_config.h ../../../includes/curl/curl_config.h
+    cd ../..
+
+    echo "Copying headers"
+    find include/curl -name \*.h -exec cp {} ../includes/curl/ \;
+
+    echo "Building x64 binaries"
+    mkdir x64
+    cd x64
+    cmake .. -A x64
+    cmake --build . --config debug
+    cmake --build . --config release
+
+    cd ../..
 elif [ "$OSTYPE" == "freebsd"* ]; then
     # ...
     echo ""
