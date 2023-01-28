@@ -27,11 +27,10 @@ elif [ "$OSTYPE" == "win32" ]; then
 
     echo "Building curl"
     cd curl
-
-    echo "Building win32 binaries"
-    mkdir win32
+    mkdir Win32
     cd Win32
-    cmake .. -A Win32
+    #-DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
+    cmake .. -A Win32 -DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
     cmake --build . --config debug
     cmake --build . --config release
     cd lib
@@ -44,7 +43,35 @@ elif [ "$OSTYPE" == "win32" ]; then
     echo "Building x64 binaries"
     mkdir x64
     cd x64
-    cmake .. -A x64
+    cmake .. -A x64 -DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
+    cmake --build . --config debug
+    cmake --build . --config release
+
+    cd ../..
+
+    mkdir includes/curl
+
+    echo "Building curl"
+    cd curl
+
+    echo "Building win32 binaries"
+    mkdir Win32
+    cd Win32
+    #-DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
+    cmake .. -A Win32 -DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
+    cmake --build . --config debug
+    cmake --build . --config release
+    cd lib
+    cp curl_config.h ../../../includes/curl/curl_config.h
+    cd ../..
+
+    echo "Copying headers"
+    find include/curl -name \*.h -exec cp {} ../includes/curl/ \;
+
+    echo "Building x64 binaries"
+    mkdir x64
+    cd x64
+    cmake .. -A x64 -DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
     cmake --build . --config debug
     cmake --build . --config release
 

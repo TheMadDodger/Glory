@@ -60,6 +60,8 @@ namespace Glory::Editor
 		m_pTempRenderImpl = nullptr;
 
 		InitializePlatform(game);
+
+		GloryAPI::Initialize();
 	}
 
 	void EditorApplication::InitializeExtensions()
@@ -82,6 +84,8 @@ namespace Glory::Editor
 
 		if(m_pPlayer) delete m_pPlayer;
 		m_pPlayer = nullptr;
+
+		GloryAPI::Cleanup();
 	}
 
 	void EditorApplication::Run(Game& game)
