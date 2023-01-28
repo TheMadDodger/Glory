@@ -42,3 +42,6 @@
 [submodule "GloryEngine/submodules/JoltPhysics"]
 	path = GloryEngine/submodules/JoltPhysics
 	url = https://github.com/jrouwe/JoltPhysics
+[submodule "GloryEngine/submodules/curl"]
+	path = GloryEngine/submodules/curl
+	url = https://github.com/curl/curl

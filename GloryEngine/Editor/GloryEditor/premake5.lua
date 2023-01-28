@@ -56,6 +56,7 @@ project "GloryEditor"
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ImGui}",
+		"%{GloryIncludeDir.api}",
 
 		"%{IncludeDir.FA}",
 
@@ -79,6 +80,7 @@ project "GloryEditor"
 	links
 	{
 		"GloryCore",
+		"GloryAPI",
 		"yaml-cpp",
 		"shaderc",
 		"shaderc_combined",

@@ -20,6 +20,7 @@ workspace "GloryEngine"
 	startproject "GloryEditorOGL"
 	startproject "GloryMonoScripting"
 	startproject "GlorySDLInput"
+	startproject "GloryAPI"
 	startproject "GloryJoltPhysics"
 	--startproject "GloryEditorVulkan"
 	--startproject "GloryVulkanGraphics"
@@ -68,6 +69,7 @@ GloryIncludeDir["jolt"]					= "%{modulesDir}/GloryJoltPhysics"
 
 GloryIncludeDir["core"]					= "%{engineDir}/GloryCore"
 GloryIncludeDir["editor"]				= "%{editorDir}/GloryEditor"
+GloryIncludeDir["api"]					= "%{editorDir}/GloryAPI"
 
 SubmodoleDirs = {}
 SubmodoleDirs["ImGui"]				= "%{rootDir}/submodules/ImGui"
@@ -140,6 +142,7 @@ group ""
 
 group "Editor"
 	include "Editor/GloryEditor"
+	include "Editor/GloryAPI"
 group ""
 
 group "Editor/Applications"

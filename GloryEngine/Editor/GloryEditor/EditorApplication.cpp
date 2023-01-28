@@ -7,6 +7,8 @@
 #include <ProjectSpace.h>
 #include <EditorSceneManager.h>
 
+#include <GloryAPI.h>
+
 namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
@@ -84,6 +86,8 @@ namespace Glory::Editor
 
 	void EditorApplication::Run(Game& game)
 	{
+		GloryAPI::Test();
+
 		game.GetEngine()->StartThreads();
 		if(m_pPlatform) m_pPlatform->SetState(Idle);
 		m_pShaderProcessor->Start();
