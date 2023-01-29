@@ -89,6 +89,7 @@ IncludeDir["implot"]				= "%{SubmodoleDirs.implot}"
 IncludeDir["ImGuizmo"]				= "%{SubmodoleDirs.ImGuizmo}"
 IncludeDir["ImFileDialog"]			= "%{SubmodoleDirs.ImFileDialog}"
 IncludeDir["yaml_cpp"]				= "%{SubmodoleDirs.yaml_cpp}/include"
+IncludeDir["rapidjson"]				= "%{SubmodoleDirs.rapidjson}/include"
 IncludeDir["ECS"]					= "%{SubmodoleDirs.ECS}"
 IncludeDir["Reflect"]				= "%{SubmodoleDirs.Reflect}"
 

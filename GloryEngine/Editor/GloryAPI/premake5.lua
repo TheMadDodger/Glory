@@ -23,6 +23,7 @@ project "GloryAPI"
 		"%{GloryIncludeDir.core}",
 
 		"%{DepIncludesDirRoot}",
+		"%{IncludeDir.rapidjson}"
 	}
 
 	libdirs

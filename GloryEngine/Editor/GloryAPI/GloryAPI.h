@@ -5,6 +5,8 @@
 #include <Versioning.h>
 #include <vector>
 
+#define NOMINMAX
+
 namespace Glory
 {
 	class GloryAPI

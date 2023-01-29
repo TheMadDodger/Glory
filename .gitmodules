@@ -45,3 +45,6 @@
 [submodule "GloryEngine/submodules/curl"]
 	path = GloryEngine/submodules/curl
 	url = https://github.com/curl/curl
+[submodule "GloryEngine/submodules/rapidjson"]
+	path = GloryEngine/submodules/rapidjson
+	url = https://github.com/Tencent/rapidjson
