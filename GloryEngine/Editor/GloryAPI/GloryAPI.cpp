@@ -6,6 +6,9 @@
 #include <iostream>
 #include <future>
 
+#include <rapidjson/document.h>
+
+#ifdef GLORY_ENABLE_API
 #define VERIFY_CURL()\
 if (!curl)\
 {\
@@ -32,10 +35,12 @@ Run([&]() -> bool {\
     }\
     return false;\
 })
+#else
+#define VERIFY_CURL()
+#define RUN(ret, f)
+#endif
 
-
-/* TODO: Replace with actual URL once we have it */
-#define GLORY_VERSION_API_URL "https://randomuser.me/api/"
+#define GLORY_VERSION_API_URL "http://localhost/version.php"
 
 namespace Glory
 {
@@ -50,13 +55,19 @@ namespace Glory
 
     bool GloryAPI::Initialize()
     {
+#ifdef GLORY_ENABLE_API
         curl = curl_easy_init();
         return curl;
+#else
+        return false;
+#endif
     }
 
     void GloryAPI::Cleanup()
     {
+#ifdef GLORY_ENABLE_API
         curl_easy_cleanup(curl);
+#endif
     }
 
     void GloryAPI::Run(std::function<bool()> func)
@@ -82,6 +93,7 @@ namespace Glory
 
     void GloryAPI::RunRequests()
     {
+#ifdef GLORY_ENABLE_API
         std::vector<size_t> toRemoveIndices;
         for (size_t i = requests.size(); i > 0; --i)
         {
@@ -93,6 +105,7 @@ namespace Glory
         {
             requests.erase(requests.begin() + i);
         }
+#endif
     }
 
     Version GloryAPI::FetchEditorVersion_Impl()
@@ -118,11 +131,15 @@ namespace Glory
 
         if (res != CURLE_OK) return {};
 
-        //std::cout << "Curl Response: " << readBuffer << std::endl;
+        /* Parse JSON response */
+        rapidjson::Document doc;
+        doc.Parse(readBuffer.c_str());
 
-        /* TODO: Parse response and get version */
+        if (doc.HasParseError() || !doc.IsObject() || !doc.HasMember("Version") || !doc["Version"].IsString()) return {};
+        const char* versionString = doc["Version"].GetString();
+
         Version version{ defaultVersionValues, 3 };
-        version.FromString("0.1.1");
+        version.FromString(versionString);
         return version;
     }
 }
