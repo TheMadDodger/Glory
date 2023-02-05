@@ -2,6 +2,7 @@
 #include <Object.h>
 #include <typeindex>
 #include "GloryEditor.h"
+#include "ResourceType.h"
 
 //#define REGISTERED_EDITORS EditorContext::GetEditors()->m_pRegisteredEditors
 //#define ACTIVE_EDITORS EditorContext::GetEditors()->m_pActiveEditors
@@ -20,7 +21,8 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void RegisterEditor(Editor* pEditor);
 
-		virtual const std::type_index& GetEditedType() = 0;
+		GLORY_EDITOR_API const size_t GetEditedType() const;
+
 		virtual GLORY_EDITOR_API void Initialize();
 		virtual bool OnGUI() = 0;
 
@@ -33,9 +35,10 @@ namespace Glory::Editor
 
 	protected:
 		Object* m_pTarget;
+		const size_t m_EditedType;
 
 	protected:
-		GLORY_EDITOR_API Editor();
+		GLORY_EDITOR_API Editor(const size_t type);
 		virtual GLORY_EDITOR_API ~Editor();
 
 	private:
@@ -52,10 +55,8 @@ namespace Glory::Editor
 	class EditorTemplate : public Editor
 	{
 	public:
-		virtual const std::type_index& GetEditedType() override
-		{
-			return typeid(TObject);
-		}
+		EditorTemplate(size_t type) : Editor(type) {}
+		EditorTemplate() : Editor(ResourceType::GetHash<TObject>()) {}
 
 	private:
 		virtual Editor* Create() override

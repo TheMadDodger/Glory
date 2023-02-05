@@ -115,7 +115,7 @@ namespace Glory
 						m_pModules.push_back(nullptr);
 						return;
 					}
-#elif
+#else
 					Debug::LogError("Failed to load dependency: " + dependency + ": The dll was not found!");
 					m_pModules.push_back(nullptr);
 					return;

@@ -11,6 +11,11 @@ namespace Glory::Editor
 		m_pRegisteredEditors.push_back(pEditor);
 	}
 
+	const size_t Editor::GetEditedType() const
+	{
+		return m_EditedType;
+	}
+
 	GLORY_EDITOR_API void Editor::Initialize() {}
 
 	GLORY_EDITOR_API Editor* Editor::CreateEditor(Object* pObject)
@@ -19,11 +24,12 @@ namespace Glory::Editor
 		{
 			std::type_index type = typeid(Object);
 			if (!pObject->GetType(i, type)) continue;
+			const size_t typeHash = ResourceType::GetHash(type);
 
 			auto it = std::find_if(m_pRegisteredEditors.begin(), m_pRegisteredEditors.end(), [&](Editor* pEditor)
 			{
-				std::type_index editorType = pEditor->GetEditedType();
-				return editorType == type;
+				const size_t editorType = pEditor->GetEditedType();
+				return editorType == typeHash;
 			});
 
 			if (it == m_pRegisteredEditors.end()) continue;
@@ -76,11 +82,11 @@ namespace Glory::Editor
 		return m_pTarget;
 	}
 
-	GLORY_EDITOR_API Editor::Editor() : m_pTarget(nullptr)
+	Editor::Editor(const size_t type) : m_pTarget(nullptr), m_EditedType(type)
 	{
 	}
 
-	GLORY_EDITOR_API Editor::~Editor()
+	Editor::~Editor()
 	{
 	}
 

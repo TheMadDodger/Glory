@@ -33,6 +33,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void ImportAssetsAsync(const std::string& path);
 		static GLORY_EDITOR_API void ImportAssetAsync(const std::string& path);
 		static GLORY_EDITOR_API void ImportNewScene(const std::string& path, GScene* pScene);
+		static GLORY_EDITOR_API void ImportScene(const std::string& path);
 		static GLORY_EDITOR_API void SaveAsset(Resource* pResource, bool markUndirty = true);
 		static GLORY_EDITOR_API void RemoveAsset(UUID uuid);
 		static GLORY_EDITOR_API void SetAssetDirty(Object* pResource);

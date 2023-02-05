@@ -27,6 +27,6 @@
 #pragma comment (lib,"opengl32.lib")
 #if _DEBUG
 #pragma comment (lib,"SDL2d.lib")
-#elif
+#else
 #pragma comment (lib,"SDL2.lib")
 #endif

@@ -9,7 +9,8 @@ namespace Glory
 	BasicTypeData::BasicTypeData(const std::string& name, size_t typeHash, size_t size)
 		: m_Name(name), m_TypeHash(typeHash), m_Size(size) {}
 
-	std::hash<std::type_index> ResourceType::m_Hasher;
+	std::hash<std::string_view> ResourceType::m_Hasher;
+	std::hash<std::type_index> ResourceType::m_OldHasher;
 
 	bool ResourceType::IsResource(size_t typeHash)
 	{
@@ -18,7 +19,10 @@ namespace Glory
 
 	ResourceType* ResourceType::RegisterResource(std::type_index type, const std::string& extensions)
 	{
-		size_t typeHash = m_Hasher(type);
+		std::string_view name = type.name();
+		size_t typeHash = m_Hasher(name);
+		size_t oldHash = m_OldHasher(type);
+		RESOURCE_TYPES->m_OldToNew.emplace(oldHash, typeHash);
 		size_t index = RESOURCE_TYPES->m_ResourceTypes.size();
 		RESOURCE_TYPES->m_ResourceTypes.push_back(ResourceType(typeHash, extensions));
 		RESOURCE_TYPES->m_HashToType[typeHash] = index;
@@ -29,6 +33,8 @@ namespace Glory
 	void ResourceType::RegisterType(const std::type_info& type, size_t size)
 	{
 		size_t hash = GetHash(type);
+		size_t oldHash = m_OldHasher(type);
+		RESOURCE_TYPES->m_OldToNew.emplace(oldHash, hash);
 		size_t index = RESOURCE_TYPES->m_BasicTypes.size();
 		std::string name = type.name();
 		RESOURCE_TYPES->m_HashToBasicType[hash] = index;
@@ -38,7 +44,8 @@ namespace Glory
 
 	size_t ResourceType::GetHash(std::type_index type)
 	{
-		return m_Hasher(type);
+		std::string_view name = type.name();
+		return m_Hasher(name);
 	}
 
 	ResourceType* ResourceType::GetResourceType(const std::string& extension)
@@ -50,7 +57,8 @@ namespace Glory
 
 	ResourceType* ResourceType::GetResourceType(std::type_index type)
 	{
-		return GetResourceType(m_Hasher(type));
+		std::string_view name = type.name();
+		return GetResourceType(m_Hasher(name));
 	}
 
 	ResourceType* ResourceType::GetResourceType(size_t hash)
@@ -103,6 +111,19 @@ namespace Glory
 			++result;
 		}
 		return result;
+	}
+
+	size_t ResourceType::OldToNewHash(size_t oldHash)
+	{
+		if (RESOURCE_TYPES->m_OldToNew.find(oldHash) == RESOURCE_TYPES->m_OldToNew.end())
+			return oldHash;
+		return RESOURCE_TYPES->m_OldToNew.at(oldHash);
+	}
+
+	bool ResourceType::IsScene(const std::string& ext)
+	{
+		/* FIXME: Should be handled by the scene module */
+		return ext == ".gscene";
 	}
 
 	ResourceType::ResourceType(size_t typeHash, const std::string& extensions)
