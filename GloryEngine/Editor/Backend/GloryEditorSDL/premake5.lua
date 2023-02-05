@@ -26,6 +26,7 @@ project "GloryEditorSDL"
 		--"%{vulkanDir}/third-party/include/SDL2",
 
 		"%{DepIncludesDir}",
+		"%{IncludeDir.SDL}",
 
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",

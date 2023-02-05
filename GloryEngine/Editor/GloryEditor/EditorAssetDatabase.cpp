@@ -4,6 +4,7 @@
 #include <Engine.h>
 #include <ProjectSpace.h>
 #include <FileBrowser.h>
+#include <EditorSceneManager.h>
 
 namespace Glory::Editor
 {
@@ -26,6 +27,22 @@ namespace Glory::Editor
 		}
 
 		m_DatabaseNode = projectNode["Assets"];
+
+#if OLD_TO_NEW_HASH
+		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
+		{
+			const UUID uuid = itor->first.as<uint64_t>();
+			EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetRegistered, uuid, nullptr);
+
+			const std::string key = std::to_string(uuid);
+			YAML::Node assetNode = m_DatabaseNode[key];
+			YAML::Node metaData = assetNode["Metadata"];
+			size_t hash = metaData["Hash"].as<size_t>();
+			size_t newHash = ResourceType::OldToNewHash(hash);
+			if (hash != newHash)
+				metaData["Hash"] = newHash;
+		}
+#endif
 
 		AssetDatabase::Load(m_DatabaseNode);
 
@@ -281,6 +298,12 @@ namespace Glory::Editor
 		std::string ext = extension.string();
 		std::for_each(ext.begin(), ext.end(), [](char& c) { c = std::tolower(c); });
 
+		if (ResourceType::IsScene(ext))
+		{
+			ImportScene(path);
+			return;
+		}
+
 		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
 		if (!pModule)
 		{
@@ -394,12 +417,11 @@ namespace Glory::Editor
 		std::filesystem::path extension = filePath.extension();
 		std::filesystem::path fileName = filePath.filename().replace_extension("");
 		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
-		std::filesystem::path metaFilePath = path + metaExtension.string();
-		// Generate a meta file
+
+		// Generate a meta
 		const ResourceType* pType = ResourceType::GetResourceType<GScene>();
 
 		const std::string assetPath = Game::GetAssetPath();
-		metaFilePath = metaFilePath.lexically_relative(assetPath);
 		ResourceMeta meta(extension.string(), fileName.string(), pScene->GetUUID(), pType->Hash());
 
 		AssetDatabase::SetIDAndName(pScene, meta.ID(), fileName.string());
@@ -410,6 +432,32 @@ namespace Glory::Editor
 
 		stream.clear();
 		stream << "Imported new scene: " << pScene->Name();
+		Debug::LogInfo(stream.str());
+	}
+
+	void EditorAssetDatabase::ImportScene(const std::string& path)
+	{
+		std::stringstream stream;
+		stream << "Importing scene at " << path << "...";
+		Debug::LogInfo(stream.str());
+
+		std::filesystem::path filePath = path;
+		std::filesystem::path extension = filePath.extension();
+		std::filesystem::path fileName = filePath.filename().replace_extension("");
+		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
+
+		// Generate a meta
+		const ResourceType* pType = ResourceType::GetResourceType<GScene>();
+
+		const std::string assetPath = Game::GetAssetPath();
+		ResourceMeta meta(extension.string(), fileName.string(), UUID(), pType->Hash());
+
+		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
+		AssetLocation location{ relativePath.string() };
+		InsertAsset(location, meta);
+
+		stream.clear();
+		stream << "Imported scene: " << GetAssetName(meta.ID());
 		Debug::LogInfo(stream.str());
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "UUID.h"
+#include "Glory.h"
 #include <typeindex>
 
 /* *IDEA FOR DETECTING OBJECT INHERITENCE AND OBJECT TYPE*
@@ -43,6 +44,9 @@ namespace Glory
 		void SetName(const std::string& name);
 
 		virtual void* GetRootDataAddress();
+
+
+		//constexpr size_t H = std::hash<const char*>()("Object");
 
 	protected:
 		std::vector<std::type_index> m_Inheritence;

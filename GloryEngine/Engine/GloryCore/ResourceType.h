@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 #include <typeindex>
 #include <vector>
 #include <unordered_map>
@@ -27,7 +28,8 @@ namespace Glory
 			{
 				std::type_index type = typeid(Object);
 				if (!t.GetType(i, type)) continue;
-				size_t hash = m_Hasher(type);
+				std::string_view name = type.name();
+				size_t hash = m_Hasher(name);
 				pResourceType->m_SubTypes.push_back(hash);
 			}
 		}
@@ -65,6 +67,10 @@ namespace Glory
 		static size_t GetSubTypeHash(ResourceType* pResourceType, size_t index);
 		static size_t GetAllResourceTypesThatHaveSubType(size_t hash, std::vector<ResourceType*>& out);
 
+		static size_t OldToNewHash(size_t oldHash);
+
+		static bool IsScene(const std::string& ext);
+
 	public:
 		virtual ~ResourceType();
 		size_t Hash() const;
@@ -78,7 +84,8 @@ namespace Glory
 		static void ReadExtensions(size_t index, const std::string& extensions);
 
 	private:
-		static std::hash<std::type_index> m_Hasher;
+		static std::hash<std::string_view> m_Hasher;
+		static std::hash<std::type_index> m_OldHasher;
 
 		const size_t m_TypeHash;
 		const std::string m_Extensions;
@@ -100,5 +107,6 @@ namespace Glory
 		std::vector<BasicTypeData> m_BasicTypes;
 		std::unordered_map<size_t, size_t> m_HashToBasicType;
 		std::unordered_map<std::string, size_t> m_NameToBasicType;
+		std::unordered_map<size_t, size_t> m_OldToNew;
 	};
 }

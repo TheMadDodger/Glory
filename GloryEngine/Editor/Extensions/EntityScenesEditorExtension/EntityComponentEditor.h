@@ -11,7 +11,7 @@ namespace Glory::Editor
 	class EntityComponentEditor : public EditorTemplate<TEditor, EntityComponentObject>
 	{
 	public:
-		EntityComponentEditor() : m_pComponentObject(nullptr) {}
+		EntityComponentEditor() : EditorTemplate(ResourceType::GetHash<TComponent>()), m_pComponentObject(nullptr) {}
 		virtual ~EntityComponentEditor() {}
 
 	protected:
@@ -57,12 +57,6 @@ namespace Glory::Editor
 			GloryECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
 			GloryECS::TypeView<TComponent>* pTypeView = pRegistry->GetTypeView<TComponent>();
 			pTypeView->Invoke(InvocationType::OnValidate, pRegistry, m_pComponentObject->EntityID(), &component);
-		}
-
-	private:
-		virtual const std::type_index& GetEditedType() override
-		{
-			return typeid(TComponent);
 		}
 
 	protected:
