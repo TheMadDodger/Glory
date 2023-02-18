@@ -36,7 +36,7 @@ project "GlorySDLInput"
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		"%{LibDirs.shaderc}",
+		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 

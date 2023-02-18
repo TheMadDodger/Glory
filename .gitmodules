@@ -30,3 +30,12 @@
 [submodule "GloryEngine/submodules/glm"]
 	path = GloryEngine/submodules/glm
 	url = https://github.com/g-truc/glm
+[submodule "GloryEngine/submodules/shaderc"]
+	path = GloryEngine/submodules/shaderc
+	url = https://github.com/google/shaderc
+[submodule "GloryEngine/submodules/SPIRV-tools"]
+	path = GloryEngine/submodules/SPIRV-tools
+	url = https://github.com/KhronosGroup/SPIRV-Tools
+[submodule "GloryEngine/submodules/SPIRV-Headers"]
+	path = GloryEngine/submodules/SPIRV-Headers
+	url = https://github.com/KhronosGroup/SPIRV-Headers

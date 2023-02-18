@@ -71,7 +71,7 @@ project "GloryEditor"
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
-		"%{LibDirs.shaderc}",
+		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 
 		"%{LibDirs.GloryECS}",

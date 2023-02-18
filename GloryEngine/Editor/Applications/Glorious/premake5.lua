@@ -45,7 +45,7 @@ project "Glorious"
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.ImFileDialog}",
-		"%{LibDirs.shaderc}",
+		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 

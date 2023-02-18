@@ -41,7 +41,7 @@ project "GlorySDLWindow"
 		"%{LibDirs.glory}",
 		"%{LibDirs.GloryECS}",
 
-		"%{LibDirs.shaderc}",
+		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
