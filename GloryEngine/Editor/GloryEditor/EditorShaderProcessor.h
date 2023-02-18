@@ -4,7 +4,7 @@
 #include <ThreadManager.h>
 #include <map>
 #include <filesystem>
-#include <shaderc.hpp>
+#include <shaderc/shaderc.hpp>
 #include <ThreadedVar.h>
 #include <ResourceMeta.h>
 

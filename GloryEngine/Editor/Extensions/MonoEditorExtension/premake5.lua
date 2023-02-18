@@ -48,7 +48,7 @@ project "MonoEditorExtension"
 		"%{LibDirs.glory}",
 		"%{modulesDir}/GloryMonoScripting",
 		"%{LibDirs.assimp}",
-		"%{LibDirs.shaderc}",
+		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 

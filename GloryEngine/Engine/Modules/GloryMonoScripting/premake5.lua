@@ -40,7 +40,7 @@ project "GloryMonoScripting"
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		"%{LibDirs.shaderc}",
+		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 

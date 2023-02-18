@@ -48,7 +48,7 @@ project "EntityScenesEditorExtension"
 		"%{LibDirs.glory}",
 		"%{modulesDir}/GloryEntityScenes",
 		"%{LibDirs.assimp}",
-		"%{LibDirs.shaderc}",
+		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
