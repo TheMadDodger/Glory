@@ -1,4 +1,4 @@
-name: editor-win32
+name: Build Engine
 
 on:
   push:
@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  editor-win32:
     runs-on: windows-latest
 
     steps:
@@ -35,7 +35,7 @@ jobs:
     - name: Download mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: curl "https://download.mono-project.com/archive/6.12.0/windows-installer/mono-6.12.0.182-gtksharp-2.12.45-win32-0.msi" -o mono.msi
-      
+
     - name: Install mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: |
@@ -58,7 +58,5 @@ jobs:
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 ${{env.SOLUTION_FILE_PATH}}
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 .
