@@ -45,7 +45,7 @@ project "GloriousLauncher"
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
 
-		"%{LibDirs.GLEW}",
+		"%{DepDirs.GLEW}/lib/%{cfg.buildcfg}",
 		"%{DepDirs.SDL}",
 	}
 
@@ -55,7 +55,6 @@ project "GloriousLauncher"
 		"ImGui",
 		"ImFileDialog",
 		"yaml-cpp",
-		"glew32",
 
 		"GloryReflectStatic",
 	}
@@ -69,7 +68,7 @@ project "GloriousLauncher"
 	{
 		("{COPY} ./Fonts %{buildDir}/Launcher/Fonts"),
 		("{COPY} %{DepDirs.SDL}/*.dll %{buildDir}/Launcher"),
-		("{COPY} %{LibDirs.GLEW}/*.dll %{buildDir}/Launcher"),
+		("{COPY} %{DepDirs.GLEW}/bin/%{cfg.buildcfg}/*.dll %{buildDir}/Launcher"),
 		("{COPY} imgui.ini %{buildDir}/Launcher"),
 		("{COPY} %{IncludeDir.FA}/FA %{buildDir}/Launcher/Fonts/FA"),
 
@@ -122,7 +121,11 @@ project "GloriousLauncher"
 		symbols "On"
 		debugdir "%{buildDir}/Launcher"
 
-		links "SDL2d"
+		links
+		{
+			"SDL2d",
+			"glew32d"
+		}
 
 	filter "configurations:Release"
 		kind "ConsoleApp"
@@ -130,4 +133,8 @@ project "GloriousLauncher"
 		defines "NDEBUG"
 		optimize "On"
 
-		links "SDL2"
+		links
+		{
+			"SDL2",
+			"glew32"
+		}
