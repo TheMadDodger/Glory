@@ -24,8 +24,8 @@ project "GloryASSIMPModelLoader"
 
 	includedirs
 	{
+		"%{DepIncludesRootDir}",
 		"%{GloryIncludeDir.core}",
-		"%{IncludeDir.assimp}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.glm}",
 

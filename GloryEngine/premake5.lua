@@ -86,7 +86,6 @@ SubmodoleDirs["ECS"]				= "%{SubmodoleDirs.GloryECS}/GloryECSStatic"
 SubmodoleDirs["Reflect"]			= "%{SubmodoleDirs.GloryECS}/GloryReflectStatic"
 
 IncludeDir = {}
-IncludeDir["assimp"]				= "%{SubmodoleDirs.assimp}/include"
 IncludeDir["glory"]					= "%{SubmodoleDirs.glory}/include"
 IncludeDir["GLEW"]					= "%{SubmodoleDirs.GLEW}/include"
 IncludeDir["ImGui"]					= "%{SubmodoleDirs.ImGui}"
@@ -125,6 +124,7 @@ DepDirs["SDL"]						= "%{SubmodoleDirs.SDL}/%{cfg.platform}/%{cfg.buildcfg}"
 DepDirs["SDL_image"]				= "%{SubmodoleDirs.SDL_image}/%{cfg.platform}/%{cfg.buildcfg}"
 
 DepIncludesDir						= "%{rootDir}/submodules/includes/%{cfg.buildcfg}/%{cfg.platform}"
+DepIncludesRootDir					= "%{rootDir}/submodules/includes"
 IncludeDir["SDL"]					= "%{rootDir}/submodules/includes/%{cfg.buildcfg}/%{cfg.platform}/SDL2"
 IncludeDir["SDL_image"]				= "%{rootDir}/submodules/includes/SDL_image"
 

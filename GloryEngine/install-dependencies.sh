@@ -29,6 +29,11 @@ fi
 
 mkdir "includes/${CONFIG}/${PLATFORM}"
 
+mkdir includes/assimp
+mkdir includes/assimp/Compiler
+mkdir includes/assimp/port
+mkdir includes/assimp/port/AndroidJNI
+
 echo "Building ASSIMP"
 cd assimp
 echo "Building ${PLATFORM} binaries"
@@ -37,7 +42,16 @@ cd "${PLATFORM}"
 cmake .. -A $PLATFORM
 cmake --build . --config $CONFIG
 
-cd ../..
+echo "Copying includes"
+find "include/assimp" -name \config.h -exec cp {} "../../includes/assimp/" \;
+cd ..
+find include -name \*.h -exec cp {} "../includes/assimp/" \;
+find include/assimp/Compiler -name \*.h -exec cp {} "../includes/assimp/Compiler/" \;
+find include/assimp/port/AndroidJNI -name \*.h -exec cp {} "../includes/assimp/port/AndroidJNI/" \;
+find include -name \*.hpp -exec cp {} "../includes/assimp/" \;
+find include -name \*.inl -exec cp {} "../includes/assimp/" \;
+find include -name \*.in -exec cp {} "../includes/assimp/" \;
+cd ..
 
 echo "Building SDL"
 mkdir "includes/${CONFIG}/${PLATFORM}/SDL2"
