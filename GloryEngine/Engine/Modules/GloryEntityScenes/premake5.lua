@@ -42,7 +42,7 @@ project "GloryEntityScenes"
 		"%{LibDirs.glory}",
 		"%{LibDirs.assimp}",
 		"%{DepDirs.shaderc}",
-		"%{LibDirs.spirv_cross}",
+		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

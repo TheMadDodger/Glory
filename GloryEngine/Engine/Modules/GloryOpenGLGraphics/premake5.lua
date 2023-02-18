@@ -40,7 +40,7 @@ project "GloryOpenGLGraphics"
 		"%{LibDirs.glory}",
 		"%{DepDirs.GLEW}/lib/%{cfg.buildcfg}",
 		"%{DepDirs.shaderc}",
-		"%{LibDirs.spirv_cross}",
+		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

@@ -111,6 +111,16 @@ cmake --build . --config $CONFIG
 
 cd ../..
 
+echo "Building SPIRV-Cross"
+cd SPIRV-Cross
+echo "Building ${PLATFORM} binaries"
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+cmake .. -A $PLATFORM
+cmake --build . --config $CONFIG
+
+cd ../..
+
 echo "Building GLEW"
 cd ../third-party
 cd glew-2.2.0
