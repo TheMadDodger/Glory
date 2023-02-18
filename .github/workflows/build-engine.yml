@@ -19,7 +19,7 @@ env:
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
   
-  BUILD_PATH: ${{env.SOLUTION_FILE_PATH}}/Build/Release/Win32
+  BUILD_PATH: ./GloryEngine/Build/Release/Win32
 
 permissions:
   contents: read
