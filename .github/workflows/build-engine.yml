@@ -12,12 +12,14 @@ env:
   # Path to premake5.exe
   PREMAKE_PATH: "third-party/premake/premake5.exe"
   # Premake arg
-  PREMAKE_ARG: vs2019
+  PREMAKE_ARG: vs2022
 
   # Configuration type to build.
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
+  
+  BUILD_PATH: ${{env.SOLUTION_FILE_PATH}}/Build/Release/Win32
 
 permissions:
   contents: read
@@ -43,12 +45,12 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-      
+  
     - name: Install dependencies
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: sh ./install-dependencies.sh Release
       shell: bash
-      
+  
     - name: Run premake5
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: ${{env.PREMAKE_PATH}} ${{env.PREMAKE_ARG}}
@@ -60,3 +62,18 @@ jobs:
     - name: Build
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 .
+  
+    - name: Install zip
+      uses: montudor/action-zip@v1
+  
+    - name: Package as zip
+      run: zip -qq -r Glorious.zip Launcher
+      working-directory: ${{env.BUILD_PATH}}
+  
+    - name: Upload editor zip Artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: editor-zip
+        path: ${{env.BUILD_PATH}}/Glorious.zip
+        retention-days: 30
+    
