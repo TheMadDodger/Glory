@@ -108,3 +108,14 @@ mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake .. -A $PLATFORM -DSHADERC_SKIP_TESTS=ON -DSHADERC_SPIRV_TOOLS_DIR=../../SPIRV-tools
 cmake --build . --config $CONFIG
+
+cd ../..
+
+echo "Building GLEW"
+cd ../third-party
+cd glew-2.2.0
+echo "Building ${PLATFORM} binaries"
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+cmake ../build/cmake -A $PLATFORM
+cmake --build . --config $CONFIG

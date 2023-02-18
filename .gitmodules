@@ -36,6 +36,3 @@
 [submodule "GloryEngine/submodules/SPIRV-tools"]
 	path = GloryEngine/submodules/SPIRV-tools
 	url = https://github.com/KhronosGroup/SPIRV-Tools
-[submodule "GloryEngine/submodules/SPIRV-Headers"]
-	path = GloryEngine/submodules/SPIRV-Headers
-	url = https://github.com/KhronosGroup/SPIRV-Headers

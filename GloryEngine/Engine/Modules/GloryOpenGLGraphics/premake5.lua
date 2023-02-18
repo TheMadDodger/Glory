@@ -38,7 +38,7 @@ project "GloryOpenGLGraphics"
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		"%{LibDirs.GLEW}",
+		"%{DepDirs.GLEW}/lib/%{cfg.buildcfg}",
 		"%{DepDirs.shaderc}",
 		"%{LibDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
@@ -48,7 +48,6 @@ project "GloryOpenGLGraphics"
 
 	links
 	{
-		"glew32",
 		"GloryCore",
 		"shaderc",
 		"shaderc_combined",
@@ -69,7 +68,7 @@ project "GloryOpenGLGraphics"
 		("{COPY} ./Assets %{moduleOutDir}/Assets"),
 		("{COPY} ./Resources %{moduleOutDir}/Resources"),
 
-		("{COPY} %{LibDirs.GLEW}/*.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} %{DepDirs.GLEW}/bin/%{cfg.buildcfg}/*.dll %{moduleOutDir}/Dependencies"),
 	}
 
 	filter "system:windows"
@@ -93,7 +92,11 @@ project "GloryOpenGLGraphics"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "glew32d"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "glew32"

@@ -43,7 +43,7 @@ project "GloryEditorOGL"
 	libdirs
 	{
 		"%{LibDirs.glory}",
-		"%{LibDirs.GLEW}",
+		"%{DepDirs.GLEW}/lib/%{cfg.buildcfg}",
 		"%{LibDirs.glory}/Modules/GloryOpenGLGraphics",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImFileDialog}",
@@ -59,7 +59,6 @@ project "GloryEditorOGL"
 	links
 	{
 		"GloryCore",
-		"glew32",
 		"yaml-cpp",
 		"GloryEditor",
 		"GloryOpenGLGraphics",
@@ -100,7 +99,11 @@ project "GloryEditorOGL"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "glew32d"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "glew32"
