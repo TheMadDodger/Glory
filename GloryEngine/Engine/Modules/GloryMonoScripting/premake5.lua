@@ -63,7 +63,7 @@ project "GloryMonoScripting"
 
 	dependson
 	{
-		"Glorious"
+
 	}
 
 	defines
