@@ -10,7 +10,7 @@ env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: ./GloryEngine
   # Path to premake5.exe
-  PREMAKE_PATH: third-party\premake\premake5.exe
+  PREMAKE_PATH: "third-party/premake/premake5.exe"
   # Premake arg
   PREMAKE_ARG: vs2019
 
@@ -34,7 +34,7 @@ jobs:
 
     - name: Run premake5
       working-directory: ${{env.SOLUTION_FILE_PATH}}
-      run: call ${{env.PREMAKE_PATH}} ${{env.PREMAKE_ARG}}
+      run: ${{env.PREMAKE_PATH}} ${{env.PREMAKE_ARG}}
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
