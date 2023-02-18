@@ -49,7 +49,12 @@ namespace Glory::EditorLauncher
     bool EditorManager::GetEditorInfo(std::filesystem::path editorDLL, EditorInfo& info)
     {
         HMODULE lib = LoadLibrary(editorDLL.wstring().c_str());
-        if (lib == NULL) return false;
+        if (lib == NULL)
+        {
+            DWORD err = GetLastError();
+            std::cout << "Failed to load " << editorDLL << " with error code: " << err;
+            return false;
+        }
         GetVersionProc versionProc = (GetVersionProc)GetProcAddress(lib, "GetVersion");
         if (versionProc == NULL)
         {

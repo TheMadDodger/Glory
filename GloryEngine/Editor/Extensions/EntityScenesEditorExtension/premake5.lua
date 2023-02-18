@@ -82,7 +82,7 @@ project "EntityScenesEditorExtension"
 
 	filter "system:windows"
 		systemversion "10.0.19041.0"
-		toolset "v142"
+		toolset "v143"
 
 		defines
 		{

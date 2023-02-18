@@ -79,7 +79,7 @@ project "GloriousLauncher"
 
 	filter "system:windows"
 		systemversion "10.0.19041.0"
-		toolset "v142"
+		toolset "v143"
 		files { 'windows.rc', '../Icon/windows.ico' }
 		vpaths { ['Resources/*'] = { 'windows.rc', '../Icon/windows.ico' } }
 
