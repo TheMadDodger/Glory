@@ -37,7 +37,8 @@ jobs:
       
     - name: Install dependencies
       working-directory: ${{env.SOLUTION_FILE_PATH}}
-      run: ./install-dependencies.sh Release
+      run: sh ./install-dependencies.sh Release
+      shell: bash
       
     - name: Run premake5
       working-directory: ${{env.SOLUTION_FILE_PATH}}

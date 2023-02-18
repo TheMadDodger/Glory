@@ -75,13 +75,19 @@ project "Glorious"
 		"GloryClusteredRenderer",
 		"GloryEntityScenes",
 		"GloryOpenGLGraphics",
+		--"GloryVulkanGraphics",
 		"GlorySDLImage",
 		"GlorySDLWindow",
+		"GlorySDLInput",
 		"GloryEditorSDL",
 		"GloryEditorOGL",
-		"GloryMonoScripting",
 		--"GloryEditorVulkan",
-		--"GloryVulkanGraphics",
+		"GloryMonoScripting",
+		"EntityScenesEditorExtension",
+		"MonoEditorExtension",
+		"GloryEntitiesMonoExtender",
+		"GloryEngine.Core",
+		"GloryEngine.Entities",
 	}
 
 	postbuildcommands
