@@ -51,7 +51,7 @@ project "GloryEditorOGL"
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
 		"%{DepDirs.shaderc}",
-		"%{LibDirs.spirv_cross}",
+		"%{DepDirs.spirv_cross}",
 
 		"%{LibDirs.GloryECS}",
 	}

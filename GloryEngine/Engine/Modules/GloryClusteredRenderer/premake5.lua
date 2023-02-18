@@ -37,7 +37,7 @@ project "GloryClusteredRenderer"
 	{
 		"%{LibDirs.glory}",
 		"%{DepDirs.shaderc}",
-		"%{LibDirs.spirv_cross}",
+		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",
