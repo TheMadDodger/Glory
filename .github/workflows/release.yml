@@ -1,10 +1,10 @@
-name: Build Engine
+name: Release
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "release" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "release" ]
 
 env:
   # Path to the solution file relative to the root of the project.
@@ -20,14 +20,14 @@ env:
   BUILD_CONFIGURATION: Release
   
   BUILD_PATH: ./GloryEngine/Build/Release/Win32/Launcher
-  ARTIFACTS_PATH: ./Artifacts
 
 permissions:
   contents: read
 
 jobs:
-  editor-win32:
+  build-editor-win32:
     runs-on: windows-latest
+    environment: 'release'
 
     steps:
     - name: Checkout repo and submodules

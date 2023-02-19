@@ -1,0 +1,77 @@
+name: Development
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: ./GloryEngine
+  # Path to premake5.exe
+  PREMAKE_PATH: "third-party/premake/premake5.exe"
+  # Premake arg
+  PREMAKE_ARG: vs2022
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+  
+  BUILD_PATH: ./GloryEngine/Build/Release/Win32/Launcher
+
+permissions:
+  contents: read
+
+jobs:
+  build-editor-win32:
+    runs-on: windows-latest
+    environment: 'dev'
+
+    steps:
+    - name: Checkout repo and submodules
+      uses: actions/checkout@v3
+      with:
+        lfs: true
+        submodules: recursive
+        
+    - name: Checkout LFS objects
+      run: git lfs checkout
+
+    - name: Download mono
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      run: curl "https://download.mono-project.com/archive/6.12.0/windows-installer/mono-6.12.0.182-gtksharp-2.12.45-win32-0.msi" -o mono.msi
+
+    - name: Install mono
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      run: |
+        .\install-mono.ps1
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+  
+    - name: Install dependencies
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      run: sh ./install-dependencies.sh Release
+      shell: bash
+  
+    - name: Run premake5
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      run: ${{env.PREMAKE_PATH}} ${{env.PREMAKE_ARG}}
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 .
+  
+    - name: Upload editor Artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: editor-zip
+        path: ${{env.BUILD_PATH}}
+        retention-days: 30
+    
