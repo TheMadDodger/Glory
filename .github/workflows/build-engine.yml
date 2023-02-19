@@ -32,7 +32,11 @@ jobs:
     - name: Checkout repo and submodules
       uses: actions/checkout@v3
       with:
+        lfs: true
         submodules: recursive
+        
+    - name: Checkout LFS objects
+      run: git lfs checkout
 
     - name: Download mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
