@@ -19,7 +19,8 @@ env:
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
   
-  BUILD_PATH: ./GloryEngine/Build/Release/Win32
+  BUILD_PATH: ./GloryEngine/Build/Release/Win32/Launcher
+  ARTIFACTS_PATH: ./Artifacts
 
 permissions:
   contents: read
@@ -66,18 +67,18 @@ jobs:
     - name: Build
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 .
-  
-    - name: Install zip
-      uses: montudor/action-zip@v1
-  
-    - name: Package as zip
-      run: zip -qq -r Glorious.zip Launcher
-      working-directory: ${{env.BUILD_PATH}}
+
+    - name: Archive editor as zip
+      uses: ihiroky/archive-action@v1
+      with:
+        root_dir: ${{env.BUILD_PATH}}
+        base_dir: .
+        file_path: ${{env.ARTIFACTS_PATH}}/Glorious.zip
   
     - name: Upload editor zip Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
         name: editor-zip
-        path: ${{env.BUILD_PATH}}/Glorious.zip
+        path: ${{env.ARTIFACTS_PATH}}/Glorious.zip
         retention-days: 30
     
