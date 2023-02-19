@@ -67,18 +67,11 @@ jobs:
     - name: Build
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 .
-
-    - name: Archive editor as zip
-      uses: ihiroky/archive-action@v1
-      with:
-        root_dir: ${{env.BUILD_PATH}}
-        base_dir: .
-        file_path: ${{env.ARTIFACTS_PATH}}/Glorious.zip
   
-    - name: Upload editor zip Artifact
+    - name: Upload editor Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
         name: editor-zip
-        path: ${{env.ARTIFACTS_PATH}}/Glorious.zip
+        path: ${{env.BUILD_PATH}}
         retention-days: 30
     

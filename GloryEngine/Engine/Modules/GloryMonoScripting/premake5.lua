@@ -104,8 +104,8 @@ project "GloryMonoScripting"
 
 		postbuildcommands
 		{
-			("{COPY} \"%{monox86Dir}/bin/mono-2.0-sgen.dll\" %{moduleOutDir}/Dependencies"),
 			("{COPY} \"%{monox86Dir}/lib/mono/4.5/*\" %{moduleOutDir}/Dependencies/mono/4.5/"),
+			("{COPY} \"%{monox86Dir}/bin/mono-2.0-sgen.dll\" %{moduleOutDir}/Dependencies"),
 			--("{COPY} \"%{monox86Dir}/lib/mono/4.5/*\" ./mono/4.5/"),
 		}
 
