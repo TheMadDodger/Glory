@@ -48,7 +48,7 @@ namespace Glory
 		return GetUUID();
 	}
 
-	uint32_t Object::TypeCount() const
+	size_t Object::TypeCount() const
 	{
 		return m_Inheritence.size();
 	}

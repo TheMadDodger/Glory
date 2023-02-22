@@ -109,7 +109,7 @@ namespace Glory
 			std::string shaderName;
 			YAML_READ(propertyNode, node, DisplayName, displayName, std::string);
 			YAML_READ(propertyNode, node, ShaderName, shaderName, std::string);
-			YAML_READ(propertyNode, node, TypeHash, typeHash, size_t);
+			YAML_READ(propertyNode, node, TypeHash, typeHash, uint32_t);
 			
 			node = propertyNode["Value"];
 

@@ -6,7 +6,7 @@
 namespace Glory
 {
 	GLBuffer::GLBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, size_t bindIndex) :
-		Buffer(bufferSize, usageFlag, memoryFlags, bindIndex)
+		Buffer(bufferSize, usageFlag, memoryFlags, bindIndex), m_BufferID(0)
 	{
 	}
 

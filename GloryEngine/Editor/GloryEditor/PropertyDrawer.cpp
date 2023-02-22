@@ -182,9 +182,6 @@ namespace Glory::Editor
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
-		std::hash<std::string> hasher;
-		uint32_t hash = hasher(label);
-
 		ImGui::PushID(label.c_str());
 
 		if (ImGui::TreeNodeEx("header", node_flags, label.data()))

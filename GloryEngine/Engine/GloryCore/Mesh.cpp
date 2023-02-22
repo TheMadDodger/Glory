@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	Mesh::Mesh(size_t vertexCount, size_t indexCount, InputRate inputRate, size_t binding, size_t stride, const std::vector<AttributeType>& attributeTypes) :
+	Mesh::Mesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, const std::vector<AttributeType>& attributeTypes) :
 		m_InputRate(inputRate), m_Binding(binding), m_Stride(stride), m_VertexCount(vertexCount), m_IndexCount(indexCount), m_AttributeTypes(attributeTypes)
 	{
 	}

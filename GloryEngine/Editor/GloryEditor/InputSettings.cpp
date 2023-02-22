@@ -215,7 +215,6 @@ namespace Glory::Editor
 			{
 				if (ImGui::BeginChild("Filtered Bindings"))
 				{
-					InputDeviceType previousDeviceType;
 					for (size_t i = 0; i < FilteredBindings.size(); i++)
 					{
 						const InputBindingData& bindingData = FilteredBindings[i];

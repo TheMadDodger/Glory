@@ -123,7 +123,7 @@ namespace Glory
 		}
 
 		size_t spaceIndex = line.find(' ');
-		if (spaceIndex == std::string::npos) spaceIndex == line.length() - 1;
+		if (spaceIndex == std::string::npos) spaceIndex = line.length() - 1;
 		std::string symbol = line.substr(1, spaceIndex - 1);
 		if (symbol[symbol.length() - 1] == '\r') symbol = symbol.substr(0, symbol.length() - 1);
 

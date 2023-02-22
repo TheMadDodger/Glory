@@ -75,7 +75,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pEntityView->ComponentCount(); i++)
 		{
 			UUID uuid = pEntityView->ComponentUUIDAt(i);
-			size_t componentType = pEntityView->ComponentTypeAt(i);
+			uint32_t componentType = pEntityView->ComponentTypeAt(i);
 			EntityComponentObject* pComponentObject = new EntityComponentObject(entityID, uuid, componentType, entity.GetScene()->GetRegistry());
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
@@ -138,10 +138,6 @@ namespace Glory::Editor
 		const std::string& nameString = m_pObject->Name();
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [&](Editor* pEditor)
 		{
-			std::string id = nameString + std::to_string(index);
-			std::hash<std::string> hasher;
-			uint32_t hash = hasher(id);
-
 			std::string_view icon = "";
 			const uint32_t componentHash = m_pComponents[index]->ComponentType();
 			if(COMPONENT_ICONS.find(componentHash) != COMPONENT_ICONS.end())

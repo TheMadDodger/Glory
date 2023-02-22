@@ -27,8 +27,8 @@ namespace Glory
 		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& atachments);
 		virtual void OnCameraResize(CameraRef camera);
 
-		int LastSubmittedObjectCount();
-		int LastSubmittedCameraCount();
+		size_t LastSubmittedObjectCount();
+		size_t LastSubmittedCameraCount();
 
 		void SetNextFramePick(const glm::ivec2& coord, CameraRef camera);
 
@@ -63,8 +63,8 @@ namespace Glory
 
 	private:
 		RenderFrame m_CurrentPreparingFrame;
-		int m_LastSubmittedObjectCount;
-		int m_LastSubmittedCameraCount;
+		size_t m_LastSubmittedObjectCount;
+		size_t m_LastSubmittedCameraCount;
 		glm::ivec2 m_PickPos;
 		CameraRef m_PickCamera;
 	};

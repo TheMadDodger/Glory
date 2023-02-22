@@ -332,8 +332,8 @@ namespace Glory
 				inputEvent.KeyID = MouseAxis::MouseAxisScrollX;
 				inputEvent.State = InputState::Axis;
 				inputEvent.SourceDeviceID = event.wheel.which;
-				inputEvent.Value = event.wheel.x;
-				inputEvent.Delta = event.wheel.x;
+				inputEvent.Value = (float)event.wheel.x;
+				inputEvent.Delta = (float)event.wheel.x;
 				consumed |= ForwardInputEvent(inputEvent);
 			}
 
@@ -344,8 +344,8 @@ namespace Glory
 				inputEvent.KeyID = MouseAxis::MouseAxisScrollX;
 				inputEvent.State = InputState::Axis;
 				inputEvent.SourceDeviceID = event.wheel.which;
-				inputEvent.Value = event.wheel.y;
-				inputEvent.Delta = event.wheel.y;
+				inputEvent.Value = (float)event.wheel.y;
+				inputEvent.Delta = (float)event.wheel.y;
 				consumed |= ForwardInputEvent(inputEvent);
 
 				/* Button event */
@@ -370,16 +370,16 @@ namespace Glory
 			inputEvent.KeyID = MouseAxis::MouseAxisX;
 			inputEvent.State = InputState::Axis;
 			inputEvent.SourceDeviceID = event.motion.which;
-			inputEvent.Value = event.motion.x;
-			inputEvent.Delta = event.motion.xrel;
+			inputEvent.Value = (float)event.motion.x;
+			inputEvent.Delta = (float)event.motion.xrel;
 			consumed |= ForwardInputEvent(inputEvent);
 
 			inputEvent.InputDeviceType = InputDeviceType::Mouse;
 			inputEvent.KeyID = MouseAxis::MouseAxisY;
 			inputEvent.State = InputState::Axis;
 			inputEvent.SourceDeviceID = event.motion.which;
-			inputEvent.Value = event.motion.y;
-			inputEvent.Delta = event.motion.yrel;
+			inputEvent.Value = (float)event.motion.y;
+			inputEvent.Delta = (float)event.motion.yrel;
 			consumed |= ForwardInputEvent(inputEvent);
 			return consumed;
 		}

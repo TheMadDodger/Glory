@@ -358,7 +358,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputDropdown(std::string_view label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, std::string_view value)
+	bool EditorUI::InputDropdown(std::string_view label, const std::vector<std::string_view>& options, std::vector<bool>& selected, std::string_view value)
 	{
 		assert(options.size() == selected.size());
 
@@ -383,7 +383,7 @@ namespace Glory::Editor
 				bool isSelected = selected[i];
 				if (ImGui::Selectable(options[i].data(), isSelected))
 				{
-					selected[i] != selected[i];
+					selected[i] = !selected[i];
 					change = true;
 				}
 			}
@@ -550,10 +550,6 @@ namespace Glory::Editor
 	bool EditorUI::Header(std::string_view label)
 	{
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
-
-		std::hash<std::string_view> hasher;
-		uint32_t hash = hasher(label);
-
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.5f));

@@ -8,8 +8,8 @@ namespace Glory::Editor
 	class AssetPicker
 	{
 	public:
-		static GLORY_EDITOR_API bool ResourceDropdown(const std::string& label, size_t resourceType, UUID* value, bool includeSubAssets = true, const float borderPadding = 0.0f);
-		static GLORY_EDITOR_API bool ResourceButton(const std::string& label, float buttonWidth, size_t resourceType, UUID* value, bool includeSubAssets = true);
+		static GLORY_EDITOR_API bool ResourceDropdown(const std::string& label, uint32_t resourceType, UUID* value, bool includeSubAssets = true, const float borderPadding = 0.0f);
+		static GLORY_EDITOR_API bool ResourceButton(const std::string& label, float buttonWidth, uint32_t resourceType, UUID* value, bool includeSubAssets = true);
 
 	private:
 		AssetPicker();

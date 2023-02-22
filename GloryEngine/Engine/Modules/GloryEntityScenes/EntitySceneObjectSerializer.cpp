@@ -106,7 +106,7 @@ namespace Glory
 		for (size_t i = 0; i < pEntityView->ComponentCount(); i++)
 		{
 			UUID componentUUID = pEntityView->ComponentUUIDAt(i);
-			size_t typeHash = pEntityView->ComponentTypeAt(i);
+			uint32_t typeHash = pEntityView->ComponentTypeAt(i);
 			BaseTypeView* pTypeView = pRegistry->GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity.GetEntityID());
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
@@ -187,18 +187,18 @@ namespace Glory
 
 		size_t currentComponentIndex = 0;
 
-		size_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
+		uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
 
 		for (size_t i = 0; i < node.size(); i++)
 		{
 			YAML::Node nextObject = node[i];
 			YAML::Node subNode;
 			UUID compUUID;
-			size_t typeHash = 0;
+			uint32_t typeHash = 0;
 			std::string typeName = "";
 			YAML_READ(nextObject, subNode, UUID, compUUID, uint64_t);
 			YAML_READ(nextObject, subNode, TypeName, typeName, std::string);
-			YAML_READ(nextObject, subNode, TypeHash, typeHash, size_t);
+			YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
 
 			if (flags & Serializer::Flags::GenerateNewUUIDs)
 			{

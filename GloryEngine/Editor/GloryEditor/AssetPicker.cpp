@@ -14,7 +14,7 @@ namespace Glory::Editor
 	std::vector<UUID> AssetPicker::m_FilteredAssets;
 	std::vector<UUID> AssetPicker::m_PossibleAssets;
 
-	bool AssetPicker::ResourceDropdown(const std::string& label, size_t resourceType, UUID* value, bool includeSubAssets, const float borderPadding)
+	bool AssetPicker::ResourceDropdown(const std::string& label, uint32_t resourceType, UUID* value, bool includeSubAssets, const float borderPadding)
 	{
 		ImGui::PushID(label.c_str());
 		std::string assetName = "";
@@ -46,7 +46,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool AssetPicker::ResourceButton(const std::string& label, float buttonWidth, size_t resourceType, UUID* value, bool includeSubAssets)
+	bool AssetPicker::ResourceButton(const std::string& label, float buttonWidth, uint32_t resourceType, UUID* value, bool includeSubAssets)
 	{
 		ImGui::PushID(label.c_str());
 		bool openPopup = false;

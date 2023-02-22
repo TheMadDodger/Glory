@@ -5,8 +5,6 @@
 
 namespace Glory
 {
-	std::hash<std::string> MaterialData::m_Hasher = std::hash<std::string>();
-
 	MaterialData::MaterialData()
 		: m_CurrentOffset(0)
 	{

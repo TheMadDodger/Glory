@@ -77,7 +77,7 @@ namespace Glory::Editor
 	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)
 	{
 		const std::hash<std::string> hasher{};
-		const uint32_t hash = hasher((pScene->Name() + std::to_string(pScene->GetUUID())));
+		const size_t hash = hasher((pScene->Name() + std::to_string(pScene->GetUUID())));
 
 		bool selected = Selection::IsObjectSelected(pScene);
 		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
@@ -154,7 +154,7 @@ namespace Glory::Editor
 		const std::string nameAndIDMinus1 = pObject->Name() + std::to_string(id - 1);
 		const std::string nameAndID = pObject->Name() + std::to_string(id);
 		const std::string nameAndIDPlus1 = pObject->Name() + std::to_string(id + 1);
-		const uint32_t hash = hasher(nameAndID);
+		const size_t hash = hasher(nameAndID);
 
 		const size_t childCount = pObject->ChildCount();
 

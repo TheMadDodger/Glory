@@ -35,7 +35,7 @@ namespace Glory
 		const UUID& GetUUID() const;
 		virtual const UUID& GetGPUUUID() const;
 
-		uint32_t TypeCount() const;
+		size_t TypeCount() const;
 		bool GetType(size_t index, std::type_index& type) const;
 
 		static Object* FindObject(UUID id);
@@ -44,9 +44,6 @@ namespace Glory
 		void SetName(const std::string& name);
 
 		virtual void* GetRootDataAddress();
-
-
-		//constexpr size_t H = std::hash<const char*>()("Object");
 
 	protected:
 		std::vector<std::type_index> m_Inheritence;

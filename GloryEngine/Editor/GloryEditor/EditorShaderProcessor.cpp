@@ -18,7 +18,7 @@ namespace Glory::Editor
 	ThreadedUMap<UUID, std::function<void(FileData*)>> EditorShaderProcessor::m_WaitingCallbacks;
 	ThreadedVector<std::function<void(FileData*)>> EditorShaderProcessor::m_Callbacks;
 
-	std::map<spirv_cross::SPIRType::BaseType, std::vector<size_t>> EditorShaderProcessor::m_SpirBaseTypeToHash = {
+	std::map<spirv_cross::SPIRType::BaseType, std::vector<uint32_t>> SpirBaseTypeToHash = {
 		// Int
 		{ spirv_cross::SPIRType::BaseType::Int,
 		{ ResourceType::GetHash<int32_t>(), ResourceType::GetHash<glm::ivec2>(), ResourceType::GetHash<glm::ivec3>(), ResourceType::GetHash<glm::ivec4>() } },
@@ -259,7 +259,7 @@ namespace Glory::Editor
 				spirv_cross::TypeID memberType = base_type.member_types[j];
 				const spirv_cross::SPIRType& type = compiler.get_type(memberType);
 				const std::string& name = compiler.get_member_name(storageBuffer.base_type_id, j);
-				uint32_t hash = type.vecsize - 1 < m_SpirBaseTypeToHash[type.basetype].size() ? m_SpirBaseTypeToHash[type.basetype][type.vecsize - 1] : 0;
+				uint32_t hash = type.vecsize - 1 < SpirBaseTypeToHash[type.basetype].size() ? SpirBaseTypeToHash[type.basetype][type.vecsize - 1] : 0;
 				pEditorShader->m_PropertyInfos.push_back(EditorShaderData::PropertyInfo(name, hash));
 			}
 		}

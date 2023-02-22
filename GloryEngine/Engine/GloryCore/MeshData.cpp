@@ -8,20 +8,20 @@ namespace Glory
 		APPEND_TYPE(MeshData);
 	}
 
-	MeshData::MeshData(size_t vertexCount, size_t vertexSize, const std::vector<float>& vertices, size_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes) :
+	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const std::vector<float>& vertices, uint32_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(vertices), m_Indices(indices), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
 		APPEND_TYPE(MeshData);
 	}
 
-	MeshData::MeshData(size_t vertexCount, size_t vertexSize, const float* vertices, size_t indexCount, const uint32_t* indices, const std::vector<AttributeType>& attributes) :
+	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, uint32_t indexCount, const uint32_t* indices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(std::vector<float>(vertexCount)), m_Indices(std::vector<uint32_t>(indexCount)), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
 		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
 		memcpy(&m_Indices[0], indices, sizeof(uint32_t) * indexCount);
 	}
 
-	MeshData::MeshData(size_t vertexCount, size_t vertexSize, const float* vertices, const std::vector<AttributeType>& attributes) :
+	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(0), m_Vertices(std::vector<float>(vertexCount)), m_Indices(), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
 		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
@@ -34,22 +34,22 @@ namespace Glory
 		m_Attributes.clear();
 	}
 
-	const size_t MeshData::VertexCount() const
+	const uint32_t MeshData::VertexCount() const
 	{
 		return m_VertexCount;
 	}
 
-	const size_t MeshData::IndexCount() const
+	const uint32_t MeshData::IndexCount() const
 	{
 		return m_IndexCount;
 	}
 
-	const size_t MeshData::VertexSize() const
+	const uint32_t MeshData::VertexSize() const
 	{
 		return m_VertexSize;
 	}
 
-	const size_t MeshData::AttributeCount() const
+	const uint32_t MeshData::AttributeCount() const
 	{
 		return m_Attributes.size();
 	}
