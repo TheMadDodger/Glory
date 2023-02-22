@@ -4,9 +4,9 @@ namespace Glory
 {
 	PropertySerializer* PropertySerializer::GetSerializer(uint32_t typeHash)
 	{
-		for (size_t i = 0; i < SERIALIZERS.size(); i++)
+		for (size_t i = 0; i < PROPERTY_SERIALIZERS.size(); i++)
 		{
-			PropertySerializer* pSerializer = SERIALIZERS[i];
+			PropertySerializer* pSerializer = PROPERTY_SERIALIZERS[i];
 			uint32_t hash = pSerializer->GetSerializedTypeHash();
 			if (hash == typeHash) return pSerializer;
 		}
@@ -21,9 +21,9 @@ namespace Glory
 
 	size_t PropertySerializer::GetID(PropertySerializer* pSerializer)
 	{
-		for (size_t i = 0; i < SERIALIZERS.size(); i++)
+		for (size_t i = 0; i < PROPERTY_SERIALIZERS.size(); i++)
 		{
-			if (SERIALIZERS[i] == pSerializer) return i;
+			if (PROPERTY_SERIALIZERS[i] == pSerializer) return i;
 		}
 		return 0;
 	}
@@ -150,7 +150,7 @@ namespace Glory
 		}
 	}
 
-	size_t PropertySerializer::GetSerializedTypeHash() const
+	uint32_t PropertySerializer::GetSerializedTypeHash() const
 	{
 		return m_TypeHash;
 	}
@@ -165,7 +165,7 @@ namespace Glory
 
 	void PropertySerializer::Cleanup()
 	{
-		std::for_each(SERIALIZERS.begin(), SERIALIZERS.end(), [](PropertySerializer* pSerializer) { delete pSerializer; });
-		SERIALIZERS.clear();
+		std::for_each(PROPERTY_SERIALIZERS.begin(), PROPERTY_SERIALIZERS.end(), [](PropertySerializer* pSerializer) { delete pSerializer; });
+		PROPERTY_SERIALIZERS.clear();
 	}
 }

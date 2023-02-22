@@ -7,8 +7,12 @@
 #include "Serializer.h"
 #include <Reflection.h>
 
-#define SERIALIZERS Glory::GloryContext::GetSerializers()->m_pRegisteredPropertySerializers
+#ifndef PROPERTY_SERIALIZERS
+#define PROPERTY_SERIALIZERS Glory::GloryContext::GetSerializers()->m_pRegisteredPropertySerializers
+#endif
+#ifndef STANDARD_SERIALIZER
 #define STANDARD_SERIALIZER(x) PropertySerializer::RegisterSerializer<SimpleTemplatedPropertySerializer<x>>()
+#endif
 
 namespace Glory
 {
@@ -20,7 +24,7 @@ namespace Glory
 		static void RegisterSerializer()
 		{
 			PropertySerializer* pSerializer = new T();
-			SERIALIZERS.push_back(pSerializer);
+			PROPERTY_SERIALIZERS.push_back(pSerializer);
 		}
 
 		//static PropertySerializer* GetSerializer(Object* pObject);
@@ -38,7 +42,7 @@ namespace Glory
 		static void DeserializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object);
 		static void DeserializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Node& object);
 
-		virtual size_t GetSerializedTypeHash() const;
+		virtual uint32_t GetSerializedTypeHash() const;
 
 	protected:
 		PropertySerializer(uint32_t typeHash);

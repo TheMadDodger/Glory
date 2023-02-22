@@ -14,7 +14,6 @@ namespace Glory
 
 		std::string Name;
 		std::string Value;
-
 	};
 
 	struct Version

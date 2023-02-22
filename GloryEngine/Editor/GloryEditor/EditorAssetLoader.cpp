@@ -65,7 +65,7 @@ namespace Glory::Editor
 		// Check if file was saved
 		if (!std::filesystem::exists(filePath) || filePath.extension() == "TMP") return;
 		std::filesystem::file_time_type lastSaveTime = std::filesystem::last_write_time(filePath);
-		long duration = lastSaveTime.time_since_epoch().count();
+		long duration = (long)lastSaveTime.time_since_epoch().count();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(filePath.string());
 		if (!uuid) return;
 		long previousDuration = EditorAssetDatabase::GetLastSavedRecord(uuid);

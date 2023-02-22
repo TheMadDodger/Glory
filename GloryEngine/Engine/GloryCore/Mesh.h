@@ -9,7 +9,7 @@ namespace Glory
 	class Mesh : public GPUResource
 	{
 	public:
-		Mesh(size_t vertexCount, size_t indexCount, InputRate inputRate, size_t binding, size_t stride, const std::vector<AttributeType>& attributeTypes);
+		Mesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, const std::vector<AttributeType>& attributeTypes);
 		virtual ~Mesh();
 
 		virtual void CreateBindingAndAttributeData() = 0;
@@ -24,10 +24,10 @@ namespace Glory
 
 	protected:
 		const InputRate m_InputRate;
-		const size_t m_Binding;
-		const size_t m_Stride;
-		const size_t m_VertexCount;
-		const size_t m_IndexCount;
+		const uint32_t m_Binding;
+		const uint32_t m_Stride;
+		const uint32_t m_VertexCount;
+		const uint32_t m_IndexCount;
 		const std::vector<AttributeType> m_AttributeTypes;
 
 		Buffer* m_pVertexBuffer;

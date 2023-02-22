@@ -18,7 +18,7 @@
 
 namespace Glory
 {
-	std::map<std::string, size_t> m_MonoTypeToHash = {
+	std::map<std::string, uint32_t> MonoTypeToHash = {
 		{"System.Single", ResourceType::GetHash<float>()},
 		{"System.Double", ResourceType::GetHash<double>()},
 		{"System.Int32", ResourceType::GetHash<int>()},
@@ -30,7 +30,7 @@ namespace Glory
 		{"GloryEngine.SceneManagement.SceneObject", SerializedType::ST_Object},
 	};
 
-	std::map<std::string, size_t> m_MonoTypeToElementHash = {
+	std::map<std::string, uint32_t> MonoTypeToElementHash = {
 		{"GloryEngine.Material", ResourceType::GetHash<MaterialData>()},
 		{"GloryEngine.MaterialInstance", ResourceType::GetHash<MaterialInstanceData>()},
 		{"GloryEngine.Model", ResourceType::GetHash<ModelData>()},
@@ -68,7 +68,7 @@ namespace Glory
 		fileStream.read(data, size);
 		fileStream.close();
 		MonoImageOpenStatus status;
-		m_pImage = mono_image_open_from_data_with_name(data, size, true, &status, false, path.string().c_str());
+		m_pImage = mono_image_open_from_data_with_name(data, (uint32_t)size, true, &status, false, path.string().c_str());
 		if (m_pImage == nullptr) return;
 		if (status != MONO_IMAGE_OK) return;
 
@@ -219,8 +219,8 @@ namespace Glory
 		m_TypeName(mono_type_get_name(m_pType)),
 		m_SizeAllignment(0),
 		m_Size(mono_type_size(m_pType, &m_SizeAllignment)),
-		m_TypeHash(m_MonoTypeToHash[m_TypeName]),
-		m_ElementTypeHash(m_MonoTypeToElementHash.find(m_TypeName) != m_MonoTypeToElementHash.end() ? m_MonoTypeToElementHash[m_TypeName] : m_TypeHash),
+		m_TypeHash(MonoTypeToHash[m_TypeName]),
+		m_ElementTypeHash(MonoTypeToElementHash.find(m_TypeName) != MonoTypeToElementHash.end() ? MonoTypeToElementHash[m_TypeName] : m_TypeHash),
 		m_IsStatic((m_Flags & MONO_FIELD_ATTR_STATIC) == MONO_FIELD_ATTR_STATIC)
 	{
 	}

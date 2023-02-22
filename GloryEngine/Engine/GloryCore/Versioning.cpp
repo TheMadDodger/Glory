@@ -73,7 +73,7 @@ namespace Glory
 		for (size_t i = 0; i < m_VersionValues.size(); i++)
 		{
 			if (other.m_VersionValues.size() <= i) break;
-			int factor = pow(10, m_VersionValues.size() - i - 1);
+			int factor = (int)pow(10.0, (double)(m_VersionValues.size() - i - 1));
 			if (m_VersionValues[i].Value == other.m_VersionValues[i].Value) continue;
 			compareValue += factor;
 		}

@@ -67,8 +67,8 @@ namespace Glory::Editor
 				std::vector<float> samples = it->second;
 				std::vector<float> frames = m_TimeFrames[name];
 
-				int newFrameMin = frames[0];
-				int newFrameMax = frames[frames.size() - 1];
+				float newFrameMin = frames[0];
+				float newFrameMax = frames[frames.size() - 1];
 
 				if (frameMin < newFrameMin) frameMin = newFrameMin;
 				if (frameMax < newFrameMax) frameMax = frames[frames.size() - 1];

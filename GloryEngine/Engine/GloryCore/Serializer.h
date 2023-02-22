@@ -5,7 +5,9 @@
 #include "GloryContext.h"
 #include "Object.h"
 
+#ifndef SERIALIZERS
 #define SERIALIZERS Glory::GloryContext::GetSerializers()->m_pRegisteredSerializers
+#endif
 
 namespace Glory
 {

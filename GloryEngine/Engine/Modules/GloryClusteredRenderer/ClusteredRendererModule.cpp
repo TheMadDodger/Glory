@@ -170,7 +170,7 @@ namespace Glory
 		pGraphics->EnableDepthTest(false);
 		pGraphics->SetViewport(0, 0, width, height);
 
-		size_t count = std::fmin(lights.size(), MAX_LIGHTS);
+		uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
 		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(PointLight));
 
 		glm::uvec2 resolution = camera.GetResolution();
@@ -178,7 +178,7 @@ namespace Glory
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
 
-		size_t sizeX = (size_t)std::ceilf(resolution.x / (float)gridSize.x);
+		uint32_t sizeX = (uint32_t)std::ceilf(resolution.x / (float)gridSize.x);
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();
@@ -297,13 +297,13 @@ namespace Glory
 		//pActiveClustersSSBO->Unbind();
 		//pActiveUniqueClustersSSBO->Unbind();
 
-		size_t count = std::fmin(lights.size(), MAX_LIGHTS);
+		uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
 		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(PointLight));
 
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
 
-		size_t sizeX = (size_t)std::ceilf(resolution.x / (float)gridSize.x);
+		uint32_t sizeX = (uint32_t)std::ceilf(resolution.x / (float)gridSize.x);
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();

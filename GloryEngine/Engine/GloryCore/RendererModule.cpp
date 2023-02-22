@@ -76,12 +76,12 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
-	int RendererModule::LastSubmittedObjectCount()
+	size_t RendererModule::LastSubmittedObjectCount()
 	{
 		return m_LastSubmittedObjectCount;
 	}
 
-	int RendererModule::LastSubmittedCameraCount()
+	size_t RendererModule::LastSubmittedCameraCount()
 	{
 		return m_LastSubmittedCameraCount;
 	}

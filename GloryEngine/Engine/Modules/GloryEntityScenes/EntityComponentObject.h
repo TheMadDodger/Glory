@@ -10,7 +10,7 @@ namespace Glory
 	{
 	public:
 		GLORY_API EntityComponentObject();
-		GLORY_API EntityComponentObject(GloryECS::EntityID entityID, UUID componentID, size_t componentType, GloryECS::EntityRegistry* pRegistry);
+		GLORY_API EntityComponentObject(GloryECS::EntityID entityID, UUID componentID, uint32_t componentType, GloryECS::EntityRegistry* pRegistry);
 		GLORY_API virtual ~EntityComponentObject();
 
 		template<typename T>

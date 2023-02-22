@@ -15,7 +15,7 @@ namespace Glory::Editor
 
 	bool SceneObjectRedirectPropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
-		const size_t sceneObjectRefType = ResourceType::GetHash<SceneObjectRef>();
+		const uint32_t sceneObjectRefType = ResourceType::GetHash<SceneObjectRef>();
 		PropertyDrawer* pDrawer = PropertyDrawer::GetPropertyDrawer(sceneObjectRefType);
 		if (!pDrawer)
 		{

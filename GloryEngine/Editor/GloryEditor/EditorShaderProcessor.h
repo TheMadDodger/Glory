@@ -43,7 +43,5 @@ namespace Glory::Editor
 		Thread* m_pThread;
 
 		std::map<ShaderType, shaderc_shader_kind> m_ShaderTypeToKind;
-
-		static std::map<spirv_cross::SPIRType::BaseType, std::vector<size_t>> m_SpirBaseTypeToHash;
 	};
 }

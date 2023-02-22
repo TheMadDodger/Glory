@@ -7,7 +7,7 @@ namespace Glory
 		APPEND_TYPE(EntityComponentObject);
 	}
 
-	EntityComponentObject::EntityComponentObject(GloryECS::EntityID entityID, UUID componentID, size_t componentType, GloryECS::EntityRegistry* pRegistry)
+	EntityComponentObject::EntityComponentObject(GloryECS::EntityID entityID, UUID componentID, uint32_t componentType, GloryECS::EntityRegistry* pRegistry)
 		: m_EntityID(entityID), m_ComponentType(componentType), m_pRegistry(pRegistry), Object(componentID)
 	{
 		APPEND_TYPE(EntityComponentObject);

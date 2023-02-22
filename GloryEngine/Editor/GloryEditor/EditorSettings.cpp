@@ -71,16 +71,16 @@ namespace Glory::Editor
         YAML::Node window = node["Window"];
         if (window.IsMap() && window.IsDefined())
         {
-            YAML::Node subNodel;
-            YAML_READ(window, subNodel, Width, pMainWindowSettings->Width, uint32_t);
-            YAML_READ(window, subNodel, Height, pMainWindowSettings->Height, uint32_t);
+            YAML::Node subNode;
+            YAML_READ(window, subNode, Width, pMainWindowSettings->Width, uint32_t);
+            YAML_READ(window, subNode, Height, pMainWindowSettings->Height, uint32_t);
 
-            glm::vec2 pos;
-            YAML_READ(window, subNodel, Position, pos, glm::vec2);
+            glm::vec2 pos{};
+            YAML_READ(window, subNode, Position, pos, glm::vec2);
 
             Window* pMainWindow = pWindowModule->GetMainWindow();
             pMainWindow->Resize(pMainWindowSettings->Width, pMainWindowSettings->Height);
-            pMainWindow->SetPosition(pos.x, pos.y);
+            pMainWindow->SetPosition((int)pos.x, (int)pos.y);
         }
 
         Shortcuts::LoadShortcuts(node);

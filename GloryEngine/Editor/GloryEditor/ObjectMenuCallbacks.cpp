@@ -397,7 +397,6 @@ namespace Glory::Editor
 		std::filesystem::path path = FileBrowserItem::GetCurrentPath();
 		path = GetUnqiueFilePath(path.append("New Folder"));
 		if (!std::filesystem::create_directory(path)) return;
-		path.filename();
 
 		FileBrowserItem::GetSelectedFolder()->Refresh();
 		FileBrowserItem::GetSelectedFolder()->SortChildren();
