@@ -13,22 +13,22 @@ namespace Glory
 	{
 	public:
 		SerializedProperty();
-		SerializedProperty(UUID objectUUID, const std::string& name, size_t typeHash, void* pMember, uint32_t flags = 0);
-		SerializedProperty(UUID objectUUID, const std::string& name, size_t typeHash, size_t elementTypeHash, void* pMember, uint32_t flags = 0);
+		SerializedProperty(UUID objectUUID, const std::string& name, uint32_t typeHash, void* pMember, uint32_t flags = 0);
+		SerializedProperty(UUID objectUUID, const std::string& name, uint32_t typeHash, uint32_t elementTypeHash, void* pMember, uint32_t flags = 0);
 		virtual ~SerializedProperty();
 
 		const std::string& Name() const;
 		uint32_t Flags() const;
 		void* MemberPointer() const;
-		size_t TypeHash() const;
-		size_t ElementTypeHash() const;
+		uint32_t TypeHash() const;
+		uint32_t ElementTypeHash() const;
 		Object* ObjectReference() const;
 
 	protected:
 		const std::string m_PropertyName;
 		void* m_pMember;
-		size_t m_TypeHash;
-		size_t m_ElementTypeHash;
+		uint32_t m_TypeHash;
+		uint32_t m_ElementTypeHash;
 		uint32_t m_Flags;
 		UUID m_ObjectUUID;
 	};

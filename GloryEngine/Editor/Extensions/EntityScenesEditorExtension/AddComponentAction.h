@@ -7,7 +7,7 @@ namespace Glory::Editor
 	class AddComponentAction : public IAction
 	{
 	public:
-		AddComponentAction(size_t typeHash, UUID uuid, size_t componentIndex);
+		AddComponentAction(uint32_t typeHash, UUID uuid, size_t componentIndex);
 		virtual ~AddComponentAction();
 
 	private:
@@ -15,7 +15,7 @@ namespace Glory::Editor
 		virtual void OnRedo(const ActionRecord& actionRecord);
 
 	private:
-		const size_t m_ComponentTypeHash;
+		const uint32_t m_ComponentTypeHash;
 		const UUID m_ComponentUUID;
 		const size_t m_ComponentIndex;
 	};

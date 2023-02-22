@@ -35,10 +35,10 @@ namespace Glory::Editor
 
 	protected:
 		Object* m_pTarget;
-		const size_t m_EditedType;
+		const uint32_t m_EditedType;
 
 	protected:
-		GLORY_EDITOR_API Editor(const size_t type);
+		GLORY_EDITOR_API Editor(const uint32_t type);
 		virtual GLORY_EDITOR_API ~Editor();
 
 	private:
@@ -55,7 +55,7 @@ namespace Glory::Editor
 	class EditorTemplate : public Editor
 	{
 	public:
-		EditorTemplate(size_t type) : Editor(type) {}
+		EditorTemplate(uint32_t type) : Editor(type) {}
 		EditorTemplate() : Editor(ResourceType::GetHash<TObject>()) {}
 
 	private:

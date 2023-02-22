@@ -1,13 +1,14 @@
 #pragma once
 #include "SerializedTypes.h"
+#include <stdint.h>
 
 namespace Glory
 {
 	struct ScriptProperty
 	{
 		const char* m_Name;
-		size_t m_TypeHash;
-		size_t m_ElementTypeHash;
+		uint32_t m_TypeHash;
+		uint32_t m_ElementTypeHash;
 		const char* m_TypeName;
 		size_t m_Size;
 		SerializedType ValueType;

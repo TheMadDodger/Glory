@@ -47,7 +47,7 @@ namespace Glory::Editor
 		}
 	}
 
-	GLORY_EDITOR_API EditorShaderData::PropertyInfo::PropertyInfo(const std::string& name, size_t typeHash) : m_Name(name), m_TypeHash(typeHash)
+	GLORY_EDITOR_API EditorShaderData::PropertyInfo::PropertyInfo(const std::string& name, uint32_t typeHash) : m_Name(name), m_TypeHash(typeHash)
 	{
 	}
 }

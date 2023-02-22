@@ -7,7 +7,7 @@
 
 namespace Glory::Editor
 {
-	bool AssetReferencePropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool AssetReferencePropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		UUID* pUUIDMember = (UUID*)data;
 		return AssetPicker::ResourceDropdown(label, typeHash, pUUIDMember);
@@ -19,7 +19,7 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool AssetReferencePropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool AssetReferencePropertyDrawer::Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)data;
 		UUID oldValue = pReferenceMember->AssetUUID();
@@ -34,7 +34,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool AssetReferencePropertyDrawer::Draw(const std::string& label, YAML::Node& node, size_t typeHash, uint32_t flags) const
+	bool AssetReferencePropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
 		UUID uuid = node.as<uint64_t>();
 		UUID oldUuid = uuid;

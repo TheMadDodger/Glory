@@ -26,7 +26,7 @@ namespace Glory
 	{
 		EntityScene* pEntityScene = GetEntityScene(pEntityHandle);
 		EntityView* pEntityView = pEntityScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
-		size_t hash = pEntityView->ComponentType(componentID);
+		uint32_t hash = pEntityView->ComponentType(componentID);
 		return pEntityScene->GetRegistry()->GetComponent<T>(pEntityHandle->m_EntityID);
 	}
 

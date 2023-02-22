@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	Camera::Camera(size_t width, size_t height)
+	Camera::Camera(uint32_t width, uint32_t height)
 		: m_DisplayIndex(0), m_Resolution(width, height), m_TextureIsDirty(true),
 		m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr),
 		m_ClearColor(glm::vec4(0.0f)), m_Priority(0), m_LayerMask(0), m_Near(0.0f), m_Far(0.0f),
@@ -13,14 +13,14 @@ namespace Glory
 
 	}
 
-	void Camera::SetResolution(size_t width, size_t height)
+	void Camera::SetResolution(uint32_t width, uint32_t height)
 	{
 		if (m_Resolution.x == width && m_Resolution.y == height) return;
 		m_Resolution = glm::ivec2(width, height);
 		m_TextureIsDirty = true;
 	}
 
-	void Camera::SetPerspectiveProjection(size_t width, size_t height, float halfFOV, float near, float far)
+	void Camera::SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far)
 	{
 		m_Near = near;
 		m_Far = far;

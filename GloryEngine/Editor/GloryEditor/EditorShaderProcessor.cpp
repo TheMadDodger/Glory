@@ -259,7 +259,7 @@ namespace Glory::Editor
 				spirv_cross::TypeID memberType = base_type.member_types[j];
 				const spirv_cross::SPIRType& type = compiler.get_type(memberType);
 				const std::string& name = compiler.get_member_name(storageBuffer.base_type_id, j);
-				size_t hash = type.vecsize - 1 < m_SpirBaseTypeToHash[type.basetype].size() ? m_SpirBaseTypeToHash[type.basetype][type.vecsize - 1] : 0;
+				uint32_t hash = type.vecsize - 1 < m_SpirBaseTypeToHash[type.basetype].size() ? m_SpirBaseTypeToHash[type.basetype][type.vecsize - 1] : 0;
 				pEditorShader->m_PropertyInfos.push_back(EditorShaderData::PropertyInfo(name, hash));
 			}
 		}
@@ -267,7 +267,7 @@ namespace Glory::Editor
 
 	void EditorShaderProcessor::AssetRegisteredCallback(UUID uuid, const ResourceMeta& meta, Resource* pResource)
 	{
-		size_t typeHash = meta.Hash();
+		uint32_t typeHash = meta.Hash();
 		size_t shaderSourceDataHash = ResourceType::GetHash<ShaderSourceData>();
 		if (typeHash != shaderSourceDataHash) return;
 		AssetManager::GetAsset(uuid, [](Resource* pLoadedResource)

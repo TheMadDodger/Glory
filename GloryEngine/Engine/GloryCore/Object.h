@@ -35,7 +35,7 @@ namespace Glory
 		const UUID& GetUUID() const;
 		virtual const UUID& GetGPUUUID() const;
 
-		size_t TypeCount() const;
+		uint32_t TypeCount() const;
 		bool GetType(size_t index, std::type_index& type) const;
 
 		static Object* FindObject(UUID id);

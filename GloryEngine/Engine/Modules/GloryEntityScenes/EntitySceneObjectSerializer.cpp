@@ -46,11 +46,11 @@ namespace Glory
 		YAML::Node nextObject = object;
 		YAML::Node subNode;
 		UUID compUUID;
-		size_t typeHash = 0;
+		uint32_t typeHash = 0;
 		std::string typeName = "";
 		YAML_READ(nextObject, subNode, UUID, compUUID, uint64_t);
 		YAML_READ(nextObject, subNode, TypeName, typeName, std::string);
-		YAML_READ(nextObject, subNode, TypeHash, typeHash, size_t);
+		YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
 
 		Entity entityHandle = pObject->GetEntityHandle();
 		EntityID entity = entityHandle.GetEntityID();

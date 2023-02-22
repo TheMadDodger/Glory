@@ -21,8 +21,8 @@ namespace Glory
 		static bool AssetExists(const std::string& path);
 		static void EnqueueCallback(const CallbackType& type, UUID uuid, Resource* pResource);
 
-		static void GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out);
-		static void GetAllAssetsOfType(size_t typeHash, std::vector<std::string>& out);
+		static void GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& out);
+		static void GetAllAssetsOfType(uint32_t typeHash, std::vector<std::string>& out);
 
 		static std::string GetAssetName(UUID uuid);
 

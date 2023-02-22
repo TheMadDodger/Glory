@@ -85,7 +85,7 @@ namespace Glory
 		}
 
 	private:
-		size_t m_ElementTypeHash;
+		uint32_t m_ElementTypeHash;
 		std::vector<T>* m_pMember;
 		std::vector<SerializedProperty*> m_pSerializedArray;
 	};

@@ -23,7 +23,7 @@ namespace Glory
 
 	private:
 		std::vector<Camera> m_Cameras;
-		std::vector<size_t> m_UnusedCameraIndices;
-		std::unordered_map<UUID, size_t> m_IDToCamera;
+		std::vector<uint32_t> m_UnusedCameraIndices;
+		std::unordered_map<UUID, uint32_t> m_IDToCamera;
 	};
 }

@@ -80,7 +80,7 @@ namespace Glory
 		return m_pLoaderModules[loaderIndex];
 	}
 
-	LoaderModule* Engine::GetLoaderModule(size_t typeHash)
+	LoaderModule* Engine::GetLoaderModule(uint32_t typeHash)
 	{
 		if (m_TypeHashToLoader.find(typeHash) == m_TypeHashToLoader.end()) return nullptr;
 		size_t loaderIndex = m_TypeHashToLoader[typeHash];
@@ -236,7 +236,7 @@ namespace Glory
 				m_pLoaderModules.push_back(pLoaderModule);
 				std::type_index type = pLoaderModule->GetResourceType();
 				m_TypeToLoader[type] = index;
-				size_t typeHash = ResourceType::GetHash(type);
+				uint32_t typeHash = ResourceType::GetHash(type);
 				m_TypeHashToLoader[typeHash] = index;
 			}
 

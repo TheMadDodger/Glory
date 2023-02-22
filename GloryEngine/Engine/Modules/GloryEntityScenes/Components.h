@@ -111,7 +111,7 @@ namespace Glory
 			(glm::vec4)	(m_ClearColor)
 		)
 
-		size_t m_LastHash;
+			uint32_t m_LastHash;
 
 		CameraRef m_Camera;
 	};

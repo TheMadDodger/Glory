@@ -37,8 +37,8 @@ namespace Glory
 		const Visibility& FieldVisibility() const;
 		const char* TypeName() const;
 		const int Size() const;
-		const size_t TypeHash() const;
-		const size_t ElementTypeHash() const;
+		const uint32_t TypeHash() const;
+		const uint32_t ElementTypeHash() const;
 		const bool IsStatic() const;
 
 	private:
@@ -50,8 +50,8 @@ namespace Glory
 		const char* m_TypeName;
 		int m_Size;
 		int m_SizeAllignment;
-		size_t m_TypeHash;
-		size_t m_ElementTypeHash;
+		uint32_t m_TypeHash;
+		uint32_t m_ElementTypeHash;
 		bool m_IsStatic;
 	};
 

@@ -11,7 +11,7 @@ namespace Glory
 		glm::mat4 Model;
 		glm::mat4 View;
 		glm::mat4 Projection;
-		uint32_t ObjectID;
+		uint64_t ObjectID;
 	};
 
 	struct RenderData
@@ -19,7 +19,7 @@ namespace Glory
 	public:
 		// Mesh
 		MeshData* m_pMesh;
-		uint32_t m_ObjectID;
+		uint64_t m_ObjectID;
 
 		// World matrices
 		glm::mat4 m_World;

@@ -11,7 +11,7 @@ namespace Glory::Editor
 	std::vector<const GloryReflect::FieldData*> PropertyDrawer::m_pCurrentFieldDataStack;
 	std::filesystem::path PropertyDrawer::m_CurrentPropertyPath = "";
 
-	PropertyDrawer::PropertyDrawer(size_t typeHash) : m_TypeHash(typeHash)
+	PropertyDrawer::PropertyDrawer(uint32_t typeHash) : m_TypeHash(typeHash)
 	{
 	}
 
@@ -19,7 +19,7 @@ namespace Glory::Editor
 	{
 	}
 
-	bool PropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool PropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		ImGui::Text(label.data());
 		return false;
@@ -31,19 +31,19 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool PropertyDrawer::Draw(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags) const
+	bool PropertyDrawer::Draw(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags) const
 	{
 		ImGui::Text(label.data());
 		return false;
 	}
 
-	bool PropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool PropertyDrawer::Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		ImGui::Text(label.data());
 		return false;
 	}
 
-	bool PropertyDrawer::Draw(const std::string& label, YAML::Node& node, size_t typeHash, uint32_t flags) const
+	bool PropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
 		ImGui::Text(label.data());
 		return false;
@@ -59,7 +59,7 @@ namespace Glory::Editor
 		m_PropertyDrawers.push_back(pDrawer);
 	}
 
-	bool PropertyDrawer::DrawProperty(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, size_t elementTypeHash, uint32_t flags)
+	bool PropertyDrawer::DrawProperty(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 			{
@@ -78,7 +78,7 @@ namespace Glory::Editor
 
 	bool PropertyDrawer::DrawProperty(const std::string& label, std::any& data, uint32_t flags)
 	{
-		size_t typeHash = ResourceType::GetHash(data.type());
+		uint32_t typeHash = ResourceType::GetHash(data.type());
 
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
@@ -100,7 +100,7 @@ namespace Glory::Editor
 		return DrawProperty(serializedProperty, serializedProperty->Name(), serializedProperty->MemberPointer(), serializedProperty->TypeHash(), serializedProperty->ElementTypeHash(), serializedProperty->Flags());
 	}
 
-	bool PropertyDrawer::DrawProperty(const std::string& label, std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, uint32_t flags)
+	bool PropertyDrawer::DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
@@ -117,7 +117,7 @@ namespace Glory::Editor
 		return drawer->Draw(label, buffer, typeHash, offset, size, flags);
 	}
 
-	bool PropertyDrawer::DrawProperty(const std::string& label, void* data, size_t typeHash, uint32_t flags)
+	bool PropertyDrawer::DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
@@ -137,8 +137,8 @@ namespace Glory::Editor
 	bool PropertyDrawer::DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags)
 	{
 		m_pCurrentFieldDataStack.push_back(pFieldData);
-		size_t typeHash = pFieldData->Type();
-		size_t elementTypeHash = pFieldData->ArrayElementType();
+		uint32_t typeHash = pFieldData->Type();
+		uint32_t elementTypeHash = pFieldData->ArrayElementType();
 
 		std::string_view name = pFieldData->Name();
 		m_CurrentPropertyPath.append(name);
@@ -183,7 +183,7 @@ namespace Glory::Editor
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
 		std::hash<std::string> hasher;
-		size_t hash = hasher(label);
+		uint32_t hash = hasher(label);
 
 		ImGui::PushID(label.c_str());
 
@@ -208,8 +208,8 @@ namespace Glory::Editor
 	bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)
 	{
 		m_CurrentPropertyPath = scriptProperty.m_Name;
-		size_t typeHash = scriptProperty.m_TypeHash;
-		size_t elementTypeHash = scriptProperty.m_ElementTypeHash;
+		uint32_t typeHash = scriptProperty.m_TypeHash;
+		uint32_t elementTypeHash = scriptProperty.m_ElementTypeHash;
 
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
@@ -226,7 +226,7 @@ namespace Glory::Editor
 		return false;
 	}
 
-	PropertyDrawer* PropertyDrawer::GetPropertyDrawer(size_t typeHash)
+	PropertyDrawer* PropertyDrawer::GetPropertyDrawer(uint32_t typeHash)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{

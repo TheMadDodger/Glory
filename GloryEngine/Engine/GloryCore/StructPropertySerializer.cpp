@@ -23,7 +23,7 @@ namespace Glory
 	{
 		void* pStructAddress = pFieldData->GetAddress(data);
 
-		size_t structTypeHash = pFieldData->ArrayElementType();
+		uint32_t structTypeHash = pFieldData->ArrayElementType();
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(structTypeHash);
 
 		const GloryReflect::TypeData* pStructTypeData = GloryReflect::Reflect::GetTyeData(structTypeHash);
@@ -53,7 +53,7 @@ namespace Glory
 	{
 		void* pStructAddress = pFieldData->GetAddress(data);
 
-		size_t structTypeHash = pFieldData->ArrayElementType();
+		uint32_t structTypeHash = pFieldData->ArrayElementType();
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(structTypeHash);
 
 		const GloryReflect::TypeData* pStructTypeData = GloryReflect::Reflect::GetTyeData(structTypeHash);

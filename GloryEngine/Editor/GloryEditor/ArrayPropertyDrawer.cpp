@@ -7,7 +7,7 @@
 
 namespace Glory::Editor
 {
-	bool ArrayPropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool ArrayPropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		if (serializedProperty == nullptr)
 		{
@@ -61,7 +61,7 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool ArrayPropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool ArrayPropertyDrawer::Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		if (data == nullptr)
 		{

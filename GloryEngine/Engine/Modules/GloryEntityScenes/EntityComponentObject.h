@@ -22,13 +22,13 @@ namespace Glory
 
 		GLORY_API GloryECS::EntityRegistry* GetRegistry() const;
 		GLORY_API const GloryECS::EntityID EntityID() const;
-		GLORY_API const size_t ComponentType() const;
+		GLORY_API const uint32_t ComponentType() const;
 
 		GLORY_API virtual void* GetRootDataAddress() override;
 
 	private:
 		GloryECS::EntityID m_EntityID;
-		size_t m_ComponentType;
+		uint32_t m_ComponentType;
 		GloryECS::EntityRegistry* m_pRegistry;
 	};
 }

@@ -37,7 +37,7 @@ namespace Glory::Editor
 			const std::string key = std::to_string(uuid);
 			YAML::Node assetNode = m_DatabaseNode[key];
 			YAML::Node metaData = assetNode["Metadata"];
-			size_t hash = metaData["Hash"].as<size_t>();
+			uint32_t hash = metaData["Hash"].as<size_t>();
 			size_t newHash = ResourceType::OldToNewHash(hash);
 			if (hash != newHash)
 				metaData["Hash"] = newHash;
@@ -607,7 +607,7 @@ namespace Glory::Editor
 		return fileName.string();
 	}
 
-	void EditorAssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& result)
+	void EditorAssetDatabase::GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& result)
 	{
 		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
 		{

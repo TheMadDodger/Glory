@@ -31,9 +31,9 @@ namespace Glory::Editor
 
 		struct PropertyInfo
 		{
-			GLORY_EDITOR_API PropertyInfo(const std::string& name, size_t typeHash);
+			GLORY_EDITOR_API PropertyInfo(const std::string& name, uint32_t typeHash);
 			std::string m_Name;
-			size_t m_TypeHash;
+			uint32_t m_TypeHash;
 		};
 		std::vector<std::string> m_SamplerNames;
 		std::vector<PropertyInfo> m_PropertyInfos;

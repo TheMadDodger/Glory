@@ -23,7 +23,7 @@ namespace Glory
 	{
 		void* pEnumAddress = pFieldData->GetAddress(data);
 
-		size_t enumTypeHash = pFieldData->ArrayElementType();
+		uint32_t enumTypeHash = pFieldData->ArrayElementType();
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(enumTypeHash);
 
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(enumTypeHash);
@@ -51,7 +51,7 @@ namespace Glory
 	{
 		void* pEnumAddress = pFieldData->GetAddress(data);
 
-		size_t enumTypeHash = pFieldData->ArrayElementType();
+		uint32_t enumTypeHash = pFieldData->ArrayElementType();
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(enumTypeHash);
 
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(enumTypeHash);

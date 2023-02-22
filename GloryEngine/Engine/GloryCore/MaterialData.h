@@ -24,8 +24,8 @@ namespace Glory
         void RemoveShaderAt(size_t index);
         bool AddShader(ShaderSourceData* pShaderSourceData);
 
-        void AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
-        void AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, UUID resourceUUID, uint32_t flags = 0);
+        void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
+        void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, uint32_t flags = 0);
 
         [[nodiscard]]virtual size_t PropertyInfoCount() const;
         virtual MaterialPropertyInfo* GetPropertyInfoAt(size_t index);
@@ -73,13 +73,11 @@ namespace Glory
         friend class MaterialInstanceData;
         std::vector<ShaderSourceData*> m_pShaderFiles;
 
-        static std::hash<std::string> m_Hasher;
-
         std::vector<char> m_PropertyBuffer;
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<size_t> m_ResourcePropertyInfoIndices;
         std::vector<UUID> m_Resources;
-        std::unordered_map<size_t, size_t> m_HashToPropertyInfoIndex;
+        std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;
 
         size_t m_CurrentOffset;
 

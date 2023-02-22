@@ -5,10 +5,10 @@ namespace Glory
 	SerializedProperty::SerializedProperty()
 		: m_PropertyName("invalid"), m_pMember(nullptr), m_TypeHash(0), m_Flags(0) {}
 
-	SerializedProperty::SerializedProperty(UUID objectUUID, const std::string& name, size_t typeHash, void* pMember, uint32_t flags)
+	SerializedProperty::SerializedProperty(UUID objectUUID, const std::string& name, uint32_t typeHash, void* pMember, uint32_t flags)
 		: m_ObjectUUID(objectUUID), m_PropertyName(name), m_pMember(pMember), m_TypeHash(typeHash), m_Flags(flags) {}
 
-	SerializedProperty::SerializedProperty(UUID objectUUID, const std::string& name, size_t typeHash, size_t elementTypeHash, void* pMember, uint32_t flags)
+	SerializedProperty::SerializedProperty(UUID objectUUID, const std::string& name, uint32_t typeHash, uint32_t elementTypeHash, void* pMember, uint32_t flags)
 		: m_ObjectUUID(objectUUID), m_PropertyName(name), m_pMember(pMember), m_TypeHash(typeHash), m_ElementTypeHash(elementTypeHash), m_Flags(flags) {}
 
 	SerializedProperty::~SerializedProperty()
@@ -21,12 +21,12 @@ namespace Glory
 		return m_PropertyName;
 	}
 
-	size_t SerializedProperty::TypeHash() const
+	uint32_t SerializedProperty::TypeHash() const
 	{
 		return m_TypeHash;
 	}
 
-	size_t SerializedProperty::ElementTypeHash() const
+	uint32_t SerializedProperty::ElementTypeHash() const
 	{
 		return m_ElementTypeHash != 0 ? m_ElementTypeHash : m_TypeHash;
 	}

@@ -89,7 +89,7 @@ namespace Glory
 			YAML_WRITE(out, DisplayName, pInfo->m_PropertyDisplayName);
 			if (!propertyInfo->m_IsResource)
 			{
-				size_t typeHash = propertyInfo->TypeHash();
+				uint32_t typeHash = propertyInfo->TypeHash();
 				size_t offset = propertyInfo->Offset();
 				size_t size = propertyInfo->Size();
 				PropertySerializer::SerializeProperty("Value", pMaterialData->GetBufferReference(), typeHash, offset, size, out);
@@ -128,7 +128,7 @@ namespace Glory
 
 			if (!propertyInfo->m_IsResource)
 			{
-				size_t typeHash = propertyInfo->TypeHash();
+				uint32_t typeHash = propertyInfo->TypeHash();
 				size_t offset = propertyInfo->Offset();
 				size_t size = propertyInfo->Size();
 				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);

@@ -11,7 +11,7 @@ namespace Glory::Editor
 		ComponentMenuItem(const std::string& itemName);
 
 		std::string m_ItemName;
-		size_t m_ComponentTypeHash;
+		uint32_t m_ComponentTypeHash;
 		std::vector<ComponentMenuItem> m_Children;
 	};
 
@@ -21,7 +21,7 @@ namespace Glory::Editor
 		static void Open(GloryECS::EntityID entity, GloryECS::EntityRegistry* pRegistry);
 
 		void OnGUI();
-		static size_t GetLastSelectedComponentTypeHash();
+		static uint32_t GetLastSelectedComponentTypeHash();
 
 	private:
 		EntityComponentPopup();
@@ -42,6 +42,6 @@ namespace Glory::Editor
 		std::string m_Filter;
 		std::vector<ComponentMenuItem> m_FilteredItems;
 		static std::vector<ComponentMenuItem> m_MenuItems;
-		static size_t m_LastSelectedComponentTypeHash;
+		static uint32_t m_LastSelectedComponentTypeHash;
 	};
 }

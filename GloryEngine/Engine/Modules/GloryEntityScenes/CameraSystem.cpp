@@ -40,7 +40,7 @@ namespace Glory
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(glm::inverse(transform.MatTransform));
 
-		size_t hash = CalcHash(pComponent);
+		uint32_t hash = CalcHash(pComponent);
 		if (pComponent.m_LastHash == hash) return;
 		pComponent.m_LastHash = hash;
 
@@ -67,7 +67,7 @@ namespace Glory
 		return "Camera";
 	}
 
-	size_t CameraSystem::CalcHash(CameraComponent& pComponent)
+	uint32_t CameraSystem::CalcHash(CameraComponent& pComponent)
 	{
 		float value = (float)pComponent.m_ClearColor.x + (float)pComponent.m_ClearColor.y
 			+ (float)pComponent.m_ClearColor.z + (float)pComponent.m_ClearColor.w

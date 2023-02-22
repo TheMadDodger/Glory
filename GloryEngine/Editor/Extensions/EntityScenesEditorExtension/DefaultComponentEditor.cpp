@@ -19,7 +19,7 @@ namespace Glory::Editor
 		Undo::StartRecord("Property Change", m_pTarget->GetUUID());
 		bool change = false;
 		EntityComponentObject* pComponentObject = (EntityComponentObject*)GetTarget();
-		size_t hash = pComponentObject->ComponentType();
+		uint32_t hash = pComponentObject->ComponentType();
 		GloryECS::EntityRegistry* pRegistry = pComponentObject->GetRegistry();
 		GloryECS::EntityID entity = pComponentObject->EntityID();
 		UUID componentID = pComponentObject->GetUUID();

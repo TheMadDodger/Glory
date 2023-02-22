@@ -49,8 +49,8 @@ namespace Glory
 			return (T*)GetUserContext(ResourceType::GetHash(typeid(T)));
 		}
 
-		static void AddUserContext(size_t hash, void* pUserContext);
-		static void* GetUserContext(size_t hash);
+		static void AddUserContext(uint32_t hash, void* pUserContext);
+		static void* GetUserContext(uint32_t hash);
 
 		std::map<UUID, UUID> m_UUIDRemapper;
 

@@ -17,7 +17,7 @@
 
 namespace Glory::Editor
 {
-	const std::map<size_t, std::string_view> COMPONENT_ICONS = {
+	const std::map<uint32_t, std::string_view> COMPONENT_ICONS = {
 		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
 		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
 		{ ResourceType::GetHash<MeshRenderer>(), ICON_FA_CUBES },
@@ -140,10 +140,10 @@ namespace Glory::Editor
 		{
 			std::string id = nameString + std::to_string(index);
 			std::hash<std::string> hasher;
-			size_t hash = hasher(id);
+			uint32_t hash = hasher(id);
 
 			std::string_view icon = "";
-			const size_t componentHash = m_pComponents[index]->ComponentType();
+			const uint32_t componentHash = m_pComponents[index]->ComponentType();
 			if(COMPONENT_ICONS.find(componentHash) != COMPONENT_ICONS.end())
 				icon = COMPONENT_ICONS.at(componentHash);
 
@@ -204,7 +204,7 @@ namespace Glory::Editor
 
 		if (m_AddingComponent)
 		{
-			size_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
+			uint32_t toAddTypeHash = EntityComponentPopup::GetLastSelectedComponentTypeHash();
 			if (toAddTypeHash)
 			{
 				Undo::StartRecord("Add Component", m_pTarget->GetUUID());

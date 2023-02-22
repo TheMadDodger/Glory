@@ -17,7 +17,7 @@ namespace Glory
 	{
 		out << YAML::Key << "Entities";
 		out << YAML::Value << YAML::BeginSeq;
-		for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
+		for (uint32_t i = 0; i < pScene->SceneObjectsCount(); i++)
 		{
 			EntitySceneObject* pObject = (EntitySceneObject*)pScene->GetSceneObject(i);
 			Serializer::SerializeObject(pObject, out);
@@ -32,7 +32,7 @@ namespace Glory
 		pScene->Initialize();
 		node = object["Entities"];
 
-		for (size_t i = 0; i < node.size(); i++)
+		for (uint32_t i = 0; i < node.size(); i++)
 		{
 			YAML::Node nextObject = node[i];
 			Serializer::DeserializeObject(pScene, nextObject, flags);
