@@ -2,7 +2,7 @@
 
 namespace Glory::Editor
 {
-	AddComponentAction::AddComponentAction(size_t typeHash, UUID uuid, size_t componentIndex) : m_ComponentTypeHash(typeHash), m_ComponentUUID(uuid), m_ComponentIndex(componentIndex)
+	AddComponentAction::AddComponentAction(uint32_t typeHash, UUID uuid, size_t componentIndex) : m_ComponentTypeHash(typeHash), m_ComponentUUID(uuid), m_ComponentIndex(componentIndex)
 	{
 	}
 

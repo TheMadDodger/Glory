@@ -396,7 +396,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputEnum(std::string_view label, size_t typeHash, size_t* value, std::vector<size_t> excludeValues)
+	bool EditorUI::InputEnum(std::string_view label, uint32_t typeHash, size_t* value, std::vector<size_t> excludeValues)
 	{
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 
@@ -552,7 +552,7 @@ namespace Glory::Editor
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
 
 		std::hash<std::string_view> hasher;
-		size_t hash = hasher(label);
+		uint32_t hash = hasher(label);
 
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));

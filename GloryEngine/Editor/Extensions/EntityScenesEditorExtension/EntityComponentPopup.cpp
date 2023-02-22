@@ -7,7 +7,7 @@
 namespace Glory::Editor
 {
 	bool EntityComponentPopup::m_Open = false;
-	size_t EntityComponentPopup::m_LastSelectedComponentTypeHash = 0;
+	uint32_t EntityComponentPopup::m_LastSelectedComponentTypeHash = 0;
 	std::vector<ComponentMenuItem> EntityComponentPopup::m_MenuItems;
 
 	void EntityComponentPopup::Open(GloryECS::EntityID entity, GloryECS::EntityRegistry* pRegistry)
@@ -18,7 +18,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < GloryECS::ComponentTypes::ComponentCount(); ++i)
 		{
 			const GloryECS::ComponentType* componentType = GloryECS::ComponentTypes::GetComponentTypeAt(i);
-			size_t typeHash = componentType->m_TypeHash;
+			uint32_t typeHash = componentType->m_TypeHash;
 
 			if (!componentType->m_AllowMultiple && pRegistry->HasComponent(entity, typeHash)) continue;
 
@@ -184,9 +184,9 @@ namespace Glory::Editor
 		ImGui::CloseCurrentPopup();
 	}
 
-	size_t EntityComponentPopup::GetLastSelectedComponentTypeHash()
+	uint32_t EntityComponentPopup::GetLastSelectedComponentTypeHash()
 	{
-		size_t selected = m_LastSelectedComponentTypeHash;
+		uint32_t selected = m_LastSelectedComponentTypeHash;
 		m_LastSelectedComponentTypeHash = 0;
 		return selected;
 	}

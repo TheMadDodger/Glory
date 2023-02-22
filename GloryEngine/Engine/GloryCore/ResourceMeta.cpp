@@ -8,7 +8,7 @@ namespace Glory
 	ResourceMeta::ResourceMeta()
 		: m_Extension(""), m_Name(""), m_Node(), m_UUID(UUID()), m_TypeHash(0), m_SerializedVersion(0) {}
 
-	ResourceMeta::ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, size_t hash)
+	ResourceMeta::ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, uint32_t hash)
 		: m_Extension(extension), m_Name(name), m_UUID(uuid), m_TypeHash(hash), m_SerializedVersion(0) {}
 
 	ResourceMeta::~ResourceMeta() {}
@@ -33,14 +33,14 @@ namespace Glory
 		return node.as<std::string>();
 	}
 
-	size_t ResourceMeta::ReadHash() const
+	uint32_t ResourceMeta::ReadHash() const
 	{
 		YAML::Node node = m_Node["Hash"];
 		if (!node.IsDefined() || !node.IsScalar())
 		{
 			return 0;
 		}
-		return node.as<size_t>();
+		return node.as<uint32_t>();
 	}
 
 	size_t ResourceMeta::ReadSerializedVersion() const
@@ -120,7 +120,7 @@ namespace Glory
 		return m_UUID;
 	}
 
-	size_t ResourceMeta::Hash() const
+	uint32_t ResourceMeta::Hash() const
 	{
 		return m_TypeHash;
 	}

@@ -30,7 +30,7 @@ namespace Glory::Editor
 			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID());
 			bool change = false;
 			TComponent& component = GetTargetComponent();
-			size_t hash = ResourceType::GetHash<TComponent>();
+			uint32_t hash = ResourceType::GetHash<TComponent>();
 
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(hash);
 			if (pTypeData)

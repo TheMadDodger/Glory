@@ -24,7 +24,7 @@ namespace Glory::Editor
 		{
 			std::type_index type = typeid(Object);
 			if (!pObject->GetType(i, type)) continue;
-			const size_t typeHash = ResourceType::GetHash(type);
+			const uint32_t typeHash = ResourceType::GetHash(type);
 
 			auto it = std::find_if(m_pRegisteredEditors.begin(), m_pRegisteredEditors.end(), [&](Editor* pEditor)
 			{
@@ -82,7 +82,7 @@ namespace Glory::Editor
 		return m_pTarget;
 	}
 
-	Editor::Editor(const size_t type) : m_pTarget(nullptr), m_EditedType(type)
+	Editor::Editor(const uint32_t type) : m_pTarget(nullptr), m_EditedType(type)
 	{
 	}
 

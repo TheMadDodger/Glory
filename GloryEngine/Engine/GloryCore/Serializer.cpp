@@ -24,13 +24,13 @@ namespace Glory
 		return nullptr;
 	}
 
-	Serializer* Serializer::GetSerializer(size_t typeHash)
+	Serializer* Serializer::GetSerializer(uint32_t typeHash)
 	{
 		for (size_t i = 0; i < SERIALIZERS.size(); i++)
 		{
 			Serializer* pSerializer = SERIALIZERS[i];
 			std::type_index type = pSerializer->GetSerializedType();
-			size_t hash = ResourceType::GetHash(type);
+			uint32_t hash = ResourceType::GetHash(type);
 			if (hash == typeHash) return pSerializer;
 		}
 
@@ -39,7 +39,7 @@ namespace Glory
 		//auto it = std::find_if(m_pRegisteredSerializers.begin(), m_pRegisteredSerializers.end(), [&](Serializer* pSerializer)
 		//{
 		//	std::type_index type = pSerializer->GetSerializedType();
-		//	size_t hash = ResourceType::GetHash(type);
+		//	uint32_t hash = ResourceType::GetHash(type);
 		//	return hash == typeHash;
 		//});
 		//
@@ -81,8 +81,8 @@ namespace Glory
 	Object* Serializer::DeserializeObject(Object* pParent, YAML::Node& object, Flags flags)
 	{
 		YAML::Node node;
-		size_t typeHash = 0;
-		YAML_READ(object, node, TypeHash, typeHash, size_t);
+		uint32_t typeHash = 0;
+		YAML_READ(object, node, TypeHash, typeHash, uint32_t);
 
 		Serializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return nullptr;
@@ -91,7 +91,7 @@ namespace Glory
 
 	Object* Serializer::DeserializeObjectOfType(std::type_index type, YAML::Node& object, const std::string& name)
 	{
-		size_t typeHash = ResourceType::GetHash(type);
+		uint32_t typeHash = ResourceType::GetHash(type);
 		Serializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return nullptr;
 		return pSerializer->Deserialize(nullptr, object, name);

@@ -11,7 +11,7 @@ namespace Glory
 		virtual ~ScriptingModule();
 
 		virtual LoaderModule* CreateLoaderModule() = 0;
-		virtual size_t GetScriptTypeHash() = 0;
+		virtual uint32_t GetScriptTypeHash() = 0;
 
 		virtual const std::string& ScriptingLanguage();
 
@@ -43,12 +43,12 @@ namespace Glory
 			return new TLoader();
 		}
 
-		virtual size_t GetScriptTypeHash() override
+		virtual uint32_t GetScriptTypeHash() override
 		{
 			return m_ScriptTypeHash;
 		}
 
 	private:
-		size_t m_ScriptTypeHash;
+		uint32_t m_ScriptTypeHash;
 	};
 }

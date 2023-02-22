@@ -85,7 +85,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void AssetPicker::LoadAssets(size_t typeHash, bool includeSubAssets)
+	void AssetPicker::LoadAssets(uint32_t typeHash, bool includeSubAssets)
 	{
 		m_PossibleAssets.clear();
 		EditorAssetDatabase::GetAllAssetsOfType(typeHash, m_PossibleAssets);
@@ -100,7 +100,7 @@ namespace Glory::Editor
 		}
 	}
 
-	bool AssetPicker::DrawPopup(UUID* value, size_t typeHash, bool includeSubAssets)
+	bool AssetPicker::DrawPopup(UUID* value, uint32_t typeHash, bool includeSubAssets)
 	{
 		bool assetChosen = false;
 

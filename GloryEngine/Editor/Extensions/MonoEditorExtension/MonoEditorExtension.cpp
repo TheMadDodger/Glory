@@ -289,7 +289,7 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*)
 	{
-		size_t typeHash = meta.Hash();
+		uint32_t typeHash = meta.Hash();
 		size_t scriptHash = ResourceType::GetHash<Script>();
 		ResourceType* pResourcerType = ResourceType::GetResourceType(typeHash);
 

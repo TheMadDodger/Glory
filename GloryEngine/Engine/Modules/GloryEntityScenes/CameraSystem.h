@@ -21,6 +21,6 @@ namespace Glory
         static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
         static std::string Name();
 
-        static size_t CalcHash(CameraComponent& pComponent);
+        static uint32_t CalcHash(CameraComponent& pComponent);
     };
 }

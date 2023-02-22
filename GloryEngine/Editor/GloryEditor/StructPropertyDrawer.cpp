@@ -4,7 +4,7 @@
 
 namespace Glory::Editor
 {
-	bool StructPropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool StructPropertyDrawer::Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		if (data == nullptr)
 		{

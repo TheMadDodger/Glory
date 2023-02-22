@@ -8,12 +8,12 @@ namespace Glory::Editor
 		return ObjectPicker::ObjectDropdown(label, data);
 	}
 
-	bool SceneObjectRedirectPropertyDrawer::Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const
+	bool SceneObjectRedirectPropertyDrawer::Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		return PropertyDrawer::DrawProperty(label, data, ResourceType::GetHash<SceneObjectRef>(), flags);
 	}
 
-	bool SceneObjectRedirectPropertyDrawer::Draw(const std::string& label, YAML::Node& node, size_t typeHash, uint32_t flags) const
+	bool SceneObjectRedirectPropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
 		const size_t sceneObjectRefType = ResourceType::GetHash<SceneObjectRef>();
 		PropertyDrawer* pDrawer = PropertyDrawer::GetPropertyDrawer(sceneObjectRefType);

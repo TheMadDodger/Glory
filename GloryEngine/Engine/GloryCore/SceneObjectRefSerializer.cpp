@@ -9,7 +9,7 @@ namespace Glory
 		out << YAML::Value << value;
 	}
 
-	void SceneObjectRefSerializer::Serialize(const std::string& name, const std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Emitter& out)
+	void SceneObjectRefSerializer::Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out)
 	{
 		SceneObjectRef value;
 		memcpy((void*)&value, (void*)&buffer[offset], size);

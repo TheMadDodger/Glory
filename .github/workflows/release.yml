@@ -19,7 +19,7 @@ env:
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
   
-  BUILD_PATH: ./GloryEngine/Build/Release/Win32/Launcher
+  BUILD_PATH: ./GloryEngine/Build/Release/x64/Launcher
 
 permissions:
   contents: read
@@ -66,7 +66,7 @@ jobs:
 
     - name: Build
       working-directory: ${{env.SOLUTION_FILE_PATH}}
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 .
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 .
   
     - name: Upload editor Artifact
       uses: actions/upload-artifact@v3.1.2

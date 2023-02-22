@@ -123,7 +123,7 @@ namespace Glory::Editor
 		//std::string extension = ext.string();
 		//std::for_each(extension.begin(), extension.end(), [](char& c) { c = std::tolower(c); });
 		//ResourceType* pResourceType = ResourceType::GetResourceType(extension);
-		//size_t hash = 0;
+		//uint32_t hash = 0;
 		//
 		//if (pResourceType != nullptr) hash = pResourceType->Hash();
 		//

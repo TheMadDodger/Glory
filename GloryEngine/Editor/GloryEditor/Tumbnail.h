@@ -22,7 +22,7 @@ namespace Glory::Editor
 		}
 
 		static GLORY_EDITOR_API void Destroy();
-		static GLORY_EDITOR_API BaseTumbnailGenerator* GetGenerator(size_t hashCode);
+		static GLORY_EDITOR_API BaseTumbnailGenerator* GetGenerator(uint32_t hashCode);
 
 	private:
 		static GLORY_EDITOR_API void AddGenerator(BaseTumbnailGenerator* pGenerator);

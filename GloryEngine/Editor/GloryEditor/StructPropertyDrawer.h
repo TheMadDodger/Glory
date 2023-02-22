@@ -10,6 +10,6 @@ namespace Glory::Editor
 		StructPropertyDrawer() : PropertyDrawer(SerializedType::ST_Struct) {}
 
 	protected:
-		virtual bool Draw(const std::string& label, void* data, size_t typeHash, uint32_t flags) const override;
+		virtual bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const override;
 	};
 }

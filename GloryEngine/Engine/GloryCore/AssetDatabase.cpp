@@ -116,7 +116,7 @@ namespace Glory
 		ASSET_DATABASE->m_Initialized = true;
 	}
 
-	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& out)
+	void AssetDatabase::GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& out)
 	{
 		ReadLock readLock;
 
@@ -127,7 +127,7 @@ namespace Glory
 		memcpy(&out[size], &ASSET_DATABASE->m_AssetsByType[typeHash][0], copySize);
 	}
 
-	void AssetDatabase::GetAllAssetsOfType(size_t typeHash, std::vector<std::string>& out)
+	void AssetDatabase::GetAllAssetsOfType(uint32_t typeHash, std::vector<std::string>& out)
 	{
 		ReadLock readLock;
 
@@ -210,7 +210,7 @@ namespace Glory
 	//		out << YAML::Value << versionHash;
 	//		out << YAML::Key << "LastSaved";
 	//		out << YAML::Value << lastSaved;
-	//		size_t hash = meta.Hash();
+	//		uint32_t hash = meta.Hash();
 	//		LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(hash);
 	//		meta.Write(out, pLoader);
 	//		out << YAML::EndMap;

@@ -52,9 +52,9 @@ namespace Glory
 		return true;
 	}
 
-	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, bool isResource, uint32_t flags)
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags)
 	{
-		const size_t hash = m_Hasher(displayName);
+		const uint32_t hash = GloryReflect::Reflect::Hash(displayName.data());
 		const size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
 		m_PropertyInfos.emplace_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
@@ -63,9 +63,9 @@ namespace Glory
 		m_HashToPropertyInfoIndex[hash] = index;
 	}
 
-	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, size_t typeHash, UUID resourceUUID, uint32_t flags)
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, uint32_t flags)
 	{
-		const size_t hash = m_Hasher(displayName);
+		const uint32_t hash = GloryReflect::Reflect::Hash(displayName.data());
 		const size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
 		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_Resources.size(), flags));
@@ -101,7 +101,7 @@ namespace Glory
 
 	bool MaterialData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
 	{
-		size_t hash = m_Hasher(name);
+		uint32_t hash = GloryReflect::Reflect::Hash(name.data());
 		if (m_HashToPropertyInfoIndex.find(hash) == m_HashToPropertyInfoIndex.end()) return false;
 		index = m_HashToPropertyInfoIndex.at(hash);
 		return true;

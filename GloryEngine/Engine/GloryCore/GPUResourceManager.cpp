@@ -59,7 +59,7 @@ namespace Glory
 		pMesh = CreateMesh_Internal(pMeshData);
 		pMesh->m_UUID = pMeshData->GetGPUUUID();
 		pMesh->Bind();
-		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
+		size_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
 		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
 		pVertexBuffer->Bind();
 		pVertexBuffer->Assign(pMeshData->Vertices());

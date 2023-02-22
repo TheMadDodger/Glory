@@ -269,12 +269,12 @@ namespace Glory
 		return m_Size;
 	}
 
-	const size_t AssemblyClassField::TypeHash() const
+	const uint32_t AssemblyClassField::TypeHash() const
 	{
 		return m_TypeHash;
 	}
 
-	const size_t AssemblyClassField::ElementTypeHash() const
+	const uint32_t AssemblyClassField::ElementTypeHash() const
 	{
 		return m_ElementTypeHash;
 	}

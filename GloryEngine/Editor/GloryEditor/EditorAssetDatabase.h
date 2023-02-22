@@ -48,7 +48,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API UUID FindAssetUUID(const std::string& path);
 		static GLORY_EDITOR_API bool AssetExists(UUID uuid);
 		static GLORY_EDITOR_API std::string GetAssetName(UUID uuid);
-		static GLORY_EDITOR_API void GetAllAssetsOfType(size_t typeHash, std::vector<UUID>& result);
+		static GLORY_EDITOR_API void GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& result);
 
 		static GLORY_EDITOR_API void RegisterAsyncImportCallback(std::function<void(Resource*)> func);
 

@@ -49,7 +49,7 @@ namespace Glory
 	{
 		void* pArrayAddress = pFieldData->GetAddress(data);
 
-		size_t elementTypeHash = pFieldData->ArrayElementType();
+		uint32_t elementTypeHash = pFieldData->ArrayElementType();
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(elementTypeHash);
 
 		size_t size = GloryReflect::Reflect::ArraySize(pArrayAddress, elementTypeHash);
@@ -89,7 +89,7 @@ namespace Glory
 	{
 		void* pArrayAddress = pFieldData->GetAddress(data);
 
-		size_t elementTypeHash = pFieldData->ArrayElementType();
+		uint32_t elementTypeHash = pFieldData->ArrayElementType();
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(elementTypeHash);
 
 		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(elementTypeHash);

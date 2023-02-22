@@ -32,7 +32,7 @@ namespace Glory
 		return m_EntityID;
 	}
 
-	const size_t EntityComponentObject::ComponentType() const
+	const uint32_t EntityComponentObject::ComponentType() const
 	{
 		return m_ComponentType;
 	}

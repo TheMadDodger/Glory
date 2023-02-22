@@ -9,12 +9,12 @@ namespace Glory
 	struct MaterialPropertyInfo
 	{
 	public:
-		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t size, size_t offset, uint32_t flags);
-		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, size_t typeHash, size_t offset, uint32_t flags);
+		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, size_t offset, uint32_t flags);
+		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t offset, uint32_t flags);
 
 		const std::string& DisplayName() const;
 		const std::string& ShaderName() const;
-		const size_t TypeHash() const;
+		const uint32_t TypeHash() const;
 		const size_t Size() const;
 		const size_t Offset() const;
 		const size_t EndOffset() const;
@@ -49,7 +49,7 @@ namespace Glory
 		friend class MaterialInstanceLoaderModule;
 		std::string m_PropertyDisplayName;
 		std::string m_PropertyShaderName;
-		size_t m_TypeHash;
+		uint32_t m_TypeHash;
 		size_t m_Size;
 		size_t m_Offset;
 		bool m_IsResource;

@@ -194,7 +194,7 @@ namespace Glory::Editor
 			node_flags |= ImGuiTreeNodeFlags_Selected;
 		}
 
-		size_t hash = m_PathHasher(m_CachedPath.string());
+		uint32_t hash = m_PathHasher(m_CachedPath.string());
 		if (m_SetOpen)
 		{
 			ImGui::SetNextItemOpen(true);
@@ -260,7 +260,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pPathTrace.size(); i++)
 		{
 			FileBrowserItem* pItem = pPathTrace[i];
-			size_t hash = m_PathHasher(pItem->m_CachedPath.string());
+			uint32_t hash = m_PathHasher(pItem->m_CachedPath.string());
 			ImGui::PushID(hash);
 			if (ImGui::Button(pItem->m_Name.c_str()))
 			{

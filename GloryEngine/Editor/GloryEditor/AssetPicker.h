@@ -16,8 +16,8 @@ namespace Glory::Editor
 		virtual ~AssetPicker();
 
 		static void RefreshFilter();
-		static void LoadAssets(size_t typeHash, bool includeSubAssets);
-		static bool DrawPopup(UUID* value, size_t typeHash, bool includeSubAssets);
+		static void LoadAssets(uint32_t typeHash, bool includeSubAssets);
+		static bool DrawPopup(UUID* value, uint32_t typeHash, bool includeSubAssets);
 		static bool DrawItems(const std::vector<UUID>& items, UUID* value);
 
 	private:

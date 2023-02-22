@@ -11,8 +11,8 @@ namespace Glory
 	class Camera
 	{
 	public:
-		void SetResolution(size_t width, size_t height);
-		void SetPerspectiveProjection(size_t width, size_t height, float halfFOV, float near, float far);
+		void SetResolution(uint32_t width, uint32_t height);
+		void SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far);
 		void SetOrthographicProjection(float width, float height, float near, float far);
 		void SetView(const glm::mat4& view);
 		void SetDisplayIndex(int index);
@@ -52,7 +52,7 @@ namespace Glory
 		UUID GetUUID() const;
 
 	private:
-		Camera(size_t width, size_t height);
+		Camera(uint32_t width, uint32_t height);
 
 	private:
 		friend class CameraManager;

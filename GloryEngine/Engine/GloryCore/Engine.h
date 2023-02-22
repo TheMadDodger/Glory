@@ -81,7 +81,7 @@ namespace Glory
 		LoaderModule* GetLoaderModule(const std::string& extension);
 
 		LoaderModule* GetLoaderModule(const std::type_info& resourceType);
-		LoaderModule* GetLoaderModule(size_t typeHash);
+		LoaderModule* GetLoaderModule(uint32_t typeHash);
 
 		Module* GetModule(const std::type_info& type);
 		Module* GetModule(const std::string& name);
@@ -144,7 +144,7 @@ namespace Glory
 
 		std::vector<LoaderModule*> m_pLoaderModules;
 		std::map<std::type_index, size_t> m_TypeToLoader;
-		std::map<size_t, size_t> m_TypeHashToLoader;
+		std::map<uint32_t, size_t> m_TypeHashToLoader;
 
 		// Threading
 		ThreadManager* m_pThreadManager;

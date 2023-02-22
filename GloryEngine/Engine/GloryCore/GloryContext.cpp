@@ -100,12 +100,12 @@ namespace Glory
 		return m_pContext->m_pLayerManager;
 	}
 
-	void GloryContext::AddUserContext(size_t hash, void* pUserContext)
+	void GloryContext::AddUserContext(uint32_t hash, void* pUserContext)
 	{
 		m_pContext->m_pUserContexts.emplace(hash, pUserContext);
 	}
 
-	void* GloryContext::GetUserContext(size_t hash)
+	void* GloryContext::GetUserContext(uint32_t hash)
 	{
 		return m_pContext->m_pUserContexts[hash];
 	}

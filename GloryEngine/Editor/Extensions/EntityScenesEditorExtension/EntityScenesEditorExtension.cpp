@@ -87,7 +87,7 @@ namespace Glory::Editor
 			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
 			for (size_t i = 0; i < m_ComponentsToUpdateInEditor.size(); i++)
 			{
-				size_t hash = ResourceType::GetHash(m_ComponentsToUpdateInEditor[i]);
+				uint32_t hash = ResourceType::GetHash(m_ComponentsToUpdateInEditor[i]);
 				pRegistry->InvokeAll(hash, GloryECS::InvocationType::Update);
 			}
 		}

@@ -6,23 +6,17 @@
 
 namespace Glory
 {
-	BasicTypeData::BasicTypeData(const std::string& name, size_t typeHash, size_t size)
+	BasicTypeData::BasicTypeData(const std::string& name, uint32_t typeHash, size_t size)
 		: m_Name(name), m_TypeHash(typeHash), m_Size(size) {}
 
-	std::hash<std::string_view> ResourceType::m_Hasher;
-	std::hash<std::type_index> ResourceType::m_OldHasher;
-
-	bool ResourceType::IsResource(size_t typeHash)
+	bool ResourceType::IsResource(uint32_t typeHash)
 	{
 		return RESOURCE_TYPES->m_HashToType.find(typeHash) != RESOURCE_TYPES->m_HashToType.end();
 	}
 
 	ResourceType* ResourceType::RegisterResource(std::type_index type, const std::string& extensions)
 	{
-		std::string_view name = type.name();
-		size_t typeHash = m_Hasher(name);
-		size_t oldHash = m_OldHasher(type);
-		RESOURCE_TYPES->m_OldToNew.emplace(oldHash, typeHash);
+		uint32_t typeHash = GetHash(type);
 		size_t index = RESOURCE_TYPES->m_ResourceTypes.size();
 		RESOURCE_TYPES->m_ResourceTypes.push_back(ResourceType(typeHash, extensions));
 		RESOURCE_TYPES->m_HashToType[typeHash] = index;
@@ -32,9 +26,7 @@ namespace Glory
 
 	void ResourceType::RegisterType(const std::type_info& type, size_t size)
 	{
-		size_t hash = GetHash(type);
-		size_t oldHash = m_OldHasher(type);
-		RESOURCE_TYPES->m_OldToNew.emplace(oldHash, hash);
+		uint32_t hash = GetHash(type);
 		size_t index = RESOURCE_TYPES->m_BasicTypes.size();
 		std::string name = type.name();
 		RESOURCE_TYPES->m_HashToBasicType[hash] = index;
@@ -42,10 +34,9 @@ namespace Glory
 		RESOURCE_TYPES->m_BasicTypes.push_back(BasicTypeData(type.name(), hash, size));
 	}
 
-	size_t ResourceType::GetHash(std::type_index type)
+	uint32_t ResourceType::GetHash(std::type_index type)
 	{
-		std::string_view name = type.name();
-		return m_Hasher(name);
+		return GloryReflect::Reflect::Hash(type.name());
 	}
 
 	ResourceType* ResourceType::GetResourceType(const std::string& extension)
@@ -57,18 +48,17 @@ namespace Glory
 
 	ResourceType* ResourceType::GetResourceType(std::type_index type)
 	{
-		std::string_view name = type.name();
-		return GetResourceType(m_Hasher(name));
+		return GetResourceType(GloryReflect::Reflect::Hash(type.name()));
 	}
 
-	ResourceType* ResourceType::GetResourceType(size_t hash)
+	ResourceType* ResourceType::GetResourceType(uint32_t hash)
 	{
 		if (RESOURCE_TYPES->m_HashToType.find(hash) == RESOURCE_TYPES->m_HashToType.end()) return nullptr;
 		size_t index = RESOURCE_TYPES->m_HashToType[hash];
 		return &RESOURCE_TYPES->m_ResourceTypes[index];
 	}
 
-	const BasicTypeData* ResourceType::GetBasicTypeData(size_t typeHash)
+	const BasicTypeData* ResourceType::GetBasicTypeData(uint32_t typeHash)
 	{
 		if (RESOURCE_TYPES->m_HashToBasicType.find(typeHash) == RESOURCE_TYPES->m_HashToBasicType.end()) return nullptr;
 		size_t index = RESOURCE_TYPES->m_HashToBasicType[typeHash];
@@ -89,18 +79,18 @@ namespace Glory
 
 	ResourceType* ResourceType::GetSubType(ResourceType* pResourceType, size_t index)
 	{
-		size_t subTypeHash = GetSubTypeHash(pResourceType, index);
+		uint32_t subTypeHash = GetSubTypeHash(pResourceType, index);
 		if (subTypeHash == 0) return nullptr;
 		return GetResourceType(subTypeHash);
 	}
 
-	size_t ResourceType::GetSubTypeHash(ResourceType* pResourceType, size_t index)
+	uint32_t ResourceType::GetSubTypeHash(ResourceType* pResourceType, size_t index)
 	{
 		if (index >= pResourceType->m_SubTypes.size()) return 0;
 		return pResourceType->m_SubTypes[index];
 	}
 
-	size_t ResourceType::GetAllResourceTypesThatHaveSubType(size_t hash, std::vector<ResourceType*>& out)
+	size_t ResourceType::GetAllResourceTypesThatHaveSubType(uint32_t hash, std::vector<ResourceType*>& out)
 	{
 		size_t result = 0;
 		for (size_t i = 0; i < RESOURCE_TYPES->m_ResourceTypes.size(); i++)
@@ -113,25 +103,18 @@ namespace Glory
 		return result;
 	}
 
-	size_t ResourceType::OldToNewHash(size_t oldHash)
-	{
-		if (RESOURCE_TYPES->m_OldToNew.find(oldHash) == RESOURCE_TYPES->m_OldToNew.end())
-			return oldHash;
-		return RESOURCE_TYPES->m_OldToNew.at(oldHash);
-	}
-
 	bool ResourceType::IsScene(const std::string& ext)
 	{
 		/* FIXME: Should be handled by the scene module */
 		return ext == ".gscene";
 	}
 
-	ResourceType::ResourceType(size_t typeHash, const std::string& extensions)
+	ResourceType::ResourceType(uint32_t typeHash, const std::string& extensions)
 		: m_TypeHash(typeHash), m_Extensions(extensions) {}
 
 	ResourceType::~ResourceType() {}
 
-	size_t ResourceType::Hash() const
+	uint32_t ResourceType::Hash() const
 	{
 		return m_TypeHash;
 	}

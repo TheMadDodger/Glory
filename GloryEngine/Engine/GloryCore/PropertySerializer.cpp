@@ -2,12 +2,12 @@
 
 namespace Glory
 {
-	PropertySerializer* PropertySerializer::GetSerializer(size_t typeHash)
+	PropertySerializer* PropertySerializer::GetSerializer(uint32_t typeHash)
 	{
 		for (size_t i = 0; i < SERIALIZERS.size(); i++)
 		{
 			PropertySerializer* pSerializer = SERIALIZERS[i];
-			size_t hash = pSerializer->GetSerializedTypeHash();
+			uint32_t hash = pSerializer->GetSerializedTypeHash();
 			if (hash == typeHash) return pSerializer;
 		}
 
@@ -28,7 +28,7 @@ namespace Glory
 		return 0;
 	}
 
-	PropertySerializer::PropertySerializer(size_t typeHash) : m_TypeHash(typeHash)
+	PropertySerializer::PropertySerializer(uint32_t typeHash) : m_TypeHash(typeHash)
 	{
 	}
 
@@ -43,7 +43,7 @@ namespace Glory
 		pSerializer->Serialize(serializedProperty, out);
 	}
 
-	void PropertySerializer::SerializeProperty(const std::string& name, const std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Emitter& out)
+	void PropertySerializer::SerializeProperty(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out)
 	{
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(typeHash);
 		if (pSerializer == nullptr) return;
@@ -91,14 +91,14 @@ namespace Glory
 		pSerializer->Deserialize(serializedProperty, object);
 	}
 
-	void PropertySerializer::DeserializeProperty(std::any& out, size_t typeHash, YAML::Node& object)
+	void PropertySerializer::DeserializeProperty(std::any& out, uint32_t typeHash, YAML::Node& object)
 	{
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(typeHash);
 		if (pSerializer == nullptr) return;
 		pSerializer->Deserialize(out, object);
 	}
 
-	void PropertySerializer::DeserializeProperty(std::vector<char>& buffer, size_t typeHash, size_t offset, size_t size, YAML::Node& object)
+	void PropertySerializer::DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Node& object)
 	{
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(typeHash);
 		if (pSerializer == nullptr) return;
@@ -155,7 +155,7 @@ namespace Glory
 		return m_TypeHash;
 	}
 
-	void PropertySerializer::Serialize(const std::string&, const std::vector<char>&, size_t, size_t, size_t, YAML::Emitter&) {}
+	void PropertySerializer::Serialize(const std::string&, const std::vector<char>&, uint32_t, size_t, size_t, YAML::Emitter&) {}
 
 	void PropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out) {}
 

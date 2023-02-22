@@ -15,10 +15,12 @@ elif [ "$OSTYPE" == "darwin" ]; then
 elif [ "$OSTYPE" == "cygwin" ]; then
     # POSIX compatibility layer and Linux environment emulation for Windows
     echo ""
-elif [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "win32" ]; then
+elif [ "$OSTYPE" == "msys" ]; then
     echo "Windows system detected"
-	echo ${PLATFORM=Win32}
-
+	echo ${PLATFORM=x64}
+elif [ "$OSTYPE" == "win32" ]; then
+    echo "32 bit windows is not supported"
+    exit
 elif [ "$OSTYPE" == "freebsd"* ]; then
     # ...
     echo ""

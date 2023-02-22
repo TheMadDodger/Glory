@@ -17,14 +17,14 @@ namespace Glory
 		return GetPriority() < other.GetPriority();
 	}
 
-	void CameraRef::SetResolution(size_t width, size_t height)
+	void CameraRef::SetResolution(uint32_t width, uint32_t height)
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
 		pCamera->SetResolution(width, height);
 	}
 
-	void CameraRef::SetPerspectiveProjection(size_t width, size_t height, float halfFOV, float near, float far)
+	void CameraRef::SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far)
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;

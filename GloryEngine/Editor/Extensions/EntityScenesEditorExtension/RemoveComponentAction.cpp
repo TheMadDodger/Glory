@@ -11,7 +11,7 @@ namespace Glory::Editor
 	{
 		YAML::Emitter out;
 		EntityView* pEntityView = pRegistry->GetEntityView(entityID);
-		size_t typeHash = pEntityView->ComponentTypeAt(componentIndex);
+		uint32_t typeHash = pEntityView->ComponentTypeAt(componentIndex);
 		UUID componentUUID = pEntityView->ComponentUUIDAt(componentIndex);
 		void* pAddress = pRegistry->GetComponentAddress(entityID, componentUUID);
 		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);

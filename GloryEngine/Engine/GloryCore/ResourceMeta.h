@@ -12,21 +12,21 @@ namespace Glory
 	{
 	public:
 		ResourceMeta();
-		ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, size_t hash);
+		ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, uint32_t hash);
 		virtual ~ResourceMeta();
 
 		void Read(const YAML::Node& node);
 		const std::string& Extension() const;
 		const std::string& Name() const;
 		UUID ID() const;
-		size_t Hash() const;
+		uint32_t Hash() const;
 		size_t SerializedVersion() const;
 		void IncrementSerializedVersion();
 
 	private:
 		uint64_t ReadUUID() const;
 		std::string ReadName() const;
-		size_t ReadHash() const;
+		uint32_t ReadHash() const;
 		size_t ReadSerializedVersion() const;
 
 	private:
@@ -35,7 +35,7 @@ namespace Glory
 		std::string m_Extension;
 		std::string m_Name;
 		UUID m_UUID;
-		size_t m_TypeHash;
+		uint32_t m_TypeHash;
 		size_t m_SerializedVersion;
 	};
 }
@@ -72,7 +72,7 @@ namespace YAML
 			node["Extension"] = meta.Extension();
 			node["Name"] = meta.Name();
 			node["UUID"] = (uint64_t)meta.ID();
-			node["Hash"] = (uint64_t)meta.Hash();
+			node["Hash"] = (uint32_t)meta.Hash();
 			node["SerializedVersion"] = (uint64_t)meta.SerializedVersion();
 			return node;
 		}

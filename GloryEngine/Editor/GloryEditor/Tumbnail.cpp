@@ -54,12 +54,12 @@ namespace Glory::Editor
 		m_pGenerators.clear();
 	}
 
-	GLORY_EDITOR_API BaseTumbnailGenerator* Tumbnail::GetGenerator(size_t hashCode)
+	GLORY_EDITOR_API BaseTumbnailGenerator* Tumbnail::GetGenerator(uint32_t hashCode)
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
 		{
 			const std::type_info& type = m_pGenerators[i]->GetAssetType();
-			size_t hash = ResourceType::GetHash(type);
+			uint32_t hash = ResourceType::GetHash(type);
 			if (hash != hashCode) continue;
 			return m_pGenerators[i];
 		}

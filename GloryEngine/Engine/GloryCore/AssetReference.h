@@ -17,7 +17,7 @@ namespace Glory
 		void SetUUID(UUID uuid);
 		Resource* GetResource();
 
-		virtual const size_t TypeHash() = 0;
+		virtual const uint32_t TypeHash() = 0;
 
 	protected:
 		REFLECTABLE(AssetReferenceBase, (UUID) (m_AssetUUID))
@@ -31,9 +31,9 @@ namespace Glory
 		AssetReference(UUID uuid) : AssetReferenceBase(uuid) {}
 		virtual ~AssetReference() {}
 
-		virtual const size_t TypeHash() override
+		virtual const uint32_t TypeHash() override
 		{
-			static const size_t typeHash = ResourceType::GetHash<T>();
+			static const uint32_t typeHash = ResourceType::GetHash<T>();
 			return typeHash;
 		}
 

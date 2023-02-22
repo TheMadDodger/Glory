@@ -37,7 +37,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API bool InputDropdown(std::string_view label, const std::vector<std::string_view>& options, size_t* index, std::string_view value);
 		static GLORY_EDITOR_API bool InputDropdown(std::string_view label, const std::vector<std::string_view>& options, const std::vector<bool>& selected, std::string_view value);
-		static GLORY_EDITOR_API bool InputEnum(std::string_view label, size_t typeHash, size_t* value, std::vector<size_t> excludeValues = std::vector<size_t>());
+		static GLORY_EDITOR_API bool InputEnum(std::string_view label, uint32_t typeHash, size_t* value, std::vector<size_t> excludeValues = std::vector<size_t>());
 
 		template<typename T>
 		static bool InputEnum(std::string_view label, T* value, std::vector<size_t> excludeValues = std::vector<size_t>())

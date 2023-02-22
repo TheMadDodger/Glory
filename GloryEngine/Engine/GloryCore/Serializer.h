@@ -26,7 +26,7 @@ namespace Glory
 		}
 
 		static Serializer* GetSerializer(Object* pObject);
-		static Serializer* GetSerializer(size_t typeHash);
+		static Serializer* GetSerializer(uint32_t typeHash);
 		static size_t GetID(Serializer* pSerializer);
 		static void SerializeObject(Object* pObject, YAML::Emitter& out);
 
