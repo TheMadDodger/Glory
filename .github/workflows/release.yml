@@ -41,7 +41,7 @@ jobs:
 
     - name: Download mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
-      run: curl "https://download.mono-project.com/archive/6.12.0/windows-installer/mono-6.12.0.182-gtksharp-2.12.45-win32-0.msi" -o mono.msi
+      run: curl "https://download.mono-project.com/archive/6.12.0/windows-installer/mono-6.12.0.182-x64-0.msi" -o mono.msi
 
     - name: Install mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
