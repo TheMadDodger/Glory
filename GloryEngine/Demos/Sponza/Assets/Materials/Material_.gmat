@@ -1,18 +1,18 @@
 Shaders:
-  - UUID: 5700780869105367740
+  - UUID: 11476690678527349262
     Type: Vert
-  - UUID: 10122391935893799229
+  - UUID: 3951604791000268414
     Type: Frag
 Properties:
   - DisplayName: normalSampler
     ShaderName: normalSampler
-    TypeHash: 298197079
+    TypeHash: 2939205195
     Value: 0
   - DisplayName: texSampler
     ShaderName: texSampler
-    TypeHash: 298197079
+    TypeHash: 2939205195
     Value: 0
   - DisplayName: Color
     ShaderName: Color
-    TypeHash: 1944535424
+    TypeHash: 1650774632
     Value: [1, 1, 1, 1]

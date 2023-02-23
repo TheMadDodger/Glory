@@ -1,6 +1,6 @@
-BaseMaterial: 6406333766906144418
+BaseMaterial: 13345938067109065567
 Overrides:
   - DisplayName: normalSampler
-    Value: 12704210864460294779
+    Value: 11656897093963063181
   - DisplayName: texSampler
-    Value: 10372601030989855107
+    Value: 16110094144495512349
