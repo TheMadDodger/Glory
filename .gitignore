@@ -63,3 +63,4 @@ Project.lock
 *.csproj
 *.aps
 GloryEngine/submodules/includes
+GloryEngine/Dependencies
