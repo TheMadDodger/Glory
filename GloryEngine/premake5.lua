@@ -115,18 +115,10 @@ LibDirs["GloryECS"]					= "%{SubmodoleDirs.GloryECS}/Build/Lib/%{cfg.buildcfg}/%
 stb_image							= "%{rootDir}/third-party/stb_image"
 
 -- External dependencies
-DepDirs = {}
-DepDirs["assimp"]					= "%{SubmodoleDirs.assimp}/%{cfg.platform}"
-DepDirs["SDL"]						= "%{SubmodoleDirs.SDL}/%{cfg.platform}/%{cfg.buildcfg}"
-DepDirs["SDL_image"]				= "%{SubmodoleDirs.SDL_image}/%{cfg.platform}/%{cfg.buildcfg}"
-DepDirs["shaderc"]					= "%{SubmodoleDirs.shaderc}/%{cfg.platform}/libshaderc/%{cfg.buildcfg}"
-DepDirs["GLEW"]						= "%{SubmodoleDirs.GLEW}/%{cfg.platform}"
-DepDirs["spirv_cross"]				= "%{SubmodoleDirs.spirv_cross}/%{cfg.platform}/%{cfg.buildcfg}"
-
-DepIncludesDir						= "%{rootDir}/submodules/includes/%{cfg.buildcfg}/%{cfg.platform}"
-DepIncludesRootDir					= "%{rootDir}/submodules/includes"
-IncludeDir["SDL"]					= "%{rootDir}/submodules/includes/%{cfg.buildcfg}/%{cfg.platform}/SDL2"
-IncludeDir["SDL_image"]				= "%{rootDir}/submodules/includes/SDL_image"
+DepsRootDir							= "%{rootDir}/Dependencies/%{cfg.buildcfg}"
+DepsIncludeDir						= "%{DepsRootDir}/include"
+DepsBinDir							= "%{DepsRootDir}/bin"
+DepsLibDir							= "%{DepsRootDir}/lib"
 
 group "Dependencies"
 	include "third-party/ImGui"
