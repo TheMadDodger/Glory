@@ -25,11 +25,10 @@ project "GloryOpenGLGraphics"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.Reflect}",
@@ -37,10 +36,9 @@ project "GloryOpenGLGraphics"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
-		"%{DepDirs.GLEW}/lib/%{cfg.buildcfg}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",
@@ -65,10 +63,7 @@ project "GloryOpenGLGraphics"
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
-
-		("{COPY} %{DepDirs.GLEW}/bin/%{cfg.buildcfg}/*.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} %{DepsBinDir}/glew32*.dll %{moduleOutDir}/Dependencies"),
 	}
 
 	filter "system:windows"

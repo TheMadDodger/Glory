@@ -24,10 +24,10 @@ project "GloryClusteredRenderer"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.Reflect}",
@@ -35,9 +35,9 @@ project "GloryClusteredRenderer"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

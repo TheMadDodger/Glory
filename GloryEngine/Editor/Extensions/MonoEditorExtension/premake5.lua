@@ -20,12 +20,12 @@ project "MonoEditorExtension"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.mono}",
@@ -42,14 +42,12 @@ project "MonoEditorExtension"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.LibDirs}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.glory}",
 		"%{modulesDir}/GloryMonoScripting",
-		"%{LibDirs.assimp}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

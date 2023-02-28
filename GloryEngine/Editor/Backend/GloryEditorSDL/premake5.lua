@@ -22,15 +22,15 @@ project "GloryEditorSDL"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+		"%{DepsIncludeDir}/SDL2",
+
 		"%{IncludeDir.glm}",
-		--"%{vulkanDir}/third-party/include/SDL2",
 
 		"%{DepIncludesDir}",
-		"%{IncludeDir.SDL}",
 
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.sdlwindow}",
@@ -43,14 +43,13 @@ project "GloryEditorSDL"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.GloryECS}",
 		"%{LibDirs.glory}/Modules/GlorySDLWindow",
 
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.yaml_cpp}",
-
-		"%{DepDirs.SDL}",
 	}
 
 	links

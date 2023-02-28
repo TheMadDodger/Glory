@@ -28,9 +28,10 @@ project "GloryMonoScripting"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.ECS}",
@@ -39,9 +40,9 @@ project "GloryMonoScripting"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

@@ -24,10 +24,10 @@ project "GlorySDLInput"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.Reflect}",
@@ -35,9 +35,9 @@ project "GlorySDLInput"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

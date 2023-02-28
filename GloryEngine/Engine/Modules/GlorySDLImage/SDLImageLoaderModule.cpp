@@ -1,5 +1,5 @@
 #include "SDLImageLoaderModule.h"
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include <Debug.h>
 #include "SDLTexture2D.h"
 

@@ -23,12 +23,12 @@ project "EntityScenesEditorExtension"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.entityscenes}",
@@ -42,14 +42,12 @@ project "EntityScenesEditorExtension"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.LibDirs}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.glory}",
 		"%{modulesDir}/GloryEntityScenes",
-		"%{LibDirs.assimp}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

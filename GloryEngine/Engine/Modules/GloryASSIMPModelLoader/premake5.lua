@@ -24,6 +24,8 @@ project "GloryASSIMPModelLoader"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{DepIncludesRootDir}",
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.yaml_cpp}",
@@ -34,11 +36,11 @@ project "GloryASSIMPModelLoader"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 		"%{LibDirs.GloryECS}",
-
-		"%{DepDirs.assimp}/lib/%{cfg.buildcfg}",
 	}
 
 	links
@@ -61,7 +63,7 @@ project "GloryASSIMPModelLoader"
 	postbuildcommands
 	{
 		("{COPY} Module.yaml %{moduleOutDir}"),
-		("{COPY} %{DepDirs.assimp}/bin/%{cfg.buildcfg}/*.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} %{DepsBinDir}/assimp-vc143-mt*.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Assets %{moduleOutDir}/Assets"),
 	}
 

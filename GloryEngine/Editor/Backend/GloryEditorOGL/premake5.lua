@@ -23,13 +23,12 @@ project "GloryEditorOGL"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImFileDialog}",
-		"%{IncludeDir.GLEW}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.editor}",
@@ -42,16 +41,15 @@ project "GloryEditorOGL"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
-		"%{DepDirs.GLEW}/lib/%{cfg.buildcfg}",
 		"%{LibDirs.glory}/Modules/GloryOpenGLGraphics",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 
 		"%{LibDirs.GloryECS}",
 	}

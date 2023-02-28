@@ -25,27 +25,25 @@ project "GlorySDLWindow"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Reflect}",
 
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 
 		"%{DepIncludesDir}",
 	}
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.GloryECS}",
 
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{DepDirs.SDL}",
 	}
 
 	links
@@ -66,10 +64,9 @@ project "GlorySDLWindow"
 
 	postbuildcommands
 	{
-		("{COPY} %{DepDirs.SDL}/*.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} %{DepsBinDir}/SDL2d?.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} %{DepsBinDir}/SDL2?.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		--("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		--("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"

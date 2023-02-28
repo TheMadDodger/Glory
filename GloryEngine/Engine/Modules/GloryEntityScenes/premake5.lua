@@ -27,10 +27,10 @@ project "GloryEntityScenes"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.ECS}",
@@ -39,10 +39,9 @@ project "GloryEntityScenes"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
-		"%{LibDirs.assimp}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",
