@@ -1,5 +1,5 @@
 #pragma once
-#include <spirv_cross.hpp>
+#include <spirv_cross/spirv_cross.hpp>
 #include <vector>
 
 namespace Glory

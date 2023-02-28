@@ -44,16 +44,15 @@ project "GloryEditor"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
 		"%{IncludeDir.ImFileDialog}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.ticpp}",
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ImGui}",
@@ -65,14 +64,14 @@ project "GloryEditor"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 
 		"%{LibDirs.GloryECS}",
 	}

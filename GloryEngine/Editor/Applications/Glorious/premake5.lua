@@ -22,17 +22,19 @@ project "Glorious"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
+		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
 		"%{IncludeDir.ImFileDialog}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
-		"%{IncludeDir.yaml_cpp}",
+
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{engineDir}/GloryEngineBuilder",
+
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.Reflect}",
@@ -40,13 +42,13 @@ project "Glorious"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.ImFileDialog}",
-		"%{DepDirs.shaderc}",
-		"%{DepDirs.spirv_cross}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",

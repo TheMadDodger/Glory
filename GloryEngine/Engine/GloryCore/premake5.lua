@@ -51,9 +51,9 @@ project "GloryCore"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
 		"%{IncludeDir.yaml_cpp}",
 
 		"%{IncludeDir.Reflect}",

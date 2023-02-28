@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <UUID.h>
-#include <spirv_cross.hpp>
+#include <spirv_cross/spirv_cross.hpp>
 #include <MaterialData.h>
 #include "GloryEditor.h"
 

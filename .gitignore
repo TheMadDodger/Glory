@@ -64,3 +64,6 @@ Project.lock
 *.aps
 GloryEngine/submodules/includes
 GloryEngine/Dependencies
+GloryEngine/third-party/glew-2.2.0/Win32
+GloryEngine/third-party/glew-2.2.0/x64/x64
+GloryEngine/third-party/glew-2.2.0/x64

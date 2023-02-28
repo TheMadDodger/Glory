@@ -22,31 +22,29 @@ project "GloriousLauncher"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImFileDialog}",
-		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.GLEW}",
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.glm}",
 		"%{DepIncludesDir}",
-		"%{IncludeDir.SDL_config}",
 	}
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.GloryECS}",
 
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{DepDirs.GLEW}/lib/%{cfg.buildcfg}",
-		"%{DepDirs.SDL}",
 	}
 
 	links
@@ -67,8 +65,9 @@ project "GloriousLauncher"
 	postbuildcommands
 	{
 		("{COPY} ./Fonts %{buildDir}/Launcher/Fonts"),
-		("{COPY} %{DepDirs.SDL}/*.dll %{buildDir}/Launcher"),
-		("{COPY} %{DepDirs.GLEW}/bin/%{cfg.buildcfg}/*.dll %{buildDir}/Launcher"),
+		("{COPY} %{DepsBinDir}/SDL2d?.dll %{buildDir}/Launcher"),
+		("{COPY} %{DepsBinDir}/SDL2?.dll %{buildDir}/Launcher"),
+		("{COPY} %{DepsBinDir}/glew32*.dll %{buildDir}/Launcher"),
 		("{COPY} imgui.ini %{buildDir}/Launcher"),
 		("{COPY} %{IncludeDir.FA}/FA %{buildDir}/Launcher/Fonts/FA"),
 

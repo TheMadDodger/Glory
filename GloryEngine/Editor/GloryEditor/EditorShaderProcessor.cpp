@@ -4,7 +4,7 @@
 #include <fstream>
 #include <ShaderManager.h>
 #include <AssetManager.h>
-#include <spirv_glsl.hpp>
+#include <spirv_cross/spirv_glsl.hpp>
 #include <FileLoaderModule.h>
 #include <EditorAssetCallbacks.h>
 #include <Engine.h>

@@ -23,9 +23,10 @@ project "GloryEntitiesMonoExtender"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.mono}",
@@ -36,6 +37,8 @@ project "GloryEntitiesMonoExtender"
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.GloryECS}",
 	}
