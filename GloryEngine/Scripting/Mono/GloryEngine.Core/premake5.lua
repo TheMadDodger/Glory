@@ -20,14 +20,6 @@ project "GloryEngine.Core"
 		"premake5.lua"
 	}
 
-	vpaths
-	{
-	}
-
-	includedirs
-	{
-	}
-
 	defines
 	{
 		"TRACE"

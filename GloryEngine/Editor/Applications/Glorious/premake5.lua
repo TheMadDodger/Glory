@@ -67,7 +67,6 @@ project "Glorious"
 		"ImFileDialog",
 		"yaml-cpp",
 		"GloryEditor",
-
 		"GloryReflectStatic",
 	}
 
@@ -90,6 +89,7 @@ project "Glorious"
 		"GloryEntitiesMonoExtender",
 		"GloryEngine.Core",
 		"GloryEngine.Entities",
+		"CSAPIInstall",
 	}
 
 	postbuildcommands
