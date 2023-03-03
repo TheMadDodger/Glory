@@ -16,27 +16,20 @@ project "GloryEngine.Entities"
 		"premake5.lua"
 	}
 
-	vpaths
-	{
-	}
-
-	includedirs
-	{
-	}
-
 	links
 	{
 		"GloryEngine.Core",
 	}
 
+	dependson
+	{
+		"GloryMonoScripting",
+		"GloryEntitiesMonoExtender",
+	}
+
 	defines
 	{
 		"TRACE"
-	}
-
-	postbuildcommands
-	{
-		("{COPY} GloryEngine.Entities.dll \"%{modulesOutDir}/GloryEntityScenes/Scripting/csharp/\""),
 	}
 
 	filter "system:windows"
