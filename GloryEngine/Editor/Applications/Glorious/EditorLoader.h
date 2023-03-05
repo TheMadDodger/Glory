@@ -1,5 +1,5 @@
 #pragma once
-#include <GloryEngine.h>
+#include <EngineLoader.h>
 #include <EditorApplication.h>
 #include <Game.h>
 
