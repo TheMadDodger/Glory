@@ -11,6 +11,7 @@
 #include "InputModule.h"
 #include "TimerModule.h"
 #include "ProfilerModule.h"
+#include "PhysicsModule.h"
 #include "ResourceType.h"
 #include "IModuleLoopHandler.h"
 #include "GloryCore.h"
@@ -26,6 +27,7 @@ namespace Glory
 		RendererModule* pRenderModule;
 		GraphicsModule* pGraphicsModule;
 		InputModule* pInputModule;
+		PhysicsModule* pPhysicsModule;
 
 		uint32_t ScriptingModulesCount;
 		ScriptingModule** pScriptingModules;
@@ -48,6 +50,7 @@ namespace Glory
 		RendererModule* GetRendererModule() const;
 		GraphicsModule* GetGraphicsModule() const;
 		InputModule* GetInputModule() const;
+		PhysicsModule* GetPhysicsModule() const;
 		TimerModule* GetTimerModule() const;
 		ProfilerModule* GetProfilerModule() const;
 		ScriptingExtender* GetScriptingExtender() const;
@@ -131,6 +134,7 @@ namespace Glory
 		RendererModule* m_pRenderModule;
 		GraphicsModule* m_pGraphicsModule;
 		InputModule* m_pInputModule;
+		PhysicsModule* m_pPhysicsModule;
 		TimerModule* m_pTimerModule;
 		ProfilerModule* m_pProfilerModule;
 		ScriptingExtender* m_pScriptingExtender;

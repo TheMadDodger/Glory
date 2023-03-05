@@ -39,3 +39,6 @@
 [submodule "GloryEngine/submodules/SPIRV-Cross"]
 	path = GloryEngine/submodules/SPIRV-Cross
 	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "GloryEngine/submodules/JoltPhysics"]
+	path = GloryEngine/submodules/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics

@@ -31,6 +31,7 @@ else
     echo ""
 fi
 
+# ASSIMP
 echo "Building ASSIMP"
 cd assimp
 echo "Building ${PLATFORM} binaries"
@@ -42,6 +43,7 @@ cmake --build . --target INSTALL --config $CONFIG
 cd ../..
 echo "Building SDL"
 
+# SDL
 cd SDL
 echo "Building ${PLATFORM} binaries"
 mkdir "${PLATFORM}"
@@ -51,6 +53,7 @@ cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..
 
+# SDL_image
 echo "Building SDL_image"
 cd SDL_image
 echo "Building ${PLATFORM} binaries"
@@ -61,11 +64,14 @@ cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..
 
+# SPIRV-tools
 cd SPIRV-tools
 echo "Cloning SPIRV-Headers"
 git clone https://github.com/KhronosGroup/SPIRV-Headers.git external/spirv-headers
 
 cd ..
+
+# shaderc
 cd shaderc
 echo "Building shaderc"
 echo "Cloning glslang"
@@ -79,6 +85,7 @@ cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..
 
+# SPIRV-Cross
 echo "Building SPIRV-Cross"
 cd SPIRV-Cross
 echo "Building ${PLATFORM} binaries"
@@ -89,6 +96,7 @@ cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..
 
+# GLEW
 echo "Building GLEW"
 cd ../third-party
 cd glew-2.2.0
@@ -97,3 +105,23 @@ mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake ../build/cmake -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
 cmake --build . --target INSTALL --config $CONFIG
+
+cd ../../../submodules
+
+# Jolt
+echo "Building Jolt Physics"
+cd JoltPhysics/Build
+echo "Building ${PLATFORM} binaries"
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake --build . --target Jolt --config $CONFIG
+
+echo "Copying Lib to Depencencies"
+cp "${CONFIG}/Jolt.lib" "../../../../Dependencies/${CONFIG}/lib"
+cp "${CONFIG}/Jolt.pdb" "../../../../Dependencies/${CONFIG}/lib"
+
+echo "Copying Includes to Depencencies"
+cd ../..
+cp -r Jolt "../../Dependencies/${CONFIG}/include"
+find "../../Dependencies/${CONFIG}/include" -name \*.cpp -type f -delete

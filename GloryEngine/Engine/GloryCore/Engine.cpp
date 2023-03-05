@@ -50,6 +50,11 @@ namespace Glory
 		return m_pInputModule;
 	}
 
+	PhysicsModule* Engine::GetPhysicsModule() const
+	{
+		return m_pPhysicsModule;
+	}
+
 	TimerModule* Engine::GetTimerModule() const
 	{
 		return m_pTimerModule;
@@ -121,7 +126,7 @@ namespace Glory
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
 		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
-		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule),
+		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule), m_pPhysicsModule(createInfo.pPhysicsModule),
 		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pInputModule(createInfo.pInputModule),
 		m_pGraphicsThread(nullptr), m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
 	{
@@ -144,6 +149,7 @@ namespace Glory
 		if (m_pRenderModule) m_pAllModules.push_back(m_pRenderModule);
 		if (m_pGraphicsModule) m_pAllModules.push_back(m_pGraphicsModule);
 		if (m_pInputModule) m_pAllModules.push_back(m_pInputModule);
+		if (m_pPhysicsModule) m_pAllModules.push_back(m_pPhysicsModule);
 		if (m_pTimerModule) m_pAllModules.push_back(m_pTimerModule);
 
 		// Add optional modules
