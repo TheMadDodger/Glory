@@ -7,4 +7,5 @@ Modules:
   - GlorySDLImage
   - GloryMonoScripting
   - GlorySDLInput
+  - GloryJoltPhysics
 EditorVersion: 0.1.0

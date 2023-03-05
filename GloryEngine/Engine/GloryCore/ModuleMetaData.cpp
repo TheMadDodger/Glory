@@ -29,6 +29,7 @@ namespace Glory
 		{ "Loader", ModuleType::MT_Loader },
 		{ "Scripting", ModuleType::MT_Scripting },
 		{ "Input", ModuleType::MT_Input },
+		{ "Physics", ModuleType::MT_Physics },
 		{ "Other", ModuleType::MT_Other },
 	};
 

@@ -16,6 +16,7 @@ namespace Glory
 		MT_Loader,
 		MT_Scripting,
 		MT_Input,
+		MT_Physics,
 		MT_Other,
 	};
 

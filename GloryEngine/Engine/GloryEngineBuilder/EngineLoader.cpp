@@ -284,6 +284,14 @@ namespace Glory
 			}
 			m_EngineInfo.pInputModule = static_cast<InputModule*>(pModule);
 			break;
+		case Glory::ModuleType::MT_Physics:
+			if (m_EngineInfo.pPhysicsModule != nullptr)
+			{
+				Debug::LogWarning("Multiple physics modules is not supported");
+				return;
+			}
+			m_EngineInfo.pPhysicsModule = static_cast<PhysicsModule*>(pModule);
+			break;
 
 		case Glory::ModuleType::MT_Loader:
 		case Glory::ModuleType::MT_Other:
