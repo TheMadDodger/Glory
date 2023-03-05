@@ -6,7 +6,7 @@
 #include <Game.h>
 #include <GameSettings.h>
 #include <windows.h>
-#include <GloryEngine.h>
+#include <EngineLoader.h>
 #include <EditorApplication.h>
 #include <EditorCreateInfo.h>
 #include <EditorWindowImpl.h>
