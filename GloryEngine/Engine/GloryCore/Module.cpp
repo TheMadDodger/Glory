@@ -55,4 +55,17 @@ namespace Glory
     {
         return CoreVersion;
     }
+
+    ModuleSettings& Module::Settings()
+    {
+        return m_Settings;
+    }
+
+    void Module::LoadSettings(const std::filesystem::path& settingsFile)
+    {
+        if (!std::filesystem::exists(settingsFile))
+            m_Settings = YAML::Node(YAML::NodeType::Map);
+        else m_Settings = YAML::LoadFile(settingsFile.string());
+        LoadSettings(m_Settings);
+    }
 }

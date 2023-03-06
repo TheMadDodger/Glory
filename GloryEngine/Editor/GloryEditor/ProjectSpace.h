@@ -27,12 +27,13 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void Save();
 		GLORY_EDITOR_API void SaveProject();
 
-		GLORY_EDITOR_API std::string Name();
-		GLORY_EDITOR_API std::string RootPath();
-		GLORY_EDITOR_API std::string ProjectPath();
-		GLORY_EDITOR_API std::string CachePath();
-		GLORY_EDITOR_API std::string LibraryPath();
-		GLORY_EDITOR_API std::string SettingsPath();
+		GLORY_EDITOR_API const std::string& Name() const;
+		GLORY_EDITOR_API const std::string& RootPath() const;
+		GLORY_EDITOR_API const std::string& ModuleSettingsPath() const;
+		GLORY_EDITOR_API const std::string& ProjectPath() const;
+		GLORY_EDITOR_API const std::string& CachePath() const;
+		GLORY_EDITOR_API const std::string& LibraryPath() const;
+		GLORY_EDITOR_API const std::string& SettingsPath() const;
 
 		static GLORY_EDITOR_API void RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback);
 		static GLORY_EDITOR_API void SetAssetDirty(const char* key, bool dirty = true);
@@ -53,6 +54,7 @@ namespace Glory::Editor
 		std::string m_ProjectRootPath;
 		std::string m_CachePath;
 		std::string m_LibraryPath;
+		std::string m_ModuleSettingsPath;
 		std::string m_SettingsPath;
 		std::string m_ProjectName;
 		std::vector<std::string> m_DirtyKeys;

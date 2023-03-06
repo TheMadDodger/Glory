@@ -2,6 +2,8 @@
 #include <imgui.h>
 #include <Engine.h>
 #include <EditorPlatform.h>
+#include <PropertyDrawer.h>
+#include <PropertySerializer.h>
 
 namespace Glory::Editor
 {
@@ -11,6 +13,20 @@ namespace Glory::Editor
         DrawRightPanel();
         return false;
 	}
+
+    void EngineSettings::OnSettingsLoaded()
+    {
+        Engine* pEngine = Game::GetGame().GetEngine();
+
+        for (size_t i = 0; i < pEngine->ModulesCount(); i++)
+        {
+            Module* pModule = pEngine->GetModule(i);
+            const std::string& moduleName = pModule->GetMetaData().Name();
+            std::filesystem::path settingsPath = ProjectSpace::GetOpenProject()->ModuleSettingsPath();
+            settingsPath.append(moduleName + ".yaml");
+            pModule->LoadSettings(settingsPath);
+        }
+    }
 
     void EngineSettings::DrawLeftPanel()
     {
@@ -84,7 +100,35 @@ namespace Glory::Editor
         ImGui::Separator();
 
         ImGui::Spacing();
-        ImGui::TextUnformatted("Module settings comming soon!");
+        ModuleSettings& settings = pModule->Settings();
+        YAML::Node& settingsNode = settings.Node();
+        for (auto groupItor = settings.GroupsBegin(); groupItor != settings.GroupsEnd(); ++groupItor)
+        {
+            const std::string& group = *groupItor;
+
+            ImGui::PushFont(EditorPlatform::LargeFont);
+            ImGui::TextUnformatted(group.c_str());
+            ImGui::PopFont();
+
+            for (auto valueItor = settings.Begin(group); valueItor != settings.End(group); ++valueItor)
+            {
+                const std::string& value = *valueItor;
+                const uint32_t type = settings.Type(value);
+                const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(type);
+
+                GloryReflect::Reflect::CreateAsTemporary(type, [&](void* data) {
+                    PropertySerializer::DeserializeProperty(pTypeData, data, settingsNode);
+                    float t = *(float*)data;
+
+                    if (PropertyDrawer::DrawProperty(value, pTypeData, data, 0))
+                    {
+                        YAML::Emitter out;
+                        PropertySerializer::SerializeProperty(pTypeData, data, out);
+                        settingsNode[value.data()] = YAML::Load(out.c_str());
+                    }
+                });
+            }
+        }
 
         ImGui::EndChild();
     }
