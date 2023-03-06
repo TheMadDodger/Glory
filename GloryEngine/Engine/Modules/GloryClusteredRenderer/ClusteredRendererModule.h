@@ -41,7 +41,6 @@ namespace Glory
 		GLORY_MODULE_VERSION_H;
 
 	private:
-		virtual void Initialize() override;
 		virtual void Cleanup() override;
 		virtual void PostInitialize() override;
 

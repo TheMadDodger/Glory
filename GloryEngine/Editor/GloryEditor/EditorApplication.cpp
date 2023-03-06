@@ -1,5 +1,6 @@
 #include "EditorApplication.h"
 #include "QuitPopup.h"
+#include "EditorAssetDatabase.h"
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
@@ -41,9 +42,15 @@ namespace Glory::Editor
 
 	void EditorApplication::Initialize(Game& game)
 	{
+		m_pEditorInstance = this;
+
 		game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
 		game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
 
+		m_pShaderProcessor = new EditorShaderProcessor();
+		EditorAssetDatabase::Initialize();
+
+		if (!m_pTempWindowImpl || !m_pTempRenderImpl) return;
 		m_pPlatform = new EditorPlatform(m_pTempWindowImpl, m_pTempRenderImpl);
 		m_pTempWindowImpl->m_pEditorPlatform = m_pPlatform;
 		m_pTempRenderImpl->m_pEditorPlatform = m_pPlatform;
@@ -64,23 +71,46 @@ namespace Glory::Editor
 
 	void EditorApplication::Destroy()
 	{
-		m_pMainEditor->Destroy();
-		m_pPlatform->Destroy();
+		EditorAssetDatabase::Cleanup();
+		if(m_pMainEditor) m_pMainEditor->Destroy();
+		if(m_pPlatform) m_pPlatform->Destroy();
 		m_pShaderProcessor->Stop();
 		delete m_pShaderProcessor;
 		m_pShaderProcessor = nullptr;
 
-		delete m_pPlayer;
+		if(m_pPlayer) delete m_pPlayer;
 		m_pPlayer = nullptr;
 	}
 
 	void EditorApplication::Run(Game& game)
 	{
 		game.GetEngine()->StartThreads();
-		m_pPlatform->SetState(Idle);
+		if(m_pPlatform) m_pPlatform->SetState(Idle);
 		m_pShaderProcessor->Start();
 
 		m_Running = true;
+		if (!m_pPlatform)
+		{
+			while (m_Running)
+			{
+				// Start a frame
+				game.GetEngine()->GameThreadFrameStart();
+
+				// Update console
+				Console::Update();
+
+				// Update asset database
+				EditorAssetDatabase::Update();
+
+				// Update engine (this also does the render loop)
+				game.GetEngine()->ModulesLoop(m_pPlayer);
+
+				// End the current frame
+				game.GetEngine()->GameThreadFrameEnd();
+			}
+			return;
+		}
+
 		while (m_Running)
 		{
 			/* We must wait for graphics to initialize */
@@ -96,6 +126,9 @@ namespace Glory::Editor
 
 			// Update editor
 			m_pMainEditor->Update();
+
+			// Update asset database
+			EditorAssetDatabase::Update();
 
 			// Update engine (this also does the render loop)
 			game.GetEngine()->ModulesLoop(m_pPlayer);
@@ -210,11 +243,9 @@ namespace Glory::Editor
 		m_pPlatform->Initialize(game);
 		m_pMainEditor = new MainEditor();
 		m_pMainEditor->Initialize();
-		m_pEditorInstance = this;
 
 		InitializeExtensions();
 
-		m_pShaderProcessor = new EditorShaderProcessor();
 		m_pPlayer = new EditorPlayer();
 
 		Debug::LogInfo("Initialized editor platform");

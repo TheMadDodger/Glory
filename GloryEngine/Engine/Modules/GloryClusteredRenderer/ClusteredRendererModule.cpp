@@ -80,10 +80,6 @@ namespace Glory
 		m_pScreenMaterial = new MaterialData(pShaderFiles);
 	}
 
-	void ClusteredRendererModule::Initialize()
-	{
-	}
-
 	void ClusteredRendererModule::Cleanup()
 	{
 		delete m_pClusterShaderData;

@@ -264,8 +264,8 @@ namespace Glory
 
 		// Bind rendering to Graphics Thread
 		m_pGraphicsThread = new GraphicsThread(this);
-		m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
-		m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
+		if(m_pGraphicsModule) m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
+		if(m_pRenderModule) m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 	}
 
 	void Engine::RegisterStandardSerializers()

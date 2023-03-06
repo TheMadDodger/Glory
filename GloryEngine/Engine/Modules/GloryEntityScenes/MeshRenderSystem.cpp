@@ -50,6 +50,6 @@ namespace Glory
         renderData.m_World = transform.MatTransform;
         renderData.m_LayerMask = mask;
         renderData.m_ObjectID = entity;
-        Game::GetGame().GetEngine()->GetRendererModule()->Submit(renderData);
+        REQUIRE_MODULE_CALL(Game::GetGame().GetEngine(), RendererModule, Submit(renderData), );
     }
 }

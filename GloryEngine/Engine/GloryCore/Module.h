@@ -36,6 +36,25 @@ const Glory::VersionValue MODULE_VERSION_DATA[] = {															\
 																											\
 const Glory::Version moduleName::Version{ MODULE_VERSION_DATA, 2 };
 
+/* Log a message if the module is not present */
+#define REQUIRE_MODULE_MESSAGE(engine, moduleName, message, level, returnValue)								\
+moduleName* p##moduleName = engine->Get##moduleName();														\
+if(!p##moduleName)																							\
+{																											\
+	Debug::Log##level(message);																				\
+	return returnValue;																						\
+}
+
+/* Check if a module is present, if not return the returnValue */
+#define REQUIRE_MODULE(engine, moduleName, returnValue)														\
+moduleName* p##moduleName = engine->Get##moduleName();														\
+if(!p##moduleName) return returnValue;
+
+/* Call a method on a function, but only if the module is present, return otherwise */
+#define REQUIRE_MODULE_CALL(engine, moduleName, func, returnValue)											\
+REQUIRE_MODULE(engine, moduleName, returnValue)																\
+p##moduleName->func;
+
 namespace Glory
 {
 	class Engine;
