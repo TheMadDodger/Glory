@@ -25,12 +25,20 @@ namespace Glory
 
 	void GraphicsThread::Start()
 	{
+		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
+		REQUIRE_MODULE(m_pEngine, RendererModule, );
+		REQUIRE_MODULE(m_pEngine, WindowModule, );
+
 		m_pRenderQueue = new RenderQueue(2);
 		m_pThread = ThreadManager::Run(std::bind(&GraphicsThread::Run, this));
 	}
 
 	void GraphicsThread::Stop()
 	{
+		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
+		REQUIRE_MODULE(m_pEngine, RendererModule, );
+		REQUIRE_MODULE(m_pEngine, WindowModule, );
+
 		// Kill the thread
 		m_Exit = true;
 		m_pRenderQueue->Stop();

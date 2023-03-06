@@ -104,8 +104,6 @@ namespace Glory::Editor
 
 	void MainEditor::Initialize()
 	{
-		EditorAssetDatabase::Initialize();
-
 		SetupTitleBar();
 		RegisterWindows();
 		RegisterPropertyDrawers();
@@ -135,7 +133,6 @@ namespace Glory::Editor
 
 	void MainEditor::Destroy()
 	{
-		EditorAssetDatabase::Cleanup();
 		ObjectMenu::Cleanup();
 
 		EditorAssetLoader::Stop();
@@ -383,7 +380,6 @@ namespace Glory::Editor
 	{
 		Shortcuts::Update();
 		EditorWindow::UpdateWindows();
-		EditorAssetDatabase::Update();
 	}
 
 	void MainEditor::RegisterWindows()

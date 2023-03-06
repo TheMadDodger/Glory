@@ -63,7 +63,7 @@ namespace Glory::Editor
 		static void ImportModuleAssets(const std::filesystem::path& path);
 
 	private:
-		friend class MainEditor;
+		friend class EditorApplication;
 		static YAML::Node m_DatabaseNode;
 
 		static ThreadedVector<UUID> m_UnsavedAssets;

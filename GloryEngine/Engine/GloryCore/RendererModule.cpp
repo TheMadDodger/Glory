@@ -64,6 +64,10 @@ namespace Glory
 
 	void RendererModule::OnGameThreadFrameStart()
 	{
+		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
+		REQUIRE_MODULE(m_pEngine, RendererModule, );
+		REQUIRE_MODULE(m_pEngine, WindowModule, );
+
 		Profiler::BeginSample("RendererModule::StartFrame");
 		m_CurrentPreparingFrame = RenderFrame();
 		Profiler::EndSample();
@@ -71,6 +75,10 @@ namespace Glory
 
 	void RendererModule::OnGameThreadFrameEnd()
 	{
+		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
+		REQUIRE_MODULE(m_pEngine, RendererModule, );
+		REQUIRE_MODULE(m_pEngine, WindowModule, );
+
 		Profiler::BeginSample("RendererModule::EndFrame");
 		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);
 		Profiler::EndSample();
@@ -90,6 +98,12 @@ namespace Glory
 	{
 		m_PickPos = coord;
 		m_PickCamera = camera;
+	}
+
+	void RendererModule::Initialize()
+	{
+		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
+		REQUIRE_MODULE_MESSAGE(m_pEngine, GraphicsModule, "A renderer module was loaded but there is no GraphicsModule present.", Warning, );
 	}
 
 	void RendererModule::Render(const RenderFrame& frame)
