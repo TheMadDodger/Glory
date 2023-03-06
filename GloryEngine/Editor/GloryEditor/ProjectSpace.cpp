@@ -84,34 +84,39 @@ namespace Glory::Editor
 		return projectFilePath.string();
 	}
 
-	std::string ProjectSpace::Name()
+	const std::string& ProjectSpace::Name() const
 	{
 		return m_ProjectName;
 	}
 
-	std::string ProjectSpace::RootPath()
+	const std::string& ProjectSpace::RootPath() const
 	{
 		return m_ProjectRootPath;
 	}
 
-	std::string ProjectSpace::ProjectPath()
+	const std::string& ProjectSpace::ModuleSettingsPath() const
+	{
+		return m_ModuleSettingsPath;
+	}
+
+	const std::string& ProjectSpace::ProjectPath() const
 	{
 		return m_ProjectFilePath;
 	}
 
-	std::string ProjectSpace::CachePath()
+	const std::string& ProjectSpace::CachePath() const
 	{
 		if (!std::filesystem::exists(m_CachePath)) std::filesystem::create_directory(m_CachePath);
 		return m_CachePath;
 	}
 
-	std::string ProjectSpace::LibraryPath()
+	const std::string& ProjectSpace::LibraryPath() const
 	{
 		if (!std::filesystem::exists(m_LibraryPath)) std::filesystem::create_directory(m_LibraryPath);
 		return m_LibraryPath;
 	}
 
-	std::string ProjectSpace::SettingsPath()
+	const std::string& ProjectSpace::SettingsPath() const
 	{
 		if (!std::filesystem::exists(m_SettingsPath)) std::filesystem::create_directory(m_SettingsPath);
 		return m_SettingsPath;
@@ -149,7 +154,8 @@ namespace Glory::Editor
 	ProjectSpace::ProjectSpace(const std::string& path)
 		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()),
 		m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string()),
-		m_SettingsPath(std::filesystem::path(path).parent_path().append("ProjectSettings").string())
+		m_SettingsPath(std::filesystem::path(path).parent_path().append("ProjectSettings").string()),
+		m_ModuleSettingsPath(std::filesystem::path(path).parent_path().append("Modules").string())
 	{
 	}
 
@@ -164,6 +170,7 @@ namespace Glory::Editor
 		CreateFolder("Cache");
 		CreateFolder("Cache/ShaderSource");
 		CreateFolder("Cache/CompiledShaders");
+		CreateFolder("Modules");
 		m_ProjectFileNode = YAML::LoadFile(m_ProjectFilePath);
 		m_ProjectName = m_ProjectFileNode["ProjectName"].as<std::string>();
 

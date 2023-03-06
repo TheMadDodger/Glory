@@ -6,6 +6,8 @@
 #include <CameraManager.h>
 #include <GloryContext.h>
 
+#include <fstream>
+
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule, 0, 1);
@@ -323,6 +325,22 @@ namespace Glory
 		m_pLightsSSBO->Unbind();
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
+	}
+
+	void ClusteredRendererModule::LoadSettings(ModuleSettings& settings)
+	{
+		settings.RegisterValue<float>("TestFloat1", 69.420f);
+		settings.RegisterValue<float>("TestFloat2", 69.420f);
+		settings.RegisterValue<float>("TestFloat3", 69.420f);
+		settings.RegisterValue<float>("TestFloat4", 69.420f);
+		settings.RegisterValue<float>("TestFloat5", 69.420f);
+
+		settings.PushGroup("Bools");
+		settings.RegisterValue<bool>("Testbool1", false);
+		settings.RegisterValue<bool>("Testbool2", true);
+		settings.RegisterValue<bool>("Testbool3", true);
+		settings.RegisterValue<bool>("Testbool4", true);
+		settings.RegisterValue<bool>("Testbool5", false);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)

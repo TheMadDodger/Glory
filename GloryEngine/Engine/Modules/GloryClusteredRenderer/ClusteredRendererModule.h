@@ -53,6 +53,8 @@ namespace Glory
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
 
+		virtual void LoadSettings(ModuleSettings& settings) override;
+
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 

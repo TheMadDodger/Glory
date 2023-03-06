@@ -1,11 +1,13 @@
 #pragma once
 #include "Object.h"
 #include "ScriptExtensions.h"
-#include <typeinfo>
 #include "Object.h"
 #include "ModuleMetaData.h"
 #include "IScriptExtender.h"
 #include "Versioning.h"
+#include "ModuleSettings.h"
+
+#include <typeinfo>
 
 #define GLORY_MODULE_H																						\
 extern "C" GLORY_API Glory::Module * OnLoadModule(Glory::GloryContext * pContext);							\
@@ -81,7 +83,12 @@ namespace Glory
 
 		virtual const Version& ModuleVersion() const;
 
+		ModuleSettings& Settings();
+
+		void LoadSettings(const std::filesystem::path& settingsFile);
+
 	protected:
+		virtual void LoadSettings(ModuleSettings& settings) {};
 		virtual void Initialize() = 0;
 		virtual void PostInitialize() {};
 		virtual void Cleanup() = 0;
@@ -107,6 +114,7 @@ namespace Glory
 		friend class Engine;
 		friend class ScriptingBinder;
 		ModuleMetaData m_MetaData;
+		ModuleSettings m_Settings;
 		std::vector<IScriptExtender*> m_pScriptingExtender;
 	};
 }

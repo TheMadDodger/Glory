@@ -67,6 +67,7 @@ namespace Glory::Editor
 
 	private:
 		virtual bool OnGui() override;
+		virtual void OnSettingsLoaded() override;
 
 		void DrawLeftPanel();
 		void DrawRightPanel();
