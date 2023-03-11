@@ -116,17 +116,7 @@ namespace Glory::Editor
                 const uint32_t type = settings.Type(value);
                 const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(type);
 
-                GloryReflect::Reflect::CreateAsTemporary(type, [&](void* data) {
-                    PropertySerializer::DeserializeProperty(pTypeData, data, settingsNode);
-                    float t = *(float*)data;
-
-                    if (PropertyDrawer::DrawProperty(value, pTypeData, data, 0))
-                    {
-                        YAML::Emitter out;
-                        PropertySerializer::SerializeProperty(pTypeData, data, out);
-                        settingsNode[value.data()] = YAML::Load(out.c_str());
-                    }
-                });
+                PropertyDrawer::DrawProperty(value, settingsNode, type, type, 0);
             }
         }
 
