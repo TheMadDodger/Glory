@@ -223,6 +223,30 @@ namespace Glory::Editor
 		return false;
 	}
 
+	bool PropertyDrawer::DrawProperty(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags)
+	{
+		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		{
+			return propertyDrawer->GetPropertyTypeHash() == typeHash;
+		});
+
+		if (it != m_PropertyDrawers.end())
+		{
+			PropertyDrawer* drawer = *it;
+			return drawer->Draw(label, node[label], elementTypeHash, flags);
+		}
+
+		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		if (pTypeData)
+		{
+			/* TODO */
+			throw new std::exception("Not yet implemented!");
+		}
+
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), label.c_str());
+		return false;
+	}
+
 	PropertyDrawer* PropertyDrawer::GetPropertyDrawer(uint32_t typeHash)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
