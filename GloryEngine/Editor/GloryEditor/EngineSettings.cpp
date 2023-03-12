@@ -124,6 +124,14 @@ namespace Glory::Editor
         ImGui::Spacing();
         ModuleSettings& settings = pModule->Settings();
         YAML::Node& settingsNode = settings.Node();
+
+        if (!settings.HasSettings())
+        {
+            ImGui::TextUnformatted("There are no settings for this module.");
+            ImGui::EndChild();
+            return change;
+        }
+
         for (auto groupItor = settings.GroupsBegin(); groupItor != settings.GroupsEnd(); ++groupItor)
         {
             const std::string& group = *groupItor;

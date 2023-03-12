@@ -6,8 +6,6 @@
 #include <CameraManager.h>
 #include <GloryContext.h>
 
-#include <fstream>
-
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule, 0, 1);

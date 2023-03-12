@@ -42,6 +42,8 @@ namespace Glory
 		const uint32_t Type(const std::string& name) const;
 		YAML::Node& Node();
 
+		const bool HasSettings() const;
+
 	private:
 		template<typename T>
 		void RegisterValue(const std::string& name)
