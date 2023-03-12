@@ -4,14 +4,14 @@
 #include <EditorPlatform.h>
 #include <PropertyDrawer.h>
 #include <PropertySerializer.h>
+#include <fstream>
 
 namespace Glory::Editor
 {
 	bool EngineSettings::OnGui()
 	{
         DrawLeftPanel();
-        DrawRightPanel();
-        return false;
+        return DrawRightPanel();
 	}
 
     void EngineSettings::OnSettingsLoaded()
@@ -25,6 +25,26 @@ namespace Glory::Editor
             std::filesystem::path settingsPath = ProjectSpace::GetOpenProject()->ModuleSettingsPath();
             settingsPath.append(moduleName + ".yaml");
             pModule->LoadSettings(settingsPath);
+        }
+    }
+
+    void EngineSettings::OnSave(ProjectSpace* pProject)
+    {
+        Engine* pEngine = Game::GetGame().GetEngine();
+
+        for (size_t i = 0; i < pEngine->ModulesCount(); i++)
+        {
+            Module* pModule = pEngine->GetModule(i);
+            const std::string& moduleName = pModule->GetMetaData().Name();
+            if (moduleName.empty()) continue;
+            ModuleSettings& settings = pModule->Settings();
+            std::filesystem::path settingsPath = pProject->ModuleSettingsPath();
+            settingsPath.append(moduleName + ".yaml");
+            YAML::Emitter out;
+            out << settings.Node();
+            std::ofstream outFile(settingsPath);
+            outFile << out.c_str();
+            outFile.close();
         }
     }
 
@@ -74,8 +94,10 @@ namespace Glory::Editor
         ImGui::EndChild();
     }
 
-    void EngineSettings::DrawRightPanel()
+    bool EngineSettings::DrawRightPanel()
     {
+        bool change = false;
+
         ImGui::SameLine();
         ImGui::BeginChild("RightPanel", ImVec2(), true);
 
@@ -116,10 +138,12 @@ namespace Glory::Editor
                 const uint32_t type = settings.Type(value);
                 const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(type);
 
-                PropertyDrawer::DrawProperty(value, settingsNode, type, type, 0);
+                change |= PropertyDrawer::DrawProperty(value, settingsNode, type, type, 0);
             }
         }
 
         ImGui::EndChild();
+
+        return change;
     }
 }

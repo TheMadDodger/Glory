@@ -38,6 +38,7 @@ namespace Glory::Editor
 	protected:
         virtual bool OnGui() = 0;
 		virtual void OnSettingsLoaded() {}
+		virtual void OnSave(ProjectSpace* pProject) {}
 		void LoadSettings(ProjectSpace* pProject);
 		void SaveSettings(ProjectSpace* pProject);
 
@@ -68,9 +69,10 @@ namespace Glory::Editor
 	private:
 		virtual bool OnGui() override;
 		virtual void OnSettingsLoaded() override;
+		void OnSave(ProjectSpace* pProject) override;
 
 		void DrawLeftPanel();
-		void DrawRightPanel();
+		bool DrawRightPanel();
 
 	private:
 		size_t m_MenuIndex;
