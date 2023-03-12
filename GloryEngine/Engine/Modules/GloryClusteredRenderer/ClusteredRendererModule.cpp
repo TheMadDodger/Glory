@@ -327,22 +327,6 @@ namespace Glory
 		pLightGridSSBO->Unbind();
 	}
 
-	void ClusteredRendererModule::LoadSettings(ModuleSettings& settings)
-	{
-		settings.RegisterValue<float>("TestFloat1", 69.420f);
-		settings.RegisterValue<float>("TestFloat2", 69.420f);
-		settings.RegisterValue<float>("TestFloat3", 69.420f);
-		settings.RegisterValue<float>("TestFloat4", 69.420f);
-		settings.RegisterValue<float>("TestFloat5", 69.420f);
-
-		settings.PushGroup("Bools");
-		settings.RegisterValue<bool>("Testbool1", false);
-		settings.RegisterValue<bool>("Testbool2", true);
-		settings.RegisterValue<bool>("Testbool3", true);
-		settings.RegisterValue<bool>("Testbool4", true);
-		settings.RegisterValue<bool>("Testbool5", false);
-	}
-
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
 	{
 		if (b == 0)

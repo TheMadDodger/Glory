@@ -101,6 +101,8 @@ namespace Glory::Editor
 		std::ofstream fileStream(path);
 		fileStream << out.c_str();
 		fileStream.close();
+
+		OnSave(pProject);
 	}
 
 	GeneralSettings::GeneralSettings() : ProjectSettings("General.yaml")
