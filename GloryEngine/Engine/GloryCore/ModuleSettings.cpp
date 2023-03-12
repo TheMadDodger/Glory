@@ -46,6 +46,11 @@ namespace Glory
 		return m_SettingsNode;
 	}
 
+	const bool ModuleSettings::HasSettings() const
+	{
+		return m_ValueNames.size();
+	}
+
 	void ModuleSettings::RegisterValue(const std::string& name, uint32_t type)
 	{
 		m_ValueNames.push_back(name);
