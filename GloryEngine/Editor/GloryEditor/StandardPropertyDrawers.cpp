@@ -31,6 +31,12 @@ namespace Glory::Editor
 	}
 
 	template<>
+	bool PropertyDrawerTemplate<uint32_t>::OnGUI(const std::string& label, uint32_t* data, uint32_t flags) const
+	{
+		return EditorUI::InputUInt(EditorUI::MakeCleanName(label), data);
+	}
+
+	template<>
 	bool PropertyDrawerTemplate<bool>::OnGUI(const std::string& label, bool* data, uint32_t flags) const
 	{
 		return EditorUI::CheckBox(EditorUI::MakeCleanName(label), data);

@@ -30,6 +30,15 @@ namespace Glory
 	{
 	}
 
+	void JoltPhysicsModule::LoadSettings(ModuleSettings& settings)
+	{
+		settings.RegisterValue<unsigned int>("MaxBodies", 1024);
+		settings.RegisterValue<unsigned int>("NumBodyMutexes", 0);
+		settings.RegisterValue<unsigned int>("MaxBodyPairs", 1024);
+		settings.RegisterValue<unsigned int>("MaxContactConstraints", 1024);
+		settings.RegisterValue<unsigned int>("TickRate", 60);
+	}
+
 	void JoltPhysicsModule::Initialize()
 	{
 		// Register allocation hook

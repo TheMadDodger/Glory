@@ -395,6 +395,7 @@ namespace Glory::Editor
 	{
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<float>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<int>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<uint32_t>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<double>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec2>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec3>>();

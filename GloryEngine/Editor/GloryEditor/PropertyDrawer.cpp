@@ -186,7 +186,7 @@ namespace Glory::Editor
 			throw new std::exception("Not yet implemented!");
 		}
 
-		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), label.c_str());
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", label.c_str());
 		return false;
 	}
 

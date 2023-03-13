@@ -24,6 +24,7 @@ namespace Glory
 		GLORY_MODULE_VERSION_H;
 
 	private:
+		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() override;

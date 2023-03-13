@@ -82,6 +82,7 @@ project "Glorious"
 		"GlorySDLInput",
 		"GloryEditorSDL",
 		"GloryEditorOGL",
+		"GloryJoltPhysics",
 		--"GloryEditorVulkan",
 		"GloryMonoScripting",
 		"EntityScenesEditorExtension",
