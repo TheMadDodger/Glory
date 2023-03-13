@@ -114,7 +114,7 @@ cd JoltPhysics/Build
 echo "Building ${PLATFORM} binaries"
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
-cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR -DUSE_STATIC_MSVC_RUNTIME_LIBRARY=OFF
 cmake --build . --target Jolt --config $CONFIG
 
 echo "Copying Lib to Depencencies"
