@@ -14,20 +14,6 @@ namespace Glory::Editor
         return DrawRightPanel();
 	}
 
-    void EngineSettings::OnSettingsLoaded()
-    {
-        Engine* pEngine = Game::GetGame().GetEngine();
-
-        for (size_t i = 0; i < pEngine->ModulesCount(); i++)
-        {
-            Module* pModule = pEngine->GetModule(i);
-            const std::string& moduleName = pModule->GetMetaData().Name();
-            std::filesystem::path settingsPath = ProjectSpace::GetOpenProject()->ModuleSettingsPath();
-            settingsPath.append(moduleName + ".yaml");
-            pModule->LoadSettings(settingsPath);
-        }
-    }
-
     void EngineSettings::OnSave(ProjectSpace* pProject)
     {
         Engine* pEngine = Game::GetGame().GetEngine();

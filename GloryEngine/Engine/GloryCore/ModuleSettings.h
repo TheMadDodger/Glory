@@ -2,6 +2,7 @@
 #include "ResourceType.h"
 #include <yaml-cpp/yaml.h>
 #include <map>
+#include <sstream>
 
 namespace Glory
 {
@@ -27,7 +28,11 @@ namespace Glory
 		{
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsDefined())
-				throw new std::exception("ModuleSettings: Value " + name + " does not exist");
+			{
+				std::stringstream stream;
+				stream << "ModuleSettings: Value " << name << " does not exist";
+				throw new std::exception(stream.str().c_str());
+			}
 
 			return node.as<T>();
 		}

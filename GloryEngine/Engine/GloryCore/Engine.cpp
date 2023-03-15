@@ -378,6 +378,31 @@ namespace Glory
 		return m_pAllModules[index];
 	}
 
+	void Engine::LoadModuleSettings(const std::filesystem::path& overrideRootPath)
+	{
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			Module* pModule = m_pAllModules[i];
+			const ModuleMetaData& moduleMetaData = pModule->GetMetaData();
+
+			const std::filesystem::path modulePath = moduleMetaData.Path();
+			/* Ignore built-in modules */
+			if (modulePath.empty()) continue;
+
+			if (overrideRootPath.empty())
+			{
+				std::filesystem::path settingsFilePath = modulePath;
+				settingsFilePath.append("config.yaml");
+				pModule->LoadSettings(settingsFilePath);
+				continue;
+			}
+
+			std::filesystem::path settingsFilePath = overrideRootPath;
+			settingsFilePath.append(moduleMetaData.Name() + ".yaml");
+			pModule->LoadSettings(settingsFilePath);
+		}
+	}
+
 	void Engine::GraphicsThreadFrameStart()
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
