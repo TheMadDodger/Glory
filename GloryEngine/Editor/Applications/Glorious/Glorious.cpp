@@ -47,13 +47,15 @@ int main(int argc, char* argv[])
             return -1;
         }
 
-
         std::filesystem::path engineConfPath = projectPath;
         engineConfPath = engineConfPath.parent_path();
         engineConfPath.append("ProjectSettings").append("Engine.yaml");
 
         Glory::EngineLoader engineLoader(engineConfPath);
         Glory::Engine* pEngine = engineLoader.LoadEngine(windowCreateInfo);
+        std::filesystem::path moduleSettingsRootPath = engineConfPath.parent_path().parent_path();
+        moduleSettingsRootPath.append("Modules");
+        pEngine->LoadModuleSettings(moduleSettingsRootPath);
 
         if (pEngine == nullptr)
         {

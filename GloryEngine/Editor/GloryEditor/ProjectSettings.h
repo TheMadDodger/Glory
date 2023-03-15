@@ -68,7 +68,6 @@ namespace Glory::Editor
 
 	private:
 		virtual bool OnGui() override;
-		virtual void OnSettingsLoaded() override;
 		void OnSave(ProjectSpace* pProject) override;
 
 		void DrawLeftPanel();

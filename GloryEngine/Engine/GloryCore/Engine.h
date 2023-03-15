@@ -99,6 +99,8 @@ namespace Glory
 		const size_t ModulesCount() const;
 		Module* GetModule(size_t index) const;
 
+		void LoadModuleSettings(const std::filesystem::path& overrideRootPath = "");
+
 	private:
 		Engine(const EngineCreateInfo& createInfo);
 		virtual ~Engine();
