@@ -13,6 +13,8 @@ project "GloryJoltPhysics"
 		"**.cpp",
 		"Module.yaml",
 		"premake5.lua",
+
+		"%{rootDir}/submodules/JoltPhysics/Jolt/**.*",
 	}
 
 	vpaths
@@ -30,6 +32,11 @@ project "GloryJoltPhysics"
 		"%{IncludeDir.yaml_cpp}",
 
 		"%{DepIncludesDir}",
+	}
+
+	sysincludedirs
+	{
+		"%{rootDir}/submodules/JoltPhysics",
 	}
 
 	libdirs
@@ -51,7 +58,6 @@ project "GloryJoltPhysics"
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
-		"Jolt",
 	}
 
 	defines

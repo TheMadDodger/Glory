@@ -28,5 +28,18 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() override;
+		virtual void Update() override;
+
+	private:
+		JPH::TempAllocatorImpl* m_pJPHTempAllocator;
+		JPH::JobSystem* m_pJPHJobSystem;
+		JPH::PhysicsSystem* m_pJPHPhysicsSystem;
+
+
+
+
+		/* TEMPORARY FOR TESTING ONLY */
+		JPH::BodyID m_SphereID;
+		JPH::BodyID m_FloorID;
     };
 }
