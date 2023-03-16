@@ -15,7 +15,7 @@ namespace Glory
 
 		virtual const std::type_info& GetModuleType() override;
 
-		virtual uint32_t CreatePhysicsBody(const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType) = 0;
+		virtual uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType) = 0;
 		virtual void DestroyPhysicsBody(uint32_t& bodyID) = 0;
 		virtual void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) = 0;
 

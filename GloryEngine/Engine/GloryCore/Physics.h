@@ -1,4 +1,6 @@
 #pragma once
+#include "Shapes.h"
+
 #include <Reflection.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>

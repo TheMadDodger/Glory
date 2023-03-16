@@ -19,8 +19,10 @@
 #include <Reflection.h>
 #include <map>
 #include <Physics.h>
+#include <ShapeProperty.h>
 
-REFLECTABLE_ENUM(CameraPerspective, Orthographic, Perspective)
+REFLECTABLE_ENUM_NS(Glory, CameraPerspective, Orthographic, Perspective)
+REFLECTABLE_ENUM_NS(Glory, PhysicsShapeType, Sphere, Box)
 
 #define PROPERTY_BUFFER_SIZE 2048;
 
@@ -185,7 +187,8 @@ namespace Glory
 		PhysicsBody() : m_BodyType(BodyType::Dynamic), m_BodyID(InvalidBodyID) {}
 
 		REFLECTABLE(PhysicsBody,
-			(BodyType) (m_BodyType)
+			(BodyType) (m_BodyType),
+			(ShapeProperty) (m_Shape)
 		);
 
 		uint32_t m_BodyID;

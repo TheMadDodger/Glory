@@ -208,10 +208,10 @@ namespace Glory
 	{
 	}
 
-	uint32_t JoltPhysicsModule::CreatePhysicsBody(const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType)
+	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType)
 	{
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
-		BodyCreationSettings bodySettings(new SphereShape(0.5f), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, Layers::MOVING);
+		BodyCreationSettings bodySettings(GetJPHShape(shape), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, Layers::MOVING);
 		JPH::BodyID bodyID = bodyInterface.CreateAndAddBody(bodySettings, EActivation::Activate);
 		return bodyID.GetIndexAndSequenceNumber();
 	}

@@ -56,7 +56,6 @@ namespace Glory
 
 		/* Register component types */
 		GloryReflect::Reflect::RegisterEnum<CameraPerspective>();
-		GloryReflect::Reflect::RegisterEnum<BodyType>();
 		GloryReflect::Reflect::RegisterType<MeshMaterial>();
 
 		/* Register engine components */

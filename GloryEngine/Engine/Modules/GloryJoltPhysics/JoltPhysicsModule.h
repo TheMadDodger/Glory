@@ -2,14 +2,14 @@
 #include <PhysicsModule.h>
 
 #include <Jolt/Jolt.h>
-
-
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 
 namespace Glory
 {
+	struct Shape;
+
     class JoltPhysicsModule : public PhysicsModule
     {
 	public:
@@ -18,7 +18,7 @@ namespace Glory
 
 		GLORY_MODULE_VERSION_H;
 
-		uint32_t CreatePhysicsBody(const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType) override;
+		uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType) override;
 		void DestroyPhysicsBody(uint32_t& bodyID) override;
 		void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) override;
 
