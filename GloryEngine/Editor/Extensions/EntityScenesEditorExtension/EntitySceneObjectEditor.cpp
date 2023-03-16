@@ -25,6 +25,7 @@ namespace Glory::Editor
 		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
 		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
+		{ ResourceType::GetHash<PhysicsBody>(), ICON_FA_CUBES_STACKED },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)

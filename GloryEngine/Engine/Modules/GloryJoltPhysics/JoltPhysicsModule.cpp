@@ -1,4 +1,15 @@
 #include "JoltPhysicsModule.h"
+#include "Helpers.h"
+
+#include <Jolt/RegisterTypes.h>
+#include <Jolt/Core/Factory.h>
+#include <Jolt/Physics/PhysicsSettings.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyActivationListener.h>
+
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/SphereShape.h>
+
 #include <Debug.h>
 #include <cstdarg>
 
@@ -197,6 +208,34 @@ namespace Glory
 	{
 	}
 
+	uint32_t JoltPhysicsModule::CreatePhysicsBody(const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		BodyCreationSettings bodySettings(new SphereShape(0.5f), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, Layers::MOVING);
+		JPH::BodyID bodyID = bodyInterface.CreateAndAddBody(bodySettings, EActivation::Activate);
+		return bodyID.GetIndexAndSequenceNumber();
+	}
+
+	void JoltPhysicsModule::DestroyPhysicsBody(uint32_t& bodyID)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		if (jphBodyID.IsInvalid()) return;
+		bodyInterface.RemoveBody(jphBodyID);
+		bodyInterface.DestroyBody(jphBodyID);
+		bodyID = JPH::BodyID::cInvalidBodyID;
+	}
+
+	void JoltPhysicsModule::PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+
+		// Output current position and velocity of the sphere
+		*outPosition = ToVec3(bodyInterface.GetCenterOfMassPosition(jphBodyID));
+		*outRotation = ToQuat(bodyInterface.GetRotation(jphBodyID));
+	}
+
 	void JoltPhysicsModule::LoadSettings(ModuleSettings& settings)
 	{
 		settings.RegisterValue<unsigned int>("TemporaryAllocationSize", 10 * 1024 * 1024);
@@ -224,25 +263,10 @@ namespace Glory
 
 		/* Refresh rate of physics world */
 		settings.RegisterValue<unsigned int>("TickRate", 60);
+	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	void JoltPhysicsModule::Initialize()
+	{
 		// Register allocation hook
 		JPH::RegisterDefaultAllocator();
 
@@ -298,40 +322,25 @@ namespace Glory
 		// Next we can create a rigid body to serve as the floor, we make a large box
 		// Create the settings for the collision volume (the shape). 
 		// Note that for simple shapes (like boxes) you can also directly construct a BoxShape.
-		JPH::BoxShapeSettings floor_shape_settings(JPH::Vec3(100.0f, 1.0f, 100.0f));
+		//JPH::BoxShapeSettings floor_shape_settings(JPH::Vec3(100.0f, 1.0f, 100.0f));
 
 		// Create the shape
-		JPH::ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
-		JPH::ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
+		//JPH::ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
+		//JPH::ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
 
 		// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
-		JPH::BodyCreationSettings floor_settings(floor_shape, JPH::RVec3(0.0_r, -1.0_r, 0.0_r), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
+		//JPH::BodyCreationSettings floor_settings(floor_shape, JPH::RVec3(0.0_r, -1.0_r, 0.0_r), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
 
 		// Create the actual rigid body
-		JPH::Body* floor = bodyInterface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
-		m_FloorID = floor->GetID();
+		//JPH::Body* floor = bodyInterface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
 
 		// Add it to the world
-		bodyInterface.AddBody(floor->GetID(), JPH::EActivation::DontActivate);
-
-		// Now create a dynamic body to bounce on the floor
-		// Note that this uses the shorthand version of creating and adding a body to the world
-		BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(0.0_r, 2.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-		m_SphereID = bodyInterface.CreateAndAddBody(sphere_settings, EActivation::Activate);
-
-		// Now you can interact with the dynamic body, in this case we're going to give it a velocity.
-		// (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
-		bodyInterface.SetLinearVelocity(m_SphereID, JPH::Vec3(0.0f, -5.0f, 0.0f));
+		//bodyInterface.AddBody(floor->GetID(), JPH::EActivation::DontActivate);
 
 		// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
 		// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
 		// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
-		m_pJPHPhysicsSystem->OptimizeBroadPhase();
-	}
-
-	void JoltPhysicsModule::Initialize()
-	{
-		
+		//m_pJPHPhysicsSystem->OptimizeBroadPhase();
 	}
 
 	void JoltPhysicsModule::PostInitialize()
@@ -340,18 +349,6 @@ namespace Glory
 
 	void JoltPhysicsModule::Cleanup()
 	{
-		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
-
-		// Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
-		bodyInterface.RemoveBody(m_SphereID);
-
-		// Destroy the sphere. After this the sphere ID is no longer valid.
-		bodyInterface.DestroyBody(m_SphereID);
-
-		// Remove and destroy the floor
-		bodyInterface.RemoveBody(m_FloorID);
-		bodyInterface.DestroyBody(m_FloorID);
-
 		// Destroy the factory
 		delete JPH::Factory::sInstance;
 		JPH::Factory::sInstance = nullptr;
@@ -370,8 +367,6 @@ namespace Glory
 		
 		// Now we're ready to simulate the body, keep simulating until it goes to sleep
 		static uint32_t step = 0;
-		if (!bodyInterface.IsActive(m_SphereID)) return;
-		
 		
 		// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
 		const uint32_t tickRate = Settings().Value<unsigned int>("TickRate");
@@ -379,14 +374,6 @@ namespace Glory
 		
 		// Next step
 		++step;
-		
-		// Output current position and velocity of the sphere
-		JPH::RVec3 position = bodyInterface.GetCenterOfMassPosition(m_SphereID);
-		JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(m_SphereID);
-		
-		std::stringstream stream;
-		stream << "Step " << step << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")";
-		Debug::LogInfo(stream.str());
 		
 		// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
 		const int collisionSteps = 1;

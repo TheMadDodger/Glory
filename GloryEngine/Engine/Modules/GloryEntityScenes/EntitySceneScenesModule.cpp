@@ -56,6 +56,7 @@ namespace Glory
 
 		/* Register component types */
 		GloryReflect::Reflect::RegisterEnum<CameraPerspective>();
+		GloryReflect::Reflect::RegisterEnum<BodyType>();
 		GloryReflect::Reflect::RegisterType<MeshMaterial>();
 
 		/* Register engine components */
@@ -67,6 +68,7 @@ namespace Glory
 		RegisterComponent<ModelRenderer>();
 		RegisterComponent<LightComponent>();
 		RegisterComponent<ScriptedComponent>();
+		RegisterComponent<PhysicsBody>();
 
 		const GloryReflect::FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
 		GloryReflect::Reflect::SetFieldFlags(pColorField, Vec4Flags::Color);

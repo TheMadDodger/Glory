@@ -1,17 +1,12 @@
 #pragma once
 #include <PhysicsModule.h>
+
 #include <Jolt/Jolt.h>
 
-#include <Jolt/RegisterTypes.h>
-#include <Jolt/Core/Factory.h>
+
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
-#include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
 
 namespace Glory
 {
@@ -22,6 +17,10 @@ namespace Glory
 		GLORY_API virtual ~JoltPhysicsModule();
 
 		GLORY_MODULE_VERSION_H;
+
+		uint32_t CreatePhysicsBody(const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType) override;
+		void DestroyPhysicsBody(uint32_t& bodyID) override;
+		void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) override;
 
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;
@@ -34,12 +33,5 @@ namespace Glory
 		JPH::TempAllocatorImpl* m_pJPHTempAllocator;
 		JPH::JobSystem* m_pJPHJobSystem;
 		JPH::PhysicsSystem* m_pJPHPhysicsSystem;
-
-
-
-
-		/* TEMPORARY FOR TESTING ONLY */
-		JPH::BodyID m_SphereID;
-		JPH::BodyID m_FloorID;
     };
 }
