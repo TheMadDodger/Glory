@@ -1,7 +1,8 @@
 #pragma once
+#include <Physics.h>
+
 #include <Jolt/Jolt.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <Jolt/Physics/Collision/Shape/Shape.h>
 
 
 namespace Glory
@@ -11,4 +12,6 @@ namespace Glory
 
 	glm::vec3 ToVec3(const JPH::Vec3& v);
 	glm::quat ToQuat(const JPH::Quat& q);
+
+	JPH::Shape* GetJPHShape(const Shape& shape);
 }

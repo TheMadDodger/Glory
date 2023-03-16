@@ -15,6 +15,8 @@
 #include "WindowsDebugConsole.h"
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
+#include "Physics.h"
+#include "ShapeProperty.h"
 #include <algorithm>
 
 namespace Glory
@@ -309,6 +311,7 @@ namespace Glory
 		ResourceType::RegisterType<glm::quat>();
 		ResourceType::RegisterType<LayerMask>();
 		ResourceType::RegisterType<SceneObjectRef>();
+		ResourceType::RegisterType<ShapeProperty>();
 
 		GloryReflect::Reflect::RegisterBasicType<glm::vec2>("vec2");
 		GloryReflect::Reflect::RegisterBasicType<glm::vec3>("vec3");
@@ -322,6 +325,9 @@ namespace Glory
 		GloryReflect::Reflect::RegisterEnum<InputMappingType>();
 		GloryReflect::Reflect::RegisterEnum<InputState>();
 		GloryReflect::Reflect::RegisterEnum<AxisBlending>();
+		GloryReflect::Reflect::RegisterEnum<BodyType>();
+		GloryReflect::Reflect::RegisterEnum<ShapeType>();
+		GloryReflect::Reflect::RegisterType<ShapeProperty>();
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}

@@ -62,6 +62,6 @@ namespace Glory
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
 
 		/* TODO: Calculate world rotation from transform matrix */
-		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(transform.MatTransform[3], glm::identity<glm::quat>(), pComponent.m_BodyType);
+		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(Sphere(0.5f), transform.MatTransform[3], glm::identity<glm::quat>(), pComponent.m_BodyType);
 	}
 }
