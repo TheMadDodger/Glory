@@ -6,3 +6,4 @@
 #include "SpinSystem.h"
 #include "LightSystem.h"
 #include "ScriptedSystem.h"
+#include "PhysicsSystem.h"

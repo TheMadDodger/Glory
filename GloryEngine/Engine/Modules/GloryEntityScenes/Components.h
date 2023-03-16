@@ -18,6 +18,7 @@
 #include <LayerRef.h>
 #include <Reflection.h>
 #include <map>
+#include <Physics.h>
 
 REFLECTABLE_ENUM(CameraPerspective, Orthographic, Perspective)
 
@@ -175,6 +176,19 @@ namespace Glory
 
 		std::vector<ScriptProperty> m_ScriptProperties;
 		std::vector<ScriptProperty> m_ScriptChildProperties;
+	};
+
+	struct PhysicsBody
+	{
+		static constexpr uint32_t InvalidBodyID = 0xffffffff;
+
+		PhysicsBody() : m_BodyType(BodyType::Dynamic), m_BodyID(InvalidBodyID) {}
+
+		REFLECTABLE(PhysicsBody,
+			(BodyType) (m_BodyType)
+		);
+
+		uint32_t m_BodyID;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
