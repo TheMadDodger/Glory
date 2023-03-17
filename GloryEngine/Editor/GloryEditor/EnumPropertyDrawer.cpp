@@ -1,4 +1,5 @@
 #include "EnumPropertyDrawer.h"
+#include "EditorUI.h"
 #include <imgui.h>
 #include <Reflection.h>
 
@@ -11,8 +12,6 @@ namespace Glory::Editor
 			ImGui::Text("Error");
 			return false;
 		}
-
-		bool change = false;
 
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
@@ -28,24 +27,7 @@ namespace Glory::Editor
 		std::string value;
 		if (!pEnumType->ToString(data, value)) value = "none";
 
-		size_t* currentValue = (size_t*)data;
-		if (ImGui::BeginCombo(label.c_str(), value.c_str()))
-		{
-			for (size_t i = 0; i < pEnumType->NumValues(); i++)
-			{
-				const std::string& name = pEnumType->GetName(i);
-				size_t outValue = 0;
-				pEnumType->FromString(name, (void*)&outValue);
-
-				if (ImGui::Selectable(name.c_str(), outValue == *currentValue))
-				{
-					*currentValue = outValue;
-					change = true;
-				}
-			}
-			ImGui::EndCombo();
-		}
-
-		return change;
+		uint32_t* currentValue = (uint32_t*)data;
+		return EditorUI::InputEnum(label, typeHash, currentValue);
 	}
 }

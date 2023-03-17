@@ -396,7 +396,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputEnum(std::string_view label, uint32_t typeHash, size_t* value, std::vector<size_t> excludeValues)
+	bool EditorUI::InputEnum(std::string_view label, uint32_t typeHash, uint32_t* value, std::vector<uint32_t> excludeValues)
 	{
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 
