@@ -88,7 +88,10 @@ namespace Glory
 
 	void ShapePropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
 	{
-		ShapeProperty* value = (ShapeProperty*)data;
+		size_t offset = pFieldData->Offset();
+		void* pAddress = (void*)((char*)(data)+offset);
+
+		ShapeProperty* value = (ShapeProperty*)pAddress;
 		std::string shapeType;
 		if (!GloryReflect::Enum<ShapeType>().ToString(value->m_ShapeType, shapeType)) return;
 
