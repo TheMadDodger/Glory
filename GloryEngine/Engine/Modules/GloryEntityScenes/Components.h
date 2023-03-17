@@ -187,10 +187,10 @@ namespace Glory
 		PhysicsBody() : m_BodyType(BodyType::Dynamic), m_BodyID(InvalidBodyID) {}
 
 		REFLECTABLE(PhysicsBody,
-			(BodyType) (m_BodyType),
 			(ShapeProperty) (m_Shape)
 		);
 
+		BodyType m_BodyType;
 		uint32_t m_BodyID;
 	};
 
