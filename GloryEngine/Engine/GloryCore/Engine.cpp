@@ -325,8 +325,12 @@ namespace Glory
 		GloryReflect::Reflect::RegisterEnum<InputMappingType>();
 		GloryReflect::Reflect::RegisterEnum<InputState>();
 		GloryReflect::Reflect::RegisterEnum<AxisBlending>();
+
+		/* Physics types */
 		GloryReflect::Reflect::RegisterEnum<BodyType>();
 		GloryReflect::Reflect::RegisterEnum<ShapeType>();
+		GloryReflect::Reflect::RegisterType<Box>();
+		GloryReflect::Reflect::RegisterType<Sphere>();
 		GloryReflect::Reflect::RegisterType<ShapeProperty>();
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));

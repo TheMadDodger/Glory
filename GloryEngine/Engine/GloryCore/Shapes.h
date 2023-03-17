@@ -19,18 +19,20 @@ namespace Glory
 	struct Sphere : public Shape
 	{
 	public:
+		Sphere() : m_Radius(1.0f), Shape(ShapeType::Sphere) {}
 		Sphere(float radius) : m_Radius(radius), Shape(ShapeType::Sphere) {}
 
 	public:
-		float m_Radius;
+		REFLECTABLE(Sphere, (float)(m_Radius));
 	};
 
 	struct Box : public Shape
 	{
 	public:
+		Box() : m_Extends({1.0f, 1.0f, 1.0f}), Shape(ShapeType::Box) {}
 		Box(const glm::vec3& extends) : m_Extends(extends), Shape(ShapeType::Box) {}
 
 	public:
-		glm::vec3 m_Extends;
+		REFLECTABLE(Box, (glm::vec3)(m_Extends));
 	};
 }

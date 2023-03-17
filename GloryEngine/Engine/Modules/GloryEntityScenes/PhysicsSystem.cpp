@@ -60,8 +60,8 @@ namespace Glory
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
-
+		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
 		/* TODO: Calculate world rotation from transform matrix */
-		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(Sphere(0.5f), transform.MatTransform[3], glm::identity<glm::quat>(), pComponent.m_BodyType);
+		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, transform.MatTransform[3], glm::identity<glm::quat>(), pComponent.m_BodyType);
 	}
 }
