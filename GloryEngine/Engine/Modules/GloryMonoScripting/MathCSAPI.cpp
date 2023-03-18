@@ -59,6 +59,14 @@ namespace Glory
 		return Mat4Wrapper(v1, v2, v3, v4);
 	}
 
+	Vec3Wrapper::Vec3Wrapper(const glm::vec3& v) : Vec3Wrapper(v.x, v.y, v.z) {}
+
+	Vec3Wrapper::Vec3Wrapper(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+
+	QuatWrapper::QuatWrapper(const glm::quat& q) : QuatWrapper(q.x, q.y, q.z, q.w) {}
+
+	QuatWrapper::QuatWrapper(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
+
 #pragma endregion
 
 #pragma region Vector2
@@ -92,29 +100,31 @@ namespace Glory
 
 #pragma region Vector3
 
+	/* FIXME: It's probably way faster to calculate these on the CS rather than having the overhead of calling the c++ */
+
 	Vec3Wrapper Vector3_GetNormalized(Vec3Wrapper a)
 	{
-		return ToVec3Wrapper(glm::normalize(ToGLMVec3(a)));
+		return glm::normalize(ToGLMVec3(a));
 	}
 
 	Vec3Wrapper Vector3AddOverload(Vec3Wrapper a, Vec3Wrapper b)
 	{
-		return ToVec3Wrapper(ToGLMVec3(a) + ToGLMVec3(b));
+		return ToGLMVec3(a) + ToGLMVec3(b);
 	}
 
 	Vec3Wrapper Vector3SubtractOverload(Vec3Wrapper a, Vec3Wrapper b)
 	{
-		return ToVec3Wrapper(ToGLMVec3(a) - ToGLMVec3(b));
+		return ToGLMVec3(a) - ToGLMVec3(b);
 	}
 
 	Vec3Wrapper Vector3MultiplyOverload(Vec3Wrapper a, Vec3Wrapper b)
 	{
-		return ToVec3Wrapper(ToGLMVec3(a) * ToGLMVec3(b));
+		return ToGLMVec3(a) * ToGLMVec3(b);
 	}
 
 	Vec3Wrapper Vector3DivideOverload(Vec3Wrapper a, Vec3Wrapper b)
 	{
-		return ToVec3Wrapper(ToGLMVec3(a) / ToGLMVec3(b));
+		return ToGLMVec3(a) / ToGLMVec3(b);
 	}
 
 #pragma endregion
@@ -152,27 +162,27 @@ namespace Glory
 
 	QuatWrapper Quaternion_Euler(float x, float y, float z)
 	{
-		return ToQuatWrapper(glm::quat(glm::vec3(x, y, z)));
+		return glm::quat(glm::vec3(x, y, z));
 	}
 
 	QuatWrapper Quaternion_AddOverload(QuatWrapper a, QuatWrapper b)
 	{
-		return ToQuatWrapper(ToGLMQuat(a) + ToGLMQuat(b));
+		return ToGLMQuat(a) + ToGLMQuat(b);
 	}
 
 	QuatWrapper Quaternion_SubtractOverload(QuatWrapper a, QuatWrapper b)
 	{
-		return ToQuatWrapper(ToGLMQuat(a) - ToGLMQuat(b));
+		return ToGLMQuat(a) - ToGLMQuat(b);
 	}
 
 	QuatWrapper Quaternion_MultiplyOverload(QuatWrapper a, QuatWrapper b)
 	{
-		return ToQuatWrapper(ToGLMQuat(a) * ToGLMQuat(b));
+		return ToGLMQuat(a) * ToGLMQuat(b);
 	}
 
 	QuatWrapper Quaternion_MultiplyFloatOverload(QuatWrapper a, float b)
 	{
-		return ToQuatWrapper(ToGLMQuat(a) * b);
+		return ToGLMQuat(a) * b;
 	}
 
 #pragma endregion

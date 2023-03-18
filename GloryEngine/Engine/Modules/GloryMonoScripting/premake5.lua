@@ -20,7 +20,7 @@ project "GloryMonoScripting"
 	vpaths
 	{
 		["Module"] = { "GloryMono.*", "GloryMonoScipting.*" },
-		["API"] = { "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*" },
+		["API"] = { "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*", "PhysicsAPI.*" },
 		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" },
 		["Mono"] = { "AssemblyBinding.*", "MonoAssetManager.*", "MonoLibManager.*", "MonoManager.*", "CoreLibManager.*", "IMonoLibManager.*" },
 		["Memory"] = { "MonoSceneObjectManager.*", "MonoSceneManager.*", "MonoScriptObjectManager.*" }

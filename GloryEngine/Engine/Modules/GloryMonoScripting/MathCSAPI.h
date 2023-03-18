@@ -15,6 +15,9 @@ namespace Glory
 
 	struct Vec3Wrapper
 	{
+		Vec3Wrapper(const glm::vec3& v);
+		Vec3Wrapper(float _x, float _y, float _z);
+
 		float x;
 		float y;
 		float z;
@@ -30,6 +33,9 @@ namespace Glory
 
 	struct QuatWrapper
 	{
+		QuatWrapper(const glm::quat& q);
+		QuatWrapper(float _x, float _y, float _z, float _w);
+
 		float x;
 		float y;
 		float z;
