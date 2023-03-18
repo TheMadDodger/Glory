@@ -18,9 +18,16 @@ namespace Glory
 
 		GLORY_MODULE_VERSION_H;
 
-		uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType) override;
+		uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType) override;
 		void DestroyPhysicsBody(uint32_t& bodyID) override;
 		void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) override;
+		void SetBodyPosition(uint32_t bodyID, const glm::vec3& postion, const ActivationType activationType = ActivationType::Activate) override;
+		void SetBodyRotation(uint32_t bodyID, const glm::quat& rotation, const ActivationType activationType = ActivationType::Activate) override;
+		void SetBodyScale(uint32_t bodyID, const glm::vec3& scale, const ActivationType activationType = ActivationType::Activate) override;
+		void ActivateBody(uint32_t bodyID) override;
+		void DeactivateBody(uint32_t bodyID) override;
+		bool IsBodyActive(uint32_t bodyID) const override;
+		bool IsValidBody(uint32_t bodyID) const override;
 
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;

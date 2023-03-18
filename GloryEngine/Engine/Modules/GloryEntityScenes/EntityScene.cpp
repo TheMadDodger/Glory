@@ -52,6 +52,10 @@ namespace Glory
 	void EntityScene::Initialize()
 	{
 		// Register Invocations
+		// Transform
+		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Start, TransformSystem::OnStart);
+		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Update, TransformSystem::OnUpdate);
+		
 		// Camera
 		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
 		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
@@ -69,9 +73,6 @@ namespace Glory
 
 		// Spin
 		m_Registry.RegisterInvokaction<Spin>(GloryECS::InvocationType::Update, SpinSystem::OnUpdate);
-
-		// Transform
-		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Update, TransformSystem::OnUpdate);
 
 		// Scripted
 		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnAdd, ScriptedSystem::OnAdd);

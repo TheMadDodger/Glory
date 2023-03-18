@@ -13,7 +13,17 @@ namespace Glory
     {
     }
 
-    void Glory::TransformSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent)
+    void TransformSystem::OnStart(GloryECS::EntityRegistry*, EntityID, Transform& pComponent)
+    {
+        CalculateMatrix(pComponent);
+    }
+
+    void Glory::TransformSystem::OnUpdate(GloryECS::EntityRegistry*, EntityID, Transform& pComponent)
+    {
+        CalculateMatrix(pComponent);
+    }
+
+    void TransformSystem::CalculateMatrix(Transform& pComponent)
     {
         glm::mat4 startTransform = glm::identity<glm::mat4>();
         if (pComponent.Parent.IsValid())

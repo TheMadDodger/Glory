@@ -19,6 +19,6 @@ namespace Glory
 
 	glm::quat ToQuat(const JPH::Quat& q)
 	{
-		return glm::quat(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+		return glm::quat(q.GetW(), q.GetX(), q.GetY(), q.GetZ());
 	}
 }

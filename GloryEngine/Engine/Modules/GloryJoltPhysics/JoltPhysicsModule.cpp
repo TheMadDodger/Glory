@@ -208,10 +208,12 @@ namespace Glory
 	{
 	}
 
-	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const BodyType bodyType)
+	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType)
 	{
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
-		BodyCreationSettings bodySettings(GetJPHShape(shape), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, Layers::MOVING);
+		JPH::Shape* pShape = GetJPHShape(shape);
+		JPH::Shape::ShapeResult scaledShape = pShape->ScaleShape(ToJPHVec3(inScale));
+		BodyCreationSettings bodySettings(scaledShape.Get(), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, Layers::MOVING);
 		JPH::BodyID bodyID = bodyInterface.CreateAndAddBody(bodySettings, EActivation::Activate);
 		return bodyID.GetIndexAndSequenceNumber();
 	}
@@ -231,9 +233,67 @@ namespace Glory
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
 		JPH::BodyID jphBodyID{ bodyID };
 
-		// Output current position and velocity of the sphere
+		/* Output current position and velocity of the sphere */
 		*outPosition = ToVec3(bodyInterface.GetCenterOfMassPosition(jphBodyID));
 		*outRotation = ToQuat(bodyInterface.GetRotation(jphBodyID));
+	}
+
+	void JoltPhysicsModule::SetBodyPosition(uint32_t bodyID, const glm::vec3& position, const ActivationType activationType)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+
+		bodyInterface.SetPosition(jphBodyID, ToJPHVec3(position), EActivation(activationType));
+	}
+
+	void JoltPhysicsModule::SetBodyRotation(uint32_t bodyID, const glm::quat& rotation, const ActivationType activationType)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+
+		bodyInterface.SetRotation(jphBodyID, ToJPHQuat(rotation), EActivation(activationType));
+	}
+
+	void JoltPhysicsModule::SetBodyScale(uint32_t bodyID, const glm::vec3& inScale, const ActivationType activationType)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+
+		JPH::ShapeRefC shape = bodyInterface.GetShape(jphBodyID);
+		if (!shape) return;
+		shape->ScaleShape(ToJPHVec3(inScale));
+
+		if (activationType == ActivationType::Activate)
+			bodyInterface.ActivateBody(jphBodyID);
+	}
+
+	void JoltPhysicsModule::ActivateBody(uint32_t bodyID)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.ActivateBody(jphBodyID);
+	}
+
+	void JoltPhysicsModule::DeactivateBody(uint32_t bodyID)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.DeactivateBody(jphBodyID);
+	}
+
+	bool JoltPhysicsModule::IsBodyActive(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return bodyInterface.IsActive(jphBodyID);
+	}
+
+	bool JoltPhysicsModule::IsValidBody(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		if (jphBodyID.IsInvalid()) return false;
+		return bodyInterface.IsAdded(jphBodyID);
 	}
 
 	void JoltPhysicsModule::LoadSettings(ModuleSettings& settings)
