@@ -296,6 +296,172 @@ namespace Glory
 		return bodyInterface.IsAdded(jphBodyID);
 	}
 
+	glm::vec3 JoltPhysicsModule::GetBodyPosition(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return ToVec3(bodyInterface.GetPosition(jphBodyID));
+	}
+
+	glm::vec3 JoltPhysicsModule::GetBodyCenterOfMassPosition(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return ToVec3(bodyInterface.GetCenterOfMassPosition(jphBodyID));
+	}
+
+	glm::quat JoltPhysicsModule::GetBodyRotation(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return ToQuat(bodyInterface.GetRotation(jphBodyID));
+	}
+
+	void JoltPhysicsModule::MoveBodyKinematic(uint32_t bodyID, const glm::vec3& targetPosition, const glm::quat& targetRotation, float deltaTime)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.MoveKinematic(jphBodyID, ToJPHVec3(targetPosition), ToJPHQuat(targetRotation), deltaTime);
+	}
+
+	void JoltPhysicsModule::SetBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.SetLinearAndAngularVelocity(jphBodyID, ToJPHVec3(linearVelocity), ToJPHVec3(angularVelocity));
+	}
+
+	void JoltPhysicsModule::GetBodyLinearAndAngularVelocity(uint32_t bodyID, glm::vec3& linearVelocity, glm::vec3& angularVelocity) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		JPH::Vec3 lv, av;
+		bodyInterface.GetLinearAndAngularVelocity(jphBodyID, lv, av);
+		linearVelocity = ToVec3(lv);
+		angularVelocity = ToVec3(av);
+	}
+
+	void JoltPhysicsModule::SetBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.SetLinearVelocity(jphBodyID, ToJPHVec3(linearVelocity));
+	}
+
+	glm::vec3 JoltPhysicsModule::GetBodyLinearVelocity(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return ToVec3(bodyInterface.GetLinearVelocity(jphBodyID));
+	}
+
+	void JoltPhysicsModule::AddBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddLinearVelocity(jphBodyID, ToJPHVec3(linearVelocity));
+	}
+
+	void JoltPhysicsModule::AddBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddLinearAndAngularVelocity(jphBodyID, ToJPHVec3(linearVelocity), ToJPHVec3(angularVelocity));
+	}
+
+	void JoltPhysicsModule::SetBodyAngularVelocity(uint32_t bodyID, const glm::vec3& angularVelocity)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.SetAngularVelocity(jphBodyID, ToJPHVec3(angularVelocity));
+	}
+
+	glm::vec3 JoltPhysicsModule::GetBodyAngularVelocity(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return ToVec3(bodyInterface.GetAngularVelocity(jphBodyID));
+	}
+
+	glm::vec3 JoltPhysicsModule::GetBodyPointVelocity(uint32_t bodyID, const glm::vec3& point) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return ToVec3(bodyInterface.GetPointVelocity(jphBodyID, ToJPHVec3(point)));
+	}
+
+	void JoltPhysicsModule::SetBodyPositionRotationAndVelocity(uint32_t bodyID, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.SetPositionRotationAndVelocity(jphBodyID, ToJPHVec3(position), ToJPHQuat(rotation), ToJPHVec3(linearVelocity), ToJPHVec3(angularVelocity));
+	}
+
+	void JoltPhysicsModule::AddBodyForce(uint32_t bodyID, const glm::vec3& force)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddForce(jphBodyID, ToJPHVec3(force));
+	}
+
+	void JoltPhysicsModule::AddBodyForce(uint32_t bodyID, const glm::vec3& force, const glm::vec3& point)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddForce(jphBodyID, ToJPHVec3(force), ToJPHVec3(point));
+	}
+
+	void JoltPhysicsModule::AddBodyTorque(uint32_t bodyID, const glm::vec3& torque)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddTorque(jphBodyID, ToJPHVec3(torque));
+	}
+
+	void JoltPhysicsModule::AddBodyForceAndTorque(uint32_t bodyID, const glm::vec3& force, const glm::vec3& torque)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddForceAndTorque(jphBodyID, ToJPHVec3(force), ToJPHVec3(torque));
+	}
+
+	void JoltPhysicsModule::AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddImpulse(jphBodyID, ToJPHVec3(impulse));
+	}
+
+	void JoltPhysicsModule::AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse, const glm::vec3& point)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddImpulse(jphBodyID, ToJPHVec3(impulse), ToJPHVec3(point));
+	}
+
+	void JoltPhysicsModule::AddBodyAngularImpulse(uint32_t bodyID, const glm::vec3& angularImpulse)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.AddAngularImpulse(jphBodyID, ToJPHVec3(angularImpulse));
+	}
+
+	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
+	//{
+	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+	//	JPH::BodyID jphBodyID{ bodyID };
+	//	if (jphBodyID.IsInvalid()) return {};
+	//	return ToVec3(bodyInterface.GetPosition(jphBodyID));
+	//}
+	//
+	//glm::mat4 JoltPhysicsModule::GetBodyCenterOfMassTransform(uint32_t bodyID) const
+	//{
+	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+	//	JPH::BodyID jphBodyID{ bodyID };
+	//	if (jphBodyID.IsInvalid()) return {};
+	//	return ToVec3(bodyInterface.GetPosition(jphBodyID));
+	//}
+
 	void JoltPhysicsModule::LoadSettings(ModuleSettings& settings)
 	{
 		settings.RegisterValue<unsigned int>("TemporaryAllocationSize", 10 * 1024 * 1024);

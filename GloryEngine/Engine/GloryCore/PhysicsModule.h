@@ -15,23 +15,52 @@ namespace Glory
 
 		virtual const std::type_info& GetModuleType() override;
 
+		/* Body management */
 		virtual uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType) = 0;
 		virtual void DestroyPhysicsBody(uint32_t& bodyID) = 0;
 		virtual void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) = 0;
-		virtual void SetBodyPosition(uint32_t bodyID, const glm::vec3& position, const ActivationType activationType = ActivationType::Activate) = 0;
-		virtual void SetBodyRotation(uint32_t bodyID, const glm::quat& rotation, const ActivationType activationType = ActivationType::Activate) = 0;
-		virtual void SetBodyScale(uint32_t bodyID, const glm::vec3& scale, const ActivationType activationType = ActivationType::Activate) = 0;
+		
+		/* States */
 		virtual void ActivateBody(uint32_t bodyID) = 0;
 		virtual void DeactivateBody(uint32_t bodyID) = 0;
 		virtual bool IsBodyActive(uint32_t bodyID) const = 0;
 		virtual bool IsValidBody(uint32_t bodyID) const = 0;
 
+		/* Position and rotation */
+		virtual void SetBodyPosition(uint32_t bodyID, const glm::vec3& position, const ActivationType activationType = ActivationType::Activate) = 0;
+		virtual void SetBodyRotation(uint32_t bodyID, const glm::quat& rotation, const ActivationType activationType = ActivationType::Activate) = 0;
+		virtual void SetBodyScale(uint32_t bodyID, const glm::vec3& scale, const ActivationType activationType = ActivationType::Activate) = 0;
+		virtual glm::vec3 GetBodyPosition(uint32_t bodyID) const = 0;
+		virtual glm::vec3 GetBodyCenterOfMassPosition(uint32_t bodyID) const = 0;
+		virtual glm::quat GetBodyRotation(uint32_t bodyID) const = 0;
+		//virtual glm::mat4 GetBodyWorldTransform(uint32_t bodyID) const = 0;
+		//virtual glm::mat4 GetBodyCenterOfMassTransform(uint32_t bodyID) const = 0;
+
+		/* Velocities */
+		virtual void MoveBodyKinematic(uint32_t bodyID, const glm::vec3& targetPosition, const glm::quat& targetRotation, float deltaTime) = 0;
+		virtual void SetBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) = 0;
+		virtual void GetBodyLinearAndAngularVelocity(uint32_t bodyID, glm::vec3& linearVelocity, glm::vec3& angularVelocity) const = 0;
+		virtual void SetBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity) = 0;
+		virtual glm::vec3 GetBodyLinearVelocity(uint32_t bodyID) const = 0;
+		virtual void AddBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity) = 0;
+		virtual void AddBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) = 0;
+		virtual void SetBodyAngularVelocity(uint32_t bodyID, const glm::vec3& angularVelocity) = 0;
+		virtual glm::vec3 GetBodyAngularVelocity(uint32_t bodyID) const = 0;
+		virtual glm::vec3 GetBodyPointVelocity(uint32_t bodyID, const glm::vec3& point) const = 0;
+		virtual void SetBodyPositionRotationAndVelocity(uint32_t bodyID, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) = 0;
+
+		/* Forces */
+		virtual void AddBodyForce(uint32_t bodyID, const glm::vec3& force) = 0;
+		virtual void AddBodyForce(uint32_t bodyID, const glm::vec3& force, const glm::vec3& point) = 0;
+		virtual void AddBodyTorque(uint32_t bodyID, const glm::vec3& torque) = 0;
+		virtual void AddBodyForceAndTorque(uint32_t bodyID, const glm::vec3& force, const glm::vec3& torque) = 0;
+
+		/* Impulses */
+		virtual void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse) = 0;
+		virtual void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse, const glm::vec3& point) = 0;
+		virtual void AddBodyAngularImpulse(uint32_t bodyID, const glm::vec3& angularImpulse) = 0;
+
 		/*
-		RVec3 GetPosition(const BodyID& inBodyID) const;
-		RVec3 GetCenterOfMassPosition(const BodyID& inBodyID) const;
-		Quat GetRotation(const BodyID& inBodyID) const;
-		RMat44 GetWorldTransform(const BodyID& inBodyID) const;
-		RMat44 GetCenterOfMassTransform(const BodyID& inBodyID) const;
 
 		/// Create a two body constraint
 		TwoBodyConstraint* CreateConstraint(const TwoBodyConstraintSettings* inSettings, const BodyID& inBodyID1, const BodyID& inBodyID2);
@@ -39,49 +68,10 @@ namespace Glory
 		/// Activate non-static bodies attached to a constraint
 		void ActivateConstraint(const TwoBodyConstraint* inConstraint);
 
-		///@name Access to the shape of a body
-		///@{
-
-		///@}
-
 		///@name Object layer of a body
 		///@{
 		void SetObjectLayer(const BodyID& inBodyID, ObjectLayer inLayer);
 		ObjectLayer GetObjectLayer(const BodyID& inBodyID) const;
-		///@}
-
-		/// Set velocity of body such that it will be positioned at inTargetPosition/Rotation in inDeltaTime seconds (will activate body if needed)
-		void MoveKinematic(const BodyID& inBodyID, RVec3Arg inTargetPosition, QuatArg inTargetRotation, float inDeltaTime);
-
-		/// Linear or angular velocity (functions will activate body if needed).
-		/// Note that the linear velocity is the velocity of the center of mass, which may not coincide with the position of your object, to correct for this: \f$VelocityCOM = Velocity - AngularVelocity \times ShapeCOM\f$
-		void SetLinearAndAngularVelocity(const BodyID& inBodyID, Vec3Arg inLinearVelocity, Vec3Arg inAngularVelocity);
-		void GetLinearAndAngularVelocity(const BodyID& inBodyID, Vec3& outLinearVelocity, Vec3& outAngularVelocity) const;
-		void SetLinearVelocity(const BodyID& inBodyID, Vec3Arg inLinearVelocity);
-		Vec3 GetLinearVelocity(const BodyID& inBodyID) const;
-		void AddLinearVelocity(const BodyID& inBodyID, Vec3Arg inLinearVelocity); ///< Add velocity to current velocity
-		void AddLinearAndAngularVelocity(const BodyID& inBodyID, Vec3Arg inLinearVelocity, Vec3Arg inAngularVelocity); ///< Add linear and angular to current velocities
-		void SetAngularVelocity(const BodyID& inBodyID, Vec3Arg inAngularVelocity);
-		Vec3 GetAngularVelocity(const BodyID& inBodyID) const;
-		Vec3 GetPointVelocity(const BodyID& inBodyID, RVec3Arg inPoint) const; ///< Velocity of point inPoint (in world space, e.g. on the surface of the body) of the body
-
-		/// Set the complete motion state of a body.
-		/// Note that the linear velocity is the velocity of the center of mass, which may not coincide with the position of your object, to correct for this: \f$VelocityCOM = Velocity - AngularVelocity \times ShapeCOM\f$
-		void SetPositionRotationAndVelocity(const BodyID& inBodyID, RVec3Arg inPosition, QuatArg inRotation, Vec3Arg inLinearVelocity, Vec3Arg inAngularVelocity);
-
-		///@name Add forces to the body
-		///@{
-		void AddForce(const BodyID& inBodyID, Vec3Arg inForce); ///< See Body::AddForce
-		void AddForce(const BodyID& inBodyID, Vec3Arg inForce, RVec3Arg inPoint); ///< Applied at inPoint
-		void AddTorque(const BodyID& inBodyID, Vec3Arg inTorque); ///< See Body::AddTorque
-		void AddForceAndTorque(const BodyID& inBodyID, Vec3Arg inForce, Vec3Arg inTorque); ///< A combination of Body::AddForce and Body::AddTorque
-		///@}
-
-		///@name Add an impulse to the body
-		///@{
-		void AddImpulse(const BodyID& inBodyID, Vec3Arg inImpulse); ///< Applied at center of mass
-		void AddImpulse(const BodyID& inBodyID, Vec3Arg inImpulse, RVec3Arg inPoint); ///< Applied at inPoint
-		void AddAngularImpulse(const BodyID& inBodyID, Vec3Arg inAngularImpulse);
 		///@}
 
 		///@name Body motion type
