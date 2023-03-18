@@ -1,4 +1,5 @@
 #include "PhysicsSystem.h"
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory
 {
@@ -53,15 +54,35 @@ namespace Glory
 		if (pComponent.m_BodyID == PhysicsBody::InvalidBodyID) return;
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
-		/* TODO: Convert results to local space before assigning */
 		pPhysics->PollPhysicsState(pComponent.m_BodyID, &transform.Position, &transform.Rotation);
+		transform.Rotation = glm::conjugate(transform.Rotation);
+
+		if (transform.Parent.IsValid())
+		{
+			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+			const glm::mat4 inverse = glm::inverse(parentTransform.MatTransform);
+			glm::vec3 scale;
+			glm::quat rotation;
+			glm::vec3 translation;
+			glm::vec3 skew;
+			glm::vec4 perspective;
+			if (!glm::decompose(inverse, scale, rotation, translation, skew, perspective)) return;
+			transform.Position = inverse * glm::vec4(transform.Position, 1.0f);
+			transform.Rotation = transform.Rotation * glm::inverse(rotation);
+		}
 	}
 
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
-		/* TODO: Calculate world rotation from transform matrix */
-		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, transform.MatTransform[3], glm::identity<glm::quat>(), pComponent.m_BodyType);
+
+		glm::quat rotation;
+		glm::vec3 translation;
+		glm::vec3 scale;
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
+		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, translation, rotation, scale, pComponent.m_BodyType);
 	}
 }
