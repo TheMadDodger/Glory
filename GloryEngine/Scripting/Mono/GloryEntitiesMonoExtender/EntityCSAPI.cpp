@@ -426,6 +426,203 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Physics Component
+
+#define PHYSICS Game::GetGame().GetEngine()->GetPhysicsModule()
+
+#pragma region States
+
+	void PhysicsBody_Activate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->ActivateBody(physicsComp.m_BodyID);
+	}
+
+	void PhysicsBody_Deactivate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->DeactivateBody(physicsComp.m_BodyID);
+	}
+
+	bool PhysicsBody_IsActive(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->IsBodyActive(physicsComp.m_BodyID);
+	}
+
+	bool PhysicsBody_IsValid(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->IsValidBody(physicsComp.m_BodyID);
+	}
+
+#pragma endregion
+
+#pragma region Position and rotation
+
+	void PhysicsBody_SetPosition(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* position, const ActivationType activationType)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->SetBodyPosition(physicsComp.m_BodyID, ToGLMVec3(*position), activationType);
+	}
+
+	void PhysicsBody_SetRotation(MonoEntityHandle* pEntityHandle, UUID componentID, const QuatWrapper* rotation, const ActivationType activationType)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->SetBodyRotation(physicsComp.m_BodyID, ToGLMQuat(*rotation), activationType);
+	}
+
+	void PhysicsBody_SetScale(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* scale, const ActivationType activationType)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->SetBodyScale(physicsComp.m_BodyID, ToGLMVec3(*scale), activationType);
+	}
+
+	Vec3Wrapper PhysicsBody_GetPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->GetBodyPosition(physicsComp.m_BodyID);
+	}
+
+	Vec3Wrapper PhysicsBody_GetCenterOfMassPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->GetBodyCenterOfMassPosition(physicsComp.m_BodyID);
+	}
+
+	QuatWrapper PhysicsBody_GetRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->GetBodyRotation(physicsComp.m_BodyID);
+	}
+
+#pragma endregion
+
+#pragma region Velocities
+
+	void PhysicsBody_MoveKinematic(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* targetPosition, const QuatWrapper* targetRotation, float deltaTime)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->MoveBodyKinematic(physicsComp.m_BodyID, ToGLMVec3(*targetPosition), ToGLMQuat(*targetRotation), deltaTime);
+	}
+
+	void PhysicsBody_SetLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->SetBodyLinearAndAngularVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
+	}
+
+	void PhysicsBody_GetLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, Vec3Wrapper* linearVelocity, Vec3Wrapper* angularVelocity)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		glm::vec3 lv, av;
+		PHYSICS->GetBodyLinearAndAngularVelocity(physicsComp.m_BodyID, lv, av);
+		*linearVelocity = lv;
+		*angularVelocity = av;
+	}
+
+	void PhysicsBody_SetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->SetBodyLinearVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity));
+	}
+
+	Vec3Wrapper PhysicsBody_GetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->GetBodyLinearVelocity(physicsComp.m_BodyID);
+	}
+
+	void PhysicsBody_AddLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyLinearVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity));
+	}
+
+	void PhysicsBody_AddLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyLinearAndAngularVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
+	}
+
+	void PhysicsBody_SetAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* angularVelocity)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->SetBodyAngularVelocity(physicsComp.m_BodyID, ToGLMVec3(*angularVelocity));
+	}
+
+	Vec3Wrapper PhysicsBody_GetAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->GetBodyAngularVelocity(physicsComp.m_BodyID);
+	}
+
+	Vec3Wrapper PhysicsBody_GetPointVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* point)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return PHYSICS->GetBodyPointVelocity(physicsComp.m_BodyID, ToGLMVec3(*point));
+	}
+
+	void PhysicsBody_SetPositionRotationAndVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* position, const QuatWrapper* rotation, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->SetBodyPositionRotationAndVelocity(physicsComp.m_BodyID, ToGLMVec3(*position), ToGLMQuat(*rotation), ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
+	}
+
+#pragma endregion
+
+#pragma region Forces
+
+	void PhysicsBody_AddForce(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* force)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyForce(physicsComp.m_BodyID, ToGLMVec3(*force));
+	}
+
+	void PhysicsBody_AddForce_Point(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* force, const Vec3Wrapper* point)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyForce(physicsComp.m_BodyID, ToGLMVec3(*force), ToGLMVec3(*point));
+	}
+
+	void PhysicsBody_AddTorque(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* torque)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyTorque(physicsComp.m_BodyID, ToGLMVec3(*torque));
+	}
+
+	void PhysicsBody_AddForceAndTorque(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* force, const Vec3Wrapper* torque)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyForceAndTorque(physicsComp.m_BodyID, ToGLMVec3(*force), ToGLMVec3(*torque));
+	}
+
+#pragma endregion
+
+#pragma region Impulses
+
+	void PhysicsBody_AddImpulse(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* impulse)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyImpulse(physicsComp.m_BodyID, ToGLMVec3(*impulse));
+	}
+
+	void PhysicsBody_AddImpulse_Point(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* impulse, const Vec3Wrapper* point)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyForce(physicsComp.m_BodyID, ToGLMVec3(*impulse), ToGLMVec3(*point));
+	}
+
+	void PhysicsBody_AddAngularImpulse(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* angularImpulse)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PHYSICS->AddBodyAngularImpulse(physicsComp.m_BodyID, ToGLMVec3(*angularImpulse));
+	}
+
+#pragma endregion
+
+#pragma endregion
+
 #pragma region Binding
 
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
@@ -512,6 +709,44 @@ namespace Glory
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_ClearMaterials", ModelRenderer_ClearMaterials));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel));
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel));
+
+		/*  status */
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_Activate", PhysicsBody_Activate);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_Deactivate", PhysicsBody_Deactivate);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_IsActive", PhysicsBody_IsActive);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_IsValid", PhysicsBody_IsValid);
+
+		/* Position and rotation */
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetPosition", PhysicsBody_SetPosition);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetRotation", PhysicsBody_SetRotation);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetScale", PhysicsBody_SetScale);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetPosition", PhysicsBody_GetPosition);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetCenterOfMassPosition", PhysicsBody_GetCenterOfMassPosition);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetRotation", PhysicsBody_GetRotation);
+
+		/* Velocities */
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_MoveKinematic", PhysicsBody_MoveKinematic);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetLinearAndAngularVelocity", PhysicsBody_SetLinearAndAngularVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetLinearAndAngularVelocity", PhysicsBody_GetLinearAndAngularVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetLinearVelocity", PhysicsBody_SetLinearVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetLinearVelocity", PhysicsBody_GetLinearVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddLinearVelocity", PhysicsBody_AddLinearVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddLinearAndAngularVelocity", PhysicsBody_AddLinearAndAngularVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetAngularVelocity", PhysicsBody_SetAngularVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetAngularVelocity", PhysicsBody_GetAngularVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetPointVelocity", PhysicsBody_GetPointVelocity);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetPositionRotationAndVelocity", PhysicsBody_SetPositionRotationAndVelocity);
+
+		/* Velocities */
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddForce", PhysicsBody_AddForce);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddForce_Point", PhysicsBody_AddForce_Point);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddTorque", PhysicsBody_AddTorque);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddForceAndTorque", PhysicsBody_AddForceAndTorque);
+
+		/* Impulses */
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddImpulse", PhysicsBody_AddImpulse);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddImpulse_Point", PhysicsBody_AddImpulse_Point);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddAngularImpulse", PhysicsBody_AddAngularImpulse);
 	}
 
 	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)

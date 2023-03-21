@@ -195,7 +195,7 @@ namespace Glory
 		BIND("GloryEngine.Physics::Physics_GetBodyLinearAndAngularVelocity", Physics_GetBodyLinearAndAngularVelocity);
 		BIND("GloryEngine.Physics::Physics_SetBodyLinearVelocity", Physics_SetBodyLinearVelocity);
 		BIND("GloryEngine.Physics::Physics_GetBodyLinearVelocity", Physics_GetBodyLinearVelocity);
-		BIND("GloryEngine.Physics::Physics_GetBodyRotation", Physics_AddBodyLinearVelocity);
+		BIND("GloryEngine.Physics::Physics_AddBodyLinearVelocity", Physics_AddBodyLinearVelocity);
 		BIND("GloryEngine.Physics::Physics_AddBodyLinearAndAngularVelocity", Physics_AddBodyLinearAndAngularVelocity);
 		BIND("GloryEngine.Physics::Physics_SetBodyAngularVelocity", Physics_SetBodyAngularVelocity);
 		BIND("GloryEngine.Physics::Physics_GetBodyAngularVelocity", Physics_GetBodyAngularVelocity);
