@@ -54,7 +54,7 @@ namespace GloryEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Physics_SetBodyLinearVelocity(UInt32 bodyID, ref Vector3 linearVelocity);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Vector3 GetBodyLinearVelocity(UInt32 bodyID);
+		public static extern Vector3 Physics_GetBodyLinearVelocity(UInt32 bodyID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Physics_AddBodyLinearVelocity(UInt32 bodyID, ref Vector3 linearVelocity);
 		[MethodImpl(MethodImplOptions.InternalCall)]
