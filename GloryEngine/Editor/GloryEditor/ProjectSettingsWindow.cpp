@@ -3,7 +3,7 @@
 namespace Glory::Editor
 {
 	const char* ProjectSettingsWindow::TAB_NAMES[] = {
-		"General", "Engine", "Layers", "Input",
+		"General", "Engine", "Layers", "Input", "Physics"
 	};
 
 	ProjectSettingsWindow::ProjectSettingsWindow() : EditorWindowTemplate("Project Settings", 400.0f, 600.0f), m_CurrentTab(ProjectSettingsType::General)

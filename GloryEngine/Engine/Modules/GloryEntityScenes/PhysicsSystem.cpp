@@ -80,6 +80,14 @@ namespace Glory
 				pComponent.m_CurrentLayerIndex = layerIndex;
 			}
 		}
+		else
+		{
+			if (pComponent.m_CurrentLayerIndex != 0)
+			{
+				pPhysics->SetBodyObjectLayer(pComponent.m_BodyID, 0);
+				pComponent.m_CurrentLayerIndex = 0;
+			}
+		}
 	}
 
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)

@@ -66,6 +66,9 @@ namespace Glory
 		virtual void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) = 0;
 		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const = 0;
 
+		void SetCollisionMatrix(std::vector<std::vector<bool>>&& matrix);
+		bool ShouldCollide(uint16_t layer1, uint16_t layer2) const;
+
 		/*
 
 		/// Create a two body constraint
@@ -123,5 +126,10 @@ namespace Glory
 	protected:
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
+
+		bool ShouldCollidePass(uint16_t layer1, uint16_t layer2) const;
+
+	private:
+		std::vector<std::vector<bool>> m_CollisionMatrix;
     };
 }

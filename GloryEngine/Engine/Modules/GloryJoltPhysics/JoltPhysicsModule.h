@@ -1,6 +1,8 @@
 #pragma once
 #include <PhysicsModule.h>
 
+#include "LayerCollisionFilter.h"
+
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
@@ -76,5 +78,7 @@ namespace Glory
 		JPH::TempAllocatorImpl* m_pJPHTempAllocator;
 		JPH::JobSystem* m_pJPHJobSystem;
 		JPH::PhysicsSystem* m_pJPHPhysicsSystem;
+
+		LayerCollisionFilter m_CollisionFilter;
     };
 }

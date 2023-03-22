@@ -10,11 +10,12 @@ namespace Glory::Editor
 		new EngineSettings(),
 		new LayerSettings(),
 		new InputSettings(),
+		new PhysicsSettings(),
 	};
 
 	void ProjectSettings::Load(ProjectSpace* pProject)
 	{
-		for (size_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < 5; i++)
 		{
 			m_pAllSettings[i]->LoadSettings(pProject);
 			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
@@ -25,7 +26,7 @@ namespace Glory::Editor
 
 	void ProjectSettings::Save(ProjectSpace* pProject)
 	{
-		for (size_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < 5; i++)
 		{
 			m_pAllSettings[i]->SaveSettings(pProject);
 			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
@@ -44,7 +45,7 @@ namespace Glory::Editor
 
 	void ProjectSettings::OnStartPlay()
 	{
-		for (size_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < 5; i++)
 		{
 			m_pAllSettings[i]->OnStartPlay_Impl();
 		}
@@ -52,7 +53,7 @@ namespace Glory::Editor
 
 	void ProjectSettings::OnStopPlay()
 	{
-		for (size_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < 5; i++)
 		{
 			m_pAllSettings[i]->OnStopPlay_Impl();
 		}
@@ -122,6 +123,10 @@ namespace Glory::Editor
 	}
 
 	InputSettings::InputSettings() : ProjectSettings("Input.yaml")
+	{
+	}
+
+	PhysicsSettings::PhysicsSettings() : ProjectSettings("Physics.yaml")
 	{
 	}
 }
