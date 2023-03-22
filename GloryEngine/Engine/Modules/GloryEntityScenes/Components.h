@@ -192,6 +192,7 @@ namespace Glory
 		);
 
 		uint32_t m_BodyID;
+		uint32_t m_CurrentLayerIndex;
 	};
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));

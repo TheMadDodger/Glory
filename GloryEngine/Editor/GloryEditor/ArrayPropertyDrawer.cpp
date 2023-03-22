@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <Reflection.h>
 #include <IconsFontAwesome6.h>
+#include <PropertySerializer.h>
 
 namespace Glory::Editor
 {

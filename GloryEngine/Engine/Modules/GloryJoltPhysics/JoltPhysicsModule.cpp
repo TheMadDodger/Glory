@@ -13,6 +13,10 @@
 #include <Debug.h>
 #include <cstdarg>
 
+#include <LayerManager.h>
+#include <LayerRef.h>
+#include <GLORY_YAML.h>
+
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -208,12 +212,12 @@ namespace Glory
 	{
 	}
 
-	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType)
+	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex)
 	{
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
 		JPH::Shape* pShape = GetJPHShape(shape);
 		JPH::Shape::ShapeResult scaledShape = pShape->ScaleShape(ToJPHVec3(inScale));
-		BodyCreationSettings bodySettings(scaledShape.Get(), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, Layers::MOVING);
+		BodyCreationSettings bodySettings(scaledShape.Get(), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, layerIndex);
 		JPH::BodyID bodyID = bodyInterface.CreateAndAddBody(bodySettings, EActivation::Activate);
 		return bodyID.GetIndexAndSequenceNumber();
 	}
@@ -446,6 +450,20 @@ namespace Glory
 		bodyInterface.AddAngularImpulse(jphBodyID, ToJPHVec3(angularImpulse));
 	}
 
+	void JoltPhysicsModule::SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		bodyInterface.SetObjectLayer(jphBodyID, layerIndex);
+	}
+
+	const uint16_t JoltPhysicsModule::GetBodyObjectLayer(uint32_t bodyID) const
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		return bodyInterface.GetObjectLayer(jphBodyID);
+	}
+
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
 	//{
 	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
@@ -489,6 +507,43 @@ namespace Glory
 
 		/* Refresh rate of physics world */
 		settings.RegisterValue<unsigned int>("TickRate", 60);
+
+		/* Broadphase layer mappings */
+		settings.PushGroup("Broadphase Layers");
+		settings.RegisterValue<LayerRef>("Broadphase Layer 1", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 2", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 3", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 4", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 5", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 6", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 7", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 8", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 9", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 10", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 11", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 12", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 13", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 14", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 15", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 16", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 17", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 18", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 19", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 20", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 20", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 21", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 22", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 23", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 24", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 25", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 26", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 27", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 28", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 29", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 30", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 31", LayerRef());
+		settings.RegisterValue<LayerRef>("Broadphase Layer 32", LayerRef());
+
 	}
 
 	void JoltPhysicsModule::Initialize()

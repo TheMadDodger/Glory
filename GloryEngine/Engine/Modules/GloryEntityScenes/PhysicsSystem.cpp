@@ -70,6 +70,16 @@ namespace Glory
 			transform.Position = inverse * glm::vec4(transform.Position, 1.0f);
 			transform.Rotation = transform.Rotation * glm::inverse(rotation);
 		}
+
+		if (pRegistry->HasComponent<LayerComponent>(entity))
+		{
+			const uint32_t layerIndex = pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex;
+			if (pComponent.m_CurrentLayerIndex != layerIndex)
+			{
+				pPhysics->SetBodyObjectLayer(pComponent.m_BodyID, layerIndex);
+				pComponent.m_CurrentLayerIndex = layerIndex;
+			}
+		}
 	}
 
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
@@ -77,12 +87,14 @@ namespace Glory
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
 
+		pComponent.m_CurrentLayerIndex = pRegistry->HasComponent<LayerComponent>(entity) ? pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex : 0;
+
 		glm::quat rotation;
 		glm::vec3 translation;
 		glm::vec3 scale;
 		glm::vec3 skew;
 		glm::vec4 perspective;
 		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
-		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, translation, rotation, scale, pComponent.m_BodyType);
+		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, translation, rotation, scale, pComponent.m_BodyType, pComponent.m_CurrentLayerIndex);
 	}
 }
