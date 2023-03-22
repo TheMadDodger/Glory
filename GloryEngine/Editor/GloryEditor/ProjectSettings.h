@@ -18,6 +18,7 @@ namespace Glory::Editor
 		Engine,
 		Layers,
 		Input,
+		Physics,
 		Count
 	};
 
@@ -101,5 +102,16 @@ namespace Glory::Editor
 
 		virtual void OnStartPlay_Impl() override;
 		virtual void OnStopPlay_Impl() override;
+	};
+
+	class PhysicsSettings : public ProjectSettings
+	{
+	public:
+		PhysicsSettings();
+
+	private:
+		virtual bool OnGui() override;
+		virtual void OnSettingsLoaded() override;
+		virtual void OnStartPlay_Impl() override;
 	};
 }

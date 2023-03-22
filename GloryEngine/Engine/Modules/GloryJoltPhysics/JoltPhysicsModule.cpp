@@ -30,28 +30,10 @@ namespace Glory
 // but only if you do collision testing).
 	namespace Layers
 	{
-		static constexpr JPH::uint8 NON_MOVING = 0;
-		static constexpr JPH::uint8 MOVING = 1;
-		static constexpr JPH::uint8 NUM_LAYERS = 2;
-	};
-
-	/// Class that determines if two object layers can collide
-	class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilter
-	{
-	public:
-		virtual bool					ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override
-		{
-			switch (inObject1)
-			{
-			case Layers::NON_MOVING:
-				return inObject2 == Layers::MOVING; // Non moving only collides with moving
-			case Layers::MOVING:
-				return true; // Moving collides with everything
-			default:
-				JPH_ASSERT(false);
-				return false;
-			}
-		}
+		static constexpr JPH::uint8 DEFAULT = 0;
+		static constexpr JPH::uint8 NON_MOVING = 1;
+		static constexpr JPH::uint8 MOVING = 2;
+		static constexpr JPH::uint8 NUM_LAYERS = 3;
 	};
 
 	// Each broadphase layer results in a separate bounding volume tree in the broad phase. You at least want to have
@@ -113,6 +95,8 @@ namespace Glory
 		{
 			switch (inLayer1)
 			{
+			case Layers::DEFAULT:
+				return true;
 			case Layers::NON_MOVING:
 				return inLayer2 == BroadPhaseLayers::MOVING;
 			case Layers::MOVING:
@@ -199,12 +183,8 @@ namespace Glory
 	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
 	ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
 
-	// Create class that filters object vs object layers
-	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-	ObjectLayerPairFilterImpl object_vs_object_layer_filter;
-
 	JoltPhysicsModule::JoltPhysicsModule()
-		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr)
+		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr), m_CollisionFilter(this)
 	{
 	}
 
@@ -584,7 +564,7 @@ namespace Glory
 
 		m_pJPHPhysicsSystem->Init(maxBodies, numBodyMutexes, maxBodyPairs,
 			maxContactConstraints, broad_phase_layer_interface,
-			object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
+			object_vs_broadphase_layer_filter, m_CollisionFilter);
 
 		// A body activation listener gets notified when bodies activate and go to sleep
 		// Note that this is called from a job so whatever you do here needs to be thread safe.
