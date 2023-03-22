@@ -7,6 +7,8 @@
 
 namespace Glory
 {
+	struct Layer;
+
     class PhysicsModule : public Module
     {
 	public:
@@ -16,7 +18,7 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		/* Body management */
-		virtual uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType) = 0;
+		virtual uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex = 0) = 0;
 		virtual void DestroyPhysicsBody(uint32_t& bodyID) = 0;
 		virtual void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) = 0;
 		
@@ -60,6 +62,10 @@ namespace Glory
 		virtual void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse, const glm::vec3& point) = 0;
 		virtual void AddBodyAngularImpulse(uint32_t bodyID, const glm::vec3& angularImpulse) = 0;
 
+		/* Layer */
+		virtual void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) = 0;
+		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const = 0;
+
 		/*
 
 		/// Create a two body constraint
@@ -67,12 +73,6 @@ namespace Glory
 
 		/// Activate non-static bodies attached to a constraint
 		void ActivateConstraint(const TwoBodyConstraint* inConstraint);
-
-		///@name Object layer of a body
-		///@{
-		void SetObjectLayer(const BodyID& inBodyID, ObjectLayer inLayer);
-		ObjectLayer GetObjectLayer(const BodyID& inBodyID) const;
-		///@}
 
 		///@name Body motion type
 		///@{

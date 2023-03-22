@@ -19,7 +19,7 @@ namespace Glory
 		GLORY_MODULE_VERSION_H;
 
 		/* Body management */
-		uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType) override;
+		uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex) override;
 		void DestroyPhysicsBody(uint32_t& bodyID) override;
 		void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) override;
 
@@ -60,6 +60,10 @@ namespace Glory
 		void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse) override;
 		void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse, const glm::vec3& point) override;
 		void AddBodyAngularImpulse(uint32_t bodyID, const glm::vec3& angularImpulse) override;
+
+		/* Layer */
+		virtual void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) override;
+		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const override;
 
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;

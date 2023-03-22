@@ -130,9 +130,8 @@ namespace Glory::Editor
             {
                 const std::string& value = *valueItor;
                 const uint32_t type = settings.Type(value);
-                const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(type);
-
-                change |= PropertyDrawer::DrawProperty(value, settingsNode, type, type, 0);
+                const uint32_t elementType = settings.ElementType(value);
+                change |= PropertyDrawer::DrawProperty(value, settingsNode, type, elementType, 0);
             }
         }
 

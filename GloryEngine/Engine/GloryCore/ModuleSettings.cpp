@@ -41,6 +41,12 @@ namespace Glory
 		return m_Types.at(name);
 	}
 
+	const uint32_t ModuleSettings::ElementType(const std::string& name) const
+	{
+		if (m_ElementTypes.find(name) == m_ElementTypes.end()) return 0;
+		return m_ElementTypes.at(name);
+	}
+
 	YAML::Node& ModuleSettings::Node()
 	{
 		return m_SettingsNode;
@@ -51,10 +57,11 @@ namespace Glory
 		return m_ValueNames.size();
 	}
 
-	void ModuleSettings::RegisterValue(const std::string& name, uint32_t type)
+	void ModuleSettings::RegisterValue(const std::string& name, uint32_t type, uint32_t elementType)
 	{
 		m_ValueNames.push_back(name);
 		m_Types.emplace(m_ValueNames.back(), type);
+		m_ElementTypes.emplace(m_ValueNames.back(), elementType);
 		const std::string& group = m_GroupNames.back();
 		if (m_Groups.find(group) == m_Groups.end())
 			m_Groups.emplace(group, std::vector<std::string>());
