@@ -2,6 +2,7 @@
 #include <PhysicsModule.h>
 
 #include "LayerCollisionFilter.h"
+#include "BroadphaseLayerImpl.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/TempAllocator.h>
@@ -67,6 +68,8 @@ namespace Glory
 		virtual void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) override;
 		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const override;
 
+		BPLayerInterfaceImpl& BPLayerImpl();
+
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void Initialize() override;
@@ -80,5 +83,6 @@ namespace Glory
 		JPH::PhysicsSystem* m_pJPHPhysicsSystem;
 
 		LayerCollisionFilter m_CollisionFilter;
+		BPLayerInterfaceImpl m_BPLayerImpl;
     };
 }

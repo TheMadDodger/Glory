@@ -48,6 +48,22 @@ namespace Glory
 			return node.as<T>();
 		}
 
+		template<typename T>
+		T ArrayValue(const std::string& name, const size_t index)
+		{
+			YAML::Node node = m_SettingsNode[name];
+			if (!node.IsSequence())
+			{
+				std::stringstream stream;
+				stream << "ModuleSettings: Value " << name << " is not an array";
+				throw new std::exception(stream.str().c_str());
+			}
+
+			return node[index].as<T>();
+		}
+
+		size_t ArraySize(const std::string& name) const;
+
 		void PushGroup(const std::string& name);
 		std::vector<std::string>::iterator GroupsBegin();
 		std::vector<std::string>::iterator GroupsEnd();
