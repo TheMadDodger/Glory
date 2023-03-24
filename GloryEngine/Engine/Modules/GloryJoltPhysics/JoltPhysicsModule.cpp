@@ -48,45 +48,6 @@ namespace Glory
 		static constexpr JPH::uint NUM_LAYERS(2);
 	};
 
-	// BroadPhaseLayerInterface implementation
-	// This defines a mapping between object and broadphase layers.
-	class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface
-	{
-	public:
-		BPLayerInterfaceImpl()
-		{
-			// Create a mapping table from object to broad phase layer
-			mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
-			mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
-		}
-
-		virtual JPH::uint					GetNumBroadPhaseLayers() const override
-		{
-			return BroadPhaseLayers::NUM_LAYERS;
-		}
-
-		virtual JPH::BroadPhaseLayer			GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
-		{
-			JPH_ASSERT(inLayer < Layers::NUM_LAYERS);
-			return mObjectToBroadPhase[inLayer];
-		}
-
-#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-		virtual const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
-		{
-			switch ((BroadPhaseLayer::Type)inLayer)
-			{
-			case (BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING:	return "NON_MOVING";
-			case (BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:		return "MOVING";
-			default:													JPH_ASSERT(false); return "INVALID";
-			}
-		}
-#endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
-
-	private:
-		JPH::BroadPhaseLayer					mObjectToBroadPhase[Layers::NUM_LAYERS];
-	};
-
 	/// Class that determines if an object layer can collide with a broadphase layer
 	class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFilter
 	{
@@ -174,10 +135,6 @@ namespace Glory
 
 	MyBodyActivationListener body_activation_listener;
 	MyContactListener contact_listener;
-
-	// Create mapping table from object layer to broadphase layer
-	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-	BPLayerInterfaceImpl broad_phase_layer_interface;
 
 	// Create class that filters object vs broadphase layers
 	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
@@ -444,6 +401,11 @@ namespace Glory
 		return bodyInterface.GetObjectLayer(jphBodyID);
 	}
 
+	BPLayerInterfaceImpl& JoltPhysicsModule::BPLayerImpl()
+	{
+		return m_BPLayerImpl;
+	}
+
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
 	//{
 	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
@@ -490,40 +452,8 @@ namespace Glory
 
 		/* Broadphase layer mappings */
 		settings.PushGroup("Broadphase Layers");
-		settings.RegisterValue<LayerRef>("Broadphase Layer 1", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 2", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 3", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 4", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 5", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 6", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 7", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 8", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 9", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 10", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 11", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 12", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 13", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 14", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 15", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 16", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 17", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 18", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 19", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 20", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 20", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 21", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 22", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 23", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 24", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 25", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 26", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 27", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 28", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 29", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 30", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 31", LayerRef());
-		settings.RegisterValue<LayerRef>("Broadphase Layer 32", LayerRef());
-
+		settings.RegisterArray<LayerRef>("Broadphase Layer Mapping");
+		settings.RegisterArray<LayerMask>("Broadphase Layer Collisions");
 	}
 
 	void JoltPhysicsModule::Initialize()
@@ -563,7 +493,7 @@ namespace Glory
 		m_pJPHPhysicsSystem = new PhysicsSystem();
 
 		m_pJPHPhysicsSystem->Init(maxBodies, numBodyMutexes, maxBodyPairs,
-			maxContactConstraints, broad_phase_layer_interface,
+			maxContactConstraints, m_BPLayerImpl,
 			object_vs_broadphase_layer_filter, m_CollisionFilter);
 
 		// A body activation listener gets notified when bodies activate and go to sleep
@@ -579,6 +509,18 @@ namespace Glory
 		// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
 		// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+
+		std::vector<JPH::BroadPhaseLayer> bpLayersMapping{Settings().ArraySize("Broadphase Layer Mapping") + 1};
+		for (size_t i = 0; i < bpLayersMapping.size(); ++i)
+		{
+			if (!i)
+			{
+				bpLayersMapping[i] = BroadPhaseLayer(0);
+				continue;
+			}
+			bpLayersMapping[i] = BroadPhaseLayer(Settings().ArrayValue<LayerRef>("Broadphase Layer Mapping", i - 1).m_LayerIndex);
+		}
+		m_BPLayerImpl.SetObjectToBroadphase(std::move(bpLayersMapping));
 
 		// Next we can create a rigid body to serve as the floor, we make a large box
 		// Create the settings for the collision volume (the shape). 

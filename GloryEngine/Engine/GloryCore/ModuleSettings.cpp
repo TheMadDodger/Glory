@@ -10,6 +10,19 @@ namespace Glory
 
 	ModuleSettings::~ModuleSettings() {}
 
+	size_t ModuleSettings::ArraySize(const std::string& name) const
+	{
+		YAML::Node node = m_SettingsNode[name];
+		if (!node.IsSequence())
+		{
+			std::stringstream stream;
+			stream << "ModuleSettings: Value " << name << " is not an array";
+			throw new std::exception(stream.str().c_str());
+		}
+
+		return node.size();
+	}
+
 	void ModuleSettings::PushGroup(const std::string& name)
 	{
 		m_GroupNames.push_back(name);
