@@ -30,7 +30,7 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool PropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
+	bool PropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags) const
 	{
 		ImGui::Text(label.data());
 		return false;
@@ -159,7 +159,7 @@ namespace Glory::Editor
 		if (it != m_PropertyDrawers.end())
 		{
 			PropertyDrawer* drawer = *it;
-			return drawer->Draw(scriptProperty.m_Name, node[scriptProperty.m_Name], elementTypeHash, flags);
+			return drawer->Draw(scriptProperty.m_Name, node[scriptProperty.m_Name], typeHash, elementTypeHash, flags);
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), scriptProperty.m_Name);
@@ -176,7 +176,7 @@ namespace Glory::Editor
 		if (it != m_PropertyDrawers.end())
 		{
 			PropertyDrawer* drawer = *it;
-			return drawer->Draw(label, node[label], elementTypeHash, flags);
+			return drawer->Draw(label, node[label], typeHash, elementTypeHash, flags);
 		}
 
 		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);

@@ -7,9 +7,6 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
-
 #include <Debug.h>
 #include <cstdarg>
 
@@ -23,51 +20,6 @@ using namespace JPH::literals;
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(JoltPhysicsModule, 0, 1);
-
-	// Layer that objects can be in, determines which other objects it can collide with
-// Typically you at least want to have 1 layer for moving bodies and 1 layer for static bodies, but you can have more
-// layers if you want. E.g. you could have a layer for high detail collision (which is not used by the physics simulation
-// but only if you do collision testing).
-	namespace Layers
-	{
-		static constexpr JPH::uint8 DEFAULT = 0;
-		static constexpr JPH::uint8 NON_MOVING = 1;
-		static constexpr JPH::uint8 MOVING = 2;
-		static constexpr JPH::uint8 NUM_LAYERS = 3;
-	};
-
-	// Each broadphase layer results in a separate bounding volume tree in the broad phase. You at least want to have
-	// a layer for non-moving and moving objects to avoid having to update a tree full of static objects every frame.
-	// You can have a 1-on-1 mapping between object layers and broadphase layers (like in this case) but if you have
-	// many object layers you'll be creating many broad phase trees, which is not efficient. If you want to fine tune
-	// your broadphase layers define JPH_TRACK_BROADPHASE_STATS and look at the stats reported on the TTY.
-	namespace BroadPhaseLayers
-	{
-		static constexpr JPH::BroadPhaseLayer NON_MOVING(0);
-		static constexpr JPH::BroadPhaseLayer MOVING(1);
-		static constexpr JPH::uint NUM_LAYERS(2);
-	};
-
-	/// Class that determines if an object layer can collide with a broadphase layer
-	class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFilter
-	{
-	public:
-		virtual bool				ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const override
-		{
-			switch (inLayer1)
-			{
-			case Layers::DEFAULT:
-				return true;
-			case Layers::NON_MOVING:
-				return inLayer2 == BroadPhaseLayers::MOVING;
-			case Layers::MOVING:
-				return true;
-			default:
-				JPH_ASSERT(false);
-				return false;
-			}
-		}
-	};
 
 	// An example contact listener
 	class MyContactListener : public JPH::ContactListener
@@ -135,10 +87,6 @@ namespace Glory
 
 	MyBodyActivationListener body_activation_listener;
 	MyContactListener contact_listener;
-
-	// Create class that filters object vs broadphase layers
-	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-	ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
 
 	JoltPhysicsModule::JoltPhysicsModule()
 		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr), m_CollisionFilter(this)
@@ -406,6 +354,11 @@ namespace Glory
 		return m_BPLayerImpl;
 	}
 
+	ObjectVsBroadPhaseLayerFilterImpl& JoltPhysicsModule::BPCollisionFilter()
+	{
+		return m_ObjectVSBroadPhase;
+	}
+
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
 	//{
 	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
@@ -452,12 +405,21 @@ namespace Glory
 
 		/* Broadphase layer mappings */
 		settings.PushGroup("Broadphase Layers");
-		settings.RegisterArray<LayerRef>("Broadphase Layer Mapping");
-		settings.RegisterArray<LayerMask>("Broadphase Layer Collisions");
+		settings.RegisterArray<BPLayer>("BroadPhaseLayerMapping");
+
+		const size_t bpLayerCount = GloryReflect::Enum<BPLayer>().NumValues();
+		for (size_t i = 0; i < bpLayerCount; i++)
+		{
+			std::string layerName;
+			GloryReflect::Enum<BPLayer>().ToString(BPLayer(i), layerName);
+			settings.RegisterValue<LayerMask>(layerName + "CollisionMask", 0);
+		}
 	}
 
 	void JoltPhysicsModule::Initialize()
 	{
+		GloryReflect::Reflect::RegisterEnum<BPLayer>();
+
 		// Register allocation hook
 		JPH::RegisterDefaultAllocator();
 
@@ -494,7 +456,7 @@ namespace Glory
 
 		m_pJPHPhysicsSystem->Init(maxBodies, numBodyMutexes, maxBodyPairs,
 			maxContactConstraints, m_BPLayerImpl,
-			object_vs_broadphase_layer_filter, m_CollisionFilter);
+			m_ObjectVSBroadPhase, m_CollisionFilter);
 
 		// A body activation listener gets notified when bodies activate and go to sleep
 		// Note that this is called from a job so whatever you do here needs to be thread safe.
@@ -510,17 +472,27 @@ namespace Glory
 		// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
 
-		std::vector<JPH::BroadPhaseLayer> bpLayersMapping{Settings().ArraySize("Broadphase Layer Mapping") + 1};
-		for (size_t i = 0; i < bpLayersMapping.size(); ++i)
+		std::map<JPH::ObjectLayer, JPH::BroadPhaseLayer> bpLayersMapping;
+		bpLayersMapping.emplace(0, 0);
+		for (size_t i = 0; i < Settings().ArraySize("BroadPhaseLayerMapping"); ++i)
 		{
-			if (!i)
-			{
-				bpLayersMapping[i] = BroadPhaseLayer(0);
-				continue;
-			}
-			bpLayersMapping[i] = BroadPhaseLayer(Settings().ArrayValue<LayerRef>("Broadphase Layer Mapping", i - 1).m_LayerIndex);
+			const std::string valueStr = Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
+			BPLayer bpLayer;
+			GloryReflect::Enum<BPLayer>().FromString(valueStr, bpLayer);
+			bpLayersMapping.emplace(i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
 		}
 		m_BPLayerImpl.SetObjectToBroadphase(std::move(bpLayersMapping));
+
+		const size_t bpLayerCount = GloryReflect::Enum< BPLayer>().NumValues();
+		std::vector<LayerMask> bpCollisionMapping = std::vector<LayerMask>(bpLayerCount);
+		for (size_t i = 0; i < bpLayerCount; i++)
+		{
+			std::string layerName;
+			GloryReflect::Enum<BPLayer>().ToString(BPLayer(i), layerName);
+			const LayerMask mask = Settings().Value<LayerMask>(layerName + "CollisionMask");
+			bpCollisionMapping[i] = mask;
+		}
+		m_ObjectVSBroadPhase.SetBPCollisionMapping(std::move(bpCollisionMapping));
 
 		// Next we can create a rigid body to serve as the floor, we make a large box
 		// Create the settings for the collision volume (the shape). 

@@ -36,30 +36,42 @@ namespace Glory::Editor
 		return "Jolt Physics";
 	}
 
-	void JoltEditorExtension::HandleStart(Module* pModule)
+	void JoltEditorExtension::HandleBeforeStart(Module* pModule)
 	{
 		JoltPhysicsModule* pPhysics = static_cast<JoltPhysicsModule*>(pModule);
 
-		std::vector<JPH::BroadPhaseLayer> bpLayersMapping{ pPhysics->Settings().ArraySize("Broadphase Layer Mapping") + 1 };
-		for (size_t i = 0; i < bpLayersMapping.size(); ++i)
+		std::map<JPH::ObjectLayer, JPH::BroadPhaseLayer> bpLayersMapping;
+		bpLayersMapping.emplace(0, 0);
+		for (size_t i = 0; i < pPhysics->Settings().ArraySize("BroadPhaseLayerMapping"); ++i)
 		{
-			if (!i)
-			{
-				bpLayersMapping[i] = JPH::BroadPhaseLayer(0);
-				continue;
-			}
-			bpLayersMapping[i] = JPH::BroadPhaseLayer(pPhysics->Settings().ArrayValue<LayerRef>("Broadphase Layer Mapping", i - 1).m_LayerIndex);
+			const std::string valueStr = pPhysics->Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
+			BPLayer bpLayer;
+			GloryReflect::Enum<BPLayer>().FromString(valueStr, bpLayer);
+			bpLayersMapping.emplace(i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
 		}
 		pPhysics->BPLayerImpl().SetObjectToBroadphase(std::move(bpLayersMapping));
+
+		const size_t bpLayerCount = GloryReflect::Enum<BPLayer>().NumValues();
+		std::vector<LayerMask> bpCollisionMapping = std::vector<LayerMask>(bpLayerCount);
+		for (size_t i = 0; i < bpLayerCount; i++)
+		{
+			std::string layerName;
+			GloryReflect::Enum<BPLayer>().ToString(BPLayer(i), layerName);
+			const LayerMask mask = pPhysics->Settings().Value<LayerMask>(layerName + "CollisionMask");
+			bpCollisionMapping[i] = mask;
+		}
+		pPhysics->BPCollisionFilter().SetBPCollisionMapping(std::move(bpCollisionMapping));
+	}
+
+	void JoltEditorExtension::HandleStart(Module* pModule)
+	{
 	}
 
 	void JoltEditorExtension::HandleStop(Module* pModule)
 	{
-
 	}
 
 	void JoltEditorExtension::HandleUpdate(Module* pModule)
 	{
-
 	}
 }
