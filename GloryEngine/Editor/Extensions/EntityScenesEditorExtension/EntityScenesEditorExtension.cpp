@@ -43,6 +43,10 @@ namespace Glory::Editor
 		return "Entity Scenes";
 	}
 
+	void EntityScenesEditorExtension::HandleBeforeStart(Module* pModule)
+	{
+	}
+
 	void EntityScenesEditorExtension::HandleStart(Module* pModule)
 	{
 		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;

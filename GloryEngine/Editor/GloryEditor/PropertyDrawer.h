@@ -144,7 +144,7 @@ namespace Glory::Editor
 			return true;
 		}
 
-		virtual bool Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const override
+		virtual bool Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags) const override
 		{
 			PropertyType oldValue = PropertyType();
 			if (node.IsDefined()) oldValue = node.as<PropertyType>();
