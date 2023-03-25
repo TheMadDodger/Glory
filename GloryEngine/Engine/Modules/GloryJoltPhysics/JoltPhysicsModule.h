@@ -22,53 +22,53 @@ namespace Glory
 		GLORY_MODULE_VERSION_H;
 
 		/* Body management */
-		uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex) override;
-		void DestroyPhysicsBody(uint32_t& bodyID) override;
-		void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) override;
+		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex) override;
+		GLORY_API void DestroyPhysicsBody(uint32_t& bodyID) override;
+		GLORY_API void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation) override;
 
 		/* States */
-		void ActivateBody(uint32_t bodyID) override;
-		void DeactivateBody(uint32_t bodyID) override;
-		bool IsBodyActive(uint32_t bodyID) const override;
-		bool IsValidBody(uint32_t bodyID) const override;
+		GLORY_API void ActivateBody(uint32_t bodyID) override;
+		GLORY_API void DeactivateBody(uint32_t bodyID) override;
+		GLORY_API bool IsBodyActive(uint32_t bodyID) const override;
+		GLORY_API bool IsValidBody(uint32_t bodyID) const override;
 
 		/* Position and rotation */
-		void SetBodyPosition(uint32_t bodyID, const glm::vec3& position, const ActivationType activationType = ActivationType::Activate) override;
-		void SetBodyRotation(uint32_t bodyID, const glm::quat& rotation, const ActivationType activationType = ActivationType::Activate) override;
-		void SetBodyScale(uint32_t bodyID, const glm::vec3& scale, const ActivationType activationType = ActivationType::Activate) override;
-		glm::vec3 GetBodyPosition(uint32_t bodyID) const override;
-		glm::vec3 GetBodyCenterOfMassPosition(uint32_t bodyID) const override;
-		glm::quat GetBodyRotation(uint32_t bodyID) const override;
+		GLORY_API void SetBodyPosition(uint32_t bodyID, const glm::vec3& position, const ActivationType activationType = ActivationType::Activate) override;
+		GLORY_API void SetBodyRotation(uint32_t bodyID, const glm::quat& rotation, const ActivationType activationType = ActivationType::Activate) override;
+		GLORY_API void SetBodyScale(uint32_t bodyID, const glm::vec3& scale, const ActivationType activationType = ActivationType::Activate) override;
+		GLORY_API glm::vec3 GetBodyPosition(uint32_t bodyID) const override;
+		GLORY_API glm::vec3 GetBodyCenterOfMassPosition(uint32_t bodyID) const override;
+		GLORY_API glm::quat GetBodyRotation(uint32_t bodyID) const override;
 
 		/* Velocities */
-		void MoveBodyKinematic(uint32_t bodyID, const glm::vec3& targetPosition, const glm::quat& targetRotation, float deltaTime) override;
-		void SetBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) override;
-		void GetBodyLinearAndAngularVelocity(uint32_t bodyID, glm::vec3& linearVelocity, glm::vec3& angularVelocity) const override;
-		void SetBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity) override;
-		glm::vec3 GetBodyLinearVelocity(uint32_t bodyID) const override;
-		void AddBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity) override;
-		void AddBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) override;
-		void SetBodyAngularVelocity(uint32_t bodyID, const glm::vec3& angularVelocity) override;
-		glm::vec3 GetBodyAngularVelocity(uint32_t bodyID) const override;
-		glm::vec3 GetBodyPointVelocity(uint32_t bodyID, const glm::vec3& point) const override;
-		void SetBodyPositionRotationAndVelocity(uint32_t bodyID, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) override;
+		GLORY_API void MoveBodyKinematic(uint32_t bodyID, const glm::vec3& targetPosition, const glm::quat& targetRotation, float deltaTime) override;
+		GLORY_API void SetBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) override;
+		GLORY_API void GetBodyLinearAndAngularVelocity(uint32_t bodyID, glm::vec3& linearVelocity, glm::vec3& angularVelocity) const override;
+		GLORY_API void SetBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity) override;
+		GLORY_API glm::vec3 GetBodyLinearVelocity(uint32_t bodyID) const override;
+		GLORY_API void AddBodyLinearVelocity(uint32_t bodyID, const glm::vec3& linearVelocity) override;
+		GLORY_API void AddBodyLinearAndAngularVelocity(uint32_t bodyID, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) override;
+		GLORY_API void SetBodyAngularVelocity(uint32_t bodyID, const glm::vec3& angularVelocity) override;
+		GLORY_API glm::vec3 GetBodyAngularVelocity(uint32_t bodyID) const override;
+		GLORY_API glm::vec3 GetBodyPointVelocity(uint32_t bodyID, const glm::vec3& point) const override;
+		GLORY_API void SetBodyPositionRotationAndVelocity(uint32_t bodyID, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& linearVelocity, const glm::vec3& angularVelocity) override;
 
 		/* Forces */
-		void AddBodyForce(uint32_t bodyID, const glm::vec3& force) override;
-		void AddBodyForce(uint32_t bodyID, const glm::vec3& force, const glm::vec3& point) override;
-		void AddBodyTorque(uint32_t bodyID, const glm::vec3& torque) override;
-		void AddBodyForceAndTorque(uint32_t bodyID, const glm::vec3& force, const glm::vec3& torque) override;
+		GLORY_API void AddBodyForce(uint32_t bodyID, const glm::vec3& force) override;
+		GLORY_API void AddBodyForce(uint32_t bodyID, const glm::vec3& force, const glm::vec3& point) override;
+		GLORY_API void AddBodyTorque(uint32_t bodyID, const glm::vec3& torque) override;
+		GLORY_API void AddBodyForceAndTorque(uint32_t bodyID, const glm::vec3& force, const glm::vec3& torque) override;
 
 		/* Impulses */
-		void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse) override;
-		void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse, const glm::vec3& point) override;
-		void AddBodyAngularImpulse(uint32_t bodyID, const glm::vec3& angularImpulse) override;
+		GLORY_API void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse) override;
+		GLORY_API void AddBodyImpulse(uint32_t bodyID, const glm::vec3& impulse, const glm::vec3& point) override;
+		GLORY_API void AddBodyAngularImpulse(uint32_t bodyID, const glm::vec3& angularImpulse) override;
 
 		/* Layer */
-		virtual void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) override;
-		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const override;
+		GLORY_API void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) override;
+		GLORY_API const uint16_t GetBodyObjectLayer(uint32_t bodyID) const override;
 
-		BPLayerInterfaceImpl& BPLayerImpl();
+		GLORY_API BPLayerInterfaceImpl& BPLayerImpl();
 
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;

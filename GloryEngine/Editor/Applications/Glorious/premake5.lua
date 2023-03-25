@@ -86,6 +86,7 @@ project "Glorious"
 		--"GloryEditorVulkan",
 		"GloryMonoScripting",
 		"EntityScenesEditorExtension",
+		"JoltEditorExtension",
 		"MonoEditorExtension",
 		"GloryEntitiesMonoExtender",
 		"GloryEngine.Core",

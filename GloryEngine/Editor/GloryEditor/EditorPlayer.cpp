@@ -101,7 +101,6 @@ namespace Glory::Editor
 	bool EditorPlayer::HandleModuleLoop(Module* pModule)
 	{
 		const ModuleMetaData& metaData = pModule->GetMetaData();
-		if (metaData.Type() != ModuleType::MT_SceneManagement) return false;
 
 		if (EditorApplication::CurrentMode() == EditorMode::M_Play)
 		{
@@ -115,7 +114,12 @@ namespace Glory::Editor
 				const std::string& moduleName = pEditorLoopHandler->ModuleName();
 				return moduleName == metaData.Name();
 			});
-			if (it == m_pSceneLoopHandlers.end()) return false;
+			if (it == m_pSceneLoopHandlers.end())
+			{
+				pModule->GetEngine()->CallModuleUpdate(pModule);
+				pModule->GetEngine()->CallModuleDraw(pModule);
+				return false;
+			}
 			IPlayModeHandler* pEditorLoopHandler = *it;
 			pEditorLoopHandler->HandleUpdate(pModule);
 		}
