@@ -129,6 +129,123 @@ namespace Glory
 		pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyDeactivated", args);
 	}
 
+	void PhysicsSystem::OnContactAdded(uint32_t body1ID, uint32_t body2ID)
+	{
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners[body1ID];
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners[body2ID];
+		GloryECS::EntityRegistry* pRegistry1 = pair1.first;
+		GloryECS::EntityRegistry* pRegistry2 = pair2.first;
+		EntityID entity1 = pair1.second;
+		EntityID entity2 = pair2.second;
+		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+
+		if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
+		{
+			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
+			Script* pScript = scriptComponent.m_Script.Get();
+			if (!pScript) return;
+			void* args[2] = {
+				&body1ID,
+				&body2ID
+			};
+
+			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactAdded", args);
+		}
+
+		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
+		{
+			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
+			Script* pScript = scriptComponent.m_Script.Get();
+			if (!pScript) return;
+			void* args[2] = {
+				&body2ID,
+				&body1ID
+			};
+
+			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactAdded", args);
+		}
+	}
+
+	void PhysicsSystem::OnContactPersisted(uint32_t body1ID, uint32_t body2ID)
+	{
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners[body1ID];
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners[body2ID];
+		GloryECS::EntityRegistry* pRegistry1 = pair1.first;
+		GloryECS::EntityRegistry* pRegistry2 = pair2.first;
+		EntityID entity1 = pair1.second;
+		EntityID entity2 = pair2.second;
+		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+
+		if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
+		{
+			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
+			Script* pScript = scriptComponent.m_Script.Get();
+			if (!pScript) return;
+			void* args[2] = {
+				&body1ID,
+				&body2ID
+			};
+
+			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactPersisted", args);
+		}
+
+		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
+		{
+			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
+			Script* pScript = scriptComponent.m_Script.Get();
+			if (!pScript) return;
+			void* args[2] = {
+				&body2ID,
+				&body1ID
+			};
+
+			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactPersisted", args);
+		}
+	}
+
+	void PhysicsSystem::OnContactRemoved(uint32_t body1ID, uint32_t body2ID)
+	{
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners[body1ID];
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners[body2ID];
+		GloryECS::EntityRegistry* pRegistry1 = pair1.first;
+		GloryECS::EntityRegistry* pRegistry2 = pair2.first;
+		EntityID entity1 = pair1.second;
+		EntityID entity2 = pair2.second;
+		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+
+		if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
+		{
+			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
+			Script* pScript = scriptComponent.m_Script.Get();
+			if (!pScript) return;
+			void* args[2] = {
+				&body1ID,
+				&body2ID
+			};
+
+			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactRemoved", args);
+		}
+
+		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
+		{
+			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
+			Script* pScript = scriptComponent.m_Script.Get();
+			if (!pScript) return;
+			void* args[2] = {
+				&body2ID,
+				&body1ID
+			};
+
+			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactRemoved", args);
+		}
+	}
+
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);

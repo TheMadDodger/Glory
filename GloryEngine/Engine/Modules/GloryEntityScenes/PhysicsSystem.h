@@ -22,6 +22,10 @@ namespace Glory
         static void OnBodyActivated(uint32_t bodyID);
         static void OnBodyDeactivated(uint32_t bodyID);
 
+        static void OnContactAdded(uint32_t body1ID, uint32_t body2ID);
+        static void OnContactPersisted(uint32_t body1ID, uint32_t body2ID);
+        static void OnContactRemoved(uint32_t body1ID, uint32_t body2ID);
+
     private:
         static void SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
         
