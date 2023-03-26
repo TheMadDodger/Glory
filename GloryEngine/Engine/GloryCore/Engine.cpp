@@ -334,6 +334,9 @@ namespace Glory
 		GloryReflect::Reflect::RegisterEnum<ShapeType>();
 		GloryReflect::Reflect::RegisterType<Box>();
 		GloryReflect::Reflect::RegisterType<Sphere>();
+		GloryReflect::Reflect::RegisterType<Cylinder>();
+		GloryReflect::Reflect::RegisterType<Capsule>();
+		GloryReflect::Reflect::RegisterType<TaperedCapsule>();
 		GloryReflect::Reflect::RegisterType<ShapeProperty>();
 
 		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
