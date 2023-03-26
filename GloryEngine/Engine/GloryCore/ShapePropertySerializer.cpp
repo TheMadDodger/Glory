@@ -77,6 +77,9 @@ namespace Glory
 	std::map<ShapeType, ShapeSerializers*> ShapeSerializers::SHAPE_SERIALIZERS = {
 		SHAPE_SERIALIZER(Sphere),
 		SHAPE_SERIALIZER(Box),
+		SHAPE_SERIALIZER(Cylinder),
+		SHAPE_SERIALIZER(Capsule),
+		SHAPE_SERIALIZER(TaperedCapsule),
 	};
 
 	ShapePropertySerializer::~ShapePropertySerializer()

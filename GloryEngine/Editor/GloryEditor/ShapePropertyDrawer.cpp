@@ -69,6 +69,9 @@ namespace Glory::Editor
 	std::map<ShapeType, ShapeDrawers*> ShapeDrawers::SHAPE_DRAWERS = {
 		SHAPE_DRAWER(Sphere),
 		SHAPE_DRAWER(Box),
+		SHAPE_DRAWER(Cylinder),
+		SHAPE_DRAWER(Capsule),
+		SHAPE_DRAWER(TaperedCapsule),
 	};
 
 	ShapePropertyDrawer::~ShapePropertyDrawer()
