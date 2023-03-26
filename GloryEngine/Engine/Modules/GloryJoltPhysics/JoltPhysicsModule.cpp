@@ -5,7 +5,6 @@
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
 
 #include <Debug.h>
 #include <cstdarg>
@@ -21,53 +20,6 @@ namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(JoltPhysicsModule, 0, 1);
 
-	// An example contact listener
-	class MyContactListener : public JPH::ContactListener
-	{
-	public:
-		// See: ContactListener
-		virtual JPH::ValidateResult	OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& inCollisionResult) override
-		{
-			Debug::LogNotice("Contact validate callback");
-
-			// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
-			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
-		}
-
-		virtual void			OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
-		{
-			Debug::LogNotice("A contact was added");
-		}
-
-		virtual void			OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
-		{
-			Debug::LogNotice("A contact was persisted");
-		}
-
-		virtual void			OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
-		{
-			Debug::LogNotice("A contact was removed");
-		}
-	};
-
-	// An example activation listener
-	class MyBodyActivationListener : public JPH::BodyActivationListener
-	{
-	public:
-		virtual void		OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
-		{
-			Debug::LogNotice("A body got activated");
-		}
-
-		virtual void		OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
-		{
-			Debug::LogNotice("A body went to sleep");
-		}
-	};
-
-
-
-
 	// Callback for traces, connect this to your own trace function if you have one
 	static void TraceImpl(const char* inFMT, ...)
 	{
@@ -82,14 +34,9 @@ namespace Glory
 		//Debug::LogInfo(buffer);
 	}
 
-
-
-
-	MyBodyActivationListener body_activation_listener;
-	MyContactListener contact_listener;
-
 	JoltPhysicsModule::JoltPhysicsModule()
-		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr), m_CollisionFilter(this)
+		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr),
+		m_CollisionFilter(this), m_BodyActivationListener(this), m_ContactListener(this)
 	{
 	}
 
@@ -359,6 +306,11 @@ namespace Glory
 		return m_ObjectVSBroadPhase;
 	}
 
+	void JoltPhysicsModule::TriggerLateActivationCallback(ActivationCallback callbackType, uint32_t bodyID)
+	{
+		m_LateCallbacks[callbackType].push_back(bodyID);
+	}
+
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
 	//{
 	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
@@ -461,12 +413,12 @@ namespace Glory
 		// A body activation listener gets notified when bodies activate and go to sleep
 		// Note that this is called from a job so whatever you do here needs to be thread safe.
 		// Registering one is entirely optional.
-		m_pJPHPhysicsSystem->SetBodyActivationListener(&body_activation_listener);
+		m_pJPHPhysicsSystem->SetBodyActivationListener(&m_BodyActivationListener);
 
 		// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
 		// Note that this is called from a job so whatever you do here needs to be thread safe.
 		// Registering one is entirely optional.
-		m_pJPHPhysicsSystem->SetContactListener(&contact_listener);
+		m_pJPHPhysicsSystem->SetContactListener(&m_ContactListener);
 
 		// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
 		// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
@@ -538,6 +490,15 @@ namespace Glory
 
 	void JoltPhysicsModule::Update()
 	{
+		for (size_t i = 0; i < size_t(ActivationCallback::Count); ++i)
+		{
+			for (size_t j = 0; j < m_LateCallbacks[ActivationCallback(i)].size(); j++)
+			{
+				TriggerActivationCallback(ActivationCallback(i), m_LateCallbacks[ActivationCallback(i)][j]);
+			}
+			m_LateCallbacks[ActivationCallback(i)].clear();
+		}
+
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
 		
 		// Now we're ready to simulate the body, keep simulating until it goes to sleep

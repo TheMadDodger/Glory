@@ -5,6 +5,7 @@
 #include "ScriptedComponentSerializer.h"
 #include <PropertyFlags.h>
 #include <TypeFlags.h>
+#include "PhysicsSystem.h"
 
 namespace Glory
 {
@@ -81,6 +82,9 @@ namespace Glory
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
 		Serializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
+
+		m_pEngine->GetPhysicsModule()->RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);
+		m_pEngine->GetPhysicsModule()->RegisterActivationCallback(ActivationCallback::Deactivated, PhysicsSystem::OnBodyDeactivated);
 	}
 
 	void EntitySceneScenesModule::PostInitialize()

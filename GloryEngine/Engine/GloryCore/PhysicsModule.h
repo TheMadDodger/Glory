@@ -9,6 +9,23 @@ namespace Glory
 {
 	struct Layer;
 
+	enum class ContactCallback
+	{
+		Added,
+		Persisted,
+		Removed,
+
+		Count
+	};
+
+	enum class ActivationCallback
+	{
+		Activated,
+		Deactivated,
+
+		Count
+	};
+
     class PhysicsModule : public Module
     {
 	public:
@@ -66,8 +83,14 @@ namespace Glory
 		virtual void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) = 0;
 		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const = 0;
 
-		void SetCollisionMatrix(std::vector<std::vector<bool>>&& matrix);
-		bool ShouldCollide(uint16_t layer1, uint16_t layer2) const;
+		GLORY_API void SetCollisionMatrix(std::vector<std::vector<bool>>&& matrix);
+		GLORY_API bool ShouldCollide(uint16_t layer1, uint16_t layer2) const;
+
+		GLORY_API void RegisterContactCallback(ContactCallback callbackType, std::function<void(uint32_t, uint32_t)> callback);
+		GLORY_API void RegisterActivationCallback(ActivationCallback callbackType, std::function<void(uint32_t)> callback);
+
+		GLORY_API void TriggerContactCallback(ContactCallback callbackType, uint32_t bodyID1, uint32_t bodyID2);
+		GLORY_API void TriggerActivationCallback(ActivationCallback callbackType, uint32_t bodyID);
 
 		/*
 
@@ -131,5 +154,7 @@ namespace Glory
 
 	private:
 		std::vector<std::vector<bool>> m_CollisionMatrix;
+		std::map<ContactCallback, std::vector<std::function<void(uint32_t, uint32_t)>>> m_ContactCallbacks;
+		std::map<ActivationCallback, std::vector<std::function<void(uint32_t)>>> m_ActivationCallbacks;
     };
 }

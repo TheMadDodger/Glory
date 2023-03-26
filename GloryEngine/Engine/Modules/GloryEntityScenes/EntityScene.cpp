@@ -7,17 +7,17 @@
 
 namespace Glory
 {
-	EntityScene::EntityScene() : m_Valid(true), GScene("New Scene") //: m_pJobPool(nullptr)
+	EntityScene::EntityScene() : m_Valid(true), GScene("New Scene"), m_Registry(this) //: m_pJobPool(nullptr)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName) : m_Valid(true), GScene(sceneName)
+	EntityScene::EntityScene(const std::string& sceneName) : m_Valid(true), GScene(sceneName), m_Registry(this)
 	{
 		APPEND_TYPE(EntityScene);
 	}
 
-	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : m_Valid(true), GScene(sceneName, uuid)
+	EntityScene::EntityScene(const std::string& sceneName, UUID uuid) : m_Valid(true), GScene(sceneName, uuid), m_Registry(this)
 	{
 		APPEND_TYPE(EntityScene);
 	}

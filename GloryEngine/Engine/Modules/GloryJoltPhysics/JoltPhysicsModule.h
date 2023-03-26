@@ -71,6 +71,8 @@ namespace Glory
 		GLORY_API BPLayerInterfaceImpl& BPLayerImpl();
 		GLORY_API ObjectVsBroadPhaseLayerFilterImpl& BPCollisionFilter();
 
+		void TriggerLateActivationCallback(ActivationCallback callbackType, uint32_t bodyID);
+
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void Initialize() override;
@@ -86,5 +88,10 @@ namespace Glory
 		LayerCollisionFilter m_CollisionFilter;
 		BPLayerInterfaceImpl m_BPLayerImpl;
 		ObjectVsBroadPhaseLayerFilterImpl m_ObjectVSBroadPhase;
+
+		MyBodyActivationListener m_BodyActivationListener;
+		MyContactListener m_ContactListener;
+
+		std::map<ActivationCallback, std::vector<uint32_t>> m_LateCallbacks;
     };
 }
