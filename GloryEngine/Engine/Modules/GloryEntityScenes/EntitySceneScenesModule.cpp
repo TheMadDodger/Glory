@@ -85,6 +85,10 @@ namespace Glory
 
 		m_pEngine->GetPhysicsModule()->RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);
 		m_pEngine->GetPhysicsModule()->RegisterActivationCallback(ActivationCallback::Deactivated, PhysicsSystem::OnBodyDeactivated);
+
+		m_pEngine->GetPhysicsModule()->RegisterContactCallback(ContactCallback::Added, PhysicsSystem::OnContactAdded);
+		m_pEngine->GetPhysicsModule()->RegisterContactCallback(ContactCallback::Persisted, PhysicsSystem::OnContactPersisted);
+		m_pEngine->GetPhysicsModule()->RegisterContactCallback(ContactCallback::Removed, PhysicsSystem::OnContactRemoved);
 	}
 
 	void EntitySceneScenesModule::PostInitialize()

@@ -308,7 +308,12 @@ namespace Glory
 
 	void JoltPhysicsModule::TriggerLateActivationCallback(ActivationCallback callbackType, uint32_t bodyID)
 	{
-		m_LateCallbacks[callbackType].push_back(bodyID);
+		m_LateActivationCallbacks[callbackType].push_back(bodyID);
+	}
+
+	void JoltPhysicsModule::TriggerLateContactCallback(ContactCallback callbackType, uint32_t body1ID, uint32_t body2ID)
+	{
+		m_LateContactCallbacks[callbackType].push_back({ body1ID, body2ID });
 	}
 
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
@@ -492,11 +497,21 @@ namespace Glory
 	{
 		for (size_t i = 0; i < size_t(ActivationCallback::Count); ++i)
 		{
-			for (size_t j = 0; j < m_LateCallbacks[ActivationCallback(i)].size(); j++)
+			for (size_t j = 0; j < m_LateActivationCallbacks[ActivationCallback(i)].size(); j++)
 			{
-				TriggerActivationCallback(ActivationCallback(i), m_LateCallbacks[ActivationCallback(i)][j]);
+				TriggerActivationCallback(ActivationCallback(i), m_LateActivationCallbacks[ActivationCallback(i)][j]);
 			}
-			m_LateCallbacks[ActivationCallback(i)].clear();
+			m_LateActivationCallbacks[ActivationCallback(i)].clear();
+		}
+
+		for (size_t i = 0; i < size_t(ContactCallback::Count); ++i)
+		{
+			for (size_t j = 0; j < m_LateContactCallbacks[ContactCallback(i)].size(); j++)
+			{
+				const std::pair<uint32_t, uint32_t>& pair = m_LateContactCallbacks[ContactCallback(i)][j];
+				TriggerContactCallback(ContactCallback(i), pair.first, pair.second);
+			}
+			m_LateContactCallbacks[ContactCallback(i)].clear();
 		}
 
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();

@@ -56,17 +56,17 @@ namespace Glory
 
 	void MyContactListener::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings)
 	{
-		m_pPhysics->TriggerContactCallback(ContactCallback::Added, body1.GetID().GetIndexAndSequenceNumber(), body2.GetID().GetIndexAndSequenceNumber());
+		m_pPhysics->TriggerLateContactCallback(ContactCallback::Added, body1.GetID().GetIndexAndSequenceNumber(), body2.GetID().GetIndexAndSequenceNumber());
 	}
 
 	void MyContactListener::OnContactPersisted(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings)
 	{
-		m_pPhysics->TriggerContactCallback(ContactCallback::Persisted, body1.GetID().GetIndexAndSequenceNumber(), body2.GetID().GetIndexAndSequenceNumber());
+		m_pPhysics->TriggerLateContactCallback(ContactCallback::Persisted, body1.GetID().GetIndexAndSequenceNumber(), body2.GetID().GetIndexAndSequenceNumber());
 	}
 
 	void MyContactListener::OnContactRemoved(const JPH::SubShapeIDPair& subShapePair)
 	{
-		m_pPhysics->TriggerContactCallback(ContactCallback::Removed, subShapePair.GetBody1ID().GetIndexAndSequenceNumber(), subShapePair.GetBody2ID().GetIndexAndSequenceNumber());
+		m_pPhysics->TriggerLateContactCallback(ContactCallback::Removed, subShapePair.GetBody1ID().GetIndexAndSequenceNumber(), subShapePair.GetBody2ID().GetIndexAndSequenceNumber());
 	}
 
 	void MyBodyActivationListener::OnBodyActivated(const JPH::BodyID& bodyID, JPH::uint64 bodyUserData)
