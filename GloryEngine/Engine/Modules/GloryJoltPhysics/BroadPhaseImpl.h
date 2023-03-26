@@ -1,6 +1,8 @@
 #pragma once
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhase.h>
+#include <Jolt/Physics/Collision/ContactListener.h>
+#include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Glory.h>
 #include <LayerMask.h>
 
@@ -39,5 +41,34 @@ namespace Glory
 
 	private:
 		std::vector<LayerMask> m_BPCollissionMapping;
+	};
+
+	// An example contact listener
+	class MyContactListener : public JPH::ContactListener
+	{
+	public:
+		MyContactListener(JoltPhysicsModule* pPhysics) : m_pPhysics(pPhysics) {}
+
+		// See: ContactListener
+		virtual JPH::ValidateResult	OnContactValidate(const JPH::Body& body1, const JPH::Body& body2, JPH::RVec3Arg baseOffset, const JPH::CollideShapeResult& collisionResult) override;
+		virtual void OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
+		virtual void OnContactPersisted(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
+		virtual void OnContactRemoved(const JPH::SubShapeIDPair& subShapePair) override;
+
+	private:
+		JoltPhysicsModule* m_pPhysics;
+	};
+
+	// An example activation listener
+	class MyBodyActivationListener : public JPH::BodyActivationListener
+	{
+	public:
+		MyBodyActivationListener(JoltPhysicsModule* pPhysics) : m_pPhysics(pPhysics) {}
+
+		virtual void OnBodyActivated(const JPH::BodyID& bodyID, JPH::uint64 bodyUserData) override;
+		virtual void OnBodyDeactivated(const JPH::BodyID& bodyID, JPH::uint64 bodyUserData) override;
+
+	private:
+		JoltPhysicsModule* m_pPhysics;
 	};
 }

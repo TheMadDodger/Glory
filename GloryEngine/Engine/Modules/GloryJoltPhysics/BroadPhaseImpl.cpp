@@ -48,4 +48,34 @@ namespace Glory
 	{
 		m_BPCollissionMapping = std::move(mapping);
 	}
+
+	JPH::ValidateResult MyContactListener::OnContactValidate(const JPH::Body& body1, const JPH::Body& body2, JPH::RVec3Arg baseOffset, const JPH::CollideShapeResult& collisionResult)
+	{
+		return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
+	}
+
+	void MyContactListener::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings)
+	{
+		m_pPhysics->TriggerContactCallback(ContactCallback::Added, body1.GetID().GetIndexAndSequenceNumber(), body2.GetID().GetIndexAndSequenceNumber());
+	}
+
+	void MyContactListener::OnContactPersisted(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings)
+	{
+		m_pPhysics->TriggerContactCallback(ContactCallback::Persisted, body1.GetID().GetIndexAndSequenceNumber(), body2.GetID().GetIndexAndSequenceNumber());
+	}
+
+	void MyContactListener::OnContactRemoved(const JPH::SubShapeIDPair& subShapePair)
+	{
+		m_pPhysics->TriggerContactCallback(ContactCallback::Removed, subShapePair.GetBody1ID().GetIndexAndSequenceNumber(), subShapePair.GetBody2ID().GetIndexAndSequenceNumber());
+	}
+
+	void MyBodyActivationListener::OnBodyActivated(const JPH::BodyID& bodyID, JPH::uint64 bodyUserData)
+	{
+		m_pPhysics->TriggerLateActivationCallback(ActivationCallback::Activated, bodyID.GetIndexAndSequenceNumber());
+	}
+
+	void MyBodyActivationListener::OnBodyDeactivated(const JPH::BodyID& bodyID, JPH::uint64 bodyUserData)
+	{
+		m_pPhysics->TriggerLateActivationCallback(ActivationCallback::Deactivated, bodyID.GetIndexAndSequenceNumber());
+	}
 }

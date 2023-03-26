@@ -1,8 +1,11 @@
 #include "PhysicsSystem.h"
 #include <glm/gtx/matrix_decompose.hpp>
+#include "EntitySceneScenesModule.h"
 
 namespace Glory
 {
+	std::map<uint32_t, std::pair<GloryECS::EntityRegistry*, EntityID>> PhysicsSystem::m_BodyOwners;
+
 	void PhysicsSystem::OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
@@ -90,6 +93,42 @@ namespace Glory
 		}
 	}
 
+	void PhysicsSystem::OnBodyActivated(uint32_t bodyID)
+	{
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair = m_BodyOwners[bodyID];
+		GloryECS::EntityRegistry* pRegistry = pair.first;
+		EntityID entity = pair.second;
+		if (!pRegistry->IsValid(entity)) return;
+		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
+		ScriptedComponent& scriptComponent = pRegistry->GetComponent<ScriptedComponent>(entity);
+		Script* pScript = scriptComponent.m_Script.Get();
+		if (!pScript) return;
+		void* args[1] = {
+			&bodyID
+		};
+
+		EntityScene* pEntityScene = pRegistry->GetUserData<EntityScene*>();
+		pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyActivated", args);
+	}
+
+	void PhysicsSystem::OnBodyDeactivated(uint32_t bodyID)
+	{
+		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair = m_BodyOwners[bodyID];
+		GloryECS::EntityRegistry* pRegistry = pair.first;
+		EntityID entity = pair.second;
+		if (!pRegistry->IsValid(entity)) return;
+		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
+		ScriptedComponent& scriptComponent = pRegistry->GetComponent<ScriptedComponent>(entity);
+		Script* pScript = scriptComponent.m_Script.Get();
+		if (!pScript) return;
+		void* args[1] = {
+			&bodyID
+		};
+
+		EntityScene* pEntityScene = pRegistry->GetUserData<EntityScene*>();
+		pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyDeactivated", args);
+	}
+
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
@@ -104,5 +143,6 @@ namespace Glory
 		glm::vec4 perspective;
 		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
 		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, translation, rotation, scale, pComponent.m_BodyType, pComponent.m_CurrentLayerIndex);
+		m_BodyOwners[pComponent.m_BodyID] = { pRegistry, entity };
 	}
 }
