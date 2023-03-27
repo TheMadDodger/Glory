@@ -15,7 +15,6 @@ namespace Glory
 	class ResourceTypes;
 	class Serializers;
 	class DisplayManager;
-	class SerializedPropertyManager;
 	class Console;
 	class LayerManager;
 
@@ -29,7 +28,6 @@ namespace Glory
 		static ResourceTypes* GetResourceTypes();
 		static Serializers* GetSerializers();
 		static DisplayManager* GetDisplayManager();
-		static SerializedPropertyManager* GetSerializedPropertyManager();
 		static Console* GetConsole();
 		static LayerManager* GetLayerManager();
 		static void SetContext(GloryContext* pContext);
@@ -72,7 +70,6 @@ namespace Glory
 		ResourceTypes* m_pResourceTypes;
 		Serializers* m_pSerializers;
 		DisplayManager* m_pDisplayManager;
-		SerializedPropertyManager* m_pSerializedPropertyManager;
 		Console* m_pConsole;
 		LayerManager* m_pLayerManager;
 		GloryReflect::Reflect* m_pReflection;

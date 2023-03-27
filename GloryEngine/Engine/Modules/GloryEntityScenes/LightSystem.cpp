@@ -2,7 +2,6 @@
 #include <Game.h>
 #include <Engine.h>
 #include <PropertyFlags.h>
-#include <SerializedPropertyManager.h>
 #include <EntityRegistry.h>
 
 namespace Glory

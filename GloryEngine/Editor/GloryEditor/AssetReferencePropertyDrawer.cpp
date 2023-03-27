@@ -7,18 +7,6 @@
 
 namespace Glory::Editor
 {
-	bool AssetReferencePropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
-	{
-		UUID* pUUIDMember = (UUID*)data;
-		return AssetPicker::ResourceDropdown(label, typeHash, pUUIDMember);
-	}
-
-	bool AssetReferencePropertyDrawer::Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const
-	{
-		// TODO
-		return false;
-	}
-
 	bool AssetReferencePropertyDrawer::Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
 		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)data;

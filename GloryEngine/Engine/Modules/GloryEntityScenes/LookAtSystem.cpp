@@ -1,6 +1,5 @@
 #include "LookAtSystem.h"
 #include <glm/gtx/matrix_decompose.hpp>
-#include <SerializedPropertyManager.h>
 #include <EntityRegistry.h>
 
 namespace Glory

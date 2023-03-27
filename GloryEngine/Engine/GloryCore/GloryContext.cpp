@@ -4,7 +4,6 @@
 #include "ResourceType.h"
 #include "Serializer.h"
 #include "DisplayManager.h"
-#include "SerializedPropertyManager.h"
 #include "Console.h"
 #include "LayerManager.h"
 #include "WindowsDebugConsole.h"
@@ -85,11 +84,6 @@ namespace Glory
 		return m_pContext->m_pDisplayManager;
 	}
 
-	SerializedPropertyManager* GloryContext::GetSerializedPropertyManager()
-	{
-		return m_pContext->m_pSerializedPropertyManager;
-	}
-
 	Console* GloryContext::GetConsole()
 	{
 		return m_pContext->m_pConsole;
@@ -112,8 +106,8 @@ namespace Glory
 
 	Glory::GloryContext::GloryContext()
 		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
-		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pSerializedPropertyManager(new SerializedPropertyManager()),
-		m_pConsole(new Console()), m_pLayerManager(new LayerManager()), m_pReflection(GloryReflect::Reflect::CreateReflectInstance())
+		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pConsole(new Console()),
+		m_pLayerManager(new LayerManager()), m_pReflection(GloryReflect::Reflect::CreateReflectInstance())
 	{
 	}
 
@@ -129,8 +123,6 @@ namespace Glory
 		m_pSerializers = nullptr;
 		delete m_pDisplayManager;
 		m_pDisplayManager = nullptr;
-		delete m_pSerializedPropertyManager;
-		m_pSerializedPropertyManager = nullptr;
 		delete m_pConsole;
 		m_pConsole = nullptr;
 

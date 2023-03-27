@@ -1,7 +1,6 @@
 #include "TransformSystem.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <SerializedPropertyManager.h>
 #include <EntityRegistry.h>
 
 namespace Glory

@@ -1,7 +1,6 @@
 #include "SpinSystem.h"
 #include <chrono>
 #include <glm/gtx/matrix_decompose.hpp>
-#include <SerializedPropertyManager.h>
 #include <GameTime.h>
 #include <EntityRegistry.h>
 

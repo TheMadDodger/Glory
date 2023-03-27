@@ -1,7 +1,6 @@
 #pragma once
 #include <Editor.h>
 #include <EntityComponentObject.h>
-#include <SerializedProperty.h>
 
 namespace Glory::Editor
 {
@@ -17,7 +16,6 @@ namespace Glory::Editor
 		virtual std::string Name() override;
 
 	private:
-		std::vector<SerializedProperty*> m_Properties;
 		std::string m_Name;
 	};
 }

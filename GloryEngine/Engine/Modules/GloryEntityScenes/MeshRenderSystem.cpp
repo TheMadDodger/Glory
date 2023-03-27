@@ -2,9 +2,6 @@
 #include <Game.h>
 #include <Engine.h>
 #include <Debug.h>
-#include <SerializedArrayProperty.h>
-#include <AssetReferencePropertyTemplate.h>
-#include <SerializedPropertyManager.h>
 #include <AssetManager.h>
 #include <EntityRegistry.h>
 

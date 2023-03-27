@@ -9,9 +9,7 @@
 #include <yaml-cpp/yaml.h>
 #include <YAML_GLM.h>
 #include <GLORY_YAML.h>
-#include "SerializedProperty.h"
 #include "GloryEditor.h"
-#include "PropertyAction.h"
 #include "ValueChangeAction.h"
 #include "NodeValueChangeAction.h"
 
@@ -24,12 +22,9 @@ namespace Glory::Editor
 	public:
 		GLORY_EDITOR_API PropertyDrawer(uint32_t typeHash);
 		virtual GLORY_EDITOR_API ~PropertyDrawer();
-		virtual GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const;
-		virtual GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const;
-		GLORY_EDITOR_API bool Draw(const SerializedProperty* serializedProperty) const;
 
 		template<class T>
 		static void RegisterPropertyDrawer()
@@ -39,9 +34,6 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void RegisterPropertyDrawer(PropertyDrawer* pDrawer);
 
-		static GLORY_EDITOR_API bool DrawProperty(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags);
-		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::any& data, uint32_t flags);
-		static GLORY_EDITOR_API bool DrawProperty(const SerializedProperty* serializedProperty);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags);
@@ -102,7 +94,8 @@ namespace Glory::Editor
 			PropertyType originalValue = value;
 			if (OnGUI(label, &value, flags))
 			{
-				Undo::AddAction(new PropertyAction<PropertyType>(label, originalValue, value));
+				//Undo::AddAction(new PropertyAction<PropertyType>(label, originalValue, value));
+				// FIXME SER
 			}
 			if (originalValue == value) return false;
 			memcpy((void*)&buffer[offset], (void*)&value, size);
@@ -119,18 +112,6 @@ namespace Glory::Editor
 		PropertyDrawerTemplate() : PropertyDrawer(ResourceType::GetHash<PropertyType>()) {}
 
 	protected:
-		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const override
-		{
-			PropertyType oldValue = *(PropertyType*)data;
-			if (OnGUI(label, (PropertyType*)data, flags))
-			{
-				PropertyType newValue = *(PropertyType*)data;
-				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, newValue));
-				return true;
-			}
-			return false;
-		}
-
 		virtual bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const override
 		{
 			PropertyType oldValue = *(PropertyType*)data;
@@ -147,19 +128,6 @@ namespace Glory::Editor
 			return false;
 		}
 
-		virtual bool Draw(const SerializedProperty* serializedProperty, const std::string& label, std::any& data, uint32_t flags) const override
-		{
-			PropertyType pPropertyData = std::any_cast<PropertyType>(data);
-			PropertyType oldValue = pPropertyData;
-			bool result = OnGUI(label, &pPropertyData, flags);
-			if (result)
-			{
-				Undo::AddAction(new PropertyAction<PropertyType>(label, oldValue, pPropertyData));
-				data = pPropertyData;
-			}
-			return result;
-		}
-
 		virtual bool Draw(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags) const override
 		{
 			PropertyType value;
@@ -167,7 +135,9 @@ namespace Glory::Editor
 			PropertyType originalValue = value;
 			if (OnGUI(label, &value, flags))
 			{
-				Undo::AddAction(new PropertyAction<PropertyType>(label, originalValue, value));
+				//Undo::AddAction(new PropertyAction<PropertyType>(label, originalValue, value));
+
+				// FIXME SER
 			}
 			if (originalValue == value) return false;
 			memcpy((void*)&buffer[offset], (void*)&value, size);
