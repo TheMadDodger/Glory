@@ -8,7 +8,6 @@
 #include "EnumPropertySerializer.h"
 #include "StructPropertySerializer.h"
 #include "SceneObjectRefSerializer.h"
-#include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
 #include "ScriptExtensions.h"
 #include "ScriptingExtender.h"
@@ -209,7 +208,6 @@ namespace Glory
 
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
-		SerializedPropertyManager::Clear();
 		ShaderManager::Cleanup();
 		GloryContext::DestroyContext();
 	}

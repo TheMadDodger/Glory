@@ -1,7 +1,5 @@
 #include "ScriptedSystem.h"
 #include "EntityScene.h"
-#include <AssetReferencePropertyTemplate.h>
-#include <SerializedPropertyManager.h>
 #include <AssetManager.h>
 
 namespace Glory

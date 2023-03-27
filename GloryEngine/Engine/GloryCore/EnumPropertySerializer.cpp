@@ -11,14 +11,6 @@ namespace Glory
 	{
 	}
 
-	void EnumPropertySerializer::Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out)
-	{
-	}
-
-	void EnumPropertySerializer::Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object)
-	{
-	}
-
 	void EnumPropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
 	{
 		void* pEnumAddress = pFieldData->GetAddress(data);
@@ -40,11 +32,6 @@ namespace Glory
 		if(!pEnumType->ToString(pEnumAddress, valueString)) valueString = "none";
 		out << YAML::Key << pFieldData->Name();
 		out << YAML::Value << valueString;
-	}
-
-	void EnumPropertySerializer::Deserialize(std::any& out, YAML::Node& object)
-	{
-		
 	}
 
 	void EnumPropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)

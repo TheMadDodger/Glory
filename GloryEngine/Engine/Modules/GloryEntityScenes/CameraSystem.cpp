@@ -3,7 +3,6 @@
 #include <Window.h>
 #include <Game.h>
 #include <CameraManager.h>
-#include <SerializedPropertyManager.h>
 #include <GloryContext.h>
 #include <EntityRegistry.h>
 

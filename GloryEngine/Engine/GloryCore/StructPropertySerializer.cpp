@@ -11,14 +11,6 @@ namespace Glory
 	{
 	}
 
-	void StructPropertySerializer::Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out)
-	{
-	}
-
-	void StructPropertySerializer::Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object)
-	{
-	}
-
 	void StructPropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
 	{
 		void* pStructAddress = pFieldData->GetAddress(data);
@@ -43,10 +35,6 @@ namespace Glory
 			PropertySerializer::SerializeProperty(pSubFieldData, pStructAddress, out);
 		}
 		out << YAML::EndMap;
-	}
-
-	void StructPropertySerializer::Deserialize(std::any& out, YAML::Node& object)
-	{
 	}
 
 	void StructPropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
