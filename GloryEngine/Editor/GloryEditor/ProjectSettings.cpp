@@ -59,7 +59,7 @@ namespace Glory::Editor
 	}
 
 	ProjectSettings::ProjectSettings(const char* settingsFile)
-		: m_SettingsNode(), m_SettingsFile(settingsFile)
+		: m_YAMLFile(), m_SettingsFile(settingsFile)
 	{
 	}
 
@@ -77,32 +77,30 @@ namespace Glory::Editor
 			return;
 		}
 
-		m_SettingsNode = YAML::LoadFile(path.string());
-		if (!m_SettingsNode.IsDefined() || !m_SettingsNode.IsMap())
+		m_YAMLFile = YAMLFileRef{ path };
+		NodeRef rootNode = m_YAMLFile.RootNodeRef();
+		NodeValueRef rootValue = rootNode.ValueRef();
+		if (!rootValue.Exists() || !rootValue.IsMap())
 		{
-			m_SettingsNode = YAML::Node(YAML::NodeType::Map);
-			m_SettingsNode["EditorVersion"] = EditorApplication::Version.GetVersionString();
+			rootValue.Set(YAML::Node(YAML::NodeType::Map));
+			rootValue["EditorVersion"].Set(EditorApplication::Version.GetVersionString());
 		}
 
 		OnSettingsLoaded();
 
 		/* After migrations are done we can safely override the version */
-		m_SettingsNode["EditorVersion"] = EditorApplication::Version.GetVersionString();
+		rootValue["EditorVersion"].Set(EditorApplication::Version.GetVersionString());
 	}
 
 	void ProjectSettings::SaveSettings(ProjectSpace* pProject)
 	{
-		std::filesystem::path path = pProject->SettingsPath();
-		path.append(m_SettingsFile);
-
-		YAML::Emitter out;
-		out << m_SettingsNode;
-
-		std::ofstream fileStream(path);
-		fileStream << out.c_str();
-		fileStream.close();
-
+		m_YAMLFile.Save();
 		OnSave(pProject);
+	}
+
+	NodeValueRef ProjectSettings::RootValue()
+	{
+		return m_YAMLFile.RootNodeRef().ValueRef();
 	}
 
 	GeneralSettings::GeneralSettings() : ProjectSettings("General.yaml")
