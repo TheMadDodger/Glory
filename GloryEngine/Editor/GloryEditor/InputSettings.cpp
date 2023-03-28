@@ -26,55 +26,55 @@ namespace Glory::Editor
 
 	char FilterBuffer[200] = "\0";
 
-	bool InputModesGui(YAML::Node& settings)
+	bool InputModesGui(NodeValueRef settings)
 	{
 		bool change = false;
 
-		YAML::Node inputModes = settings[Key_InputModes];
+		NodeValueRef inputModes = settings[Key_InputModes];
 
 		ListView listView = ListView("Input Modes");
 
 		listView.OnDrawElement = [&](size_t index) {
-			YAML::Node inmputMode = inputModes[index];
-			YAML::Node nameNode = inmputMode["Name"];
-			const std::string name = nameNode.as<std::string>();
+			NodeValueRef inmputMode = inputModes[index];
+			NodeValueRef nameNode = inmputMode["Name"];
+			const std::string name = nameNode.As<std::string>();
 
 			if (EditorUI::Header(name))
 			{
 				strcpy(TextBuffer, name.c_str());
 				if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
 				{
-					nameNode = std::string(TextBuffer);
+					nameNode.Set(std::string(TextBuffer));
 					change = true;
 				}
 
-				YAML::Node deviceTypesNode = inmputMode["DeviceTypes"];
+				NodeValueRef deviceTypesNode = inmputMode["DeviceTypes"];
 				ListView deviceTypesListView{ "Device Types" };
 
 				deviceTypesListView.OnDrawElement = [&](size_t index) {
-					YAML::Node deviceTypeNode = deviceTypesNode[index];
-					std::string value = deviceTypeNode.as<std::string>();
+					NodeValueRef deviceTypeNode = deviceTypesNode[index];
+					std::string value = deviceTypeNode.As<std::string>();
 					InputDeviceType deviceType = InputDeviceType(-1);
 					GloryReflect::Enum<InputDeviceType>().FromString(value, deviceType);
 					if (EditorUI::InputEnum<InputDeviceType>("", &deviceType))
 					{
 						GloryReflect::Enum<InputDeviceType>().ToString(deviceType, value);
-						deviceTypeNode = value;
+						deviceTypeNode.Set(value);
 						change = true;
 					}
 				};
 
 				deviceTypesListView.OnAdd = [&]() {
-					deviceTypesNode.push_back("");
+					deviceTypesNode.PushBack<std::string>("");
 					change = true;
 				};
 
 				deviceTypesListView.OnRemove = [&](int index) {
-					deviceTypesNode.remove(index);
+					deviceTypesNode.Remove(index);
 					change = true;
 				};
 
-				deviceTypesListView.Draw(deviceTypesNode.size());
+				deviceTypesListView.Draw(deviceTypesNode.Size());
 			}
 		};
 
@@ -82,16 +82,16 @@ namespace Glory::Editor
 			YAML::Node newNode{ YAML::NodeType::Map };
 			newNode["Name"] = "New Input Mode";
 			newNode["DeviceTypes"] = YAML::Node(YAML::NodeType::Sequence);
-			inputModes.push_back(newNode);
+			inputModes.PushBack(newNode);
 			change = true;
 		};
 
 		listView.OnRemove = [&](int index) {
-			inputModes.remove(index);
+			inputModes.Remove(index);
 			change = true;
 		};
 
-		listView.Draw(inputModes.size());
+		listView.Draw(inputModes.Size());
 
 		return change;
 	}
@@ -284,68 +284,68 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool InputMapsGui(YAML::Node& settings)
+	bool InputMapsGui(NodeValueRef settings)
 	{
 		bool change = false;
 
 		std::vector<std::string> inputModeNamesTemp;
 		std::vector<std::string_view> inputModeNames;
-		YAML::Node inputModes = settings[Key_InputModes];
-		for (size_t i = 0; i < inputModes.size(); i++)
+		NodeValueRef inputModes = settings[Key_InputModes];
+		for (size_t i = 0; i < inputModes.Size(); i++)
 		{
-			const std::string name = inputModes[i]["Name"].as<std::string>();
+			const std::string name = inputModes[i]["Name"].As<std::string>();
 			inputModeNamesTemp.push_back(name.c_str());
 			inputModeNames.push_back(inputModeNamesTemp[i].c_str());
 		}
 
-		YAML::Node inputMaps = settings[Key_InputMaps];
+		NodeValueRef inputMaps = settings[Key_InputMaps];
 
 		ListView listView = ListView("Input Maps");
 
 		listView.OnDrawElement = [&](size_t index) {
-			YAML::Node inmputMode = inputMaps[index];
-			YAML::Node nameNode = inmputMode["Name"];
-			const std::string name = nameNode.as<std::string>();
+			NodeValueRef inmputMode = inputMaps[index];
+			NodeValueRef nameNode = inmputMode["Name"];
+			const std::string name = nameNode.As<std::string>();
 
 			if (EditorUI::Header(name))
 			{
 				strcpy(TextBuffer, name.c_str());
 				if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
 				{
-					nameNode = std::string(TextBuffer);
+					nameNode.Set(std::string(TextBuffer));
 					change = true;
 				}
 
-				YAML::Node actionsNode = inmputMode["Actions"];
+				NodeValueRef actionsNode = inmputMode["Actions"];
 				ListView actionsListView{ "Actions" };
 
 				actionsListView.OnDrawElement = [&](size_t index) {
-					YAML::Node actionNode = actionsNode[index];
+					NodeValueRef actionNode = actionsNode[index];
 
-					YAML::Node actionNameNode = actionNode["Name"];
-					const std::string actionName = actionNameNode.as<std::string>();
+					NodeValueRef actionNameNode = actionNode["Name"];
+					const std::string actionName = actionNameNode.As<std::string>();
 
 					if (EditorUI::Header(actionName))
 					{
 						strcpy(TextBuffer, actionName.c_str());
 						if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
 						{
-							actionNameNode = std::string(TextBuffer);
+							actionNameNode.Set(std::string(TextBuffer));
 							change = true;
 						}
 
-						YAML::Node actionMappingNode = actionNode["ActionMapping"];
-						std::string actionMappingString = actionMappingNode.as<std::string>();
-						YAML::Node axisBlendingNode = actionNode["AxisBlending"];
-						std::string axisBlendingString = axisBlendingNode.as<std::string>();
-						YAML::Node axisBlendingSpeedNode = actionNode["AxisBlendingSpeed"];
+						NodeValueRef actionMappingNode = actionNode["ActionMapping"];
+						std::string actionMappingString = actionMappingNode.As<std::string>();
+						NodeValueRef axisBlendingNode = actionNode["AxisBlending"];
+						std::string axisBlendingString = axisBlendingNode.As<std::string>();
+						NodeValueRef axisBlendingSpeedNode = actionNode["AxisBlendingSpeed"];
 
 						InputMappingType actionMapping = InputMappingType::Bool;
 						GloryReflect::Enum<InputMappingType>().FromString(actionMappingString, actionMapping);
 						if (EditorUI::InputEnum<InputMappingType>("Mapping Type", &actionMapping))
 						{
 							GloryReflect::Enum<InputMappingType>().ToString(actionMapping, actionMappingString);
-							actionMappingNode = actionMappingString;
+							actionMappingNode.Set(actionMappingString);
 							change = true;
 						}
 
@@ -356,43 +356,43 @@ namespace Glory::Editor
 							if (EditorUI::InputEnum<AxisBlending>("Axis Blending", &axisBlending))
 							{
 								GloryReflect::Enum<AxisBlending>().ToString(axisBlending, axisBlendingString);
-								axisBlendingNode = axisBlendingString;
+								axisBlendingNode.Set(axisBlendingString);
 								change = true;
 							}
 
-							float blendingSpeed = axisBlendingSpeedNode.as<float>();
+							float blendingSpeed = axisBlendingSpeedNode.As<float>();
 							if (EditorUI::InputFloat("Axis Blending Speed", &blendingSpeed, 0.0f))
 							{
-								axisBlendingSpeedNode = blendingSpeed;
+								axisBlendingSpeedNode.Set(blendingSpeed);
 								change = true;
 							}
 						}
 
-						YAML::Node bindingsNode = actionNode["Bindings"];
+						NodeValueRef bindingsNode = actionNode["Bindings"];
 
 						ListView bindingsListView{ "Bindings" };
 
 						bindingsListView.OnDrawElement = [&](size_t index) {
-							YAML::Node bindingNode = bindingsNode[index];
-							YAML::Node BindingNameNode = bindingNode["Name"];
-							const std::string bindingName = BindingNameNode.as<std::string>();
+							NodeValueRef bindingNode = bindingsNode[index];
+							NodeValueRef BindingNameNode = bindingNode["Name"];
+							const std::string bindingName = BindingNameNode.As<std::string>();
 
 							if (EditorUI::Header(bindingName))
 							{
-								YAML::Node stateNode = bindingNode["State"];
-								YAML::Node multiplierNode = bindingNode["Multiplier"];
-								YAML::Node inputModeNode = bindingNode["InputMode"];
-								YAML::Node bindingKeyNode = bindingNode["Binding"];
-								YAML::Node mapDeltaToValueNode = bindingNode["MapDeltaToValue"];
-								std::string stateString = stateNode.as<std::string>();
-								std::string bindingString = bindingKeyNode.as<std::string>();
+								NodeValueRef stateNode = bindingNode["State"];
+								NodeValueRef multiplierNode = bindingNode["Multiplier"];
+								NodeValueRef inputModeNode = bindingNode["InputMode"];
+								NodeValueRef bindingKeyNode = bindingNode["Binding"];
+								NodeValueRef mapDeltaToValueNode = bindingNode["MapDeltaToValue"];
+								std::string stateString = stateNode.As<std::string>();
+								std::string bindingString = bindingKeyNode.As<std::string>();
 
 								KeyBinding binding{ bindingString };
 
 								strcpy(TextBuffer, bindingName.c_str());
 								if (EditorUI::InputText("Name", TextBuffer, BUFFER_SIZE))
 								{
-									BindingNameNode = std::string(TextBuffer);
+									BindingNameNode.Set(std::string(TextBuffer));
 									change = true;
 								}
 
@@ -403,30 +403,30 @@ namespace Glory::Editor
 									if (EditorUI::InputEnum<InputState>("Key State", &state, { size_t(InputState::Axis) }))
 									{
 										GloryReflect::Enum<InputState>().ToString(state, stateString);
-										stateNode = stateString;
+										stateNode.Set(stateString);
 										change = true;
 									}
 								}
 
 								if (actionMapping == InputMappingType::Float)
 								{
-									bool mapToDelta = mapDeltaToValueNode.as<bool>();
+									bool mapToDelta = mapDeltaToValueNode.As<bool>();
 
 									if (EditorUI::CheckBox("Map Delta to Value", &mapToDelta))
 									{
-										mapDeltaToValueNode = mapToDelta;
+										mapDeltaToValueNode.Set(mapToDelta);
 										change = true;
 									}
 
-									float multiplier = multiplierNode.as<float>();
+									float multiplier = multiplierNode.As<float>();
 									if (EditorUI::InputFloat("Multiplier", &multiplier))
 									{
-										multiplierNode = multiplier;
+										multiplierNode.Set(multiplier);
 										change = true;
 									}
 								}
 
-								std::string inputMode = inputModeNode.as<std::string>();
+								std::string inputMode = inputModeNode.As<std::string>();
 								size_t inputModeIndex = 0;
 								for (size_t i = 0; i < inputModeNames.size(); i++)
 								{
@@ -439,19 +439,19 @@ namespace Glory::Editor
 								if (inputMode.empty() && inputModeNames.size() > 0)
 								{
 									inputMode = inputModeNames[inputModeIndex];
-									inputModeNode = inputMode;
+									inputModeNode.Set(inputMode);
 								}
 
 								if (EditorUI::InputDropdown("Input Mode", inputModeNames, &inputModeIndex, inputMode))
 								{
 									inputMode = inputModeNames[inputModeIndex];
-									inputModeNode = inputMode;
+									inputModeNode.Set(inputMode);
 									change = true;
 								}
 
 								if (KeyDrowdown("Binding", bindingString))
 								{
-									bindingKeyNode = bindingString;
+									bindingKeyNode.Set(bindingString);
 									change = true;
 								}
 							}
@@ -465,16 +465,16 @@ namespace Glory::Editor
 							newNode["Multiplier"] = 1.0f;
 							newNode["InputMode"] = "";
 							newNode["Binding"] = "";
-							bindingsNode.push_back(newNode);
+							bindingsNode.PushBack(newNode);
 							change = true;
 						};
 
 						bindingsListView.OnRemove = [&](int index) {
-							bindingsNode.remove(index);
+							bindingsNode.Remove(index);
 							change = true;
 						};
 
-						bindingsListView.Draw(bindingsNode.size());
+						bindingsListView.Draw(bindingsNode.Size());
 					}
 				};
 
@@ -485,16 +485,16 @@ namespace Glory::Editor
 					newNode["AxisBlending"] = "Jump";
 					newNode["AxisBlendingSpeed"] = 5.0f;
 					newNode["Bindings"] = YAML::Node(YAML::NodeType::Sequence);
-					actionsNode.push_back(newNode);
+					actionsNode.PushBack(newNode);
 					change = true;
 				};
 
 				actionsListView.OnRemove = [&](int index) {
-					inputMaps.remove(index);
+					inputMaps.Remove(index);
 					change = true;
 				};
 
-				actionsListView.Draw(actionsNode.size());
+				actionsListView.Draw(actionsNode.Size());
 			}
 		};
 
@@ -502,16 +502,16 @@ namespace Glory::Editor
 			YAML::Node newNode{ YAML::NodeType::Map };
 			newNode["Name"] = "New Input Map";
 			newNode["Actions"] = YAML::Node(YAML::NodeType::Sequence);
-			inputMaps.push_back(newNode);
+			inputMaps.PushBack(newNode);
 			change = true;
 		};
 
 		listView.OnRemove = [&](int index) {
-			inputMaps.remove(index);
+			inputMaps.Remove(index);
 			change = true;
 		};
 
-		listView.Draw(inputMaps.size());
+		listView.Draw(inputMaps.Size());
 
 		return change;
 	}
@@ -520,26 +520,21 @@ namespace Glory::Editor
 	{
 		bool change = false;
 		ImGui::BeginChild("Input Settings");
-		change |= InputModesGui(m_SettingsNode);
-		change |= InputMapsGui(m_SettingsNode);
+		change |= InputModesGui(RootValue());
+		change |= InputMapsGui(RootValue());
 		ImGui::EndChild();
 		return change;
 	}
 
 	void InputSettings::OnSettingsLoaded()
 	{
-		if (!m_SettingsNode.IsDefined() || !m_SettingsNode.IsMap())
-		{
-			m_SettingsNode = YAML::Node(YAML::NodeType::Map);
-		}
-
 		SETTINGS_DEFAULT_KEY(inputModes, Key_InputModes, Sequence);
 		SETTINGS_DEFAULT_KEY(kayMaps, Key_InputMaps, Sequence);
 	}
 
 	void InputSettings::OnStartPlay_Impl()
 	{
-		Game::GetGame().GetEngine()->GetInputModule()->ReadInputData(m_SettingsNode);
+		Game::GetGame().GetEngine()->GetInputModule()->ReadInputData(RootValue().Node());
 		Game::GetGame().GetEngine()->GetInputModule()->InputBlocked() = false;
 	}
 

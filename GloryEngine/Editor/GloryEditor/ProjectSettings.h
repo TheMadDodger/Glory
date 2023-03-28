@@ -2,11 +2,12 @@
 #include "ProjectSpace.h"
 #include <string_view>
 #include <yaml-cpp/yaml.h>
+#include <NodeRef.h>
 
-#define SETTINGS_DEFAULT_KEY(node, key, nodeType) YAML::Node node = m_SettingsNode[key]; \
-if (!node.IsDefined() || !node.Is##nodeType()) \
+#define SETTINGS_DEFAULT_KEY(node, key, nodeType) NodeValueRef node = RootValue()[key]; \
+if (!node.Exists() || !node.Is##nodeType()) \
 { \
-	node = YAML::Node(YAML::NodeType::nodeType); \
+	node.Set(YAML::Node(YAML::NodeType::nodeType)); \
 }
 
 namespace Glory::Editor
@@ -45,8 +46,10 @@ namespace Glory::Editor
 		virtual void OnStartPlay_Impl() {}
 		virtual void OnStopPlay_Impl() {}
 
+		NodeValueRef RootValue();
+
     protected:
-        YAML::Node m_SettingsNode;
+		YAMLFileRef m_YAMLFile;
 		const char* m_SettingsFile;
 
 		static ProjectSettings* m_pAllSettings[];

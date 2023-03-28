@@ -9,20 +9,20 @@ namespace Glory::Editor
 
 	bool LayerSettings::OnGui()
 	{
-		YAML::Node layersNode = m_SettingsNode["Layers"];
+		NodeValueRef layersNode = RootValue()["Layers"];
 
-		for (size_t i = 0; i < LayerManager::LayerCount(); i++)
+		size_t count = layersNode.Size();
+		for (size_t i = 0; i < count; ++i)
 		{
-			YAML::Node layerNode = layersNode[i];
-			YAML::Node layerNameNode = layerNode["Name"];
+			NodeValueRef layerNode = layersNode[i];
+			NodeValueRef layerNameNode = layerNode["Name"];
 
 			const std::string label = "Layer " + std::to_string(i);
-			const Layer* pLayer = LayerManager::GetLayerAtIndex(i);
-
-			strcpy(LAYER_BUFFER, pLayer->m_Name.data());
+			const std::string layerName = layerNameNode.As<std::string>();
+			strcpy(LAYER_BUFFER, layerName.data());
 			if (EditorUI::InputText(label.data(), LAYER_BUFFER, LAYER_BUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				layerNameNode = std::string(LAYER_BUFFER);
+				layerNameNode.Set(std::string(LAYER_BUFFER));
 				SaveSettings(ProjectSpace::GetOpenProject());
 				LayerManager::Load();
 			}
@@ -37,7 +37,7 @@ namespace Glory::Editor
 				YAML::Node newLayerNode{ YAML::NodeType::Map };
 				newLayerNode["Name"] = std::string(LAYER_BUFFER);
 
-				layersNode.push_back(newLayerNode);
+				layersNode.PushBack(newLayerNode);
 				SaveSettings(ProjectSpace::GetOpenProject());
 				LayerManager::Load();
 			}
