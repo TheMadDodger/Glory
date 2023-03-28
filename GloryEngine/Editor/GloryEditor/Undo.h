@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <UUID.h>
+#include <NodeRef.h>
 
 namespace Glory::Editor
 {
@@ -39,6 +40,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void StopRecord();
 		static GLORY_EDITOR_API void AddAction(IAction* action);
 		static GLORY_EDITOR_API void Clear();
+
+		static GLORY_EDITOR_API void YAMLEdit(YAMLFileRef& file, const std::filesystem::path& path, YAML::Node oldValue, YAML::Node newValue);
 
 		static GLORY_EDITOR_API void DoUndo();
 		static GLORY_EDITOR_API void DoRedo();

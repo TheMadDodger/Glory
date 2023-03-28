@@ -1,6 +1,7 @@
 #include "ProjectSettings.h"
 #include "EditorUI.h"
 #include <LayerManager.h>
+#include <Undo.h>
 
 namespace Glory::Editor
 {
@@ -11,7 +12,7 @@ namespace Glory::Editor
 	{
 		NodeValueRef layersNode = RootValue()["Layers"];
 
-		size_t count = layersNode.Size();
+		const size_t count = layersNode.Size();
 		for (size_t i = 0; i < count; ++i)
 		{
 			NodeValueRef layerNode = layersNode[i];
@@ -22,7 +23,15 @@ namespace Glory::Editor
 			strcpy(LAYER_BUFFER, layerName.data());
 			if (EditorUI::InputText(label.data(), LAYER_BUFFER, LAYER_BUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				Undo::StartRecord("Rename Layer");
+				YAML::Node oldValue = YAML::Node(YAML::NodeType::Scalar);
+				YAML::Node newValue = YAML::Node(YAML::NodeType::Scalar);
+				oldValue = layerName;
+				newValue = std::string(LAYER_BUFFER);
 				layerNameNode.Set(std::string(LAYER_BUFFER));
+				Undo::YAMLEdit(m_YAMLFile, layerNameNode.Path(), oldValue, newValue);
+				Undo::StopRecord();
+
 				SaveSettings(ProjectSpace::GetOpenProject());
 				LayerManager::Load();
 			}
@@ -34,10 +43,15 @@ namespace Glory::Editor
 			std::string name = std::string(LAYER_BUFFER);
 			if (!name.empty())
 			{
-				YAML::Node newLayerNode{ YAML::NodeType::Map };
-				newLayerNode["Name"] = std::string(LAYER_BUFFER);
+				Undo::StartRecord("Add Layer");
+				YAML::Node oldValue = YAML::Node(YAML::NodeType::Null);
+				YAML::Node newValue = YAML::Node(YAML::NodeType::Map);
+				newValue["Name"] = std::string(LAYER_BUFFER);
+				layersNode.PushBack(newValue);
 
-				layersNode.PushBack(newLayerNode);
+				NodeValueRef layerNode = layersNode[count];
+				Undo::YAMLEdit(m_YAMLFile, layerNode.Path(), oldValue, newValue);
+				Undo::StopRecord();
 				SaveSettings(ProjectSpace::GetOpenProject());
 				LayerManager::Load();
 			}

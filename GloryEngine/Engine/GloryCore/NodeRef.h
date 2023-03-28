@@ -34,6 +34,8 @@ namespace Glory
 
 		void PushBack(YAML::Node& node);
 		void Remove(size_t index);
+		void Remove(const std::string& key);
+		void Insert(YAML::Node& node, size_t index);
 		size_t Size();
 
 		bool Exists();
@@ -42,6 +44,8 @@ namespace Glory
 		bool IsMap();
 		YAML::Node Node();
 		const std::filesystem::path& Path();
+		void Erase();
+		NodeValueRef Parent();
 
 	private:
 		YAML::Node FindNode(YAML::Node node, std::filesystem::path path);

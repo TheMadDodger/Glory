@@ -1,5 +1,6 @@
 #include "Undo.h"
 #include "Debug.h"
+#include <YAMLAction.h>
 
 namespace Glory::Editor
 {
@@ -76,6 +77,13 @@ namespace Glory::Editor
 		}
 		m_ActionRecords.clear();
 		m_RewindIndex = 0;
+	}
+
+	void Undo::YAMLEdit(YAMLFileRef& file, const std::filesystem::path& path, YAML::Node oldValue, YAML::Node newValue)
+	{
+		YAMLAction* pAction = new YAMLAction(file, path, oldValue, newValue);
+		AddAction(pAction);
+		file[path].Set(newValue);
 	}
 
 	void Undo::DoUndo()
