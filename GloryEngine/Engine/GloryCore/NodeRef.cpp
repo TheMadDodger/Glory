@@ -50,6 +50,16 @@ namespace Glory
 		Node().remove(index);
 	}
 
+	void NodeValueRef::Remove(const std::string& key)
+	{
+		Node().remove(key);
+	}
+
+	void NodeValueRef::Insert(YAML::Node& node, size_t index)
+	{
+		Node().force_insert(index, node);
+	}
+
 	size_t NodeValueRef::Size()
 	{
 		return Node().size();
@@ -78,6 +88,25 @@ namespace Glory
 	const std::filesystem::path& NodeValueRef::Path()
 	{
 		return m_Path;
+	}
+
+	void NodeValueRef::Erase()
+	{
+		NodeValueRef parent = Parent();
+		const std::filesystem::path& path = m_Path.lexically_relative(parent.Path());
+		const std::string& pathString = path.string();
+		if (pathString._Starts_with("##"))
+		{
+			const size_t index = std::stoul(pathString.substr(2));
+			parent.Remove(index);
+			return;
+		}
+		parent.Remove(path.string());
+	}
+
+	NodeValueRef NodeValueRef::Parent()
+	{
+		return NodeValueRef(m_RootNode, m_Path.parent_path());
 	}
 
 	YAML::Node NodeValueRef::FindNode(YAML::Node node, std::filesystem::path path)
