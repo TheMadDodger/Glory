@@ -107,4 +107,76 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<glm::ivec2>
+	{
+		static Node encode(const glm::ivec2& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::ivec2& v)
+		{
+			if (!node.IsSequence() || node.size() < 2)
+				return false;
+
+			v.x = node[0].as<int>();
+			v.y = node[1].as<int>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::ivec3>
+	{
+		static Node encode(const glm::ivec3& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+			node.push_back(v.z);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::ivec3& v)
+		{
+			if (!node.IsSequence() || node.size() < 3)
+				return false;
+
+			v.x = node[0].as<int>();
+			v.y = node[1].as<int>();
+			v.z = node[2].as<int>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::ivec4>
+	{
+		static Node encode(const glm::ivec4& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+			node.push_back(v.z);
+			node.push_back(v.w);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::ivec4& v)
+		{
+			if (!node.IsSequence() || node.size() < 4)
+				return false;
+
+			v.x = node[0].as<int>();
+			v.y = node[1].as<int>();
+			v.z = node[2].as<int>();
+			v.w = node[3].as<int>();
+			return true;
+		}
+	};
 }

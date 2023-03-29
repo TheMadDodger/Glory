@@ -1,31 +1,80 @@
 #include "EditorUI.h"
+#include "Undo.h"
 #include <LayerManager.h>
 #include <LayerRef.h>
+#include <YAML_GLM.h>
 
 namespace Glory::Editor
 {
-	size_t Glory::Editor::EditorUI::m_BufferWriteIndex = 0;
-	char Glory::Editor::EditorUI::m_CleanNameBuffer[BUFFERLENGTH] = "\0";
+	size_t EditorUI::m_BufferWriteIndex = 0;
+	char EditorUI::m_CleanNameBuffer[BUFFERLENGTH] = "\0";
+	char EditorUI::m_TextBuffer[TEXTSIZE] = "\0";
 
-	bool Glory::Editor::EditorUI::InputFloat(std::string_view label, float* value, const float min, const float max, const float steps)
+	EditorUI::UIFlags EditorUI::m_UIFlags = 0;
+	std::vector<EditorUI::Flag> EditorUI::m_FlagsStack;
+
+	struct Scope
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
-		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+	public:
+		Scope(const std::filesystem::path& path) : m_Path(path)
+		{
+			for (const std::filesystem::path& subPath : m_Path)
+			{
+				ImGui::PushID(subPath.string().c_str());
+			}
+		}
+		~Scope()
+		{
+			for (const std::filesystem::path& subPath : m_Path)
+			{
+				ImGui::PopID();
+			}
+		}
 
-		const float width = std::max(maxWidth, 100.0f);
+	private:
+		const std::filesystem::path m_Path;
+	};
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+	bool EditorUI::InputFloat(std::string_view label, float* value, const float min, const float max, const float steps)
+	{
+		if (!HasFlag(Flag::NoLabel))
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::PushID(label.data());
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		ImGui::PushItemWidth(width);
+			const float width = std::max(maxWidth, 100.0f);
+
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+			ImGui::PushItemWidth(width);
+		}
 		const bool change = ImGui::DragFloat("##value", value, steps, min, max, "%.3f");
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
+	}
+
+	bool EditorUI::InputFloat(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	{
+		Scope s{ path };
+		const float oldValue = file[path].As<float>();
+		float newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputFloat(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
 	}
 
 	bool EditorUI::InputFloat2(std::string_view label, glm::vec2* value, const float min, const float max, const float steps)
@@ -49,6 +98,24 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputFloat2(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	{
+		Scope s{ path };
+		const glm::vec2 oldValue = file[path].As<glm::vec2>();
+		glm::vec2 newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputFloat2(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::InputFloat3(std::string_view label, glm::vec3* value, const float min, const float max, const float steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
@@ -68,6 +135,24 @@ namespace Glory::Editor
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
+	}
+
+	bool EditorUI::InputFloat3(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	{
+		Scope s{ path };
+		const glm::vec3 oldValue = file[path].As<glm::vec3>();
+		glm::vec3 newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputFloat3(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
 	}
 
 	bool EditorUI::InputFloat4(std::string_view label, glm::vec4* value, const float min, const float max, const float steps)
@@ -91,6 +176,24 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputFloat4(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	{
+		Scope s{ path };
+		const glm::vec4 oldValue = file[path].As<glm::vec4>();
+		glm::vec4 newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputFloat4(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::InputInt(std::string_view label, int* value, const int min, const int max, const int steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
@@ -110,6 +213,24 @@ namespace Glory::Editor
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
+	}
+
+	bool EditorUI::InputInt(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	{
+		Scope s{ path };
+		const int oldValue = file[path].As<float>();
+		int newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputInt(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
 	}
 
 	bool EditorUI::InputInt2(std::string_view label, glm::ivec2* value, const int min, const int max, const int steps)
@@ -133,6 +254,24 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputInt2(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	{
+		Scope s{ path };
+		const glm::ivec2 oldValue = file[path].As<glm::ivec2>();
+		glm::ivec2 newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputInt2(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::InputInt3(std::string_view label, glm::ivec3* value, const int min, const int max, const int steps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
@@ -152,6 +291,24 @@ namespace Glory::Editor
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
+	}
+
+	bool EditorUI::InputInt3(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	{
+		Scope s{ path };
+		const glm::ivec3 oldValue = file[path].As<glm::ivec3>();
+		glm::ivec3 newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputInt3(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
 	}
 
 	bool EditorUI::InputInt4(std::string_view label, glm::ivec4* value, const int min, const int max, const int steps)
@@ -175,6 +332,24 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputInt4(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	{
+		Scope s{ path };
+		const glm::ivec4 oldValue = file[path].As<glm::ivec4>();
+		glm::ivec4 newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputInt4(label.string(), &newValue, min, max))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::InputDouble(std::string_view label, double* value, const double slowSteps, const double fastSteps)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
@@ -196,6 +371,24 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputDouble(YAMLFileRef& file, const std::filesystem::path& path, const double slowSteps, const double fastSteps)
+	{
+		Scope s{ path };
+		const double oldValue = file[path].As<double>();
+		double newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputDouble(label.string(), &newValue, slowSteps, fastSteps))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::CheckBox(std::string_view label, bool* value)
 	{
 		const ImVec2 textSize = ImGui::CalcTextSize(label.data());
@@ -209,6 +402,24 @@ namespace Glory::Editor
 		const bool change = ImGui::Checkbox("##value", value);
 		ImGui::PopID();
 		return change;
+	}
+
+	bool EditorUI::CheckBox(YAMLFileRef& file, const std::filesystem::path& path)
+	{
+		Scope s{ path };
+		const bool oldValue = file[path].As<bool>();
+		bool newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (CheckBox(label.string(), &newValue))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
 	}
 
 	bool EditorUI::InputColor(std::string_view label, glm::vec4* value, const bool hdr)
@@ -301,6 +512,24 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputColor(YAMLFileRef& file, const std::filesystem::path& path, const bool hdr)
+	{
+		Scope s{ path };
+		const glm::vec4 oldValue = file[path].As<glm::vec4>();
+		glm::vec4 newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputColor(label.string(), &newValue, hdr))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::InputText(std::string_view label, char* value, size_t bufferSize, ImGuiInputTextFlags flags)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
@@ -320,6 +549,24 @@ namespace Glory::Editor
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
+	}
+
+	bool EditorUI::InputText(YAMLFileRef& file, const std::filesystem::path& path, ImGuiInputTextFlags flags)
+	{
+		Scope s{ path };
+		const std::string oldValue = file[path].As<std::string>();
+		strcpy(m_TextBuffer, oldValue.c_str());
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputText(label.string(), m_TextBuffer, TEXTSIZE, flags))
+		{
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, std::string(m_TextBuffer));
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
 	}
 
 	bool EditorUI::InputDropdown(std::string_view label, const std::vector<std::string_view>& options, size_t* index, std::string_view value)
@@ -396,7 +643,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputEnum(std::string_view label, uint32_t typeHash, uint32_t* value, std::vector<uint32_t> excludeValues)
+	bool EditorUI::InputEnum(std::string_view label, uint32_t typeHash, uint32_t* value, const std::vector<uint32_t>& excludeValues)
 	{
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 
@@ -414,7 +661,7 @@ namespace Glory::Editor
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		float maxWidth = ImGui::GetContentRegionAvail().x;
 		ImGui::PushID(label.data());
-		if (!label.empty())
+		if (!label.empty() && !HasFlag(Flag::NoLabel))
 		{
 			ImGui::TextUnformatted(label.data());
 			maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
@@ -454,6 +701,29 @@ namespace Glory::Editor
 		ImGui::PopID();
 
 		return change;
+	}
+
+	bool EditorUI::InputEnum(YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, const std::vector<uint32_t>& excludeValues)
+	{
+		Scope s{ path };
+		const std::string strValue = file[path].As<std::string>();
+		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		uint32_t oldValue = 0;
+		pEnumType->FromString(strValue, &oldValue);
+		uint32_t newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputEnum(label.string(),typeHash, &newValue, excludeValues))
+		{
+			std::string newValueStr;
+			pEnumType->ToString(&newValue, newValueStr);
+			Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, strValue, newValueStr);
+			Undo::StopRecord();
+			return true;
+		}
+		return false;
 	}
 
 	bool EditorUI::InputLayerMask(std::string_view label, LayerMask* data)
@@ -637,5 +907,23 @@ namespace Glory::Editor
 		m_CleanNameBuffer[m_BufferWriteIndex] = '\0';
 		++m_BufferWriteIndex;
 		return m_CleanNameBuffer;
+	}
+
+	void EditorUI::PushFlag(Flag flag)
+	{
+		m_FlagsStack.push_back(flag);
+		m_UIFlags |= flag;
+	}
+
+	void EditorUI::PopFlag()
+	{
+		Flag back = m_FlagsStack.back();
+		m_FlagsStack.pop_back();
+		m_UIFlags &= ~back;
+	}
+
+	bool EditorUI::HasFlag(Flag flag)
+	{
+		return (m_UIFlags & flag) == flag;
 	}
 }
