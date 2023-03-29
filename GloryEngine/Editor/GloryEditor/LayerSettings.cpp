@@ -21,17 +21,8 @@ namespace Glory::Editor
 			const std::string label = "Layer " + std::to_string(i);
 			const std::string layerName = layerNameNode.As<std::string>();
 			strcpy(LAYER_BUFFER, layerName.data());
-			if (EditorUI::InputText(label.data(), LAYER_BUFFER, LAYER_BUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			if (EditorUI::InputText(m_YAMLFile, layerNameNode.Path(), ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				Undo::StartRecord("Rename Layer");
-				YAML::Node oldValue = YAML::Node(YAML::NodeType::Scalar);
-				YAML::Node newValue = YAML::Node(YAML::NodeType::Scalar);
-				oldValue = layerName;
-				newValue = std::string(LAYER_BUFFER);
-				layerNameNode.Set(std::string(LAYER_BUFFER));
-				Undo::YAMLEdit(m_YAMLFile, layerNameNode.Path(), oldValue, newValue);
-				Undo::StopRecord();
-
 				SaveSettings(ProjectSpace::GetOpenProject());
 				LayerManager::Load();
 			}

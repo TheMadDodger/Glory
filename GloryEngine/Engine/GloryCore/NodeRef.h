@@ -19,6 +19,15 @@ namespace Glory
 		}
 
 		template<typename T>
+		T AsEnum()
+		{
+			const std::string& valueStr = Node().as<std::string>();
+			T value;
+			if (!GloryReflect::Enum<T>().FromString(valueStr, value)) return T(0);
+			return value;
+		}
+
+		template<typename T>
 		void Set(const T& value)
 		{
 			Node() = value;
