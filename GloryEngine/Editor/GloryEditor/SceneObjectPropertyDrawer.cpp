@@ -3,7 +3,8 @@
 
 namespace Glory::Editor
 {
-	bool SceneObjectPropertyDrawer::OnGUI(const std::string& label, SceneObjectRef* data, uint32_t flags) const
+	template<>
+	bool PropertyDrawerTemplate<SceneObjectRef>::OnGUI(const std::string& label, SceneObjectRef* data, uint32_t flags) const
 	{
 		return ObjectPicker::ObjectDropdown(label, data);
 	}

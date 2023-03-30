@@ -29,7 +29,6 @@
 #include "Editor.h"
 #include "ProfilerWindow.h"
 #include "MaterialEditor.h"
-#include "StandardPropertyDrawers.h"
 #include "MaterialInstanceEditor.h"
 #include "EditorSceneManager.h"
 #include "AssetReferencePropertyDrawer.h"
@@ -394,21 +393,21 @@ namespace Glory::Editor
 
 	void MainEditor::RegisterPropertyDrawers()
 	{
-		PropertyDrawer::RegisterPropertyDrawer<FloatDrawer>();
-		PropertyDrawer::RegisterPropertyDrawer<IntDrawer>();
-		PropertyDrawer::RegisterPropertyDrawer<BoolDrawer>();
-		PropertyDrawer::RegisterPropertyDrawer<DoubleDrawer>();
-		PropertyDrawer::RegisterPropertyDrawer<Vector2Drawer>();
-		PropertyDrawer::RegisterPropertyDrawer<Vector3Drawer>();
-		PropertyDrawer::RegisterPropertyDrawer<Vector4Drawer>();
-		PropertyDrawer::RegisterPropertyDrawer<QuatDrawer>();
-		PropertyDrawer::RegisterPropertyDrawer<LayerMaskDrawer>();
-		PropertyDrawer::RegisterPropertyDrawer<LayerRefDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<float>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<int>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<double>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec2>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec3>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec4>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::quat>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<LayerMask>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<LayerRef>>();
+
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<EnumPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<StructPropertyDrawer>();
-		PropertyDrawer::RegisterPropertyDrawer<SceneObjectPropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<SceneObjectRef>>();
 		PropertyDrawer::RegisterPropertyDrawer<SceneObjectRedirectPropertyDrawer>();
 	}
 

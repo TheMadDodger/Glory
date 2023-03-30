@@ -8,7 +8,6 @@
 
 #include <Reflection.h>
 #include "ScriptedComponentEditor.h"
-#include "MeshMaterialPropertyDrawer.h"
 
 namespace Glory::Editor
 {
@@ -36,7 +35,7 @@ namespace Glory::Editor
 
 		EditorPlayer::RegisterLoopHandler(this);
 
-		PropertyDrawer::RegisterPropertyDrawer<MeshMaterialPropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<SimplePropertyDrawerTemplate<MeshMaterial>>();
 	}
 
 	const char* EntityScenesEditorExtension::ModuleName()

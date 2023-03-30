@@ -79,31 +79,27 @@ namespace Glory::Editor
 	bool PropertyDrawer::DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags)
 	{
 		m_pCurrentFieldDataStack.push_back(pFieldData);
-		uint32_t typeHash = pFieldData->Type();
-		uint32_t elementTypeHash = pFieldData->ArrayElementType();
 
 		std::string_view name = pFieldData->Name();
 		m_CurrentPropertyPath.append(name);
 
-		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		if (pFieldData->Type() == ST_Array)
 		{
-			return propertyDrawer->GetPropertyTypeHash() == typeHash;
-		});
-
-		if (it != m_PropertyDrawers.end())
-		{
-			PropertyDrawer* drawer = *it;
-			const bool change = drawer->Draw(pFieldData->Name(), data, elementTypeHash, flags);
-			m_pCurrentFieldDataStack.pop_back();
-			return change;
+			return GetPropertyDrawer(ST_Array)->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
 		}
 
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
 			const bool change = DrawProperty(pFieldData->Name(), pTypeData, data, flags);
 			m_pCurrentFieldDataStack.pop_back();
 			return change;
+		}
+
+		PropertyDrawer* pDrawer = GetPropertyDrawer(pFieldData->Type());
+		if (pDrawer)
+		{
+			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->Type(), flags);
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
@@ -120,41 +116,23 @@ namespace Glory::Editor
 			m_CurrentPropertyPath = "";
 		}
 
-		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		PropertyDrawer* pDrawer = GetPropertyDrawer(pTypeData->TypeHash());
+		if (pDrawer)
 		{
-			return propertyDrawer->GetPropertyTypeHash() == pTypeData->InternalTypeHash();
-		});
-
-		if (it != m_PropertyDrawers.end())
-		{
-			PropertyDrawer* drawer = *it;
-			const bool change = drawer->Draw(label, data, pTypeData->TypeHash(), flags);
-			m_pCurrentFieldDataStack.pop_back();
-			return change;
+			return pDrawer->Draw(label, data, pTypeData->TypeHash(), flags);
 		}
 
-		bool change = false;
-
-		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-
-		ImGui::PushID(label.c_str());
-
-		if (ImGui::TreeNodeEx("header", node_flags, label.data()))
+		PropertyDrawer* pInternalDrawer = GetPropertyDrawer(pTypeData->InternalTypeHash());
+		if (pInternalDrawer)
 		{
-			for (size_t i = 0; i < pTypeData->FieldCount(); i++)
-			{
-				const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-				size_t offset = pFieldData->Offset();
-				void* pAddress = (void*)((char*)(data)+offset);
-				change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, 0);
-			}
-			ImGui::TreePop();
+			return pInternalDrawer->Draw(label, data, pTypeData->TypeHash(), flags);
 		}
-		ImGui::PopID();
+
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), label.c_str());
 
 		if (setRootType)
 			m_pRootTypeData = nullptr;
-		return change;
+		return false;
 	}
 
 	bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)

@@ -32,7 +32,6 @@ namespace Glory::Editor
 				const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
 				size_t offset = pFieldData->Offset();
 				void* pAddress = (void*)((char*)(pRegistry->GetComponentAddress(entity, componentID)) + offset);
-				std::string labelSuffix = std::to_string(componentID);
 				change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, GloryReflect::Reflect::GetFieldFlags(pFieldData));
 			}
 		}

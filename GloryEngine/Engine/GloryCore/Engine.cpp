@@ -304,6 +304,11 @@ namespace Glory
 		ResourceType::RegisterType<LayerMask>();
 		ResourceType::RegisterType<SceneObjectRef>();
 
+		GloryReflect::Reflect::RegisterBasicType<glm::vec2>("vec2");
+		GloryReflect::Reflect::RegisterBasicType<glm::vec3>("vec3");
+		GloryReflect::Reflect::RegisterBasicType<glm::vec4>("vec4");
+		GloryReflect::Reflect::RegisterBasicType<glm::quat>("quat");
+
 		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
 		GloryReflect::Reflect::RegisterBasicType<LayerRef>("LayerRef");
 		GloryReflect::Reflect::RegisterBasicType<LayerMask>();
