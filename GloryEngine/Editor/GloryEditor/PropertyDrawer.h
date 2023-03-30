@@ -34,10 +34,11 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void RegisterPropertyDrawer(PropertyDrawer* pDrawer);
 
-		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
-		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags);
+
+		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags);
 
@@ -102,7 +103,7 @@ namespace Glory::Editor
 			return true;
 		}
 
-		virtual bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const = 0;
+		bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const;
 	};
 
 	template<typename PropertyType>
@@ -159,6 +160,6 @@ namespace Glory::Editor
 			return false;
 		}
 
-		virtual bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const = 0;
+		bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const;
 	};
 }

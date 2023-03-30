@@ -4,12 +4,6 @@
 
 namespace Glory::Editor
 {
-    class SceneObjectPropertyDrawer : public PropertyDrawerTemplate<SceneObjectRef>
-    {
-	protected:
-		virtual bool OnGUI(const std::string& label, SceneObjectRef* data, uint32_t flags) const override;
-    };
-
     /* Redirects property drawing of type ST_Object to the SceneObjectPropertyDrawer above */
     class SceneObjectRedirectPropertyDrawer : public PropertyDrawer
     {
