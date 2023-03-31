@@ -14,7 +14,7 @@ namespace Glory::Editor
 		bool change = AssetPicker::ResourceDropdown(label, pReferenceMember->TypeHash(), pReferenceMember->AssetUUIDMember());
 		if (change)
 		{
-			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 			pAction->SetOldValue(&oldValue);
 			pAction->SetOldValue(pReferenceMember->AssetUUIDMember());
 			Undo::AddAction(pAction);

@@ -31,13 +31,10 @@ namespace Glory
 		out << YAML::Value << (uint64_t)uuid;
 	}
 
-	void AssetReferencePropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	void AssetReferencePropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
 	{
-		void* pAssetRefAddress = pFieldData->GetAddress(data);
-
-		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)pAssetRefAddress;
+		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)data;
 		UUID uuid = object.as<uint64_t>();
-
 		pReferenceMember->SetUUID(uuid);
 	}
 }

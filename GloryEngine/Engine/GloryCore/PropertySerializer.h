@@ -34,8 +34,8 @@ namespace Glory
 		static void DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Node& object);
 
 		static void SerializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Emitter& out);
-		static void DeserializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Node& object);
 		static void SerializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out);
+		static void DeserializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Node& object);
 		static void DeserializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object);
 
 		virtual uint32_t GetSerializedTypeHash() const;
@@ -49,7 +49,7 @@ namespace Glory
 		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, YAML::Node& object);
 		
 		virtual void Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out);
-		virtual void Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object);
+		virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object);
 
 
 	private:
@@ -100,11 +100,11 @@ namespace Glory
 			memcpy((void*)&buffer[offset], (void*)&value, size);
 		}
 
-		virtual void Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object) override
+		virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object) override
 		{
 			if (!object.IsDefined()) return;
-			T value = object.as<T>();
-			pFieldData->Set(data, &value);
+			T* value = (T*)data;
+			*value = object.as<T>();
 		}
 	};
 }

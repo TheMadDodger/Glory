@@ -99,6 +99,7 @@ namespace Glory::Editor
 		PropertyDrawer* pDrawer = GetPropertyDrawer(pFieldData->Type());
 		if (pDrawer)
 		{
+			m_pCurrentFieldDataStack.pop_back();
 			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->Type(), flags);
 		}
 
@@ -113,26 +114,30 @@ namespace Glory::Editor
 		if (setRootType)
 		{
 			m_pRootTypeData = pTypeData;
-			m_CurrentPropertyPath = "";
 		}
 
+		bool change = false;
 		PropertyDrawer* pDrawer = GetPropertyDrawer(pTypeData->TypeHash());
+		PropertyDrawer* pInternalDrawer = GetPropertyDrawer(pTypeData->InternalTypeHash());
 		if (pDrawer)
 		{
-			return pDrawer->Draw(label, data, pTypeData->TypeHash(), flags);
+			change = pDrawer->Draw(label, data, pTypeData->TypeHash(), flags);
 		}
-
-		PropertyDrawer* pInternalDrawer = GetPropertyDrawer(pTypeData->InternalTypeHash());
-		if (pInternalDrawer)
+		else if (pInternalDrawer)
 		{
-			return pInternalDrawer->Draw(label, data, pTypeData->TypeHash(), flags);
+			change = pInternalDrawer->Draw(label, data, pTypeData->TypeHash(), flags);
 		}
-
-		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), label.c_str());
+		else
+		{
+			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), label.c_str());
+		}
 
 		if (setRootType)
+		{
 			m_pRootTypeData = nullptr;
-		return false;
+			m_CurrentPropertyPath = "";
+		}
+		return change;
 	}
 
 	bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)

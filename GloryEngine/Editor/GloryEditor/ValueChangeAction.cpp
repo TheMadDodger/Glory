@@ -6,8 +6,8 @@
 
 namespace Glory::Editor
 {
-	ValueChangeAction::ValueChangeAction(const std::vector<const GloryReflect::FieldData*>& pFieldStack)
-		: m_pFieldStack(pFieldStack)
+	ValueChangeAction::ValueChangeAction(const GloryReflect::TypeData* pType, const std::filesystem::path& path)
+		: m_pRootType(pType), m_PropertyPath(path)
 	{
 	}
 
@@ -17,7 +17,18 @@ namespace Glory::Editor
 
 	void ValueChangeAction::SetOldValue(void* pObject)
 	{
-		const GloryReflect::FieldData* pField = m_pFieldStack[m_pFieldStack.size() - 1];
+		const GloryReflect::FieldData* pField = nullptr;
+		const GloryReflect::TypeData* pType = m_pRootType;
+		for (const std::filesystem::path& subPath : m_PropertyPath)
+		{
+			pField = pType->GetFieldData(subPath.string());
+			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+		}
+
+		if (!pField)
+		{
+			throw std::exception("Unknown field");
+		}
 
 		// Rewind offset so Get() reads from the correct address
 		void* pAddress = (void*)((char*)(pObject)-pField->Offset());
@@ -30,7 +41,18 @@ namespace Glory::Editor
 
 	void ValueChangeAction::SetNewValue(void* pObject)
 	{
-		const GloryReflect::FieldData* pField = m_pFieldStack[m_pFieldStack.size() - 1];
+		const GloryReflect::FieldData* pField = nullptr;
+		const GloryReflect::TypeData* pType = m_pRootType;
+		for (const std::filesystem::path& subPath : m_PropertyPath)
+		{
+			pField = pType->GetFieldData(subPath.string());
+			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+		}
+
+		if (!pField)
+		{
+			throw std::exception("Unknown field");
+		}
 
 		// Rewind offset so Get() reads from the correct address
 		void* pAddress = (void*)((char*)(pObject)-pField->Offset());
@@ -45,23 +67,23 @@ namespace Glory::Editor
 	{
 		Object* pObject = Object::FindObject(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
-		for (size_t i = 0; i < m_pFieldStack.size() - 1; i++)
+
+		const GloryReflect::FieldData* pField = nullptr;
+		const GloryReflect::TypeData* pType = m_pRootType;
+		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
-			const GloryReflect::FieldData* pField = m_pFieldStack[i];
-			if (pField->Type() == ST_Array)
-			{
-				/* Get array address */
-				pAddress = pField->GetAddress(pAddress);
-				/* Get array element address */
-				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pField->ArrayElementType(), 0);
-				continue;
-			}
+			pField = pType->GetFieldData(subPath.string());
+			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
 			/* Get field address */
 			pAddress = pField->GetAddress(pAddress);
 		}
 
-		const GloryReflect::FieldData* pField = m_pFieldStack[m_pFieldStack.size() - 1];
+		if (!pField)
+		{
+			throw std::exception("Unknown field");
+		}
+
 		PropertySerializer::DeserializeProperty(pField, pAddress, m_OldValue[pField->Name()]);
 	}
 
@@ -69,23 +91,23 @@ namespace Glory::Editor
 	{
 		Object* pObject = Object::FindObject(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
-		for (size_t i = 0; i < m_pFieldStack.size() - 1; i++)
+
+		const GloryReflect::FieldData* pField = nullptr;
+		const GloryReflect::TypeData* pType = m_pRootType;
+		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
-			const GloryReflect::FieldData* pField = m_pFieldStack[i];
-			if (pField->Type() == ST_Array)
-			{
-				/* Get array address */
-				pAddress = pField->GetAddress(pAddress);
-				/* Get array element address */
-				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pField->ArrayElementType(), 0);
-				continue;
-			}
+			pField = pType->GetFieldData(subPath.string());
+			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
 			/* Get field address */
 			pAddress = pField->GetAddress(pAddress);
 		}
 
-		const GloryReflect::FieldData* pField = m_pFieldStack[m_pFieldStack.size() - 1];
+		if (!pField)
+		{
+			throw std::exception("Unknown field");
+		}
+
 		PropertySerializer::DeserializeProperty(pField, pAddress, m_NewValue[pField->Name()]);
 	}
 }

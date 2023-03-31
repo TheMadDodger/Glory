@@ -37,28 +37,17 @@ namespace Glory
 		out << YAML::EndMap;
 	}
 
-	void StructPropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	void StructPropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
 	{
-		void* pStructAddress = pFieldData->GetAddress(data);
-
-		uint32_t structTypeHash = pFieldData->ArrayElementType();
-		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(structTypeHash);
-
-		const GloryReflect::TypeData* pStructTypeData = GloryReflect::Reflect::GetTyeData(structTypeHash);
-		if (pSerializer)
-		{
-			const GloryReflect::FieldData* pFieldData = pStructTypeData->GetFieldData(0);
-			const GloryReflect::FieldData fieldData(structTypeHash, "", pFieldData->TypeName(), 0, pFieldData->Size());
-			pSerializer->Deserialize(&fieldData, pStructAddress, object);
-			return;
-		}
-
-		//YAML::Node structObject = object[pFieldData->Name()];
+		const GloryReflect::TypeData* pStructTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 		for (size_t i = 0; i < pStructTypeData->FieldCount(); i++)
 		{
 			const GloryReflect::FieldData* pSubFieldData = pStructTypeData->GetFieldData(i);
+			size_t offset = pSubFieldData->Offset();
+			void* pAddress = (void*)((char*)(data)+offset);
+
 			YAML::Node structFieldObject = object[pSubFieldData->Name()];
-			PropertySerializer::DeserializeProperty(pSubFieldData, pStructAddress, structFieldObject);
+			PropertySerializer::DeserializeProperty(pSubFieldData, pAddress, structFieldObject);
 		}
 	}
 }

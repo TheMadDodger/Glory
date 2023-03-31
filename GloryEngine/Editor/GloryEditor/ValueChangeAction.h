@@ -9,7 +9,7 @@ namespace Glory::Editor
     class ValueChangeAction : public IAction
     {
     public:
-        GLORY_EDITOR_API ValueChangeAction(const std::vector<const GloryReflect::FieldData*>& pFieldStack);
+        GLORY_EDITOR_API ValueChangeAction(const GloryReflect::TypeData* pType, const std::filesystem::path& path);
         GLORY_EDITOR_API virtual ~ValueChangeAction();
 
         GLORY_EDITOR_API void SetOldValue(void* pObject);
@@ -20,7 +20,8 @@ namespace Glory::Editor
         virtual GLORY_EDITOR_API void OnRedo(const ActionRecord& actionRecord);
 
     private:
-        const std::vector<const GloryReflect::FieldData*> m_pFieldStack;
+        const GloryReflect::TypeData* m_pRootType;
+        const std::filesystem::path m_PropertyPath;
         YAML::Node m_OldValue;
         YAML::Node m_NewValue;
     };
