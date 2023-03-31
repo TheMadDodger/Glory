@@ -17,9 +17,9 @@ namespace Glory
 		void SetUUID(UUID uuid);
 		Resource* GetResource();
 
-		virtual const uint32_t TypeHash() = 0;
+		virtual const uint32_t TypeHash() { return 0; };
 
-		virtual AssetReferenceBase* CreateCopy() = 0;
+		virtual AssetReferenceBase* CreateCopy() { return new AssetReferenceBase(m_AssetUUID); };
 
 	protected:
 		REFLECTABLE(AssetReferenceBase, (UUID) (m_AssetUUID))
