@@ -10,11 +10,7 @@ namespace Glory
 		virtual ~ShapePropertySerializer();
 
 	private:
-		void Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out) override;
-		void Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object) override;
-
-		void Serialize(const SerializedProperty* serializedProperty, YAML::Emitter& out) override {}
-		void Deserialize(const SerializedProperty* serializedProperty, YAML::Node& object) override {}
-		void Deserialize(std::any& out, YAML::Node& object) override {}
+		void Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out) override;
+		void Deserialize(void* data, uint32_t typeHash, YAML::Node& object) override;
     };
 }

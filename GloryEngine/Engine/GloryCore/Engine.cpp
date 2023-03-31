@@ -9,7 +9,6 @@
 #include "StructPropertySerializer.h"
 #include "SceneObjectRefSerializer.h"
 #include "ShapePropertySerializer.h"
-#include "SerializedPropertyManager.h"
 #include "ShaderManager.h"
 #include "ScriptExtensions.h"
 #include "ScriptingExtender.h"

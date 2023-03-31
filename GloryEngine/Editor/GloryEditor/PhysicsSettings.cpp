@@ -10,9 +10,9 @@ namespace Glory::Editor
 	{
 		ImGui::BeginChild("Input Settings");
 
-		YAML::Node collisionMatrixNode = m_SettingsNode["CollisionMatrix"];
+		NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
 		if (!collisionMatrixNode.IsSequence())
-			collisionMatrixNode = YAML::Node(YAML::NodeType::Sequence);
+			collisionMatrixNode.Set(YAML::Node(YAML::NodeType::Sequence));
 
 		bool changed = false;
 
@@ -78,16 +78,16 @@ namespace Glory::Editor
 			{
 				ImGui::PushID(x);
 
-				YAML::Node xNode = collisionMatrixNode[x];
+				NodeValueRef xNode = collisionMatrixNode[x];
 				if (!xNode.IsSequence())
-					xNode = YAML::Node(YAML::NodeType::Sequence);
+					xNode.Set(YAML::Node(YAML::NodeType::Sequence));
 
-				YAML::Node yNode = xNode[y];
-				if (!yNode.IsDefined())
-					yNode = true;
+				NodeValueRef yNode = xNode[y];
+				if (!yNode.Exists())
+					yNode.Set(true);
 
 				const Layer* pXLayer = LayerManager::GetLayerAtIndex(x);
-				bool value = yNode.as<bool>();
+				bool value = yNode.As<bool>();
 
 				if (!x)
 				{
@@ -109,7 +109,7 @@ namespace Glory::Editor
 
 				if (ImGui::Checkbox("##val", &value))
 				{
-					yNode = value;
+					yNode.Set(value);
 					changed = true;
 				}
 
@@ -139,21 +139,21 @@ namespace Glory::Editor
 
 	void PhysicsSettings::OnStartPlay_Impl()
 	{
-		YAML::Node collisionMatrixNode = m_SettingsNode["CollisionMatrix"];
+		NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
 		if (!collisionMatrixNode.IsSequence())
 			return;
 
 		std::vector<std::vector<bool>> matrix;
 		matrix.resize(LayerManager::LayerCount());
 
-		for (size_t x = 0; x < collisionMatrixNode.size(); ++x)
+		for (size_t x = 0; x < collisionMatrixNode.Size(); ++x)
 		{
 			matrix[x].resize(LayerManager::LayerCount());
-			YAML::Node xNode = collisionMatrixNode[x];
-			for (size_t y = 0; y < xNode.size(); ++y)
+			NodeValueRef xNode = collisionMatrixNode[x];
+			for (size_t y = 0; y < xNode.Size(); ++y)
 			{
-				YAML::Node yNode = xNode[y];
-				matrix[x][y] = yNode.as<bool>();
+				NodeValueRef yNode = xNode[y];
+				matrix[x][y] = yNode.As<bool>();
 			}
 		}
 

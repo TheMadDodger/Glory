@@ -43,17 +43,8 @@ namespace Glory
 		{
 			T* pShape = shapeProperty->ShapePointer<T>();
 
-			out << YAML::Key << "Shape";
-			out << YAML::Value << YAML::BeginMap;
-
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(ResourceType::GetHash<T>());
-			for (size_t i = 0; i < pTypeData->FieldCount(); ++i)
-			{
-				const GloryReflect::FieldData* pField = pTypeData->GetFieldData(i);
-				PropertySerializer::SerializeProperty(pField, pShape, out);
-			}
-
-			out << YAML::EndMap;
+			PropertySerializer::SerializeProperty("Shape", pTypeData, pShape, out);
 		}
 
 		void DeserializeInternal(ShapeProperty* shapeProperty, YAML::Node& object) const override
@@ -63,13 +54,8 @@ namespace Glory
 			T* pShape = shapeProperty->ShapePointer<T>();
 
 			YAML::Node shape = object["Shape"];
-
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(ResourceType::GetHash<T>());
-			for (size_t i = 0; i < pTypeData->FieldCount(); ++i)
-			{
-				const GloryReflect::FieldData* pField = pTypeData->GetFieldData(i);
-				PropertySerializer::DeserializeProperty(pField, pShape, shape[pField->Name()]);
-			}
+			PropertySerializer::DeserializeProperty(pTypeData, pShape, shape);
 		}
 	};
 
@@ -89,24 +75,26 @@ namespace Glory
 
 	ShapePropertySerializer::ShapePropertySerializer() : PropertySerializer(ResourceType::GetHash<ShapeProperty>()) {}
 
-	void ShapePropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	void ShapePropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
 	{
-		size_t offset = pFieldData->Offset();
-		void* pAddress = (void*)((char*)(data)+offset);
-
-		ShapeProperty* value = (ShapeProperty*)pAddress;
+		ShapeProperty* value = (ShapeProperty*)data;
 		std::string shapeType;
 		if (!GloryReflect::Enum<ShapeType>().ToString(value->m_ShapeType, shapeType)) return;
 
-		out << YAML::Key << pFieldData->Name();
-		out << YAML::Value << YAML::BeginMap;
+		if (!name.empty())
+		{
+			out << YAML::Key << name;
+			out << YAML::Value;
+		}
+
+		out << YAML::BeginMap;
 		out << YAML::Key << "ShapeType";
 		out << YAML::Value << shapeType;
 		ShapeSerializers::Serialize(value, out);
 		out << YAML::EndMap;
 	}
 
-	void ShapePropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	void ShapePropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
 		YAML::Node shapeTypeNode = object["ShapeType"];
@@ -114,10 +102,7 @@ namespace Glory
 		ShapeType shapeTye;
 		if (!GloryReflect::Enum<ShapeType>().FromString(shapeTypeStr, shapeTye)) return;
 
-		size_t offset = pFieldData->Offset();
-		void* pAddress = (void*)((char*)(data)+offset);
-
-		ShapeProperty* value = (ShapeProperty*)pAddress;
+		ShapeProperty* value = (ShapeProperty*)data;
 		ShapeSerializers::Deserialize(shapeTye, value, object);
 	}
 }
