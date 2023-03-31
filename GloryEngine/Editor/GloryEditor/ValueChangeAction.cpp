@@ -31,6 +31,8 @@ namespace Glory::Editor
 			else
 				pField = pType->GetFieldData(pathStr);
 
+			if (!pField) return;
+
 			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
@@ -62,6 +64,8 @@ namespace Glory::Editor
 			else
 				pField = pType->GetFieldData(pathStr);
 
+			if (!pField) return;
+
 			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
@@ -92,6 +96,7 @@ namespace Glory::Editor
 				if (!pField) throw new std::exception("Unexpected property path");
 				const size_t index = (size_t)std::stoul(pathStr.substr(2));
 				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				if (!pField) return;
 				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get element address */
@@ -100,6 +105,7 @@ namespace Glory::Editor
 			else
 			{
 				pField = pType->GetFieldData(pathStr);
+				if (!pField) return;
 				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get field address */
@@ -130,6 +136,7 @@ namespace Glory::Editor
 				if (!pField) throw new std::exception("Unexpected property path");
 				const size_t index = (size_t)std::stoul(pathStr.substr(2));
 				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				if (!pField) return;
 				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get element address */
@@ -138,6 +145,7 @@ namespace Glory::Editor
 			else
 			{
 				pField = pType->GetFieldData(pathStr);
+				if (!pField) return;
 				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get field address */

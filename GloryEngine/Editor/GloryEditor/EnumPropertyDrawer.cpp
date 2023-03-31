@@ -31,7 +31,7 @@ namespace Glory::Editor
 		return EditorUI::InputEnum(label, typeHash, currentValue);
 	}
 
-	bool EnumPropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags) const
+	bool EnumPropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
 		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);

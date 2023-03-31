@@ -45,18 +45,8 @@ namespace Glory::Editor
 		bool OnGUI(ShapeProperty* shapeProperty) const override
 		{
 			T* data = shapeProperty->ShapePointer<T>();
-
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(ResourceType::GetHash<T>());
-			bool change = false;
-			for (size_t i = 0; i < pTypeData->FieldCount(); ++i)
-			{
-				const GloryReflect::FieldData* pField = pTypeData->GetFieldData(i);
-				size_t offset = pField->Offset();
-				void* pAddress = (void*)((char*)(data)+offset);
-				change |= PropertyDrawer::DrawProperty(pField, pAddress, 0);
-			}
-
-			return change;
+			return PropertyDrawer::DrawProperty("", pTypeData, data, 0);
 		}
 
 		void SetShapeInternal(ShapeProperty* shapeProperty) const override
@@ -85,7 +75,7 @@ namespace Glory::Editor
 		if (OnGUI(label, (ShapeProperty*)data, flags))
 		{
 			ShapeProperty newValue = *(ShapeProperty*)data;
-			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 			pAction->SetOldValue(&oldValue);
 			pAction->SetNewValue(&newValue);
 			Undo::AddAction(pAction);
@@ -101,7 +91,7 @@ namespace Glory::Editor
 		ShapeProperty originalValue = value;
 		if (OnGUI(label, &value, flags))
 		{
-			Undo::AddAction(new PropertyAction<ShapeProperty>(label, originalValue, value));
+			//Undo::AddAction(new PropertyAction<ShapeProperty>(label, originalValue, value));
 		}
 		if (originalValue == value) return false;
 		memcpy((void*)&buffer[offset], (void*)&value, size);
