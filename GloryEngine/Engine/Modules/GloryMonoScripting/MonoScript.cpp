@@ -7,6 +7,7 @@
 #include <AssetDatabase.h>
 #include <Reflection.h>
 #include <PropertySerializer.h>
+#include <AssetReference.h>
 
 namespace Glory
 {
@@ -95,22 +96,21 @@ namespace Glory
 			{
 			case ST_Asset:
 			{
-				UUID uuid = 0;
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &uuid, 0);
+				AssetReferenceBase assetReference;
 				MonoObject* pMonoObject;
 				pField->GetValue(pDummyObject, &pMonoObject);
 				if (pMonoObject)
 				{
 					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_objectID");
-					mono_field_get_value(pMonoObject, pIDField, &uuid);
+					mono_field_get_value(pMonoObject, pIDField, assetReference.AssetUUIDMember());
 				}
-				PropertySerializer::SerializeProperty(&prop, e);
+
+				PropertySerializer::GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), e);
 				break;
 			}
 			case ST_Object:
 			{
 				SceneObjectRef objectRef;
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &objectRef, 0);
 				MonoObject* pMonoObject;
 				pField->GetValue(pDummyObject, &pMonoObject);
 				if (pMonoObject)
@@ -120,15 +120,16 @@ namespace Glory
 					mono_field_get_value(pMonoObject, pIDField, objectRef.ObjectUUIDMember());
 					mono_field_get_value(pMonoObject, pSceneIDField, objectRef.SceneUUIDMember());
 				}
-				PropertySerializer::SerializeProperty(&prop, e);
+
+				PropertySerializer::GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), e);
 				break;
 			}
 
 			default:
 				GloryReflect::Reflect::CreateAsTemporary(pField->ElementTypeHash(), [&](void* value) {
-					SerializedProperty prop(0, pField->Name(), pField->ElementTypeHash(), value, 0);
+					const GloryReflect::TypeData* pType = GloryReflect::Reflect::GetTyeData(pField->ElementTypeHash());
 					pField->GetValue(pDummyObject, value);
-					PropertySerializer::SerializeProperty(&prop, e);
+					PropertySerializer::SerializeProperty(pField->Name(), pType, value, e);
 				});
 				break;
 			}
@@ -158,18 +159,16 @@ namespace Glory
 			{
 			case ST_Asset:
 			{
-				UUID uuid = 0;
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &uuid, 0);
-				PropertySerializer::DeserializeProperty(&prop, valueNode);
-				MonoObject* pAssetObject = MonoAssetManager::MakeMonoAssetObject(uuid, pField->TypeName());
+				AssetReferenceBase assetReference;
+				PropertySerializer::GetSerializer(ST_Asset)->Deserialize(&assetReference, pField->ElementTypeHash(), valueNode);
+				MonoObject* pAssetObject = MonoAssetManager::MakeMonoAssetObject(assetReference.AssetUUID(), pField->TypeName());
 				pField->SetValue(pMonoObject, pAssetObject);
 				break;
 			}
 			case ST_Object:
 			{
 				SceneObjectRef objectRef;
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &objectRef, 0);
-				PropertySerializer::DeserializeProperty(&prop, valueNode);
+				PropertySerializer::GetSerializer(ST_Object)->Deserialize(&objectRef, pField->ElementTypeHash(), valueNode);
 
 				GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(objectRef.SceneUUID());
 				if (!pScene) continue;
@@ -184,8 +183,8 @@ namespace Glory
 
 			default:
 				GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-					SerializedProperty prop(0, pField->Name(), pField->TypeHash(), value, 0);
-					PropertySerializer::DeserializeProperty(&prop, valueNode);
+					const GloryReflect::TypeData* pType = GloryReflect::Reflect::GetTyeData(pField->ElementTypeHash());
+					PropertySerializer::DeserializeProperty(pType, value, valueNode);
 					pField->SetValue(pMonoObject, value);
 				});
 				break;
@@ -213,26 +212,24 @@ namespace Glory
 			{
 			case ST_Asset:
 			{
-				UUID uuid = 0;
+				AssetReferenceBase assetReference;
 				MonoObject* pMonoResourceObject = nullptr;
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &uuid, 0);
 				pField->GetValue(pMonoObject, &pMonoResourceObject);
 
 				if (pMonoResourceObject)
 				{
 					MonoClass* pMonoClass = mono_object_get_class(pMonoResourceObject);
 					MonoClassField* pIDField = mono_class_get_field_from_name(pMonoClass, "_objectID");
-					mono_field_get_value(pMonoResourceObject, pIDField, &uuid);
+					mono_field_get_value(pMonoResourceObject, pIDField, assetReference.AssetUUIDMember());
 				}
 
-				PropertySerializer::SerializeProperty(&prop, emitter);
+				PropertySerializer::GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), emitter);
 
 				break;
 			}
 			case ST_Object:
 			{
 				SceneObjectRef objectRef;
-				SerializedProperty prop(0, pField->Name(), pField->TypeHash(), pField->ElementTypeHash(), &objectRef, 0);
 				MonoObject* pMonoSceneObject;
 				pField->GetValue(pMonoObject, &pMonoSceneObject);
 				if (pMonoSceneObject)
@@ -242,15 +239,15 @@ namespace Glory
 					mono_field_get_value(pMonoSceneObject, pIDField, objectRef.ObjectUUIDMember());
 					mono_field_get_value(pMonoSceneObject, pSceneIDField, objectRef.SceneUUIDMember());
 				}
-				PropertySerializer::SerializeProperty(&prop, emitter);
+				PropertySerializer::GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), emitter);
 				break;
 			}
 
 			default:
 				GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-					SerializedProperty prop(0, pField->Name(), pField->TypeHash(), value, 0);
+					const GloryReflect::TypeData* pType = GloryReflect::Reflect::GetTyeData(pField->ElementTypeHash());
 					pField->GetValue(pMonoObject, value);
-					PropertySerializer::SerializeProperty(&prop, emitter);
+					PropertySerializer::SerializeProperty(pField->Name(), pType, value, emitter);
 				});
 				break;
 			}
