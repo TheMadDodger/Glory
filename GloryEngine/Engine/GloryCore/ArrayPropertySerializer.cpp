@@ -11,34 +11,22 @@ namespace Glory
 	{
 	}
 
-	void ArrayPropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	void ArrayPropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
 	{
-		void* pArrayAddress = pFieldData->GetAddress(data);
+		size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
+		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
 
-		uint32_t elementTypeHash = pFieldData->ArrayElementType();
-		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(elementTypeHash);
+		if (!name.empty())
+		{
+			out << YAML::Key << name;
+			out << YAML::Value;
+		}
 
-		size_t size = GloryReflect::Reflect::ArraySize(pArrayAddress, elementTypeHash);
-
-		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(elementTypeHash);
-
-		out << YAML::Key << pFieldData->Name();
-		out << YAML::Value << YAML::BeginSeq;
+		out << YAML::BeginSeq;
 		for (size_t i = 0; i < size; i++)
 		{
-			void* pElementAddress = GloryReflect::Reflect::ElementAddress(pArrayAddress, elementTypeHash, i);
-
-			if (pSerializer)
-			{
-				const GloryReflect::FieldData* pFieldData = pElementTypeData->GetFieldData(0);
-				const GloryReflect::FieldData fieldData(elementTypeHash, "", pFieldData->TypeName(), 0, pFieldData->Size());
-				pSerializer->Serialize(&fieldData, pElementAddress, out);
-				continue;
-			}
-
-			out << YAML::BeginMap;
-			PropertySerializer::SerializeProperty(pElementTypeData, pElementAddress, out);
-			out << YAML::EndMap;
+			void* pElementAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, i);
+			PropertySerializer::SerializeProperty("", pElementTypeData, pElementAddress, out);
 		}
 		out << YAML::EndSeq;
 	}

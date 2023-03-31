@@ -19,6 +19,8 @@ namespace Glory
 
 		virtual const uint32_t TypeHash() = 0;
 
+		virtual AssetReferenceBase* CreateCopy() = 0;
+
 	protected:
 		REFLECTABLE(AssetReferenceBase, (UUID) (m_AssetUUID))
 	};
@@ -35,6 +37,11 @@ namespace Glory
 		{
 			static const uint32_t typeHash = ResourceType::GetHash<T>();
 			return typeHash;
+		}
+
+		AssetReferenceBase* CreateCopy() override
+		{
+			return new AssetReference<T>(m_AssetUUID);
 		}
 
 		T* Get()

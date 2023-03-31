@@ -45,38 +45,46 @@ namespace Glory
 		pSerializer->Deserialize(buffer, offset, size, object);
 	}
 
-	void PropertySerializer::SerializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Emitter& out)
+	void PropertySerializer::SerializeProperty(const std::string& name, const GloryReflect::TypeData* pTypeData, void* data, YAML::Emitter& out)
 	{
-		for (size_t i = 0; i < pTypeData->FieldCount(); i++)
+		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(pTypeData->TypeHash());
+		PropertySerializer* pInternalSerializer = PropertySerializer::GetSerializer(pTypeData->InternalTypeHash());
+		if (pSerializer)
 		{
-			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-			SerializeProperty(pFieldData, data, out);
+			pSerializer->Serialize(name, data, pTypeData->TypeHash(), out);
+			return;
 		}
+		if (pInternalSerializer)
+		{
+			pInternalSerializer->Serialize(name, data, pTypeData->TypeHash(), out);
+			return;
+		}
+
+		throw new std::exception("Missing serializer!");
 	}
 
 	void PropertySerializer::SerializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
 	{
-		// If we have a custom serializer for this type we should prioritize it over serializing each field individually
-		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(pFieldData->Type());
-		if (pSerializer)
+		if (pFieldData->Type() == ST_Array)
 		{
-			pSerializer->Serialize(pFieldData, data, out);
+			return GetSerializer(ST_Array)->Serialize(pFieldData->Name(), data, pFieldData->ArrayElementType(), out);
+		}
+
+		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pFieldData->ArrayElementType());
+		if (pTypeData)
+		{
+			SerializeProperty(pFieldData->Name(), pTypeData, data, out);
 			return;
 		}
 
-		// If no serializer is found we can move onto trying to serialize each field individually given the type exists in our Reflect database
-		const GloryReflect::TypeData* pFieldTypeData = GloryReflect::Reflect::GetTyeData(pFieldData->Type());
-		if (pFieldTypeData)
+		PropertySerializer* pSerializer = GetSerializer(pFieldData->Type());
+		if (pSerializer)
 		{
-			// Address needs to start at the beginning of the field, otherwise Set will write to the wrong offset
-			size_t offset = pFieldData->Offset();
-			void* pAddress = (void*)((char*)(data)+offset);
-
-			out << YAML::Key << pFieldData->Name();
-			out << YAML::Value << YAML::BeginMap;
-			SerializeProperty(pFieldTypeData, pAddress, out);
-			out << YAML::EndMap;
+			pSerializer->Serialize(pFieldData->Name(), data, pFieldData->Type(), out);
+			return;
 		}
+
+		throw new std::exception("Missing serializer!");
 	}
 
 	void PropertySerializer::DeserializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Node& object)
@@ -119,9 +127,6 @@ namespace Glory
 		}
 
 		throw new std::exception("Missing serializer!");
-
-		//size_t offset = pFieldData->Offset();
-		//void* pAddress = (void*)((char*)(data)+offset);
 	}
 
 	uint32_t PropertySerializer::GetSerializedTypeHash() const
@@ -131,7 +136,7 @@ namespace Glory
 
 	void PropertySerializer::Serialize(const std::string&, const std::vector<char>&, uint32_t, size_t, size_t, YAML::Emitter&) {}
 
-	void PropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out) {}
+	void PropertySerializer::Serialize(const std::string&, void*, uint32_t, YAML::Emitter&) {}
 
 	void PropertySerializer::Deserialize(std::vector<char>&, size_t, size_t, YAML::Node&) {}
 

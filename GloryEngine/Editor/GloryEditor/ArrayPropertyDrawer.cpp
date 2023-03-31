@@ -24,24 +24,14 @@ namespace Glory::Editor
 
 		ListView listView{ label.data() };
 
-		size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
+		const size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
 		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
 
 		listView.OnDrawElement = [&](size_t index) {
+			PropertyDrawer::PushPath("##" + std::to_string(index));
 			void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, index);
-			const std::vector<const GloryReflect::FieldData*>& fieldStack = PropertyDrawer::GetCurrentFieldStack();
-
-			PropertyDrawer::PushFieldType(fieldStack[fieldStack.size() - 1]->GetArrayElementFieldData(index));
-			if (pPropertyDrawer)
-			{
-				change |= pPropertyDrawer->Draw("Element " + std::to_string(index), pAddress, typeHash, flags);
-				PropertyDrawer::PopFieldType();
-				return;
-			}
-
 			change |= PropertyDrawer::DrawProperty("Element " + std::to_string(index), pElementTypeData, pAddress, flags);
-			PropertyDrawer::PopFieldType();
+			PropertyDrawer::PopPath();
 		};
 
 		listView.OnAdd = [&]() {

@@ -8,9 +8,10 @@ Entities:
       - UUID: 18204704133723635371
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [0.100000001, 0.100000001, 0.100000001]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [0.100000001, 0.100000001, 0.100000001]
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 9633068980373811153
@@ -19,14 +20,16 @@ Entities:
       - UUID: 884153109342230157
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 822724438160365448
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 17532063210297151852
-        m_Material: 3010624712422607554
+        Properties:
+          m_Mesh: 17532063210297151852
+          m_Material: 3010624712422607554
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 1929165601438965095
@@ -35,14 +38,16 @@ Entities:
       - UUID: 5926581293340248581
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 5602788897470116323
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 12429677753437743544
-        m_Material: 1373122324226100331
+        Properties:
+          m_Mesh: 12429677753437743544
+          m_Material: 1373122324226100331
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 6733794115416260875
@@ -51,14 +56,16 @@ Entities:
       - UUID: 1677671940154398428
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 488602928418974774
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 7675729155273259691
-        m_Material: 3517522003741332949
+        Properties:
+          m_Mesh: 7675729155273259691
+          m_Material: 3517522003741332949
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 16619809777251583583
@@ -67,14 +74,16 @@ Entities:
       - UUID: 12833772403137543774
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 7158727387753955914
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 2450393029431649271
-        m_Material: 12679807362730774903
+        Properties:
+          m_Mesh: 2450393029431649271
+          m_Material: 12679807362730774903
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 496063730323052555
@@ -83,14 +92,16 @@ Entities:
       - UUID: 2737737437624335321
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 10778836007303281280
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 7721550961057073102
-        m_Material: 17419002243068841690
+        Properties:
+          m_Mesh: 7721550961057073102
+          m_Material: 17419002243068841690
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 2818726132249776398
@@ -99,14 +110,16 @@ Entities:
       - UUID: 4537295826793303564
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 6376903139074167370
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 1471158900630878266
-        m_Material: 18433151773314596530
+        Properties:
+          m_Mesh: 1471158900630878266
+          m_Material: 18433151773314596530
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 5200820769716449032
@@ -115,14 +128,16 @@ Entities:
       - UUID: 16494299213209560777
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 4962692106468680399
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 11984165006817897718
-        m_Material: 2727112760671078320
+        Properties:
+          m_Mesh: 11984165006817897718
+          m_Material: 2727112760671078320
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 15503940848487879159
@@ -131,14 +146,16 @@ Entities:
       - UUID: 16372428964147073311
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 4706383678460675586
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 12239620810926317704
-        m_Material: 15256394464770530809
+        Properties:
+          m_Mesh: 12239620810926317704
+          m_Material: 15256394464770530809
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 14584894073713875494
@@ -147,14 +164,16 @@ Entities:
       - UUID: 5735586756526817197
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 9560074955497254908
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 247047318591435938
-        m_Material: 5283983514866805294
+        Properties:
+          m_Mesh: 247047318591435938
+          m_Material: 5283983514866805294
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 996105090416364611
@@ -163,14 +182,16 @@ Entities:
       - UUID: 9097569941761365685
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 11945522542468239055
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 13705869600799594977
-        m_Material: 526352692630726967
+        Properties:
+          m_Mesh: 13705869600799594977
+          m_Material: 526352692630726967
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 2625351190591908217
@@ -179,14 +200,16 @@ Entities:
       - UUID: 8491288171622480265
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 3995664425905671625
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 3684355902571898662
-        m_Material: 12329445205047472005
+        Properties:
+          m_Mesh: 3684355902571898662
+          m_Material: 12329445205047472005
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 16723064688710570144
@@ -195,14 +218,16 @@ Entities:
       - UUID: 15264891153044970248
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 7937987680970231448
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 17541763384336518307
-        m_Material: 1049992442256444805
+        Properties:
+          m_Mesh: 17541763384336518307
+          m_Material: 1049992442256444805
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 4623068161024552477
@@ -211,14 +236,16 @@ Entities:
       - UUID: 16697687432981404117
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 12632948041969612714
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 8191548454703725565
-        m_Material: 14102624392720317306
+        Properties:
+          m_Mesh: 8191548454703725565
+          m_Material: 14102624392720317306
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 14189946983857302350
@@ -227,14 +254,16 @@ Entities:
       - UUID: 12531312256174191787
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 17306240991513005444
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 12478537470136972126
-        m_Material: 1398703171167915645
+        Properties:
+          m_Mesh: 12478537470136972126
+          m_Material: 1398703171167915645
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 11752083846228828745
@@ -243,14 +272,16 @@ Entities:
       - UUID: 5647203766444917700
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 34810779938709211
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 10482285695037371483
-        m_Material: 17185067663040798019
+        Properties:
+          m_Mesh: 10482285695037371483
+          m_Material: 17185067663040798019
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 1709415427775040872
@@ -259,14 +290,16 @@ Entities:
       - UUID: 15608174446649902983
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 15383689688536913114
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 8742102673439741599
-        m_Material: 12050675179094362886
+        Properties:
+          m_Mesh: 8742102673439741599
+          m_Material: 12050675179094362886
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 7231479477814594935
@@ -275,14 +308,16 @@ Entities:
       - UUID: 816089195388104271
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 9013172212212340161
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 4075180663175126061
-        m_Material: 12263872001811937335
+        Properties:
+          m_Mesh: 4075180663175126061
+          m_Material: 12263872001811937335
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 7457695161864327433
@@ -291,14 +326,16 @@ Entities:
       - UUID: 1400339687442648812
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 10220338219368827801
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 2301235609140589785
-        m_Material: 3418489109220757858
+        Properties:
+          m_Mesh: 2301235609140589785
+          m_Material: 3418489109220757858
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 16700679349648496680
@@ -307,14 +344,16 @@ Entities:
       - UUID: 8052968510448252660
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 4338616451700995282
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 6157830810398406145
-        m_Material: 12787556475590031533
+        Properties:
+          m_Mesh: 6157830810398406145
+          m_Material: 12787556475590031533
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 5498044398606816486
@@ -323,14 +362,16 @@ Entities:
       - UUID: 11643170895521159638
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 13835026547873310545
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 12363208155753198496
-        m_Material: 4941950203725921729
+        Properties:
+          m_Mesh: 12363208155753198496
+          m_Material: 4941950203725921729
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 8508318670443437948
@@ -339,14 +380,16 @@ Entities:
       - UUID: 2383769523839959974
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 5977065323782974896
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 4484240044989851036
-        m_Material: 1344859053152692766
+        Properties:
+          m_Mesh: 4484240044989851036
+          m_Material: 1344859053152692766
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 8021461720234696314
@@ -355,14 +398,16 @@ Entities:
       - UUID: 8597743702374209359
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 2386150152502015859
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 15653227552723793608
-        m_Material: 10443563090520142511
+        Properties:
+          m_Mesh: 15653227552723793608
+          m_Material: 10443563090520142511
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 4329541299693977651
@@ -371,14 +416,16 @@ Entities:
       - UUID: 3163931563965865921
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 16355419394298553114
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 12889795759988507493
-        m_Material: 12917108602555706804
+        Properties:
+          m_Mesh: 12889795759988507493
+          m_Material: 12917108602555706804
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 3991934814061726346
@@ -387,14 +434,16 @@ Entities:
       - UUID: 10487477607087666479
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 4618562551534985904
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 6943495384598175665
-        m_Material: 9521915265913145591
+        Properties:
+          m_Mesh: 6943495384598175665
+          m_Material: 9521915265913145591
   - TypeHash: 1002038608
     Name: Sponza
     UUID: 8217608674061609435
@@ -403,14 +452,16 @@ Entities:
       - UUID: 183533921884068211
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [0, 0, 0, 1]
+          Scale: [1, 1, 1]
       - UUID: 7138769733694434568
         TypeName: MeshRenderer
         TypeHash: 346634903
-        m_Mesh: 801469628739818311
-        m_Material: 15672791594304400152
+        Properties:
+          m_Mesh: 801469628739818311
+          m_Material: 15672791594304400152
   - TypeHash: 1002038608
     Name: Light
     UUID: 6954602842274281219
@@ -419,15 +470,17 @@ Entities:
       - UUID: 17638823490775983541
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 34.734333, 0]
-        Rotation: [-0, -0, -0, 1]
-        Scale: [1, 1, 1]
+        Properties:
+          Position: [0, 34.734333, 0]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [1, 1, 1]
       - UUID: 6749485746316172157
         TypeName: LightComponent
         TypeHash: 1833534594
-        m_Color: [1, 1, 1, 1]
-        m_Intensity: 1
-        m_Range: 100
+        Properties:
+          m_Color: [1, 1, 1, 1]
+          m_Intensity: 1
+          m_Range: 100
   - TypeHash: 1002038608
     Name: FlyCam
     UUID: 143065800091249678
@@ -436,22 +489,23 @@ Entities:
       - UUID: 6305972698325124772
         TypeName: Transform
         TypeHash: 3193129575
-        Position: [0, 159.295013, 0]
-        Rotation: [-0, -0.739167333, -0, -0.673521817]
-        Scale: [0.999999881, 0.99999994, 0.999999881]
+        Properties:
+          Position: [0, 159.295013, 0]
+          Rotation: [-0, -0.739167333, -0, -0.673521817]
+          Scale: [0.999999881, 0.99999994, 0.999999881]
       - UUID: 11425176883776957746
         TypeName: CameraComponent
         TypeHash: 2448640685
-        m_HalfFOV: 45
-        m_Near: 0.100000001
-        m_Far: 3000
-        m_DisplayIndex: 0
-        m_Priority: 0
-        m_LayerMask: 0
-        m_ClearColor: [0, 0, 0, 0]
+        Properties:
+          m_HalfFOV: 45
+          m_Near: 0.100000001
+          m_Far: 3000
+          m_DisplayIndex: 0
+          m_Priority: 0
+          m_LayerMask: 0
+          m_ClearColor: [0, 0, 0, 0]
       - UUID: 683262553564920250
         TypeName: ScriptedComponent
         TypeHash: 201832386
-        m_Script: 14298078551315780740
-        ScriptData:
-          _freeLookSensitivity: 1
+        Properties:
+          m_Script: 14298078551315780740
