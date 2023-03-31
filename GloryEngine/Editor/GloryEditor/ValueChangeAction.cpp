@@ -21,7 +21,16 @@ namespace Glory::Editor
 		const GloryReflect::TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
-			pField = pType->GetFieldData(subPath.string());
+			const std::string& pathStr = subPath.string();
+			if (pathStr._Starts_with("##"))
+			{
+				if (!pField) throw new std::exception("Unexpected property path");
+				const size_t index = (size_t)std::stoul(pathStr.substr(2));
+				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+			}
+			else
+				pField = pType->GetFieldData(pathStr);
+
 			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
@@ -30,11 +39,9 @@ namespace Glory::Editor
 			throw std::exception("Unknown field");
 		}
 
-		// Rewind offset so Get() reads from the correct address
-		void* pAddress = (void*)((char*)(pObject)-pField->Offset());
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		PropertySerializer::SerializeProperty(pField, pAddress, out);
+		PropertySerializer::SerializeProperty(pField, pObject, out);
 		out << YAML::EndMap;
 		m_OldValue = YAML::Load(out.c_str());
 	}
@@ -45,7 +52,16 @@ namespace Glory::Editor
 		const GloryReflect::TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
-			pField = pType->GetFieldData(subPath.string());
+			const std::string& pathStr = subPath.string();
+			if (pathStr._Starts_with("##"))
+			{
+				if (!pField) throw new std::exception("Unexpected property path");
+				const size_t index = (size_t)std::stoul(pathStr.substr(2));
+				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+			}
+			else
+				pField = pType->GetFieldData(pathStr);
+
 			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
@@ -54,11 +70,9 @@ namespace Glory::Editor
 			throw std::exception("Unknown field");
 		}
 
-		// Rewind offset so Get() reads from the correct address
-		void* pAddress = (void*)((char*)(pObject)-pField->Offset());
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		PropertySerializer::SerializeProperty(pField, pAddress, out);
+		PropertySerializer::SerializeProperty(pField, pObject, out);
 		out << YAML::EndMap;
 		m_NewValue = YAML::Load(out.c_str());
 	}
@@ -72,11 +86,25 @@ namespace Glory::Editor
 		const GloryReflect::TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
-			pField = pType->GetFieldData(subPath.string());
-			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+			const std::string& pathStr = subPath.string();
+			if (pathStr._Starts_with("##"))
+			{
+				if (!pField) throw new std::exception("Unexpected property path");
+				const size_t index = (size_t)std::stoul(pathStr.substr(2));
+				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
-			/* Get field address */
-			pAddress = pField->GetAddress(pAddress);
+				/* Get element address */
+				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pType->TypeHash(), index);
+			}
+			else
+			{
+				pField = pType->GetFieldData(pathStr);
+				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+
+				/* Get field address */
+				pAddress = pField->GetAddress(pAddress);
+			}
 		}
 
 		if (!pField)
@@ -96,11 +124,25 @@ namespace Glory::Editor
 		const GloryReflect::TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
-			pField = pType->GetFieldData(subPath.string());
-			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+			const std::string& pathStr = subPath.string();
+			if (pathStr._Starts_with("##"))
+			{
+				if (!pField) throw new std::exception("Unexpected property path");
+				const size_t index = (size_t)std::stoul(pathStr.substr(2));
+				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 
-			/* Get field address */
-			pAddress = pField->GetAddress(pAddress);
+				/* Get element address */
+				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pType->TypeHash(), index);
+			}
+			else
+			{
+				pField = pType->GetFieldData(pathStr);
+				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+
+				/* Get field address */
+				pAddress = pField->GetAddress(pAddress);
+			}
 		}
 
 		if (!pField)

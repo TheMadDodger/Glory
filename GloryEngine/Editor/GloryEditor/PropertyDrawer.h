@@ -46,9 +46,9 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API const std::filesystem::path& GetCurrentPropertyPath();
 		static GLORY_EDITOR_API const GloryReflect::TypeData* GetRootTypeData();
-		static GLORY_EDITOR_API const std::vector<const GloryReflect::FieldData*>& GetCurrentFieldStack();
-		static GLORY_EDITOR_API void PushFieldType(const GloryReflect::FieldData* pField);
-		static GLORY_EDITOR_API void PopFieldType();
+
+		static GLORY_EDITOR_API void PushPath(const std::string& name);
+		static GLORY_EDITOR_API void PopPath();
 
 	public:
 		GLORY_EDITOR_API size_t GetPropertyTypeHash() const;
@@ -62,7 +62,6 @@ namespace Glory::Editor
 
 		static std::vector<PropertyDrawer*> m_PropertyDrawers;
 		static const GloryReflect::TypeData* m_pRootTypeData;
-		static std::vector<const GloryReflect::FieldData*> m_pCurrentFieldDataStack;
 		static std::filesystem::path m_CurrentPropertyPath;
 	};
 

@@ -11,26 +11,19 @@ namespace Glory
 	{
 	}
 
-	void EnumPropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	void EnumPropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
 	{
-		void* pEnumAddress = pFieldData->GetAddress(data);
-
-		uint32_t enumTypeHash = pFieldData->ArrayElementType();
-		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(enumTypeHash);
-
-		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(enumTypeHash);
-		if (pSerializer)
+		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		std::string valueString;
+		if(!pEnumType->ToString(data, valueString)) valueString = "none";
+		if (name.empty())
 		{
-			const GloryReflect::FieldData* pFieldData = pEnumTypeData->GetFieldData(0);
-			const GloryReflect::FieldData fieldData(enumTypeHash, "", pFieldData->TypeName(), 0, pFieldData->Size());
-			pSerializer->Serialize(&fieldData, pEnumAddress, out);
+			out << valueString;
 			return;
 		}
 
-		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(enumTypeHash);
-		std::string valueString;
-		if(!pEnumType->ToString(pEnumAddress, valueString)) valueString = "none";
-		out << YAML::Key << pFieldData->Name();
+		out << YAML::Key << name;
 		out << YAML::Value << valueString;
 	}
 

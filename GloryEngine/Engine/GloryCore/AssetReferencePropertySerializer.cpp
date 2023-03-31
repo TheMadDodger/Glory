@@ -12,16 +12,12 @@ namespace Glory
 	{
 	}
 
-	void AssetReferencePropertySerializer::Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	void AssetReferencePropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
 	{
-		void* pAssetRefAddress = pFieldData->GetAddress(data);
-
-		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)pAssetRefAddress;
+		AssetReferenceBase* pReferenceMember = (AssetReferenceBase*)data;
 		UUID uuid = pReferenceMember->AssetUUID();
 
-		const std::string& name = pFieldData->Name();
-
-		if (name == "")
+		if (name.empty())
 		{
 			out << (uint64_t)uuid;
 			return;

@@ -8,7 +8,6 @@ namespace Glory::Editor
 {
 	std::vector<PropertyDrawer*> PropertyDrawer::m_PropertyDrawers = std::vector<PropertyDrawer*>();
 	const GloryReflect::TypeData* PropertyDrawer::m_pRootTypeData = nullptr;
-	std::vector<const GloryReflect::FieldData*> PropertyDrawer::m_pCurrentFieldDataStack;
 	std::filesystem::path PropertyDrawer::m_CurrentPropertyPath = "";
 
 	PropertyDrawer::PropertyDrawer(uint32_t typeHash) : m_TypeHash(typeHash)
@@ -76,12 +75,21 @@ namespace Glory::Editor
 		return drawer->Draw(label, data, typeHash, flags);
 	}
 
+	struct PathGuard
+	{
+		PathGuard(const std::string name)
+		{
+			PropertyDrawer::PushPath(name);
+		}
+		~PathGuard()
+		{
+			PropertyDrawer::PopPath();
+		}
+	};
+
 	bool PropertyDrawer::DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags)
 	{
-		m_pCurrentFieldDataStack.push_back(pFieldData);
-
-		std::string_view name = pFieldData->Name();
-		m_CurrentPropertyPath.append(name);
+		PathGuard p(pFieldData->Name());
 
 		if (pFieldData->Type() == ST_Array)
 		{
@@ -92,19 +100,16 @@ namespace Glory::Editor
 		if (pTypeData)
 		{
 			const bool change = DrawProperty(pFieldData->Name(), pTypeData, data, flags);
-			m_pCurrentFieldDataStack.pop_back();
 			return change;
 		}
 
 		PropertyDrawer* pDrawer = GetPropertyDrawer(pFieldData->Type());
 		if (pDrawer)
 		{
-			m_pCurrentFieldDataStack.pop_back();
 			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->Type(), flags);
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
-		m_pCurrentFieldDataStack.pop_back();
 		return false;
 	}
 
@@ -206,19 +211,14 @@ namespace Glory::Editor
 		return m_pRootTypeData;
 	}
 
-	const std::vector<const GloryReflect::FieldData*>& PropertyDrawer::GetCurrentFieldStack()
+	void PropertyDrawer::PushPath(const std::string& name)
 	{
-		return m_pCurrentFieldDataStack;
+		m_CurrentPropertyPath.append(name);
 	}
 
-	void PropertyDrawer::PushFieldType(const GloryReflect::FieldData* pField)
+	void PropertyDrawer::PopPath()
 	{
-		m_pCurrentFieldDataStack.push_back(pField);
-	}
-
-	void PropertyDrawer::PopFieldType()
-	{
-		m_pCurrentFieldDataStack.pop_back();
+		m_CurrentPropertyPath = m_CurrentPropertyPath.parent_path();
 	}
 
 	size_t PropertyDrawer::GetPropertyTypeHash() const
