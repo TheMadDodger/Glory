@@ -27,13 +27,7 @@ namespace Glory::Editor
 		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(hash);
 		if (pTypeData)
 		{
-			for (int i = 0; i < pTypeData->FieldCount(); i++)
-			{
-				const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-				size_t offset = pFieldData->Offset();
-				void* pAddress = (void*)((char*)(pRegistry->GetComponentAddress(entity, componentID)) + offset);
-				change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, GloryReflect::Reflect::GetFieldFlags(pFieldData));
-			}
+			PropertyDrawer::DrawProperty("", pTypeData, pRegistry->GetComponentAddress(entity, componentID), 0);
 		}
 
 		Undo::StopRecord();

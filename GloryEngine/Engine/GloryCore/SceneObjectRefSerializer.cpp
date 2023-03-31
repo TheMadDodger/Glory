@@ -34,10 +34,10 @@ namespace Glory
 		memcpy((void*)&buffer[offset], (void*)&value, size);
 	}
 
-	void SceneObjectRefSerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	void SceneObjectRefSerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
 	{
 		if (!object.IsDefined()) return;
-		SceneObjectRef value = object.as<SceneObjectRef>();
-		pFieldData->Set(data, &value);
+		SceneObjectRef* value = (SceneObjectRef*)data;
+		*value = object.as<SceneObjectRef>();
 	}
 }

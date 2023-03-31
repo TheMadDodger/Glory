@@ -74,13 +74,7 @@ namespace Glory
 		{
 			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
 			subNode = nextObject[pFieldData->Name()];
-			if (!subNode.IsDefined())
-			{
-				std::string legacyConversion = pFieldData->Name();
-				legacyConversion = legacyConversion.substr(1);
-				subNode = nextObject[legacyConversion];
-				if (!subNode.IsDefined()) continue;
-			}
+			if (!subNode.IsDefined()) return;
 			PropertySerializer::DeserializeProperty(pFieldData, pComponentAddress, subNode);
 		}
 
@@ -234,19 +228,7 @@ namespace Glory
 			}
 
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-			for (size_t i = 0; i < pTypeData->FieldCount(); i++)
-			{
-				const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-				subNode = nextObject[pFieldData->Name()];
-				if (!subNode.IsDefined())
-				{
-					std::string legacyConversion = pFieldData->Name();
-					legacyConversion = legacyConversion.substr(1);
-					subNode = nextObject[legacyConversion];
-					if (!subNode.IsDefined()) continue;
-				}
-				PropertySerializer::DeserializeProperty(pFieldData, pComponentAddress, subNode);
-			}
+			PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, nextObject);
 
 			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 			++currentComponentIndex;

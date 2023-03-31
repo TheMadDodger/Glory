@@ -45,7 +45,7 @@ namespace Glory::Editor
 		};
 
 		listView.OnAdd = [&]() {
-			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 			pAction->SetOldValue(data);
 			GloryReflect::Reflect::ResizeArray(data, typeHash, size + 1);
 			pAction->SetNewValue(data);
@@ -58,7 +58,7 @@ namespace Glory::Editor
 		};
 
 		listView.OnResize = [&](size_t newSize) {
-			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 			pAction->SetOldValue(data);
 			GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
 			pAction->SetNewValue(data);

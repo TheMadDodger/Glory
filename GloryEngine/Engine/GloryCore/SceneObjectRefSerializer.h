@@ -12,6 +12,6 @@ namespace Glory
         virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out) override;
         virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, YAML::Node& object) override;
         virtual void Serialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out) override;
-        virtual void Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object) override;
+        virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object) override;
     };
 }

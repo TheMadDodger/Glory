@@ -21,18 +21,33 @@ namespace Glory::Editor
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
 		ImGui::PushID(label.c_str());
+
+		if (label.empty())
+		{
+			change |= DrawFields(data, pStructTypeData, flags);
+			ImGui::PopID();
+			return change;
+		}
+
 		if (ImGui::TreeNodeEx("node", node_flags, label.data()))
 		{
-			for (size_t i = 0; i < pStructTypeData->FieldCount(); i++)
-			{
-				const GloryReflect::FieldData* pFieldData = pStructTypeData->GetFieldData(i);
-				size_t offset = pFieldData->Offset();
-				void* pAddress = (void*)((char*)(data)+offset);
-				change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, flags);
-			}
+			change |= DrawFields(data, pStructTypeData, flags);
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
+		return change;
+	}
+
+	bool StructPropertyDrawer::DrawFields(void* data, const GloryReflect::TypeData* pStructTypeData, uint32_t flags) const
+	{
+		bool change = false;
+		for (size_t i = 0; i < pStructTypeData->FieldCount(); i++)
+		{
+			const GloryReflect::FieldData* pFieldData = pStructTypeData->GetFieldData(i);
+			size_t offset = pFieldData->Offset();
+			void* pAddress = (void*)((char*)(data)+offset);
+			change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, flags);
+		}
 		return change;
 	}
 }

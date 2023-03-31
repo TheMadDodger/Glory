@@ -34,24 +34,11 @@ namespace Glory
 		out << YAML::Value << valueString;
 	}
 
-	void EnumPropertySerializer::Deserialize(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	void EnumPropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
 	{
-		void* pEnumAddress = pFieldData->GetAddress(data);
-
-		uint32_t enumTypeHash = pFieldData->ArrayElementType();
-		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(enumTypeHash);
-
-		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(enumTypeHash);
-		if (pSerializer)
-		{
-			const GloryReflect::FieldData* pFieldData = pEnumTypeData->GetFieldData(0);
-			const GloryReflect::FieldData fieldData(enumTypeHash, "", pFieldData->TypeName(), 0, pFieldData->Size());
-			pSerializer->Deserialize(&fieldData, pEnumAddress, object);
-			return;
-		}
-
-		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(enumTypeHash);
+		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
 		std::string valueString = object.as<std::string>();
-		pEnumType->FromString(valueString, pEnumAddress);
+		pEnumType->FromString(valueString, data);
 	}
 }

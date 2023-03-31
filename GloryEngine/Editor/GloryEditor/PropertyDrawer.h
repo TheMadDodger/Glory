@@ -79,7 +79,7 @@ namespace Glory::Editor
 			if (OnGUI(label, (PropertyType*)data, flags))
 			{
 				PropertyType newValue = *(PropertyType*)data;
-				ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+				ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 				pAction->SetOldValue(&oldValue);
 				pAction->SetNewValue(&newValue);
 				Undo::AddAction(pAction);
@@ -119,7 +119,7 @@ namespace Glory::Editor
 			if (OnGUI(label, (PropertyType*)data, flags))
 			{
 				PropertyType newValue = *(PropertyType*)data;
-				ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetCurrentFieldStack());
+				ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 				pAction->SetOldValue(&oldValue);
 				pAction->SetNewValue(&newValue);
 				Undo::AddAction(pAction);
