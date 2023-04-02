@@ -13,29 +13,20 @@ namespace Glory
 {
 #pragma region Ray Casting
 
-	struct RayCastResultWrapper
-	{
-		//MonoArray* m_pHits;
-		RayCastHit* m_pHits;
-	};
-
-	RayCastResult rayCastResult;
-	bool Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction, RayCastResultWrapper* result)
+	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction)
 	{
 		const CoreLibManager* pCoreLibManager = SCRIPTING->GetCoreLibManager();
 		AssemblyBinding* pAssembly = pCoreLibManager->GetAssemblyBinding();
 		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
 
-		rayCastResult = RayCastResult();
-		if (!PHYSICS->CastRay(ToGLMVec3(origin), ToGLMVec3(direction), rayCastResult)) return false;
-		//result->m_pHits = mono_array_new(MonoManager::GetDomain(), pClass->m_pClass, rayCastResult.m_Hits.size());
-		//for (size_t i = 0; i < rayCastResult.m_Hits.size(); ++i)
-		//{
-		//	mono_array_set(result->m_pHits, RayCastHit, i, rayCastResult.m_Hits[i]);
-		//}
-
-		result->m_pHits = rayCastResult.m_Hits.data();
-		return true;
+		RayCastResult result;
+		if (!PHYSICS->CastRay(ToGLMVec3(origin), ToGLMVec3(direction), result)) return nullptr;
+		MonoArray* hits = mono_array_new(MonoManager::GetDomain(), pClass->m_pClass, result.m_Hits.size());
+		for (size_t i = 0; i < result.m_Hits.size(); ++i)
+		{
+			mono_array_set(hits, RayCastHit, i, result.m_Hits[i]);
+		}
+		return hits;
 	}
 
 #pragma endregion
