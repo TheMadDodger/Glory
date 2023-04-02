@@ -83,6 +83,9 @@ namespace Glory
 		virtual void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) = 0;
 		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const = 0;
 
+		/* Raycast */
+		virtual bool CastRay(const glm::uvec3& origin, const glm::vec3& direction, RayCastResult& result) const = 0;
+
 		GLORY_API void SetCollisionMatrix(std::vector<std::vector<bool>>&& matrix);
 		GLORY_API bool ShouldCollide(uint16_t layer1, uint16_t layer2) const;
 

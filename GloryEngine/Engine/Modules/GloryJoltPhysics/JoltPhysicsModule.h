@@ -68,6 +68,9 @@ namespace Glory
 		GLORY_API void SetBodyObjectLayer(uint32_t bodyID, const uint16_t layerIndex) override;
 		GLORY_API const uint16_t GetBodyObjectLayer(uint32_t bodyID) const override;
 
+		/* RayCast */
+		GLORY_API bool CastRay(const glm::uvec3& origin, const glm::vec3& direction, RayCastResult& result) const override;
+
 		GLORY_API BPLayerInterfaceImpl& BPLayerImpl();
 		GLORY_API ObjectVsBroadPhaseLayerFilterImpl& BPCollisionFilter();
 

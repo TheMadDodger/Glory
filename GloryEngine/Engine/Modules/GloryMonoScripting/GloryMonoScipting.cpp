@@ -22,6 +22,11 @@ namespace Glory
 		m_pCoreLibManager = nullptr;
 	}
 
+	CoreLibManager* GloryMonoScipting::GetCoreLibManager() const
+	{
+		return m_pCoreLibManager;
+	}
+
 	void GloryMonoScipting::Initialize()
 	{
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);

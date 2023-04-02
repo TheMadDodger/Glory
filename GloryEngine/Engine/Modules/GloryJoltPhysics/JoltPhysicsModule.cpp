@@ -6,12 +6,17 @@
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseQuery.h>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
+
 #include <Debug.h>
 #include <cstdarg>
 
 #include <LayerManager.h>
 #include <LayerRef.h>
 #include <GLORY_YAML.h>
+#include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -294,6 +299,25 @@ namespace Glory
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
 		JPH::BodyID jphBodyID{ bodyID };
 		return bodyInterface.GetObjectLayer(jphBodyID);
+	}
+
+	bool JoltPhysicsModule::CastRay(const glm::uvec3& origin, const glm::vec3& direction, RayCastResult& result) const
+	{
+		const JPH::RRayCast ray{ ToJPHVec3(origin), ToJPHVec3(direction) };
+		AllHitCollisionCollector<CastRayCollector> collector;
+		IgnoreMultipleBodiesFilter body_filter;
+		RayCastSettings ray_settings;
+		m_pJPHPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, {}, {}, {});
+		if (!collector.HadHit()) return false;
+		result = RayCastResult();
+		for (size_t i = 0; i < collector.mHits.size(); ++i)
+		{
+			const JPH::RayCastResult& rayHit = collector.mHits[i];
+			result.m_Hits.push_back(
+				RayCastHit{ rayHit.mFraction, rayHit.mBodyID.GetIndexAndSequenceNumber(), rayHit.mSubShapeID2.GetValue() }
+			);
+		}
+		return true;
 	}
 
 	BPLayerInterfaceImpl& JoltPhysicsModule::BPLayerImpl()

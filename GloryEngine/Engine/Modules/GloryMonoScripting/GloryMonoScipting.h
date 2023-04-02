@@ -20,6 +20,8 @@ namespace Glory
 
         GLORY_MODULE_VERSION_H;
 
+        CoreLibManager* GetCoreLibManager() const;
+
     private:
         virtual void Initialize() override;
         virtual void PostInitialize() override;
