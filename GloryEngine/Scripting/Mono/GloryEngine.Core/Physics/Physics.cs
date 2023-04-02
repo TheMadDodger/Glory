@@ -40,16 +40,27 @@ namespace GloryEngine
 
     public struct RayCastResult
     {
-        public RayCastHit[] Hits;
+        public List<RayCastHit> Hits;
 	};
 
     public static class Physics
     {
-        public static bool CastRay(Ray ray, out RayCastResult result) => Physics_CastRay(ray.Origin, ray.Direction, out result);
+		public static bool CastRay(Ray ray, out RayCastResult result)
+		{
+			result = new RayCastResult();
+			RayCastHit[] hits = Physics_CastRay(ray.Origin, ray.Direction);
+			if(hits == null || hits.Length == 0 ) return false;
+			result.Hits = new List<RayCastHit>();
+			for (int i = 0; i < hits.Length; i++)
+			{
+				result.Hits.Add(hits[i]);
+			}
+			return true;
+        }
 
 		/* Ray Casting */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern bool Physics_CastRay(Vector3 origin, Vector3 direction, out RayCastResult result);
+        private static extern RayCastHit[] Physics_CastRay(Vector3 origin, Vector3 direction);
 
         /* States */
         [MethodImpl(MethodImplOptions.InternalCall)]
