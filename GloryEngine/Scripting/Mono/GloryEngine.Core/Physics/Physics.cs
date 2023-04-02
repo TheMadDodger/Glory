@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine
@@ -18,8 +19,38 @@ namespace GloryEngine
 		Dynamic
 	};
 
+    public struct Ray
+	{
+		public Ray(Vector3 origin, Vector3 direction)
+		{
+			Origin = origin;
+			Direction = direction;
+		}
+
+		public Vector3 Origin;
+		public Vector3 Direction;
+	}
+
+    public struct RayCastHit
+    {
+        public float Distance;
+        public UInt32 BodyID;
+        public UInt32 SubShapeID;
+    };
+
+    public struct RayCastResult
+    {
+        public RayCastHit[] Hits;
+	};
+
     public static class Physics
     {
+        public static bool CastRay(Ray ray, out RayCastResult result) => Physics_CastRay(ray.Origin, ray.Direction, out result);
+
+		/* Ray Casting */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool Physics_CastRay(Vector3 origin, Vector3 direction, out RayCastResult result);
+
         /* States */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void Physics_ActivateBody(UInt32 bodyID);

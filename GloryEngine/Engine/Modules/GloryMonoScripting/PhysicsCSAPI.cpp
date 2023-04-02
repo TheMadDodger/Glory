@@ -1,13 +1,45 @@
 #include "PhysicsCSAPI.h"
 #include "MathCSAPI.h"
 #include "GloryMonoScipting.h"
+#include "MonoManager.h"
+#include "CoreLibManager.h"
 
 #include <PhysicsModule.h>
 
 #define PHYSICS Game::GetGame().GetEngine()->GetPhysicsModule()
+#define SCRIPTING Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()
 
 namespace Glory
 {
+#pragma region Ray Casting
+
+	struct RayCastResultWrapper
+	{
+		//MonoArray* m_pHits;
+		RayCastHit* m_pHits;
+	};
+
+	RayCastResult rayCastResult;
+	bool Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction, RayCastResultWrapper* result)
+	{
+		const CoreLibManager* pCoreLibManager = SCRIPTING->GetCoreLibManager();
+		AssemblyBinding* pAssembly = pCoreLibManager->GetAssemblyBinding();
+		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
+
+		rayCastResult = RayCastResult();
+		if (!PHYSICS->CastRay(ToGLMVec3(origin), ToGLMVec3(direction), rayCastResult)) return false;
+		//result->m_pHits = mono_array_new(MonoManager::GetDomain(), pClass->m_pClass, rayCastResult.m_Hits.size());
+		//for (size_t i = 0; i < rayCastResult.m_Hits.size(); ++i)
+		//{
+		//	mono_array_set(result->m_pHits, RayCastHit, i, rayCastResult.m_Hits[i]);
+		//}
+
+		result->m_pHits = rayCastResult.m_Hits.data();
+		return true;
+	}
+
+#pragma endregion
+
 #pragma region States
 
 	void Physics_ActivateBody(uint32_t bodyID)
@@ -212,6 +244,9 @@ namespace Glory
 		BIND("GloryEngine.Physics::Physics_AddBodyImpulse", Physics_AddBodyImpulse);
 		BIND("GloryEngine.Physics::Physics_AddBodyImpulse_Point", Physics_AddBodyImpulse_Point);
 		BIND("GloryEngine.Physics::Physics_AddBodyAngularImpulse", Physics_AddBodyAngularImpulse);
+
+		/* Ray Casting */
+		BIND("GloryEngine.Physics::Physics_CastRay", Physics_CastRay);
 	}
 
 #pragma endregion

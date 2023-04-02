@@ -7,6 +7,11 @@ namespace Glory
 	{
 	}
 
+	AssemblyBinding* CoreLibManager::GetAssemblyBinding() const
+	{
+		return m_pAssembly;
+	}
+
 	void CoreLibManager::Initialize(AssemblyBinding* pAssembly)
 	{
 		m_pAssembly = pAssembly;

@@ -8,6 +8,8 @@ namespace Glory
     public:
         CoreLibManager();
 
+        AssemblyBinding* GetAssemblyBinding() const;
+
     public:
         void Initialize(AssemblyBinding* pAssembly) override;
         void Cleanup() override;
