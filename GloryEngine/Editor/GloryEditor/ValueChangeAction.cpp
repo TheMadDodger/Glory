@@ -160,4 +160,14 @@ namespace Glory::Editor
 
 		PropertySerializer::DeserializeProperty(pField, pAddress, m_NewValue[pField->Name()]);
 	}
+
+	bool ValueChangeAction::Combine(IAction* pOther)
+	{
+		ValueChangeAction* pAction = dynamic_cast<ValueChangeAction*>(pOther);
+		if (!pAction) return false;
+		if (pAction->m_pRootType != m_pRootType) return false;
+		if (pAction->m_PropertyPath != m_PropertyPath) return false;
+		m_NewValue = std::move(pAction->m_NewValue);
+		return true;
+	}
 }

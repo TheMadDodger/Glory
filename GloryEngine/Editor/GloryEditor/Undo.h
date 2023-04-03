@@ -26,8 +26,10 @@ namespace Glory::Editor
 	class IAction
 	{
 	protected:
-		virtual GLORY_EDITOR_API void OnUndo(const ActionRecord& actionRecord) = 0;
-		virtual GLORY_EDITOR_API void OnRedo(const ActionRecord& actionRecord) = 0;
+		virtual void OnUndo(const ActionRecord& actionRecord) = 0;
+		virtual void OnRedo(const ActionRecord& actionRecord) = 0;
+
+		virtual bool Combine(IAction* pOther) { return false; }
 
 	private:
 		friend class Undo;
@@ -36,7 +38,7 @@ namespace Glory::Editor
 	class Undo
 	{
 	public:
-		static GLORY_EDITOR_API void StartRecord(const std::string& name, UUID uuid = 0);
+		static GLORY_EDITOR_API void StartRecord(const std::string& name, UUID uuid = 0, bool continuous = false);
 		static GLORY_EDITOR_API void StopRecord();
 		static GLORY_EDITOR_API void AddAction(IAction* action);
 		static GLORY_EDITOR_API void Clear();
@@ -78,6 +80,7 @@ namespace Glory::Editor
 		static std::vector<IAction*> m_RecordedActions;
 		static std::string m_RecordingName;
 		static UUID m_RecordingUUID;
+		static bool m_RecordingContinuous;
 
 		static std::vector<ActionRecord> m_ActionRecords;
 		static size_t m_RewindIndex;

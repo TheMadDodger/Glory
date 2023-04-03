@@ -16,7 +16,7 @@ namespace Glory::Editor
 
 	bool DefaultComponentEditor::OnGUI()
 	{
-		Undo::StartRecord("Property Change", m_pTarget->GetUUID());
+		Undo::StartRecord("Property Change", m_pTarget->GetUUID(), true);
 		bool change = false;
 		EntityComponentObject* pComponentObject = (EntityComponentObject*)GetTarget();
 		uint32_t hash = pComponentObject->ComponentType();

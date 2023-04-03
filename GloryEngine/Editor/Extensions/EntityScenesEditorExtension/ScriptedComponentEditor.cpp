@@ -50,7 +50,7 @@ namespace Glory::Editor
 
 		if (!m_pScript) return change;
 
-		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID());
+		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 		bool changedScriptProp = false;
 		for (size_t i = 0; i < scriptComponent.m_ScriptProperties.size(); i++)
 		{

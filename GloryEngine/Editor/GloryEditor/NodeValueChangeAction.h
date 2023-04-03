@@ -15,6 +15,7 @@ namespace Glory::Editor
     private:
         virtual GLORY_EDITOR_API void OnUndo(const ActionRecord& actionRecord);
         virtual GLORY_EDITOR_API void OnRedo(const ActionRecord& actionRecord);
+        virtual GLORY_EDITOR_API bool NodeValueChangeAction::Combine(IAction* pOther);
 
         void Set(std::vector<std::filesystem::path>& splitPath, YAML::Node& node, YAML::Node& value);
 
