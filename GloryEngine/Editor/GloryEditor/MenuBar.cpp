@@ -35,7 +35,7 @@ namespace Glory::Editor
 		{
 			if (childItem.m_HasFunc)
 			{
-				std::string_view shortcutString = Shortcuts::GetShortcutString(childItem.m_Shortcut);
+				std::string shortcutString = Shortcuts::GetShortcutString(childItem.m_Shortcut);
 				if (ImGui::MenuItem(childItem.m_Name.c_str(), shortcutString.data()))
 					childItem.m_Func();
 			}
@@ -53,7 +53,7 @@ namespace Glory::Editor
 		std::vector<std::string> result;
 		std::string currentPath = path;
 
-		int forwardSlashIndex = currentPath.find("/");
+		size_t forwardSlashIndex = currentPath.find("/");
 		while (forwardSlashIndex != std::string::npos)
 		{
 			std::string item = currentPath.substr(0, forwardSlashIndex);

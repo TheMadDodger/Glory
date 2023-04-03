@@ -244,7 +244,7 @@ namespace Glory::Editor
 						const float availableWidth = ImGui::GetContentRegionAvail().x;
 						const ImVec2 cursorPos = ImGui::GetCursorPos();
 
-						ImGui::PushID(i);
+						ImGui::PushID((int)i);
 						/* Icon */
 						std::string bindingString;
 						GloryReflect::Enum<InputDeviceType>().ToString(bindingData.DeviceType, bindingString);

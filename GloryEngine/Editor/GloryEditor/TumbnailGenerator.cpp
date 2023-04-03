@@ -2,6 +2,8 @@
 
 namespace Glory::Editor
 {
+	const std::string BaseTumbnailGenerator::m_DefaultExtension;
+
 	BaseTumbnailGenerator::BaseTumbnailGenerator()
 	{
 	}
@@ -14,6 +16,6 @@ namespace Glory::Editor
 
 	const std::string& BaseTumbnailGenerator::GetExtension()
 	{
-		return "";
+		return m_DefaultExtension;
 	}
 }

@@ -79,7 +79,7 @@ namespace Glory::Editor
 
 				std::string label = shaderTypeString + ": " + name;
 
-				ImGui::PushID(row_n);
+				ImGui::PushID((int)row_n);
 				ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
 
 				ImGui::TableSetColumnIndex(0);
@@ -98,7 +98,7 @@ namespace Glory::Editor
 
 				if (ImGui::TableSetColumnIndex(3) && ImGui::Button("Remove", ImVec2(removeButtonWidth - 2.5f, rowHeight)))
 				{
-					toRemoveShaderIndex = row_n;
+					toRemoveShaderIndex = (int)row_n;
 				}
 
 				ImGui::PopID();

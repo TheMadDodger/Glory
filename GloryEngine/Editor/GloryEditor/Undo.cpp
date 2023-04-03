@@ -111,7 +111,7 @@ namespace Glory::Editor
 		m_IsBusy = true;
 		++m_RewindIndex;
 		size_t index = m_ActionRecords.size() - m_RewindIndex;
-		for (int i = m_ActionRecords[index].Actions.size() - 1; i >= 0; i--)
+		for (int i = (int)m_ActionRecords[index].Actions.size() - 1; i >= 0; --i)
 		{
 			m_ActionRecords[index].Actions[i]->OnUndo(m_ActionRecords[index]);
 		}
@@ -197,7 +197,7 @@ namespace Glory::Editor
 	{
 		if (historyRewindIndex > m_ActionRecords.size()) return;
 		size_t last = m_ActionRecords.size() - 1;
-		int diff = m_RewindIndex - historyRewindIndex;
+		int diff = (int)(m_RewindIndex - historyRewindIndex);
 
 		for (size_t i = 0; i < std::abs(diff); i++)
 		{

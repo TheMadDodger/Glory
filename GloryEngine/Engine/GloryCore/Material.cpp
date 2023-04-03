@@ -32,7 +32,7 @@ namespace Glory
 
 		std::vector<char>& propertyBuffer = m_pMaterialData->GetBufferReference();
 		if (propertyBuffer.empty()) return;
-		if (m_pPropertiesBuffer == nullptr) m_pPropertiesBuffer = CreatePropertiesBuffer(propertyBuffer.size());
+		if (m_pPropertiesBuffer == nullptr) m_pPropertiesBuffer = CreatePropertiesBuffer((uint32_t)propertyBuffer.size());
 		m_pPropertiesBuffer->Assign((const void*)propertyBuffer.data());
 		m_pPropertiesBuffer->Bind();
 	}

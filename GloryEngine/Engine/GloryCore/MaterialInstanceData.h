@@ -18,7 +18,7 @@ namespace Glory
 		MaterialData* GetBaseMaterial() const;
 		void SetBaseMaterial(MaterialData* pMaterial);
 
-		virtual const UUID& GetGPUUUID() const;
+		virtual UUID GetGPUUUID() const;
 
 		void CopyOverrideStates(std::vector<bool>& destination);
 		void PasteOverrideStates(std::vector<bool>& destination);

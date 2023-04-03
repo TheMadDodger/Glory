@@ -182,7 +182,7 @@ namespace Glory
 		Mesh* pMesh = GetResourceManager()->CreateMesh(pMeshData);
 		pMesh->Bind();
 
-		size_t indexCount = pMesh->GetIndexCount();
+		uint32_t indexCount = pMesh->GetIndexCount();
 		if (indexCount == 0) glDrawArrays(GL_TRIANGLES, 0, 6);
 		else glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, NULL);
 		LogGLError(glGetError());

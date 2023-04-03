@@ -8,7 +8,8 @@ namespace Glory::Editor
 
 	GLORY_EDITOR_API EditorWindow::EditorWindow(const std::string& windowName, float windowWidth, float windowHeight)
 		: m_WindowName(windowName), m_WindowDimensions(windowWidth, windowHeight),
-		m_IsOpen(true), m_Resizeable(true), m_WindowFlags(ImGuiWindowFlags_::ImGuiWindowFlags_None)
+		m_IsOpen(true), m_Resizeable(true), m_WindowFlags(ImGuiWindowFlags_::ImGuiWindowFlags_None),
+		m_IsFocused(false), m_WindowID(0)
 	{
 	}
 

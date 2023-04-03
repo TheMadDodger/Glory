@@ -236,7 +236,7 @@ namespace Glory::EditorLauncher
 				bool selected = m_SelectedEditorIndex == i;
 				if (ImGui::Selectable(editorInfo.Version.GetVersionString().c_str(), selected))
 				{
-					m_SelectedEditorIndex = i;
+					m_SelectedEditorIndex = (int)i;
 					TemplateManager::LoadTemplates(editorInfo);
 					m_SelectedTemplate = TemplateManager::TemplateCount() > 0 ? 0 : -1;
 				}
@@ -314,7 +314,7 @@ namespace Glory::EditorLauncher
 		ImGui::BeginChild("Templates", { 0.0f, templateSize + windowMargin * 2.0f });
 		for (size_t i = 0; i < TemplateManager::TemplateCount(); i++)
 		{
-			ImGui::PushID(i);
+			ImGui::PushID((int)i);
 			const ProjectTemplate* pTemplate = TemplateManager::GetTemplate(i);
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
@@ -326,7 +326,7 @@ namespace Glory::EditorLauncher
 
 			const ImVec2 cursorPos = ImGui::GetCursorPos();
 			if (ImGui::Selectable("##templateButton", m_SelectedTemplate == i, ImGuiSelectableFlags_AllowItemOverlap, { templateSize, templateSize }))
-				m_SelectedTemplate = i;
+				m_SelectedTemplate = (int)i;
 
 			const char* icon = TEMPLATE_ICONS.find(pTemplate->m_Name) != TEMPLATE_ICONS.end() ? TEMPLATE_ICONS.at(pTemplate->m_Name) : UNKNOWN_TEMPLATE_ICON;
 			const ImVec2 iconSize = ImGui::CalcTextSize(icon);
@@ -445,7 +445,7 @@ namespace Glory::EditorLauncher
 				bool selected = currentIndex == i;
 				if (ImGui::Selectable(name.c_str(), selected))
 				{
-					currentIndex = i;
+					currentIndex = (int)i;
 				}
 			}
 
@@ -480,7 +480,7 @@ namespace Glory::EditorLauncher
 			ImGui::SameLine();
 			if (ImGui::Button(label.c_str(), ImVec2(25.0f, 25.0f)))
 			{
-				toRemoveIndex = i;
+				toRemoveIndex = (int)i;
 			}
 
 			if (!valid)
@@ -519,7 +519,7 @@ namespace Glory::EditorLauncher
 			ImGui::SameLine();
 			if (ImGui::Button(label.c_str(), ImVec2(25.0f, 25.0f)))
 			{
-				toRemoveIndex = i;
+				toRemoveIndex = (int)i;
 			}
 
 			if (!valid)

@@ -184,7 +184,7 @@ namespace Glory
 	{
 		static constexpr uint32_t InvalidBodyID = 0xffffffff;
 
-		PhysicsBody() : m_BodyType(BodyType::Dynamic), m_BodyID(InvalidBodyID) {}
+		PhysicsBody() : m_BodyType(BodyType::Dynamic), m_BodyID(InvalidBodyID), m_CurrentLayerIndex(0) {}
 
 		REFLECTABLE(PhysicsBody,
 			(BodyType) (m_BodyType),

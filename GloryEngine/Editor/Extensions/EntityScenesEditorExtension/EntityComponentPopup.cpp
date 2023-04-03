@@ -166,7 +166,7 @@ namespace Glory::Editor
 		std::vector<std::string> result;
 		std::string currentPath = path;
 
-		int forwardSlashIndex = currentPath.find("/");
+		size_t forwardSlashIndex = currentPath.find("/");
 		while (forwardSlashIndex != std::string::npos)
 		{
 			std::string item = currentPath.substr(0, forwardSlashIndex);
@@ -191,7 +191,7 @@ namespace Glory::Editor
 		return selected;
 	}
 
-	ComponentMenuItem::ComponentMenuItem(const std::string& itemName) : m_ItemName(itemName)
+	ComponentMenuItem::ComponentMenuItem(const std::string& itemName) : m_ItemName(itemName), m_ComponentTypeHash(0)
 	{
 	}
 

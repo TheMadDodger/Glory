@@ -21,7 +21,7 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
-	RenderTexture* DisplayManager::CreateOutputTexture(Engine* pEngine, size_t width, size_t height)
+	RenderTexture* DisplayManager::CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height)
 	{
 		RenderTextureCreateInfo createInfo(width, height, false);
 		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));

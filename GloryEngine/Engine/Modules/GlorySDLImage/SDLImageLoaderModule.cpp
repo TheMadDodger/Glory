@@ -36,7 +36,7 @@ namespace Glory
 
 	ImageData* SDLImageLoaderModule::LoadTexture(const void* buffer, size_t length, const ImageImportSettings& importSettings)
 	{
-		SDL_RWops* rw = SDL_RWFromConstMem(buffer, length);
+		SDL_RWops* rw = SDL_RWFromConstMem(buffer, (int)length);
 
 		SDL_Surface* pSDLImage;
 		if (importSettings.m_Extension.length() > 0)

@@ -23,7 +23,7 @@ namespace Glory::Editor
 		if (OnResize != NULL)
 		{
 			ImGui::SetCursorPos({ startPos.x + regionAvail.x - buttonSize + 4.0f, startPos.y });
-			int size = elementCount;
+			int size = (int)elementCount;
 			ImGui::SetNextItemWidth(buttonSize);
 			if (ImGui::InputInt("##size", &size, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
@@ -40,7 +40,7 @@ namespace Glory::Editor
 			ImVec2 cursorPosBackup = ImGui::GetCursorPos();
 			for (size_t i = 0; i < elementCount; i++)
 			{
-				ImGui::PushID(i);
+				ImGui::PushID((int)i);
 				const ImVec2 regionAvailChild = ImGui::GetContentRegionAvail();
 				const ImVec2 cursorPos = ImGui::GetCursorPos();
 				//ImGui::BeginChild("##elementchild", { regionAvailChild.x - buttonSize - 2.0f, buttonSize }, false);
@@ -51,7 +51,7 @@ namespace Glory::Editor
 				ImGui::SetCursorPos({ cursorPos.x + regionAvailChild.x - buttonSize + 4.0f, cursorPos.y });
 				if (ImGui::Button(ICON_FA_MINUS "##RemoveModule", { buttonSize, buttonSize }))
 				{
-					toRemoveIndex = i;
+					toRemoveIndex = (int)i;
 				}
 				ImGui::PopID();
 				ImGui::SetCursorPos(cursorPosAfterElement);

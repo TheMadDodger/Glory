@@ -260,8 +260,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pPathTrace.size(); i++)
 		{
 			FileBrowserItem* pItem = pPathTrace[i];
-			size_t hash = m_PathHasher(pItem->m_CachedPath.string());
-			ImGui::PushID(hash);
+			ImGui::PushID(pItem->m_CachedPath.string().c_str());
 			if (ImGui::Button(pItem->m_Name.c_str()))
 			{
 				m_pSelectedFolder = pItem;
@@ -457,7 +456,7 @@ namespace Glory::Editor
 		const float availableWidth = ImGui::GetContentRegionAvail().x - padding;
 		const std::string text = m_CachedPath.filename().replace_extension().string();
 		const float textWidth = ImGui::CalcTextSize(text.data()).x;
-		const int wraps = textWidth / (availableWidth - 8.0f);
+		const int wraps = (int)(textWidth / (availableWidth - 8.0f));
 
 		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y - wraps * padding / 1.2f });
 

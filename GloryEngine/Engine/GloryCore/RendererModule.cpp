@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	RendererModule::RendererModule() : m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0)
+	RendererModule::RendererModule() : m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_PickPos(0, 0)
 	{
 	}
 
@@ -144,7 +144,7 @@ namespace Glory
 					pOutputTexture = DisplayManager::CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
 					camera.SetOutputTexture(pOutputTexture);
 				}
-				size_t width, height;
+				uint32_t width, height;
 				pOutputTexture->GetDimensions(width, height);
 				if (width != resolution.x || height != resolution.y) pOutputTexture->Resize(resolution.x, resolution.y);
 
@@ -189,7 +189,7 @@ namespace Glory
 		Profiler::EndSample();
 	}
 
-	RenderTexture* RendererModule::CreateCameraRenderTexture(size_t width, size_t height)
+	RenderTexture* RendererModule::CreateCameraRenderTexture(uint32_t width, uint32_t height)
 	{
 		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
 		RenderTextureCreateInfo createInfo(width, height, true);

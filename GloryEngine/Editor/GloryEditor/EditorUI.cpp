@@ -209,7 +209,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
-		const bool change = ImGui::DragInt("##value", value, steps, min, max);
+		const bool change = ImGui::DragInt("##value", value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
@@ -218,7 +218,7 @@ namespace Glory::Editor
 	bool EditorUI::InputInt(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
-		const int oldValue = file[path].As<float>();
+		const int oldValue = file[path].As<int>();
 		int newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -248,7 +248,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
-		const bool change = ImGui::DragInt2("##value", (int*)value, steps, min, max);
+		const bool change = ImGui::DragInt2("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
@@ -287,7 +287,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
-		const bool change = ImGui::DragInt3("##value", (int*)value, steps, min, max);
+		const bool change = ImGui::DragInt3("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
@@ -326,7 +326,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
-		const bool change = ImGui::DragInt4("##value", (int*)value, steps, min, max);
+		const bool change = ImGui::DragInt4("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
@@ -365,7 +365,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		ImGui::PushItemWidth(width);
-		const bool change = ImGui::DragInt("##value", (int*)value, steps, min, max);
+		const bool change = ImGui::DragInt("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
@@ -705,7 +705,7 @@ namespace Glory::Editor
 			for (size_t i = 0; i < pEnumType->NumValues(); i++)
 			{
 				const std::string& name = pEnumType->GetName(i);
-				size_t outValue = 0;
+				uint32_t outValue = 0;
 
 				pEnumType->FromString(name, (void*)&outValue);
 
@@ -773,7 +773,7 @@ namespace Glory::Editor
 		{
 			for (size_t i = 0; i < layerOptions.size(); i++)
 			{
-				const Layer* pLayer = LayerManager::GetLayerAtIndex(i - 1);
+				const Layer* pLayer = LayerManager::GetLayerAtIndex((int)i - 1);
 
 				bool selected = pLayer == nullptr ? *data == 0 : (*data & pLayer->m_Mask) > 0;
 				if (ImGui::Selectable(layerOptions[i].data(), selected))
@@ -809,7 +809,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		int index = data->m_LayerIndex;
+		const uint32_t index = data->m_LayerIndex;
 
 		std::vector<std::string_view> options;
 		LayerManager::GetAllLayerNames(options);
@@ -823,7 +823,7 @@ namespace Glory::Editor
 				bool selected = i == index;
 				if (ImGui::Selectable(options[i].data(), selected))
 				{
-					data->m_LayerIndex = i;
+					data->m_LayerIndex = (uint32_t)i;
 					change = true;
 				}
 

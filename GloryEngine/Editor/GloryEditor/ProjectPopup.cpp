@@ -170,7 +170,7 @@ namespace Glory::Editor
             {
                 Project* item = &m_Projects[row_n];
 
-                ImGui::PushID(row_n);
+                ImGui::PushID((int)row_n);
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
 
                 ImGui::TableSetColumnIndex(0);
@@ -284,7 +284,7 @@ namespace Glory::Editor
             if (ImGui::Button(name.data()))
             {
                 std::string pathString = m_BrowsingPath;
-                int index = pathString.find(name) + name.size();
+                size_t index = pathString.find(name) + name.size();
                 pathString = pathString.substr(0, index);
                 if (name == "C:") m_BrowsingPath = "C:/";
                 else m_BrowsingPath = pathString;

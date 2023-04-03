@@ -96,7 +96,7 @@ namespace Glory
         float* vertices = nullptr;
         std::vector<AttributeType> attributes;
         std::vector<uint32_t> indices;
-        size_t vertexSize = 0;
+        uint32_t vertexSize = 0;
         size_t arraySize = 0;
         //vector<Texture> textures;
 
@@ -186,7 +186,7 @@ namespace Glory
         verticesVector.assign(&vertices[0], &vertices[arraySize]);
         std::stringstream stream;
         stream << mesh->mName.C_Str() << " Material " << mesh->mMaterialIndex;
-        MeshData* pMesh = new MeshData(mesh->mNumVertices, vertexSize, verticesVector, indices.size(), indices, attributes);
+        MeshData* pMesh = new MeshData(mesh->mNumVertices, vertexSize, verticesVector, (uint32_t)indices.size(), indices, attributes);
         pMesh->SetName(stream.str());
         delete[] vertices;
         return pMesh;

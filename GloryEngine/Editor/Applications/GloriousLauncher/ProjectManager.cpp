@@ -214,8 +214,8 @@ namespace Glory::EditorLauncher
 
         emitter << YAML::Key << "Optional";
         emitter << YAML::Value << YAML::BeginSeq;
-        int startIndex = 5;
-        for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); i++)
+        size_t startIndex = 5;
+        for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); ++i)
         {
             emitter << startIndex + i;
         }
@@ -223,7 +223,7 @@ namespace Glory::EditorLauncher
         emitter << YAML::Key << "Scripting";
         emitter << YAML::Value << YAML::BeginSeq;
         startIndex += createSettings.EngineSettings.OptionalModules.size();
-        for (size_t i = 0; i < createSettings.EngineSettings.ScriptingModules.size(); i++)
+        for (size_t i = 0; i < createSettings.EngineSettings.ScriptingModules.size(); ++i)
         {
             emitter << startIndex + i;
         }

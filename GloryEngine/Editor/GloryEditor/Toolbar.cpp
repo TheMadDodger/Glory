@@ -94,7 +94,7 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		ImGui::BeginChild("CENTER_TOOLCHAIN", ImVec2(m_ToolbarLength / 3.0f, 0.0f));
 		float barWidth = ImGui::GetContentRegionAvail().x;
-		float startPos = barWidth / 2.0f - m_LastFrameToolBarLengths[ToolChainPosition::Center] / 2.0;
+		float startPos = barWidth / 2.0f - m_LastFrameToolBarLengths[ToolChainPosition::Center] / 2.0f;
 		DrawSubBar(startPos, ToolChainPosition::Center);
 		ImGui::EndChild();
 	}

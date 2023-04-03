@@ -18,6 +18,7 @@ namespace Glory::Editor
 
 	private:
 		friend class Tumbnail;
+		static const std::string m_DefaultExtension;
 	};
 
 	template<class T>

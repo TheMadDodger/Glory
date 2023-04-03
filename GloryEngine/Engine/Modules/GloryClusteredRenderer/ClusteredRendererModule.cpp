@@ -152,7 +152,7 @@ namespace Glory
 		pGraphics->DrawMesh(pMeshData);
 	}
 
-	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture)
+	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 

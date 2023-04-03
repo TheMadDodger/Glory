@@ -15,8 +15,8 @@ namespace Glory::Editor
         void StartLooking();
         void StopLooking();
 
-        void SetPerspective(float width, float height, float halfFOV, float near, float far);
-        void SetOrthographic(float width, float height, float near, float far);
+        void SetPerspective(uint32_t width, uint32_t height, float halfFOV, float near, float far);
+        void SetOrthographic(uint32_t width, uint32_t height, float near, float far);
 
         //float GetOrthoZoom();
 
@@ -44,8 +44,8 @@ namespace Glory::Editor
 
         bool m_IsOrthographic = false;
         float m_HalfFOV = 60.0f;
-        float m_Width = 1.0f;
-        float m_Height = 1.0f;
+        uint32_t m_Width = 1;
+        uint32_t m_Height = 1;
         float m_Near = 0.1f;
         float m_Far = 3000.0f;
         float m_OrthoZoom = 0.1f;

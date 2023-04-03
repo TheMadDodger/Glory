@@ -5,7 +5,7 @@
 namespace Glory
 {
 	LayerRef::LayerRef() : m_LayerIndex(0) {}
-	LayerRef::LayerRef(size_t layerIndex) : m_LayerIndex(layerIndex) {}
+	LayerRef::LayerRef(uint32_t layerIndex) : m_LayerIndex(layerIndex) {}
 
 	bool LayerRef::operator==(const LayerRef&& other)
 	{
@@ -19,7 +19,7 @@ namespace Glory
 
 	const Layer* LayerRef::Layer() const
 	{
-		return LayerManager::GetLayerAtIndex(m_LayerIndex);
+		return LayerManager::GetLayerAtIndex((int)m_LayerIndex);
 	}
 
 	const GloryReflect::TypeData* LayerRef::GetTypeData()

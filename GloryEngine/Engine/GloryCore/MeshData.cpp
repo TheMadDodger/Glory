@@ -51,7 +51,7 @@ namespace Glory
 
 	const uint32_t MeshData::AttributeCount() const
 	{
-		return m_Attributes.size();
+		return (uint32_t)m_Attributes.size();
 	}
 
 	const float* MeshData::Vertices() const

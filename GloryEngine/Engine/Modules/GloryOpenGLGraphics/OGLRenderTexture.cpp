@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	OGLRenderTexture::OGLRenderTexture(const RenderTextureCreateInfo& createInfo) : RenderTexture(createInfo)
+	OGLRenderTexture::OGLRenderTexture(const RenderTextureCreateInfo& createInfo) : RenderTexture(createInfo), m_GLFrameBufferID(0)
 	{
 	}
 
@@ -23,7 +23,7 @@ namespace Glory
 	{
 		Bind();
 
-		size_t index = m_NameToTextureIndex["object"];
+		uint32_t index = (uint32_t)m_NameToTextureIndex["object"];
 		uint32_t value;
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
 		glReadPixels(coord.x, coord.y, 1, 1, GL_RED_INTEGER, GL_INT, &value);
@@ -79,7 +79,7 @@ namespace Glory
 		// Initialize the framebuffer
 		size_t attachmentCount = m_CreateInfo.Attachments.size();
 		std::vector<GLenum> drawBuffers = std::vector<GLenum>(attachmentCount);
-		for (size_t i = 0; i < attachmentCount; i++)
+		for (uint32_t i = 0; i < attachmentCount; i++)
 		{
 			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
 			GLTexture* pTexture = (GLTexture*)m_pTextures[i];

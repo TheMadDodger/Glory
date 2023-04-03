@@ -85,7 +85,7 @@ namespace Glory
 		if (pLayer == nullptr) return -1;
 		if (LAYER_MANAGER->m_NameToLayer.find(pLayer->m_Name) == LAYER_MANAGER->m_NameToLayer.end())
 			return -1;
-		return LAYER_MANAGER->m_NameToLayer[pLayer->m_Name];
+		return (int)LAYER_MANAGER->m_NameToLayer[pLayer->m_Name];
 	}
 
 	void LayerManager::GetAllLayerNames(std::vector<std::string_view>& names)

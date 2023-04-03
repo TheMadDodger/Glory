@@ -412,7 +412,7 @@ namespace Glory::EditorLauncher
 
                 bool editorInstalled = EditorManager::IsInstalled(item->SelectedVersion);
 
-                ImGui::PushID(row_n);
+                ImGui::PushID((int)row_n);
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
 
                 ImGui::TableSetColumnIndex(0);
@@ -539,7 +539,7 @@ namespace Glory::EditorLauncher
             {
                 const EditorInfo& editorInfo = EditorManager::GetEditorInfo(row_n);
 
-                ImGui::PushID(row_n);
+                ImGui::PushID((int)row_n);
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
 
                 ImGui::TableSetColumnIndex(0);
