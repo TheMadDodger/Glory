@@ -48,7 +48,7 @@ namespace Glory
 		virtual void OnThreadedCleanup() override;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
-		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, size_t width, size_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;

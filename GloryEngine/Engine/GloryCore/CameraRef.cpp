@@ -97,18 +97,20 @@ namespace Glory
 	const glm::uvec2& CameraRef::GetResolution() const
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return glm::uvec2();
+		if (pCamera == nullptr)
+			throw std::exception();
 		return pCamera->GetResolution();
 	}
 
 	const glm::mat4& CameraRef::GetView() const
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return glm::mat4();
+		if (pCamera == nullptr)
+			throw std::exception();
 		return pCamera->GetView();
 	}
 
-	const glm::mat4& CameraRef::GetViewInverse() const
+	glm::mat4 CameraRef::GetViewInverse() const
 	{
 		return glm::inverse(GetView());
 	}
@@ -116,11 +118,12 @@ namespace Glory
 	const glm::mat4& CameraRef::GetProjection() const
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return glm::mat4();
+		if (pCamera == nullptr)
+			throw std::exception();
 		return pCamera->GetProjection();
 	}
 
-	const glm::mat4& CameraRef::GetProjectionInverse() const
+	glm::mat4 CameraRef::GetProjectionInverse() const
 	{
 		return glm::inverse(GetProjection());
 	}
@@ -128,7 +131,8 @@ namespace Glory
 	glm::mat4 CameraRef::GetFinalView() const
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return glm::mat4();
+		if (pCamera == nullptr)
+			throw std::exception();
 		return pCamera->GetFinalView();
 	}
 
@@ -163,14 +167,16 @@ namespace Glory
 	const glm::vec4& CameraRef::GetClearColor() const
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return glm::vec4(0.0f);
+		if (pCamera == nullptr)
+			throw std::exception();
 		return pCamera->GetClearColor();
 	}
 
 	const LayerMask& CameraRef::GetLayerMask() const
 	{
 		Camera* pCamera = GloryContext::GetCameraManager()->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return 0;
+		if (pCamera == nullptr)
+			throw std::exception();
 		return pCamera->GetLayerMask();
 	}
 

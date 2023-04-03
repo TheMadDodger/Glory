@@ -34,9 +34,9 @@ namespace Glory::Editor
 		ImGuiIO& io = ImGui::GetIO();
 
 		m_SceneCamera.Initialize();
-		m_SceneCamera.m_Camera.SetResolution((int)m_WindowDimensions.x, (int)m_WindowDimensions.y);
-		if (m_Orthographic) m_SceneCamera.SetOrthographic(m_WindowDimensions.x, m_WindowDimensions.y, 0.1f, 3000.0f);
-		else m_SceneCamera.SetPerspective(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Camera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y);
+		if (m_Orthographic) m_SceneCamera.SetOrthographic((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 0.1f, 3000.0f);
+		else m_SceneCamera.SetPerspective((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 		m_SceneCamera.m_Camera.EnableOutput(true);
 	}
 
@@ -102,9 +102,9 @@ namespace Glory::Editor
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max)) m_SceneCamera.Update();
-		m_SceneCamera.m_Camera.SetResolution((int)m_WindowDimensions.x, (int)m_WindowDimensions.y);
-		if (m_Orthographic) m_SceneCamera.SetOrthographic(m_WindowDimensions.x, m_WindowDimensions.y, 0.1f, 3000.0f);
-		else m_SceneCamera.SetPerspective(m_WindowDimensions.x, m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Camera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y);
+		if (m_Orthographic) m_SceneCamera.SetOrthographic((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 0.1f, 3000.0f);
+		else m_SceneCamera.SetPerspective((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 	}
 
 	void SceneWindow::DrawScene(RenderTexture* pRenderTexture)

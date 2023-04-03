@@ -16,7 +16,7 @@ namespace Glory
 
     private:
         virtual void Initialize() override;
-        virtual Buffer* CreatePropertiesBuffer(size_t size) override;
+        virtual Buffer* CreatePropertiesBuffer(uint32_t size) override;
         virtual Buffer* CreateMVPBuffer() override;
         virtual void SetTexture(const std::string& name, Texture* value) override;
 

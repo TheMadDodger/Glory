@@ -14,9 +14,9 @@ namespace Glory
 	{
 	public:
 		LayerRef();
-		LayerRef(size_t layerIndex);
+		LayerRef(uint32_t layerIndex);
 
-		size_t m_LayerIndex;
+		uint32_t m_LayerIndex;
 
 	public:
 		bool operator==(const LayerRef&& other);

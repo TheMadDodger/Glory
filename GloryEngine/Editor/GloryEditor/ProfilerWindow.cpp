@@ -96,7 +96,7 @@ namespace Glory::Editor
 
 				if (m_CurrentlyInspectingSampleIndex != -1)
 				{
-					int gridX = m_CurrentlyInspectingSampleIndex + frameMin;
+					int gridX = m_CurrentlyInspectingSampleIndex + (int)frameMin;
 					float tool_l = ImPlot::PlotToPixels(gridX - half_width * 1.5, 0).x;
 					float tool_r = ImPlot::PlotToPixels(gridX + half_width * 1.5, 0).x;
 					float tool_t = ImPlot::GetPlotPos().y;
@@ -119,7 +119,7 @@ namespace Glory::Editor
 					draw_list->AddRectFilled(ImVec2(tool_l, tool_t), ImVec2(tool_r, tool_b), IM_COL32(128, 128, 128, 64));
 					ImPlot::PopPlotClipRect();
 
-					int index = gridX - frameMin;
+					int index = gridX - (int)frameMin;
 					ImGui::BeginTooltip();
 					for (size_t i = 0; i < maxValues.size(); i++)
 					{
@@ -127,7 +127,7 @@ namespace Glory::Editor
 						std::vector<float> samples = m_TimeSamples[name];
 						std::vector<float> frames = m_TimeFrames[name];
 
-						int frame = frames[index];
+						int frame = (int)frames[index];
 						float sample = samples[index];
 
 						if (i == 0) ImGui::Text("Frame: %d", frame);
@@ -150,8 +150,8 @@ namespace Glory::Editor
 					std::vector<float> samples = m_TimeSamples[name];
 					std::vector<float> frames = m_TimeFrames[name];
 					if (frames.size() <= 1) continue;
-					ImPlot::PlotShaded<float>(name.c_str(), (const float*)frames.data(), (const float*)samples.data(), samples.size());
-					ImPlot::PlotLine<float>(name.c_str(), (const float*)frames.data(), (const float*)samples.data(), samples.size());
+					ImPlot::PlotShaded<float>(name.c_str(), (const float*)frames.data(), (const float*)samples.data(), (int)samples.size());
+					ImPlot::PlotLine<float>(name.c_str(), (const float*)frames.data(), (const float*)samples.data(), (int)samples.size());
 				}
 
 				ImPlot::PopStyleVar();
@@ -267,7 +267,7 @@ namespace Glory::Editor
 
 			for (size_t row_n = 0; row_n < 10; row_n++)
 			{
-				ImGui::PushID(row_n);
+				ImGui::PushID((int)row_n);
 				ImGui::TableNextRow(ImGuiTableRowFlags_None, 0.0f);
 
 				ImGui::TableSetColumnIndex(0);
@@ -389,7 +389,7 @@ namespace Glory::Editor
 			m_TimeFrames[name].resize(MAX_SAMPLE_RECORDS);
 			for (size_t i = 0; i < m_TimeFrames[name].size(); i++)
 			{
-				m_TimeFrames[name][i] = i;
+				m_TimeFrames[name][i] = (float)i;
 			}
 		}
 

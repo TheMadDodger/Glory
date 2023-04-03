@@ -42,7 +42,7 @@ namespace Glory::Editor
 
 		const float itemHeight = 24.0f;
 
-		ImGuiListClipper clipper(recordCount, itemHeight);
+		ImGuiListClipper clipper((int)recordCount, itemHeight);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
 
@@ -54,7 +54,7 @@ namespace Glory::Editor
 
 				const ActionRecord* pRecord = Undo::RecordAt(recordIndex);
 				const bool selected = recordIndex + 1 <= selectedIndex;
-				ImGui::PushID(i);
+				ImGui::PushID((int)i);
 				
 				const float width = ImGui::GetContentRegionAvail().x;
 				if (selected) ImGui::PushStyleColor(ImGuiCol_Button, selectedColor);

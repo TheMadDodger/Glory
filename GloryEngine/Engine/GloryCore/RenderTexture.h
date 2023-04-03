@@ -28,10 +28,10 @@ namespace Glory
 	struct RenderTextureCreateInfo
 	{
 	public:
-		RenderTextureCreateInfo(size_t width, size_t height, bool hasDepth);
+		RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth);
 
-		size_t Width;
-		size_t Height;
+		uint32_t Width;
+		uint32_t Height;
 		bool HasDepth;
 		std::vector<Attachment> Attachments;
 	};
@@ -39,8 +39,8 @@ namespace Glory
 	class RenderTexture : public GPUResource
 	{
 	public:
-		void Resize(size_t width, size_t height);
-		void GetDimensions(size_t& width, size_t& height) const;
+		void Resize(uint32_t width, uint32_t height);
+		void GetDimensions(uint32_t& width, uint32_t& height) const;
 		Texture* GetTextureAttachment(size_t index);
 		Texture* GetTextureAttachment(const std::string& name);
 
@@ -66,8 +66,8 @@ namespace Glory
 
 	protected:
 		friend class GPUResourceManager;
-		size_t m_Width;
-		size_t m_Height;
+		uint32_t m_Width;
+		uint32_t m_Height;
 		std::vector<Texture*> m_pTextures;
 		std::map<std::string, size_t> m_NameToTextureIndex;
 		std::vector<std::string> m_Names;

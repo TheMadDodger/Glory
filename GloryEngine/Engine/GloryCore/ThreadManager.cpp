@@ -10,7 +10,7 @@ namespace Glory
 		return GetInstance()->CreateThread(func);
 	}
 
-	const size_t& ThreadManager::NumHardwareThread()
+	size_t ThreadManager::NumHardwareThread()
 	{
 		if (GetInstance()->m_HardwareThreads == 0) return 4;
 		return GetInstance()->m_HardwareThreads;

@@ -59,7 +59,7 @@ namespace Glory
 		}
 	}
 
-	Buffer* OGLMaterial::CreatePropertiesBuffer(size_t size)
+	Buffer* OGLMaterial::CreatePropertiesBuffer(uint32_t size)
 	{
 		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
 			->CreateBuffer(size, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 1);
@@ -68,7 +68,7 @@ namespace Glory
 	Buffer* OGLMaterial::CreateMVPBuffer()
 	{
 		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
-			->CreateBuffer(sizeof(ObjectData), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
+			->CreateBuffer((uint32_t)sizeof(ObjectData), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 	}
 
 	void OGLMaterial::SetFloat(const std::string& name, float value) const

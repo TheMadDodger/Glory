@@ -28,7 +28,7 @@ namespace Glory
 		virtual void Initialize() = 0;
 		void AddShader(Shader* pShader);
 
-		virtual Buffer* CreatePropertiesBuffer(size_t size) = 0;
+		virtual Buffer* CreatePropertiesBuffer(uint32_t size) = 0;
 		virtual Buffer* CreateMVPBuffer() = 0;
 
 		void Clear();

@@ -366,8 +366,6 @@ namespace Glory::Editor
 			return;
 		}
 
-		projectPath.parent_path().string();
-
 		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=Debug /p:Platform=x64 \"" + projectPath.string() + "\"";
 		system(cmd.c_str());
 

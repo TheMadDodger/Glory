@@ -47,7 +47,7 @@ namespace Glory::Editor
 			const std::string valueStr = pPhysics->Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
 			BPLayer bpLayer;
 			GloryReflect::Enum<BPLayer>().FromString(valueStr, bpLayer);
-			bpLayersMapping.emplace(i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
+			bpLayersMapping.emplace((uint16_t)i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
 		}
 		pPhysics->BPLayerImpl().SetObjectToBroadphase(std::move(bpLayersMapping));
 

@@ -29,7 +29,7 @@ namespace YAML
 			if (!node.IsScalar())
 				return false;
 
-			layerRef = node.as<size_t>();
+			layerRef = node.as<uint32_t>();
 			return true;
 		}
 	};

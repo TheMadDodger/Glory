@@ -11,7 +11,7 @@ namespace Glory
 	{
 	public:
 		static Thread* Run(std::function<void()> func);
-		static const size_t& NumHardwareThread();
+		static size_t NumHardwareThread();
 
 	private:
 		void Destroy();

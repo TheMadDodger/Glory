@@ -15,7 +15,7 @@ namespace Glory
 
 		static void ClearAllDisplays(Engine* pEngine);
 
-		static RenderTexture* CreateOutputTexture(Engine* pEngine, size_t width, size_t height);
+		static RenderTexture* CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height);
 
 	private:
 		DisplayManager();

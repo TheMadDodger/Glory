@@ -50,6 +50,8 @@ namespace Glory::Editor
 		{
 			if (!pEnumType->ToString(&currentValue, value)) value = "none";
 			node = value;
+			return true;
 		}
+		return false;
 	}
 }

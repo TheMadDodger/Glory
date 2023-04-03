@@ -460,7 +460,7 @@ namespace Glory
 			const std::string valueStr = Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
 			BPLayer bpLayer;
 			GloryReflect::Enum<BPLayer>().FromString(valueStr, bpLayer);
-			bpLayersMapping.emplace(i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
+			bpLayersMapping.emplace((uint16_t)i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
 		}
 		m_BPLayerImpl.SetObjectToBroadphase(std::move(bpLayersMapping));
 

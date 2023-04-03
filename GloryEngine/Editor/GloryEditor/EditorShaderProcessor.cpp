@@ -254,7 +254,7 @@ namespace Glory::Editor
 			const spirv_cross::SPIRType& type = compiler.get_type(storageBuffer.type_id);
 
 			if (base_type.basetype != spirv_cross::SPIRType::Struct) break;
-			for (size_t j = 0; j < base_type.member_types.size(); j++)
+			for (uint32_t j = 0; j < (uint32_t)base_type.member_types.size(); j++)
 			{
 				spirv_cross::TypeID memberType = base_type.member_types[j];
 				const spirv_cross::SPIRType& type = compiler.get_type(memberType);

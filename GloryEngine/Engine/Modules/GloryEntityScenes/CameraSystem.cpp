@@ -74,6 +74,6 @@ namespace Glory
 			+ (float)pComponent.m_Near + (float)pComponent.m_HalfFOV
 			+ (float)pComponent.m_Priority + (float)pComponent.m_LayerMask;
 
-		return std::hash<float>()(value);
+		return (uint32_t)std::hash<float>()(value);
 	}
 }

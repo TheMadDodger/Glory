@@ -45,10 +45,10 @@ namespace Glory::Editor
 		/* Render top layer labels first */
 		for (size_t x = 0; x < layerCount; ++x)
 		{
-			const Layer* pXLayer = LayerManager::GetLayerAtIndex(x);
+			const Layer* pXLayer = LayerManager::GetLayerAtIndex((int)x);
 			const std::string& name = pXLayer->m_Name;
 
-			const size_t textHeight = name.size() * textSize.y + 4.0f;
+			const float textHeight = name.size() * textSize.y + 4.0f;
 
 			if (textHeight > lastMaxHeight)
 				lastMaxHeight = textHeight;
@@ -71,12 +71,12 @@ namespace Glory::Editor
 
 		for (size_t y = 0; y < layerCount; ++y)
 		{
-			ImGui::PushID(y);
+			ImGui::PushID((int)y);
 
-			const Layer* pYLayer = LayerManager::GetLayerAtIndex(y);
+			const Layer* pYLayer = LayerManager::GetLayerAtIndex((int)y);
 			for (size_t x = 0; x < layerCount; ++x)
 			{
-				ImGui::PushID(x);
+				ImGui::PushID((int)x);
 
 				NodeValueRef xNode = collisionMatrixNode[x];
 				if (!xNode.IsSequence())
@@ -86,7 +86,7 @@ namespace Glory::Editor
 				if (!yNode.Exists())
 					yNode.Set(true);
 
-				const Layer* pXLayer = LayerManager::GetLayerAtIndex(x);
+				const Layer* pXLayer = LayerManager::GetLayerAtIndex((int)x);
 				bool value = yNode.As<bool>();
 
 				if (!x)
@@ -115,8 +115,8 @@ namespace Glory::Editor
 
 				if (ImGui::IsItemHovered())
 				{
-					hoverXLastFrame = x;
-					hoverYLastFrame = y;
+					hoverXLastFrame = (int)x;
+					hoverYLastFrame = (int)y;
 				}
 
 				ImGui::PopID();

@@ -15,11 +15,11 @@ namespace Glory::EditorLauncher
 
 	struct EngineSettings
 	{
-		int RenderModule;
-		int GraphicsModule;
-		int WindowModule;
-		int ScenesModule;
-		int InputModule;
+		int RenderModule = -1;
+		int GraphicsModule = -1;
+		int WindowModule = -1;
+		int ScenesModule = -1;
+		int InputModule = -1;
 		std::vector<int> OptionalModules;
 		std::vector<int> ScriptingModules;
 

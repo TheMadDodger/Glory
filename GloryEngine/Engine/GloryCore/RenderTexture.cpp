@@ -10,17 +10,17 @@ namespace Glory
 	{
 	}
 
-	RenderTextureCreateInfo::RenderTextureCreateInfo(size_t width, size_t height, bool hasDepth)
+	RenderTextureCreateInfo::RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth)
 		: Width(width), Height(height), HasDepth(hasDepth), Attachments(std::vector<Attachment>()) {}
 
-	void RenderTexture::Resize(size_t width, size_t height)
+	void RenderTexture::Resize(uint32_t width, uint32_t height)
 	{
 		m_Width = width;
 		m_Height = height;
 		OnResize();
 	}
 
-	void RenderTexture::GetDimensions(size_t& width, size_t& height) const
+	void RenderTexture::GetDimensions(uint32_t& width, uint32_t& height) const
 	{
 		width = m_Width;
 		height = m_Height;

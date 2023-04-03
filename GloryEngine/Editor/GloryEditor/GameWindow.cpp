@@ -49,7 +49,7 @@ namespace Glory::Editor
 		if (pDisplayTexture == nullptr) return;
 		Texture* pTexture = pDisplayTexture->GetTextureAttachment(0);
 
-		size_t width, height;
+		uint32_t width, height;
 		pDisplayTexture->GetDimensions(width, height);
 		float textureAspect = (float)width / (float)height;
 

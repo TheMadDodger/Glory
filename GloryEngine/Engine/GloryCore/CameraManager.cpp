@@ -61,8 +61,8 @@ namespace Glory
 
 		if (!createIfNotExist) return nullptr;
 
-		size_t width = pCamera->m_Resolution.x;
-		size_t height = pCamera->m_Resolution.y;
+		uint32_t width = pCamera->m_Resolution.x;
+		uint32_t height = pCamera->m_Resolution.y;
 		pCamera->m_pRenderTexture = pEngine->GetRendererModule()->CreateCameraRenderTexture(width, height);
 		pCamera->m_TextureIsDirty = false;
 		Profiler::EndSample();

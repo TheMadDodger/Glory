@@ -59,7 +59,7 @@ namespace Glory
 		ReloadProperties();
 	}
 
-	const UUID& MaterialInstanceData::GetGPUUUID() const
+	UUID MaterialInstanceData::GetGPUUUID() const
 	{
 		if (!m_pBaseMaterial) return 0;
 		return m_pBaseMaterial->GetUUID();

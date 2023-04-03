@@ -38,12 +38,12 @@ namespace Glory
 		pContext->m_pAllObjects.Erase(this);
 	}
 
-	const UUID& Object::GetUUID() const
+	UUID Object::GetUUID() const
 	{
 		return m_ID;
 	}
 
-	const UUID& Object::GetGPUUUID() const
+	UUID Object::GetGPUUUID() const
 	{
 		return GetUUID();
 	}

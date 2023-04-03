@@ -62,7 +62,7 @@ namespace Glory
 	void GLMesh::SetupAttributes()
 	{
 		size_t offset = 0;
-		for (size_t i = 0; i < m_AttributeTypes.size(); i++)
+		for (uint32_t i = 0; i < m_AttributeTypes.size(); i++)
 		{
 			OpenGLGraphicsModule::LogGLError(glGetError());
 

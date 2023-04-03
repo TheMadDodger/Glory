@@ -108,7 +108,7 @@ namespace Glory
 			const UUID deviceID = FindAvailableInputDevice(deviceType);
 			if (deviceID == 0) continue;
 			InputDevice* pDevice = GetInputDevice(deviceID);
-			pDevice->m_PlayerIndex = playerIndex;
+			pDevice->m_PlayerIndex = (int)playerIndex;
 			player->m_ClaimedDevices.push_back(deviceID);
 			player->m_ClaimedDeviceTypes.push_back(deviceType);
 		}
