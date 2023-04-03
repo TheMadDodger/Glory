@@ -1,5 +1,7 @@
 #pragma once
 #include <Engine.h>
+#include <NodeRef.h>
+#include <GloryEditor.h>
 
 namespace Glory::Editor
 {
@@ -11,11 +13,13 @@ namespace Glory::Editor
 		void Load(Engine* pEngine);
 		void Save(Engine* pEngine);
 
+		GLORY_EDITOR_API NodeValueRef operator[](const std::filesystem::path& path);
+
 	private:
 		void LoadSettingsFile(Engine* pEngine);
 		void LoadDefaultSettings(Engine* pEngine);
 
 	private:
-		std::filesystem::path m_EditorSettingsPath;
+		YAMLFileRef m_YAMLFile;
 	};
 }

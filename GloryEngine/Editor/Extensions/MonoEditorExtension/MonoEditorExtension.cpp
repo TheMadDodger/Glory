@@ -18,6 +18,7 @@
 
 #include <string>
 #include <MonoLibManager.h>
+#include <EditorApplication.h>
 
 #include <tchar.h>
 #include <locale>
@@ -38,8 +39,6 @@ void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
 
 namespace Glory::Editor
 {
-	std::filesystem::path MonoEditorExtension::m_VisualStudioPath = "";
-
 	MonoEditorExtension::MonoEditorExtension()
 	{
 	}
@@ -78,7 +77,11 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::RegisterEditors()
 	{
-		FindVisualStudioPath();
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+		std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
+		if (!FindMSBuild(visualStudioPath))
+			FindVisualStudioPath();
 
 		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, MonoEditorExtension::OnProjectClose);
 		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, MonoEditorExtension::OnProjectOpen);
@@ -99,15 +102,18 @@ namespace Glory::Editor
 		const std::filesystem::path x64Path = "C:/Program Files/Microsoft Visual Studio";
 		const std::filesystem::path x86Path = "C:/Program Files (x86)/Microsoft Visual Studio";
 
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+
 		if (FindVisualStudioPath(x64Path))
 		{
-			Debug::LogInfo("Found Visual Studio at " + m_VisualStudioPath.string());
+			Debug::LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
 			return;
 		}
 
 		if (FindVisualStudioPath(x86Path))
 		{
-			Debug::LogInfo("Found Visual Studio at " + m_VisualStudioPath.string());
+			Debug::LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
 			return;
 		}
 
@@ -116,6 +122,9 @@ namespace Glory::Editor
 
 	bool MonoEditorExtension::FindVisualStudioPath(const std::filesystem::path& path)
 	{
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+
 		if (!std::filesystem::exists(path)) return false;
 		for (const std::filesystem::directory_entry entry : std::filesystem::directory_iterator(path))
 		{
@@ -125,7 +134,7 @@ namespace Glory::Editor
 			editionPath.append("Enterprise");
 			if (FindMSBuild(std::filesystem::path(editionPath)))
 			{
-				m_VisualStudioPath = editionPath;
+				settings["Mono/VisualStudioPath"].Set(editionPath.string());
 				return true;
 			}
 
@@ -133,7 +142,7 @@ namespace Glory::Editor
 			editionPath.append("Professional");
 			if (FindMSBuild(std::filesystem::path(editionPath)))
 			{
-				m_VisualStudioPath = editionPath;
+				settings["Mono/VisualStudioPath"].Set(editionPath.string());
 				return true;
 			}
 
@@ -141,7 +150,7 @@ namespace Glory::Editor
 			editionPath.append("Community");
 			if (FindMSBuild(std::filesystem::path(editionPath)))
 			{
-				m_VisualStudioPath = editionPath;
+				settings["Mono/VisualStudioPath"].Set(editionPath.string());
 				return true;
 			}
 		}
@@ -347,7 +356,10 @@ namespace Glory::Editor
 		std::filesystem::path projectPath = pProject->RootPath();
 		projectPath = projectPath.append(pProject->Name() + ".csproj");
 
-		std::filesystem::path msBuildPath = m_VisualStudioPath;
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+
+		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>();
 		if (!FindMSBuild(msBuildPath))
 		{
 			Debug::LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
@@ -390,17 +402,21 @@ namespace Glory::Editor
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		ImGui::Text("Visual Studio: %s", m_VisualStudioPath.string().c_str());
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+		const std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>();
+
+		ImGui::Text("Visual Studio: %s", visualStudioPath.string().c_str());
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 		const float cursorX = ImGui::GetCursorPosX();
 		ImGui::SetCursorPosX(cursorX + availableWidth - 100);
 		if (ImGui::Button("Browse", { 100.0f, 0.0f }))
 		{
-			FileDialog::Open("visualstudiopath", "Visual Studio Installation", "", false, m_VisualStudioPath.string().c_str(), [&](const std::string& path) {
+			FileDialog::Open("visualstudiopath", "Visual Studio Installation", "", false, visualStudioPath.string().c_str(), [&](const std::string& path) {
 				if (FindMSBuild(std::filesystem::path(path)))
 				{
-					m_VisualStudioPath = path;
+					settings["Mono/VisualStudioPath"].Set(path);
 					return;
 				}
 				Debug::LogWarning("Invalid Visual Studio Path");

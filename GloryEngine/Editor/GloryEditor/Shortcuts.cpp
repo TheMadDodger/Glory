@@ -70,34 +70,41 @@ namespace Glory::Editor
 		return m_Shortcuts.end();
 	}
 
-	void Shortcuts::SaveShortcuts(YAML::Emitter& out)
+	void Shortcuts::SaveShortcuts(YAMLFileRef& yamlFile)
 	{
-		out << YAML::Key << "Shortcuts";
-		out << YAML::BeginSeq;
+		NodeValueRef shortcuts = yamlFile["Shortcuts"];
+		if (!shortcuts.IsSequence())
+		{
+			shortcuts.Set(YAML::Node(YAML::NodeType::Sequence));
+		}
+
+		size_t index = 0;
 		for (auto itor = m_Shortcuts.begin(); itor != m_Shortcuts.end(); ++itor)
 		{
-			out << YAML::BeginMap;
-			out << YAML::Key << "Name";
-			out << YAML::Value << itor->first.data();
-			out << YAML::Key << "Key";
-			out << YAML::Value << int(itor->second.m_Key);
-			out << YAML::Key << "Mods";
-			out << YAML::Value << int(itor->second.m_Mods);
-			out << YAML::EndMap;
+			NodeValueRef shortcut = shortcuts[index];
+			if (!shortcut.IsMap())
+			{
+				shortcut.Set(YAML::Node(YAML::NodeType::Map));
+			}
+
+			shortcut["Name"].Set(itor->first.data());
+			shortcut["Key"].Set((int)itor->second.m_Key);
+			shortcut["Mods"].Set((int)itor->second.m_Mods);
+
+			++index;
 		}
-		out << YAML::EndSeq;
 	}
 
-	void Shortcuts::LoadShortcuts(YAML::Node& node)
+	void Shortcuts::LoadShortcuts(YAMLFileRef& yamlFile)
 	{
-		YAML::Node shortcutsNode = node["Shortcuts"];
-		if (!shortcutsNode.IsDefined() || !shortcutsNode.IsSequence()) return;
-		for (size_t i = 0; i < shortcutsNode.size(); i++)
+		NodeValueRef shortcuts = yamlFile["Shortcuts"];
+		if (!shortcuts.IsSequence()) return;
+		for (size_t i = 0; i < shortcuts.Size(); i++)
 		{
-			YAML::Node shortcutNode = shortcutsNode[i];
-			std::string name = shortcutNode["Name"].as<std::string>();
-			ImGuiKey key = ImGuiKey(shortcutNode["Key"].as<int>());
-			ImGuiModFlags mods = shortcutNode["Mods"].as<int>();
+			NodeValueRef shortcut = shortcuts[i];
+			std::string name = shortcut["Name"].As<std::string>("");
+			ImGuiKey key = ImGuiKey(shortcut["Key"].As<int>(0));
+			ImGuiModFlags mods = shortcut["Mods"].As<int>(0);
 			Shortcuts::SetShortcut(name, key, mods);
 		}
 	}

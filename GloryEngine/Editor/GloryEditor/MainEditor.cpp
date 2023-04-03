@@ -211,6 +211,11 @@ namespace Glory::Editor
 		FileBrowser::OnFileDragAndDrop(path);
 	}
 
+	EditorSettings& MainEditor::Settings()
+	{
+		return m_Settings;
+	}
+
 	void MainEditor::SetupTitleBar()
 	{
 		TitleBar::AddSection("Application", "Glorious");
