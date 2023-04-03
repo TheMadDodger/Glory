@@ -29,19 +29,13 @@ namespace Glory::Editor
 		{
 			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID());
 			bool change = false;
-			TComponent& component = GetTargetComponent();
-			uint32_t hash = ResourceType::GetHash<TComponent>();
 
+			uint32_t hash = ResourceType::GetHash<TComponent>();
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(hash);
 			if (pTypeData)
 			{
-				for (int i = 0; i < pTypeData->FieldCount(); ++i)
-				{
-					const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-					size_t offset = pFieldData->Offset();
-					void* pAddress = (void*)((char*)(&component) + offset);
-					change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, 0);
-				}
+				TComponent& component = GetTargetComponent();
+				PropertyDrawer::DrawProperty("", pTypeData, &component, 0);
 			}
 
 			Undo::StopRecord();
