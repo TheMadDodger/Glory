@@ -1,7 +1,9 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
+#include "FileDialog.h"
 
 #include <EditorAssetDatabase.h>
+#include <EditorPreferencesWindow.h>
 #include <EditorAssetCallbacks.h>
 #include <Game.h>
 #include <Engine.h>
@@ -36,6 +38,8 @@ void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
 
 namespace Glory::Editor
 {
+	std::filesystem::path MonoEditorExtension::m_VisualStudioPath = "";
+
 	MonoEditorExtension::MonoEditorExtension()
 	{
 	}
@@ -47,8 +51,8 @@ namespace Glory::Editor
 	void MonoEditorExtension::OpenCSharpProject()
 	{
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		std::filesystem::path projectPath = pProject->RootPath();
-		projectPath = projectPath.append(pProject->Name() + ".csproj");
+		std::filesystem::path solutionPath = pProject->RootPath();
+		solutionPath = solutionPath.append(pProject->Name() + ".csproj");
 
 		GeneratePremakeFile(pProject);
 		GenerateBatchFile(pProject);
@@ -58,8 +62,7 @@ namespace Glory::Editor
 		HWND handle = FindWindowA(NULL, windowName.c_str());
 		if (handle == NULL)
 		{
-			std::string cmd = "\"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/devenv\" " + projectPath.string();
-			system(cmd.c_str());
+			OpenFile(solutionPath);
 
 			while (handle == NULL)
 				handle = FindWindowA(NULL, windowName.c_str());
@@ -68,9 +71,14 @@ namespace Glory::Editor
 		SetForegroundWindow(handle);
 	}
 
+	void MonoEditorExtension::OpenFile(const std::filesystem::path& path)
+	{
+		ShellExecute(0, L"open", path.wstring().c_str(), 0, 0, SW_SHOW);
+	}
+
 	void MonoEditorExtension::RegisterEditors()
 	{
-		m_pScriptingModule = Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>();
+		FindVisualStudioPath();
 
 		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, MonoEditorExtension::OnProjectClose);
 		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, MonoEditorExtension::OnProjectOpen);
@@ -83,6 +91,68 @@ namespace Glory::Editor
 		Tumbnail::AddGenerator<MonoScriptTumbnail>();
 
 		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
+		EditorPreferencesWindow::AddPreferencesTab({ "Mono", [this]() { Preferences(); } });
+	}
+
+	void MonoEditorExtension::FindVisualStudioPath()
+	{
+		const std::filesystem::path x64Path = "C:/Program Files/Microsoft Visual Studio";
+		const std::filesystem::path x86Path = "C:/Program Files (x86)/Microsoft Visual Studio";
+
+		if (FindVisualStudioPath(x64Path))
+		{
+			Debug::LogInfo("Found Visual Studio at " + m_VisualStudioPath.string());
+			return;
+		}
+
+		if (FindVisualStudioPath(x86Path))
+		{
+			Debug::LogInfo("Found Visual Studio at " + m_VisualStudioPath.string());
+			return;
+		}
+
+		Debug::LogWarning("Could not find Visual Studio installation");
+	}
+
+	bool MonoEditorExtension::FindVisualStudioPath(const std::filesystem::path& path)
+	{
+		if (!std::filesystem::exists(path)) return false;
+		for (const std::filesystem::directory_entry entry : std::filesystem::directory_iterator(path))
+		{
+			if (!entry.is_directory()) continue;
+			const std::filesystem::path versionPath = entry.path();
+			std::filesystem::path editionPath = versionPath;
+			editionPath.append("Enterprise");
+			if (FindMSBuild(std::filesystem::path(editionPath)))
+			{
+				m_VisualStudioPath = editionPath;
+				return true;
+			}
+
+			editionPath = versionPath;
+			editionPath.append("Professional");
+			if (FindMSBuild(std::filesystem::path(editionPath)))
+			{
+				m_VisualStudioPath = editionPath;
+				return true;
+			}
+
+			editionPath = versionPath;
+			editionPath.append("Community");
+			if (FindMSBuild(std::filesystem::path(editionPath)))
+			{
+				m_VisualStudioPath = editionPath;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool MonoEditorExtension::FindMSBuild(std::filesystem::path& path)
+	{
+		path.append("MSBuild/Current/Bin/MSBuild.exe");
+		return std::filesystem::exists(path);
 	}
 
 	void MonoEditorExtension::OnProjectClose(ProjectSpace* pProject)
@@ -277,8 +347,18 @@ namespace Glory::Editor
 		std::filesystem::path projectPath = pProject->RootPath();
 		projectPath = projectPath.append(pProject->Name() + ".csproj");
 
-		std::string cmd = "\"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/devenv\" " + projectPath.string() + " /Build";
+		std::filesystem::path msBuildPath = m_VisualStudioPath;
+		if (!FindMSBuild(msBuildPath))
+		{
+			Debug::LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
+			return;
+		}
+
+		projectPath.parent_path().string();
+
+		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=Debug /p:Platform=x64 \"" + projectPath.string() + "\"";
 		system(cmd.c_str());
+
 		ReloadAssembly();
 	}
 
@@ -303,15 +383,28 @@ namespace Glory::Editor
 			return;
 		}
 	}
+
+	void MonoEditorExtension::Preferences()
+	{
+		ImGui::TextUnformatted("Mono");
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::Text("Visual Studio: %s", m_VisualStudioPath.string().c_str());
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const float cursorX = ImGui::GetCursorPosX();
+		ImGui::SetCursorPosX(cursorX + availableWidth - 100);
+		if (ImGui::Button("Browse", { 100.0f, 0.0f }))
+		{
+			FileDialog::Open("visualstudiopath", "Visual Studio Installation", "", false, m_VisualStudioPath.string().c_str(), [&](const std::string& path) {
+				if (FindMSBuild(std::filesystem::path(path)))
+				{
+					m_VisualStudioPath = path;
+					return;
+				}
+				Debug::LogWarning("Invalid Visual Studio Path");
+			});
+		}
+	}
 }
-
-//<ItemGroup>
-//<Compile Include = "Assets\Scripts\rtlkhyjtlhkrthikhbk.cs" />
-//<Compile Include = "Assets\Scripts\TestScript.cs" />
-//</ItemGroup>
-
-//<ItemGroup>
-//	<Reference Include = "AppLogger">
-//		<HintPath>..\..\..\Glorious\TEST\CSharpTest\AppLogger\bin\Debug\netcoreapp3.1\AppLogger.dll< / HintPath>
-//	< / Reference>
-//< / ItemGroup>
