@@ -27,7 +27,7 @@ namespace Glory::Editor
 
 		virtual bool OnGUI() override
 		{
-			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID());
+			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 			bool change = false;
 
 			uint32_t hash = ResourceType::GetHash<TComponent>();

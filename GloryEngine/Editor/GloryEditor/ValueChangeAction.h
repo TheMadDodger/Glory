@@ -18,6 +18,7 @@ namespace Glory::Editor
     private:
         virtual GLORY_EDITOR_API void OnUndo(const ActionRecord& actionRecord);
         virtual GLORY_EDITOR_API void OnRedo(const ActionRecord& actionRecord);
+        virtual GLORY_EDITOR_API bool Combine(IAction* pOther);
 
     private:
         const GloryReflect::TypeData* m_pRootType;

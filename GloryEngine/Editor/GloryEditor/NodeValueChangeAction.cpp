@@ -59,4 +59,13 @@ namespace Glory::Editor
 
 		Set(splitPath, nextNode, value);
 	}
+
+	bool NodeValueChangeAction::Combine(IAction* pOther)
+	{
+		NodeValueChangeAction* pAction = dynamic_cast<NodeValueChangeAction*>(pOther);
+		if (!pAction) return false;
+		if (pAction->m_PropertyPath != m_PropertyPath) return false;
+		m_NewValue = std::move(pAction->m_NewValue);
+		return true;
+	}
 }

@@ -6,6 +6,7 @@ namespace Glory::Editor
 {
 	std::vector<IAction*> Undo::m_RecordedActions;
 	std::string Undo::m_RecordingName;
+	bool Undo::m_RecordingContinuous;
 
 	std::vector<ActionRecord> Undo::m_ActionRecords;
 	size_t Undo::m_RewindIndex = 0;
@@ -13,7 +14,7 @@ namespace Glory::Editor
 
 	bool Undo::m_IsBusy = false;
 
-	void Undo::StartRecord(const std::string& name, UUID uuid)
+	void Undo::StartRecord(const std::string& name, UUID uuid, bool continuous)
 	{
 		if (m_IsBusy) return;
 
@@ -25,6 +26,7 @@ namespace Glory::Editor
 
 		m_RecordingName = name;
 		m_RecordingUUID = uuid;
+		m_RecordingContinuous = continuous;
 	}
 
 	void Undo::StopRecord()
@@ -56,6 +58,23 @@ namespace Glory::Editor
 
 	void Undo::AddAction(IAction* action)
 	{
+		if (m_RecordingContinuous && m_ActionRecords.size())
+		{
+			size_t index = m_ActionRecords.size() - m_RewindIndex - 1;
+			ActionRecord& record = m_ActionRecords[index];
+			if (record.Name == m_RecordingName && record.ObjectID == m_RecordingUUID)
+			{
+				for (size_t i = 0; i < record.Actions.size(); ++i)
+				{
+					if (record.Actions[i]->Combine(action))
+					{
+						delete action;
+						return;
+					}
+				}
+			}
+		}
+
 		if (m_RecordingName == "")
 		{
 			delete action;
