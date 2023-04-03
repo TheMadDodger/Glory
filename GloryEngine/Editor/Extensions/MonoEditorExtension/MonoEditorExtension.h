@@ -19,8 +19,13 @@ namespace Glory::Editor
 
         static void OpenCSharpProject();
 
+        static void OpenFile(const std::filesystem::path& path);
+
     private:
         virtual void RegisterEditors() override;
+        static void FindVisualStudioPath();
+        static bool FindVisualStudioPath(const std::filesystem::path& path);
+        static bool FindMSBuild(std::filesystem::path& path);
 
         static void OnProjectClose(ProjectSpace* pProject);
         static void OnProjectOpen(ProjectSpace* pProject);
@@ -36,10 +41,11 @@ namespace Glory::Editor
         static void CompileProject();
         static void ReloadAssembly();
 
-
         static void AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*);
 
+        void Preferences();
+
     private:
-        GloryMonoScipting* m_pScriptingModule;
+        static std::filesystem::path m_VisualStudioPath;
     };
 }

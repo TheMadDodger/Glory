@@ -29,12 +29,12 @@ namespace Glory::Editor
 		AssetLocation location;
 		if (!EditorAssetDatabase::GetAssetLocation(uuid, location)) return;
 
+		/* Open project first before opening a single file */
 		MonoEditorExtension::OpenCSharpProject();
 
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		std::filesystem::path path = pProject->RootPath();
 		path = path.append("Assets").append(location.Path);
-		std::string cmd = "\"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/devenv\" /edit " + path.string();
-		system(cmd.c_str());
+		MonoEditorExtension::OpenFile(path);
 	}
 }

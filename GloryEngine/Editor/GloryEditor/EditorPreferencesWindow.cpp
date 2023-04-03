@@ -13,6 +13,7 @@ namespace Glory::Editor
 	ImGuiKey_F7, ImGuiKey_F8, ImGuiKey_F9, ImGuiKey_F10, ImGuiKey_F11, ImGuiKey_F12, };
 
 	int EditorPreferencesWindow::m_ThemeIndex = 0;
+	std::vector<PreferencesTab> EditorPreferencesWindow::m_Tabs;
 
 	EditorPreferencesWindow::EditorPreferencesWindow()
 		: EditorWindowTemplate("Preferences", 600.0f, 400.0f), m_RebindingShortcut("")
@@ -24,6 +25,10 @@ namespace Glory::Editor
 	{
 	}
 
+	void EditorPreferencesWindow::AddPreferencesTab(const PreferencesTab&& tab)
+	{
+		m_Tabs.push_back(std::move(tab));
+	}
 
 	void EditorPreferencesWindow::OnGUI()
 	{
@@ -35,6 +40,16 @@ namespace Glory::Editor
 				Shortcuts();
 				ImGui::EndTabItem();
 			}
+
+			for (size_t i = 0; i < m_Tabs.size(); ++i)
+			{
+				if (ImGui::BeginTabItem(m_Tabs[i].m_Name.c_str()))
+				{
+					m_Tabs[i].m_DrawCallback();
+					ImGui::EndTabItem();
+				}
+			}
+
 			ImGui::EndTabBar();
 		}
 	}
