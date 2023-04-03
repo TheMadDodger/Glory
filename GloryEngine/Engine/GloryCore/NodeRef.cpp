@@ -157,6 +157,11 @@ namespace Glory
 		file.close();
 	}
 
+	const std::filesystem::path& YAMLFileRef::Path() const
+	{
+		return m_FilePath;
+	}
+
 	NodeRef YAMLFileRef::RootNodeRef()
 	{
 		return NodeRef(m_RootNode);

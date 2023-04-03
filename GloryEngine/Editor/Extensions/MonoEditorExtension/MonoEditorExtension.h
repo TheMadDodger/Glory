@@ -44,8 +44,5 @@ namespace Glory::Editor
         static void AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*);
 
         void Preferences();
-
-    private:
-        static std::filesystem::path m_VisualStudioPath;
     };
 }

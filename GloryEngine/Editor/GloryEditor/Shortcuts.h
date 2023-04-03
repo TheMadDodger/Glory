@@ -5,6 +5,7 @@
 #include <string_view>
 #include <functional>
 #include <yaml-cpp/yaml.h>
+#include <NodeRef.h>
 #include "GloryEditor.h"
 
 namespace Glory::Editor
@@ -53,11 +54,11 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API const std::map<std::string_view, Shortcut>::iterator End();
 
 		/* @brief Write user set shortcut keys to a yaml emitter.
-		 * @param out The emitter to write the keys to. */
-		static GLORY_EDITOR_API void SaveShortcuts(YAML::Emitter& out);
+		 * @param yamlFile The yaml file to write the keys to. */
+		static GLORY_EDITOR_API void SaveShortcuts(YAMLFileRef& yamlFile);
 		/* @brief Read user set shortcut keys from a yaml node.
-		 * @param node The yaml node to read the keys from.*/
-		static GLORY_EDITOR_API void LoadShortcuts(YAML::Node& node);
+		 * @param yamlFile The yaml file to read the keys from.*/
+		static GLORY_EDITOR_API void LoadShortcuts(YAMLFileRef& yamlFile);
 
 		static GLORY_EDITOR_API void BlockActionForOneFrame(std::string_view action);
 		static GLORY_EDITOR_API void AddBlockKeyForOneFrame(ImGuiKey key);

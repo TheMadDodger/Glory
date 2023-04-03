@@ -19,6 +19,13 @@ namespace Glory
 		}
 
 		template<typename T>
+		T As(const T& defaultValue)
+		{
+			if (!Exists() || !IsScalar()) return defaultValue;
+			return As<T>();
+		}
+
+		template<typename T>
 		T AsEnum()
 		{
 			const std::string& valueStr = Node().as<std::string>();
@@ -85,6 +92,7 @@ namespace Glory
 
 		void Load();
 		void Save();
+		const std::filesystem::path& Path() const;
 
 		NodeRef RootNodeRef();
 		NodeValueRef operator[](const std::filesystem::path& path);
