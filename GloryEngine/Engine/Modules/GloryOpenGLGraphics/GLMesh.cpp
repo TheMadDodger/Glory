@@ -10,6 +10,11 @@ namespace Glory
 	{
 	}
 
+	GLMesh::GLMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes) :
+		Mesh(vertexCount, indexCount, inputRate, binding, stride, primitiveType, attributeTypes), m_VertexArrayID(0)
+	{
+	}
+
 	GLMesh::~GLMesh()
 	{
 		if (m_VertexArrayID == 0) return;

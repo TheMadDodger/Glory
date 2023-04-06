@@ -1,12 +1,17 @@
 #pragma once
 #include "Module.h"
 #include "RenderFrame.h"
-#include <vector>
 #include "CameraRef.h"
 #include "LightData.h"
+#include "VertexHelpers.h"
+
+#include <vector>
 
 namespace Glory
 {
+	class Buffer;
+	class Mesh;
+
 	class RendererModule : public Module
 	{
 	public:
@@ -31,6 +36,10 @@ namespace Glory
 		size_t LastSubmittedCameraCount();
 
 		void SetNextFramePick(const glm::ivec2& coord, CameraRef camera);
+
+		void DrawLine(const glm::mat4& transform, const glm::vec3& p1, const glm::vec3& p2, const glm::vec4& color);
+		void DrawLineQuad(const glm::mat4& transform, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color);
+		void DrawLineBox(const glm::mat4& transform, const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color);
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
@@ -61,6 +70,8 @@ namespace Glory
 		void Render(const RenderFrame& frame);
 
 		void ReadHoveringObject();
+		void CreateLineBuffer();
+		void RenderLines(CameraRef camera);
 
 	private:
 		RenderFrame m_CurrentPreparingFrame;
@@ -68,5 +79,15 @@ namespace Glory
 		size_t m_LastSubmittedCameraCount;
 		glm::ivec2 m_PickPos;
 		CameraRef m_PickCamera;
+
+		uint32_t m_LineVertexCount;
+		Buffer* m_pLineBuffer;
+		Mesh* m_pLineMesh;
+		MaterialData* m_pLinesMaterialData;
+		Material* m_pLinesMaterial;
+
+		static const uint32_t MAX_LINE_VERTICES = 1000;
+		LineVertex* m_pLineVertices;
+		LineVertex* m_pLineVertex;
 	};
 }

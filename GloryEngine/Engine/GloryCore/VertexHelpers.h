@@ -28,4 +28,10 @@ namespace Glory
 		glm::vec3 Pos;
 		glm::vec2 TexCoord;
 	};
+
+	struct LineVertex
+	{
+		glm::vec3 Pos;
+		glm::vec4 Color;
+	};
 }

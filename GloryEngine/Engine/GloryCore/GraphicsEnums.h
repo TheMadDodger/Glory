@@ -426,4 +426,20 @@ namespace Glory
         MU_DYNAMIC_READ,
         MU_DYNAMIC_COPY,
     };
+
+    enum class PrimitiveType
+    {
+        PT_Point,
+        PT_LineStrip,
+        PT_LineLoop,
+        PT_Lines,
+        PT_LineStripAdjacency,
+        PT_LinesAdjacency,
+        PT_TriangleStrip,
+        PT_TriangleFan,
+        PT_Triangles,
+        PT_TriangleStripAdjacency,
+        PT_TrianglesAdjacency,
+        PT_Patches
+    };
 }

@@ -23,9 +23,9 @@ layout(location = 0) in vec2 fragTexCoord;
 layout(location = 1) in vec4 inColor;
 layout(location = 2) in mat3 TBN;
 
-layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec4 outNormal;
-layout(location = 2) out uint outID;
+layout(location = 0) out uint outID;
+layout(location = 1) out vec4 outColor;
+layout(location = 2) out vec4 outNormal;
 
 void main()
 {

@@ -3,12 +3,21 @@
 namespace Glory
 {
 	Mesh::Mesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, const std::vector<AttributeType>& attributeTypes) :
-		m_InputRate(inputRate), m_Binding(binding), m_Stride(stride), m_VertexCount(vertexCount), m_IndexCount(indexCount), m_AttributeTypes(attributeTypes)
+		m_InputRate(inputRate), m_Binding(binding), m_Stride(stride), m_VertexCount(vertexCount), m_IndexCount(indexCount),
+        m_PrimitiveType(PrimitiveType::PT_Triangles), m_AttributeTypes(attributeTypes), m_pVertexBuffer(nullptr), m_pIndexBuffer(nullptr)
 	{
 	}
 
+    Mesh::Mesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes) :
+        m_InputRate(inputRate), m_Binding(binding), m_Stride(stride), m_VertexCount(vertexCount), m_IndexCount(indexCount),
+        m_PrimitiveType(primitiveType), m_AttributeTypes(attributeTypes), m_pVertexBuffer(nullptr), m_pIndexBuffer(nullptr)
+    {
+    }
+
 	Mesh::~Mesh()
 	{
+        delete m_pVertexBuffer;
+        delete m_pIndexBuffer;
 	}
 
     uint32_t Mesh::GetVertexCount() const
@@ -19,6 +28,11 @@ namespace Glory
     uint32_t Mesh::GetIndexCount() const
     {
         return m_IndexCount;
+    }
+
+    const PrimitiveType Mesh::GetPrimitiveType() const
+    {
+        return m_PrimitiveType;
     }
 
     void Mesh::SetBuffers(Buffer* pVertexBuffer, Buffer* pIndexBuffer)

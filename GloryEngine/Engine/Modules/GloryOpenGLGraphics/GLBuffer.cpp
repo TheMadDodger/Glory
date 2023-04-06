@@ -50,6 +50,7 @@ namespace Glory
 		glBufferSubData(target, offset, size, data);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindBuffer(target, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void GLBuffer::CopyFrom(Buffer* source, uint32_t size)

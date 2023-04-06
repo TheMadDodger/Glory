@@ -70,6 +70,22 @@ namespace Glory
 		return pMesh;
 	}
 
+	Mesh* GPUResourceManager::CreateMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding,
+		uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes, Buffer* pVertexBuffer, Buffer* pIndexBuffer)
+	{
+		Profiler::BeginSample("GPUResourceManager::CreateMeshNoIndexBuffer");
+		Mesh* pMesh = CreateMesh_Internal(vertexCount, indexCount, inputRate, binding, stride, primitiveType, attributeTypes);
+		pMesh->m_UUID = UUID();
+		pMesh->Bind();
+		pVertexBuffer->Bind();
+		if(pIndexBuffer) pIndexBuffer->Bind();
+		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
+		pMesh->CreateBindingAndAttributeData();
+		m_IDResources[pMesh->m_UUID] = pMesh;
+		Profiler::EndSample();
+		return pMesh;
+	}
+
 	Shader* GPUResourceManager::CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function)
 	{
 		Shader* pShader = GetResource<Shader>(pShaderFile);

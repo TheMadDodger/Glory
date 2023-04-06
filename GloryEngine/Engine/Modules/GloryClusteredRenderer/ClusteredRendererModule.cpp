@@ -23,6 +23,7 @@ namespace Glory
 	{
 		attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 		attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 	}
 
 	void ClusteredRendererModule::OnCameraResize(CameraRef camera)
@@ -46,7 +47,7 @@ namespace Glory
 		importSettings.AddNullTerminateAtEnd = true;
 
 		// Cluster generator shader
-		std::filesystem::path path;;
+		std::filesystem::path path;
 		GetResourcePath("Shaders/Compute/ClusterShader.shader", path);
 		FileData* pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
 		m_pClusterShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
