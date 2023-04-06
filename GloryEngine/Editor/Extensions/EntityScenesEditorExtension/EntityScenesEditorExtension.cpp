@@ -2,6 +2,7 @@
 #include "EntitySceneObjectEditor.h"
 #include "DefaultComponentEditor.h"
 #include "TransformEditor.h"
+#include "PhysicsBodyEditor.h"
 #include <EntitySceneScenesModule.h>
 #include <EditorPlayer.h>
 #include <Components.h>
@@ -32,6 +33,7 @@ namespace Glory::Editor
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
 		Editor::RegisterEditor<ScriptedComponentEditor>();
+		Editor::RegisterEditor<PhysicsBodyEditor>();
 
 		EditorPlayer::RegisterLoopHandler(this);
 

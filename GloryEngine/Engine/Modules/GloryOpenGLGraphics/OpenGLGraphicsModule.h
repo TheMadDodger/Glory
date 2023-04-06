@@ -19,7 +19,7 @@ namespace Glory
 		virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) override;
 		virtual void Swap() override;
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
-		virtual void OnDrawMesh(MeshData* pMeshData) override;
+		virtual void OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount) override;
 		virtual void DrawScreenQuad() override;
 		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;
 		virtual void EnableDepthTest(bool enable) override;

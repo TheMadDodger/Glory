@@ -244,6 +244,22 @@ namespace Glory
         { MemoryUsage::MU_DYNAMIC_COPY, GL_DYNAMIC_COPY },
     };
 
+    const std::map<PrimitiveType, GLuint> GLConverter::TO_GLPRIMITIVETYPE =
+    {
+        { PrimitiveType::PT_Point, GL_POINT  },
+        { PrimitiveType::PT_LineStrip, GL_LINE_STRIP  },
+        { PrimitiveType::PT_LineLoop, GL_LINE_LOOP  },
+        { PrimitiveType::PT_Lines, GL_LINES  },
+        { PrimitiveType::PT_LineStripAdjacency, GL_LINE_STRIP_ADJACENCY  },
+        { PrimitiveType::PT_LinesAdjacency, GL_LINES_ADJACENCY  },
+        { PrimitiveType::PT_TriangleStrip, GL_TRIANGLE_STRIP },
+        { PrimitiveType::PT_TriangleFan, GL_TRIANGLE_FAN },
+        { PrimitiveType::PT_Triangles, GL_TRIANGLES },
+        { PrimitiveType::PT_TriangleStripAdjacency, GL_TRIANGLE_STRIP_ADJACENCY },
+        { PrimitiveType::PT_TrianglesAdjacency, GL_TRIANGLES_ADJACENCY },
+        { PrimitiveType::PT_Patches, GL_PATCHES },
+    };
+
     GLuint GLConverter::GetGLImageType(const ImageType& imageType)
     {
         switch (imageType)

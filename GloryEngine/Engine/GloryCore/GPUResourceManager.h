@@ -22,6 +22,7 @@ namespace Glory
 		Buffer* CreateBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex);
 		Mesh* CreateMesh(MeshData* pMeshData);
 		Mesh* CreateMeshNoIndexBuffer(MeshData* pMeshData);
+		Mesh* CreateMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes, Buffer* pVertexBuffer, Buffer* pIndexBuffer);
 		Shader* CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Texture* CreateTexture(ImageData* pImageData);
@@ -37,6 +38,7 @@ namespace Glory
 		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex) = 0;
 		virtual Mesh* CreateMesh_Internal(MeshData* pMeshData) = 0;
+		virtual Mesh* CreateMesh_Internal(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes) = 0;
 		virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
 		virtual Texture* CreateTexture_Internal(ImageData* pImageData) = 0;

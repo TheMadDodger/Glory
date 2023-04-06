@@ -1,12 +1,14 @@
 #include "OpenGLGraphicsModule.h"
-#include <Engine.h>
-#include <Debug.h>
 #include "VertexHelpers.h"
 #include "FileLoaderModule.h"
-#include <ios>
 #include "GLShader.h"
 #include "OGLResourceManager.h"
 #include "GloryOGL.h"
+#include "GLConverter.h"
+
+#include <Engine.h>
+#include <Debug.h>
+#include <ios>
 
 namespace Glory
 {
@@ -177,14 +179,13 @@ namespace Glory
 		return pMaterial;
 	}
 
-	void OpenGLGraphicsModule::OnDrawMesh(MeshData* pMeshData)
+	void OpenGLGraphicsModule::OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount)
 	{
-		Mesh* pMesh = GetResourceManager()->CreateMesh(pMeshData);
 		pMesh->Bind();
-
-		uint32_t indexCount = pMesh->GetIndexCount();
-		if (indexCount == 0) glDrawArrays(GL_TRIANGLES, 0, 6);
-		else glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, NULL);
+		const GLuint primitiveType = GLConverter::TO_GLPRIMITIVETYPE.at(pMesh->GetPrimitiveType());
+		const uint32_t indexCount = pMesh->GetIndexCount();
+		if (indexCount == 0) glDrawArrays(primitiveType, vertexOffset, vertexCount ? vertexCount : pMesh->GetVertexCount());
+		else glDrawElements(primitiveType, indexCount, GL_UNSIGNED_INT, NULL);
 		LogGLError(glGetError());
 		glBindVertexArray(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());

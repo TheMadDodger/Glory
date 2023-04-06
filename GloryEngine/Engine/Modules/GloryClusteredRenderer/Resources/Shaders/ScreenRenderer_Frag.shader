@@ -5,7 +5,8 @@ in vec2 Coord;
 layout(location = 0) out vec4 out_Color;
 layout (binding = 0) uniform sampler2D Color;
 layout (binding = 1) uniform sampler2D Normal;
-layout (binding = 2) uniform sampler2D Depth;
+layout (binding = 2) uniform sampler2D Debug;
+layout (binding = 3) uniform sampler2D Depth;
 
 //uniform vec3 eyeDirection;
 
@@ -85,6 +86,13 @@ const vec3 BadColor = vec3(1.0, 0.0, 0.0);
 
 void main()
 {
+	vec3 debug = texture2D(Debug, Coord).xzy;
+	if (debug.r > 0.0 || debug.g > 0.0 || debug.b > 0.0)
+	{
+		out_Color = vec4(debug, 1.0);
+		return;
+	}
+
 	vec3 color = texture2D(Color, Coord).xyz;
 	vec3 normal = texture2D(Normal, Coord).xyz * 2.0 - 1.0;
 	float depth = texture2D(Depth, Coord).r;

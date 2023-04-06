@@ -40,15 +40,12 @@ namespace Glory
 
 	void RenderTexture::BindAll(Material* pMaterial)
 	{
-		auto it = m_NameToTextureIndex.begin();
 		for (size_t i = 0; i < m_CreateInfo.Attachments.size(); i++)
 		{
 			if (!m_CreateInfo.Attachments[i].m_AutoBind) continue;
-			std::string name = (*it).first;
+			const std::string& name = m_CreateInfo.Attachments[i].Name;
 			pMaterial->SetTexture(name, m_pTextures[i]);
-			++it;
 		}
-
 		if (m_CreateInfo.HasDepth) pMaterial->SetTexture("Depth", GetTextureAttachment("Depth"));
 	}
 

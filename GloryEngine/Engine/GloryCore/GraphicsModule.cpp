@@ -32,13 +32,23 @@ namespace Glory
 		return m_LastTriangles;
 	}
 
-	void GraphicsModule::DrawMesh(MeshData* pMeshData)
+	void GraphicsModule::DrawMesh(MeshData* pMeshData, uint32_t vertexOffset, uint32_t vertexCount)
 	{
-		int vertexCount = pMeshData->VertexCount();
-		m_CurrentVertices += vertexCount;
-		m_CurrentTriangles += vertexCount / 3;
+		const size_t finalVertexCount = vertexCount ? vertexCount : pMeshData->VertexCount();
+		m_CurrentVertices += finalVertexCount;
+		m_CurrentTriangles += finalVertexCount / 3;
 		++m_CurrentDrawCalls;
-		OnDrawMesh(pMeshData);
+		Mesh* pMesh = GetResourceManager()->CreateMesh(pMeshData);
+		OnDrawMesh(pMesh, vertexOffset, vertexCount);
+	}
+
+	void GraphicsModule::DrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount)
+	{
+		const size_t finalVertexCount = vertexCount ? vertexCount : pMesh->GetVertexCount();
+		m_CurrentVertices += finalVertexCount;
+		m_CurrentTriangles += finalVertexCount / 3;
+		++m_CurrentDrawCalls;
+		OnDrawMesh(pMesh, vertexOffset, vertexCount);
 	}
 
 	FrameStates* GraphicsModule::GetFrameStates()

@@ -28,15 +28,18 @@ namespace Glory
 		return new GLMesh(pMeshData->VertexCount(), pMeshData->IndexCount(), InputRate::Vertex, 0, pMeshData->VertexSize(), attributes);
 	}
 
+	Mesh* OGLResourceManager::CreateMesh_Internal(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes)
+	{
+		return new GLMesh(vertexCount, indexCount, inputRate, binding, stride, primitiveType, attributeTypes);
+	}
+
 	Buffer* OGLResourceManager::CreateVertexBuffer(uint32_t bufferSize)
 	{
-		//return CreateBuffer(bufferSize, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
 		return CreateBuffer(bufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 	}
 
 	Buffer* OGLResourceManager::CreateIndexBuffer(uint32_t bufferSize)
 	{
-		//return CreateBuffer(bufferSize, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 0);
 		return CreateBuffer(bufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 	}
 
