@@ -1,7 +1,7 @@
 #include "GPUResourceManager.h"
 #include "EngineProfiler.h"
-#include <algorithm>
 #include "MaterialInstanceData.h"
+#include <algorithm>
 
 namespace Glory
 {
@@ -9,13 +9,19 @@ namespace Glory
 
 	GPUResourceManager::~GPUResourceManager()
 	{
+		for (std::map<UUID, Buffer*>::iterator it = m_pBuffers.begin(); it != m_pBuffers.end(); it++)
+		{
+			delete it->second;
+		}
+
+		m_pBuffers.clear();
+
 		for (std::map<UUID, GPUResource*>::iterator it = m_IDResources.begin(); it != m_IDResources.end(); it++)
 		{
 			delete it->second;
 		}
 
-		std::for_each(m_pBuffers.begin(), m_pBuffers.end(), [](Buffer* pBuffer) { delete pBuffer; });
-		m_pBuffers.clear();
+		m_IDResources.clear();
 	}
 
 	Buffer* GPUResourceManager::CreateBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex)
@@ -24,7 +30,7 @@ namespace Glory
 		Profiler::BeginSample("GPUResourceManager::CreateBuffer");
 		Buffer* pBuffer = CreateBuffer_Internal(bufferSize, usageFlag, memoryFlags, bindIndex);
 		pBuffer->CreateBuffer();
-		m_pBuffers.push_back(pBuffer);
+		m_pBuffers.emplace(pBuffer->m_UUID, pBuffer);
 		Profiler::EndSample();
 		return pBuffer;
 	}
@@ -172,13 +178,24 @@ namespace Glory
 
 	void GPUResourceManager::Free(GPUResource* pResource)
 	{
+		ProfileSample s{ "GPUResourceManager::Free" };
+		if (!pResource) return;
 		UUID id = pResource->m_UUID;
+		delete pResource;
 		auto it = m_IDResources.find(id);
 		if (it == m_IDResources.end()) return;
-		Profiler::BeginSample("GPUResourceManager::Free");
-		delete m_IDResources[id];
 		m_IDResources.erase(it);
-		Profiler::EndSample();
+	}
+	
+	void GPUResourceManager::Free(Buffer* pBuffer)
+	{
+		ProfileSample s{ "GPUResourceManager::Free(Buffer)" };
+		if (!pBuffer) return;
+		UUID id = pBuffer->m_UUID;
+		delete pBuffer;
+		auto it = m_pBuffers.find(id);
+		if (it == m_pBuffers.end()) return;
+		m_pBuffers.erase(it);
 	}
 
 	bool GPUResourceManager::ResourceExists(Resource* pResource)

@@ -30,6 +30,7 @@ namespace Glory
 		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
 
 		void Free(GPUResource* pResource);
+		void Free(Buffer* pBuffer);
 
 		bool ResourceExists(Resource* pResource);
 
@@ -56,7 +57,7 @@ namespace Glory
 		}
 
 	private:
-		std::vector<Buffer*> m_pBuffers;
+		std::map<UUID, Buffer*> m_pBuffers;
 		std::map<UUID, GPUResource*> m_IDResources;
 	};
 }

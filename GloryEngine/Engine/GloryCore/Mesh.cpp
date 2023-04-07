@@ -16,8 +16,6 @@ namespace Glory
 
 	Mesh::~Mesh()
 	{
-        delete m_pVertexBuffer;
-        delete m_pIndexBuffer;
 	}
 
     uint32_t Mesh::GetVertexCount() const
