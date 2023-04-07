@@ -30,4 +30,14 @@ namespace Glory
 	Profiler::Profiler() {}
 
 	Profiler::~Profiler() {}
+
+	ProfileSample::ProfileSample(const std::string& name)
+	{
+		Profiler::BeginSample(name);
+	}
+
+	ProfileSample::~ProfileSample()
+	{
+		Profiler::EndSample();
+	}
 }

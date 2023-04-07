@@ -15,4 +15,10 @@ namespace Glory
 		Profiler();
 		virtual ~Profiler();
 	};
+
+	struct ProfileSample
+	{
+		ProfileSample(const std::string& name);
+		~ProfileSample();
+	};
 }
