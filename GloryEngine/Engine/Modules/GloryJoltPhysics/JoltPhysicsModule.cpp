@@ -18,6 +18,8 @@
 #include <GLORY_YAML.h>
 #include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 
+#include <JoltDebugRenderer.h>
+
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -433,6 +435,10 @@ namespace Glory
 		const uint32_t maxBodyPairs = Settings().Value<unsigned int>("MaxBodyPairs");
 		const uint32_t maxContactConstraints = Settings().Value<unsigned int>("MaxContactConstraints");
 
+#ifdef JPH_DEBUG_RENDERER
+		DebugRenderer::sInstance = new JoltDebugRenderer(m_pEngine);
+#endif
+
 		m_pJPHPhysicsSystem = new PhysicsSystem();
 
 		m_pJPHPhysicsSystem->Init(maxBodies, numBodyMutexes, maxBodyPairs,
@@ -558,5 +564,20 @@ namespace Glory
 		
 		// Step the world
 		m_pJPHPhysicsSystem->Update(deltaTime, collisionSteps, integrationSubSteps, m_pJPHTempAllocator, m_pJPHJobSystem);
+	}
+
+	void JoltPhysicsModule::Draw()
+	{
+		/* TODO: These need module settings! */
+
+#ifdef JPH_DEBUG_RENDERER
+		JPH::BodyManager::DrawSettings settings{};
+		settings.mDrawShape = true;
+		settings.mDrawShapeWireframe = true;
+		settings.mDrawVelocity = true;
+		settings.mDrawBoundingBox = true;
+		settings.mDrawCenterOfMassTransform = true;
+		m_pJPHPhysicsSystem->DrawBodies(settings, DebugRenderer::sInstance);
+#endif
 	}
 }

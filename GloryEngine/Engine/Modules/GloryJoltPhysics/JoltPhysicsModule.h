@@ -83,6 +83,7 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Cleanup() override;
 		virtual void Update() override;
+		virtual void Draw() override;
 
 	private:
 		JPH::TempAllocatorImpl* m_pJPHTempAllocator;
