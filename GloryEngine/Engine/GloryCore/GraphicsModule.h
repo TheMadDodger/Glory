@@ -19,8 +19,8 @@ namespace Glory
         int GetLastTriangleCount();
 
     public: // Commands
-        void DrawMesh(MeshData* pMeshData, uint32_t vertexOffset = 0, uint32_t vertexCount = 0);
-        void DrawMesh(Mesh* pMesh, uint32_t vertexOffset = 0, uint32_t vertexCount = 0);
+        void DrawMesh(MeshData* pMeshData, uint32_t vertexOffset, uint32_t vertexCount);
+        void DrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount);
         virtual void DrawScreenQuad() = 0;
         virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) = 0;
         virtual void Swap() = 0;

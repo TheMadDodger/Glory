@@ -34,9 +34,8 @@ namespace Glory
 
 	void GraphicsModule::DrawMesh(MeshData* pMeshData, uint32_t vertexOffset, uint32_t vertexCount)
 	{
-		const size_t finalVertexCount = vertexCount ? vertexCount : pMeshData->VertexCount();
-		m_CurrentVertices += finalVertexCount;
-		m_CurrentTriangles += finalVertexCount / 3;
+		m_CurrentVertices += vertexCount;
+		m_CurrentTriangles += vertexCount / 3;
 		++m_CurrentDrawCalls;
 		Mesh* pMesh = GetResourceManager()->CreateMesh(pMeshData);
 		OnDrawMesh(pMesh, vertexOffset, vertexCount);
@@ -44,9 +43,9 @@ namespace Glory
 
 	void GraphicsModule::DrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount)
 	{
-		const size_t finalVertexCount = vertexCount ? vertexCount : pMesh->GetVertexCount();
-		m_CurrentVertices += finalVertexCount;
-		m_CurrentTriangles += finalVertexCount / 3;
+		m_CurrentVertices += vertexCount;
+		if (pMesh->GetPrimitiveType() == PrimitiveType::PT_Triangles)
+			m_CurrentTriangles += vertexCount / 3;
 		++m_CurrentDrawCalls;
 		OnDrawMesh(pMesh, vertexOffset, vertexCount);
 	}

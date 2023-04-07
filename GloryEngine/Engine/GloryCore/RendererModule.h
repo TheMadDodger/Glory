@@ -4,6 +4,7 @@
 #include "CameraRef.h"
 #include "LightData.h"
 #include "VertexHelpers.h"
+#include "ShapeProperty.h"
 
 #include <vector>
 
@@ -37,9 +38,20 @@ namespace Glory
 
 		void SetNextFramePick(const glm::ivec2& coord, CameraRef camera);
 
+		enum CircleUp
+		{
+			x,
+			y,
+			z
+		};
+
 		void DrawLine(const glm::mat4& transform, const glm::vec3& p1, const glm::vec3& p2, const glm::vec4& color);
 		void DrawLineQuad(const glm::mat4& transform, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color);
+		void DrawLineCircle(const glm::mat4& transform, const glm::vec3& position, float radius, CircleUp up, const glm::vec4& color);
 		void DrawLineBox(const glm::mat4& transform, const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color);
+		void DrawLineSphere(const glm::mat4& transform, const glm::vec3& position, float radius, const glm::vec4& color);
+
+		void DrawLineShape(const glm::mat4& transform, const glm::vec3& position, const ShapeProperty& shape, const glm::vec4& color);
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}

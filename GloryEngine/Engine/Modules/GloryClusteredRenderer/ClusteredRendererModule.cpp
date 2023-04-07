@@ -150,7 +150,7 @@ namespace Glory
 
 		pMaterial->SetProperties();
 		pMaterial->SetObjectData(object);
-		pGraphics->DrawMesh(pMeshData);
+		pGraphics->DrawMesh(pMeshData, 0 , pMeshData->VertexCount());
 	}
 
 	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)

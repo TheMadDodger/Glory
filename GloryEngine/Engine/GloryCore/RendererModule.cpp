@@ -5,9 +5,11 @@
 #include "EngineProfiler.h"
 #include "GloryContext.h"
 #include "Buffer.h"
-
-#include <algorithm>
 #include "FileLoaderModule.h"
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <algorithm>
 
 namespace Glory
 {
@@ -128,6 +130,40 @@ namespace Glory
 		DrawLine(transform, p4, p1, color);
 	}
 
+	void RendererModule::DrawLineCircle(const glm::mat4& transform, const glm::vec3& position, float radius, CircleUp up, const glm::vec4& color)
+	{
+		static constexpr float pi = glm::pi<float>();
+		static const float res = 100;
+		static const float fullRadius = 360;
+		static const float segments = fullRadius / res;
+
+		for (float deg = 0; deg < fullRadius; deg += segments)
+		{
+			float d1 = deg;
+			float d2 = deg + segments;
+
+			const float x1 = radius * glm::sin(glm::radians(d1));
+			const float y1 = radius * glm::cos(glm::radians(d1));
+			const float x2 = radius * glm::sin(glm::radians(d2));
+			const float y2 = radius * glm::cos(glm::radians(d2));
+
+			switch (up)
+			{
+			case Glory::RendererModule::x:
+				DrawLine(transform, position + glm::vec3{ 0, x1, y1 }, position + glm::vec3{ 0, x2, y2 }, color);
+				break;
+			case Glory::RendererModule::y:
+				DrawLine(transform, position + glm::vec3{ x1, 0, y1 }, position + glm::vec3{ x2, 0, y2 }, color);
+				break;
+			case Glory::RendererModule::z:
+				DrawLine(transform, position + glm::vec3{ x1, y1, 0 }, position + glm::vec3{ x2, y2, 0 }, color);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 	void RendererModule::DrawLineBox(const glm::mat4& transform, const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color)
 	{
 		const glm::vec3 topTopLeft = position + glm::vec3(-extends.x, extends.y, -extends.z);
@@ -145,6 +181,40 @@ namespace Glory
 
 		DrawLineQuad(transform, topBottomLeft, topTopLeft, bottomTopLeft, bottomBottomLeft, color);
 		DrawLineQuad(transform, topBottomRight, topTopRight, bottomTopRight, bottomBottomRight, color);
+	}
+
+	void RendererModule::DrawLineSphere(const glm::mat4& transform, const glm::vec3& position, float radius, const glm::vec4& color)
+	{
+		DrawLineCircle(transform, position, radius, CircleUp::y, color);
+		DrawLineCircle(transform, position, radius, CircleUp::z, color);
+	}
+
+	void RendererModule::DrawLineShape(const glm::mat4& transform, const glm::vec3& position, const ShapeProperty& shape, const glm::vec4& color)
+	{
+		switch (shape.m_ShapeType)
+		{
+		case ShapeType::Sphere: {
+			const Sphere* sphere = shape.ShapePointer<Sphere>();
+			DrawLineSphere(transform, position, sphere->m_Radius, color);
+			break;
+		}
+		case ShapeType::Box: {
+			const Box* box = shape.ShapePointer<Box>();
+			DrawLineBox(transform, position, box->m_Extends, color);
+			break;
+		}
+		case ShapeType::Cylinder:
+
+			break;
+		case ShapeType::Capsule:
+
+			break;
+		case ShapeType::TaperedCapsule:
+
+			break;
+		default:
+			break;
+		}
 	}
 
 	void RendererModule::Initialize()
@@ -267,7 +337,7 @@ namespace Glory
 	void RendererModule::RenderLines(CameraRef camera)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
-		if (!pGraphics) return;
+		if (!pGraphics || !m_LineVertexCount) return;
 
 		m_pLineMesh->Bind();
 		m_pLineBuffer->Assign(m_pLineVertices);
