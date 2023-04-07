@@ -21,4 +21,9 @@ namespace Glory
 	{
 		return glm::quat(q.GetW(), q.GetX(), q.GetY(), q.GetZ());
 	}
+
+	glm::vec4 ToVec3(const JPH::Color& v)
+	{
+		return glm::vec4(v.r, v.g, v.b, v.a);
+	}
 }

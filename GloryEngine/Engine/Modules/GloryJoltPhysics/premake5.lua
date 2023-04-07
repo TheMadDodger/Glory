@@ -62,7 +62,8 @@ project "GloryJoltPhysics"
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"JPH_DEBUG_RENDERER"
 	}
 
 	postbuildcommands
