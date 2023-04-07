@@ -14,6 +14,12 @@ namespace Glory
 			return (T*)m_ShapeDataBuffer;
 		}
 
+		template<typename T>
+		const T* ShapePointer() const
+		{
+			return (T*)m_ShapeDataBuffer;
+		}
+
 		const Shape* BaseShapePointer()
 		{
 			return (Shape*)m_ShapeDataBuffer;
@@ -25,6 +31,11 @@ namespace Glory
 			assert(sizeof(T) <= sizeof(m_ShapeDataBuffer));
 			m_ShapeType = data.m_ShapeType;
 			std::memcpy(m_ShapeDataBuffer, (void*)&data, sizeof(T));
+		}
+
+		const char* Data() const
+		{
+			return m_ShapeDataBuffer;
 		}
 
 		bool operator==(const ShapeProperty& other)

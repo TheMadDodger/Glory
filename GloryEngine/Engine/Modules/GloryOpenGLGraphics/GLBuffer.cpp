@@ -30,12 +30,25 @@ namespace Glory
 
 		//GL_STATIC_DRAW
 
-		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
-		GLuint usage = GLConverter::TO_GLBUFFERUSAGE.at(m_MemoryFlags);
+		const GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		const GLuint usage = GLConverter::TO_GLBUFFERUSAGE.at(m_MemoryFlags);
 
 		glBindBuffer(target, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBufferData(target, m_BufferSize, data, usage);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(target, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void GLBuffer::Assign(const void* data, uint32_t size)
+	{
+		const GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		const GLuint usage = GLConverter::TO_GLBUFFERUSAGE.at(m_MemoryFlags);
+
+		glBindBuffer(target, m_BufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBufferData(target, size, data, usage);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindBuffer(target, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());

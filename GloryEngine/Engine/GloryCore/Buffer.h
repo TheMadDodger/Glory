@@ -12,6 +12,7 @@ namespace Glory
 		virtual ~Buffer();
 
 		virtual void Assign(const void* data) = 0;
+		virtual void Assign(const void* data, uint32_t size) = 0;
 		virtual void Assign(const void* data, uint32_t offset, uint32_t size) = 0;
 		virtual void CopyFrom(Buffer* source, uint32_t size) = 0;
 		static void Copy(Buffer* source, Buffer* dest, uint32_t size);

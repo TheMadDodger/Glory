@@ -12,6 +12,7 @@ namespace Glory
 
 		virtual void CreateBuffer() override;
 		virtual void Assign(const void* data) override;
+		virtual void Assign(const void* data, uint32_t size) override;
 		virtual void Assign(const void* data, uint32_t offset, uint32_t size) override;
 		virtual void CopyFrom(Buffer* source, uint32_t size) override;
 

@@ -18,7 +18,6 @@ namespace Glory::Editor
 	void PhysicsBodyEditor::Initialize()
 	{
 		EntityComponentEditor::Initialize();
-		PhysicsBody& transform = GetTargetComponent();
 	}
 
 	bool PhysicsBodyEditor::OnGUI()
@@ -32,7 +31,9 @@ namespace Glory::Editor
 		glm::vec4 perspective;
 		glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective);
 
-		Game::GetGame().GetEngine()->GetRendererModule()->DrawLineBox(transform.MatTransform, {}, { 1, 1, 1 }, { 1, 0, 0, 1 });
+		PhysicsBody& body = GetTargetComponent();
+
+		Game::GetGame().GetEngine()->GetRendererModule()->DrawLineShape(transform.MatTransform, {}, body.m_Shape, {1, 0, 0, 1});
 		return EntityComponentEditor::OnGUI();
 	}
 
