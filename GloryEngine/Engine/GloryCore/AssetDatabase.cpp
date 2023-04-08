@@ -75,12 +75,12 @@ namespace Glory
 
 	void AssetDatabase::Load(YAML::Node& node)
 	{
-		ASSET_DATABASE->m_Initialized = false;
 		while (ASSET_DATABASE->m_IsReading)
 		{
-			system("");
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 
+		ASSET_DATABASE->m_Initialized = false;
 		for (YAML::const_iterator itor = node.begin(); itor != node.end(); ++itor)
 		{
 			UUID key = itor->first.as<uint64_t>();
@@ -91,26 +91,6 @@ namespace Glory
 			AssetLocation location = assetNode["Location"].as<AssetLocation>();
 			ResourceMeta meta = assetNode["Metadata"].as<ResourceMeta>();
 			SetAsset(location, meta);
-
-			//std::filesystem::path metaFilePath(path);
-			//std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
-			//metaFilePath += std::filesystem::path(".gmeta");
-			//ResourceMeta meta(metaFilePath.string(), extension, uuid, hash);
-			//YAML::Node importSettingsNode = assetNode["ImportSettings"];
-			//meta.m_ImportSettings = ImportSettings();
-			//LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(hash);
-			//if (pLoader)
-			//{
-			//	if (meta.Exists())
-			//	{
-			//		size_t originalVersionHash = std::hash<ResourceMeta>()(meta);
-			//		if (originalVersionHash != versionHash)
-			//			meta.Read();
-			//		else
-			//			meta.m_ImportSettings = pLoader->ReadImportSettings(importSettingsNode);
-			//	}
-			//	else meta.m_ImportSettings = pLoader->ReadImportSettings(importSettingsNode);
-			//}
 		}
 
 		ASSET_DATABASE->m_Initialized = true;
@@ -167,12 +147,12 @@ namespace Glory
 
 	void AssetDatabase::Clear()
 	{
-		ASSET_DATABASE->m_Initialized = false;
 		while (ASSET_DATABASE->m_IsReading)
 		{
-			system("");
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 
+		ASSET_DATABASE->m_Initialized = false;
 		ASSET_DATABASE->m_AssetLocations.clear();
 		ASSET_DATABASE->m_PathToUUID.clear();
 		ASSET_DATABASE->m_Metas.clear();
@@ -229,7 +209,8 @@ namespace Glory
 	AssetDatabase::ReadLock::ReadLock()
 	{
 		++m_LockCounter;
-		while (!ASSET_DATABASE->m_Initialized) system("NOP");
+		while (!ASSET_DATABASE->m_Initialized)
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 		ASSET_DATABASE->m_IsReading = true;
 	}
 
