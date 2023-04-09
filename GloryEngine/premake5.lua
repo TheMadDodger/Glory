@@ -112,6 +112,7 @@ DepsRootDir							= "%{rootDir}/Dependencies/%{cfg.buildcfg}"
 DepsIncludeDir						= "%{DepsRootDir}/include"
 DepsBinDir							= "%{DepsRootDir}/bin"
 DepsLibDir							= "%{DepsRootDir}/lib"
+rapidjson							= "%{rootDir}/submodules/rapidjson/include"
 
 group "Dependencies"
 	include "third-party/ImGui"
