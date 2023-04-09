@@ -20,18 +20,18 @@ project "GloryAPI"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
 		"%{GloryIncludeDir.core}",
-
-		"%{DepIncludesDirRoot}",
-		"%{IncludeDir.rapidjson}"
+		"%{rapidjson}"
 	}
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.GloryECS}",
 
-		"%{DepDirs.curl}",
 		"%{LibDirs.yaml_cpp}",
 	}
 
@@ -42,7 +42,7 @@ project "GloryAPI"
 
 	postbuildcommands
 	{
-		("{COPY} %{DepDirs.curl}/*.dll %{engineOutDir}"),
+		("{COPY} %{DepsBinDir}/libcurl*.dll %{engineOutDir}"),
 	}
 
 	links
@@ -54,7 +54,7 @@ project "GloryAPI"
 
 	filter "system:windows"
 		systemversion "10.0.19041.0"
-		toolset "v142"
+		toolset "v143"
 
 		defines
 		{
