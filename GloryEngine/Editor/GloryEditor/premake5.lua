@@ -61,6 +61,8 @@ project "GloryEditor"
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.Reflect}",
+
+		"%{rapidjson}",
 	}
 
 	libdirs
