@@ -110,17 +110,17 @@ namespace Glory
 		return Value().Size();
 	}
 
-	bool JSONValueRef::Exists()
+	bool JSONValueRef::Exists() const
 	{
 		return Exists(m_Document, m_Path);
 	}
 
-	bool JSONValueRef::IsSequence()
+	bool JSONValueRef::IsSequence() const
 	{
 		return Value().IsArray();
 	}
 
-	bool JSONValueRef::IsObject()
+	bool JSONValueRef::IsObject() const
 	{
 		return Value().IsObject();
 	}
@@ -147,16 +147,6 @@ namespace Glory
 	JSONValueRef JSONValueRef::Parent()
 	{
 		return JSONValueRef(m_Document, m_Path.parent_path());
-	}
-
-	rapidjson::Value::MemberIterator JSONValueRef::begin()
-	{
-		return Value().MemberBegin();
-	}
-
-	rapidjson::Value::MemberIterator JSONValueRef::end()
-	{
-		return Value().MemberEnd();
 	}
 
 	rapidjson::Value::ConstMemberIterator JSONValueRef::begin() const
@@ -189,71 +179,80 @@ namespace Glory
 		return keys;
 	}
 
-	rapidjson::Value& JSONValueRef::FindValue(rapidjson::Value& value, std::filesystem::path path)
+	rapidjson::Value& JSONValueRef::FindValue(rapidjson::Value& value, const std::filesystem::path& path)
 	{
 		if (path.empty() || path == ".") return value;
 
-		const std::string& subPathString = (*path.begin()).string();
-		if (subPathString._Starts_with("##"))
+		rapidjson::Value* pNext = &value;
+		for (const std::filesystem::path& subPath : path)
 		{
-			const size_t index = std::stoul(subPathString.substr(2));
-			path = path.lexically_relative(subPathString);
-			rapidjson::Value& nextNode = value[index];
-			return FindValue(nextNode, path);
-		}
+			const std::string& pathStr = subPath.string();
 
-		if (value.IsNull() && !value.IsObject())
-		{
-			value.SetObject();
-		}
+			if (pathStr._Starts_with("##"))
+			{
+				const size_t index = std::stoul(pathStr.substr(2).data());
+				pNext = &(*pNext)[index];
+				continue;
+			}
 
-		if (!value.HasMember(subPathString.data()))
-		{
-			rapidjson::Value name = rapidjson::Value(subPathString.data(), m_Document.GetAllocator());
-			value.AddMember(name, rapidjson::Value(rapidjson::kNullType), m_Document.GetAllocator());
-		}
+			if (pNext->IsNull() && !pNext->IsObject())
+			{
+				pNext->SetObject();
+			}
 
-		rapidjson::Value& nextNode = value[subPathString.data()];
-		path = path.lexically_relative(subPathString);
-		return FindValue(nextNode, path);
+			if (!pNext->HasMember(pathStr.data()))
+			{
+				rapidjson::Value name = rapidjson::Value(pathStr.data(), m_Document.GetAllocator());
+				pNext->AddMember(name, rapidjson::Value(rapidjson::kNullType), m_Document.GetAllocator());
+			}
+
+			pNext = &(*pNext)[pathStr.data()];
+		}
+		return *pNext;
 	}
 
-	const rapidjson::Value& JSONValueRef::FindValue(const rapidjson::Value& value, std::filesystem::path path) const
+	const rapidjson::Value& JSONValueRef::FindValue(const rapidjson::Value& value, const std::filesystem::path& path) const
 	{
 		if (path.empty() || path == ".") return value;
 
-		const std::string& subPathString = (*path.begin()).string();
-		if (subPathString._Starts_with("##"))
+		const rapidjson::Value* pNext = &value;
+		for (const std::filesystem::path& subPath : path)
 		{
-			const size_t index = std::stoul(subPathString.substr(2));
-			path = path.lexically_relative(subPathString);
-			const rapidjson::Value& nextNode = value[index];
-			return FindValue(nextNode, path);
-		}
+			const std::string& pathStr = subPath.string();
 
-		const rapidjson::Value& nextNode = value[subPathString.data()];
-		path = path.lexically_relative(subPathString);
-		return FindValue(nextNode, path);
+			if (pathStr._Starts_with("##"))
+			{
+				const size_t index = std::stoul(pathStr.substr(2).data());
+				pNext = &(*pNext)[index];
+				continue;
+			}
+
+			pNext = &(*pNext)[pathStr.data()];
+		}
+		return *pNext;
 	}
 
-	bool JSONValueRef::Exists(const rapidjson::Value& value, std::filesystem::path path) const
+	bool JSONValueRef::Exists(const rapidjson::Value& value, const std::filesystem::path& path) const
 	{
 		if (path.empty() || path == ".") return true;
 
-		const std::string& subPathString = (*path.begin()).string();
-		if (subPathString._Starts_with("##"))
+		const rapidjson::Value* pNext = &value;
+		for (const std::filesystem::path& subPath : path)
 		{
-			const size_t index = std::stoul(subPathString.substr(2));
-			path = path.lexically_relative(subPathString);
-			if (!value.IsArray() || value.Size() <= index) return false;
-			const rapidjson::Value& nextNode = value[index];
-			return Exists(nextNode, path);
-		}
+			const std::string& pathStr = subPath.string();
 
-		if (!value.IsObject() || !value.HasMember(subPathString.data())) return false;
-		const rapidjson::Value& nextNode = value[subPathString.data()];
-		path = path.lexically_relative(subPathString);
-		return Exists(nextNode, path);
+			if (pathStr._Starts_with("##"))
+			{
+				const size_t index = std::stoul(pathStr.substr(2).data());
+				if (!pNext->IsArray() || pNext->Size() <= index) return false;
+				pNext = &(*pNext)[index];
+				continue;
+			}
+
+			if (!pNext->IsObject() || !pNext->HasMember(pathStr.data())) return false;
+			pNext = &(*pNext)[pathStr.data()];
+		}
+		return true;
 	}
 
 	rapidjson::Value& JSONValueRef::Value()

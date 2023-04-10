@@ -30,7 +30,7 @@ namespace Glory::Editor
 		//AssetDatabase::Load(m_Database);
 
 		m_PathToUUIDCache.Clear();
-		for (auto& f : assetsNode)
+		for (const auto& f : assetsNode)
 		{
 			const std::string_view key = f.name.GetString();
 			const UUID uuid = std::stoull(key.data());
@@ -173,7 +173,7 @@ namespace Glory::Editor
 		absolutePath = absolutePath.append(fixedOldPath);
 
 		/* Find all assets inside this folder and update their folder */
-		for (auto& f : assetsNode)
+		for (const auto& f : assetsNode)
 		{
 			const std::string_view key = f.name.GetString();
 			UUID uuid = std::stoull(key.data());
@@ -225,7 +225,7 @@ namespace Glory::Editor
 
 		/* Find all assets on this path */
 		std::vector<UUID> relevantAssets;
-		for (auto& f : assetsNode)
+		for (const auto& f : assetsNode)
 		{
 			const std::string_view key = f.name.GetString();
 			const UUID uuid = std::stoull(key.data());
@@ -258,7 +258,7 @@ namespace Glory::Editor
 		absolutePath = absolutePath.append(fixedPath);
 
 		std::vector<UUID> relevantAssets;
-		for (auto& f : assetsNode)
+		for (const auto& f : assetsNode)
 		{
 			const std::string_view key = f.name.GetString();
 			const UUID uuid = std::stoull(key.data());
@@ -678,7 +678,7 @@ namespace Glory::Editor
 		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
-		for (auto& f : assetsNode)
+		for (const auto& f : assetsNode)
 		{
 			const std::string_view key = f.name.GetString();
 			const UUID uuid = std::stoull(key.data());
