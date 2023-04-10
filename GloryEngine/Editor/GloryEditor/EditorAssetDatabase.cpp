@@ -1,14 +1,15 @@
 #include "EditorAssetDatabase.h"
 #include "AssetManager.h"
 #include "EditorAssetCallbacks.h"
+#include "ProjectSpace.h"
+#include "FileBrowser.h"
+#include "EditorSceneManager.h"
+#include "AssetCompiler.h"
+
 #include <Engine.h>
-#include <ProjectSpace.h>
-#include <FileBrowser.h>
-#include <EditorSceneManager.h>
 
 namespace Glory::Editor
 {
-	YAML::Node EditorAssetDatabase::m_DatabaseNode;
 	ThreadedVector<UUID> EditorAssetDatabase::m_UnsavedAssets;
 	ThreadedVector<EditorAssetDatabase::ImportedResource> EditorAssetDatabase::m_ImportedResources;
 	ThreadedUMap<std::string, UUID> EditorAssetDatabase::m_PathToUUIDCache;
@@ -18,56 +19,44 @@ namespace Glory::Editor
 
 	Jobs::JobPool<bool, std::filesystem::path>* EditorAssetDatabase::m_pImportPool = nullptr;
 
-	void EditorAssetDatabase::Load(YAML::Node& projectNode)
+	void EditorAssetDatabase::Load(JSONFileRef& projectFile)
 	{
-		YAML::Node assetsNode = projectNode["Assets"];
-		if (!projectNode["Assets"].IsDefined() || !projectNode["Assets"].IsMap())
+		JSONValueRef assetsNode = projectFile["Assets"];
+		if (!projectFile["Assets"].Exists() || !projectFile["Assets"].IsObject())
 		{
-			projectNode["Assets"] = YAML::Node(YAML::NodeType::Map);
+			projectFile["Assets"].SetObject();
 		}
 
-		m_DatabaseNode = projectNode["Assets"];
-
-#if OLD_TO_NEW_HASH
-		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
-		{
-			const UUID uuid = itor->first.as<uint64_t>();
-			EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetRegistered, uuid, nullptr);
-
-			const std::string key = std::to_string(uuid);
-			YAML::Node assetNode = m_DatabaseNode[key];
-			YAML::Node metaData = assetNode["Metadata"];
-			uint32_t hash = metaData["Hash"].as<size_t>();
-			size_t newHash = ResourceType::OldToNewHash(hash);
-			if (hash != newHash)
-				metaData["Hash"] = newHash;
-		}
-#endif
-
-		AssetDatabase::Load(m_DatabaseNode);
+		//AssetDatabase::Load(m_Database);
 
 		m_PathToUUIDCache.Clear();
-		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
+		for (auto& f : assetsNode)
 		{
-			const UUID uuid = itor->first.as<uint64_t>();
+			const std::string_view key = f.name.GetString();
+			const UUID uuid = std::stoull(key.data());
 			EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetRegistered, uuid, nullptr);
 
-			const std::string key = std::to_string(uuid);
-			YAML::Node assetNode = m_DatabaseNode[key];
-			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
-			if (!location.SubresourcePath.empty()) continue;
+			JSONValueRef assetNode = assetsNode[key];
+			JSONValueRef locationNode = assetNode["Location"];
+			JSONValueRef pathNode = locationNode["Path"];
+			JSONValueRef subPathNode = locationNode["SubresourcePath"];
+			JSONValueRef indexNode = locationNode["Index"];
 
-			std::filesystem::path absolutePath = location.Path;
-			if (!absolutePath.is_absolute() && location.Path[0] != '.')
+			if (!subPathNode.AsString().empty()) continue;
+
+			std::string_view path = pathNode.AsString();
+			std::filesystem::path absolutePath = path;
+			if (!absolutePath.is_absolute() && path[0] != '.')
 			{
 				absolutePath = Game::GetAssetPath();
-				absolutePath = absolutePath.append(location.Path);
+				absolutePath = absolutePath.append(path);
 			}
 
 			m_PathToUUIDCache.Set(absolutePath.string(), uuid);
 		}
 
 		Debug::LogInfo("Loaded asset database");
+		AssetCompiler::CompileAssetDatabase();
 
 		m_LastSavedRecords.Clear();
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
@@ -87,26 +76,34 @@ namespace Glory::Editor
 	void EditorAssetDatabase::Reload()
 	{
 		AssetDatabase::Clear();
-		AssetDatabase::Load(m_DatabaseNode);
+		AssetCompiler::CompileAssetDatabase();
 
 		Debug::LogInfo("Reloaded asset database");
 	}
 
 	void EditorAssetDatabase::InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+
 		std::replace(location.Path.begin(), location.Path.end(), '/', '\\');
 		uint64_t uuid = meta.ID();
 		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
+		JSONValueRef assetNode = projectFile["Assets"][key];
 		/* We are not updating the asset but adding it */
 		/* So if the asset already exists we ignore it */
-		if (assetNode.IsDefined() && assetNode.IsMap()) return;
+		if (assetNode.Exists() && assetNode.IsObject()) return;
 
-		YAML::Node insertedAsset{ YAML::NodeType::Map };
-		insertedAsset["Location"] = location;
-		insertedAsset["Metadata"] = meta;
+		JSONValueRef locationNode = assetNode["Location"];
+		locationNode["Path"].SetString(location.Path);
+		locationNode["SubresourcePath"].SetString(location.SubresourcePath);
+		locationNode["Index"].SetInt(location.Index);
 
-		m_DatabaseNode[key] = insertedAsset;
+		JSONValueRef metaNode = assetNode["Metadata"];
+		metaNode["Extension"].SetString(meta.Extension());
+		metaNode["Name"].SetString(meta.Extension());
+		metaNode["UUID"].SetUInt64(meta.ID());
+		metaNode["Hash"].SetUInt(meta.Hash());
+		metaNode["SerializedVersion"].SetUInt64(meta.SerializedVersion());
 
 		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetRegistered, uuid, nullptr);
 		SetDirty();
@@ -114,17 +111,16 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath)
 	{
-		YAML::Node assetNode = m_DatabaseNode[std::to_string(uuid)];
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetNode = projectFile["Assets"][std::to_string(uuid)];
 
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return;
+		if (!assetNode.Exists() || !assetNode.IsObject()) return;
 
 		std::string fixedNewPath = newPath;
 		std::replace(fixedNewPath.begin(), fixedNewPath.end(), '/', '\\');
-		AssetLocation location = assetNode["Location"].as<AssetLocation>();
-		const std::string oldPath = location.Path;
-		location.Path = fixedNewPath;
-		assetNode["Location"] = location;
-		assetNode["Metadata"]["Name"] = std::filesystem::path{ newPath }.filename().replace_extension().string();
+		const std::string_view oldPath = assetNode["Location"]["Path"].AsString();
+		assetNode["Location"]["Path"].SetString(fixedNewPath);
+		assetNode["Metadata"]["Name"].SetString(std::filesystem::path{newPath}.filename().replace_extension().string());
 
 		std::filesystem::path oldAbsolutePath = oldPath;
 		if (!oldAbsolutePath.is_absolute() && oldPath[0] != '.')
@@ -145,6 +141,8 @@ namespace Glory::Editor
 		stream << "Moved asset from " << oldPath << " to " << fixedNewPath;
 		Debug::LogInfo(stream.str());
 
+		AssetCompiler::CompileAssetDatabase(uuid);
+
 		SetDirty();
 	}
 
@@ -152,6 +150,7 @@ namespace Glory::Editor
 	{
 		m_LastSavedRecords.Set(uuid, lastSaved);
 		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetUpdated, uuid, nullptr);
+		AssetCompiler::CompileAssetDatabase(uuid);
 		SetDirty();
 	}
 
@@ -162,6 +161,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::UpdateAssetPaths(const std::string& oldPath, const std::string& newPath)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		std::string fixedNewPath = newPath;
 		std::replace(fixedNewPath.begin(), fixedNewPath.end(), '/', '\\');
 		std::string fixedOldPath = oldPath;
@@ -171,17 +173,17 @@ namespace Glory::Editor
 		absolutePath = absolutePath.append(fixedOldPath);
 
 		/* Find all assets inside this folder and update their folder */
-		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
+		for (auto& f : assetsNode)
 		{
-			UUID uuid = itor->first.as<uint64_t>();
-			const std::string key = std::to_string(uuid);
-			YAML::Node assetNode = m_DatabaseNode[key];
-			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
+			const std::string_view key = f.name.GetString();
+			UUID uuid = std::stoull(key.data());
+			JSONValueRef assetNode = assetsNode[key];
+			const std::string_view pathStr = assetNode["Location"]["Path"].AsString();
 			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
-			absoluteAssetPath = absoluteAssetPath.append(location.Path);
+			absoluteAssetPath = absoluteAssetPath.append(pathStr);
 			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
 
-			std::string path = location.Path;
+			std::string path = std::string(pathStr);
 			size_t index = path.find(fixedOldPath);
 			size_t length = fixedOldPath.length();
 			path = path.replace(index, length, fixedNewPath);
@@ -189,23 +191,32 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorAssetDatabase::DeleteAsset(UUID uuid)
+	void EditorAssetDatabase::DeleteAsset(UUID uuid, bool compile)
 	{
-		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return;
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
 
-		m_DatabaseNode.remove(key);
+		const std::string key = std::to_string(uuid);
+		JSONValueRef assetNode = assetsNode[key];
+		if (!assetNode.Exists() || !assetNode.IsObject()) return;
+
+		assetsNode.Remove(key);
 		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetDeleted, uuid, nullptr);
 
 		std::stringstream stream;
 		stream << "Deleted asset: " << uuid;
 		Debug::LogInfo(stream.str());
+
+		if (compile) AssetCompiler::CompileAssetDatabase(uuid);
+
 		SetDirty();
 	}
 
 	void EditorAssetDatabase::DeleteAsset(const std::string& path)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		std::string fixedPath = path;
 		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
 
@@ -214,15 +225,14 @@ namespace Glory::Editor
 
 		/* Find all assets on this path */
 		std::vector<UUID> relevantAssets;
-		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
+		for (auto& f : assetsNode)
 		{
-			UUID uuid = itor->first.as<uint64_t>();
-			const std::string key = std::to_string(uuid);
-			YAML::Node assetNode = m_DatabaseNode[key];
-
-			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
+			const std::string_view key = f.name.GetString();
+			const UUID uuid = std::stoull(key.data());
+			JSONValueRef assetNode = assetsNode[key];
+			const std::string_view pathStr = assetNode["Location"]["Path"].AsString();
 			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
-			absoluteAssetPath = absoluteAssetPath.append(location.Path);
+			absoluteAssetPath = absoluteAssetPath.append(pathStr);
 			if (absoluteAssetPath != absolutePath.string()) continue;
 			relevantAssets.push_back(uuid);
 		}
@@ -230,12 +240,17 @@ namespace Glory::Editor
 		for (size_t i = 0; i < relevantAssets.size(); i++)
 		{
 			UUID uuid = relevantAssets[i];
-			DeleteAsset(uuid);
+			DeleteAsset(uuid, false);
 		}
+
+		AssetCompiler::CompileAssetDatabase(relevantAssets);
 	}
 
 	void EditorAssetDatabase::DeleteAssets(const std::string& path)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		std::string fixedPath = path;
 		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
 
@@ -243,15 +258,14 @@ namespace Glory::Editor
 		absolutePath = absolutePath.append(fixedPath);
 
 		std::vector<UUID> relevantAssets;
-		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
+		for (auto& f : assetsNode)
 		{
-			UUID uuid = itor->first.as<uint64_t>();
-			const std::string key = std::to_string(uuid);
-			YAML::Node assetNode = m_DatabaseNode[key];
-
-			const AssetLocation location = assetNode["Location"].as<AssetLocation>();
+			const std::string_view key = f.name.GetString();
+			const UUID uuid = std::stoull(key.data());
+			JSONValueRef assetNode = assetsNode[key];
+			const std::string_view pathStr = assetNode["Location"]["Path"].AsString();
 			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
-			absoluteAssetPath = absoluteAssetPath.append(location.Path);
+			absoluteAssetPath = absoluteAssetPath.append(pathStr);
 			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
 			relevantAssets.push_back(uuid);
 		}
@@ -259,17 +273,26 @@ namespace Glory::Editor
 		for (size_t i = 0; i < relevantAssets.size(); i++)
 		{
 			UUID uuid = relevantAssets[i];
-			DeleteAsset(uuid);
+			DeleteAsset(uuid, false);
 		}
+
+		AssetCompiler::CompileAssetDatabase(relevantAssets);
 	}
 
 	void EditorAssetDatabase::IncrementAssetVersion(UUID uuid)
 	{
-		YAML::Node assetNode = m_DatabaseNode[std::to_string(uuid)];
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return;
-		ResourceMeta meta = assetNode["Metadata"].as<ResourceMeta>();
-		meta.IncrementSerializedVersion();
-		assetNode["Metadata"] = meta;
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
+		JSONValueRef assetNode = assetsNode[std::to_string(uuid)];
+		if (!assetNode.Exists() || !assetNode.IsObject()) return;
+		JSONValueRef metaNode = assetNode["Metadata"];
+
+		const uint64_t version = metaNode["SerializedVersion"].AsUInt64() + 1;
+		metaNode["SerializedVersion"].SetUInt64(version);
+
+		AssetCompiler::CompileAssetDatabase(uuid);
+
 		SetDirty();
 	}
 
@@ -370,6 +393,8 @@ namespace Glory::Editor
 		else stream << "Imported asset at " << path;
 		Debug::LogInfo(stream.str());
 
+		AssetCompiler::CompileAssetDatabase(meta.ID());
+
 		/* Import sub resources */
 		for (size_t i = 0; i < pLoadedResource->SubResourceCount(); i++)
 		{
@@ -378,10 +403,6 @@ namespace Glory::Editor
 			newSubPath.append(pSubResource->Name());
 			ImportAsset(path, pSubResource, newSubPath);
 		}
-
-		if (!subPath.empty()) return;
-		AssetDatabase::Clear();
-		AssetDatabase::Load(m_DatabaseNode);
 	}
 
 	void EditorAssetDatabase::ImportAssetsAsync(const std::string& path)
@@ -433,6 +454,8 @@ namespace Glory::Editor
 		stream.clear();
 		stream << "Imported new scene: " << pScene->Name();
 		Debug::LogInfo(stream.str());
+
+		AssetCompiler::CompileAssetDatabase(meta.ID());
 	}
 
 	void EditorAssetDatabase::ImportScene(const std::string& path)
@@ -459,24 +482,29 @@ namespace Glory::Editor
 		stream.clear();
 		stream << "Imported scene: " << GetAssetName(meta.ID());
 		Debug::LogInfo(stream.str());
+
+		AssetCompiler::CompileAssetDatabase(meta.ID());
 	}
 
 	void EditorAssetDatabase::SaveAsset(Resource* pResource, bool markUndirty)
 	{
 		if (!pResource) return;
 
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		const UUID uuid = pResource->GetUUID();
 		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
+		JSONValueRef assetNode = assetsNode[key];
 
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return;
+		if (!assetNode.Exists() || !assetNode.IsObject()) return;
 
-		AssetLocation location = assetNode["Location"].as<AssetLocation>();
-		ResourceMeta meta = assetNode["Metadata"].as<ResourceMeta>();
+		JSONValueRef location = assetNode["Location"];
+		JSONValueRef meta = assetNode["Metadata"];
 
-		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(meta.Hash());
+		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(meta["Hash"].AsUInt());
 		std::filesystem::path path = Game::GetAssetPath();
-		path.append(location.Path);
+		path.append(location["Path"].AsString());
 		pModule->Save(path.string(), pResource);
 		IncrementAssetVersion(pResource->GetUUID());
 
@@ -484,21 +512,28 @@ namespace Glory::Editor
 			m_UnsavedAssets.Erase(pResource->GetUUID());
 
 		std::stringstream stream;
-		stream << "Saved asset to " << location.Path;
+		stream << "Saved asset to " << location["Path"].AsString();
 		Debug::LogInfo(stream.str());
+
+		AssetCompiler::CompileAssetDatabase(pResource->GetUUID());
 	}
 
 	void EditorAssetDatabase::RemoveAsset(UUID uuid)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return;
-		m_DatabaseNode.remove(key);
+		JSONValueRef assetNode = assetsNode[key];
+		if (!assetNode.Exists() || !assetNode.IsObject()) return;
+		assetsNode.Remove(key);
 		SetDirty();
 
 		std::stringstream stream;
 		stream << "Removed asset " << uuid;
 		Debug::LogInfo(stream.str());
+
+		AssetCompiler::CompileAssetDatabase(uuid);
 	}
 
 	void EditorAssetDatabase::SetAssetDirty(Object* pResource)
@@ -534,21 +569,45 @@ namespace Glory::Editor
 		return m_IsDirty || m_UnsavedAssets.Size();
 	}
 
+	std::vector<UUID> EditorAssetDatabase::UUIDs()
+	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+		return assetsNode.IDKeys();
+	}
+
 	bool EditorAssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return false;
-		location = assetNode["Location"].as<AssetLocation>();
+		JSONValueRef assetNode = assetsNode[key];
+		if (!assetNode.Exists() || !assetNode.IsObject()) return false;
+		JSONValueRef locationNode = assetNode["Location"];
+		location.Path = locationNode["Path"].AsString();
+		location.SubresourcePath = locationNode["SubresourcePath"].AsString();
+		location.Index = locationNode["Index"].AsUInt64();
 		return true;
 	}
 
 	bool EditorAssetDatabase::GetAssetMetadata(UUID uuid, ResourceMeta& meta)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return false;
-		meta = assetNode["Metadata"].as<ResourceMeta>();
+		JSONValueRef assetNode = assetsNode[key];
+		if (!assetNode.Exists() || !assetNode.IsObject()) return false;
+
+		JSONValueRef metaNode = assetNode["Metadata"];
+
+		const std::string_view ext = metaNode["Extension"].AsString();
+		const std::string_view name = metaNode["Name"].AsString();
+		const uint32_t hash = metaNode["Hash"].AsUInt();
+		const uint64_t version = metaNode["SerializedVersion"].AsUInt64();
+
+		meta = ResourceMeta(std::string(ext), std::string(name), uuid, hash, version);
 		return true;
 	}
 
@@ -567,11 +626,11 @@ namespace Glory::Editor
 		if (!m_PathToUUIDCache.Contains(absolutePath.string())) return 0;
 		return m_PathToUUIDCache[absolutePath.string()];
 
-		//for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
+		//for (YAML::const_iterator itor = m_Database.begin(); itor != m_Database.end(); ++itor)
 		//{
 		//	UUID uuid = itor->first.as<uint64_t>();
 		//	const std::string key = std::to_string(uuid);
-		//	YAML::Node assetNode = m_DatabaseNode[key];
+		//	YAML::Node assetNode = m_Database[key];
 		//
 		//	const AssetLocation location = assetNode["Location"].as<AssetLocation>();
 		//	std::filesystem::path absoluteAssetPath = location.Path;
@@ -589,34 +648,44 @@ namespace Glory::Editor
 
 	bool EditorAssetDatabase::AssetExists(UUID uuid)
 	{
+		JSONFileRef & projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
-		return assetNode.IsDefined() && assetNode.IsMap();
+		JSONValueRef assetNode = assetsNode[key];
+		return assetNode.Exists() && assetNode.IsObject();
 	}
 
 	std::string EditorAssetDatabase::GetAssetName(UUID uuid)
 	{
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
 		const std::string key = std::to_string(uuid);
-		YAML::Node assetNode = m_DatabaseNode[key];
-		if (!assetNode.IsDefined() || !assetNode.IsMap()) return "";
-		ResourceMeta meta = assetNode["Metadata"].as<ResourceMeta>();
-		if (!meta.Name().empty()) return meta.Name();
-		AssetLocation location = assetNode["Location"].as<AssetLocation>();
-		std::filesystem::path fileName = std::filesystem::path(location.Path).filename().replace_extension();
-		if (!location.SubresourcePath.empty()) fileName.append(location.SubresourcePath);
+		JSONValueRef assetNode = assetsNode[key];
+		if (!assetNode.Exists() || !assetNode.IsObject()) return "";
+		const std::string_view name = assetNode["Metadata"]["Name"].AsString();
+		if (!name.empty()) return std::string(name);
+		const std::string_view location = assetNode["Location"]["Path"].AsString();
+		const std::string_view subPath = assetNode["Location"]["SubresourcePath"].AsString();
+		std::filesystem::path fileName = std::filesystem::path(location).filename().replace_extension();
+		if (!subPath.empty()) fileName.append(subPath);
 		return fileName.string();
 	}
 
 	void EditorAssetDatabase::GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& result)
 	{
-		for (YAML::const_iterator itor = m_DatabaseNode.begin(); itor != m_DatabaseNode.end(); ++itor)
-		{
-			UUID uuid = itor->first.as<uint64_t>();
-			const std::string key = std::to_string(uuid);
-			YAML::Node assetNode = m_DatabaseNode[key];
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
 
-			const ResourceMeta meta = assetNode["Metadata"].as<ResourceMeta>();
-			if (meta.Hash() != typeHash) continue;
+		for (auto& f : assetsNode)
+		{
+			const std::string_view key = f.name.GetString();
+			const UUID uuid = std::stoull(key.data());
+			JSONValueRef assetNode = assetsNode[key];
+
+			const uint32_t hash = assetNode["Metadata"]["Hash"].AsUInt();
+			if (hash != typeHash) continue;
 			result.push_back(uuid);
 		}
 	}
@@ -725,7 +794,7 @@ namespace Glory::Editor
 		for (auto itor : std::filesystem::directory_iterator(path))
 		{
 			std::filesystem::path path = itor.path();
-			const std::string pathString = ".\\" + path.string();
+			const std::string pathString = path.string();
 			if (!itor.is_directory())
 			{
 				/* Is it already imported? */

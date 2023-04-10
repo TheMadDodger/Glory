@@ -358,7 +358,7 @@ namespace Glory::Editor
 		GScene* pScene = (GScene*)pObject;
 		if (pScene == nullptr) return;
 		UUID uuid = pScene->GetUUID();
-		if (!AssetDatabase::AssetExists(uuid)) return;
+		if (!EditorAssetDatabase::AssetExists(uuid)) return;
 		EditorSceneManager::CloseScene(uuid);
 		EditorSceneManager::OpenScene(uuid, true);
 	}

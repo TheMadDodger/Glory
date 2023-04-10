@@ -31,6 +31,31 @@ namespace Glory
 		return Value().GetString();
 	}
 
+	int JSONValueRef::AsInt() const
+	{
+		return Value().GetInt();
+	}
+
+	uint32_t JSONValueRef::AsUInt() const
+	{
+		return Value().GetUint();
+	}
+
+	uint64_t JSONValueRef::AsUInt64() const
+	{
+		return Value().GetUint64();
+	}
+
+	void JSONValueRef::SetObject()
+	{
+		Value().SetObject();
+	}
+
+	void JSONValueRef::SetArray()
+	{
+		Value().SetArray();
+	}
+
 	void JSONValueRef::SetString(const std::string& str)
 	{
 		Value().SetString(str.data(), m_Document.GetAllocator());
@@ -39,6 +64,16 @@ namespace Glory
 	void JSONValueRef::SetInt(int value)
 	{
 		Value().SetInt(value);
+	}
+
+	void JSONValueRef::SetUInt(uint32_t value)
+	{
+		Value().SetUint(value);
+	}
+
+	void JSONValueRef::SetUInt64(uint64_t value)
+	{
+		Value().SetUint64(value);
 	}
 
 	void JSONValueRef::Set(rapidjson::Value& value)
@@ -77,7 +112,7 @@ namespace Glory
 
 	bool JSONValueRef::Exists()
 	{
-		return Value().IsNull();
+		return Exists(m_Document, m_Path);
 	}
 
 	bool JSONValueRef::IsSequence()
@@ -85,7 +120,7 @@ namespace Glory
 		return Value().IsArray();
 	}
 
-	bool JSONValueRef::IsMap()
+	bool JSONValueRef::IsObject()
 	{
 		return Value().IsObject();
 	}
@@ -112,6 +147,46 @@ namespace Glory
 	JSONValueRef JSONValueRef::Parent()
 	{
 		return JSONValueRef(m_Document, m_Path.parent_path());
+	}
+
+	rapidjson::Value::MemberIterator JSONValueRef::begin()
+	{
+		return Value().MemberBegin();
+	}
+
+	rapidjson::Value::MemberIterator JSONValueRef::end()
+	{
+		return Value().MemberEnd();
+	}
+
+	rapidjson::Value::ConstMemberIterator JSONValueRef::begin() const
+	{
+		return Value().MemberBegin();
+	}
+
+	rapidjson::Value::ConstMemberIterator JSONValueRef::end() const
+	{
+		return Value().MemberEnd();
+	}
+
+	std::vector<std::string_view> JSONValueRef::Keys() const
+	{
+		std::vector<std::string_view> keys;
+		for (rapidjson::Value::ConstMemberIterator itor = begin(); itor != end(); ++itor)
+		{
+			keys.push_back(itor->name.GetString());
+		}
+		return keys;
+	}
+
+	std::vector<UUID> JSONValueRef::IDKeys() const
+	{
+		std::vector<UUID> keys;
+		for (rapidjson::Value::ConstMemberIterator itor = begin(); itor != end(); ++itor)
+		{
+			keys.push_back(std::stoull(itor->name.GetString()));
+		}
+		return keys;
 	}
 
 	rapidjson::Value& JSONValueRef::FindValue(rapidjson::Value& value, std::filesystem::path path)
@@ -159,6 +234,26 @@ namespace Glory
 		const rapidjson::Value& nextNode = value[subPathString.data()];
 		path = path.lexically_relative(subPathString);
 		return FindValue(nextNode, path);
+	}
+
+	bool JSONValueRef::Exists(const rapidjson::Value& value, std::filesystem::path path) const
+	{
+		if (path.empty() || path == ".") return true;
+
+		const std::string& subPathString = (*path.begin()).string();
+		if (subPathString._Starts_with("##"))
+		{
+			const size_t index = std::stoul(subPathString.substr(2));
+			path = path.lexically_relative(subPathString);
+			if (!value.IsArray() || value.Size() <= index) return false;
+			const rapidjson::Value& nextNode = value[index];
+			return Exists(nextNode, path);
+		}
+
+		if (!value.IsObject() || !value.HasMember(subPathString.data())) return false;
+		const rapidjson::Value& nextNode = value[subPathString.data()];
+		path = path.lexically_relative(subPathString);
+		return Exists(nextNode, path);
 	}
 
 	rapidjson::Value& JSONValueRef::Value()

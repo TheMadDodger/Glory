@@ -2,7 +2,7 @@
 #include "ThreadedVar.h"
 #include "UUID.h"
 #include "GloryEditor.h"
-#include <yaml-cpp/yaml.h>
+
 #include <ResourceMeta.h>
 #include <AssetLocation.h>
 #include <JobManager.h>
@@ -10,21 +10,23 @@
 namespace Glory
 {
 	class GScene;
+	struct JSONFileRef;
 }
 
 namespace Glory::Editor
 {
+
 	class EditorAssetDatabase
 	{
 	public:
-		static GLORY_EDITOR_API void Load(YAML::Node& projectNode);
+		static GLORY_EDITOR_API void Load(JSONFileRef& projectFile);
 		static GLORY_EDITOR_API void Reload();
 		static GLORY_EDITOR_API void InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty = true);
 		static GLORY_EDITOR_API void UpdateAssetPath(UUID uuid, const std::string& newPath);
 		static GLORY_EDITOR_API void UpdateAsset(UUID uuid, long lastSaved);
 		static GLORY_EDITOR_API long GetLastSavedRecord(UUID uuid);
 		static GLORY_EDITOR_API void UpdateAssetPaths(const std::string& oldPath, const std::string& newPath);
-		static GLORY_EDITOR_API void DeleteAsset(UUID uuid);
+		static GLORY_EDITOR_API void DeleteAsset(UUID uuid, bool compile = true);
 		static GLORY_EDITOR_API void DeleteAsset(const std::string& path);
 		static GLORY_EDITOR_API void DeleteAssets(const std::string& path);
 		static GLORY_EDITOR_API void IncrementAssetVersion(UUID uuid);
@@ -41,6 +43,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void SaveDirtyAssets();
 		static GLORY_EDITOR_API void SetDirty(bool dirty = true);
 		static GLORY_EDITOR_API bool IsDirty();
+		static GLORY_EDITOR_API std::vector<UUID> UUIDs();
 
 		static GLORY_EDITOR_API bool GetAssetLocation(UUID uuid, AssetLocation& location);
 		static GLORY_EDITOR_API bool GetAssetMetadata(UUID uuid, ResourceMeta& meta);
@@ -64,7 +67,6 @@ namespace Glory::Editor
 
 	private:
 		friend class EditorApplication;
-		static YAML::Node m_DatabaseNode;
 
 		static ThreadedVector<UUID> m_UnsavedAssets;
 
