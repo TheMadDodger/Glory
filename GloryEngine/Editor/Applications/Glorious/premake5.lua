@@ -38,6 +38,8 @@ project "Glorious"
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.Reflect}",
+
+		"%{rapidjson}",
 	}
 
 	libdirs

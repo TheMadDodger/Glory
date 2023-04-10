@@ -37,7 +37,9 @@ project "EntityScenesEditorExtension"
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.ECS}",
-		"%{IncludeDir.Reflect}"
+		"%{IncludeDir.Reflect}",
+
+		"%{rapidjson}",
 	}
 
 	libdirs

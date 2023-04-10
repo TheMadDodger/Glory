@@ -37,7 +37,9 @@ project "MonoEditorExtension"
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.ECS}",
-		"%{IncludeDir.Reflect}"
+		"%{IncludeDir.Reflect}",
+
+		"%{rapidjson}",
 	}
 
 	libdirs

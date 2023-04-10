@@ -8,8 +8,8 @@ namespace Glory
 	ResourceMeta::ResourceMeta()
 		: m_Extension(""), m_Name(""), m_Node(), m_UUID(UUID()), m_TypeHash(0), m_SerializedVersion(0) {}
 
-	ResourceMeta::ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, uint32_t hash)
-		: m_Extension(extension), m_Name(name), m_UUID(uuid), m_TypeHash(hash), m_SerializedVersion(0) {}
+	ResourceMeta::ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, uint32_t hash, size_t serializedVersion)
+		: m_Extension(extension), m_Name(name), m_UUID(uuid), m_TypeHash(hash), m_SerializedVersion(serializedVersion) {}
 
 	ResourceMeta::~ResourceMeta() {}
 

@@ -99,10 +99,10 @@ namespace Glory
 		AssetLocation assetLocation;
 		if (!AssetDatabase::GetAssetLocation(uuid, assetLocation)) return nullptr;
 
-		UUID rootUUID = AssetDatabase::GetAssetUUID(assetLocation.Path);
-		if (rootUUID != uuid)
+		if (!assetLocation.SubresourcePath.empty())
 		{
 			/* Load root resource */
+			UUID rootUUID = AssetDatabase::GetAssetUUID(assetLocation.Path);
 			Resource* pRootResource = FindResource(rootUUID);
 			if (!pRootResource)
 				pRootResource = LoadAsset(rootUUID);

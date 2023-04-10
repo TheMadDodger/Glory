@@ -66,14 +66,25 @@ namespace Glory
 	{
 		std::replace(assetLocation.Path.begin(), assetLocation.Path.end(), '/', '\\');
 
-		uint64_t uuid = meta.ID();
-		ASSET_DATABASE->m_Metas.emplace(uuid, meta);
-		ASSET_DATABASE->m_AssetLocations.emplace(uuid, assetLocation);
-		ASSET_DATABASE->m_PathToUUID.emplace(assetLocation.Path, uuid);
-		ASSET_DATABASE->m_AssetsByType[meta.Hash()].push_back(uuid);
+		const uint64_t uuid = meta.ID();
+		ASSET_DATABASE->m_Metas[uuid] = meta;
+		ASSET_DATABASE->m_AssetLocations[uuid] = assetLocation;
+		if (assetLocation.SubresourcePath.empty()) ASSET_DATABASE->m_PathToUUID[assetLocation.Path] = uuid;
+		ASSET_DATABASE->m_AssetsByType[meta.m_TypeHash].push_back(uuid);
 	}
 
-	void AssetDatabase::Load(YAML::Node& node)
+	void AssetDatabase::Remove(UUID uuid)
+	{
+		const ResourceMeta& meta = ASSET_DATABASE->m_Metas[uuid];
+		const AssetLocation& location = ASSET_DATABASE->m_AssetLocations[uuid];
+
+		if (location.SubresourcePath.empty()) ASSET_DATABASE->m_PathToUUID.erase(location.Path);
+		std::remove(ASSET_DATABASE->m_AssetsByType[meta.m_TypeHash].begin(), ASSET_DATABASE->m_AssetsByType[meta.m_TypeHash].end(), uuid);
+		ASSET_DATABASE->m_AssetLocations.erase(uuid);
+		ASSET_DATABASE->m_Metas.erase(uuid);
+	}
+
+	void AssetDatabase::Load()
 	{
 		while (ASSET_DATABASE->m_IsReading)
 		{
@@ -81,17 +92,7 @@ namespace Glory
 		}
 
 		ASSET_DATABASE->m_Initialized = false;
-		for (YAML::const_iterator itor = node.begin(); itor != node.end(); ++itor)
-		{
-			UUID key = itor->first.as<uint64_t>();
-			YAML::Node assetNode = node[std::to_string(key)];
-
-			if (!assetNode.IsDefined() || !assetNode.IsMap()) continue;
-
-			AssetLocation location = assetNode["Location"].as<AssetLocation>();
-			ResourceMeta meta = assetNode["Metadata"].as<ResourceMeta>();
-			SetAsset(location, meta);
-		}
+		
 
 		ASSET_DATABASE->m_Initialized = true;
 	}
@@ -205,12 +206,13 @@ namespace Glory
 	AssetDatabase::~AssetDatabase() {}
 
 	size_t AssetDatabase::ReadLock::m_LockCounter = 0;
+	size_t AssetDatabase::WriteLock::m_LockCounter = 0;
 
 	AssetDatabase::ReadLock::ReadLock()
 	{
 		++m_LockCounter;
 		while (!ASSET_DATABASE->m_Initialized)
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
 		ASSET_DATABASE->m_IsReading = true;
 	}
 
@@ -219,5 +221,20 @@ namespace Glory
 		--m_LockCounter;
 		if (m_LockCounter > 0) return;
 		ASSET_DATABASE->m_IsReading = false;
+	}
+
+	AssetDatabase::WriteLock::WriteLock()
+	{
+		++m_LockCounter;
+		while (ASSET_DATABASE->m_IsReading)
+			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+		ASSET_DATABASE->m_Initialized = false;
+	}
+
+	AssetDatabase::WriteLock::~WriteLock()
+	{
+		--m_LockCounter;
+		if (m_LockCounter > 0) return;
+		ASSET_DATABASE->m_Initialized = true;
 	}
 }

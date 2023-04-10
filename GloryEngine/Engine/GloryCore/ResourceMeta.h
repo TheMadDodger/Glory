@@ -12,7 +12,7 @@ namespace Glory
 	{
 	public:
 		ResourceMeta();
-		ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, uint32_t hash);
+		ResourceMeta(const std::string& extension, const std::string& name, UUID uuid, uint32_t hash, size_t serializedVersion = 0);
 		virtual ~ResourceMeta();
 
 		void Read(const YAML::Node& node);

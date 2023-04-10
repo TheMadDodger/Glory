@@ -3,8 +3,9 @@
 #include <mutex>
 #include <functional>
 #include <string>
-#include <yaml-cpp/yaml.h>
+
 #include "GloryEditor.h"
+#include "JSONRef.h"
 
 namespace Glory::Editor
 {
@@ -39,6 +40,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void SetAssetDirty(const char* key, bool dirty = true);
 		static GLORY_EDITOR_API bool HasUnsavedChanges();
 
+		JSONFileRef& ProjectFile();
+
 	private:
 		ProjectSpace(const std::string& path);
 		virtual ~ProjectSpace();
@@ -58,6 +61,6 @@ namespace Glory::Editor
 		std::string m_SettingsPath;
 		std::string m_ProjectName;
 		std::vector<std::string> m_DirtyKeys;
-		YAML::Node m_ProjectFileNode;
+		JSONFileRef m_ProjectFile;
 	};
 }

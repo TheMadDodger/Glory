@@ -37,6 +37,8 @@ project "JoltEditorExtension"
 		"%{IncludeDir.Reflect}",
 
 		"%{rootDir}/submodules/JoltPhysics",
+
+		"%{rapidjson}",
 	}
 
 	libdirs

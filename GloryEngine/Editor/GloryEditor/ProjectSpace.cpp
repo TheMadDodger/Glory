@@ -7,7 +7,6 @@
 #include "TitleBar.h"
 
 #include <filesystem>
-#include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <AssetDatabase.h>
 
@@ -151,6 +150,11 @@ namespace Glory::Editor
 		return pProject->m_DirtyKeys.size() > 0;
 	}
 
+	JSONFileRef& ProjectSpace::ProjectFile()
+	{
+		return m_ProjectFile;
+	}
+
 	ProjectSpace::ProjectSpace(const std::string& path)
 		: m_ProjectFilePath(path), m_ProjectRootPath(std::filesystem::path(path).parent_path().string()),
 		m_CachePath(std::filesystem::path(path).parent_path().append("Cache").string()), m_LibraryPath(std::filesystem::path(path).parent_path().append("Library").string()),
@@ -171,8 +175,9 @@ namespace Glory::Editor
 		CreateFolder("Cache/ShaderSource");
 		CreateFolder("Cache/CompiledShaders");
 		CreateFolder("Modules");
-		m_ProjectFileNode = YAML::LoadFile(m_ProjectFilePath);
-		m_ProjectName = m_ProjectFileNode["ProjectName"].as<std::string>();
+		m_ProjectFile = JSONFileRef(m_ProjectFilePath);
+		m_ProjectFile.Load();
+		m_ProjectName = m_ProjectFile["ProjectName"].AsString();
 
 		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnOpen].size(); i++)
 		{
@@ -181,7 +186,7 @@ namespace Glory::Editor
 
 		lock.unlock();
 
-		EditorAssetDatabase::Load(m_ProjectFileNode);
+		EditorAssetDatabase::Load(m_ProjectFile);
 		EditorAssetDatabase::ImportModuleAssets();
 		FileBrowser::LoadProject();
 		ProjectSettings::Load(this);
@@ -227,11 +232,7 @@ namespace Glory::Editor
 	void ProjectSpace::SaveProject()
 	{
 		/* Save project file */
-		YAML::Emitter projectOut;
-		projectOut << m_ProjectFileNode;
-		std::ofstream projectFileStream(m_ProjectFilePath);
-		projectFileStream << projectOut.c_str();
-		projectFileStream.close();
+		m_ProjectFile.Save();
 
 		/* Save project version */
 		std::filesystem::path projectVersionTxtPath = m_SettingsPath;

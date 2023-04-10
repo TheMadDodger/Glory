@@ -26,17 +26,30 @@ namespace Glory
 
 		static std::string GetAssetName(UUID uuid);
 
-		static void Load(YAML::Node& node);
+		static void Load();
 
 		static void Clear();
 
 		static void SetIDAndName(Resource* pResource, UUID newID, const std::string& name);
 
+		static void SetAsset(AssetLocation& assetLocation, const ResourceMeta& meta);
+
+		static void Remove(UUID uuid);
+
+		struct WriteLock
+		{
+		public:
+			WriteLock();
+			~WriteLock();
+
+		private:
+			static size_t m_LockCounter;
+		};
+
 	private:
 		static void Initialize();
 		static void Destroy();
 
-		static void SetAsset(AssetLocation& assetLocation, const ResourceMeta& meta);
 
 	private:
 		friend class AssetManager;
@@ -51,7 +64,7 @@ namespace Glory
 		std::map<UUID, AssetLocation> m_AssetLocations;
 		std::map<std::string, UUID> m_PathToUUID;
 		std::map<UUID, ResourceMeta> m_Metas;
-		std::map<size_t, std::vector<UUID>> m_AssetsByType;
+		std::map<uint32_t, std::vector<UUID>> m_AssetsByType;
 		AssetCallbacks m_Callbacks;
 
 		struct ReadLock

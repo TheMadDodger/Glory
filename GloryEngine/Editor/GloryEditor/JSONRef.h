@@ -3,6 +3,7 @@
 #include <rapidjson/document.h>
 
 #include <filesystem>
+#include <UUID.h>
 
 namespace Glory
 {
@@ -21,6 +22,9 @@ namespace Glory
 		}
 
 		std::string_view AsString() const;
+		int AsInt() const;
+		uint32_t AsUInt() const;
+		uint64_t AsUInt64() const;
 
 		template<typename T>
 		T As(const T& defaultValue)
@@ -44,8 +48,12 @@ namespace Glory
 			Set(rapidjson::Value(value));
 		}
 
+		void SetObject();
+		void SetArray();
 		void SetString(const std::string& str);
 		void SetInt(int value);
+		void SetUInt(uint32_t value);
+		void SetUInt64(uint64_t value);
 
 		void Set(rapidjson::Value& value);
 
@@ -73,16 +81,26 @@ namespace Glory
 
 		bool Exists();
 		bool IsSequence();
-		bool IsMap();
+		bool IsObject();
 		rapidjson::Value& Value();
 		const rapidjson::Value& Value() const;
 		const std::filesystem::path& Path();
 		void Erase();
 		JSONValueRef Parent();
 
+		rapidjson::Value::MemberIterator begin();
+		rapidjson::Value::MemberIterator end();
+
+		rapidjson::Value::ConstMemberIterator begin() const;
+		rapidjson::Value::ConstMemberIterator end() const;
+
+		std::vector<std::string_view> Keys() const;
+		std::vector<UUID> IDKeys() const;
+
 	private:
 		rapidjson::Value& FindValue(rapidjson::Value& JSON, std::filesystem::path path);
 		const rapidjson::Value& FindValue(const rapidjson::Value& JSON, std::filesystem::path path) const;
+		bool Exists(const rapidjson::Value& value, std::filesystem::path path) const;
 
 	private:
 		rapidjson::Document& m_Document;
