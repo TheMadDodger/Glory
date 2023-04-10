@@ -79,17 +79,14 @@ namespace Glory
 			return Value().Is<T>();
 		}
 
-		bool Exists();
-		bool IsSequence();
-		bool IsObject();
+		bool Exists() const;
+		bool IsSequence() const;
+		bool IsObject() const;
 		rapidjson::Value& Value();
 		const rapidjson::Value& Value() const;
 		const std::filesystem::path& Path();
 		void Erase();
 		JSONValueRef Parent();
-
-		rapidjson::Value::MemberIterator begin();
-		rapidjson::Value::MemberIterator end();
 
 		rapidjson::Value::ConstMemberIterator begin() const;
 		rapidjson::Value::ConstMemberIterator end() const;
@@ -98,9 +95,9 @@ namespace Glory
 		std::vector<UUID> IDKeys() const;
 
 	private:
-		rapidjson::Value& FindValue(rapidjson::Value& JSON, std::filesystem::path path);
-		const rapidjson::Value& FindValue(const rapidjson::Value& JSON, std::filesystem::path path) const;
-		bool Exists(const rapidjson::Value& value, std::filesystem::path path) const;
+		rapidjson::Value& FindValue(rapidjson::Value& JSON, const std::filesystem::path& path);
+		const rapidjson::Value& FindValue(const rapidjson::Value& JSON, const std::filesystem::path& path) const;
+		bool Exists(const rapidjson::Value& value, const std::filesystem::path& path) const;
 
 	private:
 		rapidjson::Document& m_Document;
