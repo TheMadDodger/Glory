@@ -7,6 +7,8 @@
 #include "ProjectLock.h"
 #include "EditorManager.h"
 
+#include <GloryAPI.h>
+
 namespace Glory::EditorLauncher
 {
     std::map<HubMenu, const char*> MENUTOSTRING = {
@@ -30,6 +32,8 @@ namespace Glory::EditorLauncher
 
 	void LauncherHub::Run()
 	{
+        GloryAPI::Initialize();
+
         ImGuiIO& io = ImGui::GetIO();
         DefaultFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Regular.ttf", 18.0f);
         BoldLargeFont = io.Fonts->AddFontFromFileTTF("./Fonts/PT_Sans/PTSans-Bold.ttf", 32.0f);
@@ -96,6 +100,8 @@ namespace Glory::EditorLauncher
         }
 
         ProjectManager::Save();
+
+        GloryAPI::Cleanup();
 	}
 
     void LauncherHub::InitializeFileDialog()

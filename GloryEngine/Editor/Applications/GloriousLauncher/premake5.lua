@@ -30,6 +30,7 @@ project "GloriousLauncher"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.FA}",
+		"%{GloryIncludeDir.api}",
 
 		"%{IncludeDir.glm}",
 		"%{DepIncludesDir}",
@@ -50,6 +51,7 @@ project "GloriousLauncher"
 	links
 	{
 		"GloryCore",
+		"GloryAPI",
 		"ImGui",
 		"ImFileDialog",
 		"yaml-cpp",
@@ -70,9 +72,17 @@ project "GloriousLauncher"
 		("{COPY} %{DepsBinDir}/glew32*.dll %{buildDir}/Launcher"),
 		("{COPY} imgui.ini %{buildDir}/Launcher"),
 		("{COPY} %{IncludeDir.FA}/FA %{buildDir}/Launcher/Fonts/FA"),
+		("{COPY} %{engineOutDir}/GloryAPI.dll %{buildDir}/Launcher"),
+		("{COPY} %{DepsBinDir}/libcurl*.dll %{buildDir}/Launcher"),
 
 		-- Copy editor to launcher
 		("{COPY} %{editorBuildDir} %{buildDir}/Launcher/Editor/Any"),
+
+	}
+
+	postbuildcommands
+	{
+		("{COPY} %{DepsBinDir}/libcurl*.dll %{engineOutDir}"),
 	}
 
 	filter "system:windows"
