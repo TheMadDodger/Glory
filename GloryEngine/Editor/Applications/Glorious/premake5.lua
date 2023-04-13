@@ -100,6 +100,9 @@ project "Glorious"
 	{
 		("{COPY} %{modulesOutDir} %{editorBuildDir}/Modules"),
 		("{COPY} %{engineOutDir}/GloryEditor.dll %{editorBuildDir}"),
+		("{COPY} %{engineOutDir}/GloryAPI.dll %{editorBuildDir}"),
+		("{COPY} %{engineOutDir}/libcurl*.dll %{editorBuildDir}"),
+		("{COPY} %{engineOutDir}/GloryEditor.dll %{editorBuildDir}"),
 		("{COPY} ./EditorAssets %{editorBuildDir}/EditorAssets"),
 		("{COPY} ./EditorAssets %{engineOutDir}/EditorAssets"),
 		("{COPY} EditorSettings.yaml %{editorBuildDir}"),

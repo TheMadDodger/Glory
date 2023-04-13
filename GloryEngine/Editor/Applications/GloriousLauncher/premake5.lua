@@ -31,6 +31,7 @@ project "GloriousLauncher"
 		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.FA}",
 		"%{GloryIncludeDir.api}",
+		"%{rapidjson}",
 
 		"%{IncludeDir.glm}",
 		"%{DepIncludesDir}",
