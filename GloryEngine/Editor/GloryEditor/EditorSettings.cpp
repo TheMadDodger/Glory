@@ -78,8 +78,11 @@ namespace Glory::Editor
             const glm::vec2 pos = window["Position"].As<glm::vec2>({0, 0});
 
             Window* pMainWindow = pWindowModule->GetMainWindow();
+            int top;
+            pMainWindow->GetWindowBordersSize(&top, nullptr, nullptr, nullptr);
+
             pMainWindow->Resize(pMainWindowSettings->Width, pMainWindowSettings->Height);
-            pMainWindow->SetPosition((int)pos.x, (int)pos.y);
+            pMainWindow->SetPosition((int)pos.x, (int)pos.y + top);
         }
 
         Shortcuts::LoadShortcuts(m_YAMLFile);
