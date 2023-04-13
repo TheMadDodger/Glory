@@ -35,6 +35,8 @@ namespace Glory
 
 		virtual void SetWindowTitle(const char* title) = 0;
 
+		virtual void GetWindowBordersSize(int* top, int* left, int* bottom, int* right) = 0;
+
 	protected:
 		Window(const WindowCreateInfo& createInfo);
 		virtual ~Window();

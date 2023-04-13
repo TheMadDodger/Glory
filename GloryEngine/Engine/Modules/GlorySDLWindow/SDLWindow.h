@@ -22,6 +22,8 @@ namespace Glory
 
 		GLORY_API virtual void SetWindowTitle(const char* title) override;
 
+		GLORY_API virtual void GetWindowBordersSize(int* top, int* left, int* bottom, int* right) override;
+
 		GLORY_API SDL_Window* GetSDLWindow();
 		GLORY_API SDL_GLContext GetSDLGLConext() const;
 
