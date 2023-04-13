@@ -291,9 +291,8 @@ namespace Glory
 		buffer.resize(fileSize);
 		fstream.seekg(0);
 		fstream.read(buffer.data(), fileSize);
-		//buffer.push_back('\0');
 		fstream.close();
-		m_Document.Parse(buffer.data());
+		m_Document.Parse(buffer.data(), buffer.size());
 	}
 
 	void JSONFileRef::Save()

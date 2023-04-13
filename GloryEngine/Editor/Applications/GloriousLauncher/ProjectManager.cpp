@@ -2,6 +2,8 @@
 #include "ProjectManager.h"
 #include "EditorManager.h"
 #include "TemplateManager.h"
+#include "rapidjson/document.h"
+#include "rapidjson/prettywriter.h"
 
 namespace Glory::EditorLauncher
 {
@@ -243,20 +245,27 @@ namespace Glory::EditorLauncher
 
     void ProjectManager::WriteProjectFile(const ProjectCreateSettings& createSettings)
     {
-        YAML::Node projectFileNode{ YAML::NodeType::Map };
-        if (std::filesystem::exists(createSettings.Path))
-            projectFileNode = YAML::LoadFile(createSettings.Path);
+        if (!std::filesystem::exists(createSettings.Path)) return;
+        std::ifstream fstream{ createSettings.Path, std::ios::ate };
+        std::vector<char> buffer;
+        const size_t fileSize = (size_t)fstream.tellg();
+        buffer.resize(fileSize);
+        fstream.seekg(0);
+        fstream.read(buffer.data(), fileSize);
+        fstream.close();
+        rapidjson::Document projectFile;
+        projectFile.Parse(buffer.data(), buffer.size());
 
-        projectFileNode["ProjectName"] = createSettings.Name;
+        projectFile["ProjectName"].SetString(createSettings.Name.c_str(), createSettings.Name.length());
 
-        YAML::Emitter emitter;
-        emitter << projectFileNode;
-
-        std::filesystem::path projectFilePath = createSettings.Path;
-        std::ofstream out(projectFilePath);
-        out << emitter.c_str();
+        std::ofstream out{ createSettings.Path };
+        rapidjson::StringBuffer strbuf;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
+        projectFile.Accept(writer);
+        out << strbuf.GetString();
         out.close();
 
+        std::filesystem::path projectFilePath = createSettings.Path;
         std::filesystem::path projectVersionPath = createSettings.Path;
         projectVersionPath = projectFilePath.parent_path();
         projectVersionPath.append("ProjectSettings").append("ProjectVersion.txt");
