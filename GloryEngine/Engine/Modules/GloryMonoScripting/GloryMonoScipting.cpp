@@ -10,7 +10,7 @@
 
 namespace Glory
 {
-	GLORY_MODULE_VERSION_CPP(GloryMonoScipting, 0, 1);
+	GLORY_MODULE_VERSION_CPP(GloryMonoScipting);
 
 	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp"), m_pCoreLibManager(new CoreLibManager())
 	{

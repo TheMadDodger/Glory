@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	GLORY_MODULE_VERSION_CPP(SDLInputModule, 0, 1);
+	GLORY_MODULE_VERSION_CPP(SDLInputModule);
 
 	SDLInputModule::SDLInputModule()
 	{

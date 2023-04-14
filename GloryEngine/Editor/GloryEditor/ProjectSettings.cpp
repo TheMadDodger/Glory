@@ -84,13 +84,18 @@ namespace Glory::Editor
 		if (!rootValue.Exists() || !rootValue.IsMap())
 		{
 			rootValue.Set(YAML::Node(YAML::NodeType::Map));
-			rootValue["EditorVersion"].Set(EditorApplication::Version.GetVersionString());
+
+			std::string versionString;
+			EditorApplication::Version.GetVersionString(versionString);
+			rootValue["EditorVersion"].Set(versionString);
 		}
 
 		OnSettingsLoaded();
 
 		/* After migrations are done we can safely override the version */
-		rootValue["EditorVersion"].Set(EditorApplication::Version.GetVersionString());
+		std::string versionString;
+		EditorApplication::Version.GetVersionString(versionString);
+		rootValue["EditorVersion"].Set(versionString);
 	}
 
 	void ProjectSettings::SaveSettings(ProjectSpace* pProject)

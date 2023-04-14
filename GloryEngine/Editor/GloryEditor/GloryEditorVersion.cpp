@@ -1,6 +1,6 @@
 #include "GloryEditorVersion.h"
 
-GLORY_EDITOR_API Glory::Version GetVersion()
+const char* GetVersion()
 {
-	return Glory::Editor::Version;
+	return Glory::Editor::GloryEditorVersion;
 }

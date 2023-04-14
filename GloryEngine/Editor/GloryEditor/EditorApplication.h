@@ -6,7 +6,7 @@
 #include "EditorAssetLoader.h"
 #include "EditorCreateInfo.h"
 #include "EditorPlayer.h"
-#include <Versioning.h>
+#include <Version.h>
 #include <Game.h>
 
 namespace Glory::Editor
@@ -66,7 +66,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
 
-		static const Glory::Version Version;
+		static const Version Version;
 
 	private:
 		void RenderEditor();

@@ -1,5 +1,5 @@
 #pragma once
-#include "Versioning.h"
+#include "Version.h"
 
 #ifdef GLORY_EXPORTS
 // BUILD LIB
@@ -9,12 +9,16 @@
 #define GLORY_API __declspec(dllimport)
 #endif
 
-#define CORE_VERSION_MAJOR 0
-#define CORE_VERSION_MINOR 1
+#define GLORY_CORE_VERSION_MAJOR 0
+#define GLORY_CORE_VERSION_MINOR 1
+#define GLORY_CORE_VERSION_SUBMINOR 0
 
-const Glory::VersionValue CORE_VERSION_DATA[] = {
-	{"Major", TOSTRING(CORE_VERSION_MAJOR)},
-	{"Minor", TOSTRING(CORE_VERSION_MINOR)},
-};
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define GLORY_CORE_VERSION TOSTRING(GLORY_CORE_VERSION_MAJOR.GLORY_CORE_VERSION_MINOR.GLORY_CORE_VERSION_SUBMINOR)
 
-const Glory::Version CoreVersion(CORE_VERSION_DATA, 2);
+namespace Glory
+{
+	constexpr char* GloryCoreVersion = GLORY_CORE_VERSION;
+	const Version CoreVersion = Version::Parse(GloryCoreVersion);
+}

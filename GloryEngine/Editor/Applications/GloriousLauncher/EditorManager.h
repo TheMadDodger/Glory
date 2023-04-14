@@ -1,7 +1,7 @@
 #pragma once
-#include <Versioning.h>
+#include <Version.h>
 
-typedef Glory::Version (__cdecl* GetVersionProc)();
+typedef const char* (__cdecl* GetVersionProc)();
 
 namespace Glory::EditorLauncher
 {

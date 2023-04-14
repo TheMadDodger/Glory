@@ -221,14 +221,16 @@ namespace Glory::Editor
 	
 	void MainEditor::VersionOutdated(const Glory::Version& latestVersion)
 	{
-		VersionPopup::Open(latestVersion);
+		std::string latestVersionString;
+		latestVersion.GetVersionString(latestVersionString);
+		VersionPopup::Open(latestVersionString);
 	}
 
 	void MainEditor::SetupTitleBar()
 	{
 		TitleBar::AddSection("Application", "Glorious");
 		TitleBar::AddSection("ApplicationSpace", " ");
-		TitleBar::AddSection("Version", Version.GetVersionString().c_str());
+		TitleBar::AddSection("Version", GloryEditorVersion);
 		TitleBar::AddSection("VersionSpace", " - ");
 
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();

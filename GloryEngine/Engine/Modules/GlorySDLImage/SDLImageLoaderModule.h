@@ -9,7 +9,7 @@ namespace Glory
 		SDLImageLoaderModule();
 		virtual ~SDLImageLoaderModule();
 
-		GLORY_MODULE_VERSION_H;
+		GLORY_MODULE_VERSION_H(0,1,0);
 
 	private:
 		virtual ImageData* LoadTexture(const std::string& path) override;

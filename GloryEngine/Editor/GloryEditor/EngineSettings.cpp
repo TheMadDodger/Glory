@@ -91,7 +91,8 @@ namespace Glory::Editor
         Module* pModule = pEngine->GetModule(m_MenuIndex);
         const ModuleMetaData& moduleMetaData = pModule->GetMetaData();
         const Glory::Version& version = pModule->ModuleVersion();
-        const std::string versionString = version.GetVersionString();
+        std::string versionString;
+        version.GetVersionString(versionString);
 
         ImGui::PushFont(EditorPlatform::LargeFont);
         ImGui::TextUnformatted(moduleMetaData.Name().data());

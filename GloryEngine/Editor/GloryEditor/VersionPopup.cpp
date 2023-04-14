@@ -2,11 +2,11 @@
 
 namespace Glory::Editor
 {
-	Glory::Version currentLatestVersion;
+	std::string currentLatestVersion;
 	bool openPopup = false;
 	const char* popupName = "New Release Available";
 
-	void VersionPopup::Open(const Glory::Version& latestVersion)
+	void VersionPopup::Open(const std::string& latestVersion)
 	{
 		currentLatestVersion = latestVersion;
 		openPopup = true;
@@ -26,7 +26,7 @@ namespace Glory::Editor
 		if (ImGui::BeginPopupModal(popupName, &isOpen, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize))
 		{
 			ImGui::TextUnformatted("A new Editor version is available!");
-			ImGui::Text("Currently using %s but lastest available version is %s", Version.GetVersionString().c_str(), currentLatestVersion.GetVersionString().c_str());
+			ImGui::Text("Currently using %s but lastest available version is %s", GloryEditorVersion, currentLatestVersion);
 			ImGui::Separator();
 
 			const ImVec2 availableRegion = ImGui::GetContentRegionAvail();

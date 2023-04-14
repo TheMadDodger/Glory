@@ -4,14 +4,14 @@
 #include "Object.h"
 #include "ModuleMetaData.h"
 #include "IScriptExtender.h"
-#include "Versioning.h"
 #include "ModuleSettings.h"
+#include "Version.h"
 
 #include <typeinfo>
 
 #define GLORY_MODULE_H																						\
 extern "C" GLORY_API Glory::Module * OnLoadModule(Glory::GloryContext * pContext);							\
-extern "C" GLORY_API const Glory::Version& ModuleVersion();
+extern "C" GLORY_API const char* ModuleVersion();
 
 #define GLORY_MODULE_CPP(moduleName)																		\
 Glory::Module* OnLoadModule(Glory::GloryContext* pContext)													\
@@ -20,23 +20,18 @@ Glory::Module* OnLoadModule(Glory::GloryContext* pContext)													\
 	return new Glory::moduleName();																			\
 }																											\
 																											\
-const Glory::Version& ModuleVersion()																		\
+const char* ModuleVersion()																					\
 {																											\
-	return Glory::moduleName::Version;																		\
+	return Glory::moduleName::VersionStr;																	\
 }
 
-#define GLORY_MODULE_VERSION_H																				\
+#define GLORY_MODULE_VERSION_CPP(moduleName)																\
+const Glory::Version Glory::moduleName::Version = Version::Parse(VersionStr);
+
+#define GLORY_MODULE_VERSION_H(major, minor, subMinor)														\
+static constexpr char* VersionStr = TOSTRING(major.minor.subMinor);											\
 static const Glory::Version Version;																		\
 virtual const Glory::Version& ModuleVersion() const override { return Version; };
-
-
-#define GLORY_MODULE_VERSION_CPP(moduleName, major, minor)													\
-const Glory::VersionValue MODULE_VERSION_DATA[] = {															\
-	{"Major", TOSTRING(major)},																				\
-	{"Minor", TOSTRING(minor)},																				\
-};																											\
-																											\
-const Glory::Version moduleName::Version{ MODULE_VERSION_DATA, 2 };
 
 /* Log a message if the module is not present */
 #define REQUIRE_MODULE_MESSAGE(engine, moduleName, message, level, returnValue)								\

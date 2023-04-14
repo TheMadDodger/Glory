@@ -9,12 +9,6 @@ namespace Glory::EditorLauncher
 {
 	std::vector<Project> ProjectManager::m_Projects;
 
-    const Glory::VersionValue DEFAULT_VERSION[] = {
-        {"Major", "0"},
-        {"Minor", "0"},
-        {"Build", "0"},
-    };
-
     void ProjectManager::OpenProject(size_t index)
     {
         Project* pProject = &m_Projects[index];
@@ -24,7 +18,7 @@ namespace Glory::EditorLauncher
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         long long timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
         pProject->LastEdit = timestamp;
-        pProject->Version.FromString(pProject->SelectedVersion.GetVersionString());
+        pProject->Version = pProject->SelectedVersion;
 
         std::string editorPathString = std::filesystem::absolute(editorPath).string();
 
@@ -76,8 +70,7 @@ namespace Glory::EditorLauncher
         {
             std::string versionString;
             std::getline(ifstream, versionString);
-            project.Version = Version(DEFAULT_VERSION, 3);
-            project.Version.FromString(versionString);
+            project.Version = Version::Parse(versionString.data());
             project.SelectedVersion = project.Version;
         }
         else open = false;
@@ -122,8 +115,7 @@ namespace Glory::EditorLauncher
             {
                 std::string versionString;
                 std::getline(ifstream, versionString);
-                project.Version = Version(DEFAULT_VERSION, 3);
-                project.Version.FromString(versionString);
+                project.Version = Version::Parse(versionString.data());
                 project.SelectedVersion = project.Version;
             }
 
@@ -270,7 +262,8 @@ namespace Glory::EditorLauncher
         projectVersionPath = projectFilePath.parent_path();
         projectVersionPath.append("ProjectSettings").append("ProjectVersion.txt");
         std::ofstream fileStream(projectVersionPath, std::ofstream::out | std::ofstream::trunc);
-        std::string versionString = createSettings.EditorVersion.GetVersionString();
+        std::string versionString;
+        createSettings.EditorVersion.GetVersionString(versionString);
         fileStream.write(versionString.c_str(), versionString.size());
         fileStream.close();
     }

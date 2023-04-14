@@ -25,7 +25,7 @@ using namespace JPH::literals;
 
 namespace Glory
 {
-	GLORY_MODULE_VERSION_CPP(JoltPhysicsModule, 0, 1);
+	GLORY_MODULE_VERSION_CPP(JoltPhysicsModule);
 
 	// Callback for traces, connect this to your own trace function if you have one
 	static void TraceImpl(const char* inFMT, ...)

@@ -6,13 +6,14 @@
 #include <implot.h>
 #include <ProjectSpace.h>
 #include <EditorSceneManager.h>
+#include <Version.h>
 
 #include <GloryAPI.h>
 
 namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
-	const Glory::Version EditorApplication::Version(VERSION_DATA, 3);
+	const Version EditorApplication::Version = Version::Parse(GloryEditorVersion);
 	EditorMode EditorApplication::m_Mode = EditorMode::M_Edit;
 	bool EditorApplication::m_Running = false;
 
@@ -281,7 +282,7 @@ namespace Glory::Editor
 	void EditorApplication::VersionCheck(const Glory::Version& latestVersion)
 	{
 		if (!latestVersion.IsValid()) return;
-		if (latestVersion.HardCompare(Version))
+		if (Version::Compare(latestVersion, Version) > 1)
 			MainEditor::VersionOutdated(latestVersion);
 	}
 

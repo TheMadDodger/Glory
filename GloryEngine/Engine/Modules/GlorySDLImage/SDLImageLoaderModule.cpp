@@ -5,7 +5,7 @@
 
 namespace Glory
 {
-	GLORY_MODULE_VERSION_CPP(SDLImageLoaderModule, 0, 1);
+	GLORY_MODULE_VERSION_CPP(SDLImageLoaderModule);
 
 	SDLImageLoaderModule::SDLImageLoaderModule() : m_InitializedFlags(0)
 	{

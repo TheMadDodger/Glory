@@ -2,6 +2,7 @@
 #include "UUID.h"
 #include "Glory.h"
 #include <typeindex>
+#include <string>
 
 /* *IDEA FOR DETECTING OBJECT INHERITENCE AND OBJECT TYPE*
 * The Object class keeps track of an array of all the inherited classes,

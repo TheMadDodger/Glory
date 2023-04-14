@@ -238,8 +238,8 @@ namespace Glory::Editor
 		std::filesystem::path projectVersionTxtPath = m_SettingsPath;
 		projectVersionTxtPath.append("ProjectVersion.txt");
 		std::ofstream versionFileStream(projectVersionTxtPath, std::ofstream::out | std::ofstream::trunc);
-		std::string versionString = Glory::Editor::Version.GetVersionString();
-		versionFileStream.write(versionString.c_str(), versionString.size());
+		std::string versionString = GloryEditorVersion;
+		versionFileStream.write(GloryEditorVersion, strlen(GloryEditorVersion));
 		versionFileStream.close();
 
 		/* Save project settings */

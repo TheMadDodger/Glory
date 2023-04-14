@@ -6,7 +6,7 @@ namespace Glory::Editor
     class VersionPopup
     {
     public:
-        GLORY_EDITOR_API static void Open(const Glory::Version& latestVersion);
+        GLORY_EDITOR_API static void Open(const std::string& latestVersion);
 
     private:
         static void Draw();

@@ -222,7 +222,7 @@ namespace Glory::EditorLauncher
 		if (m_SelectedEditorIndex != -1)
 		{
 			const EditorInfo& selectedEditor = EditorManager::GetEditorInfo(m_SelectedEditorIndex);
-			versionString = selectedEditor.Version.GetVersionString();
+			selectedEditor.Version.GetVersionString(versionString);
 		}
 
 		size_t currentIndex = m_SelectedEditorIndex;
@@ -234,7 +234,8 @@ namespace Glory::EditorLauncher
 			{
 				const EditorInfo& editorInfo = EditorManager::GetEditorInfo(i);
 				bool selected = m_SelectedEditorIndex == i;
-				if (ImGui::Selectable(editorInfo.Version.GetVersionString().c_str(), selected))
+				editorInfo.Version.GetVersionString(versionString);
+				if (ImGui::Selectable(versionString.c_str(), selected))
 				{
 					m_SelectedEditorIndex = (int)i;
 					TemplateManager::LoadTemplates(editorInfo);
