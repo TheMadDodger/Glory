@@ -75,6 +75,8 @@ namespace Glory
 		RenderTexture* m_pOutputTexture;
 		bool m_OutputEnabled;
 
+		bool m_PerspectiveDirty;
+
 		std::unordered_map<std::string, void*> m_UserDatas;
 
 		UUID m_UUID;

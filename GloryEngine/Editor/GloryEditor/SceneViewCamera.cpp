@@ -122,6 +122,9 @@ namespace Glory::Editor
 
 	void SceneViewCamera::SetPerspective(uint32_t width, uint32_t height, float halfFOV, float near, float far)
 	{
+		if (!m_IsOrthographic && width == m_Width && height == m_Height && halfFOV == m_HalfFOV && near == m_Near && far == m_Far)
+			return;
+
 		m_HalfFOV = halfFOV;
 		m_Width = width;
 		m_Height = height;
@@ -133,6 +136,9 @@ namespace Glory::Editor
 	}
 	void SceneViewCamera::SetOrthographic(uint32_t width, uint32_t height, float near, float far)
 	{
+		if (m_IsOrthographic && width == m_Width && height == m_Height && near == m_Near && far == m_Far)
+			return;
+
 		m_Width = width;
 		m_Height = height;
 		m_Near = near;
