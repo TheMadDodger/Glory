@@ -18,7 +18,7 @@ namespace Glory
 
         void SetMonoDirs(const std::string& assemblyDir, const std::string& configDir);
 
-        GLORY_MODULE_VERSION_H;
+        GLORY_MODULE_VERSION_H(0,1,0);
 
         CoreLibManager* GetCoreLibManager() const;
 

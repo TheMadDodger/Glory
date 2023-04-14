@@ -12,7 +12,7 @@ namespace Glory
         ASSIMPModule();
         virtual ~ASSIMPModule();
 
-        GLORY_MODULE_VERSION_H;
+        GLORY_MODULE_VERSION_H(0,1,0);
 
     private:
         virtual void Initialize() override;

@@ -35,14 +35,14 @@ namespace Glory::EditorLauncher
 
     const std::filesystem::path& EditorManager::GetEditorLocation(const Version& version)
     {
-        auto it = std::find_if(m_InstalledEditors.begin(), m_InstalledEditors.end(), [version](const EditorInfo& editorInfo) { return editorInfo.Version.HardCompare(version) == 0; });
+        auto it = std::find_if(m_InstalledEditors.begin(), m_InstalledEditors.end(), [version](const EditorInfo& editorInfo) { return Version::Compare( editorInfo.Version, version) == 0; });
         if (it == m_InstalledEditors.end()) return "";
         return it->RootPath;
     }
 
     bool EditorManager::IsInstalled(const Version& version)
     {
-        auto it = std::find_if(m_InstalledEditors.begin(), m_InstalledEditors.end(), [version](const EditorInfo& editorInfo) { return editorInfo.Version.HardCompare(version) == 0; });
+        auto it = std::find_if(m_InstalledEditors.begin(), m_InstalledEditors.end(), [version](const EditorInfo& editorInfo) { return Version::Compare(editorInfo.Version, version) == 0; });
         return it != m_InstalledEditors.end();
     }
 
@@ -61,7 +61,8 @@ namespace Glory::EditorLauncher
             FreeLibrary(lib);
             return false;
         }
-        info.Version = versionProc();
+        const char* versionStr = versionProc();
+        info.Version = Version::Parse(versionStr);
         FreeLibrary(lib);
         return true;
     }

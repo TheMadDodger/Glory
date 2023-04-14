@@ -464,21 +464,27 @@ namespace Glory::EditorLauncher
 
                 if (ImGui::TableSetColumnIndex(2))
                 {
-                    if (ImGui::BeginCombo("##CurrentVersion", item->SelectedVersion.GetVersionString().c_str()))
+                    std::string versionString;
+                    item->SelectedVersion.GetVersionString(versionString);
+                    if (ImGui::BeginCombo("##CurrentVersion", versionString.c_str()))
                     {
                         for (size_t i = 0; i < EditorManager::EditorCount(); i++)
                         {
                             const EditorInfo& editorInfo = EditorManager::GetEditorInfo(i);
-                            bool selected = editorInfo.Version.HardCompare(item->SelectedVersion) == 0;
-                            if (ImGui::Selectable(editorInfo.Version.GetVersionString().c_str(), selected))
+                            const bool selected = Version::Compare(editorInfo.Version, item->SelectedVersion) == 0;
+                            std::string otherVersionString;
+                            editorInfo.Version.GetVersionString(otherVersionString);
+                            if (ImGui::Selectable(otherVersionString.c_str(), selected))
                             {
                                 item->SelectedVersion = editorInfo.Version;
                             }
                         }
                         if (!EditorManager::IsInstalled(item->Version))
                         {
-                            bool selected = item->Version.HardCompare(item->SelectedVersion) == 0;
-                            std::string missingEditor = item->Version.GetVersionString() + " !";
+                            bool selected = Version::Compare(item->Version, item->SelectedVersion) == 0;
+                            std::string missingEditor;
+                            item->Version.GetVersionString(missingEditor);
+                            missingEditor += " !";
                             if (ImGui::Selectable(missingEditor.c_str(), selected))
                             {
                                 item->SelectedVersion = item->Version;
@@ -552,7 +558,9 @@ namespace Glory::EditorLauncher
                 ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 
                 std::string editorString("Version ");
-                editorString += editorInfo.Version.GetVersionString();
+                std::string versionString;
+                editorInfo.Version.GetVersionString(versionString);
+                editorString += versionString;
                 editorString += '\n';
                 editorString += "-----------------------------------------------------------------\n";
                 editorString += std::filesystem::absolute(editorInfo.RootPath).string();

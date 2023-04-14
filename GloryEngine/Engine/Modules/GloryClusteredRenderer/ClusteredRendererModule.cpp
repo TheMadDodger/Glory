@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule, 0, 1);
+	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
 	ClusteredRendererModule::ClusteredRendererModule()
 		: m_pClusterShaderData(nullptr), m_pClusterShaderMaterialData(nullptr), m_pClusterShaderMaterial(nullptr),

@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <future>
+#include <Version.h>
 
 #include <rapidjson/document.h>
 
@@ -46,12 +47,6 @@ namespace Glory
 {
     CURL* curl = nullptr;
     std::vector<std::function<bool()>> requests;
-
-    VersionValue defaultVersionValues[] = {
-        {"Major", TOSTRING(0)},
-        {"Minor", TOSTRING(0)},
-        {"Build", TOSTRING(0)},
-    };
 
     bool GloryAPI::Initialize()
     {
@@ -138,8 +133,6 @@ namespace Glory
         if (doc.HasParseError() || !doc.IsObject() || !doc.HasMember("Version") || !doc["Version"].IsString()) return {};
         const char* versionString = doc["Version"].GetString();
 
-        Version version{ defaultVersionValues, 3 };
-        version.FromString(versionString);
-        return version;
+        return Version::Parse(versionString);
     }
 }

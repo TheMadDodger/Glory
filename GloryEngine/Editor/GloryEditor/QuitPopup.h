@@ -1,5 +1,6 @@
 #pragma once
 #include "GloryEditor.h"
+#include <string>
 
 namespace Glory::Editor
 {

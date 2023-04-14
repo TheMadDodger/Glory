@@ -2,7 +2,7 @@
 #include "visibility.h"
 
 #include <functional>
-#include <Versioning.h>
+#include <Version.h>
 #include <vector>
 
 #define NOMINMAX

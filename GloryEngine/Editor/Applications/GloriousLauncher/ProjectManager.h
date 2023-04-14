@@ -1,6 +1,6 @@
 #pragma once
 #include "ModuleManager.h"
-#include <Versioning.h>
+#include <Version.h>
 
 namespace Glory::EditorLauncher
 {

@@ -9,7 +9,7 @@
 
 namespace Glory
 {
-	GLORY_MODULE_VERSION_CPP(EntitySceneScenesModule, 0, 1);
+	GLORY_MODULE_VERSION_CPP(EntitySceneScenesModule);
 
 	EntitySceneScenesModule::EntitySceneScenesModule() : m_pComponentTypesInstance(nullptr)
 	{

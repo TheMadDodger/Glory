@@ -2,6 +2,8 @@
 #include <mono/jit/jit.h>
 #include <UUID.h>
 #include <Glory.h>
+#include <string>
+#include <map>
 
 namespace Glory
 {

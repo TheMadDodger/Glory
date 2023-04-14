@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-    GLORY_MODULE_VERSION_CPP(ASSIMPModule, 0, 1);
+    GLORY_MODULE_VERSION_CPP(ASSIMPModule);
 
 	ASSIMPModule::ASSIMPModule()
 	{
