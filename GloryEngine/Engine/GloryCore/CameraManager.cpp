@@ -53,7 +53,13 @@ namespace Glory
 			{
 				pCamera->m_pRenderTexture->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
 				pCamera->m_TextureIsDirty = false;
+				pCamera->m_PerspectiveDirty = false;
 				pEngine->GetRendererModule()->OnCameraResize(camera);
+			}
+			else if (createIfNotExist && pCamera->m_PerspectiveDirty)
+			{
+				pCamera->m_PerspectiveDirty = false;
+				pEngine->GetRendererModule()->OnCameraPerspectiveChanged(camera);
 			}
 			Profiler::EndSample();
 			return pCamera->m_pRenderTexture;

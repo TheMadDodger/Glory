@@ -8,7 +8,7 @@ namespace Glory
 		: m_DisplayIndex(0), m_Resolution(width, height), m_TextureIsDirty(true),
 		m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr),
 		m_ClearColor(glm::vec4(0.0f)), m_Priority(0), m_LayerMask(0), m_Near(0.0f), m_Far(0.0f),
-		m_pOutputTexture(nullptr), m_OutputEnabled(false)
+		m_pOutputTexture(nullptr), m_OutputEnabled(false), m_PerspectiveDirty(true), m_ViewOffset(glm::identity<glm::mat4>())
 	{
 
 	}
@@ -27,6 +27,8 @@ namespace Glory
 
 		m_Projection = glm::perspective(glm::radians(halfFOV), (float)width / (float)height, near, far);
 		m_ViewOffset = glm::identity<glm::mat4>();
+
+		m_PerspectiveDirty = true;
 	}
 
 	void Camera::SetOrthographicProjection(float width, float height, float near, float far)
@@ -36,6 +38,8 @@ namespace Glory
 
 		m_Projection = glm::ortho<float>(0.0f, width, 0.0f, height, near, far);
 		m_ViewOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(width / 2.0f, height / 2.0f, 0.0f));
+
+		m_PerspectiveDirty = true;
 	}
 
 	void Camera::SetView(const glm::mat4& view)

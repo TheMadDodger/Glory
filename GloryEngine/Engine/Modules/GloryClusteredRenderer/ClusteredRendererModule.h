@@ -37,6 +37,7 @@ namespace Glory
 
 		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments) override;
 		virtual void OnCameraResize(CameraRef camera) override;
+		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
 
 		GLORY_MODULE_VERSION_H;
 
@@ -56,7 +57,7 @@ namespace Glory
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 
-		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera, const glm::uvec3& gridSize, const glm::uvec2& resolution);
+		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
 
 	private:
 		// Compute shaders

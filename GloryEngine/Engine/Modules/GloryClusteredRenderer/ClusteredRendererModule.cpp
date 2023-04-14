@@ -11,7 +11,11 @@ namespace Glory
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule, 0, 1);
 
 	ClusteredRendererModule::ClusteredRendererModule()
-		: m_pClusterShaderData(nullptr), m_pClusterShaderMaterial(nullptr), m_pClusterShaderMaterialData(nullptr), m_pScreenToViewSSBO(nullptr)
+		: m_pClusterShaderData(nullptr), m_pClusterShaderMaterialData(nullptr), m_pClusterShaderMaterial(nullptr),
+		m_pMarkActiveClustersShaderData(nullptr), m_pMarkActiveClustersMaterialData(nullptr), m_pMarkActiveClustersMaterial(nullptr),
+		m_pCompactClustersShaderData(nullptr), m_pCompactClustersMaterialData(nullptr), m_pCompactClustersMaterial(nullptr),
+		m_pClusterCullLightShaderData(nullptr), m_pClusterCullLightMaterialData(nullptr), m_pClusterCullLightMaterial(nullptr),
+		m_pScreenToViewSSBO(nullptr), m_pLightsSSBO(nullptr), m_pScreenMaterial(nullptr)
 	{
 	}
 
@@ -32,12 +36,20 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		glm::uvec2 resolution = camera.GetResolution();
-		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+		Buffer* pClusterSSBO = nullptr;
+		if (!camera.GetUserData<Buffer>("ClusterSSBO", pClusterSSBO)) return; // Should not happen but just in case
+		GenerateClusterSSBO(pClusterSSBO, camera);
+	}
+
+	void ClusteredRendererModule::OnCameraPerspectiveChanged(CameraRef camera)
+	{
+		// When the camera changed perspective we need to generate a new grid of clusters for that camera
+		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		Buffer* pClusterSSBO = nullptr;
 		if (!camera.GetUserData<Buffer>("ClusterSSBO", pClusterSSBO)) return; // Should not happen but just in case
-		GenerateClusterSSBO(pClusterSSBO, camera, gridSize, resolution);
+		GenerateClusterSSBO(pClusterSSBO, camera);
 	}
 
 	void ClusteredRendererModule::PostInitialize()
@@ -175,7 +187,7 @@ namespace Glory
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
 
-		uint32_t sizeX = (uint32_t)std::ceilf(resolution.x / (float)gridSize.x);
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();
@@ -222,9 +234,6 @@ namespace Glory
 		Buffer* pClusterSSBO = nullptr;
 		if (!camera.GetUserData<Buffer>("ClusterSSBO", pClusterSSBO))
 		{
-			glm::uvec2 resolution = camera.GetResolution();
-			glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
-
 			Buffer* pActiveClustersSSBO = nullptr;
 			Buffer* pActiveUniqueClustersSSBO = nullptr;
 			Buffer* pLightIndexSSBO = nullptr;
@@ -251,7 +260,7 @@ namespace Glory
 			camera.SetUserData("LightIndexSSBO", pLightIndexSSBO);
 			camera.SetUserData("LightGridSSBO", pLightGridSSBO);
 
-			GenerateClusterSSBO(pClusterSSBO, camera, gridSize, resolution);
+			GenerateClusterSSBO(pClusterSSBO, camera);
 		}
 	}
 
@@ -300,7 +309,7 @@ namespace Glory
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
 
-		uint32_t sizeX = (uint32_t)std::ceilf(resolution.x / (float)gridSize.x);
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();
@@ -333,12 +342,15 @@ namespace Glory
 		return GetGCD(b, a % b);
 	}
 
-	void ClusteredRendererModule::GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera, const glm::uvec3& gridSize, const glm::uvec2& resolution)
+	void ClusteredRendererModule::GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera)
 	{
-		float zNear = camera.GetNear();
-		float zFar = camera.GetFar();
+		const glm::uvec2 resolution = camera.GetResolution();
+		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
-		size_t sizeX = (size_t)std::ceilf(resolution.x / (float)gridSize.x);
+		const float zNear = camera.GetNear();
+		const float zFar = camera.GetFar();
+
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();

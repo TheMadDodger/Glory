@@ -32,6 +32,7 @@ namespace Glory
 		virtual RenderTexture* CreateCameraRenderTexture(uint32_t width, uint32_t height);
 		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& atachments);
 		virtual void OnCameraResize(CameraRef camera);
+		virtual void OnCameraPerspectiveChanged(CameraRef camera);
 
 		size_t LastSubmittedObjectCount();
 		size_t LastSubmittedCameraCount();
