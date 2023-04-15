@@ -1,1699 +1,1699 @@
 {
-  "ProjectName": "Sponza",
-  "Assets": {
-    "3951604791000268414": {
-      "Location": {
-        "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_frag.shader",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".shader",
-        "Name": "PhongTextured_frag",
-        "UUID": 3951604791000268414,
-        "Hash": 3732387374,
-        "SerializedVersion": 0
-      }
-    },
-    "11476690678527349262": {
-      "Location": {
-        "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_vert.shader",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".shader",
-        "Name": "PhongTextured_vert",
-        "UUID": 11476690678527349262,
-        "Hash": 3732387374,
-        "SerializedVersion": 0
-      }
-    },
-    "472749852331879165": {
-      "Location": {
-        "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_frag.shader",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".shader",
-        "Name": "Phong_frag",
-        "UUID": 472749852331879165,
-        "Hash": 3732387374,
-        "SerializedVersion": 0
-      }
-    },
-    "6885077887218838044": {
-      "Location": {
-        "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_vert.shader",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".shader",
-        "Name": "Phong_vert",
-        "UUID": 6885077887218838044,
-        "Hash": 3732387374,
-        "SerializedVersion": 0
-      }
-    },
-    "5531747418035730214": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Cube.fbx",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Cube",
-        "UUID": 5531747418035730214,
-        "Hash": 1373658899,
-        "SerializedVersion": 0
-      }
-    },
-    "8775173730644711025": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Cube.fbx",
-        "SubresourcePath": "Cube Material 0",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Cube\\Cube Material 0",
-        "UUID": 8775173730644711025,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "16095291107992966623": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Plane.fbx",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Plane",
-        "UUID": 16095291107992966623,
-        "Hash": 1373658899,
-        "SerializedVersion": 0
-      }
-    },
-    "194088887845596180": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Plane.fbx",
-        "SubresourcePath": "Plane Material 0",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Plane\\Plane Material 0",
-        "UUID": 194088887845596180,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "5737915164152700352": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Sphere.fbx",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sphere",
-        "UUID": 5737915164152700352,
-        "Hash": 1373658899,
-        "SerializedVersion": 0
-      }
-    },
-    "8241758071598024455": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Sphere.fbx",
-        "SubresourcePath": "Icosphere Material 0",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sphere\\Icosphere Material 0",
-        "UUID": 8241758071598024455,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "3120522291978299567": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Suzanne.fbx",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Suzanne",
-        "UUID": 3120522291978299567,
-        "Hash": 1373658899,
-        "SerializedVersion": 0
-      }
-    },
-    "2651267194082843053": {
-      "Location": {
-        "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Suzanne.fbx",
-        "SubresourcePath": "Suzanne Material 0",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Suzanne\\Suzanne Material 0",
-        "UUID": 2651267194082843053,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "13425468899519182746": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_0.png",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".png",
-        "Name": "Color_0",
-        "UUID": 13425468899519182746,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "11323661636176346038": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_01.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_01",
-        "UUID": 11323661636176346038,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "12532995314834561844": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_02.png",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".png",
-        "Name": "Color_02",
-        "UUID": 12532995314834561844,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "5696163521154384606": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_03.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_03",
-        "UUID": 5696163521154384606,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "7454721898774670338": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_04.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_04",
-        "UUID": 7454721898774670338,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "11953224369621141221": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_05.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_05",
-        "UUID": 11953224369621141221,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "18319610226175902642": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_06.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_06",
-        "UUID": 18319610226175902642,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "13623168319441427052": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_07.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_07",
-        "UUID": 13623168319441427052,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "13562333831616496681": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_08.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_08",
-        "UUID": 13562333831616496681,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "16988089304658175807": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_09.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_09",
-        "UUID": 16988089304658175807,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "16110094144495512349": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_10.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_10",
-        "UUID": 16110094144495512349,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "3360851813438330229": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_11.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_11",
-        "UUID": 3360851813438330229,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "6107747105154468476": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_12.png",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".png",
-        "Name": "Color_12",
-        "UUID": 6107747105154468476,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "13842665555110442384": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_13.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_13",
-        "UUID": 13842665555110442384,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "2861992296664304442": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_14.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_14",
-        "UUID": 2861992296664304442,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "49755128732503598": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_15.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_15",
-        "UUID": 49755128732503598,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "12361706307150214937": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_16.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_16",
-        "UUID": 12361706307150214937,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "5952783537093955003": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_17.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_17",
-        "UUID": 5952783537093955003,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "9928202009557952243": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_18.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_18",
-        "UUID": 9928202009557952243,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "5182383661900561429": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_19.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_19",
-        "UUID": 5182383661900561429,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "8889879357759915270": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_20.png",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".png",
-        "Name": "Color_20",
-        "UUID": 8889879357759915270,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "17073021643265339932": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_21.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_21",
-        "UUID": 17073021643265339932,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "15688789071987215183": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_22.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_22",
-        "UUID": 15688789071987215183,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "9544514686278591134": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_23.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_23",
-        "UUID": 9544514686278591134,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "185153625520028542": {
-      "Location": {
-        "Path": "Textures\\Color\\Color_24.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Color_24",
-        "UUID": 185153625520028542,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "5123585235222917909": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_00.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_00",
-        "UUID": 5123585235222917909,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "3293608511237066675": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_01.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_01",
-        "UUID": 3293608511237066675,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "13069041316917749677": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_02.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_02",
-        "UUID": 13069041316917749677,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "8887878455147112166": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_03.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_03",
-        "UUID": 8887878455147112166,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "8649909608898466891": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_04.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_04",
-        "UUID": 8649909608898466891,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "4118731546932361371": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_05.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_05",
-        "UUID": 4118731546932361371,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "9605362729415224258": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_06.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_06",
-        "UUID": 9605362729415224258,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "8293130993136076599": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_07.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_07",
-        "UUID": 8293130993136076599,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "833358993034357866": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_08.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_08",
-        "UUID": 833358993034357866,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "16125910657719946442": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_09.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_09",
-        "UUID": 16125910657719946442,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "11656897093963063181": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_10.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_10",
-        "UUID": 11656897093963063181,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "14482175695450409013": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_11.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_11",
-        "UUID": 14482175695450409013,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "16151159399430366753": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_13.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_13",
-        "UUID": 16151159399430366753,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "8504184588832211901": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_14.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_14",
-        "UUID": 8504184588832211901,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "12009318235737925384": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_15.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_15",
-        "UUID": 12009318235737925384,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "14364992230023539299": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_16.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_16",
-        "UUID": 14364992230023539299,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "4525986098218257644": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_17.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_17",
-        "UUID": 4525986098218257644,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "17161700371595628740": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_18.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_18",
-        "UUID": 17161700371595628740,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "9770263686991283700": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_19.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_19",
-        "UUID": 9770263686991283700,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "5041837049586087351": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_20.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_20",
-        "UUID": 5041837049586087351,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "1758419454477167702": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_21.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_21",
-        "UUID": 1758419454477167702,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "7924685771789138514": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_22.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_22",
-        "UUID": 7924685771789138514,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "13699892231164727248": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_23.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_23",
-        "UUID": 13699892231164727248,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "5871861956848271348": {
-      "Location": {
-        "Path": "Textures\\Normal\\Normal_24.jpg",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".jpg",
-        "Name": "Normal_24",
-        "UUID": 5871861956848271348,
-        "Hash": 2939205195,
-        "SerializedVersion": 0
-      }
-    },
-    "4660780722336116355": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza",
-        "UUID": 4660780722336116355,
-        "Hash": 1373658899,
-        "SerializedVersion": 0
-      }
-    },
-    "17532063210297151852": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 0",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 0",
-        "UUID": 17532063210297151852,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "12429677753437743544": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 1",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 1",
-        "UUID": 12429677753437743544,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "7675729155273259691": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 2",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 2",
-        "UUID": 7675729155273259691,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "2450393029431649271": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 3",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 3",
-        "UUID": 2450393029431649271,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "7721550961057073102": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 4",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 4",
-        "UUID": 7721550961057073102,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "1471158900630878266": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 5",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 5",
-        "UUID": 1471158900630878266,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "11984165006817897718": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 6",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 6",
-        "UUID": 11984165006817897718,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "12239620810926317704": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 7",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 7",
-        "UUID": 12239620810926317704,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "247047318591435938": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 8",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 8",
-        "UUID": 247047318591435938,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "13705869600799594977": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 9",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 9",
-        "UUID": 13705869600799594977,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "3684355902571898662": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 10",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 10",
-        "UUID": 3684355902571898662,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "17541763384336518307": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 11",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 11",
-        "UUID": 17541763384336518307,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "8191548454703725565": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 12",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 12",
-        "UUID": 8191548454703725565,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "12478537470136972126": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 13",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 13",
-        "UUID": 12478537470136972126,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "10482285695037371483": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 14",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 14",
-        "UUID": 10482285695037371483,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "8742102673439741599": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 15",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 15",
-        "UUID": 8742102673439741599,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "4075180663175126061": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 16",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 16",
-        "UUID": 4075180663175126061,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "2301235609140589785": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 17",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 17",
-        "UUID": 2301235609140589785,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "6157830810398406145": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 18",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 18",
-        "UUID": 6157830810398406145,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "12363208155753198496": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 19",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 19",
-        "UUID": 12363208155753198496,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "4484240044989851036": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 20",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 20",
-        "UUID": 4484240044989851036,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "15653227552723793608": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 21",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 21",
-        "UUID": 15653227552723793608,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "12889795759988507493": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 22",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 22",
-        "UUID": 12889795759988507493,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "6943495384598175665": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 23",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 23",
-        "UUID": 6943495384598175665,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "801469628739818311": {
-      "Location": {
-        "Path": "Models\\Sponza.fbx",
-        "SubresourcePath": "Mesh_0 Material 24",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".fbx",
-        "Name": "Sponza\\Mesh_0 Material 24",
-        "UUID": 801469628739818311,
-        "Hash": 111102399,
-        "SerializedVersion": 0
-      }
-    },
-    "5124037798463162004": {
-      "Location": {
-        "Path": "Materials\\Blue.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Blue",
-        "UUID": 5124037798463162004,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "15517212185802880352": {
-      "Location": {
-        "Path": "Materials\\Green.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Green",
-        "UUID": 15517212185802880352,
-        "Hash": 3688170836,
-        "SerializedVersion": 2
-      }
-    },
-    "13345938067109065567": {
-      "Location": {
-        "Path": "Materials\\Material_.gmat",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_",
-        "UUID": 13345938067109065567,
-        "Hash": 1884319791,
-        "SerializedVersion": 2
-      }
-    },
-    "3010624712422607554": {
-      "Location": {
-        "Path": "Materials\\Material_Instance.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance",
-        "UUID": 3010624712422607554,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "1373122324226100331": {
-      "Location": {
-        "Path": "Materials\\Material_Instance1.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance1",
-        "UUID": 1373122324226100331,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "12329445205047472005": {
-      "Location": {
-        "Path": "Materials\\Material_Instance10.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance10",
-        "UUID": 12329445205047472005,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "1049992442256444805": {
-      "Location": {
-        "Path": "Materials\\Material_Instance11.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance11",
-        "UUID": 1049992442256444805,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "14102624392720317306": {
-      "Location": {
-        "Path": "Materials\\Material_Instance12.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance12",
-        "UUID": 14102624392720317306,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "1398703171167915645": {
-      "Location": {
-        "Path": "Materials\\Material_Instance13.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance13",
-        "UUID": 1398703171167915645,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "17185067663040798019": {
-      "Location": {
-        "Path": "Materials\\Material_Instance14.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance14",
-        "UUID": 17185067663040798019,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "12050675179094362886": {
-      "Location": {
-        "Path": "Materials\\Material_Instance15.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance15",
-        "UUID": 12050675179094362886,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "12263872001811937335": {
-      "Location": {
-        "Path": "Materials\\Material_Instance16.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance16",
-        "UUID": 12263872001811937335,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "3418489109220757858": {
-      "Location": {
-        "Path": "Materials\\Material_Instance17.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance17",
-        "UUID": 3418489109220757858,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "12787556475590031533": {
-      "Location": {
-        "Path": "Materials\\Material_Instance18.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance18",
-        "UUID": 12787556475590031533,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "4941950203725921729": {
-      "Location": {
-        "Path": "Materials\\Material_Instance19.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance19",
-        "UUID": 4941950203725921729,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "3517522003741332949": {
-      "Location": {
-        "Path": "Materials\\Material_Instance2.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance2",
-        "UUID": 3517522003741332949,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "1344859053152692766": {
-      "Location": {
-        "Path": "Materials\\Material_Instance20.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance20",
-        "UUID": 1344859053152692766,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "10443563090520142511": {
-      "Location": {
-        "Path": "Materials\\Material_Instance21.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance21",
-        "UUID": 10443563090520142511,
-        "Hash": 3688170836,
-        "SerializedVersion": 2
-      }
-    },
-    "12917108602555706804": {
-      "Location": {
-        "Path": "Materials\\Material_Instance22.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance22",
-        "UUID": 12917108602555706804,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "9521915265913145591": {
-      "Location": {
-        "Path": "Materials\\Material_Instance23.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance23",
-        "UUID": 9521915265913145591,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "15672791594304400152": {
-      "Location": {
-        "Path": "Materials\\Material_Instance24.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance24",
-        "UUID": 15672791594304400152,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "12679807362730774903": {
-      "Location": {
-        "Path": "Materials\\Material_Instance3.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance3",
-        "UUID": 12679807362730774903,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "17419002243068841690": {
-      "Location": {
-        "Path": "Materials\\Material_Instance4.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance4",
-        "UUID": 17419002243068841690,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "18433151773314596530": {
-      "Location": {
-        "Path": "Materials\\Material_Instance5.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance5",
-        "UUID": 18433151773314596530,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "2727112760671078320": {
-      "Location": {
-        "Path": "Materials\\Material_Instance6.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance6",
-        "UUID": 2727112760671078320,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "15256394464770530809": {
-      "Location": {
-        "Path": "Materials\\Material_Instance7.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance7",
-        "UUID": 15256394464770530809,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "5283983514866805294": {
-      "Location": {
-        "Path": "Materials\\Material_Instance8.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance8",
-        "UUID": 5283983514866805294,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "526352692630726967": {
-      "Location": {
-        "Path": "Materials\\Material_Instance9.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Material_Instance9",
-        "UUID": 526352692630726967,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "18425840311753929193": {
-      "Location": {
-        "Path": "Materials\\Red.gminst",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "Red",
-        "UUID": 18425840311753929193,
-        "Hash": 3688170836,
-        "SerializedVersion": 1
-      }
-    },
-    "16123365490737747324": {
-      "Location": {
-        "Path": "Materials\\White.gmat",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": "",
-        "Name": "White",
-        "UUID": 16123365490737747324,
-        "Hash": 1884319791,
-        "SerializedVersion": 1
-      }
-    },
-    "16787318667428770552": {
-      "Location": {
-        "Path": "Scenes\\Sponza.gscene",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".gscene",
-        "Name": "Sponza",
-        "UUID": 16787318667428770552,
-        "Hash": 2713038901,
-        "SerializedVersion": 0
-      }
-    },
-    "14298078551315780740": {
-      "Location": {
-        "Path": "Scripts\\FlyCam.cs",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".cs",
-        "Name": "FlyCam",
-        "UUID": 14298078551315780740,
-        "Hash": 3098219186,
-        "SerializedVersion": 0
-      }
-    },
-    "849823111375322860": {
-      "Location": {
-        "Path": "Scripts\\NewScript.cs",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".cs",
-        "Name": "NewScript",
-        "UUID": 849823111375322860,
-        "Hash": 3098219186,
-        "SerializedVersion": 0
-      }
-    },
-    "12621251150032435605": {
-      "Location": {
-        "Path": "Scripts\\TestScript.cs",
-        "SubresourcePath": "",
-        "Index": 0
-      },
-      "Metadata": {
-        "Extension": ".cs",
-        "Name": "TestScript",
-        "UUID": 12621251150032435605,
-        "Hash": 3098219186,
-        "SerializedVersion": 0
-      }
+    "ProjectName": "Sponza",
+    "Assets": {
+        "3951604791000268414": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "PhongTextured_frag",
+                "UUID": 3951604791000268414,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "11476690678527349262": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "PhongTextured_vert",
+                "UUID": 11476690678527349262,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "472749852331879165": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Phong_frag",
+                "UUID": 472749852331879165,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "6885077887218838044": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Phong_vert",
+                "UUID": 6885077887218838044,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "5531747418035730214": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube",
+                "UUID": 5531747418035730214,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "8775173730644711025": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "Cube Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube\\Cube Material 0",
+                "UUID": 8775173730644711025,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "16095291107992966623": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane",
+                "UUID": 16095291107992966623,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "194088887845596180": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "Plane Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane\\Plane Material 0",
+                "UUID": 194088887845596180,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "5737915164152700352": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere",
+                "UUID": 5737915164152700352,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "8241758071598024455": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "Icosphere Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere\\Icosphere Material 0",
+                "UUID": 8241758071598024455,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "3120522291978299567": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne",
+                "UUID": 3120522291978299567,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "2651267194082843053": {
+            "Location": {
+                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "Suzanne Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne\\Suzanne Material 0",
+                "UUID": 2651267194082843053,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "13425468899519182746": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_0.png",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_0",
+                "UUID": 13425468899519182746,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "11323661636176346038": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_01.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_01",
+                "UUID": 11323661636176346038,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "12532995314834561844": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_02.png",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_02",
+                "UUID": 12532995314834561844,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "5696163521154384606": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_03.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_03",
+                "UUID": 5696163521154384606,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "7454721898774670338": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_04.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_04",
+                "UUID": 7454721898774670338,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "11953224369621141221": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_05.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_05",
+                "UUID": 11953224369621141221,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "18319610226175902642": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_06.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_06",
+                "UUID": 18319610226175902642,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "13623168319441427052": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_07.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_07",
+                "UUID": 13623168319441427052,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "13562333831616496681": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_08.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_08",
+                "UUID": 13562333831616496681,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "16988089304658175807": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_09.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_09",
+                "UUID": 16988089304658175807,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "16110094144495512349": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_10.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_10",
+                "UUID": 16110094144495512349,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "3360851813438330229": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_11.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_11",
+                "UUID": 3360851813438330229,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "6107747105154468476": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_12.png",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_12",
+                "UUID": 6107747105154468476,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "13842665555110442384": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_13.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_13",
+                "UUID": 13842665555110442384,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "2861992296664304442": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_14.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_14",
+                "UUID": 2861992296664304442,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "49755128732503598": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_15.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_15",
+                "UUID": 49755128732503598,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "12361706307150214937": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_16.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_16",
+                "UUID": 12361706307150214937,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "5952783537093955003": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_17.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_17",
+                "UUID": 5952783537093955003,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "9928202009557952243": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_18.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_18",
+                "UUID": 9928202009557952243,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "5182383661900561429": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_19.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_19",
+                "UUID": 5182383661900561429,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "8889879357759915270": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_20.png",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_20",
+                "UUID": 8889879357759915270,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "17073021643265339932": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_21.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_21",
+                "UUID": 17073021643265339932,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "15688789071987215183": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_22.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_22",
+                "UUID": 15688789071987215183,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "9544514686278591134": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_23.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_23",
+                "UUID": 9544514686278591134,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "185153625520028542": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_24.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_24",
+                "UUID": 185153625520028542,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "5123585235222917909": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_00.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_00",
+                "UUID": 5123585235222917909,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "3293608511237066675": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_01.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_01",
+                "UUID": 3293608511237066675,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "13069041316917749677": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_02.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_02",
+                "UUID": 13069041316917749677,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "8887878455147112166": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_03.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_03",
+                "UUID": 8887878455147112166,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "8649909608898466891": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_04.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_04",
+                "UUID": 8649909608898466891,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "4118731546932361371": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_05.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_05",
+                "UUID": 4118731546932361371,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "9605362729415224258": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_06.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_06",
+                "UUID": 9605362729415224258,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "8293130993136076599": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_07.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_07",
+                "UUID": 8293130993136076599,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "833358993034357866": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_08.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_08",
+                "UUID": 833358993034357866,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "16125910657719946442": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_09.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_09",
+                "UUID": 16125910657719946442,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "11656897093963063181": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_10.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_10",
+                "UUID": 11656897093963063181,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "14482175695450409013": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_11.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_11",
+                "UUID": 14482175695450409013,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "16151159399430366753": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_13.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_13",
+                "UUID": 16151159399430366753,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "8504184588832211901": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_14.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_14",
+                "UUID": 8504184588832211901,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "12009318235737925384": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_15.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_15",
+                "UUID": 12009318235737925384,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "14364992230023539299": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_16.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_16",
+                "UUID": 14364992230023539299,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "4525986098218257644": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_17.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_17",
+                "UUID": 4525986098218257644,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "17161700371595628740": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_18.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_18",
+                "UUID": 17161700371595628740,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "9770263686991283700": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_19.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_19",
+                "UUID": 9770263686991283700,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "5041837049586087351": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_20.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_20",
+                "UUID": 5041837049586087351,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "1758419454477167702": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_21.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_21",
+                "UUID": 1758419454477167702,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "7924685771789138514": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_22.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_22",
+                "UUID": 7924685771789138514,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "13699892231164727248": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_23.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_23",
+                "UUID": 13699892231164727248,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "5871861956848271348": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_24.jpg",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_24",
+                "UUID": 5871861956848271348,
+                "Hash": 2939205195,
+                "SerializedVersion": 0
+            }
+        },
+        "4660780722336116355": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza",
+                "UUID": 4660780722336116355,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "17532063210297151852": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 0",
+                "UUID": 17532063210297151852,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "12429677753437743544": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 1",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 1",
+                "UUID": 12429677753437743544,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "7675729155273259691": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 2",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 2",
+                "UUID": 7675729155273259691,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "2450393029431649271": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 3",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 3",
+                "UUID": 2450393029431649271,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "7721550961057073102": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 4",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 4",
+                "UUID": 7721550961057073102,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "1471158900630878266": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 5",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 5",
+                "UUID": 1471158900630878266,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "11984165006817897718": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 6",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 6",
+                "UUID": 11984165006817897718,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "12239620810926317704": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 7",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 7",
+                "UUID": 12239620810926317704,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "247047318591435938": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 8",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 8",
+                "UUID": 247047318591435938,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "13705869600799594977": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 9",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 9",
+                "UUID": 13705869600799594977,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "3684355902571898662": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 10",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 10",
+                "UUID": 3684355902571898662,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "17541763384336518307": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 11",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 11",
+                "UUID": 17541763384336518307,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "8191548454703725565": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 12",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 12",
+                "UUID": 8191548454703725565,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "12478537470136972126": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 13",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 13",
+                "UUID": 12478537470136972126,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "10482285695037371483": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 14",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 14",
+                "UUID": 10482285695037371483,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "8742102673439741599": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 15",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 15",
+                "UUID": 8742102673439741599,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "4075180663175126061": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 16",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 16",
+                "UUID": 4075180663175126061,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "2301235609140589785": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 17",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 17",
+                "UUID": 2301235609140589785,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "6157830810398406145": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 18",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 18",
+                "UUID": 6157830810398406145,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "12363208155753198496": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 19",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 19",
+                "UUID": 12363208155753198496,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "4484240044989851036": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 20",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 20",
+                "UUID": 4484240044989851036,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "15653227552723793608": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 21",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 21",
+                "UUID": 15653227552723793608,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "12889795759988507493": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 22",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 22",
+                "UUID": 12889795759988507493,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "6943495384598175665": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 23",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 23",
+                "UUID": 6943495384598175665,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "801469628739818311": {
+            "Location": {
+                "Path": "Models\\Sponza.fbx",
+                "SubresourcePath": "Mesh_0 Material 24",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sponza\\Mesh_0 Material 24",
+                "UUID": 801469628739818311,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "5124037798463162004": {
+            "Location": {
+                "Path": "Materials\\Blue.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Blue",
+                "UUID": 5124037798463162004,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "15517212185802880352": {
+            "Location": {
+                "Path": "Materials\\Green.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Green",
+                "UUID": 15517212185802880352,
+                "Hash": 3688170836,
+                "SerializedVersion": 2
+            }
+        },
+        "13345938067109065567": {
+            "Location": {
+                "Path": "Materials\\Material_.gmat",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_",
+                "UUID": 13345938067109065567,
+                "Hash": 1884319791,
+                "SerializedVersion": 2
+            }
+        },
+        "3010624712422607554": {
+            "Location": {
+                "Path": "Materials\\Material_Instance.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance",
+                "UUID": 3010624712422607554,
+                "Hash": 3688170836,
+                "SerializedVersion": 4
+            }
+        },
+        "1373122324226100331": {
+            "Location": {
+                "Path": "Materials\\Material_Instance1.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance1",
+                "UUID": 1373122324226100331,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "12329445205047472005": {
+            "Location": {
+                "Path": "Materials\\Material_Instance10.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance10",
+                "UUID": 12329445205047472005,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "1049992442256444805": {
+            "Location": {
+                "Path": "Materials\\Material_Instance11.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance11",
+                "UUID": 1049992442256444805,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "14102624392720317306": {
+            "Location": {
+                "Path": "Materials\\Material_Instance12.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance12",
+                "UUID": 14102624392720317306,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "1398703171167915645": {
+            "Location": {
+                "Path": "Materials\\Material_Instance13.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance13",
+                "UUID": 1398703171167915645,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "17185067663040798019": {
+            "Location": {
+                "Path": "Materials\\Material_Instance14.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance14",
+                "UUID": 17185067663040798019,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "12050675179094362886": {
+            "Location": {
+                "Path": "Materials\\Material_Instance15.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance15",
+                "UUID": 12050675179094362886,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "12263872001811937335": {
+            "Location": {
+                "Path": "Materials\\Material_Instance16.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance16",
+                "UUID": 12263872001811937335,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "3418489109220757858": {
+            "Location": {
+                "Path": "Materials\\Material_Instance17.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance17",
+                "UUID": 3418489109220757858,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "12787556475590031533": {
+            "Location": {
+                "Path": "Materials\\Material_Instance18.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance18",
+                "UUID": 12787556475590031533,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "4941950203725921729": {
+            "Location": {
+                "Path": "Materials\\Material_Instance19.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance19",
+                "UUID": 4941950203725921729,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "3517522003741332949": {
+            "Location": {
+                "Path": "Materials\\Material_Instance2.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance2",
+                "UUID": 3517522003741332949,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "1344859053152692766": {
+            "Location": {
+                "Path": "Materials\\Material_Instance20.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance20",
+                "UUID": 1344859053152692766,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "10443563090520142511": {
+            "Location": {
+                "Path": "Materials\\Material_Instance21.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance21",
+                "UUID": 10443563090520142511,
+                "Hash": 3688170836,
+                "SerializedVersion": 2
+            }
+        },
+        "12917108602555706804": {
+            "Location": {
+                "Path": "Materials\\Material_Instance22.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance22",
+                "UUID": 12917108602555706804,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "9521915265913145591": {
+            "Location": {
+                "Path": "Materials\\Material_Instance23.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance23",
+                "UUID": 9521915265913145591,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "15672791594304400152": {
+            "Location": {
+                "Path": "Materials\\Material_Instance24.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance24",
+                "UUID": 15672791594304400152,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "12679807362730774903": {
+            "Location": {
+                "Path": "Materials\\Material_Instance3.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance3",
+                "UUID": 12679807362730774903,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "17419002243068841690": {
+            "Location": {
+                "Path": "Materials\\Material_Instance4.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance4",
+                "UUID": 17419002243068841690,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "18433151773314596530": {
+            "Location": {
+                "Path": "Materials\\Material_Instance5.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance5",
+                "UUID": 18433151773314596530,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "2727112760671078320": {
+            "Location": {
+                "Path": "Materials\\Material_Instance6.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance6",
+                "UUID": 2727112760671078320,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "15256394464770530809": {
+            "Location": {
+                "Path": "Materials\\Material_Instance7.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance7",
+                "UUID": 15256394464770530809,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "5283983514866805294": {
+            "Location": {
+                "Path": "Materials\\Material_Instance8.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance8",
+                "UUID": 5283983514866805294,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "526352692630726967": {
+            "Location": {
+                "Path": "Materials\\Material_Instance9.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Material_Instance9",
+                "UUID": 526352692630726967,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "18425840311753929193": {
+            "Location": {
+                "Path": "Materials\\Red.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "Red",
+                "UUID": 18425840311753929193,
+                "Hash": 3688170836,
+                "SerializedVersion": 1
+            }
+        },
+        "16123365490737747324": {
+            "Location": {
+                "Path": "Materials\\White.gmat",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": "",
+                "Name": "White",
+                "UUID": 16123365490737747324,
+                "Hash": 1884319791,
+                "SerializedVersion": 1
+            }
+        },
+        "16787318667428770552": {
+            "Location": {
+                "Path": "Scenes\\Sponza.gscene",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gscene",
+                "Name": "Sponza",
+                "UUID": 16787318667428770552,
+                "Hash": 2713038901,
+                "SerializedVersion": 0
+            }
+        },
+        "14298078551315780740": {
+            "Location": {
+                "Path": "Scripts\\FlyCam.cs",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".cs",
+                "Name": "FlyCam",
+                "UUID": 14298078551315780740,
+                "Hash": 3098219186,
+                "SerializedVersion": 0
+            }
+        },
+        "849823111375322860": {
+            "Location": {
+                "Path": "Scripts\\NewScript.cs",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".cs",
+                "Name": "NewScript",
+                "UUID": 849823111375322860,
+                "Hash": 3098219186,
+                "SerializedVersion": 0
+            }
+        },
+        "12621251150032435605": {
+            "Location": {
+                "Path": "Scripts\\TestScript.cs",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".cs",
+                "Name": "TestScript",
+                "UUID": 12621251150032435605,
+                "Hash": 3098219186,
+                "SerializedVersion": 0
+            }
+        }
     }
-  }
 }

@@ -48,10 +48,8 @@ namespace Glory::Editor
 
 			if (info->IsResource())
 			{
-				//SerializedProperty serializedProperty = SerializedProperty(0, info->DisplayName(), SerializedType::ST_Asset, info->TypeHash(), pMaterial->GetResourceUUIDPointer(resourceCounter), info->Flags());
-				//change |= PropertyDrawer::DrawProperty(&serializedProperty);
-				// FIXME SER
-
+				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
+				change |= pPropertyDrawer->Draw(info->DisplayName(), pMaterial->GetResourceUUIDPointer(resourceCounter), info->TypeHash(), info->Flags());
 				++resourceCounter;
 			}
 			else change |= PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());

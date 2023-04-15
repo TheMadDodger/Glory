@@ -5,6 +5,7 @@
 #include "MaterialPropertyData.h"
 #include "MaterialPropertyInfo.h"
 #include "GraphicsEnums.h"
+#include "AssetReference.h"
 #include <vector>
 #include <unordered_map>
 #include <mutex>
@@ -34,7 +35,7 @@ namespace Glory
         virtual std::vector<char>& GetFinalBufferReference();
         virtual bool GetPropertyInfoIndex(const std::string& name, size_t& index) const;
         [[nodiscard]]size_t ResourceCount() const;
-        virtual UUID* GetResourceUUIDPointer(size_t index);
+        virtual AssetReference<ImageData>* GetResourceUUIDPointer(size_t index);
         [[nodiscard]]virtual size_t GetResourcePropertyCount() const;
         virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index);
         [[nodiscard]]virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
@@ -76,7 +77,7 @@ namespace Glory
         std::vector<char> m_PropertyBuffer;
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<size_t> m_ResourcePropertyInfoIndices;
-        std::vector<UUID> m_Resources;
+        std::vector<AssetReference<ImageData>> m_Resources;
         std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;
 
         size_t m_CurrentOffset;
