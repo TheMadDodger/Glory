@@ -7,12 +7,5 @@ Modules:
   - GlorySDLImage
   - GloryMonoScripting
   - GlorySDLInput
-Engine:
-  Window: 0
-  SceneManagement: 1
-  Renderer: 2
-  Graphics: 3
-  Input: 7
-  Optional: [4, 5]
-  Scripting: [6]
+  - GloryJoltPhysics
 EditorVersion: 0.1.0
