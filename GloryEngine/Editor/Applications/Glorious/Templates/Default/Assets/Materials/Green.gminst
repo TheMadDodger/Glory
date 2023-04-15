@@ -1,4 +1,4 @@
-BaseMaterial: 7881132402106282378
+BaseMaterial: 13534698605446403028
 Overrides:
   - DisplayName: Color
-    Value: [0.5, 1, 0.5, 1]
+    Value: [0.100000001, 1, 0.100000001, 1]

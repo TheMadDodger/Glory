@@ -1,183 +1,169 @@
-TypeHash: 3294947155
+TypeHash: 3536807891
 Entities:
-  - TypeHash: 3083728904
-    Name: Floor
-    UUID: 4078920889168899226
-    ParentUUID: 2222039300059234601
-    Components:
-      - UUID: 6465767714372151689
-        TypeName: Transform
-        TypeHash: 3246206669
-        Position: [0, 0, 0]
-        Rotation: [0.70710665, -0, 0, 0.707106888]
-        Scale: [1, 1, 1]
-      - UUID: 12277487052444650117
-        TypeName: MeshRenderer
-        TypeHash: 196355731
-        m_Mesh: 8022175713581132735
-        m_Material: 7881132402106282378
-  - TypeHash: 3083728904
-    Name: Environment
-    UUID: 2222039300059234601
+  - TypeHash: 1002038608
+    Name: Plane
+    UUID: 14444483842672663668
     ParentUUID: 0
     Components:
-      - UUID: 5876236421920674822
+      - UUID: 14894679713950030081
         TypeName: Transform
-        TypeHash: 3246206669
-        Position: [0, 0, 0]
-        Rotation: [0, 0, 0, 1]
-        Scale: [1, 1, 1]
-  - TypeHash: 3083728904
+        TypeHash: 3193129575
+        Properties:
+          Position: [0, 0, 0]
+          Rotation: [-0.707278132, -0, -0, -0.706935406]
+          Scale: [1, 1, 1]
+      - UUID: 6361602995766346262
+        TypeName: MeshRenderer
+        TypeHash: 346634903
+        Properties:
+          m_Mesh: 13626072069977488810
+          m_Material: 13534698605446403028
+  - TypeHash: 1002038608
     Name: Light
-    UUID: 6102376559816485440
-    ParentUUID: 361237885435485055
+    UUID: 2846236319857627105
+    ParentUUID: 0
     Components:
-      - UUID: 14101090424737032338
+      - UUID: 12335406533271122913
         TypeName: Transform
-        TypeHash: 3246206669
-        Position: [-16.1832924, 65.8290939, 90.7986832]
-        Rotation: [-0, -0, -0, 1]
-        Scale: [1, 1, 1]
-      - UUID: 6390103091075250528
+        TypeHash: 3193129575
+        Properties:
+          Position: [-107.928406, 47.5893593, -7.34331131]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [1, 1, 1]
+      - UUID: 9621234675004018954
         TypeName: LightComponent
-        TypeHash: 3313657466
-        m_Color: [0, 0.223938227, 1, 1]
-        m_Intensity: 1
-        m_Range: 117.599998
-  - TypeHash: 3083728904
+        TypeHash: 1833534594
+        Properties:
+          m_Color: [0.800000012, 0.400000006, 1.10000002, 1]
+          m_Intensity: 1
+          m_Range: 100
+  - TypeHash: 1002038608
+    Name: Light
+    UUID: 8281934531754343243
+    ParentUUID: 0
+    Components:
+      - UUID: 6948696469425579692
+        TypeName: Transform
+        TypeHash: 3193129575
+        Properties:
+          Position: [-28.7289581, 47.5893173, 0]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [1, 1, 1]
+      - UUID: 18358851645578088572
+        TypeName: LightComponent
+        TypeHash: 1833534594
+        Properties:
+          m_Color: [1, 1, 1, 1]
+          m_Intensity: 1
+          m_Range: 100
+  - TypeHash: 1002038608
+    Name: Light
+    UUID: 2398726306303203326
+    ParentUUID: 0
+    Components:
+      - UUID: 127789030219371760
+        TypeName: Transform
+        TypeHash: 3193129575
+        Properties:
+          Position: [37.078373, 47.5893631, -72.2553864]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [1, 1, 1]
+      - UUID: 7133873032200028935
+        TypeName: LightComponent
+        TypeHash: 1833534594
+        Properties:
+          m_Color: [-0.5, 0.600000024, 0.400000006, 1]
+          m_Intensity: 1
+          m_Range: 100
+  - TypeHash: 1002038608
+    Name: Light
+    UUID: 17185265971636399872
+    ParentUUID: 0
+    Components:
+      - UUID: 273735631368523348
+        TypeName: Transform
+        TypeHash: 3193129575
+        Properties:
+          Position: [63.4122581, 47.5893593, 16.2651634]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [1, 1, 1]
+      - UUID: 1955574557480198848
+        TypeName: LightComponent
+        TypeHash: 1833534594
+        Properties:
+          m_Color: [0.800000012, 0.100000001, 0.400000006, 1]
+          m_Intensity: 1
+          m_Range: 100
+  - TypeHash: 1002038608
+    Name: Light
+    UUID: 13681712572653402427
+    ParentUUID: 0
+    Components:
+      - UUID: 1070472677894393890
+        TypeName: Transform
+        TypeHash: 3193129575
+        Properties:
+          Position: [-19.2780304, 47.5893593, 88.4345169]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [1, 1, 1]
+      - UUID: 17738459304458559483
+        TypeName: LightComponent
+        TypeHash: 1833534594
+        Properties:
+          m_Color: [0.800000012, 1, -0.200000003, 1]
+          m_Intensity: 1
+          m_Range: 100
+  - TypeHash: 1002038608
     Name: Sphere
-    UUID: 10666027724189828511
-    ParentUUID: 2222039300059234601
-    Components:
-      - UUID: 10186200690601786324
-        TypeName: Transform
-        TypeHash: 3246206669
-        Position: [4.0146637, 5.94942999, 2.68447018]
-        Rotation: [0, 0, 0, 1]
-        Scale: [6, 5.99999952, 5.99999952]
-      - UUID: 1723236182805457484
-        TypeName: MeshRenderer
-        TypeHash: 196355731
-        m_Mesh: 237651829735264987
-        m_Material: 11131025528240494197
-  - TypeHash: 3083728904
-    Name: Lights
-    UUID: 361237885435485055
+    UUID: 4345487058126478835
     ParentUUID: 0
     Components:
-      - UUID: 11371483439513892761
+      - UUID: 1613821258425797408
         TypeName: Transform
-        TypeHash: 3246206669
-        Position: [0, 0, 0]
-        Rotation: [-0, -0, -0, 1]
-        Scale: [1, 1, 1]
-  - TypeHash: 3083728904
-    Name: Suzanne
-    UUID: 17331162315904662467
-    ParentUUID: 2222039300059234601
-    Components:
-      - UUID: 10758342164898075923
-        TypeName: Transform
-        TypeHash: 3246206669
-        Position: [-14.5986261, 24.8061752, -7.0737505]
-        Rotation: [0.70710665, -0, 0, 0.707106888]
-        Scale: [6.23199987, 6.23199987, 6.23199987]
-      - UUID: 8824153588950093465
+        TypeHash: 3193129575
+        Properties:
+          Position: [-29.3321495, 6.44250107, 29.5552177]
+          Rotation: [-0.00248775189, -0.359826595, -0.932993591, 0.00645048218]
+          Scale: [10.6240005, 10.6239977, 10.623991]
+      - UUID: 4752584013170062910
         TypeName: MeshRenderer
-        TypeHash: 196355731
-        m_Mesh: 8202302961862614735
-        m_Material: 7881132402106282378
-  - TypeHash: 3083728904
-    Name: Light
-    UUID: 1539248310347274443
-    ParentUUID: 361237885435485055
-    Components:
-      - UUID: 9003386519585546693
-        TypeName: Transform
-        TypeHash: 3246206669
-        Position: [0, 65.8291931, -68.5961075]
-        Rotation: [-0, -0, -0, 1]
-        Scale: [1, 1, 1]
-      - UUID: 9007391682504843526
-        TypeName: LightComponent
-        TypeHash: 3313657466
-        m_Color: [1, 0, 1, 1]
-        m_Intensity: 1
-        m_Range: 150
-  - TypeHash: 3083728904
-    Name: Light
-    UUID: 14197796902433141329
-    ParentUUID: 361237885435485055
-    Components:
-      - UUID: 15111196864714462344
-        TypeName: Transform
-        TypeHash: 3246206669
-        Position: [-90.1282196, 65.8291855, 3.22225952]
-        Rotation: [-0, -0, -0, 1]
-        Scale: [1, 1, 1]
-      - UUID: 5786598380860957923
-        TypeName: LightComponent
-        TypeHash: 3313657466
-        m_Color: [1, 0, 0, 1]
-        m_Intensity: 1
-        m_Range: 150
-  - TypeHash: 3083728904
-    Name: Light
-    UUID: 4678162004072669135
-    ParentUUID: 361237885435485055
-    Components:
-      - UUID: 5190496392410692932
-        TypeName: Transform
-        TypeHash: 3246206669
-        Position: [72.6501389, 65.8290863, 39.3020821]
-        Rotation: [-0, -0, -0, 1]
-        Scale: [1, 1, 1]
-      - UUID: 12932819862595366066
-        TypeName: LightComponent
-        TypeHash: 3313657466
-        m_Color: [0, 1, 0.942085028, 1]
-        m_Intensity: 0.5
-        m_Range: 117.599998
-  - TypeHash: 3083728904
-    Name: Cube
-    UUID: 11300829163223131265
-    ParentUUID: 2222039300059234601
-    Components:
-      - UUID: 18081906430457946483
-        TypeName: Transform
-        TypeHash: 3246206669
-        Position: [-37.4496689, 6.17607164, -24.7203579]
-        Rotation: [0, 0, 0, 1]
-        Scale: [6, 6, 6]
-      - UUID: 8783825634277046086
-        TypeName: MeshRenderer
-        TypeHash: 196355731
-        m_Mesh: 7424419239349481089
-        m_Material: 1437111904747059733
-  - TypeHash: 3083728904
-    Name: Camera
-    UUID: 3087028763500725476
+        TypeHash: 346634903
+        Properties:
+          m_Mesh: 17961775830786883855
+          m_Material: 11026795263020128071
+  - TypeHash: 1002038608
+    Name: Box
+    UUID: 1121127913509796133
     ParentUUID: 0
     Components:
-      - UUID: 16899638179691268663
+      - UUID: 7058706370952688588
         TypeName: Transform
-        TypeHash: 3246206669
-        Position: [-16.8490009, 22.5680008, 39.8709984]
-        Rotation: [-0, -0, -0, 1]
-        Scale: [1, 1, 1]
-      - UUID: 12277839110058073945
-        TypeName: CameraComponent
-        TypeHash: 1777037639
-        m_HalfFOV: 60
-        m_Near: 0.100000001
-        m_Far: 1000
-        m_DisplayIndex: 0
-        m_Priority: 0
-        m_LayerMask: 0
-        m_ClearColor: [0, 0, 1, 1]
-      - UUID: 11741162565096887579
-        TypeName: ScriptedComponent
-        TypeHash: 727558036
-        m_Script: 11400304124179733749
-        ScriptData:
-          _freeLookSensitivity: 1
+        TypeHash: 3193129575
+        Properties:
+          Position: [0, 11.1839294, 0]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [10.6239996, 10.6239996, 10.6239996]
+      - UUID: 4290348745882500702
+        TypeName: MeshRenderer
+        TypeHash: 346634903
+        Properties:
+          m_Mesh: 9370195999809206538
+          m_Material: 15215640328795177848
+  - TypeHash: 1002038608
+    Name: Sphere
+    UUID: 935191002156100895
+    ParentUUID: 0
+    Components:
+      - UUID: 17759054221476408974
+        TypeName: Transform
+        TypeHash: 3193129575
+        Properties:
+          Position: [-43.8871956, 11.1841803, -2.91013718]
+          Rotation: [-0, -0, -0, 1]
+          Scale: [10.6239996, 10.6239996, 10.6239996]
+      - UUID: 12440825719499956732
+        TypeName: MeshRenderer
+        TypeHash: 346634903
+        Properties:
+          m_Mesh: 4525122409987139965
+          m_Material: 12631227897872624515

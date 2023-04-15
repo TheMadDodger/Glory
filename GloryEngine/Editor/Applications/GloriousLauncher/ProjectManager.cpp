@@ -180,6 +180,7 @@ namespace Glory::EditorLauncher
         WriteModule(ModuleType::MT_Renderer, createSettings.EngineSettings.RenderModule, emitter);
         WriteModule(ModuleType::MT_SceneManagement, createSettings.EngineSettings.ScenesModule, emitter);
         WriteModule(ModuleType::MT_Input, createSettings.EngineSettings.InputModule, emitter);
+        WriteModule(ModuleType::MT_Physics, createSettings.EngineSettings.PhysicsModule, emitter);
 
         for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); i++)
         {

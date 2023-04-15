@@ -100,7 +100,7 @@ namespace Glory::Editor
 
 		JSONValueRef metaNode = assetNode["Metadata"];
 		metaNode["Extension"].SetString(meta.Extension());
-		metaNode["Name"].SetString(meta.Extension());
+		metaNode["Name"].SetString(meta.Name());
 		metaNode["UUID"].SetUInt64(meta.ID());
 		metaNode["Hash"].SetUInt(meta.Hash());
 		metaNode["SerializedVersion"].SetUInt64(meta.SerializedVersion());
@@ -664,10 +664,10 @@ namespace Glory::Editor
 		const std::string key = std::to_string(uuid);
 		JSONValueRef assetNode = assetsNode[key];
 		if (!assetNode.Exists() || !assetNode.IsObject()) return "";
-		const std::string_view name = assetNode["Metadata"]["Name"].AsString();
+		const std::string_view name = assetNode["Metadata/Name"].AsString();
 		if (!name.empty()) return std::string(name);
-		const std::string_view location = assetNode["Location"]["Path"].AsString();
-		const std::string_view subPath = assetNode["Location"]["SubresourcePath"].AsString();
+		const std::string_view location = assetNode["Location/Path"].AsString();
+		const std::string_view subPath = assetNode["Location/SubresourcePath"].AsString();
 		std::filesystem::path fileName = std::filesystem::path(location).filename().replace_extension();
 		if (!subPath.empty()) fileName.append(subPath);
 		return fileName.string();
