@@ -35,6 +35,7 @@ fi
 echo "Building ASSIMP"
 cd assimp
 echo "Building ${PLATFORM} binaries"
+rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
@@ -46,10 +47,19 @@ echo "Building SDL"
 # SDL
 cd SDL
 echo "Building ${PLATFORM} binaries"
+rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
 cmake --build . --target INSTALL --config $CONFIG
+
+if [ "$CONFIG" == "Debug" ]; then
+    echo ${SDL_LIB="SDL2d"}
+    echo ${SDL_MAIN_LIB="SDL2maind"}
+else
+    echo ${SDL_LIB="SDL2"}
+    echo ${SDL_MAIN_LIB="SDL2main"}
+fi
 
 cd ../..
 
@@ -57,8 +67,10 @@ cd ../..
 echo "Building SDL_image"
 cd SDL_image
 echo "Building ${PLATFORM} binaries"
+rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
+
 cmake .. -A $PLATFORM -DSDL2_INCLUDE_DIR="../../includes/${CONFIG}/${PLATFORM}/SDL2" -DSDL2_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_LIB}.lib" -DSDL2_MAIN_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_MAIN_LIB}.lib" -DCMAKE_INSTALL_PREFIX=$DEPSDIR
 cmake --build . --target INSTALL --config $CONFIG
 
@@ -78,6 +90,7 @@ echo "Cloning glslang"
 git clone https://github.com/KhronosGroup/glslang.git third_party/glslang
 
 echo "Building ${PLATFORM} binaries"
+rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake .. -A $PLATFORM -DSHADERC_SKIP_TESTS=ON -DSHADERC_SPIRV_TOOLS_DIR=../../SPIRV-tools -DCMAKE_INSTALL_PREFIX=$DEPSDIR
@@ -89,6 +102,7 @@ cd ../..
 echo "Building SPIRV-Cross"
 cd SPIRV-Cross
 echo "Building ${PLATFORM} binaries"
+rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
@@ -101,6 +115,7 @@ echo "Building GLEW"
 cd ../third-party
 cd glew-2.2.0
 echo "Building ${PLATFORM} binaries"
+rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake ../build/cmake -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
@@ -116,6 +131,7 @@ cd curl
 #echo "Copying headers"
 #find include/curl -name \*.h -exec cp {} ../includes/curl/ \;
 
+rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR #-DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
