@@ -110,7 +110,7 @@ namespace Glory
 		return m_Resources.size();
 	}
 
-	UUID* MaterialData::GetResourceUUIDPointer(size_t index)
+	AssetReference<ImageData>* MaterialData::GetResourceUUIDPointer(size_t index)
 	{
 		return &m_Resources[index];
 	}
@@ -159,8 +159,8 @@ namespace Glory
 		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
 		if (!pPropertyInfo->IsResource()) return false;
 		const size_t resourceIndex = pPropertyInfo->Offset();
-		*value = AssetManager::GetAssetImmediate<ImageData>(m_Resources[resourceIndex]);
-		return true;
+		*value = m_Resources[resourceIndex].Get();
+		return *value;
 	}
 
 	void MaterialData::EnableProperty(size_t)

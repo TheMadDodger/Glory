@@ -171,7 +171,7 @@ namespace Glory
 			{
 				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
 				++resourceIndex;
-				UUID uuid = *pMaterialData->GetResourceUUIDPointer(index);
+				const UUID uuid = pMaterialData->GetResourceUUIDPointer(index)->AssetUUID();
 				out << YAML::Key << "Value" << YAML::Value << uuid;
 			}
 

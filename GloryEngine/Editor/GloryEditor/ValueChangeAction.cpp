@@ -36,10 +36,7 @@ namespace Glory::Editor
 			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
-		if (!pField)
-		{
-			throw std::exception("Unknown field");
-		}
+		if (!pField) return;
 
 		YAML::Emitter out;
 		out << YAML::BeginMap;
@@ -69,10 +66,7 @@ namespace Glory::Editor
 			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
-		if (!pField)
-		{
-			throw std::exception("Unknown field");
-		}
+		if (!pField) return;
 
 		YAML::Emitter out;
 		out << YAML::BeginMap;
