@@ -7,7 +7,6 @@
 namespace Glory::Editor
 {
 	std::map<UUID, IGizmo*> Gizmos::m_pGizmos;
-	//std::vector<bool> Gizmos::m_ManipulatedGizmos;
 
 	ImGuizmo::OPERATION Gizmos::m_DefaultOperation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE Gizmos::m_DefaultMode = ImGuizmo::LOCAL;
@@ -21,20 +20,12 @@ namespace Glory::Editor
 	const char* Gizmos::Shortcut_Gizmos_Local = "Transform Local";
 	const char* Gizmos::Shortcut_Gizmos_World = "Transform World";
 
-	//GLORY_EDITOR_API bool Gizmos::DrawGizmo(glm::mat4* transfrom)
-	//{
-	//	size_t index = m_pGizmos.size();
-	//	m_pGizmos.push_back(new DefaultGizmo(transfrom));
-	//	if (index >= m_ManipulatedGizmos.size()) return false;
-	//	return m_ManipulatedGizmos[index];
-	//}
-
 	void Gizmos::AddGizmo(UUID uuid, IGizmo* pGizmo)
 	{
 		m_pGizmos.emplace(uuid, pGizmo);
 	}
 
-	GLORY_EDITOR_API IGizmo* Gizmos::FindGizmo(UUID uuid)
+	IGizmo* Gizmos::FindGizmo(UUID uuid)
 	{
 		if (m_pGizmos.find(uuid) == m_pGizmos.end()) return nullptr;
 		return m_pGizmos[uuid];
@@ -92,17 +83,17 @@ namespace Glory::Editor
 		m_pToolChain = nullptr;
 	}
 
-	GLORY_EDITOR_API Gizmos::Gizmos() {}
-	GLORY_EDITOR_API Gizmos::~Gizmos() {}
+	Gizmos::Gizmos() {}
+	Gizmos::~Gizmos() {}
 
-	GLORY_EDITOR_API IGizmo::IGizmo() {}
-	GLORY_EDITOR_API IGizmo::~IGizmo() {}
+	IGizmo::IGizmo() {}
+	IGizmo::~IGizmo() {}
 
-	GLORY_EDITOR_API DefaultGizmo::DefaultGizmo(glm::mat4 transform) : m_Transform(transform), m_OldTransform(transform), m_IsManipulating(false), m_WasManipulated(false)
+	DefaultGizmo::DefaultGizmo(glm::mat4 transform) : m_Transform(transform), m_OldTransform(transform), m_IsManipulating(false), m_WasManipulated(false)
 	{
 	}
 
-	GLORY_EDITOR_API DefaultGizmo::~DefaultGizmo()
+	DefaultGizmo::~DefaultGizmo()
 	{
 	}
 
@@ -140,5 +131,10 @@ namespace Glory::Editor
 	{
 		m_Transform = newTransform;
 		m_OldTransform = m_Transform;
+	}
+
+	bool DefaultGizmo::IsManipulating()
+	{
+		return m_IsManipulating;
 	}
 }

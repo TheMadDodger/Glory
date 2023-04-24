@@ -17,11 +17,10 @@ namespace Glory::Editor
         virtual bool OnGUI() override;
         virtual std::string Name() override;
 
-        void UpdateTransform();
+        void UpdateTransform(const glm::mat4 newTransform);
+        void UpdatePhysics();
 
     private:
-        glm::mat4 m_Transform;
-        glm::mat4 m_LastTransform;
 
         DefaultGizmo* m_pGizmo;
 	};
