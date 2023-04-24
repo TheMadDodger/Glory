@@ -75,6 +75,7 @@ namespace Glory::Editor
 		virtual bool WasManipulated(glm::mat4& oldTransform, glm::mat4& newTransform) = 0;
 		virtual void ManualManipulate(const glm::mat4& newTransform) = 0;
 		virtual void UpdateTransform(const glm::mat4& newTransform) = 0;
+		virtual bool IsManipulating() = 0;
 
 	protected:
 		GLORY_EDITOR_API IGizmo();
@@ -93,6 +94,7 @@ namespace Glory::Editor
 		virtual bool WasManipulated(glm::mat4& oldTransform, glm::mat4& newTransform) override;
 		virtual void ManualManipulate(const glm::mat4& newTransform) override;
 		virtual void UpdateTransform(const glm::mat4& newTransform) override;
+		virtual bool IsManipulating() override;
 
 		std::function<void(const glm::mat4&)> OnManualManipulate;
 

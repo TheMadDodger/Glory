@@ -111,6 +111,8 @@ namespace Glory::Editor
 	public:
 		PropertyDrawerTemplate() : PropertyDrawer(ResourceType::GetHash<PropertyType>()) {}
 
+		GLORY_EDITOR_API bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const;
+
 	protected:
 		virtual bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const override
 		{
@@ -158,7 +160,5 @@ namespace Glory::Editor
 			}
 			return false;
 		}
-
-		bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const;
 	};
 }

@@ -3,10 +3,13 @@
 #include "GizmoAction.h"
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
+#include <EditorUI.h>
+#include <TransformSystem.h>
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory::Editor
 {
-	TransformEditor::TransformEditor() : m_Transform(glm::mat4()), m_LastTransform(glm::mat4()), m_pGizmo(nullptr)
+	TransformEditor::TransformEditor() : m_pGizmo(nullptr)
 	{
 	}
 
@@ -21,39 +24,98 @@ namespace Glory::Editor
 		EntityComponentEditor::Initialize();
 		Transform& transform = GetTargetComponent();
 
-		glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), transform.Scale);
-		glm::mat4 rotation = glm::mat4_cast(transform.Rotation);
-		//glm::mat4 rotation = glm::eulerAngleXYX(90.0f, 90.0f, 0.0f);
-		glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), transform.Position);
-		m_Transform = translation * rotation * scale;
-
-		if (transform.Parent.IsValid())
-		{
-			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
-			m_Transform = parentTransform.MatTransform * m_Transform;
-		}
-		m_LastTransform = m_Transform;
 		m_pGizmo = Gizmos::GetGizmo<DefaultGizmo>(m_pTarget->GetUUID(), transform.MatTransform);
-
-		m_pGizmo->OnManualManipulate = [&](const glm::mat4& newTransform)
-		{
-			m_Transform = newTransform;
-			UpdateTransform();
+		m_pGizmo->OnManualManipulate = [&](const glm::mat4& newTransform) {
+			UpdateTransform(newTransform);
 		};
 	}
 
 	bool TransformEditor::OnGUI()
 	{
-		bool change = EntityComponentEditor::OnGUI();
-		UpdateTransform();
-		if (change) m_pGizmo->UpdateTransform(m_Transform);
-		glm::mat4 oldTransform;
-		if (!m_pGizmo->WasManipulated(oldTransform, m_Transform)) return change;
+		glm::mat4 oldTransform, newTransform;
+		bool wasManipulated = m_pGizmo->WasManipulated(oldTransform, newTransform);
+		const bool isManipulating = m_pGizmo->IsManipulating();
 
-		Undo::StartRecord("Transform");
-		Undo::AddAction(new GizmoAction(m_pTarget->GetUUID(), oldTransform, m_Transform));
+		bool change = false;
+
+		const EntityID entity = m_pComponentObject->EntityID();
+		const GloryReflect::TypeData* pTypeData = Transform::GetTypeData();
+		Transform& transform = GetTargetComponent();
+
+		if (!wasManipulated && !isManipulating && transform.MatTransform != newTransform)
+		{
+			m_pGizmo->UpdateTransform(transform.MatTransform);
+		}
+
+		glm::vec3 pos = transform.Position;
+		glm::quat rotation = transform.Rotation;
+		glm::vec3 scale = transform.Scale;
+
+		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
+		if (EditorUI::InputFloat3("Position", &pos))
+		{
+			ValueChangeAction* pAction = new ValueChangeAction(pTypeData, "Position");
+			pAction->SetOldValue(&transform.Position);
+			pAction->SetNewValue(&pos);
+			Undo::AddAction(pAction);
+
+			change = true;
+		}
+
+		glm::vec3 euler = glm::eulerAngles(rotation) / 3.141592f * 180.0f;
+		if (PropertyDrawerTemplate<glm::quat>().OnGUI("Rotation", &rotation, 0))
+		{
+			ValueChangeAction* pAction = new ValueChangeAction(pTypeData, "Rotation");
+			pAction->SetOldValue(&transform.Rotation);
+			pAction->SetNewValue(&rotation);
+			Undo::AddAction(pAction);
+
+			change = true;
+		}
+
+		if (EditorUI::InputFloat3("Scale", &scale))
+		{
+			ValueChangeAction* pAction = new ValueChangeAction(pTypeData, "Scale");
+			pAction->SetOldValue(&transform.Scale);
+			pAction->SetNewValue(&scale);
+			Undo::AddAction(pAction);
+
+			change = true;
+		}
 		Undo::StopRecord();
-		return true;
+
+		if (change)
+		{
+			transform.Position = pos;
+			transform.Rotation = rotation;
+			transform.Scale = scale;
+			TransformSystem::OnUpdate(m_pComponentObject->GetRegistry(), entity, transform);
+			UpdatePhysics();
+		}
+
+		if (change)
+		{
+			Validate();
+			m_pGizmo->UpdateTransform(transform.MatTransform);
+			wasManipulated = false;
+		}
+
+		if (isManipulating)
+		{
+			UpdateTransform(newTransform);
+			UpdatePhysics();
+		}
+
+		if (wasManipulated)
+		{
+			Undo::StartRecord("Transform");
+			Undo::AddAction(new GizmoAction(m_pTarget->GetUUID(), oldTransform, newTransform));
+			Undo::StopRecord();
+			UpdateTransform(newTransform);
+			return change;
+		}
+
+		return change;
 	}
 
 	std::string TransformEditor::Name()
@@ -61,28 +123,11 @@ namespace Glory::Editor
 		return "Transform";
 	}
 
-	void TransformEditor::UpdateTransform()
+	void TransformEditor::UpdateTransform(const glm::mat4 newTransform)
 	{
 		Transform& transform = GetTargetComponent();
 
-		if (m_LastTransform == m_Transform)
-		{
-			glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), transform.Scale);
-			glm::mat4 rotation = glm::mat4_cast(transform.Rotation);
-			//glm::mat4 rotation = glm::eulerAngleXYX(90.0f, 90.0f, 0.0f);
-			glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), transform.Position);
-			m_Transform = translation * rotation * scale;
-
-			if (transform.Parent.IsValid())
-			{
-				Transform& parentTransform = transform.Parent.GetComponent<Transform>();
-				m_Transform = parentTransform.MatTransform * m_Transform;
-			}
-			m_LastTransform = m_Transform;
-			return;
-		}
-
-		glm::mat4 localTransform = m_Transform;
+		glm::mat4 localTransform = newTransform;
 
 		if (transform.Parent.IsValid())
 		{
@@ -106,7 +151,29 @@ namespace Glory::Editor
 		transform.Position = position;
 		transform.Rotation = glm::conjugate(glm::quatLookAt(-forward, up));
 		transform.Scale = scale;
+	}
 
-		m_LastTransform = m_Transform;
+	void TransformEditor::UpdatePhysics()
+	{
+		const EntityID entity = m_pComponentObject->EntityID();
+		EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
+		if (pRegistry->HasComponent<PhysicsBody>(entity))
+		{
+			Transform& transform = pRegistry->GetComponent<Transform>(entity);
+			PhysicsBody& physicsBody = pRegistry->GetComponent<PhysicsBody>(entity);
+			PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+			if (pPhysics && pPhysics->IsValidBody(physicsBody.m_BodyID))
+			{
+				glm::quat rotation;
+				glm::vec3 translation, scale, skew;
+				glm::vec4 perspective;
+				if (glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective))
+				{
+					pPhysics->SetBodyPosition(physicsBody.m_BodyID, translation);
+					pPhysics->SetBodyRotation(physicsBody.m_BodyID, rotation);
+					pPhysics->SetBodyScale(physicsBody.m_BodyID, scale);
+				}
+			}
+		}
 	}
 }

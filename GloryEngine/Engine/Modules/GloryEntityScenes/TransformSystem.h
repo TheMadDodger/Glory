@@ -12,7 +12,7 @@ namespace Glory
     {
     public:
         static void OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
-        static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
+        GLORY_API static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
 
     private:
         TransformSystem();
