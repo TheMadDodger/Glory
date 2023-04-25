@@ -3,27 +3,30 @@
 
 namespace Glory
 {
-	void ScriptedComponentSerailizer::Serialize(UUID uuid, ScriptedComponent& component, YAML::Emitter& out)
+	ScriptedComponentSerailizer::ScriptedComponentSerailizer() : PropertySerializer(ResourceType::GetHash<ScriptedComponent>())
 	{
-		const GloryReflect::TypeData* pTypeData = ScriptedComponent::GetTypeData();
-		for (size_t i = 0; i < pTypeData->FieldCount(); i++)
-		{
-			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-			PropertySerializer::SerializeProperty(pFieldData, &component, out);
-		}
-
-		out << YAML::Key << "ScriptData" << YAML::Value << component.m_ScriptData;
 	}
 
-	void ScriptedComponentSerailizer::Deserialize(ScriptedComponent& component, YAML::Node& object, Serializer::Flags flags)
+	ScriptedComponentSerailizer::~ScriptedComponentSerailizer()
 	{
-		const GloryReflect::TypeData* pTypeData = ScriptedComponent::GetTypeData();
-		for (size_t i = 0; i < pTypeData->FieldCount(); i++)
-		{
-			const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(i);
-			PropertySerializer::DeserializeProperty(pFieldData, &component, object[pFieldData->Name()]);
-		}
+	}
 
-		component.m_ScriptData = object["ScriptData"];
+	void ScriptedComponentSerailizer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
+	{
+		ScriptedComponent* pScriptedComponent = (ScriptedComponent*)data;
+		out << YAML::Key << "Properties";
+		out << YAML::BeginMap;
+		out << YAML::Key << "m_Script" << YAML::Value << pScriptedComponent->m_Script.AssetUUID();
+		out << YAML::Key << "ScriptData" << YAML::Value << pScriptedComponent->m_ScriptData;
+		out << YAML::EndMap;
+	}
+
+	void ScriptedComponentSerailizer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
+	{
+		YAML::Node scriptNode = object["m_Script"];
+
+		ScriptedComponent* pScriptedComponent = (ScriptedComponent*)data;
+		pScriptedComponent->m_Script.SetUUID(scriptNode.as<uint64_t>());
+		pScriptedComponent->m_ScriptData = object["ScriptData"];
 	}
 }

@@ -107,12 +107,12 @@ namespace Glory
 		ScriptedComponent& scriptComponent = pRegistry->GetComponent<ScriptedComponent>(entity);
 		Script* pScript = scriptComponent.m_Script.Get();
 		if (!pScript) return;
-		void* args[1] = {
+		std::vector<void*> args = {
 			&bodyID
 		};
 
 		EntityScene* pEntityScene = pRegistry->GetUserData<EntityScene*>();
-		pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyActivated", args);
+		pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyActivated", args);
 	}
 
 	void PhysicsSystem::OnBodyDeactivated(uint32_t bodyID)
@@ -126,12 +126,12 @@ namespace Glory
 		ScriptedComponent& scriptComponent = pRegistry->GetComponent<ScriptedComponent>(entity);
 		Script* pScript = scriptComponent.m_Script.Get();
 		if (!pScript) return;
-		void* args[1] = {
+		std::vector<void*> args = {
 			&bodyID
 		};
 
 		EntityScene* pEntityScene = pRegistry->GetUserData<EntityScene*>();
-		pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyDeactivated", args);
+		pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyDeactivated", args);
 	}
 
 	void PhysicsSystem::OnContactAdded(uint32_t body1ID, uint32_t body2ID)
@@ -151,13 +151,13 @@ namespace Glory
 			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
 			Script* pScript = scriptComponent.m_Script.Get();
 			if (!pScript) return;
-			void* args[2] = {
+			std::vector<void*> args = {
 				&body1ID,
 				&body2ID
 			};
 
 			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
-			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactAdded", args);
+			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactAdded", args);
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -165,13 +165,13 @@ namespace Glory
 			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
 			Script* pScript = scriptComponent.m_Script.Get();
 			if (!pScript) return;
-			void* args[2] = {
+			std::vector<void*> args = {
 				&body2ID,
 				&body1ID
 			};
 
 			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
-			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactAdded", args);
+			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactAdded", args);
 		}
 	}
 
@@ -192,13 +192,13 @@ namespace Glory
 			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
 			Script* pScript = scriptComponent.m_Script.Get();
 			if (!pScript) return;
-			void* args[2] = {
+			std::vector<void*> args = {
 				&body1ID,
 				&body2ID
 			};
 
 			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
-			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactPersisted", args);
+			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactPersisted", args);
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -206,13 +206,13 @@ namespace Glory
 			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
 			Script* pScript = scriptComponent.m_Script.Get();
 			if (!pScript) return;
-			void* args[2] = {
+			std::vector<void*> args = {
 				&body2ID,
 				&body1ID
 			};
 
 			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
-			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactPersisted", args);
+			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactPersisted", args);
 		}
 	}
 
@@ -233,13 +233,13 @@ namespace Glory
 			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
 			Script* pScript = scriptComponent.m_Script.Get();
 			if (!pScript) return;
-			void* args[2] = {
+			std::vector<void*> args = {
 				&body1ID,
 				&body2ID
 			};
 
 			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
-			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactRemoved", args);
+			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactRemoved", args);
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -247,13 +247,13 @@ namespace Glory
 			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
 			Script* pScript = scriptComponent.m_Script.Get();
 			if (!pScript) return;
-			void* args[2] = {
+			std::vector<void*> args = {
 				&body2ID,
 				&body1ID
 			};
 
 			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
-			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactRemoved", args);
+			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactRemoved", args);
 		}
 	}
 

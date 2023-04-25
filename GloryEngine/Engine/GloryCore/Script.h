@@ -14,6 +14,7 @@ namespace Glory
         virtual ~Script();
 
         virtual void Invoke(Object* pObject, const std::string& method, void** args) = 0;
+        virtual void InvokeSafe(Object* pObject, const std::string& method, std::vector<void*>& args) = 0;
 
         virtual bool IsBehaviour() = 0;
 

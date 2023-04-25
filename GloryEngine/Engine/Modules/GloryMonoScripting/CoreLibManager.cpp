@@ -1,5 +1,6 @@
 #include "CoreLibManager.h"
 #include "MonoAssetManager.h"
+#include "ScriptingMethodsHelper.h"
 
 namespace Glory
 {
@@ -16,6 +17,7 @@ namespace Glory
 	{
 		m_pAssembly = pAssembly;
 		MonoAssetManager::Initialize(m_pAssembly->GetMonoImage());
+		ScriptingMethodsHelper::Initialize(m_pAssembly->GetMonoImage());
 	}
 
 	void CoreLibManager::Cleanup()

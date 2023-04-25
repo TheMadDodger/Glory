@@ -80,7 +80,7 @@ namespace Glory
 		/* Register serializers */
 		Serializer::RegisterSerializer<EntitySceneSerializer>();
 		Serializer::RegisterSerializer<EntitySceneObjectSerializer>();
-		Serializer::RegisterSerializer<ScriptedComponentSerailizer>();
+		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 
 		m_pEngine->GetPhysicsModule()->RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);

@@ -12,13 +12,19 @@ namespace Glory
 {
 #pragma region Entity
 
-	EntityScene* GetEntityScene(MonoEntityHandle* pEntityHandle)
+	EntityScene* GetEntityScene(UUID sceneID)
 	{
-		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return nullptr;
-		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (sceneID == 0) return nullptr;
+		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
 		if (pScene == nullptr) return nullptr;
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		return pEntityScene;
+	}
+
+	EntityScene* GetEntityScene(MonoEntityHandle* pEntityHandle)
+	{
+		if (pEntityHandle->m_EntityID == 0) return nullptr;
+		return GetEntityScene((UUID)pEntityHandle->m_SceneID);
 	}
 
 	template<typename T>
@@ -621,6 +627,23 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region EntitySceneObject
+
+	MonoEntityHandle EntitySceneObject_GetEntityHandle(uint64_t objectID, uint64_t sceneID)
+	{
+		EntityScene* pScene = GetEntityScene(sceneID);
+		if(!pScene) return MonoEntityHandle();
+		SceneObject* pSceneObject = pScene->FindSceneObject(objectID);
+		if (!pSceneObject) return MonoEntityHandle();
+		EntitySceneObject* pEntityObject = (EntitySceneObject*)pSceneObject;
+		if (!pEntityObject) return MonoEntityHandle();
+		Entity entityHandle = pEntityObject->GetEntityHandle();
+		EntityID entityID = entityHandle.GetEntityID();
+		return MonoEntityHandle(entityID, pScene->GetUUID());
+	}
+
+#pragma endregion
+
 #pragma endregion
 
 #pragma region Binding
@@ -747,6 +770,9 @@ namespace Glory
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddImpulse", PhysicsBody_AddImpulse);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddImpulse_Point", PhysicsBody_AddImpulse_Point);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddAngularImpulse", PhysicsBody_AddAngularImpulse);
+
+		/* Entity Scene Object */
+		BIND("GloryEngine.Entities.EntitySceneObject::EntitySceneObject_GetEntityHandle", EntitySceneObject_GetEntityHandle);
 	}
 
 	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)
