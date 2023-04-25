@@ -3,6 +3,7 @@
 #include "MonoLibManager.h"
 #include "MonoAssetManager.h"
 #include "MonoSceneManager.h"
+#include "ScriptingMethodsHelper.h"
 
 #include <AssetDatabase.h>
 #include <Reflection.h>
@@ -36,6 +37,15 @@ namespace Glory
 		if (pMethod == nullptr) return;
 		MonoObject* pException = nullptr;
 		MonoLibManager::InvokeMethod(pMethod, pMonoObject, &pException, args);
+	}
+
+	void MonoScript::InvokeSafe(Object* pObject, const std::string& method, std::vector<void*>& args)
+	{
+		AssemblyClass* pClass = LoadClass(MonoLibManager::GetMainAssemblyName(), m_NamespaceName, m_ClassName);
+		if (pClass == nullptr) return;
+		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
+		if (pMonoObject == nullptr) return;
+		ScriptingMethodsHelper::InvokeScriptingMethod(pMonoObject, method, args);
 	}
 
 	void MonoScript::SetValue(Object* pObject, const std::string& name, void* value)

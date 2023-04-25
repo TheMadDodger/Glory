@@ -14,6 +14,7 @@ namespace Glory
         virtual GLORY_API ~MonoScript();
 
         virtual void GLORY_API Invoke(Object* pObject, const std::string& method, void** args) override;
+        virtual void GLORY_API InvokeSafe(Object* pObject, const std::string& method, std::vector<void*>& args) override;
 
         virtual void SetValue(Object* pObject, const std::string& name, void* value) override;
         virtual void GetValue(Object* pObject, const std::string& name, void* value) override;
