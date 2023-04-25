@@ -109,7 +109,7 @@ namespace Glory
 		return NodeValueRef(m_RootNode, m_Path.parent_path());
 	}
 
-	YAML::Node NodeValueRef::FindNode(YAML::Node node, std::filesystem::path path)
+	YAML::Node NodeValueRef::FindNode(YAML::Node& node, std::filesystem::path path)
 	{
 		if (path.empty() || path == ".") return node;
 
@@ -118,11 +118,11 @@ namespace Glory
 		{
 			const size_t index = std::stoul(subPathString.substr(2));
 			path = path.lexically_relative(subPathString);
-			YAML::Node nextNode = node[index];
+			YAML::Node& nextNode = node[index];
 			return FindNode(nextNode, path);
 		}
 
-		YAML::Node nextNode = node[subPathString];
+		YAML::Node& nextNode = node[subPathString];
 		path = path.lexically_relative(subPathString);
 		return FindNode(nextNode, path);
 	}
