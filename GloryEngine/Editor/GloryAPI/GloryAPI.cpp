@@ -41,7 +41,7 @@ Run([&]() -> bool {\
 #define RUN(ret, f)
 #endif
 
-#define GLORY_VERSION_API_URL "http://localhost/version.php"
+#define GLORY_VERSION_API_URL "http://glory-engine.com:5000/versions"
 
 namespace Glory
 {
@@ -130,9 +130,11 @@ namespace Glory
         rapidjson::Document doc;
         doc.Parse(readBuffer.c_str());
 
-        if (doc.HasParseError() || !doc.IsObject() || !doc.HasMember("Version") || !doc["Version"].IsString()) return {};
-        const char* versionString = doc["Version"].GetString();
-
+        if (doc.HasParseError() || !doc.IsArray()) return {};
+        if (!doc.Size()) return {};
+        rapidjson::Value& latest = doc[0];
+        if (!latest.IsObject() || !latest.HasMember("Version") || !latest["Version"].IsString()) return {};
+        const char* versionString = latest["Version"].GetString();
         return Version::Parse(versionString);
     }
 }
