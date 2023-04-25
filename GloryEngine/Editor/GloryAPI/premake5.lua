@@ -38,6 +38,7 @@ project "GloryAPI"
 	defines
 	{
 		"GLORY_API_EXPORTS",
+		"GLORY_ENABLE_API"
 	}
 
 	postbuildcommands
