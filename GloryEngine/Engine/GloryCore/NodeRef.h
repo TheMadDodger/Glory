@@ -64,7 +64,7 @@ namespace Glory
 		NodeValueRef Parent();
 
 	private:
-		YAML::Node FindNode(YAML::Node node, std::filesystem::path path);
+		YAML::Node FindNode(YAML::Node& node, std::filesystem::path path);
 
 	private:
 		YAML::Node& m_RootNode;

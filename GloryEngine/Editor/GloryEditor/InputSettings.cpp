@@ -61,7 +61,6 @@ namespace Glory::Editor
 					YAML::Node oldValue = YAML::Node(YAML::NodeType::Null);
 					YAML::Node newValue = YAML::Node(YAML::NodeType::Scalar);
 					newValue = "";
-					deviceTypesNode.PushBack<std::string>("");
 					NodeValueRef deviceTypeNode = deviceTypesNode[count];
 					Undo::YAMLEdit(file, deviceTypeNode.Path(), oldValue, newValue);
 					Undo::StopRecord();
@@ -92,7 +91,6 @@ namespace Glory::Editor
 			YAML::Node newValue{ YAML::NodeType::Map };
 			newValue["Name"] = "New Input Mode";
 			newValue["DeviceTypes"] = YAML::Node(YAML::NodeType::Sequence);
-			inputModes.PushBack(newValue);
 			NodeValueRef inputMode = inputModes[count];
 			Undo::YAMLEdit(file, inputMode.Path(), oldValue, newValue);
 			Undo::StopRecord();
@@ -451,7 +449,6 @@ namespace Glory::Editor
 							YAML::Node oldValue = YAML::Node(YAML::NodeType::Null);
 							NodeValueRef bindingNode = bindingsNode[count];
 							Undo::YAMLEdit(file, bindingNode.Path(), oldValue, newNode);
-							bindingsNode.PushBack(newNode);
 							Undo::StopRecord();
 							change = true;
 						};
@@ -484,7 +481,6 @@ namespace Glory::Editor
 					YAML::Node oldValue = YAML::Node(YAML::NodeType::Null);
 					NodeValueRef actionNode = actionsNode[count];
 					Undo::YAMLEdit(file, actionNode.Path(), oldValue, newNode);
-					actionsNode.PushBack(newNode);
 					Undo::StopRecord();
 					change = true;
 				};
@@ -515,7 +511,6 @@ namespace Glory::Editor
 			YAML::Node oldValue = YAML::Node(YAML::NodeType::Null);
 			NodeValueRef inputMap = inputMaps[count];
 			Undo::YAMLEdit(file, inputMap.Path(), oldValue, newNode);
-			inputMaps.PushBack(newNode);
 			Undo::StopRecord();
 
 			change = true;
