@@ -38,7 +38,11 @@ namespace Glory
             if (v1[i] > v2[i]) return 1;
         }
 
-        return v1.RC == v2.RC ? 0 : (v1.RC > v2.RC) ? -1 : 1;
+        /* RC 0 is always considered latest! */
+        if (v1.RC == v2.RC) return 0;
+        if (v1.RC == 0) return 1;
+        if (v2.RC == 0) return -1;
+        return v1.RC > v2.RC ? 1 : -1;
     }
 
     int Version::operator[](size_t index) const
