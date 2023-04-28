@@ -26,7 +26,7 @@ namespace Glory::Editor
 		if (ImGui::BeginPopupModal(popupName, &isOpen, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize))
 		{
 			ImGui::TextUnformatted("A new Editor version is available!");
-			ImGui::Text("Currently using %s but lastest available version is %s", GloryEditorVersion, currentLatestVersion);
+			ImGui::Text("Currently using %s but lastest available version is %s", GloryEditorVersion, currentLatestVersion.c_str());
 			ImGui::Separator();
 
 			const ImVec2 availableRegion = ImGui::GetContentRegionAvail();
@@ -40,8 +40,7 @@ namespace Glory::Editor
 			{
 				ImGui::CloseCurrentPopup();
 				isOpen = false;
-				/* TODO: Open download URL */
-				system("start \"\" \"www.google.com\"");
+				system("start \"\" \"https://glory-engine.com/downloads\"");
 			}
 
 			ImGui::EndPopup();

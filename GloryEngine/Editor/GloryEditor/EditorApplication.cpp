@@ -282,7 +282,7 @@ namespace Glory::Editor
 	void EditorApplication::VersionCheck(const Glory::Version& latestVersion)
 	{
 		if (!latestVersion.IsValid()) return;
-		if (Version::Compare(latestVersion, Version) > 1)
+		if (Version::Compare(latestVersion, Version) == 1)
 			MainEditor::VersionOutdated(latestVersion);
 	}
 

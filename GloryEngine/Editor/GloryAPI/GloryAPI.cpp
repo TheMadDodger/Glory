@@ -133,8 +133,8 @@ namespace Glory
         if (doc.HasParseError() || !doc.IsArray()) return {};
         if (!doc.Size()) return {};
         rapidjson::Value& latest = doc[0];
-        if (!latest.IsObject() || !latest.HasMember("Version") || !latest["Version"].IsString()) return {};
-        const char* versionString = latest["Version"].GetString();
+        if (!latest.IsObject() || !latest.HasMember("appVersion") || !latest["appVersion"].IsString()) return {};
+        const char* versionString = latest["appVersion"].GetString();
         return Version::Parse(versionString);
     }
 }
