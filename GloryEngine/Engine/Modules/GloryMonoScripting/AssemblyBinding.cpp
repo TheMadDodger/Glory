@@ -16,6 +16,8 @@
 #include <MaterialInstanceData.h>
 #include <SceneObject.h>
 
+#include <glm/detail/type_quat.hpp>
+
 namespace Glory
 {
 	std::map<std::string, uint32_t> MonoTypeToHash = {
@@ -28,6 +30,11 @@ namespace Glory
 		{"GloryEngine.Model", SerializedType::ST_Asset},
 		{"GloryEngine.Image", SerializedType::ST_Asset},
 		{"GloryEngine.SceneManagement.SceneObject", SerializedType::ST_Object},
+		{"GloryEngine.Entities.EntitySceneObject", SerializedType::ST_Object},
+		{"GloryEngine.Quaternion", ResourceType::GetHash<glm::quat>()},
+		{"GloryEngine.Vector2", ResourceType::GetHash<glm::vec2>()},
+		{"GloryEngine.Vector3", ResourceType::GetHash<glm::vec3>()},
+		{"GloryEngine.Vector4", ResourceType::GetHash<glm::vec4>()},
 	};
 
 	std::map<std::string, uint32_t> MonoTypeToElementHash = {
