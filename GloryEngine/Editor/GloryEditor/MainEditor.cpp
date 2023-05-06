@@ -413,6 +413,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<int>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<uint32_t>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<double>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<bool>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec2>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec3>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::vec4>>();
