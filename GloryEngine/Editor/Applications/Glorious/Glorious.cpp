@@ -6,6 +6,7 @@
 #include "CommandLine.h"
 #include "ProjectLock.h"
 #include <Console.h>
+#include <Logs.h>
 #include <ProjectSpace.h>
 
 int main(int argc, char* argv[])
@@ -21,6 +22,8 @@ int main(int argc, char* argv[])
         windowCreateInfo.WindowFlags = 2 | 32;
 
         Glory::GloryContext::CreateContext();
+
+        Glory::Console::RegisterConsole<Glory::Logs>();
 
         Glory::CommandLine commandLine(argc, argv);
 
