@@ -359,7 +359,7 @@ namespace Glory::Editor
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
 
-		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>();
+		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>("");
 		if (!FindMSBuild(msBuildPath))
 		{
 			Debug::LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
@@ -402,7 +402,7 @@ namespace Glory::Editor
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
-		const std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>();
+		const std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
 
 		ImGui::Text("Visual Studio: %s", visualStudioPath.string().c_str());
 		ImGui::SameLine();

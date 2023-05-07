@@ -14,7 +14,7 @@ namespace Glory
 			std::filesystem::create_directory(LogsPath);
 
 		if (std::filesystem::exists(LogPath))
-			std::filesystem::copy_file(LogPath, LogBackupPath);
+			std::filesystem::copy_file(LogPath, LogBackupPath, std::filesystem::copy_options::overwrite_existing);
 
 		std::filesystem::remove(LogPath);
 	}
