@@ -24,17 +24,12 @@ namespace Glory::EditorLauncher
 		static ImFont* BoldLargeFont;
 		static ImFont* IconFontHuge;
 
-		static std::function<void(const std::string&)> FileBrowserCallback;
-
 	private:
-		void InitializeFileDialog();
 		void Draw();
-		void DrawFileDialog();
 
 		std::string FormatTimestamp(long long timestamp);
 
 		void OnProjectNotFoundGui();
-		void OnNewProjectPopupGui();
 
 		bool ProjectExists(const std::string& path, const std::string& name);
 		std::filesystem::path GetProjectPath(const std::string& path, const std::string& name);
@@ -61,8 +56,6 @@ namespace Glory::EditorLauncher
 		std::string m_BrowsingPath;
 		std::string m_ProjectFolder;
 		std::string m_DefaultProjectsFolder = "%userprofile%\\Documents\\Glorious\\Projects";
-
-		const char* FILEDIALOG_ID = "FileDialog";
 
 		HubMenu m_CurrentMenu = HubMenu::ProjectList;
 

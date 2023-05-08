@@ -122,6 +122,7 @@ group "Dependencies"
 	include "third-party/yaml-cpp"
 	include "submodules/GloryECS/GloryECS/GloryECSStatic"
 	include "submodules/GloryECS/GloryECS/GloryReflectStatic"
+	include "third-party/tinyfiledialogs"
 group ""
 
 group "Engine"

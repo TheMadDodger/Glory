@@ -3,9 +3,9 @@
 #include "EditorManager.h"
 #include "LauncherHub.h"
 #include "ProjectManager.h"
-#include "ImFileDialog.h"
 #include "TemplateManager.h"
 
+#include <tinyfiledialogs.h>
 #include <imgui.h>
 #include <ShlObj_core.h>
 
@@ -36,7 +36,7 @@ namespace Glory::EditorLauncher
 		std::filesystem::path result = p;
 		CoTaskMemFree(p);
 
-		result.append("Glorious\\Projects");
+		result.append("Glorious\\Projects\\");
 
 		m_DefaultProjectsFolder = result.string();
 
@@ -273,7 +273,10 @@ namespace Glory::EditorLauncher
 		ImGui::SameLine();
 		if (ImGui::Button("Browse", ImVec2(ImGui::GetContentRegionAvail().x - 8.0f, 0.0f)))
 		{
-			LauncherHub::FileBrowserCallback = [&](const std::string& path)
+			const char* filters[1] = { "*.gproj" };
+			const char* path = tinyfd_saveFileDialog("Save Project", m_PathText, 1, filters, "Glorious Projects");
+
+			if (path)
 			{
 				std::filesystem::path fullPath = path;
 				std::filesystem::path fileName = fullPath.filename();
@@ -287,10 +290,11 @@ namespace Glory::EditorLauncher
 				std::string folderNameString = folderName.string();
 				m_ProjectFolder = "";
 				if (folderNameString != fileName) m_ProjectFolder = folderNameString;
-				m_BrowsingPath = fullPath.parent_path().string();
+				m_BrowsingPath = fullPath.parent_path().string() + "\\";
 				strcpy(m_PathText, m_BrowsingPath.data());
-			};
-			ifd::FileDialog::Instance().Save(FILEDIALOG_ID, "Save project", "Project file (*.gproj){.gproj},.*", m_PathText);
+			}
+
+			//ifd::FileDialog::Instance().Save(FILEDIALOG_ID, "Save project", "Project file (*.gproj){.gproj},.*", m_PathText);
 		}
 
 		bool exists = ProjectExists(m_PathText, m_ProjectNameText);
