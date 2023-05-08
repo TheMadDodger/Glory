@@ -2,11 +2,11 @@
 #include "LauncherHub.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
-#include "ImFileDialog.h"
 #include "ProjectManager.h"
 #include "ProjectLock.h"
 #include "EditorManager.h"
 
+#include <tinyfiledialogs.h>
 #include <GloryAPI.h>
 
 namespace Glory::EditorLauncher
@@ -19,8 +19,6 @@ namespace Glory::EditorLauncher
     ImFont* LauncherHub::DefaultFont = nullptr;
     ImFont* LauncherHub::BoldLargeFont = nullptr;
     ImFont* LauncherHub::IconFontHuge = nullptr;
-
-    std::function<void(const std::string&)> LauncherHub::FileBrowserCallback;
 
 	LauncherHub::LauncherHub(ImGuiImpl* pHubWindow) : m_pImGuiImpl(pHubWindow), m_OpenErrorPopup(false), m_OpenNewProjectPopup(false), m_OpenProjectOpenError(false), m_OpenMissingEditorError(false), m_ProjectFolder("")
 	{
@@ -51,8 +49,6 @@ namespace Glory::EditorLauncher
         ImFont* pIconBrandsFont = io.Fonts->AddFontFromFileTTF("./Fonts/FA/" FONT_ICON_FILE_NAME_FAB, 14.0f, &config, brandIconRanges);
 
         IconFontHuge = io.Fonts->AddFontFromFileTTF("./Fonts/FA/" FONT_ICON_FILE_NAME_FAS, 64.0f, NULL, iconRanges);
-
-        InitializeFileDialog();
 
         ProjectManager::Load();
 
@@ -104,29 +100,6 @@ namespace Glory::EditorLauncher
         GloryAPI::Cleanup();
 	}
 
-    void LauncherHub::InitializeFileDialog()
-    {
-        ifd::FileDialog::Instance().CreateTexture = [](const std::string& path, uint8_t* data, int w, int h, char fmt) -> void* {
-            GLuint tex;
-
-            glGenTextures(1, &tex);
-            glBindTexture(GL_TEXTURE_2D, tex);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            return (void*)tex;
-        };
-        ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
-            GLuint texID = (GLuint)tex;
-            glDeleteTextures(1, &texID);
-        };
-    }
-
     void LauncherHub::Draw()
     {
         //ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
@@ -145,18 +118,6 @@ namespace Glory::EditorLauncher
         ImGui::End();
 
         DrawPopups();
-    }
-
-    void LauncherHub::DrawFileDialog()
-    {
-        if (ifd::FileDialog::Instance().IsDone(FILEDIALOG_ID)) {
-            if (ifd::FileDialog::Instance().HasResult()) {
-                std::string res = ifd::FileDialog::Instance().GetResult().u8string();
-                printf("OPEN[%s]\n", res.c_str());
-                FileBrowserCallback(res);
-            }
-            ifd::FileDialog::Instance().Close();
-        }
     }
 
     std::string LauncherHub::FormatTimestamp(long long timestamp)
@@ -211,89 +172,6 @@ namespace Glory::EditorLauncher
             ImGui::CloseCurrentPopup();
             m_OpenErrorPopup = false;
         }
-    }
-
-    void LauncherHub::OnNewProjectPopupGui()
-    {
-        float x = ImGui::CalcTextSize("Project Name").x + 20.0f;
-
-        ImGui::Text("New Project");
-        ImGui::Spacing();
-        ImGui::Text("Project Name");
-        ImGui::SameLine(x);
-        ImGui::SetNextItemWidth(600.0f);
-        ImGui::InputText("##Project Name", m_ProjectNameText, 100);
-        ImGui::Spacing();
-        ImGui::Text("Project Path");
-        ImGui::SameLine(x);
-        ImGui::SetNextItemWidth(350.0f);
-        ImGui::InputText("##Project Path", m_PathText, 100);
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(150.0f);
-        ImGui::TextUnformatted(m_ProjectFolder != "" ? m_ProjectFolder.c_str() : m_ProjectNameText);
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(100.0f);
-        if (ImGui::Button("Browse"))
-        {
-            FileBrowserCallback = [&](const std::string& path)
-            {
-                std::filesystem::path fullPath = path;
-                std::filesystem::path fileName = fullPath.filename();
-                fileName = fileName.replace_extension("");
-                std::string fileNameString = fileName.string();
-                strcpy(m_ProjectNameText, fileNameString.data());
-                fullPath = fullPath.parent_path();
-                std::filesystem::path::iterator last = fullPath.end();
-                --last;
-                std::filesystem::path folderName = *last;
-                std::string folderNameString = folderName.string();
-                m_ProjectFolder = "";
-                if (folderNameString != fileName) m_ProjectFolder = folderNameString;
-                m_BrowsingPath = fullPath.parent_path().string();
-                strcpy(m_PathText, m_BrowsingPath.data());
-            };
-            ifd::FileDialog::Instance().Save(FILEDIALOG_ID, "Save project", "Project file (*.gproj){.gproj},.*", m_PathText);
-        }
-
-        ImGui::Spacing();
-
-        bool exists = ProjectExists(m_PathText, m_ProjectNameText);
-        bool tooShort = strlen(m_ProjectNameText) < 3;
-
-        if (exists)
-        {
-            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Project already exists!");
-        }
-
-        if (tooShort)
-        {
-            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Project name must be at least 3 characters long!");
-        }
-
-        bool valid = !exists && !tooShort;
-
-        ImGui::BeginDisabled(!valid);
-        if (ImGui::Button("Create Project", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f)) && valid)
-        {
-            ProjectCreateSettings createSettings{};
-            createSettings.Name = m_ProjectNameText;
-            createSettings.Path = GetProjectPath(m_PathText, m_ProjectNameText).string();
-            // Other settings!
-
-            ProjectManager::CreateProject(createSettings);
-
-            ImGui::CloseCurrentPopup();
-            m_OpenNewProjectPopup = false;
-        }
-        ImGui::EndDisabled();
-
-        if (ImGui::Button("Cancel", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f)))
-        {
-            ImGui::CloseCurrentPopup();
-            m_OpenNewProjectPopup = false;
-        }
-
-        DrawFileDialog();
     }
 
     bool LauncherHub::ProjectExists(const std::string& path, const std::string& name)
@@ -379,15 +257,16 @@ namespace Glory::EditorLauncher
         ImGui::SameLine(regionWidth - buttonWidth * 2.0f);
         if (ImGui::Button("ADD", ImVec2(buttonWidth, 0.0f)))
         {
-            FileBrowserCallback = [&](const std::string& path)
+            const char* filters[1] = { "*.gproj" };
+            const char* path = tinyfd_openFileDialog("Open Project", m_DefaultProjectsFolder.c_str(), 1, filters, "Glorious Project", false);
+            if (path)
             {
                 if (!std::filesystem::exists(path))
                 {
                     return;
                 }
                 ProjectManager::AddProject(path);
-            };
-            ifd::FileDialog::Instance().Open(FILEDIALOG_ID, "Open a project", "Project file (*.gproj){.gproj},.*", false);//, m_DefaultProjectsFolder);
+            }
         }
         ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
         if (ImGui::Button("NEW", ImVec2(buttonWidth, 0.0f)))
@@ -514,22 +393,26 @@ namespace Glory::EditorLauncher
 
         ImGui::Text("Installs");
         ImGui::SameLine(regionWidth - buttonWidth * 2.0f);
+        ImGui::BeginDisabled(true);
         if (ImGui::Button("Locate", ImVec2(buttonWidth, 0.0f)))
         {
-            FileBrowserCallback = [&](const std::string& path)
+            const char* filters[1] = { "GloryEditor.dll" };
+            const char* path = tinyfd_openFileDialog("Open Editor", ".\\", 1, filters, "GloryEditor.dll", false);
+
+            if (path)
             {
                 if (!std::filesystem::exists(path))
                 {
                     return;
                 }
-            };
-            ifd::FileDialog::Instance().Open(FILEDIALOG_ID, "Open GloryEditor.dll", "GloryEditor (GloryEditor.dll){GloryEditor.gproj}", false);//, m_DefaultProjectsFolder);
+            }
         }
         ImGui::SameLine(regionWidth - buttonWidth + 8.0f);
         if (ImGui::Button("Install Editor", ImVec2(buttonWidth, 0.0f)))
         {
 
         }
+        ImGui::EndDisabled();
 
         static ImGuiTableFlags flags =
             //ImGuiTableFlags_Resizable
@@ -602,14 +485,6 @@ namespace Glory::EditorLauncher
         }
 
         if (m_OpenNewProjectPopup) ImGui::OpenPopup("New Project");
-
-        ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
-        if (ImGui::BeginPopupModal("New Project", &m_OpenNewProjectPopup, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            OnNewProjectPopupGui();
-            ImGui::EndPopup();
-        }
-        else DrawFileDialog();
 
         if (m_OpenProjectOpenError) ImGui::OpenPopup("Error Opening Project");
         HubWindow* pHubWindow = m_pImGuiImpl->GetHubWindow();

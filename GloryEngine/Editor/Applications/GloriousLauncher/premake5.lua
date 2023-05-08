@@ -28,13 +28,14 @@ project "GloriousLauncher"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.FA}",
 		"%{GloryIncludeDir.api}",
 		"%{rapidjson}",
 
 		"%{IncludeDir.glm}",
 		"%{DepIncludesDir}",
+
+		"%{rootDir}/third-party/tinyfiledialogs"
 	}
 
 	libdirs
@@ -54,9 +55,8 @@ project "GloriousLauncher"
 		"GloryCore",
 		"GloryAPI",
 		"ImGui",
-		"ImFileDialog",
 		"yaml-cpp",
-
+		"tinyfiledialogs",
 		"GloryReflectStatic",
 	}
 
