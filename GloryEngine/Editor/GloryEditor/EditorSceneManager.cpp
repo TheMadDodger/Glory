@@ -1,5 +1,4 @@
 #include "EditorSceneManager.h"
-#include "FileDialog.h"
 #include "Selection.h"
 #include "EditorAssetDatabase.h"
 #include "CreateObjectAction.h"
@@ -9,6 +8,7 @@
 #include <ScenesModule.h>
 #include <Serializer.h>
 #include <TitleBar.h>
+#include <tinyfiledialogs.h>
 
 namespace Glory::Editor
 {
@@ -136,24 +136,25 @@ namespace Glory::Editor
 	void EditorSceneManager::SaveSceneAs(UUID uuid)
 	{
 		m_CurrentlySavingScene = uuid;
-		FileDialog::Save("SceneSaveDialog", "Save scene", "Glory Scene (*.gscene){.gscene}", Game::GetAssetPath(), [&](const std::string& result)
+
+		const char* filters[1] = { "*.gscene" };
+		const char* path = tinyfd_saveFileDialog("Save Scene", Game::GetAssetPath().data(), 1, filters, "Glory Scene");
+
+		if (!path) return;
+
+		std::filesystem::path relativePath = path;
+		relativePath = relativePath.lexically_relative(Game::GetAssetPath());
+		UUID existingAsset = EditorAssetDatabase::FindAssetUUID(relativePath.string());
+
+		if (existingAsset != 0)
 		{
-			if (result == "") return;
+			Save(m_CurrentlySavingScene, path);
+			CloseScene(m_CurrentlySavingScene);
+			OpenScene(existingAsset, true);
+			return;
+		}
 
-			std::filesystem::path relativePath = result;
-			relativePath = relativePath.lexically_relative(Game::GetAssetPath());
-			UUID existingAsset = EditorAssetDatabase::FindAssetUUID(relativePath.string());
-
-			if (existingAsset != 0)
-			{
-				Save(m_CurrentlySavingScene, result);
-				CloseScene(m_CurrentlySavingScene);
-				OpenScene(existingAsset, true);
-				return;
-			}
-
-			Save(m_CurrentlySavingScene, result, true);
-		});
+		Save(m_CurrentlySavingScene, path, true);
 	}
 
 	void EditorSceneManager::SerializeOpenScenes(YAML::Emitter& out)

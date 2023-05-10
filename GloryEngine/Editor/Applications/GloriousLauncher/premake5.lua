@@ -46,7 +46,6 @@ project "GloriousLauncher"
 		"%{LibDirs.GloryECS}",
 
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
 	}
 

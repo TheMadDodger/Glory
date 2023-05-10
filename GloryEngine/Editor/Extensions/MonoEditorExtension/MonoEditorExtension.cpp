@@ -1,6 +1,5 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
-#include "FileDialog.h"
 
 #include <EditorAssetDatabase.h>
 #include <EditorPreferencesWindow.h>
@@ -19,12 +18,13 @@
 #include <string>
 #include <MonoLibManager.h>
 #include <EditorApplication.h>
+#include <MenuBar.h>
 
 #include <tchar.h>
 #include <locale>
 #include <codecvt>
 #include <windows.h>
-#include <MenuBar.h>
+#include <tinyfiledialogs.h>
 
 Glory::Editor::BaseEditorExtension* LoadExtension()
 {
@@ -99,8 +99,8 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::FindVisualStudioPath()
 	{
-		const std::filesystem::path x64Path = "C:/Program Files/Microsoft Visual Studio";
-		const std::filesystem::path x86Path = "C:/Program Files (x86)/Microsoft Visual Studio";
+		const std::filesystem::path x64Path = "C:\\Program Files\\Microsoft Visual Studio";
+		const std::filesystem::path x86Path = "C:\\Program Files (x86)\\Microsoft Visual Studio";
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
@@ -160,7 +160,7 @@ namespace Glory::Editor
 
 	bool MonoEditorExtension::FindMSBuild(std::filesystem::path& path)
 	{
-		path.append("MSBuild/Current/Bin/MSBuild.exe");
+		path.append("MSBuild\\Current\\Bin\\MSBuild.exe");
 		return std::filesystem::exists(path);
 	}
 
@@ -411,14 +411,17 @@ namespace Glory::Editor
 		ImGui::SetCursorPosX(cursorX + availableWidth - 100);
 		if (ImGui::Button("Browse", { 100.0f, 0.0f }))
 		{
-			FileDialog::Open("visualstudiopath", "Visual Studio Installation", "", false, visualStudioPath.string().c_str(), [&](const std::string& path) {
-				if (FindMSBuild(std::filesystem::path(path)))
-				{
-					settings["Mono/VisualStudioPath"].Set(path);
-					return;
-				}
-				Debug::LogWarning("Invalid Visual Studio Path");
-			});
+			const char* filters[1] = { "*.gproj" };
+			const char* path = tinyfd_selectFolderDialog("Select Visual Studio Installation", visualStudioPath.string().data());
+
+			if (!path) return;
+
+			if (FindMSBuild(std::filesystem::path(path)))
+			{
+				settings["Mono/VisualStudioPath"].Set(path);
+				return;
+			}
+			Debug::LogWarning("Invalid Visual Studio Path");
 		}
 	}
 }

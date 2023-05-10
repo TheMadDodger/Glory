@@ -28,7 +28,6 @@ project "GloryEditorOGL"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.ImFileDialog}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.editor}",
@@ -46,7 +45,6 @@ project "GloryEditorOGL"
 		"%{LibDirs.glory}",
 		"%{LibDirs.glory}/Modules/GloryOpenGLGraphics",
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
@@ -66,7 +64,6 @@ project "GloryEditorOGL"
 		"ImGui",
 		"ImGuizmo",
 		"implot",
-		"ImFileDialog",
 
 		"GloryReflectStatic",
 	}

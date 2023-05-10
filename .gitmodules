@@ -14,9 +14,6 @@
 [submodule "GloryEngine/submodules/ImGuizmo"]
 	path = GloryEngine/submodules/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
-[submodule "GloryEngine/submodules/ImFileDialog"]
-	path = GloryEngine/submodules/ImFileDialog
-	url = https://github.com/TheMadDodger/ImFileDialog
 [submodule "GloryEngine/submodules/GloryECS"]
 	path = GloryEngine/submodules/GloryECS
 	url = https://github.com/TheMadDodger/GloryECS
