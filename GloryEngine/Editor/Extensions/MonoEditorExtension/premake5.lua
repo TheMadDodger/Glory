@@ -40,6 +40,8 @@ project "MonoEditorExtension"
 		"%{IncludeDir.Reflect}",
 
 		"%{rapidjson}",
+
+		"%{rootDir}/third-party/tinyfiledialogs"
 	}
 
 	libdirs
@@ -69,7 +71,7 @@ project "MonoEditorExtension"
 		"yaml-cpp",
 		"mono-2.0-sgen",
 		"MonoPosixHelper",
-
+		"tinyfiledialogs",
 		"GloryECSStatic",
 		"GloryReflectStatic"
 	}

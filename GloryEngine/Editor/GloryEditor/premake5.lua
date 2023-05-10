@@ -51,7 +51,6 @@ project "GloryEditor"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
-		"%{IncludeDir.ImFileDialog}",
 		"%{IncludeDir.yaml_cpp}",
 
 		"%{GloryIncludeDir.core}",
@@ -63,6 +62,8 @@ project "GloryEditor"
 		"%{IncludeDir.Reflect}",
 
 		"%{rapidjson}",
+
+		"%{rootDir}/third-party/tinyfiledialogs"
 	}
 
 	libdirs
@@ -71,7 +72,6 @@ project "GloryEditor"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.ImGui}",
-		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
@@ -90,9 +90,9 @@ project "GloryEditor"
 		"ImGui",
 		"ImGuizmo",
 		"implot",
-		"ImFileDialog",
 
 		"GloryReflectStatic",
+		"tinyfiledialogs",
 	}
 
 	defines

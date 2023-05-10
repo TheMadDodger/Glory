@@ -29,7 +29,6 @@ project "Glorious"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
-		"%{IncludeDir.ImFileDialog}",
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
@@ -50,7 +49,6 @@ project "Glorious"
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
-		"%{LibDirs.ImFileDialog}",
 		"%{LibDirs.yaml_cpp}",
 
 		"%{LibDirs.GloryECS}",
@@ -66,7 +64,6 @@ project "Glorious"
 		"ImGui",
 		"ImGuizmo",
 		"implot",
-		"ImFileDialog",
 		"yaml-cpp",
 		"GloryEditor",
 		"GloryReflectStatic",

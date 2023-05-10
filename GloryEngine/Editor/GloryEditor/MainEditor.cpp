@@ -38,7 +38,6 @@
 #include "Gizmos.h"
 #include "ObjectMenu.h"
 #include "ObjectMenuCallbacks.h"
-#include "FileDialog.h"
 #include "ImGuiHelpers.h"
 #include "EnumPropertyDrawer.h"
 #include "StructPropertyDrawer.h"
@@ -124,8 +123,6 @@ namespace Glory::Editor
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
 
-		FileDialog::Initialize();
-
 		Gizmos::Initialize();
 
 		m_Settings.Load(Game::GetGame().GetEngine());
@@ -204,7 +201,6 @@ namespace Glory::Editor
 		PopupManager::OnGUI();
 		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
-		FileDialog::Update();
 		QuitPopup::Draw();
 		VersionPopup::Draw();
 	}

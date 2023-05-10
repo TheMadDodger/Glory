@@ -293,8 +293,6 @@ namespace Glory::EditorLauncher
 				m_BrowsingPath = fullPath.parent_path().string() + "\\";
 				strcpy(m_PathText, m_BrowsingPath.data());
 			}
-
-			//ifd::FileDialog::Instance().Save(FILEDIALOG_ID, "Save project", "Project file (*.gproj){.gproj},.*", m_PathText);
 		}
 
 		bool exists = ProjectExists(m_PathText, m_ProjectNameText);

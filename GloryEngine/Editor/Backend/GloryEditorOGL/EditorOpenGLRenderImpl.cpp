@@ -2,7 +2,6 @@
 #include <Game.h>
 #include <GL/glew.h>
 #include <GLTexture.h>
-#include <ImFileDialog.h>
 
 namespace Glory::Editor
 {
