@@ -12,7 +12,6 @@
 #include <LayerManager.h>
 #include <LightData.h>
 #include <Script.h>
-#include "Entity.h"
 
 #include <AssetReference.h>
 #include <LayerRef.h>
@@ -20,6 +19,8 @@
 #include <map>
 #include <Physics.h>
 #include <ShapeProperty.h>
+
+#include "Entity.h"
 
 REFLECTABLE_ENUM_NS(Glory, CameraPerspective, Orthographic, Perspective)
 REFLECTABLE_ENUM_NS(Glory, PhysicsShapeType, Sphere, Box)

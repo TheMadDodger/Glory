@@ -15,7 +15,7 @@ namespace Glory
 		 * @param v2 Version 2
 		 * @returns -1 if v1 is less than v2, +1 for the opposite, 0 if they are identical
 		 */
-		static int Compare(const Version& v1, const Version& v2);
+		static int Compare(const Version& v1, const Version& v2, bool ignoreRC = false);
 
 		static constexpr char Separator = '.';
 

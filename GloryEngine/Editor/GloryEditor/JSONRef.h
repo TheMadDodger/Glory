@@ -51,6 +51,7 @@ namespace Glory
 		void SetObject();
 		void SetArray();
 		void SetString(const std::string& str);
+		void SetStringFromView(const std::string_view& str);
 		void SetInt(int value);
 		void SetUInt(uint32_t value);
 		void SetUInt64(uint64_t value);

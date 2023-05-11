@@ -61,6 +61,11 @@ namespace Glory
 		Value().SetString(str.data(), m_Document.GetAllocator());
 	}
 
+	void JSONValueRef::SetStringFromView(const std::string_view& str)
+	{
+		Value().SetString(str.data(), m_Document.GetAllocator());
+	}
+
 	void JSONValueRef::SetInt(int value)
 	{
 		Value().SetInt(value);
