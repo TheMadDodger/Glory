@@ -5,6 +5,7 @@
 #include "ProjectSettings.h"
 #include "EditorAssetDatabase.h"
 #include "TitleBar.h"
+#include "ProjectMigrations.h"
 
 #include <filesystem>
 #include <fstream>
@@ -177,6 +178,7 @@ namespace Glory::Editor
 		CreateFolder("Modules");
 		m_ProjectFile = JSONFileRef(m_ProjectFilePath);
 		m_ProjectFile.Load();
+		Migrate(m_pCurrentProject);
 		m_ProjectName = m_ProjectFile["ProjectName"].AsString();
 
 		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnOpen].size(); i++)
