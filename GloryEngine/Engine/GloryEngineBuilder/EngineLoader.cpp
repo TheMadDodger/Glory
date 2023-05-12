@@ -54,6 +54,7 @@ namespace Glory
 		m_pOptionalModules.push_back(new Glory::FileLoaderModule());
 		m_pOptionalModules.push_back(new Glory::MaterialLoaderModule());
 		m_pOptionalModules.push_back(new Glory::MaterialInstanceLoaderModule());
+		m_pOptionalModules.push_back(new Glory::TextureDataLoaderModule());
 		m_pOptionalModules.push_back(new Glory::ShaderSourceLoaderModule());
 
 		for (size_t i = 0; i < m_pScriptingModules.size(); i++)
