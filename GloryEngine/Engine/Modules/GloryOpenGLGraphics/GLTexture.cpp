@@ -29,8 +29,10 @@ namespace Glory
 		return m_TextureID;
 	}
 
-	GLORY_API void GLTexture::Create(ImageData* pImageData)
+	GLORY_API void GLTexture::Create(TextureData* pTextureData)
 	{
+		ImageData* pImageData = pTextureData->Image();
+
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
 
 		GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_InternalFormat);

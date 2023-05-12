@@ -238,7 +238,7 @@ namespace Glory
 			return;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		ImageData* pImage = value ? AssetManager::GetAssetImmediate<ImageData>(value) : nullptr;
+		TextureData* pImage = value ? AssetManager::GetAssetImmediate<TextureData>(value) : nullptr;
 		pMaterial->SetTexture(propNameStr, pImage);
 	}
 
@@ -251,7 +251,7 @@ namespace Glory
 			return false;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		ImageData* pImage = nullptr;
+		TextureData* pImage = nullptr;
 		if (!pMaterial->GetTexture(propNameStr, &pImage)) return false;
 		value = pImage ? pImage->GetUUID() : 0;
 		return true;

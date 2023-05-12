@@ -17,9 +17,9 @@ namespace Glory::Editor
 		auto it = m_pTumbnails.find(uuid);
 		if (it != m_pTumbnails.end())
 		{
-			ImageData* pImage = m_pTumbnails[uuid];
-			if (pResourceManager->ResourceExists(pImage))
-				return pResourceManager->CreateTexture(pImage);
+			ImageData* pTextureData = m_pTumbnails.at(uuid);
+			if (pResourceManager->ResourceExists(pTextureData->Subresource(0)))
+				return pResourceManager->CreateTexture((TextureData*)pTextureData->Subresource(0));
 			return EditorAssets::GetTexture("file");
 		}
 
@@ -35,7 +35,7 @@ namespace Glory::Editor
 		if (pImage == nullptr)
 			return EditorAssets::GetTexture("file");
 
-		m_pTumbnails[uuid] = pImage;
+		m_pTumbnails.emplace(uuid, pImage);
 		EditorAssets::EnqueueTextureCreation(pImage);
 		return EditorAssets::GetTexture("file");
 	}

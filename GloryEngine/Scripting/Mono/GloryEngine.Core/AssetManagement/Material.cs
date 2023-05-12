@@ -195,8 +195,8 @@ namespace GloryEngine
         /// If the property is not found nothing happens
         /// </summary>
         /// <param name="propertyName">Name of the property</param>
-        /// <param name="value">Image to bind the property to</param>
-        public void SetTexture(string propertyName, Image value)
+        /// <param name="value">Texture to bind the property to</param>
+        public void SetTexture(string propertyName, Texture value)
         {
             Material_SetTexture(_objectID, propertyName, value != null ? value.ID : 0);
         }
@@ -205,15 +205,15 @@ namespace GloryEngine
         /// Get the texture currently bound to a property
         /// </summary>
         /// <param name="propertyName">Name of the property</param>
-        /// <param name="value">The out image</param>
+        /// <param name="value">The out Texture</param>
         /// <returns>True if successfull, false if the property does not exist</returns>
-        public bool GetTexture(string propertyName, out Image value)
+        public bool GetTexture(string propertyName, out Texture value)
         {
             value = null;
             UInt64 imageID;
             if (!Material_GetTexture(_objectID, propertyName, out imageID)) return false;
             if (imageID == 0) return true;
-            value = AssetManager.MakeResource<Image>(imageID);
+            value = AssetManager.MakeResource<Texture>(imageID);
             return true;
         }
 
