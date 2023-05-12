@@ -118,7 +118,7 @@ namespace Glory
 		return m_pBaseMaterial ? m_pBaseMaterial->GetPropertyInfoIndex(name, index) : false;
 	}
 
-	AssetReference<ImageData>* MaterialInstanceData::GetResourceUUIDPointer(size_t index)
+	AssetReference<TextureData>* MaterialInstanceData::GetResourceUUIDPointer(size_t index)
 	{
 		size_t propertyIndex = GetPropertyIndexFromResourceIndex(index);
 		return m_PropertyOverridesEnable[propertyIndex] ? &m_Resources[index] : m_pBaseMaterial->GetResourceUUIDPointer(index);

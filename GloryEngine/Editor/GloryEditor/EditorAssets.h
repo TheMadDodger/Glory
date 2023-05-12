@@ -38,6 +38,6 @@ namespace Glory::Editor
 		static std::vector<ImageData*> m_pEditorImages;
 		static std::unordered_map<std::string, Texture*> m_pTextures;
 		static std::mutex m_QueueLock;
-		static std::vector<ImageData*> m_pTextureCreationQueue;
+		static std::vector<TextureData*> m_pTextureCreationQueue;
 	};
 }

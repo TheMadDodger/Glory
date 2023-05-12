@@ -7,7 +7,10 @@ namespace Glory
 	{
     public:
         TextureData();
+        TextureData(ImageData* pImageData);
         virtual ~TextureData();
+
+        ImageData* Image();
 
     private:
         friend class TextureDataLoaderModule;

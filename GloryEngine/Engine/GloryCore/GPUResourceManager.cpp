@@ -137,16 +137,16 @@ namespace Glory
 		return pMaterial;
 	}
 
-	Texture* GPUResourceManager::CreateTexture(ImageData* pImageData)
+	Texture* GPUResourceManager::CreateTexture(TextureData* pTextureData)
 	{
-		Texture* pTexture = GetResource<Texture>(pImageData);
+		Texture* pTexture = GetResource<Texture>(pTextureData);
 		if (pTexture) return pTexture;
 
 		Profiler::BeginSample("GPUResourceManager::CreateTexture");
-		pTexture = CreateTexture_Internal(pImageData);
-		pTexture->m_UUID = pImageData->GetGPUUUID();
-		pTexture->Create(pImageData);
-		m_IDResources[pImageData->GetGPUUUID()] = pTexture;
+		pTexture = CreateTexture_Internal(pTextureData);
+		pTexture->m_UUID = pTextureData->GetGPUUUID();
+		pTexture->Create(pTextureData);
+		m_IDResources[pTextureData->GetGPUUUID()] = pTexture;
 		Profiler::EndSample();
 		return pTexture;
 	}
