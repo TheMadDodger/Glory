@@ -260,6 +260,22 @@ namespace Glory
         { PrimitiveType::PT_Patches, GL_PATCHES },
     };
 
+    const std::map<Filter, GLint> GLConverter::TO_GLFILTER = {
+        { Filter::F_Linear, GL_LINEAR },
+        { Filter::F_Nearest, GL_NEAREST },
+        { Filter::F_CubicEXT, GL_CUBIC_EXT },
+        { Filter::F_CubicIMG, GL_CUBIC_IMG },
+    };
+
+    const std::map<SamplerAddressMode, GLint> GLConverter::TO_GLTEXTUREWRAP = {
+        { SamplerAddressMode::SAM_Repeat, GL_REPEAT },
+        { SamplerAddressMode::SAM_ClampToEdge, GL_CLAMP_TO_EDGE },
+        { SamplerAddressMode::SAM_ClampToBorder, GL_CLAMP_TO_BORDER },
+        { SamplerAddressMode::SAM_MirroredRepeat, GL_MIRRORED_REPEAT },
+        { SamplerAddressMode::SAM_MirrorClampToEdge, GL_MIRROR_CLAMP_TO_EDGE },
+        { SamplerAddressMode::SAM_MirrorClampToEdgeKHR, GL_MIRROR_CLAMP_TO_EDGE_EXT },
+    };
+
     GLuint GLConverter::GetGLImageType(const ImageType& imageType)
     {
         switch (imageType)

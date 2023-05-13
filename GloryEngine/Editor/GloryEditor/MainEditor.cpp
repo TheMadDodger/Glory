@@ -3,6 +3,7 @@
 #include <Engine.h>
 #include <ImGuizmo.h>
 #include <Serializer.h>
+#include <TextureDataEditor.h>
 
 #include "EditorApplication.h"
 #include "MainEditor.h"
@@ -429,6 +430,7 @@ namespace Glory::Editor
 
 	void MainEditor::RegisterEditors()
 	{
+		Editor::RegisterEditor<TextureDataEditor>();
 		Editor::RegisterEditor<MaterialEditor>();
 		Editor::RegisterEditor<MaterialInstanceEditor>();
 	}

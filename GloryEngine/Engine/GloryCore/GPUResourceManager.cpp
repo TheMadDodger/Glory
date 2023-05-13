@@ -140,10 +140,16 @@ namespace Glory
 	Texture* GPUResourceManager::CreateTexture(TextureData* pTextureData)
 	{
 		Texture* pTexture = GetResource<Texture>(pTextureData);
-		if (pTexture) return pTexture;
+		if (pTexture)
+		{
+			if (pTexture->IsDirty())
+				pTexture->Create(pTextureData);
+			return pTexture;
+		}
 
 		Profiler::BeginSample("GPUResourceManager::CreateTexture");
 		pTexture = CreateTexture_Internal(pTextureData);
+		if (!pTexture) return nullptr;
 		pTexture->m_UUID = pTextureData->GetGPUUUID();
 		pTexture->Create(pTextureData);
 		m_IDResources[pTextureData->GetGPUUUID()] = pTexture;
@@ -201,5 +207,12 @@ namespace Glory
 	bool GPUResourceManager::ResourceExists(Resource* pResource)
 	{
 		return m_IDResources.find(pResource->GetGPUUUID()) != m_IDResources.end();
+	}
+
+	void GPUResourceManager::SetDirty(UUID uuid)
+	{
+		auto itor = m_IDResources.find(uuid);
+		if (itor == m_IDResources.end()) return;
+		itor->second->m_IsDirty = true;
 	}
 }

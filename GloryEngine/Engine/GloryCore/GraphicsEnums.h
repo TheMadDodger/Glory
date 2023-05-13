@@ -1,4 +1,29 @@
 #pragma once
+#include <Reflection.h>
+
+REFLECTABLE_ENUM_NS(Glory, Filter,
+    F_Nearest,
+    F_Linear,
+    F_CubicIMG,
+    F_CubicEXT);
+
+REFLECTABLE_ENUM_NS(Glory, SamplerAddressMode,
+    SAM_Repeat,
+    SAM_MirroredRepeat,
+    SAM_ClampToEdge,
+    SAM_ClampToBorder,
+    SAM_MirrorClampToEdge,
+    SAM_MirrorClampToEdgeKHR);
+
+REFLECTABLE_ENUM_NS(Glory, CompareOp,
+    OP_Never,
+    OP_Less,
+    OP_Equal,
+    OP_LessOrEqual,
+    OP_Greater,
+    OP_NotEqual,
+    OP_GreaterOrEqual,
+    OP_Always);
 
 namespace Glory
 {
@@ -337,38 +362,15 @@ namespace Glory
 		IA_Plane2KHR		= 0x00002000,
 	};
 
-	enum class Filter
-	{
-		F_Nearest,
-		F_Linear,
-		F_CubicIMG,
-		F_CubicEXT,
-	};
-
-	enum class SamplerAddressMode
-	{
-		SAM_Repeat,
-		SAM_MirroredRepeat,
-		SAM_ClampToEdge,
-		SAM_ClampToBorder,
-		SAM_MirrorClampToEdge,
-		SAM_MirrorClampToEdgeKHR,
-	};
-
-	enum class CompareOp
-	{
-		OP_Never,
-		OP_Less,
-		OP_Equal,
-		OP_LessOrEqual,
-		OP_Greater,
-		OP_NotEqual,
-		OP_GreaterOrEqual,
-		OP_Always,
-	};
-
 	struct SamplerSettings
 	{
+        SamplerSettings() : MagFilter(Filter::F_Nearest), MinFilter(Filter::F_Nearest),
+            AddressModeU(SamplerAddressMode::SAM_Repeat), AddressModeV(SamplerAddressMode::SAM_Repeat),
+            AddressModeW(SamplerAddressMode::SAM_Repeat), AnisotropyEnable(false), MaxAnisotropy(1.f),
+            UnnormalizedCoordinates(false), CompareEnable(false), CompareOp(CompareOp::OP_Never),
+            MipmapMode(Filter::F_Nearest), MipLODBias(0.0f), MinLOD(0.f), MaxLOD(0.f)
+        {};
+
 		Filter MagFilter;
 		Filter MinFilter;
 		SamplerAddressMode AddressModeU;

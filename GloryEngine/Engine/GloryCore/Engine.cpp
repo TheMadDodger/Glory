@@ -329,6 +329,10 @@ namespace Glory
 		GloryReflect::Reflect::RegisterEnum<InputState>();
 		GloryReflect::Reflect::RegisterEnum<AxisBlending>();
 
+		GloryReflect::Reflect::RegisterEnum<Filter>();
+		GloryReflect::Reflect::RegisterEnum<SamplerAddressMode>();
+		GloryReflect::Reflect::RegisterEnum<CompareOp>();
+
 		/* Physics types */
 		GloryReflect::Reflect::RegisterEnum<BodyType>();
 		GloryReflect::Reflect::RegisterEnum<ShapeType>();
