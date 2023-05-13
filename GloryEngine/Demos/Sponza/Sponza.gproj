@@ -1694,6 +1694,693 @@
                 "Hash": 3098219186,
                 "SerializedVersion": 0
             }
+        },
+        "3389196519412227173": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_0.png",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_0",
+                "UUID": 3389196519412227173,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "10648157664063813230": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_01.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_01",
+                "UUID": 10648157664063813230,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "248651002552724616": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_02.png",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_02",
+                "UUID": 248651002552724616,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "7311119110290688398": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_03.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_03",
+                "UUID": 7311119110290688398,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "15608506942847383620": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_04.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_04",
+                "UUID": 15608506942847383620,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "11326412845372105062": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_05.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_05",
+                "UUID": 11326412845372105062,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "1683741461712643638": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_06.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_06",
+                "UUID": 1683741461712643638,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "12051672819414949732": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_07.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_07",
+                "UUID": 12051672819414949732,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "2017732343929085740": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_08.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_08",
+                "UUID": 2017732343929085740,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "9006037442915690805": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_09.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_09",
+                "UUID": 9006037442915690805,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "10657555301837960534": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_10.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_10",
+                "UUID": 10657555301837960534,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "14750351488643243024": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_11.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_11",
+                "UUID": 14750351488643243024,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "11907371281933135908": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_12.png",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_12",
+                "UUID": 11907371281933135908,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "2862505044673683575": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_13.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_13",
+                "UUID": 2862505044673683575,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "8221495873546758371": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_14.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_14",
+                "UUID": 8221495873546758371,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "17410421498144710498": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_15.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_15",
+                "UUID": 17410421498144710498,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "1115597097930247024": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_16.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_16",
+                "UUID": 1115597097930247024,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "14745877014014286399": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_17.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_17",
+                "UUID": 14745877014014286399,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "13174680235897273844": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_18.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_18",
+                "UUID": 13174680235897273844,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "2557816623246813881": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_19.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_19",
+                "UUID": 2557816623246813881,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "13271798497848458159": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_20.png",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".png",
+                "Name": "Color_20",
+                "UUID": 13271798497848458159,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "15227899384936924890": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_21.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_21",
+                "UUID": 15227899384936924890,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "8441844654741203962": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_22.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_22",
+                "UUID": 8441844654741203962,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "5403809863264816822": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_23.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_23",
+                "UUID": 5403809863264816822,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "846981225561350745": {
+            "Location": {
+                "Path": "Textures\\Color\\Color_24.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Color_24",
+                "UUID": 846981225561350745,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "1202166823444648380": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_00.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_00",
+                "UUID": 1202166823444648380,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "13063020126169683518": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_01.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_01",
+                "UUID": 13063020126169683518,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "10523856049139518251": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_02.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_02",
+                "UUID": 10523856049139518251,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "968211521954784084": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_03.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_03",
+                "UUID": 968211521954784084,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "7792383246214602619": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_04.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_04",
+                "UUID": 7792383246214602619,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "11506145675021224560": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_05.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_05",
+                "UUID": 11506145675021224560,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "13160096475191642374": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_06.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_06",
+                "UUID": 13160096475191642374,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "13967464072007596334": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_07.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_07",
+                "UUID": 13967464072007596334,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "6159757422447268135": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_08.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_08",
+                "UUID": 6159757422447268135,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "12501074980098246513": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_09.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_09",
+                "UUID": 12501074980098246513,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "16827006852828381323": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_10.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_10",
+                "UUID": 16827006852828381323,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "12971034562412315897": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_11.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_11",
+                "UUID": 12971034562412315897,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "3677734753038755219": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_13.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_13",
+                "UUID": 3677734753038755219,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "5609165062124881700": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_14.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_14",
+                "UUID": 5609165062124881700,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "17712964304395913047": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_15.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_15",
+                "UUID": 17712964304395913047,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "15379173467276368062": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_16.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_16",
+                "UUID": 15379173467276368062,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "8100111982032519534": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_17.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_17",
+                "UUID": 8100111982032519534,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "2453052861271600386": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_18.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_18",
+                "UUID": 2453052861271600386,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "18207904132524784940": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_19.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_19",
+                "UUID": 18207904132524784940,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "5399757633365986715": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_20.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_20",
+                "UUID": 5399757633365986715,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "5426981673806397786": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_21.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_21",
+                "UUID": 5426981673806397786,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "5861441182087585417": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_22.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_22",
+                "UUID": 5861441182087585417,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "17964919923294083593": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_23.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_23",
+                "UUID": 17964919923294083593,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
+        },
+        "1750837155511528038": {
+            "Location": {
+                "Path": "Textures\\Normal\\Normal_24.jpg",
+                "SubresourcePath": "Default",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".jpg",
+                "Name": "Normal_24",
+                "UUID": 1750837155511528038,
+                "Hash": 1187257381,
+                "SerializedVersion": 0
+            }
         }
-    }
+    },
+    "EditorVersion": "0.1.1"
 }
