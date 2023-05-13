@@ -12,10 +12,12 @@ namespace Glory
         virtual ~TextureData();
 
         AssetReference<ImageData>& Image();
+        SamplerSettings& GetSamplerSettings();
 
     private:
         friend class TextureDataLoaderModule;
         friend class ImageLoaderModule;
         AssetReference<ImageData> m_Image;
+        SamplerSettings m_SamplerSettings;
 	};
 }

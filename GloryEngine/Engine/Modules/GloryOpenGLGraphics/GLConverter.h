@@ -15,6 +15,8 @@ namespace Glory
 		static const std::map<BufferBindingTarget, GLuint> TO_GLBUFFERTARGET;
 		static const std::map<MemoryUsage, GLuint> TO_GLBUFFERUSAGE;
 		static const std::map<PrimitiveType, GLuint> TO_GLPRIMITIVETYPE;
+		static const std::map<Filter, GLint> TO_GLFILTER;
+		static const std::map<SamplerAddressMode, GLint> TO_GLTEXTUREWRAP;
 
 	private:
 		GLConverter() {}

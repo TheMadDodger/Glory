@@ -35,6 +35,8 @@ namespace Glory
 
 		bool ResourceExists(Resource* pResource);
 
+		void SetDirty(UUID uuid);
+
 	protected: // Internal functions
 		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
