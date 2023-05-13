@@ -1,5 +1,6 @@
 #include "ProjectMigrations.h"
 #include "EditorAssetDatabase.h"
+#include "AssetCompiler.h"
 
 #include <JSONRef.h>
 #include <TextureData.h>

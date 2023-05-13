@@ -60,7 +60,9 @@ namespace Glory
 
 	Texture* OGLResourceManager::CreateTexture_Internal(TextureData* pTextureData)
 	{
-		ImageData* pImageData = pTextureData->Image();
+		Resource* pParent = pTextureData->ParentResource();
+		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate();
 		return new GLTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, 0, 0, ImageAspect::IA_Color);
 	}
 

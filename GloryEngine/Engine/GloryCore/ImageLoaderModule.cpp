@@ -22,7 +22,7 @@ namespace Glory
 
 		/* Default TextureData */
 		TextureData* pDefualtTexture = new TextureData();
-		pDefualtTexture->m_pImage = pImage;
+		pDefualtTexture->m_Image = pImage;
 		pImage->AddSubresource(pDefualtTexture, "Default");
 
 		Profiler::EndSample();
@@ -42,7 +42,7 @@ namespace Glory
 
 		/* Default TextureData */
 		TextureData* pDefualtTexture = new TextureData();
-		pDefualtTexture->m_pImage = pImage;
+		pDefualtTexture->m_Image = pImage;
 		pImage->AddSubresource(pDefualtTexture, "Default");
 
 		Profiler::EndSample();

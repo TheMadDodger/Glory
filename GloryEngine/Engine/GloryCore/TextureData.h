@@ -1,5 +1,6 @@
 #pragma once
 #include "ImageData.h"
+#include "AssetReference.h"
 
 namespace Glory
 {
@@ -10,11 +11,11 @@ namespace Glory
         TextureData(ImageData* pImageData);
         virtual ~TextureData();
 
-        ImageData* Image();
+        AssetReference<ImageData>& Image();
 
     private:
         friend class TextureDataLoaderModule;
         friend class ImageLoaderModule;
-        ImageData* m_pImage;
+        AssetReference<ImageData> m_Image;
 	};
 }
