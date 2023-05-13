@@ -19,16 +19,17 @@ env:
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
-  
+
   BUILD_PATH: ./GloryEngine/Build/Release/x64/Launcher
 
 permissions:
   contents: read
 
 jobs:
-  build-editor-win32:
+  build-editor-win64:
     runs-on: windows-latest
     environment: 'release'
+    if: ${{ false }}  # disable for now
 
     steps:
     - name: Checkout repo and submodules
@@ -36,7 +37,7 @@ jobs:
       with:
         lfs: true
         submodules: recursive
-        
+
     - name: Checkout LFS objects
       run: git lfs checkout
 
@@ -51,12 +52,12 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-  
+
     - name: Install dependencies
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: sh ./install-dependencies.sh Release
       shell: bash
-  
+
     - name: Run premake5
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: ${{env.PREMAKE_PATH}} ${{env.PREMAKE_ARG}}
@@ -68,11 +69,67 @@ jobs:
     - name: Build
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 .
-  
+
     - name: Upload editor Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
         name: editor-zip
         path: ${{env.BUILD_PATH}}
         retention-days: 30
-    
+
+  deploy:
+    #needs: build-editor-win64
+    runs-on: ubuntu-latest
+    environment: 'release'
+
+    steps:
+    #- name: Download editor zip artifact
+    #  uses: actions/download-artifact@v3
+    #  with:
+    #    name: editor-zip
+    #    path: ./download
+
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        # Optional, workflow file name or ID
+        # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
+        workflow: release.yml
+        # Optional, the status or conclusion of a completed workflow to search for
+        # Can be one of a workflow conclusion:
+        #   "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
+        # Or a workflow status:
+        #   "completed", "in_progress", "queued"
+        # Use the empty string ("") to ignore status or conclusion in the search
+        workflow_conclusion: success
+        # Optional, run number from the workflow
+        run_number: 5
+        # Optional, uploaded artifact name,
+        # will download all artifacts if not specified
+        # and extract them into respective subdirectories
+        # https://github.com/actions/download-artifact#download-all-artifacts
+        # is treated as a regular expression if input name_is_regexp is true
+        # will download only those artifacts with a name that matches this regular expression
+        # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
+        name: editor-zip
+        # Optional, check the workflow run to whether it has an artifact
+        # then will get the last available artifact from the previous workflow
+        # default false, just try to download from the last one
+        check_artifacts: true
+        # Optional, search for the last workflow run whose stored an artifact named as in `name` input
+        # default false
+        search_artifacts: false
+        # Optional, choose to skip unpacking the downloaded artifact(s)
+        # default false
+        skip_unpack: true
+
+    - name: Upload to server
+      uses: fjogeleit/http-request-action@v1.14.0
+      with:
+        timeout: 9999999
+        url: 'https://glory-engine.com/api/upload-version'
+        method: 'POST'
+        customHeaders: '{"Connection": "keep-alive", "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br"}'
+        data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "0.1.0.rc-4", "generalChanges": "Test lol"}'
+        files: '{"windowsFile": "editor-zip.zip"}'

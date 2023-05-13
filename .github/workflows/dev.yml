@@ -18,14 +18,14 @@ env:
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
-  
+
   BUILD_PATH: ./GloryEngine/Build/Release/x64/Launcher
 
 permissions:
   contents: read
 
 jobs:
-  build-editor-win32:
+  build-editor-win64:
     runs-on: windows-latest
     environment: 'dev'
 
@@ -35,7 +35,7 @@ jobs:
       with:
         lfs: true
         submodules: recursive
-        
+
     - name: Checkout LFS objects
       run: git lfs checkout
 
@@ -50,12 +50,12 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-  
+
     - name: Install dependencies
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: sh ./install-dependencies.sh Release
       shell: bash
-  
+
     - name: Run premake5
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: ${{env.PREMAKE_PATH}} ${{env.PREMAKE_ARG}}
@@ -67,11 +67,10 @@ jobs:
     - name: Build
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 .
-  
+
     - name: Upload editor Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
         name: editor-zip
         path: ${{env.BUILD_PATH}}
         retention-days: 30
-    
