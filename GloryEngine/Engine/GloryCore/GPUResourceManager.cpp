@@ -143,7 +143,10 @@ namespace Glory
 		if (pTexture)
 		{
 			if (pTexture->IsDirty())
+			{
 				pTexture->Create(pTextureData);
+				pTexture->SetDirty(false);
+			}
 			return pTexture;
 		}
 

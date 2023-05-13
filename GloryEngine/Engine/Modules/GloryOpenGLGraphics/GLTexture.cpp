@@ -45,20 +45,15 @@ namespace Glory
 		{
 			glGenTextures(1, &m_TextureID);
 			OpenGLGraphicsModule::LogGLError(glGetError());
-			glBindTexture(m_GLImageType, m_TextureID);
-			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
 
-			glTexImage2D(m_GLImageType, 0, internalFormat, (GLsizei)pImageData->GetWidth(), (GLsizei)pImageData->GetHeight(), 0, format, GL_UNSIGNED_BYTE, pImageData->GetPixels());
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-		else
-		{
-			glBindTexture(m_GLImageType, m_TextureID);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
+		glBindTexture(m_GLImageType, m_TextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glTexImage2D(m_GLImageType, 0, internalFormat, (GLsizei)pImageData->GetWidth(), (GLsizei)pImageData->GetHeight(), 0, format, GL_UNSIGNED_BYTE, pImageData->GetPixels());
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
-
 		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GLConverter::TO_GLFILTER.at(sampler.MinFilter));
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GLConverter::TO_GLFILTER.at(sampler.MagFilter));

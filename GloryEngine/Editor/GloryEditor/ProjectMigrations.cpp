@@ -84,9 +84,7 @@ namespace Glory::Editor
             location["Index"].SetUInt(0);
 
             metaData["Extension"].SetStringFromView(asset["Metadata/Extension"].AsString());
-            std::stringstream str;
-            str << asset["Metadata/Name"].AsString() << "\\Default";
-            metaData["Name"].SetString(str.str());
+            metaData["Name"].SetStringFromView(asset["Metadata/Name"].AsString());
             metaData["UUID"].SetUInt64(newUUID);
             metaData["Hash"].SetUInt(ResourceType::GetHash<TextureData>());
             metaData["SerializedVersion"].SetUInt(0);
