@@ -17,10 +17,7 @@ namespace Glory::Editor
 	{
 		TextureData* pTextureData = (TextureData*)m_pTarget;
 		AssetReference<ImageData>& imageRef = pTextureData->Image();
-		const bool exists = EditorAssetDatabase::AssetExists(imageRef.AssetUUID());
-		ImGui::BeginDisabled(exists);
 		bool change = AssetPicker::ResourceDropdown("Image", ResourceType::GetHash<ImageData>(), imageRef.AssetUUIDMember());
-		ImGui::EndDisabled();
 
 		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
 		change |= EditorUI::InputEnum<Filter>("Mag Filter", &sampler.MagFilter);
