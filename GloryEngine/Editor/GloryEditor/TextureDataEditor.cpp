@@ -3,6 +3,7 @@
 #include "EditorAssetDatabase.h"
 #include "PropertyDrawer.h"
 #include "EditorUI.h"
+#include "Tumbnail.h"
 #include <imgui.h>
 #include <ResourceType.h>
 
@@ -31,6 +32,7 @@ namespace Glory::Editor
 		if (change)
 		{
 			Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
+			Tumbnail::SetDirty(pTextureData->GetUUID());
 		}
 		return change;
 	}

@@ -25,6 +25,7 @@
 #include "EditorAssets.h"
 #include "ProjectSpace.h"
 #include "Tumbnail.h"
+#include "ImageTumbnailGenerator.h"
 #include "TextureTumbnailGenerator.h"
 #include "SceneTumbnailGenerator.h"
 #include "Editor.h"
@@ -121,6 +122,7 @@ namespace Glory::Editor
 		//if (ProjectSpace::GetOpenProject() == nullptr)
 		//	m_pProjectPopup->Open();
 
+		Tumbnail::AddGenerator<ImageTumbnailGenerator>();
 		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
 		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
 

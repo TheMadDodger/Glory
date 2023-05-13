@@ -1,26 +1,26 @@
-#include "TextureTumbnailGenerator.h"
+#include "ImageTumbnailGenerator.h"
 #include "AssetManager.h"
 
 namespace Glory::Editor
 {
-	TextureTumbnailGenerator::TextureTumbnailGenerator()
+	ImageTumbnailGenerator::ImageTumbnailGenerator()
 	{
 	}
 
-	TextureTumbnailGenerator::~TextureTumbnailGenerator()
+	ImageTumbnailGenerator::~ImageTumbnailGenerator()
 	{
 	}
 
-	TextureData* TextureTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
+	TextureData* ImageTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
 	{
 		UUID id = pResourceType->ID();
 		if (std::find(m_AlreadyRequestedTumbnails.begin(), m_AlreadyRequestedTumbnails.end(), id) != m_AlreadyRequestedTumbnails.end()) return nullptr;
 
-		if (m_pLoadedTextures.find(id) != m_pLoadedTextures.end())
+		if (m_pLoadedImages.find(id) != m_pLoadedImages.end())
 		{
-			TextureData* pImage = m_pLoadedTextures.at(id);
-			m_pLoadedTextures.erase(id);
-			return pImage;
+			ImageData* pImage = m_pLoadedImages[id];
+			m_pLoadedImages.erase(id);
+			return (TextureData*)pImage->Subresource(0);
 		}
 
 		m_AlreadyRequestedTumbnails.push_back(id);
@@ -29,7 +29,7 @@ namespace Glory::Editor
 		{
 			UUID uuid = pResource->GetUUID();
 			auto it = std::find(m_AlreadyRequestedTumbnails.begin(), m_AlreadyRequestedTumbnails.end(), uuid);
-			m_pLoadedTextures[uuid] = (TextureData*)pResource;
+			m_pLoadedImages[uuid] = (ImageData*)pResource;
 			if (it == m_AlreadyRequestedTumbnails.end()) return;
 			m_AlreadyRequestedTumbnails.erase(it);
 		});

@@ -39,10 +39,10 @@ namespace Glory::Editor
 		m_pTextures.clear();
 	}
 
-	void EditorAssets::EnqueueTextureCreation(ImageData* pImage)
+	void EditorAssets::EnqueueTextureCreation(TextureData* pImage)
 	{
 		std::unique_lock<std::mutex> lock(m_QueueLock);
-		m_pTextureCreationQueue.push_back((TextureData*)pImage->Subresource(0));
+		m_pTextureCreationQueue.push_back(pImage);
 		lock.unlock();
 	}
 
