@@ -40,6 +40,17 @@ namespace Glory
 			Node() = value;
 		}
 
+		template<typename T>
+		void SetEnum(const T& value)
+		{
+			std::string valueStr;
+			if (!GloryReflect::Enum<T>().ToString(value, valueStr)) {
+				Set("");
+				return;
+			}
+			Set(valueStr);
+		}
+
 		void Set(YAML::Node& node);
 
 		template<typename T>
