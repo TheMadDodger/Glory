@@ -363,6 +363,19 @@ namespace Glory::Editor
 		EditorSceneManager::OpenScene(uuid, true);
 	}
 
+	OBJECTMENU_CALLBACK(CreateNewTextureCallback)
+	{
+		std::filesystem::path path = FileBrowser::GetCurrentPath();
+		path = path.append("NewTexture.gtex");
+		path = GetUnqiueFilePath(path);
+		TextureData* pTextureData = new TextureData();
+		EditorAssetDatabase::CreateAsset(pTextureData, path.string());
+
+		FileBrowserItem::GetSelectedFolder()->Refresh();
+		FileBrowserItem::GetSelectedFolder()->SortChildren();
+		FileBrowser::BeginRename(path.filename().string(), false);
+	}
+
 	OBJECTMENU_CALLBACK(CreateNewMaterialCallback)
 	{
 		std::filesystem::path path = FileBrowser::GetCurrentPath();

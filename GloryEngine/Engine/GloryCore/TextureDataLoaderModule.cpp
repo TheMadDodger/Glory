@@ -37,10 +37,7 @@ namespace Glory
     void TextureDataLoaderModule::SaveResource(const std::string& path, TextureData* pResource)
     {
         YAMLFileRef file{ path };
-        file.Load();
-
         file["Image"].Set((uint64_t)pResource->Image().AssetUUID());
-
         file.Save();
     }
 }
