@@ -73,4 +73,9 @@ namespace Glory
 		const size_t index = itor->second;
 		return Subresource(index);
 	}
+
+	Resource* Resource::ParentResource() const
+	{
+		return m_pParent;
+	}
 }

@@ -40,7 +40,7 @@ project "GloryEditor"
 		["UI"] = { "EditorUI.*", "ListView.*" },
 		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp" },
 		["Asset Management"] = { "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
-		["Migration"] = { "ProjectMigrations.h" }
+		["Migration"] = { "ProjectMigrations.*" }
 	}
 
 	includedirs

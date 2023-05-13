@@ -31,7 +31,9 @@ namespace Glory
 
 	GLORY_API void GLTexture::Create(TextureData* pTextureData)
 	{
-		ImageData* pImageData = pTextureData->Image();
+		Resource* pParent = pTextureData->ParentResource();
+		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate();
 
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
 

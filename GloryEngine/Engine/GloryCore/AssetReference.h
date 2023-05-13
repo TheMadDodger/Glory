@@ -31,6 +31,7 @@ namespace Glory
 	public:
 		AssetReference() : AssetReferenceBase() {}
 		AssetReference(UUID uuid) : AssetReferenceBase(uuid) {}
+		AssetReference(T* pAsset) : AssetReferenceBase(pAsset ? pAsset->GetUUID() : 0) {}
 		virtual ~AssetReference() {}
 
 		virtual const uint32_t TypeHash() override
@@ -47,6 +48,11 @@ namespace Glory
 		T* Get()
 		{
 			return AssetManager::GetOrLoadAsset<T>(m_AssetUUID);
+		}
+
+		T* GetImmediate()
+		{
+			return AssetManager::GetAssetImmediate<T>(m_AssetUUID);
 		}
 	};
 }
