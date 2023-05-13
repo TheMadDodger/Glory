@@ -9,7 +9,7 @@ namespace Glory::Editor
 	public:
 		GLORY_EDITOR_API BaseTumbnailGenerator();
 		virtual GLORY_EDITOR_API ~BaseTumbnailGenerator();
-		virtual GLORY_EDITOR_API ImageData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
+		virtual GLORY_EDITOR_API TextureData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
 		virtual GLORY_EDITOR_API void OnFileDoubleClick(UUID uuid);
 
 	protected:
@@ -28,6 +28,6 @@ namespace Glory::Editor
 		TumbnailGenerator() {}
 		virtual ~TumbnailGenerator() {}
 		const std::type_info& GetAssetType() override { return typeid(T); }
-		virtual ImageData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
+		virtual TextureData* GetTumbnail(const ResourceMeta* pResourceType) = 0;
 	};
 }

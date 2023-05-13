@@ -13,7 +13,7 @@ namespace Glory::Editor
 	{
 	}
 
-	ImageData* MonoScriptTumbnail::GetTumbnail(const ResourceMeta* pResourceType)
+	TextureData* MonoScriptTumbnail::GetTumbnail(const ResourceMeta* pResourceType)
 	{
 		if (!m_pScriptTumbnail)
 		{
@@ -21,7 +21,7 @@ namespace Glory::Editor
 			m_pScriptTumbnail = (ImageData*)pLoader->Load("./EditorAssets/Mono/Code.png");
 		}
 
-		return m_pScriptTumbnail;
+		return (TextureData*)m_pScriptTumbnail->Subresource(0);
 	}
 
 	void MonoScriptTumbnail::OnFileDoubleClick(UUID uuid)

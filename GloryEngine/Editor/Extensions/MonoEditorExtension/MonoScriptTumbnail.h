@@ -10,7 +10,7 @@ namespace Glory::Editor
 		MonoScriptTumbnail();
 		virtual ~MonoScriptTumbnail();
 
-		virtual ImageData* GetTumbnail(const ResourceMeta* pResourceType) override;
+		virtual TextureData* GetTumbnail(const ResourceMeta* pResourceType) override;
 		virtual void OnFileDoubleClick(UUID uuid) override;
 
 	private:

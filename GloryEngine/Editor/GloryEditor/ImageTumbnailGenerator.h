@@ -3,16 +3,16 @@
 
 namespace Glory::Editor
 {
-	class TextureTumbnailGenerator : public TumbnailGenerator<TextureData>
+	class ImageTumbnailGenerator : public TumbnailGenerator<ImageData>
 	{
 	public:
-		TextureTumbnailGenerator();
-		virtual ~TextureTumbnailGenerator();
+		ImageTumbnailGenerator();
+		virtual ~ImageTumbnailGenerator();
 
 		virtual TextureData* GetTumbnail(const ResourceMeta* pResourceType) override;
 
 	private:
 		std::vector<UUID> m_AlreadyRequestedTumbnails;
-		std::map<UUID, TextureData*> m_pLoadedTextures;
+		std::map<UUID, ImageData*> m_pLoadedImages;
 	};
 }

@@ -22,7 +22,7 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API void LoadAssets();
 		static GLORY_EDITOR_API void Destroy();
-		static GLORY_EDITOR_API void EnqueueTextureCreation(ImageData* pImage);
+		static GLORY_EDITOR_API void EnqueueTextureCreation(TextureData* pImage);
 
 		static GLORY_EDITOR_API Texture* GetTexture(const std::string& key);
 
