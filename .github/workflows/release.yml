@@ -87,7 +87,7 @@ jobs:
     #  uses: actions/download-artifact@v3
     #  with:
     #    name: editor-zip
-    #    path: ./download
+    #    path: artifacts/windows
 
     - name: Download artifact
       id: download-artifact
@@ -104,7 +104,7 @@ jobs:
         # Use the empty string ("") to ignore status or conclusion in the search
         workflow_conclusion: success
         # Optional, run number from the workflow
-        run_number: 5
+        run_number: 32
         # Optional, uploaded artifact name,
         # will download all artifacts if not specified
         # and extract them into respective subdirectories
@@ -113,16 +113,30 @@ jobs:
         # will download only those artifacts with a name that matches this regular expression
         # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
         name: editor-zip
+        # Optional, a directory where to extract artifact(s), defaults to the current directory
+        path: artifacts/windows
         # Optional, check the workflow run to whether it has an artifact
         # then will get the last available artifact from the previous workflow
         # default false, just try to download from the last one
-        check_artifacts: true
+        check_artifacts: false
         # Optional, search for the last workflow run whose stored an artifact named as in `name` input
         # default false
         search_artifacts: false
         # Optional, choose to skip unpacking the downloaded artifact(s)
         # default false
-        skip_unpack: true
+        skip_unpack: false
+
+    - name: Read version file
+      id: appVersion
+      uses: juliangruber/read-file-action@v1.1.6
+      with:
+        path: artifacts/windows/Editor/Any/version.txt
+
+    - name: Zip windows editor
+      uses: vimtor/action-zip@v1.1
+      with:
+          files: artifacts/windows/
+          dest: archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip
 
     - name: Upload to server
       uses: fjogeleit/http-request-action@v1.14.0
@@ -131,5 +145,5 @@ jobs:
         url: 'https://glory-engine.com/api/upload-version'
         method: 'POST'
         customHeaders: '{"Connection": "keep-alive", "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br"}'
-        data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "0.1.0.rc-4", "generalChanges": "Test lol"}'
-        files: '{"windowsFile": "editor-zip.zip"}'
+        data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "${{ steps.appVersion.outputs.content }}", "generalChanges": "Test lol"}'
+        files: '{"windowsFile": "archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip"}'

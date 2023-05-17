@@ -91,12 +91,14 @@ project "Glorious"
 		"GloryEngine.Core",
 		"GloryEngine.Entities",
 		"CSAPIInstall",
+		"WriteVersion",
 	}
 
 	postbuildcommands
 	{
 		("{COPY} %{modulesOutDir} %{editorBuildDir}/Modules"),
 		("{COPY} %{engineOutDir}/GloryEditor.dll %{editorBuildDir}"),
+		("{COPY} %{engineOutDir}/version.txt %{editorBuildDir}"),
 		("{COPY} %{engineOutDir}/GloryAPI.dll %{editorBuildDir}"),
 		("{COPY} %{engineOutDir}/libcurl*.dll %{editorBuildDir}"),
 		("{COPY} %{engineOutDir}/GloryEditor.dll %{editorBuildDir}"),

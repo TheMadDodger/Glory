@@ -142,6 +142,7 @@ group ""
 group "Editor"
 	include "Editor/GloryEditor"
 	include "Editor/GloryAPI"
+	include "Editor/WriteVersion"
 group ""
 
 group "Editor/Applications"
