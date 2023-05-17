@@ -70,3 +70,5 @@ GloryEngine/third-party/glew-2.2.0/x64
 
 GloryEngine/third-party/tinyfiledialogs/Debug
 GloryEngine/third-party/tinyfiledialogs/Release
+GloryEngine/Editor/WriteVersion/Patchnotes
+GloryEngine/Editor/WriteVersion/version.txt

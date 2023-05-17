@@ -1,6 +1,7 @@
 project "WriteVersion"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++17"
 	staticruntime "Off"
 
 	targetdir ("%{outputDir}")
@@ -20,6 +21,5 @@ project "WriteVersion"
 
 	postbuildcommands
 	{
-		("\"$(ProjectDir)Debug\\x64\\WriteVersion.exe\""),
-		("{COPY} version.txt %{engineOutDir}"),
+		("\"$(ProjectDir)%{outputDir}/WriteVersion.exe\" \"%{engineOutDir}\"")
 	}
