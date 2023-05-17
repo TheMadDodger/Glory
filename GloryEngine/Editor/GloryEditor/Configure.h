@@ -18,7 +18,10 @@
 #define GLORY_EDITOR_VERSION TOSTRING(GLORY_EDITOR_VERSION_MAJOR.GLORY_EDITOR_VERSION_MINOR.GLORY_EDITOR_VERSION_SUBMINOR)
 #endif
 
-namespace Glory::Editor
+namespace Glory
 {
-	constexpr char* GloryEditorVersion = GLORY_EDITOR_VERSION;
+	namespace Editor
+	{
+		constexpr char* GloryEditorVersion = GLORY_EDITOR_VERSION;
+	}
 }
