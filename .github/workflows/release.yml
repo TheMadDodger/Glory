@@ -48,10 +48,30 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Install dependencies
+    - name: Restore cached dependencies
+      id: cache-dependencies-restore
+      uses: actions/cache/restore@v3
+      env:
+        cache-name: cache-dependencies
+      with:
+        path: ${{env.SOLUTION_FILE_PATH}}/Dependencies
+        key: ${{ runner.os }}-dependencies
+
+    - if: ${{ steps.cache-dependencies-restore.outputs.cache-hit != 'true' }}
+      name: Install dependencies
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: sh ./install-dependencies.sh Release
       shell: bash
+
+    - if: ${{ steps.cache-dependencies-restore.outputs.cache-hit != 'true' }}
+      name: Cache dependencies
+      id: cache-dependencies-save
+      uses: actions/cache/save@v3
+      env:
+        cache-name: cache-dependencies
+      with:
+        path: ${{env.SOLUTION_FILE_PATH}}/Dependencies
+        key: ${{ steps.cache-dependencies-restore.outputs.cache-primary-key }}
 
     - name: Run premake5
       working-directory: ${{env.SOLUTION_FILE_PATH}}
