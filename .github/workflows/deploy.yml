@@ -1,0 +1,90 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
+  workflow_dispatch:
+
+env:
+  VERSION_FILE: artifacts/windows/Editor/Any/version.txt
+  PATCH_NOTES: artifacts/windows/Editor/Any/Patchnotes
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: 'deploy'
+
+    steps:
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        # Optional, workflow file name or ID
+        # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
+        workflow: release.yml
+        # Optional, the status or conclusion of a completed workflow to search for
+        # Can be one of a workflow conclusion:
+        #   "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
+        # Or a workflow status:
+        #   "completed", "in_progress", "queued"
+        # Use the empty string ("") to ignore status or conclusion in the search
+        workflow_conclusion: success
+        # Optional, uploaded artifact name,
+        # will download all artifacts if not specified
+        # and extract them into respective subdirectories
+        # https://github.com/actions/download-artifact#download-all-artifacts
+        # is treated as a regular expression if input name_is_regexp is true
+        # will download only those artifacts with a name that matches this regular expression
+        # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
+        name: editor-zip
+        # Optional, a directory where to extract artifact(s), defaults to the current directory
+        path: artifacts/windows
+
+    - name: Read version file
+      id: appVersion
+      uses: juliangruber/read-file-action@v1.1.6
+      with:
+        path: ${{env.VERSION_FILE}}
+
+    - name: Delete version file
+      uses: JesseTG/rm@v1.0.3
+      with:
+        path: ${{env.VERSION_FILE}}
+        
+    - name: Read general patch notes file
+      id: patchNotes
+      uses: juliangruber/read-file-action@v1.1.6
+      with:
+        path: ${{env.PATCH_NOTES}}/general.txt
+
+    - name: Read windows patch notes file
+      id: windowsPatchNotes
+      uses: juliangruber/read-file-action@v1.1.6
+      with:
+        path: ${{env.PATCH_NOTES}}/windows.txt
+
+    - name: Delete Patchnotes
+      uses: JesseTG/rm@v1.0.3
+      with:
+        path: ${{env.PATCH_NOTES}}
+
+    - name: Zip windows editor
+      uses: vimtor/action-zip@v1.1
+      with:
+          files: artifacts/windows/
+          dest: archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip
+
+    - name: Upload to server
+      uses: fjogeleit/http-request-action@v1.14.0
+      with:
+        timeout: 9999999
+        url: 'https://glory-engine.com/api/upload-version'
+        method: 'POST'
+        customHeaders: '{"Connection": "keep-alive", "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br"}'
+        data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "${{ steps.appVersion.outputs.content }}", "generalChanges": "${{ steps.patchNotes.outputs.content }}", "windowsChanges": "${{ steps.windowsPatchNotes.outputs.content }}"}'
+        files: '{"windowsFile": "archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip"}'
