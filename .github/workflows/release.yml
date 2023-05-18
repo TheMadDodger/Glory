@@ -1,10 +1,6 @@
 name: Release
 
 on:
-  push:
-    branches: [ "release" ]
-  pull_request:
-    branches: [ "release" ]
   workflow_dispatch:
 
 env:
@@ -22,9 +18,6 @@ env:
 
   BUILD_PATH: ./GloryEngine/Build/Release/x64/Launcher
 
-  VERSION_FILE: artifacts/windows/Editor/Any/version.txt
-  PATCH_NOTES: artifacts/windows/Editor/Any/Patchnotes
-
 permissions:
   contents: read
 
@@ -32,7 +25,6 @@ jobs:
   build-editor-win64:
     runs-on: windows-latest
     environment: 'release'
-    #if: ${{ false }}  # disable for now
 
     steps:
     - name: Checkout repo and submodules
@@ -79,86 +71,3 @@ jobs:
         name: editor-zip
         path: ${{env.BUILD_PATH}}
         retention-days: 30
-
-  deploy:
-    needs: build-editor-win64
-    runs-on: ubuntu-latest
-    environment: 'release'
-
-    steps:
-    - name: Download editor zip artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: editor-zip
-        path: artifacts/windows
-
-    #- name: Download artifact
-      #id: download-artifact
-      #uses: dawidd6/action-download-artifact@v2
-      #with:
-        # Optional, workflow file name or ID
-        # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
-        #workflow: release.yml
-        # Optional, the status or conclusion of a completed workflow to search for
-        # Can be one of a workflow conclusion:
-        #   "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
-        # Or a workflow status:
-        #   "completed", "in_progress", "queued"
-        # Use the empty string ("") to ignore status or conclusion in the search
-        #workflow_conclusion: success
-        # Optional, run number from the workflow
-        #run_number: 32
-        # Optional, uploaded artifact name,
-        # will download all artifacts if not specified
-        # and extract them into respective subdirectories
-        # https://github.com/actions/download-artifact#download-all-artifacts
-        # is treated as a regular expression if input name_is_regexp is true
-        # will download only those artifacts with a name that matches this regular expression
-        # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
-        #name: editor-zip
-        # Optional, a directory where to extract artifact(s), defaults to the current directory
-        #path: artifacts/windows
-        # Optional, check the workflow run to whether it has an artifact
-        # then will get the last available artifact from the previous workflow
-        # default false, just try to download from the last one
-        #check_artifacts: false
-        # Optional, search for the last workflow run whose stored an artifact named as in `name` input
-        # default false
-        #search_artifacts: false
-        # Optional, choose to skip unpacking the downloaded artifact(s)
-        # default false
-        #skip_unpack: false
-
-    - name: Read version file
-      id: appVersion
-      uses: juliangruber/read-file-action@v1.1.6
-      with:
-        path: ${{env.VERSION_FILE}}
-
-    - name: Read general patch notes file
-      id: patchNotes
-      uses: juliangruber/read-file-action@v1.1.6
-      with:
-        path: ${{env.PATCH_NOTES}}/general.txt
-
-    - name: Read windows patch notes file
-      id: windowsPatchNotes
-      uses: juliangruber/read-file-action@v1.1.6
-      with:
-        path: ${{env.PATCH_NOTES}}/windows.txt
-
-    - name: Zip windows editor
-      uses: vimtor/action-zip@v1.1
-      with:
-          files: artifacts/windows/
-          dest: archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip
-
-    - name: Upload to server
-      uses: fjogeleit/http-request-action@v1.14.0
-      with:
-        timeout: 9999999
-        url: 'https://glory-engine.com/api/upload-version'
-        method: 'POST'
-        customHeaders: '{"Connection": "keep-alive", "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br"}'
-        data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "${{ steps.appVersion.outputs.content }}", "generalChanges": "${{ steps.patchNotes.outputs.content }}", "windowsChanges": "${{ steps.windowsPatchNotes.outputs.content }}"}'
-        files: '{"windowsFile": "archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip"}'
