@@ -3,12 +3,14 @@
 #include "EditorAssetDatabase.h"
 #include "CreateObjectAction.h"
 #include "Undo.h"
+
 #include <Game.h>
 #include <Engine.h>
 #include <ScenesModule.h>
 #include <Serializer.h>
 #include <TitleBar.h>
 #include <tinyfiledialogs.h>
+#include <ProjectSpace.h>
 
 namespace Glory::Editor
 {
@@ -303,5 +305,7 @@ namespace Glory::Editor
 		std::stringstream stream;
 		stream << "Saved scene to: " << path;
 		Debug::LogInfo(stream.str());
+
+		ProjectSpace::Save();
 	}
 }
