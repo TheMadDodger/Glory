@@ -20,6 +20,7 @@ namespace Glory::Editor
 	{
 	public:
 		static GLORY_EDITOR_API void Load(JSONFileRef& projectFile);
+		static GLORY_EDITOR_API void LoadLastSavedRecords();
 		static GLORY_EDITOR_API void Reload();
 		static GLORY_EDITOR_API void InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty = true);
 		static GLORY_EDITOR_API void UpdateAssetPath(UUID uuid, const std::string& newPath);
