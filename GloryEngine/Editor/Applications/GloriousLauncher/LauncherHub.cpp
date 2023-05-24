@@ -11,9 +11,11 @@
 
 namespace Glory::EditorLauncher
 {
-    std::map<HubMenu, const char*> MENUTOSTRING = {
-        { HubMenu::ProjectList, "Projects" },
-        { HubMenu::EditorList, "Installs" },
+    constexpr char* MenuNames[] = {
+        "Projects",
+        "Installs",
+        "Support",
+        "About",
     };
 
     ImFont* LauncherHub::DefaultFont = nullptr;
@@ -214,7 +216,7 @@ namespace Glory::EditorLauncher
             HubMenu menu = (HubMenu)i;
             bool selected = m_CurrentMenu == menu;
             ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_SelectableTextAlign, ImVec2(0.1f, 0.5f));
-            if (ImGui::Selectable(MENUTOSTRING[menu], selected, 0, ImVec2(0.0f, 50.0f)))
+            if (ImGui::Selectable(MenuNames[i], selected, 0, ImVec2(0.0f, 50.0f)))
             {
                 m_CurrentMenu = menu;
             }
@@ -238,6 +240,12 @@ namespace Glory::EditorLauncher
             break;
         case Glory::EditorLauncher::EditorList:
             DrawInstalledEditorsList();
+            break;
+        case Glory::EditorLauncher::Support:
+            DrawSupport();
+            break;
+        case Glory::EditorLauncher::About:
+            DrawAbout();
             break;
         case Glory::EditorLauncher::MAX:
             break;
@@ -470,8 +478,40 @@ namespace Glory::EditorLauncher
         for (size_t i = 0; i < EditorManager::EditorCount(); i++)
         {
             const EditorInfo& editorInfo = EditorManager::GetEditorInfo(i);
-
         }
+    }
+
+    void LauncherHub::DrawSupport()
+    {
+        ImGui::Text("Support");
+        ImGui::Separator();
+        ImGui::Text("The following links may provide you with help");
+
+        const float width = ImGui::GetContentRegionAvail().x;
+        if (ImGui::Button("glory-engine.com", { width , 0.0f }))
+        {
+            system("start \"\" \"https://glory-engine.com\"");
+        }
+        if (ImGui::Button("glory-engine.com/docs", { width , 0.0f }))
+        {
+            system("start \"\" \"https://glory-engine.com/docs\"");
+        }
+        ImGui::Text("You can also join our discord and get help from our community");
+        if (ImGui::Button("Join Discord", { width , 0.0f }))
+        {
+            system("start \"\" \"https://discord.gg/e8Tzqbb\"");
+        }
+    }
+
+    void LauncherHub::DrawAbout()
+    {
+        ImGui::Text("About");
+        ImGui::Separator();
+        ImGui::Text("Glory Engine is copyright (C) 2020-2023 Robin Cordemans");
+        ImGui::Text("All rights reserved.");
+        ImGui::Spacing();
+        ImGui::Text("License");
+        ImGui::Text("Given the early state of the engine, this software is for personal use only.");
     }
 
     void LauncherHub::DrawPopups()

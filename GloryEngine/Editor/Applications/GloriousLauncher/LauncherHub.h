@@ -8,6 +8,8 @@ namespace Glory::EditorLauncher
 	{
 		ProjectList,
 		EditorList,
+		Support,
+		About,
 
 		MAX,
 	};
@@ -38,6 +40,8 @@ namespace Glory::EditorLauncher
 		void DrawRightPanel();
 		void DrawProjectList();
 		void DrawInstalledEditorsList();
+		void DrawSupport();
+		void DrawAbout();
 		void DrawPopups();
 
 	private:
