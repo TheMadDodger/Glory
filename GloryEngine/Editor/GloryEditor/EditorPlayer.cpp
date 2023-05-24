@@ -173,6 +173,8 @@ namespace Glory::Editor
 		{
 			EditorApplication::TogglePlay();
 		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("Toggle play mode");
 		ImGui::PopStyleColor(styleColorCount);
 
 		cursor += maxButtonSize.x;
@@ -191,6 +193,8 @@ namespace Glory::Editor
 		{
 			EditorApplication::TogglePause();
 		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("Toggle pause");
 		ImGui::PopStyleColor(styleColorCount);
 
 		cursor += maxButtonSize.x;
@@ -199,6 +203,8 @@ namespace Glory::Editor
 		{
 			EditorApplication::TickFrame();
 		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("Step into next frame");
 	}
 
 	EditorPlayer::EditorPlayer() : m_SerializedScenes(""), m_UndoHistoryIndex(0), m_IsPaused(false), m_FrameRequested(false)

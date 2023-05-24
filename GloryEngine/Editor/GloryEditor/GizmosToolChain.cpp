@@ -23,6 +23,14 @@ namespace Glory::Editor
 		ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER,
 		ICON_FA_ARROW_DOWN_UP_ACROSS_LINE,
 	};
+
+	const std::string_view OPERATION_TOOLTIPS[] = {
+		"Translate gizmo",
+		"Rotate gizmo",
+		"Scale gizmo",
+		"Universal gizmo",
+	};
+
 	const size_t OPERATIONS_COUNT = 4;
 
 	const ImGuizmo::MODE MODES[] = {
@@ -33,6 +41,11 @@ namespace Glory::Editor
 		ICON_FA_LOCATION_DOT,
 		ICON_FA_GLOBE
 	};
+	const std::string_view MODE_TOOLTIPS[] = {
+		"Local gizmo transform",
+		"World gizmo transform"
+	};
+
 	const size_t MODES_COUNT = 2;
 
 	GizmosToolChain::GizmosToolChain()
@@ -76,6 +89,8 @@ namespace Glory::Editor
 			{
 				Gizmos::m_DefaultOperation = op;
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip(OPERATION_TOOLTIPS[i].data());
 			ImGui::PopStyleColor(styleColorCount);
 			cursor += maxButtonSize.x;
 		}
@@ -106,6 +121,8 @@ namespace Glory::Editor
 			{
 				Gizmos::m_DefaultMode = mode;
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip(MODE_TOOLTIPS[i].data());
 			ImGui::PopStyleColor(styleColorCount);
 			cursor += maxButtonSize.x;
 		}
