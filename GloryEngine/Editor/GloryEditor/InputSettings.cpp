@@ -51,7 +51,9 @@ namespace Glory::Editor
 				deviceTypesListView.OnDrawElement = [&](size_t index) {
 					NodeValueRef deviceTypeNode = deviceTypesNode[index];
 					EditorUI::PushFlag(EditorUI::NoLabel);
+					EditorUI::PushFlag(EditorUI::HasSmallButton);
 					change |= EditorUI::InputEnum<InputDeviceType>(file, deviceTypeNode.Path());
+					EditorUI::PopFlag();
 					EditorUI::PopFlag();
 				};
 

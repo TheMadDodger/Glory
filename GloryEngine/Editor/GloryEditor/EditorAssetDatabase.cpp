@@ -27,8 +27,6 @@ namespace Glory::Editor
 			projectFile["Assets"].SetObject();
 		}
 
-		//AssetDatabase::Load(m_Database);
-
 		m_PathToUUIDCache.Clear();
 		for (const auto& f : assetsNode)
 		{
@@ -58,6 +56,11 @@ namespace Glory::Editor
 		Debug::LogInfo("Loaded asset database");
 		AssetCompiler::CompileAssetDatabase();
 
+		LoadLastSavedRecords();
+	}
+
+	void EditorAssetDatabase::LoadLastSavedRecords()
+	{
 		m_LastSavedRecords.Clear();
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		std::filesystem::path path = pProject->CachePath();
@@ -150,8 +153,6 @@ namespace Glory::Editor
 	{
 		m_LastSavedRecords.Set(uuid, lastSaved);
 		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetUpdated, uuid, nullptr);
-		AssetCompiler::CompileAssetDatabase(uuid);
-		SetDirty();
 	}
 
 	long EditorAssetDatabase::GetLastSavedRecord(UUID uuid)

@@ -38,6 +38,8 @@ namespace Glory::Editor
 		void Dockspace();
 		void DrawUserEditor();
 
+		void DrawAboutPopup();
+
 	private:
 		friend class EditorApplication;
 		ProjectPopup* m_pProjectPopup;
@@ -47,5 +49,6 @@ namespace Glory::Editor
 		static size_t m_SaveSceneIndex;
 
 		static const float TOOLBAR_SIZE;
+		bool m_OpenAboutPopup = false;
 	};
 }

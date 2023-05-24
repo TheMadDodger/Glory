@@ -28,6 +28,8 @@ namespace Glory::EditorLauncher
         system(stream.str().c_str());
 
         Save();
+
+        exit(0);
     }
 
     void ProjectManager::CreateProject(const ProjectCreateSettings& createSettings)
@@ -45,7 +47,6 @@ namespace Glory::EditorLauncher
         WriteProjectFile(createSettings);
 
         OpenProject(m_Projects.size() - 1);
-        Save();
     }
 
     void ProjectManager::RemoveProjectAt(size_t index)

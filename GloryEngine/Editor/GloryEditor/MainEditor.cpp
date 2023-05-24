@@ -206,6 +206,28 @@ namespace Glory::Editor
 		m_pProjectPopup->OnGui();
 		QuitPopup::Draw();
 		VersionPopup::Draw();
+		DrawAboutPopup();
+	}
+
+	void MainEditor::DrawAboutPopup()
+	{
+		static bool popupOpen = false;
+		if (m_OpenAboutPopup)
+		{
+			popupOpen = true;
+			m_OpenAboutPopup = false;
+			ImGui::OpenPopup("About");
+		}
+		if (ImGui::BeginPopupModal("About", &popupOpen, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
+		{
+			ImGui::Text("Glorious version %s", GloryEditorVersion);
+			ImGui::Text("Glory Engine is copyright (C) 2020-2023 Robin Cordemans");
+			ImGui::Text("All rights reserved.");
+			ImGui::Spacing();
+			ImGui::Text("License");
+			ImGui::Text("Given the early state of the engine,\nthis software is for personal use only.");
+			ImGui::EndPopup();
+		}
 	}
 
 	void MainEditor::OnFileDragAndDrop(std::string_view path)
@@ -245,27 +267,16 @@ namespace Glory::Editor
 	{
 		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); }, NULL, Shortcut_File_NewScene);
 		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes, NULL, Shortcut_File_SaveScene);
-		MenuBar::AddMenuItem("File/Load Scene", []()
-		{
-			//YAML::Node node = YAML::LoadFile("test.gscene");
-			//Serializer::DeserializeObject(node);
-		}, NULL, Shortcut_File_LoadScene);
+		//MenuBar::AddMenuItem("File/Load Scene", []()
+		//{
+		//	//YAML::Node node = YAML::LoadFile("test.gscene");
+		//	//Serializer::DeserializeObject(node);
+		//}, NULL, Shortcut_File_LoadScene);
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
-		//MenuBar::AddMenuItem("File/Create/Empty Object", []()
-		//{
-		//	GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
-		//	if (!pActiveScene) return;
-		//	pActiveScene->CreateEmptyObject();
-		//});
 
-		//MenuBar::AddMenuItem("File/Exit", [&]() {
-		//	std::vector<std::string> buttons = { "Cancel", "Exit" };
-		//	std::vector<std::function<void()>> buttonFuncs = { [&]() { PopupManager::CloseCurrentPopup(); }, [&]() { exit(0); } };
-		//	PopupManager::OpenPopup("Exit", "Are you sure you want to exit? All unsaved changes will be lost!",
-		//		buttons, buttonFuncs); }, NULL, Shortcut_File_Exit);
-
+		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
 		MenuBar::AddMenuItem("File/Exit", EditorApplication::TryToQuit, NULL, Shortcut_File_Exit);
 
 		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
