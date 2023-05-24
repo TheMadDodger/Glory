@@ -20,6 +20,7 @@ namespace Glory
         const size_t SubResourceCount() const;
         Resource* Subresource(size_t index) const;
         Resource* Subresource(std::string_view name) const;
+        Resource* ParentResource() const;
 
         Resource* SubresourceFromPath(std::filesystem::path path);
 

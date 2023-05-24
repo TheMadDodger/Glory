@@ -139,8 +139,10 @@ namespace Glory
 	}
 
 	YAMLFileRef::YAMLFileRef(const std::filesystem::path& filePath)
-		: m_FilePath(filePath), m_RootNode(YAML::LoadFile(filePath.string()))
+		: m_FilePath(filePath)
 	{
+		if(std::filesystem::exists(filePath))
+			m_RootNode = YAML::LoadFile(filePath.string());
 	}
 
 	void YAMLFileRef::Load()

@@ -137,16 +137,25 @@ namespace Glory
 		return pMaterial;
 	}
 
-	Texture* GPUResourceManager::CreateTexture(ImageData* pImageData)
+	Texture* GPUResourceManager::CreateTexture(TextureData* pTextureData)
 	{
-		Texture* pTexture = GetResource<Texture>(pImageData);
-		if (pTexture) return pTexture;
+		Texture* pTexture = GetResource<Texture>(pTextureData);
+		if (pTexture)
+		{
+			if (pTexture->IsDirty())
+			{
+				pTexture->Create(pTextureData);
+				pTexture->SetDirty(false);
+			}
+			return pTexture;
+		}
 
 		Profiler::BeginSample("GPUResourceManager::CreateTexture");
-		pTexture = CreateTexture_Internal(pImageData);
-		pTexture->m_UUID = pImageData->GetGPUUUID();
-		pTexture->Create(pImageData);
-		m_IDResources[pImageData->GetGPUUUID()] = pTexture;
+		pTexture = CreateTexture_Internal(pTextureData);
+		if (!pTexture) return nullptr;
+		pTexture->m_UUID = pTextureData->GetGPUUUID();
+		pTexture->Create(pTextureData);
+		m_IDResources[pTextureData->GetGPUUUID()] = pTexture;
 		Profiler::EndSample();
 		return pTexture;
 	}
@@ -201,5 +210,12 @@ namespace Glory
 	bool GPUResourceManager::ResourceExists(Resource* pResource)
 	{
 		return m_IDResources.find(pResource->GetGPUUUID()) != m_IDResources.end();
+	}
+
+	void GPUResourceManager::SetDirty(UUID uuid)
+	{
+		auto itor = m_IDResources.find(uuid);
+		if (itor == m_IDResources.end()) return;
+		itor->second->m_IsDirty = true;
 	}
 }

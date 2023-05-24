@@ -19,6 +19,7 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(SetActiveSceneCallback);
 	OBJECTMENU_CALLBACK(RemoveSceneCallback);
 	OBJECTMENU_CALLBACK(ReloadSceneCallback);
+	OBJECTMENU_CALLBACK(CreateNewTextureCallback);
 	OBJECTMENU_CALLBACK(CreateNewMaterialCallback);
 	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback);
 	OBJECTMENU_CALLBACK(CreateNewFolderCallback);

@@ -6,11 +6,11 @@ Shaders:
 Properties:
   - DisplayName: normalSampler
     ShaderName: normalSampler
-    TypeHash: 2939205195
+    TypeHash: 1187257381
     Value: 0
   - DisplayName: texSampler
     ShaderName: texSampler
-    TypeHash: 2939205195
+    TypeHash: 1187257381
     Value: 0
   - DisplayName: Color
     ShaderName: Color

@@ -8,7 +8,7 @@
 namespace Glory::Editor
 {
 	std::vector<BaseTumbnailGenerator*> Tumbnail::m_pGenerators;
-	std::map<UUID, ImageData*> Tumbnail::m_pTumbnails;
+	std::map<UUID, TextureData*> Tumbnail::m_pTumbnails;
 
 	Texture* Tumbnail::GetTumbnail(UUID uuid)
 	{
@@ -17,9 +17,9 @@ namespace Glory::Editor
 		auto it = m_pTumbnails.find(uuid);
 		if (it != m_pTumbnails.end())
 		{
-			ImageData* pImage = m_pTumbnails[uuid];
-			if (pResourceManager->ResourceExists(pImage))
-				return pResourceManager->CreateTexture(pImage);
+			TextureData* pTextureData = m_pTumbnails.at(uuid);
+			if (pResourceManager->ResourceExists(pTextureData))
+				return pResourceManager->CreateTexture(pTextureData);
 			return EditorAssets::GetTexture("file");
 		}
 
@@ -30,14 +30,21 @@ namespace Glory::Editor
 		if (pGenerator == nullptr)
 			return EditorAssets::GetTexture("file");
 
-		ImageData* pImage = pGenerator->GetTumbnail(&meta);
+		TextureData* pImage = pGenerator->GetTumbnail(&meta);
 
 		if (pImage == nullptr)
 			return EditorAssets::GetTexture("file");
 
-		m_pTumbnails[uuid] = pImage;
+		m_pTumbnails.emplace(uuid, pImage);
 		EditorAssets::EnqueueTextureCreation(pImage);
 		return EditorAssets::GetTexture("file");
+	}
+
+	void Tumbnail::SetDirty(UUID uuid)
+	{
+		auto it = m_pTumbnails.find(uuid);
+		if (it == m_pTumbnails.end()) return;
+		m_pTumbnails.erase(uuid);
 	}
 
 	void Tumbnail::AddGenerator(BaseTumbnailGenerator* pGenerator)

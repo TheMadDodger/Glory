@@ -8,7 +8,7 @@ namespace Glory::Editor
 	std::vector<ImageData*> EditorAssets::m_pEditorImages;
 	std::unordered_map<std::string, Texture*> EditorAssets::m_pTextures;
 	std::mutex EditorAssets::m_QueueLock;
-	std::vector<ImageData*> EditorAssets::m_pTextureCreationQueue;
+	std::vector<TextureData*> EditorAssets::m_pTextureCreationQueue;
 
 	void EditorAssets::LoadAssets()
 	{
@@ -35,15 +35,11 @@ namespace Glory::Editor
 
 	void EditorAssets::Destroy()
 	{
-		for (size_t i = 0; i < m_pEditorImages.size(); i++)
-		{
-			delete m_pEditorImages[i];
-		}
 		m_pEditorImages.clear();
 		m_pTextures.clear();
 	}
 
-	void EditorAssets::EnqueueTextureCreation(ImageData* pImage)
+	void EditorAssets::EnqueueTextureCreation(TextureData* pImage)
 	{
 		std::unique_lock<std::mutex> lock(m_QueueLock);
 		m_pTextureCreationQueue.push_back(pImage);
@@ -60,8 +56,9 @@ namespace Glory::Editor
 	void EditorAssets::LoadImage(GraphicsModule* pGraphics, LoaderModule* pLoader, const std::string& path, const std::string& key)
 	{
 		ImageData* pImageData = (ImageData*)pLoader->Load(path);
+		TextureData* pTextureData = (TextureData*)pImageData->Subresource(0);
 		m_pEditorImages.push_back(pImageData);
-		m_pTextures[key] = pGraphics->GetResourceManager()->CreateTexture(pImageData);
+		m_pTextures[key] = pGraphics->GetResourceManager()->CreateTexture(pTextureData);
 	}
 
 	EditorAssets::EditorAssets() {}

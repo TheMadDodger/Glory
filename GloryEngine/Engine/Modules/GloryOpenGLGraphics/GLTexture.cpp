@@ -29,35 +29,43 @@ namespace Glory
 		return m_TextureID;
 	}
 
-	GLORY_API void GLTexture::Create(ImageData* pImageData)
+	GLORY_API void GLTexture::Create(TextureData* pTextureData)
 	{
+		Resource* pParent = pTextureData->ParentResource();
+		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate();
+		if (!pImageData) return;
+
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
 
 		GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_InternalFormat);
 		GLuint format = GLConverter::TO_GLFORMAT.at(m_PixelFormat);
-		//glTexImage2D(m_GLImageType, 0, format, (GLsizei)pImageData->GetWidth(), (GLsizei)pImageData->GetHeight(), 0, format, GL_FLOAT, pImageData->GetPixels());
-		//OpenGLGraphicsModule::LogGLError(glGetError());
-		//
-		//glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//OpenGLGraphicsModule::LogGLError(glGetError());
-		//glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//OpenGLGraphicsModule::LogGLError(glGetError());
 
-		glGenTextures(1, &m_TextureID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		if (!m_TextureID)
+		{
+			glGenTextures(1, &m_TextureID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
 		glBindTexture(m_GLImageType, m_TextureID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glTexImage2D(m_GLImageType, 0, internalFormat, (GLsizei)pImageData->GetWidth(), (GLsizei)pImageData->GetHeight(), 0, format, GL_UNSIGNED_BYTE, pImageData->GetPixels());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GLConverter::TO_GLFILTER.at(sampler.MinFilter));
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GLConverter::TO_GLFILTER.at(sampler.MagFilter));
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeU));
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeV));
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeW));
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindTexture(m_GLImageType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
@@ -84,6 +92,11 @@ namespace Glory
 		glTexParameteri(m_GLImageType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(m_GLImageType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindTexture(m_GLImageType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 

@@ -110,7 +110,7 @@ namespace Glory
 		return m_Resources.size();
 	}
 
-	AssetReference<ImageData>* MaterialData::GetResourceUUIDPointer(size_t index)
+	AssetReference<TextureData>* MaterialData::GetResourceUUIDPointer(size_t index)
 	{
 		return &m_Resources[index];
 	}
@@ -141,7 +141,7 @@ namespace Glory
 		m_CurrentOffset = 0;
 	}
 
-	void MaterialData::SetTexture(const std::string& name, ImageData* value)
+	void MaterialData::SetTexture(const std::string& name, TextureData* value)
 	{
 		size_t index;
 		if (!GetPropertyInfoIndex(name, index)) return;
@@ -152,7 +152,7 @@ namespace Glory
 		m_Resources[resourceIndex] = value ? value->GetUUID() : 0;
 	}
 
-	bool MaterialData::GetTexture(const std::string& name, ImageData** value)
+	bool MaterialData::GetTexture(const std::string& name, TextureData** value)
 	{
 		size_t index;
 		if (!GetPropertyInfoIndex(name, index)) return false;

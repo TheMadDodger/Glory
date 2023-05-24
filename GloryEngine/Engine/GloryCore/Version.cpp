@@ -29,7 +29,7 @@ namespace Glory
             (int)std::strtol(splits[2].data(), nullptr, 10), rc);
     }
 
-    int Version::Compare(const Version& v1, const Version& v2)
+    int Version::Compare(const Version& v1, const Version& v2, bool ignoreRC)
     {
         for (size_t i = 0; i < 3; i++)
         {
@@ -37,6 +37,8 @@ namespace Glory
             if (v1[i] < v2[i]) return -1;
             if (v1[i] > v2[i]) return 1;
         }
+
+        if (ignoreRC) return 0;
 
         /* RC 0 is always considered latest! */
         if (v1.RC == v2.RC) return 0;

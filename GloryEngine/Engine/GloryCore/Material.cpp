@@ -25,8 +25,8 @@ namespace Glory
 			MaterialPropertyInfo* pPropertyInfo = m_pMaterialData->GetResourcePropertyInfo(i);
 			const std::string& shaderName = pPropertyInfo->ShaderName();
 			const UUID uuid = m_pMaterialData->GetResourceUUIDPointer(i)->AssetUUID();
-			ImageData* pImageData = AssetManager::GetOrLoadAsset<ImageData>(uuid);
-			Texture* pTexture = pImageData != nullptr ? Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pImageData) : nullptr;
+			TextureData* pTextureData = AssetManager::GetOrLoadAsset<TextureData>(uuid);
+			Texture* pTexture = pTextureData != nullptr ? Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pTextureData) : nullptr;
 			SetTexture(shaderName, pTexture);
 		}
 

@@ -13,6 +13,7 @@ namespace Glory::Editor
 	{
 	public:
 		static GLORY_EDITOR_API Texture* GetTumbnail(UUID uuid);
+		static GLORY_EDITOR_API void SetDirty(UUID uuid);
 
 		template<class T>
 		static void AddGenerator()
@@ -29,7 +30,7 @@ namespace Glory::Editor
 
 	private:
 		static std::vector<BaseTumbnailGenerator*> m_pGenerators;
-		static std::map<UUID, ImageData*> m_pTumbnails;
+		static std::map<UUID, TextureData*> m_pTumbnails;
 
 	private:
 		Tumbnail();

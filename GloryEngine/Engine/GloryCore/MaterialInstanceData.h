@@ -28,7 +28,7 @@ namespace Glory
 		virtual size_t GetCurrentBufferOffset() const override;
 		virtual std::vector<char>& GetBufferReference() override;
 		virtual bool GetPropertyInfoIndex(const std::string& name, size_t& index) const override;
-		virtual AssetReference<ImageData>* GetResourceUUIDPointer(size_t index) override;
+		virtual AssetReference<TextureData>* GetResourceUUIDPointer(size_t index) override;
 		virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const override;
 		virtual size_t GetResourcePropertyCount() const override;
 		virtual MaterialPropertyInfo* GetResourcePropertyInfo(size_t index) override;

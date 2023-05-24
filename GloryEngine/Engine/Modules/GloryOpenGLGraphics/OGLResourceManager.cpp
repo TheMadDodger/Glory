@@ -58,8 +58,12 @@ namespace Glory
 		return new OGLMaterial(pMaterialData);
 	}
 
-	Texture* OGLResourceManager::CreateTexture_Internal(ImageData* pImageData)
+	Texture* OGLResourceManager::CreateTexture_Internal(TextureData* pTextureData)
 	{
+		Resource* pParent = pTextureData->ParentResource();
+		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate();
+		if (!pImageData) return nullptr;
 		return new GLTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, 0, 0, ImageAspect::IA_Color);
 	}
 

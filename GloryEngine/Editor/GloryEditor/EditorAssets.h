@@ -22,7 +22,7 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API void LoadAssets();
 		static GLORY_EDITOR_API void Destroy();
-		static GLORY_EDITOR_API void EnqueueTextureCreation(ImageData* pImage);
+		static GLORY_EDITOR_API void EnqueueTextureCreation(TextureData* pImage);
 
 		static GLORY_EDITOR_API Texture* GetTexture(const std::string& key);
 
@@ -38,6 +38,6 @@ namespace Glory::Editor
 		static std::vector<ImageData*> m_pEditorImages;
 		static std::unordered_map<std::string, Texture*> m_pTextures;
 		static std::mutex m_QueueLock;
-		static std::vector<ImageData*> m_pTextureCreationQueue;
+		static std::vector<TextureData*> m_pTextureCreationQueue;
 	};
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "ImageData.h"
+#include "TextureData.h"
 #include "GraphicsEnums.h"
 #include "GPUResource.h"
 #include <any>
@@ -15,7 +15,7 @@ namespace Glory
 		Texture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings = SamplerSettings());
 		virtual ~Texture();
 
-		virtual void Create(ImageData* pImageData) = 0;
+		virtual void Create(TextureData* pTextureData) = 0;
 		virtual void Create() = 0;
 		void CopyFromBuffer(Buffer* pBuffer);
 		virtual void CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth) = 0;
