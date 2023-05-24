@@ -21,7 +21,11 @@ namespace Glory::Editor
 		enum Flag : uint64_t
 		{
 			NoLabel = 1,
+			/* Leave a space for one button to the right of the field */
+			HasSmallButton = 2,
 		};
+
+		static constexpr float RemoveButtonPadding = 24.0f;
 
 	public:
 		static GLORY_EDITOR_API bool InputFloat(std::string_view label, float* value, const float min = -FLT_MAX, const float max = FLT_MAX, const float steps = 0.1f);

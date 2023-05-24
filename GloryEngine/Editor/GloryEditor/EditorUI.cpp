@@ -4,6 +4,8 @@
 #include <LayerRef.h>
 #include <YAML_GLM.h>
 
+#define REMOVE_BUTTON_PADDING (HasFlag(Flag::HasSmallButton) ? EditorUI::RemoveButtonPadding : 0.0f)
+
 namespace Glory::Editor
 {
 	size_t EditorUI::m_BufferWriteIndex = 0;
@@ -37,7 +39,8 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat(std::string_view label, float* value, const float min, const float max, const float steps)
 	{
-		if (!HasFlag(Flag::NoLabel))
+		const bool hasLabel = HasFlag(Flag::NoLabel);
+		if (!hasLabel)
 		{
 			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 			ImGui::PushID(label.data());
@@ -51,10 +54,10 @@ namespace Glory::Editor
 			const ImVec2 cursorPos = ImGui::GetCursorPos();
 			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-			ImGui::PushItemWidth(width);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		}
 		const bool change = ImGui::DragFloat("##value", value, steps, min, max, "%.3f");
-		ImGui::PopItemWidth();
+		if (!hasLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -91,7 +94,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragFloat2("##value", (float*)value, steps, min, max, "%.3f");
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -130,7 +133,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragFloat3("##value", (float*)value, steps, min, max, "%.3f");
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -169,7 +172,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragFloat4("##value", (float*)value, steps, min, max, "%.3f");
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -208,7 +211,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragInt("##value", value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -247,7 +250,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragInt2("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -286,7 +289,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragInt3("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -325,7 +328,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragInt4("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -364,7 +367,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::DragInt("##value", (int*)value, (float)steps, min, max);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -385,7 +388,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::InputDouble("##value", value, slowSteps, fastSteps);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -565,7 +568,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::InputText("##value", value, bufferSize, flags);
 		ImGui::PopItemWidth();
 		ImGui::PopID();
@@ -605,7 +608,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		bool change = false;
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		if (ImGui::BeginCombo("##combo", value.data()))
 		{
 			for (size_t i = 0; i < options.size(); i++)
@@ -643,7 +646,7 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
 		bool change = false;
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		if(ImGui::BeginCombo("##combo", value.data()))
 		{
 			for (size_t i = 0; i < options.size(); i++)
@@ -696,7 +699,7 @@ namespace Glory::Editor
 		if (!label.empty())
 		{
 			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
-			ImGui::PushItemWidth(width);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		}
 
 		bool change = false;
@@ -768,7 +771,7 @@ namespace Glory::Editor
 		layerText = LayerManager::LayerMaskToString(*data);
 
 		LayerMask originalMask = *data;
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		if(ImGui::BeginCombo("##mask", layerText.data()))
 		{
 			for (size_t i = 0; i < layerOptions.size(); i++)
@@ -815,7 +818,7 @@ namespace Glory::Editor
 		LayerManager::GetAllLayerNames(options);
 
 		bool change = false;
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		if (ImGui::BeginCombo("##layer", options[index].data()))
 		{
 			for (size_t i = 0; i < options.size(); i++)
@@ -866,7 +869,7 @@ namespace Glory::Editor
 		std::vector<std::string_view> options;
 		LayerManager::GetAllLayerNames(options);
 
-		ImGui::PushItemWidth(width);
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		if (ImGui::BeginCombo("##dropdown", value.data()))
 		{
 			callback();
