@@ -1,5 +1,6 @@
 #include "ArrayPropertyDrawer.h"
 #include "ListView.h"
+#include "EditorUI.h"
 #include <imgui.h>
 #include <Reflection.h>
 #include <IconsFontAwesome6.h>
@@ -31,7 +32,9 @@ namespace Glory::Editor
 		listView.OnDrawElement = [&](size_t index) {
 			PropertyDrawer::PushPath("##" + std::to_string(index));
 			void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, index);
+			EditorUI::PushFlag(EditorUI::HasSmallButton);
 			change |= PropertyDrawer::DrawProperty("Element " + std::to_string(index), pElementTypeData, pAddress, flags);
+			EditorUI::PopFlag();
 			PropertyDrawer::PopPath();
 		};
 
