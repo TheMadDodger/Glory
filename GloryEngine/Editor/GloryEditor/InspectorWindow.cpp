@@ -38,6 +38,8 @@ namespace Glory::Editor
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, { 0,0,0,0 });
 		if (ImGui::Selectable("##lock", false, 0, ImVec2(buttonSize, buttonSize)))
 			m_Locked = !m_Locked;
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(m_Locked ? "Unlock inspector" : "Lock inspector to current selection");
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
