@@ -55,23 +55,11 @@ jobs:
       uses: JesseTG/rm@v1.0.3
       with:
         path: ${{env.VERSION_FILE}}
-        
-    - name: Read general patch notes file
-      id: patchNotes
-      uses: juliangruber/read-file-action@v1.1.6
-      with:
-        path: ${{env.PATCH_NOTES}}/general.txt
 
-    - name: Read windows patch notes file
-      id: windowsPatchNotes
-      uses: juliangruber/read-file-action@v1.1.6
-      with:
-        path: ${{env.PATCH_NOTES}}/windows.txt
-
-    - name: Delete Patchnotes
-      uses: JesseTG/rm@v1.0.3
-      with:
-        path: ${{env.PATCH_NOTES}}
+    #- name: Delete Patchnotes
+    #  uses: JesseTG/rm@v1.0.3
+    #  with:
+    #    path: ${{env.PATCH_NOTES}}
 
     - name: Zip windows editor
       uses: vimtor/action-zip@v1.1
@@ -86,5 +74,5 @@ jobs:
         url: 'https://glory-engine.com/api/upload-version'
         method: 'POST'
         customHeaders: '{"Connection": "keep-alive", "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br"}'
-        data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "${{ steps.appVersion.outputs.content }}", "generalChanges": "${{ steps.patchNotes.outputs.content }}", "windowsChanges": "${{ steps.windowsPatchNotes.outputs.content }}"}'
-        files: '{"windowsFile": "archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip"}'
+        data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "${{ steps.appVersion.outputs.content }}"}'
+        files: '{"windowsFile": "archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip", "generalChanges": "${{env.PATCH_NOTES}}/general.txt", "windowsChanges": "${{env.PATCH_NOTES}}/windows.txt"}'
