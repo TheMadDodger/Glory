@@ -3,12 +3,13 @@
 #include "DefaultComponentEditor.h"
 #include "TransformEditor.h"
 #include "PhysicsBodyEditor.h"
+#include "ScriptedComponentEditor.h"
+#include "CharacterControllerEditor.h"
+
 #include <EntitySceneScenesModule.h>
 #include <EditorPlayer.h>
 #include <Components.h>
-
 #include <Reflection.h>
-#include "ScriptedComponentEditor.h"
 
 namespace Glory::Editor
 {
@@ -34,6 +35,7 @@ namespace Glory::Editor
 		Editor::RegisterEditor<TransformEditor>();
 		Editor::RegisterEditor<ScriptedComponentEditor>();
 		Editor::RegisterEditor<PhysicsBodyEditor>();
+		Editor::RegisterEditor<CharacterControllerEditor>();
 
 		EditorPlayer::RegisterLoopHandler(this);
 

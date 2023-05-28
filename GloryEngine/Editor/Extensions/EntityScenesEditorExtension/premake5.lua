@@ -17,7 +17,7 @@ project "EntityScenesEditorExtension"
 	vpaths
 	{
 		["Extension"] = { "EntityScenesEditorExtension.*" },
-		["Editors"] = { "PhysicsBodyEditor.*", "MeshMaterialPropertyDrawer.*", "ScriptedComponentEditor.*", "TransformEditor.*", "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*" },
+		["Editors"] = { "CharacterControllerEditor.*", "PhysicsBodyEditor.*", "MeshMaterialPropertyDrawer.*", "ScriptedComponentEditor.*", "TransformEditor.*", "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*" },
 		["Actions"] = { "AddComponentAction.*", "RemoveComponentAction.*" }
 	}
 
