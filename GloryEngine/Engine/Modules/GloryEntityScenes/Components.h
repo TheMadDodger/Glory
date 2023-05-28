@@ -198,10 +198,11 @@ namespace Glory
 
 	struct CharacterController
 	{
-		CharacterController() : m_MaxSlopeAngle(45.0f), m_Friction(0.5f), m_CurrentLayerIndex(0) {}
+		CharacterController() : m_MaxSlopeAngle(45.0f), m_Friction(0.5f), m_Shape(), m_CharacterID(0), m_CurrentLayerIndex(0) {}
 
 		REFLECTABLE(CharacterController,
 			(float)(m_MaxSlopeAngle),
+			(ShapeProperty)(m_Shape),
 			(float)(m_Friction)
 		);
 
@@ -209,14 +210,8 @@ namespace Glory
 		uint32_t m_CurrentLayerIndex;
 	};
 
-	//Ref<CharacterSettings> settings = new CharacterSettings();
-	//settings->mMaxSlopeAngle = DegreesToRadians(45.0f);
-	//settings->mLayer = Layers::MOVING;
-	//settings->mShape = mStandingShape;
-	//settings->mFriction = 0.5f;
 	//settings->mSupportingVolume = Plane(Vec3::sAxisY(), -cCharacterRadiusStanding); // Accept contacts that touch the lower sphere of the capsule
 	//mCharacter = new Character(settings, RVec3::sZero(), Quat::sIdentity(), 0, mPhysicsSystem);
-	//mCharacter->AddToPhysicsSystem(EActivation::Activate);
 
 	//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	//

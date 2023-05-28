@@ -49,6 +49,7 @@ namespace Glory
 
 	JoltPhysicsModule::~JoltPhysicsModule()
 	{
+		m_CharacterManager.DestroyAll();
 	}
 
 	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex)
