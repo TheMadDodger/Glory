@@ -155,6 +155,9 @@ namespace Glory::Editor
 
 	void TransformEditor::UpdatePhysics()
 	{
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		if (!pPhysics) return;
+
 		const EntityID entity = m_pComponentObject->EntityID();
 		EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
 		if (pRegistry->HasComponent<PhysicsBody>(entity))
@@ -172,6 +175,28 @@ namespace Glory::Editor
 					pPhysics->SetBodyPosition(physicsBody.m_BodyID, translation);
 					pPhysics->SetBodyRotation(physicsBody.m_BodyID, rotation);
 					pPhysics->SetBodyScale(physicsBody.m_BodyID, scale);
+					pPhysics->SetBodyLinearAndAngularVelocity(physicsBody.m_BodyID, {}, {});
+				}
+			}
+		}
+
+		CharacterManager* pCharacters = pPhysics->GetCharacterManager();
+		if (!pCharacters) return;
+
+		if (pRegistry->HasComponent<CharacterController>(entity))
+		{
+			Transform& transform = pRegistry->GetComponent<Transform>(entity);
+			CharacterController& characterController = pRegistry->GetComponent<CharacterController>(entity);
+			if (pPhysics && characterController.m_CharacterID)
+			{
+				glm::quat rotation;
+				glm::vec3 translation, scale, skew;
+				glm::vec4 perspective;
+				if (glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective))
+				{
+					pCharacters->SetPosition(characterController.m_CharacterID, translation);
+					pCharacters->SetRotation(characterController.m_CharacterID, rotation);
+					pCharacters->SetLinearAndAngularVelocity(characterController.m_CharacterID, {}, {});
 				}
 			}
 		}

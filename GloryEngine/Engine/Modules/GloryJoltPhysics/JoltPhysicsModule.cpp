@@ -572,6 +572,8 @@ namespace Glory
 		
 		// Step the world
 		m_pJPHPhysicsSystem->Update(deltaTime, collisionSteps, integrationSubSteps, m_pJPHTempAllocator, m_pJPHJobSystem);
+
+		m_CharacterManager.PostSimulation(1.0f);
 	}
 
 	void JoltPhysicsModule::Draw()
