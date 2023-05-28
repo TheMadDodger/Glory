@@ -75,4 +75,4 @@ jobs:
         method: 'POST'
         customHeaders: '{"Connection": "keep-alive", "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br"}'
         data: '{"key": "${{secrets.GLORY_API_KEY}}", "appVersion": "${{ steps.appVersion.outputs.content }}"}'
-        files: '{"windowsFile": "archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip", "generalChanges": "${{env.PATCH_NOTES}}/general.txt", "windowsChanges": "${{env.PATCH_NOTES}}/windows.txt"}'
+        files: '{"windowsFileCompressed": "archives/Glorious-Win64-${{ steps.appVersion.outputs.content }}.zip", "generalChanges": "${{env.PATCH_NOTES}}/general.txt", "windowsChanges": "${{env.PATCH_NOTES}}/windows.txt"}'
