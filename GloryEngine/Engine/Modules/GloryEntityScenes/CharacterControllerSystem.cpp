@@ -80,8 +80,8 @@ namespace Glory
 		if (!pCharacters) return;
 		
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
-		transform.Position = pCharacters->CharacterPosition(pComponent.m_CharacterID);
-		transform.Rotation = pCharacters->CharacterRotation(pComponent.m_CharacterID);
+		transform.Position = pCharacters->GetPosition(pComponent.m_CharacterID);
+		transform.Rotation = pCharacters->GetRotation(pComponent.m_CharacterID);
 		transform.Rotation = glm::conjugate(transform.Rotation);
 
 		if (transform.Parent.IsValid())
@@ -103,7 +103,7 @@ namespace Glory
 			const uint32_t layerIndex = pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex;
 			if (pComponent.m_CurrentLayerIndex != layerIndex)
 			{
-				//pPhysics->SetBodyObjectLayer(pComponent.m_BodyID, layerIndex);
+				pCharacters->SetLayer(pComponent.m_CharacterID, layerIndex);
 				pComponent.m_CurrentLayerIndex = layerIndex;
 			}
 		}
@@ -111,7 +111,7 @@ namespace Glory
 		{
 			if (pComponent.m_CurrentLayerIndex != 0)
 			{
-				//pPhysics->SetBodyObjectLayer(pComponent.m_BodyID, 0);
+				pCharacters->SetLayer(pComponent.m_CharacterID, 0);
 				pComponent.m_CurrentLayerIndex = 0;
 			}
 		}
