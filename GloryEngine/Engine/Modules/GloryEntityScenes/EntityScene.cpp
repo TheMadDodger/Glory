@@ -88,6 +88,13 @@ namespace Glory
 		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::OnRemove, PhysicsSystem::OnStop);
 		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::OnValidate, PhysicsSystem::OnValidate);
 		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::Update, PhysicsSystem::OnUpdate);
+
+		/* Character controllers */
+		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::Start, CharacterControllerSystem::OnStart);
+		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::Stop, CharacterControllerSystem::OnStop);
+		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::OnRemove, CharacterControllerSystem::OnStop);
+		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::OnValidate, CharacterControllerSystem::OnValidate);
+		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::Update, CharacterControllerSystem::OnUpdate);
 	}
 
 	void EntityScene::OnTick()

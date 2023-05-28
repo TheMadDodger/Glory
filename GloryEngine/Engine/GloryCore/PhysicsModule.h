@@ -1,6 +1,7 @@
 #pragma once
 #include "Module.h"
 #include "Physics.h"
+#include "CharacterManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -94,6 +95,8 @@ namespace Glory
 
 		GLORY_API void TriggerContactCallback(ContactCallback callbackType, uint32_t bodyID1, uint32_t bodyID2);
 		GLORY_API void TriggerActivationCallback(ActivationCallback callbackType, uint32_t bodyID);
+
+		virtual CharacterManager* GetCharacterManager() = 0;
 
 		/*
 

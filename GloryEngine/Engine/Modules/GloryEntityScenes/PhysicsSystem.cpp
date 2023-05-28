@@ -32,7 +32,7 @@ namespace Glory
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
 		if (!pPhysics)
 		{
-			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysocsModule was loaded");
+			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysicsModule was loaded");
 			return;
 		}
 

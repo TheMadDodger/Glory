@@ -342,6 +342,11 @@ namespace Glory
 		m_LateContactCallbacks[callbackType].push_back({ body1ID, body2ID });
 	}
 
+	CharacterManager* JoltPhysicsModule::GetCharacterManager()
+	{
+		return &m_CharacterManager;
+	}
+
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
 	//{
 	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
@@ -480,6 +485,8 @@ namespace Glory
 			bpCollisionMapping[i] = mask;
 		}
 		m_ObjectVSBroadPhase.SetBPCollisionMapping(std::move(bpCollisionMapping));
+
+		m_CharacterManager.SetPhysicsSystem(m_pJPHPhysicsSystem);
 
 		// Next we can create a rigid body to serve as the floor, we make a large box
 		// Create the settings for the collision volume (the shape). 
