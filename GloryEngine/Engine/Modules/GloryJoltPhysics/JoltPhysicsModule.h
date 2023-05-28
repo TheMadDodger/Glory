@@ -2,6 +2,7 @@
 #include <PhysicsModule.h>
 
 #include "LayerCollisionFilter.h"
+#include "JoltCharacterManager.h"
 #include "BroadPhaseImpl.h"
 
 #include <Jolt/Jolt.h>
@@ -19,7 +20,7 @@ namespace Glory
 		GLORY_API JoltPhysicsModule();
 		GLORY_API virtual ~JoltPhysicsModule();
 
-		GLORY_MODULE_VERSION_H(0,1,0);
+		GLORY_MODULE_VERSION_H(0,2,0);
 
 		/* Body management */
 		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex) override;
@@ -77,6 +78,8 @@ namespace Glory
 		void TriggerLateActivationCallback(ActivationCallback callbackType, uint32_t bodyID);
 		void TriggerLateContactCallback(ContactCallback callbackType, uint32_t body1ID, uint32_t body2ID);
 
+		virtual CharacterManager* GetCharacterManager() override;
+
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void Initialize() override;
@@ -96,6 +99,7 @@ namespace Glory
 
 		MyBodyActivationListener m_BodyActivationListener;
 		MyContactListener m_ContactListener;
+		JoltCharacterManager m_CharacterManager;
 
 		std::map<ActivationCallback, std::vector<uint32_t>> m_LateActivationCallbacks;
 		std::map<ContactCallback, std::vector<std::pair<uint32_t, uint32_t>>> m_LateContactCallbacks;

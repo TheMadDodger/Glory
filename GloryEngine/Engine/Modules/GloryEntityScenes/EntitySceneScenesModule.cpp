@@ -69,6 +69,7 @@ namespace Glory
 		RegisterComponent<LightComponent>();
 		RegisterComponent<ScriptedComponent>();
 		RegisterComponent<PhysicsBody>();
+		RegisterComponent<CharacterController>();
 
 		const GloryReflect::FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
 		GloryReflect::Reflect::SetFieldFlags(pColorField, Vec4Flags::Color);

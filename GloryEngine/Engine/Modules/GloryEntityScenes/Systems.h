@@ -7,3 +7,4 @@
 #include "LightSystem.h"
 #include "ScriptedSystem.h"
 #include "PhysicsSystem.h"
+#include "CharacterControllerSystem.h"
