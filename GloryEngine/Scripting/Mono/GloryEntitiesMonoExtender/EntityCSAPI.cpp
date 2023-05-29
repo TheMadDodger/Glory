@@ -438,6 +438,12 @@ namespace Glory
 
 #pragma region States
 
+	uint32_t PhysicsBody_GetID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		return physicsComp.m_BodyID;
+	}
+
 	void PhysicsBody_Activate(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
@@ -627,6 +633,122 @@ namespace Glory
 
 #pragma endregion
 
+#pragma endregion
+
+#pragma region Character Controller
+
+#define CHARACTERS PHYSICS->GetCharacterManager()
+
+#pragma region States
+
+	uint32_t CharacterController_GetCharacterID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		return characterController.m_CharacterID;
+	}
+
+	uint32_t CharacterController_GetBodyID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		return CHARACTERS->GetBodyID(characterController.m_CharacterID);
+	}
+
+	void CharacterController_Activate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CHARACTERS->Activate(characterController.m_CharacterID);
+	}
+
+	void CharacterController_Deactivate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		const uint32_t bodyID = CHARACTERS->GetBodyID(characterController.m_CharacterID);
+		PHYSICS->DeactivateBody(bodyID);
+	}
+
+	bool CharacterController_IsActive(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		const uint32_t bodyID = CHARACTERS->GetBodyID(characterController.m_CharacterID);
+		return PHYSICS->IsBodyActive(bodyID);
+	}
+
+#pragma endregion
+
+#pragma region Position and rotation
+
+	void CharacterController_SetPosition(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* position, const ActivationType activationType)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CHARACTERS->SetPosition(characterController.m_CharacterID, ToGLMVec3(*position), activationType);
+	}
+
+	void CharacterController_SetRotation(MonoEntityHandle* pEntityHandle, UUID componentID, const QuatWrapper* rotation, const ActivationType activationType)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CHARACTERS->SetRotation(characterController.m_CharacterID, ToGLMQuat(*rotation), activationType);
+	}
+
+	Vec3Wrapper CharacterController_GetPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		return CHARACTERS->GetPosition(characterController.m_CharacterID);
+	}
+
+	Vec3Wrapper CharacterController_GetCenterOfMassPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		return CHARACTERS->GetCenterOfMassPosition(characterController.m_CharacterID);
+	}
+
+	QuatWrapper CharacterController_GetRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		return CHARACTERS->GetRotation(characterController.m_CharacterID);
+	}
+
+#pragma endregion
+
+#pragma region Velocities
+
+	void CharacterController_SetLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CHARACTERS->SetLinearAndAngularVelocity(characterController.m_CharacterID, ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
+	}
+
+	void CharacterController_SetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CHARACTERS->SetLinearVelocity(characterController.m_CharacterID, ToGLMVec3(*linearVelocity));
+	}
+
+	Vec3Wrapper CharacterController_GetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		return CHARACTERS->GetLinearVelocity(characterController.m_CharacterID);
+	}
+
+	void CharacterController_AddLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CHARACTERS->AddLinearVelocity(characterController.m_CharacterID, ToGLMVec3(*linearVelocity));
+	}
+
+#pragma endregion
+
+#pragma region Impulses
+
+	void CharacterController_AddImpulse(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* impulse)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CHARACTERS->AddImpulse(characterController.m_CharacterID, ToGLMVec3(*impulse));
+	}
+
+#pragma endregion
+
+#pragma endregion
+
 #pragma region EntitySceneObject
 
 	MonoEntityHandle EntitySceneObject_GetEntityHandle(uint64_t objectID, uint64_t sceneID)
@@ -641,8 +763,6 @@ namespace Glory
 		EntityID entityID = entityHandle.GetEntityID();
 		return MonoEntityHandle(entityID, pScene->GetUUID());
 	}
-
-#pragma endregion
 
 #pragma endregion
 
@@ -734,6 +854,7 @@ namespace Glory
 		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel));
 
 		/*  status */
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetID", PhysicsBody_GetID);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_Activate", PhysicsBody_Activate);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_Deactivate", PhysicsBody_Deactivate);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_IsActive", PhysicsBody_IsActive);
@@ -760,7 +881,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetPointVelocity", PhysicsBody_GetPointVelocity);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetPositionRotationAndVelocity", PhysicsBody_SetPositionRotationAndVelocity);
 
-		/* Velocities */
+		/* Forces */
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddForce", PhysicsBody_AddForce);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddForce_Point", PhysicsBody_AddForce_Point);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddTorque", PhysicsBody_AddTorque);
@@ -770,6 +891,29 @@ namespace Glory
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddImpulse", PhysicsBody_AddImpulse);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddImpulse_Point", PhysicsBody_AddImpulse_Point);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddAngularImpulse", PhysicsBody_AddAngularImpulse);
+
+		/*  status */
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetCharacterID", CharacterController_GetCharacterID);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetBodyID", CharacterController_GetBodyID);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_Activate", CharacterController_Activate);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_Deactivate", CharacterController_Deactivate);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_IsActive", CharacterController_IsActive);
+
+		/* Position and rotation */
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_SetPosition", CharacterController_SetPosition);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_SetRotation", CharacterController_SetRotation);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetPosition", CharacterController_GetPosition);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetCenterOfMassPosition", CharacterController_GetCenterOfMassPosition);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetRotation", CharacterController_GetRotation);
+
+		/* Velocities */
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_SetLinearAndAngularVelocity", CharacterController_SetLinearAndAngularVelocity);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_SetLinearVelocity", CharacterController_SetLinearVelocity);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetLinearVelocity", CharacterController_GetLinearVelocity);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_AddLinearVelocity", CharacterController_AddLinearVelocity);
+
+		/* Impulses */
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_AddImpulse", CharacterController_AddImpulse);
 
 		/* Entity Scene Object */
 		BIND("GloryEngine.Entities.EntitySceneObject::EntitySceneObject_GetEntityHandle", EntitySceneObject_GetEntityHandle);
