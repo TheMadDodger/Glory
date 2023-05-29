@@ -2,10 +2,10 @@
 #include "EntitySceneSerializer.h"
 #include "EntitySceneObjectSerializer.h"
 #include "Components.h"
+#include "Systems.h"
 #include "ScriptedComponentSerializer.h"
 #include <PropertyFlags.h>
 #include <TypeFlags.h>
-#include "PhysicsSystem.h"
 
 namespace Glory
 {
@@ -84,12 +84,15 @@ namespace Glory
 		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 
-		m_pEngine->GetPhysicsModule()->RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);
-		m_pEngine->GetPhysicsModule()->RegisterActivationCallback(ActivationCallback::Deactivated, PhysicsSystem::OnBodyDeactivated);
+		PhysicsModule* pPhysics = m_pEngine->GetPhysicsModule();
+		if (!pPhysics) return;
 
-		m_pEngine->GetPhysicsModule()->RegisterContactCallback(ContactCallback::Added, PhysicsSystem::OnContactAdded);
-		m_pEngine->GetPhysicsModule()->RegisterContactCallback(ContactCallback::Persisted, PhysicsSystem::OnContactPersisted);
-		m_pEngine->GetPhysicsModule()->RegisterContactCallback(ContactCallback::Removed, PhysicsSystem::OnContactRemoved);
+		pPhysics->RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);
+		pPhysics->RegisterActivationCallback(ActivationCallback::Deactivated, PhysicsSystem::OnBodyDeactivated);
+
+		pPhysics->RegisterContactCallback(ContactCallback::Added, PhysicsSystem::OnContactAdded);
+		pPhysics->RegisterContactCallback(ContactCallback::Persisted, PhysicsSystem::OnContactPersisted);
+		pPhysics->RegisterContactCallback(ContactCallback::Removed, PhysicsSystem::OnContactRemoved);
 	}
 
 	void EntitySceneScenesModule::PostInitialize()

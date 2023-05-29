@@ -198,7 +198,7 @@ namespace Glory
 
 	struct CharacterController
 	{
-		CharacterController() : m_MaxSlopeAngle(45.0f), m_Friction(0.5f), m_Shape(), m_CharacterID(0), m_CurrentLayerIndex(0) {}
+		CharacterController() : m_MaxSlopeAngle(45.0f), m_Friction(0.5f), m_Shape(), m_CharacterID(0), m_BodyID(PhysicsBody::InvalidBodyID), m_CurrentLayerIndex(0) {}
 
 		REFLECTABLE(CharacterController,
 			(float)(m_MaxSlopeAngle),
@@ -207,6 +207,7 @@ namespace Glory
 		);
 
 		uint32_t m_CharacterID;
+		uint32_t m_BodyID;
 		uint32_t m_CurrentLayerIndex;
 	};
 
