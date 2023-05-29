@@ -1,4 +1,6 @@
 #include "CharacterControllerSystem.h"
+#include "PhysicsSystem.h"
+
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory
@@ -28,6 +30,8 @@ namespace Glory
 		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
 		pComponent.m_CurrentLayerIndex = pRegistry->HasComponent<LayerComponent>(entity) ? pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex : 0;
 		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_CurrentLayerIndex, translation, rotation, *pComponent.m_Shape.BaseShapePointer(), pComponent.m_Friction);
+		pComponent.m_BodyID = pCharacters->GetBodyID(pComponent.m_CharacterID);
+		PhysicsSystem::AddBody(pComponent.m_BodyID, pRegistry, entity);
 	}
 
 	void CharacterControllerSystem::OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
@@ -48,8 +52,10 @@ namespace Glory
 			return;
 		}
 
+		PhysicsSystem::RemoveBody(pComponent.m_BodyID);
 		pCharacters->DestroyCharacter(pComponent.m_CharacterID);
 		pComponent.m_CharacterID = 0;
+		pComponent.m_BodyID = 0;
 	}
 
 	void CharacterControllerSystem::OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)

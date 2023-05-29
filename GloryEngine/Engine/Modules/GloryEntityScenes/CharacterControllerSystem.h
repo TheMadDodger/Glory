@@ -18,18 +18,5 @@ namespace Glory
         static void OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent);
         static void OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent);
         static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent);
-
-        //static void OnBodyActivated(uint32_t bodyID);
-        //static void OnBodyDeactivated(uint32_t bodyID);
-        //
-        //static void OnContactAdded(uint32_t body1ID, uint32_t body2ID);
-        //static void OnContactPersisted(uint32_t body1ID, uint32_t body2ID);
-        //static void OnContactRemoved(uint32_t body1ID, uint32_t body2ID);
-
-    private:
-        //static void SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent);
-
-    private:
-        static std::map<uint32_t, std::pair<GloryECS::EntityRegistry*, EntityID>> m_BodyOwners;
     };
 }

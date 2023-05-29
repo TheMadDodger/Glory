@@ -257,6 +257,16 @@ namespace Glory
 		}
 	}
 
+	void PhysicsSystem::AddBody(uint32_t bodyID, GloryECS::EntityRegistry* pRegistry, EntityID entity)
+	{
+		m_BodyOwners[bodyID] = { pRegistry, entity };
+	}
+
+	void PhysicsSystem::RemoveBody(uint32_t bodyID)
+	{
+		m_BodyOwners.erase(bodyID);
+	}
+
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
