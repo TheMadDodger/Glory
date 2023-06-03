@@ -43,6 +43,7 @@ namespace Glory
 		{
 			transform.Parent = Entity();
 			m_pParent = nullptr;
+			SetHierarchyActive(IsActiveInHierarchy());
 			return;
 		}
 
@@ -56,11 +57,37 @@ namespace Glory
 
 		m_pParent = pEntityParent;
 		transform.Parent = parentHandle;
+		SetHierarchyActive(pParent->IsActiveInHierarchy());
 	}
 
 	Entity EntitySceneObject::GetEntityHandle()
 	{
 		return m_Entity;
+	}
+
+	bool EntitySceneObject::IsActiveSelf() const
+	{
+		return m_Entity.IsActiveSelf();
+	}
+
+	bool EntitySceneObject::IsActiveInHierarchy() const
+	{
+		return m_Entity.IsActive();
+	}
+
+	void EntitySceneObject::SetActive(bool active)
+	{
+		m_Entity.SetActive(active);
+		SetHierarchyActive(active);
+	}
+
+	void EntitySceneObject::SetHierarchyActive(bool active)
+	{
+		m_Entity.SetActiveHierarchy(active);
+		for (size_t i = 0; i < ChildCount(); i++)
+		{
+			GetChild(i)->SetHierarchyActive(active);
+		}
 	}
 
 	void EntitySceneObject::Initialize()

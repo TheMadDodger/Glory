@@ -26,6 +26,11 @@ namespace Glory
         void SetScene(GScene* pScene);
         GScene* GetScene() const;
 
+        virtual bool IsActiveSelf() const = 0;
+        virtual bool IsActiveInHierarchy() const = 0;
+        virtual void SetActive(bool active) = 0;
+        virtual void SetHierarchyActive(bool active) = 0;
+
     public:
         void SetParent(SceneObject* pParent);
 

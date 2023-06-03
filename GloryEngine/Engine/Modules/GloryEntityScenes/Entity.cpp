@@ -46,4 +46,24 @@ namespace Glory
 	{
 		return m_pEntityScene;
 	}
+
+	bool Entity::IsActiveSelf() const
+	{
+		return m_pEntityScene->m_Registry.GetEntityView(m_EntityID)->Active();
+	}
+
+	bool Entity::IsActive() const
+	{
+		return m_pEntityScene->m_Registry.GetEntityView(m_EntityID)->IsActive();
+	}
+
+	void Entity::SetActive(bool active)
+	{
+		m_pEntityScene->m_Registry.GetEntityView(m_EntityID)->Active() = active;
+	}
+
+	void Entity::SetActiveHierarchy(bool active)
+	{
+		m_pEntityScene->m_Registry.GetEntityView(m_EntityID)->HierarchyActive() = active;
+	}
 }

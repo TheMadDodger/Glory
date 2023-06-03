@@ -18,6 +18,11 @@ namespace Glory
 
         GLORY_API Entity GetEntityHandle();
 
+        bool IsActiveSelf() const override;
+        bool IsActiveInHierarchy() const override;
+        void SetActive(bool active) override;
+        void SetHierarchyActive(bool active) override;
+
     private:
         virtual void Initialize() override;
         virtual void OnSetParent(SceneObject* pParent) override;

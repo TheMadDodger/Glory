@@ -3,13 +3,13 @@
 #include "EditorSceneManager.h"
 #include "ObjectMenu.h"
 #include "ImGuiHelpers.h"
-
-#include <Game.h>
-#include <Engine.h>
-
 #include "Undo.h"
 #include "SetParentAction.h"
 #include "SetSiblingIndexAction.h"
+
+#include <Game.h>
+#include <Engine.h>
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -202,9 +202,7 @@ namespace Glory::Editor
 
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, pObject->Name().data());
-		ImGui::PopStyleVar();
-
+		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, "");
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 		{
 			// Set payload to carry the index of our item (could be anything)
@@ -258,6 +256,11 @@ namespace Glory::Editor
 		{
 			ObjectMenu::Open(pObject, T_SceneObject);
 		}
+
+		ImGui::SameLine();
+		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+
+		ImGui::PopStyleVar();
 
 		if (node_open)
 		{

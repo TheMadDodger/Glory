@@ -60,6 +60,8 @@ namespace Glory
 		out << YAML::Value << pObject->Name();
 		out << YAML::Key << "UUID";
 		out << YAML::Value << pObject->GetUUID();
+		out << YAML::Key << "Active";
+		out << YAML::Value << pObject->IsActiveSelf();
 		out << YAML::Key << "ParentUUID";
 		out << YAML::Value << (pParent ? pParent->GetUUID() : 0);
 		out << YAML::Key << "Components";
@@ -87,8 +89,10 @@ namespace Glory
 		std::string name;
 		UUID uuid;
 		UUID parentUuid;
+		bool active = true;
 		YAML_READ(object, node, Name, name, std::string);
 		YAML_READ(object, node, UUID, uuid, uint64_t);
+		YAML_READ(object, node, Active, active, bool);
 		YAML_READ(object, node, ParentUUID, parentUuid, uint64_t);
 
 		if (flags & Serializer::Flags::GenerateNewUUIDs)
@@ -195,6 +199,7 @@ namespace Glory
 			++currentComponentIndex;
 		}
 
+		pObject->SetActive(active);
 		return pObject;
 	}
 }
