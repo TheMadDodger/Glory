@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <string>
 #include <SceneObjectNameAction.h>
+#include <EnableObjectAction.h>
 #include <Undo.h>
 #include <algorithm>
 #include <EditorUI.h>
@@ -49,10 +50,14 @@ namespace Glory::Editor
 
 		const std::string uuidString = std::to_string(m_pObject->GetUUID());
 		ImGui::PushID(uuidString.c_str());
-		bool active = m_pObject->IsActiveInHierarchy();
+		bool active = m_pObject->IsActiveSelf();
 		bool change = false;
 		if (EditorUI::CheckBox("Active", &active))
 		{
+			Undo::StartRecord("Set Active", m_pObject->GetUUID());
+			Undo::AddAction(new EnableObjectAction(active));
+			Undo::StopRecord();
+
 			m_pObject->SetActive(active);
 			change = true;
 		}
