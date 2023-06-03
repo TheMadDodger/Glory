@@ -102,7 +102,7 @@ namespace Glory
 		transform.Position = *position;
 	}
 
-	glm::quat Transform_GetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
+	QuatWrapper Transform_GetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return transform.Rotation;

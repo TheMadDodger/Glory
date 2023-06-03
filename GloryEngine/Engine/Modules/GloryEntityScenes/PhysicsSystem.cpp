@@ -74,7 +74,7 @@ namespace Glory
 			glm::vec4 perspective;
 			if (!glm::decompose(inverse, scale, rotation, translation, skew, perspective)) return;
 			transform.Position = inverse * glm::vec4(transform.Position, 1.0f);
-			transform.Rotation = transform.Rotation * glm::inverse(rotation);
+			transform.Rotation = transform.Rotation * glm::conjugate(rotation);
 		}
 
 		if (pRegistry->HasComponent<LayerComponent>(entity))
