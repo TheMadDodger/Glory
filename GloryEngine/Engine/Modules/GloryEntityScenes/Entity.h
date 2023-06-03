@@ -50,6 +50,11 @@ namespace Glory
 
 		GLORY_API EntityScene* GetScene();
 
+		GLORY_API bool IsActiveSelf() const;
+		GLORY_API bool IsActive() const;
+		GLORY_API void SetActive(bool active);
+		GLORY_API void SetActiveHierarchy(bool active);
+
 	private:
 		EntityID m_EntityID;
 		EntityScene* m_pEntityScene;

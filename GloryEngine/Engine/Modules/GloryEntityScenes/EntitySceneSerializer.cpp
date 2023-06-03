@@ -39,6 +39,12 @@ namespace Glory
 		}
 		pScene->HandleDelayedParents();
 
+		for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
+		{
+			SceneObject* pObject = pScene->GetSceneObject(i);
+			pObject->SetHierarchyActive(pObject->IsActiveInHierarchy());
+		}
+
 		return pScene;
 	}
 }

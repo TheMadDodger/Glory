@@ -49,7 +49,14 @@ namespace Glory::Editor
 
 		const std::string uuidString = std::to_string(m_pObject->GetUUID());
 		ImGui::PushID(uuidString.c_str());
-		bool change = NameGUI();
+		bool active = m_pObject->IsActiveInHierarchy();
+		bool change = false;
+		if (EditorUI::CheckBox("Active", &active))
+		{
+			m_pObject->SetActive(active);
+			change = true;
+		}
+		change |= NameGUI();
 		ImGui::Spacing();
 		change |= ComponentGUI();
 		ImGui::PopID();
