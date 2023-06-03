@@ -42,7 +42,7 @@ namespace Glory
 		for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
 		{
 			SceneObject* pObject = pScene->GetSceneObject(i);
-			pObject->SetHierarchyActive(pObject->IsActiveInHierarchy());
+			pObject->SetHierarchyActive();
 		}
 
 		return pScene;

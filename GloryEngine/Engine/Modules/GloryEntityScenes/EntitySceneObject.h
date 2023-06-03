@@ -21,7 +21,7 @@ namespace Glory
         bool IsActiveSelf() const override;
         bool IsActiveInHierarchy() const override;
         void SetActive(bool active) override;
-        void SetHierarchyActive(bool active) override;
+        void SetHierarchyActive() override;
 
     private:
         virtual void Initialize() override;
