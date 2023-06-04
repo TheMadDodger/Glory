@@ -137,6 +137,9 @@ namespace Glory::Editor
 
 		while (m_Running)
 		{
+			/* Ensure filewatch is still watching */
+			m_pFileWatcher->watch();
+
 			/* We must wait for graphics to initialize */
 			if (!game.GetEngine()->GetGraphicsThread()->IsInitialized()) continue;
 
