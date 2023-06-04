@@ -1,7 +1,6 @@
 #pragma once
 #include "ProjectPopup.h"
 #include "EditorSettings.h"
-#include "EditorAssetLoader.h"
 #include "Toolbar.h"
 #include <imgui_internal.h>
 

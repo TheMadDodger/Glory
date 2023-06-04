@@ -133,6 +133,7 @@ project "GloryEditor"
 			"spirv-cross-msld",
 			"spirv-cross-reflectd",
 			"spirv-cross-utild",
+			"efsw-static-debug"
 		}
 
 	filter "configurations:Release"
@@ -150,4 +151,5 @@ project "GloryEditor"
 			"spirv-cross-msl",
 			"spirv-cross-reflect",
 			"spirv-cross-util",
+			"efsw-static-release"
 		}

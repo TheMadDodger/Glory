@@ -137,8 +137,6 @@ namespace Glory::Editor
 	{
 		ObjectMenu::Cleanup();
 
-		EditorAssetLoader::Stop();
-
 		m_Settings.Save(Game::GetGame().GetEngine());
 		Shortcuts::Clear();
 
