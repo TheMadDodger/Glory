@@ -38,7 +38,7 @@ namespace Glory::Editor
         static void GenerateBatchFile(ProjectSpace* pProject);
         static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);
 
-        static void CompileProject();
+        static void CompileProject(ProjectSpace* pProject);
         static void ReloadAssembly();
 
         static void AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*);

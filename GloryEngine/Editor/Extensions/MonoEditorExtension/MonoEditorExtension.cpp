@@ -89,7 +89,7 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/Script/C#", MonoEditorExtension::OnCreateScript, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		ObjectMenu::AddMenuItem("Open C# Project", MonoEditorExtension::OnOpenCSharpProject, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 
-		MenuBar::AddMenuItem("File/Compile C# Project", CompileProject);
+		MenuBar::AddMenuItem("File/Compile C# Project", []() { CompileProject(ProjectSpace::GetOpenProject()); });
 
 		Tumbnail::AddGenerator<MonoScriptTumbnail>();
 
@@ -174,6 +174,7 @@ namespace Glory::Editor
 		GeneratePremakeFile(pProject);
 		GenerateBatchFile(pProject);
 		RunGenerateProjectFilesBatch(pProject);
+		CompileProject(pProject);
 
 		std::string name = pProject->Name() + ".dll";
 		std::filesystem::path path = pProject->ProjectPath();
@@ -350,9 +351,8 @@ namespace Glory::Editor
 		std::filesystem::remove(tempLuaPath);
 	}
 
-	void MonoEditorExtension::CompileProject()
+	void MonoEditorExtension::CompileProject(ProjectSpace* pProject)
 	{
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		std::filesystem::path projectPath = pProject->RootPath();
 		projectPath = projectPath.append(pProject->Name() + ".csproj");
 
@@ -389,7 +389,7 @@ namespace Glory::Editor
 			size_t subHash = ResourceType::GetSubTypeHash(pResourcerType, i);
 			if (scriptHash != subHash) continue;
 			AssetManager::ReloadAsset(uuid);
-			CompileProject();
+			CompileProject(ProjectSpace::GetOpenProject());
 			return;
 		}
 	}
