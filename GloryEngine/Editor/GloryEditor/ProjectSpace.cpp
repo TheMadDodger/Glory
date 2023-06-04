@@ -25,13 +25,11 @@ namespace Glory::Editor
 		m_pCurrentProject = new ProjectSpace(absolutePath);
 		lock.unlock();
 		m_pCurrentProject->Open();
-		EditorAssetLoader::Start();
 	}
 
 	void ProjectSpace::CloseProject()
 	{
 		if (m_pCurrentProject == nullptr) return;
-		EditorAssetLoader::Stop();
 		m_pCurrentProject->Close();
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		delete m_pCurrentProject;

@@ -126,16 +126,40 @@ cd ../../../submodules
 echo "Building curl"
 cd curl
 
-#cp curl_config.h ../../../includes/curl/curl_config.h
+cp curl_config.h ../../../includes/curl/curl_config.h
 
-#echo "Copying headers"
-#find include/curl -name \*.h -exec cp {} ../includes/curl/ \;
+echo "Copying headers"
+find include/curl -name \*.h -exec cp {} ../includes/curl/ \;
 
 rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR #-DCURL_ENABLE_SSL=ON -DCURL_USE_OPENSSL=ON
 cmake --build . --target INSTALL --config $CONFIG
+cd ../..
+
+#efsw
+echo "Building efsw"
+cd efsw
+../../third-party/premake/premake5.exe vs2022
+cd make/windows
+msbuild.exe -p:Configuration=$CONFIG -p:Platform=x64 efsw.sln
+cd ../..
+
+if [ "$CONFIG" == "Debug" ]; then
+    echo ${EFSW_LIB="efsw-static-debug"}
+else
+    echo ${EFSW_LIB="efsw-static-release"}
+fi
+
+cp "lib/${EFSW_LIB}.lib" "../../Dependencies/${CONFIG}/lib/${EFSW_LIB}.lib"
+cp "lib/${EFSW_LIB}.idb" "../../Dependencies/${CONFIG}/lib/${EFSW_LIB}.idb"
+cp "lib/${EFSW_LIB}.pdb" "../../Dependencies/${CONFIG}/lib/${EFSW_LIB}.pdb"
+
+mkdir "../../Dependencies/${CONFIG}/include/efsw"
+cp "include/efsw/efsw.h" "../../Dependencies/${CONFIG}/include/efsw/efsw.h"
+cp "include/efsw/efsw.hpp" "../../Dependencies/${CONFIG}/include/efsw/efsw.hpp"
+
 
 # Jolt
 # Jolt now gets built in the jolt module itself because I could not solve an illusive linker error

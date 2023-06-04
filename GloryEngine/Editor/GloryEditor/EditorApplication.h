@@ -3,11 +3,15 @@
 #include "MainEditor.h"
 #include "ProjectSpace.h"
 #include "EditorShaderProcessor.h"
-#include "EditorAssetLoader.h"
 #include "EditorCreateInfo.h"
 #include "EditorPlayer.h"
 #include <Version.h>
 #include <Game.h>
+
+namespace efsw
+{
+	class FileWatcher;
+}
 
 namespace Glory::Editor
 {
@@ -40,6 +44,7 @@ namespace Glory::Editor
 			InitializePlatform(game);
 
 			Debug::LogInfo("Initialized editor application");
+			m_pFileWatcher->watch();
 		}
 
 		GLORY_EDITOR_API void Initialize(Game& game);
@@ -52,6 +57,7 @@ namespace Glory::Editor
 
 		GLORY_EDITOR_API EditorPlatform* GetEditorPlatform();
 		GLORY_EDITOR_API MainEditor* GetMainEditor();
+		GLORY_EDITOR_API efsw::FileWatcher* FileWatch();
 
 		static GLORY_EDITOR_API EditorApplication* GetInstance();
 		static GLORY_EDITOR_API const EditorMode& CurrentMode();
@@ -85,6 +91,8 @@ namespace Glory::Editor
 		EditorPlatform* m_pPlatform;
 		MainEditor* m_pMainEditor;
 		EditorPlayer* m_pPlayer;
+		efsw::FileWatcher* m_pFileWatcher;
+
 		std::vector<BaseEditorExtension*> m_pExtensions;
 		EditorShaderProcessor* m_pShaderProcessor;
 		static EditorApplication* m_pEditorInstance;

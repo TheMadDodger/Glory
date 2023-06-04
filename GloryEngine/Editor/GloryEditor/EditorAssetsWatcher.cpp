@@ -1,47 +1,56 @@
-#include "EditorAssetLoader.h"
+#include "EditorAssetsWatcher.h"
 #include "ProjectSpace.h"
 #include "EditorAssetDatabase.h"
+#include "EditorApplication.h"
 
 #include <Engine.h>
 
 namespace Glory::Editor
 {
-	Thread* EditorAssetLoader::m_pThread = nullptr;
-	bool EditorAssetLoader::m_Exit = false;
-
-	EditorAssetLoader::EditorAssetLoader() {}
-
-	EditorAssetLoader::~EditorAssetLoader() {}
-
-	void EditorAssetLoader::Start()
+	void EditorAssetsWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
 	{
-		m_Exit = false;
-		m_pThread = ThreadManager::Run(EditorAssetLoader::Run);
+		std::filesystem::path filePath = dir;
+		filePath.append(filename);
+
+		switch (action)
+		{
+		case efsw::Actions::Add:
+			/* TODO: Process externally added assets */
+			//std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Added" << std::endl;
+			break;
+		case efsw::Actions::Delete:
+			/* TODO: Process externally deleted assets */
+			//std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Delete" << std::endl;
+			break;
+		case efsw::Actions::Modified:
+			//std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Modified" << std::endl;
+			ProcessFileChange(filePath);
+			break;
+		case efsw::Actions::Moved:
+			/* TODO: Process externally moved assets */
+			//std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Moved from (" << oldFilename << ")" << std::endl;
+			break;
+		//default:
+			//std::cout << "Should never happen!" << std::endl;
+		}
 	}
 
-	void EditorAssetLoader::Stop()
+	EditorAssetsWatcher::EditorAssetsWatcher() : m_WatchID(0)
 	{
-		m_Exit = true;
-		while(m_pThread != nullptr && !m_pThread->IsIdle()) {}
-		m_pThread = nullptr;
+		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace* pProject) {
+			std::filesystem::path assetPath = pProject->RootPath();
+			assetPath.append("Assets");
+			m_WatchID = EditorApplication::GetInstance()->FileWatch()->addWatch(assetPath.string(), this, true);
+		});
+
+		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, [&](ProjectSpace* pProject) {
+			EditorApplication::GetInstance()->FileWatch()->removeWatch(m_WatchID);
+		});
 	}
 
-	void EditorAssetLoader::LoadAll()
-	{
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		if (!pProject) return;
+	EditorAssetsWatcher::~EditorAssetsWatcher() {}
 
-		std::filesystem::path assetPath = pProject->RootPath();
-		assetPath.append("Assets");
-
-		ProcessDirectory(assetPath.string(), true);
-		//RemoveDeletedAssets();
-		//
-		//assetPath = "./Modules/";
-		//ProcessDirectory(assetPath.string(), true, "\\Assets\\");
-	}
-
-	void EditorAssetLoader::ProcessDirectory(const std::string& path, bool recursive, const std::string& folderFilter)
+	void EditorAssetsWatcher::ProcessDirectory(const std::string& path, bool recursive, const std::string& folderFilter)
 	{
 		if (!std::filesystem::is_directory(path)) return;
 
@@ -55,24 +64,21 @@ namespace Glory::Editor
 
 			std::string pathString = entry.path().string();
 			if (folderFilter != "" && pathString.find(folderFilter) == std::string::npos) continue;
-			ProcessFile(entry.path());
+			ProcessFileChange(entry.path());
 		}
 	}
 
-	void EditorAssetLoader::ProcessFile(const std::filesystem::path& filePath)
+	void EditorAssetsWatcher::ProcessFileChange(const std::filesystem::path& filePath)
 	{
-		// Check if file was saved
-		if (!std::filesystem::exists(filePath) || filePath.extension() == "TMP") return;
-		std::filesystem::file_time_type lastSaveTime = std::filesystem::last_write_time(filePath);
-		long duration = (long)lastSaveTime.time_since_epoch().count();
+		if (!std::filesystem::exists(filePath)) return;
+
+		/* TODO: Check for external changes in directories */
+		if (std::filesystem::is_directory(filePath)) return;
+
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(filePath.string());
 		if (!uuid) return;
-		long previousDuration = EditorAssetDatabase::GetLastSavedRecord(uuid);
-		if (duration != previousDuration)
-		{
-			// Asset was updated
-			EditorAssetDatabase::UpdateAsset(uuid, duration);
-		}
+		// Asset was updated
+		EditorAssetDatabase::UpdateAsset(uuid);
 
 		// Make the path relative to the asset/resource path!
 		//ProjectSpace* pProject = ProjectSpace::GetOpenProject();
@@ -146,7 +152,7 @@ namespace Glory::Editor
 		//EditorAssetDatabase::InsertAsset(relativePathToFile, meta);
 	}
 
-	void EditorAssetLoader::RemoveDeletedAssets()
+	void EditorAssetsWatcher::RemoveDeletedAssets()
 	{
 		/* TODO */
 		//std::vector<UUID> toDeleteAssets;
@@ -164,14 +170,5 @@ namespace Glory::Editor
 		//{
 		//	AssetDatabase::RemoveAsset(toDeleteAssets[i]);
 		//}
-	}
-
-	void EditorAssetLoader::Run()
-	{
-		while (!m_Exit)
-		{
-			if (m_Exit) return;
-			LoadAll();
-		}
 	}
 }

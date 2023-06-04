@@ -13,7 +13,6 @@ namespace Glory::Editor
 	ThreadedVector<UUID> EditorAssetDatabase::m_UnsavedAssets;
 	ThreadedVector<EditorAssetDatabase::ImportedResource> EditorAssetDatabase::m_ImportedResources;
 	ThreadedUMap<std::string, UUID> EditorAssetDatabase::m_PathToUUIDCache;
-	ThreadedUMap<UUID, long> EditorAssetDatabase::m_LastSavedRecords;
 	std::function<void(Resource*)> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
 
@@ -55,25 +54,6 @@ namespace Glory::Editor
 
 		Debug::LogInfo("Loaded asset database");
 		AssetCompiler::CompileAssetDatabase();
-
-		LoadLastSavedRecords();
-	}
-
-	void EditorAssetDatabase::LoadLastSavedRecords()
-	{
-		m_LastSavedRecords.Clear();
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		std::filesystem::path path = pProject->CachePath();
-		path.append("LastSaved.yaml");
-		if (!std::filesystem::exists(path)) return;
-		YAML::Node savedRecordsNode = YAML::LoadFile(path.string());
-		if (!savedRecordsNode.IsDefined() || !savedRecordsNode.IsMap()) return;
-		for (YAML::const_iterator itor = savedRecordsNode.begin(); itor != savedRecordsNode.end(); ++itor)
-		{
-			const UUID uuid = itor->first.as<uint64_t>();
-			const long lastSaved = itor->second.as<long>();
-			m_LastSavedRecords.Set(uuid, lastSaved);
-		}
 	}
 
 	void EditorAssetDatabase::Reload()
@@ -149,15 +129,9 @@ namespace Glory::Editor
 		SetDirty();
 	}
 
-	void EditorAssetDatabase::UpdateAsset(UUID uuid, long lastSaved)
+	void EditorAssetDatabase::UpdateAsset(UUID uuid)
 	{
-		m_LastSavedRecords.Set(uuid, lastSaved);
 		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetUpdated, uuid, nullptr);
-	}
-
-	long EditorAssetDatabase::GetLastSavedRecord(UUID uuid)
-	{
-		return m_LastSavedRecords[uuid];
 	}
 
 	void EditorAssetDatabase::UpdateAssetPaths(const std::string& oldPath, const std::string& newPath)
@@ -727,25 +701,7 @@ namespace Glory::Editor
 		m_AsyncImportCallback = NULL;
 
 		EditorAssetCallbacks::Cleanup();
-
-		YAML::Emitter out;
-		out << YAML::BeginMap;
-		m_LastSavedRecords.ForEach([&](const UUID& uuid, const long& value) {
-			out << YAML::Key << std::to_string(uuid);
-			out << YAML::Value << value;
-		});
-		out << YAML::EndMap;
-
 		m_PathToUUIDCache.Clear();
-		m_LastSavedRecords.Clear();
-
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		std::filesystem::path path = pProject->CachePath();
-		path.append("LastSaved.yaml");
-
-		std::ofstream outStream{ path };
-		outStream << out.c_str();
-		outStream.close();
 	}
 
 	void EditorAssetDatabase::Update()

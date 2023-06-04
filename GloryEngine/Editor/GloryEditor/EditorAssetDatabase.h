@@ -20,12 +20,10 @@ namespace Glory::Editor
 	{
 	public:
 		static GLORY_EDITOR_API void Load(JSONFileRef& projectFile);
-		static GLORY_EDITOR_API void LoadLastSavedRecords();
 		static GLORY_EDITOR_API void Reload();
 		static GLORY_EDITOR_API void InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty = true);
 		static GLORY_EDITOR_API void UpdateAssetPath(UUID uuid, const std::string& newPath);
-		static GLORY_EDITOR_API void UpdateAsset(UUID uuid, long lastSaved);
-		static GLORY_EDITOR_API long GetLastSavedRecord(UUID uuid);
+		static GLORY_EDITOR_API void UpdateAsset(UUID uuid);
 		static GLORY_EDITOR_API void UpdateAssetPaths(const std::string& oldPath, const std::string& newPath);
 		static GLORY_EDITOR_API void DeleteAsset(UUID uuid, bool compile = true);
 		static GLORY_EDITOR_API void DeleteAsset(const std::string& path);
@@ -78,7 +76,6 @@ namespace Glory::Editor
 		};
 		static ThreadedVector<ImportedResource> m_ImportedResources;
 		static ThreadedUMap<std::string, UUID> m_PathToUUIDCache;
-		static ThreadedUMap<UUID, long> m_LastSavedRecords;
 		static bool m_IsDirty;
 
 		static std::function<void(Resource*)> m_AsyncImportCallback;

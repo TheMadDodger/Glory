@@ -1,6 +1,8 @@
 #include "EditorApplication.h"
 #include "QuitPopup.h"
 #include "EditorAssetDatabase.h"
+#include "EditorAssetsWatcher.h"
+
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
@@ -17,9 +19,12 @@ namespace Glory::Editor
 	EditorMode EditorApplication::m_Mode = EditorMode::M_Edit;
 	bool EditorApplication::m_Running = false;
 
+	EditorAssetsWatcher* AssetsWatcher = nullptr;
+
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo)
 		: m_pMainEditor(nullptr), m_pPlatform(nullptr), m_pTempWindowImpl(createInfo.pWindowImpl),
-		m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr), m_pPlayer(nullptr)
+		m_pTempRenderImpl(createInfo.pRenderImpl), m_pShaderProcessor(nullptr), m_pPlayer(nullptr),
+		m_pFileWatcher(new efsw::FileWatcher())
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.ExtensionsCount > 0 && createInfo.pExtensions != nullptr)
@@ -40,7 +45,10 @@ namespace Glory::Editor
 		m_pMainEditor = nullptr;
 
 		delete m_pPlatform;
-		m_pPlatform = nullptr;;
+		m_pPlatform = nullptr;
+
+		delete m_pFileWatcher;
+		m_pFileWatcher = nullptr;
 	}
 
 	void EditorApplication::Initialize(Game& game)
@@ -63,6 +71,10 @@ namespace Glory::Editor
 		InitializePlatform(game);
 
 		GloryAPI::Initialize();
+
+		m_pFileWatcher->watch();
+
+		AssetsWatcher = new EditorAssetsWatcher();
 	}
 
 	void EditorApplication::InitializeExtensions()
@@ -87,6 +99,9 @@ namespace Glory::Editor
 		m_pPlayer = nullptr;
 
 		GloryAPI::Cleanup();
+
+		delete AssetsWatcher;
+		AssetsWatcher = nullptr;
 	}
 
 	void EditorApplication::Run(Game& game)
@@ -183,6 +198,11 @@ namespace Glory::Editor
 	MainEditor* EditorApplication::GetMainEditor()
 	{
 		return m_pMainEditor;
+	}
+
+	efsw::FileWatcher* EditorApplication::FileWatch()
+	{
+		return m_pFileWatcher;
 	}
 
 	EditorApplication* EditorApplication::GetInstance()

@@ -45,3 +45,6 @@
 [submodule "GloryEngine/submodules/rapidjson"]
 	path = GloryEngine/submodules/rapidjson
 	url = https://github.com/Tencent/rapidjson
+[submodule "GloryEngine/submodules/efsw"]
+	path = GloryEngine/submodules/efsw
+	url = https://github.com/SpartanJ/efsw
