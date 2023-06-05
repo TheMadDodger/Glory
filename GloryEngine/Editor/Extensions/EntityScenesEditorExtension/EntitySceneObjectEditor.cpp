@@ -22,6 +22,7 @@ namespace Glory::Editor
 		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
 		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
 		{ ResourceType::GetHash<MeshRenderer>(), ICON_FA_CUBES },
+		{ ResourceType::GetHash<ModelRenderer>(), ICON_FA_CUBES },
 		{ ResourceType::GetHash<CameraComponent>(), ICON_FA_VIDEO },
 		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
@@ -71,6 +72,12 @@ namespace Glory::Editor
 	void EntitySceneObjectEditor::Refresh()
 	{
 		Initialize();
+	}
+
+	std::string_view EntitySceneObjectEditor::GetComponentIcon(uint32_t typeHash)
+	{
+		auto itor = COMPONENT_ICONS.find(typeHash);
+		return itor != COMPONENT_ICONS.end() ? itor->second : "";
 	}
 
 	void EntitySceneObjectEditor::Initialize()

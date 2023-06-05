@@ -5,11 +5,17 @@
 #include "PhysicsBodyEditor.h"
 #include "ScriptedComponentEditor.h"
 #include "CharacterControllerEditor.h"
+#include "CreateEntityObjectsCallbacks.h"
 
 #include <EntitySceneScenesModule.h>
 #include <EditorPlayer.h>
 #include <Components.h>
 #include <Reflection.h>
+#include <ObjectMenu.h>
+
+#define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
+name##MenuName << STRINGIFY(Create/Entity Object/) << EntitySceneObjectEditor::GetComponentIcon<component>() << "  " << STRINGIFY(name); \
+ObjectMenu::AddMenuItem(name##MenuName.str(), Create##name, T_SceneObject | T_Scene | T_Hierarchy);
 
 namespace Glory::Editor
 {
@@ -40,6 +46,14 @@ namespace Glory::Editor
 		EditorPlayer::RegisterLoopHandler(this);
 
 		PropertyDrawer::RegisterPropertyDrawer<SimplePropertyDrawerTemplate<MeshMaterial>>();
+
+		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
+		OBJECT_CREATE_MENU(Model, ModelRenderer);
+		OBJECT_CREATE_MENU(Camera, CameraComponent);
+		OBJECT_CREATE_MENU(Light, LightComponent);
+		OBJECT_CREATE_MENU(Scripted, ScriptedComponent);
+		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
+		OBJECT_CREATE_MENU(Character, CharacterController);
 	}
 
 	const char* EntityScenesEditorExtension::ModuleName()

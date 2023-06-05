@@ -15,6 +15,14 @@ namespace Glory::Editor
 
 		void Refresh();
 
+		template<typename T>
+		static std::string_view GetComponentIcon()
+		{
+			return GetComponentIcon(ResourceType::GetHash<T>());
+		}
+
+		static GLORY_EDITOR_API std::string_view GetComponentIcon(uint32_t typeHash);
+
 	private:
 		void Initialize();
 		bool NameGUI();

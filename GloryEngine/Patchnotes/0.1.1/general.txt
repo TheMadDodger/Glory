@@ -1,0 +1,10 @@
+- Added TextureData which will replace ImageData inputs
+- Replaced ImageData fields with TextureData fields
+- Added an automated project migration that adds a default TextureData asset to ImageData assets
+- Added automated project migration that replaces ImageData fields in materials with the default TextureData asset of that ImageData asset
+- Added a checkbox to enable/disable objects
+- Added CharacterController component and CS API
+- Fixed incorrect quaternion when getting local rotation
+- Fixed crash caused by automatic recompilation of csharp project
+- Csharp project will now be compiled after project is opened
+- Added a menu for creating basic objects
