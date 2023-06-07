@@ -1,14 +1,17 @@
 #include "ProjectSettings.h"
 
+#include <YAML_GLM.h>
 #include <LayerManager.h>
-
 #include <imgui.h>
+#include <EditorUI.h>
 
 namespace Glory::Editor
 {
 	bool PhysicsSettings::OnGui()
 	{
-		ImGui::BeginChild("Input Settings");
+		ImGui::BeginChild("Physics Settings");
+
+		EditorUI::InputFloat3(m_YAMLFile, "Gravity");
 
 		NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
 		if (!collisionMatrixNode.IsSequence())
@@ -139,6 +142,9 @@ namespace Glory::Editor
 
 	void PhysicsSettings::OnStartPlay_Impl()
 	{
+		NodeValueRef gravityNode = m_YAMLFile["Gravity"];
+		const glm::vec3 gravity = gravityNode.As<glm::vec3>();
+
 		NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
 		if (!collisionMatrixNode.IsSequence())
 			return;
@@ -157,6 +163,8 @@ namespace Glory::Editor
 			}
 		}
 
-		Game::GetGame().GetEngine()->GetPhysicsModule()->SetCollisionMatrix(std::move(matrix));
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		pPhysics->SetCollisionMatrix(std::move(matrix));
+		pPhysics->SetGravity(gravity);
 	}
 }

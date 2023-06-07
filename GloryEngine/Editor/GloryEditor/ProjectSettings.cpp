@@ -72,13 +72,14 @@ namespace Glory::Editor
 	{
 		std::filesystem::path path = pProject->SettingsPath();
 		path.append(m_SettingsFile);
+		m_YAMLFile = YAMLFileRef{ path };
+		
 		if (!std::filesystem::exists(path))
 		{
 			/* TODO: Create default file? */
 			return;
 		}
 
-		m_YAMLFile = YAMLFileRef{ path };
 		NodeRef rootNode = m_YAMLFile.RootNodeRef();
 		NodeValueRef rootValue = rootNode.ValueRef();
 		if (!rootValue.Exists() || !rootValue.IsMap())

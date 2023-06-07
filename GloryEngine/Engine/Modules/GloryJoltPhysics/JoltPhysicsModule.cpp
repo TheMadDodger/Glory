@@ -19,6 +19,7 @@
 #include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 
 #include <JoltDebugRenderer.h>
+#include <GameTime.h>
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -348,6 +349,16 @@ namespace Glory
 		return &m_CharacterManager;
 	}
 
+	void JoltPhysicsModule::SetGravity(const glm::vec3& gravity)
+	{
+		m_pJPHPhysicsSystem->SetGravity(ToJPHVec3(gravity));
+	}
+
+	const glm::vec3 JoltPhysicsModule::GetGravity() const
+	{
+		return ToVec3(m_pJPHPhysicsSystem->GetGravity());
+	}
+
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
 	//{
 	//	JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
@@ -557,8 +568,14 @@ namespace Glory
 		// Now we're ready to simulate the body, keep simulating until it goes to sleep
 		static uint32_t step = 0;
 		
-		// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
+		// We simulate the physics world in discrete time steps.
+		const float engineDeltaTime = Time::GetDeltaTime<float, std::ratio<1, 1>>();
 		const uint32_t tickRate = Settings().Value<unsigned int>("TickRate");
+		static float timer = 0.0f;
+		timer += engineDeltaTime;
+		if (timer < 1.0f / tickRate) return;
+		timer -= 1.0f / tickRate;
+
 		const float deltaTime = 1.0f / tickRate;
 		
 		// Next step
