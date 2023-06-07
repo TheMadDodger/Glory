@@ -6,6 +6,7 @@
 #include <TextureData.h>
 #include <MaterialInstanceData.h>
 #include <NodeRef.h>
+#include <YAML_GLM.h>
 
 namespace Glory::Editor
 {
@@ -25,6 +26,7 @@ namespace Glory::Editor
         if (Version::Compare(version, { 0,1,1,0 }, true) < 0)
         {
             Migrate_0_1_1_DefaultTextureAndMaterialProperties(pProject);
+            Migrate_0_1_1_AddGravityToPhysicsSettings(pProject);
         }
 
         /* Update version to current */
@@ -164,5 +166,14 @@ namespace Glory::Editor
             }
             materialFile.Save();
         }
+    }
+
+    void Migrate_0_1_1_AddGravityToPhysicsSettings(ProjectSpace* pProject)
+    {
+        std::filesystem::path physicsSettingsPath = pProject->RootPath();
+        physicsSettingsPath.append("ProjectSettings").append("Physics.yaml");
+        YAMLFileRef physicsSettings{ physicsSettingsPath };
+        physicsSettings["Gravity"].Set(glm::vec3{0.0f, -9.81000042f, 0.0f});
+        physicsSettings.Save();
     }
 }

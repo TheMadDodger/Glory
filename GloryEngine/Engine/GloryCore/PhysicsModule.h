@@ -98,6 +98,9 @@ namespace Glory
 
 		virtual CharacterManager* GetCharacterManager() = 0;
 
+		/* Gravity */
+		virtual void SetGravity(const glm::vec3& gravity) = 0;
+		virtual const glm::vec3 GetGravity() const = 0;
 		/*
 
 		/// Create a two body constraint

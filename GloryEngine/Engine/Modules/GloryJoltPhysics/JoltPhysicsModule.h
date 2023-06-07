@@ -80,6 +80,10 @@ namespace Glory
 
 		virtual CharacterManager* GetCharacterManager() override;
 
+		/* Gravity */
+		void SetGravity(const glm::vec3& gravity) override;
+		const glm::vec3 GetGravity() const override;
+
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void Initialize() override;
