@@ -149,7 +149,7 @@ namespace Glory::Editor
 		forward /= scale.z;
 
 		transform.Position = position;
-		transform.Rotation = glm::conjugate(glm::quatLookAt(forward, up));
+		transform.Rotation = glm::conjugate(glm::quatLookAt(-forward, up));
 		transform.Scale = scale;
 	}
 
