@@ -58,9 +58,21 @@ namespace GloryEngine
 			return true;
         }
 
+		public static Vector3 Gravity
+		{
+			get => Physics_GetGravity();
+			set => Physics_SetGravity(value);
+        }
+
 		/* Ray Casting */
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern RayCastHit[] Physics_CastRay(Vector3 origin, Vector3 direction);
+
+        /* Gravity */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void Physics_SetGravity(Vector3 gravity);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern Vector3 Physics_GetGravity();
 
         /* States */
         [MethodImpl(MethodImplOptions.InternalCall)]

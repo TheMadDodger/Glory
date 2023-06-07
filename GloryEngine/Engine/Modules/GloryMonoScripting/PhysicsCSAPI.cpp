@@ -31,6 +31,20 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Gravity
+
+	void Physics_SetGravity(Vec3Wrapper gravity)
+	{
+		PHYSICS->SetGravity(ToGLMVec3(gravity));
+	}
+
+	Vec3Wrapper Physics_GetGravity()
+	{
+		return PHYSICS->GetGravity();
+	}
+
+#pragma endregion
+
 #pragma region States
 
 	void Physics_ActivateBody(uint32_t bodyID)
@@ -238,6 +252,10 @@ namespace Glory
 
 		/* Ray Casting */
 		BIND("GloryEngine.Physics::Physics_CastRay", Physics_CastRay);
+
+		/* Gravity */
+		BIND("GloryEngine.Physics::Physics_SetGravity", Physics_SetGravity);
+		BIND("GloryEngine.Physics::Physics_GetGravity", Physics_GetGravity);
 	}
 
 #pragma endregion
