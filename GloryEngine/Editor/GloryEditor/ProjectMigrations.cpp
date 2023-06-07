@@ -170,6 +170,7 @@ namespace Glory::Editor
 
     void Migrate_0_1_1_AddGravityToPhysicsSettings(ProjectSpace* pProject)
     {
+        Debug::LogInfo("0.1.1> Migrating PhysicsSettings to include Gravity property");
         std::filesystem::path physicsSettingsPath = pProject->RootPath();
         physicsSettingsPath.append("ProjectSettings").append("Physics.yaml");
         YAMLFileRef physicsSettings{ physicsSettingsPath };

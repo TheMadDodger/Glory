@@ -1,0 +1,18 @@
+EditorVersion: 0.1.1
+Gravity:
+  - 0
+  - -9.81000042
+  - 0
+CollisionMatrix:
+  -
+    - true
+    - true
+    - true
+  -
+    - true
+    - false
+    - true
+  -
+    - true
+    - true
+    - false
