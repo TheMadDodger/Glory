@@ -1,20 +1,41 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace GloryEngine
+﻿namespace GloryEngine
 {
     public struct Vector4
     {
         #region Props
 
-        public Vector4 Normalized => Vector4_GetNormalized(this);
+        /// <summary>
+        /// Get normalized vector
+        /// </summary>
+        public Vector4 Normalized => new Vector4(x, y, z, w) / Length;
+
+        /// <summary>
+        /// Length of the vector
+        /// </summary>
+        public float Length => (float)System.Math.Sqrt(x * x + y * y + z * z + w * w);
 
         #endregion
 
         #region Fields
 
+        /// <summary>
+        /// X component
+        /// </summary>
         public float x;
+
+        /// <summary>
+        /// Y component
+        /// </summary>
         public float y;
+
+        /// <summary>
+        /// Z component
+        /// </summary>
         public float z;
+
+        /// <summary>
+        /// W component
+        /// </summary>
         public float w;
 
         #endregion
@@ -57,20 +78,83 @@ namespace GloryEngine
 
         #region Methods
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector4 Vector4_GetNormalized(Vector4 a);
+        /// <summary>
+        /// Calculate the Dot product between this vector and another
+        /// </summary>
+        /// <param name="other">The other vector</param>
+        /// <returns>The dot product of the 2 vectors</returns>
+        public float Dot(Vector4 other)
+        {
+            return Dot(this, other);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector4 operator +(Vector4 a, Vector4 b);
+        /// <summary>
+        /// Linear interpolate between this vector and another by factor t
+        /// </summary>
+        /// <param name="other">The other vector</param>
+        /// <param name="t">Lerp factor</param>
+        /// <returns>The lerped vector</returns>
+        public Vector4 Lerp(Vector4 other, float t)
+        {
+            return Lerp(this, other, t);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector4 operator -(Vector4 a, Vector4 b);
+        /// <summary>
+        /// Calculate the dot product between 2 vectors
+        /// </summary>
+        /// <param name="a">Vector a</param>
+        /// <param name="b">Vector b</param>
+        /// <returns>The dot product of the 2 vectors</returns>
+        public static float Dot(Vector4 a, Vector4 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector4 operator *(Vector4 a, Vector4 b);
+        /// <summary>
+        /// Linear interpolate between this vector and another by factor t
+        /// </summary>
+        /// <param name="a">Starting vector</param>
+        /// <param name="b">Target vector</param>
+        /// <param name="t">Lerp factor</param>
+        /// <returns>The lerped vector</returns>
+        public static Vector4 Lerp(Vector4 a, Vector4 b, float t)
+        {
+            Vector4 result = new Vector4();
+            result.x = Math.Lerp(a.x, b.x, t);
+            result.y = Math.Lerp(a.y, b.y, t);
+            result.z = Math.Lerp(a.z, b.z, t);
+            result.z = Math.Lerp(a.w, b.w, t);
+            return result;
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector4 operator /(Vector4 a, Vector4 b);
+        public override string ToString()
+        {
+            return string.Format("{0},{1},{2},{3}", x, y, z, w);
+        }
+
+        #endregion
+
+        #region Operator Overloads
+
+        public static Vector4 operator +(Vector4 a, Vector4 b)
+        {
+            return new Vector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
+        }
+
+        public static Vector4 operator -(Vector4 a, Vector4 b)
+        {
+            return new Vector4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
+        }
+
+        public static Vector4 operator *(Vector4 a, Vector4 b)
+        {
+            return new Vector4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+        }
+
+        public static Vector4 operator /(Vector4 a, Vector4 b)
+        {
+            return new Vector4(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
+        }
 
         public static Vector4 operator *(Vector4 a, float factor)
         {
@@ -80,11 +164,6 @@ namespace GloryEngine
         public static Vector4 operator /(Vector4 a, float factor)
         {
             return a / new Vector4(factor);
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0},{1},{2},{3}", x, y, z, w);
         }
 
         #endregion

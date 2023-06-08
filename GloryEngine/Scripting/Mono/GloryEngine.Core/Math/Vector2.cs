@@ -1,18 +1,31 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace GloryEngine
+﻿namespace GloryEngine
 {
     public struct Vector2
     {
         #region Props
 
-        public Vector2 Normalized => Vector2_GetNormalized(this);
+        /// <summary>
+        /// Get normalized vector
+        /// </summary>
+        public Vector2 Normalized => new Vector2(x, y) / Length;
+
+        /// <summary>
+        /// Length of the vector
+        /// </summary>
+        public float Length => (float)System.Math.Sqrt(x * x + y * y);
 
         #endregion
 
         #region Fields
 
+        /// <summary>
+        /// X component
+        /// </summary>
         public float x;
+
+        /// <summary>
+        /// Y component
+        /// </summary>
         public float y;
 
         #endregion
@@ -41,20 +54,81 @@ namespace GloryEngine
 
         #region Methods
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 Vector2_GetNormalized(Vector2 a);
+        /// <summary>
+        /// Calculate the Dot product between this vector and another
+        /// </summary>
+        /// <param name="other">The other vector</param>
+        /// <returns>The dot product of the 2 vectors</returns>
+        public float Dot(Vector2 other)
+        {
+            return Dot(this, other);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 operator +(Vector2 a, Vector2 b);
+        /// <summary>
+        /// Linear interpolate between this vector and another by factor t
+        /// </summary>
+        /// <param name="other">The other vector</param>
+        /// <param name="t">Lerp factor</param>
+        /// <returns>The lerped vector</returns>
+        public Vector2 Lerp(Vector2 other, float t)
+        {
+            return Lerp(this, other, t);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 operator -(Vector2 a, Vector2 b);
+        /// <summary>
+        /// Calculate the dot product between 2 vectors
+        /// </summary>
+        /// <param name="a">Vector a</param>
+        /// <param name="b">Vector b</param>
+        /// <returns>The dot product of the 2 vectors</returns>
+        public static float Dot(Vector2 a, Vector2 b)
+        {
+            return a.x * b.x + a.y * b.y;
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 operator *(Vector2 a, Vector2 b);
+        /// <summary>
+        /// Linear interpolate between this vector and another by factor t
+        /// </summary>
+        /// <param name="a">Starting vector</param>
+        /// <param name="b">Target vector</param>
+        /// <param name="t">Lerp factor</param>
+        /// <returns>The lerped vector</returns>
+        public static Vector2 Lerp(Vector2 a, Vector2 b, float t)
+        {
+            Vector2 result = new Vector2();
+            result.x = Math.Lerp(a.x, b.x, t);
+            result.y = Math.Lerp(a.y, b.y, t);
+            return result;
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 operator /(Vector2 a, Vector2 b);
+        public override string ToString()
+        {
+            return string.Format("{0},{1}", x, y);
+        }
+
+        #endregion
+
+        #region Operator Overloads
+
+        public static Vector2 operator +(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.x + b.x, a.y + b.y);
+        }
+
+        public static Vector2 operator -(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.x - b.x, a.y - b.y);
+        }
+
+        public static Vector2 operator *(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.x * b.x, a.y * b.y);
+        }
+
+        public static Vector2 operator /(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.x / b.x, a.y / b.y);
+        }
 
         public static Vector2 operator *(Vector2 a, float factor)
         {
@@ -64,11 +138,6 @@ namespace GloryEngine
         public static Vector2 operator /(Vector2 a, float factor)
         {
             return a / new Vector2(factor);
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0},{1}", x, y);
         }
 
         #endregion
