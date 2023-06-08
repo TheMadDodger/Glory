@@ -1,12 +1,12 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace GloryEngine
+﻿namespace GloryEngine
 {
     public struct Vector3
     {
         #region Props
 
-        public Vector3 Normalized => Vector3_GetNormalized(this);
+        public Vector3 Normalized => new Vector3(x, y, z) / Length;
+
+        public float Length => (float)System.Math.Sqrt(x*x + y*y + z*z);
 
         #endregion
 
@@ -52,20 +52,30 @@ namespace GloryEngine
 
         #region Methods
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector3 Vector3_GetNormalized(Vector3 a);
+        public float Dot(Vector3 other)
+        {
+            return Dot(this, other);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector3 operator +(Vector3 a, Vector3 b);
+        public static Vector3 operator +(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector3 operator -(Vector3 a, Vector3 b);
+        public static Vector3 operator -(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector3 operator *(Vector3 a, Vector3 b);
+        public static Vector3 operator *(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
+        }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector3 operator /(Vector3 a, Vector3 b);
+        public static Vector3 operator /(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+        }
 
         public static Vector3 operator *(Vector3 a, float factor)
         {
@@ -75,6 +85,11 @@ namespace GloryEngine
         public static Vector3 operator /(Vector3 a, float factor)
         {
             return a / new Vector3(factor);
+        }
+
+        public static float Dot(Vector3 a, Vector3 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
         }
 
         public override string ToString()
