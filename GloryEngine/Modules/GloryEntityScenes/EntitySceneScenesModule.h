@@ -22,7 +22,7 @@ namespace Glory
 			Reflect::RegisterType<T>();
 		}
 
-		GLORY_MODULE_VERSION_H(0,1,0);
+		GLORY_MODULE_VERSION_H(0,2,0);
 
 	private:
 		virtual void Initialize() override;
@@ -35,6 +35,8 @@ namespace Glory
 		static EntitySceneObject* CreateDeserializedObject(GScene* pScene, const std::string& name, UUID uuid);
 
 		virtual SceneObject* GetSceneObjectFromObjectID(uint64_t objectID) override;
+
+		virtual LoaderModule* CreatePrefabLoader() override;
 
 	private:
 		friend class EntitySceneObjectSerializer;

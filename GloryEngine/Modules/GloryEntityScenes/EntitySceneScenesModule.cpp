@@ -4,6 +4,7 @@
 #include "Components.h"
 #include "Systems.h"
 #include "ScriptedComponentSerializer.h"
+#include "EntityPrefabDataLoader.h"
 
 #include <Engine.h>
 #include <PhysicsModule.h>
@@ -52,6 +53,11 @@ namespace Glory
 		}
 
 		return nullptr;
+	}
+
+	LoaderModule* EntitySceneScenesModule::CreatePrefabLoader()
+	{
+		return new EntityPrefabDataLoader();
 	}
 
 	void EntitySceneScenesModule::Initialize()
