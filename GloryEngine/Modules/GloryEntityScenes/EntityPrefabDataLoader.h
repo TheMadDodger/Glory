@@ -23,5 +23,7 @@ namespace Glory
         virtual EntityPrefabData* LoadResource(const std::string& path, const ImportSettings& importSettings) override;
         virtual EntityPrefabData* LoadResource(const void* buffer, size_t length, const ImportSettings& importSettings) override;
         virtual void SaveResource(const std::string& path, EntityPrefabData* pResource) override;
+
+        void WriteChild(YAML::Emitter& out, const PrefabNode& node);
 	};
 }

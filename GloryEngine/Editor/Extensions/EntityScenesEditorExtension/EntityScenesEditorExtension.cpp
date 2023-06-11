@@ -11,6 +11,9 @@
 #include <EditorPlayer.h>
 #include <Components.h>
 #include <Reflection.h>
+#include <EntityPrefabData.h>
+#include <EditorAssetDatabase.h>
+#include <FileBrowser.h>
 #include <ObjectMenu.h>
 #include <SceneGraphWindow.h>
 
@@ -61,6 +64,8 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(Scripted, ScriptedComponent);
 		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
 		OBJECT_CREATE_MENU(Character, CharacterController);
+
+		ObjectMenu::AddMenuItem("Convert to Prefab", &ConvertToPrefab, T_SceneObject);
 	}
 
 	const char* EntityScenesEditorExtension::ModuleName()
@@ -119,6 +124,15 @@ namespace Glory::Editor
 				pRegistry->InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
 			}
 		}
+	}
+
+	void EntityScenesEditorExtension::ConvertToPrefab(Object* pObject, const ObjectMenuType&)
+	{
+		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
+		EntityPrefabData* pEntityPrefab = EntityPrefabData::CreateFromSceneObject(pSceneObject);
+		const std::filesystem::path path = FileBrowser::GetCurrentPath().append(pEntityPrefab->Name() + ".gentity");
+		EditorAssetDatabase::CreateAsset(pEntityPrefab, path.string());
+		EditorAssetDatabase::FindAssetUUID(path.string());
 	}
 }
 
