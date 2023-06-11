@@ -249,6 +249,7 @@ namespace Glory::Editor
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
+		const bool isPrefab = pObject->GetScene()->Prefab(pObject->GetUUID()) || pObject->GetScene()->PrefabChild(pObject->GetUUID());
 		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, "");
 		ObjectPayload payload{ pObject };
 		DND::DragAndDropSource<SceneObject>(&payload, sizeof(ObjectPayload), [pObject]() {
@@ -295,6 +296,8 @@ namespace Glory::Editor
 
 		ImGui::SameLine();
 		DrawObjectNameCallback(pObject);
+		//ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{1.0f, 1.0f, 1.0f, 1.0f},
+			//" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
 
 		ImGui::PopStyleVar();
 

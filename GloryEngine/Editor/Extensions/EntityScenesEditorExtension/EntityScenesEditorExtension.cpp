@@ -14,6 +14,7 @@
 #include <EntityPrefabData.h>
 #include <EditorAssetDatabase.h>
 #include <FileBrowser.h>
+#include <EditorSceneManager.h>
 #include <ObjectMenu.h>
 #include <SceneGraphWindow.h>
 
@@ -113,7 +114,7 @@ namespace Glory::Editor
 		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
 		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
-		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); ++i)
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
 			EntityScene* pEntityScene = (EntityScene*)pScene;
@@ -131,8 +132,10 @@ namespace Glory::Editor
 		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
 		EntityPrefabData* pEntityPrefab = EntityPrefabData::CreateFromSceneObject(pSceneObject);
 		const std::filesystem::path path = FileBrowser::GetCurrentPath().append(pEntityPrefab->Name() + ".gentity");
-		EditorAssetDatabase::CreateAsset(pEntityPrefab, path.string());
-		EditorAssetDatabase::FindAssetUUID(path.string());
+		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pEntityPrefab, path.string());
+		GScene* pScene = pSceneObject->GetScene();
+		pScene->SetPrefab(pSceneObject, prefabUUID);
+		EditorSceneManager::SetSceneDirty(pScene);
 	}
 }
 

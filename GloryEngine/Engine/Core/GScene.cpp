@@ -85,6 +85,29 @@ namespace Glory
 		m_DelayedParents.clear();
 	}
 
+	void GScene::SetPrefab(SceneObject* pObject, UUID prefabID)
+	{
+		m_ActivePrefabs.emplace(pObject->GetUUID(), prefabID);
+
+		for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			SetChildrenPrefab(pChild, prefabID);
+		}
+	}
+
+	const UUID GScene::Prefab(UUID objectID) const
+	{
+		const auto itor = m_ActivePrefabs.find(objectID);
+		return itor != m_ActivePrefabs.end() ? itor->second : 0;
+	}
+
+	const UUID GScene::PrefabChild(UUID objectID) const
+	{
+		const auto itor = m_ActivePrefabChildren.find(objectID);
+		return itor != m_ActivePrefabChildren.end() ? itor->second : 0;
+	}
+
 	void GScene::OnDelayedSetParent(const DelayedParentData& data)
 	{
 		SceneObject* pParent = FindSceneObject(data.ParentID);
@@ -99,5 +122,16 @@ namespace Glory
 	void GScene::SetUUID(UUID uuid)
 	{
 		m_ID = uuid;
+	}
+
+	void GScene::SetChildrenPrefab(SceneObject* pObject, UUID prefabID)
+	{
+		m_ActivePrefabChildren.emplace(pObject->GetUUID(), prefabID);
+
+		for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			SetChildrenPrefab(pChild, prefabID);
+		}
 	}
 }

@@ -20,6 +20,7 @@ namespace Glory
 		for (uint32_t i = 0; i < pScene->SceneObjectsCount(); i++)
 		{
 			EntitySceneObject* pObject = (EntitySceneObject*)pScene->GetSceneObject(i);
+			if (pScene->PrefabChild(pObject->GetUUID())) continue;
 			Serializer::SerializeObject(pObject, out);
 		}
 		out << YAML::EndSeq;

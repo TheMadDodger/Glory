@@ -52,9 +52,16 @@ namespace Glory
 		pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 	}
 
+	void WriteIDSMap(EntitySceneObject* pChild, YAML::Emitter& out)
+	{
+
+	}
+
 	void EntitySceneObjectSerializer::Serialize(EntitySceneObject* pObject, YAML::Emitter& out)
 	{
 		SceneObject* pParent = pObject->GetParent();
+
+		GScene* pScene = pObject->GetScene();
 
 		out << YAML::Key << "Name";
 		out << YAML::Value << pObject->Name();
@@ -64,6 +71,20 @@ namespace Glory
 		out << YAML::Value << pObject->IsActiveSelf();
 		out << YAML::Key << "ParentUUID";
 		out << YAML::Value << (pParent ? pParent->GetUUID() : 0);
+
+		const UUID prefabID = pScene->Prefab(pObject->GetUUID());
+		if (prefabID)
+		{
+			/* Serialize the prefab ID instead */
+			out << YAML::Key << "PrefabID";
+			out << YAML::Value << prefabID;
+
+			/* TODO: Serialize ID remapping */
+
+			/* TODO: Serialize overrides */
+			return;
+		}
+
 		out << YAML::Key << "Components";
 		out << YAML::Value << YAML::BeginSeq;
 		Entity entity = pObject->GetEntityHandle();

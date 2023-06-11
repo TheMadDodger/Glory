@@ -35,6 +35,10 @@ namespace Glory
         virtual void Start() {}
         virtual void Stop() {}
 
+        void SetPrefab(SceneObject* pObject, UUID prefabID);
+        const UUID Prefab(UUID objectID) const;
+        const UUID PrefabChild(UUID objectID) const;
+
     protected:
         virtual void Initialize() {}
         virtual void OnTick() {}
@@ -48,11 +52,14 @@ namespace Glory
 
     private:
         void SetUUID(UUID uuid);
+        void SetChildrenPrefab(SceneObject* pObject, UUID prefabID);
 
     protected:
         friend class ScenesModule;
         friend class SceneObject;
         std::vector<SceneObject*> m_pSceneObjects;
         std::vector<DelayedParentData> m_DelayedParents;
+        std::map<UUID, UUID> m_ActivePrefabs;
+        std::map<UUID, UUID> m_ActivePrefabChildren;
     };
 }
