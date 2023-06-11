@@ -9,6 +9,10 @@ namespace Glory
 	{
 		APPEND_TYPE(EntityPrefabData);
 	}
+
+	EntityPrefabData::EntityPrefabData(PrefabNode&& rootNode) noexcept : m_RootNode(std::move(rootNode))
+	{
+	}
 	
 	EntityPrefabData* EntityPrefabData::CreateFromSceneObject(EntitySceneObject* pSceneObject)
 	{
@@ -22,14 +26,45 @@ namespace Glory
 		return m_RootNode;
 	}
 
+	void EntityPrefabData::SetRootNode(PrefabNode&& node)
+	{
+		m_RootNode = std::move(node);
+	}
+
+	PrefabNode::PrefabNode(PrefabNode&& other) noexcept
+		: m_OriginalUUID(other.m_OriginalUUID), m_ActiveSelf(other.m_ActiveSelf), m_pPrefab(other.m_pPrefab),
+		m_SerializedComponents(std::move(other.m_SerializedComponents)), m_Children(std::move(other.m_Children))
+	{
+		other.m_OriginalUUID = 0;
+		other.m_ActiveSelf = false;
+		other.m_pPrefab = nullptr;
+	}
+
 	PrefabNode::PrefabNode(EntityPrefabData* pPrefab, EntitySceneObject* pSceneObject) : m_pPrefab(pPrefab)
 	{
 		Load(pSceneObject);
 	}
 
+	PrefabNode::PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents)
+		: m_OriginalUUID(originalUUID), m_ActiveSelf(activeSelf), m_pPrefab(pPrefab),
+		m_SerializedComponents(serializedComponents), m_Children() {}
+
 	void PrefabNode::operator=(EntitySceneObject* pSceneObject)
 	{
 		Load(pSceneObject);
+	}
+
+	void PrefabNode::operator=(PrefabNode&& other)
+	{
+		m_OriginalUUID = other.m_OriginalUUID;
+		m_ActiveSelf = other.m_ActiveSelf;
+		m_pPrefab = other.m_pPrefab;
+		m_SerializedComponents = std::move(other.m_SerializedComponents);
+		m_Children = std::move(other.m_Children);
+
+		other.m_OriginalUUID = 0;
+		other.m_ActiveSelf = false;
+		other.m_pPrefab = nullptr;
 	}
 
 	const size_t PrefabNode::ChildCount() const
@@ -55,6 +90,18 @@ namespace Glory
 	const bool PrefabNode::ActiveSelf() const
 	{
 		return m_ActiveSelf;
+	}
+
+	PrefabNode PrefabNode::Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents)
+	{
+		return PrefabNode{ pPrefab, originalUUID, activeSelf, serializedComponents };
+	}
+
+	PrefabNode& PrefabNode::AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents)
+	{
+		size_t index = m_Children.size();
+		m_Children.push_back(PrefabNode{ pPrefab, originalUUID, activeSelf, serializedComponents });
+		return m_Children[index];
 	}
 
 	void PrefabNode::Load(EntitySceneObject* pSceneObject)

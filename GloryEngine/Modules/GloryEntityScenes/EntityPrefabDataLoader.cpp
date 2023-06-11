@@ -7,7 +7,25 @@ namespace Glory
 {
     EntityPrefabData* EntityPrefabDataLoader::LoadResource(const std::string& path, const ImportSettings& importSettings)
     {
-        return nullptr;
+        EntityPrefabData* pPrefab = new EntityPrefabData();
+
+        YAMLFileRef yamlFile{ path };
+        const UUID originalUUID = yamlFile["OriginalUUID"].As<uint64_t>();
+        const bool activeSelf = yamlFile["ActiveSelf"].As<bool>();
+        NodeValueRef components = yamlFile["Components"];
+        YAML::Emitter componentsWriter;
+        componentsWriter << components.Node();
+        PrefabNode rootNode = PrefabNode::Create(pPrefab, originalUUID, activeSelf, componentsWriter.c_str());
+
+        NodeValueRef children = yamlFile["Children"];
+        for (size_t i = 0; i < children.Size(); ++i)
+        {
+            NodeValueRef child = children[i];
+            ReadChild(pPrefab, child, rootNode);
+        }
+
+        pPrefab->SetRootNode(std::move(rootNode));
+        return pPrefab;
     }
 
     EntityPrefabData* EntityPrefabDataLoader::LoadResource(const void* buffer, size_t length, const ImportSettings& importSettings)
@@ -49,5 +67,22 @@ namespace Glory
             out << YAML::EndMap;
         }
         out << YAML::EndSeq;
+    }
+
+    void EntityPrefabDataLoader::ReadChild(EntityPrefabData* pPrefab, NodeValueRef yamlNode, PrefabNode& parent)
+    {
+        const UUID originalUUID = yamlNode["OriginalUUID"].As<uint64_t>();
+        const bool activeSelf = yamlNode["ActiveSelf"].As<bool>();
+        NodeValueRef components = yamlNode["Components"];
+        YAML::Emitter componentsWriter;
+        componentsWriter << components.Node();
+        PrefabNode& childNode = parent.AddChild(pPrefab, originalUUID, activeSelf, componentsWriter.c_str());
+
+        NodeValueRef children = yamlNode["Children"];
+        for (size_t i = 0; i < children.Size(); ++i)
+        {
+            NodeValueRef child = children[i];
+            ReadChild(pPrefab, child, childNode);
+        }
     }
 }

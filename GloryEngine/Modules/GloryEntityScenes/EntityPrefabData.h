@@ -10,8 +10,10 @@ namespace Glory
     struct PrefabNode
     {
     public:
+        PrefabNode(PrefabNode&& other) noexcept;
         PrefabNode(EntityPrefabData* pPrefab, EntitySceneObject* pSceneObject);
         void operator=(EntitySceneObject* pSceneObject);
+        void operator=(PrefabNode&& other);
 
         const size_t ChildCount() const;
         const PrefabNode& ChildNode(size_t index) const;
@@ -20,7 +22,11 @@ namespace Glory
         const UUID OriginalUUID() const;
         const bool ActiveSelf() const;
 
+        static PrefabNode Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents);
+        PrefabNode& AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents);
+
     private:
+        PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents);
         std::vector<PrefabNode> m_Children;
         EntityPrefabData* m_pPrefab;
         UUID m_OriginalUUID;
@@ -35,14 +41,16 @@ namespace Glory
     {
     public:
         EntityPrefabData();
+        EntityPrefabData(PrefabNode&& rootNode) noexcept;
         virtual ~EntityPrefabData() = default;
 
         GLORY_API static EntityPrefabData* CreateFromSceneObject(EntitySceneObject* pSceneObject);
 
         const PrefabNode& RootNode() const;
 
-    private:
+        void SetRootNode(PrefabNode&& node);
 
+    private:
         PrefabNode m_RootNode;
     };
 }
