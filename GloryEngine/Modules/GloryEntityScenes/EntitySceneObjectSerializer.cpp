@@ -1,8 +1,11 @@
 #include "EntitySceneObjectSerializer.h"
 #include "EntityComponentObject.h"
 #include "EntitySceneScenesModule.h"
-#include <PropertySerializer.h>
 #include "Components.h"
+#include "EntityPrefabData.h"
+
+#include <PropertySerializer.h>
+#include <NodeRef.h>
 
 namespace Glory
 {
@@ -104,6 +107,8 @@ namespace Glory
 
 	Object* EntitySceneObjectSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string&, Flags flags)
 	{
+		EntityScene* pScene = (EntityScene*)pParent;
+
 		std::map<UUID, UUID>& uuidRemapper = GloryContext::GetContext()->m_UUIDRemapper;
 
 		YAML::Node node;
@@ -115,6 +120,21 @@ namespace Glory
 		YAML_READ(object, node, UUID, uuid, uint64_t);
 		YAML_READ(object, node, Active, active, bool);
 		YAML_READ(object, node, ParentUUID, parentUuid, uint64_t);
+
+		NodeRef nodeRef{ object };
+		NodeValueRef prefabIDRef = nodeRef["PrefabID"];
+		if (prefabIDRef.Exists())
+		{
+			const UUID prefabID = prefabIDRef.As<uint64_t>();
+			EntityPrefabData* pPrefab = AssetManager::GetAssetImmediate<EntityPrefabData>(prefabID);
+			if (pPrefab)
+			{
+				SceneObject* pInstantiatedPrefab = pScene->InstantiatePrefab(uuid, pPrefab);
+
+				/* TODO: Deserialize overrides */
+				return pInstantiatedPrefab;
+			}
+		}
 
 		if (flags & Serializer::Flags::GenerateNewUUIDs)
 		{
@@ -145,8 +165,6 @@ namespace Glory
 			}
 		}
 
-		EntityScene* pScene = (EntityScene*)pParent;
-
 		UUID transformUUID = object["Components"][0]["UUID"].as<uint64_t>();
 		if (flags & Serializer::Flags::GenerateNewUUIDs)
 		{
@@ -176,7 +194,7 @@ namespace Glory
 
 		size_t currentComponentIndex = 0;
 
-		uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
+		const uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
 
 		for (size_t i = 0; i < node.size(); ++i)
 		{

@@ -4,6 +4,11 @@
 #include "Components.h"
 #include "Systems.h"
 #include "EntitySceneObject.h"
+#include "EntityPrefabData.h"
+#include "PropertySerializer.h"
+
+#include <EntityView.h>
+#include <TypeData.h>
 
 namespace Glory
 {
@@ -141,5 +146,69 @@ namespace Glory
 	void EntityScene::Stop()
 	{
 		m_Registry.InvokeAll(InvocationType::Stop);
+	}
+
+	SceneObject* EntityScene::InstantiatePrefab(UUID objectID, EntityPrefabData* pPrefab)
+	{
+		const PrefabNode& rootNode = pPrefab->RootNode();
+		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode(objectID, nullptr, rootNode);
+		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
+		return pInstantiatedPrefab;
+	}
+
+
+	EntitySceneObject* EntityScene::InstantiatePrefabNode(UUID objectID, EntitySceneObject* pParent, const PrefabNode& node)
+	{
+		EntitySceneObject* pObject = (EntitySceneObject*)CreateEmptyObject(node.Name(), objectID);
+		if (pParent)
+			pObject->SetParent(pParent);
+
+		pObject->SetActive(node.ActiveSelf());
+		/* TODO: Remap ID */
+
+		/* TODO: Deserialize components */
+		const std::string& serializedComponents = node.SerializedComponents();
+		YAML::Node components = YAML::Load(serializedComponents);
+
+		const uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
+
+		size_t currentComponentIndex = 0;
+		for (size_t i = 0; i < components.size(); ++i)
+		{
+			YAML::Node nextObject = components[i];
+			YAML::Node subNode;
+			uint32_t typeHash = 0;
+			std::string typeName = "";
+			YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
+
+			Entity entityHandle = pObject->GetEntityHandle();
+			EntityID entity = entityHandle.GetEntityID();
+			EntityRegistry* pRegistry = GetRegistry();
+
+			UUID compUUID = UUID();
+
+			void* pComponentAddress = nullptr;
+			if (typeHash != transformTypeHash) pComponentAddress = pRegistry->CreateComponent(entity, typeHash, compUUID);
+			else
+			{
+				Utils::ECS::EntityView * pEntityView = pRegistry->GetEntityView(entity);
+				compUUID = pEntityView->ComponentUUIDAt(0);
+				pComponentAddress = pRegistry->GetComponentAddress(entity, compUUID);
+			}
+
+			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(typeHash);
+			PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, nextObject["Properties"]);
+
+			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
+			++currentComponentIndex;
+		}
+
+		for (size_t i = 0; i < node.ChildCount(); ++i)
+		{
+			const PrefabNode& childNode = node.ChildNode(i);
+			InstantiatePrefabNode(UUID(), pObject, childNode);
+		}
+
+		return pObject;
 	}
 }

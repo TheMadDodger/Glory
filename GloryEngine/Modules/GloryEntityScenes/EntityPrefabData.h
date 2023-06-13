@@ -13,24 +13,26 @@ namespace Glory
         PrefabNode(PrefabNode&& other) noexcept;
         PrefabNode(EntityPrefabData* pPrefab, EntitySceneObject* pSceneObject);
         void operator=(EntitySceneObject* pSceneObject);
-        void operator=(PrefabNode&& other);
+        void operator=(PrefabNode&& other) noexcept;
 
         const size_t ChildCount() const;
         const PrefabNode& ChildNode(size_t index) const;
+        const std::string& Name() const;
         const std::string& SerializedComponents() const;
 
         const UUID OriginalUUID() const;
         const bool ActiveSelf() const;
 
-        static PrefabNode Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents);
-        PrefabNode& AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents);
+        static PrefabNode Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
+        PrefabNode& AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
 
     private:
-        PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents);
+        PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
         std::vector<PrefabNode> m_Children;
         EntityPrefabData* m_pPrefab;
         UUID m_OriginalUUID;
         bool m_ActiveSelf;
+        std::string m_Name;
         std::string m_SerializedComponents;
 
     private:

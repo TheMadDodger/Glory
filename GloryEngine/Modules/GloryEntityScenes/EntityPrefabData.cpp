@@ -33,7 +33,8 @@ namespace Glory
 
 	PrefabNode::PrefabNode(PrefabNode&& other) noexcept
 		: m_OriginalUUID(other.m_OriginalUUID), m_ActiveSelf(other.m_ActiveSelf), m_pPrefab(other.m_pPrefab),
-		m_SerializedComponents(std::move(other.m_SerializedComponents)), m_Children(std::move(other.m_Children))
+		m_Name(std::move(other.m_Name)), m_SerializedComponents(std::move(other.m_SerializedComponents)),
+		m_Children(std::move(other.m_Children))
 	{
 		other.m_OriginalUUID = 0;
 		other.m_ActiveSelf = false;
@@ -45,20 +46,21 @@ namespace Glory
 		Load(pSceneObject);
 	}
 
-	PrefabNode::PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents)
+	PrefabNode::PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
 		: m_OriginalUUID(originalUUID), m_ActiveSelf(activeSelf), m_pPrefab(pPrefab),
-		m_SerializedComponents(serializedComponents), m_Children() {}
+		m_Name(name), m_SerializedComponents(serializedComponents), m_Children() {}
 
 	void PrefabNode::operator=(EntitySceneObject* pSceneObject)
 	{
 		Load(pSceneObject);
 	}
 
-	void PrefabNode::operator=(PrefabNode&& other)
+	void PrefabNode::operator=(PrefabNode&& other) noexcept
 	{
 		m_OriginalUUID = other.m_OriginalUUID;
 		m_ActiveSelf = other.m_ActiveSelf;
 		m_pPrefab = other.m_pPrefab;
+		m_Name = std::move(other.m_Name);
 		m_SerializedComponents = std::move(other.m_SerializedComponents);
 		m_Children = std::move(other.m_Children);
 
@@ -77,6 +79,11 @@ namespace Glory
 		return m_Children[index];
 	}
 
+	const std::string& PrefabNode::Name() const
+	{
+		return m_Name;
+	}
+
 	const std::string& PrefabNode::SerializedComponents() const
 	{
 		return m_SerializedComponents;
@@ -92,15 +99,15 @@ namespace Glory
 		return m_ActiveSelf;
 	}
 
-	PrefabNode PrefabNode::Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents)
+	PrefabNode PrefabNode::Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
 	{
-		return PrefabNode{ pPrefab, originalUUID, activeSelf, serializedComponents };
+		return PrefabNode{ pPrefab, originalUUID, activeSelf, name, serializedComponents };
 	}
 
-	PrefabNode& PrefabNode::AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& serializedComponents)
+	PrefabNode& PrefabNode::AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
 	{
 		size_t index = m_Children.size();
-		m_Children.push_back(PrefabNode{ pPrefab, originalUUID, activeSelf, serializedComponents });
+		m_Children.push_back(PrefabNode{ pPrefab, originalUUID, activeSelf, name, serializedComponents });
 		return m_Children[index];
 	}
 
@@ -109,6 +116,7 @@ namespace Glory
 		if (!pSceneObject) return;
 		m_OriginalUUID = pSceneObject->GetUUID();
 		m_ActiveSelf = pSceneObject->IsActiveSelf();
+		m_Name = pSceneObject->Name();
 
 		Entity entity = pSceneObject->GetEntityHandle();
 		GloryECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
@@ -121,7 +129,7 @@ namespace Glory
 			out << YAML::BeginMap;
 			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID compUUID = pEntityView->ComponentUUIDAt(i);
-			out << YAML::Key << "Type";
+			out << YAML::Key << "TypeHash";
 			out << YAML::Value << type;
 
 			out << YAML::Key << "UUID";
@@ -131,10 +139,12 @@ namespace Glory
 			out << YAML::Value << YAML::BeginMap;
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(type);
 			GloryECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(type);
+			void* compAddress = pTypeView->GetComponentAddress(entityID);
 			for (size_t j = 0; j < pTypeData->FieldCount(); ++j)
 			{
 				const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(j);
-				PropertySerializer::SerializeProperty(pFieldData, pTypeView->GetComponentAddress(entityID), out);
+				void* pAddress = pFieldData->GetAddress(compAddress);
+				PropertySerializer::SerializeProperty(pFieldData, pAddress, out);
 			}
 			out << YAML::EndMap;
 			out << YAML::EndMap;
