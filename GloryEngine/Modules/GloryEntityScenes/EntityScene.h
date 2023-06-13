@@ -27,7 +27,7 @@ namespace Glory
 
 		GLORY_API bool IsValid() const;
 
-		GLORY_API SceneObject* InstantiatePrefab(UUID objectID, EntityPrefabData* pPrefab);
+		GLORY_API SceneObject* InstantiatePrefab(const std::map<UUID, UUID>& idRemap, EntityPrefabData* pPrefab);
 
 	private:
 		virtual void Initialize() override;
@@ -43,7 +43,7 @@ namespace Glory
 		virtual void Start() override;
 		virtual void Stop() override;
 
-		EntitySceneObject* InstantiatePrefabNode(UUID objectID, EntitySceneObject* pParent, const PrefabNode& node);
+		EntitySceneObject* InstantiatePrefabNode(const std::map<UUID, UUID>& idRemap, EntitySceneObject* pParent, const PrefabNode& node);
 
 	private:
 		friend class Entity;

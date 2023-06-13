@@ -54,6 +54,14 @@ namespace Glory
 		return m_Valid;
 	}
 
+	SceneObject* EntityScene::InstantiatePrefab(const std::map<UUID, UUID>& idRemap, EntityPrefabData* pPrefab)
+	{
+		const PrefabNode& rootNode = pPrefab->RootNode();
+		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode(idRemap, nullptr, rootNode);
+		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
+		return pInstantiatedPrefab;
+	}
+
 	void EntityScene::Initialize()
 	{
 		// Register Invocations
@@ -148,25 +156,18 @@ namespace Glory
 		m_Registry.InvokeAll(InvocationType::Stop);
 	}
 
-	SceneObject* EntityScene::InstantiatePrefab(UUID objectID, EntityPrefabData* pPrefab)
+	EntitySceneObject* EntityScene::InstantiatePrefabNode(const std::map<UUID, UUID>& idRemap, EntitySceneObject* pParent, const PrefabNode& node)
 	{
-		const PrefabNode& rootNode = pPrefab->RootNode();
-		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode(objectID, nullptr, rootNode);
-		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
-		return pInstantiatedPrefab;
-	}
-
-
-	EntitySceneObject* EntityScene::InstantiatePrefabNode(UUID objectID, EntitySceneObject* pParent, const PrefabNode& node)
-	{
-		EntitySceneObject* pObject = (EntitySceneObject*)CreateEmptyObject(node.Name(), objectID);
+		auto itor = idRemap.find(node.OriginalUUID());
+		const UUID objectID = itor != idRemap.end() ? itor->second : UUID();
+		itor = idRemap.find(node.TransformUUID());
+		const UUID transformID = itor != idRemap.end() ? itor->second : UUID();
+		EntitySceneObject* pObject = (EntitySceneObject*)CreateEmptyObject(node.Name(), objectID, transformID);
 		if (pParent)
 			pObject->SetParent(pParent);
 
 		pObject->SetActive(node.ActiveSelf());
-		/* TODO: Remap ID */
 
-		/* TODO: Deserialize components */
 		const std::string& serializedComponents = node.SerializedComponents();
 		YAML::Node components = YAML::Load(serializedComponents);
 
@@ -178,14 +179,17 @@ namespace Glory
 			YAML::Node nextObject = components[i];
 			YAML::Node subNode;
 			uint32_t typeHash = 0;
+			UUID originalUUID = 0;
 			std::string typeName = "";
 			YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
+			YAML_READ(nextObject, subNode, UUID, originalUUID, uint64_t);
 
 			Entity entityHandle = pObject->GetEntityHandle();
 			EntityID entity = entityHandle.GetEntityID();
 			EntityRegistry* pRegistry = GetRegistry();
 
-			UUID compUUID = UUID();
+			itor = idRemap.find(originalUUID);
+			UUID compUUID = itor != idRemap.end() ? itor->second : UUID();
 
 			void* pComponentAddress = nullptr;
 			if (typeHash != transformTypeHash) pComponentAddress = pRegistry->CreateComponent(entity, typeHash, compUUID);
@@ -206,7 +210,7 @@ namespace Glory
 		for (size_t i = 0; i < node.ChildCount(); ++i)
 		{
 			const PrefabNode& childNode = node.ChildNode(i);
-			InstantiatePrefabNode(UUID(), pObject, childNode);
+			InstantiatePrefabNode(idRemap, pObject, childNode);
 		}
 
 		return pObject;

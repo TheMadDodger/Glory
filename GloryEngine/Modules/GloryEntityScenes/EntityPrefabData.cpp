@@ -2,6 +2,7 @@
 #include "EntitySceneObject.h"
 
 #include <PropertySerializer.h>
+#include <NodeRef.h>
 
 namespace Glory
 {
@@ -12,6 +13,9 @@ namespace Glory
 
 	EntityPrefabData::EntityPrefabData(PrefabNode&& rootNode) noexcept : m_RootNode(std::move(rootNode))
 	{
+		/* Cache original UUIDs */
+		m_OriginalUUIDs.clear();
+		m_RootNode.CacheOriginalUUIDs();
 	}
 	
 	EntityPrefabData* EntityPrefabData::CreateFromSceneObject(EntitySceneObject* pSceneObject)
@@ -29,6 +33,10 @@ namespace Glory
 	void EntityPrefabData::SetRootNode(PrefabNode&& node)
 	{
 		m_RootNode = std::move(node);
+
+		/* Cache original UUIDs */
+		m_OriginalUUIDs.clear();
+		m_RootNode.CacheOriginalUUIDs();
 	}
 
 	PrefabNode::PrefabNode(PrefabNode&& other) noexcept
@@ -46,9 +54,10 @@ namespace Glory
 		Load(pSceneObject);
 	}
 
-	PrefabNode::PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
+	PrefabNode::PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
 		: m_OriginalUUID(originalUUID), m_ActiveSelf(activeSelf), m_pPrefab(pPrefab),
-		m_Name(name), m_SerializedComponents(serializedComponents), m_Children() {}
+		m_Name(name), m_SerializedComponents(serializedComponents), m_Children() {
+	}
 
 	void PrefabNode::operator=(EntitySceneObject* pSceneObject)
 	{
@@ -94,21 +103,44 @@ namespace Glory
 		return m_OriginalUUID;
 	}
 
+	const UUID PrefabNode::TransformUUID() const
+	{
+		return m_TransformUUID;
+	}
+
 	const bool PrefabNode::ActiveSelf() const
 	{
 		return m_ActiveSelf;
 	}
 
-	PrefabNode PrefabNode::Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
+	PrefabNode PrefabNode::Create(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
 	{
-		return PrefabNode{ pPrefab, originalUUID, activeSelf, name, serializedComponents };
+		return PrefabNode{ pPrefab, originalUUID, transformUUID, activeSelf, name, serializedComponents };
 	}
 
-	PrefabNode& PrefabNode::AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
+	PrefabNode& PrefabNode::AddChild(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
 	{
 		size_t index = m_Children.size();
-		m_Children.push_back(PrefabNode{ pPrefab, originalUUID, activeSelf, name, serializedComponents });
+		m_Children.push_back(PrefabNode{ pPrefab, originalUUID, transformUUID, activeSelf, name, serializedComponents });
 		return m_Children[index];
+	}
+
+	void PrefabNode::CacheOriginalUUIDs()
+	{
+		m_pPrefab->m_OriginalUUIDs.push_back(m_OriginalUUID);
+		YAML::Node components = YAML::Load(m_SerializedComponents);
+		NodeRef componentsRef = components;
+		for (size_t i = 0; i < components.size(); ++i)
+		{
+			NodeValueRef component = componentsRef.ValueRef()[i];
+			const UUID uuid = component["UUID"].As<uint64_t>();
+			m_pPrefab->m_OriginalUUIDs.push_back(uuid);
+		}
+
+		for (size_t i = 0; i < m_Children.size(); ++i)
+		{
+			m_Children[i].CacheOriginalUUIDs();
+		}
 	}
 
 	void PrefabNode::Load(EntitySceneObject* pSceneObject)
@@ -117,6 +149,7 @@ namespace Glory
 		m_OriginalUUID = pSceneObject->GetUUID();
 		m_ActiveSelf = pSceneObject->IsActiveSelf();
 		m_Name = pSceneObject->Name();
+		m_pPrefab->m_OriginalUUIDs.push_back(m_OriginalUUID);
 
 		Entity entity = pSceneObject->GetEntityHandle();
 		GloryECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
@@ -129,6 +162,9 @@ namespace Glory
 			out << YAML::BeginMap;
 			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID compUUID = pEntityView->ComponentUUIDAt(i);
+			if (i == 0) m_TransformUUID = compUUID;
+
+			m_pPrefab->m_OriginalUUIDs.push_back(compUUID);
 			out << YAML::Key << "TypeHash";
 			out << YAML::Value << type;
 

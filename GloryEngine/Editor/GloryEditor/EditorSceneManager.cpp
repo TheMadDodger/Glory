@@ -267,7 +267,7 @@ namespace Glory::Editor
 				Serializer::SetUUIDRemap(parentUUID, parentUUID);
 			}
 
-			SceneObject* pDupedObject = (SceneObject*)Serializer::DeserializeObject(pScene, objectNode, Serializer::Flags::GenerateNewUUIDs);
+			SceneObject* pDupedObject = (SceneObject*)Serializer::DeserializeObject(pScene, objectNode, Serializer::Flags(Serializer::Flags::GenerateNewUUIDs));
 			if (i == 0 && pDupedObject)
 			{
 				Undo::StartRecord("Duplicate", pDupedObject->GetUUID());

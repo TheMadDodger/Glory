@@ -21,16 +21,22 @@ namespace Glory
         const std::string& SerializedComponents() const;
 
         const UUID OriginalUUID() const;
+        const UUID TransformUUID() const;
         const bool ActiveSelf() const;
 
-        static PrefabNode Create(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
-        PrefabNode& AddChild(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
+        static PrefabNode Create(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
+        PrefabNode& AddChild(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
 
     private:
-        PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
+        void CacheOriginalUUIDs();
+
+    private:
+        friend class EntityPrefabData;
+        PrefabNode(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
         std::vector<PrefabNode> m_Children;
         EntityPrefabData* m_pPrefab;
         UUID m_OriginalUUID;
+        UUID m_TransformUUID;
         bool m_ActiveSelf;
         std::string m_Name;
         std::string m_SerializedComponents;
@@ -53,6 +59,8 @@ namespace Glory
         void SetRootNode(PrefabNode&& node);
 
     private:
+        friend struct PrefabNode;
         PrefabNode m_RootNode;
+        std::vector<UUID> m_OriginalUUIDs;
     };
 }

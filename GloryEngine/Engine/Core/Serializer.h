@@ -17,6 +17,7 @@ namespace Glory
 		enum Flags
 		{
 			GenerateNewUUIDs = 1,
+			IgnorePrefabs = 2,
 		};
 
 	public:

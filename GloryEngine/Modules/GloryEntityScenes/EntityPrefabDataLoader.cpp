@@ -11,12 +11,13 @@ namespace Glory
 
         YAMLFileRef yamlFile{ path };
         const UUID originalUUID = yamlFile["OriginalUUID"].As<uint64_t>();
+        const UUID transformUUID = yamlFile["TransformUUID"].As<uint64_t>();
         const bool activeSelf = yamlFile["ActiveSelf"].As<bool>();
         const std::string name = yamlFile["Name"].As<std::string>();
         NodeValueRef components = yamlFile["Components"];
         YAML::Emitter componentsWriter;
         componentsWriter << components.Node();
-        PrefabNode rootNode = PrefabNode::Create(pPrefab, originalUUID, activeSelf, name, componentsWriter.c_str());
+        PrefabNode rootNode = PrefabNode::Create(pPrefab, originalUUID, transformUUID, activeSelf, name, componentsWriter.c_str());
 
         NodeValueRef children = yamlFile["Children"];
         for (size_t i = 0; i < children.Size(); ++i)
@@ -51,6 +52,8 @@ namespace Glory
     {
         out << YAML::Key << "OriginalUUID";
         out << YAML::Value << (uint64_t)node.OriginalUUID();
+        out << YAML::Key << "TransformUUID";
+        out << YAML::Value << (uint64_t)node.TransformUUID();
         out << YAML::Key << "ActiveSelf";
         out << YAML::Value << node.ActiveSelf();
         out << YAML::Key << "Name";
@@ -75,12 +78,13 @@ namespace Glory
     void EntityPrefabDataLoader::ReadChild(EntityPrefabData* pPrefab, NodeValueRef yamlNode, PrefabNode& parent)
     {
         const UUID originalUUID = yamlNode["OriginalUUID"].As<uint64_t>();
+        const UUID transformUUID = yamlNode["TransformUUID"].As<uint64_t>();
         const bool activeSelf = yamlNode["ActiveSelf"].As<bool>();
         const std::string name = yamlNode["Name"].As<std::string>();
         NodeValueRef components = yamlNode["Components"];
         YAML::Emitter componentsWriter;
         componentsWriter << components.Node();
-        PrefabNode& childNode = parent.AddChild(pPrefab, originalUUID, activeSelf, name, componentsWriter.c_str());
+        PrefabNode& childNode = parent.AddChild(pPrefab, originalUUID, transformUUID, activeSelf, name, componentsWriter.c_str());
 
         NodeValueRef children = yamlNode["Children"];
         for (size_t i = 0; i < children.Size(); ++i)

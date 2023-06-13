@@ -55,9 +55,41 @@ namespace Glory
 		pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 	}
 
-	void WriteIDSMap(EntitySceneObject* pChild, YAML::Emitter& out)
+	bool WriteIDSMap(EntitySceneObject* pObject, const PrefabNode& node, YAML::Emitter& out)
 	{
+		Entity entity = pObject->GetEntityHandle();
+		EntityScene* pScene = entity.GetScene();
 
+		if (!pScene->Prefab(pObject->GetUUID()) && !pScene->PrefabChild(pObject->GetUUID())) return false;
+
+		out << YAML::Key << (uint64_t)node.OriginalUUID();
+		out << YAML::Value << (uint64_t)pObject->GetUUID();
+
+		GloryECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+		GloryECS::EntityView* pEntityView = pRegistry->GetEntityView(entity.GetEntityID());
+		YAML::Node components = YAML::Load(node.SerializedComponents());
+		NodeRef componentsRef = components;
+		NodeValueRef componentsValue = componentsRef.ValueRef();
+
+		assert(componentsValue.Size() == pEntityView->ComponentCount());
+
+		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
+		{
+			NodeValueRef component = componentsValue[i];
+			const UUID uuid = pEntityView->ComponentUUIDAt(i);
+			const UUID originalUUID = component["UUID"].As<uint64_t>();
+			out << YAML::Key << originalUUID;
+			out << YAML::Value << originalUUID;
+		}
+
+		size_t childCounter = 0;
+		for (size_t i = 0; i < pObject->ChildCount(); ++i)
+		{
+			EntitySceneObject* pChildObject = (EntitySceneObject*)pObject->GetChild(i);
+			const PrefabNode& childNode = node.ChildNode(childCounter);
+			if (!WriteIDSMap(pChildObject, childNode, out)) continue;
+			++childCounter;
+		}
 	}
 
 	void EntitySceneObjectSerializer::Serialize(EntitySceneObject* pObject, YAML::Emitter& out)
@@ -82,7 +114,14 @@ namespace Glory
 			out << YAML::Key << "PrefabID";
 			out << YAML::Value << prefabID;
 
-			/* TODO: Serialize ID remapping */
+			/* Serialize ID remapping */
+			EntityPrefabData* pPrefab = AssetManager::GetAssetImmediate<EntityPrefabData>(prefabID);
+			const PrefabNode& rootNode = pPrefab->RootNode();
+
+			out << YAML::Key << "IDRemap";
+			out << YAML::Value << YAML::BeginMap;
+			WriteIDSMap(pObject, rootNode, out);
+			out << YAML::EndMap;
 
 			/* TODO: Serialize overrides */
 			return;
@@ -123,13 +162,17 @@ namespace Glory
 
 		NodeRef nodeRef{ object };
 		NodeValueRef prefabIDRef = nodeRef["PrefabID"];
-		if (prefabIDRef.Exists())
+		if (!(flags & Flags::IgnorePrefabs) && prefabIDRef.Exists())
 		{
 			const UUID prefabID = prefabIDRef.As<uint64_t>();
 			EntityPrefabData* pPrefab = AssetManager::GetAssetImmediate<EntityPrefabData>(prefabID);
 			if (pPrefab)
 			{
-				SceneObject* pInstantiatedPrefab = pScene->InstantiatePrefab(uuid, pPrefab);
+				NodeValueRef idsRemapValue = nodeRef["IDRemap"];
+				/* TODO: When GenerateNewUUIDs flag is set generate a new map of UUID remappings */
+				std::map<UUID, UUID> idsRemap = idsRemapValue.As<std::map<UUID, UUID>>();
+
+				SceneObject* pInstantiatedPrefab = pScene->InstantiatePrefab(idsRemap, pPrefab);
 
 				/* TODO: Deserialize overrides */
 				return pInstantiatedPrefab;
