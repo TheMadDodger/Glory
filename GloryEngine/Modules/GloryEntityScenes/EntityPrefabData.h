@@ -58,6 +58,8 @@ namespace Glory
 
         void SetRootNode(PrefabNode&& node);
 
+        void GenerateNewUUIDs(std::map<UUID, UUID>& uuidRemap) const;
+
     private:
         friend struct PrefabNode;
         PrefabNode m_RootNode;

@@ -284,6 +284,7 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SerializeObjects(SceneObject* pObject, YAML::Emitter& out)
 	{
+		if (pObject->GetScene()->PrefabChild(pObject->GetUUID())) return;
 		Serializer::SerializeObject(pObject, out);
 		for (size_t i = 0; i < pObject->ChildCount(); i++)
 		{

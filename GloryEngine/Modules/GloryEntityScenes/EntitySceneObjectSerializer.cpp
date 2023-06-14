@@ -170,9 +170,17 @@ namespace Glory
 			{
 				NodeValueRef idsRemapValue = nodeRef["IDRemap"];
 				/* TODO: When GenerateNewUUIDs flag is set generate a new map of UUID remappings */
-				std::map<UUID, UUID> idsRemap = idsRemapValue.As<std::map<UUID, UUID>>();
-
-				SceneObject* pInstantiatedPrefab = pScene->InstantiatePrefab(idsRemap, pPrefab);
+				SceneObject* pInstantiatedPrefab = nullptr;
+				if (flags & Serializer::Flags::GenerateNewUUIDs)
+				{
+					pPrefab->GenerateNewUUIDs(uuidRemapper);
+					pInstantiatedPrefab = pScene->InstantiatePrefab(uuidRemapper, pPrefab);
+				}
+				else
+				{
+					const std::map<UUID, UUID> idsRemap = idsRemapValue.As<std::map<UUID, UUID>>();
+					pInstantiatedPrefab = pScene->InstantiatePrefab(idsRemap, pPrefab);
+				}
 
 				/* TODO: Deserialize overrides */
 				return pInstantiatedPrefab;

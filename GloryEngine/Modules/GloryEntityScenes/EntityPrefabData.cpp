@@ -39,6 +39,14 @@ namespace Glory
 		m_RootNode.CacheOriginalUUIDs();
 	}
 
+	void EntityPrefabData::GenerateNewUUIDs(std::map<UUID, UUID>& uuidRemap) const
+	{
+		for (size_t i = 0; i < m_OriginalUUIDs.size(); ++i)
+		{
+			uuidRemap.emplace(m_OriginalUUIDs.at(i), UUID());
+		}
+	}
+
 	PrefabNode::PrefabNode(PrefabNode&& other) noexcept
 		: m_OriginalUUID(other.m_OriginalUUID), m_ActiveSelf(other.m_ActiveSelf), m_pPrefab(other.m_pPrefab),
 		m_Name(std::move(other.m_Name)), m_SerializedComponents(std::move(other.m_SerializedComponents)),
