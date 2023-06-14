@@ -9,6 +9,9 @@
 
 #include <EntityView.h>
 #include <TypeData.h>
+#include <glm/glm.hpp>
+#include <PropertySerializer.h>
+#include <NodeRef.h>
 
 namespace Glory
 {
@@ -172,6 +175,7 @@ namespace Glory
 		YAML::Node components = YAML::Load(serializedComponents);
 
 		const uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
+		const uint32_t scriptedTypeHash = ResourceType::GetHash(typeid(ScriptedComponent));
 
 		size_t currentComponentIndex = 0;
 		for (size_t i = 0; i < components.size(); ++i)
@@ -200,8 +204,59 @@ namespace Glory
 				pComponentAddress = pRegistry->GetComponentAddress(entity, compUUID);
 			}
 
-			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(typeHash);
-			PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, nextObject["Properties"]);
+			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+			YAML::Node originalProperties = nextObject["Properties"];
+			if (typeHash != scriptedTypeHash)
+			{
+				PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
+			}
+			else
+			{
+				YAML::Node finalProperties = YAML::Node(YAML::NodeType::Map);
+
+				NodeRef originalPropertiesRef = originalProperties;
+				NodeRef finalPropertiesRef = finalProperties;
+
+				NodeValueRef props = originalPropertiesRef.ValueRef();
+				NodeValueRef finalProps = finalPropertiesRef.ValueRef();
+
+				finalPropertiesRef["m_Script"].Set(originalPropertiesRef["m_Script"].As<uint64_t>());
+				YAML::Node scriptData = originalProperties["ScriptData"];
+				for (YAML::const_iterator itor = scriptData.begin(); itor != scriptData.end(); ++itor)
+				{
+					const std::string name = itor->first.as<std::string>();
+					NodeValueRef prop = props["ScriptData"][name];
+					if (!prop.IsMap())
+					{
+						finalProps[name].Set(prop.Node());
+						continue;
+					}
+
+					NodeValueRef originalSceneUUD = prop["SceneUUID"];
+					NodeValueRef originalObjectUUD = prop["ObjectUUID"];
+
+					NodeValueRef sceneUUID = finalProps["ScriptData"][name]["SceneUUID"];
+					NodeValueRef objectUUID = finalProps["ScriptData"][name]["ObjectUUID"];
+
+					if (!originalSceneUUD.Exists() || !originalObjectUUD.Exists())
+					{
+						finalProps["ScriptData"][name].Set(prop.Node());
+						continue;
+					}
+
+					sceneUUID.Set((uint64_t)GetUUID());
+					const UUID uuid = originalObjectUUD.As<uint64_t>();
+					auto idItor = idRemap.find(uuid);
+					if (idItor == idRemap.end())
+					{
+						objectUUID.Set(originalObjectUUD.As<uint64_t>());
+						continue;
+					}
+					objectUUID.Set((uint64_t)idItor->second);
+				}
+
+				PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
+			}
 
 			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 			++currentComponentIndex;

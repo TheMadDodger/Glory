@@ -1,5 +1,6 @@
 #include "EntityPrefabData.h"
 #include "EntitySceneObject.h"
+#include "EntitySceneObjectSerializer.h"
 
 #include <PropertySerializer.h>
 #include <NodeRef.h>
@@ -167,31 +168,15 @@ namespace Glory
 		out << YAML::BeginSeq;
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
-			out << YAML::BeginMap;
 			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID compUUID = pEntityView->ComponentUUIDAt(i);
 			if (i == 0) m_TransformUUID = compUUID;
-
 			m_pPrefab->m_OriginalUUIDs.push_back(compUUID);
-			out << YAML::Key << "TypeHash";
-			out << YAML::Value << type;
 
-			out << YAML::Key << "UUID";
-			out << YAML::Value << (uint64_t)compUUID;
-
-			out << YAML::Key << "Properties";
-			out << YAML::Value << YAML::BeginMap;
 			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(type);
 			GloryECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(type);
 			void* compAddress = pTypeView->GetComponentAddress(entityID);
-			for (size_t j = 0; j < pTypeData->FieldCount(); ++j)
-			{
-				const GloryReflect::FieldData* pFieldData = pTypeData->GetFieldData(j);
-				void* pAddress = pFieldData->GetAddress(compAddress);
-				PropertySerializer::SerializeProperty(pFieldData, pAddress, out);
-			}
-			out << YAML::EndMap;
-			out << YAML::EndMap;
+			EntitySceneObjectSerializer::SerializeComponent(entityID, pRegistry, compUUID, compAddress, pTypeData, out);
 		}
 		out << YAML::EndSeq;
 		m_SerializedComponents = out.c_str();
