@@ -10,7 +10,7 @@ namespace Glory
 	{
 	public:
 		LayerWrapper(const Layer* pLayer) : Mask(pLayer ? pLayer->m_Mask : 0),
-			Name(mono_string_new(MonoManager::GetDomain(), pLayer ? pLayer->m_Name.c_str() : ""))
+			Name(mono_string_new(mono_domain_get(), pLayer ? pLayer->m_Name.c_str() : ""))
 		{ }
 
 		LayerMask Mask;

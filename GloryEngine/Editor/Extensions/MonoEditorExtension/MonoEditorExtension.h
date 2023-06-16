@@ -1,13 +1,17 @@
 #pragma once
 #include <BaseEditorExtension.h>
 #include <ProjectSpace.h>
-#include <GloryMonoScipting.h>
 #include <ObjectMenu.h>
 #include <Glory.h>
 #include <ResourceMeta.h>
 
 extern "C" GLORY_EDITOR_EXTENSION_API Glory::Editor::BaseEditorExtension * LoadExtension();
 extern "C" GLORY_EDITOR_EXTENSION_API void SetContext(Glory::GloryContext * pContext, ImGuiContext * pImGUIContext);
+
+namespace Glory
+{
+    class GloryMonoScipting;
+}
 
 namespace Glory::Editor
 {
@@ -44,5 +48,8 @@ namespace Glory::Editor
         static void AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*);
 
         void Preferences();
+
+    private:
+        static GloryMonoScipting* m_pMonoScriptingModule;
     };
 }

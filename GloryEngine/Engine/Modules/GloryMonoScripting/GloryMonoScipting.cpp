@@ -3,39 +3,42 @@
 #include "MathCSAPI.h"
 #include "InputCSAPI.h"
 #include "PhysicsCSAPI.h"
-#include "MonoLibManager.h"
 #include "MonoManager.h"
-#include "CoreLibManager.h"
+
 #include <Game.h>
 
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(GloryMonoScipting);
 
-	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp"), m_pCoreLibManager(new CoreLibManager())
+	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp"), m_pMonoManager(new MonoManager(this))
 	{
 	}
 
 	GloryMonoScipting::~GloryMonoScipting()
 	{
-		delete m_pCoreLibManager;
-		m_pCoreLibManager = nullptr;
+		delete m_pMonoManager;
+		m_pMonoManager = nullptr;
 	}
 
-	CoreLibManager* GloryMonoScipting::GetCoreLibManager() const
+	MonoManager* GloryMonoScipting::GetMonoManager() const
 	{
-		return m_pCoreLibManager;
+		return m_pMonoManager;
+	}
+
+	void GloryMonoScipting::LoadSettings(ModuleSettings& settings)
+	{
+		settings.RegisterEnumValue<MonoLogLevel>("MonoLogLevel", MonoLogLevel::debug);
+		settings.RegisterValue<std::string>("MonoDebuggingIP", "127.0.0.1");
+		settings.RegisterValue<uint32_t>("MonoDebuggingPort", 55555);
 	}
 
 	void GloryMonoScipting::Initialize()
 	{
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
-		MonoManager::Initialize("./Modules/GloryMonoScripting/Dependencies");
-	}
+		m_pMonoManager->Initialize("./Modules/GloryMonoScripting/Dependencies");
 
-	void GloryMonoScipting::SetMonoDirs(const std::string& assemblyDir, const std::string& configDir)
-	{
-		mono_set_dirs(assemblyDir.c_str(), configDir.c_str());
+		GloryReflect::Reflect::RegisterEnum<MonoLogLevel>();
 	}
 
 	void GloryMonoScipting::PostInitialize()
@@ -60,12 +63,12 @@ namespace Glory
 
 	void GloryMonoScipting::Cleanup()
 	{
-		MonoManager::Cleanup();
+		m_pMonoManager->Cleanup();
 	}
 
 	void GloryMonoScipting::LoadLib(const ScriptingLib& library)
 	{
-		MonoManager::LoadLib(library);
+		m_pMonoManager->LoadLib(library);
 	}
 
 	void GloryMonoScipting::Bind(const InternalCall& internalCall)
@@ -89,6 +92,6 @@ namespace Glory
 
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)
 	{
-		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll", m_pCoreLibManager);
+		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll", m_pMonoManager->GetCoreLibManager());
 	}
 }

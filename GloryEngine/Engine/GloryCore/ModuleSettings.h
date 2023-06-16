@@ -3,6 +3,7 @@
 #include <yaml-cpp/yaml.h>
 #include <map>
 #include <sstream>
+#include <Reflection.h>
 
 namespace Glory
 {
@@ -21,6 +22,20 @@ namespace Glory
 				m_SettingsNode[name] = defaultValue;
 
 			RegisterValue<T>(name);
+		}
+
+		template<typename T>
+		void RegisterEnumValue(const std::string& name, T defaultValue)
+		{
+			YAML::Node node = m_SettingsNode[name];
+			if (!node.IsDefined())
+			{
+				std::string stringValue = "";
+				GloryReflect::Enum<T>().ToString(defaultValue, stringValue);
+				m_SettingsNode[name] = stringValue;
+			}
+
+			RegisterValue(name, ST_Enum, ResourceType::GetHash<T>());
 		}
 
 		template<typename T>
@@ -46,6 +61,23 @@ namespace Glory
 			}
 
 			return node.as<T>();
+		}
+
+		template<typename T>
+		T EnumValue(const std::string& name)
+		{
+			YAML::Node node = m_SettingsNode[name];
+			if (!node.IsDefined())
+			{
+				std::stringstream stream;
+				stream << "ModuleSettings: Value " << name << " does not exist";
+				throw new std::exception(stream.str().c_str());
+			}
+
+			const std::string strValue = node.as<std::string>();
+			T value = T(0);
+			GloryReflect::Enum<T>().FromString(strValue, value);
+			return value;
 		}
 
 		template<typename T>

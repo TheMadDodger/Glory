@@ -8,20 +8,21 @@ namespace Glory
 	class ScriptingMethodsHelper
 	{
 	public:
-		GLORY_API static void InvokeScriptingMethod(MonoObject* pObject, const std::string& methodName, std::vector<void*>& args);
+		GLORY_API void InvokeScriptingMethod(MonoObject* pObject, const std::string& methodName, std::vector<void*>& args);
 
-	private:
-		static void Initialize(MonoImage* pImage);
+		void Initialize(MonoImage* pImage);
 
 	private:
 		ScriptingMethodsHelper() = default;
 		virtual ~ScriptingMethodsHelper() = default;
 
+		void Cleanup();
+
 	private:
-		friend class CoreLibManager;
-		static MonoClass* m_pMethodHelperClass;
-		static MonoMethod* m_pCallBasicMethod;
-		static MonoMethod* m_pCallOneArgsMethod;
-		static MonoMethod* m_pCallTwoArgsMethod;
+		friend class MonoManager;
+		MonoClass* m_pMethodHelperClass;
+		MonoMethod* m_pCallBasicMethod;
+		MonoMethod* m_pCallOneArgsMethod;
+		MonoMethod* m_pCallTwoArgsMethod;
 	};
 }

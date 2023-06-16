@@ -4,6 +4,7 @@
 #include "MonoAssetManager.h"
 #include "MonoSceneManager.h"
 #include "ScriptingMethodsHelper.h"
+#include "MonoManager.h"
 
 #include <AssetDatabase.h>
 #include <Reflection.h>
@@ -45,7 +46,7 @@ namespace Glory
 		if (pClass == nullptr) return;
 		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
-		ScriptingMethodsHelper::InvokeScriptingMethod(pMonoObject, method, args);
+		Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()->GetMonoManager()->GetMethodsHelper()->InvokeScriptingMethod(pMonoObject, method, args);
 	}
 
 	void MonoScript::SetValue(Object* pObject, const std::string& name, void* value)

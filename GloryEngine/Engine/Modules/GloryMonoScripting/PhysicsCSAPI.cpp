@@ -15,13 +15,13 @@ namespace Glory
 
 	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction)
 	{
-		const CoreLibManager* pCoreLibManager = SCRIPTING->GetCoreLibManager();
+		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
 		AssemblyBinding* pAssembly = pCoreLibManager->GetAssemblyBinding();
 		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
 
 		RayCastResult result;
 		if (!PHYSICS->CastRay(ToGLMVec3(origin), ToGLMVec3(direction), result)) return nullptr;
-		MonoArray* hits = mono_array_new(MonoManager::GetDomain(), pClass->m_pClass, result.m_Hits.size());
+		MonoArray* hits = mono_array_new(mono_domain_get(), pClass->m_pClass, result.m_Hits.size());
 		for (size_t i = 0; i < result.m_Hits.size(); ++i)
 		{
 			mono_array_set(hits, RayCastHit, i, result.m_Hits[i]);

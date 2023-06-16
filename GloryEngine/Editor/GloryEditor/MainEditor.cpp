@@ -420,6 +420,8 @@ namespace Glory::Editor
 	{
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<float>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<int>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<uint8_t>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<uint16_t>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<uint32_t>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<double>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<bool>>();

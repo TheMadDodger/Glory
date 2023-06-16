@@ -1,5 +1,6 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
+#include "GloryMonoScipting.h"
 
 #include <EditorAssetDatabase.h>
 #include <EditorPreferencesWindow.h>
@@ -26,6 +27,8 @@
 #include <windows.h>
 #include <tinyfiledialogs.h>
 
+#include <GloryMonoScipting.h>
+
 Glory::Editor::BaseEditorExtension* LoadExtension()
 {
 	return new Glory::Editor::MonoEditorExtension();
@@ -39,6 +42,8 @@ void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
 
 namespace Glory::Editor
 {
+	GloryMonoScipting* MonoEditorExtension::m_pMonoScriptingModule = nullptr;
+
 	MonoEditorExtension::MonoEditorExtension()
 	{
 	}
@@ -77,6 +82,8 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::RegisterEditors()
 	{
+		m_pMonoScriptingModule = Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>();
+
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
 		std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
@@ -180,7 +187,8 @@ namespace Glory::Editor
 		std::filesystem::path path = pProject->ProjectPath();
 		path = path.parent_path().append("Library/Assembly");
 		/* TODO: Lib manager for uuser assemblies */
-		MonoManager::LoadLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
+
+		m_pMonoScriptingModule->GetMonoManager()->LoadLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)
@@ -207,7 +215,7 @@ namespace Glory::Editor
 		assembliesPath.append("Assembly");
 
 		ScriptingExtender* pScriptingExtender = Game::GetGame().GetEngine()->GetScriptingExtender();
-		for (size_t i = 0; i < pScriptingExtender->InternalLibCount(); i++)
+		for (size_t i = 0; i < pScriptingExtender->InternalLibCount(); ++i)
 		{
 			const ScriptingLib& lib = pScriptingExtender->GetInternalLib(i);
 			std::filesystem::path path = lib.Location();
@@ -374,7 +382,7 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::ReloadAssembly()
 	{
-		MonoManager::Reload();
+		m_pMonoScriptingModule->GetMonoManager()->Reload();
 	}
 
 	void MonoEditorExtension::AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*)

@@ -5,25 +5,38 @@
 
 namespace Glory
 {
+	class CoreLibManager;
+	class GloryMonoScipting;
+	class ScriptingMethodsHelper;
+
 	class MonoManager
 	{
 	public:
-		static GLORY_API MonoDomain* GetDomain();
-		static GLORY_API void LoadLib(const ScriptingLib& lib);
+		GLORY_API MonoDomain* GetDomain(const std::string& name);
+		GLORY_API void LoadLib(const ScriptingLib& lib);
 
-		static GLORY_API void Reload();
+		GLORY_API void Reload();
+
+		GLORY_API CoreLibManager* GetCoreLibManager() const;
+		GLORY_API ScriptingMethodsHelper* GetMethodsHelper() const;
+
+		GLORY_API MonoDomain* CreateDomain(const std::string& name);
+		GLORY_API void UnloadDomain(const std::string& name);
 
 	private:
-		static void Initialize(const std::string& assemblyDir = ".", const std::string& configDir = "");
-		static void Cleanup();
+		void Initialize(const std::string& assemblyDir = ".", const std::string& configDir = "");
+		void Cleanup();
 
 	private:
-		MonoManager();
+		MonoManager(GloryMonoScipting* pModule);
 		virtual ~MonoManager();
 
 	private:
 		friend class GloryMonoScipting;
-		static MonoDomain* m_pMainDomain;
-		static MonoDomain* m_pDomain;
+		GloryMonoScipting* m_pModule;
+		CoreLibManager* m_pCoreLibManager;
+		ScriptingMethodsHelper* m_pMethodsHelper;
+		std::map<std::string, MonoDomain*> m_Domains;
+		MonoDomain* m_pRootDomain;
 	};
 }
