@@ -107,7 +107,7 @@ namespace Glory
 		void Destroy();
 
 	private:
-		friend class MonoLibManager;
+		friend class AssemblyDomain;
 		const ScriptingLib m_Lib;
 		MonoAssembly* m_pAssembly;
 		MonoImage* m_pImage;

@@ -27,7 +27,7 @@ namespace Glory
         virtual bool IsBehaviour() override;
 
     private:
-        AssemblyClass* LoadClass(const std::string& lib, const std::string& namespaceName, const std::string& className);
+        AssemblyClass* LoadClass(AssemblyBinding* pAssembly, const std::string& namespaceName, const std::string& className);
         MonoObject* LoadObject(Object* pObject, MonoClass* pClass);
 
     private:

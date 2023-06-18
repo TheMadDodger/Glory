@@ -17,7 +17,6 @@
 #include <AssetManager.h>
 
 #include <string>
-#include <MonoLibManager.h>
 #include <EditorApplication.h>
 #include <MenuBar.h>
 

@@ -1,10 +1,10 @@
 #include "MonoManager.h"
-#include "MonoLibManager.h"
 #include "MonoSceneManager.h"
 #include "GloryMonoScipting.h"
 #include "MonoScriptObjectManager.h"
 #include "CoreLibManager.h"
 #include "ScriptingMethodsHelper.h"
+#include "AssemblyDomain.h"
 
 #include <mono/jit/jit.h>
 #include <mono/utils/mono-counters.h>
@@ -60,6 +60,8 @@ void OnGCEvent(MonoProfiler* profiler, MonoProfilerGCEvent event, uint32_t gener
 
 namespace Glory
 {
+	MonoManager* MonoManager::m_pInstance = nullptr;
+
 	std::map<std::string, Debug::LogLevel> MONOTOLOGLEVEL = {
 		{"error", Debug::LogLevel::Error},
 		{"critical", Debug::LogLevel::FatalError},
@@ -142,8 +144,10 @@ namespace Glory
 
 		const char* monoVersion = "v4.0.30319";
 
-		m_pRootDomain = mono_jit_init_version("GloryDomain", monoVersion);
+		MonoDomain* pMonoDomain = mono_jit_init_version("GloryDomain", monoVersion);
+		m_pRootDomain = new AssemblyDomain("root", pMonoDomain);
 		m_Domains.emplace("root", m_pRootDomain);
+		m_pActiveDomain = m_pRootDomain;
 		//mono_debug_domain_create(m_pDomain);
 		//mono_domain_set(m_pDomain, false);
 
@@ -160,17 +164,25 @@ namespace Glory
 	void MonoManager::Cleanup()
 	{
 		MonoScriptObjectManager::Cleanup();
-		MonoLibManager::Cleanup();
 		MonoSceneManager::Cleanup();
-
-		mono_jit_cleanup(m_pRootDomain);
-		m_pRootDomain = nullptr;
 
 		m_pMethodsHelper->Cleanup();
 		m_pCoreLibManager->Cleanup();
+
+		for (auto& itor : m_Domains)
+		{
+			if (itor.first == "root") continue;
+			UnloadDomain(itor.first, false);
+		}
+
+		m_pRootDomain->Cleanup();
+		mono_jit_cleanup(m_pRootDomain->GetNative());
+		m_pRootDomain = nullptr;
+		m_pActiveDomain = nullptr;
+		m_Domains.clear();
 	}
 
-	MonoDomain* MonoManager::GetDomain(const std::string& name)
+	AssemblyDomain* MonoManager::GetDomain(const std::string& name)
 	{
 		auto itor = m_Domains.find(name);
 		if (itor == m_Domains.end()) return nullptr;
@@ -179,7 +191,7 @@ namespace Glory
 
 	void MonoManager::LoadLib(const ScriptingLib& lib)
 	{
-		MonoLibManager::LoadLib(mono_domain_get(), lib);
+		m_pRootDomain->LoadLib(lib);
 	}
 
 	void MonoManager::Reload()
@@ -196,7 +208,7 @@ namespace Glory
 
 		// Load assemblies into this domain
 		MonoScriptObjectManager::Cleanup();
-		MonoLibManager::ReloadAll(m_pRootDomain);
+		m_pRootDomain->ReloadAll();
 	}
 
 	CoreLibManager* MonoManager::GetCoreLibManager() const
@@ -209,40 +221,54 @@ namespace Glory
 		return m_pMethodsHelper;
 	}
 
-	MonoDomain* MonoManager::CreateDomain(const std::string& name)
+	AssemblyDomain* MonoManager::CreateDomain(const std::string& name)
 	{
 		auto itor = m_Domains.find(name);
 		if (itor != m_Domains.end()) return itor->second;
 
-		const auto monoDomain = mono_domain_create_appdomain((char*)name.data(), nullptr);
-		mono_debug_domain_create(monoDomain);
-		m_Domains.emplace(name, monoDomain);
-		return monoDomain;
+		const auto pMonoDomain = mono_domain_create_appdomain((char*)name.data(), nullptr);
+		mono_debug_domain_create(pMonoDomain);
+		AssemblyDomain* pDomain = new AssemblyDomain(name, pMonoDomain);
+		m_Domains.emplace(name, pDomain);
+		return pDomain;
 	}
 
-	void MonoManager::UnloadDomain(const std::string& name)
+	AssemblyDomain* MonoManager::ActiveDomain()
+	{
+		return m_pActiveDomain;
+	}
+
+	void MonoManager::UnloadDomain(const std::string& name, bool remove)
 	{
 		auto itor = m_Domains.find(name);
 		if (itor == m_Domains.end()) return;
 
-		MonoDomain* monoDomin = itor->second;
-		mono_debug_domain_unload(monoDomin);
+		AssemblyDomain* pDomain = itor->second;
+		mono_debug_domain_unload(pDomain->GetNative());
 
 		MonoObject* exception = nullptr;
-		mono_domain_try_unload(monoDomin, &exception);
+		mono_domain_try_unload(pDomain->GetNative(), &exception);
 		if (exception)
 		{
 			Debug::LogFatalError("An exception was thrown when trying to unload a domain");
 			return;
 		}
+		delete pDomain;
 		
+		if (!remove) return;
 		m_Domains.erase(itor);
+	}
+
+	MonoManager* MonoManager::Instance()
+	{
+		return m_pInstance;
 	}
 
 	MonoManager::MonoManager(GloryMonoScipting* pModule)
 		: m_pModule(pModule), m_pMethodsHelper(new ScriptingMethodsHelper()), m_pCoreLibManager(new CoreLibManager(this)),
-		m_pRootDomain(nullptr)
+		m_pRootDomain(nullptr), m_pActiveDomain(nullptr)
 	{
+		m_pInstance = this;
 	}
 
 	MonoManager::~MonoManager()
@@ -252,5 +278,7 @@ namespace Glory
 
 		delete m_pCoreLibManager;
 		m_pCoreLibManager = nullptr;
+
+		m_pInstance = nullptr;
 	}
 }
