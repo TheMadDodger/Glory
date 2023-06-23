@@ -18,8 +18,6 @@ namespace Glory
 		GLORY_API AssemblyDomain* GetDomain(const std::string& name);
 		GLORY_API void AddLib(const ScriptingLib& lib);
 
-		//GLORY_API void Reload();
-
 		GLORY_API CoreLibManager* GetCoreLibManager() const;
 		GLORY_API ScriptingMethodsHelper* GetMethodsHelper() const;
 
@@ -31,6 +29,7 @@ namespace Glory
 
 		GLORY_API void CollectGC();
 		GLORY_API void CollectGC(int32_t generation);
+		GLORY_API void WaitForPendingFinalizers();
 
 		static GLORY_API MonoManager* Instance();
 

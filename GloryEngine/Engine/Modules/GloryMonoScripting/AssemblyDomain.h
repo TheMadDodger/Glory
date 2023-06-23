@@ -34,7 +34,7 @@ namespace Glory
 		GLORY_API size_t AssemblyCount();
 		GLORY_API void ForEachAssembly(std::function<void(Assembly*)> callback);
 
-		GLORY_API bool SetCurrentDomain(bool force);
+		GLORY_API bool SetCurrentDomain(bool force = false);
 
 	private:
 		AssemblyDomain(const std::string& name, MonoDomain* pMonoDomain);

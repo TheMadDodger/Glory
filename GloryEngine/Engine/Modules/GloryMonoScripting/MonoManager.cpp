@@ -18,31 +18,6 @@
 #include <mono/metadata/mono-gc.h>
 #include <mono/metadata/profiler.h>
 
-
-mono_bool OnStackWalk(MonoMethod* method, int32_t native_offset, int32_t il_offset, mono_bool managed, void* data)
-{
-    //auto result = (StackWalkDataResult*)data;
-    //
-    //if (method)
-    //{
-    //    auto mName = mono_method_get_name(method);
-    //    auto mKlassNameSpace = mono_class_get_namespace(mono_method_get_class(method));
-    //    auto mKlassName = mono_class_get_name(mono_method_get_class(method));
-    //    result->Buffer.Append(mKlassNameSpace);
-    //    result->Buffer.Append(TEXT("."));
-    //    result->Buffer.Append(mKlassName);
-    //    result->Buffer.Append(TEXT("::"));
-    //    result->Buffer.Append(mName);
-    //    result->Buffer.Append(TEXT("\n"));
-    //}
-    //else if (!managed)
-    //{
-    //    result->Buffer.Append(TEXT("<unmanaged>\n"));
-    //}
-
-    return 0;
-}
-
 namespace Glory
 {
 	struct GMonoProfiler
@@ -55,8 +30,10 @@ namespace Glory
 		/* Counts the number of calls observed. */
 		unsigned long long NCalls;
 
+		/* Number of allocated bytes since last collection */
 		unsigned long long ActiveGCBytes;
 
+		/* Mono manager instance */
 		MonoManager* m_pMonoManager;
 	};
 
@@ -110,7 +87,7 @@ namespace Glory
 		pGProfiler->ActiveGCBytes = 0;
 	}
 
-	void OnGCEvent(MonoProfiler* profiler, MonoProfilerGCEvent event, uint32_t generation, mono_bool is_serial)
+	void OnGCEvent(MonoProfiler* profiler, MonoProfilerGCEvent event, uint32_t generation, mono_bool isSerial)
 	{
 	}
 
@@ -166,17 +143,15 @@ namespace Glory
 		GProfiler.m_pMonoManager = this;
 		GProfiler.Handle = mono_profiler_create((MonoProfiler*)&GProfiler);
 		mono_profiler_set_gc_allocation_callback(GProfiler.Handle, &OnGCAllocation);
-		mono_profiler_set_gc_event_callback(GProfiler.Handle, &OnGCEvent);
+		//mono_profiler_set_gc_event_callback(GProfiler.Handle, &OnGCEvent);
 		mono_profiler_enable_allocations();
 
 		const char* monoVersion = "v4.0.30319";
 
-		MonoDomain* pMonoDomain = mono_jit_init_version("GloryDomain", monoVersion);
+		MonoDomain* pMonoDomain = mono_jit_init_version("GloryRootDomain", monoVersion);
 		m_pRootDomain = new AssemblyDomain("root", pMonoDomain);
 		m_Domains.emplace("root", m_pRootDomain);
 		m_pActiveDomain = m_pRootDomain;
-		//mono_debug_domain_create(m_pDomain);
-		//mono_domain_set(m_pDomain, false);
 
 		//mono_domain_set_config(m_pRootDomain, configDir.c_str(), configFilename.c_str());
 		mono_thread_set_main(mono_thread_current());
@@ -190,37 +165,39 @@ namespace Glory
 
 	void MonoManager::Cleanup()
 	{
-		MonoSceneManager::Cleanup();
-
-		m_pMethodsHelper->Cleanup();
-		m_pCoreLibManager->Cleanup();
+		CollectGC();
+		WaitForPendingFinalizers();
 
 		for (auto& itor : m_Domains)
 		{
 			if (itor.first == "root") continue;
 			UnloadDomain(itor.first, false);
 		}
-
-		CollectGC();
-
-		if (mono_gc_pending_finalizers())
-		{
-			mono_gc_finalize_notify();
-			while (mono_gc_pending_finalizers());
-			{
-				std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-			}
-		}
+		m_Domains.clear();
 
 		m_pRootDomain->Unload(true);
 		mono_jit_cleanup(m_pRootDomain->GetMonoDomain());
+		delete m_pRootDomain;
 		m_pRootDomain = nullptr;
 		m_pActiveDomain = nullptr;
-		m_Domains.clear();
+
+		m_pMethodsHelper->Cleanup();
+		m_pCoreLibManager->Cleanup();
+		MonoSceneManager::Cleanup();
+
+		mono_debug_cleanup();
 	}
 
 	void MonoManager::InitialLoad()
 	{
+		AssemblyDomain* pStartDomain = CreateDomain("GloryDomain");
+		if (!pStartDomain->SetCurrentDomain())
+		{
+			Debug::LogFatalError("MonoManager::InitialLoad > Failed to set initial domain");
+			return;
+		}
+		m_pActiveDomain = pStartDomain;
+
 		for (size_t i = 0; i < m_Libs.size(); ++i)
 		{
 			m_pActiveDomain->LoadLib(m_Libs[i]);
@@ -238,7 +215,6 @@ namespace Glory
 	void MonoManager::AddLib(const ScriptingLib& lib)
 	{
 		m_Libs.push_back(lib);
-
 		if (!m_HadInitialLoad) return;
 		m_pActiveDomain->LoadLib(lib);
 	}
@@ -292,15 +268,22 @@ namespace Glory
 		if (itor == m_Domains.end()) return;
 
 		AssemblyDomain* pDomain = itor->second;
-		mono_debug_domain_unload(pDomain->GetMonoDomain());
+		pDomain->Unload(true);
+
+		if (m_pActiveDomain == pDomain)
+		{
+			if (!m_pRootDomain->SetCurrentDomain())
+			{
+				Debug::LogFatalError("MonoManager::UnloadDomain > Failed to set root domain as active!");
+				return;
+			}
+			m_pActiveDomain = m_pRootDomain;
+		}
 
 		MonoObject* exception = nullptr;
+		mono_domain_finalize(pDomain->GetMonoDomain(), 2000);
 		mono_domain_try_unload(pDomain->GetMonoDomain(), &exception);
-		if (exception)
-		{
-			Debug::LogFatalError("An exception was thrown when trying to unload a domain");
-			return;
-		}
+		//mono_debug_domain_unload(pDomain->GetMonoDomain());
 		delete pDomain;
 		
 		if (!remove) return;
@@ -310,9 +293,18 @@ namespace Glory
 	void MonoManager::Reload()
 	{
 		UnloadDomain("GloryDomain");
-		AssemblyDomain* pNewDomain = CreateDomain("GloryMain");
-		if (!pNewDomain->SetCurrentDomain(true)) UnloadDomain("GloryDomain");
+		AssemblyDomain* pNewDomain = CreateDomain("GloryDomain");
+		if (!pNewDomain->SetCurrentDomain())
+		{
+			Debug::LogFatalError("MonoManager::Reload > Failed to set new domain as active");
+			return;
+		}
 		m_pActiveDomain = pNewDomain;
+
+		for (size_t i = 0; i < m_Libs.size(); ++i)
+		{
+			m_pActiveDomain->LoadLib(m_Libs[i]);
+		}
 	}
 
 	void MonoManager::CollectGC()
@@ -323,6 +315,18 @@ namespace Glory
 	void MonoManager::CollectGC(int32_t generation)
 	{
 		mono_gc_collect(generation);
+	}
+
+	void MonoManager::WaitForPendingFinalizers()
+	{
+		if (mono_gc_pending_finalizers())
+		{
+			mono_gc_finalize_notify();
+			while (mono_gc_pending_finalizers());
+			{
+				std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+			}
+		}
 	}
 
 	MonoManager* MonoManager::Instance()

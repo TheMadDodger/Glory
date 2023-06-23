@@ -382,7 +382,7 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::ReloadAssembly(ProjectSpace* pProject)
 	{
-		m_pMonoScriptingModule->GetMonoManager()->ActiveDomain()->Reload(pProject->Name() + ".dll");
+		m_pMonoScriptingModule->GetMonoManager()->Reload();
 	}
 
 	void MonoEditorExtension::AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*)

@@ -28,7 +28,7 @@ namespace Glory
 
 	void GloryMonoScipting::LoadSettings(ModuleSettings& settings)
 	{
-		settings.RegisterEnumValue<MonoLogLevel>("MonoLogLevel", MonoLogLevel::debug);
+		settings.RegisterEnumValue<MonoLogLevel>("MonoLogLevel", MonoLogLevel::error);
 		settings.RegisterValue<std::string>("MonoDebuggingIP", "127.0.0.1");
 		settings.RegisterValue<uint32_t>("MonoDebuggingPort", 55555);
 	}

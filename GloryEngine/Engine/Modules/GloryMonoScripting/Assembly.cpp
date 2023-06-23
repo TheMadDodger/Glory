@@ -327,7 +327,11 @@ namespace Glory
         if (!IsLoaded())
             return;
 
-		if (m_pImage && isReloading) mono_assembly_close(m_pAssembly);
+		if (m_pImage && !isReloading)
+		{
+			mono_assembly_close(m_pAssembly);
+			mono_debug_close_image(m_pImage);
+		}
 
 		m_Locked = false;
         m_pAssembly = nullptr;
@@ -416,6 +420,9 @@ namespace Glory
             return false;
         }
 
+		/* Get the image from the assembly */
+		pAssemblyImage = mono_assembly_get_image(pAssembly);
+
 		/* Load debug symbols if they exist */
 		std::filesystem::path pdbPath = assemblyPath;
 		pdbPath.replace_extension(".pdb");
@@ -427,11 +434,11 @@ namespace Glory
 			m_DebugDataSize = (size_t)pdbFileStream.tellg();
 			pdbFileStream.seekg(0, std::ios::beg);
 
-			m_DebugData = new mono_byte[size];
-			pdbFileStream.read((char*)m_DebugData, size);
+			m_DebugData = new mono_byte[m_DebugDataSize];
+			pdbFileStream.read((char*)m_DebugData, m_DebugDataSize);
 			pdbFileStream.close();
 
-            if (size)
+            if (m_DebugDataSize)
                 mono_debug_open_image_from_memory(pAssemblyImage, m_DebugData, (uint32_t)m_DebugDataSize);
         }
 		else
@@ -442,7 +449,7 @@ namespace Glory
 		}
 
         m_pAssembly = pAssembly;
-        m_pImage = mono_assembly_get_image(pAssembly);
+        m_pImage = pAssemblyImage;
         m_Locked = false;
         return true;
     }
