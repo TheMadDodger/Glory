@@ -13,7 +13,8 @@ namespace Glory
 		void Initialize(MonoImage* pImage);
 
 	private:
-		ScriptingMethodsHelper() = default;
+		ScriptingMethodsHelper()
+			: m_pMethodHelperClass(nullptr), m_pCallBasicMethod(nullptr), m_pCallOneArgsMethod(nullptr), m_pCallTwoArgsMethod(nullptr) {}
 		virtual ~ScriptingMethodsHelper() = default;
 
 		void Cleanup();

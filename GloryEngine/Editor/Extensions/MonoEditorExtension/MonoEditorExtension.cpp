@@ -1,7 +1,7 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
-#include "GloryMonoScipting.h"
 
+#include <GloryMonoScipting.h>
 #include <EditorAssetDatabase.h>
 #include <EditorPreferencesWindow.h>
 #include <EditorAssetCallbacks.h>
@@ -14,6 +14,7 @@
 #include <MonoScript.h>
 #include <Tumbnail.h>
 #include <MonoManager.h>
+#include <AssemblyDomain.h>
 #include <AssetManager.h>
 
 #include <string>
@@ -187,7 +188,7 @@ namespace Glory::Editor
 		path = path.parent_path().append("Library/Assembly");
 		/* TODO: Lib manager for uuser assemblies */
 
-		m_pMonoScriptingModule->GetMonoManager()->LoadLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
+		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)
@@ -376,12 +377,12 @@ namespace Glory::Editor
 		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=Debug /p:Platform=x64 \"" + projectPath.string() + "\"";
 		system(cmd.c_str());
 
-		ReloadAssembly();
+		ReloadAssembly(pProject);
 	}
 
-	void MonoEditorExtension::ReloadAssembly()
+	void MonoEditorExtension::ReloadAssembly(ProjectSpace* pProject)
 	{
-		m_pMonoScriptingModule->GetMonoManager()->Reload();
+		m_pMonoScriptingModule->GetMonoManager()->ActiveDomain()->Reload(pProject->Name() + ".dll");
 	}
 
 	void MonoEditorExtension::AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*)

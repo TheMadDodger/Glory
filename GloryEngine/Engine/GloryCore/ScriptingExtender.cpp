@@ -24,7 +24,7 @@ namespace Glory
 			for (size_t i = 0; i < m_Libs.size(); i++)
 			{
 				if (m_Libs[i].Language() != language) continue;
-				pScriptingModule->LoadLib(m_Libs[i]);
+				pScriptingModule->AddLib(m_Libs[i]);
 			}
 
 			for (size_t i = 0; i < m_InternalCalls.size(); i++)
@@ -33,8 +33,6 @@ namespace Glory
 				if (internalCall.m_Language != language) continue;
 				pScriptingModule->Bind(internalCall);
 			}
-
-			pScriptingModule->InitializeScripting();
 		}
 	}
 

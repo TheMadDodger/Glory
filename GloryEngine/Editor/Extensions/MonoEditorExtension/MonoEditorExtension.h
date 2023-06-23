@@ -43,7 +43,7 @@ namespace Glory::Editor
         static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);
 
         static void CompileProject(ProjectSpace* pProject);
-        static void ReloadAssembly();
+        static void ReloadAssembly(ProjectSpace* pProject);
 
         static void AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*);
 

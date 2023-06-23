@@ -16,22 +16,22 @@ namespace Glory
 	class MonoScriptObjectManager
 	{
 	public:
-		static GLORY_API MonoObject* GetScriptDummyObject(MonoClass* pClass);
-		static GLORY_API MonoObject* GetScriptObject(MonoClass* pClass, Object* pObject);
-		static GLORY_API Object* GetScriptObject(MonoObject* pMonoObject);
-		static GLORY_API void DestroyScriptObject(MonoClass* pClass, Object* pObject);
+		GLORY_API MonoObject* GetScriptDummyObject(MonoClass* pClass);
+		GLORY_API MonoObject* GetScriptObject(MonoClass* pClass, Object* pObject);
+		GLORY_API Object* GetScriptObject(MonoObject* pMonoObject);
+		GLORY_API void DestroyScriptObject(MonoClass* pClass, Object* pObject);
 
 	private:
-		static void Cleanup();
-		static MonoObject* CreateScriptObject(MonoClass* pClass, Object* pObject);
-		static MonoObject* CreateScriptDummyObject(MonoClass* pClass);
+		void Cleanup();
+		MonoObject* CreateScriptObject(MonoClass* pClass, Object* pObject);
+		MonoObject* CreateScriptDummyObject(MonoClass* pClass);
 
 	private:
-		friend class MonoManager;
+		friend class AssemblyDomain;
 		MonoScriptObjectManager();
 		virtual ~MonoScriptObjectManager();
-		static std::map<Object*, ObjectInstanceData> m_Objects;
-		static std::map<MonoClass*, MonoObject*> m_pDummyScriptObjects;
-		static std::map<MonoObject*, Object*> m_pMonoToObject;
+		std::map<Object*, ObjectInstanceData> m_Objects;
+		std::map<MonoClass*, MonoObject*> m_pDummyScriptObjects;
+		std::map<MonoObject*, Object*> m_pMonoToObject;
 	};
 }

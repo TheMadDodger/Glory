@@ -1,6 +1,5 @@
 #pragma once
 #include "MonoScript.h"
-#include "AssemblyBinding.h"
 #include "MonoScriptLoader.h"
 #include "GloryMono.h"
 
@@ -26,10 +25,9 @@ namespace Glory
         virtual void LoadSettings(ModuleSettings& settings) override;
         virtual void Initialize() override;
         virtual void PostInitialize() override;
-        virtual void InitializeScripting() override;
         virtual void Cleanup() override;
 
-        void LoadLib(const ScriptingLib& library) override;
+        void AddLib(const ScriptingLib& library) override;
         void Bind(const InternalCall& internalCall) override;
 
         virtual std::string Language() override;

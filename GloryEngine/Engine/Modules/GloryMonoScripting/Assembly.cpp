@@ -1,14 +1,12 @@
-#include "AssemblyBinding.h"
+#include "Assembly.h"
+#include "AssemblyDomain.h"
 #include "MonoAssetManager.h"
 #include "IMonoLibManager.h"
-#include <mono/metadata/assembly.h>
-#include <mono/metadata/debug-helpers.h>
+
 #include <Debug.h>
 #include <filesystem>
 #include <fstream>
-#include <mono/metadata/attrdefs.h>
 #include <ResourceType.h>
-
 #include <SerializedTypes.h>
 #include <ModelData.h>
 #include <ImageData.h>
@@ -17,6 +15,11 @@
 #include <SceneObject.h>
 
 #include <glm/detail/type_quat.hpp>
+
+#include <mono/metadata/mono-debug.h>
+#include <mono/metadata/assembly.h>
+#include <mono/metadata/debug-helpers.h>
+#include <mono/metadata/attrdefs.h>
 
 namespace Glory
 {
@@ -44,19 +47,21 @@ namespace Glory
 		{"GloryEngine.Image", ResourceType::GetHash<ImageData>()},
 	};
 
-	AssemblyBinding::AssemblyBinding(const ScriptingLib& lib, IMonoLibManager* pLibManager)
-		: m_Lib(lib), m_pAssembly(nullptr), m_pImage(nullptr), m_pLibManager(pLibManager)
+	Assembly::Assembly(AssemblyDomain* pDomain)
+		: m_pDomain(pDomain), m_pAssembly(nullptr), m_pImage(nullptr), m_pLibManager(nullptr), m_Reloadable(false), m_DebugData(nullptr), m_DebugDataSize(0)
 	{
 	}
 
-	AssemblyBinding::~AssemblyBinding()
+	Assembly::~Assembly()
 	{
-		m_pAssembly = nullptr;
-		m_pImage = nullptr;
-		m_pLibManager = nullptr;
+		if (!m_DebugData) return;
+
+		delete[] m_DebugData;
+		m_DebugData = nullptr;
+		m_DebugDataSize = 0;
 	}
 
-	void AssemblyBinding::Initialize(MonoDomain* pDomain)
+	/*void Assembly::Initialize()
 	{
 		std::filesystem::path path = m_Lib.Location();
 		const std::string& name = m_Lib.LibraryName();
@@ -87,22 +92,9 @@ namespace Glory
 		delete[] data;
 
 		if (m_pLibManager) m_pLibManager->Initialize(this);
-	}
+	}*/
 
-	void AssemblyBinding::Destroy()
-	{
-		if (m_pLibManager) m_pLibManager->Cleanup();
-		m_Namespaces.clear();
-		m_pAssembly = nullptr;
-		m_pImage = nullptr;
-	}
-
-	MonoImage* AssemblyBinding::GetMonoImage()
-	{
-		return m_pImage;
-	}
-
-	AssemblyClass* AssemblyBinding::GetClass(const std::string& namespaceName, const std::string& className)
+	AssemblyClass* Assembly::GetClass(const std::string& namespaceName, const std::string& className)
 	{
 		if (m_Namespaces.find(namespaceName) == m_Namespaces.end() || m_Namespaces[namespaceName].m_Classes.find(className) == m_Namespaces[namespaceName].m_Classes.end())
 		{
@@ -111,7 +103,7 @@ namespace Glory
 		return &m_Namespaces[namespaceName].m_Classes[className];
 	}
 
-	bool AssemblyBinding::GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c)
+	bool Assembly::GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c)
 	{
 		if (m_Namespaces.find(namespaceName) == m_Namespaces.end() || m_Namespaces[namespaceName].m_Classes.find(className) == m_Namespaces[namespaceName].m_Classes.end())
 		{
@@ -121,17 +113,7 @@ namespace Glory
 		return true;
 	}
 
-	const std::string& AssemblyBinding::Name()
-	{
-		return m_Lib.LibraryName();
-	}
-
-	GLORY_API const std::string& AssemblyBinding::Location()
-	{
-		return m_Lib.Location();
-	}
-
-	AssemblyClass* AssemblyBinding::LoadClass(const std::string& namespaceName, const std::string& className)
+	AssemblyClass* Assembly::LoadClass(const std::string& namespaceName, const std::string& className)
 	{
 		MonoClass* pClass = mono_class_from_name(m_pImage, namespaceName.c_str(), className.c_str());
 		if (pClass == nullptr)
@@ -142,7 +124,7 @@ namespace Glory
 
 		if (mono_class_init(pClass) == false)
 		{
-			Debug::LogError("AssemblyBinding::LoadClass > Failed to initialize a MonoClass!");
+			Debug::LogError("Assembly::LoadClass > Failed to initialize a MonoClass!");
 			return nullptr;
 		}
 
@@ -220,6 +202,7 @@ namespace Glory
 		m_IsStatic(false)
 	{
 	}
+
 	AssemblyClassField::AssemblyClassField(MonoClassField* pField) :
 		m_pMonoField(pField), m_pType(mono_field_get_type(pField)), m_Name(mono_field_get_name(pField)),
 		m_Flags(mono_field_get_flags(pField)), m_Visibility(Visibility(m_Flags & MONO_FIELD_ATTR_FIELD_ACCESS_MASK)),
@@ -290,4 +273,177 @@ namespace Glory
 	{
 		return m_IsStatic;
 	}
+
+    bool Assembly::Load(const ScriptingLib& lib, IMonoLibManager* pLibManager)
+    {
+        if (IsLoaded())
+            return false;
+
+		m_State = AssemblyState::AS_Loading;
+
+		std::filesystem::path path = lib.Location();
+		const std::string& name = lib.LibraryName();
+		path.append(name);
+        if (!std::filesystem::exists(path))
+        {
+            Debug::LogError("Failed to open assembly, file \"" + path.string() + "\" not found!");
+            return true;
+        }
+
+		if (!lib.Reloadable() && !LoadAssembly(path)) return false;
+		else if (!LoadAssemblyWithImage(path)) return false;
+
+		m_Name = lib.LibraryName();
+		m_Location = lib.Location();
+		m_Reloadable = lib.Reloadable();
+		m_pLibManager = pLibManager;
+		if (m_pLibManager) m_pLibManager->Initialize(this);
+		m_State = AssemblyState::AS_Loaded;
+		return true;
+    }
+
+    bool Assembly::Load(MonoImage* monoImage)
+    {
+        if (IsLoaded())
+            return false;
+
+        Unload();
+
+		m_State = AssemblyState::AS_Loading;
+
+        m_pAssembly = mono_image_get_assembly(monoImage);
+		if (m_pAssembly == nullptr) return false;
+
+        m_pImage = monoImage;
+        //m_IsDependency = true;
+
+		if (m_pLibManager) m_pLibManager->Initialize(this);
+		m_State = AssemblyState::AS_Loaded;
+        return true;
+    }
+
+    void Assembly::Unload(bool isReloading)
+    {
+        if (!IsLoaded())
+            return;
+
+		if (m_pImage && isReloading) mono_assembly_close(m_pAssembly);
+
+		m_Locked = false;
+        m_pAssembly = nullptr;
+        m_pImage = nullptr;
+		m_Name = "";
+		m_Location = "";
+		m_Reloadable = false;
+		m_State = AssemblyState::AS_NotLoaded;
+
+		if (m_pLibManager) m_pLibManager->Cleanup();
+		m_pLibManager = nullptr;
+		m_Namespaces.clear();
+
+		if (m_DebugData)
+		{
+			delete[] m_DebugData;
+			m_DebugData = nullptr;
+			m_DebugDataSize = 0;
+		}
+
+		if (m_pLibManager) m_pLibManager->Cleanup();
+    }
+
+    MonoReflectionAssembly* Assembly::GetReflectionAssembly() const
+    {
+        if (!m_pAssembly)
+			return nullptr;
+        return mono_assembly_get_object(mono_domain_get(), m_pAssembly);
+    }
+
+    bool Assembly::LoadAssembly(const std::filesystem::path& assemblyPath)
+    {
+		m_Locked = true;
+
+        MonoAssembly* pAssembly = mono_domain_assembly_open(m_pDomain->GetMonoDomain(), assemblyPath.string().c_str());
+        if (!pAssembly) return false;
+
+        MonoImage* pAssemblyImage = mono_assembly_get_image(pAssembly);
+        if (!pAssembly)
+        {
+            mono_assembly_close(pAssembly);
+            return false;
+        }
+
+        m_pAssembly = pAssembly;
+        m_pImage = pAssemblyImage;
+
+        return true;
+    }
+
+    bool Assembly::LoadAssemblyWithImage(const std::filesystem::path& assemblyPath)
+    {
+		m_Locked = true;
+
+		const std::string assemblyPathStr = assemblyPath.string();
+
+		std::ifstream assemblyFileStream;
+		assemblyFileStream.open(assemblyPathStr, std::ios::in | std::ios::ate | std::ios::binary);
+		std::streampos size = assemblyFileStream.tellg();
+		assemblyFileStream.seekg(0, std::ios::beg);
+
+		char* data = new char[size];
+		assemblyFileStream.read(data, size);
+		assemblyFileStream.close();
+
+        /* Load image */
+        MonoImageOpenStatus status;
+        MonoImage* pAssemblyImage = mono_image_open_from_data_with_name(data, (uint32_t)size, true, &status, false, assemblyPathStr.c_str());
+		delete[] data;
+        if (status != MONO_IMAGE_OK || pAssemblyImage == nullptr)
+        {
+			std::stringstream log;
+			log << "Mono assembly image is invalid at " << assemblyPath;
+			Debug::LogError(log.str());
+            return false;
+        }
+
+        /* Load assembly */
+        MonoAssembly* pAssembly = mono_assembly_load_from_full(pAssemblyImage, assemblyPathStr.c_str(), &status, false);
+        mono_image_close(pAssemblyImage);
+        if (status != MONO_IMAGE_OK || pAssembly == nullptr)
+        {
+			std::stringstream log;
+			log << "Mono assembly image is corrupted at " << assemblyPath;
+			Debug::LogError(log.str());
+            return false;
+        }
+
+		/* Load debug symbols if they exist */
+		std::filesystem::path pdbPath = assemblyPath;
+		pdbPath.replace_extension(".pdb");
+
+        if (std::filesystem::exists(pdbPath))
+        {
+			std::ifstream pdbFileStream;
+			pdbFileStream.open(assemblyPathStr, std::ios::in | std::ios::ate | std::ios::binary);
+			m_DebugDataSize = (size_t)pdbFileStream.tellg();
+			pdbFileStream.seekg(0, std::ios::beg);
+
+			m_DebugData = new mono_byte[size];
+			pdbFileStream.read((char*)m_DebugData, size);
+			pdbFileStream.close();
+
+            if (size)
+                mono_debug_open_image_from_memory(pAssemblyImage, m_DebugData, (uint32_t)m_DebugDataSize);
+        }
+		else
+		{
+			std::stringstream log;
+			log << "No pdb file found for " << assemblyPath << " debugging this assembly will not be possible.";
+			Debug::LogError(log.str());
+		}
+
+        m_pAssembly = pAssembly;
+        m_pImage = mono_assembly_get_image(pAssembly);
+        m_Locked = false;
+        return true;
+    }
 }

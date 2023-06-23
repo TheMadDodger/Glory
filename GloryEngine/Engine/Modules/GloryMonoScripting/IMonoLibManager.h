@@ -1,12 +1,13 @@
 #pragma once
-#include "AssemblyBinding.h"
 
 namespace Glory
 {
+	class Assembly;
+
 	class IMonoLibManager
 	{
 	public:
-		virtual void Initialize(AssemblyBinding* pAssembly) = 0;
+		virtual void Initialize(Assembly* pAssembly) = 0;
 		virtual void Cleanup() = 0;
 	};
 }

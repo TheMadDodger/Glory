@@ -2,6 +2,7 @@
 #include "MonoAssetManager.h"
 #include "MonoManager.h"
 #include "ScriptingMethodsHelper.h"
+#include "Assembly.h"
 
 namespace Glory
 {
@@ -9,12 +10,12 @@ namespace Glory
 	{
 	}
 
-	AssemblyBinding* CoreLibManager::GetAssemblyBinding() const
+	Assembly* CoreLibManager::GetAssemblyBinding() const
 	{
 		return m_pAssembly;
 	}
 
-	void CoreLibManager::Initialize(AssemblyBinding* pAssembly)
+	void CoreLibManager::Initialize(Assembly* pAssembly)
 	{
 		m_pAssembly = pAssembly;
 		MonoAssetManager::Initialize(m_pAssembly->GetMonoImage());

@@ -3,6 +3,7 @@
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
 #include "CoreLibManager.h"
+#include "Assembly.h"
 
 #include <PhysicsModule.h>
 
@@ -16,7 +17,7 @@ namespace Glory
 	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction)
 	{
 		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
-		AssemblyBinding* pAssembly = pCoreLibManager->GetAssemblyBinding();
+		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
 		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
 
 		RayCastResult result;

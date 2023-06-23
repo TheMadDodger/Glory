@@ -4,12 +4,15 @@
 #include "MonoSceneManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "MonoManager.h"
+#include "Assembly.h"
 #include "AssemblyDomain.h"
 
 #include <AssetDatabase.h>
 #include <Reflection.h>
 #include <PropertySerializer.h>
 #include <AssetReference.h>
+
+#include <mono/jit/jit.h>
 
 namespace Glory
 {
@@ -30,7 +33,7 @@ namespace Glory
 	void MonoScript::Invoke(Object* pObject, const std::string& method, void** args)
 	{
 		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
-		AssemblyBinding* pAssembly = pDomain->GetMainAssembly();
+		Assembly* pAssembly = pDomain->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
@@ -44,7 +47,7 @@ namespace Glory
 
 	void MonoScript::InvokeSafe(Object* pObject, const std::string& method, std::vector<void*>& args)
 	{
-		AssemblyBinding* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
@@ -54,7 +57,7 @@ namespace Glory
 
 	void MonoScript::SetValue(Object* pObject, const std::string& name, void* value)
 	{
-		AssemblyBinding* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
@@ -66,7 +69,7 @@ namespace Glory
 
 	void MonoScript::GetValue(Object* pObject, const std::string& name, void* value)
 	{
-		AssemblyBinding* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
@@ -78,12 +81,13 @@ namespace Glory
 
 	void MonoScript::LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data)
 	{
-		AssemblyBinding* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
+		Assembly* pAssembly = pDomain->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 
 		// Dummy object for default values
-		MonoObject* pDummyObject = MonoScriptObjectManager::GetScriptDummyObject(pClass->m_pClass);
+		MonoObject* pDummyObject = pDomain->ScriptObjectManager()->GetScriptDummyObject(pClass->m_pClass);
 		if (!data.IsDefined() || !data.IsMap())
 			data = YAML::Node(YAML::NodeType::Map);
 
@@ -158,7 +162,7 @@ namespace Glory
 
 	void MonoScript::SetPropertyValues(Object* pObject, YAML::Node& node)
 	{
-		AssemblyBinding* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 
@@ -212,7 +216,7 @@ namespace Glory
 
 	void MonoScript::GetPropertyValues(Object* pObject, YAML::Node& node)
 	{
-		AssemblyBinding* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
 
@@ -282,7 +286,7 @@ namespace Glory
 		return false;
 	}
 
-	AssemblyClass* MonoScript::LoadClass(AssemblyBinding* pAssembly, const std::string& namespaceName, const std::string& className)
+	AssemblyClass* MonoScript::LoadClass(Assembly* pAssembly, const std::string& namespaceName, const std::string& className)
 	{
 		if (pAssembly == nullptr) return nullptr;
 		AssemblyClass* pClass = pAssembly->GetClass(namespaceName, className);
@@ -292,6 +296,6 @@ namespace Glory
 
 	MonoObject* MonoScript::LoadObject(Object* pObject, MonoClass* pClass)
 	{
-		return MonoScriptObjectManager::GetScriptObject(pClass, pObject);
+		return MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->GetScriptObject(pClass, pObject);
 	}
 }

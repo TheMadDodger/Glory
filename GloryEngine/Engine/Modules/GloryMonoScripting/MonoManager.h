@@ -13,10 +13,12 @@ namespace Glory
 	class MonoManager
 	{
 	public:
-		GLORY_API AssemblyDomain* GetDomain(const std::string& name);
-		GLORY_API void LoadLib(const ScriptingLib& lib);
+		GLORY_API void InitialLoad();
 
-		GLORY_API void Reload();
+		GLORY_API AssemblyDomain* GetDomain(const std::string& name);
+		GLORY_API void AddLib(const ScriptingLib& lib);
+
+		//GLORY_API void Reload();
 
 		GLORY_API CoreLibManager* GetCoreLibManager() const;
 		GLORY_API ScriptingMethodsHelper* GetMethodsHelper() const;
@@ -24,6 +26,11 @@ namespace Glory
 		GLORY_API AssemblyDomain* CreateDomain(const std::string& name);
 		GLORY_API AssemblyDomain* ActiveDomain();
 		GLORY_API void UnloadDomain(const std::string& name, bool remove = true);
+
+		GLORY_API void Reload();
+
+		GLORY_API void CollectGC();
+		GLORY_API void CollectGC(int32_t generation);
 
 		static GLORY_API MonoManager* Instance();
 
@@ -44,5 +51,9 @@ namespace Glory
 		std::map<std::string, AssemblyDomain*> m_Domains;
 		AssemblyDomain* m_pRootDomain;
 		AssemblyDomain* m_pActiveDomain;
+
+		std::vector<ScriptingLib> m_Libs;
+
+		bool m_HadInitialLoad;
 	};
 }

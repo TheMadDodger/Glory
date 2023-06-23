@@ -10,14 +10,14 @@ namespace Glory
     public:
         CoreLibManager(MonoManager* pMonoManager);
 
-        AssemblyBinding* GetAssemblyBinding() const;
+        Assembly* GetAssemblyBinding() const;
 
     public:
-        void Initialize(AssemblyBinding* pAssembly) override;
+        void Initialize(Assembly* pAssembly) override;
         void Cleanup() override;
 
     private:
         MonoManager* m_pMonoManager;
-        AssemblyBinding* m_pAssembly;
+        Assembly* m_pAssembly;
     };
 }

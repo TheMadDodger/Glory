@@ -19,8 +19,7 @@ namespace Glory
 		virtual void Initialize() {};
 		virtual void Cleanup() {};
 
-		virtual void InitializeScripting() = 0;
-		virtual void LoadLib(const ScriptingLib& library) = 0;
+		virtual void AddLib(const ScriptingLib& library) = 0;
 		virtual void Bind(const InternalCall& internalCall) = 0;
 
 	private:

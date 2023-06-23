@@ -2,6 +2,7 @@
 
 #include <MacroHelpers.h>
 #include <MonoManager.h>
+#include <Assembly.h>
 
 #define GET_CLASS(name, out) \
 out = mono_class_from_name(pAssembly->GetMonoImage(), "GloryEngine.Entities", STRINGIZE(name)); \
@@ -67,7 +68,7 @@ namespace Glory
         return new MonoEntityObjectManager(pScene);
     }
 
-    void MonoEntitySceneManager::Initialize(AssemblyBinding* pAssembly)
+    void MonoEntitySceneManager::Initialize(Assembly* pAssembly)
     {
         GET_CLASS(EntityScene, m_pEntitySceneClass);
         GET_CLASS(EntitySceneObject, m_pEntitySceneObjectClass);

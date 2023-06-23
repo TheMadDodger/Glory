@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace GloryEngine
 {
     internal static class ScriptingMethodsHelper
     {
+        static Dictionary<Type, Dictionary<string, MethodInfo>> m_CachedMethods = new Dictionary<Type, Dictionary<string, MethodInfo>>();
+
         internal static void CallBasicMethod(object obj, string methodName)
         {
+            if (obj == null) return;
 			try
 			{
-				MethodInfo method = obj.GetType().GetMethod(methodName);
-				if (method == null) return;
+                MethodInfo method = GetMethodInfo(obj.GetType(), methodName);
+                if (method == null) return;
 				method.Invoke(obj, null);
 			}
 			catch (Exception e)
@@ -21,11 +25,11 @@ namespace GloryEngine
 
         internal static void Call1ArgsMethod(object obj, string methodName, UInt32 arg1)
         {
-			try
+            if (obj == null) return;
+            try
 			{
-                Debug.LogInfo(arg1.ToString());
-				MethodInfo method = obj.GetType().GetMethod(methodName);
-				if (method == null) return;
+                MethodInfo method = GetMethodInfo(obj.GetType(), methodName);
+                if (method == null) return;
 				object[] args = new object[1];
                 args[0] = arg1;
 				method.Invoke(obj, args);
@@ -38,9 +42,10 @@ namespace GloryEngine
 
         internal static void Call2ArgsMethod(object obj, string methodName, UInt32 arg1, UInt32 arg2)
         {
+            if (obj == null) return;
             try
             {
-                MethodInfo method = obj.GetType().GetMethod(methodName);
+                MethodInfo method = GetMethodInfo(obj.GetType(), methodName);
                 if (method == null) return;
                 object[] args =
                 {
@@ -53,6 +58,21 @@ namespace GloryEngine
             {
                 Debug.LogError(e.ToString());
             }
+        }
+
+        internal static MethodInfo GetMethodInfo(Type type, string name)
+        {
+            if(!m_CachedMethods.ContainsKey(type))
+                m_CachedMethods.Add(type, new Dictionary<string, MethodInfo>());
+
+            if (!m_CachedMethods[type].ContainsKey(name))
+            {
+                MethodInfo method = type.GetMethod(name);
+                if(method == null) return null;
+                m_CachedMethods[type].Add(name, method);
+            }
+
+            return m_CachedMethods[type][name];
         }
     }
 }

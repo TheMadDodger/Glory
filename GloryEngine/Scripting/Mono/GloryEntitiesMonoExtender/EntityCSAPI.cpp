@@ -1,4 +1,6 @@
 #include "EntityCSAPI.h"
+#include "AssemblyDomain.h"
+
 #include <MonoScriptObjectManager.h>
 #include <EntitySceneObject.h>
 #include <ComponentTypes.h>
@@ -57,7 +59,8 @@ namespace Glory
 
 	MonoEntityHandle GetEntityHandle(MonoObject* pObject)
 	{
-		Object* pEngineObject = MonoScriptObjectManager::GetScriptObject(pObject);
+		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
+		Object* pEngineObject = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->GetScriptObject(pObject);
 		if (!pEngineObject) return MonoEntityHandle();
 		EntitySceneObject* pEntityObject = (EntitySceneObject*)pEngineObject;
 		if (!pEntityObject) return MonoEntityHandle();
