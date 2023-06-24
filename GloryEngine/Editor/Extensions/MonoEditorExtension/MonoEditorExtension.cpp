@@ -14,6 +14,7 @@
 #include <MonoScript.h>
 #include <Tumbnail.h>
 #include <MonoManager.h>
+#include <MonoScriptObjectManager.h>
 #include <AssemblyDomain.h>
 #include <AssetManager.h>
 
@@ -43,6 +44,13 @@ void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
 namespace Glory::Editor
 {
 	GloryMonoScipting* MonoEditorExtension::m_pMonoScriptingModule = nullptr;
+
+	void MonoEditorExtension::HandleStop(Module* pModule)
+	{
+		MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->DestroyAllObjects();
+		MonoManager::Instance()->CollectGC();
+		MonoManager::Instance()->WaitForPendingFinalizers();
+	}
 
 	MonoEditorExtension::MonoEditorExtension()
 	{
@@ -102,6 +110,8 @@ namespace Glory::Editor
 
 		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
 		EditorPreferencesWindow::AddPreferencesTab({ "Mono", [this]() { Preferences(); } });
+
+		EditorPlayer::RegisterLoopHandler(this);
 	}
 
 	void MonoEditorExtension::FindVisualStudioPath()
@@ -361,10 +371,12 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::CompileProject(ProjectSpace* pProject)
 	{
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		pEditorApp->StopPlay();
+
 		std::filesystem::path projectPath = pProject->RootPath();
 		projectPath = projectPath.append(pProject->Name() + ".csproj");
 
-		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
 
 		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>("");

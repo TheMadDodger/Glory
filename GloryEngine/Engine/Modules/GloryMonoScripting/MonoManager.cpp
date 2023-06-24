@@ -75,14 +75,19 @@ namespace Glory
 		const char* name = mono_class_get_name(pMonoClass);
 		const int32_t size = mono_class_instance_size(pMonoClass);
 
-		std::stringstream log;
-		log << "New GC allocation of type " << nameSpace << "." << name << " with size " << size << " bytes";
-		//Glory::Debug::LogInfo(log.str());
-
 		GMonoProfiler* pGProfiler = (GMonoProfiler*)pProfiler;
-		pGProfiler->ActiveGCBytes += size;
+		const ModuleSettings& settings = pGProfiler->m_pMonoManager->Module()->Settings();
+		const bool gcLogging = settings.Value<bool>("Enable GC allocation logging");
+		if (gcLogging)
+		{
+			std::stringstream log;
+			log << "New GC allocation of type " << nameSpace << "." << name << " with size " << size << " bytes";
+			Glory::Debug::LogInfo(log.str());
+		}
 
-		if (pGProfiler->ActiveGCBytes < GMonoProfiler::MaxGCAllocations) return;
+		const bool autoGarbageCollect = settings.Value<bool>("Auto Collect Garbage");
+		pGProfiler->ActiveGCBytes += size;
+		if (pGProfiler->ActiveGCBytes < GMonoProfiler::MaxGCAllocations || !autoGarbageCollect) return;
 		pGProfiler->m_pMonoManager->CollectGC();
 		pGProfiler->ActiveGCBytes = 0;
 	}
@@ -119,19 +124,24 @@ namespace Glory
         /* Setup debugger */
         const std::string debugAgentIP = m_pModule->Settings().Value<std::string>("MonoDebuggingIP");
         const uint16_t debugAgentPort = m_pModule->Settings().Value<uint16_t>("MonoDebuggingPort");
-        std::stringstream debuggerAgentStream;
-        debuggerAgentStream << "--debugger-agent=transport=dt_socket,address=" << debugAgentIP << ":" << debugAgentPort << ",embedding=1,server=y,suspend=n,loglevel=10";
+		m_DebuggingEnabled = m_pModule->Settings().Value<bool>("Enable Debugging");
 
-        const std::string debuggerAgentString = debuggerAgentStream.str();
+		if (m_DebuggingEnabled)
+		{
+			std::stringstream debuggerAgentStream;
+			debuggerAgentStream << "--debugger-agent=transport=dt_socket,address=" << debugAgentIP << ":" << debugAgentPort << ",embedding=1,server=y,suspend=n,loglevel=10";
 
-		const char* options[] = {
-		    "--soft-breakpoints",
-            //"--debugger-agent=transport=dt_socket,address=127.0.0.1:55555"
-            debuggerAgentString.c_str(),
-		};
-		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
+			const std::string debuggerAgentString = debuggerAgentStream.str();
 
-		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+			const char* options[] = {
+				"--soft-breakpoints",
+				//"--debugger-agent=transport=dt_socket,address=127.0.0.1:55555"
+				debuggerAgentString.c_str(),
+			};
+			mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
+
+			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+		}
 
         /* Setup log callbacks */
         mono_trace_set_log_handler(OnLogCallback, nullptr);
@@ -184,8 +194,8 @@ namespace Glory
 		m_pMethodsHelper->Cleanup();
 		m_pCoreLibManager->Cleanup();
 		MonoSceneManager::Cleanup();
-
-		mono_debug_cleanup();
+		
+		if (m_DebuggingEnabled) mono_debug_cleanup();
 	}
 
 	void MonoManager::InitialLoad()
@@ -203,6 +213,8 @@ namespace Glory
 			m_pActiveDomain->LoadLib(m_Libs[i]);
 		}
 		m_HadInitialLoad = true;
+
+		m_ScriptExecutionAllowed = true;
 	}
 
 	AssemblyDomain* MonoManager::GetDomain(const std::string& name)
@@ -219,21 +231,10 @@ namespace Glory
 		m_pActiveDomain->LoadLib(lib);
 	}
 
-	//void MonoManager::Reload()
-	//{
-	//	// Create new domain
-	//	//MonoDomain* pNewDomain = mono_domain_create_appdomain("GloryDomain", NULL);
-	//	//mono_domain_set(pNewDomain, false);
-	//	//mono_debug_domain_create(pNewDomain);
-
-	//	// Unload domain
-	//	//mono_debug_domain_unload(m_pDomain);
-	//	//mono_domain_unload(m_pDomain);
-	//	//mono_domain_finalize(m_pDomain, 2000);
-
-	//	// Load assemblies into this domain
-	//	//m_pRootDomain->ReloadAll();
-	//}
+	GloryMonoScipting* MonoManager::Module() const
+	{
+		return m_pModule;
+	}
 
 	CoreLibManager* MonoManager::GetCoreLibManager() const
 	{
@@ -245,13 +246,18 @@ namespace Glory
 		return m_pMethodsHelper;
 	}
 
+	bool MonoManager::ScriptExecutionAllowed() const
+	{
+		return m_ScriptExecutionAllowed;
+	}
+
 	AssemblyDomain* MonoManager::CreateDomain(const std::string& name)
 	{
 		auto itor = m_Domains.find(name);
 		if (itor != m_Domains.end()) return itor->second;
 
 		const auto pMonoDomain = mono_domain_create_appdomain((char*)name.data(), nullptr);
-		mono_debug_domain_create(pMonoDomain);
+		if (m_DebuggingEnabled) mono_debug_domain_create(pMonoDomain);
 		AssemblyDomain* pDomain = new AssemblyDomain(name, pMonoDomain);
 		m_Domains.emplace(name, pDomain);
 		return pDomain;
@@ -283,7 +289,7 @@ namespace Glory
 		MonoObject* exception = nullptr;
 		mono_domain_finalize(pDomain->GetMonoDomain(), 2000);
 		mono_domain_try_unload(pDomain->GetMonoDomain(), &exception);
-		//mono_debug_domain_unload(pDomain->GetMonoDomain());
+		//if (m_DebuggingEnabled) mono_debug_domain_unload(pDomain->GetMonoDomain());
 		delete pDomain;
 		
 		if (!remove) return;
@@ -292,6 +298,8 @@ namespace Glory
 
 	void MonoManager::Reload()
 	{
+		m_ScriptExecutionAllowed = false;
+
 		UnloadDomain("GloryDomain");
 		AssemblyDomain* pNewDomain = CreateDomain("GloryDomain");
 		if (!pNewDomain->SetCurrentDomain())
@@ -305,6 +313,8 @@ namespace Glory
 		{
 			m_pActiveDomain->LoadLib(m_Libs[i]);
 		}
+
+		m_ScriptExecutionAllowed = true;
 	}
 
 	void MonoManager::CollectGC()
@@ -329,6 +339,11 @@ namespace Glory
 		}
 	}
 
+	bool MonoManager::DebuggingEnabled() const
+	{
+		return m_DebuggingEnabled;
+	}
+
 	MonoManager* MonoManager::Instance()
 	{
 		return m_pInstance;
@@ -336,7 +351,7 @@ namespace Glory
 
 	MonoManager::MonoManager(GloryMonoScipting* pModule)
 		: m_pModule(pModule), m_pMethodsHelper(new ScriptingMethodsHelper()), m_pCoreLibManager(new CoreLibManager(this)),
-		m_pRootDomain(nullptr), m_pActiveDomain(nullptr), m_HadInitialLoad(false)
+		m_pRootDomain(nullptr), m_pActiveDomain(nullptr), m_HadInitialLoad(false), m_ScriptExecutionAllowed(false), m_DebuggingEnabled(false)
 	{
 		m_pInstance = this;
 	}

@@ -21,6 +21,8 @@ namespace Glory
 		GLORY_API Object* GetScriptObject(MonoObject* pMonoObject);
 		GLORY_API void DestroyScriptObject(MonoClass* pClass, Object* pObject);
 
+		GLORY_API void DestroyAllObjects();
+
 	private:
 		void Cleanup();
 		MonoObject* CreateScriptObject(MonoClass* pClass, Object* pObject);

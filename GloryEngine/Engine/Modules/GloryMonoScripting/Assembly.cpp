@@ -2,6 +2,7 @@
 #include "AssemblyDomain.h"
 #include "MonoAssetManager.h"
 #include "IMonoLibManager.h"
+#include "MonoManager.h"
 
 #include <Debug.h>
 #include <filesystem>
@@ -60,39 +61,6 @@ namespace Glory
 		m_DebugData = nullptr;
 		m_DebugDataSize = 0;
 	}
-
-	/*void Assembly::Initialize()
-	{
-		std::filesystem::path path = m_Lib.Location();
-		const std::string& name = m_Lib.LibraryName();
-		path.append(name);
-		if (!std::filesystem::exists(path))
-		{
-			Debug::LogError("Missing assembly");
-			return;
-		}
-
-		std::ifstream fileStream;
-		fileStream.open(path.string(), std::ios::in | std::ios::ate | std::ios::binary);
-		std::streampos size = fileStream.tellg();
-		fileStream.seekg(0, std::ios::beg);
-		char* data = new char[size];
-		fileStream.read(data, size);
-		fileStream.close();
-		MonoImageOpenStatus status;
-		m_pImage = mono_image_open_from_data_with_name(data, (uint32_t)size, true, &status, false, path.string().c_str());
-		if (m_pImage == nullptr) return;
-		if (status != MONO_IMAGE_OK) return;
-
-		m_pAssembly = mono_image_get_assembly(m_pImage);
-		if (!m_pAssembly) m_pAssembly = mono_assembly_load_from_full(m_pImage, path.string().c_str(), &status, false);
-		if (status != MONO_IMAGE_OK) return;
-		mono_image_close(m_pImage);
-		m_pImage = mono_assembly_get_image(m_pAssembly);
-		delete[] data;
-
-		if (m_pLibManager) m_pLibManager->Initialize(this);
-	}*/
 
 	AssemblyClass* Assembly::GetClass(const std::string& namespaceName, const std::string& className)
 	{
@@ -427,25 +395,28 @@ namespace Glory
 		std::filesystem::path pdbPath = assemblyPath;
 		pdbPath.replace_extension(".pdb");
 
-        if (std::filesystem::exists(pdbPath))
-        {
-			std::ifstream pdbFileStream;
-			pdbFileStream.open(assemblyPathStr, std::ios::in | std::ios::ate | std::ios::binary);
-			m_DebugDataSize = (size_t)pdbFileStream.tellg();
-			pdbFileStream.seekg(0, std::ios::beg);
-
-			m_DebugData = new mono_byte[m_DebugDataSize];
-			pdbFileStream.read((char*)m_DebugData, m_DebugDataSize);
-			pdbFileStream.close();
-
-            if (m_DebugDataSize)
-                mono_debug_open_image_from_memory(pAssemblyImage, m_DebugData, (uint32_t)m_DebugDataSize);
-        }
-		else
+		if (MonoManager::Instance()->DebuggingEnabled())
 		{
-			std::stringstream log;
-			log << "No pdb file found for " << assemblyPath << " debugging this assembly will not be possible.";
-			Debug::LogError(log.str());
+			if (std::filesystem::exists(pdbPath))
+			{
+				std::ifstream pdbFileStream;
+				pdbFileStream.open(assemblyPathStr, std::ios::in | std::ios::ate | std::ios::binary);
+				m_DebugDataSize = (size_t)pdbFileStream.tellg();
+				pdbFileStream.seekg(0, std::ios::beg);
+
+				m_DebugData = new mono_byte[m_DebugDataSize];
+				pdbFileStream.read((char*)m_DebugData, m_DebugDataSize);
+				pdbFileStream.close();
+
+				if (m_DebugDataSize)
+					mono_debug_open_image_from_memory(pAssemblyImage, m_DebugData, (uint32_t)m_DebugDataSize);
+			}
+			else
+			{
+				std::stringstream log;
+				log << "No pdb file found for " << assemblyPath << " debugging this assembly will not be possible.";
+				Debug::LogError(log.str());
+			}
 		}
 
         m_pAssembly = pAssembly;

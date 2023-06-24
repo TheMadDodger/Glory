@@ -50,7 +50,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		T Value(const std::string& name)
+		T Value(const std::string& name) const
 		{
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsDefined())
@@ -64,7 +64,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		T EnumValue(const std::string& name)
+		T EnumValue(const std::string& name) const
 		{
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsDefined())
@@ -81,7 +81,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		T ArrayValue(const std::string& name, const size_t index)
+		T ArrayValue(const std::string& name, const size_t index) const
 		{
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsSequence())

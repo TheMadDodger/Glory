@@ -10,7 +10,7 @@ namespace GloryEngine
 
         internal static void CallBasicMethod(object obj, string methodName)
         {
-            if (obj == null) return;
+            if (obj == null || methodName == null) return;
 			try
 			{
                 MethodInfo method = GetMethodInfo(obj.GetType(), methodName);
@@ -25,7 +25,7 @@ namespace GloryEngine
 
         internal static void Call1ArgsMethod(object obj, string methodName, UInt32 arg1)
         {
-            if (obj == null) return;
+            if (obj == null || methodName == null) return;
             try
 			{
                 MethodInfo method = GetMethodInfo(obj.GetType(), methodName);
@@ -42,7 +42,7 @@ namespace GloryEngine
 
         internal static void Call2ArgsMethod(object obj, string methodName, UInt32 arg1, UInt32 arg2)
         {
-            if (obj == null) return;
+            if (obj == null || methodName == null) return;
             try
             {
                 MethodInfo method = GetMethodInfo(obj.GetType(), methodName);
@@ -62,7 +62,9 @@ namespace GloryEngine
 
         internal static MethodInfo GetMethodInfo(Type type, string name)
         {
-            if(!m_CachedMethods.ContainsKey(type))
+            if (type == null || name == null) return null;
+
+            if (!m_CachedMethods.ContainsKey(type))
                 m_CachedMethods.Add(type, new Dictionary<string, MethodInfo>());
 
             if (!m_CachedMethods[type].ContainsKey(name))
