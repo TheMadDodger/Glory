@@ -1,6 +1,7 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
 
+#include <GloryMonoScipting.h>
 #include <EditorAssetDatabase.h>
 #include <EditorPreferencesWindow.h>
 #include <EditorAssetCallbacks.h>
@@ -13,10 +14,11 @@
 #include <MonoScript.h>
 #include <Tumbnail.h>
 #include <MonoManager.h>
+#include <MonoScriptObjectManager.h>
+#include <AssemblyDomain.h>
 #include <AssetManager.h>
 
 #include <string>
-#include <MonoLibManager.h>
 #include <EditorApplication.h>
 #include <MenuBar.h>
 
@@ -25,6 +27,8 @@
 #include <codecvt>
 #include <windows.h>
 #include <tinyfiledialogs.h>
+
+#include <GloryMonoScipting.h>
 
 Glory::Editor::BaseEditorExtension* LoadExtension()
 {
@@ -39,6 +43,15 @@ void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
 
 namespace Glory::Editor
 {
+	GloryMonoScipting* MonoEditorExtension::m_pMonoScriptingModule = nullptr;
+
+	void MonoEditorExtension::HandleStop(Module* pModule)
+	{
+		MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->DestroyAllObjects();
+		MonoManager::Instance()->CollectGC();
+		MonoManager::Instance()->WaitForPendingFinalizers();
+	}
+
 	MonoEditorExtension::MonoEditorExtension()
 	{
 	}
@@ -77,6 +90,8 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::RegisterEditors()
 	{
+		m_pMonoScriptingModule = Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>();
+
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
 		std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
@@ -95,6 +110,8 @@ namespace Glory::Editor
 
 		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
 		EditorPreferencesWindow::AddPreferencesTab({ "Mono", [this]() { Preferences(); } });
+
+		EditorPlayer::RegisterLoopHandler(this);
 	}
 
 	void MonoEditorExtension::FindVisualStudioPath()
@@ -180,7 +197,8 @@ namespace Glory::Editor
 		std::filesystem::path path = pProject->ProjectPath();
 		path = path.parent_path().append("Library/Assembly");
 		/* TODO: Lib manager for uuser assemblies */
-		MonoManager::LoadLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
+
+		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)
@@ -207,7 +225,7 @@ namespace Glory::Editor
 		assembliesPath.append("Assembly");
 
 		ScriptingExtender* pScriptingExtender = Game::GetGame().GetEngine()->GetScriptingExtender();
-		for (size_t i = 0; i < pScriptingExtender->InternalLibCount(); i++)
+		for (size_t i = 0; i < pScriptingExtender->InternalLibCount(); ++i)
 		{
 			const ScriptingLib& lib = pScriptingExtender->GetInternalLib(i);
 			std::filesystem::path path = lib.Location();
@@ -353,10 +371,12 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::CompileProject(ProjectSpace* pProject)
 	{
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		pEditorApp->StopPlay();
+
 		std::filesystem::path projectPath = pProject->RootPath();
 		projectPath = projectPath.append(pProject->Name() + ".csproj");
 
-		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
 
 		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>("");
@@ -369,12 +389,12 @@ namespace Glory::Editor
 		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=Debug /p:Platform=x64 \"" + projectPath.string() + "\"";
 		system(cmd.c_str());
 
-		ReloadAssembly();
+		ReloadAssembly(pProject);
 	}
 
-	void MonoEditorExtension::ReloadAssembly()
+	void MonoEditorExtension::ReloadAssembly(ProjectSpace* pProject)
 	{
-		MonoManager::Reload();
+		m_pMonoScriptingModule->GetMonoManager()->Reload();
 	}
 
 	void MonoEditorExtension::AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*)

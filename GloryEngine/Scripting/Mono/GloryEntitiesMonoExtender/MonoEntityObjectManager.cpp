@@ -16,7 +16,7 @@ namespace Glory
 
     MonoObject* MonoEntityObjectManager::GetSceneObject_Impl(SceneObject* pObject)
     {
-        MonoObject* pMonoObject = mono_object_new(MonoManager::GetDomain(), MonoEntitySceneManager::EntitySceneObjectClass());
+        MonoObject* pMonoObject = mono_object_new(mono_domain_get(), MonoEntitySceneManager::EntitySceneObjectClass());
         if (pMonoObject == nullptr)
         {
             Debug::LogError("MonoEntityObjectManager::GetSceneObject_Impl > Failed to create MonoObject from class");

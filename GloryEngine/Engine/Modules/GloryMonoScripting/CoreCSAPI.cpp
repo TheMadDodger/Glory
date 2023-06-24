@@ -136,7 +136,7 @@ namespace Glory
 	MonoString* LayerManager_LayerMaskToString(const LayerMask* layerMask)
 	{
 		const std::string str = LayerManager::LayerMaskToString(*layerMask);
-		return mono_string_new(MonoManager::GetDomain(), str.c_str());
+		return mono_string_new(mono_domain_get(), str.c_str());
 	}
 
 	int LayerManager_GetLayerIndex(const Layer* pLayer)
@@ -173,7 +173,7 @@ namespace Glory
 	{
 		Object* pObject = Object::FindObject(uuid);
 		if (!pObject) return nullptr;
-		return mono_string_new(MonoManager::GetDomain(), pObject->Name().c_str());
+		return mono_string_new(mono_domain_get(), pObject->Name().c_str());
 	}
 
 	void Object_SetName(uint64_t uuid, MonoString* name)
@@ -188,7 +188,7 @@ namespace Glory
 	{
 		Resource* pResource = AssetManager::GetAssetImmediate(uuid);
 		if (!pResource) return nullptr;
-		return mono_string_new(MonoManager::GetDomain(), pResource->Name().c_str());
+		return mono_string_new(mono_domain_get(), pResource->Name().c_str());
 	}
 
 	void Resource_SetName(uint64_t uuid, MonoString* name)
@@ -406,7 +406,7 @@ namespace Glory
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
 		SceneObject* pSceneObject = pScene->FindSceneObject(UUID(objectID));
-		return pSceneObject ? mono_string_new(MonoManager::GetDomain(), pSceneObject->Name().c_str()) : nullptr;
+		return pSceneObject ? mono_string_new(mono_domain_get(), pSceneObject->Name().c_str()) : nullptr;
 	}
 
 	void SceneObject_SetName(uint64_t objectID, uint64_t sceneID, MonoString* name)

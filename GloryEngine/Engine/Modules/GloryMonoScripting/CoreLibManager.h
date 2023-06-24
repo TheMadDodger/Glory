@@ -3,18 +3,21 @@
 
 namespace Glory
 {
+    class MonoManager;
+
     class CoreLibManager : public IMonoLibManager
     {
     public:
-        CoreLibManager();
+        CoreLibManager(MonoManager* pMonoManager);
 
-        AssemblyBinding* GetAssemblyBinding() const;
+        Assembly* GetAssemblyBinding() const;
 
     public:
-        void Initialize(AssemblyBinding* pAssembly) override;
+        void Initialize(Assembly* pAssembly) override;
         void Cleanup() override;
 
     private:
-        AssemblyBinding* m_pAssembly;
+        MonoManager* m_pMonoManager;
+        Assembly* m_pAssembly;
     };
 }

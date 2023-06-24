@@ -1,11 +1,15 @@
 #pragma once
 #include <Script.h>
-#include <mono/jit/jit.h>
 #include <Glory.h>
-#include "AssemblyBinding.h"
+
+#include <mono/metadata/object-forward.h>
+#include <mono/metadata/class.h>
 
 namespace Glory
 {
+    class Assembly;
+    struct AssemblyClass;
+
     class MonoScript : public Script
     {
     public:
@@ -27,7 +31,7 @@ namespace Glory
         virtual bool IsBehaviour() override;
 
     private:
-        AssemblyClass* LoadClass(const std::string& lib, const std::string& namespaceName, const std::string& className);
+        AssemblyClass* LoadClass(Assembly* pAssembly, const std::string& namespaceName, const std::string& className);
         MonoObject* LoadObject(Object* pObject, MonoClass* pClass);
 
     private:

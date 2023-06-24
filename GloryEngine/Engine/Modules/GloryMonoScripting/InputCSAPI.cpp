@@ -13,8 +13,8 @@ namespace Glory
 	{
 		InputModule* pInputModule = INPUT_MODULE;
 		InputDevice* pDevice = pInputModule->GetInputDevice(deviceID);
-		if (!pDevice) return mono_string_new(MonoManager::GetDomain(), "Unknown device");
-		return mono_string_new(MonoManager::GetDomain(), pDevice->m_Name);
+		if (!pDevice) return mono_string_new(mono_domain_get(), "Unknown device");
+		return mono_string_new(mono_domain_get(), pDevice->m_Name);
 	}
 
 	InputDeviceType InputDevice_GetInputDeviceType(uint64_t deviceID)

@@ -1,14 +1,15 @@
 #pragma once
 #include "MonoScript.h"
-#include "AssemblyBinding.h"
 #include "MonoScriptLoader.h"
 #include "GloryMono.h"
 
 #define BIND(x, y) internalCalls.push_back(InternalCall("csharp", x, &y))
 
+REFLECTABLE_ENUM_NS(Glory, MonoLogLevel, error, critical, warning, message, info, debug);
+
 namespace Glory
 {
-    class CoreLibManager;
+    class MonoManager;
 
 	class GloryMonoScipting : public ScriptingModuleTemplate<MonoScript, MonoScriptLoader>, IScriptExtender
 	{
@@ -16,19 +17,17 @@ namespace Glory
         GloryMonoScipting();
         virtual ~GloryMonoScipting();
 
-        void SetMonoDirs(const std::string& assemblyDir, const std::string& configDir);
+        GLORY_MODULE_VERSION_H(0,2,0);
 
-        GLORY_MODULE_VERSION_H(0,1,0);
-
-        CoreLibManager* GetCoreLibManager() const;
+        GLORY_API MonoManager* GetMonoManager() const;
 
     private:
+        virtual void LoadSettings(ModuleSettings& settings) override;
         virtual void Initialize() override;
         virtual void PostInitialize() override;
-        virtual void InitializeScripting() override;
         virtual void Cleanup() override;
 
-        void LoadLib(const ScriptingLib& library) override;
+        void AddLib(const ScriptingLib& library) override;
         void Bind(const InternalCall& internalCall) override;
 
         virtual std::string Language() override;
@@ -36,6 +35,6 @@ namespace Glory
         virtual void GetLibs(ScriptingExtender* pScriptingExtender) override;
 
     private:
-        CoreLibManager* m_pCoreLibManager;
+        MonoManager* m_pMonoManager;
 	};
 }

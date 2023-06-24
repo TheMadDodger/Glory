@@ -3,6 +3,7 @@
 #include <yaml-cpp/yaml.h>
 #include <map>
 #include <sstream>
+#include <Reflection.h>
 
 namespace Glory
 {
@@ -24,6 +25,20 @@ namespace Glory
 		}
 
 		template<typename T>
+		void RegisterEnumValue(const std::string& name, T defaultValue)
+		{
+			YAML::Node node = m_SettingsNode[name];
+			if (!node.IsDefined())
+			{
+				std::string stringValue = "";
+				GloryReflect::Enum<T>().ToString(defaultValue, stringValue);
+				m_SettingsNode[name] = stringValue;
+			}
+
+			RegisterValue(name, ST_Enum, ResourceType::GetHash<T>());
+		}
+
+		template<typename T>
 		void RegisterArray(const std::string& name)
 		{
 			YAML::Node node = m_SettingsNode[name];
@@ -35,7 +50,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		T Value(const std::string& name)
+		T Value(const std::string& name) const
 		{
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsDefined())
@@ -49,7 +64,24 @@ namespace Glory
 		}
 
 		template<typename T>
-		T ArrayValue(const std::string& name, const size_t index)
+		T EnumValue(const std::string& name) const
+		{
+			YAML::Node node = m_SettingsNode[name];
+			if (!node.IsDefined())
+			{
+				std::stringstream stream;
+				stream << "ModuleSettings: Value " << name << " does not exist";
+				throw new std::exception(stream.str().c_str());
+			}
+
+			const std::string strValue = node.as<std::string>();
+			T value = T(0);
+			GloryReflect::Enum<T>().FromString(strValue, value);
+			return value;
+		}
+
+		template<typename T>
+		T ArrayValue(const std::string& name, const size_t index) const
 		{
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsSequence())

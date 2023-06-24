@@ -1,13 +1,8 @@
 #include "MonoScriptObjectManager.h"
-#include "MonoLibManager.h"
 #include "MonoManager.h"
 
 namespace Glory
 {
-    std::map<Object*, ObjectInstanceData> MonoScriptObjectManager::m_Objects;
-    std::map<MonoClass*, MonoObject*> MonoScriptObjectManager::m_pDummyScriptObjects;
-    std::map<MonoObject*, Object*> MonoScriptObjectManager::m_pMonoToObject;
-
     MonoObject* MonoScriptObjectManager::GetScriptDummyObject(MonoClass* pClass)
     {
         if (m_pDummyScriptObjects.find(pClass) == m_pDummyScriptObjects.end())
@@ -33,15 +28,24 @@ namespace Glory
         if (m_Objects.find(pObject) == m_Objects.end() || m_Objects[pObject].m_pObjects.find(pClass) == m_Objects[pObject].m_pObjects.end()) return;
         MonoObject* pMonoObject = m_Objects[pObject].m_pObjects[pClass];
 
-        /* TODO: Cleanup the GC Handle */
+        mono_gchandle_free(m_Objects[pObject].m_GCHandle);
 
         m_Objects[pObject].m_pObjects.erase(pClass);
         m_pMonoToObject.erase(pMonoObject);
     }
 
+    void MonoScriptObjectManager::DestroyAllObjects()
+    {
+        for (auto itor : m_Objects)
+        {
+            mono_gchandle_free(itor.second.m_GCHandle);
+        }
+        m_Objects.clear();
+    }
+
     void MonoScriptObjectManager::Cleanup()
     {
-        m_Objects.clear();
+        DestroyAllObjects();
     }
 
     MonoObject* MonoScriptObjectManager::CreateScriptObject(MonoClass* pClass, Object* pObject)
@@ -56,6 +60,7 @@ namespace Glory
         mono_runtime_object_init(pMonoObject);
         m_Objects[pObject].m_pObjects[pClass] = pMonoObject;
         m_pMonoToObject[pMonoObject] = pObject;
+        m_Objects[pObject].m_GCHandle = mono_gchandle_new(pMonoObject, false);
         return pMonoObject;
     }
 

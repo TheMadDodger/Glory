@@ -13,7 +13,7 @@ namespace Glory
 	class EntityLibManager : public IMonoLibManager
 	{
 	public: /* Lib manager implementation */
-		virtual void Initialize(AssemblyBinding* pAssembly) override;
+		virtual void Initialize(Assembly* pAssembly) override;
 		virtual void Cleanup() override;
 	};
 

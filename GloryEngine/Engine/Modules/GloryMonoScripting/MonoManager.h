@@ -5,25 +5,60 @@
 
 namespace Glory
 {
+	class CoreLibManager;
+	class GloryMonoScipting;
+	class ScriptingMethodsHelper;
+	class AssemblyDomain;
+
 	class MonoManager
 	{
 	public:
-		static GLORY_API MonoDomain* GetDomain();
-		static GLORY_API void LoadLib(const ScriptingLib& lib);
+		GLORY_API void InitialLoad();
 
-		static GLORY_API void Reload();
+		GLORY_API AssemblyDomain* GetDomain(const std::string& name);
+		GLORY_API void AddLib(const ScriptingLib& lib);
+
+		GLORY_API GloryMonoScipting* Module() const;
+		GLORY_API CoreLibManager* GetCoreLibManager() const;
+		GLORY_API ScriptingMethodsHelper* GetMethodsHelper() const;
+		GLORY_API bool ScriptExecutionAllowed() const;
+
+		GLORY_API AssemblyDomain* CreateDomain(const std::string& name);
+		GLORY_API AssemblyDomain* ActiveDomain();
+		GLORY_API void UnloadDomain(const std::string& name, bool remove = true);
+
+		GLORY_API void Reload();
+
+		GLORY_API void CollectGC();
+		GLORY_API void CollectGC(int32_t generation);
+		GLORY_API void WaitForPendingFinalizers();
+		GLORY_API bool DebuggingEnabled() const;
+
+		static GLORY_API MonoManager* Instance();
 
 	private:
-		static void Initialize(const std::string& assemblyDir = ".", const std::string& configDir = "");
-		static void Cleanup();
+		void Initialize(const std::string& assemblyDir = ".", const std::string& configDir = "");
+		void Cleanup();
 
 	private:
-		MonoManager();
+		MonoManager(GloryMonoScipting* pModule);
 		virtual ~MonoManager();
 
 	private:
 		friend class GloryMonoScipting;
-		static MonoDomain* m_pMainDomain;
-		static MonoDomain* m_pDomain;
+		static MonoManager* m_pInstance;
+		GloryMonoScipting* m_pModule;
+		CoreLibManager* m_pCoreLibManager;
+		ScriptingMethodsHelper* m_pMethodsHelper;
+		std::map<std::string, AssemblyDomain*> m_Domains;
+		AssemblyDomain* m_pRootDomain;
+		AssemblyDomain* m_pActiveDomain;
+
+		bool m_DebuggingEnabled;
+
+		std::vector<ScriptingLib> m_Libs;
+
+		bool m_HadInitialLoad;
+		bool m_ScriptExecutionAllowed;
 	};
 }

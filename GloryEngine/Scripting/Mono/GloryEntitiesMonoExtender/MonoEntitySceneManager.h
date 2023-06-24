@@ -3,7 +3,6 @@
 
 #include <Glory.h>
 #include <GloryMono.h>
-#include <AssemblyBinding.h>
 
 #define GETTER(type, x) \
 static GLORY_API type* x() \
@@ -13,6 +12,8 @@ static GLORY_API type* x() \
 
 namespace Glory
 {
+	class Assembly;
+
 	class MonoEntitySceneManager
 	{
 	public:
@@ -25,7 +26,7 @@ namespace Glory
 		GETTER(MonoMethod, EntitySceneObjectConstructor);
 
 	private:
-		static void Initialize(AssemblyBinding* pAssembly);
+		static void Initialize(Assembly* pAssembly);
 		static void Cleanup();
 
 	private:

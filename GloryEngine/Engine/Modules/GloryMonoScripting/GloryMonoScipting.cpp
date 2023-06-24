@@ -3,69 +3,63 @@
 #include "MathCSAPI.h"
 #include "InputCSAPI.h"
 #include "PhysicsCSAPI.h"
-#include "MonoLibManager.h"
 #include "MonoManager.h"
-#include "CoreLibManager.h"
+
 #include <Game.h>
 
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(GloryMonoScipting);
 
-	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp"), m_pCoreLibManager(new CoreLibManager())
+	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp"), m_pMonoManager(new MonoManager(this))
 	{
 	}
 
 	GloryMonoScipting::~GloryMonoScipting()
 	{
-		delete m_pCoreLibManager;
-		m_pCoreLibManager = nullptr;
+		delete m_pMonoManager;
+		m_pMonoManager = nullptr;
 	}
 
-	CoreLibManager* GloryMonoScipting::GetCoreLibManager() const
+	MonoManager* GloryMonoScipting::GetMonoManager() const
 	{
-		return m_pCoreLibManager;
+		return m_pMonoManager;
+	}
+
+	void GloryMonoScipting::LoadSettings(ModuleSettings& settings)
+	{
+		settings.PushGroup("Debugging");
+		settings.RegisterValue<bool>("Enable Debugging", false);
+		settings.RegisterEnumValue<MonoLogLevel>("MonoLogLevel", MonoLogLevel::error);
+		settings.RegisterValue<std::string>("MonoDebuggingIP", "127.0.0.1");
+		settings.RegisterValue<uint32_t>("MonoDebuggingPort", 55555);
+
+		settings.PushGroup("Garbage Collection");
+		settings.RegisterValue<bool>("Enable GC allocation logging", false);
+		settings.RegisterValue<bool>("Auto Collect Garbage", true);
 	}
 
 	void GloryMonoScipting::Initialize()
 	{
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
-		MonoManager::Initialize("./Modules/GloryMonoScripting/Dependencies");
-	}
+		m_pMonoManager->Initialize("./Modules/GloryMonoScripting/Dependencies");
 
-	void GloryMonoScipting::SetMonoDirs(const std::string& assemblyDir, const std::string& configDir)
-	{
-		mono_set_dirs(assemblyDir.c_str(), configDir.c_str());
+		GloryReflect::Reflect::RegisterEnum<MonoLogLevel>();
 	}
 
 	void GloryMonoScipting::PostInitialize()
 	{
-	}
-
-	void GloryMonoScipting::InitializeScripting()
-	{
-		//AssemblyBinding* pAssembly = MonoLibManager::GetAssembly("GloryEngine.Core.dll");
-		//MonoClass* pMainClass = mono_class_from_name(pAssembly->GetMonoImage(), "Glory", "GloryCSMain");
-		//mono_bool result = mono_class_init(pMainClass);
-		//MonoObject* pMonoObject1 = mono_object_new(mono_domain_get(), pMainClass);
-		//
-		//MonoMethodDesc* pMainFuncDesc = mono_method_desc_new(".GloryMain:main()", false);
-		//MonoMethod* pMainFunc = mono_method_desc_search_in_class(pMainFuncDesc, pMainClass);
-		//// Exception object
-		//MonoObject* pExObject = nullptr;
-		//MonoObject* pMonoObject = mono_runtime_invoke(pMainFunc, nullptr, nullptr, &pExObject);
-		//uint32_t monoObjectGCHandle = mono_gchandle_new(pMonoObject, false);
-		//mono_method_desc_free(pMainFuncDesc);
+		m_pMonoManager->InitialLoad();
 	}
 
 	void GloryMonoScipting::Cleanup()
 	{
-		MonoManager::Cleanup();
+		m_pMonoManager->Cleanup();
 	}
 
-	void GloryMonoScipting::LoadLib(const ScriptingLib& library)
+	void GloryMonoScipting::AddLib(const ScriptingLib& library)
 	{
-		MonoManager::LoadLib(library);
+		m_pMonoManager->AddLib(library);
 	}
 
 	void GloryMonoScipting::Bind(const InternalCall& internalCall)
@@ -89,6 +83,6 @@ namespace Glory
 
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)
 	{
-		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll", m_pCoreLibManager);
+		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll", m_pMonoManager->GetCoreLibManager());
 	}
 }

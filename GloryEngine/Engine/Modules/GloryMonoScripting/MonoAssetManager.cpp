@@ -22,7 +22,7 @@ namespace Glory
 
 		if (m_AssetCache.find(uuid) == m_AssetCache.end())
 		{
-			MonoString* pMonoString = mono_string_new(MonoManager::GetDomain(), type.c_str());
+			MonoString* pMonoString = mono_string_new(mono_domain_get(), type.c_str());
 			void* args[2] = { &uuid, (void*)pMonoString };
 			MonoObject* pExcept;
 			MonoObject* pAssetObject = mono_runtime_invoke(m_pMakeResourceMethod, nullptr, args, &pExcept);

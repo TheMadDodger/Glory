@@ -2,6 +2,7 @@
 
 #include <MacroHelpers.h>
 #include <MonoManager.h>
+#include <Assembly.h>
 
 #define GET_CLASS(name, out) \
 out = mono_class_from_name(pAssembly->GetMonoImage(), "GloryEngine.Entities", STRINGIZE(name)); \
@@ -43,7 +44,7 @@ namespace Glory
 
     MonoObject* MonoEntitySceneManager::GetSceneObject(GScene* pScene)
     {
-        MonoObject* pMonoObject = mono_object_new(MonoManager::GetDomain(), m_pEntitySceneClass);
+        MonoObject* pMonoObject = mono_object_new(mono_domain_get(), m_pEntitySceneClass);
         if (pMonoObject == nullptr)
         {
             Debug::LogError("MonoEntityObjectManager::GetSceneObject_Impl > Failed to create MonoObject from class");
@@ -67,7 +68,7 @@ namespace Glory
         return new MonoEntityObjectManager(pScene);
     }
 
-    void MonoEntitySceneManager::Initialize(AssemblyBinding* pAssembly)
+    void MonoEntitySceneManager::Initialize(Assembly* pAssembly)
     {
         GET_CLASS(EntityScene, m_pEntitySceneClass);
         GET_CLASS(EntitySceneObject, m_pEntitySceneObjectClass);

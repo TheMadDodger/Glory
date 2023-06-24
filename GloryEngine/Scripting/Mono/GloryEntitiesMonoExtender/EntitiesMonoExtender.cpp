@@ -39,7 +39,7 @@ namespace Glory
 		return new EntitiesMonoExtender();
 	}
 
-	void EntityLibManager::Initialize(AssemblyBinding* pAssembly)
+	void EntityLibManager::Initialize(Assembly* pAssembly)
 	{
 		MonoSceneManager::BindImplemetation<MonoEntitySceneManager>();
 		MonoEntitySceneManager::Initialize(pAssembly);

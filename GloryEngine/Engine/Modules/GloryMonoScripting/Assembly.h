@@ -7,6 +7,7 @@
 #include <string>
 #include <Glory.h>
 #include <ScriptExtensions.h>
+#include <filesystem>
 
 namespace Glory
 {
@@ -86,33 +87,87 @@ namespace Glory
 	};
 
 	class IMonoLibManager;
+	class AssemblyDomain;
 
-	class AssemblyBinding
+	class Assembly
 	{
 	public:
-		GLORY_API AssemblyBinding(const ScriptingLib& name, IMonoLibManager* pLibManager);
-		virtual GLORY_API ~AssemblyBinding();
+		enum AssemblyState
+		{
+			AS_NotLoaded,
+			AS_Loading,
+			AS_Loaded,
+		};
 
-		GLORY_API MonoImage* GetMonoImage();
+	public:
+		GLORY_API Assembly(AssemblyDomain* pDomain);
+		virtual GLORY_API ~Assembly();
+
 		GLORY_API AssemblyClass* GetClass(const std::string& namespaceName, const std::string& className);
 		GLORY_API bool GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c);
 
-		GLORY_API const std::string& Name();
-		GLORY_API const std::string& Location();
+		GLORY_API bool Load(const ScriptingLib& lib, IMonoLibManager* pLibManager);
+		GLORY_API bool Load(MonoImage* monoImage);
+		GLORY_API void Unload(bool isReloading = false);
+		GLORY_API MonoReflectionAssembly* GetReflectionAssembly() const;
+
+		GLORY_API bool IsLoading() const
+		{
+			return m_State == AssemblyState::AS_Loading;
+		}
+
+		GLORY_API bool IsLoaded() const
+		{
+			return m_State == AssemblyState::AS_Loaded;
+		}
+
+		GLORY_API AssemblyDomain* GetDomain() const
+		{
+			return m_pDomain;
+		}
+
+		GLORY_API MonoAssembly* GetMonoAssembly() const
+		{
+			return m_pAssembly;
+		}
+
+		GLORY_API MonoImage* GetMonoImage()
+		{
+			return m_pImage;
+		}
+
+		GLORY_API const std::string& Name()
+		{
+			return m_Name;
+		}
+
+		GLORY_API const std::string& Location()
+		{
+			return m_Location;
+		}
 
 	private:
+		bool LoadAssembly(const std::filesystem::path& assemblyPath);
+		bool LoadAssemblyWithImage(const std::filesystem::path& assemblyPath);
 		AssemblyClass* LoadClass(const std::string& namespaceName, const std::string& className);
 
-		void Initialize(MonoDomain* pDomain);
-		void Destroy();
-
 	private:
-		friend class MonoLibManager;
-		const ScriptingLib m_Lib;
+		friend class AssemblyDomain;
+		AssemblyDomain* m_pDomain;
 		MonoAssembly* m_pAssembly;
 		MonoImage* m_pImage;
 		std::map<std::string, AssemblyNamespace> m_Namespaces;
 		IMonoLibManager* m_pLibManager;
+
+		AssemblyState m_State = AssemblyState::AS_NotLoaded;
+		bool m_Locked = false;
+
+		mono_byte* m_DebugData;
+		size_t m_DebugDataSize;
+
+		std::string m_Name;
+		std::string m_Location;
+		bool m_Reloadable;
 	};
 
 	class Attributes
