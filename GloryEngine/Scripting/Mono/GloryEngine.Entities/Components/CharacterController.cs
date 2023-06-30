@@ -82,6 +82,12 @@ namespace GloryEngine.Entities
             set => CharacterController_SetAngularVelocity(ref _entity, _objectID, ref value);
         }
 
+        public Shape Shape
+        {
+            get => new Shape(CharacterController_GetShapeID(ref _entity, _objectID));
+            set => CharacterController_SetShape(ref _entity, _objectID, value.ShapeID);
+        }
+
         #endregion
 
         #region Methods
@@ -96,6 +102,18 @@ namespace GloryEngine.Entities
         /// </summary>
         /// <param name="linearVelocity">Direction and amplitude of the velocity to add</param>
         public void AddLinearVelocity(ref Vector3 linearVelocity) => CharacterController_AddLinearVelocity(ref _entity, _objectID, ref linearVelocity);
+
+        /// <summary>
+        /// Set the shape of the character controller
+        /// </summary>
+        /// <param name="shape">Shape to set</param>
+        /// <param name="maxPenetrationDepth">Checks if the new shapes collides with a given distance, set to float.MaxValue to ignore</param>
+        /// <param name="lockBodies">Whether to lock the body while setting the shape</param>
+        /// <returns>True if the switch succeeded</returns>
+        public bool SetShape(Shape shape, float maxPenetrationDepth = float.MaxValue, bool lockBodies = true)
+        {
+            return CharacterController_SetShape(ref _entity, _objectID, shape.ShapeID, maxPenetrationDepth, lockBodies);
+        }
 
         #endregion
 
@@ -142,6 +160,12 @@ namespace GloryEngine.Entities
         /* Impulses */
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void CharacterController_AddImpulse(ref Entity entity, UInt64 componentID, ref Vector3 impulse);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 CharacterController_GetShapeID(ref Entity entity, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool CharacterController_SetShape(ref Entity entity, UInt64 componentID, UInt64 shapeID, float maxPenetrationDepth = float.MaxValue, bool lockBodies = true);
 
         #endregion
     }

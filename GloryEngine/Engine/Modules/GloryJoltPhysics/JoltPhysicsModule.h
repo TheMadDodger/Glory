@@ -3,6 +3,7 @@
 
 #include "LayerCollisionFilter.h"
 #include "JoltCharacterManager.h"
+#include "JoltShapeManager.h"
 #include "BroadPhaseImpl.h"
 
 #include <Jolt/Jolt.h>
@@ -79,6 +80,7 @@ namespace Glory
 		void TriggerLateContactCallback(ContactCallback callbackType, uint32_t body1ID, uint32_t body2ID);
 
 		virtual CharacterManager* GetCharacterManager() override;
+		virtual ShapeManager* GetShapeManager() override;
 
 		/* Gravity */
 		void SetGravity(const glm::vec3& gravity) override;
@@ -104,6 +106,7 @@ namespace Glory
 		MyBodyActivationListener m_BodyActivationListener;
 		MyContactListener m_ContactListener;
 		JoltCharacterManager m_CharacterManager;
+		JoltShapeManager m_ShapeManager;
 
 		std::map<ActivationCallback, std::vector<uint32_t>> m_LateActivationCallbacks;
 		std::map<ContactCallback, std::vector<std::pair<uint32_t, uint32_t>>> m_LateContactCallbacks;

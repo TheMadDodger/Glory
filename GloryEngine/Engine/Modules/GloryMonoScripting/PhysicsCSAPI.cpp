@@ -5,6 +5,7 @@
 #include "CoreLibManager.h"
 #include "Assembly.h"
 
+#include <ShapeManager.h>
 #include <PhysicsModule.h>
 
 #define PHYSICS Game::GetGame().GetEngine()->GetPhysicsModule()
@@ -209,6 +210,25 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Shapes
+
+	uint64_t Shapes_CreateBox(Vec3Wrapper extends)
+	{
+		return PHYSICS->GetShapeManager()->CreateShape(Box(ToGLMVec3(extends)));
+	}
+
+	uint64_t Shapes_CreateSphere(float radius)
+	{
+		return PHYSICS->GetShapeManager()->CreateShape(Sphere(radius));
+	}
+
+	uint64_t Shapes_CreateCapsule(float halfHeight, float radius)
+	{
+		return PHYSICS->GetShapeManager()->CreateShape(Capsule(halfHeight, radius));
+	}
+
+#pragma endregion
+
 #pragma region Bindings
 
 	void PhysicsCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -257,6 +277,11 @@ namespace Glory
 		/* Gravity */
 		BIND("GloryEngine.Physics::Physics_SetGravity", Physics_SetGravity);
 		BIND("GloryEngine.Physics::Physics_GetGravity", Physics_GetGravity);
+
+		/* Shapes */
+		BIND("GloryEngine.Shapes::Shapes_CreateBox", Shapes_CreateBox);
+		BIND("GloryEngine.Shapes::Shapes_CreateSphere", Shapes_CreateSphere);
+		BIND("GloryEngine.Shapes::Shapes_CreateCapsule", Shapes_CreateCapsule);
 	}
 
 #pragma endregion

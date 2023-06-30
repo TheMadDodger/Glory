@@ -15,7 +15,7 @@ namespace Glory
     private:
         void SetPhysicsSystem(JPH::PhysicsSystem* pPhysics);
 
-        uint32_t CreateCharacter_Internal(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const Shape& shape, float friction) override;
+        uint32_t CreateCharacter_Internal(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const ShapeData& shape, float friction) override;
         void DestroyCharacter_Internal(uint32_t characterID) override;
         void DestroyAll_Internal() override;
 
@@ -34,7 +34,7 @@ namespace Glory
 		void SetRotation(uint32_t characterID, const glm::quat& rotation, ActivationType activationMode, bool lockBodies) override;
 		glm::vec3 GetCenterOfMassPosition(uint32_t characterID, bool lockBodies) const override;
 		void SetLayer(uint32_t characterID, uint32_t layer, bool lockBodies) override;
-		bool SetShape(uint32_t characterID, const Shape& shape, float maxPenetrationDepth, bool lockBodies) override;
+		bool SetShape(uint32_t characterID, const ShapeData& shape, float maxPenetrationDepth, bool lockBodies) override;
 
     private:
         friend class JoltPhysicsModule;

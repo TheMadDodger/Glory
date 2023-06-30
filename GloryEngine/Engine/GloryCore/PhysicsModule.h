@@ -1,13 +1,15 @@
 #pragma once
 #include "Module.h"
 #include "Physics.h"
-#include "CharacterManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 namespace Glory
 {
+	class CharacterManager;
+	class ShapeManager;
+
 	struct Layer;
 
 	enum class ContactCallback
@@ -97,6 +99,7 @@ namespace Glory
 		GLORY_API void TriggerActivationCallback(ActivationCallback callbackType, uint32_t bodyID);
 
 		virtual CharacterManager* GetCharacterManager() = 0;
+		virtual ShapeManager* GetShapeManager() = 0;
 
 		/* Gravity */
 		virtual void SetGravity(const glm::vec3& gravity) = 0;

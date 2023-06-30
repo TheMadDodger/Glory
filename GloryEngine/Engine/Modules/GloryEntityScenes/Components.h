@@ -209,6 +209,7 @@ namespace Glory
 		uint32_t m_CharacterID;
 		uint32_t m_BodyID;
 		uint32_t m_CurrentLayerIndex;
+		UUID m_ShapeID;
 	};
 
 	//settings->mSupportingVolume = Plane(Vec3::sAxisY(), -cCharacterRadiusStanding); // Accept contacts that touch the lower sphere of the capsule

@@ -5,6 +5,7 @@
 #include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/Physics/Character/Character.h>
 #include <UUID.h>
+#include <ShapeManager.h>
 
 namespace Glory
 {
@@ -13,7 +14,7 @@ namespace Glory
 		m_pPhysicsSystem = pPhysics;
 	}
 
-	uint32_t JoltCharacterManager::CreateCharacter_Internal(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& position, const glm::quat& rotation, const Shape& shape, float friction)
+	uint32_t JoltCharacterManager::CreateCharacter_Internal(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& position, const glm::quat& rotation, const ShapeData& shape, float friction)
 	{
 		uint32_t characterID = uint32_t(UUID());
 
@@ -22,7 +23,7 @@ namespace Glory
 		JPH::CharacterSettings settings = {};
 		settings.mMaxSlopeAngle = JPH::DegreesToRadians(maxSlopeAngle);
 		settings.mLayer = JPH::ObjectLayer(layerIndex);
-		settings.mShape = GetJPHShape(shape);
+		settings.mShape = (JPH::Shape*)shape.m_pShape;
 		settings.mFriction = friction;
 		settings.mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -cCharacterRadiusStanding); // Accept contacts that touch the lower sphere of the capsule
 		JPH::Character* pCharacter = new JPH::Character(&settings, ToJPHVec3(position), ToJPHQuat(rotation), 0, m_pPhysicsSystem);
@@ -159,11 +160,11 @@ namespace Glory
 		itor->second->SetLayer(JPH::ObjectLayer(layer), lockBodies);
 	}
 
-	bool JoltCharacterManager::SetShape(uint32_t characterID, const Shape& shape, float maxPenetrationDepth, bool lockBodies)
+	bool JoltCharacterManager::SetShape(uint32_t characterID, const ShapeData& shape, float maxPenetrationDepth, bool lockBodies)
 	{
 		auto itor = m_pCharacters.find(characterID);
 		if (itor == m_pCharacters.end()) return false;
-		JPH::Shape* pShape = GetJPHShape(shape);
+		JPH::Shape* pShape = (JPH::Shape*)shape.m_pShape;
 		return itor->second->SetShape(pShape, maxPenetrationDepth, lockBodies);
 	}
 

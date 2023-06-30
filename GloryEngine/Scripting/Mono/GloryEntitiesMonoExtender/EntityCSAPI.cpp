@@ -7,6 +7,8 @@
 #include <Components.h>
 #include <CoreCSAPI.h>
 #include <LayerManager.h>
+#include <CharacterManager.h>
+#include <ShapeManager.h>
 #include <MonoAssetManager.h>
 #include <MathCSAPI.h>
 
@@ -641,6 +643,7 @@ namespace Glory
 #pragma region Character Controller
 
 #define CHARACTERS PHYSICS->GetCharacterManager()
+#define SHAPES PHYSICS->GetShapeManager()
 
 #pragma region States
 
@@ -746,6 +749,31 @@ namespace Glory
 	{
 		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
 		CHARACTERS->AddImpulse(characterController.m_CharacterID, ToGLMVec3(*impulse));
+	}
+
+#pragma endregion
+
+#pragma region Shapes
+
+	uint64_t CharacterController_GetShapeID(MonoEntityHandle* pEntityHandle, uint64_t componentID)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		return characterController.m_ShapeID;
+	}
+
+	bool CharacterController_SetShape(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t shapeID, float maxPenetrationDepth = 0.0f, bool lockBodies = true)
+	{
+		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		const ShapeData* pShapeData = SHAPES->GetShape(shapeID);
+		if (!pShapeData)
+		{
+			std::stringstream log;
+			log << "CharacterController_SetShape: Failed to set shape, shape with ID: " << shapeID << " does not exist!";
+			Debug::LogError(log.str());
+			return false;
+		}
+		characterController.m_ShapeID = shapeID;
+		return CHARACTERS->SetShape(characterController.m_CharacterID, *pShapeData, maxPenetrationDepth, lockBodies);
 	}
 
 #pragma endregion
@@ -895,7 +923,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddImpulse_Point", PhysicsBody_AddImpulse_Point);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_AddAngularImpulse", PhysicsBody_AddAngularImpulse);
 
-		/*  status */
+		/* Status */
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetCharacterID", CharacterController_GetCharacterID);
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetBodyID", CharacterController_GetBodyID);
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_Activate", CharacterController_Activate);
@@ -914,6 +942,10 @@ namespace Glory
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_SetLinearVelocity", CharacterController_SetLinearVelocity);
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetLinearVelocity", CharacterController_GetLinearVelocity);
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_AddLinearVelocity", CharacterController_AddLinearVelocity);
+
+		/* Shape */
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_SetShape", CharacterController_SetShape);
+		BIND("GloryEngine.Entities.CharacterController::CharacterController_GetShapeID", CharacterController_GetShapeID);
 
 		/* Impulses */
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_AddImpulse", CharacterController_AddImpulse);
