@@ -1,0 +1,9 @@
+Engine:
+- Rewrote the mono module
+- Scripts will now have their code executed after native components
+
+Scripting:
+- Fixed crashes caused by mono
+- Implemented customizable debugger agent
+- Added shapes API
+- You can now set the shape of a character controller at runtime
