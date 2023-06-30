@@ -24,7 +24,7 @@ namespace GloryEngine
         /// </summary>
         /// <param name="extends">Extends of the box</param>
         /// <returns>Shape handle</returns>
-        public static Shape CreateBox(Vector3 extends)
+        public static Shape Box(Vector3 extends)
         {
             return new Shape(Shapes_CreateBox(extends));
         }
@@ -34,7 +34,7 @@ namespace GloryEngine
         /// </summary>
         /// <param name="radius">Radius of the sphere</param>
         /// <returns>Shape handle</returns>
-        public static Shape CreateSphere(float radius)
+        public static Shape Sphere(float radius)
         {
             return new Shape(Shapes_CreateSphere(radius));
         }
@@ -45,7 +45,7 @@ namespace GloryEngine
         /// <param name="halfHeight">Half height of the cylinder part of the capsule</param>
         /// <param name="radius">Radius of the capsule</param>
         /// <returns>Shape handle</returns>
-        public static Shape CreateCapsule(float halfHeight, float radius)
+        public static Shape Capsule(float halfHeight, float radius)
         {
             return new Shape(Shapes_CreateCapsule(halfHeight, radius));
         }

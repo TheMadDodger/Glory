@@ -8,11 +8,4 @@ namespace Glory
         JPH::Shape* pShape = GetJPHShape(shape);
         return (PhysicsShape*)pShape;
     }
-
-    void JoltShapeManager::DestroyShape_Internal(ShapeData& shapeData)
-    {
-        if (!shapeData.m_Owned) return;
-        JPH::Shape* pShape = (JPH::Shape*)shapeData.m_pShape;
-        delete pShape;
-    }
 }

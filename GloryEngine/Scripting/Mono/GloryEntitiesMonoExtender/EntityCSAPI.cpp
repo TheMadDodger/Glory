@@ -772,6 +772,9 @@ namespace Glory
 			Debug::LogError(log.str());
 			return false;
 		}
+
+		/* Never continue to store the original shape! Some physics engines like jolt delete them upon swappin! */
+		SHAPES->DestroyShape(characterController.m_ShapeID);
 		characterController.m_ShapeID = shapeID;
 		return CHARACTERS->SetShape(characterController.m_CharacterID, *pShapeData, maxPenetrationDepth, lockBodies);
 	}

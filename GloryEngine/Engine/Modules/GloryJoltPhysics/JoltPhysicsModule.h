@@ -1,15 +1,15 @@
 #pragma once
 #include <PhysicsModule.h>
 
-#include "LayerCollisionFilter.h"
-#include "JoltCharacterManager.h"
-#include "JoltShapeManager.h"
-#include "BroadPhaseImpl.h"
-
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSystem.h>
+
+#include "LayerCollisionFilter.h"
+#include "JoltCharacterManager.h"
+#include "JoltShapeManager.h"
+#include "BroadPhaseImpl.h"
 
 namespace Glory
 {
@@ -21,7 +21,7 @@ namespace Glory
 		GLORY_API JoltPhysicsModule();
 		GLORY_API virtual ~JoltPhysicsModule();
 
-		GLORY_MODULE_VERSION_H(0,2,0);
+		GLORY_MODULE_VERSION_H(0,3,0);
 
 		/* Body management */
 		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex) override;

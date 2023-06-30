@@ -7,6 +7,6 @@ namespace Glory
 	{
 	private:
 		virtual PhysicsShape* CreateShape_Internal(const Shape& shape, const UUID uuid) override;
-		virtual void DestroyShape_Internal(ShapeData& shapeData) override;
+		virtual void DestroyShape_Internal(ShapeData&) override {};
 	};
 }

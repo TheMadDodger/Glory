@@ -12,7 +12,6 @@ namespace Glory
 	{
 		const PhysicsShape* m_pShape;
 		const UUID m_UUID;
-		const bool m_Owned;
 	};
 
 	class ShapeManager
@@ -21,10 +20,12 @@ namespace Glory
 		ShapeManager();
 		~ShapeManager();
 
-		UUID CreateShape(const Shape& shape, bool owned = true);
+		UUID CreateShape(const Shape& shape);
 		void DestroyShape(const UUID shapeId);
 
 		const ShapeData* GetShape(const UUID shapeId) const;
+
+		void Clear();
 
 	protected:
 		virtual PhysicsShape* CreateShape_Internal(const Shape& shape, const UUID uuid) = 0;
