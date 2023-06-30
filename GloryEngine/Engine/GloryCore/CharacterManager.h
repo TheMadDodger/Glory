@@ -7,10 +7,12 @@
 
 namespace Glory
 {
+	struct ShapeData;
+
 	class CharacterManager
 	{
 	public:
-		uint32_t CreateCharacter(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const Shape& shape, float friction);
+		uint32_t CreateCharacter(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const ShapeData& shape, float friction);
 		void DestroyCharacter(uint32_t characterID);
 
 		void DestroyAll();
@@ -62,7 +64,7 @@ namespace Glory
 
 		/// Switch the shape of the character (e.g. for stance). When inMaxPenetrationDepth is not FLT_MAX, it checks
 		/// if the new shape collides before switching shape. Returns true if the switch succeeded.
-		virtual bool SetShape(uint32_t characterID, const Shape& shape, float maxPenetrationDepth, bool lockBodies = true) = 0;
+		virtual bool SetShape(uint32_t characterID, const ShapeData& shape, float maxPenetrationDepth, bool lockBodies = true) = 0;
 
 		/// @brief Get all contacts for the character at a particular location
 		/// @param inPosition Position to test.
@@ -76,7 +78,7 @@ namespace Glory
 		//virtual void CheckCollision(uint32_t characterID, const glm::vec3& inPosition, QuatArg inRotation, const glm::vec3& inMovementDirection, float inMaxSeparationDistance, const Shape* inShape, const glm::vec3& inBaseOffset, CollideShapeCollector& ioCollector, bool inLockBodies = true) const = 0;
 
 	protected:
-		virtual uint32_t CreateCharacter_Internal(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& position, const glm::quat& rotation, const Shape& shape, float friction) = 0;
+		virtual uint32_t CreateCharacter_Internal(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& position, const glm::quat& rotation, const ShapeData& shape, float friction) = 0;
 		virtual void DestroyCharacter_Internal(uint32_t) = 0;
 		virtual void DestroyAll_Internal() = 0;
 	};

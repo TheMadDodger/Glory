@@ -19,7 +19,7 @@ project "GloryJoltPhysics"
 
 	vpaths
 	{
-		["Module"] = { "GloryJoltPhysics.*", "JoltPhysicsModule.*", "JoltCharacterManager.*" },
+		["Module"] = { "GloryJoltPhysics.*", "JoltPhysicsModule.*", "JoltCharacterManager.*", "JoltShapeManager.*" },
 		["Collision"] = { "BroadPhaseImpl.*", "LayerCollisionFilter.*", "JoltDebugRenderer.*" },
 		["Helpers"] = { "Helpers.*", "ShapeHandlers.*" }
 	}

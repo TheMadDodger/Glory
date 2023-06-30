@@ -1,6 +1,8 @@
 #include "CharacterControllerSystem.h"
 #include "PhysicsSystem.h"
 
+#include <CharacterManager.h>
+#include <ShapeManager.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory
@@ -15,6 +17,7 @@ namespace Glory
 		}
 
 		CharacterManager* pCharacters = pPhysics->GetCharacterManager();
+		ShapeManager* pShapes = pPhysics->GetShapeManager();
 		if (!pCharacters)
 		{
 			Debug::LogWarning("The loaded PhysicsModule does not have support for CharacterControllers");
@@ -28,8 +31,13 @@ namespace Glory
 		glm::vec3 skew;
 		glm::vec4 perspective;
 		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
+
+		const UUID shapeID = pShapes->CreateShape(*pComponent.m_Shape.BaseShapePointer());
+		const ShapeData* pShape = pShapes->GetShape(shapeID);
+
 		pComponent.m_CurrentLayerIndex = pRegistry->HasComponent<LayerComponent>(entity) ? pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex : 0;
-		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_CurrentLayerIndex, translation, rotation, *pComponent.m_Shape.BaseShapePointer(), pComponent.m_Friction);
+		pComponent.m_ShapeID = shapeID;
+		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_CurrentLayerIndex, translation, rotation, *pShape, pComponent.m_Friction);
 		pComponent.m_BodyID = pCharacters->GetBodyID(pComponent.m_CharacterID);
 		PhysicsSystem::AddBody(pComponent.m_BodyID, pRegistry, entity);
 	}
@@ -56,6 +64,7 @@ namespace Glory
 		pCharacters->DestroyCharacter(pComponent.m_CharacterID);
 		pComponent.m_CharacterID = 0;
 		pComponent.m_BodyID = 0;
+		pComponent.m_ShapeID = 0;
 	}
 
 	void CharacterControllerSystem::OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)

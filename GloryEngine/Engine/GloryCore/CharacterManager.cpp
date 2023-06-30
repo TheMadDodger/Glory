@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	uint32_t CharacterManager::CreateCharacter(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const Shape& shape, float friction)
+	uint32_t CharacterManager::CreateCharacter(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const ShapeData& shape, float friction)
 	{
 		return CreateCharacter_Internal(maxSlopeAngle, layerIndex, inPosition, inRotation, shape, friction);
 	}

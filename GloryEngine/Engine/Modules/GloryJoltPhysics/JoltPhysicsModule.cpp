@@ -349,6 +349,11 @@ namespace Glory
 		return &m_CharacterManager;
 	}
 
+	ShapeManager* JoltPhysicsModule::GetShapeManager()
+	{
+		return &m_ShapeManager;
+	}
+
 	void JoltPhysicsModule::SetGravity(const glm::vec3& gravity)
 	{
 		m_pJPHPhysicsSystem->SetGravity(ToJPHVec3(gravity));

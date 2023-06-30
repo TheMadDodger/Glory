@@ -3,6 +3,7 @@
 #include "GizmoAction.h"
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
+#include <CharacterManager.h>
 #include <EditorUI.h>
 #include <TransformSystem.h>
 #include <glm/gtx/matrix_decompose.hpp>
