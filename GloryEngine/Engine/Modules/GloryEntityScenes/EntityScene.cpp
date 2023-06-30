@@ -74,14 +74,6 @@ namespace Glory
 		// Spin
 		m_Registry.RegisterInvokaction<Spin>(GloryECS::InvocationType::Update, SpinSystem::OnUpdate);
 
-		// Scripted
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnAdd, ScriptedSystem::OnAdd);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Update, ScriptedSystem::OnUpdate);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Draw, ScriptedSystem::OnDraw);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Start, ScriptedSystem::OnStart);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Stop, ScriptedSystem::OnStop);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
-
 		/* Physics Bodies */
 		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::Start, PhysicsSystem::OnStart);
 		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::Stop, PhysicsSystem::OnStop);
@@ -95,6 +87,14 @@ namespace Glory
 		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::OnRemove, CharacterControllerSystem::OnStop);
 		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::OnValidate, CharacterControllerSystem::OnValidate);
 		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::Update, CharacterControllerSystem::OnUpdate);
+
+		// Scripted
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnAdd, ScriptedSystem::OnAdd);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Update, ScriptedSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Draw, ScriptedSystem::OnDraw);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Start, ScriptedSystem::OnStart);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Stop, ScriptedSystem::OnStop);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
 	}
 
 	void EntityScene::OnTick()
