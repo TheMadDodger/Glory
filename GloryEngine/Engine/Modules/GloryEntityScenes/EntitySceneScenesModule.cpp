@@ -67,9 +67,11 @@ namespace Glory
 		RegisterComponent<MeshRenderer>();
 		RegisterComponent<ModelRenderer>();
 		RegisterComponent<LightComponent>();
-		RegisterComponent<ScriptedComponent>();
 		RegisterComponent<PhysicsBody>();
 		RegisterComponent<CharacterController>();
+
+		/* Always register scripted component as last to preserve execution order */
+		RegisterComponent<ScriptedComponent>();
 
 		const GloryReflect::FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
 		GloryReflect::Reflect::SetFieldFlags(pColorField, Vec4Flags::Color);
