@@ -30,15 +30,7 @@ namespace Glory
 				for (size_t j = 0; j < itor->second.m_Bindings.size(); ++j)
 				{
 					InputBinding& binding = itor->second.m_Bindings[j];
-					if (itor->second.m_MappingType == InputMappingType::Bool)
-					{
-						if (binding.m_State == InputState::KeyPressed && e.State != InputState::KeyDown && e.State != InputState::KeyUp && binding.m_State != e.State) continue;
-						else if (binding.m_State != InputState::KeyPressed && binding.m_State != e.State) continue;
-					}
-
 					if (!binding.m_KeyBinding.CheckEvent(e)) continue;
-					std::filesystem::path path = "";
-					path = path.append(pInputMap->m_Name).append(itor->second.m_Name);
 					switch (itor->second.m_MappingType)
 					{
 					case InputMappingType::Bool:
@@ -61,6 +53,12 @@ namespace Glory
 		for (size_t i = 0; i < m_InputData.size(); ++i)
 		{
 			m_InputData[i].m_TriggeredActions.clear();
+
+			/* Re-add down states */
+			for (auto& itor : m_InputData[i].m_DownStates)
+			{
+				m_InputData[i].m_TriggeredActions.push_back(itor.second);
+			}
 
 			for (auto itor = m_InputData[i].m_AxisDeltas.begin(); itor != m_InputData[i].m_AxisDeltas.end(); ++itor)
 			{
@@ -173,7 +171,9 @@ namespace Glory
 
 	void PlayerInput::TriggerAction(PlayerInputData& inputData, InputAction& inputAction, InputBinding& inputBinding, InputEvent& e)
 	{
-		if (inputBinding.m_State == InputState::KeyPressed)
+		switch (inputBinding.m_State)
+		{
+		case InputState::KeyPressed:
 		{
 			switch (e.State)
 			{
@@ -189,10 +189,36 @@ namespace Glory
 				/* Shouldnt happen but just in case */
 				return;
 			}
+			break;
+		}
+		case InputState::KeyDown:
+		{
+			switch (e.State)
+			{
+			case InputState::KeyDown:
+				if (inputData.m_DownStates.find(inputBinding.m_Name) != inputData.m_DownStates.end()) return;
+				inputData.m_DownStates[inputBinding.m_Name] = inputAction.m_Name;
+				break;
+
+			case InputState::KeyUp:
+				inputData.m_DownStates.erase(inputBinding.m_Name);
+				return; /* Don't trigger KeyDown on KeyUp */
+			default:
+				/* Shouldnt happen but just in case */
+				return;
+			}
+			break;
+		}
+		case InputState::KeyUp:
+		{
+			if (e.State != InputState::KeyUp) return;
+			break;
+		}
+		default:
+			return;
 		}
 
 		inputData.m_TriggeredActions.push_back(inputAction.m_Name);
-		/* TODO: Forward to scripting for triggering input event */
 	}
 
 	void PlayerInput::MapOnFloat(PlayerInputData& inputData, InputAction& inputAction, InputBinding& inputBinding, InputEvent& e)
@@ -210,8 +236,6 @@ namespace Glory
 			/* TODO: Add a ShouldClearOnNewFrame bool for clearing values */
 			inputData.m_ToClearValues.push_back(inputAction.m_Name);
 		}
-
-		/* TODO: Forward to scripting for triggering input event */
 	}
 
 	float PlayerInput::Lerp(float a, float b, float t)
