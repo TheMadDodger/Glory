@@ -48,6 +48,8 @@ namespace Glory
 		std::map<std::string, float> m_AxisDeltas;
 		/* Actions that were triggered this frame */
 		std::vector<std::string_view> m_TriggeredActions;
+		/* Used for KeyDown actions */
+		std::map<std::string_view, std::string_view> m_DownStates;
 		/* Used for KeyPressed actions */
 		std::map<std::string_view, bool> m_PressedStates;
 		/* When MapDeltaToValue is set the value should also be cleared */

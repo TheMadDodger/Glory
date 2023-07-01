@@ -7,3 +7,6 @@ Scripting:
 - Implemented customizable debugger agent
 - Added shapes API
 - You can now set the shape of a character controller at runtime
+
+Bugs:
+- Fixed inconsistent input KeyDown behaviour
