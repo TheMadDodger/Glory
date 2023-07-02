@@ -40,8 +40,6 @@ project "GloryOpenGLGraphics"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -52,7 +50,7 @@ project "GloryOpenGLGraphics"
 		"shaderc_shared",
 		"yaml-cpp",
 
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	defines

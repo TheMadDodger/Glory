@@ -46,7 +46,6 @@ project "GloryJoltPhysics"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-		"%{LibDirs.GloryECS}",
 
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -54,7 +53,7 @@ project "GloryJoltPhysics"
 	links
 	{
 		"GloryCore",
-		"GloryReflectStatic",
+		"GloryReflect",
 
 		"shaderc",
 		"shaderc_combined",

@@ -53,8 +53,6 @@ project "MonoEditorExtension"
 		"%{LibDirs.glory}",
 		"%{modulesDir}/GloryMonoScripting",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -72,8 +70,8 @@ project "MonoEditorExtension"
 		"mono-2.0-sgen",
 		"MonoPosixHelper",
 		"tinyfiledialogs",
-		"GloryECSStatic",
-		"GloryReflectStatic"
+		"GloryECS",
+		"GloryReflect"
 	}
 
 	defines

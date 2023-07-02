@@ -43,8 +43,6 @@ project "GloryEntityScenes"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -55,8 +53,8 @@ project "GloryEntityScenes"
 		"shaderc_shared",
 		"yaml-cpp",
 
-		"GloryECSStatic",
-		"GloryReflectStatic",
+		"GloryECS",
+		"GloryReflect",
 	}
 
 	defines

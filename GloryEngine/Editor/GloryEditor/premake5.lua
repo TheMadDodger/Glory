@@ -76,8 +76,6 @@ project "GloryEditor"
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -92,7 +90,7 @@ project "GloryEditor"
 		"ImGuizmo",
 		"implot",
 
-		"GloryReflectStatic",
+		"GloryReflect",
 		"tinyfiledialogs",
 	}
 

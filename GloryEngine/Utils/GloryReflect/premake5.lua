@@ -1,5 +1,5 @@
-project "GloryAPI"
-	kind "SharedLib"
+project "GloryReflect"
+	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -9,47 +9,14 @@ project "GloryAPI"
 
 	files
 	{
-		"**.h",
-		"**.cpp",
+		"*.h",
+		"*.cpp",
 		"premake5.lua"
 	}
 
 	vpaths
 	{
-	}
-
-	includedirs
-	{
-		"%{DepsIncludeDir}",
-		"%{GloryIncludeDir.core}",
-		"%{rapidjson}"
-	}
-
-	libdirs
-	{
-		"%{DepsLibDir}",
-
-		"%{LibDirs.glory}",
-
-		"%{LibDirs.yaml_cpp}",
-	}
-
-	defines
-	{
-		"GLORY_API_EXPORTS",
-		"GLORY_ENABLE_API"
-	}
-
-	postbuildcommands
-	{
-		("{COPY} %{DepsBinDir}/libcurl*.dll %{engineOutDir}"),
-	}
-
-	links
-	{
-		"GloryCore",
-		"yaml-cpp",
-		"GloryReflect",
+		
 	}
 
 	filter "system:windows"
@@ -73,11 +40,7 @@ project "GloryAPI"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "libcurl-d_imp"
-
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-		links "libcurl_imp"

@@ -39,8 +39,6 @@ project "GlorySDLInput"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -51,7 +49,7 @@ project "GlorySDLInput"
 		"shaderc_shared",
 		"yaml-cpp",
 
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	defines

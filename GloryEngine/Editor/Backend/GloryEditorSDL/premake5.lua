@@ -46,7 +46,6 @@ project "GloryEditorSDL"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-		"%{LibDirs.GloryECS}",
 		"%{LibDirs.glory}/Modules/GlorySDLWindow",
 
 		"%{LibDirs.ImGui}",
@@ -55,7 +54,7 @@ project "GloryEditorSDL"
 	links
 	{
 		"GloryCore",
-		"GloryReflectStatic",
+		"GloryReflect",
 		"GlorySDLWindow",
 
 		"yaml-cpp",

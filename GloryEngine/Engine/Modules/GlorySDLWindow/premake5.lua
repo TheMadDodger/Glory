@@ -41,7 +41,6 @@ project "GlorySDLWindow"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-		"%{LibDirs.GloryECS}",
 
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -49,7 +48,7 @@ project "GlorySDLWindow"
 	links
 	{
 		"GloryCore",
-		"GloryReflectStatic",
+		"GloryReflect",
 
 		"shaderc",
 		"shaderc_combined",

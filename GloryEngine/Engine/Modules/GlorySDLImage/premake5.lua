@@ -40,7 +40,6 @@ project "GlorySDLImage"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-		"%{LibDirs.GloryECS}",
 
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -50,7 +49,7 @@ project "GlorySDLImage"
 		"GloryCore",
 		"yaml-cpp",
 
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	defines

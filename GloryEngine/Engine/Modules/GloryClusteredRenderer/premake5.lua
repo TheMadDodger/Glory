@@ -39,8 +39,6 @@ project "GloryClusteredRenderer"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -51,7 +49,7 @@ project "GloryClusteredRenderer"
 		"shaderc_shared",
 		"yaml-cpp",
 
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	defines

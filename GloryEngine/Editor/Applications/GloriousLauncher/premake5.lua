@@ -43,7 +43,6 @@ project "GloriousLauncher"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-		"%{LibDirs.GloryECS}",
 
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.yaml_cpp}",
@@ -56,7 +55,7 @@ project "GloriousLauncher"
 		"ImGui",
 		"yaml-cpp",
 		"tinyfiledialogs",
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	dependson
