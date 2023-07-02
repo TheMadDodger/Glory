@@ -2,7 +2,7 @@
 #include "FieldData.h"
 #include <string>
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	struct TypeData
 	{

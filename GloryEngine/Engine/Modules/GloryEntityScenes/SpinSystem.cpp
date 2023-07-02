@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	void SpinSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, Spin& pComponent)
+	void SpinSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, Spin& pComponent)
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Time += Time::GetDeltaTime<float, std::ratio<1, 1>>() * pComponent.m_Speed;

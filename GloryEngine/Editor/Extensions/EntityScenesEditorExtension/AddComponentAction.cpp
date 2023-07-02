@@ -32,7 +32,7 @@ namespace Glory::Editor
 
 		EntitySceneObject* pEntityObject = (EntitySceneObject*)editors[0]->GetTarget();
 		EntityScene* pEntityScene = (EntityScene*)pEntityObject->GetScene();
-		GloryECS::EntityRegistry* pRegistry = pEntityScene->GetRegistry();
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pEntityScene->GetRegistry();
 		EntityID entity = pEntityObject->GetEntityHandle().GetEntityID();
 		pRegistry->CreateComponent(entity, m_ComponentTypeHash, m_ComponentUUID);
 		EntityView* pEntityView = pRegistry->GetEntityView(entity);

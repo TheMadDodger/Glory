@@ -45,7 +45,7 @@ namespace Glory
 		pSerializer->Deserialize(buffer, offset, size, object);
 	}
 
-	void PropertySerializer::SerializeProperty(const std::string& name, const GloryReflect::TypeData* pTypeData, void* data, YAML::Emitter& out)
+	void PropertySerializer::SerializeProperty(const std::string& name, const TypeData* pTypeData, void* data, YAML::Emitter& out)
 	{
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(pTypeData->TypeHash());
 		PropertySerializer* pInternalSerializer = PropertySerializer::GetSerializer(pTypeData->InternalTypeHash());
@@ -63,14 +63,14 @@ namespace Glory
 		throw new std::exception("Missing serializer!");
 	}
 
-	void PropertySerializer::SerializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out)
+	void PropertySerializer::SerializeProperty(const FieldData* pFieldData, void* data, YAML::Emitter& out)
 	{
 		if (pFieldData->Type() == ST_Array)
 		{
 			return GetSerializer(ST_Array)->Serialize(pFieldData->Name(), data, pFieldData->ArrayElementType(), out);
 		}
 
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pFieldData->ArrayElementType());
+		const TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
 			SerializeProperty(pFieldData->Name(), pTypeData, data, out);
@@ -87,7 +87,7 @@ namespace Glory
 		throw new std::exception("Missing serializer!");
 	}
 
-	void PropertySerializer::DeserializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Node& object)
+	void PropertySerializer::DeserializeProperty(const TypeData* pTypeData, void* data, YAML::Node& object)
 	{
 		PropertySerializer* pSerializer = PropertySerializer::GetSerializer(pTypeData->TypeHash());
 		PropertySerializer* pInternalSerializer = PropertySerializer::GetSerializer(pTypeData->InternalTypeHash());
@@ -105,14 +105,14 @@ namespace Glory
 		throw new std::exception("Missing serializer!");
 	}
 
-	void PropertySerializer::DeserializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object)
+	void PropertySerializer::DeserializeProperty(const FieldData* pFieldData, void* data, YAML::Node& object)
 	{
 		if (pFieldData->Type() == ST_Array)
 		{
 			return GetSerializer(ST_Array)->Deserialize(data, pFieldData->ArrayElementType(), object);
 		}
 
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pFieldData->ArrayElementType());
+		const TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
 			DeserializeProperty(pTypeData, data, object);

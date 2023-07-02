@@ -3,7 +3,7 @@
 #include <Glory.h>
 #include <EntityRegistry.h>
 
-using namespace GloryECS;
+using namespace Glory::Utils::ECS;
 
 namespace Glory
 {

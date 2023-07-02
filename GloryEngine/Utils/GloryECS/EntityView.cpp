@@ -1,7 +1,7 @@
 #include "EntityView.h"
 #include "EntityRegistry.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
     EntityView::EntityView(EntityRegistry* pRegistry) : m_pRegistry(pRegistry), m_Active(true), m_HierarchyActive(true)
     {

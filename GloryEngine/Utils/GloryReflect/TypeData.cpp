@@ -1,7 +1,7 @@
 #include "TypeData.h"
 #include "CustomTypeHash.h"
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	TypeData::TypeData(const char* typeName, const FieldData* pFields, uint32_t internalTypeHash, uint32_t typeHash, int numFields) :
 		m_TypeName(typeName),

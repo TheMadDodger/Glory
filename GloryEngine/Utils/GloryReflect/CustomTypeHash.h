@@ -1,6 +1,6 @@
 #pragma once
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	enum class CustomTypeHash
 	{

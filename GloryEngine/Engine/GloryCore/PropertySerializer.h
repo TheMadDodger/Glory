@@ -33,10 +33,10 @@ namespace Glory
 		static void SerializeProperty(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out);
 		static void DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Node& object);
 
-		static void SerializeProperty(const std::string& name, const GloryReflect::TypeData* pTypeData, void* data, YAML::Emitter& out);
-		static void SerializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Emitter& out);
-		static void DeserializeProperty(const GloryReflect::TypeData* pTypeData, void* data, YAML::Node& object);
-		static void DeserializeProperty(const GloryReflect::FieldData* pFieldData, void* data, YAML::Node& object);
+		static void SerializeProperty(const std::string& name, const TypeData* pTypeData, void* data, YAML::Emitter& out);
+		static void SerializeProperty(const FieldData* pFieldData, void* data, YAML::Emitter& out);
+		static void DeserializeProperty(const TypeData* pTypeData, void* data, YAML::Node& object);
+		static void DeserializeProperty(const FieldData* pFieldData, void* data, YAML::Node& object);
 
 		virtual uint32_t GetSerializedTypeHash() const;
 

@@ -38,7 +38,7 @@ namespace Glory
 		{
 			const std::string& valueStr = Value().as<std::string>();
 			T value;
-			if (!GloryReflect::Enum<T>().FromString(valueStr, value)) return T(0);
+			if (!Enum<T>().FromString(valueStr, value)) return T(0);
 			return value;
 		}
 

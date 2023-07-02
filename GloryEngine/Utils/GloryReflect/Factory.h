@@ -4,7 +4,7 @@
 #include <typeindex>
 #include <functional>
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	class FactoryBase
 	{

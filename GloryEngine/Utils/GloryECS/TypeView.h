@@ -7,7 +7,7 @@
 
 #define MAX_COMPONENTS 1000
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
 

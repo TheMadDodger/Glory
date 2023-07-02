@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	using FieldType = uint32_t;
 	using ElementType = uint32_t;

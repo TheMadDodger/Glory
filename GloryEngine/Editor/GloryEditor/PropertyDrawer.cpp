@@ -7,7 +7,7 @@
 namespace Glory::Editor
 {
 	std::vector<PropertyDrawer*> PropertyDrawer::m_PropertyDrawers = std::vector<PropertyDrawer*>();
-	const GloryReflect::TypeData* PropertyDrawer::m_pRootTypeData = nullptr;
+	const TypeData* PropertyDrawer::m_pRootTypeData = nullptr;
 	std::filesystem::path PropertyDrawer::m_CurrentPropertyPath = "";
 
 	PropertyDrawer::PropertyDrawer(uint32_t typeHash) : m_TypeHash(typeHash)
@@ -87,7 +87,7 @@ namespace Glory::Editor
 		}
 	};
 
-	bool PropertyDrawer::DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags)
+	bool PropertyDrawer::DrawProperty(const FieldData* pFieldData, void* data, uint32_t flags)
 	{
 		PathGuard p(pFieldData->Name());
 
@@ -96,7 +96,7 @@ namespace Glory::Editor
 			return GetPropertyDrawer(ST_Array)->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
 		}
 
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pFieldData->ArrayElementType());
+		const TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
 			const bool change = DrawProperty(pFieldData->Name(), pTypeData, data, flags);
@@ -113,7 +113,7 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool PropertyDrawer::DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags)
+	bool PropertyDrawer::DrawProperty(const std::string& label, const TypeData* pTypeData, void* data, uint32_t flags)
 	{
 		const bool setRootType = !m_pRootTypeData;
 		if (setRootType)
@@ -179,7 +179,7 @@ namespace Glory::Editor
 			return drawer->Draw(label, node[label], elementTypeHash, flags);
 		}
 
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 		if (pTypeData)
 		{
 			/* TODO */
@@ -206,7 +206,7 @@ namespace Glory::Editor
 		return m_CurrentPropertyPath;
 	}
 
-	const GloryReflect::TypeData* PropertyDrawer::GetRootTypeData()
+	const TypeData* PropertyDrawer::GetRootTypeData()
 	{
 		return m_pRootTypeData;
 	}

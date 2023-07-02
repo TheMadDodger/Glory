@@ -30,7 +30,7 @@ namespace Glory
 		for (auto itor = bindingPathTemp.begin(); itor != bindingPathTemp.end(); itor++)
 		{
 			const std::filesystem::path& subPath = *itor;
-			if (GloryReflect::Enum<InputDeviceType>().FromString(subPath.string(), m_DeviceType)) continue;
+			if (Enum<InputDeviceType>().FromString(subPath.string(), m_DeviceType)) continue;
 			if (subPath.string() == "Axis")
 			{
 				m_IsAxis = true;
@@ -43,21 +43,21 @@ namespace Glory
 			}
 
 			KeyboardKey key{ KeyboardKey(-1) };
-			if (GloryReflect::Enum<KeyboardKey>().FromString(subPath.string(), key))
+			if (Enum<KeyboardKey>().FromString(subPath.string(), key))
 			{
 				m_KeyID = key;
 				continue;
 			}
 
 			MouseButton mouseButton{ MouseButton(-1) };
-			if (GloryReflect::Enum<MouseButton>().FromString(subPath.string(), mouseButton))
+			if (Enum<MouseButton>().FromString(subPath.string(), mouseButton))
 			{
 				m_KeyID = mouseButton;
 				continue;
 			}
 
 			MouseAxis mouseAxis{ MouseAxis(-1) };
-			if (GloryReflect::Enum<MouseAxis>().FromString(subPath.string(), mouseAxis))
+			if (Enum<MouseAxis>().FromString(subPath.string(), mouseAxis))
 			{
 				m_KeyID = mouseAxis;
 				continue;

@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	struct TypeData;
 }
@@ -24,7 +24,7 @@ namespace Glory
 
 		const Layer* Layer() const;
 
-		static const GloryReflect::TypeData* GetTypeData();
+		static const Glory::Utils::Reflect::TypeData* GetTypeData();
 
 	};
 }

@@ -26,12 +26,12 @@ namespace Glory::Editor
 
 		ListView listView{ label.data() };
 
-		const size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
-		const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const size_t size = Reflect::ArraySize(data, typeHash);
+		const TypeData* pElementTypeData = Reflect::GetTyeData(typeHash);
 
 		listView.OnDrawElement = [&](size_t index) {
 			PropertyDrawer::PushPath("##" + std::to_string(index));
-			void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, index);
+			void* pAddress = Reflect::ElementAddress(data, typeHash, index);
 			EditorUI::PushFlag(EditorUI::HasSmallButton);
 			change |= PropertyDrawer::DrawProperty("Element " + std::to_string(index), pElementTypeData, pAddress, flags);
 			EditorUI::PopFlag();
@@ -41,20 +41,20 @@ namespace Glory::Editor
 		listView.OnAdd = [&]() {
 			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 			pAction->SetOldValue(data);
-			GloryReflect::Reflect::ResizeArray(data, typeHash, size + 1);
+			Reflect::ResizeArray(data, typeHash, size + 1);
 			pAction->SetNewValue(data);
 			Undo::AddAction(pAction);
 		};
 
 		listView.OnRemove = [&](int index) {
-			// Do nothing for now because GloryReflect is missing a feature for this
+			// Do nothing for now because Glory::Utils::Reflect is missing a feature for this
 			// TODO: Implement
 		};
 
 		listView.OnResize = [&](size_t newSize) {
 			ValueChangeAction* pAction = new ValueChangeAction(PropertyDrawer::GetRootTypeData(), PropertyDrawer::GetCurrentPropertyPath());
 			pAction->SetOldValue(data);
-			GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
+			Reflect::ResizeArray(data, typeHash, newSize);
 			pAction->SetNewValue(data);
 			Undo::AddAction(pAction);
 		};
@@ -68,16 +68,16 @@ namespace Glory::Editor
 		//ImGui::TextUnformatted(label.c_str());
 		//ImGui::SameLine(width);
 		//
-		//size_t size = GloryReflect::Reflect::ArraySize(data, typeHash);
+		//size_t size = Reflect::ArraySize(data, typeHash);
 		//int newSize = (int)size;
 		//if (ImGui::InputInt("##size", &newSize, 0, 0, ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue) && size != (size_t)newSize)
 		//{
 		//	if (newSize <= 0) newSize = 0;
-		//	GloryReflect::Reflect::ResizeArray(data, typeHash, newSize);
+		//	Reflect::ResizeArray(data, typeHash, newSize);
 		//	change = true;
 		//}
 		//
-		//const GloryReflect::TypeData* pElementTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		//const TypeData* pElementTypeData = Reflect::GetTyeData(typeHash);
 		//
 		//PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
 		//
@@ -85,7 +85,7 @@ namespace Glory::Editor
 		//{
 		//	for (size_t i = 0; i < newSize; i++)
 		//	{
-		//		void* pAddress = GloryReflect::Reflect::ElementAddress(data, typeHash, i);
+		//		void* pAddress = Reflect::ElementAddress(data, typeHash, i);
 		//		std::string elementLabel = "Element_" + std::to_string(i);
 		//		ImGui::PushID(elementLabel.c_str());
 		//		if (pPropertyDrawer)

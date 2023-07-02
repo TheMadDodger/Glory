@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	void ScriptedSystem::OnAdd(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnAdd(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
@@ -14,7 +14,7 @@ namespace Glory
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
 	}
 
-	void ScriptedSystem::OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
@@ -29,7 +29,7 @@ namespace Glory
 		pScript->InvokeSafe(pObject, "Start", std::vector<void*>{});
 	}
 
-	void ScriptedSystem::OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnStop(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
@@ -40,7 +40,7 @@ namespace Glory
 		pScript->InvokeSafe(pObject, "Stop", std::vector<void*>{});
 	}
 
-	void ScriptedSystem::OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
@@ -55,7 +55,7 @@ namespace Glory
 		pScript->InvokeSafe(pObject, "OnValidate", std::vector<void*>{});
 	}
 
-	void ScriptedSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
@@ -67,7 +67,7 @@ namespace Glory
 		pScript->GetPropertyValues(pObject, pComponent.m_ScriptData);
 	}
 
-	void ScriptedSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
+	void ScriptedSystem::OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
 	{
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;

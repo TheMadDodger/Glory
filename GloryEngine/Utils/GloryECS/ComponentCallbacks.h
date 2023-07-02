@@ -3,7 +3,7 @@
 #include <functional>
 #include <UUID.h>
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
 

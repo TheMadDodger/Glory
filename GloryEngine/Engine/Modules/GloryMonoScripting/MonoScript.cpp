@@ -152,8 +152,8 @@ namespace Glory
 			}
 
 			default:
-				GloryReflect::Reflect::CreateAsTemporary(pField->ElementTypeHash(), [&](void* value) {
-					const GloryReflect::TypeData* pType = GloryReflect::Reflect::GetTyeData(pField->ElementTypeHash());
+				Reflect::CreateAsTemporary(pField->ElementTypeHash(), [&](void* value) {
+					const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
 					pField->GetValue(pDummyObject, value);
 					PropertySerializer::SerializeProperty(pField->Name(), pType, value, e);
 				});
@@ -210,8 +210,8 @@ namespace Glory
 			}
 
 			default:
-				GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-					const GloryReflect::TypeData* pType = GloryReflect::Reflect::GetTyeData(pField->ElementTypeHash());
+				Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
+					const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
 					PropertySerializer::DeserializeProperty(pType, value, valueNode);
 					pField->SetValue(pMonoObject, value);
 				});
@@ -274,8 +274,8 @@ namespace Glory
 			}
 
 			default:
-				GloryReflect::Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-					const GloryReflect::TypeData* pType = GloryReflect::Reflect::GetTyeData(pField->ElementTypeHash());
+				Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
+					const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
 					pField->GetValue(pMonoObject, value);
 					PropertySerializer::SerializeProperty(pField->Name(), pType, value, emitter);
 				});

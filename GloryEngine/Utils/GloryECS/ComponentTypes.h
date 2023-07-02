@@ -4,7 +4,7 @@
 #include <string>
 #include "../Hash.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
 

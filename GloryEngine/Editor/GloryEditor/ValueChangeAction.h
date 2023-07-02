@@ -9,7 +9,7 @@ namespace Glory::Editor
     class ValueChangeAction : public IAction
     {
     public:
-        GLORY_EDITOR_API ValueChangeAction(const GloryReflect::TypeData* pType, const std::filesystem::path& path);
+        GLORY_EDITOR_API ValueChangeAction(const Utils::Reflect::TypeData* pType, const std::filesystem::path& path);
         GLORY_EDITOR_API virtual ~ValueChangeAction();
 
         GLORY_EDITOR_API void SetOldValue(void* pObject);
@@ -21,7 +21,7 @@ namespace Glory::Editor
         virtual GLORY_EDITOR_API bool Combine(IAction* pOther);
 
     private:
-        const GloryReflect::TypeData* m_pRootType;
+        const Utils::Reflect::TypeData* m_pRootType;
         const std::filesystem::path m_PropertyPath;
         YAML::Node m_OldValue;
         YAML::Node m_NewValue;

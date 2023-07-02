@@ -7,11 +7,11 @@ namespace Glory
 		APPEND_TYPE(EntityComponentObject);
 	}
 
-	EntityComponentObject::EntityComponentObject(GloryECS::EntityID entityID, UUID componentID, uint32_t componentType, GloryECS::EntityRegistry* pRegistry)
+	EntityComponentObject::EntityComponentObject(Glory::Utils::ECS::EntityID entityID, UUID componentID, uint32_t componentType, Glory::Utils::ECS::EntityRegistry* pRegistry)
 		: m_EntityID(entityID), m_ComponentType(componentType), m_pRegistry(pRegistry), Object(componentID)
 	{
 		APPEND_TYPE(EntityComponentObject);
-		GloryECS::BaseTypeView* pTypeView = m_pRegistry->GetTypeView(componentType);
+		Glory::Utils::ECS::BaseTypeView* pTypeView = m_pRegistry->GetTypeView(componentType);
 		PushInheritence(pTypeView->ComponentType());
 	}
 
@@ -22,12 +22,12 @@ namespace Glory
 		m_pRegistry = nullptr;
 	}
 
-	GloryECS::EntityRegistry* EntityComponentObject::GetRegistry() const
+	Glory::Utils::ECS::EntityRegistry* EntityComponentObject::GetRegistry() const
 	{
 		return m_pRegistry;
 	}
 
-	const GloryECS::EntityID EntityComponentObject::EntityID() const
+	const Glory::Utils::ECS::EntityID EntityComponentObject::EntityID() const
 	{
 		return m_EntityID;
 	}

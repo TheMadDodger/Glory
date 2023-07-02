@@ -1,7 +1,7 @@
 #pragma once
 #include "Components.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
     class EntityRegistry;
 }
@@ -11,12 +11,12 @@ namespace Glory
     class ScriptedSystem
     {
     public:
-        static void OnAdd(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
-        static void OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
-        static void OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
-        static void OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
-        static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
-        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnAdd(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnStop(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
+        static void OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent);
 
     private:
         ScriptedSystem() {}

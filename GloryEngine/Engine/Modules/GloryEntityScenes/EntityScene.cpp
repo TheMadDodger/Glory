@@ -53,59 +53,59 @@ namespace Glory
 	{
 		// Register Invocations
 		// Transform
-		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Start, TransformSystem::OnStart);
-		m_Registry.RegisterInvokaction<Transform>(GloryECS::InvocationType::Update, TransformSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Start, TransformSystem::OnStart);
+		m_Registry.RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Update, TransformSystem::OnUpdate);
 		
 		// Camera
-		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
-		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
-		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::Update, CameraSystem::OnUpdate);
-		m_Registry.RegisterInvokaction<CameraComponent>(GloryECS::InvocationType::Draw, CameraSystem::OnDraw);
+		m_Registry.RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
+		m_Registry.RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
+		m_Registry.RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Update, CameraSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Draw, CameraSystem::OnDraw);
 
 		// Light
-		m_Registry.RegisterInvokaction<LightComponent>(GloryECS::InvocationType::Draw, LightSystem::OnDraw);
+		m_Registry.RegisterInvokaction<LightComponent>(Glory::Utils::ECS::InvocationType::Draw, LightSystem::OnDraw);
 
 		// LookAt
-		m_Registry.RegisterInvokaction<LookAt>(GloryECS::InvocationType::Update, LookAtSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<LookAt>(Glory::Utils::ECS::InvocationType::Update, LookAtSystem::OnUpdate);
 
 		// MeshRenderer
-		m_Registry.RegisterInvokaction<MeshRenderer>(GloryECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+		m_Registry.RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
 
 		// Spin
-		m_Registry.RegisterInvokaction<Spin>(GloryECS::InvocationType::Update, SpinSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<Spin>(Glory::Utils::ECS::InvocationType::Update, SpinSystem::OnUpdate);
 
 		/* Physics Bodies */
-		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::Start, PhysicsSystem::OnStart);
-		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::Stop, PhysicsSystem::OnStop);
-		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::OnRemove, PhysicsSystem::OnStop);
-		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::OnValidate, PhysicsSystem::OnValidate);
-		m_Registry.RegisterInvokaction<PhysicsBody>(GloryECS::InvocationType::Update, PhysicsSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Start, PhysicsSystem::OnStart);
+		m_Registry.RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Stop, PhysicsSystem::OnStop);
+		m_Registry.RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::OnRemove, PhysicsSystem::OnStop);
+		m_Registry.RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::OnValidate, PhysicsSystem::OnValidate);
+		m_Registry.RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Update, PhysicsSystem::OnUpdate);
 
 		/* Character controllers */
-		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::Start, CharacterControllerSystem::OnStart);
-		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::Stop, CharacterControllerSystem::OnStop);
-		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::OnRemove, CharacterControllerSystem::OnStop);
-		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::OnValidate, CharacterControllerSystem::OnValidate);
-		m_Registry.RegisterInvokaction<CharacterController>(GloryECS::InvocationType::Update, CharacterControllerSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::Start, CharacterControllerSystem::OnStart);
+		m_Registry.RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::Stop, CharacterControllerSystem::OnStop);
+		m_Registry.RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::OnRemove, CharacterControllerSystem::OnStop);
+		m_Registry.RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::OnValidate, CharacterControllerSystem::OnValidate);
+		m_Registry.RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::Update, CharacterControllerSystem::OnUpdate);
 
 		// Scripted
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnAdd, ScriptedSystem::OnAdd);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Update, ScriptedSystem::OnUpdate);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Draw, ScriptedSystem::OnDraw);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Start, ScriptedSystem::OnStart);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::Stop, ScriptedSystem::OnStop);
-		m_Registry.RegisterInvokaction<ScriptedComponent>(GloryECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::OnAdd, ScriptedSystem::OnAdd);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Update, ScriptedSystem::OnUpdate);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Draw, ScriptedSystem::OnDraw);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Start, ScriptedSystem::OnStart);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Stop, ScriptedSystem::OnStop);
+		m_Registry.RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
 	}
 
 	void EntityScene::OnTick()
 	{
-		m_Registry.InvokeAll(GloryECS::InvocationType::Update);
+		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Update);
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
 	void EntityScene::OnPaint()
 	{
-		m_Registry.InvokeAll(GloryECS::InvocationType::Draw);
+		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Draw);
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 

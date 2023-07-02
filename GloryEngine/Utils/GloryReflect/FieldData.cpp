@@ -2,7 +2,7 @@
 #include "Reflection.h"
 #include <string>
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	FieldData::FieldData(FieldType type, const char* name, const char* typeName, size_t offset, size_t size) :
 		m_Type(Reflect::GetCustomTypeHash(type)),

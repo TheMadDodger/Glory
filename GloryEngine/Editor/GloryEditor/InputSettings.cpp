@@ -165,7 +165,7 @@ namespace Glory::Editor
 				FilteredBindings.clear();
 				if (CurrentDeviceType == InputDeviceType(-1) || CurrentDeviceType == InputDeviceType::Keyboard)
 				{
-					auto keyEnum = GloryReflect::Enum<KeyboardKey>();
+					auto keyEnum = Enum<KeyboardKey>();
 					for (size_t i = 0; i < keyEnum.NumValues(); i++)
 					{
 						std::string keyString;
@@ -177,7 +177,7 @@ namespace Glory::Editor
 
 				if (CurrentDeviceType == InputDeviceType(-1) || CurrentDeviceType == InputDeviceType::Mouse)
 				{
-					auto keyEnum = GloryReflect::Enum<MouseButton>();
+					auto keyEnum = Enum<MouseButton>();
 					for (size_t i = 0; i < keyEnum.NumValues(); i++)
 					{
 						std::string buttonString;
@@ -186,7 +186,7 @@ namespace Glory::Editor
 						FilteredBindings.push_back({ InputDeviceType::Mouse, buttonString, i, false });
 					}
 
-					auto axisEnum = GloryReflect::Enum<MouseAxis>();
+					auto axisEnum = Enum<MouseAxis>();
 					for (size_t i = 0; i < axisEnum.NumValues(); i++)
 					{
 						std::string axisString;
@@ -211,7 +211,7 @@ namespace Glory::Editor
 
 			if (CurrentDeviceType == InputDeviceType(-1) && search.empty())
 			{
-				auto deviceTypeEnum = GloryReflect::Enum<InputDeviceType>();
+				auto deviceTypeEnum = Enum<InputDeviceType>();
 				for (size_t i = 0; i < deviceTypeEnum.NumValues(); i++)
 				{
 					InputDeviceType deviceType = InputDeviceType(i);
@@ -247,7 +247,7 @@ namespace Glory::Editor
 						ImGui::PushID((int)i);
 						/* Icon */
 						std::string bindingString;
-						GloryReflect::Enum<InputDeviceType>().ToString(bindingData.DeviceType, bindingString);
+						Enum<InputDeviceType>().ToString(bindingData.DeviceType, bindingString);
 						std::filesystem::path bindingPath{ bindingString };
 						bindingPath = bindingPath.append(bindingData.IsAxis ? "Axis" : "Key").append(bindingData.Label);
 						if (ImGui::Selectable(bindingData.IsAxis ? ICON_FA_ARROW_RIGHT_ARROW_LEFT : ICON_FA_CIRCLE_DOWN, bindingPath.string() == value, ImGuiSelectableFlags_AllowItemOverlap))

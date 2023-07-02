@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	void CharacterControllerSystem::OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
+	void CharacterControllerSystem::OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
 	{
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
 		if (!pPhysics)
@@ -42,7 +42,7 @@ namespace Glory
 		PhysicsSystem::AddBody(pComponent.m_BodyID, pRegistry, entity);
 	}
 
-	void CharacterControllerSystem::OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
+	void CharacterControllerSystem::OnStop(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
 	{
 		if (!pComponent.m_CharacterID) return;
 
@@ -67,7 +67,7 @@ namespace Glory
 		pComponent.m_ShapeID = 0;
 	}
 
-	void CharacterControllerSystem::OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
+	void CharacterControllerSystem::OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
 	{
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
 		if (!pPhysics)
@@ -84,7 +84,7 @@ namespace Glory
 		}
 	}
 
-	void CharacterControllerSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
+	void CharacterControllerSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
 	{
 		if (!pComponent.m_CharacterID) return;
 

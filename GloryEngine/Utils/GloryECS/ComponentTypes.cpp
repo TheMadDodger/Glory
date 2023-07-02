@@ -2,7 +2,7 @@
 #include "EntityRegistry.h"
 #include <exception>
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	ComponentTypes* ComponentTypes::m_pInstance = nullptr;
 	bool ComponentTypes::m_InstanceOwned = false;

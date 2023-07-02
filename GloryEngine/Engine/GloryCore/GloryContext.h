@@ -3,7 +3,7 @@
 #include "CameraManager.h"
 #include "ThreadedVar.h"
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	class Reflect;
 }
@@ -72,7 +72,7 @@ namespace Glory
 		DisplayManager* m_pDisplayManager;
 		Console* m_pConsole;
 		LayerManager* m_pLayerManager;
-		GloryReflect::Reflect* m_pReflection;
+		Reflect* m_pReflection;
 		ThreadedVector<Object*> m_pAllObjects;
 		std::map<size_t, void*> m_pUserContexts;
 	};

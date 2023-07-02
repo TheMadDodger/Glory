@@ -44,7 +44,7 @@ namespace Glory
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
 		m_pMonoManager->Initialize("./Modules/GloryMonoScripting/Dependencies");
 
-		GloryReflect::Reflect::RegisterEnum<MonoLogLevel>();
+		Reflect::RegisterEnum<MonoLogLevel>();
 	}
 
 	void GloryMonoScipting::PostInitialize()

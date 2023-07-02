@@ -117,7 +117,7 @@ namespace Glory
         /* Set mono log level */
         const MonoLogLevel logLevel = m_pModule->Settings().EnumValue<MonoLogLevel>("MonoLogLevel");
         std::string logLevelString;
-        if (!GloryReflect::Enum<MonoLogLevel>().ToString(logLevel, logLevelString))
+        if (!Enum<MonoLogLevel>().ToString(logLevel, logLevelString))
             logLevelString = "error";
         mono_trace_set_level_string(logLevelString.c_str());
 

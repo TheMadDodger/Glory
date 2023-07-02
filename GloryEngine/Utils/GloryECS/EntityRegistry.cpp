@@ -1,7 +1,7 @@
 #include "EntityRegistry.h"
 #include "ComponentTypes.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	EntityRegistry::EntityRegistry() : m_NextEntityID(1), m_pUserData(nullptr)
 	{

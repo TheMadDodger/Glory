@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	class EnumType
 	{

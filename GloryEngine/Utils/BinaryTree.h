@@ -3,7 +3,7 @@
 #include <limits>
 #include <exception>
 
-namespace GloryECS
+namespace Glory::Utils
 {
 	template<typename TElem, typename TIndex>
 	class BinaryTree

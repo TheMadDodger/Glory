@@ -8,7 +8,7 @@
 #include <map>
 #include <vector>
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	class Reflect
 	{

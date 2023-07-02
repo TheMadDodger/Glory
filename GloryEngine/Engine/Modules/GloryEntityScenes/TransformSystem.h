@@ -1,7 +1,7 @@
 #pragma once
 #include "Components.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
     class EntityRegistry;
 }
@@ -11,8 +11,8 @@ namespace Glory
     class TransformSystem
     {
     public:
-        static void OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
-        GLORY_API static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
+        static void OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
+        GLORY_API static void OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, Transform& pComponent);
 
     private:
         TransformSystem();

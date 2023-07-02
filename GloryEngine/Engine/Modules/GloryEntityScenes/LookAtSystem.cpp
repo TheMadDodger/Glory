@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	void LookAtSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, LookAt& pComponent)
+	void LookAtSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, LookAt& pComponent)
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		glm::mat4 matrix = glm::lookAt(pComponent.m_Eye, pComponent.m_Center, pComponent.m_Up);

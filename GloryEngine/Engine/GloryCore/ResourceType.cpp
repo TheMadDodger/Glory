@@ -36,7 +36,7 @@ namespace Glory
 
 	uint32_t ResourceType::GetHash(std::type_index type)
 	{
-		return GloryReflect::Reflect::Hash(type.name());
+		return Reflect::Hash(type.name());
 	}
 
 	ResourceType* ResourceType::GetResourceType(const std::string& extension)
@@ -48,7 +48,7 @@ namespace Glory
 
 	ResourceType* ResourceType::GetResourceType(std::type_index type)
 	{
-		return GetResourceType(GloryReflect::Reflect::Hash(type.name()));
+		return GetResourceType(Reflect::Hash(type.name()));
 	}
 
 	ResourceType* ResourceType::GetResourceType(uint32_t hash)

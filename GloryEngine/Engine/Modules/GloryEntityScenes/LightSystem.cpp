@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	void LightSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, LightComponent& pComponent)
+	void LightSystem::OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, LightComponent& pComponent)
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		PointLight pointLight;

@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	typedef uint64_t EntityID;
 }

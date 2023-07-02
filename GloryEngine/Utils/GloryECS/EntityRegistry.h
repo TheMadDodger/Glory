@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <functional>
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	class EntityRegistry
 	{

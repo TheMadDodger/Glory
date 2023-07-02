@@ -1,6 +1,6 @@
 #include "TypeView.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	BaseTypeView::BaseTypeView(uint32_t typeHash, EntityRegistry* pRegistry) : m_TypeHash(typeHash), m_pRegistry(pRegistry), m_Entities()
 	{

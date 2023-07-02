@@ -14,7 +14,7 @@ namespace Glory::Editor
 		uint32_t typeHash = pEntityView->ComponentTypeAt(componentIndex);
 		UUID componentUUID = pEntityView->ComponentUUIDAt(componentIndex);
 		void* pAddress = pRegistry->GetComponentAddress(entityID, componentUUID);
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 		EntitySceneObjectSerializer::SerializeComponent(entityID, pRegistry, componentUUID, pAddress, pTypeData, out);
 		m_SerializedComponent = out.c_str();
 	}

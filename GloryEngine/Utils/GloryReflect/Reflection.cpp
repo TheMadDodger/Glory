@@ -1,7 +1,7 @@
 #include "Reflection.h"
 #include "../Hash.h"
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	Reflect* Reflect::m_pReflectInstance = nullptr;
 	bool Reflect::m_InstanceOwned = false;
@@ -236,7 +236,7 @@ namespace GloryReflect
 		if (m_pReflectInstance->m_ArrayElementFieldDatas.at(pFieldData->ArrayElementType()).find(index)
 			== m_pReflectInstance->m_ArrayElementFieldDatas.at(pFieldData->ArrayElementType()).end())
 		{
-			const TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pFieldData->ArrayElementType());
+			const TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 			m_pReflectInstance->m_ArrayElementFieldDatas.at(pFieldData->ArrayElementType())
 				.emplace(index, FieldData(pFieldData->ArrayElementType(), "Element", pTypeData->TypeName(), index * pFieldData->Size(), pFieldData->Size()));
 		}

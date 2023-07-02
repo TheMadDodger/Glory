@@ -13,12 +13,12 @@ namespace Glory
     {
     }
 
-    void TransformSystem::OnStart(GloryECS::EntityRegistry*, EntityID, Transform& pComponent)
+    void TransformSystem::OnStart(Glory::Utils::ECS::EntityRegistry*, EntityID, Transform& pComponent)
     {
         CalculateMatrix(pComponent);
     }
 
-    void Glory::TransformSystem::OnUpdate(GloryECS::EntityRegistry*, EntityID, Transform& pComponent)
+    void Glory::TransformSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry*, EntityID, Transform& pComponent)
     {
         CalculateMatrix(pComponent);
     }

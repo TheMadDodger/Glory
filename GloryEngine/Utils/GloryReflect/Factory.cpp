@@ -1,6 +1,6 @@
 #include "Factory.h"
 
-namespace GloryReflect
+namespace Glory::Utils::Reflect
 {
 	FactoryBase::FactoryBase(uint32_t typeHash) : m_TypeHash(typeHash)
 	{

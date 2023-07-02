@@ -150,7 +150,7 @@ namespace Glory::Editor
 
 		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
 		EntityID entityID = entity.GetEntityID();
-		GloryECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
+		Glory::Utils::ECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
 
 		bool removeComponent = false;
 		size_t toRemoveComponent = 0;

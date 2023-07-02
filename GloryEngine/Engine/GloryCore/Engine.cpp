@@ -316,34 +316,34 @@ namespace Glory
 		ResourceType::RegisterType<SceneObjectRef>();
 		ResourceType::RegisterType<ShapeProperty>();
 
-		GloryReflect::Reflect::RegisterBasicType<glm::vec2>("vec2");
-		GloryReflect::Reflect::RegisterBasicType<glm::vec3>("vec3");
-		GloryReflect::Reflect::RegisterBasicType<glm::vec4>("vec4");
-		GloryReflect::Reflect::RegisterBasicType<glm::quat>("quat");
+		Reflect::RegisterBasicType<glm::vec2>("vec2");
+		Reflect::RegisterBasicType<glm::vec3>("vec3");
+		Reflect::RegisterBasicType<glm::vec4>("vec4");
+		Reflect::RegisterBasicType<glm::quat>("quat");
 
-		GloryReflect::Reflect::RegisterBasicType<UUID>("UUID");
-		GloryReflect::Reflect::RegisterBasicType<LayerRef>("LayerRef");
-		GloryReflect::Reflect::RegisterBasicType<LayerMask>();
-		GloryReflect::Reflect::RegisterEnum<InputDeviceType>();
-		GloryReflect::Reflect::RegisterEnum<InputMappingType>();
-		GloryReflect::Reflect::RegisterEnum<InputState>();
-		GloryReflect::Reflect::RegisterEnum<AxisBlending>();
+		Reflect::RegisterBasicType<UUID>("UUID");
+		Reflect::RegisterBasicType<LayerRef>("LayerRef");
+		Reflect::RegisterBasicType<LayerMask>();
+		Reflect::RegisterEnum<InputDeviceType>();
+		Reflect::RegisterEnum<InputMappingType>();
+		Reflect::RegisterEnum<InputState>();
+		Reflect::RegisterEnum<AxisBlending>();
 
-		GloryReflect::Reflect::RegisterEnum<Filter>();
-		GloryReflect::Reflect::RegisterEnum<SamplerAddressMode>();
-		GloryReflect::Reflect::RegisterEnum<CompareOp>();
+		Reflect::RegisterEnum<Filter>();
+		Reflect::RegisterEnum<SamplerAddressMode>();
+		Reflect::RegisterEnum<CompareOp>();
 
 		/* Physics types */
-		GloryReflect::Reflect::RegisterEnum<BodyType>();
-		GloryReflect::Reflect::RegisterEnum<ShapeType>();
-		GloryReflect::Reflect::RegisterType<Box>();
-		GloryReflect::Reflect::RegisterType<Sphere>();
-		GloryReflect::Reflect::RegisterType<Cylinder>();
-		GloryReflect::Reflect::RegisterType<Capsule>();
-		GloryReflect::Reflect::RegisterType<TaperedCapsule>();
-		GloryReflect::Reflect::RegisterType<ShapeProperty>();
+		Reflect::RegisterEnum<BodyType>();
+		Reflect::RegisterEnum<ShapeType>();
+		Reflect::RegisterType<Box>();
+		Reflect::RegisterType<Sphere>();
+		Reflect::RegisterType<Cylinder>();
+		Reflect::RegisterType<Capsule>();
+		Reflect::RegisterType<TaperedCapsule>();
+		Reflect::RegisterType<ShapeProperty>();
 
-		GloryReflect::Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
+		Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}
 
 	void Engine::Update()
