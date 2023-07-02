@@ -34,8 +34,8 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void RegisterPropertyDrawer(PropertyDrawer* pDrawer);
 
-		static GLORY_EDITOR_API bool DrawProperty(const GloryReflect::FieldData* pFieldData, void* data, uint32_t flags);
-		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const GloryReflect::TypeData* pTypeData, void* data, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(const FieldData* pFieldData, void* data, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const TypeData* pTypeData, void* data, uint32_t flags);
 
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);
@@ -45,7 +45,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API PropertyDrawer* GetPropertyDrawer(uint32_t typeHash);
 
 		static GLORY_EDITOR_API const std::filesystem::path& GetCurrentPropertyPath();
-		static GLORY_EDITOR_API const GloryReflect::TypeData* GetRootTypeData();
+		static GLORY_EDITOR_API const TypeData* GetRootTypeData();
 
 		static GLORY_EDITOR_API void PushPath(const std::string& name);
 		static GLORY_EDITOR_API void PopPath();
@@ -61,7 +61,7 @@ namespace Glory::Editor
 		uint32_t m_TypeHash;
 
 		static std::vector<PropertyDrawer*> m_PropertyDrawers;
-		static const GloryReflect::TypeData* m_pRootTypeData;
+		static const TypeData* m_pRootTypeData;
 		static std::filesystem::path m_CurrentPropertyPath;
 	};
 

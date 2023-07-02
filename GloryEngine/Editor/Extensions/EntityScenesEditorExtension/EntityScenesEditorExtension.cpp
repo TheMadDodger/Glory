@@ -68,38 +68,38 @@ namespace Glory::Editor
 	void EntityScenesEditorExtension::HandleStart(Module* pModule)
 	{
 		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
-		GloryECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
-		GloryECS::ComponentTypes::SetInstance(pComponentTypes);
+		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
+		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
 		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
 			EntityScene* pEntityScene = (EntityScene*)pScene;
 			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
-			pRegistry->InvokeAll(GloryECS::InvocationType::Start);
+			pRegistry->InvokeAll(Glory::Utils::ECS::InvocationType::Start);
 		}
 	}
 
 	void EntityScenesEditorExtension::HandleStop(Module* pModule)
 	{
 		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
-		GloryECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
-		GloryECS::ComponentTypes::SetInstance(pComponentTypes);
+		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
+		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
 		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
 			EntityScene* pEntityScene = (EntityScene*)pScene;
 			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
-			pRegistry->InvokeAll(GloryECS::InvocationType::Stop);
+			pRegistry->InvokeAll(Glory::Utils::ECS::InvocationType::Stop);
 		}
 	}
 
 	void EntityScenesEditorExtension::HandleUpdate(Module* pModule)
 	{
 		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
-		GloryECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
-		GloryECS::ComponentTypes::SetInstance(pComponentTypes);
+		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
+		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
 		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
 		{
@@ -109,7 +109,7 @@ namespace Glory::Editor
 			for (size_t i = 0; i < m_ComponentsToUpdateInEditor.size(); i++)
 			{
 				uint32_t hash = ResourceType::GetHash(m_ComponentsToUpdateInEditor[i]);
-				pRegistry->InvokeAll(hash, GloryECS::InvocationType::Update);
+				pRegistry->InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
 			}
 		}
 	}

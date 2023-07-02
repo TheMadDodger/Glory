@@ -13,11 +13,11 @@ namespace Glory::Editor
 			return false;
 		}
 
-		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const TypeData* pEnumTypeData = Reflect::GetTyeData(typeHash);
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
 		if(pPropertyDrawer) return PropertyDrawer::DrawProperty(label, pEnumTypeData, data, flags);
 
-		GloryReflect::EnumType *pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		EnumType *pEnumType = Reflect::GetEnumType(typeHash);
 		if (!pEnumType)
 		{
 			ImGui::TextColored({1,0,0,1}, label.c_str());
@@ -33,8 +33,8 @@ namespace Glory::Editor
 
 	bool EnumPropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
-		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		const TypeData* pEnumTypeData = Reflect::GetTyeData(typeHash);
+		EnumType* pEnumType = Reflect::GetEnumType(typeHash);
 		if (!pEnumType)
 		{
 			ImGui::TextColored({ 1,0,0,1 }, label.c_str());

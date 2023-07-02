@@ -412,18 +412,18 @@ namespace Glory
 		settings.PushGroup("Broadphase Layers");
 		settings.RegisterArray<BPLayer>("BroadPhaseLayerMapping");
 
-		const size_t bpLayerCount = GloryReflect::Enum<BPLayer>().NumValues();
+		const size_t bpLayerCount = Enum<BPLayer>().NumValues();
 		for (size_t i = 0; i < bpLayerCount; i++)
 		{
 			std::string layerName;
-			GloryReflect::Enum<BPLayer>().ToString(BPLayer(i), layerName);
+			Enum<BPLayer>().ToString(BPLayer(i), layerName);
 			settings.RegisterValue<LayerMask>(layerName + "CollisionMask", 0);
 		}
 	}
 
 	void JoltPhysicsModule::Initialize()
 	{
-		GloryReflect::Reflect::RegisterEnum<BPLayer>();
+		Reflect::RegisterEnum<BPLayer>();
 
 		// Register allocation hook
 		JPH::RegisterDefaultAllocator();
@@ -487,17 +487,17 @@ namespace Glory
 		{
 			const std::string valueStr = Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
 			BPLayer bpLayer;
-			GloryReflect::Enum<BPLayer>().FromString(valueStr, bpLayer);
+			Enum<BPLayer>().FromString(valueStr, bpLayer);
 			bpLayersMapping.emplace((uint16_t)i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
 		}
 		m_BPLayerImpl.SetObjectToBroadphase(std::move(bpLayersMapping));
 
-		const size_t bpLayerCount = GloryReflect::Enum< BPLayer>().NumValues();
+		const size_t bpLayerCount = Enum< BPLayer>().NumValues();
 		std::vector<LayerMask> bpCollisionMapping = std::vector<LayerMask>(bpLayerCount);
 		for (size_t i = 0; i < bpLayerCount; i++)
 		{
 			std::string layerName;
-			GloryReflect::Enum<BPLayer>().ToString(BPLayer(i), layerName);
+			Enum<BPLayer>().ToString(BPLayer(i), layerName);
 			const LayerMask mask = Settings().Value<LayerMask>(layerName + "CollisionMask");
 			bpCollisionMapping[i] = mask;
 		}

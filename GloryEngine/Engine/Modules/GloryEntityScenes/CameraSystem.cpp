@@ -16,7 +16,7 @@ namespace Glory
 	{
 	}
 
-	void CameraSystem::OnComponentAdded(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnComponentAdded(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Engine* pEngine = Game::GetGame().GetEngine();
 		Window* pWindow = pEngine->GetWindowModule()->GetMainWindow();
@@ -29,12 +29,12 @@ namespace Glory
 		pComponent.m_LastHash = CalcHash(pComponent);
 	}
 
-	void CameraSystem::OnComponentRemoved(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnComponentRemoved(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		pComponent.m_Camera.Free();
 	}
 
-	void CameraSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(glm::inverse(transform.MatTransform));
@@ -56,7 +56,7 @@ namespace Glory
 		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
 	}
 
-	void CameraSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_Camera);
 	}

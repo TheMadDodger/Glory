@@ -30,7 +30,7 @@ namespace Glory
 		{
 			const std::string& valueStr = Node().as<std::string>();
 			T value;
-			if (!GloryReflect::Enum<T>().FromString(valueStr, value)) return T(0);
+			if (!Enum<T>().FromString(valueStr, value)) return T(0);
 			return value;
 		}
 
@@ -44,7 +44,7 @@ namespace Glory
 		void SetEnum(const T& value)
 		{
 			std::string valueStr;
-			if (!GloryReflect::Enum<T>().ToString(value, valueStr)) {
+			if (!Enum<T>().ToString(value, valueStr)) {
 				Set("");
 				return;
 			}

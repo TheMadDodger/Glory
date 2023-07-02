@@ -51,8 +51,6 @@ project "EntityScenesEditorExtension"
 		"%{LibDirs.glory}",
 		"%{modulesDir}/GloryEntityScenes",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -68,8 +66,8 @@ project "EntityScenesEditorExtension"
 		"implot",
 		"yaml-cpp",
 
-		"GloryECSStatic",
-		"GloryReflectStatic"
+		"GloryECS",
+		"GloryReflect"
 	}
 
 	defines

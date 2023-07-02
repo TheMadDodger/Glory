@@ -669,9 +669,9 @@ namespace Glory::Editor
 
 	bool EditorUI::InputEnum(std::string_view label, uint32_t typeHash, uint32_t* value, const std::vector<uint32_t>& excludeValues)
 	{
-		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const TypeData* pEnumTypeData = Reflect::GetTyeData(typeHash);
 
-		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		EnumType* pEnumType = Reflect::GetEnumType(typeHash);
 		if (!pEnumType)
 		{
 			ImGui::TextColored({ 1,0,0,1 }, label.data());
@@ -731,7 +731,7 @@ namespace Glory::Editor
 	{
 		Scope s{ path };
 		const std::string strValue = file[path].As<std::string>();
-		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		EnumType* pEnumType = Reflect::GetEnumType(typeHash);
 		uint32_t oldValue = 0;
 		pEnumType->FromString(strValue, &oldValue);
 		uint32_t newValue = oldValue;

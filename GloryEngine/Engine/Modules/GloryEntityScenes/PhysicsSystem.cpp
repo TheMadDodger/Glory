@@ -4,9 +4,9 @@
 
 namespace Glory
 {
-	std::map<uint32_t, std::pair<GloryECS::EntityRegistry*, EntityID>> PhysicsSystem::m_BodyOwners;
+	std::map<uint32_t, std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>> PhysicsSystem::m_BodyOwners;
 
-	void PhysicsSystem::OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
+	void PhysicsSystem::OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
 		if (!pPhysics)
@@ -18,7 +18,7 @@ namespace Glory
 		SetupBody(pPhysics, pRegistry, entity, pComponent);
 	}
 
-	void PhysicsSystem::OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
+	void PhysicsSystem::OnStop(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
 		if (!pPhysics) return;
@@ -27,7 +27,7 @@ namespace Glory
 		pPhysics->DestroyPhysicsBody(pComponent.m_BodyID);
 	}
 
-	void PhysicsSystem::OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
+	void PhysicsSystem::OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
 		if (!pPhysics)
@@ -47,7 +47,7 @@ namespace Glory
 		SetupBody(pPhysics, pRegistry, entity, pComponent);
 	}
 
-	void PhysicsSystem::OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
+	void PhysicsSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
 		if (!pPhysics)
@@ -99,8 +99,8 @@ namespace Glory
 	void PhysicsSystem::OnBodyActivated(uint32_t bodyID)
 	{
 		if (m_BodyOwners.find(bodyID) == m_BodyOwners.end()) return;
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair = m_BodyOwners.at(bodyID);
-		GloryECS::EntityRegistry* pRegistry = pair.first;
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair = m_BodyOwners.at(bodyID);
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pair.first;
 		EntityID entity = pair.second;
 		if (!pRegistry->IsValid(entity)) return;
 		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
@@ -118,8 +118,8 @@ namespace Glory
 	void PhysicsSystem::OnBodyDeactivated(uint32_t bodyID)
 	{
 		if (m_BodyOwners.find(bodyID) == m_BodyOwners.end()) return;
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair = m_BodyOwners.at(bodyID);
-		GloryECS::EntityRegistry* pRegistry = pair.first;
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair = m_BodyOwners.at(bodyID);
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pair.first;
 		EntityID entity = pair.second;
 		if (!pRegistry->IsValid(entity)) return;
 		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
@@ -138,10 +138,10 @@ namespace Glory
 	{
 		if (m_BodyOwners.find(body1ID) == m_BodyOwners.end()) return;
 		if (m_BodyOwners.find(body2ID) == m_BodyOwners.end()) return;
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners.at(body1ID);
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners.at(body2ID);
-		GloryECS::EntityRegistry* pRegistry1 = pair1.first;
-		GloryECS::EntityRegistry* pRegistry2 = pair2.first;
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners.at(body1ID);
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners.at(body2ID);
+		Glory::Utils::ECS::EntityRegistry* pRegistry1 = pair1.first;
+		Glory::Utils::ECS::EntityRegistry* pRegistry2 = pair2.first;
 		EntityID entity1 = pair1.second;
 		EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
@@ -179,10 +179,10 @@ namespace Glory
 	{
 		if (m_BodyOwners.find(body1ID) == m_BodyOwners.end()) return;
 		if (m_BodyOwners.find(body2ID) == m_BodyOwners.end()) return;
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners.at(body1ID);
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners.at(body2ID);
-		GloryECS::EntityRegistry* pRegistry1 = pair1.first;
-		GloryECS::EntityRegistry* pRegistry2 = pair2.first;
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners.at(body1ID);
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners.at(body2ID);
+		Glory::Utils::ECS::EntityRegistry* pRegistry1 = pair1.first;
+		Glory::Utils::ECS::EntityRegistry* pRegistry2 = pair2.first;
 		EntityID entity1 = pair1.second;
 		EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
@@ -220,10 +220,10 @@ namespace Glory
 	{
 		if (m_BodyOwners.find(body1ID) == m_BodyOwners.end()) return;
 		if (m_BodyOwners.find(body2ID) == m_BodyOwners.end()) return;
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners.at(body1ID);
-		const std::pair<GloryECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners.at(body2ID);
-		GloryECS::EntityRegistry* pRegistry1 = pair1.first;
-		GloryECS::EntityRegistry* pRegistry2 = pair2.first;
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair1 = m_BodyOwners.at(body1ID);
+		const std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>& pair2 = m_BodyOwners.at(body2ID);
+		Glory::Utils::ECS::EntityRegistry* pRegistry1 = pair1.first;
+		Glory::Utils::ECS::EntityRegistry* pRegistry2 = pair2.first;
 		EntityID entity1 = pair1.second;
 		EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
@@ -257,7 +257,7 @@ namespace Glory
 		}
 	}
 
-	void PhysicsSystem::AddBody(uint32_t bodyID, GloryECS::EntityRegistry* pRegistry, EntityID entity)
+	void PhysicsSystem::AddBody(uint32_t bodyID, Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity)
 	{
 		m_BodyOwners[bodyID] = { pRegistry, entity };
 	}
@@ -267,7 +267,7 @@ namespace Glory
 		m_BodyOwners.erase(bodyID);
 	}
 
-	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
+	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();

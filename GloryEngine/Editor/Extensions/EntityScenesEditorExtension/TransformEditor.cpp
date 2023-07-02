@@ -40,7 +40,7 @@ namespace Glory::Editor
 		bool change = false;
 
 		const EntityID entity = m_pComponentObject->EntityID();
-		const GloryReflect::TypeData* pTypeData = Transform::GetTypeData();
+		const TypeData* pTypeData = Transform::GetTypeData();
 		Transform& transform = GetTargetComponent();
 
 		if (!wasManipulated && !isManipulating && transform.MatTransform != newTransform)

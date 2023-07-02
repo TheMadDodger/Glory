@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-    void MeshRenderSystem::OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, MeshRenderer& pComponent)
+    void MeshRenderSystem::OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, MeshRenderer& pComponent)
     {
         //ubo.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 10.0f);
         //ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan

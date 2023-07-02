@@ -2,7 +2,7 @@
 #include "Components.h"
 #include <RenderData.h>
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
     class EntityRegistry;
 }
@@ -12,7 +12,7 @@ namespace Glory
     class MeshRenderSystem
     {
     public:
-        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, MeshRenderer& pComponent);
+        static void OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, MeshRenderer& pComponent);
 
     private:
         MeshRenderSystem() {}

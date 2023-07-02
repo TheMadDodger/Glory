@@ -43,7 +43,7 @@ namespace Glory
 		{
 			T* pShape = shapeProperty->ShapePointer<T>();
 
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(ResourceType::GetHash<T>());
+			const TypeData* pTypeData = Reflect::GetTyeData(ResourceType::GetHash<T>());
 			PropertySerializer::SerializeProperty("Shape", pTypeData, pShape, out);
 		}
 
@@ -54,7 +54,7 @@ namespace Glory
 			T* pShape = shapeProperty->ShapePointer<T>();
 
 			YAML::Node shape = object["Shape"];
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(ResourceType::GetHash<T>());
+			const TypeData* pTypeData = Reflect::GetTyeData(ResourceType::GetHash<T>());
 			PropertySerializer::DeserializeProperty(pTypeData, pShape, shape);
 		}
 	};
@@ -79,7 +79,7 @@ namespace Glory
 	{
 		ShapeProperty* value = (ShapeProperty*)data;
 		std::string shapeType;
-		if (!GloryReflect::Enum<ShapeType>().ToString(value->m_ShapeType, shapeType)) return;
+		if (!Enum<ShapeType>().ToString(value->m_ShapeType, shapeType)) return;
 
 		if (!name.empty())
 		{
@@ -100,7 +100,7 @@ namespace Glory
 		YAML::Node shapeTypeNode = object["ShapeType"];
 		std::string shapeTypeStr = shapeTypeNode.as<std::string>();
 		ShapeType shapeTye;
-		if (!GloryReflect::Enum<ShapeType>().FromString(shapeTypeStr, shapeTye)) return;
+		if (!Enum<ShapeType>().FromString(shapeTypeStr, shapeTye)) return;
 
 		ShapeProperty* value = (ShapeProperty*)data;
 		ShapeSerializers::Deserialize(shapeTye, value, object);

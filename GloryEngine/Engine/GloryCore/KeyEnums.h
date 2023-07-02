@@ -233,9 +233,9 @@ namespace Glory
 	};
 }
 
-const size_t GloryReflect::Enum<Glory::KeyboardKey>::m_NumValues = size_t(Glory::KeyboardKey::KeyboardKeyCount);
-bool GloryReflect::Enum<Glory::KeyboardKey>::Valid() { return true; }\
-const std::string GloryReflect::Enum<Glory::KeyboardKey>::m_EnumStringValues[] = {
+const size_t Glory::Utils::Reflect::Enum<Glory::KeyboardKey>::m_NumValues = size_t(Glory::KeyboardKey::KeyboardKeyCount);
+bool Glory::Utils::Reflect::Enum<Glory::KeyboardKey>::Valid() { return true; }\
+const std::string Glory::Utils::Reflect::Enum<Glory::KeyboardKey>::m_EnumStringValues[] = {
 	"KeyEscape",
 	"KeyF1",
 	"KeyF2",
@@ -426,9 +426,9 @@ const std::string GloryReflect::Enum<Glory::KeyboardKey>::m_EnumStringValues[] =
 	"KeySysRq",
 };
 
-const size_t GloryReflect::Enum<Glory::MouseButton>::m_NumValues = size_t(Glory::MouseButton::MouseButtonCount);
-bool GloryReflect::Enum<Glory::MouseButton>::Valid() { return true; }
-const std::string GloryReflect::Enum<Glory::MouseButton>::m_EnumStringValues[] = {
+const size_t Glory::Utils::Reflect::Enum<Glory::MouseButton>::m_NumValues = size_t(Glory::MouseButton::MouseButtonCount);
+bool Glory::Utils::Reflect::Enum<Glory::MouseButton>::Valid() { return true; }
+const std::string Glory::Utils::Reflect::Enum<Glory::MouseButton>::m_EnumStringValues[] = {
 	"MouseButtonLeft",
 	"MouseButtonMiddle",
 	"MouseButtonRight",
@@ -452,9 +452,9 @@ const std::string GloryReflect::Enum<Glory::MouseButton>::m_EnumStringValues[] =
 	"MouseButton20",
 };
 
-const size_t GloryReflect::Enum<Glory::MouseAxis>::m_NumValues = size_t(Glory::MouseAxis::MouseAxisCount);
-bool GloryReflect::Enum<Glory::MouseAxis>::Valid() { return true; }
-const std::string GloryReflect::Enum<Glory::MouseAxis>::m_EnumStringValues[] = {
+const size_t Glory::Utils::Reflect::Enum<Glory::MouseAxis>::m_NumValues = size_t(Glory::MouseAxis::MouseAxisCount);
+bool Glory::Utils::Reflect::Enum<Glory::MouseAxis>::Valid() { return true; }
+const std::string Glory::Utils::Reflect::Enum<Glory::MouseAxis>::m_EnumStringValues[] = {
 	"MouseAxisX",
 	"MouseAxisY",
 	"MouseAxisScrollX",

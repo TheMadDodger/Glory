@@ -13,13 +13,13 @@ namespace Glory
 		GLORY_API EntitySceneScenesModule();
 		GLORY_API virtual ~EntitySceneScenesModule();
 
-		GLORY_API GloryECS::ComponentTypes* ComponentTypesInstance() const;
+		GLORY_API Glory::Utils::ECS::ComponentTypes* ComponentTypesInstance() const;
 
 		template<typename T>
 		void RegisterComponent(bool allowMultiple = false, const uint64_t customFlags = 0)
 		{
-			GloryECS::ComponentTypes::RegisterComponent<T>(allowMultiple, customFlags);
-			GloryReflect::Reflect::RegisterType<T>();
+			Glory::Utils::ECS::ComponentTypes::RegisterComponent<T>(allowMultiple, customFlags);
+			Reflect::RegisterType<T>();
 		}
 
 		GLORY_MODULE_VERSION_H(0,1,0);
@@ -39,6 +39,6 @@ namespace Glory
 	private:
 		friend class EntitySceneObjectSerializer;
 		friend class EntitySceneSerializer;
-		GloryECS::ComponentTypes* m_pComponentTypesInstance;
+		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;
 	};
 }

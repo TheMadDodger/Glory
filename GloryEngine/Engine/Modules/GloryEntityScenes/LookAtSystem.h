@@ -1,7 +1,7 @@
 #pragma once
 #include "Components.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
 }
@@ -11,7 +11,7 @@ namespace Glory
 	class LookAtSystem
 	{
 	public:
-		static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, LookAt& pComponent);
+		static void OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, LookAt& pComponent);
 
 	private:
 		LookAtSystem();

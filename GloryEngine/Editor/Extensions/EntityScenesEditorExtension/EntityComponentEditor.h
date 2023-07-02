@@ -31,7 +31,7 @@ namespace Glory::Editor
 			bool change = false;
 
 			uint32_t hash = ResourceType::GetHash<TComponent>();
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(hash);
+			const TypeData* pTypeData = Reflect::GetTyeData(hash);
 			if (pTypeData)
 			{
 				TComponent& component = GetTargetComponent();
@@ -48,8 +48,8 @@ namespace Glory::Editor
 		void Validate()
 		{
 			TComponent& component = GetTargetComponent();
-			GloryECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
-			GloryECS::TypeView<TComponent>* pTypeView = pRegistry->GetTypeView<TComponent>();
+			Glory::Utils::ECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
+			Glory::Utils::ECS::TypeView<TComponent>* pTypeView = pRegistry->GetTypeView<TComponent>();
 			pTypeView->Invoke(InvocationType::OnValidate, pRegistry, m_pComponentObject->EntityID(), &component);
 		}
 

@@ -40,14 +40,13 @@ project "GloryASSIMPModelLoader"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
 	{
 		"GloryCore",
 		"yaml-cpp",
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	defines

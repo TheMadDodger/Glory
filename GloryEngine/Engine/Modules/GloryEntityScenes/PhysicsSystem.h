@@ -1,7 +1,7 @@
 #pragma once
 #include "Components.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
     class EntityRegistry;
 }
@@ -14,10 +14,10 @@ namespace Glory
         PhysicsSystem() = delete;
 
     public:
-        static void OnStart(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
-        static void OnStop(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
-        static void OnValidate(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
-        static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
+        static void OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
+        static void OnStop(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
+        static void OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
+        static void OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
 
         static void OnBodyActivated(uint32_t bodyID);
         static void OnBodyDeactivated(uint32_t bodyID);
@@ -26,13 +26,13 @@ namespace Glory
         static void OnContactPersisted(uint32_t body1ID, uint32_t body2ID);
         static void OnContactRemoved(uint32_t body1ID, uint32_t body2ID);
 
-        static void AddBody(uint32_t bodyID, GloryECS::EntityRegistry* pRegistry, EntityID entity);
+        static void AddBody(uint32_t bodyID, Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity);
         static void RemoveBody(uint32_t bodyID);
 
     private:
-        static void SetupBody(PhysicsModule* pPhysics, GloryECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
+        static void SetupBody(PhysicsModule* pPhysics, Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent);
         
     private:
-        static std::map<uint32_t, std::pair<GloryECS::EntityRegistry*, EntityID>> m_BodyOwners;
+        static std::map<uint32_t, std::pair<Glory::Utils::ECS::EntityRegistry*, EntityID>> m_BodyOwners;
     };
 }

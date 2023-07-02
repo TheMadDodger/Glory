@@ -18,7 +18,7 @@ namespace Glory::Editor
 	class EntityComponentPopup
 	{
 	public:
-		static void Open(GloryECS::EntityID entity, GloryECS::EntityRegistry* pRegistry);
+		static void Open(Glory::Utils::ECS::EntityID entity, Glory::Utils::ECS::EntityRegistry* pRegistry);
 
 		void OnGUI();
 		static uint32_t GetLastSelectedComponentTypeHash();

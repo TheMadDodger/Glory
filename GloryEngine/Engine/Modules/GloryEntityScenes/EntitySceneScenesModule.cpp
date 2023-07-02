@@ -19,7 +19,7 @@ namespace Glory
 	{
 	}
 
-	GloryECS::ComponentTypes* EntitySceneScenesModule::ComponentTypesInstance() const
+	Glory::Utils::ECS::ComponentTypes* EntitySceneScenesModule::ComponentTypesInstance() const
 	{
 		return m_pComponentTypesInstance;
 	}
@@ -53,11 +53,11 @@ namespace Glory
 
 	void EntitySceneScenesModule::Initialize()
 	{
-		m_pComponentTypesInstance = GloryECS::ComponentTypes::CreateInstance();
+		m_pComponentTypesInstance = Glory::Utils::ECS::ComponentTypes::CreateInstance();
 
 		/* Register component types */
-		GloryReflect::Reflect::RegisterEnum<CameraPerspective>();
-		GloryReflect::Reflect::RegisterType<MeshMaterial>();
+		Reflect::RegisterEnum<CameraPerspective>();
+		Reflect::RegisterType<MeshMaterial>();
 
 		/* Register engine components */
 		RegisterComponent<Transform>();
@@ -73,8 +73,8 @@ namespace Glory
 		/* Always register scripted component as last to preserve execution order */
 		RegisterComponent<ScriptedComponent>();
 
-		const GloryReflect::FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
-		GloryReflect::Reflect::SetFieldFlags(pColorField, Vec4Flags::Color);
+		const FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
+		Reflect::SetFieldFlags(pColorField, Vec4Flags::Color);
 
 		/* Temporary components for testing */
 		RegisterComponent<Spin>();
@@ -103,7 +103,7 @@ namespace Glory
 
 	void EntitySceneScenesModule::OnCleanup()
 	{
-		GloryECS::ComponentTypes::DestroyInstance();
+		Glory::Utils::ECS::ComponentTypes::DestroyInstance();
 		m_pComponentTypesInstance = nullptr;
 	}
 }

@@ -48,8 +48,6 @@ project "GloryEditorOGL"
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -65,7 +63,7 @@ project "GloryEditorOGL"
 		"ImGuizmo",
 		"implot",
 
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	defines

@@ -46,17 +46,17 @@ namespace Glory::Editor
 		{
 			const std::string valueStr = pPhysics->Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
 			BPLayer bpLayer;
-			GloryReflect::Enum<BPLayer>().FromString(valueStr, bpLayer);
+			Enum<BPLayer>().FromString(valueStr, bpLayer);
 			bpLayersMapping.emplace((uint16_t)i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
 		}
 		pPhysics->BPLayerImpl().SetObjectToBroadphase(std::move(bpLayersMapping));
 
-		const size_t bpLayerCount = GloryReflect::Enum<BPLayer>().NumValues();
+		const size_t bpLayerCount = Enum<BPLayer>().NumValues();
 		std::vector<LayerMask> bpCollisionMapping = std::vector<LayerMask>(bpLayerCount);
 		for (size_t i = 0; i < bpLayerCount; i++)
 		{
 			std::string layerName;
-			GloryReflect::Enum<BPLayer>().ToString(BPLayer(i), layerName);
+			Enum<BPLayer>().ToString(BPLayer(i), layerName);
 			const LayerMask mask = pPhysics->Settings().Value<LayerMask>(layerName + "CollisionMask");
 			bpCollisionMapping[i] = mask;
 		}

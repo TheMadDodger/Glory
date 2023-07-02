@@ -36,7 +36,7 @@ namespace Glory
 	void GloryContext::SetContext(GloryContext* pContext)
 	{
 		m_pContext = pContext;
-		GloryReflect::Reflect::SetReflectInstance(m_pContext->m_pReflection);
+		Reflect::SetReflectInstance(m_pContext->m_pReflection);
 	}
 
 	GloryContext* GloryContext::GetContext()
@@ -107,7 +107,7 @@ namespace Glory
 	Glory::GloryContext::GloryContext()
 		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
 		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pConsole(new Console()),
-		m_pLayerManager(new LayerManager()), m_pReflection(GloryReflect::Reflect::CreateReflectInstance())
+		m_pLayerManager(new LayerManager()), m_pReflection(Reflect::CreateReflectInstance())
 	{
 	}
 
@@ -127,6 +127,6 @@ namespace Glory
 		m_pConsole = nullptr;
 
 		m_CameraManager.Cleanup();
-		GloryReflect::Reflect::DestroyReflectInstance();
+		Reflect::DestroyReflectInstance();
 	}
 }

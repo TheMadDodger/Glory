@@ -45,7 +45,7 @@ namespace Glory::Editor
 		bool OnGUI(ShapeProperty* shapeProperty) const override
 		{
 			T* data = shapeProperty->ShapePointer<T>();
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(ResourceType::GetHash<T>());
+			const TypeData* pTypeData = Reflect::GetTyeData(ResourceType::GetHash<T>());
 			return PropertyDrawer::DrawProperty("", pTypeData, data, 0);
 		}
 

@@ -14,7 +14,7 @@ namespace Glory::Editor
 
 		bool change = false;
 
-		const GloryReflect::TypeData* pStructTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const TypeData* pStructTypeData = Reflect::GetTyeData(typeHash);
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
 		if (pPropertyDrawer) return PropertyDrawer::DrawProperty(label, pStructTypeData, data, flags);
 
@@ -38,12 +38,12 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool StructPropertyDrawer::DrawFields(void* data, const GloryReflect::TypeData* pStructTypeData, uint32_t flags) const
+	bool StructPropertyDrawer::DrawFields(void* data, const TypeData* pStructTypeData, uint32_t flags) const
 	{
 		bool change = false;
 		for (size_t i = 0; i < pStructTypeData->FieldCount(); i++)
 		{
-			const GloryReflect::FieldData* pFieldData = pStructTypeData->GetFieldData(i);
+			const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
 			size_t offset = pFieldData->Offset();
 			void* pAddress = (void*)((char*)(data)+offset);
 			change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, flags);

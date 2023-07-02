@@ -50,8 +50,6 @@ project "JoltEditorExtension"
 		"%{LibDirs.glory}",
 		"%{modulesDir}/GloryJoltPhysics",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -67,8 +65,8 @@ project "JoltEditorExtension"
 		"implot",
 		"yaml-cpp",
 
-		"GloryECSStatic",
-		"GloryReflectStatic"
+		"GloryECS",
+		"GloryReflect"
 	}
 
 	defines

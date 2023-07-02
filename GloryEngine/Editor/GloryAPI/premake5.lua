@@ -30,7 +30,6 @@ project "GloryAPI"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-		"%{LibDirs.GloryECS}",
 
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -50,7 +49,7 @@ project "GloryAPI"
 	{
 		"GloryCore",
 		"yaml-cpp",
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	filter "system:windows"

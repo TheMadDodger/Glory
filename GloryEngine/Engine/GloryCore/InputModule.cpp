@@ -243,7 +243,7 @@ namespace Glory
 				YAML::Node deviceTypeNode = deviceTypesNode[i];
 				const std::string deviceTypeString = deviceTypeNode.as<std::string>();
 				InputDeviceType deviceType;
-				GloryReflect::Enum<InputDeviceType>().FromString(deviceTypeString, deviceType);
+				Enum<InputDeviceType>().FromString(deviceTypeString, deviceType);
 				inputMode.m_DeviceTypes.push_back(deviceType);
 			}
 			m_InputModes.emplace(inputMode.m_Name.data(), std::move(inputMode));
@@ -254,9 +254,9 @@ namespace Glory
 	{
 		m_InputMaps.clear();
 
-		auto inputMappingEnum = GloryReflect::Enum<InputMappingType>();
-		auto keyStateEnum = GloryReflect::Enum<InputState>();
-		auto axisBlendingEnum = GloryReflect::Enum<AxisBlending>();
+		auto inputMappingEnum = Enum<InputMappingType>();
+		auto keyStateEnum = Enum<InputState>();
+		auto axisBlendingEnum = Enum<AxisBlending>();
 
 		for (size_t i = 0; i < node.size(); i++)
 		{

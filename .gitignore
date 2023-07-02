@@ -72,3 +72,6 @@ GloryEngine/third-party/tinyfiledialogs/Debug
 GloryEngine/third-party/tinyfiledialogs/Release
 GloryEngine/Editor/WriteVersion/Patchnotes
 GloryEngine/Editor/WriteVersion/version.txt
+GloryEngine/Utils/**/Debug
+GloryEngine/Utils/**/Release
+Logs

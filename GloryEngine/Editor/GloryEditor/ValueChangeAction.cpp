@@ -4,9 +4,11 @@
 
 #include <Debug.h>
 
+using namespace Glory::Utils::Reflect;
+
 namespace Glory::Editor
 {
-	ValueChangeAction::ValueChangeAction(const GloryReflect::TypeData* pType, const std::filesystem::path& path)
+	ValueChangeAction::ValueChangeAction(const TypeData* pType, const std::filesystem::path& path)
 		: m_pRootType(pType), m_PropertyPath(path)
 	{
 	}
@@ -17,8 +19,8 @@ namespace Glory::Editor
 
 	void ValueChangeAction::SetOldValue(void* pObject)
 	{
-		const GloryReflect::FieldData* pField = nullptr;
-		const GloryReflect::TypeData* pType = m_pRootType;
+		const FieldData* pField = nullptr;
+		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
 			const std::string& pathStr = subPath.string();
@@ -26,14 +28,14 @@ namespace Glory::Editor
 			{
 				if (!pField) throw new std::exception("Unexpected property path");
 				const size_t index = (size_t)std::stoul(pathStr.substr(2));
-				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				pField = Reflect::GetArrayElementData(pField, index);
 			}
 			else
 				pField = pType->GetFieldData(pathStr);
 
 			if (!pField) return;
 
-			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+			pType = Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
 		if (!pField) return;
@@ -47,8 +49,8 @@ namespace Glory::Editor
 
 	void ValueChangeAction::SetNewValue(void* pObject)
 	{
-		const GloryReflect::FieldData* pField = nullptr;
-		const GloryReflect::TypeData* pType = m_pRootType;
+		const FieldData* pField = nullptr;
+		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
 			const std::string& pathStr = subPath.string();
@@ -56,14 +58,14 @@ namespace Glory::Editor
 			{
 				if (!pField) throw new std::exception("Unexpected property path");
 				const size_t index = (size_t)std::stoul(pathStr.substr(2));
-				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				pField = Reflect::GetArrayElementData(pField, index);
 			}
 			else
 				pField = pType->GetFieldData(pathStr);
 
 			if (!pField) return;
 
-			pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+			pType = Reflect::GetTyeData(pField->ArrayElementType());
 		}
 
 		if (!pField) return;
@@ -80,8 +82,8 @@ namespace Glory::Editor
 		Object* pObject = Object::FindObject(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 
-		const GloryReflect::FieldData* pField = nullptr;
-		const GloryReflect::TypeData* pType = m_pRootType;
+		const FieldData* pField = nullptr;
+		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
 			const std::string& pathStr = subPath.string();
@@ -89,18 +91,18 @@ namespace Glory::Editor
 			{
 				if (!pField) throw new std::exception("Unexpected property path");
 				const size_t index = (size_t)std::stoul(pathStr.substr(2));
-				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				pField = Reflect::GetArrayElementData(pField, index);
 				if (!pField) return;
-				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+				pType = Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get element address */
-				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pType->TypeHash(), index);
+				pAddress = Reflect::ElementAddress(pAddress, pType->TypeHash(), index);
 			}
 			else
 			{
 				pField = pType->GetFieldData(pathStr);
 				if (!pField) return;
-				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+				pType = Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get field address */
 				pAddress = pField->GetAddress(pAddress);
@@ -120,8 +122,8 @@ namespace Glory::Editor
 		Object* pObject = Object::FindObject(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 
-		const GloryReflect::FieldData* pField = nullptr;
-		const GloryReflect::TypeData* pType = m_pRootType;
+		const FieldData* pField = nullptr;
+		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
 		{
 			const std::string& pathStr = subPath.string();
@@ -129,18 +131,18 @@ namespace Glory::Editor
 			{
 				if (!pField) throw new std::exception("Unexpected property path");
 				const size_t index = (size_t)std::stoul(pathStr.substr(2));
-				pField = GloryReflect::Reflect::GetArrayElementData(pField, index);
+				pField = Reflect::GetArrayElementData(pField, index);
 				if (!pField) return;
-				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+				pType = Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get element address */
-				pAddress = GloryReflect::Reflect::ElementAddress(pAddress, pType->TypeHash(), index);
+				pAddress = Reflect::ElementAddress(pAddress, pType->TypeHash(), index);
 			}
 			else
 			{
 				pField = pType->GetFieldData(pathStr);
 				if (!pField) return;
-				pType = GloryReflect::Reflect::GetTyeData(pField->ArrayElementType());
+				pType = Reflect::GetTyeData(pField->ArrayElementType());
 
 				/* Get field address */
 				pAddress = pField->GetAddress(pAddress);

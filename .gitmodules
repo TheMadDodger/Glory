@@ -14,10 +14,6 @@
 [submodule "GloryEngine/submodules/ImGuizmo"]
 	path = GloryEngine/submodules/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
-[submodule "GloryEngine/submodules/GloryECS"]
-	path = GloryEngine/submodules/GloryECS
-	url = https://github.com/TheMadDodger/GloryECS
-	branch = glory
 [submodule "GloryEngine/submodules/SDL_image"]
 	path = GloryEngine/submodules/SDL_image
 	url = https://github.com/libsdl-org/SDL_image

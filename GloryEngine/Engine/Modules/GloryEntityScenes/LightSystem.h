@@ -1,7 +1,7 @@
 #pragma once
 #include "Components.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
     class EntityRegistry;
 }
@@ -11,7 +11,7 @@ namespace Glory
 	class LightSystem
 	{
     public:
-        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, LightComponent& pComponent);
+        static void OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, LightComponent& pComponent);
 
     private:
         LightSystem();

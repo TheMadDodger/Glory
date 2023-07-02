@@ -13,8 +13,8 @@ namespace Glory
 
 	void EnumPropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
 	{
-		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		const TypeData* pEnumTypeData = Reflect::GetTyeData(typeHash);
+		EnumType* pEnumType = Reflect::GetEnumType(typeHash);
 		std::string valueString;
 		if(!pEnumType->ToString(data, valueString)) valueString = "none";
 		if (name.empty())
@@ -29,8 +29,8 @@ namespace Glory
 
 	void EnumPropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
 	{
-		const GloryReflect::TypeData* pEnumTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
-		GloryReflect::EnumType* pEnumType = GloryReflect::Reflect::GetEnumType(typeHash);
+		const TypeData* pEnumTypeData = Reflect::GetTyeData(typeHash);
+		EnumType* pEnumType = Reflect::GetEnumType(typeHash);
 		std::string valueString = object.as<std::string>();
 		pEnumType->FromString(valueString, data);
 	}

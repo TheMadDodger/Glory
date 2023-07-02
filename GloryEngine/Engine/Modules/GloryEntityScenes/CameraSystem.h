@@ -1,7 +1,7 @@
 #pragma once
 #include "Components.h"
 
-namespace GloryECS
+namespace Glory::Utils::ECS
 {
     class EntityRegistry;
 }
@@ -15,10 +15,10 @@ namespace Glory
         virtual ~CameraSystem();
 
     public:
-        static void OnComponentAdded(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
-        static void OnComponentRemoved(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
-        static void OnUpdate(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
-        static void OnDraw(GloryECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static void OnComponentAdded(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static void OnComponentRemoved(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static void OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
+        static void OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent);
         static std::string Name();
 
         static uint32_t CalcHash(CameraComponent& pComponent);

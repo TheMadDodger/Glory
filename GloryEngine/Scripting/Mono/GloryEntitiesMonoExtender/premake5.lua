@@ -40,7 +40,6 @@ project "GloryEntitiesMonoExtender"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -52,8 +51,8 @@ project "GloryEntitiesMonoExtender"
 		"mono-2.0-sgen",
 		"MonoPosixHelper",
 
-		"GloryECSStatic",
-		"GloryReflectStatic"
+		"GloryECS",
+		"GloryReflect"
 	}
 
 	defines

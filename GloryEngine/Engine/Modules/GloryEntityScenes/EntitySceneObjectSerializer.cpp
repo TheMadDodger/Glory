@@ -14,7 +14,7 @@ namespace Glory
 	{
 	}
 
-	void EntitySceneObjectSerializer::SerializeComponent(GloryECS::EntityID entityID, GloryECS::EntityRegistry* pRegistry, UUID componentUUID, void* pAddress, const GloryReflect::TypeData* pTypeData, YAML::Emitter& out)
+	void EntitySceneObjectSerializer::SerializeComponent(Glory::Utils::ECS::EntityID entityID, Glory::Utils::ECS::EntityRegistry* pRegistry, UUID componentUUID, void* pAddress, const TypeData* pTypeData, YAML::Emitter& out)
 	{
 		out << YAML::BeginMap;
 		out << YAML::Key << "UUID";
@@ -46,7 +46,7 @@ namespace Glory
 		EntityView* pEntityView = pRegistry->GetEntityView(entity);
 		pEntityView->SetComponentIndex(pEntityView->ComponentCount() - 1, componentIndex);
 
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 		PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, nextObject["Properties"]);
 
 		pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
@@ -75,7 +75,7 @@ namespace Glory
 			uint32_t typeHash = pEntityView->ComponentTypeAt(i);
 			BaseTypeView* pTypeView = pRegistry->GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity.GetEntityID());
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+			const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 			SerializeComponent(entity.GetEntityID(), pRegistry, componentUUID, pAddress, pTypeData, out);
 		}
 		out << YAML::EndSeq;
@@ -192,7 +192,7 @@ namespace Glory
 			if (typeHash != transformTypeHash) pComponentAddress = pRegistry->CreateComponent(entity, typeHash, compUUID);
 			else pComponentAddress = pRegistry->GetComponentAddress(entity, compUUID);
 
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+			const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 			PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, nextObject["Properties"]);
 
 			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);

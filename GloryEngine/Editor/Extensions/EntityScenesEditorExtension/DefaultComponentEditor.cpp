@@ -20,11 +20,11 @@ namespace Glory::Editor
 		bool change = false;
 		EntityComponentObject* pComponentObject = (EntityComponentObject*)GetTarget();
 		uint32_t hash = pComponentObject->ComponentType();
-		GloryECS::EntityRegistry* pRegistry = pComponentObject->GetRegistry();
-		GloryECS::EntityID entity = pComponentObject->EntityID();
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pComponentObject->GetRegistry();
+		Glory::Utils::ECS::EntityID entity = pComponentObject->EntityID();
 		UUID componentID = pComponentObject->GetUUID();
 
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(hash);
+		const TypeData* pTypeData = Reflect::GetTyeData(hash);
 		if (pTypeData)
 		{
 			PropertyDrawer::DrawProperty("", pTypeData, pRegistry->GetComponentAddress(entity, componentID), 0);
@@ -37,7 +37,7 @@ namespace Glory::Editor
 	void DefaultComponentEditor::Initialize()
 	{
 		EntityComponentObject* pEntityComponentObject = (EntityComponentObject*)m_pTarget;
-		const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(pEntityComponentObject->ComponentType());
+		const TypeData* pTypeData = Reflect::GetTyeData(pEntityComponentObject->ComponentType());
 		m_Name = pTypeData->TypeName();
 	}
 

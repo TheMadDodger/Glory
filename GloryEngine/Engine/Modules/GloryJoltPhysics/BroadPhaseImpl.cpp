@@ -12,7 +12,7 @@ namespace Glory
 
 	JPH::uint BPLayerInterfaceImpl::GetNumBroadPhaseLayers() const
 	{
-		return (JPH::uint)GloryReflect::Enum<BPLayer>().NumValues();
+		return (JPH::uint)Enum<BPLayer>().NumValues();
 	}
 
 	JPH::BroadPhaseLayer BPLayerInterfaceImpl::GetBroadPhaseLayer(JPH::ObjectLayer layer) const

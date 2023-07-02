@@ -50,8 +50,6 @@ project "Glorious"
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -66,7 +64,7 @@ project "Glorious"
 		"implot",
 		"yaml-cpp",
 		"GloryEditor",
-		"GloryReflectStatic",
+		"GloryReflect",
 	}
 
 	dependson

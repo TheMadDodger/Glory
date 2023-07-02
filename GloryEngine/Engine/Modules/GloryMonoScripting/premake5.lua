@@ -44,8 +44,6 @@ project "GloryMonoScripting"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
-
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
@@ -58,8 +56,8 @@ project "GloryMonoScripting"
 		"mono-2.0-sgen",
 		"MonoPosixHelper",
 
-		"GloryECSStatic",
-		"GloryReflectStatic",
+		"GloryECS",
+		"GloryReflect",
 	}
 
 	dependson

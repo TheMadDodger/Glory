@@ -31,7 +31,7 @@ namespace Glory
 			if (!node.IsDefined())
 			{
 				std::string stringValue = "";
-				GloryReflect::Enum<T>().ToString(defaultValue, stringValue);
+				Enum<T>().ToString(defaultValue, stringValue);
 				m_SettingsNode[name] = stringValue;
 			}
 
@@ -76,7 +76,7 @@ namespace Glory
 
 			const std::string strValue = node.as<std::string>();
 			T value = T(0);
-			GloryReflect::Enum<T>().FromString(strValue, value);
+			Enum<T>().FromString(strValue, value);
 			return value;
 		}
 
