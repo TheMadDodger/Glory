@@ -201,7 +201,5 @@ namespace Glory::Utils::ECS
 		std::map<size_t, size_t> m_ViewIndices;
 
 		void* m_pUserData;
-
-		//EntitySystems m_Systems;
 	};
 }

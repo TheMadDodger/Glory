@@ -14,9 +14,10 @@ namespace Glory::Utils
 
 	public:
 		void Set(Element index);
+		void Set(Element index, bool on);
 		void UnSet(Element index);
-		bool IsSet(Element index);
 		void Reserve(size_t capacity);
+		bool IsSet(Element index) const;
 
 	private:
 		Element* m_pMemory = nullptr;

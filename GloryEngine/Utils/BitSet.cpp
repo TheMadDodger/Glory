@@ -24,18 +24,21 @@ namespace Glory::Utils
 		m_pMemory[elementIndex] |= 1 << bitIndex;
 	}
 
+	void BitSet::Set(Element index, bool on)
+	{
+		if (on)
+		{
+			Set(index);
+			return;
+		}
+		UnSet(index);
+	}
+
 	void BitSet::UnSet(Element index)
 	{
 		const Element elementIndex = index / (sizeof(Element) * 8);
 		const uint32_t bitIndex = index - elementIndex * sizeof(Element) * 8;
 		m_pMemory[elementIndex] &= ~(1 << bitIndex);
-	}
-
-	bool BitSet::IsSet(Element index)
-	{
-		const Element elementIndex = index / (sizeof(Element) * 8);
-		const uint32_t bitIndex = index - elementIndex * sizeof(Element) * 8;
-		return m_pMemory[elementIndex] & 1 << bitIndex;
 	}
 
 	void BitSet::Reserve(size_t capacity)
@@ -45,5 +48,12 @@ namespace Glory::Utils
 		std::memcpy(pNewMemory, m_pMemory, m_Capacity);
 		delete m_pMemory;
 		m_pMemory = pNewMemory;
+	}
+
+	bool BitSet::IsSet(Element index) const
+	{
+		const Element elementIndex = index / (sizeof(Element) * 8);
+		const uint32_t bitIndex = index - elementIndex * sizeof(Element) * 8;
+		return m_pMemory[elementIndex] & 1 << bitIndex;
 	}
 }
