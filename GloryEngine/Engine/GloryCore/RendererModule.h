@@ -73,6 +73,8 @@ namespace Glory
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
 
+		virtual void Draw() override;
+
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
 

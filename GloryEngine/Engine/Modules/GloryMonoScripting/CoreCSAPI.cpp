@@ -7,6 +7,7 @@
 #include <LayerManager.h>
 #include <EngineProfiler.h>
 #include <AssetManager.h>
+#include "MathCSAPI.h"
 
 namespace Glory
 {
@@ -45,6 +46,16 @@ namespace Glory
 	void LogOnce(MonoString* key, MonoString* message, Debug::LogLevel logLevel, MonoBoolean bIncludeTimeStamp)
 	{
 		Debug::LogOnce(mono_string_to_utf8(key), mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
+	}
+
+	void DrawLine(Vec3Wrapper start, Vec3Wrapper end, Vec4Wrapper color, float time)
+	{
+		Debug::DrawLine(ToGLMVec3(start), ToGLMVec3(end), ToGLMVec4(color), time);
+	}
+	
+	void DrawRay(Vec3Wrapper start, Vec3Wrapper dir, Vec4Wrapper color, float length, float time)
+	{
+		Debug::DrawRay(ToGLMVec3(start), ToGLMVec3(dir), ToGLMVec4(color), length, time);
 	}
 
 #pragma endregion
@@ -504,6 +515,8 @@ namespace Glory
 		BIND("GloryEngine.Debug::LogError(string,bool)", LogError);
 		BIND("GloryEngine.Debug::LogFatalError(string,bool)", LogFatalError);
 		BIND("GloryEngine.Debug::LogOnce(string,string,GloryEngine.LogLevel,bool)", LogOnce);
+		BIND("GloryEngine.Debug::DrawLine", DrawLine);
+		BIND("GloryEngine.Debug::DrawRay", DrawRay);
 
 		// Time
 		BIND("GloryEngine.Time::Time_GetDeltaTime", Time_GetDeltaTime);

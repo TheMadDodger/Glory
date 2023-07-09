@@ -48,5 +48,11 @@ namespace GloryEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern static void LogOnce(string key, string message, LogLevel logLevel, bool bIncludeTimeStamp = true);
-	}
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void DrawLine(Vector3 start, Vector3 end, Vector4 color, float time = 0.1f);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void DrawRay(Vector3 start, Vector3 dir, Vector4 color, float length = 1.0f, float time = 0.1f);
+    }
 }

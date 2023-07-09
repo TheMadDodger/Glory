@@ -305,7 +305,7 @@ namespace Glory
 		return bodyInterface.GetObjectLayer(jphBodyID);
 	}
 
-	bool JoltPhysicsModule::CastRay(const glm::uvec3& origin, const glm::vec3& direction, RayCastResult& result) const
+	bool JoltPhysicsModule::CastRay(const glm::uvec3& origin, const glm::vec3& direction, RayCastResult& result, float maxDistance) const
 	{
 		const JPH::RRayCast ray{ ToJPHVec3(origin), ToJPHVec3(direction) };
 		AllHitCollisionCollector<CastRayCollector> collector;
@@ -317,6 +317,7 @@ namespace Glory
 		for (size_t i = 0; i < collector.mHits.size(); ++i)
 		{
 			const JPH::RayCastResult& rayHit = collector.mHits[i];
+			if (rayHit.mFraction > maxDistance) continue;
 			result.m_Hits.push_back(
 				RayCastHit{ rayHit.mFraction, rayHit.mBodyID.GetIndexAndSequenceNumber(), rayHit.mSubShapeID2.GetValue() }
 			);

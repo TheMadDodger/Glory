@@ -94,6 +94,11 @@ namespace Glory
 		return m_pContext->m_pLayerManager;
 	}
 
+	Debug* GloryContext::GetDebug()
+	{
+		return m_pContext->m_pDebug;
+	}
+
 	void GloryContext::AddUserContext(uint32_t hash, void* pUserContext)
 	{
 		m_pContext->m_pUserContexts.emplace(hash, pUserContext);
@@ -107,7 +112,7 @@ namespace Glory
 	Glory::GloryContext::GloryContext()
 		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
 		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pConsole(new Console()),
-		m_pLayerManager(new LayerManager()), m_pReflection(Reflect::CreateReflectInstance())
+		m_pLayerManager(new LayerManager()), m_pReflection(Reflect::CreateReflectInstance()), m_pDebug(new Debug())
 	{
 	}
 
@@ -125,6 +130,8 @@ namespace Glory
 		m_pDisplayManager = nullptr;
 		delete m_pConsole;
 		m_pConsole = nullptr;
+		delete m_pDebug;
+		m_pDebug = nullptr;
 
 		m_CameraManager.Cleanup();
 		Reflect::DestroyReflectInstance();
