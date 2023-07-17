@@ -45,16 +45,13 @@ namespace GloryEngine
 
     public static class Physics
     {
-		public static bool CastRay(Ray ray, out RayCastResult result, float maxDistance = float.MaxValue, bool debugDraw = false)
+		public static bool CastRay(Ray ray, out RayCastResult result, float maxDistance = float.MaxValue, bool debugDraw = false, int maxHits = 20)
 		{
 			result = new RayCastResult();
-			RayCastHit[] hits = Physics_CastRay(ray.Origin, ray.Direction, maxDistance, debugDraw);
-			if(hits == null || hits.Length == 0 ) return false;
-			result.Hits = new List<RayCastHit>();
-			for (int i = 0; i < hits.Length; i++)
-			{
-				result.Hits.Add(hits[i]);
-			}
+			RayCastHit[] hits = new RayCastHit[maxHits];
+			int numHits = Physics_CastRayNoAlloc(ray.Origin, ray.Direction, maxDistance, debugDraw, hits);
+			if(numHits == 0) return false;
+			result.Hits = new List<RayCastHit>(hits);
 			return true;
         }
 
@@ -67,6 +64,8 @@ namespace GloryEngine
 		/* Ray Casting */
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern RayCastHit[] Physics_CastRay(Vector3 origin, Vector3 direction, float maxDistance, bool debugDraw);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern int Physics_CastRayNoAlloc(Vector3 origin, Vector3 direction, float maxDistance, bool debugDraw, RayCastHit[] hits);
 
         /* Gravity */
         [MethodImpl(MethodImplOptions.InternalCall)]
