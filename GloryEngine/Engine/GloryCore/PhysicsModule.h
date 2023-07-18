@@ -1,6 +1,7 @@
 #pragma once
 #include "Module.h"
 #include "Physics.h"
+#include "LayerMask.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -87,7 +88,7 @@ namespace Glory
 		virtual const uint16_t GetBodyObjectLayer(uint32_t bodyID) const = 0;
 
 		/* Raycast */
-		virtual bool CastRay(const Ray& ray, RayCastResult& result, float maxDistance) const = 0;
+		virtual bool CastRay(const Ray& ray, RayCastResult& result, float maxDistance, const LayerMask& layerMask = LayerMask{ 0 }) const = 0;
 
 		GLORY_API void SetCollisionMatrix(std::vector<std::vector<bool>>&& matrix);
 		GLORY_API bool ShouldCollide(uint16_t layer1, uint16_t layer2) const;

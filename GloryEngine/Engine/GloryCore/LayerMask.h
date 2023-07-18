@@ -13,7 +13,7 @@ namespace Glory
 		operator uint64_t() const { return m_Mask; }
 		LayerMask& operator |=(const LayerMask& other);
 		LayerMask& operator ^=(const LayerMask& other);
-		LayerMask operator &(const LayerMask& other);
+		LayerMask operator &(const LayerMask& other) const;
 
 		static LayerMask FromString(const std::string& names);
 
