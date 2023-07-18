@@ -378,6 +378,11 @@ namespace Glory
 
 	void RendererModule::OnCameraPerspectiveChanged(CameraRef camera) {}
 
+	void RendererModule::Draw()
+	{
+		Debug::SubmitLines(this);
+	}
+
 	void RendererModule::ThreadedInitialize()
 	{
 		DisplayManager::Initialize(m_pEngine);

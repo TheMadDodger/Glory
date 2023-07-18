@@ -9,26 +9,95 @@
 #include <PhysicsModule.h>
 
 #define PHYSICS Game::GetGame().GetEngine()->GetPhysicsModule()
+#define RENDERER Game::GetGame().GetEngine()->GetRendererModule()
 #define SCRIPTING Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()
 
 namespace Glory
 {
 #pragma region Ray Casting
 
-	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction)
+	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, bool debugDraw)
 	{
 		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
 		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
 		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
 
+		Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
+
 		RayCastResult result;
-		if (!PHYSICS->CastRay(ToGLMVec3(origin), ToGLMVec3(direction), result)) return nullptr;
+		if (!PHYSICS->CastRay(ray, result, maxDistance))
+		{
+			if (debugDraw) RENDERER->DrawLine(glm::identity<glm::mat4>(), ray.m_Origin, ray.m_Origin + ray.m_Direction * maxDistance, {0.0f, 1.0f, 0.0f, 1.0f});
+			return nullptr;
+		}
+
 		MonoArray* hits = mono_array_new(mono_domain_get(), pClass->m_pClass, result.m_Hits.size());
 		for (size_t i = 0; i < result.m_Hits.size(); ++i)
 		{
+			if (debugDraw)
+			{
+				const float lastDistance = i == 0 ? 0.0f : result.m_Hits[i - 1].m_Distance;
+				const float currentDistance = result.m_Hits[i].m_Distance;
+				const float length = currentDistance - lastDistance;
+				const glm::vec3 start = ray.m_Origin + ray.m_Direction*lastDistance;
+				RENDERER->DrawLine(glm::identity<glm::mat4>(), start, start + ray.m_Direction * length,
+					{ i == 0 ? 0.0f : 1.0f, i == 0 ? 1.0f : 0.0f, 0.0f, 1.0f });
+
+				const glm::vec3 hit = ray.m_Origin + ray.m_Direction*currentDistance;
+				RENDERER->DrawLineBox(glm::identity<glm::mat4>(), hit, { 0.1f, 0.1f, 0.1f }, { 1.0f, 1.0f, 0.0f, 1.0f });
+			}
 			mono_array_set(hits, RayCastHit, i, result.m_Hits[i]);
 		}
+		if (debugDraw && !result.m_Hits.empty())
+		{
+			const float finalDistance = result.m_Hits.back().m_Distance;
+			const float distance = maxDistance - finalDistance;
+			const glm::vec3 start = ray.m_Origin + ray.m_Direction*finalDistance;
+			RENDERER->DrawLine(glm::identity<glm::mat4>(), start, start + ray.m_Direction * distance, { 0.0f, 1.0f, 0.0f, 1.0f });
+		}
+
 		return hits;
+	}
+
+	int Physics_CastRayNoAlloc(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, bool debugDraw, MonoArray* hits)
+	{
+		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
+		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
+		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
+
+		const Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
+
+		RayCastResult result;
+		if (!PHYSICS->CastRay(ray, result, maxDistance))
+		{
+			if (debugDraw) RENDERER->DrawLine(glm::identity<glm::mat4>(), ray.m_Origin, ray.m_Origin + ray.m_Direction * maxDistance, { 0.0f, 1.0f, 0.0f, 1.0f });
+			return 0;
+		}
+
+		const size_t maxHits = mono_array_length(hits);
+		for (size_t i = 0; i < result.m_Hits.size(); ++i)
+		{
+			if (debugDraw)
+			{
+				const float lastDistance = i == 0 ? 0.0f : result.m_Hits[i - 1].m_Distance;
+				const float currentDistance = result.m_Hits[i].m_Distance;
+				const glm::vec3 start = ray.GetPointOnRay(lastDistance);
+				const glm::vec3 end = ray.GetPointOnRay(currentDistance);
+				RENDERER->DrawLine(glm::identity<glm::mat4>(), start, end,
+					{ i == 0 ? 0.0f : 1.0f, i == 0 ? 1.0f : 0.0f, 0.0f, 1.0f });
+				RENDERER->DrawLineBox(glm::identity<glm::mat4>(), end, { 0.1f, 0.1f, 0.1f }, { 1.0f, 1.0f, 0.0f, 1.0f });
+			}
+			if (i < maxHits) mono_array_set(hits, RayCastHit, i, result.m_Hits[i]);
+		}
+		if (debugDraw)
+		{
+			const float finalDistance = result.m_Hits.back().m_Distance;
+			const float distance = maxDistance - finalDistance;
+			const glm::vec3 start = ray.m_Origin + ray.m_Direction * finalDistance;
+			RENDERER->DrawLine(glm::identity<glm::mat4>(), start, start + ray.m_Direction * distance, { 0.0f, 1.0f, 0.0f, 1.0f });
+		}
+
+		return result.m_Hits.size();
 	}
 
 #pragma endregion
@@ -273,6 +342,7 @@ namespace Glory
 
 		/* Ray Casting */
 		BIND("GloryEngine.Physics::Physics_CastRay", Physics_CastRay);
+		BIND("GloryEngine.Physics::Physics_CastRayNoAlloc", Physics_CastRayNoAlloc);
 
 		/* Gravity */
 		BIND("GloryEngine.Physics::Physics_SetGravity", Physics_SetGravity);

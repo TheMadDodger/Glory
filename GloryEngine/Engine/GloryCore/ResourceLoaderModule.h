@@ -7,14 +7,6 @@
 #include "Resource.h"
 #include "ResourceType.h"
 
-
-
-
-
-
-
-#include "EngineProfiler.h"
-
 namespace Glory
 {
 	struct ImportSettings

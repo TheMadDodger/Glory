@@ -7,6 +7,7 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseQuery.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseQuadTree.h>
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
 
@@ -44,7 +45,7 @@ namespace Glory
 
 	JoltPhysicsModule::JoltPhysicsModule()
 		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr),
-		m_CollisionFilter(this), m_BodyActivationListener(this), m_ContactListener(this)
+		m_CollisionFilter(this), m_BodyActivationListener(this), m_ContactListener(this), m_Gravity()
 	{
 	}
 
@@ -305,20 +306,24 @@ namespace Glory
 		return bodyInterface.GetObjectLayer(jphBodyID);
 	}
 
-	bool JoltPhysicsModule::CastRay(const glm::uvec3& origin, const glm::vec3& direction, RayCastResult& result) const
+	bool JoltPhysicsModule::CastRay(const Ray& ray, RayCastResult& result, float maxDistance) const
 	{
-		const JPH::RRayCast ray{ ToJPHVec3(origin), ToJPHVec3(direction) };
+		const JPH::RRayCast jphRay{ ToJPHVec3(ray.m_Origin), ToJPHVec3(ray.m_Direction) * maxDistance };
 		AllHitCollisionCollector<CastRayCollector> collector;
 		IgnoreMultipleBodiesFilter body_filter;
 		RayCastSettings ray_settings;
-		m_pJPHPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, {}, {}, {});
+		m_pJPHPhysicsSystem->GetNarrowPhaseQuery().CastRay(jphRay, ray_settings, collector, {}, {}, {});
 		if (!collector.HadHit()) return false;
 		result = RayCastResult();
 		for (size_t i = 0; i < collector.mHits.size(); ++i)
 		{
 			const JPH::RayCastResult& rayHit = collector.mHits[i];
+			const JPH::RVec3 hit = jphRay.GetPointOnRay(rayHit.mFraction);
+			const float distance = rayHit.mFraction * maxDistance;
+
 			result.m_Hits.push_back(
-				RayCastHit{ rayHit.mFraction, rayHit.mBodyID.GetIndexAndSequenceNumber(), rayHit.mSubShapeID2.GetValue() }
+				RayCastHit{ distance, rayHit.mBodyID.GetIndexAndSequenceNumber(),
+				rayHit.mSubShapeID2.GetValue(), ToVec3(hit) }
 			);
 		}
 		return true;
@@ -356,12 +361,92 @@ namespace Glory
 
 	void JoltPhysicsModule::SetGravity(const glm::vec3& gravity)
 	{
-		m_pJPHPhysicsSystem->SetGravity(ToJPHVec3(gravity));
+		m_Gravity = ToJPHVec3(gravity);
+		if (m_pJPHPhysicsSystem) m_pJPHPhysicsSystem->SetGravity(m_Gravity);
 	}
 
 	const glm::vec3 JoltPhysicsModule::GetGravity() const
 	{
 		return ToVec3(m_pJPHPhysicsSystem->GetGravity());
+	}
+
+	void JoltPhysicsModule::CleanupPhysics()
+	{
+		m_CharacterManager.DestroyAll();
+
+		delete m_pJPHTempAllocator;
+		m_pJPHTempAllocator = nullptr;
+		delete m_pJPHPhysicsSystem;
+		m_pJPHPhysicsSystem = nullptr;
+	}
+
+	void JoltPhysicsModule::SetupPhysics()
+	{
+		if (m_pJPHTempAllocator) CleanupPhysics();
+
+		// We need a temp allocator for temporary allocations during the physics update. We're
+		// pre-allocating 10 MB to avoid having to do allocations during the physics update. 
+		// B.t.w. 10 MB is way too much for this example but it is a typical value you can use.
+		// If you don't want to pre-allocate you can also use TempAllocatorMalloc to fall back to
+		// malloc / free.
+		const uint32_t tempAllocationSize = Settings().Value<unsigned int>("TemporaryAllocationSize");
+		m_pJPHTempAllocator = new JPH::TempAllocatorImpl{ tempAllocationSize };
+
+		// Now we can create the actual physics system.
+		const uint32_t maxBodies = Settings().Value<unsigned int>("MaxBodies");
+		const uint32_t numBodyMutexes = Settings().Value<unsigned int>("NumBodyMutexes");
+		const uint32_t maxBodyPairs = Settings().Value<unsigned int>("MaxBodyPairs");
+		const uint32_t maxContactConstraints = Settings().Value<unsigned int>("MaxContactConstraints");
+
+		JPH::PhysicsSettings settings{};
+
+		// Create physics system
+		m_pJPHPhysicsSystem = new PhysicsSystem();
+		m_pJPHPhysicsSystem->Init(maxBodies, numBodyMutexes, maxBodyPairs,
+			maxContactConstraints, m_BPLayerImpl,
+			m_ObjectVSBroadPhase, m_CollisionFilter);
+		m_pJPHPhysicsSystem->SetPhysicsSettings(settings);
+
+		// Restore gravity
+		m_pJPHPhysicsSystem->SetGravity(m_Gravity);
+
+		// A body activation listener gets notified when bodies activate and go to sleep
+		// Note that this is called from a job so whatever you do here needs to be thread safe.
+		// Registering one is entirely optional.
+		m_pJPHPhysicsSystem->SetBodyActivationListener(&m_BodyActivationListener);
+
+		// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
+		// Note that this is called from a job so whatever you do here needs to be thread safe.
+		// Registering one is entirely optional.
+		m_pJPHPhysicsSystem->SetContactListener(&m_ContactListener);
+
+		// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
+		// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+
+		std::map<JPH::ObjectLayer, JPH::BroadPhaseLayer> bpLayersMapping;
+		bpLayersMapping.emplace(0, 0);
+		for (size_t i = 0; i < Settings().ArraySize("BroadPhaseLayerMapping"); ++i)
+		{
+			const std::string valueStr = Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
+			BPLayer bpLayer;
+			Enum<BPLayer>().FromString(valueStr, bpLayer);
+			bpLayersMapping.emplace((uint16_t)i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
+		}
+		m_BPLayerImpl.SetObjectToBroadphase(std::move(bpLayersMapping));
+
+		const size_t bpLayerCount = Enum< BPLayer>().NumValues();
+		std::vector<LayerMask> bpCollisionMapping = std::vector<LayerMask>(bpLayerCount);
+		for (size_t i = 0; i < bpLayerCount; i++)
+		{
+			std::string layerName;
+			Enum<BPLayer>().ToString(BPLayer(i), layerName);
+			const LayerMask mask = Settings().Value<LayerMask>(layerName + "CollisionMask");
+			bpCollisionMapping[i] = mask;
+		}
+		m_ObjectVSBroadPhase.SetBPCollisionMapping(std::move(bpCollisionMapping));
+
+		m_CharacterManager.SetPhysicsSystem(m_pJPHPhysicsSystem);
 	}
 
 	//glm::mat4 JoltPhysicsModule::GetBodyWorldTransform(uint32_t bodyID) const
@@ -438,72 +523,16 @@ namespace Glory
 		// Register all Jolt physics types
 		JPH::RegisterTypes();
 
-		// We need a temp allocator for temporary allocations during the physics update. We're
-		// pre-allocating 10 MB to avoid having to do allocations during the physics update. 
-		// B.t.w. 10 MB is way too much for this example but it is a typical value you can use.
-		// If you don't want to pre-allocate you can also use TempAllocatorMalloc to fall back to
-		// malloc / free.
-		const uint32_t tempAllocationSize = Settings().Value<unsigned int>("TemporaryAllocationSize");
-		m_pJPHTempAllocator = new JPH::TempAllocatorImpl{ tempAllocationSize };
-
 		// We need a job system that will execute physics jobs on multiple threads. Typically
 		// you would implement the JobSystem interface yourself and let Jolt Physics run on top
 		// of your own job scheduler. JobSystemThreadPool is an example implementation.
 		m_pJPHJobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 
-		// Now we can create the actual physics system.
-		const uint32_t maxBodies = Settings().Value<unsigned int>("MaxBodies");
-		const uint32_t numBodyMutexes = Settings().Value<unsigned int>("NumBodyMutexes");
-		const uint32_t maxBodyPairs = Settings().Value<unsigned int>("MaxBodyPairs");
-		const uint32_t maxContactConstraints = Settings().Value<unsigned int>("MaxContactConstraints");
-
 #ifdef JPH_DEBUG_RENDERER
 		DebugRenderer::sInstance = new JoltDebugRenderer(m_pEngine);
 #endif
 
-		m_pJPHPhysicsSystem = new PhysicsSystem();
-
-		m_pJPHPhysicsSystem->Init(maxBodies, numBodyMutexes, maxBodyPairs,
-			maxContactConstraints, m_BPLayerImpl,
-			m_ObjectVSBroadPhase, m_CollisionFilter);
-
-		// A body activation listener gets notified when bodies activate and go to sleep
-		// Note that this is called from a job so whatever you do here needs to be thread safe.
-		// Registering one is entirely optional.
-		m_pJPHPhysicsSystem->SetBodyActivationListener(&m_BodyActivationListener);
-
-		// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
-		// Note that this is called from a job so whatever you do here needs to be thread safe.
-		// Registering one is entirely optional.
-		m_pJPHPhysicsSystem->SetContactListener(&m_ContactListener);
-
-		// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
-		// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
-		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
-
-		std::map<JPH::ObjectLayer, JPH::BroadPhaseLayer> bpLayersMapping;
-		bpLayersMapping.emplace(0, 0);
-		for (size_t i = 0; i < Settings().ArraySize("BroadPhaseLayerMapping"); ++i)
-		{
-			const std::string valueStr = Settings().ArrayValue<std::string>("BroadPhaseLayerMapping", i);
-			BPLayer bpLayer;
-			Enum<BPLayer>().FromString(valueStr, bpLayer);
-			bpLayersMapping.emplace((uint16_t)i + 1, JPH::BroadPhaseLayer(JPH::uint8(bpLayer)));
-		}
-		m_BPLayerImpl.SetObjectToBroadphase(std::move(bpLayersMapping));
-
-		const size_t bpLayerCount = Enum< BPLayer>().NumValues();
-		std::vector<LayerMask> bpCollisionMapping = std::vector<LayerMask>(bpLayerCount);
-		for (size_t i = 0; i < bpLayerCount; i++)
-		{
-			std::string layerName;
-			Enum<BPLayer>().ToString(BPLayer(i), layerName);
-			const LayerMask mask = Settings().Value<LayerMask>(layerName + "CollisionMask");
-			bpCollisionMapping[i] = mask;
-		}
-		m_ObjectVSBroadPhase.SetBPCollisionMapping(std::move(bpCollisionMapping));
-
-		m_CharacterManager.SetPhysicsSystem(m_pJPHPhysicsSystem);
+		SetupPhysics();
 
 		// Next we can create a rigid body to serve as the floor, we make a large box
 		// Create the settings for the collision volume (the shape). 
@@ -539,12 +568,10 @@ namespace Glory
 		delete JPH::Factory::sInstance;
 		JPH::Factory::sInstance = nullptr;
 
-		delete m_pJPHTempAllocator;
-		m_pJPHTempAllocator = nullptr;
 		delete m_pJPHJobSystem;
 		m_pJPHJobSystem = nullptr;
-		delete m_pJPHPhysicsSystem;
-		m_pJPHPhysicsSystem = nullptr;
+
+		CleanupPhysics();
 	}
 
 	void JoltPhysicsModule::Update()
@@ -591,9 +618,9 @@ namespace Glory
 		
 		// If you want more accurate step results you can do multiple sub steps within a collision step. Usually you would set this to 1.
 		const int integrationSubSteps = 1;
-		
+
 		// Step the world
-		m_pJPHPhysicsSystem->Update(deltaTime, collisionSteps, integrationSubSteps, m_pJPHTempAllocator, m_pJPHJobSystem);
+		m_pJPHPhysicsSystem->Update(deltaTime, collisionSteps, m_pJPHTempAllocator, m_pJPHJobSystem);
 
 		m_CharacterManager.PostSimulation(1.0f);
 	}
@@ -601,6 +628,8 @@ namespace Glory
 	void JoltPhysicsModule::Draw()
 	{
 		/* TODO: These need module settings! */
+
+		if (!m_pJPHPhysicsSystem) return;
 
 #ifdef JPH_DEBUG_RENDERER
 		JPH::BodyManager::DrawSettings settings{};

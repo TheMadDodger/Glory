@@ -2,6 +2,10 @@
 #include "Console.h"
 #include "Game.h"
 #include "Engine.h"
+#include "GameTime.h"
+#include "GloryContext.h"
+
+#define DEBUG GloryContext::GetDebug()
 
 namespace Glory
 {
@@ -87,11 +91,61 @@ namespace Glory
 		Log(message, logLevel, bIncludeTimeStamp);
 	}
 
-	Debug::Debug()
+#ifndef GLORY_NO_DEBUG_LINES
+
+	void Debug::DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, float time)
 	{
+		DEBUG->m_DebugLines.push_back({ start , end, color, time });
 	}
 
-	Debug::~Debug()
+	void Debug::DrawLineQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color, float time)
 	{
+		DrawLine(p1, p2, color, time);
+		DrawLine(p2, p3, color, time);
+		DrawLine(p3, p4, color, time);
+		DrawLine(p4, p1, color, time);
+	}
+
+	void Debug::DrawWireCube(const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color, float time)
+	{
+		const glm::vec3 topTopLeft = position + glm::vec3(-extends.x, extends.y, -extends.z);
+		const glm::vec3 topTopRight = position + glm::vec3(extends.x, extends.y, -extends.z);
+		const glm::vec3 topBottomRight = position + glm::vec3(extends.x, extends.y, extends.z);
+		const glm::vec3 topBottomLeft = position + glm::vec3(-extends.x, extends.y, extends.z);
+
+		const glm::vec3 bottomTopLeft = position + glm::vec3(-extends.x, -extends.y, -extends.z);
+		const glm::vec3 bottomTopRight = position + glm::vec3(extends.x, -extends.y, -extends.z);
+		const glm::vec3 bottomBottomRight = position + glm::vec3(extends.x, -extends.y, extends.z);
+		const glm::vec3 bottomBottomLeft = position + glm::vec3(-extends.x, -extends.y, extends.z);
+
+		DrawLineQuad(topTopLeft, topTopRight, topBottomRight, topBottomLeft, color, time);
+		DrawLineQuad(bottomTopLeft, bottomTopRight, bottomBottomRight, bottomBottomLeft, color, time);
+
+		DrawLineQuad(topBottomLeft, topTopLeft, bottomTopLeft, bottomBottomLeft, color, time);
+		DrawLineQuad(topBottomRight, topTopRight, bottomTopRight, bottomBottomRight, color, time);
+	}
+
+	void Debug::DrawRay(const glm::vec3& start, const glm::vec3& dir, const glm::vec4& color, float length, float time)
+	{
+		DrawLine(start, start + dir * length, color, time);
+	}
+
+#endif
+
+	void Debug::SubmitLines(RendererModule* pRenderer)
+	{
+		for (size_t i = DEBUG->m_DebugLines.size(); i > 0; --i)
+		{
+			const size_t index = i - 1;
+			DebugLine& line = DEBUG->m_DebugLines[index];
+			line.Time -= Time::GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
+			if (line.Time <= 0.f)
+			{
+				DEBUG->m_DebugLines.erase(DEBUG->m_DebugLines.begin() + index);
+				continue;
+			}
+
+			pRenderer->DrawLine(glm::identity<glm::mat4>(), line.Start, line.End, line.Color);
+		}
 	}
 }

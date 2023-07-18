@@ -30,6 +30,7 @@ namespace Glory
 		static DisplayManager* GetDisplayManager();
 		static Console* GetConsole();
 		static LayerManager* GetLayerManager();
+		static Debug* GetDebug();
 		static void SetContext(GloryContext* pContext);
 		static GloryContext* GetContext();
 		static GloryContext* CreateContext();
@@ -74,6 +75,7 @@ namespace Glory
 		LayerManager* m_pLayerManager;
 		Reflect* m_pReflection;
 		ThreadedVector<Object*> m_pAllObjects;
+		Debug* m_pDebug;
 		std::map<size_t, void*> m_pUserContexts;
 	};
 }

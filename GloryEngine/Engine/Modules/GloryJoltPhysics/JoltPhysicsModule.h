@@ -71,7 +71,7 @@ namespace Glory
 		GLORY_API const uint16_t GetBodyObjectLayer(uint32_t bodyID) const override;
 
 		/* RayCast */
-		GLORY_API bool CastRay(const glm::uvec3& origin, const glm::vec3& direction, RayCastResult& result) const override;
+		GLORY_API bool CastRay(const Ray& ray, RayCastResult& result, float maxDistance) const override;
 
 		GLORY_API BPLayerInterfaceImpl& BPLayerImpl();
 		GLORY_API ObjectVsBroadPhaseLayerFilterImpl& BPCollisionFilter();
@@ -86,6 +86,9 @@ namespace Glory
 		void SetGravity(const glm::vec3& gravity) override;
 		const glm::vec3 GetGravity() const override;
 
+		GLORY_API void CleanupPhysics();
+		GLORY_API void SetupPhysics();
+
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void Initialize() override;
@@ -98,6 +101,8 @@ namespace Glory
 		JPH::TempAllocatorImpl* m_pJPHTempAllocator;
 		JPH::JobSystem* m_pJPHJobSystem;
 		JPH::PhysicsSystem* m_pJPHPhysicsSystem;
+
+		JPH::Vec3 m_Gravity;
 
 		LayerCollisionFilter m_CollisionFilter;
 		BPLayerInterfaceImpl m_BPLayerImpl;

@@ -37,7 +37,8 @@ project "GloryAPI"
 	defines
 	{
 		"GLORY_API_EXPORTS",
-		"GLORY_ENABLE_API"
+		"GLORY_ENABLE_API",
+		"GLORY_NO_DEBUG_LINES"
 	}
 
 	postbuildcommands

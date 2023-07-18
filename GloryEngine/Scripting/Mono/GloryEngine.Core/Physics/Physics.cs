@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Activation type
+    /// </summary>
     public enum ActivationType
     {
         /* Activate the body */
@@ -12,6 +15,9 @@ namespace GloryEngine
 		DontActivate
     };
 
+    /// <summary>
+    /// Body type
+    /// </summary>
     public enum BodyType
 	{
 		Static,
@@ -19,6 +25,9 @@ namespace GloryEngine
 		Dynamic
 	};
 
+	/// <summary>
+	/// Ray
+	/// </summary>
     public struct Ray
 	{
 		public Ray(Vector3 origin, Vector3 direction)
@@ -31,31 +40,65 @@ namespace GloryEngine
 		public Vector3 Direction;
 	}
 
+	/// <summary>
+	/// Raycast hit
+	/// </summary>
     public struct RayCastHit
     {
+		/// <summary>
+		/// Distance from the origin of the ray
+		/// </summary>
         public float Distance;
+		/// <summary>
+		/// ID of the physics body that was hit
+		/// </summary>
         public UInt32 BodyID;
+		/// <summary>
+		/// ID of the subshape that was hit
+		/// </summary>
         public UInt32 SubShapeID;
+		/// <summary>
+		/// The position on which the hit occured
+		/// </summary>
+		public Vector3 Pos;
     };
 
+	/// <summary>
+	/// Hit result for a raycast
+	/// </summary>
     public struct RayCastResult
     {
+		/// <summary>
+		/// List containing all hits of a raycast
+		/// </summary>
         public List<RayCastHit> Hits;
 	};
 
+	/// <summary>
+	/// Physics API
+	/// </summary>
     public static class Physics
     {
-		public static bool CastRay(Ray ray, out RayCastResult result)
+        /// <summary>
+        /// Do a raycast check.
+        /// 
+        /// Whenever there are any hits, result will always have a list with a size of maxHits.
+		/// Use the returned integer value to determine the actual hit count.
+        /// </summary>
+        /// <param name="ray">Origin and direction ray</param>
+        /// <param name="result">The out result of the raycast</param>
+        /// <param name="maxDistance">Maximum distance an object can be considered for the raycast</param>
+        /// <param name="debugDraw">Wether to render debug information on the raycast</param>
+        /// <param name="maxHits">The maximum number of hits the raycast may produce</param>
+        /// <returns>The number of hit colliders during the raycast</returns>
+        public static int CastRay(Ray ray, out RayCastResult result, float maxDistance = 9999.9f, bool debugDraw = false, int maxHits = 20)
 		{
 			result = new RayCastResult();
-			RayCastHit[] hits = Physics_CastRay(ray.Origin, ray.Direction);
-			if(hits == null || hits.Length == 0 ) return false;
-			result.Hits = new List<RayCastHit>();
-			for (int i = 0; i < hits.Length; i++)
-			{
-				result.Hits.Add(hits[i]);
-			}
-			return true;
+			RayCastHit[] hits = new RayCastHit[maxHits];
+			int numHits = Physics_CastRayNoAlloc(ray.Origin, ray.Direction, maxDistance, debugDraw, hits);
+			if(numHits == 0) return 0;
+			result.Hits = new List<RayCastHit>(hits);
+			return numHits;
         }
 
 		public static Vector3 Gravity
@@ -66,7 +109,9 @@ namespace GloryEngine
 
 		/* Ray Casting */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern RayCastHit[] Physics_CastRay(Vector3 origin, Vector3 direction);
+        private static extern RayCastHit[] Physics_CastRay(Vector3 origin, Vector3 direction, float maxDistance, bool debugDraw);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern int Physics_CastRayNoAlloc(Vector3 origin, Vector3 direction, float maxDistance, bool debugDraw, RayCastHit[] hits);
 
         /* Gravity */
         [MethodImpl(MethodImplOptions.InternalCall)]

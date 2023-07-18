@@ -21,6 +21,11 @@ namespace Glory
 	{
 		glm::vec3 m_Origin;
 		glm::vec3 m_Direction;
+
+		glm::vec3 GetPointOnRay(float distance) const
+		{
+			return m_Origin + m_Direction * distance;
+		}
 	};
 
 	struct RayCastHit
@@ -28,6 +33,7 @@ namespace Glory
 		float m_Distance;
 		uint32_t m_BodyID;
 		uint32_t m_SubShapeID;
+		glm::vec3 m_Pos;
 	};
 
 	struct RayCastResult
