@@ -16,7 +16,7 @@ namespace Glory
 		return *this;
 	}
 
-	LayerMask LayerMask::operator&(const LayerMask& other)
+	LayerMask LayerMask::operator&(const LayerMask& other) const
 	{
 		LayerMask mask = *this;
 		mask.m_Mask &= other.m_Mask;

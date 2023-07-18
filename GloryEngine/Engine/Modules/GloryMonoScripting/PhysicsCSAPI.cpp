@@ -16,7 +16,7 @@ namespace Glory
 {
 #pragma region Ray Casting
 
-	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, bool debugDraw)
+	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, const LayerMask layerMask, MonoArray* ignoreBodies, bool debugDraw)
 	{
 		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
 		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
@@ -24,8 +24,19 @@ namespace Glory
 
 		Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
 
+		std::vector<uint32_t> ignoreBodyIDs;
+		if (ignoreBodies)
+		{
+			const size_t numIgnoreBodies = mono_array_length(ignoreBodies);
+			ignoreBodyIDs.resize(numIgnoreBodies);
+			for (size_t i = 0; i < numIgnoreBodies; ++i)
+			{
+				ignoreBodyIDs[i] = mono_array_get(ignoreBodies, uint32_t, i);
+			}
+		}
+
 		RayCastResult result;
-		if (!PHYSICS->CastRay(ray, result, maxDistance))
+		if (!PHYSICS->CastRay(ray, result, maxDistance, layerMask, ignoreBodyIDs))
 		{
 			if (debugDraw) RENDERER->DrawLine(glm::identity<glm::mat4>(), ray.m_Origin, ray.m_Origin + ray.m_Direction * maxDistance, {0.0f, 1.0f, 0.0f, 1.0f});
 			return nullptr;
@@ -59,7 +70,7 @@ namespace Glory
 		return hits;
 	}
 
-	int Physics_CastRayNoAlloc(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, bool debugDraw, MonoArray* hits)
+	int Physics_CastRayNoAlloc(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, const LayerMask layerMask, MonoArray* ignoreBodies, bool debugDraw, MonoArray* hits)
 	{
 		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
 		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
@@ -67,8 +78,19 @@ namespace Glory
 
 		const Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
 
+		std::vector<uint32_t> ignoreBodyIDs;
+		if (ignoreBodies)
+		{
+			const size_t numIgnoreBodies = mono_array_length(ignoreBodies);
+			ignoreBodyIDs.resize(numIgnoreBodies);
+			for (size_t i = 0; i < numIgnoreBodies; ++i)
+			{
+				ignoreBodyIDs[i] = mono_array_get(ignoreBodies, uint32_t, i);
+			}
+		}
+
 		RayCastResult result;
-		if (!PHYSICS->CastRay(ray, result, maxDistance))
+		if (!PHYSICS->CastRay(ray, result, maxDistance, layerMask, ignoreBodyIDs))
 		{
 			if (debugDraw) RENDERER->DrawLine(glm::identity<glm::mat4>(), ray.m_Origin, ray.m_Origin + ray.m_Direction * maxDistance, { 0.0f, 1.0f, 0.0f, 1.0f });
 			return 0;

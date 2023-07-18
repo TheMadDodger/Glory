@@ -9,6 +9,8 @@ Scripting:
 - Added shapes API
 - You can now set the shape of a character controller at runtime
 - Changed Physics.RayCast to return the number of hits and to take a maximum number of hits as parameter
+- Added layerMask argument to Physics.RayCast to filter by layer
+- Added ignoreBodies array argument to Physics.RayCast to ignore physics bodies by ID
 
 Bugs:
 - Fixed inconsistent input KeyDown behaviour

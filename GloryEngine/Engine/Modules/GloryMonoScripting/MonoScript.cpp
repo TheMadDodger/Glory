@@ -264,6 +264,7 @@ namespace Glory
 				pField->GetValue(pMonoObject, &pMonoSceneObject);
 				if (pMonoSceneObject)
 				{
+					/* TODO: Get these fields once instead of every frame? */
 					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoSceneObject), "_objectID");
 					MonoClassField* pSceneIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoSceneObject), "_sceneID");
 					mono_field_get_value(pMonoSceneObject, pIDField, objectRef.ObjectUUIDMember());
