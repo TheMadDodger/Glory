@@ -320,13 +320,19 @@ namespace Glory
 		const LayerMask m_Mask;
 	};
 
-	bool JoltPhysicsModule::CastRay(const Ray& ray, RayCastResult& result, float maxDistance, const LayerMask& layerMask) const
+	bool JoltPhysicsModule::CastRay(const Ray& ray, RayCastResult& result, float maxDistance, const LayerMask& layerMask, const std::vector<uint32_t>& ignoreBodyIDs) const
 	{
 		const JPH::RRayCast jphRay{ ToJPHVec3(ray.m_Origin), ToJPHVec3(ray.m_Direction) * maxDistance };
 		AllHitCollisionCollector<CastRayCollector> collector;
-		IgnoreMultipleBodiesFilter body_filter;
+		IgnoreMultipleBodiesFilter bodyFilter;
+		bodyFilter.Reserve(ignoreBodyIDs.size());
+		for (size_t i = 0; i < ignoreBodyIDs.size(); ++i)
+		{
+			bodyFilter.IgnoreBody(JPH::BodyID(ignoreBodyIDs[i]));
+		}
+
 		RayCastSettings ray_settings;
-		m_pJPHPhysicsSystem->GetNarrowPhaseQuery().CastRay(jphRay, ray_settings, collector, {}, RayCastLayerFilter{ layerMask }, {});
+		m_pJPHPhysicsSystem->GetNarrowPhaseQuery().CastRay(jphRay, ray_settings, collector, {}, RayCastLayerFilter{ layerMask }, bodyFilter);
 		if (!collector.HadHit()) return false;
 		result = RayCastResult();
 		for (size_t i = 0; i < collector.mHits.size(); ++i)

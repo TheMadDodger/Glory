@@ -90,13 +90,14 @@ namespace GloryEngine
         /// <param name="maxDistance">Maximum distance an object can be considered for the raycast</param>
 		/// <param name="layerMask">Mask with layers to filter the raycast with</param>
         /// <param name="debugDraw">Wether to render debug information on the raycast</param>
+		/// <param name="ignoreBodies">Array of physics bodies by ID to ignore in the raycast</param>
         /// <param name="maxHits">The maximum number of hits the raycast may produce</param>
         /// <returns>The number of hit colliders during the raycast</returns>
-        public static int CastRay(Ray ray, out RayCastResult result, float maxDistance = 9999.9f, LayerMask layerMask = new LayerMask(), bool debugDraw = false, int maxHits = 20)
+        public static int CastRay(Ray ray, out RayCastResult result, float maxDistance = 9999.9f, LayerMask layerMask = new LayerMask(), UInt32[] ignoreBodies = null, bool debugDraw = false, int maxHits = 20)
 		{
 			result = new RayCastResult();
 			RayCastHit[] hits = new RayCastHit[maxHits];
-			int numHits = Physics_CastRayNoAlloc(ray.Origin, ray.Direction, maxDistance, layerMask, debugDraw, hits);
+			int numHits = Physics_CastRayNoAlloc(ray.Origin, ray.Direction, maxDistance, layerMask, ignoreBodies, debugDraw, hits);
 			if(numHits == 0) return 0;
 			result.Hits = new List<RayCastHit>(hits);
 			return numHits;
@@ -110,9 +111,9 @@ namespace GloryEngine
 
 		/* Ray Casting */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern RayCastHit[] Physics_CastRay(Vector3 origin, Vector3 direction, float maxDistance, LayerMask layerMask, bool debugDraw);
+        private static extern RayCastHit[] Physics_CastRay(Vector3 origin, Vector3 direction, float maxDistance, LayerMask layerMask, UInt32[] ignoreBodies, bool debugDraw);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern int Physics_CastRayNoAlloc(Vector3 origin, Vector3 direction, float maxDistance, LayerMask layerMask, bool debugDraw, RayCastHit[] hits);
+        private static extern int Physics_CastRayNoAlloc(Vector3 origin, Vector3 direction, float maxDistance, LayerMask layerMask, UInt32[] ignoreBodies, bool debugDraw, RayCastHit[] hits);
 
         /* Gravity */
         [MethodImpl(MethodImplOptions.InternalCall)]
