@@ -61,6 +61,8 @@ namespace Glory::Editor
 			bpCollisionMapping[i] = mask;
 		}
 		pPhysics->BPCollisionFilter().SetBPCollisionMapping(std::move(bpCollisionMapping));
+
+		pPhysics->SetupPhysics();
 	}
 
 	void JoltEditorExtension::HandleStart(Module* pModule)
@@ -69,6 +71,8 @@ namespace Glory::Editor
 
 	void JoltEditorExtension::HandleStop(Module* pModule)
 	{
+		JoltPhysicsModule* pPhysics = static_cast<JoltPhysicsModule*>(pModule);
+		pPhysics->CleanupPhysics();
 	}
 
 	void JoltEditorExtension::HandleUpdate(Module* pModule)

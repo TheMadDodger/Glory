@@ -1,12 +1,16 @@
 Engine:
 - Rewrote the mono module
 - Scripts will now have their code executed after native components
+- Updated Jolt to latest version
 
 Scripting:
 - Fixed crashes caused by mono
 - Implemented customizable debugger agent
 - Added shapes API
 - You can now set the shape of a character controller at runtime
+- Changed Physics.RayCast to return the number of hits and to take a maximum number of hits as parameter
 
 Bugs:
 - Fixed inconsistent input KeyDown behaviour
+- Fixed raycast crash
+- Fixed raycast not working properly

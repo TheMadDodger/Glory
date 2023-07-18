@@ -25,7 +25,7 @@ namespace Glory
 		Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
 
 		RayCastResult result;
-		if (!PHYSICS->CastRay(ray.m_Origin, ray.m_Direction, result, maxDistance))
+		if (!PHYSICS->CastRay(ray, result, maxDistance))
 		{
 			if (debugDraw) RENDERER->DrawLine(glm::identity<glm::mat4>(), ray.m_Origin, ray.m_Origin + ray.m_Direction * maxDistance, {0.0f, 1.0f, 0.0f, 1.0f});
 			return nullptr;
@@ -44,7 +44,7 @@ namespace Glory
 					{ i == 0 ? 0.0f : 1.0f, i == 0 ? 1.0f : 0.0f, 0.0f, 1.0f });
 
 				const glm::vec3 hit = ray.m_Origin + ray.m_Direction*currentDistance;
-				RENDERER->DrawLineBox(glm::identity<glm::mat4>(), hit, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f });
+				RENDERER->DrawLineBox(glm::identity<glm::mat4>(), hit, { 0.1f, 0.1f, 0.1f }, { 1.0f, 1.0f, 0.0f, 1.0f });
 			}
 			mono_array_set(hits, RayCastHit, i, result.m_Hits[i]);
 		}
@@ -65,10 +65,10 @@ namespace Glory
 		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
 		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
 
-		Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
+		const Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
 
 		RayCastResult result;
-		if (!PHYSICS->CastRay(ray.m_Origin, ray.m_Direction, result, maxDistance))
+		if (!PHYSICS->CastRay(ray, result, maxDistance))
 		{
 			if (debugDraw) RENDERER->DrawLine(glm::identity<glm::mat4>(), ray.m_Origin, ray.m_Origin + ray.m_Direction * maxDistance, { 0.0f, 1.0f, 0.0f, 1.0f });
 			return 0;
@@ -81,17 +81,15 @@ namespace Glory
 			{
 				const float lastDistance = i == 0 ? 0.0f : result.m_Hits[i - 1].m_Distance;
 				const float currentDistance = result.m_Hits[i].m_Distance;
-				const float length = currentDistance - lastDistance;
-				const glm::vec3 start = ray.m_Origin + ray.m_Direction * lastDistance;
-				RENDERER->DrawLine(glm::identity<glm::mat4>(), start, start + ray.m_Direction * length,
+				const glm::vec3 start = ray.GetPointOnRay(lastDistance);
+				const glm::vec3 end = ray.GetPointOnRay(currentDistance);
+				RENDERER->DrawLine(glm::identity<glm::mat4>(), start, end,
 					{ i == 0 ? 0.0f : 1.0f, i == 0 ? 1.0f : 0.0f, 0.0f, 1.0f });
-
-				const glm::vec3 hit = ray.m_Origin + ray.m_Direction * currentDistance;
-				RENDERER->DrawLineBox(glm::identity<glm::mat4>(), hit, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f });
+				RENDERER->DrawLineBox(glm::identity<glm::mat4>(), end, { 0.1f, 0.1f, 0.1f }, { 1.0f, 1.0f, 0.0f, 1.0f });
 			}
 			if (i < maxHits) mono_array_set(hits, RayCastHit, i, result.m_Hits[i]);
 		}
-		if (debugDraw && !result.m_Hits.empty())
+		if (debugDraw)
 		{
 			const float finalDistance = result.m_Hits.back().m_Distance;
 			const float distance = maxDistance - finalDistance;
