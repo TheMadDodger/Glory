@@ -5,7 +5,6 @@
 #include <functional>
 #include "GloryEditor.h"
 #include "Toolbar.h"
-#include "GizmosToolChain.h"
 
 namespace ImGuizmo
 {
@@ -16,6 +15,8 @@ namespace ImGuizmo
 namespace Glory::Editor
 {
 	class IGizmo;
+	class GridToolchain;
+	class GizmosToolChain;
 
 	class Gizmos
 	{
@@ -50,6 +51,8 @@ namespace Glory::Editor
 		static void Initialize();
 		static void Cleanup();
 
+		static const float* GetSnap();
+
 	private:
 		GLORY_EDITOR_API Gizmos();
 		virtual GLORY_EDITOR_API ~Gizmos();
@@ -65,6 +68,7 @@ namespace Glory::Editor
 		friend class GloryContext;
 		static std::map<UUID, IGizmo*> m_pGizmos;
 		static GizmosToolChain* m_pToolChain;
+		static GridToolchain* m_pGridToolChain;
 	};
 
 	class IGizmo

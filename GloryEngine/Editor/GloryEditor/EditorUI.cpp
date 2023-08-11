@@ -39,11 +39,11 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat(std::string_view label, float* value, const float min, const float max, const float steps)
 	{
+		ImGui::PushID(label.data());
 		const bool hasLabel = HasFlag(Flag::NoLabel);
 		if (!hasLabel)
 		{
 			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
-			ImGui::PushID(label.data());
 			ImGui::TextUnformatted(label.data());
 			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
 			ImGui::SameLine();

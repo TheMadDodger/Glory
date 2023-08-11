@@ -1,5 +1,8 @@
 #include "Gizmos.h"
 #include "Undo.h"
+#include "GizmosToolChain.h"
+#include "GridToolchain.h"
+
 #include <imgui.h>
 #include <ImGuizmo.h>
 #include <algorithm>
@@ -12,6 +15,7 @@ namespace Glory::Editor
 	ImGuizmo::MODE Gizmos::m_DefaultMode = ImGuizmo::LOCAL;
 
 	GizmosToolChain* Gizmos::m_pToolChain = nullptr;
+	GridToolchain* Gizmos::m_pGridToolChain = nullptr;
 
 	const char* Gizmos::Shortcut_Gizmos_Translate = "Translate Gizmo";
 	const char* Gizmos::Shortcut_Gizmos_Rotate = "Rotate Gizmo";
@@ -75,12 +79,21 @@ namespace Glory::Editor
 	void Gizmos::Initialize()
 	{
 		m_pToolChain = new GizmosToolChain();
+		m_pGridToolChain = new GridToolchain();
 	}
 
 	void Gizmos::Cleanup()
 	{
 		delete m_pToolChain;
 		m_pToolChain = nullptr;
+
+		delete m_pGridToolChain;
+		m_pGridToolChain = nullptr;
+	}
+
+	const float* Gizmos::GetSnap()
+	{
+		return m_pGridToolChain->GetSnap(m_DefaultOperation);
 	}
 
 	Gizmos::Gizmos() {}
@@ -99,8 +112,11 @@ namespace Glory::Editor
 
 	void DefaultGizmo::OnGui(const glm::mat4& cameraView, const glm::mat4& cameraProjection)
 	{
+		const float* snap = Gizmos::GetSnap();
+
 		m_WasManipulated = false;
-		bool manipulating = ImGuizmo::Manipulate((const float*)&cameraView, (const float*)&cameraProjection, Gizmos::m_DefaultOperation, Gizmos::m_DefaultMode, (float*)&m_Transform, NULL, NULL);//, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+
+		const bool manipulating = ImGuizmo::Manipulate((const float*)&cameraView, (const float*)&cameraProjection, Gizmos::m_DefaultOperation, Gizmos::m_DefaultMode, (float*)&m_Transform, NULL, snap);//, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 		if (manipulating && !m_IsManipulating)
 		{
 			m_IsManipulating = true;
