@@ -1,6 +1,9 @@
 #include "TransformEditor.h"
 #include "Undo.h"
 #include "GizmoAction.h"
+
+#include <Engine.h>
+#include <PhysicsModule.h>
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
 #include <CharacterManager.h>

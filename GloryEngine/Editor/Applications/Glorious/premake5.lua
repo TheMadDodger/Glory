@@ -31,12 +31,14 @@ project "Glorious"
 		"%{IncludeDir.implot}",
 
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.editor}",
 		"%{engineDir}/GloryEngineBuilder",
 
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
 
 		"%{rapidjson}",
 	}
@@ -65,6 +67,12 @@ project "Glorious"
 		"yaml-cpp",
 		"GloryEditor",
 		"GloryReflect",
+
+		"GloryUtilsVersion",
+
+		--todo: When asset management is contained in its own lib these links are no more needed
+		"GloryJobs",
+		"GloryThreads",
 	}
 
 	dependson

@@ -27,6 +27,7 @@ project "GloryEngineBuilder"
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
 	}
 
 	defines

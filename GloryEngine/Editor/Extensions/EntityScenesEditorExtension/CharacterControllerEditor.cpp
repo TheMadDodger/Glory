@@ -1,6 +1,9 @@
 #include "CharacterControllerEditor.h"
 #include "Undo.h"
 #include "GizmoAction.h"
+
+#include <Engine.h>
+#include <RendererModule.h>
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
 #include <glm/gtx/matrix_decompose.hpp>

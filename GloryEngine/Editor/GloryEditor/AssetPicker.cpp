@@ -1,9 +1,11 @@
 #include "AssetPicker.h"
 #include "EditorUI.h"
+
 #include <imgui.h>
 #include <algorithm>
 #include <EditorAssetDatabase.h>
 #include <Engine.h>
+#include <WindowModule.h>
 
 #include <IconsFontAwesome6.h>
 

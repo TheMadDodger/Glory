@@ -4,6 +4,9 @@
 #include "PropertyDrawer.h"
 #include "EditorUI.h"
 #include "Tumbnail.h"
+
+#include <Engine.h>
+#include <GraphicsModule.h>
 #include <imgui.h>
 #include <ResourceType.h>
 

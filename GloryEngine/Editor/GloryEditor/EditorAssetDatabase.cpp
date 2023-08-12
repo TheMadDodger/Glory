@@ -6,17 +6,26 @@
 #include "EditorSceneManager.h"
 #include "AssetCompiler.h"
 
+#include <JobManager.h>
 #include <Engine.h>
 
 namespace Glory::Editor
 {
-	ThreadedVector<UUID> EditorAssetDatabase::m_UnsavedAssets;
-	ThreadedVector<EditorAssetDatabase::ImportedResource> EditorAssetDatabase::m_ImportedResources;
-	ThreadedUMap<std::string, UUID> EditorAssetDatabase::m_PathToUUIDCache;
+	ThreadedVector<UUID> m_UnsavedAssets;
+
+	struct ImportedResource
+	{
+		Resource* Resource;
+		std::filesystem::path Path;
+	};
+
+	ThreadedVector<ImportedResource> m_ImportedResources;
+	ThreadedUMap<std::string, UUID> m_PathToUUIDCache;
+
 	std::function<void(Resource*)> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
 
-	Jobs::JobPool<bool, std::filesystem::path>* EditorAssetDatabase::m_pImportPool = nullptr;
+	Jobs::JobPool<bool, std::filesystem::path>* m_pImportPool;
 
 	void EditorAssetDatabase::Load(JSONFileRef& projectFile)
 	{

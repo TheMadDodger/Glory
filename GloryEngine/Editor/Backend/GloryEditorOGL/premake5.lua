@@ -34,6 +34,7 @@ project "GloryEditorOGL"
 
 		"%{IncludeDir.FA}",
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
 
 		"%{SubmodoleDirs.ImGui}/backends/",
 	}
@@ -64,6 +65,11 @@ project "GloryEditorOGL"
 		"implot",
 
 		"GloryReflect",
+		"GloryUtilsVersion",
+
+		--todo: When asset management is contained in its own lib these links are no more needed
+		"GloryJobs",
+		"GloryThreads",
 	}
 
 	defines

@@ -1,6 +1,8 @@
 #include "SceneObjectPropertyDrawer.h"
 #include "ObjectPicker.h"
 
+#include <Debug.h>
+
 namespace Glory::Editor
 {
 	template<>

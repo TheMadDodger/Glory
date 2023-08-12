@@ -1,9 +1,11 @@
 #include "ObjectPicker.h"
 #include "EditorUI.h"
+
+#include <WindowModule.h>
+#include <Engine.h>
 #include <imgui.h>
 #include <algorithm>
 #include <EditorAssetDatabase.h>
-#include <Engine.h>
 
 #include <IconsFontAwesome6.h>
 #include <EditorSceneManager.h>

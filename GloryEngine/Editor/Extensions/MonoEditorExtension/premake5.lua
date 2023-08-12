@@ -27,6 +27,8 @@ project "MonoEditorExtension"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.threads}",
+		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.mono}",
 		"%{GloryIncludeDir.ImGui}",
@@ -38,6 +40,7 @@ project "MonoEditorExtension"
 
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
 
 		"%{rapidjson}",
 
@@ -71,7 +74,12 @@ project "MonoEditorExtension"
 		"MonoPosixHelper",
 		"tinyfiledialogs",
 		"GloryECS",
-		"GloryReflect"
+		"GloryReflect",
+		"GloryUtilsVersion",
+
+		--todo: When asset management is contained in its own lib these links are no more needed
+		"GloryJobs",
+		"GloryThreads",
 	}
 
 	defines

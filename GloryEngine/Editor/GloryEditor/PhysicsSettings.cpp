@@ -1,5 +1,8 @@
 #include "ProjectSettings.h"
 
+#include <PhysicsModule.h>
+#include <Engine.h>
+
 #include <YAML_GLM.h>
 #include <LayerManager.h>
 #include <imgui.h>

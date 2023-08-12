@@ -39,7 +39,7 @@ project "GloryEditor"
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*" },
 		["UI"] = { "EditorUI.*", "ListView.*" },
 		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp" },
-		["Asset Management"] = { "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
+		["Asset Management"] = { "EditorAssetsWatcher.*", "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
 		["Migration"] = { "ProjectMigrations.*" }
 	}
 
@@ -55,12 +55,15 @@ project "GloryEditor"
 		"%{IncludeDir.yaml_cpp}",
 
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.threads}",
+		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.api}",
 
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
 
 		"%{rapidjson}",
 
@@ -81,6 +84,8 @@ project "GloryEditor"
 	links
 	{
 		"GloryCore",
+		"GloryJobs",
+		"GloryThreads",
 		"GloryAPI",
 		"yaml-cpp",
 		"shaderc",
@@ -91,6 +96,7 @@ project "GloryEditor"
 		"implot",
 
 		"GloryReflect",
+		"GloryUtilsVersion",
 		"tinyfiledialogs",
 	}
 
