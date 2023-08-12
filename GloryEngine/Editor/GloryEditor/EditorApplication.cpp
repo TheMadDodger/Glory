@@ -3,6 +3,7 @@
 #include "EditorAssetDatabase.h"
 #include "EditorAssetsWatcher.h"
 
+#include <GraphicsThread.h>
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>

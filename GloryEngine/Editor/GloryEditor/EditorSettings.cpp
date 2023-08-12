@@ -1,4 +1,6 @@
 #include "EditorSettings.h"
+
+#include <WindowModule.h>
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
 #include <Object.h>

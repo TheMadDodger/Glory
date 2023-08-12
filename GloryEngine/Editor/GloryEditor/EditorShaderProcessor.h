@@ -1,5 +1,6 @@
 #pragma once
 #include "EditorShaderData.h"
+
 #include <ShaderSourceData.h>
 #include <ThreadManager.h>
 #include <map>

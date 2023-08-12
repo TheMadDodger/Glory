@@ -18,7 +18,7 @@ project "EntityScenesEditorExtension"
 	{
 		["Extension"] = { "EntityScenesEditorExtension.*" },
 		["Editors"] = { "CharacterControllerEditor.*", "PhysicsBodyEditor.*", "MeshMaterialPropertyDrawer.*", "ScriptedComponentEditor.*", "TransformEditor.*", "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*" },
-		["Actions"] = { "AddComponentAction.*", "RemoveComponentAction.*" }
+		["Actions"] = { "AddComponentAction.*", "RemoveComponentAction.*", "CreateEntityObjectsCallbacks.*" }
 	}
 
 	includedirs
@@ -30,6 +30,8 @@ project "EntityScenesEditorExtension"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.threads}",
+		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.entityscenes}",
 		"%{GloryIncludeDir.ImGui}",
@@ -38,6 +40,7 @@ project "EntityScenesEditorExtension"
 
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
 
 		"%{rapidjson}",
 	}
@@ -67,7 +70,12 @@ project "EntityScenesEditorExtension"
 		"yaml-cpp",
 
 		"GloryECS",
-		"GloryReflect"
+		"GloryReflect",
+		"GloryUtilsVersion",
+
+		--todo: When asset management is contained in its own lib these links are no more needed
+		"GloryJobs",
+		"GloryThreads",
 	}
 
 	defines

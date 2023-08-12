@@ -1,9 +1,13 @@
 #include "EditorPlatform.h"
 #include "EditorAssets.h"
+#include "EditorRenderImpl.h"
+#include "EditorWindowImpl.h"
+
 #include <implot.h>
 #include <ImGuizmo.h>
 #include <imgui_internal.h>
 #include <Engine.h>
+#include <GraphicsThread.h>
 
 #include <IconsFontAwesome6.h>
 #include <IconsFontAwesome6Brand.h>

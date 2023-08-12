@@ -1,10 +1,12 @@
 #include "PerformanceMetrics.h"
+
 #include <GameTime.h>
 #include <imgui.h>
 #include <TimerModule.h>
 #include <Game.h>
 #include <Engine.h>
 #include <GraphicsModule.h>
+#include <RendererModule.h>
 
 namespace Glory::Editor
 {

@@ -1,9 +1,9 @@
 #pragma once
-#include "EditorRenderImpl.h"
-#include "EditorWindowImpl.h"
 #include "GloryEditor.h"
+
 #include <imgui.h>
 #include <Game.h>
+#include <mutex>
 
 namespace Glory::Editor
 {
@@ -14,6 +14,9 @@ namespace Glory::Editor
 		Begin,
 		End,
 	};
+
+	class EditorRenderImpl;
+	class EditorWindowImpl;
 
 	class EditorPlatform
 	{

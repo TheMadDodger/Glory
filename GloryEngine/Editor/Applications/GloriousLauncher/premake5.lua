@@ -25,6 +25,7 @@ project "GloriousLauncher"
 		"%{DepsIncludeDir}",
 
 		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.Version}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.ImGui}",
@@ -56,6 +57,11 @@ project "GloriousLauncher"
 		"yaml-cpp",
 		"tinyfiledialogs",
 		"GloryReflect",
+		"GloryUtilsVersion",
+
+		--todo: When asset management is contained in its own lib these links are no more needed
+		"GloryJobs",
+		"GloryThreads",
 	}
 
 	dependson

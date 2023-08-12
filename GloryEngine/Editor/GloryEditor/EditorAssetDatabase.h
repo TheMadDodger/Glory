@@ -1,11 +1,9 @@
 #pragma once
-#include "ThreadedVar.h"
 #include "UUID.h"
 #include "GloryEditor.h"
 
 #include <ResourceMeta.h>
 #include <AssetLocation.h>
-#include <JobManager.h>
 
 namespace Glory
 {
@@ -67,20 +65,8 @@ namespace Glory::Editor
 	private:
 		friend class EditorApplication;
 
-		static ThreadedVector<UUID> m_UnsavedAssets;
-
-		struct ImportedResource
-		{
-			Resource* Resource;
-			std::filesystem::path Path;
-		};
-		static ThreadedVector<ImportedResource> m_ImportedResources;
-		static ThreadedUMap<std::string, UUID> m_PathToUUIDCache;
 		static bool m_IsDirty;
-
 		static std::function<void(Resource*)> m_AsyncImportCallback;
-
-		static Jobs::JobPool<bool, std::filesystem::path>* m_pImportPool;
 
 	private:
 		EditorAssetDatabase() = delete;

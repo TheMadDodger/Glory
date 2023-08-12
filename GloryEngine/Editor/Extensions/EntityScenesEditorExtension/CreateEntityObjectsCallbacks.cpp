@@ -1,5 +1,6 @@
 #include "CreateEntityObjectsCallbacks.h"
 
+#include <ScenesModule.h>
 #include <EntitySceneObject.h>
 #include <Game.h>
 #include <Engine.h>

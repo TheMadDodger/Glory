@@ -1,7 +1,9 @@
-#include <Game.h>
-#include <Engine.h>
 #include "EditorWindowImpl.h"
 #include "EditorApplication.h"
+
+#include <Engine.h>
+#include <WindowModule.h>
+
 
 namespace Glory::Editor
 {

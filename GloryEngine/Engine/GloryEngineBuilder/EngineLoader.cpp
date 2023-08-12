@@ -1,5 +1,14 @@
 #include "EngineLoader.h"
 
+#include <WindowModule.h>
+#include <GraphicsModule.h>
+#include <ScenesModule.h>
+#include <RendererModule.h>
+#include <InputModule.h>
+#include <PhysicsModule.h>
+#include <ScriptingModule.h>
+#include <IScriptExtender.h>
+
 #include <GloryContext.h>
 #include <BuiltInModules.h>
 

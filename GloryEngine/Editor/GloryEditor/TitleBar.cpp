@@ -1,4 +1,6 @@
 #include "TitleBar.h"
+
+#include <WindowModule.h>
 #include <Engine.h>
 #include <sstream>
 

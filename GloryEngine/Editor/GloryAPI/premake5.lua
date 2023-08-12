@@ -21,17 +21,14 @@ project "GloryAPI"
 	includedirs
 	{
 		"%{DepsIncludeDir}",
-		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.Version}",
+
 		"%{rapidjson}"
 	}
 
 	libdirs
 	{
 		"%{DepsLibDir}",
-
-		"%{LibDirs.glory}",
-
-		"%{LibDirs.yaml_cpp}",
 	}
 
 	defines
@@ -48,9 +45,8 @@ project "GloryAPI"
 
 	links
 	{
-		"GloryCore",
-		"yaml-cpp",
 		"GloryReflect",
+		"GloryUtilsVersion"
 	}
 
 	filter "system:windows"

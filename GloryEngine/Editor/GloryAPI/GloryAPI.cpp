@@ -1,6 +1,5 @@
 #include "GloryAPI.h"
 
-#include <Debug.h>
 #include <curl/curl.h>
 #include <string>
 #include <iostream>
@@ -13,7 +12,7 @@
 #define VERIFY_CURL()\
 if (!curl)\
 {\
-    Debug::LogError("GloryAPI: Cannot make API request: curl is not initialized!");\
+    std::cerr << "GloryAPI: Cannot make API request: curl is not initialized!";\
     return;\
 }\
 

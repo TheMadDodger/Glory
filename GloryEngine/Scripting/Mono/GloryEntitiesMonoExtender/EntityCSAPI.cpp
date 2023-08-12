@@ -1,6 +1,8 @@
 #include "EntityCSAPI.h"
 #include "AssemblyDomain.h"
 
+#include <ScenesModule.h>
+#include <PhysicsModule.h>
 #include <MonoScriptObjectManager.h>
 #include <EntitySceneObject.h>
 #include <ComponentTypes.h>

@@ -5,6 +5,7 @@
 #include "EditorLoader.h"
 #include "CommandLine.h"
 #include "ProjectLock.h"
+
 #include <Console.h>
 #include <Logs.h>
 #include <ProjectSpace.h>
