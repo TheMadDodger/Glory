@@ -66,8 +66,6 @@ namespace Glory::Editor
 
 	void GizmosToolChain::DrawOperations(float& cursor, const ImVec2& maxButtonSize)
 	{
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
-
 		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 		int styleColorCount = 0;
 		for (size_t i = 0; i < OPERATIONS_COUNT; i++)
@@ -98,8 +96,6 @@ namespace Glory::Editor
 
 	void GizmosToolChain::DrawModes(float& cursor, const ImVec2& maxButtonSize)
 	{
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
-
 		ImVec4 activeColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 		int styleColorCount = 0;
 		for (size_t i = 0; i < MODES_COUNT; i++)
