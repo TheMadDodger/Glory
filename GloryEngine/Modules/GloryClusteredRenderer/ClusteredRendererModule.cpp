@@ -33,7 +33,7 @@ namespace Glory
 	void ClusteredRendererModule::OnCameraResize(CameraRef camera)
 	{
 		// When the camera rendertexture resizes we need to generate a new grid of clusters for that camera
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		Buffer* pClusterSSBO = nullptr;
@@ -44,7 +44,7 @@ namespace Glory
 	void ClusteredRendererModule::OnCameraPerspectiveChanged(CameraRef camera)
 	{
 		// When the camera changed perspective we need to generate a new grid of clusters for that camera
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		Buffer* pClusterSSBO = nullptr;
@@ -52,7 +52,7 @@ namespace Glory
 		GenerateClusterSSBO(pClusterSSBO, camera);
 	}
 
-	void ClusteredRendererModule::PostInitialize()
+	void ClusteredRendererModule::OnPostInitialize()
 	{
 		FileImportSettings importSettings;
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
@@ -125,7 +125,7 @@ namespace Glory
 
 	void ClusteredRendererModule::OnThreadedInitialize()
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
@@ -147,7 +147,7 @@ namespace Glory
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
 		MeshData* pMeshData = renderData.m_pMesh;
 		if (pMeshData == nullptr) return;
@@ -167,7 +167,7 @@ namespace Glory
 
 	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
 		Buffer* pClusterSSBO = nullptr;
 		Buffer* pLightIndexSSBO = nullptr;
@@ -228,7 +228,7 @@ namespace Glory
 
 	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		Buffer* pClusterSSBO = nullptr;
@@ -266,7 +266,7 @@ namespace Glory
 
 	void ClusteredRendererModule::OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(camera, m_pEngine);
@@ -366,7 +366,7 @@ namespace Glory
 		m_pScreenToViewSSBO->Bind();
 		m_pClusterShaderMaterial->SetFloat("zNear", zNear);
 		m_pClusterShaderMaterial->SetFloat("zFar", zFar);
-		m_pEngine->GetGraphicsModule()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
+		m_pEngine->GetMainModule<GraphicsModule>()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
 		pBuffer->Unbind();
 		m_pScreenToViewSSBO->Unbind();
 	}

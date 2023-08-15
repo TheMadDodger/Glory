@@ -11,7 +11,7 @@ namespace Glory
 {
 	void CharacterControllerSystem::OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
@@ -48,7 +48,7 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
@@ -71,7 +71,7 @@ namespace Glory
 
 	void CharacterControllerSystem::OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
@@ -90,7 +90,7 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics) return;
 
 		CharacterManager* pCharacters = pPhysics->GetCharacterManager();

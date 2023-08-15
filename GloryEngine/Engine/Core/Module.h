@@ -32,7 +32,7 @@ virtual const Glory::Version& ModuleVersion() const override { return Version; }
 
 /* Log a message if the module is not present */
 #define REQUIRE_MODULE_MESSAGE(engine, moduleName, message, level, returnValue)								\
-moduleName* p##moduleName = engine->Get##moduleName();														\
+moduleName* p##moduleName = engine->GetMainModule<moduleName>();												\
 if(!p##moduleName)																							\
 {																											\
 	Debug::Log##level(message);																				\
@@ -41,7 +41,7 @@ if(!p##moduleName)																							\
 
 /* Check if a module is present, if not return the returnValue */
 #define REQUIRE_MODULE(engine, moduleName, returnValue)														\
-moduleName* p##moduleName = engine->Get##moduleName();														\
+moduleName* p##moduleName = engine->GetMainModule<moduleName>();														\
 if(!p##moduleName) return returnValue;
 
 /* Call a method on a function, but only if the module is present, return otherwise */
@@ -103,6 +103,7 @@ namespace Glory
 	protected:
 		Engine* m_pEngine;
 		std::filesystem::path m_ModulePath;
+		bool m_IsInitialized;
 
 	private:
 		friend class Engine;

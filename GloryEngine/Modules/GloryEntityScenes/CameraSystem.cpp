@@ -22,7 +22,7 @@ namespace Glory
 	void CameraSystem::OnComponentAdded(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
 		Engine* pEngine = Game::GetGame().GetEngine();
-		Window* pWindow = pEngine->GetWindowModule()->GetMainWindow();
+		Window* pWindow = pEngine->GetMainModule<WindowModule>()->GetMainWindow();
 
 		int width, height;
 		pWindow->GetDrawableSize(&width, &height);
@@ -52,7 +52,7 @@ namespace Glory
 		pComponent.m_Camera.SetClearColor(pComponent.m_ClearColor);
 
 		Engine* pEngine = Game::GetGame().GetEngine();
-		Window* pWindow = pEngine->GetWindowModule()->GetMainWindow();
+		Window* pWindow = pEngine->GetMainModule<WindowModule>()->GetMainWindow();
 
 		int width, height;
 		pWindow->GetDrawableSize(&width, &height);
@@ -61,7 +61,7 @@ namespace Glory
 
 	void CameraSystem::OnDraw(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CameraComponent& pComponent)
 	{
-		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pComponent.m_Camera);
+		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->Submit(pComponent.m_Camera);
 	}
 
 	std::string CameraSystem::Name()

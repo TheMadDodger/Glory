@@ -3,7 +3,7 @@
 #include "Engine.h"
 #include "TimerModule.h"
 
-#define TIMER Game::GetGame().GetEngine()->GetTimerModule()
+#define TIMER Game::GetGame().GetEngine()->GetInternalModule<TimerModule>()
 
 namespace Glory
 {

@@ -40,7 +40,7 @@ namespace Glory
 		glBindFramebuffer(GL_FRAMEBUFFER, m_GLFrameBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager();
+		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
 		CreateTextures(pResourceManager);
 		
 		//GLTexture* pGLTexture = (GLTexture*)m_pTexture;
@@ -119,7 +119,7 @@ namespace Glory
 		m_GLFrameBufferID = NULL;
 		//m_GLDepthBufferID = NULL;
 
-		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager();
+		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
 		size_t attachmentCount = m_CreateInfo.Attachments.size();
 		for (size_t i = 0; i < attachmentCount; i++)
 		{

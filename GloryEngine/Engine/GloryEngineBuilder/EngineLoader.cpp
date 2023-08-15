@@ -1,11 +1,6 @@
 #include "EngineLoader.h"
 
 #include <WindowModule.h>
-#include <GraphicsModule.h>
-#include <ScenesModule.h>
-#include <RendererModule.h>
-#include <InputModule.h>
-#include <PhysicsModule.h>
 #include <ScriptingModule.h>
 #include <IScriptExtender.h>
 
@@ -41,12 +36,12 @@ namespace Glory
 	typedef Module* (__cdecl* OnLoadModuleProc)(GloryContext*);
 	typedef IScriptExtender*(__cdecl* OnLoadExtensionProc)(GloryContext*);
 	
-	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath)
-		: m_CFGPath(cfgPath) {}
+	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow)
+		: m_CFGPath(cfgPath), m_DefaultWindow(defaultWindow), m_EngineInfo{} {}
 	
 	EngineLoader::~EngineLoader() {}
 
-	Engine* EngineLoader::LoadEngine(const Glory::WindowCreateInfo& defaultWindow)
+	Engine* EngineLoader::LoadEngine()
 	{
 		if (!std::filesystem::exists(m_CFGPath))
 		{
@@ -71,19 +66,20 @@ namespace Glory
 			LoadScriptingExtendersForScripting(m_pScriptingModules[i]);
 		}
 
+		m_EngineInfo.MainModuleCount = static_cast<uint32_t>(m_pMainModules.size());
+		m_EngineInfo.pMainModules = m_pMainModules.data();
+
 		m_EngineInfo.OptionalModuleCount = static_cast<uint32_t>(m_pOptionalModules.size());
 		m_EngineInfo.pOptionalModules = m_pOptionalModules.data();
 
 		m_EngineInfo.ScriptingModulesCount = static_cast<uint32_t>(m_pScriptingModules.size());
 		m_EngineInfo.pScriptingModules = m_pScriptingModules.data();
-
-		if (m_EngineInfo.pWindowModule) m_EngineInfo.pWindowModule->SetMainWindowCreateInfo(defaultWindow);
 		return Engine::CreateEngine(m_EngineInfo);
 	}
 		
 	void EngineLoader::Unload()
 	{
-		m_pModules.clear();
+		m_pAllModules.clear();
 		m_LoadedModuleNames.clear();
 		m_pOptionalModules.clear();
 		m_pScriptingModules.clear();
@@ -113,12 +109,12 @@ namespace Glory
 
 	const size_t EngineLoader::ModuleCount() const
 	{
-		return m_pModules.size();
+		return m_pAllModules.size();
 	}
 		
 	const Module* EngineLoader::GetModule(size_t index) const
 	{
-		return m_pModules[index];
+		return m_pAllModules[index];
 	}
 
 	void EngineLoader::LoadModules(YAML::Node& modules)
@@ -130,6 +126,15 @@ namespace Glory
 			std::string moduleName = moduleNode.as<std::string>();
 			LoadModule(moduleName);
 		}
+
+		std::sort(m_pMainModules.begin(), m_pMainModules.end(), [](Module* pModuleA, Module* pModuleB)
+		{
+			const ModuleMetaData& metaA = pModuleA->GetMetaData();
+			const ModuleMetaData& metaB = pModuleB->GetMetaData();
+			const ModuleType typeA = metaA.Type();
+			const ModuleType typeB = metaB.Type();
+			return typeA < typeB;
+		});
 	}
 
 	void EngineLoader::LoadModule(const std::string& moduleName)
@@ -239,7 +244,7 @@ namespace Glory
 
 		m_ModuleLibs.push_back(lib);
 		pModule->SetMetaData(metaData);
-		m_pModules.push_back(pModule);
+		m_pAllModules.push_back(pModule);
 		m_LoadedModuleNames.push_back(moduleName);
 		ReadModule(pModule);
 	}
@@ -247,76 +252,34 @@ namespace Glory
 	void EngineLoader::ReadModule(Module* pModule)
 	{
 		const ModuleMetaData& metaData = pModule->GetMetaData();
+		const ModuleType moduleType = metaData.Type();
 
-		ModuleType moduleType = metaData.Type();
-		switch (moduleType)
+		/* FIXME: There is a better place for this */
+		if (moduleType == ModuleType::MT_Window)
 		{
-		case Glory::ModuleType::MT_Window:
-			if (m_EngineInfo.pWindowModule != nullptr)
-			{
-				Debug::LogWarning("Multiple window modules is not supported");
-				return;
-			}
-			m_EngineInfo.pWindowModule = static_cast<WindowModule*>(pModule);
-			break;
-		case Glory::ModuleType::MT_Graphics:
-			if (m_EngineInfo.pGraphicsModule != nullptr)
-			{
-				Debug::LogWarning("Multiple graphics modules is currently not supported");
-				return;
-			}
-			m_EngineInfo.pGraphicsModule = static_cast<GraphicsModule*>(pModule);
-			break;
-		case Glory::ModuleType::MT_Renderer:
-			if (m_EngineInfo.pRenderModule != nullptr)
-			{
-				Debug::LogWarning("Multiple renderer modules is currently not supported");
-				return;
-			}
-			m_EngineInfo.pRenderModule = static_cast<RendererModule*>(pModule);
-			break;
-		case Glory::ModuleType::MT_SceneManagement:
-			if (m_EngineInfo.pScenesModule != nullptr)
-			{
-				Debug::LogWarning("Multiple scene management modules is currently not supported");
-				return;
-			}
-			m_EngineInfo.pScenesModule = static_cast<ScenesModule*>(pModule);
-			break;
-		case Glory::ModuleType::MT_Scripting:
-			m_pScriptingModules.push_back(static_cast<ScriptingModule*>(pModule));
-			break;
-		case Glory::ModuleType::MT_Input:
-			if (m_EngineInfo.pInputModule != nullptr)
-			{
-				Debug::LogWarning("Multiple input modules is currently not supported");
-				return;
-			}
-			m_EngineInfo.pInputModule = static_cast<InputModule*>(pModule);
-			break;
-		case Glory::ModuleType::MT_Physics:
-			if (m_EngineInfo.pPhysicsModule != nullptr)
-			{
-				Debug::LogWarning("Multiple physics modules is not supported");
-				return;
-			}
-			m_EngineInfo.pPhysicsModule = static_cast<PhysicsModule*>(pModule);
-			break;
-
-		case Glory::ModuleType::MT_Loader:
-		case Glory::ModuleType::MT_Other:
-			m_pOptionalModules.push_back(pModule);
-			break;
-		default:
-			break;
+			((WindowModule*)pModule)->SetMainWindowCreateInfo(m_DefaultWindow);
 		}
+
+		if (moduleType < ModuleType::MT_Scripting)
+		{
+			m_pMainModules.push_back(pModule);
+			return;
+		}
+
+		if (moduleType == ModuleType::MT_Scripting)
+		{
+			m_pScriptingModules.push_back((ScriptingModule*)pModule);
+			return;
+		}
+
+		m_pOptionalModules.push_back(pModule);
 	}
 
 	void EngineLoader::LoadScriptingExtendersForScripting(ScriptingModule* pScriptingModule)
 	{
-		for (size_t i = 0; i < m_pModules.size(); i++)
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
-			Module* pModule = m_pModules[i];
+			Module* pModule = m_pAllModules[i];
 			const ModuleMetaData& metaData = pModule->GetMetaData();
 			const ModuleScriptingExtension* const extender = metaData.ScriptExtenderForLanguage(pScriptingModule->ScriptingLanguage());
 			if (extender == nullptr) continue;

@@ -1,5 +1,7 @@
 #include "GraphicsModule.h"
+#include "GraphicsThread.h"
 #include "FrameStates.h"
+#include "Engine.h"
 
 namespace Glory
 {
@@ -77,6 +79,12 @@ namespace Glory
 		m_pResourceManager = CreateGPUResourceManager();
 		OnInitialize();
 		m_pFrameStates->Initialize();
+	}
+
+	void GraphicsModule::PostInitialize()
+	{
+		/* Bind to graphics thread */
+		m_pEngine->GetGraphicsThread()->BindNoRender(this);
 	}
 
 	void GraphicsModule::Cleanup()

@@ -51,7 +51,7 @@ namespace Glory::Editor
 
 		const ImVec2 cursor = ImGui::GetCursorPos();
 		const ImVec2 windowPos = ImGui::GetWindowPos();
-		Window* pWindow = Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow();
+		Window* pWindow = Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		int mainWindowWidth, mainWindowHeight;
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
 		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });

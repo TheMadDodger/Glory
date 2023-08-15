@@ -21,7 +21,7 @@ namespace Glory::Editor
 	GScene* EditorSceneManager::NewScene(bool additive)
 	{
 		if (!additive) CloseAll();
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		GScene* pScene = pScenesModule->CreateEmptyScene();
 		m_OpenedSceneIDs.push_back(pScene->GetUUID());
 		SetSceneDirty(pScene);
@@ -34,7 +34,7 @@ namespace Glory::Editor
 			CloseScene(uuid);
 		if (!additive) CloseAll();
 
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);
 		std::string path = Game::GetGame().GetAssetPath() + "\\" + location.Path;
@@ -50,7 +50,7 @@ namespace Glory::Editor
 		if (IsSceneOpen(uuid))
 			CloseScene(uuid);
 
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		pScenesModule->AddOpenScene(pScene, uuid);
 		m_OpenedSceneIDs.push_back(uuid);
 
@@ -74,7 +74,7 @@ namespace Glory::Editor
 	{
 		// TODO: Check if scene has changes
 		Selection::SetActiveObject(nullptr);
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		if (it == m_OpenedSceneIDs.end()) return;
 		m_OpenedSceneIDs.erase(it);
@@ -95,7 +95,7 @@ namespace Glory::Editor
 	{
 		m_OpenedSceneIDs.clear();
 		m_DirtySceneIDs.clear();
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		pScenesModule->CloseAllScenes();
 		TitleBar::SetText("Scene", "No Scene open");
 	}
@@ -113,12 +113,12 @@ namespace Glory::Editor
 	GScene* EditorSceneManager::GetOpenScene(size_t index)
 	{
 		const UUID uuid = GetOpenSceneUUID(index);
-		return Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(index);
+		return Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(index);
 	}
 
 	GScene* EditorSceneManager::GetOpenScene(UUID uuid)
 	{
-		return Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
+		return Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(uuid);
 	}
 
 	void EditorSceneManager::SaveScene(UUID uuid)
@@ -161,7 +161,7 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SerializeOpenScenes(YAML::Emitter& out)
 	{
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		out << YAML::BeginSeq;
 		for (size_t i = 0; i < m_OpenedSceneIDs.size(); i++)
 		{
@@ -197,13 +197,13 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SetActiveScene(GScene* pScene)
 	{
-		Game::GetGame().GetEngine()->GetScenesModule()->SetActiveScene(pScene);
+		Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->SetActiveScene(pScene);
 		TitleBar::SetText("Scene", pScene ? pScene->Name().c_str() : "No Scene open");
 	}
 
 	GScene* EditorSceneManager::GetActiveScene()
 	{
-		return Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
+		return Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetActiveScene();
 	}
 
 	void EditorSceneManager::SetSceneDirty(GScene* pScene, bool dirty)
@@ -293,7 +293,7 @@ namespace Glory::Editor
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(uuid);
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(uuid);
 		YAML::Emitter out;
 		Serializer::SerializeObject(pScene, out);
 		std::ofstream outStream(path);

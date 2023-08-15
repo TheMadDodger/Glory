@@ -23,7 +23,7 @@ namespace Glory::Editor
 
 	void SceneGraphWindow::OnGUI()
 	{
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 
 		const GScene* pActiveScene = pScenesModule->GetActiveScene();
 

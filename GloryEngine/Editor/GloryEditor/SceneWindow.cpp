@@ -69,7 +69,7 @@ namespace Glory::Editor
 
 	void SceneWindow::Draw()
 	{
-		Game::GetGame().GetEngine()->GetRendererModule()->Submit(m_SceneCamera.m_Camera);
+		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->Submit(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::MenuBar(RenderTexture* pRenderTexture)
@@ -164,12 +164,12 @@ namespace Glory::Editor
 		glm::uvec2 textureCoord = viewportCoord * (glm::vec2)resolution;
 		textureCoord.y = resolution.y - textureCoord.y;
 
-		Game::GetGame().GetEngine()->GetRendererModule()->SetNextFramePick(textureCoord, m_SceneCamera.m_Camera);
+		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->SetNextFramePick(textureCoord, m_SceneCamera.m_Camera);
 
 		if (!ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
 			Engine* pEngine = Game::GetGame().GetEngine();
-			Selection::SetActiveObject(pEngine->GetScenesModule()->GetHoveringObject());
+			Selection::SetActiveObject(pEngine->GetMainModule<ScenesModule>()->GetHoveringObject());
 		}
 	}
 }

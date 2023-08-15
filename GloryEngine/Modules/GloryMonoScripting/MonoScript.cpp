@@ -199,7 +199,7 @@ namespace Glory
 				SceneObjectRef objectRef;
 				PropertySerializer::GetSerializer(ST_Object)->Deserialize(&objectRef, pField->ElementTypeHash(), valueNode);
 
-				GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(objectRef.SceneUUID());
+				GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(objectRef.SceneUUID());
 				if (!pScene) continue;
 				MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 				if (!pObjectManager) continue;

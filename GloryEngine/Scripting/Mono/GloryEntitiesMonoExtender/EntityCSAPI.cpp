@@ -21,7 +21,7 @@ namespace Glory
 	EntityScene* GetEntityScene(UUID sceneID)
 	{
 		if (sceneID == 0) return nullptr;
-		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene(sceneID);
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(sceneID);
 		if (pScene == nullptr) return nullptr;
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		return pEntityScene;
@@ -45,7 +45,7 @@ namespace Glory
 	bool IsValid(MonoEntityHandle* pMonoEntityHandle)
 	{
 		if (pMonoEntityHandle->m_EntityID == 0 || pMonoEntityHandle->m_SceneID == 0) return false;
-		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene((UUID)pMonoEntityHandle->m_SceneID);
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene((UUID)pMonoEntityHandle->m_SceneID);
 		if (pScene == nullptr) return false;
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		if (pEntityScene == nullptr) return false;
@@ -78,7 +78,7 @@ namespace Glory
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
 		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
-		GScene* pScene = Game::GetGame().GetEngine()->GetScenesModule()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
 		if (pScene == nullptr) return 0;
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		if (pEntityScene == nullptr) return 0;
@@ -441,7 +441,7 @@ namespace Glory
 
 #pragma region Physics Component
 
-#define PHYSICS Game::GetGame().GetEngine()->GetPhysicsModule()
+#define PHYSICS Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>()
 
 #pragma region States
 

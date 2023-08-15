@@ -9,14 +9,6 @@ namespace Glory
 {
 	class Module;
 	class IModuleLoopHandler;
-	class WindowModule;
-	class ScenesModule;
-	class RendererModule;
-	class GraphicsModule;
-	class InputModule;
-	class PhysicsModule;
-	class TimerModule;
-	class ProfilerModule;
 	class ScriptingExtender;
 	class GraphicsThread;
 	class ThreadManager;
@@ -30,12 +22,16 @@ namespace Glory
 
 	struct EngineCreateInfo
 	{
-		WindowModule* pWindowModule;
-		ScenesModule* pScenesModule;
-		RendererModule* pRenderModule;
-		GraphicsModule* pGraphicsModule;
-		InputModule* pInputModule;
-		PhysicsModule* pPhysicsModule;
+		uint32_t MainModuleCount;
+		/* Order should be: 
+		 * - WindowModule
+		 * - ScenesModule
+		 * - GraphicsModule
+		 * - RenderModule
+		 * - InputModule
+		 * - PhysicsModule
+		 */
+		Module** pMainModules;
 
 		uint32_t ScriptingModulesCount;
 		ScriptingModule** pScriptingModules;
@@ -53,21 +49,49 @@ namespace Glory
 	public:
 		static Engine* CreateEngine(const EngineCreateInfo& createInfo);
 
-		WindowModule* GetWindowModule() const;
-		ScenesModule* GetScenesModule() const;
-		RendererModule* GetRendererModule() const;
-		GraphicsModule* GetGraphicsModule() const;
-		InputModule* GetInputModule() const;
-		PhysicsModule* GetPhysicsModule() const;
-		TimerModule* GetTimerModule() const;
-		ProfilerModule* GetProfilerModule() const;
+		void AddMainModule(Module* pModule, bool initialize = false);
+		void AddOptionalModule(Module* pModule, bool initialize = false);
+		void AddInternalModule(Module* pModule, bool initialize = false);
+
 		ScriptingExtender* GetScriptingExtender() const;
 
+		Module* GetMainModule(const std::type_info& type) const;
+		Module* GetMainModule(const std::string& name) const;
+
 		template<class T>
-		T* GetModule()
+		T* GetMainModule() const
+		{
+			Module* pModule = GetMainModule(typeid(T));
+			return pModule ? (T*)pModule : nullptr;
+		}
+
+		Module* GetOptionalModule(const std::type_info& type) const;
+		Module* GetOptionalModule(const std::string& name) const;
+
+		template<class T>
+		T* GetOptionalModule() const
+		{
+			Module* pModule = GetOptionalModule(typeid(T));
+			return pModule ? (T*)pModule : nullptr;
+		}
+
+		Module* GetModule(const std::type_info& type) const;
+		Module* GetModule(const std::string& name) const;
+
+		template<class T>
+		T* GetModule() const
 		{
 			Module* pModule = GetModule(typeid(T));
-			return (T*)pModule;
+			return pModule ? (T*)pModule : nullptr;
+		}
+
+		Module* GetInternalModule(const std::type_info& type) const;
+
+		template<class T>
+		T* GetInternalModule() const
+		{
+			Module* pModule = GetInternalModule(typeid(T));
+			return pModule ? (T*)pModule : nullptr;
 		}
 
 		template<class T>
@@ -93,9 +117,6 @@ namespace Glory
 
 		LoaderModule* GetLoaderModule(const std::type_info& resourceType);
 		LoaderModule* GetLoaderModule(uint32_t typeHash);
-
-		Module* GetModule(const std::type_info& type);
-		Module* GetModule(const std::string& name);
 
 		GraphicsThread* GetGraphicsThread() const;
 
@@ -133,38 +154,37 @@ namespace Glory
 		friend class GraphicsThread;
 		friend class ScriptingExtender;
 
-		// Original crate info
+		/* Original create info*/
 		const EngineCreateInfo m_CreateInfo;
 
-		// Required modules
-		WindowModule* m_pWindowModule;
-		ScenesModule* m_pScenesModule;
-		RendererModule* m_pRenderModule;
-		GraphicsModule* m_pGraphicsModule;
-		InputModule* m_pInputModule;
-		PhysicsModule* m_pPhysicsModule;
-		TimerModule* m_pTimerModule;
-		ProfilerModule* m_pProfilerModule;
+		/* Scripting */
 		ScriptingExtender* m_pScriptingExtender;
 		std::vector<ScriptingModule*> m_pScriptingModules;
 
-		// Optional modules
+		/* Main Modules */
+		std::vector<Module*> m_pMainModules;
+
+		/* Optional modules */
 		std::vector<Module*> m_pOptionalModules;
 
-		// All modules
+		/* All modules */
 		std::vector<Module*> m_pAllModules;
 
+		/* Optional modules that have priority over initialization order */
 		std::vector<Module*> m_pPriorityInitializationModules;
+
+		/* Internal modules */
+		std::vector<Module*> m_pInternalModules;
 
 		std::vector<LoaderModule*> m_pLoaderModules;
 		std::map<std::type_index, size_t> m_TypeToLoader;
 		std::map<uint32_t, size_t> m_TypeHashToLoader;
 
-		// Threading
+		/* Threading */
 		ThreadManager* m_pThreadManager;
 		Jobs::JobManager* m_pJobManager;
 
-		// Threads
+		/* Threads */
 		GraphicsThread* m_pGraphicsThread;
 	};
 }

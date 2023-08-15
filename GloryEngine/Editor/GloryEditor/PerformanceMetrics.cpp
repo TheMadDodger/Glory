@@ -29,10 +29,10 @@ namespace Glory::Editor
 		ImGui::Text("Average Game Time: %.3f ms - Average Graphics Time: %.3f ms", m_LastGameThreadFrameTime, m_LastGraphicsThreadFrameTime);
 		ImGui::Text("Frame Count: %d - Game Frame Count: %d", Time::GetTotalFrames(), Time::GetTotalGameFrames());
 
-		GraphicsModule* pGraphics = Game::GetGame().GetEngine()->GetGraphicsModule();
+		GraphicsModule* pGraphics = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>();
 		ImGui::Text("Draw Calls: %d - Vertices: %d - Triangles: %d", pGraphics->GetLastDrawCalls(), pGraphics->GetLastVertexCount(), pGraphics->GetLastTriangleCount());
 
-		RendererModule* pRenderer = Game::GetGame().GetEngine()->GetRendererModule();
+		RendererModule* pRenderer = Game::GetGame().GetEngine()->GetMainModule<RendererModule>();
 		ImGui::Text("Active Objects: %d - Active Cameras: %d", pRenderer->LastSubmittedObjectCount(), pRenderer->LastSubmittedCameraCount());
 	}
 

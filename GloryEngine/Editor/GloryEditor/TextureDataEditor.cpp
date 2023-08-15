@@ -31,7 +31,7 @@ namespace Glory::Editor
 
 		if (change)
 		{
-			Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
+			Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
 			Tumbnail::SetDirty(pTextureData->GetUUID());
 		}
 		return change;

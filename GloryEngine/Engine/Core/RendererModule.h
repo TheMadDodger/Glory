@@ -62,11 +62,13 @@ namespace Glory
 	protected:
 		friend class GraphicsThread;
 		virtual void Initialize() override;
+		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 
 		virtual void OnInitialize() {};
+		virtual void OnPostInitialize() {};
 		virtual void OnThreadedInitialize() {}
 		virtual void OnThreadedCleanup() {}
 

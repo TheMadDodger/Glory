@@ -13,23 +13,18 @@
 #include "ScriptExtensions.h"
 #include "ScriptingExtender.h"
 #include "GloryContext.h"
-#include "WindowsDebugConsole.h"
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "Physics.h"
 #include "ShapeProperty.h"
 
 #include "IModuleLoopHandler.h"
-#include "WindowModule.h"
-#include "GraphicsModule.h"
 #include "GraphicsThread.h"
-#include "ScenesModule.h"
-#include "RendererModule.h"
 #include "ResourceLoaderModule.h"
-#include "InputModule.h"
+
 #include "TimerModule.h"
 #include "ProfilerModule.h"
-#include "PhysicsModule.h"
+
 #include "ScriptingModule.h"
 #include "IScriptExtender.h"
 
@@ -46,49 +41,116 @@ namespace Glory
 		return pEngine;
 	}
 
-	WindowModule* Engine::GetWindowModule() const
+	void Engine::AddMainModule(Module* pModule, bool initialize)
 	{
-		return m_pWindowModule;
+		m_pMainModules.push_back(pModule);
+		m_pAllModules.push_back(pModule);
+		if (!initialize) return;
+		pModule->Initialize();
+		pModule->PostInitialize();
+		pModule->m_IsInitialized = true;
 	}
 
-	ScenesModule* Engine::GetScenesModule() const
+	void Engine::AddOptionalModule(Module* pModule, bool initialize)
 	{
-		return m_pScenesModule;
+		m_pOptionalModules.push_back(pModule);
+		m_pAllModules.push_back(pModule);
+		if (!initialize) return;
+		pModule->Initialize();
+		pModule->PostInitialize();
+		pModule->m_IsInitialized = true;
 	}
 
-	RendererModule* Engine::GetRendererModule() const
+	void Engine::AddInternalModule(Module* pModule, bool initialize)
 	{
-		return m_pRenderModule;
-	}
-
-	GraphicsModule* Engine::GetGraphicsModule() const
-	{
-		return m_pGraphicsModule;
-	}
-
-	InputModule* Engine::GetInputModule() const
-	{
-		return m_pInputModule;
-	}
-
-	PhysicsModule* Engine::GetPhysicsModule() const
-	{
-		return m_pPhysicsModule;
-	}
-
-	TimerModule* Engine::GetTimerModule() const
-	{
-		return m_pTimerModule;
-	}
-
-	ProfilerModule* Engine::GetProfilerModule() const
-	{
-		return m_pProfilerModule;
+		m_pInternalModules.push_back(pModule);
+		m_pAllModules.push_back(pModule);
+		if (!initialize) return;
+		pModule->Initialize();
+		pModule->PostInitialize();
+		pModule->m_IsInitialized = true;
 	}
 
 	ScriptingExtender* Engine::GetScriptingExtender() const
 	{
 		return m_pScriptingExtender;
+	}
+
+	Module* Engine::GetMainModule(const std::type_info& type) const
+	{
+		auto it = std::find_if(m_pMainModules.begin(), m_pMainModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetModuleType() == type;
+		});
+
+		if (it == m_pMainModules.end()) return nullptr;
+		return *it;
+	}
+
+	Module* Engine::GetMainModule(const std::string& name) const
+	{
+		auto it = std::find_if(m_pMainModules.begin(), m_pMainModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetMetaData().Name() == name;
+		});
+
+		if (it == m_pMainModules.end()) return nullptr;
+		return *it;
+	}
+
+	Module* Engine::GetOptionalModule(const std::type_info& type) const
+	{
+		auto it = std::find_if(m_pOptionalModules.begin(), m_pOptionalModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetModuleType() == type;
+		});
+
+		if (it == m_pOptionalModules.end()) return nullptr;
+		return *it;
+	}
+
+	Module* Engine::GetOptionalModule(const std::string& name) const
+	{
+		auto it = std::find_if(m_pOptionalModules.begin(), m_pOptionalModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetMetaData().Name() == name;
+		});
+
+		if (it == m_pOptionalModules.end()) return nullptr;
+		return *it;
+	}
+
+	Module* Engine::GetModule(const std::type_info& type) const
+	{
+		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetModuleType() == type;
+		});
+
+		if (it == m_pAllModules.end()) return nullptr;
+		return *it;
+	}
+
+	Module* Engine::GetModule(const std::string& name) const
+	{
+		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetMetaData().Name() == name;
+		});
+
+		if (it == m_pAllModules.end()) return nullptr;
+		return *it;
+	}
+
+	Module* Engine::GetInternalModule(const std::type_info& type) const
+	{
+		auto it = std::find_if(m_pInternalModules.begin(), m_pInternalModules.end(), [&](Module* pModule)
+		{
+			return pModule->GetModuleType() == type;
+		});
+
+		if (it == m_pInternalModules.end()) return nullptr;
+		return *it;
 	}
 
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
@@ -112,28 +174,6 @@ namespace Glory
 		return m_pLoaderModules[loaderIndex];
 	}
 
-	Module* Engine::GetModule(const std::type_info& type)
-	{
-		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
-		{
-			return pModule->GetModuleType() == type;
-		});
-
-		if (it == m_pAllModules.end()) return nullptr;
-		return *it;
-	}
-
-	Module* Engine::GetModule(const std::string& name)
-	{
-		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
-		{
-			return pModule->GetMetaData().Name() == name;
-		});
-
-		if (it == m_pAllModules.end()) return nullptr;
-		return *it;
-	}
-
 	GraphicsThread* Engine::GetGraphicsThread() const
 	{
 		return m_pGraphicsThread;
@@ -145,13 +185,16 @@ namespace Glory
 	}
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
-		: m_pWindowModule(createInfo.pWindowModule), m_pGraphicsModule(createInfo.pGraphicsModule),
-		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
-		m_pScenesModule(createInfo.pScenesModule), m_pRenderModule(createInfo.pRenderModule), m_pPhysicsModule(createInfo.pPhysicsModule),
-		m_pTimerModule(new TimerModule()), m_pProfilerModule(new ProfilerModule()), m_pInputModule(createInfo.pInputModule),
+		: m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
 		m_pGraphicsThread(nullptr), m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
 	{
-		// Copy the optional modules into the optional modules vector
+		/* Copy main modules */
+		m_pMainModules.resize(createInfo.MainModuleCount);
+		m_pAllModules.resize(createInfo.MainModuleCount);
+		std::memcpy(m_pMainModules.data(), createInfo.pMainModules, sizeof(Module*)*createInfo.MainModuleCount);
+		std::memcpy(m_pAllModules.data(), createInfo.pMainModules, sizeof(Module*)*createInfo.MainModuleCount);
+
+		/* Copy the optional modules into the optional modules vector */
 		if (createInfo.OptionalModuleCount > 0 && createInfo.pOptionalModules != nullptr)
 		{
 			m_pOptionalModules.resize(createInfo.OptionalModuleCount);
@@ -163,17 +206,7 @@ namespace Glory
 			}
 		}
 
-		// Fill in the all modules vector with the required modules first
-		// In order of importance
-		if (m_pWindowModule) m_pAllModules.push_back(m_pWindowModule);
-		if (m_pScenesModule) m_pAllModules.push_back(m_pScenesModule);
-		if (m_pRenderModule) m_pAllModules.push_back(m_pRenderModule);
-		if (m_pGraphicsModule) m_pAllModules.push_back(m_pGraphicsModule);
-		if (m_pInputModule) m_pAllModules.push_back(m_pInputModule);
-		if (m_pPhysicsModule) m_pAllModules.push_back(m_pPhysicsModule);
-		if (m_pTimerModule) m_pAllModules.push_back(m_pTimerModule);
-
-		// Add optional modules
+		/* Add optional modules */
 		size_t currentSize = m_pAllModules.size();
 		m_pAllModules.resize(currentSize + m_pOptionalModules.size());
 		for (size_t i = 0; i < m_pOptionalModules.size(); i++)
@@ -184,6 +217,7 @@ namespace Glory
 		m_pScriptingModules.resize(createInfo.ScriptingModulesCount);
 		if (m_pScriptingModules.size() > 0) memcpy(&m_pScriptingModules[0], createInfo.pScriptingModules, createInfo.ScriptingModulesCount * sizeof(ScriptingModule*));
 
+		/* Add scripting modules */
 		currentSize = m_pAllModules.size();
 		m_pAllModules.resize(currentSize + m_pScriptingModules.size() * 2);
 		for (size_t i = 0; i < m_pScriptingModules.size(); ++i)
@@ -192,7 +226,8 @@ namespace Glory
 			m_pAllModules[currentSize + m_pScriptingModules.size() + i] = m_pScriptingModules[i]->CreateLoaderModule();
 		}
 
-		m_pAllModules.push_back(m_pProfilerModule);
+		AddInternalModule(new TimerModule);
+		AddInternalModule(new ProfilerModule);
 	}
 
 	Engine::~Engine()
@@ -215,10 +250,6 @@ namespace Glory
 			m_pAllModules[(size_t)i]->Cleanup();
 			delete m_pAllModules[(size_t)i];
 		}
-		m_pWindowModule = nullptr;
-		m_pScenesModule = nullptr;
-		m_pRenderModule = nullptr;
-		m_pGraphicsModule = nullptr;
 
 		m_pAllModules.clear();
 		m_pOptionalModules.clear();
@@ -250,6 +281,7 @@ namespace Glory
 		{
 			m_pPriorityInitializationModules[i]->m_pEngine = this;
 			m_pPriorityInitializationModules[i]->Initialize();
+			m_pPriorityInitializationModules[i]->m_IsInitialized = true;
 		}
 
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
@@ -271,26 +303,24 @@ namespace Glory
 				m_pScriptingExtender->RegisterManagedExtender(m_pAllModules[i], pScriptExtender);
 			}
 
-			auto it = std::find(m_pPriorityInitializationModules.begin(), m_pPriorityInitializationModules.end(), m_pAllModules[i]);
-			if (it != m_pPriorityInitializationModules.end()) continue;
+			if (m_pAllModules[i]->m_IsInitialized) continue;			
 			m_pAllModules[i]->m_pEngine = this;
 			m_pAllModules[i]->Initialize();
+			m_pAllModules[i]->m_IsInitialized = true;
 		}
 
 		AssetManager::Initialize();
 
 		m_pScriptingExtender->Initialize(this);
 
-		// Run Post Initialize
+		/* Create graphics thread */
+		m_pGraphicsThread = new GraphicsThread(this);
+
+		/* Run Post Initialize */
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->PostInitialize();
 		}
-
-		// Bind rendering to Graphics Thread
-		m_pGraphicsThread = new GraphicsThread(this);
-		if(m_pGraphicsModule) m_pGraphicsThread->BindNoRender<GraphicsModule>(m_pGraphicsModule);
-		if(m_pRenderModule) m_pGraphicsThread->Bind<RendererModule>(m_pRenderModule);
 	}
 
 	void Engine::RegisterStandardSerializers()
@@ -368,7 +398,6 @@ namespace Glory
 	{
 		GameThreadFrameStart();
 		Console::Update();
-		m_pWindowModule->PollEvents();
 		ModulesLoop();
 		GameThreadFrameEnd();
 	}

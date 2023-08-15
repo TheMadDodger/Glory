@@ -42,16 +42,16 @@ namespace Glory
 		m_ScreenQuadVertexbufferID = 0;
 
 		GraphicsModule::ThreadedCleanup();
-		GetEngine()->GetWindowModule()->GetMainWindow()->CleanupOpenGL();
+		GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->CleanupOpenGL();
 		LogGLError(glGetError());
 	}
 
 	void OpenGLGraphicsModule::ThreadedInitialize()
 	{
-		Window* pMainWindow = GetEngine()->GetWindowModule()->GetMainWindow();
+		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
 		LogGLError(glGetError());
-		GetEngine()->GetWindowModule()->GetMainWindow()->MakeGLContextCurrent();
+		GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->MakeGLContextCurrent();
 		LogGLError(glGetError());
 
 		// Init GLEW
@@ -165,7 +165,7 @@ namespace Glory
 
 	void OpenGLGraphicsModule::Swap()
 	{
-		Window* pMainWindow = GetEngine()->GetWindowModule()->GetMainWindow();
+		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->GLSwapWindow();
 	}
 

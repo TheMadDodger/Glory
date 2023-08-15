@@ -3,7 +3,7 @@
 #include "MonoManager.h"
 #include <InputModule.h>
 
-#define INPUT_MODULE Game::GetGame().GetEngine()->GetInputModule();
+#define INPUT_MODULE Game::GetGame().GetEngine()->GetMainModule<InputModule>();
 
 namespace Glory
 {

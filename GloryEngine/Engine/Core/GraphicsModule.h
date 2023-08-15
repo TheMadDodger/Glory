@@ -46,6 +46,7 @@ namespace Glory
 
     private:
         virtual void Initialize() override;
+        virtual void PostInitialize() override;
         virtual void Cleanup() override;
 
         virtual void OnGraphicsThreadFrameStart() override;

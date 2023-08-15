@@ -351,14 +351,14 @@ namespace Glory::Editor
 
 	void ProfilerWindow::OnOpen()
 	{
-		ProfilerModule* pProfiler = Game::GetGame().GetEngine()->GetProfilerModule();
+		ProfilerModule* pProfiler = Game::GetGame().GetEngine()->GetInternalModule<ProfilerModule>();
 		pProfiler->RegisterRecordCallback(ProfilerWindow::StoreSampleRecord);
 		pProfiler->EnableSampleCollecting(true);
 	}
 
 	void ProfilerWindow::OnClose()
 	{
-		ProfilerModule* pProfiler = Game::GetGame().GetEngine()->GetProfilerModule();
+		ProfilerModule* pProfiler = Game::GetGame().GetEngine()->GetInternalModule<ProfilerModule>();
 		pProfiler->RegisterRecordCallback(NULL);
 		pProfiler->EnableSampleCollecting(false);
 	}

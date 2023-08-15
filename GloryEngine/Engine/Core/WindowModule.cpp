@@ -51,6 +51,11 @@ namespace Glory
         m_pMainWindow = CreateNewWindow(m_MainWindowCreateInfo);
     }
 
+    void WindowModule::Update()
+    {
+        PollEvents();
+    }
+
     void WindowModule::Cleanup()
     {
         for (size_t i = 0; i < m_pWindows.size(); i++)

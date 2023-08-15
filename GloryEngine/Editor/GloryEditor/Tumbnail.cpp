@@ -12,7 +12,7 @@ namespace Glory::Editor
 
 	Texture* Tumbnail::GetTumbnail(UUID uuid)
 	{
-		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager();
+		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
 
 		auto it = m_pTumbnails.find(uuid);
 		if (it != m_pTumbnails.end())

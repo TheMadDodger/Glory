@@ -61,13 +61,13 @@ namespace Glory
 
 	Buffer* OGLMaterial::CreatePropertiesBuffer(uint32_t size)
 	{
-		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
+		return Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
 			->CreateBuffer(size, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 1);
 	}
 
 	Buffer* OGLMaterial::CreateMVPBuffer()
 	{
-		return Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()
+		return Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
 			->CreateBuffer((uint32_t)sizeof(ObjectData), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 	}
 
