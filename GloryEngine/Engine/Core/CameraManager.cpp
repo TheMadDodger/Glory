@@ -1,5 +1,4 @@
 #include "CameraManager.h"
-#include "Game.h"
 #include "Engine.h"
 #include "WindowModule.h"
 #include "RendererModule.h"
@@ -12,7 +11,7 @@ namespace Glory
 	{
 		Profiler::BeginSample("CameraManager::GetNewOrUnusedCamera");
 		int width, height;
-		Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow()->GetDrawableSize(&width, &height);
+		Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
 
 		if (m_UnusedCameraIndices.size() > 0)
 		{
@@ -52,12 +51,12 @@ namespace Glory
 				pCamera->m_pRenderTexture->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
 				pCamera->m_TextureIsDirty = false;
 				pCamera->m_PerspectiveDirty = false;
-				pEngine->GetRendererModule()->OnCameraResize(camera);
+				pEngine->GetMainModule<RendererModule>()->OnCameraResize(camera);
 			}
 			else if (createIfNotExist && pCamera->m_PerspectiveDirty)
 			{
 				pCamera->m_PerspectiveDirty = false;
-				pEngine->GetRendererModule()->OnCameraPerspectiveChanged(camera);
+				pEngine->GetMainModule<RendererModule>()->OnCameraPerspectiveChanged(camera);
 			}
 			Profiler::EndSample();
 			return pCamera->m_pRenderTexture;
@@ -67,7 +66,7 @@ namespace Glory
 
 		uint32_t width = pCamera->m_Resolution.x;
 		uint32_t height = pCamera->m_Resolution.y;
-		pCamera->m_pRenderTexture = pEngine->GetRendererModule()->CreateCameraRenderTexture(width, height);
+		pCamera->m_pRenderTexture = pEngine->GetMainModule<RendererModule>()->CreateCameraRenderTexture(width, height);
 		pCamera->m_TextureIsDirty = false;
 		Profiler::EndSample();
 		return pCamera->m_pRenderTexture;

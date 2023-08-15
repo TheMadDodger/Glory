@@ -23,7 +23,7 @@ namespace Glory
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetAssetImmediate<Script>(uuid);
 		if (pScript == nullptr) return;
-		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
@@ -38,7 +38,7 @@ namespace Glory
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
-		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 		pScript->InvokeSafe(pObject, "Stop", std::vector<void*>{});
 	}
@@ -52,7 +52,7 @@ namespace Glory
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
 
-		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 		pScript->SetPropertyValues(pObject, pComponent.m_ScriptData);
 		pScript->InvokeSafe(pObject, "OnValidate", std::vector<void*>{});
@@ -64,7 +64,7 @@ namespace Glory
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
-		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 		pScript->InvokeSafe(pObject, "Update", std::vector<void*>{});
 		pScript->GetPropertyValues(pObject, pComponent.m_ScriptData);
@@ -76,7 +76,7 @@ namespace Glory
 		if (!uuid) return;
 		Script* pScript = AssetManager::GetOrLoadAsset<Script>(uuid);
 		if (pScript == nullptr) return;
-		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 		pScript->InvokeSafe(pObject, "Draw", std::vector<void*>{});
 	}

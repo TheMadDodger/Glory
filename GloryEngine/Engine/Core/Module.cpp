@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-    Module::Module() : m_pEngine(nullptr)
+    Module::Module() : m_pEngine(nullptr), m_IsInitialized(false)
     {
     }
 

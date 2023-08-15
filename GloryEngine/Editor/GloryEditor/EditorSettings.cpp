@@ -30,7 +30,7 @@ namespace Glory::Editor
 
     void EditorSettings::Save(Engine* pEngine)
     {
-        WindowModule* pWindowModule = pEngine->GetWindowModule();
+        WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
         Window* pMainWindow = pWindowModule->GetMainWindow();
         if (!pMainWindow) return;
 
@@ -68,7 +68,7 @@ namespace Glory::Editor
 
     void EditorSettings::LoadSettingsFile(Engine* pEngine)
     {
-        WindowModule* pWindowModule = pEngine->GetWindowModule();
+        WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
         WindowCreateInfo* pMainWindowSettings = pWindowModule->GetMainWindowCreateInfo();
 
         NodeValueRef window = m_YAMLFile["Window"];
@@ -96,7 +96,7 @@ namespace Glory::Editor
 
     void EditorSettings::LoadDefaultSettings(Engine* pEngine)
     {
-        WindowModule* pWindowModule = pEngine->GetWindowModule();
+        WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
         WindowCreateInfo* pMainWindowSettings = pWindowModule->GetMainWindowCreateInfo();
         pWindowModule->GetCurrentScreenResolution(pMainWindowSettings->Width, pMainWindowSettings->Height);
         Window* pMainWindow = pWindowModule->GetMainWindow();

@@ -11,7 +11,7 @@ namespace Glory
 
 	void PhysicsSystem::OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysocsModule was loaded");
@@ -23,7 +23,7 @@ namespace Glory
 
 	void PhysicsSystem::OnStop(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics) return;
 		if (pComponent.m_BodyID == PhysicsBody::InvalidBodyID) return;
 		m_BodyOwners.erase(pComponent.m_BodyID);
@@ -32,7 +32,7 @@ namespace Glory
 
 	void PhysicsSystem::OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysicsModule was loaded");
@@ -52,7 +52,7 @@ namespace Glory
 
 	void PhysicsSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("An Entity has a PhysicsBody but no PhysocsModule was loaded");

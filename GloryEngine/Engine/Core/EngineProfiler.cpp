@@ -3,7 +3,7 @@
 #include "Engine.h"
 #include "ProfilerModule.h"
 
-#define PROFILER Game::GetGame().GetEngine()->GetProfilerModule()
+#define PROFILER Game::GetGame().GetEngine()->GetInternalModule<ProfilerModule>()
 
 namespace Glory
 {

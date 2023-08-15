@@ -300,7 +300,7 @@ namespace Glory::Editor
 
 		const ImVec2 cursor = ImGui::GetCursorPos();
 		const ImVec2 windowPos = ImGui::GetWindowPos();
-		Window* pWindow = Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow();
+		Window* pWindow = Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		int mainWindowWidth, mainWindowHeight;
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
 		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f - scrollHeight });
@@ -555,13 +555,13 @@ namespace Glory::Editor
 
 	void InputSettings::OnStartPlay_Impl()
 	{
-		Game::GetGame().GetEngine()->GetInputModule()->ReadInputData(RootValue().Node());
-		Game::GetGame().GetEngine()->GetInputModule()->InputBlocked() = false;
+		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->ReadInputData(RootValue().Node());
+		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->InputBlocked() = false;
 	}
 
 	void InputSettings::OnStopPlay_Impl()
 	{
-		Game::GetGame().GetEngine()->GetInputModule()->InputBlocked() = true;
-		Game::GetGame().GetEngine()->GetInputModule()->ClearInputData();
+		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->InputBlocked() = true;
+		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->ClearInputData();
 	}
 }

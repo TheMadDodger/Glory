@@ -1,8 +1,9 @@
 #include "GraphicsThread.h"
 #include "ThreadManager.h"
-#include "Game.h"
 #include "Engine.h"
 #include "FrameStates.h"
+#include "WindowModule.h"
+#include "RendererModule.h"
 
 namespace Glory
 {
@@ -100,7 +101,7 @@ namespace Glory
 	{
 		for (size_t i = 0; i < m_BeginRenderBinds.size(); i++) m_BeginRenderBinds[i]();
 		m_pEngine->GraphicsThreadFrameStart();
-		FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetGraphicsModule()->GetFrameStates();
+		FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetFrameStates();
 		pFrameStates->OnFrameStart();
 		for (size_t i = 0; i < m_RenderBinds.size(); i++)
 		{

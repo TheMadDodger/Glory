@@ -91,7 +91,7 @@ namespace Glory
 		Console::WriteLine(finalMessage, bIncludeTimeStamp);
 
 		// Open message box
-		Game::GetGame().GetEngine()->GetWindowModule()->OpenMessageBox("FATAL ERROR: " + message);
+		Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->OpenMessageBox("FATAL ERROR: " + message);
 		Game::GetGame().Quit();
 	}
 

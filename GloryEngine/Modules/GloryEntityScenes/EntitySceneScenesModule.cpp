@@ -89,7 +89,7 @@ namespace Glory
 		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 
-		PhysicsModule* pPhysics = m_pEngine->GetPhysicsModule();
+		PhysicsModule* pPhysics = m_pEngine->GetMainModule<PhysicsModule>();
 		if (!pPhysics) return;
 
 		pPhysics->RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);

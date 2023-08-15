@@ -18,7 +18,7 @@ namespace Glory::Editor
 	{
 		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
 		if (pObject == nullptr) return;
-		ScenesModule* pSceneModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pSceneModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		GScene* pOriginalScene = pSceneModule->GetOpenScene(m_OriginalSceneID);
 		pObject->SetScene(pOriginalScene);
 	}
@@ -27,7 +27,7 @@ namespace Glory::Editor
 	{
 		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
 		if (pObject == nullptr) return;
-		ScenesModule* pSceneModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pSceneModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		GScene* pNewScene = pSceneModule->GetOpenScene(m_NewSceneID);
 		pObject->SetScene(pNewScene);
 	}

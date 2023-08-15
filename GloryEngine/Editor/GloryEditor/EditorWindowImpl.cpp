@@ -13,7 +13,7 @@ namespace Glory::Editor
 
 	void EditorWindowImpl::Initialize()
 	{
-		WindowModule* pWindowModule = Game::GetGame().GetEngine()->GetWindowModule();
+		WindowModule* pWindowModule = Game::GetGame().GetEngine()->GetMainModule<WindowModule>();
 		m_pMainWindow = pWindowModule->GetMainWindow();
 	}
 

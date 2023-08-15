@@ -55,8 +55,8 @@ int main(int argc, char* argv[])
         engineConfPath = engineConfPath.parent_path();
         engineConfPath.append("ProjectSettings").append("Engine.yaml");
 
-        Glory::EngineLoader engineLoader(engineConfPath);
-        Glory::Engine* pEngine = engineLoader.LoadEngine(windowCreateInfo);
+        Glory::EngineLoader engineLoader(engineConfPath, windowCreateInfo);
+        Glory::Engine* pEngine = engineLoader.LoadEngine();
         std::filesystem::path moduleSettingsRootPath = engineConfPath.parent_path().parent_path();
         moduleSettingsRootPath.append("Modules");
         pEngine->LoadModuleSettings(moduleSettingsRootPath);

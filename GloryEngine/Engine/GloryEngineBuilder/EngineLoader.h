@@ -11,10 +11,10 @@ namespace Glory
 	class EngineLoader
 	{
 	public:
-		EngineLoader(const std::filesystem::path& cfgPath);
+		EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow);
 		virtual ~EngineLoader();
 
-		Engine* LoadEngine(const Glory::WindowCreateInfo& defaultWindow);
+		Engine* LoadEngine();
 		void Unload();
 
 		const size_t ModuleCount() const;
@@ -33,10 +33,12 @@ namespace Glory
 		std::vector<HMODULE> m_DependencyLibs;
 		std::vector<HMODULE> m_ModuleLibs;
 		std::vector<HMODULE> m_ScriptingLibs;
-		std::vector<Module*> m_pModules;
+		std::vector<Module*> m_pMainModules;
+		std::vector<Module*> m_pAllModules;
 		std::vector<std::string> m_LoadedModuleNames;
 
 		EngineCreateInfo m_EngineInfo;
+		const Glory::WindowCreateInfo m_DefaultWindow;
 		std::vector<Module*> m_pOptionalModules;
 		std::vector<ScriptingModule*> m_pScriptingModules;
 		std::vector<IScriptExtender*> m_pScriptingExtenders;

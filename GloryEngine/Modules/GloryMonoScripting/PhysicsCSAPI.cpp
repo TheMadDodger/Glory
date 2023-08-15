@@ -9,8 +9,8 @@
 #include <ShapeManager.h>
 #include <PhysicsModule.h>
 
-#define PHYSICS Game::GetGame().GetEngine()->GetPhysicsModule()
-#define RENDERER Game::GetGame().GetEngine()->GetRendererModule()
+#define PHYSICS Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>()
+#define RENDERER Game::GetGame().GetEngine()->GetMainModule<RendererModule>()
 #define SCRIPTING Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()
 
 namespace Glory

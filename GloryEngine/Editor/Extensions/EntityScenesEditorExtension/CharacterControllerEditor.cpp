@@ -27,7 +27,7 @@ namespace Glory::Editor
 	{
 		Transform& transform = m_pComponentObject->GetRegistry()->GetComponent<Transform>(m_pComponentObject->EntityID());
 		CharacterController& body = GetTargetComponent();
-		Game::GetGame().GetEngine()->GetRendererModule()->DrawLineShape(transform.MatTransform, {}, body.m_Shape, {1, 0, 0, 1});
+		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->DrawLineShape(transform.MatTransform, {}, body.m_Shape, {1, 0, 0, 1});
 		return EntityComponentEditor::OnGUI();
 	}
 

@@ -19,7 +19,7 @@ namespace Glory::Editor
 
 	void DeleteSceneObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetScenesModule();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		GScene* pScene = pScenesModule->GetOpenScene(m_OriginalSceneUUID);
 		if (pScene == nullptr) return;
 		YAML::Node node = YAML::Load(m_SerializedObject.c_str());

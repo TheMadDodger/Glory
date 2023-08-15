@@ -159,7 +159,7 @@ namespace Glory::Editor
 
 	void TransformEditor::UpdatePhysics()
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics) return;
 
 		const EntityID entity = m_pComponentObject->EntityID();
@@ -168,7 +168,7 @@ namespace Glory::Editor
 		{
 			Transform& transform = pRegistry->GetComponent<Transform>(entity);
 			PhysicsBody& physicsBody = pRegistry->GetComponent<PhysicsBody>(entity);
-			PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetPhysicsModule();
+			PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 			if (pPhysics && pPhysics->IsValidBody(physicsBody.m_BodyID))
 			{
 				glm::quat rotation;

@@ -14,7 +14,7 @@ namespace Glory
 
 	void JoltDebugRenderer::DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH::ColorArg inColor)
 	{
-		m_pEngine->GetRendererModule()->DrawLine(glm::identity<glm::mat4>(), ToVec3(inFrom), ToVec3(inTo), ToVec3(inColor));
+		m_pEngine->GetMainModule<RendererModule>()->DrawLine(glm::identity<glm::mat4>(), ToVec3(inFrom), ToVec3(inTo), ToVec3(inColor));
 	}
 
 	void JoltDebugRenderer::DrawTriangle(JPH::RVec3Arg inV1, JPH::RVec3Arg inV2, JPH::RVec3Arg inV3, JPH::ColorArg inColor)

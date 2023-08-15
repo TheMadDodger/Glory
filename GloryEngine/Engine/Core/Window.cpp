@@ -34,7 +34,7 @@ namespace Glory
 
 	bool Window::ForwardInputEvent(InputEvent& input)
 	{
-		InputModule* pInput = m_pWindowManager->GetEngine()->GetInputModule();
+		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
 		return pInput->OnInput(input);
 	}
 }

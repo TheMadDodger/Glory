@@ -30,7 +30,7 @@ namespace Glory::Editor
 		if (!pObject)
 		{
 			Selection::SetActiveObject(nullptr);
-			GScene* pActiveScene = Game::GetGame().GetEngine()->GetScenesModule()->GetActiveScene();
+			GScene* pActiveScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
 			SceneObject* pNewObject = pActiveScene->CreateEmptyObject(name, UUID());
 			Selection::SetActiveObject(pNewObject);

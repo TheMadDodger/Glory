@@ -17,7 +17,7 @@ namespace Glory
 		pointLight.intensity = pComponent.m_Intensity;
 		pointLight.range = pComponent.m_Range;
 
-		Game::GetGame().GetEngine()->GetRendererModule()->Submit(pointLight);
+		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->Submit(pointLight);
 	}
 
 	LightSystem::LightSystem()

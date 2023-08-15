@@ -43,7 +43,7 @@ namespace Glory
 
 	private:
 		virtual void Cleanup() override;
-		virtual void PostInitialize() override;
+		virtual void OnPostInitialize() override;
 
 		virtual void OnThreadedInitialize() override;
 		virtual void OnThreadedCleanup() override;

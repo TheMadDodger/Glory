@@ -246,6 +246,12 @@ namespace Glory
 		m_pLinesMaterialData = new MaterialData(pShaderFiles);
 	}
 
+	void RendererModule::PostInitialize()
+	{
+		m_pEngine->GetGraphicsThread()->Bind(this);
+		OnPostInitialize();
+	}
+
 	void RendererModule::Render(const RenderFrame& frame)
 	{
 		ReadHoveringObject();
@@ -259,7 +265,7 @@ namespace Glory
 
 			RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(camera, m_pEngine);
 			pRenderTexture->Bind();
-			m_pEngine->GetGraphicsModule()->Clear(camera.GetClearColor());
+			m_pEngine->GetMainModule<GraphicsModule>()->Clear(camera.GetClearColor());
 
 			OnStartCameraRender(camera, frame.ActiveLights);
 
@@ -302,7 +308,7 @@ namespace Glory
 			RenderTexture* pDisplayRenderTexture = DisplayManager::GetDisplayRenderTexture(displayIndex);
 			if (pDisplayRenderTexture == nullptr) continue;
 
-			Window* pWindow = m_pEngine->GetWindowModule()->GetMainWindow();
+			Window* pWindow = m_pEngine->GetMainModule<WindowModule>()->GetMainWindow();
 			
 			int width, height;
 			pWindow->GetDrawableSize(&width, &height);
@@ -327,13 +333,13 @@ namespace Glory
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;
 		uint32_t objectID = pRenderTexture->ReadPixel(m_PickPos);
-		m_pEngine->GetScenesModule()->SetHoveringObject(objectID);
+		m_pEngine->GetMainModule<ScenesModule>()->SetHoveringObject(objectID);
 		Profiler::EndSample();
 	}
 
 	void RendererModule::CreateLineBuffer()
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		if (!pGraphics) return;
 		m_pLineBuffer = pGraphics->GetResourceManager()->CreateBuffer(sizeof(LineVertex) * MAX_LINE_VERTICES, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 		m_pLineMesh = pGraphics->GetResourceManager()->CreateMesh(MAX_LINE_VERTICES, 0, InputRate::Vertex, 0, sizeof(LineVertex), PrimitiveType::PT_Lines, { AttributeType::Float3, AttributeType::Float4 }, m_pLineBuffer, nullptr);
@@ -342,7 +348,7 @@ namespace Glory
 
 	void RendererModule::RenderLines(CameraRef camera)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetGraphicsModule();
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		if (!pGraphics || !m_LineVertexCount) return;
 
 		m_pLineMesh->Bind();
@@ -368,7 +374,7 @@ namespace Glory
 
 	RenderTexture* RendererModule::CreateCameraRenderTexture(uint32_t width, uint32_t height)
 	{
-		GPUResourceManager* pResourceManager = m_pEngine->GetGraphicsModule()->GetResourceManager();
+		GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
 		RenderTextureCreateInfo createInfo(width, height, true);
 		createInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RI, PixelFormat::PF_R32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, false));
 		GetCameraRenderTextureAttachments(createInfo.Attachments);

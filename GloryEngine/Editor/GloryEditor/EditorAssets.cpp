@@ -12,7 +12,7 @@ namespace Glory::Editor
 
 	void EditorAssets::LoadAssets()
 	{
-		GraphicsModule* pGraphics = Game::GetGame().GetEngine()->GetGraphicsModule();
+		GraphicsModule* pGraphics = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>();
 
 		std::unique_lock<std::mutex> lock(m_QueueLock);
 		for (size_t i = 0; i < m_pTextureCreationQueue.size(); i++)

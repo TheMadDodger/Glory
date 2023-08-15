@@ -27,7 +27,7 @@ namespace Glory
 			const std::string& shaderName = pPropertyInfo->ShaderName();
 			const UUID uuid = m_pMaterialData->GetResourceUUIDPointer(i)->AssetUUID();
 			TextureData* pTextureData = AssetManager::GetOrLoadAsset<TextureData>(uuid);
-			Texture* pTexture = pTextureData != nullptr ? Game::GetGame().GetEngine()->GetGraphicsModule()->GetResourceManager()->CreateTexture(pTextureData) : nullptr;
+			Texture* pTexture = pTextureData != nullptr ? Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateTexture(pTextureData) : nullptr;
 			SetTexture(shaderName, pTexture);
 		}
 
