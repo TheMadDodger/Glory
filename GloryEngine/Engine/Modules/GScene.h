@@ -1,6 +1,7 @@
 #pragma once
-#include "Resource.h"
 #include "SceneObject.h"
+
+#include <Resource.h>
 #include <mutex>
 
 namespace Glory

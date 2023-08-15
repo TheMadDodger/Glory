@@ -3,7 +3,7 @@
 #include "AssetLocation.h"
 #include "ResourceMeta.h"
 #include "AssetCallbacks.h"
-#include "GScene.h"
+
 #include <map>
 
 #define ASSET_DATABASE Glory::GloryContext::GetAssetDatabase()

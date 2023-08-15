@@ -1,7 +1,8 @@
 #pragma once
-#include "Module.h"
 #include "GScene.h"
-#include "CameraRef.h"
+
+#include <CameraRef.h>
+#include <Module.h>
 #include <mutex>
 
 namespace Glory

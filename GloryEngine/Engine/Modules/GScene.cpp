@@ -1,5 +1,6 @@
 #include "GScene.h"
-#include "Debug.h"
+
+#include <Debug.h>
 #include <algorithm>
 
 namespace Glory

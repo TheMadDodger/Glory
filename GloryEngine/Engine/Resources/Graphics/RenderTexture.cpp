@@ -1,9 +1,10 @@
 #include "RenderTexture.h"
-#include "Debug.h"
 #include "GPUResourceManager.h"
-#include "GraphicsEnums.h"
 #include "Texture.h"
 #include "Material.h"
+
+#include <Debug.h>
+#include <GraphicsEnums.h>
 
 namespace Glory
 {

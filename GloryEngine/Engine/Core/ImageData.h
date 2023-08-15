@@ -1,7 +1,8 @@
 #pragma once
 #include "Resource.h"
-#include <cstdint>
 #include "GraphicsEnums.h"
+
+#include <cstdint>
 
 namespace Glory
 {

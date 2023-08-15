@@ -1,6 +1,7 @@
 #pragma once
-#include <glm/glm.hpp>
 #include "LayerMask.h"
+
+#include <glm/glm.hpp>
 
 namespace Glory
 {

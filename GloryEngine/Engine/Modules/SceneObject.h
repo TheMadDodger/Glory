@@ -1,6 +1,5 @@
 #pragma once
-#include "Object.h"
-#include "Layer.h"
+#include <Object.h>
 
 namespace Glory
 {

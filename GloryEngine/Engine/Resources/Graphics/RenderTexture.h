@@ -1,7 +1,7 @@
 #pragma once
 #include "GPUResource.h"
-#include "GraphicsEnums.h"
 
+#include <GraphicsEnums.h>
 #include <vector>
 #include <list>
 #include <glm/glm.hpp>

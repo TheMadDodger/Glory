@@ -1,11 +1,15 @@
 #pragma once
 #include "Object.h"
 #include "GameSettings.h"
-#include "Window.h"
 #include "Glory.h"
+
+#include <string>
+#include <functional>
 
 namespace Glory
 {
+	class Engine;
+
 	class Game
 	{
 	public:
