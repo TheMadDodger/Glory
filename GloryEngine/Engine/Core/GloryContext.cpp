@@ -8,6 +8,8 @@
 #include "LayerManager.h"
 #include "WindowsDebugConsole.h"
 #include "ObjectManager.h"
+#include "ShaderManager.h"
+
 #include <Reflection.h>
 
 namespace Glory
@@ -95,6 +97,11 @@ namespace Glory
 		return m_pContext->m_pLayerManager;
 	}
 
+	ShaderManager* GloryContext::GetShaderManager()
+	{
+		return m_pContext->m_pShaderManager;
+	}
+
 	Debug* GloryContext::GetDebug()
 	{
 		return m_pContext->m_pDebug;
@@ -113,7 +120,8 @@ namespace Glory
 	Glory::GloryContext::GloryContext()
 		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
 		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pConsole(new Console()),
-		m_pLayerManager(new LayerManager()), m_pReflection(Reflect::CreateReflectInstance()), m_pDebug(new Debug()), m_pObjectManager(new ObjectManager())
+		m_pLayerManager(new LayerManager()), m_pShaderManager(new ShaderManager()), m_pReflection(Reflect::CreateReflectInstance()),
+		m_pDebug(new Debug()), m_pObjectManager(new ObjectManager())
 	{
 	}
 
@@ -131,6 +139,10 @@ namespace Glory
 		m_pDisplayManager = nullptr;
 		delete m_pConsole;
 		m_pConsole = nullptr;
+		delete m_pLayerManager;
+		m_pLayerManager = nullptr;
+		delete m_pShaderManager;
+		m_pShaderManager = nullptr;
 		delete m_pDebug;
 		m_pDebug = nullptr;
 		delete m_pObjectManager;
@@ -138,5 +150,7 @@ namespace Glory
 
 		m_CameraManager.Cleanup();
 		Reflect::DestroyReflectInstance();
+		m_pReflection = nullptr;
+		m_Game = nullptr;
 	}
 }
