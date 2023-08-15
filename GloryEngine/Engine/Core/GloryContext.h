@@ -8,6 +8,8 @@ namespace Glory::Utils::Reflect
 
 namespace Glory
 {
+	class Game;
+	class Debug;
 	class AssetDatabase;
 	class AssetManager;
 	class ResourceTypes;
@@ -16,8 +18,7 @@ namespace Glory
 	class Console;
 	class LayerManager;
 	class ObjectManager;
-	class Game;
-	class Debug;
+	class ShaderManager;
 
 	class GloryContext
 	{
@@ -31,6 +32,7 @@ namespace Glory
 		static DisplayManager* GetDisplayManager();
 		static Console* GetConsole();
 		static LayerManager* GetLayerManager();
+		static ShaderManager* GetShaderManager();
 		static Debug* GetDebug();
 		static void SetContext(GloryContext* pContext);
 		static GloryContext* GetContext();
@@ -74,6 +76,7 @@ namespace Glory
 		DisplayManager* m_pDisplayManager;
 		Console* m_pConsole;
 		LayerManager* m_pLayerManager;
+		ShaderManager* m_pShaderManager;
 		Reflect* m_pReflection;
 		ObjectManager* m_pObjectManager;
 		Debug* m_pDebug;

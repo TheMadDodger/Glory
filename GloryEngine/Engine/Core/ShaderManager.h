@@ -21,13 +21,14 @@ namespace Glory
 		static void RunCallbacks();
 
 	private:
+		friend class GloryContext;
 		ShaderManager();
 		virtual ~ShaderManager();
 
 	private:
 		friend class Engine;
-		static std::function<std::string()> m_CompiledShadersPathFunc;
-		static std::function<void(UUID, std::function<void(FileData*)>)> m_MissingShaderHandlerFunc;
-		static std::unordered_map<UUID, FileData*> m_pLoadedShaderFiles;
+		std::function<std::string()> m_CompiledShadersPathFunc;
+		std::function<void(UUID, std::function<void(FileData*)>)> m_MissingShaderHandlerFunc;
+		std::unordered_map<UUID, FileData*> m_pLoadedShaderFiles;
 	};
 }
