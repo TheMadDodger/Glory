@@ -70,9 +70,9 @@ namespace Glory::Editor
 		return m_Shortcuts.end();
 	}
 
-	void Shortcuts::SaveShortcuts(YAMLFileRef& yamlFile)
+	void Shortcuts::SaveShortcuts(Utils::YAMLFileRef& yamlFile)
 	{
-		NodeValueRef shortcuts = yamlFile["Shortcuts"];
+		Utils::NodeValueRef shortcuts = yamlFile["Shortcuts"];
 		if (!shortcuts.IsSequence())
 		{
 			shortcuts.Set(YAML::Node(YAML::NodeType::Sequence));
@@ -81,7 +81,7 @@ namespace Glory::Editor
 		size_t index = 0;
 		for (auto itor = m_Shortcuts.begin(); itor != m_Shortcuts.end(); ++itor)
 		{
-			NodeValueRef shortcut = shortcuts[index];
+			Utils::NodeValueRef shortcut = shortcuts[index];
 			if (!shortcut.IsMap())
 			{
 				shortcut.Set(YAML::Node(YAML::NodeType::Map));
@@ -95,13 +95,13 @@ namespace Glory::Editor
 		}
 	}
 
-	void Shortcuts::LoadShortcuts(YAMLFileRef& yamlFile)
+	void Shortcuts::LoadShortcuts(Utils::YAMLFileRef& yamlFile)
 	{
-		NodeValueRef shortcuts = yamlFile["Shortcuts"];
+		Utils::NodeValueRef shortcuts = yamlFile["Shortcuts"];
 		if (!shortcuts.IsSequence()) return;
 		for (size_t i = 0; i < shortcuts.Size(); i++)
 		{
-			NodeValueRef shortcut = shortcuts[i];
+			Utils::NodeValueRef shortcut = shortcuts[i];
 			std::string name = shortcut["Name"].As<std::string>("");
 			ImGuiKey key = ImGuiKey(shortcut["Key"].As<int>(0));
 			ImGuiModFlags mods = shortcut["Mods"].As<int>(0);

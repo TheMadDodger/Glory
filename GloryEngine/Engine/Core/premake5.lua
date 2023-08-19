@@ -47,7 +47,6 @@ project "GloryCore"
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
 		["Serialization"] = { "SceneObjectRefSerializer.*", "StructPropertySerializer.*", "AssetReference.*", "SceneObjectRef.*", "AssetRef.*", "LayerRef.*", "EnumPropertySerializer.*", "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "SerializedTypes.*", "ArrayPropertySerializer.*", "AssetReferencePropertyTemplate.*", "ShapePropertySerializer.*" },
 		["Scripting"] = { "ScriptExtensions.*", "ScriptingExtender.*", "ScriptProperty.*" },
-		["Utils"] = { "NodeRef.*" }
 	}
 
 	includedirs
@@ -62,6 +61,8 @@ project "GloryCore"
 
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+
+		"%{IncludeDir.Utils}",
 	}
 
 	defines

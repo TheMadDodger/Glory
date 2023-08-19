@@ -62,7 +62,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputFloat(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	bool EditorUI::InputFloat(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
 		const float oldValue = file[path].As<float>();
@@ -101,7 +101,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputFloat2(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	bool EditorUI::InputFloat2(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
 		const glm::vec2 oldValue = file[path].As<glm::vec2>();
@@ -140,7 +140,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputFloat3(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	bool EditorUI::InputFloat3(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
 		const glm::vec3 oldValue = file[path].As<glm::vec3>();
@@ -179,7 +179,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputFloat4(YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
+	bool EditorUI::InputFloat4(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
 		const glm::vec4 oldValue = file[path].As<glm::vec4>();
@@ -218,7 +218,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	bool EditorUI::InputInt(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
 		const int oldValue = file[path].As<int>();
@@ -257,7 +257,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt2(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	bool EditorUI::InputInt2(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
 		const glm::ivec2 oldValue = file[path].As<glm::ivec2>();
@@ -296,7 +296,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt3(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	bool EditorUI::InputInt3(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
 		const glm::ivec3 oldValue = file[path].As<glm::ivec3>();
@@ -335,7 +335,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputInt4(YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
+	bool EditorUI::InputInt4(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
 		const glm::ivec4 oldValue = file[path].As<glm::ivec4>();
@@ -395,7 +395,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputDouble(YAMLFileRef& file, const std::filesystem::path& path, const double slowSteps, const double fastSteps)
+	bool EditorUI::InputDouble(Utils::YAMLFileRef& file, const std::filesystem::path& path, const double slowSteps, const double fastSteps)
 	{
 		Scope s{ path };
 		const double oldValue = file[path].As<double>();
@@ -428,7 +428,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::CheckBox(YAMLFileRef& file, const std::filesystem::path& path)
+	bool EditorUI::CheckBox(Utils::YAMLFileRef& file, const std::filesystem::path& path)
 	{
 		Scope s{ path };
 		const bool oldValue = file[path].As<bool>();
@@ -536,7 +536,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputColor(YAMLFileRef& file, const std::filesystem::path& path, const bool hdr)
+	bool EditorUI::InputColor(Utils::YAMLFileRef& file, const std::filesystem::path& path, const bool hdr)
 	{
 		Scope s{ path };
 		const glm::vec4 oldValue = file[path].As<glm::vec4>();
@@ -575,7 +575,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputText(YAMLFileRef& file, const std::filesystem::path& path, ImGuiInputTextFlags flags)
+	bool EditorUI::InputText(Utils::YAMLFileRef& file, const std::filesystem::path& path, ImGuiInputTextFlags flags)
 	{
 		Scope s{ path };
 		const std::string oldValue = file[path].As<std::string>();
@@ -727,7 +727,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool EditorUI::InputEnum(YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, const std::vector<uint32_t>& excludeValues)
+	bool EditorUI::InputEnum(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, const std::vector<uint32_t>& excludeValues)
 	{
 		Scope s{ path };
 		const std::string strValue = file[path].As<std::string>();

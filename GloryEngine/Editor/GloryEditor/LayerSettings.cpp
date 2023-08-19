@@ -10,13 +10,13 @@ namespace Glory::Editor
 
 	bool LayerSettings::OnGui()
 	{
-		NodeValueRef layersNode = RootValue()["Layers"];
+		Utils::NodeValueRef layersNode = RootValue()["Layers"];
 
 		const size_t count = layersNode.Size();
 		for (size_t i = 0; i < count; ++i)
 		{
-			NodeValueRef layerNode = layersNode[i];
-			NodeValueRef layerNameNode = layerNode["Name"];
+			Utils::NodeValueRef layerNode = layersNode[i];
+			Utils::NodeValueRef layerNameNode = layerNode["Name"];
 
 			const std::string label = "Layer " + std::to_string(i);
 			const std::string layerName = layerNameNode.As<std::string>();
@@ -40,7 +40,7 @@ namespace Glory::Editor
 				newValue["Name"] = std::string(LAYER_BUFFER);
 				layersNode.PushBack(newValue);
 
-				NodeValueRef layerNode = layersNode[count];
+				Utils::NodeValueRef layerNode = layersNode[count];
 				Undo::YAMLEdit(m_YAMLFile, layerNode.Path(), oldValue, newValue);
 				Undo::StopRecord();
 				SaveSettings(ProjectSpace::GetOpenProject());

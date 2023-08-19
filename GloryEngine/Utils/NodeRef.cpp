@@ -1,7 +1,7 @@
 #include "NodeRef.h"
 #include <fstream>
 
-namespace Glory
+namespace Glory::Utils
 {
 	NodeRef::NodeRef(YAML::Node& node)
 		: m_RootNode(node), m_RootValueRef(node, "") {}

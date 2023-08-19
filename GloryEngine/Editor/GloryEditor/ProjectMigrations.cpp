@@ -109,17 +109,17 @@ namespace Glory::Editor
 
             if (!std::filesystem::exists(absolutePath)) continue;
 
-            YAMLFileRef materialFile{ absolutePath };
+            Utils::YAMLFileRef materialFile{ absolutePath };
             materialFile.Load();
-            NodeValueRef properties = materialFile["Properties"];
+            Utils::NodeValueRef properties = materialFile["Properties"];
             for (size_t i = 0; i < properties.Size(); ++i)
             {
-                NodeValueRef property = properties[i];
-                NodeValueRef propetyHash = property["TypeHash"];
+                Utils::NodeValueRef property = properties[i];
+                Utils::NodeValueRef propetyHash = property["TypeHash"];
                 const uint32_t typeHash = propetyHash.As<uint32_t>();
                 if (typeHash != imageDataHash) continue;
                 propetyHash.Set(textureDataHash);
-                NodeValueRef propertyValue = property["Value"];
+                Utils::NodeValueRef propertyValue = property["Value"];
                 const UUID uuid = propertyValue.As<uint64_t>();
                 auto itor = imageIDToTextureID.find(std::to_string(uuid));
                 if (itor == imageIDToTextureID.end()) continue;
@@ -146,13 +146,13 @@ namespace Glory::Editor
 
             if (!std::filesystem::exists(absolutePath)) continue;
 
-            YAMLFileRef materialFile{ absolutePath };
+            Utils::YAMLFileRef materialFile{ absolutePath };
             materialFile.Load();
-            NodeValueRef overrides = materialFile["Overrides"];
+            Utils::NodeValueRef overrides = materialFile["Overrides"];
             for (size_t i = 0; i < overrides.Size(); ++i)
             {
-                NodeValueRef override = overrides[i];
-                NodeValueRef overrideValue = override["Value"];
+                Utils::NodeValueRef override = overrides[i];
+                Utils::NodeValueRef overrideValue = override["Value"];
                 if (!overrideValue.IsScalar()) continue;
                 const UUID uuid = overrideValue.As<uint64_t>();
                 auto itor = imageIDToTextureID.find(std::to_string(uuid));
@@ -173,7 +173,7 @@ namespace Glory::Editor
         Debug::LogInfo("0.1.1> Migrating PhysicsSettings to include Gravity property");
         std::filesystem::path physicsSettingsPath = pProject->RootPath();
         physicsSettingsPath.append("ProjectSettings").append("Physics.yaml");
-        YAMLFileRef physicsSettings{ physicsSettingsPath };
+        Utils::YAMLFileRef physicsSettings{ physicsSettingsPath };
         physicsSettings["Gravity"].Set(glm::vec3{0.0f, -9.81000042f, 0.0f});
         physicsSettings.Save();
     }

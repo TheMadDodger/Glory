@@ -55,10 +55,10 @@ namespace Glory::Editor
 
 		/* @brief Write user set shortcut keys to a yaml emitter.
 		 * @param yamlFile The yaml file to write the keys to. */
-		static GLORY_EDITOR_API void SaveShortcuts(YAMLFileRef& yamlFile);
+		static GLORY_EDITOR_API void SaveShortcuts(Utils::YAMLFileRef& yamlFile);
 		/* @brief Read user set shortcut keys from a yaml node.
 		 * @param yamlFile The yaml file to read the keys from.*/
-		static GLORY_EDITOR_API void LoadShortcuts(YAMLFileRef& yamlFile);
+		static GLORY_EDITOR_API void LoadShortcuts(Utils::YAMLFileRef& yamlFile);
 
 		static GLORY_EDITOR_API void BlockActionForOneFrame(std::string_view action);
 		static GLORY_EDITOR_API void AddBlockKeyForOneFrame(ImGuiKey key);

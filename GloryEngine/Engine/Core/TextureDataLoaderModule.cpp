@@ -1,6 +1,8 @@
 #include "TextureDataLoaderModule.h"
 #include "NodeRef.h"
 
+using namespace Glory::Utils;
+
 namespace Glory
 {
     TextureDataLoaderModule::TextureDataLoaderModule() : ResourceLoaderModule(".gtex")
@@ -18,7 +20,7 @@ namespace Glory
 
     TextureData* TextureDataLoaderModule::LoadResource(const std::string& path, const ImportSettings&)
     {
-        YAMLFileRef file{ path };
+        Utils::YAMLFileRef file{ path };
         file.Load();
 
         const UUID imageUUID = file["Image"].As<uint64_t>();
@@ -26,7 +28,7 @@ namespace Glory
         TextureData* pTexture = new TextureData();
         pTexture->m_Image.SetUUID(imageUUID);
 
-        NodeValueRef sampler = file["Sampler"];
+        Utils::NodeValueRef sampler = file["Sampler"];
         pTexture->m_SamplerSettings.MagFilter = sampler["MinFilter"].AsEnum<Filter>();
         pTexture->m_SamplerSettings.MinFilter = sampler["MagFilter"].AsEnum<Filter>();
         pTexture->m_SamplerSettings.AddressModeU = sampler["AddressModeU"].AsEnum<SamplerAddressMode>();
@@ -52,9 +54,9 @@ namespace Glory
 
     void TextureDataLoaderModule::SaveResource(const std::string& path, TextureData* pResource)
     {
-        YAMLFileRef file{ path };
+        Utils::YAMLFileRef file{ path };
         file["Image"].Set((uint64_t)pResource->Image().AssetUUID());
-        NodeValueRef sampler = file["Sampler"];
+        Utils::NodeValueRef sampler = file["Sampler"];
 
         sampler["MinFilter"].SetEnum<Filter>(pResource->m_SamplerSettings.MagFilter);
         sampler["MagFilter"].SetEnum<Filter>(pResource->m_SamplerSettings.MinFilter);

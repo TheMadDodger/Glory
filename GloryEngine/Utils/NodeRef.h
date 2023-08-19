@@ -2,7 +2,7 @@
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
 
-namespace Glory
+namespace Glory::Utils
 {
 	struct NodeValueRef
 	{

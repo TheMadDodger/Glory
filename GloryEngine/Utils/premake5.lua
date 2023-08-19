@@ -19,6 +19,11 @@ project "GloryUtils"
 		
 	}
 
+	includedirs
+	{
+		"%{IncludeDir.yaml_cpp}",
+	}
+
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v143"

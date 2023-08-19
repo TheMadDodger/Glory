@@ -43,7 +43,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void AddAction(IAction* action);
 		static GLORY_EDITOR_API void Clear();
 
-		static GLORY_EDITOR_API void YAMLEdit(YAMLFileRef& file, const std::filesystem::path& path, YAML::Node oldValue, YAML::Node newValue);
+		static GLORY_EDITOR_API void YAMLEdit(Utils::YAMLFileRef& file, const std::filesystem::path& path, YAML::Node oldValue, YAML::Node newValue);
 
 		static GLORY_EDITOR_API void DoUndo();
 		static GLORY_EDITOR_API void DoRedo();
@@ -60,7 +60,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void JumpTo(size_t historyRewindIndex);
 
 		template<typename T>
-		static void ApplyYAMLEdit(YAMLFileRef& file, const std::filesystem::path& path, const T& oldValue, const T& newValue)
+		static void ApplyYAMLEdit(Utils::YAMLFileRef& file, const std::filesystem::path& path, const T& oldValue, const T& newValue)
 		{
 			YAML::Node oldValueNode = YAML::Node(YAML::NodeType::Scalar);
 			YAML::Node newValueNode = YAML::Node(YAML::NodeType::Scalar);
