@@ -2,14 +2,14 @@
 
 namespace Glory::Editor
 {
-	YAMLAction::YAMLAction(YAMLFileRef& file, const std::filesystem::path& propertyPath, YAML::Node oldValue, YAML::Node newValue)
+	YAMLAction::YAMLAction(Utils::YAMLFileRef& file, const std::filesystem::path& propertyPath, YAML::Node oldValue, YAML::Node newValue)
 		: m_File(file), m_PropertyPath(propertyPath), m_OldValue(oldValue), m_NewValue(newValue)
 	{
 	}
 
 	void YAMLAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		NodeValueRef node = m_File[m_PropertyPath];
+		Utils::NodeValueRef node = m_File[m_PropertyPath];
 		if (m_OldValue.IsNull())
 		{
 			node.Erase();
@@ -25,7 +25,7 @@ namespace Glory::Editor
 
 	void YAMLAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		NodeValueRef node = m_File[m_PropertyPath];
+		Utils::NodeValueRef node = m_File[m_PropertyPath];
 		if (m_NewValue.IsNull())
 		{
 			node.Erase();

@@ -39,7 +39,7 @@ namespace Glory::Editor
 
         emitter << YAML::Key << "Window";
 
-        NodeValueRef window = m_YAMLFile["Window"];
+        Utils::NodeValueRef window = m_YAMLFile["Window"];
         if (!window.IsMap())
         {
             window.Set(YAML::Node(YAML::NodeType::Map));
@@ -61,7 +61,7 @@ namespace Glory::Editor
         Debug::LogInfo(stream.str());
     }
 
-    NodeValueRef EditorSettings::operator[](const std::filesystem::path& path)
+    Utils::NodeValueRef EditorSettings::operator[](const std::filesystem::path& path)
     {
         return m_YAMLFile[path];
     }
@@ -71,7 +71,7 @@ namespace Glory::Editor
         WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
         WindowCreateInfo* pMainWindowSettings = pWindowModule->GetMainWindowCreateInfo();
 
-        NodeValueRef window = m_YAMLFile["Window"];
+        Utils::NodeValueRef window = m_YAMLFile["Window"];
         if (window.IsMap())
         {
             pMainWindowSettings->Width = window["Width"].As<uint32_t>(1920);

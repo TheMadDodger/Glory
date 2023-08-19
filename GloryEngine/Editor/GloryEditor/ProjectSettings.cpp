@@ -72,7 +72,7 @@ namespace Glory::Editor
 	{
 		std::filesystem::path path = pProject->SettingsPath();
 		path.append(m_SettingsFile);
-		m_YAMLFile = YAMLFileRef{ path };
+		m_YAMLFile = Utils::YAMLFileRef{ path };
 		
 		if (!std::filesystem::exists(path))
 		{
@@ -80,8 +80,8 @@ namespace Glory::Editor
 			return;
 		}
 
-		NodeRef rootNode = m_YAMLFile.RootNodeRef();
-		NodeValueRef rootValue = rootNode.ValueRef();
+		Utils::NodeRef rootNode = m_YAMLFile.RootNodeRef();
+		Utils::NodeValueRef rootValue = rootNode.ValueRef();
 		if (!rootValue.Exists() || !rootValue.IsMap())
 		{
 			rootValue.Set(YAML::Node(YAML::NodeType::Map));
@@ -105,7 +105,7 @@ namespace Glory::Editor
 		OnSave(pProject);
 	}
 
-	NodeValueRef ProjectSettings::RootValue()
+	Utils::NodeValueRef ProjectSettings::RootValue()
 	{
 		return m_YAMLFile.RootNodeRef().ValueRef();
 	}

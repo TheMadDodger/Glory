@@ -13,13 +13,13 @@ namespace Glory::Editor
 		void Load(Engine* pEngine);
 		void Save(Engine* pEngine);
 
-		GLORY_EDITOR_API NodeValueRef operator[](const std::filesystem::path& path);
+		GLORY_EDITOR_API Utils::NodeValueRef operator[](const std::filesystem::path& path);
 
 	private:
 		void LoadSettingsFile(Engine* pEngine);
 		void LoadDefaultSettings(Engine* pEngine);
 
 	private:
-		YAMLFileRef m_YAMLFile;
+		Utils::YAMLFileRef m_YAMLFile;
 	};
 }

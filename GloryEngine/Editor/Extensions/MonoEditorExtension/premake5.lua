@@ -41,6 +41,7 @@ project "MonoEditorExtension"
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
 
 		"%{rapidjson}",
 
@@ -75,6 +76,7 @@ project "MonoEditorExtension"
 		"tinyfiledialogs",
 		"GloryECS",
 		"GloryReflect",
+		"GloryUtils",
 		"GloryUtilsVersion",
 
 		--todo: When asset management is contained in its own lib these links are no more needed

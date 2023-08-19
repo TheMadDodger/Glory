@@ -4,7 +4,7 @@
 #include <yaml-cpp/yaml.h>
 #include <NodeRef.h>
 
-#define SETTINGS_DEFAULT_KEY(node, key, nodeType) NodeValueRef node = RootValue()[key]; \
+#define SETTINGS_DEFAULT_KEY(node, key, nodeType) Utils::NodeValueRef node = RootValue()[key]; \
 if (!node.Exists() || !node.Is##nodeType()) \
 { \
 	node.Set(YAML::Node(YAML::NodeType::nodeType)); \
@@ -47,10 +47,10 @@ namespace Glory::Editor
 		virtual void OnStartPlay_Impl() {}
 		virtual void OnStopPlay_Impl() {}
 
-		NodeValueRef RootValue();
+		Utils::NodeValueRef RootValue();
 
     protected:
-		YAMLFileRef m_YAMLFile;
+		Utils::YAMLFileRef m_YAMLFile;
 		const char* m_SettingsFile;
 
 		static ProjectSettings* m_pAllSettings[];

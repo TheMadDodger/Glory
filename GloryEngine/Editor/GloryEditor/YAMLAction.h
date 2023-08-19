@@ -9,7 +9,7 @@ namespace Glory::Editor
     class YAMLAction : public IAction
     {
     public:
-        GLORY_EDITOR_API YAMLAction(YAMLFileRef& file, const std::filesystem::path& propertyPath, YAML::Node oldValue, YAML::Node newValue);
+        GLORY_EDITOR_API YAMLAction(Utils::YAMLFileRef& file, const std::filesystem::path& propertyPath, YAML::Node oldValue, YAML::Node newValue);
 
     private:
         virtual GLORY_EDITOR_API void OnUndo(const ActionRecord& actionRecord);
@@ -17,7 +17,7 @@ namespace Glory::Editor
 
     private:
         friend class Undo;
-        YAMLFileRef& m_File;
+        Utils::YAMLFileRef& m_File;
         const std::filesystem::path m_PropertyPath;
         YAML::Node m_OldValue;
         YAML::Node m_NewValue;

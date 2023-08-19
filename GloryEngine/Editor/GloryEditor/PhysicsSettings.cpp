@@ -16,7 +16,7 @@ namespace Glory::Editor
 
 		EditorUI::InputFloat3(m_YAMLFile, "Gravity");
 
-		NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
+		Utils::NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
 		if (!collisionMatrixNode.IsSequence())
 			collisionMatrixNode.Set(YAML::Node(YAML::NodeType::Sequence));
 
@@ -84,11 +84,11 @@ namespace Glory::Editor
 			{
 				ImGui::PushID((int)x);
 
-				NodeValueRef xNode = collisionMatrixNode[x];
+				Utils::NodeValueRef xNode = collisionMatrixNode[x];
 				if (!xNode.IsSequence())
 					xNode.Set(YAML::Node(YAML::NodeType::Sequence));
 
-				NodeValueRef yNode = xNode[y];
+				Utils::NodeValueRef yNode = xNode[y];
 				if (!yNode.Exists())
 					yNode.Set(true);
 
@@ -145,10 +145,10 @@ namespace Glory::Editor
 
 	void PhysicsSettings::OnStartPlay_Impl()
 	{
-		NodeValueRef gravityNode = m_YAMLFile["Gravity"];
+		Utils::NodeValueRef gravityNode = m_YAMLFile["Gravity"];
 		const glm::vec3 gravity = gravityNode.As<glm::vec3>();
 
-		NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
+		Utils::NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
 		if (!collisionMatrixNode.IsSequence())
 			return;
 
@@ -158,10 +158,10 @@ namespace Glory::Editor
 		for (size_t x = 0; x < collisionMatrixNode.Size(); ++x)
 		{
 			matrix[x].resize(LayerManager::LayerCount());
-			NodeValueRef xNode = collisionMatrixNode[x];
+			Utils::NodeValueRef xNode = collisionMatrixNode[x];
 			for (size_t y = 0; y < xNode.Size(); ++y)
 			{
-				NodeValueRef yNode = xNode[y];
+				Utils::NodeValueRef yNode = xNode[y];
 				matrix[x][y] = yNode.As<bool>();
 			}
 		}

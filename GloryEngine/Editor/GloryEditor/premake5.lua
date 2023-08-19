@@ -64,6 +64,7 @@ project "GloryEditor"
 
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
 
 		"%{rapidjson}",
 
@@ -96,6 +97,7 @@ project "GloryEditor"
 		"implot",
 
 		"GloryReflect",
+		"GloryUtils",
 		"GloryUtilsVersion",
 		"tinyfiledialogs",
 	}
