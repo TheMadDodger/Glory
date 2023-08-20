@@ -259,6 +259,9 @@ namespace Glory::Editor
         ImVec2 max = ImGui::GetWindowContentRegionMax();
         ImVec2 pos = ImGui::GetWindowPos();
 
+        if (FileBrowserItem::m_Dirty)
+            RefreshContentBrowser();
+
         FileBrowserItem* pSelected = FileBrowserItem::GetSelectedFolder();
         if (pSelected->IsEditable() && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseClicked(1)) ObjectMenu::Open(nullptr, ObjectMenuType::T_ContentBrowser);
         FileBrowserItem::DrawFileBrowser(m_IconSize);
@@ -272,6 +275,7 @@ namespace Glory::Editor
         if (pSelected == nullptr) return;
         pSelected->Refresh();
         pSelected->SortChildren();
+        FileBrowserItem::m_Dirty = false;
     }
 
 

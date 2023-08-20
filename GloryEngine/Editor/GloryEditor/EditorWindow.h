@@ -1,11 +1,13 @@
 #pragma once
+#include "GloryEditor.h"
+#include "DND.h"
+
 #include <vector>
 #include <list>
 #include <string>
 #include <algorithm>
 #include <imgui.h>
 #include <typeinfo>
-#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
@@ -13,7 +15,7 @@ namespace Glory::Editor
 	{
 	public:
 		GLORY_EDITOR_API EditorWindow(const std::string& windowName, float windowWidth, float windowHeight);
-		virtual GLORY_EDITOR_API ~EditorWindow();
+		GLORY_EDITOR_API virtual ~EditorWindow();
 
 		template<typename T>
 		static T* GetWindow(bool alwaysOpenNew = false)
@@ -31,10 +33,10 @@ namespace Glory::Editor
 			return (T*)pWindow;
 		}
 
-		static GLORY_EDITOR_API EditorWindow* FindEditorWindow(const std::type_info& type);
-		static GLORY_EDITOR_API void OpenEditorWindow(EditorWindow* pWindow);
+		GLORY_EDITOR_API static EditorWindow* FindEditorWindow(const std::type_info& type);
+		GLORY_EDITOR_API static void OpenEditorWindow(EditorWindow* pWindow);
 
-		static GLORY_EDITOR_API void UpdateWindows();
+		GLORY_EDITOR_API static void UpdateWindows();
 
 		virtual const std::type_info& GetType() = 0;
 
@@ -42,6 +44,7 @@ namespace Glory::Editor
 
 		virtual void OnOpen() {}
 		virtual void OnClose() {}
+		virtual void HandleDragAndDropPayload(uint32_t, const ImGuiPayload*) {}
 
 		GLORY_EDITOR_API const bool IsFocused() const;
 
@@ -69,6 +72,7 @@ namespace Glory::Editor
 		int m_WindowFlags;
 		size_t m_WindowID;
 		bool m_IsFocused;
+		DND m_DragAndDrop;
 	};
 
 	template<typename T>

@@ -14,7 +14,7 @@ namespace Glory
         SceneObject(const std::string& name, UUID uuid);
         virtual ~SceneObject();
 
-        virtual SceneObject* GetParent() = 0;
+        virtual SceneObject* GetParent() { throw new std::exception("Not implemented"); }
 
         size_t ChildCount();
         SceneObject* GetChild(size_t index);
@@ -26,17 +26,17 @@ namespace Glory
         void SetScene(GScene* pScene);
         GScene* GetScene() const;
 
-        virtual bool IsActiveSelf() const = 0;
-        virtual bool IsActiveInHierarchy() const = 0;
-        virtual void SetActive(bool active) = 0;
-        virtual void SetHierarchyActive() = 0;
+        virtual bool IsActiveSelf() const { throw new std::exception("Not implemented"); }
+        virtual bool IsActiveInHierarchy() const { throw new std::exception("Not implemented"); }
+        virtual void SetActive(bool active) { throw new std::exception("Not implemented"); }
+        virtual void SetHierarchyActive() { throw new std::exception("Not implemented"); }
 
     public:
         void SetParent(SceneObject* pParent);
 
     protected:
-        virtual void Initialize() = 0;
-        virtual void OnSetParent(SceneObject* pParent) = 0;
+        virtual void Initialize() { throw new std::exception("Not implemented"); }
+        virtual void OnSetParent(SceneObject* pParent) { throw new std::exception("Not implemented"); }
         void DestroyOwnChildren();
 
     private:

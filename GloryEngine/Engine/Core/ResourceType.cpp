@@ -18,7 +18,7 @@ namespace Glory
 	{
 		uint32_t typeHash = GetHash(type);
 		size_t index = RESOURCE_TYPES->m_ResourceTypes.size();
-		RESOURCE_TYPES->m_ResourceTypes.push_back(ResourceType(typeHash, extensions));
+		RESOURCE_TYPES->m_ResourceTypes.push_back(ResourceType(typeHash, extensions, type.name()));
 		RESOURCE_TYPES->m_HashToType[typeHash] = index;
 		ReadExtensions(index, extensions);
 		return &RESOURCE_TYPES->m_ResourceTypes[index];
@@ -109,8 +109,8 @@ namespace Glory
 		return ext == ".gscene";
 	}
 
-	ResourceType::ResourceType(uint32_t typeHash, const std::string& extensions)
-		: m_TypeHash(typeHash), m_Extensions(extensions) {}
+	ResourceType::ResourceType(uint32_t typeHash, const std::string& extensions, const char* name)
+		: m_TypeHash(typeHash), m_Extensions(extensions), m_Name(name) {}
 
 	ResourceType::~ResourceType() {}
 
@@ -122,6 +122,11 @@ namespace Glory
 	const std::string& ResourceType::Extensions() const
 	{
 		return m_Extensions;
+	}
+
+	const std::string& ResourceType::Name() const
+	{
+		return m_Name;
 	}
 
 	void ResourceType::ReadExtensions(size_t index, const std::string& extensions)
