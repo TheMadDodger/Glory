@@ -9,14 +9,14 @@ namespace Glory::Editor
 	class FileBrowserItem
 	{
 	public:
-		static GLORY_EDITOR_API FileBrowserItem* GetSelectedFolder();
+		GLORY_EDITOR_API static FileBrowserItem* GetSelectedFolder();
 		GLORY_EDITOR_API void SetSelectedFolder(const std::filesystem::path& path);
-		static GLORY_EDITOR_API void SetSelectedFolder(FileBrowserItem* pItem);
+		GLORY_EDITOR_API static void SetSelectedFolder(FileBrowserItem* pItem);
 
 		GLORY_EDITOR_API bool HasParent();
 		GLORY_EDITOR_API void Up();
-		static GLORY_EDITOR_API void HistoryUp();
-		static GLORY_EDITOR_API void HistoryDown();
+		GLORY_EDITOR_API static void HistoryUp();
+		GLORY_EDITOR_API static void HistoryDown();
 
 		GLORY_EDITOR_API void Change(const std::string& name, bool isFolder);
 		GLORY_EDITOR_API void Refresh();
@@ -30,17 +30,21 @@ namespace Glory::Editor
 
 		GLORY_EDITOR_API void SortChildren();
 
-		static GLORY_EDITOR_API std::filesystem::path GetCurrentPath();
+		GLORY_EDITOR_API static std::filesystem::path GetCurrentPath();
 
 		GLORY_EDITOR_API FileBrowserItem* GetChildByName(const std::string& name, bool folder);
 		GLORY_EDITOR_API void BeginRename();
 
 		bool IsEditable() const;
 
-		static GLORY_EDITOR_API const std::string& GetHighlightedPath();
+		GLORY_EDITOR_API static const std::string& GetHighlightedPath();
 		GLORY_EDITOR_API void AddIgnoreDirectory(const std::string& directory);
 		GLORY_EDITOR_API void AddIgnoreDirectories(const std::vector<std::string>& directories);
 		GLORY_EDITOR_API const std::string& Name();
+
+		GLORY_EDITOR_API static void PerformSearch(const std::vector<FileBrowserItem*>& pRootItems);
+		GLORY_EDITOR_API static void PerformSearch(FileBrowserItem* pItem);
+		GLORY_EDITOR_API static void ClearSearch();
 
 	private:
 		FileBrowserItem();
@@ -76,5 +80,7 @@ namespace Glory::Editor
 		static std::vector<FileBrowserItem*> m_pHistory;
 		static size_t m_HistoryIndex;
 		static std::string m_HighlightedPath;
+		static char m_SearchBuffer[1000];
+		static std::vector<FileBrowserItem*> m_pSearchResultCache;
 	};
 }

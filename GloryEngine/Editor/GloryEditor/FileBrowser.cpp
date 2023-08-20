@@ -16,9 +16,10 @@
 namespace Glory::Editor
 {
     int FileBrowser::m_IconSize = 128;
+    bool FileBrowser::m_SearchInCurrent = false;
 
 	FileBrowser::FileBrowser() : EditorWindowTemplate("File Browser", 1600.0f, 600.0f),
-        m_I(0), m_SearchBuffer("\0"), m_pRootItems(std::vector<FileBrowserItem*>())
+        m_I(0), m_pRootItems(std::vector<FileBrowserItem*>())
 	{
 		m_Resizeable = true;
         m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
@@ -173,7 +174,7 @@ namespace Glory::Editor
         DrawPathControls();
         ImGui::SameLine();
         FileBrowserItem::DrawCurrentPath();
-        //DrawSearchBar();
+        DrawSearchBar();
         ImGui::EndChild();
     }
 
@@ -209,16 +210,45 @@ namespace Glory::Editor
     {
         float regionWidth = ImGui::GetWindowContentRegionMax().x;
         float width = 300.0f;
-        float padding = 10.0f;
+        float padding = 0.0f;
+
+        const char* folderToggleText = m_SearchInCurrent ?
+            ICON_FA_FOLDER_CLOSED " " : ICON_FA_FOLDER_OPEN " ";
+        float folderToggleTextWidth = ImGui::CalcTextSize(ICON_FA_FOLDER_OPEN " ").x;
 
         const char* searchText = ICON_FA_MAGNIFYING_GLASS " ";
-        float textWidth = ImGui::CalcTextSize(searchText).x;
+        float searchTextWidth = ImGui::CalcTextSize(searchText).x;
 
-        ImGui::SameLine(regionWidth - width - textWidth - padding);
+        bool forceFilter = false;
+
+        ImGui::SameLine(regionWidth - width - searchTextWidth - folderToggleTextWidth - padding);
+        ImGui::Text(folderToggleText);
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Search %s", m_SearchInCurrent ? "in current folder" : "globally");
+            if (ImGui::IsMouseClicked(0))
+            {
+                m_SearchInCurrent = !m_SearchInCurrent;
+                forceFilter = true;
+            }
+        }
+
+        ImGui::SameLine(regionWidth - width - searchTextWidth - padding);
         ImGui::Text(searchText);
         ImGui::SameLine(regionWidth - width - padding);
         ImGui::SetNextItemWidth(width);
-        ImGui::InputText("##Search", m_SearchBuffer, 100);
+        if (ImGui::InputText("##Search", FileBrowserItem::m_SearchBuffer, 1000) || forceFilter)
+        {
+            if (m_SearchInCurrent)
+            {
+                FileBrowserItem::m_pSearchResultCache.clear();
+                FileBrowserItem::PerformSearch(FileBrowserItem::m_pSelectedFolder);
+            }
+            else
+            {
+                FileBrowserItem::PerformSearch(m_pRootItems);
+            }
+        }
     }
 
     void FileBrowser::DrawFileBrowser()
