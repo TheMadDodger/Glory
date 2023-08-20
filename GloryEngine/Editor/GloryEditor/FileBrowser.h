@@ -37,9 +37,9 @@ namespace Glory::Editor
 	private:
 		int m_I;
 		static int m_IconSize;
-		std::hash<std::string> m_Hasher;
-		char m_SearchBuffer[100];
+		static bool m_SearchInCurrent;
 
+		std::hash<std::string> m_Hasher;
 		std::vector<FileBrowserItem*> m_pRootItems;
 	};
 }

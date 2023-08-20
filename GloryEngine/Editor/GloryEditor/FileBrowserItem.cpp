@@ -1,6 +1,3 @@
-#include <stack>
-#include <imgui.h>
-#include <AssetManager.h>
 #include "EditorAssetDatabase.h"
 #include "ProjectSpace.h"
 #include "EditorApplication.h"
@@ -11,6 +8,12 @@
 #include "Selection.h"
 #include "ObjectMenu.h"
 
+#include <stack>
+#include <imgui.h>
+#include <AssetManager.h>
+#include <AssetManager.h>
+#include <StringUtils.h>
+
 namespace Glory::Editor
 {
 	std::hash<std::string> FileBrowserItem::m_PathHasher;
@@ -18,6 +21,9 @@ namespace Glory::Editor
 	std::vector<FileBrowserItem*> FileBrowserItem::m_pHistory;
 	size_t FileBrowserItem::m_HistoryIndex = 1;
 	std::string FileBrowserItem::m_HighlightedPath;
+
+	char FileBrowserItem::m_SearchBuffer[1000] = "\0";
+	std::vector<FileBrowserItem*> FileBrowserItem::m_pSearchResultCache;
 
 	FileBrowserItem::FileBrowserItem()
 		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<FileBrowserItem*>()), m_Editable(true)
@@ -230,9 +236,12 @@ namespace Glory::Editor
 		int columns = (int)(width / (iconSize + 32.0f));
 		if (columns <= 0) columns = 1;
 
-		for (size_t i = 0; i < m_pSelectedFolder->m_pChildren.size(); i++)
+		const std::vector<FileBrowserItem*>& pDrawList = std::string_view{m_SearchBuffer}.empty() ?
+			m_pSelectedFolder->m_pChildren : m_pSearchResultCache;
+
+		for (size_t i = 0; i < pDrawList.size(); i++)
 		{
-			FileBrowserItem* pChild = m_pSelectedFolder->m_pChildren[i];
+			FileBrowserItem* pChild = pDrawList[i];
 
 			const int columnIndex = (i % columns) - 1;
 			ImGui::PushID(pChild->m_CachedPath.c_str());
@@ -303,6 +312,7 @@ namespace Glory::Editor
 				EraseExcessHistory();
 				m_pHistory.push_back(this);
 				SetOpen();
+				ClearSearch();
 			}
 
 			if (ImGui::IsItemClicked(0))
@@ -438,6 +448,40 @@ namespace Glory::Editor
 	const std::string& FileBrowserItem::Name()
 	{
 		return m_Name;
+	}
+
+	void FileBrowserItem::PerformSearch(const std::vector<FileBrowserItem*>& pRootItems)
+	{
+		m_pSearchResultCache.clear();
+		if (std::string_view{m_SearchBuffer}.empty()) return;
+
+
+		for (size_t i = 0; i < pRootItems.size(); i++)
+		{
+			PerformSearch(pRootItems[i]);
+		}
+	}
+
+	void FileBrowserItem::PerformSearch(FileBrowserItem* pItem)
+	{
+		std::string_view search{m_SearchBuffer};
+		std::string_view name = pItem->m_Name;
+
+		if (Utils::CaseInsensitiveSearch(name, search) != std::string::npos)
+		{
+			m_pSearchResultCache.push_back(pItem);
+		}
+
+		for (auto pChild : pItem->m_pChildren)
+		{
+			PerformSearch(pChild);
+		}
+	}
+
+	void FileBrowserItem::ClearSearch()
+	{
+		m_pSearchResultCache.clear();
+		m_SearchBuffer[0] = '\0';
 	}
 
 	void FileBrowserItem::EraseExcessHistory()
