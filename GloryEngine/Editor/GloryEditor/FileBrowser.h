@@ -34,6 +34,8 @@ namespace Glory::Editor
 
 		void LoadItems();
 
+		void RefreshSearch();
+
 	private:
 		int m_I;
 		static int m_IconSize;

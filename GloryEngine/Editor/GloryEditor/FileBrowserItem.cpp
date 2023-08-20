@@ -15,6 +15,7 @@
 #include <StringUtils.h>
 #include <DND.h>
 #include <IconsFontAwesome6.h>
+#include <PopupManager.h>
 
 namespace Glory::Editor
 {
@@ -230,7 +231,20 @@ namespace Glory::Editor
 				const std::filesystem::path fileName = filePath.filename();
 				std::filesystem::path newPath = m_CachedPath;
 				newPath.append(fileName.string());
-				std::filesystem::rename(filePath, newPath);
+				
+				if (std::filesystem::exists(newPath))
+				{
+					PopupManager::OpenModal("Error moving file", "Path already exists!", { "OK" }, { PopupManager::CloseCurrentPopup });
+					return;
+				}
+
+				std::error_code error;
+				std::filesystem::rename(filePath, newPath, error);
+				if (error.value())
+				{
+					PopupManager::OpenModal("Failed to move file", "An unexpected error occured!", { "OK" }, { PopupManager::CloseCurrentPopup });
+					return;
+				}
 
 				newPath = newPath.lexically_relative(Game::GetAssetPath());
 				filePath = filePath.lexically_relative(Game::GetAssetPath());
@@ -332,7 +346,19 @@ namespace Glory::Editor
 					const std::filesystem::path fileName = filePath.filename();
 					std::filesystem::path newPath = m_CachedPath;
 					newPath.append(fileName.string());
-					std::filesystem::rename(filePath, newPath);
+					if (std::filesystem::exists(newPath))
+					{
+						PopupManager::OpenModal("Error moving file", "Path already exists!", { "OK" }, { PopupManager::CloseCurrentPopup });
+						return;
+					}
+
+					std::error_code error;
+					std::filesystem::rename(filePath, newPath, error);
+					if (error.value())
+					{
+						PopupManager::OpenModal("Failed to move file", "An unexpected error occured!", { "OK" }, { PopupManager::CloseCurrentPopup });
+						return;
+					}
 
 					newPath = newPath.lexically_relative(Game::GetAssetPath());
 					filePath = filePath.lexically_relative(Game::GetAssetPath());
