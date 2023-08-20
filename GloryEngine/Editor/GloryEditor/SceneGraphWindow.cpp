@@ -13,6 +13,8 @@
 
 namespace Glory::Editor
 {
+	DND DragAndDrop{ { ResourceType::GetHash<SceneObject>() } };
+
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
 	}
@@ -47,24 +49,19 @@ namespace Glory::Editor
 		}
 
 		ImGui::InvisibleButton("WINDOWTARGET", { size.x, availableRegion.y });
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
-			{
-				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+		DragAndDrop.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* pPayload) {
+			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 
-				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-				const UUID newParent = 0;
-				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-				payload.pObject->SetParent(nullptr);
-				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-				Undo::StopRecord();
+			Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+			const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+			const UUID newParent = 0;
+			const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
+			payload.pObject->SetParent(nullptr);
+			Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+			Undo::StopRecord();
 
-				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
-			}
-			ImGui::EndDragDropTarget();
-		}
+			EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+		});
 
 		if (ImGui::IsItemClicked(1))
 		{
@@ -95,24 +92,19 @@ namespace Glory::Editor
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
-			{
-				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+		DragAndDrop.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* pPayload) {
+			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 
-				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-				const UUID newParent = 0;
-				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-				payload.pObject->SetParent(nullptr);
-				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-				Undo::StopRecord();
+			Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+			const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+			const UUID newParent = 0;
+			const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
+			payload.pObject->SetParent(nullptr);
+			Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+			Undo::StopRecord();
 
-				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
-			}
-			ImGui::EndDragDropTarget();
-		}
+			EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+		});
 
 		if (ImGui::IsItemClicked())
 		{
@@ -161,124 +153,8 @@ namespace Glory::Editor
 		if (index == 0)
 		{
 			ImGui::InvisibleButton(nameAndIDMinus1.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
-				{
-					const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
-					SceneObject* pParent = pObject->GetParent();
-					bool canParent = true;
-					while (pParent)
-					{
-						if (pParent == payload.pObject)
-						{
-							canParent = false;
-							break;
-						}
-
-						pParent = pParent->GetParent();
-					}
-
-					pParent = pObject->GetParent();
-					if (canParent)
-					{
-						Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-						const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-						const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
-						const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-						const size_t siblingIndex = pObject->GetSiblingIndex();
-						payload.pObject->SetParent(pParent);
-						payload.pObject->SetSiblingIndex(siblingIndex);
-						Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-						Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
-						Undo::StopRecord();
-
-						EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
-					}
-				}
-				ImGui::EndDragDropTarget();
-			}
-		}
-
-		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
-		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, "");
-		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-		{
-			// Set payload to carry the index of our item (could be anything)
-			DNDPayload payload{ pObject };
-			ImGui::SetDragDropPayload("DND_DEMO_CELL", &payload, sizeof(DNDPayload));
-
-			// Display preview (could be anything, e.g. when dragging an image we could decide to display
-			// the filename and a small preview of the image, etc.)
-			ImGui::Text(pObject->Name().data());
-			ImGui::EndDragDropSource();
-		}
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
-			{
-				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
-
-				SceneObject* pParent = pObject->GetParent();
-				bool canParent = true;
-				while (pParent)
-				{
-					if (pParent == payload.pObject)
-					{
-						canParent = false;
-						break;
-					}
-
-					pParent = pParent->GetParent();
-				}
-				if (canParent)
-				{
-					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-					const UUID newParent = pObject ? pObject->GetUUID() : UUID(0);
-					const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-					payload.pObject->SetParent(pObject);
-					Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-					Undo::StopRecord();
-
-					EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (ImGui::IsItemClicked())
-		{
-			Selection::SetActiveObject(pObject);
-		}
-		if (ImGui::IsItemClicked(1))
-		{
-			ObjectMenu::Open(pObject, T_SceneObject);
-		}
-
-		ImGui::SameLine();
-		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
-
-		ImGui::PopStyleVar();
-
-		if (node_open)
-		{
-			for (size_t i = 0; i < pObject->ChildCount(); i++)
-			{
-				SceneObject* pChild = pObject->GetChild(i);
-				ChildrenList(i, pChild);
-			}
-
-			if (childCount > 0) ImGui::TreePop();
-		}
-
-		ImGui::InvisibleButton(nameAndIDPlus1.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
-			{
-				const DNDPayload payload = *(const DNDPayload*)pPayload->Data;
+			DragAndDrop.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* pPayload) {
+				const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 				SceneObject* pParent = pObject->GetParent();
 				bool canParent = true;
 				while (pParent)
@@ -308,8 +184,103 @@ namespace Glory::Editor
 
 					EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
 				}
-			}
-			ImGui::EndDragDropTarget();
+			});
 		}
+
+		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
+		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, "");
+		ObjectPayload payload{ pObject };
+		DND::DragAndDropSource<SceneObject>(&payload, sizeof(ObjectPayload), [pObject]() {
+			ImGui::Text("%s: %s", pObject->Name().data(), std::to_string(pObject->GetUUID()).data());
+		});
+		DragAndDrop.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* pPayload) {
+			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
+
+			SceneObject* pParent = pObject->GetParent();
+			bool canParent = true;
+			while (pParent)
+			{
+				if (pParent == payload.pObject)
+				{
+					canParent = false;
+					break;
+				}
+
+				pParent = pParent->GetParent();
+			}
+			if (canParent)
+			{
+				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+				const UUID newParent = pObject ? pObject->GetUUID() : UUID(0);
+				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
+				payload.pObject->SetParent(pObject);
+				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+				Undo::StopRecord();
+
+				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+			}
+		});
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
+		{
+			Selection::SetActiveObject(pObject);
+		}
+		if (ImGui::IsItemClicked(1))
+		{
+			Selection::SetActiveObject(pObject);
+			ObjectMenu::Open(pObject, T_SceneObject);
+		}
+
+		ImGui::SameLine();
+		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+
+		ImGui::PopStyleVar();
+
+		if (node_open)
+		{
+			for (size_t i = 0; i < pObject->ChildCount(); i++)
+			{
+				SceneObject* pChild = pObject->GetChild(i);
+				ChildrenList(i, pChild);
+			}
+
+			if (childCount > 0) ImGui::TreePop();
+		}
+
+		ImGui::InvisibleButton(nameAndIDPlus1.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
+		DragAndDrop.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* pPayload) {
+			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
+			SceneObject* pParent = pObject->GetParent();
+			bool canParent = true;
+			while (pParent)
+			{
+				if (pParent == payload.pObject)
+				{
+					canParent = false;
+					break;
+				}
+
+				pParent = pParent->GetParent();
+			}
+
+			pParent = pObject->GetParent();
+			if (canParent)
+			{
+				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
+				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+				const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
+				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
+				const size_t siblingIndex = pObject->GetSiblingIndex();
+				payload.pObject->SetParent(pParent);
+				payload.pObject->SetSiblingIndex(siblingIndex);
+				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+				Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
+				Undo::StopRecord();
+
+				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+			}
+		});
 	}
 }

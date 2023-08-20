@@ -10,27 +10,27 @@ namespace Glory::Editor
 	std::vector<PopupManager::Popup> PopupManager::m_Popups = std::vector<Popup>();
 	std::vector<std::string> PopupManager::m_OpeningPopupNames = std::vector<std::string>();
 
-	GLORY_EDITOR_API void PopupManager::OpenPopup(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
+	void PopupManager::OpenPopup(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
 	{
 		m_OpeningPopupNames.push_back(name);
 
 		auto it = std::find_if(m_Popups.begin(), m_Popups.end(), [&](const Popup& popup)
-			{
-				return popup.m_PopupName == name;
-			});
+		{
+			return popup.m_PopupName == name;
+		});
 
 		if (it != m_Popups.end()) return;
 		m_Popups.push_back(Popup(name, description, buttons, buttonFuncs));
 	}
 
-	GLORY_EDITOR_API void PopupManager::OpenModal(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
+	void PopupManager::OpenModal(const std::string& name, const std::string& description, const std::vector<std::string>& buttons, const std::vector<std::function<void()>>& buttonFuncs)
 	{
 		m_OpeningPopupNames.push_back(name);
 
 		auto it = std::find_if(m_Popups.begin(), m_Popups.end(), [&](const Popup& popup)
-			{
-				return popup.m_PopupName == name;
-			});
+		{
+			return popup.m_PopupName == name;
+		});
 
 		if (it != m_Popups.end())
 		{
@@ -41,7 +41,7 @@ namespace Glory::Editor
 		m_Popups.push_back(Popup(name, description, buttons, buttonFuncs, true));
 	}
 
-	GLORY_EDITOR_API void PopupManager::CloseCurrentPopup()
+	void PopupManager::CloseCurrentPopup()
 	{
 		ImGui::CloseCurrentPopup();
 	}
@@ -49,9 +49,9 @@ namespace Glory::Editor
 	void PopupManager::OnGUI()
 	{
 		std::for_each(m_OpeningPopupNames.begin(), m_OpeningPopupNames.end(), [](const std::string& name)
-			{
-				ImGui::OpenPopup(name.c_str());
-			});
+		{
+			ImGui::OpenPopup(name.c_str());
+		});
 		m_OpeningPopupNames.clear();
 
 		std::for_each(m_Popups.begin(), m_Popups.end(), [&](const Popup& popup)

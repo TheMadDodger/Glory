@@ -1,5 +1,6 @@
 #include "ObjectPicker.h"
 #include "EditorUI.h"
+#include "DND.h"
 
 #include <WindowModule.h>
 #include <Engine.h>
@@ -12,6 +13,8 @@
 
 namespace Glory::Editor
 {
+	DND DragAndDropTarget = { { ResourceType::GetHash<SceneObject>() }};
+
 	char ObjectPicker::m_FilterBuffer[200] = "";
 	std::string ObjectPicker::m_Filter = "";
 	std::vector<SceneObject*> ObjectPicker::m_FilteredObjects;
@@ -34,6 +37,7 @@ namespace Glory::Editor
 
 		bool openPopup = false;
 		float start, width;
+		bool change = false;
 		EditorUI::EmptyDropdown(EditorUI::MakeCleanName(label), objectName, [&]
 		{
 			m_FilterBuffer[0] = '\0';
@@ -41,6 +45,12 @@ namespace Glory::Editor
 			m_FilteredObjects.clear();
 			openPopup = true;
 		}, start, width, borderPadding);
+		change = DragAndDropTarget.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* payload)
+		{
+			const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
+			*sceneValue = objectPayload.pObject->GetScene()->GetUUID();
+			*objectValue = objectPayload.pObject->GetUUID();
+		});
 
 		if (openPopup)
 		{
@@ -56,7 +66,7 @@ namespace Glory::Editor
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
 		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });
 		ImGui::SetNextWindowSize({ width, mainWindowHeight - windowPos.y - cursor.y - 10.0f });
-		bool change = DrawPopup(sceneValue, objectValue);
+		change |= DrawPopup(sceneValue, objectValue);
 		ImGui::PopID();
 		return change;
 	}

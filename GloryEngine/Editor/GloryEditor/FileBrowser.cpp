@@ -239,15 +239,7 @@ namespace Glory::Editor
         ImGui::SetNextItemWidth(width);
         if (ImGui::InputText("##Search", FileBrowserItem::m_SearchBuffer, 1000) || forceFilter)
         {
-            if (m_SearchInCurrent)
-            {
-                FileBrowserItem::m_pSearchResultCache.clear();
-                FileBrowserItem::PerformSearch(FileBrowserItem::m_pSelectedFolder);
-            }
-            else
-            {
-                FileBrowserItem::PerformSearch(m_pRootItems);
-            }
+            RefreshSearch();
         }
     }
 
@@ -258,6 +250,9 @@ namespace Glory::Editor
         ImVec2 min = ImGui::GetWindowContentRegionMin();
         ImVec2 max = ImGui::GetWindowContentRegionMax();
         ImVec2 pos = ImGui::GetWindowPos();
+
+        if (FileBrowserItem::m_Dirty)
+            RefreshContentBrowser();
 
         FileBrowserItem* pSelected = FileBrowserItem::GetSelectedFolder();
         if (pSelected->IsEditable() && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseClicked(1)) ObjectMenu::Open(nullptr, ObjectMenuType::T_ContentBrowser);
@@ -272,6 +267,8 @@ namespace Glory::Editor
         if (pSelected == nullptr) return;
         pSelected->Refresh();
         pSelected->SortChildren();
+        RefreshSearch();
+        FileBrowserItem::m_Dirty = false;
     }
 
 
@@ -281,6 +278,19 @@ namespace Glory::Editor
         {
             m_pRootItems[i]->Refresh();
             m_pRootItems[i]->SortChildren();
+        }
+    }
+
+    void FileBrowser::RefreshSearch()
+    {
+        if (m_SearchInCurrent)
+        {
+            FileBrowserItem::m_pSearchResultCache.clear();
+            FileBrowserItem::PerformSearch(FileBrowserItem::m_pSelectedFolder);
+        }
+        else
+        {
+            FileBrowserItem::PerformSearch(m_pRootItems);
         }
     }
 }

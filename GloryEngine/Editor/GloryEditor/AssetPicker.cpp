@@ -1,11 +1,13 @@
 #include "AssetPicker.h"
 #include "EditorUI.h"
+#include "DND.h"
 
 #include <imgui.h>
 #include <algorithm>
 #include <EditorAssetDatabase.h>
 #include <Engine.h>
 #include <WindowModule.h>
+#include <SerializedTypes.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -31,6 +33,33 @@ namespace Glory::Editor
 			m_FilteredAssets.clear();
 			openPopup = true;
 		}, start, width, borderPadding);
+		bool change = DND{ { ST_Path, resourceType } }.HandleDragAndDropTarget([&](uint32_t type, const ImGuiPayload* payload)
+		{
+			if (type == ST_Path)
+			{
+				const std::string path = (const char*)payload->Data;
+				const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
+				if (!uuid) return;
+				ResourceMeta meta;
+				if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
+				ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
+
+				if (meta.Hash() == resourceType)
+				{
+					*value = uuid;
+					return;
+				}
+
+				for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
+				{
+					if (ResourceType::GetSubTypeHash(pResourceType, i) != resourceType) continue;
+					*value = uuid;
+				}
+				return;
+			}
+
+			*value = *(const UUID*)payload->Data;
+		});
 
 		if (openPopup)
 			ImGui::OpenPopup("AssetPicker");
@@ -43,7 +72,7 @@ namespace Glory::Editor
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
 		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });
 		ImGui::SetNextWindowSize({ width, mainWindowHeight - windowPos.y - cursor.y - 10.0f });
-		bool change = DrawPopup(value, resourceType, includeSubAssets);
+		change |= DrawPopup(value, resourceType, includeSubAssets);
 		ImGui::PopID();
 		return change;
 	}

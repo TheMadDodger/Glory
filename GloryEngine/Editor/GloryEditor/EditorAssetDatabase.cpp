@@ -370,6 +370,8 @@ namespace Glory::Editor
 
 		AssetLocation location{ relativePath.empty() ? path : relativePath.string(), subPath.string() };
 		InsertAsset(location, meta);
+		const UUID uuid = meta.ID();
+		if (subPath.empty()) m_PathToUUIDCache.Set(path, uuid);
 
 		std::stringstream stream;
 		if (!subPath.empty())
@@ -434,6 +436,7 @@ namespace Glory::Editor
 		AssetManager::AddLoadedResource(pScene);
 		AssetLocation location{ relativePath.string() };
 		InsertAsset(location, meta);
+		m_PathToUUIDCache.Set(path, meta.ID());
 
 		stream.clear();
 		stream << "Imported new scene: " << pScene->Name();
@@ -462,6 +465,7 @@ namespace Glory::Editor
 		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
 		AssetLocation location{ relativePath.string() };
 		InsertAsset(location, meta);
+		m_PathToUUIDCache.Set(path, meta.ID());
 
 		stream.clear();
 		stream << "Imported scene: " << GetAssetName(meta.ID());

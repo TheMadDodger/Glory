@@ -27,7 +27,7 @@ namespace Glory::Editor
 		const TypeData* pTypeData = Reflect::GetTyeData(hash);
 		if (pTypeData)
 		{
-			PropertyDrawer::DrawProperty("", pTypeData, pRegistry->GetComponentAddress(entity, componentID), 0);
+			change |= PropertyDrawer::DrawProperty("", pTypeData, pRegistry->GetComponentAddress(entity, componentID), 0);
 		}
 
 		Undo::StopRecord();

@@ -13,6 +13,9 @@
 #include <AssetManager.h>
 #include <AssetManager.h>
 #include <StringUtils.h>
+#include <DND.h>
+#include <IconsFontAwesome6.h>
+#include <PopupManager.h>
 
 namespace Glory::Editor
 {
@@ -21,6 +24,7 @@ namespace Glory::Editor
 	std::vector<FileBrowserItem*> FileBrowserItem::m_pHistory;
 	size_t FileBrowserItem::m_HistoryIndex = 1;
 	std::string FileBrowserItem::m_HighlightedPath;
+	bool FileBrowserItem::m_Dirty = false;
 
 	char FileBrowserItem::m_SearchBuffer[1000] = "\0";
 	std::vector<FileBrowserItem*> FileBrowserItem::m_pSearchResultCache;
@@ -222,6 +226,31 @@ namespace Glory::Editor
 				m_pChildren[i]->DrawDirectoryBrowser();
 			}
 			ImGui::TreePop();
+			DND{ { ST_Path } }.HandleDragAndDropTarget([this](uint32_t, const ImGuiPayload* payload) {
+				std::filesystem::path filePath = (const char*)payload->Data;
+				const std::filesystem::path fileName = filePath.filename();
+				std::filesystem::path newPath = m_CachedPath;
+				newPath.append(fileName.string());
+				
+				if (std::filesystem::exists(newPath))
+				{
+					PopupManager::OpenModal("Error moving file", "Path already exists!", { "OK" }, { PopupManager::CloseCurrentPopup });
+					return;
+				}
+
+				std::error_code error;
+				std::filesystem::rename(filePath, newPath, error);
+				if (error.value())
+				{
+					PopupManager::OpenModal("Failed to move file", "An unexpected error occured!", { "OK" }, { PopupManager::CloseCurrentPopup });
+					return;
+				}
+
+				newPath = newPath.lexically_relative(Game::GetAssetPath());
+				filePath = filePath.lexically_relative(Game::GetAssetPath());
+				EditorAssetDatabase::UpdateAssetPaths(filePath.string(), newPath.string());
+				m_Dirty = true;
+			});
 		}
 	}
 
@@ -304,6 +333,40 @@ namespace Glory::Editor
 
 			ImGui::PushStyleColor(ImGuiCol_Button, m_HighlightedPath == m_CachedPath.string() ? buttonColor : buttonInactiveColor);
 			ImGui::Button("##fileItem", itemSize);
+
+			if(IsEditable())
+			{
+				std::string path = m_CachedPath.string();
+				DND::DragAndDropSource(STNames[ST_Path], path.data(), path.size() + 1, [&]() {
+					ImGui::Text("%s %s", ICON_FA_FOLDER_OPEN, m_CachedPath.string().data());
+				});
+
+				DND{ { ST_Path } }.HandleDragAndDropTarget([this](uint32_t, const ImGuiPayload* payload) {
+					std::filesystem::path filePath = (const char*)payload->Data;
+					const std::filesystem::path fileName = filePath.filename();
+					std::filesystem::path newPath = m_CachedPath;
+					newPath.append(fileName.string());
+					if (std::filesystem::exists(newPath))
+					{
+						PopupManager::OpenModal("Error moving file", "Path already exists!", { "OK" }, { PopupManager::CloseCurrentPopup });
+						return;
+					}
+
+					std::error_code error;
+					std::filesystem::rename(filePath, newPath, error);
+					if (error.value())
+					{
+						PopupManager::OpenModal("Failed to move file", "An unexpected error occured!", { "OK" }, { PopupManager::CloseCurrentPopup });
+						return;
+					}
+
+					newPath = newPath.lexically_relative(Game::GetAssetPath());
+					filePath = filePath.lexically_relative(Game::GetAssetPath());
+					EditorAssetDatabase::UpdateAssetPaths(filePath.string(), newPath.string());
+					m_Dirty = true;
+				});
+			}
+
 			ImGui::PopStyleColor();
 			ImGui::SetItemAllowOverlap();
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
@@ -315,7 +378,7 @@ namespace Glory::Editor
 				ClearSearch();
 			}
 
-			if (ImGui::IsItemClicked(0))
+			if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 			{
 				Selection::SetActiveObject(nullptr);
 				m_HighlightedPath = m_CachedPath.string();
@@ -347,6 +410,17 @@ namespace Glory::Editor
 
 		ImGui::PushStyleColor(ImGuiCol_Button, selectedID == uuid || m_HighlightedPath == m_CachedPath.string() ? buttonColor : buttonInactiveColor);
 		ImGui::Button("##fileItem", itemSize);
+
+		if (IsEditable())
+		{
+			std::string path = m_CachedPath.string();
+			DND::DragAndDropSource(STNames[ST_Path], path.data(), path.size() + 1, [&]() {
+				ImGui::Image(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)iconSize, (float)iconSize));
+				ImGui::SameLine();
+				ImGui::Text(m_CachedPath.string().data());
+			});
+		}
+
 		ImGui::PopStyleColor();
 		ImGui::SetItemAllowOverlap();
 
@@ -363,7 +437,7 @@ namespace Glory::Editor
 			pGenerator->OnFileDoubleClick(uuid);
 		}
 
-		if (ImGui::IsItemClicked(0))
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 		{
 			m_HighlightedPath = m_CachedPath.string();
 			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);

@@ -82,5 +82,6 @@ namespace Glory::Editor
 		static std::string m_HighlightedPath;
 		static char m_SearchBuffer[1000];
 		static std::vector<FileBrowserItem*> m_pSearchResultCache;
+		static bool m_Dirty;
 	};
 }

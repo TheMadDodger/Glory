@@ -6,18 +6,18 @@ namespace Glory::Editor
 	std::vector<EditorWindow*> EditorWindow::m_pClosingEditorWindows = std::vector<EditorWindow*>();
 	std::list<size_t> EditorWindow::m_IDs = std::list<size_t>();
 
-	GLORY_EDITOR_API EditorWindow::EditorWindow(const std::string& windowName, float windowWidth, float windowHeight)
+	EditorWindow::EditorWindow(const std::string& windowName, float windowWidth, float windowHeight)
 		: m_WindowName(windowName), m_WindowDimensions(windowWidth, windowHeight),
 		m_IsOpen(true), m_Resizeable(true), m_WindowFlags(ImGuiWindowFlags_::ImGuiWindowFlags_None),
 		m_IsFocused(false), m_WindowID(0)
 	{
 	}
 
-	GLORY_EDITOR_API EditorWindow::~EditorWindow()
+	EditorWindow::~EditorWindow()
 	{
 	}
 
-	GLORY_EDITOR_API EditorWindow* EditorWindow::FindEditorWindow(const std::type_info& type)
+	EditorWindow* EditorWindow::FindEditorWindow(const std::type_info& type)
 	{
 		for (size_t i = 0; i < m_pActiveEditorWindows.size(); ++i)
 		{
@@ -41,16 +41,16 @@ namespace Glory::Editor
 		pWindow->OnOpen();
 	}
 
-	GLORY_EDITOR_API void EditorWindow::UpdateWindows()
+	void EditorWindow::UpdateWindows()
 	{
-		for (size_t i = 0; i < m_pActiveEditorWindows.size(); i++)
+		for (size_t i = 0; i < m_pActiveEditorWindows.size(); ++i)
 		{
 			m_pActiveEditorWindows[i]->Update();
 			m_pActiveEditorWindows[i]->Draw();
 		}
 	}
 
-	GLORY_EDITOR_API void EditorWindow::Close()
+	void EditorWindow::Close()
 	{
 		OnClose();
 		m_pClosingEditorWindows.push_back(this);
@@ -66,7 +66,7 @@ namespace Glory::Editor
 		ImGuiWindowFlags window_flags = m_WindowFlags | (m_Resizeable? 0 : ImGuiWindowFlags_::ImGuiWindowFlags_NoResize);
 		ImGui::SetNextWindowSize(m_WindowDimensions);
 
-		std::string windowString = m_WindowName + "##" + std::to_string(m_WindowID);
+		const std::string windowString = m_WindowName + "##" + std::to_string(m_WindowID);
 
 		if (ImGui::Begin(windowString.c_str(), &m_IsOpen, window_flags))
 		{
@@ -76,6 +76,7 @@ namespace Glory::Editor
 		}
 		else m_IsFocused = false;
 		ImGui::End();
+		m_DragAndDrop.HandleDragAndDropTarget([this](uint32_t type, const ImGuiPayload* payload) { HandleDragAndDropPayload(type, payload); });
 
 		if (!m_IsOpen) Close();
 	}
@@ -83,28 +84,28 @@ namespace Glory::Editor
 	void EditorWindow::RenderWindows()
 	{
 		std::for_each(m_pClosingEditorWindows.begin(), m_pClosingEditorWindows.end(), [&](EditorWindow* pWindow)
-			{
-				auto it = std::find(m_pActiveEditorWindows.begin(), m_pActiveEditorWindows.end(), pWindow);
-				m_pActiveEditorWindows.erase(it);
-				m_IDs.push_back(pWindow->m_WindowID);
-				delete pWindow;
-			});
+		{
+			auto it = std::find(m_pActiveEditorWindows.begin(), m_pActiveEditorWindows.end(), pWindow);
+			m_pActiveEditorWindows.erase(it);
+			m_IDs.push_back(pWindow->m_WindowID);
+			delete pWindow;
+		});
 
 		m_pClosingEditorWindows.clear();
 
 		std::for_each(m_pActiveEditorWindows.begin(), m_pActiveEditorWindows.end(), [&](EditorWindow* pWindow)
-			{
-				pWindow->RenderGUI();
-			});
+		{
+			pWindow->RenderGUI();
+		});
 	}
 
 	void EditorWindow::Cleanup()
 	{
 		std::for_each(m_pActiveEditorWindows.begin(), m_pActiveEditorWindows.end(), [&](EditorWindow* pWindow)
-			{
-				pWindow->OnClose();
-				delete pWindow;
-			});
+		{
+			pWindow->OnClose();
+			delete pWindow;
+		});
 
 		m_pActiveEditorWindows.clear();
 		m_pClosingEditorWindows.clear();
