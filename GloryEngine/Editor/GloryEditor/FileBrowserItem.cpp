@@ -378,7 +378,7 @@ namespace Glory::Editor
 				ClearSearch();
 			}
 
-			if (ImGui::IsItemClicked(0))
+			if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 			{
 				Selection::SetActiveObject(nullptr);
 				m_HighlightedPath = m_CachedPath.string();
@@ -437,7 +437,7 @@ namespace Glory::Editor
 			pGenerator->OnFileDoubleClick(uuid);
 		}
 
-		if (ImGui::IsItemClicked(0))
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 		{
 			m_HighlightedPath = m_CachedPath.string();
 			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
