@@ -8,7 +8,7 @@ namespace Glory
 {
 	struct ObjectInstanceData
 	{
-		MonoObject* m_pObject;
+		/* FIXME: There should be a GCHandle for each object in the map below */
 		uint32_t m_GCHandle;
 		std::map<MonoClass*, MonoObject*> m_pObjects;
 	};
@@ -25,7 +25,7 @@ namespace Glory
 
 	private:
 		void Cleanup();
-		MonoObject* CreateScriptObject(MonoClass* pClass, Object* pObject);
+		MonoObject* CreateScriptObject(ObjectInstanceData& instanceData, MonoClass* pClass, Object* pObject);
 		MonoObject* CreateScriptDummyObject(MonoClass* pClass);
 
 	private:

@@ -20,6 +20,10 @@ namespace Glory
 		m_pAssembly = pAssembly;
 		MonoAssetManager::Initialize(m_pAssembly->GetMonoImage());
 		m_pMonoManager->GetMethodsHelper()->Initialize(m_pAssembly->GetMonoImage());
+
+		/* Pre-load Object classes */
+		m_pAssembly->GetClass("GloryEngine", "Object");
+		m_pAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
 	}
 
 	void CoreLibManager::Cleanup()

@@ -6,6 +6,7 @@
 #include "MonoManager.h"
 #include "Assembly.h"
 #include "AssemblyDomain.h"
+#include "CoreLibManager.h"
 
 #include <ScenesModule.h>
 #include <AssetDatabase.h>
@@ -90,6 +91,7 @@ namespace Glory
 		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
 		Assembly* pAssembly = pDomain->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
+
 		if (pClass == nullptr) return;
 
 		// Dummy object for default values
@@ -98,7 +100,7 @@ namespace Glory
 			data = YAML::Node(YAML::NodeType::Map);
 
 		scriptProperties.clear();
-		for (size_t i = 0; i < pClass->NumFields(); i++)
+		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
 			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
@@ -123,31 +125,15 @@ namespace Glory
 			{
 			case ST_Asset:
 			{
-				AssetReferenceBase assetReference;
-				MonoObject* pMonoObject;
-				pField->GetValue(pDummyObject, &pMonoObject);
-				if (pMonoObject)
-				{
-					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_objectID");
-					mono_field_get_value(pMonoObject, pIDField, assetReference.AssetUUIDMember());
-				}
-
+				/* Asset reference from a dummy object will always be null */
+				AssetReferenceBase assetReference{};
 				PropertySerializer::GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), e);
 				break;
 			}
 			case ST_Object:
 			{
-				SceneObjectRef objectRef;
-				MonoObject* pMonoObject;
-				pField->GetValue(pDummyObject, &pMonoObject);
-				if (pMonoObject)
-				{
-					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_objectID");
-					MonoClassField* pSceneIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoObject), "_sceneID");
-					mono_field_get_value(pMonoObject, pIDField, objectRef.ObjectUUIDMember());
-					mono_field_get_value(pMonoObject, pSceneIDField, objectRef.SceneUUIDMember());
-				}
-
+				/* Object reference from a dummy object will always be null */
+				SceneObjectRef objectRef{};
 				PropertySerializer::GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), e);
 				break;
 			}
@@ -176,7 +162,7 @@ namespace Glory
 		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 
-		for (size_t i = 0; i < pClass->NumFields(); i++)
+		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
 			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
@@ -226,32 +212,39 @@ namespace Glory
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
+
 		if (pClass == nullptr) return;
+
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		Assembly* pCoreAssembly = pCoreLibManager->GetAssemblyBinding();
+		AssemblyClass* pObjectClass = pCoreAssembly->GetClass("GloryEngine", "Object");
+		AssemblyClass* pSceneObjectClass = pCoreAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
+		const AssemblyClassField* pObjectIDField = pObjectClass->GetField("_objectID");
+		const AssemblyClassField* pSceneIDField = pSceneObjectClass->GetField("_sceneID");
 
 		MonoObject* pMonoObject = LoadObject(pObject, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 
+		/* FIXME: There has to be a better way to do this
+		 * Ideally, store as binary data and use reflection? */
 		YAML::Emitter emitter;
 		emitter << YAML::BeginMap;
-		for (size_t i = 0; i < pClass->NumFields(); i++)
+		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
 			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
-
 
 			switch (pField->TypeHash())
 			{
 			case ST_Asset:
 			{
-				AssetReferenceBase assetReference;
+				AssetReferenceBase assetReference{};
 				MonoObject* pMonoResourceObject = nullptr;
 				pField->GetValue(pMonoObject, &pMonoResourceObject);
 
 				if (pMonoResourceObject)
 				{
-					MonoClass* pMonoClass = mono_object_get_class(pMonoResourceObject);
-					MonoClassField* pIDField = mono_class_get_field_from_name(pMonoClass, "_objectID");
-					mono_field_get_value(pMonoResourceObject, pIDField, assetReference.AssetUUIDMember());
+					pObjectIDField->GetValue(pMonoResourceObject, assetReference.AssetUUIDMember());
 				}
 
 				PropertySerializer::GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), emitter);
@@ -260,16 +253,13 @@ namespace Glory
 			}
 			case ST_Object:
 			{
-				SceneObjectRef objectRef;
-				MonoObject* pMonoSceneObject;
+				SceneObjectRef objectRef{};
+				MonoObject* pMonoSceneObject = nullptr;
 				pField->GetValue(pMonoObject, &pMonoSceneObject);
 				if (pMonoSceneObject)
 				{
-					/* TODO: Get these fields once instead of every frame? */
-					MonoClassField* pIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoSceneObject), "_objectID");
-					MonoClassField* pSceneIDField = mono_class_get_field_from_name(mono_object_get_class(pMonoSceneObject), "_sceneID");
-					mono_field_get_value(pMonoSceneObject, pIDField, objectRef.ObjectUUIDMember());
-					mono_field_get_value(pMonoSceneObject, pSceneIDField, objectRef.SceneUUIDMember());
+					pObjectIDField->GetValue(pMonoSceneObject, objectRef.ObjectUUIDMember());
+					pSceneIDField->GetValue(pMonoSceneObject, objectRef.SceneUUIDMember());
 				}
 				PropertySerializer::GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), emitter);
 				break;

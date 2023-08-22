@@ -149,7 +149,7 @@ namespace Glory
 	private:
 		bool LoadAssembly(const std::filesystem::path& assemblyPath);
 		bool LoadAssemblyWithImage(const std::filesystem::path& assemblyPath);
-		AssemblyClass* LoadClass(const std::string& namespaceName, const std::string& className);
+		AssemblyClass* LoadClass(AssemblyNamespace* pNamespace, const std::string& className);
 
 	private:
 		friend class AssemblyDomain;
