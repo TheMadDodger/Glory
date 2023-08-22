@@ -120,7 +120,7 @@ namespace Glory
 			RENDERER->DrawLine(glm::identity<glm::mat4>(), start, start + ray.m_Direction * distance, { 0.0f, 1.0f, 0.0f, 1.0f });
 		}
 
-		return result.m_Hits.size();
+		return (int)result.m_Hits.size();
 	}
 
 #pragma endregion

@@ -64,26 +64,41 @@ namespace Glory
 
 	AssemblyClass* Assembly::GetClass(const std::string& namespaceName, const std::string& className)
 	{
-		if (m_Namespaces.find(namespaceName) == m_Namespaces.end() || m_Namespaces[namespaceName].m_Classes.find(className) == m_Namespaces[namespaceName].m_Classes.end())
+		auto namespaceItor = m_Namespaces.find(namespaceName);
+		if (namespaceItor == m_Namespaces.end())
 		{
-			return LoadClass(namespaceName, className);
+			auto newItor = m_Namespaces.emplace(namespaceName, AssemblyNamespace{ namespaceName }).first;
+			return LoadClass(&newItor->second, className);
 		}
-		return &m_Namespaces[namespaceName].m_Classes[className];
+		auto classItor = namespaceItor->second.m_Classes.find(className);
+		if (classItor == namespaceItor->second.m_Classes.end())
+		{
+			return LoadClass(&namespaceItor->second, className);
+		}
+
+		return &classItor->second;
 	}
 
 	bool Assembly::GetClass(const std::string& namespaceName, const std::string& className, AssemblyClass& c)
 	{
-		if (m_Namespaces.find(namespaceName) == m_Namespaces.end() || m_Namespaces[namespaceName].m_Classes.find(className) == m_Namespaces[namespaceName].m_Classes.end())
+		auto namespaceItor = m_Namespaces.find(namespaceName);
+		if (namespaceItor == m_Namespaces.end())
 		{
-			if (LoadClass(namespaceName, className) == nullptr) return false;
+			auto newItor = m_Namespaces.emplace(namespaceName, AssemblyNamespace{ namespaceName }).first;
+			if (LoadClass(&newItor->second, className) == nullptr) return false;
 		}
-		c = m_Namespaces[namespaceName].m_Classes[className];
+		auto classItor = namespaceItor->second.m_Classes.find(className);
+		if (classItor == namespaceItor->second.m_Classes.end())
+		{
+			if (LoadClass(&namespaceItor->second, className) == nullptr) return false;
+		}
+		c = classItor->second;
 		return true;
 	}
 
-	AssemblyClass* Assembly::LoadClass(const std::string& namespaceName, const std::string& className)
+	AssemblyClass* Assembly::LoadClass(AssemblyNamespace* pNamespace, const std::string& className)
 	{
-		MonoClass* pClass = mono_class_from_name(m_pImage, namespaceName.c_str(), className.c_str());
+		MonoClass* pClass = mono_class_from_name(m_pImage, pNamespace->m_Name.c_str(), className.c_str());
 		if (pClass == nullptr)
 		{
 			Debug::LogError("Failed to load mono class");
@@ -96,8 +111,8 @@ namespace Glory
 			return nullptr;
 		}
 
-		m_Namespaces[namespaceName].m_Classes[className] = AssemblyClass(className, pClass);
-		return &m_Namespaces[namespaceName].m_Classes[className];
+		auto itor = pNamespace->m_Classes.emplace(className, AssemblyClass{ className, pClass }).first;
+		return &itor->second;
 	}
 
 	AssemblyClass::AssemblyClass() : m_Name(""), m_pClass(nullptr) {}
@@ -109,17 +124,18 @@ namespace Glory
 
 	MonoMethod* AssemblyClass::GetMethod(const std::string& name)
 	{
-		if (m_pMethods.find(name) == m_pMethods.end())
-		{
+		auto itor = m_pMethods.find(name);
+		if (itor == m_pMethods.end())
 			return LoadMethod(name);
-		}
-		return m_pMethods[name];
+
+		return itor->second;
 	}
 
 	const AssemblyClassField* AssemblyClass::GetField(const std::string& name) const
 	{
-		if (m_NameToFieldIndex.find(name) == m_NameToFieldIndex.end()) return nullptr;
-		const size_t& index = m_NameToFieldIndex.at(name);
+		auto itor = m_NameToFieldIndex.find(name);
+		if (itor == m_NameToFieldIndex.end()) return nullptr;
+		const size_t& index = itor->second;
 		return &m_Fields[index];
 	}
 
