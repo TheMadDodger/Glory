@@ -1,0 +1,16 @@
+Editor:
+- Added grid snapping and snapping controls in the toolbar
+- Added a search bar in the file browser
+- Implemented a drag and drop system
+- Added drag and drop to resource pickers
+- Added drag and drop to object pickers
+- Files and folder can now be moved in the file browser using drag and drop
+- Added an error window to material editors to show any errors with the material
+
+Scripting:
+- Improved overall memory handling of scripting data
+
+Bugs:
+- Fixed crash caused when entering play mode after editing a script property
+- Fixed memory leak caused by script property loading
+- Fixed garbage collection of scene wrapper objects
