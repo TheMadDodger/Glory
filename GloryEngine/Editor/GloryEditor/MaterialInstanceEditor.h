@@ -10,6 +10,8 @@ namespace Glory::Editor
         MaterialInstanceEditor();
         virtual ~MaterialInstanceEditor();
 
+        void DrawErrorWindow(const char* error);
+
     private:
         virtual bool OnGUI() override;
         virtual void Initialize() override;

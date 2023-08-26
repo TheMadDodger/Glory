@@ -396,6 +396,8 @@ namespace Glory
         ST_TessControl,
         ST_TessEval,
         ST_Compute,
+
+        ST_Count
     };
 
     enum class BufferBindingTarget

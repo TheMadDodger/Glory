@@ -3,7 +3,10 @@
 #include "AssetPicker.h"
 #include "AssetManager.h"
 #include "EditorAssetDatabase.h"
+
 #include <imgui.h>
+#include <MaterialEditor.h>
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -27,7 +30,11 @@ namespace Glory::Editor
 			pMaterial->SetBaseMaterial(pBaseMaterial);
 		}
 
-		if (!pMaterial->GetBaseMaterial()) return false;
+		if (!pMaterial->GetBaseMaterial())
+		{
+			DrawErrorWindow("No base material selected");
+			return false;
+		}
 
 		std::vector<bool> overrideStates;
 		pMaterial->CopyOverrideStates(overrideStates);
@@ -63,6 +70,9 @@ namespace Glory::Editor
 		if (change)
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
 
+		const char* error = MaterialEditor::GetMaterialError(pMaterial);
+		DrawErrorWindow(error);
+
 		return change;
 	}
 
@@ -71,5 +81,23 @@ namespace Glory::Editor
 		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
 		if (!pMaterial) return;
 		pMaterial->ReloadProperties();
+	}
+
+	void MaterialInstanceEditor::DrawErrorWindow(const char* error)
+	{
+		if (!error) return;
+		const float childHeight = ImGui::CalcTextSize("A").y * 6;
+		ImGui::BeginChild("error", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
+		if (ImGui::BeginMenuBar())
+		{
+			ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, ICON_FA_CIRCLE_EXCLAMATION);
+			ImGui::SameLine();
+			ImGui::Text(" Material Error");
+			ImGui::EndMenuBar();
+		}
+		ImGui::Text("The selected base material has the following errors:");
+		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "ERROR: %s", error);
+		ImGui::Text("Using this material may have unexpected results and errors.");
+		ImGui::EndChild();
 	}
 }

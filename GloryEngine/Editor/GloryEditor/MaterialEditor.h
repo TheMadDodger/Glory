@@ -11,6 +11,8 @@ namespace Glory::Editor
 		virtual ~MaterialEditor();
 		virtual bool OnGUI() override;
 
+		static const char* GetMaterialError(MaterialData* pMaterial);
+
 	private:
 		void ShaderGUI(MaterialData* pMaterial);
 		bool PropertiesGUI(MaterialData* pMaterial);
