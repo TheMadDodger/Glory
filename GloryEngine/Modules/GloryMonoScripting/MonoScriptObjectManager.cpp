@@ -25,7 +25,7 @@ namespace Glory
         if (classItor == itor->second.m_pObjects.end())
             return CreateScriptObject(itor->second, pClass, pObject);
 
-        return classItor->second;
+        return classItor->second.first;
     }
 
     Object* MonoScriptObjectManager::GetScriptObject(MonoObject* pMonoObject)
@@ -42,9 +42,9 @@ namespace Glory
         auto objectItor = itor->second.m_pObjects.find(pClass);
 
         if (objectItor == itor->second.m_pObjects.end()) return;
-        MonoObject* pMonoObject = objectItor->second;
+        MonoObject* pMonoObject = objectItor->second.first;
 
-        mono_gchandle_free(itor->second.m_GCHandle);
+        mono_gchandle_free(objectItor->second.second);
 
         itor->second.m_pObjects.erase(objectItor);
         m_pMonoToObject.erase(pMonoObject);
@@ -52,9 +52,12 @@ namespace Glory
 
     void MonoScriptObjectManager::DestroyAllObjects()
     {
-        for (auto itor : m_Objects)
+        for (auto& itor : m_Objects)
         {
-            mono_gchandle_free(itor.second.m_GCHandle);
+            for (auto& objectItor : itor.second.m_pObjects)
+            {
+                mono_gchandle_free(objectItor.second.second);
+            }
         }
         m_Objects.clear();
     }
@@ -74,9 +77,10 @@ namespace Glory
             return nullptr;
         }
         mono_runtime_object_init(pMonoObject);
-        instanceData.m_pObjects.emplace(pClass, pMonoObject);
+        const uint32_t gcHandle = mono_gchandle_new(pMonoObject, false);
+
+        instanceData.m_pObjects.emplace(pClass, std::pair<MonoObject*, uint32_t>{ pMonoObject, gcHandle });
         m_pMonoToObject.emplace(pMonoObject, pObject);
-        instanceData.m_GCHandle = mono_gchandle_new(pMonoObject, false);
         return pMonoObject;
     }
 

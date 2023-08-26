@@ -18,6 +18,8 @@
 
 namespace Glory
 {
+	char PropertyBuffer[1024] = "\0";
+
 	MonoScript::MonoScript()
 	{
 		APPEND_TYPE(MonoScript);
@@ -139,11 +141,9 @@ namespace Glory
 			}
 
 			default:
-				Reflect::CreateAsTemporary(pField->ElementTypeHash(), [&](void* value) {
-					const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-					pField->GetValue(pDummyObject, value);
-					PropertySerializer::SerializeProperty(pField->Name(), pType, value, e);
-				});
+				pField->GetValue(pDummyObject, PropertyBuffer);
+				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
+				PropertySerializer::SerializeProperty(pField->Name(), pType, PropertyBuffer, e);
 				break;
 			}
 			e << YAML::EndMap;
@@ -197,11 +197,9 @@ namespace Glory
 			}
 
 			default:
-				Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-					const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-					PropertySerializer::DeserializeProperty(pType, value, valueNode);
-					pField->SetValue(pMonoObject, value);
-				});
+				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
+				PropertySerializer::DeserializeProperty(pType, PropertyBuffer, valueNode);
+				pField->SetValue(pMonoObject, PropertyBuffer);
 				break;
 			}
 		}
@@ -266,18 +264,16 @@ namespace Glory
 			}
 
 			default:
-				Reflect::CreateAsTemporary(pField->TypeHash(), [&](void* value) {
-					const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-					pField->GetValue(pMonoObject, value);
-					PropertySerializer::SerializeProperty(pField->Name(), pType, value, emitter);
-				});
+				pField->GetValue(pMonoObject, PropertyBuffer);
+				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
+				PropertySerializer::SerializeProperty(pField->Name(), pType, PropertyBuffer, emitter);
 				break;
 			}
 		}
 		emitter << YAML::EndMap;
 
 		/* FIXME: Causes a memory leak for some reason */
-		node = YAML::Load(emitter.c_str());
+		node.reset(YAML::Load(emitter.c_str()));
 	}
 
 	bool MonoScript::IsBehaviour()

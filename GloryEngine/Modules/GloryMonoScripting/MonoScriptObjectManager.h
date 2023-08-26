@@ -8,9 +8,7 @@ namespace Glory
 {
 	struct ObjectInstanceData
 	{
-		/* FIXME: There should be a GCHandle for each object in the map below */
-		uint32_t m_GCHandle;
-		std::map<MonoClass*, MonoObject*> m_pObjects;
+		std::map<MonoClass*, std::pair<MonoObject*, uint32_t>> m_pObjects;
 	};
 
 	class MonoScriptObjectManager
