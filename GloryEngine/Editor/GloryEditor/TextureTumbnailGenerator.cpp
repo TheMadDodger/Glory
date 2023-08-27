@@ -27,6 +27,7 @@ namespace Glory::Editor
 
 		AssetManager::GetAsset(id, [&](Resource* pResource)
 		{
+			if (!pResource) return;
 			UUID uuid = pResource->GetUUID();
 			auto it = std::find(m_AlreadyRequestedTumbnails.begin(), m_AlreadyRequestedTumbnails.end(), uuid);
 			m_pLoadedTextures[uuid] = (TextureData*)pResource;

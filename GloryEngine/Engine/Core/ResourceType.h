@@ -72,6 +72,7 @@ namespace Glory
 		virtual ~ResourceType();
 		uint32_t Hash() const;
 		const std::string& Extensions() const;
+		const std::string& FullName() const;
 		const std::string& Name() const;
 
 	private:
@@ -84,7 +85,8 @@ namespace Glory
 	private:
 		const uint32_t m_TypeHash;
 		const std::string m_Extensions;
-		const std::string m_Name;
+		const std::string m_FullName;
+		std::string m_Name;
 		std::vector<uint32_t> m_SubTypes;
 	};
 

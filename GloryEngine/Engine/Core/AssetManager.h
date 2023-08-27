@@ -6,6 +6,7 @@
 #include "AssetDatabase.h"
 #include "ThreadedVar.h"
 #include "JobManager.h"
+
 #include <unordered_map>
 #include <vector>
 
@@ -48,6 +49,9 @@ namespace Glory
 		static void UnloadAsset(UUID uuid);
 		static Resource* FindResource(UUID uuid);
 		static void AddLoadedResource(Resource* pResource);
+
+		static bool IsLoading(UUID uuid);
+		static void GetAllLoading(std::vector<UUID>& out);
 
 	private:
 		static bool LoadResourceJob(UUID uuid);

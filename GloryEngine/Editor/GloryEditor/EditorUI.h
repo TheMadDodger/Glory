@@ -89,6 +89,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void PushFlag(Flag flag);
 		static GLORY_EDITOR_API void PopFlag();
 		static GLORY_EDITOR_API bool HasFlag(Flag flag);
+		static GLORY_EDITOR_API bool SearchBar(float width, char* buffer, size_t bufferSize);
 
 	private:
 		typedef uint64_t UIFlags;

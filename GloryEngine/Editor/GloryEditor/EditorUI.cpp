@@ -1,8 +1,10 @@
 #include "EditorUI.h"
 #include "Undo.h"
+
 #include <LayerManager.h>
 #include <LayerRef.h>
 #include <YAML_GLM.h>
+#include <IconsFontAwesome6.h>
 
 #define REMOVE_BUTTON_PADDING (HasFlag(Flag::HasSmallButton) ? EditorUI::RemoveButtonPadding : 0.0f)
 
@@ -949,5 +951,14 @@ namespace Glory::Editor
 	bool EditorUI::HasFlag(Flag flag)
 	{
 		return (m_UIFlags & flag) == flag;
+	}
+
+	bool EditorUI::SearchBar(float width, char* buffer, size_t bufferSize)
+	{
+		const float searchTextWidth = ImGui::CalcTextSize(ICON_FA_MAGNIFYING_GLASS).x;
+		ImGui::Text(ICON_FA_MAGNIFYING_GLASS);
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(width - searchTextWidth);
+		return ImGui::InputText("##Search", buffer, bufferSize);
 	}
 }

@@ -4,7 +4,6 @@
 #include "Texture.h"
 #include "GloryEditor.h"
 
-
 namespace Glory::Editor
 {
 	class BaseTumbnailGenerator;

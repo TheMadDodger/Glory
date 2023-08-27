@@ -415,7 +415,7 @@ namespace Glory::Editor
 		{
 			std::string path = m_CachedPath.string();
 			DND::DragAndDropSource(STNames[ST_Path], path.data(), path.size() + 1, [&]() {
-				ImGui::Image(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)iconSize, (float)iconSize));
+				ImGui::Image(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, { 64.0f, 64.0f });
 				ImGui::SameLine();
 				ImGui::Text(m_CachedPath.string().data());
 			});

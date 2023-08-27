@@ -82,6 +82,18 @@ namespace Glory
 		ASSET_MANAGER->m_pLoadedAssets.Set(pResource->GetUUID(), pResource);
 	}
 
+	bool AssetManager::IsLoading(UUID uuid)
+	{
+		return ASSET_MANAGER->m_pLoadingAssets.Contains(uuid);
+	}
+
+	void AssetManager::GetAllLoading(std::vector<UUID>& out)
+	{
+		ASSET_MANAGER->m_pLoadingAssets.ForEach([&out](const UUID& uuid) {
+			out.push_back(uuid);
+		});
+	}
+
 	bool AssetManager::LoadResourceJob(UUID uuid)
 	{
 		Resource* pResource = LoadAsset(uuid);
