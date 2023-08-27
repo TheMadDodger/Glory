@@ -110,7 +110,14 @@ namespace Glory
 	}
 
 	ResourceType::ResourceType(uint32_t typeHash, const std::string& extensions, const char* name)
-		: m_TypeHash(typeHash), m_Extensions(extensions), m_Name(name) {}
+		: m_TypeHash(typeHash), m_Extensions(extensions), m_FullName(name)
+	{
+		static constexpr std::string_view classNamespaceName = "class Glory::";
+		const size_t classIndex = m_FullName.find(classNamespaceName);
+		m_Name = classIndex == std::string::npos ? m_FullName : m_FullName.substr(classNamespaceName.length());
+		const size_t dataIndex = m_Name.find("Data");
+		m_Name = m_Name.substr(0, dataIndex);
+	}
 
 	ResourceType::~ResourceType() {}
 
@@ -122,6 +129,11 @@ namespace Glory
 	const std::string& ResourceType::Extensions() const
 	{
 		return m_Extensions;
+	}
+
+	const std::string& ResourceType::FullName() const
+	{
+		return m_FullName;
 	}
 
 	const std::string& ResourceType::Name() const

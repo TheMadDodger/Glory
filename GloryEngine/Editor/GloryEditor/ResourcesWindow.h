@@ -1,6 +1,8 @@
 #pragma once
 #include "EditorWindow.h"
 
+#include <UUID.h>
+
 namespace Glory::Editor
 {
 	class ResourcesWindow : public EditorWindowTemplate<ResourcesWindow>
@@ -11,5 +13,10 @@ namespace Glory::Editor
 
     private:
         virtual void OnGUI() override;
+
+    private:
+        std::vector<UUID> m_SearchResultCache;
+        std::vector<size_t> m_SearchResultIndexCache;
+        bool m_ForceFilter;
 	};
 }
