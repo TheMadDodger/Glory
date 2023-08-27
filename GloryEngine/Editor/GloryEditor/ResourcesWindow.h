@@ -13,10 +13,14 @@ namespace Glory::Editor
 
     private:
         virtual void OnGUI() override;
+        virtual void OnOpen() override;
+
+        void RunFilter();
 
     private:
         std::vector<UUID> m_SearchResultCache;
         std::vector<size_t> m_SearchResultIndexCache;
-        bool m_ForceFilter;
+        static bool m_ForceFilter;
+        static bool m_SubscribedToEvents;
 	};
 }

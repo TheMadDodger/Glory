@@ -49,6 +49,9 @@ namespace Glory
 		static Resource* FindResource(UUID uuid);
 		static void AddLoadedResource(Resource* pResource);
 
+		static bool IsLoading(UUID uuid);
+		static void GetAllLoading(std::vector<UUID>& out);
+
 	private:
 		static bool LoadResourceJob(UUID uuid);
 		static Resource* LoadAsset(UUID uuid);

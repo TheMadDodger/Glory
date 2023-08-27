@@ -7,19 +7,27 @@
 #include <EditorUI.h>
 #include <StringUtils.h>
 #include <ProjectSpace.h>
+#include <EditorAssetCallbacks.h>
 
 namespace Glory::Editor
 {
 	const size_t SearchBufferSize = 1000;
 	char SearchBuffer[SearchBufferSize] = "\0";
 	std::vector<ResourceType*> ResourceTypes;
-	size_t TabBarIndex = 0;
+	size_t TabBarIndex = 1;
 
-	ResourcesWindow::ResourcesWindow() : EditorWindowTemplate("Resources", 600.0f, 600.0f), m_ForceFilter(true)
+	bool ResourcesWindow::m_ForceFilter = true;
+	bool ResourcesWindow::m_SubscribedToEvents = false;
+
+	ResourcesWindow::ResourcesWindow() : EditorWindowTemplate("Resources", 600.0f, 600.0f)
 	{
+		if (m_SubscribedToEvents) return;
 		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace*) { m_ForceFilter = true; });
 		ResourceTypes.clear();
 		ResourceType::GetAllResourceTypesThatHaveSubType(ResourceType::GetHash<Resource>(), ResourceTypes);
+
+		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, [&](UUID, const ResourceMeta&, Resource*) { m_ForceFilter = true; });
+		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetDeleted, [&](UUID, const ResourceMeta&, Resource*) { m_ForceFilter = true; });
 	}
 
 	ResourcesWindow::~ResourcesWindow()
@@ -30,11 +38,21 @@ namespace Glory::Editor
 	{
 		if (ImGui::BeginTabBar("ResourcesTabs"))
 		{
-			if (ImGui::BeginTabItem("All"))
+			if (ImGui::BeginTabItem("Loading"))
 			{
 				if (TabBarIndex != 0)
 				{
 					TabBarIndex = 0;
+					m_ForceFilter = true;
+				}
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("All"))
+			{
+				if (TabBarIndex != 1)
+				{
+					TabBarIndex = 1;
 					m_ForceFilter = true;
 				}
 				ImGui::EndTabItem();
@@ -45,9 +63,9 @@ namespace Glory::Editor
 				const std::string& name = ResourceTypes[i]->Name();
 				if (ImGui::BeginTabItem(name.data()))
 				{
-					if (TabBarIndex != i + 1)
+					if (TabBarIndex != i + 2)
 					{
-						TabBarIndex = i + 1;
+						TabBarIndex = i + 2;
 						m_ForceFilter = true;
 					}
 					ImGui::EndTabItem();
@@ -56,7 +74,6 @@ namespace Glory::Editor
 
 			ImGui::EndTabBar();
 		}
-
 
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
 
@@ -67,33 +84,11 @@ namespace Glory::Editor
 		const float rowHeight = 64.0f;
 
 		const float regionWidth = ImGui::GetWindowContentRegionMax().x;
-		const bool needsFilter = EditorUI::SearchBar(regionWidth, SearchBuffer, SearchBufferSize) || m_ForceFilter;
+		const bool needsFilter = TabBarIndex == 0 || EditorUI::SearchBar(regionWidth, SearchBuffer, SearchBufferSize) || m_ForceFilter;
 		m_ForceFilter = false;
 
 		if (needsFilter)
-		{
-			std::string_view search{SearchBuffer};
-			m_SearchResultCache.clear();
-			m_SearchResultIndexCache.clear();
-			const std::vector<UUID> allResources = EditorAssetDatabase::UUIDs();
-			for (size_t i = 0; i < allResources.size(); ++i)
-			{
-				const std::string name = EditorAssetDatabase::GetAssetName(allResources[i]);
-				if (TabBarIndex != 0)
-				{
-					const ResourceType* pFilteredType = ResourceTypes[TabBarIndex - 1];
-					ResourceMeta meta;
-					EditorAssetDatabase::GetAssetMetadata(allResources[i], meta);
-					const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
-					if (pType != pFilteredType) continue;
-
-				}
-
-				if (!search.empty() && Utils::CaseInsensitiveSearch(name, search) == std::string::npos) continue;
-				m_SearchResultCache.push_back(allResources[i]);
-				m_SearchResultIndexCache.push_back(i);
-			}
-		}
+			RunFilter();
 
 		if (!ImGui::BeginChild("ResourcesChild") || !ImGui::BeginTable("ResourcesTable", 6, flags))
 		{
@@ -169,7 +164,7 @@ namespace Glory::Editor
 				if (ImGui::TableNextColumn())
 				{
 					const bool loaded = AssetManager::FindResource(uuid) != nullptr;
-					ImGui::Text("%s", loaded ? "Yes" : "No");
+					ImGui::Text("%s", loaded ? "Yes" : AssetManager::IsLoading(uuid) ? "Loading..." : "No");
 				}
 
 				ImGui::PopID();
@@ -178,5 +173,40 @@ namespace Glory::Editor
 
 		ImGui::EndTable();
 		ImGui::EndChild();
+	}
+
+	void ResourcesWindow::OnOpen()
+	{
+		m_ForceFilter = true;
+	}
+	void ResourcesWindow::RunFilter()
+	{
+		m_SearchResultCache.clear();
+		m_SearchResultIndexCache.clear();
+
+		if (TabBarIndex == 0)
+		{
+			AssetManager::GetAllLoading(m_SearchResultCache);
+			return;
+		}
+
+		std::string_view search{SearchBuffer};
+		const std::vector<UUID> allResources = EditorAssetDatabase::UUIDs();
+		for (size_t i = 0; i < allResources.size(); ++i)
+		{
+			const std::string name = EditorAssetDatabase::GetAssetName(allResources[i]);
+			if (TabBarIndex != 1)
+			{
+				const ResourceType* pFilteredType = ResourceTypes[TabBarIndex - 2];
+				ResourceMeta meta;
+				EditorAssetDatabase::GetAssetMetadata(allResources[i], meta);
+				const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
+				if (pType != pFilteredType) continue;
+			}
+
+			if (!search.empty() && Utils::CaseInsensitiveSearch(name, search) == std::string::npos) continue;
+			m_SearchResultCache.push_back(allResources[i]);
+			m_SearchResultIndexCache.push_back(i);
+		}
 	}
 }
