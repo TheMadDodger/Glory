@@ -13,6 +13,7 @@
 #include "InspectorWindow.h"
 #include "SceneGraphWindow.h"
 #include "FileBrowser.h"
+#include "ResourcesWindow.h"
 #include "EditorConsoleWindow.h"
 #include "HistoryWindow.h"
 #include "PerformanceMetrics.h"
@@ -75,6 +76,7 @@ namespace Glory::Editor
 	static const char* Shortcut_Window_Performance		= "Open Performance Metrics";
 	static const char* Shortcut_Window_Profiler			= "Open Profiler";
 	static const char* Shortcut_Window_ProjectSettings	= "Open Project Settings";
+	static const char* Shortcut_Window_Resources		= "Open Resources";
 	static const char* Shortcut_View_Perspective		= "Switch To Perspective";
 	static const char* Shortcut_View_Orthographic		= "Switch To Orthographic";
 	static const char* Shortcut_Edit_Undo				= "Undo";
@@ -290,6 +292,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); }, NULL, Shortcut_Window_Performance);
 		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); }, NULL, Shortcut_Window_Profiler);
 		MenuBar::AddMenuItem("Window/Project Settings", []() { EditorWindow::GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
+		MenuBar::AddMenuItem("Window/Resources", []() { EditorWindow::GetWindow<ResourcesWindow>(); }, NULL, Shortcut_Window_Resources);
 
 		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Perspective);
 		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Orthographic);

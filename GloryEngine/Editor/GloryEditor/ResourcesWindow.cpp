@@ -1,0 +1,108 @@
+#include "ResourcesWindow.h"
+#include "EditorAssetDatabase.h"
+#include "Tumbnail.h"
+#include "EditorApplication.h"
+
+#include <AssetManager.h>
+
+namespace Glory::Editor
+{
+	ResourcesWindow::ResourcesWindow() : EditorWindowTemplate("Resources", 600.0f, 600.0f)
+	{
+	}
+
+	ResourcesWindow::~ResourcesWindow()
+	{
+	}
+
+	void ResourcesWindow::OnGUI()
+	{
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+
+		const std::vector<UUID> allResources = EditorAssetDatabase::UUIDs();
+
+		static const ImGuiTableFlags flags =
+			ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg
+			| ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit;
+
+		const float rowHeight = 64.0f;
+
+		if (ImGui::BeginTable("Resources", 6, flags))
+		{
+			ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 10.0f, 0);
+			ImGui::TableSetupColumn("Thumb", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, rowHeight, 1);
+			ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 100.0f, 2);
+			ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 110.0f, 3);
+			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.3f, 4);
+			ImGui::TableSetupColumn("Loaded?", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.1f, 5);
+
+			ImGui::TableSetupScrollFreeze(0, 1);
+			ImGui::TableHeadersRow();
+
+			ImGuiListClipper clipper(allResources.size(), rowHeight + 2*ImGui::GetCurrentTable()->CellPaddingY);
+
+			auto itorStart = allResources.begin();
+			while (clipper.Step()) {
+				const auto start = itorStart + clipper.DisplayStart;
+				const auto end = itorStart + clipper.DisplayEnd;
+
+				for (auto it = start; it != end; ++it) {
+					size_t row_n = allResources.size() - (allResources.end() - it);
+
+					const UUID uuid = *it;
+
+					ImGui::PushID(uuid);
+					ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+
+					if (ImGui::TableNextColumn())
+					{
+						ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+
+						if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
+						{
+							/* Select it? */
+						}
+
+						ImGui::SameLine();
+						ImGui::Text("%i", row_n);
+					}
+
+					if (ImGui::TableNextColumn())
+					{
+						Texture* pThumbnail = Tumbnail::GetTumbnail(uuid);
+						ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { rowHeight, rowHeight });
+					}
+
+					if (ImGui::TableNextColumn())
+					{
+						ImGui::Text("%s", std::to_string(uuid).data());
+					}
+
+					if (ImGui::TableNextColumn())
+					{
+						ResourceMeta meta;
+						EditorAssetDatabase::GetAssetMetadata(uuid, meta);
+						const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
+						ImGui::Text("%s", pType->Name().data());
+					}
+
+					if (ImGui::TableNextColumn())
+					{
+						const std::string name = EditorAssetDatabase::GetAssetName(uuid);
+						ImGui::Text("%s", name.data());
+					}
+
+					if (ImGui::TableNextColumn())
+					{
+						const bool loaded = AssetManager::FindResource(uuid) != nullptr;
+						ImGui::Text("%s", loaded ? "Yes" : "No");
+					}
+
+					ImGui::PopID();
+				}
+			}
+
+			ImGui::EndTable();
+		}
+	}
+}
