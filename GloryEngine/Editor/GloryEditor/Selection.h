@@ -1,9 +1,10 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <Object.h>
 #include <vector>
 #include <functional>
 #include <map>
-#include "GloryEditor.h"
 
 namespace Glory::Editor
 {

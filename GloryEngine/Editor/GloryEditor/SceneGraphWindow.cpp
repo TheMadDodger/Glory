@@ -223,13 +223,21 @@ namespace Glory::Editor
 			}
 		});
 
+		const bool isCtrlDown = ImGui::GetIO().KeyCtrl;
+
 		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 		{
-			Selection::SetActiveObject(pObject);
+			if (isCtrlDown)
+				Selection::AddObjectToSelection(pObject);
+			else
+				Selection::SetActiveObject(pObject);
 		}
 		if (ImGui::IsItemClicked(1))
 		{
-			Selection::SetActiveObject(pObject);
+			if(isCtrlDown)
+				Selection::AddObjectToSelection(pObject);
+			else
+				Selection::SetActiveObject(pObject);
 			ObjectMenu::Open(pObject, T_SceneObject);
 		}
 
