@@ -2,6 +2,7 @@
 #include <Enum.h>
 #include <functional>
 #include <filesystem>
+#include <UUID.h>
 #include <imgui.h>
 
 namespace Glory
@@ -19,7 +20,7 @@ namespace Glory::Editor
 
 	struct AssetPayload
 	{
-		//UUID ResourceID;
+		UUID ResourceID;
 	};
 
 	struct DND

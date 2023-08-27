@@ -6,6 +6,7 @@
 #include "AssetDatabase.h"
 #include "ThreadedVar.h"
 #include "JobManager.h"
+
 #include <unordered_map>
 #include <vector>
 

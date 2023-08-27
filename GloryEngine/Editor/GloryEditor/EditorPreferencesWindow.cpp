@@ -1,6 +1,7 @@
-#include <imgui.h>
 #include "EditorPreferencesWindow.h"
 #include "Shortcuts.h"
+
+#include <imgui.h>
 
 namespace Glory::Editor
 {

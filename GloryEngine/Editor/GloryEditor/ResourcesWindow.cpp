@@ -8,6 +8,7 @@
 #include <StringUtils.h>
 #include <ProjectSpace.h>
 #include <EditorAssetCallbacks.h>
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -15,6 +16,25 @@ namespace Glory::Editor
 	char SearchBuffer[SearchBufferSize] = "\0";
 	std::vector<ResourceType*> ResourceTypes;
 	size_t TabBarIndex = 1;
+	bool FirstGui = true;
+
+	enum FilterOption : size_t
+	{
+		FO_All,
+		FO_Unloaded,
+		FO_Loaded,
+		FO_Loading,
+		FO_Count
+	};
+
+	constexpr std::string_view FilterNames[] = {
+		"Show All",
+		"Show Unloaded",
+		"Show Loaded",
+		"Show Loading",
+	};
+
+	FilterOption Filter = FilterOption::FO_All;
 
 	bool ResourcesWindow::m_ForceFilter = true;
 	bool ResourcesWindow::m_SubscribedToEvents = false;
@@ -48,7 +68,7 @@ namespace Glory::Editor
 				ImGui::EndTabItem();
 			}
 
-			if (ImGui::BeginTabItem("All"))
+			if (ImGui::BeginTabItem("All", nullptr, FirstGui ? ImGuiTabItemFlags_SetSelected : 0))
 			{
 				if (TabBarIndex != 1)
 				{
@@ -57,6 +77,8 @@ namespace Glory::Editor
 				}
 				ImGui::EndTabItem();
 			}
+
+			FirstGui = false;
 
 			for (size_t i = 0; i < ResourceTypes.size(); ++i)
 			{
@@ -84,24 +106,41 @@ namespace Glory::Editor
 		const float rowHeight = 64.0f;
 
 		const float regionWidth = ImGui::GetWindowContentRegionMax().x;
-		const bool needsFilter = TabBarIndex == 0 || EditorUI::SearchBar(regionWidth, SearchBuffer, SearchBufferSize) || m_ForceFilter;
+		bool needsFilter = TabBarIndex == 0 || EditorUI::SearchBar(regionWidth, SearchBuffer, SearchBufferSize) || m_ForceFilter;
 		m_ForceFilter = false;
+
+		if (TabBarIndex != 0)
+		{
+			ImGui::TextUnformatted(ICON_FA_FILTER " Filter");
+			for (size_t i = 0; i < FilterOption::FO_Count; ++i)
+			{
+				FilterOption filter = FilterOption(i);
+				ImGui::SameLine();
+				if (ImGui::RadioButton(FilterNames[i].data(), Filter == filter))
+				{
+					Filter = filter;
+					needsFilter = true;
+				}
+			}
+		}
 
 		if (needsFilter)
 			RunFilter();
 
-		if (!ImGui::BeginChild("ResourcesChild") || !ImGui::BeginTable("ResourcesTable", 6, flags))
+		if (!ImGui::BeginChild("ResourcesChild") || !ImGui::BeginTable("ResourcesTable", 8, flags))
 		{
 			ImGui::EndChild();
 			return;
 		}
 
-		ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, rowHeight, 1);
+		ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 40.0f, 1);
 		ImGui::TableSetupColumn("Thumb", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, rowHeight, 1);
 		ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 100.0f, 2);
 		ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 110.0f, 3);
-		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.3f, 4);
-		ImGui::TableSetupColumn("Loaded?", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.1f, 5);
+		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.2f, 4);
+		ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 500.0f, 5);
+		ImGui::TableSetupColumn("Sub Path", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.7f, 6);
+		ImGui::TableSetupColumn("Loaded?", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, rowHeight, 7);
 
 		ImGui::TableSetupScrollFreeze(0, 1);
 		ImGui::TableHeadersRow();
@@ -123,6 +162,15 @@ namespace Glory::Editor
 				ImGui::PushID(uuid);
 				ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
 
+				ResourceMeta meta;
+				EditorAssetDatabase::GetAssetMetadata(uuid, meta);
+				const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
+				Texture* pThumbnail = Tumbnail::GetTumbnail(uuid);
+				const std::string name = EditorAssetDatabase::GetAssetName(uuid);
+
+				AssetLocation location;
+				EditorAssetDatabase::GetAssetLocation(uuid, location);
+
 				if (ImGui::TableNextColumn())
 				{
 					ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
@@ -132,13 +180,19 @@ namespace Glory::Editor
 						/* Select it? */
 					}
 
+					AssetPayload payload{ uuid };
+					DND::DragAndDropSource(pType->Name(), &payload, sizeof(AssetPayload), [&]() {
+						ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { 64.0f, 64.0f });
+						ImGui::SameLine();
+						ImGui::Text(name.data());
+					});
+
 					ImGui::SameLine();
 					ImGui::Text("%i", index);
 				}
 
 				if (ImGui::TableNextColumn())
 				{
-					Texture* pThumbnail = Tumbnail::GetTumbnail(uuid);
 					ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { rowHeight, rowHeight });
 				}
 
@@ -149,16 +203,22 @@ namespace Glory::Editor
 
 				if (ImGui::TableNextColumn())
 				{
-					ResourceMeta meta;
-					EditorAssetDatabase::GetAssetMetadata(uuid, meta);
-					const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
 					ImGui::Text("%s", pType->Name().data());
 				}
 
 				if (ImGui::TableNextColumn())
 				{
-					const std::string name = EditorAssetDatabase::GetAssetName(uuid);
 					ImGui::Text("%s", name.data());
+				}
+
+				if (ImGui::TableNextColumn())
+				{
+					ImGui::Text("%s", location.Path.data());
+				}
+
+				if (ImGui::TableNextColumn())
+				{
+					ImGui::Text("%s", location.SubresourcePath.data());
 				}
 
 				if (ImGui::TableNextColumn())
@@ -202,6 +262,24 @@ namespace Glory::Editor
 				EditorAssetDatabase::GetAssetMetadata(allResources[i], meta);
 				const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
 				if (pType != pFilteredType) continue;
+			}
+
+			const bool loaded = AssetManager::FindResource(allResources[i]) != nullptr;
+			const bool loading = AssetManager::IsLoading(allResources[i]);
+
+			switch (Filter)
+			{
+			case Glory::Editor::FO_Unloaded:
+				if (loaded) continue;
+				break;
+			case Glory::Editor::FO_Loaded:
+				if (!loaded) continue;
+				break;
+			case Glory::Editor::FO_Loading:
+				if (!loading) continue;
+				break;
+			default:
+				break;
 			}
 
 			if (!search.empty() && Utils::CaseInsensitiveSearch(name, search) == std::string::npos) continue;
