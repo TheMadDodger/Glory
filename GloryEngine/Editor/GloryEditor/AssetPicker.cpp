@@ -1,6 +1,8 @@
 #include "AssetPicker.h"
 #include "EditorUI.h"
 #include "DND.h"
+#include "Tumbnail.h"
+#include "EditorApplication.h"
 
 #include <imgui.h>
 #include <algorithm>
@@ -8,15 +10,16 @@
 #include <Engine.h>
 #include <WindowModule.h>
 #include <SerializedTypes.h>
+#include <StringUtils.h>
 
 #include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
-	char AssetPicker::m_FilterBuffer[200] = "";
-	std::string AssetPicker::m_Filter = "";
-	std::vector<UUID> AssetPicker::m_FilteredAssets;
-	std::vector<UUID> AssetPicker::m_PossibleAssets;
+	char AssetPicker::m_SearchBuffer[200] = "";
+	std::vector<UUID> AssetPicker::m_SearchResultCache;
+
+	bool ForceFilter = false;
 
 	bool AssetPicker::ResourceDropdown(const std::string& label, uint32_t resourceType, UUID* value, bool includeSubAssets, const float borderPadding)
 	{
@@ -29,8 +32,7 @@ namespace Glory::Editor
 		float start, width;
 		EditorUI::EmptyDropdown(EditorUI::MakeCleanName(label), assetName, [&]
 		{
-			m_PossibleAssets.clear();
-			m_FilteredAssets.clear();
+			ForceFilter = true;
 			openPopup = true;
 		}, start, width, borderPadding);
 		bool change = DND{ { ST_Path, resourceType } }.HandleDragAndDropTarget([&](uint32_t type, const ImGuiPayload* payload)
@@ -83,8 +85,7 @@ namespace Glory::Editor
 		bool openPopup = false;
 		if (ImGui::Button(label.c_str(), ImVec2(buttonWidth, 0.0f)))
 		{
-			m_PossibleAssets.clear();
-			m_FilteredAssets.clear();
+			ForceFilter = true;
 			openPopup = true;
 		}
 		if (openPopup)
@@ -98,36 +99,38 @@ namespace Glory::Editor
 		return change;
 	}
 
-	AssetPicker::AssetPicker() {}
-	AssetPicker::~AssetPicker() {}
-
-	void AssetPicker::RefreshFilter()
-	{
-		m_FilteredAssets.clear();
-		if (m_Filter == "") return;
-
-		size_t compCount = 0;
-		for (size_t i = 0; i < m_PossibleAssets.size(); i++)
-		{
-			UUID uuid = m_PossibleAssets[i];
-			std::string name = EditorAssetDatabase::GetAssetName(uuid);
-			if (name.find(m_Filter) == std::string::npos) continue;
-			m_FilteredAssets.push_back(m_PossibleAssets[i]);
-		}
-	}
-
 	void AssetPicker::LoadAssets(uint32_t typeHash, bool includeSubAssets)
 	{
-		m_PossibleAssets.clear();
-		EditorAssetDatabase::GetAllAssetsOfType(typeHash, m_PossibleAssets);
+		std::vector<UUID> assets;
+		EditorAssetDatabase::GetAllAssetsOfType(typeHash, assets);
 
-		if (!includeSubAssets) return;
-		std::vector<ResourceType*> pTypes;
-		ResourceType::GetAllResourceTypesThatHaveSubType(typeHash, pTypes);
-		for (size_t i = 0; i < pTypes.size(); i++)
+		if (includeSubAssets)
 		{
-			if (pTypes[i]->Hash() == typeHash) continue;
-			EditorAssetDatabase::GetAllAssetsOfType(pTypes[i]->Hash(), m_PossibleAssets);
+			std::vector<ResourceType*> pTypes;
+			ResourceType::GetAllResourceTypesThatHaveSubType(typeHash, pTypes);
+			for (size_t i = 0; i < pTypes.size(); i++)
+			{
+				if (pTypes[i]->Hash() == typeHash) continue;
+				EditorAssetDatabase::GetAllAssetsOfType(pTypes[i]->Hash(), assets);
+			}
+		}
+
+		const std::string_view search{m_SearchBuffer};
+		m_SearchResultCache.clear();
+
+		if (search.empty())
+		{
+			m_SearchResultCache.resize(assets.size());
+			std::memcpy(m_SearchResultCache.data(), assets.data(), sizeof(UUID)*assets.size());
+			return;
+		}
+
+		for (size_t i = 0; i < assets.size(); i++)
+		{
+			const UUID uuid = assets[i];
+			const std::string name = EditorAssetDatabase::GetAssetName(uuid);
+			if (Utils::CaseInsensitiveSearch(name, search) == std::string::npos) continue;
+			m_SearchResultCache.push_back(assets[i]);
 		}
 	}
 
@@ -137,65 +140,58 @@ namespace Glory::Editor
 
 		if (ImGui::BeginPopup("AssetPicker"))
 		{
-			if (m_PossibleAssets.size() == 0)
+			const bool needsFilter = EditorUI::SearchBar(ImGui::GetContentRegionAvail().x, m_SearchBuffer, 200) || ForceFilter;
+			if (needsFilter)
 				LoadAssets(typeHash, includeSubAssets);
 
-			//ImGui::Text("Asset Picker");
-			ImGui::TextUnformatted(ICON_FA_MAGNIFYING_GLASS);
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-			ImGui::InputText("##search", m_FilterBuffer, 200);
-
-			if (m_Filter != std::string(m_FilterBuffer))
-			{
-				m_Filter = std::string(m_FilterBuffer);
-				RefreshFilter();
-			}
-
-			if (m_Filter.length() > 0)
-			{
-				assetChosen = DrawItems(m_FilteredAssets, value);
-			}
-			else
-			{
-				assetChosen = DrawItems(m_PossibleAssets, value);
-			}
-
+			assetChosen = DrawItems(m_SearchResultCache, value);
+			if (assetChosen)
+				ImGui::CloseCurrentPopup();
 			ImGui::EndPopup();
-		}
-
-		if (assetChosen)
-		{
-			m_Filter = "";
-			m_FilteredAssets.clear();
-			m_PossibleAssets.clear();
-			ImGui::CloseCurrentPopup();
 		}
 		return assetChosen;
 	}
 
 	bool AssetPicker::DrawItems(const std::vector<UUID>& items, UUID* value)
 	{
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+
 		bool change = false;
-		if (ImGui::MenuItem("Noone"))
+		if (ImGui::Selectable("None", *value == 0))
 		{
 			*value = 0;
-			m_PossibleAssets.clear();
-			m_FilteredAssets.clear();
 			change = true;
 		}
 
-		std::for_each(items.begin(), items.end(), [&](UUID uuid)
-		{
-			const std::string name = EditorAssetDatabase::GetAssetName(uuid);
-			if (ImGui::MenuItem(name.c_str()))
+		ImGui::BeginChild("scrollregion");
+		const float rowHeight = 64.0f;
+		ImGuiListClipper clipper{ int(items.size()), rowHeight };
+
+		auto itorStart = items.begin();
+		while (clipper.Step()) {
+			const auto start = itorStart + clipper.DisplayStart;
+			const auto end = itorStart + clipper.DisplayEnd;
+
+			for (auto it = start; it != end; ++it)
 			{
-				*value = uuid;
-				m_PossibleAssets.clear();
-				m_FilteredAssets.clear();
-				change = true;
+				ImGui::PushID(*it);
+				const std::string name = EditorAssetDatabase::GetAssetName(*it);
+				if (ImGui::Selectable("##select", *it == *value, ImGuiSelectableFlags_AllowItemOverlap, { 0.0f, rowHeight }))
+				{
+					*value = *it;
+					change = true;
+				}
+
+				Texture* pThumbnail = Tumbnail::GetTumbnail(*it);
+				ImGui::SameLine();
+				ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { rowHeight, rowHeight });
+				ImGui::SameLine();
+				ImGui::TextUnformatted(name.c_str());
+				ImGui::PopID();
 			}
-		});
+		}
+		ImGui::EndChild();
+
 		return change;
 	}
 }
