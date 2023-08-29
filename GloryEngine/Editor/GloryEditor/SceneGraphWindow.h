@@ -14,6 +14,18 @@ namespace Glory::Editor
 		virtual void OnGUI() override;
 
 		void SceneDropdown(size_t index, GScene* pScene, bool isActive);
-		void ChildrenList(size_t index, SceneObject* pScene);
+		bool ChildrenList(size_t index, SceneObject* pObject);
+
+		bool GetExcludedObjectsFromFilterRecursive(GScene* pScene);
+		bool GetExcludedObjectsFromFilterRecursive(SceneObject* pObject);
+
+		bool IsExcluded(const UUID uuid);
+
+	private:
+		static const size_t SearchBufferSize = 1000;
+		char SearchBuffer[SearchBufferSize] = "\0";
+		bool m_NeedsFilter = false;
+
+		std::vector<UUID> m_SearchResultExcludeCache;
 	};
 }
