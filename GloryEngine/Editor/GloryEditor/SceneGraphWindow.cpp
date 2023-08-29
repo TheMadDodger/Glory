@@ -6,10 +6,12 @@
 #include "Undo.h"
 #include "SetParentAction.h"
 #include "SetSiblingIndexAction.h"
+#include "EditorUI.h"
 
 #include <Game.h>
 #include <Engine.h>
 #include <IconsFontAwesome6.h>
+#include <StringUtils.h>
 
 namespace Glory::Editor
 {
@@ -35,9 +37,28 @@ namespace Glory::Editor
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
+		m_NeedsFilter = EditorUI::SearchBar(ImGui::GetContentRegionAvail().x, SearchBuffer, SearchBufferSize);
+		if (m_NeedsFilter)
+		{
+			m_SearchResultExcludeCache.clear();
+			if (!std::string_view{SearchBuffer}.empty())
+			{
+				for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+				{
+					GScene* pScene = pScenesModule->GetOpenScene(i);
+					if (GetExcludedObjectsFromFilterRecursive(pScene)) {
+						continue;
+					}
+					m_SearchResultExcludeCache.push_back(pScene->GetUUID());
+				}
+			}
+			else m_NeedsFilter = false;
+		}
+
 		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
+			if (IsExcluded(pScene->GetUUID())) continue;
 			SceneDropdown(i, pScene, pScene == pActiveScene);
 		}
 
@@ -69,6 +90,8 @@ namespace Glory::Editor
 		}
 
 		ImGui::PopStyleVar();
+
+		m_NeedsFilter = false;
 	}
 
 	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)
@@ -86,6 +109,7 @@ namespace Glory::Editor
 		if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
 
 		const std::string label = pScene->Name() + (EditorSceneManager::IsSceneDirty(pScene) ? " *" : "");
+		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
 		const bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, label.data());
 		if (isActive) ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
@@ -119,11 +143,13 @@ namespace Glory::Editor
 		{
 			//ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
 
+			size_t index = 0;
 			for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
 			{
 				SceneObject* pObject = pScene->GetSceneObject(i);
 				if (pObject->GetParent() != nullptr) continue;
-				ChildrenList(i, pObject);
+				if (!ChildrenList(index, pObject)) continue;
+				++index;
 			}
 
 			//ImGui::PopStyleVar();
@@ -132,15 +158,17 @@ namespace Glory::Editor
 		}
 	}
 
-	void SceneGraphWindow::ChildrenList(size_t index, SceneObject* pObject)
+	bool SceneGraphWindow::ChildrenList(size_t index, SceneObject* pObject)
 	{
+		const UUID id = pObject->GetUUID();
+
+		if (IsExcluded(id)) return false;
+
 		// Disable the default open on single-click behavior and pass in Selected flag according to our selection state.
 
 		bool selected = Selection::IsObjectSelected(pObject);
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
 			| ImGuiTreeNodeFlags_SpanAvailWidth | (selected ? ImGuiTreeNodeFlags_Selected : 0);
-
-		const UUID id = pObject->GetUUID();
 
 		constexpr std::hash<std::string> hasher{};
 		const std::string nameAndIDMinus1 = pObject->Name() + std::to_string(id - 1);
@@ -189,6 +217,7 @@ namespace Glory::Editor
 
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
 		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, "");
 		ObjectPayload payload{ pObject };
 		DND::DragAndDropSource<SceneObject>(&payload, sizeof(ObjectPayload), [pObject]() {
@@ -240,10 +269,12 @@ namespace Glory::Editor
 
 		if (node_open)
 		{
+			size_t index = 0;
 			for (size_t i = 0; i < pObject->ChildCount(); i++)
 			{
 				SceneObject* pChild = pObject->GetChild(i);
-				ChildrenList(i, pChild);
+				if (!ChildrenList(index, pChild)) continue;
+				++index;
 			}
 
 			if (childCount > 0) ImGui::TreePop();
@@ -282,5 +313,42 @@ namespace Glory::Editor
 				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
 			}
 		});
+		return true;
+	}
+
+	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(GScene* pScene)
+	{
+		bool hasNonFilteredChild = false;
+		for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
+		{
+			SceneObject* pObject = pScene->GetSceneObject(i);
+			hasNonFilteredChild |= GetExcludedObjectsFromFilterRecursive(pObject);
+		}
+		return hasNonFilteredChild;
+	}
+
+	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(SceneObject* pObject)
+	{
+		const std::string_view search{SearchBuffer};
+		const bool searchPassed = Utils::CaseInsensitiveSearch(pObject->Name(), search) != std::string::npos;
+
+		bool hasNonFilteredChild = false;
+		for (size_t i = 0; i < pObject->ChildCount(); i++)
+		{
+			SceneObject* pChild = pObject->GetChild(i);
+			hasNonFilteredChild |= GetExcludedObjectsFromFilterRecursive(pChild);
+		}
+
+		const bool shouldBeExcluded = !searchPassed && !hasNonFilteredChild;
+		if (shouldBeExcluded)
+			m_SearchResultExcludeCache.push_back(pObject->GetUUID());
+
+		return !shouldBeExcluded;
+	}
+
+	bool SceneGraphWindow::IsExcluded(const UUID uuid)
+	{
+		return std::find(m_SearchResultExcludeCache.begin(), m_SearchResultExcludeCache.end(), uuid)
+			!= m_SearchResultExcludeCache.end();
 	}
 }

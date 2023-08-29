@@ -956,9 +956,13 @@ namespace Glory::Editor
 	bool EditorUI::SearchBar(float width, char* buffer, size_t bufferSize)
 	{
 		const float searchTextWidth = ImGui::CalcTextSize(ICON_FA_MAGNIFYING_GLASS).x;
+		const float cursorY = ImGui::GetCursorPosY();
+		ImGui::SetCursorPosY(cursorY + 2.0f);
 		ImGui::Text(ICON_FA_MAGNIFYING_GLASS);
 		ImGui::SameLine();
-		ImGui::SetNextItemWidth(width - searchTextWidth);
+		ImGui::SetCursorPosY(cursorY);
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4.0f);
+		ImGui::SetNextItemWidth(width - searchTextWidth - 4.0f);
 		return ImGui::InputText("##Search", buffer, bufferSize);
 	}
 }
