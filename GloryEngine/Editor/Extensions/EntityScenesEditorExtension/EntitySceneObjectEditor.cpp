@@ -244,4 +244,25 @@ namespace Glory::Editor
 		if (change) EditorSceneManager::SetSceneDirty(pScene);
 		return change;
 	}
+
+	void EntitySceneObjectEditor::DrawObjectNodeName(SceneObject* pObject)
+	{
+		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
+		Entity entity = pEntityObject->GetEntityHandle();
+		EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
+		std::stringstream stream;
+		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
+		{
+			const uint32_t typeHash = pEntityView->ComponentTypeAt(i);
+			stream << COMPONENT_ICONS.at(typeHash) << ' ';
+		}
+
+		const std::string componentLabels = stream.str();
+		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+
+		const float compLabelsWidth = ImGui::CalcTextSize(componentLabels.data()).x;
+		const float availableWidth = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowPos().x;
+		ImGui::SameLine(availableWidth - compLabelsWidth);
+		ImGui::TextUnformatted(componentLabels.data());
+	}
 }

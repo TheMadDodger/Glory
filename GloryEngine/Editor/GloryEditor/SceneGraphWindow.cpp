@@ -16,6 +16,9 @@
 namespace Glory::Editor
 {
 	DND DragAndDrop{ { ResourceType::GetHash<SceneObject>() } };
+	std::function<void(SceneObject*)> DrawObjectNameCallback = [](SceneObject* pObject){
+		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+	};
 
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
@@ -23,6 +26,11 @@ namespace Glory::Editor
 
 	SceneGraphWindow::~SceneGraphWindow()
 	{
+	}
+
+	void SceneGraphWindow::SetDrawObjectNameCallback(std::function<void(SceneObject*)> callback)
+	{
+		DrawObjectNameCallback = callback;
 	}
 
 	void SceneGraphWindow::OnGUI()
@@ -263,7 +271,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SameLine();
-		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+		DrawObjectNameCallback(pObject);
 
 		ImGui::PopStyleVar();
 
