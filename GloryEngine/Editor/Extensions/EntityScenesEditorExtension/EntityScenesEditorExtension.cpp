@@ -12,6 +12,7 @@
 #include <Components.h>
 #include <Reflection.h>
 #include <ObjectMenu.h>
+#include <SceneGraphWindow.h>
 
 #define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
 name##MenuName << STRINGIFY(Create/Entity Object/) << EntitySceneObjectEditor::GetComponentIcon<component>() << "  " << STRINGIFY(name); \
@@ -46,6 +47,8 @@ namespace Glory::Editor
 		EditorPlayer::RegisterLoopHandler(this);
 
 		PropertyDrawer::RegisterPropertyDrawer<SimplePropertyDrawerTemplate<MeshMaterial>>();
+
+		SceneGraphWindow::SetDrawObjectNameCallback(EntitySceneObjectEditor::DrawObjectNodeName);
 
 		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
 		OBJECT_CREATE_MENU(Model, ModelRenderer);

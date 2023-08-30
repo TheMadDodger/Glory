@@ -21,14 +21,17 @@ namespace Glory::Editor
 			return GetComponentIcon(ResourceType::GetHash<T>());
 		}
 
-		static GLORY_EDITOR_API std::string_view GetComponentIcon(uint32_t typeHash);
+		GLORY_EDITOR_API static std::string_view GetComponentIcon(uint32_t typeHash);
 
 	private:
 		void Initialize();
 		bool NameGUI();
 		bool ComponentGUI();
 
+		static void DrawObjectNodeName(SceneObject* pObject);
+
 	private:
+		friend class EntityScenesEditorExtension;
 		std::vector<Editor*> m_pComponentEditors;
 		bool m_Initialized;
 		static const int MAXNAMESIZE = 250;

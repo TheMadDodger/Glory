@@ -10,6 +10,8 @@ namespace Glory::Editor
 		SceneGraphWindow();
 		virtual ~SceneGraphWindow();
 
+		GLORY_EDITOR_API static void SetDrawObjectNameCallback(std::function<void(SceneObject*)> callback);
+
 	private:
 		virtual void OnGUI() override;
 
