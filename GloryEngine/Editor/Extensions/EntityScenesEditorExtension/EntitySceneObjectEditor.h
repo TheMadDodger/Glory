@@ -29,6 +29,7 @@ namespace Glory::Editor
 		bool ComponentGUI();
 
 		static void DrawObjectNodeName(SceneObject* pObject);
+		static bool SearchCompare(std::string_view search, SceneObject* pObject);
 
 	private:
 		friend class EntityScenesEditorExtension;

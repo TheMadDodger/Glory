@@ -20,6 +20,14 @@ namespace Glory::Editor
 		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
 	};
 
+	std::function<bool(std::string_view, SceneObject*)> SearchCompareCallback = [](std::string_view search, SceneObject* pObject) {
+		return Utils::CaseInsensitiveSearch(pObject->Name(), search) != std::string::npos;
+	};
+
+	std::function<void()> SearchTooltipCallback = []() {
+		ImGui::SetTooltip("Search for an object by name");
+	};
+
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
 	}
@@ -31,6 +39,16 @@ namespace Glory::Editor
 	void SceneGraphWindow::SetDrawObjectNameCallback(std::function<void(SceneObject*)> callback)
 	{
 		DrawObjectNameCallback = callback;
+	}
+
+	void SceneGraphWindow::SetSearchCompareCallback(std::function<bool(std::string_view, SceneObject*)> callback)
+	{
+		SearchCompareCallback = callback;
+	}
+
+	void SceneGraphWindow::SetSearchTooltipCallback(std::function<void()> callback)
+	{
+		SearchTooltipCallback = callback;
 	}
 
 	void SceneGraphWindow::OnGUI()
@@ -46,6 +64,11 @@ namespace Glory::Editor
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
 		m_NeedsFilter = EditorUI::SearchBar(ImGui::GetContentRegionAvail().x, SearchBuffer, SearchBufferSize);
+		if (ImGui::IsItemHovered())
+		{
+			SearchTooltipCallback();
+		}
+
 		if (m_NeedsFilter)
 		{
 			m_SearchResultExcludeCache.clear();
@@ -338,7 +361,7 @@ namespace Glory::Editor
 	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(SceneObject* pObject)
 	{
 		const std::string_view search{SearchBuffer};
-		const bool searchPassed = Utils::CaseInsensitiveSearch(pObject->Name(), search) != std::string::npos;
+		const bool searchPassed = SearchCompareCallback(search, pObject);
 
 		bool hasNonFilteredChild = false;
 		for (size_t i = 0; i < pObject->ChildCount(); i++)

@@ -11,6 +11,8 @@ namespace Glory::Editor
 		virtual ~SceneGraphWindow();
 
 		GLORY_EDITOR_API static void SetDrawObjectNameCallback(std::function<void(SceneObject*)> callback);
+		GLORY_EDITOR_API static void SetSearchCompareCallback(std::function<bool(std::string_view, SceneObject*)> callback);
+		GLORY_EDITOR_API static void SetSearchTooltipCallback(std::function<void()> callback);
 
 	private:
 		virtual void OnGUI() override;
