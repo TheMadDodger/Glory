@@ -49,6 +49,10 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<SimplePropertyDrawerTemplate<MeshMaterial>>();
 
 		SceneGraphWindow::SetDrawObjectNameCallback(EntitySceneObjectEditor::DrawObjectNodeName);
+		SceneGraphWindow::SetSearchCompareCallback(EntitySceneObjectEditor::SearchCompare);
+		SceneGraphWindow::SetSearchTooltipCallback([]() {
+			ImGui::SetTooltip("Search by object name,\nyou can also search by component by typing c:componenttype");
+		});
 
 		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
 		OBJECT_CREATE_MENU(Model, ModelRenderer);

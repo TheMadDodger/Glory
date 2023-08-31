@@ -2,6 +2,7 @@
 #include "AddComponentAction.h"
 #include "RemoveComponentAction.h"
 #include "EditorSceneManager.h"
+
 #include <imgui.h>
 #include <string>
 #include <SceneObjectNameAction.h>
@@ -11,8 +12,9 @@
 #include <EditorUI.h>
 #include <string_view>
 #include <ResourceType.h>
-
 #include <Components.h>
+#include <StringUtils.h>
+#include <Reflection.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -264,5 +266,39 @@ namespace Glory::Editor
 		const float availableWidth = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowPos().x;
 		ImGui::SameLine(availableWidth - compLabelsWidth);
 		ImGui::TextUnformatted(componentLabels.data());
+	}
+
+	bool EntitySceneObjectEditor::SearchCompare(std::string_view search, SceneObject* pObject)
+	{
+		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
+		Entity entity = pEntityObject->GetEntityHandle();
+		EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
+
+		if (search.size() > 2 && search[1] == ':')
+		{
+			const char searchType = search[0];
+			switch (searchType)
+			{
+			case 'C':
+			case 'c':
+			{
+				const std::string_view comp = search.substr(2);
+				for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
+				{
+					const uint32_t typeHash = pEntityView->ComponentTypeAt(i);
+					const TypeData* pType = Utils::Reflect::Reflect::GetTyeData(typeHash);
+					const std::string_view name{pType->TypeName()};
+					if (Utils::CaseInsensitiveSearch(name, comp) == std::string::npos) continue;
+					return true;
+				}
+				return false;
+				break;
+			}
+			default:
+				break;
+			}
+		}
+
+		return Utils::CaseInsensitiveSearch(pObject->Name(), search) != std::string::npos;
 	}
 }
