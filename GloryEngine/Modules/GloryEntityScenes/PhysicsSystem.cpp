@@ -272,8 +272,15 @@ namespace Glory
 
 	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, PhysicsBody& pComponent)
 	{
+		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
+
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
+		if (pShape->m_ShapeType == ShapeType::None)
+		{
+			Debug::LogWarning("PhysicsBody does not have a shape!");
+			return;
+		}
 
 		pComponent.m_CurrentLayerIndex = pRegistry->HasComponent<LayerComponent>(entity) ? pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex : 0;
 

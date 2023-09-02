@@ -11,6 +11,7 @@ namespace Glory
 {
 	void CharacterControllerSystem::OnStart(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, CharacterController& pComponent)
 	{
+		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics)
 		{
@@ -26,6 +27,13 @@ namespace Glory
 			return;
 		}
 
+		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
+		if (pShape->m_ShapeType == ShapeType::None)
+		{
+			Debug::LogWarning("CharacterController does not have a shape!");
+			return;
+		}
+
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		glm::quat rotation;
 		glm::vec3 translation;
@@ -34,12 +42,12 @@ namespace Glory
 		glm::vec4 perspective;
 		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
 
-		const UUID shapeID = pShapes->CreateShape(*pComponent.m_Shape.BaseShapePointer());
-		const ShapeData* pShape = pShapes->GetShape(shapeID);
+		const UUID shapeID = pShapes->CreateShape(*pShape);
+		const ShapeData* pShapeData = pShapes->GetShape(shapeID);
 
 		pComponent.m_CurrentLayerIndex = pRegistry->HasComponent<LayerComponent>(entity) ? pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex : 0;
 		pComponent.m_ShapeID = shapeID;
-		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_CurrentLayerIndex, translation, rotation, *pShape, pComponent.m_Friction);
+		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_CurrentLayerIndex, translation, rotation, *pShapeData, pComponent.m_Friction);
 		pComponent.m_BodyID = pCharacters->GetBodyID(pComponent.m_CharacterID);
 		PhysicsSystem::AddBody(pComponent.m_BodyID, pRegistry, entity);
 	}

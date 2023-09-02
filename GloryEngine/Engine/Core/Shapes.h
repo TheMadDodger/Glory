@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <Reflection.h>
 
-REFLECTABLE_ENUM_NS(Glory, ShapeType, Sphere, Box, Cylinder, Capsule, TaperedCapsule)
+REFLECTABLE_ENUM_NS(Glory, ShapeType, None, Sphere, Box, Cylinder, Capsule, TaperedCapsule)
 
 namespace Glory
 {
