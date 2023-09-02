@@ -1,0 +1,6 @@
+Editor:
+
+Scripting:
+
+Bugs:
+- Fixed crash when shape is set to none in a PhysicsBody or CharacterController

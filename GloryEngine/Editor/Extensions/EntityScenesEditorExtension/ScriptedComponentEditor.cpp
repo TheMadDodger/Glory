@@ -55,6 +55,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < scriptComponent.m_ScriptProperties.size(); i++)
 		{
 			const ScriptProperty* scriptProperty = &scriptComponent.m_ScriptProperties[i];
+			if (std::string_view{scriptProperty->m_Name}.empty()) continue;
 			changedScriptProp |= PropertyDrawer::DrawProperty(*scriptProperty, scriptComponent.m_ScriptData, 0);
 		}
 

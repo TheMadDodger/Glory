@@ -6,7 +6,7 @@ namespace Glory
 	struct ShapeProperty
 	{
 	public:
-		ShapeProperty() : m_ShapeDataBuffer("\0") {}
+		ShapeProperty() : m_ShapeType(ShapeType::None), m_ShapeDataBuffer("\0") {}
 
 		template<typename T>
 		T* ShapePointer()
