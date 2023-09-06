@@ -1,4 +1,8 @@
 Editor:
+- Added a searchbar to search for objects or components in your scene
+- Added component icons to scenegraph object nodes
+- Added a resource window where all imported resources can be inspected
+- Resource dropdowns now use the same thumbnails as the file browser
 
 Scripting:
 
