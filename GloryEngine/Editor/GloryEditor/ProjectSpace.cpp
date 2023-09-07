@@ -10,12 +10,14 @@
 #include <filesystem>
 #include <fstream>
 #include <AssetDatabase.h>
+#include <Dispatcher.h>
 
 namespace Glory::Editor
 {
 	ProjectSpace* ProjectSpace::m_pCurrentProject = nullptr;
 	std::mutex ProjectSpace::m_ProjectLock;
-	std::unordered_map<ProjectCallback, std::vector<std::function<void(ProjectSpace*)>>> ProjectSpace::m_ProjectCallbacks;
+
+	Dispatcher<ProjectSpace*> ProjectCallbacks[ProjectCallback::Count];
 
 	void ProjectSpace::OpenProject(const std::string& path)
 	{
@@ -120,9 +122,14 @@ namespace Glory::Editor
 		return m_SettingsPath;
 	}
 
-	void ProjectSpace::RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback)
+	UUID ProjectSpace::RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback)
 	{
-		m_ProjectCallbacks[callbackType].push_back(callback);
+		return ProjectCallbacks[callbackType].AddListener(callback);
+	}
+
+	void ProjectSpace::RemoveCallback(const ProjectCallback& callbackType, UUID& id)
+	{
+		ProjectCallbacks[callbackType].RemoveListener(id);
 	}
 
 	void ProjectSpace::SetAssetDirty(const char* key, bool dirty)
@@ -179,10 +186,7 @@ namespace Glory::Editor
 		Migrate(m_pCurrentProject);
 		m_ProjectName = m_ProjectFile["ProjectName"].AsString();
 
-		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnOpen].size(); i++)
-		{
-			m_ProjectCallbacks[ProjectCallback::OnOpen][i](this);
-		}
+		ProjectCallbacks[ProjectCallback::OnOpen].Dispatch(this);
 
 		lock.unlock();
 
@@ -200,10 +204,7 @@ namespace Glory::Editor
 
 	void ProjectSpace::Close()
 	{
-		for (size_t i = 0; i < m_ProjectCallbacks[ProjectCallback::OnClose].size(); i++)
-		{
-			m_ProjectCallbacks[ProjectCallback::OnClose][i](this);
-		}
+		ProjectCallbacks[ProjectCallback::OnClose].Dispatch(this);
 
 		TitleBar::SetText("Project", "No Project open");
 		m_DirtyKeys.clear();

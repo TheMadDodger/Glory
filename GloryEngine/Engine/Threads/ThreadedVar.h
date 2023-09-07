@@ -14,6 +14,21 @@ namespace Glory
 	};
 
 	template<typename _Ty>
+	struct ThreadedVar : public BaseThreadedVar
+	{
+	public:
+		void Do(std::function<void(_Ty* value)> callback)
+		{
+			m_Mutex.lock();
+			callback(&m_Value);
+			m_Mutex.unlock();
+		}
+
+	private:
+		_Ty m_Value;
+	};
+
+	template<typename _Ty>
 	struct ThreadedVector : public BaseThreadedVar
 	{
 	public:

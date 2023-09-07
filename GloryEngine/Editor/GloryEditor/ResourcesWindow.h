@@ -14,6 +14,7 @@ namespace Glory::Editor
     private:
         virtual void OnGUI() override;
         virtual void OnOpen() override;
+        virtual void OnClose() override;
 
         void RunFilter();
 
@@ -21,6 +22,9 @@ namespace Glory::Editor
         std::vector<UUID> m_SearchResultCache;
         std::vector<size_t> m_SearchResultIndexCache;
         static bool m_ForceFilter;
-        static bool m_SubscribedToEvents;
+
+        UUID m_ProjectOpenCallback;
+        UUID m_AssetRegisteredCallback;
+        UUID m_AssetDeletedCallback;
 	};
 }

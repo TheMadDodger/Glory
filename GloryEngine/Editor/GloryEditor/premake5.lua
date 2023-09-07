@@ -23,7 +23,7 @@ project "GloryEditor"
 		["Content/Editors"] = { "TextureDataEditor.*", "GloryEditor.*", "GloryEditorVersion.*", "FileDialog.*", "EditorSettings.*", "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
 		["Content/PropertyDrawers"] = { "SceneObjectPropertyDrawer.*", "StructPropertyDrawer.*", "EnumPropertyDrawer.*", "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*", "ShapePropertyDrawer.*" },
 		["Content/Tumbnails"] = { "ImageTumbnailGenerator.*", "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
-		["Editor"] = { "DND.*", "Configure.*", "QuitPopup.*", "TitleBar.*", "Shortcuts.*", "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "ProjectSpace.*", "Selection.*", "EditorCreateInfo.*", "Gizmos.*" },
+		["Editor"] = { "Dispatcher.h", "DND.*", "Configure.*", "QuitPopup.*", "TitleBar.*", "Shortcuts.*", "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "ProjectSpace.*", "Selection.*", "EditorCreateInfo.*", "Gizmos.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },

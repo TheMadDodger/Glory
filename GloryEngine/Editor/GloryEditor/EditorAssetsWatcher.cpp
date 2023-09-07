@@ -2,6 +2,7 @@
 #include "ProjectSpace.h"
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
+#include "Dispatcher.h"
 
 #include <Engine.h>
 
@@ -11,6 +12,8 @@ namespace Glory::Editor
 	{
 		std::filesystem::path filePath = dir;
 		filePath.append(filename);
+
+		AssetsFileWatchEvents().Dispatch(AssetsFileWatchEvent{ dir.data(), filename.data(), oldFilename.data(), action});
 
 		switch (action)
 		{
@@ -33,6 +36,12 @@ namespace Glory::Editor
 		//default:
 			//std::cout << "Should never happen!" << std::endl;
 		}
+	}
+
+	EditorAssetsWatcher::AssetsFileWatchDispatcher& EditorAssetsWatcher::AssetsFileWatchEvents()
+	{
+		static AssetsFileWatchDispatcher dispatcher;
+		return dispatcher;
 	}
 
 	EditorAssetsWatcher::EditorAssetsWatcher() : m_WatchID(0)

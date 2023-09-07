@@ -10,6 +10,8 @@
 #include <imgui.h>
 #include <EditorAssetCallbacks.h>
 #include <EditorAssetDatabase.h>
+#include <EditorAssetsWatcher.h>
+#include <Dispatcher.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -18,16 +20,13 @@ namespace Glory::Editor
     int FileBrowser::m_IconSize = 128;
     bool FileBrowser::m_SearchInCurrent = false;
 
+    UUID AssetsFileWatchListenerID = 0;
+
 	FileBrowser::FileBrowser() : EditorWindowTemplate("File Browser", 1600.0f, 600.0f),
         m_I(0), m_pRootItems(std::vector<FileBrowserItem*>())
 	{
 		m_Resizeable = true;
         m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
-
-        EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, [&](UUID uuid, const ResourceMeta& meta, Resource* pResource)
-        {
-            //RefreshContentBrowser();
-        });
 	}
 
 	FileBrowser::~FileBrowser()
@@ -87,6 +86,11 @@ namespace Glory::Editor
         {
             m_pRootItems[i]->RefreshSelected(m_pRootItems[i]);
         }
+
+        AssetsFileWatchListenerID = EditorAssetsWatcher::AssetsFileWatchEvents().AddListener([&](const AssetsFileWatchEvent& e) {
+            if (e.Action == efsw::Action::Modified) return;
+            RefreshContentBrowser();
+        });
     }
 
     void FileBrowser::OnClose()
@@ -98,6 +102,8 @@ namespace Glory::Editor
             delete m_pRootItems[i];
         }
         m_pRootItems.clear();
+
+        EditorAssetsWatcher::AssetsFileWatchEvents().RemoveListener(AssetsFileWatchListenerID);
     }
 
     void FileBrowser::BeginRename(const std::string& name, bool folder)

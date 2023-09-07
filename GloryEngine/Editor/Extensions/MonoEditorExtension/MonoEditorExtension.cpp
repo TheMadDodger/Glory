@@ -397,8 +397,10 @@ namespace Glory::Editor
 		m_pMonoScriptingModule->GetMonoManager()->Reload();
 	}
 
-	void MonoEditorExtension::AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*)
+	void MonoEditorExtension::AssetCallback(const AssetCallbackData& callback)
 	{
+		ResourceMeta meta;
+		EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta);
 		uint32_t typeHash = meta.Hash();
 		size_t scriptHash = ResourceType::GetHash<Script>();
 		ResourceType* pResourcerType = ResourceType::GetResourceType(typeHash);
@@ -408,7 +410,7 @@ namespace Glory::Editor
 		{
 			size_t subHash = ResourceType::GetSubTypeHash(pResourcerType, i);
 			if (scriptHash != subHash) continue;
-			AssetManager::ReloadAsset(uuid);
+			AssetManager::ReloadAsset(callback.m_UUID);
 			CompileProject(ProjectSpace::GetOpenProject());
 			return;
 		}
