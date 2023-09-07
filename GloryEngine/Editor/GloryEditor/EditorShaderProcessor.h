@@ -11,6 +11,8 @@
 
 namespace Glory::Editor
 {
+	struct AssetCallbackData;
+
 	class EditorShaderProcessor
 	{
 	public:
@@ -30,7 +32,7 @@ namespace Glory::Editor
 		void CompileForCurrentPlatform(EditorShaderData* pEditorShader, const std::string& path);
 		void ProcessReflection(EditorShaderData* pEditorShader);
 
-		static void AssetRegisteredCallback(UUID uuid, const ResourceMeta& meta, Resource* pResource);
+		static void AssetRegisteredCallback(const AssetCallbackData& callback);
 
 	private:
 		friend class EditorApplication;
@@ -44,5 +46,7 @@ namespace Glory::Editor
 		Thread* m_pThread;
 
 		std::map<ShaderType, shaderc_shader_kind> m_ShaderTypeToKind;
+
+		UUID m_AssetRegisteredCallback;
 	};
 }

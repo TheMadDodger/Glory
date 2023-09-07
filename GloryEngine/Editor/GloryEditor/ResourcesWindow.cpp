@@ -37,17 +37,12 @@ namespace Glory::Editor
 	FilterOption Filter = FilterOption::FO_All;
 
 	bool ResourcesWindow::m_ForceFilter = true;
-	bool ResourcesWindow::m_SubscribedToEvents = false;
 
-	ResourcesWindow::ResourcesWindow() : EditorWindowTemplate("Resources", 600.0f, 600.0f)
+	ResourcesWindow::ResourcesWindow() : EditorWindowTemplate("Resources", 600.0f, 600.0f),
+		m_ProjectOpenCallback(0),
+		m_AssetRegisteredCallback(0),
+		m_AssetDeletedCallback(0)
 	{
-		if (m_SubscribedToEvents) return;
-		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace*) { m_ForceFilter = true; });
-		ResourceTypes.clear();
-		ResourceType::GetAllResourceTypesThatHaveSubType(ResourceType::GetHash<Resource>(), ResourceTypes);
-
-		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, [&](UUID, const ResourceMeta&, Resource*) { m_ForceFilter = true; });
-		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetDeleted, [&](UUID, const ResourceMeta&, Resource*) { m_ForceFilter = true; });
 	}
 
 	ResourcesWindow::~ResourcesWindow()
@@ -238,7 +233,24 @@ namespace Glory::Editor
 	void ResourcesWindow::OnOpen()
 	{
 		m_ForceFilter = true;
+
+		m_ProjectOpenCallback = ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace*) { m_ForceFilter = true; });
+		ResourceTypes.clear();
+		ResourceType::GetAllResourceTypesThatHaveSubType(ResourceType::GetHash<Resource>(), ResourceTypes);
+
+		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered,
+			[&](const AssetCallbackData&) { m_ForceFilter = true; });
+		m_AssetDeletedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetDeleted,
+			[&](const AssetCallbackData&) { m_ForceFilter = true; });
 	}
+
+	void ResourcesWindow::OnClose()
+	{
+		ProjectSpace::RemoveCallback(ProjectCallback::OnOpen, m_ProjectOpenCallback);
+		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
+		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetDeleted, m_AssetDeletedCallback);
+	}
+
 	void ResourcesWindow::RunFilter()
 	{
 		m_SearchResultCache.clear();

@@ -700,7 +700,6 @@ namespace Glory::Editor
 	void EditorAssetDatabase::Initialize()
 	{
 		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
-		EditorAssetCallbacks::Initialize();
 
 		YAML::Node m_LastSavedNode;
 		Debug::LogInfo("Initialized EditorAssetDatabase");
@@ -713,7 +712,6 @@ namespace Glory::Editor
 		m_pImportPool = nullptr;
 		m_AsyncImportCallback = NULL;
 
-		EditorAssetCallbacks::Cleanup();
 		m_PathToUUIDCache.Clear();
 	}
 

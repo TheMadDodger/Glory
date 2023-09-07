@@ -13,19 +13,25 @@ namespace Glory::Editor
 	{
 		OnOpen,
 		OnClose,
+
+		Count
 	};
+
+	template<typename Arg>
+	struct Dispatcher;
 
 	class ProjectSpace
 	{
 	public:
-		static GLORY_EDITOR_API void OpenProject(const std::string& path);
-		static GLORY_EDITOR_API void CloseProject();
-		static GLORY_EDITOR_API ProjectSpace* GetOpenProject();
-		static GLORY_EDITOR_API bool ProjectExists(const std::string& path);
-		static GLORY_EDITOR_API bool ProjectExists(const std::string& path, const std::string& name);
-		static GLORY_EDITOR_API std::string NewProject(const std::string& path, const std::string& name);
+		GLORY_EDITOR_API static void OpenProject(const std::string& path);
+		GLORY_EDITOR_API static void CloseProject();
+		GLORY_EDITOR_API static ProjectSpace* GetOpenProject();
+		GLORY_EDITOR_API static bool ProjectExists(const std::string& path);
+		GLORY_EDITOR_API static bool ProjectExists(const std::string& path, const std::string& name);
+		GLORY_EDITOR_API static std::string NewProject(const std::string& path, const std::string& name);
+		GLORY_EDITOR_API static void Save();
+
 		GLORY_EDITOR_API void CreateFolder(const std::string& name);
-		static GLORY_EDITOR_API void Save();
 		GLORY_EDITOR_API void SaveProject();
 
 		GLORY_EDITOR_API const std::string& Name() const;
@@ -36,9 +42,10 @@ namespace Glory::Editor
 		GLORY_EDITOR_API const std::string& LibraryPath() const;
 		GLORY_EDITOR_API const std::string& SettingsPath() const;
 
-		static GLORY_EDITOR_API void RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback);
-		static GLORY_EDITOR_API void SetAssetDirty(const char* key, bool dirty = true);
-		static GLORY_EDITOR_API bool HasUnsavedChanges();
+		GLORY_EDITOR_API static UUID RegisterCallback(const ProjectCallback& callbackType, std::function<void(ProjectSpace*)> callback);
+		GLORY_EDITOR_API static void RemoveCallback(const ProjectCallback& callbackType, UUID& id);
+		GLORY_EDITOR_API static void SetAssetDirty(const char* key, bool dirty = true);
+		GLORY_EDITOR_API static bool HasUnsavedChanges();
 
 		JSONFileRef& ProjectFile();
 
@@ -51,7 +58,6 @@ namespace Glory::Editor
 
 	private:
 		static ProjectSpace* m_pCurrentProject;
-		static std::unordered_map<ProjectCallback, std::vector<std::function<void(ProjectSpace*)>>> m_ProjectCallbacks;
 		static std::mutex m_ProjectLock;
 		std::string m_ProjectFilePath;
 		std::string m_ProjectRootPath;

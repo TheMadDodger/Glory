@@ -1,5 +1,6 @@
 #include "EditorShaderProcessor.h"
 #include "ProjectSpace.h"
+
 #include <Debug.h>
 #include <fstream>
 #include <ShaderManager.h>
@@ -8,6 +9,7 @@
 #include <FileLoaderModule.h>
 #include <EditorAssetCallbacks.h>
 #include <Engine.h>
+#include <EditorAssetDatabase.h>
 
 namespace Glory::Editor
 {
@@ -73,7 +75,7 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
-	EditorShaderProcessor::EditorShaderProcessor() : m_pThread(nullptr)
+	EditorShaderProcessor::EditorShaderProcessor() : m_pThread(nullptr), m_AssetRegisteredCallback(0)
 	{
 		m_ShaderTypeToKind = {
 			{ ShaderType::ST_Compute, shaderc_shader_kind::shaderc_compute_shader },
@@ -99,7 +101,7 @@ namespace Glory::Editor
 			return cachePath;
 		});
 
-		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, AssetRegisteredCallback);
+		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, AssetRegisteredCallback);
 
 		//ShaderManager::OverrideMissingShaderHandlerFunc([&](UUID uuid, std::function<void(FileData*)> callback)
 		//{
@@ -117,6 +119,8 @@ namespace Glory::Editor
 
 	void EditorShaderProcessor::Stop()
 	{
+		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
+
 		std::unique_lock<std::mutex> lock(m_QueueLock);
 		m_Exit = true;
 		m_QueueCondition.notify_one();
@@ -265,12 +269,14 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorShaderProcessor::AssetRegisteredCallback(UUID uuid, const ResourceMeta& meta, Resource* pResource)
+	void EditorShaderProcessor::AssetRegisteredCallback(const AssetCallbackData& callback)
 	{
-		uint32_t typeHash = meta.Hash();
+		ResourceMeta meta;
+		EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta);
+		const uint32_t typeHash = meta.Hash();
 		size_t shaderSourceDataHash = ResourceType::GetHash<ShaderSourceData>();
 		if (typeHash != shaderSourceDataHash) return;
-		AssetManager::GetAsset(uuid, [](Resource* pLoadedResource)
+		AssetManager::GetAsset(callback.m_UUID, [](Resource* pLoadedResource)
 		{
 			if (!pLoadedResource) return;
 			GetShaderSource((ShaderSourceData*)pLoadedResource);

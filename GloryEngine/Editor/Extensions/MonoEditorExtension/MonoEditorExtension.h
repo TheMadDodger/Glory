@@ -16,6 +16,8 @@ namespace Glory
 
 namespace Glory::Editor
 {
+    struct AssetCallbackData;
+
     class MonoEditorExtension : public BaseEditorExtension, public IPlayModeHandler
     {
     public:
@@ -53,7 +55,7 @@ namespace Glory::Editor
         static void CompileProject(ProjectSpace* pProject);
         static void ReloadAssembly(ProjectSpace* pProject);
 
-        static void AssetCallback(UUID uuid, const ResourceMeta& meta, Resource*);
+        static void AssetCallback(const AssetCallbackData& callback);
 
         void Preferences();
 

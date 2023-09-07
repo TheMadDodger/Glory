@@ -1,46 +1,39 @@
 #include "EditorAssetCallbacks.h"
 #include "GloryContext.h"
 #include "EditorAssetDatabase.h"
+#include "Dispatcher.h"
 
 namespace Glory::Editor
 {
-	ThreadedVector<std::vector<ASSET_CALLBACK>> EditorAssetCallbacks::m_RegisteredCallbacks;
-	ThreadedVector<EditorAssetCallbacks::EnqueuedCallback> EditorAssetCallbacks::m_EnqueuedCallbacks;
+	ThreadedVar<Dispatcher<AssetCallbackData>> AssetCallbacks[(size_t)AssetCallbackType::CT_MAX];
 
-	void EditorAssetCallbacks::RegisterCallback(const AssetCallbackType& type, ASSET_CALLBACK callback)
+	ThreadedVector<AssetCallbackData> EditorAssetCallbacks::m_EnqueuedCallbacks;
+
+	UUID EditorAssetCallbacks::RegisterCallback(const AssetCallbackType& type, std::function<void(const AssetCallbackData&)> callback)
 	{
-		m_RegisteredCallbacks.Do((size_t)type, [&](std::vector<ASSET_CALLBACK>* callbacks) { callbacks->push_back(callback); });
+		UUID uuid;
+		AssetCallbacks[(size_t)type].Do([&](Dispatcher<AssetCallbackData>* dispatcher) { uuid = dispatcher->AddListener(callback); });
+		return uuid;
 	}
 
-	void EditorAssetCallbacks::Initialize()
+	void EditorAssetCallbacks::RemoveCallback(const AssetCallbackType& type, UUID& id)
 	{
-		for (size_t i = 0; i < (size_t)AssetCallbackType::CT_MAX; i++)
-		{
-			m_RegisteredCallbacks.push_back(std::vector<ASSET_CALLBACK>());
-		}
-	}
-
-	void EditorAssetCallbacks::Cleanup()
-	{
-		m_RegisteredCallbacks.Clear();
+		AssetCallbacks[(size_t)type].Do([&](Dispatcher<AssetCallbackData>* dispatcher) { dispatcher->RemoveListener(id); });
 	}
 
 	void EditorAssetCallbacks::TriggerCallback(const AssetCallbackType& type, UUID uuid, Resource* pResource)
 	{
 		ResourceMeta meta;
 		if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-		m_RegisteredCallbacks.Do((size_t)type, [&](const std::vector<ASSET_CALLBACK>& callbacks)
+		AssetCallbacks[(size_t)type].Do([&](Dispatcher<AssetCallbackData>* dispatcher)
 		{
-			for (size_t i = 0; i < callbacks.size(); i++)
-			{
-				callbacks[i](uuid, meta, pResource);
-			}
+			dispatcher->Dispatch(AssetCallbackData{ type, uuid, pResource });
 		});
 	}
 
 	void EditorAssetCallbacks::RunCallbacks()
 	{
-		m_EnqueuedCallbacks.ForEachClear([&](const EnqueuedCallback& callback)
+		m_EnqueuedCallbacks.ForEachClear([&](const AssetCallbackData& callback)
 		{
 			TriggerCallback(callback.m_Type, callback.m_UUID, callback.m_pResource);
 		});
@@ -48,7 +41,7 @@ namespace Glory::Editor
 
 	void EditorAssetCallbacks::EnqueueCallback(const AssetCallbackType& type, UUID uuid, Resource* pResource)
 	{
-		EnqueuedCallback callback = EnqueuedCallback();
+		AssetCallbackData callback = AssetCallbackData();
 		callback.m_Type = type;
 		callback.m_UUID = uuid;
 		callback.m_pResource = pResource;

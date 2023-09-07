@@ -1,9 +1,23 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <filesystem>
 #include <efsw/efsw.hpp>
+#include <string_view>
 
 namespace Glory::Editor
 {
+	template<typename Arg>
+	struct Dispatcher;
+
+	struct AssetsFileWatchEvent
+	{
+		const std::string_view Directory;
+		const std::string_view Filename;
+		const std::string_view OldFilename;
+		const efsw::Action Action;
+	};
+
 	class EditorAssetsWatcher : public efsw::FileWatchListener
 	{
 	public:
@@ -12,6 +26,10 @@ namespace Glory::Editor
 
 		void handleFileAction(efsw::WatchID watchid, const std::string& dir,
 			const std::string& filename, efsw::Action action, std::string oldFilename) override;
+
+		using AssetsFileWatchDispatcher = Dispatcher<AssetsFileWatchEvent>;
+
+		GLORY_EDITOR_API static AssetsFileWatchDispatcher& AssetsFileWatchEvents();
 
 	private:
 		void ProcessDirectory(const std::string& path, bool recursive = true, const std::string& folderFilter = "");
