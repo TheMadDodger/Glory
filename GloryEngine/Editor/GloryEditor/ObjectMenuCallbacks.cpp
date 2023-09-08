@@ -440,7 +440,7 @@ namespace Glory::Editor
 	{
 		Selection::SetActiveObject(nullptr);
 		std::filesystem::path file = FileBrowserItem::GetHighlightedPath();
-		UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
+		const UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
 		Resource* pLoadedResource = AssetManager::FindResource(uuid);
 		if (pLoadedResource) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
@@ -455,8 +455,6 @@ namespace Glory::Editor
 		if (!std::filesystem::remove_all(path)) return;
 
 		EditorAssetDatabase::DeleteAssets(relativePath.string());
-		FileBrowserItem::GetSelectedFolder()->Refresh();
-		FileBrowserItem::GetSelectedFolder()->SortChildren();
 		PopupManager::CloseCurrentPopup();
 	}
 
@@ -467,7 +465,5 @@ namespace Glory::Editor
 		if (!std::filesystem::remove(path)) return;
 
 		EditorAssetDatabase::DeleteAsset(relativePath.string());
-		FileBrowserItem::GetSelectedFolder()->Refresh();
-		FileBrowserItem::GetSelectedFolder()->SortChildren();
 	}
 }
