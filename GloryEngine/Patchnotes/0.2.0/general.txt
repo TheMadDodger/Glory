@@ -3,8 +3,11 @@ Editor:
 - Added component icons to scenegraph object nodes
 - Added a resource window where all imported resources can be inspected
 - Resource dropdowns now use the same thumbnails as the file browser
+- File browser will now auto refresh
 
 Scripting:
 
 Bugs:
 - Fixed crash when shape is set to none in a PhysicsBody or CharacterController
+- Fixed crash caused by assets filewatch
+- Fixed shortcuts activating when trying to type in a text field
