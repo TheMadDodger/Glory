@@ -128,6 +128,10 @@ namespace Glory::Editor
 
 	void Shortcuts::Update()
 	{
+		/* If any ImGui item is active we want to ignore all shortcuts */
+		if (ImGui::IsAnyItemActive())
+			return;
+
 		ImGuiIO& io = ImGui::GetIO();
 
 		for (auto itor = m_Shortcuts.begin(); itor != m_Shortcuts.end(); ++itor)
