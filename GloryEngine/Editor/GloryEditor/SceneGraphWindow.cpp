@@ -16,8 +16,9 @@
 namespace Glory::Editor
 {
 	DND DragAndDrop{ { ResourceType::GetHash<SceneObject>() } };
-	std::function<void(SceneObject*)> DrawObjectNameCallback = [](SceneObject* pObject){
-		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+	std::function<void(SceneObject*, bool)> DrawObjectNameCallback = [](SceneObject* pObject, bool isPrefab) {
+		ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
+			" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
 	};
 
 	std::function<bool(std::string_view, SceneObject*)> SearchCompareCallback = [](std::string_view search, SceneObject* pObject) {
@@ -36,7 +37,7 @@ namespace Glory::Editor
 	{
 	}
 
-	void SceneGraphWindow::SetDrawObjectNameCallback(std::function<void(SceneObject*)> callback)
+	void SceneGraphWindow::SetDrawObjectNameCallback(std::function<void(SceneObject*, bool)> callback)
 	{
 		DrawObjectNameCallback = callback;
 	}
@@ -295,9 +296,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SameLine();
-		DrawObjectNameCallback(pObject);
-		//ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{1.0f, 1.0f, 1.0f, 1.0f},
-			//" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+		DrawObjectNameCallback(pObject, isPrefab);
 
 		ImGui::PopStyleVar();
 

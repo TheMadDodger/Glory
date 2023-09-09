@@ -204,7 +204,7 @@ namespace Glory
 				pComponentAddress = pRegistry->GetComponentAddress(entity, compUUID);
 			}
 
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(typeHash);
+			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(typeHash);
 			YAML::Node originalProperties = nextObject["Properties"];
 			if (typeHash != scriptedTypeHash)
 			{
@@ -214,29 +214,29 @@ namespace Glory
 			{
 				YAML::Node finalProperties = YAML::Node(YAML::NodeType::Map);
 
-				NodeRef originalPropertiesRef = originalProperties;
-				NodeRef finalPropertiesRef = finalProperties;
+				Utils::NodeRef originalPropertiesRef = originalProperties;
+				Utils::NodeRef finalPropertiesRef = finalProperties;
 
-				NodeValueRef props = originalPropertiesRef.ValueRef();
-				NodeValueRef finalProps = finalPropertiesRef.ValueRef();
+				Utils::NodeValueRef props = originalPropertiesRef.ValueRef();
+				Utils::NodeValueRef finalProps = finalPropertiesRef.ValueRef();
 
 				finalPropertiesRef["m_Script"].Set(originalPropertiesRef["m_Script"].As<uint64_t>());
 				YAML::Node scriptData = originalProperties["ScriptData"];
 				for (YAML::const_iterator itor = scriptData.begin(); itor != scriptData.end(); ++itor)
 				{
 					const std::string name = itor->first.as<std::string>();
-					NodeValueRef prop = props["ScriptData"][name];
+					Utils::NodeValueRef prop = props["ScriptData"][name];
 					if (!prop.IsMap())
 					{
 						finalProps[name].Set(prop.Node());
 						continue;
 					}
 
-					NodeValueRef originalSceneUUD = prop["SceneUUID"];
-					NodeValueRef originalObjectUUD = prop["ObjectUUID"];
+					Utils::NodeValueRef originalSceneUUD = prop["SceneUUID"];
+					Utils::NodeValueRef originalObjectUUD = prop["ObjectUUID"];
 
-					NodeValueRef sceneUUID = finalProps["ScriptData"][name]["SceneUUID"];
-					NodeValueRef objectUUID = finalProps["ScriptData"][name]["ObjectUUID"];
+					Utils::NodeValueRef sceneUUID = finalProps["ScriptData"][name]["SceneUUID"];
+					Utils::NodeValueRef objectUUID = finalProps["ScriptData"][name]["ObjectUUID"];
 
 					if (!originalSceneUUD.Exists() || !originalObjectUUD.Exists())
 					{

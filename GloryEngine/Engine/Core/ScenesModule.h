@@ -32,8 +32,6 @@ namespace Glory
 
         virtual SceneObject* GetSceneObjectFromObjectID(uint64_t objectID) = 0;
 
-        virtual LoaderModule* CreatePrefabLoader() { return nullptr; }
-
     protected:
         virtual void Initialize() = 0;
         virtual void Cleanup() override;

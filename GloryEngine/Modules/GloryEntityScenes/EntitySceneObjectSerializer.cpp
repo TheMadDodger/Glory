@@ -3,6 +3,7 @@
 #include "EntitySceneScenesModule.h"
 #include "Components.h"
 #include "EntityPrefabData.h"
+#include "AssetManager.h"
 
 #include <PropertySerializer.h>
 #include <NodeRef.h>
@@ -65,17 +66,17 @@ namespace Glory
 		out << YAML::Key << (uint64_t)node.OriginalUUID();
 		out << YAML::Value << (uint64_t)pObject->GetUUID();
 
-		GloryECS::EntityRegistry* pRegistry = pScene->GetRegistry();
-		GloryECS::EntityView* pEntityView = pRegistry->GetEntityView(entity.GetEntityID());
+		Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity.GetEntityID());
 		YAML::Node components = YAML::Load(node.SerializedComponents());
-		NodeRef componentsRef = components;
-		NodeValueRef componentsValue = componentsRef.ValueRef();
+		Utils::NodeRef componentsRef = components;
+		Utils::NodeValueRef componentsValue = componentsRef.ValueRef();
 
 		assert(componentsValue.Size() == pEntityView->ComponentCount());
 
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
-			NodeValueRef component = componentsValue[i];
+			Utils::NodeValueRef component = componentsValue[i];
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
 			const UUID originalUUID = component["UUID"].As<uint64_t>();
 			out << YAML::Key << originalUUID;
@@ -160,15 +161,15 @@ namespace Glory
 		YAML_READ(object, node, Active, active, bool);
 		YAML_READ(object, node, ParentUUID, parentUuid, uint64_t);
 
-		NodeRef nodeRef{ object };
-		NodeValueRef prefabIDRef = nodeRef["PrefabID"];
+		Utils::NodeRef nodeRef{ object };
+		Utils::NodeValueRef prefabIDRef = nodeRef["PrefabID"];
 		if (!(flags & Flags::IgnorePrefabs) && prefabIDRef.Exists())
 		{
 			const UUID prefabID = prefabIDRef.As<uint64_t>();
 			EntityPrefabData* pPrefab = AssetManager::GetAssetImmediate<EntityPrefabData>(prefabID);
 			if (pPrefab)
 			{
-				NodeValueRef idsRemapValue = nodeRef["IDRemap"];
+				Utils::NodeValueRef idsRemapValue = nodeRef["IDRemap"];
 				/* TODO: When GenerateNewUUIDs flag is set generate a new map of UUID remappings */
 				SceneObject* pInstantiatedPrefab = nullptr;
 				if (flags & Serializer::Flags::GenerateNewUUIDs)

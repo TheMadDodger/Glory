@@ -247,7 +247,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	void EntitySceneObjectEditor::DrawObjectNodeName(SceneObject* pObject)
+	void EntitySceneObjectEditor::DrawObjectNodeName(SceneObject* pObject, bool isPrefab)
 	{
 		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
 		Entity entity = pEntityObject->GetEntityHandle();
@@ -260,7 +260,8 @@ namespace Glory::Editor
 		}
 
 		const std::string componentLabels = stream.str();
-		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+		ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
+			" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
 
 		const float compLabelsWidth = ImGui::CalcTextSize(componentLabels.data()).x;
 		const float availableWidth = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowPos().x;

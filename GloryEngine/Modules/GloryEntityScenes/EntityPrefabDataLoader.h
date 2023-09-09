@@ -26,6 +26,6 @@ namespace Glory
         virtual void SaveResource(const std::string& path, EntityPrefabData* pResource) override;
 
         void WriteChild(YAML::Emitter& out, const PrefabNode& parent);
-        void ReadChild(EntityPrefabData* pPrefab, NodeValueRef nodeValue, PrefabNode& node);
+        void ReadChild(EntityPrefabData* pPrefab, Utils::NodeValueRef nodeValue, PrefabNode& node);
 	};
 }

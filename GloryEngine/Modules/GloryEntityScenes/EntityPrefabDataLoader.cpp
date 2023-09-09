@@ -9,20 +9,20 @@ namespace Glory
     {
         EntityPrefabData* pPrefab = new EntityPrefabData();
 
-        YAMLFileRef yamlFile{ path };
+        Utils::YAMLFileRef yamlFile{ path };
         const UUID originalUUID = yamlFile["OriginalUUID"].As<uint64_t>();
         const UUID transformUUID = yamlFile["TransformUUID"].As<uint64_t>();
         const bool activeSelf = yamlFile["ActiveSelf"].As<bool>();
         const std::string name = yamlFile["Name"].As<std::string>();
-        NodeValueRef components = yamlFile["Components"];
+        Utils::NodeValueRef components = yamlFile["Components"];
         YAML::Emitter componentsWriter;
         componentsWriter << components.Node();
         PrefabNode rootNode = PrefabNode::Create(pPrefab, originalUUID, transformUUID, activeSelf, name, componentsWriter.c_str());
 
-        NodeValueRef children = yamlFile["Children"];
+        Utils::NodeValueRef children = yamlFile["Children"];
         for (size_t i = 0; i < children.Size(); ++i)
         {
-            NodeValueRef child = children[i];
+            Utils::NodeValueRef child = children[i];
             ReadChild(pPrefab, child, rootNode);
         }
 
@@ -75,21 +75,21 @@ namespace Glory
         out << YAML::EndSeq;
     }
 
-    void EntityPrefabDataLoader::ReadChild(EntityPrefabData* pPrefab, NodeValueRef yamlNode, PrefabNode& parent)
+    void EntityPrefabDataLoader::ReadChild(EntityPrefabData* pPrefab, Utils::NodeValueRef yamlNode, PrefabNode& parent)
     {
         const UUID originalUUID = yamlNode["OriginalUUID"].As<uint64_t>();
         const UUID transformUUID = yamlNode["TransformUUID"].As<uint64_t>();
         const bool activeSelf = yamlNode["ActiveSelf"].As<bool>();
         const std::string name = yamlNode["Name"].As<std::string>();
-        NodeValueRef components = yamlNode["Components"];
+        Utils::NodeValueRef components = yamlNode["Components"];
         YAML::Emitter componentsWriter;
         componentsWriter << components.Node();
         PrefabNode& childNode = parent.AddChild(pPrefab, originalUUID, transformUUID, activeSelf, name, componentsWriter.c_str());
 
-        NodeValueRef children = yamlNode["Children"];
+        Utils::NodeValueRef children = yamlNode["Children"];
         for (size_t i = 0; i < children.Size(); ++i)
         {
-            NodeValueRef child = children[i];
+            Utils::NodeValueRef child = children[i];
             ReadChild(pPrefab, child, childNode);
         }
     }

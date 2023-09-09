@@ -138,10 +138,10 @@ namespace Glory
 	{
 		m_pPrefab->m_OriginalUUIDs.push_back(m_OriginalUUID);
 		YAML::Node components = YAML::Load(m_SerializedComponents);
-		NodeRef componentsRef = components;
+		Utils::NodeRef componentsRef = components;
 		for (size_t i = 0; i < components.size(); ++i)
 		{
-			NodeValueRef component = componentsRef.ValueRef()[i];
+			Utils::NodeValueRef component = componentsRef.ValueRef()[i];
 			const UUID uuid = component["UUID"].As<uint64_t>();
 			m_pPrefab->m_OriginalUUIDs.push_back(uuid);
 		}
@@ -161,7 +161,7 @@ namespace Glory
 		m_pPrefab->m_OriginalUUIDs.push_back(m_OriginalUUID);
 
 		Entity entity = pSceneObject->GetEntityHandle();
-		GloryECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
+		Utils::ECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
 		EntityID entityID = entity.GetEntityID();
 		EntityView* pEntityView = pRegistry->GetEntityView(entityID);
 		YAML::Emitter out;
@@ -173,8 +173,8 @@ namespace Glory
 			if (i == 0) m_TransformUUID = compUUID;
 			m_pPrefab->m_OriginalUUIDs.push_back(compUUID);
 
-			const GloryReflect::TypeData* pTypeData = GloryReflect::Reflect::GetTyeData(type);
-			GloryECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(type);
+			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(type);
+			Utils::ECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(type);
 			void* compAddress = pTypeView->GetComponentAddress(entityID);
 			EntitySceneObjectSerializer::SerializeComponent(entityID, pRegistry, compUUID, compAddress, pTypeData, out);
 		}
