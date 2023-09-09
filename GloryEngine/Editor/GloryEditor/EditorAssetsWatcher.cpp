@@ -8,14 +8,50 @@
 
 namespace Glory::Editor
 {
+	UUID EditorAssetsWatcher::m_InternalWatchHandler = 0;
+
 	void EditorAssetsWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
 	{
-		std::filesystem::path filePath = dir;
-		filePath.append(filename);
+		AssetsFileWatchEvents().Enqueue(AssetsFileWatchEvent{ dir.data(), filename.data(), oldFilename.data(), action });
+	}
 
-		AssetsFileWatchEvents().Dispatch(AssetsFileWatchEvent{ dir.data(), filename.data(), oldFilename.data(), action});
+	EditorAssetsWatcher::AssetsFileWatchDispatcher& EditorAssetsWatcher::AssetsFileWatchEvents()
+	{
+		static AssetsFileWatchDispatcher dispatcher;
+		return dispatcher;
+	}
 
-		switch (action)
+	void EditorAssetsWatcher::RunCallbacks()
+	{
+		AssetsFileWatchEvents().Flush();
+	}
+
+	EditorAssetsWatcher::EditorAssetsWatcher() : m_WatchID(0)
+	{
+		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace* pProject) {
+			std::filesystem::path assetPath = pProject->RootPath();
+			assetPath.append("Assets");
+			m_WatchID = EditorApplication::GetInstance()->FileWatch()->addWatch(assetPath.string(), this, true);
+			});
+
+		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, [&](ProjectSpace* pProject) {
+			EditorApplication::GetInstance()->FileWatch()->removeWatch(m_WatchID);
+			});
+
+		m_InternalWatchHandler = AssetsFileWatchEvents().AddListener(HandleFileWatchInternal);
+	}
+
+	EditorAssetsWatcher::~EditorAssetsWatcher()
+	{
+		AssetsFileWatchEvents().RemoveListener(m_InternalWatchHandler);
+	}
+
+	void EditorAssetsWatcher::HandleFileWatchInternal(const AssetsFileWatchEvent& e)
+	{
+		std::filesystem::path filePath = e.Directory;
+		filePath.append(e.Filename);
+
+		switch (e.Action)
 		{
 		case efsw::Actions::Add:
 			/* TODO: Process externally added assets */
@@ -33,31 +69,10 @@ namespace Glory::Editor
 			/* TODO: Process externally moved assets */
 			//std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Moved from (" << oldFilename << ")" << std::endl;
 			break;
-		//default:
-			//std::cout << "Should never happen!" << std::endl;
+			//default:
+				//std::cout << "Should never happen!" << std::endl;
 		}
 	}
-
-	EditorAssetsWatcher::AssetsFileWatchDispatcher& EditorAssetsWatcher::AssetsFileWatchEvents()
-	{
-		static AssetsFileWatchDispatcher dispatcher;
-		return dispatcher;
-	}
-
-	EditorAssetsWatcher::EditorAssetsWatcher() : m_WatchID(0)
-	{
-		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace* pProject) {
-			std::filesystem::path assetPath = pProject->RootPath();
-			assetPath.append("Assets");
-			m_WatchID = EditorApplication::GetInstance()->FileWatch()->addWatch(assetPath.string(), this, true);
-		});
-
-		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, [&](ProjectSpace* pProject) {
-			EditorApplication::GetInstance()->FileWatch()->removeWatch(m_WatchID);
-		});
-	}
-
-	EditorAssetsWatcher::~EditorAssetsWatcher() {}
 
 	void EditorAssetsWatcher::ProcessDirectory(const std::string& path, bool recursive, const std::string& folderFilter)
 	{

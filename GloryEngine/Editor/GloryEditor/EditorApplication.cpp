@@ -118,6 +118,11 @@ namespace Glory::Editor
 		{
 			while (m_Running)
 			{
+				/* Ensure filewatch is still watching */
+				m_pFileWatcher->watch();
+
+				EditorAssetsWatcher::RunCallbacks();
+
 				// Start a frame
 				game.GetEngine()->GameThreadFrameStart();
 
@@ -140,6 +145,8 @@ namespace Glory::Editor
 		{
 			/* Ensure filewatch is still watching */
 			m_pFileWatcher->watch();
+
+			EditorAssetsWatcher::RunCallbacks();
 
 			/* We must wait for graphics to initialize */
 			if (!game.GetEngine()->GetGraphicsThread()->IsInitialized()) continue;

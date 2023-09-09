@@ -89,7 +89,9 @@ namespace Glory::Editor
 
         AssetsFileWatchListenerID = EditorAssetsWatcher::AssetsFileWatchEvents().AddListener([&](const AssetsFileWatchEvent& e) {
             if (e.Action == efsw::Action::Modified) return;
-            RefreshContentBrowser();
+            FileBrowserItem::GetSelectedFolder()->Refresh();
+            FileBrowserItem::GetSelectedFolder()->SortChildren();
+            RefreshSearch();
         });
     }
 
