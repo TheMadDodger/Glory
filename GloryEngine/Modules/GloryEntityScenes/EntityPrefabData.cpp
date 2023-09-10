@@ -22,6 +22,7 @@ namespace Glory
 	EntityPrefabData* EntityPrefabData::CreateFromSceneObject(EntitySceneObject* pSceneObject)
 	{
 		EntityPrefabData* pPrefab = new EntityPrefabData();
+		pPrefab->SetName(pSceneObject->Name());
 		pPrefab->m_RootNode = pSceneObject;
 		return pPrefab;
 	}
