@@ -13,6 +13,7 @@ extern "C" GLORY_EDITOR_EXTENSION_API void SetContext(Glory::GloryContext * pCon
 namespace Glory
 {
     class SceneObject;
+    class EntitySceneObject;
 }
 
 namespace Glory::Editor
@@ -32,7 +33,8 @@ namespace Glory::Editor
         virtual void HandleStop(Module* pModule) override;
         virtual void HandleUpdate(Module* pModule) override;
 
-        static void ConvertToPrefab(Object* pObject, const ObjectMenuType&);
+        static void ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&);
+        static void ConvertToPrefab(EntitySceneObject* pObject, std::filesystem::path path);
 
     private:
         static const std::vector<std::type_index> m_ComponentsToUpdateInEditor;

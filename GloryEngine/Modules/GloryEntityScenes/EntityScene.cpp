@@ -6,6 +6,8 @@
 #include "EntitySceneObject.h"
 #include "EntityPrefabData.h"
 #include "PropertySerializer.h"
+#include "UUIDRemapper.h"
+#include "DistributedRandom.h"
 
 #include <EntityView.h>
 #include <TypeData.h>
@@ -52,15 +54,37 @@ namespace Glory
 		return &m_Registry;
 	}
 
-	GLORY_API bool EntityScene::IsValid() const
+	bool EntityScene::IsValid() const
 	{
 		return m_Valid;
 	}
 
-	SceneObject* EntityScene::InstantiatePrefab(const std::map<UUID, UUID>& idRemap, EntityPrefabData* pPrefab)
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab)
+	{
+		EntityPrefabData* pEntityPrefab = (EntityPrefabData*)pPrefab;
+
+		UUID uuid = UUID();
+		const uint32_t first32Bits = uint32_t((uuid << 32) >> 32);
+		const uint32_t second32Bits = uint32_t(uuid >> 32);
+		const uint32_t seed = first32Bits & second32Bits;
+		UUIDRemapper remapper{ seed };
+		remapper.EnforceRemap(pEntityPrefab->RootNode().OriginalUUID(), uuid);
+		return InstantiatePrefab(pParent, (EntityPrefabData*)pPrefab, RandomDevice::Seed());
+	}
+
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, uint32_t remapSeed)
+	{
+		UUIDRemapper remapper{ remapSeed };
+		const PrefabNode& rootNode = pPrefab->RootNode();
+		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode((EntitySceneObject*)pParent, rootNode, remapper);
+		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
+		return pInstantiatedPrefab;
+	}
+
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, UUIDRemapper& remapper)
 	{
 		const PrefabNode& rootNode = pPrefab->RootNode();
-		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode(idRemap, nullptr, rootNode);
+		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode((EntitySceneObject*)pParent, rootNode, remapper);
 		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
 		return pInstantiatedPrefab;
 	}
@@ -159,12 +183,10 @@ namespace Glory
 		m_Registry.InvokeAll(InvocationType::Stop);
 	}
 
-	EntitySceneObject* EntityScene::InstantiatePrefabNode(const std::map<UUID, UUID>& idRemap, EntitySceneObject* pParent, const PrefabNode& node)
+	EntitySceneObject* EntityScene::InstantiatePrefabNode(EntitySceneObject* pParent, const PrefabNode& node, UUIDRemapper& remapper)
 	{
-		auto itor = idRemap.find(node.OriginalUUID());
-		const UUID objectID = itor != idRemap.end() ? itor->second : UUID();
-		itor = idRemap.find(node.TransformUUID());
-		const UUID transformID = itor != idRemap.end() ? itor->second : UUID();
+		const UUID objectID = remapper(node.OriginalUUID());
+		const UUID transformID = remapper(node.TransformUUID());
 		EntitySceneObject* pObject = (EntitySceneObject*)CreateEmptyObject(node.Name(), objectID, transformID);
 		if (pParent)
 			pObject->SetParent(pParent);
@@ -192,14 +214,13 @@ namespace Glory
 			EntityID entity = entityHandle.GetEntityID();
 			EntityRegistry* pRegistry = GetRegistry();
 
-			itor = idRemap.find(originalUUID);
-			UUID compUUID = itor != idRemap.end() ? itor->second : UUID();
+			UUID compUUID = remapper(originalUUID);
 
 			void* pComponentAddress = nullptr;
 			if (typeHash != transformTypeHash) pComponentAddress = pRegistry->CreateComponent(entity, typeHash, compUUID);
 			else
 			{
-				Utils::ECS::EntityView * pEntityView = pRegistry->GetEntityView(entity);
+				Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
 				compUUID = pEntityView->ComponentUUIDAt(0);
 				pComponentAddress = pRegistry->GetComponentAddress(entity, compUUID);
 			}
@@ -246,13 +267,11 @@ namespace Glory
 
 					sceneUUID.Set((uint64_t)GetUUID());
 					const UUID uuid = originalObjectUUD.As<uint64_t>();
-					auto idItor = idRemap.find(uuid);
-					if (idItor == idRemap.end())
-					{
-						objectUUID.Set(originalObjectUUD.As<uint64_t>());
-						continue;
-					}
-					objectUUID.Set((uint64_t)idItor->second);
+					UUID remapped;
+					if (!remapper.Find(uuid, remapped))
+						remapped = uuid;
+
+					objectUUID.Set(remapped);
 				}
 
 				PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
@@ -265,7 +284,7 @@ namespace Glory
 		for (size_t i = 0; i < node.ChildCount(); ++i)
 		{
 			const PrefabNode& childNode = node.ChildNode(i);
-			InstantiatePrefabNode(idRemap, pObject, childNode);
+			InstantiatePrefabNode(pObject, childNode, remapper);
 		}
 
 		return pObject;

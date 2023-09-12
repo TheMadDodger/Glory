@@ -17,6 +17,7 @@
 #include <EditorSceneManager.h>
 #include <ObjectMenu.h>
 #include <SceneGraphWindow.h>
+#include <Dispatcher.h>
 
 #define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
 name##MenuName << STRINGIFY(Create/Entity Object/) << EntitySceneObjectEditor::GetComponentIcon<component>() << "  " << STRINGIFY(name); \
@@ -66,7 +67,11 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
 		OBJECT_CREATE_MENU(Character, CharacterController);
 
-		ObjectMenu::AddMenuItem("Convert to Prefab", &ConvertToPrefab, T_SceneObject);
+		ObjectMenu::AddMenuItem("Convert to Prefab", &ConvertToPrefabMenuItem, T_SceneObject);
+
+		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
+			ConvertToPrefab((EntitySceneObject*)e.Object, e.Path);
+		});
 	}
 
 	const char* EntityScenesEditorExtension::ModuleName()
@@ -127,14 +132,20 @@ namespace Glory::Editor
 		}
 	}
 
-	void EntityScenesEditorExtension::ConvertToPrefab(Object* pObject, const ObjectMenuType&)
+	void EntityScenesEditorExtension::ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&)
 	{
 		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
-		EntityPrefabData* pEntityPrefab = EntityPrefabData::CreateFromSceneObject(pSceneObject);
-		const std::filesystem::path path = FileBrowser::GetCurrentPath().append(pEntityPrefab->Name() + ".gentity");
+		const std::filesystem::path path = FileBrowser::GetCurrentPath();
+		ConvertToPrefab(pSceneObject, path);
+	}
+
+	void EntityScenesEditorExtension::ConvertToPrefab(EntitySceneObject* pObject, std::filesystem::path path)
+	{
+		EntityPrefabData* pEntityPrefab = EntityPrefabData::CreateFromSceneObject(pObject);
+		path.append(pObject->Name() + ".gentity");
 		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pEntityPrefab, path.string());
-		GScene* pScene = pSceneObject->GetScene();
-		pScene->SetPrefab(pSceneObject, prefabUUID);
+		GScene* pScene = pObject->GetScene();
+		pScene->SetPrefab(pObject, prefabUUID);
 		EditorSceneManager::SetSceneDirty(pScene);
 	}
 }

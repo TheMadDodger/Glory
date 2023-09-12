@@ -7,9 +7,12 @@
 
 #include <PropertySerializer.h>
 #include <NodeRef.h>
+#include <DistributedRandom.h>
 
 namespace Glory
 {
+	DistributedRandom<uint32_t> SeedRandomizer;
+
 	EntitySceneObjectSerializer::EntitySceneObjectSerializer()
 	{
 	}
@@ -56,43 +59,6 @@ namespace Glory
 		pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 	}
 
-	bool WriteIDSMap(EntitySceneObject* pObject, const PrefabNode& node, YAML::Emitter& out)
-	{
-		Entity entity = pObject->GetEntityHandle();
-		EntityScene* pScene = entity.GetScene();
-
-		if (!pScene->Prefab(pObject->GetUUID()) && !pScene->PrefabChild(pObject->GetUUID())) return false;
-
-		out << YAML::Key << (uint64_t)node.OriginalUUID();
-		out << YAML::Value << (uint64_t)pObject->GetUUID();
-
-		Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
-		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity.GetEntityID());
-		YAML::Node components = YAML::Load(node.SerializedComponents());
-		Utils::NodeRef componentsRef = components;
-		Utils::NodeValueRef componentsValue = componentsRef.ValueRef();
-
-		assert(componentsValue.Size() == pEntityView->ComponentCount());
-
-		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
-		{
-			Utils::NodeValueRef component = componentsValue[i];
-			const UUID uuid = pEntityView->ComponentUUIDAt(i);
-			const UUID originalUUID = component["UUID"].As<uint64_t>();
-			out << YAML::Key << originalUUID;
-			out << YAML::Value << originalUUID;
-		}
-
-		size_t childCounter = 0;
-		for (size_t i = 0; i < pObject->ChildCount(); ++i)
-		{
-			EntitySceneObject* pChildObject = (EntitySceneObject*)pObject->GetChild(i);
-			const PrefabNode& childNode = node.ChildNode(childCounter);
-			if (!WriteIDSMap(pChildObject, childNode, out)) continue;
-			++childCounter;
-		}
-	}
-
 	void EntitySceneObjectSerializer::Serialize(EntitySceneObject* pObject, YAML::Emitter& out)
 	{
 		SceneObject* pParent = pObject->GetParent();
@@ -119,10 +85,15 @@ namespace Glory
 			EntityPrefabData* pPrefab = AssetManager::GetAssetImmediate<EntityPrefabData>(prefabID);
 			const PrefabNode& rootNode = pPrefab->RootNode();
 
-			out << YAML::Key << "IDRemap";
-			out << YAML::Value << YAML::BeginMap;
-			WriteIDSMap(pObject, rootNode, out);
-			out << YAML::EndMap;
+			if (rootNode.OriginalUUID() != pObject->GetUUID())
+			{
+				out << YAML::Key << "IDRemapSeed";
+				const uint64_t id = pObject->GetUUID();
+				const uint32_t first32Bits = uint32_t((id << 32) >> 32);
+				const uint32_t second32Bits = uint32_t(id >> 32);
+				const uint32_t seed = first32Bits & second32Bits;
+				out << YAML::Value << seed;
+			}
 
 			/* TODO: Serialize overrides */
 			return;
@@ -149,17 +120,25 @@ namespace Glory
 	{
 		EntityScene* pScene = (EntityScene*)pParent;
 
-		std::map<UUID, UUID>& uuidRemapper = GloryContext::GetContext()->m_UUIDRemapper;
+		UUIDRemapper& uuidRemapper = GloryContext::GetContext()->m_UUIDRemapper;
 
 		YAML::Node node;
 		std::string name;
 		UUID uuid;
 		UUID parentUuid;
+		uint32_t seed = 0;
 		bool active = true;
 		YAML_READ(object, node, Name, name, std::string);
 		YAML_READ(object, node, UUID, uuid, uint64_t);
 		YAML_READ(object, node, Active, active, bool);
 		YAML_READ(object, node, ParentUUID, parentUuid, uint64_t);
+		YAML_READ(object, node, IDRemapSeed, seed, uint32_t);
+
+		if (flags & Serializer::Flags::GenerateNewUUIDs)
+		{
+			uuid = uuidRemapper(uuid);
+			parentUuid = uuidRemapper(parentUuid);
+		}
 
 		Utils::NodeRef nodeRef{ object };
 		Utils::NodeValueRef prefabIDRef = nodeRef["PrefabID"];
@@ -174,13 +153,18 @@ namespace Glory
 				SceneObject* pInstantiatedPrefab = nullptr;
 				if (flags & Serializer::Flags::GenerateNewUUIDs)
 				{
-					pPrefab->GenerateNewUUIDs(uuidRemapper);
-					pInstantiatedPrefab = pScene->InstantiatePrefab(uuidRemapper, pPrefab);
+					const uint32_t first32Bits = uint32_t((uuid << 32) >> 32);
+					const uint32_t second32Bits = uint32_t(uuid >> 32);
+					seed = first32Bits & second32Bits;
+					uuidRemapper.SoftReset(seed);
+					uuidRemapper.EnforceRemap(pPrefab->RootNode().OriginalUUID(), uuid);
+					pInstantiatedPrefab = pScene->InstantiatePrefab(nullptr, pPrefab, uuidRemapper);
 				}
 				else
 				{
-					const std::map<UUID, UUID> idsRemap = idsRemapValue.As<std::map<UUID, UUID>>();
-					pInstantiatedPrefab = pScene->InstantiatePrefab(idsRemap, pPrefab);
+					UUIDRemapper remapper{ seed };
+					remapper.EnforceRemap(pPrefab->RootNode().OriginalUUID(), uuid);
+					pInstantiatedPrefab = pScene->InstantiatePrefab(nullptr, pPrefab, remapper);
 				}
 
 				/* TODO: Deserialize overrides */
@@ -188,50 +172,10 @@ namespace Glory
 			}
 		}
 
-		if (flags & Serializer::Flags::GenerateNewUUIDs)
-		{
-			if (uuidRemapper.find(uuid) != uuidRemapper.end())
-			{
-				/* Use existing newly generated UUID */
-				uuid = uuidRemapper.at(uuid);
-			}
-			else
-			{
-				/* Generate new UUID */
-				UUID newUUID = UUID();
-				uuidRemapper.emplace(uuid, newUUID);
-				uuid = newUUID;
-			}
-
-			/* Remap parent */
-			if (parentUuid)
-			{
-				if (uuidRemapper.find(parentUuid) == uuidRemapper.end())
-				{
-					/* Generate new UUID for parent */
-					UUID newParentUuid = UUID();
-					uuidRemapper.emplace(parentUuid, newParentUuid);
-				}
-
-				parentUuid = uuidRemapper.at(parentUuid);
-			}
-		}
-
 		UUID transformUUID = object["Components"][0]["UUID"].as<uint64_t>();
 		if (flags & Serializer::Flags::GenerateNewUUIDs)
 		{
-			if (uuidRemapper.find(transformUUID) != uuidRemapper.end())
-			{
-				/* Use existing newly generated UUID */
-				transformUUID = uuidRemapper.at(transformUUID);
-			}
-			else
-			{
-				/* Generate new UUID */
-				UUID newUUID = UUID();
-				uuidRemapper.emplace(transformUUID, newUUID);
-				transformUUID = newUUID;
-			}
+			transformUUID = uuidRemapper(transformUUID);
 		}
 
 		EntitySceneObject* pObject = (EntitySceneObject*)pScene->CreateEmptyObject(name, uuid, transformUUID);
@@ -261,18 +205,7 @@ namespace Glory
 
 			if (flags & Serializer::Flags::GenerateNewUUIDs)
 			{
-				if (uuidRemapper.find(compUUID) != uuidRemapper.end())
-				{
-					/* Use existing newly generated UUID */
-					compUUID = uuidRemapper.at(compUUID);
-				}
-				else
-				{
-					/* Generate new UUID */
-					UUID newUUID = UUID();
-					uuidRemapper.emplace(compUUID, newUUID);
-					compUUID = newUUID;
-				}
+				compUUID = uuidRemapper(compUUID);
 			}
 
 			Entity entityHandle = pObject->GetEntityHandle();

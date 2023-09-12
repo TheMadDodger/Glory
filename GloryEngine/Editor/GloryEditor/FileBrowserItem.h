@@ -4,8 +4,16 @@
 #include <filesystem>
 #include <functional>
 
+namespace Glory
+{
+	class SceneObject;
+}
+
 namespace Glory::Editor
 {
+	template<typename T>
+	struct Dispatcher;
+
 	class FileBrowserItem
 	{
 	public:
@@ -46,6 +54,13 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void PerformSearch(FileBrowserItem* pItem);
 		GLORY_EDITOR_API static void ClearSearch();
 
+		struct ObjectDNDEvent
+		{
+			std::filesystem::path Path;
+			SceneObject* Object;
+		};
+		GLORY_EDITOR_API static Dispatcher<ObjectDNDEvent>& ObjectDNDEventDispatcher();
+
 	private:
 		FileBrowserItem();
 		FileBrowserItem(const std::string& name, bool isFolder, FileBrowserItem* pParent, bool isEditable, const std::string& directoryFilter = "", std::function<std::filesystem::path()> rootPathFunc = DefaultRootPathFunc);
@@ -83,5 +98,7 @@ namespace Glory::Editor
 		static char m_SearchBuffer[1000];
 		static std::vector<FileBrowserItem*> m_pSearchResultCache;
 		static bool m_Dirty;
+
+		static Dispatcher<FileBrowserItem::ObjectDNDEvent>* m_pObjectDNDDispatcher;
 	};
 }

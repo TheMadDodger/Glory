@@ -5,6 +5,8 @@
 
 namespace Glory
 {
+    class PrefabData;
+
     struct DelayedParentData
     {
         DelayedParentData(SceneObject* pObjectToParent, UUID parentID) : ObjectToParent(pObjectToParent), ParentID(parentID) {}
@@ -38,6 +40,8 @@ namespace Glory
         void SetPrefab(SceneObject* pObject, UUID prefabID);
         const UUID Prefab(UUID objectID) const;
         const UUID PrefabChild(UUID objectID) const;
+
+        virtual SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab) { return nullptr; }
 
     protected:
         virtual void Initialize() {}
