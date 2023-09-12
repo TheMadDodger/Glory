@@ -25,6 +25,8 @@ namespace Glory::Editor
 
 		bool IsExcluded(const UUID uuid);
 
+		bool HandleAssetDragAndDrop(SceneObject* pParent, uint32_t dndHash, const ImGuiPayload* pPayload);
+
 	private:
 		static const size_t SearchBufferSize = 1000;
 		char SearchBuffer[SearchBufferSize] = "\0";

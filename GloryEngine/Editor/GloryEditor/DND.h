@@ -29,8 +29,6 @@ namespace Glory::Editor
 		static void DragAndDropSource(void* payload, size_t payloadSize, std::function<void()> previewCallback, ImGuiDragDropFlags flags = 0)
 		{
 			ResourceType* pType = ResourceType::GetResourceType<T>();
-			//if(pType->SubTypeCount()) pType = pType->GetSubType(0);
-
 			DragAndDropSource(pType->Name(), payload, payloadSize, previewCallback, flags);
 		}
 

@@ -19,7 +19,7 @@
 
 namespace Glory::Editor
 {
-	DND DragAndDrop{ { ST_Path, ResourceType::GetHash<SceneObject>() } };
+	DND DragAndDrop{ { ST_Path, ResourceType::GetHash<SceneObject>(), ResourceType::GetHash<PrefabData>() } };
 	std::function<void(SceneObject*, bool)> DrawObjectNameCallback = [](SceneObject* pObject, bool isPrefab) {
 		ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
 			" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
@@ -107,34 +107,7 @@ namespace Glory::Editor
 
 		ImGui::InvisibleButton("WINDOWTARGET", { size.x, availableRegion.y });
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			if (dndHash == ST_Path)
-			{
-				const std::string path = (const char*)pPayload->Data;
-				const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
-				if (!uuid) return;
-				ResourceMeta meta;
-				if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-				ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
-
-				if (meta.Hash() != ResourceType::GetHash<PrefabData>())
-				{
-					for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
-					{
-						ResourceType* pSubResourceType = ResourceType::GetSubType(pResourceType, i);
-						if (pSubResourceType->Hash() != ResourceType::GetHash<PrefabData>()) continue;
-
-						PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-						EditorSceneManager::GetActiveScene()->InstantiatePrefab(nullptr, pPrefab);
-						EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
-						return;
-					}
-					return;
-				}
-
-				PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-				EditorSceneManager::GetActiveScene()->InstantiatePrefab(nullptr, pPrefab);
-				return;
-			}
+			if (HandleAssetDragAndDrop(nullptr, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 
@@ -182,34 +155,7 @@ namespace Glory::Editor
 		ImGui::PopStyleColor();
 
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			if (dndHash == ST_Path)
-			{
-				const std::string path = (const char*)pPayload->Data;
-				const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
-				if (!uuid) return;
-				ResourceMeta meta;
-				if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-				ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
-
-				if (meta.Hash() != ResourceType::GetHash<PrefabData>())
-				{
-					for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
-					{
-						ResourceType* pSubResourceType = ResourceType::GetSubType(pResourceType, i);
-						if (pSubResourceType->Hash() != ResourceType::GetHash<PrefabData>()) continue;
-
-						PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-						EditorSceneManager::GetActiveScene()->InstantiatePrefab(nullptr, pPrefab);
-						EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
-						return;
-					}
-					return;
-				}
-
-				PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-				EditorSceneManager::GetActiveScene()->InstantiatePrefab(nullptr, pPrefab);
-				return;
-			}
+			if (HandleAssetDragAndDrop(nullptr, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 
@@ -277,34 +223,7 @@ namespace Glory::Editor
 			ImGui::InvisibleButton(nameAndIDMinus1.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 			DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 				SceneObject* pParent = pObject->GetParent();
-				if (dndHash == ST_Path)
-				{
-					const std::string path = (const char*)pPayload->Data;
-					const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
-					if (!uuid) return;
-					ResourceMeta meta;
-					if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-					ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
-
-					if (meta.Hash() != ResourceType::GetHash<PrefabData>())
-					{
-						for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
-						{
-							ResourceType* pSubResourceType = ResourceType::GetSubType(pResourceType, i);
-							if (pSubResourceType->Hash() != ResourceType::GetHash<PrefabData>()) continue;
-
-							PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-							EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab);
-							EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
-							return;
-						}
-						return;
-					}
-
-					PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-					EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab);
-					return;
-				}
+				if (HandleAssetDragAndDrop(pParent, dndHash, pPayload)) return;
 
 				const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 				bool canParent = true;
@@ -348,34 +267,7 @@ namespace Glory::Editor
 			ImGui::Text("%s: %s", pObject->Name().data(), std::to_string(pObject->GetUUID()).data());
 		});
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			if (dndHash == ST_Path)
-			{
-				const std::string path = (const char*)pPayload->Data;
-				const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
-				if (!uuid) return;
-				ResourceMeta meta;
-				if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-				ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
-
-				if (meta.Hash() != ResourceType::GetHash<PrefabData>())
-				{
-					for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
-					{
-						ResourceType* pSubResourceType = ResourceType::GetSubType(pResourceType, i);
-						if (pSubResourceType->Hash() != ResourceType::GetHash<PrefabData>()) continue;
-
-						PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-						EditorSceneManager::GetActiveScene()->InstantiatePrefab(pObject, pPrefab);
-						EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
-						return;
-					}
-					return;
-				}
-
-				PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-				EditorSceneManager::GetActiveScene()->InstantiatePrefab(pObject, pPrefab);
-				return;
-			}
+			if (HandleAssetDragAndDrop(pObject, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 
@@ -436,34 +328,7 @@ namespace Glory::Editor
 		ImGui::InvisibleButton(nameAndIDPlus1.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			SceneObject* pParent = pObject->GetParent();
-			if (dndHash == ST_Path)
-			{
-				const std::string path = (const char*)pPayload->Data;
-				const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
-				if (!uuid) return;
-				ResourceMeta meta;
-				if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-				ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
-
-				if (meta.Hash() != ResourceType::GetHash<PrefabData>())
-				{
-					for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
-					{
-						ResourceType* pSubResourceType = ResourceType::GetSubType(pResourceType, i);
-						if (pSubResourceType->Hash() != ResourceType::GetHash<PrefabData>()) continue;
-
-						PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-						EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab);
-						EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
-						return;
-					}
-					return;
-				}
-
-				PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
-				EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab);
-				return;
-			}
+			if (HandleAssetDragAndDrop(pParent, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			bool canParent = true;
@@ -532,5 +397,52 @@ namespace Glory::Editor
 	{
 		return std::find(m_SearchResultExcludeCache.begin(), m_SearchResultExcludeCache.end(), uuid)
 			!= m_SearchResultExcludeCache.end();
+	}
+
+	bool SceneGraphWindow::HandleAssetDragAndDrop(SceneObject* pParent, uint32_t dndHash, const ImGuiPayload* pPayload)
+	{
+		if (dndHash != ST_Path && dndHash != ResourceType::GetHash<PrefabData>()) return false;
+
+		PrefabData* pPrefab = nullptr;
+
+		const uint32_t prefabHash = ResourceType::GetHash<PrefabData>();
+
+		if (dndHash == ST_Path)
+		{
+			const std::string path = (const char*)pPayload->Data;
+			const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
+			if (!uuid) return false;
+			ResourceMeta meta;
+			if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return false;
+			ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
+
+			if (meta.Hash() != ResourceType::GetHash<PrefabData>())
+			{
+				bool found = false;
+				for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
+				{
+					ResourceType* pSubResourceType = ResourceType::GetSubType(pResourceType, i);
+					if (pSubResourceType->Hash() != ResourceType::GetHash<PrefabData>()) continue;
+
+					pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
+					found = true;
+					break;
+				}
+				if(!found) return false;
+			}
+
+			pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
+		}
+		else if (dndHash = ResourceType::GetHash<PrefabData>())
+		{
+			const UUID prefabID = *(const UUID*)pPayload->Data;
+			pPrefab = AssetManager::GetAssetImmediate<PrefabData>(prefabID);
+		}
+
+		if (!pPrefab) return false;
+
+		EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab);
+		EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
+		return true;
 	}
 }

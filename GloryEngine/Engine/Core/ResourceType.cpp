@@ -72,19 +72,19 @@ namespace Glory
 		return &RESOURCE_TYPES->m_BasicTypes[index];
 	}
 
-	size_t ResourceType::SubTypeCount(ResourceType* pResourceType)
+	size_t ResourceType::SubTypeCount(const ResourceType* pResourceType)
 	{
 		return pResourceType->m_SubTypes.size();
 	}
 
-	ResourceType* ResourceType::GetSubType(ResourceType* pResourceType, size_t index)
+	ResourceType* ResourceType::GetSubType(const ResourceType* pResourceType, size_t index)
 	{
 		uint32_t subTypeHash = GetSubTypeHash(pResourceType, index);
 		if (subTypeHash == 0) return nullptr;
 		return GetResourceType(subTypeHash);
 	}
 
-	uint32_t ResourceType::GetSubTypeHash(ResourceType* pResourceType, size_t index)
+	uint32_t ResourceType::GetSubTypeHash(const ResourceType* pResourceType, size_t index)
 	{
 		if (index >= pResourceType->m_SubTypes.size()) return 0;
 		return pResourceType->m_SubTypes[index];

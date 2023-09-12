@@ -62,9 +62,10 @@ namespace Glory::Editor
 
             ResourceType* pResource = ResourceType::GetResourceType(type);
             const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(pResource->Name().c_str(), m_DNDFlags);
-            if (!payload) return false;
+            if (!payload) continue;
             callback(type, payload);
             return true;
         }
+        return false;
     }
 }
