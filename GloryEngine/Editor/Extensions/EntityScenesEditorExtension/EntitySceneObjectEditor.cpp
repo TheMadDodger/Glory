@@ -115,6 +115,23 @@ namespace Glory::Editor
 		ImGui::TextDisabled("Entity Object");
 		ImGui::Separator();
 
+		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
+		EntityID entityID = entity.GetEntityID();
+		EntityScene* pScene = entity.GetScene();
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+
+		const UUID prefabID = pScene->Prefab(m_pObject->GetUUID());
+		if (prefabID)
+		{
+			std::string prefabIDString = std::to_string(prefabID);
+			ImGui::Text("Linked to prefab:");
+			const float textWitdh = ImGui::CalcTextSize(prefabIDString.data()).x;
+			ImGui::SameLine();
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
+			ImGui::Text(prefabIDString.data());
+		}
+
 		std::string originalName = m_pObject->Name();
 		const char* name = originalName.c_str();
 		memcpy(m_NameBuff, name, originalName.length() + 1);
@@ -143,16 +160,20 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::ComponentGUI()
 	{
-		ImGui::PushID("Components");
-
-		ImGui::TextDisabled("Components");
-		ImGui::Separator();
-
 		bool change = false;
 
 		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
 		EntityID entityID = entity.GetEntityID();
-		Glory::Utils::ECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
+		EntityScene* pScene = entity.GetScene();
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+
+		const bool isPrefab = pScene->Prefab(m_pObject->GetUUID());
+		ImGui::BeginDisabled(isPrefab);
+
+		ImGui::PushID("Components");
+
+		ImGui::TextDisabled("Components");
+		ImGui::Separator();
 
 		bool removeComponent = false;
 		size_t toRemoveComponent = 0;
@@ -242,8 +263,8 @@ namespace Glory::Editor
 		m_ComponentPopup.OnGUI();
 
 		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
-		EntityScene* pScene = (EntityScene*)pObject->GetScene();
 		if (change) EditorSceneManager::SetSceneDirty(pScene);
+		ImGui::EndDisabled();
 		return change;
 	}
 
