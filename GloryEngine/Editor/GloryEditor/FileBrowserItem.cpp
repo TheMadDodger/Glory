@@ -233,7 +233,13 @@ namespace Glory::Editor
 				m_pChildren[i]->DrawDirectoryBrowser();
 			}
 			ImGui::TreePop();
-			DND{ { ST_Path } }.HandleDragAndDropTarget([this](uint32_t, const ImGuiPayload* payload) {
+			DND{ { ST_Path, ResourceType::GetHash<SceneObject>() } }.HandleDragAndDropTarget([this](uint32_t typeHash, const ImGuiPayload* payload) {
+				if (typeHash != ST_Path)
+				{
+					const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
+					FileBrowserItem::ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, objectPayload.pObject });
+					return;
+				}
 				std::filesystem::path filePath = (const char*)payload->Data;
 				const std::filesystem::path fileName = filePath.filename();
 				std::filesystem::path newPath = m_CachedPath;
@@ -265,7 +271,7 @@ namespace Glory::Editor
 	{
 		if (!m_pSelectedFolder) return;
 
-		ImVec2 windowSize = ImGui::GetWindowSize();
+		const ImVec2 windowSize = ImGui::GetWindowSize();
 
 		float width = windowSize.x;
 
@@ -356,7 +362,6 @@ namespace Glory::Editor
 						ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, objectPayload.pObject });
 						return;
 					}
-
 
 					std::filesystem::path filePath = (const char*)payload->Data;
 					const std::filesystem::path fileName = filePath.filename();

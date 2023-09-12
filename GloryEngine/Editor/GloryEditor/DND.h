@@ -38,8 +38,12 @@ namespace Glory::Editor
 
 		bool IsEnabled() { return !m_AcceptedTypes.empty(); }
 		bool HandleDragAndDropTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback);
+		bool HandleDragAndDropWindowTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback);
 
 		std::vector<uint32_t> m_AcceptedTypes;
 		ImGuiDragDropFlags m_DNDFlags = 0;
+
+	private:
+		bool HandleTargetInternal(std::function<void(uint32_t, const ImGuiPayload*)> callback);
 	};
 }

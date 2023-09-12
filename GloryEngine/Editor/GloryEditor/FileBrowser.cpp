@@ -256,15 +256,11 @@ namespace Glory::Editor
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::BeginChild("FileBrowser", ImVec2(0, 0), true, window_flags);
         /* TODO: This will need to become a custom DND target with internal ImGui::BeginDragDropTargetCustom */
-        DND{ { ResourceType::GetHash<SceneObject>() } }.HandleDragAndDropTarget([&](uint32_t hash, const ImGuiPayload* payload) {
+        DND{ { ResourceType::GetHash<SceneObject>() } }.HandleDragAndDropWindowTarget([&](uint32_t hash, const ImGuiPayload* payload) {
             const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
             FileBrowserItem::ObjectDNDEventDispatcher().Dispatch({ GetCurrentPath(), objectPayload.pObject});
             return;
         });
-
-        ImVec2 min = ImGui::GetWindowContentRegionMin();
-        ImVec2 max = ImGui::GetWindowContentRegionMax();
-        ImVec2 pos = ImGui::GetWindowPos();
 
         if (FileBrowserItem::m_Dirty)
             RefreshContentBrowser();
