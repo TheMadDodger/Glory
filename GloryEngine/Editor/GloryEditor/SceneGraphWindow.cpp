@@ -16,6 +16,7 @@
 #include <PrefabData.h>
 #include <AssetManager.h>
 #include <UUIDRemapper.h>
+#include <glm/ext/quaternion_float.hpp>
 
 namespace Glory::Editor
 {
@@ -441,7 +442,7 @@ namespace Glory::Editor
 
 		if (!pPrefab) return false;
 
-		EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab);
+		EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab, glm::vec3{}, glm::quat{0, 0, 0, 1}, glm::vec3{1, 1, 1});
 		EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
 		return true;
 	}

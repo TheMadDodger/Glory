@@ -14,6 +14,7 @@
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
 #include <SceneObject.h>
+#include <PrefabData.h>
 
 #include <glm/detail/type_quat.hpp>
 
@@ -33,6 +34,8 @@ namespace Glory
 		{"GloryEngine.MaterialInstance", SerializedType::ST_Asset},
 		{"GloryEngine.Model", SerializedType::ST_Asset},
 		{"GloryEngine.Image", SerializedType::ST_Asset},
+		{"GloryEngine.Prefab", SerializedType::ST_Asset},
+		{"GloryEngine.Entities.EntityPrefab", SerializedType::ST_Asset},
 		{"GloryEngine.SceneManagement.SceneObject", SerializedType::ST_Object},
 		{"GloryEngine.Entities.EntitySceneObject", SerializedType::ST_Object},
 		{"GloryEngine.Quaternion", ResourceType::GetHash<glm::quat>()},
@@ -46,6 +49,8 @@ namespace Glory
 		{"GloryEngine.MaterialInstance", ResourceType::GetHash<MaterialInstanceData>()},
 		{"GloryEngine.Model", ResourceType::GetHash<ModelData>()},
 		{"GloryEngine.Image", ResourceType::GetHash<ImageData>()},
+		{"GloryEngine.Prefab", ResourceType::GetHash<PrefabData>()},
+		{"GloryEngine.Entities.EntityPrefab", ResourceType::GetHash<PrefabData>()},
 	};
 
 	Assembly::Assembly(AssemblyDomain* pDomain)

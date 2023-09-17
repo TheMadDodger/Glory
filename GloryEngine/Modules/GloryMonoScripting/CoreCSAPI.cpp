@@ -342,6 +342,20 @@ namespace Glory
 		pScene->DeleteObject(pObject);
 	}
 
+	MonoObject* Scene_InstantiatePrefab(uint64_t sceneID, uint64_t prefabID, Vec3Wrapper position, QuatWrapper rotation, Vec3Wrapper scale, uint64_t parentID)
+	{
+		PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(prefabID);
+		if (!pPrefab) return nullptr;
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		if (!pScene) return nullptr;
+		SceneObject* pParent = pScene->FindSceneObject(parentID);
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		if (!pObjectManager) return nullptr;
+		SceneObject* pNewObject = pScene->InstantiatePrefab(pParent, pPrefab, ToGLMVec3(position), ToGLMQuat(rotation), ToGLMVec3(scale));
+		if (!pNewObject) return nullptr;
+		return pObjectManager->GetSceneObject(pNewObject);
+	}
+
 #pragma endregion
 
 #pragma region Scene Management
@@ -602,6 +616,7 @@ namespace Glory
 		BIND("GloryEngine.SceneManagement.Scene::Scene_GetSceneObject", Scene_GetSceneObject);
 		BIND("GloryEngine.SceneManagement.Scene::Scene_GetSceneObjectAt", Scene_GetSceneObjectAt);
 		BIND("GloryEngine.SceneManagement.Scene::Scene_Destroy", Scene_Destroy);
+		BIND("GloryEngine.SceneManagement.Scene::Scene_InstantiatePrefab", Scene_InstantiatePrefab);
 
 		// Scene Manager
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CreateEmptyScene", SceneManager_CreateEmptyScene);

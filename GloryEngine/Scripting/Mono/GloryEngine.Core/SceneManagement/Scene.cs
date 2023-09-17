@@ -76,6 +76,27 @@ namespace GloryEngine.SceneManagement
             return true;
         }
 
+        /// <summary>
+        /// Spawn an instance of a prefab
+        /// </summary>
+        /// <param name="prefab">The prefab to spawn</param>
+        /// <param name="parent">What object to parent the new instance to</param>
+        /// <returns>The instance handle of the spawned prefab</returns>
+        public SceneObject InstantiatePrefab(Prefab prefab, SceneObject parent = null)
+            => Scene_InstantiatePrefab(_objectID, prefab.ID, new Vector3(), Quaternion.Identity, new Vector3(1, 1, 1), parent != null ? parent.ID : 0);
+
+        /// <summary>
+        /// Spawn an instance of a prefab
+        /// </summary>
+        /// <param name="prefab">The prefab to spawn</param>
+        /// <param name="position">Local position to override the root of the prefab with</param>
+        /// <param name="rotation">Local rotation to override the root of the prefab with</param>
+        /// <param name="scale">Local scale to override the root of the prefab with</param>
+        /// <param name="parent">What object to parent the new instance to</param>
+        /// <returns></returns>
+        public SceneObject InstantiatePrefab(Prefab prefab, Vector3 position, Quaternion rotation, Vector3 scale, SceneObject parent = null)
+            => Scene_InstantiatePrefab(_objectID, prefab.ID, position, rotation, scale, parent != null ? parent.ID : 0);
+
         #endregion
 
         #region API Methods
@@ -97,6 +118,9 @@ namespace GloryEngine.SceneManagement
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern bool Scene_Destroy(UInt64 sceneID, UInt64 objectID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern SceneObject Scene_InstantiatePrefab(UInt64 sceneID, UInt64 prefabID, Vector3 position, Quaternion rotation, Vector3 scale, UInt64 parentID);
 
         #endregion
     }
