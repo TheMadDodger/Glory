@@ -61,6 +61,10 @@ namespace Glory
 
 	void EntitySceneObjectSerializer::Serialize(EntitySceneObject* pObject, YAML::Emitter& out)
 	{
+		Entity entity = pObject->GetEntityHandle();
+		EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
+		EntityView* pEntityView = entity.GetEntityView();
+
 		SceneObject* pParent = pObject->GetParent();
 
 		GScene* pScene = pObject->GetScene();
@@ -95,15 +99,24 @@ namespace Glory
 				out << YAML::Value << seed;
 			}
 
+			/* For now only serialize the transform.
+			 * We do not put this in a component array
+			 * so that in future when we add overrides it can be ignored
+			 * in scenes where this still occurs.
+			 */
+			const TypeData* pTransformTypeData = Transform::GetTypeData();
+			void* pTransformAddress = pRegistry->GetComponentAddress(entity.GetEntityID(), pEntityView->ComponentUUIDAt(0));
+			out << YAML::Key << "Transform";
+			out << YAML::Value << YAML::BeginMap;
+			PropertySerializer::SerializeProperty("Properties", pTransformTypeData, pTransformAddress, out);
+			out << YAML::EndMap;
+
 			/* TODO: Serialize overrides */
 			return;
 		}
 
 		out << YAML::Key << "Components";
 		out << YAML::Value << YAML::BeginSeq;
-		Entity entity = pObject->GetEntityHandle();
-		EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
-		EntityView* pEntityView = entity.GetEntityView();
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
 			UUID componentUUID = pEntityView->ComponentUUIDAt(i);
@@ -151,6 +164,13 @@ namespace Glory
 				Utils::NodeValueRef idsRemapValue = nodeRef["IDRemap"];
 				/* TODO: When GenerateNewUUIDs flag is set generate a new map of UUID remappings */
 				SceneObject* pInstantiatedPrefab = nullptr;
+				/* Deserialize the transform override */
+				Transform transform;
+				Utils::NodeValueRef transformRef = nodeRef["Transform/Properties"];
+				const glm::vec3 position = transformRef["Position"].As<glm::vec3>();
+				const glm::quat rotation = transformRef["Rotation"].As<glm::quat>();
+				const glm::vec3 scale = transformRef["Scale"].As<glm::vec3>();
+
 				if (flags & Serializer::Flags::GenerateNewUUIDs)
 				{
 					const uint32_t first32Bits = uint32_t((uuid << 32) >> 32);
@@ -158,13 +178,13 @@ namespace Glory
 					seed = first32Bits & second32Bits;
 					uuidRemapper.SoftReset(seed);
 					uuidRemapper.EnforceRemap(pPrefab->RootNode().OriginalUUID(), uuid);
-					pInstantiatedPrefab = pScene->InstantiatePrefab(nullptr, pPrefab, uuidRemapper);
+					pInstantiatedPrefab = pScene->InstantiatePrefab(nullptr, pPrefab, uuidRemapper, position, rotation, scale);
 				}
 				else
 				{
 					UUIDRemapper remapper{ seed };
 					remapper.EnforceRemap(pPrefab->RootNode().OriginalUUID(), uuid);
-					pInstantiatedPrefab = pScene->InstantiatePrefab(nullptr, pPrefab, remapper);
+					pInstantiatedPrefab = pScene->InstantiatePrefab(nullptr, pPrefab, remapper, position, rotation, scale);
 				}
 
 				/* TODO: Deserialize overrides */

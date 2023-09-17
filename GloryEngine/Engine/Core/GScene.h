@@ -2,6 +2,7 @@
 #include "Resource.h"
 #include "SceneObject.h"
 #include <mutex>
+#include <glm/fwd.hpp>
 
 namespace Glory
 {
@@ -41,7 +42,9 @@ namespace Glory
         const UUID Prefab(UUID objectID) const;
         const UUID PrefabChild(UUID objectID) const;
 
-        virtual SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab) { return nullptr; }
+        virtual SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
+            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+        { return nullptr; }
 
     protected:
         virtual void Initialize() {}

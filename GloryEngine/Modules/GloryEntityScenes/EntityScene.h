@@ -28,9 +28,12 @@ namespace Glory
 
 		GLORY_API bool IsValid() const;
 
-		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab) override;
-		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, uint32_t remapSeed);
-		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, UUIDRemapper& remapper);
+		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale) override;
+		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, uint32_t remapSeed,
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, UUIDRemapper& remapper,
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
 
 	private:
 		virtual void Initialize() override;

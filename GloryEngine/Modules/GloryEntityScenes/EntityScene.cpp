@@ -59,7 +59,8 @@ namespace Glory
 		return m_Valid;
 	}
 
-	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab)
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
+		const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		EntityPrefabData* pEntityPrefab = (EntityPrefabData*)pPrefab;
 
@@ -69,22 +70,36 @@ namespace Glory
 		const uint32_t seed = first32Bits & second32Bits;
 		UUIDRemapper remapper{ seed };
 		remapper.EnforceRemap(pEntityPrefab->RootNode().OriginalUUID(), uuid);
-		return InstantiatePrefab(pParent, (EntityPrefabData*)pPrefab, RandomDevice::Seed());
+		return InstantiatePrefab(pParent, (EntityPrefabData*)pPrefab, RandomDevice::Seed(), pos, rot, scale);
 	}
 
-	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, uint32_t remapSeed)
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, uint32_t remapSeed,
+		const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		UUIDRemapper remapper{ remapSeed };
 		const PrefabNode& rootNode = pPrefab->RootNode();
 		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode((EntitySceneObject*)pParent, rootNode, remapper);
+
+		Transform& transform = pInstantiatedPrefab->GetEntityHandle().GetComponent<Transform>();
+		transform.Position = pos;
+		transform.Rotation = rot;
+		transform.Scale = scale;
+
 		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
 		return pInstantiatedPrefab;
 	}
 
-	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, UUIDRemapper& remapper)
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, UUIDRemapper& remapper,
+		const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		const PrefabNode& rootNode = pPrefab->RootNode();
 		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode((EntitySceneObject*)pParent, rootNode, remapper);
+
+		Transform& transform = pInstantiatedPrefab->GetEntityHandle().GetComponent<Transform>();
+		transform.Position = pos;
+		transform.Rotation = rot;
+		transform.Scale = scale;
+
 		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
 		return pInstantiatedPrefab;
 	}
