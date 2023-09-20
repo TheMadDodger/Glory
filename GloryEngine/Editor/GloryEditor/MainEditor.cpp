@@ -52,6 +52,8 @@
 
 #include "VersionPopup.h"
 
+#include <About.h>
+
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
 
@@ -221,11 +223,7 @@ namespace Glory::Editor
 		if (ImGui::BeginPopupModal("About", &popupOpen, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
 		{
 			ImGui::Text("Glorious version %s", GloryEditorVersion);
-			ImGui::Text("Glory Engine is copyright (C) 2020-2023 Robin Cordemans");
-			ImGui::Text("All rights reserved.");
-			ImGui::Spacing();
-			ImGui::Text("License");
-			ImGui::Text("Given the early state of the engine,\nthis software is for personal use only.");
+			ImGui::TextUnformatted(AboutText);
 			ImGui::EndPopup();
 		}
 	}

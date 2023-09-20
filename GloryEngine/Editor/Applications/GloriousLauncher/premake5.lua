@@ -30,6 +30,7 @@ project "GloriousLauncher"
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.FA}",
+		"%{IncludeDir.Utils}",
 		"%{GloryIncludeDir.api}",
 		"%{rapidjson}",
 
