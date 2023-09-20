@@ -159,7 +159,14 @@ cp "lib/${EFSW_LIB}.pdb" "../../Dependencies/${CONFIG}/lib/${EFSW_LIB}.pdb"
 mkdir "../../Dependencies/${CONFIG}/include/efsw"
 cp "include/efsw/efsw.h" "../../Dependencies/${CONFIG}/include/efsw/efsw.h"
 cp "include/efsw/efsw.hpp" "../../Dependencies/${CONFIG}/include/efsw/efsw.hpp"
+cd ..
 
+cd mono
+msbuild.exe msvc/mono.sln -p:Platform=x64 -p:Configuration=$CONFIG -p:MONO_TARGET_GC=sgen
+find "msvc/build/sgen/x64/lib/${CONFIG}" -name \*.* -exec cp {} "../../Dependencies/${CONFIG}/lib/" \;
+find "msvc/build/sgen/x64/bin/${CONFIG}" -name \*.* -exec cp {} "../../Dependencies/${CONFIG}/bin/" \;
+find "msvc/build/sgen/x64/bin/${CONFIG}" -name \*.* -exec cp {} "../../Dependencies/${CONFIG}/bin/" \;
+cp -r msvc/include/mono "../../Dependencies/${CONFIG}/include"
 
 # Jolt
 # Jolt now gets built in the jolt module itself because I could not solve an illusive linker error
