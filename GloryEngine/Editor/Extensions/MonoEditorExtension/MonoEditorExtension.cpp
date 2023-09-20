@@ -196,7 +196,7 @@ namespace Glory::Editor
 		std::string name = pProject->Name() + ".dll";
 		std::filesystem::path path = pProject->ProjectPath();
 		path = path.parent_path().append("Library/Assembly");
-		/* TODO: Lib manager for uuser assemblies */
+		/* TODO: Lib manager for user assemblies */
 
 		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib("csharp", name, path.string(), true, nullptr, true));
 	}

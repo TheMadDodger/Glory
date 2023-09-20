@@ -44,3 +44,6 @@
 [submodule "GloryEngine/submodules/efsw"]
 	path = GloryEngine/submodules/efsw
 	url = https://github.com/SpartanJ/efsw
+[submodule "GloryEngine/submodules/mono"]
+	path = GloryEngine/submodules/mono
+	url = https://github.com/mono/mono.git

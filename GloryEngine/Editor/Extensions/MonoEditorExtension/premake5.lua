@@ -34,8 +34,6 @@ project "MonoEditorExtension"
 		"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.mono}",
 
-		"%{monoDir}/include/mono-2.0",
-
 		"%{IncludeDir.FA}",
 
 		"%{IncludeDir.ECS}",
@@ -105,28 +103,8 @@ project "MonoEditorExtension"
 		architecture "x86"
 		defines "WIN32"
 
-		libdirs
-		{
-			"%{monox86Dir}/lib",
-		}
-
-		includedirs
-		{
-			"%{monox86Dir}/include/mono-2.0",
-		}
-
 	filter "platforms:x64"
 		architecture "x64"
-
-		libdirs
-		{
-			"%{monoDir}/lib",
-		}
-
-		includedirs
-		{
-			"%{monoDir}/include/mono-2.0",
-		}
 
 	filter "configurations:Debug"
 		runtime "Debug"

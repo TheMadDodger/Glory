@@ -20,7 +20,6 @@ workspace "GloryEngine"
 
 vulkanDir								= "C:/VulkanSDK/1.2.182.0"
 monoDir									= "C:/Program Files/Mono"
-monox86Dir								= "C:/Program Files (x86)/Mono"
 leakDetectorDir							= "C:/Program Files (x86)/Visual Leak Detector/include"
 
 rootDir									= "%{wks.location}"

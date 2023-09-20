@@ -2,6 +2,8 @@
 #include "Assembly.h"
 #include "MonoScriptObjectManager.h"
 
+#include <mono/metadata/exception.h>
+
 namespace Glory
 {
 	AssemblyDomain::AssemblyDomain(const std::string& name, MonoDomain* pDomain)
@@ -62,9 +64,16 @@ namespace Glory
 		return m_pScriptObjectManager;
 	}
 
-	MonoObject* AssemblyDomain::InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, MonoObject** pExceptionObject, void** args)
+	MonoObject* AssemblyDomain::InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, void** args)
 	{
-		return mono_runtime_invoke(pMethod, pObject, args, pExceptionObject);
+		MonoObject* pExceptionObject = nullptr;
+		MonoObject* result = mono_runtime_invoke(pMethod, pObject, args, &pExceptionObject);
+		if (pExceptionObject)
+		{
+			mono_print_unhandled_exception(pExceptionObject);
+			return nullptr;
+		}
+		return result;
 	}
 
 	size_t AssemblyDomain::AssemblyCount()

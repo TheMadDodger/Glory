@@ -115,7 +115,7 @@ namespace Glory
 		};
 
 		EntityScene* pEntityScene = pRegistry->GetUserData<EntityScene*>();
-		pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyActivated", args);
+		pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyActivated", args.data());
 	}
 
 	void PhysicsSystem::OnBodyDeactivated(uint32_t bodyID)
@@ -134,7 +134,7 @@ namespace Glory
 		};
 
 		EntityScene* pEntityScene = pRegistry->GetUserData<EntityScene*>();
-		pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyDeactivated", args);
+		pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity), "OnBodyDeactivated", args.data());
 	}
 
 	void PhysicsSystem::OnContactAdded(uint32_t body1ID, uint32_t body2ID)
@@ -160,7 +160,7 @@ namespace Glory
 			};
 
 			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
-			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactAdded", args);
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactAdded", args.data());
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -174,7 +174,7 @@ namespace Glory
 			};
 
 			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
-			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactAdded", args);
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactAdded", args.data());
 		}
 	}
 
@@ -201,7 +201,7 @@ namespace Glory
 			};
 
 			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
-			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactPersisted", args);
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactPersisted", args.data());
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -215,7 +215,7 @@ namespace Glory
 			};
 
 			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
-			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactPersisted", args);
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactPersisted", args.data());
 		}
 	}
 
@@ -242,7 +242,7 @@ namespace Glory
 			};
 
 			EntityScene* pEntityScene = pRegistry1->GetUserData<EntityScene*>();
-			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactRemoved", args);
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity1), "OnContactRemoved", args.data());
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -256,7 +256,7 @@ namespace Glory
 			};
 
 			EntityScene* pEntityScene = pRegistry2->GetUserData<EntityScene*>();
-			pScript->InvokeSafe(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactRemoved", args);
+			pScript->Invoke(pEntityScene->GetEntitySceneObjectFromEntityID(entity2), "OnContactRemoved", args.data());
 		}
 	}
 
