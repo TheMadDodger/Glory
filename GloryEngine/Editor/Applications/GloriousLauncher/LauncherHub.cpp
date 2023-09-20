@@ -8,6 +8,7 @@
 
 #include <tinyfiledialogs.h>
 #include <GloryAPI.h>
+#include <About.h>
 
 namespace Glory::EditorLauncher
 {
@@ -505,13 +506,14 @@ namespace Glory::EditorLauncher
 
     void LauncherHub::DrawAbout()
     {
-        ImGui::Text("About");
+        ImGui::TextUnformatted("About");
         ImGui::Separator();
-        ImGui::Text("Glory Engine is copyright (C) 2020-2023 Robin Cordemans");
-        ImGui::Text("All rights reserved.");
-        ImGui::Spacing();
-        ImGui::Text("License");
-        ImGui::Text("Given the early state of the engine, this software is for personal use only.");
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{});
+        ImGui::BeginChild("AboutText");
+        ImGui::PopStyleVar();
+        ImGui::TextUnformatted(AboutText);
+        ImGui::EndChild();
+
     }
 
     void LauncherHub::DrawPopups()
