@@ -8,6 +8,9 @@ namespace Glory
 {
 	void ScriptingMethodsHelper::InvokeScriptingMethod(MonoObject* pObject, const std::string& methodName, std::vector<void*>& args)
 	{
+		/* Unfortunately this is slow and proned to crashing, so will not be used anymore */
+		throw new std::exception("ScriptingMethodsHelper::InvokeScriptingMethod should not be called anymore");
+
 		const size_t argCount = args.size();
 
 		MonoString* pMonoString = mono_string_new(mono_domain_get(), methodName.c_str());

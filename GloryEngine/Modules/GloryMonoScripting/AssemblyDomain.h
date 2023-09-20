@@ -29,7 +29,7 @@ namespace Glory
 		GLORY_API const std::string& GetMainAssemblyName();
 		GLORY_API MonoScriptObjectManager* ScriptObjectManager();
 
-		GLORY_API MonoObject* InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, MonoObject** pExceptionObject, void** args);
+		GLORY_API MonoObject* InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, void** args);
 
 		GLORY_API size_t AssemblyCount();
 		GLORY_API void ForEachAssembly(std::function<void(Assembly*)> callback);

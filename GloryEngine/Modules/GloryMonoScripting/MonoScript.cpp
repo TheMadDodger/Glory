@@ -46,8 +46,7 @@ namespace Glory
 		std::string fullMethodName = ".::" + method;
 		MonoMethod* pMethod = pClass->GetMethod(fullMethodName);
 		if (pMethod == nullptr) return;
-		MonoObject* pException = nullptr;
-		pDomain->InvokeMethod(pMethod, pMonoObject, &pException, args);
+		pDomain->InvokeMethod(pMethod, pMonoObject, args);
 	}
 
 	void MonoScript::InvokeSafe(Object* pObject, const std::string& method, std::vector<void*>& args)

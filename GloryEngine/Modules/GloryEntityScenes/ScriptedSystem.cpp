@@ -29,7 +29,7 @@ namespace Glory
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
 		pScript->SetPropertyValues(pObject, pComponent.m_ScriptData);
 
-		pScript->InvokeSafe(pObject, "Start", std::vector<void*>{});
+		pScript->Invoke(pObject, "Start", nullptr);
 	}
 
 	void ScriptedSystem::OnStop(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
@@ -40,7 +40,7 @@ namespace Glory
 		if (pScript == nullptr) return;
 		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
-		pScript->InvokeSafe(pObject, "Stop", std::vector<void*>{});
+		pScript->Invoke(pObject, "Stop", nullptr);
 	}
 
 	void ScriptedSystem::OnValidate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
@@ -55,7 +55,7 @@ namespace Glory
 		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
 		pScript->SetPropertyValues(pObject, pComponent.m_ScriptData);
-		pScript->InvokeSafe(pObject, "OnValidate", std::vector<void*>{});
+		pScript->Invoke(pObject, "OnValidate", nullptr);
 	}
 
 	void ScriptedSystem::OnUpdate(Glory::Utils::ECS::EntityRegistry* pRegistry, EntityID entity, ScriptedComponent& pComponent)
@@ -66,7 +66,7 @@ namespace Glory
 		if (pScript == nullptr) return;
 		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
-		pScript->InvokeSafe(pObject, "Update", std::vector<void*>{});
+		pScript->Invoke(pObject, "Update", nullptr);
 		pScript->GetPropertyValues(pObject, pComponent.m_ScriptData);
 	}
 
@@ -78,6 +78,6 @@ namespace Glory
 		if (pScript == nullptr) return;
 		ScenesModule* pEntityScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		SceneObject* pObject = pEntityScenes->GetSceneObjectFromObjectID(entity);
-		pScript->InvokeSafe(pObject, "Draw", std::vector<void*>{});
+		pScript->Invoke(pObject, "Draw", nullptr);
 	}
 }
