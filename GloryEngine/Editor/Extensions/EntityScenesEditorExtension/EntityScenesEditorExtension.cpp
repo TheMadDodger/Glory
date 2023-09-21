@@ -68,6 +68,7 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(Character, CharacterController);
 
 		ObjectMenu::AddMenuItem("Convert to Prefab", &ConvertToPrefabMenuItem, T_SceneObject);
+		ObjectMenu::AddMenuItem("Unpack Prefab", &UnpackPrefabMenuItem, T_SceneObject);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
 			ConvertToPrefab((EntitySceneObject*)e.Object, e.Path);
@@ -146,6 +147,15 @@ namespace Glory::Editor
 		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pEntityPrefab, path.string());
 		GScene* pScene = pObject->GetScene();
 		pScene->SetPrefab(pObject, prefabUUID);
+		EditorSceneManager::SetSceneDirty(pScene);
+	}
+
+	void EntityScenesEditorExtension::UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&)
+	{
+		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
+		GScene* pScene = pSceneObject->GetScene();
+		if (!pScene->Prefab(pSceneObject->GetUUID())) return;
+		pScene->UnsetPrefab(pSceneObject);
 		EditorSceneManager::SetSceneDirty(pScene);
 	}
 }

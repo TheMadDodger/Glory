@@ -96,6 +96,17 @@ namespace Glory
 		}
 	}
 
+	void GScene::UnsetPrefab(SceneObject* pObject)
+	{
+		m_ActivePrefabs.erase(pObject->GetUUID());
+
+		for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			UnsetChildrenPrefab(pChild);
+		}
+	}
+
 	const UUID GScene::Prefab(UUID objectID) const
 	{
 		const auto itor = m_ActivePrefabs.find(objectID);
@@ -132,6 +143,17 @@ namespace Glory
 		{
 			SceneObject* pChild = pObject->m_pChildren[i];
 			SetChildrenPrefab(pChild, prefabID);
+		}
+	}
+
+	void GScene::UnsetChildrenPrefab(SceneObject* pObject)
+	{
+		m_ActivePrefabChildren.erase(pObject->GetUUID());
+
+		for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			UnsetChildrenPrefab(pChild);
 		}
 	}
 }

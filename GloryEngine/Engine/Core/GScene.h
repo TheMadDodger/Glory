@@ -39,6 +39,7 @@ namespace Glory
         virtual void Stop() {}
 
         void SetPrefab(SceneObject* pObject, UUID prefabID);
+        void UnsetPrefab(SceneObject* pObject);
         const UUID Prefab(UUID objectID) const;
         const UUID PrefabChild(UUID objectID) const;
 
@@ -60,6 +61,7 @@ namespace Glory
     private:
         void SetUUID(UUID uuid);
         void SetChildrenPrefab(SceneObject* pObject, UUID prefabID);
+        void UnsetChildrenPrefab(SceneObject* pObject);
 
     protected:
         friend class ScenesModule;

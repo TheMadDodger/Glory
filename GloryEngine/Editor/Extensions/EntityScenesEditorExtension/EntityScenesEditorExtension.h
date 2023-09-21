@@ -35,6 +35,7 @@ namespace Glory::Editor
 
         static void ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&);
         static void ConvertToPrefab(EntitySceneObject* pObject, std::filesystem::path path);
+        static void UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&);
 
     private:
         static const std::vector<std::type_index> m_ComponentsToUpdateInEditor;
