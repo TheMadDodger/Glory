@@ -70,7 +70,7 @@ There are currently 2 options for configuration, `Debug` and `Release`.
 
 ### Build the engine
 
-Run the `generateprojects.bat` file under `GloryEngine/scripts` to run the premake scripts and generate the visual studio project files.
+Run the `generateprojects.bat` file to run the premake scripts and generate the visual studio project files.
 Open `GloryEngine.sln` and build the whole solution.
 Run the editor by running Glorious.
 
