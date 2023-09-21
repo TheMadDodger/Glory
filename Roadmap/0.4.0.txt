@@ -1,0 +1,4 @@
+Render your scenes with stunning visuals powered by voxel based global illumination (VXGI) alongside the power of clustered rendering for optimal performance.
+Numerous rendering optimizations like occlusion culling, sorting, instancing, and so on.
+Multiple light types with fast shadow casting.
+More flexibility with custom shaders.

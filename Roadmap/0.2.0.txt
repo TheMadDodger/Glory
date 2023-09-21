@@ -1,0 +1,3 @@
+Aimed at improving the overall experience of working with the engine and editor, this update brings numerous improvements to all aspects of Glory.
+Reducing the amount of crashes that make you lose work and time to 0, and making sure everything is working the way it is supposed to.
+Quality of life improvements through feedback and testing.

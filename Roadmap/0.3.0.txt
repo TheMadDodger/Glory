@@ -1,0 +1,2 @@
+Package your games into an executable to distribute to your fans, or sell on platforms like steam, epic, etc.
+Introduction of a commercial use license with limitations.

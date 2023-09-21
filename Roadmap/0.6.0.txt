@@ -1,0 +1,2 @@
+Make your game come to life with skeletal animations, with full blending support.
+You'll be the one in control with full customizability of your animations through state machines, blend trees, etc.
