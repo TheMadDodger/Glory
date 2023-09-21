@@ -203,7 +203,9 @@ namespace Glory::Editor
 
 	GScene* EditorSceneManager::GetActiveScene()
 	{
-		return Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetActiveScene();
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetActiveScene();
+		if (!pScene) pScene = NewScene();
+		return pScene;
 	}
 
 	void EditorSceneManager::SetSceneDirty(GScene* pScene, bool dirty)

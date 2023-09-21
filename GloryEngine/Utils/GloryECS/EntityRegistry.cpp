@@ -78,8 +78,8 @@ namespace Glory::Utils::ECS
 
 	EntityView* EntityRegistry::GetEntityView(EntityID entity)
 	{
-		if (m_pEntityViews.find(entity) == m_pEntityViews.end())
-			throw new std::exception("Entity does not exist");
+		if(m_pEntityViews.find(entity) == m_pEntityViews.end())
+			return nullptr;
 
 		return m_pEntityViews[entity];
 	}

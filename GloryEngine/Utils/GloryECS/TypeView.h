@@ -116,7 +116,8 @@ namespace Glory::Utils::ECS
 			{
 				T& component = m_ComponentData[i];
 				EntityID entity = m_Entities[i];
-				if (!pRegistry->GetEntityView(entity)->IsActive()) continue;
+				EntityView* pEntityView = pRegistry->GetEntityView(entity);
+				if (!pEntityView || !pEntityView->IsActive()) continue;
 				m_Callbacks.Invoke(invocationType, pRegistry, entity, component);
 			}
 		}
