@@ -203,7 +203,9 @@ namespace Glory::Editor
 
 	GScene* EditorSceneManager::GetActiveScene()
 	{
-		return Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetActiveScene();
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetActiveScene();
+		if (!pScene) pScene = NewScene();
+		return pScene;
 	}
 
 	void EditorSceneManager::SetSceneDirty(GScene* pScene, bool dirty)
@@ -267,7 +269,7 @@ namespace Glory::Editor
 				Serializer::SetUUIDRemap(parentUUID, parentUUID);
 			}
 
-			SceneObject* pDupedObject = (SceneObject*)Serializer::DeserializeObject(pScene, objectNode, Serializer::Flags::GenerateNewUUIDs);
+			SceneObject* pDupedObject = (SceneObject*)Serializer::DeserializeObject(pScene, objectNode, Serializer::Flags(Serializer::Flags::GenerateNewUUIDs));
 			if (i == 0 && pDupedObject)
 			{
 				Undo::StartRecord("Duplicate", pDupedObject->GetUUID());
@@ -284,6 +286,7 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SerializeObjects(SceneObject* pObject, YAML::Emitter& out)
 	{
+		if (pObject->GetScene()->PrefabChild(pObject->GetUUID())) return;
 		Serializer::SerializeObject(pObject, out);
 		for (size_t i = 0; i < pObject->ChildCount(); i++)
 		{

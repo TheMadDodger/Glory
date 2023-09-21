@@ -4,12 +4,11 @@
 
 namespace Glory
 {
-	class UUID
+	struct UUID
 	{
 	public:
 		UUID();
 		UUID(uint64_t uuid);
-		~UUID();
 
 		operator uint64_t() const { return m_UUID; }
 

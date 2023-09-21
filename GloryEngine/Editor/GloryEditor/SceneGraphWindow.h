@@ -10,7 +10,7 @@ namespace Glory::Editor
 		SceneGraphWindow();
 		virtual ~SceneGraphWindow();
 
-		GLORY_EDITOR_API static void SetDrawObjectNameCallback(std::function<void(SceneObject*)> callback);
+		GLORY_EDITOR_API static void SetDrawObjectNameCallback(std::function<void(SceneObject*, bool)> callback);
 		GLORY_EDITOR_API static void SetSearchCompareCallback(std::function<bool(std::string_view, SceneObject*)> callback);
 		GLORY_EDITOR_API static void SetSearchTooltipCallback(std::function<void()> callback);
 
@@ -24,6 +24,8 @@ namespace Glory::Editor
 		bool GetExcludedObjectsFromFilterRecursive(SceneObject* pObject);
 
 		bool IsExcluded(const UUID uuid);
+
+		bool HandleAssetDragAndDrop(SceneObject* pParent, uint32_t dndHash, const ImGuiPayload* pPayload);
 
 	private:
 		static const size_t SearchBufferSize = 1000;

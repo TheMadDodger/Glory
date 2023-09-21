@@ -61,9 +61,9 @@ namespace Glory
 		static const BasicTypeData* GetBasicTypeData(uint32_t typeHash);
 		static const BasicTypeData* GetBasicTypeData(const std::string& name);
 
-		static size_t SubTypeCount(ResourceType* pResourceType);
-		static ResourceType* GetSubType(ResourceType* pResourceType, size_t index);
-		static uint32_t GetSubTypeHash(ResourceType* pResourceType, size_t index);
+		static size_t SubTypeCount(const ResourceType* pResourceType);
+		static ResourceType* GetSubType(const ResourceType* pResourceType, size_t index);
+		static uint32_t GetSubTypeHash(const ResourceType* pResourceType, size_t index);
 		static size_t GetAllResourceTypesThatHaveSubType(uint32_t hash, std::vector<ResourceType*>& out);
 
 		static bool IsScene(const std::string& ext);

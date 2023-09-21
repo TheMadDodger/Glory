@@ -16,6 +16,7 @@
 #include <DND.h>
 #include <IconsFontAwesome6.h>
 #include <PopupManager.h>
+#include <Dispatcher.h>
 
 namespace Glory::Editor
 {
@@ -28,6 +29,12 @@ namespace Glory::Editor
 
 	char FileBrowserItem::m_SearchBuffer[1000] = "\0";
 	std::vector<FileBrowserItem*> FileBrowserItem::m_pSearchResultCache;
+
+	Dispatcher<FileBrowserItem::ObjectDNDEvent>& FileBrowserItem::ObjectDNDEventDispatcher()
+	{
+		static Dispatcher<ObjectDNDEvent> dispatcher;
+		return dispatcher;
+	}
 
 	FileBrowserItem::FileBrowserItem()
 		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<FileBrowserItem*>()), m_Editable(true)
@@ -226,7 +233,13 @@ namespace Glory::Editor
 				m_pChildren[i]->DrawDirectoryBrowser();
 			}
 			ImGui::TreePop();
-			DND{ { ST_Path } }.HandleDragAndDropTarget([this](uint32_t, const ImGuiPayload* payload) {
+			DND{ { ST_Path, ResourceType::GetHash<SceneObject>() } }.HandleDragAndDropTarget([this](uint32_t typeHash, const ImGuiPayload* payload) {
+				if (typeHash != ST_Path)
+				{
+					const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
+					FileBrowserItem::ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, objectPayload.pObject });
+					return;
+				}
 				std::filesystem::path filePath = (const char*)payload->Data;
 				const std::filesystem::path fileName = filePath.filename();
 				std::filesystem::path newPath = m_CachedPath;
@@ -258,7 +271,7 @@ namespace Glory::Editor
 	{
 		if (!m_pSelectedFolder) return;
 
-		ImVec2 windowSize = ImGui::GetWindowSize();
+		const ImVec2 windowSize = ImGui::GetWindowSize();
 
 		float width = windowSize.x;
 
@@ -341,7 +354,15 @@ namespace Glory::Editor
 					ImGui::Text("%s %s", ICON_FA_FOLDER_OPEN, m_CachedPath.string().data());
 				});
 
-				DND{ { ST_Path } }.HandleDragAndDropTarget([this](uint32_t, const ImGuiPayload* payload) {
+				const uint32_t sceneObjectHash = ResourceType::GetHash<SceneObject>();
+				DND{ { ST_Path, sceneObjectHash } }.HandleDragAndDropTarget([&](uint32_t hash, const ImGuiPayload* payload) {
+					if (hash == sceneObjectHash)
+					{
+						const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
+						ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, objectPayload.pObject });
+						return;
+					}
+
 					std::filesystem::path filePath = (const char*)payload->Data;
 					const std::filesystem::path fileName = filePath.filename();
 					std::filesystem::path newPath = m_CachedPath;

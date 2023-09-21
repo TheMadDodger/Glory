@@ -7,6 +7,9 @@
 
 namespace Glory
 {
+	class LoaderModule;
+	class EntityPrefabDataLoader;
+
 	class EntitySceneScenesModule : public ScenesModule
 	{
 	public:
@@ -22,7 +25,7 @@ namespace Glory
 			Reflect::RegisterType<T>();
 		}
 
-		GLORY_MODULE_VERSION_H(0,1,0);
+		GLORY_MODULE_VERSION_H(0,2,0);
 
 	private:
 		virtual void Initialize() override;
@@ -40,5 +43,7 @@ namespace Glory
 		friend class EntitySceneObjectSerializer;
 		friend class EntitySceneSerializer;
 		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;
+
+		EntityPrefabDataLoader* m_pPrefabLoader;
 	};
 }

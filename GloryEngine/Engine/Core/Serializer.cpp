@@ -99,12 +99,12 @@ namespace Glory
 
 	void Serializer::ClearUUIDRemapCache()
 	{
-		GloryContext::GetContext()->m_UUIDRemapper.clear();
+		GloryContext::GetContext()->m_UUIDRemapper.Reset();
 	}
 
 	void Serializer::SetUUIDRemap(UUID oldUUID, UUID newUUID)
 	{
-		GloryContext::GetContext()->m_UUIDRemapper.emplace(oldUUID, newUUID);
+		GloryContext::GetContext()->m_UUIDRemapper.EnforceRemap(oldUUID, newUUID);
 	}
 
 	Serializer::Serializer()

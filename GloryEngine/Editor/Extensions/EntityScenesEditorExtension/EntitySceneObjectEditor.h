@@ -28,7 +28,7 @@ namespace Glory::Editor
 		bool NameGUI();
 		bool ComponentGUI();
 
-		static void DrawObjectNodeName(SceneObject* pObject);
+		static void DrawObjectNodeName(SceneObject* pObject, bool isPrefab);
 		static bool SearchCompare(std::string_view search, SceneObject* pObject);
 
 	private:

@@ -4,6 +4,7 @@
 #include "Components.h"
 #include "Systems.h"
 #include "ScriptedComponentSerializer.h"
+#include "EntityPrefabDataLoader.h"
 
 #include <Engine.h>
 #include <PhysicsModule.h>
@@ -14,12 +15,14 @@ namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(EntitySceneScenesModule);
 
-	EntitySceneScenesModule::EntitySceneScenesModule() : m_pComponentTypesInstance(nullptr)
+	EntitySceneScenesModule::EntitySceneScenesModule() : m_pComponentTypesInstance(nullptr), m_pPrefabLoader(nullptr)
 	{
 	}
 
 	EntitySceneScenesModule::~EntitySceneScenesModule()
 	{
+		m_pComponentTypesInstance = nullptr;
+		m_pPrefabLoader = nullptr;
 	}
 
 	Glory::Utils::ECS::ComponentTypes* EntitySceneScenesModule::ComponentTypesInstance() const
@@ -98,6 +101,9 @@ namespace Glory
 		pPhysics->RegisterContactCallback(ContactCallback::Added, PhysicsSystem::OnContactAdded);
 		pPhysics->RegisterContactCallback(ContactCallback::Persisted, PhysicsSystem::OnContactPersisted);
 		pPhysics->RegisterContactCallback(ContactCallback::Removed, PhysicsSystem::OnContactRemoved);
+
+		m_pPrefabLoader = new EntityPrefabDataLoader();
+		m_pEngine->AddOptionalModule(m_pPrefabLoader, true);
 	}
 
 	void EntitySceneScenesModule::PostInitialize()

@@ -5,6 +5,7 @@
 #include <imgui_internal.h>
 #include <GloryContext.h>
 #include <IPlayModeHandler.h>
+#include <ObjectMenu.h>
 
 extern "C" GLORY_EDITOR_EXTENSION_API Glory::Editor::BaseEditorExtension* LoadExtension();
 extern "C" GLORY_EDITOR_EXTENSION_API void SetContext(Glory::GloryContext * pContext, ImGuiContext* pImGUIContext);
@@ -12,6 +13,7 @@ extern "C" GLORY_EDITOR_EXTENSION_API void SetContext(Glory::GloryContext * pCon
 namespace Glory
 {
     class SceneObject;
+    class EntitySceneObject;
 }
 
 namespace Glory::Editor
@@ -30,6 +32,10 @@ namespace Glory::Editor
         virtual void HandleStart(Module* pModule) override;
         virtual void HandleStop(Module* pModule) override;
         virtual void HandleUpdate(Module* pModule) override;
+
+        static void ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&);
+        static void ConvertToPrefab(EntitySceneObject* pObject, std::filesystem::path path);
+        static void UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&);
 
     private:
         static const std::vector<std::type_index> m_ComponentsToUpdateInEditor;

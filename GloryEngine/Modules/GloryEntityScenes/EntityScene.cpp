@@ -4,6 +4,16 @@
 #include "Components.h"
 #include "Systems.h"
 #include "EntitySceneObject.h"
+#include "EntityPrefabData.h"
+#include "PropertySerializer.h"
+#include "UUIDRemapper.h"
+#include "DistributedRandom.h"
+
+#include <EntityView.h>
+#include <TypeData.h>
+#include <glm/glm.hpp>
+#include <PropertySerializer.h>
+#include <NodeRef.h>
 
 namespace Glory
 {
@@ -44,9 +54,54 @@ namespace Glory
 		return &m_Registry;
 	}
 
-	GLORY_API bool EntityScene::IsValid() const
+	bool EntityScene::IsValid() const
 	{
 		return m_Valid;
+	}
+
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
+		const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+	{
+		EntityPrefabData* pEntityPrefab = (EntityPrefabData*)pPrefab;
+
+		UUID uuid = UUID();
+		const uint32_t first32Bits = uint32_t((uuid << 32) >> 32);
+		const uint32_t second32Bits = uint32_t(uuid >> 32);
+		const uint32_t seed = first32Bits & second32Bits;
+		UUIDRemapper remapper{ seed };
+		remapper.EnforceRemap(pEntityPrefab->RootNode().OriginalUUID(), uuid);
+		return InstantiatePrefab(pParent, (EntityPrefabData*)pPrefab, RandomDevice::Seed(), pos, rot, scale);
+	}
+
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, uint32_t remapSeed,
+		const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+	{
+		UUIDRemapper remapper{ remapSeed };
+		const PrefabNode& rootNode = pPrefab->RootNode();
+		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode((EntitySceneObject*)pParent, rootNode, remapper);
+
+		Transform& transform = pInstantiatedPrefab->GetEntityHandle().GetComponent<Transform>();
+		transform.Position = pos;
+		transform.Rotation = rot;
+		transform.Scale = scale;
+
+		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
+		return pInstantiatedPrefab;
+	}
+
+	SceneObject* EntityScene::InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, UUIDRemapper& remapper,
+		const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+	{
+		const PrefabNode& rootNode = pPrefab->RootNode();
+		EntitySceneObject* pInstantiatedPrefab = InstantiatePrefabNode((EntitySceneObject*)pParent, rootNode, remapper);
+
+		Transform& transform = pInstantiatedPrefab->GetEntityHandle().GetComponent<Transform>();
+		transform.Position = pos;
+		transform.Rotation = rot;
+		transform.Scale = scale;
+
+		SetPrefab(pInstantiatedPrefab, pPrefab->GetUUID());
+		return pInstantiatedPrefab;
 	}
 
 	void EntityScene::Initialize()
@@ -141,5 +196,112 @@ namespace Glory
 	void EntityScene::Stop()
 	{
 		m_Registry.InvokeAll(InvocationType::Stop);
+	}
+
+	EntitySceneObject* EntityScene::InstantiatePrefabNode(EntitySceneObject* pParent, const PrefabNode& node, UUIDRemapper& remapper)
+	{
+		const UUID objectID = remapper(node.OriginalUUID());
+		const UUID transformID = remapper(node.TransformUUID());
+		EntitySceneObject* pObject = (EntitySceneObject*)CreateEmptyObject(node.Name(), objectID, transformID);
+		if (pParent)
+			pObject->SetParent(pParent);
+
+		pObject->SetActive(node.ActiveSelf());
+
+		const std::string& serializedComponents = node.SerializedComponents();
+		YAML::Node components = YAML::Load(serializedComponents);
+
+		const uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
+		const uint32_t scriptedTypeHash = ResourceType::GetHash(typeid(ScriptedComponent));
+
+		size_t currentComponentIndex = 0;
+		for (size_t i = 0; i < components.size(); ++i)
+		{
+			YAML::Node nextObject = components[i];
+			YAML::Node subNode;
+			uint32_t typeHash = 0;
+			UUID originalUUID = 0;
+			std::string typeName = "";
+			YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
+			YAML_READ(nextObject, subNode, UUID, originalUUID, uint64_t);
+
+			Entity entityHandle = pObject->GetEntityHandle();
+			EntityID entity = entityHandle.GetEntityID();
+			EntityRegistry* pRegistry = GetRegistry();
+
+			UUID compUUID = remapper(originalUUID);
+
+			void* pComponentAddress = nullptr;
+			if (typeHash != transformTypeHash) pComponentAddress = pRegistry->CreateComponent(entity, typeHash, compUUID);
+			else
+			{
+				Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+				compUUID = pEntityView->ComponentUUIDAt(0);
+				pComponentAddress = pRegistry->GetComponentAddress(entity, compUUID);
+			}
+
+			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(typeHash);
+			YAML::Node originalProperties = nextObject["Properties"];
+			if (typeHash != scriptedTypeHash)
+			{
+				PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
+			}
+			else
+			{
+				YAML::Node finalProperties = YAML::Node(YAML::NodeType::Map);
+
+				Utils::NodeRef originalPropertiesRef = originalProperties;
+				Utils::NodeRef finalPropertiesRef = finalProperties;
+
+				Utils::NodeValueRef props = originalPropertiesRef.ValueRef();
+				Utils::NodeValueRef finalProps = finalPropertiesRef.ValueRef();
+
+				finalPropertiesRef["m_Script"].Set(originalPropertiesRef["m_Script"].As<uint64_t>());
+				YAML::Node scriptData = originalProperties["ScriptData"];
+				for (YAML::const_iterator itor = scriptData.begin(); itor != scriptData.end(); ++itor)
+				{
+					const std::string name = itor->first.as<std::string>();
+					Utils::NodeValueRef prop = props["ScriptData"][name];
+					if (!prop.IsMap())
+					{
+						finalProps[name].Set(prop.Node());
+						continue;
+					}
+
+					Utils::NodeValueRef originalSceneUUD = prop["SceneUUID"];
+					Utils::NodeValueRef originalObjectUUD = prop["ObjectUUID"];
+
+					Utils::NodeValueRef sceneUUID = finalProps["ScriptData"][name]["SceneUUID"];
+					Utils::NodeValueRef objectUUID = finalProps["ScriptData"][name]["ObjectUUID"];
+
+					if (!originalSceneUUD.Exists() || !originalObjectUUD.Exists())
+					{
+						finalProps["ScriptData"][name].Set(prop.Node());
+						continue;
+					}
+
+					sceneUUID.Set((uint64_t)GetUUID());
+					const UUID uuid = originalObjectUUD.As<uint64_t>();
+					UUID remapped;
+					if (!remapper.Find(uuid, remapped))
+						remapped = uuid;
+
+					objectUUID.Set(remapped);
+				}
+
+				PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
+			}
+
+			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
+			++currentComponentIndex;
+		}
+
+		for (size_t i = 0; i < node.ChildCount(); ++i)
+		{
+			const PrefabNode& childNode = node.ChildNode(i);
+			InstantiatePrefabNode(pObject, childNode, remapper);
+		}
+
+		return pObject;
 	}
 }

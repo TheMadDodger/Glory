@@ -9,6 +9,9 @@ namespace Glory
 {
 	class Entity;
 	class EntitySceneObject;
+	class EntityPrefabData;
+	struct PrefabNode;
+	struct UUIDRemapper;
 
 	class EntityScene : public GScene
 	{
@@ -25,6 +28,13 @@ namespace Glory
 
 		GLORY_API bool IsValid() const;
 
+		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale) override;
+		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, uint32_t remapSeed,
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+		GLORY_API SceneObject* InstantiatePrefab(SceneObject* pParent, EntityPrefabData* pPrefab, UUIDRemapper& remapper,
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+
 	private:
 		virtual void Initialize() override;
 		virtual void OnTick() override;
@@ -38,6 +48,8 @@ namespace Glory
 
 		virtual void Start() override;
 		virtual void Stop() override;
+
+		EntitySceneObject* InstantiatePrefabNode(EntitySceneObject* pParent, const PrefabNode& node, UUIDRemapper& remapper);
 
 	private:
 		friend class Entity;

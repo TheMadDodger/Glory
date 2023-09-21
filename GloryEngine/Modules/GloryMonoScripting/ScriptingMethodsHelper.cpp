@@ -22,7 +22,7 @@ namespace Glory
 		{
 		case 0:
 			mono_runtime_invoke(m_pCallBasicMethod, nullptr, args.data(), &pExcept);
-			break;
+		break;
 		case 1:
 			mono_runtime_invoke(m_pCallOneArgsMethod, nullptr, args.data(), &pExcept);
 			break;

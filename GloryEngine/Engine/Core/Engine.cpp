@@ -17,6 +17,7 @@
 #include "SceneObjectRef.h"
 #include "Physics.h"
 #include "ShapeProperty.h"
+#include "PrefabData.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -364,6 +365,7 @@ namespace Glory
 		ResourceType::RegisterType<SceneObjectRef>();
 		ResourceType::RegisterType<ShapeProperty>();
 		ResourceType::RegisterResource<SceneObject>("");
+		ResourceType::RegisterResource<PrefabData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");

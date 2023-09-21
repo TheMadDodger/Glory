@@ -1,5 +1,6 @@
 #pragma once
 #include "CameraManager.h"
+#include "UUIDRemapper.h"
 
 namespace Glory::Utils::Reflect
 {
@@ -54,7 +55,7 @@ namespace Glory
 		static void AddUserContext(uint32_t hash, void* pUserContext);
 		static void* GetUserContext(uint32_t hash);
 
-		std::map<UUID, UUID> m_UUIDRemapper;
+		UUIDRemapper m_UUIDRemapper;
 
 	private:
 		void Initialize();

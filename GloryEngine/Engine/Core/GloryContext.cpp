@@ -9,6 +9,7 @@
 #include "WindowsDebugConsole.h"
 #include "ObjectManager.h"
 #include "ShaderManager.h"
+#include "DistributedRandom.h"
 
 #include <Reflection.h>
 
@@ -121,7 +122,7 @@ namespace Glory
 		: m_Game(nullptr), m_pAssetDatabase(new AssetDatabase()), m_pAssetManager(new AssetManager()), m_pResourceTypes(new ResourceTypes()),
 		m_pSerializers(new Serializers()), m_pDisplayManager(new DisplayManager()), m_pConsole(new Console()),
 		m_pLayerManager(new LayerManager()), m_pShaderManager(new ShaderManager()), m_pReflection(Reflect::CreateReflectInstance()),
-		m_pDebug(new Debug()), m_pObjectManager(new ObjectManager())
+		m_pDebug(new Debug()), m_pObjectManager(new ObjectManager()), m_UUIDRemapper(RandomDevice::Seed())
 	{
 	}
 

@@ -280,7 +280,7 @@ namespace Glory::Editor
 		SetDirty();
 	}
 
-	void EditorAssetDatabase::CreateAsset(Resource* pResource, const std::string& path)
+	UUID EditorAssetDatabase::CreateAsset(Resource* pResource, const std::string& path)
 	{
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -290,13 +290,13 @@ namespace Glory::Editor
 		{
 			// Shouldnt happen but uuuuuuuuuh
 			Debug::LogError("Failed to save asset, asset type not supported!");
-			return;
+			return 0;
 		}
 		pModule->Save(path, pResource);
-		ImportAsset(path, pResource);
+		return ImportAsset(path, pResource);
 	}
 
-	void EditorAssetDatabase::ImportAsset(const std::string& path, Resource* pLoadedResource, std::filesystem::path subPath)
+	UUID EditorAssetDatabase::ImportAsset(const std::string& path, Resource* pLoadedResource, std::filesystem::path subPath)
 	{
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -308,7 +308,7 @@ namespace Glory::Editor
 		if (ResourceType::IsScene(ext))
 		{
 			ImportScene(path);
-			return;
+			return 0;
 		}
 
 		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
@@ -316,7 +316,7 @@ namespace Glory::Editor
 		{
 			// Not supperted!
 			Debug::LogError("Failed to import file, asset type not supported!");
-			return;
+			return 0;
 		}
 
 		const ResourceType* pType = nullptr;
@@ -328,7 +328,7 @@ namespace Glory::Editor
 			if (!pLoadedResource)
 			{
 				Debug::LogError("Failed to import file, could not load resource file!");
-				return;
+				return 0;
 			}
 		}
 
@@ -353,7 +353,7 @@ namespace Glory::Editor
 			{
 				// Not supperted!
 				Debug::LogError("Failed to import file, could not determine ResourceType!");
-				return;
+				return 0;
 			}
 		}
 
@@ -389,6 +389,8 @@ namespace Glory::Editor
 			newSubPath.append(pSubResource->Name());
 			ImportAsset(path, pSubResource, newSubPath);
 		}
+
+		return meta.ID();
 	}
 
 	void EditorAssetDatabase::ImportAssetsAsync(const std::string& path)

@@ -2,9 +2,12 @@
 #include "Resource.h"
 #include "SceneObject.h"
 #include <mutex>
+#include <glm/fwd.hpp>
 
 namespace Glory
 {
+    class PrefabData;
+
     struct DelayedParentData
     {
         DelayedParentData(SceneObject* pObjectToParent, UUID parentID) : ObjectToParent(pObjectToParent), ParentID(parentID) {}
@@ -35,6 +38,15 @@ namespace Glory
         virtual void Start() {}
         virtual void Stop() {}
 
+        void SetPrefab(SceneObject* pObject, UUID prefabID);
+        void UnsetPrefab(SceneObject* pObject);
+        const UUID Prefab(UUID objectID) const;
+        const UUID PrefabChild(UUID objectID) const;
+
+        virtual SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
+            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+        { return nullptr; }
+
     protected:
         virtual void Initialize() {}
         virtual void OnTick() {}
@@ -48,11 +60,15 @@ namespace Glory
 
     private:
         void SetUUID(UUID uuid);
+        void SetChildrenPrefab(SceneObject* pObject, UUID prefabID);
+        void UnsetChildrenPrefab(SceneObject* pObject);
 
     protected:
         friend class ScenesModule;
         friend class SceneObject;
         std::vector<SceneObject*> m_pSceneObjects;
         std::vector<DelayedParentData> m_DelayedParents;
+        std::map<UUID, UUID> m_ActivePrefabs;
+        std::map<UUID, UUID> m_ActivePrefabChildren;
     };
 }

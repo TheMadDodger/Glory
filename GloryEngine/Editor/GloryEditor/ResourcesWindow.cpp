@@ -8,6 +8,9 @@
 #include <StringUtils.h>
 #include <ProjectSpace.h>
 #include <EditorAssetCallbacks.h>
+
+#include <PrefabData.h>
+
 #include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
@@ -176,7 +179,15 @@ namespace Glory::Editor
 					}
 
 					AssetPayload payload{ uuid };
-					DND::DragAndDropSource(pType->Name(), &payload, sizeof(AssetPayload), [&]() {
+					const uint32_t subTypeHash = ResourceType::GetSubTypeHash(pType, 1);
+					const ResourceType* pPayloadType = pType;
+					if (subTypeHash != ResourceType::GetHash<Resource>())
+					{
+						pPayloadType = ResourceType::GetResourceType(subTypeHash);
+						if (pPayloadType == nullptr) pPayloadType = pType;
+					}
+
+					DND::DragAndDropSource(pPayloadType->Name(), &payload, sizeof(AssetPayload), [&]() {
 						ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { 64.0f, 64.0f });
 						ImGui::SameLine();
 						ImGui::Text(name.data());
@@ -236,7 +247,14 @@ namespace Glory::Editor
 
 		m_ProjectOpenCallback = ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace*) { m_ForceFilter = true; });
 		ResourceTypes.clear();
-		ResourceType::GetAllResourceTypesThatHaveSubType(ResourceType::GetHash<Resource>(), ResourceTypes);
+		std::vector<ResourceType*> types;
+		ResourceType::GetAllResourceTypesThatHaveSubType(ResourceType::GetHash<Resource>(), types);
+		for (size_t i = 0; i < types.size(); ++i)
+		{
+			ResourceType* pType = types[i];
+			if (pType->Hash() == ResourceType::GetHash<PrefabData>()) continue;
+			ResourceTypes.push_back(pType);
+		}
 
 		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered,
 			[&](const AssetCallbackData&) { m_ForceFilter = true; });

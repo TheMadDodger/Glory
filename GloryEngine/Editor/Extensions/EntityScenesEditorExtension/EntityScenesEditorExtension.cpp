@@ -11,8 +11,13 @@
 #include <EditorPlayer.h>
 #include <Components.h>
 #include <Reflection.h>
+#include <EntityPrefabData.h>
+#include <EditorAssetDatabase.h>
+#include <FileBrowser.h>
+#include <EditorSceneManager.h>
 #include <ObjectMenu.h>
 #include <SceneGraphWindow.h>
+#include <Dispatcher.h>
 
 #define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
 name##MenuName << STRINGIFY(Create/Entity Object/) << EntitySceneObjectEditor::GetComponentIcon<component>() << "  " << STRINGIFY(name); \
@@ -61,6 +66,13 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(Scripted, ScriptedComponent);
 		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
 		OBJECT_CREATE_MENU(Character, CharacterController);
+
+		ObjectMenu::AddMenuItem("Convert to Prefab", &ConvertToPrefabMenuItem, T_SceneObject);
+		ObjectMenu::AddMenuItem("Unpack Prefab", &UnpackPrefabMenuItem, T_SceneObject);
+
+		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
+			ConvertToPrefab((EntitySceneObject*)e.Object, e.Path);
+		});
 	}
 
 	const char* EntityScenesEditorExtension::ModuleName()
@@ -108,7 +120,7 @@ namespace Glory::Editor
 		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
 		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
-		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); ++i)
 		{
 			GScene* pScene = pScenesModule->GetOpenScene(i);
 			EntityScene* pEntityScene = (EntityScene*)pScene;
@@ -119,6 +131,32 @@ namespace Glory::Editor
 				pRegistry->InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
 			}
 		}
+	}
+
+	void EntityScenesEditorExtension::ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&)
+	{
+		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
+		const std::filesystem::path path = FileBrowser::GetCurrentPath();
+		ConvertToPrefab(pSceneObject, path);
+	}
+
+	void EntityScenesEditorExtension::ConvertToPrefab(EntitySceneObject* pObject, std::filesystem::path path)
+	{
+		EntityPrefabData* pEntityPrefab = EntityPrefabData::CreateFromSceneObject(pObject);
+		path.append(pObject->Name() + ".gentity");
+		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pEntityPrefab, path.string());
+		GScene* pScene = pObject->GetScene();
+		pScene->SetPrefab(pObject, prefabUUID);
+		EditorSceneManager::SetSceneDirty(pScene);
+	}
+
+	void EntityScenesEditorExtension::UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&)
+	{
+		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
+		GScene* pScene = pSceneObject->GetScene();
+		if (!pScene->Prefab(pSceneObject->GetUUID())) return;
+		pScene->UnsetPrefab(pSceneObject);
+		EditorSceneManager::SetSceneDirty(pScene);
 	}
 }
 

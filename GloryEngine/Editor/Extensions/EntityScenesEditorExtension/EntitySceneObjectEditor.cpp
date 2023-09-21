@@ -115,6 +115,25 @@ namespace Glory::Editor
 		ImGui::TextDisabled("Entity Object");
 		ImGui::Separator();
 
+		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
+		EntityID entityID = entity.GetEntityID();
+		EntityScene* pScene = entity.GetScene();
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+
+		const UUID prefabID = pScene->Prefab(m_pObject->GetUUID());
+		const UUID childOfPrefabID = pScene->PrefabChild(m_pObject->GetUUID());
+		if (prefabID || childOfPrefabID)
+		{
+			std::string prefabIDString = std::to_string(prefabID ? prefabID : childOfPrefabID);
+			ImGui::Text("Linked to prefab:");
+			const float textWitdh = ImGui::CalcTextSize(prefabIDString.data()).x;
+			ImGui::SameLine();
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
+			ImGui::Text(prefabIDString.data());
+		}
+
+		ImGui::BeginDisabled(prefabID || childOfPrefabID);
 		std::string originalName = m_pObject->Name();
 		const char* name = originalName.c_str();
 		memcpy(m_NameBuff, name, originalName.length() + 1);
@@ -136,6 +155,7 @@ namespace Glory::Editor
 			Undo::AddAction(new SceneObjectNameAction(originalName, m_pObject->Name()));
 			Undo::StopRecord();
 		}
+		ImGui::EndDisabled();
 
 		ImGui::PopID();
 		return change;
@@ -143,16 +163,21 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::ComponentGUI()
 	{
-		ImGui::PushID("Components");
-
-		ImGui::TextDisabled("Components");
-		ImGui::Separator();
-
 		bool change = false;
 
 		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
 		EntityID entityID = entity.GetEntityID();
-		Glory::Utils::ECS::EntityRegistry* pRegistry = entity.GetScene()->GetRegistry();
+		EntityScene* pScene = entity.GetScene();
+		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+
+		const bool isPrefab = pScene->Prefab(m_pObject->GetUUID());
+		const bool isChildOfPrefab = pScene->PrefabChild(m_pObject->GetUUID());
+		ImGui::BeginDisabled(isChildOfPrefab);
+
+		ImGui::PushID("Components");
+
+		ImGui::TextDisabled("Components");
+		ImGui::Separator();
 
 		bool removeComponent = false;
 		size_t toRemoveComponent = 0;
@@ -167,6 +192,9 @@ namespace Glory::Editor
 				icon = COMPONENT_ICONS.at(componentHash);
 
 			ImGui::PushID(index);
+
+			/* Do not disable editing the transform */
+			ImGui::BeginDisabled(isPrefab && index);
 
 			std::string label = std::string(icon) + "	" + pEditor->Name();
 			const bool open = EditorUI::Header(label);
@@ -192,6 +220,8 @@ namespace Glory::Editor
 				ImGui::EndPopup();
 			}
 
+			ImGui::EndDisabled();
+
 			ImGui::PopID();
 
 			ImGui::Spacing();
@@ -202,11 +232,13 @@ namespace Glory::Editor
 
 		ImGui::Separator();
 		const float buttonWidth = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginDisabled(isPrefab);
 		if (ImGui::Button("Add Component", { buttonWidth, 0.0f }))
 		{
 			EntityComponentPopup::Open(entityID, pRegistry);
 			m_AddingComponent = true;
 		}
+		ImGui::EndDisabled();
 
 		if (removeComponent)
 		{
@@ -242,12 +274,12 @@ namespace Glory::Editor
 		m_ComponentPopup.OnGUI();
 
 		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
-		EntityScene* pScene = (EntityScene*)pObject->GetScene();
 		if (change) EditorSceneManager::SetSceneDirty(pScene);
+		ImGui::EndDisabled();
 		return change;
 	}
 
-	void EntitySceneObjectEditor::DrawObjectNodeName(SceneObject* pObject)
+	void EntitySceneObjectEditor::DrawObjectNodeName(SceneObject* pObject, bool isPrefab)
 	{
 		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
 		Entity entity = pEntityObject->GetEntityHandle();
@@ -260,7 +292,8 @@ namespace Glory::Editor
 		}
 
 		const std::string componentLabels = stream.str();
-		ImGui::Text(" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+		ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
+			" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
 
 		const float compLabelsWidth = ImGui::CalcTextSize(componentLabels.data()).x;
 		const float availableWidth = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowPos().x;
