@@ -37,12 +37,27 @@ namespace GloryEngine.Entities
             private set { }
         }
 
+        /// <summary>
+        /// Scene object of the entity this component is attached to
+        /// </summary>
+        public EntitySceneObject SceneObject
+        {
+            get
+            {
+                if (_sceneObject != null) return _sceneObject;
+                _sceneObject = Entity.SceneObject;
+                return _sceneObject;
+            }
+            private set { }
+        }
+
         #endregion
 
         #region Fields
 
         private Entity _entity = new Entity(0, 0);
         private Transform _transform = null;
+        private EntitySceneObject _sceneObject = null;
 
         #endregion
 

@@ -100,14 +100,14 @@ namespace Glory::Utils::ECS
 		return pTypeView->Contains(entity);
 	}
 
-	void EntityRegistry::RemoveComponent(EntityID entity, uint32_t typeHash)
+	UUID EntityRegistry::RemoveComponent(EntityID entity, uint32_t typeHash)
 	{
 		EntityView* pEntityView = GetEntityView(entity);
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		void* pAddress = pTypeView->GetComponentAddress(entity);
 		pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);
 		pTypeView->Remove(entity);
-		m_pEntityViews[entity]->Remove(typeHash);
+		return m_pEntityViews[entity]->Remove(typeHash);
 	}
 
 	void EntityRegistry::RemoveComponentAt(EntityID entity, size_t index)

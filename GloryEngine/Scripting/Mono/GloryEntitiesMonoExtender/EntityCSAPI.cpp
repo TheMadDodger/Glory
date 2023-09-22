@@ -3,6 +3,8 @@
 
 #include <ScenesModule.h>
 #include <PhysicsModule.h>
+#include <MonoSceneManager.h>
+#include <MonoSceneObjectManager.h>
 #include <MonoScriptObjectManager.h>
 #include <EntitySceneObject.h>
 #include <ComponentTypes.h>
@@ -42,7 +44,7 @@ namespace Glory
 		return pEntityScene->GetRegistry()->GetComponent<T>(pEntityHandle->m_EntityID);
 	}
 
-	bool IsValid(MonoEntityHandle* pMonoEntityHandle)
+	bool Entity_IsValid(MonoEntityHandle* pMonoEntityHandle)
 	{
 		if (pMonoEntityHandle->m_EntityID == 0 || pMonoEntityHandle->m_SceneID == 0) return false;
 		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene((UUID)pMonoEntityHandle->m_SceneID);
@@ -50,15 +52,17 @@ namespace Glory
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		if (pEntityScene == nullptr) return false;
 		return pEntityScene->GetRegistry()->IsValid(pMonoEntityHandle->m_EntityID);
+	}
 
-		//MonoClass* pClass = mono_object_get_class(pObject);
-		//MonoClassField* pField = mono_class_get_field_from_name(pClass, "_entityID");
-		//uint32_t entID;
-		//mono_field_get_value(pObject, pField, &entID);
-		//Object* pObject = MonoObjectManager::GetObject(pObject);
-		//EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
-		//EntityScene* pScene = (EntityScene*)pEntityObject->GetScene();
-		//return pScene->GetRegistry()->IsValid(entID);
+	MonoObject* Entity_GetSceneObjectID(MonoEntityHandle* pMonoEntityHandle)
+	{
+		EntityScene* pScene = (EntityScene*)Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(pMonoEntityHandle->m_SceneID);
+		if (!pScene) return nullptr;
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		if (!pObjectManager) return nullptr;
+		EntitySceneObject* pObject = pScene->GetEntitySceneObjectFromEntityID(pMonoEntityHandle->m_EntityID);
+		if (!pObject) return nullptr;
+		return pObjectManager->GetSceneObject(pObject);
 	}
 
 	MonoEntityHandle GetEntityHandle(MonoObject* pObject)
@@ -91,6 +95,44 @@ namespace Glory
 			return iter->first;
 		}
 		return 0;
+	}
+
+	uint64_t Component_AddComponent(MonoEntityHandle* pEntityHandle, MonoString* pComponentName)
+	{
+		const std::string componentName{ mono_string_to_utf8(pComponentName) };
+		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (pScene == nullptr) return 0;
+		EntityScene* pEntityScene = (EntityScene*)pScene;
+		if (pEntityScene == nullptr) return 0;
+		const size_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
+		const UUID uuid{};
+		pEntityScene->GetRegistry()->CreateComponent(pEntityHandle->m_EntityID, componentHash, uuid);
+		return uuid;
+	}
+
+	uint64_t Component_RemoveComponent(MonoEntityHandle* pEntityHandle, MonoString* pComponentName)
+	{
+		const std::string componentName{ mono_string_to_utf8(pComponentName) };
+		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (pScene == nullptr) return 0;
+		EntityScene* pEntityScene = (EntityScene*)pScene;
+		if (pEntityScene == nullptr) return 0;
+		const size_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
+		return pEntityScene->GetRegistry()->RemoveComponent(pEntityHandle->m_EntityID, componentHash);
+	}
+
+	void Component_RemoveComponentByID(MonoEntityHandle* pEntityHandle, uint64_t id)
+	{
+		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return;
+		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (pScene == nullptr) return;
+		EntityScene* pEntityScene = (EntityScene*)pScene;
+		if (pEntityScene == nullptr) return;
+		EntityView* pEntityView = pEntityScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
+		const uint32_t hash = pEntityView->ComponentType(id);
+		pEntityScene->GetRegistry()->RemoveComponent(pEntityHandle->m_EntityID, hash);
 	}
 
 #pragma endregion
@@ -806,88 +848,92 @@ namespace Glory
 
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
 	{
-		// Entity
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Entity::IsValid()", IsValid));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.EntityBehaviour::GetEntityHandle()", GetEntityHandle));
+		/* Entity */
+		BIND("GloryEngine.Entities.Entity::Entity_IsValid", Entity_IsValid);
+		BIND("GloryEngine.Entities.Entity::Entity_GetSceneObjectID", Entity_GetSceneObjectID);
+		BIND("GloryEngine.Entities.EntityBehaviour::GetEntityHandle()", GetEntityHandle);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.EntityComponentManager::Component_GetComponentID", Component_GetComponentID));
+		BIND("GloryEngine.Entities.EntityComponentManager::Component_GetComponentID", Component_GetComponentID);
+		BIND("GloryEngine.Entities.EntityComponentManager::Component_AddComponent", Component_AddComponent);
+		BIND("GloryEngine.Entities.EntityComponentManager::Component_RemoveComponent", Component_RemoveComponent);
+		BIND("GloryEngine.Entities.EntityComponentManager::Component_RemoveComponentByID", Component_RemoveComponentByID);
 
-		// Transform
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetLocalPosition", Transform_GetLocalPosition));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalPosition", Transform_SetLocalPosition));
+		/* Transform */
+		BIND("GloryEngine.Entities.Transform::Transform_GetLocalPosition", Transform_GetLocalPosition);
+		BIND("GloryEngine.Entities.Transform::Transform_SetLocalPosition", Transform_SetLocalPosition);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetLocalRotation", Transform_GetLocalRotation));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalRotation", Transform_SetLocalRotation));
+		BIND("GloryEngine.Entities.Transform::Transform_GetLocalRotation", Transform_GetLocalRotation);
+		BIND("GloryEngine.Entities.Transform::Transform_SetLocalRotation", Transform_SetLocalRotation);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetLocalRotationEuler", Transform_GetLocalRotationEuler));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalRotationEuler", Transform_SetLocalRotationEuler));
+		BIND("GloryEngine.Entities.Transform::Transform_GetLocalRotationEuler", Transform_GetLocalRotationEuler);
+		BIND("GloryEngine.Entities.Transform::Transform_SetLocalRotationEuler", Transform_SetLocalRotationEuler);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetLocalScale", Transform_GetLocalScale));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetLocalScale", Transform_SetLocalScale));
+		BIND("GloryEngine.Entities.Transform::Transform_GetLocalScale", Transform_GetLocalScale);
+		BIND("GloryEngine.Entities.Transform::Transform_SetLocalScale", Transform_SetLocalScale);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetForward", Transform_GetForward));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_SetForward", Transform_SetForward));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetRight", Transform_GetRight));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.Transform::Transform_GetUp", Transform_GetUp));
+		BIND("GloryEngine.Entities.Transform::Transform_GetForward", Transform_GetForward);
+		BIND("GloryEngine.Entities.Transform::Transform_SetForward", Transform_SetForward);
+		BIND("GloryEngine.Entities.Transform::Transform_GetRight", Transform_GetRight);
+		BIND("GloryEngine.Entities.Transform::Transform_GetUp", Transform_GetUp);
 
-		// Camera
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetHalfFOV", CameraComponent_GetHalfFOV));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetHalfFOV", CameraComponent_SetHalfFOV));
+		/* Camera */
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetHalfFOV", CameraComponent_GetHalfFOV);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetHalfFOV", CameraComponent_SetHalfFOV);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetNear", CameraComponent_GetNear));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetNear", CameraComponent_SetNear));
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetNear", CameraComponent_GetNear);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetNear", CameraComponent_SetNear);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetFar", CameraComponent_GetFar));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetFar", CameraComponent_SetFar));
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetFar", CameraComponent_GetFar);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetFar", CameraComponent_SetFar);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetDisplayIndex", CameraComponent_GetDisplayIndex));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetDisplayIndex", CameraComponent_SetDisplayIndex));
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetDisplayIndex", CameraComponent_GetDisplayIndex);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetDisplayIndex", CameraComponent_SetDisplayIndex);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetPriority", CameraComponent_GetPriority));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetPriority", CameraComponent_SetPriority));
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetPriority", CameraComponent_GetPriority);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetPriority", CameraComponent_SetPriority);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetLayerMask", CameraComponent_GetLayerMask));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetLayerMask", CameraComponent_SetLayerMask));
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetLayerMask", CameraComponent_GetLayerMask);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetLayerMask", CameraComponent_SetLayerMask);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetClearColor", CameraComponent_GetClearColor));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_SetClearColor", CameraComponent_SetClearColor));
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetClearColor", CameraComponent_GetClearColor);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetClearColor", CameraComponent_SetClearColor);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.CameraComponent::CameraComponent_GetCameraID", CameraComponent_GetCameraID));
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetCameraID", CameraComponent_GetCameraID);
 
-		// Layer
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LayerComponent::LayerComponent_GetLayer", LayerComponent_GetLayer));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LayerComponent::LayerComponent_SetLayer", LayerComponent_SetLayer));
+		/* Layer */
+		BIND("GloryEngine.Entities.LayerComponent::LayerComponent_GetLayer", LayerComponent_GetLayer);
+		BIND("GloryEngine.Entities.LayerComponent::LayerComponent_SetLayer", LayerComponent_SetLayer);
 
-		// Light
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_GetColor", LightComponent_GetColor));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_SetColor", LightComponent_SetColor));
+		/* Light */
+		BIND("GloryEngine.Entities.LightComponent::LightComponent_GetColor", LightComponent_GetColor);
+		BIND("GloryEngine.Entities.LightComponent::LightComponent_SetColor", LightComponent_SetColor);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_GetIntensity", LightComponent_GetIntensity));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_SetIntensity", LightComponent_SetIntensity));
+		BIND("GloryEngine.Entities.LightComponent::LightComponent_GetIntensity", LightComponent_GetIntensity);
+		BIND("GloryEngine.Entities.LightComponent::LightComponent_SetIntensity", LightComponent_SetIntensity);
 
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_GetRange", LightComponent_GetRange));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.LightComponent::LightComponent_SetRange", LightComponent_SetRange));
+		BIND("GloryEngine.Entities.LightComponent::LightComponent_GetRange", LightComponent_GetRange);
+		BIND("GloryEngine.Entities.LightComponent::LightComponent_SetRange", LightComponent_SetRange);
 
-		// MeshFilter
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshFilter::MeshFilter_GetMesh", MeshFilter_GetMesh));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshFilter::MeshFilter_SetMesh", MeshFilter_SetMesh));
+		/* MeshFilter */
+		BIND("GloryEngine.Entities.MeshFilter::MeshFilter_GetMesh", MeshFilter_GetMesh);
+		BIND("GloryEngine.Entities.MeshFilter::MeshFilter_SetMesh", MeshFilter_SetMesh);
 
-		// MeshRenderer
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::MeshRenderer_GetMaterial", MeshRenderer_GetMaterial));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::MeshRenderer_SetMaterial", MeshRenderer_SetMaterial));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::MeshRenderer_GetMesh", MeshRenderer_GetMesh));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::MeshRenderer_SetMesh", MeshRenderer_SetMesh));
+		/* MeshRenderer */
+		BIND("GloryEngine.Entities.MeshRenderer::MeshRenderer_GetMaterial", MeshRenderer_GetMaterial);
+		BIND("GloryEngine.Entities.MeshRenderer::MeshRenderer_SetMaterial", MeshRenderer_SetMaterial);
+		BIND("GloryEngine.Entities.MeshRenderer::MeshRenderer_GetMesh", MeshRenderer_GetMesh);
+		BIND("GloryEngine.Entities.MeshRenderer::MeshRenderer_SetMesh", MeshRenderer_SetMesh);
 
-		// ModelRenderer
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterial", ModelRenderer_GetMaterial));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_SetMaterial", ModelRenderer_SetMaterial));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterialCount", ModelRenderer_GetMaterialCount));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterialAt", ModelRenderer_GetMaterialAt));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_AddMaterial", ModelRenderer_AddMaterial));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_SetMaterialAt", ModelRenderer_SetMaterialAt));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_ClearMaterials", ModelRenderer_ClearMaterials));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel));
-		internalCalls.push_back(InternalCall("csharp", "GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel));
+		/* ModelRenderer */
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterial", ModelRenderer_GetMaterial);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetMaterial", ModelRenderer_SetMaterial);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterialCount", ModelRenderer_GetMaterialCount);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterialAt", ModelRenderer_GetMaterialAt);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_AddMaterial", ModelRenderer_AddMaterial);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetMaterialAt", ModelRenderer_SetMaterialAt);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_ClearMaterials", ModelRenderer_ClearMaterials);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);
 
 		/*  status */
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetID", PhysicsBody_GetID);
