@@ -60,7 +60,7 @@ namespace Glory::Editor
 	{
 		if (m_RecordingContinuous && m_ActionRecords.size())
 		{
-			size_t index = m_ActionRecords.size() - (m_RewindIndex - 1);
+			const size_t index = m_ActionRecords.size() - m_RewindIndex - 1;
 			ActionRecord& record = m_ActionRecords[index];
 			if (record.Name == m_RecordingName && record.ObjectID == m_RecordingUUID)
 			{
