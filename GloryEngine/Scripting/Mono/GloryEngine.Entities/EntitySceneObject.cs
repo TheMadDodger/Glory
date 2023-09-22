@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Handle for an entity object
+    /// </summary>
     public class EntitySceneObject : SceneObject
     {
         #region Props

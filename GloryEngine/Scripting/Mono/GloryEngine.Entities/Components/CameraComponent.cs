@@ -3,7 +3,10 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
-	public class CameraComponent : EntityComponent
+    /// <summary>
+    /// Handle for a CameraComponent component
+    /// </summary>
+    public class CameraComponent : EntityComponent
 	{
 		#region Props
 

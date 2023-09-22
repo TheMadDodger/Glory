@@ -5,6 +5,8 @@
 #include <ScriptingExtender.h>
 #include <Engine.h>
 #include <MonoSceneManager.h>
+#include <ScenesModule.h>
+#include <EntitySceneScenesModule.h>
 
 namespace Glory
 {
@@ -43,6 +45,10 @@ namespace Glory
 	{
 		MonoSceneManager::BindImplemetation<MonoEntitySceneManager>();
 		MonoEntitySceneManager::Initialize(pAssembly);
+
+		EntitySceneScenesModule* pScenes = (EntitySceneScenesModule*)Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		Utils::ECS::ComponentTypes* pComponentTypesInstance = pScenes->ComponentTypesInstance();
+		Utils::ECS::ComponentTypes::SetInstance(pComponentTypesInstance);
 	}
 
 	void EntityLibManager::Cleanup()

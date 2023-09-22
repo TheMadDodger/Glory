@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Handle for a LayerComponent component
+    /// </summary>
     public class LayerComponent : EntityComponent
     {
         #region Props

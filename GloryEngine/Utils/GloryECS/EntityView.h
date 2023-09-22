@@ -27,7 +27,7 @@ namespace Glory::Utils::ECS
 
 	private:
 		void Add(uint32_t hash, Glory::UUID uuid = Glory::UUID());
-		void Remove(uint32_t hash);
+		UUID Remove(uint32_t hash);
 		void Remove(Glory::UUID uuid);
 
 	private:

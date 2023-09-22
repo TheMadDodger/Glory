@@ -127,7 +127,7 @@ namespace Glory::Utils::ECS
 			pEntityView->Remove(pTypeView->m_TypeHash);
 		}
 
-		void RemoveComponent(EntityID entity, uint32_t typeHash);
+		UUID RemoveComponent(EntityID entity, uint32_t typeHash);
 		void RemoveComponentAt(EntityID entity, size_t index);
 		//void ChangeComponentIndex(EntityID entity, size_t index, size_t newIndex);
 		size_t ComponentCount(EntityID entity);

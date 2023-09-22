@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.SceneManagement
 {
+    /// <summary>
+    /// Handle for a scene object
+    /// </summary>
     public class SceneObject : Object
     {
         #region Props

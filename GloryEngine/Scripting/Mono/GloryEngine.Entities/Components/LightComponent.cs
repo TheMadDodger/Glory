@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Handle for a LightComponent component
+    /// </summary>
     public class LightComponent : EntityComponent
     {
 		#region Props

@@ -81,14 +81,15 @@ namespace Glory::Utils::ECS
         m_ComponentOrder.push_back(uuid);
     }
 
-    void EntityView::Remove(uint32_t hash)
+    UUID EntityView::Remove(uint32_t hash)
     {
-        if (m_TypeToUUID.find(hash) == m_TypeToUUID.end()) return;
+        if (m_TypeToUUID.find(hash) == m_TypeToUUID.end()) return 0;
         Glory::UUID uuid = m_TypeToUUID[hash];
         m_TypeToUUID.erase(hash);
         m_ComponentTypes.erase(uuid);
         auto it = std::find(m_ComponentOrder.begin(), m_ComponentOrder.end(), uuid);
         m_ComponentOrder.erase(it);
+        return uuid;
     }
 
     void EntityView::Remove(Glory::UUID uuid)

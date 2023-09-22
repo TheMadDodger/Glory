@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Handle for a PhysicsBody component
+    /// </summary>
     public class PhysicsBody : EntityComponent
     {
         #region Props

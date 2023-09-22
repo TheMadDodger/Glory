@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Handle for a MeshFilter component
+    /// </summary>
     public class MeshFilter : EntityComponent
     {
         #region Props
