@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
+    /// <summary>
+    /// Handle for a ModelRenderer component
+    /// </summary>
     public class ModelRenderer : EntityComponent
     {
         #region Props

@@ -827,6 +827,35 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region ScriptedComponent
+
+	MonoObject* ScriptedComponent_GetScript(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
+		const UUID uuid = scriptComp.m_Script.AssetUUID();
+		return MonoAssetManager::MakeMonoAssetObject<ModelData>(uuid);
+	}
+
+	void ScriptedComponent_SetScript(MonoEntityHandle* pEntityHandle, UUID componentID, UUID scriptID)
+	{
+		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
+		if (scriptComp.m_Script.AssetUUID() != 0)
+		{
+			Debug::LogError("You are trying to set the script on a ScriptedComponent that already has a script, this is not allowed.");
+			return;
+		}
+		scriptComp.m_Script = scriptID;
+	}
+
+	MonoObject* ScriptedComponent_GetBehaviour(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
+		MonoScriptObjectManager* pScriptObjectManager = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
+		/* TODO */
+	}
+
+#pragma endregion
+
 #pragma region EntitySceneObject
 
 	MonoEntityHandle EntitySceneObject_GetEntityHandle(uint64_t objectID, uint64_t sceneID)
@@ -935,7 +964,13 @@ namespace Glory
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);
 
-		/*  status */
+		/* ScriptedComponent */
+		BIND("GloryEngine.Entities.ScriptedComponent::ScriptedComponent_GetScript", ScriptedComponent_GetScript);
+		BIND("GloryEngine.Entities.ScriptedComponent::ScriptedComponent_SetScript", ScriptedComponent_SetScript);
+		BIND("GloryEngine.Entities.ScriptedComponent::ScriptedComponent_GetBehaviour", ScriptedComponent_GetBehaviour);
+
+		/* PhysicsBody */
+		/* status */
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetID", PhysicsBody_GetID);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_Activate", PhysicsBody_Activate);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_Deactivate", PhysicsBody_Deactivate);
