@@ -7,6 +7,6 @@ namespace Glory
 	class ComponentTypes
 	{
 	public:
-		GLORY_API static size_t GetComponentHash(const std::string& name);
+		GLORY_API static uint32_t GetComponentHash(const std::string& name);
 	};
 }

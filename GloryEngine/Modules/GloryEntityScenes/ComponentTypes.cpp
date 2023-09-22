@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	size_t ComponentTypes::GetComponentHash(const std::string& name)
+	uint32_t ComponentTypes::GetComponentHash(const std::string& name)
 	{
 		return Glory::Utils::ECS::ComponentTypes::GetComponentHash(name.find("Glory::") != std::string::npos ? name : "Glory::" + name);
 	}

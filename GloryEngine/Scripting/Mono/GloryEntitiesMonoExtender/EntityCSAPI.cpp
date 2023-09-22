@@ -86,7 +86,7 @@ namespace Glory
 		if (pScene == nullptr) return 0;
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		if (pEntityScene == nullptr) return 0;
-		const size_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
+		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		EntityView* pEntityView = pEntityScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
 
 		for (auto iter = pEntityView->GetIterator(); iter != pEntityView->GetIteratorEnd(); iter++)
@@ -105,7 +105,7 @@ namespace Glory
 		if (pScene == nullptr) return 0;
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		if (pEntityScene == nullptr) return 0;
-		const size_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
+		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		const UUID uuid{};
 		pEntityScene->GetRegistry()->CreateComponent(pEntityHandle->m_EntityID, componentHash, uuid);
 		return uuid;
@@ -119,7 +119,7 @@ namespace Glory
 		if (pScene == nullptr) return 0;
 		EntityScene* pEntityScene = (EntityScene*)pScene;
 		if (pEntityScene == nullptr) return 0;
-		const size_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
+		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		return pEntityScene->GetRegistry()->RemoveComponent(pEntityHandle->m_EntityID, componentHash);
 	}
 
@@ -852,6 +852,7 @@ namespace Glory
 		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
 		MonoScriptObjectManager* pScriptObjectManager = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
 		/* TODO */
+		return nullptr;
 	}
 
 #pragma endregion
