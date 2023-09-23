@@ -12,10 +12,10 @@ namespace Glory::Utils::ECS
 	public:
 		EntityView(EntityRegistry* pRegistry);
 
-		size_t ComponentCount();
-		Glory::UUID ComponentUUIDAt(size_t index);
-		uint32_t ComponentTypeAt(size_t index);
-		uint32_t ComponentType(Glory::UUID uuid);
+		size_t ComponentCount() const;
+		Glory::UUID ComponentUUIDAt(size_t index) const;
+		uint32_t ComponentTypeAt(size_t index) const;
+		uint32_t ComponentType(Glory::UUID uuid) const;
 		std::map<Glory::UUID, uint32_t>::iterator GetIterator();
 		std::map<Glory::UUID, uint32_t>::iterator GetIteratorEnd();
 		void SwapComponentIndex(size_t index1, size_t index2);
@@ -23,7 +23,7 @@ namespace Glory::Utils::ECS
 
 		bool& Active();
 		bool& HierarchyActive();
-		bool IsActive();
+		bool IsActive() const;
 
 	private:
 		void Add(uint32_t hash, Glory::UUID uuid = Glory::UUID());

@@ -21,6 +21,7 @@ project "GloryECS"
 	includedirs
 	{
 		"%{GloryIncludeDir.core}",
+		"%{IncludeDir.Utils}",
 	}
 
 	filter "system:windows"

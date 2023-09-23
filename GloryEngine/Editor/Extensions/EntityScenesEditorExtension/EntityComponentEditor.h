@@ -1,9 +1,11 @@
 #pragma once
+#include "Editor.h"
+
 #include <Object.h>
 #include <EntityComponentObject.h>
 #include <PropertyDrawer.h>
 #include <TypeData.h>
-#include "Editor.h"
+#include <EditorUI.h>
 
 namespace Glory::Editor
 {
@@ -30,10 +32,20 @@ namespace Glory::Editor
 			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 			bool change = false;
 
-			uint32_t hash = ResourceType::GetHash<TComponent>();
+			const uint32_t hash = ResourceType::GetHash<TComponent>();
 			const TypeData* pTypeData = Reflect::GetTyeData(hash);
+
 			if (pTypeData)
 			{
+				const Utils::ECS::EntityID entity = m_pComponentObject->EntityID();
+				Utils::ECS::BaseTypeView* pTypeView = m_pComponentObject->GetRegistry()->GetTypeView(hash);
+				bool active = pTypeView->IsActive(entity);
+				if (EditorUI::CheckBox("Active", &active))
+				{
+					pTypeView->SetActive(entity, active);
+					change = true;
+				}
+
 				TComponent& component = GetTargetComponent();
 				PropertyDrawer::DrawProperty("", pTypeData, &component, 0);
 			}

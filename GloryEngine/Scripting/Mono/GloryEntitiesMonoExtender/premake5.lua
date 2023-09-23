@@ -33,7 +33,8 @@ project "GloryEntitiesMonoExtender"
 
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
-		"%{IncludeDir.Version}"
+		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}"
 	}
 
 	libdirs
@@ -55,6 +56,7 @@ project "GloryEntitiesMonoExtender"
 		"GloryECS",
 		"GloryReflect",
 		"GloryUtilsVersion",
+		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
