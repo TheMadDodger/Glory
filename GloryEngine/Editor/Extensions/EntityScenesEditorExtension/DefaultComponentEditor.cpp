@@ -1,8 +1,10 @@
 #include "DefaultComponentEditor.h"
+
 #include <imgui.h>
 #include <PropertyDrawer.h>
 #include <Undo.h>
 #include <TypeData.h>
+#include <EditorUI.h>
 
 namespace Glory::Editor
 {
@@ -19,12 +21,21 @@ namespace Glory::Editor
 		Undo::StartRecord("Property Change", m_pTarget->GetUUID(), true);
 		bool change = false;
 		EntityComponentObject* pComponentObject = (EntityComponentObject*)GetTarget();
-		uint32_t hash = pComponentObject->ComponentType();
-		Glory::Utils::ECS::EntityRegistry* pRegistry = pComponentObject->GetRegistry();
-		Glory::Utils::ECS::EntityID entity = pComponentObject->EntityID();
-		UUID componentID = pComponentObject->GetUUID();
+		const uint32_t hash = pComponentObject->ComponentType();
+		Utils::ECS::EntityRegistry* pRegistry = pComponentObject->GetRegistry();
+		const Utils::ECS::EntityID entity = pComponentObject->EntityID();
+		const UUID componentID = pComponentObject->GetUUID();
 
 		const TypeData* pTypeData = Reflect::GetTyeData(hash);
+
+		Utils::ECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(hash);
+		bool active = pTypeView->IsActive(entity);
+		if (EditorUI::CheckBox("Active", &active))
+		{
+			pTypeView->SetActive(entity, active);
+			change = true;
+		}
+
 		if (pTypeData)
 		{
 			change |= PropertyDrawer::DrawProperty("", pTypeData, pRegistry->GetComponentAddress(entity, componentID), 0);

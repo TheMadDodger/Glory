@@ -23,9 +23,13 @@ namespace Glory
 
 	void EntitySceneObjectSerializer::SerializeComponent(Glory::Utils::ECS::EntityID entityID, Glory::Utils::ECS::EntityRegistry* pRegistry, UUID componentUUID, void* pAddress, const TypeData* pTypeData, YAML::Emitter& out)
 	{
+		Utils::ECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(pTypeData->TypeHash());
+
 		out << YAML::BeginMap;
 		out << YAML::Key << "UUID";
 		out << YAML::Value << componentUUID;
+		out << YAML::Key << "Active";
+		out << YAML::Value << pTypeView->IsActive(entityID);
 		out << YAML::Key << "TypeName";
 		out << YAML::Value << pTypeData->TypeName();
 		out << YAML::Key << "TypeHash";
@@ -39,9 +43,11 @@ namespace Glory
 		YAML::Node nextObject = object;
 		YAML::Node subNode;
 		UUID compUUID;
+		bool active = true;
 		uint32_t typeHash = 0;
 		std::string typeName = "";
 		YAML_READ(nextObject, subNode, UUID, compUUID, uint64_t);
+		YAML_READ(nextObject, subNode, Active, active, bool);
 		YAML_READ(nextObject, subNode, TypeName, typeName, std::string);
 		YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
 
@@ -56,7 +62,10 @@ namespace Glory
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 		PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, nextObject["Properties"]);
 
-		pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
+		Utils::ECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(typeHash);
+		pTypeView->SetActive(entity, active);
+
+		pTypeView->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 	}
 
 	void EntitySceneObjectSerializer::Serialize(EntitySceneObject* pObject, YAML::Emitter& out)
@@ -217,9 +226,11 @@ namespace Glory
 			YAML::Node nextObject = node[i];
 			YAML::Node subNode;
 			UUID compUUID;
+			bool active = true;
 			uint32_t typeHash = 0;
 			std::string typeName = "";
 			YAML_READ(nextObject, subNode, UUID, compUUID, uint64_t);
+			YAML_READ(nextObject, subNode, Active, active, bool);
 			YAML_READ(nextObject, subNode, TypeName, typeName, std::string);
 			YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
 
@@ -239,7 +250,10 @@ namespace Glory
 			const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 			PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, nextObject["Properties"]);
 
-			pRegistry->GetTypeView(typeHash)->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
+			Utils::ECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(typeHash);
+			pTypeView->SetActive(entity, active);
+
+			pTypeView->Invoke(InvocationType::OnValidate, pRegistry, entity, pComponentAddress);
 			++currentComponentIndex;
 		}
 

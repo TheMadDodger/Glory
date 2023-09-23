@@ -3,16 +3,16 @@
 
 namespace Glory::Utils::ECS
 {
-    EntityView::EntityView(EntityRegistry* pRegistry) : m_pRegistry(pRegistry), m_Active(true), m_HierarchyActive(true)
-    {
-    }
+    EntityView::EntityView(EntityRegistry* pRegistry)
+        : m_pRegistry(pRegistry), m_Active(true), m_HierarchyActive(true)
+    {}
 
-    size_t EntityView::ComponentCount()
+    size_t EntityView::ComponentCount() const
     {
         return m_ComponentOrder.size();
     }
 
-    Glory::UUID EntityView::ComponentUUIDAt(size_t index)
+    Glory::UUID EntityView::ComponentUUIDAt(size_t index) const
     {
         return m_ComponentOrder[index];
     }
@@ -57,21 +57,22 @@ namespace Glory::Utils::ECS
         return m_HierarchyActive;
     }
 
-    bool EntityView::IsActive()
+    bool EntityView::IsActive() const
     {
         return m_HierarchyActive && m_Active;
     }
 
-    uint32_t EntityView::ComponentTypeAt(size_t index)
+    uint32_t EntityView::ComponentTypeAt(size_t index) const
     {
         Glory::UUID uuid = m_ComponentOrder[index];
         return ComponentType(uuid);
     }
 
-    uint32_t EntityView::ComponentType(Glory::UUID uuid)
+    uint32_t EntityView::ComponentType(Glory::UUID uuid) const
     {
-        if (m_ComponentTypes.find(uuid) == m_ComponentTypes.end()) return 0;
-        return m_ComponentTypes[uuid];
+        auto itor = m_ComponentTypes.find(uuid);
+        if (itor == m_ComponentTypes.end()) return 0;
+        return itor->second;
     }
 
     void EntityView::Add(uint32_t hash, Glory::UUID uuid)
@@ -83,22 +84,26 @@ namespace Glory::Utils::ECS
 
     UUID EntityView::Remove(uint32_t hash)
     {
-        if (m_TypeToUUID.find(hash) == m_TypeToUUID.end()) return 0;
-        Glory::UUID uuid = m_TypeToUUID[hash];
+        auto itor = m_TypeToUUID.find(hash);
+        if (itor == m_TypeToUUID.end()) return 0;
+        Glory::UUID uuid = itor->second;
         m_TypeToUUID.erase(hash);
         m_ComponentTypes.erase(uuid);
         auto it = std::find(m_ComponentOrder.begin(), m_ComponentOrder.end(), uuid);
+        const uint32_t index = uint32_t(it - m_ComponentOrder.begin());
         m_ComponentOrder.erase(it);
         return uuid;
     }
 
     void EntityView::Remove(Glory::UUID uuid)
     {
-        if (m_ComponentTypes.find(uuid) == m_ComponentTypes.end()) return;
-        uint32_t hash = m_ComponentTypes[uuid];
+        auto itor = m_ComponentTypes.find(uuid);
+        if (itor == m_ComponentTypes.end()) return;
+        uint32_t hash = itor->second;
         m_ComponentTypes.erase(uuid);
         m_TypeToUUID.erase(hash);
         auto it = std::find(m_ComponentOrder.begin(), m_ComponentOrder.end(), uuid);
+        const uint32_t index = uint32_t(it - m_ComponentOrder.begin());
         m_ComponentOrder.erase(it);
     }
 }

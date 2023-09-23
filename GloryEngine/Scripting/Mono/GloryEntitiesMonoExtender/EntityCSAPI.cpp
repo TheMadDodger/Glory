@@ -135,6 +135,26 @@ namespace Glory
 		pEntityScene->GetRegistry()->RemoveComponent(pEntityHandle->m_EntityID, hash);
 	}
 
+	bool EntityComponent_GetActive(MonoEntityHandle* pEntityHandle, uint64_t componentID)
+	{
+		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return false;
+		EntityScene* pEntityScene = GetEntityScene(pEntityHandle);
+		EntityView* pEntityView = pEntityScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
+		const uint32_t type = pEntityView->ComponentType(componentID);
+		BaseTypeView* pTypeView = pEntityScene->GetRegistry()->GetTypeView(type);
+		return pTypeView->IsActive(pEntityHandle->m_EntityID);
+	}
+
+	void EntityComponent_SetActive(MonoEntityHandle* pEntityHandle, uint64_t componentID, bool active)
+	{
+		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return;
+		EntityScene* pEntityScene = GetEntityScene(pEntityHandle);
+		EntityView* pEntityView = pEntityScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
+		const uint32_t type = pEntityView->ComponentType(componentID);
+		BaseTypeView* pTypeView = pEntityScene->GetRegistry()->GetTypeView(type);
+		pTypeView->SetActive(pEntityHandle->m_EntityID, active);
+	}
+
 #pragma endregion
 
 #pragma region Transform
@@ -887,6 +907,9 @@ namespace Glory
 		BIND("GloryEngine.Entities.EntityComponentManager::Component_AddComponent", Component_AddComponent);
 		BIND("GloryEngine.Entities.EntityComponentManager::Component_RemoveComponent", Component_RemoveComponent);
 		BIND("GloryEngine.Entities.EntityComponentManager::Component_RemoveComponentByID", Component_RemoveComponentByID);
+
+		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_GetActive", EntityComponent_GetActive);
+		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_SetActive", EntityComponent_SetActive);
 
 		/* Transform */
 		BIND("GloryEngine.Entities.Transform::Transform_GetLocalPosition", Transform_GetLocalPosition);

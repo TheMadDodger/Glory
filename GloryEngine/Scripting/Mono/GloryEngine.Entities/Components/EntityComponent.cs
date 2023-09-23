@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
@@ -26,6 +27,15 @@ namespace GloryEngine.Entities
                 return _transform;
             }
             private set { }
+        }
+
+        /// <summary>
+        /// Active state of the component
+        /// </summary>
+        public bool Active
+        {
+            get => EntityComponent_GetActive(ref _entity, _objectID);
+            set => EntityComponent_SetActive(ref _entity, _objectID, value);
         }
 
         #endregion
@@ -64,6 +74,16 @@ namespace GloryEngine.Entities
             _entity = entity;
             _objectID = componentID;
         }
+
+        #endregion
+
+        #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool EntityComponent_GetActive(ref Entity entity, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void EntityComponent_SetActive(ref Entity entity, UInt64 componentID, bool active);
 
         #endregion
     }

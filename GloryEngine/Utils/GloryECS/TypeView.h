@@ -1,9 +1,11 @@
 #pragma once
 #include "EntityID.h"
+
 #include "ComponentCallbacks.h"
 #include <vector>
 #include <exception>
 #include <typeindex>
+#include <BitSet.h>
 
 #define MAX_COMPONENTS 1000
 
@@ -27,6 +29,11 @@ namespace Glory::Utils::ECS
 		virtual void Invoke(const InvocationType& callbackType, EntityRegistry* pRegistry, EntityID entity, void* pComponentAddress) = 0;
 		virtual void InvokeAll(const InvocationType& callbackType, EntityRegistry* pRegistry) = 0;
 
+		virtual uint32_t GetComponentIndex(EntityID entityID, size_t number = 0) const = 0;
+
+		bool IsActive(EntityID entity) const;
+		void SetActive(EntityID entity, bool active);
+
 	protected:
 		virtual BaseTypeView* Create(EntityRegistry* pRegistry) = 0;
 		virtual void OnRemove(size_t index) = 0;
@@ -35,6 +42,7 @@ namespace Glory::Utils::ECS
 		const uint32_t m_TypeHash;
 		std::vector<EntityID> m_Entities;
 		EntityRegistry* m_pRegistry;
+		BitSet m_ActiveStates;
 
 	private:
 		friend class EntityRegistry;
@@ -57,12 +65,14 @@ namespace Glory::Utils::ECS
 			m_Entities.push_back(entityID);
 			size_t index = m_ComponentData.size();
 			m_ComponentData.push_back(T(args...));
+			m_ActiveStates.Reserve(index);
 			return m_ComponentData[index];
 		}
 
 		virtual void OnRemove(size_t index) override
 		{
 			m_ComponentData.erase(m_ComponentData.begin() + index);
+			m_ActiveStates.Set(uint32_t(index));
 		}
 
 		T& Get(EntityID entityID)
@@ -84,10 +94,11 @@ namespace Glory::Utils::ECS
 			m_Entities.push_back(entityID);
 			size_t index = m_ComponentData.size();
 			m_ComponentData.push_back(T());
+			m_ActiveStates.Reserve(index);
 			return &m_ComponentData[index];
 		}
 
-		virtual void* GetComponentAddress(EntityID entityID, size_t number = 0) override
+		uint32_t GetComponentIndex(EntityID entityID, size_t number = 0) const override
 		{
 			auto it = std::find_if(m_Entities.begin(), m_Entities.end(), [&](EntityID othereEntity)
 			{
@@ -99,25 +110,46 @@ namespace Glory::Utils::ECS
 				}
 				return true;
 			});
-			size_t index = it - m_Entities.begin();
+			return uint32_t(it - m_Entities.begin());
+		}
+
+		virtual void* GetComponentAddress(EntityID entityID, size_t number = 0) override
+		{
+			const uint32_t index = GetComponentIndex(entityID, number);
 			return &m_ComponentData[index];
 		}
 
 		void Invoke(const InvocationType& callbackType, EntityRegistry* pRegistry, EntityID entity, void* pComponentAddress) override
 		{
-			if (!pRegistry->GetEntityView(entity)->IsActive()) return;
+			EntityView* pEntityView = pRegistry->GetEntityView(entity);
+			if (!pEntityView) return;
+			const uint32_t index = GetComponentIndex(entity);
+			switch (callbackType)
+			{
+			case InvocationType::Update:
+			case InvocationType::Draw:
+				if (!pEntityView->IsActive() || !m_ActiveStates.IsSet(index)) return;
+				break;
+			}
 			T* pComponent = (T*)pComponentAddress;
 			m_Callbacks.Invoke(callbackType, pRegistry, entity, *pComponent);
 		}
 
 		void InvokeAll(const InvocationType& invocationType, EntityRegistry* pRegistry) override
 		{
-			for (size_t i = 0; i < m_ComponentData.size(); i++)
+			for (size_t i = 0; i < m_ComponentData.size(); ++i)
 			{
 				T& component = m_ComponentData[i];
 				EntityID entity = m_Entities[i];
 				EntityView* pEntityView = pRegistry->GetEntityView(entity);
-				if (!pEntityView || !pEntityView->IsActive()) continue;
+				if (!pEntityView) continue;
+				switch (invocationType)
+				{
+				case InvocationType::Update:
+				case InvocationType::Draw:
+					if (!pEntityView->IsActive() || !m_ActiveStates.IsSet(uint32_t(i))) continue;
+					break;
+				}
 				m_Callbacks.Invoke(invocationType, pRegistry, entity, component);
 			}
 		}
