@@ -1,10 +1,18 @@
 #pragma once
 #include "EditorWindow.h"
 #include "SceneViewCamera.h"
+
 #include <ImGuizmo.h>
 
 namespace Glory::Editor
 {
+    struct ViewEvent
+    {
+        bool Ortho;
+    };
+    template<typename T>
+    struct Dispatcher;
+
     class SceneWindow : public EditorWindowTemplate<SceneWindow>
     {
     public:
@@ -14,8 +22,7 @@ namespace Glory::Editor
         virtual void OnOpen() override;
         virtual void OnClose() override;
 
-        static void EnableOrthographicView(bool enable);
-        static bool IsOrthographicEnabled();
+        static Dispatcher<ViewEvent>& GetViewEventDispatcher();
 
     private:
         virtual void OnGUI() override;
@@ -28,8 +35,8 @@ namespace Glory::Editor
 
     private:
         SceneViewCamera m_SceneCamera;
-        static bool m_Orthographic;
         bool m_DrawGrid;
         size_t m_SelectedFrameBufferIndex;
+        UUID m_ViewEventID;
     };
 }

@@ -13,13 +13,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui_internal.h>
 #include <GloryContext.h>
+#include <EditorUI.h>
+#include <Shortcuts.h>
+#include <Dispatcher.h>
 
 namespace Glory::Editor
 {
-	bool SceneWindow::m_Orthographic = false;
+	static const char* Shortcut_View_Perspective = "Switch To Perspective";
+	static const char* Shortcut_View_Orthographic = "Switch To Orthographic";
 
 	SceneWindow::SceneWindow()
-		: EditorWindowTemplate("Scene", 1280.0f, 720.0f), m_DrawGrid(true), m_SelectedFrameBufferIndex(0)
+		: EditorWindowTemplate("Scene", 1280.0f, 720.0f),
+		m_DrawGrid(true), m_SelectedFrameBufferIndex(0),
+		m_ViewEventID(0)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 	}
@@ -35,26 +41,29 @@ namespace Glory::Editor
 		ImGuiIO& io = ImGui::GetIO();
 
 		m_SceneCamera.Initialize();
-		m_SceneCamera.m_Camera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y);
-		if (m_Orthographic) m_SceneCamera.SetOrthographic((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 0.1f, 3000.0f);
-		else m_SceneCamera.SetPerspective((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Width = (uint32_t)m_WindowDimensions.x;
+		m_SceneCamera.m_Height = (uint32_t)m_WindowDimensions.x;
+		m_SceneCamera.SetPerspective((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 		m_SceneCamera.m_Camera.EnableOutput(true);
+
+		m_ViewEventID = GetViewEventDispatcher().AddListener([&](const ViewEvent& e) {
+			m_SceneCamera.m_IsOrthographic = e.Ortho;
+			m_SceneCamera.UpdateCamera();
+		});
 	}
 
 	void SceneWindow::OnClose()
 	{
 		Gizmos::Clear();
 		m_SceneCamera.Cleanup();
+
+		GetViewEventDispatcher().RemoveListener(m_ViewEventID);
 	}
 
-	void SceneWindow::EnableOrthographicView(bool enable)
+	Dispatcher<ViewEvent>& SceneWindow::GetViewEventDispatcher()
 	{
-		m_Orthographic = enable;
-	}
-
-	bool SceneWindow::IsOrthographicEnabled()
-	{
-		return m_Orthographic;
+		static Dispatcher<ViewEvent> dispatcher;
+		return dispatcher;
 	}
 
 	void SceneWindow::OnGUI()
@@ -95,6 +104,37 @@ namespace Glory::Editor
 
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("View"))
+			{
+				if (ImGui::MenuItem("Perspective", Shortcuts::GetShortcutString(Shortcut_View_Perspective).data(), !m_SceneCamera.m_IsOrthographic))
+				{
+					m_SceneCamera.m_IsOrthographic = false;
+					m_SceneCamera.UpdateCamera();
+				}
+				if (ImGui::MenuItem("Orthographic", Shortcuts::GetShortcutString(Shortcut_View_Orthographic).data(), m_SceneCamera.m_IsOrthographic))
+				{
+					m_SceneCamera.m_IsOrthographic = true;
+					m_SceneCamera.UpdateCamera();
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Camera"))
+			{
+				ImGui::TextUnformatted("				Camera Settings					");
+				ImGui::Separator();
+				bool change = false;
+				change |= EditorUI::InputFloat("FOV", &m_SceneCamera.m_HalfFOV, 0, 175.0f);
+				change |= EditorUI::InputFloat("Near", &m_SceneCamera.m_Near, 0.001f);
+				change |= EditorUI::InputFloat("Far", &m_SceneCamera.m_Far, m_SceneCamera.m_Near + 1.0f);
+				EditorUI::InputFloat("Fly Speed", &m_SceneCamera.m_MovementSpeed, 0.001f);
+				EditorUI::InputFloat("Sensitivity", &m_SceneCamera.m_FreeLookSensitivity, 0.001f);
+				EditorUI::InputFloat("Zoom Sensitivity", &m_SceneCamera.m_ZoomSensitivity, 0.001f);
+				if (change) m_SceneCamera.UpdateCamera();
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMenuBar();
 		}
 	}
@@ -103,9 +143,10 @@ namespace Glory::Editor
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max)) m_SceneCamera.Update();
-		m_SceneCamera.m_Camera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y);
-		if (m_Orthographic) m_SceneCamera.SetOrthographic((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 0.1f, 3000.0f);
-		else m_SceneCamera.SetPerspective((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
+		m_SceneCamera.m_Width = (uint32_t)m_WindowDimensions.x;
+		m_SceneCamera.m_Height = (uint32_t)m_WindowDimensions.x;
+		if (!m_SceneCamera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y)) return;
+		m_SceneCamera.UpdateCamera();
 	}
 
 	void SceneWindow::DrawScene(RenderTexture* pRenderTexture)

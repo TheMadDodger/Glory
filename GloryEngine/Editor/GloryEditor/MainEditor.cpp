@@ -1,10 +1,3 @@
-#include <imgui.h>
-#include <Game.h>
-#include <Engine.h>
-#include <ImGuizmo.h>
-#include <Serializer.h>
-#include <TextureDataEditor.h>
-
 #include "EditorApplication.h"
 #include "MainEditor.h"
 #include "EditorWindow.h"
@@ -52,7 +45,14 @@
 
 #include "VersionPopup.h"
 
+#include <imgui.h>
+#include <Game.h>
+#include <Engine.h>
+#include <ImGuizmo.h>
+#include <Serializer.h>
+#include <TextureDataEditor.h>
 #include <About.h>
+#include <Dispatcher.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -292,9 +292,6 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Project Settings", []() { EditorWindow::GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
 		MenuBar::AddMenuItem("Window/Resources", []() { EditorWindow::GetWindow<ResourcesWindow>(); }, NULL, Shortcut_Window_Resources);
 
-		MenuBar::AddMenuItem("View/Perspective", []() { SceneWindow::EnableOrthographicView(false); }, []() { return !SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Perspective);
-		MenuBar::AddMenuItem("View/Orthographic", []() { SceneWindow::EnableOrthographicView(true); }, []() { return SceneWindow::IsOrthographicEnabled(); }, Shortcut_View_Orthographic);
-
 		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay, NULL, Shortcut_Play_Start);
 		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay, NULL, Shortcut_Play_Stop);
 		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause, NULL, Shortcut_Play_Pauze);
@@ -307,6 +304,9 @@ namespace Glory::Editor
 
 		GIZMO_MODE_MENU("Gizmos/Mode/Local", Gizmos::m_DefaultMode, ImGuizmo::LOCAL, Gizmos::Shortcut_Gizmos_Local);
 		GIZMO_MODE_MENU("Gizmos/Mode/World", Gizmos::m_DefaultMode, ImGuizmo::WORLD, Gizmos::Shortcut_Gizmos_World);
+
+		Shortcuts::AddAction(Shortcut_View_Perspective, [&]() {SceneWindow::GetViewEventDispatcher().Dispatch({ false }); });
+		Shortcuts::AddAction(Shortcut_View_Orthographic, [&]() {SceneWindow::GetViewEventDispatcher().Dispatch({ true }); });
 
 		Shortcuts::SetShortcut(Shortcut_File_NewScene, ImGuiKey_N, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_File_SaveScene, ImGuiKey_S, ImGuiMod_Ctrl);

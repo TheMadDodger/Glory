@@ -15,10 +15,11 @@ namespace Glory::Editor
         void StartLooking();
         void StopLooking();
 
+        bool SetResolution(uint32_t width, uint32_t height);
         void SetPerspective(uint32_t width, uint32_t height, float halfFOV, float near, float far);
         void SetOrthographic(uint32_t width, uint32_t height, float near, float far);
 
-        //float GetOrthoZoom();
+        void UpdateCamera();
 
     private:
         void Initialize();
@@ -29,9 +30,6 @@ namespace Glory::Editor
         friend class SceneWindow;
         /// Normal speed of camera movement.
         float m_MovementSpeed = 10.f;
-
-        /// Speed of camera movement when shift is held down,
-        float m_FastMovementSpeed = 100.f;
 
         /// Sensitivity for free look.
         float m_FreeLookSensitivity = 1.f;

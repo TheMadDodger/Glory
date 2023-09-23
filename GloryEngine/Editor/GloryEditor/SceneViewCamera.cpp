@@ -1,4 +1,5 @@
 #include "SceneViewCamera.h"
+
 #include <CameraManager.h>
 #include <ImGuizmo.h>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -29,31 +30,30 @@ namespace Glory::Editor
     void SceneViewCamera::Update()
     {
 		glm::mat4 view = m_Camera.GetView();
-		glm::mat4 viewInverse = m_Camera.GetViewInverse();
+		const glm::mat4 viewInverse = m_Camera.GetViewInverse();
 
 		glm::vec3 position(viewInverse[3][0], viewInverse[3][1], viewInverse[3][2]);
 
-        ImGuiIO& io = ImGui::GetIO();
-		io.KeyShift;
+        const ImGuiIO& io = ImGui::GetIO();
 
-		bool fastMode = io.KeyShift;
-		float movementSpeed = fastMode ? m_FastMovementSpeed : m_MovementSpeed;
+		const bool fastMode = io.KeyShift;
+		const float movementSpeed = fastMode ? m_MovementSpeed * 5.0f : m_MovementSpeed;
 
-		float deltaTime = io.DeltaTime;
+		const float deltaTime = io.DeltaTime;
 
-		bool leftKey = ImGui::IsKeyDown(ImGuiKey_A);
-		bool rightKey = ImGui::IsKeyDown(ImGuiKey_D);
-		bool forwardKey = ImGui::IsKeyDown(ImGuiKey_W);
-		bool backwardKey = ImGui::IsKeyDown(ImGuiKey_S);
-		bool upKey = ImGui::IsKeyDown(ImGuiKey_Q);
-		bool downKey = ImGui::IsKeyDown(ImGuiKey_E);
+		const bool leftKey = ImGui::IsKeyDown(ImGuiKey_A);
+		const bool rightKey = ImGui::IsKeyDown(ImGuiKey_D);
+		const bool forwardKey = ImGui::IsKeyDown(ImGuiKey_W);
+		const bool backwardKey = ImGui::IsKeyDown(ImGuiKey_S);
+		const bool upKey = ImGui::IsKeyDown(ImGuiKey_Q);
+		const bool downKey = ImGui::IsKeyDown(ImGuiKey_E);
 
-		glm::vec3 right(viewInverse[0][0], viewInverse[0][1], viewInverse[0][2]);
-		glm::vec3 left = -right;
-		glm::vec3 forward(viewInverse[2][0], viewInverse[2][1], viewInverse[2][2]);
-		glm::vec3 backward = -forward;
-		glm::vec3 referenceUp = glm::vec3(0.0f, 1.0f, 0.0f);
-		glm::vec3 referenceDown = glm::vec3(0.0f, -1.0f, 0.0f);
+		const glm::vec3 right(viewInverse[0][0], viewInverse[0][1], viewInverse[0][2]);
+		const glm::vec3 left = -right;
+		const glm::vec3 forward(viewInverse[2][0], viewInverse[2][1], viewInverse[2][2]);
+		const glm::vec3 backward = -forward;
+		const glm::vec3 referenceUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		const glm::vec3 referenceDown = glm::vec3(0.0f, -1.0f, 0.0f);
 
 		if (leftKey) position += left * movementSpeed * deltaTime;
 		if (rightKey) position += right * movementSpeed * deltaTime;
@@ -62,8 +62,8 @@ namespace Glory::Editor
 		if (upKey) position += referenceDown * movementSpeed * deltaTime;
 		if (downKey) position += referenceUp * movementSpeed * deltaTime;
 
-		float axis = io.MouseWheel;
-		auto zoomSensitivity = fastMode ? m_FastZoomSensitivity : m_ZoomSensitivity;
+		const float axis = io.MouseWheel;
+		const auto zoomSensitivity = fastMode ? m_FastZoomSensitivity : m_ZoomSensitivity;
 		if (axis > 0)
 		{
 			if (!m_IsOrthographic) position += forward * movementSpeed * deltaTime;
@@ -75,7 +75,7 @@ namespace Glory::Editor
 			else m_OrthoZoom += movementSpeed * deltaTime;
 		}
 
-		ImVec2 mouseDelta = io.MouseDelta;
+		const ImVec2 mouseDelta = io.MouseDelta;
 
 		glm::mat4 transform = viewInverse;
 		view = glm::inverse(transform);
@@ -120,6 +120,15 @@ namespace Glory::Editor
         m_Looking = false;
     }
 
+	bool SceneViewCamera::SetResolution(uint32_t width, uint32_t height)
+	{
+		const bool diff = width != m_Width || height != m_Height;
+		m_Width = width;
+		m_Height = height;
+		m_Camera.SetResolution(m_Width, m_Height);
+		return diff;
+	}
+
 	void SceneViewCamera::SetPerspective(uint32_t width, uint32_t height, float halfFOV, float near, float far)
 	{
 		if (!m_IsOrthographic && width == m_Width && height == m_Height && halfFOV == m_HalfFOV && near == m_Near && far == m_Far)
@@ -146,5 +155,13 @@ namespace Glory::Editor
 
 		m_IsOrthographic = true;
 		m_Camera.SetOrthographicProjection(m_Width * m_OrthoZoom, m_Height * m_OrthoZoom, m_Near, m_Far);
+	}
+
+	void SceneViewCamera::UpdateCamera()
+	{
+		if (m_IsOrthographic)
+			m_Camera.SetOrthographicProjection(m_Width * m_OrthoZoom, m_Height * m_OrthoZoom, m_Near, m_Far);
+		else
+			m_Camera.SetPerspectiveProjection(m_Width, m_Height, m_HalfFOV, m_Near, m_Far);
 	}
 }

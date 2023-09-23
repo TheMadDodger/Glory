@@ -1,4 +1,6 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <imgui.h>
 #include <map>
 #include <vector>
@@ -6,7 +8,6 @@
 #include <functional>
 #include <yaml-cpp/yaml.h>
 #include <NodeRef.h>
-#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
