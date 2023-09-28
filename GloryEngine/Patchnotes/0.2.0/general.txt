@@ -5,8 +5,17 @@ Editor:
 - Resource dropdowns now use the same thumbnails as the file browser
 - File browser will now auto refresh when a file is changed externally
 - Updated about popup to mention used libraries and licenses
+- Added configuration options for scene view camera
+- Added a Prefab system
+- Added an active toggle to components
 
 Scripting:
+- Added a SceneObject property to Behaviour
+- Added a Scene property to SceneObject
+- Added an Add and Remove Component API
+- Added ScriptedComponent class
+- Added Prefab API
+- Added numerous other properties and methods
 
 Bugs:
 - Fixed crash when shape is set to none in a PhysicsBody or CharacterController
