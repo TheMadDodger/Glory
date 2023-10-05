@@ -30,16 +30,7 @@
 
 #include <GloryMonoScipting.h>
 
-Glory::Editor::BaseEditorExtension* LoadExtension()
-{
-	return new Glory::Editor::MonoEditorExtension();
-}
-
-void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
-{
-	Glory::GloryContext::SetContext(pContext);
-	ImGui::SetCurrentContext(pImGUIContext);
-}
+EXTENSION_CPP(MonoEditorExtension)
 
 namespace Glory::Editor
 {
@@ -88,7 +79,7 @@ namespace Glory::Editor
 		ShellExecute(0, L"open", path.wstring().c_str(), 0, 0, SW_SHOW);
 	}
 
-	void MonoEditorExtension::RegisterEditors()
+	void MonoEditorExtension::Initialize()
 	{
 		m_pMonoScriptingModule = Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>();
 

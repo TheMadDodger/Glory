@@ -7,8 +7,7 @@
 #include <IPlayModeHandler.h>
 #include <ObjectMenu.h>
 
-extern "C" GLORY_EDITOR_EXTENSION_API Glory::Editor::BaseEditorExtension* LoadExtension();
-extern "C" GLORY_EDITOR_EXTENSION_API void SetContext(Glory::GloryContext * pContext, ImGuiContext* pImGUIContext);
+EXTENSION_H
 
 namespace Glory
 {
@@ -25,7 +24,7 @@ namespace Glory::Editor
         virtual ~EntityScenesEditorExtension();
 
     private:
-        virtual void RegisterEditors() override;
+        virtual void Initialize() override;
 
         virtual const char* ModuleName() override;
         virtual void HandleBeforeStart(Module* pModule) override;

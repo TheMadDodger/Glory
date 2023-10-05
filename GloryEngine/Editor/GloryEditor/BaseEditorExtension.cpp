@@ -10,7 +10,7 @@ namespace Glory::Editor
 	{
 	}
 
-	GLORY_EDITOR_API void BaseEditorExtension::SetSetContextProc(SetContextProc proc)
+	void BaseEditorExtension::SetSetContextProc(SetContextProc proc)
 	{
 		m_SetContextProc = proc;
 	}

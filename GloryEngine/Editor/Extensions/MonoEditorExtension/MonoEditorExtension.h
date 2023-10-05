@@ -6,8 +6,7 @@
 #include <ResourceMeta.h>
 #include <IPlayModeHandler.h>
 
-extern "C" GLORY_EDITOR_EXTENSION_API Glory::Editor::BaseEditorExtension * LoadExtension();
-extern "C" GLORY_EDITOR_EXTENSION_API void SetContext(Glory::GloryContext * pContext, ImGuiContext * pImGUIContext);
+EXTENSION_H
 
 namespace Glory
 {
@@ -36,7 +35,7 @@ namespace Glory::Editor
         static void OpenFile(const std::filesystem::path& path);
 
     private:
-        virtual void RegisterEditors() override;
+        virtual void Initialize() override;
         static void FindVisualStudioPath();
         static bool FindVisualStudioPath(const std::filesystem::path& path);
         static bool FindMSBuild(std::filesystem::path& path);
