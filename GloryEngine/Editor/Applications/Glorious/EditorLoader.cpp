@@ -27,6 +27,8 @@ namespace Glory
 			LoadExtensions(metaData);
 		}
 
+		LoadGlobalExtensions();
+
 		editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(m_pExtensions.size());
 		editorCreateInfo.pExtensions = m_pExtensions.data();
 		return editorCreateInfo;
@@ -154,5 +156,21 @@ namespace Glory
 		if (pExtension == nullptr) return;
 		m_pExtensions.push_back(pExtension);
 		pExtension->SetSetContextProc(contextProc);
+	}
+
+	void EditorLoader::LoadGlobalExtensions()
+	{
+		const std::filesystem::path extensionsPath = "./Extensions";
+
+		for (const auto& entry : std::filesystem::directory_iterator(extensionsPath))
+		{
+			/* Recursive extensions are not supported! */
+			if (entry.is_directory()) continue;
+
+			const std::filesystem::path file = entry.path();
+			if (file.extension().compare(".dll") != 0) continue;
+			const std::string name = file.filename().replace_extension("").string();
+			LoadExtensionDLL(file, name);
+		}
 	}
 }

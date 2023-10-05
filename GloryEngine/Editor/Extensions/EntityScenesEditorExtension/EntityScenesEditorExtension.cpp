@@ -40,7 +40,7 @@ namespace Glory::Editor
 	{
 	}
 
-	void EntityScenesEditorExtension::RegisterEditors()
+	void EntityScenesEditorExtension::Initialize()
 	{
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
@@ -160,13 +160,4 @@ namespace Glory::Editor
 	}
 }
 
-Glory::Editor::BaseEditorExtension* LoadExtension()
-{
-	return new Glory::Editor::EntityScenesEditorExtension();
-}
-
-void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
-{
-	Glory::GloryContext::SetContext(pContext);
-	ImGui::SetCurrentContext(pImGUIContext);
-}
+EXTENSION_CPP(EntityScenesEditorExtension)

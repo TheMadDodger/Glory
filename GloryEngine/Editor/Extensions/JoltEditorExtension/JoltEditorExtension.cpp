@@ -5,16 +5,7 @@
 #include <JoltPhysicsModule.h>
 #include <GLORY_YAML.h>
 
-Glory::Editor::BaseEditorExtension* LoadExtension()
-{
-	return new Glory::Editor::JoltEditorExtension();
-}
-
-void SetContext(Glory::GloryContext* pContext, ImGuiContext* pImGUIContext)
-{
-	Glory::GloryContext::SetContext(pContext);
-	ImGui::SetCurrentContext(pImGUIContext);
-}
+EXTENSION_CPP(JoltEditorExtension)
 
 namespace Glory::Editor
 {
@@ -26,7 +17,7 @@ namespace Glory::Editor
 	{
 	}
 
-	void JoltEditorExtension::RegisterEditors()
+	void JoltEditorExtension::Initialize()
 	{
 		EditorPlayer::RegisterLoopHandler(this);
 	}
