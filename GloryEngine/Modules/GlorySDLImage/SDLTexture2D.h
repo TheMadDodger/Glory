@@ -10,7 +10,7 @@ namespace Glory
 		SDLImageData();
 		virtual ~SDLImageData();
 
-		virtual const void* GetPixels() override;
+		virtual const void* GetPixels() const override;
 
 	private:
 		virtual void BuildTexture() override;
