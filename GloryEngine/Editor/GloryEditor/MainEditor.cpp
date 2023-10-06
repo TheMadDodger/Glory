@@ -38,6 +38,7 @@
 #include "EnumPropertyDrawer.h"
 #include "StructPropertyDrawer.h"
 #include "EditorAssetDatabase.h"
+#include "Importer.h"
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
@@ -149,6 +150,8 @@ namespace Glory::Editor
 		PropertyDrawer::Cleanup();
 
 		Gizmos::Cleanup();
+
+		Importer::CleanupAll();
 	}
 
     static void HelpMarker(const char* desc)
