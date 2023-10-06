@@ -13,7 +13,7 @@ namespace Glory
 		m_pSurface = nullptr;
 	}
 
-	const void* SDLImageData::GetPixels()
+	const void* SDLImageData::GetPixels() const
 	{
 		return m_pSurface->pixels;
 	}
