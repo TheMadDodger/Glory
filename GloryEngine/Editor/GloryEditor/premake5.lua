@@ -40,6 +40,7 @@ project "GloryEditor"
 		["UI"] = { "EditorUI.*", "ListView.*" },
 		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp" },
 		["Asset Management"] = { "EditorAssetsWatcher.*", "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
+		["Asset Management/Importer"] = { "Importer.*", "ImporterTemplate.*" },
 		["Migration"] = { "ProjectMigrations.*" }
 	}
 

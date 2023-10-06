@@ -5,6 +5,7 @@
 #include "FileBrowser.h"
 #include "EditorSceneManager.h"
 #include "AssetCompiler.h"
+#include "Importer.h"
 
 #include <JobManager.h>
 #include <Engine.h>
@@ -311,37 +312,39 @@ namespace Glory::Editor
 			return 0;
 		}
 
-		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
-		if (!pModule)
-		{
-			// Not supperted!
-			Debug::LogError("Failed to import file, asset type not supported!");
-			return 0;
-		}
-
 		const ResourceType* pType = nullptr;
 		if (!pLoadedResource)
 		{
-			std::any importSettings = pModule->CreateDefaultImportSettings(ext);
-			pLoadedResource = pModule->Load(path);
-
+			pLoadedResource = Importer::Import(path, nullptr);
 			if (!pLoadedResource)
 			{
-				Debug::LogError("Failed to import file, could not load resource file!");
-				return 0;
+				Debug::LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
+
+				LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
+				if (!pModule)
+				{
+					// Not supperted!
+					Debug::LogError("Failed to import file, asset type not supported!");
+					return 0;
+				}
+
+				pLoadedResource = pModule->Load(path);
+
+				if (!pLoadedResource)
+				{
+					Debug::LogError("Failed to import file, could not load resource file!");
+					return 0;
+				}
 			}
 		}
 
-		if (pLoadedResource)
+		/* Try getting the resource type from the loaded resource */
+		std::type_index type = typeid(Resource);
+		for (size_t i = 0; i < pLoadedResource->TypeCount(); ++i)
 		{
-			/* Try getting the resource type from the loaded resource */
-			std::type_index type = typeid(Resource);
-			for (size_t i = 0; i < pLoadedResource->TypeCount(); ++i)
-			{
-				if (!pLoadedResource->GetType(0, type)) continue;
-				pType = ResourceType::GetResourceType(type);
-				if (pType) break;
-			}
+			if (!pLoadedResource->GetType(0, type)) continue;
+			pType = ResourceType::GetResourceType(type);
+			if (pType) break;
 		}
 
 		if (!pType)
@@ -736,19 +739,25 @@ namespace Glory::Editor
 		std::string ext = extension.string();
 		std::for_each(ext.begin(), ext.end(), [](char& c) { c = std::tolower(c); });
 
-		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
-		if (!pModule)
-		{
-			// Not supperted!
-			Debug::LogError("Failed to import file, asset type not supported!");
-			return false;
-		}
-
-		Resource* pResource = pModule->Load(path.string());
+		Resource* pResource = Importer::Import(path, nullptr);
 		if (!pResource)
 		{
-			Debug::LogError("Failed to import file, the returned Resource is null!");
-			return false;
+			Debug::LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
+
+			LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
+			if (!pModule)
+			{
+				// Not supperted!
+				Debug::LogError("Failed to import file, asset type not supported!");
+				return false;
+			}
+
+			pResource = pModule->Load(path.string());
+			if (!pResource)
+			{
+				Debug::LogError("Failed to import file, the returned Resource is null!");
+				return false;
+			}
 		}
 
 		m_ImportedResources.push_back({ pResource, path });
