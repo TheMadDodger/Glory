@@ -22,9 +22,9 @@ namespace Glory::Editor
 			return pResource;
 		}
 
-		virtual void Save(const std::filesystem::path& path, Resource* pResource) const override
+		virtual bool Save(const std::filesystem::path& path, Resource* pResource) const override
 		{
-			SaveResource(path, (T*)pResource);
+			return SaveResource(path, (T*)pResource);
 		}
 
 		virtual uint32_t ResourceTypeHash() const override
@@ -34,7 +34,7 @@ namespace Glory::Editor
 
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
 		virtual T* LoadResource(const std::filesystem::path& path) const = 0;
-		virtual void SaveResource(const std::filesystem::path& path, T* pResource) const {}
+		virtual bool SaveResource(const std::filesystem::path& path, T* pResource) const { return false; }
 
 	protected:
 		virtual void Initialize() = 0;

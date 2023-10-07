@@ -41,6 +41,7 @@ project "GloryEditor"
 		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp" },
 		["Asset Management"] = { "EditorAssetsWatcher.*", "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
 		["Asset Management/Importer"] = { "Importer.*", "ImporterTemplate.*" },
+		["Asset Management/Importer/Internal"] = { "MaterialImporter.*", "MaterialInstanceImporter.*" },
 		["Migration"] = { "ProjectMigrations.*" }
 	}
 

@@ -38,7 +38,9 @@
 #include "EnumPropertyDrawer.h"
 #include "StructPropertyDrawer.h"
 #include "EditorAssetDatabase.h"
+
 #include "Importer.h"
+#include "MaterialImporter.h"
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
@@ -136,6 +138,8 @@ namespace Glory::Editor
 		m_Settings.Load(Game::GetGame().GetEngine());
 
 		Debug::LogInfo("Initialized editor");
+
+		Importer::Register<MaterialImporter>();
 	}
 
 	void MainEditor::Destroy()
