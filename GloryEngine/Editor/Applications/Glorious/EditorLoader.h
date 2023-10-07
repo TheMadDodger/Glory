@@ -21,7 +21,9 @@ namespace Glory
 
 		void LoadBackendDLL(const std::filesystem::path& dllPath, const std::string& name, Glory::EditorCreateInfo& editorCreateInfo);
 		void LoadExtensionDLL(const std::filesystem::path& dllPath, const std::string& name);
+		void LoadExtensionDependencyDLL(const std::filesystem::path& dllPath, const std::string& name);
 
+		void LoadGlobalExtensionDependencies();
 		void LoadGlobalExtensions();
 
 	private:
