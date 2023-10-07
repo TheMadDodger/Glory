@@ -96,6 +96,7 @@ project "Glorious"
 		"JoltEditorExtension",
 		"MonoEditorExtension",
 		"SDLImageImporter",
+		"ASSIMPImporter",
 		"GloryEntitiesMonoExtender",
 		"GloryEngine.Core",
 		"GloryEngine.Entities",

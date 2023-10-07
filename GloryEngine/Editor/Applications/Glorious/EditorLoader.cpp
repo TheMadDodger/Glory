@@ -27,6 +27,7 @@ namespace Glory
 			LoadExtensions(metaData);
 		}
 
+		LoadGlobalExtensionDependencies();
 		LoadGlobalExtensions();
 
 		editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(m_pExtensions.size());
@@ -156,6 +157,34 @@ namespace Glory
 		if (pExtension == nullptr) return;
 		m_pExtensions.push_back(pExtension);
 		pExtension->SetSetContextProc(contextProc);
+	}
+
+	void EditorLoader::LoadExtensionDependencyDLL(const std::filesystem::path& dllPath, const std::string& name)
+	{
+		Debug::LogInfo("Loading editor extension dependency: " + name + "...");
+		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
+		if (lib == NULL)
+		{
+			Debug::LogFatalError("Failed to load editor extension dependency: " + name + ": The dll was not found!");
+			return;
+		}
+		m_Libs.push_back(lib);
+	}
+
+	void EditorLoader::LoadGlobalExtensionDependencies()
+	{
+		const std::filesystem::path extensionsPath = "./Extensions/Dependencies";
+
+		for (const auto& entry : std::filesystem::directory_iterator(extensionsPath))
+		{
+			/* Recursive extensions are not supported! */
+			if (entry.is_directory()) continue;
+
+			const std::filesystem::path file = entry.path();
+			if (file.extension().compare(".dll") != 0) continue;
+			const std::string name = file.filename().replace_extension("").string();
+			LoadExtensionDependencyDLL(file, name);
+		}
 	}
 
 	void EditorLoader::LoadGlobalExtensions()
