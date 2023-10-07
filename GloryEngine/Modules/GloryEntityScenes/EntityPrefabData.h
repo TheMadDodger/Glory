@@ -10,22 +10,22 @@ namespace Glory
     struct PrefabNode
     {
     public:
-        PrefabNode(PrefabNode&& other) noexcept;
-        PrefabNode(EntityPrefabData* pPrefab, EntitySceneObject* pSceneObject);
-        void operator=(EntitySceneObject* pSceneObject);
-        void operator=(PrefabNode&& other) noexcept;
+        GLORY_API PrefabNode(PrefabNode&& other) noexcept;
+        GLORY_API PrefabNode(EntityPrefabData* pPrefab, EntitySceneObject* pSceneObject);
+        GLORY_API void operator=(EntitySceneObject* pSceneObject);
+        GLORY_API void operator=(PrefabNode&& other) noexcept;
 
-        const size_t ChildCount() const;
-        const PrefabNode& ChildNode(size_t index) const;
-        const std::string& Name() const;
-        const std::string& SerializedComponents() const;
+        GLORY_API const size_t ChildCount() const;
+        GLORY_API const PrefabNode& ChildNode(size_t index) const;
+        GLORY_API const std::string& Name() const;
+        GLORY_API const std::string& SerializedComponents() const;
 
-        const UUID OriginalUUID() const;
-        const UUID TransformUUID() const;
-        const bool ActiveSelf() const;
+        GLORY_API const UUID OriginalUUID() const;
+        GLORY_API const UUID TransformUUID() const;
+        GLORY_API const bool ActiveSelf() const;
 
-        static PrefabNode Create(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
-        PrefabNode& AddChild(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
+        GLORY_API static PrefabNode Create(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
+        GLORY_API PrefabNode& AddChild(EntityPrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents);
 
     private:
         void CacheOriginalUUIDs();
@@ -48,15 +48,15 @@ namespace Glory
     class EntityPrefabData : public PrefabData
     {
     public:
-        EntityPrefabData();
-        EntityPrefabData(PrefabNode&& rootNode) noexcept;
-        virtual ~EntityPrefabData() = default;
+        GLORY_API EntityPrefabData();
+        GLORY_API EntityPrefabData(PrefabNode&& rootNode) noexcept;
+        GLORY_API virtual ~EntityPrefabData() = default;
 
         GLORY_API static EntityPrefabData* CreateFromSceneObject(EntitySceneObject* pSceneObject);
 
-        const PrefabNode& RootNode() const;
+        GLORY_API const PrefabNode& RootNode() const;
 
-        void SetRootNode(PrefabNode&& node);
+        GLORY_API void SetRootNode(PrefabNode&& node);
 
     private:
         friend struct PrefabNode;

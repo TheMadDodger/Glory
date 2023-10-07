@@ -4,4 +4,4 @@ Scripting:
 - Language: "csharp"
   Extension: "GloryEntitiesMonoExtender"
 Editor:
- Extensions: [EntityScenesEditorExtension]
+ Extensions: ["EntityScenesEditorExtension", "EntityPrefabImporter"]
