@@ -42,6 +42,7 @@
 #include "Importer.h"
 #include "MaterialImporter.h"
 #include "MaterialInstanceImporter.h"
+#include "TextureImporter.h"
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
@@ -142,6 +143,7 @@ namespace Glory::Editor
 
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();
+		Importer::Register<TextureImporter>();
 	}
 
 	void MainEditor::Destroy()
