@@ -147,6 +147,11 @@ namespace Glory
 		m_Resources.resize(m_pBaseMaterial->ResourceCount());
 	}
 
+	bool MaterialInstanceData::IsPropertyOverriden(size_t index) const
+	{
+		return m_PropertyOverridesEnable[index];
+	}
+
 	void MaterialInstanceData::EnableProperty(size_t index)
 	{
 		m_PropertyOverridesEnable[index] = true;
