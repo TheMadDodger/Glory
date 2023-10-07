@@ -11,7 +11,6 @@ namespace Glory::Editor
 
 	Resource* Importer::Import(const std::filesystem::path& path, void* pImportSettings)
 	{
-		path.extension();
 		auto itor = std::find_if(m_pImporters.begin(), m_pImporters.end(), [&](const Importer* pImporter) {
 			return pImporter->SupportsExtension(path.extension());
 		});
@@ -31,6 +30,27 @@ namespace Glory::Editor
 		return (*itor)->Load(path);
 	}
 
+	bool Importer::Export(const std::filesystem::path& path, Resource* pResource)
+	{
+		auto itor = std::find_if(m_pImporters.begin(), m_pImporters.end(), [&](const Importer* pImporter) {
+			return pImporter->SupportsExtension(path.extension());
+		});
+
+		if (itor == m_pImporters.end())
+		{
+			std::stringstream str;
+			str << "Could not find importer for extension: " << path.extension() << " for exporting file: " << path;
+			Debug::LogWarning(str.str());
+			return false;
+		}
+
+		std::stringstream str;
+		str << "Found importer " << (*itor)->Name() << " for exporting " << path.extension() << " files to export: " << path;
+		Debug::LogInfo(str.str());
+
+		return (*itor)->Save(path, pResource);
+	}
+
 	void Importer::Register(Importer* pImporter)
 	{
 		m_pImporters.push_back(pImporter);
@@ -41,6 +61,7 @@ namespace Glory::Editor
 	{
 		m_pOwnedImporters.push_back(pImporter);
 		m_pImporters.push_back(pImporter);
+		pImporter->Initialize();
 	}
 
 	void Importer::CleanupAll()
@@ -56,6 +77,5 @@ namespace Glory::Editor
 			delete m_pOwnedImporters[i];
 		}
 		m_pOwnedImporters.clear();
-
 	}
 }

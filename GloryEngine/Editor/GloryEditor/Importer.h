@@ -15,6 +15,7 @@ namespace Glory::Editor
 	{
 	public:
 		GLORY_EDITOR_API static Resource* Import(const std::filesystem::path& path, void* pImportSettings);
+		GLORY_EDITOR_API static bool Export(const std::filesystem::path& path, Resource* pResource);
 		GLORY_EDITOR_API static void Register(Importer* pImporter);
 
 		template<typename T>
@@ -30,11 +31,11 @@ namespace Glory::Editor
 		virtual ~Importer() {};
 
 		virtual Resource* Load(const std::filesystem::path& path) const = 0;
-		virtual void Save(const std::filesystem::path& path, Resource* pResource) const = 0;
+		virtual bool Save(const std::filesystem::path& path, Resource* pResource) const = 0;
 		virtual uint32_t ResourceTypeHash() const = 0;
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
 
-		GLORY_EDITOR_API void RegisterOwned(Importer* pImporter);
+		GLORY_EDITOR_API static void RegisterOwned(Importer* pImporter);
 
 	protected:
 		virtual void Initialize() = 0;
