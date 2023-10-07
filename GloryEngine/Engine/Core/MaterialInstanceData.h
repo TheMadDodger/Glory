@@ -35,8 +35,10 @@ namespace Glory
 
 		void ReloadProperties();
 
-	private:
+		bool IsPropertyOverriden(size_t index) const;
 		virtual void EnableProperty(size_t index) override;
+
+	private:
 		virtual std::vector<char>& GetPropertyBuffer(size_t index) override;
 
 	private:
