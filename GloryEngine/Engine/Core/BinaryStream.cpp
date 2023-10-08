@@ -5,8 +5,7 @@ namespace Glory
 	BinaryFileStream::BinaryFileStream(const std::filesystem::path& path) :
 		m_File(), m_Size(0), m_Tell(0)
 	{
-		//m_File.open(path.string(), std::fstream::in | std::fstream::out | std::fstream::trunc);
-		m_File.open(path.string(), std::fstream::out);
+		m_File.open(path.string(), std::fstream::in | std::fstream::out | std::fstream::trunc);
 		m_File.seekg(std::ios_base::end);
 		m_Size = m_File.tellg();
 		m_File.seekg(std::ios_base::beg);

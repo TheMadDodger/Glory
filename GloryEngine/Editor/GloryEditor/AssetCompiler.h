@@ -15,6 +15,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void CompileAssetDatabase();
 		GLORY_EDITOR_API static void CompileAssetDatabase(UUID id);
 		GLORY_EDITOR_API static void CompileAssetDatabase(const std::vector<UUID>& ids);
+		GLORY_EDITOR_API static void CompileNewAssets();
 		GLORY_EDITOR_API static void CompileAssets();
 		GLORY_EDITOR_API static void CompileAssets(const std::vector<UUID>& ids);
 
@@ -31,5 +32,6 @@ namespace Glory::Editor
 	private:
 		static void DispatchCompilationJob(const AssetData& asset);
 		static bool CompileJob(const AssetData asset);
+		static std::filesystem::path GenerateCompiledAssetPath(const UUID uuid);
 	};
 }

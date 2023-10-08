@@ -51,6 +51,25 @@ namespace Glory::Editor
 		}
 	}
 
+	void AssetCompiler::CompileNewAssets()
+	{
+		std::vector<UUID> ids = EditorAssetDatabase::UUIDs();
+		std::vector<UUID> newIDs;
+
+		for (UUID id : ids)
+		{
+			const std::filesystem::path path = GenerateCompiledAssetPath(id);
+			std::error_code code;
+			const bool exists = std::filesystem::exists(path);
+			if (!exists)
+			{
+				newIDs.push_back(id);
+			}
+		}
+
+		CompileAssets(newIDs);
+	}
+
 	void AssetCompiler::CompileAssets()
 	{
 		CompileAssets(EditorAssetDatabase::UUIDs());
@@ -99,19 +118,20 @@ namespace Glory::Editor
 		if (!std::filesystem::exists(path))
 			path = asset.Location.Path;
 
+		const UUID uuid = asset.Meta.ID();
+
 		/* Try get the asset if its already loaded */
-		Resource* pResource = AssetManager::FindResource(asset.Meta.ID());
+		Resource* pResource = AssetManager::FindResource(uuid);
 		if (!pResource)
 		{
 			/* Import the resource */
 			pResource = Importer::Import(path, nullptr);
 			if (!pResource)
 			{
-				/* TODO: Log this on main thread */
-				//std::stringstream str;
-				//str << "AssetCompiler: Failed to compile asset " << asset.Meta.ID() << " there was an error when importing the asset.";
-				//Debug::LogError(str.str());
-				m_CompilingAssets.Erase(asset.Meta.ID());
+				std::stringstream str;
+				str << "AssetCompiler: Failed to compile asset " << uuid << " there was an error when importing the asset.";
+				Debug::LogError(str.str());
+				m_CompilingAssets.Erase(uuid);
 				return false;
 			}
 
@@ -120,16 +140,26 @@ namespace Glory::Editor
 		}
 
 		/* Serialize the resource into a binary file */
-		std::filesystem::path compiledPath = ProjectSpace::GetOpenProject()->CachePath();
-		compiledPath.append("CompiledAssets").append(std::to_string(asset.Meta.ID())).replace_extension(".gag");
-		BinaryFileStream stream{ compiledPath };
+		const std::filesystem::path compiledPath = GenerateCompiledAssetPath(uuid);
 		{
+			BinaryFileStream stream{ compiledPath };
 			AssetArchive archive{ &stream };
 			archive.Serialize(pResource);
 		}
 
+		std::stringstream str;
+		str << "AssetCompiler: Compiled asset " << uuid;
+		Debug::LogInfo(str.str());
+
 		/* We're done here */
-		m_CompilingAssets.Erase(asset.Meta.ID());
+		m_CompilingAssets.Erase(uuid);
 		return true;
+	}
+
+	std::filesystem::path AssetCompiler::GenerateCompiledAssetPath(const UUID uuid)
+	{
+		std::filesystem::path compiledPath = ProjectSpace::GetOpenProject()->CachePath();
+		compiledPath.append("CompiledAssets").append(std::to_string(uuid)).replace_extension(".gag");
+		return compiledPath;
 	}
 }
