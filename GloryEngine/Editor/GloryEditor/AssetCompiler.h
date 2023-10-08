@@ -5,6 +5,7 @@
 #include <map>
 #include <UUID.h>
 #include <AssetLocation.h>
+#include <ThreadedVar.h>
 
 namespace Glory::Editor
 {
@@ -14,14 +15,21 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void CompileAssetDatabase();
 		GLORY_EDITOR_API static void CompileAssetDatabase(UUID id);
 		GLORY_EDITOR_API static void CompileAssetDatabase(const std::vector<UUID>& ids);
+		GLORY_EDITOR_API static void CompileAssets();
+		GLORY_EDITOR_API static void CompileAssets(const std::vector<UUID>& ids);
 
-	private:
 		struct AssetData
 		{
 			AssetLocation Location;
 			ResourceMeta Meta;
 		};
 
+	private:
 		static std::map<UUID, AssetData> m_AssetDatas;
+		static ThreadedVector<UUID> m_CompilingAssets;
+
+	private:
+		static void DispatchCompilationJob(const AssetData& asset);
+		static bool CompileJob(const AssetData asset);
 	};
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+
 #include <map>
 #include <string>
 #include <string_view>
@@ -7,6 +8,8 @@
 
 namespace Glory
 {
+    class BinaryStream;
+
     class Resource : public Object
     {
     public:
@@ -37,6 +40,9 @@ namespace Glory
         }
 
         void AddSubresource(Resource* pResource, const std::string& name);
+
+        virtual void Serialize(BinaryStream& container) const {};
+        virtual void Deserialize(BinaryStream& container) const {};
 
     protected:
         std::vector<Resource*> m_pSubresources;

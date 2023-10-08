@@ -34,7 +34,7 @@ namespace Glory::Editor
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
         //if (copy_to_clipboard)
         //    ImGui::LogToClipboard();
-        for (int i = 0; i < m_ConsoleLines.size(); i++)
+        for (int i = 0; i < m_ConsoleLines.Size(); i++)
         {
             const char* item = m_ConsoleLines[i].Message.data();
             if (!m_TextFilter.PassFilter(item))
@@ -183,7 +183,7 @@ namespace Glory::Editor
 
 	void EditorConsoleWindow::OnConsoleClose()
 	{
-        m_ConsoleLines.clear();
+        m_ConsoleLines.Clear();
 	}
 
 	void EditorConsoleWindow::SetNextColor(const glm::vec4& color)

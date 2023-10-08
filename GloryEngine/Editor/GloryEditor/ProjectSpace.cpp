@@ -181,6 +181,7 @@ namespace Glory::Editor
 		CreateFolder("Cache/ShaderSource");
 		CreateFolder("Cache/CompiledShaders");
 		CreateFolder("Modules");
+		CreateFolder("Cache/CompiledAssets");
 		m_ProjectFile = JSONFileRef(m_ProjectFilePath);
 		m_ProjectFile.Load();
 		Migrate(m_pCurrentProject);

@@ -1,5 +1,6 @@
 #include "Resource.h"
 #include "Debug.h"
+#include "BinaryStream.h"
 
 namespace Glory
 {
