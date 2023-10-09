@@ -21,6 +21,9 @@ namespace Glory
         virtual const void* GetPixels() const;
         virtual size_t DataSize() const;
 
+        void Serialize(BinaryStream& container) const override;
+        void Deserialize(BinaryStream& container) const override;
+
     protected:
         uint32_t m_Width;
         uint32_t m_Height;

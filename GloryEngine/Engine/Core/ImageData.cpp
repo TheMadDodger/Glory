@@ -1,4 +1,10 @@
 #include "ImageData.h"
+#include "BinaryStream.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image/stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image/stb_image_write.h>
 
 namespace Glory
 {
@@ -42,6 +48,29 @@ namespace Glory
 	size_t ImageData::DataSize() const
 	{
 		return m_DataSize;
+	}
+
+	void ImageData::Serialize(BinaryStream& container) const
+	{
+		container.Write(m_Width);
+		container.Write(m_Height);
+		container.Write(m_InternalFormat);
+		container.Write(m_PixelFormat);
+		container.Write(m_BytesPerPixel);
+
+		const int channels = m_InternalFormat == PixelFormat::PF_RGBA ? 4 : 3;
+		/* TODO: Use libpng to compress this even further */
+		stbi_write_png_to_func([](void* context, void* data, int size)
+		{
+			BinaryStream* container = (BinaryStream*)context;
+			container->Write(size);
+			container->Write(data, size_t(size));
+		}, &container, int(m_Width), int(m_Height), int(channels), m_pPixels, int(m_BytesPerPixel * m_Width));
+	}
+
+	void ImageData::Deserialize(BinaryStream& container) const
+	{
+
 	}
 
 	const PixelFormat& ImageData::GetFormat() const

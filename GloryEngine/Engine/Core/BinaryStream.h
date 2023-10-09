@@ -26,6 +26,7 @@ namespace Glory
 		virtual size_t Tell() const = 0;
 		virtual size_t Size() const = 0;
 		virtual BinaryStream& Write(const char* data, size_t size) = 0;
+		BinaryStream& Write(const void* data, size_t size);
 		virtual void Close() = 0;
 	};
 

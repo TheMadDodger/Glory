@@ -41,6 +41,9 @@ namespace Glory
         [[nodiscard]]virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
         void ClearProperties();
 
+        void Serialize(BinaryStream& container) const override;
+        void Deserialize(BinaryStream& container) const override;
+
     public: // Properties
         // Setters
         template<typename T>
@@ -72,10 +75,11 @@ namespace Glory
         friend class MaterialLoaderModule;
         friend class MaterialInstanceLoaderModule;
         friend class MaterialInstanceData;
-        std::vector<ShaderSourceData*> m_pShaderFiles;
 
-        std::vector<char> m_PropertyBuffer;
+        std::vector<ShaderSourceData*> m_pShaderFiles;
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
+        std::vector<char> m_PropertyBuffer;
+
         std::vector<size_t> m_ResourcePropertyInfoIndices;
         std::vector<AssetReference<TextureData>> m_Resources;
         std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;

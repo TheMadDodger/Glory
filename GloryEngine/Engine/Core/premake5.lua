@@ -63,6 +63,7 @@ project "GloryCore"
 		"%{IncludeDir.Version}",
 
 		"%{IncludeDir.Utils}",
+		"%{stb_image}/..",
 	}
 
 	defines
