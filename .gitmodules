@@ -47,3 +47,6 @@
 [submodule "GloryEngine/submodules/mono"]
 	path = GloryEngine/submodules/mono
 	url = https://github.com/mono/mono.git
+[submodule "GloryEngine/submodules/basis_importer"]
+	path = GloryEngine/submodules/basis_universal
+	url = https://github.com/rouault/basis_universal

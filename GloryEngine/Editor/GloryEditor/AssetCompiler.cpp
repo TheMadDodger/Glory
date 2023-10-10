@@ -136,7 +136,7 @@ namespace Glory::Editor
 			}
 
 			/* Insert the loaded asset into the manager */
-			AssetManager::AddLoadedResource(pResource);
+			AssetManager::AddLoadedResource(pResource, uuid);
 		}
 
 		/* Serialize the resource into a binary file */
