@@ -58,13 +58,12 @@ namespace Glory::Editor
 
 		for (UUID id : ids)
 		{
+			/* Skip sub assets */
+			if (!m_AssetDatas.at(id).Location.SubresourcePath.empty()) continue;
 			const std::filesystem::path path = GenerateCompiledAssetPath(id);
-			std::error_code code;
-			const bool exists = std::filesystem::exists(path);
-			if (!exists)
-			{
-				newIDs.push_back(id);
-			}
+			const bool exists = std::filesystem::exists(path.string());
+			if (exists) continue;
+			newIDs.push_back(id);
 		}
 
 		CompileAssets(newIDs);
@@ -136,7 +135,7 @@ namespace Glory::Editor
 			}
 
 			/* Insert the loaded asset into the manager */
-			AssetManager::AddLoadedResource(pResource);
+			AssetManager::AddLoadedResource(pResource, uuid);
 		}
 
 		/* Serialize the resource into a binary file */
@@ -159,7 +158,7 @@ namespace Glory::Editor
 	std::filesystem::path AssetCompiler::GenerateCompiledAssetPath(const UUID uuid)
 	{
 		std::filesystem::path compiledPath = ProjectSpace::GetOpenProject()->CachePath();
-		compiledPath.append("CompiledAssets").append(std::to_string(uuid)).replace_extension(".gag");
+		compiledPath.append("CompiledAssets").append(std::to_string(uuid)).replace_extension(".gcag");
 		return compiledPath;
 	}
 }

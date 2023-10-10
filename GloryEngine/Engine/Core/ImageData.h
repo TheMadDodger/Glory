@@ -8,7 +8,19 @@ namespace Glory
     class ImageData : public Resource
     {
     public:
-        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, const char*&& pPixels, size_t dataSize);
+        struct Header
+        {
+            uint32_t m_Width;
+            uint32_t m_Height;
+            PixelFormat m_InternalFormat;
+            PixelFormat m_PixelFormat;
+            uint8_t m_BytesPerPixel;
+            size_t m_DataSize;
+            bool m_Compressed;
+        };
+
+    public:
+        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, const char*&& pPixels, size_t dataSize, bool compressed=false);
         ImageData();
         virtual ~ImageData();
 
@@ -25,14 +37,8 @@ namespace Glory
         void Deserialize(BinaryStream& container) const override;
 
     protected:
-        uint32_t m_Width;
-        uint32_t m_Height;
-        PixelFormat m_InternalFormat;
-        PixelFormat m_PixelFormat;
-        uint8_t m_BytesPerPixel;
-
+        Header m_Header;
         const char* m_pPixels;
-        size_t m_DataSize;
 
         virtual void BuildTexture();
 

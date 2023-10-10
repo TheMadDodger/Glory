@@ -76,6 +76,12 @@ namespace Glory
 		return ASSET_MANAGER->m_pLoadedAssets[uuid];
 	}
 
+	void AssetManager::AddLoadedResource(Resource* pResource, UUID uuid)
+	{
+		pResource->m_ID = uuid;
+		AddLoadedResource(pResource);
+	}
+
 	void AssetManager::AddLoadedResource(Resource* pResource)
 	{
 		UnloadAsset(pResource->GetUUID());
