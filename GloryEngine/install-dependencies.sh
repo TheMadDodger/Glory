@@ -167,6 +167,14 @@ find "msvc/build/sgen/x64/lib/${CONFIG}" -name \*.* -exec cp {} "../../Dependenc
 find "msvc/build/sgen/x64/bin/${CONFIG}" -name \*.* -exec cp {} "../../Dependencies/${CONFIG}/bin/" \;
 find "msvc/build/sgen/x64/bin/${CONFIG}" -name \*.* -exec cp {} "../../Dependencies/${CONFIG}/bin/" \;
 cp -r msvc/include/mono "../../Dependencies/${CONFIG}/include"
+cd ..
+
+# basis_universal
+cd basis_universal
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake --build . --target INSTALL --config $CONFIG
 
 # Jolt
 # Jolt now gets built in the jolt module itself because I could not solve an illusive linker error

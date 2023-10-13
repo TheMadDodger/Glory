@@ -238,7 +238,6 @@ namespace Glory
         PF_Depth24,
         PF_Depth32,
 
-
         // NOT SUPPORTED FOR NOW
         PF_G8B8G8R8422Unorm = 1000156000,
         PF_B8G8R8G8422Unorm,

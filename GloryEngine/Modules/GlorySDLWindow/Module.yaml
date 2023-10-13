@@ -3,4 +3,4 @@ Type: Window
 Dependencies: ["SDL2"]
 Editor:
  Backend: GloryEditorSDL
- Extensions: ["SDLImageImporter"]
+ Extensions: []
