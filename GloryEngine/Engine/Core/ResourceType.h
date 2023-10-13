@@ -7,6 +7,8 @@
 
 namespace Glory
 {
+	class Resource;
+
 	struct BasicTypeData
 	{
 		BasicTypeData(const std::string& name, uint32_t typeHash, size_t size);
@@ -14,6 +16,22 @@ namespace Glory
 		const std::string m_Name;
 		uint32_t m_TypeHash;
 		size_t m_Size;
+	};
+
+	class ResourceFactory
+	{
+	public:
+		virtual Resource* Create() const = 0;
+	};
+
+	template<typename R>
+	class ResourceFactoryTemplate : public ResourceFactory
+	{
+	public:
+		virtual Resource* Create() const override
+		{
+			return (Resource*)new R();
+		}
 	};
 
 	class ResourceType
@@ -24,9 +42,10 @@ namespace Glory
 		const std::string& Extensions() const;
 		const std::string& FullName() const;
 		const std::string& Name() const;
+		Resource* Create() const;
 
 	private:
-		ResourceType(uint32_t typeHash, const std::string& extensions, const char* name);
+		ResourceType(uint32_t typeHash, const std::string& extensions, const char* name, ResourceFactory* pFactory);
 		const ResourceType operator=(const ResourceType&) = delete;
 
 	private:
@@ -36,6 +55,7 @@ namespace Glory
 		const std::string m_FullName;
 		std::string m_Name;
 		std::vector<uint32_t> m_SubTypes;
+		ResourceFactory* m_pFactory;
 	};
 
 	class ResourceTypes
@@ -44,7 +64,8 @@ namespace Glory
 		template<class T>
 		void RegisterResource(const std::string& extensions)
 		{
-			ResourceType* pResourceType = RegisterResource(typeid(T), extensions);
+			ResourceFactory* pFactory = new ResourceFactoryTemplate<T>();
+			ResourceType* pResourceType = RegisterResource(typeid(T), extensions, pFactory);
 			T t = T();
 			for (size_t i = 0; i < t.TypeCount(); i++)
 			{
@@ -74,8 +95,9 @@ namespace Glory
 		}
 
 		bool IsResource(uint32_t typeHash);
-		ResourceType* RegisterResource(std::type_index type, const std::string& extensions);
+		ResourceType* RegisterResource(std::type_index type, const std::string& extensions, ResourceFactory* pFactory);
 		void RegisterType(const std::type_info& type, size_t size);
+
 		static uint32_t GetHash(std::type_index type);
 		ResourceType* GetResourceType(const std::string& extension);
 		ResourceType* GetResourceType(std::type_index type);
@@ -92,11 +114,18 @@ namespace Glory
 		static bool IsScene(const std::string& ext);
 
 	public:
-		ResourceTypes();
 		virtual ~ResourceTypes();
 
 	private:
 		void ReadExtensions(size_t index, const std::string& extensions);
+
+	private:
+		friend class ResourceTypes;
+		ResourceFactory* m_pFactory;
+
+	public:
+		ResourceTypes();
+		virtual ~ResourceTypes();
 
 	private:
 		friend class ResourceType;

@@ -52,7 +52,11 @@ namespace Glory::Editor
 				m_AssetDatas.erase(id);
 				continue;
 			}
-			assetDatabase.SetAsset(data.Location, data.Meta);
+
+			AssetLocation location = data.Location;
+			location.Index = 0;
+			location.Path = GenerateCompiledAssetPath(id).string();
+			assetDatabase.SetAsset(location, data.Meta);
 		}
 	}
 
@@ -154,7 +158,7 @@ namespace Glory::Editor
 		const std::filesystem::path compiledPath = GenerateCompiledAssetPath(uuid);
 		{
 			BinaryFileStream stream{ compiledPath };
-			AssetArchive archive{ &stream };
+			AssetArchive archive{ &stream, true };
 			archive.Serialize(pResource);
 		}
 

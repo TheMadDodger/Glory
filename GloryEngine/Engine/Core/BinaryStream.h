@@ -28,6 +28,18 @@ namespace Glory
 		virtual BinaryStream& Write(const char* data, size_t size) = 0;
 		BinaryStream& Write(const void* data, size_t size);
 		virtual void Close() = 0;
+
+		template<typename T>
+		BinaryStream& Read(T& out)
+		{
+			return Read(reinterpret_cast<char*>(&out), sizeof(T));
+		}
+
+		BinaryStream& Read(std::string& value);
+		BinaryStream& Read(void* out, size_t size);
+		virtual BinaryStream& Read(char* out, size_t size) = 0;
+
+		virtual bool Eof() = 0;
 	};
 
 	class BinaryFileStream : public BinaryStream
@@ -40,7 +52,10 @@ namespace Glory
 		size_t Tell() const override;
 		size_t Size() const override;
 		BinaryStream& Write(const char* data, size_t size) override;
+		BinaryStream& Read(char* out, size_t size) override;
 		void Close() override;
+
+		virtual bool Eof() override;
 
 	private:
 		std::fstream m_File;

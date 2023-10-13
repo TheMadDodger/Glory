@@ -47,6 +47,11 @@ namespace Glory
 		return pSubresource->SubresourceFromPath(nextPath);
 	}
 
+	void Resource::AddSubresource(Resource* pResource)
+	{
+		AddSubresource(pResource, pResource->Name());
+	}
+
 	void Resource::AddSubresource(Resource* pResource, const std::string& name)
 	{
 		if (m_NameToSubresourceIndex.find(name) != m_NameToSubresourceIndex.end())

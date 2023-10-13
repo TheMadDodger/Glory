@@ -39,6 +39,7 @@ namespace Glory
             return static_cast<T*>(Subresource(name));
         }
 
+        void AddSubresource(Resource* pResource);
         void AddSubresource(Resource* pResource, const std::string& name);
 
         virtual void Serialize(BinaryStream& container) const {};
