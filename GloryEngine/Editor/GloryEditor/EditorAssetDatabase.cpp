@@ -286,14 +286,7 @@ namespace Glory::Editor
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
 		std::filesystem::path fileName = filePath.filename().replace_extension("");
-		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(extension.string());
-		if (!pModule)
-		{
-			// Shouldnt happen but uuuuuuuuuh
-			Debug::LogError("Failed to save asset, asset type not supported!");
-			return 0;
-		}
-		pModule->Save(path, pResource);
+		if (!Importer::Export(path, pResource)) return 0;
 		return ImportAsset(path, pResource);
 	}
 
@@ -495,10 +488,9 @@ namespace Glory::Editor
 		JSONValueRef location = assetNode["Location"];
 		JSONValueRef meta = assetNode["Metadata"];
 
-		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(meta["Hash"].AsUInt());
 		std::filesystem::path path = Game::GetAssetPath();
 		path.append(location["Path"].AsString());
-		pModule->Save(path.string(), pResource);
+		if (!Importer::Export(path, pResource)) return;
 		IncrementAssetVersion(pResource->GetUUID());
 
 		if (markUndirty)
