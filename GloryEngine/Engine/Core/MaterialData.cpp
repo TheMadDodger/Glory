@@ -1,5 +1,6 @@
 #include "MaterialData.h"
 #include "AssetManager.h"
+#include "BinaryStream.h"
 
 #include <algorithm>
 
@@ -99,7 +100,7 @@ namespace Glory
 
 	bool MaterialData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
 	{
-		uint32_t hash = Reflect::Hash(name.data());
+		const uint32_t hash = Reflect::Hash(name.data());
 		if (m_HashToPropertyInfoIndex.find(hash) == m_HashToPropertyInfoIndex.end()) return false;
 		index = m_HashToPropertyInfoIndex.at(hash);
 		return true;
@@ -139,6 +140,46 @@ namespace Glory
 		m_Resources.clear();
 		m_HashToPropertyInfoIndex.clear();
 		m_CurrentOffset = 0;
+	}
+
+	void MaterialData::Serialize(BinaryStream& container) const
+	{
+		/* Write shader IDs */
+		container.Write(m_pShaderFiles.size());
+		for (size_t i = 0; i < m_pShaderFiles.size(); ++i)
+		{
+			container.Write(m_pShaderFiles[0]->GetUUID());
+		}
+
+		/* Write property infos */
+		container.Write(m_PropertyInfos.size());
+		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
+		{
+			const MaterialPropertyInfo& prop = m_PropertyInfos[i];
+			container.Write(prop.TypeHash());
+			container.Write(prop.ShaderName());
+			container.Write(prop.DisplayName());
+			container.Write(prop.Size());
+			container.Write(prop.Offset());
+			container.Write(prop.EndOffset());
+			container.Write(prop.IsResource());
+			container.Write(prop.Flags());
+		}
+
+		/* Write property buffer */
+		container.Write(m_PropertyBuffer.size()).
+			Write(m_PropertyBuffer.data(), m_PropertyBuffer.size());
+
+		/* Write resources */
+		container.Write(m_Resources.size());
+		for (size_t i = 0; i < m_Resources.size(); ++i)
+		{
+			container.Write(m_Resources[i].AssetUUID());
+		}
+	}
+
+	void MaterialData::Deserialize(BinaryStream& container) const
+	{
 	}
 
 	void MaterialData::SetTexture(const std::string& name, TextureData* value)

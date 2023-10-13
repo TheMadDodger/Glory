@@ -64,6 +64,7 @@ namespace Glory::Editor
 
 		Debug::LogInfo("Loaded asset database");
 		AssetCompiler::CompileAssetDatabase();
+		AssetCompiler::CompileNewAssets();
 	}
 
 	void EditorAssetDatabase::Reload()

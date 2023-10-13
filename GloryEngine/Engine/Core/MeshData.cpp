@@ -1,4 +1,5 @@
 #include "MeshData.h"
+#include "BinaryStream.h"
 
 namespace Glory
 {
@@ -67,5 +68,19 @@ namespace Glory
 	const AttributeType* MeshData::AttributeTypes() const
 	{
 		return m_Attributes.data();
+	}
+
+	void MeshData::Serialize(BinaryStream& container) const
+	{
+		container.Write(m_VertexCount);
+		container.Write(m_IndexCount);
+		container.Write(m_VertexSize);
+		container.Write(reinterpret_cast<const char*>(m_Attributes.data()), sizeof(AttributeType)*m_Attributes.size());
+		container.Write(reinterpret_cast<const char*>(m_Vertices.data()), sizeof(float)*m_Vertices.size());
+		container.Write(reinterpret_cast<const char*>(m_Indices.data()), sizeof(uint32_t)*m_Indices.size());
+	}
+
+	void MeshData::Deserialize(BinaryStream& container) const
+	{
 	}
 }

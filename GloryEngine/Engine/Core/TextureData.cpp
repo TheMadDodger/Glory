@@ -1,4 +1,5 @@
 #include "TextureData.h"
+#include "BinaryStream.h"
 
 namespace Glory
 {
@@ -23,5 +24,15 @@ namespace Glory
 	SamplerSettings& TextureData::GetSamplerSettings()
 	{
 		return m_SamplerSettings;
+	}
+
+	void TextureData::Serialize(BinaryStream& container) const
+	{
+		/* Write image ID */
+		container.Write(m_Image.AssetUUID()).Write(m_SamplerSettings);
+	}
+
+	void TextureData::Deserialize(BinaryStream& container) const
+	{
 	}
 }

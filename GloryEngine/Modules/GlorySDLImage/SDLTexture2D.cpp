@@ -20,37 +20,37 @@ namespace Glory
 
 	void SDLImageData::BuildTexture()
 	{
-		m_Width = static_cast<uint32_t>(m_pSurface->w);
-		m_Height = static_cast<uint32_t>(m_pSurface->h);
+		m_Header.m_Width = static_cast<uint32_t>(m_pSurface->w);
+		m_Header.m_Height = static_cast<uint32_t>(m_pSurface->h);
 
-		m_PixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
-		m_InternalFormat = Glory::PixelFormat::PF_RGB;
-		m_BytesPerPixel = m_pSurface->format->BytesPerPixel;
+		m_Header.m_PixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
+		m_Header.m_InternalFormat = Glory::PixelFormat::PF_RGB;
+		m_Header.m_BytesPerPixel = m_pSurface->format->BytesPerPixel;
 
-		switch (m_BytesPerPixel)
+		switch (m_Header.m_BytesPerPixel)
 		{
 		case 3:
 			if (m_pSurface->format->Rmask == 0x000000ff)
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_RGB;
-				m_InternalFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
+				m_Header.m_PixelFormat = Glory::PixelFormat::PF_RGB;
+				m_Header.m_InternalFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
 			}
 			else
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_RGB;
-				m_InternalFormat = Glory::PixelFormat::PF_B8G8R8Srgb;
+				m_Header.m_PixelFormat = Glory::PixelFormat::PF_RGB;
+				m_Header.m_InternalFormat = Glory::PixelFormat::PF_B8G8R8Srgb;
 			}
 			break;
 		case 4:
 			if (m_pSurface->format->Rmask == 0x000000ff)
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_RGBA;
-				m_InternalFormat = Glory::PixelFormat::PF_R8G8B8A8Srgb;
+				m_Header.m_PixelFormat = Glory::PixelFormat::PF_RGBA;
+				m_Header.m_InternalFormat = Glory::PixelFormat::PF_R8G8B8A8Srgb;
 			}
 			else
 			{
-				m_PixelFormat = Glory::PixelFormat::PF_RGBA;
-				m_InternalFormat = Glory::PixelFormat::PF_B8G8R8A8Srgb;
+				m_Header.m_PixelFormat = Glory::PixelFormat::PF_RGBA;
+				m_Header.m_InternalFormat = Glory::PixelFormat::PF_B8G8R8A8Srgb;
 			}
 			break;
 		default:

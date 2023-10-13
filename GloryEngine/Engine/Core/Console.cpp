@@ -107,6 +107,8 @@ namespace Glory
 
 	void Console::WriteLine(const std::string& line, bool addTimestamp)
 	{
+		std::unique_lock lock{CONSOLE_INSTANCE->m_Lock};
+
 		std::string finalLine = line;
 		if (addTimestamp) finalLine = TimeStamp() + finalLine;
 		AddLineToConsole(finalLine);

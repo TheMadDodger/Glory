@@ -2,9 +2,11 @@
 #include "Commands.h"
 #include "IConsole.h"
 #include "GloryContext.h"
+
 #include <thread>
 #include <queue>
 #include <functional>
+#include <mutex>
 
 #define CONSOLE_INSTANCE GloryContext::GetContext()->GetConsole()
 
@@ -73,6 +75,8 @@ namespace Glory
 		int m_CurrentConsoleSize = 0;
 		bool m_Writing = false;
 		bool m_Reading = false;
+
+		std::mutex m_Lock;
 
 		std::vector<std::string> m_CommandHistory;
 		std::vector<std::string> m_ConsoleLines;

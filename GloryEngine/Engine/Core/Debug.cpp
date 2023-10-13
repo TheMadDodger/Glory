@@ -52,7 +52,7 @@ namespace Glory
 
 	void Debug::LogInfo(const std::string& message, bool bIncludeTimeStamp)
 	{
-		//Console::SetConsoleColor(15);
+		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({1.f, 1.f, 1.f, 1.0f});
 		std::string finalMessage = "Info:	" + message;
 		Console::WriteLine(finalMessage, bIncludeTimeStamp);
@@ -60,7 +60,7 @@ namespace Glory
 
 	void Debug::LogNotice(const std::string& message, bool bIncludeTimeStamp)
 	{
-		//Console::SetConsoleColor(8);
+		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 0.5f, 0.5f, 0.5f, 1.0f });
 		std::string finalMessage = "Notice:	" + message;
 		Console::WriteLine(finalMessage, bIncludeTimeStamp);
@@ -69,7 +69,7 @@ namespace Glory
 
 	void Debug::LogWarning(const std::string& message, bool bIncludeTimeStamp)
 	{
-		//Console::SetConsoleColor(14);
+		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 1.f, 0.918f, 0.0f, 1.0f });
 		std::string finalMessage = "WARNING:	" + message;
 		Console::WriteLine(finalMessage, bIncludeTimeStamp);
@@ -77,7 +77,7 @@ namespace Glory
 
 	void Debug::LogError(const std::string& message, bool bIncludeTimeStamp)
 	{
-		//Console::SetConsoleColor(12);
+		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
 		std::string finalMessage = "ERROR:	" + message;
 		Console::WriteLine(finalMessage, bIncludeTimeStamp);
@@ -85,7 +85,7 @@ namespace Glory
 
 	void Debug::LogFatalError(const std::string& message, bool bIncludeTimeStamp)
 	{
-		//Console::SetConsoleColor(12);
+		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
 		std::string finalMessage = "FATAL ERROR:	" + message;
 		Console::WriteLine(finalMessage, bIncludeTimeStamp);

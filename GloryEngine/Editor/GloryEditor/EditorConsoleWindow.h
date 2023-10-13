@@ -1,7 +1,9 @@
 #pragma once
 #include "EditorWindow.h"
 #include "IConsole.h"
+
 #include <imgui.h>
+#include <ThreadedVar.h>
 
 namespace Glory::Editor
 {
@@ -33,7 +35,7 @@ namespace Glory::Editor
             const glm::vec4 Color;
         };
 
-        std::vector<ConsoleLine> m_ConsoleLines;
+        ThreadedVector<ConsoleLine> m_ConsoleLines;
         static const int MAXINPUTLENGTH = 200;
         char m_InputBuffer[MAXINPUTLENGTH];
         ImGuiTextFilter m_TextFilter;

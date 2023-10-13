@@ -1,5 +1,7 @@
 #include "MaterialInstanceData.h"
 #include "ResourceType.h"
+#include "BinaryStream.h"
+
 #include <algorithm>
 
 namespace Glory
@@ -155,6 +157,33 @@ namespace Glory
 	void MaterialInstanceData::EnableProperty(size_t index)
 	{
 		m_PropertyOverridesEnable[index] = true;
+	}
+
+	void MaterialInstanceData::Serialize(BinaryStream& container) const
+	{
+		/* Write base material */
+		container.Write(m_pBaseMaterial->GetUUID());
+
+		/* Write overrides */
+		for (size_t i = 0; i < m_PropertyOverridesEnable.size(); ++i)
+		{
+			container.Write(m_PropertyOverridesEnable[i]);
+		}
+
+		/* Write property buffer */
+		container.Write(m_PropertyBuffer.size()).
+			Write(m_PropertyBuffer.data(), m_PropertyBuffer.size());
+
+		/* Write resources */
+		container.Write(m_Resources.size());
+		for (size_t i = 0; i < m_Resources.size(); ++i)
+		{
+			container.Write(m_Resources[i].AssetUUID());
+		}
+	}
+
+	void MaterialInstanceData::Deserialize(BinaryStream& container) const
+	{
 	}
 
 	std::vector<char>& MaterialInstanceData::GetPropertyBuffer(size_t index)

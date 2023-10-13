@@ -1,11 +1,17 @@
 #include "ImageData.h"
+#include "BinaryStream.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image/stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image/stb_image_write.h>
 
 namespace Glory
 {
-	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, const char*&& pPixels, size_t dataSize)
-		: m_Width(w), m_Height(h), m_InternalFormat(internalFormat), m_PixelFormat(format), m_BytesPerPixel(bytesPerPixel), m_pPixels(std::move(pPixels)), m_DataSize(dataSize) {}
+	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, const char*&& pPixels, size_t dataSize, bool compressed)
+		: m_Header{ w, h, internalFormat, format, bytesPerPixel, dataSize, compressed }, m_pPixels(std::move(pPixels)) {}
 
-	ImageData::ImageData() : m_Width(0), m_Height(0), m_InternalFormat(PixelFormat::PF_RGB), m_PixelFormat(PixelFormat::PF_R8G8B8Srgb), m_BytesPerPixel(0), m_pPixels(nullptr), m_DataSize(0)
+	ImageData::ImageData() : m_Header{}, m_pPixels(nullptr)
 	{
 		APPEND_TYPE(ImageData);
 	}
@@ -16,22 +22,22 @@ namespace Glory
 
 	uint32_t ImageData::GetWidth() const
 	{
-		return m_Width;
+		return m_Header.m_Width;
 	}
 
 	uint32_t ImageData::GetHeight() const
 	{
-		return m_Height;
+		return m_Header.m_Height;
 	}
 
 	uint8_t ImageData::GetBytesPerPixel() const
 	{
-		return m_BytesPerPixel;
+		return m_Header.m_BytesPerPixel;
 	}
 
 	uint32_t ImageData::GetByteSize() const
 	{
-		return m_Width * m_Height * m_BytesPerPixel;
+		return m_Header.m_Width * m_Header.m_Height * m_Header.m_BytesPerPixel;
 	}
 
 	const void* ImageData::GetPixels() const
@@ -41,17 +47,52 @@ namespace Glory
 
 	size_t ImageData::DataSize() const
 	{
-		return m_DataSize;
+		return m_Header.m_DataSize;
+	}
+
+	void ImageData::Serialize(BinaryStream& container) const
+	{
+		const int channels = m_Header.m_InternalFormat == PixelFormat::PF_RGBA ? 4 : 3;
+		if (m_Header.m_Compressed)
+		{
+			/* No need to compress if it was already compressed by the importer */
+			container.Write(m_Header).Write(m_pPixels, m_Header.m_DataSize);
+			return;
+		}
+
+		/* TODO: Use libpng to compress this even further */
+		struct ContextData
+		{
+			BinaryStream* stream;
+			const ImageData* image;
+		};
+		ContextData data{ &container, this };
+
+		stbi_write_png_to_func([](void* context, void* data, int size)
+		{
+			ContextData* contextData = (ContextData*)context;
+			/* Overwrite the size */
+			Header h = contextData->image->m_Header;
+			h.m_DataSize = size;
+			contextData->stream->Write(h);
+			contextData->stream->Write(size);
+			contextData->stream->Write(data, size_t(size));
+		}, &data, int(m_Header.m_Width), int(m_Header.m_Height), int(channels), m_pPixels, int(m_Header.m_BytesPerPixel * m_Header.m_Width));
+	}
+
+	void ImageData::Deserialize(BinaryStream& container) const
+	{
+
 	}
 
 	const PixelFormat& ImageData::GetFormat() const
 	{
-		return m_PixelFormat;
+		return m_Header.m_PixelFormat;
 	}
 
 	const PixelFormat& ImageData::GetInternalFormat() const
 	{
-		return m_InternalFormat;
+		return m_Header.m_InternalFormat;
 	}
 
 	void ImageData::BuildTexture() {}

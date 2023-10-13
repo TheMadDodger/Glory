@@ -14,6 +14,9 @@ namespace Glory
         AssetReference<ImageData>& Image();
         SamplerSettings& GetSamplerSettings();
 
+        void Serialize(BinaryStream& container) const override;
+        void Deserialize(BinaryStream& container) const override;
+
     private:
         friend class TextureDataLoaderModule;
         friend class ImageLoaderModule;

@@ -22,6 +22,9 @@ namespace Glory
 		const uint32_t* Indices() const;
 		const AttributeType* AttributeTypes() const;
 
+		void Serialize(BinaryStream& container) const override;
+		void Deserialize(BinaryStream& container) const override;
+
 	private:
 		friend class Mesh;
 		std::vector<float> m_Vertices;
