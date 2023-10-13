@@ -34,11 +34,21 @@ namespace Glory::Utils
 		UnSet(index);
 	}
 
+	void BitSet::SetAll()
+	{
+		std::memset(m_pMemory, ~0, m_Capacity);
+	}
+
 	void BitSet::UnSet(Element index)
 	{
 		const Element elementIndex = index / (sizeof(Element) * 8);
 		const uint32_t bitIndex = index - elementIndex * sizeof(Element) * 8;
 		m_pMemory[elementIndex] &= ~(1 << bitIndex);
+	}
+
+	void BitSet::Clear()
+	{
+		std::memset(m_pMemory, 0, m_Capacity);
 	}
 
 	void BitSet::Reserve(size_t capacity)

@@ -165,6 +165,14 @@ namespace Glory
 			return value;
 		}
 
+		const _Ty& at(const _Kty& key)
+		{
+			m_Mutex.lock();
+			const _Ty& value = m_Data.at(key);
+			m_Mutex.unlock();
+			return value;
+		}
+
 		bool Contains(const _Kty& key)
 		{
 			m_Mutex.lock();
@@ -245,6 +253,13 @@ namespace Glory
 			callback(m_Data[key]);
 			m_Mutex.unlock();
 			return true;
+		}
+
+		void Emplace(const _Kty& key, _Ty&& value)
+		{
+			m_Mutex.lock();
+			m_Data.emplace(key, std::move(value));
+			m_Mutex.unlock();
 		}
 
 		size_t Size()

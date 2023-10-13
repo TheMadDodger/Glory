@@ -63,6 +63,7 @@ project "GloryClusteredRenderer"
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
+		"GloryUtils",
 	}
 
 	defines
