@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <mutex>
 
 #ifndef GLORY_NO_DEBUG_LINES
 
@@ -65,6 +66,8 @@ namespace Glory
 		friend class RendererModule;
 		Debug() = default;
 		~Debug() = default;
+
+		std::mutex m_Lock;
 
 #ifndef GLORY_NO_DEBUG_LINES
 
