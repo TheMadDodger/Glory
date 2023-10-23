@@ -18,6 +18,7 @@
 #include "Physics.h"
 #include "ShapeProperty.h"
 #include "PrefabData.h"
+#include "SceneManager.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -40,6 +41,11 @@ namespace Glory
 	{
 		Engine* pEngine = new Engine(createInfo);
 		return pEngine;
+	}
+
+	SceneManager* Engine::GetSceneManager()
+	{
+		return m_pSceneManager;
 	}
 
 	void Engine::AddMainModule(Module* pModule, bool initialize)
@@ -186,8 +192,9 @@ namespace Glory
 	}
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
-		: m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
-		m_pGraphicsThread(nullptr), m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
+		: m_pSceneManager(new SceneManager(this)), m_pThreadManager(ThreadManager::GetInstance()),
+		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr),
+		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);

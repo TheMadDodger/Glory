@@ -81,7 +81,6 @@ project "Glorious"
 	{
 		"GloryASSIMPModelLoader",
 		"GloryClusteredRenderer",
-		"GloryEntityScenes",
 		"GloryOpenGLGraphics",
 		--"GloryVulkanGraphics",
 		"GlorySDLImage",

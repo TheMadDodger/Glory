@@ -56,7 +56,6 @@ project "EntityPrefabImporter"
 	links
 	{
 		"GloryCore",
-		"GloryEntityScenes",
 		"GloryEditor",
 		"shaderc",
 		"shaderc_combined",

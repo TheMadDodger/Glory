@@ -1,12 +1,18 @@
 #pragma once
 #include "Resource.h"
 #include "SceneObject.h"
+#include "UUIDRemapper.h"
+#include "Entity.h"
+
 #include <mutex>
 #include <glm/fwd.hpp>
+#include <GloryECS/EntityRegistry.h>
 
 namespace Glory
 {
+    struct PrefabNode;
     class PrefabData;
+    class SceneObject;
 
     struct DelayedParentData
     {
@@ -35,40 +41,59 @@ namespace Glory
 
         void HandleDelayedParents();
 
-        virtual void Start() {}
-        virtual void Stop() {}
+        void Start();
+        void Stop();
 
         void SetPrefab(SceneObject* pObject, UUID prefabID);
         void UnsetPrefab(SceneObject* pObject);
         const UUID Prefab(UUID objectID) const;
         const UUID PrefabChild(UUID objectID) const;
 
-        virtual SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
-            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
-        { return nullptr; }
+        SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
+            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+        SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab, uint32_t remapSeed,
+            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+        SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab, UUIDRemapper& remapper,
+            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+
+        SceneObject* GetSceneObjectFromEntityID(Utils::ECS::EntityID entity);
+
+        Utils::ECS::EntityRegistry* GetRegistry();
+
+        bool IsValid() const;
 
     protected:
-        virtual void Initialize() {}
-        virtual void OnTick() {}
-        virtual void OnPaint() {}
+        void Initialize();
+        void OnTick();
+        void OnPaint();
 
-        virtual SceneObject* CreateObject(const std::string& name) { return nullptr; }
-        virtual SceneObject* CreateObject(const std::string& name, UUID uuid, UUID uuid2 = 0) { return nullptr; }
-        virtual void OnDeleteObject(SceneObject* pObject) {}
-        virtual void OnObjectAdded(SceneObject* pObject) {}
-        virtual void OnDelayedSetParent(const DelayedParentData& data);
+        SceneObject* CreateObject(const std::string& name);
+        SceneObject* CreateObject(const std::string& name, UUID uuid, UUID uuid2 = 0);
+        void OnDeleteObject(SceneObject* pObject);
+        void OnObjectAdded(SceneObject* pObject);
+        void OnDelayedSetParent(const DelayedParentData& data);
 
     private:
         void SetUUID(UUID uuid);
         void SetChildrenPrefab(SceneObject* pObject, UUID prefabID);
         void UnsetChildrenPrefab(SceneObject* pObject);
 
+        Entity CreateEntity(UUID uuid, UUID transUUID);
+
+        SceneObject* InstantiatePrefabNode(SceneObject* pParent, const PrefabNode& node, UUIDRemapper& remapper);
+
     protected:
-        friend class ScenesModule;
+        friend class Entity;
+        friend class SceneSerializer;
+        friend class SceneManager;
         friend class SceneObject;
         std::vector<SceneObject*> m_pSceneObjects;
         std::vector<DelayedParentData> m_DelayedParents;
         std::map<UUID, UUID> m_ActivePrefabs;
         std::map<UUID, UUID> m_ActivePrefabChildren;
+
+        Utils::ECS::EntityRegistry m_Registry;
+        bool m_Valid;
+        std::unordered_map<Utils::ECS::EntityID, SceneObject*> m_EntityIDToObject;
     };
 }

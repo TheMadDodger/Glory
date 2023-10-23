@@ -38,15 +38,16 @@ project "GloryCore"
 		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderData.*", "ShaderLoaderModule.*", "ShaderSourceData.*", "ShaderSourceLoaderModule.*" },
 		["Modules/ResourceLoading/Images"] = { "ImageData.*", "ImageLoaderModule.*" },
 		["Modules/ResourceLoading/Textures"] = { "TextureData.*", "TextureDataLoaderModule.*" },
-		["Modules/Scenes"] = { "ScenesModule.*", "SceneObject.*", "GScene.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
 		["Modules/Scripting"] = { "Script.*", "ScriptingModule.*", "ScriptLoaderModule.*", "ScriptBinding.*", "ScriptingBinder.*", "IScriptExtender.*" },
 		["Modules/Input"] = { "InputModule.*", "Input.*", "KeyEnums.*", "PlayerInput.*" },
 		["Modules/Physics"] = { "ShapeManager.*", "CharacterManager.*", "PhysicsModule.*", "Shapes.*", "Physics.*", "ShapeProperty.*" },
 		["Analysis"] = { "EngineProfiler.*", "ProfilerModule.*", "ProfilerSample.*", "ProfilerThreadSample.*" },
-		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
-		["Serialization"] = { "SceneObjectRefSerializer.*", "StructPropertySerializer.*", "AssetReference.*", "SceneObjectRef.*", "AssetRef.*", "LayerRef.*", "EnumPropertySerializer.*", "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "SerializedTypes.*", "ArrayPropertySerializer.*", "AssetReferencePropertyTemplate.*", "ShapePropertySerializer.*" },
+		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*", "ComponentTypes.*" },
+		["Serialization"] = { "SceneObjectRefSerializer.*", "StructPropertySerializer.*", "AssetReference.*", "SceneObjectRef.*", "AssetRef.*", "LayerRef.*", "EnumPropertySerializer.*", "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializer.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "SerializedTypes.*", "ArrayPropertySerializer.*", "AssetReferencePropertyTemplate.*", "ShapePropertySerializer.*", "ScriptedComponentSerializer.*", "GSceneSerializer.*", "SceneObjectSerializer.*", "EntityComponentSerializer.*" },
 		["Scripting"] = { "ScriptExtensions.*", "ScriptingExtender.*", "ScriptProperty.*" },
+		["SceneManagement"] = { "SceneManager.*", "SceneObject.*", "GScene.*", "Components.*", "Entity.*", "EntityComponentObject.*", "SceneObject.*" },
+		["EntitySystems"] = { "CharacterControllerSystem.*", "ModelRenderSystem.*", "ScriptedSystem.*", "MeshRenderSystem.*", "Systems.*", "TransformSystem.*", "CameraSystem.*", "LookAtSystem.*", "SpinSystem.*", "LightSystem.*", "MeshFilterSystem.*", "PhysicsSystem.*" },
 	}
 
 	includedirs

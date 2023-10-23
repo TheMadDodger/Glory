@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 #include <functional>
-#include <UUID.h>
 
 namespace Glory::Utils::ECS
 {
