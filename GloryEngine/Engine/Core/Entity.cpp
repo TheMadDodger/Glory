@@ -35,7 +35,7 @@ namespace Glory
 
 	void Entity::Destroy()
 	{
-		if (!m_pGScene->IsValid()) return;
+		if (!m_pGScene || !m_pGScene->IsValid()) return;
 		m_pRegistry->DestroyEntity(m_EntityID);
 	}
 
