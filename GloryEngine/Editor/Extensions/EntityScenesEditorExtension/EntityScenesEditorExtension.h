@@ -12,12 +12,11 @@ EXTENSION_H
 namespace Glory
 {
     class SceneObject;
-    class EntitySceneObject;
 }
 
 namespace Glory::Editor
 {
-    class EntityScenesEditorExtension : public BaseEditorExtension, IPlayModeHandler
+    class EntityScenesEditorExtension : public BaseEditorExtension
     {
     public:
         EntityScenesEditorExtension();
@@ -26,14 +25,8 @@ namespace Glory::Editor
     private:
         virtual void Initialize() override;
 
-        virtual const char* ModuleName() override;
-        virtual void HandleBeforeStart(Module* pModule) override;
-        virtual void HandleStart(Module* pModule) override;
-        virtual void HandleStop(Module* pModule) override;
-        virtual void HandleUpdate(Module* pModule) override;
-
         static void ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&);
-        static void ConvertToPrefab(EntitySceneObject* pObject, std::filesystem::path path);
+        static void ConvertToPrefab(SceneObject* pObject, std::filesystem::path path);
         static void UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&);
 
     private:

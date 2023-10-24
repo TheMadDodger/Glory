@@ -123,6 +123,8 @@ namespace Glory
 		GraphicsThread* GetGraphicsThread() const;
 
 		void StartThreads();
+		void UpdateSceneManager();
+		void DrawSceneManager();
 		void ModulesLoop(IModuleLoopHandler* pLoopHandler = nullptr);
 		void GameThreadFrameStart();
 		void GameThreadFrameEnd();

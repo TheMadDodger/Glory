@@ -19,10 +19,6 @@ namespace Glory
     class SceneManager
     {
     public:
-        SceneManager(Engine* pEngine);
-        virtual ~SceneManager();
-
-    public:
         GScene* CreateEmptyScene(const std::string& name = "Empty Scene");
 
         size_t OpenScenesCount();
@@ -38,7 +34,7 @@ namespace Glory
         void SetHoveringObject(uint64_t objectID);
         SceneObject* GetHoveringObject();
 
-        virtual SceneObject* GetSceneObjectFromObjectID(uint64_t objectID);
+        SceneObject* GetSceneObjectFromObjectID(uint64_t objectID);
 
         Glory::Utils::ECS::ComponentTypes* ComponentTypesInstance() const;
 
@@ -49,25 +45,28 @@ namespace Glory
             Reflect::RegisterType<T>();
         }
 
-    protected:
-        virtual void Initialize();
-        virtual void Cleanup();
+    private:
+        void Initialize();
+        void Cleanup();
+        void Update();
+        void Draw();
 
         static SceneObject* CreateObject(GScene* pScene, const std::string& name, UUID uuid);
 
-        virtual void OnSceneOpen(UUID uuid) {}
-        virtual void OnSceneClose(UUID uuid) {}
+        void OnSceneOpen(UUID uuid) {}
+        void OnSceneClose(UUID uuid) {}
 
-    private:
-        virtual void Update();
-        virtual void Draw();
 
         static SceneObject* CreateDeserializedObject(GScene* pScene, const std::string& name, UUID uuid);
 
     private:
+        SceneManager(Engine* pEngine);
+        virtual ~SceneManager();
+
         friend class GameThread;
         friend class SceneObjectSerializer;
         friend class SceneSerializer;
+        friend class Engine;
 
     protected:
         Engine* m_pEngine;

@@ -7,11 +7,11 @@
 #include "CharacterControllerEditor.h"
 #include "CreateEntityObjectsCallbacks.h"
 
-#include <EntitySceneScenesModule.h>
+#include <SceneManager.h>
 #include <EditorPlayer.h>
 #include <Components.h>
 #include <Reflection.h>
-#include <EntityPrefabData.h>
+#include <PrefabData.h>
 #include <EditorAssetDatabase.h>
 #include <FileBrowser.h>
 #include <EditorSceneManager.h>
@@ -25,13 +25,6 @@ ObjectMenu::AddMenuItem(name##MenuName.str(), Create##name, T_SceneObject | T_Sc
 
 namespace Glory::Editor
 {
-	const std::vector<std::type_index> EntityScenesEditorExtension::m_ComponentsToUpdateInEditor =
-	{
-		typeid(Transform),
-		typeid(CameraComponent),
-		typeid(LookAt),
-	};
-
 	EntityScenesEditorExtension::EntityScenesEditorExtension()
 	{
 	}
@@ -48,8 +41,6 @@ namespace Glory::Editor
 		Editor::RegisterEditor<ScriptedComponentEditor>();
 		Editor::RegisterEditor<PhysicsBodyEditor>();
 		Editor::RegisterEditor<CharacterControllerEditor>();
-
-		EditorPlayer::RegisterLoopHandler(this);
 
 		PropertyDrawer::RegisterPropertyDrawer<SimplePropertyDrawerTemplate<MeshMaterial>>();
 
@@ -71,80 +62,22 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Unpack Prefab", &UnpackPrefabMenuItem, T_SceneObject);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
-			ConvertToPrefab((EntitySceneObject*)e.Object, e.Path);
+			ConvertToPrefab(e.Object, e.Path);
 		});
-	}
-
-	const char* EntityScenesEditorExtension::ModuleName()
-	{
-		return "Entity Scenes";
-	}
-
-	void EntityScenesEditorExtension::HandleBeforeStart(Module* pModule)
-	{
-	}
-
-	void EntityScenesEditorExtension::HandleStart(Module* pModule)
-	{
-		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
-		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
-		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
-
-		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
-		{
-			GScene* pScene = pScenesModule->GetOpenScene(i);
-			EntityScene* pEntityScene = (EntityScene*)pScene;
-			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
-			pRegistry->InvokeAll(Glory::Utils::ECS::InvocationType::Start);
-		}
-	}
-
-	void EntityScenesEditorExtension::HandleStop(Module* pModule)
-	{
-		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
-		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
-		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
-
-		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
-		{
-			GScene* pScene = pScenesModule->GetOpenScene(i);
-			EntityScene* pEntityScene = (EntityScene*)pScene;
-			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
-			pRegistry->InvokeAll(Glory::Utils::ECS::InvocationType::Stop);
-		}
-	}
-
-	void EntityScenesEditorExtension::HandleUpdate(Module* pModule)
-	{
-		EntitySceneScenesModule* pScenesModule = (EntitySceneScenesModule*)pModule;
-		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenesModule->ComponentTypesInstance();
-		Glory::Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
-
-		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); ++i)
-		{
-			GScene* pScene = pScenesModule->GetOpenScene(i);
-			EntityScene* pEntityScene = (EntityScene*)pScene;
-			EntityRegistry* pRegistry = pEntityScene->GetRegistry();
-			for (size_t i = 0; i < m_ComponentsToUpdateInEditor.size(); i++)
-			{
-				uint32_t hash = ResourceType::GetHash(m_ComponentsToUpdateInEditor[i]);
-				pRegistry->InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
-			}
-		}
 	}
 
 	void EntityScenesEditorExtension::ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&)
 	{
-		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
+		SceneObject* pSceneObject = (SceneObject*)pObject;
 		const std::filesystem::path path = FileBrowser::GetCurrentPath();
 		ConvertToPrefab(pSceneObject, path);
 	}
 
-	void EntityScenesEditorExtension::ConvertToPrefab(EntitySceneObject* pObject, std::filesystem::path path)
+	void EntityScenesEditorExtension::ConvertToPrefab(SceneObject* pObject, std::filesystem::path path)
 	{
-		EntityPrefabData* pEntityPrefab = EntityPrefabData::CreateFromSceneObject(pObject);
+		PrefabData* pPrefab = PrefabData::CreateFromSceneObject(pObject);
 		path.append(pObject->Name() + ".gentity");
-		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pEntityPrefab, path.string());
+		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pPrefab, path.string());
 		GScene* pScene = pObject->GetScene();
 		pScene->SetPrefab(pObject, prefabUUID);
 		EditorSceneManager::SetSceneDirty(pScene);
@@ -152,7 +85,7 @@ namespace Glory::Editor
 
 	void EntityScenesEditorExtension::UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&)
 	{
-		EntitySceneObject* pSceneObject = (EntitySceneObject*)pObject;
+		SceneObject* pSceneObject = (SceneObject*)pObject;
 		GScene* pScene = pSceneObject->GetScene();
 		if (!pScene->Prefab(pSceneObject->GetUUID())) return;
 		pScene->UnsetPrefab(pSceneObject);

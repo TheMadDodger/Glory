@@ -191,6 +191,16 @@ namespace Glory
 		m_pGraphicsThread->Start();
 	}
 
+	void Engine::UpdateSceneManager()
+	{
+		m_pSceneManager->Update();
+	}
+
+	void Engine::DrawSceneManager()
+	{
+		m_pSceneManager->Draw();
+	}
+
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pSceneManager(new SceneManager(this)), m_pThreadManager(ThreadManager::GetInstance()),
 		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr),
@@ -271,6 +281,10 @@ namespace Glory
 
 		delete m_pScriptingExtender;
 		m_pScriptingExtender = nullptr;
+
+		m_pSceneManager->Cleanup();
+		delete m_pSceneManager;
+		m_pSceneManager = nullptr;
 
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
@@ -408,6 +422,8 @@ namespace Glory
 	{
 		GameThreadFrameStart();
 		Console::Update();
+		m_pSceneManager->Update();
+		m_pSceneManager->Draw();
 		ModulesLoop();
 		GameThreadFrameEnd();
 	}
