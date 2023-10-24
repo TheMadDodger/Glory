@@ -1,7 +1,7 @@
 #include "EnableObjectAction.h"
+
 #include <Engine.h>
 #include <Game.h>
-#include <ScenesModule.h>
 
 namespace Glory::Editor
 {
