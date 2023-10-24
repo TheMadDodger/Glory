@@ -1,7 +1,5 @@
 #pragma once
 #include <ScriptingExtender.h>
-#include <mono/jit/jit.h>
-#include <EntityScene.h>
 
 namespace Glory
 {

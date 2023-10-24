@@ -14,8 +14,8 @@ namespace Glory
 		GLORY_API void DestroySceneObject(SceneObject* pObject);
 
 	protected:
-		virtual MonoObject* GetSceneObject_Impl(SceneObject* pObject) = 0;
-		virtual void DestroySceneObject_Impl(MonoObject* pMonoObject) = 0;
+		MonoObject* GetSceneObject_Internal(SceneObject* pObject);
+		void DestroySceneObject_Internal(MonoObject* pMonoObject);
 
 	protected:
 		GScene* m_pScene;

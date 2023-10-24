@@ -1,7 +1,10 @@
 #pragma once
 #include <GloryECS/ComponentTypes.h>
 
-namespace Glory::ComponentTypes
+namespace Glory
 {
-	static uint32_t GetComponentHash(const std::string& name);
+	struct ComponentTypes
+	{
+		static uint32_t GetComponentHash(const std::string& name);
+	};
 }

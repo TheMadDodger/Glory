@@ -1,14 +1,13 @@
 #pragma once
+#include "IMonoLibManager.h"
+
 #include <IScriptExtender.h>
 #include <Glory.h>
 #include <GloryContext.h>
-#include <IMonoLibManager.h>
 
 namespace Glory
 {
 	class Engine;
-
-	extern "C" GLORY_API IScriptExtender* OnLoadExtension(Glory::GloryContext* pContext);
 
 	class EntityLibManager : public IMonoLibManager
 	{
