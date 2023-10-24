@@ -31,6 +31,8 @@ project "GlorySDLWindow"
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
 
 		"%{IncludeDir.yaml_cpp}",
 
@@ -50,6 +52,7 @@ project "GlorySDLWindow"
 	{
 		"GloryCore",
 		"GloryReflect",
+		"GloryECS",
 
 		"shaderc",
 		"shaderc_combined",
@@ -57,6 +60,7 @@ project "GlorySDLWindow"
 		"yaml-cpp",
 
 		"GloryUtilsVersion",
+		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",

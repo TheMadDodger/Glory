@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <functional>
-#include <GloryECS/EntityID.h>
-#include <GloryECS/EntityRegistry.h>
+#include <EntityID.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {

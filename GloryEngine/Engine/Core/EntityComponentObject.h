@@ -1,8 +1,8 @@
 #pragma once
 #include "Object.h"
 #include "Glory.h"
-#include <GloryECS/EntityID.h>
-#include <GloryECS/EntityRegistry.h>
+#include <EntityID.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {

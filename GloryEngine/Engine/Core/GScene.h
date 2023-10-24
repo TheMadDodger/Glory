@@ -6,7 +6,7 @@
 
 #include <mutex>
 #include <glm/fwd.hpp>
-#include <GloryECS/EntityRegistry.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {

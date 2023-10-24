@@ -3,7 +3,7 @@
 
 #include <chrono>
 #include <glm/gtx/matrix_decompose.hpp>
-#include <GloryECS/EntityRegistry.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {

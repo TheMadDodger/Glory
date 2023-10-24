@@ -64,6 +64,7 @@ project "GloryCore"
 		"%{IncludeDir.Version}",
 
 		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
 		"%{stb_image}/..",
 	}
 

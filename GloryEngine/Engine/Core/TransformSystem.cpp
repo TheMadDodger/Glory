@@ -2,7 +2,7 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <GloryECS/EntityRegistry.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {

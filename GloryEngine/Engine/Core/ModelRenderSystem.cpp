@@ -5,7 +5,7 @@
 #include "Debug.h"
 #include "AssetManager.h"
 
-#include <GloryECS/EntityRegistry.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {
