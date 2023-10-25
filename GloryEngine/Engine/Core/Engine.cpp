@@ -298,6 +298,7 @@ namespace Glory
 
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
+		m_pSceneManager->Initialize();
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{

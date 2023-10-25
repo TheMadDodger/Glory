@@ -5,22 +5,22 @@
 
 namespace Glory
 {
-	SceneObject::SceneObject() : Object("Empty Object"), m_pScene(nullptr), m_Entity()
+	SceneObject::SceneObject() : Object("Empty Object"), m_pScene(nullptr), m_Entity(), m_pParent(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
-	SceneObject::SceneObject(Entity entity) : Object("Empty Object"), m_pScene(nullptr), m_Entity(entity)
+	SceneObject::SceneObject(Entity entity) : Object("Empty Object"), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
-	SceneObject::SceneObject(Entity entity, const std::string& name) : Object(name), m_pScene(nullptr), m_Entity(entity)
+	SceneObject::SceneObject(Entity entity, const std::string& name) : Object(name), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
-	SceneObject::SceneObject(Entity entity, const std::string& name, UUID uuid) : Object(uuid, name), m_pScene(nullptr), m_Entity(entity)
+	SceneObject::SceneObject(Entity entity, const std::string& name, UUID uuid) : Object(uuid, name), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
