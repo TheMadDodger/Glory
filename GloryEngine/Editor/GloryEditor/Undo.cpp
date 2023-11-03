@@ -58,6 +58,12 @@ namespace Glory::Editor
 
 	void Undo::AddAction(IAction* action)
 	{
+		if (m_RecordingName == "")
+		{
+			delete action;
+			return;
+		}
+
 		if (m_RecordingContinuous && m_ActionRecords.size())
 		{
 			const size_t index = m_ActionRecords.size() - m_RewindIndex - 1;
@@ -73,12 +79,6 @@ namespace Glory::Editor
 					}
 				}
 			}
-		}
-
-		if (m_RecordingName == "")
-		{
-			delete action;
-			return;
 		}
 
 		m_RecordedActions.push_back(action);
