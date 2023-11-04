@@ -19,5 +19,5 @@ project "CSAPIInstall"
 
 	postbuildcommands
 	{
-		("{COPY} %{engineOutDir}/Mono/GloryEngine.Entities/GloryEngine.Entities.dll \"%{modulesOutDir}/GloryMonoScripting/Scripting/csharp/\""),
+		("{COPY} %{engineOutDir}/Mono/GloryEngine.Entities/GloryEngine.Entities.dll \"%{modulesOutDir}/GloryEntityScenes/Scripting/csharp/\""),
 	}

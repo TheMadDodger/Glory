@@ -1,7 +1,6 @@
 #pragma once
 #include "Object.h"
 #include "Layer.h"
-#include "Entity.h"
 
 namespace Glory
 {
@@ -11,12 +10,11 @@ namespace Glory
     {
     public:
         SceneObject();
-        SceneObject(Entity entity);
-        SceneObject(Entity entity, const std::string& name);
-        SceneObject(Entity entity, const std::string& name, UUID uuid);
+        SceneObject(const std::string& name);
+        SceneObject(const std::string& name, UUID uuid);
         virtual ~SceneObject();
 
-        SceneObject* GetParent();
+        virtual SceneObject* GetParent() { throw new std::exception("Not implemented"); }
 
         size_t ChildCount();
         SceneObject* GetChild(size_t index);
@@ -28,25 +26,22 @@ namespace Glory
         void SetScene(GScene* pScene);
         GScene* GetScene() const;
 
-        bool IsActiveSelf() const;
-        bool IsActiveInHierarchy() const;
-        void SetActive(bool active);
-        void SetHierarchyActive();
-
-        Entity GetEntityHandle();
+        virtual bool IsActiveSelf() const { throw new std::exception("Not implemented"); }
+        virtual bool IsActiveInHierarchy() const { throw new std::exception("Not implemented"); }
+        virtual void SetActive(bool active) { throw new std::exception("Not implemented"); }
+        virtual void SetHierarchyActive() { throw new std::exception("Not implemented"); }
 
     public:
         void SetParent(SceneObject* pParent);
 
     protected:
-        void OnSetParent(SceneObject* pParent);
+        virtual void Initialize() { throw new std::exception("Not implemented"); }
+        virtual void OnSetParent(SceneObject* pParent) { throw new std::exception("Not implemented"); }
         void DestroyOwnChildren();
 
     private:
         friend class GScene;
         GScene* m_pScene;
         std::vector<SceneObject*> m_pChildren;
-        Entity m_Entity;
-        SceneObject* m_pParent;
     };
 }

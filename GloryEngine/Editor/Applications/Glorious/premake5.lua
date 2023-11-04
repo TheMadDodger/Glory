@@ -40,7 +40,6 @@ project "Glorious"
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
-		"%{IncludeDir.ECS}",
 
 		"%{rapidjson}",
 	}
@@ -70,7 +69,6 @@ project "Glorious"
 		"GloryEditor",
 		"GloryReflect",
 
-		"GloryECS",
 		"GloryUtils",
 		"GloryUtilsVersion",
 
@@ -83,6 +81,7 @@ project "Glorious"
 	{
 		"GloryASSIMPModelLoader",
 		"GloryClusteredRenderer",
+		"GloryEntityScenes",
 		"GloryOpenGLGraphics",
 		--"GloryVulkanGraphics",
 		"GlorySDLImage",

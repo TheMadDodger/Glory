@@ -4,50 +4,48 @@
 #include "GloryMono.h"
 #include "MonoSceneObjectManager.h"
 
-#define GETTER(type, x) \
-static GLORY_API type* x() \
-{ \
-	return m_p##x; \
-}
+#define BINDER(name, ret, ...) \
+static std::function<ret(__VA_ARGS__)> m_##name##Impl; \
+static GLORY_API void Bind##name(std::function<ret(__VA_ARGS__)> f);
 
 namespace Glory
 {
-	class Assembly;
-
 	class MonoSceneManager
 	{
 	public:
 		static GLORY_API MonoObject* GetSceneObject(GScene* pScene);
 		static GLORY_API MonoSceneObjectManager* GetSceneObjectManager(GScene* pScene);
 		static GLORY_API void DestroyScene(GScene* pScene);
+		static GLORY_API void UnbindImplementation();
 
-		GETTER(MonoClass, EntitySceneClass);
-		GETTER(MonoClass, EntitySceneObjectClass);
-		GETTER(MonoMethod, EntitySceneConstructor);
-		GETTER(MonoMethod, EntitySceneObjectConstructor);
+		template<class T>
+		static void BindImplemetation()
+		{
+			CheckBound();
+			BindGetSceneObject(T::GetSceneObject);
+			BindGetSceneObjectManager(T::GetSceneObjectManager);
+		}
 
 	private:
-		static void Initialize(Assembly* pAssembly);
 		static void Cleanup();
+		static GLORY_API void CheckBound();
 
 	private:
 		friend class MonoManager;
-		friend class EntityLibManager;
 		/* No instances allowed */
 		MonoSceneManager() = delete;
 
 	private:
-		static MonoObject* GetSceneObject_Internal(GScene* pScene);
+		BINDER(GetSceneObject, MonoObject*, GScene*);
+		BINDER(GetSceneObjectManager, MonoSceneObjectManager*, GScene*);
+
+		static bool m_Bound;
 
 		/* Cache */
 		static std::map<GScene*, MonoObject*> m_SceneObjectCache;
 		static std::map<GScene*, MonoSceneObjectManager*> m_SceneObjectManagers;
-
-		static MonoClass* m_pEntitySceneClass;
-		static MonoClass* m_pEntitySceneObjectClass;
-		static MonoMethod* m_pEntitySceneConstructor;
-		static MonoMethod* m_pEntitySceneObjectConstructor;
 	};
 }
 
-#undef GETTER
+/* Prevent macro usage outside of this header */
+#undef BINDER

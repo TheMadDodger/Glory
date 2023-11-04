@@ -1,7 +1,7 @@
 #include "ChangeObjectSceneAction.h"
 #include <Engine.h>
 #include <Game.h>
-#include <SceneManager.h>
+#include <ScenesModule.h>
 
 namespace Glory::Editor
 {
@@ -18,7 +18,7 @@ namespace Glory::Editor
 	{
 		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
 		if (pObject == nullptr) return;
-		SceneManager* pSceneModule = Game::GetGame().GetEngine()->GetSceneManager();
+		ScenesModule* pSceneModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		GScene* pOriginalScene = pSceneModule->GetOpenScene(m_OriginalSceneID);
 		pObject->SetScene(pOriginalScene);
 	}
@@ -27,7 +27,7 @@ namespace Glory::Editor
 	{
 		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
 		if (pObject == nullptr) return;
-		SceneManager* pSceneModule = Game::GetGame().GetEngine()->GetSceneManager();
+		ScenesModule* pSceneModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		GScene* pNewScene = pSceneModule->GetOpenScene(m_NewSceneID);
 		pObject->SetScene(pNewScene);
 	}

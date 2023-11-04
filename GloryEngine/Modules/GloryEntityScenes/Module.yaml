@@ -1,0 +1,7 @@
+Name: "Entity Scenes"
+Type: SceneManagement
+Scripting: 
+- Language: "csharp"
+  Extension: "GloryEntitiesMonoExtender"
+Editor:
+ Extensions: ["EntityScenesEditorExtension", "EntityPrefabImporter"]

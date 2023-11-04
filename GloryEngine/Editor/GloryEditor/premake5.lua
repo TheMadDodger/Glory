@@ -67,7 +67,6 @@ project "GloryEditor"
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
-		"%{IncludeDir.ECS}",
 
 		"%{rapidjson}",
 
@@ -101,7 +100,6 @@ project "GloryEditor"
 
 		"GloryReflect",
 		"GloryUtils",
-		"GloryECS",
 		"GloryUtilsVersion",
 		"tinyfiledialogs",
 	}

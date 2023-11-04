@@ -1,30 +1,25 @@
 #pragma once
 #include "ResourceLoaderModule.h"
-#include "PrefabData.h"
-
-#include <NodeRef.h>
 
 namespace Glory
 {
-	class PrefabDataLoader : public ResourceLoaderModule<PrefabData, ImportSettings>
+	template<class T, typename S>
+	class PrefabDataLoader : public ResourceLoaderModule<T, S>
 	{
 	public:
-		PrefabDataLoader() : ResourceLoaderModule(".gentity") {}
-		virtual ~PrefabDataLoader() = default;
+		PrefabDataLoader(const std::string& extensions) : ResourceLoaderModule<T, S>(extensions) {}
+		virtual ~PrefabDataLoader() {}
 
 		virtual const std::type_info& GetModuleType() override { return typeid(PrefabDataLoader); }
 
 	protected:
-		ImportSettings ReadImportSettings_Internal(YAML::Node& node) override { return {}; };
-		void WriteImportSettings_Internal(const ImportSettings& importSettings, YAML::Emitter& out) override {}
+		virtual S ReadImportSettings_Internal(YAML::Node& node) = 0;
+		virtual void WriteImportSettings_Internal(const S& importSettings, YAML::Emitter& out) = 0;
 
 	private:
-		PrefabData* LoadResource(const std::string& path, const ImportSettings& importSettings);
-		PrefabData* LoadResource(const void* buffer, size_t length, const ImportSettings& importSettings);
-		void SaveResource(const std::string& path, PrefabData* pResource);
-
-		void WriteChild(YAML::Emitter& out, const PrefabNode& parent);
-		void ReadChild(PrefabData* pPrefab, Utils::NodeValueRef nodeValue, PrefabNode& node);
+		virtual T* LoadResource(const std::string& path, const S& importSettings) = 0;
+		virtual T* LoadResource(const void* buffer, size_t length, const S& importSettings) = 0;
+		virtual void SaveResource(const std::string& path, T* pResource) = 0;
 
 	protected:
 		virtual void Initialize() {};

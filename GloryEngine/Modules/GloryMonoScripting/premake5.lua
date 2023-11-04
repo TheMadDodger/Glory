@@ -20,10 +20,10 @@ project "GloryMonoScripting"
 	vpaths
 	{
 		["Module"] = { "GloryMono.*", "GloryMonoScipting.*" },
-		["API"] = { "EntityCSAPI.*", "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*", "PhysicsCSAPI.*", "ScriptingMethodsHelper.*" },
+		["API"] = { "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*", "PhysicsCSAPI.*", "ScriptingMethodsHelper.*" },
 		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" },
 		["Mono"] = { "Assembly.*", "AssemblyDomain.*", "MonoAssetManager.*", "MonoLibManager.*", "MonoManager.*", "CoreLibManager.*", "IMonoLibManager.*" },
-		["Memory"] = { "MonoEntityObjectManager.*", "MonoEntitySceneManager.*", "MonoSceneObjectManager.*", "MonoSceneManager.*", "MonoScriptObjectManager.*" }
+		["Memory"] = { "MonoSceneObjectManager.*", "MonoSceneManager.*", "MonoScriptObjectManager.*" }
 	}
 
 	includedirs
@@ -37,7 +37,6 @@ project "GloryMonoScripting"
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
 
-		"%{IncludeDir.Utils}",
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
@@ -64,7 +63,6 @@ project "GloryMonoScripting"
 		"GloryECS",
 		"GloryReflect",
 		"GloryUtilsVersion",
-		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",

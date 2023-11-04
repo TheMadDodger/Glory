@@ -60,9 +60,9 @@ namespace Glory::Editor
 		void Validate()
 		{
 			TComponent& component = GetTargetComponent();
-			Utils::ECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
-			Utils::ECS::TypeView<TComponent>* pTypeView = pRegistry->GetTypeView<TComponent>();
-			pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, pRegistry, m_pComponentObject->EntityID(), &component);
+			Glory::Utils::ECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
+			Glory::Utils::ECS::TypeView<TComponent>* pTypeView = pRegistry->GetTypeView<TComponent>();
+			pTypeView->Invoke(InvocationType::OnValidate, pRegistry, m_pComponentObject->EntityID(), &component);
 		}
 
 	protected:

@@ -7,9 +7,9 @@
 #include "Selection.h"
 
 #include <CameraManager.h>
-#include <SceneManager.h>
 #include <Engine.h>
 #include <RendererModule.h>
+#include <ScenesModule.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui_internal.h>
 #include <GloryContext.h>
@@ -210,7 +210,7 @@ namespace Glory::Editor
 		if (!ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
 			Engine* pEngine = Game::GetGame().GetEngine();
-			Selection::SetActiveObject(pEngine->GetSceneManager()->GetHoveringObject());
+			Selection::SetActiveObject(pEngine->GetMainModule<ScenesModule>()->GetHoveringObject());
 		}
 	}
 }

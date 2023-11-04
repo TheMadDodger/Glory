@@ -33,8 +33,6 @@ project "GloryJoltPhysics"
 
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.ECS}",
-		"%{IncludeDir.Utils}",
 
 		"%{IncludeDir.yaml_cpp}",
 
@@ -59,7 +57,6 @@ project "GloryJoltPhysics"
 	{
 		"GloryCore",
 		"GloryReflect",
-		"GloryECS",
 
 		"shaderc",
 		"shaderc_combined",
@@ -67,7 +64,6 @@ project "GloryJoltPhysics"
 		"yaml-cpp",
 
 		"GloryUtilsVersion",
-		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",

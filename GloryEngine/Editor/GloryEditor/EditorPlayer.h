@@ -2,7 +2,6 @@
 #include "IPlayModeHandler.h"
 #include "GloryEditor.h"
 #include "Toolbar.h"
-
 #include <IModuleLoopHandler.h>
 #include <GScene.h>
 #include <vector>
@@ -19,9 +18,6 @@ namespace Glory::Editor
 		void Stop();
 		void TogglePauze();
 		void TickFrame();
-
-		void Tick(Engine* pEngine);
-		void EndTick();
 
 		virtual bool HandleModuleLoop(Module* pModule) override;
 		virtual void DrawToolchain(float& cursor, const ImVec2& maxButtonSize);

@@ -4,7 +4,7 @@ project "EntityPrefabImporter"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineOutDir}/Extensions")
+	targetdir ("%{modulesOutDir}/GloryEntityScenes/Editor/Extension")
 	objdir ("%{outputDir}")
 
 	files
@@ -56,6 +56,7 @@ project "EntityPrefabImporter"
 	links
 	{
 		"GloryCore",
+		"GloryEntityScenes",
 		"GloryEditor",
 		"shaderc",
 		"shaderc_combined",

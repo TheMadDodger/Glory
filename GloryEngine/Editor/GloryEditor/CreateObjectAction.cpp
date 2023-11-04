@@ -2,7 +2,7 @@
 #include <GScene.h>
 #include <Game.h>
 #include <Engine.h>
-#include <SceneManager.h>
+#include <ScenesModule.h>
 #include <Serializer.h>
 
 namespace Glory::Editor
@@ -32,7 +32,7 @@ namespace Glory::Editor
 
 	void CreateObjectAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		SceneManager* pScenesModule = Game::GetGame().GetEngine()->GetSceneManager();
+		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
 		GScene* pScene = pScenesModule->GetOpenScene(m_SceneID);
 		if (pScene == nullptr) return;
 		YAML::Node node = YAML::Load(m_SerializedObject.c_str());

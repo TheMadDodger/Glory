@@ -31,7 +31,6 @@ project "GloriousLauncher"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.FA}",
 		"%{IncludeDir.Utils}",
-		"%{IncludeDir.ECS}",
 		"%{GloryIncludeDir.api}",
 		"%{rapidjson}",
 
@@ -60,8 +59,6 @@ project "GloriousLauncher"
 		"tinyfiledialogs",
 		"GloryReflect",
 		"GloryUtilsVersion",
-		"GloryUtils",
-		"GloryECS",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",

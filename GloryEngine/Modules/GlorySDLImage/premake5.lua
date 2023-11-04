@@ -29,8 +29,6 @@ project "GlorySDLImage"
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.Utils}",
-		"%{IncludeDir.ECS}",
 
 		"%{DepIncludesDir}",
 		"%{IncludeDir.glm}",
@@ -53,9 +51,7 @@ project "GlorySDLImage"
 		"yaml-cpp",
 
 		"GloryReflect",
-		"GloryECS",
 		"GloryUtilsVersion",
-		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",

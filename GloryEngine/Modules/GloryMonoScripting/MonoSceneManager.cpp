@@ -1,49 +1,25 @@
 #include "MonoSceneManager.h"
-#include "Assembly.h"
 
 #include <Debug.h>
 
-#define GET_CLASS(name, out) \
-out = mono_class_from_name(pAssembly->GetMonoImage(), "GloryEngine.Entities", STRINGIZE(name)); \
-if (!out) \
+#define BINDER_DEF(name, ret, ...) \
+std::function<ret(__VA_ARGS__)> MonoSceneManager::m_##name##Impl = NULL; \
+void MonoSceneManager::Bind##name(std::function<ret(__VA_ARGS__)> f) \
 { \
-    Debug::LogError(STRINGIZE(MonoEntitySceneManager::Initialize > Could not load GloryEngine.Entities.##name class!)); \
-    return; \
-} \
-mono_class_init(out);
-
-#define GET_CTOR(name, cls, out, argc) \
-iter = NULL; \
-method = nullptr; \
-while ((method = mono_class_get_methods(cls, &iter))) \
-{ \
-    const char* methodName = mono_method_get_name(method); \
-    if (strcmp(methodName, ".ctor") == 0) \
-    { \
-        MonoMethodSignature* sig = mono_method_signature(method); \
-        if (mono_signature_get_param_count(sig) == argc) \
-        { \
-            out = method; \
-            break; \
-        } \
-    } \
-} \
-if (!out) \
-{ \
-    Debug::LogError(STRINGIZE(MonoEntitySceneManager::Initialize: Could not load GloryEngine.Entities.##name##.::ctor method!)); \
-    return; \
+	m_##name##Impl = f; \
 }
 
 namespace Glory
 {
+	/* Implementation binds */
+	BINDER_DEF(GetSceneObject, MonoObject*, GScene*);
+	BINDER_DEF(GetSceneObjectManager, MonoSceneObjectManager*, GScene*);
+
 	/* Cache */
 	std::map<GScene*, MonoObject*> MonoSceneManager::m_SceneObjectCache;
 	std::map<GScene*, MonoSceneObjectManager*> MonoSceneManager::m_SceneObjectManagers;
 
-	MonoClass* MonoSceneManager::m_pEntitySceneObjectClass = nullptr;
-	MonoClass* MonoSceneManager::m_pEntitySceneClass = nullptr;
-	MonoMethod* MonoSceneManager::m_pEntitySceneObjectConstructor = nullptr;
-	MonoMethod* MonoSceneManager::m_pEntitySceneConstructor = nullptr;
+	bool MonoSceneManager::m_Bound = false;
 
 	MonoObject* MonoSceneManager::GetSceneObject(GScene* pScene)
 	{
@@ -55,7 +31,13 @@ namespace Glory
 
 		if (m_SceneObjectCache.find(pScene) == m_SceneObjectCache.end())
 		{
-			MonoObject* pMonoSceneObject = GetSceneObject_Internal(pScene);
+			if (m_GetSceneObjectImpl == NULL)
+			{
+				Debug::LogError("MonoSceneManager::GetSceneObject: No extension loaded that implements scene management!");
+				return nullptr;
+			}
+
+			MonoObject* pMonoSceneObject = m_GetSceneObjectImpl(pScene);
 			m_SceneObjectCache.emplace(pScene, pMonoSceneObject);
 		}
 
@@ -72,7 +54,13 @@ namespace Glory
 
 		if (m_SceneObjectManagers.find(pScene) == m_SceneObjectManagers.end())
 		{
-			MonoSceneObjectManager* pMonoSceneObject = new MonoSceneObjectManager(pScene);
+			if (m_GetSceneObjectManagerImpl == NULL)
+			{
+				Debug::LogError("MonoSceneManager::GetSceneObjectManager: No extension loaded that implements scene management!");
+				return nullptr;
+			}
+
+			MonoSceneObjectManager* pMonoSceneObject = m_GetSceneObjectManagerImpl(pScene);
 			m_SceneObjectManagers.emplace(pScene, pMonoSceneObject);
 		}
 
@@ -84,16 +72,11 @@ namespace Glory
 
 	}
 
-	void MonoSceneManager::Initialize(Assembly* pAssembly)
+	void MonoSceneManager::UnbindImplementation()
 	{
-		GET_CLASS(EntityScene, m_pEntitySceneClass);
-		GET_CLASS(EntitySceneObject, m_pEntitySceneObjectClass);
-
-		void* iter = NULL;
-		MonoMethod* method = nullptr;
-
-		GET_CTOR(EntityScene, m_pEntitySceneClass, m_pEntitySceneConstructor, 1);
-		GET_CTOR(EntitySceneObject, m_pEntitySceneObjectClass, m_pEntitySceneObjectConstructor, 2);
+		m_GetSceneObjectImpl = NULL;
+		m_GetSceneObjectManagerImpl = NULL;
+		m_Bound = false;
 	}
 
 	void MonoSceneManager::Cleanup()
@@ -104,28 +87,19 @@ namespace Glory
 		}
 		m_SceneObjectManagers.clear();
 
-		/* @todo: Destroy all scene objects */
+		/* TODO: Destroy all scene objects */
 		m_SceneObjectCache.clear();
+
+		UnbindImplementation();
 	}
 
-	MonoObject* MonoSceneManager::GetSceneObject_Internal(GScene* pScene)
+	void MonoSceneManager::CheckBound()
 	{
-		MonoObject* pMonoObject = mono_object_new(mono_domain_get(), m_pEntitySceneClass);
-		if (pMonoObject == nullptr)
+		if (m_Bound)
 		{
-			Debug::LogError("MonoEntityObjectManager::GetSceneObject_Impl > Failed to create MonoObject from class");
-			return nullptr;
+			Debug::LogWarning("MonoSceneManager::BindImplemetation: Other extension has already bound a scene implementation");
+			return;
 		}
-
-		uint64_t sceneID = uint64_t(pScene->GetUUID());
-		void* args[1] = {
-			&sceneID
-		};
-
-		MonoObject* pExcept;
-		mono_runtime_invoke(m_pEntitySceneConstructor, pMonoObject, args, &pExcept);
-		/* TODO: Handle exception */
-
-		return pMonoObject;
+		m_Bound = true;
 	}
 }

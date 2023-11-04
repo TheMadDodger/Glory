@@ -1,13 +1,12 @@
 #pragma once
-#include "EntityComponentPopup.h"
-
 #include <Editor.h>
-#include <SceneObject.h>
+#include <EntitySceneObject.h>
 #include <EntityComponentObject.h>
+#include "EntityComponentPopup.h"
 
 namespace Glory::Editor
 {
-    class EntitySceneObjectEditor : public EditorTemplate<EntitySceneObjectEditor, SceneObject>
+    class EntitySceneObjectEditor : public EditorTemplate<EntitySceneObjectEditor, EntitySceneObject>
     {
 	public:
 		EntitySceneObjectEditor();

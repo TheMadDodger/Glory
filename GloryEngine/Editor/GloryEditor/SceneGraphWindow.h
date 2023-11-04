@@ -1,11 +1,8 @@
 #pragma once
+#include <ScenesModule.h>
 #include "EditorWindow.h"
 
-namespace Glory
-{
-	class GScene;
-
-namespace Editor
+namespace Glory::Editor
 {
 	class SceneGraphWindow : public EditorWindowTemplate<SceneGraphWindow>
 	{
@@ -37,5 +34,4 @@ namespace Editor
 
 		std::vector<UUID> m_SearchResultExcludeCache;
 	};
-}
 }

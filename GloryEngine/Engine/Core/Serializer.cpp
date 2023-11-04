@@ -1,16 +1,9 @@
 #include <algorithm>
 #include "Serializer.h"
 #include "ResourceType.h"
-#include "GScene.h"
 
 namespace Glory
 {
-	/* This ensures legacy support by rerouting an old hash to a new one */
-	const std::map<uint32_t, uint32_t> LegacyRehasher = {
-		{3536807891, ResourceType::GetHash<GScene>()},
-		{1002038608, ResourceType::GetHash<SceneObject>()}
-	};
-
 	Serializer* Serializer::GetSerializer(Object* pObject)
 	{
 		for (size_t i = 0; i < pObject->TypeCount(); i++)
@@ -33,9 +26,6 @@ namespace Glory
 
 	Serializer* Serializer::GetSerializer(uint32_t typeHash)
 	{
-		const auto itor = LegacyRehasher.find(typeHash);
-		typeHash = itor != LegacyRehasher.end() ? itor->second : typeHash;
-
 		for (size_t i = 0; i < SERIALIZERS.size(); i++)
 		{
 			Serializer* pSerializer = SERIALIZERS[i];
