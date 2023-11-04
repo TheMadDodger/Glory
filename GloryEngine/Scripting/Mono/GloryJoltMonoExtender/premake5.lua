@@ -1,50 +1,39 @@
-project "GloryJoltPhysics"
+project "GloryJoltMonoExtender"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{moduleOutDir}")
+	targetdir ("%{modulesOutDir}/GloryJoltPhysics/Scripting/csharp")
 	objdir ("%{outputDir}")
 
 	files
 	{
 		"**.h",
 		"**.cpp",
-		"Module.yaml",
-		"premake5.lua",
-
-		"%{rootDir}/submodules/JoltPhysics/Jolt/**.*",
+		"premake5.lua"
 	}
 
 	vpaths
 	{
-		["Module"] = { "GloryJoltPhysics.*", "JoltPhysicsModule.*", "JoltCharacterManager.*", "JoltShapeManager.*" },
-		["Collision"] = { "BroadPhaseImpl.*", "LayerCollisionFilter.*", "JoltDebugRenderer.*" },
-		["Helpers"] = { "Helpers.*", "ShapeHandlers.*" }
+		["API"] = { "PhysicsCSAPI.*" },
+		["Extenstion"] = { "JoltMonoExtender.*" }
 	}
 
 	includedirs
 	{
 		"%{DepsIncludeDir}",
-		"%{IncludeDir.glm}",
 
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.jolt}",
+		"%{GloryIncludeDir.mono}",
 
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Utils}",
-
-		"%{IncludeDir.yaml_cpp}",
-
-		"%{DepIncludesDir}",
-	}
-
-	sysincludedirs
-	{
-		"%{rootDir}/submodules/JoltPhysics",
 	}
 
 	libdirs
@@ -52,22 +41,19 @@ project "GloryJoltPhysics"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
-
-		"%{LibDirs.yaml_cpp}",
 	}
 
 	links
 	{
 		"GloryCore",
-		"GloryReflect",
-		"GloryECS",
-
-		"shaderc",
-		"shaderc_combined",
-		"shaderc_shared",
+		"GloryJoltPhysics",
+		"GloryMonoScripting",
 		"yaml-cpp",
+		"mono-2.0-sgen",
+		"MonoPosixHelper",
 
-		"GloryUtils",
+		"GloryECS",
+		"GloryReflect",
 		"GloryUtilsVersion",
 		"GloryUtils",
 
@@ -79,12 +65,7 @@ project "GloryJoltPhysics"
 	defines
 	{
 		"GLORY_EXPORTS",
-		"JPH_DEBUG_RENDERER"
-	}
-
-	postbuildcommands
-	{
-		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		"GLORY_UUID_DEFINED"
 	}
 
 	filter "system:windows"
@@ -108,11 +89,7 @@ project "GloryJoltPhysics"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "SDL2d"
-
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-		links "SDL2"

@@ -4,8 +4,8 @@
 
 namespace Glory
 {
-	LayerCollisionFilter::LayerCollisionFilter(JoltPhysicsModule* pModule)
-		: m_pPhysicsModule(pModule) {}
+	LayerCollisionFilter::LayerCollisionFilter()
+		: m_pPhysicsModule(nullptr) {}
 
 	bool LayerCollisionFilter::ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const
 	{

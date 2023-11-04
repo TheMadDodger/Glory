@@ -4,12 +4,12 @@
 #include "MonoManager.h"
 #include "CoreLibManager.h"
 #include "Assembly.h"
+#include "JoltShapeManager.h"
 
+#include <JoltPhysicsModule.h>
 #include <RendererModule.h>
-#include <ShapeManager.h>
-#include <PhysicsModule.h>
 
-#define PHYSICS Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>()
+#define PHYSICS Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>()
 #define RENDERER Game::GetGame().GetEngine()->GetMainModule<RendererModule>()
 #define SCRIPTING Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()
 

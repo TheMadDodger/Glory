@@ -1,5 +1,7 @@
 #include "BroadPhaseImpl.h"
 #include "JoltPhysicsModule.h"
+
+#include <Jolt/Jolt.h>
 #include <LayerManager.h>
 
 using namespace JPH;

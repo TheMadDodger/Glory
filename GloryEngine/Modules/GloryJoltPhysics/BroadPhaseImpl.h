@@ -1,5 +1,6 @@
 #pragma once
 #include <Jolt/Jolt.h>
+#include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhase.h>
 #include <Jolt/Physics/Collision/ContactListener.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
@@ -47,7 +48,7 @@ namespace Glory
 	class MyContactListener : public JPH::ContactListener
 	{
 	public:
-		MyContactListener(JoltPhysicsModule* pPhysics) : m_pPhysics(pPhysics) {}
+		MyContactListener() : m_pPhysics(nullptr) {}
 
 		// See: ContactListener
 		virtual JPH::ValidateResult	OnContactValidate(const JPH::Body& body1, const JPH::Body& body2, JPH::RVec3Arg baseOffset, const JPH::CollideShapeResult& collisionResult) override;
@@ -56,6 +57,7 @@ namespace Glory
 		virtual void OnContactRemoved(const JPH::SubShapeIDPair& subShapePair) override;
 
 	private:
+		friend class JoltPhysicsModule;
 		JoltPhysicsModule* m_pPhysics;
 	};
 
@@ -63,12 +65,13 @@ namespace Glory
 	class MyBodyActivationListener : public JPH::BodyActivationListener
 	{
 	public:
-		MyBodyActivationListener(JoltPhysicsModule* pPhysics) : m_pPhysics(pPhysics) {}
+		MyBodyActivationListener() : m_pPhysics(nullptr) {}
 
 		virtual void OnBodyActivated(const JPH::BodyID& bodyID, JPH::uint64 bodyUserData) override;
 		virtual void OnBodyDeactivated(const JPH::BodyID& bodyID, JPH::uint64 bodyUserData) override;
 
 	private:
+		friend class JoltPhysicsModule;
 		JoltPhysicsModule* m_pPhysics;
 	};
 }

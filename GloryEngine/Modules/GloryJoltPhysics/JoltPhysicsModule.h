@@ -1,15 +1,15 @@
 #pragma once
+#include "Physics.h"
+
 #include <Module.h>
+#include <glm/fwd.hpp>
 
-#include <Jolt/Jolt.h>
-#include <Jolt/Core/TempAllocator.h>
-#include <Jolt/Core/JobSystemThreadPool.h>
-#include <Jolt/Physics/PhysicsSystem.h>
-
-#include "LayerCollisionFilter.h"
-#include "JoltCharacterManager.h"
-#include "JoltShapeManager.h"
-#include "BroadPhaseImpl.h"
+namespace JPH
+{
+	class TempAllocatorImpl;
+	class JobSystem;
+	class PhysicsSystem;
+}
 
 namespace Glory
 {
@@ -33,6 +33,11 @@ namespace Glory
 	struct Shape;
 	struct Layer;
 	struct LayerMask;
+
+	class ObjectVsBroadPhaseLayerFilterImpl;
+	class BPLayerInterfaceImpl;
+	class JoltCharacterManager;
+	class JoltShapeManager;
 
     class JoltPhysicsModule : public Module
     {
@@ -187,17 +192,6 @@ namespace Glory
 		JPH::TempAllocatorImpl* m_pJPHTempAllocator;
 		JPH::JobSystem* m_pJPHJobSystem;
 		JPH::PhysicsSystem* m_pJPHPhysicsSystem;
-
-		JPH::Vec3 m_Gravity;
-
-		LayerCollisionFilter m_CollisionFilter;
-		BPLayerInterfaceImpl m_BPLayerImpl;
-		ObjectVsBroadPhaseLayerFilterImpl m_ObjectVSBroadPhase;
-
-		MyBodyActivationListener m_BodyActivationListener;
-		MyContactListener m_ContactListener;
-		JoltCharacterManager m_CharacterManager;
-		JoltShapeManager m_ShapeManager;
 
 		std::map<ActivationCallback, std::vector<uint32_t>> m_LateActivationCallbacks;
 		std::map<ContactCallback, std::vector<std::pair<uint32_t, uint32_t>>> m_LateContactCallbacks;

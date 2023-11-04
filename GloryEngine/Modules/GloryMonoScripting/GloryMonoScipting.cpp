@@ -2,7 +2,6 @@
 #include "CoreCSAPI.h"
 #include "MathCSAPI.h"
 #include "InputCSAPI.h"
-#include "PhysicsCSAPI.h"
 #include "EntityCSAPI.h"
 #include "MonoManager.h"
 
@@ -79,7 +78,6 @@ namespace Glory
 		CoreCSAPI::AddInternalCalls(internalCalls);
 		MathCSAPI::AddInternalCalls(internalCalls);
 		InputCSAPI::AddInternalCalls(internalCalls);
-		PhysicsCSAPI::AddInternalCalls(internalCalls);
 		EntityCSAPI::GetInternallCalls(internalCalls);
 	}
 

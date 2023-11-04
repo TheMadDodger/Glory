@@ -1,9 +1,19 @@
 #include "JoltPhysicsModule.h"
 #include "Helpers.h"
+
 #include "JoltComponents.h"
 #include "PhysicsSystem.h"
 #include "CharacterControllerSystem.h"
 
+#include "LayerCollisionFilter.h"
+#include "JoltCharacterManager.h"
+#include "JoltShapeManager.h"
+#include "BroadPhaseImpl.h"
+
+#include <Jolt/Jolt.h>
+#include <Jolt/Core/TempAllocator.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
+#include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Physics/PhysicsSettings.h>
@@ -27,11 +37,23 @@
 #include <Engine.h>
 #include <SceneManager.h>
 
+
 using namespace JPH;
 using namespace JPH::literals;
 
 namespace Glory
 {
+	JPH::Vec3 m_Gravity;
+
+	LayerCollisionFilter m_CollisionFilter;
+	BPLayerInterfaceImpl m_BPLayerImpl;
+	ObjectVsBroadPhaseLayerFilterImpl m_ObjectVSBroadPhase;
+
+	MyBodyActivationListener m_BodyActivationListener;
+	MyContactListener m_ContactListener;
+	JoltCharacterManager m_CharacterManager;
+	JoltShapeManager m_ShapeManager;
+
 	GLORY_MODULE_VERSION_CPP(JoltPhysicsModule);
 
 	// Callback for traces, connect this to your own trace function if you have one
@@ -50,9 +72,11 @@ namespace Glory
 
 	JoltPhysicsModule::JoltPhysicsModule()
 		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr),
-		m_CollisionFilter(this), m_BodyActivationListener(this), m_ContactListener(this), m_Gravity(),
 		m_CollisionMatrix(std::vector<std::vector<bool>>())
 	{
+		m_CollisionFilter.m_pPhysicsModule = this;
+		m_BodyActivationListener.m_pPhysics = this;
+		m_ContactListener.m_pPhysics = this;
 	}
 
 	JoltPhysicsModule::~JoltPhysicsModule()
