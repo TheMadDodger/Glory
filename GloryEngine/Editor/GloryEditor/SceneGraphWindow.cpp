@@ -11,6 +11,8 @@
 
 #include <Game.h>
 #include <Engine.h>
+#include <GScene.h>
+#include <SceneManager.h>
 #include <IconsFontAwesome6.h>
 #include <StringUtils.h>
 #include <PrefabData.h>
@@ -59,9 +61,9 @@ namespace Glory::Editor
 
 	void SceneGraphWindow::OnGUI()
 	{
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 
-		const GScene* pActiveScene = pScenesModule->GetActiveScene();
+		const GScene* pActiveScene = pScenes->GetActiveScene();
 
 		const ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 		const ImVec2 vMax = ImGui::GetWindowContentRegionMax();
@@ -80,9 +82,9 @@ namespace Glory::Editor
 			m_SearchResultExcludeCache.clear();
 			if (!std::string_view{SearchBuffer}.empty())
 			{
-				for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+				for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
 				{
-					GScene* pScene = pScenesModule->GetOpenScene(i);
+					GScene* pScene = pScenes->GetOpenScene(i);
 					if (GetExcludedObjectsFromFilterRecursive(pScene)) {
 						continue;
 					}
@@ -92,9 +94,9 @@ namespace Glory::Editor
 			else m_NeedsFilter = false;
 		}
 
-		for (size_t i = 0; i < pScenesModule->OpenScenesCount(); i++)
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
 		{
-			GScene* pScene = pScenesModule->GetOpenScene(i);
+			GScene* pScene = pScenes->GetOpenScene(i);
 			if (IsExcluded(pScene->GetUUID())) continue;
 			SceneDropdown(i, pScene, pScene == pActiveScene);
 		}

@@ -1,25 +1,38 @@
 #include "SceneObject.h"
 #include "GScene.h"
+#include "Debug.h"
+#include "Components.h"
 
 namespace Glory
 {
-	SceneObject::SceneObject() : Object("Empty Object"), m_pScene(nullptr)
+	SceneObject::SceneObject() : Object("Empty Object"), m_pScene(nullptr), m_Entity(), m_pParent(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
-	SceneObject::SceneObject(const std::string& name) : Object(name), m_pScene(nullptr)
+	SceneObject::SceneObject(Entity entity) : Object("Empty Object"), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
-	SceneObject::SceneObject(const std::string& name, UUID uuid) : Object(uuid, name), m_pScene(nullptr)
+	SceneObject::SceneObject(Entity entity, const std::string& name) : Object(name), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
+	{
+		APPEND_TYPE(SceneObject);
+	}
+
+	SceneObject::SceneObject(Entity entity, const std::string& name, UUID uuid) : Object(uuid, name), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
 	{
 		APPEND_TYPE(SceneObject);
 	}
 
 	SceneObject::~SceneObject()
 	{
+		m_Entity.Destroy();
+	}
+
+	SceneObject* SceneObject::GetParent()
+	{
+		return m_pParent;
 	}
 
 	size_t SceneObject::ChildCount()
@@ -121,6 +134,36 @@ namespace Glory
 		return m_pScene;
 	}
 
+	void SceneObject::OnSetParent(SceneObject* pParent)
+	{
+		if (!m_Entity.HasComponent<Transform>())
+		{
+			Debug::LogError("Cant add parent to an entity with no Transform component!");
+			return;
+		}
+
+		Transform& transform = m_Entity.GetComponent<Transform>();
+
+		if (pParent == nullptr)
+		{
+			transform.Parent = Entity();
+			m_pParent = nullptr;
+			SetHierarchyActive();
+			return;
+		}
+
+		Entity parentHandle = pParent->GetEntityHandle();
+		if (!parentHandle.HasComponent<Transform>())
+		{
+			Debug::LogError("Cant parent entity to an entity with no Transform component!");
+			return;
+		}
+
+		m_pParent = pParent;
+		transform.Parent = parentHandle;
+		SetHierarchyActive();
+	}
+
 	void SceneObject::DestroyOwnChildren()
 	{
 		const size_t size = m_pChildren.size();
@@ -147,5 +190,38 @@ namespace Glory
 
 		if (pParent != nullptr) pParent->m_pChildren.push_back(this);
 		OnSetParent(pParent);
+	}
+
+	bool SceneObject::IsActiveSelf() const
+	{
+		return m_Entity.IsActiveSelf();
+	}
+
+	bool SceneObject::IsActiveInHierarchy() const
+	{
+		return m_Entity.IsActive();
+	}
+
+	void SceneObject::SetActive(bool active)
+	{
+		m_Entity.SetActive(active);
+		SetHierarchyActive();
+	}
+
+	void SceneObject::SetHierarchyActive()
+	{
+		SceneObject* pParent = GetParent();
+		const bool active = (!pParent || pParent->IsActiveInHierarchy()) && IsActiveSelf();
+		m_Entity.SetActiveHierarchy(active);
+
+		for (size_t i = 0; i < ChildCount(); i++)
+		{
+			GetChild(i)->SetHierarchyActive();
+		}
+	}
+
+	Entity SceneObject::GetEntityHandle()
+	{
+		return m_Entity;
 	}
 }

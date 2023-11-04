@@ -6,7 +6,7 @@
 
 #include <Game.h>
 #include <Engine.h>
-#include <ScenesModule.h>
+#include <SceneManager.h>
 #include <Serializer.h>
 #include <TitleBar.h>
 #include <tinyfiledialogs.h>
@@ -21,8 +21,8 @@ namespace Glory::Editor
 	GScene* EditorSceneManager::NewScene(bool additive)
 	{
 		if (!additive) CloseAll();
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
-		GScene* pScene = pScenesModule->CreateEmptyScene();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		GScene* pScene = pScenes->CreateEmptyScene();
 		m_OpenedSceneIDs.push_back(pScene->GetUUID());
 		SetSceneDirty(pScene);
 		return pScene;
@@ -34,14 +34,14 @@ namespace Glory::Editor
 			CloseScene(uuid);
 		if (!additive) CloseAll();
 
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);
 		std::string path = Game::GetGame().GetAssetPath() + "\\" + location.Path;
-		pScenesModule->OpenScene(path, uuid);
+		pScenes->OpenScene(path, uuid);
 		m_OpenedSceneIDs.push_back(uuid);
 
-		GScene* pActiveScene = pScenesModule->GetActiveScene();
+		GScene* pActiveScene = pScenes->GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 	}
 
@@ -50,11 +50,11 @@ namespace Glory::Editor
 		if (IsSceneOpen(uuid))
 			CloseScene(uuid);
 
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
-		pScenesModule->AddOpenScene(pScene, uuid);
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		pScenes->AddOpenScene(pScene, uuid);
 		m_OpenedSceneIDs.push_back(uuid);
 
-		GScene* pActiveScene = pScenesModule->GetActiveScene();
+		GScene* pActiveScene = pScenes->GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 	}
 
@@ -74,14 +74,14 @@ namespace Glory::Editor
 	{
 		// TODO: Check if scene has changes
 		Selection::SetActiveObject(nullptr);
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		if (it == m_OpenedSceneIDs.end()) return;
 		m_OpenedSceneIDs.erase(it);
-		SetSceneDirty(pScenesModule->GetOpenScene(uuid), false);
-		pScenesModule->CloseScene(uuid);
+		SetSceneDirty(pScenes->GetOpenScene(uuid), false);
+		pScenes->CloseScene(uuid);
 
-		GScene* pActiveScene = pScenesModule->GetActiveScene();
+		GScene* pActiveScene = pScenes->GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 	}
 
@@ -95,8 +95,8 @@ namespace Glory::Editor
 	{
 		m_OpenedSceneIDs.clear();
 		m_DirtySceneIDs.clear();
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
-		pScenesModule->CloseAllScenes();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		pScenes->CloseAllScenes();
 		TitleBar::SetText("Scene", "No Scene open");
 	}
 
@@ -113,12 +113,12 @@ namespace Glory::Editor
 	GScene* EditorSceneManager::GetOpenScene(size_t index)
 	{
 		const UUID uuid = GetOpenSceneUUID(index);
-		return Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(index);
+		return Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(index);
 	}
 
 	GScene* EditorSceneManager::GetOpenScene(UUID uuid)
 	{
-		return Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(uuid);
+		return Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(uuid);
 	}
 
 	void EditorSceneManager::SaveScene(UUID uuid)
@@ -161,12 +161,12 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SerializeOpenScenes(YAML::Emitter& out)
 	{
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		out << YAML::BeginSeq;
 		for (size_t i = 0; i < m_OpenedSceneIDs.size(); i++)
 		{
 			UUID uuid = m_OpenedSceneIDs[i];
-			GScene* pScene = pScenesModule->GetOpenScene(uuid);
+			GScene* pScene = pScenes->GetOpenScene(uuid);
 			out << YAML::BeginMap;
 			out << YAML::Key << "Name";
 			out << YAML::Value << pScene->Name();
@@ -197,13 +197,13 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SetActiveScene(GScene* pScene)
 	{
-		Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->SetActiveScene(pScene);
+		Game::GetGame().GetEngine()->GetSceneManager()->SetActiveScene(pScene);
 		TitleBar::SetText("Scene", pScene ? pScene->Name().c_str() : "No Scene open");
 	}
 
 	GScene* EditorSceneManager::GetActiveScene()
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetActiveScene();
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetActiveScene();
 		if (!pScene) pScene = NewScene();
 		return pScene;
 	}
@@ -296,7 +296,7 @@ namespace Glory::Editor
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(uuid);
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(uuid);
 		YAML::Emitter out;
 		Serializer::SerializeObject(pScene, out);
 		std::ofstream outStream(path);

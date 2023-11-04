@@ -4,7 +4,7 @@ project "EntityScenesEditorExtension"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GloryEntityScenes/Editor/Extension")
+	targetdir ("%{engineOutDir}/Extensions")
 	objdir ("%{outputDir}")
 
 	files
@@ -53,7 +53,6 @@ project "EntityScenesEditorExtension"
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.glory}",
-		"%{modulesDir}/GloryEntityScenes",
 		"%{LibDirs.yaml_cpp}",
 	}
 
@@ -61,7 +60,6 @@ project "EntityScenesEditorExtension"
 	{
 		"GloryCore",
 		"GloryEditor",
-		"GloryEntityScenes",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",

@@ -33,6 +33,8 @@ project "GloryASSIMPModelLoader"
 
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
 	}
 
 	libdirs
@@ -48,6 +50,8 @@ project "GloryASSIMPModelLoader"
 		"GloryCore",
 		"yaml-cpp",
 		"GloryReflect",
+		"GloryECS",
+		"GloryUtils",
 		"GloryUtilsVersion",
 
 		--todo: When asset management is contained in its own lib these links are no more needed

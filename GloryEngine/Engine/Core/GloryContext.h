@@ -9,8 +9,8 @@ namespace Glory::Utils::Reflect
 
 namespace Glory
 {
-	class Game;
 	class Debug;
+	class Game;
 	class AssetDatabase;
 	class AssetManager;
 	class ResourceTypes;

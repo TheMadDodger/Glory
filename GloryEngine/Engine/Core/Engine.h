@@ -14,6 +14,7 @@ namespace Glory
 	class ThreadManager;
 	class ScriptingModule;
 	class LoaderModule;
+	class SceneManager;
 
 	namespace Jobs
 	{
@@ -25,7 +26,6 @@ namespace Glory
 		uint32_t MainModuleCount;
 		/* Order should be: 
 		 * - WindowModule
-		 * - ScenesModule
 		 * - GraphicsModule
 		 * - RenderModule
 		 * - InputModule
@@ -48,6 +48,8 @@ namespace Glory
 	{
 	public:
 		static Engine* CreateEngine(const EngineCreateInfo& createInfo);
+
+		SceneManager* GetSceneManager();
 
 		void AddMainModule(Module* pModule, bool initialize = false);
 		void AddOptionalModule(Module* pModule, bool initialize = false);
@@ -121,6 +123,8 @@ namespace Glory
 		GraphicsThread* GetGraphicsThread() const;
 
 		void StartThreads();
+		void UpdateSceneManager();
+		void DrawSceneManager();
 		void ModulesLoop(IModuleLoopHandler* pLoopHandler = nullptr);
 		void GameThreadFrameStart();
 		void GameThreadFrameEnd();
@@ -156,6 +160,9 @@ namespace Glory
 
 		/* Original create info*/
 		const EngineCreateInfo m_CreateInfo;
+
+		/* Scene Manager */
+		SceneManager* m_pSceneManager;
 
 		/* Scripting */
 		ScriptingExtender* m_pScriptingExtender;

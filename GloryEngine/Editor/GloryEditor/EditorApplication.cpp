@@ -132,6 +132,8 @@ namespace Glory::Editor
 				// Update asset database
 				EditorAssetDatabase::Update();
 
+				m_pPlayer->Tick(game.GetEngine());
+
 				// Update engine (this also does the render loop)
 				game.GetEngine()->ModulesLoop(m_pPlayer);
 
@@ -164,6 +166,8 @@ namespace Glory::Editor
 
 			// Update asset database
 			EditorAssetDatabase::Update();
+
+			m_pPlayer->Tick(game.GetEngine());
 
 			// Update engine (this also does the render loop)
 			game.GetEngine()->ModulesLoop(m_pPlayer);

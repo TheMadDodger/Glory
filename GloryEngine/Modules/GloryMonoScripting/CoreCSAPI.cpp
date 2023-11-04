@@ -5,7 +5,7 @@
 #include "MathCSAPI.h"
 
 #include <Engine.h>
-#include <ScenesModule.h>
+#include <SceneManager.h>
 #include <Layer.h>
 #include <GameTime.h>
 #include <LayerManager.h>
@@ -283,7 +283,7 @@ namespace Glory
 
 	MonoObject* Scene_NewEmptyObject(uint64_t sceneID)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if(!pScene) return nullptr;
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 		if (!pObjectManager) return nullptr;
@@ -294,7 +294,7 @@ namespace Glory
 
 	MonoObject* Scene_NewEmptyObjectWithName(uint64_t sceneID, MonoString* name)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 		if (!pObjectManager) return nullptr;
@@ -306,14 +306,14 @@ namespace Glory
 
 	size_t Scene_ObjectsCount(uint64_t sceneID)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
 		return pScene->SceneObjectsCount();
 	}
 
 	MonoObject* Scene_GetSceneObject(uint64_t sceneID, uint64_t objectID)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 		if (!pObjectManager) return nullptr;
@@ -324,7 +324,7 @@ namespace Glory
 
 	MonoObject* Scene_GetSceneObjectAt(uint64_t sceneID, size_t index)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 		if (!pObjectManager) return nullptr;
@@ -335,7 +335,7 @@ namespace Glory
 
 	void Scene_Destroy(uint64_t sceneID, uint64_t objectID)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
 		SceneObject* pObject = pScene->FindSceneObject(UUID(objectID));
 		if (!pObject) return;
@@ -346,7 +346,7 @@ namespace Glory
 	{
 		PrefabData* pPrefab = AssetManager::GetAssetImmediate<PrefabData>(prefabID);
 		if (!pPrefab) return nullptr;
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
 		SceneObject* pParent = pScene->FindSceneObject(parentID);
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
@@ -362,7 +362,7 @@ namespace Glory
 
 	MonoObject* SceneManager_CreateEmptyScene(MonoString* name)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return nullptr;
 		GScene* pScene = pScenes->CreateEmptyScene(mono_string_to_utf8(name));
 		return MonoSceneManager::GetSceneObject(pScene);
@@ -370,14 +370,14 @@ namespace Glory
 
 	size_t SceneManager_OpenScenesCount()
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		return pScenes->OpenScenesCount();
 	}
 
 	MonoObject* SceneManager_GetOpenSceneAt(size_t index)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(index);
 		return MonoSceneManager::GetSceneObject(pScene);
@@ -385,7 +385,7 @@ namespace Glory
 
 	MonoObject* SceneManager_GetOpenScene(uint64_t sceneID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		return MonoSceneManager::GetSceneObject(pScene);
@@ -393,7 +393,7 @@ namespace Glory
 
 	MonoObject* SceneManager_GetActiveScene()
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetActiveScene();
 		return MonoSceneManager::GetSceneObject(pScene);
@@ -401,7 +401,7 @@ namespace Glory
 
 	void SceneManager_SetActiveScene(uint64_t sceneID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
@@ -410,21 +410,21 @@ namespace Glory
 
 	void SceneManager_CloseAllScenes()
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return;
 		pScenes->CloseAllScenes();
 	}
 
 	void SceneManager_OpenScene(MonoString* path)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return;
 		pScenes->OpenScene(mono_string_to_utf8(path));
 	}
 
 	void SceneManager_CloseScene(uint64_t sceneID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return;
 		pScenes->CloseScene(UUID(sceneID));
 	}
@@ -435,7 +435,7 @@ namespace Glory
 
 	MonoString* SceneObject_GetName(uint64_t objectID, uint64_t sceneID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return nullptr;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
@@ -445,7 +445,7 @@ namespace Glory
 
 	void SceneObject_SetName(uint64_t objectID, uint64_t sceneID, MonoString* name)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
@@ -456,7 +456,7 @@ namespace Glory
 
 	size_t SceneObject_GetSiblingIndex(uint64_t objectID, uint64_t sceneID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -467,7 +467,7 @@ namespace Glory
 
 	void SceneObject_SetSiblingIndex(uint64_t objectID, uint64_t sceneID, size_t index)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
@@ -478,7 +478,7 @@ namespace Glory
 
 	size_t SceneObject_GetChildCount(uint64_t objectID, uint64_t sceneID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -489,7 +489,7 @@ namespace Glory
 
 	uint64_t SceneObject_GetChild(uint64_t objectID, uint64_t sceneID, size_t index)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -501,7 +501,7 @@ namespace Glory
 
 	uint64_t SceneObject_GetParent(uint64_t objectID, uint64_t sceneID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -513,7 +513,7 @@ namespace Glory
 
 	void SceneObject_SetParent(uint64_t objectID, uint64_t sceneID, uint64_t parentID)
 	{
-		ScenesModule* pScenes = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;

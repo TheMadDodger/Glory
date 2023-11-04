@@ -10,10 +10,20 @@
 #include "ImGuiHelpers.h"
 #include "ProjectSettings.h"
 
+#include <SceneManager.h>
 #include <IconsFontAwesome6.h>
+#include <Components.h>
 
 namespace Glory::Editor
 {
+	/* @todo: Add types dynamically */
+	const std::vector<std::type_index> ComponentsToUpdateInEditor =
+	{
+		typeid(Transform),
+		typeid(CameraComponent),
+		typeid(LookAt),
+	};
+
 	std::vector<IPlayModeHandler*> EditorPlayer::m_pSceneLoopHandlers;
 
 	void EditorPlayer::RegisterLoopHandler(IPlayModeHandler* pEditorLoopHandler)
@@ -44,6 +54,17 @@ namespace Glory::Editor
 
 		//if (pSelected) Selection::SetActiveObject(pSelected);
 
+		SceneManager* pScenes = pEngine->GetSceneManager();
+		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
+		Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
+
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
+		{
+			GScene* pScene = pScenes->GetOpenScene(i);
+			Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+			pRegistry->InvokeAll(Utils::ECS::InvocationType::Start);
+		}
+
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
 			IPlayModeHandler* pPlayModeHandler = m_pSceneLoopHandlers[i];
@@ -58,6 +79,18 @@ namespace Glory::Editor
 		ProjectSettings::OnStopPlay();
 
 		Engine* pEngine = Game::GetGame().GetEngine();
+
+		SceneManager* pScenes = pEngine->GetSceneManager();
+		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
+		Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
+
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
+		{
+			GScene* pScene = pScenes->GetOpenScene(i);
+			Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+			pRegistry->InvokeAll(Utils::ECS::InvocationType::Stop);
+		}
+
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
 			IPlayModeHandler* pPlayModeHandler = m_pSceneLoopHandlers[i];
@@ -106,6 +139,39 @@ namespace Glory::Editor
 		m_FrameRequested = true;
 	}
 
+	void EditorPlayer::Tick(Engine* pEngine)
+	{
+		if (EditorApplication::CurrentMode() == EditorMode::M_Play)
+		{
+			if (!m_IsPaused || m_FrameRequested) pEngine->UpdateSceneManager();
+			m_FrameRequested = false;
+		}
+		else
+		{
+			SceneManager* pScenes = pEngine->GetSceneManager();
+			Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
+			Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
+
+			for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
+			{
+				GScene* pScene = pScenes->GetOpenScene(i);
+				Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+				for (size_t i = 0; i < ComponentsToUpdateInEditor.size(); i++)
+				{
+					uint32_t hash = ResourceType::GetHash(ComponentsToUpdateInEditor[i]);
+					pRegistry->InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
+				}
+			}
+		}
+
+		pEngine->DrawSceneManager();
+	}
+
+	void EditorPlayer::EndTick()
+	{
+		m_FrameRequested = false;
+	}
+
 	bool EditorPlayer::HandleModuleLoop(Module* pModule)
 	{
 		const ModuleMetaData& metaData = pModule->GetMetaData();
@@ -113,7 +179,6 @@ namespace Glory::Editor
 		if (EditorApplication::CurrentMode() == EditorMode::M_Play)
 		{
 			if (!m_IsPaused || m_FrameRequested) pModule->GetEngine()->CallModuleUpdate(pModule);
-			m_FrameRequested = false;
 		}
 		else
 		{

@@ -18,6 +18,7 @@
 #include "Physics.h"
 #include "ShapeProperty.h"
 #include "PrefabData.h"
+#include "SceneManager.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -40,6 +41,11 @@ namespace Glory
 	{
 		Engine* pEngine = new Engine(createInfo);
 		return pEngine;
+	}
+
+	SceneManager* Engine::GetSceneManager()
+	{
+		return m_pSceneManager;
 	}
 
 	void Engine::AddMainModule(Module* pModule, bool initialize)
@@ -185,9 +191,20 @@ namespace Glory
 		m_pGraphicsThread->Start();
 	}
 
+	void Engine::UpdateSceneManager()
+	{
+		m_pSceneManager->Update();
+	}
+
+	void Engine::DrawSceneManager()
+	{
+		m_pSceneManager->Draw();
+	}
+
 	Engine::Engine(const EngineCreateInfo& createInfo)
-		: m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
-		m_pGraphicsThread(nullptr), m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
+		: m_pSceneManager(new SceneManager(this)), m_pThreadManager(ThreadManager::GetInstance()),
+		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr),
+		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -265,6 +282,10 @@ namespace Glory
 		delete m_pScriptingExtender;
 		m_pScriptingExtender = nullptr;
 
+		m_pSceneManager->Cleanup();
+		delete m_pSceneManager;
+		m_pSceneManager = nullptr;
+
 		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
 		ShaderManager::Cleanup();
@@ -277,6 +298,7 @@ namespace Glory
 
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
+		m_pSceneManager->Initialize();
 
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{
@@ -401,6 +423,8 @@ namespace Glory
 	{
 		GameThreadFrameStart();
 		Console::Update();
+		m_pSceneManager->Update();
+		m_pSceneManager->Draw();
 		ModulesLoop();
 		GameThreadFrameEnd();
 	}
