@@ -1,5 +1,8 @@
 #include "JoltPhysicsModule.h"
 #include "Helpers.h"
+#include "JoltComponents.h"
+#include "PhysicsSystem.h"
+#include "CharacterControllerSystem.h"
 
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
@@ -10,6 +13,7 @@
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseQuadTree.h>
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
+#include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 
 #include <Debug.h>
 #include <cstdarg>
@@ -17,10 +21,11 @@
 #include <LayerManager.h>
 #include <LayerRef.h>
 #include <GLORY_YAML.h>
-#include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 
 #include <JoltDebugRenderer.h>
 #include <GameTime.h>
+#include <Engine.h>
+#include <SceneManager.h>
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -45,13 +50,16 @@ namespace Glory
 
 	JoltPhysicsModule::JoltPhysicsModule()
 		: m_pJPHTempAllocator(nullptr), m_pJPHJobSystem(nullptr), m_pJPHPhysicsSystem(nullptr),
-		m_CollisionFilter(this), m_BodyActivationListener(this), m_ContactListener(this), m_Gravity()
+		m_CollisionFilter(this), m_BodyActivationListener(this), m_ContactListener(this), m_Gravity(),
+		m_CollisionMatrix(std::vector<std::vector<bool>>())
 	{
 	}
 
 	JoltPhysicsModule::~JoltPhysicsModule()
 	{
 		m_CharacterManager.DestroyAll();
+		m_ContactCallbacks.clear();
+		m_ActivationCallbacks.clear();
 	}
 
 	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex)
@@ -369,12 +377,12 @@ namespace Glory
 		m_LateContactCallbacks[callbackType].push_back({ body1ID, body2ID });
 	}
 
-	CharacterManager* JoltPhysicsModule::GetCharacterManager()
+	JoltCharacterManager* JoltPhysicsModule::GetCharacterManager()
 	{
 		return &m_CharacterManager;
 	}
 
-	ShapeManager* JoltPhysicsModule::GetShapeManager()
+	JoltShapeManager* JoltPhysicsModule::GetShapeManager()
 	{
 		return &m_ShapeManager;
 	}
@@ -421,7 +429,7 @@ namespace Glory
 		JPH::PhysicsSettings settings{};
 
 		// Create physics system
-		m_pJPHPhysicsSystem = new PhysicsSystem();
+		m_pJPHPhysicsSystem = new JPH::PhysicsSystem();
 		m_pJPHPhysicsSystem->Init(maxBodies, numBodyMutexes, maxBodyPairs,
 			maxContactConstraints, m_BPLayerImpl,
 			m_ObjectVSBroadPhase, m_CollisionFilter);
@@ -484,6 +492,50 @@ namespace Glory
 	//	if (jphBodyID.IsInvalid()) return {};
 	//	return ToVec3(bodyInterface.GetPosition(jphBodyID));
 	//}
+
+	void JoltPhysicsModule::SetCollisionMatrix(std::vector<std::vector<bool>>&& matrix)
+	{
+		m_CollisionMatrix = std::move(matrix);
+	}
+
+	bool JoltPhysicsModule::ShouldCollide(uint16_t layer1, uint16_t layer2) const
+	{
+		if (layer1 == 0 || layer2 == 0) return true;
+		return ShouldCollidePass(layer1 - 1, layer2 - 1) || ShouldCollidePass(layer2 - 1, layer1 - 1);
+	}
+
+	bool JoltPhysicsModule::ShouldCollidePass(uint16_t layer1, uint16_t layer2) const
+	{
+		if (layer1 >= m_CollisionMatrix.size()) return false;
+		if (layer2 >= m_CollisionMatrix[layer1].size()) return false;
+		return m_CollisionMatrix[layer1][layer2];
+	}
+
+	void JoltPhysicsModule::RegisterContactCallback(ContactCallback callbackType, std::function<void(uint32_t, uint32_t)> callback)
+	{
+		m_ContactCallbacks[callbackType].push_back(callback);
+	}
+
+	void JoltPhysicsModule::RegisterActivationCallback(ActivationCallback callbackType, std::function<void(uint32_t)> callback)
+	{
+		m_ActivationCallbacks[callbackType].push_back(callback);
+	}
+
+	void JoltPhysicsModule::TriggerContactCallback(ContactCallback callbackType, uint32_t bodyID1, uint32_t bodyID2)
+	{
+		for (size_t i = 0; i < m_ContactCallbacks[callbackType].size(); i++)
+		{
+			m_ContactCallbacks[callbackType][i](bodyID1, bodyID2);
+		}
+	}
+
+	void JoltPhysicsModule::TriggerActivationCallback(ActivationCallback callbackType, uint32_t bodyID)
+	{
+		for (size_t i = 0; i < m_ActivationCallbacks[callbackType].size(); i++)
+		{
+			m_ActivationCallbacks[callbackType][i](bodyID);
+		}
+	}
 
 	void JoltPhysicsModule::LoadSettings(ModuleSettings& settings)
 	{
@@ -576,6 +628,35 @@ namespace Glory
 		// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
 		// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
 		//m_pJPHPhysicsSystem->OptimizeBroadPhase();
+
+		Reflect::RegisterEnum<BodyType>();
+
+		/* @todo: Replace this with scene manager when that is a thing */
+		SceneManager* pScenes = m_pEngine->GetSceneManager();
+		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
+		pComponentTypes->RegisterComponent<PhysicsBody>();
+		pComponentTypes->RegisterComponent<CharacterController>();
+
+		/* Physics Bodies */
+		pComponentTypes->RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Start, PhysicsSystem::OnStart);
+		pComponentTypes->RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Stop, PhysicsSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::OnRemove, PhysicsSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::OnValidate, PhysicsSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Update, PhysicsSystem::OnUpdate);
+
+		/* Character controllers */
+		pComponentTypes->RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::Start, CharacterControllerSystem::OnStart);
+		pComponentTypes->RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::Stop, CharacterControllerSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::OnRemove, CharacterControllerSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::OnValidate, CharacterControllerSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<CharacterController>(Glory::Utils::ECS::InvocationType::Update, CharacterControllerSystem::OnUpdate);
+
+		RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);
+		RegisterActivationCallback(ActivationCallback::Deactivated, PhysicsSystem::OnBodyDeactivated);
+
+		RegisterContactCallback(ContactCallback::Added, PhysicsSystem::OnContactAdded);
+		RegisterContactCallback(ContactCallback::Persisted, PhysicsSystem::OnContactPersisted);
+		RegisterContactCallback(ContactCallback::Removed, PhysicsSystem::OnContactRemoved);
 	}
 
 	void JoltPhysicsModule::PostInitialize()
@@ -660,5 +741,10 @@ namespace Glory
 		settings.mDrawCenterOfMassTransform = true;
 		m_pJPHPhysicsSystem->DrawBodies(settings, DebugRenderer::sInstance);
 #endif
+	}
+
+	const std::type_info& JoltPhysicsModule::GetModuleType()
+	{
+		return typeid(JoltPhysicsModule);
 	}
 }

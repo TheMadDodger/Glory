@@ -1,11 +1,12 @@
+#include "JoltShapeManager.h"
 #include "JoltCharacterManager.h"
 #include "Helpers.h"
 
+#include <Shapes.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/Physics/Character/Character.h>
 #include <UUID.h>
-#include <ShapeManager.h>
 
 namespace Glory
 {
@@ -14,7 +15,7 @@ namespace Glory
 		m_pPhysicsSystem = pPhysics;
 	}
 
-	uint32_t JoltCharacterManager::CreateCharacter_Internal(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& position, const glm::quat& rotation, const ShapeData& shape, float friction)
+	uint32_t JoltCharacterManager::CreateCharacter(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& position, const glm::quat& rotation, const ShapeData& shape, float friction)
 	{
 		uint32_t characterID = uint32_t(UUID());
 
@@ -33,7 +34,7 @@ namespace Glory
 		return characterID;
 	}
 
-	void JoltCharacterManager::DestroyCharacter_Internal(uint32_t characterID)
+	void JoltCharacterManager::DestroyCharacter(uint32_t characterID)
 	{
 		auto itor = m_pCharacters.find(characterID);
 		if (itor == m_pCharacters.end()) return;
@@ -42,7 +43,7 @@ namespace Glory
 		m_pCharacters.erase(itor);
 	}
 
-	void JoltCharacterManager::DestroyAll_Internal()
+	void JoltCharacterManager::DestroyAll()
 	{
 		for (auto itor : m_pCharacters)
 		{

@@ -1,5 +1,6 @@
 #pragma once
-#include "Components.h"
+#include <EntityID.h>
+#include <map>
 
 namespace Glory::Utils::ECS
 {
@@ -8,7 +9,8 @@ namespace Glory::Utils::ECS
 
 namespace Glory
 {
-    class PhysicsModule;
+    class JoltPhysicsModule;
+    struct PhysicsBody;
 
     class PhysicsSystem
     {
@@ -32,7 +34,7 @@ namespace Glory
         static void RemoveBody(uint32_t bodyID);
 
     private:
-        static void SetupBody(PhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent);
+        static void SetupBody(JoltPhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent);
         
     private:
         static std::map<uint32_t, std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>> m_BodyOwners;

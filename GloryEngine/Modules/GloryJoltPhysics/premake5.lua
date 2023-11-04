@@ -30,7 +30,9 @@ project "GloryJoltPhysics"
 		"%{IncludeDir.glm}",
 
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.entityscenes}",
 
+		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.ECS}",
@@ -53,6 +55,11 @@ project "GloryJoltPhysics"
 		"%{LibDirs.glory}",
 
 		"%{LibDirs.yaml_cpp}",
+
+
+
+		--temporary until entity scenes module becomes internal
+		"%{modulesDir}/GloryEntityScenes",
 	}
 
 	links
@@ -66,12 +73,17 @@ project "GloryJoltPhysics"
 		"shaderc_shared",
 		"yaml-cpp",
 
+		"GloryUtils",
 		"GloryUtilsVersion",
 		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
+
+
+		--temporary until entity scenes module becomes internal
+		"GloryEntityScenes",
 	}
 
 	defines

@@ -9,10 +9,10 @@
 #include "SceneSerializer.h"
 #include "SceneObjectSerializer.h"
 #include "ScriptedComponentSerializer.h"
-#include "PhysicsModule.h"
-#include "PhysicsSystem.h"
 #include "PrefabDataLoader.h"
 #include "SceneObject.h"
+#include "Components.h"
+#include "Systems.h"
 
 #include <GloryECS/ComponentTypes.h>
 
@@ -162,8 +162,6 @@ namespace Glory
 		RegisterComponent<MeshRenderer>();
 		RegisterComponent<ModelRenderer>();
 		RegisterComponent<LightComponent>();
-		RegisterComponent<PhysicsBody>();
-		RegisterComponent<CharacterController>();
 
 		/* Always register scripted component as last to preserve execution order */
 		RegisterComponent<ScriptedComponent>();
@@ -181,15 +179,36 @@ namespace Glory
 		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 
-		PhysicsModule* pPhysics = m_pEngine->GetMainModule<PhysicsModule>();
-		if (!pPhysics) return;
+		// Register Invocations
+		// Transform
+		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Start, TransformSystem::OnStart);
+		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Update, TransformSystem::OnUpdate);
 
-		pPhysics->RegisterActivationCallback(ActivationCallback::Activated, PhysicsSystem::OnBodyActivated);
-		pPhysics->RegisterActivationCallback(ActivationCallback::Deactivated, PhysicsSystem::OnBodyDeactivated);
+		// Camera
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Update, CameraSystem::OnUpdate);
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Draw, CameraSystem::OnDraw);
 
-		pPhysics->RegisterContactCallback(ContactCallback::Added, PhysicsSystem::OnContactAdded);
-		pPhysics->RegisterContactCallback(ContactCallback::Persisted, PhysicsSystem::OnContactPersisted);
-		pPhysics->RegisterContactCallback(ContactCallback::Removed, PhysicsSystem::OnContactRemoved);
+		// Light
+		m_pComponentTypesInstance->RegisterInvokaction<LightComponent>(Glory::Utils::ECS::InvocationType::Draw, LightSystem::OnDraw);
+
+		// LookAt
+		m_pComponentTypesInstance->RegisterInvokaction<LookAt>(Glory::Utils::ECS::InvocationType::Update, LookAtSystem::OnUpdate);
+
+		// MeshRenderer
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+
+		// Spin
+		m_pComponentTypesInstance->RegisterInvokaction<Spin>(Glory::Utils::ECS::InvocationType::Update, SpinSystem::OnUpdate);
+
+		// Scripted
+		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::OnAdd, ScriptedSystem::OnAdd);
+		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Update, ScriptedSystem::OnUpdate);
+		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Draw, ScriptedSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Start, ScriptedSystem::OnStart);
+		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Stop, ScriptedSystem::OnStop);
+		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
 
 		m_pPrefabLoader = new PrefabDataLoader();
 		m_pEngine->AddOptionalModule(m_pPrefabLoader, true);

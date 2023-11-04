@@ -15,7 +15,6 @@
 #include "GloryContext.h"
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
-#include "Physics.h"
 #include "ShapeProperty.h"
 #include "PrefabData.h"
 #include "SceneManager.h"
@@ -406,8 +405,7 @@ namespace Glory
 		Reflect::RegisterEnum<SamplerAddressMode>();
 		Reflect::RegisterEnum<CompareOp>();
 
-		/* Physics types */
-		Reflect::RegisterEnum<BodyType>();
+		/* Shape types */
 		Reflect::RegisterEnum<ShapeType>();
 		Reflect::RegisterType<Box>();
 		Reflect::RegisterType<Sphere>();
