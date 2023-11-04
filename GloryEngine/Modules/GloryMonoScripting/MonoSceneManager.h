@@ -32,7 +32,7 @@ namespace Glory
 
 	private:
 		friend class MonoManager;
-		friend class EntityLibManager;
+		friend class CoreLibManager;
 		/* No instances allowed */
 		MonoSceneManager() = delete;
 

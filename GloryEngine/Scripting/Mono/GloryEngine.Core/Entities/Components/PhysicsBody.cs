@@ -18,7 +18,7 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Whether the Physics is active and awake
         /// </summary>
-        public bool Active
+        public bool BodyActive
         {
             set
             {

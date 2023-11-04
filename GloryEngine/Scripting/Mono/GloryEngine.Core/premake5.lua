@@ -18,6 +18,7 @@ project "GloryEngine.Core"
 		"Math/*.cs",
 		"Input/*.cs",
 		"Physics/*.cs",
+		"Entities/**.cs",
 		"premake5.lua"
 	}
 

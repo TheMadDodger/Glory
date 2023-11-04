@@ -23,7 +23,7 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Whether the character is active and awake
         /// </summary>
-        public bool Active
+        public bool BodyActive
         {
             set
             {

@@ -1,14 +1,29 @@
-﻿using System;
+﻿using GloryEngine.Entities;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine.SceneManagement
 {
     /// <summary>
-    /// Handle for a scene object
+    /// Handle for an entity object
     /// </summary>
     public class SceneObject : Object
     {
         #region Props
+
+        /// <summary>
+        /// The Entity handle for this object
+        /// </summary>
+        public Entity Entity
+        {
+            get
+            {
+                if (_entity.IsValid()) return _entity;
+                _entity = SceneObject_GetEntityHandle(_objectID, _sceneID);
+                return _entity;
+            }
+            private set { }
+        }
 
         /// <summary>
         /// The scene this object exists in
@@ -67,6 +82,7 @@ namespace GloryEngine.SceneManagement
 
         #region Fields
 
+        private Entity _entity;
         protected UInt64 _sceneID;
         protected Scene _scene;
 
@@ -79,7 +95,10 @@ namespace GloryEngine.SceneManagement
 
         #endregion
 
-        #region Methods
+        #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Entity SceneObject_GetEntityHandle(UInt64 objectID, UInt64 sceneID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static string SceneObject_GetName(UInt64 objectID, UInt64 sceneID);

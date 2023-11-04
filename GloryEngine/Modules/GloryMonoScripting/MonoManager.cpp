@@ -3,7 +3,6 @@
 #include "GloryMonoScipting.h"
 #include "MonoScriptObjectManager.h"
 #include "CoreLibManager.h"
-#include "EntityLibManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
 
@@ -242,11 +241,6 @@ namespace Glory
 		return m_pCoreLibManager;
 	}
 
-	EntityLibManager* MonoManager::GetEntityLibManager() const
-	{
-		return m_pEntityLibManager;
-	}
-
 	ScriptingMethodsHelper* MonoManager::GetMethodsHelper() const
 	{
 		return m_pMethodsHelper;
@@ -356,8 +350,8 @@ namespace Glory
 	}
 
 	MonoManager::MonoManager(GloryMonoScipting* pModule)
-		: m_pModule(pModule), m_pMethodsHelper(new ScriptingMethodsHelper()), m_pCoreLibManager(new CoreLibManager(this)),
-		m_pEntityLibManager(new EntityLibManager()), m_pRootDomain(nullptr), m_pActiveDomain(nullptr),
+		: m_pModule(pModule), m_pMethodsHelper(new ScriptingMethodsHelper()),
+		m_pCoreLibManager(new CoreLibManager(this)), m_pRootDomain(nullptr), m_pActiveDomain(nullptr),
 		m_HadInitialLoad(false), m_ScriptExecutionAllowed(false), m_DebuggingEnabled(false)
 	{
 		m_pInstance = this;

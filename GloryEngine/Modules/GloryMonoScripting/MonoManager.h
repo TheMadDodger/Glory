@@ -6,7 +6,6 @@
 namespace Glory
 {
 	class CoreLibManager;
-	class EntityLibManager;
 	class GloryMonoScipting;
 	class ScriptingMethodsHelper;
 	class AssemblyDomain;
@@ -21,7 +20,6 @@ namespace Glory
 
 		GLORY_API GloryMonoScipting* Module() const;
 		GLORY_API CoreLibManager* GetCoreLibManager() const;
-		GLORY_API EntityLibManager* GetEntityLibManager() const;
 		GLORY_API ScriptingMethodsHelper* GetMethodsHelper() const;
 		GLORY_API bool ScriptExecutionAllowed() const;
 
@@ -51,7 +49,6 @@ namespace Glory
 		static MonoManager* m_pInstance;
 		GloryMonoScipting* m_pModule;
 		CoreLibManager* m_pCoreLibManager;
-		EntityLibManager* m_pEntityLibManager;
 		ScriptingMethodsHelper* m_pMethodsHelper;
 		std::map<std::string, AssemblyDomain*> m_Domains;
 		AssemblyDomain* m_pRootDomain;
