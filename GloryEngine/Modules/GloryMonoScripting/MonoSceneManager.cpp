@@ -3,16 +3,16 @@
 
 #include <Debug.h>
 
-#define GET_CLASS(name, out) \
-out = mono_class_from_name(pAssembly->GetMonoImage(), "GloryEngine.Entities", STRINGIZE(name)); \
+#define GET_CLASS(ns, name, out) \
+out = mono_class_from_name(pAssembly->GetMonoImage(), STRINGIZE(ns), STRINGIZE(name)); \
 if (!out) \
 { \
-    Debug::LogError(STRINGIZE(MonoEntitySceneManager::Initialize > Could not load GloryEngine.Entities.##name class!)); \
+    Debug::LogError(STRINGIZE(MonoSceneManager::Initialize > Could not load ns.##name class!)); \
     return; \
 } \
 mono_class_init(out);
 
-#define GET_CTOR(name, cls, out, argc) \
+#define GET_CTOR(ns, name, cls, out, argc) \
 iter = NULL; \
 method = nullptr; \
 while ((method = mono_class_get_methods(cls, &iter))) \
@@ -30,7 +30,7 @@ while ((method = mono_class_get_methods(cls, &iter))) \
 } \
 if (!out) \
 { \
-    Debug::LogError(STRINGIZE(MonoEntitySceneManager::Initialize: Could not load GloryEngine.Entities.##name##.::ctor method!)); \
+    Debug::LogError(STRINGIZE(MonoSceneManager::Initialize: Could not load ns.##name##.::ctor method!)); \
     return; \
 }
 
@@ -86,14 +86,14 @@ namespace Glory
 
 	void MonoSceneManager::Initialize(Assembly* pAssembly)
 	{
-		GET_CLASS(EntityScene, m_pEntitySceneClass);
-		GET_CLASS(EntitySceneObject, m_pEntitySceneObjectClass);
+		GET_CLASS(GloryEngine.SceneManagement, Scene, m_pEntitySceneClass);
+		GET_CLASS(GloryEngine.SceneManagement, SceneObject, m_pEntitySceneObjectClass);
 
 		void* iter = NULL;
 		MonoMethod* method = nullptr;
 
-		GET_CTOR(EntityScene, m_pEntitySceneClass, m_pEntitySceneConstructor, 1);
-		GET_CTOR(EntitySceneObject, m_pEntitySceneObjectClass, m_pEntitySceneObjectConstructor, 2);
+		GET_CTOR(GloryEngine.SceneManagement, Scene, m_pEntitySceneClass, m_pEntitySceneConstructor, 1);
+		GET_CTOR(GloryEngine.SceneManagement, SceneObject, m_pEntitySceneObjectClass, m_pEntitySceneObjectConstructor, 2);
 	}
 
 	void MonoSceneManager::Cleanup()

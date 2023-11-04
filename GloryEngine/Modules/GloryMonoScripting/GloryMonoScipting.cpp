@@ -86,6 +86,5 @@ namespace Glory
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)
 	{
 		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll", m_pMonoManager->GetCoreLibManager());
-		pScriptingExtender->AddInternalLib("GloryEngine.Entities.dll", m_pMonoManager->GetEntityLibManager());
 	}
 }

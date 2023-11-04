@@ -154,6 +154,5 @@ group ""
 
 group "Scripting/Mono"
 	include "Scripting/Mono/GloryEngine.Core"
-	include "Scripting/Mono/GloryEngine.Entities"
 	include "Scripting/Mono/Install"
 group ""

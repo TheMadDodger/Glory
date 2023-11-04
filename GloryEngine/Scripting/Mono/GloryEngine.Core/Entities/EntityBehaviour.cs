@@ -1,11 +1,12 @@
-﻿using System.Runtime.CompilerServices;
+﻿using GloryEngine.SceneManagement;
+using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
     /// <summary>
     /// Base class for custom Entity behaviours/scripting
     /// </summary>
-    public class EntityBehaviour : Behaviour
+    public class EntityBehaviour : Object
     {
         #region Props
 
@@ -40,7 +41,7 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Scene object of the entity this component is attached to
         /// </summary>
-        public EntitySceneObject SceneObject
+        public SceneObject SceneObject
         {
             get
             {
@@ -57,16 +58,7 @@ namespace GloryEngine.Entities
 
         private Entity _entity = new Entity(0, 0);
         private Transform _transform = null;
-        private EntitySceneObject _sceneObject = null;
-
-        #endregion
-
-        #region Initialization
-
-        public void Initialize()
-        {
-
-        }
+        private SceneObject _sceneObject = null;
 
         #endregion
 

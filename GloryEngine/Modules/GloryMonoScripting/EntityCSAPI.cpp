@@ -869,7 +869,7 @@ namespace Glory
 
 #pragma region SceneObject
 
-	MonoEntityHandle EntitySceneObject_GetEntityHandle(uint64_t objectID, uint64_t sceneID)
+	MonoEntityHandle SceneObject_GetEntityHandle(uint64_t objectID, uint64_t sceneID)
 	{
 		GScene* pScene = GetEntityScene(sceneID);
 		if(!pScene) return MonoEntityHandle();
@@ -1051,7 +1051,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_AddImpulse", CharacterController_AddImpulse);
 
 		/* Entity Scene Object */
-		BIND("GloryEngine.Entities.SceneObject::EntitySceneObject_GetEntityHandle", EntitySceneObject_GetEntityHandle);
+		BIND("GloryEngine.Entities.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);
 	}
 
 	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)

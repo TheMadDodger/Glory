@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.SceneManagement
 {
+    /// <summary>
+    /// Handle to an entity scene
+    /// </summary>
     public class Scene : Object
     {
         #region Props
@@ -23,7 +26,7 @@ namespace GloryEngine.SceneManagement
 
         #region Constructor
 
-        protected Scene() : base() { }
+        protected Scene() { }
         protected Scene(UInt64 sceneID) : base(sceneID) { }
 
         #endregion

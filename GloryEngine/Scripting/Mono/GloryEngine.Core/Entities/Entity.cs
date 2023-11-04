@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GloryEngine.SceneManagement;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
@@ -23,9 +24,9 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Object in the scene that owns this Entity
         /// </summary>
-        public EntitySceneObject SceneObject => Entity_GetSceneObjectID(this);
+        public SceneObject SceneObject => Entity_GetSceneObjectID(this);
 
-        public EntityScene Scene => SceneManagement.SceneManager.GetOpenScene(_sceneID) as EntityScene;
+        public Scene Scene => SceneManagement.SceneManager.GetOpenScene(_sceneID) as Scene;
 
         #endregion
 
@@ -94,7 +95,7 @@ namespace GloryEngine.Entities
         private static extern bool Entity_IsValid(Entity entity);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern EntitySceneObject Entity_GetSceneObjectID(Entity entity);
+        private static extern SceneObject Entity_GetSceneObjectID(Entity entity);
 
         #endregion
     }

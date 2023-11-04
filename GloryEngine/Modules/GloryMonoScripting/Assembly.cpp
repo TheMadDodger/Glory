@@ -35,13 +35,11 @@ namespace Glory
 		{"GloryEngine.Model", SerializedType::ST_Asset},
 		{"GloryEngine.Image", SerializedType::ST_Asset},
 		{"GloryEngine.Prefab", SerializedType::ST_Asset},
-		{"GloryEngine.Entities.EntityPrefab", SerializedType::ST_Asset},
-		{"GloryEngine.SceneManagement.SceneObject", SerializedType::ST_Object},
-		{"GloryEngine.Entities.EntitySceneObject", SerializedType::ST_Object},
 		{"GloryEngine.Quaternion", ResourceType::GetHash<glm::quat>()},
 		{"GloryEngine.Vector2", ResourceType::GetHash<glm::vec2>()},
 		{"GloryEngine.Vector3", ResourceType::GetHash<glm::vec3>()},
 		{"GloryEngine.Vector4", ResourceType::GetHash<glm::vec4>()},
+		{"GloryEngine.SceneManagement.SceneObject", SerializedType::ST_Object},
 	};
 
 	std::map<std::string, uint32_t> MonoTypeToElementHash = {
@@ -50,7 +48,6 @@ namespace Glory
 		{"GloryEngine.Model", ResourceType::GetHash<ModelData>()},
 		{"GloryEngine.Image", ResourceType::GetHash<ImageData>()},
 		{"GloryEngine.Prefab", ResourceType::GetHash<PrefabData>()},
-		{"GloryEngine.Entities.EntityPrefab", ResourceType::GetHash<PrefabData>()},
 	};
 
 	Assembly::Assembly(AssemblyDomain* pDomain)
