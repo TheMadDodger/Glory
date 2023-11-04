@@ -42,7 +42,7 @@ namespace Glory::Editor
 
 		bool change = false;
 
-		const EntityID entity = m_pComponentObject->EntityID();
+		const Utils::ECS::EntityID entity = m_pComponentObject->EntityID();
 		const TypeData* pTypeData = Transform::GetTypeData();
 		Transform& transform = GetTargetComponent();
 
@@ -162,8 +162,8 @@ namespace Glory::Editor
 		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
 		if (!pPhysics) return;
 
-		const EntityID entity = m_pComponentObject->EntityID();
-		EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
+		const Utils::ECS::EntityID entity = m_pComponentObject->EntityID();
+		Utils::ECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
 		if (pRegistry->HasComponent<PhysicsBody>(entity))
 		{
 			Transform& transform = pRegistry->GetComponent<Transform>(entity);

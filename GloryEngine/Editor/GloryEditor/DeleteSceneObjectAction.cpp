@@ -1,5 +1,8 @@
 #include "DeleteSceneObjectAction.h"
-#include <ScenesModule.h>
+#include <SceneManager.h>
+#include <Serializer.h>
+#include <SceneObject.h>
+#include <GScene.h>
 #include <Engine.h>
 
 namespace Glory::Editor
@@ -19,14 +22,14 @@ namespace Glory::Editor
 
 	void DeleteSceneObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		ScenesModule* pScenesModule = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>();
+		SceneManager* pScenesModule = Game::GetGame().GetEngine()->GetSceneManager();
 		GScene* pScene = pScenesModule->GetOpenScene(m_OriginalSceneUUID);
 		if (pScene == nullptr) return;
 		YAML::Node node = YAML::Load(m_SerializedObject.c_str());
 		for (size_t i = 0; i < node.size(); i++)
 		{
 			YAML::Node subNode = node[i];
-			SceneObject* pSceneObject = (SceneObject*)Serializer::DeserializeObject(pScene, subNode);
+			SceneObject* pSceneObject = Serializer::DeserializeObject<SceneObject>(pScene, subNode);
 		}
 	}
 

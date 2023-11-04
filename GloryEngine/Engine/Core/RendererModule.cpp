@@ -7,7 +7,7 @@
 #include "Buffer.h"
 #include "FileLoaderModule.h"
 #include "WindowModule.h"
-#include "ScenesModule.h"
+#include "SceneManager.h"
 #include "GraphicsModule.h"
 #include "GraphicsThread.h"
 
@@ -333,7 +333,7 @@ namespace Glory
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;
 		uint32_t objectID = pRenderTexture->ReadPixel(m_PickPos);
-		m_pEngine->GetMainModule<ScenesModule>()->SetHoveringObject(objectID);
+		m_pEngine->GetSceneManager()->SetHoveringObject(objectID);
 		Profiler::EndSample();
 	}
 

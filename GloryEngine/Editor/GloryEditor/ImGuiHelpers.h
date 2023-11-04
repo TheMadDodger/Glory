@@ -1,5 +1,6 @@
 #pragma once
 #include <imgui.h>
+#include <glm/glm.hpp>
 
 namespace Glory
 {

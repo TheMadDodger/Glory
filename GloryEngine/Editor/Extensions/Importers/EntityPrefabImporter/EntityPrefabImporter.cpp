@@ -22,9 +22,9 @@ namespace Glory::Editor
 		return extension.compare(".gentity") == 0;
 	}
 
-	EntityPrefabData* EntityPrefabImporter::LoadResource(const std::filesystem::path& path) const
+	PrefabData* EntityPrefabImporter::LoadResource(const std::filesystem::path& path) const
 	{
-        EntityPrefabData* pPrefab = new EntityPrefabData();
+        PrefabData* pPrefab = new PrefabData();
 
         Utils::YAMLFileRef yamlFile{ path };
         const UUID originalUUID = yamlFile["OriginalUUID"].As<uint64_t>();
@@ -47,7 +47,7 @@ namespace Glory::Editor
         return pPrefab;
 	}
 
-	bool EntityPrefabImporter::SaveResource(const std::filesystem::path& path, EntityPrefabData* pResource) const
+	bool EntityPrefabImporter::SaveResource(const std::filesystem::path& path, PrefabData* pResource) const
 	{
         YAML::Emitter out;
         const PrefabNode& node = pResource->RootNode();
@@ -88,7 +88,7 @@ namespace Glory::Editor
         out << YAML::EndSeq;
     }
 
-    void EntityPrefabImporter::ReadChild(EntityPrefabData* pPrefab, Utils::NodeValueRef yamlNode, PrefabNode& parent) const
+    void EntityPrefabImporter::ReadChild(PrefabData* pPrefab, Utils::NodeValueRef yamlNode, PrefabNode& parent) const
     {
         const UUID originalUUID = yamlNode["OriginalUUID"].As<uint64_t>();
         const UUID transformUUID = yamlNode["TransformUUID"].As<uint64_t>();

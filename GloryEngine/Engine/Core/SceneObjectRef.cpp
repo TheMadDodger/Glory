@@ -1,6 +1,7 @@
 #include "SceneObjectRef.h"
-#include "ScenesModule.h"
+#include "SceneManager.h"
 #include "Engine.h"
+#include "GScene.h"
 
 namespace Glory
 {
@@ -41,7 +42,7 @@ namespace Glory
 	SceneObject* SceneObjectRef::GetObject()
 	{
 		/* FIXME: This is kinda slow */
-		GScene* pScene = Game::GetGame().GetEngine()->GetMainModule<ScenesModule>()->GetOpenScene(m_SceneUUID);
+		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(m_SceneUUID);
 		if (!pScene) return nullptr;
 		return pScene->FindSceneObject(m_ObjectUUID);
 	}

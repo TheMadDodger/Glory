@@ -1,4 +1,5 @@
 #include "GloryContext.h"
+#include "SceneManager.h"
 #include "AssetManager.h"
 #include "AssetDatabase.h"
 #include "ResourceType.h"
@@ -57,7 +58,7 @@ namespace Glory
 	{
 		return m_pContext->m_Game;
 	}
-
+	
 	CameraManager* GloryContext::GetCameraManager()
 	{
 		return &m_pContext->m_CameraManager;

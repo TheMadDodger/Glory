@@ -90,10 +90,10 @@ namespace Glory::Editor
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
 		m_pComponentEditors.clear();
 
-		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+		SceneObject* pObject = (SceneObject*)m_pTarget;
 		Entity entity = pObject->GetEntityHandle();
-		EntityID entityID = entity.GetEntityID();
-		EntityView* pEntityView = entity.GetEntityView();
+		Utils::ECS::EntityID entityID = entity.GetEntityID();
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 
 		for (size_t i = 0; i < pEntityView->ComponentCount(); i++)
 		{
@@ -115,9 +115,9 @@ namespace Glory::Editor
 		ImGui::TextDisabled("Entity Object");
 		ImGui::Separator();
 
-		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
-		EntityID entityID = entity.GetEntityID();
-		EntityScene* pScene = entity.GetScene();
+		Entity entity = ((SceneObject*)m_pObject)->GetEntityHandle();
+		Utils::ECS::EntityID entityID = entity.GetEntityID();
+		GScene* pScene = entity.GetScene();
 		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
 
 		const UUID prefabID = pScene->Prefab(m_pObject->GetUUID());
@@ -165,9 +165,9 @@ namespace Glory::Editor
 	{
 		bool change = false;
 
-		Entity entity = ((EntitySceneObject*)m_pObject)->GetEntityHandle();
-		EntityID entityID = entity.GetEntityID();
-		EntityScene* pScene = entity.GetScene();
+		Entity entity = ((SceneObject*)m_pObject)->GetEntityHandle();
+		Utils::ECS::EntityID entityID = entity.GetEntityID();
+		GScene* pScene = entity.GetScene();
 		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
 
 		const bool isPrefab = pScene->Prefab(m_pObject->GetUUID());
@@ -243,8 +243,8 @@ namespace Glory::Editor
 		if (removeComponent)
 		{
 			Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
-			EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
-			EntityScene* pScene = (EntityScene*)pObject->GetScene();
+			SceneObject* pObject = (SceneObject*)m_pTarget;
+			GScene* pScene = pObject->GetScene();
 			Undo::AddAction(new RemoveComponentAction(pRegistry, entityID, toRemoveComponent));
 			pRegistry->RemoveComponentAt(entityID, toRemoveComponent);
 			Undo::StopRecord();
@@ -273,7 +273,7 @@ namespace Glory::Editor
 
 		m_ComponentPopup.OnGUI();
 
-		EntitySceneObject* pObject = (EntitySceneObject*)m_pTarget;
+		SceneObject* pObject = (SceneObject*)m_pTarget;
 		if (change) EditorSceneManager::SetSceneDirty(pScene);
 		ImGui::EndDisabled();
 		return change;
@@ -281,9 +281,8 @@ namespace Glory::Editor
 
 	void EntitySceneObjectEditor::DrawObjectNodeName(SceneObject* pObject, bool isPrefab)
 	{
-		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
-		Entity entity = pEntityObject->GetEntityHandle();
-		EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
+		Entity entity = pObject->GetEntityHandle();
+		Utils::ECS::EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
 		std::stringstream stream;
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
@@ -303,9 +302,8 @@ namespace Glory::Editor
 
 	bool EntitySceneObjectEditor::SearchCompare(std::string_view search, SceneObject* pObject)
 	{
-		EntitySceneObject* pEntityObject = (EntitySceneObject*)pObject;
-		Entity entity = pEntityObject->GetEntityHandle();
-		EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
+		Entity entity = pObject->GetEntityHandle();
+		Utils::ECS::EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
 
 		if (search.size() > 2 && search[1] == ':')
 		{
