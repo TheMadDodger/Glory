@@ -20,6 +20,10 @@
 
 namespace Glory::Editor
 {
+	/* @todo GET RID OF DIS */
+	struct PhysicsBody {};
+	struct CharacterController {};
+
 	const std::map<uint32_t, std::string_view> COMPONENT_ICONS = {
 		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
 		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
@@ -29,6 +33,7 @@ namespace Glory::Editor
 		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
 		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
+
 		{ ResourceType::GetHash<PhysicsBody>(), ICON_FA_CUBES_STACKED },
 		{ ResourceType::GetHash<CharacterController>(), ICON_FA_PERSON },
 	};

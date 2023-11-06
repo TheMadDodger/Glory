@@ -1,4 +1,10 @@
 #include "JoltEditorExtension.h"
+#include "PhysicsSettings.h"
+
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhase.h>
+
+#include <BroadPhaseImpl.h>
 
 #include <EditorPlayer.h>
 #include <LayerRef.h>
@@ -9,6 +15,8 @@ EXTENSION_CPP(JoltEditorExtension)
 
 namespace Glory::Editor
 {
+	PhysicsSettings Physics;
+
 	JoltEditorExtension::JoltEditorExtension()
 	{
 	}
@@ -20,6 +28,8 @@ namespace Glory::Editor
 	void JoltEditorExtension::Initialize()
 	{
 		EditorPlayer::RegisterLoopHandler(this);
+
+		ProjectSettings::Add(&Physics);
 	}
 
 	const char* JoltEditorExtension::ModuleName()

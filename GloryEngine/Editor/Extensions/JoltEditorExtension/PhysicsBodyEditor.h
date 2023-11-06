@@ -1,5 +1,5 @@
 #pragma once
-#include "EntityComponentEditor.h"
+#include <EntityComponentEditor.h>
 #include <Components.h>
 #include <Gizmos.h>
 

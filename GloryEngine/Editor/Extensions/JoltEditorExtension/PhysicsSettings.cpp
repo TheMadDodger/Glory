@@ -1,8 +1,7 @@
-#include "ProjectSettings.h"
+#include "PhysicsSettings.h"
 
-#include <PhysicsModule.h>
+#include <JoltPhysicsModule.h>
 #include <Engine.h>
-
 #include <YAML_GLM.h>
 #include <LayerManager.h>
 #include <imgui.h>
@@ -10,6 +9,8 @@
 
 namespace Glory::Editor
 {
+	PhysicsSettings::PhysicsSettings() : ProjectSettings("Physics.yaml") {}
+
 	bool PhysicsSettings::OnGui()
 	{
 		ImGui::BeginChild("Physics Settings");
@@ -166,7 +167,7 @@ namespace Glory::Editor
 			}
 		}
 
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
 		pPhysics->SetCollisionMatrix(std::move(matrix));
 		pPhysics->SetGravity(gravity);
 	}
