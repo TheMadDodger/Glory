@@ -7,6 +7,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <Components.h>
 
 namespace Glory::Editor
 {

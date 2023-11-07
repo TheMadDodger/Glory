@@ -13,6 +13,8 @@
 
 #include <GloryAPI.h>
 
+#include <SceneManager.h>
+
 namespace Glory::Editor
 {
 	EditorApplication* EditorApplication::m_pEditorInstance = nullptr;
@@ -108,6 +110,9 @@ namespace Glory::Editor
 	void EditorApplication::Run(Game& game)
 	{
 		GloryAPI::FetchEditorVersion(VersionCheck);
+
+		/* @fixme There is a better place for this */
+		Game::GetGame().GetEngine()->GetSceneManager()->ComponentTypesInstance();
 
 		game.GetEngine()->StartThreads();
 		if(m_pPlatform) m_pPlatform->SetState(Idle);

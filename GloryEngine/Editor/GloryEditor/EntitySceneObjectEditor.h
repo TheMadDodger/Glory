@@ -4,17 +4,20 @@
 #include <Editor.h>
 #include <SceneObject.h>
 #include <EntityComponentObject.h>
+#include <filesystem>
 
 namespace Glory::Editor
 {
+	enum ObjectMenuType : unsigned int;
+
     class EntitySceneObjectEditor : public EditorTemplate<EntitySceneObjectEditor, SceneObject>
     {
 	public:
-		EntitySceneObjectEditor();
-		virtual ~EntitySceneObjectEditor();
-		virtual bool OnGUI() override;
+		GLORY_EDITOR_API EntitySceneObjectEditor();
+		GLORY_EDITOR_API virtual ~EntitySceneObjectEditor();
+		GLORY_EDITOR_API virtual bool OnGUI() override;
 
-		void Refresh();
+		GLORY_EDITOR_API void Refresh();
 
 		template<typename T>
 		static std::string_view GetComponentIcon()
@@ -23,17 +26,19 @@ namespace Glory::Editor
 		}
 
 		GLORY_EDITOR_API static std::string_view GetComponentIcon(uint32_t typeHash);
+		GLORY_EDITOR_API static void DrawObjectNodeName(SceneObject* pObject, bool isPrefab);
+		GLORY_EDITOR_API static bool SearchCompare(std::string_view search, SceneObject* pObject);
+
+		GLORY_EDITOR_API static void ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&);
+		GLORY_EDITOR_API static void ConvertToPrefab(SceneObject* pObject, std::filesystem::path path);
+		GLORY_EDITOR_API static void UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&);
 
 	private:
 		void Initialize();
 		bool NameGUI();
 		bool ComponentGUI();
 
-		static void DrawObjectNodeName(SceneObject* pObject, bool isPrefab);
-		static bool SearchCompare(std::string_view search, SceneObject* pObject);
-
 	private:
-		friend class EntityScenesEditorExtension;
 		std::vector<Editor*> m_pComponentEditors;
 		bool m_Initialized;
 		static const int MAXNAMESIZE = 250;

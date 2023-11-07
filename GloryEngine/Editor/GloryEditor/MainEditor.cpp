@@ -50,6 +50,8 @@
 
 #include "VersionPopup.h"
 
+#include "CreateEntityObjectsCallbacks.h"
+
 #include <imgui.h>
 #include <Game.h>
 #include <Engine.h>
@@ -58,6 +60,11 @@
 #include <TextureDataEditor.h>
 #include <About.h>
 #include <Dispatcher.h>
+#include <Components.h>
+#include <EntitySceneObjectEditor.h>
+#include <DefaultComponentEditor.h>
+#include <TransformEditor.h>
+#include <ScriptedComponentEditor.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -405,11 +412,24 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
 		ObjectMenu::AddMenuItem("Reimport", ReimportAssetCallback, T_Resource);
 
+		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
+		OBJECT_CREATE_MENU(Model, ModelRenderer);
+		OBJECT_CREATE_MENU(Camera, CameraComponent);
+		OBJECT_CREATE_MENU(Light, LightComponent);
+		OBJECT_CREATE_MENU(Scripted, ScriptedComponent);
+
+		ObjectMenu::AddMenuItem("Convert to Prefab", &EntitySceneObjectEditor::ConvertToPrefabMenuItem, T_SceneObject);
+		ObjectMenu::AddMenuItem("Unpack Prefab", &EntitySceneObjectEditor::UnpackPrefabMenuItem, T_SceneObject);
+
 		Shortcuts::SetShortcut(Shortcut_Copy, ImGuiKey_C, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Paste, ImGuiKey_V, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Duplicate, ImGuiKey_D, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Delete, ImGuiKey_Delete, ImGuiModFlags_None);
 		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_R, ImGuiModFlags_Ctrl);
+
+		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
+			EntitySceneObjectEditor::ConvertToPrefab(e.Object, e.Path);
+		});
 	}
 
 	void MainEditor::Update()
@@ -449,6 +469,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<SceneObjectRef>>();
 		PropertyDrawer::RegisterPropertyDrawer<SceneObjectRedirectPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ShapePropertyDrawer>();
+		PropertyDrawer::RegisterPropertyDrawer<SimplePropertyDrawerTemplate<MeshMaterial>>();
 	}
 
 	void MainEditor::RegisterEditors()
@@ -456,5 +477,10 @@ namespace Glory::Editor
 		Editor::RegisterEditor<TextureDataEditor>();
 		Editor::RegisterEditor<MaterialEditor>();
 		Editor::RegisterEditor<MaterialInstanceEditor>();
+
+		Editor::RegisterEditor<EntitySceneObjectEditor>();
+		Editor::RegisterEditor<DefaultComponentEditor>();
+		Editor::RegisterEditor<TransformEditor>();
+		Editor::RegisterEditor<ScriptedComponentEditor>();
 	}
 }

@@ -8,6 +8,7 @@
 #include "SetSiblingIndexAction.h"
 #include "EditorUI.h"
 #include "EditorAssetDatabase.h"
+#include "EntitySceneObjectEditor.h"
 
 #include <Game.h>
 #include <Engine.h>
@@ -23,18 +24,6 @@
 namespace Glory::Editor
 {
 	DND DragAndDrop{ { ST_Path, ResourceType::GetHash<SceneObject>(), ResourceType::GetHash<PrefabData>() } };
-	std::function<void(SceneObject*, bool)> DrawObjectNameCallback = [](SceneObject* pObject, bool isPrefab) {
-		ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
-			" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
-	};
-
-	std::function<bool(std::string_view, SceneObject*)> SearchCompareCallback = [](std::string_view search, SceneObject* pObject) {
-		return Utils::CaseInsensitiveSearch(pObject->Name(), search) != std::string::npos;
-	};
-
-	std::function<void()> SearchTooltipCallback = []() {
-		ImGui::SetTooltip("Search for an object by name");
-	};
 
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
@@ -42,21 +31,6 @@ namespace Glory::Editor
 
 	SceneGraphWindow::~SceneGraphWindow()
 	{
-	}
-
-	void SceneGraphWindow::SetDrawObjectNameCallback(std::function<void(SceneObject*, bool)> callback)
-	{
-		DrawObjectNameCallback = callback;
-	}
-
-	void SceneGraphWindow::SetSearchCompareCallback(std::function<bool(std::string_view, SceneObject*)> callback)
-	{
-		SearchCompareCallback = callback;
-	}
-
-	void SceneGraphWindow::SetSearchTooltipCallback(std::function<void()> callback)
-	{
-		SearchTooltipCallback = callback;
 	}
 
 	void SceneGraphWindow::OnGUI()
@@ -74,7 +48,7 @@ namespace Glory::Editor
 		m_NeedsFilter = EditorUI::SearchBar(ImGui::GetContentRegionAvail().x, SearchBuffer, SearchBufferSize);
 		if (ImGui::IsItemHovered())
 		{
-			SearchTooltipCallback();
+			ImGui::SetTooltip("Search by object name,\nyou can also search by component by typing c:componenttype");
 		}
 
 		if (m_NeedsFilter)
@@ -311,7 +285,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SameLine();
-		DrawObjectNameCallback(pObject, isPrefab);
+		EntitySceneObjectEditor::DrawObjectNodeName(pObject, isPrefab);
 
 		ImGui::PopStyleVar();
 
@@ -380,7 +354,7 @@ namespace Glory::Editor
 	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(SceneObject* pObject)
 	{
 		const std::string_view search{SearchBuffer};
-		const bool searchPassed = SearchCompareCallback(search, pObject);
+		const bool searchPassed = EntitySceneObjectEditor::SearchCompare(search, pObject);
 
 		bool hasNonFilteredChild = false;
 		for (size_t i = 0; i < pObject->ChildCount(); i++)

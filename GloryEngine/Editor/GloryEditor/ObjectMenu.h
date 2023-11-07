@@ -1,8 +1,9 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <Object.h>
 #include <functional>
 #include <Selection.h>
-#include "GloryEditor.h"
 
 namespace Glory::Editor
 {

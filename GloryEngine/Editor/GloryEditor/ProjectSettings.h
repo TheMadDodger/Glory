@@ -36,8 +36,8 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void Add(ProjectSettings* pSettings);
 
     protected:
-        ProjectSettings(const char* settingsFile);
-        virtual ~ProjectSettings();
+        GLORY_EDITOR_API ProjectSettings(const char* settingsFile);
+        GLORY_EDITOR_API virtual ~ProjectSettings();
 
 	protected:
         virtual bool OnGui() = 0;
