@@ -49,7 +49,7 @@ namespace Glory::Utils::ECS
 			EntityView* pEntityView = GetEntityView(entity);
 			Glory::UUID uuid;
 			pEntityView->Add(pTypeView->m_TypeHash, uuid);
-			pTypeView->m_Callbacks.Invoke(InvocationType::OnAdd, this, entity, component);
+			pTypeView->m_Callbacks->Invoke(InvocationType::OnAdd, this, entity, component);
 			return component;
 		}
 
@@ -65,7 +65,7 @@ namespace Glory::Utils::ECS
 			Component& component = pTypeView->Add(entity, std::forward<Args>(args)...);
 			EntityView* pEntityView = GetEntityView(entity);
 			pEntityView->Add(pTypeView->m_TypeHash, uuid);
-			pTypeView->m_Callbacks.Invoke(InvocationType::OnAdd, this, entity, component);
+			pTypeView->m_Callbacks->Invoke(InvocationType::OnAdd, this, entity, component);
 			return component;
 		}
 
@@ -78,7 +78,7 @@ namespace Glory::Utils::ECS
 			if (m_ViewIndices.find(hash) == m_ViewIndices.end())
 			{
 				const size_t index = m_pViews.size();
-				m_pViews.push_back(new TypeView<Component>(this));
+				TypeView<Component>* pTypeView = ComponentTypes::CreateTypeView<Component>(this);
 				m_ViewIndices.emplace(hash, index);
 			}
 
@@ -121,7 +121,7 @@ namespace Glory::Utils::ECS
 				throw new std::exception("Entity does not have component!");
 
 			Component& component = pTypeView->Get(entity);
-			pTypeView->m_Callbacks.Invoke(InvocationType::OnRemove, this, entity, component);
+			pTypeView->m_Callbacks->Invoke(InvocationType::OnRemove, this, entity, component);
 
 			pTypeView->Remove(entity);
 			pEntityView->Remove(pTypeView->m_TypeHash);
@@ -136,13 +136,6 @@ namespace Glory::Utils::ECS
 		const bool IsValid(EntityID entity) const;
 		const size_t TypeViewCount() const;
 		BaseTypeView* TypeViewAt(size_t index) const;
-		
-		template<typename T>
-		void RegisterInvokaction(InvocationType invocationType, std::function<void(EntityRegistry*, EntityID, T&)> callback)
-		{
-			TypeView<T>* pTypeView = GetTypeView<T>();
-			pTypeView->m_Callbacks.m_Callbacks[invocationType] = callback;
-		}
 
 		template<typename T>
 		void InvokeAll(InvocationType invocationType)

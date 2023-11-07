@@ -7,8 +7,6 @@
 #include <typeindex>
 #include <BitSet.h>
 
-#define MAX_COMPONENTS 1000
-
 namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
@@ -57,6 +55,9 @@ namespace Glory::Utils::ECS
 		virtual ~TypeView()
 		{
 			m_ComponentData.clear();
+
+			if (!m_IsFactory) return;
+			delete m_Callbacks;
 		}
 
 		template<typename... Args>
@@ -132,7 +133,7 @@ namespace Glory::Utils::ECS
 				break;
 			}
 			T* pComponent = (T*)pComponentAddress;
-			m_Callbacks.Invoke(callbackType, pRegistry, entity, *pComponent);
+			m_Callbacks->Invoke(callbackType, pRegistry, entity, *pComponent);
 		}
 
 		void InvokeAll(const InvocationType& invocationType, EntityRegistry* pRegistry) override
@@ -150,19 +151,26 @@ namespace Glory::Utils::ECS
 					if (!pEntityView->IsActive() || !m_ActiveStates.IsSet(uint32_t(i))) continue;
 					break;
 				}
-				m_Callbacks.Invoke(invocationType, pRegistry, entity, component);
+				m_Callbacks->Invoke(invocationType, pRegistry, entity, component);
 			}
 		}
 
 	private:
 		virtual BaseTypeView* Create(EntityRegistry* pRegistry) override
 		{
-			return new TypeView<T>(pRegistry);
+			if (!m_IsFactory)
+				throw new std::exception("Cannot create TypeView: Not a factory!");
+
+			TypeView<T>* pTypeView = new TypeView<T>(pRegistry);
+			pTypeView->m_Callbacks = this->m_Callbacks;
+			return pTypeView;
 		}
 
 	private:
 		friend class EntityRegistry;
+		friend class ComponentTypes;
 		std::vector<T> m_ComponentData;
-		ComponentInvokations<T> m_Callbacks;
+		ComponentInvokations<T>* m_Callbacks;
+		bool m_IsFactory = false;
 	};
 }

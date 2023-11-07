@@ -18,7 +18,6 @@ namespace Glory::Editor
         virtual std::string Name() override;
 
         void UpdateTransform(const glm::mat4 newTransform);
-        void UpdatePhysics();
 
     private:
 

@@ -25,17 +25,19 @@ namespace Glory::Editor
     class ProjectSettings
     {
 	public:
-		static void Load(ProjectSpace* pProject);
-		static void Save(ProjectSpace* pProject);
+		GLORY_EDITOR_API static void Load(ProjectSpace* pProject);
+		GLORY_EDITOR_API static void Save(ProjectSpace* pProject);
 
-		static void Paint(ProjectSettingsType type);
+		GLORY_EDITOR_API static void Paint(ProjectSettingsType type);
 
-		static void OnStartPlay();
-		static void OnStopPlay();
+		GLORY_EDITOR_API static void OnStartPlay();
+		GLORY_EDITOR_API static void OnStopPlay();
+
+		GLORY_EDITOR_API static void Add(ProjectSettings* pSettings);
 
     protected:
-        ProjectSettings(const char* settingsFile);
-        virtual ~ProjectSettings();
+        GLORY_EDITOR_API ProjectSettings(const char* settingsFile);
+        GLORY_EDITOR_API virtual ~ProjectSettings();
 
 	protected:
         virtual bool OnGui() = 0;
@@ -53,7 +55,7 @@ namespace Glory::Editor
 		Utils::YAMLFileRef m_YAMLFile;
 		const char* m_SettingsFile;
 
-		static ProjectSettings* m_pAllSettings[];
+	private:
     };
 
 	class GeneralSettings : public ProjectSettings
@@ -102,16 +104,5 @@ namespace Glory::Editor
 
 		virtual void OnStartPlay_Impl() override;
 		virtual void OnStopPlay_Impl() override;
-	};
-
-	class PhysicsSettings : public ProjectSettings
-	{
-	public:
-		PhysicsSettings();
-
-	private:
-		virtual bool OnGui() override;
-		virtual void OnSettingsLoaded() override;
-		virtual void OnStartPlay_Impl() override;
 	};
 }

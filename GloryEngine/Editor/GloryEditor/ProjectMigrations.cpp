@@ -22,11 +22,17 @@ namespace Glory::Editor
         const std::string_view editorVersionStr = editorVersion.AsString();
         const Version version = Version::Parse(editorVersionStr.data());
 
-        /* Run migrations */
+        /* Perform 0.1.1 migrations */
         if (Version::Compare(version, { 0,1,1,0 }, true) < 0)
         {
             Migrate_0_1_1_DefaultTextureAndMaterialProperties(pProject);
             Migrate_0_1_1_AddGravityToPhysicsSettings(pProject);
+        }
+
+        /* Perform 0.3.0 migrations */
+        if (Version::Compare(version, { 0,1,1,0 }, true) < 0)
+        {
+            
         }
 
         /* Update version to current */

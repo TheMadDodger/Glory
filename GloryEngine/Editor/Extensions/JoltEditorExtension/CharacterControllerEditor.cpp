@@ -1,4 +1,4 @@
-#include "PhysicsBodyEditor.h"
+#include "CharacterControllerEditor.h"
 #include "Undo.h"
 #include "GizmoAction.h"
 
@@ -7,32 +7,33 @@
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <Components.h>
 
 namespace Glory::Editor
 {
-	PhysicsBodyEditor::PhysicsBodyEditor()
+	CharacterControllerEditor::CharacterControllerEditor()
 	{
 	}
 
-	PhysicsBodyEditor::~PhysicsBodyEditor()
+	CharacterControllerEditor::~CharacterControllerEditor()
 	{
 	}
 
-	void PhysicsBodyEditor::Initialize()
+	void CharacterControllerEditor::Initialize()
 	{
 		EntityComponentEditor::Initialize();
 	}
 
-	bool PhysicsBodyEditor::OnGUI()
+	bool CharacterControllerEditor::OnGUI()
 	{
 		Transform& transform = m_pComponentObject->GetRegistry()->GetComponent<Transform>(m_pComponentObject->EntityID());
-		PhysicsBody& body = GetTargetComponent();
+		CharacterController& body = GetTargetComponent();
 		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->DrawLineShape(transform.MatTransform, {}, body.m_Shape, {1, 0, 0, 1});
 		return EntityComponentEditor::OnGUI();
 	}
 
-	std::string PhysicsBodyEditor::Name()
+	std::string CharacterControllerEditor::Name()
 	{
-		return "Physics Body";
+		return "Character Controller";
 	}
 }

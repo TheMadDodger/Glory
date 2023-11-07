@@ -4,6 +4,10 @@
 #include "Toolbar.h"
 #include <imgui_internal.h>
 
+#define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
+name##MenuName << STRINGIFY(Create/Entity Object/) << EntitySceneObjectEditor::GetComponentIcon<component>() << "  " << STRINGIFY(name); \
+ObjectMenu::AddMenuItem(name##MenuName.str(), Create##name, T_SceneObject | T_Scene | T_Hierarchy);
+
 namespace Glory::Editor
 {
 	class MainEditor

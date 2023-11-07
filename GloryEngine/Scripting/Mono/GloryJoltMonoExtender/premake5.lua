@@ -1,10 +1,10 @@
-project "EntityScenesEditorExtension"
+project "GloryJoltMonoExtender"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineOutDir}/Extensions")
+	targetdir ("%{modulesOutDir}/GloryJoltPhysics/Scripting/csharp")
 	objdir ("%{outputDir}")
 
 	files
@@ -16,9 +16,8 @@ project "EntityScenesEditorExtension"
 
 	vpaths
 	{
-		["Extension"] = { "EntityScenesEditorExtension.*" },
-		["Editors"] = { "CharacterControllerEditor.*", "PhysicsBodyEditor.*", "MeshMaterialPropertyDrawer.*", "ScriptedComponentEditor.*", "TransformEditor.*", "EntitySceneObjectEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*" },
-		["Actions"] = { "AddComponentAction.*", "RemoveComponentAction.*", "CreateEntityObjectsCallbacks.*" }
+		["API"] = { "PhysicsCSAPI.*" },
+		["Extenstion"] = { "JoltMonoExtender.*" }
 	}
 
 	includedirs
@@ -26,52 +25,37 @@ project "EntityScenesEditorExtension"
 		"%{DepsIncludeDir}",
 
 		"%{IncludeDir.glm}",
-
-		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
-		"%{GloryIncludeDir.threads}",
-		"%{GloryIncludeDir.jobs}",
-		"%{GloryIncludeDir.editor}",
-		"%{GloryIncludeDir.entityscenes}",
-		"%{GloryIncludeDir.ImGui}",
-
-		"%{IncludeDir.FA}",
+		"%{GloryIncludeDir.jolt}",
+		"%{GloryIncludeDir.mono}",
 
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
-
-		"%{rapidjson}",
 	}
 
 	libdirs
 	{
 		"%{DepsLibDir}",
 
-		"%{LibDirs.ImGui}",
-		"%{LibDirs.implot}",
 		"%{LibDirs.glory}",
-		"%{LibDirs.yaml_cpp}",
 	}
 
 	links
 	{
 		"GloryCore",
-		"GloryEditor",
-		"shaderc",
-		"shaderc_combined",
-		"shaderc_shared",
-		"ImGui",
-		"ImGuizmo",
-		"implot",
+		"GloryJoltPhysics",
+		"GloryMonoScripting",
 		"yaml-cpp",
+		"mono-2.0-sgen",
+		"MonoPosixHelper",
 
 		"GloryECS",
 		"GloryReflect",
-		"GloryUtils",
 		"GloryUtilsVersion",
+		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
@@ -81,9 +65,7 @@ project "EntityScenesEditorExtension"
 	defines
 	{
 		"GLORY_EXPORTS",
-		"GLORY_EDITOR_EXPORTS",
-		"GLORY_EDITOR_EXTENSION_EXPORTS",
-		"GLORY_UUID_DEFINED",
+		"GLORY_UUID_DEFINED"
 	}
 
 	filter "system:windows"

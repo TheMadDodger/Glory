@@ -1,14 +1,37 @@
 #include "JoltEditorExtension.h"
+#include "PhysicsSettings.h"
+
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhase.h>
+
+#include <BroadPhaseImpl.h>
 
 #include <EditorPlayer.h>
 #include <LayerRef.h>
 #include <JoltPhysicsModule.h>
 #include <GLORY_YAML.h>
+#include <CreateEntityObjectsCallbacks.h>
+#include <JoltComponents.h>
+
+#include <PhysicsBodyEditor.h>
+#include <CharacterControllerEditor.h>
+#include <ObjectMenu.h>
+#include <EntitySceneObjectEditor.h>
+#include <CreateObjectAction.h>
 
 EXTENSION_CPP(JoltEditorExtension)
 
+#define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
+name##MenuName << STRINGIFY(Create/Entity Object/) << EntitySceneObjectEditor::GetComponentIcon<component>() << "  " << STRINGIFY(name); \
+ObjectMenu::AddMenuItem(name##MenuName.str(), Create##name, T_SceneObject | T_Scene | T_Hierarchy);
+
 namespace Glory::Editor
 {
+	CREATE_OBJECT_CALLBACK_CPP(PhysicsBody, PhysicsBody, ());
+	CREATE_OBJECT_CALLBACK_CPP(Character, CharacterController, ());
+
+	PhysicsSettings Physics;
+
 	JoltEditorExtension::JoltEditorExtension()
 	{
 	}
@@ -20,6 +43,14 @@ namespace Glory::Editor
 	void JoltEditorExtension::Initialize()
 	{
 		EditorPlayer::RegisterLoopHandler(this);
+
+		Editor::RegisterEditor<PhysicsBodyEditor>();
+		Editor::RegisterEditor<CharacterControllerEditor>();
+
+		ProjectSettings::Add(&Physics);
+
+		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
+		OBJECT_CREATE_MENU(Character, CharacterController);
 	}
 
 	const char* JoltEditorExtension::ModuleName()

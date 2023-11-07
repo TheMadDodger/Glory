@@ -3,10 +3,8 @@
 #include "GizmoAction.h"
 
 #include <Engine.h>
-#include <PhysicsModule.h>
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
-#include <CharacterManager.h>
 #include <EditorUI.h>
 #include <TransformSystem.h>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -94,7 +92,7 @@ namespace Glory::Editor
 			transform.Rotation = rotation;
 			transform.Scale = scale;
 			TransformSystem::OnUpdate(m_pComponentObject->GetRegistry(), entity, transform);
-			UpdatePhysics();
+			//UpdatePhysics();
 		}
 
 		if (change)
@@ -107,7 +105,7 @@ namespace Glory::Editor
 		if (isManipulating)
 		{
 			UpdateTransform(newTransform);
-			UpdatePhysics();
+			//UpdatePhysics();
 		}
 
 		if (wasManipulated)
@@ -157,52 +155,52 @@ namespace Glory::Editor
 		transform.Scale = scale;
 	}
 
-	void TransformEditor::UpdatePhysics()
-	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
-		if (!pPhysics) return;
-
-		const Utils::ECS::EntityID entity = m_pComponentObject->EntityID();
-		Utils::ECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
-		if (pRegistry->HasComponent<PhysicsBody>(entity))
-		{
-			Transform& transform = pRegistry->GetComponent<Transform>(entity);
-			PhysicsBody& physicsBody = pRegistry->GetComponent<PhysicsBody>(entity);
-			PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
-			if (pPhysics && pPhysics->IsValidBody(physicsBody.m_BodyID))
-			{
-				glm::quat rotation;
-				glm::vec3 translation, scale, skew;
-				glm::vec4 perspective;
-				if (glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective))
-				{
-					pPhysics->SetBodyPosition(physicsBody.m_BodyID, translation);
-					pPhysics->SetBodyRotation(physicsBody.m_BodyID, rotation);
-					pPhysics->SetBodyScale(physicsBody.m_BodyID, scale);
-					pPhysics->SetBodyLinearAndAngularVelocity(physicsBody.m_BodyID, {}, {});
-				}
-			}
-		}
-
-		CharacterManager* pCharacters = pPhysics->GetCharacterManager();
-		if (!pCharacters) return;
-
-		if (pRegistry->HasComponent<CharacterController>(entity))
-		{
-			Transform& transform = pRegistry->GetComponent<Transform>(entity);
-			CharacterController& characterController = pRegistry->GetComponent<CharacterController>(entity);
-			if (pPhysics && characterController.m_CharacterID)
-			{
-				glm::quat rotation;
-				glm::vec3 translation, scale, skew;
-				glm::vec4 perspective;
-				if (glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective))
-				{
-					pCharacters->SetPosition(characterController.m_CharacterID, translation);
-					pCharacters->SetRotation(characterController.m_CharacterID, rotation);
-					pCharacters->SetLinearAndAngularVelocity(characterController.m_CharacterID, {}, {});
-				}
-			}
-		}
-	}
+	//void TransformEditor::UpdatePhysics()
+	//{
+	//	PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+	//	if (!pPhysics) return;
+	//
+	//	const Utils::ECS::EntityID entity = m_pComponentObject->EntityID();
+	//	Utils::ECS::EntityRegistry* pRegistry = m_pComponentObject->GetRegistry();
+	//	if (pRegistry->HasComponent<PhysicsBody>(entity))
+	//	{
+	//		Transform& transform = pRegistry->GetComponent<Transform>(entity);
+	//		PhysicsBody& physicsBody = pRegistry->GetComponent<PhysicsBody>(entity);
+	//		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+	//		if (pPhysics && pPhysics->IsValidBody(physicsBody.m_BodyID))
+	//		{
+	//			glm::quat rotation;
+	//			glm::vec3 translation, scale, skew;
+	//			glm::vec4 perspective;
+	//			if (glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective))
+	//			{
+	//				pPhysics->SetBodyPosition(physicsBody.m_BodyID, translation);
+	//				pPhysics->SetBodyRotation(physicsBody.m_BodyID, rotation);
+	//				pPhysics->SetBodyScale(physicsBody.m_BodyID, scale);
+	//				pPhysics->SetBodyLinearAndAngularVelocity(physicsBody.m_BodyID, {}, {});
+	//			}
+	//		}
+	//	}
+	//
+	//	CharacterManager* pCharacters = pPhysics->GetCharacterManager();
+	//	if (!pCharacters) return;
+	//
+	//	if (pRegistry->HasComponent<CharacterController>(entity))
+	//	{
+	//		Transform& transform = pRegistry->GetComponent<Transform>(entity);
+	//		CharacterController& characterController = pRegistry->GetComponent<CharacterController>(entity);
+	//		if (pPhysics && characterController.m_CharacterID)
+	//		{
+	//			glm::quat rotation;
+	//			glm::vec3 translation, scale, skew;
+	//			glm::vec4 perspective;
+	//			if (glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective))
+	//			{
+	//				pCharacters->SetPosition(characterController.m_CharacterID, translation);
+	//				pCharacters->SetRotation(characterController.m_CharacterID, rotation);
+	//				pCharacters->SetLinearAndAngularVelocity(characterController.m_CharacterID, {}, {});
+	//			}
+	//		}
+	//	}
+	//}
 }

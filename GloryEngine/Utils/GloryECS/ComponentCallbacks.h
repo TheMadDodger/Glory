@@ -40,6 +40,7 @@ namespace Glory::Utils::ECS
 
 	private:
 		friend class EntityRegistry;
+		friend class ComponentTypes;
 		std::map<InvocationType, std::function<void(EntityRegistry*, EntityID, T&)>> m_Callbacks;
 	};
 }

@@ -2,6 +2,8 @@
 #include "AddComponentAction.h"
 #include "RemoveComponentAction.h"
 #include "EditorSceneManager.h"
+#include "EditorAssetDatabase.h"
+#include "FileBrowser.h"
 
 #include <imgui.h>
 #include <string>
@@ -15,11 +17,16 @@
 #include <Components.h>
 #include <StringUtils.h>
 #include <Reflection.h>
+#include <PrefabData.h>
 
 #include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
+	/* @todo GET RID OF DIS */
+	struct PhysicsBody {};
+	struct CharacterController {};
+
 	const std::map<uint32_t, std::string_view> COMPONENT_ICONS = {
 		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
 		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
@@ -29,6 +36,7 @@ namespace Glory::Editor
 		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
 		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
+
 		{ ResourceType::GetHash<PhysicsBody>(), ICON_FA_CUBES_STACKED },
 		{ ResourceType::GetHash<CharacterController>(), ICON_FA_PERSON },
 	};
@@ -331,5 +339,31 @@ namespace Glory::Editor
 		}
 
 		return Utils::CaseInsensitiveSearch(pObject->Name(), search) != std::string::npos;
+	}
+
+	void EntitySceneObjectEditor::ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&)
+	{
+		SceneObject* pSceneObject = (SceneObject*)pObject;
+		const std::filesystem::path path = FileBrowser::GetCurrentPath();
+		ConvertToPrefab(pSceneObject, path);
+	}
+
+	void EntitySceneObjectEditor::ConvertToPrefab(SceneObject* pObject, std::filesystem::path path)
+	{
+		PrefabData* pPrefab = PrefabData::CreateFromSceneObject(pObject);
+		path.append(pObject->Name() + ".gentity");
+		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pPrefab, path.string());
+		GScene* pScene = pObject->GetScene();
+		pScene->SetPrefab(pObject, prefabUUID);
+		EditorSceneManager::SetSceneDirty(pScene);
+	}
+
+	void EntitySceneObjectEditor::UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&)
+	{
+		SceneObject* pSceneObject = (SceneObject*)pObject;
+		GScene* pScene = pSceneObject->GetScene();
+		if (!pScene->Prefab(pSceneObject->GetUUID())) return;
+		pScene->UnsetPrefab(pSceneObject);
+		EditorSceneManager::SetSceneDirty(pScene);
 	}
 }

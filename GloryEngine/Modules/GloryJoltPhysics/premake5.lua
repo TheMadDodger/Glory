@@ -31,6 +31,7 @@ project "GloryJoltPhysics"
 
 		"%{GloryIncludeDir.core}",
 
+		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.ECS}",
@@ -66,6 +67,7 @@ project "GloryJoltPhysics"
 		"shaderc_shared",
 		"yaml-cpp",
 
+		"GloryUtils",
 		"GloryUtilsVersion",
 		"GloryUtils",
 

@@ -1,5 +1,8 @@
 #pragma once
-#include <Module.h>
+namespace Glory
+{
+	class Module;
+}
 
 namespace Glory::Editor
 {

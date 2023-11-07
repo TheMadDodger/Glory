@@ -1,15 +1,15 @@
 #pragma once
 #include "EntityComponentEditor.h"
-#include <Components.h>
 #include <Gizmos.h>
+#include <JoltComponents.h>
 
 namespace Glory::Editor
 {
-	class PhysicsBodyEditor : public EntityComponentEditor<PhysicsBodyEditor, PhysicsBody>
+	class CharacterControllerEditor : public EntityComponentEditor<CharacterControllerEditor, CharacterController>
 	{
     public:
-        PhysicsBodyEditor();
-        virtual ~PhysicsBodyEditor();
+        CharacterControllerEditor();
+        virtual ~CharacterControllerEditor();
 
         virtual void Initialize() override;
 

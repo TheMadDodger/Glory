@@ -1,9 +1,12 @@
-#include "PhysicsSystem.h"
-#include "Game.h"
-#include "Engine.h"
-#include "PhysicsModule.h"
-#include "GScene.h"
+#include "JoltPhysicsModule.h"
+#include "JoltPhysicsModule.h"
+#include "JoltComponents.h"
 
+#include <PhysicsSystem.h>
+#include <Game.h>
+#include <Engine.h>
+#include <GScene.h>
+#include <Components.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory
@@ -12,7 +15,7 @@ namespace Glory
 
 	void PhysicsSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysocsModule was loaded");
@@ -24,7 +27,7 @@ namespace Glory
 
 	void PhysicsSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
 		if (!pPhysics) return;
 		if (pComponent.m_BodyID == PhysicsBody::InvalidBodyID) return;
 		m_BodyOwners.erase(pComponent.m_BodyID);
@@ -33,7 +36,7 @@ namespace Glory
 
 	void PhysicsSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysicsModule was loaded");
@@ -53,7 +56,7 @@ namespace Glory
 
 	void PhysicsSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("An Entity has a PhysicsBody but no PhysocsModule was loaded");
@@ -271,7 +274,7 @@ namespace Glory
 		m_BodyOwners.erase(bodyID);
 	}
 
-	void PhysicsSystem::SetupBody(PhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
+	void PhysicsSystem::SetupBody(JoltPhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
 		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
 

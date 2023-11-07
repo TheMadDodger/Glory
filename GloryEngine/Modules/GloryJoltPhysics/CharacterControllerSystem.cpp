@@ -1,12 +1,16 @@
 #include "CharacterControllerSystem.h"
+#include "JoltPhysicsModule.h"
+#include "JoltComponents.h"
+#include "JoltCharacterManager.h"
+#include "JoltShapeManager.h"
+#include "JoltPhysicsModule.h"
 #include "PhysicsSystem.h"
 
-#include "Engine.h"
-#include "Game.h"
-#include "CharacterManager.h"
-#include "ShapeManager.h"
-#include "PhysicsModule.h"
+#include <Engine.h>
+#include <Game.h>
 
+#include <Components.h>
+#include <Engine.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory
@@ -14,20 +18,9 @@ namespace Glory
 	void CharacterControllerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
 		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
-		if (!pPhysics)
-		{
-			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
-			return;
-		}
-
-		CharacterManager* pCharacters = pPhysics->GetCharacterManager();
-		ShapeManager* pShapes = pPhysics->GetShapeManager();
-		if (!pCharacters)
-		{
-			Debug::LogWarning("The loaded PhysicsModule does not have support for CharacterControllers");
-			return;
-		}
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
+		JoltShapeManager* pShapes = pPhysics->GetShapeManager();
 
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
 		if (pShape->m_ShapeType == ShapeType::None)
@@ -58,19 +51,8 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
-		if (!pPhysics)
-		{
-			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
-			return;
-		}
-
-		CharacterManager* pCharacters = pPhysics->GetCharacterManager();
-		if (!pCharacters)
-		{
-			Debug::LogWarning("The loaded PhysicsModule does not have support for CharacterControllers");
-			return;
-		}
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 
 		PhysicsSystem::RemoveBody(pComponent.m_BodyID);
 		pCharacters->DestroyCharacter(pComponent.m_CharacterID);
@@ -81,29 +63,23 @@ namespace Glory
 
 	void CharacterControllerSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
 			return;
 		}
 
-		CharacterManager* pCharacters = pPhysics->GetCharacterManager();
-		if (!pCharacters)
-		{
-			Debug::LogWarning("The loaded PhysicsModule does not have support for CharacterControllers");
-			return;
-		}
+		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 	}
 
 	void CharacterControllerSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		PhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<PhysicsModule>();
-		if (!pPhysics) return;
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
 
-		CharacterManager* pCharacters = pPhysics->GetCharacterManager();
+		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 		if (!pCharacters) return;
 		
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);

@@ -1,5 +1,5 @@
 #pragma once
-#include "Components.h"
+#include <EntityID.h>
 
 namespace Glory::Utils::ECS
 {
@@ -8,6 +8,8 @@ namespace Glory::Utils::ECS
 
 namespace Glory
 {
+    struct CharacterController;
+
     class CharacterControllerSystem
     {
     public:

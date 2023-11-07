@@ -8,21 +8,6 @@
 #include <CreateObjectAction.h>
 #include <Components.h>
 
-#define CTOR_ARGS(...) __VA_ARGS__
-
-#define CREATE_OBJECT_CALLBACK_CPP(name, component, ctor) void Create##name(Object* pObject, const ObjectMenuType& currentMenu) \
-{\
-    SceneObject* pNewObject = CreateNewEmptyObject(pObject, STRINGIFY(name), currentMenu); \
-	if (!pNewObject) return; \
-	Entity entity = pNewObject->GetEntityHandle(); \
-	entity.AddComponent<component>(CTOR_ARGS ctor); \
-	Selection::SetActiveObject(nullptr); \
-	Undo::StartRecord("Create Empty Object", pNewObject->GetUUID()); \
-	Undo::AddAction(new CreateObjectAction(pNewObject)); \
-	Undo::StopRecord(); \
-	Selection::SetActiveObject(pNewObject); \
-}
-
 namespace Glory::Editor
 {
 	SceneObject* CreateNewEmptyObject(Object* pObject, const std::string& name, const ObjectMenuType& currentMenu)
@@ -71,6 +56,4 @@ namespace Glory::Editor
 	CREATE_OBJECT_CALLBACK_CPP(Camera, CameraComponent, ());
 	CREATE_OBJECT_CALLBACK_CPP(Light, LightComponent, ());
 	CREATE_OBJECT_CALLBACK_CPP(Scripted, ScriptedComponent, ());
-	CREATE_OBJECT_CALLBACK_CPP(PhysicsBody, PhysicsBody, ());
-	CREATE_OBJECT_CALLBACK_CPP(Character, CharacterController, ());
 }

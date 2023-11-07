@@ -1,8 +1,9 @@
 #pragma once
 #include "TypeView.h"
+#include "../Hash.h"
+
 #include <map>
 #include <string>
-#include "../Hash.h"
 
 namespace Glory::Utils::ECS
 {
@@ -28,6 +29,8 @@ namespace Glory::Utils::ECS
 		static void RegisterComponent(bool allowMultiple = false, const uint64_t customFlags = 0)
 		{
 			TypeView<T>* pTypeView = new TypeView<T>(nullptr);
+			pTypeView->m_IsFactory = true;
+			pTypeView->m_Callbacks = new ComponentInvokations<T>();
 			std::type_index type = typeid(T);
 			uint32_t hash = Hashing::Hash(type.name());
 			m_pInstance->m_TypeHashes.push_back(hash);
@@ -44,6 +47,14 @@ namespace Glory::Utils::ECS
 		static const ComponentType* GetComponentType(const uint32_t hash);
 		static const ComponentType* GetComponentTypeAt(const size_t index);
 
+		template<typename T>
+		void RegisterInvokaction(InvocationType invocationType, std::function<void(EntityRegistry*, EntityID, T&)> callback)
+		{
+			const uint32_t hash = Hashing::Hash(typeid(T).name());
+			TypeView<T>* pTypeView = (TypeView<T>*)m_pTypeViewTemplates.at(hash);
+			pTypeView->m_Callbacks->m_Callbacks[invocationType] = callback;
+		}
+
 	private:
 		static void AddTypeView(std::string& name, uint32_t hash, BaseTypeView* pTypeView);
 		static void AddComponentType(std::string& name, uint32_t hash, bool allowMultiple, uint64_t customFlags);
@@ -51,8 +62,8 @@ namespace Glory::Utils::ECS
 		template<typename T>
 		static TypeView<T>* CreateTypeView(EntityRegistry* pRegistry)
 		{
-			uint32_t hash = Hashing::Hash(typeid(T).name());
-			return CreateTypeView(pRegistry, hash);
+			const uint32_t hash = Hashing::Hash(typeid(T).name());
+			return (TypeView<T>*)CreateTypeView(pRegistry, hash);
 		}
 
 		static BaseTypeView* CreateTypeView(EntityRegistry* pRegistry, uint32_t hash);

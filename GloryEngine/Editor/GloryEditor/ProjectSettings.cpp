@@ -5,20 +5,24 @@
 
 namespace Glory::Editor
 {
-	ProjectSettings* ProjectSettings::m_pAllSettings[] = {
-		new GeneralSettings(),
-		new EngineSettings(),
-		new LayerSettings(),
-		new InputSettings(),
-		new PhysicsSettings(),
+	GeneralSettings General;
+	EngineSettings Engine;
+	LayerSettings Layer;
+	InputSettings Input;
+
+	std::vector<ProjectSettings*> Settings = {
+		&General,
+		&Engine,
+		&Layer,
+		&Input,
 	};
 
 	void ProjectSettings::Load(ProjectSpace* pProject)
 	{
-		for (size_t i = 0; i < 5; i++)
+		for (size_t i = 0; i < Settings.size(); ++i)
 		{
-			m_pAllSettings[i]->LoadSettings(pProject);
-			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
+			Settings[i]->LoadSettings(pProject);
+			ProjectSpace::SetAssetDirty(Settings[i]->m_SettingsFile, false);
 		}
 
 		Debug::LogInfo("Loaded project settings");
@@ -26,10 +30,10 @@ namespace Glory::Editor
 
 	void ProjectSettings::Save(ProjectSpace* pProject)
 	{
-		for (size_t i = 0; i < 5; i++)
+		for (size_t i = 0; i < Settings.size(); ++i)
 		{
-			m_pAllSettings[i]->SaveSettings(pProject);
-			ProjectSpace::SetAssetDirty(m_pAllSettings[i]->m_SettingsFile, false);
+			Settings[i]->SaveSettings(pProject);
+			ProjectSpace::SetAssetDirty(Settings[i]->m_SettingsFile, false);
 		}
 
 		Debug::LogInfo("Saved project settings");
@@ -37,26 +41,31 @@ namespace Glory::Editor
 
 	void ProjectSettings::Paint(ProjectSettingsType type)
 	{
-		if (m_pAllSettings[size_t(type)]->OnGui())
+		if (Settings[size_t(type)]->OnGui())
 		{
-			ProjectSpace::SetAssetDirty(m_pAllSettings[size_t(type)]->m_SettingsFile);
+			ProjectSpace::SetAssetDirty(Settings[size_t(type)]->m_SettingsFile);
 		}
 	}
 
 	void ProjectSettings::OnStartPlay()
 	{
-		for (size_t i = 0; i < 5; i++)
+		for (size_t i = 0; i < Settings.size(); ++i)
 		{
-			m_pAllSettings[i]->OnStartPlay_Impl();
+			Settings[i]->OnStartPlay_Impl();
 		}
 	}
 
 	void ProjectSettings::OnStopPlay()
 	{
-		for (size_t i = 0; i < 5; i++)
+		for (size_t i = 0; i < Settings.size(); ++i)
 		{
-			m_pAllSettings[i]->OnStopPlay_Impl();
+			Settings[i]->OnStopPlay_Impl();
 		}
+	}
+
+	void ProjectSettings::Add(ProjectSettings* pSettings)
+	{
+		Settings.push_back(pSettings);
 	}
 
 	ProjectSettings::ProjectSettings(const char* settingsFile)
@@ -129,10 +138,6 @@ namespace Glory::Editor
 	}
 
 	InputSettings::InputSettings() : ProjectSettings("Input.yaml")
-	{
-	}
-
-	PhysicsSettings::PhysicsSettings() : ProjectSettings("Physics.yaml")
 	{
 	}
 }

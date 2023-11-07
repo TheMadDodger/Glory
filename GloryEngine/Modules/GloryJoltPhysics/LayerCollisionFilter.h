@@ -9,11 +9,12 @@ namespace Glory
 	class LayerCollisionFilter : public JPH::ObjectLayerPairFilter
 	{
 	public:
-		LayerCollisionFilter(JoltPhysicsModule* pModule);
+		LayerCollisionFilter();
 
 		virtual bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override;
 
 	private:
+		friend class JoltPhysicsModule;
 		const JoltPhysicsModule* m_pPhysicsModule;
 	};
 }
