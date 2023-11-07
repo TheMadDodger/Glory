@@ -4,7 +4,6 @@
 
 #include <ScriptingExtender.h>
 #include <Engine.h>
-#include <MonoSceneManager.h>
 
 namespace Glory
 {

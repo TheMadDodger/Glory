@@ -1,6 +1,8 @@
 #pragma once
 #include "IMonoLibManager.h"
 
+#include <Glory.h>
+
 namespace Glory
 {
     class MonoManager;
@@ -8,9 +10,8 @@ namespace Glory
     class CoreLibManager : public IMonoLibManager
     {
     public:
-        CoreLibManager(MonoManager* pMonoManager);
-
-        Assembly* GetAssemblyBinding() const;
+        GLORY_API CoreLibManager(MonoManager* pMonoManager);
+        GLORY_API Assembly* GetAssemblyBinding() const;
 
     public:
         void Initialize(Assembly* pAssembly) override;

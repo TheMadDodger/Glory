@@ -1,8 +1,9 @@
 #pragma once
-#include <functional>
-#include <Glory.h>
 #include "GloryMono.h"
 #include "MonoSceneObjectManager.h"
+
+#include <functional>
+#include <Glory.h>
 
 #define GETTER(type, x) \
 static GLORY_API type* x() \

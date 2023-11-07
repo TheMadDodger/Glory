@@ -5,6 +5,7 @@
 #include "CoreLibManager.h"
 #include "Assembly.h"
 #include "JoltShapeManager.h"
+#include "ScriptExtensions.h"
 
 #include <JoltPhysicsModule.h>
 #include <RendererModule.h>

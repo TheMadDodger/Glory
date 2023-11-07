@@ -2,6 +2,8 @@
 
 namespace Glory
 {
+	class InternalCall;
+
 	class PhysicsComponentsCSAPI
 	{
 	public:

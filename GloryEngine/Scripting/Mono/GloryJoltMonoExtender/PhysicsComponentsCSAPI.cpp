@@ -1,6 +1,8 @@
 #include "JoltPhysicsModule.h"
 #include "PhysicsComponentsCSAPI.h"
 #include "JoltComponents.h"
+#include "JoltCharacterManager.h"
+#include "JoltShapeManager.h"
 
 #include <EntityCSAPI.h>
 #include <cstdint>

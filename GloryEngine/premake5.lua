@@ -144,7 +144,6 @@ group "Editor/Backend"
 group ""
 
 group "Editor/Extensions"
-	include "Editor/Extensions/EntityScenesEditorExtension"
 	include "Editor/Extensions/MonoEditorExtension"
 	include "Editor/Extensions/JoltEditorExtension"
 	include "Editor/Extensions/Importers/SDLImageImporter"

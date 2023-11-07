@@ -69,7 +69,9 @@ namespace Glory
 
 	void SceneManager::CloseAllScenes()
 	{
-		Cleanup();
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
+		m_pOpenScenes.clear();
+		m_ActiveSceneIndex = 0;
 	}
 
 	void SceneManager::OpenScene(const std::string& path, UUID uuid)
@@ -143,6 +145,7 @@ namespace Glory
 
 	Utils::ECS::ComponentTypes* SceneManager::ComponentTypesInstance() const
 	{
+		Utils::ECS::ComponentTypes::SetInstance(m_pComponentTypesInstance);
 		return m_pComponentTypesInstance;
 	}
 
@@ -216,9 +219,7 @@ namespace Glory
 
 	void SceneManager::Cleanup()
 	{
-		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
-		m_pOpenScenes.clear();
-		m_ActiveSceneIndex = 0;
+		CloseAllScenes();
 
 		Utils::ECS::ComponentTypes::DestroyInstance();
 		m_pComponentTypesInstance = nullptr;

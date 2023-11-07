@@ -63,7 +63,7 @@ namespace Glory::Utils::ECS
 		static TypeView<T>* CreateTypeView(EntityRegistry* pRegistry)
 		{
 			const uint32_t hash = Hashing::Hash(typeid(T).name());
-			return CreateTypeView(pRegistry, hash);
+			return (TypeView<T>*)CreateTypeView(pRegistry, hash);
 		}
 
 		static BaseTypeView* CreateTypeView(EntityRegistry* pRegistry, uint32_t hash);

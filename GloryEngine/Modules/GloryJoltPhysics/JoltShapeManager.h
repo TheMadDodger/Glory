@@ -3,6 +3,7 @@
 
 #include <UUID.h>
 #include <map>
+#include <Glory.h>
 
 namespace JPH
 {
@@ -25,12 +26,12 @@ namespace Glory
 		JoltShapeManager();
 		~JoltShapeManager();
 
-		UUID CreateShape(const Shape& shape);
-		void DestroyShape(const UUID shapeId);
+		GLORY_API UUID CreateShape(const Shape& shape);
+		GLORY_API void DestroyShape(const UUID shapeId);
 
-		const ShapeData* GetShape(const UUID shapeId) const;
+		GLORY_API const ShapeData* GetShape(const UUID shapeId) const;
 
-		void Clear();
+		GLORY_API void Clear();
 
 	private:
 		std::map<UUID, ShapeData> m_pShapes;

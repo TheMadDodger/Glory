@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
-#include "ScriptExtensions.h"
 
 namespace Glory
 {
+	class InternalCall;
+
 	class PhysicsCSAPI
 	{
 	public:

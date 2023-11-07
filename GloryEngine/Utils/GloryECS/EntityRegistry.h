@@ -78,7 +78,7 @@ namespace Glory::Utils::ECS
 			if (m_ViewIndices.find(hash) == m_ViewIndices.end())
 			{
 				const size_t index = m_pViews.size();
-				m_pViews.push_back(new TypeView<Component>(this));
+				TypeView<Component>* pTypeView = ComponentTypes::CreateTypeView<Component>(this);
 				m_ViewIndices.emplace(hash, index);
 			}
 
