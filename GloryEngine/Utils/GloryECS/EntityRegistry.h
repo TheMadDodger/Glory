@@ -3,6 +3,7 @@
 #include "TypeView.h"
 #include "EntityView.h"
 #include "ComponentTypes.h"
+
 #include <map>
 #include <unordered_map>
 #include <functional>
@@ -154,7 +155,7 @@ namespace Glory::Utils::ECS
 			return static_cast<T>(m_pUserData);
 		}
 
-		//void ForEach(std::function<void(EntityRegistry*, EntityID)> func);
+		void ForEach(std::function<void(EntityRegistry*, EntityID)> func);
 		//void ForEachComponent(EntityID entity, std::function<void(EntityRegistry*, EntityID, size_t, size_t)> func);
 		//
 		//template<typename C, typename Component>

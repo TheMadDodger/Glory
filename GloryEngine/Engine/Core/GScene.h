@@ -1,99 +1,85 @@
 #pragma once
 #include "Resource.h"
-#include "SceneObject.h"
-#include "UUIDRemapper.h"
 #include "Entity.h"
 
-#include <mutex>
-#include <glm/fwd.hpp>
 #include <EntityRegistry.h>
 
 namespace Glory
 {
-    struct PrefabNode;
-    class PrefabData;
-    class SceneObject;
+	namespace Utils::ECS
+	{
+		class EntityRegistry;
+	}
 
-    struct DelayedParentData
-    {
-        DelayedParentData(SceneObject* pObjectToParent, UUID parentID) : ObjectToParent(pObjectToParent), ParentID(parentID) {}
+	class GScene : public Resource
+	{
+	public:
+		/** @brief Constructor */
+		GScene(const std::string& sceneName = "New Scene");
+		/** @overload */
+		GScene(const std::string& sceneName, UUID uuid);
+		/** @brief Destructor */
+		virtual ~GScene();
 
-        SceneObject* ObjectToParent;
-        UUID ParentID;
-    };
+	public:
+		/** @brief Create a new entity with an ID and transform with ID
+		 * @param uuid ID of the entity, not the same as EntityID
+		 * @param transUuid ID of the entities transform component
+		 */
+		Entity CreateEmptyObject(UUID uuid = UUID(), UUID transUuid = UUID());
+		/** @overload
+		 * @param name Name of the entity
+		 * @param uuid ID of the entity, not the same as EntityID
+		 * @param transUuid ID of the entities transform component
+		 */
+		Entity CreateEmptyObject(const std::string& name, UUID uuid = UUID(), UUID transUuid = UUID());
 
-    class GScene : public Resource
-    {
-    public:
-        GScene(const std::string& sceneName = "New Scene");
-        GScene(const std::string& sceneName, UUID uuid);
-        virtual ~GScene();
+		/** @brief Get number of active entities in this scene */
+		size_t SceneObjectsCount() const;
 
-    public:
-        SceneObject* CreateEmptyObject();
-        SceneObject* CreateEmptyObject(const std::string& name, UUID uuid, UUID uuid2 = UUID());
-        size_t SceneObjectsCount();
-        SceneObject* GetSceneObject(size_t index);
-        void DeleteObject(SceneObject* pObject);
+		/** @brief Get an entity by UUID */
+		Entity GetEntity(UUID uuid);
+		/** @brief Get an entity by entity ID */
+		Entity GetEntityByEntityID(Utils::ECS::EntityID entityId);
 
-        SceneObject* FindSceneObject(UUID uuid) const;
-        void DelayedSetParent(SceneObject* pObjectToParent, UUID parentID);
+		/** @brief Invoke a start on all entities and components */
+		void Start();
+		/** @brief Invoke a stop on all entities and components */
+		void Stop();
 
-        void HandleDelayedParents();
+		/** @brief Get prefab ID for an entities UUID */
+		const UUID Prefab(UUID objectID) const;
+		/** @brief Get prefab ID for a child of an entity by UUID */
+		const UUID PrefabChild(UUID objectID) const;
 
-        void Start();
-        void Stop();
+		/** @brief Get entity registry for this scene */
+		Utils::ECS::EntityRegistry& GetRegistry();
 
-        void SetPrefab(SceneObject* pObject, UUID prefabID);
-        void UnsetPrefab(SceneObject* pObject);
-        const UUID Prefab(UUID objectID) const;
-        const UUID PrefabChild(UUID objectID) const;
+		/** @brief Get the UUID of an entity */
+		UUID GetEntityUUID(Utils::ECS::EntityID entity) const;
 
-        SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab,
-            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
-        SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab, uint32_t remapSeed,
-            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
-        SceneObject* InstantiatePrefab(SceneObject* pParent, PrefabData* pPrefab, UUIDRemapper& remapper,
-            const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+	protected:
+		/** @brief Invoke an update on all active entities and components */
+		void OnTick();
+		/** @brief Invoke a draw on all active entities and components */
+		void OnPaint();
 
-        SceneObject* GetSceneObjectFromEntityID(Utils::ECS::EntityID entity);
+	private:
+		/** @brief Set the id of this scene */
+		void SetUUID(UUID uuid);
+		/** @brief Create an entity with transform component in the registry */
+		Entity CreateEntity(UUID transUUID);
 
-        Utils::ECS::EntityRegistry* GetRegistry();
+	protected:
+		friend class Entity;
+		friend class SceneSerializer;
+		friend class SceneManager;
+		std::map<UUID, Utils::ECS::EntityID> m_Ids;
+		std::map<Utils::ECS::EntityID, UUID> m_UUIds;
+		std::map<Utils::ECS::EntityID, std::string> m_Names;
+		std::map<UUID, UUID> m_ActivePrefabs;
+		std::map<UUID, UUID> m_ActivePrefabChildren;
 
-        bool IsValid() const;
-
-    protected:
-        void Initialize();
-        void OnTick();
-        void OnPaint();
-
-        SceneObject* CreateObject(const std::string& name);
-        SceneObject* CreateObject(const std::string& name, UUID uuid, UUID uuid2 = 0);
-        void OnDeleteObject(SceneObject* pObject);
-        void OnObjectAdded(SceneObject* pObject);
-        void OnDelayedSetParent(const DelayedParentData& data);
-
-    private:
-        void SetUUID(UUID uuid);
-        void SetChildrenPrefab(SceneObject* pObject, UUID prefabID);
-        void UnsetChildrenPrefab(SceneObject* pObject);
-
-        Entity CreateEntity(UUID uuid, UUID transUUID);
-
-        SceneObject* InstantiatePrefabNode(SceneObject* pParent, const PrefabNode& node, UUIDRemapper& remapper);
-
-    protected:
-        friend class Entity;
-        friend class SceneSerializer;
-        friend class SceneManager;
-        friend class SceneObject;
-        std::vector<SceneObject*> m_pSceneObjects;
-        std::vector<DelayedParentData> m_DelayedParents;
-        std::map<UUID, UUID> m_ActivePrefabs;
-        std::map<UUID, UUID> m_ActivePrefabChildren;
-
-        Utils::ECS::EntityRegistry m_Registry;
-        bool m_Valid;
-        std::unordered_map<Utils::ECS::EntityID, SceneObject*> m_EntityIDToObject;
-    };
+		Utils::ECS::EntityRegistry m_Registry;
+	};
 }

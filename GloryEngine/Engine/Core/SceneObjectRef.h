@@ -1,5 +1,8 @@
 #pragma once
 #include "SceneObject.h"
+#include "Entity.h"
+
+#include <Reflection.h>
 
 namespace Glory
 {
@@ -14,7 +17,7 @@ namespace Glory
 		UUID* SceneUUIDMember();
 		const UUID ObjectUUID() const;
 		UUID* ObjectUUIDMember();
-		SceneObject* GetObject();
+		Entity GetEntity();
 
 		bool operator==(const SceneObjectRef& other) const;
 		bool operator==(const SceneObjectRef&& other) const;

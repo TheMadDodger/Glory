@@ -8,7 +8,7 @@ namespace Glory
 	}
 
 	Entity::Entity(Utils::ECS::EntityID entityHandle, GScene* pScene) :
-		m_EntityID(entityHandle), m_pGScene(pScene), m_pRegistry(pScene->GetRegistry())
+		m_EntityID(entityHandle), m_pGScene(pScene), m_pRegistry(&pScene->m_Registry)
 	{
 	}
 
@@ -35,7 +35,7 @@ namespace Glory
 
 	void Entity::Destroy()
 	{
-		if (!m_pGScene || !m_pGScene->IsValid()) return;
+		if (!m_pGScene) return;
 		m_pRegistry->DestroyEntity(m_EntityID);
 	}
 

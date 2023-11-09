@@ -24,7 +24,8 @@ namespace Glory
 		Script* pScript = AssetManager::GetAssetImmediate<Script>(uuid);
 		if (pScript == nullptr) return;
 		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
-		SceneObject* pObject = pScenes->GetSceneObjectFromObjectID(entity);
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Entity entity = pScene->GetEntityByEntityID(entity);
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
 		pScript->SetPropertyValues(pObject, pComponent.m_ScriptData);

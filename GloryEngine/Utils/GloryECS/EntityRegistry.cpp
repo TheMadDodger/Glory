@@ -166,6 +166,14 @@ namespace Glory::Utils::ECS
 		pTypeView->InvokeAll(invocationType, this);
 	}
 
+	void EntityRegistry::ForEach(std::function<void(EntityRegistry*, EntityID)> func)
+	{
+		for (auto& itor : m_pEntityViews)
+		{
+			func(this, itor.first);
+		}
+	}
+
 	void EntityRegistry::InvokeAll(InvocationType invocationType)
 	{
 		for (size_t i = 0; i < m_pViews.size(); ++i)
