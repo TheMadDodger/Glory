@@ -385,7 +385,6 @@ namespace Glory
 		ResourceType::RegisterType<LayerMask>();
 		ResourceType::RegisterType<SceneObjectRef>();
 		ResourceType::RegisterType<ShapeProperty>();
-		ResourceType::RegisterResource<SceneObject>("");
 		ResourceType::RegisterResource<PrefabData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");

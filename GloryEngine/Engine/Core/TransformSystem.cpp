@@ -1,4 +1,5 @@
 #include "TransformSystem.h"
+#include "GScene.h"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -14,22 +15,25 @@ namespace Glory
     {
     }
 
-    void TransformSystem::OnStart(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, Transform& pComponent)
+    void TransformSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent)
     {
-        CalculateMatrix(pComponent);
+        CalculateMatrix(pRegistry, entity, pComponent);
     }
 
-    void Glory::TransformSystem::OnUpdate(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, Transform& pComponent)
+    void Glory::TransformSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent)
     {
-        CalculateMatrix(pComponent);
+        CalculateMatrix(pRegistry, entity, pComponent);
     }
 
-    void TransformSystem::CalculateMatrix(Transform& pComponent)
+    void TransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent)
     {
         glm::mat4 startTransform = glm::identity<glm::mat4>();
-        if (pComponent.Parent.IsValid())
+
+        Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+        Entity parent = pRegistry->GetUserData<GScene*>()->GetEntity(pEntityView->Parent());
+        if (parent.IsValid())
         {
-            Transform& parentTransform = pComponent.Parent.GetComponent<Transform>();
+            Transform& parentTransform = parent.GetComponent<Transform>();
             startTransform = parentTransform.MatTransform;
         }
 

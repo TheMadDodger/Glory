@@ -26,6 +26,8 @@ namespace Glory::Utils::ECS
 		bool& HierarchyActive();
 		bool IsActive() const;
 
+		EntityID Parent() const;
+
 	private:
 		void Add(uint32_t hash, Glory::UUID uuid = Glory::UUID());
 		UUID Remove(uint32_t hash);

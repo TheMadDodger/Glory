@@ -17,22 +17,22 @@ namespace Glory
         GLORY_API MonoScript(FileData* pFileData);
         virtual GLORY_API ~MonoScript();
 
-        virtual void GLORY_API Invoke(Object* pObject, const std::string& method, void** args) override;
-        virtual void GLORY_API InvokeSafe(Object* pObject, const std::string& method, std::vector<void*>& args) override;
+        virtual void GLORY_API Invoke(UUID objectID, const std::string& method, void** args) override;
+        virtual void GLORY_API InvokeSafe(UUID objectID, const std::string& method, std::vector<void*>& args) override;
 
-        virtual void SetValue(Object* pObject, const std::string& name, void* value) override;
-        virtual void GetValue(Object* pObject, const std::string& name, void* value) override;
+        virtual void SetValue(UUID objectID, const std::string& name, void* value) override;
+        virtual void GetValue(UUID objectID, const std::string& name, void* value) override;
 
         virtual void LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data) override;
-        virtual void SetPropertyValues(Object* pObject, YAML::Node& node) override;
-        virtual void GetPropertyValues(Object* pObject, YAML::Node& node) override;
+        virtual void SetPropertyValues(UUID objectID, YAML::Node& node) override;
+        virtual void GetPropertyValues(UUID objectID, YAML::Node& node) override;
 
     private:
         virtual bool IsBehaviour() override;
 
     private:
         AssemblyClass* LoadClass(Assembly* pAssembly, const std::string& namespaceName, const std::string& className);
-        MonoObject* LoadObject(Object* pObject, MonoClass* pClass);
+        MonoObject* LoadObject(UUID objectID, MonoClass* pClass);
 
     private:
         friend class MonoScriptLoader;

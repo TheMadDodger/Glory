@@ -62,6 +62,11 @@ namespace Glory::Utils::ECS
         return m_HierarchyActive && m_Active;
     }
 
+    EntityID EntityView::Parent() const
+    {
+        return m_Parent;
+    }
+
     uint32_t EntityView::ComponentTypeAt(size_t index) const
     {
         Glory::UUID uuid = m_ComponentOrder[index];

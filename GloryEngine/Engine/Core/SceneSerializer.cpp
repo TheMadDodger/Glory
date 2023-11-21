@@ -29,10 +29,11 @@ namespace Glory
 			out << YAML::Key << "UUID";
 			out << YAML::Value << uint64_t(uuid);
 
-			Transform& transform = pRegistry->GetComponent<Transform>(entity);
 			out << YAML::Key << "ParentUUID";
-			out << YAML::Value << (transform.Parent.IsValid() ?
-				uint64_t(pScene->GetEntityUUID(transform.Parent.GetEntityID())) : 0);
+
+			Entity parent = pScene->GetEntity(pEntityView->Parent());
+			out << YAML::Value << (parent.IsValid() ?
+				uint64_t(pScene->GetEntityUUID(parent.GetEntityID())) : 0);
 
 			out << YAML::Key << "SiblingIndex";
 			out << YAML::Value << 0;

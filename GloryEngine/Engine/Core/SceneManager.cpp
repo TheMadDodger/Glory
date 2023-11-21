@@ -146,7 +146,6 @@ namespace Glory
 
 		/* Register serializers */
 		Serializer::RegisterSerializer<SceneSerializer>();
-		Serializer::RegisterSerializer<SceneObjectSerializer>();
 		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 
