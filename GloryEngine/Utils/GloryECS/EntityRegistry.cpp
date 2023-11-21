@@ -24,6 +24,7 @@ namespace Glory::Utils::ECS
 		m_pEntityViews.clear();
 		m_pViews.clear();
 		m_ViewIndices.clear();
+		m_RootOrder.clear();
 
 		m_pUserData = nullptr;
 	}
@@ -33,6 +34,7 @@ namespace Glory::Utils::ECS
 		EntityID newEntity = m_NextEntityID;
 		++m_NextEntityID;
 		m_pEntityViews.emplace(newEntity, new EntityView(this));
+		m_RootOrder.push_back(newEntity);
 		return newEntity;
 	}
 
@@ -47,7 +49,22 @@ namespace Glory::Utils::ECS
 			pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);
 			pTypeView->Remove(entity);
 		}
-		delete m_pEntityViews[entity];
+
+		if (pEntityView->m_Parent)
+		{
+			/* Remove from parent children array */
+			EntityView* pParentView = m_pEntityViews.at(pEntityView->m_Parent);
+			const auto itor = std::find(pParentView->m_Children.begin(), pParentView->m_Children.end(), entity);
+			pParentView->m_Children.erase(itor);
+		}
+		else
+		{
+			/* Remove from root order */
+			const auto itor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
+			m_RootOrder.erase(itor);
+		}
+
+		delete pEntityView;
 		m_pEntityViews.erase(entity);
 	}
 
@@ -172,6 +189,33 @@ namespace Glory::Utils::ECS
 		{
 			func(this, itor.first);
 		}
+	}
+
+	bool EntityRegistry::SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent)
+	{
+		const auto itor1 = m_pEntityViews.find(entity);
+
+		if (itor1 == m_pEntityViews.end()) return false;
+		const Utils::ECS::EntityID oldParent = itor1->second->m_Parent;
+		if (oldParent)
+		{
+			auto& oldParentChildren = m_pEntityViews.at(oldParent)->m_Children;
+			const auto itor = std::find(oldParentChildren.begin(), oldParentChildren.end(), entity);
+			oldParentChildren.erase(itor);
+		}
+
+		itor1->second->m_Parent = parent;
+		const auto itor2 = m_pEntityViews.find(parent);
+		if (itor2 == m_pEntityViews.end())
+		{
+			m_RootOrder.push_back(entity);
+			return true;
+		}
+
+		const auto itor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
+		m_RootOrder.erase(itor);
+		itor2->second->m_Children.push_back(entity);
+		return true;
 	}
 
 	void EntityRegistry::InvokeAll(InvocationType invocationType)

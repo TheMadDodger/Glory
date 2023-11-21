@@ -42,8 +42,6 @@ namespace Glory
 		)
 
 		glm::mat4 MatTransform;
-
-		Entity Parent;
 	};
 
 	struct MeshFilter

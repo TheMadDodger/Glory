@@ -44,12 +44,22 @@ namespace Glory
 			return {};
 
 		const Utils::ECS::EntityID entity = itor->second;
-		return Entity{ entity, this };
+		return { entity, this };
 	}
 
 	Entity GScene::GetEntityByEntityID(Utils::ECS::EntityID entityId)
 	{
-		return Entity(entityId, this);
+		return { entityId, this };
+	}
+
+	void GScene::DestroyEntity(Utils::ECS::EntityID entity)
+	{
+		const auto itor = m_UUIds.find(entity);
+		if (itor == m_UUIds.end()) return;
+		m_Registry.DestroyEntity(entity);
+		const UUID uuid = itor->second;
+		m_UUIds.erase(itor);
+		m_Ids.erase(uuid);
 	}
 		
 	void GScene::Start()
@@ -60,6 +70,36 @@ namespace Glory
 	void GScene::Stop()
 	{
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Stop);
+	}
+
+	void GScene::SetPrefab(Utils::ECS::EntityID entity, UUID prefabID)
+	{
+		const auto itor = m_UUIds.find(entity);
+		if (itor == m_UUIds.end()) return;
+		const UUID uuid = itor->second;
+
+		m_ActivePrefabs.emplace(uuid, prefabID);
+
+		/*for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			SetChildrenPrefab(pChild, prefabID);
+		}*/
+	}
+
+	void GScene::UnsetPrefab(Utils::ECS::EntityID entity)
+	{
+		const auto itor = m_UUIds.find(entity);
+		if (itor == m_UUIds.end()) return;
+		const UUID uuid = itor->second;
+
+		m_ActivePrefabs.erase(uuid);
+
+		/*for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			UnsetChildrenPrefab(pChild);
+		}*/
 	}
 
 	const UUID GScene::Prefab(UUID objectID) const
@@ -84,6 +124,12 @@ namespace Glory
 		return m_UUIds.at(entity);
 	}
 
+	void GScene::SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent)
+	{
+		if (!m_Registry.SetParent(entity, parent)) return;
+		//m_Registry.GetComponent<Transform>(entity).Parent = { entity, this };
+	}
+
 	void GScene::OnTick()
 	{
 		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Update);
@@ -104,6 +150,34 @@ namespace Glory
 	Entity GScene::CreateEntity(UUID transUUID)
 	{
 		Utils::ECS::EntityID entityID = m_Registry.CreateEntity<Transform>(transUUID);
-		return Entity(entityID, this);
+		return { entityID, this };
+	}
+
+	void GScene::SetChildrenPrefab(Utils::ECS::EntityID entity, UUID prefabID)
+	{
+		const auto itor = m_UUIds.find(entity);
+		if (itor == m_UUIds.end()) return;
+		const UUID uuid = itor->second;
+		m_ActivePrefabChildren.emplace(uuid, prefabID);
+	
+		/*for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			SetChildrenPrefab(pChild, prefabID);
+		}*/
+	}
+	
+	void GScene::UnsetChildrenPrefab(Utils::ECS::EntityID entity)
+	{
+		const auto itor = m_UUIds.find(entity);
+		if (itor == m_UUIds.end()) return;
+		const UUID uuid = itor->second;
+		m_ActivePrefabChildren.erase(uuid);
+	
+		/*for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
+		{
+			SceneObject* pChild = pObject->m_pChildren[i];
+			UnsetChildrenPrefab(pChild);
+		}*/
 	}
 }

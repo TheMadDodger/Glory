@@ -11,47 +11,6 @@
 //
 //namespace Glory
 //{
-//	GScene::GScene(const std::string& sceneName) : Resource(sceneName), m_Valid(true), m_Registry(this)
-//	{
-//		APPEND_TYPE(GScene);
-//	}
-//
-//	GScene::GScene(const std::string& sceneName, UUID uuid) : Resource(uuid, sceneName), m_Valid(true), m_Registry(this)
-//	{
-//		APPEND_TYPE(GScene);
-//	}
-//
-//	GScene::~GScene()
-//	{
-//		std::for_each(m_pSceneObjects.begin(), m_pSceneObjects.end(), [](SceneObject* pObject) { delete pObject; });
-//		m_pSceneObjects.clear();
-//
-//		m_Valid = false;
-//	}
-//
-//	SceneObject* GScene::CreateEmptyObject()
-//	{
-//		SceneObject* pObject = CreateObject("Empty Object");
-//		pObject->m_pScene = this;
-//		m_pSceneObjects.push_back(pObject);
-//		OnObjectAdded(pObject);
-//		return pObject;
-//	}
-//
-//	SceneObject* GScene::CreateEmptyObject(const std::string& name, UUID uuid, UUID uuid2)
-//	{
-//		SceneObject* pObject = CreateObject(name, uuid, uuid2);
-//		pObject->m_pScene = this;
-//		m_pSceneObjects.push_back(pObject);
-//		OnObjectAdded(pObject);
-//		return pObject;
-//	}
-//
-//	size_t GScene::SceneObjectsCount()
-//	{
-//		return m_pSceneObjects.size();
-//	}
-//
 //	SceneObject* GScene::GetSceneObject(size_t index)
 //	{
 //		if (index >= m_pSceneObjects.size()) return nullptr;
@@ -90,27 +49,6 @@
 //	{
 //		std::for_each(m_DelayedParents.begin(), m_DelayedParents.end(), [&](const DelayedParentData& data) { OnDelayedSetParent(data); });
 //		m_DelayedParents.clear();
-//	}
-//
-//	void GScene::Start()
-//	{
-//		m_Registry.InvokeAll(Utils::ECS::InvocationType::Start);
-//	}
-//
-//	void GScene::Stop()
-//	{
-//		m_Registry.InvokeAll(Utils::ECS::InvocationType::Stop);
-//	}
-//
-//	void GScene::SetPrefab(SceneObject* pObject, UUID prefabID)
-//	{
-//		m_ActivePrefabs.emplace(pObject->GetUUID(), prefabID);
-//
-//		for (size_t i = 0; i < pObject->m_pChildren.size(); ++i)
-//		{
-//			SceneObject* pChild = pObject->m_pChildren[i];
-//			SetChildrenPrefab(pChild, prefabID);
-//		}
 //	}
 //
 //	void GScene::UnsetPrefab(SceneObject* pObject)
@@ -184,56 +122,6 @@
 //		return m_EntityIDToObject[entity];
 //	}
 //
-//	Utils::ECS::EntityRegistry* GScene::GetRegistry()
-//	{
-//		return &m_Registry;
-//	}
-//
-//	bool GScene::IsValid() const
-//	{
-//		return m_Valid;
-//	}
-//
-//	void GScene::Initialize()
-//	{
-//	}
-//
-//	void GScene::OnTick()
-//	{
-//		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Update);
-//		//while (m_Scene.m_Registry.IsUpdating()) {}
-//	}
-//
-//	void GScene::OnPaint()
-//	{
-//		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Draw);
-//		//while (m_Scene.m_Registry.IsUpdating()) {}
-//	}
-//
-//	SceneObject* GScene::CreateObject(const std::string& name)
-//	{
-//		UUID uuid = UUID();
-//		Entity entity = CreateEntity(uuid, UUID());
-//		return new SceneObject(entity, name, uuid);
-//	}
-//
-//	SceneObject* GScene::CreateObject(const std::string& name, UUID uuid, UUID uuid2)
-//	{
-//		Entity entity = CreateEntity(uuid, uuid2);
-//		return new SceneObject(entity, name, uuid);
-//	}
-//
-//	void GScene::OnDeleteObject(SceneObject* pObject)
-//	{
-//
-//	}
-//
-//	void GScene::OnObjectAdded(SceneObject* pObject)
-//	{
-//		Utils::ECS::EntityID entity = pObject->GetEntityHandle().GetEntityID();
-//		m_EntityIDToObject[entity] = pObject;
-//	}
-//
 //	void GScene::OnDelayedSetParent(const DelayedParentData& data)
 //	{
 //		SceneObject* pParent = FindSceneObject(data.ParentID);
@@ -243,11 +131,6 @@
 //			return;
 //		}
 //		data.ObjectToParent->SetParent(pParent);
-//	}
-//
-//	void GScene::SetUUID(UUID uuid)
-//	{
-//		m_ID = uuid;
 //	}
 //
 //	void GScene::SetChildrenPrefab(SceneObject* pObject, UUID prefabID)

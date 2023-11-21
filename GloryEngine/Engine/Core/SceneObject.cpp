@@ -5,46 +5,6 @@
 //
 //namespace Glory
 //{
-//	SceneObject::SceneObject() : Object("Empty Object"), m_pScene(nullptr), m_Entity(), m_pParent(nullptr)
-//	{
-//		APPEND_TYPE(SceneObject);
-//	}
-//
-//	SceneObject::SceneObject(Entity entity) : Object("Empty Object"), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
-//	{
-//		APPEND_TYPE(SceneObject);
-//	}
-//
-//	SceneObject::SceneObject(Entity entity, const std::string& name) : Object(name), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
-//	{
-//		APPEND_TYPE(SceneObject);
-//	}
-//
-//	SceneObject::SceneObject(Entity entity, const std::string& name, UUID uuid) : Object(uuid, name), m_pScene(nullptr), m_Entity(entity), m_pParent(nullptr)
-//	{
-//		APPEND_TYPE(SceneObject);
-//	}
-//
-//	SceneObject::~SceneObject()
-//	{
-//		m_Entity.Destroy();
-//	}
-//
-//	SceneObject* SceneObject::GetParent()
-//	{
-//		return m_pParent;
-//	}
-//
-//	size_t SceneObject::ChildCount()
-//	{
-//		return m_pChildren.size();
-//	}
-//
-//	SceneObject* SceneObject::GetChild(size_t index)
-//	{
-//		return m_pChildren[index];
-//	}
-//
 //	void SceneObject::SetSiblingIndex(size_t index)
 //	{
 //		SceneObject* pParent = GetParent();
@@ -116,24 +76,7 @@
 //		auto it = std::find(targetVector->begin(), targetVector->end(), this);
 //		return it - targetVector->begin();
 //	}
-//
-//	void SceneObject::SetScene(GScene* pScene)
-//	{
-//		if (m_pScene)
-//		{
-//			auto it = std::find(m_pScene->m_pSceneObjects.begin(), m_pScene->m_pSceneObjects.end(), this);
-//			if (it != m_pScene->m_pSceneObjects.end()) m_pScene->m_pSceneObjects.erase(it);
-//		}
-//
-//		m_pScene = pScene;
-//		m_pScene->m_pSceneObjects.push_back(this);
-//	}
-//
-//	GScene* SceneObject::GetScene() const
-//	{
-//		return m_pScene;
-//	}
-//
+// 
 //	void SceneObject::OnSetParent(SceneObject* pParent)
 //	{
 //		if (!m_Entity.HasComponent<Transform>())

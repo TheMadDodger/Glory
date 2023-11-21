@@ -156,6 +156,9 @@ namespace Glory::Utils::ECS
 		}
 
 		void ForEach(std::function<void(EntityRegistry*, EntityID)> func);
+
+		bool SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
+		void SetEntityOrder(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 		//void ForEachComponent(EntityID entity, std::function<void(EntityRegistry*, EntityID, size_t, size_t)> func);
 		//
 		//template<typename C, typename Component>
@@ -188,6 +191,7 @@ namespace Glory::Utils::ECS
 
 		// Entity data
 		std::map<EntityID, EntityView*> m_pEntityViews;
+		std::vector<EntityID> m_RootOrder;
 		EntityID m_NextEntityID;
 
 		// Basic type views

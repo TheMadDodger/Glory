@@ -37,6 +37,7 @@ namespace Glory::Utils::ECS
 		std::map<Glory::UUID, uint32_t> m_ComponentTypes;
 		std::map<uint32_t, Glory::UUID> m_TypeToUUID;
 		std::vector<Glory::UUID> m_ComponentOrder;
+		EntityID m_Parent;
 		std::vector<EntityID> m_Children;
 		bool m_Active;
 		bool m_HierarchyActive;
