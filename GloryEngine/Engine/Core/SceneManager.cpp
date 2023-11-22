@@ -15,6 +15,11 @@
 
 namespace Glory
 {
+	void SceneManager::SetHoveringObject(uint32_t objectID)
+	{
+		m_HoveringObjectID = objectID;
+	}
+
 	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0)
 	{
 	}

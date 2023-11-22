@@ -19,7 +19,7 @@ namespace Glory
 		m_GLFrameBufferID = NULL;
 	}
 
-	uint32_t OGLRenderTexture::ReadPixel(const glm::ivec2& coord)
+	void OGLRenderTexture::ReadPixel(const glm::ivec2& coord, void* value, size_t size, uint32_t type)
 	{
 		Bind();
 
@@ -29,7 +29,6 @@ namespace Glory
 		glReadPixels(coord.x, coord.y, 1, 1, GL_RED_INTEGER, GL_INT, &value);
 
 		UnBind();
-		return value;
 	}
 
 	void OGLRenderTexture::Initialize()

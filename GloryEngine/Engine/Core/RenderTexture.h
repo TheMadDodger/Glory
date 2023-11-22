@@ -54,7 +54,7 @@ namespace Glory
 		size_t AttachmentCount() const;
 		const std::string AttachmentName(size_t index) const;
 
-		virtual uint32_t ReadPixel(const glm::ivec2& coord) = 0;
+		virtual void ReadPixel(const glm::ivec2& coord, void* value, size_t size, uint32_t type) = 0;
 
 	protected:
 		RenderTexture(const RenderTextureCreateInfo& createInfo);

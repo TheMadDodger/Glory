@@ -332,7 +332,8 @@ namespace Glory
 		if (pRenderTexture == nullptr) return;
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;
-		uint32_t objectID = pRenderTexture->ReadPixel(m_PickPos);
+		uint32_t objectID = 0;
+		pRenderTexture->ReadPixel(m_PickPos, &objectID, sizeof(uint32_t), 0);
 		m_pEngine->GetSceneManager()->SetHoveringObject(objectID);
 		Profiler::EndSample();
 	}

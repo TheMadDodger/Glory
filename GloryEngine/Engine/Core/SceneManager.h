@@ -35,6 +35,8 @@ namespace Glory
 		    Reflect::RegisterType<T>();
 		}
 
+		void SetHoveringObject(uint32_t objectID);
+
 	private:
 		friend class Engine;
 		SceneManager(Engine* pEngine);
@@ -53,6 +55,7 @@ namespace Glory
 		Engine* m_pEngine;
 		std::vector<GScene*> m_pOpenScenes;
 		size_t m_ActiveSceneIndex;
+		uint32_t m_HoveringObjectID;
 
 		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;
 	};
