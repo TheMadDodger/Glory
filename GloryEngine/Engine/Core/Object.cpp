@@ -77,6 +77,11 @@ namespace Glory
 		m_Name = name;
 	}
 
+	void Object::SetName(const std::string_view name)
+	{
+		m_Name = name;
+	}
+
 	void* Object::GetRootDataAddress()
 	{
 		return (void*)this;

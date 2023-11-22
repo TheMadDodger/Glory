@@ -43,6 +43,7 @@ namespace Glory
 
 		const std::string& Name();
 		void SetName(const std::string& name);
+		void SetName(const std::string_view name);
 
 		virtual void* GetRootDataAddress();
 

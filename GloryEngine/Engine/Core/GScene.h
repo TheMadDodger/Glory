@@ -85,6 +85,12 @@ namespace Glory
 		 */
 		void SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 
+		/** @brief Get the name of an entity */
+		std::string_view Name(Utils::ECS::EntityID entity) const;
+
+		/** @brief Set the name of an entity */
+		void SetName(Utils::ECS::EntityID entity, std::string& name);
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();

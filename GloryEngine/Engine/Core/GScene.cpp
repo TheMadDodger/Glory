@@ -130,6 +130,20 @@ namespace Glory
 		//m_Registry.GetComponent<Transform>(entity).Parent = { entity, this };
 	}
 
+	std::string_view GScene::Name(Utils::ECS::EntityID entity) const
+	{
+		const auto itor = m_Names.find(entity);
+		if (itor == m_Names.end()) return "";
+		return itor->second;
+	}
+
+	void GScene::SetName(Utils::ECS::EntityID entity, std::string& name)
+	{
+		const auto itor = m_Names.find(entity);
+		if (itor == m_Names.end()) return;
+		itor->second = name;
+	}
+
 	void GScene::OnTick()
 	{
 		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Update);

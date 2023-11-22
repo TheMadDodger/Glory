@@ -67,6 +67,16 @@ namespace Glory::Utils::ECS
         return m_Parent;
     }
 
+    size_t EntityView::ChildCount() const
+    {
+        return m_Children.size();
+    }
+
+    EntityID EntityView::Child(size_t index) const
+    {
+        return m_Children[index];
+    }
+
     uint32_t EntityView::ComponentTypeAt(size_t index) const
     {
         Glory::UUID uuid = m_ComponentOrder[index];

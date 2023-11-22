@@ -12,7 +12,7 @@ namespace Glory
 	{
 	}
 
-	Utils::ECS::EntityView* Entity::GetEntityView()
+	Utils::ECS::EntityView* Entity::GetEntityView() const
 	{
 		return m_pRegistry->GetEntityView(m_EntityID);
 	}
@@ -22,7 +22,7 @@ namespace Glory
 		m_pRegistry->Clear(m_EntityID);
 	}
 
-	bool Entity::IsValid()
+	bool Entity::IsValid() const
 	{
 		if (!m_pGScene) return false;
 		return m_pRegistry->IsValid(m_EntityID);
@@ -39,17 +39,17 @@ namespace Glory
 		m_pRegistry->DestroyEntity(m_EntityID);
 	}
 
-	Utils::ECS::EntityID Entity::GetEntityID()
+	Utils::ECS::EntityID Entity::GetEntityID() const
 	{
 		return m_EntityID;
 	}
 
-	Utils::ECS::EntityRegistry* Entity::GetRegistry()
+	Utils::ECS::EntityRegistry* Entity::GetRegistry() const
 	{
 		return m_pRegistry;
 	}
 
-	GScene* Entity::GetScene()
+	GScene* Entity::GetScene() const
 	{
 		return m_pGScene;
 	}

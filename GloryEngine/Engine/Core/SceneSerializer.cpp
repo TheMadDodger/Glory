@@ -15,6 +15,28 @@ namespace Glory
 	{
 	}
 
+	void SceneSerializer::SerializeComponent(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, YAML::Emitter& out)
+	{
+		const UUID compUUID = pEntityView->ComponentUUIDAt(index);
+		out << YAML::Key << "UUID";
+		out << YAML::Value << uint64_t(compUUID);
+
+		const uint32_t type = pEntityView->ComponentTypeAt(index);
+		const Utils::Reflect::TypeData* pType = Utils::Reflect::Reflect::GetTyeData(type);
+
+		out << YAML::Key << "TypeName";
+		out << YAML::Value << pType->TypeName();
+
+		out << YAML::Key << "TypeHash";
+		out << YAML::Value << uint64_t(type);
+
+		PropertySerializer::SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), out);
+	}
+
+	void SceneSerializer::DeserializeComponent()
+	{
+	}
+
 	void SceneSerializer::Serialize(GScene* pScene, YAML::Emitter& out)
 	{
 		out << YAML::Key << "Entities";
@@ -42,26 +64,7 @@ namespace Glory
 			out << YAML::Value << YAML::BeginSeq;
 			for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 			{
-				const UUID compUUID = pEntityView->ComponentUUIDAt(i);
-				out << YAML::Key << "UUID";
-				out << YAML::Value << uint64_t(compUUID);
-
-				const uint32_t type = pEntityView->ComponentTypeAt(i);
-				const Utils::Reflect::TypeData* pType = Utils::Reflect::Reflect::GetTyeData(type);
-
-				out << YAML::Key << "TypeName";
-				out << YAML::Value << pType->TypeName();
-
-				out << YAML::Key << "TypeHash";
-				out << YAML::Value << uint64_t(type);
-
-				//out << YAML::Key << "Properties";
-				//out << YAML::Value << YAML::BeginMap;
-
-				PropertySerializer::SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), out);
-
-				//out << YAML::Value << YAML::EndMap;
-
+				SerializeComponent(pRegistry, pEntityView, entity, i, out);
 			}
 			out << YAML::EndSeq;
 		});

@@ -1,5 +1,6 @@
 #pragma once
 #include "UUID.h"
+#include "EntityID.h"
 
 #include <vector>
 #include <map>
@@ -27,6 +28,9 @@ namespace Glory::Utils::ECS
 		bool IsActive() const;
 
 		EntityID Parent() const;
+
+		size_t ChildCount() const;
+		EntityID Child(size_t index) const;
 
 	private:
 		void Add(uint32_t hash, Glory::UUID uuid = Glory::UUID());

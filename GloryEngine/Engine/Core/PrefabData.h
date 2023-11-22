@@ -1,17 +1,20 @@
 #pragma once
 #include "Resource.h"
 
+#include <EntityID.h>
+
 namespace Glory
 {
-    class SceneObject;
     class PrefabData;
+    class GScene;
+    class Entity;
 
     struct PrefabNode
     {
     public:
         PrefabNode(PrefabNode&& other) noexcept;
-        PrefabNode(PrefabData* pPrefab, SceneObject* pSceneObject);
-        void operator=(SceneObject* pSceneObject);
+        PrefabNode(PrefabData* pPrefab, const Entity& entity);
+        void operator=(const Entity& entity);
         void operator=(PrefabNode&& other) noexcept;
 
         const size_t ChildCount() const;
@@ -41,7 +44,7 @@ namespace Glory
         std::string m_SerializedComponents;
 
     private:
-        void Load(SceneObject* pSceneObject);
+        void Load(const Entity& entity);
     };
 
     class PrefabData : public Resource
@@ -51,7 +54,7 @@ namespace Glory
         PrefabData(PrefabNode&& rootNode) noexcept;
         virtual ~PrefabData() = default;
 
-        static PrefabData* CreateFromSceneObject(SceneObject* pSceneObject);
+        static PrefabData* CreateFromEntity(GScene* pScene, Utils::ECS::EntityID entity);
 
         const PrefabNode& RootNode() const;
 
