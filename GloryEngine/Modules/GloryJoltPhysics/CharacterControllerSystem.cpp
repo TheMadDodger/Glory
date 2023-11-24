@@ -8,6 +8,7 @@
 
 #include <Engine.h>
 #include <Game.h>
+#include <GScene.h>
 
 #include <Components.h>
 #include <Engine.h>
@@ -86,9 +87,11 @@ namespace Glory
 		transform.Position = pCharacters->GetPosition(pComponent.m_CharacterID);
 		transform.Rotation = pCharacters->GetRotation(pComponent.m_CharacterID);
 
-		if (transform.Parent.IsValid())
+		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+		Entity parent = pRegistry->GetUserData<GScene*>()->GetEntity(pEntityView->Parent());
+		if (parent.IsValid())
 		{
-			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+			Transform& parentTransform = parent.GetComponent<Transform>();
 			const glm::mat4 inverse = glm::inverse(parentTransform.MatTransform);
 			glm::vec3 scale;
 			glm::quat rotation;

@@ -32,9 +32,9 @@ namespace Glory
 	static T& GetComponent(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		GScene* pScene = GetEntityScene(pEntityHandle);
-		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry()->GetEntityView(pEntityHandle->m_EntityID);
+		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
 		uint32_t hash = pEntityView->ComponentType(componentID);
-		return pScene->GetRegistry()->GetComponent<T>(pEntityHandle->m_EntityID);
+		return pScene->GetRegistry().GetComponent<T>(pEntityHandle->m_EntityID);
 	}
 
 #pragma region Physics Component

@@ -70,9 +70,11 @@ namespace Glory
 		pPhysics->PollPhysicsState(pComponent.m_BodyID, &transform.Position, &transform.Rotation);
 		transform.Rotation = glm::conjugate(transform.Rotation);
 
-		if (transform.Parent.IsValid())
+		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+		Entity parent = pRegistry->GetUserData<GScene*>()->GetEntity(pEntityView->Parent());
+		if (parent.IsValid())
 		{
-			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+			Transform& parentTransform = parent.GetComponent<Transform>();
 			const glm::mat4 inverse = glm::inverse(parentTransform.MatTransform);
 			glm::vec3 scale;
 			glm::quat rotation;
@@ -119,7 +121,7 @@ namespace Glory
 		};
 
 		GScene* pGScene = pRegistry->GetUserData<GScene*>();
-		pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity), "OnBodyActivated", args.data());
+		pScript->Invoke(pGScene->GetEntityUUID(entity), pGScene->GetUUID(), "OnBodyActivated", args.data());
 	}
 
 	void PhysicsSystem::OnBodyDeactivated(uint32_t bodyID)
@@ -138,7 +140,7 @@ namespace Glory
 		};
 
 		GScene* pGScene = pRegistry->GetUserData<GScene*>();
-		pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity), "OnBodyDeactivated", args.data());
+		pScript->Invoke(pGScene->GetEntityUUID(entity), pGScene->GetUUID(), "OnBodyDeactivated", args.data());
 	}
 
 	void PhysicsSystem::OnContactAdded(uint32_t body1ID, uint32_t body2ID)
@@ -164,7 +166,7 @@ namespace Glory
 			};
 
 			GScene* pGScene = pRegistry1->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity1), "OnContactAdded", args.data());
+			pScript->Invoke(pGScene->GetEntityUUID(entity1), pGScene->GetUUID(), "OnContactAdded", args.data());
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -178,7 +180,7 @@ namespace Glory
 			};
 
 			GScene* pGScene = pRegistry2->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity2), "OnContactAdded", args.data());
+			pScript->Invoke(pGScene->GetEntityUUID(entity2), pGScene->GetUUID(), "OnContactAdded", args.data());
 		}
 	}
 
@@ -205,7 +207,7 @@ namespace Glory
 			};
 
 			GScene* pGScene = pRegistry1->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity1), "OnContactPersisted", args.data());
+			pScript->Invoke(pGScene->GetEntityUUID(entity1), pGScene->GetUUID(), "OnContactPersisted", args.data());
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -219,7 +221,7 @@ namespace Glory
 			};
 
 			GScene* pGScene = pRegistry2->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity2), "OnContactPersisted", args.data());
+			pScript->Invoke(pGScene->GetEntityUUID(entity2), pGScene->GetUUID(), "OnContactPersisted", args.data());
 		}
 	}
 
@@ -246,7 +248,7 @@ namespace Glory
 			};
 
 			GScene* pGScene = pRegistry1->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity1), "OnContactRemoved", args.data());
+			pScript->Invoke(pGScene->GetEntityUUID(entity1), pGScene->GetUUID(), "OnContactRemoved", args.data());
 		}
 
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
@@ -260,7 +262,7 @@ namespace Glory
 			};
 
 			GScene* pGScene = pRegistry2->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetSceneObjectFromEntityID(entity2), "OnContactRemoved", args.data());
+			pScript->Invoke(pGScene->GetEntityUUID(entity2), pGScene->GetUUID(), "OnContactRemoved", args.data());
 		}
 	}
 
