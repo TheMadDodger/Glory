@@ -27,9 +27,10 @@ namespace Glory
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
-		pScript->SetPropertyValues(entityUuid, pComponent.m_ScriptData);
+		const UUID sceneID = pRegistry->GetUserData<GScene*>()->GetUUID();
+		pScript->SetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData);
 
-		pScript->Invoke(entityUuid, "Start", nullptr);
+		pScript->Invoke(entityUuid, sceneID, "Start", nullptr);
 	}
 
 	void ScriptedSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, ScriptedComponent& pComponent)
@@ -40,7 +41,8 @@ namespace Glory
 		if (pScript == nullptr) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
-		pScript->Invoke(entityUuid, "Stop", nullptr);
+		const UUID sceneID = pRegistry->GetUserData<GScene*>()->GetUUID();
+		pScript->Invoke(entityUuid, sceneID, "Stop", nullptr);
 	}
 
 	void ScriptedSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, ScriptedComponent& pComponent)
@@ -54,8 +56,9 @@ namespace Glory
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
-		pScript->SetPropertyValues(entityUuid, pComponent.m_ScriptData);
-		pScript->Invoke(entityUuid, "OnValidate", nullptr);
+		const UUID sceneID = pRegistry->GetUserData<GScene*>()->GetUUID();
+		pScript->SetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData);
+		pScript->Invoke(entityUuid, sceneID, "OnValidate", nullptr);
 	}
 
 	void ScriptedSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, ScriptedComponent& pComponent)
@@ -66,8 +69,9 @@ namespace Glory
 		if (pScript == nullptr) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
-		pScript->Invoke(entityUuid, "Update", nullptr);
-		pScript->GetPropertyValues(entityUuid, pComponent.m_ScriptData);
+		const UUID sceneID = pRegistry->GetUserData<GScene*>()->GetUUID();
+		pScript->Invoke(entityUuid, sceneID, "Update", nullptr);
+		pScript->GetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData);
 	}
 
 	void ScriptedSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, ScriptedComponent& pComponent)
@@ -78,6 +82,7 @@ namespace Glory
 		if (pScript == nullptr) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
-		pScript->Invoke(entityUuid, "Draw", nullptr);
+		const UUID sceneID = pRegistry->GetUserData<GScene*>()->GetUUID();
+		pScript->Invoke(entityUuid, sceneID, "Draw", nullptr);
 	}
 }

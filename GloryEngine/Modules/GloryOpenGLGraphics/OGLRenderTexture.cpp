@@ -22,12 +22,9 @@ namespace Glory
 	void OGLRenderTexture::ReadPixel(const glm::ivec2& coord, void* value, size_t size, uint32_t type)
 	{
 		Bind();
-
-		uint32_t index = (uint32_t)m_NameToTextureIndex["object"];
-		uint32_t value;
+		const uint32_t index = (uint32_t)m_NameToTextureIndex["object"];
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
 		glReadPixels(coord.x, coord.y, 1, 1, GL_RED_INTEGER, GL_INT, &value);
-
 		UnBind();
 	}
 

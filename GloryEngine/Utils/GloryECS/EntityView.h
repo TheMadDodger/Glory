@@ -32,6 +32,8 @@ namespace Glory::Utils::ECS
 		size_t ChildCount() const;
 		EntityID Child(size_t index) const;
 
+		size_t ChildIndex(EntityID entity) const;
+
 	private:
 		void Add(uint32_t hash, Glory::UUID uuid = Glory::UUID());
 		UUID Remove(uint32_t hash);

@@ -95,10 +95,11 @@ namespace Glory::Utils::ECS
 
 	EntityView* EntityRegistry::GetEntityView(EntityID entity)
 	{
-		if(m_pEntityViews.find(entity) == m_pEntityViews.end())
+		const auto itor = m_pEntityViews.find(entity);
+		if(itor == m_pEntityViews.end())
 			return nullptr;
 
-		return m_pEntityViews[entity];
+		return itor->second;
 	}
 
 	void* EntityRegistry::GetComponentAddress(EntityID entityID, Glory::UUID componentID)
@@ -191,6 +192,13 @@ namespace Glory::Utils::ECS
 		}
 	}
 
+	EntityID EntityRegistry::GetParent(Utils::ECS::EntityID entity) const
+	{
+		const auto itor = m_pEntityViews.find(entity);
+		if (itor == m_pEntityViews.end()) return false;
+		return itor->second->Parent();
+	}
+
 	bool EntityRegistry::SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent)
 	{
 		const auto itor1 = m_pEntityViews.find(entity);
@@ -216,6 +224,36 @@ namespace Glory::Utils::ECS
 		m_RootOrder.erase(itor);
 		itor2->second->m_Children.push_back(entity);
 		return true;
+	}
+
+	size_t EntityRegistry::ChildCount(Utils::ECS::EntityID entity) const
+	{
+		const auto itor = m_pEntityViews.find(entity);
+		return itor->second->ChildCount();
+	}
+
+	EntityID EntityRegistry::Child(Utils::ECS::EntityID entity, size_t index) const
+	{
+		const auto itor = m_pEntityViews.find(entity);
+		return itor->second->Child(index);
+	}
+
+	size_t EntityRegistry::SiblingIndex(Utils::ECS::EntityID entity) const
+	{
+		auto itor = m_pEntityViews.find(entity);
+		itor = m_pEntityViews.find(itor->second->Parent());
+		if (itor == m_pEntityViews.end())
+		{
+			const auto rootItor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
+			if (rootItor == m_RootOrder.end()) return 0;
+			return rootItor - m_RootOrder.begin();
+		}
+		return itor->second->ChildIndex(entity);
+	}
+
+	void EntityRegistry::SetSiblingIndex(Utils::ECS::EntityID entity, size_t index)
+	{
+		throw new std::exception("Not implemented yet");
 	}
 
 	void EntityRegistry::InvokeAll(InvocationType invocationType)

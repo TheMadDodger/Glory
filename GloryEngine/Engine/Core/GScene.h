@@ -2,10 +2,15 @@
 #include "Resource.h"
 #include "Entity.h"
 
+#include <glm/fwd.hpp>
 #include <EntityRegistry.h>
 
 namespace Glory
 {
+	class PrefabData;
+	struct UUIDRemapper;
+	struct PrefabNode;
+
 	namespace Utils::ECS
 	{
 		class EntityRegistry;
@@ -79,17 +84,65 @@ namespace Glory
 		/** @brief Get the UUID of an entity */
 		UUID GetEntityUUID(Utils::ECS::EntityID entity) const;
 
+		/** @brief Get the parent entity of an entity */
+		Utils::ECS::EntityID Parent(Utils::ECS::EntityID entity) const;
+
+		/** @overload */
+		Utils::ECS::EntityID Parent(UUID uuid) const;
+
 		/** @brief Re-parent an entity
 		 * @param entity The entity to re-parent
 		 * @param parent The entity to parent to, use 0 to unparrent
 		 */
 		void SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 
+		/** @brief Get number of children on an entity */
+		size_t ChildCount(Utils::ECS::EntityID entity) const;
+
+		/** @brief Get a child entity by index on an entity */
+		Utils::ECS::EntityID Child(Utils::ECS::EntityID entity, size_t index) const;
+
+		/** @brief Get the sibling index of an entity */
+		size_t SiblingIndex(Utils::ECS::EntityID entity) const;
+
+		/** @brief Set the sibling index of an entity */
+		void SetSiblingIndex(Utils::ECS::EntityID entity, size_t index);
+
 		/** @brief Get the name of an entity */
 		std::string_view Name(Utils::ECS::EntityID entity) const;
 
 		/** @brief Set the name of an entity */
 		void SetName(Utils::ECS::EntityID entity, std::string& name);
+
+		/** @brief Create a new Entity in the scene from a prefab
+		 * @param parent The entity to parent the created object to
+		 * @param pPrefab The prefab to instantiate
+		 * @parem pos Position of the created entity
+		 * @parem rot Rotation of the created entity
+		 * @parem scale Scale of the created entity
+		 */
+		Entity InstantiatePrefab(UUID parent, PrefabData* pPrefab,
+		    const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+		/** @overload
+		 * @param parent The entity to parent the created object to
+		 * @param pPrefab The prefab to instantiate
+		 * @param remapSeed The seed to use to regenerate ids
+		 * @parem pos Position of the created entity
+		 * @parem rot Rotation of the created entity
+		 * @parem scale Scale of the created entity
+		 */
+		Entity InstantiatePrefab(UUID parent, PrefabData* pPrefab, uint32_t remapSeed,
+		    const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+		/** @overload
+		 * @param parent The entity to parent the created object to
+		 * @param pPrefab The prefab to instantiate
+		 * @param remapper The ID remapper to generate new ids with
+		 * @parem pos Position of the created entity
+		 * @parem rot Rotation of the created entity
+		 * @parem scale Scale of the created entity
+		 */
+		Entity InstantiatePrefab(UUID parent, PrefabData* pPrefab, UUIDRemapper& remapper,
+		    const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
 
 	protected:
 		/** @brief Invoke an update on all active entities and components */
@@ -115,6 +168,9 @@ namespace Glory
 		 * @param prefabID ID of the prefab
 		 */
 		void UnsetChildrenPrefab(Utils::ECS::EntityID entity);
+
+		/** @brief Internal function for creating an entity from a prefab */
+		Entity InstantiatePrefabNode(UUID parent, const PrefabNode& node, UUIDRemapper& remapper);
 
 	protected:
 		friend class Entity;

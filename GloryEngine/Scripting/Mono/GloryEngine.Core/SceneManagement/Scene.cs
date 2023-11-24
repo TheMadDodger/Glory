@@ -50,7 +50,8 @@ namespace GloryEngine.SceneManagement
         /// Get an object in the scene
         /// </summary>
         /// <param name="index">Index of the object</param>
-        public SceneObject GetSceneObjectAt(uint index) => Scene_GetSceneObjectAt(_objectID, index);
+        [Obsolete("GetSceneObjectAt is obsolete as of 0.3.0")]
+        public SceneObject GetSceneObjectAt(uint index) => null;
 
         /// <summary>
         /// Get an object in the scene by ID
@@ -115,9 +116,6 @@ namespace GloryEngine.SceneManagement
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern SceneObject Scene_GetSceneObject(UInt64 sceneID, UInt64 objectID);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern SceneObject Scene_GetSceneObjectAt(UInt64 sceneID, uint index);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern bool Scene_Destroy(UInt64 sceneID, UInt64 objectID);

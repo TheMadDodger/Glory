@@ -157,8 +157,12 @@ namespace Glory::Utils::ECS
 
 		void ForEach(std::function<void(EntityRegistry*, EntityID)> func);
 
+		EntityID GetParent(Utils::ECS::EntityID entity) const;
 		bool SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
-		void SetEntityOrder(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
+		size_t ChildCount(Utils::ECS::EntityID entity) const;
+		EntityID Child(Utils::ECS::EntityID entity, size_t index) const;
+		size_t SiblingIndex(Utils::ECS::EntityID entity) const;
+		void SetSiblingIndex(Utils::ECS::EntityID entity, size_t index);
 		//void ForEachComponent(EntityID entity, std::function<void(EntityRegistry*, EntityID, size_t, size_t)> func);
 		//
 		//template<typename C, typename Component>

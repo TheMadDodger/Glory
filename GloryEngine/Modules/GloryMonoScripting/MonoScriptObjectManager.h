@@ -15,8 +15,9 @@ namespace Glory
 	{
 	public:
 		GLORY_API MonoObject* GetMonoScriptDummyObject(MonoClass* pClass);
-		GLORY_API MonoObject* GetMonoScriptObject(MonoClass* pClass, UUID uuid);
+		GLORY_API MonoObject* GetMonoScriptObject(MonoClass* pClass, UUID uuid, UUID sceneID);
 		GLORY_API UUID GetIDForMonoScriptObject(MonoObject* pMonoObject) const;
+		GLORY_API UUID GetSceneIDForMonoScriptObject(MonoObject* pMonoObject) const;
 		GLORY_API void DestroyScriptObject(MonoClass* pClass, UUID uuid);
 
 		GLORY_API void DestroyAllObjects();
@@ -33,5 +34,6 @@ namespace Glory
 		std::map<UUID, ObjectInstanceData> m_Objects;
 		std::map<MonoClass*, MonoObject*> m_pDummyScriptObjects;
 		std::map<MonoObject*, UUID> m_pMonoToObject;
+		std::map<MonoObject*, UUID> m_pMonoObjectScenes;
 	};
 }
