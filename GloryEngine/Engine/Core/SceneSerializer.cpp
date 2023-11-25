@@ -53,7 +53,7 @@ namespace Glory
 
 			out << YAML::Key << "ParentUUID";
 
-			Entity parent = pScene->GetEntity(pEntityView->Parent());
+			Entity parent = pScene->GetEntityByUUID(pEntityView->Parent());
 			out << YAML::Value << (parent.IsValid() ?
 				uint64_t(pScene->GetEntityUUID(parent.GetEntityID())) : 0);
 

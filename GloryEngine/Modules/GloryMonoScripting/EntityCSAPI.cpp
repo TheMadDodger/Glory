@@ -69,7 +69,7 @@ namespace Glory
 		if (!uuid || !sceneID) return MonoEntityHandle();
 		GScene* pScene = GetEntityScene(sceneID);
 		if (!pScene) return MonoEntityHandle();
-		Entity entity = pScene->GetEntity(uuid);
+		Entity entity = pScene->GetEntityByUUID(uuid);
 		if (!entity.IsValid()) return MonoEntityHandle();
 		Utils::ECS::EntityID entityID = entity.GetEntityID();
 		return MonoEntityHandle(entityID, pScene->GetUUID());
@@ -526,7 +526,7 @@ namespace Glory
 	{
 		GScene* pScene = GetEntityScene(sceneID);
 		if(!pScene) return MonoEntityHandle();
-		Entity entity = pScene->GetEntity(objectID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
 		if (!entity.IsValid()) return MonoEntityHandle();
 		Utils::ECS::EntityID entityID = entity.GetEntityID();
 		return MonoEntityHandle(entityID, pScene->GetUUID());

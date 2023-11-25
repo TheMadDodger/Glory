@@ -43,7 +43,7 @@ namespace Glory
 		return m_Registry.Alive();
 	}
 
-	Entity GScene::GetEntity(UUID uuid)
+	Entity GScene::GetEntityByUUID(UUID uuid)
 	{
 		const auto itor = m_Ids.find(uuid);
 		if (itor == m_Ids.end())
@@ -170,14 +170,14 @@ namespace Glory
 		return m_Registry.SetSiblingIndex(entity, index);
 	}
 
-	std::string_view GScene::Name(Utils::ECS::EntityID entity) const
+	std::string_view GScene::EntityName(Utils::ECS::EntityID entity) const
 	{
 		const auto itor = m_Names.find(entity);
 		if (itor == m_Names.end()) return "";
 		return itor->second;
 	}
 
-	void GScene::SetName(Utils::ECS::EntityID entity, std::string& name)
+	void GScene::SetEntityName(Utils::ECS::EntityID entity, const std::string& name)
 	{
 		const auto itor = m_Names.find(entity);
 		if (itor == m_Names.end()) return;
@@ -281,7 +281,7 @@ namespace Glory
 		const UUID transformID = remapper(node.TransformUUID());
 		Entity entity = CreateEmptyObject(node.Name(), objectID, transformID);
 		const Utils::ECS::EntityID entityID = entity.GetEntityID();
-		const Entity parentEntity = GetEntity(parent);
+		const Entity parentEntity = GetEntityByUUID(parent);
 
 		if (parentEntity.IsValid())
 			SetParent(entity.GetEntityID(), parentEntity.GetEntityID());

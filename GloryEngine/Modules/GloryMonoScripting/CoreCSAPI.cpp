@@ -318,7 +318,7 @@ namespace Glory
 		if (!pScene) return nullptr;
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 		if (!pObjectManager) return nullptr;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return nullptr;
 		return pObjectManager->GetMonoSceneObject(pScene->GetEntityUUID(entity.GetEntityID()));
 	}
@@ -327,7 +327,7 @@ namespace Glory
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return;
 		pScene->DestroyEntity(entity.GetEntityID());
 	}
@@ -338,7 +338,7 @@ namespace Glory
 		if (!pPrefab) return nullptr;
 		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
-		const Entity parentEntity = pScene->GetEntity(UUID(parentID));
+		const Entity parentEntity = pScene->GetEntityByUUID(UUID(parentID));
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 		if (!pObjectManager) return nullptr;
 		const Entity entity = pScene->InstantiatePrefab(parentEntity.IsValid() ? pScene->GetEntityUUID(parentEntity.GetEntityID()) : 0, pPrefab, ToGLMVec3(position), ToGLMQuat(rotation), ToGLMVec3(scale));
@@ -429,8 +429,8 @@ namespace Glory
 		if (!pScenes) return nullptr;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
-		return entity.IsValid() ? mono_string_new(mono_domain_get(), pScene->Name(entity.GetEntityID()).data()) : nullptr;
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
+		return entity.IsValid() ? mono_string_new(mono_domain_get(), pScene->EntityName(entity.GetEntityID()).data()) : nullptr;
 	}
 
 	void SceneObject_SetName(uint64_t objectID, uint64_t sceneID, MonoString* name)
@@ -439,7 +439,7 @@ namespace Glory
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return;
 		pScene->SetName(entity.GetEntityID(), std::string{mono_string_to_utf8(name)});
 	}
@@ -450,7 +450,7 @@ namespace Glory
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return 0;
 		return pScene->SiblingIndex(entity.GetEntityID());
 	}
@@ -461,7 +461,7 @@ namespace Glory
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return;
 		pScene->SetSiblingIndex(entity.GetEntityID(), index);
 	}
@@ -472,7 +472,7 @@ namespace Glory
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return 0;
 		return pScene->ChildCount(entity.GetEntityID());
 	}
@@ -483,7 +483,7 @@ namespace Glory
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return 0;
 		const Entity childEntity = { pScene->Child(entity.GetEntityID(), index), pScene};
 		return childEntity.IsValid() ? pScene->GetEntityUUID(childEntity.GetEntityID()) : 0;
@@ -495,10 +495,10 @@ namespace Glory
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return 0;
 		Utils::ECS::EntityID parent = pScene->Parent(entity.GetEntityID());
-		Entity parentEntity = pScene->GetEntity(parent);
+		Entity parentEntity = pScene->GetEntityByUUID(parent);
 		return parentEntity.IsValid() ? pScene->GetEntityUUID(parent) : 0;
 	}
 
@@ -508,8 +508,8 @@ namespace Glory
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
-		const Entity entity = pScene->GetEntity(UUID(objectID));
-		const Entity parent = pScene->GetEntity(UUID(parentID));
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
+		const Entity parent = pScene->GetEntityByUUID(UUID(parentID));
 		if (!entity.IsValid() || !parent.IsValid()) return;
 		pScene->SetParent(entity.GetEntityID(), parent.GetEntityID());
 	}

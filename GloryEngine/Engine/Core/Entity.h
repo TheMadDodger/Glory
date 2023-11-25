@@ -39,15 +39,24 @@ namespace Glory
 			m_pRegistry->RemoveComponent<T>(m_EntityID);
 		}
 
+		Entity ParentEntity() const;
+		Utils::ECS::EntityID Parent() const;
+		void SetParent(Utils::ECS::EntityID parent);
+
 		Utils::ECS::EntityView* GetEntityView() const;
 
 		void Clear();
 		bool IsValid() const;
-		//GLORY_API void ForEachComponent(std::function<void(EntityRegistry*, EntityID, EntityComponentData*)> func);
-
 		void Destroy();
 
 		Utils::ECS::EntityID GetEntityID() const;
+		UUID EntityUUID() const;
+
+		size_t ChildCount() const;
+		Entity ChildEntity(size_t index) const;
+		Utils::ECS::EntityID Child(size_t index) const;
+		size_t SiblingIndex() const;
+		void SetSiblingIndex(size_t index);
 
 		Utils::ECS::EntityRegistry* GetRegistry() const;
 		GScene* GetScene() const;

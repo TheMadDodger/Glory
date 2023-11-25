@@ -188,7 +188,7 @@ namespace Glory
 				if (!pScene) continue;
 				MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
 				if (!pObjectManager) continue;
-				Entity entity = pScene->GetEntity(objectRef.ObjectUUID());
+				Entity entity = pScene->GetEntityByUUID(objectRef.ObjectUUID());
 				if (!entity.IsValid()) continue;
 				MonoObject* pMonoSceneObject = pObjectManager->GetMonoSceneObject(objectRef.ObjectUUID());
 				pField->SetValue(pMonoObject, pMonoSceneObject);

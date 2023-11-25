@@ -228,6 +228,9 @@ namespace Glory::Utils::ECS
 
 	size_t EntityRegistry::ChildCount(Utils::ECS::EntityID entity) const
 	{
+		if (entity == 0)
+			return m_RootOrder.size();
+
 		const auto itor = m_pEntityViews.find(entity);
 		return itor->second->ChildCount();
 	}

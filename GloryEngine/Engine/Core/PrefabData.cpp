@@ -24,7 +24,7 @@ namespace Glory
 	PrefabData* PrefabData::CreateFromEntity(GScene* pScene, Utils::ECS::EntityID entity)
 	{
 		PrefabData* pPrefab = new PrefabData();
-		pPrefab->SetName(pScene->Name(entity));
+		pPrefab->SetName(pScene->EntityName(entity));
 		pPrefab->m_RootNode = { entity, pScene };
 		return pPrefab;
 	}
@@ -154,7 +154,7 @@ namespace Glory
 
 		m_OriginalUUID = entity.GetScene()->GetEntityUUID(entityID);
 		m_ActiveSelf = entity.IsActiveSelf();
-		m_Name = entity.GetScene()->Name(entityID);
+		m_Name = entity.GetScene()->EntityName(entityID);
 		m_pPrefab->m_OriginalUUIDs.push_back(m_OriginalUUID);
 
 		Utils::ECS::EntityRegistry* pRegistry = entity.GetRegistry();

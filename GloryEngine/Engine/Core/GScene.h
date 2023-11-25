@@ -44,7 +44,7 @@ namespace Glory
 		size_t SceneObjectsCount() const;
 
 		/** @brief Get an entity by UUID */
-		Entity GetEntity(UUID uuid);
+		Entity GetEntityByUUID(UUID uuid);
 		/** @brief Create an entity handle for an entity in this scene */
 		Entity GetEntityByEntityID(Utils::ECS::EntityID entityId);
 
@@ -109,10 +109,10 @@ namespace Glory
 		void SetSiblingIndex(Utils::ECS::EntityID entity, size_t index);
 
 		/** @brief Get the name of an entity */
-		std::string_view Name(Utils::ECS::EntityID entity) const;
+		std::string_view EntityName(Utils::ECS::EntityID entity) const;
 
 		/** @brief Set the name of an entity */
-		void SetName(Utils::ECS::EntityID entity, std::string& name);
+		void SetEntityName(Utils::ECS::EntityID entity, const std::string& name);
 
 		/** @brief Create a new Entity in the scene from a prefab
 		 * @param parent The entity to parent the created object to
