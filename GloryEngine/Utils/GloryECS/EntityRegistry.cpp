@@ -237,6 +237,9 @@ namespace Glory::Utils::ECS
 
 	EntityID EntityRegistry::Child(Utils::ECS::EntityID entity, size_t index) const
 	{
+		if (entity == 0)
+			return m_RootOrder[index];
+
 		const auto itor = m_pEntityViews.find(entity);
 		return itor->second->Child(index);
 	}

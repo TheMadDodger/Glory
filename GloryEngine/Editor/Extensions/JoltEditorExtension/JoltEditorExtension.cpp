@@ -21,6 +21,8 @@
 #include <EditableEntity.h>
 #include <EntityEditor.h>
 
+#include <IconsFontAwesome6.h>
+
 EXTENSION_CPP(JoltEditorExtension)
 
 #define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
@@ -48,6 +50,11 @@ namespace Glory::Editor
 
 		Editor::RegisterEditor<PhysicsBodyEditor>();
 		Editor::RegisterEditor<CharacterControllerEditor>();
+
+		static constexpr char* bodyIcon = ICON_FA_CUBES_STACKED;
+		static constexpr char* characterIcon = ICON_FA_PERSON;
+		EntitySceneObjectEditor::AddComponentIcon<PhysicsBody>(bodyIcon);
+		EntitySceneObjectEditor::AddComponentIcon<CharacterController>(characterIcon);
 
 		ProjectSettings::Add(&Physics);
 

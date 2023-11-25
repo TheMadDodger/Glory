@@ -658,8 +658,8 @@ namespace Glory
 		/* @todo: Replace this with scene manager when that is a thing */
 		SceneManager* pScenes = m_pEngine->GetSceneManager();
 		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
-		pComponentTypes->RegisterComponent<PhysicsBody>();
-		pComponentTypes->RegisterComponent<CharacterController>();
+		pScenes->RegisterComponent<PhysicsBody>();
+		pScenes->RegisterComponent<CharacterController>();
 
 		/* Physics Bodies */
 		pComponentTypes->RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Start, PhysicsSystem::OnStart);

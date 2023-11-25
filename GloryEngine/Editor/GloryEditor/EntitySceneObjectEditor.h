@@ -37,6 +37,13 @@ namespace Editor
 		GLORY_EDITOR_API static void ConvertToPrefab(Entity& entity, std::filesystem::path path);
 		GLORY_EDITOR_API static void UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&);
 
+		template<typename T>
+		static void AddComponentIcon(std::string_view icon)
+		{
+			AddComponentIcon(ResourceType::GetHash<T>(), icon);
+		}
+		GLORY_EDITOR_API static void AddComponentIcon(uint32_t hash, std::string_view icon);
+
 	private:
 		void Initialize();
 		bool NameGUI();

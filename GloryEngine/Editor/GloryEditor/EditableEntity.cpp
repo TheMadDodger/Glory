@@ -2,6 +2,10 @@
 
 namespace Glory::Editor
 {
+	EditableEntity::EditableEntity(): m_Entity(0), m_SceneID(0)
+	{
+	}
+
 	EditableEntity::EditableEntity(Utils::ECS::EntityID entity, UUID entityID, UUID sceneID):
 		Object(entityID), m_Entity(entity), m_SceneID(sceneID)
 	{

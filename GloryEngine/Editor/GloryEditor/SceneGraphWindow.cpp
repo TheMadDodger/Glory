@@ -317,7 +317,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SameLine();
-		//EntitySceneObjectEditor::DrawObjectNodeName(pObject, isPrefab);
+		EntitySceneObjectEditor::DrawObjectNodeName(entity, isPrefab);
 
 		ImGui::PopStyleVar();
 

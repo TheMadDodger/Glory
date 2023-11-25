@@ -14,7 +14,7 @@ namespace Glory::Editor
     EditableEntity* Create(Utils::ECS::EntityID entity, UUID sceneID, std::vector<std::unique_ptr<EditableEntity>>& entities)
     {
         if (entities.size() <= entity)
-            entities.resize(entity);
+            entities.resize(entity + 1);
 
         UUID entityID = EditorSceneManager::GetOpenScene(sceneID)->GetEntityUUID(entity);
         entities[entity].reset(new EditableEntity(entity, entityID, sceneID));

@@ -33,7 +33,7 @@ namespace Glory
 	{
 		Entity entity = CreateEntity(transUuid);
 		m_Ids.emplace(uuid, entity.GetEntityID());
-		m_Ids.emplace(entity.GetEntityID(), uuid);
+		m_UUIds.emplace(entity.GetEntityID(), uuid);
 		m_Names.emplace(entity.GetEntityID(), name);
 		return entity;
 	}

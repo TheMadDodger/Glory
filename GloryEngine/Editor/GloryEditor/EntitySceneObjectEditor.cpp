@@ -23,11 +23,7 @@
 
 namespace Glory::Editor
 {
-	/* @todo GET RID OF DIS */
-	struct PhysicsBody {};
-	struct CharacterController {};
-
-	const std::map<uint32_t, std::string_view> COMPONENT_ICONS = {
+	std::map<uint32_t, std::string_view> ComponentIcons = {
 		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
 		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
 		{ ResourceType::GetHash<MeshRenderer>(), ICON_FA_CUBES },
@@ -36,9 +32,6 @@ namespace Glory::Editor
 		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
 		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
-
-		{ ResourceType::GetHash<PhysicsBody>(), ICON_FA_CUBES_STACKED },
-		{ ResourceType::GetHash<CharacterController>(), ICON_FA_PERSON },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)
@@ -87,8 +80,13 @@ namespace Glory::Editor
 
 	std::string_view EntitySceneObjectEditor::GetComponentIcon(uint32_t typeHash)
 	{
-		auto itor = COMPONENT_ICONS.find(typeHash);
-		return itor != COMPONENT_ICONS.end() ? itor->second : "";
+		auto itor = ComponentIcons.find(typeHash);
+		return itor != ComponentIcons.end() ? itor->second : "";
+	}
+
+	void EntitySceneObjectEditor::AddComponentIcon(uint32_t hash, std::string_view icon)
+	{
+		ComponentIcons.emplace(hash, icon);
 	}
 
 	void EntitySceneObjectEditor::Initialize()
@@ -143,8 +141,8 @@ namespace Glory::Editor
 		}
 
 		ImGui::BeginDisabled(prefabID || childOfPrefabID);
-		std::string originalName = m_pObject->Name();
-		const char* name = originalName.c_str();
+		const std::string_view originalName = entity.Name();
+		const char* name = originalName.data();
 		memcpy(m_NameBuff, name, originalName.length() + 1);
 		m_NameBuff[originalName.length()] = '\0';
 
@@ -197,8 +195,8 @@ namespace Glory::Editor
 		{
 			std::string_view icon = "";
 			const uint32_t componentHash = m_pComponents[index]->ComponentType();
-			if(COMPONENT_ICONS.find(componentHash) != COMPONENT_ICONS.end())
-				icon = COMPONENT_ICONS.at(componentHash);
+			if(ComponentIcons.find(componentHash) != ComponentIcons.end())
+				icon = ComponentIcons.at(componentHash);
 
 			ImGui::PushID(index);
 
@@ -292,7 +290,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
 			const uint32_t typeHash = pEntityView->ComponentTypeAt(i);
-			stream << COMPONENT_ICONS.at(typeHash) << ' ';
+			stream << ComponentIcons.at(typeHash) << ' ';
 		}
 
 		const std::string componentLabels = stream.str();

@@ -51,6 +51,7 @@
 #include "VersionPopup.h"
 
 #include "CreateEntityObjectsCallbacks.h"
+#include "EditableEntity.h"
 
 #include <imgui.h>
 #include <Game.h>
@@ -151,6 +152,8 @@ namespace Glory::Editor
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();
 		Importer::Register<TextureImporter>();
+
+		ResourceType::RegisterResource<EditableEntity>("");
 	}
 
 	void MainEditor::Destroy()

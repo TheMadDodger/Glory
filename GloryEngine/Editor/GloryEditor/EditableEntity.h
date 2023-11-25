@@ -7,6 +7,7 @@ namespace Glory::Editor
 	class EditableEntity : public Object
 	{
 	public:
+		EditableEntity();
 		EditableEntity(Utils::ECS::EntityID entity, UUID entityID, UUID sceneID);
 
 		Utils::ECS::EntityID EntityID() const;
