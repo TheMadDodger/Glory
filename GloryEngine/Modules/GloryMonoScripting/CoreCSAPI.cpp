@@ -498,7 +498,7 @@ namespace Glory
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return 0;
 		Utils::ECS::EntityID parent = pScene->Parent(entity.GetEntityID());
-		Entity parentEntity = pScene->GetEntityByUUID(parent);
+		Entity parentEntity = pScene->GetEntityByEntityID(parent);
 		return parentEntity.IsValid() ? pScene->GetEntityUUID(parent) : 0;
 	}
 

@@ -30,7 +30,7 @@ namespace Glory
         glm::mat4 startTransform = glm::identity<glm::mat4>();
 
         Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
-        Entity parent = pRegistry->GetUserData<GScene*>()->GetEntityByUUID(pEntityView->Parent());
+        Entity parent = pRegistry->GetUserData<GScene*>()->GetEntityByEntityID(pEntityView->Parent());
         if (parent.IsValid())
         {
             Transform& parentTransform = parent.GetComponent<Transform>();

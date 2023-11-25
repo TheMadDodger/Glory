@@ -71,7 +71,7 @@ namespace Glory
 		transform.Rotation = glm::conjugate(transform.Rotation);
 
 		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
-		Entity parent = pRegistry->GetUserData<GScene*>()->GetEntityByUUID(pEntityView->Parent());
+		Entity parent = pRegistry->GetUserData<GScene*>()->GetEntityByEntityID(pEntityView->Parent());
 		if (parent.IsValid())
 		{
 			Transform& parentTransform = parent.GetComponent<Transform>();
