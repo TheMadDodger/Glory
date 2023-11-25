@@ -1,8 +1,9 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <GScene.h>
 #include <yaml-cpp/yaml.h>
 #include <vector>
-#include "GloryEditor.h"
 
 namespace Glory::Editor
 {
@@ -37,10 +38,10 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool IsSceneDirty(GScene* pScene);
 		static GLORY_EDITOR_API bool HasUnsavedChanges();
 
-		static GLORY_EDITOR_API void DuplicateSceneObject(SceneObject* pObject);
-		static GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, SceneObject* pParent, YAML::Node& node);
+		static GLORY_EDITOR_API void DuplicateSceneObject(Entity entity);
+		static GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, YAML::Node& node);
 
-		static GLORY_EDITOR_API void SerializeObjects(SceneObject* pObject, YAML::Emitter& out);
+		static GLORY_EDITOR_API void SerializeObjects(Entity entity, YAML::Emitter& out);
 
 	private:
 		static void Save(UUID uuid, const std::string& path, bool newScene = false);

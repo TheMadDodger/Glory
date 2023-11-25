@@ -18,6 +18,8 @@
 #include <ObjectMenu.h>
 #include <EntitySceneObjectEditor.h>
 #include <CreateObjectAction.h>
+#include <EditableEntity.h>
+#include <EntityEditor.h>
 
 EXTENSION_CPP(JoltEditorExtension)
 

@@ -428,7 +428,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_R, ImGuiModFlags_Ctrl);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
-			EntitySceneObjectEditor::ConvertToPrefab(e.Object, e.Path);
+			//EntitySceneObjectEditor::ConvertToPrefab(e.Object, e.Path);
 		});
 	}
 

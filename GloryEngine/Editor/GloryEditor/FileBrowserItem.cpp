@@ -7,6 +7,8 @@
 #include "TumbnailGenerator.h"
 #include "Selection.h"
 #include "ObjectMenu.h"
+#include "EntityEditor.h"
+#include "EditableEntity.h"
 
 #include <stack>
 #include <imgui.h>
@@ -233,11 +235,11 @@ namespace Glory::Editor
 				m_pChildren[i]->DrawDirectoryBrowser();
 			}
 			ImGui::TreePop();
-			DND{ { ST_Path, ResourceType::GetHash<SceneObject>() } }.HandleDragAndDropTarget([this](uint32_t typeHash, const ImGuiPayload* payload) {
+			DND{ { ST_Path, ResourceType::GetHash<EditableEntity>() } }.HandleDragAndDropTarget([this](uint32_t typeHash, const ImGuiPayload* payload) {
 				if (typeHash != ST_Path)
 				{
 					const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
-					FileBrowserItem::ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, objectPayload.pObject });
+					FileBrowserItem::ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, GetEditableEntity(objectPayload.EntityID, objectPayload.SceneID) });
 					return;
 				}
 				std::filesystem::path filePath = (const char*)payload->Data;
@@ -354,12 +356,12 @@ namespace Glory::Editor
 					ImGui::Text("%s %s", ICON_FA_FOLDER_OPEN, m_CachedPath.string().data());
 				});
 
-				const uint32_t sceneObjectHash = ResourceType::GetHash<SceneObject>();
+				const uint32_t sceneObjectHash = ResourceType::GetHash<EditableEntity>();
 				DND{ { ST_Path, sceneObjectHash } }.HandleDragAndDropTarget([&](uint32_t hash, const ImGuiPayload* payload) {
 					if (hash == sceneObjectHash)
 					{
 						const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
-						ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, objectPayload.pObject });
+						ObjectDNDEventDispatcher().Dispatch({ m_CachedPath, GetEditableEntity(objectPayload.EntityID, objectPayload.SceneID) });
 						return;
 					}
 

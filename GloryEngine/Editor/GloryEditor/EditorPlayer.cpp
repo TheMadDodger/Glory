@@ -61,8 +61,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenes->GetOpenScene(i);
-			Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
-			pRegistry->InvokeAll(Utils::ECS::InvocationType::Start);
+			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Start);
 		}
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
@@ -87,8 +86,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenes->GetOpenScene(i);
-			Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
-			pRegistry->InvokeAll(Utils::ECS::InvocationType::Stop);
+			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Stop);
 		}
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
@@ -155,11 +153,10 @@ namespace Glory::Editor
 			for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
 			{
 				GScene* pScene = pScenes->GetOpenScene(i);
-				Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
 				for (size_t i = 0; i < ComponentsToUpdateInEditor.size(); i++)
 				{
 					uint32_t hash = ResourceType::GetHash(ComponentsToUpdateInEditor[i]);
-					pRegistry->InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
+					pScene->GetRegistry().InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
 				}
 			}
 		}

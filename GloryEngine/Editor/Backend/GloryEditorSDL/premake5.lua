@@ -38,6 +38,7 @@ project "GloryEditorSDL"
 		"%{IncludeDir.FA}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.ECS}",
 
 		"%{SubmodoleDirs.ImGui}/backends/",
 	}
@@ -56,6 +57,7 @@ project "GloryEditorSDL"
 	{
 		"GloryCore",
 		"GloryReflect",
+		"GloryECS",
 		"GlorySDLWindow",
 
 		"yaml-cpp",

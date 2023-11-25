@@ -96,11 +96,24 @@ namespace Glory
 		 */
 		void SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 
-		/** @brief Get number of children on an entity */
+		/** @brief Get number of children on an entity
+		 * @param entity ID of the entity, set to 0 to get the child count on the root
+		 */
 		size_t ChildCount(Utils::ECS::EntityID entity) const;
 
-		/** @brief Get a child entity by index on an entity */
+		/** @brief Get a child entity by index on an entity
+		 * @param entity ID of the entity, set to 0 to get the child on the root
+		 * @param index Index of the child
+		 * @returns @ref Utils::ECS::EntityID of the child entity,
+		 * you will need to check if the entity is valid
+		 */
 		Utils::ECS::EntityID Child(Utils::ECS::EntityID entity, size_t index) const;
+
+		/** @brief Get entity handle of a child entity
+		 *
+		 * See @ref GScene::Child() for more info.
+		 */
+		Entity ChildEntity(Utils::ECS::EntityID entity, size_t index);
 
 		/** @brief Get the sibling index of an entity */
 		size_t SiblingIndex(Utils::ECS::EntityID entity) const;

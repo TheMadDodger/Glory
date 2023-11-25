@@ -8,6 +8,8 @@
 #include "CreateObjectAction.h"
 #include "DeleteSceneObjectAction.h"
 #include "EditorAssetDatabase.h"
+#include "EditableEntity.h"
+#include "EntityEditor.h"
 
 #include <AssetManager.h>
 #include <Game.h>
@@ -42,14 +44,16 @@ namespace Glory::Editor
 		{
 		case T_SceneObject:
 		{
-			SceneObject* pSceneObject = (SceneObject*)pObject;
+			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			YAML::Emitter out;
 			out << YAML::BeginMap;
 			out << YAML::Key << "Type";
 			out << YAML::Value << "SceneObject";
 			out << YAML::Key << "Value";
 			out << YAML::Value << YAML::BeginSeq;
-			EditorSceneManager::SerializeObjects(pSceneObject, out);
+			/** @todo for rework */
+			throw new std::exception("todo...");
+			//EditorSceneManager::SerializeObjects(pSceneObject, out);
 			out << YAML::EndSeq;
 			out << YAML::EndMap;
 			ImGui::SetClipboardText(out.c_str());
@@ -128,7 +132,7 @@ namespace Glory::Editor
 		{
 			if (type != "SceneObject") return;
 			GScene* pScene = (GScene*)pObject;
-			EditorSceneManager::PasteSceneObject(pScene, nullptr, valueNode);
+			EditorSceneManager::PasteSceneObject(pScene, {}, valueNode);
 			break;
 		}
 		case T_Hierarchy:
@@ -137,13 +141,13 @@ namespace Glory::Editor
 			if (type != "SceneObject") return;
 			GScene* pScene = EditorSceneManager::GetActiveScene();
 			if (!pScene) pScene = EditorSceneManager::NewScene();
-			SceneObject* pSceneObject = nullptr;
+			EditableEntity* pSceneObject = nullptr;
 			if (pObject)
 			{
-				pSceneObject = (SceneObject*)pObject;
-				pScene = pSceneObject->GetScene();
+				pSceneObject = (EditableEntity*)pObject;
+				pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
 			}
-			EditorSceneManager::PasteSceneObject(pScene, pSceneObject, valueNode);
+			EditorSceneManager::PasteSceneObject(pScene, pSceneObject ? pSceneObject->EntityID() : 0, valueNode);
 			break;
 		}
 
@@ -180,8 +184,10 @@ namespace Glory::Editor
 		{
 		case T_SceneObject:
 		{
-			SceneObject* pSceneObject = (SceneObject*)pObject;
-			EditorSceneManager::DuplicateSceneObject(pSceneObject);
+			EditableEntity* pSceneObject = (EditableEntity*)pObject;
+			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+			Entity entity = pScene->GetEntityByEntityID(pSceneObject->EntityID());
+			EditorSceneManager::DuplicateSceneObject(entity);
 			break;
 		}
 		case T_Resource:
@@ -216,13 +222,13 @@ namespace Glory::Editor
 		{
 		case ObjectMenuType::T_SceneObject:
 		{
-			SceneObject* pSceneObject = (SceneObject*)pObject;
-			GScene* pScene = pSceneObject->GetScene();
+			EditableEntity* pSceneObject = (EditableEntity*)pObject;
+			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
 			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
-			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
-			Undo::AddAction(new DeleteSceneObjectAction(pSceneObject));
-			pScene->DeleteObject(pSceneObject);
-			Undo::StopRecord();
+			//Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
+			//Undo::AddAction(new DeleteSceneObjectAction(pSceneObject));
+			pScene->DestroyEntity(pSceneObject->EntityID());
+			//Undo::StopRecord();
 			break;
 		}
 
@@ -284,11 +290,11 @@ namespace Glory::Editor
 			Selection::SetActiveObject(nullptr);
 			GScene* pActiveScene = Game::GetGame().GetEngine()->GetSceneManager()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
-			SceneObject* pNewObject = pActiveScene->CreateEmptyObject();
-			Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
-			Undo::AddAction(new CreateObjectAction(pNewObject));
-			Undo::StopRecord();
-			Selection::SetActiveObject(pNewObject);
+			Entity newEnity = pActiveScene->CreateEmptyObject();
+			//Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
+			//Undo::AddAction(new CreateObjectAction(pNewObject));
+			//Undo::StopRecord();
+			Selection::SetActiveObject(GetEditableEntity(newEnity.GetEntityID(), newEnity.GetScene()));
 			return;
 		}
 
@@ -299,27 +305,27 @@ namespace Glory::Editor
 			Selection::SetActiveObject(nullptr);
 			GScene* pScene = (GScene*)pObject;
 			if (pScene == nullptr) return;
-			SceneObject* pNewObject = pScene->CreateEmptyObject();
-			Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
-			Undo::AddAction(new CreateObjectAction(pNewObject));
-			Undo::StopRecord();
-			Selection::SetActiveObject(pNewObject);
+			Entity newEntity = pScene->CreateEmptyObject();
+			//Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
+			//Undo::AddAction(new CreateObjectAction(pNewObject));
+			//Undo::StopRecord();
+			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}
 
 		case ObjectMenuType::T_SceneObject:
 		{
 			Selection::SetActiveObject(nullptr);
-			SceneObject* pSceneObject = (SceneObject*)pObject;
+			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			if (pSceneObject == nullptr) return;
-			GScene* pScene = pSceneObject->GetScene();
+			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
 			if (pScene == nullptr) return;
-			SceneObject* pNewObject = pScene->CreateEmptyObject();
-			Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
-			Undo::AddAction(new CreateObjectAction(pNewObject));
-			pNewObject->SetParent(pSceneObject);
-			Undo::StopRecord();
-			Selection::SetActiveObject(pNewObject);
+			Entity newEntity = pScene->CreateEmptyObject();
+			//Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
+			//Undo::AddAction(new CreateObjectAction(pNewObject));
+			newEntity.SetParent(pSceneObject->EntityID());
+			//Undo::StopRecord();
+			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}
 		default:

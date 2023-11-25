@@ -1,6 +1,7 @@
 #include "ObjectPicker.h"
 #include "EditorUI.h"
 #include "DND.h"
+#include "EditableEntity.h"
 
 #include <WindowModule.h>
 #include <Engine.h>
@@ -13,11 +14,11 @@
 
 namespace Glory::Editor
 {
-	DND DragAndDropTarget = { { ResourceType::GetHash<SceneObject>() }};
+	DND DragAndDropTarget = { { ResourceType::GetHash<EditableEntity>() }};
 
 	char ObjectPicker::m_FilterBuffer[200] = "";
 	std::string ObjectPicker::m_Filter = "";
-	std::vector<SceneObject*> ObjectPicker::m_FilteredObjects;
+	std::vector<Entity> ObjectPicker::m_FilteredObjects;
 
 	bool ObjectPicker::ObjectDropdown(const std::string& label, SceneObjectRef* value, const float borderPadding)
 	{
@@ -27,13 +28,14 @@ namespace Glory::Editor
 	bool ObjectPicker::ObjectDropdown(const std::string& label, UUID* sceneValue, UUID* objectValue, const float borderPadding)
 	{
 		GScene* pScene = EditorSceneManager::GetOpenScene(*sceneValue);
-		SceneObject* pObject = pScene ? pScene->FindSceneObject(*objectValue) : nullptr;
+		Entity entity = pScene ? pScene->GetEntityByUUID(*objectValue) : Entity{};
 
 		ImGui::PushID(label.c_str());
 		std::string objectName = "";
-		bool missing = *sceneValue != 0 && *objectValue != 0 && (pScene == nullptr || pObject == nullptr);
+		bool missing = *sceneValue != 0 && *objectValue != 0 && (pScene == nullptr || !entity.IsValid());
 
-		objectName = missing ? "Missing Object" : (!pObject ? "Noone" : pObject->Name() + ": " + std::to_string(pObject->GetUUID()));
+		const std::string name{entity.Name()};
+		objectName = missing ? "Missing Object" : (!entity.IsValid() ? "Noone" : name + ": " + std::to_string(entity.EntityUUID()));
 
 		bool openPopup = false;
 		float start, width;
@@ -48,8 +50,10 @@ namespace Glory::Editor
 		change = DragAndDropTarget.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* payload)
 		{
 			const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
-			*sceneValue = objectPayload.pObject->GetScene()->GetUUID();
-			*objectValue = objectPayload.pObject->GetUUID();
+			GScene* pScene = EditorSceneManager::GetOpenScene(objectPayload.SceneID);
+			Entity draggingEntity = pScene->GetEntityByEntityID(objectPayload.EntityID);
+			*sceneValue = pScene->GetUUID();
+			*objectValue = draggingEntity.EntityUUID();
 		});
 
 		if (openPopup)
@@ -80,12 +84,12 @@ namespace Glory::Editor
 		for (size_t i = 0; i < EditorSceneManager::OpenSceneCount(); ++i)
 		{
 			GScene* pScene = EditorSceneManager::GetOpenScene(i);
-			for (size_t j = 0; j < pScene->SceneObjectsCount(); ++j)
+			for (size_t j = 0; j < pScene->ChildCount(0); ++j)
 			{
-				SceneObject* pObject = pScene->GetSceneObject(j);
-				if (!m_Filter.empty() && pObject->Name().find(m_Filter) == std::string::npos &&
-					std::to_string(pObject->GetUUID()).find(m_Filter) == std::string::npos) continue;
-				m_FilteredObjects.push_back(pObject);
+				Entity child = pScene->ChildEntity(0, j);
+				if (!m_Filter.empty() && child.Name().find(m_Filter) == std::string::npos &&
+					std::to_string(child.EntityUUID()).find(m_Filter) == std::string::npos) continue;
+				m_FilteredObjects.push_back(child);
 			}
 		}
 	}
@@ -118,28 +122,28 @@ namespace Glory::Editor
 			GScene* pLastScene = nullptr;
 			for (size_t i = 0; i < m_FilteredObjects.size(); ++i)
 			{
-				SceneObject* pObject = m_FilteredObjects[i];
-				if (pLastScene != pObject->GetScene())
+				Entity entity = m_FilteredObjects[i];
+				if (pLastScene != entity.GetScene())
 				{
 					if (pLastScene) ImGui::PopID();
-					pLastScene = pObject->GetScene();
+					pLastScene = entity.GetScene();
 					ImGui::PushID(pLastScene->Name().c_str());
 					ImGui::Separator();
 					ImGui::TextDisabled("Scene: %s", pLastScene->Name().c_str());
 				}
 
-				const std::string uuidString = std::to_string(pObject->GetUUID());
+				const std::string uuidString = std::to_string(entity.EntityUUID());
 				ImGui::PushID(uuidString.data());
-				const bool selected = *sceneValue == pLastScene->GetUUID() && *objectValue == pObject->GetUUID();
+				const bool selected = *sceneValue == pLastScene->GetUUID() && *objectValue == entity.EntityUUID();
 				if (ImGui::Selectable("##selectable", selected, ImGuiSelectableFlags_AllowItemOverlap))
 				{
 					*sceneValue = pLastScene->GetUUID();
-					*objectValue = pObject->GetUUID();
+					*objectValue = entity.EntityUUID();
 					m_FilteredObjects.clear();
 					objectChosen = true;
 				}
 				ImGui::SameLine();
-				ImGui::Text("%s: %s", pObject->Name().c_str(), uuidString.data());
+				ImGui::Text("%s: %s", entity.Name().data(), uuidString.data());
 				ImGui::PopID();
 			}
 			if (pLastScene) ImGui::PopID();

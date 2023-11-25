@@ -35,6 +35,7 @@ namespace Glory
 		    Reflect::RegisterType<T>();
 		}
 
+		uint32_t GetHoveringObject() const;
 		void SetHoveringObject(uint32_t objectID);
 
 	private:

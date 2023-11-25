@@ -63,8 +63,11 @@ namespace Glory
 
 		bool IsActiveSelf() const;
 		bool IsActive() const;
+		bool IsHierarchyActive() const;
 		void SetActive(bool active);
 		void SetActiveHierarchy(bool active);
+
+		std::string_view Name() const;
 
 	private:
 		Utils::ECS::EntityID m_EntityID;

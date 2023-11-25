@@ -4,6 +4,7 @@
 #include "CreateObjectAction.h"
 #include "Undo.h"
 
+#include <SceneSerializer.h>
 #include <Game.h>
 #include <Engine.h>
 #include <SceneManager.h>
@@ -235,63 +236,68 @@ namespace Glory::Editor
 		return m_DirtySceneIDs.size() > 0;
 	}
 
-	void EditorSceneManager::DuplicateSceneObject(SceneObject* pObject)
+	void EditorSceneManager::DuplicateSceneObject(Entity entity)
 	{
-		if (!pObject) return;
+		if (!entity.IsValid()) return;
 
 		/* Get correct parent to deserialize to */
-		SceneObject* pParent = pObject->GetParent();
-		GScene* pScene = pObject->GetScene();
+		GScene* pScene = entity.GetScene();
 		if (!pScene) pScene = EditorSceneManager::GetActiveScene();
 		if (!pScene) pScene = EditorSceneManager::NewScene();
 
 		/* Serialize the objects entire heirarchy */
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
-		SerializeObjects(pObject, out);
+		SerializeObjects(entity, out);
 		out << YAML::EndSeq;
 
 		/* Deserialize node into a new objects */
 		YAML::Node node = YAML::Load(out.c_str());
-		PasteSceneObject(pScene, pParent, node);
+		PasteSceneObject(pScene, entity.Parent(), node);
 	}
 
-	void EditorSceneManager::PasteSceneObject(GScene* pScene, SceneObject* pParent, YAML::Node& node)
+	void EditorSceneManager::PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, YAML::Node& node)
 	{
+		/** @todo for rework */
+		throw new std::exception("todo...");
+
 		/* Deserialize node into a new objects */
-		for (size_t i = 0; i < node.size(); i++)
-		{
-			YAML::Node objectNode = node[i];
-			if (i == 0 && pParent)
-			{
-				const UUID parentUUID = pParent->GetUUID();
-				objectNode["ParentUUID"] = (uint64_t)parentUUID;
-				Serializer::SetUUIDRemap(parentUUID, parentUUID);
-			}
+		//for (size_t i = 0; i < node.size(); i++)
+		//{
+		//	YAML::Node objectNode = node[i];
+		//	if (i == 0 && pParent)
+		//	{
+		//		const UUID parentUUID = pParent->GetUUID();
+		//		objectNode["ParentUUID"] = (uint64_t)parentUUID;
+		//		Serializer::SetUUIDRemap(parentUUID, parentUUID);
+		//	}
 
-			SceneObject* pDupedObject = (SceneObject*)Serializer::DeserializeObject(pScene, objectNode, Serializer::Flags(Serializer::Flags::GenerateNewUUIDs));
-			if (i == 0 && pDupedObject)
-			{
-				Undo::StartRecord("Duplicate", pDupedObject->GetUUID());
-				Undo::AddAction(new CreateObjectAction(pDupedObject));
-				Undo::StopRecord();
-			}
-		}
+		//	SceneObject* pDupedObject = (SceneObject*)Serializer::DeserializeObject(pScene, objectNode, Serializer::Flags(Serializer::Flags::GenerateNewUUIDs));
+		//	if (i == 0 && pDupedObject)
+		//	{
+		//		//Undo::StartRecord("Duplicate", pDupedObject->GetUUID());
+		//		//Undo::AddAction(new CreateObjectAction(pDupedObject));
+		//		//Undo::StopRecord();
+		//	}
+		//}
 
-		Serializer::ClearUUIDRemapCache();
+		//Serializer::ClearUUIDRemapCache();
 
-		/* Set scene dirty */
-		SetSceneDirty(pScene);
+		///* Set scene dirty */
+		//SetSceneDirty(pScene);
 	}
 
-	void EditorSceneManager::SerializeObjects(SceneObject* pObject, YAML::Emitter& out)
+	void EditorSceneManager::SerializeObjects(Entity entity, YAML::Emitter& out)
 	{
-		if (pObject->GetScene()->PrefabChild(pObject->GetUUID())) return;
+		/** @todo for rework */
+		throw new std::exception("todo...");
+
+		/*if (pObject->GetScene()->PrefabChild(pObject->GetUUID())) return;
 		Serializer::SerializeObject(pObject, out);
 		for (size_t i = 0; i < pObject->ChildCount(); i++)
 		{
 			SerializeObjects(pObject->GetChild(i), out);
-		}
+		}*/
 	}
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)

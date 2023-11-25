@@ -104,6 +104,11 @@ namespace Glory
 		return m_pRegistry->GetEntityView(m_EntityID)->IsActive();
 	}
 
+	bool Entity::IsHierarchyActive() const
+	{
+		return m_pRegistry->GetEntityView(m_EntityID)->HierarchyActive();
+	}
+
 	void Entity::SetActive(bool active)
 	{
 		m_pRegistry->GetEntityView(m_EntityID)->Active() = active;
@@ -112,5 +117,10 @@ namespace Glory
 	void Entity::SetActiveHierarchy(bool active)
 	{
 		m_pRegistry->GetEntityView(m_EntityID)->HierarchyActive() = active;
+	}
+
+	std::string_view Entity::Name() const
+	{
+		return m_pGScene->EntityName(m_EntityID);
 	}
 }

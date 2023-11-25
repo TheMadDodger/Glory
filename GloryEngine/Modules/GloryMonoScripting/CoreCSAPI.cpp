@@ -441,7 +441,7 @@ namespace Glory
 		if (!pScene) return;
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return;
-		pScene->SetName(entity.GetEntityID(), std::string{mono_string_to_utf8(name)});
+		pScene->SetEntityName(entity.GetEntityID(), std::string{mono_string_to_utf8(name)});
 	}
 
 	size_t SceneObject_GetSiblingIndex(uint64_t objectID, uint64_t sceneID)

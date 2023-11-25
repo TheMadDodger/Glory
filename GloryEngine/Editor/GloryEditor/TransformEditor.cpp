@@ -3,6 +3,7 @@
 #include "GizmoAction.h"
 
 #include <Engine.h>
+#include <GScene.h>
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
 #include <EditorUI.h>
@@ -130,10 +131,13 @@ namespace Glory::Editor
 		Transform& transform = GetTargetComponent();
 
 		glm::mat4 localTransform = newTransform;
+		Utils::ECS::EntityID entity = m_pComponentObject->EntityID();
+		GScene* pScene = m_pComponentObject->GetRegistry()->GetUserData<GScene*>();
+		Entity entityHandle = pScene->GetEntityByEntityID(entity);
 
-		if (transform.Parent.IsValid())
+		if (entityHandle.ParentEntity().IsValid())
 		{
-			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+			Transform& parentTransform = entityHandle.ParentEntity().GetComponent<Transform>();
 			localTransform = glm::inverse(parentTransform.MatTransform) * localTransform;
 		}
 		glm::vec3 right(localTransform[0][0], localTransform[0][1], localTransform[0][2]);

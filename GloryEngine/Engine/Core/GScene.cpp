@@ -160,6 +160,11 @@ namespace Glory
 		return m_Registry.Child(entity, index);
 	}
 
+	Entity GScene::ChildEntity(Utils::ECS::EntityID entity, size_t index)
+	{
+		return GetEntityByEntityID(Child(entity, index));
+	}
+
 	size_t GScene::SiblingIndex(Utils::ECS::EntityID entity) const
 	{
 		return m_Registry.SiblingIndex(entity);

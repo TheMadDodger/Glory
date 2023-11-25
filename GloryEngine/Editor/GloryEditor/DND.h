@@ -4,10 +4,10 @@
 #include <filesystem>
 #include <UUID.h>
 #include <imgui.h>
+#include <EntityID.h>
 
 namespace Glory
 {
-	class SceneObject;
 	class Resource;
 }
 
@@ -15,7 +15,8 @@ namespace Glory::Editor
 {
 	struct ObjectPayload
 	{
-		SceneObject* pObject;
+		Utils::ECS::EntityID EntityID;
+		UUID SceneID;
 	};
 
 	struct AssetPayload

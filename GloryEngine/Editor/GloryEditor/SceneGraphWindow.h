@@ -1,9 +1,12 @@
 #pragma once
 #include "EditorWindow.h"
 
+#include <EntityID.h>
+
 namespace Glory
 {
 	class GScene;
+	class Entity;
 
 namespace Editor
 {
@@ -17,14 +20,14 @@ namespace Editor
 		virtual void OnGUI() override;
 
 		void SceneDropdown(size_t index, GScene* pScene, bool isActive);
-		bool ChildrenList(size_t index, SceneObject* pObject);
+		bool ChildrenList(size_t index, Entity& entity);
 
 		bool GetExcludedObjectsFromFilterRecursive(GScene* pScene);
-		bool GetExcludedObjectsFromFilterRecursive(SceneObject* pObject);
+		bool GetExcludedObjectsFromFilterRecursive(Entity& entity);
 
 		bool IsExcluded(const UUID uuid);
 
-		bool HandleAssetDragAndDrop(SceneObject* pParent, uint32_t dndHash, const ImGuiPayload* pPayload);
+		bool HandleAssetDragAndDrop(Utils::ECS::EntityID entity, GScene* pScene, uint32_t dndHash, const ImGuiPayload* pPayload);
 
 	private:
 		static const size_t SearchBufferSize = 1000;

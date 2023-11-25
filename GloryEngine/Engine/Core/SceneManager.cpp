@@ -15,6 +15,11 @@
 
 namespace Glory
 {
+	uint32_t SceneManager::GetHoveringObject() const
+	{
+		return m_HoveringObjectID;
+	}
+
 	void SceneManager::SetHoveringObject(uint32_t objectID)
 	{
 		m_HoveringObjectID = objectID;
