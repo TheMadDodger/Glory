@@ -267,8 +267,8 @@ namespace Glory::Editor
 				UUID uuid = UUID();
 				size_t index = m_pComponentEditors.size();
 				pRegistry.CreateComponent(entityID, toAddTypeHash, uuid);
-				//Undo::AddAction(new AddComponentAction(toAddTypeHash, uuid, index));
-				//Undo::StopRecord();
+				Undo::AddAction(new AddComponentAction(toAddTypeHash, uuid, index));
+				Undo::StopRecord();
 
 				m_AddingComponent = false;
 				Initialize();

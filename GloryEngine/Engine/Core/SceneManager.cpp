@@ -8,7 +8,6 @@
 
 #include "Serializer.h"
 #include "SceneSerializer.h"
-#include "SceneObjectSerializer.h"
 #include "ScriptedComponentSerializer.h"
 
 #include <Reflection.h>
@@ -25,7 +24,8 @@ namespace Glory
 		m_HoveringObjectID = objectID;
 	}
 
-	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0)
+	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
+		m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
 	{
 	}
 

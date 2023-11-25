@@ -229,6 +229,27 @@ namespace Glory
 		return entity;
 	}
 
+	void GScene::DelayedSetParent(Entity entity, UUID parentID)
+	{
+		if (!entity.IsValid() || parentID == NULL) return;
+		m_DelayedParents.emplace_back(DelayedParentData(entity, parentID));
+	}
+
+	void GScene::HandleDelayedParents()
+	{
+		std::for_each(m_DelayedParents.begin(), m_DelayedParents.end(), [&](DelayedParentData& data) {
+			Entity parent = GetEntityByUUID(data.ParentID);
+			if (!parent.IsValid())
+			{
+				std::string name{data.ObjectToParent.Name()};
+				Debug::LogError("Could not set delayed parent for object " + name + " because the parent does not exist!");
+				return;
+			}
+			data.ObjectToParent.SetParent(parent.GetEntityID());
+		});
+		m_DelayedParents.clear();
+	}
+
 	void GScene::OnTick()
 	{
 		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Update);

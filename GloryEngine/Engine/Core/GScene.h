@@ -16,6 +16,14 @@ namespace Glory
 		class EntityRegistry;
 	}
 
+	struct DelayedParentData
+	{
+		DelayedParentData(Entity pObjectToParent, UUID parentID) : ObjectToParent(pObjectToParent), ParentID(parentID) {}
+		
+		Entity ObjectToParent;
+		UUID ParentID;
+	};
+
 	/** @brief Glory Scene */
 	class GScene : public Resource
 	{
@@ -157,6 +165,15 @@ namespace Glory
 		Entity InstantiatePrefab(UUID parent, PrefabData* pPrefab, UUIDRemapper& remapper,
 		    const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
 
+		/** @brief Set the parent of an entity at the next @ref HandleDelayedParents() call
+		 *
+		 * Used when an entity doesn't exist yet but will exist in the future
+		 */
+		void DelayedSetParent(Entity entity, UUID parentID);
+
+		/** @brief Handle all delayed parents requested by @ref DelayedSetParent() calls. */
+		void HandleDelayedParents();
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();
@@ -197,5 +214,7 @@ namespace Glory
 		std::map<UUID, UUID> m_ActivePrefabChildren;
 
 		Utils::ECS::EntityRegistry m_Registry;
+
+		std::vector<DelayedParentData> m_DelayedParents;
 	};
 }

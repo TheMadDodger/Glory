@@ -41,6 +41,13 @@ namespace Glory::Utils::ECS
 	void EntityRegistry::DestroyEntity(EntityID entity)
 	{
 		EntityView* pEntityView = GetEntityView(entity);
+		/* Destroy children first */
+		for (size_t i = 0; i < pEntityView->ChildCount(); ++i)
+		{
+			DestroyEntity(pEntityView->Child(i));
+		}
+
+		/* Remove all components */
 		for (auto it = pEntityView->m_ComponentTypes.begin(); it != pEntityView->m_ComponentTypes.end(); it++)
 		{
 			uint32_t typeHash = it->second;
@@ -50,6 +57,7 @@ namespace Glory::Utils::ECS
 			pTypeView->Remove(entity);
 		}
 
+		/* Update parent */
 		if (pEntityView->m_Parent)
 		{
 			/* Remove from parent children array */
@@ -64,6 +72,7 @@ namespace Glory::Utils::ECS
 			m_RootOrder.erase(itor);
 		}
 
+		/* Delete view */
 		delete pEntityView;
 		m_pEntityViews.erase(entity);
 	}
