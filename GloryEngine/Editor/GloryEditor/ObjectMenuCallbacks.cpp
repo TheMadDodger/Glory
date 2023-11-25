@@ -225,10 +225,10 @@ namespace Glory::Editor
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
 			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
-			//Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
-			//Undo::AddAction(new DeleteSceneObjectAction(pSceneObject));
+			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
+			Undo::AddAction(new DeleteSceneObjectAction(pScene, pSceneObject->EntityID()));
 			pScene->DestroyEntity(pSceneObject->EntityID());
-			//Undo::StopRecord();
+			Undo::StopRecord();
 			break;
 		}
 
@@ -291,9 +291,9 @@ namespace Glory::Editor
 			GScene* pActiveScene = Game::GetGame().GetEngine()->GetSceneManager()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
 			Entity newEnity = pActiveScene->CreateEmptyObject();
-			//Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
-			//Undo::AddAction(new CreateObjectAction(pNewObject));
-			//Undo::StopRecord();
+			Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
+			Undo::AddAction(new CreateObjectAction(pActiveScene));
+			Undo::StopRecord();
 			Selection::SetActiveObject(GetEditableEntity(newEnity.GetEntityID(), newEnity.GetScene()));
 			return;
 		}
@@ -306,9 +306,9 @@ namespace Glory::Editor
 			GScene* pScene = (GScene*)pObject;
 			if (pScene == nullptr) return;
 			Entity newEntity = pScene->CreateEmptyObject();
-			//Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
-			//Undo::AddAction(new CreateObjectAction(pNewObject));
-			//Undo::StopRecord();
+			Undo::StartRecord("Create Empty Object", newEntity.EntityUUID());
+			Undo::AddAction(new CreateObjectAction(pScene));
+			Undo::StopRecord();
 			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}
@@ -321,10 +321,10 @@ namespace Glory::Editor
 			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
 			if (pScene == nullptr) return;
 			Entity newEntity = pScene->CreateEmptyObject();
-			//Undo::StartRecord("Create Empty Object", pNewObject->GetUUID());
-			//Undo::AddAction(new CreateObjectAction(pNewObject));
+			Undo::StartRecord("Create Empty Object", newEntity.EntityUUID());
+			Undo::AddAction(new CreateObjectAction(pScene));
 			newEntity.SetParent(pSceneObject->EntityID());
-			//Undo::StopRecord();
+			Undo::StopRecord();
 			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}

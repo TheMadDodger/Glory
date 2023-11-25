@@ -3,7 +3,6 @@
 #include "EditableEntity.h"
 
 #include <Editor.h>
-#include <SceneObject.h>
 #include <EntityComponentObject.h>
 #include <filesystem>
 

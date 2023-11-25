@@ -1,52 +1,64 @@
-//#include "DeleteSceneObjectAction.h"
-//#include <SceneManager.h>
-//#include <Serializer.h>
-//#include <SceneObject.h>
-//#include <GScene.h>
-//#include <Engine.h>
-//
-//namespace Glory::Editor
-//{
-//	DeleteSceneObjectAction::DeleteSceneObjectAction(SceneObject* pDeletedObject) : m_OriginalSceneUUID(pDeletedObject->GetScene()->GetUUID())
-//	{
-//		YAML::Emitter out;
-//		out << YAML::BeginSeq;
-//		SerializeRecursive(pDeletedObject, out);
-//		out << YAML::EndSeq;
-//		m_SerializedObject = out.c_str();
-//	}
-//
-//	DeleteSceneObjectAction::~DeleteSceneObjectAction()
-//	{
-//	}
-//
-//	void DeleteSceneObjectAction::OnUndo(const ActionRecord& actionRecord)
-//	{
-//		SceneManager* pScenesModule = Game::GetGame().GetEngine()->GetSceneManager();
-//		GScene* pScene = pScenesModule->GetOpenScene(m_OriginalSceneUUID);
-//		if (pScene == nullptr) return;
-//		YAML::Node node = YAML::Load(m_SerializedObject.c_str());
-//		for (size_t i = 0; i < node.size(); i++)
-//		{
-//			YAML::Node subNode = node[i];
-//			SceneObject* pSceneObject = Serializer::DeserializeObject<SceneObject>(pScene, subNode);
-//		}
-//	}
-//
-//	void DeleteSceneObjectAction::OnRedo(const ActionRecord& actionRecord)
-//	{
-//		SceneObject* pSceneObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
-//		if (pSceneObject == nullptr) return;
-//		pSceneObject->GetScene()->DeleteObject(pSceneObject);
-//	}
-//
-//	void DeleteSceneObjectAction::SerializeRecursive(SceneObject* pDeletedObject, YAML::Emitter& out)
-//	{
-//		Serializer::SerializeObject(pDeletedObject, out);
-//		for (size_t i = 0; i < pDeletedObject->ChildCount(); i++)
-//		{
-//			SceneObject* pChild = pDeletedObject->GetChild(i);
-//			SerializeRecursive(pChild, out);
-//		}
-//	}
-//}
+#include "DeleteSceneObjectAction.h"
+#include "EditorSceneManager.h"
+#include "Selection.h"
+#include "EntityEditor.h"
+#include "EditableEntity.h"
+
+#include <SceneSerializer.h>
+#include <GScene.h>
+
+namespace Glory::Editor
+{
+	DeleteSceneObjectAction::DeleteSceneObjectAction(GScene* pScene, Utils::ECS::EntityID deletedEntity) : m_OriginalSceneUUID(pScene->GetUUID())
+	{
+		YAML::Emitter out;
+		out << YAML::BeginSeq;
+		SceneSerializer::SerializeEntityRecursive(pScene, deletedEntity, out);
+		out << YAML::EndSeq;
+		m_SerializedObject = out.c_str();
+	}
+
+	DeleteSceneObjectAction::~DeleteSceneObjectAction()
+	{
+	}
+
+	void DeleteSceneObjectAction::OnUndo(const ActionRecord& actionRecord)
+	{
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_OriginalSceneUUID);
+		if (pScene == nullptr) return;
+		YAML::Node node = YAML::Load(m_SerializedObject.c_str());
+		Utils::NodeRef entities{node};
+		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
+		{
+			Utils::NodeValueRef entity = entities.ValueRef()[i];
+			SceneSerializer::DeserializeEntity(pScene, entity.Node());
+		}
+
+		if (!m_WasSelected) return;
+		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).EntityUUID(), pScene));
+	}
+
+	void DeleteSceneObjectAction::OnRedo(const ActionRecord& actionRecord)
+	{
+		m_WasSelected = false;
+		if (Selection::GetActiveObject()->GetUUID() == actionRecord.ObjectID)
+		{
+			Selection::SetActiveObject(nullptr);
+			m_WasSelected = true;
+		}
+
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_OriginalSceneUUID);
+
+		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
+		if (!entity.IsValid()) return;
+
+		/* Take a snapshot of the object for redoing */
+		YAML::Emitter out;
+		out << YAML::BeginSeq;
+		SceneSerializer::SerializeEntityRecursive(pScene, entity.GetEntityID(), out);
+		out << YAML::EndSeq;
+		m_SerializedObject = out.c_str();
+
+		pScene->DestroyEntity(entity.GetEntityID());
+	}
+}

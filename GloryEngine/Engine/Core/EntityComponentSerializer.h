@@ -1,7 +1,6 @@
 #pragma once
 #include "Serializer.h"
 #include "EntityComponentObject.h"
-#include "SceneObject.h"
 
 namespace Glory
 {

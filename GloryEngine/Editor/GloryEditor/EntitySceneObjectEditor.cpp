@@ -250,9 +250,9 @@ namespace Glory::Editor
 		if (removeComponent)
 		{
 			Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
-			//Undo::AddAction(new RemoveComponentAction(pRegistry, entityID, toRemoveComponent));
+			Undo::AddAction(new RemoveComponentAction(&pRegistry, entityID, toRemoveComponent));
 			pRegistry.RemoveComponentAt(entityID, toRemoveComponent);
-			//Undo::StopRecord();
+			Undo::StopRecord();
 
 			Initialize();
 			change = true;

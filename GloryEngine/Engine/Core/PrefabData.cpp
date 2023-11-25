@@ -1,5 +1,4 @@
 #include "PrefabData.h"
-#include "SceneObject.h"
 #include "SceneSerializer.h"
 #include "GScene.h"
 

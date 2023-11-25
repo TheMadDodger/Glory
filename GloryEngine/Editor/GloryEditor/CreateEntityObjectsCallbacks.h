@@ -11,9 +11,9 @@
 	if (!newEntity.IsValid()) return; \
 	newEntity.AddComponent<component>(CTOR_ARGS ctor); \
 	Selection::SetActiveObject(nullptr); \
-	/*Undo::StartRecord("Create Empty Object", pNewObject->GetUUID()); \
-	Undo::AddAction(new CreateObjectAction(pNewObject)); \
-	Undo::StopRecord();*/ \
+	Undo::StartRecord("Create Empty Object", newEntity.EntityUUID()); \
+	Undo::AddAction(new CreateObjectAction(newEntity.GetScene())); \
+	Undo::StopRecord(); \
 	Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene())); \
 }
 

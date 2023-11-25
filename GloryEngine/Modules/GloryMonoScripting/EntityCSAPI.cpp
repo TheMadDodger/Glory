@@ -9,7 +9,6 @@
 
 #include <GScene.h>
 #include <SceneManager.h>
-#include <SceneObject.h>
 #include <ComponentTypes.h>
 #include <Components.h>
 #include <LayerManager.h>

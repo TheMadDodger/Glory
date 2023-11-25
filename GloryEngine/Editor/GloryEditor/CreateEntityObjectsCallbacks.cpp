@@ -3,7 +3,6 @@
 #include "EntityEditor.h"
 
 #include <SceneManager.h>
-#include <SceneObject.h>
 #include <Game.h>
 #include <Engine.h>
 #include <EditorSceneManager.h>

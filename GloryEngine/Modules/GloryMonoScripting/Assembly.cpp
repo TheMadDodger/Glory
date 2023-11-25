@@ -13,7 +13,6 @@
 #include <ImageData.h>
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
-#include <SceneObject.h>
 #include <PrefabData.h>
 
 #include <glm/detail/type_quat.hpp>
