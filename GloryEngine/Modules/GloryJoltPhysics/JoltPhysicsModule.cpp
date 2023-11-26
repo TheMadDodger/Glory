@@ -655,7 +655,6 @@ namespace Glory
 
 		Reflect::RegisterEnum<BodyType>();
 
-		/* @todo: Replace this with scene manager when that is a thing */
 		SceneManager* pScenes = m_pEngine->GetSceneManager();
 		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
 		pScenes->RegisterComponent<PhysicsBody>();

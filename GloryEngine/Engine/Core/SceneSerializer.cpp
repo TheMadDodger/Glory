@@ -167,7 +167,7 @@ namespace Glory
 		if (parentUuid != NULL)
 		{
 			Entity parentEntity = pScene->GetEntityByUUID(parentUuid);
-			if (parentEntity.IsValid()) pScene->DelayedSetParent(entityHandle, parentUuid);
+			if (!parentEntity.IsValid()) pScene->DelayedSetParent(entityHandle, parentUuid);
 			else entityHandle.SetParent(parentEntity.GetEntityID());
 		}
 		

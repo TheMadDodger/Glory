@@ -16,12 +16,11 @@
 
 namespace Glory::Editor
 {
-	/* @todo: Add types dynamically */
-	const std::vector<std::type_index> ComponentsToUpdateInEditor =
+	std::vector<uint32_t> ComponentsToUpdateInEditor =
 	{
-		typeid(Transform),
-		typeid(CameraComponent),
-		typeid(LookAt),
+		ResourceType::GetHash<Transform>(),
+		ResourceType::GetHash<CameraComponent>(),
+		ResourceType::GetHash<LookAt>()
 	};
 
 	std::vector<IPlayModeHandler*> EditorPlayer::m_pSceneLoopHandlers;
@@ -29,6 +28,11 @@ namespace Glory::Editor
 	void EditorPlayer::RegisterLoopHandler(IPlayModeHandler* pEditorLoopHandler)
 	{
 		m_pSceneLoopHandlers.push_back(pEditorLoopHandler);
+	}
+
+	void EditorPlayer::UpdateComponentInEditMode(uint32_t hash)
+	{
+		ComponentsToUpdateInEditor.push_back(hash);
 	}
 
 	void EditorPlayer::Start()
@@ -155,7 +159,7 @@ namespace Glory::Editor
 				GScene* pScene = pScenes->GetOpenScene(i);
 				for (size_t i = 0; i < ComponentsToUpdateInEditor.size(); i++)
 				{
-					uint32_t hash = ResourceType::GetHash(ComponentsToUpdateInEditor[i]);
+					const uint32_t hash = ComponentsToUpdateInEditor[i];
 					pScene->GetRegistry().InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
 				}
 			}
