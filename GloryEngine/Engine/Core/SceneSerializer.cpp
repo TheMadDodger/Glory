@@ -26,6 +26,8 @@ namespace Glory
 		
 		Entity parent = entityHandle.ParentEntity();
 		
+		if (pScene->PrefabChild(entityHandle.EntityUUID())) return;
+
 		out << YAML::BeginMap;
 		out << YAML::Key << "Name";
 		out << YAML::Value << std::string{entityHandle.Name()};
