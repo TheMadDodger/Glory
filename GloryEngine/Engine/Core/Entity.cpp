@@ -24,6 +24,7 @@ namespace Glory
 
 	void Entity::SetParent(Utils::ECS::EntityID parent)
 	{
+		if (parent == Parent()) return;
 		m_pRegistry->SetParent(m_EntityID, parent);
 	}
 
@@ -111,16 +112,33 @@ namespace Glory
 
 	void Entity::SetActive(bool active)
 	{
-		m_pRegistry->GetEntityView(m_EntityID)->Active() = active;
+		Utils::ECS::EntityView* pEntityView = m_pRegistry->GetEntityView(m_EntityID);
+		pEntityView->Active() = active;
+		UpdateHierarchyActive();
 	}
 
 	void Entity::SetActiveHierarchy(bool active)
 	{
-		m_pRegistry->GetEntityView(m_EntityID)->HierarchyActive() = active;
+		Utils::ECS::EntityView* pEntityView = m_pRegistry->GetEntityView(m_EntityID);
+		pEntityView->HierarchyActive() = active;
 	}
 
 	std::string_view Entity::Name() const
 	{
 		return m_pGScene->EntityName(m_EntityID);
+	}
+
+	void Entity::UpdateHierarchyActive()
+	{
+		Entity parent = ParentEntity();
+
+		const bool activeSelf = IsActiveSelf();
+		const bool activeHierarchy = IsActiveSelf() && (parent.IsValid() ? parent.IsHierarchyActive() : true);
+		SetActiveHierarchy(activeSelf && activeHierarchy);
+
+		for (size_t i = 0; i < ChildCount(); ++i)
+		{
+			ChildEntity(i).UpdateHierarchyActive();
+		}
 	}
 }

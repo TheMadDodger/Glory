@@ -133,7 +133,7 @@ namespace Glory
 		std::string_view EntityName(Utils::ECS::EntityID entity) const;
 
 		/** @brief Set the name of an entity */
-		void SetEntityName(Utils::ECS::EntityID entity, const std::string& name);
+		void SetEntityName(Utils::ECS::EntityID entity, const std::string_view name);
 
 		/** @brief Create a new Entity in the scene from a prefab
 		 * @param parent The entity to parent the created object to

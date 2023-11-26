@@ -182,7 +182,7 @@ namespace Glory
 		return itor->second;
 	}
 
-	void GScene::SetEntityName(Utils::ECS::EntityID entity, const std::string& name)
+	void GScene::SetEntityName(Utils::ECS::EntityID entity, const std::string_view name)
 	{
 		const auto itor = m_Names.find(entity);
 		if (itor == m_Names.end()) return;

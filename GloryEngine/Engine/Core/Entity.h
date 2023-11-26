@@ -70,6 +70,9 @@ namespace Glory
 		std::string_view Name() const;
 
 	private:
+		void UpdateHierarchyActive();
+
+	private:
 		Utils::ECS::EntityID m_EntityID;
 		Utils::ECS::EntityRegistry* m_pRegistry;
 		GScene* m_pGScene;

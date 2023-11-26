@@ -220,18 +220,23 @@ namespace Glory::Utils::ECS
 			const auto itor = std::find(oldParentChildren.begin(), oldParentChildren.end(), entity);
 			oldParentChildren.erase(itor);
 		}
+		else
+		{
+			const auto itor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
+			m_RootOrder.erase(itor);
+		}
 
 		itor1->second->m_Parent = parent;
 		const auto itor2 = m_pEntityViews.find(parent);
-		if (itor2 == m_pEntityViews.end())
+		if (itor2 != m_pEntityViews.end())
+		{
+			itor2->second->m_Children.push_back(entity);
+		}
+		else
 		{
 			m_RootOrder.push_back(entity);
-			return true;
 		}
 
-		const auto itor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
-		m_RootOrder.erase(itor);
-		itor2->second->m_Children.push_back(entity);
 		return true;
 	}
 
@@ -268,7 +273,30 @@ namespace Glory::Utils::ECS
 
 	void EntityRegistry::SetSiblingIndex(Utils::ECS::EntityID entity, size_t index)
 	{
-		throw new std::exception("Not implemented yet");
+		auto itor = m_pEntityViews.find(entity);
+		itor = m_pEntityViews.find(itor->second->Parent());
+		std::vector<EntityID>* targetVector = nullptr;
+		if (itor == m_pEntityViews.end())
+		{
+			targetVector = &m_RootOrder;
+		}
+		else
+		{
+			targetVector = &itor->second->m_Children;;
+		}
+		auto it = std::find(targetVector->begin(), targetVector->end(), entity);
+		const size_t oldIndex = it - targetVector->begin();
+		if (index > 0 && oldIndex < index)
+			index -= 1;
+
+		if (it == targetVector->end()) return;
+		targetVector->erase(it);
+		if (index >= targetVector->size())
+		{
+			targetVector->push_back(entity);
+			return;
+		}
+		targetVector->insert(targetVector->begin() + index, entity);
 	}
 
 	void EntityRegistry::InvokeAll(InvocationType invocationType)
@@ -278,22 +306,6 @@ namespace Glory::Utils::ECS
 			m_pViews[i]->InvokeAll(invocationType, this);
 		}
 	}
-
-//	void SceneObject::SetSiblingIndex(size_t index)
-//	{
-//		SceneObject* pParent = GetParent();
-//
-//		std::vector<SceneObject*>* targetVector = nullptr;
-//		if (pParent == nullptr)
-//			targetVector = &m_pScene->m_pSceneObjects;
-//		else
-//			targetVector = &pParent->m_pChildren;
-//
-//		auto it = std::find(targetVector->begin(), targetVector->end(), this);
-//		if (it == targetVector->end()) return;
-//		targetVector->erase(it);
-//		targetVector->insert(targetVector->begin() + index, this);
-//	}
 //
 //	void SceneObject::SetBeforeObject(SceneObject* pObject)
 //	{
@@ -336,18 +348,5 @@ namespace Glory::Utils::ECS
 //			return;
 //		}
 //		targetVector->insert(targetIterator + 1, this);
-//	}
-//
-//	size_t SceneObject::GetSiblingIndex()
-//	{
-//		SceneObject* pParent = GetParent();
-//		std::vector<SceneObject*>* targetVector = nullptr;
-//		if (pParent == nullptr)
-//			targetVector = &m_pScene->m_pSceneObjects;
-//		else
-//			targetVector = &pParent->m_pChildren;
-//
-//		auto it = std::find(targetVector->begin(), targetVector->end(), this);
-//		return it - targetVector->begin();
 //	}
 }

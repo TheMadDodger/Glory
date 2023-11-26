@@ -59,9 +59,9 @@ namespace Glory::Editor
 		bool change = false;
 		if (EditorUI::CheckBox("Active", &active))
 		{
-			//Undo::StartRecord("Set Active", m_pObject->GetUUID());
-			//Undo::AddAction(new EnableObjectAction(active));
-			//Undo::StopRecord();
+			Undo::StartRecord("Set Active", m_pObject->GetUUID());
+			Undo::AddAction(new EnableObjectAction(pScene, active));
+			Undo::StopRecord();
 
 			entity.SetActive(active);
 			change = true;
@@ -154,13 +154,13 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
 		ImGui::Text(uuidString.data());
-		const bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE);
+		const bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE, ImGuiInputTextFlags_EnterReturnsTrue);
 		if (change)
 		{
+			Undo::StartRecord("Change Name", m_pObject->GetUUID());
+			Undo::AddAction(new SceneObjectNameAction(pScene, originalName, m_NameBuff));
+			Undo::StopRecord();
 			pScene->SetEntityName(entityID, m_NameBuff);
-			//Undo::StartRecord("Change Name", m_pObject->GetUUID());
-			//Undo::AddAction(new SceneObjectNameAction(originalName, m_pObject->Name()));
-			//Undo::StopRecord();
 		}
 		ImGui::EndDisabled();
 

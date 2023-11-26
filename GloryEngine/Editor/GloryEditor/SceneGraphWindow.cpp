@@ -91,15 +91,16 @@ namespace Glory::Editor
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			pScene = EditorSceneManager::GetOpenScene(payload.SceneID);
-			Entity entity = pScene->GetEntityByEntityID(payload.EntityID);
+			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+			Entity oldParent = draggingEntity.ParentEntity();
 
-			//Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-			//const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-			//const UUID newParent = 0;
-			//const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-			entity.SetParent(0);
-			//Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-			//Undo::StopRecord();
+			Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+			const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+			const UUID newParent = 0;
+			const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+			draggingEntity.SetParent(0);
+			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+			Undo::StopRecord();
 
 			EditorSceneManager::SetSceneDirty(pScene);
 		});
@@ -148,15 +149,16 @@ namespace Glory::Editor
 				return;
 			}
 
-			Entity entity = pScene->GetEntityByEntityID(payload.EntityID);
+			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+			Entity oldParent = draggingEntity.ParentEntity();
 
-			//Undo::StartRecord("Re-parent", entity.EntityUUID());
-			//const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-			//const UUID newParent = 0;
-			//const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-			entity.SetParent(0);
-			//Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-			//Undo::StopRecord();
+			Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+			const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+			const UUID newParent = 0;
+			const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+			draggingEntity.SetParent(0);
+			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+			Undo::StopRecord();
 
 			EditorSceneManager::SetSceneDirty(pScene);
 		});
@@ -212,7 +214,7 @@ namespace Glory::Editor
 
 		if (index == 0)
 		{
-			ImGui::InvisibleButton("##reorderafter", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
+			ImGui::InvisibleButton("##reorderbefore", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 			DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 				GScene* pScene = entity.GetScene();
 				Entity parentEntity = entity.ParentEntity();
@@ -226,6 +228,7 @@ namespace Glory::Editor
 				}
 
 				Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+				if (draggingEntity.GetEntityID() == entity.GetEntityID()) return;
 
 				bool canParent = true;
 				while (parentEntity.IsValid())
@@ -242,16 +245,18 @@ namespace Glory::Editor
 				parentEntity = entity.ParentEntity();
 				if (canParent)
 				{
-					//Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-					//const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-					//const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
-					//const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-					const size_t siblingIndex = entity.SiblingIndex();
+					Entity oldParent = draggingEntity.ParentEntity();
+
+					Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+					const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+					const UUID newParent = parentEntity.IsValid() ? parentEntity.EntityUUID() : UUID(0);
+					const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+					const size_t siblingIndex = 0;
 					draggingEntity.SetParent(parentEntity.GetEntityID());
 					draggingEntity.SetSiblingIndex(siblingIndex);
-					//Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-					//Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
-					//Undo::StopRecord();
+					Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+					Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
+					Undo::StopRecord();
 
 					EditorSceneManager::SetSceneDirty(pScene);
 				}
@@ -279,6 +284,8 @@ namespace Glory::Editor
 			}
 			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
 
+			if (draggingEntity.GetEntityID() == entity.GetEntityID()) return;
+
 			Entity parentEntity = entity.ParentEntity();
 			bool canParent = true;
 			while (parentEntity.IsValid())
@@ -293,13 +300,15 @@ namespace Glory::Editor
 			}
 			if (canParent)
 			{
-				//Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				//const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-				//const UUID newParent = pObject ? pObject->GetUUID() : UUID(0);
-				//const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
+				Entity oldParent = draggingEntity.ParentEntity();
+
+				Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+				const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+				const UUID newParent = entity.IsValid() ? entity.EntityUUID() : UUID(0);
+				const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
 				draggingEntity.SetParent(entity.GetEntityID());
-				//Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-				//Undo::StopRecord();
+				Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+				Undo::StopRecord();
 
 				EditorSceneManager::SetSceneDirty(pScene);
 			}
@@ -334,7 +343,7 @@ namespace Glory::Editor
 			if (childCount > 0) ImGui::TreePop();
 		}
 
-		ImGui::InvisibleButton("##reorderbefore", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
+		ImGui::InvisibleButton("##reorderafter", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			Entity parent = entity.ParentEntity();
 			if (HandleAssetDragAndDrop(parent.GetEntityID(), pScene, dndHash, pPayload)) return;
@@ -346,6 +355,8 @@ namespace Glory::Editor
 				return;
 			}
 			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+
+			if (draggingEntity.GetEntityID() == entity.GetEntityID()) return;
 
 			bool canParent = true;
 			while (parent.IsValid())
@@ -362,16 +373,18 @@ namespace Glory::Editor
 			parent = entity.ParentEntity();
 			if (canParent)
 			{
-				//Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				//const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-				//const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
-				//const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-				const size_t siblingIndex = entity.SiblingIndex();
+				Entity oldParent = draggingEntity.ParentEntity();
+
+				Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+				const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+				const UUID newParent = parent.IsValid() ? parent.EntityUUID() : UUID(0);
+				const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+				const size_t siblingIndex = entity.SiblingIndex() + 1;
 				draggingEntity.SetParent(parent.GetEntityID());
 				draggingEntity.SetSiblingIndex(siblingIndex);
-				//Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-				//Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
-				//Undo::StopRecord();
+				Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+				Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
+				Undo::StopRecord();
 
 				EditorSceneManager::SetSceneDirty(pScene);
 			}
