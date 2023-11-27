@@ -14,9 +14,10 @@ project "CSAPIInstall"
 	dependson
 	{
 		"GloryEngine.Core",
+		"GloryEngine.Jolt",
 	}
 
 	postbuildcommands
 	{
-		--("{COPY} %{engineOutDir}/Mono/GloryEngine.Entities/GloryEngine.Entities.dll \"%{modulesOutDir}/GloryMonoScripting/Scripting/csharp/\""),
+		("{COPY} %{engineOutDir}/Mono/GloryEngine.Jolt/GloryEngine.Jolt.dll \"%{modulesOutDir}/GloryJoltPhysics/Scripting/csharp/\""),
 	}

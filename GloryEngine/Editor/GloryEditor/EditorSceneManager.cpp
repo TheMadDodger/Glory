@@ -191,7 +191,7 @@ namespace Glory::Editor
 			YAML::Node uuidNode = sceneDataNode["UUID"];
 			UUID uuid = uuidNode.as<uint64_t>();
 			YAML::Node sceneNode = sceneDataNode["Scene"];
-			GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(sceneNode, name);
+			GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(sceneNode, uuid, name);
 			OpenScene(pScene, uuid);
 		}
 	}

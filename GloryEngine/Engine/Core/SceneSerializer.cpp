@@ -257,9 +257,9 @@ namespace Glory
 		out << YAML::EndSeq;
 	}
 
-	Object* SceneSerializer::Deserialize(Object* pParent, YAML::Node& object, const std::string& name, Flags flags)
+	Object* SceneSerializer::Deserialize(Object* pParent, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)
 	{
-		GScene* pScene = new GScene(name);
+		GScene* pScene = new GScene(name, uuid);
 		Utils::NodeRef node{object};
 
 		Utils::NodeValueRef entities = node["Entities"];

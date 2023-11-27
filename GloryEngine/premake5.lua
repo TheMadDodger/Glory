@@ -153,6 +153,7 @@ group ""
 
 group "Scripting/Mono"
 	include "Scripting/Mono/GloryEngine.Core"
+	include "Scripting/Mono/GloryEngine.Jolt"
 	include "Scripting/Mono/GloryJoltMonoExtender"
 	include "Scripting/Mono/Install"
 group ""

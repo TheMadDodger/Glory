@@ -538,6 +538,7 @@ namespace Glory
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
 	{
 		/* Entity */
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);
 		BIND("GloryEngine.Entities.Entity::Entity_IsValid", Entity_IsValid);
 		BIND("GloryEngine.Entities.Entity::Entity_GetSceneObjectID", Entity_GetSceneObjectID);
 		BIND("GloryEngine.Entities.EntityBehaviour::GetEntityHandle()", GetEntityHandle);

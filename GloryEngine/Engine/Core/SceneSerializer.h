@@ -21,6 +21,6 @@ namespace Glory
 
     private:
         virtual void Serialize(GScene* pScene, YAML::Emitter& out) override;
-        virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string& name, Flags flags) override;
+        virtual Object* Deserialize(Object* pParent, YAML::Node& object, UUID uuid, const std::string& name, Flags flags) override;
     };
 }

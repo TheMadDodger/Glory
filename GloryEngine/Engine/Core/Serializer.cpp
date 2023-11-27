@@ -84,12 +84,12 @@ namespace Glory
 		out << YAML::EndMap;
 	}
 
-	Object* Serializer::DeserializeObject(YAML::Node& object)
+	Object* Serializer::DeserializeObject(YAML::Node& object, UUID uuid)
 	{
-		return DeserializeObject(nullptr, object);
+		return DeserializeObject(nullptr, object, uuid);
 	}
 
-	Object* Serializer::DeserializeObject(Object* pParent, YAML::Node& object, Flags flags)
+	Object* Serializer::DeserializeObject(Object* pParent, YAML::Node& object, UUID uuid, Flags flags)
 	{
 		YAML::Node node;
 		uint32_t typeHash = 0;
@@ -97,15 +97,15 @@ namespace Glory
 
 		Serializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return nullptr;
-		return pSerializer->Deserialize(pParent, object, "", flags);
+		return pSerializer->Deserialize(pParent, object, uuid, "", flags);
 	}
 
-	Object* Serializer::DeserializeObjectOfType(std::type_index type, YAML::Node& object, const std::string& name)
+	Object* Serializer::DeserializeObjectOfType(std::type_index type, YAML::Node& object, UUID uuid, const std::string& name)
 	{
 		uint32_t typeHash = ResourceType::GetHash(type);
 		Serializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return nullptr;
-		return pSerializer->Deserialize(nullptr, object, name);
+		return pSerializer->Deserialize(nullptr, object, uuid, name);
 	}
 
 	void Serializer::ClearUUIDRemapCache()
