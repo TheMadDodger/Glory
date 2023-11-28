@@ -23,13 +23,11 @@ namespace Glory
 	std::map<std::string, ModuleType> ModuleMetaData::STRINGTOMODULETYPE =
 	{
 		{ "Window", ModuleType::MT_Window },
-		{ "SceneManagement", ModuleType::MT_SceneManagement },
 		{ "Renderer", ModuleType::MT_Renderer },
 		{ "Graphics", ModuleType::MT_Graphics },
 		{ "Loader", ModuleType::MT_Loader },
 		{ "Scripting", ModuleType::MT_Scripting },
 		{ "Input", ModuleType::MT_Input },
-		{ "Physics", ModuleType::MT_Physics },
 		{ "Other", ModuleType::MT_Other },
 	};
 
@@ -60,6 +58,17 @@ namespace Glory
 		YAML_READ_REQUIRED(rootNode, node, Name, m_Name, std::string, "Missing Name property in Module.yaml at path: " + m_Path.string());
 		std::string type = "";
 		YAML_READ_REQUIRED(rootNode, node, Type, type, std::string, "Missing Type property in Module.yaml at path: " + m_Path.string());
+		if (type == "SceneManagement")
+		{
+			Debug::LogError("Scene modules are no longer supported as of 0.3.0");
+			m_Type = ModuleType::MT_Invalid;
+			return;
+		}
+		if (type == "Physics")
+		{
+			Debug::LogWarning("As of 0.3.0 physics modules are now categorized as \"Other\" modules");
+			type = "Other";
+		}
 		if (STRINGTOMODULETYPE.find(type) != STRINGTOMODULETYPE.end()) m_Type = STRINGTOMODULETYPE[type];
 
 		YAML::Node dependenciesNode = rootNode["Dependencies"];

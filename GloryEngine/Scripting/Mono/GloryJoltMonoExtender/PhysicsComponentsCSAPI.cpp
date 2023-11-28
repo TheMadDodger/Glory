@@ -39,7 +39,7 @@ namespace Glory
 
 #pragma region Physics Component
 
-#define PHYSICS Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>()
+#define PHYSICS Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>()
 
 #pragma region States
 

@@ -179,9 +179,7 @@ namespace Glory::EditorLauncher
         WriteModule(ModuleType::MT_Window, createSettings.EngineSettings.WindowModule, emitter);
         WriteModule(ModuleType::MT_Graphics, createSettings.EngineSettings.GraphicsModule, emitter);
         WriteModule(ModuleType::MT_Renderer, createSettings.EngineSettings.RenderModule, emitter);
-        WriteModule(ModuleType::MT_SceneManagement, createSettings.EngineSettings.ScenesModule, emitter);
         WriteModule(ModuleType::MT_Input, createSettings.EngineSettings.InputModule, emitter);
-        WriteModule(ModuleType::MT_Physics, createSettings.EngineSettings.PhysicsModule, emitter);
 
         for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); i++)
         {
@@ -195,36 +193,10 @@ namespace Glory::EditorLauncher
         }
 
         emitter << YAML::EndSeq;
-        emitter << YAML::Key << "Engine";
-        emitter << YAML::Value << YAML::BeginMap;
-        emitter << YAML::Key << "Window";
-        emitter << YAML::Value << 0;
-        emitter << YAML::Key << "Graphics";
-        emitter << YAML::Value << 1;
-        emitter << YAML::Key << "Renderer";
-        emitter << YAML::Value << 2;
-        emitter << YAML::Key << "SceneManagement";
-        emitter << YAML::Value << 3;
-        emitter << YAML::Key << "Input";
-        emitter << YAML::Value << 4;
-
-        emitter << YAML::Key << "Optional";
-        emitter << YAML::Value << YAML::BeginSeq;
-        size_t startIndex = 5;
-        for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); ++i)
-        {
-            emitter << startIndex + i;
-        }
-        emitter << YAML::EndSeq;
-        emitter << YAML::Key << "Scripting";
-        emitter << YAML::Value << YAML::BeginSeq;
-        startIndex += createSettings.EngineSettings.OptionalModules.size();
-        for (size_t i = 0; i < createSettings.EngineSettings.ScriptingModules.size(); ++i)
-        {
-            emitter << startIndex + i;
-        }
-        emitter << YAML::EndSeq;
-        emitter << YAML::EndMap;
+        emitter << YAML::Key << "EditorVersion";
+        std::string versionString;
+        createSettings.EditorVersion.GetVersionString(versionString);
+        emitter << YAML::Value << versionString;
         emitter << YAML::EndMap;
 
         std::filesystem::path engineConfPath = createSettings.Path;

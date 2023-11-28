@@ -254,6 +254,7 @@ namespace Glory::EditorLauncher
 			m_EngineSettings = {};
 			m_EngineSettings.ScriptingModules.push_back(0);
 			m_EngineSettings.OptionalModules.push_back(0);
+			m_EngineSettings.OptionalModules.push_back(2);
 			m_EngineSettings.OptionalModules.push_back(1);
 		}
 
@@ -363,9 +364,7 @@ namespace Glory::EditorLauncher
 		DrawModuleSelector("Window", ModuleType::MT_Window, m_EngineSettings.WindowModule, regionAvail.x - maxItemSize, maxItemSize);
 		DrawModuleSelector("Graphics", ModuleType::MT_Graphics, m_EngineSettings.GraphicsModule, regionAvail.x - maxItemSize, maxItemSize);
 		DrawModuleSelector("Renderer", ModuleType::MT_Renderer, m_EngineSettings.RenderModule, regionAvail.x - maxItemSize, maxItemSize);
-		DrawModuleSelector("Scene Management", ModuleType::MT_SceneManagement, m_EngineSettings.ScenesModule, regionAvail.x - maxItemSize, maxItemSize);
 		DrawModuleSelector("Input", ModuleType::MT_Input, m_EngineSettings.InputModule, regionAvail.x - maxItemSize, maxItemSize);
-		DrawModuleSelector("Physics", ModuleType::MT_Physics, m_EngineSettings.PhysicsModule, regionAvail.x - maxItemSize, maxItemSize);
 
 		DrawScriptingModulesArray(regionAvail, maxItemSize);
 		DrawOptionalModulesArray(regionAvail, maxItemSize);
@@ -388,8 +387,6 @@ namespace Glory::EditorLauncher
 		if (!ValidateModule(ModuleType::MT_Window, m_EngineSettings.WindowModule)) return ProjectValidationResult::EVR_MissingModules;
 		if (!ValidateModule(ModuleType::MT_Graphics, m_EngineSettings.GraphicsModule)) return ProjectValidationResult::EVR_MissingModules;
 		if (!ValidateModule(ModuleType::MT_Renderer, m_EngineSettings.RenderModule)) return ProjectValidationResult::EVR_MissingModules;
-		if (!ValidateModule(ModuleType::MT_SceneManagement, m_EngineSettings.ScenesModule)) return ProjectValidationResult::EVR_MissingModules;
-		if (!ValidateModule(ModuleType::MT_Physics, m_EngineSettings.PhysicsModule)) return ProjectValidationResult::EVR_MissingModules;
 
 		for (size_t i = 0; i < m_EngineSettings.OptionalModules.size(); i++)
 		{

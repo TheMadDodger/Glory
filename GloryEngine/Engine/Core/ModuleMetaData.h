@@ -9,12 +9,12 @@ namespace Glory
 {
 	enum class ModuleType
 	{
+		MT_Invalid,
+
 		MT_Window,
-		MT_SceneManagement,
 		MT_Graphics,
 		MT_Renderer,
 		MT_Input,
-		MT_Physics,
 		MT_Scripting,
 
 		MT_Loader,

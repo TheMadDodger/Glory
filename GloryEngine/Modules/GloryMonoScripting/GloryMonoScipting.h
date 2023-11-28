@@ -17,7 +17,7 @@ namespace Glory
         GloryMonoScipting();
         virtual ~GloryMonoScipting();
 
-        GLORY_MODULE_VERSION_H(0,2,0);
+        GLORY_MODULE_VERSION_H(0,3,0);
 
         GLORY_API MonoManager* GetMonoManager() const;
 

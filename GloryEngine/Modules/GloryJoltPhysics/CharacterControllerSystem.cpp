@@ -19,7 +19,7 @@ namespace Glory
 	void CharacterControllerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
 		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 		JoltShapeManager* pShapes = pPhysics->GetShapeManager();
 
@@ -52,7 +52,7 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 
 		PhysicsSystem::RemoveBody(pComponent.m_BodyID);
@@ -64,7 +64,7 @@ namespace Glory
 
 	void CharacterControllerSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
@@ -78,7 +78,7 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 		if (!pCharacters) return;

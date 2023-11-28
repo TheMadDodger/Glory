@@ -11,7 +11,7 @@
 #include <JoltPhysicsModule.h>
 #include <RendererModule.h>
 
-#define PHYSICS Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>()
+#define PHYSICS Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>()
 #define RENDERER Game::GetGame().GetEngine()->GetMainModule<RendererModule>()
 #define SCRIPTING Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()
 #define ASSEMBLY SCRIPTING->GetMonoManager()->ActiveDomain()->GetAssembly("GloryEngine.Jolt.dll")

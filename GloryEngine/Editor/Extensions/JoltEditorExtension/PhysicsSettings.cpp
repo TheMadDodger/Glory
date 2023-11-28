@@ -167,7 +167,7 @@ namespace Glory::Editor
 			}
 		}
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		pPhysics->SetCollisionMatrix(std::move(matrix));
 		pPhysics->SetGravity(gravity);
 	}

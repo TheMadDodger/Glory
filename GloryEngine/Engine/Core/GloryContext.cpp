@@ -110,6 +110,7 @@ namespace Glory
 
 	Debug* GloryContext::GetDebug()
 	{
+		if (!m_pContext) return nullptr;
 		return m_pContext->m_pDebug;
 	}
 

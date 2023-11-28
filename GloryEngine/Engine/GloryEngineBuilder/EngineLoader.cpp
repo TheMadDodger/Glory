@@ -53,7 +53,6 @@ namespace Glory
 		YAML::Node node = YAML::LoadFile(m_CFGPath.string());
 		YAML::Node modules = node["Modules"];
 		LoadModules(modules);
-		YAML::Node engineInfo = node["Engine"];
 
 		m_pOptionalModules.push_back(new Glory::FileLoaderModule());
 		m_pOptionalModules.push_back(new Glory::MaterialLoaderModule());
@@ -139,6 +138,12 @@ namespace Glory
 
 	void EngineLoader::LoadModule(const std::string& moduleName)
 	{
+		if (moduleName == "GloryEntityScenes")
+		{
+			Debug::LogInfo("GloryEntityScenes has been removed and is now part of the core engine");
+			return;
+		}
+
 		std::stringstream debugStream;
 
 		std::filesystem::path modulePath = "./Modules";
@@ -150,6 +155,12 @@ namespace Glory
 		metaPath = metaPath.append("Module.yaml");
 		ModuleMetaData metaData(metaPath);
 		metaData.Read();
+
+		if (metaData.Type() == ModuleType::MT_Invalid)
+		{
+			Debug::LogError("Failed to load module " + moduleName + " because the module is invalid!");
+			return;
+		}
 
 		/* Load dependencies */
 		const std::vector<std::string>& dependencies = metaData.Dependencies();
