@@ -14,18 +14,24 @@
 
 namespace Glory
 {
-	uint32_t SceneManager::GetHoveringObject() const
+	GScene* SceneManager::GetHoveringEntityScene()
+	{
+		return m_HoveringObjectSceneID ? GetOpenScene(m_HoveringObjectSceneID) : nullptr;
+	}
+
+	UUID SceneManager::GetHoveringEntityUUID() const
 	{
 		return m_HoveringObjectID;
 	}
 
-	void SceneManager::SetHoveringObject(uint32_t objectID)
+	void SceneManager::SetHoveringObject(UUID sceneID, UUID objectID)
 	{
+		m_HoveringObjectSceneID = sceneID;
 		m_HoveringObjectID = objectID;
 	}
 
 	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
-		m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
+		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
 	{
 	}
 

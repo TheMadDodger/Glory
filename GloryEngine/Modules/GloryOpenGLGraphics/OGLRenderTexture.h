@@ -9,7 +9,7 @@ namespace Glory
 	private:
 		OGLRenderTexture(const RenderTextureCreateInfo& createInfo);
 		virtual ~OGLRenderTexture();
-		virtual void ReadPixel(const glm::ivec2& coord, void* value, size_t size, uint32_t type) override;
+		virtual void ReadColorPixel(const std::string& attachment, const glm::ivec2& coord, void* value, DataType type) override;
 
 	private:
 		virtual void Initialize() override;

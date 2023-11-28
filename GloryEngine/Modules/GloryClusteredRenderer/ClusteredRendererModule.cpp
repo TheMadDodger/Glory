@@ -159,6 +159,7 @@ namespace Glory
 		object.View = camera.GetView();
 		object.Projection = camera.GetProjection();
 		object.ObjectID = renderData.m_ObjectID;
+		object.SceneID = renderData.m_SceneID;
 
 		pMaterial->SetProperties();
 		pMaterial->SetObjectData(object);

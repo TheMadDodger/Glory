@@ -34,7 +34,7 @@ namespace Glory
             return;
         }
 
-        UUID materialUUID = pComponent.m_Material.AssetUUID();
+        const UUID materialUUID = pComponent.m_Material.AssetUUID();
         MaterialData* pMaterial = AssetManager::GetOrLoadAsset<MaterialData>(materialUUID);
 
         if (pMaterial == nullptr)
@@ -43,12 +43,15 @@ namespace Glory
             return;
         }
 
+        GScene* pScene = pRegistry->GetUserData<GScene*>();
         RenderData renderData;
         renderData.m_pMesh = pMeshData;
         renderData.m_pMaterial = pMaterial;
         renderData.m_World = transform.MatTransform;
         renderData.m_LayerMask = mask;
-        renderData.m_ObjectID = entity;
+        renderData.m_ObjectID = pScene->GetEntityUUID(entity);
+        renderData.m_SceneID = pScene->GetUUID();
+
         REQUIRE_MODULE_CALL(Game::GetGame().GetEngine(), RendererModule, Submit(renderData), );
     }
 }

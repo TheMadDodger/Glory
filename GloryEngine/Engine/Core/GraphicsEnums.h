@@ -446,4 +446,19 @@ namespace Glory
         PT_TrianglesAdjacency,
         PT_Patches
     };
+
+    enum class DataType
+    {
+        DT_Byte,
+        DT_UByte,
+        DT_Short,
+        DT_UShort,
+        DT_Int,
+        DT_UInt,
+        DT_Float,
+        DT_2Bytes,
+        DT_3Bytes,
+        DT_4Bytes,
+        DT_Double
+    };
 }

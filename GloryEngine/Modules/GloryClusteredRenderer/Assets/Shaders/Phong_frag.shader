@@ -13,13 +13,13 @@ layout(std430, binding = 2) buffer ObjectData
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-	uint ObjectID;
+	uvec4 ObjectID;
 } Object;
 
 layout(location = 0) in vec3 normal;
 layout(location = 1) in vec4 inColor;
 
-layout(location = 0) out uint outID;
+layout(location = 0) out uvec4 outID;
 layout(location = 1) out vec4 outColor;
 layout(location = 2) out vec4 outNormal;
 

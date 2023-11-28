@@ -1,6 +1,8 @@
 #pragma once
-#include <glm/glm.hpp>
 #include "LayerMask.h"
+#include "UUID.h"
+
+#include <glm/glm.hpp>
 
 namespace Glory
 {
@@ -12,6 +14,7 @@ namespace Glory
 		glm::mat4 Model;
 		glm::mat4 View;
 		glm::mat4 Projection;
+		uint64_t SceneID;
 		uint64_t ObjectID;
 	};
 
@@ -20,7 +23,8 @@ namespace Glory
 	public:
 		// Mesh
 		MeshData* m_pMesh;
-		uint64_t m_ObjectID;
+		UUID m_SceneID;
+		UUID m_ObjectID;
 
 		// World matrices
 		glm::mat4 m_World;
