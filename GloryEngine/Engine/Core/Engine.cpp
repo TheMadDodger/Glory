@@ -18,6 +18,7 @@
 #include "ShapeProperty.h"
 #include "PrefabData.h"
 #include "SceneManager.h"
+#include "WindowModule.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -422,6 +423,8 @@ namespace Glory
 		Console::Update();
 		m_pSceneManager->Update();
 		m_pSceneManager->Draw();
+		WindowModule* pWindows = GetMainModule<WindowModule>();
+		if (pWindows) pWindows->PollEvents();
 		ModulesLoop();
 		GameThreadFrameEnd();
 	}
