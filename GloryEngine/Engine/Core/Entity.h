@@ -39,23 +39,38 @@ namespace Glory
 			m_pRegistry->RemoveComponent<T>(m_EntityID);
 		}
 
-		Utils::ECS::EntityView* GetEntityView();
+		Entity ParentEntity() const;
+		Utils::ECS::EntityID Parent() const;
+		void SetParent(Utils::ECS::EntityID parent);
+
+		Utils::ECS::EntityView* GetEntityView() const;
 
 		void Clear();
-		bool IsValid();
-		//GLORY_API void ForEachComponent(std::function<void(EntityRegistry*, EntityID, EntityComponentData*)> func);
-
+		bool IsValid() const;
 		void Destroy();
 
-		Utils::ECS::EntityID GetEntityID();
+		Utils::ECS::EntityID GetEntityID() const;
+		UUID EntityUUID() const;
 
-		Utils::ECS::EntityRegistry* GetRegistry();
-		GScene* GetScene();
+		size_t ChildCount() const;
+		Entity ChildEntity(size_t index) const;
+		Utils::ECS::EntityID Child(size_t index) const;
+		size_t SiblingIndex() const;
+		void SetSiblingIndex(size_t index);
+
+		Utils::ECS::EntityRegistry* GetRegistry() const;
+		GScene* GetScene() const;
 
 		bool IsActiveSelf() const;
 		bool IsActive() const;
+		bool IsHierarchyActive() const;
 		void SetActive(bool active);
 		void SetActiveHierarchy(bool active);
+
+		std::string_view Name() const;
+
+	private:
+		void UpdateHierarchyActive();
 
 	private:
 		Utils::ECS::EntityID m_EntityID;

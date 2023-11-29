@@ -2,6 +2,7 @@
 #include "QuitPopup.h"
 #include "EditorAssetDatabase.h"
 #include "EditorAssetsWatcher.h"
+#include "EntityEditor.h"
 
 #include <GraphicsThread.h>
 #include <imgui.h>
@@ -105,6 +106,8 @@ namespace Glory::Editor
 
 		delete AssetsWatcher;
 		AssetsWatcher = nullptr;
+
+		DestroyAllEditableEntities();
 	}
 
 	void EditorApplication::Run(Game& game)

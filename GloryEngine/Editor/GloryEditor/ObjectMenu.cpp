@@ -1,10 +1,12 @@
 #include "ObjectMenu.h"
+#include "Shortcuts.h"
+#include "AssetManager.h"
+#include "EditableEntity.h"
+
 #include <ResourceType.h>
 #include <GScene.h>
 #include <algorithm>
 #include <imgui.h>
-#include "Shortcuts.h"
-#include "AssetManager.h"
 #include <FileBrowserItem.h>
 
 namespace Glory::Editor
@@ -187,7 +189,7 @@ namespace Glory::Editor
 				m_Func(pSelected, T_Resource);
 				return;
 			}
-			if (type == typeid(SceneObject))
+			if (type == typeid(EditableEntity))
 			{
 				m_Func(pSelected, T_SceneObject);
 				return;

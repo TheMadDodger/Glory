@@ -1,12 +1,12 @@
 #include "EnableObjectAction.h"
+#include "EditorSceneManager.h"
 
-#include <Engine.h>
-#include <Game.h>
+#include <GScene.h>
 
 namespace Glory::Editor
 {
-	EnableObjectAction::EnableObjectAction(bool active)
-		: m_Active(active)
+	EnableObjectAction::EnableObjectAction(GScene* pScene, bool active)
+		: m_SceneID(pScene->GetUUID()), m_Active(active)
 	{
 	}
 
@@ -16,15 +16,17 @@ namespace Glory::Editor
 
 	void EnableObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
-		if (pObject == nullptr) return;
-		pObject->SetActive(!m_Active);
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
+		entity.SetActive(!m_Active);
 	}
 
 	void EnableObjectAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
-		if (pObject == nullptr) return;
-		pObject->SetActive(m_Active);
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
+		entity.SetActive(m_Active);
 	}
 }

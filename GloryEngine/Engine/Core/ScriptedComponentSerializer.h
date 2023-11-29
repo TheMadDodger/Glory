@@ -1,5 +1,4 @@
 #pragma once
-#include "EntityComponentSerializer.h"
 #include "Components.h"
 #include "PropertySerializer.h"
 

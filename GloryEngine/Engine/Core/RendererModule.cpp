@@ -332,8 +332,16 @@ namespace Glory
 		if (pRenderTexture == nullptr) return;
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;
-		uint32_t objectID = pRenderTexture->ReadPixel(m_PickPos);
-		m_pEngine->GetSceneManager()->SetHoveringObject(objectID);
+
+		struct ObjData
+		{
+			uint64_t SceneID;
+			uint64_t ObjectID;
+		};
+
+		ObjData object;
+		pRenderTexture->ReadColorPixel("object", m_PickPos, &object, DataType::DT_UInt);
+		m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
 		Profiler::EndSample();
 	}
 
@@ -376,7 +384,7 @@ namespace Glory
 	{
 		GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
 		RenderTextureCreateInfo createInfo(width, height, true);
-		createInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RI, PixelFormat::PF_R32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, false));
+		createInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, false));
 		GetCameraRenderTextureAttachments(createInfo.Attachments);
 		return pResourceManager->CreateRenderTexture(createInfo);
 	}

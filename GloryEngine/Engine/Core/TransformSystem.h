@@ -18,6 +18,6 @@ namespace Glory
         TransformSystem();
         virtual ~TransformSystem();
 
-        static void CalculateMatrix(Transform& pComponent);
+        static void CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent);
     };
 }

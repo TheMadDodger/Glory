@@ -1,6 +1,7 @@
 #pragma once
 #include "UUID.h"
 #include "Glory.h"
+
 #include <typeindex>
 #include <string>
 
@@ -43,6 +44,7 @@ namespace Glory
 
 		const std::string& Name();
 		void SetName(const std::string& name);
+		void SetName(const std::string_view name);
 
 		virtual void* GetRootDataAddress();
 

@@ -1,17 +1,20 @@
 #pragma once
 #include "EntityComponentPopup.h"
+#include "EditableEntity.h"
 
 #include <Editor.h>
-#include <SceneObject.h>
 #include <EntityComponentObject.h>
 #include <filesystem>
 
-namespace Glory::Editor
+namespace Glory
+{
+	class Entity;
+namespace Editor
 {
 	enum ObjectMenuType : unsigned int;
 
-    class EntitySceneObjectEditor : public EditorTemplate<EntitySceneObjectEditor, SceneObject>
-    {
+	class EntitySceneObjectEditor : public EditorTemplate<EntitySceneObjectEditor, EditableEntity>
+	{
 	public:
 		GLORY_EDITOR_API EntitySceneObjectEditor();
 		GLORY_EDITOR_API virtual ~EntitySceneObjectEditor();
@@ -26,12 +29,19 @@ namespace Glory::Editor
 		}
 
 		GLORY_EDITOR_API static std::string_view GetComponentIcon(uint32_t typeHash);
-		GLORY_EDITOR_API static void DrawObjectNodeName(SceneObject* pObject, bool isPrefab);
-		GLORY_EDITOR_API static bool SearchCompare(std::string_view search, SceneObject* pObject);
+		GLORY_EDITOR_API static void DrawObjectNodeName(Entity& entity, bool isPrefab);
+		GLORY_EDITOR_API static bool SearchCompare(std::string_view search, Entity& entity);
 
 		GLORY_EDITOR_API static void ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&);
-		GLORY_EDITOR_API static void ConvertToPrefab(SceneObject* pObject, std::filesystem::path path);
+		GLORY_EDITOR_API static void ConvertToPrefab(Entity& entity, std::filesystem::path path);
 		GLORY_EDITOR_API static void UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&);
+
+		template<typename T>
+		static void AddComponentIcon(std::string_view icon)
+		{
+			AddComponentIcon(ResourceType::GetHash<T>(), icon);
+		}
+		GLORY_EDITOR_API static void AddComponentIcon(uint32_t hash, std::string_view icon);
 
 	private:
 		void Initialize();
@@ -45,9 +55,10 @@ namespace Glory::Editor
 		char m_NameBuff[MAXNAMESIZE];
 		bool m_AddingComponent;
 
-		SceneObject* m_pObject;
+		EditableEntity* m_pObject;
 		std::vector<EntityComponentObject*> m_pComponents;
 
 		EntityComponentPopup m_ComponentPopup;
-    };
+	};
+}
 }

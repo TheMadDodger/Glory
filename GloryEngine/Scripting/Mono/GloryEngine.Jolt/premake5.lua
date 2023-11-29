@@ -1,10 +1,10 @@
-project "GloryEngine.Core"
+project "GloryEngine.Jolt"
 	kind "SharedLib"
 	language "C#"
 	staticruntime "Off"
 	namespace ("GloryEngine")
 
-	targetdir ("%{modulesOutDir}/GloryMonoScripting/Scripting/csharp")
+	targetdir ("%{engineOutDir}/Mono/GloryEngine.Jolt")
 	objdir ("%{outputDir}")
 
 	dotnetframework "4.7.1"
@@ -12,18 +12,24 @@ project "GloryEngine.Core"
 	files
 	{
 		"*.cs",
-		"SceneManagement/*.cs",
-		"AssetManagement/*.cs",
-		"Layers/*.cs",
-		"Math/*.cs",
-		"Input/*.cs",
-		"Entities/**.cs",
+		"Physics/*.cs",
+		"Components/*.cs",
 		"premake5.lua"
 	}
 
 	defines
 	{
 		"TRACE"
+	}
+
+	links
+	{
+		"GloryEngine.Core"
+	}
+
+	dependson
+	{
+		"GloryJoltPhysics"
 	}
 
 	filter "system:windows"

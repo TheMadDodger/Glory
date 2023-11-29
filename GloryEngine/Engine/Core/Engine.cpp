@@ -18,6 +18,7 @@
 #include "ShapeProperty.h"
 #include "PrefabData.h"
 #include "SceneManager.h"
+#include "WindowModule.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -385,7 +386,6 @@ namespace Glory
 		ResourceType::RegisterType<LayerMask>();
 		ResourceType::RegisterType<SceneObjectRef>();
 		ResourceType::RegisterType<ShapeProperty>();
-		ResourceType::RegisterResource<SceneObject>("");
 		ResourceType::RegisterResource<PrefabData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
@@ -423,6 +423,8 @@ namespace Glory
 		Console::Update();
 		m_pSceneManager->Update();
 		m_pSceneManager->Draw();
+		WindowModule* pWindows = GetMainModule<WindowModule>();
+		if (pWindows) pWindows->PollEvents();
 		ModulesLoop();
 		GameThreadFrameEnd();
 	}

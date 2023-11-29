@@ -16,12 +16,11 @@
 
 namespace Glory::Editor
 {
-	/* @todo: Add types dynamically */
-	const std::vector<std::type_index> ComponentsToUpdateInEditor =
+	std::vector<uint32_t> ComponentsToUpdateInEditor =
 	{
-		typeid(Transform),
-		typeid(CameraComponent),
-		typeid(LookAt),
+		ResourceType::GetHash<Transform>(),
+		ResourceType::GetHash<CameraComponent>(),
+		ResourceType::GetHash<LookAt>()
 	};
 
 	std::vector<IPlayModeHandler*> EditorPlayer::m_pSceneLoopHandlers;
@@ -29,6 +28,11 @@ namespace Glory::Editor
 	void EditorPlayer::RegisterLoopHandler(IPlayModeHandler* pEditorLoopHandler)
 	{
 		m_pSceneLoopHandlers.push_back(pEditorLoopHandler);
+	}
+
+	void EditorPlayer::UpdateComponentInEditMode(uint32_t hash)
+	{
+		ComponentsToUpdateInEditor.push_back(hash);
 	}
 
 	void EditorPlayer::Start()
@@ -61,8 +65,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenes->GetOpenScene(i);
-			Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
-			pRegistry->InvokeAll(Utils::ECS::InvocationType::Start);
+			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Start);
 		}
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
@@ -87,8 +90,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
 		{
 			GScene* pScene = pScenes->GetOpenScene(i);
-			Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
-			pRegistry->InvokeAll(Utils::ECS::InvocationType::Stop);
+			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Stop);
 		}
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
@@ -155,11 +157,10 @@ namespace Glory::Editor
 			for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
 			{
 				GScene* pScene = pScenes->GetOpenScene(i);
-				Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
 				for (size_t i = 0; i < ComponentsToUpdateInEditor.size(); i++)
 				{
-					uint32_t hash = ResourceType::GetHash(ComponentsToUpdateInEditor[i]);
-					pRegistry->InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
+					const uint32_t hash = ComponentsToUpdateInEditor[i];
+					pScene->GetRegistry().InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
 				}
 			}
 		}

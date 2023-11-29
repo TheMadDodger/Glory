@@ -23,11 +23,7 @@
 
 namespace Glory::Editor
 {
-	/* @todo GET RID OF DIS */
-	struct PhysicsBody {};
-	struct CharacterController {};
-
-	const std::map<uint32_t, std::string_view> COMPONENT_ICONS = {
+	std::map<uint32_t, std::string_view> ComponentIcons = {
 		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
 		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
 		{ ResourceType::GetHash<MeshRenderer>(), ICON_FA_CUBES },
@@ -36,9 +32,6 @@ namespace Glory::Editor
 		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
 		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
-
-		{ ResourceType::GetHash<PhysicsBody>(), ICON_FA_CUBES_STACKED },
-		{ ResourceType::GetHash<CharacterController>(), ICON_FA_PERSON },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)
@@ -57,19 +50,20 @@ namespace Glory::Editor
 	bool EntitySceneObjectEditor::OnGUI()
 	{
 		if (!m_Initialized) Initialize();
-		m_pObject = (SceneObject*)m_pTarget;
-
+		m_pObject = (EditableEntity*)m_pTarget;
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
 		const std::string uuidString = std::to_string(m_pObject->GetUUID());
 		ImGui::PushID(uuidString.c_str());
-		bool active = m_pObject->IsActiveSelf();
+		bool active = entity.IsActiveSelf();
 		bool change = false;
 		if (EditorUI::CheckBox("Active", &active))
 		{
 			Undo::StartRecord("Set Active", m_pObject->GetUUID());
-			Undo::AddAction(new EnableObjectAction(active));
+			Undo::AddAction(new EnableObjectAction(pScene, active));
 			Undo::StopRecord();
 
-			m_pObject->SetActive(active);
+			entity.SetActive(active);
 			change = true;
 		}
 		change |= NameGUI();
@@ -86,8 +80,13 @@ namespace Glory::Editor
 
 	std::string_view EntitySceneObjectEditor::GetComponentIcon(uint32_t typeHash)
 	{
-		auto itor = COMPONENT_ICONS.find(typeHash);
-		return itor != COMPONENT_ICONS.end() ? itor->second : "";
+		auto itor = ComponentIcons.find(typeHash);
+		return itor != ComponentIcons.end() ? itor->second : "";
+	}
+
+	void EntitySceneObjectEditor::AddComponentIcon(uint32_t hash, std::string_view icon)
+	{
+		ComponentIcons.emplace(hash, icon);
 	}
 
 	void EntitySceneObjectEditor::Initialize()
@@ -98,16 +97,17 @@ namespace Glory::Editor
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
 		m_pComponentEditors.clear();
 
-		SceneObject* pObject = (SceneObject*)m_pTarget;
-		Entity entity = pObject->GetEntityHandle();
-		Utils::ECS::EntityID entityID = entity.GetEntityID();
+		m_pObject = (EditableEntity*)m_pTarget;
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
+		const Utils::ECS::EntityID entityID = entity.GetEntityID();
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 
 		for (size_t i = 0; i < pEntityView->ComponentCount(); i++)
 		{
 			UUID uuid = pEntityView->ComponentUUIDAt(i);
 			uint32_t componentType = pEntityView->ComponentTypeAt(i);
-			EntityComponentObject* pComponentObject = new EntityComponentObject(entityID, uuid, componentType, entity.GetScene()->GetRegistry());
+			EntityComponentObject* pComponentObject = new EntityComponentObject(entityID, uuid, componentType, &entity.GetScene()->GetRegistry());
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
 			if (pEditor) m_pComponentEditors.push_back(pEditor);
@@ -123,10 +123,9 @@ namespace Glory::Editor
 		ImGui::TextDisabled("Entity Object");
 		ImGui::Separator();
 
-		Entity entity = ((SceneObject*)m_pObject)->GetEntityHandle();
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
 		Utils::ECS::EntityID entityID = entity.GetEntityID();
-		GScene* pScene = entity.GetScene();
-		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
 
 		const UUID prefabID = pScene->Prefab(m_pObject->GetUUID());
 		const UUID childOfPrefabID = pScene->PrefabChild(m_pObject->GetUUID());
@@ -142,8 +141,8 @@ namespace Glory::Editor
 		}
 
 		ImGui::BeginDisabled(prefabID || childOfPrefabID);
-		std::string originalName = m_pObject->Name();
-		const char* name = originalName.c_str();
+		const std::string_view originalName = entity.Name();
+		const char* name = originalName.data();
 		memcpy(m_NameBuff, name, originalName.length() + 1);
 		m_NameBuff[originalName.length()] = '\0';
 
@@ -155,13 +154,13 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
 		ImGui::Text(uuidString.data());
-		const bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE);
+		const bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE, ImGuiInputTextFlags_EnterReturnsTrue);
 		if (change)
 		{
-			m_pObject->SetName(m_NameBuff);
 			Undo::StartRecord("Change Name", m_pObject->GetUUID());
-			Undo::AddAction(new SceneObjectNameAction(originalName, m_pObject->Name()));
+			Undo::AddAction(new SceneObjectNameAction(pScene, originalName, m_NameBuff));
 			Undo::StopRecord();
+			pScene->SetEntityName(entityID, m_NameBuff);
 		}
 		ImGui::EndDisabled();
 
@@ -173,10 +172,10 @@ namespace Glory::Editor
 	{
 		bool change = false;
 
-		Entity entity = ((SceneObject*)m_pObject)->GetEntityHandle();
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
 		Utils::ECS::EntityID entityID = entity.GetEntityID();
-		GScene* pScene = entity.GetScene();
-		Glory::Utils::ECS::EntityRegistry* pRegistry = pScene->GetRegistry();
+		Glory::Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
 
 		const bool isPrefab = pScene->Prefab(m_pObject->GetUUID());
 		const bool isChildOfPrefab = pScene->PrefabChild(m_pObject->GetUUID());
@@ -196,8 +195,8 @@ namespace Glory::Editor
 		{
 			std::string_view icon = "";
 			const uint32_t componentHash = m_pComponents[index]->ComponentType();
-			if(COMPONENT_ICONS.find(componentHash) != COMPONENT_ICONS.end())
-				icon = COMPONENT_ICONS.at(componentHash);
+			if(ComponentIcons.find(componentHash) != ComponentIcons.end())
+				icon = ComponentIcons.at(componentHash);
 
 			ImGui::PushID(index);
 
@@ -243,7 +242,7 @@ namespace Glory::Editor
 		ImGui::BeginDisabled(isPrefab);
 		if (ImGui::Button("Add Component", { buttonWidth, 0.0f }))
 		{
-			EntityComponentPopup::Open(entityID, pRegistry);
+			EntityComponentPopup::Open(entityID, &pRegistry);
 			m_AddingComponent = true;
 		}
 		ImGui::EndDisabled();
@@ -251,10 +250,8 @@ namespace Glory::Editor
 		if (removeComponent)
 		{
 			Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
-			SceneObject* pObject = (SceneObject*)m_pTarget;
-			GScene* pScene = pObject->GetScene();
-			Undo::AddAction(new RemoveComponentAction(pRegistry, entityID, toRemoveComponent));
-			pRegistry->RemoveComponentAt(entityID, toRemoveComponent);
+			Undo::AddAction(new RemoveComponentAction(&pRegistry, entityID, toRemoveComponent));
+			pRegistry.RemoveComponentAt(entityID, toRemoveComponent);
 			Undo::StopRecord();
 
 			Initialize();
@@ -269,7 +266,7 @@ namespace Glory::Editor
 				Undo::StartRecord("Add Component", m_pTarget->GetUUID());
 				UUID uuid = UUID();
 				size_t index = m_pComponentEditors.size();
-				pRegistry->CreateComponent(entityID, toAddTypeHash, uuid);
+				pRegistry.CreateComponent(entityID, toAddTypeHash, uuid);
 				Undo::AddAction(new AddComponentAction(toAddTypeHash, uuid, index));
 				Undo::StopRecord();
 
@@ -281,26 +278,24 @@ namespace Glory::Editor
 
 		m_ComponentPopup.OnGUI();
 
-		SceneObject* pObject = (SceneObject*)m_pTarget;
 		if (change) EditorSceneManager::SetSceneDirty(pScene);
 		ImGui::EndDisabled();
 		return change;
 	}
 
-	void EntitySceneObjectEditor::DrawObjectNodeName(SceneObject* pObject, bool isPrefab)
+	void EntitySceneObjectEditor::DrawObjectNodeName(Entity& entity, bool isPrefab)
 	{
-		Entity entity = pObject->GetEntityHandle();
-		Utils::ECS::EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
+		Utils::ECS::EntityView* pEntityView = entity.GetScene()->GetRegistry().GetEntityView(entity.GetEntityID());
 		std::stringstream stream;
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
 			const uint32_t typeHash = pEntityView->ComponentTypeAt(i);
-			stream << COMPONENT_ICONS.at(typeHash) << ' ';
+			stream << ComponentIcons.at(typeHash) << ' ';
 		}
 
 		const std::string componentLabels = stream.str();
 		ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
-			" %s %s", pObject->IsActiveInHierarchy() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, pObject->Name().data());
+			" %s %s", entity.IsHierarchyActive() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, entity.Name().data());
 
 		const float compLabelsWidth = ImGui::CalcTextSize(componentLabels.data()).x;
 		const float availableWidth = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowPos().x;
@@ -308,10 +303,9 @@ namespace Glory::Editor
 		ImGui::TextUnformatted(componentLabels.data());
 	}
 
-	bool EntitySceneObjectEditor::SearchCompare(std::string_view search, SceneObject* pObject)
+	bool EntitySceneObjectEditor::SearchCompare(std::string_view search, Entity& entity)
 	{
-		Entity entity = pObject->GetEntityHandle();
-		Utils::ECS::EntityView* pEntityView = entity.GetScene()->GetRegistry()->GetEntityView(entity.GetEntityID());
+		Utils::ECS::EntityView* pEntityView = entity.GetScene()->GetRegistry().GetEntityView(entity.GetEntityID());
 
 		if (search.size() > 2 && search[1] == ':')
 		{
@@ -338,32 +332,35 @@ namespace Glory::Editor
 			}
 		}
 
-		return Utils::CaseInsensitiveSearch(pObject->Name(), search) != std::string::npos;
+		return Utils::CaseInsensitiveSearch(entity.Name(), search) != std::string::npos;
 	}
 
 	void EntitySceneObjectEditor::ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&)
 	{
-		SceneObject* pSceneObject = (SceneObject*)pObject;
+		EditableEntity* pSceneObject = (EditableEntity*)pObject;
+		GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+		Entity entity = pScene->GetEntityByEntityID(pSceneObject->EntityID());
 		const std::filesystem::path path = FileBrowser::GetCurrentPath();
-		ConvertToPrefab(pSceneObject, path);
+		ConvertToPrefab(entity, path);
 	}
 
-	void EntitySceneObjectEditor::ConvertToPrefab(SceneObject* pObject, std::filesystem::path path)
+	void EntitySceneObjectEditor::ConvertToPrefab(Entity& entity, std::filesystem::path path)
 	{
-		PrefabData* pPrefab = PrefabData::CreateFromSceneObject(pObject);
-		path.append(pObject->Name() + ".gentity");
+		GScene* pScene = entity.GetScene();
+		PrefabData* pPrefab = PrefabData::CreateFromEntity(pScene, entity.GetEntityID());
+		path.append(entity.Name()).replace_extension(".gentity");
 		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pPrefab, path.string());
-		GScene* pScene = pObject->GetScene();
-		pScene->SetPrefab(pObject, prefabUUID);
+		pScene->SetPrefab(entity.GetEntityID(), prefabUUID);
 		EditorSceneManager::SetSceneDirty(pScene);
 	}
 
 	void EntitySceneObjectEditor::UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&)
 	{
-		SceneObject* pSceneObject = (SceneObject*)pObject;
-		GScene* pScene = pSceneObject->GetScene();
+		EditableEntity* pSceneObject = (EditableEntity*)pObject;
+		GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+		Entity entity = pScene->GetEntityByEntityID(pSceneObject->EntityID());
 		if (!pScene->Prefab(pSceneObject->GetUUID())) return;
-		pScene->UnsetPrefab(pSceneObject);
+		pScene->UnsetPrefab(entity.GetEntityID());
 		EditorSceneManager::SetSceneDirty(pScene);
 	}
 }

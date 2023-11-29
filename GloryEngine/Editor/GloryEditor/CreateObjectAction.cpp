@@ -1,13 +1,16 @@
 #include "CreateObjectAction.h"
+#include "EditorSceneManager.h"
+#include "SceneSerializer.h"
+#include "Selection.h"
+#include "EditableEntity.h"
+#include "EntityEditor.h"
+
 #include <GScene.h>
 #include <Game.h>
-#include <Engine.h>
-#include <SceneManager.h>
-#include <Serializer.h>
 
 namespace Glory::Editor
 {
-	CreateObjectAction::CreateObjectAction(SceneObject* pSceneObject) : m_SceneID(pSceneObject->GetScene()->GetUUID())
+	CreateObjectAction::CreateObjectAction(GScene* pScene) : m_SceneID(pScene->GetUUID())
 	{
 	}
 
@@ -17,39 +20,35 @@ namespace Glory::Editor
 
 	void CreateObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		SceneObject* pSceneObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
-		if (pSceneObject == nullptr) return;
+		Selection::SetActiveObject(nullptr);
+
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+
+		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
+		if (!entity.IsValid()) return;
 
 		/* Take a snapshot of the object for redoing */
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
-		SerializeRecursive(pSceneObject, out);
+		SceneSerializer::SerializeEntityRecursive(pScene, entity.GetEntityID(), out);
 		out << YAML::EndSeq;
 		m_SerializedObject = out.c_str();
 
-		pSceneObject->GetScene()->DeleteObject(pSceneObject);
+		pScene->DestroyEntity(entity.GetEntityID());
 	}
 
 	void CreateObjectAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		SceneManager* pScenesModule = Game::GetGame().GetEngine()->GetSceneManager();
-		GScene* pScene = pScenesModule->GetOpenScene(m_SceneID);
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
 		if (pScene == nullptr) return;
 		YAML::Node node = YAML::Load(m_SerializedObject.c_str());
-		for (size_t i = 0; i < node.size(); i++)
+		Utils::NodeRef entities{node};
+		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
 		{
-			YAML::Node subNode = node[i];
-			SceneObject* pSceneObject = (SceneObject*)Serializer::DeserializeObject(pScene, subNode);
+			Utils::NodeValueRef entity = entities.ValueRef()[i];
+			SceneSerializer::DeserializeEntity(pScene, entity.Node());
 		}
-	}
 
-	void CreateObjectAction::SerializeRecursive(SceneObject* pObject, YAML::Emitter& out)
-	{
-		Serializer::SerializeObject(pObject, out);
-		for (size_t i = 0; i < pObject->ChildCount(); i++)
-		{
-			SceneObject* pChild = pObject->GetChild(i);
-			SerializeRecursive(pChild, out);
-		}
+		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).GetEntityID(), pScene));
 	}
 }

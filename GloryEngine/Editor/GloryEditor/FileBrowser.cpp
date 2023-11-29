@@ -6,6 +6,8 @@
 #include "EditorRenderImpl.h"
 #include "ObjectMenu.h"
 #include "ImGuiHelpers.h"
+#include "EditableEntity.h"
+#include "EntityEditor.h"
 
 #include <imgui.h>
 #include <EditorAssetCallbacks.h>
@@ -256,9 +258,10 @@ namespace Glory::Editor
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::BeginChild("FileBrowser", ImVec2(0, 0), true, window_flags);
         /* TODO: This will need to become a custom DND target with internal ImGui::BeginDragDropTargetCustom */
-        DND{ { ResourceType::GetHash<SceneObject>() } }.HandleDragAndDropWindowTarget([&](uint32_t hash, const ImGuiPayload* payload) {
+        DND{ { ResourceType::GetHash<EditableEntity>() } }.HandleDragAndDropWindowTarget([&](uint32_t hash, const ImGuiPayload* payload) {
             const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
-            FileBrowserItem::ObjectDNDEventDispatcher().Dispatch({ GetCurrentPath(), objectPayload.pObject});
+            EditableEntity* pEntity = GetEditableEntity(objectPayload.EntityID, objectPayload.SceneID);
+            FileBrowserItem::ObjectDNDEventDispatcher().Dispatch({ GetCurrentPath(), pEntity });
             return;
         });
 

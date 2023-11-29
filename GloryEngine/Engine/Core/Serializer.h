@@ -34,32 +34,32 @@ namespace Glory
 		static void SerializeObject(Object* pObject, YAML::Emitter& out);
 
 		template<class T>
-		static T* DeserializeObject(YAML::Node& object)
+		static T* DeserializeObject(YAML::Node& object, UUID uuid)
 		{
-			return (T*)DeserializeObject(object);
+			return (T*)DeserializeObject(object, uuid);
 		}
 
-		static Object* DeserializeObject(YAML::Node& object);
+		static Object* DeserializeObject(YAML::Node& object, UUID uuid);
 
 		template<class T>
-		static T* DeserializeObjectOfType(YAML::Node& object, const std::string& name = "")
+		static T* DeserializeObjectOfType(YAML::Node& object, UUID uuid, const std::string& name = "")
 		{
-			return (T*)DeserializeObjectOfType(typeid(T), object, name);
+			return (T*)DeserializeObjectOfType(typeid(T), object, uuid, name);
 		}
 
 		template<class T>
-		static T* DeserializeObject(Object* pParent, YAML::Node& object)
+		static T* DeserializeObject(Object* pParent, UUID uuid, YAML::Node& object)
 		{
-			return (T*)DeserializeObject(pParent, object);
+			return (T*)DeserializeObject(pParent, object, uuid);
 		}
 
-		static Object* DeserializeObject(Object* pParent, YAML::Node& object, Flags flags = Flags(0));
-		static Object* DeserializeObjectOfType(std::type_index type, YAML::Node& object, const std::string& name = "");
+		static Object* DeserializeObject(Object* pParent, YAML::Node& object, UUID uuid, Flags flags = Flags(0));
+		static Object* DeserializeObjectOfType(std::type_index type, YAML::Node& object, UUID uuid, const std::string& name = "");
 
 		virtual std::type_index GetSerializedType() = 0;
 
 		virtual void Serialize(Object* pObject, YAML::Emitter& out) = 0;
-		virtual Object* Deserialize(Object* pParent, YAML::Node& object, const std::string& name = "", Flags flags = Flags(0)) = 0;
+		virtual Object* Deserialize(Object* pParent, YAML::Node& object, UUID uuid, const std::string& name = "", Flags flags = Flags(0)) = 0;
 
 		static void ClearUUIDRemapCache();
 		static void SetUUIDRemap(UUID oldUUID, UUID newUUID);

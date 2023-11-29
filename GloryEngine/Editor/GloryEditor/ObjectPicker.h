@@ -1,8 +1,10 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <Resource.h>
 #include <functional>
 #include <SceneObjectRef.h>
-#include "GloryEditor.h"
+#include <Entity.h>
 
 namespace Glory::Editor
 {
@@ -22,6 +24,6 @@ namespace Glory::Editor
 	private:
 		static char m_FilterBuffer[200];
 		static std::string m_Filter;
-		static std::vector<SceneObject*> m_FilteredObjects;
+		static std::vector<Entity> m_FilteredObjects;
 	};
 }

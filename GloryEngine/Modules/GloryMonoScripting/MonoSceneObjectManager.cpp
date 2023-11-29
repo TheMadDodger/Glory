@@ -11,26 +11,26 @@ namespace Glory
 		m_ObjectsCache.clear();
 	}
 
-	MonoObject* MonoSceneObjectManager::GetSceneObject(SceneObject* pObject)
+	MonoObject* MonoSceneObjectManager::GetMonoSceneObject(UUID objectID)
 	{
-		if (m_ObjectsCache.find(pObject) == m_ObjectsCache.end())
+		if (m_ObjectsCache.find(objectID) == m_ObjectsCache.end())
 		{
-			MonoObject* pMonoObject = GetSceneObject_Internal(pObject);
+			MonoObject* pMonoObject = GetMonoSceneObject_Internal(objectID);
 			if (!pMonoObject) return nullptr;
-			m_ObjectsCache.emplace(pObject, pMonoObject);
+			m_ObjectsCache.emplace(objectID, pMonoObject);
 		}
 
-		return m_ObjectsCache.at(pObject);
+		return m_ObjectsCache.at(objectID);
 	}
 
-	void MonoSceneObjectManager::DestroySceneObject(SceneObject* pObject)
+	void MonoSceneObjectManager::DestroyMonoSceneObject(UUID objectID)
 	{
-		if (m_ObjectsCache.find(pObject) == m_ObjectsCache.end()) return;
-		DestroySceneObject_Internal(m_ObjectsCache.at(pObject));
-		m_ObjectsCache.erase(pObject);
+		if (m_ObjectsCache.find(objectID) == m_ObjectsCache.end()) return;
+		DestroyMonoSceneObject_Internal(m_ObjectsCache.at(objectID));
+		m_ObjectsCache.erase(objectID);
 	}
 
-	MonoObject* MonoSceneObjectManager::GetSceneObject_Internal(SceneObject* pObject)
+	MonoObject* MonoSceneObjectManager::GetMonoSceneObject_Internal(UUID objectID)
 	{
 		MonoObject* pMonoObject = mono_object_new(mono_domain_get(), MonoSceneManager::EntitySceneObjectClass());
 		if (pMonoObject == nullptr)
@@ -39,10 +39,10 @@ namespace Glory
 			return nullptr;
 		}
 
-		uint64_t objectID = uint64_t(pObject->GetUUID());
+		uint64_t object = uint64_t(objectID);
 		uint64_t sceneID = uint64_t(m_pScene->GetUUID());
 		void* args[2] = {
-			&objectID,
+			&object,
 			&sceneID
 		};
 
@@ -53,7 +53,7 @@ namespace Glory
 		return pMonoObject;
 	}
 
-	void MonoSceneObjectManager::DestroySceneObject_Internal(MonoObject* pMonoObject)
+	void MonoSceneObjectManager::DestroyMonoSceneObject_Internal(MonoObject* pMonoObject)
 	{
 	}
 }

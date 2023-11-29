@@ -1,7 +1,8 @@
 #include "CreateEntityObjectsCallbacks.h"
+#include "EditableEntity.h"
+#include "EntityEditor.h"
 
 #include <SceneManager.h>
-#include <SceneObject.h>
 #include <Game.h>
 #include <Engine.h>
 #include <EditorSceneManager.h>
@@ -10,16 +11,16 @@
 
 namespace Glory::Editor
 {
-	SceneObject* CreateNewEmptyObject(Object* pObject, const std::string& name, const ObjectMenuType& currentMenu)
+	Entity CreateNewEmptyObject(Object* pObject, const std::string& name, const ObjectMenuType& currentMenu)
     {
 		if (!pObject)
 		{
 			Selection::SetActiveObject(nullptr);
 			GScene* pActiveScene = Game::GetGame().GetEngine()->GetSceneManager()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
-			SceneObject* pNewObject = pActiveScene->CreateEmptyObject(name, UUID());
-			Selection::SetActiveObject(pNewObject);
-			return (SceneObject*)pNewObject;
+			Entity newEntity = pActiveScene->CreateEmptyObject(name, UUID());
+			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
+			return newEntity;
 		}
 
 		switch (currentMenu)
@@ -28,27 +29,27 @@ namespace Glory::Editor
 		{
 			Selection::SetActiveObject(nullptr);
 			GScene* pScene = (GScene*)pObject;
-			if (pScene == nullptr) return nullptr;
-			SceneObject* pNewObject = pScene->CreateEmptyObject(name, UUID());
-			Selection::SetActiveObject(pNewObject);
-			return (SceneObject*)pNewObject;
+			if (pScene == nullptr) return {};
+			Entity newEntity = pScene->CreateEmptyObject(name, UUID());
+			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
+			return newEntity;
 		}
 
 		case ObjectMenuType::T_SceneObject:
 		{
 			Selection::SetActiveObject(nullptr);
-			SceneObject* pSceneObject = (SceneObject*)pObject;
-			if (pSceneObject == nullptr) return nullptr;
-			GScene* pScene = pSceneObject->GetScene();
-			if (pScene == nullptr) return nullptr;
-			SceneObject* pNewObject = pScene->CreateEmptyObject(name, UUID());
-			pNewObject->SetParent(pSceneObject);
-			Selection::SetActiveObject(pNewObject);
-			return (SceneObject*)pNewObject;
+			EditableEntity* pSceneObject = (EditableEntity*)pObject;
+			if (pSceneObject == nullptr) return {};
+			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+			if (pScene == nullptr) return {};
+			Entity newEntity = pScene->CreateEmptyObject(name, UUID());
+			newEntity.SetParent(pSceneObject->EntityID());
+			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
+			return newEntity;
 		}
 		}
 
-		return nullptr;
+		return {};
     }
 
 	CREATE_OBJECT_CALLBACK_CPP(Mesh, MeshRenderer, ());

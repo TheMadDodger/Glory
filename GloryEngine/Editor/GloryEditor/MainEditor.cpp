@@ -51,6 +51,7 @@
 #include "VersionPopup.h"
 
 #include "CreateEntityObjectsCallbacks.h"
+#include "EditableEntity.h"
 
 #include <imgui.h>
 #include <Game.h>
@@ -151,6 +152,8 @@ namespace Glory::Editor
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();
 		Importer::Register<TextureImporter>();
+
+		ResourceType::RegisterResource<EditableEntity>("");
 	}
 
 	void MainEditor::Destroy()
@@ -428,7 +431,8 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_R, ImGuiModFlags_Ctrl);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
-			EntitySceneObjectEditor::ConvertToPrefab(e.Object, e.Path);
+			Entity entity = EditorSceneManager::GetOpenScene(e.Object->SceneID())->GetEntityByEntityID(e.Object->EntityID());
+			EntitySceneObjectEditor::ConvertToPrefab(entity, e.Path);
 		});
 	}
 

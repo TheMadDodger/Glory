@@ -1,9 +1,12 @@
 #include "SceneObjectNameAction.h"
-#include <SceneObject.h>
+#include "EditorSceneManager.h"
+
+#include <GScene.h>
 
 namespace Glory::Editor
 {
-	SceneObjectNameAction::SceneObjectNameAction(const std::string& original, const std::string& name) : m_Original(original), m_NewName(name)
+	SceneObjectNameAction::SceneObjectNameAction(GScene* pScene, const std::string_view original, const std::string_view name)
+		: m_SceneID(pScene->GetUUID()), m_Original(original), m_NewName(name)
 	{
 	}
 
@@ -13,13 +16,17 @@ namespace Glory::Editor
 
 	void SceneObjectNameAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
-		pObject->SetName(m_Original);
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
+		pScene->SetEntityName(entity.GetEntityID(), m_Original);
 	}
 
 	void SceneObjectNameAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		SceneObject* pObject = (SceneObject*)Object::FindObject(actionRecord.ObjectID);
-		pObject->SetName(m_NewName);
+		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
+		pScene->SetEntityName(entity.GetEntityID(), m_NewName);
 	}
 }

@@ -4,7 +4,7 @@
 namespace Glory::Utils::ECS
 {
     EntityView::EntityView(EntityRegistry* pRegistry)
-        : m_pRegistry(pRegistry), m_Active(true), m_HierarchyActive(true)
+        : m_pRegistry(pRegistry), m_Active(true), m_HierarchyActive(true), m_Parent(0)
     {}
 
     size_t EntityView::ComponentCount() const
@@ -60,6 +60,28 @@ namespace Glory::Utils::ECS
     bool EntityView::IsActive() const
     {
         return m_HierarchyActive && m_Active;
+    }
+
+    EntityID EntityView::Parent() const
+    {
+        return m_Parent;
+    }
+
+    size_t EntityView::ChildCount() const
+    {
+        return m_Children.size();
+    }
+
+    EntityID EntityView::Child(size_t index) const
+    {
+        return m_Children[index];
+    }
+
+    size_t EntityView::ChildIndex(EntityID entity) const
+    {
+        auto itor = std::find(m_Children.begin(), m_Children.end(), entity);
+        if (itor == m_Children.end()) return 0;
+        return itor - m_Children.begin();
     }
 
     uint32_t EntityView::ComponentTypeAt(size_t index) const

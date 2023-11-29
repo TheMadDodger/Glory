@@ -90,7 +90,7 @@ namespace Glory::Editor
 		JSONValueRef locationNode = assetNode["Location"];
 		locationNode["Path"].SetString(location.Path);
 		locationNode["SubresourcePath"].SetString(location.SubresourcePath);
-		locationNode["Index"].SetInt(location.Index);
+		locationNode["Index"].SetInt(int(location.Index));
 
 		JSONValueRef metaNode = assetNode["Metadata"];
 		metaNode["Extension"].SetString(meta.Extension());

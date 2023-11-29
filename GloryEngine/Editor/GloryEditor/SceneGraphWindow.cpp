@@ -9,6 +9,8 @@
 #include "EditorUI.h"
 #include "EditorAssetDatabase.h"
 #include "EntitySceneObjectEditor.h"
+#include "EditableEntity.h"
+#include "EntityEditor.h"
 
 #include <Game.h>
 #include <Engine.h>
@@ -23,7 +25,7 @@
 
 namespace Glory::Editor
 {
-	DND DragAndDrop{ { ST_Path, ResourceType::GetHash<SceneObject>(), ResourceType::GetHash<PrefabData>() } };
+	DND DragAndDrop{ { ST_Path, ResourceType::GetHash<EditableEntity>(), ResourceType::GetHash<PrefabData>() } };
 
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
@@ -84,19 +86,23 @@ namespace Glory::Editor
 
 		ImGui::InvisibleButton("WINDOWTARGET", { size.x, availableRegion.y });
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			if (HandleAssetDragAndDrop(nullptr, dndHash, pPayload)) return;
+			GScene* pScene = EditorSceneManager::GetActiveScene();
+			if (HandleAssetDragAndDrop(0, pScene, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
+			pScene = EditorSceneManager::GetOpenScene(payload.SceneID);
+			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+			Entity oldParent = draggingEntity.ParentEntity();
 
-			Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-			const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+			Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+			const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
 			const UUID newParent = 0;
-			const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-			payload.pObject->SetParent(nullptr);
-			Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+			const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+			draggingEntity.SetParent(0);
+			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
 			Undo::StopRecord();
 
-			EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+			EditorSceneManager::SetSceneDirty(pScene);
 		});
 
 		if (ImGui::IsItemClicked(1))
@@ -111,6 +117,8 @@ namespace Glory::Editor
 
 	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)
 	{
+		ImGui::PushID(int(index));
+
 		const std::hash<std::string> hasher{};
 		const size_t hash = hasher((pScene->Name() + std::to_string(pScene->GetUUID())));
 
@@ -125,26 +133,34 @@ namespace Glory::Editor
 
 		const std::string label = pScene->Name() + (EditorSceneManager::IsSceneDirty(pScene) ? " *" : "");
 		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
-		const bool nodeOpen = ImGui::TreeNodeEx((void*)hash, node_flags, label.data());
+		const bool nodeOpen = ImGui::TreeNodeEx("##scenenode", node_flags, label.data());
 		if (isActive) ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			if (HandleAssetDragAndDrop(nullptr, dndHash, pPayload)) return;
+			if (HandleAssetDragAndDrop(0, pScene, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
+			if (pScene->GetUUID() != payload.SceneID)
+			{
+				Debug::LogWarning("Moving an entity to another scene is currently not supported");
+				return;
+			}
 
-			Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-			const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
+			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+			Entity oldParent = draggingEntity.ParentEntity();
+
+			Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+			const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
 			const UUID newParent = 0;
-			const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-			payload.pObject->SetParent(nullptr);
-			Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+			const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+			draggingEntity.SetParent(0);
+			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
 			Undo::StopRecord();
 
-			EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+			EditorSceneManager::SetSceneDirty(pScene);
 		});
 
 		if (ImGui::IsItemClicked())
@@ -161,75 +177,88 @@ namespace Glory::Editor
 			//ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
 
 			size_t index = 0;
-			for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
+			for (size_t i = 0; i < pScene->ChildCount(0); i++)
 			{
-				SceneObject* pObject = pScene->GetSceneObject(i);
-				if (pObject->GetParent() != nullptr) continue;
-				if (!ChildrenList(index, pObject)) continue;
+				Entity childEntity = pScene->ChildEntity(0, i);
+				if (!ChildrenList(index, childEntity)) continue;
 				++index;
 			}
 
 			//ImGui::PopStyleVar();
 			ImGui::TreePop();
-			return;
 		}
+
+		ImGui::PopID();
 	}
 
-	bool SceneGraphWindow::ChildrenList(size_t index, SceneObject* pObject)
+	bool SceneGraphWindow::ChildrenList(size_t index, Entity& entity)
 	{
-		const UUID id = pObject->GetUUID();
+		ImGui::PushID(int(index));
 
-		if (IsExcluded(id)) return false;
+		const UUID id = entity.EntityUUID();
+
+		if (IsExcluded(id))
+		{
+			ImGui::PopID();
+			return false;
+		}
 
 		// Disable the default open on single-click behavior and pass in Selected flag according to our selection state.
-
-		bool selected = Selection::IsObjectSelected(pObject);
+		bool selected = Selection::IsObjectSelected(GetEditableEntity(entity.GetEntityID(), entity.GetScene()));
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
 			| ImGuiTreeNodeFlags_SpanAvailWidth | (selected ? ImGuiTreeNodeFlags_Selected : 0);
 
-		constexpr std::hash<std::string> hasher{};
-		const std::string nameAndIDMinus1 = pObject->Name() + std::to_string(id - 1);
-		const std::string nameAndID = pObject->Name() + std::to_string(id);
-		const std::string nameAndIDPlus1 = pObject->Name() + std::to_string(id + 1);
-		const size_t hash = hasher(nameAndID);
+		const std::string name{entity.Name()};
 
-		const size_t childCount = pObject->ChildCount();
+		const size_t childCount = entity.ChildCount();
 
 		if (index == 0)
 		{
-			ImGui::InvisibleButton(nameAndIDMinus1.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
+			ImGui::InvisibleButton("##reorderbefore", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 			DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-				SceneObject* pParent = pObject->GetParent();
-				if (HandleAssetDragAndDrop(pParent, dndHash, pPayload)) return;
+				GScene* pScene = entity.GetScene();
+				Entity parentEntity = entity.ParentEntity();
+				if (HandleAssetDragAndDrop(parentEntity.GetEntityID(), pScene, dndHash, pPayload)) return;
 
 				const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
-				bool canParent = true;
-				while (pParent)
+				if (payload.SceneID != pScene->GetUUID())
 				{
-					if (pParent == payload.pObject)
+					Debug::LogWarning("Moving an entity to another scene is currently not supported");
+					return;
+				}
+
+				Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+				if (draggingEntity.GetEntityID() == entity.GetEntityID()) return;
+
+				bool canParent = true;
+				while (parentEntity.IsValid())
+				{
+					if (parentEntity.GetEntityID() == payload.EntityID)
 					{
 						canParent = false;
 						break;
 					}
 
-					pParent = pParent->GetParent();
+					parentEntity = parentEntity.ParentEntity();
 				}
 
-				pParent = pObject->GetParent();
+				parentEntity = entity.ParentEntity();
 				if (canParent)
 				{
-					Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-					const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-					const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
-					const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-					const size_t siblingIndex = pObject->GetSiblingIndex();
-					payload.pObject->SetParent(pParent);
-					payload.pObject->SetSiblingIndex(siblingIndex);
-					Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-					Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
+					Entity oldParent = draggingEntity.ParentEntity();
+
+					Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+					const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+					const UUID newParent = parentEntity.IsValid() ? parentEntity.EntityUUID() : UUID(0);
+					const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+					const size_t siblingIndex = 0;
+					draggingEntity.SetParent(parentEntity.GetEntityID());
+					draggingEntity.SetSiblingIndex(siblingIndex);
+					Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+					Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
 					Undo::StopRecord();
 
-					EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+					EditorSceneManager::SetSceneDirty(pScene);
 				}
 			});
 		}
@@ -237,135 +266,160 @@ namespace Glory::Editor
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
-		const bool isPrefab = pObject->GetScene()->Prefab(pObject->GetUUID()) || pObject->GetScene()->PrefabChild(pObject->GetUUID());
-		const bool node_open = ImGui::TreeNodeEx((void*)hash, node_flags, "");
-		ObjectPayload payload{ pObject };
-		DND::DragAndDropSource<SceneObject>(&payload, sizeof(ObjectPayload), [pObject]() {
-			ImGui::Text("%s: %s", pObject->Name().data(), std::to_string(pObject->GetUUID()).data());
+		GScene* pScene = entity.GetScene();
+		const bool isPrefab = entity.GetScene()->Prefab(entity.EntityUUID()) || pScene->PrefabChild(entity.EntityUUID());
+		const bool node_open = ImGui::TreeNodeEx("##entitynode", node_flags, "");
+		ObjectPayload payload{ entity.GetEntityID(), pScene->GetUUID() };
+		DND::DragAndDropSource<EditableEntity>(&payload, sizeof(ObjectPayload), [entity]() {
+			ImGui::Text("%s: %s", entity.Name().data(), std::to_string(entity.EntityUUID()).data());
 		});
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			if (HandleAssetDragAndDrop(pObject, dndHash, pPayload)) return;
+			if (HandleAssetDragAndDrop(entity.GetEntityID(), pScene, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
-
-			SceneObject* pParent = pObject->GetParent();
-			bool canParent = true;
-			while (pParent)
+			if (payload.SceneID != pScene->GetUUID())
 			{
-				if (pParent == payload.pObject)
+				Debug::LogWarning("Moving an entity to another scene is currently not supported");
+				return;
+			}
+			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+
+			if (draggingEntity.GetEntityID() == entity.GetEntityID()) return;
+
+			Entity parentEntity = entity.ParentEntity();
+			bool canParent = true;
+			while (parentEntity.IsValid())
+			{
+				if (parentEntity.GetEntityID() == payload.EntityID)
 				{
 					canParent = false;
 					break;
 				}
 
-				pParent = pParent->GetParent();
+				parentEntity = parentEntity.ParentEntity();
 			}
 			if (canParent)
 			{
-				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-				const UUID newParent = pObject ? pObject->GetUUID() : UUID(0);
-				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-				payload.pObject->SetParent(pObject);
-				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
+				Entity oldParent = draggingEntity.ParentEntity();
+
+				Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+				const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+				const UUID newParent = entity.IsValid() ? entity.EntityUUID() : UUID(0);
+				const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+				draggingEntity.SetParent(entity.GetEntityID());
+				Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
 				Undo::StopRecord();
 
-				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+				EditorSceneManager::SetSceneDirty(pScene);
 			}
 		});
 
+		EditableEntity* pEntity = GetEditableEntity(entity.GetEntityID(), pScene);
 		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 		{
-			Selection::SetActiveObject(pObject);
+			Selection::SetActiveObject(pEntity);
 		}
 		if (ImGui::IsItemClicked(1))
 		{
-			Selection::SetActiveObject(pObject);
-			ObjectMenu::Open(pObject, T_SceneObject);
+			Selection::SetActiveObject(pEntity);
+			ObjectMenu::Open(pEntity, T_SceneObject);
 		}
 
 		ImGui::SameLine();
-		EntitySceneObjectEditor::DrawObjectNodeName(pObject, isPrefab);
+		EntitySceneObjectEditor::DrawObjectNodeName(entity, isPrefab);
 
 		ImGui::PopStyleVar();
 
 		if (node_open)
 		{
 			size_t index = 0;
-			for (size_t i = 0; i < pObject->ChildCount(); i++)
+			for (size_t i = 0; i < entity.ChildCount(); i++)
 			{
-				SceneObject* pChild = pObject->GetChild(i);
-				if (!ChildrenList(index, pChild)) continue;
+				Entity child = entity.ChildEntity(i);
+				if (!ChildrenList(index, child)) continue;
 				++index;
 			}
 
 			if (childCount > 0) ImGui::TreePop();
 		}
 
-		ImGui::InvisibleButton(nameAndIDPlus1.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
+		ImGui::InvisibleButton("##reorderafter", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			SceneObject* pParent = pObject->GetParent();
-			if (HandleAssetDragAndDrop(pParent, dndHash, pPayload)) return;
+			Entity parent = entity.ParentEntity();
+			if (HandleAssetDragAndDrop(parent.GetEntityID(), pScene, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
-			bool canParent = true;
-			while (pParent)
+			if (payload.SceneID != pScene->GetUUID())
 			{
-				if (pParent == payload.pObject)
+				Debug::LogWarning("Moving an entity to another scene is currently not supported");
+				return;
+			}
+			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
+
+			if (draggingEntity.GetEntityID() == entity.GetEntityID()) return;
+
+			bool canParent = true;
+			while (parent.IsValid())
+			{
+				if (parent.GetEntityID() == payload.EntityID)
 				{
 					canParent = false;
 					break;
 				}
 
-				pParent = pParent->GetParent();
+				parent = parent.ParentEntity();
 			}
 
-			pParent = pObject->GetParent();
+			parent = entity.ParentEntity();
 			if (canParent)
 			{
-				Undo::StartRecord("Re-parent", payload.pObject->GetUUID());
-				const UUID oldParent = payload.pObject->GetParent() ? payload.pObject->GetParent()->GetUUID() : UUID(0);
-				const UUID newParent = pParent ? pParent->GetUUID() : UUID(0);
-				const size_t oldSiblingIndex = payload.pObject->GetSiblingIndex();
-				const size_t siblingIndex = pObject->GetSiblingIndex();
-				payload.pObject->SetParent(pParent);
-				payload.pObject->SetSiblingIndex(siblingIndex);
-				Undo::AddAction(new SetParentAction(oldParent, newParent, oldSiblingIndex));
-				Undo::AddAction(new SetSiblingIndexAction(oldSiblingIndex, siblingIndex));
+				Entity oldParent = draggingEntity.ParentEntity();
+
+				Undo::StartRecord("Re-parent", draggingEntity.EntityUUID());
+				const UUID oldParentID = oldParent.IsValid() ? oldParent.EntityUUID() : UUID(0);
+				const UUID newParent = parent.IsValid() ? parent.EntityUUID() : UUID(0);
+				const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
+				const size_t siblingIndex = entity.SiblingIndex() + 1;
+				draggingEntity.SetParent(parent.GetEntityID());
+				draggingEntity.SetSiblingIndex(siblingIndex);
+				Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+				Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
 				Undo::StopRecord();
 
-				EditorSceneManager::SetSceneDirty(payload.pObject->GetScene());
+				EditorSceneManager::SetSceneDirty(pScene);
 			}
 		});
+
+		ImGui::PopID();
 		return true;
 	}
 
 	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(GScene* pScene)
 	{
 		bool hasNonFilteredChild = false;
-		for (size_t i = 0; i < pScene->SceneObjectsCount(); i++)
+		for (size_t i = 0; i < pScene->ChildCount(0); i++)
 		{
-			SceneObject* pObject = pScene->GetSceneObject(i);
-			hasNonFilteredChild |= GetExcludedObjectsFromFilterRecursive(pObject);
+			Entity child = pScene->ChildEntity(0, i);
+			hasNonFilteredChild |= GetExcludedObjectsFromFilterRecursive(child);
 		}
 		return hasNonFilteredChild;
 	}
 
-	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(SceneObject* pObject)
+	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(Entity& entity)
 	{
 		const std::string_view search{SearchBuffer};
-		const bool searchPassed = EntitySceneObjectEditor::SearchCompare(search, pObject);
+		const bool searchPassed = true;//EntitySceneObjectEditor::SearchCompare(search, pObject);
 
 		bool hasNonFilteredChild = false;
-		for (size_t i = 0; i < pObject->ChildCount(); i++)
+		for (size_t i = 0; i < entity.ChildCount(); i++)
 		{
-			SceneObject* pChild = pObject->GetChild(i);
-			hasNonFilteredChild |= GetExcludedObjectsFromFilterRecursive(pChild);
+			Entity childEntity = entity.ChildEntity(i);
+			hasNonFilteredChild |= GetExcludedObjectsFromFilterRecursive(childEntity);
 		}
 
 		const bool shouldBeExcluded = !searchPassed && !hasNonFilteredChild;
 		if (shouldBeExcluded)
-			m_SearchResultExcludeCache.push_back(pObject->GetUUID());
+			m_SearchResultExcludeCache.push_back(entity.EntityUUID());
 
 		return !shouldBeExcluded;
 	}
@@ -376,7 +430,7 @@ namespace Glory::Editor
 			!= m_SearchResultExcludeCache.end();
 	}
 
-	bool SceneGraphWindow::HandleAssetDragAndDrop(SceneObject* pParent, uint32_t dndHash, const ImGuiPayload* pPayload)
+	bool SceneGraphWindow::HandleAssetDragAndDrop(Utils::ECS::EntityID entity, GScene* pScene, uint32_t dndHash, const ImGuiPayload* pPayload)
 	{
 		if (dndHash != ST_Path && dndHash != ResourceType::GetHash<PrefabData>()) return false;
 
@@ -418,8 +472,9 @@ namespace Glory::Editor
 
 		if (!pPrefab) return false;
 
-		EditorSceneManager::GetActiveScene()->InstantiatePrefab(pParent, pPrefab, glm::vec3{}, glm::quat{0, 0, 0, 1}, glm::vec3{1, 1, 1});
-		EditorSceneManager::SetSceneDirty(EditorSceneManager::GetActiveScene());
+		Entity entityHandle = pScene->GetEntityByEntityID(entity);
+		pScene->InstantiatePrefab(entityHandle.EntityUUID(), pPrefab, glm::vec3{}, glm::quat{0, 0, 0, 1}, glm::vec3{1, 1, 1});
+		EditorSceneManager::SetSceneDirty(pScene);
 		return true;
 	}
 }

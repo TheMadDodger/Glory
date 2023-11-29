@@ -24,6 +24,7 @@ namespace Glory::Utils::ECS
 		m_pEntityViews.clear();
 		m_pViews.clear();
 		m_ViewIndices.clear();
+		m_RootOrder.clear();
 
 		m_pUserData = nullptr;
 	}
@@ -33,12 +34,20 @@ namespace Glory::Utils::ECS
 		EntityID newEntity = m_NextEntityID;
 		++m_NextEntityID;
 		m_pEntityViews.emplace(newEntity, new EntityView(this));
+		m_RootOrder.push_back(newEntity);
 		return newEntity;
 	}
 
 	void EntityRegistry::DestroyEntity(EntityID entity)
 	{
 		EntityView* pEntityView = GetEntityView(entity);
+		/* Destroy children first */
+		for (size_t i = 0; i < pEntityView->ChildCount(); ++i)
+		{
+			DestroyEntity(pEntityView->Child(i));
+		}
+
+		/* Remove all components */
 		for (auto it = pEntityView->m_ComponentTypes.begin(); it != pEntityView->m_ComponentTypes.end(); it++)
 		{
 			uint32_t typeHash = it->second;
@@ -47,7 +56,24 @@ namespace Glory::Utils::ECS
 			pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);
 			pTypeView->Remove(entity);
 		}
-		delete m_pEntityViews[entity];
+
+		/* Update parent */
+		if (pEntityView->m_Parent)
+		{
+			/* Remove from parent children array */
+			EntityView* pParentView = m_pEntityViews.at(pEntityView->m_Parent);
+			const auto itor = std::find(pParentView->m_Children.begin(), pParentView->m_Children.end(), entity);
+			pParentView->m_Children.erase(itor);
+		}
+		else
+		{
+			/* Remove from root order */
+			const auto itor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
+			m_RootOrder.erase(itor);
+		}
+
+		/* Delete view */
+		delete pEntityView;
 		m_pEntityViews.erase(entity);
 	}
 
@@ -78,10 +104,11 @@ namespace Glory::Utils::ECS
 
 	EntityView* EntityRegistry::GetEntityView(EntityID entity)
 	{
-		if(m_pEntityViews.find(entity) == m_pEntityViews.end())
+		const auto itor = m_pEntityViews.find(entity);
+		if(itor == m_pEntityViews.end())
 			return nullptr;
 
-		return m_pEntityViews[entity];
+		return itor->second;
 	}
 
 	void* EntityRegistry::GetComponentAddress(EntityID entityID, Glory::UUID componentID)
@@ -166,6 +193,112 @@ namespace Glory::Utils::ECS
 		pTypeView->InvokeAll(invocationType, this);
 	}
 
+	void EntityRegistry::ForEach(std::function<void(EntityRegistry*, EntityID)> func)
+	{
+		for (auto& itor : m_pEntityViews)
+		{
+			func(this, itor.first);
+		}
+	}
+
+	EntityID EntityRegistry::GetParent(Utils::ECS::EntityID entity) const
+	{
+		const auto itor = m_pEntityViews.find(entity);
+		if (itor == m_pEntityViews.end()) return false;
+		return itor->second->Parent();
+	}
+
+	bool EntityRegistry::SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent)
+	{
+		const auto itor1 = m_pEntityViews.find(entity);
+
+		if (itor1 == m_pEntityViews.end()) return false;
+		const Utils::ECS::EntityID oldParent = itor1->second->m_Parent;
+		if (oldParent)
+		{
+			auto& oldParentChildren = m_pEntityViews.at(oldParent)->m_Children;
+			const auto itor = std::find(oldParentChildren.begin(), oldParentChildren.end(), entity);
+			oldParentChildren.erase(itor);
+		}
+		else
+		{
+			const auto itor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
+			m_RootOrder.erase(itor);
+		}
+
+		itor1->second->m_Parent = parent;
+		const auto itor2 = m_pEntityViews.find(parent);
+		if (itor2 != m_pEntityViews.end())
+		{
+			itor2->second->m_Children.push_back(entity);
+		}
+		else
+		{
+			m_RootOrder.push_back(entity);
+		}
+
+		return true;
+	}
+
+	size_t EntityRegistry::ChildCount(Utils::ECS::EntityID entity) const
+	{
+		if (entity == 0)
+			return m_RootOrder.size();
+
+		const auto itor = m_pEntityViews.find(entity);
+		return itor->second->ChildCount();
+	}
+
+	EntityID EntityRegistry::Child(Utils::ECS::EntityID entity, size_t index) const
+	{
+		if (entity == 0)
+			return m_RootOrder[index];
+
+		const auto itor = m_pEntityViews.find(entity);
+		return itor->second->Child(index);
+	}
+
+	size_t EntityRegistry::SiblingIndex(Utils::ECS::EntityID entity) const
+	{
+		auto itor = m_pEntityViews.find(entity);
+		itor = m_pEntityViews.find(itor->second->Parent());
+		if (itor == m_pEntityViews.end())
+		{
+			const auto rootItor = std::find(m_RootOrder.begin(), m_RootOrder.end(), entity);
+			if (rootItor == m_RootOrder.end()) return 0;
+			return rootItor - m_RootOrder.begin();
+		}
+		return itor->second->ChildIndex(entity);
+	}
+
+	void EntityRegistry::SetSiblingIndex(Utils::ECS::EntityID entity, size_t index)
+	{
+		auto itor = m_pEntityViews.find(entity);
+		itor = m_pEntityViews.find(itor->second->Parent());
+		std::vector<EntityID>* targetVector = nullptr;
+		if (itor == m_pEntityViews.end())
+		{
+			targetVector = &m_RootOrder;
+		}
+		else
+		{
+			targetVector = &itor->second->m_Children;;
+		}
+		auto it = std::find(targetVector->begin(), targetVector->end(), entity);
+		const size_t oldIndex = it - targetVector->begin();
+		if (index > 0 && oldIndex < index)
+			index -= 1;
+
+		if (it == targetVector->end()) return;
+		targetVector->erase(it);
+		if (index >= targetVector->size())
+		{
+			targetVector->push_back(entity);
+			return;
+		}
+		targetVector->insert(targetVector->begin() + index, entity);
+	}
+
 	void EntityRegistry::InvokeAll(InvocationType invocationType)
 	{
 		for (size_t i = 0; i < m_pViews.size(); ++i)
@@ -173,4 +306,47 @@ namespace Glory::Utils::ECS
 			m_pViews[i]->InvokeAll(invocationType, this);
 		}
 	}
+//
+//	void SceneObject::SetBeforeObject(SceneObject* pObject)
+//	{
+//		SceneObject* pParent = GetParent();
+//
+//		std::vector<SceneObject*>* targetVector = &m_pScene->m_pSceneObjects;
+//		if (pParent != nullptr)
+//			targetVector = &pParent->m_pChildren;
+//
+//		auto it = std::find(targetVector->begin(), targetVector->end(), this);
+//		if (it == targetVector->end()) return;
+//		targetVector->erase(it);
+//
+//		auto targetIterator = std::find(targetVector->begin(), targetVector->end(), pObject);
+//		if (targetIterator == targetVector->end())
+//		{
+//			targetVector->push_back(this);
+//			return;
+//		}
+//		targetVector->insert(targetIterator, this);
+//	}
+//
+//	void SceneObject::SetAfterObject(SceneObject* pObject)
+//	{
+//		SceneObject* pParent = GetParent();
+//
+//		std::vector<SceneObject*>* targetVector = &m_pScene->m_pSceneObjects;
+//		if (pParent != nullptr)
+//			targetVector = &pParent->m_pChildren;
+//
+//		auto it = std::find(targetVector->begin(), targetVector->end(), this);
+//		if (it == targetVector->end()) return;
+//		targetVector->erase(it);
+//
+//		auto targetIterator = std::find(targetVector->begin(), targetVector->end(), pObject);
+//
+//		if (targetIterator == targetVector->end() || targetIterator + 1 == targetVector->end())
+//		{
+//			targetVector->push_back(this);
+//			return;
+//		}
+//		targetVector->insert(targetIterator + 1, this);
+//	}
 }

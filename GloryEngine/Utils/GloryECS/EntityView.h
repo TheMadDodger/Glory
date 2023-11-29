@@ -1,5 +1,7 @@
 #pragma once
 #include "UUID.h"
+#include "EntityID.h"
+
 #include <vector>
 #include <map>
 
@@ -25,6 +27,13 @@ namespace Glory::Utils::ECS
 		bool& HierarchyActive();
 		bool IsActive() const;
 
+		EntityID Parent() const;
+
+		size_t ChildCount() const;
+		EntityID Child(size_t index) const;
+
+		size_t ChildIndex(EntityID entity) const;
+
 	private:
 		void Add(uint32_t hash, Glory::UUID uuid = Glory::UUID());
 		UUID Remove(uint32_t hash);
@@ -36,6 +45,8 @@ namespace Glory::Utils::ECS
 		std::map<Glory::UUID, uint32_t> m_ComponentTypes;
 		std::map<uint32_t, Glory::UUID> m_TypeToUUID;
 		std::vector<Glory::UUID> m_ComponentOrder;
+		EntityID m_Parent;
+		std::vector<EntityID> m_Children;
 		bool m_Active;
 		bool m_HierarchyActive;
 	};

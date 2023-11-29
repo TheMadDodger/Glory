@@ -2,12 +2,15 @@
 #include "Undo.h"
 #include <GScene.h>
 
-namespace Glory::Editor
+namespace Glory
+{
+    class GScene;
+namespace Editor
 {
     class EnableObjectAction : public IAction
     {
     public:
-        GLORY_EDITOR_API EnableObjectAction(bool active);
+        GLORY_EDITOR_API EnableObjectAction(GScene* pScene, bool active);
         virtual ~EnableObjectAction();
 
     private:
@@ -15,6 +18,8 @@ namespace Glory::Editor
         virtual void OnRedo(const ActionRecord& actionRecord);
 
     private:
-        bool m_Active;
+        const UUID m_SceneID;
+        const bool m_Active;
     };
+}
 }

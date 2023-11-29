@@ -130,7 +130,7 @@ namespace Glory
         { PixelFormat::PF_R32G32B32Uint,             0 },
         { PixelFormat::PF_R32G32B32Sint,             0 },
         { PixelFormat::PF_R32G32B32Sfloat,           0 },
-        { PixelFormat::PF_R32G32B32A32Uint,          0 },
+        { PixelFormat::PF_R32G32B32A32Uint,          GL_RGBA32UI },
         { PixelFormat::PF_R32G32B32A32Sint,          0 },
         { PixelFormat::PF_R32G32B32A32Sfloat,        0 },
         { PixelFormat::PF_R64Uint,                   0 }, // Not supported
@@ -274,6 +274,20 @@ namespace Glory
         { SamplerAddressMode::SAM_MirroredRepeat, GL_MIRRORED_REPEAT },
         { SamplerAddressMode::SAM_MirrorClampToEdge, GL_MIRROR_CLAMP_TO_EDGE },
         { SamplerAddressMode::SAM_MirrorClampToEdgeKHR, GL_MIRROR_CLAMP_TO_EDGE_EXT },
+    };
+    
+    const std::map<DataType, GLenum> GLConverter::TO_GLDATATYPE = {
+        { DataType::DT_Byte, GL_BYTE },
+        { DataType::DT_UByte, GL_UNSIGNED_BYTE },
+        { DataType::DT_Short, GL_SHORT },
+        { DataType::DT_UShort, GL_UNSIGNED_SHORT },
+        { DataType::DT_Int, GL_INT },
+        { DataType::DT_UInt, GL_UNSIGNED_INT },
+        { DataType::DT_Float, GL_FLOAT },
+        { DataType::DT_2Bytes, GL_2_BYTES },
+        { DataType::DT_3Bytes, GL_3_BYTES },
+        { DataType::DT_4Bytes, GL_4_BYTES },
+        { DataType::DT_Double, GL_DOUBLE },
     };
 
     GLuint GLConverter::GetGLImageType(const ImageType& imageType)

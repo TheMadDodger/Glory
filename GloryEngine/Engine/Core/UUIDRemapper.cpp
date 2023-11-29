@@ -28,6 +28,7 @@ namespace Glory
 
 	UUID UUIDRemapper::operator()(const UUID uuid)
 	{
+		if (uuid == 0) return 0;
 		if (m_IsPassThrough) return uuid;
 		auto itor = m_Results.find(uuid);
 		if (itor != m_Results.end()) return itor->second;

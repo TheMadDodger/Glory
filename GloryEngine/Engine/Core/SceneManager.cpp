@@ -1,24 +1,37 @@
 #include "SceneManager.h"
-#include "Engine.h"
-#include "GScene.h"
-#include "EngineProfiler.h"
-#include "Serializer.h"
-#include "Components.h"
-#include "PropertyFlags.h"
-#include "PropertySerializer.h"
-#include "SceneSerializer.h"
-#include "SceneObjectSerializer.h"
-#include "ScriptedComponentSerializer.h"
-#include "PrefabDataLoader.h"
-#include "SceneObject.h"
-#include "Components.h"
-#include "Systems.h"
 
-#include <GloryECS/ComponentTypes.h>
+#include "EngineProfiler.h"
+#include "GScene.h"
+#include "PropertyFlags.h"
+#include "Systems.h"
+#include "Components.h"
+
+#include "Serializer.h"
+#include "SceneSerializer.h"
+#include "ScriptedComponentSerializer.h"
+
+#include <Reflection.h>
 
 namespace Glory
 {
-	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0)
+	GScene* SceneManager::GetHoveringEntityScene()
+	{
+		return m_HoveringObjectSceneID ? GetOpenScene(m_HoveringObjectSceneID) : nullptr;
+	}
+
+	UUID SceneManager::GetHoveringEntityUUID() const
+	{
+		return m_HoveringObjectID;
+	}
+
+	void SceneManager::SetHoveringObject(UUID sceneID, UUID objectID)
+	{
+		m_HoveringObjectSceneID = sceneID;
+		m_HoveringObjectID = objectID;
+	}
+
+	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
+		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
 	{
 	}
 
@@ -30,7 +43,6 @@ namespace Glory
 	{
 		Profiler::BeginSample("ScenesModule::CreateEmptyScene");
 		GScene* pScene = new GScene(name);
-		pScene->Initialize();
 		m_pOpenScenes.push_back(pScene);
 		Profiler::EndSample();
 		return pScene;
@@ -78,7 +90,7 @@ namespace Glory
 	{
 		YAML::Node node = YAML::LoadFile(path);
 		std::filesystem::path filePath = path;
-		GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(node, filePath.filename().replace_extension().string());
+		GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(node, uuid, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 		pScene->SetUUID(uuid);
 		m_pOpenScenes.push_back(pScene);
@@ -115,34 +127,6 @@ namespace Glory
 		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
 	}
 
-	void SceneManager::SetHoveringObject(uint64_t objectID)
-	{
-		std::unique_lock<std::mutex> lock(m_HoveringLock);
-		m_pHoveringObject = GetSceneObjectFromObjectID(objectID);
-		lock.unlock();
-	}
-
-	SceneObject* SceneManager::GetHoveringObject()
-	{
-		SceneObject* pObject = nullptr;
-		std::unique_lock<std::mutex> lock(m_HoveringLock);
-		pObject = m_pHoveringObject;
-		lock.unlock();
-		return pObject;
-	}
-
-	SceneObject* SceneManager::GetSceneObjectFromObjectID(uint64_t objectID)
-	{
-		for (size_t i = 0; i < m_pOpenScenes.size(); i++)
-		{
-			GScene* pScene = m_pOpenScenes[i];
-			SceneObject* pEntityObject = pScene->GetSceneObjectFromEntityID(objectID);
-			if (pEntityObject) return pEntityObject;
-		}
-
-		return nullptr;
-	}
-
 	Utils::ECS::ComponentTypes* SceneManager::ComponentTypesInstance() const
 	{
 		Utils::ECS::ComponentTypes::SetInstance(m_pComponentTypesInstance);
@@ -151,7 +135,7 @@ namespace Glory
 
 	void SceneManager::Initialize()
 	{
-		m_pComponentTypesInstance = Glory::Utils::ECS::ComponentTypes::CreateInstance();
+		m_pComponentTypesInstance = Utils::ECS::ComponentTypes::CreateInstance();
 
 		/* Register component types */
 		Reflect::RegisterEnum<CameraPerspective>();
@@ -178,7 +162,6 @@ namespace Glory
 
 		/* Register serializers */
 		Serializer::RegisterSerializer<SceneSerializer>();
-		Serializer::RegisterSerializer<SceneObjectSerializer>();
 		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 
@@ -212,9 +195,6 @@ namespace Glory
 		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Start, ScriptedSystem::OnStart);
 		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::Stop, ScriptedSystem::OnStop);
 		m_pComponentTypesInstance->RegisterInvokaction<ScriptedComponent>(Glory::Utils::ECS::InvocationType::OnValidate, ScriptedSystem::OnValidate);
-
-		m_pPrefabLoader = new PrefabDataLoader();
-		m_pEngine->AddOptionalModule(m_pPrefabLoader, true);
 	}
 
 	void SceneManager::Cleanup()
@@ -237,15 +217,5 @@ namespace Glory
 		Profiler::BeginSample("SceneManager::Paint");
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
 		Profiler::EndSample();
-	}
-
-	SceneObject* SceneManager::CreateDeserializedObject(GScene* pScene, const std::string& name, UUID uuid)
-	{
-		return CreateObject(pScene, name, uuid);
-	}
-
-	SceneObject* SceneManager::CreateObject(GScene* pScene, const std::string& name, UUID uuid)
-	{
-		return pScene->CreateObject(name, uuid);
 	}
 }

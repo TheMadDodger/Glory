@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.h"
 #include "Glory.h"
+
 #include <EntityID.h>
 #include <EntityRegistry.h>
 

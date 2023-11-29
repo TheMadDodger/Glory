@@ -4,15 +4,12 @@
 #include <filesystem>
 #include <functional>
 
-namespace Glory
-{
-	class SceneObject;
-}
-
 namespace Glory::Editor
 {
 	template<typename T>
 	struct Dispatcher;
+
+	class EditableEntity;
 
 	class FileBrowserItem
 	{
@@ -57,7 +54,7 @@ namespace Glory::Editor
 		struct ObjectDNDEvent
 		{
 			std::filesystem::path Path;
-			SceneObject* Object;
+			EditableEntity* Object;
 		};
 		GLORY_EDITOR_API static Dispatcher<ObjectDNDEvent>& ObjectDNDEventDispatcher();
 

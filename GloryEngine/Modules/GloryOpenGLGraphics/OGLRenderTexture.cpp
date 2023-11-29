@@ -1,10 +1,12 @@
 #include "OGLRenderTexture.h"
 #include "OpenGLGraphicsModule.h"
 #include "Debug.h"
+#include "GloryOGL.h"
+#include "GLConverter.h"
+
 #include <GL/glew.h>
 #include <Game.h>
 #include <Engine.h>
-#include "GloryOGL.h"
 
 namespace Glory
 {
@@ -19,17 +21,17 @@ namespace Glory
 		m_GLFrameBufferID = NULL;
 	}
 
-	uint32_t OGLRenderTexture::ReadPixel(const glm::ivec2& coord)
+	void OGLRenderTexture::ReadColorPixel(const std::string& attachment, const glm::ivec2& coord, void* value, DataType type)
 	{
 		Bind();
-
-		uint32_t index = (uint32_t)m_NameToTextureIndex["object"];
-		uint32_t value;
+		const uint32_t index = (uint32_t)m_NameToTextureIndex.at(attachment);
+		const GLuint format = GLConverter::TO_GLFORMAT.at(m_CreateInfo.Attachments[index].Format);
+		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(type);
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
-		glReadPixels(coord.x, coord.y, 1, 1, GL_RED_INTEGER, GL_INT, &value);
-
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glReadPixels(coord.x, coord.y, 1, 1, format, dataType, value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		UnBind();
-		return value;
 	}
 
 	void OGLRenderTexture::Initialize()

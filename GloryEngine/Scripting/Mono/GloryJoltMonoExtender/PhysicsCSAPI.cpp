@@ -7,12 +7,14 @@
 #include "JoltShapeManager.h"
 #include "ScriptExtensions.h"
 
+#include <AssemblyDomain.h>
 #include <JoltPhysicsModule.h>
 #include <RendererModule.h>
 
-#define PHYSICS Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>()
+#define PHYSICS Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>()
 #define RENDERER Game::GetGame().GetEngine()->GetMainModule<RendererModule>()
 #define SCRIPTING Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()
+#define ASSEMBLY SCRIPTING->GetMonoManager()->ActiveDomain()->GetAssembly("GloryEngine.Jolt.dll")
 
 namespace Glory
 {
@@ -20,9 +22,7 @@ namespace Glory
 
 	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, const LayerMask layerMask, MonoArray* ignoreBodies, bool debugDraw)
 	{
-		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
-		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
-		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
+		AssemblyClass* pClass = ASSEMBLY->GetClass("GloryEngine", "Physics");
 
 		Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
 
@@ -74,9 +74,7 @@ namespace Glory
 
 	int Physics_CastRayNoAlloc(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, const LayerMask layerMask, MonoArray* ignoreBodies, bool debugDraw, MonoArray* hits)
 	{
-		const CoreLibManager* pCoreLibManager = SCRIPTING->GetMonoManager()->GetCoreLibManager();
-		Assembly* pAssembly = pCoreLibManager->GetAssemblyBinding();
-		AssemblyClass* pClass = pAssembly->GetClass("GloryEngine", "Physics");
+		AssemblyClass* pClass = ASSEMBLY->GetClass("GloryEngine", "Physics");
 
 		const Ray ray = { ToGLMVec3(origin), ToGLMVec3(direction) };
 

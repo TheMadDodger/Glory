@@ -34,7 +34,6 @@ namespace Glory
 
 	private:
 		virtual void Initialize() override;
-		virtual void Update() override;
 		virtual void Cleanup() override;
 		virtual void PollEvents();
 

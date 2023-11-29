@@ -3,41 +3,54 @@
 
 namespace Glory
 {
-    MonoObject* MonoScriptObjectManager::GetScriptDummyObject(MonoClass* pClass)
+    MonoObject* MonoScriptObjectManager::GetMonoScriptDummyObject(MonoClass* pClass)
     {
         auto itor = m_pDummyScriptObjects.find(pClass);
         if (itor == m_pDummyScriptObjects.end())
-            return CreateScriptDummyObject(pClass);
+            return CreateMonoScriptDummyObject(pClass);
 
         return itor->second;
     }
 
-    MonoObject* MonoScriptObjectManager::GetScriptObject(MonoClass* pClass, Object* pObject)
+    MonoObject* MonoScriptObjectManager::GetMonoScriptObject(MonoClass* pClass, UUID uuid, UUID sceneID)
     {
-        auto itor = m_Objects.find(pObject);
+        auto itor = m_Objects.find(uuid);
         if (itor == m_Objects.end())
         {
-            auto newItor = m_Objects.emplace(pObject, ObjectInstanceData{}).first;
-            return CreateScriptObject(newItor->second, pClass, pObject);
+            auto newItor = m_Objects.emplace(uuid, ObjectInstanceData{}).first;
+            MonoObject* pObject = CreateMonoScriptObject(newItor->second, pClass, uuid);
+            if (pObject) m_pMonoObjectScenes.emplace(pObject, sceneID);
+            return pObject;
         }
 
         auto classItor = itor->second.m_pObjects.find(pClass);
         if (classItor == itor->second.m_pObjects.end())
-            return CreateScriptObject(itor->second, pClass, pObject);
+        {
+            MonoObject* pObject = CreateMonoScriptObject(itor->second, pClass, uuid);
+            if (pObject) m_pMonoObjectScenes.emplace(pObject, sceneID);
+            return pObject;
+        }
 
         return classItor->second.first;
     }
 
-    Object* MonoScriptObjectManager::GetScriptObject(MonoObject* pMonoObject)
+    UUID MonoScriptObjectManager::GetIDForMonoScriptObject(MonoObject* pMonoObject) const
     {
         auto itor = m_pMonoToObject.find(pMonoObject);
-        if (itor == m_pMonoToObject.end()) return nullptr;
+        if (itor == m_pMonoToObject.end()) return 0;
         return itor->second;
     }
 
-    void MonoScriptObjectManager::DestroyScriptObject(MonoClass* pClass, Object* pObject)
+    UUID MonoScriptObjectManager::GetSceneIDForMonoScriptObject(MonoObject* pMonoObject) const
     {
-        auto itor = m_Objects.find(pObject);
+        auto itor = m_pMonoObjectScenes.find(pMonoObject);
+        if (itor == m_pMonoObjectScenes.end()) return 0;
+        return itor->second;
+    }
+
+    void MonoScriptObjectManager::DestroyScriptObject(MonoClass* pClass, UUID uuid)
+    {
+        auto itor = m_Objects.find(uuid);
         if (itor == m_Objects.end()) return;
         auto objectItor = itor->second.m_pObjects.find(pClass);
 
@@ -67,7 +80,7 @@ namespace Glory
         DestroyAllObjects();
     }
 
-    MonoObject* MonoScriptObjectManager::CreateScriptObject(ObjectInstanceData& instanceData, MonoClass* pClass, Object* pObject)
+    MonoObject* MonoScriptObjectManager::CreateMonoScriptObject(ObjectInstanceData& instanceData, MonoClass* pClass, UUID uuid)
     {
         MonoDomain* pDomain = mono_domain_get();
         MonoObject* pMonoObject = mono_object_new(pDomain, pClass);
@@ -80,11 +93,11 @@ namespace Glory
         const uint32_t gcHandle = mono_gchandle_new(pMonoObject, false);
 
         instanceData.m_pObjects.emplace(pClass, std::pair<MonoObject*, uint32_t>{ pMonoObject, gcHandle });
-        m_pMonoToObject.emplace(pMonoObject, pObject);
+        m_pMonoToObject.emplace(pMonoObject, uuid);
         return pMonoObject;
     }
 
-    MonoObject* MonoScriptObjectManager::CreateScriptDummyObject(MonoClass* pClass)
+    MonoObject* MonoScriptObjectManager::CreateMonoScriptDummyObject(MonoClass* pClass)
     {
         MonoDomain* pDomain = mono_domain_get();
         MonoObject* pMonoObject = mono_object_new(pDomain, pClass);

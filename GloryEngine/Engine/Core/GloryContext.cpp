@@ -42,6 +42,10 @@ namespace Glory
 	{
 		m_pContext = pContext;
 		Reflect::SetReflectInstance(m_pContext->m_pReflection);
+
+		if (!pContext->GetGame()) return;
+		auto inst = pContext->GetGame()->GetEngine()->GetSceneManager()->ComponentTypesInstance();
+		Glory::Utils::ECS::ComponentTypes::SetInstance(inst);
 	}
 
 	GloryContext* GloryContext::GetContext()
@@ -106,6 +110,7 @@ namespace Glory
 
 	Debug* GloryContext::GetDebug()
 	{
+		if (!m_pContext) return nullptr;
 		return m_pContext->m_pDebug;
 	}
 

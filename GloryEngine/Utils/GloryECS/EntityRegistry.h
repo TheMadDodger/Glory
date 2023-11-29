@@ -3,6 +3,7 @@
 #include "TypeView.h"
 #include "EntityView.h"
 #include "ComponentTypes.h"
+
 #include <map>
 #include <unordered_map>
 #include <functional>
@@ -154,7 +155,14 @@ namespace Glory::Utils::ECS
 			return static_cast<T>(m_pUserData);
 		}
 
-		//void ForEach(std::function<void(EntityRegistry*, EntityID)> func);
+		void ForEach(std::function<void(EntityRegistry*, EntityID)> func);
+
+		EntityID GetParent(Utils::ECS::EntityID entity) const;
+		bool SetParent(Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
+		size_t ChildCount(Utils::ECS::EntityID entity) const;
+		EntityID Child(Utils::ECS::EntityID entity, size_t index) const;
+		size_t SiblingIndex(Utils::ECS::EntityID entity) const;
+		void SetSiblingIndex(Utils::ECS::EntityID entity, size_t index);
 		//void ForEachComponent(EntityID entity, std::function<void(EntityRegistry*, EntityID, size_t, size_t)> func);
 		//
 		//template<typename C, typename Component>
@@ -187,6 +195,7 @@ namespace Glory::Utils::ECS
 
 		// Entity data
 		std::map<EntityID, EntityView*> m_pEntityViews;
+		std::vector<EntityID> m_RootOrder;
 		EntityID m_NextEntityID;
 
 		// Basic type views

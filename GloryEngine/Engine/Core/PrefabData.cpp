@@ -1,13 +1,14 @@
 #include "PrefabData.h"
-#include "SceneObject.h"
-#include "SceneObjectSerializer.h"
+#include "SceneSerializer.h"
+#include "GScene.h"
 
 #include <yaml-cpp/yaml.h>
 #include <NodeRef.h>
+#include <TypeData.h>
 
 namespace Glory
 {
-	PrefabData::PrefabData() : m_RootNode(this, nullptr)
+	PrefabData::PrefabData() : m_RootNode(this, {})
 	{
 		APPEND_TYPE(PrefabData);
 	}
@@ -19,11 +20,11 @@ namespace Glory
 		m_RootNode.CacheOriginalUUIDs();
 	}
 
-	PrefabData* PrefabData::CreateFromSceneObject(SceneObject* pSceneObject)
+	PrefabData* PrefabData::CreateFromEntity(GScene* pScene, Utils::ECS::EntityID entity)
 	{
 		PrefabData* pPrefab = new PrefabData();
-		pPrefab->SetName(pSceneObject->Name());
-		pPrefab->m_RootNode = pSceneObject;
+		pPrefab->SetName(pScene->EntityName(entity));
+		pPrefab->m_RootNode = { entity, pScene };
 		return pPrefab;
 	}
 
@@ -51,9 +52,9 @@ namespace Glory
 		other.m_pPrefab = nullptr;
 	}
 
-	PrefabNode::PrefabNode(PrefabData* pPrefab, SceneObject* pSceneObject) : m_pPrefab(pPrefab)
+	PrefabNode::PrefabNode(PrefabData* pPrefab, const Entity& entity) : m_pPrefab(pPrefab)
 	{
-		Load(pSceneObject);
+		Load(entity);
 	}
 
 	PrefabNode::PrefabNode(PrefabData* pPrefab, UUID originalUUID, UUID transformUUID, bool activeSelf, const std::string& name, const std::string& serializedComponents)
@@ -61,9 +62,9 @@ namespace Glory
 		m_Name(name), m_SerializedComponents(serializedComponents), m_Children() {
 	}
 
-	void PrefabNode::operator=(SceneObject* pSceneObject)
+	void PrefabNode::operator=(const Entity& entity)
 	{
-		Load(pSceneObject);
+		Load(entity);
 	}
 
 	void PrefabNode::operator=(PrefabNode&& other) noexcept
@@ -145,40 +146,35 @@ namespace Glory
 		}
 	}
 
-	void PrefabNode::Load(SceneObject* pSceneObject)
+	void PrefabNode::Load(const Entity& entity)
 	{
-		if (!pSceneObject) return;
-		m_OriginalUUID = pSceneObject->GetUUID();
-		m_ActiveSelf = pSceneObject->IsActiveSelf();
-		m_Name = pSceneObject->Name();
+		if (!entity.IsValid()) return;
+		Utils::ECS::EntityID entityID = entity.GetEntityID();
+
+		m_OriginalUUID = entity.GetScene()->GetEntityUUID(entityID);
+		m_ActiveSelf = entity.IsActiveSelf();
+		m_Name = entity.GetScene()->EntityName(entityID);
 		m_pPrefab->m_OriginalUUIDs.push_back(m_OriginalUUID);
 
-		Entity entity = pSceneObject->GetEntityHandle();
 		Utils::ECS::EntityRegistry* pRegistry = entity.GetRegistry();
-		Utils::ECS::EntityID entityID = entity.GetEntityID();
 		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entityID);
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
-			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID compUUID = pEntityView->ComponentUUIDAt(i);
 			if (i == 0) m_TransformUUID = compUUID;
 			m_pPrefab->m_OriginalUUIDs.push_back(compUUID);
-
-			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(type);
-			Utils::ECS::BaseTypeView* pTypeView = pRegistry->GetTypeView(type);
-			void* compAddress = pTypeView->GetComponentAddress(entityID);
-			SceneObjectSerializer::SerializeComponent(entityID, pRegistry, compUUID, compAddress, pTypeData, out);
+			SceneSerializer::SerializeComponent(pRegistry, pEntityView, entityID, i, out);
 		}
 		out << YAML::EndSeq;
 		m_SerializedComponents = out.c_str();
 
 		m_Children.clear();
-		for (size_t i = 0; i < pSceneObject->ChildCount(); ++i)
+		for (size_t i = 0; i < pEntityView->ChildCount(); ++i)
 		{
-			SceneObject* pChild = pSceneObject->GetChild(i);
-			m_Children.push_back({ m_pPrefab, pChild });
+			Utils::ECS::EntityID childEntity = pEntityView->Child(i);
+			m_Children.push_back({ m_pPrefab, { childEntity, entity.GetScene() } });
 		}
 	}
 }

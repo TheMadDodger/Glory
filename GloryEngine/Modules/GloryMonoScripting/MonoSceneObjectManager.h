@@ -10,17 +10,17 @@ namespace Glory
 		GLORY_API MonoSceneObjectManager(GScene* pScene) : m_pScene(pScene) {}
 		GLORY_API virtual ~MonoSceneObjectManager();
 
-		GLORY_API MonoObject* GetSceneObject(SceneObject* pObject);
-		GLORY_API void DestroySceneObject(SceneObject* pObject);
+		GLORY_API MonoObject* GetMonoSceneObject(UUID objectID);
+		GLORY_API void DestroyMonoSceneObject(UUID objectID);
 
 	protected:
-		MonoObject* GetSceneObject_Internal(SceneObject* pObject);
-		void DestroySceneObject_Internal(MonoObject* pMonoObject);
+		MonoObject* GetMonoSceneObject_Internal(UUID objectID);
+		void DestroyMonoSceneObject_Internal(MonoObject* pMonoObject);
 
 	protected:
 		GScene* m_pScene;
 
 	private:
-		std::map<SceneObject*, MonoObject*> m_ObjectsCache;
+		std::map<UUID, MonoObject*> m_ObjectsCache;
 	};
 }

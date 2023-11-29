@@ -8,6 +8,7 @@
 
 #include <Engine.h>
 #include <Game.h>
+#include <GScene.h>
 
 #include <Components.h>
 #include <Engine.h>
@@ -18,7 +19,7 @@ namespace Glory
 	void CharacterControllerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
 		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 		JoltShapeManager* pShapes = pPhysics->GetShapeManager();
 
@@ -51,7 +52,7 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 
 		PhysicsSystem::RemoveBody(pComponent.m_BodyID);
@@ -63,7 +64,7 @@ namespace Glory
 
 	void CharacterControllerSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
 			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
@@ -77,7 +78,7 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetMainModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 		if (!pCharacters) return;
@@ -86,9 +87,11 @@ namespace Glory
 		transform.Position = pCharacters->GetPosition(pComponent.m_CharacterID);
 		transform.Rotation = pCharacters->GetRotation(pComponent.m_CharacterID);
 
-		if (transform.Parent.IsValid())
+		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+		Entity parent = pRegistry->GetUserData<GScene*>()->GetEntityByEntityID(pEntityView->Parent());
+		if (parent.IsValid())
 		{
-			Transform& parentTransform = transform.Parent.GetComponent<Transform>();
+			Transform& parentTransform = parent.GetComponent<Transform>();
 			const glm::mat4 inverse = glm::inverse(parentTransform.MatTransform);
 			glm::vec3 scale;
 			glm::quat rotation;

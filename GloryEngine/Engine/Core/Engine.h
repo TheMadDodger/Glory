@@ -29,7 +29,6 @@ namespace Glory
 		 * - GraphicsModule
 		 * - RenderModule
 		 * - InputModule
-		 * - PhysicsModule
 		 */
 		Module** pMainModules;
 

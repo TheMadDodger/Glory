@@ -5,6 +5,8 @@
 #include "EditorRenderImpl.h"
 #include "Gizmos.h"
 #include "Selection.h"
+#include "EditableEntity.h"
+#include "EntityEditor.h"
 
 #include <CameraManager.h>
 #include <SceneManager.h>
@@ -210,7 +212,20 @@ namespace Glory::Editor
 		if (!ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
 			Engine* pEngine = Game::GetGame().GetEngine();
-			Selection::SetActiveObject(pEngine->GetSceneManager()->GetHoveringObject());
+			GScene* pScene = pEngine->GetSceneManager()->GetHoveringEntityScene();
+			if (!pScene)
+			{
+				Selection::SetActiveObject(nullptr);
+				return;
+			}
+			const UUID objectID = pEngine->GetSceneManager()->GetHoveringEntityUUID();
+			Entity entityHandle = pScene->GetEntityByUUID(objectID);
+			if (!entityHandle.IsValid())
+			{
+				Selection::SetActiveObject(nullptr);
+				return;
+			}
+			Selection::SetActiveObject(GetEditableEntity(entityHandle.GetEntityID(), pScene));
 		}
 	}
 }

@@ -52,6 +52,7 @@ namespace Glory
 
 	void Debug::LogInfo(const std::string& message, bool bIncludeTimeStamp)
 	{
+		if (!DEBUG) return;
 		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({1.f, 1.f, 1.f, 1.0f});
 		std::string finalMessage = "Info:	" + message;
@@ -60,15 +61,16 @@ namespace Glory
 
 	void Debug::LogNotice(const std::string& message, bool bIncludeTimeStamp)
 	{
+		if (!DEBUG) return;
 		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 0.5f, 0.5f, 0.5f, 1.0f });
 		std::string finalMessage = "Notice:	" + message;
 		Console::WriteLine(finalMessage, bIncludeTimeStamp);
-
 	}
 
 	void Debug::LogWarning(const std::string& message, bool bIncludeTimeStamp)
 	{
+		if (!DEBUG) return;
 		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 1.f, 0.918f, 0.0f, 1.0f });
 		std::string finalMessage = "WARNING:	" + message;
@@ -77,6 +79,7 @@ namespace Glory
 
 	void Debug::LogError(const std::string& message, bool bIncludeTimeStamp)
 	{
+		if (!DEBUG) return;
 		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
 		std::string finalMessage = "ERROR:	" + message;
@@ -85,6 +88,7 @@ namespace Glory
 
 	void Debug::LogFatalError(const std::string& message, bool bIncludeTimeStamp)
 	{
+		if (!DEBUG) return;
 		std::unique_lock lock{DEBUG->m_Lock};
 		Console::SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
 		std::string finalMessage = "FATAL ERROR:	" + message;
@@ -97,6 +101,7 @@ namespace Glory
 
 	void Debug::LogOnce(const std::string& key, const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp)
 	{
+		if (!DEBUG) return;
 		if (m_LoggedKeys.Contains(key)) return;
 		m_LoggedKeys.push_back(key);
 		Log(message, logLevel, bIncludeTimeStamp);

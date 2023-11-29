@@ -1,8 +1,9 @@
 #pragma once
-#include <vector>
-#include <imgui_internal.h>
 #include "Editor.h"
 #include "GloryContext.h"
+
+#include <vector>
+#include <imgui_internal.h>
 
 typedef void(__cdecl* SetContextProc)(Glory::GloryContext*, ImGuiContext* pImGUIContext);
 

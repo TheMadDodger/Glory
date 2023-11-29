@@ -19,7 +19,7 @@ project "GloryEditor"
 		["Backend"] = {  },
 		["Backend/Base"] = { "EditorRenderImpl.*", "EditorWindowImpl.*" },
 		["Extensions"] = { "BaseEditorExtension.*" },
-		["Editor"] = { "Dispatcher.h", "DND.*", "Configure.*", "QuitPopup.*", "TitleBar.*", "Shortcuts.*", "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "ProjectSpace.*", "Selection.*", "EditorCreateInfo.*", "Gizmos.*" },
+		["Editor"] = { "EntityEditor.*", "EditableEntity.*", "Dispatcher.h", "DND.*", "Configure.*", "QuitPopup.*", "TitleBar.*", "Shortcuts.*", "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "ProjectSpace.*", "Selection.*", "EditorCreateInfo.*", "Gizmos.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*", "CreateEntityObjectsCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },

@@ -14,6 +14,13 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API void RegisterLoopHandler(IPlayModeHandler* pEditorSceneLoopHandler);
 
+		template<typename T>
+		static void UpdateComponentInEditMode()
+		{
+			UpdateComponentInEditMode(ResourceType::GetHash<T>());
+		}
+		static GLORY_EDITOR_API void UpdateComponentInEditMode(uint32_t hash);
+
 	private:
 		void Start();
 		void Stop();
