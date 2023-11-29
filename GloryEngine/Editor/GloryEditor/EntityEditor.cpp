@@ -43,4 +43,9 @@ namespace Glory::Editor
     {
         return GetEditableEntity(entity, pScene->GetUUID());
     }
+
+    void DestroyAllEditableEntities()
+    {
+        editableEntities.clear();
+    }
 }

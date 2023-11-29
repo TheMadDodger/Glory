@@ -17,5 +17,8 @@ namespace Editor
 
 	/** @overload */
 	GLORY_EDITOR_API EditableEntity* GetEditableEntity(Utils::ECS::EntityID entity, GScene* pScene);
+
+	/** @brief Destroy all instances of editable entities */
+	GLORY_EDITOR_API void DestroyAllEditableEntities();
 }
 }
