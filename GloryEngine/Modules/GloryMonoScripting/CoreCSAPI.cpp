@@ -405,12 +405,12 @@ namespace Glory
 		pScenes->CloseAllScenes();
 	}
 
-	void SceneManager_OpenScene(MonoString* path)
-	{
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
-		if (!pScenes) return;
-		pScenes->OpenScene(mono_string_to_utf8(path));
-	}
+	//void SceneManager_OpenScene(MonoString* path)
+	//{
+	//	SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+	//	if (!pScenes) return;
+	//	pScenes->OpenScene(mono_string_to_utf8(path));
+	//}
 
 	void SceneManager_CloseScene(uint64_t sceneID)
 	{
@@ -615,7 +615,7 @@ namespace Glory
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_GetActiveScene", SceneManager_GetActiveScene);
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_SetActiveScene", SceneManager_SetActiveScene);
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseAllScenes", SceneManager_CloseAllScenes);
-		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
+		//BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
 
 		// Scene Objects

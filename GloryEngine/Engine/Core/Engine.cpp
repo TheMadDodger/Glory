@@ -1,7 +1,6 @@
 #include "Engine.h"
 #include "Console.h"
 #include "AssetManager.h"
-#include "Serializer.h"
 #include "PropertySerializer.h"
 #include "AssetReferencePropertySerializer.h"
 #include "ArrayPropertySerializer.h"
@@ -286,7 +285,6 @@ namespace Glory
 		delete m_pSceneManager;
 		m_pSceneManager = nullptr;
 
-		Serializer::Cleanup();
 		PropertySerializer::Cleanup();
 		ShaderManager::Cleanup();
 		GloryContext::DestroyContext();

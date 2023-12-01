@@ -22,7 +22,6 @@ namespace Glory
 		GScene* GetActiveScene();
 		void SetActiveScene(GScene* pScene);
 		void CloseAllScenes();
-		void OpenScene(const std::string& path, UUID uuid = UUID());
 		void AddOpenScene(GScene* pScene, UUID uuid = 0);
 		void CloseScene(UUID uuid);
 

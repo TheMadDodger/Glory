@@ -2,7 +2,6 @@
 #include "Undo.h"
 
 #include <EntityID.h>
-#include <Serializer.h>
 
 namespace Glory
 {

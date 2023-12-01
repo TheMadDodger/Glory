@@ -51,7 +51,7 @@ namespace GloryEngine.SceneManagement
         /// Open a scene at a specific path
         /// </summary>
         /// <param name="path">The path to open the scene from</param>
-        public static void OpenScene(string path) => SceneManager_OpenScene(path);
+        //public static void OpenScene(string path) => SceneManager_OpenScene(path);
         /// <summary>
         /// Close a scene
         /// </summary>
@@ -83,8 +83,8 @@ namespace GloryEngine.SceneManagement
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_CloseAllScenes();
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void SceneManager_OpenScene(string path);
+        //[MethodImpl(MethodImplOptions.InternalCall)]
+        //private static extern void SceneManager_OpenScene(string path);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_CloseScene(UInt64 sceneID);

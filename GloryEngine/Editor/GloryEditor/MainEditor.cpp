@@ -57,7 +57,6 @@
 #include <Game.h>
 #include <Engine.h>
 #include <ImGuizmo.h>
-#include <Serializer.h>
 #include <TextureDataEditor.h>
 #include <About.h>
 #include <Dispatcher.h>

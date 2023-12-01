@@ -1,6 +1,6 @@
 #include "PrefabData.h"
-#include "SceneSerializer.h"
 #include "GScene.h"
+#include "PropertySerializer.h"
 
 #include <yaml-cpp/yaml.h>
 #include <NodeRef.h>
@@ -8,6 +8,30 @@
 
 namespace Glory
 {
+	/* @fixme Remove this when prefabs no longer require yaml data */
+	void SerializeComponent(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, YAML::Emitter& out)
+	{
+		out << YAML::BeginMap;
+		const UUID compUUID = pEntityView->ComponentUUIDAt(index);
+		out << YAML::Key << "UUID";
+		out << YAML::Value << uint64_t(compUUID);
+
+		const uint32_t type = pEntityView->ComponentTypeAt(index);
+		const Utils::Reflect::TypeData* pType = Utils::Reflect::Reflect::GetTyeData(type);
+
+		out << YAML::Key << "TypeName";
+		out << YAML::Value << pType->TypeName();
+
+		out << YAML::Key << "TypeHash";
+		out << YAML::Value << uint64_t(type);
+
+		out << YAML::Key << "Active";
+		out << YAML::Value << pRegistry->GetTypeView(type)->IsActive(entity);
+
+		PropertySerializer::SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), out);
+		out << YAML::EndMap;
+	}
+
 	PrefabData::PrefabData() : m_RootNode(this, {})
 	{
 		APPEND_TYPE(PrefabData);
@@ -165,7 +189,7 @@ namespace Glory
 			const UUID compUUID = pEntityView->ComponentUUIDAt(i);
 			if (i == 0) m_TransformUUID = compUUID;
 			m_pPrefab->m_OriginalUUIDs.push_back(compUUID);
-			SceneSerializer::SerializeComponent(pRegistry, pEntityView, entityID, i, out);
+			SerializeComponent(pRegistry, pEntityView, entityID, i, out);
 		}
 		out << YAML::EndSeq;
 		m_SerializedComponents = out.c_str();

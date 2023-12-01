@@ -1,6 +1,5 @@
 #include "MaterialInstanceLoaderModule.h"
 #include "GLORY_YAML.h"
-#include "Serializer.h"
 #include "PropertySerializer.h"
 #include "AssetManager.h"
 #include "ShaderManager.h"

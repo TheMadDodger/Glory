@@ -16,7 +16,7 @@ project "GloryJoltMonoExtender"
 
 	vpaths
 	{
-		["API"] = { "PhysicsCSAPI.*" },
+		["API"] = { "PhysicsCSAPI.*", "PhysicsComponentsCSAPI.*" },
 		["Extenstion"] = { "JoltMonoExtender.*" }
 	}
 

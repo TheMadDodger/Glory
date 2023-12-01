@@ -10,8 +10,8 @@
 #include "EditorAssetDatabase.h"
 #include "EditableEntity.h"
 #include "EntityEditor.h"
+#include "EditorSceneSerializer.h"
 
-#include <SceneSerializer.h>
 #include <AssetManager.h>
 #include <Game.h>
 #include <Engine.h>
@@ -53,7 +53,7 @@ namespace Glory::Editor
 			out << YAML::Key << "Value";
 			out << YAML::Value << YAML::BeginSeq;
 			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
-			SceneSerializer::SerializeEntityRecursive(pScene, pSceneObject->EntityID(), out);
+			EditorSceneSerializer::SerializeEntityRecursive(pScene, pSceneObject->EntityID(), out);
 			out << YAML::EndSeq;
 			out << YAML::EndMap;
 			ImGui::SetClipboardText(out.c_str());

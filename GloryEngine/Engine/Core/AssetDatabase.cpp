@@ -3,7 +3,6 @@
 #include "AssetDatabase.h"
 #include "AssetManager.h"
 #include "LayerManager.h"
-#include "Serializer.h"
 #include "GloryContext.h"
 #include "Engine.h"
 
