@@ -1,0 +1,21 @@
+Engine:
+- GloryEntityScenes has been removed and has become the internal scene graph
+- Improved performance across the board
+- JoltPhysics has become an independant module
+
+Editor:
+- Fixed picking for multiple scenes (delete you projects cache folder if you have issues)
+- Added an importer system and flow
+- Added ASSIMP importer
+- Added SDLImage importer
+- Added an asset compilation system and flow
+
+Scripting:
+- Fixed an issue where objects on the CS would have an incorrect scene ID
+
+Launcher:
+- Removed scene module from required module selection in new project wizzard
+- Removed physics module from required module selection in new project wizzard
+- Added JoltPhysics as a default optional module
+
+Bugs:
