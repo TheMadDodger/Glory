@@ -40,7 +40,7 @@ project "GloryEditor"
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*", "GridToolchain.*" },
 		["UI"] = { "EditorUI.*", "ListView.*" },
 		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp" },
-		["Asset Management"] = { "EditorAssetsWatcher.*", "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
+		["Asset Management"] = { "EditorSceneSerializer*", "EditorAssetsWatcher.*", "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
 		["Asset Management/Importer"] = { "Importer.*", "ImporterTemplate.*" },
 		["Asset Management/Importer/Internal"] = { "MaterialImporter.*", "MaterialInstanceImporter.*", "TextureImporter.*" },
 		["Migration"] = { "ProjectMigrations.*" }

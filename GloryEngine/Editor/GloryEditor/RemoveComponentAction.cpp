@@ -1,15 +1,14 @@
 #include "RemoveComponentAction.h"
-#include "SceneSerializer.h"
-#include "SceneSerializer.h"
+#include "EditorSceneSerializer.h"
 #include "EditableEntity.h"
 #include "EditorSceneManager.h"
+#include "Editor.h"
 
 #include <SceneManager.h>
 #include <Engine.h>
-#include <Serializer.h>
+#include <UUIDRemapper.h>
 
 #include <EntityRegistry.h>
-#include <Editor.h>
 
 namespace Glory::Editor
 {
@@ -17,7 +16,7 @@ namespace Glory::Editor
 	{
 		YAML::Emitter out;
 		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entityID);
-		SceneSerializer::SerializeComponent(pRegistry, pEntityView, entityID, componentIndex, out);
+		EditorSceneSerializer::SerializeComponent(pRegistry, pEntityView, entityID, componentIndex, out);
 		m_SerializedComponent = out.c_str();
 	}
 
@@ -35,7 +34,7 @@ namespace Glory::Editor
 		GScene* pEntityScene = EditorSceneManager::GetOpenScene(pEntityObject->SceneID());
 		Utils::ECS::EntityView* pEntityView = pEntityScene->GetRegistry().GetEntityView(pEntityObject->EntityID());
 		const size_t index = pEntityView->ComponentCount();
-		SceneSerializer::DeserializeComponent(pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, node);
+		EditorSceneSerializer::DeserializeComponent(pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, node);
 		pEntityView->SetComponentIndex(index, m_ComponentIndex);
 
 		for (size_t i = 0; i < editors.size(); i++)

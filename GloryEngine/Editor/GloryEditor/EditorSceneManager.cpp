@@ -1,14 +1,14 @@
 #include "EditorSceneManager.h"
 #include "Selection.h"
 #include "EditorAssetDatabase.h"
+#include "EditorSceneSerializer.h"
 #include "CreateObjectAction.h"
 #include "Undo.h"
+#include "GloryContext.h"
 
-#include <SceneSerializer.h>
 #include <Game.h>
 #include <Engine.h>
 #include <SceneManager.h>
-#include <Serializer.h>
 #include <TitleBar.h>
 #include <tinyfiledialogs.h>
 #include <ProjectSpace.h>
@@ -39,7 +39,13 @@ namespace Glory::Editor
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);
 		std::string path = Game::GetGame().GetAssetPath() + "\\" + location.Path;
-		pScenes->OpenScene(path, uuid);
+
+		YAML::Node node = YAML::LoadFile(path);
+		std::filesystem::path filePath = path;
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(node, uuid, filePath.filename().replace_extension().string());
+		if (pScene == nullptr) return;
+
+		pScenes->AddOpenScene(pScene);
 		m_OpenedSceneIDs.push_back(uuid);
 
 		GScene* pActiveScene = pScenes->GetActiveScene();
@@ -174,8 +180,9 @@ namespace Glory::Editor
 			out << YAML::Key << "UUID";
 			out << YAML::Value << pScene->GetUUID();
 			out << YAML::Key << "Scene";
-			out << YAML::Value;
-			Serializer::SerializeObject(pScene, out);
+			out << YAML::Value << YAML::BeginMap;
+			EditorSceneSerializer::SerializeScene(pScene, out);
+			out << YAML::EndMap;
 			out << YAML::EndMap;
 		}
 		out << YAML::EndSeq;
@@ -191,7 +198,7 @@ namespace Glory::Editor
 			YAML::Node uuidNode = sceneDataNode["UUID"];
 			UUID uuid = uuidNode.as<uint64_t>();
 			YAML::Node sceneNode = sceneDataNode["Scene"];
-			GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(sceneNode, uuid, name);
+			GScene* pScene = EditorSceneSerializer::DeserializeScene(sceneNode, uuid, name);
 			OpenScene(pScene, uuid);
 		}
 	}
@@ -248,7 +255,7 @@ namespace Glory::Editor
 		/* Serialize the objects entire heirarchy */
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
-		SceneSerializer::SerializeEntityRecursive(pScene, entity.GetEntityID(), out);
+		EditorSceneSerializer::SerializeEntityRecursive(pScene, entity.GetEntityID(), out);
 		out << YAML::EndSeq;
 
 		/* Deserialize node into a new objects */
@@ -268,10 +275,10 @@ namespace Glory::Editor
 			{
 				const UUID parentUUID = parentEntity.EntityUUID();
 				entity["ParentUUID"].Set((uint64_t)parentUUID);
-				Serializer::SetUUIDRemap(parentUUID, parentUUID);
+				GloryContext::GetContext()->m_UUIDRemapper.EnforceRemap(parentUUID, parentUUID);
 			}
 
-			Entity newEntity = SceneSerializer::DeserializeEntity(pScene, entity.Node(), Serializer::Flags(Serializer::Flags::GenerateNewUUIDs));
+			Entity newEntity = EditorSceneSerializer::DeserializeEntity(pScene, entity.Node(), EditorSceneSerializer::Flags::GenerateNewUUIDs);
 			if (i == 0 && newEntity.IsValid())
 			{
 				Undo::StartRecord("Duplicate", newEntity.EntityUUID());
@@ -280,7 +287,7 @@ namespace Glory::Editor
 			}
 		}
 
-		Serializer::ClearUUIDRemapCache();
+		GloryContext::GetContext()->m_UUIDRemapper.Reset();
 
 		///* Set scene dirty */
 		SetSceneDirty(pScene);
@@ -290,7 +297,7 @@ namespace Glory::Editor
 	{
 		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(uuid);
 		YAML::Emitter out;
-		Serializer::SerializeObject(pScene, out);
+		EditorSceneSerializer::SerializeScene(pScene, out);
 		std::ofstream outStream(path);
 		outStream << out.c_str();
 		outStream.close();

@@ -105,6 +105,9 @@ namespace Glory::Editor
 	void AssetCompiler::DispatchCompilationJob(const AssetData& asset)
 	{
 		if (m_CompilingAssets.Contains(asset.Meta.ID())) return;
+		/* Don't compile scenes */
+		if (asset.Meta.Extension() == ".gscene") return;
+
 		m_CompilingAssets.push_back(asset.Meta.ID());
 		CompilationJobPool->QueueJob(CompileJob, asset);
 	}

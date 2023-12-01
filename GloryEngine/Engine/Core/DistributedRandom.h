@@ -8,6 +8,7 @@ namespace Glory
 		static std::random_device Seed;
 	};
 
+	/* @todo Move this to utils */
 	template<typename T>
 	struct DistributedRandom
 	{

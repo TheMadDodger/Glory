@@ -2,8 +2,8 @@
 #include "YAML_GLM.h"
 #include "GLORY_YAML.h"
 #include "GloryContext.h"
-#include "Serializer.h"
 #include "SerializedTypes.h"
+#include "Serializers.h"
 
 #include <yaml-cpp/yaml.h>
 #include <Reflection.h>

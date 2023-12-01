@@ -6,8 +6,6 @@
 #include "Systems.h"
 #include "Components.h"
 
-#include "Serializer.h"
-#include "SceneSerializer.h"
 #include "ScriptedComponentSerializer.h"
 
 #include <Reflection.h>
@@ -86,17 +84,6 @@ namespace Glory
 		m_ActiveSceneIndex = 0;
 	}
 
-	void SceneManager::OpenScene(const std::string& path, UUID uuid)
-	{
-		YAML::Node node = YAML::LoadFile(path);
-		std::filesystem::path filePath = path;
-		GScene* pScene = Serializer::DeserializeObjectOfType<GScene>(node, uuid, filePath.filename().replace_extension().string());
-		if (pScene == nullptr) return;
-		pScene->SetUUID(uuid);
-		m_pOpenScenes.push_back(pScene);
-		OnSceneOpen(uuid);
-	}
-
 	void SceneManager::AddOpenScene(GScene* pScene, UUID uuid)
 	{
 		if (pScene == nullptr) return;
@@ -161,7 +148,6 @@ namespace Glory
 		RegisterComponent<LookAt>();
 
 		/* Register serializers */
-		Serializer::RegisterSerializer<SceneSerializer>();
 		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
 		ResourceType::RegisterResource<GScene>(".gscene");
 
