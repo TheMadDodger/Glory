@@ -9,6 +9,7 @@
 #include "CoreLibManager.h"
 
 #include <SceneManager.h>
+#include <BinaryStream.h>
 #include <AssetDatabase.h>
 #include <Reflection.h>
 #include <PropertySerializer.h>
@@ -25,7 +26,8 @@ namespace Glory
 		APPEND_TYPE(MonoScript);
 	}
 
-	MonoScript::MonoScript(FileData* pFileData) : Script(pFileData)
+	MonoScript::MonoScript(FileData* pFileData, std::string_view ns, std::string_view className)
+		: Script(pFileData), m_NamespaceName(ns), m_ClassName(className)
 	{
 		APPEND_TYPE(MonoScript);
 	}
@@ -273,6 +275,16 @@ namespace Glory
 
 		/* FIXME: Causes a memory leak for some reason */
 		node.reset(YAML::Load(emitter.c_str()));
+	}
+
+	void MonoScript::Serialize(BinaryStream& container) const
+	{
+		container.Write(m_NamespaceName);
+		container.Write(m_ClassName);
+	}
+
+	void MonoScript::Deserialize(BinaryStream& container) const
+	{
 	}
 
 	bool MonoScript::IsBehaviour()
