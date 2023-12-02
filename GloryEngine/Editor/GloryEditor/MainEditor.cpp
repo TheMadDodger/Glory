@@ -43,6 +43,7 @@
 #include "MaterialImporter.h"
 #include "MaterialInstanceImporter.h"
 #include "TextureImporter.h"
+#include "ShaderImporter.h"
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
@@ -151,6 +152,7 @@ namespace Glory::Editor
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();
 		Importer::Register<TextureImporter>();
+		Importer::Register<ShaderImporter>();
 
 		ResourceType::RegisterResource<EditableEntity>("");
 	}

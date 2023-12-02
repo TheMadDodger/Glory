@@ -2,12 +2,18 @@
 
 namespace Glory
 {
-    ShaderSourceData::ShaderSourceData(ShaderType shaderType, FileData* pCompiledSource)
-        : m_ProcessedSource(), m_OriginalSource(), m_ShaderType(shaderType), m_pPlatformCompiledShader(pCompiledSource)
-    {}
-
     ShaderSourceData::ShaderSourceData() : m_ProcessedSource(), m_OriginalSource(), m_ShaderType(ShaderType::ST_Unknown), m_pPlatformCompiledShader(nullptr)
     {
+    }
+
+    ShaderSourceData::ShaderSourceData(ShaderType shaderType, FileData* pCompiledSource)
+        : m_ShaderType(shaderType), m_pPlatformCompiledShader(pCompiledSource), m_OriginalSource(), m_ProcessedSource()
+    {}
+
+    ShaderSourceData::ShaderSourceData(ShaderType shaderType, std::vector<char>&& source, std::vector<char>&& processed)
+        : m_ShaderType(shaderType), m_pPlatformCompiledShader(nullptr), m_OriginalSource(std::move(source)), m_ProcessedSource(std::move(processed))
+    {
+
     }
 
     ShaderSourceData::~ShaderSourceData()
