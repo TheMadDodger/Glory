@@ -87,7 +87,11 @@ cd ..
 cd shaderc
 echo "Building shaderc"
 echo "Cloning glslang"
+
 git clone https://github.com/KhronosGroup/glslang.git third_party/glslang
+cd third_party/glslang
+git reset --hard 52c59ec
+cd ../..
 
 echo "Building ${PLATFORM} binaries"
 rm "${PLATFORM}" -r
