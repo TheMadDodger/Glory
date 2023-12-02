@@ -1,5 +1,6 @@
 #include "MonoEditorExtension.h"
 #include "MonoScriptTumbnail.h"
+#include "MonoScriptImporter.h"
 
 #include <GloryMonoScipting.h>
 #include <EditorAssetDatabase.h>
@@ -35,6 +36,8 @@ EXTENSION_CPP(MonoEditorExtension)
 namespace Glory::Editor
 {
 	GloryMonoScipting* MonoEditorExtension::m_pMonoScriptingModule = nullptr;
+
+	MonoScriptImporter ScriptImporter;
 
 	void MonoEditorExtension::HandleStop(Module* pModule)
 	{
@@ -103,6 +106,8 @@ namespace Glory::Editor
 		EditorPreferencesWindow::AddPreferencesTab({ "Mono", [this]() { Preferences(); } });
 
 		EditorPlayer::RegisterLoopHandler(this);
+
+		Importer::Register(&ScriptImporter);
 	}
 
 	void MonoEditorExtension::FindVisualStudioPath()

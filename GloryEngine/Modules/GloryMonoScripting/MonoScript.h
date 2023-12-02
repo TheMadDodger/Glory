@@ -14,7 +14,7 @@ namespace Glory
     {
     public:
         GLORY_API MonoScript();
-        GLORY_API MonoScript(FileData* pFileData);
+        GLORY_API MonoScript(FileData* pFileData, std::string_view ns, std::string_view className);
         virtual GLORY_API ~MonoScript();
 
         virtual void GLORY_API Invoke(UUID objectID, UUID sceneID, const std::string& method, void** args) override;
@@ -26,6 +26,9 @@ namespace Glory
         virtual void LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data) override;
         virtual void SetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node) override;
         virtual void GetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node) override;
+
+        void Serialize(BinaryStream& container) const override;
+        void Deserialize(BinaryStream& container) const override;
 
     private:
         virtual bool IsBehaviour() override;
