@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, const char*&& pPixels, size_t dataSize, bool compressed)
+	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed)
 		: m_Header{ w, h, internalFormat, format, bytesPerPixel, dataSize, compressed }, m_pPixels(std::move(pPixels)) {}
 
 	ImageData::ImageData() : m_Header{}, m_pPixels(nullptr)
@@ -18,6 +18,8 @@ namespace Glory
 
 	ImageData::~ImageData()
 	{
+		delete m_pPixels;
+		m_pPixels = nullptr;
 	}
 
 	uint32_t ImageData::GetWidth() const
@@ -80,9 +82,20 @@ namespace Glory
 		}, &data, int(m_Header.m_Width), int(m_Header.m_Height), int(channels), m_pPixels, int(m_Header.m_BytesPerPixel * m_Header.m_Width));
 	}
 
-	void ImageData::Deserialize(BinaryStream& container) const
+	void ImageData::Deserialize(BinaryStream& container)
 	{
+		container.Read(m_Header);
 
+		if (!m_Header.m_Compressed)
+		{
+			/* Image is not compressed or was compressed by the importer */
+			m_pPixels = new char[m_Header.m_DataSize];
+			container.Read(m_pPixels, m_Header.m_DataSize);
+			return;
+		}
+
+		//stbi__context context;
+		//stbi__png_load(&context, );
 	}
 
 	const PixelFormat& ImageData::GetFormat() const

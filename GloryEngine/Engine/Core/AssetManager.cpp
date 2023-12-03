@@ -117,7 +117,7 @@ namespace Glory
 		/* Load as archive */
 		BinaryFileStream stream{ path };
 		AssetArchive archive{ &stream };
-		archive.Deserialize();
+		archive.Deserialize(m_pEngine);
 		const std::string& str = path.string();
 		const uint32_t hash = Hashing::Hash(str.data());
 		m_LoadedArchives.Emplace(hash, std::move(archive));
@@ -179,7 +179,7 @@ namespace Glory
 			{
 				for (size_t i = 0; i < archive->Size(); ++i)
 				{
-					Resource* pSubResource = archive->Get(i);
+					Resource* pSubResource = archive->Get(m_pEngine, i);
 					AddLoadedResource(pResource);
 				}
 
@@ -187,7 +187,7 @@ namespace Glory
 			}
 		}
 
-		if (!pResource)
+		/*if (!pResource)
 		{
 			std::stringstream str;
 			str << "Using legacy loading for file: " << path;
@@ -200,7 +200,7 @@ namespace Glory
 				path = assetLocation.Path;
 
 			pResource = pModule->Load(path.string());
-		}
+		}*/
 
 		if (pResource == nullptr)
 		{

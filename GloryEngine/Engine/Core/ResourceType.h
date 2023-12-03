@@ -125,7 +125,6 @@ namespace Glory
 
 	public:
 		ResourceTypes();
-		virtual ~ResourceTypes();
 
 	private:
 		friend class ResourceType;

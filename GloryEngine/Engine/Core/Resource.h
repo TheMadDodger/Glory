@@ -27,7 +27,7 @@ namespace Glory
 
     public:
         virtual void Serialize(BinaryStream& container) const {};
-        virtual void Deserialize(BinaryStream& container) const {};
+        virtual void Deserialize(BinaryStream& container) {};
 
         /** @brief Change the UUID of this resource
          * @param uuid The new UUID of this resource
