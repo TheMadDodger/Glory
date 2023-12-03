@@ -15,7 +15,7 @@ namespace Glory
         SamplerSettings& GetSamplerSettings();
 
         void Serialize(BinaryStream& container) const override;
-        void Deserialize(BinaryStream& container) const override;
+        void Deserialize(BinaryStream& container) override;
 
     private:
         friend class TextureDataLoaderModule;

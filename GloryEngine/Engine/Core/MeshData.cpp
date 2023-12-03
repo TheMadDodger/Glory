@@ -75,12 +75,24 @@ namespace Glory
 		container.Write(m_VertexCount);
 		container.Write(m_IndexCount);
 		container.Write(m_VertexSize);
+		container.Write(m_Attributes.size());
 		container.Write(reinterpret_cast<const char*>(m_Attributes.data()), sizeof(AttributeType)*m_Attributes.size());
 		container.Write(reinterpret_cast<const char*>(m_Vertices.data()), sizeof(float)*m_Vertices.size());
 		container.Write(reinterpret_cast<const char*>(m_Indices.data()), sizeof(uint32_t)*m_Indices.size());
 	}
 
-	void MeshData::Deserialize(BinaryStream& container) const
+	void MeshData::Deserialize(BinaryStream& container)
 	{
+		container.Read(m_VertexCount);
+		container.Read(m_IndexCount);
+		container.Read(m_VertexSize);
+		size_t attributeCount;
+		container.Read(attributeCount);
+		m_Attributes.resize(attributeCount);
+		container.Read(m_Attributes.data(), sizeof(AttributeType)*m_Attributes.size());
+		m_Vertices.resize(m_VertexCount);
+		container.Read(m_Vertices.data(), sizeof(float)*m_Vertices.size());
+		m_Indices.resize(m_IndexCount);
+		container.Read(m_Indices.data(), sizeof(uint32_t)*m_Indices.size());
 	}
 }

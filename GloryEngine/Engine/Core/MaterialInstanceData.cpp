@@ -167,6 +167,7 @@ namespace Glory
 		container.Write(m_BaseMaterial);
 
 		/* Write overrides */
+		container.Write(m_PropertyOverridesEnable.size());
 		for (size_t i = 0; i < m_PropertyOverridesEnable.size(); ++i)
 		{
 			container.Write(m_PropertyOverridesEnable[i]);
@@ -184,8 +185,36 @@ namespace Glory
 		}
 	}
 
-	void MaterialInstanceData::Deserialize(BinaryStream& container) const
+	void MaterialInstanceData::Deserialize(BinaryStream& container)
 	{
+		/* Read base material */
+		UUID baseMaterialID;
+		container.Read(baseMaterialID);
+		m_pBaseMaterial = AssetManager::GetAssetImmediate<MaterialData>(baseMaterialID);
+
+		/* Write overrides */
+		size_t numPropertyOverrides;
+		container.Read(numPropertyOverrides);
+		m_PropertyOverridesEnable.resize(numPropertyOverrides);
+		for (size_t i = 0; i < m_PropertyOverridesEnable.size(); ++i)
+		{
+			container.Read(m_PropertyOverridesEnable[i]);
+		}
+
+		/* Read property buffer */
+		size_t propertyBufferSize;
+		container.Read(propertyBufferSize);
+		m_PropertyBuffer.resize(propertyBufferSize);
+		container.Read(m_PropertyBuffer.data(), propertyBufferSize);
+
+		/* Read resources */
+		size_t numResources;
+		container.Read(numResources);
+		m_Resources.resize(numResources);
+		for (size_t i = 0; i < m_Resources.size(); ++i)
+		{
+			container.Read(*m_Resources[i].AssetUUIDMember());
+		}
 	}
 
 	std::vector<char>& MaterialInstanceData::GetPropertyBuffer(MaterialManager& manager, size_t index)

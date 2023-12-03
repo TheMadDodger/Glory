@@ -32,7 +32,8 @@ namespace Glory
 		container.Write(m_Image.AssetUUID()).Write(m_SamplerSettings);
 	}
 
-	void TextureData::Deserialize(BinaryStream& container) const
+	void TextureData::Deserialize(BinaryStream& container)
 	{
+		container.Read(*m_Image.AssetUUIDMember()).Read(m_SamplerSettings);
 	}
 }

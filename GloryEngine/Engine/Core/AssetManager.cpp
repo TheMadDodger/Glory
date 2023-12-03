@@ -187,7 +187,7 @@ namespace Glory
 			}
 		}
 
-		if (!pResource)
+		/*if (!pResource)
 		{
 			std::stringstream str;
 			str << "Using legacy loading for file: " << path;
@@ -200,7 +200,7 @@ namespace Glory
 				path = assetLocation.Path;
 
 			pResource = pModule->Load(path.string());
-		}
+		}*/
 
 		if (pResource == nullptr)
 		{

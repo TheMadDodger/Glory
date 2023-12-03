@@ -35,7 +35,7 @@ namespace Glory
         GLORY_API void GetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node);
 
         GLORY_API void Serialize(BinaryStream& container) const override;
-        GLORY_API void Deserialize(BinaryStream& container) const override;
+        GLORY_API void Deserialize(BinaryStream& container) override;
 
     private:
         GLORY_API bool IsBehaviour();

@@ -20,7 +20,7 @@ namespace Glory
         };
 
     public:
-        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, const char*&& pPixels, size_t dataSize, bool compressed=false);
+        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed=false);
         ImageData();
         virtual ~ImageData();
 
@@ -34,11 +34,11 @@ namespace Glory
         virtual size_t DataSize() const;
 
         void Serialize(BinaryStream& container) const override;
-        void Deserialize(BinaryStream& container) const override;
+        void Deserialize(BinaryStream& container) override;
 
     protected:
         Header m_Header;
-        const char* m_pPixels;
+        char* m_pPixels;
 
         virtual void BuildTexture();
 
