@@ -9,6 +9,12 @@ namespace Glory
 		APPEND_TYPE(MeshData);
 	}
 
+	MeshData::MeshData(UUID uuid, const std::string& name): Resource(uuid, name),
+		m_VertexCount(0), m_IndexCount(0), m_Vertices(), m_Indices(), m_Attributes(), m_VertexSize(0)
+	{
+		APPEND_TYPE(MeshData);
+	}
+
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const std::vector<float>& vertices, uint32_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(vertices), m_Indices(indices), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
@@ -20,12 +26,16 @@ namespace Glory
 	{
 		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
 		memcpy(&m_Indices[0], indices, sizeof(uint32_t) * indexCount);
+
+		APPEND_TYPE(MeshData);
 	}
 
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(0), m_Vertices(std::vector<float>(vertexCount)), m_Indices(), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
 		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
+
+		APPEND_TYPE(MeshData);
 	}
 
 	MeshData::~MeshData()

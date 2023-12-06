@@ -41,8 +41,5 @@ namespace Glory
         char* m_pPixels;
 
         virtual void BuildTexture();
-
-    private:
-        friend class ImageLoaderModule;
     };
 }

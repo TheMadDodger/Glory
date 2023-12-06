@@ -51,6 +51,7 @@ namespace Glory
     {
     public:
         PrefabData();
+        PrefabData(UUID uuid, const std::string& name);
         PrefabData(PrefabNode&& rootNode) noexcept;
         virtual ~PrefabData() = default;
 

@@ -1,5 +1,4 @@
 #include "AssetReferencePropertySerializer.h"
-#include "AssetManager.h"
 #include "AssetReference.h"
 
 namespace Glory

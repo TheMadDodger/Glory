@@ -1,7 +1,6 @@
 #include <fstream>
 #include <filesystem>
 #include "AssetDatabase.h"
-#include "AssetManager.h"
 #include "LayerManager.h"
 #include "Engine.h"
 

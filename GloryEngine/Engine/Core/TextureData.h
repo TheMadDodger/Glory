@@ -18,8 +18,6 @@ namespace Glory
         void Deserialize(BinaryStream& container) override;
 
     private:
-        friend class TextureDataLoaderModule;
-        friend class ImageLoaderModule;
         AssetReference<ImageData> m_Image;
         SamplerSettings m_SamplerSettings;
 	};

@@ -1,5 +1,4 @@
 #include "AssetReference.h"
-#include "AssetManager.h"
 
 namespace Glory
 {

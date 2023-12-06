@@ -7,18 +7,16 @@ namespace Glory::Jobs
 	class JobManager
 	{
 	public:
-		template<typename ret, typename ...args>
-		static JobPool<ret, args...>* Run(size_t numJobsPerThread = 1)
-		{
-			return GetInstance()->CreateJobPool<ret, args...>();
-		}
-
-	private:
 		JobManager();
 		virtual ~JobManager();
 
-		static JobManager* GetInstance();
+		template<typename ret, typename ...args>
+		JobPool<ret, args...>* Run(size_t numJobsPerThread = 1)
+		{
+			return CreateJobPool<ret, args...>();
+		}
 
+	private:
 		void Kill();
 
 		template<typename ret, typename ...args>
@@ -33,6 +31,5 @@ namespace Glory::Jobs
 	private:
 		friend class Engine;
 		std::vector<JobPoolBase*> m_pJobPools;
-		static JobManager* m_pInstance;
 	};
 }

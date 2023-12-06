@@ -32,7 +32,7 @@ namespace Glory
 		/** @brief Constructor */
 		GScene(const std::string& sceneName = "New Scene");
 		/** @overload */
-		GScene(const std::string& sceneName, UUID uuid);
+		GScene(UUID uuid, const std::string& sceneName);
 		/** @brief Destructor */
 		virtual ~GScene();
 

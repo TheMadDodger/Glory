@@ -8,6 +8,10 @@
 
 namespace Glory
 {
+	AssetArchive::AssetArchive(): m_pStream(nullptr), m_Version(), m_Owned()
+	{
+	}
+
 	AssetArchive::AssetArchive(BinaryStream* pStream, bool isNew) : m_pStream(pStream), m_Version(), m_Owned()
 	{
 		if (isNew)
@@ -98,6 +102,11 @@ namespace Glory
 		return m_pResources[index];
 	}
 
+	AssetArchive::operator bool() const
+	{
+		return !!m_pStream;
+	}
+
 	void AssetArchive::WriteVersion()
 	{
 		m_pStream->Write(m_Version);
@@ -117,7 +126,7 @@ namespace Glory
 		m_pStream->Read(uuid).Read(name).Read(typeHash).Read(subResourcesCount);
 
 		const ResourceType* pType = ResourceType::GetResourceType(typeHash);
-		Resource* pResource = pType->Create();
+		Resource* pResource = pType->Create(uuid, name);
 
 		pResource->Deserialize(*m_pStream);
 		m_pResources.push_back(pResource);
@@ -125,6 +134,7 @@ namespace Glory
 		for (size_t i = 0; i < subResourcesCount; ++i)
 		{
 			Resource* pSubResource = ReadResource();
+			/* This should be UUID and not resource directly! */
 			pResource->AddSubresource(pSubResource, pSubResource->Name());
 		}
 

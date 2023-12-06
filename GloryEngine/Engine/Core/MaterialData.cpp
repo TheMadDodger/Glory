@@ -1,5 +1,4 @@
 #include "MaterialData.h"
-#include "AssetManager.h"
 #include "BinaryStream.h"
 #include "ShaderManager.h"
 

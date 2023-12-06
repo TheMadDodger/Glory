@@ -12,6 +12,7 @@ namespace Glory
 	class AssetArchive
 	{
 	public:
+		AssetArchive();
 		AssetArchive(BinaryStream* pStream, bool isNew=false);
 		virtual ~AssetArchive();
 
@@ -22,6 +23,8 @@ namespace Glory
 
 		size_t Size() const;
 		Resource* Get(size_t index) const;
+
+		operator bool() const;
 
 	private:
 		void WriteVersion();

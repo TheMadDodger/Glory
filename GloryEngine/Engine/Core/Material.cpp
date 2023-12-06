@@ -1,6 +1,5 @@
 #include "Material.h"
 #include "Engine.h"
-#include "AssetManager.h"
 #include "GraphicsModule.h"
 
 namespace Glory

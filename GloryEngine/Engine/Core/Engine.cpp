@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Console.h"
-#include "AssetManager.h"
+#include "Resources.h"
+#include "AssetLoader.h"
 #include "PropertySerializer.h"
 #include "AssetReferencePropertySerializer.h"
 #include "ArrayPropertySerializer.h"
@@ -12,7 +13,6 @@
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "ShapeProperty.h"
-#include "PrefabData.h"
 #include "SceneManager.h"
 #include "WindowModule.h"
 #include "EngineProfiler.h"
@@ -20,7 +20,6 @@
 #include "Debug.h"
 #include "Console.h"
 #include "AssetDatabase.h"
-#include "AssetManager.h"
 #include "Serializers.h"
 #include "DisplayManager.h"
 #include "LayerManager.h"
@@ -28,6 +27,7 @@
 #include "CameraManager.h"
 #include "ShaderManager.h"
 #include "GameTime.h"
+#include "InternalResource.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -212,10 +212,10 @@ namespace Glory
 		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
 		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
-		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
+		m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
 		m_Serializers(new Serializers), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
 		m_pShaderManager(createInfo.pShaderManager), m_pMaterialManager(createInfo.pMaterialManager),
-		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
+		m_pResources(new Resources()), m_pAssetLoader(new AssetLoader(this)), m_ObjectManager(new ObjectManager)
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -286,8 +286,6 @@ namespace Glory
 			m_pAllModules[i]->m_IsInitialized = true;
 		}
 
-		m_AssetManager->Initialize();
-
 		/* Create graphics thread */
 		m_pGraphicsThread = new GraphicsThread(this);
 
@@ -305,6 +303,7 @@ namespace Glory
 		m_pJobManager->Kill();
 		m_pThreadManager->Destroy();
 
+
 		// We need to cleanup in reverse
 		// This makes sure things like graphics get cleaned up before we close the window
 		for (int i = (int)m_pAllModules.size() - 1; i >= 0; --i)
@@ -314,6 +313,12 @@ namespace Glory
 		}
 
 		m_pSceneManager->Cleanup();
+
+		delete m_pResources;
+		m_pResources = nullptr;
+
+		delete m_pAssetLoader;
+		m_pAssetLoader = nullptr;
 
 		delete m_pJobManager;
 		m_pJobManager = nullptr;
@@ -532,6 +537,14 @@ namespace Glory
 		Reflect::RegisterType<ShapeProperty>();
 
 		Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
+
+		m_pResources->Register<ImageData>();
+		m_pResources->Register<TextureData>();
+		m_pResources->Register<MaterialData>();
+		m_pResources->Register<MaterialInstanceData>();
+		m_pResources->Register<ModelData>();
+		m_pResources->Register<MeshData>();
+		m_pResources->Register<PrefabData>();
 	}
 
 	void Engine::Update()
@@ -548,7 +561,7 @@ namespace Glory
 
 	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
 	{
-		m_AssetManager->RunCallbacks();
+		m_pAssetLoader->DumpLoadedArchives();
 
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
@@ -621,6 +634,21 @@ namespace Glory
 			settingsFilePath.append(moduleMetaData.Name() + ".yaml");
 			pModule->LoadSettings(settingsFilePath);
 		}
+	}
+
+	Resources& Engine::GetResources()
+	{
+		return *m_pResources;
+	}
+
+	AssetLoader& Engine::GetAssetLoader()
+	{
+		return *m_pAssetLoader;
+	}
+
+	Jobs::JobManager& Engine::Jobs()
+	{
+		return *m_pJobManager;
 	}
 
 	void Engine::GraphicsThreadFrameStart()

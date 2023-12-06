@@ -42,7 +42,7 @@ namespace Glory
 		void push_back(_Ty&& val)
 		{
 			m_Mutex.lock();
-			m_Data.push_back(val);
+			m_Data.push_back(std::move(val));
 			m_Mutex.unlock();
 		}
 

@@ -42,6 +42,10 @@ namespace Glory
 		APPEND_TYPE(PrefabData);
 	}
 
+	PrefabData::PrefabData(UUID uuid, const std::string& name): Resource(uuid, name), m_RootNode(this, {})
+	{
+	}
+
 	PrefabData::PrefabData(PrefabNode&& rootNode) noexcept : m_RootNode(std::move(rootNode))
 	{
 		/* Cache original UUIDs */

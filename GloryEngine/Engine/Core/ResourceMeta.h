@@ -1,4 +1,8 @@
 #pragma once
+#include "ResourceLoaderModule.h"
+#include "Game.h"
+#include "UUID.h"
+
 #include <string>
 #include <fstream>
 #include <yaml-cpp/yaml.h>

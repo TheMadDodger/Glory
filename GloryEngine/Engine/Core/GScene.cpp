@@ -17,7 +17,7 @@ namespace Glory
 		APPEND_TYPE(GScene);
 	}
 		
-	GScene::GScene(const std::string& sceneName, UUID uuid) : Resource(uuid, sceneName), m_Registry(this)
+	GScene::GScene(UUID uuid, const std::string& sceneName) : Resource(uuid, sceneName), m_Registry(this)
 	{
 		APPEND_TYPE(GScene);
 	}

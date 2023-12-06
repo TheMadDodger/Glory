@@ -1,5 +1,4 @@
 #pragma once
-#include <ImageLoaderModule.h>
 #include <GraphicsModule.h>
 #include <mutex>
 #include <unordered_map>

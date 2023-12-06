@@ -22,10 +22,10 @@ namespace Utils::Reflect
 	class ThreadManager;
 	class LoaderModule;
 	class SceneManager;
+
 	class PropertySerializer;
 
 	class AssetDatabase;
-	class AssetManager;
 	class ShaderManager;
 	class MaterialManager;
 
@@ -38,6 +38,10 @@ namespace Utils::Reflect
 	class CameraManager;
 	class GameTime;
 	class EngineProfiler;
+
+	class Resources;
+	class JobManager;
+	class AssetLoader;
 
 	namespace Jobs
 	{
@@ -150,16 +154,11 @@ namespace Utils::Reflect
 
 		void LoadModuleSettings(const std::filesystem::path& overrideRootPath = "");
 
-		void Update();
-		void Initialize();
-		void Cleanup();
-
 		Console& GetConsole();
 		Debug& GetDebug();
 		GameTime& Time();
 		CameraManager& GetCameraManager();
 		AssetDatabase& GetAssetDatabase();
-		AssetManager& GetAssetManager();
 		ResourceTypes& GetResourceTypes();
 		Serializers& GetSerializers();
 		DisplayManager& GetDisplayManager();
@@ -169,6 +168,9 @@ namespace Utils::Reflect
 		Utils::Reflect::Reflect& Reflection();
 		ObjectManager& GetObjectManager();
 		EngineProfiler& Profiler();
+		Resources& GetResources();
+		AssetLoader& GetAssetLoader();
+		Jobs::JobManager& Jobs();
 
 		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);
@@ -258,6 +260,8 @@ namespace Utils::Reflect
 		std::unique_ptr<Utils::Reflect::Reflect> m_Reflection;
 		std::unique_ptr<ObjectManager> m_ObjectManager;
 		std::unique_ptr<EngineProfiler> m_Profiler;
+		std::unique_ptr<Resources> m_Resources;
+		std::unique_ptr<AssetLoader> m_AssetLoader;
 		std::map<size_t, void*> m_pUserContexts;
 		std::vector<PropertySerializer*> m_pRegisteredPropertySerializers;
 	};

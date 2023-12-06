@@ -1,7 +1,7 @@
 #pragma once
 #include "Module.h"
 #include "Resource.h"
-#include "ResourceType.h"
+#include "Resources.h"
 #include "Engine.h"
 
 #include <string>

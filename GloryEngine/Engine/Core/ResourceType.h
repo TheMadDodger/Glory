@@ -1,4 +1,6 @@
 #pragma once
+#include "UUID.h"
+
 #include <string>
 #include <string_view>
 #include <typeindex>
@@ -22,6 +24,7 @@ namespace Glory
 	{
 	public:
 		virtual Resource* Create() const = 0;
+		virtual Resource* Create(const UUID uuid, const std::string& name) const = 0;
 	};
 
 	template<typename R>
@@ -31,6 +34,11 @@ namespace Glory
 		virtual Resource* Create() const override
 		{
 			return (Resource*)new R();
+		}
+
+		virtual Resource* Create(const UUID uuid, const std::string& name) const override
+		{
+			return (Resource*)new R(uuid, name);
 		}
 	};
 
@@ -43,6 +51,7 @@ namespace Glory
 		const std::string& FullName() const;
 		const std::string& Name() const;
 		Resource* Create() const;
+		Resource* Create(const UUID uuid, const std::string& name) const;
 
 	private:
 		ResourceType(uint32_t typeHash, const std::string& extensions, const char* name, ResourceFactory* pFactory);

@@ -8,6 +8,7 @@ namespace Glory
     {
     public:
         FileData();
+        FileData(UUID uuid, const std::string& name);
         FileData(FileData* pFileData);
         virtual ~FileData();
 
