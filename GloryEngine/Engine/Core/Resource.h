@@ -9,6 +9,7 @@
 namespace Glory
 {
     class BinaryStream;
+    class BaseResourceManager;
 
     class Resource : public Object
     {
@@ -57,10 +58,11 @@ namespace Glory
         std::vector<Resource*> m_pSubresources;
         std::map<std::string, size_t, std::less<>> m_NameToSubresourceIndex;
         Resource* m_pParent;
+        BaseResourceManager* m_pManager;
 
     private:
-        friend class AssetManager;
         friend class AssetDatabase;
         friend class LoaderModule;
+        friend class BaseResourceManager;
     };
 }

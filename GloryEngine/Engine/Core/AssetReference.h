@@ -1,13 +1,15 @@
 #pragma once
 #include "UUID.h"
 #include "ResourceType.h"
+#include "Engine.h"
+#include "Resources.h"
 
 #include <Reflection.h>
 
 namespace Glory
 {
 	class Resource;
-	class AssetManager;
+	class Resources;
 
 	class AssetReferenceBase
 	{
@@ -19,10 +21,9 @@ namespace Glory
 		const UUID AssetUUID() const;
 		UUID* AssetUUIDMember();
 		void SetUUID(UUID uuid);
-		Resource* GetResource(AssetManager* pAssets) const;
-		Resource* GetResourceImmediate(AssetManager* pAssets) const;
 
-		virtual const uint32_t TypeHash() { return 0; };
+		virtual const uint32_t TypeHash() { return 0; }
+		virtual Resource* GetBase(Resources*) const { return nullptr; }
 
 		virtual AssetReferenceBase* CreateCopy() { return new AssetReferenceBase(m_AssetUUID); };
 
@@ -45,21 +46,19 @@ namespace Glory
 			return typeHash;
 		}
 
+		Resource* GetBase(Resources* pResources) const override
+		{
+			return Get(pResources);
+		}
+
 		AssetReferenceBase* CreateCopy() override
 		{
 			return new AssetReference<T>(m_AssetUUID);
 		}
 
-		T* Get(AssetManager* pManager) const
+		T* Get(Resources* pResources) const
 		{
-			Resource* pResource = GetResource(pManager);
-			return pResource ? dynamic_cast<T*>(pResource) : nullptr;
-		}
-
-		T* GetImmediate(AssetManager* pManager) const
-		{
-			Resource* pResource = GetResourceImmediate(pManager);
-			return pResource ? dynamic_cast<T*>(pResource) : nullptr;
+			return pResources->Manager<T>()->Get(m_AssetUUID);
 		}
 	};
 }

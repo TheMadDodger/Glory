@@ -154,7 +154,7 @@ namespace Glory
 		return m_pFactory->Create(uuid, name);
 	}
 
-	void ResourceType::ReadExtensions(size_t index, const std::string& extensions)
+	void ResourceTypes::ReadExtensions(size_t index, const std::string& extensions)
 	{
 		if (extensions.empty()) return;
 		std::stringstream stream(extensions);

@@ -8,6 +8,7 @@ namespace Glory
 {
 	class Resource;
 	class BinaryStream;
+	class Engine;
 
 	class AssetArchive
 	{
@@ -19,10 +20,10 @@ namespace Glory
 		bool VerifyVersion();
 
 		void Serialize(Resource* pResource);
-		void Deserialize();
+		void Deserialize(Engine* pEngine);
 
 		size_t Size() const;
-		Resource* Get(size_t index) const;
+		Resource* Get(Engine* pEngine, size_t index) const;
 
 		operator bool() const;
 
@@ -30,7 +31,7 @@ namespace Glory
 		void WriteVersion();
 		void ReadVersion();
 
-		Resource* ReadResource();
+		Resource* ReadResource(Engine* pEngine);
 
 		BinaryStream* m_pStream;
 		Version m_Version;

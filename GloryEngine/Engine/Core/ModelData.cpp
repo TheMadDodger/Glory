@@ -7,6 +7,11 @@ namespace Glory
 		APPEND_TYPE(ModelData);
 	}
 
+	ModelData::ModelData(UUID uuid, const std::string& name): Resource(uuid, name)
+	{
+		APPEND_TYPE(ModelData);
+	}
+
 	ModelData::~ModelData()
 	{
 	}

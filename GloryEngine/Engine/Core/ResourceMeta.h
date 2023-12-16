@@ -1,13 +1,11 @@
 #pragma once
 #include "ResourceLoaderModule.h"
-#include "Game.h"
 #include "UUID.h"
 
 #include <string>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 #include "ResourceLoaderModule.h"
-#include "ModelLoaderModule.h"
 
 namespace Glory
 {

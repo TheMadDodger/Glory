@@ -9,6 +9,7 @@ namespace Glory
 	{
 	public:
 		MaterialInstanceData();
+		MaterialInstanceData(UUID uuid, const std::string& name);
 		MaterialInstanceData(UUID baseMaterial);
 		virtual ~MaterialInstanceData();
 

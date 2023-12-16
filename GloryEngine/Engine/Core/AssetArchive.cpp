@@ -3,6 +3,7 @@
 #include "Resource.h"
 #include "ResourceType.h"
 #include "Debug.h"
+#include "Engine.h"
 
 #include <sstream>
 
@@ -65,7 +66,7 @@ namespace Glory
 		}
 	}
 
-	void AssetArchive::Deserialize()
+	void AssetArchive::Deserialize(Engine* pEngine)
 	{
 		if (!VerifyVersion())
 		{
@@ -73,13 +74,13 @@ namespace Glory
 			m_Version.GetVersionString(versionStr);
 			std::stringstream str;
 			str << "Compiled asset archive was built with a different core/runtime version (" << versionStr << ") than the current version " << GloryCoreVersion;
-			Debug::LogFatalError(str.str());
+			pEngine->GetDebug().LogFatalError(str.str());
 			return;
 		}
 
 		while (!m_pStream->Eof())
 		{
-			ReadResource();
+			ReadResource(pEngine);
 		}
 
 		m_Owned.Reserve(m_pResources.size());
@@ -91,11 +92,11 @@ namespace Glory
 		return m_pResources.size();
 	}
 
-	Resource* AssetArchive::Get(size_t index) const
+	Resource* AssetArchive::Get(Engine* pEngine, size_t index) const
 	{
 		if (!m_Owned.IsSet(index))
 		{
-			Debug::LogError("Resource already claimed!");
+			pEngine->GetDebug().LogError("Resource already claimed!");
 			return nullptr;
 		}
 		m_Owned.UnSet(index);
@@ -117,7 +118,7 @@ namespace Glory
 		m_pStream->Read(m_Version);
 	}
 
-	Resource* AssetArchive::ReadResource()
+	Resource* AssetArchive::ReadResource(Engine* pEngine)
 	{
 		std::string name;
 		uint32_t typeHash = 0;
@@ -125,7 +126,7 @@ namespace Glory
 		UUID uuid = 0;
 		m_pStream->Read(uuid).Read(name).Read(typeHash).Read(subResourcesCount);
 
-		const ResourceType* pType = ResourceType::GetResourceType(typeHash);
+		const ResourceType* pType = pEngine->GetResourceTypes().GetResourceType(typeHash);
 		Resource* pResource = pType->Create(uuid, name);
 
 		pResource->Deserialize(*m_pStream);
@@ -133,7 +134,7 @@ namespace Glory
 
 		for (size_t i = 0; i < subResourcesCount; ++i)
 		{
-			Resource* pSubResource = ReadResource();
+			Resource* pSubResource = ReadResource(pEngine);
 			/* This should be UUID and not resource directly! */
 			pResource->AddSubresource(pSubResource, pSubResource->Name());
 		}

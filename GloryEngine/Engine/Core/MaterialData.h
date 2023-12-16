@@ -15,11 +15,13 @@ namespace Glory
     class FileData;
     class ShaderManager;
     class MaterialManager;
+    class Resources;
 
     class MaterialData : public Resource
     {
     public:
         MaterialData();
+        MaterialData(UUID uuid, const std::string& name);
         virtual ~MaterialData();
 
         [[nodiscard]]virtual size_t ShaderCount(const MaterialManager& materialManager) const;
@@ -91,7 +93,5 @@ namespace Glory
         std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;
 
         size_t m_CurrentOffset;
-
-        std::mutex m_PropertiesAccessMutex;
     };
 }

@@ -71,7 +71,7 @@ namespace Glory
 	{
 	public:
 		template<class T>
-		void RegisterResource(const std::string& extensions)
+		void RegisterResource(const std::string& extensions="")
 		{
 			ResourceFactory* pFactory = new ResourceFactoryTemplate<T>();
 			ResourceType* pResourceType = RegisterResource(typeid(T), extensions, pFactory);
@@ -121,9 +121,6 @@ namespace Glory
 		size_t GetAllResourceTypesThatHaveSubType(uint32_t hash, std::vector<ResourceType*>& out);
 
 		static bool IsScene(const std::string& ext);
-
-	public:
-		virtual ~ResourceTypes();
 
 	private:
 		void ReadExtensions(size_t index, const std::string& extensions);

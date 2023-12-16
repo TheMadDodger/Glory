@@ -18,11 +18,12 @@ namespace Glory
 		uint64_t ObjectID;
 	};
 
+	/* @fixme Use IDs instead of assets directly */
 	struct RenderData
 	{
 	public:
 		// Mesh
-		MeshData* m_pMesh;
+		UUID m_MeshID;
 		UUID m_SceneID;
 		UUID m_ObjectID;
 
@@ -31,7 +32,7 @@ namespace Glory
 		//size_t m_NumInstances;
 		//
 		// Material
-		MaterialData* m_pMaterial;
+		UUID m_MaterialID;
 		LayerMask m_LayerMask;
 	};
 }

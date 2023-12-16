@@ -86,7 +86,7 @@ namespace Glory
 		)
 	};
 
-	struct ModelRenderer
+	/*struct ModelRenderer
 	{
 		ModelRenderer(ModelData* pModel, MaterialData* pMaterial) : m_Model(pModel != nullptr ? pModel->GetUUID() : 0), m_Materials({ pMaterial != nullptr ? pMaterial->GetUUID() : 0 }) {}
 		ModelRenderer() : m_Model(0), m_Materials(std::vector<MeshMaterial>()) {}
@@ -95,7 +95,7 @@ namespace Glory
 			(AssetReference<ModelData>)	(m_Model),
 			(std::vector<MeshMaterial>)	(m_Materials)
 		)
-	};
+	};*/
 
 	struct CameraComponent
 	{

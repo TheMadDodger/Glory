@@ -3,6 +3,7 @@
 #include "MaterialInstanceData.h"
 #include "Engine.h"
 #include "EngineProfiler.h"
+#include "Resources.h"
 
 #include <algorithm>
 

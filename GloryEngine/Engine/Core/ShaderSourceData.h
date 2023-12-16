@@ -10,6 +10,7 @@ namespace Glory
 	{
     public:
         ShaderSourceData();
+        ShaderSourceData(UUID uuid, const std::string& name);
         ShaderSourceData(ShaderType shaderType, FileData* pCompiledSource);
         ShaderSourceData(ShaderType shaderType, std::vector<char>&& source, std::vector<char>&& processed);
         virtual ~ShaderSourceData();

@@ -9,10 +9,18 @@ namespace Glory
 {
 	MaterialInstanceData::MaterialInstanceData() : m_BaseMaterial(0)
 	{
+		APPEND_TYPE(MaterialInstanceData);
+	}
+
+	MaterialInstanceData::MaterialInstanceData(UUID uuid, const std::string& name):
+		MaterialData(uuid, name)
+	{
+		APPEND_TYPE(MaterialInstanceData);
 	}
 
 	MaterialInstanceData::MaterialInstanceData(UUID baseMaterial) : m_BaseMaterial(baseMaterial)
 	{
+		APPEND_TYPE(MaterialInstanceData);
 	}
 
 	MaterialInstanceData::~MaterialInstanceData()
@@ -50,18 +58,14 @@ namespace Glory
 
 	void MaterialInstanceData::CopyOverrideStates(std::vector<bool>& destination)
 	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
 		if (m_PropertyOverridesEnable.size() != destination.size()) destination.resize(m_PropertyOverridesEnable.size());
 		destination.assign(m_PropertyOverridesEnable.begin(), m_PropertyOverridesEnable.end());
-		lock.unlock();
 	}
 
 	void MaterialInstanceData::PasteOverrideStates(std::vector<bool>& destination)
 	{
-		std::unique_lock lock(m_PropertiesAccessMutex);
 		if (m_PropertyOverridesEnable.size() != destination.size()) m_PropertyOverridesEnable.resize(destination.size());
 		m_PropertyOverridesEnable.assign(destination.begin(), destination.end());
-		lock.unlock();
 	}
 
 	size_t MaterialInstanceData::PropertyInfoCount(const MaterialManager& manager) const
@@ -188,9 +192,7 @@ namespace Glory
 	void MaterialInstanceData::Deserialize(BinaryStream& container)
 	{
 		/* Read base material */
-		UUID baseMaterialID;
-		container.Read(baseMaterialID);
-		m_pBaseMaterial = AssetManager::GetAssetImmediate<MaterialData>(baseMaterialID);
+		container.Read(m_BaseMaterialID);
 
 		/* Write overrides */
 		size_t numPropertyOverrides;

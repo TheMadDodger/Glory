@@ -1,5 +1,6 @@
 #include "AssetLoader.h"
 #include "Engine.h"
+#include "Debug.h"
 
 #include "AssetDatabase.h"
 #include "BinaryStream.h"
@@ -18,9 +19,9 @@ namespace Glory
 	bool AssetLoader::RequestLoad(UUID uuid)
 	{
 		AssetLocation assetLocation;
-		if (!AssetDatabase::GetAssetLocation(uuid, assetLocation)) return false;
+		if (!m_pEngine->GetAssetDatabase().GetAssetLocation(uuid, assetLocation)) return false;
 
-		std::filesystem::path path = Game::GetAssetPath();
+		std::filesystem::path path = m_pEngine->GetAssetDatabase().GetAssetPath();
 		path.append(assetLocation.Path);
 		if (path.extension().compare(".gcag") != 0) return false;
 
@@ -39,7 +40,7 @@ namespace Glory
 				if (!archive) return;
 				for (size_t i = 0; i < archive.Size(); ++i)
 				{
-					Resource* pResource = archive.Get(i);
+					Resource* pResource = archive.Get(m_pEngine, i);
 					if (m_pEngine->GetResources().Add(pResource)) continue;
 					delete pResource;
 				}
@@ -60,14 +61,14 @@ namespace Glory
 		{
 			std::stringstream str;
 			str << "Failed to load asset archive at path " << path << " file not found!";
-			Debug::LogError(str.str());
+			m_pEngine->GetDebug().LogError(str.str());
 			return AssetArchive{};
 		}
 
 		/* Load as archive */
 		BinaryFileStream stream{ path };
 		AssetArchive archive{ &stream };
-		archive.Deserialize();
+		archive.Deserialize(m_pEngine);
 		return archive;
 	}
 

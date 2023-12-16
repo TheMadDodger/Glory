@@ -8,6 +8,7 @@ namespace Glory
 	{
     public:
         TextureData();
+        TextureData(UUID uuid, const std::string& name);
         TextureData(ImageData* pImageData);
         virtual ~TextureData();
 

@@ -8,8 +8,14 @@ namespace Glory
 		APPEND_TYPE(TextureData);
 	}
 
+	TextureData::TextureData(UUID uuid, const std::string& name): Resource(uuid, name), m_Image(UUID(0)), m_SamplerSettings()
+	{
+		APPEND_TYPE(TextureData);
+	}
+
 	TextureData::TextureData(ImageData* pImageData) : m_Image(pImageData), m_SamplerSettings()
 	{
+		APPEND_TYPE(TextureData);
 	}
 
 	TextureData::~TextureData()

@@ -12,6 +12,12 @@ namespace Glory
 		APPEND_TYPE(MaterialData);
 	}
 
+	MaterialData::MaterialData(UUID uuid, const std::string& name):
+		Resource(uuid, name), m_CurrentOffset(0)
+	{
+		APPEND_TYPE(MaterialData);
+	}
+
 	MaterialData::~MaterialData()
 	{
 		m_Shaders.clear();
@@ -198,12 +204,11 @@ namespace Glory
 		/* Read shader IDs */
 		size_t numShaders;
 		container.Read(numShaders);
-		m_pShaderFiles.resize(numShaders);
-		for (size_t i = 0; i < m_pShaderFiles.size(); ++i)
+		m_ShaderIDs.resize(numShaders);
+		for (size_t i = 0; i < m_ShaderIDs.size(); ++i)
 		{
 			UUID shaderID;
-			container.Read(shaderID);
-			m_pShaderFiles[i] = AssetManager::GetAssetImmediate<ShaderSourceData>(shaderID);
+			container.Read(m_ShaderIDs[i]);
 		}
 
 		/* Read property infos */
@@ -267,7 +272,7 @@ namespace Glory
 		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
 		if (!pPropertyInfo->IsResource()) return false;
 		const size_t resourceIndex = pPropertyInfo->Offset();
-		*value = m_Resources[resourceIndex].Get(pManager);
+		*value = m_Resources[resourceIndex].Get(pResources);
 		return *value;
 	}
 

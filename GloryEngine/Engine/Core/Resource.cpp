@@ -4,22 +4,22 @@
 
 namespace Glory
 {
-	Resource::Resource() : m_pParent(nullptr)
+	Resource::Resource() : m_pParent(nullptr), m_pManager(nullptr)
 	{
 		APPEND_TYPE(Resource);
 	}
 
-	Resource::Resource(UUID uuid) : Object(uuid), m_pParent(nullptr)
+	Resource::Resource(UUID uuid) : Object(uuid), m_pParent(nullptr), m_pManager(nullptr)
 	{
 		APPEND_TYPE(Resource);
 	}
 
-	Resource::Resource(const std::string& name) : Object(name), m_pParent(nullptr)
+	Resource::Resource(const std::string& name) : Object(name), m_pParent(nullptr), m_pManager(nullptr)
 	{
 		APPEND_TYPE(Resource);
 	}
 
-	Resource::Resource(UUID uuid, const std::string& name) : Object(uuid, name), m_pParent(nullptr)
+	Resource::Resource(UUID uuid, const std::string& name) : Object(uuid, name), m_pParent(nullptr), m_pManager(nullptr)
 	{
 		APPEND_TYPE(Resource);
 	}

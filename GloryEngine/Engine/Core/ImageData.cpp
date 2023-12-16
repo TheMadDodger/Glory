@@ -8,10 +8,19 @@
 
 namespace Glory
 {
-	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed)
-		: m_Header{ w, h, internalFormat, format, bytesPerPixel, dataSize, compressed }, m_pPixels(std::move(pPixels)) {}
-
 	ImageData::ImageData() : m_Header{}, m_pPixels(nullptr)
+	{
+		APPEND_TYPE(ImageData);
+	}
+
+	ImageData::ImageData(UUID uuid, const std::string& name)
+		: Resource(uuid, name), m_Header{}, m_pPixels(nullptr)
+	{
+		APPEND_TYPE(ImageData);
+	}
+
+	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed)
+		: m_Header{ w, h, internalFormat, format, bytesPerPixel, dataSize, compressed }, m_pPixels(std::move(pPixels))
 	{
 		APPEND_TYPE(ImageData);
 	}

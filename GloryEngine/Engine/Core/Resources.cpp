@@ -10,7 +10,7 @@ namespace Glory
 		{
 			std::type_index type = typeid(Resource);
 			if (!pResource->GetType(i, type)) continue;
-			const uint32_t hash = ResourceType::GetHash(type);
+			const uint32_t hash = ResourceTypes::GetHash(type);
 			BaseResourceManager* pManager = Manager(hash);
 			if (!pManager) continue;
 			pManager->Add(pResource);
@@ -32,6 +32,8 @@ namespace Glory
 		const size_t index = itor - m_Types.begin();
 		return m_pManagers[index];
 	}
+
+	Resources::Resources(Engine* pEngine): m_pEngine(pEngine) {}
 
 	Resources::~Resources()
 	{

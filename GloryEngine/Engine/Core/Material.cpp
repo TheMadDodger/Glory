@@ -1,5 +1,6 @@
 #include "Material.h"
 #include "Engine.h"
+#include "Resources.h"
 #include "GraphicsModule.h"
 
 namespace Glory
@@ -24,7 +25,7 @@ namespace Glory
 			MaterialPropertyInfo* pPropertyInfo = m_pMaterialData->GetResourcePropertyInfo(pEngine->GetMaterialManager(), i);
 			const std::string& shaderName = pPropertyInfo->ShaderName();
 			const UUID uuid = m_pMaterialData->GetResourceUUIDPointer(pEngine->GetMaterialManager(), i)->AssetUUID();
-			TextureData* pTextureData = pEngine->GetAssetManager().GetOrLoadAsset<TextureData>(uuid);
+			TextureData* pTextureData = pEngine->GetResources().Manager<TextureData>()->Get(uuid);
 			Texture* pTexture = pTextureData != nullptr ? pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateTexture(pTextureData) : nullptr;
 			SetTexture(shaderName, pTexture);
 		}

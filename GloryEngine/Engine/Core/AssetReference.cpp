@@ -29,14 +29,4 @@ namespace Glory
 	{
 		m_AssetUUID = uuid;
 	}
-
-	Resource* AssetReferenceBase::GetResource(AssetManager* pAssets) const
-	{
-		return pAssets->GetOrLoadAsset(m_AssetUUID);
-	}
-
-	Resource* AssetReferenceBase::GetResourceImmediate(AssetManager* pAssets) const
-	{
-		return pAssets->GetAssetImmediate(m_AssetUUID);
-	}
 }

@@ -12,6 +12,7 @@ namespace Glory
     struct PrefabNode
     {
     public:
+        PrefabNode(const PrefabNode&) = default;
         PrefabNode(PrefabNode&& other) noexcept;
         PrefabNode(PrefabData* pPrefab, const Entity& entity);
         void operator=(const Entity& entity);

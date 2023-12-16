@@ -6,6 +6,11 @@ namespace Glory
     {
     }
 
+    ShaderSourceData::ShaderSourceData(UUID uuid, const std::string& name): Resource(uuid, name),
+        m_ProcessedSource(), m_OriginalSource(), m_ShaderType(ShaderType::ST_Unknown), m_pPlatformCompiledShader(nullptr)
+    {
+    }
+
     ShaderSourceData::ShaderSourceData(ShaderType shaderType, FileData* pCompiledSource)
         : m_ShaderType(shaderType), m_pPlatformCompiledShader(pCompiledSource), m_OriginalSource(), m_ProcessedSource()
     {}

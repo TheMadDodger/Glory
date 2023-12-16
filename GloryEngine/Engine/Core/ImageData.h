@@ -20,8 +20,9 @@ namespace Glory
         };
 
     public:
-        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed=false);
         ImageData();
+        ImageData(UUID uuid, const std::string& name);
+        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed=false);
         virtual ~ImageData();
 
         uint32_t GetWidth() const;

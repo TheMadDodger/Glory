@@ -175,6 +175,10 @@ namespace Utils::Reflect
 		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);
 
+		void Update();
+		void Initialize();
+		void Cleanup();
+
 		template<class T>
 		void AddUserContext(T* pUserContext)
 		{
@@ -252,7 +256,6 @@ namespace Utils::Reflect
 		std::unique_ptr<GameTime> m_Time;
 		std::unique_ptr<CameraManager> m_CameraManager;
 		std::unique_ptr<AssetDatabase> m_AssetDatabase;
-		std::unique_ptr<AssetManager> m_AssetManager;
 		std::unique_ptr<ResourceTypes> m_ResourceTypes;
 		std::unique_ptr<Serializers> m_Serializers;
 		std::unique_ptr<DisplayManager> m_DisplayManager;

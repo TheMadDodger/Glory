@@ -9,6 +9,7 @@ namespace Glory
 	{
 	public:
 		ModelData();
+		ModelData(UUID uuid, const std::string& name);
 		virtual ~ModelData();
 
 		size_t GetMeshCount() const;

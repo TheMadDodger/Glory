@@ -7,6 +7,7 @@
 
 namespace Glory
 {
+	class SceneManager;
 	class PrefabData;
 	class SceneManager;
 	struct UUIDRemapper;

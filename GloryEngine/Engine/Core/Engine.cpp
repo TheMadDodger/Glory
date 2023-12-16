@@ -209,13 +209,14 @@ namespace Glory
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pSceneManager(new SceneManager(this)), m_pThreadManager(ThreadManager::GetInstance()),
-		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
+		m_pJobManager(new Jobs::JobManager()), m_pGraphicsThread(new GraphicsThread(this)), m_Reflection(new Reflect),
 		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
 		m_Serializers(new Serializers), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
 		m_pShaderManager(createInfo.pShaderManager), m_pMaterialManager(createInfo.pMaterialManager),
-		m_pResources(new Resources()), m_pAssetLoader(new AssetLoader(this)), m_ObjectManager(new ObjectManager)
+		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager),
+		m_Resources(new Resources(this)), m_AssetLoader(new AssetLoader(this))
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -286,9 +287,6 @@ namespace Glory
 			m_pAllModules[i]->m_IsInitialized = true;
 		}
 
-		/* Create graphics thread */
-		m_pGraphicsThread = new GraphicsThread(this);
-
 		/* Run Post Initialize */
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
@@ -313,12 +311,6 @@ namespace Glory
 		}
 
 		m_pSceneManager->Cleanup();
-
-		delete m_pResources;
-		m_pResources = nullptr;
-
-		delete m_pAssetLoader;
-		m_pAssetLoader = nullptr;
 
 		delete m_pJobManager;
 		m_pJobManager = nullptr;
@@ -350,11 +342,6 @@ namespace Glory
 	AssetDatabase& Engine::GetAssetDatabase()
 	{
 		return *m_AssetDatabase;
-	}
-
-	AssetManager& Engine::GetAssetManager()
-	{
-		return *m_AssetManager;
 	}
 
 	ResourceTypes& Engine::GetResourceTypes()
@@ -538,13 +525,13 @@ namespace Glory
 
 		Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 
-		m_pResources->Register<ImageData>();
-		m_pResources->Register<TextureData>();
-		m_pResources->Register<MaterialData>();
-		m_pResources->Register<MaterialInstanceData>();
-		m_pResources->Register<ModelData>();
-		m_pResources->Register<MeshData>();
-		m_pResources->Register<PrefabData>();
+		m_Resources->Register<ImageData>();
+		m_Resources->Register<TextureData>();
+		m_Resources->Register<MaterialData>();
+		m_Resources->Register<MaterialInstanceData>();
+		m_Resources->Register<ModelData>();
+		m_Resources->Register<MeshData>();
+		m_Resources->Register<PrefabData>();
 	}
 
 	void Engine::Update()
@@ -561,7 +548,7 @@ namespace Glory
 
 	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
 	{
-		m_pAssetLoader->DumpLoadedArchives();
+		m_AssetLoader->DumpLoadedArchives();
 
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
@@ -638,12 +625,12 @@ namespace Glory
 
 	Resources& Engine::GetResources()
 	{
-		return *m_pResources;
+		return *m_Resources;
 	}
 
 	AssetLoader& Engine::GetAssetLoader()
 	{
-		return *m_pAssetLoader;
+		return *m_AssetLoader;
 	}
 
 	Jobs::JobManager& Engine::Jobs()
