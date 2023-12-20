@@ -2,6 +2,7 @@
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
 
+#include <Engine.h>
 #include <InputModule.h>
 
 namespace Glory
@@ -114,7 +115,6 @@ namespace Glory
 	}
 
 #pragma endregion
-
 
 #pragma region Binding
 

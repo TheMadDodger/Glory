@@ -124,6 +124,14 @@ namespace Glory
 		Utils::ECS::EntityRegistry* pRegistry = pair.first;
 		Utils::ECS::EntityID entity = pair.second;
 		if (!pRegistry->IsValid(entity)) return;
+		if (!Instance()->OnBodyActivated_Callback) return;
+		Instance()->OnBodyActivated_Callback(pRegistry, entity, bodyID);
+
+		throw new std::exception("TODO: USE THESE CALLBACKS IN THE JOLT MONO EXTENDER");
+
+
+		/*ScriptedComponent& scriptComponent = pRegistry->GetComponent<ScriptedComponent>(entity);
+		Script* pScript = scriptComponent.m_Script.Get();
 		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
@@ -137,7 +145,7 @@ namespace Glory
 		};
 
 		GScene* pGScene = pRegistry->GetUserData<GScene*>();
-		pScript->Invoke(pGScene->GetEntityUUID(entity), pGScene->GetUUID(), "OnBodyActivated", args.data());
+		pScript->Invoke(pGScene->GetEntityUUID(entity), pGScene->GetUUID(), "OnBodyActivated", args.data());*/
 	}
 
 	void PhysicsSystem::OnBodyDeactivated(uint32_t bodyID)
@@ -147,6 +155,12 @@ namespace Glory
 		Utils::ECS::EntityRegistry* pRegistry = pair.first;
 		Utils::ECS::EntityID entity = pair.second;
 		if (!pRegistry->IsValid(entity)) return;
+		if (!Instance()->OnBodyDeactivated_Callback) return;
+		Instance()->OnBodyDeactivated_Callback(pRegistry, entity, bodyID);
+
+		throw new std::exception("TODO: USE THESE CALLBACKS IN THE JOLT MONO EXTENDER");
+
+		/*if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
 		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
@@ -160,7 +174,7 @@ namespace Glory
 		};
 
 		GScene* pGScene = pRegistry->GetUserData<GScene*>();
-		pScript->Invoke(pGScene->GetEntityUUID(entity), pGScene->GetUUID(), "OnBodyDeactivated", args.data());
+		pScript->Invoke(pGScene->GetEntityUUID(entity), pGScene->GetUUID(), "OnBodyDeactivated", args.data());*/
 	}
 
 	void PhysicsSystem::OnContactAdded(uint32_t body1ID, uint32_t body2ID)
@@ -174,7 +188,13 @@ namespace Glory
 		Utils::ECS::EntityID entity1 = pair1.second;
 		Utils::ECS::EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+		if (!Instance()->OnContactAdded_Callback) return;
+		Instance()->OnContactAdded_Callback(pRegistry1, entity1, body1ID, body2ID);
+		Instance()->OnContactAdded_Callback(pRegistry2, entity2, body2ID, body1ID);
 
+		throw new std::exception("TODO: USE THESE CALLBACKS IN THE JOLT MONO EXTENDER");
+
+		/*if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
 		GScene* pScene = pRegistry1->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager& assets = pEngine->GetAssetManager();
@@ -204,7 +224,7 @@ namespace Glory
 
 			GScene* pGScene = pRegistry2->GetUserData<GScene*>();
 			pScript->Invoke(pGScene->GetEntityUUID(entity2), pGScene->GetUUID(), "OnContactAdded", args.data());
-		}
+		}*/
 	}
 
 	void PhysicsSystem::OnContactPersisted(uint32_t body1ID, uint32_t body2ID)
@@ -218,7 +238,13 @@ namespace Glory
 		Utils::ECS::EntityID entity1 = pair1.second;
 		Utils::ECS::EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+		if (!Instance()->OnContactPersisted_Callback) return;
+		Instance()->OnContactPersisted_Callback(pRegistry1, entity1, body1ID, body2ID);
+		Instance()->OnContactPersisted_Callback(pRegistry2, entity2, body2ID, body1ID);
 
+		throw new std::exception("TODO: USE THESE CALLBACKS IN THE JOLT MONO EXTENDER");
+
+		/*if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
 		GScene* pScene = pRegistry1->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager& assets = pEngine->GetAssetManager();
@@ -248,7 +274,7 @@ namespace Glory
 
 			GScene* pGScene = pRegistry2->GetUserData<GScene*>();
 			pScript->Invoke(pGScene->GetEntityUUID(entity2), pGScene->GetUUID(), "OnContactPersisted", args.data());
-		}
+		}*/
 	}
 
 	void PhysicsSystem::OnContactRemoved(uint32_t body1ID, uint32_t body2ID)
@@ -262,7 +288,21 @@ namespace Glory
 		Utils::ECS::EntityID entity1 = pair1.second;
 		Utils::ECS::EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+		if (!Instance()->OnContactRemoved_Callback) return;
+		Instance()->OnContactRemoved_Callback(pRegistry1, entity1, body1ID, body2ID);
+		Instance()->OnContactRemoved_Callback(pRegistry2, entity2, body2ID, body1ID);
 
+		throw new std::exception("TODO: USE THESE CALLBACKS IN THE JOLT MONO EXTENDER");
+
+		//if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
+		//{
+		//	ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
+		//	Script* pScript = scriptComponent.m_Script.Get();
+		//	if (!pScript) return;
+		//	std::vector<void*> args = {
+		//		&body1ID,
+		//		&body2ID
+		//	};
 		GScene* pScene = pRegistry1->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager& assets = pEngine->GetAssetManager();
@@ -276,11 +316,20 @@ namespace Glory
 				&body2ID
 			};
 
-			GScene* pGScene = pRegistry1->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetEntityUUID(entity1), pGScene->GetUUID(), "OnContactRemoved", args.data());
-		}
+		//	GScene* pGScene = pRegistry1->GetUserData<GScene*>();
+		//	pScript->Invoke(pGScene->GetEntityUUID(entity1), pGScene->GetUUID(), "OnContactRemoved", args.data());
+		//}
 
-		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
+		//if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
+		//{
+		//	ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
+		//	Script* pScript = scriptComponent.m_Script.Get();
+		//	if (!pScript) return;
+		//	std::vector<void*> args = {
+		//		&body2ID,
+		//		&body1ID
+		//	};
+		/*if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
 		{
 			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
 			Script* pScript = scriptComponent.m_Script.Get(&assets);
@@ -288,11 +337,11 @@ namespace Glory
 			std::vector<void*> args = {
 				&body2ID,
 				&body1ID
-			};
+			};*/
 
-			GScene* pGScene = pRegistry2->GetUserData<GScene*>();
-			pScript->Invoke(pGScene->GetEntityUUID(entity2), pGScene->GetUUID(), "OnContactRemoved", args.data());
-		}
+		//	GScene* pGScene = pRegistry2->GetUserData<GScene*>();
+		//	pScript->Invoke(pGScene->GetEntityUUID(entity2), pGScene->GetUUID(), "OnContactRemoved", args.data());
+		//}
 	}
 
 	void PhysicsSystem::AddBody(uint32_t bodyID, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity)
@@ -303,6 +352,12 @@ namespace Glory
 	void PhysicsSystem::RemoveBody(uint32_t bodyID)
 	{
 		m_BodyOwners.erase(bodyID);
+	}
+
+	PhysicsSystem* PhysicsSystem::Instance()
+	{
+		static PhysicsSystem Inst;
+		return &Inst;
 	}
 
 	void PhysicsSystem::SetupBody(JoltPhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)

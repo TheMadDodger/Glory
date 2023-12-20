@@ -1,11 +1,18 @@
 #pragma once
-#include <ScriptLoaderModule.h>
-#include "MonoScript.h"
+#include <ResourceLoaderModule.h>
 #include <yaml-cpp/yaml.h>
+
+#include "MonoScript.h"
 
 namespace Glory
 {
-	class MonoScriptLoader : public ScriptLoaderModule<MonoScript, ScriptImportSettings>
+    struct ScriptImportSettings : public ImportSettings
+    {
+        ScriptImportSettings() {}
+        ScriptImportSettings(const std::string& extension) : ImportSettings(extension) {}
+    };
+
+	class MonoScriptLoader : public ResourceLoaderModule<MonoScript, ScriptImportSettings>
 	{
     public:
         MonoScriptLoader();

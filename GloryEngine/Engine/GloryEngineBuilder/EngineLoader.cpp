@@ -1,8 +1,6 @@
 #include "EngineLoader.h"
 
 #include <WindowModule.h>
-#include <ScriptingModule.h>
-#include <IScriptExtender.h>
 
 #include <BuiltInModules.h>
 
@@ -33,7 +31,7 @@ std::string GetLastErrorAsString()
 namespace Glory
 {
 	typedef Module* (__cdecl* OnLoadModuleProc)();
-	typedef IScriptExtender*(__cdecl* OnLoadExtensionProc)();
+	typedef bool(__cdecl* OnLoadExtraProc)(const char*, Module*, Module*);
 	
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow)
 		: m_CFGPath(cfgPath), m_DefaultWindow(defaultWindow), m_EngineInfo{} {}
@@ -65,19 +63,12 @@ namespace Glory
 		m_pOptionalModules.push_back(new Glory::TextureDataLoaderModule());
 		m_pOptionalModules.push_back(new Glory::ShaderSourceLoaderModule());
 
-		for (size_t i = 0; i < m_pScriptingModules.size(); i++)
-		{
-			LoadScriptingExtendersForScripting(m_pScriptingModules[i]);
-		}
-
 		m_EngineInfo.MainModuleCount = static_cast<uint32_t>(m_pMainModules.size());
 		m_EngineInfo.pMainModules = m_pMainModules.data();
 
 		m_EngineInfo.OptionalModuleCount = static_cast<uint32_t>(m_pOptionalModules.size());
 		m_EngineInfo.pOptionalModules = m_pOptionalModules.data();
 
-		m_EngineInfo.ScriptingModulesCount = static_cast<uint32_t>(m_pScriptingModules.size());
-		m_EngineInfo.pScriptingModules = m_pScriptingModules.data();
 		return { m_EngineInfo };
 	}
 		
@@ -86,25 +77,23 @@ namespace Glory
 		m_pAllModules.clear();
 		m_LoadedModuleNames.clear();
 		m_pOptionalModules.clear();
-		m_pScriptingModules.clear();
-		m_pScriptingExtenders.clear();
 
-		/* Unload scripting libs */
-		for (size_t i = 0; i < m_ScriptingLibs.size(); i++)
+		/* Unload other libs */
+		for (size_t i = 0; i < m_ExtraLibs.size(); ++i)
 		{
-			FreeLibrary(m_ScriptingLibs[i]);
+			FreeLibrary(m_ExtraLibs[i]);
 		}
-		m_ScriptingLibs.clear();
+		m_ModuleLibs.clear();
 		
 		/* Unload module libs */
-		for (size_t i = 0; i < m_ModuleLibs.size(); i++)
+		for (size_t i = 0; i < m_ModuleLibs.size(); ++i)
 		{
 			FreeLibrary(m_ModuleLibs[i]);
 		}
 		m_ModuleLibs.clear();
 
 		/* Unload dependency libs */
-		for (size_t i = 0; i < m_DependencyLibs.size(); i++)
+		for (size_t i = 0; i < m_DependencyLibs.size(); ++i)
 		{
 			FreeLibrary(m_DependencyLibs[i]);
 		}
@@ -139,6 +128,34 @@ namespace Glory
 			const ModuleType typeB = metaB.Type();
 			return typeA < typeB;
 		});
+
+		/* Load extras */
+		for (size_t i = 0; i < m_pAllModules.size(); ++i)
+		{
+			const ModuleMetaData& meta = m_pAllModules[i]->GetMetaData();
+			for (size_t i = 0; i < meta.NumExtras(); ++i)
+			{
+				const ModuleExtra& extra = meta.Extra(i);
+				Module* pRequired = nullptr;
+				if (!extra.m_Requires.empty())
+				{
+					const auto itor = std::find(m_LoadedModuleNames.begin(), m_LoadedModuleNames.end(), extra.m_Requires);
+					if (itor == m_LoadedModuleNames.end())
+					{
+						std::stringstream stream;
+						stream << "Skipping loading of module extra \"" << extra.m_File << "\", the required module \"" << extra.m_Requires << "\" is not loaded";
+						Debug::LogInfo(stream.str());
+						continue;
+					}
+					const size_t index = itor - m_LoadedModuleNames.begin();
+					pRequired = m_pAllModules[index];
+				}
+
+				std::filesystem::path filePath = meta.Path();
+				filePath.append(extra.m_File);
+				LoadExtra(extra.m_File, filePath, m_pAllModules[i], pRequired);
+			}
+		}
 	}
 
 	void EngineLoader::LoadModule(const std::string& moduleName)
@@ -226,7 +243,7 @@ namespace Glory
 		if (!std::filesystem::exists(dllPath))
 		{
 			debugStream.clear();
-			debugStream << "Failed to load module: " << moduleName << ": There was an error while loading the library!";
+			debugStream << "Failed to load module: " << moduleName << ": The module was not found!";
 			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			return;
 		}
@@ -235,7 +252,7 @@ namespace Glory
 		if (lib == NULL)
 		{
 			debugStream.clear();
-			debugStream << "Failed to load module: " << moduleName << ": The module was not found!";
+			debugStream << "Failed to load module: " << moduleName << ": There was an error while loading the library!";
 			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			m_EngineInfo.m_pDebug->LogError(GetLastErrorAsString());
 			return;
@@ -275,64 +292,57 @@ namespace Glory
 			((WindowModule*)pModule)->SetMainWindowCreateInfo(m_DefaultWindow);
 		}
 
-		if (moduleType < ModuleType::MT_Scripting)
+		if (moduleType < ModuleType::MT_Loader)
 		{
 			m_pMainModules.push_back(pModule);
-			return;
-		}
-
-		if (moduleType == ModuleType::MT_Scripting)
-		{
-			m_pScriptingModules.push_back((ScriptingModule*)pModule);
 			return;
 		}
 
 		m_pOptionalModules.push_back(pModule);
 	}
 
-	void EngineLoader::LoadScriptingExtendersForScripting(ScriptingModule* pScriptingModule)
+	void EngineLoader::LoadExtra(const std::string& name, const std::filesystem::path& path, Module* pModule, Module* pRequiredModule)
 	{
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			Module* pModule = m_pAllModules[i];
-			const ModuleMetaData& metaData = pModule->GetMetaData();
-			const ModuleScriptingExtension* const extender = metaData.ScriptExtenderForLanguage(pScriptingModule->ScriptingLanguage());
-			if (extender == nullptr) continue;
-			LoadScriptingExtender(extender, pModule, metaData);
-		}
-	}
+		std::stringstream debugStream;
+		debugStream << "Loading module extra \"" << name << "\"...";
+		Debug::LogInfo(debugStream.str());
 
-	void EngineLoader::LoadScriptingExtender(const ModuleScriptingExtension* const extension, Module* pScriptingModule, const ModuleMetaData& metaData)
-	{
-		std::filesystem::path pathToExtension = metaData.Path();
-		pathToExtension = pathToExtension.parent_path().append("Scripting").append(extension->m_Language).append(extension->m_ExtensionFile).replace_extension(".dll");
-		
-		m_EngineInfo.m_pDebug->LogInfo("Loading scripting extender " + extension->m_ExtensionFile + " for language " + extension->m_Language + "...");
-		HMODULE lib = LoadLibrary(pathToExtension.wstring().c_str());
-		if (lib == NULL)
+		/* Load lib */
+		std::filesystem::path dllPath = path;
+		dllPath.replace_extension(".dll");
+		if (!std::filesystem::exists(dllPath))
 		{
-			m_EngineInfo.m_pDebug->LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": The extension was not found!");
+			debugStream.clear();
+			debugStream << "Failed to load module extra: " << name << ": The module was not found!";
+			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			return;
 		}
-		
-		OnLoadExtensionProc loadProc = (OnLoadExtensionProc)GetProcAddress(lib, "OnLoadExtension");
+
+		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
+		if (lib == NULL)
+		{
+			debugStream.clear();
+			debugStream << "Failed to load module extra: " << name << ": There was an error while loading the library!";
+			m_EngineInfo.m_pDebug->LogError(debugStream.str());
+			m_EngineInfo.m_pDebug->LogError(GetLastErrorAsString());
+			return;
+		}
+
+		OnLoadExtraProc loadProc = (OnLoadExtraProc)GetProcAddress(lib, "OnLoadExtra");
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			m_EngineInfo.m_pDebug->LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": Missing OnLoadExtension function!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load module extra: " + name + ": Missing OnLoadExtra function!");
 			return;
 		}
-		
-		IScriptExtender* pScriptExtender = loadProc();
-		if (pScriptExtender == nullptr)
+
+		if (!(loadProc)(dllPath.parent_path().string().data(), pModule, pRequiredModule))
 		{
 			FreeLibrary(lib);
-			m_EngineInfo.m_pDebug->LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": OnLoadExtension returned nullptr!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load module extra: " + name + ": OnLoadExtra return false!");
 			return;
 		}
-		
-		pScriptingModule->AddScriptingExtender(pScriptExtender);
-		m_pScriptingExtenders.push_back(pScriptExtender);
-		m_ScriptingLibs.push_back(lib);
+
+		m_ExtraLibs.push_back(lib);
 	}
 }

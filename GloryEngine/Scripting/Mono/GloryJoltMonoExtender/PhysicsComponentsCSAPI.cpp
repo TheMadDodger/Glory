@@ -12,6 +12,7 @@
 #include <MathCSAPI.h>
 #include <GloryMonoScipting.h>
 #include <Debug.h>
+#include <Engine.h>
 
 namespace Glory
 {

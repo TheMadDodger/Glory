@@ -6,11 +6,12 @@
 #include <array>
 #include <string>
 #include <Glory.h>
-#include <ScriptExtensions.h>
 #include <filesystem>
 
 namespace Glory
 {
+	class ScriptingLib;
+
 	enum class Visibility
 	{
 		VISIBILITY_PRIVATE = 1,

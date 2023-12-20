@@ -2,6 +2,6 @@ Name: "Jolt Physics"
 Type: Physics
 Editor:
  Extensions: [JoltEditorExtension]
-Scripting:
-- Language: "csharp"
-  Extension: "GloryJoltMonoExtender"
+Extras:
+ - File: Scripting/csharp/GloryJoltMonoExtender
+   Requires: "Mono Scripting"

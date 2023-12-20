@@ -320,7 +320,6 @@ namespace Glory
 		YAML::Node components = YAML::Load(serializedComponents);
 		
 		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
-		const uint32_t scriptedTypeHash = ResourceTypes::GetHash(typeid(ScriptedComponent));
 		
 		size_t currentComponentIndex = 0;
 		for (size_t i = 0; i < components.size(); ++i)
@@ -346,11 +345,8 @@ namespace Glory
 
 			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(typeHash);
 			YAML::Node originalProperties = nextObject["Properties"];
-			if (typeHash != scriptedTypeHash)
-			{
-				m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
-			}
-			else
+			m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
+			/*else
 			{
 				YAML::Node finalProperties = YAML::Node(YAML::NodeType::Map);
 		
@@ -395,7 +391,7 @@ namespace Glory
 
 				
 				m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
-			}
+			}*/
 		
 			m_Registry.GetTypeView(typeHash)->Invoke(Utils::ECS::InvocationType::OnValidate, &m_Registry, entityID, pComponentAddress);
 			++currentComponentIndex;

@@ -9,7 +9,6 @@
 #include "CameraRef.h"
 #include "LayerManager.h"
 #include "LightData.h"
-#include "Script.h"
 #include "AssetReference.h"
 #include "LayerRef.h"
 #include "ShapeProperty.h"
@@ -161,22 +160,6 @@ namespace Glory
 			(float)	(m_Intensity),
 			(float)	(m_Range)
 		)
-	};
-
-	struct ScriptedComponent
-	{
-		ScriptedComponent() : m_Script(0), m_ScriptData() {}
-		ScriptedComponent(Script* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0), m_ScriptData() {}
-
-		// Script data MUST be at offset 0 otherwise undo/redo actions will read the wrong address
-		YAML::Node m_ScriptData;
-
-		REFLECTABLE(ScriptedComponent,
-			(AssetReference<Script>) (m_Script)
-		);
-
-		std::vector<ScriptProperty> m_ScriptProperties;
-		std::vector<ScriptProperty> m_ScriptChildProperties;
 	};
 
 	//settings->mSupportingVolume = Plane(Vec3::sAxisY(), -cCharacterRadiusStanding); // Accept contacts that touch the lower sphere of the capsule

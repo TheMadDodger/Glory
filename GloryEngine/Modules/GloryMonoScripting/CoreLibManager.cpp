@@ -5,6 +5,7 @@
 #include "Assembly.h"
 #include "MonoSceneManager.h"
 
+#include <Engine.h>
 #include <SceneManager.h>
 
 namespace Glory

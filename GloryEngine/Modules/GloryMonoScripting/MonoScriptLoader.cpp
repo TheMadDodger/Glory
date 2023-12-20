@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	MonoScriptLoader::MonoScriptLoader() : ScriptLoaderModule(".cs")
+	MonoScriptLoader::MonoScriptLoader(): ResourceLoaderModule(".cs")
 	{
 	}
 

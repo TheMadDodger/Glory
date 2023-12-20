@@ -39,7 +39,6 @@ project "GloryCore"
 		["Modules/ResourceLoading/Images"] = { "ImageData.*", "ImageLoaderModule.*" },
 		["Modules/ResourceLoading/Textures"] = { "TextureData.*", "TextureDataLoaderModule.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
-		["Modules/Scripting"] = { "Script.*", "ScriptingModule.*", "ScriptLoaderModule.*", "ScriptBinding.*", "ScriptingBinder.*", "IScriptExtender.*" },
 		["Modules/Input"] = { "InputModule.*", "Input.*", "KeyEnums.*", "PlayerInput.*" },
 		["Modules/Physics"] = { "ShapeManager.*", "CharacterManager.*", "PhysicsModule.*", "Shapes.*", "Physics.*", "ShapeProperty.*" },
 		["Analysis"] = { "EngineProfiler.*", "ProfilerModule.*", "ProfilerSample.*", "ProfilerThreadSample.*" },

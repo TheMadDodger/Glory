@@ -28,15 +28,13 @@ namespace Glory
 		void LoadModules(YAML::Node& modules);
 		void LoadModule(const std::string& moduleName);
 		void ReadModule(Module* pModule);
-
-		void LoadScriptingExtendersForScripting(ScriptingModule* pModule);
-		void LoadScriptingExtender(const ModuleScriptingExtension* const extension, Module* pModule, const ModuleMetaData& metaData);
+		void LoadExtra(const std::string& name, const std::filesystem::path& path, Module* pModule, Module* pRequiredModule);
 
 	private:
 		const std::filesystem::path m_CFGPath;
 		std::vector<HMODULE> m_DependencyLibs;
 		std::vector<HMODULE> m_ModuleLibs;
-		std::vector<HMODULE> m_ScriptingLibs;
+		std::vector<HMODULE> m_ExtraLibs;
 		std::vector<Module*> m_pMainModules;
 		std::vector<Module*> m_pAllModules;
 		std::vector<std::string> m_LoadedModuleNames;
@@ -44,7 +42,5 @@ namespace Glory
 		EngineCreateInfo m_EngineInfo;
 		const Glory::WindowCreateInfo m_DefaultWindow;
 		std::vector<Module*> m_pOptionalModules;
-		std::vector<ScriptingModule*> m_pScriptingModules;
-		std::vector<IScriptExtender*> m_pScriptingExtenders;
 	};
 }

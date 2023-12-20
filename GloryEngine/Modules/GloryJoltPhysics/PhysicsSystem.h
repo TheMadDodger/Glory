@@ -1,6 +1,7 @@
 #pragma once
 #include <EntityID.h>
 #include <map>
+#include <functional>
 
 namespace Glory::Utils::ECS
 {
@@ -14,8 +15,8 @@ namespace Glory
 
     class PhysicsSystem
     {
-    public:
-        PhysicsSystem() = delete;
+    private:
+        PhysicsSystem() = default;
 
     public:
         static void OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent);
@@ -32,6 +33,15 @@ namespace Glory
 
         static void AddBody(uint32_t bodyID, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity);
         static void RemoveBody(uint32_t bodyID);
+
+        static GLORY_API PhysicsSystem* Instance();
+
+    public:
+        std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, uint32_t)> OnBodyActivated_Callback;
+        std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, uint32_t)> OnBodyDeactivated_Callback;
+        std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, uint32_t, uint32_t)> OnContactAdded_Callback;
+        std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, uint32_t, uint32_t)> OnContactPersisted_Callback;
+        std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, uint32_t, uint32_t)> OnContactRemoved_Callback;
 
     private:
         static void SetupBody(JoltPhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent);
