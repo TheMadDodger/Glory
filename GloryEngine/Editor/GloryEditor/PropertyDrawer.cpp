@@ -145,7 +145,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)
+	/*bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)
 	{
 		PathGuard p{ scriptProperty.m_Name };
 		uint32_t typeHash = scriptProperty.m_TypeHash;
@@ -164,7 +164,7 @@ namespace Glory::Editor
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), scriptProperty.m_Name);
 		return false;
-	}
+	}*/
 
 	bool PropertyDrawer::DrawProperty(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags)
 	{
@@ -199,6 +199,16 @@ namespace Glory::Editor
 
 		if (it == m_PropertyDrawers.end()) return nullptr;
 		return *it;
+	}
+
+	void PropertyDrawer::SetCurrentPropertyPath(std::string_view path)
+	{
+		m_CurrentPropertyPath = path;
+	}
+
+	void PropertyDrawer::SetCurrentPropertyPath(std::filesystem::path& path)
+	{
+		m_CurrentPropertyPath = path;
 	}
 
 	const std::filesystem::path& PropertyDrawer::GetCurrentPropertyPath()

@@ -66,6 +66,11 @@ namespace Glory
 		m_pEngine->GetLoaderModule<FileData>()->Save(path, pResource);
 	}
 
+	const std::type_info& MonoScriptLoader::GetModuleType()
+	{
+		return typeid(MonoScriptLoader);
+	}
+
 	std::string MonoScriptLoader::Find(const std::string& source, const std::string& toFind)
 	{
 		size_t startIndex = source.find(toFind);

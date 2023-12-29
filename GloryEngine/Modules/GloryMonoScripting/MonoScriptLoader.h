@@ -31,6 +31,7 @@ namespace Glory
         virtual MonoScript* LoadResource(const void* buffer, size_t length, const ScriptImportSettings& importSettings) override;
         virtual void SaveResource(const std::string& path, MonoScript* pResource) override;
 
+        virtual const std::type_info& GetModuleType() override;
 
         std::string Find(const std::string& source, const std::string& toFind);
 	};

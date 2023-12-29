@@ -85,7 +85,7 @@ namespace Glory
 		Utils::NodeValueRef editorNode = rootNode["Editor"];
 		if (editorNode.Exists())
 		{
-			m_EditorBackend = editorNode["Backend"].As<std::string>();
+			m_EditorBackend = editorNode["Backend"].Exists() ? editorNode["Backend"].As<std::string>() : "";
 			Utils::NodeValueRef extensionsNode = editorNode["Extensions"];
 			for (size_t i = 0; i < extensionsNode.Size(); ++i) \
 			{

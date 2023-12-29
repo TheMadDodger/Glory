@@ -175,6 +175,11 @@ namespace Glory::Editor
 
 	void ProjectSpace::Open()
 	{
+		std::filesystem::path path = RootPath();
+		path.append("Assets");
+		Game::GetGame().SetAssetPath(path);
+		Game::GetGame().SetSettingsPath(SettingsPath());
+
 		std::unique_lock<std::mutex> lock(m_ProjectLock);
 		CreateFolder("Assets");
 		CreateFolder("Cache");

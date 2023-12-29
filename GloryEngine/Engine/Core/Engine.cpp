@@ -78,6 +78,16 @@ namespace Glory
 		pModule->m_IsInitialized = true;
 	}
 
+	void Engine::AddLoaderModule(LoaderModule* pModule, bool initialize)
+	{
+		m_pLoaderModules.push_back(pModule);
+		m_pAllModules.push_back(pModule);
+		if (!initialize) return;
+		pModule->Initialize();
+		pModule->PostInitialize();
+		pModule->m_IsInitialized = true;
+	}
+
 	Module* Engine::GetMainModule(const std::type_info& type) const
 	{
 		auto it = std::find_if(m_pMainModules.begin(), m_pMainModules.end(), [&](Module* pModule)

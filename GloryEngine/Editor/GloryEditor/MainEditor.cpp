@@ -64,7 +64,6 @@
 #include <EntitySceneObjectEditor.h>
 #include <DefaultComponentEditor.h>
 #include <TransformEditor.h>
-#include <ScriptedComponentEditor.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -423,7 +422,6 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(Model, ModelRenderer);
 		OBJECT_CREATE_MENU(Camera, CameraComponent);
 		OBJECT_CREATE_MENU(Light, LightComponent);
-		OBJECT_CREATE_MENU(Scripted, ScriptedComponent);
 
 		ObjectMenu::AddMenuItem("Convert to Prefab", &EntitySceneObjectEditor::ConvertToPrefabMenuItem, T_SceneObject);
 		ObjectMenu::AddMenuItem("Unpack Prefab", &EntitySceneObjectEditor::UnpackPrefabMenuItem, T_SceneObject);
@@ -489,6 +487,5 @@ namespace Glory::Editor
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
-		Editor::RegisterEditor<ScriptedComponentEditor>();
 	}
 }

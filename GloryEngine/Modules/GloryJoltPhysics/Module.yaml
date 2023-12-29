@@ -4,4 +4,4 @@ Editor:
  Extensions: [JoltEditorExtension]
 Extras:
  - File: Scripting/csharp/GloryJoltMonoExtender
-   Requires: "Mono Scripting"
+   Requires: "GloryMonoScripting"

@@ -76,7 +76,7 @@ namespace Glory::Editor
 			if (!EditorAssetDatabase::GetAssetLocation(shaderUUID, location)) continue;
 
 			const std::string_view assetPath = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath();
-			std::string path = std::string{ assetPath } + '\\' + location.Path;
+			const std::string path = std::string{ assetPath } + '\\' + location.Path;
 			ShaderSourceData* pShaderSourceData = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<ShaderSourceData>(shaderUUID);
 			if (!pShaderSourceData) continue;
 

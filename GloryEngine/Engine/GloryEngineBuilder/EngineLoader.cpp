@@ -151,7 +151,7 @@ namespace Glory
 					pRequired = m_pAllModules[index];
 				}
 
-				std::filesystem::path filePath = meta.Path();
+				std::filesystem::path filePath = meta.Path().parent_path();
 				filePath.append(extra.m_File);
 				LoadExtra(extra.m_File, filePath, m_pAllModules[i], pRequired);
 			}

@@ -54,6 +54,7 @@ namespace Glory::Editor
 	{
 		m_pEngine->Initialize();
 
+		m_pShaderProcessor = new EditorShaderProcessor();
 		EditorAssetDatabase::Initialize();
 
 		InitializePlatform();
@@ -269,23 +270,6 @@ namespace Glory::Editor
 		InitializeExtensions();
 
 		m_pEngine->GetDebug().LogInfo("Initialized editor platform");
-	}
-
-	std::string EditorApplication::AssetPathOverrider()
-	{
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		if (pProject == nullptr) return std::string("./Assets");
-		std::filesystem::path path = pProject->RootPath();
-		path.append("Assets");
-		return path.string();
-	}
-
-	std::string EditorApplication::SettingsPathOverrider()
-	{
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		if (pProject == nullptr) return std::string("./");
-		std::filesystem::path path = pProject->SettingsPath();
-		return path.string();
 	}
 
 	void EditorApplication::VersionCheck(const Glory::Version& latestVersion)

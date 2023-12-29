@@ -31,9 +31,8 @@ namespace Glory::Editor
         }
 
         /* Perform 0.3.0 migrations */
-        if (Version::Compare(version, { 0,1,1,0 }, true) < 0)
+        if (Version::Compare(version, { 0,3,0,0 }, true) < 0)
         {
-            
         }
 
         /* Update version to current */
