@@ -2,8 +2,6 @@
 #include "UUID.h"
 #include "Resource.h"
 #include "AssetGroup.h"
-#include "Game.h"
-#include "AssetDatabase.h"
 #include "ThreadedVar.h"
 #include "JobManager.h"
 
@@ -12,6 +10,8 @@
 
 namespace Glory
 {
+	class Engine;
+
 	struct CallbackData
 	{
 		CallbackData();
@@ -24,11 +24,13 @@ namespace Glory
 	class AssetManager
 	{
 	public:
-		static void GetAsset(UUID uuid, std::function<void(Resource*)> callback);
-		static Resource* GetOrLoadAsset(UUID uuid);
+		virtual ~AssetManager();
+
+		void GetAsset(UUID uuid, std::function<void(Resource*)> callback);
+		Resource* GetOrLoadAsset(UUID uuid);
 
 		template<class T>
-		static T* GetOrLoadAsset(UUID uuid)
+		T* GetOrLoadAsset(UUID uuid)
 		{
 			Resource* pResource = GetOrLoadAsset(uuid);
 			if (!pResource) return nullptr;
@@ -36,50 +38,50 @@ namespace Glory
 		}
 
 		template<class T>
-		static T* GetAssetImmediate(UUID uuid)
+		T* GetAssetImmediate(UUID uuid)
 		{
 			Resource* pResource = GetAssetImmediate(uuid);
 			if (!pResource) return nullptr;
 			return (T*)pResource;
 		}
 
-		static Resource* GetAssetImmediate(UUID uuid);
+		Resource* GetAssetImmediate(UUID uuid);
 
-		static void ReloadAsset(UUID uuid);
-		static void UnloadAsset(UUID uuid);
-		static Resource* FindResource(UUID uuid);
-		static void AddLoadedResource(Resource* pResource, UUID uuid);
-		static void AddLoadedResource(Resource* pResource);
+		void ReloadAsset(UUID uuid);
+		void UnloadAsset(UUID uuid);
+		Resource* FindResource(UUID uuid);
+		void AddLoadedResource(Resource* pResource, UUID uuid);
+		void AddLoadedResource(Resource* pResource);
 
-		static bool IsLoading(UUID uuid);
-		static void GetAllLoading(std::vector<UUID>& out);
-
-	private:
-		static bool LoadResourceJob(UUID uuid);
-		static Resource* LoadAsset(UUID uuid);
+		bool IsLoading(UUID uuid);
+		void GetAllLoading(std::vector<UUID>& out);
 
 	private:
-		AssetManager();
-		virtual ~AssetManager();
+		bool LoadResourceJob(UUID uuid);
+		Resource* LoadAsset(UUID uuid);
 
-		static void Initialize();
-		static void Destroy();
-		static void RunCallbacks();
+	private:
+		AssetManager(Engine* pEngine);
+
+		void Initialize();
+		void Destroy();
+		void RunCallbacks();
 
 	private:
 		friend class Engine;
 		friend class AssetDatabase;
-		friend class GloryContext;
 
 		struct LoadingLock
 		{
-			LoadingLock(UUID uuid);
+			LoadingLock(AssetManager* pManager, UUID uuid);
 			~LoadingLock();
 
+			AssetManager* m_pManager;
 			bool IsValid;
 			UUID m_UUID;
 		};
 
+		Engine* m_pEngine;
 		ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
 		ThreadedVector<UUID> m_pLoadingAssets;
 		ThreadedUMap<std::string, size_t> m_PathToGroupIndex;

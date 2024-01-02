@@ -18,7 +18,7 @@ namespace Glory::Editor
 	{
 		if (m_Shortcuts.find(action) != m_Shortcuts.end())
 		{
-			Debug::LogWarning(std::string("Shortcut action ") + action + " already exists.");
+			m_pEngine->GetDebug().LogWarning(std::string("Shortcut action ") + action + " already exists.");
 			return nullptr;
 		}
 

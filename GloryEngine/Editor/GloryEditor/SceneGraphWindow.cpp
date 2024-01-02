@@ -145,7 +145,7 @@ namespace Glory::Editor
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (pScene->GetUUID() != payload.SceneID)
 			{
-				Debug::LogWarning("Moving an entity to another scene is currently not supported");
+				m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 				return;
 			}
 
@@ -223,7 +223,7 @@ namespace Glory::Editor
 				const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 				if (payload.SceneID != pScene->GetUUID())
 				{
-					Debug::LogWarning("Moving an entity to another scene is currently not supported");
+					m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 					return;
 				}
 
@@ -279,7 +279,7 @@ namespace Glory::Editor
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (payload.SceneID != pScene->GetUUID())
 			{
-				Debug::LogWarning("Moving an entity to another scene is currently not supported");
+				m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 				return;
 			}
 			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
@@ -351,7 +351,7 @@ namespace Glory::Editor
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (payload.SceneID != pScene->GetUUID())
 			{
-				Debug::LogWarning("Moving an entity to another scene is currently not supported");
+				m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 				return;
 			}
 			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);

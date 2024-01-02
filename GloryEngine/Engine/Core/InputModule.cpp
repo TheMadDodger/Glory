@@ -1,4 +1,5 @@
 #include "InputModule.h"
+#include "Engine.h"
 #include "Debug.h"
 
 namespace Glory
@@ -78,14 +79,14 @@ namespace Glory
 	{
 		if (m_InputModes.find(inputMode) == m_InputModes.end())
 		{
-			Debug::LogError("SetPlayerInputMode: InputMode " + inputMode + " does not exist!");
+			m_pEngine->GetDebug().LogError("SetPlayerInputMode: InputMode " + inputMode + " does not exist!");
 			return;
 		}
 
 		PlayerInput* player = GetPlayer(playerIndex);
 		if (!player)
 		{
-			Debug::LogError("SetPlayerInputMode: Player " + std::to_string(playerIndex) + " does not exist!");
+			m_pEngine->GetDebug().LogError("SetPlayerInputMode: Player " + std::to_string(playerIndex) + " does not exist!");
 			return;
 		}
 

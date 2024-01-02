@@ -6,7 +6,7 @@ namespace Glory
     class AssetReferencePropertySerializer : public PropertySerializer
     {
     public:
-        AssetReferencePropertySerializer();
+        AssetReferencePropertySerializer(Serializers* pSerializers);
         virtual ~AssetReferencePropertySerializer();
 
     private:

@@ -61,7 +61,7 @@ namespace Glory::Editor
         {
             std::stringstream str;
             str << "ASSIMP: Could not import file: " << path << " Error: " << importer.GetErrorString();
-            Debug::LogError(str.str());
+            m_pEngine->GetDebug().LogError(str.str());
             return nullptr;
         }
 
@@ -100,7 +100,7 @@ namespace Glory::Editor
 
         if (mesh->mNormals == nullptr)
         {
-            Debug::LogError("Mesh has no normals");
+            m_pEngine->GetDebug().LogError("Mesh has no normals");
             return nullptr;
         }
 

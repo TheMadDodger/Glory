@@ -55,7 +55,7 @@ namespace Glory
 		{
 			glGetProgramInfoLog(m_ProgramID, 512, NULL, infoLog);
 			OpenGLGraphicsModule::LogGLError(glGetError());
-			Debug::LogError(infoLog);
+			m_pEngine->GetDebug().LogError(infoLog);
 		}
 	}
 
@@ -132,7 +132,7 @@ namespace Glory
 	//	OpenGLGraphicsModule::LogGLError(glGetError());
 	//	if (uniformBlockIndex == GL_INVALID_INDEX)
 	//	{
-	//		Debug::LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
+	//		m_pEngine->GetDebug().LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
 	//		return 0;
 	//	}
 	//

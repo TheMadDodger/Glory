@@ -4,7 +4,8 @@
 
 namespace Glory
 {
-	StructPropertySerializer::StructPropertySerializer() : PropertySerializer(SerializedType::ST_Struct)
+	StructPropertySerializer::StructPropertySerializer(Serializers* pSerializers):
+		PropertySerializer(pSerializers, SerializedType::ST_Struct)
 	{
 	}
 
@@ -28,7 +29,7 @@ namespace Glory
 			const FieldData* pSubFieldData = pStructTypeData->GetFieldData(i);
 			size_t offset = pSubFieldData->Offset();
 			void* pAddress = (void*)((char*)(data)+offset);
-			PropertySerializer::SerializeProperty(pSubFieldData, pAddress, out);
+			m_pSerializers->SerializeProperty(pSubFieldData, pAddress, out);
 		}
 		out << YAML::EndMap;
 	}
@@ -43,7 +44,7 @@ namespace Glory
 			void* pAddress = (void*)((char*)(data)+offset);
 
 			YAML::Node structFieldObject = object[pSubFieldData->Name()];
-			PropertySerializer::DeserializeProperty(pSubFieldData, pAddress, structFieldObject);
+			m_pSerializers->DeserializeProperty(pSubFieldData, pAddress, structFieldObject);
 		}
 	}
 }

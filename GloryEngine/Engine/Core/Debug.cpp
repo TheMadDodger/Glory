@@ -1,9 +1,6 @@
 #include "Debug.h"
 #include "Console.h"
-#include "Game.h"
-#include "Engine.h"
 #include "GameTime.h"
-#include "GloryContext.h"
 #include "WindowModule.h"
 #include "RendererModule.h"
 
@@ -52,56 +49,51 @@ namespace Glory
 
 	void Debug::LogInfo(const std::string& message, bool bIncludeTimeStamp)
 	{
-		if (!DEBUG) return;
-		std::unique_lock lock{DEBUG->m_Lock};
-		Console::SetNextColor({1.f, 1.f, 1.f, 1.0f});
+		std::unique_lock lock{m_Lock};
+		m_pConsole->SetNextColor({1.f, 1.f, 1.f, 1.0f});
 		std::string finalMessage = "Info:	" + message;
-		Console::WriteLine(finalMessage, bIncludeTimeStamp);
+		m_pConsole->WriteLine(finalMessage, bIncludeTimeStamp);
 	}
 
 	void Debug::LogNotice(const std::string& message, bool bIncludeTimeStamp)
 	{
-		if (!DEBUG) return;
-		std::unique_lock lock{DEBUG->m_Lock};
-		Console::SetNextColor({ 0.5f, 0.5f, 0.5f, 1.0f });
+		std::unique_lock lock{m_Lock};
+		m_pConsole->SetNextColor({ 0.5f, 0.5f, 0.5f, 1.0f });
 		std::string finalMessage = "Notice:	" + message;
-		Console::WriteLine(finalMessage, bIncludeTimeStamp);
+		m_pConsole->WriteLine(finalMessage, bIncludeTimeStamp);
 	}
 
 	void Debug::LogWarning(const std::string& message, bool bIncludeTimeStamp)
 	{
-		if (!DEBUG) return;
-		std::unique_lock lock{DEBUG->m_Lock};
-		Console::SetNextColor({ 1.f, 0.918f, 0.0f, 1.0f });
+		std::unique_lock lock{m_Lock};
+		m_pConsole->SetNextColor({ 1.f, 0.918f, 0.0f, 1.0f });
 		std::string finalMessage = "WARNING:	" + message;
-		Console::WriteLine(finalMessage, bIncludeTimeStamp);
+		m_pConsole->WriteLine(finalMessage, bIncludeTimeStamp);
 	}
 
 	void Debug::LogError(const std::string& message, bool bIncludeTimeStamp)
 	{
-		if (!DEBUG) return;
-		std::unique_lock lock{DEBUG->m_Lock};
-		Console::SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
+		std::unique_lock lock{m_Lock};
+		m_pConsole->SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
 		std::string finalMessage = "ERROR:	" + message;
-		Console::WriteLine(finalMessage, bIncludeTimeStamp);
+		m_pConsole->WriteLine(finalMessage, bIncludeTimeStamp);
 	}
 
 	void Debug::LogFatalError(const std::string& message, bool bIncludeTimeStamp)
 	{
-		if (!DEBUG) return;
-		std::unique_lock lock{DEBUG->m_Lock};
-		Console::SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
+		std::unique_lock lock{m_Lock};
+		m_pConsole->SetNextColor({ 1.f, 0.0f, 0.0f, 1.0f });
 		std::string finalMessage = "FATAL ERROR:	" + message;
-		Console::WriteLine(finalMessage, bIncludeTimeStamp);
+		m_pConsole->WriteLine(finalMessage, bIncludeTimeStamp);
 
 		// Open message box
-		Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->OpenMessageBox("FATAL ERROR: " + message);
-		Game::GetGame().Quit();
+		//m_pEngine->GetMainModule<WindowModule>()->OpenMessageBox("FATAL ERROR: " + message);
+		exit(-1);
+		//Game::GetGame().Quit();
 	}
 
 	void Debug::LogOnce(const std::string& key, const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp)
 	{
-		if (!DEBUG) return;
 		if (m_LoggedKeys.Contains(key)) return;
 		m_LoggedKeys.push_back(key);
 		Log(message, logLevel, bIncludeTimeStamp);
@@ -111,7 +103,7 @@ namespace Glory
 
 	void Debug::DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, float time)
 	{
-		DEBUG->m_DebugLines.push_back({ start , end, color, time });
+		m_DebugLines.push_back({ start , end, color, time });
 	}
 
 	void Debug::DrawLineQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color, float time)
@@ -147,16 +139,16 @@ namespace Glory
 	}
 
 
-	void Debug::SubmitLines(RendererModule* pRenderer)
+	void Debug::SubmitLines(RendererModule* pRenderer, GameTime* pTime)
 	{
-		for (size_t i = DEBUG->m_DebugLines.size(); i > 0; --i)
+		for (size_t i = m_DebugLines.size(); i > 0; --i)
 		{
 			const size_t index = i - 1;
-			DebugLine& line = DEBUG->m_DebugLines[index];
-			line.Time -= Time::GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
+			DebugLine& line = m_DebugLines[index];
+			line.Time -= pTime->GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
 			if (line.Time <= 0.f)
 			{
-				DEBUG->m_DebugLines.erase(DEBUG->m_DebugLines.begin() + index);
+				m_DebugLines.erase(m_DebugLines.begin() + index);
 				continue;
 			}
 

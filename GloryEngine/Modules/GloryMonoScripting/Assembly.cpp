@@ -102,13 +102,13 @@ namespace Glory
 		MonoClass* pClass = mono_class_from_name(m_pImage, pNamespace->m_Name.c_str(), className.c_str());
 		if (pClass == nullptr)
 		{
-			Debug::LogError("Failed to load mono class");
+			m_pEngine->GetDebug().LogError("Failed to load mono class");
 			return nullptr;
 		}
 
 		if (mono_class_init(pClass) == false)
 		{
-			Debug::LogError("Assembly::LoadClass > Failed to initialize a MonoClass!");
+			m_pEngine->GetDebug().LogError("Assembly::LoadClass > Failed to initialize a MonoClass!");
 			return nullptr;
 		}
 
@@ -271,7 +271,7 @@ namespace Glory
 		path.append(name);
         if (!std::filesystem::exists(path))
         {
-            Debug::LogError("Failed to open assembly, file \"" + path.string() + "\" not found!");
+            m_pEngine->GetDebug().LogError("Failed to open assembly, file \"" + path.string() + "\" not found!");
             return true;
         }
 
@@ -390,7 +390,7 @@ namespace Glory
         {
 			std::stringstream log;
 			log << "Mono assembly image is invalid at " << assemblyPath;
-			Debug::LogError(log.str());
+			m_pEngine->GetDebug().LogError(log.str());
             return false;
         }
 
@@ -401,7 +401,7 @@ namespace Glory
         {
 			std::stringstream log;
 			log << "Mono assembly image is corrupted at " << assemblyPath;
-			Debug::LogError(log.str());
+			m_pEngine->GetDebug().LogError(log.str());
             return false;
         }
 
@@ -432,7 +432,7 @@ namespace Glory
 			{
 				std::stringstream log;
 				log << "No pdb file found for " << assemblyPath << " debugging this assembly will not be possible.";
-				Debug::LogError(log.str());
+				m_pEngine->GetDebug().LogError(log.str());
 			}
 		}
 

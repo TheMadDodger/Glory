@@ -1,4 +1,3 @@
-#include <GloryContext.h>
 #include "SDLInputModule.h"
 #include "GlorySDLInput.h"
 

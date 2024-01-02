@@ -52,7 +52,7 @@ namespace Glory::Editor
 			const char* error = SDL_GetError();
 			std::stringstream str;
 			str << "SDL Could not load image " << path << " SDL Error: " << error;
-			Debug::LogWarning(str.str());
+			m_pEngine->GetDebug().LogWarning(str.str());
 			return nullptr;
 		}
 
@@ -92,7 +92,7 @@ namespace Glory::Editor
 			}
 			break;
 		default:
-			Debug::LogError("SDLImageImporter::LoadResource > unknow pixel format, BytesPerPixel: " + std::to_string(pSDLImage->format->BytesPerPixel) + " Use 32 bit or 24 bit images.\n");
+			m_pEngine->GetDebug().LogError("SDLImageImporter::LoadResource > unknow pixel format, BytesPerPixel: " + std::to_string(pSDLImage->format->BytesPerPixel) + " Use 32 bit or 24 bit images.\n");
 			SDL_FreeSurface(pSDLImage);
 			return nullptr;
 		}
@@ -115,7 +115,7 @@ namespace Glory::Editor
 		if (m_InitializedFlags == 0)
 		{
 			const char* error = SDL_GetError();
-			Debug::LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
+			m_pEngine->GetDebug().LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
 		}
 	}
 

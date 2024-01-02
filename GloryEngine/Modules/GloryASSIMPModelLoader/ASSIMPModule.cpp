@@ -1,7 +1,9 @@
 #include "ASSIMPModule.h"
+#include "VertexDefinitions.h"
+
 #include <assimp/postprocess.h>
 #include <Debug.h>
-#include "VertexDefinitions.h"
+#include <Engine.h>
 #include <sstream>
 
 namespace Glory
@@ -38,7 +40,7 @@ namespace Glory
 
 		if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
 		{
-			Debug::LogError("ASSIMP: Could not import file: " + path + " Error: " + importer.GetErrorString());
+			m_pEngine->GetDebug().LogError("ASSIMP: Could not import file: " + path + " Error: " + importer.GetErrorString());
 			return nullptr;
 		}
         //directory = file.substr(0, file.find_last_of('/'));
@@ -62,7 +64,7 @@ namespace Glory
 
         if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
         {
-            Debug::LogError("ASSIMP: Could not import file from memeory Error: " + std::string(importer.GetErrorString()));
+            m_pEngine->GetDebug().LogError("ASSIMP: Could not import file from memeory Error: " + std::string(importer.GetErrorString()));
             return nullptr;
         }
         //directory = file.substr(0, file.find_last_of('/'));
@@ -102,7 +104,7 @@ namespace Glory
 
         if (mesh->mNormals == nullptr)
         {
-            Debug::LogError("Mesh has no normals");
+            m_pEngine->GetDebug().LogError("Mesh has no normals");
             return nullptr;
         }
 

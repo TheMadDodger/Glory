@@ -3,60 +3,68 @@
 #include "AssetLocation.h"
 #include "ResourceMeta.h"
 #include "AssetCallbacks.h"
-#include "GScene.h"
-#include <map>
 
-#define ASSET_DATABASE Glory::GloryContext::GetAssetDatabase()
-#define ASSET_MANAGER Glory::GloryContext::GetAssetManager()
+#include <map>
 
 namespace Glory
 {
 	class AssetDatabase
 	{
 	public:
-		static bool GetAssetLocation(UUID uuid, AssetLocation& location);
-		static bool GetResourceMeta(UUID uuid, ResourceMeta& meta);
-		static UUID GetAssetUUID(const std::string& path);
-		static bool AssetExists(UUID uuid);
-		static bool AssetExists(const std::string& path);
-		static void EnqueueCallback(const CallbackType& type, UUID uuid, Resource* pResource);
+		virtual ~AssetDatabase();
 
-		static void GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& out);
-		static void GetAllAssetsOfType(uint32_t typeHash, std::vector<std::string>& out);
+		bool GetAssetLocation(UUID uuid, AssetLocation& location);
+		bool GetResourceMeta(UUID uuid, ResourceMeta& meta);
+		UUID GetAssetUUID(const std::string& path);
+		bool AssetExists(UUID uuid);
+		bool AssetExists(const std::string& path);
+		void EnqueueCallback(const CallbackType& type, UUID uuid, Resource* pResource);
 
-		static std::string GetAssetName(UUID uuid);
+		void GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& out);
+		void GetAllAssetsOfType(uint32_t typeHash, std::vector<std::string>& out);
 
-		static void Load();
+		std::string GetAssetName(UUID uuid);
 
-		static void Clear();
+		void Load();
 
-		static void SetIDAndName(Resource* pResource, UUID newID, const std::string& name);
+		void Clear();
 
-		static void SetAsset(AssetLocation& assetLocation, const ResourceMeta& meta);
+		void SetIDAndName(Resource* pResource, UUID newID, const std::string& name);
 
-		static void Remove(UUID uuid);
+		void SetAsset(AssetLocation& assetLocation, const ResourceMeta& meta);
+
+		void Remove(UUID uuid);
+
+		/** @brief Set the root path where assets are located */
+		void SetAssetPath(const std::filesystem::path& path);
+		/** @brief Set the root path where engine and module settings are located */
+		void SetSettingsPath(const std::filesystem::path& path);
+
+		/** @brief Get the root path where assets are located */
+		const std::string_view GetAssetPath() const { return m_AssetPath; }
+		/** @brief Get the root path where engine and module settings are located */
+		const std::string_view GetSettingsPath() const { return m_SettingsPath; };
 
 		struct WriteLock
 		{
 		public:
-			WriteLock();
+			WriteLock(AssetDatabase* pDatabase);
 			~WriteLock();
 
 		private:
 			static size_t m_LockCounter;
+			AssetDatabase* m_pDatabase;
 		};
 
 	private:
-		static void Initialize();
-		static void Destroy();
-
+		void Initialize();
+		void Destroy();
 
 	private:
+		friend class Engine;
 		friend class AssetManager;
-		friend class GloryContext;
 		friend class AssetCallbacks;
 		AssetDatabase();
-		virtual ~AssetDatabase();
 
 	private:
 		bool m_Initialized;
@@ -66,15 +74,18 @@ namespace Glory
 		std::map<UUID, ResourceMeta> m_Metas;
 		std::map<uint32_t, std::vector<UUID>> m_AssetsByType;
 		AssetCallbacks m_Callbacks;
+		std::string m_AssetPath;
+		std::string m_SettingsPath;
 
 		struct ReadLock
 		{
 		public:
-			ReadLock();
+			ReadLock(AssetDatabase* pDatabase);
 			~ReadLock();
 
 		private:
 			static size_t m_LockCounter;
+			AssetDatabase* m_pDatabase;
 		};
 	};
 }

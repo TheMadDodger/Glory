@@ -21,6 +21,7 @@ namespace Glory
 	{
 	public:
 		static void AddInternalCalls(std::vector<InternalCall>& internalCalls);
+		static void SetEngine(Engine* pEngine);
 
 	private:
 		CoreCSAPI();

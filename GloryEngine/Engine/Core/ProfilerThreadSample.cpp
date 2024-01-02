@@ -46,7 +46,7 @@ namespace Glory
 	{
 		if (m_Samples.size() <= 0 || m_Samples[m_Samples.size() - 1].m_Complete)
 		{
-			Debug::LogError("Profiler: You are popping more samples than you are pushing! Make sure to start a sample with BeginSample.");
+			//m_pEngine->GetDebug().LogError("Profiler: You are popping more samples than you are pushing! Make sure to start a sample with BeginSample.");
 			return;
 		}
 

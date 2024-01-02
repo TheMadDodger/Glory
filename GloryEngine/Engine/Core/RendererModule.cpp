@@ -3,13 +3,13 @@
 #include "CameraManager.h"
 #include "DisplayManager.h"
 #include "EngineProfiler.h"
-#include "GloryContext.h"
 #include "Buffer.h"
 #include "FileLoaderModule.h"
 #include "WindowModule.h"
 #include "SceneManager.h"
 #include "GraphicsModule.h"
 #include "GraphicsThread.h"
+#include "Engine.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -47,7 +47,7 @@ namespace Glory
 	void RendererModule::Submit(CameraRef camera)
 	{
 		Profiler::BeginSample("RendererModule::Submit(camera)");
-		auto it = std::find_if(m_CurrentPreparingFrame.ActiveCameras.begin(), m_CurrentPreparingFrame.ActiveCameras.end(), [camera](const CameraRef& other)
+		auto it = std::find_if(m_CurrentPreparingFrame.ActiveCameras.begin(), m_CurrentPreparingFrame.ActiveCameras.end(), [camera, this](const CameraRef& other)
 		{
 			return camera.GetPriority() < other.GetPriority();
 		});
@@ -257,13 +257,13 @@ namespace Glory
 		ReadHoveringObject();
 
 		Profiler::BeginSample("RendererModule::Render");
-		DisplayManager::ClearAllDisplays(m_pEngine);
+		m_pEngine->GetDisplayManager().ClearAllDisplays(m_pEngine);
 
 		for (size_t i = 0; i < frame.ActiveCameras.size(); i++)
 		{
 			CameraRef camera = frame.ActiveCameras[i];
 
-			RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(camera, m_pEngine);
+			RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 			pRenderTexture->Bind();
 			m_pEngine->GetMainModule<GraphicsModule>()->Clear(camera.GetClearColor());
 
@@ -289,7 +289,7 @@ namespace Glory
 				const glm::uvec2& resolution = camera.GetResolution();
 				if (pOutputTexture == nullptr)
 				{
-					pOutputTexture = DisplayManager::CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+					pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
 					camera.SetOutputTexture(pOutputTexture);
 				}
 				uint32_t width, height;
@@ -305,7 +305,7 @@ namespace Glory
 
 			int displayIndex = camera.GetDisplayIndex();
 			if (displayIndex == -1) continue;
-			RenderTexture* pDisplayRenderTexture = DisplayManager::GetDisplayRenderTexture(displayIndex);
+			RenderTexture* pDisplayRenderTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(displayIndex);
 			if (pDisplayRenderTexture == nullptr) continue;
 
 			Window* pWindow = m_pEngine->GetMainModule<WindowModule>()->GetMainWindow();
@@ -328,7 +328,7 @@ namespace Glory
 	void RendererModule::ReadHoveringObject()
 	{
 		Profiler::BeginSample("RendererModule::Pick");
-		RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(m_PickCamera, m_pEngine, false);
+		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(m_PickCamera, m_pEngine, false);
 		if (pRenderTexture == nullptr) return;
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;
@@ -370,7 +370,7 @@ namespace Glory
 		object.Projection = camera.GetProjection();
 		object.ObjectID = 0;
 
-		pMaterial->SetProperties();
+		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
 
 		pGraphics->DrawMesh(m_pLineMesh, 0, m_LineVertexCount);
@@ -400,12 +400,12 @@ namespace Glory
 
 	void RendererModule::Draw()
 	{
-		Debug::SubmitLines(this);
+		m_pEngine->GetDebug().SubmitLines(this, &m_pEngine->Time());
 	}
 
 	void RendererModule::ThreadedInitialize()
 	{
-		DisplayManager::Initialize(m_pEngine);
+		m_pEngine->GetDisplayManager().Initialize(m_pEngine);
 		CreateLineBuffer();
 		OnThreadedInitialize();
 	}

@@ -90,7 +90,7 @@ namespace Glory::Editor
 				{
 					std::stringstream str;
 					str << "AssetCoompiler: Failed to get parent of " << id;
-					Debug::LogWarning(str.str());
+					m_pEngine->GetDebug().LogWarning(str.str());
 					break;
 				}
 				id = parentID;
@@ -132,7 +132,7 @@ namespace Glory::Editor
 			{
 				std::stringstream str;
 				str << "AssetCompiler: Failed to compile asset " << uuid << " there was an error when importing the asset.";
-				Debug::LogError(str.str());
+				m_pEngine->GetDebug().LogError(str.str());
 				m_CompilingAssets.Erase(uuid);
 				return false;
 			}
@@ -151,7 +151,7 @@ namespace Glory::Editor
 
 		std::stringstream str;
 		str << "AssetCompiler: Compiled asset " << uuid;
-		Debug::LogInfo(str.str());
+		m_pEngine->GetDebug().LogInfo(str.str());
 
 		/* We're done here */
 		m_CompilingAssets.Erase(uuid);

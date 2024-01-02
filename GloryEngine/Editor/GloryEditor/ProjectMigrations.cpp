@@ -41,7 +41,7 @@ namespace Glory::Editor
 
     void Migrate_0_1_1_DefaultTextureAndMaterialProperties(ProjectSpace* pProject)
     {
-        Debug::LogInfo("0.1.1> Migrating image datas to include default texture");
+        m_pEngine->GetDebug().LogInfo("0.1.1> Migrating image datas to include default texture");
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
@@ -99,10 +99,10 @@ namespace Glory::Editor
 
             std::stringstream debug;
             debug << "0.1.1> Migrated image data " << assetID << " to include default texture";
-            Debug::LogInfo(debug.str());
+            m_pEngine->GetDebug().LogInfo(debug.str());
         }
 
-        Debug::LogInfo("0.1.1> Migrating material propeties");
+        m_pEngine->GetDebug().LogInfo("0.1.1> Migrating material propeties");
         for (size_t i = 0; i < materialAssets.size(); ++i)
         {
             const std::string_view materialAssetID = materialAssets[i];
@@ -134,12 +134,12 @@ namespace Glory::Editor
 
                 std::stringstream debug;
                 debug << "0.1.1> Migrated material " << materialAssetID << " propery " << property["DisplayName"].As<std::string>() << " to default texture " << newUUID;
-                Debug::LogInfo(debug.str());
+                m_pEngine->GetDebug().LogInfo(debug.str());
             }
             materialFile.Save();
         }
 
-        Debug::LogInfo("0.1.1> Migrating material instance property overrides");
+        m_pEngine->GetDebug().LogInfo("0.1.1> Migrating material instance property overrides");
         for (size_t i = 0; i < materialInstanceAssets.size(); ++i)
         {
             const std::string_view materialAssetID = materialInstanceAssets[i];
@@ -168,7 +168,7 @@ namespace Glory::Editor
 
                 std::stringstream debug;
                 debug << "0.1.1> Migrated material instance " << materialAssetID << " propery " << override["DisplayName"].As<std::string>() << " to default texture " << newUUID;
-                Debug::LogInfo(debug.str());
+                m_pEngine->GetDebug().LogInfo(debug.str());
             }
             materialFile.Save();
         }
@@ -176,7 +176,7 @@ namespace Glory::Editor
 
     void Migrate_0_1_1_AddGravityToPhysicsSettings(ProjectSpace* pProject)
     {
-        Debug::LogInfo("0.1.1> Migrating PhysicsSettings to include Gravity property");
+        m_pEngine->GetDebug().LogInfo("0.1.1> Migrating PhysicsSettings to include Gravity property");
         std::filesystem::path physicsSettingsPath = pProject->RootPath();
         physicsSettingsPath.append("ProjectSettings").append("Physics.yaml");
         Utils::YAMLFileRef physicsSettings{ physicsSettingsPath };

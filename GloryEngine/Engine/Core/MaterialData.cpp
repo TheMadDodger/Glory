@@ -193,14 +193,14 @@ namespace Glory
 		m_Resources[resourceIndex] = value ? value->GetUUID() : 0;
 	}
 
-	bool MaterialData::GetTexture(const std::string& name, TextureData** value)
+	bool MaterialData::GetTexture(const std::string& name, TextureData** value, AssetManager* pManager)
 	{
 		size_t index;
 		if (!GetPropertyInfoIndex(name, index)) return false;
 		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
 		if (!pPropertyInfo->IsResource()) return false;
 		const size_t resourceIndex = pPropertyInfo->Offset();
-		*value = m_Resources[resourceIndex].Get();
+		*value = m_Resources[resourceIndex].Get(pManager);
 		return *value;
 	}
 

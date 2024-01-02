@@ -4,7 +4,6 @@
 #include <yaml-cpp/yaml.h>
 #include "ResourceLoaderModule.h"
 #include "ModelLoaderModule.h"
-#include "Game.h"
 
 namespace Glory
 {

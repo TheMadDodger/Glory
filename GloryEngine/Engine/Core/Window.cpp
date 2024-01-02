@@ -1,5 +1,4 @@
 #include "Window.h"
-#include "CoreExceptions.h"
 #include "WindowModule.h"
 #include "InputModule.h"
 #include "Engine.h"

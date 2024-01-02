@@ -54,7 +54,7 @@ namespace Glory
 			}
 			break;
 		default:
-			Debug::LogError("Texture::CreateFromSurface, unknow pixel format, BytesPerPixel: " + std::to_string(m_pSurface->format->BytesPerPixel) + " Use 32 bit or 24 bit images.\n");
+			m_pEngine->GetDebug().LogError("Texture::CreateFromSurface, unknow pixel format, BytesPerPixel: " + std::to_string(m_pSurface->format->BytesPerPixel) + " Use 32 bit or 24 bit images.\n");
 			return;
 		}
 	}

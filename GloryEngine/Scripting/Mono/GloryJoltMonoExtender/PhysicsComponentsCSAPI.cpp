@@ -369,7 +369,7 @@ namespace Glory
 		{
 			std::stringstream log;
 			log << "CharacterController_SetShape: Failed to set shape, shape with ID: " << shapeID << " does not exist!";
-			Debug::LogError(log.str());
+			m_pEngine->GetDebug().LogError(log.str());
 			return false;
 		}
 

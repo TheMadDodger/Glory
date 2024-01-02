@@ -1,6 +1,8 @@
 #include "LightSystem.h"
 
 #include "Engine.h"
+#include "GScene.h"
+#include "SceneManager.h"
 #include "RendererModule.h"
 #include "PropertyFlags.h"
 
@@ -10,6 +12,9 @@ namespace Glory
 {
 	void LightSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, LightComponent& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		PointLight pointLight;
 		pointLight.enabled = 1;
@@ -18,7 +23,7 @@ namespace Glory
 		pointLight.intensity = pComponent.m_Intensity;
 		pointLight.range = pComponent.m_Range;
 
-		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->Submit(pointLight);
+		pEngine->GetMainModule<RendererModule>()->Submit(pointLight);
 	}
 
 	LightSystem::LightSystem()

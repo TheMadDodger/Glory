@@ -120,17 +120,17 @@ namespace Glory::Editor
 
 		if (FindVisualStudioPath(x64Path))
 		{
-			Debug::LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
+			m_pEngine->GetDebug().LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
 			return;
 		}
 
 		if (FindVisualStudioPath(x86Path))
 		{
-			Debug::LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
+			m_pEngine->GetDebug().LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
 			return;
 		}
 
-		Debug::LogWarning("Could not find Visual Studio installation");
+		m_pEngine->GetDebug().LogWarning("Could not find Visual Studio installation");
 	}
 
 	bool MonoEditorExtension::FindVisualStudioPath(const std::filesystem::path& path)
@@ -378,7 +378,7 @@ namespace Glory::Editor
 		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>("");
 		if (!FindMSBuild(msBuildPath))
 		{
-			Debug::LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
+			m_pEngine->GetDebug().LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
 			return;
 		}
 
@@ -439,7 +439,7 @@ namespace Glory::Editor
 				settings["Mono/VisualStudioPath"].Set(path);
 				return;
 			}
-			Debug::LogWarning("Invalid Visual Studio Path");
+			m_pEngine->GetDebug().LogWarning("Invalid Visual Studio Path");
 		}
 	}
 }

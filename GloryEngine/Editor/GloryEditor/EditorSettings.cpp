@@ -58,7 +58,7 @@ namespace Glory::Editor
 
         std::stringstream stream;
         stream << "Saved editor settings to " << m_YAMLFile.Path().string();
-        Debug::LogInfo(stream.str());
+        m_pEngine->GetDebug().LogInfo(stream.str());
     }
 
     Utils::NodeValueRef EditorSettings::operator[](const std::filesystem::path& path)
@@ -91,7 +91,7 @@ namespace Glory::Editor
 
         std::stringstream stream;
         stream << "Loaded editor settings from " << m_YAMLFile.Path().string();
-        Debug::LogInfo(stream.str());
+        m_pEngine->GetDebug().LogInfo(stream.str());
     }
 
     void EditorSettings::LoadDefaultSettings(Engine* pEngine)
@@ -103,6 +103,6 @@ namespace Glory::Editor
         pMainWindow->Resize(pMainWindowSettings->Width, pMainWindowSettings->Height);
         pMainWindow->SetPosition(0, 0);
 
-        Debug::LogInfo("Loaded default editor settings");
+        m_pEngine->GetDebug().LogInfo("Loaded default editor settings");
     }
 }

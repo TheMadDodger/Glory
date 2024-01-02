@@ -20,7 +20,7 @@ namespace Glory::Editor
 
 		if (m_RecordingName != "")
 		{
-			Debug::LogError("Recording already started, call StopRecord before starting a new one! Name: " + m_RecordingName);
+			m_pEngine->GetDebug().LogError("Recording already started, call StopRecord before starting a new one! Name: " + m_RecordingName);
 			return;
 		}
 
@@ -35,7 +35,7 @@ namespace Glory::Editor
 
 		if (m_RecordingName == "")
 		{
-			Debug::LogError("Recording not yet started, call StartRecord to start recording!");
+			m_pEngine->GetDebug().LogError("Recording not yet started, call StartRecord to start recording!");
 			return;
 		}
 

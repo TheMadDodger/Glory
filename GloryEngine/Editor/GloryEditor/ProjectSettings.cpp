@@ -25,7 +25,7 @@ namespace Glory::Editor
 			ProjectSpace::SetAssetDirty(Settings[i]->m_SettingsFile, false);
 		}
 
-		Debug::LogInfo("Loaded project settings");
+		m_pEngine->GetDebug().LogInfo("Loaded project settings");
 	}
 
 	void ProjectSettings::Save(ProjectSpace* pProject)
@@ -36,7 +36,7 @@ namespace Glory::Editor
 			ProjectSpace::SetAssetDirty(Settings[i]->m_SettingsFile, false);
 		}
 
-		Debug::LogInfo("Saved project settings");
+		m_pEngine->GetDebug().LogInfo("Saved project settings");
 	}
 
 	void ProjectSettings::Paint(ProjectSettingsType type)

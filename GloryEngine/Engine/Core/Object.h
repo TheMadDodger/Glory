@@ -40,8 +40,6 @@ namespace Glory
 		size_t TypeCount() const;
 		bool GetType(size_t index, std::type_index& type) const;
 
-		static Object* FindObject(UUID id);
-
 		const std::string& Name();
 		void SetName(const std::string& name);
 		void SetName(const std::string_view name);

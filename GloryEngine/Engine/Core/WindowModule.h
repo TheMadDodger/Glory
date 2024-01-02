@@ -1,6 +1,7 @@
 #pragma once
 #include "Module.h"
 #include "Window.h"
+
 #include <vector>
 
 namespace Glory

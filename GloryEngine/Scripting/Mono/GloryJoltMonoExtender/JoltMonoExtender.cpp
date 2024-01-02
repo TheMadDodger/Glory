@@ -33,9 +33,8 @@ namespace Glory
 		pScriptingExtender->AddInternalLib("GloryEngine.Jolt.dll", m_pLibManager);
 	}
 
-	IScriptExtender* OnLoadExtension(Glory::GloryContext* pContext)
+	IScriptExtender* OnLoadExtension()
 	{
-		GloryContext::SetContext(pContext);
 		return new JoltMonoExtender();
 	}
 

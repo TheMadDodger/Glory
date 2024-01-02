@@ -416,7 +416,7 @@ namespace Glory
 	void SDLWindow::GetWindowBordersSize(int* top, int* left, int* bottom, int* right)
 	{
 		if (SDL_GetWindowBordersSize(m_pWindow, top, left, bottom, right) == 0) return;
-		Debug::LogError(SDL_GetError());
+		m_pEngine->GetDebug().LogError(SDL_GetError());
 	}
 
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr), m_GLSDLContext(NULL) {}

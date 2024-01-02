@@ -4,9 +4,7 @@
 #include "EditorSceneSerializer.h"
 #include "CreateObjectAction.h"
 #include "Undo.h"
-#include "GloryContext.h"
 
-#include <Game.h>
 #include <Engine.h>
 #include <SceneManager.h>
 #include <TitleBar.h>
@@ -306,7 +304,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Saved scene to: " << path;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		ProjectSpace::Save();
 	}

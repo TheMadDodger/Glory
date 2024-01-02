@@ -147,7 +147,7 @@ namespace Glory::Editor
 
 		m_Settings.Load(Game::GetGame().GetEngine());
 
-		Debug::LogInfo("Initialized editor");
+		m_pEngine->GetDebug().LogInfo("Initialized editor");
 
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();

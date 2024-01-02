@@ -22,7 +22,7 @@ namespace Glory::Editor
 		PropertyDrawer* pDrawer = PropertyDrawer::GetPropertyDrawer(sceneObjectRefType);
 		if (!pDrawer)
 		{
-			Debug::LogFatalError("Missing SceneObjectPropertyDrawer!");
+			m_pEngine->GetDebug().LogFatalError("Missing SceneObjectPropertyDrawer!");
 			return false;
 		}
 		return pDrawer->Draw(label, node, typeHash, flags);

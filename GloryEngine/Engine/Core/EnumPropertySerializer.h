@@ -6,7 +6,7 @@ namespace Glory
     class EnumPropertySerializer : public PropertySerializer
     {
     public:
-        EnumPropertySerializer();
+        EnumPropertySerializer(Serializers* pSerializers);
         virtual ~EnumPropertySerializer();
 
     private:

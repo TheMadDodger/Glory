@@ -5,23 +5,11 @@
 
 namespace Glory
 {
-	//std::vector<BaseConsoleCommand*> Console::m_pCommands = std::vector<BaseConsoleCommand*>();
-	//std::vector<IConsole*> Console::m_pConsoles = std::vector<IConsole*>();
-
-	//bool Console::m_Writing = false;
-	//bool Console::m_Reading = false;
-	//int Console::m_CommandHistoryInsertIndex = -1;
-	//int Console::m_ConsoleInsertIndex = -1;
-	//int Console::m_CurrentCommandHistorySize = 0;
-	//int Console::m_CurrentConsoleSize = 0;
-
-	//Console* Console::m_pInstance = nullptr;
-
 	void Console::Initialize()
 	{
-		//if (CONSOLE_INSTANCE->m_pInstance != nullptr) return;
-		//CONSOLE_INSTANCE->m_pInstance = new Console();
-		RegisterCommand(new ConsoleCommand("printhistory", Console::PrintHistory));
+		//if (m_pInstance != nullptr) return;
+		//m_pInstance = new Console();
+		RegisterCommand(new ConsoleCommand("printhistory", [this]() { return PrintHistory(); }));
 	}
 
 	void Console::Cleanup()
@@ -31,14 +19,14 @@ namespace Glory
 
 	void Console::Update()
 	{
-		if (CONSOLE_INSTANCE->m_Writing) return;
-		if (CONSOLE_INSTANCE->m_CommandQueue.empty()) return;
+		if (m_Writing) return;
+		if (m_CommandQueue.empty()) return;
 
-		CONSOLE_INSTANCE->m_Reading = true;
-		const std::string& command = CONSOLE_INSTANCE->m_CommandQueue.front();
+		m_Reading = true;
+		const std::string& command = m_CommandQueue.front();
 		ExecuteCommand(command);
-		CONSOLE_INSTANCE->m_CommandQueue.pop();
-		CONSOLE_INSTANCE->m_Reading = false;
+		m_CommandQueue.pop();
+		m_Reading = false;
 	}
 
 	bool Console::PrintHistory()
@@ -52,36 +40,36 @@ namespace Glory
 
 	void Console::AddCommandToHistory(const std::string& command)
 	{
-		++CONSOLE_INSTANCE->m_CommandHistoryInsertIndex;
-		if (CONSOLE_INSTANCE->m_CommandHistoryInsertIndex >= MAX_HISTORY_SIZE) CONSOLE_INSTANCE->m_CommandHistoryInsertIndex = 0;
-		if (CONSOLE_INSTANCE->m_CurrentCommandHistorySize < MAX_HISTORY_SIZE) ++CONSOLE_INSTANCE->m_CurrentCommandHistorySize;
-		CONSOLE_INSTANCE->m_CommandHistory[CONSOLE_INSTANCE->m_CommandHistoryInsertIndex] = command;
+		++m_CommandHistoryInsertIndex;
+		if (m_CommandHistoryInsertIndex >= MAX_HISTORY_SIZE) m_CommandHistoryInsertIndex = 0;
+		if (m_CurrentCommandHistorySize < MAX_HISTORY_SIZE) ++m_CurrentCommandHistorySize;
+		m_CommandHistory[m_CommandHistoryInsertIndex] = command;
 	}
 
 	void Console::AddLineToConsole(const std::string& line)
 	{
-		++CONSOLE_INSTANCE->m_ConsoleInsertIndex;
-		if (CONSOLE_INSTANCE->m_ConsoleInsertIndex >= MAX_CONSOLE_SIZE) CONSOLE_INSTANCE->m_ConsoleInsertIndex = 0;
-		if (CONSOLE_INSTANCE->m_CurrentConsoleSize < MAX_CONSOLE_SIZE) ++CONSOLE_INSTANCE->m_CurrentConsoleSize;
-		CONSOLE_INSTANCE->m_ConsoleLines[CONSOLE_INSTANCE->m_ConsoleInsertIndex] = line;
+		++m_ConsoleInsertIndex;
+		if (m_ConsoleInsertIndex >= MAX_CONSOLE_SIZE) m_ConsoleInsertIndex = 0;
+		if (m_CurrentConsoleSize < MAX_CONSOLE_SIZE) ++m_CurrentConsoleSize;
+		m_ConsoleLines[m_ConsoleInsertIndex] = line;
 	}
 
 	void Console::RegisterCommand(BaseConsoleCommand* pCommand)
 	{
-		CONSOLE_INSTANCE->m_pCommands.push_back(pCommand);
+		m_pCommands.push_back(pCommand);
 	}
 
 	void Console::QueueCommand(const std::string& command)
 	{
 		// If m_Reading is true this function is called from another thread, this thread will need to wait untill we are done reading on the main thread!
-		while (CONSOLE_INSTANCE->m_Reading)
+		while (m_Reading)
 		{
 			// Do nothing
 		}
 
-		CONSOLE_INSTANCE->m_Writing = true;
-		CONSOLE_INSTANCE->m_CommandQueue.push(command);
-		CONSOLE_INSTANCE->m_Writing = false;
+		m_Writing = true;
+		m_CommandQueue.push(command);
+		m_Writing = false;
 	}
 
 	void Console::ExecuteCommand(const std::string& command, bool addToHistory)
@@ -99,42 +87,42 @@ namespace Glory
 		if (pCommand != nullptr)
 		{
 			if (pCommand->RootExecuteCommand(args)) return;
-				Debug::LogNotice(">>>> Could not execute command", false);
+				WriteLine(">>>> Could not execute command", false);
 		}
 		else
-			Debug::LogNotice(">>>> Unknown Command", false);
+			WriteLine(">>>> Unknown Command", false);
 	}
 
 	void Console::WriteLine(const std::string& line, bool addTimestamp)
 	{
-		std::unique_lock lock{CONSOLE_INSTANCE->m_Lock};
+		std::unique_lock lock{m_Lock};
 
 		std::string finalLine = line;
 		if (addTimestamp) finalLine = TimeStamp() + finalLine;
 		AddLineToConsole(finalLine);
 
-		for (size_t i = 0; i < CONSOLE_INSTANCE->m_pConsoles.size(); i++)
+		for (size_t i = 0; i < m_pConsoles.size(); i++)
 		{
-			CONSOLE_INSTANCE->m_pConsoles[i]->Write(finalLine);
+			m_pConsoles[i]->Write(finalLine);
 		}
 	}
 
 	void Console::ForEachCommandInHistory(std::function<void(const std::string&)> callback)
 	{
-		if (CONSOLE_INSTANCE->m_CurrentCommandHistorySize < MAX_HISTORY_SIZE)
+		if (m_CurrentCommandHistorySize < MAX_HISTORY_SIZE)
 		{
-			for (int i = CONSOLE_INSTANCE->m_CommandHistoryInsertIndex; i >= 0; --i)
+			for (int i = m_CommandHistoryInsertIndex; i >= 0; --i)
 			{
-				const std::string& command = CONSOLE_INSTANCE->m_CommandHistory[(size_t)i];
+				const std::string& command = m_CommandHistory[(size_t)i];
 				callback(command);
 			}
 			return;
 		}
 
-		int currentIndex = CONSOLE_INSTANCE->m_CommandHistoryInsertIndex;
+		int currentIndex = m_CommandHistoryInsertIndex;
 		for (size_t i = 0; i < MAX_HISTORY_SIZE; i++)
 		{
-			const std::string& command = CONSOLE_INSTANCE->m_CommandHistory[(size_t)currentIndex];
+			const std::string& command = m_CommandHistory[(size_t)currentIndex];
 			callback(command);
 
 			--currentIndex;
@@ -144,9 +132,9 @@ namespace Glory
 
 	void Console::SetNextColor(const glm::vec4& color)
 	{
-		for (size_t i = 0; i < CONSOLE_INSTANCE->m_pConsoles.size(); i++)
+		for (size_t i = 0; i < m_pConsoles.size(); i++)
 		{
-			CONSOLE_INSTANCE->m_pConsoles[i]->SetNextColor(color);
+			m_pConsoles[i]->SetNextColor(color);
 		}
 	}
 
@@ -196,13 +184,13 @@ namespace Glory
 
 	BaseConsoleCommand* Console::GetCommand(const std::string& command)
 	{
-		auto it = std::find_if(CONSOLE_INSTANCE->m_pCommands.begin(), CONSOLE_INSTANCE->m_pCommands.end(), [&](BaseConsoleCommand* pCommand)
+		auto it = std::find_if(m_pCommands.begin(), m_pCommands.end(), [&](BaseConsoleCommand* pCommand)
 		{
 			if (pCommand->GetCommand() == command) return true;
 			return false;
 		});
 
-		if (it == CONSOLE_INSTANCE->m_pCommands.end()) return nullptr;
+		if (it == m_pCommands.end()) return nullptr;
 		BaseConsoleCommand* pCommand = *it;
 		return pCommand;
 	}
@@ -217,7 +205,10 @@ namespace Glory
 		return sstream.str();
 	}
 
-	Console::Console() : m_CommandHistory(std::vector<std::string>(MAX_HISTORY_SIZE)), m_ConsoleLines(std::vector<std::string>(MAX_CONSOLE_SIZE)) {}
+	Console::Console():
+		m_CommandHistory(std::vector<std::string>(MAX_HISTORY_SIZE)),
+		m_ConsoleLines(std::vector<std::string>(MAX_CONSOLE_SIZE))
+	{}
 
 	Console::~Console()
 	{
@@ -229,7 +220,7 @@ namespace Glory
 
 		Parser::Destroy();
 
-		for (size_t i = 0; i < CONSOLE_INSTANCE->m_pConsoles.size(); i++)
+		for (size_t i = 0; i < m_pConsoles.size(); i++)
 		{
 			m_pConsoles[i]->OnConsoleClose();
 			delete m_pConsoles[i];

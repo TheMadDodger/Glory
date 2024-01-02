@@ -1,6 +1,6 @@
 #include "ShaderLoaderModule.h"
-#include "Game.h"
 #include "FileLoaderModule.h"
+
 #include <fstream>
 #include <filesystem>
 #include <iostream>
@@ -74,7 +74,7 @@ namespace Glory
 	//{
 	//	if (args.length() <= 2)
 	//	{
-	//		//Debug::LogError("ShaderLoaderModule::ProcessDirective > Syntax error: " + line);
+	//		//m_pEngine->GetDebug().LogError("ShaderLoaderModule::ProcessDirective > Syntax error: " + line);
 	//		line = "";
 	//		return false;
 	//	}
@@ -103,7 +103,7 @@ namespace Glory
 	//
 	//	if (!file.is_open())
 	//	{
-	//		Debug::LogError("Could not open file: " + path);
+	//		m_pEngine->GetDebug().LogError("Could not open file: " + path);
 	//		return "";
 	//	}
 	//
@@ -133,7 +133,7 @@ namespace Glory
 	//{
 	//	if (line.length() <= 1)
 	//	{
-	//		Debug::LogError("ShaderLoaderModule::ProcessDirective > Syntax error: " + line);
+	//		m_pEngine->GetDebug().LogError("ShaderLoaderModule::ProcessDirective > Syntax error: " + line);
 	//		line = "";
 	//		return;
 	//	}
@@ -147,7 +147,7 @@ namespace Glory
 	//
 	//	if (!callback(pShaderData, path, lineIndex, line, directive, data))
 	//	{
-	//		Debug::LogError("ShaderLoaderModule::ProcessDirective > Syntax error: " + line);
+	//		m_pEngine->GetDebug().LogError("ShaderLoaderModule::ProcessDirective > Syntax error: " + line);
 	//		line = "";
 	//		return;
 	//	}

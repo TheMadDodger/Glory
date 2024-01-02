@@ -1,11 +1,13 @@
 #pragma once
+#include "IConsole.h"
+
 #include <string>
 #include <vector>
 #include <thread>
-#include "IConsole.h"
 
 namespace Glory
 {
+	class Console;
 	class BaseConsoleCommand;
 
 	class WindowsDebugConsole : public IConsole
@@ -15,7 +17,7 @@ namespace Glory
 		void WaitForInput();
 
 	private:
-		WindowsDebugConsole();
+		WindowsDebugConsole(Console* pConsole);
 		virtual ~WindowsDebugConsole();
 
 		void Initialize() override;
@@ -28,6 +30,7 @@ namespace Glory
 	private:
 		friend class Console;
 		friend class Debug;
+		Console* m_pConsole;
 		std::thread m_pConsoleThread;
 		bool m_Running;
 	};

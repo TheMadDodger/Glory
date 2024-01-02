@@ -1,6 +1,9 @@
 #include "PrefabData.h"
 #include "GScene.h"
 #include "PropertySerializer.h"
+#include "GScene.h"
+#include "SceneManager.h"
+#include "Engine.h"
 
 #include <yaml-cpp/yaml.h>
 #include <NodeRef.h>
@@ -28,7 +31,9 @@ namespace Glory
 		out << YAML::Key << "Active";
 		out << YAML::Value << pRegistry->GetTypeView(type)->IsActive(entity);
 
-		PropertySerializer::SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), out);
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		pEngine->GetSerializers().SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), out);
 		out << YAML::EndMap;
 	}
 

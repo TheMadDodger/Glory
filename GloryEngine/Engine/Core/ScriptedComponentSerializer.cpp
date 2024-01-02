@@ -3,7 +3,8 @@
 
 namespace Glory
 {
-	ScriptedComponentSerailizer::ScriptedComponentSerailizer() : PropertySerializer(ResourceType::GetHash<ScriptedComponent>())
+	ScriptedComponentSerailizer::ScriptedComponentSerailizer(Serializers* pSerializers):
+		PropertySerializer(pSerializers, ResourceType::GetHash<ScriptedComponent>())
 	{
 	}
 

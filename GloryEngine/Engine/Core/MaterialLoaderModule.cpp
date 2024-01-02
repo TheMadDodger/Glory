@@ -1,8 +1,13 @@
 #include "MaterialLoaderModule.h"
 #include "GLORY_YAML.h"
 #include "PropertySerializer.h"
-#include "AssetManager.h"
 #include "ShaderManager.h"
+#include "AssetLocation.h"
+#include "Engine.h"
+#include "AssetDatabase.h"
+#include "AssetManager.h"
+
+#include <fstream>
 
 namespace Glory
 {
@@ -84,10 +89,10 @@ namespace Glory
 			YAML_READ(shaderNode, node, Type, shaderType, ShaderType);
 
 			AssetLocation location;
-			if (!AssetDatabase::GetAssetLocation(shaderUUID, location)) continue;
+			if (!m_pEngine->GetAssetDatabase().GetAssetLocation(shaderUUID, location)) continue;
 			
-			std::string path = Game::GetAssetPath() + '\\' + location.Path;
-			ShaderSourceData* pShaderSourceData = AssetManager::GetAssetImmediate<ShaderSourceData>(shaderUUID);
+			std::string path = std::string{ m_pEngine->GetAssetDatabase().GetAssetPath() } + '\\' + location.Path;
+			ShaderSourceData* pShaderSourceData = m_pEngine->GetAssetManager().GetAssetImmediate<ShaderSourceData>(shaderUUID);
 			if (!pShaderSourceData) continue;
 
 			pMaterialData->m_pShaderFiles.push_back(pShaderSourceData);
@@ -120,7 +125,7 @@ namespace Glory
 			if (!isResource)
 			{
 				pMaterialData->AddProperty(displayName, shaderName, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
-				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
+				m_pEngine->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
 			}
 			else
 			{
@@ -164,7 +169,7 @@ namespace Glory
 			bool isResource = ResourceType::IsResource(pPropertyInfo->m_TypeHash);
 			if (!isResource)
 			{
-				PropertySerializer::SerializeProperty("Value", pMaterialData->GetBufferReference(), pPropertyInfo->m_TypeHash, pPropertyInfo->m_Offset, pPropertyInfo->m_Size, out);
+				m_pEngine->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(), pPropertyInfo->m_TypeHash, pPropertyInfo->m_Offset, pPropertyInfo->m_Size, out);
 			}
 			else
 			{

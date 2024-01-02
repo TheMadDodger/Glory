@@ -1,15 +1,17 @@
 #pragma once
 #include "TimerModule.h"
 
-//#define TIMER Game::GetGame().GetEngine()->GetTimerModule()
-
 namespace Glory
 {
-	class Time
+	class Engine;
+
+	class GameTime
 	{
 	public:
+		virtual ~GameTime();
+
 		template<typename T, typename Ratio>
-		static const float GetDeltaTime()
+		const float GetDeltaTime()
 		{
 			T gameDelta = GetGameDeltaTime<T, Ratio>();
 			T graphicsDelta = GetGraphicsDeltaTime<T, Ratio>();
@@ -17,19 +19,19 @@ namespace Glory
 		}
 
 		template<typename T, typename Ratio>
-		static const float GetGameDeltaTime()
+		const float GetGameDeltaTime()
 		{
 			return GetUnscaledGameDeltaTime<T, Ratio>() * GetTimer()->m_TimeScale;
 		}
 
 		template<typename T, typename Ratio>
-		static const float GetGraphicsDeltaTime()
+		const float GetGraphicsDeltaTime()
 		{
 			return GetUnscaledGraphicsDeltaTime<T, Ratio>() * GetTimer()->m_TimeScale;
 		}
 
 		template<typename T, typename Ratio>
-		static const float GetUnscaledDeltaTime()
+		const float GetUnscaledDeltaTime()
 		{
 			T gameDelta = GetUnscaledGameDeltaTime<T, Ratio>();
 			T graphicsDelta = GetUnscaledGraphicsDeltaTime<T, Ratio>();
@@ -37,31 +39,33 @@ namespace Glory
 		}
 
 		template<typename T, typename Ratio>
-		static const float GetUnscaledGameDeltaTime()
+		const float GetUnscaledGameDeltaTime()
 		{
 			std::chrono::duration<T, Ratio> deltaTime = GetTimer()->m_LastGameThreadFrameEnd - GetTimer()->m_LastGameThreadFrameStart;
 			return deltaTime.count();
 		}
 
 		template<typename T, typename Ratio>
-		static const float GetUnscaledGraphicsDeltaTime()
+		const float GetUnscaledGraphicsDeltaTime()
 		{
 			std::chrono::duration<T, Ratio> deltaTime = GetTimer()->m_LastGraphicsThreadFrameEnd - GetTimer()->m_LastGraphicsThreadFrameStart;
 			return deltaTime.count();
 		}
 
-		static const float GetTime();
-		static const float GetUnscaledTime();
-		static const float GetTimeScale();
-		static const float GetFrameRate();
-		static const int GetTotalFrames();
-		static const int GetTotalGameFrames();
-		static void SetTimeScale(float scale);
+		const float GetTime();
+		const float GetUnscaledTime();
+		const float GetTimeScale();
+		const float GetFrameRate();
+		const int GetTotalFrames();
+		const int GetTotalGameFrames();
+		void SetTimeScale(float scale);
 
 	private:
-		static TimerModule* GetTimer();
+		friend class Engine;
+		TimerModule* GetTimer();
 
-		Time();
-		virtual ~Time();
+		GameTime(Engine* pEngine);
+
+		Engine* m_pEngine;
 	};
 }

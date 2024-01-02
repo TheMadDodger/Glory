@@ -6,7 +6,7 @@ namespace Glory
     class StructPropertySerializer : public PropertySerializer
     {
     public:
-        StructPropertySerializer();
+        StructPropertySerializer(Serializers* pSerializers);
         virtual ~StructPropertySerializer();
 
     private:

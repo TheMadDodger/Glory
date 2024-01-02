@@ -11,6 +11,8 @@
 
 namespace Glory
 {
+	class AssetDatabase;
+
 	enum class CallbackType : unsigned int
 	{
 		CT_AssetLoaded,
@@ -30,7 +32,7 @@ namespace Glory
 		};
 
 	public:
-		static void RegisterCallback(const CallbackType& type, ASSET_CALLBACK callback);
+		void RegisterCallback(const CallbackType& type, ASSET_CALLBACK callback);
 
 	private:
 		void Initialize();
@@ -40,12 +42,13 @@ namespace Glory
 		void EnqueueCallback(const CallbackType& type, UUID uuid, Resource* pResource);
 
 	private:
-		AssetCallbacks();
+		AssetCallbacks(AssetDatabase* pDatabase);
 		virtual ~AssetCallbacks();
 
 	private:
 		friend class AssetDatabase;
 		friend class AssetManager;
+		AssetDatabase* m_pDatabase;
 		ThreadedVector<std::vector<ASSET_CALLBACK>> m_RegisteredCallbacks;
 		ThreadedVector<EnqueuedCallback> m_EnqueuedCallbacks;
 	};

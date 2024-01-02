@@ -4,7 +4,6 @@
 
 #include <Glory.h>
 #include <Module.h>
-#include <GloryContext.h>
 #include <ScriptingModule.h>
 #include <ScriptExtensions.h>
 #include <IScriptExtender.h>

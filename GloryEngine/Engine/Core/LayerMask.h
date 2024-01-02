@@ -5,6 +5,8 @@
 
 namespace Glory
 {
+	class Engine;
+
 	struct LayerMask
 	{
 		LayerMask() : m_Mask(0) {}
@@ -15,7 +17,7 @@ namespace Glory
 		LayerMask& operator ^=(const LayerMask& other);
 		LayerMask operator &(const LayerMask& other) const;
 
-		static LayerMask FromString(const std::string& names);
+		static LayerMask FromString(Engine* pEngine, const std::string& names);
 
 		REFLECTABLE(LayerMask, (uint64_t)(m_Mask))
 	};

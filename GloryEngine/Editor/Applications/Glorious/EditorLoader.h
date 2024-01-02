@@ -1,7 +1,6 @@
 #pragma once
 #include <EngineLoader.h>
 #include <EditorApplication.h>
-#include <Game.h>
 
 namespace Glory
 {
@@ -11,7 +10,7 @@ namespace Glory
 		EditorLoader();
 		virtual ~EditorLoader();
 
-		Glory::EditorCreateInfo LoadEditor(Game& game, EngineLoader& engineLoader);
+		Glory::EditorCreateInfo LoadEditor(Engine* game, EngineLoader& engineLoader);
 		void Unload();
 
 	private:

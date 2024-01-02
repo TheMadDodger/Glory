@@ -1,6 +1,6 @@
 #include "PlayerInput.h"
 #include "InputModule.h"
-#include "Debug.h"
+#include "Engine.h"
 #include "GameTime.h"
 
 namespace Glory
@@ -126,7 +126,7 @@ namespace Glory
 			for (auto itor = m_InputData[i].m_AxisDesiredValueLeft.begin(); itor != m_InputData[i].m_AxisDesiredValueLeft.end(); ++itor)
 			{
 				InputAction& inputAction = m_InputData[i].m_InputMap->m_Actions.at(itor->first);
-				const float lFrac = std::clamp(inputAction.m_BlendSpeed * Time::GetDeltaTime<float, std::ratio<1, 1>>(), 0.0f, 0.1f);
+				const float lFrac = std::clamp(inputAction.m_BlendSpeed * m_pInputModule->GetEngine()->Time().GetDeltaTime<float, std::ratio<1, 1>>(), 0.0f, 0.1f);
 				switch (inputAction.m_Blending)
 				{
 				case AxisBlending::Jump:
@@ -148,7 +148,7 @@ namespace Glory
 			for (auto itor = m_InputData[i].m_AxisDesiredValueRight.begin(); itor != m_InputData[i].m_AxisDesiredValueRight.end(); ++itor)
 			{
 				InputAction& inputAction = m_InputData[i].m_InputMap->m_Actions.at(itor->first);
-				const float lFrac = std::clamp(inputAction.m_BlendSpeed * Time::GetDeltaTime<float, std::ratio<1, 1>>(), 0.0f, 0.1f);
+				const float lFrac = std::clamp(inputAction.m_BlendSpeed * m_pInputModule->GetEngine()->Time().GetDeltaTime<float, std::ratio<1, 1>>(), 0.0f, 0.1f);
 				switch (inputAction.m_Blending)
 				{
 				case AxisBlending::Jump:

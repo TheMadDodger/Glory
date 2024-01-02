@@ -5,8 +5,8 @@
 #include "EditorShaderProcessor.h"
 #include "EditorCreateInfo.h"
 #include "EditorPlayer.h"
+
 #include <Version.h>
-#include <Game.h>
 
 namespace efsw
 {
@@ -30,10 +30,10 @@ namespace Glory::Editor
 		virtual GLORY_EDITOR_API ~EditorApplication();
 
 		template<class Window, class Renderer>
-		void Initialize(Game& game)
+		void Initialize(Engine* pEngine)
 		{
-			game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
-			game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
+			//game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
+			//game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
 
 			auto window = (EditorWindowImpl*)(new Window());
 			auto renderer = (EditorRenderImpl*)(new Renderer());
@@ -41,16 +41,16 @@ namespace Glory::Editor
 			window->m_pEditorPlatform = m_pPlatform;
 			renderer->m_pEditorPlatform = m_pPlatform;
 
-			InitializePlatform(game);
+			InitializePlatform(pEngine);
 
-			Debug::LogInfo("Initialized editor application");
+			m_pEngine->GetDebug().LogInfo("Initialized editor application");
 			m_pFileWatcher->watch();
 		}
 
-		GLORY_EDITOR_API void Initialize(Game& game);
+		GLORY_EDITOR_API void Initialize(Engine* pEngine);
 
 		GLORY_EDITOR_API void Destroy();
-		GLORY_EDITOR_API void Run(Game& game);
+		GLORY_EDITOR_API void Run(Engine* pEngine);
 
 		GLORY_EDITOR_API void SetWindowImpl(EditorWindowImpl* pWindowImpl);
 		GLORY_EDITOR_API void SetRendererImpl(EditorRenderImpl* pRendererImpl);
@@ -76,7 +76,7 @@ namespace Glory::Editor
 
 	private:
 		void RenderEditor();
-		void InitializePlatform(Game& game);
+		void InitializePlatform(Engine* pEngine);
 		void InitializeExtensions();
 
 		static std::string AssetPathOverrider();

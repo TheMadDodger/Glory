@@ -14,7 +14,7 @@ namespace Glory
 	{
 	}
 
-	Glory::EditorCreateInfo EditorLoader::LoadEditor(Game& game, EngineLoader& engineLoader)
+	Glory::EditorCreateInfo EditorLoader::LoadEditor(Engine* game, EngineLoader& engineLoader)
 	{
 		Glory::EditorCreateInfo editorCreateInfo{};
 		editorCreateInfo.pContext = GloryContext::GetContext();
@@ -68,7 +68,7 @@ namespace Glory
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor backend for module: " + name + ": The dll was not found!");
+			m_pEngine->GetDebug().LogFatalError("Failed to load editor backend for module: " + name + ": The dll was not found!");
 			return;
 		}
 
@@ -76,7 +76,7 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load editor backend for module: " + name + ": Missing LoadBackend function!");
+			m_pEngine->GetDebug().LogError("Failed to load editor backend for module: " + name + ": Missing LoadBackend function!");
 			return;
 		}
 
@@ -112,11 +112,11 @@ namespace Glory
 
 	void EditorLoader::LoadBackendDLL(const std::filesystem::path& dllPath, const std::string& name, Glory::EditorCreateInfo& editorCreateInfo)
 	{
-		Debug::LogInfo("Loading editor backend: " + name + "...");
+		m_pEngine->GetDebug().LogInfo("Loading editor backend: " + name + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor backend: " + name + ": The dll was not found!");
+			m_pEngine->GetDebug().LogFatalError("Failed to load editor backend: " + name + ": The dll was not found!");
 			return;
 		}
 
@@ -124,7 +124,7 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load editor backend: " + name + ": Missing LoadBackend function!");
+			m_pEngine->GetDebug().LogError("Failed to load editor backend: " + name + ": Missing LoadBackend function!");
 			return;
 		}
 
@@ -134,11 +134,11 @@ namespace Glory
 
 	void EditorLoader::LoadExtensionDLL(const std::filesystem::path& dllPath, const std::string& name)
 	{
-		Debug::LogInfo("Loading editor extension: " + name + "...");
+		m_pEngine->GetDebug().LogInfo("Loading editor extension: " + name + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor extension: " + name + ": The dll was not found!");
+			m_pEngine->GetDebug().LogFatalError("Failed to load editor extension: " + name + ": The dll was not found!");
 			return;
 		}
 
@@ -146,7 +146,7 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load editor extension: " + name + ": Missing LoadExtension function!");
+			m_pEngine->GetDebug().LogError("Failed to load editor extension: " + name + ": Missing LoadExtension function!");
 			return;
 		}
 
@@ -161,11 +161,11 @@ namespace Glory
 
 	void EditorLoader::LoadExtensionDependencyDLL(const std::filesystem::path& dllPath, const std::string& name)
 	{
-		Debug::LogInfo("Loading editor extension dependency: " + name + "...");
+		m_pEngine->GetDebug().LogInfo("Loading editor extension dependency: " + name + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor extension dependency: " + name + ": The dll was not found!");
+			m_pEngine->GetDebug().LogFatalError("Failed to load editor extension dependency: " + name + ": The dll was not found!");
 			return;
 		}
 		m_Libs.push_back(lib);

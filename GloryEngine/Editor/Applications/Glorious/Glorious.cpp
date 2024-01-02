@@ -22,32 +22,30 @@ int main(int argc, char* argv[])
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
         windowCreateInfo.WindowFlags = 2 | 32;
 
-        Glory::GloryContext::CreateContext();
+        Glory::Console console;
+        Glory::Debug debug{ &console };
 
-        Glory::Console::RegisterConsole<Glory::Logs>();
+        console.RegisterConsole<Glory::Logs>();
 
         Glory::CommandLine commandLine(argc, argv);
 
         std::string projectPath;
         if (!commandLine.GetValue("projectPath", projectPath))
         {
-            Glory::Debug::LogError("Missing project path in launch arguments!");
-            Glory::GloryContext::DestroyContext();
+            debug.LogError("Missing project path in launch arguments!");
             return -1;
         }
 
         if (!std::filesystem::exists(projectPath))
         {
-            Glory::Debug::LogError("Invalid project path!");
-            Glory::GloryContext::DestroyContext();
+            debug.LogError("Invalid project path!");
             return -1;
         }
 
         Glory::Editor::ProjectLock lock(projectPath);
         if (!lock.Lock())
         {
-            Glory::Debug::LogError("Project already open in another editor!");
-            Glory::GloryContext::DestroyContext();
+            debug.LogError("Project already open in another editor!");
             return -1;
         }
 
@@ -56,37 +54,31 @@ int main(int argc, char* argv[])
         engineConfPath.append("ProjectSettings").append("Engine.yaml");
 
         Glory::EngineLoader engineLoader(engineConfPath, windowCreateInfo);
-        Glory::Engine* pEngine = engineLoader.LoadEngine();
+        Glory::Engine pEngine = engineLoader.LoadEngine(&console, &debug);
         std::filesystem::path moduleSettingsRootPath = engineConfPath.parent_path().parent_path();
         moduleSettingsRootPath.append("Modules");
-        pEngine->LoadModuleSettings(moduleSettingsRootPath);
+        pEngine.LoadModuleSettings(moduleSettingsRootPath);
 
-        if (pEngine == nullptr)
-        {
-            Glory::Debug::LogError("The projects engine configuration could not be loaded!");
-            Glory::GloryContext::DestroyContext();
-            return -1;
-        }
+        //if (pEngine == nullptr)
+        //{
+        //    Glory::m_pEngine->GetDebug().LogError("The projects engine configuration could not be loaded!");
+        //    Glory::GloryContext::DestroyContext();
+        //    return -1;
+        //}
 
-        Glory::GameSettings gameSettings;
-        gameSettings.pEngine = pEngine;
-        gameSettings.pGameState = new Glory::GameState();
-        gameSettings.ApplicationType = Glory::ApplicationType::AT_Editor;
-        Glory::Game& pGame = Glory::Game::CreateGame(gameSettings);
-        pGame.Initialize();
+        pEngine.Initialize();
 
         Glory::EditorLoader editorLoader;
-        Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(pGame, engineLoader);
+        Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(&pEngine, engineLoader);
 
         Glory::Editor::EditorApplication application(editorCreateInfo);
-        application.Initialize(pGame);
+        application.Initialize(&pEngine);
 
         Glory::Editor::ProjectSpace::OpenProject(projectPath);
 
-        application.Run(pGame);
+        application.Run(&pEngine);
 
         application.Destroy();
-        pGame.Destroy();
         engineLoader.Unload();
     }
 

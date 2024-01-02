@@ -18,7 +18,7 @@ namespace Glory
 		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysocsModule was loaded");
+			m_pEngine->GetDebug().LogWarning("A PhysicsBody was added to an entity but no PhysocsModule was loaded");
 			return;
 		}
 
@@ -39,7 +39,7 @@ namespace Glory
 		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			Debug::LogWarning("A PhysicsBody was added to an entity but no PhysicsModule was loaded");
+			m_pEngine->GetDebug().LogWarning("A PhysicsBody was added to an entity but no PhysicsModule was loaded");
 			return;
 		}
 
@@ -59,7 +59,7 @@ namespace Glory
 		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			Debug::LogWarning("An Entity has a PhysicsBody but no PhysocsModule was loaded");
+			m_pEngine->GetDebug().LogWarning("An Entity has a PhysicsBody but no PhysocsModule was loaded");
 			return;
 		}
 
@@ -284,7 +284,7 @@ namespace Glory
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
 		if (pShape->m_ShapeType == ShapeType::None)
 		{
-			Debug::LogWarning("PhysicsBody does not have a shape!");
+			m_pEngine->GetDebug().LogWarning("PhysicsBody does not have a shape!");
 			return;
 		}
 

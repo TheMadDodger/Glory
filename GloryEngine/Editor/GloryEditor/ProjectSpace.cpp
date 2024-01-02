@@ -200,7 +200,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Opened project at: " << m_ProjectFilePath;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 	}
 
 	void ProjectSpace::Close()
@@ -213,7 +213,7 @@ namespace Glory::Editor
 
 		AssetDatabase::Clear();
 
-		Debug::LogInfo("Closed current project");
+		m_pEngine->GetDebug().LogInfo("Closed current project");
 	}
 
 	void ProjectSpace::CreateFolder(const std::string& name)
@@ -255,6 +255,6 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Project saved to: " << m_ProjectFilePath;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 	}
 }

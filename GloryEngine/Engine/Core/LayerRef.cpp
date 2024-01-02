@@ -20,9 +20,9 @@ namespace Glory
 		return m_LayerIndex == other.m_LayerIndex;
 	}
 
-	const Layer* LayerRef::Layer() const
+	const Layer* LayerRef::Layer(LayerManager* pManager) const
 	{
-		return LayerManager::GetLayerAtIndex((int)m_LayerIndex);
+		return pManager->GetLayerAtIndex((int)m_LayerIndex);
 	}
 
 	const TypeData* LayerRef::GetTypeData()

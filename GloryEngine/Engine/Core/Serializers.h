@@ -1,12 +1,21 @@
 #pragma once
-#include "GloryContext.h"
+#include <vector>
+#include <string>
 
-#ifndef SERIALIZERS
-#define SERIALIZERS Glory::GloryContext::GetSerializers()->m_pRegisteredSerializers
-#endif
+namespace YAML
+{
+	class Node;
+	class Emitter;
+}
 
 namespace Glory
 {
+	namespace Utils::Reflect
+	{
+		struct TypeData;
+		struct FieldData;
+	}
+
 	class PropertySerializer;
 
 	class Serializers
@@ -14,6 +23,24 @@ namespace Glory
 	public:
 		Serializers();
 		virtual ~Serializers();
+
+		template<class T>
+		void RegisterSerializer()
+		{
+			PropertySerializer* pSerializer = new T(this);
+			m_pRegisteredPropertySerializers.push_back(pSerializer);
+		}
+
+		PropertySerializer* GetSerializer(uint32_t typeHash);
+		size_t GetID(PropertySerializer* pSerializer);
+
+		void SerializeProperty(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out);
+		void DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Node& object);
+
+		void SerializeProperty(const std::string& name, const Utils::Reflect::TypeData* pTypeData, void* data, YAML::Emitter& out);
+		void SerializeProperty(const Utils::Reflect::FieldData* pFieldData, void* data, YAML::Emitter& out);
+		void DeserializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, YAML::Node& object);
+		void DeserializeProperty(const Utils::Reflect::FieldData* pFieldData, void* data, YAML::Node& object);
 
 	private:
 		friend class PropertySerializer;

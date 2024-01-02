@@ -151,7 +151,7 @@ namespace Glory
 		if (err != GL_NO_ERROR)
 		{
 			const char* error = (const char*)glewGetErrorString(err);
-			Debug::LogWarning(error, bIncludeTimeStamp);
+			m_pEngine->GetDebug().LogWarning(error, bIncludeTimeStamp);
 		}
 	}
 

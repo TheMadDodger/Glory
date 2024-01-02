@@ -31,13 +31,13 @@ namespace Glory
 		m_AssetUUID = uuid;
 	}
 
-	Resource* AssetReferenceBase::GetResource() const
+	Resource* AssetReferenceBase::GetResource(AssetManager* pAssets) const
 	{
-		return AssetManager::GetOrLoadAsset(m_AssetUUID);
+		return pAssets->GetOrLoadAsset(m_AssetUUID);
 	}
 
-	Resource* AssetReferenceBase::GetResourceImmediate() const
+	Resource* AssetReferenceBase::GetResourceImmediate(AssetManager* pAssets) const
 	{
-		return AssetManager::GetAssetImmediate(m_AssetUUID);
+		return pAssets->GetAssetImmediate(m_AssetUUID);
 	}
 }

@@ -26,7 +26,7 @@ namespace Glory
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
 		if (pShape->m_ShapeType == ShapeType::None)
 		{
-			Debug::LogWarning("CharacterController does not have a shape!");
+			m_pEngine->GetDebug().LogWarning("CharacterController does not have a shape!");
 			return;
 		}
 
@@ -67,7 +67,7 @@ namespace Glory
 		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			Debug::LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
+			m_pEngine->GetDebug().LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
 			return;
 		}
 

@@ -1,6 +1,8 @@
 #include "FileLoaderModule.h"
-#include "Debug.h"
+#include "Engine.h"
 #include "EngineProfiler.h"
+#include "Debug.h"
+
 #include <fstream>
 
 namespace Glory
@@ -49,7 +51,7 @@ namespace Glory
 
 		if (!file.is_open())
 		{
-			Debug::LogError("Could not open file: " + path);
+			m_pEngine->GetDebug().LogError("Could not open file: " + path);
 			Profiler::EndSample();
 			return;
 		}
@@ -68,7 +70,7 @@ namespace Glory
 
 		if (!file.is_open())
 		{
-			Debug::LogError("Could not open file: " + path);
+			m_pEngine->GetDebug().LogError("Could not open file: " + path);
 			Profiler::EndSample();
 			return false;
 		}

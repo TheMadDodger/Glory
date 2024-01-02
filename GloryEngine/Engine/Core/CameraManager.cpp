@@ -11,7 +11,7 @@ namespace Glory
 	{
 		Profiler::BeginSample("CameraManager::GetNewOrUnusedCamera");
 		int width, height;
-		Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
+		m_pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
 
 		if (m_UnusedCameraIndices.size() > 0)
 		{
@@ -21,7 +21,7 @@ namespace Glory
 			pCamera.SetResolution(width, height);
 			pCamera.m_IsInUse = true;
 			Profiler::EndSample();
-			return CameraRef(pCamera.GetUUID());
+			return CameraRef(this, pCamera.GetUUID());
 		}
 
 		size_t index = m_Cameras.size();
@@ -29,7 +29,7 @@ namespace Glory
 		UUID id = m_Cameras[index].GetUUID();
 		m_IDToCamera[id] = index;
 		Profiler::EndSample();
-		return CameraRef(m_Cameras[index].GetUUID());
+		return CameraRef(this, m_Cameras[index].GetUUID());
 	}
 
 	void CameraManager::SetUnused(Camera* pCamera)
@@ -86,7 +86,9 @@ namespace Glory
 		m_IDToCamera.clear();
 	}
 
-	CameraManager::CameraManager() {}
+	CameraManager::CameraManager(Engine* pEngine): m_pEngine(pEngine)
+	{
+	}
 
 	CameraManager::~CameraManager() {}
 }

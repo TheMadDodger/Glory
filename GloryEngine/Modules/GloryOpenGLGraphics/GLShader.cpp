@@ -38,7 +38,7 @@ namespace Glory
 		{
 			glGetShaderInfoLog(m_ShaderID, 512, NULL, infoLog);
 			OpenGLGraphicsModule::LogGLError(glGetError());
-			Debug::LogError(infoLog);
+			m_pEngine->GetDebug().LogError(infoLog);
 		}
 	}
 }

@@ -61,10 +61,10 @@ namespace Glory
 		if (message) str << message;
 		if (fatal)
 		{
-			Glory::Debug::LogFatalError(str.str());
+			Glory::m_pEngine->GetDebug().LogFatalError(str.str());
 			return;
 		}
-		Glory::Debug::Log(str.str(), debugLogLevel);
+		Glory::m_pEngine->GetDebug().Log(str.str(), debugLogLevel);
 	}
 
 	void OnGCAllocation(MonoProfiler* pProfiler, MonoObject* obj)
@@ -82,7 +82,7 @@ namespace Glory
 		{
 			std::stringstream log;
 			log << "New GC allocation of type " << nameSpace << "." << name << " with size " << size << " bytes";
-			Glory::Debug::LogInfo(log.str());
+			Glory::m_pEngine->GetDebug().LogInfo(log.str());
 		}
 
 		const bool autoGarbageCollect = settings.Value<bool>("Auto Collect Garbage");
@@ -98,12 +98,12 @@ namespace Glory
 
 	void OnPrintCallback(const char* string, mono_bool)
 	{
-		Debug::LogWarning(string);
+		m_pEngine->GetDebug().LogWarning(string);
 	}
 
 	void OnPrintErrorCallback(const char* string, mono_bool)
 	{
-		Debug::LogError(string);
+		m_pEngine->GetDebug().LogError(string);
 	}
 
 	void MonoManager::Initialize(const std::string& assemblyDir, const std::string& configDir)
@@ -169,7 +169,7 @@ namespace Glory
 		char* buildInfo = mono_get_runtime_build_info();
 		std::stringstream buildInfoLog;
 		buildInfoLog << "Mono Version: " << buildInfo;
-		Debug::LogInfo(buildInfoLog.str());
+		m_pEngine->GetDebug().LogInfo(buildInfoLog.str());
 		mono_free(buildInfo);
 	}
 
@@ -203,7 +203,7 @@ namespace Glory
 		AssemblyDomain* pStartDomain = CreateDomain("GloryDomain");
 		if (!pStartDomain->SetCurrentDomain())
 		{
-			Debug::LogFatalError("MonoManager::InitialLoad > Failed to set initial domain");
+			m_pEngine->GetDebug().LogFatalError("MonoManager::InitialLoad > Failed to set initial domain");
 			return;
 		}
 		m_pActiveDomain = pStartDomain;
@@ -280,7 +280,7 @@ namespace Glory
 		{
 			if (!m_pRootDomain->SetCurrentDomain())
 			{
-				Debug::LogFatalError("MonoManager::UnloadDomain > Failed to set root domain as active!");
+				m_pEngine->GetDebug().LogFatalError("MonoManager::UnloadDomain > Failed to set root domain as active!");
 				return;
 			}
 			m_pActiveDomain = m_pRootDomain;
@@ -304,7 +304,7 @@ namespace Glory
 		AssemblyDomain* pNewDomain = CreateDomain("GloryDomain");
 		if (!pNewDomain->SetCurrentDomain())
 		{
-			Debug::LogFatalError("MonoManager::Reload > Failed to set new domain as active");
+			m_pEngine->GetDebug().LogFatalError("MonoManager::Reload > Failed to set new domain as active");
 			return;
 		}
 		m_pActiveDomain = pNewDomain;

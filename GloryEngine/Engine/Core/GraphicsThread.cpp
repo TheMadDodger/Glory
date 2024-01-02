@@ -101,7 +101,7 @@ namespace Glory
 	{
 		for (size_t i = 0; i < m_BeginRenderBinds.size(); i++) m_BeginRenderBinds[i]();
 		m_pEngine->GraphicsThreadFrameStart();
-		FrameStates* pFrameStates = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetFrameStates();
+		FrameStates* pFrameStates = m_pEngine->GetMainModule<GraphicsModule>()->GetFrameStates();
 		pFrameStates->OnFrameStart();
 		for (size_t i = 0; i < m_RenderBinds.size(); i++)
 		{

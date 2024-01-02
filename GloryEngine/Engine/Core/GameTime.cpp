@@ -1,53 +1,53 @@
 #include "GameTime.h"
-#include "Game.h"
 #include "Engine.h"
 #include "TimerModule.h"
 
-#define TIMER Game::GetGame().GetEngine()->GetInternalModule<TimerModule>()
-
 namespace Glory
 {
-    const float Time::GetTime()
+    const float GameTime::GetTime()
     {
-        return TIMER->CalculateTime(false);
+        return GetTimer()->CalculateTime(false);
     }
 
-    const float Time::GetUnscaledTime()
+    const float GameTime::GetUnscaledTime()
     {
-        return TIMER->CalculateTime(true);
+        return GetTimer()->CalculateTime(true);
     }
 
-    const float Time::GetTimeScale()
+    const float GameTime::GetTimeScale()
     {
-        return TIMER->m_TimeScale;
+        return GetTimer()->m_TimeScale;
     }
 
-    const float Time::GetFrameRate()
+    const float GameTime::GetFrameRate()
     {
         float deltaTime = GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
         return 1.0f / deltaTime;
     }
 
-    const int Time::GetTotalFrames()
+    const int GameTime::GetTotalFrames()
     {
-        return TIMER->m_TotalGraphicsFrames;
+        return GetTimer()->m_TotalGraphicsFrames;
     }
 
-    const int Time::GetTotalGameFrames()
+    const int GameTime::GetTotalGameFrames()
     {
-        return TIMER->m_TotalGameFrames;
+        return GetTimer()->m_TotalGameFrames;
     }
 
-    void Time::SetTimeScale(float scale)
+    void GameTime::SetTimeScale(float scale)
     {
-        TIMER->m_TimeScale = scale;
+        GetTimer()->m_TimeScale = scale;
     }
 
-    TimerModule* Time::GetTimer()
+    TimerModule* GameTime::GetTimer()
     {
-        return TIMER;
+        return m_pEngine->GetInternalModule<TimerModule>();
     }
 
-    Time::Time() {}
-    Time::~Time() {}
+    GameTime::GameTime(Engine* pEngine): m_pEngine(pEngine) {}
+    GameTime::~GameTime()
+    {
+        m_pEngine = nullptr;
+    }
 }

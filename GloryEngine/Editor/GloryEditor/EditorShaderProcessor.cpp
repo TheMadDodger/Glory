@@ -173,7 +173,7 @@ namespace Glory::Editor
 		ShaderType shaderType = pShaderSource->GetShaderType();
 		if (m_ShaderTypeToKind.find(shaderType) == m_ShaderTypeToKind.end())
 		{
-			Debug::LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
+			m_pEngine->GetDebug().LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
 			return nullptr;
 		}
 
@@ -185,15 +185,15 @@ namespace Glory::Editor
 
 		if (result.GetCompilationStatus() != shaderc_compilation_status::shaderc_compilation_status_success)
 		{
-			Debug::LogError("Shader " + pShaderSource->Name() + " compilation failed with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
-			Debug::LogError(result.GetErrorMessage());
+			m_pEngine->GetDebug().LogError("Shader " + pShaderSource->Name() + " compilation failed with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+			m_pEngine->GetDebug().LogError(result.GetErrorMessage());
 			return nullptr;
 		}
 		else
-			Debug::LogInfo("Shader " + pShaderSource->Name() + " compilation succeeded with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+			m_pEngine->GetDebug().LogInfo("Shader " + pShaderSource->Name() + " compilation succeeded with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
 
 		if (warnings > 0)
-			Debug::LogWarning(result.GetErrorMessage());
+			m_pEngine->GetDebug().LogWarning(result.GetErrorMessage());
 
 		EditorShaderData* pShaderData = new EditorShaderData(pShaderSource->GetUUID());
 		pShaderData->m_ShaderData.assign(result.begin(), result.end());

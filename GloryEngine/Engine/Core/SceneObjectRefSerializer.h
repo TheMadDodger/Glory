@@ -6,7 +6,7 @@ namespace Glory
     class SceneObjectRefSerializer : public PropertySerializer
     {
     public:
-        SceneObjectRefSerializer() : PropertySerializer(SerializedType::ST_Object) {}
+        SceneObjectRefSerializer(Serializers* pSerializers) : PropertySerializer(pSerializers, SerializedType::ST_Object) {}
 
     private:
         virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out) override;

@@ -19,8 +19,30 @@ namespace Glory
 	class ResourceType
 	{
 	public:
+		virtual ~ResourceType();
+		uint32_t Hash() const;
+		const std::string& Extensions() const;
+		const std::string& FullName() const;
+		const std::string& Name() const;
+
+	private:
+		ResourceType(uint32_t typeHash, const std::string& extensions, const char* name);
+		const ResourceType operator=(const ResourceType&) = delete;
+
+	private:
+		friend class ResourceTypes;
+		const uint32_t m_TypeHash;
+		const std::string m_Extensions;
+		const std::string m_FullName;
+		std::string m_Name;
+		std::vector<uint32_t> m_SubTypes;
+	};
+
+	class ResourceTypes
+	{
+	public:
 		template<class T>
-		static void RegisterResource(const std::string& extensions)
+		void RegisterResource(const std::string& extensions)
 		{
 			ResourceType* pResourceType = RegisterResource(typeid(T), extensions);
 			T t = T();
@@ -34,7 +56,7 @@ namespace Glory
 		}
 
 		template<typename T>
-		static void RegisterType()
+		void RegisterType()
 		{
 			RegisterType(typeid(T), sizeof(T));
 		}
@@ -46,55 +68,35 @@ namespace Glory
 		}
 
 		template<typename T>
-		static ResourceType* GetResourceType()
+		ResourceType* GetResourceType()
 		{
 			return GetResourceType(typeid(T));
 		}
 
-		static bool IsResource(uint32_t typeHash);
-		static ResourceType* RegisterResource(std::type_index type, const std::string& extensions);
-		static void RegisterType(const std::type_info& type, size_t size);
+		bool IsResource(uint32_t typeHash);
+		ResourceType* RegisterResource(std::type_index type, const std::string& extensions);
+		void RegisterType(const std::type_info& type, size_t size);
 		static uint32_t GetHash(std::type_index type);
-		static ResourceType* GetResourceType(const std::string& extension);
-		static ResourceType* GetResourceType(std::type_index type);
-		static ResourceType* GetResourceType(uint32_t hash);
-		static const BasicTypeData* GetBasicTypeData(uint32_t typeHash);
-		static const BasicTypeData* GetBasicTypeData(const std::string& name);
+		ResourceType* GetResourceType(const std::string& extension);
+		ResourceType* GetResourceType(std::type_index type);
+		ResourceType* GetResourceType(uint32_t hash);
+
+		const BasicTypeData* GetBasicTypeData(uint32_t typeHash);
+		const BasicTypeData* GetBasicTypeData(const std::string& name);
 
 		static size_t SubTypeCount(const ResourceType* pResourceType);
-		static ResourceType* GetSubType(const ResourceType* pResourceType, size_t index);
+		ResourceType* GetSubType(const ResourceType* pResourceType, size_t index);
 		static uint32_t GetSubTypeHash(const ResourceType* pResourceType, size_t index);
-		static size_t GetAllResourceTypesThatHaveSubType(uint32_t hash, std::vector<ResourceType*>& out);
+		size_t GetAllResourceTypesThatHaveSubType(uint32_t hash, std::vector<ResourceType*>& out);
 
 		static bool IsScene(const std::string& ext);
 
 	public:
-		virtual ~ResourceType();
-		uint32_t Hash() const;
-		const std::string& Extensions() const;
-		const std::string& FullName() const;
-		const std::string& Name() const;
-
-	private:
-		ResourceType(uint32_t typeHash, const std::string& extensions, const char* name);
-		const ResourceType operator=(const ResourceType&) = delete;
-
-	private:
-		static void ReadExtensions(size_t index, const std::string& extensions);
-
-	private:
-		const uint32_t m_TypeHash;
-		const std::string m_Extensions;
-		const std::string m_FullName;
-		std::string m_Name;
-		std::vector<uint32_t> m_SubTypes;
-	};
-
-	class ResourceTypes
-	{
-	public:
 		ResourceTypes();
 		virtual ~ResourceTypes();
+
+	private:
+		void ReadExtensions(size_t index, const std::string& extensions);
 
 	private:
 		friend class ResourceType;

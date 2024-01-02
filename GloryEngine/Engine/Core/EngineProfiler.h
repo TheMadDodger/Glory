@@ -3,22 +3,29 @@
 
 namespace Glory
 {
-	class Profiler
+	class ProfilerModule;
+
+	class EngineProfiler
 	{
 	public:
-		static void BeginThread(const std::string& name);
-		static void EndThread();
-		static void BeginSample(const std::string& name);
-		static void EndSample();
+		void BeginThread(const std::string& name);
+		void EndThread();
+		void BeginSample(const std::string& name);
+		void EndSample();
 
 	private:
-		Profiler();
-		virtual ~Profiler();
+		EngineProfiler(ProfilerModule* pProfiler);
+		virtual ~EngineProfiler();
+
+	private:
+		ProfilerModule* m_pProfiler;
 	};
 
 	struct ProfileSample
 	{
-		ProfileSample(const std::string& name);
+		ProfileSample(ProfilerModule* pProfiler, const std::string& name);
 		~ProfileSample();
+
+		ProfilerModule* Profiler;
 	};
 }

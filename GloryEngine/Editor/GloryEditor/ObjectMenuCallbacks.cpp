@@ -111,12 +111,12 @@ namespace Glory::Editor
 		}
 		catch (const std::exception&)
 		{
-			Debug::LogError("Pasted object is not a YAML object!");
+			m_pEngine->GetDebug().LogError("Pasted object is not a YAML object!");
 			return;
 		}
 		if (!clipboardNode.IsDefined() || !clipboardNode.IsMap())
 		{
-			Debug::LogError("Pasted object is not a YAML object!");
+			m_pEngine->GetDebug().LogError("Pasted object is not a YAML object!");
 			return;
 		}
 

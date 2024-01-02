@@ -1,4 +1,6 @@
 #pragma once
+#include "Glory.h"
+
 #include <string>
 #include <vector>
 #include <mutex>
@@ -9,14 +11,18 @@
 
 #endif
 
-#include "Glory.h"
-
 namespace Glory
 {
 	class RendererModule;
+	class Console;
+	class GameTime;
 
 	class Debug
 	{
+	public:
+		Debug(Console* pConsole) : m_pConsole(pConsole) {}
+		~Debug() = default;
+
 	public:
 		enum class LogLevel
 		{
@@ -43,35 +49,34 @@ namespace Glory
 		};
 
 	public:
-		static void Log(const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp = true);
-		static void LogInfo(const std::string& message, bool bIncludeTimeStamp = true);
-		static void LogNotice(const std::string& message, bool bIncludeTimeStamp = true);
-		static void LogWarning(const std::string& message, bool bIncludeTimeStamp = true);
-		static void LogError(const std::string& message, bool bIncludeTimeStamp = true);
-		static void LogFatalError(const std::string& message, bool bIncludeTimeStamp = true);
+		void Log(const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp = true);
+		void LogInfo(const std::string& message, bool bIncludeTimeStamp = true);
+		void LogNotice(const std::string& message, bool bIncludeTimeStamp = true);
+		void LogWarning(const std::string& message, bool bIncludeTimeStamp = true);
+		void LogError(const std::string& message, bool bIncludeTimeStamp = true);
+		void LogFatalError(const std::string& message, bool bIncludeTimeStamp = true);
 
-		static void LogOnce(const std::string& key, const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp = true);
+		void LogOnce(const std::string& key, const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp = true);
 
 #ifndef GLORY_NO_DEBUG_LINES
 
-		static void DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, float time = 0.1f);
-		static void DrawLineQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color, float time = 0.1f);
-		static void DrawWireCube(const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color, float time = 0.1f);
-		static void DrawRay(const glm::vec3& start, const glm::vec3& dir, const glm::vec4& color, float length = 1.0f, float time = 0.1f);
+		void DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, float time = 0.1f);
+		void DrawLineQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color, float time = 0.1f);
+		void DrawWireCube(const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color, float time = 0.1f);
+		void DrawRay(const glm::vec3& start, const glm::vec3& dir, const glm::vec4& color, float length = 1.0f, float time = 0.1f);
 
 #endif
 
 	private:
-		friend class GloryContext;
+		friend class Engine;
 		friend class RendererModule;
-		Debug() = default;
-		~Debug() = default;
 
 		std::mutex m_Lock;
+		Console* m_pConsole;
 
 #ifndef GLORY_NO_DEBUG_LINES
 
-		static void SubmitLines(RendererModule* pRenderer);
+		void SubmitLines(RendererModule* pRenderer, GameTime* pTime);
 
 #endif
 

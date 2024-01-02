@@ -4,7 +4,8 @@
 
 namespace Glory
 {
-	AssetReferencePropertySerializer::AssetReferencePropertySerializer() : PropertySerializer(SerializedType::ST_Asset)
+	AssetReferencePropertySerializer::AssetReferencePropertySerializer(Serializers* pSerializers):
+		PropertySerializer(pSerializers, SerializedType::ST_Asset)
 	{
 	}
 

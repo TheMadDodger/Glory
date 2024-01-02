@@ -3,6 +3,9 @@
 #include "PropertySerializer.h"
 #include "AssetManager.h"
 #include "ShaderManager.h"
+#include "Engine.h"
+
+#include <fstream>
 
 namespace Glory
 {
@@ -61,7 +64,7 @@ namespace Glory
 		YAML::Node node;
 		UUID baseMaterial = 0;
 		YAML_READ(rootNode, node, BaseMaterial, baseMaterial, uint64_t);
-		MaterialData* pMaterialData = AssetManager::GetAssetImmediate<MaterialData>(baseMaterial);
+		MaterialData* pMaterialData = m_pEngine->GetAssetManager().GetAssetImmediate<MaterialData>(baseMaterial);
 		MaterialInstanceData* pMaterialInstanceData = new MaterialInstanceData(pMaterialData);
 		ReadPropertyOverrides(rootNode, pMaterialInstanceData);
 		return pMaterialInstanceData;
@@ -91,7 +94,7 @@ namespace Glory
 				uint32_t typeHash = propertyInfo->TypeHash();
 				size_t offset = propertyInfo->Offset();
 				size_t size = propertyInfo->Size();
-				PropertySerializer::SerializeProperty("Value", pMaterialData->GetBufferReference(), typeHash, offset, size, out);
+				m_pEngine->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(), typeHash, offset, size, out);
 			}
 			else
 			{
@@ -130,7 +133,7 @@ namespace Glory
 				uint32_t typeHash = propertyInfo->TypeHash();
 				size_t offset = propertyInfo->Offset();
 				size_t size = propertyInfo->Size();
-				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
+				m_pEngine->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
 			}
 			else
 			{

@@ -8,6 +8,7 @@ namespace Glory::Utils::Reflect
 
 namespace Glory
 {
+	class LayerManager;
 	struct Layer;
 
 	struct LayerRef
@@ -22,7 +23,7 @@ namespace Glory
 		bool operator==(const LayerRef&& other);
 		bool operator==(LayerRef& other);
 
-		const Layer* Layer() const;
+		const Layer* Layer(LayerManager* pManager) const;
 
 		static const Glory::Utils::Reflect::TypeData* GetTypeData();
 

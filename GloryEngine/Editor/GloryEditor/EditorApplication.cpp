@@ -55,12 +55,12 @@ namespace Glory::Editor
 		m_pFileWatcher = nullptr;
 	}
 
-	void EditorApplication::Initialize(Game& game)
+	void EditorApplication::Initialize(Engine* pEngine)
 	{
 		m_pEditorInstance = this;
 
-		game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
-		game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
+		//game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
+		//game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
 
 		m_pShaderProcessor = new EditorShaderProcessor();
 		EditorAssetDatabase::Initialize();
@@ -72,7 +72,7 @@ namespace Glory::Editor
 		m_pTempWindowImpl = nullptr;
 		m_pTempRenderImpl = nullptr;
 
-		InitializePlatform(game);
+		InitializePlatform(pEngine);
 
 		GloryAPI::Initialize();
 
@@ -110,14 +110,14 @@ namespace Glory::Editor
 		DestroyAllEditableEntities();
 	}
 
-	void EditorApplication::Run(Game& game)
+	void EditorApplication::Run(Engine* pEngine)
 	{
 		GloryAPI::FetchEditorVersion(VersionCheck);
 
 		/* @fixme There is a better place for this */
-		Game::GetGame().GetEngine()->GetSceneManager()->ComponentTypesInstance();
+		pEngine->GetSceneManager()->ComponentTypesInstance();
 
-		game.GetEngine()->StartThreads();
+		pEngine->StartThreads();
 		if(m_pPlatform) m_pPlatform->SetState(Idle);
 		m_pShaderProcessor->Start();
 
@@ -132,7 +132,7 @@ namespace Glory::Editor
 				EditorAssetsWatcher::RunCallbacks();
 
 				// Start a frame
-				game.GetEngine()->GameThreadFrameStart();
+				pEngine->GameThreadFrameStart();
 
 				// Update console
 				Console::Update();
@@ -140,13 +140,13 @@ namespace Glory::Editor
 				// Update asset database
 				EditorAssetDatabase::Update();
 
-				m_pPlayer->Tick(game.GetEngine());
+				m_pPlayer->Tick(pEngine);
 
 				// Update engine (this also does the render loop)
-				game.GetEngine()->ModulesLoop(m_pPlayer);
+				pEngine->ModulesLoop(m_pPlayer);
 
 				// End the current frame
-				game.GetEngine()->GameThreadFrameEnd();
+				pEngine->GameThreadFrameEnd();
 			}
 			return;
 		}
@@ -159,10 +159,10 @@ namespace Glory::Editor
 			EditorAssetsWatcher::RunCallbacks();
 
 			/* We must wait for graphics to initialize */
-			if (!game.GetEngine()->GetGraphicsThread()->IsInitialized()) continue;
+			if (!pEngine->GetGraphicsThread()->IsInitialized()) continue;
 
 			// Start a frame
-			game.GetEngine()->GameThreadFrameStart();
+			pEngine->GameThreadFrameStart();
 			// Update console
 			Console::Update();
 
@@ -175,13 +175,13 @@ namespace Glory::Editor
 			// Update asset database
 			EditorAssetDatabase::Update();
 
-			m_pPlayer->Tick(game.GetEngine());
+			m_pPlayer->Tick(pEngine);
 
 			// Update engine (this also does the render loop)
-			game.GetEngine()->ModulesLoop(m_pPlayer);
+			pEngine->ModulesLoop(m_pPlayer);
 
 			// End the current frame
-			game.GetEngine()->GameThreadFrameEnd();
+			pEngine->GameThreadFrameEnd();
 
 			// We need to wait for the frame to start its rendering
 			m_pPlatform->Wait(Begin);
@@ -254,7 +254,7 @@ namespace Glory::Editor
 	void EditorApplication::StartPlay()
 	{
 		if (m_Mode != EditorMode::M_Edit) return;
-		Debug::LogInfo("Entering play mode");
+		m_pEngine->GetDebug().LogInfo("Entering play mode");
 		m_Mode = EditorMode::M_EnteringPlay;
 		m_pEditorInstance->m_pPlayer->Start();
 		m_Mode = EditorMode::M_Play;
@@ -263,7 +263,7 @@ namespace Glory::Editor
 	void EditorApplication::StopPlay()
 	{
 		if (m_Mode != EditorMode::M_Play) return;
-		Debug::LogInfo("Entering edit mode");
+		m_pEngine->GetDebug().LogInfo("Entering edit mode");
 		m_Mode = EditorMode::M_ExitingPlay;
 		m_pEditorInstance->m_pPlayer->Stop();
 		m_Mode = EditorMode::M_Edit;
@@ -292,9 +292,9 @@ namespace Glory::Editor
 		//ImPlot::ShowDemoWindow();
 	}
 
-	void EditorApplication::InitializePlatform(Game& game)
+	void EditorApplication::InitializePlatform(Engine* pEngine)
 	{
-		m_pPlatform->Initialize(game);
+		m_pPlatform->Initialize(pEngine);
 		m_pMainEditor = new MainEditor();
 		m_pMainEditor->Initialize();
 
@@ -302,7 +302,7 @@ namespace Glory::Editor
 
 		m_pPlayer = new EditorPlayer();
 
-		Debug::LogInfo("Initialized editor platform");
+		m_pEngine->GetDebug().LogInfo("Initialized editor platform");
 	}
 
 	std::string EditorApplication::AssetPathOverrider()
@@ -352,7 +352,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Drag and drop file received at " << path;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 		m_pEditorInstance->m_pMainEditor->OnFileDragAndDrop(path);
 	}
 }

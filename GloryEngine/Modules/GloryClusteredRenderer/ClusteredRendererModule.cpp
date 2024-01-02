@@ -4,7 +4,6 @@
 #include <GPUResourceManager.h>
 #include <FileLoaderModule.h>
 #include <CameraManager.h>
-#include <GloryContext.h>
 
 namespace Glory
 {
@@ -161,7 +160,7 @@ namespace Glory
 		object.ObjectID = renderData.m_ObjectID;
 		object.SceneID = renderData.m_SceneID;
 
-		pMaterial->SetProperties();
+		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
 		pGraphics->DrawMesh(pMeshData, 0 , pMeshData->VertexCount());
 	}
@@ -270,7 +269,7 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(camera, m_pEngine);
+		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 		Texture* pDepthTexture = pRenderTexture->GetTextureAttachment("Depth");
 
 		glm::uvec2 resolution = camera.GetResolution();

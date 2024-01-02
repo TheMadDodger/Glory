@@ -1,14 +1,11 @@
 #include "AssetCallbacks.h"
 #include "AssetDatabase.h"
-#include "GloryContext.h"
 
 namespace Glory
 {
-	//ThreadedVector<std::vector<ASSET_CALLBACK>> AssetCallbacks::m_RegisteredCallbacks;
-
 	void AssetCallbacks::RegisterCallback(const CallbackType& type, ASSET_CALLBACK callback)
 	{
-		ASSET_DATABASE->m_Callbacks.m_RegisteredCallbacks.Do((size_t)type, [&](std::vector<ASSET_CALLBACK>* callbacks) { callbacks->push_back(callback); });
+		m_RegisteredCallbacks.Do((size_t)type, [&](std::vector<ASSET_CALLBACK>* callbacks) { callbacks->push_back(callback); });
 	}
 
 	void AssetCallbacks::Initialize()
@@ -27,7 +24,7 @@ namespace Glory
 	void AssetCallbacks::TriggerCallback(const CallbackType& type, UUID uuid, Resource* pResource)
 	{
 		ResourceMeta meta;
-		if (!AssetDatabase::GetResourceMeta(uuid, meta)) return;
+		if (!m_pDatabase->GetResourceMeta(uuid, meta)) return;
 		m_RegisteredCallbacks.Do((size_t)type, [&](const std::vector<ASSET_CALLBACK>& callbacks)
 		{
 			for (size_t i = 0; i < callbacks.size(); i++)
@@ -54,6 +51,6 @@ namespace Glory
 		m_EnqueuedCallbacks.push_back(callback);
 	}
 
-	AssetCallbacks::AssetCallbacks() {}
+	AssetCallbacks::AssetCallbacks(AssetDatabase* pDatabase): m_pDatabase(pDatabase) {}
 	AssetCallbacks::~AssetCallbacks() {}
 }

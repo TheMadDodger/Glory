@@ -62,7 +62,7 @@ namespace Glory::Editor
 			m_PathToUUIDCache.Set(absolutePath.string(), uuid);
 		}
 
-		Debug::LogInfo("Loaded asset database");
+		m_pEngine->GetDebug().LogInfo("Loaded asset database");
 		AssetCompiler::CompileAssetDatabase();
 		AssetCompiler::CompileNewAssets();
 	}
@@ -72,7 +72,7 @@ namespace Glory::Editor
 		AssetDatabase::Clear();
 		AssetCompiler::CompileAssetDatabase();
 
-		Debug::LogInfo("Reloaded asset database");
+		m_pEngine->GetDebug().LogInfo("Reloaded asset database");
 	}
 
 	void EditorAssetDatabase::InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty)
@@ -133,7 +133,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Moved asset from " << oldPath << " to " << fixedNewPath;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(uuid);
 
@@ -191,7 +191,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Deleted asset: " << uuid;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		if (compile) AssetCompiler::CompileAssetDatabase(uuid);
 
@@ -312,13 +312,13 @@ namespace Glory::Editor
 			pLoadedResource = Importer::Import(path, nullptr);
 			if (!pLoadedResource)
 			{
-				Debug::LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
+				m_pEngine->GetDebug().LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
 
 				LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
 				if (!pModule)
 				{
 					// Not supperted!
-					Debug::LogError("Failed to import file, asset type not supported!");
+					m_pEngine->GetDebug().LogError("Failed to import file, asset type not supported!");
 					return 0;
 				}
 
@@ -326,7 +326,7 @@ namespace Glory::Editor
 
 				if (!pLoadedResource)
 				{
-					Debug::LogError("Failed to import file, could not load resource file!");
+					m_pEngine->GetDebug().LogError("Failed to import file, could not load resource file!");
 					return 0;
 				}
 			}
@@ -349,7 +349,7 @@ namespace Glory::Editor
 			if (!pType)
 			{
 				// Not supperted!
-				Debug::LogError("Failed to import file, could not determine ResourceType!");
+				m_pEngine->GetDebug().LogError("Failed to import file, could not determine ResourceType!");
 				return 0;
 			}
 		}
@@ -374,7 +374,7 @@ namespace Glory::Editor
 		if (!subPath.empty())
 			stream << "Imported subasset " << subPath.string() << " at " << path;
 		else stream << "Imported asset at " << path;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(meta.ID());
 
@@ -409,7 +409,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing " << path << "...";
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 		m_pImportPool->QueueSingleJob(ImportJob, path);
 	}
 
@@ -417,7 +417,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing new scene at " << path << "...";
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -439,7 +439,7 @@ namespace Glory::Editor
 
 		stream.clear();
 		stream << "Imported new scene: " << pScene->Name();
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(meta.ID());
 	}
@@ -448,7 +448,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing scene at " << path << "...";
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -468,7 +468,7 @@ namespace Glory::Editor
 
 		stream.clear();
 		stream << "Imported scene: " << GetAssetName(meta.ID());
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(meta.ID());
 	}
@@ -499,7 +499,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Saved asset to " << location["Path"].AsString();
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(pResource->GetUUID());
 	}
@@ -517,7 +517,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Removed asset " << uuid;
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(uuid);
 	}
@@ -700,12 +700,12 @@ namespace Glory::Editor
 		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
 
 		YAML::Node m_LastSavedNode;
-		Debug::LogInfo("Initialized EditorAssetDatabase");
+		m_pEngine->GetDebug().LogInfo("Initialized EditorAssetDatabase");
 	}
 
 	void EditorAssetDatabase::Cleanup()
 	{
-		Debug::LogInfo("Cleanup EditorAssetDatabase");
+		m_pEngine->GetDebug().LogInfo("Cleanup EditorAssetDatabase");
 
 		m_pImportPool = nullptr;
 		m_AsyncImportCallback = NULL;
@@ -735,20 +735,20 @@ namespace Glory::Editor
 		Resource* pResource = Importer::Import(path, nullptr);
 		if (!pResource)
 		{
-			Debug::LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
+			m_pEngine->GetDebug().LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
 
 			LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
 			if (!pModule)
 			{
 				// Not supperted!
-				Debug::LogError("Failed to import file, asset type not supported!");
+				m_pEngine->GetDebug().LogError("Failed to import file, asset type not supported!");
 				return false;
 			}
 
 			pResource = pModule->Load(path.string());
 			if (!pResource)
 			{
-				Debug::LogError("Failed to import file, the returned Resource is null!");
+				m_pEngine->GetDebug().LogError("Failed to import file, the returned Resource is null!");
 				return false;
 			}
 		}
@@ -761,7 +761,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing module assets at " << path << "...";
-		Debug::LogInfo(stream.str());
+		m_pEngine->GetDebug().LogInfo(stream.str());
 
 		for (auto itor : std::filesystem::directory_iterator(path))
 		{

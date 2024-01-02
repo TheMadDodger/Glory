@@ -103,7 +103,7 @@ namespace Glory::Editor
 
         if (!file.is_open())
         {
-            Debug::LogError("Could not open file: " + path.string());
+            m_pEngine->GetDebug().LogError("Could not open file: " + path.string());
             return nullptr;
         }
 

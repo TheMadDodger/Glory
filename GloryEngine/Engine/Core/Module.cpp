@@ -1,5 +1,4 @@
 #include "Module.h"
-#include "GloryContext.h"
 #include "IScriptExtender.h"
 
 namespace Glory

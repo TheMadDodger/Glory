@@ -102,7 +102,7 @@ namespace Glory
 		// Check if something went wrong
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
-			Debug::LogError("There was an error when trying to create a frame buffer!");
+			m_pEngine->GetDebug().LogError("There was an error when trying to create a frame buffer!");
 			return;
 		}
 

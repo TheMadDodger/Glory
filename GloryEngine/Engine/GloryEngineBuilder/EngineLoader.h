@@ -1,5 +1,6 @@
 #pragma once
 #include <Engine.h>
+#include <Window.h>
 #include <Module.h>
 
 #include <string>
@@ -8,13 +9,16 @@
 
 namespace Glory
 {
+	class Console;
+	class Debug;
+
 	class EngineLoader
 	{
 	public:
 		EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow);
 		virtual ~EngineLoader();
 
-		Engine* LoadEngine();
+		Engine LoadEngine(Console* pConsole, Debug* pDebug);
 		void Unload();
 
 		const size_t ModuleCount() const;

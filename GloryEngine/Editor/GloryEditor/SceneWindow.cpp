@@ -14,7 +14,6 @@
 #include <RendererModule.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui_internal.h>
-#include <GloryContext.h>
 #include <EditorUI.h>
 #include <Shortcuts.h>
 #include <Dispatcher.h>

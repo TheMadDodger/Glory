@@ -3,7 +3,6 @@
 #include <CameraManager.h>
 #include <ImGuizmo.h>
 #include <glm/gtx/matrix_decompose.hpp>
-#include <GloryContext.h>
 #include <Shortcuts.h>
 
 namespace Glory::Editor

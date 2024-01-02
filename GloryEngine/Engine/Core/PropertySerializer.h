@@ -1,49 +1,21 @@
 #pragma once
 #include "YAML_GLM.h"
 #include "GLORY_YAML.h"
-#include "GloryContext.h"
 #include "SerializedTypes.h"
 #include "Serializers.h"
 
 #include <yaml-cpp/yaml.h>
 #include <Reflection.h>
 
-#ifndef PROPERTY_SERIALIZERS
-#define PROPERTY_SERIALIZERS Glory::GloryContext::GetSerializers()->m_pRegisteredPropertySerializers
-#endif
-#ifndef STANDARD_SERIALIZER
-#define STANDARD_SERIALIZER(x) PropertySerializer::RegisterSerializer<SimpleTemplatedPropertySerializer<x>>()
-#endif
-
 namespace Glory
 {
-
 	class PropertySerializer
 	{
 	public:
-		template<class T>
-		static void RegisterSerializer()
-		{
-			PropertySerializer* pSerializer = new T();
-			PROPERTY_SERIALIZERS.push_back(pSerializer);
-		}
-
-		//static PropertySerializer* GetSerializer(Object* pObject);
-		static PropertySerializer* GetSerializer(uint32_t typeHash);
-		static size_t GetID(PropertySerializer* pSerializer);
-
-		static void SerializeProperty(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out);
-		static void DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Node& object);
-
-		static void SerializeProperty(const std::string& name, const TypeData* pTypeData, void* data, YAML::Emitter& out);
-		static void SerializeProperty(const FieldData* pFieldData, void* data, YAML::Emitter& out);
-		static void DeserializeProperty(const TypeData* pTypeData, void* data, YAML::Node& object);
-		static void DeserializeProperty(const FieldData* pFieldData, void* data, YAML::Node& object);
-
 		virtual uint32_t GetSerializedTypeHash() const;
 
 	protected:
-		PropertySerializer(uint32_t typeHash);
+		PropertySerializer(Serializers* pSerializers, uint32_t typeHash);
 		virtual ~PropertySerializer();
 
 	public:
@@ -53,10 +25,12 @@ namespace Glory
 		virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out);
 		virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object);
 
+	protected:
+		Serializers* m_pSerializers;
 
 	private:
 		friend class Engine;
-		static void Cleanup();
+		friend class Serializers;
 
 	private:
 		uint32_t m_TypeHash;
@@ -66,7 +40,8 @@ namespace Glory
 	class SimpleTemplatedPropertySerializer : public PropertySerializer
 	{
 	public:
-		SimpleTemplatedPropertySerializer() : PropertySerializer(ResourceType::GetHash<T>()) {}
+		SimpleTemplatedPropertySerializer(Serializers* pSerializers):
+			PropertySerializer(pSerializers, ResourceType::GetHash<T>()) {}
 		virtual ~SimpleTemplatedPropertySerializer() {}
 
 	private:

@@ -67,7 +67,7 @@ namespace Glory
 		//va_end(list);
 		//
 		//// Print to the TTY
-		//Debug::LogInfo(buffer);
+		//m_pEngine->GetDebug().LogInfo(buffer);
 	}
 
 	JoltPhysicsModule::JoltPhysicsModule()

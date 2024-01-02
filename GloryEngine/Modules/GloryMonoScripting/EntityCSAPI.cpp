@@ -503,7 +503,7 @@ namespace Glory
 		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
 		if (scriptComp.m_Script.AssetUUID() != 0)
 		{
-			Debug::LogError("You are trying to set the script on a ScriptedComponent that already has a script, this is not allowed.");
+			m_pEngine->GetDebug().LogError("You are trying to set the script on a ScriptedComponent that already has a script, this is not allowed.");
 			return;
 		}
 		scriptComp.m_Script = scriptID;
