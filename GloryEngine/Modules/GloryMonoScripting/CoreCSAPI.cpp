@@ -18,7 +18,7 @@
 
 namespace Glory
 {
-	Engine* EngineInstance;
+	Engine* Core_EngineInstance;
 
 	LayerWrapper::LayerWrapper(const Layer* pLayer) : Mask(pLayer ? pLayer->m_Mask : 0),
 		Name(mono_string_new(mono_domain_get(), pLayer ? pLayer->m_Name.c_str() : ""))
@@ -28,47 +28,47 @@ namespace Glory
 
 	void Log(MonoString* message, Debug::LogLevel logLevel, MonoBoolean bIncludeTimeStamp)
 	{
-		EngineInstance->GetDebug().Log(mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
+		Core_EngineInstance->GetDebug().Log(mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
 	}
 
 	void LogInfo(MonoString* message, MonoBoolean bIncludeTimeStamp)
 	{
-		EngineInstance->GetDebug().LogInfo(mono_string_to_utf8(message), bIncludeTimeStamp);
+		Core_EngineInstance->GetDebug().LogInfo(mono_string_to_utf8(message), bIncludeTimeStamp);
 	}
 
 	void LogNotice(MonoString* message, MonoBoolean bIncludeTimeStamp)
 	{
-		EngineInstance->GetDebug().LogNotice(mono_string_to_utf8(message), bIncludeTimeStamp);
+		Core_EngineInstance->GetDebug().LogNotice(mono_string_to_utf8(message), bIncludeTimeStamp);
 	}
 
 	void LogWarning(MonoString* message, MonoBoolean bIncludeTimeStamp)
 	{
-		EngineInstance->GetDebug().LogWarning(mono_string_to_utf8(message), bIncludeTimeStamp);
+		Core_EngineInstance->GetDebug().LogWarning(mono_string_to_utf8(message), bIncludeTimeStamp);
 	}
 
 	void LogError(MonoString* message, MonoBoolean bIncludeTimeStamp)
 	{
-		EngineInstance->GetDebug().LogError(mono_string_to_utf8(message), bIncludeTimeStamp);
+		Core_EngineInstance->GetDebug().LogError(mono_string_to_utf8(message), bIncludeTimeStamp);
 	}
 
 	void LogFatalError(MonoString* message, MonoBoolean bIncludeTimeStamp)
 	{
-		EngineInstance->GetDebug().LogFatalError(mono_string_to_utf8(message), bIncludeTimeStamp);
+		Core_EngineInstance->GetDebug().LogFatalError(mono_string_to_utf8(message), bIncludeTimeStamp);
 	}
 
 	void LogOnce(MonoString* key, MonoString* message, Debug::LogLevel logLevel, MonoBoolean bIncludeTimeStamp)
 	{
-		EngineInstance->GetDebug().LogOnce(mono_string_to_utf8(key), mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
+		Core_EngineInstance->GetDebug().LogOnce(mono_string_to_utf8(key), mono_string_to_utf8(message), logLevel, bIncludeTimeStamp);
 	}
 
 	void DrawLine(Vec3Wrapper start, Vec3Wrapper end, Vec4Wrapper color, float time)
 	{
-		EngineInstance->GetDebug().DrawLine(ToGLMVec3(start), ToGLMVec3(end), ToGLMVec4(color), time);
+		Core_EngineInstance->GetDebug().DrawLine(ToGLMVec3(start), ToGLMVec3(end), ToGLMVec4(color), time);
 	}
 	
 	void DrawRay(Vec3Wrapper start, Vec3Wrapper dir, Vec4Wrapper color, float length, float time)
 	{
-		EngineInstance->GetDebug().DrawRay(ToGLMVec3(start), ToGLMVec3(dir), ToGLMVec4(color), length, time);
+		Core_EngineInstance->GetDebug().DrawRay(ToGLMVec3(start), ToGLMVec3(dir), ToGLMVec4(color), length, time);
 	}
 
 #pragma endregion
@@ -77,67 +77,67 @@ namespace Glory
 
 	float Time_GetDeltaTime()
 	{
-		return EngineInstance->Time().GetDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetDeltaTime<float, std::ratio<1, 1>>();
 	}
 
 	float Time_GetGameDeltaTime()
 	{
-		return EngineInstance->Time().GetGameDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetGameDeltaTime<float, std::ratio<1, 1>>();
 	}
 
 	float Time_GetGraphicsDeltaTime()
 	{
-		return EngineInstance->Time().GetGraphicsDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetGraphicsDeltaTime<float, std::ratio<1, 1>>();
 	}
 
 	float Time_GetUnscaledDeltaTime()
 	{
-		return EngineInstance->Time().GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
 	}
 
 	float Time_GetUnscaledGameDeltaTime()
 	{
-		return EngineInstance->Time().GetUnscaledGameDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetUnscaledGameDeltaTime<float, std::ratio<1, 1>>();
 	}
 
 	float Time_GetUnscaledGraphicsDeltaTime()
 	{
-		return EngineInstance->Time().GetUnscaledGraphicsDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetUnscaledGraphicsDeltaTime<float, std::ratio<1, 1>>();
 	}
 
 	float Time_GetCurrentTime()
 	{
-		return EngineInstance->Time().GetTime();
+		return Core_EngineInstance->Time().GetTime();
 	}
 
 	float Time_GetUnscaledTime()
 	{
-		return EngineInstance->Time().GetUnscaledTime();
+		return Core_EngineInstance->Time().GetUnscaledTime();
 	}
 
 	float Time_GetFrameRate()
 	{
-		return EngineInstance->Time().GetFrameRate();
+		return Core_EngineInstance->Time().GetFrameRate();
 	}
 
 	int Time_GetTotalFrames()
 	{
-		return EngineInstance->Time().GetTotalFrames();
+		return Core_EngineInstance->Time().GetTotalFrames();
 	}
 
 	int Time_GetTotalGameFrames()
 	{
-		return EngineInstance->Time().GetTotalGameFrames();
+		return Core_EngineInstance->Time().GetTotalGameFrames();
 	}
 
 	float Time_GetTimeScale()
 	{
-		return EngineInstance->Time().GetTimeScale();
+		return Core_EngineInstance->Time().GetTimeScale();
 	}
 
 	void Time_SetTimeScale(float scale)
 	{
-		return EngineInstance->Time().SetTimeScale(scale);
+		return Core_EngineInstance->Time().SetTimeScale(scale);
 	}
 
 #pragma endregion
@@ -147,30 +147,30 @@ namespace Glory
 	void LayerManager_AddLayer(MonoString* name)
 	{
 		const std::string nameStr = mono_string_to_utf8(name);
-		EngineInstance->GetLayerManager().AddLayer(nameStr);
+		Core_EngineInstance->GetLayerManager().AddLayer(nameStr);
 	}
 
 	LayerWrapper LayerManager_GetLayerByName(MonoString* name)
 	{
 		const std::string nameStr = mono_string_to_utf8(name);
-		const Layer* layer = EngineInstance->GetLayerManager().GetLayerByName(nameStr);
+		const Layer* layer = Core_EngineInstance->GetLayerManager().GetLayerByName(nameStr);
 		return { layer };
 	}
 
 	MonoString* LayerManager_LayerMaskToString(const LayerMask* layerMask)
 	{
-		const std::string str = EngineInstance->GetLayerManager().LayerMaskToString(*layerMask);
+		const std::string str = Core_EngineInstance->GetLayerManager().LayerMaskToString(*layerMask);
 		return mono_string_new(mono_domain_get(), str.c_str());
 	}
 
 	int LayerManager_GetLayerIndex(const Layer* pLayer)
 	{
-		return EngineInstance->GetLayerManager().GetLayerIndex(pLayer);
+		return Core_EngineInstance->GetLayerManager().GetLayerIndex(pLayer);
 	}
 
 	LayerWrapper LayerManager_GetLayerAtIndex(int index)
 	{
-		const Layer* layer = EngineInstance->GetLayerManager().GetLayerAtIndex(index);
+		const Layer* layer = Core_EngineInstance->GetLayerManager().GetLayerAtIndex(index);
 		return { layer };
 	}
 
@@ -181,12 +181,12 @@ namespace Glory
 	void Profiler_BeginSample(MonoString* name)
 	{
 		const std::string nameStr = mono_string_to_utf8(name);
-		Profiler::BeginSample(nameStr);
+		Core_EngineInstance->Profiler().BeginSample(nameStr);
 	}
 
 	void Profiler_EndSample()
 	{
-		Profiler::EndSample();
+		Core_EngineInstance->Profiler().EndSample();
 	}
 
 #pragma endregion
@@ -195,14 +195,14 @@ namespace Glory
 
 	MonoString* Object_GetName(uint64_t uuid)
 	{
-		Object* pObject = EngineInstance->GetObjectManager().Find(uuid);
+		Object* pObject = Core_EngineInstance->GetObjectManager().Find(uuid);
 		if (!pObject) return nullptr;
 		return mono_string_new(mono_domain_get(), pObject->Name().c_str());
 	}
 
 	void Object_SetName(uint64_t uuid, MonoString* name)
 	{
-		Object* pObject = EngineInstance->GetObjectManager().Find(uuid);
+		Object* pObject = Core_EngineInstance->GetObjectManager().Find(uuid);
 		if (!pObject) return;
 		const std::string nameStr = mono_string_to_utf8(name);
 		pObject->SetName(nameStr);
@@ -210,14 +210,14 @@ namespace Glory
 
 	MonoString* Resource_GetName(uint64_t uuid)
 	{
-		Resource* pResource = EngineInstance->GetAssetManager().GetAssetImmediate(uuid);
+		Resource* pResource = Core_EngineInstance->GetAssetManager().GetAssetImmediate(uuid);
 		if (!pResource) return nullptr;
 		return mono_string_new(mono_domain_get(), pResource->Name().c_str());
 	}
 
 	void Resource_SetName(uint64_t uuid, MonoString* name)
 	{
-		Resource* pResource = EngineInstance->GetAssetManager().GetAssetImmediate(uuid);
+		Resource* pResource = Core_EngineInstance->GetAssetManager().GetAssetImmediate(uuid);
 		if (!pResource) return;
 		const std::string nameStr = mono_string_to_utf8(name);
 		pResource->SetName(nameStr);
@@ -230,10 +230,10 @@ namespace Glory
 	template<typename T>
 	void Material_Set(uint64_t matID, MonoString* propName, T value)
 	{
-		MaterialData* pMaterial = EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
+		MaterialData* pMaterial = Core_EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
 		{
-			EngineInstance->GetDebug().LogError("Material does not exist!");
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
 			return;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
@@ -243,10 +243,10 @@ namespace Glory
 	template<typename T>
 	bool Material_Get(uint64_t matID, MonoString* propName, T value)
 	{
-		MaterialData* pMaterial = EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
+		MaterialData* pMaterial = Core_EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
 		{
-			EngineInstance->GetDebug().LogError("Material does not exist!");
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
 			return false;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
@@ -255,24 +255,24 @@ namespace Glory
 
 	void Material_SetTexture(uint64_t matID, MonoString* propName, uint64_t value)
 	{
-		const auto pMaterial = EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
+		const auto pMaterial = Core_EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
 		{
-			EngineInstance->GetDebug().LogError("Material does not exist!");
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
 			return;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		TextureData* pImage = value ? EngineInstance->GetAssetManager().GetAssetImmediate<TextureData>(value) : nullptr;
+		TextureData* pImage = value ? Core_EngineInstance->GetAssetManager().GetAssetImmediate<TextureData>(value) : nullptr;
 		pMaterial->SetTexture(propNameStr, pImage);
 	}
 
 	bool Material_GetTexture(uint64_t matID, MonoString* propName, uint64_t& value)
 	{
-		AssetManager& pManager = EngineInstance->GetAssetManager();
+		AssetManager& pManager = Core_EngineInstance->GetAssetManager();
 		const auto pMaterial = pManager.GetAssetImmediate<MaterialData>(matID);
 		if (!pMaterial)
 		{
-			EngineInstance->GetDebug().LogError("Material does not exist!");
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
 			return false;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
@@ -288,9 +288,9 @@ namespace Glory
 
 	MonoObject* Scene_NewEmptyObject(uint64_t sceneID)
 	{
-		GScene* pScene = EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if(!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
 		if (!pObjectManager) return nullptr;
 		const Entity entity = pScene->CreateEmptyObject();
 		if (!entity.IsValid()) return nullptr;
@@ -299,9 +299,9 @@ namespace Glory
 
 	MonoObject* Scene_NewEmptyObjectWithName(uint64_t sceneID, MonoString* name)
 	{
-		GScene* pScene = EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
 		if (!pObjectManager) return nullptr;
 		const std::string nameStr = mono_string_to_utf8(name);
 		const Entity entity = pScene->CreateEmptyObject(nameStr, UUID());
@@ -311,16 +311,16 @@ namespace Glory
 
 	size_t Scene_ObjectsCount(uint64_t sceneID)
 	{
-		GScene* pScene = EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
 		return pScene->SceneObjectsCount();
 	}
 
 	MonoObject* Scene_GetSceneObject(uint64_t sceneID, uint64_t objectID)
 	{
-		GScene* pScene = EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
 		if (!pObjectManager) return nullptr;
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return nullptr;
@@ -329,7 +329,7 @@ namespace Glory
 
 	void Scene_Destroy(uint64_t sceneID, uint64_t objectID)
 	{
-		GScene* pScene = EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return;
@@ -338,12 +338,12 @@ namespace Glory
 
 	MonoObject* Scene_InstantiatePrefab(uint64_t sceneID, uint64_t prefabID, Vec3Wrapper position, QuatWrapper rotation, Vec3Wrapper scale, uint64_t parentID)
 	{
-		PrefabData* pPrefab = EngineInstance->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
+		PrefabData* pPrefab = Core_EngineInstance->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
 		if (!pPrefab) return nullptr;
-		GScene* pScene = EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
+		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
 		const Entity parentEntity = pScene->GetEntityByUUID(UUID(parentID));
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
 		if (!pObjectManager) return nullptr;
 		const Entity entity = pScene->InstantiatePrefab(parentEntity.IsValid() ? pScene->GetEntityUUID(parentEntity.GetEntityID()) : 0, pPrefab, ToGLMVec3(position), ToGLMQuat(rotation), ToGLMVec3(scale));
 		if (!entity.IsValid()) return nullptr;
@@ -356,46 +356,46 @@ namespace Glory
 
 	MonoObject* SceneManager_CreateEmptyScene(MonoString* name)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return nullptr;
 		GScene* pScene = pScenes->CreateEmptyScene(mono_string_to_utf8(name));
-		return MonoSceneManager::GetSceneObject(pScene);
+		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
 	}
 
 	size_t SceneManager_OpenScenesCount()
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		return pScenes->OpenScenesCount();
 	}
 
 	MonoObject* SceneManager_GetOpenSceneAt(size_t index)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(index);
-		return MonoSceneManager::GetSceneObject(pScene);
+		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
 	}
 
 	MonoObject* SceneManager_GetOpenScene(uint64_t sceneID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
-		return MonoSceneManager::GetSceneObject(pScene);
+		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
 	}
 
 	MonoObject* SceneManager_GetActiveScene()
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetActiveScene();
-		return MonoSceneManager::GetSceneObject(pScene);
+		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
 	}
 
 	void SceneManager_SetActiveScene(uint64_t sceneID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
@@ -404,7 +404,7 @@ namespace Glory
 
 	void SceneManager_CloseAllScenes()
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
 		pScenes->CloseAllScenes();
 	}
@@ -418,7 +418,7 @@ namespace Glory
 
 	void SceneManager_CloseScene(uint64_t sceneID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
 		pScenes->CloseScene(UUID(sceneID));
 	}
@@ -429,7 +429,7 @@ namespace Glory
 
 	MonoString* SceneObject_GetName(uint64_t objectID, uint64_t sceneID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return nullptr;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;
@@ -439,7 +439,7 @@ namespace Glory
 
 	void SceneObject_SetName(uint64_t objectID, uint64_t sceneID, MonoString* name)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
@@ -450,7 +450,7 @@ namespace Glory
 
 	size_t SceneObject_GetSiblingIndex(uint64_t objectID, uint64_t sceneID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -461,7 +461,7 @@ namespace Glory
 
 	void SceneObject_SetSiblingIndex(uint64_t objectID, uint64_t sceneID, size_t index)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
@@ -472,7 +472,7 @@ namespace Glory
 
 	size_t SceneObject_GetChildCount(uint64_t objectID, uint64_t sceneID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -483,7 +483,7 @@ namespace Glory
 
 	uint64_t SceneObject_GetChild(uint64_t objectID, uint64_t sceneID, size_t index)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -495,7 +495,7 @@ namespace Glory
 
 	uint64_t SceneObject_GetParent(uint64_t objectID, uint64_t sceneID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
@@ -508,7 +508,7 @@ namespace Glory
 
 	void SceneObject_SetParent(uint64_t objectID, uint64_t sceneID, uint64_t parentID)
 	{
-		SceneManager* pScenes = EngineInstance->GetSceneManager();
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
@@ -525,37 +525,37 @@ namespace Glory
 	void CoreCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
 		// Debug
-		BIND("GloryEngine.EngineInstance->GetDebug().Log(string,GloryEngine.LogLevel,bool)", Log);
-		BIND("GloryEngine.EngineInstance->GetDebug().LogInfo(string,bool)", LogInfo);
-		BIND("GloryEngine.EngineInstance->GetDebug().LogNotice(string,bool)", LogNotice);
-		BIND("GloryEngine.EngineInstance->GetDebug().LogWarning(string,bool)", LogWarning);
-		BIND("GloryEngine.EngineInstance->GetDebug().LogError(string,bool)", LogError);
-		BIND("GloryEngine.EngineInstance->GetDebug().LogFatalError(string,bool)", LogFatalError);
-		BIND("GloryEngine.EngineInstance->GetDebug().LogOnce(string,string,GloryEngine.LogLevel,bool)", LogOnce);
-		BIND("GloryEngine.EngineInstance->GetDebug().DrawLine", DrawLine);
-		BIND("GloryEngine.EngineInstance->GetDebug().DrawRay", DrawRay);
+		BIND("GloryEngine.Debug::Log(string,GloryEngine.LogLevel,bool)", Log);
+		BIND("GloryEngine.Debug::LogInfo(string,bool)", LogInfo);
+		BIND("GloryEngine.Debug::LogNotice(string,bool)", LogNotice);
+		BIND("GloryEngine.Debug::LogWarning(string,bool)", LogWarning);
+		BIND("GloryEngine.Debug::LogError(string,bool)", LogError);
+		BIND("GloryEngine.Debug::LogFatalError(string,bool)", LogFatalError);
+		BIND("GloryEngine.Debug::LogOnce(string,string,GloryEngine.LogLevel,bool)", LogOnce);
+		BIND("GloryEngine.Debug::DrawLine", DrawLine);
+		BIND("GloryEngine.Debug::DrawRay", DrawRay);
 
 		// Time
-		BIND("GloryEngine.EngineInstance->Time().Time_GetDeltaTime", Time_GetDeltaTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetGameDeltaTime", Time_GetGameDeltaTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetGraphicsDeltaTime", Time_GetGraphicsDeltaTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetUnscaledDeltaTime", Time_GetUnscaledDeltaTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetUnscaledGameDeltaTime", Time_GetUnscaledGameDeltaTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetUnscaledGraphicsDeltaTime", Time_GetUnscaledGraphicsDeltaTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetCurrentTime", Time_GetCurrentTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetUnscaledTime", Time_GetUnscaledTime);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetFrameRate", Time_GetFrameRate);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetTotalFrames", Time_GetTotalFrames);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetTotalGameFrames", Time_GetTotalGameFrames);
-		BIND("GloryEngine.EngineInstance->Time().Time_SetTimeScale", Time_SetTimeScale);
-		BIND("GloryEngine.EngineInstance->Time().Time_GetTimeScale", Time_GetTimeScale);
+		BIND("GloryEngine.Time::Time_GetDeltaTime", Time_GetDeltaTime);
+		BIND("GloryEngine.Time::Time_GetGameDeltaTime", Time_GetGameDeltaTime);
+		BIND("GloryEngine.Time::Time_GetGraphicsDeltaTime", Time_GetGraphicsDeltaTime);
+		BIND("GloryEngine.Time::Time_GetUnscaledDeltaTime", Time_GetUnscaledDeltaTime);
+		BIND("GloryEngine.Time::Time_GetUnscaledGameDeltaTime", Time_GetUnscaledGameDeltaTime);
+		BIND("GloryEngine.Time::Time_GetUnscaledGraphicsDeltaTime", Time_GetUnscaledGraphicsDeltaTime);
+		BIND("GloryEngine.Time::Time_GetCurrentTime", Time_GetCurrentTime);
+		BIND("GloryEngine.Time::Time_GetUnscaledTime", Time_GetUnscaledTime);
+		BIND("GloryEngine.Time::Time_GetFrameRate", Time_GetFrameRate);
+		BIND("GloryEngine.Time::Time_GetTotalFrames", Time_GetTotalFrames);
+		BIND("GloryEngine.Time::Time_GetTotalGameFrames", Time_GetTotalGameFrames);
+		BIND("GloryEngine.Time::Time_SetTimeScale", Time_SetTimeScale);
+		BIND("GloryEngine.Time::Time_GetTimeScale", Time_GetTimeScale);
 
 		// Layers
-		BIND("GloryEngine.EngineInstance->GetLayerManager().AddLayer", LayerManager_AddLayer);
-		BIND("GloryEngine.EngineInstance->GetLayerManager().GetLayerByName", LayerManager_GetLayerByName);
-		BIND("GloryEngine.EngineInstance->GetLayerManager().LayerMaskToString", LayerManager_LayerMaskToString);
-		BIND("GloryEngine.EngineInstance->GetLayerManager().GetLayerIndex", LayerManager_GetLayerIndex);
-		BIND("GloryEngine.EngineInstance->GetLayerManager().GetLayerAtIndex", LayerManager_GetLayerAtIndex);
+		BIND("GloryEngine.LayerManager::AddLayer", LayerManager_AddLayer);
+		BIND("GloryEngine.LayerManager::GetLayerByName", LayerManager_GetLayerByName);
+		BIND("GloryEngine.LayerManager::LayerMaskToString", LayerManager_LayerMaskToString);
+		BIND("GloryEngine.LayerManager::GetLayerIndex", LayerManager_GetLayerIndex);
+		BIND("GloryEngine.LayerManager::GetLayerAtIndex", LayerManager_GetLayerAtIndex);
 
 		// Profiler
 		BIND("GloryEngine.Profiler::BeginSample", Profiler_BeginSample);
@@ -635,7 +635,7 @@ namespace Glory
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)
 	{
-		EngineInstance = pEngine;
+		Core_EngineInstance = pEngine;
 	}
 
 	CoreCSAPI::CoreCSAPI() {}

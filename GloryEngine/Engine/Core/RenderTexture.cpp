@@ -74,12 +74,12 @@ namespace Glory
 		m_NameToTextureIndex.clear();
 	}
 
-	void RenderTexture::CreateTextures(GPUResourceManager* pResourceManager)
+	void RenderTexture::CreateTextures()
 	{
 		for (size_t i = 0; i < m_CreateInfo.Attachments.size(); i++)
 		{
 			Attachment attachment = m_CreateInfo.Attachments[i];
-			Texture* pTexture = pResourceManager->CreateTexture(m_Width, m_Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, 0, 0, attachment.ImageAspect, SamplerSettings());
+			Texture* pTexture = m_pOwner->CreateTexture(m_Width, m_Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, 0, 0, attachment.ImageAspect, SamplerSettings());
 			m_pTextures[i] = pTexture;
 			m_NameToTextureIndex[attachment.Name] = i;
 			m_Names.push_back(attachment.Name);
@@ -90,7 +90,7 @@ namespace Glory
 
 		//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_Width, m_Height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
 
-		Texture* pDepthTexture = pResourceManager->CreateTexture(m_Width, m_Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth24, ImageType::IT_2D, 0, 0, ImageAspect::IA_Depth, SamplerSettings());
+		Texture* pDepthTexture = m_pOwner->CreateTexture(m_Width, m_Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth24, ImageType::IT_2D, 0, 0, ImageAspect::IA_Depth, SamplerSettings());
 		m_pTextures[depthIndex] = pDepthTexture;
 		m_NameToTextureIndex["Depth"] = depthIndex;
 		m_Names.push_back("Depth");

@@ -4,7 +4,7 @@
 namespace Glory
 {
 	ScriptedComponentSerailizer::ScriptedComponentSerailizer(Serializers* pSerializers):
-		PropertySerializer(pSerializers, ResourceType::GetHash<ScriptedComponent>())
+		PropertySerializer(pSerializers, ResourceTypes::GetHash<ScriptedComponent>())
 	{
 	}
 

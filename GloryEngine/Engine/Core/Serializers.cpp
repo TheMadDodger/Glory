@@ -8,7 +8,7 @@ namespace Glory
 {
 	/* This ensures legacy support by rerouting an old hash to a new one */
 	const std::map<uint32_t, uint32_t> LegacyRehasher = {
-		{ 3536807891, ResourceType::GetHash<GScene>() },
+		{ 3536807891, ResourceTypes::GetHash<GScene>() },
 		{ 1002038608, SerializedType::ST_Object }
 	};
 
@@ -36,7 +36,7 @@ namespace Glory
 
 	size_t Serializers::GetID(PropertySerializer* pSerializer)
 	{
-		for (size_t i = 0; i < m_pRegisteredPropertySerializers.size(); i++)
+		for (size_t i = 0; i < m_pRegisteredPropertySerializers.size(); ++i)
 		{
 			if (m_pRegisteredPropertySerializers[i] == pSerializer) return i;
 		}

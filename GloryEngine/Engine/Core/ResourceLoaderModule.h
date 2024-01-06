@@ -1,11 +1,13 @@
 #pragma once
+#include "Module.h"
+#include "Resource.h"
+#include "ResourceType.h"
+#include "Engine.h"
+
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include <any>
 #include <filesystem>
-#include "Module.h"
-#include "Resource.h"
-#include "ResourceType.h"
 
 namespace Glory
 {
@@ -49,9 +51,8 @@ namespace Glory
 	class ResourceLoaderModule : public LoaderModule
 	{
 	public:
-		ResourceLoaderModule(const std::string& extensions)
+		ResourceLoaderModule(const std::string& extensions): m_Extensions(extensions)
 		{
-			ResourceType::RegisterResource<T>(extensions);
 		}
 
 		virtual ~ResourceLoaderModule() {}
@@ -137,7 +138,13 @@ namespace Glory
 		}
 
 	protected:
-		virtual void Initialize() = 0;
+		virtual void Initialize()
+		{
+			m_pEngine->GetResourceTypes().RegisterResource<T>(m_Extensions);
+		}
 		virtual void Cleanup() = 0;
+
+	private:
+		std::string m_Extensions;
 	};
 }

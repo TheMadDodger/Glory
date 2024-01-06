@@ -20,6 +20,7 @@ namespace Glory
 
 	void ASSIMPModule::Initialize()
 	{
+        ResourceLoaderModule::Initialize();
 	}
 
 	void ASSIMPModule::Cleanup()

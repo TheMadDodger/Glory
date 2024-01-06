@@ -66,6 +66,7 @@ namespace Glory
 
 	void SDLImageLoaderModule::Initialize()
 	{
+		ResourceLoaderModule::Initialize();
 		// Initialize for all available extensions
 		m_InitializedFlags = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
 		if (m_InitializedFlags == 0)

@@ -9,7 +9,7 @@ namespace Glory
 {
 	CameraRef CameraManager::GetNewOrUnusedCamera()
 	{
-		Profiler::BeginSample("CameraManager::GetNewOrUnusedCamera");
+		ProfileSample s{ &m_pEngine->Profiler(), "CameraManager::GetNewOrUnusedCamera" };
 		int width, height;
 		m_pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
 
@@ -20,7 +20,6 @@ namespace Glory
 			Camera& pCamera = m_Cameras[index];
 			pCamera.SetResolution(width, height);
 			pCamera.m_IsInUse = true;
-			Profiler::EndSample();
 			return CameraRef(this, pCamera.GetUUID());
 		}
 
@@ -28,7 +27,6 @@ namespace Glory
 		m_Cameras.push_back(Camera(width, height));
 		UUID id = m_Cameras[index].GetUUID();
 		m_IDToCamera[id] = index;
-		Profiler::EndSample();
 		return CameraRef(this, m_Cameras[index].GetUUID());
 	}
 
@@ -41,7 +39,7 @@ namespace Glory
 
 	RenderTexture* CameraManager::GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, bool createIfNotExist)
 	{
-		Profiler::BeginSample("CameraManager::GetRenderTextureForCamera");
+		ProfileSample s{ &m_pEngine->Profiler(), "CameraManager::GetNewOrUnusedCamera" };
 		Camera* pCamera = GetCamera(camera.m_CameraID);
 		if (pCamera == nullptr) return nullptr;
 		if (pCamera->m_pRenderTexture)
@@ -58,7 +56,6 @@ namespace Glory
 				pCamera->m_PerspectiveDirty = false;
 				pEngine->GetMainModule<RendererModule>()->OnCameraPerspectiveChanged(camera);
 			}
-			Profiler::EndSample();
 			return pCamera->m_pRenderTexture;
 		}
 
@@ -68,7 +65,6 @@ namespace Glory
 		uint32_t height = pCamera->m_Resolution.y;
 		pCamera->m_pRenderTexture = pEngine->GetMainModule<RendererModule>()->CreateCameraRenderTexture(width, height);
 		pCamera->m_TextureIsDirty = false;
-		Profiler::EndSample();
 		return pCamera->m_pRenderTexture;
 	}
 

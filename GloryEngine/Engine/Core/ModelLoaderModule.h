@@ -30,7 +30,7 @@ namespace Glory
 		virtual ModelData* LoadResource(const void* buffer, size_t length, const ModelImportSettings& importSettings) override;
 
 	protected:
-		virtual void Initialize() = 0;
+		virtual void Initialize() override;
 		virtual void Cleanup() = 0;
 	};
 }

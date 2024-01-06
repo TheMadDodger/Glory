@@ -44,38 +44,34 @@ namespace Glory
 
 	ShaderSourceData* ShaderSourceLoaderModule::LoadResource(const std::string& path, const ShaderSourceImportSettings& importSettings)
 	{
-		Profiler::BeginSample("FileLoaderModule::LoadResource(path)");
+		ProfileSample s{ &m_pEngine->Profiler(), "FileLoaderModule::LoadResource(path)" };
 		ShaderSourceData* pFile = new ShaderSourceData();
 		if (!ReadFile(path, pFile, importSettings))
 		{
 			delete pFile;
-			Profiler::EndSample();
 			return nullptr;
 		}
-		Profiler::EndSample();
 		return pFile;
 	}
 
 	ShaderSourceData* ShaderSourceLoaderModule::LoadResource(const void* buffer, size_t length, const ShaderSourceImportSettings& importSettings)
 	{
 		// Should never be called because this shader loader is not meant for game builds
-		Profiler::BeginSample("FileLoaderModule::LoadResource(buffer)");
+		ProfileSample s{ &m_pEngine->Profiler(), "FileLoaderModule::LoadResource(buffer)" };
 		ShaderSourceData* pFile = new ShaderSourceData();
 		pFile->m_ProcessedSource.resize(length);
 		memcpy(&pFile->m_ProcessedSource[0], buffer, length);
-		Profiler::EndSample();
 		return pFile;
 	}
 
 	bool ShaderSourceLoaderModule::ReadFile(const std::string& path, ShaderSourceData* pShaderSource, const ShaderSourceImportSettings& importSettings)
 	{
-		Profiler::BeginSample("FileLoaderModule::ReadFile");
+		ProfileSample s{ &m_pEngine->Profiler(), "FileLoaderModule::ReadFile" };
 		std::ifstream file(path, std::ios::binary);
 
 		if (!file.is_open())
 		{
 			m_pEngine->GetDebug().LogError("Could not open file: " + path);
-			Profiler::EndSample();
 			return false;
 		}
 
@@ -86,7 +82,6 @@ namespace Glory
 		file.read(pShaderSource->m_OriginalSource.data(), fileSize);
 		file.close();
 
-
 		std::string originalSourceString(pShaderSource->m_OriginalSource.begin(), pShaderSource->m_OriginalSource.end());
 		std::istringstream stream(originalSourceString);
 		std::string line;
@@ -95,8 +90,6 @@ namespace Glory
 		{
 			ProcessLine(path, pShaderSource, line);
 		}
-
-		Profiler::EndSample();
 
 		return true;
 	}

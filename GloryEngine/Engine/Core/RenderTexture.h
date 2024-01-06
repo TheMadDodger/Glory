@@ -64,7 +64,7 @@ namespace Glory
 		virtual void Initialize() = 0;
 		virtual void OnResize() = 0;
 
-		void CreateTextures(GPUResourceManager* pResourceManager);
+		void CreateTextures();
 
 	protected:
 		friend class GPUResourceManager;

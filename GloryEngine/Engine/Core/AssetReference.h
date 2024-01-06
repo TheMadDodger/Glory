@@ -41,7 +41,7 @@ namespace Glory
 
 		virtual const uint32_t TypeHash() override
 		{
-			static const uint32_t typeHash = ResourceType::GetHash<T>();
+			static const uint32_t typeHash = ResourceTypes::GetHash<T>();
 			return typeHash;
 		}
 

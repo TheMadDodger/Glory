@@ -1,16 +1,18 @@
 #include "OGLResourceManager.h"
 #include "GLBuffer.h"
 #include "GLMesh.h"
-#include <GL/glew.h>
 #include "GLShader.h"
 #include "OGLMaterial.h"
 #include "GLTexture.h"
 #include "OGLRenderTexture.h"
 #include "GloryOGL.h"
 
+#include <Engine.h>
+#include <GL/glew.h>
+
 namespace Glory
 {
-	OGLResourceManager::OGLResourceManager()
+	OGLResourceManager::OGLResourceManager(Engine* pEngine): GPUResourceManager(pEngine)
 	{
 	}
 
@@ -62,7 +64,7 @@ namespace Glory
 	{
 		Resource* pParent = pTextureData->ParentResource();
 		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
-		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate();
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate(&m_pEngine->GetAssetManager());
 		if (!pImageData) return nullptr;
 		return new GLTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, 0, 0, ImageAspect::IA_Color);
 	}

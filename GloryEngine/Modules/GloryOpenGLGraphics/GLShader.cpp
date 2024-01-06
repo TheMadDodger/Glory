@@ -1,8 +1,10 @@
 #include "GLShader.h"
 #include "OpenGLGraphicsModule.h"
-#include <Debug.h>
 #include "GLConverter.h"
 #include "GloryOGL.h"
+
+#include <Debug.h>
+#include <Engine.h>
 
 namespace Glory
 {
@@ -38,7 +40,7 @@ namespace Glory
 		{
 			glGetShaderInfoLog(m_ShaderID, 512, NULL, infoLog);
 			OpenGLGraphicsModule::LogGLError(glGetError());
-			m_pEngine->GetDebug().LogError(infoLog);
+			m_pOwner->GetEngine()->GetDebug().LogError(infoLog);
 		}
 	}
 }

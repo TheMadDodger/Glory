@@ -43,7 +43,7 @@ namespace Glory
 		{
 			T* pShape = shapeProperty->ShapePointer<T>();
 
-			const TypeData* pTypeData = Reflect::GetTyeData(ResourceType::GetHash<T>());
+			const TypeData* pTypeData = Reflect::GetTyeData(ResourceTypes::GetHash<T>());
 			pSerializers->SerializeProperty("Shape", pTypeData, pShape, out);
 		}
 
@@ -54,7 +54,7 @@ namespace Glory
 			T* pShape = shapeProperty->ShapePointer<T>();
 
 			YAML::Node shape = object["Shape"];
-			const TypeData* pTypeData = Reflect::GetTyeData(ResourceType::GetHash<T>());
+			const TypeData* pTypeData = Reflect::GetTyeData(ResourceTypes::GetHash<T>());
 			pSerializers->DeserializeProperty(pTypeData, pShape, shape);
 		}
 	};
@@ -74,7 +74,7 @@ namespace Glory
 	}
 
 	ShapePropertySerializer::ShapePropertySerializer(Serializers* pSerializers):
-		PropertySerializer(pSerializers, ResourceType::GetHash<ShapeProperty>()) {}
+		PropertySerializer(pSerializers, ResourceTypes::GetHash<ShapeProperty>()) {}
 
 	void ShapePropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
 	{

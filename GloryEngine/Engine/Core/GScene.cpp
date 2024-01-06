@@ -319,8 +319,8 @@ namespace Glory
 		const std::string& serializedComponents = node.SerializedComponents();
 		YAML::Node components = YAML::Load(serializedComponents);
 		
-		const uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
-		const uint32_t scriptedTypeHash = ResourceType::GetHash(typeid(ScriptedComponent));
+		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
+		const uint32_t scriptedTypeHash = ResourceTypes::GetHash(typeid(ScriptedComponent));
 		
 		size_t currentComponentIndex = 0;
 		for (size_t i = 0; i < components.size(); ++i)

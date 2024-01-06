@@ -167,7 +167,7 @@ namespace Glory
 
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
 	{
-		const ResourceType* pResourceType = ResourceType::GetResourceType(extension);
+		const ResourceType* pResourceType = m_ResourceTypes->GetResourceType(extension);
 		if (!pResourceType) return nullptr;
 		return GetLoaderModule(pResourceType->Hash());
 	}
@@ -211,7 +211,7 @@ namespace Glory
 		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr),
 		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
-		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler(this))
+		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler())
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -252,7 +252,9 @@ namespace Glory
 		}
 
 		AddInternalModule(new TimerModule);
-		AddInternalModule(new ProfilerModule);
+		ProfilerModule* pProfiler = new ProfilerModule();
+		m_Profiler->m_pProfiler = pProfiler;
+		AddInternalModule(pProfiler);
 	}
 
 	Engine::~Engine()
@@ -318,7 +320,7 @@ namespace Glory
 				m_pLoaderModules.push_back(pLoaderModule);
 				std::type_index type = pLoaderModule->GetResourceType();
 				m_TypeToLoader[type] = index;
-				uint32_t typeHash = ResourceType::GetHash(type);
+				uint32_t typeHash = ResourceTypes::GetHash(type);
 				m_TypeHashToLoader[typeHash] = index;
 			}
 
@@ -423,6 +425,21 @@ namespace Glory
 		return m_pUserContexts.at(hash);
 	}
 
+	void Engine::RequestQuit()
+	{
+		m_Quit = true;
+	}
+
+	void Engine::CancelQuit()
+	{
+		m_Quit = false;
+	}
+
+	bool Engine::WantsToQuit() const
+	{
+		return m_Quit;
+	}
+
 	void Engine::RegisterStandardSerializers()
 	{
 		// Standard
@@ -452,18 +469,18 @@ namespace Glory
 
 	void Engine::RegisterBasicTypes()
 	{
-		ResourceType::RegisterType<int>();
-		ResourceType::RegisterType<float>();
-		ResourceType::RegisterType<double>();
-		ResourceType::RegisterType<long>();
-		ResourceType::RegisterType<glm::vec2>();
-		ResourceType::RegisterType<glm::vec3>();
-		ResourceType::RegisterType<glm::vec4>();
-		ResourceType::RegisterType<glm::quat>();
-		ResourceType::RegisterType<LayerMask>();
-		ResourceType::RegisterType<SceneObjectRef>();
-		ResourceType::RegisterType<ShapeProperty>();
-		ResourceType::RegisterResource<PrefabData>("");
+		m_ResourceTypes->RegisterType<int>();
+		m_ResourceTypes->RegisterType<float>();
+		m_ResourceTypes->RegisterType<double>();
+		m_ResourceTypes->RegisterType<long>();
+		m_ResourceTypes->RegisterType<glm::vec2>();
+		m_ResourceTypes->RegisterType<glm::vec3>();
+		m_ResourceTypes->RegisterType<glm::vec4>();
+		m_ResourceTypes->RegisterType<glm::quat>();
+		m_ResourceTypes->RegisterType<LayerMask>();
+		m_ResourceTypes->RegisterType<SceneObjectRef>();
+		m_ResourceTypes->RegisterType<ShapeProperty>();
+		m_ResourceTypes->RegisterResource<PrefabData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");

@@ -604,6 +604,8 @@ namespace Glory
 
 	void JoltPhysicsModule::Initialize()
 	{
+		m_ObjectVSBroadPhase.m_pLayers = &m_pEngine->GetLayerManager();
+
 		Reflect::RegisterEnum<BPLayer>();
 
 		// Register allocation hook
@@ -725,7 +727,7 @@ namespace Glory
 		static uint32_t step = 0;
 		
 		// We simulate the physics world in discrete time steps.
-		const float engineDeltaTime = Time::GetDeltaTime<float, std::ratio<1, 1>>();
+		const float engineDeltaTime = m_pEngine->Time().GetDeltaTime<float, std::ratio<1, 1>>();
 		const uint32_t tickRate = Settings().Value<unsigned int>("TickRate");
 		static float timer = 0.0f;
 		timer += engineDeltaTime;

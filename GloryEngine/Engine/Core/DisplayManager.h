@@ -1,11 +1,12 @@
 #pragma once
 #include "RenderTexture.h"
-#include "Engine.h"
 
 #include <vector>
 
 namespace Glory
 {
+	class Engine;
+
 	class DisplayManager
 	{
 	public:
@@ -27,6 +28,7 @@ namespace Glory
 	private:
 		friend class Engine;
 		friend class RendererModule;
+		Engine* m_pEngine;
 		RenderTexture* m_pRenderTextures[MAX_DISPLAYS];
 	};
 }

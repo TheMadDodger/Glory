@@ -22,7 +22,7 @@ namespace Glory
 
 		std::type_index type = typeid(Resource);
 		if (!pResource->GetType(0, type)) return;
-		const uint32_t typeHash = ResourceType::GetHash(type);
+		const uint32_t typeHash = ResourceTypes::GetHash(type);
 
 		/* Write name, type and sub resource count */
 		m_pStream->Write(pResource->Name()).Write(typeHash).Write(subResourcesCount);

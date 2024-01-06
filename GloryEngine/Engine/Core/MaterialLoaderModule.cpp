@@ -117,11 +117,11 @@ namespace Glory
 			
 			node = propertyNode["Value"];
 
-			const BasicTypeData* typeData = ResourceType::GetBasicTypeData(typeHash);
+			const BasicTypeData* typeData = m_pEngine->GetResourceTypes().GetBasicTypeData(typeHash);
 
 			size_t offset = pMaterialData->GetCurrentBufferOffset();
 
-			bool isResource = ResourceType::IsResource(typeHash);
+			bool isResource = m_pEngine->GetResourceTypes().IsResource(typeHash);
 			if (!isResource)
 			{
 				pMaterialData->AddProperty(displayName, shaderName, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
@@ -166,7 +166,7 @@ namespace Glory
 			YAML_WRITE(out, ShaderName, pPropertyInfo->ShaderName());
 			YAML_WRITE(out, TypeHash, pPropertyInfo->TypeHash());
 
-			bool isResource = ResourceType::IsResource(pPropertyInfo->m_TypeHash);
+			bool isResource = m_pEngine->GetResourceTypes().IsResource(pPropertyInfo->m_TypeHash);
 			if (!isResource)
 			{
 				m_pEngine->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(), pPropertyInfo->m_TypeHash, pPropertyInfo->m_Offset, pPropertyInfo->m_Size, out);
@@ -187,7 +187,7 @@ namespace Glory
 
 	void MaterialLoaderModule::Initialize()
 	{
-
+		ResourceLoaderModule::Initialize();
 	}
 
 	void MaterialLoaderModule::Cleanup()

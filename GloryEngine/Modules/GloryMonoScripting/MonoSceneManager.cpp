@@ -7,7 +7,7 @@
 out = mono_class_from_name(pAssembly->GetMonoImage(), STRINGIZE(ns), STRINGIZE(name)); \
 if (!out) \
 { \
-    m_pEngine->GetDebug().LogError(STRINGIZE(MonoSceneManager::Initialize > Could not load ns.##name class!)); \
+    pEngine->GetDebug().LogError(STRINGIZE(MonoSceneManager::Initialize > Could not load ns.##name class!)); \
     return; \
 } \
 mono_class_init(out);
@@ -30,7 +30,7 @@ while ((method = mono_class_get_methods(cls, &iter))) \
 } \
 if (!out) \
 { \
-    m_pEngine->GetDebug().LogError(STRINGIZE(MonoSceneManager::Initialize: Could not load ns.##name##.::ctor method!)); \
+    pEngine->GetDebug().LogError(STRINGIZE(MonoSceneManager::Initialize: Could not load ns.##name##.::ctor method!)); \
     return; \
 }
 
@@ -45,28 +45,28 @@ namespace Glory
 	MonoMethod* MonoSceneManager::m_pEntitySceneObjectConstructor = nullptr;
 	MonoMethod* MonoSceneManager::m_pEntitySceneConstructor = nullptr;
 
-	MonoObject* MonoSceneManager::GetSceneObject(GScene* pScene)
+	MonoObject* MonoSceneManager::GetSceneObject(Engine* pEngine, GScene* pScene)
 	{
 		if (!pScene)
 		{
-			m_pEngine->GetDebug().LogError("MonoSceneManager::GetSceneObject: Attempting to make scene object for nullptr scene!");
+			pEngine->GetDebug().LogError("MonoSceneManager::GetSceneObject: Attempting to make scene object for nullptr scene!");
 			return nullptr;
 		}
 
 		if (m_SceneObjectCache.find(pScene) == m_SceneObjectCache.end())
 		{
-			MonoObject* pMonoSceneObject = GetSceneObject_Internal(pScene);
+			MonoObject* pMonoSceneObject = GetSceneObject_Internal(pEngine, pScene);
 			m_SceneObjectCache.emplace(pScene, pMonoSceneObject);
 		}
 
 		return m_SceneObjectCache.at(pScene);
 	}
 
-	MonoSceneObjectManager* MonoSceneManager::GetSceneObjectManager(GScene* pScene)
+	MonoSceneObjectManager* MonoSceneManager::GetSceneObjectManager(Engine* pEngine, GScene* pScene)
 	{
 		if (!pScene)
 		{
-			m_pEngine->GetDebug().LogError("MonoSceneManager::GetSceneObjectManager: Attempting to make scene object for nullptr scene!");
+			pEngine->GetDebug().LogError("MonoSceneManager::GetSceneObjectManager: Attempting to make scene object for nullptr scene!");
 			return nullptr;
 		}
 
@@ -79,12 +79,12 @@ namespace Glory
 		return m_SceneObjectManagers.at(pScene);
 	}
 
-	void MonoSceneManager::DestroyScene(GScene* pScene)
+	void MonoSceneManager::DestroyScene(Engine* pEngine, GScene* pScene)
 	{
 
 	}
 
-	void MonoSceneManager::Initialize(Assembly* pAssembly)
+	void MonoSceneManager::Initialize(Engine* pEngine, Assembly* pAssembly)
 	{
 		GET_CLASS(GloryEngine.SceneManagement, Scene, m_pEntitySceneClass);
 		GET_CLASS(GloryEngine.SceneManagement, SceneObject, m_pEntitySceneObjectClass);
@@ -108,12 +108,12 @@ namespace Glory
 		m_SceneObjectCache.clear();
 	}
 
-	MonoObject* MonoSceneManager::GetSceneObject_Internal(GScene* pScene)
+	MonoObject* MonoSceneManager::GetSceneObject_Internal(Engine* pEngine, GScene* pScene)
 	{
 		MonoObject* pMonoObject = mono_object_new(mono_domain_get(), m_pEntitySceneClass);
 		if (pMonoObject == nullptr)
 		{
-			m_pEngine->GetDebug().LogError("MonoEntityObjectManager::GetSceneObject_Impl > Failed to create MonoObject from class");
+			pEngine->GetDebug().LogError("MonoEntityObjectManager::GetSceneObject_Impl > Failed to create MonoObject from class");
 			return nullptr;
 		}
 

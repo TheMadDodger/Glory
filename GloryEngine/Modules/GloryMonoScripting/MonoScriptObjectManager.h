@@ -31,6 +31,7 @@ namespace Glory
 		friend class AssemblyDomain;
 		MonoScriptObjectManager();
 		virtual ~MonoScriptObjectManager();
+
 		std::map<UUID, ObjectInstanceData> m_Objects;
 		std::map<MonoClass*, MonoObject*> m_pDummyScriptObjects;
 		std::map<MonoObject*, UUID> m_pMonoToObject;

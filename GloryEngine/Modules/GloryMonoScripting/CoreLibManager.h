@@ -14,7 +14,7 @@ namespace Glory
         GLORY_API Assembly* GetAssemblyBinding() const;
 
     public:
-        void Initialize(Assembly* pAssembly) override;
+        void Initialize(Engine* pEngine, Assembly* pAssembly) override;
         void Cleanup() override;
 
     private:

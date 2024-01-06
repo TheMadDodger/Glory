@@ -11,13 +11,15 @@
 #include <JoltPhysicsModule.h>
 #include <RendererModule.h>
 
-#define PHYSICS Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>()
-#define RENDERER Game::GetGame().GetEngine()->GetMainModule<RendererModule>()
-#define SCRIPTING Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()
+#define PHYSICS Physics_EngineInstance->GetOptionalModule<JoltPhysicsModule>()
+#define RENDERER Physics_EngineInstance->GetMainModule<RendererModule>()
+#define SCRIPTING Physics_EngineInstance->GetScriptingModule<GloryMonoScipting>()
 #define ASSEMBLY SCRIPTING->GetMonoManager()->ActiveDomain()->GetAssembly("GloryEngine.Jolt.dll")
 
 namespace Glory
 {
+	Engine* Physics_EngineInstance;
+
 #pragma region Ray Casting
 
 	MonoArray* Physics_CastRay(Vec3Wrapper origin, Vec3Wrapper direction, float maxDistance, const LayerMask layerMask, MonoArray* ignoreBodies, bool debugDraw)
@@ -374,6 +376,11 @@ namespace Glory
 		BIND("GloryEngine.Shapes::Shapes_CreateBox", Shapes_CreateBox);
 		BIND("GloryEngine.Shapes::Shapes_CreateSphere", Shapes_CreateSphere);
 		BIND("GloryEngine.Shapes::Shapes_CreateCapsule", Shapes_CreateCapsule);
+	}
+
+	void PhysicsCSAPI::SetEngine(Engine* pEngine)
+	{
+		Physics_EngineInstance = pEngine;
 	}
 
 #pragma endregion

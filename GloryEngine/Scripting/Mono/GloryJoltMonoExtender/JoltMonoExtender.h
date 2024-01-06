@@ -12,7 +12,7 @@ namespace Glory
 	class JoltLibManager : public IMonoLibManager
 	{
 	public: /* Lib manager implementation */
-		virtual void Initialize(Assembly* pAssembly) override;
+		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) override;
 		virtual void Cleanup() override;
 	};
 

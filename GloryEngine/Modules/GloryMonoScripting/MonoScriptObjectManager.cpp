@@ -1,6 +1,9 @@
 #include "MonoScriptObjectManager.h"
 #include "MonoManager.h"
 
+#include <Engine.h>
+#include <Debug.h>
+
 namespace Glory
 {
     MonoObject* MonoScriptObjectManager::GetMonoScriptDummyObject(MonoClass* pClass)
@@ -86,7 +89,7 @@ namespace Glory
         MonoObject* pMonoObject = mono_object_new(pDomain, pClass);
         if (pMonoObject == nullptr)
         {
-            m_pEngine->GetDebug().LogError("MonoScriptObjectManager::CreateObject > Failed to create MonoObject from class");
+            MonoManager::Instance()->Module()->GetEngine()->GetDebug().LogError("MonoScriptObjectManager::CreateObject > Failed to create MonoObject from class");
             return nullptr;
         }
         mono_runtime_object_init(pMonoObject);
@@ -103,7 +106,7 @@ namespace Glory
         MonoObject* pMonoObject = mono_object_new(pDomain, pClass);
         if (pMonoObject == nullptr)
         {
-            m_pEngine->GetDebug().LogError("MonoScriptObjectManager::CreateDummyObject > Failed to create MonoObject from class");
+            MonoManager::Instance()->Module()->GetEngine()->GetDebug().LogError("MonoScriptObjectManager::CreateDummyObject > Failed to create MonoObject from class");
             return nullptr;
         }
         mono_runtime_object_init(pMonoObject);

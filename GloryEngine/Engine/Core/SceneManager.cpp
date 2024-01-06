@@ -45,11 +45,10 @@ namespace Glory
 
 	GScene* SceneManager::CreateEmptyScene(const std::string& name)
 	{
-		Profiler::BeginSample("ScenesModule::CreateEmptyScene");
+		ProfileSample s{ &m_pEngine->Profiler(), "ScenesModule::CreateEmptyScene" };
 		GScene* pScene = new GScene(name);
 		pScene->m_pManager = this;
 		m_pOpenScenes.push_back(pScene);
-		Profiler::EndSample();
 		return pScene;
 	}
 
@@ -157,7 +156,7 @@ namespace Glory
 
 		/* Register serializers */
 		m_pEngine->GetSerializers().RegisterSerializer<ScriptedComponentSerailizer>();
-		ResourceType::RegisterResource<GScene>(".gscene");
+		m_pEngine->GetResourceTypes().RegisterResource<GScene>(".gscene");
 
 		// Register Invocations
 		// Transform
@@ -201,15 +200,13 @@ namespace Glory
 
 	void SceneManager::Update()
 	{
-		Profiler::BeginSample("SceneManager::Tick");
+		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Tick" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnTick(); });
-		Profiler::EndSample();
 	}
 
 	void SceneManager::Draw()
 	{
-		Profiler::BeginSample("SceneManager::Paint");
+		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Paint" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
-		Profiler::EndSample();
 	}
 }

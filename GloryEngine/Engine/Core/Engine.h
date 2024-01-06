@@ -196,6 +196,10 @@ namespace Utils::Reflect
 		void AddUserContext(uint32_t hash, void* pUserContext);
 		void* GetUserContext(uint32_t hash);
 
+		void RequestQuit();
+		void CancelQuit();
+		bool WantsToQuit() const;
+
 		UUIDRemapper m_UUIDRemapper;
 
 	private:
@@ -249,6 +253,8 @@ namespace Utils::Reflect
 
 		Console* m_Console;
 		Debug* m_Debug;
+
+		bool m_Quit = false;
 
 		std::unique_ptr<GameTime> m_Time;
 		std::unique_ptr<CameraManager> m_CameraManager;

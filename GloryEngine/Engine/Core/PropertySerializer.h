@@ -41,7 +41,7 @@ namespace Glory
 	{
 	public:
 		SimpleTemplatedPropertySerializer(Serializers* pSerializers):
-			PropertySerializer(pSerializers, ResourceType::GetHash<T>()) {}
+			PropertySerializer(pSerializers, ResourceTypes::GetHash<T>()) {}
 		virtual ~SimpleTemplatedPropertySerializer() {}
 
 	private:

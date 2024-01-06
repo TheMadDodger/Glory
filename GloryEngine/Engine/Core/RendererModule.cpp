@@ -38,15 +38,14 @@ namespace Glory
 
 	void RendererModule::Submit(const RenderData& renderData)
 	{
-		Profiler::BeginSample("RendererModule::Submit(renderData)");
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(renderData)" };
 		m_CurrentPreparingFrame.ObjectsToRender.push_back(renderData);
 		OnSubmit(renderData);
-		Profiler::EndSample();
 	}
 
 	void RendererModule::Submit(CameraRef camera)
 	{
-		Profiler::BeginSample("RendererModule::Submit(camera)");
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(camera)" };
 		auto it = std::find_if(m_CurrentPreparingFrame.ActiveCameras.begin(), m_CurrentPreparingFrame.ActiveCameras.end(), [camera, this](const CameraRef& other)
 		{
 			return camera.GetPriority() < other.GetPriority();
@@ -56,13 +55,11 @@ namespace Glory
 		{
 			m_CurrentPreparingFrame.ActiveCameras.insert(it, camera);
 			OnSubmit(camera);
-			Profiler::EndSample();
 			return;
 		}
 
 		m_CurrentPreparingFrame.ActiveCameras.push_back(camera);
 		OnSubmit(camera);
-		Profiler::EndSample();
 	}
 
 	void RendererModule::Submit(CameraRef camera, RenderTexture* pTexture)
@@ -71,10 +68,9 @@ namespace Glory
 
 	void RendererModule::Submit(const PointLight& light)
 	{
-		Profiler::BeginSample("RendererModule::Submit(light)");
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
 		m_CurrentPreparingFrame.ActiveLights.push_back(light);
 		OnSubmit(light);
-		Profiler::EndSample();
 	}
 
 	void RendererModule::OnGameThreadFrameStart()
@@ -83,9 +79,8 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, RendererModule, );
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
-		Profiler::BeginSample("RendererModule::StartFrame");
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
 		m_CurrentPreparingFrame = RenderFrame();
-		Profiler::EndSample();
 	}
 
 	void RendererModule::OnGameThreadFrameEnd()
@@ -94,9 +89,8 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, RendererModule, );
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
-		Profiler::BeginSample("RendererModule::EndFrame");
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::EndFrame" };
 		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);
-		Profiler::EndSample();
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -256,7 +250,7 @@ namespace Glory
 	{
 		ReadHoveringObject();
 
-		Profiler::BeginSample("RendererModule::Render");
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
 		m_pEngine->GetDisplayManager().ClearAllDisplays(m_pEngine);
 
 		for (size_t i = 0; i < frame.ActiveCameras.size(); i++)
@@ -273,9 +267,9 @@ namespace Glory
 			{
 				LayerMask mask = camera.GetLayerMask();
 				if (mask != 0 && (mask & frame.ObjectsToRender[j].m_LayerMask) == 0) continue;
-				Profiler::BeginSample("RendererModule::OnRender");
+				m_pEngine->Profiler().BeginSample("RendererModule::OnRender");
 				OnRender(camera, frame.ObjectsToRender[j]);
-				Profiler::EndSample();
+				m_pEngine->Profiler().EndSample();
 			}
 
 			RenderLines(camera);
@@ -296,11 +290,11 @@ namespace Glory
 				pOutputTexture->GetDimensions(width, height);
 				if (width != resolution.x || height != resolution.y) pOutputTexture->Resize(resolution.x, resolution.y);
 
-				Profiler::BeginSample("RendererModule::OnRender > Output Rendering");
+				m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
 				pOutputTexture->Bind();
 				OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
 				pOutputTexture->UnBind();
-				Profiler::EndSample();
+				m_pEngine->Profiler().EndSample();
 			}
 
 			int displayIndex = camera.GetDisplayIndex();
@@ -313,21 +307,20 @@ namespace Glory
 			int width, height;
 			pWindow->GetDrawableSize(&width, &height);
 
-			Profiler::BeginSample("RendererModule::OnRender > Display Rendering");
+			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Display Rendering");
 			pDisplayRenderTexture->Bind();
 			OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
 			pDisplayRenderTexture->UnBind();
-			Profiler::EndSample();
+			m_pEngine->Profiler().EndSample();
 		}
 
 		m_LastSubmittedObjectCount = frame.ObjectsToRender.size();
 		m_LastSubmittedCameraCount = frame.ActiveCameras.size();
-		Profiler::EndSample();
 	}
 
 	void RendererModule::ReadHoveringObject()
 	{
-		Profiler::BeginSample("RendererModule::Pick");
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Pick" };
 		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(m_PickCamera, m_pEngine, false);
 		if (pRenderTexture == nullptr) return;
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
@@ -342,7 +335,6 @@ namespace Glory
 		ObjData object;
 		pRenderTexture->ReadColorPixel("object", m_PickPos, &object, DataType::DT_UInt);
 		m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
-		Profiler::EndSample();
 	}
 
 	void RendererModule::CreateLineBuffer()

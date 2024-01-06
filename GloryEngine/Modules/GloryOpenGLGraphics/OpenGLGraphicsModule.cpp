@@ -7,6 +7,7 @@
 #include "GLConverter.h"
 
 #include <Engine.h>
+#include <Debug.h>
 #include <WindowModule.h>
 #include <Debug.h>
 #include <ios>
@@ -14,6 +15,8 @@
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(OpenGLGraphicsModule);
+
+	Engine* EngineInstance;
 
 	OpenGLGraphicsModule::OpenGLGraphicsModule()
 		: m_ScreenQuadVertexArrayID(0), m_ScreenQuadVertexbufferID(0)
@@ -26,6 +29,7 @@ namespace Glory
 
 	void OpenGLGraphicsModule::OnInitialize()
 	{
+		EngineInstance = m_pEngine;
 	}
 
 	void OpenGLGraphicsModule::OnCleanup()
@@ -143,7 +147,7 @@ namespace Glory
 
 	GPUResourceManager* OpenGLGraphicsModule::CreateGPUResourceManager()
 	{
-		return new OGLResourceManager();
+		return new OGLResourceManager(m_pEngine);
 	}
 
 	void OpenGLGraphicsModule::LogGLError(const GLenum& err, bool bIncludeTimeStamp)
@@ -151,7 +155,7 @@ namespace Glory
 		if (err != GL_NO_ERROR)
 		{
 			const char* error = (const char*)glewGetErrorString(err);
-			m_pEngine->GetDebug().LogWarning(error, bIncludeTimeStamp);
+			EngineInstance->GetDebug().LogWarning(error, bIncludeTimeStamp);
 		}
 	}
 

@@ -15,12 +15,14 @@
 
 namespace Glory
 {
+	Engine* Entity_EngineInstance;
+
 #pragma region Entity
 
 	GScene* GetEntityScene(UUID sceneID)
 	{
 		if (sceneID == 0) return nullptr;
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(sceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene(sceneID);
 		if (pScene == nullptr) return nullptr;
 		return pScene;
 	}
@@ -43,16 +45,16 @@ namespace Glory
 	bool Entity_IsValid(MonoEntityHandle* pMonoEntityHandle)
 	{
 		if (pMonoEntityHandle->m_EntityID == 0 || pMonoEntityHandle->m_SceneID == 0) return false;
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene((UUID)pMonoEntityHandle->m_SceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pMonoEntityHandle->m_SceneID);
 		if (pScene == nullptr) return false;
 		return pScene->GetEntityByEntityID(pMonoEntityHandle->m_EntityID).IsValid();
 	}
 
 	MonoObject* Entity_GetSceneObjectID(MonoEntityHandle* pMonoEntityHandle)
 	{
-		GScene* pScene = (GScene*)Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(pMonoEntityHandle->m_SceneID);
+		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pMonoEntityHandle->m_SceneID);
 		if (!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Entity_EngineInstance, pScene);
 		if (!pObjectManager) return nullptr;
 		Entity entity = pScene->GetEntityByEntityID(pMonoEntityHandle->m_EntityID);
 		if (!entity.IsValid()) return nullptr;
@@ -78,7 +80,7 @@ namespace Glory
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
 		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
@@ -95,7 +97,7 @@ namespace Glory
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
 		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		const UUID uuid{};
@@ -107,7 +109,7 @@ namespace Glory
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
 		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		return pScene->GetRegistry().RemoveComponent(pEntityHandle->m_EntityID, componentHash);
@@ -116,7 +118,7 @@ namespace Glory
 	void Component_RemoveComponentByID(MonoEntityHandle* pEntityHandle, uint64_t id)
 	{
 		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return;
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
 		if (pScene == nullptr) return;
 		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
 		const uint32_t hash = pEntityView->ComponentType(id);
@@ -233,7 +235,7 @@ namespace Glory
 	{
 		MeshFilter& meshFilter = GetComponent<MeshFilter>(pEntityHandle, componentID);
 		UUID uuid = meshFilter.m_Mesh.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(uuid);
+		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
 	}
 
 	void MeshFilter_SetMesh(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
@@ -250,7 +252,7 @@ namespace Glory
 	{
 		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
 		const UUID uuid = meshRenderer.m_Material.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(uuid);
+		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
 	}
 
 	void MeshRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
@@ -263,7 +265,7 @@ namespace Glory
 	{
 		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
 		const UUID uuid = meshRenderer.m_Mesh.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MeshData>(uuid);
+		return MonoAssetManager::MakeMonoAssetObject<MeshData>(Entity_EngineInstance, uuid);
 	}
 
 	void MeshRenderer_SetMesh(MonoEntityHandle* pEntityHandle, UUID componentID, UUID meshID)
@@ -280,7 +282,7 @@ namespace Glory
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
 		UUID uuid = meshRenderer.m_Materials.size() > 0 ? meshRenderer.m_Materials[0].m_MaterialReference.AssetUUID() : 0;
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(uuid);
+		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
 	}
 
 	void ModelRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
@@ -301,7 +303,7 @@ namespace Glory
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
 		if (meshRenderer.m_Materials.size() <= index) return nullptr;
 		UUID uuid = meshRenderer.m_Materials[index].m_MaterialReference.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(uuid);
+		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
 	}
 
 	void ModelRenderer_AddMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
@@ -327,7 +329,7 @@ namespace Glory
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
 		const UUID uuid = meshRenderer.m_Model.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(uuid);
+		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
 	}
 
 	void ModelRenderer_SetModel(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
@@ -437,14 +439,14 @@ namespace Glory
 	LayerWrapper LayerComponent_GetLayer(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
-		return LayerWrapper(layerComp.m_Layer.Layer());
+		return LayerWrapper(layerComp.m_Layer.Layer(&Entity_EngineInstance->GetLayerManager()));
 	}
 
 	void LayerComponent_SetLayer(MonoEntityHandle* pEntityHandle, UUID componentID, LayerWrapper* layer)
 	{
 		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
-		const Layer* pLayer = LayerManager::GetLayerByName(mono_string_to_utf8(layer->Name));
-		layerComp.m_Layer = pLayer ? LayerManager::GetLayerIndex(pLayer) + 1 : 0;
+		const Layer* pLayer = Entity_EngineInstance->GetLayerManager().GetLayerByName(mono_string_to_utf8(layer->Name));
+		layerComp.m_Layer = pLayer ? Entity_EngineInstance->GetLayerManager().GetLayerIndex(pLayer) + 1 : 0;
 	}
 
 #pragma endregion
@@ -495,7 +497,7 @@ namespace Glory
 	{
 		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
 		const UUID uuid = scriptComp.m_Script.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(uuid);
+		return MonoAssetManager::MakeMonoAssetObject<Script>(Entity_EngineInstance, uuid);
 	}
 
 	void ScriptedComponent_SetScript(MonoEntityHandle* pEntityHandle, UUID componentID, UUID scriptID)
@@ -503,7 +505,7 @@ namespace Glory
 		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
 		if (scriptComp.m_Script.AssetUUID() != 0)
 		{
-			m_pEngine->GetDebug().LogError("You are trying to set the script on a ScriptedComponent that already has a script, this is not allowed.");
+			Entity_EngineInstance->GetDebug().LogError("You are trying to set the script on a ScriptedComponent that already has a script, this is not allowed.");
 			return;
 		}
 		scriptComp.m_Script = scriptID;
@@ -635,6 +637,11 @@ namespace Glory
 
 		/* Entity Scene Object */
 		BIND("GloryEngine.Entities.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);
+	}
+
+	void EntityCSAPI::SetEngine(Engine* pEngine)
+	{
+		Entity_EngineInstance = pEngine;
 	}
 
 	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)

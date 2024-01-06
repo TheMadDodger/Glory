@@ -1,12 +1,14 @@
 #include "SDLWindow.h"
 #include "SDLWindowExceptions.h"
-#include "Game.h"
 #include "WindowModule.h"
+
+#include <Input.h>
+#include <Engine.h>
+#include <Debug.h>
 #include <SDL2/SDL_syswm.h>
 #include <SDL2/SDL_vulkan.h>
 #include <iostream>
 #include <map>
-#include <Input.h>
 
 namespace Glory
 {
@@ -416,7 +418,7 @@ namespace Glory
 	void SDLWindow::GetWindowBordersSize(int* top, int* left, int* bottom, int* right)
 	{
 		if (SDL_GetWindowBordersSize(m_pWindow, top, left, bottom, right) == 0) return;
-		m_pEngine->GetDebug().LogError(SDL_GetError());
+		m_pWindowManager->GetEngine()->GetDebug().LogError(SDL_GetError());
 	}
 
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr), m_GLSDLContext(NULL) {}
@@ -432,7 +434,7 @@ namespace Glory
 		switch (event.type)
 		{
 		case SDL_QUIT:
-			Game::Quit();
+			m_pWindowManager->GetEngine()->RequestQuit();
 			return;
 		default:
 			break;

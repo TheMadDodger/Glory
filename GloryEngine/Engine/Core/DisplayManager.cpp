@@ -2,6 +2,7 @@
 #include "EngineProfiler.h"
 #include "WindowModule.h"
 #include "GraphicsModule.h"
+#include "Engine.h"
 
 namespace Glory
 {
@@ -12,14 +13,13 @@ namespace Glory
 
 	void DisplayManager::ClearAllDisplays(Engine* pEngine)
 	{
-		Profiler::BeginSample("DisplayManager::ClearAllDisplays");
+		ProfileSample s{ &m_pEngine->Profiler(), "DisplayManager::ClearAllDisplays" };
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
 			m_pRenderTextures[i]->Bind();
 			pEngine->GetMainModule<GraphicsModule>()->Clear();
 			m_pRenderTextures[i]->UnBind();
 		}
-		Profiler::EndSample();
 	}
 
 	RenderTexture* DisplayManager::CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height)
@@ -29,7 +29,7 @@ namespace Glory
 		return pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateRenderTexture(createInfo);
 	}
 	
-	DisplayManager::DisplayManager() : m_pRenderTextures()
+	DisplayManager::DisplayManager() : m_pEngine(nullptr), m_pRenderTextures()
 	{
 	}
 
@@ -39,6 +39,8 @@ namespace Glory
 
 	void DisplayManager::Initialize(Engine* pEngine)
 	{
+		m_pEngine = pEngine;
+
 		int width, height;
 		pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
 

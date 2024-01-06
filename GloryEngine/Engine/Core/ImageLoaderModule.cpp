@@ -1,6 +1,7 @@
 #include "ImageLoaderModule.h"
 #include "EngineProfiler.h"
 #include "TextureData.h"
+#include "Engine.h"
 
 #include <string>
 
@@ -16,7 +17,7 @@ namespace Glory
 
 	ImageData* ImageLoaderModule::LoadResource(const std::string& path, const ImageImportSettings&)
 	{
-		Profiler::BeginSample("ImageLoaderModule::LoadResource(path)");
+		m_pEngine->Profiler().BeginSample("ImageLoaderModule::LoadResource(path)");
 		ImageData* pImage = LoadTexture(path);
 		pImage->BuildTexture();
 
@@ -25,17 +26,17 @@ namespace Glory
 		pDefualtTexture->m_Image = pImage;
 		pImage->AddSubresource(pDefualtTexture, "Default");
 
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pImage;
 	}
 
 	ImageData* ImageLoaderModule::LoadResource(const void* buffer, size_t length, const ImageImportSettings& importSettings)
 	{
-		Profiler::BeginSample("ImageLoaderModule::LoadResource(buffer)");
+		m_pEngine->Profiler().BeginSample("ImageLoaderModule::LoadResource(buffer)");
 		ImageData* pImage = LoadTexture(buffer, length, importSettings);
 		if (!pImage)
 		{
-			Profiler::EndSample();
+			m_pEngine->Profiler().EndSample();
 			return nullptr;
 		}
 		pImage->BuildTexture();
@@ -45,7 +46,7 @@ namespace Glory
 		pDefualtTexture->m_Image = pImage;
 		pImage->AddSubresource(pDefualtTexture, "Default");
 
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pImage;
 	}
 

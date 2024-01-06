@@ -24,11 +24,11 @@ namespace Glory
 		m_pProfiler->EndSample();
 	}
 
-	EngineProfiler::EngineProfiler(ProfilerModule* pProfiler): m_pProfiler(pProfiler) {}
+	EngineProfiler::EngineProfiler(): m_pProfiler(nullptr) {}
 
 	EngineProfiler::~EngineProfiler() {}
 
-	ProfileSample::ProfileSample(ProfilerModule* pProfiler, const std::string& name): Profiler(pProfiler)
+	ProfileSample::ProfileSample(EngineProfiler* pProfiler, const std::string& name): Profiler(pProfiler)
 	{
 		pProfiler->BeginSample(name);
 	}

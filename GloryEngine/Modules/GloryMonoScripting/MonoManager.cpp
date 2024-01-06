@@ -6,6 +6,8 @@
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
 
+#include <Debug.h>
+
 #include <mono/jit/jit.h>
 #include <mono/utils/mono-counters.h>
 #include <mono/utils/mono-logger.h>
@@ -54,6 +56,8 @@ namespace Glory
 	{
 		const Debug::LogLevel debugLogLevel = logLevel ? MONOTOLOGLEVEL.at(logLevel) : Debug::LogLevel::Info;
 
+		Engine* pEngine = (Engine*)userData;
+
 		std::stringstream str;
 		str << "MONO: ";
 		if (logDomain) str << "Domain: " << logDomain << ": ";
@@ -61,10 +65,10 @@ namespace Glory
 		if (message) str << message;
 		if (fatal)
 		{
-			Glory::m_pEngine->GetDebug().LogFatalError(str.str());
+			pEngine->GetDebug().LogFatalError(str.str());
 			return;
 		}
-		Glory::m_pEngine->GetDebug().Log(str.str(), debugLogLevel);
+		pEngine->GetDebug().Log(str.str(), debugLogLevel);
 	}
 
 	void OnGCAllocation(MonoProfiler* pProfiler, MonoObject* obj)
@@ -76,13 +80,14 @@ namespace Glory
 		const int32_t size = mono_class_instance_size(pMonoClass);
 
 		GMonoProfiler* pGProfiler = (GMonoProfiler*)pProfiler;
+		Engine* pEngine = pGProfiler->m_pMonoManager->Module()->GetEngine();
 		const ModuleSettings& settings = pGProfiler->m_pMonoManager->Module()->Settings();
 		const bool gcLogging = settings.Value<bool>("Enable GC allocation logging");
 		if (gcLogging)
 		{
 			std::stringstream log;
 			log << "New GC allocation of type " << nameSpace << "." << name << " with size " << size << " bytes";
-			Glory::m_pEngine->GetDebug().LogInfo(log.str());
+			pEngine->GetDebug().LogInfo(log.str());
 		}
 
 		const bool autoGarbageCollect = settings.Value<bool>("Auto Collect Garbage");
@@ -98,12 +103,14 @@ namespace Glory
 
 	void OnPrintCallback(const char* string, mono_bool)
 	{
-		m_pEngine->GetDebug().LogWarning(string);
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		pEngine->GetDebug().LogWarning(string);
 	}
 
 	void OnPrintErrorCallback(const char* string, mono_bool)
 	{
-		m_pEngine->GetDebug().LogError(string);
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		pEngine->GetDebug().LogError(string);
 	}
 
 	void MonoManager::Initialize(const std::string& assemblyDir, const std::string& configDir)
@@ -144,7 +151,7 @@ namespace Glory
 		}
 
         /* Setup log callbacks */
-        mono_trace_set_log_handler(OnLogCallback, nullptr);
+        mono_trace_set_log_handler(OnLogCallback, Module()->GetEngine());
         mono_trace_set_print_handler(OnPrintCallback);
         mono_trace_set_printerr_handler(OnPrintErrorCallback);
 
@@ -169,7 +176,7 @@ namespace Glory
 		char* buildInfo = mono_get_runtime_build_info();
 		std::stringstream buildInfoLog;
 		buildInfoLog << "Mono Version: " << buildInfo;
-		m_pEngine->GetDebug().LogInfo(buildInfoLog.str());
+		Module()->GetEngine()->GetDebug().LogInfo(buildInfoLog.str());
 		mono_free(buildInfo);
 	}
 
@@ -203,7 +210,7 @@ namespace Glory
 		AssemblyDomain* pStartDomain = CreateDomain("GloryDomain");
 		if (!pStartDomain->SetCurrentDomain())
 		{
-			m_pEngine->GetDebug().LogFatalError("MonoManager::InitialLoad > Failed to set initial domain");
+			Module()->GetEngine()->GetDebug().LogFatalError("MonoManager::InitialLoad > Failed to set initial domain");
 			return;
 		}
 		m_pActiveDomain = pStartDomain;
@@ -280,7 +287,7 @@ namespace Glory
 		{
 			if (!m_pRootDomain->SetCurrentDomain())
 			{
-				m_pEngine->GetDebug().LogFatalError("MonoManager::UnloadDomain > Failed to set root domain as active!");
+				Module()->GetEngine()->GetDebug().LogFatalError("MonoManager::UnloadDomain > Failed to set root domain as active!");
 				return;
 			}
 			m_pActiveDomain = m_pRootDomain;
@@ -304,7 +311,7 @@ namespace Glory
 		AssemblyDomain* pNewDomain = CreateDomain("GloryDomain");
 		if (!pNewDomain->SetCurrentDomain())
 		{
-			m_pEngine->GetDebug().LogFatalError("MonoManager::Reload > Failed to set new domain as active");
+			Module()->GetEngine()->GetDebug().LogFatalError("MonoManager::Reload > Failed to set new domain as active");
 			return;
 		}
 		m_pActiveDomain = pNewDomain;
@@ -347,6 +354,11 @@ namespace Glory
 	MonoManager* MonoManager::Instance()
 	{
 		return m_pInstance;
+	}
+
+	GloryMonoScipting* MonoManager::Module()
+	{
+		return m_pModule;
 	}
 
 	MonoManager::MonoManager(GloryMonoScipting* pModule)

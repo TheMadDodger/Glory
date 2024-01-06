@@ -7,8 +7,8 @@
 #include "PhysicsSystem.h"
 
 #include <Engine.h>
-#include <Game.h>
 #include <GScene.h>
+#include <SceneManager.h>
 
 #include <Components.h>
 #include <Engine.h>
@@ -18,15 +18,18 @@ namespace Glory
 {
 	void CharacterControllerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
 		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 		JoltShapeManager* pShapes = pPhysics->GetShapeManager();
 
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
 		if (pShape->m_ShapeType == ShapeType::None)
 		{
-			m_pEngine->GetDebug().LogWarning("CharacterController does not have a shape!");
+			pEngine->GetDebug().LogWarning("CharacterController does not have a shape!");
 			return;
 		}
 
@@ -52,7 +55,10 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 
 		PhysicsSystem::RemoveBody(pComponent.m_BodyID);
@@ -64,10 +70,13 @@ namespace Glory
 
 	void CharacterControllerSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			m_pEngine->GetDebug().LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
+			pEngine->GetDebug().LogWarning("A CharacterController was added to an entity but no PhysicsModule was loaded");
 			return;
 		}
 
@@ -78,7 +87,10 @@ namespace Glory
 	{
 		if (!pComponent.m_CharacterID) return;
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 		if (!pCharacters) return;

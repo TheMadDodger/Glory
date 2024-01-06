@@ -18,9 +18,9 @@ namespace Glory
 	class MonoSceneManager
 	{
 	public:
-		static GLORY_API MonoObject* GetSceneObject(GScene* pScene);
-		static GLORY_API MonoSceneObjectManager* GetSceneObjectManager(GScene* pScene);
-		static GLORY_API void DestroyScene(GScene* pScene);
+		static GLORY_API MonoObject* GetSceneObject(Engine* pEngine, GScene* pScene);
+		static GLORY_API MonoSceneObjectManager* GetSceneObjectManager(Engine* pEngine, GScene* pScene);
+		static GLORY_API void DestroyScene(Engine* pEngine, GScene* pScene);
 
 		GETTER(MonoClass, EntitySceneClass);
 		GETTER(MonoClass, EntitySceneObjectClass);
@@ -28,7 +28,7 @@ namespace Glory
 		GETTER(MonoMethod, EntitySceneObjectConstructor);
 
 	private:
-		static void Initialize(Assembly* pAssembly);
+		static void Initialize(Engine* pEngine, Assembly* pAssembly);
 		static void Cleanup();
 
 	private:
@@ -38,7 +38,7 @@ namespace Glory
 		MonoSceneManager() = delete;
 
 	private:
-		static MonoObject* GetSceneObject_Internal(GScene* pScene);
+		static MonoObject* GetSceneObject_Internal(Engine* pEngine, GScene* pScene);
 
 		/* Cache */
 		static std::map<GScene*, MonoObject*> m_SceneObjectCache;

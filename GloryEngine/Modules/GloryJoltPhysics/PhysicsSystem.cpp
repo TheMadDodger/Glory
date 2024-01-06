@@ -3,9 +3,9 @@
 #include "JoltComponents.h"
 
 #include <PhysicsSystem.h>
-#include <Game.h>
 #include <Engine.h>
 #include <GScene.h>
+#include <SceneManager.h>
 #include <Components.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -15,10 +15,13 @@ namespace Glory
 
 	void PhysicsSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			m_pEngine->GetDebug().LogWarning("A PhysicsBody was added to an entity but no PhysocsModule was loaded");
+			pEngine->GetDebug().LogWarning("A PhysicsBody was added to an entity but no PhysocsModule was loaded");
 			return;
 		}
 
@@ -27,7 +30,10 @@ namespace Glory
 
 	void PhysicsSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics) return;
 		if (pComponent.m_BodyID == PhysicsBody::InvalidBodyID) return;
 		m_BodyOwners.erase(pComponent.m_BodyID);
@@ -36,10 +42,13 @@ namespace Glory
 
 	void PhysicsSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			m_pEngine->GetDebug().LogWarning("A PhysicsBody was added to an entity but no PhysicsModule was loaded");
+			pEngine->GetDebug().LogWarning("A PhysicsBody was added to an entity but no PhysicsModule was loaded");
 			return;
 		}
 
@@ -56,10 +65,13 @@ namespace Glory
 
 	void PhysicsSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
+		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
 		{
-			m_pEngine->GetDebug().LogWarning("An Entity has a PhysicsBody but no PhysocsModule was loaded");
+			pEngine->GetDebug().LogWarning("An Entity has a PhysicsBody but no PhysocsModule was loaded");
 			return;
 		}
 
@@ -113,8 +125,12 @@ namespace Glory
 		Utils::ECS::EntityID entity = pair.second;
 		if (!pRegistry->IsValid(entity)) return;
 		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
+
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager& assets = pEngine->GetAssetManager();
 		ScriptedComponent& scriptComponent = pRegistry->GetComponent<ScriptedComponent>(entity);
-		Script* pScript = scriptComponent.m_Script.Get();
+		Script* pScript = scriptComponent.m_Script.Get(&assets);
 		if (!pScript) return;
 		std::vector<void*> args = {
 			&bodyID
@@ -132,8 +148,12 @@ namespace Glory
 		Utils::ECS::EntityID entity = pair.second;
 		if (!pRegistry->IsValid(entity)) return;
 		if (!pRegistry->HasComponent<ScriptedComponent>(entity)) return;
+
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager& assets = pEngine->GetAssetManager();
 		ScriptedComponent& scriptComponent = pRegistry->GetComponent<ScriptedComponent>(entity);
-		Script* pScript = scriptComponent.m_Script.Get();
+		Script* pScript = scriptComponent.m_Script.Get(&assets);
 		if (!pScript) return;
 		std::vector<void*> args = {
 			&bodyID
@@ -155,10 +175,13 @@ namespace Glory
 		Utils::ECS::EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
 
+		GScene* pScene = pRegistry1->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager& assets = pEngine->GetAssetManager();
 		if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
 		{
 			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
-			Script* pScript = scriptComponent.m_Script.Get();
+			Script* pScript = scriptComponent.m_Script.Get(&assets);
 			if (!pScript) return;
 			std::vector<void*> args = {
 				&body1ID,
@@ -172,7 +195,7 @@ namespace Glory
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
 		{
 			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
-			Script* pScript = scriptComponent.m_Script.Get();
+			Script* pScript = scriptComponent.m_Script.Get(&assets);
 			if (!pScript) return;
 			std::vector<void*> args = {
 				&body2ID,
@@ -196,10 +219,13 @@ namespace Glory
 		Utils::ECS::EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
 
+		GScene* pScene = pRegistry1->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager& assets = pEngine->GetAssetManager();
 		if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
 		{
 			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
-			Script* pScript = scriptComponent.m_Script.Get();
+			Script* pScript = scriptComponent.m_Script.Get(&assets);
 			if (!pScript) return;
 			std::vector<void*> args = {
 				&body1ID,
@@ -213,7 +239,7 @@ namespace Glory
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
 		{
 			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
-			Script* pScript = scriptComponent.m_Script.Get();
+			Script* pScript = scriptComponent.m_Script.Get(&assets);
 			if (!pScript) return;
 			std::vector<void*> args = {
 				&body2ID,
@@ -237,10 +263,13 @@ namespace Glory
 		Utils::ECS::EntityID entity2 = pair2.second;
 		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
 
+		GScene* pScene = pRegistry1->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager& assets = pEngine->GetAssetManager();
 		if (pRegistry1->HasComponent<ScriptedComponent>(entity1))
 		{
 			ScriptedComponent& scriptComponent = pRegistry1->GetComponent<ScriptedComponent>(entity1);
-			Script* pScript = scriptComponent.m_Script.Get();
+			Script* pScript = scriptComponent.m_Script.Get(&assets);
 			if (!pScript) return;
 			std::vector<void*> args = {
 				&body1ID,
@@ -254,7 +283,7 @@ namespace Glory
 		if (pRegistry2->HasComponent<ScriptedComponent>(entity2))
 		{
 			ScriptedComponent& scriptComponent = pRegistry2->GetComponent<ScriptedComponent>(entity2);
-			Script* pScript = scriptComponent.m_Script.Get();
+			Script* pScript = scriptComponent.m_Script.Get(&assets);
 			if (!pScript) return;
 			std::vector<void*> args = {
 				&body2ID,
@@ -284,7 +313,7 @@ namespace Glory
 		const Shape* pShape = pComponent.m_Shape.BaseShapePointer();
 		if (pShape->m_ShapeType == ShapeType::None)
 		{
-			m_pEngine->GetDebug().LogWarning("PhysicsBody does not have a shape!");
+			pPhysics->GetEngine()->GetDebug().LogWarning("PhysicsBody does not have a shape!");
 			return;
 		}
 

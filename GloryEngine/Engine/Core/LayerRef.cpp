@@ -28,7 +28,7 @@ namespace Glory
 	const TypeData* LayerRef::GetTypeData()
 	{
 		static const char* typeNameString = "LayerRef";
-		static const uint32_t TYPE_HASH = ResourceType::GetHash<LayerRef>();
+		static const uint32_t TYPE_HASH = ResourceTypes::GetHash<LayerRef>();
 		static const int NUM_ARGS = 0;
 		static const TypeData pTypeData = TypeData(typeNameString, nullptr, ST_Struct, TYPE_HASH, NUM_ARGS);
 		return &pTypeData;

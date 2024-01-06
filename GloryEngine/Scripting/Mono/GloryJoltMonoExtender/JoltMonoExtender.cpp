@@ -38,9 +38,10 @@ namespace Glory
 		return new JoltMonoExtender();
 	}
 
-	void JoltLibManager::Initialize(Assembly* pAssembly)
+	void JoltLibManager::Initialize(Engine* pEngine, Assembly*)
 	{
-		
+		PhysicsCSAPI::SetEngine(pEngine);
+		PhysicsComponentsCSAPI::SetEngine(pEngine);
 	}
 
 	void JoltLibManager::Cleanup()
