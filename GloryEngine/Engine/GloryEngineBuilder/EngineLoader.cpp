@@ -38,7 +38,10 @@ namespace Glory
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow)
 		: m_CFGPath(cfgPath), m_DefaultWindow(defaultWindow), m_EngineInfo{} {}
 	
-	EngineLoader::~EngineLoader() {}
+	EngineLoader::~EngineLoader()
+	{
+		Unload();
+	}
 
 	Engine EngineLoader::LoadEngine(Console* pConsole, Debug* pDebug)
 	{

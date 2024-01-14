@@ -77,10 +77,6 @@ int main(int argc, char* argv[])
         Glory::Editor::ProjectSpace::OpenProject(projectPath);
 
         application.Run();
-
-        application.Destroy();
-        engine.Cleanup();
-        engineLoader.Unload();
     }
 
     _CrtDumpMemoryLeaks();

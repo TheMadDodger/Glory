@@ -261,6 +261,7 @@ namespace Glory
 
 	Engine::~Engine()
 	{
+		Cleanup();
 	}
 
 	void Engine::Initialize()

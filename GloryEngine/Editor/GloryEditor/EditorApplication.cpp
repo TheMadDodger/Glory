@@ -44,6 +44,8 @@ namespace Glory::Editor
 
 	EditorApplication::~EditorApplication()
 	{
+		Destroy();
+
 		delete m_pFileWatcher;
 		m_pFileWatcher = nullptr;
 	}
