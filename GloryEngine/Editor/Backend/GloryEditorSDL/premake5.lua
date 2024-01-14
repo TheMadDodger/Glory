@@ -34,13 +34,17 @@ project "GloryEditorSDL"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.sdlwindow}",
+		"%{GloryIncludeDir.threads}",
 
 		"%{IncludeDir.FA}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Utils}",
 
 		"%{SubmodoleDirs.ImGui}/backends/",
+
+		"%{rapidjson}",
 	}
 
 	libdirs

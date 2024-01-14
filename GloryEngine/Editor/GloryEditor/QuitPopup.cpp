@@ -35,7 +35,7 @@ namespace Glory::Editor
 			ImGui::SameLine();
 			if (ImGui::Button("Yes", { availableRegion.x / 2.0f - 5.0f, 0.0f }))
 			{
-				EditorApplication::Quit();
+				EditorApplication::GetInstance()->Quit();
 				ImGui::CloseCurrentPopup();
 				m_Open = false;
 			}

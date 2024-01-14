@@ -606,6 +606,8 @@ namespace Glory
 	{
 		m_ObjectVSBroadPhase.m_pLayers = &m_pEngine->GetLayerManager();
 
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+
 		Reflect::RegisterEnum<BPLayer>();
 
 		// Register allocation hook

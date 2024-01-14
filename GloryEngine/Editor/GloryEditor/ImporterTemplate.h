@@ -29,7 +29,7 @@ namespace Glory::Editor
 
 		virtual uint32_t ResourceTypeHash() const override
 		{
-			return ResourceType::GetHash<T>();
+			return ResourceTypes::GetHash<T>();
 		}
 
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;

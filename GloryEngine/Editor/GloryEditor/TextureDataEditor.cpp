@@ -4,6 +4,7 @@
 #include "PropertyDrawer.h"
 #include "EditorUI.h"
 #include "Tumbnail.h"
+#include "EditorApplication.h"
 
 #include <Engine.h>
 #include <GraphicsModule.h>
@@ -20,7 +21,7 @@ namespace Glory::Editor
 	{
 		TextureData* pTextureData = (TextureData*)m_pTarget;
 		AssetReference<ImageData>& imageRef = pTextureData->Image();
-		bool change = AssetPicker::ResourceDropdown("Image", ResourceType::GetHash<ImageData>(), imageRef.AssetUUIDMember());
+		bool change = AssetPicker::ResourceDropdown("Image", ResourceTypes::GetHash<ImageData>(), imageRef.AssetUUIDMember());
 
 		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
 		change |= EditorUI::InputEnum<Filter>("Mag Filter", &sampler.MagFilter);
@@ -31,7 +32,7 @@ namespace Glory::Editor
 
 		if (change)
 		{
-			Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
+			EditorApplication::GetInstance()->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
 			Tumbnail::SetDirty(pTextureData->GetUUID());
 		}
 		return change;

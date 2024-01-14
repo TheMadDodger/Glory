@@ -166,6 +166,7 @@ namespace Utils::Reflect
 
 		void Update();
 		void Initialize();
+		void Cleanup();
 
 		Console& GetConsole();
 		Debug& GetDebug();
@@ -178,6 +179,7 @@ namespace Utils::Reflect
 		DisplayManager& GetDisplayManager();
 		LayerManager& GetLayerManager();
 		ShaderManager& GetShaderManager();
+		Utils::Reflect::Reflect& Reflection();
 		ObjectManager& GetObjectManager();
 		EngineProfiler& Profiler();
 

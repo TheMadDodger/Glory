@@ -1,5 +1,6 @@
 #include "EditorUI.h"
 #include "Undo.h"
+#include "EditorApplication.h"
 
 #include <LayerManager.h>
 #include <LayerRef.h>
@@ -769,8 +770,9 @@ namespace Glory::Editor
 		std::vector<std::string_view> layerOptions;
 		std::string layerText;
 
-		LayerManager::GetAllLayerNames(layerOptions);
-		layerText = LayerManager::LayerMaskToString(*data);
+		LayerManager& layers = EditorApplication::GetInstance()->GetEngine()->GetLayerManager();
+		layers.GetAllLayerNames(layerOptions);
+		layerText = layers.LayerMaskToString(*data);
 
 		LayerMask originalMask = *data;
 		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
@@ -778,7 +780,7 @@ namespace Glory::Editor
 		{
 			for (size_t i = 0; i < layerOptions.size(); i++)
 			{
-				const Layer* pLayer = LayerManager::GetLayerAtIndex((int)i - 1);
+				const Layer* pLayer = layers.GetLayerAtIndex((int)i - 1);
 
 				bool selected = pLayer == nullptr ? *data == 0 : (*data & pLayer->m_Mask) > 0;
 				if (ImGui::Selectable(layerOptions[i].data(), selected))
@@ -788,7 +790,7 @@ namespace Glory::Editor
 					else
 						*data ^= pLayer->m_Mask;
 
-					layerText = LayerManager::LayerMaskToString(*data);
+					layerText = layers.LayerMaskToString(*data);
 				}
 			}
 
@@ -817,7 +819,8 @@ namespace Glory::Editor
 		const uint32_t index = data->m_LayerIndex;
 
 		std::vector<std::string_view> options;
-		LayerManager::GetAllLayerNames(options);
+		LayerManager& layers = EditorApplication::GetInstance()->GetEngine()->GetLayerManager();
+		layers.GetAllLayerNames(options);
 
 		bool change = false;
 		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
@@ -869,7 +872,8 @@ namespace Glory::Editor
 		ImGui::SetCursorPos({ start, cursorPos.y });
 
 		std::vector<std::string_view> options;
-		LayerManager::GetAllLayerNames(options);
+		LayerManager& layers = EditorApplication::GetInstance()->GetEngine()->GetLayerManager();
+		layers.GetAllLayerNames(options);
 
 		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		if (ImGui::BeginCombo("##dropdown", value.data()))

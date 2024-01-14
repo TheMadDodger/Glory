@@ -13,7 +13,7 @@ namespace Glory::Editor
 	class EntityComponentEditor : public EditorTemplate<TEditor, EntityComponentObject>
 	{
 	public:
-		EntityComponentEditor() : EditorTemplate(ResourceType::GetHash<TComponent>()), m_pComponentObject(nullptr) {}
+		EntityComponentEditor() : EditorTemplate(ResourceTypes::GetHash<TComponent>()), m_pComponentObject(nullptr) {}
 		virtual ~EntityComponentEditor() {}
 
 	protected:
@@ -32,7 +32,7 @@ namespace Glory::Editor
 			Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 			bool change = false;
 
-			const uint32_t hash = ResourceType::GetHash<TComponent>();
+			const uint32_t hash = ResourceTypes::GetHash<TComponent>();
 			const TypeData* pTypeData = Reflect::GetTyeData(hash);
 
 			if (pTypeData)

@@ -1,4 +1,5 @@
 #include "TitleBar.h"
+#include "EditorApplication.h"
 
 #include <WindowModule.h>
 #include <Engine.h>
@@ -31,7 +32,7 @@ namespace Glory::Editor
 
     void TitleBar::UpdateTitlebarText()
     {
-        Window* pMainWindow = Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
+        Window* pMainWindow = EditorApplication::GetInstance()->GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 
         std::stringstream stream;
         for (size_t i = 0; i < m_Sections.size(); i++)

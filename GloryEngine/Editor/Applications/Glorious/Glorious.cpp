@@ -9,6 +9,7 @@
 #include <Console.h>
 #include <Logs.h>
 #include <ProjectSpace.h>
+#include <WindowsDebugConsole.h>
 
 int main(int argc, char* argv[])
 {
@@ -26,6 +27,7 @@ int main(int argc, char* argv[])
         Glory::Debug debug{ &console };
 
         console.RegisterConsole<Glory::Logs>();
+        console.RegisterConsole<Glory::WindowsDebugConsole>();
 
         Glory::CommandLine commandLine(argc, argv);
 
@@ -54,10 +56,10 @@ int main(int argc, char* argv[])
         engineConfPath.append("ProjectSettings").append("Engine.yaml");
 
         Glory::EngineLoader engineLoader(engineConfPath, windowCreateInfo);
-        Glory::Engine pEngine = engineLoader.LoadEngine(&console, &debug);
+        Glory::Engine engine = engineLoader.LoadEngine(&console, &debug);
         std::filesystem::path moduleSettingsRootPath = engineConfPath.parent_path().parent_path();
         moduleSettingsRootPath.append("Modules");
-        pEngine.LoadModuleSettings(moduleSettingsRootPath);
+        engine.LoadModuleSettings(moduleSettingsRootPath);
 
         //if (pEngine == nullptr)
         //{
@@ -66,19 +68,18 @@ int main(int argc, char* argv[])
         //    return -1;
         //}
 
-        pEngine.Initialize();
-
         Glory::EditorLoader editorLoader;
-        Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(&pEngine, engineLoader);
+        Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(&engine, engineLoader);
 
         Glory::Editor::EditorApplication application(editorCreateInfo);
-        application.Initialize(&pEngine);
+        application.Initialize();
 
         Glory::Editor::ProjectSpace::OpenProject(projectPath);
 
-        application.Run(&pEngine);
+        application.Run();
 
         application.Destroy();
+        engine.Cleanup();
         engineLoader.Unload();
     }
 

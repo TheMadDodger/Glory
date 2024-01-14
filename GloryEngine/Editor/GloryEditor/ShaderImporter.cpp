@@ -1,4 +1,5 @@
 #include "ShaderImporter.h"
+#include "EditorApplication.h"
 
 #include <fstream>
 #include <functional>
@@ -103,7 +104,7 @@ namespace Glory::Editor
 
         if (!file.is_open())
         {
-            m_pEngine->GetDebug().LogError("Could not open file: " + path.string());
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Could not open file: " + path.string());
             return nullptr;
         }
 

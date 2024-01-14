@@ -1,5 +1,6 @@
 #include "AssetCompiler.h"
 #include "EditorAssetDatabase.h"
+#include "EditorApplication.h"
 
 #include <AssetDatabase.h>
 #include <JobManager.h>
@@ -28,7 +29,10 @@ namespace Glory::Editor
 
 	void AssetCompiler::CompileAssetDatabase(const std::vector<UUID>& ids)
 	{
-		AssetDatabase::WriteLock lock;
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
+		AssetManager& assetManager = pEngine->GetAssetManager();
+		AssetDatabase::WriteLock lock{ &assetDatabase };
 
 		for (UUID id : ids)
 		{
@@ -36,18 +40,18 @@ namespace Glory::Editor
 
 			if (!EditorAssetDatabase::GetAssetLocation(id, data.Location))
 			{
-				AssetDatabase::Remove(id);
+				assetDatabase.Remove(id);
 				m_AssetDatas.erase(id);
 				continue;
 			}
 
 			if (!EditorAssetDatabase::GetAssetMetadata(id, data.Meta))
 			{
-				AssetDatabase::Remove(id);
+				assetDatabase.Remove(id);
 				m_AssetDatas.erase(id);
 				continue;
 			}
-			AssetDatabase::SetAsset(data.Location, data.Meta);
+			assetDatabase.SetAsset(data.Location, data.Meta);
 		}
 	}
 
@@ -90,7 +94,7 @@ namespace Glory::Editor
 				{
 					std::stringstream str;
 					str << "AssetCoompiler: Failed to get parent of " << id;
-					m_pEngine->GetDebug().LogWarning(str.str());
+					EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
 					break;
 				}
 				id = parentID;
@@ -114,7 +118,11 @@ namespace Glory::Editor
 
 	bool AssetCompiler::CompileJob(const AssetData asset)
 	{
-		std::filesystem::path path = Game::GetAssetPath();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
+		AssetManager& assetManager = pEngine->GetAssetManager();
+
+		std::filesystem::path path = assetDatabase.GetAssetPath();
 		path.append(asset.Location.Path);
 
 		if (!std::filesystem::exists(path))
@@ -123,7 +131,7 @@ namespace Glory::Editor
 		const UUID uuid = asset.Meta.ID();
 
 		/* Try get the asset if its already loaded */
-		Resource* pResource = AssetManager::FindResource(uuid);
+		Resource* pResource = assetManager.FindResource(uuid);
 		if (!pResource)
 		{
 			/* Import the resource */
@@ -132,13 +140,13 @@ namespace Glory::Editor
 			{
 				std::stringstream str;
 				str << "AssetCompiler: Failed to compile asset " << uuid << " there was an error when importing the asset.";
-				m_pEngine->GetDebug().LogError(str.str());
+				pEngine->GetDebug().LogError(str.str());
 				m_CompilingAssets.Erase(uuid);
 				return false;
 			}
 
 			/* Insert the loaded asset into the manager */
-			AssetManager::AddLoadedResource(pResource, uuid);
+			assetManager.AddLoadedResource(pResource, uuid);
 		}
 
 		/* Serialize the resource into a binary file */
@@ -151,7 +159,7 @@ namespace Glory::Editor
 
 		std::stringstream str;
 		str << "AssetCompiler: Compiled asset " << uuid;
-		m_pEngine->GetDebug().LogInfo(str.str());
+		pEngine->GetDebug().LogInfo(str.str());
 
 		/* We're done here */
 		m_CompilingAssets.Erase(uuid);

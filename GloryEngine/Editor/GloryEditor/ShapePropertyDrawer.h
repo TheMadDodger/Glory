@@ -7,7 +7,7 @@ namespace Glory::Editor
     class ShapePropertyDrawer : public PropertyDrawer
     {
 	public:
-		ShapePropertyDrawer() : PropertyDrawer(ResourceType::GetHash<ShapeProperty>()) {}
+		ShapePropertyDrawer() : PropertyDrawer(ResourceTypes::GetHash<ShapeProperty>()) {}
 		virtual ~ShapePropertyDrawer();
 
 	protected:

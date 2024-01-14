@@ -32,7 +32,7 @@ namespace Glory
 		template<class T>
 		void RegisterConsole()
 		{
-			IConsole* pConsole = new T();
+			IConsole* pConsole = new T(this);
 			m_pConsoles.push_back(pConsole);
 			pConsole->Initialize();
 		}

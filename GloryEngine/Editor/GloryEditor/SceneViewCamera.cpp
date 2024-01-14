@@ -1,4 +1,5 @@
 #include "SceneViewCamera.h"
+#include "EditorApplication.h"
 
 #include <CameraManager.h>
 #include <ImGuizmo.h>
@@ -15,7 +16,7 @@ namespace Glory::Editor
 
     void SceneViewCamera::Initialize()
     {
-        m_Camera = GloryContext::GetCameraManager()->GetNewOrUnusedCamera();
+        m_Camera = EditorApplication::GetInstance()->GetEngine()->GetCameraManager().GetNewOrUnusedCamera();
 		m_Camera.SetDisplayIndex(-1);
 		m_Camera.SetPriority(-69420);
 		m_Camera.SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));

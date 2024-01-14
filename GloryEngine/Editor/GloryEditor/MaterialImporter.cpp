@@ -1,8 +1,10 @@
 #include "MaterialImporter.h"
 #include "EditorAssetDatabase.h"
+#include "EditorApplication.h"
 
 #include <fstream>
 #include <AssetManager.h>
+#include <AssetDatabase.h>
 #include <PropertySerializer.h>
 
 namespace Glory::Editor
@@ -73,8 +75,9 @@ namespace Glory::Editor
 			AssetLocation location;
 			if (!EditorAssetDatabase::GetAssetLocation(shaderUUID, location)) continue;
 
-			std::string path = Game::GetAssetPath() + '\\' + location.Path;
-			ShaderSourceData* pShaderSourceData = AssetManager::GetAssetImmediate<ShaderSourceData>(shaderUUID);
+			const std::string_view assetPath = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath();
+			std::string path = std::string{ assetPath } + '\\' + location.Path;
+			ShaderSourceData* pShaderSourceData = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<ShaderSourceData>(shaderUUID);
 			if (!pShaderSourceData) continue;
 
 			pMaterialData->AddShader(pShaderSourceData);
@@ -99,15 +102,15 @@ namespace Glory::Editor
 
 			node = propertyNode["Value"];
 
-			const BasicTypeData* typeData = ResourceType::GetBasicTypeData(typeHash);
+			const BasicTypeData* typeData = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetBasicTypeData(typeHash);
 
 			size_t offset = pMaterialData->GetCurrentBufferOffset();
 
-			bool isResource = ResourceType::IsResource(typeHash);
+			bool isResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().IsResource(typeHash);
 			if (!isResource)
 			{
 				pMaterialData->AddProperty(displayName, shaderName, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
-				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
 			}
 			else
 			{
@@ -148,10 +151,10 @@ namespace Glory::Editor
 			YAML_WRITE(out, ShaderName, pPropertyInfo->ShaderName());
 			YAML_WRITE(out, TypeHash, pPropertyInfo->TypeHash());
 
-			bool isResource = ResourceType::IsResource(pPropertyInfo->TypeHash());
+			bool isResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().IsResource(pPropertyInfo->TypeHash());
 			if (!isResource)
 			{
-				PropertySerializer::SerializeProperty("Value", pMaterialData->GetBufferReference(), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), out);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), out);
 			}
 			else
 			{

@@ -42,7 +42,6 @@ namespace Glory::Editor
 		virtual GLORY_EDITOR_API ~Editor();
 
 	private:
-		friend class EditorApp;
 		friend class InspectorWindow;
 		static void Cleanup();
 		virtual Editor* Create() = 0;
@@ -56,7 +55,7 @@ namespace Glory::Editor
 	{
 	public:
 		EditorTemplate(uint32_t type) : Editor(type) {}
-		EditorTemplate() : Editor(ResourceType::GetHash<TObject>()) {}
+		EditorTemplate() : Editor(ResourceTypes::GetHash<TObject>()) {}
 
 	private:
 		virtual Editor* Create() override

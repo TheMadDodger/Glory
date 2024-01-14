@@ -30,6 +30,7 @@ namespace Glory::Editor
 	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)
 	{
 		GScene* pScene = new GScene(name, uuid);
+		pScene->SetManager(pEngine->GetSceneManager());
 		Utils::NodeRef node{object};
 
 		Utils::NodeValueRef entities = node["Entities"];
@@ -238,7 +239,7 @@ namespace Glory::Editor
 	{
 		Utils::NodeRef component{object};
 
-		const uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
+		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
 
 		UUID compUUID = component["UUID"].As<uint64_t>();
 		Utils::NodeValueRef activeNode = component["Active"];

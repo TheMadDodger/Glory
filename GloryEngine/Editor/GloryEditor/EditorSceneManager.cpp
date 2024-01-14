@@ -4,8 +4,10 @@
 #include "EditorSceneSerializer.h"
 #include "CreateObjectAction.h"
 #include "Undo.h"
+#include "EditorApplication.h"
 
 #include <Engine.h>
+#include <AssetDatabase.h>
 #include <SceneManager.h>
 #include <TitleBar.h>
 #include <tinyfiledialogs.h>
@@ -20,7 +22,7 @@ namespace Glory::Editor
 	GScene* EditorSceneManager::NewScene(bool additive)
 	{
 		if (!additive) CloseAll();
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		GScene* pScene = pScenes->CreateEmptyScene();
 		m_OpenedSceneIDs.push_back(pScene->GetUUID());
 		SetSceneDirty(pScene);
@@ -33,14 +35,14 @@ namespace Glory::Editor
 			CloseScene(uuid);
 		if (!additive) CloseAll();
 
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);
-		std::string path = Game::GetGame().GetAssetPath() + "\\" + location.Path;
+		std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
 
 		YAML::Node node = YAML::LoadFile(path);
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(node, uuid, filePath.filename().replace_extension().string());
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), node, uuid, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 
 		pScenes->AddOpenScene(pScene);
@@ -55,7 +57,7 @@ namespace Glory::Editor
 		if (IsSceneOpen(uuid))
 			CloseScene(uuid);
 
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->AddOpenScene(pScene, uuid);
 		m_OpenedSceneIDs.push_back(uuid);
 
@@ -71,7 +73,7 @@ namespace Glory::Editor
 			if (!EditorAssetDatabase::GetAssetLocation(uuid, location)) return; // new scene
 
 			if (location.Path == "") return;
-			Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.Path);
+			Save(uuid, std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path);
 		});
 	}
 
@@ -79,7 +81,7 @@ namespace Glory::Editor
 	{
 		// TODO: Check if scene has changes
 		Selection::SetActiveObject(nullptr);
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		if (it == m_OpenedSceneIDs.end()) return;
 		m_OpenedSceneIDs.erase(it);
@@ -100,7 +102,7 @@ namespace Glory::Editor
 	{
 		m_OpenedSceneIDs.clear();
 		m_DirtySceneIDs.clear();
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->CloseAllScenes();
 		TitleBar::SetText("Scene", "No Scene open");
 	}
@@ -118,12 +120,12 @@ namespace Glory::Editor
 	GScene* EditorSceneManager::GetOpenScene(size_t index)
 	{
 		const UUID uuid = GetOpenSceneUUID(index);
-		return Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(index);
+		return EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetOpenScene(index);
 	}
 
 	GScene* EditorSceneManager::GetOpenScene(UUID uuid)
 	{
-		return Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(uuid);
+		return EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetOpenScene(uuid);
 	}
 
 	void EditorSceneManager::SaveScene(UUID uuid)
@@ -137,7 +139,7 @@ namespace Glory::Editor
 		}
 
 		if (location.Path == "") return;
-		Save(uuid, Game::GetGame().GetAssetPath() + "\\" + location.Path);
+		Save(uuid, std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path);
 	}
 
 	void EditorSceneManager::SaveSceneAs(UUID uuid)
@@ -145,12 +147,12 @@ namespace Glory::Editor
 		m_CurrentlySavingScene = uuid;
 
 		const char* filters[1] = { "*.gscene" };
-		const char* path = tinyfd_saveFileDialog("Save Scene", Game::GetAssetPath().data(), 1, filters, "Glory Scene");
+		const char* path = tinyfd_saveFileDialog("Save Scene", EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath().data(), 1, filters, "Glory Scene");
 
 		if (!path) return;
 
 		std::filesystem::path relativePath = path;
-		relativePath = relativePath.lexically_relative(Game::GetAssetPath());
+		relativePath = relativePath.lexically_relative(EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath());
 		UUID existingAsset = EditorAssetDatabase::FindAssetUUID(relativePath.string());
 
 		if (existingAsset != 0)
@@ -166,7 +168,7 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SerializeOpenScenes(YAML::Emitter& out)
 	{
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		out << YAML::BeginSeq;
 		for (size_t i = 0; i < m_OpenedSceneIDs.size(); i++)
 		{
@@ -179,7 +181,7 @@ namespace Glory::Editor
 			out << YAML::Value << pScene->GetUUID();
 			out << YAML::Key << "Scene";
 			out << YAML::Value << YAML::BeginMap;
-			EditorSceneSerializer::SerializeScene(pScene, out);
+			EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, out);
 			out << YAML::EndMap;
 			out << YAML::EndMap;
 		}
@@ -196,20 +198,20 @@ namespace Glory::Editor
 			YAML::Node uuidNode = sceneDataNode["UUID"];
 			UUID uuid = uuidNode.as<uint64_t>();
 			YAML::Node sceneNode = sceneDataNode["Scene"];
-			GScene* pScene = EditorSceneSerializer::DeserializeScene(sceneNode, uuid, name);
+			GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), sceneNode, uuid, name);
 			OpenScene(pScene, uuid);
 		}
 	}
 
 	void EditorSceneManager::SetActiveScene(GScene* pScene)
 	{
-		Game::GetGame().GetEngine()->GetSceneManager()->SetActiveScene(pScene);
+		EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->SetActiveScene(pScene);
 		TitleBar::SetText("Scene", pScene ? pScene->Name().c_str() : "No Scene open");
 	}
 
 	GScene* EditorSceneManager::GetActiveScene()
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetActiveScene();
+		GScene* pScene = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetActiveScene();
 		if (!pScene) pScene = NewScene();
 		return pScene;
 	}
@@ -253,7 +255,7 @@ namespace Glory::Editor
 		/* Serialize the objects entire heirarchy */
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
-		EditorSceneSerializer::SerializeEntityRecursive(pScene, entity.GetEntityID(), out);
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), out);
 		out << YAML::EndSeq;
 
 		/* Deserialize node into a new objects */
@@ -273,10 +275,10 @@ namespace Glory::Editor
 			{
 				const UUID parentUUID = parentEntity.EntityUUID();
 				entity["ParentUUID"].Set((uint64_t)parentUUID);
-				GloryContext::GetContext()->m_UUIDRemapper.EnforceRemap(parentUUID, parentUUID);
+				EditorApplication::GetInstance()->GetEngine()->m_UUIDRemapper.EnforceRemap(parentUUID, parentUUID);
 			}
 
-			Entity newEntity = EditorSceneSerializer::DeserializeEntity(pScene, entity.Node(), EditorSceneSerializer::Flags::GenerateNewUUIDs);
+			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity.Node(), EditorSceneSerializer::Flags::GenerateNewUUIDs);
 			if (i == 0 && newEntity.IsValid())
 			{
 				Undo::StartRecord("Duplicate", newEntity.EntityUUID());
@@ -285,7 +287,7 @@ namespace Glory::Editor
 			}
 		}
 
-		GloryContext::GetContext()->m_UUIDRemapper.Reset();
+		EditorApplication::GetInstance()->GetEngine()->m_UUIDRemapper.Reset();
 
 		///* Set scene dirty */
 		SetSceneDirty(pScene);
@@ -293,9 +295,9 @@ namespace Glory::Editor
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
 	{
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(uuid);
+		GScene* pScene = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetOpenScene(uuid);
 		YAML::Emitter out;
-		EditorSceneSerializer::SerializeScene(pScene, out);
+		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, out);
 		std::ofstream outStream(path);
 		outStream << out.c_str();
 		outStream.close();
@@ -304,7 +306,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Saved scene to: " << path;
-		m_pEngine->GetDebug().LogInfo(stream.str());
+		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(stream.str());
 
 		ProjectSpace::Save();
 	}

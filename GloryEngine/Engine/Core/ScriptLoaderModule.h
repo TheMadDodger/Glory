@@ -29,7 +29,7 @@ namespace Glory
 		virtual void SaveResource(const std::string& path, T* pResource) = 0;
 
 	protected:
-		virtual void Initialize() {};
+		virtual void Initialize() { ResourceLoaderModule::Initialize(); };
 		virtual void Cleanup() {};
 	};
 }

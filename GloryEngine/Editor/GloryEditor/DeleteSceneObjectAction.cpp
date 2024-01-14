@@ -4,6 +4,7 @@
 #include "EntityEditor.h"
 #include "EditableEntity.h"
 #include "EditorSceneSerializer.h"
+#include "EditorApplication.h"
 
 #include <GScene.h>
 
@@ -13,7 +14,7 @@ namespace Glory::Editor
 	{
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
-		EditorSceneSerializer::SerializeEntityRecursive(pScene, deletedEntity, out);
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, deletedEntity, out);
 		out << YAML::EndSeq;
 		m_SerializedObject = out.c_str();
 	}
@@ -31,7 +32,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
 		{
 			Utils::NodeValueRef entity = entities.ValueRef()[i];
-			EditorSceneSerializer::DeserializeEntity(pScene, entity.Node());
+			EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity.Node());
 		}
 
 		if (!m_WasSelected) return;
@@ -55,7 +56,7 @@ namespace Glory::Editor
 		/* Take a snapshot of the object for redoing */
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
-		EditorSceneSerializer::SerializeEntityRecursive(pScene, entity.GetEntityID(), out);
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), out);
 		out << YAML::EndSeq;
 		m_SerializedObject = out.c_str();
 

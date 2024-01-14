@@ -7,6 +7,8 @@
 
 namespace Glory
 {
+	class Engine;
+
 	struct EditorCreateInfo
 	{
 		GLORY_EDITOR_API EditorCreateInfo();
@@ -16,5 +18,7 @@ namespace Glory
 
 		Editor::EditorWindowImpl* pWindowImpl;
 		Editor::EditorRenderImpl* pRenderImpl;
+
+		Engine* pEngine;
 	};
 }

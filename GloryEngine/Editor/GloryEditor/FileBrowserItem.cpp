@@ -12,13 +12,15 @@
 
 #include <stack>
 #include <imgui.h>
-#include <AssetManager.h>
+
+#include <AssetDatabase.h>
 #include <AssetManager.h>
 #include <StringUtils.h>
 #include <DND.h>
-#include <IconsFontAwesome6.h>
 #include <PopupManager.h>
 #include <Dispatcher.h>
+
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -65,7 +67,9 @@ namespace Glory::Editor
 
 	void FileBrowserItem::SetSelectedFolder(const std::filesystem::path& path)
 	{
-		const std::filesystem::path relative = path.lexically_relative(Game::GetAssetPath());
+		const std::string_view assetPath = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath();
+
+		const std::filesystem::path relative = path.lexically_relative(assetPath);
 		FileBrowserItem* pChild = this;
 		for (auto subPath : relative)
 		{
@@ -235,7 +239,7 @@ namespace Glory::Editor
 				m_pChildren[i]->DrawDirectoryBrowser();
 			}
 			ImGui::TreePop();
-			DND{ { ST_Path, ResourceType::GetHash<EditableEntity>() } }.HandleDragAndDropTarget([this](uint32_t typeHash, const ImGuiPayload* payload) {
+			DND{ { ST_Path, ResourceTypes::GetHash<EditableEntity>() } }.HandleDragAndDropTarget([this](uint32_t typeHash, const ImGuiPayload* payload) {
 				if (typeHash != ST_Path)
 				{
 					const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
@@ -261,8 +265,9 @@ namespace Glory::Editor
 					return;
 				}
 
-				newPath = newPath.lexically_relative(Game::GetAssetPath());
-				filePath = filePath.lexically_relative(Game::GetAssetPath());
+				const std::string_view assetPath = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath();
+				newPath = newPath.lexically_relative(assetPath);
+				filePath = filePath.lexically_relative(assetPath);
 				EditorAssetDatabase::UpdateAssetPaths(filePath.string(), newPath.string());
 				m_Dirty = true;
 			});
@@ -341,7 +346,7 @@ namespace Glory::Editor
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 		if (m_IsFolder)
 		{
 			Texture* pFolderTexture = EditorAssets::GetTexture("folder");
@@ -356,7 +361,7 @@ namespace Glory::Editor
 					ImGui::Text("%s %s", ICON_FA_FOLDER_OPEN, m_CachedPath.string().data());
 				});
 
-				const uint32_t sceneObjectHash = ResourceType::GetHash<EditableEntity>();
+				const uint32_t sceneObjectHash = ResourceTypes::GetHash<EditableEntity>();
 				DND{ { ST_Path, sceneObjectHash } }.HandleDragAndDropTarget([&](uint32_t hash, const ImGuiPayload* payload) {
 					if (hash == sceneObjectHash)
 					{
@@ -383,8 +388,9 @@ namespace Glory::Editor
 						return;
 					}
 
-					newPath = newPath.lexically_relative(Game::GetAssetPath());
-					filePath = filePath.lexically_relative(Game::GetAssetPath());
+					const std::string_view assetPath = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath();
+					newPath = newPath.lexically_relative(assetPath);
+					filePath = filePath.lexically_relative(assetPath);
 					EditorAssetDatabase::UpdateAssetPaths(filePath.string(), newPath.string());
 					m_Dirty = true;
 				});
@@ -426,7 +432,9 @@ namespace Glory::Editor
 		assetPath.append("Assets");
 		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
 		if (relativePath == "") relativePath = m_CachedPath;
-		UUID uuid = AssetDatabase::GetAssetUUID(relativePath.string());
+		AssetDatabase& assetDatabase = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase();
+		AssetManager& assetManager = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
+		UUID uuid = assetDatabase.GetAssetUUID(relativePath.string());
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
 		UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
@@ -463,14 +471,14 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 		{
 			m_HighlightedPath = m_CachedPath.string();
-			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
+			Resource* pAsset = assetManager.GetAssetImmediate(uuid);
 			Selection::SetActiveObject(pAsset);
 		}
 
 		if (ImGui::IsItemClicked(1))
 		{
 			m_HighlightedPath = m_CachedPath.string();
-			Resource* pAsset = AssetManager::GetAssetImmediate(uuid);
+			Resource* pAsset = assetManager.GetAssetImmediate(uuid);
 			ObjectMenu::Open(pAsset, m_Editable ? ObjectMenuType::T_Resource : ObjectMenuType::T_ModuleResource);
 		}
 
@@ -623,7 +631,7 @@ namespace Glory::Editor
 
 				std::filesystem::rename(m_CachedPath, newPath);
 
-				std::filesystem::path assetPath = Game::GetAssetPath();
+				const std::string_view assetPath = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath();
 				EditorAssetDatabase::UpdateAssetPaths(m_CachedPath.lexically_relative(assetPath).string(), newPath.lexically_relative(assetPath).string());
 				m_CachedPath = newPath;
 				Refresh();

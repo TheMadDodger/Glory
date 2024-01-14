@@ -208,10 +208,12 @@ namespace Glory
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pSceneManager(new SceneManager(this)), m_pThreadManager(ThreadManager::GetInstance()),
-		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr),
-		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo),
+		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
+		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
-		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler())
+		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
+		m_Serializers(new Serializers), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
+		m_ShaderManager(new ShaderManager(this)), m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -259,43 +261,6 @@ namespace Glory
 
 	Engine::~Engine()
 	{
-		m_AssetDatabase->Destroy();
-
-		m_pGraphicsThread->Stop();
-
-		m_pJobManager->Kill();
-
-		m_pThreadManager->Destroy();
-
-		delete m_pJobManager;
-		m_pJobManager = nullptr;
-
-		// We need to cleanup in reverse
-		// This makes sure things like graphics get cleaned up before we close the window
-		for (int i = (int)m_pAllModules.size() - 1; i >= 0; --i)
-		{
-			m_pAllModules[(size_t)i]->Cleanup();
-			delete m_pAllModules[(size_t)i];
-		}
-
-		m_pAllModules.clear();
-		m_pOptionalModules.clear();
-		m_pPriorityInitializationModules.clear();
-		m_TypeToLoader.clear();
-		m_TypeHashToLoader.clear();
-		m_pLoaderModules.clear();
-
-		delete m_pGraphicsThread;
-		m_pGraphicsThread = nullptr;
-
-		delete m_pScriptingExtender;
-		m_pScriptingExtender = nullptr;
-
-		m_pSceneManager->Cleanup();
-		delete m_pSceneManager;
-		m_pSceneManager = nullptr;
-
-		m_ShaderManager->Cleanup();
 	}
 
 	void Engine::Initialize()
@@ -350,6 +315,44 @@ namespace Glory
 		}
 	}
 
+	void Engine::Cleanup()
+	{
+		m_AssetDatabase->Destroy();
+		m_pGraphicsThread->Stop();
+		m_pJobManager->Kill();
+		m_pThreadManager->Destroy();
+
+		// We need to cleanup in reverse
+		// This makes sure things like graphics get cleaned up before we close the window
+		for (int i = (int)m_pAllModules.size() - 1; i >= 0; --i)
+		{
+			m_pAllModules[(size_t)i]->Cleanup();
+			delete m_pAllModules[(size_t)i];
+		}
+
+		m_pSceneManager->Cleanup();
+		m_ShaderManager->Cleanup();
+
+		delete m_pJobManager;
+		m_pJobManager = nullptr;
+
+		m_pAllModules.clear();
+		m_pOptionalModules.clear();
+		m_pPriorityInitializationModules.clear();
+		m_TypeToLoader.clear();
+		m_TypeHashToLoader.clear();
+		m_pLoaderModules.clear();
+
+		delete m_pGraphicsThread;
+		m_pGraphicsThread = nullptr;
+
+		delete m_pScriptingExtender;
+		m_pScriptingExtender = nullptr;
+
+		delete m_pSceneManager;
+		m_pSceneManager = nullptr;
+	}
+
 	GameTime& Engine::Time()
 	{
 		return *m_Time;
@@ -398,6 +401,11 @@ namespace Glory
 	ShaderManager& Engine::GetShaderManager()
 	{
 		return *m_ShaderManager;
+	}
+
+	Utils::Reflect::Reflect& Engine::Reflection()
+	{
+		return *m_Reflection;
 	}
 
 	ObjectManager& Engine::GetObjectManager()
@@ -469,6 +477,25 @@ namespace Glory
 
 	void Engine::RegisterBasicTypes()
 	{
+		Reflect::SetReflectInstance(m_Reflection.get());
+
+		Reflect::RegisterBasicType<int8_t>();
+		Reflect::RegisterBasicType<int16_t>();
+		Reflect::RegisterBasicType<int32_t>();
+		Reflect::RegisterBasicType<int64_t>();
+		Reflect::RegisterBasicType<uint8_t>();
+		Reflect::RegisterBasicType<uint16_t>();
+		Reflect::RegisterBasicType<uint32_t>();
+		Reflect::RegisterBasicType<uint64_t>();
+		Reflect::RegisterBasicType<char>();
+		Reflect::RegisterBasicType<bool>();
+		Reflect::RegisterBasicType<float>();
+		Reflect::RegisterBasicType<double>();
+		Reflect::RegisterBasicType<long>();
+		Reflect::RegisterBasicType<unsigned long>();
+
+		Reflect::RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
+
 		m_ResourceTypes->RegisterType<int>();
 		m_ResourceTypes->RegisterType<float>();
 		m_ResourceTypes->RegisterType<double>();

@@ -4,6 +4,7 @@
 #include "AssetPicker.h"
 #include "Selection.h"
 #include "EditorAssetDatabase.h"
+#include "EditorApplication.h"
 
 #include <imgui.h>
 #include <ResourceType.h>
@@ -176,11 +177,12 @@ namespace Glory::Editor
 		}
 
 		UUID addShaderID = 0;
-		if (AssetPicker::ResourceButton("Add Shader", width, ResourceType::GetHash<ShaderSourceData>(), &addShaderID))
+		if (AssetPicker::ResourceButton("Add Shader", width, ResourceTypes::GetHash<ShaderSourceData>(), &addShaderID))
 		{
 			if (!EditorAssetDatabase::AssetExists(addShaderID)) return;
 			MaterialData* pMaterial = (MaterialData*)m_pTarget;
-			ShaderSourceData* pShaderSource = (ShaderSourceData*)AssetManager::GetAssetImmediate(addShaderID);
+			AssetManager& assets = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
+			ShaderSourceData* pShaderSource = (ShaderSourceData*)assets.GetAssetImmediate(addShaderID);
 			if (!pMaterial->AddShader(pShaderSource)) return;
 			UpdateMaterial(pMaterial);
 		}

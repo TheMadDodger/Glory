@@ -2,6 +2,7 @@
 #include "ListView.h"
 #include "EditorUI.h"
 #include "Undo.h"
+#include "EditorApplication.h"
 
 #include <WindowModule.h>
 #include <InputModule.h>
@@ -300,7 +301,7 @@ namespace Glory::Editor
 
 		const ImVec2 cursor = ImGui::GetCursorPos();
 		const ImVec2 windowPos = ImGui::GetWindowPos();
-		Window* pWindow = Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
+		Window* pWindow = EditorApplication::GetInstance()->GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		int mainWindowWidth, mainWindowHeight;
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
 		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f - scrollHeight });
@@ -555,13 +556,15 @@ namespace Glory::Editor
 
 	void InputSettings::OnStartPlay_Impl()
 	{
-		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->ReadInputData(RootValue().Node());
-		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->InputBlocked() = false;
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		pEngine->GetMainModule<InputModule>()->ReadInputData(RootValue().Node());
+		pEngine->GetMainModule<InputModule>()->InputBlocked() = false;
 	}
 
 	void InputSettings::OnStopPlay_Impl()
 	{
-		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->InputBlocked() = true;
-		Game::GetGame().GetEngine()->GetMainModule<InputModule>()->ClearInputData();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		pEngine->GetMainModule<InputModule>()->InputBlocked() = true;
+		pEngine->GetMainModule<InputModule>()->ClearInputData();
 	}
 }

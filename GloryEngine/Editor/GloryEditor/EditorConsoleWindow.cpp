@@ -12,12 +12,12 @@ namespace Glory::Editor
 
 	void EditorConsoleWindow::OnOpen()
 	{
-		Console::RegisterConsole(this);
+        EditorApplication::GetInstance()->GetEngine()->GetConsole().RegisterConsole(this);
 	}
 
 	void EditorConsoleWindow::OnClose()
 	{
-		Console::RemoveConsole(this);
+        EditorApplication::GetInstance()->GetEngine()->GetConsole().RemoveConsole(this);
 	}
 
 	void EditorConsoleWindow::OnGUI()
@@ -63,7 +63,7 @@ namespace Glory::Editor
         if (ImGui::InputText("##Input", m_InputBuffer, MAXINPUTLENGTH, input_text_flags))
         {
             std::string convertedInput = m_InputBuffer;
-            Console::QueueCommand(convertedInput);
+            EditorApplication::GetInstance()->GetEngine()->GetConsole().QueueCommand(convertedInput);
             strcpy(m_InputBuffer, "");
             reclaim_focus = true;
             m_ScrollToBottom = true;

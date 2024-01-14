@@ -16,20 +16,24 @@ namespace Glory::Editor
 {
 	ImFont* EditorPlatform::LargeFont;
 
-	EditorPlatform::EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl)
-		: m_pWindowImpl(pWindowImpl), m_pRenderImpl(pRenderImpl), m_RenderState(Initializing)
+	EditorPlatform::EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl):
+		m_pWindowImpl(pWindowImpl), m_pRenderImpl(pRenderImpl),
+		m_RenderState(Initializing), m_pImguiConext(nullptr), m_Windowless(!m_pWindowImpl)
 	{
+		if (m_pWindowImpl) m_pWindowImpl->m_pEditorPlatform = this;
+		if (m_pRenderImpl) m_pRenderImpl->m_pEditorPlatform = this;
 	}
 
 	EditorPlatform::~EditorPlatform()
 	{
 		delete m_pWindowImpl;
 		m_pWindowImpl = nullptr;
+
 		delete m_pRenderImpl;
 		m_pRenderImpl = nullptr;
 	}
 
-	void EditorPlatform::Initialize(Game& game)
+	void EditorPlatform::Initialize(Engine* pEngine)
 	{
 		m_pWindowImpl->Initialize();
 		SetupDearImGuiContext();
@@ -39,8 +43,8 @@ namespace Glory::Editor
 		LoadFonts();
 		m_pRenderImpl->UploadImGUIFonts();
 
-		game.GetEngine()->GetGraphicsThread()->BindInitializeOnly<EditorPlatform>(this);
-		game.GetEngine()->GetGraphicsThread()->BindBeginAndEndRender<EditorPlatform>(this);
+		pEngine->GetGraphicsThread()->BindInitializeOnly<EditorPlatform>(this);
+		pEngine->GetGraphicsThread()->BindBeginAndEndRender<EditorPlatform>(this);
 	}
 
 	void EditorPlatform::ThreadedInitialize()

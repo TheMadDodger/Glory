@@ -119,9 +119,9 @@ namespace Glory
 
 			const BasicTypeData* typeData = m_pEngine->GetResourceTypes().GetBasicTypeData(typeHash);
 
-			size_t offset = pMaterialData->GetCurrentBufferOffset();
+			const size_t offset = pMaterialData->GetCurrentBufferOffset();
 
-			bool isResource = m_pEngine->GetResourceTypes().IsResource(typeHash);
+			const bool isResource = m_pEngine->GetResourceTypes().IsResource(typeHash);
 			if (!isResource)
 			{
 				pMaterialData->AddProperty(displayName, shaderName, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);

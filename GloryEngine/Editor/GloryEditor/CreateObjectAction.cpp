@@ -4,9 +4,9 @@
 #include "Selection.h"
 #include "EditableEntity.h"
 #include "EntityEditor.h"
+#include "EditorApplication.h"
 
 #include <GScene.h>
-#include <Game.h>
 
 namespace Glory::Editor
 {
@@ -30,7 +30,7 @@ namespace Glory::Editor
 		/* Take a snapshot of the object for redoing */
 		YAML::Emitter out;
 		out << YAML::BeginSeq;
-		EditorSceneSerializer::SerializeEntityRecursive(pScene, entity.GetEntityID(), out);
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), out);
 		out << YAML::EndSeq;
 		m_SerializedObject = out.c_str();
 
@@ -46,7 +46,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
 		{
 			Utils::NodeValueRef entity = entities.ValueRef()[i];
-			EditorSceneSerializer::DeserializeEntity(pScene, entity.Node());
+			EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity.Node());
 		}
 
 		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).GetEntityID(), pScene));

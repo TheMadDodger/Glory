@@ -11,8 +11,8 @@
 #include "EntitySceneObjectEditor.h"
 #include "EditableEntity.h"
 #include "EntityEditor.h"
+#include "EditorApplication.h"
 
-#include <Game.h>
 #include <Engine.h>
 #include <GScene.h>
 #include <SceneManager.h>
@@ -25,7 +25,7 @@
 
 namespace Glory::Editor
 {
-	DND DragAndDrop{ { ST_Path, ResourceType::GetHash<EditableEntity>(), ResourceType::GetHash<PrefabData>() } };
+	DND DragAndDrop{ { ST_Path, ResourceTypes::GetHash<EditableEntity>(), ResourceTypes::GetHash<PrefabData>() } };
 
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
@@ -37,7 +37,7 @@ namespace Glory::Editor
 
 	void SceneGraphWindow::OnGUI()
 	{
-		SceneManager* pScenes = Game::GetGame().GetEngine()->GetSceneManager();
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 
 		const GScene* pActiveScene = pScenes->GetActiveScene();
 
@@ -145,7 +145,7 @@ namespace Glory::Editor
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (pScene->GetUUID() != payload.SceneID)
 			{
-				m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
+				EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 				return;
 			}
 
@@ -223,7 +223,7 @@ namespace Glory::Editor
 				const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 				if (payload.SceneID != pScene->GetUUID())
 				{
-					m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
+					EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 					return;
 				}
 
@@ -279,7 +279,7 @@ namespace Glory::Editor
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (payload.SceneID != pScene->GetUUID())
 			{
-				m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
+				EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 				return;
 			}
 			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
@@ -351,7 +351,7 @@ namespace Glory::Editor
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (payload.SceneID != pScene->GetUUID())
 			{
-				m_pEngine->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
+				EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning("Moving an entity to another scene is currently not supported");
 				return;
 			}
 			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
@@ -432,12 +432,14 @@ namespace Glory::Editor
 
 	bool SceneGraphWindow::HandleAssetDragAndDrop(Utils::ECS::EntityID entity, GScene* pScene, uint32_t dndHash, const ImGuiPayload* pPayload)
 	{
-		if (dndHash != ST_Path && dndHash != ResourceType::GetHash<PrefabData>()) return false;
+		if (dndHash != ST_Path && dndHash != ResourceTypes::GetHash<PrefabData>()) return false;
 
 		PrefabData* pPrefab = nullptr;
 
-		const uint32_t prefabHash = ResourceType::GetHash<PrefabData>();
+		const uint32_t prefabHash = ResourceTypes::GetHash<PrefabData>();
 
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		AssetManager& assetManager = pEngine->GetAssetManager();
 		if (dndHash == ST_Path)
 		{
 			const std::string path = (const char*)pPayload->Data;
@@ -445,29 +447,30 @@ namespace Glory::Editor
 			if (!uuid) return false;
 			ResourceMeta meta;
 			if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return false;
-			ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
+			ResourceTypes& types = pEngine->GetResourceTypes();
+			ResourceType* pResourceType = types.GetResourceType(meta.Hash());
 
-			if (meta.Hash() != ResourceType::GetHash<PrefabData>())
+			if (meta.Hash() != ResourceTypes::GetHash<PrefabData>())
 			{
 				bool found = false;
-				for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
+				for (size_t i = 0; i < types.SubTypeCount(pResourceType); ++i)
 				{
-					ResourceType* pSubResourceType = ResourceType::GetSubType(pResourceType, i);
-					if (pSubResourceType->Hash() != ResourceType::GetHash<PrefabData>()) continue;
+					ResourceType* pSubResourceType = types.GetSubType(pResourceType, i);
+					if (pSubResourceType->Hash() != ResourceTypes::GetHash<PrefabData>()) continue;
 
-					pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
+					pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(uuid);
 					found = true;
 					break;
 				}
 				if(!found) return false;
 			}
 
-			pPrefab = AssetManager::GetAssetImmediate<PrefabData>(uuid);
+			pPrefab = assetManager.GetAssetImmediate<PrefabData>(uuid);
 		}
-		else if (dndHash = ResourceType::GetHash<PrefabData>())
+		else if (dndHash = ResourceTypes::GetHash<PrefabData>())
 		{
 			const UUID prefabID = *(const UUID*)pPayload->Data;
-			pPrefab = AssetManager::GetAssetImmediate<PrefabData>(prefabID);
+			pPrefab = assetManager.GetAssetImmediate<PrefabData>(prefabID);
 		}
 
 		if (!pPrefab) return false;

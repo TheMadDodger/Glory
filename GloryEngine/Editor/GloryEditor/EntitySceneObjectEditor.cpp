@@ -24,14 +24,14 @@
 namespace Glory::Editor
 {
 	std::map<uint32_t, std::string_view> ComponentIcons = {
-		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
-		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
-		{ ResourceType::GetHash<MeshRenderer>(), ICON_FA_CUBES },
-		{ ResourceType::GetHash<ModelRenderer>(), ICON_FA_CUBES },
-		{ ResourceType::GetHash<CameraComponent>(), ICON_FA_VIDEO },
-		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
-		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
-		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
+		{ ResourceTypes::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
+		{ ResourceTypes::GetHash<MeshFilter>(), ICON_FA_CUBE },
+		{ ResourceTypes::GetHash<MeshRenderer>(), ICON_FA_CUBES },
+		{ ResourceTypes::GetHash<ModelRenderer>(), ICON_FA_CUBES },
+		{ ResourceTypes::GetHash<CameraComponent>(), ICON_FA_VIDEO },
+		{ ResourceTypes::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
+		{ ResourceTypes::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
+		{ ResourceTypes::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)

@@ -1,8 +1,12 @@
-#include <algorithm>
 #include "Selection.h"
 #include "Undo.h"
 #include "SelectAction.h"
 #include "DeselectAction.h"
+#include "EditorApplication.h"
+
+#include <ObjectManager.h>
+
+#include <algorithm>
 
 namespace Glory::Editor
 {
@@ -102,13 +106,13 @@ namespace Glory::Editor
 
 	void Selection::AddObjectToSelection(UUID objectID)
 	{
-		Object* pObject = Object::FindObject(objectID);
+		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(objectID);
 		AddObjectToSelection(pObject);
 	}
 
 	void Selection::RemoveObjectFromSelection(UUID objectID)
 	{
-		Object* pObject = Object::FindObject(objectID);
+		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(objectID);
 		RemoveObjectFromSelection(pObject);
 	}
 

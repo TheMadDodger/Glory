@@ -1,5 +1,6 @@
 #include "MonoScriptImporter.h"
 
+#include <EditorApplication.h>
 #include <Engine.h>
 #include <FileLoaderModule.h>
 
@@ -33,7 +34,7 @@ namespace Glory::Editor
 	MonoScript* MonoScriptImporter::LoadResource(const std::filesystem::path& path) const
 	{
 		/* @todo Replace with a text file importer (but then again there is no need to load the code?) */
-		LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule<FileData>();
+		LoaderModule* pModule = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>();
 		FileImportSettings fileImportSettings;
 		fileImportSettings.m_Extension = "cs";
 		fileImportSettings.Flags = std::ios::ate;

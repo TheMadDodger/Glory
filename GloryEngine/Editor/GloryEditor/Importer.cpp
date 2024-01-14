@@ -1,4 +1,5 @@
 #include "Importer.h"
+#include "EditorApplication.h"
 
 #include <Debug.h>
 #include <sstream>
@@ -19,13 +20,13 @@ namespace Glory::Editor
 		{
 			std::stringstream str;
 			str << "Could not find importer for extension: " << path.extension() << " for file: " << path;
-			m_pEngine->GetDebug().LogWarning(str.str());
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
 			return nullptr;
 		}
 
 		std::stringstream str;
 		str << "Found importer " << (*itor)->Name() << " for loading " << path.extension() << " files to import: " << path;
-		m_pEngine->GetDebug().LogInfo(str.str());
+		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(str.str());
 
 		return (*itor)->Load(path);
 	}
@@ -40,13 +41,13 @@ namespace Glory::Editor
 		{
 			std::stringstream str;
 			str << "Could not find importer for extension: " << path.extension() << " for exporting file: " << path;
-			m_pEngine->GetDebug().LogWarning(str.str());
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
 			return false;
 		}
 
 		std::stringstream str;
 		str << "Found importer " << (*itor)->Name() << " for exporting " << path.extension() << " files to export: " << path;
-		m_pEngine->GetDebug().LogInfo(str.str());
+		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(str.str());
 
 		return (*itor)->Save(path, pResource);
 	}

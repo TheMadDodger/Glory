@@ -2,6 +2,7 @@
 #include "EditorUI.h"
 #include "DND.h"
 #include "EditableEntity.h"
+#include "EditorApplication.h"
 
 #include <WindowModule.h>
 #include <Engine.h>
@@ -14,7 +15,7 @@
 
 namespace Glory::Editor
 {
-	DND DragAndDropTarget = { { ResourceType::GetHash<EditableEntity>() }};
+	DND DragAndDropTarget = { { ResourceTypes::GetHash<EditableEntity>() }};
 
 	char ObjectPicker::m_FilterBuffer[200] = "";
 	std::string ObjectPicker::m_Filter = "";
@@ -65,7 +66,7 @@ namespace Glory::Editor
 
 		const ImVec2 cursor = ImGui::GetCursorPos();
 		const ImVec2 windowPos = ImGui::GetWindowPos();
-		Window* pWindow = Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
+		Window* pWindow = EditorApplication::GetInstance()->GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		int mainWindowWidth, mainWindowHeight;
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
 		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });

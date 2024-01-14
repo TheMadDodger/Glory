@@ -28,6 +28,8 @@ namespace Glory::Editor
 		assetName = EditorAssetDatabase::GetAssetName(*value);
 		if (assetName == "") assetName = "Noone";
 
+		ResourceTypes& resourceTypes = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
+
 		bool openPopup = false;
 		float start, width;
 		EditorUI::EmptyDropdown(EditorUI::MakeCleanName(label), assetName, [&]
@@ -44,7 +46,7 @@ namespace Glory::Editor
 				if (!uuid) return;
 				ResourceMeta meta;
 				if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-				ResourceType* pResourceType = ResourceType::GetResourceType(meta.Hash());
+				ResourceType* pResourceType = resourceTypes.GetResourceType(meta.Hash());
 
 				if (meta.Hash() == resourceType)
 				{
@@ -52,9 +54,9 @@ namespace Glory::Editor
 					return;
 				}
 
-				for (size_t i = 0; i < ResourceType::SubTypeCount(pResourceType); ++i)
+				for (size_t i = 0; i < resourceTypes.SubTypeCount(pResourceType); ++i)
 				{
-					if (ResourceType::GetSubTypeHash(pResourceType, i) != resourceType) continue;
+					if (resourceTypes.GetSubTypeHash(pResourceType, i) != resourceType) continue;
 					*value = uuid;
 				}
 				return;
@@ -69,7 +71,7 @@ namespace Glory::Editor
 
 		const ImVec2 cursor = ImGui::GetCursorPos();
 		const ImVec2 windowPos = ImGui::GetWindowPos();
-		Window* pWindow = Game::GetGame().GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
+		Window* pWindow = EditorApplication::GetInstance()->GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		int mainWindowWidth, mainWindowHeight;
 		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
 		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });
@@ -107,7 +109,7 @@ namespace Glory::Editor
 		if (includeSubAssets)
 		{
 			std::vector<ResourceType*> pTypes;
-			ResourceType::GetAllResourceTypesThatHaveSubType(typeHash, pTypes);
+			EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetAllResourceTypesThatHaveSubType(typeHash, pTypes);
 			for (size_t i = 0; i < pTypes.size(); i++)
 			{
 				if (pTypes[i]->Hash() == typeHash) continue;
@@ -154,7 +156,7 @@ namespace Glory::Editor
 
 	bool AssetPicker::DrawItems(const std::vector<UUID>& items, UUID* value)
 	{
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		bool change = false;
 		if (ImGui::Selectable("None", *value == 0))

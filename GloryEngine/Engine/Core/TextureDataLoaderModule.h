@@ -24,7 +24,7 @@ namespace Glory
 		virtual TextureData* LoadResource(const void* buffer, size_t length, const ImportSettings& importSettings) override;
 		virtual void SaveResource(const std::string& path, TextureData* pResource) override;
 
-		void Initialize() override {};
+		void Initialize() override { ResourceLoaderModule::Initialize(); };
 		void Cleanup() override {};
 	};
 }

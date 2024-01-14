@@ -25,7 +25,7 @@ namespace Editor
 		template<typename T>
 		static std::string_view GetComponentIcon()
 		{
-			return GetComponentIcon(ResourceType::GetHash<T>());
+			return GetComponentIcon(ResourceTypes::GetHash<T>());
 		}
 
 		GLORY_EDITOR_API static std::string_view GetComponentIcon(uint32_t typeHash);
@@ -39,7 +39,7 @@ namespace Editor
 		template<typename T>
 		static void AddComponentIcon(std::string_view icon)
 		{
-			AddComponentIcon(ResourceType::GetHash<T>(), icon);
+			AddComponentIcon(ResourceTypes::GetHash<T>(), icon);
 		}
 		GLORY_EDITOR_API static void AddComponentIcon(uint32_t hash, std::string_view icon);
 

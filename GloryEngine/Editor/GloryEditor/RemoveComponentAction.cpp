@@ -3,6 +3,7 @@
 #include "EditableEntity.h"
 #include "EditorSceneManager.h"
 #include "Editor.h"
+#include "EditorApplication.h"
 
 #include <SceneManager.h>
 #include <Engine.h>
@@ -16,7 +17,7 @@ namespace Glory::Editor
 	{
 		YAML::Emitter out;
 		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entityID);
-		EditorSceneSerializer::SerializeComponent(pRegistry, pEntityView, entityID, componentIndex, out);
+		EditorSceneSerializer::SerializeComponent(EditorApplication::GetInstance()->GetEngine(), pRegistry, pEntityView, entityID, componentIndex, out);
 		m_SerializedComponent = out.c_str();
 	}
 
@@ -34,7 +35,7 @@ namespace Glory::Editor
 		GScene* pEntityScene = EditorSceneManager::GetOpenScene(pEntityObject->SceneID());
 		Utils::ECS::EntityView* pEntityView = pEntityScene->GetRegistry().GetEntityView(pEntityObject->EntityID());
 		const size_t index = pEntityView->ComponentCount();
-		EditorSceneSerializer::DeserializeComponent(pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, node);
+		EditorSceneSerializer::DeserializeComponent(EditorApplication::GetInstance()->GetEngine(), pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, node);
 		pEntityView->SetComponentIndex(index, m_ComponentIndex);
 
 		for (size_t i = 0; i < editors.size(); i++)

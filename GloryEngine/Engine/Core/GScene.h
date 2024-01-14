@@ -178,6 +178,12 @@ namespace Glory
 		/** @brief Get the @ref SceneManager that owns this scene */
 		SceneManager* Manager();
 
+		/** @brief Set the @ref SceneManager for this scene
+		 * this does not add the scene to the manager.
+		 * @param pManager The manager
+		 */
+		void SetManager(SceneManager* pManager);
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();

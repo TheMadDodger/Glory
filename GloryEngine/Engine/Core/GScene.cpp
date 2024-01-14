@@ -414,4 +414,9 @@ namespace Glory
 	{
 		return m_pManager;
 	}
+
+	void GScene::SetManager(SceneManager* pManager)
+	{
+		m_pManager = pManager;
+	}
 }

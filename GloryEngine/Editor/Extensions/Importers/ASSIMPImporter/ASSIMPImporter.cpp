@@ -1,6 +1,7 @@
 #include "ASSIMPImporter.h"
 #include "VertexDefinitions.h"
 
+#include <EditorApplication.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -61,7 +62,7 @@ namespace Glory::Editor
         {
             std::stringstream str;
             str << "ASSIMP: Could not import file: " << path << " Error: " << importer.GetErrorString();
-            m_pEngine->GetDebug().LogError(str.str());
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError(str.str());
             return nullptr;
         }
 
@@ -100,7 +101,7 @@ namespace Glory::Editor
 
         if (mesh->mNormals == nullptr)
         {
-            m_pEngine->GetDebug().LogError("Mesh has no normals");
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Mesh has no normals");
             return nullptr;
         }
 

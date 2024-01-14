@@ -146,7 +146,7 @@ namespace Glory
 
 	void MaterialInstanceLoaderModule::Initialize()
 	{
-
+		ResourceLoaderModule::Initialize();
 	}
 
 	void MaterialInstanceLoaderModule::Cleanup()

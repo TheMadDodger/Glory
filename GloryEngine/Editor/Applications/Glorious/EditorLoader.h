@@ -10,20 +10,20 @@ namespace Glory
 		EditorLoader();
 		virtual ~EditorLoader();
 
-		Glory::EditorCreateInfo LoadEditor(Engine* game, EngineLoader& engineLoader);
+		Glory::EditorCreateInfo LoadEditor(Engine* pEngine, EngineLoader& engineLoader);
 		void Unload();
 
 	private:
 		void LoadModuleMetadata(Glory::EditorCreateInfo& editorCreateInfo, const std::string& name);
 		void LoadBackend(Glory::EditorCreateInfo& editorCreateInfo, const ModuleMetaData& metaData);
-		void LoadExtensions(const ModuleMetaData& metaData);
+		void LoadExtensions(Engine* pEngine, const ModuleMetaData& metaData);
 
 		void LoadBackendDLL(const std::filesystem::path& dllPath, const std::string& name, Glory::EditorCreateInfo& editorCreateInfo);
-		void LoadExtensionDLL(const std::filesystem::path& dllPath, const std::string& name);
-		void LoadExtensionDependencyDLL(const std::filesystem::path& dllPath, const std::string& name);
+		void LoadExtensionDLL(Engine* pEngine, const std::filesystem::path& dllPath, const std::string& name);
+		void LoadExtensionDependencyDLL(Engine* pEngine, const std::filesystem::path& dllPath, const std::string& name);
 
-		void LoadGlobalExtensionDependencies();
-		void LoadGlobalExtensions();
+		void LoadGlobalExtensionDependencies(Engine* pEngine);
+		void LoadGlobalExtensions(Engine* pEngine);
 
 	private:
 		std::vector<HMODULE> m_Libs;

@@ -287,7 +287,6 @@ namespace Glory
 
 		if (!fstream.is_open())
 		{
-			m_pEngine->GetDebug().LogError("Could not open file: " + m_FilePath.string());
 			return;
 		}
 

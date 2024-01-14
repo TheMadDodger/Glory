@@ -47,7 +47,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void SetAssetDirty(const char* key, bool dirty = true);
 		GLORY_EDITOR_API static bool HasUnsavedChanges();
 
-		JSONFileRef& ProjectFile();
+		GLORY_EDITOR_API JSONFileRef& ProjectFile();
 
 	private:
 		ProjectSpace(const std::string& path);

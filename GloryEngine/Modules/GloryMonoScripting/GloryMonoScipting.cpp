@@ -42,6 +42,8 @@ namespace Glory
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
 		m_pMonoManager->Initialize("./Modules/GloryMonoScripting/Dependencies");
 
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+
 		Reflect::RegisterEnum<MonoLogLevel>();
 
 		CoreCSAPI::SetEngine(m_pEngine);

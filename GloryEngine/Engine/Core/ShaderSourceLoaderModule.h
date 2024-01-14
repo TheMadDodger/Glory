@@ -32,7 +32,7 @@ namespace Glory
         virtual void WriteImportSettings_Internal(const ShaderSourceImportSettings& importSettings, YAML::Emitter& out) override;
 
     protected:
-        virtual void Initialize() override {};
+        virtual void Initialize() override { ResourceLoaderModule::Initialize(); };
         virtual void Cleanup() override {};
 
     private:

@@ -29,54 +29,34 @@ namespace Glory::Editor
 		GLORY_EDITOR_API EditorApplication(const EditorCreateInfo& createInfo);
 		virtual GLORY_EDITOR_API ~EditorApplication();
 
-		template<class Window, class Renderer>
-		void Initialize(Engine* pEngine)
-		{
-			//game.OverrideAssetPathFunc(EditorApplication::AssetPathOverrider);
-			//game.OverrideSettingsPathFunc(EditorApplication::SettingsPathOverrider);
-
-			auto window = (EditorWindowImpl*)(new Window());
-			auto renderer = (EditorRenderImpl*)(new Renderer());
-			m_pPlatform = new EditorPlatform(window, renderer);
-			window->m_pEditorPlatform = m_pPlatform;
-			renderer->m_pEditorPlatform = m_pPlatform;
-
-			InitializePlatform(pEngine);
-
-			m_pEngine->GetDebug().LogInfo("Initialized editor application");
-			m_pFileWatcher->watch();
-		}
-
-		GLORY_EDITOR_API void Initialize(Engine* pEngine);
+		GLORY_EDITOR_API void Initialize();
 
 		GLORY_EDITOR_API void Destroy();
-		GLORY_EDITOR_API void Run(Engine* pEngine);
+		GLORY_EDITOR_API void Run();
 
-		GLORY_EDITOR_API void SetWindowImpl(EditorWindowImpl* pWindowImpl);
-		GLORY_EDITOR_API void SetRendererImpl(EditorRenderImpl* pRendererImpl);
+		GLORY_EDITOR_API EditorPlatform& GetEditorPlatform();
+		GLORY_EDITOR_API MainEditor& GetMainEditor();
+		GLORY_EDITOR_API efsw::FileWatcher& FileWatch();
 
-		GLORY_EDITOR_API EditorPlatform* GetEditorPlatform();
-		GLORY_EDITOR_API MainEditor* GetMainEditor();
-		GLORY_EDITOR_API efsw::FileWatcher* FileWatch();
+		GLORY_EDITOR_API const EditorMode& CurrentMode();
+		GLORY_EDITOR_API void TogglePlay();
+		GLORY_EDITOR_API void StartPlay();
+		GLORY_EDITOR_API void StopPlay();
+		GLORY_EDITOR_API void TogglePause();
+		GLORY_EDITOR_API void TickFrame();
+		GLORY_EDITOR_API bool IsPaused();
+		GLORY_EDITOR_API void Quit();
+		GLORY_EDITOR_API void TryToQuit();
+		GLORY_EDITOR_API Engine* GetEngine();
 
-		static GLORY_EDITOR_API EditorApplication* GetInstance();
-		static GLORY_EDITOR_API const EditorMode& CurrentMode();
-		static GLORY_EDITOR_API void TogglePlay();
-		static GLORY_EDITOR_API void StartPlay();
-		static GLORY_EDITOR_API void StopPlay();
-		static GLORY_EDITOR_API void TogglePause();
-		static GLORY_EDITOR_API void TickFrame();
-		static GLORY_EDITOR_API bool IsPaused();
-		static GLORY_EDITOR_API void Quit();
-		static GLORY_EDITOR_API void TryToQuit();
-
-		static GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
+		GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
+		GLORY_EDITOR_API static EditorApplication* GetInstance();
 
 		static const Version Version;
 
 	private:
 		void RenderEditor();
-		void InitializePlatform(Engine* pEngine);
+		void InitializePlatform();
 		void InitializeExtensions();
 
 		static std::string AssetPathOverrider();
@@ -85,18 +65,16 @@ namespace Glory::Editor
 		static void VersionCheck(const Glory::Version& latestVersion);
 
 	private:
-		EditorWindowImpl* m_pTempWindowImpl;
-		EditorRenderImpl* m_pTempRenderImpl;
+		Engine* m_pEngine;
 
-		EditorPlatform* m_pPlatform;
-		MainEditor* m_pMainEditor;
-		EditorPlayer* m_pPlayer;
+		EditorPlatform m_Platform;
+		MainEditor m_MainEditor;
+		EditorPlayer m_Player;
+		EditorShaderProcessor m_ShaderProcessor;
 		efsw::FileWatcher* m_pFileWatcher;
 
 		std::vector<BaseEditorExtension*> m_pExtensions;
-		EditorShaderProcessor* m_pShaderProcessor;
-		static EditorApplication* m_pEditorInstance;
-		static EditorMode m_Mode;
-		static bool m_Running;
+		EditorMode m_Mode = EditorMode::M_Edit;
+		bool m_Running = false;
 	};
 }

@@ -1,5 +1,7 @@
 #include "MonoScriptTumbnail.h"
 #include "MonoEditorExtension.h"
+
+#include <EditorApplication.h>
 #include <Engine.h>
 #include <EditorAssetDatabase.h>
 
@@ -17,7 +19,7 @@ namespace Glory::Editor
 	{
 		if (!m_pScriptTumbnail)
 		{
-			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule<ImageData>();
+			LoaderModule* pLoader = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<ImageData>();
 			m_pScriptTumbnail = (ImageData*)pLoader->Load("./EditorAssets/Mono/Code.png");
 		}
 

@@ -69,8 +69,8 @@ namespace Glory::Editor
 
 	void SceneWindow::OnGUI()
 	{
-		Engine* pEngine = Game::GetGame().GetEngine();
-		RenderTexture* pRenderTexture = GloryContext::GetCameraManager()->GetRenderTextureForCamera(m_SceneCamera.m_Camera, pEngine, false);
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		RenderTexture* pRenderTexture = pEngine->GetCameraManager().GetRenderTextureForCamera(m_SceneCamera.m_Camera, pEngine, false);
 
 		MenuBar(pRenderTexture);
 		CameraUpdate();
@@ -79,7 +79,7 @@ namespace Glory::Editor
 
 	void SceneWindow::Draw()
 	{
-		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->Submit(m_SceneCamera.m_Camera);
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::MenuBar(RenderTexture* pRenderTexture)
@@ -155,7 +155,7 @@ namespace Glory::Editor
 		RenderTexture* pSceneTexture = m_SceneCamera.m_Camera.GetOutputTexture();
 		if (pSceneTexture == nullptr) return;
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		ImVec2 screenPos = ImGui::GetCursorScreenPos();
 		ImVec2 regionAvail = ImGui::GetContentRegionAvail();
@@ -206,11 +206,11 @@ namespace Glory::Editor
 		glm::uvec2 textureCoord = viewportCoord * (glm::vec2)resolution;
 		textureCoord.y = resolution.y - textureCoord.y;
 
-		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->SetNextFramePick(textureCoord, m_SceneCamera.m_Camera);
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->SetNextFramePick(textureCoord, m_SceneCamera.m_Camera);
 
 		if (!ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
-			Engine* pEngine = Game::GetGame().GetEngine();
+			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 			GScene* pScene = pEngine->GetSceneManager()->GetHoveringEntityScene();
 			if (!pScene)
 			{

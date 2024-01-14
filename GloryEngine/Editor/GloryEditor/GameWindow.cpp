@@ -45,7 +45,7 @@ namespace Glory::Editor
 
 	void GameWindow::View()
 	{
-		RenderTexture* pDisplayTexture = DisplayManager::GetDisplayRenderTexture(m_DisplayIndex);
+		RenderTexture* pDisplayTexture = EditorApplication::GetInstance()->GetEngine()->GetDisplayManager().GetDisplayRenderTexture(m_DisplayIndex);
 		if (pDisplayTexture == nullptr) return;
 		Texture* pTexture = pDisplayTexture->GetTextureAttachment(0);
 
@@ -79,7 +79,7 @@ namespace Glory::Editor
 		//ImGui::GetForegroundDrawList()->AddRect(center, center + halfMax, IM_COL32(255, 255, 0, 255));
 		//ImGui::GetForegroundDrawList()->AddRect(center, center - halfMax, IM_COL32(255, 255, 0, 255));
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		ImGui::GetWindowDrawList()->AddImage(
 			pRenderImpl->GetTextureID(pTexture), center - halfOffsets,

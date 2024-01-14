@@ -1,6 +1,8 @@
 #include "SceneTumbnailGenerator.h"
 #include "EditorAssets.h"
 #include "EditorSceneManager.h"
+#include "EditorApplication.h"
+
 #include <Engine.h>
 
 namespace Glory::Editor
@@ -17,7 +19,7 @@ namespace Glory::Editor
 	{
 		if (!m_pSceneTumbnail)
 		{
-			LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule<ImageData>();
+			LoaderModule* pLoader = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<ImageData>();
 			m_pSceneTumbnail = (ImageData*)pLoader->Load("./EditorAssets/Thumb/scene.png");
 		}
 
