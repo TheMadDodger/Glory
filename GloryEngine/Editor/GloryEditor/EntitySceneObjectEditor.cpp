@@ -7,6 +7,8 @@
 
 #include <imgui.h>
 #include <string>
+
+#include <ObjectManager.h>
 #include <SceneObjectNameAction.h>
 #include <EnableObjectAction.h>
 #include <Undo.h>
@@ -43,7 +45,9 @@ namespace Glory::Editor
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
 		m_pComponentEditors.clear();
 
-		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
+		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) {
+			EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Destroy(pObject);
+		});
 		m_pComponents.clear();
 	}
 
@@ -107,7 +111,10 @@ namespace Glory::Editor
 		{
 			UUID uuid = pEntityView->ComponentUUIDAt(i);
 			uint32_t componentType = pEntityView->ComponentTypeAt(i);
-			EntityComponentObject* pComponentObject = new EntityComponentObject(entityID, uuid, componentType, &entity.GetScene()->GetRegistry());
+			ObjectManager& objects = EditorApplication::GetInstance()->GetEngine()->GetObjectManager();
+			EntityComponentObject* pComponentObject = objects.Find<EntityComponentObject>(uuid);
+			if(!pComponentObject)
+				pComponentObject = objects.Create<EntityComponentObject>(entityID, uuid, componentType, &entity.GetScene()->GetRegistry());
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
 			if (pEditor) m_pComponentEditors.push_back(pEditor);
