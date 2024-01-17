@@ -21,11 +21,19 @@ namespace Glory::Editor
 
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
 
-		if (pPropertyDrawer)
-			return pPropertyDrawer->Draw(scriptProperty.m_Name, node[scriptProperty.m_Name], elementTypeHash, flags);
+		bool change = false;
 
-		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), scriptProperty.m_Name);
-		return false;
+		if (pPropertyDrawer)
+		{
+			change = pPropertyDrawer->Draw(scriptProperty.m_Name, node[scriptProperty.m_Name], elementTypeHash, flags);
+		}
+		else
+		{
+			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), scriptProperty.m_Name);
+		}
+
+		PropertyDrawer::SetCurrentPropertyPath("");
+		return change;
 	}
 
 	void MonoScriptComponentEditor::Initialize()
