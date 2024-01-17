@@ -5,7 +5,6 @@ namespace Glory
 {
 	ModelLoaderModule::ModelLoaderModule() : ResourceLoaderModule(".obj,.fbx,.gltf")
 	{
-		ResourceType::RegisterResource<MeshData>("");
 	}
 
 	ModelLoaderModule::~ModelLoaderModule()
@@ -28,18 +27,22 @@ namespace Glory
 
 	ModelData* ModelLoaderModule::LoadResource(const std::string& path, const ModelImportSettings& importSettings)
 	{
-		Profiler::BeginSample("ModelLoaderModule::LoadResource(path)");
+		ProfileSample s{ &m_pEngine->Profiler(), "ModelLoaderModule::LoadResource(path)" };
 		ModelData* pModel = LoadModel(path, importSettings);
-		Profiler::EndSample();
 		return pModel;
 	}
 
 	ModelData* ModelLoaderModule::LoadResource(const void* buffer, size_t length, const ModelImportSettings& importSettings)
 	{
-		Profiler::BeginSample("ModelLoaderModule::LoadResource(buffer)");
+		ProfileSample s{ &m_pEngine->Profiler(), "ModelLoaderModule::LoadResource(buffer)" };
 		ModelData* pModel = LoadModel(buffer, length, importSettings);
-		Profiler::EndSample();
 		return pModel;
+	}
+
+	void ModelLoaderModule::Initialize()
+	{
+		ResourceLoaderModule::Initialize();
+		m_pEngine->GetResourceTypes().RegisterResource<MeshData>("");
 	}
 
 	ModelImportSettings::ModelImportSettings() {}

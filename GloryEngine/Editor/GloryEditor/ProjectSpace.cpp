@@ -182,6 +182,17 @@ namespace Glory::Editor
 		CreateFolder("Cache/CompiledShaders");
 		CreateFolder("Modules");
 		CreateFolder("Cache/CompiledAssets");
+
+		std::filesystem::path assetPath = m_ProjectFilePath;
+		assetPath = assetPath.parent_path();
+		assetPath.append("Assets");
+		EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().SetAssetPath(assetPath);
+
+		std::filesystem::path settingsPath = m_ProjectFilePath;
+		settingsPath = settingsPath.parent_path();
+		settingsPath.append("ProjectSettings");
+		EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().SetSettingsPath(settingsPath);
+
 		m_ProjectFile = JSONFileRef(m_ProjectFilePath);
 		m_ProjectFile.Load();
 		Migrate(m_pCurrentProject);
@@ -200,7 +211,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Opened project at: " << m_ProjectFilePath;
-		Debug::LogInfo(stream.str());
+		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(stream.str());
 	}
 
 	void ProjectSpace::Close()
@@ -211,9 +222,8 @@ namespace Glory::Editor
 		m_DirtyKeys.clear();
 		TitleBar::SetText("ProjectChanges", "");
 
-		AssetDatabase::Clear();
-
-		Debug::LogInfo("Closed current project");
+		EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().Clear();
+		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("Closed current project");
 	}
 
 	void ProjectSpace::CreateFolder(const std::string& name)
@@ -255,6 +265,6 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Project saved to: " << m_ProjectFilePath;
-		Debug::LogInfo(stream.str());
+		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(stream.str());
 	}
 }

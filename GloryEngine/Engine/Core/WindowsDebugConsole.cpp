@@ -1,8 +1,9 @@
 #include "WindowsDebugConsole.h"
 #include "Commands.h"
+#include "Console.h"
+
 #include <algorithm>
 #include <iostream>
-#include "Console.h"
 //#include <consoleapi2.h>
 //#include <WinBase.h>
 
@@ -20,7 +21,8 @@ namespace Glory
 		return 0;
 	}
 
-	WindowsDebugConsole::WindowsDebugConsole() : m_Running(false), m_pConsoleThread() {}
+	WindowsDebugConsole::WindowsDebugConsole(Console* pConsole):
+		m_pConsole(pConsole), m_Running(false), m_pConsoleThread() {}
 
 	WindowsDebugConsole::~WindowsDebugConsole() {}
 
@@ -35,8 +37,7 @@ namespace Glory
 	{
 		std::string line = "";
 		std::getline(std::cin, line);
-
-		Console::QueueCommand(line);
+		m_pConsole->QueueCommand(line);
 	}
 
 	bool WindowsDebugConsole::Running()

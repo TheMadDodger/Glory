@@ -18,8 +18,7 @@ namespace Glory::Editor
 	void BaseEditorExtension::SetCurrentContext()
 	{
 		if (m_SetContextProc == NULL) return;
-		GloryContext* pCurrentContext = GloryContext::GetContext();
 		ImGuiContext* pCurrentEditorContext = ImGui::GetCurrentContext();
-		m_SetContextProc(pCurrentContext, pCurrentEditorContext);
+		m_SetContextProc(pCurrentEditorContext);
 	}
 }

@@ -2,7 +2,9 @@
 #include "ScriptExtensions.h"
 #include "GloryMono.h"
 #include "MonoManager.h"
+
 #include <Debug.h>
+#include <LayerMask.h>
 
 namespace Glory
 {
@@ -21,6 +23,7 @@ namespace Glory
 	{
 	public:
 		static void AddInternalCalls(std::vector<InternalCall>& internalCalls);
+		static void SetEngine(Engine* pEngine);
 
 	private:
 		CoreCSAPI();

@@ -1,5 +1,6 @@
 #include "EditorAssets.h"
-#include <Game.h>
+#include "EditorApplication.h"
+
 #include <Engine.h>
 
 namespace Glory::Editor
@@ -12,7 +13,7 @@ namespace Glory::Editor
 
 	void EditorAssets::LoadAssets()
 	{
-		GraphicsModule* pGraphics = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>();
+		GraphicsModule* pGraphics = EditorApplication::GetInstance()->GetEngine()->GetMainModule<GraphicsModule>();
 
 		std::unique_lock<std::mutex> lock(m_QueueLock);
 		for (size_t i = 0; i < m_pTextureCreationQueue.size(); i++)
@@ -24,7 +25,7 @@ namespace Glory::Editor
 
 		if (m_IsInitialized) return;
 
-		LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule<ImageData>();
+		LoaderModule* pLoader = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<ImageData>();
 		LoadImage(pGraphics, pLoader, "./EditorAssets/Thumb/folder.png", "folder");
 		LoadImage(pGraphics, pLoader, "./EditorAssets/Thumb/file.png", "file");
 		LoadImage(pGraphics, pLoader, "./EditorAssets/Thumb/scene.png", "scene");

@@ -40,7 +40,7 @@ namespace Glory
 	{
 		if (layer1 == 0) return true;
 		const uint8_t index = layer2.operator JPH::BroadPhaseLayer::Type();
-		const Layer* pLayer = LayerManager::GetLayerAtIndex(layer1 - 1);
+		const Layer* pLayer = m_pLayers->GetLayerAtIndex(layer1 - 1);
 		if (!pLayer) return true;
 		if (!m_BPCollissionMapping[index]) return true;
 		return m_BPCollissionMapping[index] & pLayer->m_Mask;

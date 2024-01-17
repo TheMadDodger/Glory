@@ -37,7 +37,7 @@ namespace Glory
 				m_SettingsNode[name] = stringValue;
 			}
 
-			RegisterValue(name, ST_Enum, ResourceType::GetHash<T>());
+			RegisterValue(name, ST_Enum, ResourceTypes::GetHash<T>());
 		}
 
 		template<typename T>
@@ -48,7 +48,7 @@ namespace Glory
 				m_SettingsNode[name] = YAML::Node(YAML::NodeType::Sequence);
 
 			if (m_Types.find(name) != m_Types.end()) return;
-			RegisterValue(name, ST_Array, ResourceType::GetHash<T>());
+			RegisterValue(name, ST_Array, ResourceTypes::GetHash<T>());
 		}
 
 		template<typename T>
@@ -116,7 +116,7 @@ namespace Glory
 		void RegisterValue(const std::string& name)
 		{
 			if (m_Types.find(name) != m_Types.end()) return;
-			const uint32_t type = ResourceType::GetHash<T>();
+			const uint32_t type = ResourceTypes::GetHash<T>();
 			RegisterValue(name, type, type);
 		}
 

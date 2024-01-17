@@ -4,6 +4,9 @@
 #include "RendererModule.h"
 #include "Debug.h"
 #include "AssetManager.h"
+#include "AssetDatabase.h"
+#include "GScene.h"
+#include "SceneManager.h"
 
 #include <EntityRegistry.h>
 
@@ -13,6 +16,12 @@ namespace Glory
     {
         //ubo.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 10.0f);
         //ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan
+        GScene* pScene = pRegistry->GetUserData<GScene*>();
+        Engine* pEngine = pScene->Manager()->GetEngine();
+        AssetManager* pAssets = &pEngine->GetAssetManager();
+        AssetDatabase* pAssetDB = &pEngine->GetAssetDatabase();
+        LayerManager* pLayers = &pEngine->GetLayerManager();
+        Debug* pDebug = &pEngine->GetDebug();
 
         Transform& transform = pRegistry->GetComponent<Transform>(entity);
 
@@ -20,22 +29,22 @@ namespace Glory
         if (pRegistry->HasComponent<LayerComponent>(entity))
         {
             LayerComponent& layer = pRegistry->GetComponent<LayerComponent>(entity);
-            mask = layer.m_Layer.Layer() != nullptr ? layer.m_Layer.Layer()->m_Mask : 0;
+            mask = layer.m_Layer.Layer(pLayers) != nullptr ? layer.m_Layer.Layer(pLayers)->m_Mask : 0;
         }
 
-        MeshData* pMeshData = AssetManager::GetOrLoadAsset<MeshData>(pComponent.m_Mesh.AssetUUID());
+        MeshData* pMeshData = pAssets->GetOrLoadAsset<MeshData>(pComponent.m_Mesh.AssetUUID());
         if (pMeshData == nullptr) return;
 
-        if (!AssetDatabase::AssetExists(pComponent.m_Material.AssetUUID()))
+        if (!pAssetDB->AssetExists(pComponent.m_Material.AssetUUID()))
         {
             // TODO: Set some default material
             std::string key = std::to_string(entity) + "_MISSING_MATERIAL";
-            Debug::LogOnce(key, "MeshRenderer: Missing Materials on MeshRenderer!", Debug::LogLevel::Warning);
+            pDebug->LogOnce(key, "MeshRenderer: Missing Materials on MeshRenderer!", Debug::LogLevel::Warning);
             return;
         }
 
         const UUID materialUUID = pComponent.m_Material.AssetUUID();
-        MaterialData* pMaterial = AssetManager::GetOrLoadAsset<MaterialData>(materialUUID);
+        MaterialData* pMaterial = pAssets->GetOrLoadAsset<MaterialData>(materialUUID);
 
         if (pMaterial == nullptr)
         {
@@ -43,7 +52,6 @@ namespace Glory
             return;
         }
 
-        GScene* pScene = pRegistry->GetUserData<GScene*>();
         RenderData renderData;
         renderData.m_pMesh = pMeshData;
         renderData.m_pMaterial = pMaterial;
@@ -52,6 +60,6 @@ namespace Glory
         renderData.m_ObjectID = pScene->GetEntityUUID(entity);
         renderData.m_SceneID = pScene->GetUUID();
 
-        REQUIRE_MODULE_CALL(Game::GetGame().GetEngine(), RendererModule, Submit(renderData), );
+        REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(renderData), );
     }
 }

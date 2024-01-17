@@ -18,7 +18,7 @@ namespace Glory
 		return m_pAssembly;
 	}
 
-	void CoreLibManager::Initialize(Assembly* pAssembly)
+	void CoreLibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
 	{
 		m_pAssembly = pAssembly;
 		MonoAssetManager::Initialize(m_pAssembly->GetMonoImage());
@@ -28,9 +28,9 @@ namespace Glory
 		m_pAssembly->GetClass("GloryEngine", "Object");
 		m_pAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
 
-		MonoSceneManager::Initialize(pAssembly);
+		MonoSceneManager::Initialize(pEngine, pAssembly);
 
-		Utils::ECS::ComponentTypes::SetInstance(Game::GetGame().GetEngine()->GetSceneManager()->ComponentTypesInstance());
+		Utils::ECS::ComponentTypes::SetInstance(pEngine->GetSceneManager()->ComponentTypesInstance());
 	}
 
 	void CoreLibManager::Cleanup()

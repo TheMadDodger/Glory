@@ -20,15 +20,15 @@ namespace Glory
 		return m_LayerIndex == other.m_LayerIndex;
 	}
 
-	const Layer* LayerRef::Layer() const
+	const Layer* LayerRef::Layer(LayerManager* pManager) const
 	{
-		return LayerManager::GetLayerAtIndex((int)m_LayerIndex);
+		return pManager->GetLayerAtIndex((int)m_LayerIndex);
 	}
 
 	const TypeData* LayerRef::GetTypeData()
 	{
 		static const char* typeNameString = "LayerRef";
-		static const uint32_t TYPE_HASH = ResourceType::GetHash<LayerRef>();
+		static const uint32_t TYPE_HASH = ResourceTypes::GetHash<LayerRef>();
 		static const int NUM_ARGS = 0;
 		static const TypeData pTypeData = TypeData(typeNameString, nullptr, ST_Struct, TYPE_HASH, NUM_ARGS);
 		return &pTypeData;

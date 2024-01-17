@@ -8,6 +8,7 @@
 #include "AssemblyDomain.h"
 #include "CoreLibManager.h"
 
+#include <Serializers.h>
 #include <SceneManager.h>
 #include <BinaryStream.h>
 #include <AssetDatabase.h>
@@ -59,7 +60,7 @@ namespace Glory
 		if (pClass == nullptr) return;
 		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
-		Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>()->GetMonoManager()->GetMethodsHelper()->InvokeScriptingMethod(pMonoObject, method, args);
+		MonoManager::Instance()->GetMethodsHelper()->InvokeScriptingMethod(pMonoObject, method, args);
 	}
 
 	void MonoScript::SetValue(UUID objectID, UUID sceneID, const std::string& name, void* value)
@@ -103,6 +104,8 @@ namespace Glory
 			data = YAML::Node(YAML::NodeType::Map);
 
 		scriptProperties.clear();
+
+		Serializers& pSerializers = MonoManager::Instance()->Module()->GetEngine()->GetSerializers();
 		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
@@ -130,21 +133,21 @@ namespace Glory
 			{
 				/* Asset reference from a dummy object will always be null */
 				AssetReferenceBase assetReference{};
-				PropertySerializer::GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), e);
+				pSerializers.GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), e);
 				break;
 			}
 			case ST_Object:
 			{
 				/* Object reference from a dummy object will always be null */
 				SceneObjectRef objectRef{};
-				PropertySerializer::GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), e);
+				pSerializers.GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), e);
 				break;
 			}
 
 			default:
 				pField->GetValue(pDummyObject, PropertyBuffer);
 				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-				PropertySerializer::SerializeProperty(pField->Name(), pType, PropertyBuffer, e);
+				pSerializers.SerializeProperty(pField->Name(), pType, PropertyBuffer, e);
 				break;
 			}
 			e << YAML::EndMap;
@@ -163,6 +166,8 @@ namespace Glory
 		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		Serializers& pSerializers = pEngine->GetSerializers();
 		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
@@ -176,19 +181,19 @@ namespace Glory
 			case ST_Asset:
 			{
 				AssetReferenceBase assetReference;
-				PropertySerializer::GetSerializer(ST_Asset)->Deserialize(&assetReference, pField->ElementTypeHash(), valueNode);
-				MonoObject* pAssetObject = MonoAssetManager::MakeMonoAssetObject(assetReference.AssetUUID(), pField->TypeName());
+				pSerializers.GetSerializer(ST_Asset)->Deserialize(&assetReference, pField->ElementTypeHash(), valueNode);
+				MonoObject* pAssetObject = MonoAssetManager::MakeMonoAssetObject(pEngine, assetReference.AssetUUID(), pField->TypeName());
 				pField->SetValue(pMonoObject, pAssetObject);
 				break;
 			}
 			case ST_Object:
 			{
 				SceneObjectRef objectRef;
-				PropertySerializer::GetSerializer(ST_Object)->Deserialize(&objectRef, pField->ElementTypeHash(), valueNode);
+				pSerializers.GetSerializer(ST_Object)->Deserialize(&objectRef, pField->ElementTypeHash(), valueNode);
 
-				GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(objectRef.SceneUUID());
+				GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(objectRef.SceneUUID());
 				if (!pScene) continue;
-				MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pScene);
+				MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pEngine, pScene);
 				if (!pObjectManager) continue;
 				Entity entity = pScene->GetEntityByUUID(objectRef.ObjectUUID());
 				if (!entity.IsValid()) continue;
@@ -199,7 +204,7 @@ namespace Glory
 
 			default:
 				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-				PropertySerializer::DeserializeProperty(pType, PropertyBuffer, valueNode);
+				pSerializers.DeserializeProperty(pType, PropertyBuffer, valueNode);
 				pField->SetValue(pMonoObject, PropertyBuffer);
 				break;
 			}
@@ -224,6 +229,7 @@ namespace Glory
 		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 
+		Serializers& pSerializers = MonoManager::Instance()->Module()->GetEngine()->GetSerializers();
 		/* FIXME: There has to be a better way to do this
 		 * Ideally, store as binary data and use reflection? */
 		YAML::Emitter emitter;
@@ -246,7 +252,7 @@ namespace Glory
 					pObjectIDField->GetValue(pMonoResourceObject, assetReference.AssetUUIDMember());
 				}
 
-				PropertySerializer::GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), emitter);
+				pSerializers.GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), emitter);
 
 				break;
 			}
@@ -260,14 +266,14 @@ namespace Glory
 					pObjectIDField->GetValue(pMonoSceneObject, objectRef.ObjectUUIDMember());
 					pSceneIDField->GetValue(pMonoSceneObject, objectRef.SceneUUIDMember());
 				}
-				PropertySerializer::GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), emitter);
+				pSerializers.GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), emitter);
 				break;
 			}
 
 			default:
 				pField->GetValue(pMonoObject, PropertyBuffer);
 				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-				PropertySerializer::SerializeProperty(pField->Name(), pType, PropertyBuffer, emitter);
+				pSerializers.SerializeProperty(pField->Name(), pType, PropertyBuffer, emitter);
 				break;
 			}
 		}

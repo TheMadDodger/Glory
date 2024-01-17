@@ -1,5 +1,7 @@
 #include "Undo.h"
 #include "Debug.h"
+#include "EditorApplication.h"
+
 #include <YAMLAction.h>
 
 namespace Glory::Editor
@@ -20,7 +22,7 @@ namespace Glory::Editor
 
 		if (m_RecordingName != "")
 		{
-			Debug::LogError("Recording already started, call StopRecord before starting a new one! Name: " + m_RecordingName);
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Recording already started, call StopRecord before starting a new one! Name: " + m_RecordingName);
 			return;
 		}
 
@@ -35,7 +37,7 @@ namespace Glory::Editor
 
 		if (m_RecordingName == "")
 		{
-			Debug::LogError("Recording not yet started, call StartRecord to start recording!");
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Recording not yet started, call StartRecord to start recording!");
 			return;
 		}
 

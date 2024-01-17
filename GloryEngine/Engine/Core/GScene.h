@@ -8,6 +8,7 @@
 namespace Glory
 {
 	class PrefabData;
+	class SceneManager;
 	struct UUIDRemapper;
 	struct PrefabNode;
 
@@ -174,6 +175,15 @@ namespace Glory
 		/** @brief Handle all delayed parents requested by @ref DelayedSetParent() calls. */
 		void HandleDelayedParents();
 
+		/** @brief Get the @ref SceneManager that owns this scene */
+		SceneManager* Manager();
+
+		/** @brief Set the @ref SceneManager for this scene
+		 * this does not add the scene to the manager.
+		 * @param pManager The manager
+		 */
+		void SetManager(SceneManager* pManager);
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();
@@ -216,5 +226,7 @@ namespace Glory
 		Utils::ECS::EntityRegistry m_Registry;
 
 		std::vector<DelayedParentData> m_DelayedParents;
+
+		SceneManager* m_pManager = nullptr;
 	};
 }

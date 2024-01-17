@@ -2,11 +2,15 @@
 #include "GloryEditor.h"
 
 #include <imgui.h>
-#include <Game.h>
 #include <mutex>
 
-namespace Glory::Editor
+namespace Glory
 {
+	class Engine;
+
+namespace Editor
+{
+
 	enum EditorRenderState
 	{
 		Initializing,
@@ -24,7 +28,7 @@ namespace Glory::Editor
 		EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl);
 		virtual ~EditorPlatform();
 
-		void Initialize(Game& game);
+		void Initialize(Engine* pEngine);
 		void ThreadedInitialize();
 		bool PollEvents();
 		void Destroy();
@@ -57,7 +61,9 @@ namespace Glory::Editor
 		std::mutex m_Mutex;
 		EditorRenderState m_RenderState;
 		ImGuiContext* m_pImguiConext;
+		bool m_Windowless;
 
 		const ImVec4 CLEARCOLOR = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	};
+}
 }

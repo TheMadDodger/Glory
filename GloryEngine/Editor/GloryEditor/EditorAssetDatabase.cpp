@@ -6,6 +6,8 @@
 #include "EditorSceneManager.h"
 #include "AssetCompiler.h"
 #include "Importer.h"
+#include "EditorApplication.h"
+#include "AssetDatabase.h"
 
 #include <JobManager.h>
 #include <Engine.h>
@@ -13,6 +15,8 @@
 namespace Glory::Editor
 {
 	ThreadedVector<UUID> m_UnsavedAssets;
+
+	Engine* DB_EngineInstance = nullptr;
 
 	struct ImportedResource
 	{
@@ -55,24 +59,24 @@ namespace Glory::Editor
 			std::filesystem::path absolutePath = path;
 			if (!absolutePath.is_absolute() && path[0] != '.')
 			{
-				absolutePath = Game::GetAssetPath();
+				absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 				absolutePath = absolutePath.append(path);
 			}
 
 			m_PathToUUIDCache.Set(absolutePath.string(), uuid);
 		}
 
-		Debug::LogInfo("Loaded asset database");
+		DB_EngineInstance->GetDebug().LogInfo("Loaded asset database");
 		AssetCompiler::CompileAssetDatabase();
 		AssetCompiler::CompileNewAssets();
 	}
 
 	void EditorAssetDatabase::Reload()
 	{
-		AssetDatabase::Clear();
+		DB_EngineInstance->GetAssetDatabase().Clear();
 		AssetCompiler::CompileAssetDatabase();
 
-		Debug::LogInfo("Reloaded asset database");
+		DB_EngineInstance->GetDebug().LogInfo("Reloaded asset database");
 	}
 
 	void EditorAssetDatabase::InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty)
@@ -119,13 +123,13 @@ namespace Glory::Editor
 		std::filesystem::path oldAbsolutePath = oldPath;
 		if (!oldAbsolutePath.is_absolute() && oldPath[0] != '.')
 		{
-			oldAbsolutePath = Game::GetAssetPath();
+			oldAbsolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 			oldAbsolutePath = oldAbsolutePath.append(oldPath);
 		}
 		std::filesystem::path newAbsolutePath = newPath;
 		if (!newAbsolutePath.is_absolute() && newPath[0] != '.')
 		{
-			newAbsolutePath = Game::GetAssetPath();
+			newAbsolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 			newAbsolutePath = newAbsolutePath.append(newPath);
 		}
 		m_PathToUUIDCache.Erase(oldAbsolutePath.string());
@@ -133,7 +137,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Moved asset from " << oldPath << " to " << fixedNewPath;
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(uuid);
 
@@ -155,7 +159,7 @@ namespace Glory::Editor
 		std::string fixedOldPath = oldPath;
 		std::replace(fixedOldPath.begin(), fixedOldPath.end(), '/', '\\');
 
-		std::filesystem::path absolutePath = Game::GetAssetPath();
+		std::filesystem::path absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 		absolutePath = absolutePath.append(fixedOldPath);
 
 		/* Find all assets inside this folder and update their folder */
@@ -165,7 +169,7 @@ namespace Glory::Editor
 			UUID uuid = std::stoull(key.data());
 			JSONValueRef assetNode = assetsNode[key];
 			const std::string_view pathStr = assetNode["Location"]["Path"].AsString();
-			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
+			std::filesystem::path absoluteAssetPath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 			absoluteAssetPath = absoluteAssetPath.append(pathStr);
 			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
 
@@ -191,7 +195,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Deleted asset: " << uuid;
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		if (compile) AssetCompiler::CompileAssetDatabase(uuid);
 
@@ -206,7 +210,7 @@ namespace Glory::Editor
 		std::string fixedPath = path;
 		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
 
-		std::filesystem::path absolutePath = Game::GetAssetPath();
+		std::filesystem::path absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 		absolutePath = absolutePath.append(fixedPath);
 
 		/* Find all assets on this path */
@@ -217,7 +221,7 @@ namespace Glory::Editor
 			const UUID uuid = std::stoull(key.data());
 			JSONValueRef assetNode = assetsNode[key];
 			const std::string_view pathStr = assetNode["Location"]["Path"].AsString();
-			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
+			std::filesystem::path absoluteAssetPath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 			absoluteAssetPath = absoluteAssetPath.append(pathStr);
 			if (absoluteAssetPath != absolutePath.string()) continue;
 			relevantAssets.push_back(uuid);
@@ -240,7 +244,7 @@ namespace Glory::Editor
 		std::string fixedPath = path;
 		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
 
-		std::filesystem::path absolutePath = Game::GetAssetPath();
+		std::filesystem::path absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 		absolutePath = absolutePath.append(fixedPath);
 
 		std::vector<UUID> relevantAssets;
@@ -250,7 +254,7 @@ namespace Glory::Editor
 			const UUID uuid = std::stoull(key.data());
 			JSONValueRef assetNode = assetsNode[key];
 			const std::string_view pathStr = assetNode["Location"]["Path"].AsString();
-			std::filesystem::path absoluteAssetPath = Game::GetAssetPath();
+			std::filesystem::path absoluteAssetPath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 			absoluteAssetPath = absoluteAssetPath.append(pathStr);
 			if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
 			relevantAssets.push_back(uuid);
@@ -300,7 +304,7 @@ namespace Glory::Editor
 		std::string ext = extension.string();
 		std::for_each(ext.begin(), ext.end(), [](char& c) { c = std::tolower(c); });
 
-		if (ResourceType::IsScene(ext))
+		if (DB_EngineInstance->GetResourceTypes().IsScene(ext))
 		{
 			ImportScene(path);
 			return 0;
@@ -312,13 +316,13 @@ namespace Glory::Editor
 			pLoadedResource = Importer::Import(path, nullptr);
 			if (!pLoadedResource)
 			{
-				Debug::LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
+				DB_EngineInstance->GetDebug().LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
 
-				LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
+				LoaderModule* pModule = DB_EngineInstance->GetLoaderModule(ext);
 				if (!pModule)
 				{
 					// Not supperted!
-					Debug::LogError("Failed to import file, asset type not supported!");
+					DB_EngineInstance->GetDebug().LogError("Failed to import file, asset type not supported!");
 					return 0;
 				}
 
@@ -326,7 +330,7 @@ namespace Glory::Editor
 
 				if (!pLoadedResource)
 				{
-					Debug::LogError("Failed to import file, could not load resource file!");
+					DB_EngineInstance->GetDebug().LogError("Failed to import file, could not load resource file!");
 					return 0;
 				}
 			}
@@ -337,33 +341,35 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pLoadedResource->TypeCount(); ++i)
 		{
 			if (!pLoadedResource->GetType(0, type)) continue;
-			pType = ResourceType::GetResourceType(type);
+			pType = DB_EngineInstance->GetResourceTypes().GetResourceType(type);
 			if (pType) break;
 		}
 
 		if (!pType)
 		{
 			/* Try to get the resource type from the extension */
-			pType = ResourceType::GetResourceType(ext);
+			pType = DB_EngineInstance->GetResourceTypes().GetResourceType(ext);
 
 			if (!pType)
 			{
 				// Not supperted!
-				Debug::LogError("Failed to import file, could not determine ResourceType!");
+				DB_EngineInstance->GetDebug().LogError("Failed to import file, could not determine ResourceType!");
 				return 0;
 			}
 		}
 
 		// Generate a meta file
-		const std::string assetPath = Game::GetAssetPath();
+		AssetDatabase& assetDatabase = DB_EngineInstance->GetAssetDatabase();
+		AssetManager& assetManager = DB_EngineInstance->GetAssetManager();
+		const std::string_view assetPath = assetDatabase.GetAssetPath();
 
 		std::filesystem::path namePath = fileName;
 		if (!subPath.empty()) namePath.append(subPath.string());
 		ResourceMeta meta(extension.string(), namePath.string(), pLoadedResource->GetUUID(), pType->Hash());
 
-		AssetDatabase::SetIDAndName(pLoadedResource, meta.ID(), meta.Name());
+		assetDatabase.SetIDAndName(pLoadedResource, meta.ID(), meta.Name());
 		std::filesystem::path relativePath = filePath.lexically_relative(assetPath);
-		AssetManager::AddLoadedResource(pLoadedResource);
+		assetManager.AddLoadedResource(pLoadedResource);
 
 		AssetLocation location{ relativePath.empty() ? path : relativePath.string(), subPath.string() };
 		InsertAsset(location, meta);
@@ -374,7 +380,7 @@ namespace Glory::Editor
 		if (!subPath.empty())
 			stream << "Imported subasset " << subPath.string() << " at " << path;
 		else stream << "Imported asset at " << path;
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(meta.ID());
 
@@ -409,7 +415,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing " << path << "...";
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 		m_pImportPool->QueueSingleJob(ImportJob, path);
 	}
 
@@ -417,7 +423,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing new scene at " << path << "...";
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -425,21 +431,23 @@ namespace Glory::Editor
 		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
 
 		// Generate a meta
-		const ResourceType* pType = ResourceType::GetResourceType<GScene>();
+		const ResourceType* pType = DB_EngineInstance->GetResourceTypes().GetResourceType<GScene>();
 
-		const std::string assetPath = Game::GetAssetPath();
+		const std::string_view assetPath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 		ResourceMeta meta(extension.string(), fileName.string(), pScene->GetUUID(), pType->Hash());
 
-		AssetDatabase::SetIDAndName(pScene, meta.ID(), fileName.string());
-		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
-		AssetManager::AddLoadedResource(pScene);
+		AssetDatabase& assetDatabase = DB_EngineInstance->GetAssetDatabase();
+		AssetManager& assetManager = DB_EngineInstance->GetAssetManager();
+		assetDatabase.SetIDAndName(pScene, meta.ID(), fileName.string());
+		std::filesystem::path relativePath = filePath.lexically_relative(assetDatabase.GetAssetPath());
+		assetManager.AddLoadedResource(pScene);
 		AssetLocation location{ relativePath.string() };
 		InsertAsset(location, meta);
 		m_PathToUUIDCache.Set(path, meta.ID());
 
 		stream.clear();
 		stream << "Imported new scene: " << pScene->Name();
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(meta.ID());
 	}
@@ -448,7 +456,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing scene at " << path << "...";
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -456,19 +464,19 @@ namespace Glory::Editor
 		std::filesystem::path metaExtension = std::filesystem::path(".gmeta");
 
 		// Generate a meta
-		const ResourceType* pType = ResourceType::GetResourceType<GScene>();
+		const ResourceType* pType = DB_EngineInstance->GetResourceTypes().GetResourceType<GScene>();
 
-		const std::string assetPath = Game::GetAssetPath();
+		const std::string_view assetPath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 		ResourceMeta meta(extension.string(), fileName.string(), UUID(), pType->Hash());
 
-		std::filesystem::path relativePath = filePath.lexically_relative(Game::GetGame().GetAssetPath());
+		std::filesystem::path relativePath = filePath.lexically_relative(assetPath);
 		AssetLocation location{ relativePath.string() };
 		InsertAsset(location, meta);
 		m_PathToUUIDCache.Set(path, meta.ID());
 
 		stream.clear();
 		stream << "Imported scene: " << GetAssetName(meta.ID());
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(meta.ID());
 	}
@@ -489,7 +497,7 @@ namespace Glory::Editor
 		JSONValueRef location = assetNode["Location"];
 		JSONValueRef meta = assetNode["Metadata"];
 
-		std::filesystem::path path = Game::GetAssetPath();
+		std::filesystem::path path = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 		path.append(location["Path"].AsString());
 		if (!Importer::Export(path, pResource)) return;
 		IncrementAssetVersion(pResource->GetUUID());
@@ -499,7 +507,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Saved asset to " << location["Path"].AsString();
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(pResource->GetUUID());
 	}
@@ -517,7 +525,7 @@ namespace Glory::Editor
 
 		std::stringstream stream;
 		stream << "Removed asset " << uuid;
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(uuid);
 	}
@@ -538,7 +546,7 @@ namespace Glory::Editor
 	{
 		m_UnsavedAssets.ForEachClear([&](const UUID& uuid)
 		{
-			Resource* pResource = AssetManager::FindResource(uuid);
+			Resource* pResource = DB_EngineInstance->GetAssetManager().FindResource(uuid);
 			if (!pResource) return;
 			SaveAsset(pResource, false);
 		});
@@ -605,7 +613,7 @@ namespace Glory::Editor
 		std::filesystem::path absolutePath = fixedPath;
 		if (!absolutePath.is_absolute() && fixedPath[0] != '.')
 		{
-			absolutePath = Game::GetAssetPath();
+			absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 			absolutePath = absolutePath.append(fixedPath);
 		}
 
@@ -622,7 +630,7 @@ namespace Glory::Editor
 		//	std::filesystem::path absoluteAssetPath = location.Path;
 		//	if (!absoluteAssetPath.is_absolute() && location.Path[0] != '.')
 		//	{
-		//		absoluteAssetPath = Game::GetAssetPath();
+		//		absoluteAssetPath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
 		//		absoluteAssetPath.append(location.Path);
 		//	}
 		//	if (absoluteAssetPath.string().find(absolutePath.string()) == std::string::npos) continue;
@@ -683,9 +691,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::ImportModuleAssets()
 	{
-		for (size_t i = 0; i < Game::GetGame().GetEngine()->ModulesCount(); i++)
+		for (size_t i = 0; i < DB_EngineInstance->ModulesCount(); i++)
 		{
-			Module* pModule = Game::GetGame().GetEngine()->GetModule(i);
+			Module* pModule = DB_EngineInstance->GetModule(i);
 			const ModuleMetaData& metaData = pModule->GetMetaData();
 			std::filesystem::path assetsPath = metaData.Path().parent_path();
 			if (!std::filesystem::exists(assetsPath)) continue;
@@ -697,15 +705,17 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::Initialize()
 	{
+		DB_EngineInstance = EditorApplication::GetInstance()->GetEngine();
+
 		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
 
 		YAML::Node m_LastSavedNode;
-		Debug::LogInfo("Initialized EditorAssetDatabase");
+		DB_EngineInstance->GetDebug().LogInfo("Initialized EditorAssetDatabase");
 	}
 
 	void EditorAssetDatabase::Cleanup()
 	{
-		Debug::LogInfo("Cleanup EditorAssetDatabase");
+		DB_EngineInstance->GetDebug().LogInfo("Cleanup EditorAssetDatabase");
 
 		m_pImportPool = nullptr;
 		m_AsyncImportCallback = NULL;
@@ -735,20 +745,20 @@ namespace Glory::Editor
 		Resource* pResource = Importer::Import(path, nullptr);
 		if (!pResource)
 		{
-			Debug::LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
+			DB_EngineInstance->GetDebug().LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
 
-			LoaderModule* pModule = Game::GetGame().GetEngine()->GetLoaderModule(ext);
+			LoaderModule* pModule = DB_EngineInstance->GetLoaderModule(ext);
 			if (!pModule)
 			{
 				// Not supperted!
-				Debug::LogError("Failed to import file, asset type not supported!");
+				DB_EngineInstance->GetDebug().LogError("Failed to import file, asset type not supported!");
 				return false;
 			}
 
 			pResource = pModule->Load(path.string());
 			if (!pResource)
 			{
-				Debug::LogError("Failed to import file, the returned Resource is null!");
+				DB_EngineInstance->GetDebug().LogError("Failed to import file, the returned Resource is null!");
 				return false;
 			}
 		}
@@ -761,7 +771,7 @@ namespace Glory::Editor
 	{
 		std::stringstream stream;
 		stream << "Importing module assets at " << path << "...";
-		Debug::LogInfo(stream.str());
+		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		for (auto itor : std::filesystem::directory_iterator(path))
 		{

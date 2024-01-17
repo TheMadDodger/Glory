@@ -30,6 +30,7 @@ project "JoltEditorExtension"
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.jolt}",
+		"%{GloryIncludeDir.threads}",
 
 		"%{IncludeDir.FA}",
 

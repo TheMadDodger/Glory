@@ -14,21 +14,21 @@ namespace Glory
 	{
 	}
 
-	Glory::EditorCreateInfo EditorLoader::LoadEditor(Game& game, EngineLoader& engineLoader)
+	Glory::EditorCreateInfo EditorLoader::LoadEditor(Engine* pEngine, EngineLoader& engineLoader)
 	{
 		Glory::EditorCreateInfo editorCreateInfo{};
-		editorCreateInfo.pContext = GloryContext::GetContext();
+		editorCreateInfo.pEngine = pEngine;
 
 		for (size_t i = 0; i < engineLoader.ModuleCount(); i++)
 		{
 			const Module* pModule = engineLoader.GetModule(i);
 			const ModuleMetaData& metaData = pModule->GetMetaData();
 			LoadBackend(editorCreateInfo, metaData);
-			LoadExtensions(metaData);
+			LoadExtensions(pEngine, metaData);
 		}
 
-		LoadGlobalExtensionDependencies();
-		LoadGlobalExtensions();
+		LoadGlobalExtensionDependencies(pEngine);
+		LoadGlobalExtensions(pEngine);
 
 		editorCreateInfo.ExtensionsCount = static_cast<uint32_t>(m_pExtensions.size());
 		editorCreateInfo.pExtensions = m_pExtensions.data();
@@ -68,7 +68,7 @@ namespace Glory
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor backend for module: " + name + ": The dll was not found!");
+			editorCreateInfo.pEngine->GetDebug().LogFatalError("Failed to load editor backend for module: " + name + ": The dll was not found!");
 			return;
 		}
 
@@ -76,7 +76,7 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load editor backend for module: " + name + ": Missing LoadBackend function!");
+			editorCreateInfo.pEngine->GetDebug().LogError("Failed to load editor backend for module: " + name + ": Missing LoadBackend function!");
 			return;
 		}
 
@@ -97,7 +97,7 @@ namespace Glory
 		LoadBackendDLL(dllPath, editorBackend, editorCreateInfo);
 	}
 
-	void EditorLoader::LoadExtensions(const ModuleMetaData& metaData)
+	void EditorLoader::LoadExtensions(Engine* pEngine, const ModuleMetaData& metaData)
 	{
 		const std::vector<std::string>& extensionNames = metaData.EditorExtensions();
 		std::filesystem::path extensionsPath = metaData.Path();
@@ -106,17 +106,17 @@ namespace Glory
 		{
 			std::filesystem::path path = extensionsPath;
 			path.append(extensionNames[i]).replace_extension(".dll");
-			LoadExtensionDLL(path, extensionNames[i]);
+			LoadExtensionDLL(pEngine, path, extensionNames[i]);
 		}
 	}
 
 	void EditorLoader::LoadBackendDLL(const std::filesystem::path& dllPath, const std::string& name, Glory::EditorCreateInfo& editorCreateInfo)
 	{
-		Debug::LogInfo("Loading editor backend: " + name + "...");
+		editorCreateInfo.pEngine->GetDebug().LogInfo("Loading editor backend: " + name + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor backend: " + name + ": The dll was not found!");
+			editorCreateInfo.pEngine->GetDebug().LogFatalError("Failed to load editor backend: " + name + ": The dll was not found!");
 			return;
 		}
 
@@ -124,7 +124,7 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load editor backend: " + name + ": Missing LoadBackend function!");
+			editorCreateInfo.pEngine->GetDebug().LogError("Failed to load editor backend: " + name + ": Missing LoadBackend function!");
 			return;
 		}
 
@@ -132,13 +132,13 @@ namespace Glory
 		m_Libs.push_back(lib);
 	}
 
-	void EditorLoader::LoadExtensionDLL(const std::filesystem::path& dllPath, const std::string& name)
+	void EditorLoader::LoadExtensionDLL(Engine* pEngine, const std::filesystem::path& dllPath, const std::string& name)
 	{
-		Debug::LogInfo("Loading editor extension: " + name + "...");
+		pEngine->GetDebug().LogInfo("Loading editor extension: " + name + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor extension: " + name + ": The dll was not found!");
+			pEngine->GetDebug().LogFatalError("Failed to load editor extension: " + name + ": The dll was not found!");
 			return;
 		}
 
@@ -146,7 +146,7 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load editor extension: " + name + ": Missing LoadExtension function!");
+			pEngine->GetDebug().LogError("Failed to load editor extension: " + name + ": Missing LoadExtension function!");
 			return;
 		}
 
@@ -159,19 +159,19 @@ namespace Glory
 		pExtension->SetSetContextProc(contextProc);
 	}
 
-	void EditorLoader::LoadExtensionDependencyDLL(const std::filesystem::path& dllPath, const std::string& name)
+	void EditorLoader::LoadExtensionDependencyDLL(Engine* pEngine, const std::filesystem::path& dllPath, const std::string& name)
 	{
-		Debug::LogInfo("Loading editor extension dependency: " + name + "...");
+		pEngine->GetDebug().LogInfo("Loading editor extension dependency: " + name + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogFatalError("Failed to load editor extension dependency: " + name + ": The dll was not found!");
+			pEngine->GetDebug().LogFatalError("Failed to load editor extension dependency: " + name + ": The dll was not found!");
 			return;
 		}
 		m_Libs.push_back(lib);
 	}
 
-	void EditorLoader::LoadGlobalExtensionDependencies()
+	void EditorLoader::LoadGlobalExtensionDependencies(Engine* pEngine)
 	{
 		const std::filesystem::path extensionsPath = "./Extensions/Dependencies";
 
@@ -183,11 +183,11 @@ namespace Glory
 			const std::filesystem::path file = entry.path();
 			if (file.extension().compare(".dll") != 0) continue;
 			const std::string name = file.filename().replace_extension("").string();
-			LoadExtensionDependencyDLL(file, name);
+			LoadExtensionDependencyDLL(pEngine, file, name);
 		}
 	}
 
-	void EditorLoader::LoadGlobalExtensions()
+	void EditorLoader::LoadGlobalExtensions(Engine* pEngine)
 	{
 		const std::filesystem::path extensionsPath = "./Extensions";
 
@@ -199,7 +199,7 @@ namespace Glory
 			const std::filesystem::path file = entry.path();
 			if (file.extension().compare(".dll") != 0) continue;
 			const std::string name = file.filename().replace_extension("").string();
-			LoadExtensionDLL(file, name);
+			LoadExtensionDLL(pEngine, file, name);
 		}
 	}
 }

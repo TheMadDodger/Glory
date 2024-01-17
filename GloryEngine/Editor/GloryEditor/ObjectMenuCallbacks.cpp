@@ -11,9 +11,10 @@
 #include "EditableEntity.h"
 #include "EntityEditor.h"
 #include "EditorSceneSerializer.h"
+#include "EditorApplication.h"
 
 #include <AssetManager.h>
-#include <Game.h>
+#include <AssetDatabase.h>
 #include <Engine.h>
 #include <SceneManager.h>
 #include <MaterialInstanceData.h>
@@ -53,7 +54,7 @@ namespace Glory::Editor
 			out << YAML::Key << "Value";
 			out << YAML::Value << YAML::BeginSeq;
 			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
-			EditorSceneSerializer::SerializeEntityRecursive(pScene, pSceneObject->EntityID(), out);
+			EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, pSceneObject->EntityID(), out);
 			out << YAML::EndSeq;
 			out << YAML::EndMap;
 			ImGui::SetClipboardText(out.c_str());
@@ -103,6 +104,8 @@ namespace Glory::Editor
 
 	OBJECTMENU_CALLBACK(PasteObjectCallback)
 	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+
 		const char* clipboardText = ImGui::GetClipboardText();
 		YAML::Node clipboardNode;
 		try
@@ -111,12 +114,12 @@ namespace Glory::Editor
 		}
 		catch (const std::exception&)
 		{
-			Debug::LogError("Pasted object is not a YAML object!");
+			pEngine->GetDebug().LogError("Pasted object is not a YAML object!");
 			return;
 		}
 		if (!clipboardNode.IsDefined() || !clipboardNode.IsMap())
 		{
-			Debug::LogError("Pasted object is not a YAML object!");
+			pEngine->GetDebug().LogError("Pasted object is not a YAML object!");
 			return;
 		}
 
@@ -288,7 +291,8 @@ namespace Glory::Editor
 		if (!pObject)
 		{
 			Selection::SetActiveObject(nullptr);
-			GScene* pActiveScene = Game::GetGame().GetEngine()->GetSceneManager()->GetActiveScene();
+			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+			GScene* pActiveScene = pEngine->GetSceneManager()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
 			Entity newEnity = pActiveScene->CreateEmptyObject();
 			Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
@@ -449,7 +453,8 @@ namespace Glory::Editor
 		Selection::SetActiveObject(nullptr);
 		std::filesystem::path file = FileBrowserItem::GetHighlightedPath();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
-		Resource* pLoadedResource = AssetManager::FindResource(uuid);
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Resource* pLoadedResource = pEngine->GetAssetManager().FindResource(uuid);
 		if (pLoadedResource) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
 		EditorAssetDatabase::ImportAsset(file.string(), pLoadedResource);
@@ -458,7 +463,8 @@ namespace Glory::Editor
 	void DeleteFolder()
 	{
 		std::filesystem::path path = m_DeletingFile;
-		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		std::filesystem::path relativePath = path.lexically_relative(pEngine->GetAssetDatabase().GetAssetPath());
 		if (!std::filesystem::exists(path)) return;
 		if (!std::filesystem::remove_all(path)) return;
 
@@ -469,7 +475,8 @@ namespace Glory::Editor
 	void DeleteResource(std::filesystem::path path)
 	{
 		if (path.empty()) path = FileBrowserItem::GetHighlightedPath();
-		std::filesystem::path relativePath = path.lexically_relative(Game::GetAssetPath());
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		std::filesystem::path relativePath = path.lexically_relative(pEngine->GetAssetDatabase().GetAssetPath());
 		if (!std::filesystem::remove(path)) return;
 
 		EditorAssetDatabase::DeleteAsset(relativePath.string());

@@ -4,6 +4,7 @@
 #include "EditorAssets.h"
 #include "Tumbnail.h"
 #include "TumbnailGenerator.h"
+#include "EditorApplication.h"
 
 namespace Glory::Editor
 {
@@ -12,7 +13,7 @@ namespace Glory::Editor
 
 	Texture* Tumbnail::GetTumbnail(UUID uuid)
 	{
-		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
+		GPUResourceManager* pResourceManager = EditorApplication::GetInstance()->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
 
 		auto it = m_pTumbnails.find(uuid);
 		if (it != m_pTumbnails.end())
@@ -52,7 +53,7 @@ namespace Glory::Editor
 		m_pGenerators.push_back(pGenerator);
 	}
 
-	GLORY_EDITOR_API void Tumbnail::Destroy()
+	void Tumbnail::Destroy()
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
 		{
@@ -61,12 +62,12 @@ namespace Glory::Editor
 		m_pGenerators.clear();
 	}
 
-	GLORY_EDITOR_API BaseTumbnailGenerator* Tumbnail::GetGenerator(uint32_t hashCode)
+	BaseTumbnailGenerator* Tumbnail::GetGenerator(uint32_t hashCode)
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
 		{
 			const std::type_info& type = m_pGenerators[i]->GetAssetType();
-			uint32_t hash = ResourceType::GetHash(type);
+			uint32_t hash = ResourceTypes::GetHash(type);
 			if (hash != hashCode) continue;
 			return m_pGenerators[i];
 		}

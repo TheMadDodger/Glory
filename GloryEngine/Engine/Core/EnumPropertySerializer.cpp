@@ -3,7 +3,8 @@
 
 namespace Glory
 {
-	EnumPropertySerializer::EnumPropertySerializer() : PropertySerializer(SerializedType::ST_Enum)
+	EnumPropertySerializer::EnumPropertySerializer(Serializers* pSerializers):
+		PropertySerializer(pSerializers, SerializedType::ST_Enum)
 	{
 	}
 

@@ -1,4 +1,8 @@
 #pragma once
+#include "EditorApplication.h"
+
+#include <Engine.h>
+#include <ResourceType.h>
 #include <Enum.h>
 #include <functional>
 #include <filesystem>
@@ -29,7 +33,7 @@ namespace Glory::Editor
 		template<typename T>
 		static void DragAndDropSource(void* payload, size_t payloadSize, std::function<void()> previewCallback, ImGuiDragDropFlags flags = 0)
 		{
-			ResourceType* pType = ResourceType::GetResourceType<T>();
+			ResourceType* pType = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetResourceType<T>();
 			DragAndDropSource(pType->Name(), payload, payloadSize, previewCallback, flags);
 		}
 

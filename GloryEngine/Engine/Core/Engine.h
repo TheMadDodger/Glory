@@ -1,12 +1,21 @@
 #pragma once
 #include "Object.h"
 #include "ResourceType.h"
-#include "GloryCore.h"
 
+#include "UUIDRemapper.h"
+
+#include <memory>
 #include <filesystem>
+#include <map>
+#include <vector>
 
 namespace Glory
 {
+namespace Utils::Reflect
+{
+	class Reflect;
+}
+
 	class Module;
 	class IModuleLoopHandler;
 	class ScriptingExtender;
@@ -15,6 +24,20 @@ namespace Glory
 	class ScriptingModule;
 	class LoaderModule;
 	class SceneManager;
+	class PropertySerializer;
+
+	class Debug;
+	class Console;
+	class AssetDatabase;
+	class AssetManager;
+	class Serializers;
+	class DisplayManager;
+	class LayerManager;
+	class ObjectManager;
+	class CameraManager;
+	class ShaderManager;
+	class GameTime;
+	class EngineProfiler;
 
 	namespace Jobs
 	{
@@ -23,6 +46,9 @@ namespace Glory
 
 	struct EngineCreateInfo
 	{
+		Debug* m_pDebug;
+		Console* m_pConsole;
+
 		uint32_t MainModuleCount;
 		/* Order should be: 
 		 * - WindowModule
@@ -46,8 +72,10 @@ namespace Glory
 	class Engine
 	{
 	public:
-		static Engine* CreateEngine(const EngineCreateInfo& createInfo);
+		Engine(const EngineCreateInfo& createInfo);
+		virtual ~Engine();
 
+	public:
 		SceneManager* GetSceneManager();
 
 		void AddMainModule(Module* pModule, bool initialize = false);
@@ -136,14 +164,47 @@ namespace Glory
 
 		void LoadModuleSettings(const std::filesystem::path& overrideRootPath = "");
 
-	private:
-		Engine(const EngineCreateInfo& createInfo);
-		virtual ~Engine();
-
-	private:
 		void Update();
 		void Initialize();
+		void Cleanup();
 
+		Console& GetConsole();
+		Debug& GetDebug();
+		GameTime& Time();
+		CameraManager& GetCameraManager();
+		AssetDatabase& GetAssetDatabase();
+		AssetManager& GetAssetManager();
+		ResourceTypes& GetResourceTypes();
+		Serializers& GetSerializers();
+		DisplayManager& GetDisplayManager();
+		LayerManager& GetLayerManager();
+		ShaderManager& GetShaderManager();
+		Utils::Reflect::Reflect& Reflection();
+		ObjectManager& GetObjectManager();
+		EngineProfiler& Profiler();
+
+		template<class T>
+		void AddUserContext(T* pUserContext)
+		{
+			AddUserContext(ResourceType::GetHash(typeid(T)), (void*)pUserContext);
+		}
+
+		template<class T>
+		T* GetUserContext()
+		{
+			return (T*)GetUserContext(ResourceType::GetHash(typeid(T)));
+		}
+
+		void AddUserContext(uint32_t hash, void* pUserContext);
+		void* GetUserContext(uint32_t hash);
+
+		void RequestQuit();
+		void CancelQuit();
+		bool WantsToQuit() const;
+
+		UUIDRemapper m_UUIDRemapper;
+
+	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
 
@@ -152,7 +213,6 @@ namespace Glory
 		void GraphicsThreadFrameEnd();
 
 	private:
-		friend class Game;
 		friend class GameThread;
 		friend class GraphicsThread;
 		friend class ScriptingExtender;
@@ -192,5 +252,25 @@ namespace Glory
 
 		/* Threads */
 		GraphicsThread* m_pGraphicsThread;
+
+		Console* m_Console;
+		Debug* m_Debug;
+
+		bool m_Quit = false;
+
+		std::unique_ptr<GameTime> m_Time;
+		std::unique_ptr<CameraManager> m_CameraManager;
+		std::unique_ptr<AssetDatabase> m_AssetDatabase;
+		std::unique_ptr<AssetManager> m_AssetManager;
+		std::unique_ptr<ResourceTypes> m_ResourceTypes;
+		std::unique_ptr<Serializers> m_Serializers;
+		std::unique_ptr<DisplayManager> m_DisplayManager;
+		std::unique_ptr<LayerManager> m_LayerManager;
+		std::unique_ptr<ShaderManager> m_ShaderManager;
+		std::unique_ptr<Utils::Reflect::Reflect> m_Reflection;
+		std::unique_ptr<ObjectManager> m_ObjectManager;
+		std::unique_ptr<EngineProfiler> m_Profiler;
+		std::map<size_t, void*> m_pUserContexts;
+		std::vector<PropertySerializer*> m_pRegisteredPropertySerializers;
 	};
 }

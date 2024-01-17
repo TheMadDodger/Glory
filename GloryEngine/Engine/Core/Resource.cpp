@@ -51,7 +51,7 @@ namespace Glory
 	{
 		if (m_NameToSubresourceIndex.find(name) != m_NameToSubresourceIndex.end())
 		{
-			Debug::LogError("Could not add Subresource because a Subresource with the same name already exists!");
+			//m_pEngine->GetDebug().LogError("Could not add Subresource because a Subresource with the same name already exists!");
 			return;
 		}
 		size_t index = m_pSubresources.size();

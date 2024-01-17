@@ -1,32 +1,34 @@
 #pragma once
 #include "RenderTexture.h"
-#include <vector>
-#include "Engine.h"
 
-#define DISPLAYMANAGR Glory::GloryContext::GetDisplayManager()
+#include <vector>
 
 namespace Glory
 {
+	class Engine;
+
 	class DisplayManager
 	{
 	public:
-		static RenderTexture* GetDisplayRenderTexture(size_t index);
+		virtual ~DisplayManager();
+
+		RenderTexture* GetDisplayRenderTexture(size_t index);
 		static const int MAX_DISPLAYS = 10;
 
-		static void ClearAllDisplays(Engine* pEngine);
+		void ClearAllDisplays(Engine* pEngine);
 
-		static RenderTexture* CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height);
+		RenderTexture* CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height);
 
 	private:
 		DisplayManager();
-		virtual ~DisplayManager();
 
 	private:
-		static void Initialize(Engine* pEngine);
+		void Initialize(Engine* pEngine);
 
 	private:
+		friend class Engine;
 		friend class RendererModule;
-		friend class GloryContext;
+		Engine* m_pEngine;
 		RenderTexture* m_pRenderTextures[MAX_DISPLAYS];
 	};
 }

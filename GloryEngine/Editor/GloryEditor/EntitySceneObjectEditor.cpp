@@ -7,6 +7,8 @@
 
 #include <imgui.h>
 #include <string>
+
+#include <ObjectManager.h>
 #include <SceneObjectNameAction.h>
 #include <EnableObjectAction.h>
 #include <Undo.h>
@@ -24,14 +26,14 @@
 namespace Glory::Editor
 {
 	std::map<uint32_t, std::string_view> ComponentIcons = {
-		{ ResourceType::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
-		{ ResourceType::GetHash<MeshFilter>(), ICON_FA_CUBE },
-		{ ResourceType::GetHash<MeshRenderer>(), ICON_FA_CUBES },
-		{ ResourceType::GetHash<ModelRenderer>(), ICON_FA_CUBES },
-		{ ResourceType::GetHash<CameraComponent>(), ICON_FA_VIDEO },
-		{ ResourceType::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
-		{ ResourceType::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
-		{ ResourceType::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
+		{ ResourceTypes::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
+		{ ResourceTypes::GetHash<MeshFilter>(), ICON_FA_CUBE },
+		{ ResourceTypes::GetHash<MeshRenderer>(), ICON_FA_CUBES },
+		{ ResourceTypes::GetHash<ModelRenderer>(), ICON_FA_CUBES },
+		{ ResourceTypes::GetHash<CameraComponent>(), ICON_FA_VIDEO },
+		{ ResourceTypes::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
+		{ ResourceTypes::GetHash<ScriptedComponent>(), ICON_FA_FILE_CODE },
+		{ ResourceTypes::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)
@@ -43,7 +45,9 @@ namespace Glory::Editor
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
 		m_pComponentEditors.clear();
 
-		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
+		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) {
+			EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Destroy(pObject);
+		});
 		m_pComponents.clear();
 	}
 
@@ -107,7 +111,10 @@ namespace Glory::Editor
 		{
 			UUID uuid = pEntityView->ComponentUUIDAt(i);
 			uint32_t componentType = pEntityView->ComponentTypeAt(i);
-			EntityComponentObject* pComponentObject = new EntityComponentObject(entityID, uuid, componentType, &entity.GetScene()->GetRegistry());
+			ObjectManager& objects = EditorApplication::GetInstance()->GetEngine()->GetObjectManager();
+			EntityComponentObject* pComponentObject = objects.Find<EntityComponentObject>(uuid);
+			if(!pComponentObject)
+				pComponentObject = objects.Create<EntityComponentObject>(entityID, uuid, componentType, &entity.GetScene()->GetRegistry());
 			m_pComponents.push_back(pComponentObject);
 			Editor* pEditor = Editor::CreateEditor(pComponentObject);
 			if (pEditor) m_pComponentEditors.push_back(pEditor);

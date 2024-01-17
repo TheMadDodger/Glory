@@ -1,6 +1,8 @@
 #include "LayerManager.h"
-#include "Game.h"
+#include "Engine.h"
+#include "AssetDatabase.h"
 #include "Debug.h"
+
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <filesystem>
@@ -9,18 +11,18 @@ namespace Glory
 {
 	void LayerManager::AddLayer(const std::string& name)
 	{
-		size_t index = LAYER_MANAGER->m_Layers.size();
+		size_t index = m_Layers.size();
 		uint64_t mask = static_cast<uint64_t>(1) << index;
-		LAYER_MANAGER->m_Layers.push_back(Layer(mask, name));
-		LAYER_MANAGER->m_NameToLayer[name] = index;
+		m_Layers.push_back(Layer(mask, name));
+		m_NameToLayer[name] = index;
 	}
 
 	void LayerManager::Load()
 	{
-		LAYER_MANAGER->m_Layers.clear();
-		LAYER_MANAGER->m_NameToLayer.clear();
+		m_Layers.clear();
+		m_NameToLayer.clear();
 
-		std::filesystem::path layersPath = Game::GetSettingsPath();
+		std::filesystem::path layersPath = m_pEngine->GetAssetDatabase().GetSettingsPath();
 		layersPath.append("Layers.yaml");
 
 		if (!std::filesystem::exists(layersPath))
@@ -32,14 +34,14 @@ namespace Glory
 		YAML::Node node = YAML::LoadFile(layersPath.string());
 		if (!node.IsMap())
 		{
-			Debug::LogError("Could not load Layers.yaml!");
+			m_pEngine->GetDebug().LogError("Could not load Layers.yaml!");
 			return;
 		}
 
 		YAML::Node layersNode = node["Layers"];
 		if (!layersNode.IsSequence())
 		{
-			Debug::LogError("Could not load Layers.yaml!");
+			m_pEngine->GetDebug().LogError("Could not load Layers.yaml!");
 			return;
 		}
 
@@ -50,7 +52,7 @@ namespace Glory
 
 			if (!nameNode.IsDefined())
 			{
-				Debug::LogError("Could not load Layers.yaml!");
+				m_pEngine->GetDebug().LogError("Could not load Layers.yaml!");
 				return;
 			}
 
@@ -61,9 +63,9 @@ namespace Glory
 
 	const Layer* LayerManager::GetLayerByName(const std::string& name)
 	{
-		if (LAYER_MANAGER->m_NameToLayer.find(name) == LAYER_MANAGER->m_NameToLayer.end()) return nullptr;
-		size_t index = LAYER_MANAGER->m_NameToLayer[name];
-		return &LAYER_MANAGER->m_Layers[index];
+		if (m_NameToLayer.find(name) == m_NameToLayer.end()) return nullptr;
+		size_t index = m_NameToLayer[name];
+		return &m_Layers[index];
 	}
 
 	std::string LayerManager::LayerMaskToString(const LayerMask& layerMask)
@@ -71,10 +73,10 @@ namespace Glory
 		if (layerMask == 0) return "Default";
 
 		std::string result = "";
-		for (size_t i = 0; i < LAYER_MANAGER->m_Layers.size(); i++)
+		for (size_t i = 0; i < m_Layers.size(); i++)
 		{
-			if ((layerMask & LAYER_MANAGER->m_Layers[i].m_Mask) == 0) continue;
-			result += LAYER_MANAGER->m_Layers[i].m_Name + ',';
+			if ((layerMask & m_Layers[i].m_Mask) == 0) continue;
+			result += m_Layers[i].m_Name + ',';
 		}
 		result.erase(result.end() - 1);
 		return result;
@@ -83,29 +85,29 @@ namespace Glory
 	int LayerManager::GetLayerIndex(const Layer* pLayer)
 	{
 		if (pLayer == nullptr) return -1;
-		if (LAYER_MANAGER->m_NameToLayer.find(pLayer->m_Name) == LAYER_MANAGER->m_NameToLayer.end())
+		if (m_NameToLayer.find(pLayer->m_Name) == m_NameToLayer.end())
 			return -1;
-		return (int)LAYER_MANAGER->m_NameToLayer[pLayer->m_Name];
+		return (int)m_NameToLayer[pLayer->m_Name];
 	}
 
 	void LayerManager::GetAllLayerNames(std::vector<std::string_view>& names)
 	{
 		names.push_back("Default"); // Layer 0
-		for (size_t i = 0; i < LAYER_MANAGER->m_Layers.size(); i++)
+		for (size_t i = 0; i < m_Layers.size(); i++)
 		{
-			names.push_back(LAYER_MANAGER->m_Layers[i].m_Name);
+			names.push_back(m_Layers[i].m_Name);
 		}
 	}
 
 	const Layer* LayerManager::GetLayerAtIndex(int index)
 	{
-		if (index < 0 || (size_t)(index) >= LAYER_MANAGER->m_Layers.size()) return nullptr;
-		return &LAYER_MANAGER->m_Layers[index];
+		if (index < 0 || (size_t)(index) >= m_Layers.size()) return nullptr;
+		return &m_Layers[index];
 	}
 
 	const size_t LayerManager::LayerCount()
 	{
-		return LAYER_MANAGER->m_Layers.size();
+		return m_Layers.size();
 	}
 
 	void LayerManager::CreateDefaultLayers()
@@ -115,6 +117,6 @@ namespace Glory
 		AddLayer("Effects");
 	}
 
-	LayerManager::LayerManager() {}
-	LayerManager::~LayerManager() {}
+	LayerManager::LayerManager(Engine* pEngine): m_pEngine(pEngine) {}
+	LayerManager::~LayerManager() { m_pEngine = nullptr; }
 }

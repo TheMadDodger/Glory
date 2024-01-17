@@ -1,5 +1,6 @@
 #include "SceneObjectPropertyDrawer.h"
 #include "ObjectPicker.h"
+#include "EditorApplication.h"
 
 #include <Debug.h>
 
@@ -13,16 +14,16 @@ namespace Glory::Editor
 
 	bool SceneObjectRedirectPropertyDrawer::Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const
 	{
-		return PropertyDrawer::DrawProperty(label, data, ResourceType::GetHash<SceneObjectRef>(), flags);
+		return PropertyDrawer::DrawProperty(label, data, ResourceTypes::GetHash<SceneObjectRef>(), flags);
 	}
 
 	bool SceneObjectRedirectPropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
-		const uint32_t sceneObjectRefType = ResourceType::GetHash<SceneObjectRef>();
+		const uint32_t sceneObjectRefType = ResourceTypes::GetHash<SceneObjectRef>();
 		PropertyDrawer* pDrawer = PropertyDrawer::GetPropertyDrawer(sceneObjectRefType);
 		if (!pDrawer)
 		{
-			Debug::LogFatalError("Missing SceneObjectPropertyDrawer!");
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogFatalError("Missing SceneObjectPropertyDrawer!");
 			return false;
 		}
 		return pDrawer->Draw(label, node, typeHash, flags);

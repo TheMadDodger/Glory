@@ -22,7 +22,7 @@ namespace Glory
 		if (pSDLImage == NULL)
 		{
 			const char* error = SDL_GetError();
-			Debug::LogWarning("SDL Could not load image " + path + " SDL Error: " + std::string(error));
+			m_pEngine->GetDebug().LogWarning("SDL Could not load image " + path + " SDL Error: " + std::string(error));
 
 			return nullptr;
 		}
@@ -47,7 +47,7 @@ namespace Glory
 		if (pSDLImage == NULL)
 		{
 			const char* error = SDL_GetError();
-			Debug::LogWarning("SDL Could not load image from memory SDL Error: " + std::string(error));
+			m_pEngine->GetDebug().LogWarning("SDL Could not load image from memory SDL Error: " + std::string(error));
 
 			return nullptr;
 		}
@@ -66,12 +66,13 @@ namespace Glory
 
 	void SDLImageLoaderModule::Initialize()
 	{
+		ResourceLoaderModule::Initialize();
 		// Initialize for all available extensions
 		m_InitializedFlags = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
 		if (m_InitializedFlags == 0)
 		{
 			const char* error = SDL_GetError();
-			Debug::LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
+			m_pEngine->GetDebug().LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
 		}
 	}
 

@@ -11,13 +11,25 @@
 #include "ShaderManager.h"
 #include "ScriptExtensions.h"
 #include "ScriptingExtender.h"
-#include "GloryContext.h"
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "ShapeProperty.h"
 #include "PrefabData.h"
 #include "SceneManager.h"
 #include "WindowModule.h"
+#include "EngineProfiler.h"
+
+#include "Debug.h"
+#include "Console.h"
+#include "AssetDatabase.h"
+#include "AssetManager.h"
+#include "Serializers.h"
+#include "DisplayManager.h"
+#include "LayerManager.h"
+#include "ObjectManager.h"
+#include "CameraManager.h"
+#include "ShaderManager.h"
+#include "GameTime.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -36,12 +48,6 @@
 
 namespace Glory
 {
-	Engine* Engine::CreateEngine(const EngineCreateInfo& createInfo)
-	{
-		Engine* pEngine = new Engine(createInfo);
-		return pEngine;
-	}
-
 	SceneManager* Engine::GetSceneManager()
 	{
 		return m_pSceneManager;
@@ -161,7 +167,7 @@ namespace Glory
 
 	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
 	{
-		const ResourceType* pResourceType = ResourceType::GetResourceType(extension);
+		const ResourceType* pResourceType = m_ResourceTypes->GetResourceType(extension);
 		if (!pResourceType) return nullptr;
 		return GetLoaderModule(pResourceType->Hash());
 	}
@@ -202,8 +208,12 @@ namespace Glory
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pSceneManager(new SceneManager(this)), m_pThreadManager(ThreadManager::GetInstance()),
-		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr),
-		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo)
+		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
+		m_pScriptingExtender(new ScriptingExtender()), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
+		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
+		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
+		m_Serializers(new Serializers), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
+		m_ShaderManager(new ShaderManager(this)), m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -244,56 +254,18 @@ namespace Glory
 		}
 
 		AddInternalModule(new TimerModule);
-		AddInternalModule(new ProfilerModule);
+		ProfilerModule* pProfiler = new ProfilerModule();
+		m_Profiler->m_pProfiler = pProfiler;
+		AddInternalModule(pProfiler);
 	}
 
 	Engine::~Engine()
 	{
-		AssetManager::Destroy();
-
-		m_pGraphicsThread->Stop();
-
-		m_pJobManager->Kill();
-
-		m_pThreadManager->Destroy();
-
-		delete m_pJobManager;
-		m_pJobManager = nullptr;
-
-		// We need to cleanup in reverse
-		// This makes sure things like graphics get cleaned up before we close the window
-		for (int i = (int)m_pAllModules.size() - 1; i >= 0; --i)
-		{
-			m_pAllModules[(size_t)i]->Cleanup();
-			delete m_pAllModules[(size_t)i];
-		}
-
-		m_pAllModules.clear();
-		m_pOptionalModules.clear();
-		m_pPriorityInitializationModules.clear();
-		m_TypeToLoader.clear();
-		m_TypeHashToLoader.clear();
-		m_pLoaderModules.clear();
-
-		delete m_pGraphicsThread;
-		m_pGraphicsThread = nullptr;
-
-		delete m_pScriptingExtender;
-		m_pScriptingExtender = nullptr;
-
-		m_pSceneManager->Cleanup();
-		delete m_pSceneManager;
-		m_pSceneManager = nullptr;
-
-		PropertySerializer::Cleanup();
-		ShaderManager::Cleanup();
-		GloryContext::DestroyContext();
+		Cleanup();
 	}
 
 	void Engine::Initialize()
 	{
-		GloryContext::GetContext()->Initialize();
-
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
 		m_pSceneManager->Initialize();
@@ -314,7 +286,7 @@ namespace Glory
 				m_pLoaderModules.push_back(pLoaderModule);
 				std::type_index type = pLoaderModule->GetResourceType();
 				m_TypeToLoader[type] = index;
-				uint32_t typeHash = ResourceType::GetHash(type);
+				uint32_t typeHash = ResourceTypes::GetHash(type);
 				m_TypeHashToLoader[typeHash] = index;
 			}
 
@@ -330,7 +302,7 @@ namespace Glory
 			m_pAllModules[i]->m_IsInitialized = true;
 		}
 
-		AssetManager::Initialize();
+		m_AssetManager->Initialize();
 
 		m_pScriptingExtender->Initialize(this);
 
@@ -344,47 +316,199 @@ namespace Glory
 		}
 	}
 
+	void Engine::Cleanup()
+	{
+		m_AssetDatabase->Destroy();
+		m_pGraphicsThread->Stop();
+		m_pJobManager->Kill();
+		m_pThreadManager->Destroy();
+
+		// We need to cleanup in reverse
+		// This makes sure things like graphics get cleaned up before we close the window
+		for (int i = (int)m_pAllModules.size() - 1; i >= 0; --i)
+		{
+			m_pAllModules[(size_t)i]->Cleanup();
+			delete m_pAllModules[(size_t)i];
+		}
+
+		m_pSceneManager->Cleanup();
+		m_ShaderManager->Cleanup();
+
+		delete m_pJobManager;
+		m_pJobManager = nullptr;
+
+		m_pAllModules.clear();
+		m_pOptionalModules.clear();
+		m_pPriorityInitializationModules.clear();
+		m_TypeToLoader.clear();
+		m_TypeHashToLoader.clear();
+		m_pLoaderModules.clear();
+
+		delete m_pGraphicsThread;
+		m_pGraphicsThread = nullptr;
+
+		delete m_pScriptingExtender;
+		m_pScriptingExtender = nullptr;
+
+		delete m_pSceneManager;
+		m_pSceneManager = nullptr;
+	}
+
+	GameTime& Engine::Time()
+	{
+		return *m_Time;
+	}
+
+	CameraManager& Engine::GetCameraManager()
+	{
+		return *m_CameraManager;
+	}
+
+	AssetDatabase& Engine::GetAssetDatabase()
+	{
+		return *m_AssetDatabase;
+	}
+
+	AssetManager& Engine::GetAssetManager()
+	{
+		return *m_AssetManager;
+	}
+
+	ResourceTypes& Engine::GetResourceTypes()
+	{
+		return *m_ResourceTypes;
+	}
+
+	Serializers& Engine::GetSerializers()
+	{
+		return *m_Serializers;
+	}
+
+	DisplayManager& Engine::GetDisplayManager()
+	{
+		return *m_DisplayManager;
+	}
+
+	Console& Engine::GetConsole()
+	{
+		return *m_Console;
+	}
+
+	LayerManager& Engine::GetLayerManager()
+	{
+		return *m_LayerManager;
+	}
+
+	ShaderManager& Engine::GetShaderManager()
+	{
+		return *m_ShaderManager;
+	}
+
+	Utils::Reflect::Reflect& Engine::Reflection()
+	{
+		return *m_Reflection;
+	}
+
+	ObjectManager& Engine::GetObjectManager()
+	{
+		return *m_ObjectManager;
+	}
+
+	EngineProfiler& Engine::Profiler()
+	{
+		return *m_Profiler;
+	}
+
+	Debug& Engine::GetDebug()
+	{
+		return *m_Debug;
+	}
+
+	void Engine::AddUserContext(uint32_t hash, void* pUserContext)
+	{
+		m_pUserContexts.emplace(hash, pUserContext);
+	}
+
+	void* Engine::GetUserContext(uint32_t hash)
+	{
+		return m_pUserContexts.at(hash);
+	}
+
+	void Engine::RequestQuit()
+	{
+		m_Quit = true;
+	}
+
+	void Engine::CancelQuit()
+	{
+		m_Quit = false;
+	}
+
+	bool Engine::WantsToQuit() const
+	{
+		return m_Quit;
+	}
+
 	void Engine::RegisterStandardSerializers()
 	{
 		// Standard
-		STANDARD_SERIALIZER(int);
-		STANDARD_SERIALIZER(float);
-		STANDARD_SERIALIZER(double);
-		STANDARD_SERIALIZER(bool);
-		STANDARD_SERIALIZER(long);
-		STANDARD_SERIALIZER(uint32_t);
-		STANDARD_SERIALIZER(uint64_t);
-		STANDARD_SERIALIZER(glm::vec2);
-		STANDARD_SERIALIZER(glm::vec3);
-		STANDARD_SERIALIZER(glm::vec4);
-		STANDARD_SERIALIZER(glm::quat);
-		STANDARD_SERIALIZER(LayerMask);
-		STANDARD_SERIALIZER(LayerRef);
-		STANDARD_SERIALIZER(SceneObjectRef);
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<int>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<float>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<double>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<bool>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<long>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<uint32_t>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<uint64_t>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec2>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec3>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec4>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::quat>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerMask>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerRef>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<SceneObjectRef>>();
 
 		// Special
-		PropertySerializer::RegisterSerializer<AssetReferencePropertySerializer>();
-		PropertySerializer::RegisterSerializer<ArrayPropertySerializer>();
-		PropertySerializer::RegisterSerializer<EnumPropertySerializer>();
-		PropertySerializer::RegisterSerializer<StructPropertySerializer>();
-		PropertySerializer::RegisterSerializer<SceneObjectRefSerializer>();
-		PropertySerializer::RegisterSerializer<ShapePropertySerializer>();
+		m_Serializers->RegisterSerializer<AssetReferencePropertySerializer>();
+		m_Serializers->RegisterSerializer<ArrayPropertySerializer>();
+		m_Serializers->RegisterSerializer<EnumPropertySerializer>();
+		m_Serializers->RegisterSerializer<StructPropertySerializer>();
+		m_Serializers->RegisterSerializer<SceneObjectRefSerializer>();
+		m_Serializers->RegisterSerializer<ShapePropertySerializer>();
 	}
 
 	void Engine::RegisterBasicTypes()
 	{
-		ResourceType::RegisterType<int>();
-		ResourceType::RegisterType<float>();
-		ResourceType::RegisterType<double>();
-		ResourceType::RegisterType<long>();
-		ResourceType::RegisterType<glm::vec2>();
-		ResourceType::RegisterType<glm::vec3>();
-		ResourceType::RegisterType<glm::vec4>();
-		ResourceType::RegisterType<glm::quat>();
-		ResourceType::RegisterType<LayerMask>();
-		ResourceType::RegisterType<SceneObjectRef>();
-		ResourceType::RegisterType<ShapeProperty>();
-		ResourceType::RegisterResource<PrefabData>("");
+		Reflect::SetReflectInstance(m_Reflection.get());
+
+		Reflect::RegisterBasicType<int8_t>();
+		Reflect::RegisterBasicType<int16_t>();
+		Reflect::RegisterBasicType<int32_t>();
+		Reflect::RegisterBasicType<int64_t>();
+		Reflect::RegisterBasicType<uint8_t>();
+		Reflect::RegisterBasicType<uint16_t>();
+		Reflect::RegisterBasicType<uint32_t>();
+		Reflect::RegisterBasicType<uint64_t>();
+		Reflect::RegisterBasicType<char>();
+		Reflect::RegisterBasicType<bool>();
+		Reflect::RegisterBasicType<float>();
+		Reflect::RegisterBasicType<double>();
+		Reflect::RegisterBasicType<long>();
+		Reflect::RegisterBasicType<unsigned long>();
+
+		Reflect::RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
+
+		m_ResourceTypes->RegisterType<int>();
+		m_ResourceTypes->RegisterType<float>();
+		m_ResourceTypes->RegisterType<double>();
+		m_ResourceTypes->RegisterType<long>();
+		m_ResourceTypes->RegisterType<glm::vec2>();
+		m_ResourceTypes->RegisterType<glm::vec3>();
+		m_ResourceTypes->RegisterType<glm::vec4>();
+		m_ResourceTypes->RegisterType<glm::quat>();
+		m_ResourceTypes->RegisterType<LayerMask>();
+		m_ResourceTypes->RegisterType<SceneObjectRef>();
+		m_ResourceTypes->RegisterType<ShapeProperty>();
+		m_ResourceTypes->RegisterResource<PrefabData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");
@@ -418,7 +542,7 @@ namespace Glory
 	void Engine::Update()
 	{
 		GameThreadFrameStart();
-		Console::Update();
+		m_Console->Update();
 		m_pSceneManager->Update();
 		m_pSceneManager->Draw();
 		WindowModule* pWindows = GetMainModule<WindowModule>();
@@ -429,7 +553,7 @@ namespace Glory
 
 	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
 	{
-		AssetManager::RunCallbacks();
+		m_AssetManager->RunCallbacks();
 
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{

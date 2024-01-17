@@ -13,7 +13,7 @@ namespace Glory::Editor
 
 	void EditorWindowImpl::Initialize()
 	{
-		WindowModule* pWindowModule = Game::GetGame().GetEngine()->GetMainModule<WindowModule>();
+		WindowModule* pWindowModule = EditorApplication::GetInstance()->GetEngine()->GetMainModule<WindowModule>();
 		m_pMainWindow = pWindowModule->GetMainWindow();
 	}
 
@@ -24,6 +24,6 @@ namespace Glory::Editor
 
 	void EditorWindowImpl::OnFileDragAndDrop(std::string_view path)
 	{
-		EditorApplication::OnFileDragAndDrop(path);
+		EditorApplication::GetInstance()->OnFileDragAndDrop(path);
 	}
 }

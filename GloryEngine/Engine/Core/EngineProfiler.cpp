@@ -1,43 +1,40 @@
 #include "EngineProfiler.h"
-#include "Game.h"
 #include "Engine.h"
 #include "ProfilerModule.h"
 
-#define PROFILER Game::GetGame().GetEngine()->GetInternalModule<ProfilerModule>()
-
 namespace Glory
 {
-	void Profiler::BeginThread(const std::string& name)
+	void EngineProfiler::BeginThread(const std::string& name)
 	{
-		PROFILER->BeginThread(name);
+		m_pProfiler->BeginThread(name);
 	}
 
-	void Profiler::EndThread()
+	void EngineProfiler::EndThread()
 	{
-		PROFILER->EndThread();
+		m_pProfiler->EndThread();
 	}
 
-	void Profiler::BeginSample(const std::string& name)
+	void EngineProfiler::BeginSample(const std::string& name)
 	{
-		PROFILER->BeginSample(name);
+		m_pProfiler->BeginSample(name);
 	}
 
-	void Profiler::EndSample()
+	void EngineProfiler::EndSample()
 	{
-		PROFILER->EndSample();
+		m_pProfiler->EndSample();
 	}
 
-	Profiler::Profiler() {}
+	EngineProfiler::EngineProfiler(): m_pProfiler(nullptr) {}
 
-	Profiler::~Profiler() {}
+	EngineProfiler::~EngineProfiler() {}
 
-	ProfileSample::ProfileSample(const std::string& name)
+	ProfileSample::ProfileSample(EngineProfiler* pProfiler, const std::string& name): Profiler(pProfiler)
 	{
-		Profiler::BeginSample(name);
+		pProfiler->BeginSample(name);
 	}
 
 	ProfileSample::~ProfileSample()
 	{
-		Profiler::EndSample();
+		Profiler->EndSample();
 	}
 }

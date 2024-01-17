@@ -5,8 +5,6 @@
 #include "EntityCSAPI.h"
 #include "MonoManager.h"
 
-#include <Game.h>
-
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(GloryMonoScipting);
@@ -44,7 +42,13 @@ namespace Glory
 		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
 		m_pMonoManager->Initialize("./Modules/GloryMonoScripting/Dependencies");
 
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+
 		Reflect::RegisterEnum<MonoLogLevel>();
+
+		CoreCSAPI::SetEngine(m_pEngine);
+		InputCSAPI::SetEngine(m_pEngine);
+		EntityCSAPI::SetEngine(m_pEngine);
 	}
 
 	void GloryMonoScipting::PostInitialize()

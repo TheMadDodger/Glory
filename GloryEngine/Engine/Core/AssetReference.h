@@ -7,6 +7,7 @@
 namespace Glory
 {
 	class Resource;
+	class AssetManager;
 
 	class AssetReferenceBase
 	{
@@ -18,8 +19,8 @@ namespace Glory
 		const UUID AssetUUID() const;
 		UUID* AssetUUIDMember();
 		void SetUUID(UUID uuid);
-		Resource* GetResource() const;
-		Resource* GetResourceImmediate() const;
+		Resource* GetResource(AssetManager* pAssets) const;
+		Resource* GetResourceImmediate(AssetManager* pAssets) const;
 
 		virtual const uint32_t TypeHash() { return 0; };
 
@@ -40,7 +41,7 @@ namespace Glory
 
 		virtual const uint32_t TypeHash() override
 		{
-			static const uint32_t typeHash = ResourceType::GetHash<T>();
+			static const uint32_t typeHash = ResourceTypes::GetHash<T>();
 			return typeHash;
 		}
 
@@ -49,15 +50,15 @@ namespace Glory
 			return new AssetReference<T>(m_AssetUUID);
 		}
 
-		T* Get() const
+		T* Get(AssetManager* pManager) const
 		{
-			Resource* pResource = GetResource();
+			Resource* pResource = GetResource(pManager);
 			return pResource ? dynamic_cast<T*>(pResource) : nullptr;
 		}
 
-		T* GetImmediate() const
+		T* GetImmediate(AssetManager* pManager) const
 		{
-			Resource* pResource = GetResourceImmediate();
+			Resource* pResource = GetResourceImmediate(pManager);
 			return pResource ? dynamic_cast<T*>(pResource) : nullptr;
 		}
 	};

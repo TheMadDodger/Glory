@@ -6,7 +6,6 @@
 #include <EditorAssetDatabase.h>
 #include <EditorPreferencesWindow.h>
 #include <EditorAssetCallbacks.h>
-#include <Game.h>
 #include <Engine.h>
 #include <ObjectMenuCallbacks.h>
 #include <FileBrowser.h>
@@ -84,10 +83,10 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::Initialize()
 	{
-		m_pMonoScriptingModule = Game::GetGame().GetEngine()->GetScriptingModule<GloryMonoScipting>();
+		m_pMonoScriptingModule = EditorApplication::GetInstance()->GetEngine()->GetScriptingModule<GloryMonoScipting>();
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
-		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 		std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
 		if (!FindMSBuild(visualStudioPath))
 			FindVisualStudioPath();
@@ -116,27 +115,27 @@ namespace Glory::Editor
 		const std::filesystem::path x86Path = "C:\\Program Files (x86)\\Microsoft Visual Studio";
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
-		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 
 		if (FindVisualStudioPath(x64Path))
 		{
-			Debug::LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
+			pEditorApp->GetEngine()->GetDebug().LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
 			return;
 		}
 
 		if (FindVisualStudioPath(x86Path))
 		{
-			Debug::LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
+			pEditorApp->GetEngine()->GetDebug().LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
 			return;
 		}
 
-		Debug::LogWarning("Could not find Visual Studio installation");
+		pEditorApp->GetEngine()->GetDebug().LogWarning("Could not find Visual Studio installation");
 	}
 
 	bool MonoEditorExtension::FindVisualStudioPath(const std::filesystem::path& path)
 	{
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
-		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 
 		if (!std::filesystem::exists(path)) return false;
 		for (const std::filesystem::directory_entry entry : std::filesystem::directory_iterator(path))
@@ -220,7 +219,7 @@ namespace Glory::Editor
 		std::filesystem::path assembliesPath = pProject->LibraryPath();
 		assembliesPath.append("Assembly");
 
-		ScriptingExtender* pScriptingExtender = Game::GetGame().GetEngine()->GetScriptingExtender();
+		ScriptingExtender* pScriptingExtender = EditorApplication::GetInstance()->GetEngine()->GetScriptingExtender();
 		for (size_t i = 0; i < pScriptingExtender->InternalLibCount(); ++i)
 		{
 			const ScriptingLib& lib = pScriptingExtender->GetInternalLib(i);
@@ -234,7 +233,7 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::GeneratePremakeFile(ProjectSpace* pProject)
 	{
-		ScriptingExtender* pScriptingExtender = Game::GetGame().GetEngine()->GetScriptingExtender();
+		ScriptingExtender* pScriptingExtender = EditorApplication::GetInstance()->GetEngine()->GetScriptingExtender();
 
 		std::string projectName = pProject->Name();
 		// TODO: Make this setable in engine settings later
@@ -373,12 +372,12 @@ namespace Glory::Editor
 		std::filesystem::path projectPath = pProject->RootPath();
 		projectPath = projectPath.append(pProject->Name() + ".csproj");
 
-		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 
 		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>("");
 		if (!FindMSBuild(msBuildPath))
 		{
-			Debug::LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
+			pEditorApp->GetEngine()->GetDebug().LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
 			return;
 		}
 
@@ -398,15 +397,16 @@ namespace Glory::Editor
 		ResourceMeta meta;
 		EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta);
 		uint32_t typeHash = meta.Hash();
-		size_t scriptHash = ResourceType::GetHash<Script>();
-		ResourceType* pResourcerType = ResourceType::GetResourceType(typeHash);
+		size_t scriptHash = ResourceTypes::GetHash<Script>();
+		ResourceTypes& types = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
+		ResourceType* pResourcerType = types.GetResourceType(typeHash);
 
-		size_t subTypesCount = ResourceType::SubTypeCount(pResourcerType);
+		size_t subTypesCount = types.SubTypeCount(pResourcerType);
 		for (size_t i = 0; i < subTypesCount; i++)
 		{
-			size_t subHash = ResourceType::GetSubTypeHash(pResourcerType, i);
+			size_t subHash = types.GetSubTypeHash(pResourcerType, i);
 			if (scriptHash != subHash) continue;
-			AssetManager::ReloadAsset(callback.m_UUID);
+			EditorApplication::GetInstance()->GetEngine()->GetAssetManager().ReloadAsset(callback.m_UUID);
 			CompileProject(ProjectSpace::GetOpenProject());
 			return;
 		}
@@ -419,7 +419,7 @@ namespace Glory::Editor
 		ImGui::Spacing();
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
-		EditorSettings& settings = pEditorApp->GetMainEditor()->Settings();
+		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 		const std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
 
 		ImGui::Text("Visual Studio: %s", visualStudioPath.string().c_str());
@@ -439,7 +439,7 @@ namespace Glory::Editor
 				settings["Mono/VisualStudioPath"].Set(path);
 				return;
 			}
-			Debug::LogWarning("Invalid Visual Studio Path");
+			pEditorApp->GetEngine()->GetDebug().LogWarning("Invalid Visual Studio Path");
 		}
 	}
 }

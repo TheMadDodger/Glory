@@ -29,7 +29,7 @@ namespace Glory
         float CalculateTime(bool unscaled);
 
     private:
-        friend class Time;
+        friend class GameTime;
 
         float m_TimeScale = 1.0f;
         int m_TotalGameFrames = 0;

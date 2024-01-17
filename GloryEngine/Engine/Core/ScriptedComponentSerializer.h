@@ -7,7 +7,7 @@ namespace Glory
 	class ScriptedComponentSerailizer : public PropertySerializer
 	{
     public:
-        ScriptedComponentSerailizer();
+        ScriptedComponentSerailizer(Serializers* pSerializers);
         virtual ~ScriptedComponentSerailizer();
 
     private:

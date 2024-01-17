@@ -145,7 +145,6 @@ namespace Glory
 	struct LayerComponent
 	{
 		LayerComponent() : m_Layer(0) {}
-		LayerComponent(const Layer* pLayer) : m_Layer(pLayer ? LayerManager::GetLayerIndex(pLayer) + 1 : 0) {}
 
 		REFLECTABLE(LayerComponent,
 			(LayerRef)	(m_Layer)

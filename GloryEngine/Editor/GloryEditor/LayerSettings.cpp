@@ -1,5 +1,7 @@
 #include "ProjectSettings.h"
 #include "EditorUI.h"
+#include "EditorApplication.h"
+
 #include <LayerManager.h>
 #include <Undo.h>
 
@@ -24,7 +26,7 @@ namespace Glory::Editor
 			if (EditorUI::InputText(m_YAMLFile, layerNameNode.Path(), ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				SaveSettings(ProjectSpace::GetOpenProject());
-				LayerManager::Load();
+				EditorApplication::GetInstance()->GetEngine()->GetLayerManager().Load();
 			}
 		}
 
@@ -44,7 +46,7 @@ namespace Glory::Editor
 				Undo::YAMLEdit(m_YAMLFile, layerNode.Path(), oldValue, newValue);
 				Undo::StopRecord();
 				SaveSettings(ProjectSpace::GetOpenProject());
-				LayerManager::Load();
+				EditorApplication::GetInstance()->GetEngine()->GetLayerManager().Load();
 			}
 		}
 		return false;
@@ -52,6 +54,6 @@ namespace Glory::Editor
 
 	void LayerSettings::OnSettingsLoaded()
 	{
-		LayerManager::Load();
+		EditorApplication::GetInstance()->GetEngine()->GetLayerManager().Load();
 	}
 }

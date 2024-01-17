@@ -68,13 +68,13 @@ namespace Glory::Editor
 		template<typename T>
 		static bool InputEnum(Utils::YAMLFileRef& file, const std::filesystem::path& path, const std::vector<uint32_t>& excludeValues = std::vector<uint32_t>())
 		{
-			return InputEnum(file, path, ResourceType::GetHash<T>(), excludeValues);
+			return InputEnum(file, path, ResourceTypes::GetHash<T>(), excludeValues);
 		}
 
 		template<typename T>
 		static bool InputEnum(std::string_view label, T* value, const std::vector<uint32_t>& excludeValues = std::vector<uint32_t>())
 		{
-			return InputEnum(label, ResourceType::GetHash<T>(), (uint32_t*)value, excludeValues);
+			return InputEnum(label, ResourceTypes::GetHash<T>(), (uint32_t*)value, excludeValues);
 		}
 
 		static GLORY_EDITOR_API bool InputLayerMask(std::string_view label, LayerMask* data);

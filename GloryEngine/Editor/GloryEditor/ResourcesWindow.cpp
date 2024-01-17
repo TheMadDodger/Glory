@@ -10,6 +10,7 @@
 #include <EditorAssetCallbacks.h>
 
 #include <PrefabData.h>
+#include <ResourceType.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -17,7 +18,7 @@ namespace Glory::Editor
 {
 	const size_t SearchBufferSize = 1000;
 	char SearchBuffer[SearchBufferSize] = "\0";
-	std::vector<ResourceType*> ResourceTypes;
+	std::vector<ResourceType*> AllResourceTypes;
 	size_t TabBarIndex = 1;
 	bool FirstGui = true;
 
@@ -78,9 +79,9 @@ namespace Glory::Editor
 
 			FirstGui = false;
 
-			for (size_t i = 0; i < ResourceTypes.size(); ++i)
+			for (size_t i = 0; i < AllResourceTypes.size(); ++i)
 			{
-				const std::string& name = ResourceTypes[i]->Name();
+				const std::string& name = AllResourceTypes[i]->Name();
 				if (ImGui::BeginTabItem(name.data()))
 				{
 					if (TabBarIndex != i + 2)
@@ -95,7 +96,7 @@ namespace Glory::Editor
 			ImGui::EndTabBar();
 		}
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		static const ImGuiTableFlags flags =
 			ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg
@@ -145,6 +146,10 @@ namespace Glory::Editor
 
 		ImGuiListClipper clipper(m_SearchResultCache.size(), rowHeight + 2*ImGui::GetCurrentTable()->CellPaddingY);
 
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		AssetManager& assetManager = pEngine->GetAssetManager();
+		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
+
 		auto itorStart = m_SearchResultCache.begin();
 		while (clipper.Step()) {
 			const auto start = itorStart + clipper.DisplayStart;
@@ -162,7 +167,7 @@ namespace Glory::Editor
 
 				ResourceMeta meta;
 				EditorAssetDatabase::GetAssetMetadata(uuid, meta);
-				const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
+				const ResourceType* pType = resourceTypes.GetResourceType(meta.Hash());
 				Texture* pThumbnail = Tumbnail::GetTumbnail(uuid);
 				const std::string name = EditorAssetDatabase::GetAssetName(uuid);
 
@@ -179,11 +184,11 @@ namespace Glory::Editor
 					}
 
 					AssetPayload payload{ uuid };
-					const uint32_t subTypeHash = ResourceType::GetSubTypeHash(pType, 1);
+					const uint32_t subTypeHash = resourceTypes.GetSubTypeHash(pType, 1);
 					const ResourceType* pPayloadType = pType;
-					if (subTypeHash != ResourceType::GetHash<Resource>())
+					if (subTypeHash != ResourceTypes::GetHash<Resource>())
 					{
-						pPayloadType = ResourceType::GetResourceType(subTypeHash);
+						pPayloadType = resourceTypes.GetResourceType(subTypeHash);
 						if (pPayloadType == nullptr) pPayloadType = pType;
 					}
 
@@ -229,8 +234,8 @@ namespace Glory::Editor
 
 				if (ImGui::TableNextColumn())
 				{
-					const bool loaded = AssetManager::FindResource(uuid) != nullptr;
-					ImGui::Text("%s", loaded ? "Yes" : AssetManager::IsLoading(uuid) ? "Loading..." : "No");
+					const bool loaded = assetManager.FindResource(uuid) != nullptr;
+					ImGui::Text("%s", loaded ? "Yes" : assetManager.IsLoading(uuid) ? "Loading..." : "No");
 				}
 
 				ImGui::PopID();
@@ -246,14 +251,16 @@ namespace Glory::Editor
 		m_ForceFilter = true;
 
 		m_ProjectOpenCallback = ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace*) { m_ForceFilter = true; });
-		ResourceTypes.clear();
+		AllResourceTypes.clear();
 		std::vector<ResourceType*> types;
-		ResourceType::GetAllResourceTypesThatHaveSubType(ResourceType::GetHash<Resource>(), types);
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
+
+		resourceTypes.GetAllResourceTypesThatHaveSubType(ResourceTypes::GetHash<Resource>(), types);
 		for (size_t i = 0; i < types.size(); ++i)
 		{
 			ResourceType* pType = types[i];
-			if (pType->Hash() == ResourceType::GetHash<PrefabData>()) continue;
-			ResourceTypes.push_back(pType);
+			AllResourceTypes.push_back(pType);
 		}
 
 		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered,
@@ -274,9 +281,13 @@ namespace Glory::Editor
 		m_SearchResultCache.clear();
 		m_SearchResultIndexCache.clear();
 
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		AssetManager& assetManager = pEngine->GetAssetManager();
+		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
+
 		if (TabBarIndex == 0)
 		{
-			AssetManager::GetAllLoading(m_SearchResultCache);
+			assetManager.GetAllLoading(m_SearchResultCache);
 			return;
 		}
 
@@ -287,15 +298,15 @@ namespace Glory::Editor
 			const std::string name = EditorAssetDatabase::GetAssetName(allResources[i]);
 			if (TabBarIndex != 1)
 			{
-				const ResourceType* pFilteredType = ResourceTypes[TabBarIndex - 2];
+				const ResourceType* pFilteredType = AllResourceTypes[TabBarIndex - 2];
 				ResourceMeta meta;
 				EditorAssetDatabase::GetAssetMetadata(allResources[i], meta);
-				const ResourceType* pType = ResourceType::GetResourceType(meta.Hash());
+				const ResourceType* pType = resourceTypes.GetResourceType(meta.Hash());
 				if (pType != pFilteredType) continue;
 			}
 
-			const bool loaded = AssetManager::FindResource(allResources[i]) != nullptr;
-			const bool loading = AssetManager::IsLoading(allResources[i]);
+			const bool loaded = assetManager.FindResource(allResources[i]) != nullptr;
+			const bool loading = assetManager.IsLoading(allResources[i]);
 
 			switch (Filter)
 			{

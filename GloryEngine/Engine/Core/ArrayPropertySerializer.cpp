@@ -1,9 +1,11 @@
 #include "ArrayPropertySerializer.h"
+
 #include <Reflection.h>
 
 namespace Glory
 {
-	ArrayPropertySerializer::ArrayPropertySerializer() : PropertySerializer(SerializedType::ST_Array)
+	ArrayPropertySerializer::ArrayPropertySerializer(Serializers* pSerializers):
+		PropertySerializer(pSerializers, SerializedType::ST_Array)
 	{
 	}
 
@@ -26,7 +28,7 @@ namespace Glory
 		for (size_t i = 0; i < size; i++)
 		{
 			void* pElementAddress = Reflect::ElementAddress(data, typeHash, i);
-			PropertySerializer::SerializeProperty("", pElementTypeData, pElementAddress, out);
+			m_pSerializers->SerializeProperty("", pElementTypeData, pElementAddress, out);
 		}
 		out << YAML::EndSeq;
 	}
@@ -43,7 +45,7 @@ namespace Glory
 		{
 			YAML::Node elementNode = arrayNode[i];
 			void* pElementAddress = Reflect::ElementAddress(data, typeHash, i);
-			PropertySerializer::DeserializeProperty(pElementTypeData, pElementAddress, elementNode);
+			m_pSerializers->DeserializeProperty(pElementTypeData, pElementAddress, elementNode);
 		}
 	}
 }

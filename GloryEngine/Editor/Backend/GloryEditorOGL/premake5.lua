@@ -31,12 +31,17 @@ project "GloryEditorOGL"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.editor}",
+		"%{GloryIncludeDir.threads}",
 
 		"%{IncludeDir.FA}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
 
 		"%{SubmodoleDirs.ImGui}/backends/",
+
+		"%{rapidjson}",
 	}
 
 	libdirs

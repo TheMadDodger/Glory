@@ -1,26 +1,25 @@
 #include "DisplayManager.h"
 #include "EngineProfiler.h"
-#include "GloryContext.h"
 #include "WindowModule.h"
 #include "GraphicsModule.h"
+#include "Engine.h"
 
 namespace Glory
 {
 	RenderTexture* DisplayManager::GetDisplayRenderTexture(size_t index)
 	{
-		return index >= MAX_DISPLAYS ? nullptr : DISPLAYMANAGR->m_pRenderTextures[index];
+		return index >= MAX_DISPLAYS ? nullptr : m_pRenderTextures[index];
 	}
 
 	void DisplayManager::ClearAllDisplays(Engine* pEngine)
 	{
-		Profiler::BeginSample("DisplayManager::ClearAllDisplays");
+		ProfileSample s{ &m_pEngine->Profiler(), "DisplayManager::ClearAllDisplays" };
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
-			DISPLAYMANAGR->m_pRenderTextures[i]->Bind();
+			m_pRenderTextures[i]->Bind();
 			pEngine->GetMainModule<GraphicsModule>()->Clear();
-			DISPLAYMANAGR->m_pRenderTextures[i]->UnBind();
+			m_pRenderTextures[i]->UnBind();
 		}
-		Profiler::EndSample();
 	}
 
 	RenderTexture* DisplayManager::CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height)
@@ -30,7 +29,7 @@ namespace Glory
 		return pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateRenderTexture(createInfo);
 	}
 	
-	DisplayManager::DisplayManager() : m_pRenderTextures()
+	DisplayManager::DisplayManager() : m_pEngine(nullptr), m_pRenderTextures()
 	{
 	}
 
@@ -40,6 +39,8 @@ namespace Glory
 
 	void DisplayManager::Initialize(Engine* pEngine)
 	{
+		m_pEngine = pEngine;
+
 		int width, height;
 		pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
 
@@ -48,10 +49,10 @@ namespace Glory
 
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
-			DISPLAYMANAGR->m_pRenderTextures[i] = pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateRenderTexture(createInfo);
-			DISPLAYMANAGR->m_pRenderTextures[i]->Bind();
+			m_pRenderTextures[i] = pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateRenderTexture(createInfo);
+			m_pRenderTextures[i]->Bind();
 			pEngine->GetMainModule<GraphicsModule>()->Clear();
-			DISPLAYMANAGR->m_pRenderTextures[i]->UnBind();
+			m_pRenderTextures[i]->UnBind();
 		}
 	}
 }

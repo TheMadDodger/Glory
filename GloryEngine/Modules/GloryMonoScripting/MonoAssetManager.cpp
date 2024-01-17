@@ -11,10 +11,10 @@ namespace Glory
 	MonoMethod* MonoAssetManager::m_pMakeResourceMethod = nullptr;
 	std::map<UUID, MonoObject*> MonoAssetManager::m_AssetCache;
 
-	MonoObject* MonoAssetManager::MakeMonoAssetObject(UUID uuid, const std::string& type)
+	MonoObject* MonoAssetManager::MakeMonoAssetObject(Engine* pEngine, UUID uuid, const std::string& type)
 	{
 		if (uuid == 0) return nullptr;
-		if (!AssetDatabase::AssetExists(uuid))
+		if (!pEngine->GetAssetDatabase().AssetExists(uuid))
 		{
 			// Delete the mono version?
 			return nullptr;

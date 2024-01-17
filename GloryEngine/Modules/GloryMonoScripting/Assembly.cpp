@@ -3,6 +3,7 @@
 #include "MonoAssetManager.h"
 #include "IMonoLibManager.h"
 #include "MonoManager.h"
+#include "GloryMonoScipting.h"
 
 #include <Debug.h>
 #include <filesystem>
@@ -22,31 +23,33 @@
 #include <mono/metadata/debug-helpers.h>
 #include <mono/metadata/attrdefs.h>
 
+#define ENGINE MonoManager::Instance()->Module()->GetEngine()
+
 namespace Glory
 {
 	std::map<std::string, uint32_t> MonoTypeToHash = {
-		{"System.Single", ResourceType::GetHash<float>()},
-		{"System.Double", ResourceType::GetHash<double>()},
-		{"System.Int32", ResourceType::GetHash<int>()},
-		{"System.Boolean", ResourceType::GetHash<bool>()},
+		{"System.Single", ResourceTypes::GetHash<float>()},
+		{"System.Double", ResourceTypes::GetHash<double>()},
+		{"System.Int32", ResourceTypes::GetHash<int>()},
+		{"System.Boolean", ResourceTypes::GetHash<bool>()},
 		{"GloryEngine.Material", SerializedType::ST_Asset},
 		{"GloryEngine.MaterialInstance", SerializedType::ST_Asset},
 		{"GloryEngine.Model", SerializedType::ST_Asset},
 		{"GloryEngine.Image", SerializedType::ST_Asset},
 		{"GloryEngine.Prefab", SerializedType::ST_Asset},
-		{"GloryEngine.Quaternion", ResourceType::GetHash<glm::quat>()},
-		{"GloryEngine.Vector2", ResourceType::GetHash<glm::vec2>()},
-		{"GloryEngine.Vector3", ResourceType::GetHash<glm::vec3>()},
-		{"GloryEngine.Vector4", ResourceType::GetHash<glm::vec4>()},
+		{"GloryEngine.Quaternion", ResourceTypes::GetHash<glm::quat>()},
+		{"GloryEngine.Vector2", ResourceTypes::GetHash<glm::vec2>()},
+		{"GloryEngine.Vector3", ResourceTypes::GetHash<glm::vec3>()},
+		{"GloryEngine.Vector4", ResourceTypes::GetHash<glm::vec4>()},
 		{"GloryEngine.SceneManagement.SceneObject", SerializedType::ST_Object},
 	};
 
 	std::map<std::string, uint32_t> MonoTypeToElementHash = {
-		{"GloryEngine.Material", ResourceType::GetHash<MaterialData>()},
-		{"GloryEngine.MaterialInstance", ResourceType::GetHash<MaterialInstanceData>()},
-		{"GloryEngine.Model", ResourceType::GetHash<ModelData>()},
-		{"GloryEngine.Image", ResourceType::GetHash<ImageData>()},
-		{"GloryEngine.Prefab", ResourceType::GetHash<PrefabData>()},
+		{"GloryEngine.Material", ResourceTypes::GetHash<MaterialData>()},
+		{"GloryEngine.MaterialInstance", ResourceTypes::GetHash<MaterialInstanceData>()},
+		{"GloryEngine.Model", ResourceTypes::GetHash<ModelData>()},
+		{"GloryEngine.Image", ResourceTypes::GetHash<ImageData>()},
+		{"GloryEngine.Prefab", ResourceTypes::GetHash<PrefabData>()},
 	};
 
 	Assembly::Assembly(AssemblyDomain* pDomain)
@@ -102,13 +105,13 @@ namespace Glory
 		MonoClass* pClass = mono_class_from_name(m_pImage, pNamespace->m_Name.c_str(), className.c_str());
 		if (pClass == nullptr)
 		{
-			Debug::LogError("Failed to load mono class");
+			ENGINE->GetDebug().LogError("Failed to load mono class");
 			return nullptr;
 		}
 
 		if (mono_class_init(pClass) == false)
 		{
-			Debug::LogError("Assembly::LoadClass > Failed to initialize a MonoClass!");
+			ENGINE->GetDebug().LogError("Assembly::LoadClass > Failed to initialize a MonoClass!");
 			return nullptr;
 		}
 
@@ -271,7 +274,7 @@ namespace Glory
 		path.append(name);
         if (!std::filesystem::exists(path))
         {
-            Debug::LogError("Failed to open assembly, file \"" + path.string() + "\" not found!");
+			ENGINE->GetDebug().LogError("Failed to open assembly, file \"" + path.string() + "\" not found!");
             return true;
         }
 
@@ -282,7 +285,8 @@ namespace Glory
 		m_Location = lib.Location();
 		m_Reloadable = lib.Reloadable();
 		m_pLibManager = pLibManager;
-		if (m_pLibManager) m_pLibManager->Initialize(this);
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
 		m_State = AssemblyState::AS_Loaded;
 		return true;
     }
@@ -302,7 +306,8 @@ namespace Glory
         m_pImage = monoImage;
         //m_IsDependency = true;
 
-		if (m_pLibManager) m_pLibManager->Initialize(this);
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
 		m_State = AssemblyState::AS_Loaded;
         return true;
     }
@@ -390,7 +395,7 @@ namespace Glory
         {
 			std::stringstream log;
 			log << "Mono assembly image is invalid at " << assemblyPath;
-			Debug::LogError(log.str());
+			ENGINE->GetDebug().LogError(log.str());
             return false;
         }
 
@@ -401,7 +406,7 @@ namespace Glory
         {
 			std::stringstream log;
 			log << "Mono assembly image is corrupted at " << assemblyPath;
-			Debug::LogError(log.str());
+			ENGINE->GetDebug().LogError(log.str());
             return false;
         }
 
@@ -432,7 +437,7 @@ namespace Glory
 			{
 				std::stringstream log;
 				log << "No pdb file found for " << assemblyPath << " debugging this assembly will not be possible.";
-				Debug::LogError(log.str());
+				ENGINE->GetDebug().LogError(log.str());
 			}
 		}
 

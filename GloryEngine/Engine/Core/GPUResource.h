@@ -3,6 +3,8 @@
 
 namespace Glory
 {
+	class GPUResourceManager;
+
 	class GPUResource
 	{
 	public:
@@ -11,6 +13,9 @@ namespace Glory
 
 		void SetDirty(bool dirty);
 		bool IsDirty() const;
+
+	protected:
+		GPUResourceManager* m_pOwner = nullptr;
 
 	private:
 		friend class GPUResourceManager;

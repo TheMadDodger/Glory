@@ -1,5 +1,6 @@
 #include "PhysicsSettings.h"
 
+#include <EditorApplication.h>
 #include <JoltPhysicsModule.h>
 #include <Engine.h>
 #include <YAML_GLM.h>
@@ -13,6 +14,8 @@ namespace Glory::Editor
 
 	bool PhysicsSettings::OnGui()
 	{
+		LayerManager& layers = EditorApplication::GetInstance()->GetEngine()->GetLayerManager();
+
 		ImGui::BeginChild("Physics Settings");
 
 		EditorUI::InputFloat3(m_YAMLFile, "Gravity");
@@ -27,7 +30,7 @@ namespace Glory::Editor
 		ImGui::Separator();
 
 		ImGui::PushID("CollisionMatrix");
-		const size_t layerCount = LayerManager::LayerCount();
+		const size_t layerCount = layers.LayerCount();
 
 		const float labelReservedWidth = 150.0f;
 
@@ -52,7 +55,7 @@ namespace Glory::Editor
 		/* Render top layer labels first */
 		for (size_t x = 0; x < layerCount; ++x)
 		{
-			const Layer* pXLayer = LayerManager::GetLayerAtIndex((int)x);
+			const Layer* pXLayer = layers.GetLayerAtIndex((int)x);
 			const std::string& name = pXLayer->m_Name;
 
 			const float textHeight = name.size() * textSize.y + 4.0f;
@@ -80,7 +83,7 @@ namespace Glory::Editor
 		{
 			ImGui::PushID((int)y);
 
-			const Layer* pYLayer = LayerManager::GetLayerAtIndex((int)y);
+			const Layer* pYLayer = layers.GetLayerAtIndex((int)y);
 			for (size_t x = 0; x < layerCount; ++x)
 			{
 				ImGui::PushID((int)x);
@@ -93,7 +96,7 @@ namespace Glory::Editor
 				if (!yNode.Exists())
 					yNode.Set(true);
 
-				const Layer* pXLayer = LayerManager::GetLayerAtIndex((int)x);
+				const Layer* pXLayer = layers.GetLayerAtIndex((int)x);
 				bool value = yNode.As<bool>();
 
 				if (!x)
@@ -146,6 +149,8 @@ namespace Glory::Editor
 
 	void PhysicsSettings::OnStartPlay_Impl()
 	{
+		LayerManager& layers = EditorApplication::GetInstance()->GetEngine()->GetLayerManager();
+
 		Utils::NodeValueRef gravityNode = m_YAMLFile["Gravity"];
 		const glm::vec3 gravity = gravityNode.As<glm::vec3>();
 
@@ -154,11 +159,11 @@ namespace Glory::Editor
 			return;
 
 		std::vector<std::vector<bool>> matrix;
-		matrix.resize(LayerManager::LayerCount());
+		matrix.resize(layers.LayerCount());
 
 		for (size_t x = 0; x < collisionMatrixNode.Size(); ++x)
 		{
-			matrix[x].resize(LayerManager::LayerCount());
+			matrix[x].resize(layers.LayerCount());
 			Utils::NodeValueRef xNode = collisionMatrixNode[x];
 			for (size_t y = 0; y < xNode.Size(); ++y)
 			{
@@ -167,7 +172,7 @@ namespace Glory::Editor
 			}
 		}
 
-		JoltPhysicsModule* pPhysics = Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>();
+		JoltPhysicsModule* pPhysics = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		pPhysics->SetCollisionMatrix(std::move(matrix));
 		pPhysics->SetGravity(gravity);
 	}

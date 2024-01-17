@@ -287,7 +287,6 @@ namespace Glory
 
 		if (!fstream.is_open())
 		{
-			Debug::LogError("Could not open file: " + m_FilePath.string());
 			return;
 		}
 

@@ -65,7 +65,7 @@ namespace Glory
         }
 
         virtual void SetTexture(const std::string& name, TextureData* value);
-        virtual bool GetTexture(const std::string& name, TextureData** value);
+        virtual bool GetTexture(const std::string& name, TextureData** value, AssetManager* pManager);
 
     protected:
         virtual void EnableProperty(size_t index);

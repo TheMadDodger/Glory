@@ -6,7 +6,7 @@ namespace Glory
     class OGLResourceManager : public GPUResourceManager
     {
     public:
-        OGLResourceManager();
+        OGLResourceManager(Engine* pEngine);
         virtual ~OGLResourceManager();
 
     protected:

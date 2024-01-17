@@ -12,6 +12,7 @@ REFLECTABLE_ENUM_NS(Glory, BPLayer, Default, One, Two, Three);
 namespace Glory
 {
 	class JoltPhysicsModule;
+	class LayerManager;
 
 	// BroadPhaseLayerInterface implementation
 	// This defines a mapping between object and broadphase layers.
@@ -41,6 +42,8 @@ namespace Glory
 		GLORY_API void SetBPCollisionMapping(std::vector<LayerMask>&& mapping);
 
 	private:
+		friend class JoltPhysicsModule;
+		LayerManager* m_pLayers = nullptr;
 		std::vector<LayerMask> m_BPCollissionMapping;
 	};
 

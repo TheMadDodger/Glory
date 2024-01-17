@@ -1,5 +1,6 @@
 #include "SDLImageImporter.h"
 
+#include <EditorApplication.h>
 #include <SDL2/SDL_image.h>
 #include <sstream>
 #include <Debug.h>
@@ -28,7 +29,7 @@ namespace Glory::Editor
 	{
 	}
 
-	std::string_view Editor::SDLImageImporter::Name() const
+	std::string_view SDLImageImporter::Name() const
 	{
 		return "SDLImage Importer";
 	}
@@ -52,7 +53,7 @@ namespace Glory::Editor
 			const char* error = SDL_GetError();
 			std::stringstream str;
 			str << "SDL Could not load image " << path << " SDL Error: " << error;
-			Debug::LogWarning(str.str());
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
 			return nullptr;
 		}
 
@@ -92,7 +93,7 @@ namespace Glory::Editor
 			}
 			break;
 		default:
-			Debug::LogError("SDLImageImporter::LoadResource > unknow pixel format, BytesPerPixel: " + std::to_string(pSDLImage->format->BytesPerPixel) + " Use 32 bit or 24 bit images.\n");
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("SDLImageImporter::LoadResource > unknow pixel format, BytesPerPixel: " + std::to_string(pSDLImage->format->BytesPerPixel) + " Use 32 bit or 24 bit images.\n");
 			SDL_FreeSurface(pSDLImage);
 			return nullptr;
 		}
@@ -115,7 +116,7 @@ namespace Glory::Editor
 		if (m_InitializedFlags == 0)
 		{
 			const char* error = SDL_GetError();
-			Debug::LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
 		}
 	}
 

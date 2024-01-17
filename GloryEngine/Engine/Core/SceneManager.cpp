@@ -5,6 +5,7 @@
 #include "PropertyFlags.h"
 #include "Systems.h"
 #include "Components.h"
+#include "Engine.h"
 
 #include "ScriptedComponentSerializer.h"
 
@@ -28,6 +29,11 @@ namespace Glory
 		m_HoveringObjectID = objectID;
 	}
 
+	Engine* SceneManager::GetEngine()
+	{
+		return m_pEngine;
+	}
+
 	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
 		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
 	{
@@ -39,10 +45,10 @@ namespace Glory
 
 	GScene* SceneManager::CreateEmptyScene(const std::string& name)
 	{
-		Profiler::BeginSample("ScenesModule::CreateEmptyScene");
+		ProfileSample s{ &m_pEngine->Profiler(), "ScenesModule::CreateEmptyScene" };
 		GScene* pScene = new GScene(name);
+		pScene->m_pManager = this;
 		m_pOpenScenes.push_back(pScene);
-		Profiler::EndSample();
 		return pScene;
 	}
 
@@ -88,6 +94,7 @@ namespace Glory
 	{
 		if (pScene == nullptr) return;
 		if (uuid) pScene->SetUUID(uuid);
+		pScene->m_pManager = this;
 		m_pOpenScenes.push_back(pScene);
 		OnSceneOpen(uuid);
 	}
@@ -148,8 +155,8 @@ namespace Glory
 		RegisterComponent<LookAt>();
 
 		/* Register serializers */
-		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
-		ResourceType::RegisterResource<GScene>(".gscene");
+		m_pEngine->GetSerializers().RegisterSerializer<ScriptedComponentSerailizer>();
+		m_pEngine->GetResourceTypes().RegisterResource<GScene>(".gscene");
 
 		// Register Invocations
 		// Transform
@@ -193,15 +200,13 @@ namespace Glory
 
 	void SceneManager::Update()
 	{
-		Profiler::BeginSample("SceneManager::Tick");
+		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Tick" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnTick(); });
-		Profiler::EndSample();
 	}
 
 	void SceneManager::Draw()
 	{
-		Profiler::BeginSample("SceneManager::Paint");
+		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Paint" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
-		Profiler::EndSample();
 	}
 }

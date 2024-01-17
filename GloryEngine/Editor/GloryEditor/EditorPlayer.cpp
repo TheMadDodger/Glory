@@ -18,9 +18,9 @@ namespace Glory::Editor
 {
 	std::vector<uint32_t> ComponentsToUpdateInEditor =
 	{
-		ResourceType::GetHash<Transform>(),
-		ResourceType::GetHash<CameraComponent>(),
-		ResourceType::GetHash<LookAt>()
+		ResourceTypes::GetHash<Transform>(),
+		ResourceTypes::GetHash<CameraComponent>(),
+		ResourceTypes::GetHash<LookAt>()
 	};
 
 	std::vector<IPlayModeHandler*> EditorPlayer::m_pSceneLoopHandlers;
@@ -39,7 +39,7 @@ namespace Glory::Editor
 	{
 		ProjectSettings::OnStartPlay();
 
-		Engine* pEngine = Game::GetGame().GetEngine();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
 			IPlayModeHandler* pPlayModeHandler = m_pSceneLoopHandlers[i];
@@ -81,7 +81,7 @@ namespace Glory::Editor
 	{
 		ProjectSettings::OnStopPlay();
 
-		Engine* pEngine = Game::GetGame().GetEngine();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		SceneManager* pScenes = pEngine->GetSceneManager();
 		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
@@ -143,7 +143,7 @@ namespace Glory::Editor
 
 	void EditorPlayer::Tick(Engine* pEngine)
 	{
-		if (EditorApplication::CurrentMode() == EditorMode::M_Play)
+		if (EditorApplication::GetInstance()->CurrentMode() == EditorMode::M_Play)
 		{
 			if (!m_IsPaused || m_FrameRequested) pEngine->UpdateSceneManager();
 			m_FrameRequested = false;
@@ -177,7 +177,7 @@ namespace Glory::Editor
 	{
 		const ModuleMetaData& metaData = pModule->GetMetaData();
 
-		if (EditorApplication::CurrentMode() == EditorMode::M_Play)
+		if (EditorApplication::GetInstance()->CurrentMode() == EditorMode::M_Play)
 		{
 			if (!m_IsPaused || m_FrameRequested) pModule->GetEngine()->CallModuleUpdate(pModule);
 		}
@@ -210,7 +210,7 @@ namespace Glory::Editor
 
 		int styleColorCount = 0;
 
-		switch (EditorApplication::CurrentMode())
+		switch (EditorApplication::GetInstance()->CurrentMode())
 		{
 		case EditorMode::M_Edit:
 
@@ -234,10 +234,10 @@ namespace Glory::Editor
 			break;
 		}
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform()->GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 		if (ImGui::Button(ICON_FA_PLAY, maxButtonSize))
 		{
-			EditorApplication::TogglePlay();
+			EditorApplication::GetInstance()->TogglePlay();
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Toggle play mode");
@@ -257,7 +257,7 @@ namespace Glory::Editor
 
 		if (ImGui::Button(ICON_FA_PAUSE, maxButtonSize))
 		{
-			EditorApplication::TogglePause();
+			EditorApplication::GetInstance()->TogglePause();
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Toggle pause");
@@ -267,7 +267,7 @@ namespace Glory::Editor
 		ImGui::SameLine(cursor);
 		if (ImGui::Button(ICON_FA_FORWARD_STEP, maxButtonSize))
 		{
-			EditorApplication::TickFrame();
+			EditorApplication::GetInstance()->TickFrame();
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Step into next frame");

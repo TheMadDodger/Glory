@@ -37,7 +37,8 @@ namespace Glory
 	class ScriptingModuleTemplate : public ScriptingModule
 	{
 	public:
-		ScriptingModuleTemplate(const std::string& scriptingLanguage) : ScriptingModule(scriptingLanguage), m_ScriptTypeHash(ResourceType::GetHash<TScript>()) {}
+		ScriptingModuleTemplate(const std::string& scriptingLanguage):
+			ScriptingModule(scriptingLanguage), m_ScriptTypeHash(ResourceTypes::GetHash<TScript>()) {}
 		virtual ~ScriptingModuleTemplate() {}
 
 		virtual LoaderModule* CreateLoaderModule() override

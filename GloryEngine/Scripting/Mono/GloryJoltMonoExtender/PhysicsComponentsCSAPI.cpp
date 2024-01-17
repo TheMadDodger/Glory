@@ -1,5 +1,5 @@
-#include "JoltPhysicsModule.h"
 #include "PhysicsComponentsCSAPI.h"
+#include "JoltPhysicsModule.h"
 #include "JoltComponents.h"
 #include "JoltCharacterManager.h"
 #include "JoltShapeManager.h"
@@ -11,13 +11,16 @@
 #include <SceneManager.h>
 #include <MathCSAPI.h>
 #include <GloryMonoScipting.h>
+#include <Debug.h>
 
 namespace Glory
 {
+	Engine* PhysicsComponents_EngineInstance;
+
 	GScene* GetEntityScene(UUID sceneID)
 	{
 		if (sceneID == 0) return nullptr;
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(sceneID);
+		GScene* pScene = PhysicsComponents_EngineInstance->GetSceneManager()->GetOpenScene(sceneID);
 		if (pScene == nullptr) return nullptr;
 		return pScene;
 	}
@@ -39,7 +42,7 @@ namespace Glory
 
 #pragma region Physics Component
 
-#define PHYSICS Game::GetGame().GetEngine()->GetOptionalModule<JoltPhysicsModule>()
+#define PHYSICS PhysicsComponents_EngineInstance->GetOptionalModule<JoltPhysicsModule>()
 
 #pragma region States
 
@@ -369,7 +372,7 @@ namespace Glory
 		{
 			std::stringstream log;
 			log << "CharacterController_SetShape: Failed to set shape, shape with ID: " << shapeID << " does not exist!";
-			Debug::LogError(log.str());
+			PhysicsComponents_EngineInstance->GetDebug().LogError(log.str());
 			return false;
 		}
 
@@ -453,6 +456,11 @@ namespace Glory
 
 		/* Impulses */
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_AddImpulse", CharacterController_AddImpulse);
+	}
+
+	void PhysicsComponentsCSAPI::SetEngine(Engine* pEngine)
+	{
+		PhysicsComponents_EngineInstance = pEngine;
 	}
 
 #pragma endregion

@@ -1,5 +1,8 @@
 #include "ValueChangeAction.h"
+#include "EditorApplication.h"
+
 #include <Reflection.h>
+#include <ObjectManager.h>
 #include <PropertySerializer.h>
 
 #include <Debug.h>
@@ -42,7 +45,7 @@ namespace Glory::Editor
 
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		PropertySerializer::SerializeProperty(pField, pObject, out);
+		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, out);
 		out << YAML::EndMap;
 		m_OldValue = YAML::Load(out.c_str());
 	}
@@ -72,14 +75,14 @@ namespace Glory::Editor
 
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		PropertySerializer::SerializeProperty(pField, pObject, out);
+		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, out);
 		out << YAML::EndMap;
 		m_NewValue = YAML::Load(out.c_str());
 	}
 
 	void ValueChangeAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		Object* pObject = Object::FindObject(actionRecord.ObjectID);
+		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 
 		const FieldData* pField = nullptr;
@@ -114,12 +117,12 @@ namespace Glory::Editor
 			throw std::exception("Unknown field");
 		}
 
-		PropertySerializer::DeserializeProperty(pField, pAddress, m_OldValue[pField->Name()]);
+		EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pField, pAddress, m_OldValue[pField->Name()]);
 	}
 
 	void ValueChangeAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		Object* pObject = Object::FindObject(actionRecord.ObjectID);
+		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 
 		const FieldData* pField = nullptr;
@@ -154,7 +157,7 @@ namespace Glory::Editor
 			throw std::exception("Unknown field");
 		}
 
-		PropertySerializer::DeserializeProperty(pField, pAddress, m_NewValue[pField->Name()]);
+		EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pField, pAddress, m_NewValue[pField->Name()]);
 	}
 
 	bool ValueChangeAction::Combine(IAction* pOther)

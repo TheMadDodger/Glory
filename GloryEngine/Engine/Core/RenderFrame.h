@@ -18,8 +18,8 @@ namespace Glory
 		{
 			if (m_Counter >= m_ActiveObjects.size())
 			{
-				const std::string typeName = typeid(T).name();
-				Debug::LogWarning(typeName + " overflow in render data!");
+				//const std::string typeName = typeid(T).name();
+				//m_pEngine->GetDebug().LogWarning(typeName + " overflow in render data!");
 				return;
 			}
 			m_ActiveObjects[m_Counter] = std::move(value);

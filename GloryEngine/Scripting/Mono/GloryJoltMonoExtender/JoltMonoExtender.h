@@ -1,19 +1,18 @@
 #pragma once
 #include <IScriptExtender.h>
 #include <Glory.h>
-#include <GloryContext.h>
 #include <IMonoLibManager.h>
 
 namespace Glory
 {
 	class Engine;
 
-	extern "C" GLORY_API IScriptExtender* OnLoadExtension(Glory::GloryContext* pContext);
+	extern "C" GLORY_API IScriptExtender* OnLoadExtension();
 
 	class JoltLibManager : public IMonoLibManager
 	{
 	public: /* Lib manager implementation */
-		virtual void Initialize(Assembly* pAssembly) override;
+		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) override;
 		virtual void Cleanup() override;
 	};
 

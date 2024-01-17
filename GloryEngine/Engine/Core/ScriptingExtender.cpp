@@ -54,7 +54,7 @@ namespace Glory
 	{
 		if (m_CurrentAppendingLanguage == "" || m_pCurrentAppendingModule == nullptr)
 		{
-			Debug::LogError("Cannot add internal libs outside of IScriptExtender::GetLibs call!");
+			//m_pEngine->GetDebug().LogError("Cannot add internal libs outside of IScriptExtender::GetLibs call!");
 			return;
 		}
 

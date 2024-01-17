@@ -2,6 +2,7 @@
 #include "MonoSceneManager.h"
 
 #include <Debug.h>
+#include <SceneManager.h>
 
 namespace Glory
 {
@@ -35,7 +36,7 @@ namespace Glory
 		MonoObject* pMonoObject = mono_object_new(mono_domain_get(), MonoSceneManager::EntitySceneObjectClass());
 		if (pMonoObject == nullptr)
 		{
-			Debug::LogError("MonoEntityObjectManager::GetSceneObject_Impl > Failed to create MonoObject from class");
+			m_pScene->Manager()->GetEngine()->GetDebug().LogError("MonoEntityObjectManager::GetSceneObject_Impl > Failed to create MonoObject from class");
 			return nullptr;
 		}
 

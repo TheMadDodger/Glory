@@ -5,6 +5,8 @@
 #include "UUIDRemapper.h"
 #include "DistributedRandom.h"
 #include "PropertySerializer.h"
+#include "SceneManager.h"
+#include "Engine.h"
 
 #include <NodeRef.h>
 
@@ -242,7 +244,7 @@ namespace Glory
 			if (!parent.IsValid())
 			{
 				std::string name{data.ObjectToParent.Name()};
-				Debug::LogError("Could not set delayed parent for object " + name + " because the parent does not exist!");
+				//m_pEngine->GetDebug().LogError("Could not set delayed parent for object " + name + " because the parent does not exist!");
 				return;
 			}
 			data.ObjectToParent.SetParent(parent.GetEntityID());
@@ -317,8 +319,8 @@ namespace Glory
 		const std::string& serializedComponents = node.SerializedComponents();
 		YAML::Node components = YAML::Load(serializedComponents);
 		
-		const uint32_t transformTypeHash = ResourceType::GetHash(typeid(Transform));
-		const uint32_t scriptedTypeHash = ResourceType::GetHash(typeid(ScriptedComponent));
+		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
+		const uint32_t scriptedTypeHash = ResourceTypes::GetHash(typeid(ScriptedComponent));
 		
 		size_t currentComponentIndex = 0;
 		for (size_t i = 0; i < components.size(); ++i)
@@ -346,7 +348,7 @@ namespace Glory
 			YAML::Node originalProperties = nextObject["Properties"];
 			if (typeHash != scriptedTypeHash)
 			{
-				PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
+				m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
 			}
 			else
 			{
@@ -390,8 +392,9 @@ namespace Glory
 		
 					objectUUID.Set(remapped);
 				}
-		
-				PropertySerializer::DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
+
+				
+				m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
 			}
 		
 			m_Registry.GetTypeView(typeHash)->Invoke(Utils::ECS::InvocationType::OnValidate, &m_Registry, entityID, pComponentAddress);
@@ -405,5 +408,15 @@ namespace Glory
 		}
 		
 		return entity;
+	}
+
+	SceneManager* GScene::Manager()
+	{
+		return m_pManager;
+	}
+
+	void GScene::SetManager(SceneManager* pManager)
+	{
+		m_pManager = pManager;
 	}
 }

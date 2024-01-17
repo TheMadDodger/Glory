@@ -2,9 +2,9 @@
 #include "OpenGLGraphicsModule.h"
 #include "Debug.h"
 #include "GLShader.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <Game.h>
 #include <Engine.h>
 #include "GloryOGL.h"
 
@@ -55,19 +55,19 @@ namespace Glory
 		{
 			glGetProgramInfoLog(m_ProgramID, 512, NULL, infoLog);
 			OpenGLGraphicsModule::LogGLError(glGetError());
-			Debug::LogError(infoLog);
+			m_pOwner->GetEngine()->GetDebug().LogError(infoLog);
 		}
 	}
 
 	Buffer* OGLMaterial::CreatePropertiesBuffer(uint32_t size)
 	{
-		return Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
+		return m_pOwner->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
 			->CreateBuffer(size, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 1);
 	}
 
 	Buffer* OGLMaterial::CreateMVPBuffer()
 	{
-		return Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
+		return m_pOwner->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
 			->CreateBuffer((uint32_t)sizeof(ObjectData), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 	}
 
@@ -132,7 +132,7 @@ namespace Glory
 	//	OpenGLGraphicsModule::LogGLError(glGetError());
 	//	if (uniformBlockIndex == GL_INVALID_INDEX)
 	//	{
-	//		Debug::LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
+	//		m_pEngine->GetDebug().LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
 	//		return 0;
 	//	}
 	//

@@ -7,13 +7,12 @@
 #include <typeinfo>
 
 #define GLORY_MODULE_H																						\
-extern "C" GLORY_API Glory::Module * OnLoadModule(Glory::GloryContext * pContext);							\
+extern "C" GLORY_API Glory::Module * OnLoadModule();														\
 extern "C" GLORY_API const char* ModuleVersion();
 
 #define GLORY_MODULE_CPP(moduleName)																		\
-Glory::Module* OnLoadModule(Glory::GloryContext* pContext)													\
+Glory::Module* OnLoadModule()																				\
 {																											\
-	Glory::GloryContext::SetContext(pContext);																\
 	return new Glory::moduleName();																			\
 }																											\
 																											\
@@ -32,16 +31,16 @@ virtual const Glory::Version& ModuleVersion() const override { return Version; }
 
 /* Log a message if the module is not present */
 #define REQUIRE_MODULE_MESSAGE(engine, moduleName, message, level, returnValue)								\
-moduleName* p##moduleName = engine->GetMainModule<moduleName>();												\
+moduleName* p##moduleName = engine->GetMainModule<moduleName>();											\
 if(!p##moduleName)																							\
 {																											\
-	Debug::Log##level(message);																				\
+	engine->GetDebug().Log##level(message);																	\
 	return returnValue;																						\
 }
 
 /* Check if a module is present, if not return the returnValue */
 #define REQUIRE_MODULE(engine, moduleName, returnValue)														\
-moduleName* p##moduleName = engine->GetMainModule<moduleName>();														\
+moduleName* p##moduleName = engine->GetMainModule<moduleName>();											\
 if(!p##moduleName) return returnValue;
 
 /* Call a method on a function, but only if the module is present, return otherwise */
@@ -52,7 +51,6 @@ p##moduleName->func;
 namespace Glory
 {
 	class Engine;
-	class GloryContext;
 
 	class IScriptExtender;
 

@@ -1,6 +1,4 @@
 #pragma once
-#include <map>
-#include <vector>
 #include "UUID.h"
 #include "GPUResource.h"
 #include "Buffer.h"
@@ -11,12 +9,17 @@
 #include "RenderTexture.h"
 #include "TextureData.h"
 
+#include <map>
+#include <vector>
+
 namespace Glory
 {
+	class Engine;
+
 	class GPUResourceManager
 	{
 	public:
-		GPUResourceManager();
+		GPUResourceManager(Engine* pEngine);
 		virtual ~GPUResourceManager();
 
 	public:
@@ -37,6 +40,8 @@ namespace Glory
 
 		void SetDirty(UUID uuid);
 
+		Engine* GetEngine();
+
 	protected: // Internal functions
 		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
@@ -48,6 +53,9 @@ namespace Glory
 		virtual Texture* CreateTexture_Internal(TextureData* pTextureData) = 0;
 		virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) = 0;
 		virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) = 0;
+
+	protected:
+		Engine* m_pEngine;
 
 	private: // Resource lookups
 		template<class T>

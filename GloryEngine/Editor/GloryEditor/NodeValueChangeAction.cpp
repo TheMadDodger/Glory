@@ -1,5 +1,8 @@
 #include "NodeValueChangeAction.h"
+#include "EditorApplication.h"
+
 #include <Reflection.h>
+#include <ObjectManager.h>
 #include <PropertySerializer.h>
 
 #include <Debug.h>
@@ -17,7 +20,7 @@ namespace Glory::Editor
 
 	void NodeValueChangeAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		Object* pObject = Object::FindObject(actionRecord.ObjectID);
+		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 		YAML::Node* pNode = (YAML::Node*)pAddress;
 		std::vector<std::filesystem::path> splitPath;
@@ -31,7 +34,7 @@ namespace Glory::Editor
 
 	void NodeValueChangeAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		Object* pObject = Object::FindObject(actionRecord.ObjectID);
+		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 		YAML::Node* pNode = (YAML::Node*)pAddress;
 		std::vector<std::filesystem::path> splitPath;

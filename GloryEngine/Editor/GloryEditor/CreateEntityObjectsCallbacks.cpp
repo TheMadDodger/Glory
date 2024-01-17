@@ -1,9 +1,9 @@
 #include "CreateEntityObjectsCallbacks.h"
 #include "EditableEntity.h"
 #include "EntityEditor.h"
+#include "EditorApplication.h"
 
 #include <SceneManager.h>
-#include <Game.h>
 #include <Engine.h>
 #include <EditorSceneManager.h>
 #include <CreateObjectAction.h>
@@ -16,7 +16,7 @@ namespace Glory::Editor
 		if (!pObject)
 		{
 			Selection::SetActiveObject(nullptr);
-			GScene* pActiveScene = Game::GetGame().GetEngine()->GetSceneManager()->GetActiveScene();
+			GScene* pActiveScene = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
 			Entity newEntity = pActiveScene->CreateEmptyObject(name, UUID());
 			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));

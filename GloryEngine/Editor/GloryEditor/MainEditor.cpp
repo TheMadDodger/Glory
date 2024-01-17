@@ -55,7 +55,6 @@
 #include "EditableEntity.h"
 
 #include <imgui.h>
-#include <Game.h>
 #include <Engine.h>
 #include <ImGuizmo.h>
 #include <TextureDataEditor.h>
@@ -72,37 +71,37 @@
 
 namespace Glory::Editor
 {
-	static const char* Shortcut_File_NewScene			= "New Scene";
-	static const char* Shortcut_File_SaveScene			= "Save Scene";
-	static const char* Shortcut_File_LoadScene			= "Load Scene";
-	static const char* Shortcut_File_Exit				= "Quit";
-	static const char* Shortcut_File_Preferences		= "Preferences";
-	static const char* Shortcut_File_SaveProject		= "Save Project";
-	static const char* Shortcut_Play_Start				= "Enter Playmode";
-	static const char* Shortcut_Play_Stop				= "Stop Playmode";
-	static const char* Shortcut_Play_Pauze				= "Toggle Pauze Playmode";
-	static const char* Shortcut_Play_NextFrame			= "Playmode Next Frame";
-	static const char* Shortcut_Window_Scene			= "Open Scene View";
-	static const char* Shortcut_Window_Game				= "Open Game View";
-	static const char* Shortcut_Window_SceneGraph		= "Open Scene Graph";
-	static const char* Shortcut_Window_Inspector		= "Open New Inspector Window";
-	static const char* Shortcut_Window_Content			= "Open Content Browser";
-	static const char* Shortcut_Window_Console			= "Open Console";
-	static const char* Shortcut_Window_Performance		= "Open Performance Metrics";
-	static const char* Shortcut_Window_Profiler			= "Open Profiler";
-	static const char* Shortcut_Window_ProjectSettings	= "Open Project Settings";
-	static const char* Shortcut_Window_Resources		= "Open Resources";
-	static const char* Shortcut_View_Perspective		= "Switch To Perspective";
-	static const char* Shortcut_View_Orthographic		= "Switch To Orthographic";
-	static const char* Shortcut_Edit_Undo				= "Undo";
-	static const char* Shortcut_Edit_Redo				= "Redo";
-	static const char* Shortcut_Edit_History			= "Edit History";
+	static constexpr char* Shortcut_File_NewScene			= "New Scene";
+	static constexpr char* Shortcut_File_SaveScene			= "Save Scene";
+	static constexpr char* Shortcut_File_LoadScene			= "Load Scene";
+	static constexpr char* Shortcut_File_Exit				= "Quit";
+	static constexpr char* Shortcut_File_Preferences		= "Preferences";
+	static constexpr char* Shortcut_File_SaveProject		= "Save Project";
+	static constexpr char* Shortcut_Play_Start				= "Enter Playmode";
+	static constexpr char* Shortcut_Play_Stop				= "Stop Playmode";
+	static constexpr char* Shortcut_Play_Pauze				= "Toggle Pauze Playmode";
+	static constexpr char* Shortcut_Play_NextFrame			= "Playmode Next Frame";
+	static constexpr char* Shortcut_Window_Scene			= "Open Scene View";
+	static constexpr char* Shortcut_Window_Game				= "Open Game View";
+	static constexpr char* Shortcut_Window_SceneGraph		= "Open Scene Graph";
+	static constexpr char* Shortcut_Window_Inspector		= "Open New Inspector Window";
+	static constexpr char* Shortcut_Window_Content			= "Open Content Browser";
+	static constexpr char* Shortcut_Window_Console			= "Open Console";
+	static constexpr char* Shortcut_Window_Performance		= "Open Performance Metrics";
+	static constexpr char* Shortcut_Window_Profiler			= "Open Profiler";
+	static constexpr char* Shortcut_Window_ProjectSettings	= "Open Project Settings";
+	static constexpr char* Shortcut_Window_Resources		= "Open Resources";
+	static constexpr char* Shortcut_View_Perspective		= "Switch To Perspective";
+	static constexpr char* Shortcut_View_Orthographic		= "Switch To Orthographic";
+	static constexpr char* Shortcut_Edit_Undo				= "Undo";
+	static constexpr char* Shortcut_Edit_Redo				= "Redo";
+	static constexpr char* Shortcut_Edit_History			= "Edit History";
 
-	static const char* Shortcut_Copy					= "Copy";
-	static const char* Shortcut_Paste					= "Paste";
-	static const char* Shortcut_Duplicate				= "Duplicate";
-	static const char* Shortcut_Delete					= "Delete";
-	static const char* Shortcut_Rename					= "Rename";
+	static constexpr char* Shortcut_Copy					= "Copy";
+	static constexpr char* Shortcut_Paste					= "Paste";
+	static constexpr char* Shortcut_Duplicate				= "Duplicate";
+	static constexpr char* Shortcut_Delete					= "Delete";
+	static constexpr char* Shortcut_Rename					= "Rename";
 
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
@@ -145,23 +144,25 @@ namespace Glory::Editor
 
 		Gizmos::Initialize();
 
-		m_Settings.Load(Game::GetGame().GetEngine());
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		m_Settings.Load(pEngine);
 
-		Debug::LogInfo("Initialized editor");
+		pEngine->GetDebug().LogInfo("Initialized editor");
 
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();
 		Importer::Register<TextureImporter>();
 		Importer::Register<ShaderImporter>();
 
-		ResourceType::RegisterResource<EditableEntity>("");
+		pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
 	}
 
 	void MainEditor::Destroy()
 	{
 		ObjectMenu::Cleanup();
 
-		m_Settings.Save(Game::GetGame().GetEngine());
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		m_Settings.Save(pEngine);
 		Shortcuts::Clear();
 
 		ProjectSpace::CloseProject();
@@ -293,11 +294,13 @@ namespace Glory::Editor
 		//	//Serializer::DeserializeObject(node);
 		//}, NULL, Shortcut_File_LoadScene);
 
+		EditorApplication* app = EditorApplication::GetInstance();
+
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
-		MenuBar::AddMenuItem("File/Exit", EditorApplication::TryToQuit, NULL, Shortcut_File_Exit);
+		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);
 
 		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
 		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo, NULL, Shortcut_Edit_Redo);
@@ -314,10 +317,10 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Project Settings", []() { EditorWindow::GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
 		MenuBar::AddMenuItem("Window/Resources", []() { EditorWindow::GetWindow<ResourcesWindow>(); }, NULL, Shortcut_Window_Resources);
 
-		MenuBar::AddMenuItem("Play/Start", EditorApplication::StartPlay, NULL, Shortcut_Play_Start);
-		MenuBar::AddMenuItem("Play/Stop", EditorApplication::StopPlay, NULL, Shortcut_Play_Stop);
-		MenuBar::AddMenuItem("Play/Pauze", EditorApplication::TogglePause, NULL, Shortcut_Play_Pauze);
-		MenuBar::AddMenuItem("Play/Next Frame", EditorApplication::TickFrame, NULL, Shortcut_Play_NextFrame);
+		MenuBar::AddMenuItem("Play/Start", [app]() { app->StartPlay(); }, NULL, Shortcut_Play_Start);
+		MenuBar::AddMenuItem("Play/Stop", [app]() { app->StopPlay(); }, NULL, Shortcut_Play_Stop);
+		MenuBar::AddMenuItem("Play/Pauze", [app]() { app->TogglePause(); }, NULL, Shortcut_Play_Pauze);
+		MenuBar::AddMenuItem("Play/Next Frame", [app]() { app->TickFrame(); }, NULL, Shortcut_Play_NextFrame);
 
 		GIZMO_MENU("Gizmos/Operation/Translate", Gizmos::m_DefaultOperation, ImGuizmo::TRANSLATE, Gizmos::Shortcut_Gizmos_Translate);
 		GIZMO_MENU("Gizmos/Operation/Rotate", Gizmos::m_DefaultOperation, ImGuizmo::ROTATE, Gizmos::Shortcut_Gizmos_Rotate);

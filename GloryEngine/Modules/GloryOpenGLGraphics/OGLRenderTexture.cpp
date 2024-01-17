@@ -5,7 +5,6 @@
 #include "GLConverter.h"
 
 #include <GL/glew.h>
-#include <Game.h>
 #include <Engine.h>
 
 namespace Glory
@@ -42,8 +41,7 @@ namespace Glory
 		glBindFramebuffer(GL_FRAMEBUFFER, m_GLFrameBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
-		CreateTextures(pResourceManager);
+		CreateTextures();
 		
 		//GLTexture* pGLTexture = (GLTexture*)m_pTexture;
 		//glBindTexture(GL_TEXTURE_2D, pGLTexture->GetID());
@@ -102,7 +100,7 @@ namespace Glory
 		// Check if something went wrong
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
-			Debug::LogError("There was an error when trying to create a frame buffer!");
+			m_pOwner->GetEngine()->GetDebug().LogError("There was an error when trying to create a frame buffer!");
 			return;
 		}
 
@@ -121,7 +119,7 @@ namespace Glory
 		m_GLFrameBufferID = NULL;
 		//m_GLDepthBufferID = NULL;
 
-		GPUResourceManager* pResourceManager = Game::GetGame().GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
+		GPUResourceManager* pResourceManager = m_pOwner->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
 		size_t attachmentCount = m_CreateInfo.Attachments.size();
 		for (size_t i = 0; i < attachmentCount; i++)
 		{

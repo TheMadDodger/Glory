@@ -8,6 +8,7 @@
 namespace Glory
 {
 	class RenderTexture;
+	class CameraManager;
 
 	struct CameraRef
 	{
@@ -62,13 +63,12 @@ namespace Glory
 
 		void Free();
 
-		bool operator<(const CameraRef& other) const;
-
 	private:
-		CameraRef(UUID uuid);
+		CameraRef(CameraManager* pManager, UUID uuid);
 
 	private:
 		friend class CameraManager;
+		CameraManager* m_pManager;
 		UUID m_CameraID;
 	};
 }

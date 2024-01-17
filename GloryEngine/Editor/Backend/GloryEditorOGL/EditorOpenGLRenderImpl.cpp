@@ -1,5 +1,6 @@
 #include "EditorOpenGLRenderImpl.h"
-#include <Game.h>
+
+#include <EditorApplication.h>
 #include <GL/glew.h>
 #include <GLTexture.h>
 
@@ -81,11 +82,11 @@ namespace Glory::Editor
 		if (err != GL_NO_ERROR)
 		{
 			const char* error = (const char*)glewGetErrorString(err);
-			Debug::LogWarning(error, bIncludeTimeStamp);
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(error, bIncludeTimeStamp);
 		}
 	}
 
-	GLORY_API void LoadBackend(EditorCreateInfo& editorCreateInfo)
+	void LoadBackend(EditorCreateInfo& editorCreateInfo)
 	{
 		editorCreateInfo.pRenderImpl = new EditorOpenGLRenderImpl();
 	}

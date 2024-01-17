@@ -5,6 +5,8 @@
 
 namespace Glory
 {
+	class SceneManager;
+
 	class SceneObjectRef
 	{
 	public:
@@ -16,7 +18,7 @@ namespace Glory
 		UUID* SceneUUIDMember();
 		const UUID ObjectUUID() const;
 		UUID* ObjectUUIDMember();
-		Entity GetEntity();
+		Entity GetEntity(SceneManager* pScenes);
 
 		bool operator==(const SceneObjectRef& other) const;
 		bool operator==(const SceneObjectRef&& other) const;

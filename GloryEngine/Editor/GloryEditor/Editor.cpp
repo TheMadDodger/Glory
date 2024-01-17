@@ -24,7 +24,7 @@ namespace Glory::Editor
 		{
 			std::type_index type = typeid(Object);
 			if (!pObject->GetType(i, type)) continue;
-			const uint32_t typeHash = ResourceType::GetHash(type);
+			const uint32_t typeHash = ResourceTypes::GetHash(type);
 
 			auto it = std::find_if(m_pRegisteredEditors.begin(), m_pRegisteredEditors.end(), [&](Editor* pEditor)
 			{

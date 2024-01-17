@@ -31,12 +31,12 @@ namespace Glory::Editor
 		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace* pProject) {
 			std::filesystem::path assetPath = pProject->RootPath();
 			assetPath.append("Assets");
-			m_WatchID = EditorApplication::GetInstance()->FileWatch()->addWatch(assetPath.string(), this, true);
+			m_WatchID = EditorApplication::GetInstance()->FileWatch().addWatch(assetPath.string(), this, true);
 			});
 
 		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, [&](ProjectSpace* pProject) {
-			EditorApplication::GetInstance()->FileWatch()->removeWatch(m_WatchID);
-			});
+			EditorApplication::GetInstance()->FileWatch().removeWatch(m_WatchID);
+		});
 
 		m_InternalWatchHandler = AssetsFileWatchEvents().AddListener(HandleFileWatchInternal);
 	}

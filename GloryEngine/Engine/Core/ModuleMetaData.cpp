@@ -16,7 +16,10 @@ if (node.IsDefined()) out = node.as<type>()
 
 #define YAML_READ_REQUIRED(startNode, node, key, out, type, error) node = startNode[#key]; \
 if (node.IsDefined()) out = node.as<type>();\
-else Debug::LogWarning(error)
+else m_pEngine->GetDebug().LogWarning(error)
+
+#define YAML_READ_REQUIRED_1(startNode, node, key, out, type, error) node = startNode[#key]; \
+if (node.IsDefined()) out = node.as<type>();
 
 namespace Glory
 {
@@ -49,24 +52,24 @@ namespace Glory
 	{
 		if (!std::filesystem::exists(m_Path))
 		{
-			Debug::LogWarning("Could not load Module.yaml at path: " + m_Path.string());
+			//m_pEngine->GetDebug().LogWarning("Could not load Module.yaml at path: " + m_Path.string());
 			return;
 		}
 
 		YAML::Node rootNode = YAML::LoadFile(m_Path.string());
 		YAML::Node node;
-		YAML_READ_REQUIRED(rootNode, node, Name, m_Name, std::string, "Missing Name property in Module.yaml at path: " + m_Path.string());
+		YAML_READ_REQUIRED_1(rootNode, node, Name, m_Name, std::string, "Missing Name property in Module.yaml at path: " + m_Path.string());
 		std::string type = "";
-		YAML_READ_REQUIRED(rootNode, node, Type, type, std::string, "Missing Type property in Module.yaml at path: " + m_Path.string());
+		YAML_READ_REQUIRED_1(rootNode, node, Type, type, std::string, "Missing Type property in Module.yaml at path: " + m_Path.string());
 		if (type == "SceneManagement")
 		{
-			Debug::LogError("Scene modules are no longer supported as of 0.3.0");
+			//m_pEngine->GetDebug().LogError("Scene modules are no longer supported as of 0.3.0");
 			m_Type = ModuleType::MT_Invalid;
 			return;
 		}
 		if (type == "Physics")
 		{
-			Debug::LogWarning("As of 0.3.0 physics modules are now categorized as \"Other\" modules");
+			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 physics modules are now categorized as \"Other\" modules");
 			type = "Other";
 		}
 		if (STRINGTOMODULETYPE.find(type) != STRINGTOMODULETYPE.end()) m_Type = STRINGTOMODULETYPE[type];

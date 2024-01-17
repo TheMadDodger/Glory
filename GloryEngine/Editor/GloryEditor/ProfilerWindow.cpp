@@ -1,6 +1,7 @@
 #include "ProfilerWindow.h"
+#include "EditorApplication.h"
+
 #include <ProfilerModule.h>
-#include <Game.h>
 #include <Engine.h>
 #include <imgui.h>
 #include <implot.h>
@@ -351,14 +352,14 @@ namespace Glory::Editor
 
 	void ProfilerWindow::OnOpen()
 	{
-		ProfilerModule* pProfiler = Game::GetGame().GetEngine()->GetInternalModule<ProfilerModule>();
+		ProfilerModule* pProfiler = EditorApplication::GetInstance()->GetEngine()->GetInternalModule<ProfilerModule>();
 		pProfiler->RegisterRecordCallback(ProfilerWindow::StoreSampleRecord);
 		pProfiler->EnableSampleCollecting(true);
 	}
 
 	void ProfilerWindow::OnClose()
 	{
-		ProfilerModule* pProfiler = Game::GetGame().GetEngine()->GetInternalModule<ProfilerModule>();
+		ProfilerModule* pProfiler = EditorApplication::GetInstance()->GetEngine()->GetInternalModule<ProfilerModule>();
 		pProfiler->RegisterRecordCallback(NULL);
 		pProfiler->EnableSampleCollecting(false);
 	}

@@ -1,11 +1,14 @@
 #include "GPUResourceManager.h"
 #include "EngineProfiler.h"
 #include "MaterialInstanceData.h"
+#include "Engine.h"
+#include "EngineProfiler.h"
+
 #include <algorithm>
 
 namespace Glory
 {
-	GPUResourceManager::GPUResourceManager() {}
+	GPUResourceManager::GPUResourceManager(Engine* pEngine): m_pEngine(pEngine) {}
 
 	GPUResourceManager::~GPUResourceManager()
 	{
@@ -27,11 +30,12 @@ namespace Glory
 	Buffer* GPUResourceManager::CreateBuffer(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex)
 	{
 		if (bufferSize == 0) return nullptr;
-		Profiler::BeginSample("GPUResourceManager::CreateBuffer");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateBuffer");
 		Buffer* pBuffer = CreateBuffer_Internal(bufferSize, usageFlag, memoryFlags, bindIndex);
+		pBuffer->m_pOwner = this;
 		pBuffer->CreateBuffer();
 		m_pBuffers.emplace(pBuffer->m_UUID, pBuffer);
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pBuffer;
 	}
 
@@ -40,19 +44,22 @@ namespace Glory
 		Mesh* pMesh = GetResource<Mesh>(pMeshData);
 		if (pMesh) return pMesh;
 
-		Profiler::BeginSample("GPUResourceManager::CreateMesh");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMesh");
 		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
 		uint32_t indexBufferSize = pMeshData->IndexCount() * sizeof(uint32_t);
 		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
 		Buffer* pIndexBuffer = CreateIndexBuffer(indexBufferSize);
+		pVertexBuffer->m_pOwner = this;
+		pIndexBuffer->m_pOwner = this;
 		pVertexBuffer->Assign(pMeshData->Vertices());
 		if (pIndexBuffer) pIndexBuffer->Assign(pMeshData->Indices());
 		pMesh = CreateMesh_Internal(pMeshData);
+		pMesh->m_pOwner = this;
 		pMesh->m_UUID = pMeshData->GetGPUUUID();
 		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
 		pMesh->CreateBindingAndAttributeData();
 		m_IDResources[pMeshData->GetGPUUUID()] = pMesh;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pMesh;
 	}
 
@@ -61,26 +68,29 @@ namespace Glory
 		Mesh* pMesh = GetResource<Mesh>(pMeshData);
 		if (pMesh) return pMesh;
 
-		Profiler::BeginSample("GPUResourceManager::CreateMeshNoIndexBuffer");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMeshNoIndexBuffer");
 		pMesh = CreateMesh_Internal(pMeshData);
+		pMesh->m_pOwner = this;
 		pMesh->m_UUID = pMeshData->GetGPUUUID();
 		pMesh->Bind();
 		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
 		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
+		pVertexBuffer->m_pOwner = this;
 		pVertexBuffer->Bind();
 		pVertexBuffer->Assign(pMeshData->Vertices());
 		pMesh->SetBuffers(pVertexBuffer, nullptr);
 		pMesh->CreateBindingAndAttributeData();
 		m_IDResources[pMeshData->GetGPUUUID()] = pMesh;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pMesh;
 	}
 
 	Mesh* GPUResourceManager::CreateMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding,
 		uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes, Buffer* pVertexBuffer, Buffer* pIndexBuffer)
 	{
-		Profiler::BeginSample("GPUResourceManager::CreateMeshNoIndexBuffer");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMeshNoIndexBuffer");
 		Mesh* pMesh = CreateMesh_Internal(vertexCount, indexCount, inputRate, binding, stride, primitiveType, attributeTypes);
+		pMesh->m_pOwner = this;
 		pMesh->m_UUID = UUID();
 		pMesh->Bind();
 		pVertexBuffer->Bind();
@@ -88,7 +98,7 @@ namespace Glory
 		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
 		pMesh->CreateBindingAndAttributeData();
 		m_IDResources[pMesh->m_UUID] = pMesh;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pMesh;
 	}
 
@@ -97,12 +107,13 @@ namespace Glory
 		Shader* pShader = GetResource<Shader>(pShaderFile);
 		if (pShader) return pShader;
 
-		Profiler::BeginSample("GPUResourceManager::CreateShader");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateShader");
 		pShader = CreateShader_Internal(pShaderFile, shaderType, function);
+		pShader->m_pOwner = this;
 		pShader->m_UUID = pShaderFile->GetGPUUUID();
 		pShader->Initialize();
 		m_IDResources[pShaderFile->GetGPUUUID()] = pShader;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pShader;
 	}
 
@@ -115,9 +126,10 @@ namespace Glory
 			return pMaterial;
 		}
 
-		Profiler::BeginSample("GPUResourceManager::CreateMaterial");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMaterial");
 		if (pMaterial) pMaterial->Clear();
 		else pMaterial = CreateMaterial_Internal(pMaterialData);
+		pMaterial->m_pOwner = this;
 		pMaterial->m_pMaterialData = pMaterialData;
 		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
 		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
@@ -133,7 +145,7 @@ namespace Glory
 		pMaterial->Initialize();
 		pMaterial->m_Complete = true;
 		m_IDResources[pMaterialData->GetGPUUUID()] = pMaterial;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pMaterial;
 	}
 
@@ -150,44 +162,47 @@ namespace Glory
 			return pTexture;
 		}
 
-		Profiler::BeginSample("GPUResourceManager::CreateTexture");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateTexture");
 		pTexture = CreateTexture_Internal(pTextureData);
 		if (!pTexture) return nullptr;
+		pTexture->m_pOwner = this;
 		pTexture->m_UUID = pTextureData->GetGPUUUID();
 		pTexture->Create(pTextureData);
 		m_IDResources[pTextureData->GetGPUUUID()] = pTexture;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pTexture;
 	}
 
 	Texture* GPUResourceManager::CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
 	{
-		Profiler::BeginSample("GPUResourceManager::CreateTexture (2)");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateTexture (2)");
 		Texture* pTexture = CreateTexture_Internal(width, height, format, internalFormat, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
 		UUID id = UUID();
+		pTexture->m_pOwner = this;
 		pTexture->m_UUID = id;
 		pTexture->Create();
 
 		m_IDResources[id] = pTexture;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pTexture;
 	}
 
 	RenderTexture* GPUResourceManager::CreateRenderTexture(const RenderTextureCreateInfo& createInfo)
 	{
-		Profiler::BeginSample("GPUResourceManager::CreateRenderTexture");
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateRenderTexture");
 		RenderTexture* pRenderTexture = CreateRenderTexture_Internal(createInfo);
 		UUID id = UUID();
+		pRenderTexture->m_pOwner = this;
 		pRenderTexture->m_UUID = id;
 		pRenderTexture->Initialize();
 		m_IDResources[id] = pRenderTexture;
-		Profiler::EndSample();
+		m_pEngine->Profiler().EndSample();
 		return pRenderTexture;
 	}
 
 	void GPUResourceManager::Free(GPUResource* pResource)
 	{
-		ProfileSample s{ "GPUResourceManager::Free" };
+		ProfileSample s{ &m_pEngine->Profiler(), "GPUResourceManager::Free" };
 		if (!pResource) return;
 		UUID id = pResource->m_UUID;
 		delete pResource;
@@ -198,7 +213,7 @@ namespace Glory
 	
 	void GPUResourceManager::Free(Buffer* pBuffer)
 	{
-		ProfileSample s{ "GPUResourceManager::Free(Buffer)" };
+		ProfileSample s{ &m_pEngine->Profiler(), "GPUResourceManager::Free(Buffer)" };
 		if (!pBuffer) return;
 		UUID id = pBuffer->m_UUID;
 		delete pBuffer;
@@ -217,5 +232,10 @@ namespace Glory
 		auto itor = m_IDResources.find(uuid);
 		if (itor == m_IDResources.end()) return;
 		itor->second->m_IsDirty = true;
+	}
+
+	Engine* GPUResourceManager::GetEngine()
+	{
+		return m_pEngine;
 	}
 }

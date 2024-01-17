@@ -1,6 +1,7 @@
 #include "ProjectMigrations.h"
 #include "EditorAssetDatabase.h"
 #include "AssetCompiler.h"
+#include "EditorApplication.h"
 
 #include <JSONRef.h>
 #include <TextureData.h>
@@ -41,7 +42,7 @@ namespace Glory::Editor
 
     void Migrate_0_1_1_DefaultTextureAndMaterialProperties(ProjectSpace* pProject)
     {
-        Debug::LogInfo("0.1.1> Migrating image datas to include default texture");
+        EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("0.1.1> Migrating image datas to include default texture");
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
@@ -50,10 +51,10 @@ namespace Glory::Editor
         std::vector<std::string_view> materialAssets;
         std::vector<std::string_view> materialInstanceAssets;
 
-        const uint32_t imageDataHash = ResourceType::GetHash<ImageData>();
-        const uint32_t textureDataHash = ResourceType::GetHash<TextureData>();
-        const uint32_t materialDataHash = ResourceType::GetHash<MaterialData>();
-        const uint32_t materialInstanceDataHash = ResourceType::GetHash<MaterialInstanceData>();
+        const uint32_t imageDataHash = ResourceTypes::GetHash<ImageData>();
+        const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
+        const uint32_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
+        const uint32_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
 
         for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
         {
@@ -76,6 +77,7 @@ namespace Glory::Editor
 
         std::map<std::string_view, UUID> imageIDToTextureID;
 
+        Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
         for (size_t i = 0; i < imageAssets.size(); i++)
         {
             const std::string_view assetID = imageAssets[i];
@@ -94,15 +96,15 @@ namespace Glory::Editor
             metaData["Extension"].SetStringFromView(asset["Metadata/Extension"].AsString());
             metaData["Name"].SetStringFromView(asset["Metadata/Name"].AsString());
             metaData["UUID"].SetUInt64(newUUID);
-            metaData["Hash"].SetUInt(ResourceType::GetHash<TextureData>());
+            metaData["Hash"].SetUInt(ResourceTypes::GetHash<TextureData>());
             metaData["SerializedVersion"].SetUInt(0);
 
             std::stringstream debug;
             debug << "0.1.1> Migrated image data " << assetID << " to include default texture";
-            Debug::LogInfo(debug.str());
+            pEngine->GetDebug().LogInfo(debug.str());
         }
 
-        Debug::LogInfo("0.1.1> Migrating material propeties");
+        pEngine->GetDebug().LogInfo("0.1.1> Migrating material propeties");
         for (size_t i = 0; i < materialAssets.size(); ++i)
         {
             const std::string_view materialAssetID = materialAssets[i];
@@ -134,12 +136,12 @@ namespace Glory::Editor
 
                 std::stringstream debug;
                 debug << "0.1.1> Migrated material " << materialAssetID << " propery " << property["DisplayName"].As<std::string>() << " to default texture " << newUUID;
-                Debug::LogInfo(debug.str());
+                pEngine->GetDebug().LogInfo(debug.str());
             }
             materialFile.Save();
         }
 
-        Debug::LogInfo("0.1.1> Migrating material instance property overrides");
+        pEngine->GetDebug().LogInfo("0.1.1> Migrating material instance property overrides");
         for (size_t i = 0; i < materialInstanceAssets.size(); ++i)
         {
             const std::string_view materialAssetID = materialInstanceAssets[i];
@@ -168,7 +170,7 @@ namespace Glory::Editor
 
                 std::stringstream debug;
                 debug << "0.1.1> Migrated material instance " << materialAssetID << " propery " << override["DisplayName"].As<std::string>() << " to default texture " << newUUID;
-                Debug::LogInfo(debug.str());
+                pEngine->GetDebug().LogInfo(debug.str());
             }
             materialFile.Save();
         }
@@ -176,7 +178,7 @@ namespace Glory::Editor
 
     void Migrate_0_1_1_AddGravityToPhysicsSettings(ProjectSpace* pProject)
     {
-        Debug::LogInfo("0.1.1> Migrating PhysicsSettings to include Gravity property");
+        EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("0.1.1> Migrating PhysicsSettings to include Gravity property");
         std::filesystem::path physicsSettingsPath = pProject->RootPath();
         physicsSettingsPath.append("ProjectSettings").append("Physics.yaml");
         Utils::YAMLFileRef physicsSettings{ physicsSettingsPath };

@@ -5,7 +5,8 @@
 #include "RendererModule.h"
 #include "Window.h"
 #include "CameraManager.h"
-#include "GloryContext.h"
+#include "SceneManager.h"
+#include "GScene.h"
 
 #include <EntityRegistry.h>
 
@@ -21,13 +22,14 @@ namespace Glory
 
 	void CameraSystem::OnComponentAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
-		Engine* pEngine = Game::GetGame().GetEngine();
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
 		Window* pWindow = pEngine->GetMainModule<WindowModule>()->GetMainWindow();
 
 		int width, height;
 		pWindow->GetDrawableSize(&width, &height);
 
-		pComponent.m_Camera = GloryContext::GetCameraManager()->GetNewOrUnusedCamera();
+		pComponent.m_Camera = pEngine->GetCameraManager().GetNewOrUnusedCamera();
 		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
 		pComponent.m_LastHash = CalcHash(pComponent);
 	}
@@ -39,6 +41,9 @@ namespace Glory
 
 	void CameraSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(glm::inverse(transform.MatTransform));
 
@@ -51,7 +56,6 @@ namespace Glory
 		pComponent.m_Camera.SetLayerMask(pComponent.m_LayerMask);
 		pComponent.m_Camera.SetClearColor(pComponent.m_ClearColor);
 
-		Engine* pEngine = Game::GetGame().GetEngine();
 		Window* pWindow = pEngine->GetMainModule<WindowModule>()->GetMainWindow();
 
 		int width, height;
@@ -61,7 +65,9 @@ namespace Glory
 
 	void CameraSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
-		Game::GetGame().GetEngine()->GetMainModule<RendererModule>()->Submit(pComponent.m_Camera);
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		pEngine->GetMainModule<RendererModule>()->Submit(pComponent.m_Camera);
 	}
 
 	std::string CameraSystem::Name()

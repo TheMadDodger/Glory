@@ -3,6 +3,8 @@
 
 namespace Glory
 {
+	class Engine;
+
 	struct MonoEntityHandle
 	{
 		MonoEntityHandle();
@@ -16,5 +18,6 @@ namespace Glory
 	{
 	public:
 		static void GetInternallCalls(std::vector<InternalCall>& internalCalls);
+		static void SetEngine(Engine* pEngine);
 	};
 }

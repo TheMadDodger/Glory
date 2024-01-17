@@ -1,6 +1,8 @@
 #include "ScriptedComponentEditor.h"
 #include "Undo.h"
 #include "GizmoAction.h"
+#include "EditorApplication.h"
+
 #include <glm/gtx/quaternion.hpp>
 #include <sstream>
 #include <TypeData.h>
@@ -22,7 +24,7 @@ namespace Glory::Editor
 		EntityComponentEditor::Initialize();
 		ScriptedComponent& scriptComponent = GetTargetComponent();
 		if (!scriptComponent.m_Script.AssetUUID()) return;
-		m_pScript = AssetManager::GetAssetImmediate<Script>(scriptComponent.m_Script.AssetUUID());
+		m_pScript = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<Script>(scriptComponent.m_Script.AssetUUID());
 		if (!m_pScript)
 		{
 			scriptComponent.m_Script.SetUUID(0);

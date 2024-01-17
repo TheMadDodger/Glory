@@ -69,7 +69,7 @@ namespace Glory::Editor
 	class SimplePropertyDrawerTemplate : public PropertyDrawer
 	{
 	public:
-		SimplePropertyDrawerTemplate() : PropertyDrawer(ResourceType::GetHash<PropertyType>()) {}
+		SimplePropertyDrawerTemplate() : PropertyDrawer(ResourceTypes::GetHash<PropertyType>()) {}
 
 	protected:
 		virtual bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const override
@@ -109,7 +109,7 @@ namespace Glory::Editor
 	class PropertyDrawerTemplate : public PropertyDrawer
 	{
 	public:
-		PropertyDrawerTemplate() : PropertyDrawer(ResourceType::GetHash<PropertyType>()) {}
+		PropertyDrawerTemplate() : PropertyDrawer(ResourceTypes::GetHash<PropertyType>()) {}
 
 		GLORY_EDITOR_API bool OnGUI(const std::string& label, PropertyType* data, uint32_t flags) const;
 

@@ -1,7 +1,5 @@
 #pragma once
 #include <vector>
-#include <Game.h>
-#include <GloryContext.h>
 #include "BaseEditorExtension.h"
 #include "EditorWindowImpl.h"
 #include "EditorRenderImpl.h"
@@ -9,6 +7,8 @@
 
 namespace Glory
 {
+	class Engine;
+
 	struct EditorCreateInfo
 	{
 		GLORY_EDITOR_API EditorCreateInfo();
@@ -18,6 +18,7 @@ namespace Glory
 
 		Editor::EditorWindowImpl* pWindowImpl;
 		Editor::EditorRenderImpl* pRenderImpl;
-		GloryContext* pContext;
+
+		Engine* pEngine;
 	};
 }

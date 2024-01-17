@@ -1,6 +1,8 @@
 #include "LayerMask.h"
-#include "LayerManager.h"
+#include "Engine.h"
 #include "Debug.h"
+#include "LayerManager.h"
+#include "Layer.h"
 
 namespace Glory
 {
@@ -23,7 +25,7 @@ namespace Glory
 		return mask;
 	}
 
-	LayerMask LayerMask::FromString(const std::string& names)
+	LayerMask LayerMask::FromString(Engine* pEngine, const std::string& names)
 	{
 		size_t currentIndex = 0;
 		size_t nextIndex = 0;
@@ -32,10 +34,10 @@ namespace Glory
 		{
 			nextIndex = names.find(',', currentIndex + 1);
 			std::string name = names.substr(currentIndex, nextIndex - currentIndex);
-			const Layer* pLayer = LayerManager::GetLayerByName(name);
+			const Layer* pLayer = pEngine->GetLayerManager().GetLayerByName(name);
 			if (pLayer == nullptr)
 			{
-				Debug::LogWarning("Layer with name " + name + " does not exist!");
+				pEngine->GetDebug().LogWarning("Layer with name " + name + " does not exist!");
 				continue;
 			}
 			layerMask |= pLayer->m_Mask;

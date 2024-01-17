@@ -65,7 +65,6 @@ namespace Glory::Editor
 	private:
 		friend class MainEditor;
 		friend class SceneWindow;
-		friend class GloryContext;
 		static std::map<UUID, IGizmo*> m_pGizmos;
 		static GizmosToolChain* m_pToolChain;
 		static GridToolchain* m_pGridToolChain;

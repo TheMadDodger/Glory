@@ -36,6 +36,8 @@ namespace Glory
 
 		static GLORY_API MonoManager* Instance();
 
+		GLORY_API GloryMonoScipting* Module();
+
 	private:
 		void Initialize(const std::string& assemblyDir = ".", const std::string& configDir = "");
 		void Cleanup();

@@ -1,5 +1,4 @@
 #include "EditorAssetCallbacks.h"
-#include "GloryContext.h"
 #include "EditorAssetDatabase.h"
 #include "Dispatcher.h"
 

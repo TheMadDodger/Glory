@@ -1,5 +1,6 @@
 #include "EditorShaderProcessor.h"
 #include "ProjectSpace.h"
+#include "EditorApplication.h"
 
 #include <Debug.h>
 #include <fstream>
@@ -23,36 +24,36 @@ namespace Glory::Editor
 	std::map<spirv_cross::SPIRType::BaseType, std::vector<uint32_t>> SpirBaseTypeToHash = {
 		// Int
 		{ spirv_cross::SPIRType::BaseType::Int,
-		{ ResourceType::GetHash<int32_t>(), ResourceType::GetHash<glm::ivec2>(), ResourceType::GetHash<glm::ivec3>(), ResourceType::GetHash<glm::ivec4>() } },
+		{ ResourceTypes::GetHash<int32_t>(), ResourceTypes::GetHash<glm::ivec2>(), ResourceTypes::GetHash<glm::ivec3>(), ResourceTypes::GetHash<glm::ivec4>() } },
 
 		// UInt
 		{ spirv_cross::SPIRType::BaseType::UInt,
-		{ ResourceType::GetHash<uint32_t>(), ResourceType::GetHash<glm::uvec2>(), ResourceType::GetHash<glm::uvec3>(), ResourceType::GetHash<glm::uvec4>() } },
+		{ ResourceTypes::GetHash<uint32_t>(), ResourceTypes::GetHash<glm::uvec2>(), ResourceTypes::GetHash<glm::uvec3>(), ResourceTypes::GetHash<glm::uvec4>() } },
 
 		// I64
 		{ spirv_cross::SPIRType::BaseType::Int64,
-		{ ResourceType::GetHash<int64_t>(), ResourceType::GetHash<glm::i64vec2>(), ResourceType::GetHash<glm::i64vec3>(), ResourceType::GetHash<glm::i64vec4>() } },
+		{ ResourceTypes::GetHash<int64_t>(), ResourceTypes::GetHash<glm::i64vec2>(), ResourceTypes::GetHash<glm::i64vec3>(), ResourceTypes::GetHash<glm::i64vec4>() } },
 
 		// U64
 		{ spirv_cross::SPIRType::BaseType::UInt64,
-		{ ResourceType::GetHash<uint64_t>(), ResourceType::GetHash<glm::u64vec2>(), ResourceType::GetHash<glm::u64vec3>(), ResourceType::GetHash<glm::u64vec4>() } },
+		{ ResourceTypes::GetHash<uint64_t>(), ResourceTypes::GetHash<glm::u64vec2>(), ResourceTypes::GetHash<glm::u64vec3>(), ResourceTypes::GetHash<glm::u64vec4>() } },
 
 		// Float
 		{ spirv_cross::SPIRType::BaseType::Float,
-		{ ResourceType::GetHash<float>(), ResourceType::GetHash<glm::vec2>(), ResourceType::GetHash<glm::vec3>(), ResourceType::GetHash<glm::vec4>() } },
+		{ ResourceTypes::GetHash<float>(), ResourceTypes::GetHash<glm::vec2>(), ResourceTypes::GetHash<glm::vec3>(), ResourceTypes::GetHash<glm::vec4>() } },
 
 		// Bool
 		{ spirv_cross::SPIRType::BaseType::Boolean,
-		{ ResourceType::GetHash<bool>(), ResourceType::GetHash<glm::bvec2>(), ResourceType::GetHash<glm::bvec3>(), ResourceType::GetHash<glm::bvec4>() } },
+		{ ResourceTypes::GetHash<bool>(), ResourceTypes::GetHash<glm::bvec2>(), ResourceTypes::GetHash<glm::bvec3>(), ResourceTypes::GetHash<glm::bvec4>() } },
 
 		// Double
-		{ spirv_cross::SPIRType::BaseType::Double, { ResourceType::GetHash<double>() } },
+		{ spirv_cross::SPIRType::BaseType::Double, { ResourceTypes::GetHash<double>() } },
 
 		// Short
-		{ spirv_cross::SPIRType::BaseType::Short, { ResourceType::GetHash<short>() } },
+		{ spirv_cross::SPIRType::BaseType::Short, { ResourceTypes::GetHash<short>() } },
 
 		// UShort
-		{ spirv_cross::SPIRType::BaseType::UShort, { ResourceType::GetHash<unsigned short>() } },
+		{ spirv_cross::SPIRType::BaseType::UShort, { ResourceTypes::GetHash<unsigned short>() } },
 
 		// Unknown
 		{ spirv_cross::SPIRType::BaseType::Unknown, { 0 } },
@@ -93,7 +94,8 @@ namespace Glory::Editor
 
 	void EditorShaderProcessor::Start()
 	{
-		ShaderManager::OverrideCompiledShadersPathFunc([]()
+
+		EditorApplication::GetInstance()->GetEngine()->GetShaderManager().OverrideCompiledShadersPathFunc([]()
 		{
 			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 			if (pProject == nullptr) return std::string("");
@@ -156,14 +158,14 @@ namespace Glory::Editor
 
 			ProcessReflection(pShaderData);
 
-			std::string path = ShaderManager::GetCompiledShaderPath(pShaderData->GetUUID());
+			std::string path = EditorApplication::GetInstance()->GetEngine()->GetShaderManager().GetCompiledShaderPath(pShaderData->GetUUID());
 			CompileForCurrentPlatform(pShaderData, path);
 
 			FileImportSettings importSettings;
 			importSettings.AddNullTerminateAtEnd = true;
 			importSettings.Flags = std::ios::ate | std::ios::binary;
 			importSettings.m_Extension = "";
-			FileData* pCompiledShader = (FileData*)Game::GetGame().GetEngine()->GetLoaderModule<FileData>()->Load(path, importSettings);
+			FileData* pCompiledShader = (FileData*)EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>()->Load(path, importSettings);
 			pShaderSource->SetCompiledShader(pCompiledShader);
 		}
 	}
@@ -173,7 +175,7 @@ namespace Glory::Editor
 		ShaderType shaderType = pShaderSource->GetShaderType();
 		if (m_ShaderTypeToKind.find(shaderType) == m_ShaderTypeToKind.end())
 		{
-			Debug::LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
 			return nullptr;
 		}
 
@@ -185,15 +187,15 @@ namespace Glory::Editor
 
 		if (result.GetCompilationStatus() != shaderc_compilation_status::shaderc_compilation_status_success)
 		{
-			Debug::LogError("Shader " + pShaderSource->Name() + " compilation failed with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
-			Debug::LogError(result.GetErrorMessage());
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Shader " + pShaderSource->Name() + " compilation failed with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError(result.GetErrorMessage());
 			return nullptr;
 		}
 		else
-			Debug::LogInfo("Shader " + pShaderSource->Name() + " compilation succeeded with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("Shader " + pShaderSource->Name() + " compilation succeeded with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
 
 		if (warnings > 0)
-			Debug::LogWarning(result.GetErrorMessage());
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(result.GetErrorMessage());
 
 		EditorShaderData* pShaderData = new EditorShaderData(pShaderSource->GetUUID());
 		pShaderData->m_ShaderData.assign(result.begin(), result.end());
@@ -274,9 +276,9 @@ namespace Glory::Editor
 		ResourceMeta meta;
 		EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta);
 		const uint32_t typeHash = meta.Hash();
-		size_t shaderSourceDataHash = ResourceType::GetHash<ShaderSourceData>();
+		size_t shaderSourceDataHash = ResourceTypes::GetHash<ShaderSourceData>();
 		if (typeHash != shaderSourceDataHash) return;
-		AssetManager::GetAsset(callback.m_UUID, [](Resource* pLoadedResource)
+		EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAsset(callback.m_UUID, [](Resource* pLoadedResource)
 		{
 			if (!pLoadedResource) return;
 			GetShaderSource((ShaderSourceData*)pLoadedResource);

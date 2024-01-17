@@ -37,7 +37,7 @@ namespace Glory
 			catch (const std::exception&)
 			{
 				succes = false;
-				Debug::LogNotice(">>>> Invalid Argument", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument", false);
 				return -1;
 			}
 		}
@@ -54,7 +54,7 @@ namespace Glory
 			catch (const std::exception&)
 			{
 				succes = false;
-				Debug::LogNotice(">>>> Invalid Argument", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument", false);
 				return -1.0f;
 			}
 		}
@@ -71,7 +71,7 @@ namespace Glory
 			catch (const std::exception&)
 			{
 				succes = false;
-				Debug::LogNotice(">>>> Invalid Argument", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument", false);
 				return "";
 			}
 		}
@@ -93,7 +93,7 @@ namespace Glory
 			catch (const std::exception&)
 			{
 				succes = false;
-				Debug::LogNotice(">>>> Invalid Argument", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument", false);
 				return 0;
 			}
 		}
@@ -178,7 +178,7 @@ namespace Glory
 		{
 			if (!UnpackArguments(args))
 			{
-				Debug::LogNotice(">>>> Invalid Argument count", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument count", false);
 				return true;
 			}
 			return m_Function(m_Argument1);
@@ -209,7 +209,7 @@ namespace Glory
 		{
 			if (!UnpackArguments(args))
 			{
-				Debug::LogNotice(">>>> Invalid Argument count!", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument count!", false);
 				return true;
 			}
 			return m_Function(m_Argument1, m_Argument2);
@@ -242,7 +242,7 @@ namespace Glory
 		{
 			if (!UnpackArguments(args))
 			{
-				Debug::LogNotice(">>>> Invalid Argument count!", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument count!", false);
 				return true;
 			}
 			return m_Function(m_Argument1, m_Argument2, m_Argument3);
@@ -277,7 +277,7 @@ namespace Glory
 		{
 			if (!UnpackArguments(args))
 			{
-				Debug::LogNotice(">>>> Invalid Argument count!", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument count!", false);
 				return true;
 			}
 			return m_Function(m_Argument1, m_Argument2, m_Argument3, m_Argument4);
@@ -314,7 +314,7 @@ namespace Glory
 		{
 			if (!UnpackArguments(args))
 			{
-				Debug::LogNotice(">>>> Invalid Argument count!", false);
+				//m_pEngine->GetDebug().LogNotice(">>>> Invalid Argument count!", false);
 				return true;
 			}
 			return m_Function(m_Argument1, m_Argument2, m_Argument3, m_Argument4);

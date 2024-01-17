@@ -39,10 +39,9 @@ namespace Glory
 		return &m_ObjectUUID;
 	}
 
-	Entity SceneObjectRef::GetEntity()
+	Entity SceneObjectRef::GetEntity(SceneManager* pScenes)
 	{
-		/* FIXME: This is kinda slow */
-		GScene* pScene = Game::GetGame().GetEngine()->GetSceneManager()->GetOpenScene(m_SceneUUID);
+		GScene* pScene = pScenes->GetOpenScene(m_SceneUUID);
 		if (!pScene) return {};
 		return pScene->GetEntityByUUID(m_ObjectUUID);
 	}

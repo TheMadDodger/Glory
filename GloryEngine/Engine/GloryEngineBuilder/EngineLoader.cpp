@@ -4,7 +4,6 @@
 #include <ScriptingModule.h>
 #include <IScriptExtender.h>
 
-#include <GloryContext.h>
 #include <BuiltInModules.h>
 
 std::string GetLastErrorAsString()
@@ -33,23 +32,29 @@ std::string GetLastErrorAsString()
 
 namespace Glory
 {
-	typedef Module* (__cdecl* OnLoadModuleProc)(GloryContext*);
-	typedef IScriptExtender*(__cdecl* OnLoadExtensionProc)(GloryContext*);
+	typedef Module* (__cdecl* OnLoadModuleProc)();
+	typedef IScriptExtender*(__cdecl* OnLoadExtensionProc)();
 	
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow)
 		: m_CFGPath(cfgPath), m_DefaultWindow(defaultWindow), m_EngineInfo{} {}
 	
-	EngineLoader::~EngineLoader() {}
+	EngineLoader::~EngineLoader()
+	{
+		Unload();
+	}
 
-	Engine* EngineLoader::LoadEngine()
+	Engine EngineLoader::LoadEngine(Console* pConsole, Debug* pDebug)
 	{
 		if (!std::filesystem::exists(m_CFGPath))
 		{
-			Debug::LogError("Missing Engine.yaml file in project directory!");
-			return nullptr;
+			pDebug->LogFatalError("Missing Engine.yaml file in project directory!");
+			throw std::exception();
 		}
 		
 		m_EngineInfo = {};
+		m_EngineInfo.m_pConsole = pConsole;
+		m_EngineInfo.m_pDebug = pDebug;
+
 		YAML::Node node = YAML::LoadFile(m_CFGPath.string());
 		YAML::Node modules = node["Modules"];
 		LoadModules(modules);
@@ -73,7 +78,7 @@ namespace Glory
 
 		m_EngineInfo.ScriptingModulesCount = static_cast<uint32_t>(m_pScriptingModules.size());
 		m_EngineInfo.pScriptingModules = m_pScriptingModules.data();
-		return Engine::CreateEngine(m_EngineInfo);
+		return { m_EngineInfo };
 	}
 		
 	void EngineLoader::Unload()
@@ -140,7 +145,7 @@ namespace Glory
 	{
 		if (moduleName == "GloryEntityScenes")
 		{
-			Debug::LogInfo("GloryEntityScenes has been removed and is now part of the core engine");
+			m_EngineInfo.m_pDebug->LogInfo("GloryEntityScenes has been removed and is now part of the core engine");
 			return;
 		}
 
@@ -150,7 +155,7 @@ namespace Glory
 		modulePath.append(moduleName);
 
 		/* Read meta data */
-		Debug::LogInfo("Loading module metadata: " + moduleName + "...");
+		m_EngineInfo.m_pDebug->LogInfo("Loading module metadata: " + moduleName + "...");
 		std::filesystem::path metaPath = modulePath;
 		metaPath = metaPath.append("Module.yaml");
 		ModuleMetaData metaData(metaPath);
@@ -158,7 +163,7 @@ namespace Glory
 
 		if (metaData.Type() == ModuleType::MT_Invalid)
 		{
-			Debug::LogError("Failed to load module " + moduleName + " because the module is invalid!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load module " + moduleName + " because the module is invalid!");
 			return;
 		}
 
@@ -167,11 +172,11 @@ namespace Glory
 		size_t dependencyCount = dependencies.size();
 		if (dependencyCount > 0)
 		{
-			Debug::LogInfo("Loading dependencies for module: " + moduleName + "...");
+			m_EngineInfo.m_pDebug->LogInfo("Loading dependencies for module: " + moduleName + "...");
 			for (size_t i = 0; i < dependencyCount; i++)
 			{
 				std::string dependency = dependencies[i];
-				Debug::LogInfo("Loading dependency: " + dependency + "...");
+				m_EngineInfo.m_pDebug->LogInfo("Loading dependency: " + dependency + "...");
 				std::filesystem::path dependencyPath = modulePath;
 				dependencyPath = dependencyPath.append("Dependencies").append(dependency);
 				dependencyPath = dependencyPath.string() + ".dll";
@@ -187,13 +192,13 @@ namespace Glory
 					{
 						debugStream.clear();
 						debugStream << "Failed to load dependency: " << dependency << ": The library was not found!";
-						Debug::LogError(debugStream.str());
+						m_EngineInfo.m_pDebug->LogError(debugStream.str());
 						return;
 					}
 #else
 					debugStream.clear();
 					debugStream << "Failed to load dependency: " << dependency << ": The library was not found!";
-					Debug::LogError(debugStream.str());
+					m_EngineInfo.m_pDebug->LogError(debugStream.str());
 					return;
 #endif
 				}
@@ -203,8 +208,8 @@ namespace Glory
 				{
 					debugStream.clear();
 					debugStream << "Failed to load dependency: " << dependency << ": There was an error while loading the library!";
-					Debug::LogError(debugStream.str());
-					Debug::LogError(GetLastErrorAsString());
+					m_EngineInfo.m_pDebug->LogError(debugStream.str());
+					m_EngineInfo.m_pDebug->LogError(GetLastErrorAsString());
 					return;
 				}
 				m_DependencyLibs.push_back(dependencyLib);
@@ -214,7 +219,7 @@ namespace Glory
 		/* Load module lib */
 		debugStream.clear();
 		debugStream << "Loading module: " << moduleName << "...";
-		Debug::LogInfo(debugStream.str());
+		m_EngineInfo.m_pDebug->LogInfo(debugStream.str());
 
 		std::filesystem::path dllPath = modulePath;
 		dllPath = dllPath.append(moduleName).replace_extension(".dll");
@@ -222,7 +227,7 @@ namespace Glory
 		{
 			debugStream.clear();
 			debugStream << "Failed to load module: " << moduleName << ": There was an error while loading the library!";
-			Debug::LogError(debugStream.str());
+			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			return;
 		}
 
@@ -231,8 +236,8 @@ namespace Glory
 		{
 			debugStream.clear();
 			debugStream << "Failed to load module: " << moduleName << ": The module was not found!";
-			Debug::LogError(debugStream.str());
-			Debug::LogError(GetLastErrorAsString());
+			m_EngineInfo.m_pDebug->LogError(debugStream.str());
+			m_EngineInfo.m_pDebug->LogError(GetLastErrorAsString());
 			return;
 		}
 
@@ -240,16 +245,15 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load module: " + moduleName + ": Missing OnLoadModule function!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load module: " + moduleName + ": Missing OnLoadModule function!");
 			return;
 		}
 
-		GloryContext* pContext = GloryContext::GetContext();
-		Module* pModule = (loadProc)(pContext);
+		Module* pModule = (loadProc)();
 		if (pModule == nullptr)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load module: " + moduleName + ": OnLoadModule returned nullptr!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load module: " + moduleName + ": OnLoadModule returned nullptr!");
 			return;
 		}
 
@@ -303,11 +307,11 @@ namespace Glory
 		std::filesystem::path pathToExtension = metaData.Path();
 		pathToExtension = pathToExtension.parent_path().append("Scripting").append(extension->m_Language).append(extension->m_ExtensionFile).replace_extension(".dll");
 		
-		Debug::LogInfo("Loading scripting extender " + extension->m_ExtensionFile + " for language " + extension->m_Language + "...");
+		m_EngineInfo.m_pDebug->LogInfo("Loading scripting extender " + extension->m_ExtensionFile + " for language " + extension->m_Language + "...");
 		HMODULE lib = LoadLibrary(pathToExtension.wstring().c_str());
 		if (lib == NULL)
 		{
-			Debug::LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": The extension was not found!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": The extension was not found!");
 			return;
 		}
 		
@@ -315,15 +319,15 @@ namespace Glory
 		if (loadProc == NULL)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": Missing OnLoadExtension function!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": Missing OnLoadExtension function!");
 			return;
 		}
 		
-		IScriptExtender* pScriptExtender = loadProc(GloryContext::GetContext());
+		IScriptExtender* pScriptExtender = loadProc();
 		if (pScriptExtender == nullptr)
 		{
 			FreeLibrary(lib);
-			Debug::LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": OnLoadExtension returned nullptr!");
+			m_EngineInfo.m_pDebug->LogError("Failed to load scripting extender: " + extension->m_ExtensionFile + ": OnLoadExtension returned nullptr!");
 			return;
 		}
 		

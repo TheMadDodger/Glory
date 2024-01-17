@@ -1,4 +1,6 @@
 #include "Shortcuts.h"
+#include "EditorApplication.h"
+
 #include <Debug.h>
 
 namespace Glory::Editor
@@ -18,7 +20,7 @@ namespace Glory::Editor
 	{
 		if (m_Shortcuts.find(action) != m_Shortcuts.end())
 		{
-			Debug::LogWarning(std::string("Shortcut action ") + action + " already exists.");
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(std::string("Shortcut action ") + action + " already exists.");
 			return nullptr;
 		}
 

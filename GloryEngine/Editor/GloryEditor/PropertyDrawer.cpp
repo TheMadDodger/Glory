@@ -147,7 +147,7 @@ namespace Glory::Editor
 
 	bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)
 	{
-		m_CurrentPropertyPath = scriptProperty.m_Name;
+		PathGuard p{ scriptProperty.m_Name };
 		uint32_t typeHash = scriptProperty.m_TypeHash;
 		uint32_t elementTypeHash = scriptProperty.m_ElementTypeHash;
 

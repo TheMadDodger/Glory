@@ -1,4 +1,6 @@
 #include "ProjectSettings.h"
+#include "EditorApplication.h"
+
 #include <imgui.h>
 #include <Engine.h>
 #include <EditorPlatform.h>
@@ -16,7 +18,7 @@ namespace Glory::Editor
 
     void EngineSettings::OnSave(ProjectSpace* pProject)
     {
-        Engine* pEngine = Game::GetGame().GetEngine();
+        Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
         for (size_t i = 0; i < pEngine->ModulesCount(); i++)
         {
@@ -53,7 +55,7 @@ namespace Glory::Editor
         ImGui::Separator();
         ImGui::BeginChild("LeftPanelBody", ImVec2(0.0f, 0.0f), false);
 
-        Engine* pEngine = Game::GetGame().GetEngine();
+        Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
         for (size_t i = 0; i < pEngine->ModulesCount(); i++)
         {
@@ -87,7 +89,7 @@ namespace Glory::Editor
         ImGui::SameLine();
         ImGui::BeginChild("RightPanel", ImVec2(), true);
 
-        Engine* pEngine = Game::GetGame().GetEngine();
+        Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
         Module* pModule = pEngine->GetModule(m_MenuIndex);
         const ModuleMetaData& moduleMetaData = pModule->GetMetaData();
         const Glory::Version& version = pModule->ModuleVersion();

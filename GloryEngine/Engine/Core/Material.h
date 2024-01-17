@@ -7,6 +7,8 @@
 
 namespace Glory
 {
+	class Engine;
+
 	class Material : public GPUResource
 	{
 	public:
@@ -14,7 +16,7 @@ namespace Glory
 		virtual ~Material();
 
 		virtual void Use() = 0;
-		void SetProperties();
+		void SetProperties(Engine* pEngine);
 		void SetObjectData(const ObjectData& data);
 
 		virtual void SetTexture(const std::string& name, Texture* value) = 0;

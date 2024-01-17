@@ -1,4 +1,5 @@
 #include "MaterialInstanceImporter.h"
+#include "EditorApplication.h"
 
 #include <fstream>
 #include <AssetManager.h>
@@ -48,7 +49,8 @@ namespace Glory::Editor
 		YAML::Node node;
 		UUID baseMaterial = 0;
 		YAML_READ(rootNode, node, BaseMaterial, baseMaterial, uint64_t);
-		MaterialData* pMaterialData = AssetManager::GetAssetImmediate<MaterialData>(baseMaterial);
+		EditorApplication::GetInstance()->GetEngine();
+		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MaterialData>(baseMaterial);
 		MaterialInstanceData* pMaterialInstanceData = new MaterialInstanceData(pMaterialData);
 		ReadPropertyOverrides(rootNode, pMaterialInstanceData);
 		return pMaterialInstanceData;
@@ -77,7 +79,7 @@ namespace Glory::Editor
 				uint32_t typeHash = propertyInfo->TypeHash();
 				size_t offset = propertyInfo->Offset();
 				size_t size = propertyInfo->Size();
-				PropertySerializer::SerializeProperty("Value", pMaterialData->GetBufferReference(), typeHash, offset, size, out);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(), typeHash, offset, size, out);
 			}
 			else
 			{
@@ -116,7 +118,7 @@ namespace Glory::Editor
 				uint32_t typeHash = propertyInfo->TypeHash();
 				size_t offset = propertyInfo->Offset();
 				size_t size = propertyInfo->Size();
-				PropertySerializer::DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
 			}
 			else
 			{

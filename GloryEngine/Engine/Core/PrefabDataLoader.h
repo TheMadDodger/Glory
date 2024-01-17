@@ -27,7 +27,7 @@ namespace Glory
 		void ReadChild(PrefabData* pPrefab, Utils::NodeValueRef nodeValue, PrefabNode& node);
 
 	protected:
-		virtual void Initialize() {};
+		virtual void Initialize() { ResourceLoaderModule::Initialize(); };
 		virtual void Cleanup() {};
 	};
 }

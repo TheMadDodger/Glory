@@ -3,6 +3,7 @@
 #include "AssetPicker.h"
 #include "AssetManager.h"
 #include "EditorAssetDatabase.h"
+#include "EditorApplication.h"
 
 #include <imgui.h>
 #include <MaterialEditor.h>
@@ -23,10 +24,11 @@ namespace Glory::Editor
 		//ImGui::SameLine();
 		UUID baseMaterialID = pBaseMaterial ? pBaseMaterial->GetUUID() : UUID(0);
 		bool change = false;
-		if (AssetPicker::ResourceDropdown("Base Material", ResourceType::GetHash<MaterialData>(), &baseMaterialID))
+		if (AssetPicker::ResourceDropdown("Base Material", ResourceTypes::GetHash<MaterialData>(), &baseMaterialID))
 		{
 			change = true;
-			MaterialData* pBaseMaterial = EditorAssetDatabase::AssetExists(baseMaterialID) ? (MaterialData*)AssetManager::GetAssetImmediate(baseMaterialID) : nullptr;
+			AssetManager& assets = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
+			MaterialData* pBaseMaterial = EditorAssetDatabase::AssetExists(baseMaterialID) ? (MaterialData*)assets.GetAssetImmediate(baseMaterialID) : nullptr;
 			pMaterial->SetBaseMaterial(pBaseMaterial);
 		}
 

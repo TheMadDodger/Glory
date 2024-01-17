@@ -1,8 +1,8 @@
 #include "GLTexture.h"
 #include "OpenGLGraphicsModule.h"
 #include "GLConverter.h"
-#include <Game.h>
 #include "GloryOGL.h"
+#include <Engine.h>
 
 namespace Glory
 {
@@ -19,21 +19,21 @@ namespace Glory
 		m_TextureID = NULL;
 	}
 
-	GLORY_API GLuint GLTexture::GetGLImageType() const
+	GLuint GLTexture::GetGLImageType() const
 	{
 		return m_GLImageType;
 	}
 
-	GLORY_API GLuint GLTexture::GetID() const
+	GLuint GLTexture::GetID() const
 	{
 		return m_TextureID;
 	}
 
-	GLORY_API void GLTexture::Create(TextureData* pTextureData)
+	void GLTexture::Create(TextureData* pTextureData)
 	{
 		Resource* pParent = pTextureData->ParentResource();
 		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
-		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate();
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate(&m_pOwner->GetEngine()->GetAssetManager());
 		if (!pImageData) return;
 
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
