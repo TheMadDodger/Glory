@@ -70,7 +70,7 @@ namespace Glory
 		}
 		if (type == "Scripting")
 		{
-			Debug::LogWarning("As of 0.3.0 scripting modules are now categorized as \"Other\" modules");
+			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 scripting modules are now categorized as \"Other\" modules");
 			type = "Other";
 		}
 		if (STRINGTOMODULETYPE.find(type) != STRINGTOMODULETYPE.end()) m_Type = STRINGTOMODULETYPE[type];

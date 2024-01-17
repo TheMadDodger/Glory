@@ -303,7 +303,7 @@ namespace Glory
 		//		&body1ID,
 		//		&body2ID
 		//	};
-		GScene* pScene = pRegistry1->GetUserData<GScene*>();
+		/*GScene* pScene = pRegistry1->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager& assets = pEngine->GetAssetManager();
 		if (pRegistry1->HasComponent<ScriptedComponent>(entity1))

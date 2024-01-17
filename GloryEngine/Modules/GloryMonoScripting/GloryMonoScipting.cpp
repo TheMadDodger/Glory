@@ -70,11 +70,12 @@ namespace Glory
 		EntityCSAPI::SetEngine(m_pEngine);
 
 		m_pEngine->GetSceneManager()->RegisterComponent<MonoScriptComponent>();
-		PropertySerializer::RegisterSerializer<ScriptedComponentSerailizer>();
+		m_pEngine->GetSerializers().RegisterSerializer<ScriptedComponentSerailizer>();
 
-		ResourceType::RegisterResource<MonoScript>("");
+		m_pEngine->GetResourceTypes().RegisterResource<MonoScript>(".cs");
 
 		// Scripted
+		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnAdd, MonoScriptedSystem::OnAdd);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Update, MonoScriptedSystem::OnUpdate);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Draw, MonoScriptedSystem::OnDraw);

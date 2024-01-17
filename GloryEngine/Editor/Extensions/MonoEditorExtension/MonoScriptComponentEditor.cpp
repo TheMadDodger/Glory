@@ -1,6 +1,7 @@
 #include "MonoScriptComponentEditor.h"
 
 #include <AssetManager.h>
+#include <EditorApplication.h>
 
 namespace Glory::Editor
 {
@@ -32,7 +33,7 @@ namespace Glory::Editor
 		EntityComponentEditor::Initialize();
 		MonoScriptComponent& scriptComponent = GetTargetComponent();
 		if (!scriptComponent.m_Script.AssetUUID()) return;
-		m_pScript = AssetManager::GetAssetImmediate<MonoScript>(scriptComponent.m_Script.AssetUUID());
+		m_pScript = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MonoScript>(scriptComponent.m_Script.AssetUUID());
 		if (!m_pScript)
 		{
 			scriptComponent.m_Script.SetUUID(0);

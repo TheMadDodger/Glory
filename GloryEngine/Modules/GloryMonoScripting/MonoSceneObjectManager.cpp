@@ -1,6 +1,7 @@
 #include "MonoSceneObjectManager.h"
 #include "MonoSceneManager.h"
 
+#include <Engine.h>
 #include <Debug.h>
 #include <SceneManager.h>
 

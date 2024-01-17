@@ -6,6 +6,7 @@
 #include "Systems.h"
 #include "Components.h"
 #include "Engine.h"
+#include "Serializers.h"
 
 #include <Reflection.h>
 
@@ -150,7 +151,6 @@ namespace Glory
 		RegisterComponent<LookAt>();
 
 		/* Register serializers */
-		m_pEngine->GetSerializers().RegisterSerializer<ScriptedComponentSerailizer>();
 		m_pEngine->GetResourceTypes().RegisterResource<GScene>(".gscene");
 
 		// Register Invocations

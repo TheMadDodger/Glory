@@ -54,7 +54,6 @@ namespace Glory::Editor
 	{
 		m_pEngine->Initialize();
 
-		m_pShaderProcessor = new EditorShaderProcessor();
 		EditorAssetDatabase::Initialize();
 
 		InitializePlatform();

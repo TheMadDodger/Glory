@@ -144,7 +144,7 @@ namespace Glory
 					{
 						std::stringstream stream;
 						stream << "Skipping loading of module extra \"" << extra.m_File << "\", the required module \"" << extra.m_Requires << "\" is not loaded";
-						Debug::LogInfo(stream.str());
+						m_EngineInfo.m_pDebug->LogInfo(stream.str());
 						continue;
 					}
 					const size_t index = itor - m_LoadedModuleNames.begin();
@@ -305,7 +305,7 @@ namespace Glory
 	{
 		std::stringstream debugStream;
 		debugStream << "Loading module extra \"" << name << "\"...";
-		Debug::LogInfo(debugStream.str());
+		m_EngineInfo.m_pDebug->LogInfo(debugStream.str());
 
 		/* Load lib */
 		std::filesystem::path dllPath = path;

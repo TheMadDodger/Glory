@@ -64,7 +64,7 @@ namespace Glory
 
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
-		MonoScript* pScript = AssetManager::GetAssetImmediate<MonoScript>(uuid);
+		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
 		if (pScript == nullptr) return;
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);

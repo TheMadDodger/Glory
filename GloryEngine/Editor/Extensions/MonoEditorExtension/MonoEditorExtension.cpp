@@ -93,7 +93,10 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::Initialize()
 	{
-		m_pMonoScriptingModule = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<GloryMonoScipting>();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+
+		m_pMonoScriptingModule = pEngine->GetOptionalModule<GloryMonoScipting>();
+		Reflect::SetReflectInstance(&pEngine->Reflection());
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
