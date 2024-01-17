@@ -20,7 +20,6 @@ namespace Glory::EditorLauncher
 		EVR_NoEditor,
 		EVR_MissingModules,
 		EVR_DuplicateModules,
-		EVR_DuplicateScriptingModules,
 		EVR_NoTemplate,
 	};
 
@@ -46,7 +45,6 @@ namespace Glory::EditorLauncher
 
 		bool DrawModuleSelector(const char* name, const ModuleType& moduleType, int& currentIndex, float posX, float maxSize, bool showErrorOnInvalid = true);
 		void DrawOptionalModulesArray(ImVec2 regionAvail, float maxItemSize);
-		void DrawScriptingModulesArray(ImVec2 regionAvail, float maxItemSize);
 
 		bool ProjectExists(const std::string& path, const std::string& name);
 		std::filesystem::path GetProjectPath(const std::string& path, const std::string& name);
