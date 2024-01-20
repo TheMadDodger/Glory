@@ -17,6 +17,7 @@ namespace Glory
     {
     private:
         PhysicsSystem() = default;
+        ~PhysicsSystem();
 
     public:
         static void OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent);

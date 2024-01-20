@@ -1,9 +1,11 @@
 #include "JoltMonoExtender.h"
 #include "PhysicsCSAPI.h"
 #include "PhysicsComponentsCSAPI.h"
+#include "MonoScriptedSystem.h"
 
 #include <GloryMonoScipting.h>
 #include <ScriptingExtender.h>
+#include <PhysicsSystem.h>
 #include <Engine.h>
 
 namespace Glory
@@ -41,10 +43,20 @@ namespace Glory
 	{
 		PhysicsCSAPI::SetEngine(pEngine);
 		PhysicsComponentsCSAPI::SetEngine(pEngine);
+
+		PhysicsSystem::Instance()->OnBodyActivated_Callback = MonoScriptedSystem::OnBodyActivated;
+		PhysicsSystem::Instance()->OnBodyDeactivated_Callback = MonoScriptedSystem::OnBodyDeactivated;
+		PhysicsSystem::Instance()->OnContactAdded_Callback = MonoScriptedSystem::OnContactAdded;
+		PhysicsSystem::Instance()->OnContactPersisted_Callback = MonoScriptedSystem::OnContactPersisted;
+		PhysicsSystem::Instance()->OnContactRemoved_Callback = MonoScriptedSystem::OnContactRemoved;
 	}
 
 	void JoltLibManager::Cleanup()
 	{
-		
+		PhysicsSystem::Instance()->OnBodyActivated_Callback = NULL;
+		PhysicsSystem::Instance()->OnBodyDeactivated_Callback = NULL;
+		PhysicsSystem::Instance()->OnContactAdded_Callback = NULL;
+		PhysicsSystem::Instance()->OnContactPersisted_Callback = NULL;
+		PhysicsSystem::Instance()->OnContactRemoved_Callback = NULL;
 	}
 }

@@ -105,4 +105,93 @@ namespace Glory
 		const UUID sceneID = pScene->GetUUID();
 		pScript->Invoke(entityUuid, sceneID, "Draw", nullptr);
 	}
+
+	void MonoScriptedSystem::OnBodyActivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID)
+	{
+		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
+
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager* pAssets = &pEngine->GetAssetManager();
+
+		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+
+		if (!pScript) return;
+		std::vector<void*> args = {
+			&bodyID
+		};
+
+		pScript->Invoke(pScene->GetEntityUUID(entity), pScene->GetUUID(), "OnBodyActivated", args.data());
+	}
+
+	void MonoScriptedSystem::OnBodyDeactivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID)
+	{
+		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
+
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager* pAssets = &pEngine->GetAssetManager();
+
+		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+
+		if (!pScript) return;
+		std::vector<void*> args = {
+			&bodyID
+		};
+
+		pScript->Invoke(pScene->GetEntityUUID(entity), pScene->GetUUID(), "OnBodyDeactivated", args.data());
+	}
+
+	void MonoScriptedSystem::OnContactAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
+	{
+		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager* pAssets = &pEngine->GetAssetManager();
+
+		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		if (!pScript) return;
+		std::vector<void*> args = {
+			&body1ID,
+			&body2ID
+		};
+		pScript->Invoke(pScene->GetEntityUUID(entity), pScene->GetUUID(), "OnContactAdded", args.data());
+	}
+
+	void MonoScriptedSystem::OnContactPersisted(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
+	{
+		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager* pAssets = &pEngine->GetAssetManager();
+
+		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		if (!pScript) return;
+		std::vector<void*> args = {
+			&body1ID,
+			&body2ID
+		};
+		pScript->Invoke(pScene->GetEntityUUID(entity), pScene->GetUUID(), "OnContactPersisted", args.data());
+	}
+
+	void MonoScriptedSystem::OnContactRemoved(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
+	{
+		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager* pAssets = &pEngine->GetAssetManager();
+
+		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		if (!pScript) return;
+		std::vector<void*> args = {
+			&body1ID,
+			&body2ID
+		};
+		pScript->Invoke(pScene->GetEntityUUID(entity), pScene->GetUUID(), "OnContactRemoved", args.data());
+	}
 }

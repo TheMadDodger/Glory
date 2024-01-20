@@ -98,7 +98,7 @@ project "Glorious"
 		"MonoEditorExtension",
 		"SDLImageImporter",
 		"ASSIMPImporter",
-		"GloryEntitiesMonoExtender",
+		"GloryJoltMonoExtender",
 		"GloryEngine.Core",
 		"GloryEngine.Entities",
 		"CSAPIInstall",
