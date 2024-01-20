@@ -91,7 +91,7 @@ namespace Glory
 			AssetLocation location;
 			if (!m_pEngine->GetAssetDatabase().GetAssetLocation(shaderUUID, location)) continue;
 			
-			std::string path = std::string{ m_pEngine->GetAssetDatabase().GetAssetPath() } + '\\' + location.Path;
+			const std::string path = std::string{ m_pEngine->GetAssetDatabase().GetAssetPath() } + '\\' + location.Path;
 			ShaderSourceData* pShaderSourceData = m_pEngine->GetAssetManager().GetAssetImmediate<ShaderSourceData>(shaderUUID);
 			if (!pShaderSourceData) continue;
 

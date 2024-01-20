@@ -5,7 +5,6 @@
 #include <ResourceType.h>
 #include <any>
 #include <Reflection.h>
-#include <ScriptProperty.h>
 #include <yaml-cpp/yaml.h>
 #include <YAML_GLM.h>
 #include <GLORY_YAML.h>
@@ -39,11 +38,12 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);
-		static GLORY_EDITOR_API bool DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags);
 
 		static GLORY_EDITOR_API PropertyDrawer* GetPropertyDrawer(uint32_t typeHash);
 
+		static GLORY_EDITOR_API void SetCurrentPropertyPath(std::string_view path);
+		static GLORY_EDITOR_API void SetCurrentPropertyPath(std::filesystem::path& path);
 		static GLORY_EDITOR_API const std::filesystem::path& GetCurrentPropertyPath();
 		static GLORY_EDITOR_API const TypeData* GetRootTypeData();
 

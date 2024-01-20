@@ -6,6 +6,8 @@
 #include "CoreCSAPI.h"
 #include "MathCSAPI.h"
 #include "MonoAssetManager.h"
+#include "ScriptingExtender.h"
+#include "MonoComponents.h"
 
 #include <GScene.h>
 #include <SceneManager.h>
@@ -491,29 +493,29 @@ namespace Glory
 
 #pragma endregion
 
-#pragma region ScriptedComponent
+#pragma region MonoScriptComponent
 
-	MonoObject* ScriptedComponent_GetScript(MonoEntityHandle* pEntityHandle, UUID componentID)
+	MonoObject* MonoScriptComponent_GetScript(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
-		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
+		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
 		const UUID uuid = scriptComp.m_Script.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<Script>(Entity_EngineInstance, uuid);
+		return MonoAssetManager::MakeMonoAssetObject<MonoScript>(Entity_EngineInstance, uuid);
 	}
 
-	void ScriptedComponent_SetScript(MonoEntityHandle* pEntityHandle, UUID componentID, UUID scriptID)
+	void MonoScriptComponent_SetScript(MonoEntityHandle* pEntityHandle, UUID componentID, UUID scriptID)
 	{
-		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
+		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
 		if (scriptComp.m_Script.AssetUUID() != 0)
 		{
-			Entity_EngineInstance->GetDebug().LogError("You are trying to set the script on a ScriptedComponent that already has a script, this is not allowed.");
+			Entity_EngineInstance->GetDebug().LogError("You are trying to set the script on a MonoScriptComponent that already has a script, this is not allowed.");
 			return;
 		}
 		scriptComp.m_Script = scriptID;
 	}
 
-	MonoObject* ScriptedComponent_GetBehaviour(MonoEntityHandle* pEntityHandle, UUID componentID)
+	MonoObject* MonoScriptComponent_GetBehaviour(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
-		ScriptedComponent& scriptComp = GetComponent<ScriptedComponent>(pEntityHandle, componentID);
+		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
 		MonoScriptObjectManager* pScriptObjectManager = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
 		/* TODO */
 		return nullptr;
@@ -630,10 +632,10 @@ namespace Glory
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);
 
-		/* ScriptedComponent */
-		BIND("GloryEngine.Entities.ScriptedComponent::ScriptedComponent_GetScript", ScriptedComponent_GetScript);
-		BIND("GloryEngine.Entities.ScriptedComponent::ScriptedComponent_SetScript", ScriptedComponent_SetScript);
-		BIND("GloryEngine.Entities.ScriptedComponent::ScriptedComponent_GetBehaviour", ScriptedComponent_GetBehaviour);
+		/* MonoScriptComponent */
+		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetScript", MonoScriptComponent_GetScript);
+		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_SetScript", MonoScriptComponent_SetScript);
+		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetBehaviour", MonoScriptComponent_GetBehaviour);
 
 		/* Entity Scene Object */
 		BIND("GloryEngine.Entities.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);

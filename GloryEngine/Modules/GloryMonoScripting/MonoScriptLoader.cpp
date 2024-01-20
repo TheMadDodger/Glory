@@ -4,7 +4,7 @@
 
 namespace Glory
 {
-	MonoScriptLoader::MonoScriptLoader() : ScriptLoaderModule(".cs")
+	MonoScriptLoader::MonoScriptLoader(): ResourceLoaderModule(".cs")
 	{
 	}
 
@@ -64,6 +64,11 @@ namespace Glory
 	void MonoScriptLoader::SaveResource(const std::string& path, MonoScript* pResource)
 	{
 		m_pEngine->GetLoaderModule<FileData>()->Save(path, pResource);
+	}
+
+	const std::type_info& MonoScriptLoader::GetModuleType()
+	{
+		return typeid(MonoScriptLoader);
 	}
 
 	std::string MonoScriptLoader::Find(const std::string& source, const std::string& toFind)

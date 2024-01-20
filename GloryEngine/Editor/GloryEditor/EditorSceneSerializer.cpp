@@ -245,7 +245,11 @@ namespace Glory::Editor
 		Utils::NodeValueRef activeNode = component["Active"];
 		const bool active = activeNode.Exists() ? activeNode.As<bool>() : true;
 		const std::string typeName = component["TypeName"].As<std::string>();
-		const uint32_t typeHash = component["TypeHash"].As<uint32_t>();
+		uint32_t typeHash = component["TypeHash"].As<uint32_t>();
+
+		/* @todo: A scene migration system would be nice here */
+		if (typeHash == 201832386)
+			typeHash = 1226719936;
 
 		if (flags & Flags::GenerateNewUUIDs)
 		{

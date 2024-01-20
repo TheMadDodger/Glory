@@ -1,11 +1,18 @@
 #pragma once
-#include <ScriptLoaderModule.h>
-#include "MonoScript.h"
+#include <ResourceLoaderModule.h>
 #include <yaml-cpp/yaml.h>
+
+#include "MonoScript.h"
 
 namespace Glory
 {
-	class MonoScriptLoader : public ScriptLoaderModule<MonoScript, ScriptImportSettings>
+    struct ScriptImportSettings : public ImportSettings
+    {
+        ScriptImportSettings() {}
+        ScriptImportSettings(const std::string& extension) : ImportSettings(extension) {}
+    };
+
+	class MonoScriptLoader : public ResourceLoaderModule<MonoScript, ScriptImportSettings>
 	{
     public:
         MonoScriptLoader();
@@ -24,6 +31,7 @@ namespace Glory
         virtual MonoScript* LoadResource(const void* buffer, size_t length, const ScriptImportSettings& importSettings) override;
         virtual void SaveResource(const std::string& path, MonoScript* pResource) override;
 
+        virtual const std::type_info& GetModuleType() override;
 
         std::string Find(const std::string& source, const std::string& toFind);
 	};

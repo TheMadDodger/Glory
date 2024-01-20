@@ -1,5 +1,5 @@
 Name: "Mono Scripting"
-Type: Scripting
+Type: Other
 Dependencies: ["mono-2.0-sgen"]
 Editor:
  Extensions: ["MonoEditorExtension"]

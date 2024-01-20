@@ -181,15 +181,10 @@ namespace Glory::EditorLauncher
         WriteModule(ModuleType::MT_Renderer, createSettings.EngineSettings.RenderModule, emitter);
         WriteModule(ModuleType::MT_Input, createSettings.EngineSettings.InputModule, emitter);
 
-        for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); i++)
+        for (size_t i = 0; i < createSettings.EngineSettings.OptionalModules.size(); ++i)
         {
             int index = createSettings.EngineSettings.OptionalModules[i];
             WriteModule(ModuleType::MT_Other, index, emitter);
-        }
-        for (size_t i = 0; i < createSettings.EngineSettings.ScriptingModules.size(); i++)
-        {
-            int index = createSettings.EngineSettings.ScriptingModules[i];
-            WriteModule(ModuleType::MT_Scripting, index, emitter);
         }
 
         emitter << YAML::EndSeq;

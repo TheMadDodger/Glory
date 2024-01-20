@@ -2,6 +2,7 @@
 #include "Assembly.h"
 
 #include <Debug.h>
+#include <Engine.h>
 
 #define GET_CLASS(ns, name, out) \
 out = mono_class_from_name(pAssembly->GetMonoImage(), STRINGIZE(ns), STRINGIZE(name)); \

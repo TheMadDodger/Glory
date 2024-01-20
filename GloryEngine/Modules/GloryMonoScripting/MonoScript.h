@@ -1,37 +1,44 @@
 #pragma once
-#include <Script.h>
+#include "ScriptProperty.h"
+
+#include <FileData.h>
 #include <Glory.h>
 
 #include <mono/metadata/object-forward.h>
 #include <mono/metadata/class.h>
+
+namespace YAML
+{
+    class Node;
+}
 
 namespace Glory
 {
     class Assembly;
     struct AssemblyClass;
 
-    class MonoScript : public Script
+    class MonoScript : public FileData
     {
     public:
         GLORY_API MonoScript();
         GLORY_API MonoScript(FileData* pFileData, std::string_view ns, std::string_view className);
-        virtual GLORY_API ~MonoScript();
+        GLORY_API virtual ~MonoScript();
 
-        virtual void GLORY_API Invoke(UUID objectID, UUID sceneID, const std::string& method, void** args) override;
-        virtual void GLORY_API InvokeSafe(UUID objectID, UUID sceneID, const std::string& method, std::vector<void*>& args) override;
+        GLORY_API void Invoke(UUID objectID, UUID sceneID, const std::string& method, void** args);
+        GLORY_API void InvokeSafe(UUID objectID, UUID sceneID, const std::string& method, std::vector<void*>& args);
 
-        virtual void SetValue(UUID objectID, UUID sceneID, const std::string& name, void* value) override;
-        virtual void GetValue(UUID objectID, UUID sceneID, const std::string& name, void* value) override;
+        GLORY_API void SetValue(UUID objectID, UUID sceneID, const std::string& name, void* value);
+        GLORY_API void GetValue(UUID objectID, UUID sceneID, const std::string& name, void* value);
 
-        virtual void LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data) override;
-        virtual void SetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node) override;
-        virtual void GetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node) override;
+        GLORY_API void LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data);
+        GLORY_API void SetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node);
+        GLORY_API void GetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node);
 
-        void Serialize(BinaryStream& container) const override;
-        void Deserialize(BinaryStream& container) const override;
+        GLORY_API void Serialize(BinaryStream& container) const override;
+        GLORY_API void Deserialize(BinaryStream& container) const override;
 
     private:
-        virtual bool IsBehaviour() override;
+        GLORY_API bool IsBehaviour();
 
     private:
         AssemblyClass* LoadClass(Assembly* pAssembly, const std::string& namespaceName, const std::string& className);

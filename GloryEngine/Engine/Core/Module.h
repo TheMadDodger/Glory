@@ -52,8 +52,6 @@ namespace Glory
 {
 	class Engine;
 
-	class IScriptExtender;
-
 	class Module : public Object
 	{
 	public:
@@ -70,8 +68,6 @@ namespace Glory
 		const std::filesystem::path& GetPath() const;
 
 		bool GetResourcePath(const std::string& resource, std::filesystem::path& path) const;
-
-		void AddScriptingExtender(IScriptExtender* pScriptExtender);
 
 		virtual const Version& ModuleVersion() const;
 
@@ -108,6 +104,5 @@ namespace Glory
 		friend class ScriptingBinder;
 		ModuleMetaData m_MetaData;
 		ModuleSettings m_Settings;
-		std::vector<IScriptExtender*> m_pScriptingExtender;
 	};
 }

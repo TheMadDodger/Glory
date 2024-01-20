@@ -1,15 +1,9 @@
 #include "ModuleMetaData.h"
 #include "Debug.h"
 
-#define READ(node, t, out) if (node.IsDefined())\
-out = nameNode.as<t>()
+#include <NodeRef.h>
 
-#define READ_ARRAY(node, t, out) if (node.IsDefined() && node.IsSequence())\
-for (size_t i = 0; i < node.size(); i++) \
-{ \
-YAML::Node nextNode = node[i]; \
-if (nextNode.IsDefined()) out.push_back(nextNode.as<t>()); \
-}\
+#include <map>
 
 #define YAML_READ(startNode, node, key, out, type) node = startNode[#key]; \
 if (node.IsDefined()) out = node.as<type>()
@@ -23,13 +17,12 @@ if (node.IsDefined()) out = node.as<type>();
 
 namespace Glory
 {
-	std::map<std::string, ModuleType> ModuleMetaData::STRINGTOMODULETYPE =
+	std::map<std::string, ModuleType> STRINGTOMODULETYPE =
 	{
 		{ "Window", ModuleType::MT_Window },
 		{ "Renderer", ModuleType::MT_Renderer },
 		{ "Graphics", ModuleType::MT_Graphics },
 		{ "Loader", ModuleType::MT_Loader },
-		{ "Scripting", ModuleType::MT_Scripting },
 		{ "Input", ModuleType::MT_Input },
 		{ "Other", ModuleType::MT_Other },
 	};
@@ -56,11 +49,14 @@ namespace Glory
 			return;
 		}
 
-		YAML::Node rootNode = YAML::LoadFile(m_Path.string());
-		YAML::Node node;
-		YAML_READ_REQUIRED_1(rootNode, node, Name, m_Name, std::string, "Missing Name property in Module.yaml at path: " + m_Path.string());
-		std::string type = "";
-		YAML_READ_REQUIRED_1(rootNode, node, Type, type, std::string, "Missing Type property in Module.yaml at path: " + m_Path.string());
+		Utils::YAMLFileRef metaFile{ m_Path };
+		metaFile.Load();
+
+		Utils::NodeRef rootNode = metaFile.RootNodeRef();
+
+		m_Name = rootNode["Name"].As<std::string>();
+		std::string type = rootNode["Type"].As<std::string>();
+
 		if (type == "SceneManagement")
 		{
 			//m_pEngine->GetDebug().LogError("Scene modules are no longer supported as of 0.3.0");
@@ -72,18 +68,43 @@ namespace Glory
 			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 physics modules are now categorized as \"Other\" modules");
 			type = "Other";
 		}
+		if (type == "Scripting")
+		{
+			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 scripting modules are now categorized as \"Other\" modules");
+			type = "Other";
+		}
 		if (STRINGTOMODULETYPE.find(type) != STRINGTOMODULETYPE.end()) m_Type = STRINGTOMODULETYPE[type];
 
-		YAML::Node dependenciesNode = rootNode["Dependencies"];
-		READ_ARRAY(dependenciesNode, std::string, m_Dependencies);
+		Utils::NodeValueRef dependenciesNode = rootNode["Dependencies"];
+		for (size_t i = 0; i < dependenciesNode.Size(); ++i) \
+		{
+			Utils::NodeValueRef nextNode = dependenciesNode[i]; \
+			m_Dependencies.push_back(nextNode.As<std::string>()); \
+		}
 
-		YAML::Node editorNode = rootNode["Editor"];
-		if (!editorNode.IsDefined()) return;
-		YAML_READ(editorNode, node, Backend, m_EditorBackend, std::string);
-		YAML::Node extensionsNode = editorNode["Extensions"];
-		READ_ARRAY(extensionsNode, std::string, m_EditorExtensions);
+		Utils::NodeValueRef editorNode = rootNode["Editor"];
+		if (editorNode.Exists())
+		{
+			m_EditorBackend = editorNode["Backend"].Exists() ? editorNode["Backend"].As<std::string>() : "";
+			Utils::NodeValueRef extensionsNode = editorNode["Extensions"];
+			for (size_t i = 0; i < extensionsNode.Size(); ++i) \
+			{
+				Utils::NodeValueRef nextNode = extensionsNode[i]; \
+				m_EditorExtensions.push_back(nextNode.As<std::string>()); \
+			}
+		}
 
-		ReadScriptingExtender(rootNode);
+		/* Read extras */
+		Utils::NodeValueRef extrasNode = rootNode["Extras"];
+		if (!extrasNode.Exists() || !extrasNode.IsSequence()) return;
+		for (size_t i = 0; i < extrasNode.Size(); i++)
+		{
+			ModuleExtra extra;
+			Utils::NodeValueRef subNode = extrasNode[i];
+			extra.m_File = subNode["File"].As<std::string>();
+			extra.m_Requires = subNode["Requires"].As<std::string>();
+			m_ModuleExtras.push_back(extra);
+		}
 	}
 
 	const std::filesystem::path& ModuleMetaData::Path() const
@@ -116,24 +137,13 @@ namespace Glory
 		return m_Dependencies;
 	}
 
-	const ModuleScriptingExtension* const ModuleMetaData::ScriptExtenderForLanguage(const std::string& language) const
+	const size_t ModuleMetaData::NumExtras() const
 	{
-		if (m_ScriptingExtensions.find(language) == m_ScriptingExtensions.end()) return nullptr;
-		return &m_ScriptingExtensions.at(language);
+		return m_ModuleExtras.size();
 	}
 
-	void ModuleMetaData::ReadScriptingExtender(YAML::Node& node)
+	const ModuleExtra& ModuleMetaData::Extra(size_t index) const
 	{
-		YAML::Node scriptingNode = node["Scripting"];
-		if (!scriptingNode.IsDefined() || !scriptingNode.IsSequence()) return;
-		for (size_t i = 0; i < scriptingNode.size(); i++)
-		{
-			ModuleScriptingExtension scriptingExtension;
-			YAML::Node subNode = scriptingNode[i];
-			YAML::Node readNode;
-			YAML_READ(subNode, readNode, Language, scriptingExtension.m_Language, std::string);
-			YAML_READ(subNode, readNode, Extension, scriptingExtension.m_ExtensionFile, std::string);
-			m_ScriptingExtensions.emplace(scriptingExtension.m_Language, scriptingExtension);
-		}
+		return m_ModuleExtras.at(index);
 	}
 }

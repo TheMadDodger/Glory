@@ -1,5 +1,6 @@
 #pragma once
 #include "SerializedTypes.h"
+
 #include <stdint.h>
 
 namespace Glory

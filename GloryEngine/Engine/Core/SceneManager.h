@@ -30,6 +30,7 @@ namespace Glory
 		template<typename T>
 		void RegisterComponent(bool allowMultiple = false, const uint64_t customFlags = 0)
 		{
+			Utils::ECS::ComponentTypes::SetInstance(m_pComponentTypesInstance);
 		    Utils::ECS::ComponentTypes::RegisterComponent<T>(allowMultiple, customFlags);
 		    Reflect::RegisterType<T>();
 		}

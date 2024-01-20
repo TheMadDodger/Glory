@@ -8,6 +8,7 @@
 #include "AssemblyDomain.h"
 #include "CoreLibManager.h"
 
+#include <Engine.h>
 #include <Serializers.h>
 #include <SceneManager.h>
 #include <BinaryStream.h>
@@ -28,7 +29,7 @@ namespace Glory
 	}
 
 	MonoScript::MonoScript(FileData* pFileData, std::string_view ns, std::string_view className)
-		: Script(pFileData), m_NamespaceName(ns), m_ClassName(className)
+		: FileData(pFileData), m_NamespaceName(ns), m_ClassName(className)
 	{
 		APPEND_TYPE(MonoScript);
 	}

@@ -4,12 +4,21 @@
 #include "InputCSAPI.h"
 #include "EntityCSAPI.h"
 #include "MonoManager.h"
+#include "ScriptedComponentSerializer.h"
+#include "MonoComponents.h"
+#include "MonoScriptedSystem.h"
+#include "ScriptingExtender.h"
+#include "MonoScriptLoader.h"
+
+#include <SceneManager.h>
+#include <PropertySerializer.h>
+#include <Engine.h>
 
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(GloryMonoScipting);
 
-	GloryMonoScipting::GloryMonoScipting() : ScriptingModuleTemplate("csharp"), m_pMonoManager(new MonoManager(this))
+	GloryMonoScipting::GloryMonoScipting() : m_pMonoManager(new MonoManager(this)), m_pScriptingExtender(new ScriptingExtender())
 	{
 	}
 
@@ -22,6 +31,16 @@ namespace Glory
 	MonoManager* GloryMonoScipting::GetMonoManager() const
 	{
 		return m_pMonoManager;
+	}
+
+	const std::type_info& GloryMonoScipting::GetModuleType()
+	{
+		return typeid(GloryMonoScipting);
+	}
+
+	ScriptingExtender* GloryMonoScipting::GetScriptingExtender()
+	{
+		return m_pScriptingExtender;
 	}
 
 	void GloryMonoScipting::LoadSettings(ModuleSettings& settings)
@@ -39,8 +58,8 @@ namespace Glory
 
 	void GloryMonoScipting::Initialize()
 	{
-		m_pEngine->GetScriptingExtender()->RegisterExtender(this, this);
 		m_pMonoManager->Initialize("./Modules/GloryMonoScripting/Dependencies");
+		m_pScriptingExtender->Initialize(this);
 
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
@@ -49,6 +68,22 @@ namespace Glory
 		CoreCSAPI::SetEngine(m_pEngine);
 		InputCSAPI::SetEngine(m_pEngine);
 		EntityCSAPI::SetEngine(m_pEngine);
+
+		m_pEngine->GetSceneManager()->RegisterComponent<MonoScriptComponent>();
+		m_pEngine->GetSerializers().RegisterSerializer<ScriptedComponentSerailizer>();
+
+		m_pEngine->GetResourceTypes().RegisterResource<MonoScript>(".cs");
+
+		// Scripted
+		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnAdd, MonoScriptedSystem::OnAdd);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Update, MonoScriptedSystem::OnUpdate);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Draw, MonoScriptedSystem::OnDraw);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Start, MonoScriptedSystem::OnStart);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Stop, MonoScriptedSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnValidate, MonoScriptedSystem::OnValidate);
+
+		m_pEngine->AddLoaderModule(new MonoScriptLoader());
 	}
 
 	void GloryMonoScipting::PostInitialize()
@@ -72,11 +107,6 @@ namespace Glory
 		mono_add_internal_call(scriptMethod.c_str(), internalCall.RedirectMethod());
 	}
 
-	std::string GloryMonoScipting::Language()
-	{
-		return ScriptingLanguage();
-	}
-
 	void GloryMonoScipting::GetInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
 		CoreCSAPI::AddInternalCalls(internalCalls);
@@ -87,6 +117,8 @@ namespace Glory
 
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)
 	{
-		pScriptingExtender->AddInternalLib("GloryEngine.Core.dll", m_pMonoManager->GetCoreLibManager());
+		std::filesystem::path path = GetMetaData().Path().parent_path();
+		path.append("Scripting/csharp");
+		pScriptingExtender->AddInternalLib(path.string(), "GloryEngine.Core.dll", m_pMonoManager->GetCoreLibManager());
 	}
 }
