@@ -278,69 +278,69 @@ namespace Glory
 
 #pragma endregion
 
-#pragma region ModelRenderer
-
-	MonoObject* ModelRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		UUID uuid = meshRenderer.m_Materials.size() > 0 ? meshRenderer.m_Materials[0].m_MaterialReference.AssetUUID() : 0;
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
-	}
-
-	void ModelRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		if (meshRenderer.m_Materials.size() <= 0) meshRenderer.m_Materials.push_back(materialID);
-		else meshRenderer.m_Materials[0] = materialID;
-	}
-
-	size_t ModelRenderer_GetMaterialCount(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		return meshRenderer.m_Materials.size();
-	}
-
-	MonoObject* ModelRenderer_GetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		if (meshRenderer.m_Materials.size() <= index) return nullptr;
-		UUID uuid = meshRenderer.m_Materials[index].m_MaterialReference.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
-	}
-
-	void ModelRenderer_AddMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Materials.push_back(materialID);
-	}
-
-	void ModelRenderer_SetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index, UUID materialID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		if (meshRenderer.m_Materials.size() <= index) return;
-		meshRenderer.m_Materials[index] = materialID;
-	}
-
-	void ModelRenderer_ClearMaterials(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Materials.clear();
-	}
-
-	MonoObject* ModelRenderer_GetModel(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		const UUID uuid = meshRenderer.m_Model.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
-	}
-
-	void ModelRenderer_SetModel(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
-	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Model = modelID;
-	}
-
-#pragma endregion
+//#pragma region ModelRenderer
+//
+//	MonoObject* ModelRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		UUID uuid = meshRenderer.m_Materials.size() > 0 ? meshRenderer.m_Materials[0].m_MaterialReference.AssetUUID() : 0;
+//		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+//	}
+//
+//	void ModelRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		if (meshRenderer.m_Materials.size() <= 0) meshRenderer.m_Materials.push_back(materialID);
+//		else meshRenderer.m_Materials[0] = materialID;
+//	}
+//
+//	size_t ModelRenderer_GetMaterialCount(MonoEntityHandle* pEntityHandle, UUID componentID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		return meshRenderer.m_Materials.size();
+//	}
+//
+//	MonoObject* ModelRenderer_GetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		if (meshRenderer.m_Materials.size() <= index) return nullptr;
+//		UUID uuid = meshRenderer.m_Materials[index].m_MaterialReference.AssetUUID();
+//		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+//	}
+//
+//	void ModelRenderer_AddMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		meshRenderer.m_Materials.push_back(materialID);
+//	}
+//
+//	void ModelRenderer_SetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index, UUID materialID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		if (meshRenderer.m_Materials.size() <= index) return;
+//		meshRenderer.m_Materials[index] = materialID;
+//	}
+//
+//	void ModelRenderer_ClearMaterials(MonoEntityHandle* pEntityHandle, UUID componentID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		meshRenderer.m_Materials.clear();
+//	}
+//
+//	MonoObject* ModelRenderer_GetModel(MonoEntityHandle* pEntityHandle, UUID componentID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		const UUID uuid = meshRenderer.m_Model.AssetUUID();
+//		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
+//	}
+//
+//	void ModelRenderer_SetModel(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
+//	{
+//		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+//		meshRenderer.m_Model = modelID;
+//	}
+//
+//#pragma endregion
 
 #pragma region CameraComponent
 
@@ -622,7 +622,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.MeshRenderer::MeshRenderer_SetMesh", MeshRenderer_SetMesh);
 
 		/* ModelRenderer */
-		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterial", ModelRenderer_GetMaterial);
+		/*BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterial", ModelRenderer_GetMaterial);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetMaterial", ModelRenderer_SetMaterial);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterialCount", ModelRenderer_GetMaterialCount);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetMaterialAt", ModelRenderer_GetMaterialAt);
@@ -630,7 +630,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetMaterialAt", ModelRenderer_SetMaterialAt);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_ClearMaterials", ModelRenderer_ClearMaterials);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel);
-		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);
+		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);*/
 
 		/* MonoScriptComponent */
 		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetScript", MonoScriptComponent_GetScript);

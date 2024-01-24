@@ -3,7 +3,7 @@
 
 #include "Engine.h"
 #include "SceneManager.h"
-#include "AssetManager.h"
+#include "Resources.h"
 #include "MonoComponents.h"
 
 namespace Glory
@@ -12,11 +12,11 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
+		MonoScript* pScript = pResources->Manager<MonoScript>()->Get(uuid);
 		if (pScript == nullptr) return;
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
@@ -26,11 +26,11 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
+		MonoScript* pScript = pResources->Manager<MonoScript>()->Get(uuid);
 		if (pScript == nullptr) return;
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 
@@ -45,11 +45,11 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetOrLoadAsset<MonoScript>(uuid);
+		MonoScript* pScript = pResources->Manager<MonoScript>()->Get(uuid);;
 		if (pScript == nullptr) return;
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 		const UUID sceneID = pRegistry->GetUserData<GScene*>()->GetUUID();
@@ -60,11 +60,11 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
+		MonoScript* pScript = pResources->Manager<MonoScript>()->Get(uuid);
 		if (pScript == nullptr) return;
 
 		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
@@ -79,11 +79,11 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetOrLoadAsset<MonoScript>(uuid);
+		MonoScript* pScript = pResources->Manager<MonoScript>()->Get(uuid);;
 		if (pScript == nullptr) return;
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 		const UUID sceneID = pScene->GetUUID();
@@ -95,11 +95,11 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		const UUID uuid = pComponent.m_Script.AssetUUID();
 		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetOrLoadAsset<MonoScript>(uuid);
+		MonoScript* pScript = pResources->Manager<MonoScript>()->Get(uuid);;
 		if (pScript == nullptr) return;
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 		const UUID sceneID = pScene->GetUUID();
@@ -112,10 +112,10 @@ namespace Glory
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pResources);
 
 		if (!pScript) return;
 		std::vector<void*> args = {
@@ -131,10 +131,10 @@ namespace Glory
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pResources);
 
 		if (!pScript) return;
 		std::vector<void*> args = {
@@ -149,10 +149,10 @@ namespace Glory
 		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pResources);
 		if (!pScript) return;
 		std::vector<void*> args = {
 			&body1ID,
@@ -166,10 +166,10 @@ namespace Glory
 		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pResources);
 		if (!pScript) return;
 		std::vector<void*> args = {
 			&body1ID,
@@ -183,10 +183,10 @@ namespace Glory
 		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
+		Resources* pResources = &pEngine->GetResources();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
+		MonoScript* pScript = scriptComponent.m_Script.Get(pResources);
 		if (!pScript) return;
 		std::vector<void*> args = {
 			&body1ID,

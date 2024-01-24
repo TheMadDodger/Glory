@@ -33,7 +33,7 @@ namespace Glory
 	{
 		Resource* pParent = pTextureData->ParentResource();
 		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
-		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate(&m_pOwner->GetEngine()->GetAssetManager());
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().Get(&m_pOwner->GetEngine()->GetResources());
 		if (!pImageData) return;
 
 		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);

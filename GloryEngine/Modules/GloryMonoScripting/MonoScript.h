@@ -21,6 +21,7 @@ namespace Glory
     {
     public:
         GLORY_API MonoScript();
+        GLORY_API MonoScript(const UUID uuid, const std::string& name);
         GLORY_API MonoScript(FileData* pFileData, std::string_view ns, std::string_view className);
         GLORY_API virtual ~MonoScript();
 

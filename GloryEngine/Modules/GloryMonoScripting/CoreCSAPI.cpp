@@ -8,10 +8,10 @@
 #include <SceneManager.h>
 #include <Layer.h>
 #include <GameTime.h>
-#include <LayerManager.h>
 #include <EngineProfiler.h>
-#include <AssetManager.h>
+#include <LayerManager.h>
 #include <ObjectManager.h>
+#include <AssetDatabase.h>
 
 #include <MaterialData.h>
 #include <PrefabData.h>
@@ -210,14 +210,22 @@ namespace Glory
 
 	MonoString* Resource_GetName(uint64_t uuid)
 	{
-		Resource* pResource = Core_EngineInstance->GetAssetManager().GetAssetImmediate(uuid);
+		ResourceMeta meta;
+		if (!Core_EngineInstance->GetAssetDatabase().GetResourceMeta(uuid, meta))
+			return nullptr;
+
+		Resource* pResource = Core_EngineInstance->GetResources().Manager(meta.Hash())->GetBase(uuid);
 		if (!pResource) return nullptr;
 		return mono_string_new(mono_domain_get(), pResource->Name().c_str());
 	}
 
 	void Resource_SetName(uint64_t uuid, MonoString* name)
 	{
-		Resource* pResource = Core_EngineInstance->GetAssetManager().GetAssetImmediate(uuid);
+		ResourceMeta meta;
+		if (!Core_EngineInstance->GetAssetDatabase().GetResourceMeta(uuid, meta))
+			return;
+
+		Resource* pResource = Core_EngineInstance->GetResources().Manager(meta.Hash())->GetBase(uuid);
 		if (!pResource) return;
 		const std::string nameStr = mono_string_to_utf8(name);
 		pResource->SetName(nameStr);
@@ -230,7 +238,7 @@ namespace Glory
 	template<typename T>
 	void Material_Set(uint64_t matID, MonoString* propName, T value)
 	{
-		MaterialData* pMaterial = Core_EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
+		MaterialData* pMaterial = Core_EngineInstance->GetResources().Manager<MaterialData>()->Get(matID);
 		if (!pMaterial)
 		{
 			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
@@ -243,7 +251,7 @@ namespace Glory
 	template<typename T>
 	bool Material_Get(uint64_t matID, MonoString* propName, T value)
 	{
-		MaterialData* pMaterial = Core_EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
+		MaterialData* pMaterial = Core_EngineInstance->GetResources().Manager<MaterialData>()->Get(matID);
 		if (!pMaterial)
 		{
 			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
@@ -255,21 +263,21 @@ namespace Glory
 
 	void Material_SetTexture(uint64_t matID, MonoString* propName, uint64_t value)
 	{
-		const auto pMaterial = Core_EngineInstance->GetAssetManager().GetAssetImmediate<MaterialData>(matID);
+		const auto pMaterial = Core_EngineInstance->GetResources().Manager<MaterialData>()->Get(matID);
 		if (!pMaterial)
 		{
 			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
 			return;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		TextureData* pImage = value ? Core_EngineInstance->GetAssetManager().GetAssetImmediate<TextureData>(value) : nullptr;
+		TextureData* pImage = value ? Core_EngineInstance->GetResources().Manager<TextureData>()->Get(value) : nullptr;
 		pMaterial->SetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, pImage);
 	}
 
 	bool Material_GetTexture(uint64_t matID, MonoString* propName, uint64_t& value)
 	{
-		AssetManager& pManager = Core_EngineInstance->GetAssetManager();
-		const auto pMaterial = pManager.GetAssetImmediate<MaterialData>(matID);
+		Resources& resources = Core_EngineInstance->GetResources();
+		const auto pMaterial = resources.Manager<MaterialData>()->Get(matID);
 		if (!pMaterial)
 		{
 			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
@@ -277,7 +285,7 @@ namespace Glory
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
 		TextureData* pImage = nullptr;
-		if (!pMaterial->GetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, &pImage, &pManager)) return false;
+		if (!pMaterial->GetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, &pImage, &resources)) return false;
 		value = pImage ? pImage->GetUUID() : 0;
 		return true;
 	}
@@ -338,7 +346,7 @@ namespace Glory
 
 	MonoObject* Scene_InstantiatePrefab(uint64_t sceneID, uint64_t prefabID, Vec3Wrapper position, QuatWrapper rotation, Vec3Wrapper scale, uint64_t parentID)
 	{
-		PrefabData* pPrefab = Core_EngineInstance->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
+		PrefabData* pPrefab = Core_EngineInstance->GetResources().Manager<PrefabData>()->Get(prefabID);
 		if (!pPrefab) return nullptr;
 		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return nullptr;

@@ -28,6 +28,11 @@ namespace Glory
 		APPEND_TYPE(MonoScript);
 	}
 
+	MonoScript::MonoScript(const UUID uuid, const std::string& name): FileData(uuid, name)
+	{
+		APPEND_TYPE(MonoScript);
+	}
+
 	MonoScript::MonoScript(FileData* pFileData, std::string_view ns, std::string_view className)
 		: FileData(pFileData), m_NamespaceName(ns), m_ClassName(className)
 	{

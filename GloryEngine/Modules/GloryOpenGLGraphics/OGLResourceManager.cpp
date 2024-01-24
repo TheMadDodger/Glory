@@ -64,7 +64,7 @@ namespace Glory
 	{
 		Resource* pParent = pTextureData->ParentResource();
 		ImageData* pParentImage = pParent ? dynamic_cast<ImageData*>(pParent) : nullptr;
-		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().GetImmediate(&m_pEngine->GetAssetManager());
+		ImageData* pImageData = pParentImage ? pParentImage : pTextureData->Image().Get(&m_pEngine->GetResources());
 		if (!pImageData) return nullptr;
 		return new GLTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, 0, 0, ImageAspect::IA_Color);
 	}

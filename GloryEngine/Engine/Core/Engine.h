@@ -175,6 +175,10 @@ namespace Utils::Reflect
 		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);
 
+		void RequestQuit();
+		void CancelQuit();
+		bool WantsToQuit() const;
+
 		void Update();
 		void Initialize();
 		void Cleanup();
@@ -193,10 +197,6 @@ namespace Utils::Reflect
 
 		void AddUserContext(uint32_t hash, void* pUserContext);
 		void* GetUserContext(uint32_t hash);
-
-		void RequestQuit();
-		void CancelQuit();
-		bool WantsToQuit() const;
 
 		UUIDRemapper m_UUIDRemapper;
 

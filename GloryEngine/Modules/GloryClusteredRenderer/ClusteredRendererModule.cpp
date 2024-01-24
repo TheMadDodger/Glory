@@ -147,10 +147,15 @@ namespace Glory
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		Resources& resources = m_pEngine->GetResources();
 
-		MeshData* pMeshData = renderData.m_pMesh;
+
+		MeshData* pMeshData = resources.Manager<MeshData>()->Get(renderData.m_MeshID);
 		if (pMeshData == nullptr) return;
-		Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
+		MaterialData* pMaterialData = resources.Manager<MaterialData>()->Get(renderData.m_MaterialID);
+		if (pMaterialData == nullptr) return;
+
+		Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
 		if (!pMaterial) return;
 
 		ObjectData object;
