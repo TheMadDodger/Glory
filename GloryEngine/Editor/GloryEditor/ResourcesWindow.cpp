@@ -3,7 +3,6 @@
 #include "Tumbnail.h"
 #include "EditorApplication.h"
 
-#include <AssetManager.h>
 #include <EditorUI.h>
 #include <StringUtils.h>
 #include <ProjectSpace.h>
@@ -147,7 +146,7 @@ namespace Glory::Editor
 		ImGuiListClipper clipper(m_SearchResultCache.size(), rowHeight + 2*ImGui::GetCurrentTable()->CellPaddingY);
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		AssetManager& assetManager = pEngine->GetAssetManager();
+		Resources& resources = pEngine->GetResources();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 
 		auto itorStart = m_SearchResultCache.begin();
@@ -234,8 +233,8 @@ namespace Glory::Editor
 
 				if (ImGui::TableNextColumn())
 				{
-					const bool loaded = assetManager.FindResource(uuid) != nullptr;
-					ImGui::Text("%s", loaded ? "Yes" : assetManager.IsLoading(uuid) ? "Loading..." : "No");
+					const bool loaded = resources.IsLoaded(uuid);
+					ImGui::Text("%s", loaded ? "Yes" : "No"); //assetManager.IsLoading(uuid) ? "Loading..." : "No");
 				}
 
 				ImGui::PopID();
@@ -282,12 +281,12 @@ namespace Glory::Editor
 		m_SearchResultIndexCache.clear();
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		AssetManager& assetManager = pEngine->GetAssetManager();
+		Resources& resources = pEngine->GetResources();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 
 		if (TabBarIndex == 0)
 		{
-			assetManager.GetAllLoading(m_SearchResultCache);
+			//resources.GetAllLoading(m_SearchResultCache);
 			return;
 		}
 
@@ -305,8 +304,8 @@ namespace Glory::Editor
 				if (pType != pFilteredType) continue;
 			}
 
-			const bool loaded = assetManager.FindResource(allResources[i]) != nullptr;
-			const bool loading = assetManager.IsLoading(allResources[i]);
+			const bool loaded = resources.IsLoaded(allResources[i]);
+			const bool loading = false;//assetManager.IsLoading(allResources[i]);
 
 			switch (Filter)
 			{

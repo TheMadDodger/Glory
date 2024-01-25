@@ -70,7 +70,7 @@ namespace Glory
         const UUID materialUUID = pComponent.m_Material.AssetUUID();
         MaterialData* pMaterial = pMaterials->GetMaterial(materialUUID);
 
-        if (!materialLoaded)
+        if (!pMaterial)
         {
             // TODO: Use some default material
             return;

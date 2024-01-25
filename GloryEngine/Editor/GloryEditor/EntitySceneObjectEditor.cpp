@@ -29,7 +29,7 @@ namespace Glory::Editor
 		{ ResourceTypes::GetHash<Transform>(), ICON_FA_LOCATION_CROSSHAIRS },
 		{ ResourceTypes::GetHash<MeshFilter>(), ICON_FA_CUBE },
 		{ ResourceTypes::GetHash<MeshRenderer>(), ICON_FA_CUBES },
-		{ ResourceTypes::GetHash<ModelRenderer>(), ICON_FA_CUBES },
+		//{ ResourceTypes::GetHash<ModelRenderer>(), ICON_FA_CUBES },
 		{ ResourceTypes::GetHash<CameraComponent>(), ICON_FA_VIDEO },
 		{ ResourceTypes::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceTypes::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },

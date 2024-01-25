@@ -16,7 +16,6 @@
 #include <imgui.h>
 
 #include <AssetDatabase.h>
-#include <AssetManager.h>
 #include <StringUtils.h>
 #include <DND.h>
 #include <PopupManager.h>

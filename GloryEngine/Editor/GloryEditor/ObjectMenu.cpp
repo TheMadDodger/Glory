@@ -1,6 +1,5 @@
 #include "ObjectMenu.h"
 #include "Shortcuts.h"
-#include "AssetManager.h"
 #include "EditableEntity.h"
 
 #include <ResourceType.h>

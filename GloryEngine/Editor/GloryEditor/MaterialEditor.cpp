@@ -14,7 +14,6 @@
 #include <ShaderSourceData.h>
 #include <GLORY_YAML.h>
 #include <AssetDatabase.h>
-#include <AssetManager.h>
 #include <IconsFontAwesome6.h>
 #include <EditorUI.h>
 

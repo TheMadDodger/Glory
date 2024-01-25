@@ -5,7 +5,6 @@
 #include "EditorResourceManager.h"
 
 #include <fstream>
-#include <AssetManager.h>
 #include <AssetDatabase.h>
 #include <PropertySerializer.h>
 

@@ -79,6 +79,10 @@ namespace Utils::Reflect
 		virtual ~Engine();
 
 	public:
+		void Update();
+		void Initialize();
+		void Cleanup();
+
 		SceneManager* GetSceneManager();
 
 		void AddMainModule(Module* pModule, bool initialize = false);
@@ -179,10 +183,7 @@ namespace Utils::Reflect
 		void CancelQuit();
 		bool WantsToQuit() const;
 
-		void Update();
-		void Initialize();
-		void Cleanup();
-
+		UUIDRemapper m_UUIDRemapper;
 		template<class T>
 		void AddUserContext(T* pUserContext)
 		{
@@ -197,8 +198,6 @@ namespace Utils::Reflect
 
 		void AddUserContext(uint32_t hash, void* pUserContext);
 		void* GetUserContext(uint32_t hash);
-
-		UUIDRemapper m_UUIDRemapper;
 
 	private:
 		void RegisterStandardSerializers();

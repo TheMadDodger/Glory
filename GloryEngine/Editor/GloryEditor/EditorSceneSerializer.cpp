@@ -2,7 +2,6 @@
 
 #include <Serializers.h>
 #include <PropertySerializer.h>
-#include <AssetManager.h>
 #include <PrefabData.h>
 #include <Components.h>
 #include <Engine.h>
@@ -29,7 +28,7 @@ namespace Glory::Editor
 
 	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)
 	{
-		GScene* pScene = new GScene(name, uuid);
+		GScene* pScene = new GScene(uuid, name);
 		pScene->SetManager(pEngine->GetSceneManager());
 		Utils::NodeRef node{object};
 
@@ -71,7 +70,7 @@ namespace Glory::Editor
 			out << YAML::Value << prefabID;
 		
 			/* Serialize ID remapping */
-			PrefabData* pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
+			PrefabData* pPrefab = pEngine->GetResources().Manager<PrefabData>()->Get(prefabID);
 			const PrefabNode& rootNode = pPrefab->RootNode();
 		
 			if (rootNode.OriginalUUID() != entityHandle.EntityUUID())
@@ -148,7 +147,7 @@ namespace Glory::Editor
 		if (!(flags & Flags::IgnorePrefabs) && prefabIDRef.Exists())
 		{
 			const UUID prefabID = prefabIDRef.As<uint64_t>();
-			PrefabData* pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
+			PrefabData* pPrefab = pEngine->GetResources().Manager<PrefabData>()->Get(prefabID);
 			if (pPrefab)
 			{
 				Utils::NodeValueRef idsRemapValue = nodeRef["IDRemap"];

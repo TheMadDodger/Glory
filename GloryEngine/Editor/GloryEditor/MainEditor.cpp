@@ -53,6 +53,7 @@
 
 #include "CreateEntityObjectsCallbacks.h"
 #include "EditableEntity.h"
+#include "EditorResourceManager.h"
 
 #include <imgui.h>
 #include <Engine.h>
@@ -106,8 +107,9 @@ namespace Glory::Editor
 	float MainEditor::MENUBAR_SIZE = 0.0f;
 	const float MainEditor::TOOLBAR_SIZE = 50.0f;
 
-	MainEditor::MainEditor()
-		: m_pProjectPopup(new ProjectPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), m_Settings("./EditorSettings.yaml")
+	MainEditor::MainEditor(Engine* pEngine)
+		: m_pProjectPopup(new ProjectPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), 
+		m_pEngine(pEngine), m_Settings("./EditorSettings.yaml")
 	{
 	}
 
@@ -143,26 +145,24 @@ namespace Glory::Editor
 
 		Gizmos::Initialize();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		m_Settings.Load(pEngine);
+		m_Settings.Load(m_pEngine);
 
-		pEngine->GetDebug().LogInfo("Initialized editor");
+		m_pEngine->GetDebug().LogInfo("Initialized editor");
 
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();
 		Importer::Register<TextureImporter>();
 		Importer::Register<ShaderImporter>();
 
-		pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
-		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
+		m_pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
+		m_pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
 	}
 
 	void MainEditor::Destroy()
 	{
 		ObjectMenu::Cleanup();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		m_Settings.Save(pEngine);
+		m_Settings.Save(m_pEngine);
 		Shortcuts::Clear();
 
 		ProjectSpace::CloseProject();
@@ -420,7 +420,7 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Reimport", ReimportAssetCallback, T_Resource);
 
 		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
-		OBJECT_CREATE_MENU(Model, ModelRenderer);
+		//OBJECT_CREATE_MENU(Model, ModelRenderer);
 		OBJECT_CREATE_MENU(Camera, CameraComponent);
 		OBJECT_CREATE_MENU(Light, LightComponent);
 

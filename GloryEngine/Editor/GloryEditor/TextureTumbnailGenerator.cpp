@@ -1,6 +1,6 @@
 #include "TextureTumbnailGenerator.h"
-#include "AssetManager.h"
 #include "EditorApplication.h"
+#include "EditorResourceManager.h"
 
 namespace Glory::Editor
 {
@@ -26,7 +26,7 @@ namespace Glory::Editor
 
 		m_AlreadyRequestedTumbnails.push_back(id);
 
-		EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAsset(id, [&](Resource* pResource)
+		EditorApplication::GetInstance()->GetResourceManager().GetAsset(id, [&](Resource* pResource)
 		{
 			if (!pResource) return;
 			UUID uuid = pResource->GetUUID();

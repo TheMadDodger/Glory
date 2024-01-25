@@ -204,11 +204,11 @@ namespace Glory
 		/* Read shader IDs */
 		size_t numShaders;
 		container.Read(numShaders);
-		m_ShaderIDs.resize(numShaders);
-		for (size_t i = 0; i < m_ShaderIDs.size(); ++i)
+		m_Shaders.resize(numShaders);
+		for (size_t i = 0; i < m_Shaders.size(); ++i)
 		{
 			UUID shaderID;
-			container.Read(m_ShaderIDs[i]);
+			container.Read(m_Shaders[i]);
 		}
 
 		/* Read property infos */
@@ -265,7 +265,7 @@ namespace Glory
 		m_Resources[resourceIndex] = uuid;
 	}
 
-	bool MaterialData::GetTexture(MaterialManager& materialManager, const std::string& name, TextureData** value, AssetManager* pManager)
+	bool MaterialData::GetTexture(MaterialManager& materialManager, const std::string& name, TextureData** value, Resources* pResources)
 	{
 		size_t index;
 		if (!GetPropertyInfoIndex(materialManager, name, index)) return false;

@@ -1,5 +1,4 @@
 #include "EditorAssetDatabase.h"
-#include "AssetManager.h"
 #include "EditorAssetCallbacks.h"
 #include "ProjectSpace.h"
 #include "FileBrowser.h"
@@ -364,7 +363,7 @@ namespace Glory::Editor
 
 		// Generate a meta file
 		AssetDatabase& assetDatabase = DB_EngineInstance->GetAssetDatabase();
-		AssetManager& assetManager = DB_EngineInstance->GetAssetManager();
+		Resources& resources = DB_EngineInstance->GetResources();
 		const std::string_view assetPath = assetDatabase.GetAssetPath();
 
 		std::filesystem::path namePath = fileName;
@@ -373,7 +372,6 @@ namespace Glory::Editor
 
 		assetDatabase.SetIDAndName(pLoadedResource, meta.ID(), meta.Name());
 		std::filesystem::path relativePath = filePath.lexically_relative(assetPath);
-		assetManager.AddLoadedResource(pLoadedResource);
 
 		AssetLocation location{ relativePath.empty() ? path : relativePath.string(), subPath.string() };
 		InsertAsset(location, meta);
@@ -396,6 +394,7 @@ namespace Glory::Editor
 			newSubPath.append(pSubResource->Name());
 			ImportAsset(path, pSubResource, newSubPath);
 		}
+		resources.Manager(meta.Hash())->Add(pLoadedResource);
 
 		return meta.ID();
 	}
@@ -441,10 +440,8 @@ namespace Glory::Editor
 		ResourceMeta meta(extension.string(), fileName.string(), pScene->GetUUID(), pType->Hash());
 
 		AssetDatabase& assetDatabase = DB_EngineInstance->GetAssetDatabase();
-		AssetManager& assetManager = DB_EngineInstance->GetAssetManager();
 		assetDatabase.SetIDAndName(pScene, meta.ID(), fileName.string());
 		std::filesystem::path relativePath = filePath.lexically_relative(assetDatabase.GetAssetPath());
-		assetManager.AddLoadedResource(pScene);
 		AssetLocation location{ relativePath.string() };
 		InsertAsset(location, meta);
 		m_PathToUUIDCache.Set(path, meta.ID());
@@ -711,7 +708,7 @@ namespace Glory::Editor
 	{
 		DB_EngineInstance = EditorApplication::GetInstance()->GetEngine();
 
-		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
+		m_pImportPool = DB_EngineInstance->Jobs().Run<bool, std::filesystem::path>();
 
 		YAML::Node m_LastSavedNode;
 		DB_EngineInstance->GetDebug().LogInfo("Initialized EditorAssetDatabase");

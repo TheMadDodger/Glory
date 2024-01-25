@@ -5,9 +5,8 @@
 #include "ProjectSpace.h"
 
 #include <Engine.h>
-#include <AssetManager.h>
 #include <Importer.h>
-//#include <AssetLoader.h>
+#include <AssetLoader.h>
 
 namespace Glory::Editor
 {
@@ -23,49 +22,42 @@ namespace Glory::Editor
 		m_pEditableResources.clear();
 	}
 
-	//void EditorResourceManager::GetAsset(const UUID uuid, std::function<void(Resource*)> callback)
-	//{
-	//	if (m_Callbacks.find(uuid) != m_Callbacks.end())
-	//		return;
+	void EditorResourceManager::GetAsset(const UUID uuid, std::function<void(Resource*)> callback)
+	{
+		if (m_Callbacks.find(uuid) != m_Callbacks.end())
+			return;
 
-	//	uint32_t& hash = m_Hashes[uuid];
-	//	auto hashItor = m_Hashes.find(uuid);
-	//	if (!hash)
-	//	{
-	//		ResourceMeta meta;
-	//		if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta))
-	//			return callback(nullptr);
-	//		hash = meta.Hash();
-	//	}
+		uint32_t& hash = m_Hashes[uuid];
+		auto hashItor = m_Hashes.find(uuid);
+		if (!hash)
+		{
+			ResourceMeta meta;
+			if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta))
+				return callback(nullptr);
+			hash = meta.Hash();
+		}
 
-	//	Resource* pResource = m_pEngine->GetAssetManager().GetOrLoadAsset(hash);
-	//	if (pResource)
-	//	{
-	//		callback(pResource);
-	//		return;
-	//	}
+		if (m_pEngine->GetResources().Manager(hash)->IsLoaded(uuid))
+		{
+			Resource* pResource = m_pEngine->GetResources().Manager(hash)->GetBase(uuid);
+			callback(pResource);
+			return;
+		}
 
-	//	/*if (m_pEngine->GetResources().Manager(hash)->IsLoaded(uuid))
-	//	{
-	//		Resource* pResource = m_pEngine->GetResources().Manager(hash)->GetBase(uuid);
-	//		callback(pResource);
-	//		return;
-	//	}*/
+		if (!AssetCompiler::IsCompiled(uuid))
+		{
+			AssetCompiler::CompileAssets({ uuid });
+			m_Callbacks.emplace(uuid, callback);
+			return;
+		}
 
-	//	if (!AssetCompiler::IsCompiled(uuid))
-	//	{
-	//		AssetCompiler::CompileAssets({ uuid });
-	//		m_Callbacks.emplace(uuid, callback);
-	//		return;
-	//	}
+		if (!m_pEngine->GetAssetLoader().RequestLoad(uuid))
+			return callback(nullptr);
 
-	//	if (!m_pEngine->GetAssetLoader().RequestLoad(uuid))
-	//		return callback(nullptr);
+		m_Callbacks.emplace(uuid, callback);
+	}
 
-	//	m_Callbacks.emplace(uuid, callback);
-	//}
-
-	/*void EditorResourceManager::RunCallbacks()
+	void EditorResourceManager::RunCallbacks()
 	{
 		std::vector<UUID> finishedCallbacks;
 		for (auto itor = m_Callbacks.begin(); itor != m_Callbacks.end(); ++itor)
@@ -83,7 +75,7 @@ namespace Glory::Editor
 		{
 			m_Callbacks.erase(finishedCallbacks[i]);
 		}
-	}*/
+	}
 
 	EditableResource* EditorResourceManager::GetEditableResource(const UUID uuid)
 	{

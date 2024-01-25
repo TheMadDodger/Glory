@@ -13,14 +13,12 @@
 #include "Dispatcher.h"
 #include "EditorShaderData.h"
 #include "MaterialInstanceImporter.h"
-#include "AssetManager.h"
 
 #include <Serializers.h>
 #include <NodeRef.h>
 
 #include <Engine.h>
 #include <AssetDatabase.h>
-#include <AssetManager.h>
 
 namespace Glory::Editor
 {
@@ -125,14 +123,18 @@ namespace Glory::Editor
 		const uint32_t typeHash = meta.Hash();
 		static const size_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
 		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
+
+		ResourceManager<MaterialData>* pMaterialResources = m_pEngine->GetResources().Manager<MaterialData>();
+		ResourceManager<MaterialInstanceData>* pMaterialInstanceResources = m_pEngine->GetResources().Manager<MaterialInstanceData>();
+
 		if (typeHash == materialDataHash)
 		{
-			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
-			if (!pResource)
+			MaterialData* pMaterialData = pMaterialResources->IsLoaded(callback.m_UUID) ?
+				pMaterialResources->Get(callback.m_UUID) : nullptr;
+			if (!pMaterialData)
 			{
-				MaterialData* pMaterialData = new MaterialData();
-				pResource = pMaterialData;
-				pResource->SetResourceUUID(callback.m_UUID);
+				pMaterialData = new MaterialData();
+				pMaterialData->SetResourceUUID(callback.m_UUID);
 				YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(resourceManager.GetEditableResource(callback.m_UUID));
 				if (!pMaterial)
 				{
@@ -140,12 +142,10 @@ namespace Glory::Editor
 					return;
 				}
 				LoadIntoMaterial(**pMaterial, pMaterialData);
-				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+				pMaterialData = (MaterialData*)pMaterialResources->Add(std::move(pMaterialData));
 			}
 
-			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
-			pMaterial->SetResourceUUID(callback.m_UUID);
-			m_pMaterialDatas[callback.m_UUID] = pMaterial;
+			m_pMaterialDatas[callback.m_UUID] = pMaterialData;
 
 			/* Update material instances that were waiting for this material */
 			auto itor = m_WaitingMaterialInstances.find(callback.m_UUID);
@@ -166,10 +166,10 @@ namespace Glory::Editor
 		}
 		else if (typeHash == materialInstanceDataHash)
 		{
-			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
-			if (!pResource)
+			MaterialInstanceData* pMaterialData = pMaterialInstanceResources->IsLoaded(callback.m_UUID) ?
+				pMaterialInstanceResources->Get(callback.m_UUID) : nullptr;
+			if (!pMaterialData)
 			{
-				MaterialInstanceData* pMaterialData = nullptr;
 				YAMLResource<MaterialInstanceData>* pMaterial = static_cast<YAMLResource<MaterialInstanceData>*>(resourceManager.GetEditableResource(callback.m_UUID));
 				if (!pMaterial)
 				{
@@ -177,17 +177,14 @@ namespace Glory::Editor
 					return;
 				}
 				LoadIntoMaterial(**pMaterial, pMaterialData);
-				pResource = pMaterialData;
-				pResource->SetResourceUUID(callback.m_UUID);
-				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+				pMaterialData->SetResourceUUID(callback.m_UUID);
+				pMaterialData = (MaterialInstanceData*)pMaterialInstanceResources->Add(std::move(pMaterialData));
 			}
 
-			MaterialInstanceData* pMaterial = static_cast<MaterialInstanceData*>(pResource);
-			pMaterial->SetResourceUUID(callback.m_UUID);
-			m_pMaterialInstanceDatas[callback.m_UUID] = pMaterial;
+			m_pMaterialInstanceDatas[callback.m_UUID] = pMaterialData;
 
 			/* If the base material isnt loaded we must update it when it is */
-			const UUID baseMaterial = pMaterial->BaseMaterialID();
+			const UUID baseMaterial = pMaterialData->BaseMaterialID();
 			if (!baseMaterial || m_pMaterialDatas.find(baseMaterial) != m_pMaterialDatas.end()) return;
 			m_WaitingMaterialInstances[baseMaterial].push_back(callback.m_UUID);
 		}

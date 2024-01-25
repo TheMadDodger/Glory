@@ -83,6 +83,11 @@ project "SDLImageImporter"
 		"GLORY_UUID_DEFINED",
 	}
 
+	postbuildcommands
+	{
+		("{COPY} %{DepsBinDir}/SDL2_image*.dll %{engineOutDir}/Extensions/Dependencies"),
+	}
+
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v143"

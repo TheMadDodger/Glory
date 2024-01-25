@@ -33,7 +33,8 @@ namespace Glory::Editor
 		m_ShaderProcessor(new EditorShaderProcessor(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
-		m_pFileWatcher(new efsw::FileWatcher())
+		m_pFileWatcher(new efsw::FileWatcher()),
+		m_MainEditor(createInfo.pEngine)
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.ExtensionsCount > 0 && createInfo.pExtensions != nullptr)
@@ -123,6 +124,7 @@ namespace Glory::Editor
 
 				/* Run callbacks for compiled shaders */
 				m_ShaderProcessor->RunCallbacks();
+				m_ResourceManager->RunCallbacks();
 
 				// Start a frame
 				m_pEngine->GameThreadFrameStart();

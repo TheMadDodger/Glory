@@ -5,7 +5,7 @@
 #include <Debug.h>
 #include <AssetDatabase.h>
 #include <JobManager.h>
-#include <AssetManager.h>
+#include <Resources.h>
 #include <Importer.h>
 #include <BinaryStream.h>
 #include <AssetArchive.h>
@@ -32,7 +32,6 @@ namespace Glory::Editor
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
-		AssetManager& assetManager = pEngine->GetAssetManager();
 		AssetDatabase::WriteLock lock{ &assetDatabase };
 
 		for (UUID id : ids)
@@ -85,8 +84,10 @@ namespace Glory::Editor
 
 	void AssetCompiler::CompileAssets(const std::vector<UUID>& ids)
 	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+
 		if (!CompilationJobPool)
-			CompilationJobPool = Jobs::JobManager::Run<bool, const AssetData>();
+			CompilationJobPool = pEngine->Jobs().Run<bool, const AssetData>();
 
 		CompilationJobPool->StartQueue();
 		for (UUID id : ids)
@@ -111,6 +112,12 @@ namespace Glory::Editor
 		CompilationJobPool->EndQueue();
 	}
 
+	bool AssetCompiler::IsCompiled(UUID id)
+	{
+		const std::filesystem::path path = GenerateCompiledAssetPath(id);
+		return std::filesystem::exists(path.string());
+	}
+
 	void AssetCompiler::DispatchCompilationJob(const AssetData& asset)
 	{
 		if (m_CompilingAssets.Contains(asset.Meta.ID())) return;
@@ -125,7 +132,7 @@ namespace Glory::Editor
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
-		AssetManager& assetManager = pEngine->GetAssetManager();
+		Resources& resources = pEngine->GetResources();
 
 		std::filesystem::path path = assetDatabase.GetAssetPath();
 		path.append(asset.Location.Path);
@@ -136,7 +143,8 @@ namespace Glory::Editor
 		const UUID uuid = asset.Meta.ID();
 
 		/* Try get the asset if its already loaded */
-		Resource* pResource = assetManager.FindResource(uuid);
+		BaseResourceManager* pManager = resources.Manager(asset.Meta.Hash());
+		Resource* pResource = pManager->GetBase(uuid);
 		if (!pResource)
 		{
 			/* Import the resource */
@@ -150,8 +158,9 @@ namespace Glory::Editor
 				return false;
 			}
 
+			pResource->SetResourceUUID(uuid);
 			/* Insert the loaded asset into the manager */
-			assetManager.AddLoadedResource(pResource, uuid);
+			pManager->Add(pResource);
 		}
 
 		/* Serialize the resource into a binary file */

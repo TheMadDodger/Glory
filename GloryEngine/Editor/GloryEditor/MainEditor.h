@@ -2,6 +2,7 @@
 #include "ProjectPopup.h"
 #include "EditorSettings.h"
 #include "Toolbar.h"
+
 #include <imgui_internal.h>
 
 #define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
@@ -10,10 +11,12 @@ ObjectMenu::AddMenuItem(name##MenuName.str(), Create##name, T_SceneObject | T_Sc
 
 namespace Glory::Editor
 {
+	class EditorResourceManager;
+
 	class MainEditor
 	{
 	public:
-		MainEditor();
+		MainEditor(Engine* pEngine);
 		virtual ~MainEditor();
 
 		void Initialize();
@@ -47,6 +50,7 @@ namespace Glory::Editor
 		friend class EditorApplication;
 		ProjectPopup* m_pProjectPopup;
 		Toolbar* m_pToolbar;
+		Engine* m_pEngine;
 		EditorSettings m_Settings;
 
 		static size_t m_SaveSceneIndex;

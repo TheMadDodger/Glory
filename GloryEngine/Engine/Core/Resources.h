@@ -30,6 +30,7 @@ namespace Glory
 		BaseResourceManager* Manager(uint32_t hash);
 
 		bool Add(Resource* pResource);
+		bool IsLoaded(UUID uuid) const;
 
 		~Resources();
 

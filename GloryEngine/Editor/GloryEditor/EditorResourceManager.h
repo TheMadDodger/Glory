@@ -26,8 +26,8 @@ namespace Editor
 		/** @brief Destructor */
 		~EditorResourceManager();
 
-		//void GetAsset(const UUID uuid, std::function<void(Resource*)> callback);
-		//void RunCallbacks();
+		void GetAsset(const UUID uuid, std::function<void(Resource*)> callback);
+		void RunCallbacks();
 
 		/** @brief Get the editable resource for an existing asset
 		 * @param uuid ID of the asset

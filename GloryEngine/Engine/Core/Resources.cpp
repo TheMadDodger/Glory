@@ -19,6 +19,17 @@ namespace Glory
 		return false;
 	}
 
+	bool Resources::IsLoaded(UUID uuid) const
+	{
+		for (size_t i = 0; i < m_pManagers.size(); ++i)
+		{
+			if (!m_pManagers[i]->IsLoaded(uuid))
+				continue;
+			return true;
+		}
+		return false;
+	}
+
 	void Resources::Register(uint32_t hash, BaseResourceManager* pManager)
 	{
 		m_Types.push_back(hash);

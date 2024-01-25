@@ -9,7 +9,6 @@
 #include <MonoManager.h>
 #include <MonoScriptObjectManager.h>
 #include <AssemblyDomain.h>
-#include <AssetManager.h>
 #include <MonoScript.h>
 #include <GloryMonoScipting.h>
 
@@ -428,7 +427,8 @@ namespace Glory::Editor
 		{
 			size_t subHash = types.GetSubTypeHash(pResourcerType, i);
 			if (scriptHash != subHash) continue;
-			EditorApplication::GetInstance()->GetEngine()->GetAssetManager().ReloadAsset(callback.m_UUID);
+			//EditorApplication::GetInstance()->GetEngine()->GetResources().ReloadAsset(callback.m_UUID);
+			throw new std::exception("No way to reload assets yet");
 			CompileProject(ProjectSpace::GetOpenProject());
 			return;
 		}

@@ -1,5 +1,6 @@
 #include "EditorAssets.h"
 #include "EditorApplication.h"
+#include "Importer.h"
 
 #include <Engine.h>
 
@@ -56,7 +57,7 @@ namespace Glory::Editor
 
 	void EditorAssets::LoadImage(GraphicsModule* pGraphics, LoaderModule* pLoader, const std::string& path, const std::string& key)
 	{
-		ImageData* pImageData = (ImageData*)pLoader->Load(path);
+		ImageData* pImageData = (ImageData*)Importer::Import(path, nullptr);
 		TextureData* pTextureData = (TextureData*)pImageData->Subresource(0);
 		m_pEditorImages.push_back(pImageData);
 		m_pTextures[key] = pGraphics->GetResourceManager()->CreateTexture(pTextureData);

@@ -3,7 +3,6 @@
 #include "EditorMaterialManager.h"
 
 #include <fstream>
-#include <AssetManager.h>
 #include <PropertySerializer.h>
 
 namespace Glory::Editor

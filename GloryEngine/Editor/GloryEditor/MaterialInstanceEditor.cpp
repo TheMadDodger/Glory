@@ -1,7 +1,6 @@
 #include "MaterialInstanceEditor.h"
 #include "PropertyDrawer.h"
 #include "AssetPicker.h"
-#include "AssetManager.h"
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
 #include "EditorResourceManager.h"

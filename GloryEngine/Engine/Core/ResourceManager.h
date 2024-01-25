@@ -14,7 +14,7 @@ namespace Glory
 		BaseResourceManager(Resources* pResources);
 
 		virtual uint32_t Type() const = 0;
-		virtual void Add(Resource* pResource) = 0;
+		virtual Resource* Add(Resource* pResource) = 0;
 		virtual Resource* GetBase(UUID uuid) = 0;
 
 		size_t Index(UUID uuid) const;
@@ -42,11 +42,12 @@ namespace Glory
 			return ResourceTypes::GetHash<T>();
 		}
 
-		virtual void Add(Resource* pResource) override
+		virtual Resource* Add(Resource* pResource) override
 		{
 			T* pTResource = static_cast<T*>(pResource);
-			Add(std::move(*pTResource));
+			T* pMoved = Add(std::move(*pTResource));
 			delete pResource;
+			return pMoved;
 		}
 
 		virtual Resource* GetBase(UUID uuid) override
@@ -54,12 +55,13 @@ namespace Glory
 			return Get(uuid);
 		}
 
-		void Add(T&& resource)
+		T* Add(T&& resource)
 		{
 			size_t index = m_Resources.size();
 			m_Resources.push_back(std::move(resource));
 			SetManager(&m_Resources[index]);
 			m_UUIDs.push_back(m_Resources[index].GetUUID());
+			return &m_Resources.at(index);
 		}
 
 		T* Get(UUID uuid)

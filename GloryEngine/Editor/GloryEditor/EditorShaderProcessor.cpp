@@ -10,7 +10,6 @@
 #include <Debug.h>
 #include <fstream>
 #include <ShaderManager.h>
-#include <AssetManager.h>
 #include <spirv_cross/spirv_glsl.hpp>
 #include <FileLoaderModule.h>
 #include <EditorAssetCallbacks.h>
@@ -107,7 +106,7 @@ namespace Glory::Editor
 	{
 		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, AssetCallback);
 		m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetUpdatedCallback);
-		m_pShaderJobsPool = Jobs::JobManager::Run<bool, UUID>();
+		m_pShaderJobsPool = EditorApplication::GetInstance()->GetEngine()->Jobs().Run<bool, UUID>();
 	}
 
 	void EditorShaderProcessor::Stop()

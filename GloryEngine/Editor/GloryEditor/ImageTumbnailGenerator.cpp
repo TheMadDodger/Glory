@@ -1,6 +1,6 @@
 #include "ImageTumbnailGenerator.h"
-#include "AssetManager.h"
 #include "EditorApplication.h"
+#include "EditorResourceManager.h"
 
 namespace Glory::Editor
 {
@@ -26,7 +26,7 @@ namespace Glory::Editor
 
 		m_AlreadyRequestedTumbnails.push_back(id);
 
-		EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAsset(id, [&](Resource* pResource)
+		EditorApplication::GetInstance()->GetResourceManager().GetAsset(id, [&](Resource* pResource)
 		{
 			UUID uuid = pResource->GetUUID();
 			auto it = std::find(m_AlreadyRequestedTumbnails.begin(), m_AlreadyRequestedTumbnails.end(), uuid);

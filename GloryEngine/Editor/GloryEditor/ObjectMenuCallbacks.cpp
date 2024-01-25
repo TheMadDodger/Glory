@@ -13,7 +13,6 @@
 #include "EditorSceneSerializer.h"
 #include "EditorApplication.h"
 
-#include <AssetManager.h>
 #include <AssetDatabase.h>
 #include <Engine.h>
 #include <SceneManager.h>
@@ -469,10 +468,10 @@ namespace Glory::Editor
 		std::filesystem::path file = FileBrowserItem::GetHighlightedPath();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		Resource* pLoadedResource = pEngine->GetAssetManager().FindResource(uuid);
-		if (pLoadedResource) return;
+		const bool loaded = pEngine->GetResources().IsLoaded(uuid);
+		if (loaded) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
-		EditorAssetDatabase::ImportAsset(file.string(), pLoadedResource);
+		EditorAssetDatabase::ImportAsset(file.string(), nullptr);
 	}
 
 	void DeleteFolder()
