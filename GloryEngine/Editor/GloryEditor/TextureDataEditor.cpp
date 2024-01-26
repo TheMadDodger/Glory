@@ -19,21 +19,29 @@ namespace Glory::Editor
 
 	bool TextureDataEditor::OnGUI()
 	{
-		TextureData* pTextureData = (TextureData*)m_pTarget;
-		AssetReference<ImageData>& imageRef = pTextureData->Image();
-		bool change = AssetPicker::ResourceDropdown("Image", ResourceTypes::GetHash<ImageData>(), imageRef.AssetUUIDMember());
+		YAMLResource<TextureData>* pTextureData = (YAMLResource<TextureData>*)m_pTarget;
+		Utils::YAMLFileRef& file = **pTextureData;
 
-		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
-		change |= EditorUI::InputEnum<Filter>("Mag Filter", &sampler.MagFilter);
-		change |= EditorUI::InputEnum<Filter>("Min Filter", &sampler.MinFilter);
-		change |= EditorUI::InputEnum<SamplerAddressMode>("Address Mode U", &sampler.AddressModeU);
-		change |= EditorUI::InputEnum<SamplerAddressMode>("Address Mode V", &sampler.AddressModeV);
-		change |= EditorUI::InputEnum<SamplerAddressMode>("Address Mode W", &sampler.AddressModeW);
+		bool change = false;
+
+		auto image = file["Image"];
+		AssetReference<ImageData> imageRef = image.As<uint64_t>();
+		if(AssetPicker::ResourceDropdown("Image", ResourceTypes::GetHash<ImageData>(), imageRef.AssetUUIDMember()))
+		{
+			image.Set(imageRef.AssetUUID());
+		}
+
+		change |= EditorUI::InputEnum<Filter>(file, "Sampler/MinFilter");
+		change |= EditorUI::InputEnum<Filter>(file, "Sampler/MagFilter");
+		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeU");
+		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeV");
+		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeW");
 
 		if (change)
 		{
 			EditorApplication::GetInstance()->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
 			Tumbnail::SetDirty(pTextureData->GetUUID());
+			pTextureData->SetDirty(true);
 		}
 		return change;
 	}

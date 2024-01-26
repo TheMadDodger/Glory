@@ -8,6 +8,8 @@
 #include "Importer.h"
 #include "EditorApplication.h"
 #include "AssetDatabase.h"
+#include "EditorResourceManager.h"
+#include "EditableResource.h"
 
 #include <JobManager.h>
 #include <Engine.h>
@@ -140,6 +142,7 @@ namespace Glory::Editor
 		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
 		AssetCompiler::CompileAssetDatabase(uuid);
+		EditorApplication::GetInstance()->GetResourceManager().ReloadEditableAsset(uuid);
 
 		SetDirty();
 	}
@@ -546,9 +549,9 @@ namespace Glory::Editor
 	{
 		m_UnsavedAssets.ForEachClear([&](const UUID& uuid)
 		{
-			Resource* pResource = DB_EngineInstance->GetAssetManager().FindResource(uuid);
+			EditableResource* pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
 			if (!pResource) return;
-			SaveAsset(pResource, false);
+			pResource->Save();
 		});
 	}
 

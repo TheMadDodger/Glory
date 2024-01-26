@@ -5,7 +5,7 @@
 
 namespace Glory::Editor
 {
-	class TextureImporter : public ImporterTemplate<TextureData>
+	class TextureImporter : public YAMLImporterTemplate<TextureData>
 	{
 	public:
 		TextureImporter();

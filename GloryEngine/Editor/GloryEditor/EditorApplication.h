@@ -7,6 +7,7 @@
 #include "EditorPlayer.h"
 
 #include <Version.h>
+#include <memory>
 
 namespace efsw
 {
@@ -22,6 +23,8 @@ namespace Glory::Editor
 		M_Play,
 		M_ExitingPlay,
 	};
+
+	class EditorResourceManager;
 
 	class EditorApplication
 	{
@@ -48,6 +51,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void Quit();
 		GLORY_EDITOR_API void TryToQuit();
 		GLORY_EDITOR_API Engine* GetEngine();
+		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
 
 		GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
 		GLORY_EDITOR_API static EditorApplication* GetInstance();
@@ -68,6 +72,7 @@ namespace Glory::Editor
 		MainEditor m_MainEditor;
 		EditorPlayer m_Player;
 		EditorShaderProcessor m_ShaderProcessor;
+		std::unique_ptr<EditorResourceManager> m_ResourceManager;
 		efsw::FileWatcher* m_pFileWatcher;
 
 		std::vector<BaseEditorExtension*> m_pExtensions;

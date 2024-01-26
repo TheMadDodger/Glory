@@ -44,6 +44,14 @@ namespace Glory
         virtual void Serialize(BinaryStream& container) const {};
         virtual void Deserialize(BinaryStream& container) const {};
 
+        /** @brief Change the UUID of this resource
+         * @param uuid The new UUID of this resource
+         *
+         * Only use this after constructing a new resource,
+         * never use this on an existing resource!
+         */
+        void SetResourceUUID(UUID uuid);
+
     protected:
         std::vector<Resource*> m_pSubresources;
         std::map<std::string, size_t, std::less<>> m_NameToSubresourceIndex;

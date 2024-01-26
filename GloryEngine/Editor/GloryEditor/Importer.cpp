@@ -58,6 +58,23 @@ namespace Glory::Editor
 		pImporter->Initialize();
 	}
 
+	EditableResource* Importer::CreateEditableResource(const std::filesystem::path& path)
+	{
+		auto itor = std::find_if(m_pImporters.begin(), m_pImporters.end(), [&](const Importer* pImporter) {
+			return pImporter->SupportsExtension(path.extension());
+		});
+
+		if (itor == m_pImporters.end())
+		{
+			std::stringstream str;
+			str << "Could not find importer for extension: " << path.extension() << " for file: " << path;
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
+			return nullptr;
+		}
+
+		return (*itor)->GetEditableResource(path);
+	}
+
 	void Importer::RegisterOwned(Importer* pImporter)
 	{
 		m_pOwnedImporters.push_back(pImporter);

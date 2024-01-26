@@ -6,7 +6,7 @@ namespace Glory::Editor
 	std::vector<Editor*> Editor::m_pRegisteredEditors;
 	std::vector<Editor*> Editor::m_pActiveEditors;
 
-	GLORY_EDITOR_API void Editor::RegisterEditor(Editor* pEditor)
+	void Editor::RegisterEditor(Editor* pEditor)
 	{
 		m_pRegisteredEditors.push_back(pEditor);
 	}
@@ -16,9 +16,9 @@ namespace Glory::Editor
 		return m_EditedType;
 	}
 
-	GLORY_EDITOR_API void Editor::Initialize() {}
+	void Editor::Initialize() {}
 
-	GLORY_EDITOR_API Editor* Editor::CreateEditor(Object* pObject)
+	Editor* Editor::CreateEditor(Object* pObject)
 	{
 		for (size_t i = 0; i < pObject->TypeCount(); i++)
 		{
@@ -44,7 +44,7 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
-	GLORY_EDITOR_API size_t Editor::GetID(Editor* pEditor)
+	size_t Editor::GetID(Editor* pEditor)
 	{
 		for (size_t i = 0; i < m_pActiveEditors.size(); i++)
 		{
@@ -53,12 +53,12 @@ namespace Glory::Editor
 		return 0;
 	}
 
-	GLORY_EDITOR_API std::string Editor::Name()
+	std::string Editor::Name()
 	{
 		return "Editor";
 	}
 
-	GLORY_EDITOR_API std::vector<Editor*> Editor::FindEditors(UUID uuid)
+	std::vector<Editor*> Editor::FindEditors(UUID uuid)
 	{
 		std::vector<Editor*> result;
 		std::for_each(m_pActiveEditors.begin(), m_pActiveEditors.end(), [&](Editor* pEditor)
@@ -99,7 +99,7 @@ namespace Glory::Editor
 	}
 
 	template<class TEditor, class TObject>
-	inline GLORY_EDITOR_API void EditorTemplate<TEditor, TObject>::CompilerTest()
+	inline void EditorTemplate<TEditor, TObject>::CompilerTest()
 	{
 		Editor* pObject = new TEditor();
 		Object* pObject = new TObject();

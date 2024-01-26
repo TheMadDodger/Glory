@@ -1,5 +1,7 @@
 #pragma once
 #include "Editor.h"
+#include "EditableResource.h"
+
 #include <MaterialData.h>
 
 namespace Glory::Editor

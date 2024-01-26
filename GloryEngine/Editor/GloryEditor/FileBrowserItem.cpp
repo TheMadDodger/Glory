@@ -9,6 +9,8 @@
 #include "ObjectMenu.h"
 #include "EntityEditor.h"
 #include "EditableEntity.h"
+#include "EditorResourceManager.h"
+#include "EditableResource.h"
 
 #include <stack>
 #include <imgui.h>
@@ -433,7 +435,6 @@ namespace Glory::Editor
 		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
 		if (relativePath == "") relativePath = m_CachedPath;
 		AssetDatabase& assetDatabase = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase();
-		AssetManager& assetManager = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
 		UUID uuid = assetDatabase.GetAssetUUID(relativePath.string());
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
@@ -471,14 +472,14 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
 		{
 			m_HighlightedPath = m_CachedPath.string();
-			Resource* pAsset = assetManager.GetAssetImmediate(uuid);
+			EditableResource* pAsset = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
 			Selection::SetActiveObject(pAsset);
 		}
 
 		if (ImGui::IsItemClicked(1))
 		{
 			m_HighlightedPath = m_CachedPath.string();
-			Resource* pAsset = assetManager.GetAssetImmediate(uuid);
+			EditableResource* pAsset = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
 			ObjectMenu::Open(pAsset, m_Editable ? ObjectMenuType::T_Resource : ObjectMenuType::T_ModuleResource);
 		}
 

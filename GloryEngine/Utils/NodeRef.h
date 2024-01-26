@@ -105,6 +105,8 @@ namespace Glory::Utils
 		void Save();
 		const std::filesystem::path& Path() const;
 
+		void ChangePath(const std::filesystem::path& newPath);
+
 		NodeRef RootNodeRef();
 		NodeValueRef operator[](const std::filesystem::path& path);
 

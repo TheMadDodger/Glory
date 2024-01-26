@@ -4,6 +4,7 @@
 #include <ResourceType.h>
 #include <string>
 #include <Resource.h>
+#include <EditableResource.h>
 
 namespace Glory::Editor
 {
@@ -32,6 +33,11 @@ namespace Glory::Editor
 			return ResourceTypes::GetHash<T>();
 		}
 
+		virtual EditableResource* GetEditableResource(const std::filesystem::path&) const override
+		{
+			return new NonEditableResource<T>();
+		}
+
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
 		virtual T* LoadResource(const std::filesystem::path& path) const = 0;
 		virtual bool SaveResource(const std::filesystem::path& path, T* pResource) const { return false; }
@@ -39,5 +45,15 @@ namespace Glory::Editor
 	protected:
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
+	};
+
+	template<class T>
+	class YAMLImporterTemplate : public ImporterTemplate<T>
+	{
+	protected:
+		virtual EditableResource* GetEditableResource(const std::filesystem::path& path) const override
+		{
+			return new YAMLResource<T>(path);
+		}
 	};
 }

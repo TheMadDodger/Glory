@@ -1,10 +1,12 @@
 #pragma once
 #include "Editor.h"
+#include "EditableResource.h"
+
 #include <MaterialData.h>
 
 namespace Glory::Editor
 {
-	class TextureDataEditor : public EditorTemplate<TextureDataEditor, TextureData>
+	class TextureDataEditor : public EditorTemplate<TextureDataEditor, YAMLResource<TextureData>>
 	{
 	public:
 		TextureDataEditor();

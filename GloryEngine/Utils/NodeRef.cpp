@@ -164,6 +164,11 @@ namespace Glory::Utils
 		return m_FilePath;
 	}
 
+	void YAMLFileRef::ChangePath(const std::filesystem::path& newPath)
+	{
+		m_FilePath = newPath;
+	}
+
 	NodeRef YAMLFileRef::RootNodeRef()
 	{
 		return NodeRef(m_RootNode);

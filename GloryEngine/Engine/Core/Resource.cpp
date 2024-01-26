@@ -60,6 +60,11 @@ namespace Glory
 		pResource->m_pParent = this;
 	}
 
+	void Resource::SetResourceUUID(UUID uuid)
+	{
+		m_ID = uuid;
+	}
+
 	Resource* Resource::Subresource(size_t index) const
 	{
 		if (index >= m_pSubresources.size()) return nullptr;

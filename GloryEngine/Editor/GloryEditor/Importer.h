@@ -11,12 +11,15 @@ namespace Glory
 
 namespace Glory::Editor
 {
+	class EditableResource;
+
 	class Importer
 	{
 	public:
 		GLORY_EDITOR_API static Resource* Import(const std::filesystem::path& path, void* pImportSettings);
 		GLORY_EDITOR_API static bool Export(const std::filesystem::path& path, Resource* pResource);
 		GLORY_EDITOR_API static void Register(Importer* pImporter);
+		GLORY_EDITOR_API static EditableResource* CreateEditableResource(const std::filesystem::path& path);
 
 		template<typename T>
 		static void Register()
@@ -34,6 +37,7 @@ namespace Glory::Editor
 		virtual bool Save(const std::filesystem::path& path, Resource* pResource) const = 0;
 		virtual uint32_t ResourceTypeHash() const = 0;
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
+		virtual EditableResource* GetEditableResource(const std::filesystem::path& path) const = 0;
 
 		GLORY_EDITOR_API static void RegisterOwned(Importer* pImporter);
 

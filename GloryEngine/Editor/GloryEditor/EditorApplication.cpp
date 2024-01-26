@@ -3,13 +3,14 @@
 #include "EditorAssetDatabase.h"
 #include "EditorAssetsWatcher.h"
 #include "EntityEditor.h"
+#include "EditorResourceManager.h"
+#include "EditorSceneManager.h"
+#include "ProjectSpace.h"
 
 #include <GraphicsThread.h>
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
-#include <ProjectSpace.h>
-#include <EditorSceneManager.h>
 #include <Version.h>
 
 #include <GloryAPI.h>
@@ -27,6 +28,7 @@ namespace Glory::Editor
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo):
 		m_pEngine(createInfo.pEngine),
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
+		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_pFileWatcher(new efsw::FileWatcher())
 	{
 		// Copy the optional modules into the optional modules vector
@@ -281,6 +283,11 @@ namespace Glory::Editor
 	Engine* EditorApplication::GetEngine()
 	{
 		return m_pEngine;
+	}
+
+	EditorResourceManager& Glory::Editor::EditorApplication::GetResourceManager()
+	{
+		return *m_ResourceManager;
 	}
 
 	void EditorApplication::TryToQuit()
