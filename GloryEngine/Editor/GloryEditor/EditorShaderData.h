@@ -26,6 +26,7 @@ namespace Glory::Editor
 
 	private:
 		friend class EditorShaderProcessor;
+		friend class MaterialEditor;
 		std::vector<uint32_t> m_ShaderData;
 		UUID m_UUID;
 

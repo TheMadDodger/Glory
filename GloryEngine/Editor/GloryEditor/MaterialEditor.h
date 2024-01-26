@@ -6,18 +6,18 @@
 
 namespace Glory::Editor
 {
-	class MaterialEditor : public EditorTemplate<MaterialEditor, MaterialData>
+	class MaterialEditor : public EditorTemplate<MaterialEditor, YAMLResource<MaterialData>>
 	{
 	public:
 		MaterialEditor();
 		virtual ~MaterialEditor();
 		virtual bool OnGUI() override;
 
-		static const char* GetMaterialError(MaterialData* pMaterial);
+		static const char* GetMaterialError(YAMLResource<MaterialData>* pMaterial);
 
 	private:
-		void ShaderGUI(MaterialData* pMaterial);
-		bool PropertiesGUI(MaterialData* pMaterial);
+		void ShaderGUI(YAMLResource<MaterialData>* pMaterial);
+		bool PropertiesGUI(YAMLResource<MaterialData>* pMaterial);
 
 		static void UpdateMaterial(MaterialData* pMaterial);
 	};

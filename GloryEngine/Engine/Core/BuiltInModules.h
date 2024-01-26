@@ -3,4 +3,3 @@
 #include "TextureDataLoaderModule.h"
 #include "MaterialLoaderModule.h"
 #include "MaterialInstanceLoaderModule.h"
-#include "ShaderSourceLoaderModule.h"

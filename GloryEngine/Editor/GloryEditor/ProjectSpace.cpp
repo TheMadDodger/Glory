@@ -7,6 +7,7 @@
 #include "TitleBar.h"
 #include "ProjectMigrations.h"
 
+#include <Debug.h>
 #include <filesystem>
 #include <fstream>
 #include <AssetDatabase.h>

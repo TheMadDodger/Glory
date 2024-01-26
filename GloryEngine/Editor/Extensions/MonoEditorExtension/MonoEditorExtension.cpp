@@ -3,6 +3,7 @@
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
 
+#include <Debug.h>
 #include <Engine.h>
 #include <AssetDatabase.h>
 #include <MonoManager.h>

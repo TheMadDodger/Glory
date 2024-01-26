@@ -154,6 +154,7 @@ namespace Glory::Editor
 		Importer::Register<ShaderImporter>();
 
 		pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
+		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
 	}
 
 	void MainEditor::Destroy()

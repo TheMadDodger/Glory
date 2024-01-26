@@ -1,6 +1,8 @@
 #pragma once
 #include "PropertyDrawer.h"
+
 #include <SceneObjectRef.h>
+#include <SerializedTypes.h>
 
 namespace Glory::Editor
 {

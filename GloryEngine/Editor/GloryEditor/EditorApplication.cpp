@@ -6,6 +6,7 @@
 #include "EditorResourceManager.h"
 #include "EditorSceneManager.h"
 #include "ProjectSpace.h"
+#include "EditorShaderProcessor.h"
 
 #include <GraphicsThread.h>
 #include <imgui.h>
@@ -28,6 +29,7 @@ namespace Glory::Editor
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo):
 		m_pEngine(createInfo.pEngine),
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
+		m_ShaderProcessor(new EditorShaderProcessor()),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_pFileWatcher(new efsw::FileWatcher())
 	{
@@ -81,7 +83,7 @@ namespace Glory::Editor
 		EditorAssetDatabase::Cleanup();
 		m_MainEditor.Destroy();
 		m_Platform.Destroy();
-		m_ShaderProcessor.Stop();
+		m_ShaderProcessor->Stop();
 
 		GloryAPI::Cleanup();
 
@@ -100,7 +102,7 @@ namespace Glory::Editor
 
 		m_pEngine->StartThreads();
 		m_Platform.SetState(Idle);
-		m_ShaderProcessor.Start();
+		m_ShaderProcessor->Start();
 
 		m_Running = true;
 		if (m_Platform.m_Windowless)

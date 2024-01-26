@@ -2,7 +2,6 @@
 #include "EditorPlatform.h"
 #include "MainEditor.h"
 #include "ProjectSpace.h"
-#include "EditorShaderProcessor.h"
 #include "EditorCreateInfo.h"
 #include "EditorPlayer.h"
 
@@ -24,6 +23,7 @@ namespace Glory::Editor
 		M_ExitingPlay,
 	};
 
+	class EditorShaderProcessor;
 	class EditorResourceManager;
 
 	class EditorApplication
@@ -71,7 +71,7 @@ namespace Glory::Editor
 		EditorPlatform m_Platform;
 		MainEditor m_MainEditor;
 		EditorPlayer m_Player;
-		EditorShaderProcessor m_ShaderProcessor;
+		std::unique_ptr<EditorShaderProcessor> m_ShaderProcessor;
 		std::unique_ptr<EditorResourceManager> m_ResourceManager;
 		efsw::FileWatcher* m_pFileWatcher;
 

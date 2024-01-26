@@ -1,5 +1,6 @@
 #include "EditorOpenGLRenderImpl.h"
 
+#include <Debug.h>
 #include <EditorApplication.h>
 #include <GL/glew.h>
 #include <GLTexture.h>

@@ -1,6 +1,5 @@
 #pragma once
 #include "UUID.h"
-#include "ShaderData.h"
 #include "FileData.h"
 
 #include <functional>

@@ -5,7 +5,7 @@
 
 namespace Glory::Editor
 {
-	class MaterialImporter : public ImporterTemplate<MaterialData>
+	class MaterialImporter : public YAMLImporterTemplate<MaterialData>
 	{
 	public:
 		MaterialImporter();

@@ -14,6 +14,7 @@
 #include "EditorApplication.h"
 
 #include <Engine.h>
+#include <Debug.h>
 #include <GScene.h>
 #include <SceneManager.h>
 #include <IconsFontAwesome6.h>

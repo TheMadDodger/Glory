@@ -6,6 +6,7 @@
 #include "Undo.h"
 #include "EditorApplication.h"
 
+#include <Debug.h>
 #include <Engine.h>
 #include <AssetDatabase.h>
 #include <SceneManager.h>

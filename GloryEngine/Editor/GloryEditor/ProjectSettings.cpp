@@ -1,5 +1,8 @@
 #include "ProjectSettings.h"
 #include "EditorApplication.h"
+
+#include <Debug.h>
+
 #include <filesystem>
 #include <fstream>
 

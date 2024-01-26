@@ -1,8 +1,8 @@
 #pragma once
+#include "GLMesh.h"
+
 #include <GraphicsModule.h>
 #include <GL/glew.h>
-#include <ShaderData.h>
-#include "GLMesh.h"
 
 namespace Glory
 {

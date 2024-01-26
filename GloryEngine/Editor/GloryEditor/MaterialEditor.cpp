@@ -5,6 +5,7 @@
 #include "Selection.h"
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
+#include "EditorShaderData.h"
 
 #include <imgui.h>
 #include <ResourceType.h>
@@ -12,6 +13,7 @@
 #include <AssetDatabase.h>
 #include <AssetManager.h>
 #include <IconsFontAwesome6.h>
+#include <EditorUI.h>
 
 namespace Glory::Editor
 {
@@ -21,7 +23,7 @@ namespace Glory::Editor
 
 	bool MaterialEditor::OnGUI()
 	{
-		MaterialData* pMaterial = (MaterialData*)m_pTarget;
+		YAMLResource<MaterialData>* pMaterial = (YAMLResource<MaterialData>*)m_pTarget;
 
 		bool node = ImGui::TreeNodeEx("Loaded Shaders", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
 		if (node)
@@ -65,15 +67,22 @@ namespace Glory::Editor
 		return change;
 	}
 
-	const char* MaterialEditor::GetMaterialError(MaterialData* pMaterial)
+	const char* MaterialEditor::GetMaterialError(YAMLResource<MaterialData>* pMaterial)
 	{
-		if (pMaterial->ShaderCount() == 0)
+		Utils::YAMLFileRef& file = **pMaterial;
+		auto shaders = file["Shaders"];
+
+		if (shaders.Size() == 0)
 			return "The material is empty";
 
 		uint8_t shaderCounts[(size_t)ShaderType::ST_Count] = {};
-		for (size_t i = 0; i < pMaterial->ShaderCount(); ++i)
+		for (size_t i = 0; i < shaders.Size(); ++i)
 		{
-			const ShaderType& type = pMaterial->GetShaderTypeAt(i);
+			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
+			ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
+			if (!pShaderSourceData)
+				return "Some shaders have not yet loaded.";
+			const ShaderType& type = pShaderSourceData->GetShaderType();
 			++shaderCounts[(size_t)type];
 		}
 
@@ -108,20 +117,23 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
-	void MaterialEditor::ShaderGUI(MaterialData* pMaterial)
+	void MaterialEditor::ShaderGUI(YAMLResource<MaterialData>* pMaterial)
 	{
 		static ImGuiTableFlags flags =
 			ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody;
 
-		size_t shaderCount = pMaterial->ShaderCount();
+		Utils::YAMLFileRef& file = **pMaterial;
+		auto shaders = file["Shaders"];
 
-		float rowHeight = 25.0f;
-		float totalHeight = (shaderCount)*rowHeight + 30.0f;
+		const size_t shaderCount = shaders.Size();
+
+		const float rowHeight = 25.0f;
+		const float totalHeight = (shaderCount)*rowHeight + 30.0f;
 
 		int toRemoveShaderIndex = -1;
 
-		float width = ImGui::GetContentRegionAvail().x;
-		float removeButtonWidth = 100.0f;
+		const float width = ImGui::GetContentRegionAvail().x;
+		const float removeButtonWidth = 100.0f;
 
 		if (ImGui::BeginTable("Loaded Shaders Table", 4, flags, ImVec2(0.0f, totalHeight), 0.0f))
 		{
@@ -132,11 +144,23 @@ namespace Glory::Editor
 
 			ImGui::TableHeadersRow();
 
-			for (size_t row_n = 0; row_n < shaderCount; row_n++)
+			static const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+
+			for (size_t row_n = 0; row_n < shaderCount; ++row_n)
 			{
-				ShaderSourceData* pShaderSourceData = pMaterial->GetShaderAt(row_n);
+				auto shader = shaders[row_n]["UUID"];
+				const UUID shaderID = shader.As<uint64_t>();
+				ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
+				if (!pShaderSourceData)
+				{
+					ImGui::Selectable(std::to_string(row_n).c_str(), false, selectableFlags, ImVec2(0, rowHeight));
+					ImGui::SameLine();
+					ImGui::TextColored({1,0,0,1}, "Shader not yet loaded");
+					continue;
+				}
+
 				std::string name = pShaderSourceData->Name();
-				ShaderType shaderType = pMaterial->GetShaderTypeAt(row_n);
+				ShaderType shaderType = pShaderSourceData->GetShaderType();
 				if (name == "") name = "UNKNOWN SHADER";
 
 				const std::string shaderTypeString = YAML::SHADERTYPE_TOFULLSTRING[shaderType];
@@ -147,9 +171,8 @@ namespace Glory::Editor
 				ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
 
 				ImGui::TableSetColumnIndex(0);
-				ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 
-				if (ImGui::Selectable(std::to_string(row_n).c_str(), false, selectable_flags, ImVec2(0, rowHeight)) && ImGui::IsMouseDoubleClicked(0))
+				if (ImGui::Selectable(std::to_string(row_n).c_str(), false, selectableFlags, ImVec2(0, rowHeight)) && ImGui::IsMouseDoubleClicked(0))
 				{
 					Selection::SetActiveObject(pShaderSourceData);
 				}
@@ -172,8 +195,7 @@ namespace Glory::Editor
 
 		if (toRemoveShaderIndex != -1)
 		{
-			pMaterial->RemoveShaderAt((size_t)toRemoveShaderIndex);
-			UpdateMaterial(pMaterial);
+			shaders.Remove(toRemoveShaderIndex);
 		}
 
 		UUID addShaderID = 0;
@@ -188,29 +210,105 @@ namespace Glory::Editor
 		}
 	}
 
-	bool MaterialEditor::PropertiesGUI(MaterialData* pMaterial)
+	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial)
 	{
 		bool change = false;
 
-		size_t resourceCounter = 0;
-		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
-		{
-			MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(i);
+		Utils::YAMLFileRef& file = **pMaterial;
+		auto shaders = file["Shaders"];
+		auto properties = file["Properties"];
 
-			if (info->IsResource())
+		std::vector<EditorShaderData*> compiledShaders;
+
+		for (size_t i = 0; i < shaders.Size(); ++i)
+		{
+			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
+			EditorShaderData* pEditorShader = EditorShaderProcessor::GetEditorShader(shaderID);
+			if (!pEditorShader)
 			{
-				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
-				change |= pPropertyDrawer->Draw(info->DisplayName(), pMaterial->GetResourceUUIDPointer(resourceCounter), info->TypeHash(), info->Flags());
-				++resourceCounter;
+				ImGui::TextColored({ 1,0,0,1 }, "A shader has not yet compiled");
+				return false;
 			}
-			else change |= PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
+			
+			for (size_t j = 0; j < pEditorShader->m_SamplerNames.size(); ++j)
+			{
+				const std::string& sampler = pEditorShader->m_SamplerNames[j];
+
+				static const uint32_t imageDataHash = ResourceTypes::GetHash<ImageData>();
+
+				auto prop = properties[j];
+				if (!prop.Exists()) {
+					prop["DisplayName"].Set(sampler);
+					prop["ShaderName"].Set(sampler);
+					prop["TypeHash"].Set(imageDataHash);
+					prop["Value"].Set(0);
+				}
+				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
+				UUID value = prop["Value"].As<uint64_t>();
+				if (AssetPicker::ResourceDropdown(sampler, imageDataHash, &value))
+				{
+					change = true;
+					prop["Value"].Set(value);
+				}
+			}
+
+			for (size_t j = 0; j < pEditorShader->m_PropertyInfos.size(); ++j)
+			{
+				EditorShaderData::PropertyInfo& info = pEditorShader->m_PropertyInfos[j];
+
+				const size_t index = j + pEditorShader->m_SamplerNames.size();
+				auto prop = properties[index];
+
+				if (!prop.Exists()) {
+					prop["DisplayName"].Set(info.m_Name);
+					prop["ShaderName"].Set(info.m_Name);
+					prop["TypeHash"].Set(info.m_TypeHash);
+				}
+
+				static const uint32_t f = ResourceTypes::GetHash<float>();
+				static const uint32_t f2 = ResourceTypes::GetHash<glm::vec2>();
+				static const uint32_t f3 = ResourceTypes::GetHash<glm::vec3>();
+				static const uint32_t f4 = ResourceTypes::GetHash<glm::vec4>();
+
+				auto propValue = prop["Value"];
+				if (info.m_TypeHash == f)
+				{
+					if (!propValue.Exists())
+						propValue.Set(0.0f);
+					change |= EditorUI::InputFloat(file, propValue.Path());
+				}
+				else if (info.m_TypeHash == f2)
+				{
+					if (!propValue.Exists())
+						propValue.Set(glm::vec2{ 0,0 });
+					change |= EditorUI::InputFloat2(file, propValue.Path());
+				}
+				else if (info.m_TypeHash == f3)
+				{
+					if (!propValue.Exists())
+						propValue.Set(glm::vec3{ 0,0,0 });
+					change |= EditorUI::InputFloat3(file, propValue.Path());
+				}
+				else if (info.m_TypeHash == f4)
+				{
+					if (!propValue.Exists())
+						propValue.Set(glm::vec4{ 1,1,1,1 });
+					change |= EditorUI::InputColor(file, propValue.Path(), false);
+				}
+			}
+		}
+
+		if (change)
+		{
+			pMaterial->SetDirty(true);
+			EditorAssetDatabase::SetAssetDirty(pMaterial);
 		}
 		return change;
 	}
 
 	void MaterialEditor::UpdateMaterial(MaterialData* pMaterial)
 	{
-		pMaterial->ClearProperties();
+		/*pMaterial->ClearProperties();
 		for (size_t i = 0; i < pMaterial->ShaderCount(); i++)
 		{
 			ShaderSourceData* pShader = pMaterial->GetShaderAt(i);
@@ -218,6 +316,6 @@ namespace Glory::Editor
 			if (!pShaderData) continue;
 			pShaderData->LoadIntoMaterial(pMaterial);
 		}
-		EditorAssetDatabase::SetAssetDirty(pMaterial);
+		EditorAssetDatabase::SetAssetDirty(pMaterial);*/
 	}
 }

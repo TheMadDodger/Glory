@@ -35,7 +35,7 @@ project "GloryCore"
 		["Modules/ResourceLoading/File"] = { "FileData.*", "FileLoaderModule.*" },
 		["Modules/ResourceLoading/Material"] = { "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*", "MaterialInstanceLoaderModule.*", "MaterialLoaderModule.*", "MaterialPropertyInfo.*" },
 		["Modules/ResourceLoading/Models"] = { "MeshData.*", "ModelData.*", "ModelLoaderModule.*" },
-		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderData.*", "ShaderLoaderModule.*", "ShaderSourceData.*", "ShaderSourceLoaderModule.*" },
+		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderSourceData.*" },
 		["Modules/ResourceLoading/Images"] = { "ImageData.*", "ImageLoaderModule.*" },
 		["Modules/ResourceLoading/Textures"] = { "TextureData.*", "TextureDataLoaderModule.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
