@@ -109,6 +109,18 @@ namespace Glory::Utils
 		return NodeValueRef(m_RootNode, m_Path.parent_path());
 	}
 
+	NodeValueRef::Iterator NodeValueRef::Begin()
+	{
+		YAML::const_iterator iter = Node().begin();
+		return NodeValueRef::Iterator{ iter };
+	}
+
+	NodeValueRef::Iterator NodeValueRef::End()
+	{
+		YAML::const_iterator iter = Node().end();
+		return NodeValueRef::Iterator{ iter };
+	}
+
 	YAML::Node NodeValueRef::FindNode(YAML::Node& node, std::filesystem::path path)
 	{
 		if (path.empty() || path == ".") return node;

@@ -43,6 +43,11 @@ namespace Glory
 		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
 	}
 
+	void MaterialData::RemoveAllShaders()
+	{
+		m_pShaderFiles.clear();
+	}
+
 	bool MaterialData::AddShader(ShaderSourceData* pShaderSourceData)
 	{
 		const auto it = std::find(m_pShaderFiles.begin(), m_pShaderFiles.end(), pShaderSourceData);

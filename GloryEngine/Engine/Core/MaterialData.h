@@ -23,6 +23,7 @@ namespace Glory
         [[nodiscard]]virtual ShaderSourceData* GetShaderAt(size_t index) const;
         [[nodiscard]]virtual const ShaderType& GetShaderTypeAt(size_t index) const;
         void RemoveShaderAt(size_t index);
+        void RemoveAllShaders();
         bool AddShader(ShaderSourceData* pShaderSourceData);
 
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags = 0);

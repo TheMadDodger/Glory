@@ -94,7 +94,6 @@ namespace Glory::Editor
 
 	void EditorShaderProcessor::Start()
 	{
-
 		EditorApplication::GetInstance()->GetEngine()->GetShaderManager().OverrideCompiledShadersPathFunc([]()
 		{
 			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
@@ -123,6 +122,7 @@ namespace Glory::Editor
 	void EditorShaderProcessor::Stop()
 	{
 		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
+		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetUpdatedCallback);
 	}
 
 	EditorShaderData* EditorShaderProcessor::CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path)

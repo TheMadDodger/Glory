@@ -25,6 +25,7 @@ namespace Glory::Editor
 
 	class EditorShaderProcessor;
 	class EditorResourceManager;
+	class EditorMaterialManager;
 
 	class EditorApplication
 	{
@@ -52,6 +53,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void TryToQuit();
 		GLORY_EDITOR_API Engine* GetEngine();
 		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
+		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();
 
 		GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
 		GLORY_EDITOR_API static EditorApplication* GetInstance();
@@ -73,6 +75,7 @@ namespace Glory::Editor
 		EditorPlayer m_Player;
 		std::unique_ptr<EditorShaderProcessor> m_ShaderProcessor;
 		std::unique_ptr<EditorResourceManager> m_ResourceManager;
+		std::unique_ptr<EditorMaterialManager> m_MaterialManager;
 		efsw::FileWatcher* m_pFileWatcher;
 
 		std::vector<BaseEditorExtension*> m_pExtensions;

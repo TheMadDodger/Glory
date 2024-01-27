@@ -1,6 +1,7 @@
 #include "MaterialImporter.h"
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
+#include "EditorMaterialManager.h"
 
 #include <fstream>
 #include <AssetManager.h>
@@ -29,8 +30,10 @@ namespace Glory::Editor
 
 	MaterialData* MaterialImporter::LoadResource(const std::filesystem::path& path) const
 	{
-		YAML::Node rootNode = YAML::LoadFile(path.string());
-		return LoadMaterialData(rootNode);
+		MaterialData* pMaterialData = new MaterialData();
+		Utils::YAMLFileRef file{ path };
+		EditorApplication::GetInstance()->GetMaterialManager().LoadIntoMaterial(file, pMaterialData);
+		return pMaterialData;
 	}
 
 	bool MaterialImporter::SaveResource(const std::filesystem::path& path, MaterialData* pResource) const
@@ -43,81 +46,12 @@ namespace Glory::Editor
 		return true;
 	}
 
-	MaterialData* MaterialImporter::LoadMaterialData(YAML::Node& rootNode) const
-	{
-		MaterialData* pMaterialData = new MaterialData();
-		ReadShaders(rootNode, pMaterialData);
-		ReadPropertyData(rootNode, pMaterialData);
-		return pMaterialData;
-	}
-
 	void MaterialImporter::SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out) const
 	{
 		out << YAML::BeginMap;
 		WriteShaders(out, pMaterialData);
 		WritePropertyData(out, pMaterialData);
 		out << YAML::EndMap;
-	}
-
-	void MaterialImporter::ReadShaders(YAML::Node& rootNode, MaterialData* pMaterialData) const
-	{
-		YAML::Node shadersNode = rootNode["Shaders"];
-		if (!shadersNode.IsSequence()) return;
-		for (size_t i = 0; i < shadersNode.size(); i++)
-		{
-			YAML::Node shaderNode = shadersNode[i];
-			YAML::Node node;
-			UUID shaderUUID;
-			ShaderType shaderType;
-			YAML_READ(shaderNode, node, UUID, shaderUUID, uint64_t);
-			YAML_READ(shaderNode, node, Type, shaderType, ShaderType);
-
-			AssetLocation location;
-			if (!EditorAssetDatabase::GetAssetLocation(shaderUUID, location)) continue;
-
-			const std::string_view assetPath = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath();
-			const std::string path = std::string{ assetPath } + '\\' + location.Path;
-			ShaderSourceData* pShaderSourceData = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<ShaderSourceData>(shaderUUID);
-			if (!pShaderSourceData) continue;
-
-			pMaterialData->AddShader(pShaderSourceData);
-		}
-	}
-
-	void MaterialImporter::ReadPropertyData(YAML::Node& rootNode, MaterialData* pMaterialData) const
-	{
-		YAML::Node propertiesNode = rootNode["Properties"];
-		if (!propertiesNode.IsSequence()) return;
-
-		for (size_t i = 0; i < propertiesNode.size(); i++)
-		{
-			YAML::Node propertyNode = propertiesNode[i];
-			YAML::Node node;
-			uint32_t typeHash = 0;
-			std::string displayName;
-			std::string shaderName;
-			YAML_READ(propertyNode, node, DisplayName, displayName, std::string);
-			YAML_READ(propertyNode, node, ShaderName, shaderName, std::string);
-			YAML_READ(propertyNode, node, TypeHash, typeHash, uint32_t);
-
-			node = propertyNode["Value"];
-
-			const BasicTypeData* typeData = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetBasicTypeData(typeHash);
-
-			size_t offset = pMaterialData->GetCurrentBufferOffset();
-
-			bool isResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().IsResource(typeHash);
-			if (!isResource)
-			{
-				pMaterialData->AddProperty(displayName, shaderName, typeHash, typeData != nullptr ? typeData->m_Size : 4, 0);
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, typeData != nullptr ? typeData->m_Size : 4, node);
-			}
-			else
-			{
-				UUID id = node.as<uint64_t>();
-				pMaterialData->AddProperty(displayName, shaderName, typeHash, id);
-			}
-		}
 	}
 
 	void MaterialImporter::WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData) const

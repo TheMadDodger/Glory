@@ -74,6 +74,29 @@ namespace Glory::Utils
 		void Erase();
 		NodeValueRef Parent();
 
+		struct Iterator
+		{
+			Iterator(YAML::const_iterator& iter):
+				m_Iter(iter) {}
+
+			const std::string operator*() const { return m_Iter->as<std::string>(); }
+
+			// Prefix increment
+			Iterator& operator++() { ++m_Iter; return *this; }
+
+			// Postfix increment
+			Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+			friend bool operator== (const Iterator& a, const Iterator& b) { return a.m_Iter == b.m_Iter; };
+			friend bool operator!= (const Iterator& a, const Iterator& b) { return a.m_Iter != b.m_Iter; };
+
+		private:
+			YAML::const_iterator m_Iter;
+		};
+
+		Iterator Begin();
+		Iterator End();
+
 	private:
 		YAML::Node FindNode(YAML::Node& node, std::filesystem::path path);
 

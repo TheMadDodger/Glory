@@ -7,6 +7,7 @@
 #include "EditorSceneManager.h"
 #include "ProjectSpace.h"
 #include "EditorShaderProcessor.h"
+#include "EditorMaterialManager.h"
 
 #include <GraphicsThread.h>
 #include <imgui.h>
@@ -31,6 +32,7 @@ namespace Glory::Editor
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
 		m_ShaderProcessor(new EditorShaderProcessor()),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
+		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
 		m_pFileWatcher(new efsw::FileWatcher())
 	{
 		// Copy the optional modules into the optional modules vector
@@ -84,6 +86,7 @@ namespace Glory::Editor
 		m_MainEditor.Destroy();
 		m_Platform.Destroy();
 		m_ShaderProcessor->Stop();
+		m_MaterialManager->Stop();
 
 		GloryAPI::Cleanup();
 
@@ -103,6 +106,7 @@ namespace Glory::Editor
 		m_pEngine->StartThreads();
 		m_Platform.SetState(Idle);
 		m_ShaderProcessor->Start();
+		m_MaterialManager->Start();
 
 		m_Running = true;
 		if (m_Platform.m_Windowless)
@@ -287,9 +291,14 @@ namespace Glory::Editor
 		return m_pEngine;
 	}
 
-	EditorResourceManager& Glory::Editor::EditorApplication::GetResourceManager()
+	EditorResourceManager& EditorApplication::GetResourceManager()
 	{
 		return *m_ResourceManager;
+	}
+
+	EditorMaterialManager& EditorApplication::GetMaterialManager()
+	{
+		return *m_MaterialManager;
 	}
 
 	void EditorApplication::TryToQuit()
