@@ -236,10 +236,9 @@ namespace Glory::Editor
 
 				static const uint32_t imageDataHash = ResourceTypes::GetHash<ImageData>();
 
-				auto prop = properties[j];
+				auto prop = properties[sampler];
 				if (!prop.Exists()) {
 					prop["DisplayName"].Set(sampler);
-					prop["ShaderName"].Set(sampler);
 					prop["TypeHash"].Set(imageDataHash);
 					prop["Value"].Set(0);
 				}
@@ -257,10 +256,9 @@ namespace Glory::Editor
 				EditorShaderData::PropertyInfo& info = pEditorShader->m_PropertyInfos[j];
 
 				const size_t index = j + pEditorShader->m_SamplerNames.size();
-				auto prop = properties[index];
+				auto prop = properties[info.m_Name];
 
 				if (!prop.Exists()) {
-					prop["DisplayName"].Set(info.m_Name);
 					prop["ShaderName"].Set(info.m_Name);
 					prop["TypeHash"].Set(info.m_TypeHash);
 				}
@@ -269,6 +267,9 @@ namespace Glory::Editor
 				static const uint32_t f2 = ResourceTypes::GetHash<glm::vec2>();
 				static const uint32_t f3 = ResourceTypes::GetHash<glm::vec3>();
 				static const uint32_t f4 = ResourceTypes::GetHash<glm::vec4>();
+
+				ImGui::TextUnformatted(info.m_Name.data());
+				ImGui::SameLine();
 
 				auto propValue = prop["Value"];
 				if (info.m_TypeHash == f)

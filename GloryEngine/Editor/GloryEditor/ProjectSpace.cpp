@@ -205,7 +205,8 @@ namespace Glory::Editor
 		{
 			std::stringstream str;
 			str << "Your project has been migrated to " << GloryEditorVersion << std::endl
-				<< "Some assets may have been edited,\nbut the changes won't be applied until you save.";
+				<< "Some assets may have been edited,\nbut the changes won't be applied until you save."
+				<< "\nOnce applied, these changes cannot be undone!";
 			PopupManager::OpenModal("Migration", str.str(), { "Save Now", "OK" },
 				{ []() { Save(); PopupManager::CloseCurrentPopup(); } , PopupManager::CloseCurrentPopup });
 		}

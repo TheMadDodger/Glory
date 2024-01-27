@@ -1,10 +1,12 @@
 #pragma once
 #include "Editor.h"
+#include "EditableResource.h"
+
 #include <MaterialInstanceData.h>
 
 namespace Glory::Editor
 {
-    class MaterialInstanceEditor : public EditorTemplate<MaterialInstanceEditor, MaterialInstanceData>
+    class MaterialInstanceEditor : public EditorTemplate<MaterialInstanceEditor, YAMLResource<MaterialInstanceData>>
     {
     public:
         MaterialInstanceEditor();

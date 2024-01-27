@@ -277,6 +277,7 @@ namespace Glory::Editor
                 YAML::Node value = file["OldOverrides"][i]["Value"].Node();
 
                 auto newProp = file["Overrides"][propId];
+                newProp["Enable"].Set(true);
                 newProp["Value"].Set(value);
             }
             file.RootNodeRef().ValueRef().Remove("OldOverrides");
