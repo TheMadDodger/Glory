@@ -15,7 +15,13 @@ namespace Glory::Editor
 
 	/** @brief
 	 * Add gravity value to PhysicsSettings
-	 * @param pProject Project to migrate assets in
+	 * @param pProject Project to migrate settings in
 	 */
 	GLORY_EDITOR_API void Migrate_0_1_1_AddGravityToPhysicsSettings(ProjectSpace* pProject);
+
+	/** @brief
+	 * Convert material property arrays to maps
+	 * @param pProject Project to migrate assets in
+	 */
+	GLORY_EDITOR_API void Migrate_0_3_0_ConvertMaterialPropertiesToMap(ProjectSpace* pProject);
 }

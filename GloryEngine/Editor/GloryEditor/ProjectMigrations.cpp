@@ -2,6 +2,8 @@
 #include "EditorAssetDatabase.h"
 #include "AssetCompiler.h"
 #include "EditorApplication.h"
+#include "EditorResourceManager.h"
+#include "EditableResource.h"
 
 #include <JSONRef.h>
 #include <TextureData.h>
@@ -33,6 +35,7 @@ namespace Glory::Editor
         /* Perform 0.3.0 migrations */
         if (Version::Compare(version, { 0,3,0,0 }, true) < 0)
         {
+            Migrate_0_3_0_ConvertMaterialPropertiesToMap(pProject);
         }
 
         /* Update version to current */
@@ -183,5 +186,103 @@ namespace Glory::Editor
         Utils::YAMLFileRef physicsSettings{ physicsSettingsPath };
         physicsSettings["Gravity"].Set(glm::vec3{0.0f, -9.81000042f, 0.0f});
         physicsSettings.Save();
+    }
+
+    void Migrate_0_3_0_ConvertMaterialPropertiesToMap(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrating material property arrays to maps");
+
+        const uint32_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
+        const uint32_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+
+        std::vector<std::string_view> materialAssets;
+        std::vector<std::string_view> materialInstanceAssets;
+
+        for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+        {
+            JSONValueRef asset = assets[itor->name.GetString()];
+            const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+
+            if (hash == materialDataHash)
+            {
+                materialAssets.push_back(itor->name.GetString());
+            }
+            else if (hash == materialInstanceDataHash)
+            {
+                materialInstanceAssets.push_back(itor->name.GetString());
+            }
+        }
+
+        for (auto id : materialAssets)
+        {
+            JSONValueRef asset = assets[id];
+            const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+            EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(uuid);
+            if (!pResource)
+            {
+                pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Failed to migrate a material");
+                continue;
+            }
+            YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
+            Utils::YAMLFileRef& file = **pMaterial;
+            if (file["Properties"].IsMap()) continue;
+
+            YAML::Node propertiesNode = file["Properties"].Node();
+            file["OldProperties"].Set(propertiesNode);
+            file.RootNodeRef().ValueRef().Remove("Properties");
+
+            for (size_t i = 0; i < file["OldProperties"].Size(); ++i)
+            {
+                const std::string propId = file["OldProperties"][i]["ShaderName"].As<std::string>();
+                const uint32_t hash = file["OldProperties"][i]["TypeHash"].As<uint32_t>();
+                YAML::Node value = file["OldProperties"][i]["Value"].Node();
+
+                auto newProp = file["Properties"][propId];
+                newProp["DisplayName"].Set(propId);
+                newProp["TypeHash"].Set(hash);
+                newProp["Value"].Set(value);
+            }
+            file.RootNodeRef().ValueRef().Remove("OldProperties");
+            EditorAssetDatabase::SetAssetDirty(uuid);
+            pMaterial->SetDirty(true);
+            pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrated material properties for " + std::to_string(uuid));
+        }
+
+        for (auto id : materialInstanceAssets)
+        {
+            JSONValueRef asset = assets[id];
+            const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+            EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(uuid);
+            if (!pResource)
+            {
+                pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Failed to migrate a material");
+                continue;
+            }
+            YAMLResource<MaterialInstanceData>* pMaterial = static_cast<YAMLResource<MaterialInstanceData>*>(pResource);
+            Utils::YAMLFileRef& file = **pMaterial;
+            if (file["Overrides"].IsMap()) continue;
+
+            YAML::Node overridesNode = file["Overrides"].Node();
+            file["OldOverrides"].Set(overridesNode);
+            file.RootNodeRef().ValueRef().Remove("Overrides");
+
+            for (size_t i = 0; i < file["OldOverrides"].Size(); ++i)
+            {
+                const std::string propId = file["OldOverrides"][i]["DisplayName"].As<std::string>();
+                YAML::Node value = file["OldOverrides"][i]["Value"].Node();
+
+                auto newProp = file["Overrides"][propId];
+                newProp["Value"].Set(value);
+            }
+            file.RootNodeRef().ValueRef().Remove("OldOverrides");
+            EditorAssetDatabase::SetAssetDirty(uuid);
+            pMaterial->SetDirty(true);
+            pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrated material instance overrides for " + std::to_string(uuid));
+        }
     }
 }

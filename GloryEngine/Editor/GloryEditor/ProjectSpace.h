@@ -58,7 +58,7 @@ namespace Glory::Editor
 
 	private:
 		static ProjectSpace* m_pCurrentProject;
-		static std::mutex m_ProjectLock;
+		static std::recursive_mutex m_ProjectLock;
 		std::string m_ProjectFilePath;
 		std::string m_ProjectRootPath;
 		std::string m_CachePath;

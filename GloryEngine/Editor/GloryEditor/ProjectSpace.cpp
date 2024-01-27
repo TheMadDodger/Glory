@@ -6,6 +6,7 @@
 #include "EditorAssetDatabase.h"
 #include "TitleBar.h"
 #include "ProjectMigrations.h"
+#include "PopupManager.h"
 
 #include <Debug.h>
 #include <filesystem>
@@ -16,7 +17,7 @@
 namespace Glory::Editor
 {
 	ProjectSpace* ProjectSpace::m_pCurrentProject = nullptr;
-	std::mutex ProjectSpace::m_ProjectLock;
+	std::recursive_mutex ProjectSpace::m_ProjectLock;
 
 	Dispatcher<ProjectSpace*> ProjectCallbacks[ProjectCallback::Count];
 
@@ -24,7 +25,7 @@ namespace Glory::Editor
 	{
 		std::string absolutePath = std::filesystem::absolute(path).string();
 		CloseProject();
-		std::unique_lock<std::mutex> lock(m_ProjectLock);
+		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		m_pCurrentProject = new ProjectSpace(absolutePath);
 		lock.unlock();
 		m_pCurrentProject->Open();
@@ -34,7 +35,7 @@ namespace Glory::Editor
 	{
 		if (m_pCurrentProject == nullptr) return;
 		m_pCurrentProject->Close();
-		std::unique_lock<std::mutex> lock(m_ProjectLock);
+		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		delete m_pCurrentProject;
 		m_pCurrentProject = nullptr;
 		lock.unlock();
@@ -42,7 +43,7 @@ namespace Glory::Editor
 
 	ProjectSpace* ProjectSpace::GetOpenProject()
 	{
-		std::unique_lock<std::mutex> lock(m_ProjectLock);
+		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		ProjectSpace* pProject = m_pCurrentProject;
 		lock.unlock();
 		return pProject;
@@ -179,7 +180,7 @@ namespace Glory::Editor
 		std::filesystem::path path = RootPath();
 		path.append("Assets");
 
-		std::unique_lock<std::mutex> lock(m_ProjectLock);
+		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		CreateFolder("Assets");
 		CreateFolder("Cache");
 		CreateFolder("Cache/ShaderSource");
@@ -200,6 +201,14 @@ namespace Glory::Editor
 		m_ProjectFile = JSONFileRef(m_ProjectFilePath);
 		m_ProjectFile.Load();
 		Migrate(m_pCurrentProject);
+		if (HasUnsavedChanges())
+		{
+			std::stringstream str;
+			str << "Your project has been migrated to " << GloryEditorVersion << std::endl
+				<< "Some assets may have been edited,\nbut the changes won't be applied until you save.";
+			PopupManager::OpenModal("Migration", str.str(), { "Save Now", "OK" },
+				{ []() { Save(); PopupManager::CloseCurrentPopup(); } , PopupManager::CloseCurrentPopup });
+		}
 		m_ProjectName = m_ProjectFile["ProjectName"].AsString();
 
 		ProjectCallbacks[ProjectCallback::OnOpen].Dispatch(this);
