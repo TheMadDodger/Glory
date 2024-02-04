@@ -33,6 +33,11 @@ namespace Glory
 		return m_pShaderFiles[index];
 	}
 
+	UUID MaterialData::GetShaderIDAt(size_t index) const
+	{
+		return m_Shaders[index];
+	}
+
 	const ShaderType& MaterialData::GetShaderTypeAt(size_t index) const
 	{
 		return m_pShaderFiles[index]->GetShaderType();
@@ -56,9 +61,20 @@ namespace Glory
 		return true;
 	}
 
+	bool MaterialData::AddShader(UUID shaderID)
+	{
+		const auto it = std::find(m_Shaders.begin(), m_Shaders.end(), shaderID);
+		if (it != m_Shaders.end()) return false;
+		m_Shaders.push_back(shaderID);
+		return true;
+	}
+
 	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags)
 	{
 		const uint32_t hash = Reflect::Hash(displayName.data());
+		if (m_HashToPropertyInfoIndex.find(hash) != m_HashToPropertyInfoIndex.end())
+			return;
+
 		const size_t index = m_PropertyInfos.size();
 		size_t lastIndex = index - 1;
 		m_PropertyInfos.emplace_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
@@ -70,8 +86,15 @@ namespace Glory
 	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, uint32_t flags)
 	{
 		const uint32_t hash = Reflect::Hash(displayName.data());
+		if (m_HashToPropertyInfoIndex.find(hash) != m_HashToPropertyInfoIndex.end())
+		{
+			const size_t index = m_HashToPropertyInfoIndex.at(hash);
+			const size_t resourceOffset = m_PropertyInfos[index].Offset();
+			m_Resources[resourceOffset] = resourceUUID;
+			return;
+		}
+
 		const size_t index = m_PropertyInfos.size();
-		size_t lastIndex = index - 1;
 		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_Resources.size(), flags));
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
@@ -185,6 +208,14 @@ namespace Glory
 
 	void MaterialData::Deserialize(BinaryStream& container) const
 	{
+	}
+
+	bool MaterialData::HasShader(const UUID shaderID) const
+	{
+		return std::find_if(m_pShaderFiles.begin(), m_pShaderFiles.end(), [shaderID](ShaderSourceData* pShader)
+		{
+			return pShader->GetUUID() == shaderID;
+		}) != m_pShaderFiles.end();
 	}
 
 	void MaterialData::SetTexture(const std::string& name, TextureData* value)

@@ -6,6 +6,7 @@
 #include "MaterialPropertyInfo.h"
 #include "GraphicsEnums.h"
 #include "AssetReference.h"
+
 #include <vector>
 #include <unordered_map>
 #include <mutex>
@@ -21,10 +22,12 @@ namespace Glory
 
         [[nodiscard]]virtual size_t ShaderCount() const;
         [[nodiscard]]virtual ShaderSourceData* GetShaderAt(size_t index) const;
+        [[nodiscard]]virtual UUID GetShaderIDAt(size_t index) const;
         [[nodiscard]]virtual const ShaderType& GetShaderTypeAt(size_t index) const;
         void RemoveShaderAt(size_t index);
         void RemoveAllShaders();
         bool AddShader(ShaderSourceData* pShaderSourceData);
+        bool AddShader(UUID shaderID);
 
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, uint32_t flags = 0);
@@ -44,6 +47,8 @@ namespace Glory
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) const override;
+
+        bool HasShader(const UUID shaderID) const;
 
     public: // Properties
         // Setters
@@ -78,6 +83,7 @@ namespace Glory
         friend class MaterialInstanceData;
 
         std::vector<ShaderSourceData*> m_pShaderFiles;
+        std::vector<UUID> m_Shaders;
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<char> m_PropertyBuffer;
 

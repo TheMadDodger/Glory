@@ -118,6 +118,9 @@ namespace Glory::Editor
 
 				EditorAssetsWatcher::RunCallbacks();
 
+				/* Run callbacks for compiled shaders */
+				m_ShaderProcessor->RunCallbacks();
+
 				// Start a frame
 				m_pEngine->GameThreadFrameStart();
 
@@ -147,6 +150,9 @@ namespace Glory::Editor
 
 			/* We must wait for graphics to initialize */
 			if (!m_pEngine->GetGraphicsThread()->IsInitialized()) continue;
+
+			/* Run callbacks for compiled shaders */
+			m_ShaderProcessor->RunCallbacks();
 
 			// Start a frame
 			m_pEngine->GameThreadFrameStart();

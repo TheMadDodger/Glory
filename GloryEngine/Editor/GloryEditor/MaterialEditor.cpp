@@ -6,6 +6,7 @@
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
 #include "EditorShaderData.h"
+#include "EditorMaterialManager.h"
 
 #include <imgui.h>
 #include <ResourceType.h>
@@ -199,14 +200,10 @@ namespace Glory::Editor
 		}
 
 		UUID addShaderID = 0;
-		if (AssetPicker::ResourceButton("Add Shader", width, ResourceTypes::GetHash<ShaderSourceData>(), &addShaderID))
+		if (AssetPicker::ResourceButton("Add Shader", width, ResourceTypes::GetHash<ShaderSourceData>(), &addShaderID, false))
 		{
 			if (!EditorAssetDatabase::AssetExists(addShaderID)) return;
-			MaterialData* pMaterial = (MaterialData*)m_pTarget;
-			AssetManager& assets = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
-			ShaderSourceData* pShaderSource = (ShaderSourceData*)assets.GetAssetImmediate(addShaderID);
-			if (!pMaterial->AddShader(pShaderSource)) return;
-			UpdateMaterial(pMaterial);
+			EditorApplication::GetInstance()->GetMaterialManager().AddShaderToMaterial(pMaterial->GetUUID(), addShaderID);
 		}
 	}
 
@@ -305,18 +302,5 @@ namespace Glory::Editor
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
 		}
 		return change;
-	}
-
-	void MaterialEditor::UpdateMaterial(MaterialData* pMaterial)
-	{
-		/*pMaterial->ClearProperties();
-		for (size_t i = 0; i < pMaterial->ShaderCount(); i++)
-		{
-			ShaderSourceData* pShader = pMaterial->GetShaderAt(i);
-			EditorShaderData* pShaderData = EditorShaderProcessor::GetShaderSource(pShader);
-			if (!pShaderData) continue;
-			pShaderData->LoadIntoMaterial(pMaterial);
-		}
-		EditorAssetDatabase::SetAssetDirty(pMaterial);*/
 	}
 }

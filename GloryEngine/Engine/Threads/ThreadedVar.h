@@ -190,14 +190,16 @@ namespace Glory
 		void Do(const _Kty& key, std::function<void(_Ty*)> callback)
 		{
 			m_Mutex.lock();
-			callback(&m_Data[key]);
+			if (m_Data.find(key) == m_Data.end()) return;
+			callback(&m_Data.at(key));
 			m_Mutex.unlock();
 		}
 
 		void DoErase(const _Kty& key, std::function<void(_Ty*)> callback)
 		{
 			m_Mutex.lock();
-			callback(&m_Data[key]);
+			if (m_Data.find(key) == m_Data.end()) return;
+			callback(&m_Data.at(key));
 			m_Data.erase(key);
 			m_Mutex.unlock();
 		}
@@ -240,7 +242,7 @@ namespace Glory
 			m_Mutex.lock();
 			for (auto it = m_Data.begin(); it != m_Data.end(); it++)
 			{
-				callback(it->first, it->second);
+				callback(it->second);
 			}
 			m_Mutex.unlock();
 		}

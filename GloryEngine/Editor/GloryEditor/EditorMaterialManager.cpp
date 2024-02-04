@@ -10,6 +10,8 @@
 #include "EditorApplication.h"
 #include "EditorResourceManager.h"
 #include "EditableResource.h"
+#include "Dispatcher.h"
+#include "EditorShaderData.h"
 
 #include <Serializers.h>
 #include <NodeRef.h>
@@ -21,7 +23,7 @@
 namespace Glory::Editor
 {
 	EditorMaterialManager::EditorMaterialManager(Engine* pEngine):
-		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0)
+		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0), m_ShaderCompiledCallback(0)
 	{
 	}
 
@@ -35,11 +37,16 @@ namespace Glory::Editor
 			[this](const AssetCallbackData& callback) { AssetAddedCallback(callback); });
 		//m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated,
 			//[this](const AssetCallbackData& callback) { AssetUpdatedCallback(callback); });
+
+		m_ShaderCompiledCallback = EditorShaderProcessor::ShaderCompiledEventDispatcher().AddListener([this](const ShaderCompiledEvent& e) {
+			OnShaderCompiled(e.ShaderID);
+		});
 	}
 
 	void EditorMaterialManager::Stop()
 	{
 		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
+		EditorShaderProcessor::ShaderCompiledEventDispatcher().RemoveListener(m_ShaderCompiledCallback);
 		//EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetUpdatedCallback);
 	}
 
@@ -49,6 +56,14 @@ namespace Glory::Editor
 		ReadShadersInto(shaders, pMaterial);
 		auto properties = file["Properties"];
 		ReadPropertiesInto(shaders, pMaterial);
+	}
+
+	void EditorMaterialManager::AddShaderToMaterial(UUID materialID, UUID shaderID)
+	{
+		m_pMaterialDatas.Do(materialID, [shaderID, this](MaterialData* pMaterial) {
+			pMaterial->AddShader(shaderID);
+			UpdateMaterial(pMaterial);
+		});
 	}
 
 	void EditorMaterialManager::AssetAddedCallback(const AssetCallbackData& callback)
@@ -121,11 +136,11 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorMaterialManager::ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialData* pMaterial) const
+	void EditorMaterialManager::ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialData* pMaterial, bool clearProperties) const
 	{
 		if (!properties.IsMap()) return;
+		if (clearProperties) pMaterial->ClearProperties();
 
-		pMaterial->ClearProperties();
 		for (auto itor = properties.Begin(); itor != properties.End(); ++itor)
 		{
 			const std::string name = *itor;
@@ -136,12 +151,13 @@ namespace Glory::Editor
 
 			const BasicTypeData* typeData = m_pEngine->GetResourceTypes().GetBasicTypeData(type);
 
-			const size_t offset = pMaterial->GetCurrentBufferOffset();
-
 			bool isResource = m_pEngine->GetResourceTypes().IsResource(type);
 			if (!isResource)
 			{
 				pMaterial->AddProperty(displayName, name, type, typeData != nullptr ? typeData->m_Size : 4, 0);
+				size_t index = 0;
+				pMaterial->GetPropertyInfoIndex(displayName, index);
+				const size_t offset = pMaterial->GetPropertyInfoAt(index)->Offset();
 				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value.Node());
 			}
 			else
@@ -150,5 +166,31 @@ namespace Glory::Editor
 				pMaterial->AddProperty(displayName, name, type, id);
 			}
 		}
+	}
+
+	void EditorMaterialManager::OnShaderCompiled(const UUID& uuid)
+	{
+		m_pMaterialDatas.ForEach([this, uuid](MaterialData* pMaterial) {
+			if (!pMaterial->HasShader(uuid)) return;
+			UpdateMaterial(pMaterial);
+		});
+	}
+
+	void EditorMaterialManager::UpdateMaterial(MaterialData* pMaterial)
+	{
+		EditorApplication* pApplication = EditorApplication::GetInstance();
+
+		pMaterial->ClearProperties();
+		for (size_t i = 0; i < pMaterial->ShaderCount(); ++i)
+		{
+			const UUID shaderID = pMaterial->GetShaderAt(i)->GetUUID();
+			EditorShaderData* pShader = EditorShaderProcessor::GetEditorShader(shaderID);
+			pShader->LoadIntoMaterial(pMaterial);
+		}
+
+		YAMLResource<MaterialData>* pEditorMaterialData = (YAMLResource<MaterialData>*)pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
+		Utils::YAMLFileRef& file = **pEditorMaterialData;
+		ReadPropertiesInto(file["Properties"], pMaterial, false);
+		/* Update properties in YAML? */
 	}
 }
