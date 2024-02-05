@@ -70,16 +70,17 @@ namespace Glory::Utils
 		bool IsSequence();
 		bool IsMap();
 		YAML::Node Node();
+		const YAML::Node Node() const;
 		const std::filesystem::path& Path();
 		void Erase();
 		NodeValueRef Parent();
 
 		struct Iterator
 		{
-			Iterator(YAML::const_iterator& iter):
+			Iterator(YAML::const_iterator iter):
 				m_Iter(iter) {}
 
-			const std::string operator*() const { return m_Iter->as<std::string>(); }
+			const std::string operator*() const { return m_Iter->first.as<std::string>(); }
 
 			// Prefix increment
 			Iterator& operator++() { ++m_Iter; return *this; }
@@ -94,11 +95,12 @@ namespace Glory::Utils
 			YAML::const_iterator m_Iter;
 		};
 
-		Iterator Begin();
-		Iterator End();
+		Iterator Begin() const;
+		Iterator End() const;
 
 	private:
 		YAML::Node FindNode(YAML::Node& node, std::filesystem::path path);
+		const YAML::Node FindNode(YAML::Node& node, std::filesystem::path path) const;
 
 	private:
 		YAML::Node& m_RootNode;
