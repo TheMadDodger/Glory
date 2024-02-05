@@ -6,6 +6,7 @@
 #include <ResourceMeta.h>
 #include <JobManager.h>
 #include <GloryEditor.h>
+#include <ShaderManager.h>
 
 namespace Glory
 {
@@ -24,7 +25,7 @@ namespace Editor
 		const UUID ShaderID;
 	};
 
-	class EditorShaderProcessor
+	class EditorShaderProcessor : public ShaderManager
 	{
 	public:
 		GLORY_EDITOR_API static ShaderSourceData* GetShaderSource(UUID uuid);

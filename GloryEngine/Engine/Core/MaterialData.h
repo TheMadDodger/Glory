@@ -1,6 +1,5 @@
 #pragma once
 #include "Resource.h"
-#include "ShaderSourceData.h"
 #include "Texture.h"
 #include "MaterialPropertyData.h"
 #include "MaterialPropertyInfo.h"
@@ -13,20 +12,21 @@
 
 namespace Glory
 {
+    class FileData;
+    class ShaderManager;
+
     class MaterialData : public Resource
     {
     public:
         MaterialData();
-        MaterialData(const std::vector<ShaderSourceData*>& shaderFiles);
         virtual ~MaterialData();
 
         [[nodiscard]]virtual size_t ShaderCount() const;
-        [[nodiscard]]virtual ShaderSourceData* GetShaderAt(size_t index) const;
+        [[nodiscard]]virtual ShaderType GetShaderTypeAt(ShaderManager& manager, size_t index) const;
+        [[nodiscard]]virtual FileData* GetShaderAt(ShaderManager& manager, size_t index) const;
         [[nodiscard]]virtual UUID GetShaderIDAt(size_t index) const;
-        [[nodiscard]]virtual const ShaderType& GetShaderTypeAt(size_t index) const;
         void RemoveShaderAt(size_t index);
         void RemoveAllShaders();
-        bool AddShader(ShaderSourceData* pShaderSourceData);
         bool AddShader(UUID shaderID);
 
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
@@ -78,11 +78,8 @@ namespace Glory
         virtual std::vector<char>& GetPropertyBuffer(size_t index);
 
     protected:
-        friend class MaterialLoaderModule;
-        friend class MaterialInstanceLoaderModule;
         friend class MaterialInstanceData;
 
-        std::vector<ShaderSourceData*> m_pShaderFiles;
         std::vector<UUID> m_Shaders;
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<char> m_PropertyBuffer;

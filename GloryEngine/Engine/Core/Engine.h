@@ -46,6 +46,7 @@ namespace Utils::Reflect
 	{
 		Debug* m_pDebug;
 		Console* m_pConsole;
+		ShaderManager* pShaderManager;
 
 		uint32_t MainModuleCount;
 		/* Order should be: 
@@ -230,11 +231,14 @@ namespace Utils::Reflect
 		/* Threads */
 		GraphicsThread* m_pGraphicsThread;
 
+		/* External objects */
 		Console* m_Console;
 		Debug* m_Debug;
+		ShaderManager* m_pShaderManager;
 
 		bool m_Quit = false;
 
+		/* Owned objects */
 		std::unique_ptr<GameTime> m_Time;
 		std::unique_ptr<CameraManager> m_CameraManager;
 		std::unique_ptr<AssetDatabase> m_AssetDatabase;
@@ -243,7 +247,6 @@ namespace Utils::Reflect
 		std::unique_ptr<Serializers> m_Serializers;
 		std::unique_ptr<DisplayManager> m_DisplayManager;
 		std::unique_ptr<LayerManager> m_LayerManager;
-		std::unique_ptr<ShaderManager> m_ShaderManager;
 		std::unique_ptr<Utils::Reflect::Reflect> m_Reflection;
 		std::unique_ptr<ObjectManager> m_ObjectManager;
 		std::unique_ptr<EngineProfiler> m_Profiler;

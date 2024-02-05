@@ -31,14 +31,10 @@ namespace Glory
 		return m_pBaseMaterial->ShaderCount();
 	}
 
-	ShaderSourceData* MaterialInstanceData::GetShaderAt(size_t index) const
+	UUID MaterialInstanceData::GetShaderIDAt(size_t index) const
 	{
-		return m_pBaseMaterial->GetShaderAt(index);
-	}
-
-	const ShaderType& MaterialInstanceData::GetShaderTypeAt(size_t index) const
-	{
-		return m_pBaseMaterial->GetShaderTypeAt(index);
+		if (!m_pBaseMaterial) return 0;
+		return m_pBaseMaterial->GetShaderIDAt(index);
 	}
 
 	MaterialData* MaterialInstanceData::GetBaseMaterial() const

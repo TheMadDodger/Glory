@@ -1,6 +1,7 @@
 #include "MaterialData.h"
 #include "AssetManager.h"
 #include "BinaryStream.h"
+#include "ShaderManager.h"
 
 #include <algorithm>
 
@@ -12,25 +13,26 @@ namespace Glory
 		APPEND_TYPE(MaterialData);
 	}
 
-	MaterialData::MaterialData(const std::vector<ShaderSourceData*>& shaderFiles)
-		: m_pShaderFiles(shaderFiles), m_CurrentOffset(0)
-	{
-		APPEND_TYPE(MaterialData);
-	}
-
 	MaterialData::~MaterialData()
 	{
-		m_pShaderFiles.clear();
+		m_Shaders.clear();
 	}
 
 	size_t MaterialData::ShaderCount() const
 	{
-		return m_pShaderFiles.size();
+		return m_Shaders.size();
 	}
 
-	ShaderSourceData* MaterialData::GetShaderAt(size_t index) const
+	ShaderType MaterialData::GetShaderTypeAt(ShaderManager& manager, size_t index) const
 	{
-		return m_pShaderFiles[index];
+		throw new std::exception("Not yet implemented");
+		return ShaderType::ST_Unknown;
+	}
+
+	FileData* MaterialData::GetShaderAt(ShaderManager& manager, size_t index) const
+	{
+		const UUID shaderID = GetShaderIDAt(index);
+		return manager.GetCompiledShaderFile(shaderID);
 	}
 
 	UUID MaterialData::GetShaderIDAt(size_t index) const
@@ -38,27 +40,14 @@ namespace Glory
 		return m_Shaders[index];
 	}
 
-	const ShaderType& MaterialData::GetShaderTypeAt(size_t index) const
-	{
-		return m_pShaderFiles[index]->GetShaderType();
-	}
-
 	void MaterialData::RemoveShaderAt(size_t index)
 	{
-		m_pShaderFiles.erase(m_pShaderFiles.begin() + index);
+		m_Shaders.erase(m_Shaders.begin() + index);
 	}
 
 	void MaterialData::RemoveAllShaders()
 	{
-		m_pShaderFiles.clear();
-	}
-
-	bool MaterialData::AddShader(ShaderSourceData* pShaderSourceData)
-	{
-		const auto it = std::find(m_pShaderFiles.begin(), m_pShaderFiles.end(), pShaderSourceData);
-		if (it != m_pShaderFiles.end()) return false;
-		m_pShaderFiles.push_back(pShaderSourceData);
-		return true;
+		m_Shaders.clear();
 	}
 
 	bool MaterialData::AddShader(UUID shaderID)
@@ -173,10 +162,10 @@ namespace Glory
 	void MaterialData::Serialize(BinaryStream& container) const
 	{
 		/* Write shader IDs */
-		container.Write(m_pShaderFiles.size());
-		for (size_t i = 0; i < m_pShaderFiles.size(); ++i)
+		container.Write(m_Shaders.size());
+		for (size_t i = 0; i < m_Shaders.size(); ++i)
 		{
-			container.Write(m_pShaderFiles[0]->GetUUID());
+			container.Write(m_Shaders[i]);
 		}
 
 		/* Write property infos */
@@ -212,10 +201,7 @@ namespace Glory
 
 	bool MaterialData::HasShader(const UUID shaderID) const
 	{
-		return std::find_if(m_pShaderFiles.begin(), m_pShaderFiles.end(), [shaderID](ShaderSourceData* pShader)
-		{
-			return pShader->GetUUID() == shaderID;
-		}) != m_pShaderFiles.end();
+		return std::find(m_Shaders.begin(), m_Shaders.end(), shaderID) != m_Shaders.end();
 	}
 
 	void MaterialData::SetTexture(const std::string& name, TextureData* value)

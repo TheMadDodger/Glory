@@ -12,8 +12,7 @@ namespace Glory
 
 	public:
         virtual size_t ShaderCount() const override;
-        virtual ShaderSourceData* GetShaderAt(size_t index) const override;;
-        virtual const ShaderType& GetShaderTypeAt(size_t index) const override;
+		virtual UUID GetShaderIDAt(size_t index) const override;
 
 		MaterialData* GetBaseMaterial() const;
 		void SetBaseMaterial(MaterialData* pMaterial);
@@ -45,7 +44,6 @@ namespace Glory
 		virtual std::vector<char>& GetPropertyBuffer(size_t index) override;
 
 	private:
-		friend class MaterialInstanceLoaderModule;
 		MaterialData* m_pBaseMaterial;
 		std::vector<bool> m_PropertyOverridesEnable;
 	};

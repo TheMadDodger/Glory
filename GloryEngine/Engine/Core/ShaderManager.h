@@ -1,38 +1,24 @@
 #pragma once
 #include "UUID.h"
-#include "FileData.h"
-
-#include <functional>
-#include <unordered_map>
+#include "GraphicsEnums.h"
 
 namespace Glory
 {
 	class Engine;
+	class FileData;
 
 	class ShaderManager
 	{
 	public:
-		virtual ~ShaderManager();
+		ShaderManager(Engine* pEngine);
+		virtual ~ShaderManager() = default;
 
 	public:
-		void OverrideCompiledShadersPathFunc(std::function<std::string()> func);
-		void OverrideMissingShaderHandlerFunc(std::function<void(UUID, std::function<void(FileData*)>)> func);
-		FileData* GetCompiledShaderFile(UUID uuid);
+		virtual ShaderType GetShaderType(UUID shaderID) const = 0;
+		virtual FileData* GetCompiledShaderFile(UUID shaderID) const = 0;
 
-		std::string GetCompiledShaderPath(UUID uuid);
-
-	private:
-		void Cleanup();
-		void RunCallbacks();
-
-	private:
-		ShaderManager(Engine* pEngine);
-
-	private:
+	protected:
 		friend class Engine;
 		Engine* m_pEngine;
-		std::function<std::string()> m_CompiledShadersPathFunc;
-		std::function<void(UUID, std::function<void(FileData*)>)> m_MissingShaderHandlerFunc;
-		std::unordered_map<UUID, FileData*> m_pLoadedShaderFiles;
 	};
 }

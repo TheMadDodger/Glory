@@ -134,10 +134,9 @@ namespace Glory
 		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
 		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
 		{
-			ShaderSourceData* pShaderSourceData = pMaterialData->GetShaderAt(i);
-			FileData* pCompiledShaderSource = pShaderSourceData != nullptr ? pShaderSourceData->GetCompiledShader() : nullptr;
+			FileData* pCompiledShaderSource = pMaterialData->GetShaderAt(m_pEngine->GetShaderManager(), i);
 			if (!pCompiledShaderSource) return nullptr;
-			const ShaderType& shaderType = pMaterialData->GetShaderTypeAt(i);
+			const ShaderType& shaderType = pMaterialData->GetShaderTypeAt(m_pEngine->GetShaderManager(), i);
 			Shader* pShader = CreateShader(pCompiledShaderSource, shaderType, "main");
 			pMaterial->AddShader(pShader);
 		}
