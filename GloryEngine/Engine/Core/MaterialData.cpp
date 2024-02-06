@@ -25,8 +25,8 @@ namespace Glory
 
 	ShaderType MaterialData::GetShaderTypeAt(ShaderManager& manager, size_t index) const
 	{
-		throw new std::exception("Not yet implemented");
-		return ShaderType::ST_Unknown;
+		const UUID shaderID = GetShaderIDAt(index);
+		return manager.GetShaderType(shaderID);
 	}
 
 	FileData* MaterialData::GetShaderAt(ShaderManager& manager, size_t index) const

@@ -1,4 +1,5 @@
 #include "InternalMaterial.h"
+#include "FileData.h"
 
 namespace Glory
 {
@@ -10,6 +11,16 @@ namespace Glory
 	size_t InternalMaterial::ShaderCount() const
 	{
 		return m_pCompiledShaders.size();
+	}
+
+	ShaderType InternalMaterial::GetShaderTypeAt(ShaderManager& manager, size_t index) const
+	{
+		return m_ShaderTypes[index];
+	}
+
+	UUID InternalMaterial::GetShaderIDAt(size_t index) const
+	{
+		return m_pCompiledShaders[index]->GetUUID();
 	}
 
 	FileData* InternalMaterial::GetShaderAt(ShaderManager&, size_t index) const

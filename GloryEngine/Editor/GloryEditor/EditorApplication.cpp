@@ -30,7 +30,7 @@ namespace Glory::Editor
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo):
 		m_pEngine(createInfo.pEngine),
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
-		m_ShaderProcessor(new EditorShaderProcessor()),
+		m_ShaderProcessor(new EditorShaderProcessor(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
 		m_pFileWatcher(new efsw::FileWatcher())
@@ -44,6 +44,8 @@ namespace Glory::Editor
 				m_pExtensions[i] = createInfo.pExtensions[i];
 			}
 		}
+
+		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
 
 		Instance = this;
 	}

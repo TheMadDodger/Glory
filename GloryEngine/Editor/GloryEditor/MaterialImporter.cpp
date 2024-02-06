@@ -61,9 +61,9 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
 		{
 			out << YAML::BeginMap;
-			ShaderSourceData* pShaderSourceData = pMaterialData->GetShaderAt(i);
-			YAML_WRITE(out, UUID, pShaderSourceData->GetUUID());
-			YAML_WRITE(out, Type, pShaderSourceData->GetShaderType());
+			const UUID shaderID = pMaterialData->GetShaderIDAt(i);
+			YAML_WRITE(out, UUID, shaderID);
+			//YAML_WRITE(out, Type, pShaderSourceData->GetShaderType());
 			out << YAML::EndMap;
 		}
 		out << YAML::EndSeq;

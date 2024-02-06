@@ -396,6 +396,11 @@ namespace Glory
 		return *m_Profiler;
 	}
 
+	void Engine::SetShaderManager(ShaderManager* pManager)
+	{
+		m_pShaderManager = pManager;
+	}
+
 	Debug& Engine::GetDebug()
 	{
 		return *m_Debug;

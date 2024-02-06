@@ -130,9 +130,7 @@ namespace Glory::Editor
 
 			const std::string_view assetPath = m_pEngine->GetAssetDatabase().GetAssetPath();
 			const std::string path = std::string{ assetPath } + '\\' + location.Path;
-			ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
-			if (!pShaderSourceData) continue;
-			pMaterial->AddShader(pShaderSourceData);
+			pMaterial->AddShader(shaderID);
 		}
 	}
 
@@ -183,7 +181,7 @@ namespace Glory::Editor
 		pMaterial->ClearProperties();
 		for (size_t i = 0; i < pMaterial->ShaderCount(); ++i)
 		{
-			const UUID shaderID = pMaterial->GetShaderAt(i)->GetUUID();
+			const UUID shaderID = pMaterial->GetShaderIDAt(i);
 			EditorShaderData* pShader = EditorShaderProcessor::GetEditorShader(shaderID);
 			pShader->LoadIntoMaterial(pMaterial);
 		}

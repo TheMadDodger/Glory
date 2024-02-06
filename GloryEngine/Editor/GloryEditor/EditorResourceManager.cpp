@@ -99,6 +99,7 @@ namespace Glory::Editor
 		path.append("Assets").append(location.Path);
 
 		EditableResource* pResource = Importer::CreateEditableResource(path);
+		if (!pResource) return nullptr;
 		pResource->SetResourceUUID(uuid);
 		m_pEditableResources.emplace(uuid, pResource);
 		return pResource;

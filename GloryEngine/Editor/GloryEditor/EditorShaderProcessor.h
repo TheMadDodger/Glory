@@ -16,6 +16,7 @@ namespace Editor
 {
 	struct AssetCallbackData;
 	class EditorShaderData;
+	class EditorApplication;
 
 	template<typename Arg>
 	struct Dispatcher;
@@ -28,14 +29,18 @@ namespace Editor
 	class EditorShaderProcessor : public ShaderManager
 	{
 	public:
+		GLORY_EDITOR_API EditorShaderProcessor(EditorApplication* pApplication);
+		GLORY_EDITOR_API virtual ~EditorShaderProcessor();
+
 		GLORY_EDITOR_API static ShaderSourceData* GetShaderSource(UUID uuid);
+		GLORY_EDITOR_API static bool GetShaderSource(UUID uuid, std::function<void(ShaderSourceData*)> callback);
 		GLORY_EDITOR_API static EditorShaderData* GetEditorShader(UUID uuid);
 
 		using ShaderCompiledDispatcher = Dispatcher<ShaderCompiledEvent>;
 		GLORY_EDITOR_API static ShaderCompiledDispatcher& ShaderCompiledEventDispatcher();
 
-		EditorShaderProcessor();
-		virtual ~EditorShaderProcessor();
+		GLORY_EDITOR_API virtual ShaderType GetShaderType(UUID shaderID) const override;
+		GLORY_EDITOR_API virtual FileData* GetCompiledShaderFile(UUID shaderID) const override;
 
 	private:
 		static EditorShaderData* CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
@@ -55,6 +60,7 @@ namespace Editor
 		static bool CompileShaderJob(UUID uuid);
 
 		static std::filesystem::path GetCompiledShaderPath(UUID uuid);
+		static std::filesystem::path GetShaderCachePath(UUID uuid);
 
 	private:
 		friend class EditorApplication;

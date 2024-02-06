@@ -80,6 +80,11 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
+	bool EditorShaderProcessor::GetShaderSource(UUID uuid, std::function<void(ShaderSourceData*)> callback)
+	{
+		return m_pLoadedShaderSources.Do(uuid, callback);
+	}
+
 	EditorShaderData* EditorShaderProcessor::GetEditorShader(UUID uuid)
 	{
 		if (m_pCompiledShaders.Contains(uuid))
@@ -87,7 +92,8 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
-	EditorShaderProcessor::EditorShaderProcessor() : m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0)
+	EditorShaderProcessor::EditorShaderProcessor(EditorApplication* pApplication):
+		m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0), ShaderManager(pApplication->GetEngine())
 	{
 	}
 
@@ -97,13 +103,13 @@ namespace Glory::Editor
 
 	void EditorShaderProcessor::Start()
 	{
-		EditorApplication::GetInstance()->GetEngine()->GetShaderManager().OverrideCompiledShadersPathFunc([]()
+		/*EditorApplication::GetInstance()->GetEngine()->GetShaderManager().OverrideCompiledShadersPathFunc([]()
 		{
 			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 			if (pProject == nullptr) return std::string("");
 			std::string cachePath = pProject->CachePath() + "\\CompiledShaders\\";
 			return cachePath;
-		});
+		});*/
 
 		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, AssetCallback);
 		m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetUpdatedCallback);
@@ -263,6 +269,22 @@ namespace Glory::Editor
 		return dispatcher;
 	}
 
+	ShaderType EditorShaderProcessor::GetShaderType(UUID shaderID) const
+	{
+		ShaderType type = ShaderType::ST_Unknown;
+		GetShaderSource(shaderID, [&type](ShaderSourceData* pShaderSource) { type = pShaderSource->GetShaderType(); });
+		return type;
+	}
+
+	FileData* EditorShaderProcessor::GetCompiledShaderFile(UUID shaderID) const
+	{
+		FileData* pCompiledShader = nullptr;
+		GetShaderSource(shaderID, [&pCompiledShader](ShaderSourceData* pShaderSource) {
+			pCompiledShader = pShaderSource->GetCompiledShader();
+		});
+		return pCompiledShader;
+	}
+
 	void EditorShaderProcessor::AssetCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
@@ -335,33 +357,33 @@ namespace Glory::Editor
 	{
 		const std::filesystem::path cachedShaderSourceFile = GetCompiledShaderPath(uuid);
 
-		ShaderSourceData* pShaderSource = GetShaderSource(uuid);
+		GetShaderSource(uuid, [uuid, cachedShaderSourceFile](ShaderSourceData* pShaderSource) {
+			EditorShaderData* pEditorShaderData = nullptr;
+			if (std::filesystem::exists(cachedShaderSourceFile))
+				pEditorShaderData = LoadCache(uuid, cachedShaderSourceFile);
+			else
+				m_pLoadedShaderSources.Do(uuid, [&pEditorShaderData, cachedShaderSourceFile](ShaderSourceData* pShaderSource) {
+					pEditorShaderData = CompileAndCache(pShaderSource, cachedShaderSourceFile);
+				});
 
-		EditorShaderData* pEditorShaderData = nullptr;
-		if (std::filesystem::exists(cachedShaderSourceFile))
-			LoadCache(uuid, cachedShaderSourceFile);
-		else
-			m_pLoadedShaderSources.Do(uuid, [&pEditorShaderData, cachedShaderSourceFile](ShaderSourceData* pShaderSource) {
-				pEditorShaderData = CompileAndCache(pShaderSource, cachedShaderSourceFile);
-			});
+			if (pEditorShaderData == nullptr)
+			{
+				m_QueuedShaders.Erase(uuid);
+				return false;
+			}
 
-		if (pEditorShaderData == nullptr)
-		{
-			m_QueuedShaders.Erase(uuid);
-			return false;
-		}
+			ProcessReflection(pEditorShaderData);
 
-		ProcessReflection(pEditorShaderData);
+			const std::string path = GetCompiledShaderPath(pEditorShaderData->GetUUID()).string();
+			CompileForCurrentPlatform(pEditorShaderData, path);
 
-		const std::string path = EditorApplication::GetInstance()->GetEngine()->GetShaderManager().GetCompiledShaderPath(pEditorShaderData->GetUUID());
-		CompileForCurrentPlatform(pEditorShaderData, path);
-
-		FileImportSettings importSettings;
-		importSettings.AddNullTerminateAtEnd = true;
-		importSettings.Flags = std::ios::ate | std::ios::binary;
-		importSettings.m_Extension = "";
-		FileData* pCompiledShader = (FileData*)EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>()->Load(path, importSettings);
-		pShaderSource->SetCompiledShader(pCompiledShader);
+			FileImportSettings importSettings;
+			importSettings.AddNullTerminateAtEnd = true;
+			importSettings.Flags = std::ios::ate | std::ios::binary;
+			importSettings.m_Extension = "";
+			FileData* pCompiledShader = (FileData*)EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>()->Load(path, importSettings);
+			pShaderSource->SetCompiledShader(pCompiledShader);
+		});
 
 		m_QueuedShaders.Erase(uuid);
 		m_FinishedShaders.push_back(uuid);
@@ -374,5 +396,13 @@ namespace Glory::Editor
 		std::filesystem::path cachedShaderSourceFile = pProject->CachePath();
 		cachedShaderSourceFile.append("ShaderSource").append(std::to_string(uuid));
 		return cachedShaderSourceFile;
+	}
+
+	std::filesystem::path EditorShaderProcessor::GetShaderCachePath(UUID uuid)
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (pProject == nullptr) return std::string("");
+		std::string cachePath = pProject->CachePath() + "\\CompiledShaders\\";
+		return cachePath;
 	}
 }

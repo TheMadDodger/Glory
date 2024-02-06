@@ -10,6 +10,7 @@
 
 #include <imgui.h>
 #include <ResourceType.h>
+#include <ShaderSourceData.h>
 #include <GLORY_YAML.h>
 #include <AssetDatabase.h>
 #include <AssetManager.h>

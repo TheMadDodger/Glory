@@ -13,8 +13,13 @@ namespace efsw
 	class FileWatcher;
 }
 
-namespace Glory::Editor
+namespace Glory
 {
+	class Engine;
+
+namespace Editor
+{
+
 	enum class EditorMode
 	{
 		M_Edit,
@@ -51,7 +56,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API bool IsPaused();
 		GLORY_EDITOR_API void Quit();
 		GLORY_EDITOR_API void TryToQuit();
-		GLORY_EDITOR_API Engine* GetEngine();
+		GLORY_EDITOR_API Glory::Engine* GetEngine();
 		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
 		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();
 
@@ -68,7 +73,7 @@ namespace Glory::Editor
 		static void VersionCheck(const Glory::Version& latestVersion);
 
 	private:
-		Engine* m_pEngine;
+		Glory::Engine* m_pEngine;
 
 		EditorPlatform m_Platform;
 		MainEditor m_MainEditor;
@@ -82,4 +87,5 @@ namespace Glory::Editor
 		EditorMode m_Mode = EditorMode::M_Edit;
 		bool m_Running = false;
 	};
+}
 }

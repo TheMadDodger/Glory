@@ -46,7 +46,7 @@ namespace Utils::Reflect
 	{
 		Debug* m_pDebug;
 		Console* m_pConsole;
-		ShaderManager* pShaderManager;
+		ShaderManager* pShaderManager = nullptr;
 
 		uint32_t MainModuleCount;
 		/* Order should be: 
@@ -165,6 +165,8 @@ namespace Utils::Reflect
 		Utils::Reflect::Reflect& Reflection();
 		ObjectManager& GetObjectManager();
 		EngineProfiler& Profiler();
+
+		void SetShaderManager(ShaderManager* pManager);
 
 		template<class T>
 		void AddUserContext(T* pUserContext)
