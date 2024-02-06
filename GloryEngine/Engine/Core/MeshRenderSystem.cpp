@@ -7,6 +7,7 @@
 #include "AssetDatabase.h"
 #include "GScene.h"
 #include "SceneManager.h"
+#include "MaterialManager.h"
 
 #include <EntityRegistry.h>
 
@@ -19,6 +20,7 @@ namespace Glory
         GScene* pScene = pRegistry->GetUserData<GScene*>();
         Engine* pEngine = pScene->Manager()->GetEngine();
         AssetManager* pAssets = &pEngine->GetAssetManager();
+        MaterialManager* pMaterials = &pEngine->GetMaterialManager();
         AssetDatabase* pAssetDB = &pEngine->GetAssetDatabase();
         LayerManager* pLayers = &pEngine->GetLayerManager();
         Debug* pDebug = &pEngine->GetDebug();
@@ -44,7 +46,7 @@ namespace Glory
         }
 
         const UUID materialUUID = pComponent.m_Material.AssetUUID();
-        MaterialData* pMaterial = pAssets->GetOrLoadAsset<MaterialData>(materialUUID);
+        MaterialData* pMaterial = pMaterials->GetMaterial(materialUUID);
 
         if (pMaterial == nullptr)
         {

@@ -46,6 +46,7 @@ namespace Glory::Editor
 		}
 
 		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
+		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 
 		Instance = this;
 	}

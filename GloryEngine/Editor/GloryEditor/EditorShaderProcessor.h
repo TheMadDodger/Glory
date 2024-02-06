@@ -43,8 +43,8 @@ namespace Editor
 		GLORY_EDITOR_API virtual FileData* GetCompiledShaderFile(UUID shaderID) const override;
 
 	private:
-		static EditorShaderData* CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
-		static EditorShaderData* LoadCache(UUID shaderID, std::filesystem::path path);
+		static void CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
+		static void LoadCache(UUID shaderID, std::filesystem::path path);
 
 		void Start();
 		void Stop();
@@ -59,8 +59,8 @@ namespace Editor
 		static bool LoadShaderSourceJob(UUID uuid);
 		static bool CompileShaderJob(UUID uuid);
 
-		static std::filesystem::path GetCompiledShaderPath(UUID uuid);
-		static std::filesystem::path GetShaderCachePath(UUID uuid);
+		static std::filesystem::path GetShaderSourceCachePath(UUID uuid);
+		static std::filesystem::path GetCompiledShaderCachePath(UUID uuid);
 
 	private:
 		friend class EditorApplication;

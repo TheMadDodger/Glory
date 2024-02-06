@@ -1,6 +1,8 @@
 #pragma once
-#include <ThreadedVar.h>
 #include <UUID.h>
+#include <MaterialManager.h>
+
+#include <map>
 
 namespace Glory
 {
@@ -18,7 +20,7 @@ namespace Editor
 {
 	struct AssetCallbackData;
 
-	class EditorMaterialManager
+	class EditorMaterialManager : public MaterialManager
 	{
 	public:
 		EditorMaterialManager(Engine* pEngine);
@@ -30,6 +32,8 @@ namespace Editor
 		void LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialData* pMaterial) const;
 
 		void AddShaderToMaterial(UUID materialID, UUID shaderID);
+
+		virtual MaterialData* GetMaterial(UUID materialID) const override;
 
 	private:
 		void AssetAddedCallback(const AssetCallbackData& callback);
@@ -43,7 +47,7 @@ namespace Editor
 		void UpdateMaterial(MaterialData* pMaterial);
 
 	private:
-		ThreadedUMap<UUID, MaterialData*> m_pMaterialDatas;
+		std::map<UUID, MaterialData*> m_pMaterialDatas;
 
 		Engine* m_pEngine;
 		UUID m_AssetRegisteredCallback;

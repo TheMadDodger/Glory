@@ -23,7 +23,8 @@
 namespace Glory::Editor
 {
 	EditorMaterialManager::EditorMaterialManager(Engine* pEngine):
-		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0), m_ShaderCompiledCallback(0)
+		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0),
+		m_ShaderCompiledCallback(0), MaterialManager(pEngine)
 	{
 	}
 
@@ -60,10 +61,17 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::AddShaderToMaterial(UUID materialID, UUID shaderID)
 	{
-		m_pMaterialDatas.Do(materialID, [shaderID, this](MaterialData* pMaterial) {
-			pMaterial->AddShader(shaderID);
-			UpdateMaterial(pMaterial);
-		});
+		auto itor = m_pMaterialDatas.find(materialID);
+		if (itor == m_pMaterialDatas.end()) return;
+		itor->second->AddShader(shaderID);
+		UpdateMaterial(itor->second);
+	}
+
+	MaterialData* EditorMaterialManager::GetMaterial(UUID materialID) const
+	{
+		auto itor = m_pMaterialDatas.find(materialID);
+		if (itor == m_pMaterialDatas.end()) return nullptr;
+		return itor->second;
 	}
 
 	void EditorMaterialManager::AssetAddedCallback(const AssetCallbackData& callback)
@@ -84,26 +92,25 @@ namespace Glory::Editor
 
 		const uint32_t typeHash = meta.Hash();
 		static const size_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
-		if (typeHash == materialDataHash)
+		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
+		if (typeHash == materialDataHash || typeHash == materialInstanceDataHash)
 		{
-			if (m_pMaterialDatas.Contains(callback.m_UUID))
-			{
-				EditableResource* pEditableResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(callback.m_UUID);
-				if (!pEditableResource) return;
-				YAMLResource<MaterialData>* pEditableMaterial = static_cast<YAMLResource<MaterialData>*>(pEditableResource);
-				m_pMaterialDatas.Do(callback.m_UUID, [this, pEditableMaterial](MaterialData** pMaterial) {
-					/* Overwrite the material with new data */
-					LoadIntoMaterial(**pEditableMaterial, *pMaterial);
-				});
-			}
+			//auto itor = m_pMaterialDatas.find(callback.m_UUID);
+			//
+			//if (itor != m_pMaterialDatas.end())
+			//{
+			//	EditableResource* pEditableResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(callback.m_UUID);
+			//	if (!pEditableResource) return;
+			//	YAMLResource<MaterialData>* pEditableMaterial = static_cast<YAMLResource<MaterialData>*>(pEditableResource);
+			//	LoadIntoMaterial(**pEditableMaterial, itor->second);
+			//}
 
 			/* Immediately import the material, which is fast */
 			Resource* pResource = Importer::Import(assetPath, nullptr);
 			if (!pResource) return;
 			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
 			pMaterial->SetResourceUUID(callback.m_UUID);
-			m_pEngine->GetAssetManager().AddLoadedResource(pMaterial);
-			m_pMaterialDatas.Set(callback.m_UUID, pMaterial);
+			m_pMaterialDatas[callback.m_UUID] = pMaterial;
 		}
 	}
 
@@ -168,10 +175,11 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::OnShaderCompiled(const UUID& uuid)
 	{
-		m_pMaterialDatas.ForEach([this, uuid](MaterialData* pMaterial) {
-			if (!pMaterial->HasShader(uuid)) return;
-			UpdateMaterial(pMaterial);
-		});
+		for (auto itor = m_pMaterialDatas.begin(); itor != m_pMaterialDatas.end(); ++itor)
+		{
+			if (!itor->second->HasShader(uuid)) continue;
+			UpdateMaterial(itor->second);
+		}
 	}
 
 	void EditorMaterialManager::UpdateMaterial(MaterialData* pMaterial)
@@ -183,6 +191,7 @@ namespace Glory::Editor
 		{
 			const UUID shaderID = pMaterial->GetShaderIDAt(i);
 			EditorShaderData* pShader = EditorShaderProcessor::GetEditorShader(shaderID);
+			if (!pShader) continue;
 			pShader->LoadIntoMaterial(pMaterial);
 		}
 
