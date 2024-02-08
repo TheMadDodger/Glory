@@ -70,7 +70,7 @@ namespace Glory::Editor
 	MaterialData* EditorMaterialManager::GetMaterial(UUID materialID) const
 	{
 		auto itor = m_pMaterialDatas.find(materialID);
-		if (itor == m_pMaterialDatas.end()) return nullptr;
+		if (itor == m_pMaterialDatas.end()) return GetMaterialInstance(materialID);
 		return itor->second;
 	}
 
@@ -93,7 +93,7 @@ namespace Glory::Editor
 		const uint32_t typeHash = meta.Hash();
 		static const size_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
 		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
-		if (typeHash == materialDataHash || typeHash == materialInstanceDataHash)
+		if (typeHash == materialDataHash)
 		{
 			//auto itor = m_pMaterialDatas.find(callback.m_UUID);
 			//
@@ -112,6 +112,18 @@ namespace Glory::Editor
 			pMaterial->SetResourceUUID(callback.m_UUID);
 			m_pMaterialDatas[callback.m_UUID] = pMaterial;
 		}
+		else if (typeHash == materialInstanceDataHash)
+		{
+			/* Immediately import the material, which is fast */
+			Resource* pResource = Importer::Import(assetPath, nullptr);
+			if (!pResource) return;
+			MaterialInstanceData* pMaterial = static_cast<MaterialInstanceData*>(pResource);
+			pMaterial->SetResourceUUID(callback.m_UUID);
+			m_pMaterialInstanceDatas[callback.m_UUID] = pMaterial;
+
+			/* If the base material is already loaded, we can update the material instance */
+
+		}
 	}
 
 	void EditorMaterialManager::AssetUpdatedCallback(const AssetCallbackData& callback)
@@ -120,6 +132,7 @@ namespace Glory::Editor
 		EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta);
 		const uint32_t typeHash = meta.Hash();
 		static const size_t shaderSourceDataHash = ResourceTypes::GetHash<MaterialData>();
+		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
 		if (typeHash != shaderSourceDataHash) return;
 	}
 
@@ -161,9 +174,9 @@ namespace Glory::Editor
 			{
 				pMaterial->AddProperty(displayName, name, type, typeData != nullptr ? typeData->m_Size : 4, 0);
 				size_t index = 0;
-				pMaterial->GetPropertyInfoIndex(displayName, index);
-				const size_t offset = pMaterial->GetPropertyInfoAt(index)->Offset();
-				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value.Node());
+				pMaterial->GetPropertyInfoIndex(*this, displayName, index);
+				const size_t offset = pMaterial->GetPropertyInfoAt(*this, index)->Offset();
+				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(*this), type, offset, typeData != nullptr ? typeData->m_Size : 4, value.Node());
 			}
 			else
 			{
@@ -187,9 +200,9 @@ namespace Glory::Editor
 		EditorApplication* pApplication = EditorApplication::GetInstance();
 
 		pMaterial->ClearProperties();
-		for (size_t i = 0; i < pMaterial->ShaderCount(); ++i)
+		for (size_t i = 0; i < pMaterial->ShaderCount(*this); ++i)
 		{
-			const UUID shaderID = pMaterial->GetShaderIDAt(i);
+			const UUID shaderID = pMaterial->GetShaderIDAt(*this, i);
 			EditorShaderData* pShader = EditorShaderProcessor::GetEditorShader(shaderID);
 			if (!pShader) continue;
 			pShader->LoadIntoMaterial(pMaterial);
@@ -199,5 +212,24 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **pEditorMaterialData;
 		ReadPropertiesInto(file["Properties"], pMaterial, false);
 		/* Update properties in YAML? */
+
+		/* Find and update material instances */
+		for (auto itor = m_pMaterialInstanceDatas.begin(); itor != m_pMaterialInstanceDatas.end(); ++itor)
+		{
+			if (itor->second->BaseMaterialID() != pMaterial->GetUUID()) continue;
+			UpdateMaterialInstance(itor->second, pMaterial);
+		}
+	}
+
+	void EditorMaterialManager::UpdateMaterialInstance(MaterialInstanceData* pMaterial, MaterialData* pBaseMaterial)
+	{
+
+	}
+
+	MaterialInstanceData* EditorMaterialManager::GetMaterialInstance(UUID materialID) const
+	{
+		auto itor = m_pMaterialInstanceDatas.find(materialID);
+		if (itor == m_pMaterialInstanceDatas.end()) return nullptr;
+		return itor->second;
 	}
 }

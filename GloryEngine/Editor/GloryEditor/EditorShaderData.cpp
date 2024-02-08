@@ -35,15 +35,17 @@ namespace Glory::Editor
 
 	void EditorShaderData::LoadIntoMaterial(MaterialData* pMaterial)
 	{
+		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
+
 		for (size_t i = 0; i < m_SamplerNames.size(); i++)
 		{
 			pMaterial->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<ImageData>(), 0);
 		}
 
-		if (pMaterial->GetCurrentBufferOffset() > 0) return; // Already added from other shader
+		if (pMaterial->GetCurrentBufferOffset(manager) > 0) return; // Already added from other shader
 		for (size_t i = 0; i < m_PropertyInfos.size(); i++)
 		{
-			EditorShaderData::PropertyInfo info = m_PropertyInfos[i];
+			EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];
 			ResourceTypes& types = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
 			const BasicTypeData* pType = types.GetBasicTypeData(info.m_TypeHash);
 			pMaterial->AddProperty(info.m_Name, info.m_Name, pType->m_TypeHash, pType->m_Size, 0);

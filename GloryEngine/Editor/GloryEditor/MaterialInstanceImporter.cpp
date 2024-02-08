@@ -49,43 +49,42 @@ namespace Glory::Editor
 		YAML::Node node;
 		UUID baseMaterial = 0;
 		YAML_READ(rootNode, node, BaseMaterial, baseMaterial, uint64_t);
-		EditorApplication::GetInstance()->GetEngine();
-		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MaterialData>(baseMaterial);
-		MaterialInstanceData* pMaterialInstanceData = new MaterialInstanceData(pMaterialData);
+		MaterialInstanceData* pMaterialInstanceData = new MaterialInstanceData(baseMaterial);
 		ReadPropertyOverrides(rootNode, pMaterialInstanceData);
 		return pMaterialInstanceData;
 	}
 
 	void MaterialInstanceImporter::SaveMaterialInstanceData(MaterialInstanceData* pMaterialData, YAML::Emitter& out) const
 	{
-		MaterialData* pBaseMaterial = pMaterialData->GetBaseMaterial();
-		UUID baseMaterial = pBaseMaterial ? pBaseMaterial->GetUUID() : 0;
+		const UUID baseMaterial = pMaterialData->BaseMaterialID();
 		YAML_WRITE(out, BaseMaterial, baseMaterial);
+
+		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
 
 		out << YAML::Key << "Overrides";
 		out << YAML::Value << YAML::BeginSeq;
-		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(); ++i)
+		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(manager); ++i)
 		{
-			MaterialPropertyInfo* pInfo = pMaterialData->GetPropertyInfoAt(i);
+			const MaterialPropertyInfo* pInfo = pMaterialData->GetPropertyInfoAt(manager, i);
 			size_t propertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(pInfo->DisplayName(), propertyIndex)) continue;
-			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
+			if (!pMaterialData->GetPropertyInfoIndex(manager, pInfo->DisplayName(), propertyIndex)) continue;
+			const MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(manager, propertyIndex);
 			if (!pMaterialData->IsPropertyOverriden(i)) continue;
 
 			out << YAML::BeginMap;
 			YAML_WRITE(out, DisplayName, pInfo->DisplayName());
 			if (!propertyInfo->IsResource())
 			{
-				uint32_t typeHash = propertyInfo->TypeHash();
-				size_t offset = propertyInfo->Offset();
-				size_t size = propertyInfo->Size();
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(), typeHash, offset, size, out);
+				const uint32_t typeHash = propertyInfo->TypeHash();
+				const size_t offset = propertyInfo->Offset();
+				const size_t size = propertyInfo->Size();
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(manager), typeHash, offset, size, out);
 			}
 			else
 			{
-				size_t resourceIndex = propertyInfo->Offset();
-				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
-				const UUID uuid = pMaterialData->GetResourceUUIDPointer(index)->AssetUUID();
+				const size_t resourceIndex = propertyInfo->Offset();
+				const size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(manager, resourceIndex);
+				const UUID uuid = pMaterialData->GetResourceUUIDPointer(manager, index)->AssetUUID();
 				out << YAML::Key << "Value" << YAML::Value << uuid;
 			}
 			out << YAML::EndMap;
@@ -95,6 +94,8 @@ namespace Glory::Editor
 
 	void MaterialInstanceImporter::ReadPropertyOverrides(YAML::Node& rootNode, MaterialInstanceData* pMaterialData) const
 	{
+		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
+
 		YAML::Node propertiesNode = rootNode["Overrides"];
 		if (!propertiesNode.IsSequence()) return;
 
@@ -106,10 +107,10 @@ namespace Glory::Editor
 			YAML_READ(propertyNode, node, DisplayName, displayName, std::string);
 
 			size_t propertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(displayName, propertyIndex)) continue;
+			if (!pMaterialData->GetPropertyInfoIndex(manager, displayName, propertyIndex)) continue;
 			pMaterialData->EnableProperty(propertyIndex);
 
-			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(propertyIndex);
+			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(manager, propertyIndex);
 
 			node = propertyNode["Value"];
 
@@ -118,13 +119,13 @@ namespace Glory::Editor
 				uint32_t typeHash = propertyInfo->TypeHash();
 				size_t offset = propertyInfo->Offset();
 				size_t size = propertyInfo->Size();
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(), typeHash, offset, size, node);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(manager), typeHash, offset, size, node);
 			}
 			else
 			{
 				UUID id = node.as<uint64_t>();
 				size_t resourceIndex = propertyInfo->Offset();
-				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(resourceIndex) = id;
+				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(manager, resourceIndex) = id;
 			}
 		}
 	}

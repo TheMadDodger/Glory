@@ -18,24 +18,24 @@ namespace Glory
 		m_Shaders.clear();
 	}
 
-	size_t MaterialData::ShaderCount() const
+	size_t MaterialData::ShaderCount(const MaterialManager&) const
 	{
 		return m_Shaders.size();
 	}
 
-	ShaderType MaterialData::GetShaderTypeAt(ShaderManager& manager, size_t index) const
+	ShaderType MaterialData::GetShaderTypeAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const
 	{
-		const UUID shaderID = GetShaderIDAt(index);
+		const UUID shaderID = GetShaderIDAt(materialManager, index);
 		return manager.GetShaderType(shaderID);
 	}
 
-	FileData* MaterialData::GetShaderAt(ShaderManager& manager, size_t index) const
+	FileData* MaterialData::GetShaderAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const
 	{
-		const UUID shaderID = GetShaderIDAt(index);
+		const UUID shaderID = GetShaderIDAt(materialManager, index);
 		return manager.GetCompiledShaderFile(shaderID);
 	}
 
-	UUID MaterialData::GetShaderIDAt(size_t index) const
+	UUID MaterialData::GetShaderIDAt(const MaterialManager&, size_t index) const
 	{
 		return m_Shaders[index];
 	}
@@ -90,32 +90,32 @@ namespace Glory
 		m_Resources.push_back(resourceUUID);
 	}
 
-	size_t MaterialData::PropertyInfoCount() const
+	size_t MaterialData::PropertyInfoCount(const MaterialManager&) const
 	{
 		return m_PropertyInfos.size();
 	}
 
-	MaterialPropertyInfo* MaterialData::GetPropertyInfoAt(size_t index)
+	MaterialPropertyInfo* MaterialData::GetPropertyInfoAt(const MaterialManager& , size_t index)
 	{
 		return &m_PropertyInfos[index];
 	}
 
-	size_t MaterialData::GetCurrentBufferOffset() const
+	size_t MaterialData::GetCurrentBufferOffset(const MaterialManager&) const
 	{
 		return m_CurrentOffset;
 	}
 
-	std::vector<char>& MaterialData::GetBufferReference()
+	std::vector<char>& MaterialData::GetBufferReference(const MaterialManager&)
 	{
 		return m_PropertyBuffer;
 	}
 
-	std::vector<char>& MaterialData::GetFinalBufferReference()
+	std::vector<char>& MaterialData::GetFinalBufferReference(MaterialManager&)
 	{
 		return m_PropertyBuffer;
 	}
 
-	bool MaterialData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
+	bool MaterialData::GetPropertyInfoIndex(const MaterialManager&, const std::string& name, size_t& index) const
 	{
 		const uint32_t hash = Reflect::Hash(name.data());
 		if (m_HashToPropertyInfoIndex.find(hash) == m_HashToPropertyInfoIndex.end()) return false;
@@ -128,23 +128,23 @@ namespace Glory
 		return m_Resources.size();
 	}
 
-	AssetReference<TextureData>* MaterialData::GetResourceUUIDPointer(size_t index)
+	AssetReference<TextureData>* MaterialData::GetResourceUUIDPointer(MaterialManager&, size_t index)
 	{
 		return &m_Resources[index];
 	}
 
-	size_t MaterialData::GetResourcePropertyCount() const
+	size_t MaterialData::GetResourcePropertyCount(MaterialManager&) const
 	{
 		return m_ResourcePropertyInfoIndices.size();
 	}
 
-	MaterialPropertyInfo* MaterialData::GetResourcePropertyInfo(size_t index)
+	MaterialPropertyInfo* MaterialData::GetResourcePropertyInfo(MaterialManager&, size_t index)
 	{
 		size_t propertyIndex = m_ResourcePropertyInfoIndices[index];
 		return &m_PropertyInfos[index];
 	}
 
-	size_t MaterialData::GetPropertyIndexFromResourceIndex(size_t index) const
+	size_t MaterialData::GetPropertyIndexFromResourceIndex(MaterialManager&, size_t index) const
 	{
 		return m_ResourcePropertyInfoIndices[index];
 	}
@@ -204,22 +204,22 @@ namespace Glory
 		return std::find(m_Shaders.begin(), m_Shaders.end(), shaderID) != m_Shaders.end();
 	}
 
-	void MaterialData::SetTexture(const std::string& name, TextureData* value)
+	void MaterialData::SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value)
 	{
 		size_t index;
-		if (!GetPropertyInfoIndex(name, index)) return;
+		if (!GetPropertyInfoIndex(materialManager, name, index)) return;
 		EnableProperty(index);
-		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
 		if (!pPropertyInfo->IsResource()) return;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		m_Resources[resourceIndex] = value ? value->GetUUID() : 0;
 	}
 
-	bool MaterialData::GetTexture(const std::string& name, TextureData** value, AssetManager* pManager)
+	bool MaterialData::GetTexture(MaterialManager& materialManager, const std::string& name, TextureData** value, AssetManager* pManager)
 	{
 		size_t index;
-		if (!GetPropertyInfoIndex(name, index)) return false;
-		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
+		if (!GetPropertyInfoIndex(materialManager, name, index)) return false;
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
 		if (!pPropertyInfo->IsResource()) return false;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		*value = m_Resources[resourceIndex].Get(pManager);
@@ -230,7 +230,7 @@ namespace Glory
 	{
 	}
 
-	std::vector<char>& MaterialData::GetPropertyBuffer(size_t)
+	std::vector<char>& MaterialData::GetPropertyBuffer(MaterialManager&, size_t)
 	{
 		return m_PropertyBuffer;
 	}

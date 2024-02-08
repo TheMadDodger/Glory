@@ -132,11 +132,11 @@ namespace Glory
 		pMaterial->m_pOwner = this;
 		pMaterial->m_pMaterialData = pMaterialData;
 		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
-		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
+		for (size_t i = 0; i < pMaterialData->ShaderCount(m_pEngine->GetMaterialManager()); i++)
 		{
-			FileData* pCompiledShaderSource = pMaterialData->GetShaderAt(m_pEngine->GetShaderManager(), i);
+			FileData* pCompiledShaderSource = pMaterialData->GetShaderAt(m_pEngine->GetMaterialManager(), m_pEngine->GetShaderManager(), i);
 			if (!pCompiledShaderSource) return nullptr;
-			const ShaderType& shaderType = pMaterialData->GetShaderTypeAt(m_pEngine->GetShaderManager(), i);
+			const ShaderType& shaderType = pMaterialData->GetShaderTypeAt(m_pEngine->GetMaterialManager(), m_pEngine->GetShaderManager(), i);
 			Shader* pShader = CreateShader(pCompiledShaderSource, shaderType, "main");
 			pMaterial->AddShader(pShader);
 		}

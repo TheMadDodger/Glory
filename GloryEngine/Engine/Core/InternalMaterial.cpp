@@ -8,22 +8,22 @@ namespace Glory
 	{
 	}
 
-	size_t InternalMaterial::ShaderCount() const
+	size_t InternalMaterial::ShaderCount(const MaterialManager&) const
 	{
 		return m_pCompiledShaders.size();
 	}
 
-	ShaderType InternalMaterial::GetShaderTypeAt(ShaderManager& manager, size_t index) const
+	ShaderType InternalMaterial::GetShaderTypeAt(const MaterialManager&, ShaderManager& manager, size_t index) const
 	{
 		return m_ShaderTypes[index];
 	}
 
-	UUID InternalMaterial::GetShaderIDAt(size_t index) const
+	UUID InternalMaterial::GetShaderIDAt(const MaterialManager&, size_t index) const
 	{
 		return m_pCompiledShaders[index]->GetUUID();
 	}
 
-	FileData* InternalMaterial::GetShaderAt(ShaderManager&, size_t index) const
+	FileData* InternalMaterial::GetShaderAt(const MaterialManager&, ShaderManager&, size_t index) const
 	{
 		return m_pCompiledShaders[index];
 	}

@@ -20,17 +20,17 @@ namespace Glory
 	{
 		if (m_pMaterialData == nullptr) return;
 
-		for (size_t i = 0; i < m_pMaterialData->GetResourcePropertyCount(); i++)
+		for (size_t i = 0; i < m_pMaterialData->GetResourcePropertyCount(pEngine->GetMaterialManager()); i++)
 		{
-			MaterialPropertyInfo* pPropertyInfo = m_pMaterialData->GetResourcePropertyInfo(i);
+			MaterialPropertyInfo* pPropertyInfo = m_pMaterialData->GetResourcePropertyInfo(pEngine->GetMaterialManager(), i);
 			const std::string& shaderName = pPropertyInfo->ShaderName();
-			const UUID uuid = m_pMaterialData->GetResourceUUIDPointer(i)->AssetUUID();
+			const UUID uuid = m_pMaterialData->GetResourceUUIDPointer(pEngine->GetMaterialManager(), i)->AssetUUID();
 			TextureData* pTextureData = pEngine->GetAssetManager().GetOrLoadAsset<TextureData>(uuid);
 			Texture* pTexture = pTextureData != nullptr ? pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateTexture(pTextureData) : nullptr;
 			SetTexture(shaderName, pTexture);
 		}
 
-		std::vector<char>& propertyBuffer = m_pMaterialData->GetBufferReference();
+		std::vector<char>& propertyBuffer = m_pMaterialData->GetBufferReference(pEngine->GetMaterialManager());
 		if (propertyBuffer.empty()) return;
 		if (m_pPropertiesBuffer == nullptr) m_pPropertiesBuffer = CreatePropertiesBuffer((uint32_t)propertyBuffer.size());
 		m_pPropertiesBuffer->Assign((const void*)propertyBuffer.data());

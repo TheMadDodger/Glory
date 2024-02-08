@@ -1,48 +1,49 @@
 #include "MaterialInstanceData.h"
 #include "ResourceType.h"
 #include "BinaryStream.h"
+#include "MaterialManager.h"
 
 #include <algorithm>
 
 namespace Glory
 {
-	MaterialInstanceData::MaterialInstanceData() : m_pBaseMaterial(nullptr)
+	MaterialInstanceData::MaterialInstanceData() : m_BaseMaterial(0)
 	{
 	}
 
-	MaterialInstanceData::MaterialInstanceData(MaterialData* pBaseMaterial) : m_pBaseMaterial(pBaseMaterial)
+	MaterialInstanceData::MaterialInstanceData(UUID baseMaterial) : m_BaseMaterial(baseMaterial)
 	{
-		APPEND_TYPE(MaterialInstanceData);
-
-		if (!pBaseMaterial) return;
-		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
-		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
-		m_Resources.resize(pBaseMaterial->ResourceCount());
 	}
 
 	MaterialInstanceData::~MaterialInstanceData()
 	{
-		m_pBaseMaterial = nullptr;
 	}
 
-	size_t MaterialInstanceData::ShaderCount() const
+	size_t MaterialInstanceData::ShaderCount(const MaterialManager& manager) const
 	{
-		if (!m_pBaseMaterial) return 0;
-		return m_pBaseMaterial->ShaderCount();
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return 0;
+		return pBaseMaterial->ShaderCount(manager);
 	}
 
-	UUID MaterialInstanceData::GetShaderIDAt(size_t index) const
+	UUID MaterialInstanceData::GetShaderIDAt(const MaterialManager& manager, size_t index) const
 	{
-		if (!m_pBaseMaterial) return 0;
-		return m_pBaseMaterial->GetShaderIDAt(index);
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return 0;
+		return pBaseMaterial->GetShaderIDAt(manager, index);
 	}
 
-	MaterialData* MaterialInstanceData::GetBaseMaterial() const
+	UUID MaterialInstanceData::BaseMaterialID() const
 	{
-		return m_pBaseMaterial;
+		return m_BaseMaterial;
 	}
 
-	void MaterialInstanceData::SetBaseMaterial(MaterialData* pMaterial)
+	MaterialData* MaterialInstanceData::GetBaseMaterial(const MaterialManager& manager) const
+	{
+		return m_BaseMaterial ? manager.GetMaterial(m_BaseMaterial) : nullptr;
+	}
+
+	/*void MaterialInstanceData::SetBaseMaterial(UUID uuid)
 	{
 		m_pBaseMaterial = pMaterial;
 
@@ -55,12 +56,11 @@ namespace Glory
 		}
 
 		ReloadProperties();
-	}
+	}*/
 
 	UUID MaterialInstanceData::GetGPUUUID() const
 	{
-		if (!m_pBaseMaterial) return 0;
-		return m_pBaseMaterial->GetUUID();
+		return m_BaseMaterial;
 	}
 
 	void MaterialInstanceData::CopyOverrideStates(std::vector<bool>& destination)
@@ -79,31 +79,36 @@ namespace Glory
 		lock.unlock();
 	}
 
-	size_t MaterialInstanceData::PropertyInfoCount() const
+	size_t MaterialInstanceData::PropertyInfoCount(const MaterialManager& manager) const
 	{
-		if (!m_pBaseMaterial) return 0;
-		return m_pBaseMaterial->PropertyInfoCount();
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return 0;
+		return pBaseMaterial->PropertyInfoCount(manager);
 	}
 
-	MaterialPropertyInfo* MaterialInstanceData::GetPropertyInfoAt(size_t index)
+	MaterialPropertyInfo* MaterialInstanceData::GetPropertyInfoAt(const MaterialManager& manager, size_t index)
 	{
-		return m_pBaseMaterial->GetPropertyInfoAt(index);
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return nullptr;
+		return pBaseMaterial->GetPropertyInfoAt(manager, index);
 	}
 
-	size_t MaterialInstanceData::GetCurrentBufferOffset() const
+	size_t MaterialInstanceData::GetCurrentBufferOffset(const MaterialManager& manager) const
 	{
-		if (!m_pBaseMaterial) return 0;
-		return m_pBaseMaterial->GetCurrentBufferOffset();
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return 0;
+		return pBaseMaterial->GetCurrentBufferOffset(manager);
 	}
 
-	std::vector<char>& MaterialInstanceData::GetBufferReference()
+	std::vector<char>& MaterialInstanceData::GetBufferReference(const MaterialManager& manager)
 	{
-		if (!m_pBaseMaterial) return m_PropertyBuffer;
-		std::vector<char>& baseBuffer = m_pBaseMaterial->GetBufferReference();
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return m_PropertyBuffer;
+		std::vector<char>& baseBuffer = pBaseMaterial->GetBufferReference(manager);
 		m_PropertyBuffer.resize(baseBuffer.size());
-		for (size_t i = 0; i < m_pBaseMaterial->PropertyInfoCount(); i++)
+		for (size_t i = 0; i < pBaseMaterial->PropertyInfoCount(manager); i++)
 		{
-			MaterialPropertyInfo* propertyInfo = m_pBaseMaterial->GetPropertyInfoAt(i);
+			MaterialPropertyInfo* propertyInfo = pBaseMaterial->GetPropertyInfoAt(manager, i);
 			if (propertyInfo->IsResource()) continue;
 			if (m_PropertyOverridesEnable[i]) continue;
 			memcpy(&m_PropertyBuffer[propertyInfo->Offset()], &baseBuffer[propertyInfo->Offset()], propertyInfo->Size());
@@ -111,39 +116,51 @@ namespace Glory
 		return m_PropertyBuffer;
 	}
 
-	bool MaterialInstanceData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
+	bool MaterialInstanceData::GetPropertyInfoIndex(const MaterialManager& manager, const std::string& name, size_t& index) const
 	{
-		return m_pBaseMaterial ? m_pBaseMaterial->GetPropertyInfoIndex(name, index) : false;
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return false;
+		return pBaseMaterial->GetPropertyInfoIndex(manager, name, index);
 	}
 
-	AssetReference<TextureData>* MaterialInstanceData::GetResourceUUIDPointer(size_t index)
+	AssetReference<TextureData>* MaterialInstanceData::GetResourceUUIDPointer(MaterialManager& manager, size_t index)
 	{
-		size_t propertyIndex = GetPropertyIndexFromResourceIndex(index);
-		return m_PropertyOverridesEnable[propertyIndex] ? &m_Resources[index] : m_pBaseMaterial->GetResourceUUIDPointer(index);
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return &m_Resources[index];
+		const size_t propertyIndex = GetPropertyIndexFromResourceIndex(manager, index);
+		return m_PropertyOverridesEnable[propertyIndex] ? &m_Resources[index] : pBaseMaterial->GetResourceUUIDPointer(manager, index);
 	}
 
-	size_t MaterialInstanceData::GetPropertyIndexFromResourceIndex(size_t index) const
+	size_t MaterialInstanceData::GetPropertyIndexFromResourceIndex(MaterialManager& manager, size_t index) const
 	{
-		return m_pBaseMaterial->GetPropertyIndexFromResourceIndex(index);
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return 0;
+		return pBaseMaterial->GetPropertyIndexFromResourceIndex(manager, index);
 	}
 
-	size_t MaterialInstanceData::GetResourcePropertyCount() const
+	size_t MaterialInstanceData::GetResourcePropertyCount(MaterialManager& manager) const
 	{
-		return m_pBaseMaterial->GetResourcePropertyCount();
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return 0;
+		return pBaseMaterial->GetResourcePropertyCount(manager);
 	}
 
-	MaterialPropertyInfo* MaterialInstanceData::GetResourcePropertyInfo(size_t index)
+	MaterialPropertyInfo* MaterialInstanceData::GetResourcePropertyInfo(MaterialManager& manager, size_t index)
 	{
-		return m_pBaseMaterial->GetResourcePropertyInfo(index);
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return nullptr;
+		return pBaseMaterial->GetResourcePropertyInfo(manager, index);
 	}
 
-	void MaterialInstanceData::ReloadProperties()
+	/*void MaterialInstanceData::ReloadProperties()
 	{
-		if (!m_pBaseMaterial || m_PropertyBuffer.size() == m_pBaseMaterial->GetBufferReference().size()) return;
-		m_PropertyOverridesEnable.resize(m_pBaseMaterial->PropertyInfoCount(), false);
-		m_PropertyBuffer.resize(m_pBaseMaterial->GetBufferReference().size());
-		m_Resources.resize(m_pBaseMaterial->ResourceCount());
-	}
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return;
+		if (!pBaseMaterial || m_PropertyBuffer.size() == pBaseMaterial->GetBufferReference().size()) return;
+		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
+		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
+		m_Resources.resize(pBaseMaterial->ResourceCount());
+	}*/
 
 	bool MaterialInstanceData::IsPropertyOverriden(size_t index) const
 	{
@@ -158,7 +175,7 @@ namespace Glory
 	void MaterialInstanceData::Serialize(BinaryStream& container) const
 	{
 		/* Write base material */
-		container.Write(m_pBaseMaterial->GetUUID());
+		container.Write(m_BaseMaterial);
 
 		/* Write overrides */
 		for (size_t i = 0; i < m_PropertyOverridesEnable.size(); ++i)
@@ -182,9 +199,11 @@ namespace Glory
 	{
 	}
 
-	std::vector<char>& MaterialInstanceData::GetPropertyBuffer(size_t index)
+	std::vector<char>& MaterialInstanceData::GetPropertyBuffer(MaterialManager& manager, size_t index)
 	{
-		if (!m_PropertyOverridesEnable[index]) return m_pBaseMaterial->m_PropertyBuffer;
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return m_PropertyBuffer;
+		if (!m_PropertyOverridesEnable[index]) return pBaseMaterial->m_PropertyBuffer;
 		return m_PropertyBuffer;
 	}
 }

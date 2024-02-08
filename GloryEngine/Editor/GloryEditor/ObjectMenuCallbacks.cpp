@@ -409,8 +409,10 @@ namespace Glory::Editor
 		std::string fileName = pMaterial ? pMaterial->Name() + "Instance.gminst" : "NewMaterialInstance.gminst";
 		path = path.append(fileName);
 		path = GetUnqiueFilePath(path);
-		MaterialInstanceData* pMaterialData = new MaterialInstanceData(pMaterial);
-		EditorAssetDatabase::CreateAsset(pMaterialData, path.string());
+		/* @todo */
+		//MaterialInstanceData* pMaterialData = new MaterialInstanceData(pMaterial);
+		//EditorAssetDatabase::CreateAsset(pMaterialData, path.string());
+		throw new std::exception("Not implemented");
 
 		FileBrowserItem::GetSelectedFolder()->Refresh();
 		FileBrowserItem::GetSelectedFolder()->SortChildren();

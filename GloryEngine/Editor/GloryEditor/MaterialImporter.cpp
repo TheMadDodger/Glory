@@ -56,12 +56,14 @@ namespace Glory::Editor
 
 	void MaterialImporter::WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData) const
 	{
+		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
+
 		out << YAML::Key << "Shaders";
 		out << YAML::Value << YAML::BeginSeq;
-		for (size_t i = 0; i < pMaterialData->ShaderCount(); i++)
+		for (size_t i = 0; i < pMaterialData->ShaderCount(manager); i++)
 		{
 			out << YAML::BeginMap;
-			const UUID shaderID = pMaterialData->GetShaderIDAt(i);
+			const UUID shaderID = pMaterialData->GetShaderIDAt(manager, i);
 			YAML_WRITE(out, UUID, shaderID);
 			//YAML_WRITE(out, Type, pShaderSourceData->GetShaderType());
 			out << YAML::EndMap;
@@ -71,15 +73,17 @@ namespace Glory::Editor
 
 	void MaterialImporter::WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData) const
 	{
+		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
+
 		out << YAML::Key << "Properties";
 		out << YAML::Value << YAML::BeginSeq;
 
 		size_t resourceIndex = 0;
-		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(); i++)
+		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(manager); i++)
 		{
 			out << YAML::BeginMap;
 
-			MaterialPropertyInfo* pPropertyInfo = pMaterialData->GetPropertyInfoAt(i);
+			MaterialPropertyInfo* pPropertyInfo = pMaterialData->GetPropertyInfoAt(manager, i);
 			std::string name;
 			YAML_WRITE(out, DisplayName, pPropertyInfo->DisplayName());
 			YAML_WRITE(out, ShaderName, pPropertyInfo->ShaderName());
@@ -88,13 +92,13 @@ namespace Glory::Editor
 			bool isResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().IsResource(pPropertyInfo->TypeHash());
 			if (!isResource)
 			{
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), out);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(manager), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), out);
 			}
 			else
 			{
-				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
+				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(manager, resourceIndex);
 				++resourceIndex;
-				const UUID uuid = pMaterialData->GetResourceUUIDPointer(index)->AssetUUID();
+				const UUID uuid = pMaterialData->GetResourceUUIDPointer(manager, index)->AssetUUID();
 				out << YAML::Key << "Value" << YAML::Value << uuid;
 			}
 

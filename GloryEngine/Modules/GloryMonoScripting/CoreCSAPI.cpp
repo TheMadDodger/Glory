@@ -237,7 +237,7 @@ namespace Glory
 			return;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		pMaterial->Set<T>(propNameStr, value);
+		pMaterial->Set<T>(Core_EngineInstance->GetMaterialManager(), propNameStr, value);
 	}
 
 	template<typename T>
@@ -250,7 +250,7 @@ namespace Glory
 			return false;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		return pMaterial->Get<T>(propNameStr, value);
+		return pMaterial->Get<T>(Core_EngineInstance->GetMaterialManager(), propNameStr, value);
 	}
 
 	void Material_SetTexture(uint64_t matID, MonoString* propName, uint64_t value)
@@ -263,7 +263,7 @@ namespace Glory
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
 		TextureData* pImage = value ? Core_EngineInstance->GetAssetManager().GetAssetImmediate<TextureData>(value) : nullptr;
-		pMaterial->SetTexture(propNameStr, pImage);
+		pMaterial->SetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, pImage);
 	}
 
 	bool Material_GetTexture(uint64_t matID, MonoString* propName, uint64_t& value)
@@ -277,7 +277,7 @@ namespace Glory
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
 		TextureData* pImage = nullptr;
-		if (!pMaterial->GetTexture(propNameStr, &pImage, &pManager)) return false;
+		if (!pMaterial->GetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, &pImage, &pManager)) return false;
 		value = pImage ? pImage->GetUUID() : 0;
 		return true;
 	}
