@@ -161,16 +161,6 @@ namespace Glory
 		m_Resources.resize(pBase->ResourceCount());
 	}
 
-	/*void MaterialInstanceData::ReloadProperties()
-	{
-		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
-		if (!pBaseMaterial) return;
-		if (!pBaseMaterial || m_PropertyBuffer.size() == pBaseMaterial->GetBufferReference().size()) return;
-		m_PropertyOverridesEnable.resize(pBaseMaterial->PropertyInfoCount(), false);
-		m_PropertyBuffer.resize(pBaseMaterial->GetBufferReference().size());
-		m_Resources.resize(pBaseMaterial->ResourceCount());
-	}*/
-
 	bool MaterialInstanceData::IsPropertyOverriden(size_t index) const
 	{
 		return m_PropertyOverridesEnable[index];

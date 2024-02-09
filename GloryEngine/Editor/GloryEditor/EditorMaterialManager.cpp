@@ -13,6 +13,7 @@
 #include "Dispatcher.h"
 #include "EditorShaderData.h"
 #include "MaterialInstanceImporter.h"
+#include "AssetManager.h"
 
 #include <Serializers.h>
 #include <NodeRef.h>
@@ -31,9 +32,12 @@ namespace Glory::Editor
 
 	EditorMaterialManager::~EditorMaterialManager()
 	{
+		m_pMaterialDatas.clear();
+		m_pMaterialInstanceDatas.clear();
+		m_WaitingMaterialInstances.clear();
 	}
 
-	void EditorMaterialManager::Start()
+	void EditorMaterialManager::Initialize()
 	{
 		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered,
 			[this](const AssetCallbackData& callback) { AssetAddedCallback(callback); });
@@ -45,7 +49,7 @@ namespace Glory::Editor
 		});
 	}
 
-	void EditorMaterialManager::Stop()
+	void EditorMaterialManager::Cleanup()
 	{
 		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
 		EditorShaderProcessor::ShaderCompiledEventDispatcher().RemoveListener(m_ShaderCompiledCallback);
@@ -96,19 +100,15 @@ namespace Glory::Editor
 		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
 		if (typeHash == materialDataHash)
 		{
-			//auto itor = m_pMaterialDatas.find(callback.m_UUID);
-			//
-			//if (itor != m_pMaterialDatas.end())
-			//{
-			//	EditableResource* pEditableResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(callback.m_UUID);
-			//	if (!pEditableResource) return;
-			//	YAMLResource<MaterialData>* pEditableMaterial = static_cast<YAMLResource<MaterialData>*>(pEditableResource);
-			//	LoadIntoMaterial(**pEditableMaterial, itor->second);
-			//}
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
+			if (!pResource)
+			{
+				/* Immediately import the material, which is fast */
+				pResource = Importer::Import(assetPath, nullptr);
+				if (!pResource) return;
+				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+			}
 
-			/* Immediately import the material, which is fast */
-			Resource* pResource = Importer::Import(assetPath, nullptr);
-			if (!pResource) return;
 			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
 			pMaterial->SetResourceUUID(callback.m_UUID);
 			m_pMaterialDatas[callback.m_UUID] = pMaterial;
@@ -132,9 +132,15 @@ namespace Glory::Editor
 		}
 		else if (typeHash == materialInstanceDataHash)
 		{
-			/* Immediately import the material, which is fast */
-			Resource* pResource = Importer::Import(assetPath, nullptr);
-			if (!pResource) return;
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
+			if (!pResource)
+			{
+				/* Immediately import the material, which is fast */
+				pResource = Importer::Import(assetPath, nullptr);
+				if (!pResource) return;
+				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+			}
+
 			MaterialInstanceData* pMaterial = static_cast<MaterialInstanceData*>(pResource);
 			pMaterial->SetResourceUUID(callback.m_UUID);
 			m_pMaterialInstanceDatas[callback.m_UUID] = pMaterial;

@@ -89,7 +89,7 @@ namespace Glory::Editor
 		m_MainEditor.Destroy();
 		m_Platform.Destroy();
 		m_ShaderProcessor->Stop();
-		m_MaterialManager->Stop();
+		m_MaterialManager->Cleanup();
 
 		GloryAPI::Cleanup();
 
@@ -109,7 +109,7 @@ namespace Glory::Editor
 		m_pEngine->StartThreads();
 		m_Platform.SetState(Idle);
 		m_ShaderProcessor->Start();
-		m_MaterialManager->Start();
+		m_MaterialManager->Initialize();
 
 		m_Running = true;
 		if (m_Platform.m_Windowless)
