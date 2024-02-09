@@ -110,7 +110,7 @@ namespace Glory
 		{
 			MaterialPropertyInfo* propertyInfo = pBaseMaterial->GetPropertyInfoAt(manager, i);
 			if (propertyInfo->IsResource()) continue;
-			if (m_PropertyOverridesEnable[i]) continue;
+			if (m_PropertyOverridesEnable.size() <= i || m_PropertyOverridesEnable[i]) continue;
 			memcpy(&m_PropertyBuffer[propertyInfo->Offset()], &baseBuffer[propertyInfo->Offset()], propertyInfo->Size());
 		}
 		return m_PropertyBuffer;
@@ -150,6 +150,15 @@ namespace Glory
 		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
 		if (!pBaseMaterial) return nullptr;
 		return pBaseMaterial->GetResourcePropertyInfo(manager, index);
+	}
+
+	void MaterialInstanceData::Resize(const MaterialManager& manager, MaterialData* pBase)
+	{
+		if (!pBase) return;
+		if (!pBase || m_PropertyBuffer.size() == pBase->GetBufferReference(manager).size()) return;
+		m_PropertyOverridesEnable.resize(pBase->PropertyInfoCount(manager), false);
+		m_PropertyBuffer.resize(pBase->GetBufferReference(manager).size());
+		m_Resources.resize(pBase->ResourceCount());
 	}
 
 	/*void MaterialInstanceData::ReloadProperties()

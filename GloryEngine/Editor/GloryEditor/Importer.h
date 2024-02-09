@@ -17,6 +17,7 @@ namespace Glory::Editor
 	{
 	public:
 		GLORY_EDITOR_API static Resource* Import(const std::filesystem::path& path, void* pImportSettings);
+		GLORY_EDITOR_API static Importer* GetImporter(const std::filesystem::path& path);
 		GLORY_EDITOR_API static bool Export(const std::filesystem::path& path, Resource* pResource);
 		GLORY_EDITOR_API static void Register(Importer* pImporter);
 		GLORY_EDITOR_API static EditableResource* CreateEditableResource(const std::filesystem::path& path);

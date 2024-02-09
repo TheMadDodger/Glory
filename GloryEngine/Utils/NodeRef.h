@@ -65,10 +65,10 @@ namespace Glory::Utils
 		void Insert(YAML::Node& node, size_t index);
 		size_t Size();
 
-		bool Exists();
-		bool IsScalar();
-		bool IsSequence();
-		bool IsMap();
+		bool Exists() const;
+		bool IsScalar() const;
+		bool IsSequence() const;
+		bool IsMap() const;
 		YAML::Node Node();
 		const YAML::Node Node() const;
 		const std::filesystem::path& Path();

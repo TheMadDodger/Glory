@@ -12,6 +12,7 @@
 #include "EditableResource.h"
 #include "Dispatcher.h"
 #include "EditorShaderData.h"
+#include "MaterialInstanceImporter.h"
 
 #include <Serializers.h>
 #include <NodeRef.h>
@@ -56,7 +57,7 @@ namespace Glory::Editor
 		auto shaders = file["Shaders"];
 		ReadShadersInto(shaders, pMaterial);
 		auto properties = file["Properties"];
-		ReadPropertiesInto(shaders, pMaterial);
+		ReadPropertiesInto(properties, pMaterial);
 	}
 
 	void EditorMaterialManager::AddShaderToMaterial(UUID materialID, UUID shaderID)
@@ -111,6 +112,23 @@ namespace Glory::Editor
 			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
 			pMaterial->SetResourceUUID(callback.m_UUID);
 			m_pMaterialDatas[callback.m_UUID] = pMaterial;
+
+			/* Update material instances that were waiting for this material */
+			auto itor = m_WaitingMaterialInstances.find(callback.m_UUID);
+			if (itor == m_WaitingMaterialInstances.end()) return;
+			for (size_t i = 0; i < itor->second.size(); ++i)
+			{
+				const UUID matInstance = itor->second[i];
+				MaterialInstanceData* pMatInst = GetMaterialInstance(matInstance);
+				if (!pMatInst) continue;
+				MaterialInstanceImporter* pImporter = static_cast<MaterialInstanceImporter*>(Importer::GetImporter(".gminst"));
+				if (!pImporter) continue;
+				EditableResource* pEditResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(matInstance);
+				Utils::YAMLFileRef& file = **static_cast<YAMLResource<MaterialInstanceData>*>(pEditResource);
+				pImporter->ReadPropertyOverrides(file, pMatInst);
+			}
+			itor->second.clear();
+			m_WaitingMaterialInstances.erase(itor);
 		}
 		else if (typeHash == materialInstanceDataHash)
 		{
@@ -121,8 +139,10 @@ namespace Glory::Editor
 			pMaterial->SetResourceUUID(callback.m_UUID);
 			m_pMaterialInstanceDatas[callback.m_UUID] = pMaterial;
 
-			/* If the base material is already loaded, we can update the material instance */
-
+			/* If the base material isnt loaded we must update it when it is */
+			const UUID baseMaterial = pMaterial->BaseMaterialID();
+			if (!baseMaterial || m_pMaterialDatas.find(baseMaterial) != m_pMaterialDatas.end()) return;
+			m_WaitingMaterialInstances[baseMaterial].push_back(callback.m_UUID);
 		}
 	}
 
@@ -217,13 +237,8 @@ namespace Glory::Editor
 		for (auto itor = m_pMaterialInstanceDatas.begin(); itor != m_pMaterialInstanceDatas.end(); ++itor)
 		{
 			if (itor->second->BaseMaterialID() != pMaterial->GetUUID()) continue;
-			UpdateMaterialInstance(itor->second, pMaterial);
+			itor->second->Resize(*this, itor->second);
 		}
-	}
-
-	void EditorMaterialManager::UpdateMaterialInstance(MaterialInstanceData* pMaterial, MaterialData* pBaseMaterial)
-	{
-
 	}
 
 	MaterialInstanceData* EditorMaterialManager::GetMaterialInstance(UUID materialID) const

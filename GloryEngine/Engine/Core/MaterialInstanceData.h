@@ -18,7 +18,6 @@ namespace Glory
 
 		UUID BaseMaterialID() const;
 		MaterialData* GetBaseMaterial(const MaterialManager& manager) const;
-		//void SetBaseMaterial(UUID );
 
 		virtual UUID GetGPUUUID() const;
 
@@ -35,7 +34,7 @@ namespace Glory
 		virtual size_t GetResourcePropertyCount(MaterialManager& manager) const override;
 		virtual MaterialPropertyInfo* GetResourcePropertyInfo(MaterialManager& manager, size_t index) override;
 
-		//void ReloadProperties(MaterialManager& manager);
+		void Resize(const MaterialManager& manager, MaterialData* pBase);
 
 		bool IsPropertyOverriden(size_t index) const;
 		virtual void EnableProperty(size_t index) override;

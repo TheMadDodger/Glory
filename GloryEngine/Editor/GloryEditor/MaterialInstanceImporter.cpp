@@ -1,5 +1,6 @@
 #include "MaterialInstanceImporter.h"
 #include "EditorApplication.h"
+#include "MaterialManager.h"
 
 #include <fstream>
 #include <AssetManager.h>
@@ -27,8 +28,9 @@ namespace Glory::Editor
 
 	MaterialInstanceData* MaterialInstanceImporter::LoadResource(const std::filesystem::path& path) const
 	{
-		YAML::Node rootNode = YAML::LoadFile(path.string());
-		return LoadMaterialInstanceData(rootNode);
+		Utils::YAMLFileRef file{ path };
+		file.Load();
+		return LoadMaterialInstanceData(file);
 	}
 
 	bool MaterialInstanceImporter::SaveResource(const std::filesystem::path& path, MaterialInstanceData* pResource) const
@@ -44,13 +46,11 @@ namespace Glory::Editor
 		return true;
 	}
 
-	MaterialInstanceData* MaterialInstanceImporter::LoadMaterialInstanceData(YAML::Node& rootNode) const
+	MaterialInstanceData* MaterialInstanceImporter::LoadMaterialInstanceData(Utils::YAMLFileRef& file) const
 	{
-		YAML::Node node;
-		UUID baseMaterial = 0;
-		YAML_READ(rootNode, node, BaseMaterial, baseMaterial, uint64_t);
+		const UUID baseMaterial = file["BaseMaterial"].As<uint64_t>();
 		MaterialInstanceData* pMaterialInstanceData = new MaterialInstanceData(baseMaterial);
-		ReadPropertyOverrides(rootNode, pMaterialInstanceData);
+		ReadPropertyOverrides(file, pMaterialInstanceData);
 		return pMaterialInstanceData;
 	}
 
@@ -92,38 +92,41 @@ namespace Glory::Editor
 		out << YAML::EndSeq;
 	}
 
-	void MaterialInstanceImporter::ReadPropertyOverrides(YAML::Node& rootNode, MaterialInstanceData* pMaterialData) const
+	void MaterialInstanceImporter::ReadPropertyOverrides(Utils::YAMLFileRef& file, MaterialInstanceData* pMaterialData) const
 	{
 		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
 
-		YAML::Node propertiesNode = rootNode["Overrides"];
-		if (!propertiesNode.IsSequence()) return;
+		MaterialData* baseMaterial = manager.GetMaterial(pMaterialData->BaseMaterialID());
+		if (!baseMaterial) return;
+		pMaterialData->Resize(manager, baseMaterial);
 
-		for (size_t i = 0; i < propertiesNode.size(); i++)
+		Utils::NodeValueRef propertiesNode = file["Overrides"];
+		if (!propertiesNode.IsMap()) return;
+
+		for (auto itor = propertiesNode.Begin(); itor != propertiesNode.End(); ++itor)
 		{
-			YAML::Node propertyNode = propertiesNode[i];
-			YAML::Node node;
-			std::string displayName;
-			YAML_READ(propertyNode, node, DisplayName, displayName, std::string);
+			const std::string displayName = *itor;
+			auto prop = propertiesNode[displayName];
+			const bool enable = prop["Enable"].As<bool>();
 
 			size_t propertyIndex = 0;
 			if (!pMaterialData->GetPropertyInfoIndex(manager, displayName, propertyIndex)) continue;
-			pMaterialData->EnableProperty(propertyIndex);
+			if (enable) pMaterialData->EnableProperty(propertyIndex);
 
 			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(manager, propertyIndex);
 
-			node = propertyNode["Value"];
+			YAML::Node value = prop["Value"].Node();
 
 			if (!propertyInfo->IsResource())
 			{
-				uint32_t typeHash = propertyInfo->TypeHash();
-				size_t offset = propertyInfo->Offset();
-				size_t size = propertyInfo->Size();
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(manager), typeHash, offset, size, node);
+				const uint32_t typeHash = propertyInfo->TypeHash();
+				const size_t offset = propertyInfo->Offset();
+				const size_t size = propertyInfo->Size();
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(manager), typeHash, offset, size, value);
 			}
 			else
 			{
-				UUID id = node.as<uint64_t>();
+				const UUID id = value.as<uint64_t>();
 				size_t resourceIndex = propertyInfo->Offset();
 				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(manager, resourceIndex) = id;
 			}

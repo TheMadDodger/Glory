@@ -3,6 +3,11 @@
 #include <MaterialInstanceData.h>
 #include <yaml-cpp/yaml.h>
 
+namespace Glory::Utils
+{
+	struct YAMLFileRef;
+}
+
 namespace Glory::Editor
 {
 	class MaterialInstanceImporter : public YAMLImporterTemplate<MaterialInstanceData>
@@ -18,12 +23,13 @@ namespace Glory::Editor
 		virtual MaterialInstanceData* LoadResource(const std::filesystem::path& path) const override;
 		bool SaveResource(const std::filesystem::path& path, MaterialInstanceData* pResource) const override;
 
-		MaterialInstanceData* LoadMaterialInstanceData(YAML::Node& rootNode) const;
+		MaterialInstanceData* LoadMaterialInstanceData(Utils::YAMLFileRef& file) const;
 
 		void SaveMaterialInstanceData(MaterialInstanceData* pMaterialData, YAML::Emitter& out) const;
-		void ReadPropertyOverrides(YAML::Node& rootNode, MaterialInstanceData* pMaterialData) const;
+		void ReadPropertyOverrides(Utils::YAMLFileRef& file, MaterialInstanceData* pMaterialData) const;
 
 	private:
+		friend class EditorMaterialManager;
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
 	};

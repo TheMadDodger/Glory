@@ -65,22 +65,22 @@ namespace Glory::Utils
 		return Node().size();
 	}
 
-	bool NodeValueRef::Exists()
+	bool NodeValueRef::Exists() const
 	{
 		return Node().IsDefined();
 	}
 
-	bool NodeValueRef::IsScalar()
+	bool NodeValueRef::IsScalar() const
 	{
 		return Node().IsScalar();
 	}
 
-	bool NodeValueRef::IsSequence()
+	bool NodeValueRef::IsSequence() const
 	{
 		return Node().IsSequence();
 	}
 
-	bool NodeValueRef::IsMap()
+	bool NodeValueRef::IsMap() const
 	{
 		return Node().IsMap();
 	}

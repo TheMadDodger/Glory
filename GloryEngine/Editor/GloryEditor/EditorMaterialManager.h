@@ -45,13 +45,13 @@ namespace Editor
 		void OnShaderCompiled(const UUID& uuid);
 
 		void UpdateMaterial(MaterialData* pMaterial);
-		void UpdateMaterialInstance(MaterialInstanceData* pMaterial, MaterialData* pBaseMaterial);
 
 		MaterialInstanceData* GetMaterialInstance(UUID materialID) const;
 
 	private:
 		std::map<UUID, MaterialData*> m_pMaterialDatas;
 		std::map<UUID, MaterialInstanceData*> m_pMaterialInstanceDatas;
+		std::map<UUID, std::vector<UUID>> m_WaitingMaterialInstances;
 
 		Engine* m_pEngine;
 		UUID m_AssetRegisteredCallback;
