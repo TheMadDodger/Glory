@@ -62,34 +62,8 @@ namespace Glory::Editor
 		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
 
 		out << YAML::Key << "Overrides";
-		out << YAML::Value << YAML::BeginSeq;
-		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(manager); ++i)
-		{
-			const MaterialPropertyInfo* pInfo = pMaterialData->GetPropertyInfoAt(manager, i);
-			size_t propertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(manager, pInfo->DisplayName(), propertyIndex)) continue;
-			const MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(manager, propertyIndex);
-			if (!pMaterialData->IsPropertyOverriden(i)) continue;
-
-			out << YAML::BeginMap;
-			YAML_WRITE(out, DisplayName, pInfo->DisplayName());
-			if (!propertyInfo->IsResource())
-			{
-				const uint32_t typeHash = propertyInfo->TypeHash();
-				const size_t offset = propertyInfo->Offset();
-				const size_t size = propertyInfo->Size();
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(manager), typeHash, offset, size, out);
-			}
-			else
-			{
-				const size_t resourceIndex = propertyInfo->Offset();
-				const size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(manager, resourceIndex);
-				const UUID uuid = pMaterialData->GetResourceUUIDPointer(manager, index)->AssetUUID();
-				out << YAML::Key << "Value" << YAML::Value << uuid;
-			}
-			out << YAML::EndMap;
-		}
-		out << YAML::EndSeq;
+		out << YAML::Value << YAML::BeginMap;
+		out << YAML::EndMap;
 	}
 
 	void MaterialInstanceImporter::ReadPropertyOverrides(Utils::YAMLFileRef& file, MaterialInstanceData* pMaterialData) const

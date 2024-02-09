@@ -85,10 +85,8 @@ namespace Glory::Editor
 				ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
 
 				if (!prop.Exists()) {
-					prop["DisplayName"].Set(sampler);
-					prop["ShaderName"].Set(sampler);
-					prop["TypeHash"].Set(imageDataHash);
 					prop["Value"].Set(0);
+					prop["Enable"].Set(enable);
 				}
 				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
 				auto baseValue = baseProperties[sampler]["Value"];
