@@ -16,6 +16,7 @@ namespace Glory::Editor
 	private:
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;
 		virtual MonoScript* LoadResource(const std::filesystem::path& path) const override;
+		virtual bool SaveResource(const std::filesystem::path& path, MonoScript* pScript) const override;
 
 	private:
 		virtual void Initialize() override {};

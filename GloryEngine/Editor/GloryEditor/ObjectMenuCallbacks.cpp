@@ -380,12 +380,16 @@ namespace Glory::Editor
 		std::filesystem::path path = FileBrowser::GetCurrentPath();
 		path = path.append("NewTexture.gtex");
 		path = GetUnqiueFilePath(path);
-		TextureData* pTextureData = new TextureData();
-		EditorAssetDatabase::CreateAsset(pTextureData, path.string());
 
-		FileBrowserItem::GetSelectedFolder()->Refresh();
-		FileBrowserItem::GetSelectedFolder()->SortChildren();
-		FileBrowser::BeginRename(path.filename().string(), false);
+		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [](std::filesystem::path& finalPath) {
+			finalPath.replace_extension("gtex");
+			if (std::filesystem::exists(finalPath)) return;
+
+			TextureData* pTextureData = new TextureData();
+			EditorAssetDatabase::CreateAsset(pTextureData, finalPath.string());
+			FileBrowserItem::GetSelectedFolder()->Refresh();
+			FileBrowserItem::GetSelectedFolder()->SortChildren();
+		});
 	}
 
 	OBJECTMENU_CALLBACK(CreateNewMaterialCallback)
@@ -393,12 +397,16 @@ namespace Glory::Editor
 		std::filesystem::path path = FileBrowser::GetCurrentPath();
 		path = path.append("NewMaterial.gmat");
 		path = GetUnqiueFilePath(path);
-		MaterialData* pMaterialData = new MaterialData();
-		EditorAssetDatabase::CreateAsset(pMaterialData, path.string());
 
-		FileBrowserItem::GetSelectedFolder()->Refresh();
-		FileBrowserItem::GetSelectedFolder()->SortChildren();
-		FileBrowser::BeginRename(path.filename().string(), false);
+		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [](std::filesystem::path& finalPath) {
+			finalPath.replace_extension("gmat");
+			if (std::filesystem::exists(finalPath)) return;
+
+			MaterialData* pMaterialData = new MaterialData();
+			EditorAssetDatabase::CreateAsset(pMaterialData, finalPath.string());
+			FileBrowserItem::GetSelectedFolder()->Refresh();
+			FileBrowserItem::GetSelectedFolder()->SortChildren();
+		});
 	}
 
 	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback)
@@ -409,23 +417,30 @@ namespace Glory::Editor
 		std::string fileName = pMaterial ? pMaterial->Name() + "Instance.gminst" : "NewMaterialInstance.gminst";
 		path = path.append(fileName);
 		path = GetUnqiueFilePath(path);
-		MaterialInstanceData* pMaterialData = new MaterialInstanceData(pMaterial->GetUUID());
-		EditorAssetDatabase::CreateAsset(pMaterialData, path.string());
 
-		FileBrowserItem::GetSelectedFolder()->Refresh();
-		FileBrowserItem::GetSelectedFolder()->SortChildren();
-		FileBrowser::BeginRename(fileName, false);
+		const UUID baseMaterial = pMaterial ? pMaterial->GetUUID() : 0;
+		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [baseMaterial](std::filesystem::path& finalPath) {
+			finalPath.replace_extension("gminst");
+			if (std::filesystem::exists(finalPath)) return;
+
+			MaterialInstanceData* pMaterialData = new MaterialInstanceData(baseMaterial);
+			EditorAssetDatabase::CreateAsset(pMaterialData, finalPath.replace_extension("gminst").string());
+			FileBrowserItem::GetSelectedFolder()->Refresh();
+			FileBrowserItem::GetSelectedFolder()->SortChildren();
+		});
 	}
 
 	OBJECTMENU_CALLBACK(CreateNewFolderCallback)
 	{
 		std::filesystem::path path = FileBrowserItem::GetCurrentPath();
 		path = GetUnqiueFilePath(path.append("New Folder"));
-		if (!std::filesystem::create_directory(path)) return;
 
-		FileBrowserItem::GetSelectedFolder()->Refresh();
-		FileBrowserItem::GetSelectedFolder()->SortChildren();
-		FileBrowser::BeginRename(path.filename().string(), true);
+		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "folder", [](std::filesystem::path& finalPath) {
+			if (std::filesystem::exists(finalPath)) return;
+			if (!std::filesystem::create_directory(finalPath.string())) return;
+			FileBrowserItem::GetSelectedFolder()->Refresh();
+			FileBrowserItem::GetSelectedFolder()->SortChildren();
+		});
 	}
 
 	OBJECTMENU_CALLBACK(RenameItemCallback)

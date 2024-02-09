@@ -220,12 +220,15 @@ namespace Glory::Editor
 		std::filesystem::path path = FileBrowserItem::GetCurrentPath();
 		path = GetUnqiueFilePath(path.append("New CSharp Script.cs"));
 
-		MonoScript* pMonoScript = new MonoScript();
-		EditorAssetDatabase::CreateAsset(pMonoScript, path.string());
+		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [](std::filesystem::path& finalPath) {
+			finalPath.replace_extension("cs");
+			if (std::filesystem::exists(finalPath)) return;
 
-		FileBrowserItem::GetSelectedFolder()->Refresh();
-		FileBrowserItem::GetSelectedFolder()->SortChildren();
-		FileBrowser::BeginRename(path.filename().string(), false);
+			MonoScript* pMonoScript = new MonoScript();
+			EditorAssetDatabase::CreateAsset(pMonoScript, finalPath.string());
+			FileBrowserItem::GetSelectedFolder()->Refresh();
+			FileBrowserItem::GetSelectedFolder()->SortChildren();
+		});
 	}
 
 	void MonoEditorExtension::OnOpenCSharpProject(Object* pObject, const ObjectMenuType& menuType)
