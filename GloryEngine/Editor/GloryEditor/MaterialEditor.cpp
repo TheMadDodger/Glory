@@ -65,7 +65,10 @@ namespace Glory::Editor
 		}
 
 		if (change)
+		{
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
+			pMaterial->SetDirty(true);
+		}
 		return change;
 	}
 
@@ -119,8 +122,10 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
-	void MaterialEditor::ShaderGUI(YAMLResource<MaterialData>* pMaterial)
+	bool MaterialEditor::ShaderGUI(YAMLResource<MaterialData>* pMaterial)
 	{
+		bool change = false;
+
 		static ImGuiTableFlags flags =
 			ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody;
 
@@ -150,27 +155,31 @@ namespace Glory::Editor
 
 			for (size_t row_n = 0; row_n < shaderCount; ++row_n)
 			{
+				ImGui::PushID((int)row_n);
+				ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+
 				auto shader = shaders[row_n]["UUID"];
 				const UUID shaderID = shader.As<uint64_t>();
 				ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
 				if (!pShaderSourceData)
 				{
+					ImGui::TableSetColumnIndex(0);
 					ImGui::Selectable(std::to_string(row_n).c_str(), false, selectableFlags, ImVec2(0, rowHeight));
-					ImGui::SameLine();
-					ImGui::TextColored({1,0,0,1}, "Shader not yet loaded");
+					if (ImGui::TableSetColumnIndex(1))
+						ImGui::TextColored({ 1,0,0,1 }, "UNKNOWN");
+					if (ImGui::TableSetColumnIndex(2))
+						ImGui::TextColored({1,0,0,1}, "Shader not yet loaded");
+					if (ImGui::TableSetColumnIndex(3))
+					{
+						if (ImGui::Button("Remove", ImVec2(removeButtonWidth - 2.5f, rowHeight)))
+						{
+							toRemoveShaderIndex = (int)row_n;
+						}
+					}
+					ImGui::PopID();
 					continue;
 				}
 
-				std::string name = pShaderSourceData->Name();
-				ShaderType shaderType = pShaderSourceData->GetShaderType();
-				if (name == "") name = "UNKNOWN SHADER";
-
-				const std::string shaderTypeString = YAML::SHADERTYPE_TOFULLSTRING[shaderType];
-
-				std::string label = shaderTypeString + ": " + name;
-
-				ImGui::PushID((int)row_n);
-				ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
 
 				ImGui::TableSetColumnIndex(0);
 
@@ -178,6 +187,12 @@ namespace Glory::Editor
 				{
 					Selection::SetActiveObject(pShaderSourceData);
 				}
+
+				std::string name = pShaderSourceData->Name();
+				ShaderType shaderType = pShaderSourceData->GetShaderType();
+				if (name == "") name = "UNKNOWN SHADER";
+
+				const std::string shaderTypeString = YAML::SHADERTYPE_TOFULLSTRING[shaderType];
 
 				if (ImGui::TableSetColumnIndex(1))
 					ImGui::TextUnformatted(shaderTypeString.c_str());
@@ -197,19 +212,27 @@ namespace Glory::Editor
 
 		if (toRemoveShaderIndex != -1)
 		{
-			shaders.Remove(toRemoveShaderIndex);
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Removing shaders not yet implemented");
+			/* @todo: Tell the material manager to update the material */
+			//shaders.Remove(toRemoveShaderIndex);
+			//change = true;
 		}
 
 		UUID addShaderID = 0;
 		if (AssetPicker::ResourceButton("Add Shader", width, ResourceTypes::GetHash<ShaderSourceData>(), &addShaderID, false))
 		{
-			if (!EditorAssetDatabase::AssetExists(addShaderID)) return;
+			if (!EditorAssetDatabase::AssetExists(addShaderID)) return change;
 			EditorApplication::GetInstance()->GetMaterialManager().AddShaderToMaterial(pMaterial->GetUUID(), addShaderID);
+			change = true;
 		}
+
+		return change;
 	}
 
 	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial)
 	{
+		/* @todo: Use combination of yaml resource and in memory resource */
+
 		bool change = false;
 
 		Utils::YAMLFileRef& file = **pMaterial;

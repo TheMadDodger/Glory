@@ -69,6 +69,11 @@ namespace Glory::Editor
 		auto itor = m_pMaterialDatas.find(materialID);
 		if (itor == m_pMaterialDatas.end()) return;
 		itor->second->AddShader(shaderID);
+		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
+			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
+		Utils::YAMLFileRef& file = **pMaterialData;
+		auto shaders = file["Shaders"];
+		shaders[shaders.Size()]["UUID"].Set(uint64_t(shaderID));
 		UpdateMaterial(itor->second);
 	}
 
@@ -189,7 +194,7 @@ namespace Glory::Editor
 		{
 			const std::string name = *itor;
 			auto prop = properties[name];
-			const std::string displayName = prop["DisplayName"].As<std::string>();
+			const std::string displayName = prop["DisplayName"].Exists() ? prop["DisplayName"].As<std::string>() : name;
 			const uint32_t type = prop["TypeHash"].As<uint32_t>();
 			auto value = prop["Value"];
 

@@ -16,7 +16,7 @@ namespace Glory::Editor
 		static const char* GetMaterialError(YAMLResource<MaterialData>* pMaterial);
 
 	private:
-		void ShaderGUI(YAMLResource<MaterialData>* pMaterial);
+		bool ShaderGUI(YAMLResource<MaterialData>* pMaterial);
 		bool PropertiesGUI(YAMLResource<MaterialData>* pMaterial);
 	};
 }
