@@ -260,6 +260,17 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
+		void ForEachClear(std::function<void(_Ty value)> callback)
+		{
+			m_Mutex.lock();
+			for (auto it = m_Data.begin(); it != m_Data.end(); it++)
+			{
+				callback(it->second);
+			}
+			m_Data.clear();
+			m_Mutex.unlock();
+		}
+
 		void Clear()
 		{
 			m_Mutex.lock();

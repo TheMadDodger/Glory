@@ -2,6 +2,7 @@
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
 #include "EditorMaterialManager.h"
+#include "EditorResourceManager.h"
 
 #include <fstream>
 #include <AssetManager.h>

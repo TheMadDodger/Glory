@@ -216,10 +216,8 @@ namespace Glory::Editor
 
 		if (toRemoveShaderIndex != -1)
 		{
-			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Removing shaders not yet implemented");
-			/* @todo: Tell the material manager to update the material */
-			//shaders.Remove(toRemoveShaderIndex);
-			//change = true;
+			EditorApplication::GetInstance()->GetMaterialManager().RemoveShaderFromMaterial(pMaterial->GetUUID(), toRemoveShaderIndex);
+			change = true;
 		}
 
 		UUID addShaderID = 0;
@@ -246,7 +244,7 @@ namespace Glory::Editor
 
 		std::vector<EditorShaderData*> compiledShaders;
 
-		static const uint32_t imageDataHash = ResourceTypes::GetHash<ImageData>();
+		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
 		for (size_t i = 0; i < shaders.Size(); ++i)
 		{
 			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
@@ -268,7 +266,7 @@ namespace Glory::Editor
 				auto prop = properties[sampler];
 				if (!prop.Exists()) {
 					prop["DisplayName"].Set(sampler);
-					prop["TypeHash"].Set(imageDataHash);
+					prop["TypeHash"].Set(textureDataHash);
 					prop["Value"].Set(0);
 				}
 

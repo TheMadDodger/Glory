@@ -39,7 +39,7 @@ namespace Glory
 		m_ProgramID = glCreateProgram();
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		for (size_t i = 0; i < m_pShaders.size(); i++)
+		for (size_t i = 0; i < m_pShaders.size(); ++i)
 		{
 			GLShader* pShader = (GLShader*)m_pShaders[i];
 			glAttachShader(m_ProgramID, pShader->m_ShaderID);

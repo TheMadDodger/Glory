@@ -64,6 +64,13 @@ namespace Glory::Editor
 		ReadPropertiesInto(properties, pMaterial);
 	}
 
+	void EditorMaterialManager::LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialInstanceData*& pMaterial) const
+	{
+		const UUID baseMaterial = file["BaseMaterial"].As<uint64_t>();
+		pMaterial = new MaterialInstanceData(baseMaterial);
+		ReadPropertiesInto(file["Overrides"], pMaterial);
+	}
+
 	void EditorMaterialManager::AddShaderToMaterial(UUID materialID, UUID shaderID)
 	{
 		auto itor = m_pMaterialDatas.find(materialID);
@@ -74,6 +81,19 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **pMaterialData;
 		auto shaders = file["Shaders"];
 		shaders[shaders.Size()]["UUID"].Set(uint64_t(shaderID));
+		UpdateMaterial(itor->second);
+	}
+
+	void EditorMaterialManager::RemoveShaderFromMaterial(UUID materialID, size_t index)
+	{
+		auto itor = m_pMaterialDatas.find(materialID);
+		if (itor == m_pMaterialDatas.end()) return;
+		itor->second->RemoveShaderAt(index);
+		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
+			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
+		Utils::YAMLFileRef& file = **pMaterialData;
+		auto shaders = file["Shaders"];
+		shaders.Remove(index);
 		UpdateMaterial(itor->second);
 	}
 
@@ -100,6 +120,8 @@ namespace Glory::Editor
 			assetPath = location.Path;
 		}
 
+		EditorResourceManager& resourceManager = EditorApplication::GetInstance()->GetResourceManager();
+
 		const uint32_t typeHash = meta.Hash();
 		static const size_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
 		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
@@ -108,9 +130,16 @@ namespace Glory::Editor
 			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
 			if (!pResource)
 			{
-				/* Immediately import the material, which is fast */
-				pResource = Importer::Import(assetPath, nullptr);
-				if (!pResource) return;
+				MaterialData* pMaterialData = new MaterialData();
+				pResource = pMaterialData;
+				pResource->SetResourceUUID(callback.m_UUID);
+				YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(resourceManager.GetEditableResource(callback.m_UUID));
+				if (!pMaterial)
+				{
+					delete pMaterialData;
+					return;
+				}
+				LoadIntoMaterial(**pMaterial, pMaterialData);
 				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
 			}
 
@@ -130,7 +159,7 @@ namespace Glory::Editor
 				if (!pImporter) continue;
 				EditableResource* pEditResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(matInstance);
 				Utils::YAMLFileRef& file = **static_cast<YAMLResource<MaterialInstanceData>*>(pEditResource);
-				pImporter->ReadPropertyOverrides(file, pMatInst);
+				ReadPropertiesInto(file["Overrides"], pMatInst);
 			}
 			itor->second.clear();
 			m_WaitingMaterialInstances.erase(itor);
@@ -140,9 +169,16 @@ namespace Glory::Editor
 			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
 			if (!pResource)
 			{
-				/* Immediately import the material, which is fast */
-				pResource = Importer::Import(assetPath, nullptr);
-				if (!pResource) return;
+				MaterialInstanceData* pMaterialData = nullptr;
+				YAMLResource<MaterialInstanceData>* pMaterial = static_cast<YAMLResource<MaterialInstanceData>*>(resourceManager.GetEditableResource(callback.m_UUID));
+				if (!pMaterial)
+				{
+					delete pMaterialData;
+					return;
+				}
+				LoadIntoMaterial(**pMaterial, pMaterialData);
+				pResource = pMaterialData;
+				pResource->SetResourceUUID(callback.m_UUID);
 				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
 			}
 
@@ -175,12 +211,6 @@ namespace Glory::Editor
 		{
 			auto shader = shaders[i];
 			const UUID shaderID = shader["UUID"].As<uint64_t>();
-
-			AssetLocation location;
-			if (!EditorAssetDatabase::GetAssetLocation(shaderID, location)) continue;
-
-			const std::string_view assetPath = m_pEngine->GetAssetDatabase().GetAssetPath();
-			const std::string path = std::string{ assetPath } + '\\' + location.Path;
 			pMaterial->AddShader(shaderID);
 		}
 	}
@@ -213,6 +243,46 @@ namespace Glory::Editor
 			{
 				const UUID id = value.As<uint64_t>();
 				pMaterial->AddProperty(displayName, name, type, id);
+			}
+		}
+	}
+
+	void EditorMaterialManager::ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialInstanceData* pMaterialData, bool clearProperties) const
+	{
+		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
+
+		MaterialData* baseMaterial = GetMaterial(pMaterialData->BaseMaterialID());
+		if (!baseMaterial) return;
+		pMaterialData->Resize(manager, baseMaterial);
+
+		if (!properties.IsMap()) return;
+
+		for (auto itor = properties.Begin(); itor != properties.End(); ++itor)
+		{
+			const std::string displayName = *itor;
+			auto prop = properties[displayName];
+			const bool enable = prop["Enable"].As<bool>();
+
+			size_t propertyIndex = 0;
+			if (!pMaterialData->GetPropertyInfoIndex(manager, displayName, propertyIndex)) continue;
+			if (enable) pMaterialData->EnableProperty(propertyIndex);
+
+			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(manager, propertyIndex);
+
+			YAML::Node value = prop["Value"].Node();
+
+			if (!propertyInfo->IsResource())
+			{
+				const uint32_t typeHash = propertyInfo->TypeHash();
+				const size_t offset = propertyInfo->Offset();
+				const size_t size = propertyInfo->Size();
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(manager), typeHash, offset, size, value);
+			}
+			else
+			{
+				const UUID id = value.as<uint64_t>();
+				size_t resourceIndex = propertyInfo->Offset();
+				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(manager, resourceIndex) = id;
 			}
 		}
 	}

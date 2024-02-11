@@ -30,10 +30,6 @@ namespace Glory::Editor
 
 		Utils::YAMLFileRef& file = **pMaterial;
 		auto baseMaterial = file["BaseMaterial"];
-
-		//MaterialData* pBaseMaterial = pMaterial->GetBaseMaterial();
-		//ImGui::Text("Material: %s", pBaseMaterial ? pBaseMaterial->Name().c_str() : "None");
-		//ImGui::SameLine();
 		UUID baseMaterialID = baseMaterial.As<uint64_t>();
 		bool change = false;
 		if (AssetPicker::ResourceDropdown("Base Material", ResourceTypes::GetHash<MaterialData>(), &baseMaterialID, false))

@@ -23,10 +23,7 @@ namespace Glory::Editor
 		virtual MaterialInstanceData* LoadResource(const std::filesystem::path& path) const override;
 		bool SaveResource(const std::filesystem::path& path, MaterialInstanceData* pResource) const override;
 
-		MaterialInstanceData* LoadMaterialInstanceData(Utils::YAMLFileRef& file) const;
-
 		void SaveMaterialInstanceData(MaterialInstanceData* pMaterialData, YAML::Emitter& out) const;
-		void ReadPropertyOverrides(Utils::YAMLFileRef& file, MaterialInstanceData* pMaterialData) const;
 
 	private:
 		friend class EditorMaterialManager;

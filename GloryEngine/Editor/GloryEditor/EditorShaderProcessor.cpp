@@ -99,6 +99,8 @@ namespace Glory::Editor
 
 	EditorShaderProcessor::~EditorShaderProcessor()
 	{
+		m_pCompiledShaders.ForEachClear([](EditorShaderData* pData) {delete pData; });
+		m_pLoadedShaderSources.ForEachClear([](ShaderSourceData* pData) {delete pData; });
 	}
 
 	void EditorShaderProcessor::Start()
