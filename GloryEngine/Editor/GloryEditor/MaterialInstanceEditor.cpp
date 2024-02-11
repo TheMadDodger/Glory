@@ -8,9 +8,11 @@
 #include "EditorShaderProcessor.h"
 #include "EditorShaderData.h"
 #include "EditorUI.h"
+#include "EditorMaterialManager.h"
 
 #include <imgui.h>
 #include <MaterialEditor.h>
+#include <PropertySerializer.h>
 #include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
@@ -21,7 +23,10 @@ namespace Glory::Editor
 
 	bool MaterialInstanceEditor::OnGUI()
 	{
+		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
 		YAMLResource<MaterialInstanceData>* pMaterial = (YAMLResource<MaterialInstanceData>*)m_pTarget;
+		MaterialInstanceData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterialInstance(pMaterial->GetUUID());
 
 		Utils::YAMLFileRef& file = **pMaterial;
 		auto baseMaterial = file["BaseMaterial"];
@@ -57,12 +62,6 @@ namespace Glory::Editor
 		auto baseProperties = baseFile["Properties"];
 		auto properties = file["Overrides"];
 
-		static const uint32_t f = ResourceTypes::GetHash<float>();
-		static const uint32_t f2 = ResourceTypes::GetHash<glm::vec2>();
-		static const uint32_t f3 = ResourceTypes::GetHash<glm::vec3>();
-		static const uint32_t f4 = ResourceTypes::GetHash<glm::vec4>();
-		static const uint32_t imageDataHash = ResourceTypes::GetHash<ImageData>();
-
 		for (size_t i = 0; i < shaders.Size(); ++i)
 		{
 			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
@@ -74,76 +73,105 @@ namespace Glory::Editor
 				auto prop = properties[sampler];
 				bool enable = prop.Exists() && (prop["Enable"].Exists() && prop["Enable"].As<bool>());
 
-				if (ImGui::Checkbox(("##" + sampler).data(), &enable))
+				size_t materialPropertyIndex = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, sampler, materialPropertyIndex))
+					continue;
+
+				if (!prop["Enable"].Exists())
+					prop["Enable"].Set(false);
+
+				ImGui::PushID(sampler.data());
+				EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+				if (EditorUI::CheckBox(file, prop["Enable"].Path()))
 				{
+					enable = prop["Enable"].As<bool>();
 					if (enable)
+					{
 						prop["Enable"].Set(true);
+						pMaterialData->EnableProperty(materialPropertyIndex);
+					}
 					else
+					{
 						prop["Enable"].Set(false);
+						pMaterialData->DisableProperty(materialPropertyIndex);
+					}
+					change = true;
 				}
-				ImGui::BeginDisabled(!enable);
+				EditorUI::PopFlag();
 				ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
 
 				if (!prop.Exists()) {
 					prop["Value"].Set(0);
 					prop["Enable"].Set(enable);
 				}
-				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
 				auto baseValue = baseProperties[sampler]["Value"];
 
-				UUID value = enable ? prop["Value"].As<uint64_t>() : baseValue.Exists() ? baseValue.As<uint64_t>() : 0;
-				if (AssetPicker::ResourceDropdown(sampler, imageDataHash, &value))
-				{
-					change = true;
-					prop["Value"].Set(value);
-				}
+				auto propValue = prop["Value"];
 
+				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
+
+				Undo::StartRecord("Material Instance Property");
+				ImGui::BeginDisabled(!enable);
+				change |= pPropertyDrawer->Draw(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
 				ImGui::EndDisabled();
+				ImGui::PopID();
+				Undo::StopRecord();
+
+				if (!enable) continue;
+				/* Deserialize new value into resources array */
+				const UUID newUUID = propValue.As<uint64_t>();
+				pMaterialData->SetTexture(materialManager, sampler, newUUID);
 			}
 
 			for (size_t j = 0; j < pEditorShader->m_PropertyInfos.size(); ++j)
 			{
 				EditorShaderData::PropertyInfo& info = pEditorShader->m_PropertyInfos[j];
+				size_t materialPropertyIndex = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, info.m_Name, materialPropertyIndex))
+					continue;
+				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+
 				auto prop = properties[info.m_Name];
+				if (!prop["Enable"].Exists())
+					prop["Enable"].Set(false);
+
 				bool enable = prop.Exists() && (prop["Enable"].Exists() && prop["Enable"].As<bool>());
 
-				if (ImGui::Checkbox(info.m_Name.data(), &enable))
+				ImGui::PushID(info.m_Name.data());
+				EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+				if (EditorUI::CheckBox(file, prop["Enable"].Path()))
 				{
+					enable = prop["Enable"].As<bool>();
 					if (enable)
+					{
 						prop["Enable"].Set(true);
+						pMaterialData->EnableProperty(materialPropertyIndex);
+					}
 					else
+					{
 						prop["Enable"].Set(false);
+						pMaterialData->DisableProperty(materialPropertyIndex);
+					}
+					change = true;
 				}
-				ImGui::BeginDisabled(!enable);
+				EditorUI::PopFlag();
 				ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
 
-				auto propValue = enable ? prop["Value"] : baseProperties[info.m_Name]["Value"];
-				if (info.m_TypeHash == f)
-				{
-					if (!propValue.Exists())
-						propValue.Set(0.0f);
-					change |= EditorUI::InputFloat(enable ? file : baseFile, propValue.Path());
-				}
-				else if (info.m_TypeHash == f2)
-				{
-					if (!propValue.Exists())
-						propValue.Set(glm::vec2{ 0,0 });
-					change |= EditorUI::InputFloat2(enable ? file : baseFile, propValue.Path());
-				}
-				else if (info.m_TypeHash == f3)
-				{
-					if (!propValue.Exists())
-						propValue.Set(glm::vec3{ 0,0,0 });
-					change |= EditorUI::InputFloat3(enable ? file : baseFile, propValue.Path());
-				}
-				else if (info.m_TypeHash == f4)
-				{
-					if (!propValue.Exists())
-						propValue.Set(glm::vec4{ 1,1,1,1 });
-					change |= EditorUI::InputColor(enable ? file : baseFile, propValue.Path(), false);
-				}
+				auto baseValue = baseProperties[info.m_Name]["Value"];
+				auto propValue = prop["Value"];
 
+				Undo::StartRecord("Material Instance Property");
+				ImGui::BeginDisabled(!enable);
+				change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), info.m_TypeHash, info.m_TypeHash, pMaterialProperty->Flags());
 				ImGui::EndDisabled();
+				ImGui::PopID();
+				Undo::StopRecord();
+
+				if (!enable) continue;
+				/* Deserialize new value into buffer */
+				serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
 			}
 		}
 
@@ -161,9 +189,6 @@ namespace Glory::Editor
 
 	void MaterialInstanceEditor::Initialize()
 	{
-		//MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
-		//if (!pMaterial) return;
-		//pMaterial->ReloadProperties();
 	}
 
 	void MaterialInstanceEditor::DrawErrorWindow(const char* error)

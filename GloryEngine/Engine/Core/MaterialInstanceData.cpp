@@ -43,21 +43,6 @@ namespace Glory
 		return m_BaseMaterial ? manager.GetMaterial(m_BaseMaterial) : nullptr;
 	}
 
-	/*void MaterialInstanceData::SetBaseMaterial(UUID uuid)
-	{
-		m_pBaseMaterial = pMaterial;
-
-		if (m_pBaseMaterial == nullptr)
-		{
-			m_PropertyOverridesEnable.clear();
-			m_PropertyBuffer.clear();
-			m_Resources.clear();
-			return;
-		}
-
-		ReloadProperties();
-	}*/
-
 	UUID MaterialInstanceData::GetGPUUUID() const
 	{
 		return m_BaseMaterial;
@@ -169,6 +154,11 @@ namespace Glory
 	void MaterialInstanceData::EnableProperty(size_t index)
 	{
 		m_PropertyOverridesEnable[index] = true;
+	}
+
+	void MaterialInstanceData::DisableProperty(size_t index)
+	{
+		m_PropertyOverridesEnable[index] = false;
 	}
 
 	void MaterialInstanceData::Serialize(BinaryStream& container) const

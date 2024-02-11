@@ -38,6 +38,7 @@ namespace Glory
 
 		bool IsPropertyOverriden(size_t index) const;
 		virtual void EnableProperty(size_t index) override;
+		void DisableProperty(size_t index);
 
 		void Serialize(BinaryStream& container) const override;
 		void Deserialize(BinaryStream& container) const override;

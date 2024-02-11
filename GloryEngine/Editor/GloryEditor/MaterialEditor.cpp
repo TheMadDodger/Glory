@@ -10,6 +10,7 @@
 
 #include <imgui.h>
 #include <ResourceType.h>
+#include <PropertySerializer.h>
 #include <ShaderSourceData.h>
 #include <GLORY_YAML.h>
 #include <AssetDatabase.h>
@@ -26,6 +27,7 @@ namespace Glory::Editor
 	bool MaterialEditor::OnGUI()
 	{
 		YAMLResource<MaterialData>* pMaterial = (YAMLResource<MaterialData>*)m_pTarget;
+		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterial(pMaterial->GetUUID());
 
 		bool node = ImGui::TreeNodeEx("Loaded Shaders", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
 		if (node)
@@ -42,8 +44,10 @@ namespace Glory::Editor
 		node = ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
 		if (node)
 		{
-			change = PropertiesGUI(pMaterial);
+			Undo::StartRecord("Material Property", pMaterial->GetUUID());
+			change = PropertiesGUI(pMaterial, pMaterialData);
 			ImGui::TreePop();
+			Undo::StopRecord();
 		}
 
 		const char* error = GetMaterialError(pMaterial);
@@ -229,9 +233,10 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial)
+	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData)
 	{
-		/* @todo: Use combination of yaml resource and in memory resource */
+		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
 
 		bool change = false;
 
@@ -241,6 +246,7 @@ namespace Glory::Editor
 
 		std::vector<EditorShaderData*> compiledShaders;
 
+		static const uint32_t imageDataHash = ResourceTypes::GetHash<ImageData>();
 		for (size_t i = 0; i < shaders.Size(); ++i)
 		{
 			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
@@ -254,8 +260,10 @@ namespace Glory::Editor
 			for (size_t j = 0; j < pEditorShader->m_SamplerNames.size(); ++j)
 			{
 				const std::string& sampler = pEditorShader->m_SamplerNames[j];
-
-				static const uint32_t imageDataHash = ResourceTypes::GetHash<ImageData>();
+				size_t materialPropertyIndex = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, sampler, materialPropertyIndex))
+					continue;
+				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
 
 				auto prop = properties[sampler];
 				if (!prop.Exists()) {
@@ -263,18 +271,29 @@ namespace Glory::Editor
 					prop["TypeHash"].Set(imageDataHash);
 					prop["Value"].Set(0);
 				}
+
+				auto propValue = prop["Value"];
 				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
-				UUID value = prop["Value"].As<uint64_t>();
-				if (AssetPicker::ResourceDropdown(sampler, imageDataHash, &value))
+
+				ImGui::PushID(sampler.data());
+				change |= pPropertyDrawer->Draw(file, propValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
+				ImGui::PopID();
+
+				/* Deserialize new value into resources array */
+				if (change)
 				{
-					change = true;
-					prop["Value"].Set(value);
+					const UUID newUUID = propValue.As<uint64_t>();
+					pMaterialData->SetTexture(materialManager, sampler, newUUID);
 				}
 			}
 
 			for (size_t j = 0; j < pEditorShader->m_PropertyInfos.size(); ++j)
 			{
 				EditorShaderData::PropertyInfo& info = pEditorShader->m_PropertyInfos[j];
+				size_t materialPropertyIndex = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, info.m_Name, materialPropertyIndex))
+					continue;
+				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
 
 				const size_t index = j + pEditorShader->m_SamplerNames.size();
 				auto prop = properties[info.m_Name];
@@ -284,38 +303,16 @@ namespace Glory::Editor
 					prop["TypeHash"].Set(info.m_TypeHash);
 				}
 
-				static const uint32_t f = ResourceTypes::GetHash<float>();
-				static const uint32_t f2 = ResourceTypes::GetHash<glm::vec2>();
-				static const uint32_t f3 = ResourceTypes::GetHash<glm::vec3>();
-				static const uint32_t f4 = ResourceTypes::GetHash<glm::vec4>();
-
-				ImGui::TextUnformatted(info.m_Name.data());
-				ImGui::SameLine();
-
+				ImGui::PushID(info.m_Name.data());
 				auto propValue = prop["Value"];
-				if (info.m_TypeHash == f)
+				change |= PropertyDrawer::DrawProperty(file, propValue.Path(), info.m_TypeHash, info.m_TypeHash, pMaterialProperty->Flags());
+				ImGui::PopID();
+
+				/* Deserialize new value into buffer */
+				if (change)
 				{
-					if (!propValue.Exists())
-						propValue.Set(0.0f);
-					change |= EditorUI::InputFloat(file, propValue.Path());
-				}
-				else if (info.m_TypeHash == f2)
-				{
-					if (!propValue.Exists())
-						propValue.Set(glm::vec2{ 0,0 });
-					change |= EditorUI::InputFloat2(file, propValue.Path());
-				}
-				else if (info.m_TypeHash == f3)
-				{
-					if (!propValue.Exists())
-						propValue.Set(glm::vec3{ 0,0,0 });
-					change |= EditorUI::InputFloat3(file, propValue.Path());
-				}
-				else if (info.m_TypeHash == f4)
-				{
-					if (!propValue.Exists())
-						propValue.Set(glm::vec4{ 1,1,1,1 });
-					change |= EditorUI::InputColor(file, propValue.Path(), false);
+					serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+						pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
 				}
 			}
 		}

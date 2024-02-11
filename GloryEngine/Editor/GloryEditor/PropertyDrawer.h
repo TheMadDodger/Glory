@@ -1,4 +1,8 @@
 #pragma once
+#include "GloryEditor.h"
+#include "ValueChangeAction.h"
+#include "NodeValueChangeAction.h"
+
 #include <ResourceType.h>
 #include <typeindex>
 #include <vector>
@@ -8,11 +12,13 @@
 #include <yaml-cpp/yaml.h>
 #include <YAML_GLM.h>
 #include <GLORY_YAML.h>
-#include "GloryEditor.h"
-#include "ValueChangeAction.h"
-#include "NodeValueChangeAction.h"
 
 #define PROPERTY_DRAWER(x) Glory::Editor::PropertyDrawer::RegisterPropertyDrawer<x>()
+
+namespace Glory::Utils
+{
+	struct YAMLFileRef;
+}
 
 namespace Glory::Editor
 {
@@ -24,6 +30,7 @@ namespace Glory::Editor
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const;
+		virtual GLORY_EDITOR_API bool Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const;
 
 		template<class T>
 		static void RegisterPropertyDrawer()
@@ -39,6 +46,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags);
 
 		static GLORY_EDITOR_API PropertyDrawer* GetPropertyDrawer(uint32_t typeHash);
 
@@ -156,6 +164,26 @@ namespace Glory::Editor
 			{
 				node = newValue;
 				Undo::AddAction(new NodeValueChangeAction(PropertyDrawer::GetCurrentPropertyPath(), YAML::Node(oldValue), YAML::Node(newValue)));
+				return true;
+			}
+			return false;
+		}
+
+		virtual bool Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const override
+		{
+			auto prop = file[path];
+			if (!prop.Exists())
+				prop.Set(PropertyType());
+
+			PropertyType value = prop.As<PropertyType>();
+			PropertyType originalValue = value;
+			std::string label = path.filename().string().data();
+			if (label == "Value")
+				label = path.parent_path().filename().string();
+
+			if (OnGUI(label, &value, flags))
+			{
+				Undo::ApplyYAMLEdit(file, path, originalValue, value);
 				return true;
 			}
 			return false;

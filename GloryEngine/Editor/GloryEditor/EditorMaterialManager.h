@@ -83,6 +83,7 @@ namespace Editor
 		MaterialInstanceData* GetMaterialInstance(UUID materialID) const;
 
 	private:
+		friend class MaterialInstanceEditor;
 		std::map<UUID, MaterialData*> m_pMaterialDatas;
 		std::map<UUID, MaterialInstanceData*> m_pMaterialInstanceDatas;
 		std::map<UUID, std::vector<UUID>> m_WaitingMaterialInstances;

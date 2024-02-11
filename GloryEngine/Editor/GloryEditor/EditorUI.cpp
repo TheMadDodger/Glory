@@ -43,8 +43,8 @@ namespace Glory::Editor
 	bool EditorUI::InputFloat(std::string_view label, float* value, const float min, const float max, const float steps)
 	{
 		ImGui::PushID(label.data());
-		const bool hasLabel = HasFlag(Flag::NoLabel);
-		if (!hasLabel)
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
 		{
 			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 			ImGui::TextUnformatted(label.data());
@@ -60,7 +60,7 @@ namespace Glory::Editor
 			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		}
 		const bool change = ImGui::DragFloat("##value", value, steps, min, max, "%.3f");
-		if (!hasLabel) ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -85,21 +85,25 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat2(std::string_view label, glm::vec2* value, const float min, const float max, const float steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragFloat2("##value", (float*)value, steps, min, max, "%.3f");
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -124,21 +128,25 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat3(std::string_view label, glm::vec3* value, const float min, const float max, const float steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragFloat3("##value", (float*)value, steps, min, max, "%.3f");
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -163,21 +171,25 @@ namespace Glory::Editor
 
 	bool EditorUI::InputFloat4(std::string_view label, glm::vec4* value, const float min, const float max, const float steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragFloat4("##value", (float*)value, steps, min, max, "%.3f");
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -202,21 +214,25 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt(std::string_view label, int* value, const int min, const int max, const int steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragInt("##value", value, (float)steps, min, max);
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -241,21 +257,25 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt2(std::string_view label, glm::ivec2* value, const int min, const int max, const int steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragInt2("##value", (int*)value, (float)steps, min, max);
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -280,21 +300,25 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt3(std::string_view label, glm::ivec3* value, const int min, const int max, const int steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragInt3("##value", (int*)value, (float)steps, min, max);
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -319,21 +343,25 @@ namespace Glory::Editor
 
 	bool EditorUI::InputInt4(std::string_view label, glm::ivec4* value, const int min, const int max, const int steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragInt4("##value", (int*)value, (float)steps, min, max);
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -358,42 +386,50 @@ namespace Glory::Editor
 	
 	bool EditorUI::InputUInt(std::string_view label, uint32_t* value, const uint32_t min, const uint32_t max, const uint32_t steps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::DragInt("##value", (int*)value, (float)steps, min, max);
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
 
 	bool EditorUI::InputDouble(std::string_view label, double* value, const double slowSteps, const double fastSteps)
 	{
-		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		const float width = std::max(maxWidth, 100.0f);
+			const float width = std::max(maxWidth, 100.0f);
 
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
 		const bool change = ImGui::InputDouble("##value", value, slowSteps, fastSteps);
-		ImGui::PopItemWidth();
+		if (!noLabel) ImGui::PopItemWidth();
 		ImGui::PopID();
 		return change;
 	}
@@ -418,14 +454,17 @@ namespace Glory::Editor
 
 	bool EditorUI::CheckBox(std::string_view label, bool* value)
 	{
-		const ImVec2 textSize = ImGui::CalcTextSize(label.data());
 		ImGui::PushID(label.data());
-		ImGui::TextUnformatted(label.data());
-		ImGui::SameLine();
-		const float availableWidth = ImGui::GetContentRegionAvail().x;
-		const float size = 24.0f;
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + availableWidth - size, cursorPos.y });
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			ImGui::TextUnformatted(label.data());
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
+			const float size = 24.0f;
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - size, cursorPos.y });
+		}
 		const bool change = ImGui::Checkbox("##value", value);
 		ImGui::PopID();
 		return change;

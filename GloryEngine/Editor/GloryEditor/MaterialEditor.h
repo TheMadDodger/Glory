@@ -17,6 +17,6 @@ namespace Glory::Editor
 
 	private:
 		bool ShaderGUI(YAMLResource<MaterialData>* pMaterial);
-		bool PropertiesGUI(YAMLResource<MaterialData>* pMaterial);
+		bool PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData);
 	};
 }

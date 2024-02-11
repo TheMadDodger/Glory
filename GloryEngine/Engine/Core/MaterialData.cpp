@@ -206,13 +206,19 @@ namespace Glory
 
 	void MaterialData::SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value)
 	{
+		const UUID uuid = value ? value->GetUUID() : 0;
+		SetTexture(materialManager, name, uuid);
+	}
+
+	void MaterialData::SetTexture(MaterialManager& materialManager, const std::string& name, UUID uuid)
+	{
 		size_t index;
 		if (!GetPropertyInfoIndex(materialManager, name, index)) return;
 		EnableProperty(index);
 		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
 		if (!pPropertyInfo->IsResource()) return;
 		const size_t resourceIndex = pPropertyInfo->Offset();
-		m_Resources[resourceIndex] = value ? value->GetUUID() : 0;
+		m_Resources[resourceIndex] = uuid;
 	}
 
 	bool MaterialData::GetTexture(MaterialManager& materialManager, const std::string& name, TextureData** value, AssetManager* pManager)
