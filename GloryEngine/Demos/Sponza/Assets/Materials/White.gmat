@@ -4,7 +4,7 @@ Shaders:
   - UUID: 472749852331879165
     Type: Frag
 Properties:
-  Color:
-    DisplayName: Color
+  - DisplayName: Color
+    ShaderName: Color
     TypeHash: 1650774632
     Value: [1, 1, 1, 1]

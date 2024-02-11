@@ -1,4 +1,4 @@
-EditorVersion: 0.3.0
+EditorVersion: 0.1.0
 InputModes:
   - Name: Keyboard and Mouse
     DeviceTypes:
