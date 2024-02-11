@@ -24,16 +24,18 @@ namespace Utils::Reflect
 	class SceneManager;
 	class PropertySerializer;
 
-	class Debug;
-	class Console;
 	class AssetDatabase;
 	class AssetManager;
+	class ShaderManager;
+	class MaterialManager;
+
+	class Debug;
+	class Console;
 	class Serializers;
 	class DisplayManager;
 	class LayerManager;
 	class ObjectManager;
 	class CameraManager;
-	class ShaderManager;
 	class GameTime;
 	class EngineProfiler;
 
@@ -46,6 +48,8 @@ namespace Utils::Reflect
 	{
 		Debug* m_pDebug;
 		Console* m_pConsole;
+		ShaderManager* pShaderManager = nullptr;
+		MaterialManager* pMaterialManager = nullptr;
 
 		uint32_t MainModuleCount;
 		/* Order should be: 
@@ -161,9 +165,13 @@ namespace Utils::Reflect
 		DisplayManager& GetDisplayManager();
 		LayerManager& GetLayerManager();
 		ShaderManager& GetShaderManager();
+		MaterialManager& GetMaterialManager();
 		Utils::Reflect::Reflect& Reflection();
 		ObjectManager& GetObjectManager();
 		EngineProfiler& Profiler();
+
+		void SetShaderManager(ShaderManager* pManager);
+		void SetMaterialManager(MaterialManager* pManager);
 
 		template<class T>
 		void AddUserContext(T* pUserContext)
@@ -230,11 +238,15 @@ namespace Utils::Reflect
 		/* Threads */
 		GraphicsThread* m_pGraphicsThread;
 
+		/* External objects */
 		Console* m_Console;
 		Debug* m_Debug;
+		ShaderManager* m_pShaderManager;
+		MaterialManager* m_pMaterialManager;
 
 		bool m_Quit = false;
 
+		/* Owned objects */
 		std::unique_ptr<GameTime> m_Time;
 		std::unique_ptr<CameraManager> m_CameraManager;
 		std::unique_ptr<AssetDatabase> m_AssetDatabase;
@@ -243,7 +255,6 @@ namespace Utils::Reflect
 		std::unique_ptr<Serializers> m_Serializers;
 		std::unique_ptr<DisplayManager> m_DisplayManager;
 		std::unique_ptr<LayerManager> m_LayerManager;
-		std::unique_ptr<ShaderManager> m_ShaderManager;
 		std::unique_ptr<Utils::Reflect::Reflect> m_Reflection;
 		std::unique_ptr<ObjectManager> m_ObjectManager;
 		std::unique_ptr<EngineProfiler> m_Profiler;

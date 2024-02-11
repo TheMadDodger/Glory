@@ -1,6 +1,7 @@
 #include "EditorSettings.h"
 #include "EditorApplication.h"
 
+#include <Debug.h>
 #include <WindowModule.h>
 #include <filesystem>
 #include <yaml-cpp/yaml.h>

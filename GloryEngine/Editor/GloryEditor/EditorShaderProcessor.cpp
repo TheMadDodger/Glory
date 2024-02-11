@@ -1,7 +1,12 @@
 #include "EditorShaderProcessor.h"
 #include "ProjectSpace.h"
 #include "EditorApplication.h"
+#include "EditorResourceManager.h"
+#include "Importer.h"
+#include "EditorShaderData.h"
+#include "Dispatcher.h"
 
+#include <ShaderSourceData.h>
 #include <Debug.h>
 #include <fstream>
 #include <ShaderManager.h>
@@ -14,12 +19,21 @@
 
 namespace Glory::Editor
 {
-	std::map<UUID, EditorShaderData*> EditorShaderProcessor::m_pLoadedShaderData;
-	std::queue<ShaderSourceData*> EditorShaderProcessor::m_ProcessShadersQueue;
-	std::condition_variable EditorShaderProcessor::m_QueueCondition;
-	std::mutex EditorShaderProcessor::m_QueueLock;
-	ThreadedUMap<UUID, std::function<void(FileData*)>> EditorShaderProcessor::m_WaitingCallbacks;
-	ThreadedVector<std::function<void(FileData*)>> EditorShaderProcessor::m_Callbacks;
+	ThreadedUMap<UUID, ShaderSourceData*> EditorShaderProcessor::m_pLoadedShaderSources;
+	ThreadedUMap<UUID, EditorShaderData*> EditorShaderProcessor::m_pCompiledShaders;
+	ThreadedVector<UUID> EditorShaderProcessor::m_QueuedShaders;
+	ThreadedVector<UUID> EditorShaderProcessor::m_FinishedShaders;
+
+	std::map<ShaderType, shaderc_shader_kind> ShaderTypeToKind = {
+		{ ShaderType::ST_Compute, shaderc_shader_kind::shaderc_compute_shader },
+		{ ShaderType::ST_Fragment, shaderc_shader_kind::shaderc_fragment_shader },
+		{ ShaderType::ST_Geomtery, shaderc_shader_kind::shaderc_geometry_shader },
+		{ ShaderType::ST_TessControl, shaderc_shader_kind::shaderc_tess_control_shader },
+		{ ShaderType::ST_TessEval, shaderc_shader_kind::shaderc_tess_evaluation_shader },
+		{ ShaderType::ST_Vertex, shaderc_shader_kind::shaderc_vertex_shader },
+	};
+
+	Jobs::JobPool<bool, UUID>* EditorShaderProcessor::m_pShaderJobsPool = nullptr;
 
 	std::map<spirv_cross::SPIRType::BaseType, std::vector<uint32_t>> SpirBaseTypeToHash = {
 		// Int
@@ -59,128 +73,60 @@ namespace Glory::Editor
 		{ spirv_cross::SPIRType::BaseType::Unknown, { 0 } },
 	};
 
-	EditorShaderData* EditorShaderProcessor::GetShaderSource(ShaderSourceData* pShaderSource)
+	ShaderSourceData* EditorShaderProcessor::GetShaderSource(UUID uuid)
 	{
-		UUID uuid = pShaderSource->GetUUID();
-		std::unique_lock<std::mutex> lock(m_QueueLock);
-
-		if (m_pLoadedShaderData.find(uuid) != m_pLoadedShaderData.end())
-		{
-			lock.unlock();
-			return m_pLoadedShaderData[uuid];
-		}
-
-		m_ProcessShadersQueue.push(pShaderSource);
-		m_QueueCondition.notify_one();
-		lock.unlock();
+		if (m_pLoadedShaderSources.Contains(uuid))
+			return m_pLoadedShaderSources[uuid];
 		return nullptr;
 	}
 
-	EditorShaderProcessor::EditorShaderProcessor() : m_pThread(nullptr), m_AssetRegisteredCallback(0)
+	bool EditorShaderProcessor::GetShaderSource(UUID uuid, std::function<void(ShaderSourceData*)> callback)
 	{
-		m_ShaderTypeToKind = {
-			{ ShaderType::ST_Compute, shaderc_shader_kind::shaderc_compute_shader },
-			{ ShaderType::ST_Fragment, shaderc_shader_kind::shaderc_fragment_shader },
-			{ ShaderType::ST_Geomtery, shaderc_shader_kind::shaderc_geometry_shader },
-			{ ShaderType::ST_TessControl, shaderc_shader_kind::shaderc_tess_control_shader },
-			{ ShaderType::ST_TessEval, shaderc_shader_kind::shaderc_tess_evaluation_shader },
-			{ ShaderType::ST_Vertex, shaderc_shader_kind::shaderc_vertex_shader },
-		};
+		return m_pLoadedShaderSources.Do(uuid, callback);
+	}
+
+	EditorShaderData* EditorShaderProcessor::GetEditorShader(UUID uuid)
+	{
+		if (m_pCompiledShaders.Contains(uuid))
+			return m_pCompiledShaders[uuid];
+		return nullptr;
+	}
+
+	EditorShaderProcessor::EditorShaderProcessor(EditorApplication* pApplication):
+		m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0), ShaderManager(pApplication->GetEngine())
+	{
 	}
 
 	EditorShaderProcessor::~EditorShaderProcessor()
 	{
+		m_pCompiledShaders.ForEachClear([](EditorShaderData* pData) {delete pData; });
+		m_pLoadedShaderSources.ForEachClear([](ShaderSourceData* pData) {delete pData; });
 	}
 
 	void EditorShaderProcessor::Start()
 	{
-
-		EditorApplication::GetInstance()->GetEngine()->GetShaderManager().OverrideCompiledShadersPathFunc([]()
-		{
-			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-			if (pProject == nullptr) return std::string("");
-			std::string cachePath = pProject->CachePath() + "\\CompiledShaders\\";
-			return cachePath;
-		});
-
-		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, AssetRegisteredCallback);
-
-		//ShaderManager::OverrideMissingShaderHandlerFunc([&](UUID uuid, std::function<void(FileData*)> callback)
-		//{
-		//	ShaderSourceData* pShaderSource = AssetManager::GetAssetImmediate<ShaderSourceData>(uuid);
-		//	EditorShaderData* pEditorShader = GetShaderSource(pShaderSource);
-		//	if (pEditorShader)
-		//	{
-		//		CompileForCurrentPlatform(pEditorShader);
-		//	}
-		//	m_WaitingCallbacks.Set(uuid, callback);
-		//});
-
-		m_pThread = ThreadManager::Run(std::bind(&EditorShaderProcessor::ThreadLoop, this));
+		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered, AssetCallback);
+		m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetUpdatedCallback);
+		m_pShaderJobsPool = Jobs::JobManager::Run<bool, UUID>();
 	}
 
 	void EditorShaderProcessor::Stop()
 	{
 		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
-
-		std::unique_lock<std::mutex> lock(m_QueueLock);
-		m_Exit = true;
-		m_QueueCondition.notify_one();
-		lock.unlock();
+		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetUpdatedCallback);
 	}
 
-	void EditorShaderProcessor::ThreadLoop()
-	{
-		while (true)
-		{
-			std::unique_lock<std::mutex> lock(m_QueueLock);
-			m_QueueCondition.wait(lock, [&] { return m_ProcessShadersQueue.size() > 0 || m_Exit; });
-			if (m_Exit)
-			{
-				lock.unlock();
-				break;
-			}
-
-			ShaderSourceData* pShaderSource = m_ProcessShadersQueue.front();
-			UUID uuid = pShaderSource->GetUUID();
-			m_ProcessShadersQueue.pop();
-			lock.unlock();
-
-			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-			std::filesystem::path cacheRoot = pProject->CachePath();
-			std::filesystem::path shaderSourceCache = cacheRoot.append("ShaderSource");
-			std::filesystem::path cachedShaderSourceFile = shaderSourceCache.append(std::to_string(uuid));
-
-			EditorShaderData* pShaderData = std::filesystem::exists(cachedShaderSourceFile) ? LoadCache(pShaderSource, cachedShaderSourceFile)
-				: CompileAndCache(pShaderSource, cachedShaderSourceFile);
-
-			if (pShaderData == nullptr) continue;
-
-			ProcessReflection(pShaderData);
-
-			std::string path = EditorApplication::GetInstance()->GetEngine()->GetShaderManager().GetCompiledShaderPath(pShaderData->GetUUID());
-			CompileForCurrentPlatform(pShaderData, path);
-
-			FileImportSettings importSettings;
-			importSettings.AddNullTerminateAtEnd = true;
-			importSettings.Flags = std::ios::ate | std::ios::binary;
-			importSettings.m_Extension = "";
-			FileData* pCompiledShader = (FileData*)EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>()->Load(path, importSettings);
-			pShaderSource->SetCompiledShader(pCompiledShader);
-		}
-	}
-
-	EditorShaderData* EditorShaderProcessor::CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path)
+	void EditorShaderProcessor::CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path)
 	{
 		ShaderType shaderType = pShaderSource->GetShaderType();
-		if (m_ShaderTypeToKind.find(shaderType) == m_ShaderTypeToKind.end())
+		if (ShaderTypeToKind.find(shaderType) == ShaderTypeToKind.end())
 		{
 			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
-			return nullptr;
+			return;
 		}
 
 		shaderc::Compiler compiler;
-		shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(pShaderSource->Data(), pShaderSource->Size(), m_ShaderTypeToKind[shaderType], pShaderSource->Name().data());
+		shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(pShaderSource->Data(), pShaderSource->Size(), ShaderTypeToKind.at(shaderType), pShaderSource->Name().data());
 
 		size_t errors = result.GetNumErrors();
 		size_t warnings = result.GetNumWarnings();
@@ -189,7 +135,7 @@ namespace Glory::Editor
 		{
 			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Shader " + pShaderSource->Name() + " compilation failed with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
 			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError(result.GetErrorMessage());
-			return nullptr;
+			return;
 		}
 		else
 			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("Shader " + pShaderSource->Name() + " compilation succeeded with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
@@ -200,35 +146,53 @@ namespace Glory::Editor
 		EditorShaderData* pShaderData = new EditorShaderData(pShaderSource->GetUUID());
 		pShaderData->m_ShaderData.assign(result.begin(), result.end());
 
-		std::unique_lock<std::mutex> lock(m_QueueLock);
-		m_pLoadedShaderData[pShaderSource->GetUUID()] = pShaderData;
-		lock.unlock();
+		if (m_pCompiledShaders.Contains(pShaderSource->GetUUID()))
+		{
+			m_pCompiledShaders.Do(pShaderSource->GetUUID(), [&](EditorShaderData** val)
+			{
+				/* Replace */
+				delete *val;
+				*val = pShaderData;
+			});
+		}
+		else
+		{
+			m_pCompiledShaders.Set(pShaderSource->GetUUID(), pShaderData);
+		}
 
 		std::ofstream fileStream(path, std::ios::binary);
 		size_t size = pShaderData->m_ShaderData.size() * sizeof(uint32_t);
 		fileStream.write((const char*)pShaderData->m_ShaderData.data(), size);
 		fileStream.close();
-		return pShaderData;
 	}
 
-	EditorShaderData* EditorShaderProcessor::LoadCache(ShaderSourceData* pShaderSource, std::filesystem::path path)
+	void EditorShaderProcessor::LoadCache(UUID shaderID, std::filesystem::path path)
 	{
 		std::ifstream fileStream(path, std::ios::binary);
-		if (!fileStream.is_open()) return nullptr;
+		if (!fileStream.is_open()) return;
 
 		fileStream.seekg(0, std::ios::end);
 		size_t size = (size_t)fileStream.tellg();
 		fileStream.seekg(0, std::ios::beg);
 
-		EditorShaderData* pShaderData = new EditorShaderData(pShaderSource->GetUUID());
+		EditorShaderData* pShaderData = new EditorShaderData(shaderID);
 		pShaderData->m_ShaderData.resize(size / sizeof(uint32_t));
 		fileStream.read((char*)pShaderData->m_ShaderData.data(), size);
 		fileStream.close();
 
-		std::unique_lock<std::mutex> lock(m_QueueLock);
-		m_pLoadedShaderData[pShaderSource->GetUUID()] = pShaderData;
-		lock.unlock();
-		return pShaderData;
+		if (m_pCompiledShaders.Contains(shaderID))
+		{
+			m_pCompiledShaders.Do(shaderID, [&](EditorShaderData** val)
+			{
+				/* Replace */
+				delete* val;
+				*val = pShaderData;
+			});
+		}
+		else
+		{
+			m_pCompiledShaders.Set(shaderID, pShaderData);
+		}
 	}
 
 	void EditorShaderProcessor::CompileForCurrentPlatform(EditorShaderData* pEditorShader, const std::string& path)
@@ -246,13 +210,13 @@ namespace Glory::Editor
 		compiler.compile();
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
-		for (size_t i = 0; i < resources.sampled_images.size(); i++)
+		for (size_t i = 0; i < resources.sampled_images.size(); ++i)
 		{
 			spirv_cross::Resource sampler = resources.sampled_images[i];
 			pEditorShader->m_SamplerNames.push_back(sampler.name);
 		}
 
-		for (size_t i = 0; i < resources.storage_buffers.size(); i++)
+		for (size_t i = 0; i < resources.storage_buffers.size(); ++i)
 		{
 			spirv_cross::Resource storageBuffer = resources.storage_buffers[i];
 			if (storageBuffer.name != "PropertiesSSBO") continue;
@@ -271,17 +235,152 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorShaderProcessor::AssetRegisteredCallback(const AssetCallbackData& callback)
+	void EditorShaderProcessor::RunCallbacks()
+	{
+		m_FinishedShaders.ForEachClear([](const UUID& uuid) {
+			ShaderCompiledEventDispatcher().Enqueue({ uuid });
+		});
+		ShaderCompiledEventDispatcher().Flush();
+	}
+
+	EditorShaderProcessor::ShaderCompiledDispatcher& EditorShaderProcessor::ShaderCompiledEventDispatcher()
+	{
+		static ShaderCompiledDispatcher dispatcher;
+		return dispatcher;
+	}
+
+	ShaderType EditorShaderProcessor::GetShaderType(UUID shaderID) const
+	{
+		ShaderType type = ShaderType::ST_Unknown;
+		GetShaderSource(shaderID, [&type](ShaderSourceData* pShaderSource) { type = pShaderSource->GetShaderType(); });
+		return type;
+	}
+
+	FileData* EditorShaderProcessor::GetCompiledShaderFile(UUID shaderID) const
+	{
+		FileData* pCompiledShader = nullptr;
+		GetShaderSource(shaderID, [&pCompiledShader](ShaderSourceData* pShaderSource) {
+			pCompiledShader = pShaderSource->GetCompiledShader();
+		});
+		return pCompiledShader;
+	}
+
+	void EditorShaderProcessor::AssetCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
-		EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta);
+		if (!EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta))
+			return;
 		const uint32_t typeHash = meta.Hash();
-		size_t shaderSourceDataHash = ResourceTypes::GetHash<ShaderSourceData>();
+		static const size_t shaderSourceDataHash = ResourceTypes::GetHash<ShaderSourceData>();
 		if (typeHash != shaderSourceDataHash) return;
-		EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAsset(callback.m_UUID, [](Resource* pLoadedResource)
+
+		m_QueuedShaders.push_back(callback.m_UUID);
+		m_pShaderJobsPool->QueueSingleJob(LoadShaderSourceJob, callback.m_UUID);
+	}
+	
+	void EditorShaderProcessor::AssetUpdatedCallback(const AssetCallbackData& callback)
+	{
+		ResourceMeta meta;
+		if (!EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta))
+			return;
+		const uint32_t typeHash = meta.Hash();
+		static const size_t shaderSourceDataHash = ResourceTypes::GetHash<ShaderSourceData>();
+		if (typeHash != shaderSourceDataHash) return;
+
+		if (m_QueuedShaders.Contains(callback.m_UUID))
+			return;
+
+		const std::filesystem::path cachedShaderSourceFile = GetShaderSourceCachePath(callback.m_UUID);
+		if (std::filesystem::exists(cachedShaderSourceFile))
+			std::filesystem::remove(cachedShaderSourceFile);
+
+		m_QueuedShaders.push_back(callback.m_UUID);
+		m_pShaderJobsPool->QueueSingleJob(LoadShaderSourceJob, callback.m_UUID);
+	}
+
+	bool EditorShaderProcessor::LoadShaderSourceJob(UUID uuid)
+	{
+		AssetLocation location;
+		if (!EditorAssetDatabase::GetAssetLocation(uuid, location))
+			return false;
+
+		std::filesystem::path assetPath = ProjectSpace::GetOpenProject()->RootPath();
+		assetPath.append("Assets").append(location.Path);
+		if (!std::filesystem::exists(assetPath))
 		{
-			if (!pLoadedResource) return;
-			GetShaderSource((ShaderSourceData*)pLoadedResource);
+			assetPath = location.Path;
+		}
+
+		Resource* pResource = Importer::Import(assetPath, nullptr);
+		if (!pResource) return false;
+		pResource->SetResourceUUID(uuid);
+		ShaderSourceData* pShaderSource = static_cast<ShaderSourceData*>(pResource);
+
+		if (m_pLoadedShaderSources.Contains(pShaderSource->GetUUID()))
+		{
+			m_pLoadedShaderSources.Do(pShaderSource->GetUUID(), [&](ShaderSourceData** val)
+			{
+				/* Replace */
+				delete* val;
+				*val = pShaderSource;
+			});
+		}
+		else
+		{
+			m_pLoadedShaderSources.Set(pShaderSource->GetUUID(), pShaderSource);
+		}
+		return CompileShaderJob(uuid);
+	}
+
+	bool EditorShaderProcessor::CompileShaderJob(UUID uuid)
+	{
+		const std::filesystem::path cachedShaderSourceFile = GetShaderSourceCachePath(uuid);
+
+		GetShaderSource(uuid, [uuid, cachedShaderSourceFile](ShaderSourceData* pShaderSource) {
+			if (std::filesystem::exists(cachedShaderSourceFile))
+				LoadCache(uuid, cachedShaderSourceFile);
+			else
+				CompileAndCache(pShaderSource, cachedShaderSourceFile);
+
+			m_pCompiledShaders.Do(uuid, [uuid, pShaderSource](EditorShaderData* pEditorShader) {
+				if (pEditorShader == nullptr)
+				{
+					m_QueuedShaders.Erase(uuid);
+					return false;
+				}
+
+				ProcessReflection(pEditorShader);
+
+				const std::string path = GetCompiledShaderCachePath(pEditorShader->GetUUID()).string();
+				CompileForCurrentPlatform(pEditorShader, path);
+
+				FileImportSettings importSettings;
+				importSettings.AddNullTerminateAtEnd = true;
+				importSettings.Flags = std::ios::ate | std::ios::binary;
+				importSettings.m_Extension = "";
+				FileData* pCompiledShader = (FileData*)EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>()->Load(path, importSettings);
+				pShaderSource->SetCompiledShader(pCompiledShader);
+			});
 		});
+
+		m_QueuedShaders.Erase(uuid);
+		m_FinishedShaders.push_back(uuid);
+		return true;
+	}
+
+	std::filesystem::path EditorShaderProcessor::GetShaderSourceCachePath(UUID uuid)
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		std::filesystem::path cachedShaderSourceFile = pProject->CachePath();
+		cachedShaderSourceFile.append("ShaderSource").append(std::to_string(uuid));
+		return cachedShaderSourceFile;
+	}
+
+	std::filesystem::path EditorShaderProcessor::GetCompiledShaderCachePath(UUID uuid)
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		std::filesystem::path cachedCompiledShaderFile = pProject->CachePath();
+		cachedCompiledShaderFile.append("CompiledShaders").append(std::to_string(uuid));
+		return cachedCompiledShaderFile;
 	}
 }

@@ -2,6 +2,7 @@
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
 
+#include <Debug.h>
 #include <AssetDatabase.h>
 #include <JobManager.h>
 #include <AssetManager.h>

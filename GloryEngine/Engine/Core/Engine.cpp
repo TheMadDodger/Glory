@@ -35,6 +35,7 @@
 
 #include "TimerModule.h"
 #include "ProfilerModule.h"
+#include "MaterialInstanceData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
@@ -213,7 +214,8 @@ namespace Glory
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
 		m_Serializers(new Serializers), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
-		m_ShaderManager(new ShaderManager(this)), m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
+		m_pShaderManager(createInfo.pShaderManager), m_pMaterialManager(createInfo.pMaterialManager),
+		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -377,7 +379,12 @@ namespace Glory
 
 	ShaderManager& Engine::GetShaderManager()
 	{
-		return *m_ShaderManager;
+		return *m_pShaderManager;
+	}
+
+	MaterialManager& Engine::GetMaterialManager()
+	{
+		return *m_pMaterialManager;
 	}
 
 	Utils::Reflect::Reflect& Engine::Reflection()
@@ -393,6 +400,16 @@ namespace Glory
 	EngineProfiler& Engine::Profiler()
 	{
 		return *m_Profiler;
+	}
+
+	void Engine::SetShaderManager(ShaderManager* pManager)
+	{
+		m_pShaderManager = pManager;
+	}
+
+	void Engine::SetMaterialManager(MaterialManager* pManager)
+	{
+		m_pMaterialManager = pManager;
 	}
 
 	Debug& Engine::GetDebug()
@@ -485,6 +502,8 @@ namespace Glory
 		m_ResourceTypes->RegisterType<SceneObjectRef>();
 		m_ResourceTypes->RegisterType<ShapeProperty>();
 		m_ResourceTypes->RegisterResource<PrefabData>("");
+		m_ResourceTypes->RegisterResource<MaterialData>("");
+		m_ResourceTypes->RegisterResource<MaterialInstanceData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");

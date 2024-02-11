@@ -65,22 +65,22 @@ namespace Glory::Utils
 		return Node().size();
 	}
 
-	bool NodeValueRef::Exists()
+	bool NodeValueRef::Exists() const
 	{
 		return Node().IsDefined();
 	}
 
-	bool NodeValueRef::IsScalar()
+	bool NodeValueRef::IsScalar() const
 	{
 		return Node().IsScalar();
 	}
 
-	bool NodeValueRef::IsSequence()
+	bool NodeValueRef::IsSequence() const
 	{
 		return Node().IsSequence();
 	}
 
-	bool NodeValueRef::IsMap()
+	bool NodeValueRef::IsMap() const
 	{
 		return Node().IsMap();
 	}
@@ -109,6 +109,18 @@ namespace Glory::Utils
 		return NodeValueRef(m_RootNode, m_Path.parent_path());
 	}
 
+	NodeValueRef::Iterator NodeValueRef::Begin() const
+	{
+		YAML::const_iterator iter = Node().begin();
+		return NodeValueRef::Iterator{ iter };
+	}
+
+	NodeValueRef::Iterator NodeValueRef::End() const
+	{
+		YAML::const_iterator iter = Node().end();
+		return NodeValueRef::Iterator{ iter };
+	}
+
 	YAML::Node NodeValueRef::FindNode(YAML::Node& node, std::filesystem::path path)
 	{
 		if (path.empty() || path == ".") return node;
@@ -127,7 +139,31 @@ namespace Glory::Utils
 		return FindNode(nextNode, path);
 	}
 
+	const YAML::Node NodeValueRef::FindNode(YAML::Node& node, std::filesystem::path path) const
+	{
+		if (path.empty() || path == ".") return node;
+
+		const std::string& subPathString = (*path.begin()).string();
+		if (subPathString._Starts_with("##"))
+		{
+			const size_t index = std::stoul(subPathString.substr(2));
+			path = path.lexically_relative(subPathString);
+			YAML::Node& nextNode = node[index];
+			return FindNode(nextNode, path);
+		}
+
+		YAML::Node& nextNode = node[subPathString];
+		path = path.lexically_relative(subPathString);
+		return FindNode(nextNode, path);
+	}
+
 	YAML::Node NodeValueRef::Node()
+	{
+		if (m_Path.empty() || m_Path == ".") return m_RootNode;
+		return FindNode(m_RootNode, m_Path);
+	}
+
+	const YAML::Node NodeValueRef::Node() const
 	{
 		if (m_Path.empty() || m_Path == ".") return m_RootNode;
 		return FindNode(m_RootNode, m_Path);

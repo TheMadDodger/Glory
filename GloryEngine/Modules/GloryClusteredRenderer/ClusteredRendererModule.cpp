@@ -1,9 +1,11 @@
 #include "ClusteredRendererModule.h"
+
 #include <Engine.h>
 #include <GraphicsModule.h>
 #include <GPUResourceManager.h>
 #include <FileLoaderModule.h>
 #include <CameraManager.h>
+#include <InternalMaterial.h>
 
 namespace Glory
 {
@@ -60,36 +62,31 @@ namespace Glory
 		// Cluster generator shader
 		std::filesystem::path path;
 		GetResourcePath("Shaders/Compute/ClusterShader.shader", path);
-		FileData* pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pClusterShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
-		m_pClusterShaderMaterialData = new MaterialData({ m_pClusterShaderData });
+		m_pClusterShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
+		m_pClusterShaderMaterialData = new InternalMaterial({ m_pClusterShaderData }, { ShaderType::ST_Compute });
 
 		// Active cluster marker shader
 		GetResourcePath("Shaders/Compute/MarkActiveClusters.shader", path);
-		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pMarkActiveClustersShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
-		m_pMarkActiveClustersMaterialData = new MaterialData({ m_pMarkActiveClustersShaderData });
+		m_pMarkActiveClustersShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
+		m_pMarkActiveClustersMaterialData = new InternalMaterial({ m_pMarkActiveClustersShaderData }, { ShaderType::ST_Compute });
 
 		// Compact active clusters shader
 		GetResourcePath("Shaders/Compute/BuildCompactClusterList.shader", path);
-		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pCompactClustersShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
-		m_pCompactClustersMaterialData = new MaterialData({ m_pCompactClustersShaderData });
+		m_pCompactClustersShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
+		m_pCompactClustersMaterialData = new InternalMaterial({ m_pCompactClustersShaderData }, { ShaderType::ST_Compute });
 
 		// Light culling shader
 		GetResourcePath("Shaders/Compute/ClusterCullLight.shader", path);
-		pShaderFile = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pClusterCullLightShaderData = new ShaderSourceData(ShaderType::ST_Compute, pShaderFile);
-		m_pClusterCullLightMaterialData = new MaterialData({ m_pClusterCullLightShaderData });
+		m_pClusterCullLightShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
+		m_pClusterCullLightMaterialData = new InternalMaterial({ m_pClusterCullLightShaderData }, { ShaderType::ST_Compute });
 
 		// Screen shaders
 		GetResourcePath("Shaders/ScreenRenderer_Vert.shader", path);
-		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+		m_pScreenVertShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 		GetResourcePath("Shaders/ScreenRenderer_Frag.shader", path);
-		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+		m_pScreenFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 
-		std::vector<ShaderSourceData*> pShaderFiles = { new ShaderSourceData(ShaderType::ST_Vertex, pVert), new ShaderSourceData(ShaderType::ST_Fragment, pFrag) };
-		m_pScreenMaterial = new MaterialData(pShaderFiles);
+		m_pScreenMaterial = new InternalMaterial({ m_pScreenVertShader, m_pScreenFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 	}
 
 	void ClusteredRendererModule::Cleanup()
@@ -120,6 +117,9 @@ namespace Glory
 
 		delete m_pScreenMaterial;
 		m_pScreenMaterial = nullptr;
+
+		delete m_pScreenVertShader;
+		delete m_pScreenFragShader;
 	}
 
 	void ClusteredRendererModule::OnThreadedInitialize()

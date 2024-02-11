@@ -45,8 +45,6 @@ namespace Glory
 		void Reserve(std::vector<char>& buffer);
 
 	private:
-		friend class MaterialLoaderModule;
-		friend class MaterialInstanceLoaderModule;
 		std::string m_PropertyDisplayName;
 		std::string m_PropertyShaderName;
 		uint32_t m_TypeHash;

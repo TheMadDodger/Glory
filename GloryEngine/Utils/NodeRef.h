@@ -65,17 +65,42 @@ namespace Glory::Utils
 		void Insert(YAML::Node& node, size_t index);
 		size_t Size();
 
-		bool Exists();
-		bool IsScalar();
-		bool IsSequence();
-		bool IsMap();
+		bool Exists() const;
+		bool IsScalar() const;
+		bool IsSequence() const;
+		bool IsMap() const;
 		YAML::Node Node();
+		const YAML::Node Node() const;
 		const std::filesystem::path& Path();
 		void Erase();
 		NodeValueRef Parent();
 
+		struct Iterator
+		{
+			Iterator(YAML::const_iterator iter):
+				m_Iter(iter) {}
+
+			const std::string operator*() const { return m_Iter->first.as<std::string>(); }
+
+			// Prefix increment
+			Iterator& operator++() { ++m_Iter; return *this; }
+
+			// Postfix increment
+			Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+			friend bool operator== (const Iterator& a, const Iterator& b) { return a.m_Iter == b.m_Iter; };
+			friend bool operator!= (const Iterator& a, const Iterator& b) { return a.m_Iter != b.m_Iter; };
+
+		private:
+			YAML::const_iterator m_Iter;
+		};
+
+		Iterator Begin() const;
+		Iterator End() const;
+
 	private:
 		YAML::Node FindNode(YAML::Node& node, std::filesystem::path path);
+		const YAML::Node FindNode(YAML::Node& node, std::filesystem::path path) const;
 
 	private:
 		YAML::Node& m_RootNode;

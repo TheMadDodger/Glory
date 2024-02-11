@@ -31,6 +31,18 @@ namespace Glory::Editor
 		return (*itor)->Load(path);
 	}
 
+	Importer* Importer::GetImporter(const std::filesystem::path& path)
+	{
+		auto itor = std::find_if(m_pImporters.begin(), m_pImporters.end(), [&](const Importer* pImporter) {
+			return pImporter->SupportsExtension(path.extension());
+		});
+
+		if (itor == m_pImporters.end())
+			return nullptr;
+
+		return *itor;
+	}
+
 	bool Importer::Export(const std::filesystem::path& path, Resource* pResource)
 	{
 		auto itor = std::find_if(m_pImporters.begin(), m_pImporters.end(), [&](const Importer* pImporter) {

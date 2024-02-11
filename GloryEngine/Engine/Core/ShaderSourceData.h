@@ -22,7 +22,6 @@ namespace Glory
         void SetCompiledShader(FileData* pCompiledShader);
 
     private:
-		friend class ShaderSourceLoaderModule;
         ShaderType m_ShaderType;
         FileData* m_pPlatformCompiledShader;
         std::vector<char> m_OriginalSource;

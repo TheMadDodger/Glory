@@ -1,5 +1,6 @@
 #include "ShapePropertySerializer.h"
 #include "ShapeProperty.h"
+#include "ResourceType.h"
 
 namespace Glory
 {

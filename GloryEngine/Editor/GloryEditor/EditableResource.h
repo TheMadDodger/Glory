@@ -28,7 +28,7 @@ namespace Glory::Editor
 		/** @brief Overidable method for handling reloading of the asset */
 		virtual void Reload(const std::filesystem::path&) {}
 
-	private:
+	protected:
 		bool m_Dirty{ false };
 	};
 
@@ -86,6 +86,7 @@ namespace Glory::Editor
 		{
 			m_File.ChangePath(newPath);
 			m_File.Load();
+			m_Dirty = false;
 		}
 
 	private:

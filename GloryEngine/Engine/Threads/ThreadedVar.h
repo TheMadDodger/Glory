@@ -187,22 +187,32 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
-		void Do(const _Kty& key, std::function<void(_Ty* value)> callback)
+		bool Do(const _Kty& key, std::function<void(_Ty*)> callback)
 		{
 			m_Mutex.lock();
-			callback(&m_Data[key]);
+			if (m_Data.find(key) == m_Data.end()) {
+				m_Mutex.unlock();
+				return false;
+			}
+			callback(&m_Data.at(key));
 			m_Mutex.unlock();
+			return true;
 		}
 
-		void DoErase(const _Kty& key, std::function<void(_Ty* value)> callback)
+		bool DoErase(const _Kty& key, std::function<void(_Ty*)> callback)
 		{
 			m_Mutex.lock();
-			callback(&m_Data[key]);
+			if (m_Data.find(key) == m_Data.end()) {
+				m_Mutex.unlock();
+				return false;
+			}
+			callback(&m_Data.at(key));
 			m_Data.erase(key);
 			m_Mutex.unlock();
+			return true;
 		}
 
-		void Replace(const _Kty& key, std::function<const _Ty&(_Ty* value)> callback)
+		void Replace(const _Kty& key, std::function<const _Ty&(_Ty*)> callback)
 		{
 			m_Mutex.lock();
 			const _Ty& newValue = callback(&m_Data[key]);
@@ -210,11 +220,16 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
-		void Do(const _Kty& key, std::function<void(const _Ty& value)> callback)
+		bool Do(const _Kty& key, std::function<void(const _Ty&)> callback)
 		{
 			m_Mutex.lock();
+			if (m_Data.find(key) == m_Data.end()) {
+				m_Mutex.unlock();
+				return false;
+			}
 			callback(m_Data[key]);
 			m_Mutex.unlock();
+			return true;
 		}
 
 		size_t Size()
@@ -240,8 +255,19 @@ namespace Glory
 			m_Mutex.lock();
 			for (auto it = m_Data.begin(); it != m_Data.end(); it++)
 			{
-				callback(it->first, it->second);
+				callback(it->second);
 			}
+			m_Mutex.unlock();
+		}
+
+		void ForEachClear(std::function<void(_Ty value)> callback)
+		{
+			m_Mutex.lock();
+			for (auto it = m_Data.begin(); it != m_Data.end(); it++)
+			{
+				callback(it->second);
+			}
+			m_Data.clear();
 			m_Mutex.unlock();
 		}
 

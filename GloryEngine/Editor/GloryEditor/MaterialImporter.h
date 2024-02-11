@@ -5,7 +5,7 @@
 
 namespace Glory::Editor
 {
-	class MaterialImporter : public ImporterTemplate<MaterialData>
+	class MaterialImporter : public YAMLImporterTemplate<MaterialData>
 	{
 	public:
 		MaterialImporter();
@@ -18,11 +18,7 @@ namespace Glory::Editor
 		virtual MaterialData* LoadResource(const std::filesystem::path& path) const override;
 		bool SaveResource(const std::filesystem::path& path, MaterialData* pResource) const override;
 
-		MaterialData* LoadMaterialData(YAML::Node& rootNode) const;
-
 		void SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out) const;
-		void ReadShaders(YAML::Node& rootNode, MaterialData* pMaterialData) const;
-		void ReadPropertyData(YAML::Node& rootNode, MaterialData* pMaterialData) const;
 		void WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData) const;
 		void WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData) const;
 

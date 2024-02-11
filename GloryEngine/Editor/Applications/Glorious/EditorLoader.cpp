@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "EditorLoader.h"
 
+#include <Debug.h>
+
 namespace Glory
 {
 	typedef void(__cdecl* LoadBackendProc)(EditorCreateInfo&);

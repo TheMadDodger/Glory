@@ -96,6 +96,13 @@ namespace Glory::Editor
 		}
 		openPopup = false;
 
+		Window* pWindow = EditorApplication::GetInstance()->GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
+		int mainWindowWidth, mainWindowHeight;
+		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
+		const ImVec2 cursor = ImGui::GetCursorPos();
+		const ImVec2 windowPos = ImGui::GetWindowPos();
+		ImGui::SetNextWindowPos({ windowPos.x + ImGui::GetCursorPosX(), windowPos.y + cursor.y - 2.5f});
+		ImGui::SetNextWindowSize({ buttonWidth, mainWindowHeight - windowPos.y - cursor.y - 10.0f });
 		const bool change = DrawPopup(value, resourceType, includeSubAssets);
 		ImGui::PopID();
 		return change;

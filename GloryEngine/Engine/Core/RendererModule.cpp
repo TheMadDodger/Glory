@@ -10,6 +10,7 @@
 #include "GraphicsModule.h"
 #include "GraphicsThread.h"
 #include "Engine.h"
+#include "InternalMaterial.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -236,8 +237,9 @@ namespace Glory
 		GetResourcePath("Shaders/Lines_Frag.shader", path);
 		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 
-		std::vector<ShaderSourceData*> pShaderFiles = { new ShaderSourceData(ShaderType::ST_Vertex, pVert), new ShaderSourceData(ShaderType::ST_Fragment, pFrag) };
-		m_pLinesMaterialData = new MaterialData(pShaderFiles);
+		std::vector<FileData*> pShaderFiles = { pVert, pFrag };
+		std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
+		m_pLinesMaterialData = new InternalMaterial(std::move(pShaderFiles), std::move(shaderTypes));
 	}
 
 	void RendererModule::PostInitialize()

@@ -6,6 +6,8 @@
 #include "EditorResourceManager.h"
 #include "EditorSceneManager.h"
 #include "ProjectSpace.h"
+#include "EditorShaderProcessor.h"
+#include "EditorMaterialManager.h"
 
 #include <GraphicsThread.h>
 #include <imgui.h>
@@ -28,7 +30,9 @@ namespace Glory::Editor
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo):
 		m_pEngine(createInfo.pEngine),
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
+		m_ShaderProcessor(new EditorShaderProcessor(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
+		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
 		m_pFileWatcher(new efsw::FileWatcher())
 	{
 		// Copy the optional modules into the optional modules vector
@@ -40,6 +44,9 @@ namespace Glory::Editor
 				m_pExtensions[i] = createInfo.pExtensions[i];
 			}
 		}
+
+		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
+		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 
 		Instance = this;
 	}
@@ -81,7 +88,8 @@ namespace Glory::Editor
 		EditorAssetDatabase::Cleanup();
 		m_MainEditor.Destroy();
 		m_Platform.Destroy();
-		m_ShaderProcessor.Stop();
+		m_ShaderProcessor->Stop();
+		m_MaterialManager->Cleanup();
 
 		GloryAPI::Cleanup();
 
@@ -100,7 +108,8 @@ namespace Glory::Editor
 
 		m_pEngine->StartThreads();
 		m_Platform.SetState(Idle);
-		m_ShaderProcessor.Start();
+		m_ShaderProcessor->Start();
+		m_MaterialManager->Initialize();
 
 		m_Running = true;
 		if (m_Platform.m_Windowless)
@@ -111,6 +120,9 @@ namespace Glory::Editor
 				m_pFileWatcher->watch();
 
 				EditorAssetsWatcher::RunCallbacks();
+
+				/* Run callbacks for compiled shaders */
+				m_ShaderProcessor->RunCallbacks();
 
 				// Start a frame
 				m_pEngine->GameThreadFrameStart();
@@ -141,6 +153,9 @@ namespace Glory::Editor
 
 			/* We must wait for graphics to initialize */
 			if (!m_pEngine->GetGraphicsThread()->IsInitialized()) continue;
+
+			/* Run callbacks for compiled shaders */
+			m_ShaderProcessor->RunCallbacks();
 
 			// Start a frame
 			m_pEngine->GameThreadFrameStart();
@@ -285,9 +300,14 @@ namespace Glory::Editor
 		return m_pEngine;
 	}
 
-	EditorResourceManager& Glory::Editor::EditorApplication::GetResourceManager()
+	EditorResourceManager& EditorApplication::GetResourceManager()
 	{
 		return *m_ResourceManager;
+	}
+
+	EditorMaterialManager& EditorApplication::GetMaterialManager()
+	{
+		return *m_MaterialManager;
 	}
 
 	void EditorApplication::TryToQuit()

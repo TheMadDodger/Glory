@@ -51,4 +51,11 @@ namespace Glory::Editor
 
 		return pMonoScript;
 	}
+
+	bool MonoScriptImporter::SaveResource(const std::filesystem::path& path, MonoScript* pScript) const
+	{
+		LoaderModule* pModule = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>();
+		pModule->Save(path.string(), pScript);
+		return true;
+	}
 }

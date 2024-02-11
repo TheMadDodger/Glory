@@ -1,11 +1,12 @@
 #pragma once
+#include "LayerManager.h"
+#include "LayerRef.h"
+#include "SceneObjectRef.h"
+#include "GraphicsEnums.h"
+
 #include <yaml-cpp/yaml.h>
 #include <string>
 #include <algorithm>
-#include "LayerManager.h"
-#include "ShaderSourceLoaderModule.h"
-#include "LayerRef.h"
-#include "SceneObjectRef.h"
 
 namespace YAML
 {
@@ -113,6 +114,24 @@ namespace YAML
 		{ Glory::ShaderType::ST_TessEval, "TessEval" },
 	};
 
+	/** @todo: This is a duplicate */
+	inline std::map<std::string, Glory::ShaderType> ShaderStringTypes = {
+		{ "compute", Glory::ShaderType::ST_Compute },
+		{ "comp", Glory::ShaderType::ST_Compute },
+		{ "fragment", Glory::ShaderType::ST_Fragment },
+		{ "frag", Glory::ShaderType::ST_Fragment },
+		{ "geometry", Glory::ShaderType::ST_Geomtery },
+		{ "geom", Glory::ShaderType::ST_Geomtery },
+		{ "tesscontrol", Glory::ShaderType::ST_TessControl },
+		{ "tc", Glory::ShaderType::ST_TessControl },
+		{ "tesselationcontrol", Glory::ShaderType::ST_TessControl },
+		{ "teseval", Glory::ShaderType::ST_TessEval },
+		{ "te", Glory::ShaderType::ST_TessEval },
+		{ "tesselationevaluation", Glory::ShaderType::ST_TessEval },
+		{ "vertex", Glory::ShaderType::ST_Vertex },
+		{ "vert", Glory::ShaderType::ST_Vertex },
+	};
+
 	template<>
 	struct convert<Glory::ShaderType>
 	{
@@ -133,7 +152,15 @@ namespace YAML
 			std::transform(typeString.begin(), typeString.end(), typeString.begin(),
 				[](unsigned char c) { return std::tolower(c); });
 
-			return Glory::ShaderSourceLoaderModule::GetShaderTypeFromString(typeString, type);
+			auto itor = ShaderStringTypes.find(typeString);
+			if (itor == ShaderStringTypes.end())
+			{
+				type = Glory::ShaderType::ST_Unknown;
+				return false;
+			}
+
+			type = itor->second;
+			return true;
 		}
 	};
 }

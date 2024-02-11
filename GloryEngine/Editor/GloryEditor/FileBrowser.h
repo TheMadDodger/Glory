@@ -14,6 +14,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API std::filesystem::path GetCurrentPath();
 		static GLORY_EDITOR_API void BeginRename(const std::string& name, bool folder);
 		static GLORY_EDITOR_API void LoadProject();
+		static GLORY_EDITOR_API void BeginCreate(const std::string& name, const std::string& icon, std::function<void(std::filesystem::path&)> callback);
+		static GLORY_EDITOR_API void CancelCreate();
 
 		static GLORY_EDITOR_API void OnFileDragAndDrop(const std::filesystem::path& path);
 
@@ -35,6 +37,9 @@ namespace Glory::Editor
 		void LoadItems();
 
 		void RefreshSearch();
+
+		void DrawCreatingItem();
+		void DrawCreatingItemName(float padding);
 
 	private:
 		int m_I;

@@ -4,9 +4,15 @@
 #include "AssetManager.h"
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
+#include "EditorResourceManager.h"
+#include "EditorShaderProcessor.h"
+#include "EditorShaderData.h"
+#include "EditorUI.h"
+#include "EditorMaterialManager.h"
 
 #include <imgui.h>
 #include <MaterialEditor.h>
+#include <PropertySerializer.h>
 #include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
@@ -17,62 +23,161 @@ namespace Glory::Editor
 
 	bool MaterialInstanceEditor::OnGUI()
 	{
-		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
+		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
+		YAMLResource<MaterialInstanceData>* pMaterial = (YAMLResource<MaterialInstanceData>*)m_pTarget;
+		MaterialInstanceData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterialInstance(pMaterial->GetUUID());
 
-		MaterialData* pBaseMaterial = pMaterial->GetBaseMaterial();
-		//ImGui::Text("Material: %s", pBaseMaterial ? pBaseMaterial->Name().c_str() : "None");
-		//ImGui::SameLine();
-		UUID baseMaterialID = pBaseMaterial ? pBaseMaterial->GetUUID() : UUID(0);
+		Utils::YAMLFileRef& file = **pMaterial;
+		auto baseMaterial = file["BaseMaterial"];
+		UUID baseMaterialID = baseMaterial.As<uint64_t>();
 		bool change = false;
-		if (AssetPicker::ResourceDropdown("Base Material", ResourceTypes::GetHash<MaterialData>(), &baseMaterialID))
+		if (AssetPicker::ResourceDropdown("Base Material", ResourceTypes::GetHash<MaterialData>(), &baseMaterialID, false))
 		{
 			change = true;
-			AssetManager& assets = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
-			MaterialData* pBaseMaterial = EditorAssetDatabase::AssetExists(baseMaterialID) ? (MaterialData*)assets.GetAssetImmediate(baseMaterialID) : nullptr;
-			pMaterial->SetBaseMaterial(pBaseMaterial);
+			baseMaterial.Set(uint64_t(baseMaterialID));
 		}
 
-		if (!pMaterial->GetBaseMaterial())
+		if (!baseMaterialID || !EditorAssetDatabase::AssetExists(baseMaterialID))
 		{
 			DrawErrorWindow("No base material selected");
 			return false;
 		}
 
-		std::vector<bool> overrideStates;
-		pMaterial->CopyOverrideStates(overrideStates);
-
-		std::vector<char>& buffer = pMaterial->GetBufferReference();
-
-		size_t resourceCounter = 0;
-		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); i++)
+		EditableResource* pBaseMaterialResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(baseMaterialID);
+		if (!pBaseMaterialResource)
 		{
-			std::string label = "##override_" + std::to_string(i);
-
-			bool enable = overrideStates[i];
-			MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(i);
-
-			ImGui::Checkbox(label.data(), &enable);
-			ImGui::BeginDisabled(!enable);
-			ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-
-			if (info->IsResource())
-			{
-				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
-				change |= pPropertyDrawer->Draw(info->DisplayName(), pMaterial->GetResourceUUIDPointer(resourceCounter), info->TypeHash(), info->Flags());
-				++resourceCounter;
-			}
-			else change |= PropertyDrawer::DrawProperty(info->DisplayName(), pMaterial->GetBufferReference(), info->TypeHash(), info->Offset(), info->Size(), info->Flags());
-
-			ImGui::EndDisabled();
-			overrideStates[i] = enable;
+			DrawErrorWindow("Invalid base material selected");
+			return false;
 		}
 
-		pMaterial->PasteOverrideStates(overrideStates);
+		YAMLResource<MaterialData>* pBaseMaterial = static_cast<YAMLResource<MaterialData>*>(pBaseMaterialResource);
+
+		Utils::YAMLFileRef& baseFile = **pBaseMaterial;
+		auto shaders = baseFile["Shaders"];
+		auto baseProperties = baseFile["Properties"];
+		auto properties = file["Overrides"];
+
+		for (size_t i = 0; i < shaders.Size(); ++i)
+		{
+			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
+
+			EditorShaderData* pEditorShader = EditorShaderProcessor::GetEditorShader(shaderID);
+			for (size_t j = 0; j < pEditorShader->m_SamplerNames.size(); ++j)
+			{
+				const std::string& sampler = pEditorShader->m_SamplerNames[j];
+				auto prop = properties[sampler];
+				bool enable = prop.Exists() && (prop["Enable"].Exists() && prop["Enable"].As<bool>());
+
+				size_t materialPropertyIndex = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, sampler, materialPropertyIndex))
+					continue;
+
+				if (!prop["Enable"].Exists())
+					prop["Enable"].Set(false);
+
+				ImGui::PushID(sampler.data());
+				EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+				if (EditorUI::CheckBox(file, prop["Enable"].Path()))
+				{
+					enable = prop["Enable"].As<bool>();
+					if (enable)
+					{
+						prop["Enable"].Set(true);
+						pMaterialData->EnableProperty(materialPropertyIndex);
+					}
+					else
+					{
+						prop["Enable"].Set(false);
+						pMaterialData->DisableProperty(materialPropertyIndex);
+					}
+					change = true;
+				}
+				EditorUI::PopFlag();
+				ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+
+				if (!prop.Exists()) {
+					prop["Value"].Set(0);
+					prop["Enable"].Set(enable);
+				}
+				auto baseValue = baseProperties[sampler]["Value"];
+
+				auto propValue = prop["Value"];
+
+				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
+
+				Undo::StartRecord("Material Instance Property");
+				ImGui::BeginDisabled(!enable);
+				change |= pPropertyDrawer->Draw(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
+				ImGui::EndDisabled();
+				ImGui::PopID();
+				Undo::StopRecord();
+
+				if (!enable) continue;
+				/* Deserialize new value into resources array */
+				const UUID newUUID = propValue.As<uint64_t>();
+				pMaterialData->SetTexture(materialManager, sampler, newUUID);
+			}
+
+			for (size_t j = 0; j < pEditorShader->m_PropertyInfos.size(); ++j)
+			{
+				EditorShaderData::PropertyInfo& info = pEditorShader->m_PropertyInfos[j];
+				size_t materialPropertyIndex = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, info.m_Name, materialPropertyIndex))
+					continue;
+				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+
+				auto prop = properties[info.m_Name];
+				if (!prop["Enable"].Exists())
+					prop["Enable"].Set(false);
+
+				bool enable = prop.Exists() && (prop["Enable"].Exists() && prop["Enable"].As<bool>());
+
+				ImGui::PushID(info.m_Name.data());
+				EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+				if (EditorUI::CheckBox(file, prop["Enable"].Path()))
+				{
+					enable = prop["Enable"].As<bool>();
+					if (enable)
+					{
+						prop["Enable"].Set(true);
+						pMaterialData->EnableProperty(materialPropertyIndex);
+					}
+					else
+					{
+						prop["Enable"].Set(false);
+						pMaterialData->DisableProperty(materialPropertyIndex);
+					}
+					change = true;
+				}
+				EditorUI::PopFlag();
+				ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+
+				auto baseValue = baseProperties[info.m_Name]["Value"];
+				auto propValue = prop["Value"];
+
+				Undo::StartRecord("Material Instance Property");
+				ImGui::BeginDisabled(!enable);
+				change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), info.m_TypeHash, info.m_TypeHash, pMaterialProperty->Flags());
+				ImGui::EndDisabled();
+				ImGui::PopID();
+				Undo::StopRecord();
+
+				if (!enable) continue;
+				/* Deserialize new value into buffer */
+				serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
+			}
+		}
 
 		if (change)
+		{
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
+			pMaterial->SetDirty(true);
+		}
 
-		const char* error = MaterialEditor::GetMaterialError(pMaterial);
+		const char* error = MaterialEditor::GetMaterialError(pBaseMaterial);
 		DrawErrorWindow(error);
 
 		return change;
@@ -80,9 +185,6 @@ namespace Glory::Editor
 
 	void MaterialInstanceEditor::Initialize()
 	{
-		MaterialInstanceData* pMaterial = (MaterialInstanceData*)m_pTarget;
-		if (!pMaterial) return;
-		pMaterial->ReloadProperties();
 	}
 
 	void MaterialInstanceEditor::DrawErrorWindow(const char* error)

@@ -20,12 +20,8 @@ namespace Glory
 		std::any& Data();
 
 	private:
-		friend class MaterialLoaderModule;
 		const std::string m_PropertyName;
 		uint32_t m_Flags;
 		std::any m_PropertyData;
-
-
-		// Material properties should become byte arrays
 	};
 }

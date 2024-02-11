@@ -36,6 +36,12 @@ namespace Glory::Editor
 		return false;
 	}
 
+	bool PropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
+	{
+		ImGui::Text(path.filename().string().data());
+		return false;
+	}
+
 	void PropertyDrawer::RegisterPropertyDrawer(PropertyDrawer* pDrawer)
 	{
 		m_PropertyDrawers.push_back(pDrawer);
@@ -187,6 +193,30 @@ namespace Glory::Editor
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", label.c_str());
+		return false;
+	}
+
+	bool PropertyDrawer::DrawProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags)
+	{
+		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		{
+			return propertyDrawer->GetPropertyTypeHash() == typeHash;
+		});
+
+		if (it != m_PropertyDrawers.end())
+		{
+			PropertyDrawer* drawer = *it;
+			return drawer->Draw(file, path, elementTypeHash, flags);
+		}
+
+		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
+		if (pTypeData)
+		{
+			/* TODO */
+			throw new std::exception("Not yet implemented!");
+		}
+
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", path.filename().string().c_str());
 		return false;
 	}
 

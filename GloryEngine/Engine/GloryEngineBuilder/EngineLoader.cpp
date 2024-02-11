@@ -1,7 +1,7 @@
 #include "EngineLoader.h"
 
+#include <Debug.h>
 #include <WindowModule.h>
-
 #include <BuiltInModules.h>
 
 std::string GetLastErrorAsString()
@@ -58,10 +58,7 @@ namespace Glory
 		LoadModules(modules);
 
 		m_pOptionalModules.push_back(new Glory::FileLoaderModule());
-		m_pOptionalModules.push_back(new Glory::MaterialLoaderModule());
-		m_pOptionalModules.push_back(new Glory::MaterialInstanceLoaderModule());
 		m_pOptionalModules.push_back(new Glory::TextureDataLoaderModule());
-		m_pOptionalModules.push_back(new Glory::ShaderSourceLoaderModule());
 
 		m_EngineInfo.MainModuleCount = static_cast<uint32_t>(m_pMainModules.size());
 		m_EngineInfo.pMainModules = m_pMainModules.data();
