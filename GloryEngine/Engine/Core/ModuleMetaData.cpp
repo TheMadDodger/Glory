@@ -41,11 +41,11 @@ namespace Glory
 	{
 	}
 
-	void ModuleMetaData::Read()
+	void ModuleMetaData::Read(Debug& debug)
 	{
 		if (!std::filesystem::exists(m_Path))
 		{
-			//m_pEngine->GetDebug().LogWarning("Could not load Module.yaml at path: " + m_Path.string());
+			debug.LogWarning("Could not load Module.yaml at path: " + m_Path.string());
 			return;
 		}
 
@@ -59,20 +59,26 @@ namespace Glory
 
 		if (type == "SceneManagement")
 		{
-			//m_pEngine->GetDebug().LogError("Scene modules are no longer supported as of 0.3.0");
+			debug.LogError("Scene modules are no longer supported as of 0.3.0");
 			m_Type = ModuleType::MT_Invalid;
 			return;
 		}
 		if (type == "Physics")
 		{
-			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 physics modules are now categorized as \"Other\" modules");
+			debug.LogWarning("As of 0.3.0 physics modules are now categorized as \"Other\" modules");
 			type = "Other";
 		}
 		if (type == "Scripting")
 		{
-			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 scripting modules are now categorized as \"Other\" modules");
+			debug.LogWarning("As of 0.3.0 scripting modules are now categorized as \"Other\" modules");
 			type = "Other";
 		}
+		if (type == "Loader")
+		{
+			debug.LogWarning("As of 0.3.0 loader modules are now categorized as \"Other\" modules");
+			type = "Other";
+		}
+
 		if (STRINGTOMODULETYPE.find(type) != STRINGTOMODULETYPE.end()) m_Type = STRINGTOMODULETYPE[type];
 
 		Utils::NodeValueRef dependenciesNode = rootNode["Dependencies"];

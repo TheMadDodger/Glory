@@ -2,6 +2,7 @@
 #include "EditorAssets.h"
 #include "EditorSceneManager.h"
 #include "EditorApplication.h"
+#include "Importer.h"
 
 #include <Engine.h>
 
@@ -19,8 +20,7 @@ namespace Glory::Editor
 	{
 		if (!m_pSceneTumbnail)
 		{
-			LoaderModule* pLoader = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<ImageData>();
-			m_pSceneTumbnail = (ImageData*)pLoader->Load("./EditorAssets/Thumb/scene.png");
+			m_pSceneTumbnail = (ImageData*)Importer::Import("./EditorAssets/Thumb/scene.png", nullptr);
 		}
 
 		return (TextureData*)m_pSceneTumbnail->Subresource(0);

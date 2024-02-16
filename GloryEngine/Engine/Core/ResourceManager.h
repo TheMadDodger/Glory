@@ -70,6 +70,37 @@ namespace Glory
 			return index == UINT64_MAX ? nullptr : &m_Resources[index];
 		}
 
+		struct Iterator
+		{
+		public:
+			Iterator(T* ptr) : m_Ptr(ptr) {}
+
+			T& operator*() const { return *m_Ptr; }
+			T* operator->() { return m_Ptr; }
+
+			// Prefix increment
+			Iterator& operator++() { m_Ptr++; return *this; }
+
+			// Postfix increment
+			Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+			friend bool operator== (Iterator& a, Iterator& b) { return a.m_Ptr == b.m_Ptr; };
+			friend bool operator!= (Iterator& a, Iterator& b) { return a.m_Ptr != b.m_Ptr; };
+
+		private:
+			T* m_Ptr;
+		};
+
+		Iterator Begin()
+		{
+			return Iterator{ m_Resources.data() };
+		}
+
+		Iterator End()
+		{
+			return Iterator{ m_Resources.data() + m_Resources.size() };
+		}
+
 	private:
 		std::vector<T> m_Resources;
 	};

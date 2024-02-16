@@ -245,6 +245,7 @@ namespace Glory
 
 	bool MaterialData::HasShader(const UUID shaderID) const
 	{
+		if (m_Shaders.empty()) return false;
 		return std::find(m_Shaders.begin(), m_Shaders.end(), shaderID) != m_Shaders.end();
 	}
 

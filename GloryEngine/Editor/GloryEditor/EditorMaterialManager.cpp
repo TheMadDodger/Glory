@@ -30,8 +30,6 @@ namespace Glory::Editor
 
 	EditorMaterialManager::~EditorMaterialManager()
 	{
-		m_pMaterialDatas.clear();
-		m_pMaterialInstanceDatas.clear();
 		m_WaitingMaterialInstances.clear();
 	}
 
@@ -71,35 +69,38 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::AddShaderToMaterial(UUID materialID, UUID shaderID)
 	{
-		auto itor = m_pMaterialDatas.find(materialID);
-		if (itor == m_pMaterialDatas.end()) return;
-		itor->second->AddShader(shaderID);
+		ResourceManager<MaterialData>* pResources = m_pEngine->GetResources().Manager<MaterialData>();
+		if (!pResources->IsLoaded(materialID)) return;
+		MaterialData* pMaterial = pResources->Get(materialID);
+		pMaterial->AddShader(shaderID);
 		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
 		Utils::YAMLFileRef& file = **pMaterialData;
 		auto shaders = file["Shaders"];
 		shaders[shaders.Size()]["UUID"].Set(uint64_t(shaderID));
-		UpdateMaterial(itor->second);
+		UpdateMaterial(pMaterial);
 	}
 
 	void EditorMaterialManager::RemoveShaderFromMaterial(UUID materialID, size_t index)
 	{
-		auto itor = m_pMaterialDatas.find(materialID);
-		if (itor == m_pMaterialDatas.end()) return;
-		itor->second->RemoveShaderAt(index);
+		ResourceManager<MaterialData>* pResources = m_pEngine->GetResources().Manager<MaterialData>();
+		if (!pResources->IsLoaded(materialID)) return;
+		MaterialData* pMaterial = pResources->Get(materialID);
+		pMaterial->RemoveShaderAt(index);
 		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
 		Utils::YAMLFileRef& file = **pMaterialData;
 		auto shaders = file["Shaders"];
 		shaders.Remove(index);
-		UpdateMaterial(itor->second);
+		UpdateMaterial(pMaterial);
 	}
 
 	MaterialData* EditorMaterialManager::GetMaterial(UUID materialID) const
 	{
-		auto itor = m_pMaterialDatas.find(materialID);
-		if (itor == m_pMaterialDatas.end()) return GetMaterialInstance(materialID);
-		return itor->second;
+		ResourceManager<MaterialData>* pResources = m_pEngine->GetResources().Manager<MaterialData>();
+		if (!pResources->IsLoaded(materialID))
+			return GetMaterialInstance(materialID);
+		return pResources->Get(materialID);
 	}
 
 	void EditorMaterialManager::AssetAddedCallback(const AssetCallbackData& callback)
@@ -145,8 +146,6 @@ namespace Glory::Editor
 				pMaterialData = (MaterialData*)pMaterialResources->Add(std::move(pMaterialData));
 			}
 
-			m_pMaterialDatas[callback.m_UUID] = pMaterialData;
-
 			/* Update material instances that were waiting for this material */
 			auto itor = m_WaitingMaterialInstances.find(callback.m_UUID);
 			if (itor == m_WaitingMaterialInstances.end()) return;
@@ -181,11 +180,10 @@ namespace Glory::Editor
 				pMaterialData = (MaterialInstanceData*)pMaterialInstanceResources->Add(std::move(pMaterialData));
 			}
 
-			m_pMaterialInstanceDatas[callback.m_UUID] = pMaterialData;
-
 			/* If the base material isnt loaded we must update it when it is */
 			const UUID baseMaterial = pMaterialData->BaseMaterialID();
-			if (!baseMaterial || m_pMaterialDatas.find(baseMaterial) != m_pMaterialDatas.end()) return;
+			MaterialData* pBaseMaterial = GetMaterial(baseMaterial);
+			if (!baseMaterial || pBaseMaterial) return;
 			m_WaitingMaterialInstances[baseMaterial].push_back(callback.m_UUID);
 		}
 	}
@@ -286,10 +284,11 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::OnShaderCompiled(const UUID& uuid)
 	{
-		for (auto itor = m_pMaterialDatas.begin(); itor != m_pMaterialDatas.end(); ++itor)
+		ResourceManager<MaterialData>* pMaterialResources = m_pEngine->GetResources().Manager<MaterialData>();
+		for (auto itor = pMaterialResources->Begin(); itor != pMaterialResources->End(); ++itor)
 		{
-			if (!itor->second->HasShader(uuid)) continue;
-			UpdateMaterial(itor->second);
+			if (!itor->HasShader(uuid)) continue;
+			UpdateMaterial(&*itor);
 		}
 	}
 
@@ -312,17 +311,18 @@ namespace Glory::Editor
 		/* Update properties in YAML? */
 
 		/* Find and update material instances */
-		for (auto itor = m_pMaterialInstanceDatas.begin(); itor != m_pMaterialInstanceDatas.end(); ++itor)
+		ResourceManager<MaterialInstanceData>* pMaterialResources = m_pEngine->GetResources().Manager<MaterialInstanceData>();
+		for (auto itor = pMaterialResources->Begin(); itor != pMaterialResources->End(); ++itor)
 		{
-			if (itor->second->BaseMaterialID() != pMaterial->GetUUID()) continue;
-			itor->second->Resize(*this, itor->second);
+			if (itor->BaseMaterialID() != pMaterial->GetUUID()) continue;
+			itor->Resize(*this, pMaterial);
 		}
 	}
 
 	MaterialInstanceData* EditorMaterialManager::GetMaterialInstance(UUID materialID) const
 	{
-		auto itor = m_pMaterialInstanceDatas.find(materialID);
-		if (itor == m_pMaterialInstanceDatas.end()) return nullptr;
-		return itor->second;
+		ResourceManager<MaterialInstanceData>* pMaterialResources = m_pEngine->GetResources().Manager<MaterialInstanceData>();
+		if (!pMaterialResources->IsLoaded(materialID)) return nullptr;
+		return pMaterialResources->Get(materialID);
 	}
 }

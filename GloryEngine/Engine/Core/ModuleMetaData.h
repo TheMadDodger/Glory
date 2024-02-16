@@ -24,6 +24,8 @@ namespace Glory
 		std::string m_Requires;
 	};
 
+	class Debug;
+
 	class ModuleMetaData
 	{
 	public:
@@ -31,7 +33,7 @@ namespace Glory
 		ModuleMetaData(const std::filesystem::path& path);
 		virtual ~ModuleMetaData();
 
-		void Read();
+		void Read(Debug& debug);
 
 		const std::filesystem::path& Path() const;
 		const std::string& Name() const;

@@ -161,6 +161,16 @@ namespace Glory
 			m_EngineInfo.m_pDebug->LogInfo("GloryEntityScenes has been removed and is now part of the core engine");
 			return;
 		}
+		if (moduleName == "GloryASSIMPModelLoader")
+		{
+			m_EngineInfo.m_pDebug->LogInfo("Module GloryASSIMPModelLoader has been removed");
+			return;
+		}
+		if (moduleName == "GlorySDLImage")
+		{
+			m_EngineInfo.m_pDebug->LogInfo("Module GlorySDLImage has been removed");
+			return;
+		}
 
 		std::stringstream debugStream;
 
@@ -172,7 +182,7 @@ namespace Glory
 		std::filesystem::path metaPath = modulePath;
 		metaPath = metaPath.append("Module.yaml");
 		ModuleMetaData metaData(metaPath);
-		metaData.Read();
+		metaData.Read(*m_EngineInfo.m_pDebug);
 
 		if (metaData.Type() == ModuleType::MT_Invalid)
 		{

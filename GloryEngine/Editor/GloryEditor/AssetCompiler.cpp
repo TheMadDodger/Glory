@@ -144,6 +144,7 @@ namespace Glory::Editor
 
 		/* Try get the asset if its already loaded */
 		BaseResourceManager* pManager = resources.Manager(asset.Meta.Hash());
+		if (!pManager) return false;
 		Resource* pResource = pManager->GetBase(uuid);
 		if (!pResource)
 		{
@@ -160,7 +161,7 @@ namespace Glory::Editor
 
 			pResource->SetResourceUUID(uuid);
 			/* Insert the loaded asset into the manager */
-			pManager->Add(pResource);
+			pResource = pManager->Add(pResource);
 		}
 
 		/* Serialize the resource into a binary file */

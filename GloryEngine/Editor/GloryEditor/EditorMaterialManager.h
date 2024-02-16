@@ -101,8 +101,6 @@ namespace Editor
 
 	private:
 		friend class MaterialInstanceEditor;
-		std::map<UUID, MaterialData*> m_pMaterialDatas;
-		std::map<UUID, MaterialInstanceData*> m_pMaterialInstanceDatas;
 		std::map<UUID, std::vector<UUID>> m_WaitingMaterialInstances;
 
 		Engine* m_pEngine;

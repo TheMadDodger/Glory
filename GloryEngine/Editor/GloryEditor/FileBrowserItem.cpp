@@ -434,10 +434,10 @@ namespace Glory::Editor
 		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
 		if (relativePath == "") relativePath = m_CachedPath;
 		AssetDatabase& assetDatabase = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase();
-		UUID uuid = assetDatabase.GetAssetUUID(relativePath.string());
+		const UUID uuid = EditorAssetDatabase::FindAssetUUID(relativePath.string());
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
-		UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
+		const UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
 
 		ImGui::PushStyleColor(ImGuiCol_Button, selectedID == uuid || m_HighlightedPath == m_CachedPath.string() ? buttonColor : buttonInactiveColor);
 		ImGui::Button("##fileItem", itemSize);

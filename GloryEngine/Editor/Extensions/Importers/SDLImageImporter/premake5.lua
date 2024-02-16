@@ -4,7 +4,7 @@ project "SDLImageImporter"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GlorySDLWindow/Editor/Extension")
+	targetdir ("%{engineOutDir}/Extensions")
 	objdir ("%{outputDir}")
 
 	files
