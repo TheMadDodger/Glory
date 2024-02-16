@@ -40,7 +40,7 @@ namespace Glory
 		size_t TypeCount() const;
 		bool GetType(size_t index, std::type_index& type) const;
 
-		const std::string& Name();
+		const std::string& Name() const;
 		void SetName(const std::string& name);
 		void SetName(const std::string_view name);
 

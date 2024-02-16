@@ -71,7 +71,7 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
-		void ForEachClear(std::function<void(const _Ty& value)> callback)
+		void ForEachClear(std::function<void(_Ty& value)> callback)
 		{
 			m_Mutex.lock();
 			for (size_t i = 0; i < m_Data.size(); i++)
@@ -180,6 +180,13 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
+		void Set(const _Kty& key, _Ty&& value)
+		{
+			m_Mutex.lock();
+			m_Data[key] = std::move(value);
+			m_Mutex.unlock();
+		}
+
 		void Erase(const _Kty& key)
 		{
 			m_Mutex.lock();
@@ -220,7 +227,7 @@ namespace Glory
 			m_Mutex.unlock();
 		}
 
-		bool Do(const _Kty& key, std::function<void(const _Ty&)> callback)
+		bool Do(const _Kty& key, std::function<void(_Ty&)> callback)
 		{
 			m_Mutex.lock();
 			if (m_Data.find(key) == m_Data.end()) {

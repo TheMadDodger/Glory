@@ -18,24 +18,15 @@ namespace Glory
 
 	void AssetArchive::Serialize(Resource* pResource)
 	{
-		const size_t subResourcesCount = pResource->SubResourceCount();
-
 		std::type_index type = typeid(Resource);
 		if (!pResource->GetType(0, type)) return;
 		const uint32_t typeHash = ResourceTypes::GetHash(type);
 
 		/* Write name, type and sub resource count */
-		m_pStream->Write(pResource->Name()).Write(typeHash).Write(subResourcesCount);
+		m_pStream->Write(pResource->Name()).Write(typeHash);
 
 		/* Write the resource */
 		pResource->Serialize(*m_pStream);
-
-		/* Write the sub resources */
-		for (size_t i = 0; i < subResourcesCount; ++i)
-		{
-			Resource* pSubResource = pResource->Subresource(i);
-			Serialize(pSubResource);
-		}
 	}
 
 	void AssetArchive::Deserialize(Resource* pResource)

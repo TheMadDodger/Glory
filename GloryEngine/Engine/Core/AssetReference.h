@@ -26,6 +26,8 @@ namespace Glory
 
 		virtual AssetReferenceBase* CreateCopy() { return new AssetReferenceBase(m_AssetUUID); };
 
+		operator bool() const;
+
 	protected:
 		REFLECTABLE(AssetReferenceBase, (UUID) (m_AssetUUID))
 	};

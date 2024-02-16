@@ -20,7 +20,7 @@ namespace Glory::Editor
 
 	private:
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;
-		virtual MaterialInstanceData* LoadResource(const std::filesystem::path& path) const override;
+		virtual ImportedResource LoadResource(const std::filesystem::path& path) const override;
 		bool SaveResource(const std::filesystem::path& path, MaterialInstanceData* pResource) const override;
 
 		void SaveMaterialInstanceData(MaterialInstanceData* pMaterialData, YAML::Emitter& out) const;

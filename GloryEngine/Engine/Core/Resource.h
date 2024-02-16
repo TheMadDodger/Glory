@@ -10,37 +10,22 @@ namespace Glory
 {
     class BinaryStream;
 
+    /** @brief Resource */
     class Resource : public Object
     {
     public:
+        /** @brief Constructor */
         Resource();
+        /** @overload */
         Resource(UUID uuid);
+        /** @overload */
         Resource(const std::string& name);
+        /** @overload */
         Resource(UUID uuid, const std::string& name);
+        /** @brief Destructor */
         virtual ~Resource();
 
     public:
-        const size_t SubResourceCount() const;
-        Resource* Subresource(size_t index) const;
-        Resource* Subresource(std::string_view name) const;
-        Resource* ParentResource() const;
-
-        Resource* SubresourceFromPath(std::filesystem::path path);
-
-        template<class T>
-        T* Subresource(size_t index) const
-        {
-            return static_cast<T*>(Subresource(index));
-        }
-
-        template<class T>
-        T* Subresource(std::string_view name) const
-        {
-            return static_cast<T*>(Subresource(name));
-        }
-
-        void AddSubresource(Resource* pResource, const std::string& name);
-
         virtual void Serialize(BinaryStream& container) const {};
         virtual void Deserialize(BinaryStream& container) const {};
 
@@ -51,11 +36,6 @@ namespace Glory
          * never use this on an existing resource!
          */
         void SetResourceUUID(UUID uuid);
-
-    protected:
-        std::vector<Resource*> m_pSubresources;
-        std::map<std::string, size_t, std::less<>> m_NameToSubresourceIndex;
-        Resource* m_pParent;
 
     private:
         friend class AssetManager;

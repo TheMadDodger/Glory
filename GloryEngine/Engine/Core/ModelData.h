@@ -10,9 +10,5 @@ namespace Glory
 	public:
 		ModelData();
 		virtual ~ModelData();
-
-		size_t GetMeshCount() const;
-		MeshData* GetMesh(size_t index) const;
-		MeshData* GetMesh(std::string_view name) const;
 	};
 }

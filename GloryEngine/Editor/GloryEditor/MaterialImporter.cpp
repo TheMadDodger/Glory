@@ -29,12 +29,12 @@ namespace Glory::Editor
 		return extension.compare(".gmat") == 0;
 	}
 
-	MaterialData* MaterialImporter::LoadResource(const std::filesystem::path& path) const
+	ImportedResource MaterialImporter::LoadResource(const std::filesystem::path& path) const
 	{
 		MaterialData* pMaterialData = new MaterialData();
 		Utils::YAMLFileRef file{ path };
 		EditorApplication::GetInstance()->GetMaterialManager().LoadIntoMaterial(file, pMaterialData);
-		return pMaterialData;
+		return ImportedResource{ pMaterialData };
 	}
 
 	bool MaterialImporter::SaveResource(const std::filesystem::path& path, MaterialData* pResource) const

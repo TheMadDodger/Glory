@@ -15,7 +15,7 @@ namespace Glory::Editor
 
 	private:
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;
-		virtual TextureData* LoadResource(const std::filesystem::path& path) const override;
+		virtual ImportedResource LoadResource(const std::filesystem::path& path) const override;
 		bool SaveResource(const std::filesystem::path& path, TextureData* pResource) const override;
 
 	private:

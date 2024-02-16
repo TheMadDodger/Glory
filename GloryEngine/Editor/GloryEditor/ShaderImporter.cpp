@@ -98,7 +98,7 @@ namespace Glory::Editor
         if (!ProcessSymbol(shaderData, symbol, argument)) AppendLine(line, shaderData.ProcessedSource);
     }
 
-    ShaderSourceData* ShaderImporter::LoadResource(const std::filesystem::path& path) const
+    ImportedResource ShaderImporter::LoadResource(const std::filesystem::path& path) const
     {
         std::ifstream file(path, std::ios::binary);
 
@@ -127,6 +127,6 @@ namespace Glory::Editor
             ProcessLine(shaderData, line);
         }
 
-        return new ShaderSourceData(shaderData.Type, std::move(shaderData.Source), std::move(shaderData.ProcessedSource));
+        return { new ShaderSourceData(shaderData.Type, std::move(shaderData.Source), std::move(shaderData.ProcessedSource)) };
     }
 }

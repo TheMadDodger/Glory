@@ -1,5 +1,6 @@
 #pragma once
 #include "GloryEditor.h"
+#include "ImportedResource.h"
 
 #include <filesystem>
 #include <vector>
@@ -16,7 +17,7 @@ namespace Glory::Editor
 	class Importer
 	{
 	public:
-		GLORY_EDITOR_API static Resource* Import(const std::filesystem::path& path, void* pImportSettings);
+		GLORY_EDITOR_API static ImportedResource Import(const std::filesystem::path& path, void* pImportSettings);
 		GLORY_EDITOR_API static Importer* GetImporter(const std::filesystem::path& path);
 		GLORY_EDITOR_API static bool Export(const std::filesystem::path& path, Resource* pResource);
 		GLORY_EDITOR_API static void Register(Importer* pImporter);
@@ -34,7 +35,7 @@ namespace Glory::Editor
 		Importer() {};
 		virtual ~Importer() {};
 
-		virtual Resource* Load(const std::filesystem::path& path) const = 0;
+		virtual ImportedResource Load(const std::filesystem::path& path) const = 0;
 		virtual bool Save(const std::filesystem::path& path, Resource* pResource) const = 0;
 		virtual uint32_t ResourceTypeHash() const = 0;
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;

@@ -44,7 +44,7 @@ namespace Glory::Editor
 		return false;
 	}
 
-	ImageData* SDLImageImporter::LoadResource(const std::filesystem::path& path) const
+	ImportedResource SDLImageImporter::LoadResource(const std::filesystem::path& path) const
 	{
 		SDL_Surface* pSDLImage = IMG_Load(path.string().data());
 
@@ -103,7 +103,9 @@ namespace Glory::Editor
 
 		ImageData* pData = new ImageData(width, height, internalFormat, pixelFormat, bytesPerPixel, std::move(data), bytesPerPixel * numPixels);
 		TextureData* pDefualtTexture = new TextureData(pData);
-		pData->AddSubresource(pDefualtTexture, "Default");
+
+		ImportedResource importedResource{ pData };
+		importedResource.AddChild(pDefualtTexture, "Default");
 
 		SDL_FreeSurface(pSDLImage);
 		return pData;

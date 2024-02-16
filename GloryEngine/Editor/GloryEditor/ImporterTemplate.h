@@ -15,10 +15,10 @@ namespace Glory::Editor
 		ImporterTemplate() {}
 		virtual ~ImporterTemplate() {}
 
-		virtual Resource* Load(const std::filesystem::path& path) const override
+		virtual ImportedResource Load(const std::filesystem::path& path) const override
 		{
 			const std::string name = path.filename().replace_extension("").string();
-			T* pResource = LoadResource(path);
+			ImportedResource pResource = LoadResource(path);
 			if (pResource) pResource->SetName(name);
 			return pResource;
 		}
@@ -39,7 +39,7 @@ namespace Glory::Editor
 		}
 
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
-		virtual T* LoadResource(const std::filesystem::path& path) const = 0;
+		virtual ImportedResource LoadResource(const std::filesystem::path& path) const = 0;
 		virtual bool SaveResource(const std::filesystem::path& path, T* pResource) const { return false; }
 
 	protected:
