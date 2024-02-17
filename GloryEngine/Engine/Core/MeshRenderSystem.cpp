@@ -37,7 +37,8 @@ namespace Glory
         MeshData* pMeshData = pAssets->GetOrLoadAsset<MeshData>(pComponent.m_Mesh.AssetUUID());
         if (pMeshData == nullptr) return;
 
-        if (!pAssetDB->AssetExists(pComponent.m_Material.AssetUUID()))
+        const UUID materialID = pComponent.m_Material.AssetUUID();
+        if (!pAssetDB->AssetExists(materialID))
         {
             // TODO: Set some default material
             std::string key = std::to_string(entity) + "_MISSING_MATERIAL";
@@ -45,18 +46,15 @@ namespace Glory
             return;
         }
 
-        const UUID materialUUID = pComponent.m_Material.AssetUUID();
-        MaterialData* pMaterial = pMaterials->GetMaterial(materialUUID);
-
-        if (pMaterial == nullptr)
+        if (!pMaterials->GetMaterial(materialID))
         {
             // TODO: Set some default material
             return;
         }
 
         RenderData renderData;
-        renderData.m_pMesh = pMeshData;
-        renderData.m_pMaterial = pMaterial;
+        renderData.m_MeshID = pComponent.m_Mesh.AssetUUID();
+        renderData.m_MaterialID = materialID;
         renderData.m_World = transform.MatTransform;
         renderData.m_LayerMask = mask;
         renderData.m_ObjectID = pScene->GetEntityUUID(entity);

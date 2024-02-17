@@ -1,5 +1,7 @@
 #include "ClusteredRendererModule.h"
 
+#include <AssetManager.h>
+#include <MaterialManager.h>
 #include <Engine.h>
 #include <GraphicsModule.h>
 #include <GPUResourceManager.h>
@@ -148,9 +150,12 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
-		MeshData* pMeshData = renderData.m_pMesh;
-		if (pMeshData == nullptr) return;
-		Material* pMaterial = pGraphics->UseMaterial(renderData.m_pMaterial);
+		Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MeshID);
+		if (!pMeshResource) return;
+		MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+		MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(renderData.m_MaterialID);
+		if (!pMaterialData) return;
+		Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
 		if (!pMaterial) return;
 
 		ObjectData object;

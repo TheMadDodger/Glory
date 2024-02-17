@@ -28,7 +28,10 @@ project "GloryClusteredRenderer"
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
+
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.threads}",
+		"%{GloryIncludeDir.jobs}",
 
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",

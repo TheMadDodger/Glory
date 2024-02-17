@@ -35,7 +35,6 @@ project "GloryJoltPhysics"
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Utils}",
 
 		"%{IncludeDir.yaml_cpp}",
