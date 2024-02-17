@@ -22,7 +22,7 @@ namespace Glory::Editor
 		return extension.compare(".gentity") == 0;
 	}
 
-	PrefabData* EntityPrefabImporter::LoadResource(const std::filesystem::path& path) const
+    ImportedResource EntityPrefabImporter::LoadResource(const std::filesystem::path& path) const
 	{
         PrefabData* pPrefab = new PrefabData();
 
@@ -44,7 +44,7 @@ namespace Glory::Editor
         }
 
         pPrefab->SetRootNode(std::move(rootNode));
-        return pPrefab;
+        return { pPrefab };
 	}
 
 	bool EntityPrefabImporter::SaveResource(const std::filesystem::path& path, PrefabData* pResource) const

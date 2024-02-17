@@ -40,6 +40,8 @@ namespace Editor
 		GLORY_EDITOR_API ImportedResource* ChildFromPath(const std::filesystem::path& path);
 		GLORY_EDITOR_API const ImportedResource* ChildFromPath(const std::filesystem::path& path) const;
 
+		GLORY_EDITOR_API void Cleanup();
+
 	private:
 		friend class EditorAssetDatabase;
 		Resource* m_pResource;

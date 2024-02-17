@@ -472,7 +472,7 @@ namespace Glory::Editor
 		Resource* pLoadedResource = pEngine->GetAssetManager().FindResource(uuid);
 		if (pLoadedResource) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
-		EditorAssetDatabase::ImportAsset(file.string(), pLoadedResource);
+		EditorAssetDatabase::ImportAsset(file.string());
 	}
 
 	void DeleteFolder()

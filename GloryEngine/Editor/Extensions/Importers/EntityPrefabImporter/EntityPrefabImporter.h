@@ -15,7 +15,7 @@ namespace Glory::Editor
 
 	private:
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;
-		virtual PrefabData* LoadResource(const std::filesystem::path& path) const override;
+		virtual ImportedResource LoadResource(const std::filesystem::path& path) const override;
 		virtual bool SaveResource(const std::filesystem::path& path, PrefabData* pResource) const override;
 
 		void WriteChild(YAML::Emitter& out, const PrefabNode& parent) const;

@@ -1,6 +1,7 @@
 #include "ImageTumbnailGenerator.h"
 #include "AssetManager.h"
 #include "EditorApplication.h"
+#include "EditorAssets.h"
 
 namespace Glory::Editor
 {
@@ -14,7 +15,7 @@ namespace Glory::Editor
 
 	TextureData* ImageTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
 	{
-		UUID id = pResourceType->ID();
+		/*UUID id = pResourceType->ID();
 		if (std::find(m_AlreadyRequestedTumbnails.begin(), m_AlreadyRequestedTumbnails.end(), id) != m_AlreadyRequestedTumbnails.end()) return nullptr;
 
 		if (m_pLoadedImages.find(id) != m_pLoadedImages.end())
@@ -34,6 +35,8 @@ namespace Glory::Editor
 			if (it == m_AlreadyRequestedTumbnails.end()) return;
 			m_AlreadyRequestedTumbnails.erase(it);
 		});
-		return nullptr;
+		return nullptr;*/
+
+		return EditorAssets::GetTextureData("file");
 	}
 }

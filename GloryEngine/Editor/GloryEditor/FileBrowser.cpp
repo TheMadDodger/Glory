@@ -159,7 +159,7 @@ namespace Glory::Editor
         CreateNameBuffer[0] = '\0';
     }
 
-    void FileBrowser::OnAsyncImport(Resource*)
+    void FileBrowser::OnAsyncImport()
     {
         FileBrowser* pWindow = GetWindow<FileBrowser>();
         std::filesystem::path currentPath = FileBrowserItem::GetCurrentPath();

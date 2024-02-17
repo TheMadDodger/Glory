@@ -4,6 +4,8 @@
 
 namespace Glory
 {
+    class AssetManager;
+
 	class TextureData : public Resource
 	{
     public:
@@ -11,6 +13,7 @@ namespace Glory
         TextureData(ImageData* pImageData);
         virtual ~TextureData();
 
+        virtual ImageData* GetImageData(AssetManager* pAssetManager);
         AssetReference<ImageData>& Image();
         SamplerSettings& GetSamplerSettings();
 

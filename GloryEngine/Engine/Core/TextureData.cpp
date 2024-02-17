@@ -16,6 +16,11 @@ namespace Glory
 	{
 	}
 
+	ImageData* TextureData::GetImageData(AssetManager* pAssetManager)
+	{
+		return Image() ? Image().Get(pAssetManager) : nullptr;
+	}
+
 	AssetReference<ImageData>& TextureData::Image()
 	{
 		return m_Image;

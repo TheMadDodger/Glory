@@ -115,4 +115,18 @@ namespace Glory::Editor
 		std::filesystem::path nextPath = path.lexically_relative(subPath);
 		return pSubresource->ChildFromPath(nextPath);
 	}
+
+	void ImportedResource::Cleanup()
+	{
+		if (m_pResource)
+		{
+			delete m_pResource;
+			m_pResource = nullptr;
+		}
+
+		for (size_t i = 0; i < m_Children.size(); ++i)
+		{
+			m_Children[i].Cleanup();
+		}
+	}
 }
