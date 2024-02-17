@@ -35,6 +35,7 @@ namespace Glory::Editor
         /* Perform 0.3.0 migrations */
         if (Version::Compare(version, { 0,3,0,0 }, true) < 0)
         {
+            Migrate_0_3_0_ASSIMPAssets(pProject);
             Migrate_0_3_0_ConvertMaterialPropertiesToMap(pProject);
         }
 
@@ -284,6 +285,35 @@ namespace Glory::Editor
             EditorAssetDatabase::SetAssetDirty(uuid);
             pMaterial->SetDirty(true);
             pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrated material instance overrides for " + std::to_string(uuid));
+        }
+    }
+
+    void Migrate_0_3_0_ASSIMPAssets(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrating ASSIMP module assets to new location");
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+
+        for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+        {
+            JSONValueRef asset = assets[itor->name.GetString()];
+            const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+            const std::string_view pathStr = asset["Location/Path"].AsString();
+            if (pathStr._Starts_with(".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\"))
+            {
+                std::filesystem::path path = pathStr;
+                path = path.lexically_relative(".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\");
+                std::filesystem::path newPath = ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\";
+                newPath.append(path.string());
+                asset["Location/Path"].SetString(newPath.string());
+
+                std::stringstream str;
+                str << "0.3.0> Moved " << pathStr << " to " << newPath.string();
+                pApplication->GetEngine()->GetDebug().LogInfo(str.str());
+            }
         }
     }
 }
