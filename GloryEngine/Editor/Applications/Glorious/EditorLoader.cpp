@@ -197,7 +197,7 @@ namespace Glory
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			pEngine->GetDebug().LogFatalError("Failed to load editor extension dependency: " + name + ": The dll was not found!");
+			pEngine->GetDebug().LogError("Failed to load editor extension dependency: " + name + ": The dll was not found!");
 			return;
 		}
 		m_Libs.push_back(lib);

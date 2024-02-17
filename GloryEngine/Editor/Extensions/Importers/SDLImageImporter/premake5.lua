@@ -4,7 +4,7 @@ project "SDLImageImporter"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GlorySDLWindow/Editor/Extension")
+	targetdir ("%{engineOutDir}/Extensions")
 	objdir ("%{outputDir}")
 
 	files
@@ -80,6 +80,11 @@ project "SDLImageImporter"
 		"GLORY_EDITOR_EXPORTS",
 		"GLORY_EDITOR_EXTENSION_EXPORTS",
 		"GLORY_UUID_DEFINED",
+	}
+
+	postbuildcommands
+	{
+		("{COPY} %{DepsBinDir}/SDL2_image*.dll %{engineOutDir}/Extensions/Dependencies"),
 	}
 
 	filter "system:windows"

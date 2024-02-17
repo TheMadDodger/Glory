@@ -49,7 +49,7 @@ namespace Glory::Editor
         return false;
     }
 
-    ImportedResource ASSIMPImporter::LoadResource(const std::filesystem::path& path) const
+    ImportedResource ASSIMPImporter::LoadResource(const std::filesystem::path& path, void*) const
     {
         Assimp::Importer importer;
 
@@ -72,7 +72,7 @@ namespace Glory::Editor
 
         importer.FreeScene();
 
-        return pModel;
+        return resource;
     }
 
     void ASSIMPImporter::ProcessNode(aiNode* node, const aiScene* scene, ImportedResource& resource) const

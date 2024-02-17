@@ -206,6 +206,14 @@ namespace Glory
 			return true;
 		}
 
+		bool Do(std::function<void(std::unordered_map<_Kty, _Ty, _Hasher>&)> callback)
+		{
+			m_Mutex.lock();
+			callback(m_Data);
+			m_Mutex.unlock();
+			return true;
+		}
+
 		bool DoErase(const _Kty& key, std::function<void(_Ty*)> callback)
 		{
 			m_Mutex.lock();

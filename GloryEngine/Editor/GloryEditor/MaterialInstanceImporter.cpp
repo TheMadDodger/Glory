@@ -26,7 +26,7 @@ namespace Glory::Editor
 		return extension.compare(".gminst") == 0;
 	}
 
-	ImportedResource MaterialInstanceImporter::LoadResource(const std::filesystem::path& path) const
+	ImportedResource MaterialInstanceImporter::LoadResource(const std::filesystem::path& path, void*) const
 	{
 		Utils::YAMLFileRef file{ path };
 		MaterialInstanceData* pMaterial = nullptr;

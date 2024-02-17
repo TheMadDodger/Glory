@@ -66,8 +66,6 @@ namespace Glory::Editor
 
 		for (UUID id : ids)
 		{
-			/* Skip sub assets */
-			if (!m_AssetDatas.at(id).Location.SubresourcePath.empty()) continue;
 			const std::filesystem::path path = GenerateCompiledAssetPath(id);
 			const bool exists = std::filesystem::exists(path.string());
 			if (exists) continue;
@@ -124,12 +122,14 @@ namespace Glory::Editor
 		Resource* pResource = assetManager.FindResource(uuid);
 		if (!pResource)
 		{
-			if (!ImportedResources.Contains(path))
-			{
+			ImportedResources.Do([&path, &uuid](std::unordered_map<std::filesystem::path, ImportedResource>& data) {
+				auto itor = data.find(path);
+				if (itor != data.end()) return;
+
 				/* Import the resource */
-				ImportedResource resource = Importer::Import(path, nullptr);
-				ImportedResources.Set(path, std::move(resource));
-			}
+				ImportedResource resource = Importer::Import(path, (void*)&uuid);
+				data.emplace(path, std::move(resource));
+			});
 
 			ImportedResources.Do(path, [asset, &pResource](ImportedResource& resource) {
 				ImportedResource* pChild = resource.ChildFromPath(asset.Location.SubresourcePath);
@@ -147,16 +147,18 @@ namespace Glory::Editor
 			}
 
 			/* Insert the loaded asset into the manager */
+			pResource->SetName(asset.Meta.Name());
 			assetManager.AddLoadedResource(pResource, uuid);
 		}
 
 		/* Serialize the resource into a binary file */
-		const std::filesystem::path compiledPath = GenerateCompiledAssetPath(uuid);
-		{
-			BinaryFileStream stream{ compiledPath };
-			AssetArchive archive{ &stream };
-			archive.Serialize(pResource);
-		}
+		/* @todo: Disabled until asset loading works, so for now assets are recompiled every time */
+		//const std::filesystem::path compiledPath = GenerateCompiledAssetPath(uuid);
+		//{
+		//	BinaryFileStream stream{ compiledPath };
+		//	AssetArchive archive{ &stream };
+		//	archive.Serialize(pResource);
+		//}
 
 		std::stringstream str;
 		str << "AssetCompiler: Compiled asset " << uuid;

@@ -98,7 +98,7 @@ namespace Glory::Editor
         if (!ProcessSymbol(shaderData, symbol, argument)) AppendLine(line, shaderData.ProcessedSource);
     }
 
-    ImportedResource ShaderImporter::LoadResource(const std::filesystem::path& path) const
+    ImportedResource ShaderImporter::LoadResource(const std::filesystem::path& path, void*) const
     {
         std::ifstream file(path, std::ios::binary);
 

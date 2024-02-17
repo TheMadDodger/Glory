@@ -26,7 +26,7 @@ namespace Glory::Editor
 
     private:
         bool SupportsExtension(const std::filesystem::path& extension) const override;
-        ImportedResource LoadResource(const std::filesystem::path& path) const override;
+        ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 
         void ProcessNode(aiNode* node, const aiScene* scene, ImportedResource& resource) const;
         MeshData* ProcessMesh(aiMesh* mesh) const;

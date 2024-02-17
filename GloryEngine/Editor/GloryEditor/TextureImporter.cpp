@@ -22,7 +22,7 @@ namespace Glory::Editor
 		return extension.compare(".gtex") == 0;
 	}
 
-	ImportedResource TextureImporter::LoadResource(const std::filesystem::path& path) const
+	ImportedResource TextureImporter::LoadResource(const std::filesystem::path& path, void*) const
 	{
 		Utils::YAMLFileRef file{ path };
 		file.Load();

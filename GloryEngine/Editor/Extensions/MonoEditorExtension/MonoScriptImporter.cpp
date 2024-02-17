@@ -31,7 +31,7 @@ namespace Glory::Editor
 		return source.substr(startIndex, length);
 	}
 
-	ImportedResource MonoScriptImporter::LoadResource(const std::filesystem::path& path) const
+	ImportedResource MonoScriptImporter::LoadResource(const std::filesystem::path& path, void*) const
 	{
 		/* @todo Replace with a text file importer (but then again there is no need to load the code?) */
 		LoaderModule* pModule = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>();
