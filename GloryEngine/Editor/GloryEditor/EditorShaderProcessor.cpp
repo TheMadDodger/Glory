@@ -311,10 +311,10 @@ namespace Glory::Editor
 			assetPath = location.Path;
 		}
 
-		Resource* pResource = Importer::Import(assetPath, nullptr);
-		if (!pResource) return false;
-		pResource->SetResourceUUID(uuid);
-		ShaderSourceData* pShaderSource = static_cast<ShaderSourceData*>(pResource);
+		ImportedResource resource = Importer::Import(assetPath, nullptr);
+		if (!resource) return false;
+		resource->SetResourceUUID(uuid);
+		ShaderSourceData* pShaderSource = static_cast<ShaderSourceData*>(*resource);
 
 		if (m_pLoadedShaderSources.Contains(pShaderSource->GetUUID()))
 		{

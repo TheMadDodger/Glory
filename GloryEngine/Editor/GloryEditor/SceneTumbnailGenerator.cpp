@@ -17,13 +17,7 @@ namespace Glory::Editor
 
 	TextureData* SceneTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
 	{
-		if (!m_pSceneTumbnail)
-		{
-			LoaderModule* pLoader = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<ImageData>();
-			m_pSceneTumbnail = (ImageData*)pLoader->Load("./EditorAssets/Thumb/scene.png");
-		}
-
-		return (TextureData*)m_pSceneTumbnail->Subresource(0);
+		return EditorAssets::GetTextureData("scene");
 	}
 
 	void SceneTumbnailGenerator::OnFileDoubleClick(UUID uuid)

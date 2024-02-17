@@ -21,16 +21,16 @@ namespace Glory::Editor
 
 	Engine* DB_EngineInstance = nullptr;
 
-	struct ImportedResource
+	struct ImportedResourceData
 	{
-		Resource* Resource;
+		ImportedResource Resource;
 		std::filesystem::path Path;
 	};
 
-	ThreadedVector<ImportedResource> m_ImportedResources;
+	ThreadedVector<ImportedResourceData> m_ImportedResources;
 	ThreadedUMap<std::string, UUID> m_PathToUUIDCache;
 
-	std::function<void(Resource*)> EditorAssetDatabase::m_AsyncImportCallback;
+	std::function<void()> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
 
 	Jobs::JobPool<bool, std::filesystem::path>* m_pImportPool;
@@ -296,10 +296,10 @@ namespace Glory::Editor
 		std::filesystem::path extension = filePath.extension();
 		std::filesystem::path fileName = filePath.filename().replace_extension("");
 		if (!Importer::Export(path, pResource)) return 0;
-		return ImportAsset(path, pResource);
+		return ImportAsset(path, ImportedResource{ pResource });
 	}
 
-	UUID EditorAssetDatabase::ImportAsset(const std::string& path, Resource* pLoadedResource, std::filesystem::path subPath)
+	UUID EditorAssetDatabase::ImportAsset(const std::string& path, ImportedResource& loadedResource, std::filesystem::path subPath)
 	{
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -315,36 +315,21 @@ namespace Glory::Editor
 		}
 
 		const ResourceType* pType = nullptr;
-		if (!pLoadedResource)
+		if (!loadedResource)
 		{
-			pLoadedResource = Importer::Import(path, nullptr);
-			if (!pLoadedResource)
+			loadedResource = Importer::Import(path, nullptr);
+			if (!loadedResource)
 			{
-				DB_EngineInstance->GetDebug().LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
-
-				LoaderModule* pModule = DB_EngineInstance->GetLoaderModule(ext);
-				if (!pModule)
-				{
-					// Not supperted!
-					DB_EngineInstance->GetDebug().LogError("Failed to import file, asset type not supported!");
-					return 0;
-				}
-
-				pLoadedResource = pModule->Load(path);
-
-				if (!pLoadedResource)
-				{
-					DB_EngineInstance->GetDebug().LogError("Failed to import file, could not load resource file!");
-					return 0;
-				}
+				DB_EngineInstance->GetDebug().LogWarning("Failed to import file!");
+				return 0;
 			}
 		}
 
 		/* Try getting the resource type from the loaded resource */
 		std::type_index type = typeid(Resource);
-		for (size_t i = 0; i < pLoadedResource->TypeCount(); ++i)
+		for (size_t i = 0; i < loadedResource->TypeCount(); ++i)
 		{
-			if (!pLoadedResource->GetType(0, type)) continue;
+			if (!loadedResource->GetType(0, type)) continue;
 			pType = DB_EngineInstance->GetResourceTypes().GetResourceType(type);
 			if (pType) break;
 		}
@@ -369,11 +354,12 @@ namespace Glory::Editor
 
 		std::filesystem::path namePath = fileName;
 		if (!subPath.empty()) namePath.append(subPath.string());
-		ResourceMeta meta(extension.string(), namePath.string(), pLoadedResource->GetUUID(), pType->Hash());
+		ResourceMeta meta(extension.string(), namePath.string(), loadedResource->GetUUID(), pType->Hash());
 
-		assetDatabase.SetIDAndName(pLoadedResource, meta.ID(), meta.Name());
+		Resource* pResource = *loadedResource;
+		assetDatabase.SetIDAndName(pResource, meta.ID(), meta.Name());
 		std::filesystem::path relativePath = filePath.lexically_relative(assetPath);
-		assetManager.AddLoadedResource(pLoadedResource);
+		assetManager.AddLoadedResource(pResource);
 
 		AssetLocation location{ relativePath.empty() ? path : relativePath.string(), subPath.string() };
 		InsertAsset(location, meta);
@@ -389,12 +375,12 @@ namespace Glory::Editor
 		AssetCompiler::CompileAssetDatabase(meta.ID());
 
 		/* Import sub resources */
-		for (size_t i = 0; i < pLoadedResource->SubResourceCount(); i++)
+		for (size_t i = 0; i < loadedResource.ChildCount(); i++)
 		{
-			Resource* pSubResource = pLoadedResource->Subresource(i);
+			ImportedResource& subResource = loadedResource.Child(i);
 			std::filesystem::path newSubPath = subPath;
-			newSubPath.append(pSubResource->Name());
-			ImportAsset(path, pSubResource, newSubPath);
+			newSubPath.append(subResource->Name());
+			ImportAsset(path, subResource, newSubPath);
 		}
 
 		return meta.ID();
@@ -688,7 +674,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorAssetDatabase::RegisterAsyncImportCallback(std::function<void(Resource*)> func)
+	void EditorAssetDatabase::RegisterAsyncImportCallback(std::function<void()> func)
 	{
 		m_AsyncImportCallback = func;
 	}
@@ -729,9 +715,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::Update()
 	{
-		m_ImportedResources.ForEachClear([](const ImportedResource& resource) {
+		m_ImportedResources.ForEachClear([](ImportedResourceData& resource) {
 			ImportAsset(resource.Path.string(), resource.Resource);
-			if (m_AsyncImportCallback) m_AsyncImportCallback(resource.Resource);
+			if (m_AsyncImportCallback) m_AsyncImportCallback();
 		});
 
 		EditorAssetCallbacks::RunCallbacks();
@@ -746,28 +732,14 @@ namespace Glory::Editor
 		std::string ext = extension.string();
 		std::for_each(ext.begin(), ext.end(), [](char& c) { c = std::tolower(c); });
 
-		Resource* pResource = Importer::Import(path, nullptr);
-		if (!pResource)
+		ImportedResource resource = Importer::Import(path, nullptr);
+		if (!resource)
 		{
-			DB_EngineInstance->GetDebug().LogWarning("Failed to import file using new importer system, using legacy loaders instead!");
-
-			LoaderModule* pModule = DB_EngineInstance->GetLoaderModule(ext);
-			if (!pModule)
-			{
-				// Not supperted!
-				DB_EngineInstance->GetDebug().LogError("Failed to import file, asset type not supported!");
-				return false;
-			}
-
-			pResource = pModule->Load(path.string());
-			if (!pResource)
-			{
-				DB_EngineInstance->GetDebug().LogError("Failed to import file, the returned Resource is null!");
-				return false;
-			}
+			DB_EngineInstance->GetDebug().LogWarning("Failed to import file!");
+			return false;
 		}
 
-		m_ImportedResources.push_back({ pResource, path });
+		m_ImportedResources.push_back({ std::move(resource), path });
 		return true;
 	}
 

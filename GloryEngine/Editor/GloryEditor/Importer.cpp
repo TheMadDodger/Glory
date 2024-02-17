@@ -10,7 +10,7 @@ namespace Glory::Editor
 	std::vector<Importer*> Importer::m_pImporters;
 	std::vector<Importer*> Importer::m_pOwnedImporters;
 
-	Resource* Importer::Import(const std::filesystem::path& path, void* pImportSettings)
+	ImportedResource Importer::Import(const std::filesystem::path& path, void* userSettings)
 	{
 		auto itor = std::find_if(m_pImporters.begin(), m_pImporters.end(), [&](const Importer* pImporter) {
 			return pImporter->SupportsExtension(path.extension());
@@ -28,7 +28,7 @@ namespace Glory::Editor
 		str << "Found importer " << (*itor)->Name() << " for loading " << path.extension() << " files to import: " << path;
 		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(str.str());
 
-		return (*itor)->Load(path);
+		return (*itor)->Load(path, userSettings);
 	}
 
 	Importer* Importer::GetImporter(const std::filesystem::path& path)

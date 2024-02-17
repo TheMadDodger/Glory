@@ -1,5 +1,6 @@
 #include "MonoScriptTumbnail.h"
 #include "MonoEditorExtension.h"
+#include "EditorAssets.h"
 
 #include <EditorApplication.h>
 #include <Engine.h>
@@ -17,13 +18,15 @@ namespace Glory::Editor
 
 	TextureData* MonoScriptTumbnail::GetTumbnail(const ResourceMeta* pResourceType)
 	{
-		if (!m_pScriptTumbnail)
+		/*if (!m_pScriptTumbnail)
 		{
 			LoaderModule* pLoader = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<ImageData>();
 			m_pScriptTumbnail = (ImageData*)pLoader->Load("./EditorAssets/Mono/Code.png");
 		}
 
-		return (TextureData*)m_pScriptTumbnail->Subresource(0);
+		return (TextureData*)m_pScriptTumbnail->Subresource(0);*/
+
+		return EditorAssets::GetTextureData("file");
 	}
 
 	void MonoScriptTumbnail::OnFileDoubleClick(UUID uuid)

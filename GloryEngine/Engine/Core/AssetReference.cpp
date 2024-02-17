@@ -40,4 +40,9 @@ namespace Glory
 	{
 		return pAssets->GetAssetImmediate(m_AssetUUID);
 	}
+	
+	AssetReferenceBase::operator bool() const
+	{
+		return m_AssetUUID;
+	}
 }

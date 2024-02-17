@@ -15,6 +15,7 @@ namespace Glory::Editor
 {
 	std::map<UUID, AssetCompiler::AssetData> AssetCompiler::m_AssetDatas;
 	ThreadedVector<UUID> AssetCompiler::m_CompilingAssets;
+	ThreadedUMap<std::filesystem::path, ImportedResource> ImportedResources;
 
 	Jobs::JobPool<bool, const AssetCompiler::AssetData>* CompilationJobPool = nullptr;
 
@@ -52,7 +53,9 @@ namespace Glory::Editor
 				m_AssetDatas.erase(id);
 				continue;
 			}
-			assetDatabase.SetAsset(data.Location, data.Meta);
+
+			AssetLocation compiledLocation{GenerateCompiledAssetPath(id).string()};
+			assetDatabase.SetAsset(compiledLocation, data.Meta);
 		}
 	}
 
@@ -63,8 +66,6 @@ namespace Glory::Editor
 
 		for (UUID id : ids)
 		{
-			/* Skip sub assets */
-			if (!m_AssetDatas.at(id).Location.SubresourcePath.empty()) continue;
 			const std::filesystem::path path = GenerateCompiledAssetPath(id);
 			const bool exists = std::filesystem::exists(path.string());
 			if (exists) continue;
@@ -87,20 +88,6 @@ namespace Glory::Editor
 		CompilationJobPool->StartQueue();
 		for (UUID id : ids)
 		{
-			/* Get the root asset */
-			while (!m_AssetDatas.at(id).Location.SubresourcePath.empty())
-			{
-				const UUID parentID = EditorAssetDatabase::FindAssetUUID(m_AssetDatas.at(id).Location.Path);
-				if (!parentID)
-				{
-					std::stringstream str;
-					str << "AssetCoompiler: Failed to get parent of " << id;
-					EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
-					break;
-				}
-				id = parentID;
-			}
-
 			const AssetData& data = m_AssetDatas.at(id);
 			DispatchCompilationJob(data);
 		}
@@ -135,8 +122,21 @@ namespace Glory::Editor
 		Resource* pResource = assetManager.FindResource(uuid);
 		if (!pResource)
 		{
-			/* Import the resource */
-			pResource = Importer::Import(path, nullptr);
+			ImportedResources.Do([&path, &uuid](std::unordered_map<std::filesystem::path, ImportedResource>& data) {
+				auto itor = data.find(path);
+				if (itor != data.end()) return;
+
+				/* Import the resource */
+				ImportedResource resource = Importer::Import(path, (void*)&uuid);
+				data.emplace(path, std::move(resource));
+			});
+
+			ImportedResources.Do(path, [asset, &pResource](ImportedResource& resource) {
+				ImportedResource* pChild = resource.ChildFromPath(asset.Location.SubresourcePath);
+				if (!pChild) return;
+				pResource = **pChild;
+			});
+
 			if (!pResource)
 			{
 				std::stringstream str;
@@ -147,16 +147,18 @@ namespace Glory::Editor
 			}
 
 			/* Insert the loaded asset into the manager */
+			pResource->SetName(asset.Meta.Name());
 			assetManager.AddLoadedResource(pResource, uuid);
 		}
 
 		/* Serialize the resource into a binary file */
-		const std::filesystem::path compiledPath = GenerateCompiledAssetPath(uuid);
-		{
-			BinaryFileStream stream{ compiledPath };
-			AssetArchive archive{ &stream };
-			archive.Serialize(pResource);
-		}
+		/* @todo: Disabled until asset loading works, so for now assets are recompiled every time */
+		//const std::filesystem::path compiledPath = GenerateCompiledAssetPath(uuid);
+		//{
+		//	BinaryFileStream stream{ compiledPath };
+		//	AssetArchive archive{ &stream };
+		//	archive.Serialize(pResource);
+		//}
 
 		std::stringstream str;
 		str << "AssetCompiler: Compiled asset " << uuid;

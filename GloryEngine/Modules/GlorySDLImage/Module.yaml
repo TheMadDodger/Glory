@@ -1,5 +1,0 @@
-Name: "SDL Image"
-Type: ImageLoader
-Dependencies: ["SDL2_image"]
-Editor:
- Extensions: []

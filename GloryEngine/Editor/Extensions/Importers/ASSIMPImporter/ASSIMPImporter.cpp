@@ -49,7 +49,7 @@ namespace Glory::Editor
         return false;
     }
 
-    ModelData* ASSIMPImporter::LoadResource(const std::filesystem::path& path) const
+    ImportedResource ASSIMPImporter::LoadResource(const std::filesystem::path& path, void*) const
     {
         Assimp::Importer importer;
 
@@ -67,26 +67,27 @@ namespace Glory::Editor
         }
 
         ModelData* pModel = new ModelData();
-        ProcessNode(pScene->mRootNode, pScene, pModel);
+        ImportedResource resource{ pModel };
+        ProcessNode(pScene->mRootNode, pScene, resource);
 
         importer.FreeScene();
 
-        return pModel;
+        return resource;
     }
 
-    void ASSIMPImporter::ProcessNode(aiNode* node, const aiScene* scene, ModelData* pModel) const
+    void ASSIMPImporter::ProcessNode(aiNode* node, const aiScene* scene, ImportedResource& resource) const
     {
         // process all the node's meshes (if any)
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(mesh);
-            pModel->AddSubresource(pMeshData, pMeshData->Name());
+            resource.AddChild(pMeshData, pMeshData->Name());
         }
         // then do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; i++)
         {
-            ProcessNode(node->mChildren[i], scene, pModel);
+            ProcessNode(node->mChildren[i], scene, resource);
         }
     }
 

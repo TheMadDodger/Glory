@@ -22,7 +22,7 @@ namespace Glory::Editor
 		return extension.compare(".gtex") == 0;
 	}
 
-	TextureData* TextureImporter::LoadResource(const std::filesystem::path& path) const
+	ImportedResource TextureImporter::LoadResource(const std::filesystem::path& path, void*) const
 	{
 		Utils::YAMLFileRef file{ path };
 		file.Load();
@@ -48,7 +48,7 @@ namespace Glory::Editor
 		pTexture->GetSamplerSettings().MinLOD = sampler["MinLOD"].As<float>();
 		pTexture->GetSamplerSettings().MaxLOD = sampler["MaxLOD"].As<float>();
 
-		return pTexture;
+		return ImportedResource{ pTexture };
 	}
 
 	bool TextureImporter::SaveResource(const std::filesystem::path& path, TextureData* pResource) const

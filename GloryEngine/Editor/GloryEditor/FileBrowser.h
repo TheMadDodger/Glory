@@ -25,7 +25,7 @@ namespace Glory::Editor
 		virtual void OnGUI() override;
 
 	private:
-		static void OnAsyncImport(Resource*);
+		static void OnAsyncImport();
 
 		void DirectoryBrowser();
 		void FileBrowserMenu();

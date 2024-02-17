@@ -117,26 +117,26 @@ namespace Glory
 		AssetLocation assetLocation;
 		if (!m_pEngine->GetAssetDatabase().GetAssetLocation(uuid, assetLocation)) return nullptr;
 
-		if (!assetLocation.SubresourcePath.empty())
-		{
-			/* Load root resource */
-			UUID rootUUID = m_pEngine->GetAssetDatabase().GetAssetUUID(assetLocation.Path);
-			Resource* pRootResource = FindResource(rootUUID);
-			if (!pRootResource)
-				pRootResource = LoadAsset(rootUUID);
+		//if (!assetLocation.SubresourcePath.empty())
+		//{
+		//	/* Load root resource */
+		//	UUID rootUUID = m_pEngine->GetAssetDatabase().GetAssetUUID(assetLocation.Path);
+		//	Resource* pRootResource = FindResource(rootUUID);
+		//	if (!pRootResource)
+		//		pRootResource = LoadAsset(rootUUID);
 
-			if (!pRootResource) return nullptr;
-			Resource* pSubResource = pRootResource->SubresourceFromPath(assetLocation.SubresourcePath);
-			if (!pSubResource) return nullptr;
+		//	if (!pRootResource) return nullptr;
+		//	Resource* pSubResource = pRootResource->SubresourceFromPath(assetLocation.SubresourcePath);
+		//	if (!pSubResource) return nullptr;
 
-			std::filesystem::path namePath = assetLocation.Path;
-			if (!assetLocation.SubresourcePath.empty()) namePath.append(assetLocation.SubresourcePath);
-			pSubResource->m_ID = uuid;
-			pSubResource->m_Name = meta.Name().empty() ? namePath.string() : meta.Name();
-			m_pLoadedAssets.Set(uuid, pSubResource);
-			m_pEngine->GetAssetDatabase().m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pSubResource);
-			return pSubResource;
-		}
+		//	std::filesystem::path namePath = assetLocation.Path;
+		//	if (!assetLocation.SubresourcePath.empty()) namePath.append(assetLocation.SubresourcePath);
+		//	pSubResource->m_ID = uuid;
+		//	pSubResource->m_Name = meta.Name().empty() ? namePath.string() : meta.Name();
+		//	m_pLoadedAssets.Set(uuid, pSubResource);
+		//	m_pEngine->GetAssetDatabase().m_Callbacks.EnqueueCallback(CallbackType::CT_AssetLoaded, uuid, pSubResource);
+		//	return pSubResource;
+		//}
 
 		LoaderModule* pModule = m_pEngine->GetLoaderModule(meta.Hash());
 

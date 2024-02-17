@@ -50,7 +50,7 @@ namespace Glory
 		return true;
 	}
 
-	const std::string& Object::Name()
+	const std::string& Object::Name() const
 	{
 		return m_Name;
 	}
