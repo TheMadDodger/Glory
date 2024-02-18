@@ -19,6 +19,7 @@ namespace Glory
 		virtual ~EngineLoader();
 
 		Engine LoadEngine(Console* pConsole, Debug* pDebug);
+		Engine LoadEngineFromPath(Console* pConsole, Debug* pDebug);
 		void Unload();
 
 		const size_t ModuleCount() const;
@@ -28,6 +29,7 @@ namespace Glory
 		void LoadModules(YAML::Node& modules);
 		void LoadModule(const std::string& moduleName);
 		void ReadModule(Module* pModule);
+		void LoadExtras();
 		void LoadExtra(const std::string& name, const std::filesystem::path& path, Module* pModule, Module* pRequiredModule);
 
 	private:

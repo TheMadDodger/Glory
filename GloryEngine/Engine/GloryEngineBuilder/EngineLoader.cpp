@@ -68,6 +68,58 @@ namespace Glory
 
 		return { m_EngineInfo };
 	}
+
+	Engine EngineLoader::LoadEngineFromPath(Console* pConsole, Debug* pDebug)
+	{
+		if (!std::filesystem::exists(m_CFGPath))
+		{
+			pDebug->LogFatalError("Provided path is invalid!");
+			throw std::exception();
+		}
+
+		m_EngineInfo = {};
+		m_EngineInfo.m_pConsole = pConsole;
+		m_EngineInfo.m_pDebug = pDebug;
+
+		/* Find and load modules at provided path */
+		for (auto itor : std::filesystem::directory_iterator(m_CFGPath))
+		{
+			const std::filesystem::path dir = itor.path();
+			const std::string dirString = dir.string();
+			if (!itor.is_directory()) continue;
+			const std::string name = dir.filename().string();
+			std::filesystem::path dllPath = dir;
+			dllPath.append(name).replace_extension("dll");
+			if (std::filesystem::exists(dllPath))
+			{
+				LoadModule(name);
+			}
+		}
+
+		/* Sort modules */
+		std::sort(m_pMainModules.begin(), m_pMainModules.end(), [](Module* pModuleA, Module* pModuleB)
+		{
+			const ModuleMetaData& metaA = pModuleA->GetMetaData();
+			const ModuleMetaData& metaB = pModuleB->GetMetaData();
+			const ModuleType typeA = metaA.Type();
+			const ModuleType typeB = metaB.Type();
+			return typeA < typeB;
+		});
+
+		/* Load extras */
+		LoadExtras();
+
+		m_pOptionalModules.push_back(new Glory::FileLoaderModule());
+		m_pOptionalModules.push_back(new Glory::TextureDataLoaderModule());
+
+		m_EngineInfo.MainModuleCount = static_cast<uint32_t>(m_pMainModules.size());
+		m_EngineInfo.pMainModules = m_pMainModules.data();
+
+		m_EngineInfo.OptionalModuleCount = static_cast<uint32_t>(m_pOptionalModules.size());
+		m_EngineInfo.pOptionalModules = m_pOptionalModules.data();
+
+		return { m_EngineInfo };
+	}
 		
 	void EngineLoader::Unload()
 	{
@@ -110,7 +162,7 @@ namespace Glory
 	void EngineLoader::LoadModules(YAML::Node& modules)
 	{
 		size_t modulesCount = modules.size();
-		for (size_t i = 0; i < modulesCount; i++)
+		for (size_t i = 0; i < modulesCount; ++i)
 		{
 			YAML::Node moduleNode = modules[i];
 			std::string moduleName = moduleNode.as<std::string>();
@@ -127,32 +179,7 @@ namespace Glory
 		});
 
 		/* Load extras */
-		for (size_t i = 0; i < m_pAllModules.size(); ++i)
-		{
-			const ModuleMetaData& meta = m_pAllModules[i]->GetMetaData();
-			for (size_t i = 0; i < meta.NumExtras(); ++i)
-			{
-				const ModuleExtra& extra = meta.Extra(i);
-				Module* pRequired = nullptr;
-				if (!extra.m_Requires.empty())
-				{
-					const auto itor = std::find(m_LoadedModuleNames.begin(), m_LoadedModuleNames.end(), extra.m_Requires);
-					if (itor == m_LoadedModuleNames.end())
-					{
-						std::stringstream stream;
-						stream << "Skipping loading of module extra \"" << extra.m_File << "\", the required module \"" << extra.m_Requires << "\" is not loaded";
-						m_EngineInfo.m_pDebug->LogInfo(stream.str());
-						continue;
-					}
-					const size_t index = itor - m_LoadedModuleNames.begin();
-					pRequired = m_pAllModules[index];
-				}
-
-				std::filesystem::path filePath = meta.Path().parent_path();
-				filePath.append(extra.m_File);
-				LoadExtra(extra.m_File, filePath, m_pAllModules[i], pRequired);
-			}
-		}
+		LoadExtras();
 	}
 
 	void EngineLoader::LoadModule(const std::string& moduleName)
@@ -296,6 +323,36 @@ namespace Glory
 		}
 
 		m_pOptionalModules.push_back(pModule);
+	}
+
+	void EngineLoader::LoadExtras()
+	{
+		for (size_t i = 0; i < m_pAllModules.size(); ++i)
+		{
+			const ModuleMetaData& meta = m_pAllModules[i]->GetMetaData();
+			for (size_t i = 0; i < meta.NumExtras(); ++i)
+			{
+				const ModuleExtra& extra = meta.Extra(i);
+				Module* pRequired = nullptr;
+				if (!extra.m_Requires.empty())
+				{
+					const auto itor = std::find(m_LoadedModuleNames.begin(), m_LoadedModuleNames.end(), extra.m_Requires);
+					if (itor == m_LoadedModuleNames.end())
+					{
+						std::stringstream stream;
+						stream << "Skipping loading of module extra \"" << extra.m_File << "\", the required module \"" << extra.m_Requires << "\" is not loaded";
+						m_EngineInfo.m_pDebug->LogInfo(stream.str());
+						continue;
+					}
+					const size_t index = itor - m_LoadedModuleNames.begin();
+					pRequired = m_pAllModules[index];
+				}
+
+				std::filesystem::path filePath = meta.Path().parent_path();
+				filePath.append(extra.m_File);
+				LoadExtra(extra.m_File, filePath, m_pAllModules[i], pRequired);
+			}
+		}
 	}
 
 	void EngineLoader::LoadExtra(const std::string& name, const std::filesystem::path& path, Module* pModule, Module* pRequiredModule)

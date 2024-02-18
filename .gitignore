@@ -45,10 +45,12 @@ GloryEngine/Build/
 GloryEngine/Engine/**/Debug
 GloryEngine/Modules/**/Debug
 GloryEngine/Editor/**/Debug
+GloryEngine/Runtime/**/Debug
 GloryEngine/Scripting/**/Debug
 GloryEngine/Engine/**/Release
 GloryEngine/Modules/**/Release
 GloryEngine/Editor/**/Release
+GloryEngine/Runtime/**/Release
 GloryEngine/Scripting/**/Release
 
 !GloryEngine/Engine/**/Data/Debug
