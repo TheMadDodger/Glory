@@ -101,6 +101,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Duplicate				= "Duplicate";
 	static constexpr char* Shortcut_Delete					= "Delete";
 	static constexpr char* Shortcut_Rename					= "Rename";
+	static constexpr char* Shortcut_Package					= "Package";
 
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
@@ -418,6 +419,7 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
 		ObjectMenu::AddMenuItem("Reimport", ReimportAssetCallback, T_Resource);
+		ObjectMenu::AddMenuItem("Package", PackageSceneCallback, T_Scene, Shortcut_Package);
 
 		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
 		OBJECT_CREATE_MENU(Model, ModelRenderer);
@@ -432,6 +434,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Duplicate, ImGuiKey_D, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Delete, ImGuiKey_Delete, ImGuiModFlags_None);
 		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_R, ImGuiModFlags_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_Package, ImGuiKey_P, ImGuiModFlags_Ctrl);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
 			Entity entity = EditorSceneManager::GetOpenScene(e.Object->SceneID())->GetEntityByEntityID(e.Object->EntityID());

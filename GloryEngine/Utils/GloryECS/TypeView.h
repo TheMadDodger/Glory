@@ -19,7 +19,7 @@ namespace Glory::Utils::ECS
 
 		void Remove(EntityID entityID);
 		bool Contains(EntityID entityID);
-		const size_t ComponentTypeHash() const;
+		const uint32_t ComponentTypeHash() const;
 		virtual const std::type_index ComponentType() const = 0;
 		virtual void* Create(EntityID entityID) = 0;
 		virtual void* GetComponentAddress(EntityID entityID, size_t number = 0) = 0;
@@ -31,6 +31,9 @@ namespace Glory::Utils::ECS
 
 		bool IsActive(EntityID entity) const;
 		void SetActive(EntityID entity, bool active);
+
+		size_t Size() const;
+		EntityID EntityAt(size_t index) const;
 
 	protected:
 		virtual BaseTypeView* Create(EntityRegistry* pRegistry) = 0;

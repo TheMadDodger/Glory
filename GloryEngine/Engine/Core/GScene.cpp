@@ -565,4 +565,113 @@ namespace Glory
 	{
 		m_pManager = pManager;
 	}
+
+	void SerializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data)
+	{
+		const uint32_t type = pFieldData->Type();
+		const uint32_t elementType = pFieldData->ArrayElementType();
+		const Utils::Reflect::TypeData* pElementTypeData = Utils::Reflect::Reflect::GetTyeData(elementType);
+		container.Write(type);
+		container.Write(elementType);
+
+		switch (type)
+		{
+		case uint32_t(CustomTypeHash::Struct): {
+			for (size_t i = 0; i < pElementTypeData->FieldCount(); ++i)
+			{
+				const Utils::Reflect::FieldData* pField = pElementTypeData->GetFieldData(i);
+				void* pAddress = pField->GetAddress(data);
+				SerializeData(container, pField, pAddress);
+			}
+			break;
+		}
+
+		case uint32_t(CustomTypeHash::Array): {
+			const size_t arraySize = Utils::Reflect::Reflect::ArraySize(data, elementType);
+			container.Write(arraySize);
+			for (size_t i = 0; i < arraySize; ++i)
+			{
+				const Utils::Reflect::FieldData* pElementField = pFieldData->GetArrayElementFieldData(i);
+				void* pAddress = pElementField->GetAddress(data);
+				SerializeData(container, pElementField, pAddress);
+			}
+			break;
+		}
+
+		case uint32_t(CustomTypeHash::Enum):
+		case uint32_t(CustomTypeHash::Basic):
+		default: {
+			const size_t size = pFieldData->Size();
+			container.Write(data, size);
+			break;
+		}
+		}
+	}
+
+	void SerializeTree(BinaryStream& container, const Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity)
+	{
+		container.Write(entity);
+		Utils::ECS::EntityView* pEntityView = registry.GetEntityView(entity);
+
+		if (pEntityView)
+		{
+			const size_t componentCount = pEntityView->ComponentCount();
+			container.Write(pEntityView->HierarchyActive()).Write(componentCount);
+
+			for (size_t i = 0; i < componentCount; ++i)
+			{
+				container.Write(pEntityView->ComponentTypeAt(i)).Write(pEntityView->ComponentUUIDAt(i));
+			}
+		}
+
+		const size_t childCount = registry.ChildCount(entity);
+		container.Write(childCount);
+		for (size_t i = 0; i < childCount; ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			SerializeTree(container, registry, child);
+		}
+	}
+
+	void GScene::Serialize(BinaryStream& container) const
+	{
+		/* Serialize component datas */
+		for (size_t i = 0; i < m_Registry.TypeViewCount(); ++i)
+		{
+			Utils::ECS::BaseTypeView* pTypeView = m_Registry.TypeViewAt(i);
+			const uint32_t hash = pTypeView->ComponentTypeHash();
+			container.Write(hash);
+			container.Write(pTypeView->Size());
+
+			const Utils::Reflect::TypeData* pTypeData =
+				Utils::Reflect::Reflect::GetTyeData(hash);
+
+			for (size_t j = 0; j < pTypeView->Size(); ++j)
+			{
+				Utils::ECS::EntityID entity = pTypeView->EntityAt(j);
+				container.Write(entity);
+				void* data = pTypeView->GetComponentAddress(entity);
+				for (size_t k = 0; k < pTypeData->FieldCount(); ++k)
+				{
+					const Utils::Reflect::FieldData* pField = pTypeData->GetFieldData(k);
+					void* pAddress = pField->GetAddress(data);
+					SerializeData(container, pField, pAddress);
+				}
+			}
+		}
+
+		/* Serialize the hierarchy */
+		SerializeTree(container, m_Registry, 0);
+
+		/* Serialize scene IDs */
+		container.Write(m_Ids.size());
+		for (auto itor = m_Ids.begin(); itor != m_Ids.end(); ++itor)
+		{
+			container.Write(itor->first).Write(itor->second);
+		}
+	}
+
+	void GScene::Deserialize(BinaryStream& container) const
+	{
+	}
 }

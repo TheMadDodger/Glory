@@ -12,6 +12,7 @@
 #include "EntityEditor.h"
 #include "EditorSceneSerializer.h"
 #include "EditorApplication.h"
+#include "Package.h"
 
 #include <AssetManager.h>
 #include <AssetDatabase.h>
@@ -473,6 +474,15 @@ namespace Glory::Editor
 		if (pLoadedResource) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
 		EditorAssetDatabase::ImportAsset(file.string());
+	}
+
+	OBJECTMENU_CALLBACK(PackageSceneCallback)
+	{
+		if (!pObject) return;
+		std::filesystem::path file = FileBrowserItem::GetCurrentPath();
+		GScene* pScene = static_cast<GScene*>(pObject);
+		file.append(pScene->Name()).replace_extension(".gcag");
+		PackageScene(pScene, file);
 	}
 
 	void DeleteFolder()

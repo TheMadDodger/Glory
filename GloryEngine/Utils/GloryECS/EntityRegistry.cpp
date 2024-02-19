@@ -111,6 +111,15 @@ namespace Glory::Utils::ECS
 		return itor->second;
 	}
 
+	EntityView* EntityRegistry::GetEntityView(EntityID entity) const
+	{
+		const auto itor = m_pEntityViews.find(entity);
+		if (itor == m_pEntityViews.end())
+			return nullptr;
+
+		return itor->second;
+	}
+
 	void* EntityRegistry::GetComponentAddress(EntityID entityID, Glory::UUID componentID)
 	{
 		EntityView* pEntityView = GetEntityView(entityID);

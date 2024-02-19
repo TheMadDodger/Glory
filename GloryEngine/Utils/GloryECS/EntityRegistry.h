@@ -90,6 +90,7 @@ namespace Glory::Utils::ECS
 
 		BaseTypeView* GetTypeView(uint32_t typeHash);
 		EntityView* GetEntityView(EntityID entity);
+		EntityView* GetEntityView(EntityID entity) const;
 
 		void* GetComponentAddress(EntityID entityID, Glory::UUID componentID);
 

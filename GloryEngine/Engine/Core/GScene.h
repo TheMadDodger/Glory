@@ -184,6 +184,9 @@ namespace Glory
 		 */
 		void SetManager(SceneManager* pManager);
 
+		virtual void Serialize(BinaryStream& container) const;
+		virtual void Deserialize(BinaryStream& container) const;
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();
