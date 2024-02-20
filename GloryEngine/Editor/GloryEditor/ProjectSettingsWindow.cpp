@@ -2,11 +2,7 @@
 
 namespace Glory::Editor
 {
-	const char* ProjectSettingsWindow::TAB_NAMES[] = {
-		"General", "Engine", "Layers", "Input", "Physics"
-	};
-
-	ProjectSettingsWindow::ProjectSettingsWindow() : EditorWindowTemplate("Project Settings", 400.0f, 600.0f), m_CurrentTab(ProjectSettingsType::General)
+	ProjectSettingsWindow::ProjectSettingsWindow() : EditorWindowTemplate("Project Settings", 400.0f, 600.0f), m_CurrentTab(0)
 	{
 		m_Resizeable = true;
 	}
@@ -19,14 +15,13 @@ namespace Glory::Editor
 	{
 		if (ImGui::BeginTabBar("projectsettingstabs"))
 		{
-			for (size_t i = 0; i < size_t(ProjectSettingsType::Count); i++)
+			for (size_t i = 0; i < ProjectSettings::SettingsCount(); ++i)
 			{
-				ProjectSettingsType tab = ProjectSettingsType(i);
-				if (ImGui::BeginTabItem(TAB_NAMES[i]))
+				if (ImGui::BeginTabItem(ProjectSettings::Name(i).data()))
 				{
-					if (m_CurrentTab != tab)
+					if (m_CurrentTab != i)
 					{
-						m_CurrentTab = tab;
+						m_CurrentTab = i;
 					}
 					ImGui::EndTabItem();
 				}

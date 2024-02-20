@@ -38,6 +38,7 @@
 #include "EnumPropertyDrawer.h"
 #include "StructPropertyDrawer.h"
 #include "EditorAssetDatabase.h"
+#include "SettingsEnums.h"
 
 #include "Importer.h"
 #include "MaterialImporter.h"
@@ -156,6 +157,8 @@ namespace Glory::Editor
 
 		pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
 		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
+
+		RegisterSettingsEnums(pEngine);
 	}
 
 	void MainEditor::Destroy()
@@ -299,6 +302,7 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
+		MenuBar::AddMenuItem("File/Package", []() {  }, NULL, Shortcut_Package);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
 		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);
@@ -419,7 +423,6 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
 		ObjectMenu::AddMenuItem("Reimport", ReimportAssetCallback, T_Resource);
-		ObjectMenu::AddMenuItem("Package", PackageSceneCallback, T_Scene, Shortcut_Package);
 
 		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
 		OBJECT_CREATE_MENU(Model, ModelRenderer);

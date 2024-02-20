@@ -16,7 +16,6 @@ namespace Glory::Editor
         virtual void OnOpen() override;
 
     private:
-        static const char* TAB_NAMES[];
-        ProjectSettingsType m_CurrentTab;
+        size_t m_CurrentTab;
     };
 }

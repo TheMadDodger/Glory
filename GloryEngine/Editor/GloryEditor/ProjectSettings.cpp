@@ -12,12 +12,14 @@ namespace Glory::Editor
 	EngineSettings Engine;
 	LayerSettings Layer;
 	InputSettings Input;
+	PackageSettings Packaging;
 
 	std::vector<ProjectSettings*> Settings = {
 		&General,
 		&Engine,
 		&Layer,
 		&Input,
+		&Packaging,
 	};
 
 	void ProjectSettings::Load(ProjectSpace* pProject)
@@ -25,7 +27,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < Settings.size(); ++i)
 		{
 			Settings[i]->LoadSettings(pProject);
-			ProjectSpace::SetAssetDirty(Settings[i]->m_SettingsFile, false);
+			ProjectSpace::SetAssetDirty(Settings[i]->m_Name, false);
 		}
 
 		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("Loaded project settings");
@@ -36,17 +38,17 @@ namespace Glory::Editor
 		for (size_t i = 0; i < Settings.size(); ++i)
 		{
 			Settings[i]->SaveSettings(pProject);
-			ProjectSpace::SetAssetDirty(Settings[i]->m_SettingsFile, false);
+			ProjectSpace::SetAssetDirty(Settings[i]->m_Name, false);
 		}
 
 		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("Saved project settings");
 	}
 
-	void ProjectSettings::Paint(ProjectSettingsType type)
+	void ProjectSettings::Paint(size_t index)
 	{
-		if (Settings[size_t(type)]->OnGui())
+		if (Settings[index]->OnGui())
 		{
-			ProjectSpace::SetAssetDirty(Settings[size_t(type)]->m_SettingsFile);
+			ProjectSpace::SetAssetDirty(Settings[index]->m_Name);
 		}
 	}
 
@@ -71,8 +73,18 @@ namespace Glory::Editor
 		Settings.push_back(pSettings);
 	}
 
+	size_t ProjectSettings::SettingsCount()
+	{
+		return Settings.size();
+	}
+
+	std::string_view ProjectSettings::Name(size_t index)
+	{
+		return { Settings[index]->m_Name };
+	}
+
 	ProjectSettings::ProjectSettings(const char* settingsFile)
-		: m_YAMLFile(), m_SettingsFile(settingsFile)
+		: m_YAMLFile(), m_Name(settingsFile)
 	{
 	}
 
@@ -83,14 +95,8 @@ namespace Glory::Editor
 	void ProjectSettings::LoadSettings(ProjectSpace* pProject)
 	{
 		std::filesystem::path path = pProject->SettingsPath();
-		path.append(m_SettingsFile);
+		path.append(m_Name).replace_extension("yaml");
 		m_YAMLFile = Utils::YAMLFileRef{ path };
-		
-		if (!std::filesystem::exists(path))
-		{
-			/* TODO: Create default file? */
-			return;
-		}
 
 		Utils::NodeRef rootNode = m_YAMLFile.RootNodeRef();
 		Utils::NodeValueRef rootValue = rootNode.ValueRef();
@@ -122,7 +128,7 @@ namespace Glory::Editor
 		return m_YAMLFile.RootNodeRef().ValueRef();
 	}
 
-	GeneralSettings::GeneralSettings() : ProjectSettings("General.yaml")
+	GeneralSettings::GeneralSettings() : ProjectSettings("General")
 	{
 	}
 
@@ -132,15 +138,19 @@ namespace Glory::Editor
 		return false;
 	}
 
-	EngineSettings::EngineSettings() : ProjectSettings("Engine.yaml"), m_MenuIndex(0)
+	EngineSettings::EngineSettings() : ProjectSettings("Engine"), m_MenuIndex(0)
 	{
 	}
 
-	LayerSettings::LayerSettings() : ProjectSettings("Layers.yaml")
+	LayerSettings::LayerSettings() : ProjectSettings("Layers")
 	{
 	}
 
-	InputSettings::InputSettings() : ProjectSettings("Input.yaml")
+	InputSettings::InputSettings() : ProjectSettings("Input")
+	{
+	}
+
+	PackageSettings::PackageSettings() : ProjectSettings("Packaging")
 	{
 	}
 }
