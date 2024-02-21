@@ -26,6 +26,9 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void Add(ProjectSettings* pSettings);
 		GLORY_EDITOR_API static size_t SettingsCount();
 		GLORY_EDITOR_API static std::string_view Name(size_t index);
+		GLORY_EDITOR_API static ProjectSettings* Get(const std::string_view name);
+
+		GLORY_EDITOR_API Utils::YAMLFileRef& operator*();
 
     protected:
         GLORY_EDITOR_API ProjectSettings(const char* settingsFile);

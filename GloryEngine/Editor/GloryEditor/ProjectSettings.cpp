@@ -83,6 +83,21 @@ namespace Glory::Editor
 		return { Settings[index]->m_Name };
 	}
 
+	ProjectSettings* ProjectSettings::Get(const std::string_view name)
+	{
+		for (size_t i = 0; i < Settings.size(); ++i)
+		{
+			const std::string_view other{ Settings[i]->m_Name };
+			if (name == other) return Settings[i];
+		}
+		return nullptr;
+	}
+
+	Utils::YAMLFileRef& ProjectSettings::operator*()
+	{
+		return m_YAMLFile;
+	}
+
 	ProjectSettings::ProjectSettings(const char* settingsFile)
 		: m_YAMLFile(), m_Name(settingsFile)
 	{

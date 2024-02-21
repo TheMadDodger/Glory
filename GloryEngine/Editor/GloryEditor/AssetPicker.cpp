@@ -37,33 +37,38 @@ namespace Glory::Editor
 			ForceFilter = true;
 			openPopup = true;
 		}, start, width, borderPadding);
-		bool change = DND{ { ST_Path, resourceType } }.HandleDragAndDropTarget([&](uint32_t type, const ImGuiPayload* payload)
-		{
-			if (type == ST_Path)
-			{
-				const std::string path = (const char*)payload->Data;
-				const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
-				if (!uuid) return;
-				ResourceMeta meta;
-				if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
-				ResourceType* pResourceType = resourceTypes.GetResourceType(meta.Hash());
 
-				if (meta.Hash() == resourceType)
+		bool change = false;
+		if (resourceType)
+		{
+			change = DND{ { ST_Path, resourceType } }.HandleDragAndDropTarget([&](uint32_t type, const ImGuiPayload* payload)
+			{
+				if (type == ST_Path)
 				{
-					*value = uuid;
+					const std::string path = (const char*)payload->Data;
+					const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
+					if (!uuid) return;
+					ResourceMeta meta;
+					if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
+					ResourceType* pResourceType = resourceTypes.GetResourceType(meta.Hash());
+
+					if (meta.Hash() == resourceType)
+					{
+						*value = uuid;
+						return;
+					}
+
+					for (size_t i = 0; i < resourceTypes.SubTypeCount(pResourceType); ++i)
+					{
+						if (resourceTypes.GetSubTypeHash(pResourceType, i) != resourceType) continue;
+						*value = uuid;
+					}
 					return;
 				}
 
-				for (size_t i = 0; i < resourceTypes.SubTypeCount(pResourceType); ++i)
-				{
-					if (resourceTypes.GetSubTypeHash(pResourceType, i) != resourceType) continue;
-					*value = uuid;
-				}
-				return;
-			}
-
-			*value = *(const UUID*)payload->Data;
-		});
+				*value = *(const UUID*)payload->Data;
+			});
+		}
 
 		if (openPopup)
 			ImGui::OpenPopup("AssetPicker");
@@ -111,16 +116,23 @@ namespace Glory::Editor
 	void AssetPicker::LoadAssets(uint32_t typeHash, bool includeSubAssets)
 	{
 		std::vector<UUID> assets;
-		EditorAssetDatabase::GetAllAssetsOfType(typeHash, assets);
-
-		if (includeSubAssets)
+		if (!typeHash)
 		{
-			std::vector<ResourceType*> pTypes;
-			EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetAllResourceTypesThatHaveSubType(typeHash, pTypes);
-			for (size_t i = 0; i < pTypes.size(); i++)
+			assets = EditorAssetDatabase::UUIDs();
+		}
+		else
+		{
+			EditorAssetDatabase::GetAllAssetsOfType(typeHash, assets);
+
+			if (includeSubAssets)
 			{
-				if (pTypes[i]->Hash() == typeHash) continue;
-				EditorAssetDatabase::GetAllAssetsOfType(pTypes[i]->Hash(), assets);
+				std::vector<ResourceType*> pTypes;
+				EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetAllResourceTypesThatHaveSubType(typeHash, pTypes);
+				for (size_t i = 0; i < pTypes.size(); i++)
+				{
+					if (pTypes[i]->Hash() == typeHash) continue;
+					EditorAssetDatabase::GetAllAssetsOfType(pTypes[i]->Hash(), assets);
+				}
 			}
 		}
 
