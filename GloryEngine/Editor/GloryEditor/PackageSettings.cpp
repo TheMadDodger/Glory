@@ -6,6 +6,7 @@
 #include "EditorAssetDatabase.h"
 #include "Package.h"
 #include "EditorApplication.h"
+#include "AssetCompiler.h"
 
 #include <imgui.h>
 #include <Reflection.h>
@@ -18,10 +19,12 @@ namespace Glory::Editor
 
 	bool PackageSettings::OnGui()
 	{
+		ImGui::BeginDisabled(AssetCompiler::IsBusy());
 		if (ImGui::Button("Package"))
 		{
 			Package(EditorApplication::GetInstance()->GetEngine());
 		}
+		ImGui::EndDisabled();
 
 		static const uint32_t sceneHash = ResourceTypes::GetHash<GScene>();
 

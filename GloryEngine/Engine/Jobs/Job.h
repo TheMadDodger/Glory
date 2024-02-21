@@ -51,7 +51,13 @@ namespace Glory::Jobs
 
 				ret result;
 				std::apply([&](auto &&... arguments) { result = m_CurrentJob(arguments...); }, job.second);
+				m_CurrentJob = NULL;
 			}
+		}
+
+		bool IsIdle() const
+		{
+			return m_CurrentJob != NULL;
 		}
 
 	private:

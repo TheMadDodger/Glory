@@ -55,6 +55,8 @@
 #include "CreateEntityObjectsCallbacks.h"
 #include "EditableEntity.h"
 
+#include "Package.h"
+
 #include <imgui.h>
 #include <Engine.h>
 #include <ImGuizmo.h>
@@ -302,7 +304,7 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
-		MenuBar::AddMenuItem("File/Package", []() {  }, NULL, Shortcut_Package);
+		MenuBar::AddMenuItem("File/Package", []() { Package(EditorApplication::GetInstance()->GetEngine()); }, NULL, Shortcut_Package);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
 		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);
