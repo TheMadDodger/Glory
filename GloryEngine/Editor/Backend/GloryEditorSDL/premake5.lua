@@ -68,6 +68,7 @@ project "GloryEditorSDL"
 		"ImGui",
 		"GloryEditor",
 		"GloryUtilsVersion",
+		"GloryUtils",
 	}
 
 	defines

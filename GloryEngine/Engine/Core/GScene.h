@@ -212,6 +212,8 @@ namespace Glory
 		/** @brief Internal function for creating an entity from a prefab */
 		Entity InstantiatePrefabNode(UUID parent, const PrefabNode& node, UUIDRemapper& remapper);
 
+		virtual void Deserialize(BinaryStream& container) override;
+
 	protected:
 		friend class Entity;
 		friend class SceneSerializer;

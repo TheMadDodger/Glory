@@ -190,6 +190,9 @@ namespace Glory::Utils::ECS
 		//void Draw();
 		//EntitySystems* GetSystems();
 
+		void ResizeRootOrder(size_t size);
+		std::vector<EntityID>& RootOrder();
+
 	private:
 		friend class ComponentTypes;
 

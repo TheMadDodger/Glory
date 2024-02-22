@@ -15,7 +15,9 @@ namespace Glory::Utils
 	public:
 		void Set(Element index);
 		void Set(Element index, bool on);
+		void SetAll();
 		void UnSet(Element index);
+		void Clear();
 		void Reserve(size_t capacity);
 		bool IsSet(Element index) const;
 

@@ -7,6 +7,7 @@
 #include "PropertySerializer.h"
 #include "SceneManager.h"
 #include "Engine.h"
+#include "BinaryStream.h"
 
 #include <NodeRef.h>
 
@@ -404,6 +405,155 @@ namespace Glory
 		}
 		
 		return entity;
+	}
+
+	void DeserializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data)
+	{
+		const uint32_t type = pFieldData->Type();
+		const uint32_t elementType = pFieldData->ArrayElementType();
+		const Utils::Reflect::TypeData* pElementTypeData = Utils::Reflect::Reflect::GetTyeData(elementType);
+
+		switch (type)
+		{
+		case uint32_t(CustomTypeHash::Struct): {
+			for (size_t i = 0; i < pElementTypeData->FieldCount(); ++i)
+			{
+				const Utils::Reflect::FieldData* pField = pElementTypeData->GetFieldData(i);
+				void* pAddress = pField->GetAddress(data);
+				DeserializeData(container, pField, pAddress);
+			}
+			break;
+		}
+
+		case uint32_t(CustomTypeHash::Array): {
+			size_t arraySize;
+			container.Read(arraySize);
+			Utils::Reflect::Reflect::ResizeArray(data, elementType, arraySize);
+			for (size_t i = 0; i < arraySize; ++i)
+			{
+				const Utils::Reflect::FieldData* pElementField = pFieldData->GetArrayElementFieldData(i);
+				void* pAddress = pElementField->GetAddress(data);
+				DeserializeData(container, pElementField, pAddress);
+			}
+			break;
+		}
+
+		case uint32_t(CustomTypeHash::Enum):
+		case uint32_t(CustomTypeHash::Basic):
+		default: {
+			const size_t size = pFieldData->Size();
+			container.Read(data, size);
+			break;
+		}
+		}
+	}
+
+	void DeserializeTree(BinaryStream& container, Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID parent, size_t& counter, size_t max)
+	{
+		/* Child count first */
+		size_t childCount;
+		container.Read(childCount);
+		Utils::ECS::EntityID nextParent;
+
+		if (parent == 0) {
+			/* We only need to deserialize the order */
+			registry.ResizeRootOrder(childCount);
+			container.Read(registry.RootOrder().data(), sizeof(Utils::ECS::EntityID)*childCount);
+
+			if (counter == max) return;
+			++counter;
+
+			/* Next entity */
+			container.Read(nextParent);
+			DeserializeTree(container, registry, nextParent, counter, max);
+			return;
+		}
+
+		/* Child order */
+		Utils::ECS::EntityView* pEntityView = registry.GetEntityView(parent);
+		pEntityView->ResizeChildren(childCount);
+		container.Read(pEntityView->ChildOrder().data(), sizeof(Utils::ECS::EntityID) * childCount);
+
+		/* Parent of this entity */
+		Utils::ECS::EntityID myParent;
+		container.Read(myParent).Read(pEntityView->HierarchyActive());
+		pEntityView->SetParent(myParent);
+
+		/* Component order */
+		size_t componentCount;
+		container.Read(componentCount);
+		pEntityView->ResizeComponentsOrder(componentCount);
+		container.Read(pEntityView->ComponentsOrder().data(), sizeof(UUID)*componentCount);
+
+		/* Component types */
+		for (size_t i = 0; i < componentCount; ++i)
+		{
+			const UUID uuid = pEntityView->ComponentUUIDAt(i);
+			uint32_t type;
+			container.Read(type);
+			pEntityView->SetType(uuid, type);
+		}
+
+		if (counter == max) return;
+		++counter;
+
+		/* Next entity */
+		container.Read(nextParent);
+		DeserializeTree(container, registry, nextParent, counter, max);
+	}
+
+	void GScene::Deserialize(BinaryStream& container)
+	{
+		size_t typeViewCount, entityCount;
+		container.Read(entityCount).Read(typeViewCount);
+
+		for (size_t i = 0; i < entityCount; ++i)
+			m_Registry.CreateEntity();
+
+		/* Deserialize component datas */
+		for (size_t i = 0; i < typeViewCount; ++i)
+		{
+			uint32_t hash;
+			container.Read(hash);
+			Utils::ECS::BaseTypeView* pTypeView = m_Registry.GetTypeView(hash);
+
+			size_t size;
+			container.Read(size);
+
+			const Utils::Reflect::TypeData* pTypeData =
+				Utils::Reflect::Reflect::GetTyeData(hash);
+
+			for (size_t j = 0; j < size; ++j)
+			{
+				Utils::ECS::EntityID entity;
+				container.Read(entity);
+				void* data = pTypeView->Create(entity);
+				for (size_t k = 0; k < pTypeData->FieldCount(); ++k)
+				{
+					const Utils::Reflect::FieldData* pField = pTypeData->GetFieldData(k);
+					void* pAddress = pField->GetAddress(data);
+					DeserializeData(container, pField, pAddress);
+				}
+			}
+		}
+
+		/* Deserialize the hierarchy */
+		Utils::ECS::EntityID parent;
+		container.Read(parent);
+		size_t entityCounter = 1;
+		DeserializeTree(container, m_Registry, parent, entityCounter, entityCount + 1);
+
+		/* Deserialize scene IDs */
+		size_t idSize;
+		container.Read(idSize);
+		for (size_t i = 0; i < idSize; i++)
+		{
+			UUID id;
+			Utils::ECS::EntityID entity;
+			container.Read(id).Write(entity);
+			m_Ids.emplace(id, entity);
+			m_UUIds.emplace(entity, id);
+		}
 	}
 
 	SceneManager* GScene::Manager()

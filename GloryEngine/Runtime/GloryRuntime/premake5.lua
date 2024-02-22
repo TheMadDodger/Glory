@@ -1,25 +1,22 @@
-project "GloryClusteredRenderer"
+project "GloryRuntime"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{moduleOutDir}")
+	targetdir ("%{engineOutDir}")
 	objdir ("%{outputDir}")
 
 	files
 	{
 		"**.h",
 		"**.cpp",
-		"Module.yaml",
-		"premake5.lua",
-		"Assets/**.*",
-		"Resources/**.*",
+		"premake5.lua"
 	}
 
 	vpaths
 	{
-		["Module"] = { "GloryClusteredRenderer.*", "ClusteredRendererModule.*" }
+		
 	}
 
 	includedirs
@@ -27,16 +24,16 @@ project "GloryClusteredRenderer"
 		"%{DepsIncludeDir}",
 
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
 
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
 
+		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
 	}
 
 	libdirs
@@ -50,32 +47,19 @@ project "GloryClusteredRenderer"
 	links
 	{
 		"GloryCore",
-		"shaderc",
-		"shaderc_combined",
-		"shaderc_shared",
-		"yaml-cpp",
-
-		"GloryReflect",
-		"GloryECS",
-		"GloryUtilsVersion",
-		"GloryUtils",
-
-		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
+
+		"GloryReflect",
 		"GloryUtils",
+		"GloryECS",
+		"GloryUtilsVersion",
+		"yaml-cpp",
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS"
-	}
-
-	postbuildcommands
-	{
-		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
+		"GLORY_RUNTIME_EXPORTS",
 	}
 
 	filter "system:windows"

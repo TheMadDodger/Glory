@@ -290,8 +290,10 @@ namespace Glory
 		container.Write(m_ClassName);
 	}
 
-	void MonoScript::Deserialize(BinaryStream& container) const
+	void MonoScript::Deserialize(BinaryStream& container)
 	{
+		container.Read(m_NamespaceName);
+		container.Read(m_ClassName);
 	}
 
 	bool MonoScript::IsBehaviour()

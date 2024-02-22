@@ -85,7 +85,6 @@ project "Glorious"
 		"GloryClusteredRenderer",
 		"GloryOpenGLGraphics",
 		--"GloryVulkanGraphics",
-		"GlorySDLImage",
 		"GlorySDLWindow",
 		"GlorySDLInput",
 		"GloryEditorSDL",
@@ -102,6 +101,7 @@ project "Glorious"
 		"GloryEngine.Core",
 		"GloryEngine.Entities",
 		"CSAPIInstall",
+		"GloryRuntime",
 		"WriteVersion",
 	}
 

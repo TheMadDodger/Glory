@@ -299,6 +299,16 @@ namespace Glory::Utils::ECS
 		targetVector->insert(targetVector->begin() + index, entity);
 	}
 
+	void EntityRegistry::ResizeRootOrder(size_t size)
+	{
+		m_RootOrder.resize(size);
+	}
+
+	std::vector<EntityID>& EntityRegistry::RootOrder()
+	{
+		return m_RootOrder;
+	}
+
 	void EntityRegistry::InvokeAll(InvocationType invocationType)
 	{
 		for (size_t i = 0; i < m_pViews.size(); ++i)

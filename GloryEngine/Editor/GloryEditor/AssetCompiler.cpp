@@ -54,8 +54,10 @@ namespace Glory::Editor
 				continue;
 			}
 
-			AssetLocation compiledLocation{GenerateCompiledAssetPath(id).string()};
-			assetDatabase.SetAsset(compiledLocation, data.Meta);
+			AssetLocation location = data.Location;
+			location.Index = 0;
+			location.Path = GenerateCompiledAssetPath(id).string();
+			assetDatabase.SetAsset(location, data.Meta);
 		}
 	}
 
