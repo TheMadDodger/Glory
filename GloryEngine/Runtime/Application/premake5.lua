@@ -110,6 +110,7 @@ project "GloryRuntimeApplication"
 		defines "_DEBUG"
 		symbols "On"
 		debugdir "%{engineOutDir}"
+		debugargs { "-path=\"%{demosDir}/Sponza/Build/Data/16787318667428770552.gcag\"" }
 
 	filter "configurations:Release"
 		kind "ConsoleApp"
