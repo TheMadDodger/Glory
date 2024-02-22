@@ -84,9 +84,40 @@ namespace Glory::Utils::ECS
         return itor - m_Children.begin();
     }
 
+    void EntityView::ResizeChildren(size_t size)
+    {
+        m_Children.resize(size);
+    }
+
+    std::vector<EntityID>& EntityView::ChildOrder()
+    {
+        return m_Children;
+    }
+
+    void EntityView::SetParent(EntityID parent)
+    {
+        m_Parent = parent;
+    }
+
+    void EntityView::ResizeComponentsOrder(size_t size)
+    {
+        m_ComponentOrder.resize(size);
+    }
+
+    std::vector<Glory::UUID>& EntityView::ComponentsOrder()
+    {
+        return m_ComponentOrder;
+    }
+
+    void EntityView::SetType(Glory::UUID uuid, uint32_t type)
+    {
+        m_ComponentTypes.emplace(uuid, type);
+        m_TypeToUUID.emplace(type, uuid);
+    }
+
     uint32_t EntityView::ComponentTypeAt(size_t index) const
     {
-        Glory::UUID uuid = m_ComponentOrder[index];
+        const Glory::UUID uuid = m_ComponentOrder[index];
         return ComponentType(uuid);
     }
 

@@ -110,6 +110,9 @@ namespace Glory
 		const ResourceType* pType = pEngine->GetResourceTypes().GetResourceType(typeHash);
 		Resource* pResource = pType->Create();
 
+		pResource->SetName(name);
+		pResource->SetResourceUUID(uuid);
+
 		pResource->Deserialize(*m_pStream);
 		m_pResources.push_back(pResource);
 

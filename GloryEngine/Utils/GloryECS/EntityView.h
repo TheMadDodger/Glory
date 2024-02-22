@@ -34,6 +34,15 @@ namespace Glory::Utils::ECS
 
 		size_t ChildIndex(EntityID entity) const;
 
+		void ResizeChildren(size_t size);
+		std::vector<EntityID>& ChildOrder();
+		void SetParent(EntityID parent);
+
+		void ResizeComponentsOrder(size_t size);
+		std::vector<Glory::UUID>& ComponentsOrder();
+
+		void SetType(Glory::UUID uuid, uint32_t type);
+
 	private:
 		void Add(uint32_t hash, Glory::UUID uuid = Glory::UUID());
 		UUID Remove(uint32_t hash);
