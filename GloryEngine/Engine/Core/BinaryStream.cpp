@@ -71,7 +71,7 @@ namespace Glory
 
 	bool BinaryFileStream::Eof()
 	{
-		return m_File.eof();
+		return m_Tell >= m_Size;
 	}
 
 	BinaryStream& BinaryStream::Write(const std::string& value)

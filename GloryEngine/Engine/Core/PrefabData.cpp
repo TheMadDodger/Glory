@@ -47,6 +47,7 @@ namespace Glory
 		/* Cache original UUIDs */
 		m_OriginalUUIDs.clear();
 		m_RootNode.CacheOriginalUUIDs();
+		APPEND_TYPE(PrefabData);
 	}
 
 	PrefabData* PrefabData::CreateFromEntity(GScene* pScene, Utils::ECS::EntityID entity)

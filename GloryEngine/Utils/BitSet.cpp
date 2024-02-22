@@ -54,8 +54,10 @@ namespace Glory::Utils
 	void BitSet::Reserve(size_t capacity)
 	{
 		if (m_Capacity >= capacity) return;
-		Element* pNewMemory = new Element[capacity + (32 - capacity % 32)];
+		const size_t newCapacity = capacity + (32 - capacity % 32);
+		Element* pNewMemory = new Element[m_Capacity];
 		std::memcpy(pNewMemory, m_pMemory, m_Capacity);
+		m_Capacity = newCapacity;
 		delete m_pMemory;
 		m_pMemory = pNewMemory;
 	}

@@ -185,7 +185,7 @@ namespace Glory
 		void SetManager(SceneManager* pManager);
 
 		virtual void Serialize(BinaryStream& container) const;
-		virtual void Deserialize(BinaryStream& container) const;
+		virtual void Deserialize(BinaryStream& container);
 
 	protected:
 		/** @brief Invoke an update on all active entities and components */
@@ -214,8 +214,6 @@ namespace Glory
 
 		/** @brief Internal function for creating an entity from a prefab */
 		Entity InstantiatePrefabNode(UUID parent, const PrefabNode& node, UUIDRemapper& remapper);
-
-		virtual void Deserialize(BinaryStream& container) override;
 
 	protected:
 		friend class Entity;

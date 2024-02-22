@@ -42,6 +42,8 @@ namespace Glory
 		/** @brief Get the engine that owns this manager */
 		Engine* GetEngine();
 
+		void Start();
+
 	private:
 		friend class Engine;
 		SceneManager(Engine* pEngine);
@@ -62,6 +64,7 @@ namespace Glory
 		size_t m_ActiveSceneIndex;
 		UUID m_HoveringObjectSceneID;
 		UUID m_HoveringObjectID;
+		bool m_Started{false};
 
 		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;
 	};

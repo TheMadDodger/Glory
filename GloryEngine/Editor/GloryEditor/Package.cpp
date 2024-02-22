@@ -125,7 +125,7 @@ namespace Glory::Editor
 			std::filesystem::path path = packageRoot;
 			path.append(relativeScenePath.string());
 			BinaryFileStream sceneFile{ path };
-			AssetArchive archive{ &sceneFile };
+			AssetArchive archive{ &sceneFile, true };
 
 			EditorSceneManager::OpenScene(scenes[i], false);
 			GScene* pScene = EditorSceneManager::GetActiveScene();

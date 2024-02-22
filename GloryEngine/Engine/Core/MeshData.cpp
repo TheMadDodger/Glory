@@ -20,12 +20,14 @@ namespace Glory
 	{
 		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
 		memcpy(&m_Indices[0], indices, sizeof(uint32_t) * indexCount);
+		APPEND_TYPE(MeshData);
 	}
 
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(0), m_Vertices(std::vector<float>(vertexCount)), m_Indices(), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
 		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
+		APPEND_TYPE(MeshData);
 	}
 
 	MeshData::~MeshData()
@@ -90,7 +92,7 @@ namespace Glory
 		container.Read(attributeCount);
 		m_Attributes.resize(attributeCount);
 		container.Read(m_Attributes.data(), sizeof(AttributeType)*m_Attributes.size());
-		m_Vertices.resize(m_VertexCount);
+		m_Vertices.resize(m_VertexCount*m_VertexSize/sizeof(float));
 		container.Read(m_Vertices.data(), sizeof(float)*m_Vertices.size());
 		m_Indices.resize(m_IndexCount);
 		container.Read(m_Indices.data(), sizeof(uint32_t)*m_Indices.size());

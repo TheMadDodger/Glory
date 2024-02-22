@@ -51,6 +51,7 @@ namespace Glory
 
 	Assembly* AssemblyDomain::GetMainAssembly()
 	{
+		if (m_MainAssemblyName.empty()) return nullptr;
 		return &m_Assemblies.at(m_MainAssemblyName);
 	}
 

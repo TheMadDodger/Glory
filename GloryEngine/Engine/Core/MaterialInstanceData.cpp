@@ -9,10 +9,12 @@ namespace Glory
 {
 	MaterialInstanceData::MaterialInstanceData() : m_BaseMaterial(0)
 	{
+		APPEND_TYPE(MaterialInstanceData);
 	}
 
 	MaterialInstanceData::MaterialInstanceData(UUID baseMaterial) : m_BaseMaterial(baseMaterial)
 	{
+		APPEND_TYPE(MaterialInstanceData);
 	}
 
 	MaterialInstanceData::~MaterialInstanceData()
@@ -194,10 +196,13 @@ namespace Glory
 		/* Write overrides */
 		size_t numPropertyOverrides;
 		container.Read(numPropertyOverrides);
+		/** @todo Use my BitSet here */
 		m_PropertyOverridesEnable.resize(numPropertyOverrides);
 		for (size_t i = 0; i < m_PropertyOverridesEnable.size(); ++i)
 		{
-			container.Read(m_PropertyOverridesEnable[i]);
+			bool enable;
+			container.Read(enable);
+			m_PropertyOverridesEnable[i] = enable;
 		}
 
 		/* Read property buffer */

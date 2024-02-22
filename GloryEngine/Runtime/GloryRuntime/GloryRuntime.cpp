@@ -6,6 +6,8 @@
 #include <AssetArchive.h>
 #include <BinaryStream.h>
 #include <GScene.h>
+#include <SceneManager.h>
+#include <AssetManager.h>
 
 #include <filesystem>
 
@@ -29,6 +31,7 @@ namespace Glory
 	void GloryRuntime::Run()
 	{
 		m_pEngine->StartThreads();
+		m_pEngine->GetSceneManager()->Start();
 
 		while (!m_pEngine->WantsToQuit())
 		{
@@ -53,5 +56,19 @@ namespace Glory
 		Resource* pRoot = archive.Get(m_pEngine, 0);
 		GScene* pScene = dynamic_cast<GScene*>(pRoot);
 		if (!pScene) return;
+
+		for (size_t i = 1; i < archive.Size(); ++i)
+		{
+			Resource* pResource = archive.Get(m_pEngine, i);
+			m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+		}
+
+		pScene->SetManager(m_pEngine->GetSceneManager());
+
+		/* Have to make sure every components add and validate callbacks are called */
+		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnAdd);
+		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnValidate);
+
+		m_pEngine->GetSceneManager()->AddOpenScene(pScene, pScene->GetUUID());
 	}
 }
