@@ -92,19 +92,6 @@ namespace Glory
 		m_SettingsPath = path.string();
 	}
 
-	void AssetDatabase::Load()
-	{
-		while (m_IsReading)
-		{
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-		}
-
-		m_Initialized = false;
-		
-
-		m_Initialized = true;
-	}
-
 	void AssetDatabase::GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& out)
 	{
 		ReadLock readLock{ this };
@@ -161,7 +148,7 @@ namespace Glory
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 
-		m_Initialized = false;
+		m_IsWriting = false;
 		m_AssetLocations.clear();
 		m_PathToUUID.clear();
 		m_Metas.clear();
@@ -209,7 +196,7 @@ namespace Glory
 	//}
 
 	AssetDatabase::AssetDatabase()
-		: m_Initialized(false), m_IsReading(false), m_Callbacks(this) {}
+		: m_IsWriting(false), m_IsReading(false), m_Callbacks(this) {}
 
 	AssetDatabase::~AssetDatabase() {}
 
@@ -219,7 +206,7 @@ namespace Glory
 	AssetDatabase::ReadLock::ReadLock(AssetDatabase* pDatabase): m_pDatabase(pDatabase)
 	{
 		++m_LockCounter;
-		while (!pDatabase->m_Initialized)
+		while (pDatabase->m_IsWriting)
 			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
 		pDatabase->m_IsReading = true;
 	}
@@ -236,13 +223,13 @@ namespace Glory
 		++m_LockCounter;
 		while (pDatabase->m_IsReading)
 			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-		pDatabase->m_Initialized = false;
+		pDatabase->m_IsWriting = true;
 	}
 
 	AssetDatabase::WriteLock::~WriteLock()
 	{
 		--m_LockCounter;
 		if (m_LockCounter > 0) return;
-		m_pDatabase->m_Initialized = true;
+		m_pDatabase->m_IsWriting = false;
 	}
 }

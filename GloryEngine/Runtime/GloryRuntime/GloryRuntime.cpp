@@ -8,6 +8,7 @@
 #include <GScene.h>
 #include <SceneManager.h>
 #include <AssetManager.h>
+#include <AssetDatabase.h>
 
 #include <filesystem>
 
@@ -24,7 +25,6 @@ namespace Glory
 	{
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 		m_pEngine->SetShaderManager(m_ShaderManager.get());
-
 		m_pEngine->Initialize();
 	}
 
@@ -43,9 +43,31 @@ namespace Glory
 	{
 		if (!std::filesystem::exists(path))
 			return;
+
+		AssetDatabase& db = m_pEngine->GetAssetDatabase();
+		
 		const std::filesystem::path rootPath = path.parent_path();
 		std::filesystem::path dbPath = rootPath;
 		dbPath.append("Assets.gcdb");
+		auto itor = std::find(m_AppendedAssetDatabases.begin(), m_AppendedAssetDatabases.end(), dbPath);
+		if (itor == m_AppendedAssetDatabases.end())
+		{
+			m_AppendedAssetDatabases.push_back(dbPath);
+			BinaryFileStream file{ dbPath, true };
+			BinaryStream* pStream = &file;
+			
+			while (!pStream->Eof())
+			{
+				ResourceMeta meta;
+				AssetLocation location;
+				pStream->Read(meta.Name());
+				pStream->Read(meta.ID());
+				pStream->Read(meta.Hash());
+				pStream->Read(location.Path);
+				pStream->Read(location.Index);
+				db.SetAsset(location, meta);
+			}
+		}
 
 		BinaryFileStream file{ path, true };
 		AssetArchive archive{ &file };

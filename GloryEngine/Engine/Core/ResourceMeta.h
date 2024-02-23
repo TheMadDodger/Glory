@@ -16,9 +16,12 @@ namespace Glory
 
 		void Read(const YAML::Node& node);
 		const std::string& Extension() const;
+		std::string& Name();
 		const std::string& Name() const;
 		UUID ID() const;
+		UUID& ID();
 		uint32_t Hash() const;
+		uint32_t& Hash();
 		size_t SerializedVersion() const;
 		void IncrementSerializedVersion();
 

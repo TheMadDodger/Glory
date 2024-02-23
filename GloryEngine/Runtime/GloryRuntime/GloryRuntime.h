@@ -2,6 +2,7 @@
 #include "Visibility.h"
 
 #include <memory>
+#include <vector>
 
 namespace std::filesystem
 {
@@ -33,5 +34,6 @@ namespace Glory
 		Engine* m_pEngine;
 		std::unique_ptr<RuntimeMaterialManager> m_MaterialManager;
 		std::unique_ptr<RuntimeShaderManager> m_ShaderManager;
+		std::vector<std::filesystem::path> m_AppendedAssetDatabases;
 	};
 }

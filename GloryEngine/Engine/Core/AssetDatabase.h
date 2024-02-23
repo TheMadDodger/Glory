@@ -25,8 +25,6 @@ namespace Glory
 
 		std::string GetAssetName(UUID uuid);
 
-		void Load();
-
 		void Clear();
 
 		void SetIDAndName(Resource* pResource, UUID newID, const std::string& name);
@@ -67,7 +65,7 @@ namespace Glory
 		AssetDatabase();
 
 	private:
-		bool m_Initialized;
+		bool m_IsWriting;
 		bool m_IsReading;
 		std::map<UUID, AssetLocation> m_AssetLocations;
 		std::map<std::string, UUID> m_PathToUUID;
