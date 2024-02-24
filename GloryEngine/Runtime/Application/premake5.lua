@@ -1,4 +1,5 @@
 project "GloryRuntimeApplication"
+	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
@@ -76,6 +77,11 @@ project "GloryRuntimeApplication"
 		"CSAPIInstall",
 	}
 
+	defines
+	{
+		"GLORY_RUNTIME_APPLICATION_EXPORTS"
+	}
+
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v143"
@@ -105,7 +111,6 @@ project "GloryRuntimeApplication"
 		}
 
 	filter "configurations:Debug"
-		kind "ConsoleApp"
 		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
@@ -113,7 +118,6 @@ project "GloryRuntimeApplication"
 		debugargs { "-path=\"%{demosDir}/Sponza/Build/Data/16787318667428770552.gcag\"" }
 
 	filter "configurations:Release"
-		kind "ConsoleApp"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"

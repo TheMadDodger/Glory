@@ -102,6 +102,7 @@ project "Glorious"
 		"GloryEngine.Entities",
 		"CSAPIInstall",
 		"GloryRuntime",
+		"GloryRuntimeApplication",
 		"WriteVersion",
 	}
 
@@ -127,6 +128,13 @@ project "Glorious"
 		("{COPY} ./Templates %{engineOutDir}/Templates"),
 		("{COPY} %{IncludeDir.FA}/FA %{editorBuildDir}/EditorAssets/Fonts/FA"),
 		("{COPY} %{IncludeDir.FA}/FA %{engineOutDir}/EditorAssets/Fonts/FA"),
+
+		("{COPY} %{engineOutDir}/GloryRuntime.dll %{editorBuildDir}/EditorAssets/Runtime"),
+		("{COPY} %{engineOutDir}/GloryRuntime.dll %{engineOutDir}/EditorAssets/Runtime"),
+		("{COPY} %{engineOutDir}/GloryRuntimeApplication.dll %{editorBuildDir}/EditorAssets/Runtime"),
+		("{COPY} %{engineOutDir}/GloryRuntimeApplication.dll %{engineOutDir}/EditorAssets/Runtime"),
+		("{COPY} %{GloryIncludeDir.runtimeTestApp}/Application.cpp %{editorBuildDir}/EditorAssets/Runtime"),
+		("{COPY} %{GloryIncludeDir.runtimeTestApp}/Application.cpp %{engineOutDir}/EditorAssets/Runtime"),
 	}
 
 	filter "system:windows"
