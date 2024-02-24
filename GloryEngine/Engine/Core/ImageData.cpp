@@ -58,7 +58,7 @@ namespace Glory
 	void ImageData::Serialize(BinaryStream& container) const
 	{
 		const int channels = m_Header.m_InternalFormat == PixelFormat::PF_RGBA ? 4 : 3;
-		if (m_Header.m_Compressed)
+		if (!m_Header.m_Compressed)
 		{
 			/* No need to compress if it was already compressed by the importer */
 			container.Write(m_Header).Write(m_pPixels, m_Header.m_DataSize);

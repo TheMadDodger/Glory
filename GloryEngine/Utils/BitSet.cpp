@@ -1,5 +1,7 @@
 #include "BitSet.h"
 
+#include <cstring>
+
 namespace Glory::Utils
 {
 	BitSet::BitSet(size_t capacity, bool defaultOn) : m_pMemory(new Element[capacity + (32 - capacity % 32)]), m_Capacity(capacity) {
@@ -11,7 +13,7 @@ namespace Glory::Utils
 
 	BitSet::~BitSet()
 	{
-		delete m_pMemory;
+		delete[] m_pMemory;
 		m_pMemory = nullptr;
 
 		m_Capacity = 0;
@@ -55,10 +57,10 @@ namespace Glory::Utils
 	{
 		if (m_Capacity >= capacity) return;
 		const size_t newCapacity = capacity + (32 - capacity % 32);
-		Element* pNewMemory = new Element[m_Capacity];
+		Element* pNewMemory = new Element[newCapacity];
 		std::memcpy(pNewMemory, m_pMemory, m_Capacity);
 		m_Capacity = newCapacity;
-		delete m_pMemory;
+		delete[] m_pMemory;
 		m_pMemory = pNewMemory;
 	}
 

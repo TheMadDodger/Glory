@@ -14,6 +14,8 @@ namespace Glory
 	class Engine;
 	class RuntimeMaterialManager;
 	class RuntimeShaderManager;
+	class RendererModule;
+	class GraphicsModule;
 
 	/** @brief Glory runtime */
 	class GloryRuntime
@@ -39,7 +41,16 @@ namespace Glory
 		GLORY_RUNTIME_API void LoadSceneOnly(const std::filesystem::path& path);
 
 	private:
+		/** @brief Callback when the rendering of a frame starts */
+		void GraphicsThreadBeginRender() {}
+		/** @brief Callback when the rendering of a frame ends */
+		void GraphicsThreadEndRender();
+
+	private:
+		friend class GraphicsThread;
 		Engine* m_pEngine;
+		RendererModule* m_pRenderer;
+		GraphicsModule* m_pGraphics;
 		std::unique_ptr<RuntimeMaterialManager> m_MaterialManager;
 		std::unique_ptr<RuntimeShaderManager> m_ShaderManager;
 		std::vector<std::filesystem::path> m_AppendedAssetDatabases;

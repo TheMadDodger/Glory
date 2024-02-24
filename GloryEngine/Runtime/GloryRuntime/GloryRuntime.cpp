@@ -3,6 +3,10 @@
 #include "RuntimeShaderManager.h"
 
 #include <Engine.h>
+#include <DisplayManager.h>
+#include <RendererModule.h>
+#include <GraphicsModule.h>
+#include <GraphicsThread.h>
 #include <Debug.h>
 #include <AssetArchive.h>
 #include <BinaryStream.h>
@@ -17,7 +21,8 @@
 namespace Glory
 {
 	GloryRuntime::GloryRuntime(Engine* pEngine): m_pEngine(pEngine),
-		m_MaterialManager(new RuntimeMaterialManager(pEngine)), m_ShaderManager(new RuntimeShaderManager(pEngine))
+		m_MaterialManager(new RuntimeMaterialManager(pEngine)), m_ShaderManager(new RuntimeShaderManager(pEngine)),
+		m_pRenderer(nullptr), m_pGraphics(nullptr)
 	{
 	}
 
@@ -28,6 +33,10 @@ namespace Glory
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 		m_pEngine->SetShaderManager(m_ShaderManager.get());
 		m_pEngine->Initialize();
+
+		m_pEngine->GetGraphicsThread()->BindBeginAndEndRender(this);
+		m_pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 	}
 
 	void GloryRuntime::Run()
@@ -39,6 +48,8 @@ namespace Glory
 		{
 			m_pEngine->Update();
 		}
+
+		m_pEngine->Cleanup();
 	}
 
 	void GloryRuntime::LoadAssetDatabase(const std::filesystem::path& path)
@@ -153,5 +164,12 @@ namespace Glory
 		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnValidate);
 
 		m_pEngine->GetSceneManager()->AddOpenScene(pScene, pScene->GetUUID());
+	}
+
+	void GloryRuntime::GraphicsThreadEndRender()
+	{
+		RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
+		m_pGraphics->Blit(pTexture);
+		m_pGraphics->Swap();
 	}
 }

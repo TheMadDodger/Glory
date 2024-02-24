@@ -224,4 +224,16 @@ namespace Glory
 	{
 		glViewport(0, 0, width, height);
 	}
+
+	void OpenGLGraphicsModule::Blit(RenderTexture* pTexture)
+	{
+		pTexture->BindRead();
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		uint32_t width, height;
+		pTexture->GetDimensions(width, height);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+			GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		pTexture->UnBindRead();
+	}
 }

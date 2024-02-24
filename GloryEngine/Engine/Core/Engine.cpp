@@ -257,6 +257,8 @@ namespace Glory
 
 	void Engine::Initialize()
 	{
+		if (m_Initialized) return;
+
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
 		m_pSceneManager->Initialize();
@@ -314,10 +316,14 @@ namespace Glory
 			m_Console->WriteLine("Extensions (legacy): " + pType->Extensions());
 			return true;
 		}));
+
+		m_Initialized = true;
 	}
 
 	void Engine::Cleanup()
 	{
+		if (!m_Initialized) return;
+
 		m_AssetDatabase->Destroy();
 		m_pGraphicsThread->Stop();
 		m_pJobManager->Kill();
@@ -348,6 +354,8 @@ namespace Glory
 
 		delete m_pSceneManager;
 		m_pSceneManager = nullptr;
+
+		m_Initialized = false;
 	}
 
 	GameTime& Engine::Time()

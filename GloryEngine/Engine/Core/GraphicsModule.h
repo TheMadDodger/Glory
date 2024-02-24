@@ -28,6 +28,7 @@ namespace Glory
         virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) = 0;
         virtual void EnableDepthTest(bool enable) = 0;
         virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) = 0;
+        virtual void Blit(RenderTexture* pTexture) = 0;
 
     public: // Getters
         FrameStates* GetFrameStates();

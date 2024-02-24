@@ -5,12 +5,15 @@
 #include "EditorShaderProcessor.h"
 #include "EditorSceneManager.h"
 #include "EditorApplication.h"
+#include "EditorResourceManager.h"
 #include "AssetCompiler.h"
-#include "ShaderSourceData.h"
+#include "EditableResource.h"
+
+#include <ShaderSourceData.h>
+#include <GScene.h>
 
 #include <Engine.h>
 #include <AssetDatabase.h>
-#include <GScene.h>
 #include <AssetArchive.h>
 #include <BinaryStream.h>
 #include <AssetManager.h>
@@ -19,12 +22,6 @@
 
 namespace Glory::Editor
 {
-	std::vector<std::string> YamlExtensions = {
-		".gmat",
-		".gminst",
-		".gtex",
-	};
-
     void Package(Engine* pEngine)
     {
 		if (AssetCompiler::IsBusy()) return;
@@ -349,20 +346,25 @@ namespace Glory::Editor
 				if (!EditorAssetDatabase::AssetExists(assetID)) return;
 				ResourceMeta meta;
 				EditorAssetDatabase::GetAssetMetadata(assetID, meta);
-				if (meta.Hash() == sceneHash) return;
-				assets.push_back(assetID);
-
-				/* We also have to search this asset recursively for any referenced assets */
-				std::filesystem::path path = pEngine->GetAssetDatabase().GetAssetPath();
 				AssetLocation location;
 				EditorAssetDatabase::GetAssetLocation(assetID, location);
-				path.append(location.Path);
+				if (meta.Hash() == sceneHash) return;
 
-				auto itor = std::find(YamlExtensions.begin(), YamlExtensions.end(), path.extension().string());
-				if (itor == YamlExtensions.end())
-					return;
+				assets.push_back(assetID);
+				if (!location.SubresourcePath.empty())
+				{
+					/* Add the parent asset */
+					const UUID parentID = EditorAssetDatabase::FindAssetUUID(location.Path);
+					assets.push_back(parentID);
+				}
 
-				Utils::YAMLFileRef assetFile{ path };
+				/* We also have to search this asset recursively for any referenced assets */
+				EditableResource* pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(assetID);
+				if (!pResource) return;
+				YAMLResourceBase* pYAMLResource = dynamic_cast<YAMLResourceBase*>(pResource);
+				if (!pYAMLResource) return;
+
+				Utils::YAMLFileRef& assetFile = **pYAMLResource;
 				ScanSceneFileForAssets(pEngine, assetFile, assets);
 			}
 			catch (const std::exception&)
