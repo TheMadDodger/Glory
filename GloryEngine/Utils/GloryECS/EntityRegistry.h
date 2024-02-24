@@ -90,6 +90,9 @@ namespace Glory::Utils::ECS
 
 		BaseTypeView* GetTypeView(uint32_t typeHash);
 		EntityView* GetEntityView(EntityID entity);
+		EntityView* GetEntityView(EntityID entity) const;
+		std::map<EntityID, EntityView*>::const_iterator EntityViewBegin() const;
+		std::map<EntityID, EntityView*>::const_iterator EntityViewEnd() const;
 
 		void* GetComponentAddress(EntityID entityID, Glory::UUID componentID);
 
@@ -192,6 +195,7 @@ namespace Glory::Utils::ECS
 
 		void ResizeRootOrder(size_t size);
 		std::vector<EntityID>& RootOrder();
+		const std::vector<EntityID>& RootOrder() const;
 
 	private:
 		friend class ComponentTypes;

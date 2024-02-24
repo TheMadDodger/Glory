@@ -27,7 +27,7 @@ namespace Glory::Utils::ECS
 		return std::find(m_Entities.begin(), m_Entities.end(), entityID) != m_Entities.end();
 	}
 
-	const size_t BaseTypeView::ComponentTypeHash() const
+	const uint32_t BaseTypeView::ComponentTypeHash() const
 	{
 		return m_TypeHash;
 	}
@@ -42,5 +42,15 @@ namespace Glory::Utils::ECS
 	{
 		const uint32_t index = GetComponentIndex(entity, 0);
 		m_ActiveStates.Set(index, active);
+	}
+
+	size_t BaseTypeView::Size() const
+	{
+		return m_Entities.size();
+	}
+
+	EntityID BaseTypeView::EntityAt(size_t index) const
+	{
+		return m_Entities[index];
 	}
 }

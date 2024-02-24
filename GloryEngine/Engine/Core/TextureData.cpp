@@ -10,6 +10,7 @@ namespace Glory
 
 	TextureData::TextureData(ImageData* pImageData) : m_Image(pImageData), m_SamplerSettings()
 	{
+		APPEND_TYPE(TextureData);
 	}
 
 	TextureData::~TextureData()

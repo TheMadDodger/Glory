@@ -1,7 +1,8 @@
 #pragma once
+#include "Job.h"
+
 #include <functional>
 #include <queue>
-#include "Job.h"
 
 namespace Glory::Jobs
 {
@@ -37,6 +38,14 @@ namespace Glory::Jobs
 		}
 		void EndQueue() { m_pJobQueue->UnLock(); }
 		bool HasTasksInQueue() { return m_pJobQueue->Size() > 0; }
+		bool IsIdle()
+		{
+			for (size_t i = 0; i < m_pJobs.size(); ++i)
+			{
+				if (!m_pJobs[i]->IsIdle()) return false;
+			}
+			return true;
+		}
 
 	private:
 		JobPool(size_t poolID, size_t numJobsPerThread = 1) : JobPoolBase(poolID, numJobsPerThread), m_pJobQueue(nullptr) {}

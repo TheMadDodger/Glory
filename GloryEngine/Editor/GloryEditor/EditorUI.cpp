@@ -904,10 +904,11 @@ namespace Glory::Editor
 		ImGui::SameLine();
 		const float availableWidth = ImGui::GetContentRegionAvail().x;
 
-		width = std::max(maxWidth, 100.0f) - borderPadding;
+		width = std::max(maxWidth, 100.0f);
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		start = cursorPos.x + availableWidth - width;
+		width -= borderPadding;
 		ImGui::SetCursorPos({ start, cursorPos.y });
 
 		std::vector<std::string_view> options;

@@ -111,6 +111,25 @@ namespace Glory::Utils::ECS
 		return itor->second;
 	}
 
+	EntityView* EntityRegistry::GetEntityView(EntityID entity) const
+	{
+		const auto itor = m_pEntityViews.find(entity);
+		if (itor == m_pEntityViews.end())
+			return nullptr;
+
+		return itor->second;
+	}
+
+	std::map<EntityID, EntityView*>::const_iterator EntityRegistry::EntityViewBegin() const
+	{
+		return m_pEntityViews.begin();
+	}
+
+	std::map<EntityID, EntityView*>::const_iterator EntityRegistry::EntityViewEnd() const
+	{
+		return m_pEntityViews.end();
+	}
+
 	void* EntityRegistry::GetComponentAddress(EntityID entityID, Glory::UUID componentID)
 	{
 		EntityView* pEntityView = GetEntityView(entityID);
@@ -305,6 +324,11 @@ namespace Glory::Utils::ECS
 	}
 
 	std::vector<EntityID>& EntityRegistry::RootOrder()
+	{
+		return m_RootOrder;
+	}
+
+	const std::vector<EntityID>& EntityRegistry::RootOrder() const
 	{
 		return m_RootOrder;
 	}

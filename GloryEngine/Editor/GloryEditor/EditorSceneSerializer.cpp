@@ -14,6 +14,7 @@ namespace Glory::Editor
 {
 	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, YAML::Emitter& out)
 	{
+		out << YAML::BeginMap;
 		out << YAML::Key << "Entities";
 		out << YAML::Value << YAML::BeginSeq;
 		/* Entities should be serialized in order off their hierarchies
@@ -25,6 +26,7 @@ namespace Glory::Editor
 			SerializeEntityRecursive(pEngine, pScene, child, out);
 		}
 		out << YAML::EndSeq;
+		out << YAML::EndMap;
 	}
 
 	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)

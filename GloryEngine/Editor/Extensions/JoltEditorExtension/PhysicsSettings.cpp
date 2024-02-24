@@ -10,7 +10,7 @@
 
 namespace Glory::Editor
 {
-	PhysicsSettings::PhysicsSettings() : ProjectSettings("Physics.yaml") {}
+	PhysicsSettings::PhysicsSettings() : ProjectSettings("Physics") {}
 
 	bool PhysicsSettings::OnGui()
 	{

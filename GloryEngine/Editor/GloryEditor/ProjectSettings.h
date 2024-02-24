@@ -12,28 +12,23 @@ if (!node.Exists() || !node.Is##nodeType()) \
 
 namespace Glory::Editor
 {
-	enum class ProjectSettingsType
-	{
-		General,
-		Engine,
-		Layers,
-		Input,
-		Physics,
-		Count
-	};
-
     class ProjectSettings
     {
 	public:
 		GLORY_EDITOR_API static void Load(ProjectSpace* pProject);
 		GLORY_EDITOR_API static void Save(ProjectSpace* pProject);
 
-		GLORY_EDITOR_API static void Paint(ProjectSettingsType type);
+		GLORY_EDITOR_API static void Paint(size_t index);
 
 		GLORY_EDITOR_API static void OnStartPlay();
 		GLORY_EDITOR_API static void OnStopPlay();
 
 		GLORY_EDITOR_API static void Add(ProjectSettings* pSettings);
+		GLORY_EDITOR_API static size_t SettingsCount();
+		GLORY_EDITOR_API static std::string_view Name(size_t index);
+		GLORY_EDITOR_API static ProjectSettings* Get(const std::string_view name);
+
+		GLORY_EDITOR_API Utils::YAMLFileRef& operator*();
 
     protected:
         GLORY_EDITOR_API ProjectSettings(const char* settingsFile);
@@ -53,9 +48,7 @@ namespace Glory::Editor
 
     protected:
 		Utils::YAMLFileRef m_YAMLFile;
-		const char* m_SettingsFile;
-
-	private:
+		const char* m_Name;
     };
 
 	class GeneralSettings : public ProjectSettings
@@ -104,5 +97,15 @@ namespace Glory::Editor
 
 		virtual void OnStartPlay_Impl() override;
 		virtual void OnStopPlay_Impl() override;
+	};
+
+	class PackageSettings : public ProjectSettings
+	{
+	public:
+		PackageSettings();
+
+	private:
+		virtual bool OnGui() override;
+		virtual void OnSettingsLoaded() override;
 	};
 }

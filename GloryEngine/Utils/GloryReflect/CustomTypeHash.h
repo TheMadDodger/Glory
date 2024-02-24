@@ -2,7 +2,7 @@
 
 namespace Glory::Utils::Reflect
 {
-	enum class CustomTypeHash
+	enum class CustomTypeHash: uint32_t
 	{
 		Basic = 96,
 		Struct = 97,

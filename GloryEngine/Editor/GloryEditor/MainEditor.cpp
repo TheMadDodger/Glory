@@ -38,6 +38,7 @@
 #include "EnumPropertyDrawer.h"
 #include "StructPropertyDrawer.h"
 #include "EditorAssetDatabase.h"
+#include "SettingsEnums.h"
 
 #include "Importer.h"
 #include "MaterialImporter.h"
@@ -53,6 +54,8 @@
 
 #include "CreateEntityObjectsCallbacks.h"
 #include "EditableEntity.h"
+
+#include "Package.h"
 
 #include <imgui.h>
 #include <Engine.h>
@@ -101,6 +104,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Duplicate				= "Duplicate";
 	static constexpr char* Shortcut_Delete					= "Delete";
 	static constexpr char* Shortcut_Rename					= "Rename";
+	static constexpr char* Shortcut_Package					= "Package";
 
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
@@ -155,6 +159,8 @@ namespace Glory::Editor
 
 		pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
 		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
+
+		RegisterSettingsEnums(pEngine);
 	}
 
 	void MainEditor::Destroy()
@@ -298,6 +304,7 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
+		MenuBar::AddMenuItem("File/Package", []() { Package(EditorApplication::GetInstance()->GetEngine()); }, NULL, Shortcut_Package);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
 		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);
@@ -432,6 +439,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Duplicate, ImGuiKey_D, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Delete, ImGuiKey_Delete, ImGuiModFlags_None);
 		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_R, ImGuiModFlags_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_Package, ImGuiKey_P, ImGuiModFlags_Ctrl);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
 			Entity entity = EditorSceneManager::GetOpenScene(e.Object->SceneID())->GetEntityByEntityID(e.Object->EntityID());

@@ -14,7 +14,7 @@ namespace Glory
 
 		virtual MaterialData* GetMaterial(UUID materialID) const = 0;
 
-	private:
+	protected:
 		Engine* m_pEngine;
 	};
 }

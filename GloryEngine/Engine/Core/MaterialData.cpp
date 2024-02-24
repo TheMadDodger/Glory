@@ -221,6 +221,9 @@ namespace Glory
 			container.Read(prop.m_Offset);
 			container.Read(prop.m_IsResource);
 			container.Read(prop.m_Flags);
+
+			if (!prop.m_IsResource) continue;
+			m_ResourcePropertyInfoIndices.push_back(i);
 		}
 
 		/* Read property buffer */

@@ -33,6 +33,16 @@ namespace Glory
 		return m_pEngine;
 	}
 
+	void SceneManager::Start()
+	{
+		if (m_Started) return;
+		m_Started = true;
+		for (size_t i = 0; i < m_pOpenScenes.size(); ++i)
+		{
+			m_pOpenScenes[i]->Start();
+		}
+	}
+
 	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
 		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
 	{
@@ -96,6 +106,9 @@ namespace Glory
 		pScene->m_pManager = this;
 		m_pOpenScenes.push_back(pScene);
 		OnSceneOpen(uuid);
+
+		if (m_Started)
+			pScene->Start();
 	}
 
 	void SceneManager::CloseScene(UUID uuid)

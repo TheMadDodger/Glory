@@ -114,17 +114,11 @@ namespace Glory
 		static bool IsScene(const std::string& ext);
 
 	public:
+		ResourceTypes();
 		virtual ~ResourceTypes();
 
 	private:
 		void ReadExtensions(size_t index, const std::string& extensions);
-
-	private:
-		friend class ResourceTypes;
-		ResourceFactory* m_pFactory;
-
-	public:
-		ResourceTypes();
 
 	private:
 		friend class ResourceType;

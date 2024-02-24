@@ -244,7 +244,8 @@ namespace Utils::Reflect
 		ShaderManager* m_pShaderManager;
 		MaterialManager* m_pMaterialManager;
 
-		bool m_Quit = false;
+		bool m_Quit{ false };
+		bool m_Initialized{ false };
 
 		/* Owned objects */
 		std::unique_ptr<GameTime> m_Time;

@@ -15,7 +15,9 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void OnResize() override;
 		virtual void Bind() override;
+		virtual void BindRead() override;
 		virtual void UnBind() override;
+		virtual void UnBindRead() override;
 
 	private:
 		friend class OGLResourceManager;

@@ -52,16 +52,15 @@ namespace Glory::Editor
 	};
 
 	/** @brief A YAML based editor asset */
-	template<class T>
-	class YAMLResource: public EditableResource
+	class YAMLResourceBase : public EditableResource
 	{
 	public:
 		/** @brief Constructor
 		 * @param path Absolute path to the YAML file
 		 */
-		YAMLResource(const std::filesystem::path& path): m_File(path)
+		YAMLResourceBase(const std::filesystem::path& path): m_File(path)
 		{
-			APPEND_TYPE(YAMLResource<T>);
+			APPEND_TYPE(YAMLResourceBase);
 			m_File.Load();
 		}
 
@@ -89,7 +88,21 @@ namespace Glory::Editor
 			m_Dirty = false;
 		}
 
-	private:
+	protected:
 		Utils::YAMLFileRef m_File;
+	};
+
+	/** @brief A YAML based editor asset for a specific type */
+	template<class T>
+	class YAMLResource: public YAMLResourceBase
+	{
+	public:
+		/** @brief Constructor
+		 * @param path Absolute path to the YAML file
+		 */
+		YAMLResource(const std::filesystem::path& path): YAMLResourceBase(path)
+		{
+			APPEND_TYPE(YAMLResource<T>);
+		}
 	};
 }

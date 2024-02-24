@@ -136,10 +136,22 @@ namespace Glory
 		glViewport(0, 0, m_Width, m_Height);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
+
+	void OGLRenderTexture::BindRead()
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GLFrameBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
 	
 	void OGLRenderTexture::UnBind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLRenderTexture::UnBindRead()
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 }

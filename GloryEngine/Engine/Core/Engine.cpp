@@ -36,6 +36,7 @@
 #include "TimerModule.h"
 #include "ProfilerModule.h"
 #include "MaterialInstanceData.h"
+#include "ShaderSourceData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
@@ -256,6 +257,8 @@ namespace Glory
 
 	void Engine::Initialize()
 	{
+		if (m_Initialized) return;
+
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
 		m_pSceneManager->Initialize();
@@ -296,10 +299,31 @@ namespace Glory
 		{
 			m_pAllModules[i]->PostInitialize();
 		}
+
+		m_Console->RegisterCommand(new ConsoleCommand1<size_t>("type", [this](size_t hash) {
+			const Utils::Reflect::TypeData* pType = m_Reflection->GetTyeData(hash);
+			if (!pType) return false;
+			m_Console->WriteLine(std::to_string(hash) + " = " + pType->TypeName());
+			return true;
+		}));
+
+		m_Console->RegisterCommand(new ConsoleCommand1<size_t>("resourcetype", [this](size_t hash) {
+			const ResourceType* pType = m_ResourceTypes->GetResourceType(hash);
+			if (!pType) return false;
+			m_Console->WriteLine("Resource type info for: " + std::to_string(hash));
+			m_Console->WriteLine("Name: " + pType->Name());
+			m_Console->WriteLine("Full name: " + pType->FullName());
+			m_Console->WriteLine("Extensions (legacy): " + pType->Extensions());
+			return true;
+		}));
+
+		m_Initialized = true;
 	}
 
 	void Engine::Cleanup()
 	{
+		if (!m_Initialized) return;
+
 		m_AssetDatabase->Destroy();
 		m_pGraphicsThread->Stop();
 		m_pJobManager->Kill();
@@ -330,6 +354,8 @@ namespace Glory
 
 		delete m_pSceneManager;
 		m_pSceneManager = nullptr;
+
+		m_Initialized = false;
 	}
 
 	GameTime& Engine::Time()
@@ -504,6 +530,10 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<PrefabData>("");
 		m_ResourceTypes->RegisterResource<MaterialData>("");
 		m_ResourceTypes->RegisterResource<MaterialInstanceData>("");
+		m_ResourceTypes->RegisterResource<MeshData>("");
+		m_ResourceTypes->RegisterResource<ModelData>("");
+		m_ResourceTypes->RegisterResource<ShaderSourceData>("");
+		m_ResourceTypes->RegisterResource<ImageData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");

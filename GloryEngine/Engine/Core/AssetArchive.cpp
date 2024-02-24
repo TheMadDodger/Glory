@@ -46,7 +46,7 @@ namespace Glory
 		if (!pResource->GetType(0, type)) return;
 		const uint32_t typeHash = ResourceTypes::GetHash(type);
 
-		/* Write name, type and sub resource count */
+		/* Write ID, name and type */
 		m_pStream->Write(pResource->GetUUID()).Write(pResource->Name()).Write(typeHash);
 
 		/* Write the resource */
@@ -108,6 +108,11 @@ namespace Glory
 		m_pStream->Read(uuid).Read(name).Read(typeHash);
 
 		const ResourceType* pType = pEngine->GetResourceTypes().GetResourceType(typeHash);
+		if (!pType)
+		{
+			throw new std::exception("Non existing resource type");
+		}
+
 		Resource* pResource = pType->Create();
 
 		pResource->SetName(name);

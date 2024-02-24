@@ -360,6 +360,7 @@ namespace Glory::Editor
 				importSettings.m_Extension = "";
 				FileData* pCompiledShader = (FileData*)EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>()->Load(path, importSettings);
 				pShaderSource->SetCompiledShader(pCompiledShader);
+				return true;
 			});
 		});
 

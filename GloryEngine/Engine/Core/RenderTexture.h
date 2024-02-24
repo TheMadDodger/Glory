@@ -47,7 +47,9 @@ namespace Glory
 		Texture* GetTextureAttachment(const std::string& name);
 
 		virtual void Bind() = 0;
+		virtual void BindRead() = 0;
 		virtual void UnBind() = 0;
+		virtual void UnBindRead() = 0;
 
 		void BindAll(Material* pMaterial);
 

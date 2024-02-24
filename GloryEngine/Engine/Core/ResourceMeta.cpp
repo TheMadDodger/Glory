@@ -110,6 +110,11 @@ namespace Glory
 		return m_Extension;
 	}
 
+	std::string& ResourceMeta::Name()
+	{
+		return m_Name;
+	}
+
 	const std::string& ResourceMeta::Name() const
 	{
 		return m_Name;
@@ -120,7 +125,17 @@ namespace Glory
 		return m_UUID;
 	}
 
+	UUID& ResourceMeta::ID()
+	{
+		return m_UUID;
+	}
+
 	uint32_t ResourceMeta::Hash() const
+	{
+		return m_TypeHash;
+	}
+
+	uint32_t& ResourceMeta::Hash()
 	{
 		return m_TypeHash;
 	}
