@@ -20,6 +20,7 @@ namespace Glory
 
 		Engine LoadEngine(Console* pConsole, Debug* pDebug);
 		Engine LoadEngineFromPath(Console* pConsole, Debug* pDebug);
+		EngineCreateInfo LoadEngineInfoFromPath(Console* pConsole, Debug* pDebug);
 		void Unload();
 
 		const size_t ModuleCount() const;

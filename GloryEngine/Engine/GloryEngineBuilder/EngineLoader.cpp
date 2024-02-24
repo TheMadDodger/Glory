@@ -71,6 +71,11 @@ namespace Glory
 
 	Engine EngineLoader::LoadEngineFromPath(Console* pConsole, Debug* pDebug)
 	{
+		return LoadEngineInfoFromPath(pConsole, pDebug);
+	}
+
+	EngineCreateInfo EngineLoader::LoadEngineInfoFromPath(Console* pConsole, Debug* pDebug)
+	{
 		if (!std::filesystem::exists(m_CFGPath))
 		{
 			pDebug->LogFatalError("Provided path is invalid!");
@@ -118,7 +123,7 @@ namespace Glory
 		m_EngineInfo.OptionalModuleCount = static_cast<uint32_t>(m_pOptionalModules.size());
 		m_EngineInfo.pOptionalModules = m_pOptionalModules.data();
 
-		return { m_EngineInfo };
+		return m_EngineInfo;
 	}
 		
 	void EngineLoader::Unload()

@@ -19,6 +19,7 @@
 #include <AssetManager.h>
 
 #include <filesystem>
+#include <tchar.h>
 
 namespace Glory::Editor
 {
@@ -26,7 +27,8 @@ namespace Glory::Editor
     {
 		if (AssetCompiler::IsBusy()) return;
 
-		std::filesystem::path packageRoot = ProjectSpace::GetOpenProject()->RootPath();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		std::filesystem::path packageRoot = pProject->RootPath();
 		packageRoot.append("Build");
 
 		std::filesystem::path dataPath = packageRoot;
@@ -276,7 +278,7 @@ namespace Glory::Editor
 
 		/* Copy modules and their resources and settings */
 		std::filesystem::path modulesPath = packageRoot;
-		modulesPath.append("Engine");
+		modulesPath.append("Modules");
 		std::filesystem::path settingsPath = modulesPath;
 		settingsPath.append("Config");
 
@@ -316,6 +318,98 @@ namespace Glory::Editor
 			outFile << out.c_str();
 			outFile.close();
 		}
+
+		/* Copy runtime and application */
+		std::filesystem::path runtimePath = "./EditorAssets/Runtime";
+		runtimePath.append("GloryRuntime.dll");
+		std::filesystem::copy(runtimePath, packageRoot, std::filesystem::copy_options::overwrite_existing);
+		runtimePath.replace_filename("GloryRuntimeApplication.dll");
+		std::filesystem::copy(runtimePath, packageRoot, std::filesystem::copy_options::overwrite_existing);
+
+		/* Compile exe */
+		std::filesystem::path packagingCachePath = pProject->CachePath();
+		packagingCachePath.append("Packaging");
+		if (!std::filesystem::exists(packagingCachePath))
+			std::filesystem::create_directories(packagingCachePath);
+
+		std::filesystem::path appCPPPath = packagingCachePath;
+		appCPPPath.append("Application.cpp");
+
+		if (!std::filesystem::exists(appCPPPath))
+		{
+			runtimePath.replace_filename("Application.cpp");
+			std::filesystem::copy(runtimePath, appCPPPath);
+		}
+
+		std::string entryScene;
+		/** @todo Let the user decide what the entry scene is */
+		if (!scenes.empty())
+		{
+			auto sceneZero = scenes[0];
+			entryScene = std::to_string(sceneZero);
+		}
+
+		const std::string projectName = pProject->Name();
+		/* Generate Configuration.h */
+		std::filesystem::path configHeaderPath = packagingCachePath;
+		configHeaderPath.append("Configuration.h");
+		std::ofstream configHeaderStream(configHeaderPath);
+		configHeaderStream << "#pragma once" << std::endl << std::endl;
+		configHeaderStream << "namespace Config" << std::endl;
+		configHeaderStream << "{" << std::endl;
+		configHeaderStream << "	constexpr char* AppName = \"" << projectName << "\";" << std::endl;
+		configHeaderStream << "	constexpr char* EntryScene = \"./Data/" << entryScene << ".gcs\";" << std::endl;
+		configHeaderStream << "}" << std::endl << std::endl;
+		configHeaderStream.close();
+
+		/* Generate premake file */
+		std::filesystem::path luaPath = packagingCachePath;
+		luaPath.append("premake5.lua");
+		std::ofstream luaStream(luaPath);
+		luaStream << "workspace \"" << projectName << "\"" << std::endl;
+		luaStream << "	platforms { \"x64\" }" << std::endl;
+		luaStream << "	configurations { \"Debug\", \"Release\" }" << std::endl;
+		luaStream << "	flags { \"MultiProcessorCompile\" }" << std::endl;
+		luaStream << "project \"" << projectName << "\"" << std::endl;
+		luaStream << "	language \"C++\"" << std::endl;
+		luaStream << "	cppdialect \"C++17\"" << std::endl;
+		luaStream << "	staticruntime \"Off\"" << std::endl;
+		luaStream << "	files " << std::endl;
+		luaStream << "	targetdir (\"bin\"" << std::endl;
+		luaStream << "	{" << std::endl;
+		luaStream << "		\"" << "*.h" << "\"," << std::endl;
+		luaStream << "		\"" << "*.cpp" << "\"" << std::endl;
+		luaStream << "	}" << std::endl;
+		luaStream << "	filter \"" << "system:windows" << "\"" << std::endl;
+		luaStream << "		defines \"" << "_CONSOLE" << "\"" << std::endl;
+		luaStream << "	filter \"" << "platforms:x64" << "\"" << std::endl;
+		luaStream << "		architecture \"" << "x64" << "\"" << std::endl;
+		luaStream << "	filter \"" << "configurations:Debug" << "\"" << std::endl;
+		luaStream << "		kind \"" << "ConsoleApp" << "\"" << std::endl;
+		luaStream << "		runtime \"" << "Debug" << "\"" << std::endl;
+		luaStream << "		defines \"" << "_DEBUG" << "\"" << std::endl;
+		luaStream << "		symbols \"" << "On" << "\"" << std::endl;
+		luaStream << "	filter \"" << "configurations:Release" << "\"" << std::endl;
+		luaStream << "		kind \"" << "WindowedApp" << "\"" << std::endl;
+		luaStream << "		runtime \"" << "Release" << "\"" << std::endl;
+		luaStream << "		defines \"" << "NDEBUG" << "\"" << std::endl;
+		luaStream << "		optimize \"" << "On" << "\"" << std::endl;
+		luaStream.close();
+
+		/* Generate batch script */
+		std::filesystem::path premakePath = std::filesystem::current_path();
+		premakePath.append("premake").append("premake5.exe");
+		packagingCachePath.append("premake5.lua");
+
+		std::string cmd = "cd \"" + premakePath.parent_path().string() + "\" && " + "premake5.exe vs2019 --file=\"" + packagingCachePath.string() + "\"";
+		system(cmd.c_str());
+		packagingCachePath = packagingCachePath.parent_path();
+		cmd = "cd \"" + packagingCachePath.string() + "\" && " + "msbuild /m /p:Configuration=Debug /p:Platform=x64 .";
+		system(cmd.c_str());
+
+		std::filesystem::path exePath = packagingCachePath;
+		exePath.append("bin").append(projectName).replace_extension(".exe");
+		std::filesystem::copy(exePath, packageRoot, std::filesystem::copy_options::overwrite_existing);
     }
 
 	void ScanForAssets(Engine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)
