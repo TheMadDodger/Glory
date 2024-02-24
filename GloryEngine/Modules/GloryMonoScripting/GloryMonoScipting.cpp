@@ -10,6 +10,7 @@
 #include "ScriptingExtender.h"
 #include "MonoScriptLoader.h"
 
+#include <Console.h>
 #include <SceneManager.h>
 #include <PropertySerializer.h>
 #include <Engine.h>
@@ -84,6 +85,11 @@ namespace Glory
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnValidate, MonoScriptedSystem::OnValidate);
 
 		m_pEngine->AddLoaderModule(new MonoScriptLoader());
+
+		m_pEngine->GetConsole().RegisterCommand(new ConsoleCommand2<std::string, std::string>("loadMainAssembly", [this](std::string name, std::string file) {
+			AddLib(ScriptingLib{ name, file, false, nullptr, true });
+			return true;
+		}));
 	}
 
 	void GloryMonoScipting::PostInitialize()

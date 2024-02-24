@@ -13,6 +13,7 @@
 #include <GScene.h>
 
 #include <Engine.h>
+#include <Debug.h>
 #include <AssetDatabase.h>
 #include <AssetArchive.h>
 #include <BinaryStream.h>
@@ -25,7 +26,11 @@ namespace Glory::Editor
 {
     void Package(Engine* pEngine)
     {
-		if (AssetCompiler::IsBusy()) return;
+		if (AssetCompiler::IsBusy())
+		{
+			pEngine->GetDebug().LogError("Cannot package while assets are compiling");
+			return;
+		}
 
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		std::filesystem::path packageRoot = pProject->RootPath();
@@ -36,6 +41,8 @@ namespace Glory::Editor
 
 		if (!std::filesystem::exists(dataPath))
 			std::filesystem::create_directories(dataPath);
+
+		EditorApplication::GetInstance()->OnBeginPackage(packageRoot);
 
         /* First we must gather what scenes will be packaged */
         ProjectSettings* packageSettings = ProjectSettings::Get("Packaging");
@@ -334,11 +341,20 @@ namespace Glory::Editor
 
 		std::filesystem::path appCPPPath = packagingCachePath;
 		appCPPPath.append("Application.cpp");
+		
+		std::filesystem::path runtimeAPIHeaderPath = appCPPPath;
+		runtimeAPIHeaderPath.replace_filename("RuntimeAPI.h");
 
 		if (!std::filesystem::exists(appCPPPath))
 		{
 			runtimePath.replace_filename("Application.cpp");
 			std::filesystem::copy(runtimePath, appCPPPath);
+		}
+
+		if (!std::filesystem::exists(runtimeAPIHeaderPath))
+		{
+			runtimePath.replace_filename("RuntimeAPI.h");
+			std::filesystem::copy(runtimePath, runtimeAPIHeaderPath);
 		}
 
 		std::string entryScene;
@@ -354,11 +370,16 @@ namespace Glory::Editor
 		std::filesystem::path configHeaderPath = packagingCachePath;
 		configHeaderPath.append("Configuration.h");
 		std::ofstream configHeaderStream(configHeaderPath);
-		configHeaderStream << "#pragma once" << std::endl << std::endl;
+		configHeaderStream << "#pragma once" << std::endl;
+		configHeaderStream << "#include \"RuntimeAPI.h\"" << std::endl << std::endl;
 		configHeaderStream << "namespace Config" << std::endl;
 		configHeaderStream << "{" << std::endl;
 		configHeaderStream << "	constexpr char* AppName = \"" << projectName << "\";" << std::endl;
 		configHeaderStream << "	constexpr char* EntryScene = \"./Data/" << entryScene << ".gcs\";" << std::endl;
+		configHeaderStream << "}" << std::endl << std::endl << std::endl;
+		configHeaderStream << "inline void Exec()" << std::endl;
+		configHeaderStream << "{" << std::endl;
+		EditorApplication::GetInstance()->OnGenerateConfigExec(configHeaderStream);
 		configHeaderStream << "}" << std::endl << std::endl;
 		configHeaderStream.close();
 
@@ -374,14 +395,16 @@ namespace Glory::Editor
 		luaStream << "	language \"C++\"" << std::endl;
 		luaStream << "	cppdialect \"C++17\"" << std::endl;
 		luaStream << "	staticruntime \"Off\"" << std::endl;
+		luaStream << "	targetdir (\"bin\")" << std::endl;
+		luaStream << "	objdir (\"bin/OBJ\")" << std::endl;
 		luaStream << "	files " << std::endl;
-		luaStream << "	targetdir (\"bin\"" << std::endl;
 		luaStream << "	{" << std::endl;
 		luaStream << "		\"" << "*.h" << "\"," << std::endl;
 		luaStream << "		\"" << "*.cpp" << "\"" << std::endl;
 		luaStream << "	}" << std::endl;
 		luaStream << "	filter \"" << "system:windows" << "\"" << std::endl;
 		luaStream << "		defines \"" << "_CONSOLE" << "\"" << std::endl;
+		luaStream << "		toolset \"v143\"" << std::endl;
 		luaStream << "	filter \"" << "platforms:x64" << "\"" << std::endl;
 		luaStream << "		architecture \"" << "x64" << "\"" << std::endl;
 		luaStream << "	filter \"" << "configurations:Debug" << "\"" << std::endl;
@@ -404,12 +427,21 @@ namespace Glory::Editor
 		std::string cmd = "cd \"" + premakePath.parent_path().string() + "\" && " + "premake5.exe vs2019 --file=\"" + packagingCachePath.string() + "\"";
 		system(cmd.c_str());
 		packagingCachePath = packagingCachePath.parent_path();
-		cmd = "cd \"" + packagingCachePath.string() + "\" && " + "msbuild /m /p:Configuration=Debug /p:Platform=x64 .";
+
+#ifdef _DEBUG
+		static const std::string config = "Debug";
+#else
+		static const std::string config = "Release";
+#endif
+
+		cmd = "cd \"" + packagingCachePath.string() + "\" && " + "msbuild /m /p:Configuration=" + config + " /p:Platform=x64 .";
 		system(cmd.c_str());
 
 		std::filesystem::path exePath = packagingCachePath;
 		exePath.append("bin").append(projectName).replace_extension(".exe");
 		std::filesystem::copy(exePath, packageRoot, std::filesystem::copy_options::overwrite_existing);
+
+		EditorApplication::GetInstance()->OnEndPackage(packageRoot);
     }
 
 	void ScanForAssets(Engine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)

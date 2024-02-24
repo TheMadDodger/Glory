@@ -133,6 +133,8 @@ project "Glorious"
 		("{COPY} %{engineOutDir}/GloryRuntime.dll %{engineOutDir}/EditorAssets/Runtime"),
 		("{COPY} %{engineOutDir}/GloryRuntimeApplication.dll %{editorBuildDir}/EditorAssets/Runtime"),
 		("{COPY} %{engineOutDir}/GloryRuntimeApplication.dll %{engineOutDir}/EditorAssets/Runtime"),
+		("{COPY} %{GloryIncludeDir.runtimeTestApp}/RuntimeAPI.h %{editorBuildDir}/EditorAssets/Runtime"),
+		("{COPY} %{GloryIncludeDir.runtimeTestApp}/RuntimeAPI.h %{engineOutDir}/EditorAssets/Runtime"),
 		("{COPY} %{GloryIncludeDir.runtimeTestApp}/Application.cpp %{editorBuildDir}/EditorAssets/Runtime"),
 		("{COPY} %{GloryIncludeDir.runtimeTestApp}/Application.cpp %{engineOutDir}/EditorAssets/Runtime"),
 	}

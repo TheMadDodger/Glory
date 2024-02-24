@@ -3,6 +3,7 @@
 #include "GloryRuntimeApplication.h"
 
 #include <GloryRuntime.h>
+#include <Console.h>
 
 Glory::GloryRuntimeApplication runtimeApp;
 
@@ -29,4 +30,9 @@ void CleanupApp()
 void LoadScene(const char* path)
 {
 	runtimeApp.Runtime().LoadScene(path);
+}
+
+void RunCommand(const char* command)
+{
+	runtimeApp.Runtime().GetEngine()->GetConsole().ExecuteCommand(command);
 }

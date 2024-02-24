@@ -166,6 +166,11 @@ namespace Glory
 		m_pEngine->GetSceneManager()->AddOpenScene(pScene, pScene->GetUUID());
 	}
 
+	Engine* GloryRuntime::GetEngine()
+	{
+		return m_pEngine;
+	}
+
 	void GloryRuntime::GraphicsThreadEndRender()
 	{
 		RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);

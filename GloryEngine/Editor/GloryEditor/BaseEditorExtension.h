@@ -19,6 +19,11 @@ void SetContext(ImGuiContext* pImGUIContext) \
 	ImGui::SetCurrentContext(pImGUIContext); \
 }
 
+namespace std::filesystem
+{
+	class path;
+}
+
 namespace Glory::Editor
 {
 	class BaseEditorExtension
@@ -31,6 +36,9 @@ namespace Glory::Editor
 
 	protected:
 		virtual void Initialize() = 0;
+		virtual void OnBeginPackage(const std::filesystem::path& path) {};
+		virtual void OnGenerateConfigExec(std::ofstream& stream) {};
+		virtual void OnEndPackage(const std::filesystem::path& path) {};
 
 	private:
 		void SetCurrentContext();
