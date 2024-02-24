@@ -6,6 +6,7 @@ namespace Glory
 {
 	class Engine;
 	class FileData;
+	class ShaderSourceData;
 
 	class ShaderManager
 	{
@@ -16,6 +17,8 @@ namespace Glory
 	public:
 		virtual ShaderType GetShaderType(UUID shaderID) const = 0;
 		virtual FileData* GetCompiledShaderFile(UUID shaderID) const = 0;
+
+		virtual void AddShader(ShaderSourceData*) {};
 
 	protected:
 		friend class Engine;

@@ -21,6 +21,9 @@ namespace Glory
 
         void SetCompiledShader(FileData* pCompiledShader);
 
+        void Serialize(BinaryStream& container) const override;
+        void Deserialize(BinaryStream& container) override;
+
     private:
         ShaderType m_ShaderType;
         FileData* m_pPlatformCompiledShader;

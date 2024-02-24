@@ -27,8 +27,16 @@ namespace Glory
 		GLORY_RUNTIME_API void Initialize();
 		/** @brief Run the runtime */
 		GLORY_RUNTIME_API void Run();
-		/** @brief Load a scene at a path */
+		/** @brief Load an asset database at a path and append it to the current database */
+		GLORY_RUNTIME_API void LoadAssetDatabase(const std::filesystem::path& path);
+		/** @brief Load an asset group at a path */
+		GLORY_RUNTIME_API void LoadAssetGroup(const std::filesystem::path& path);
+		/** @brief Load a shader pack at a path */
+		GLORY_RUNTIME_API void LoadShaderPack(const std::filesystem::path& path);
+		/** @brief Load a scene, its assets, shaders and asset database at a path */
 		GLORY_RUNTIME_API void LoadScene(const std::filesystem::path& path);
+		/** @brief Load a scene only at a path */
+		GLORY_RUNTIME_API void LoadSceneOnly(const std::filesystem::path& path);
 
 	private:
 		Engine* m_pEngine;

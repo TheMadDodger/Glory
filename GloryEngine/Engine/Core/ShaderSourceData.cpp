@@ -1,4 +1,5 @@
 #include "ShaderSourceData.h"
+#include "BinaryStream.h"
 
 namespace Glory
 {
@@ -50,5 +51,26 @@ namespace Glory
     void ShaderSourceData::SetCompiledShader(FileData* pShaderFile)
     {
         m_pPlatformCompiledShader = pShaderFile;
+    }
+
+    void ShaderSourceData::Serialize(BinaryStream& container) const
+    {
+        container.Write(m_ShaderType);
+
+        container.Write(m_pPlatformCompiledShader ? true : false);
+        if (m_pPlatformCompiledShader)
+            m_pPlatformCompiledShader->Serialize(container);
+    }
+
+    void ShaderSourceData::Deserialize(BinaryStream& container)
+    {
+        container.Read(m_ShaderType);
+        bool hasCompiledData;
+        container.Read(hasCompiledData);
+        if (hasCompiledData)
+        {
+            m_pPlatformCompiledShader = new FileData();
+            m_pPlatformCompiledShader->Deserialize(container);
+        }
     }
 }

@@ -27,18 +27,24 @@ int main(int argc, char* argv[])
         console.RegisterConsole<Glory::Logs>();
         console.RegisterConsole<Glory::WindowsDebugConsole>();
 
-        Glory::EngineLoader engineLoader("./Modules", windowCreateInfo);
-        Glory::Engine engine = engineLoader.LoadEngineFromPath(&console, &debug);
-        std::filesystem::path moduleSettingsRootPath = "./Modules";
-        engine.LoadModuleSettings(moduleSettingsRootPath);
+        {
+            Glory::EngineLoader engineLoader("./Modules", windowCreateInfo);
+            Glory::Engine engine = engineLoader.LoadEngineFromPath(&console, &debug);
+            std::filesystem::path moduleSettingsRootPath = "./Modules";
+            engine.LoadModuleSettings(moduleSettingsRootPath);
 
-        Glory::GloryRuntime runtime{ &engine };
-        runtime.Initialize();
+            {
+                Glory::GloryRuntime runtime{ &engine };
+                runtime.Initialize();
 
-        if (!path.empty())
-            runtime.LoadScene(path);
+                if (!path.empty())
+                    runtime.LoadScene(path);
 
-        runtime.Run();
+                runtime.Run();
+            }
+
+            engineLoader.Unload();
+        }
     }
 
     _CrtDumpMemoryLeaks();

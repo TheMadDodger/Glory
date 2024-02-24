@@ -2,8 +2,11 @@
 #include "ProjectSettings.h"
 #include "SettingsEnums.h"
 #include "EditorAssetDatabase.h"
+#include "EditorShaderProcessor.h"
 #include "EditorSceneManager.h"
+#include "EditorApplication.h"
 #include "AssetCompiler.h"
+#include "ShaderSourceData.h"
 
 #include <Engine.h>
 #include <AssetDatabase.h>
@@ -42,6 +45,7 @@ namespace Glory::Editor
         auto scenesToPackage = file["Scenes/List"];
 
 		static const uint32_t sceneHash = ResourceTypes::GetHash<GScene>();
+		static const uint32_t shaderSourceHash = ResourceTypes::GetHash<ShaderSourceData>();
         const PackageScenes mode = scenePackageMode.AsEnum<PackageScenes>();
 		std::vector<UUID> scenes;
 		switch (mode)
@@ -96,9 +100,28 @@ namespace Glory::Editor
 
 		/* Find unique assets and assign them to a scene */
 		std::map<UUID, std::vector<UUID>> assetsPerScene;
+		std::map<UUID, std::vector<UUID>> shadersPerScene;
 		std::vector<UUID> sharedAssets;
+		std::vector<UUID> sharedShaders;
+		std::vector<UUID> shaders;
 		for (auto itor = assetScenes.begin(); itor != assetScenes.end(); ++itor)
 		{
+			ResourceMeta meta;
+			EditorAssetDatabase::GetAssetMetadata(itor->first, meta);
+
+			/* Shaders are separate */
+			if (meta.Hash() == shaderSourceHash)
+			{
+				shaders.push_back(itor->first);
+				if (itor->second.size() == 1)
+				{
+					shadersPerScene[itor->second[0]].push_back(itor->first);
+					continue;
+				}
+				sharedShaders.push_back(itor->first);
+				continue;
+			}
+
 			if (itor->second.size() == 1)
 			{
 				assetsPerScene[itor->second[0]].push_back(itor->first);
@@ -111,8 +134,25 @@ namespace Glory::Editor
 		/* @todo */
 
 		/* Close all open scenes */
-		/* @todo Make a backup of all open scenes to restore after packaging completes */
+		/** @todo Make a backup of all open scenes to restore after packaging completes */
 		EditorSceneManager::CloseAll();
+
+		/* Compile shaders */
+		/** @todo Actually compile the shaders for the chosen platform */
+		for (size_t i = 0; i < shaders.size(); ++i)
+		{
+			const UUID uuid = shaders[i];
+			Resource* pResource = pEngine->GetAssetManager().FindResource(uuid);
+			if (!pResource) continue;
+			ShaderSourceData* pShaderSource = static_cast<ShaderSourceData*>(pResource);
+			FileData* pCompiledShader = pShaderSource->GetCompiledShader();
+			if (pCompiledShader)
+				delete pCompiledShader;
+
+			FileData* pNewCompiled = pEngine->GetShaderManager().GetCompiledShaderFile(uuid);
+			pCompiledShader = new FileData(pNewCompiled);
+			pShaderSource->SetCompiledShader(pCompiledShader);
+		}
 
 		/* Open every scene and package them individually along with their assets */
 		std::vector<UUID> usedAssets;
@@ -120,30 +160,58 @@ namespace Glory::Editor
 		for (size_t i = 0; i < scenes.size(); ++i)
 		{
 			std::filesystem::path relativeScenePath = "Data";
-			relativeScenePath.append(std::to_string(scenes[i])).replace_extension("gcag");
-
-			std::filesystem::path path = packageRoot;
-			path.append(relativeScenePath.string());
-			BinaryFileStream sceneFile{ path };
-			AssetArchive archive{ &sceneFile, true };
-
-			EditorSceneManager::OpenScene(scenes[i], false);
-			GScene* pScene = EditorSceneManager::GetActiveScene();
-			archive.Serialize(pScene);
-			EditorSceneManager::CloseAll();
-
-			usedAssets.push_back(scenes[i]);
-			assetLocations.push_back({ relativeScenePath.string(), "", 0 });
-
-			const std::vector<UUID>& assets = assetsPerScene[scenes[i]];
-			for (size_t j = 0; j < assets.size(); ++j)
+			relativeScenePath.append(std::to_string(scenes[i])).replace_extension("gcs");
 			{
-				const UUID assetID = assets[j];
-				Resource* pResource = pEngine->GetAssetManager().FindResource(assetID);
-				archive.Serialize(pResource);
+				std::filesystem::path path = packageRoot;
+				path.append(relativeScenePath.string());
+				BinaryFileStream sceneFile{ path };
+				AssetArchive archive{ &sceneFile, true };
 
-				assetLocations.push_back({ relativeScenePath.string(), "", j + 1 });
-				usedAssets.push_back(assetID);
+				EditorSceneManager::OpenScene(scenes[i], false);
+				GScene* pScene = EditorSceneManager::GetActiveScene();
+				archive.Serialize(pScene);
+				EditorSceneManager::CloseAll();
+
+				usedAssets.push_back(scenes[i]);
+				assetLocations.push_back({ relativeScenePath.string(), "", 0 });
+			}
+
+			relativeScenePath.replace_extension("gcag");
+			{
+				std::filesystem::path path = packageRoot;
+				path.append(relativeScenePath.string());
+				BinaryFileStream sceneFile{ path };
+				AssetArchive archive{ &sceneFile, true };
+
+				const std::vector<UUID>& assets = assetsPerScene[scenes[i]];
+				for (size_t j = 0; j < assets.size(); ++j)
+				{
+					const UUID assetID = assets[j];
+					Resource* pResource = pEngine->GetAssetManager().FindResource(assetID);
+					archive.Serialize(pResource);
+
+					assetLocations.push_back({ relativeScenePath.string(), "", j });
+					usedAssets.push_back(assetID);
+				}
+			}
+
+			relativeScenePath.replace_extension("gcsp");
+			{
+				std::filesystem::path path = packageRoot;
+				path.append(relativeScenePath.string());
+				BinaryFileStream sceneFile{ path };
+				AssetArchive archive{ &sceneFile, true };
+
+				const std::vector<UUID>& shaders = shadersPerScene[scenes[i]];
+				for (size_t j = 0; j < shaders.size(); ++j)
+				{
+					const UUID assetID = shaders[j];
+					Resource* pResource = pEngine->GetAssetManager().FindResource(assetID);
+					archive.Serialize(pResource);
+
+					assetLocations.push_back({ relativeScenePath.string(), "", j });
+					usedAssets.push_back(assetID);
+				}
 			}
 		}
 
@@ -157,6 +225,27 @@ namespace Glory::Editor
 			sharedAssetsPath.append(relativePath.string());
 			BinaryFileStream sharedAssetsFile{ sharedAssetsPath };
 			AssetArchive archive{ &sharedAssetsFile };
+			for (size_t i = 0; i < sharedAssets.size(); ++i)
+			{
+				const UUID assetID = sharedAssets[i];
+				Resource* pResource = pEngine->GetAssetManager().FindResource(assetID);
+				archive.Serialize(pResource);
+
+				assetLocations.push_back({ relativePath.string(), "", i });
+				usedAssets.push_back(assetID);
+			}
+		}
+
+		if (!sharedShaders.empty())
+		{
+			/* Package other asset groups */
+			std::filesystem::path relativePath = "Data";
+			relativePath.append("Shared.gcsp");
+
+			std::filesystem::path sharedShadersPath = packageRoot;
+			sharedShadersPath.append(relativePath.string());
+			BinaryFileStream sharedShadersFile{ sharedShadersPath };
+			AssetArchive archive{ &sharedShadersFile };
 			for (size_t i = 0; i < sharedAssets.size(); ++i)
 			{
 				const UUID assetID = sharedAssets[i];
@@ -187,8 +276,6 @@ namespace Glory::Editor
 				stream->Write(location.Index);
 			}
 		}
-
-		/* Compile shaders */
 
 		/* Copy modules and their resources and settings */
 		std::filesystem::path modulesPath = packageRoot;

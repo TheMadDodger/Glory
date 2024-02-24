@@ -190,8 +190,7 @@ namespace Glory
 	void MaterialInstanceData::Deserialize(BinaryStream& container)
 	{
 		/* Read base material */
-		UUID baseMaterialID;
-		container.Read(baseMaterialID);
+		container.Read(m_BaseMaterial);
 
 		/* Write overrides */
 		size_t numPropertyOverrides;
