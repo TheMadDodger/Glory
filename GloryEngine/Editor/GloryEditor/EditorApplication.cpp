@@ -271,6 +271,30 @@ namespace Glory::Editor
 		return Instance;
 	}
 
+	void EditorApplication::OnBeginPackage(const std::filesystem::path& path)
+	{
+		for (size_t i = 0; i < m_pExtensions.size(); i++)
+		{
+			m_pExtensions[i]->OnBeginPackage(path);
+		}
+	}
+
+	void EditorApplication::OnEndPackage(const std::filesystem::path& path)
+	{
+		for (size_t i = 0; i < m_pExtensions.size(); i++)
+		{
+			m_pExtensions[i]->OnEndPackage(path);
+		}
+	}
+
+	void EditorApplication::OnGenerateConfigExec(std::ofstream& stream)
+	{
+		for (size_t i = 0; i < m_pExtensions.size(); i++)
+		{
+			m_pExtensions[i]->OnGenerateConfigExec(stream);
+		}
+	}
+
 	void EditorApplication::RenderEditor()
 	{
 		m_MainEditor.PaintEditor();

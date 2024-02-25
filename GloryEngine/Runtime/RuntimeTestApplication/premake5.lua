@@ -35,6 +35,7 @@ project "RuntimeTestApplication"
 		architecture "x64"
 
 	filter "configurations:Debug"
+		debugargs { "-path=\"%{demosDir}/Sponza/Build/Data/16787318667428770552.gcs\" -command=\"loadMainAssembly Sponza.dll %{demosDir}/Sponza/Build\"" }
 		kind "ConsoleApp"
 		runtime "Debug"
 		defines "_DEBUG"

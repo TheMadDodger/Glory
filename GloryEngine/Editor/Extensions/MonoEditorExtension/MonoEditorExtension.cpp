@@ -56,6 +56,35 @@ namespace Glory::Editor
 		MonoManager::Instance()->WaitForPendingFinalizers();
 	}
 
+	void MonoEditorExtension::OnBeginPackage(const std::filesystem::path& path)
+	{
+
+	}
+
+	void MonoEditorExtension::OnGenerateConfigExec(std::ofstream& stream)
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		stream << "	runCommand(\"loadMainAssembly " << pProject->Name() << ".dll" << " ./\");" << std::endl;
+	}
+
+	void MonoEditorExtension::OnEndPackage(const std::filesystem::path& path)
+	{
+#ifdef _DEBUG
+		const bool release = false;
+#else
+		const bool release = true;
+#endif
+
+		/* Compile and copy assembly */
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		CompileProject(pProject, release);
+
+		std::filesystem::path assemblyPath = pProject->LibraryPath();
+		assemblyPath.append("Assembly").append(pProject->Name()).replace_extension(".dll");
+
+		std::filesystem::copy(assemblyPath, path, std::filesystem::copy_options::overwrite_existing);
+	}
+
 	MonoEditorExtension::MonoEditorExtension()
 	{
 	}
@@ -386,7 +415,7 @@ namespace Glory::Editor
 		std::filesystem::remove(tempLuaPath);
 	}
 
-	void MonoEditorExtension::CompileProject(ProjectSpace* pProject)
+	void MonoEditorExtension::CompileProject(ProjectSpace* pProject, bool release)
 	{
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		pEditorApp->StopPlay();
@@ -403,7 +432,9 @@ namespace Glory::Editor
 			return;
 		}
 
-		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=Debug /p:Platform=x64 \"" + projectPath.string() + "\"";
+		const std::string config = release ? "Release" : "Debug";
+
+		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=" + config + " /p:Platform=x64 \"" + projectPath.string() + "\"";
 		system(cmd.c_str());
 
 		ReloadAssembly(pProject);

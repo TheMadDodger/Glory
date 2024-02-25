@@ -26,6 +26,10 @@ namespace Glory::Editor
         virtual void HandleStop(Module* pModule) override;
         virtual void HandleUpdate(Module* pModule) override {};
 
+        virtual void OnBeginPackage(const std::filesystem::path& path) override;
+        virtual void OnGenerateConfigExec(std::ofstream& stream) override;
+        virtual void OnEndPackage(const std::filesystem::path& path) override;
+
     public:
         MonoEditorExtension();
         virtual ~MonoEditorExtension();
@@ -51,7 +55,7 @@ namespace Glory::Editor
         static void GenerateBatchFile(ProjectSpace* pProject);
         static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);
 
-        static void CompileProject(ProjectSpace* pProject);
+        static void CompileProject(ProjectSpace* pProject, bool release=false);
         static void ReloadAssembly(ProjectSpace* pProject);
 
         static void AssetCallback(const AssetCallbackData& callback);

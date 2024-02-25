@@ -39,6 +39,8 @@ namespace Glory
 		GLORY_RUNTIME_API void LoadScene(const std::filesystem::path& path);
 		/** @brief Load a scene only at a path */
 		GLORY_RUNTIME_API void LoadSceneOnly(const std::filesystem::path& path);
+		/** @brief Get the engine attached to this runtime */
+		GLORY_RUNTIME_API Engine* GetEngine();
 
 	private:
 		/** @brief Callback when the rendering of a frame starts */

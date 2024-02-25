@@ -32,10 +32,12 @@ namespace Glory
 
         CommandLine commandLine{ argc, argv };
         std::string path = "";
+        std::string cmd = "";
         commandLine.GetValue("path", path);
+        commandLine.GetValue("command", cmd);
 
         Glory::WindowCreateInfo windowCreateInfo;
-        windowCreateInfo.WindowName = "GloryRuntime";
+        windowCreateInfo.WindowName = m_AppName;
         windowCreateInfo.Width = 2560;
         windowCreateInfo.Height = 1300;
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
@@ -56,6 +58,9 @@ namespace Glory
 
         if (!path.empty())
             m_Runtime->LoadScene(path);
+
+        if (!cmd.empty())
+            m_Runtime->GetEngine()->GetConsole().ExecuteCommand(cmd);
     }
 
     void GloryRuntimeApplication::Run()

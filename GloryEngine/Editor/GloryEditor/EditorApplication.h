@@ -7,6 +7,7 @@
 
 #include <Version.h>
 #include <memory>
+#include <iosfwd>
 
 namespace efsw
 {
@@ -62,6 +63,10 @@ namespace Editor
 
 		GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
 		GLORY_EDITOR_API static EditorApplication* GetInstance();
+
+		GLORY_EDITOR_API void OnBeginPackage(const std::filesystem::path& path);
+		GLORY_EDITOR_API void OnGenerateConfigExec(std::ofstream& stream);
+		GLORY_EDITOR_API void OnEndPackage(const std::filesystem::path& path);
 
 		static const Version Version;
 
