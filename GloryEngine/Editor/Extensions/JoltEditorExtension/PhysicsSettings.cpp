@@ -7,6 +7,7 @@
 #include <LayerManager.h>
 #include <imgui.h>
 #include <EditorUI.h>
+#include <BinaryStream.h>
 
 namespace Glory::Editor
 {
@@ -175,5 +176,35 @@ namespace Glory::Editor
 		JoltPhysicsModule* pPhysics = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<JoltPhysicsModule>();
 		pPhysics->SetCollisionMatrix(std::move(matrix));
 		pPhysics->SetGravity(gravity);
+	}
+
+	void PhysicsSettings::OnCompile(const std::filesystem::path& path)
+	{
+		std::filesystem::path finalPath = path;
+		finalPath.replace_filename("Physics.dat");
+		BinaryFileStream file{ finalPath };
+		BinaryStream* stream = &file;
+		stream->Write(CoreVersion);
+
+		Utils::NodeValueRef gravityNode = RootValue()["Gravity"];
+		const glm::vec3 gravity = gravityNode.As<glm::vec3>();
+		stream->Write(gravity);
+
+		Utils::NodeValueRef collisionMatrix = RootValue()["CollisionMatrix"];
+		if (!collisionMatrix.Exists())
+		{
+			stream->Write(0);
+			return;
+		}
+
+		stream->Write(collisionMatrix.Size());
+		if (!collisionMatrix.Size()) return;
+		for (size_t i = 0; i < collisionMatrix.Size(); ++i)
+		{
+			for (size_t j = 0; j < collisionMatrix[i].Size(); ++j)
+			{
+				stream->Write(collisionMatrix[i][j].As<bool>());
+			}
+		}
 	}
 }

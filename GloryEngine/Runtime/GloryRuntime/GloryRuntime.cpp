@@ -37,6 +37,41 @@ namespace Glory
 		m_pEngine->GetGraphicsThread()->BindBeginAndEndRender(this);
 		m_pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+		if (m_DataPath.empty()) return;
+		const std::filesystem::path dataPath = m_DataPath;
+		if (!std::filesystem::exists(dataPath))
+		{
+			std::stringstream str;
+			str << "Data path: " << dataPath << " not found";
+			m_pEngine->GetDebug().LogError(str.str());
+		}
+
+		for (const auto& entry : std::filesystem::directory_iterator(dataPath))
+		{
+			const std::filesystem::path path = entry.path();
+			if (path.extension().compare(".dat") != 0) continue;
+			const std::string name = path.filename().replace_extension("").string();
+			BinaryFileStream file{ path, true };
+			BinaryStream* stream = &file;
+			Version version;
+			stream->Read(version);
+			if (Version::Compare(version, CoreVersion) != 0)
+			{
+				std::stringstream str;
+				std::string versionStr;
+				version.GetVersionString(versionStr);
+				str << name << " was compiled with a different Core/Runtime version: "
+					<< versionStr << " current: " << GloryCoreVersion;
+				m_pEngine->GetDebug().LogError(str.str());
+				continue;
+			}
+			std::vector<char> data;
+			stream->Read(data);
+			m_pEngine->AddData(name, std::move(data));
+		}
+
+		m_pEngine->ProcessData();
 	}
 
 	void GloryRuntime::Run()
@@ -169,6 +204,11 @@ namespace Glory
 	Engine* GloryRuntime::GetEngine()
 	{
 		return m_pEngine;
+	}
+
+	void GloryRuntime::SetDataPath(const std::string& dataPath)
+	{
+		m_DataPath = dataPath;
 	}
 
 	void GloryRuntime::GraphicsThreadEndRender()

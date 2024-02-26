@@ -33,8 +33,11 @@ namespace Glory
         CommandLine commandLine{ argc, argv };
         std::string path = "";
         std::string cmd = "";
+        std::string dataPath = "./Data";
         commandLine.GetValue("path", path);
         commandLine.GetValue("command", cmd);
+        if (!commandLine.GetValue("dataPath", dataPath))
+            dataPath = "./Data";
 
         Glory::WindowCreateInfo windowCreateInfo;
         windowCreateInfo.WindowName = m_AppName;
@@ -54,6 +57,7 @@ namespace Glory
         m_Engine->LoadModuleSettings(moduleSettingsRootPath);
 
         m_Runtime.reset(new GloryRuntime(m_Engine.get()));
+        m_Runtime->SetDataPath(dataPath);
         m_Runtime->Initialize();
 
         if (!path.empty())

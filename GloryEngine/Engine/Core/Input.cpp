@@ -14,6 +14,10 @@ namespace Glory
 	InputAction::InputAction(const std::string name, const InputMappingType mappingType, const AxisBlending axisBlending, const float blendSpeed)
 		: m_Name(name), m_MappingType(mappingType), m_Blending(axisBlending), m_BlendSpeed(blendSpeed), m_Bindings(std::vector<InputBinding>()) {}
 
+	KeyBinding::KeyBinding(const std::string bindingPath, const KeyBindingCompact& compact):
+		m_BindingPath(bindingPath), m_DeviceType(compact.m_DeviceType), m_KeyID(compact.m_KeyID), m_IsAxis(compact.m_IsAxis)
+	{}
+
 	KeyBinding::KeyBinding(const std::string bindingPath)
 		: m_BindingPath(bindingPath), m_DeviceType(InputDeviceType(-1)), m_KeyID(0), m_IsAxis(false)
 	{
@@ -81,6 +85,11 @@ namespace Glory
 	{
 		if (m_IsAxis && e.State != InputState::Axis) return false;
 		return e.InputDeviceType == m_DeviceType && m_KeyID == e.KeyID;
+	}
+
+	KeyBindingCompact KeyBinding::Compact()
+	{
+		return KeyBindingCompact{ m_DeviceType, m_KeyID, m_IsAxis };
 	}
 
 	InputBinding::InputBinding(const std::string name, const InputState inputState, const float multiplier, const bool mapDeltaToValue, const KeyBinding keybinding)

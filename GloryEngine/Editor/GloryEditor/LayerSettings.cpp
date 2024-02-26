@@ -4,6 +4,7 @@
 
 #include <LayerManager.h>
 #include <Undo.h>
+#include <BinaryStream.h>
 
 namespace Glory::Editor
 {
@@ -55,5 +56,25 @@ namespace Glory::Editor
 	void LayerSettings::OnSettingsLoaded()
 	{
 		EditorApplication::GetInstance()->GetEngine()->GetLayerManager().Load();
+	}
+
+	void LayerSettings::OnCompile(const std::filesystem::path& path)
+	{
+		std::filesystem::path finalPath = path;
+		finalPath.replace_filename("Layers.dat");
+		BinaryFileStream file{ finalPath };
+		BinaryStream* stream = &file;
+		stream->Write(CoreVersion);
+
+		Utils::NodeValueRef layersNode = RootValue()["Layers"];
+
+		const size_t count = layersNode.Size();
+		for (size_t i = 0; i < count; ++i)
+		{
+			Utils::NodeValueRef layerNode = layersNode[i];
+			Utils::NodeValueRef layerNameNode = layerNode["Name"];
+			const std::string layerName = layerNameNode.As<std::string>();
+			stream->Write(layerName);
+		}
 	}
 }

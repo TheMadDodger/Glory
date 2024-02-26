@@ -42,6 +42,7 @@
 #include <ThreadManager.h>
 
 #include <algorithm>
+#include "BinaryStream.h"
 
 namespace Glory
 {
@@ -466,6 +467,41 @@ namespace Glory
 	bool Engine::WantsToQuit() const
 	{
 		return m_Quit;
+	}
+
+	void Engine::AddData(const std::string& name, std::vector<char>&& data)
+	{
+		m_Datas.emplace(name, std::move(data));
+	}
+
+	void Engine::ProcessData()
+	{
+		if (HasData("Layers"))
+		{
+			BinaryMemoryStream memoryStream{ GetData("Layers") };
+			BinaryStream* stream = &memoryStream;
+			while (!stream->Eof())
+			{
+				std::string name;
+				stream->Read(name);
+				m_LayerManager->AddLayer(name);
+			}
+		}
+
+		for (size_t i = 0; i < m_pAllModules.size(); ++i)
+		{
+			m_pAllModules[i]->OnProcessData();
+		}
+	}
+
+	bool Engine::HasData(const std::string& name)
+	{
+		return m_Datas.find(name) != m_Datas.end();
+	}
+
+	std::vector<char>& Engine::GetData(const std::string& name)
+	{
+		return m_Datas.at(name);
 	}
 
 	void Engine::RegisterStandardSerializers()

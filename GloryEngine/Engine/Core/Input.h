@@ -38,14 +38,24 @@ namespace Glory
 		float Delta;
 	};
 
+	struct KeyBindingCompact
+	{
+		InputDeviceType m_DeviceType;
+		size_t m_KeyID;
+		bool m_IsAxis;
+	};
+
 	struct KeyBinding
 	{
+		KeyBinding(const std::string bindingPath, const KeyBindingCompact& compact);
 		KeyBinding(const std::string bindingPath);
 		KeyBinding(const KeyBinding& other) noexcept;
 
 		KeyBinding& operator=(const KeyBinding&& other) noexcept;
 
 		bool CheckEvent(InputEvent& e);
+
+		KeyBindingCompact Compact();
 
 		std::string m_BindingPath;
 		InputDeviceType m_DeviceType;

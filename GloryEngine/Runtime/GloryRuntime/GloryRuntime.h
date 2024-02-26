@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 namespace std::filesystem
 {
@@ -41,6 +42,8 @@ namespace Glory
 		GLORY_RUNTIME_API void LoadSceneOnly(const std::filesystem::path& path);
 		/** @brief Get the engine attached to this runtime */
 		GLORY_RUNTIME_API Engine* GetEngine();
+		/** @brief Set the data path */
+		GLORY_RUNTIME_API void SetDataPath(const std::string& dataPath);
 
 	private:
 		/** @brief Callback when the rendering of a frame starts */
@@ -56,5 +59,6 @@ namespace Glory
 		std::unique_ptr<RuntimeMaterialManager> m_MaterialManager;
 		std::unique_ptr<RuntimeShaderManager> m_ShaderManager;
 		std::vector<std::filesystem::path> m_AppendedAssetDatabases;
+		std::string m_DataPath;
 	};
 }

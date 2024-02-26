@@ -36,6 +36,7 @@
 #include <GameTime.h>
 #include <Engine.h>
 #include <SceneManager.h>
+#include <BinaryStream.h>
 
 
 using namespace JPH;
@@ -768,6 +769,35 @@ namespace Glory
 		settings.mDrawCenterOfMassTransform = true;
 		m_pJPHPhysicsSystem->DrawBodies(settings, DebugRenderer::sInstance);
 #endif
+	}
+
+	void JoltPhysicsModule::OnProcessData()
+	{
+		if (!m_pEngine->HasData("Physics")) return;
+		std::vector<char>& buffer = m_pEngine->GetData("Physics");
+
+		BinaryMemoryStream memoryStream{ buffer };
+		BinaryStream* stream = &memoryStream;
+		glm::vec3 gravity;
+		stream->Read(gravity);
+		SetGravity(gravity);
+
+		size_t size;
+		stream->Read(size);
+		if (!size) return;
+
+		m_CollisionMatrix.clear();
+		m_CollisionMatrix.resize(size);
+		for (size_t x = 0; x < m_CollisionMatrix.size(); ++x)
+		{
+			m_CollisionMatrix[x].resize(size);
+			for (size_t y = 0; y < m_CollisionMatrix[x].size(); ++y)
+			{
+				bool value;
+				stream->Read(value);
+				m_CollisionMatrix[x][y] = value;
+			}
+		}
 	}
 
 	const std::type_info& JoltPhysicsModule::GetModuleType()

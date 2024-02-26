@@ -184,6 +184,8 @@ namespace Glory
 		virtual void Update() override;
 		virtual void Draw() override;
 
+		virtual void OnProcessData() override;
+
 		virtual const std::type_info& GetModuleType() override;
 
 		bool ShouldCollidePass(uint16_t layer1, uint16_t layer2) const;

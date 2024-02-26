@@ -94,6 +94,8 @@ namespace Glory
 
 		virtual bool HasPriority();
 
+		virtual void OnProcessData() {}
+
 	protected:
 		Engine* m_pEngine;
 		std::filesystem::path m_ModulePath;

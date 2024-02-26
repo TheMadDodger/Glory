@@ -1,6 +1,7 @@
 #include "InputModule.h"
 #include "Engine.h"
 #include "Debug.h"
+#include "BinaryStream.h"
 
 namespace Glory
 {
@@ -184,6 +185,97 @@ namespace Glory
 		return 0;
 	}
 
+	void InputModule::OnProcessData()
+	{
+		if (!m_pEngine->HasData("Input")) return;
+		m_InputModes.clear();
+
+		std::vector<char> buffer = m_pEngine->GetData("Input");
+
+		BinaryMemoryStream memoryStream{ buffer };
+		BinaryStream* stream = &memoryStream;
+		
+		size_t inputModesCount;
+		stream->Read(inputModesCount);
+		for (size_t i = 0; i < inputModesCount; ++i)
+		{
+			std::string name;
+			size_t deviceTypesCount;
+			stream->Read(name).Read(deviceTypesCount);
+			stream->Write(deviceTypesCount);
+
+			InputMode mode{ name };
+			mode.m_DeviceTypes.resize(deviceTypesCount);
+			for (size_t j = 0; j < deviceTypesCount; ++j)
+			{
+				stream->Read(mode.m_DeviceTypes[j]);
+			}
+			m_InputModes.emplace(name, std::move(mode));
+		}
+
+		m_InputMaps.clear();
+
+		size_t inputMapsCount;
+		stream->Read(inputMapsCount);
+		for (size_t i = 0; i < inputMapsCount; ++i)
+		{
+			std::string inputMapName;
+			size_t actionsCount;
+			stream->Read(inputMapName).Read(actionsCount);
+
+			/* Make sure the key exists */
+			if (m_InputMaps.find(inputMapName) == m_InputMaps.end())
+				m_InputMaps.emplace(inputMapName, std::map<std::string, InputMap>());
+
+			std::map<std::string, InputMap>& inputMaps = m_InputMaps.at(inputMapName);
+
+			for (size_t j = 0; j < actionsCount; ++j)
+			{
+				std::string actionName;
+				InputMappingType actionMapping;
+				AxisBlending axisBlending = AxisBlending::Jump;
+				float blendingSpeed = 0.0f;
+
+				stream->Read(actionName).Read(actionMapping);
+				if (actionMapping == InputMappingType::Float)
+				{
+					stream->Read(axisBlending).Read(blendingSpeed);
+				}
+
+				size_t bindingsCount;
+				stream->Read(bindingsCount);
+				for (size_t k = 0; k < bindingsCount; ++k)
+				{
+					std::string bindingName;
+					InputState inputState;
+					float multiplier;
+					std::string inputMode;
+					bool mapDeltaToValue;
+					std::string bindingString;
+					KeyBindingCompact compact;
+
+					stream->Read(bindingName).Read(inputState).
+						Read(multiplier).Read(inputMode).
+						Read(mapDeltaToValue).Read(bindingString).Read(compact);
+
+					if (inputMaps.find(inputMode) == inputMaps.end())
+						inputMaps.emplace(inputMode, InputMap{ inputMapName });
+
+					InputMap& inputMap = inputMaps.at(inputMode);
+
+					/* Get the InputAction */
+					if (inputMap.m_Actions.find(actionName) == inputMap.m_Actions.end())
+						inputMap.m_Actions.emplace(actionName, InputAction{ actionName, actionMapping, axisBlending, blendingSpeed });
+
+					InputAction& inputAction = inputMap.m_Actions.at(actionName);
+
+					inputAction.m_Bindings.push_back(InputBinding{ bindingName, inputState, multiplier, mapDeltaToValue, KeyBinding{bindingString, compact} });
+				}
+			}
+		}
+
+	}
+
 	void InputModule::Initialize()
 	{
 		/* Add default devices */
@@ -193,8 +285,6 @@ namespace Glory
 		m_InputDevices.emplace(m_DefaultMouseDeviceIndex, InputDevice("Generic Mouse", InputDeviceType::Mouse, 0));
 
 		AddPlayer();
-
-		/* TODO: Load runtime input mappings */
 	}
 
 	void InputModule::PostInitialize()

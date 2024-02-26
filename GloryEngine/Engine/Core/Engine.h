@@ -194,6 +194,11 @@ namespace Utils::Reflect
 
 		UUIDRemapper m_UUIDRemapper;
 
+		void AddData(const std::string& name, std::vector<char>&& data);
+		void ProcessData();
+		bool HasData(const std::string& name);
+		std::vector<char>& GetData(const std::string& name);
+
 	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
@@ -261,5 +266,6 @@ namespace Utils::Reflect
 		std::unique_ptr<EngineProfiler> m_Profiler;
 		std::map<size_t, void*> m_pUserContexts;
 		std::vector<PropertySerializer*> m_pRegisteredPropertySerializers;
+		std::map<std::string, std::vector<char>> m_Datas;
 	};
 }

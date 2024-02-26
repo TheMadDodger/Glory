@@ -98,6 +98,14 @@ namespace Glory::Editor
 		return m_YAMLFile;
 	}
 
+	void ProjectSettings::Compile(const std::filesystem::path& path)
+	{
+		for (size_t i = 0; i < Settings.size(); ++i)
+		{
+			Settings[i]->OnCompile(path);
+		}
+	}
+
 	ProjectSettings::ProjectSettings(const char* settingsFile)
 		: m_YAMLFile(), m_Name(settingsFile)
 	{

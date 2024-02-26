@@ -44,6 +44,11 @@ namespace Glory::Editor
 
 		EditorApplication::GetInstance()->OnBeginPackage(packageRoot);
 
+		/* Compile project settings */
+		std::filesystem::path settingsCompilePath = packageRoot;
+		settingsCompilePath.append("Data/Sponza");
+		ProjectSettings::Compile(settingsCompilePath);
+
         /* First we must gather what scenes will be packaged */
         ProjectSettings* packageSettings = ProjectSettings::Get("Packaging");
         Utils::YAMLFileRef& file = **packageSettings;

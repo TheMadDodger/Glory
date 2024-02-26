@@ -97,4 +97,70 @@ namespace Glory
 	{
 		return Read(reinterpret_cast<char*>(out), size);
 	}
+
+	void BinaryStream::Read(std::vector<char>& buffer)
+	{
+		const size_t size = Size() - Tell();
+		buffer.resize(size);
+		Read(buffer.data(), buffer.size());
+	}
+
+	BinaryMemoryStream::BinaryMemoryStream(std::vector<char>& data):
+		BinaryMemoryStream(data.data(), data.size())
+	{
+	}
+
+	BinaryMemoryStream::BinaryMemoryStream(const char* data, size_t size):
+		m_Data(data), m_Size(size), m_Tell(0)
+	{
+	}
+
+	void BinaryMemoryStream::Seek(size_t offset, Relative relative)
+	{
+		switch (relative)
+		{
+		case Glory::BinaryStream::Relative::Start:
+			m_Tell = offset;
+			break;
+		case Glory::BinaryStream::Relative::Current:
+			m_Tell = m_Tell + offset;
+			break;
+		case Glory::BinaryStream::Relative::End:
+			m_Tell = m_Size - offset;
+			break;
+		default:
+			break;
+		}
+	}
+
+	size_t BinaryMemoryStream::Tell() const
+	{
+		return m_Tell;
+	}
+
+	size_t BinaryMemoryStream::Size() const
+	{
+		return m_Size;
+	}
+
+	BinaryStream& BinaryMemoryStream::Write(const char* data, size_t size)
+	{
+		return *this;
+	}
+
+	void BinaryMemoryStream::Close()
+	{
+	}
+
+	BinaryStream& BinaryMemoryStream::Read(char* out, size_t size)
+	{
+		std::memcpy(out, &m_Data[m_Tell], size);
+		m_Tell += size;
+		return *this;
+	}
+
+	bool BinaryMemoryStream::Eof()
+	{
+		return m_Tell >= m_Size;
+	}
 }
