@@ -77,7 +77,7 @@ namespace Glory::Utils::ECS
 		m_pEntityViews.erase(entity);
 	}
 
-	void* EntityRegistry::CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid)
+	void* EntityRegistry::CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, bool invokeAdd)
 	{
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		const ComponentType* componentType = ComponentTypes::GetComponentType(pTypeView->m_TypeHash);
@@ -89,7 +89,7 @@ namespace Glory::Utils::ECS
 		void* pAddress = pTypeView->Create(entityID);
 		EntityView* pEntityView = GetEntityView(entityID);
 		pEntityView->Add(pTypeView->m_TypeHash, uuid);
-		pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
+		if (invokeAdd) pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
 		return pAddress;
 	}
 

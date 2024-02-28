@@ -22,7 +22,7 @@ namespace Glory::Editor
 		ImGui::BeginDisabled(AssetCompiler::IsBusy());
 		if (ImGui::Button("Package"))
 		{
-			Package(EditorApplication::GetInstance()->GetEngine());
+			StartPackage(EditorApplication::GetInstance()->GetEngine());
 		}
 		ImGui::EndDisabled();
 

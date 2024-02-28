@@ -233,6 +233,7 @@ namespace Glory::Editor
 	{
 		EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
+		m_PackagePopup.Draw();
 		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
 		QuitPopup::Draw();
@@ -304,7 +305,7 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
-		MenuBar::AddMenuItem("File/Package", []() { Package(EditorApplication::GetInstance()->GetEngine()); }, NULL, Shortcut_Package);
+		MenuBar::AddMenuItem("File/Package", []() { StartPackage(EditorApplication::GetInstance()->GetEngine()); }, NULL, Shortcut_Package);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
 		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);

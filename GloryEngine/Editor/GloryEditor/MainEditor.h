@@ -2,6 +2,8 @@
 #include "ProjectPopup.h"
 #include "EditorSettings.h"
 #include "Toolbar.h"
+#include "PackagePopup.h"
+
 #include <imgui_internal.h>
 
 #define OBJECT_CREATE_MENU(name, component) std::stringstream name##MenuName; \
@@ -48,6 +50,8 @@ namespace Glory::Editor
 		ProjectPopup* m_pProjectPopup;
 		Toolbar* m_pToolbar;
 		EditorSettings m_Settings;
+
+		PackagePopup m_PackagePopup;
 
 		static size_t m_SaveSceneIndex;
 

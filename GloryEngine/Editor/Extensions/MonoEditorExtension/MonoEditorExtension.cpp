@@ -12,6 +12,8 @@
 #include <AssetManager.h>
 #include <MonoScript.h>
 #include <GloryMonoScipting.h>
+#include <Package.h>
+#include <Dispatcher.h>
 
 #include <EditorAssetDatabase.h>
 #include <EditorPreferencesWindow.h>
@@ -77,7 +79,7 @@ namespace Glory::Editor
 
 		/* Compile and copy assembly */
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		CompileProject(pProject, release);
+		CompileProject(pProject, release, false);
 
 		std::filesystem::path assemblyPath = pProject->LibraryPath();
 		assemblyPath.append("Assembly").append(pProject->Name()).replace_extension(".dll");
@@ -155,6 +157,18 @@ namespace Glory::Editor
 		EntitySceneObjectEditor::AddComponentIcon<MonoScriptComponent>(ICON_FA_FILE_CODE);
 
 		OBJECT_CREATE_MENU(Scripted, MonoScriptComponent);
+
+		GatherPackageTasksEvents().AddListener([&](const EmptyEvent&) {
+			PackageTask task;
+			task.m_TotalSubTasks = 1;
+			task.m_TaskID = "CompilScripting-Mono";
+			task.m_TaskName = "Compiling mono scripting assembly";
+			task.m_Callback = [this](Glory::Engine*, const std::filesystem::path& packageRoot, PackageTaskState& task) {
+				OnEndPackage(packageRoot);
+				++task.m_ProcessedSubTasks;
+			};
+			AddPackagingTask(std::move(task), "CompileEXE");
+		});
 	}
 
 	void MonoEditorExtension::FindVisualStudioPath()
@@ -415,7 +429,7 @@ namespace Glory::Editor
 		std::filesystem::remove(tempLuaPath);
 	}
 
-	void MonoEditorExtension::CompileProject(ProjectSpace* pProject, bool release)
+	void MonoEditorExtension::CompileProject(ProjectSpace* pProject, bool release, bool reload)
 	{
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		pEditorApp->StopPlay();
@@ -437,6 +451,7 @@ namespace Glory::Editor
 		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=" + config + " /p:Platform=x64 \"" + projectPath.string() + "\"";
 		system(cmd.c_str());
 
+		if (!reload) return;
 		ReloadAssembly(pProject);
 	}
 
