@@ -429,6 +429,11 @@ namespace Glory
 		return *m_Profiler;
 	}
 
+	Jobs::JobManager& Engine::Jobs()
+	{
+		return *m_pJobManager;
+	}
+
 	void Engine::SetShaderManager(ShaderManager* pManager)
 	{
 		m_pShaderManager = pManager;
@@ -651,6 +656,11 @@ namespace Glory
 	void Engine::CallModuleDraw(Module* pModule)
 	{
 		pModule->Draw();
+	}
+
+	const size_t Engine::InternalModulesCount() const
+	{
+		return m_pInternalModules.size();
 	}
 
 	const size_t Engine::ModulesCount() const

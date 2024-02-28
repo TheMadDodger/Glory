@@ -55,7 +55,7 @@ namespace Glory::Editor
         static void GenerateBatchFile(ProjectSpace* pProject);
         static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);
 
-        static void CompileProject(ProjectSpace* pProject, bool release=false);
+        static void CompileProject(ProjectSpace* pProject, bool release=false, bool reload=true);
         static void ReloadAssembly(ProjectSpace* pProject);
 
         static void AssetCallback(const AssetCallbackData& callback);

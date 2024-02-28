@@ -27,6 +27,8 @@ namespace Editor
             GenerateNewUUIDs = 1,
             /** @brief Skip deserialization of prefab instances */
             IgnorePrefabs = 2,
+            /** @brief Prevent component callbacks from firing */
+            NoComponentCallbacks = 3,
         };
 
         /** @brief Serialize a scene to a YAML emitter

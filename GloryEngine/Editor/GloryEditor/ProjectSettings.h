@@ -31,6 +31,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API Utils::YAMLFileRef& operator*();
 
 		GLORY_EDITOR_API static void Compile(const std::filesystem::path& path);
+		GLORY_EDITOR_API static void CreateCompileTask();
 
     protected:
         GLORY_EDITOR_API ProjectSettings(const char* settingsFile);

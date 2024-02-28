@@ -12,6 +12,7 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API GScene* NewScene(bool additive = false);
 		static GLORY_EDITOR_API void OpenScene(UUID uuid, bool additive);
+		static GLORY_EDITOR_API GScene* OpenSceneInMemory(UUID uuid);
 		static GLORY_EDITOR_API void OpenScene(GScene* pScene, UUID uuid = 0);
 		static GLORY_EDITOR_API void SaveOpenScenes();
 

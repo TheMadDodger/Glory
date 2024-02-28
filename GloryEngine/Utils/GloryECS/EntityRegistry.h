@@ -70,7 +70,7 @@ namespace Glory::Utils::ECS
 			return component;
 		}
 
-		void* CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid);
+		void* CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, bool invokeAdd=true);
 
 		template<typename Component>
 		TypeView<Component>* GetTypeView()

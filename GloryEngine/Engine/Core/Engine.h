@@ -145,6 +145,7 @@ namespace Utils::Reflect
 		void CallModuleUpdate(Module* pModule);
 		void CallModuleDraw(Module* pModule);
 
+		const size_t InternalModulesCount() const;
 		const size_t ModulesCount() const;
 		Module* GetModule(size_t index) const;
 
@@ -169,6 +170,7 @@ namespace Utils::Reflect
 		Utils::Reflect::Reflect& Reflection();
 		ObjectManager& GetObjectManager();
 		EngineProfiler& Profiler();
+		Jobs::JobManager& Jobs();
 
 		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);

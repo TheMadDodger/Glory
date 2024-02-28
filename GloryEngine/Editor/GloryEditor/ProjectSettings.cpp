@@ -1,10 +1,17 @@
 #include "ProjectSettings.h"
 #include "EditorApplication.h"
+#include "Package.h"
 
 #include <Debug.h>
 
 #include <filesystem>
 #include <fstream>
+
+#ifdef ADD_PACKAGE_LAG
+#define PACKAGE_LAG std::this_thread::sleep_for(std::chrono::milliseconds(100));
+#else
+#define PACKAGE_LAG
+#endif
 
 namespace Glory::Editor
 {
@@ -104,6 +111,26 @@ namespace Glory::Editor
 		{
 			Settings[i]->OnCompile(path);
 		}
+	}
+
+	void ProjectSettings::CreateCompileTask()
+	{
+		PackageTask task;
+		task.m_TaskName = "Compiling project settings";
+		task.m_TotalSubTasks = Settings.size();
+		task.m_Callback = [](Glory::Engine*, const std::filesystem::path& packageRoot, PackageTaskState& task) {
+			std::filesystem::path path = packageRoot;
+			path.append("Data/Dummy");
+			for (size_t i = 0; i < Settings.size(); ++i)
+			{
+				task.m_SubTaskName = Name(i);
+				Settings[i]->OnCompile(path);
+
+				PACKAGE_LAG
+				++task.m_ProcessedSubTasks;
+			}
+		};
+		AddPackagingTask(std::move(task), "");
 	}
 
 	ProjectSettings::ProjectSettings(const char* settingsFile)

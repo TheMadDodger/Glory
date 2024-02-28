@@ -53,6 +53,18 @@ namespace Glory::Editor
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 	}
 
+	GScene* EditorSceneManager::OpenSceneInMemory(UUID uuid)
+	{
+		AssetLocation location;
+		EditorAssetDatabase::GetAssetLocation(uuid, location);
+		std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
+		YAML::Node node = YAML::LoadFile(path);
+		std::filesystem::path filePath = path;
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), node, uuid,
+			filePath.filename().replace_extension().string(), EditorSceneSerializer::NoComponentCallbacks);
+		return pScene;
+	}
+
 	void EditorSceneManager::OpenScene(GScene* pScene, UUID uuid)
 	{
 		if (IsSceneOpen(uuid))

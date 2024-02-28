@@ -239,6 +239,8 @@ namespace Glory::Editor
 
 	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, YAML::Node& object, Flags flags)
 	{
+		const bool noCallbacks = flags & Flags::NoComponentCallbacks;
+
 		Utils::NodeRef component{object};
 
 		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
@@ -261,7 +263,7 @@ namespace Glory::Editor
 		Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
 
 		void* pComponentAddress = nullptr;
-		if (typeHash != transformTypeHash) pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID);
+		if (typeHash != transformTypeHash) pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID, !noCallbacks);
 		else pComponentAddress = pRegistry.GetComponentAddress(entity, compUUID);
 
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
@@ -270,6 +272,7 @@ namespace Glory::Editor
 		Utils::ECS::BaseTypeView* pTypeView = pRegistry.GetTypeView(typeHash);
 		pTypeView->SetActive(entity, active);
 
+		if (noCallbacks) return;
 		pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, &pRegistry, entity, pComponentAddress);
 	}
 }
