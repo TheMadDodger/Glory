@@ -43,7 +43,7 @@ project "RuntimeTestApplication"
 		debugdir "%{engineOutDir}"
 
 	filter "configurations:Release"
-		kind "WindowedApp"
+		kind "None"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"

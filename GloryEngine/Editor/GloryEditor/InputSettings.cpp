@@ -11,6 +11,7 @@
 #include <Input.h>
 
 #include <IconsFontAwesome6.h>
+#include <BinaryStream.h>
 
 namespace Glory::Editor
 {
@@ -552,6 +553,95 @@ namespace Glory::Editor
 	{
 		SETTINGS_DEFAULT_KEY(inputModes, Key_InputModes, Sequence);
 		SETTINGS_DEFAULT_KEY(kayMaps, Key_InputMaps, Sequence);
+	}
+
+	void InputSettings::OnCompile(const std::filesystem::path& path)
+	{
+		std::filesystem::path finalPath = path;
+		finalPath.replace_filename("Input.dat");
+		BinaryFileStream file{ finalPath };
+		BinaryStream* stream = &file;
+		stream->Write(CoreVersion);
+
+		Utils::NodeValueRef inputModes = RootValue()[Key_InputModes];
+
+		const size_t inputModesCount = inputModes.Size();
+		stream->Write(inputModesCount);
+		for (size_t i = 0; i < inputModesCount; ++i)
+		{
+			Utils::NodeValueRef inmputMode = inputModes[i];
+			Utils::NodeValueRef nameNode = inmputMode["Name"];
+			Utils::NodeValueRef deviceTypesNode = inmputMode["DeviceTypes"];
+			const std::string name = nameNode.As<std::string>();
+			const size_t deviceTypesCount = deviceTypesNode.Size();
+
+			stream->Write(name);
+			stream->Write(deviceTypesCount);
+			for (size_t j = 0; j < deviceTypesCount; ++j)
+			{
+				Utils::NodeValueRef deviceTypeNode = deviceTypesNode[j];
+				const InputDeviceType deviceType = deviceTypeNode.AsEnum<InputDeviceType>();
+				stream->Write(deviceType);
+			}
+		}
+
+		Utils::NodeValueRef inputMaps = RootValue()[Key_InputMaps];
+		stream->Write(inputMaps.Size());
+		for (size_t i = 0; i < inputMaps.Size(); ++i)
+		{
+			Utils::NodeValueRef inmputMode = inputMaps[i];
+			Utils::NodeValueRef nameNode = inmputMode["Name"];
+			const std::string name = nameNode.As<std::string>();
+			stream->Write(name);
+			Utils::NodeValueRef actionsNode = inmputMode["Actions"];
+			stream->Write(actionsNode.Size());
+			for (size_t j = 0; j < actionsNode.Size(); ++j)
+			{
+				Utils::NodeValueRef actionNode = actionsNode[j];
+				Utils::NodeValueRef actionNameNode = actionNode["Name"];
+				const std::string actionName = actionNameNode.As<std::string>();
+
+				Utils::NodeValueRef actionMappingNode = actionNode["ActionMapping"];
+				InputMappingType actionMapping = actionMappingNode.AsEnum<InputMappingType>();
+				Utils::NodeValueRef axisBlendingNode = actionNode["AxisBlending"];
+				AxisBlending axisBlending = axisBlendingNode.AsEnum<AxisBlending>();
+				Utils::NodeValueRef axisBlendingSpeedNode = actionNode["AxisBlendingSpeed"];
+				const float blendingSpeed = axisBlendingSpeedNode.As<float>();
+
+				stream->Write(actionName).Write(actionMapping);
+				if (actionMapping == InputMappingType::Float)
+				{
+					stream->Write(axisBlending).Write(blendingSpeed);
+				}
+
+				Utils::NodeValueRef bindingsNode = actionNode["Bindings"];
+
+				stream->Write(bindingsNode.Size());
+				for (size_t k = 0; k < bindingsNode.Size(); ++k)
+				{
+					Utils::NodeValueRef bindingNode = bindingsNode[k];
+					Utils::NodeValueRef bindingNameNode = bindingNode["Name"];
+					const std::string bindingName = bindingNameNode.As<std::string>();
+
+					Utils::NodeValueRef stateNode = bindingNode["State"];
+					Utils::NodeValueRef multiplierNode = bindingNode["Multiplier"];
+					Utils::NodeValueRef inputModeNode = bindingNode["InputMode"];
+					Utils::NodeValueRef bindingKeyNode = bindingNode["Binding"];
+					Utils::NodeValueRef mapDeltaToValueNode = bindingNode["MapDeltaToValue"];
+
+					const InputState inputState = stateNode.AsEnum<InputState>();
+					const float multiplier = multiplierNode.As<float>();
+					const std::string inputMode = inputModeNode.As<std::string>();
+					const bool mapDeltaToValue = mapDeltaToValueNode.As<bool>();
+					const std::string bindingString = bindingKeyNode.As<std::string>();
+					KeyBinding binding{ bindingString };
+
+					stream->Write(bindingName).Write(inputState).
+						Write(multiplier).Write(inputMode).
+						Write(mapDeltaToValue).Write(bindingString).Write(binding.Compact());
+				}
+			}
+		}
 	}
 
 	void InputSettings::OnStartPlay_Impl()

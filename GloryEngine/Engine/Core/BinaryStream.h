@@ -39,7 +39,29 @@ namespace Glory
 		BinaryStream& Read(void* out, size_t size);
 		virtual BinaryStream& Read(char* out, size_t size) = 0;
 
+		void Read(std::vector<char>& buffer);
+
 		virtual bool Eof() = 0;
+	};
+
+	class BinaryMemoryStream : public BinaryStream
+	{
+	public:
+		BinaryMemoryStream(std::vector<char>& data);
+		BinaryMemoryStream(const char* data, size_t size);
+
+		virtual void Seek(size_t offset, Relative relative = Relative::Start) override;
+		virtual size_t Tell() const override;
+		virtual size_t Size() const override;
+		virtual BinaryStream& Write(const char* data, size_t size) override;
+		virtual void Close() override;
+		virtual BinaryStream& Read(char* out, size_t size) override;
+		virtual bool Eof() override;
+
+	private:
+		const char* m_Data;
+		size_t m_Size;
+		size_t m_Tell;
 	};
 
 	class BinaryFileStream : public BinaryStream

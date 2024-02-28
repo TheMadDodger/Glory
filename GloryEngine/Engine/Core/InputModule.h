@@ -6,6 +6,8 @@
 
 namespace Glory
 {
+	class BinaryStream;
+
 	class InputModule : public Module
 	{
 	public:
@@ -45,6 +47,8 @@ namespace Glory
 		virtual void OnInitialize() {};
 		virtual void OnCleanup() {};
 		virtual void OnUpdate() {};
+
+		virtual void OnProcessData() override;
 
 	private:
 		virtual void Initialize() override;
