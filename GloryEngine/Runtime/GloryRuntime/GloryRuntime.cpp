@@ -6,6 +6,8 @@
 #include <DisplayManager.h>
 #include <RendererModule.h>
 #include <GraphicsModule.h>
+#include <WindowModule.h>
+
 #include <GraphicsThread.h>
 #include <Debug.h>
 #include <AssetArchive.h>
@@ -37,6 +39,10 @@ namespace Glory
 		m_pEngine->GetGraphicsThread()->BindBeginAndEndRender(this);
 		m_pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		m_pWindows = m_pEngine->GetMainModule<WindowModule>();
+
+		if (m_pWindows)
+			m_pWindows->GetMainWindow()->SetSplashScreen("./Splash.bmp");
 
 		if (m_DataPath.empty()) return;
 		const std::filesystem::path dataPath = m_DataPath;

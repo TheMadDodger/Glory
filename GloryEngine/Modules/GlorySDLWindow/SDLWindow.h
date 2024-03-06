@@ -24,6 +24,9 @@ namespace Glory
 
 		GLORY_API virtual void GetWindowBordersSize(int* top, int* left, int* bottom, int* right) override;
 
+		virtual void SetSplashScreen(const char* data, size_t size) override;
+		virtual void SetSplashScreen(const std::filesystem::path& path) override;
+
 		GLORY_API SDL_Window* GetSDLWindow();
 		GLORY_API SDL_GLContext GetSDLGLConext() const;
 
@@ -45,6 +48,8 @@ namespace Glory
 	private:
 		friend class SDLWindowModule;
 		SDL_Window* m_pWindow;
+		SDL_Surface* m_pWindowSurface;
+		SDL_Surface* m_pSplashScreen;
 		SDL_GLContext m_GLSDLContext;
 	};
 }

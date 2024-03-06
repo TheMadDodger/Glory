@@ -11,7 +11,8 @@ project "GloryRuntime"
 	{
 		"**.h",
 		"**.cpp",
-		"premake5.lua"
+		"premake5.lua",
+		"Splash.bmp"
 	}
 
 	vpaths
@@ -62,6 +63,11 @@ project "GloryRuntime"
 		"GLORY_RUNTIME_EXPORTS",
 	}
 
+	postbuildcommands
+	{
+		("{COPY} Splash.bmp %{engineOutDir}")
+	}
+
 	filter "system:windows"
 		systemversion "10.0.19041.0"
 		toolset "v143"
@@ -87,3 +93,6 @@ project "GloryRuntime"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+	filter "files:Splash.bmp"
+		buildaction "None"
