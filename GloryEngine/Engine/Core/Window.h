@@ -5,6 +5,11 @@
 #include <string>
 #include <vector>
 
+namespace std::filesystem
+{
+	class path;
+}
+
 namespace Glory
 {
 	class WindowModule;
@@ -37,6 +42,9 @@ namespace Glory
 		virtual void SetWindowTitle(const char* title) = 0;
 
 		virtual void GetWindowBordersSize(int* top, int* left, int* bottom, int* right) = 0;
+
+		virtual void SetSplashScreen(const char* data, size_t size) = 0;
+		virtual void SetSplashScreen(const std::filesystem::path& path) = 0;
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);

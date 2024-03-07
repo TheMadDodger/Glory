@@ -421,7 +421,50 @@ namespace Glory
 		m_pWindowManager->GetEngine()->GetDebug().LogError(SDL_GetError());
 	}
 
-	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo), m_pWindow(nullptr), m_GLSDLContext(NULL) {}
+	void SDLWindow::SetSplashScreen(const char* data, size_t size)
+	{
+		if (m_pSplashScreen)
+		{
+			SDL_FreeSurface(m_pSplashScreen);
+			m_pSplashScreen = nullptr;
+		}
+
+		SDL_RWops* pPixels = SDL_RWFromConstMem(data, size);
+		m_pSplashScreen = SDL_LoadBMP_RW(pPixels, 1);
+
+		if (!m_pSplashScreen)
+		{
+			m_pWindowManager->GetEngine()->GetDebug().LogFatalError("Failed to load splash screen!");
+			return;
+		}
+
+		SDL_BlitSurface(m_pSplashScreen, NULL, m_pWindowSurface, NULL);
+		SDL_UpdateWindowSurface(m_pWindow);
+	}
+
+	void SDLWindow::SetSplashScreen(const std::filesystem::path& path)
+	{
+		if (m_pSplashScreen)
+		{
+			SDL_FreeSurface(m_pSplashScreen);
+			m_pSplashScreen = nullptr;
+		}
+
+		m_pSplashScreen = SDL_LoadBMP(path.string().data());
+
+		if (!m_pSplashScreen)
+		{
+			m_pWindowManager->GetEngine()->GetDebug().LogFatalError("Failed to load splash screen!");
+			return;
+		}
+
+		SDL_BlitSurface(m_pSplashScreen, NULL, m_pWindowSurface, NULL);
+		SDL_UpdateWindowSurface(m_pWindow);
+	}
+
+	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo),
+		m_pWindow(nullptr), m_GLSDLContext(NULL), m_pWindowSurface(nullptr), m_pSplashScreen(nullptr)
+	{}
 
 	SDLWindow::~SDLWindow()
 	{
@@ -448,11 +491,21 @@ namespace Glory
 			SDL_WINDOWPOS_CENTERED, m_Width, m_Height, m_WindowFlags);
 
 		if (m_pWindow == NULL) throw new SDLErrorException(SDL_GetError());
+
+		m_pWindowSurface = SDL_GetWindowSurface(m_pWindow);
 	}
 
 	void SDLWindow::Close()
 	{
 		SDL_DestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
+		m_pWindowSurface = nullptr;
+
+		if (m_pSplashScreen)
+		{
+			SDL_FreeSurface(m_pSplashScreen);
+			m_pSplashScreen = nullptr;
+		}
 	}
 
 	void SDLWindow::PollEvents()

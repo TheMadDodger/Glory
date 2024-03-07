@@ -65,6 +65,9 @@ namespace Glory
 
         if (!cmd.empty())
             m_Runtime->GetEngine()->GetConsole().ExecuteCommand(cmd);
+
+        /* Ensure 3 second wait for splash screen */
+        std::this_thread::sleep_for(std::chrono::seconds(3));
     }
 
     void GloryRuntimeApplication::Run()
