@@ -130,6 +130,16 @@ namespace Glory
 		return path.filename().replace_extension("").string();
 	}
 
+	void AssetDatabase::SetEntryScene(UUID uuid)
+	{
+		m_EntrySceneID = uuid;
+	}
+
+	UUID AssetDatabase::GetEntryScene() const
+	{
+		return m_EntrySceneID;
+	}
+
 	void AssetDatabase::Initialize()
 	{
 		m_Callbacks.Initialize();

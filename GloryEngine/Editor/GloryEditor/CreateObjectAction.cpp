@@ -22,7 +22,7 @@ namespace Glory::Editor
 	{
 		Selection::SetActiveObject(nullptr);
 
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		if (!entity.IsValid()) return;
@@ -39,7 +39,7 @@ namespace Glory::Editor
 
 	void CreateObjectAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (pScene == nullptr) return;
 		YAML::Node node = YAML::Load(m_SerializedObject.c_str());
 		Utils::NodeRef entities{node};

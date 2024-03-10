@@ -54,6 +54,9 @@ namespace Glory
 			AssetDatabase* m_pDatabase;
 		};
 
+		void SetEntryScene(UUID uuid);
+		UUID GetEntryScene() const;
+
 	private:
 		void Initialize();
 		void Destroy();
@@ -74,6 +77,7 @@ namespace Glory
 		AssetCallbacks m_Callbacks;
 		std::string m_AssetPath;
 		std::string m_SettingsPath;
+		UUID m_EntrySceneID;
 
 		struct ReadLock
 		{

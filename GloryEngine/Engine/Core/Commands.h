@@ -116,6 +116,7 @@ namespace Glory
 					return succes;
 				}
 			}
+			return false;
 		}
 
 		static void Destroy()

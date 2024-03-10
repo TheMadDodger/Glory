@@ -31,10 +31,8 @@ namespace Glory
         m_Debug.reset(new Debug(m_Console.get()));
 
         CommandLine commandLine{ argc, argv };
-        std::string path = "";
         std::string cmd = "";
         std::string dataPath = "./Data";
-        commandLine.GetValue("path", path);
         commandLine.GetValue("command", cmd);
         if (!commandLine.GetValue("dataPath", dataPath))
             dataPath = "./Data";
@@ -59,9 +57,6 @@ namespace Glory
         m_Runtime.reset(new GloryRuntime(m_Engine.get()));
         m_Runtime->SetDataPath(dataPath);
         m_Runtime->Initialize();
-
-        if (!path.empty())
-            m_Runtime->LoadScene(path);
 
         if (!cmd.empty())
             m_Runtime->GetEngine()->GetConsole().ExecuteCommand(cmd);

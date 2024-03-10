@@ -87,11 +87,11 @@ namespace Glory::Editor
 
 		ImGui::InvisibleButton("WINDOWTARGET", { size.x, availableRegion.y });
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
-			GScene* pScene = EditorSceneManager::GetActiveScene();
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene();
 			if (HandleAssetDragAndDrop(0, pScene, dndHash, pPayload)) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
-			pScene = EditorSceneManager::GetOpenScene(payload.SceneID);
+			pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(payload.SceneID);
 			Entity draggingEntity = pScene->GetEntityByEntityID(payload.EntityID);
 			Entity oldParent = draggingEntity.ParentEntity();
 
@@ -103,7 +103,7 @@ namespace Glory::Editor
 			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
 			Undo::StopRecord();
 
-			EditorSceneManager::SetSceneDirty(pScene);
+			EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 		});
 
 		if (ImGui::IsItemClicked(1))
@@ -132,7 +132,7 @@ namespace Glory::Editor
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.15f, 0.1525f, 0.1505f, 1.0f));
 		if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
 
-		const std::string label = pScene->Name() + (EditorSceneManager::IsSceneDirty(pScene) ? " *" : "");
+		const std::string label = pScene->Name() + (EditorApplication::GetInstance()->GetSceneManager().IsSceneDirty(pScene) ? " *" : "");
 		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
 		const bool nodeOpen = ImGui::TreeNodeEx("##scenenode", node_flags, label.data());
 		if (isActive) ImGui::PopStyleColor();
@@ -161,7 +161,7 @@ namespace Glory::Editor
 			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
 			Undo::StopRecord();
 
-			EditorSceneManager::SetSceneDirty(pScene);
+			EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 		});
 
 		if (ImGui::IsItemClicked())
@@ -259,7 +259,7 @@ namespace Glory::Editor
 					Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
 					Undo::StopRecord();
 
-					EditorSceneManager::SetSceneDirty(pScene);
+					EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 				}
 			});
 		}
@@ -311,7 +311,7 @@ namespace Glory::Editor
 				Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
 				Undo::StopRecord();
 
-				EditorSceneManager::SetSceneDirty(pScene);
+				EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 			}
 		});
 
@@ -387,7 +387,7 @@ namespace Glory::Editor
 				Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
 				Undo::StopRecord();
 
-				EditorSceneManager::SetSceneDirty(pScene);
+				EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 			}
 		});
 
@@ -478,7 +478,7 @@ namespace Glory::Editor
 
 		Entity entityHandle = pScene->GetEntityByEntityID(entity);
 		pScene->InstantiatePrefab(entityHandle.EntityUUID(), pPrefab, glm::vec3{}, glm::quat{0, 0, 0, 1}, glm::vec3{1, 1, 1});
-		EditorSceneManager::SetSceneDirty(pScene);
+		EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 		return true;
 	}
 }

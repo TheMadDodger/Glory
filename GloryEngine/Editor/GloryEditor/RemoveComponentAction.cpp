@@ -32,7 +32,7 @@ namespace Glory::Editor
 
 		YAML::Node node = YAML::Load(m_SerializedComponent.c_str());
 		EditableEntity* pEntityObject = (EditableEntity*)editors[0]->GetTarget();
-		GScene* pEntityScene = EditorSceneManager::GetOpenScene(pEntityObject->SceneID());
+		GScene* pEntityScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pEntityObject->SceneID());
 		Utils::ECS::EntityView* pEntityView = pEntityScene->GetRegistry().GetEntityView(pEntityObject->EntityID());
 		const size_t index = pEntityView->ComponentCount();
 		EditorSceneSerializer::DeserializeComponent(EditorApplication::GetInstance()->GetEngine(), pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, node);
@@ -50,7 +50,7 @@ namespace Glory::Editor
 		if (!editors.size()) return;
 
 		EditableEntity* pEntityObject = (EditableEntity*)editors[0]->GetTarget();
-		GScene* pEntityScene = EditorSceneManager::GetOpenScene(pEntityObject->SceneID());
+		GScene* pEntityScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pEntityObject->SceneID());
 		pEntityScene->GetRegistry().RemoveComponentAt(pEntityObject->EntityID(), m_ComponentIndex);
 
 		for (size_t i = 0; i < editors.size(); i++)

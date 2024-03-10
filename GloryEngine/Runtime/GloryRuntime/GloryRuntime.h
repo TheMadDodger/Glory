@@ -1,6 +1,7 @@
 #pragma once
 #include "Visibility.h"
 
+#include <UUID.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -13,6 +14,7 @@ namespace std::filesystem
 namespace Glory
 {
 	class Engine;
+	class RuntimeSceneManager;
 	class RuntimeMaterialManager;
 	class RuntimeShaderManager;
 	class RendererModule;
@@ -33,18 +35,18 @@ namespace Glory
 		GLORY_RUNTIME_API void Run();
 		/** @brief Load an asset database at a path and append it to the current database */
 		GLORY_RUNTIME_API void LoadAssetDatabase(const std::filesystem::path& path);
+		/** @brief Load a scene and its assets and shaders */
+		GLORY_RUNTIME_API void LoadScene(const UUID uuid);
 		/** @brief Load an asset group at a path */
 		GLORY_RUNTIME_API void LoadAssetGroup(const std::filesystem::path& path);
 		/** @brief Load a shader pack at a path */
 		GLORY_RUNTIME_API void LoadShaderPack(const std::filesystem::path& path);
-		/** @brief Load a scene, its assets, shaders and asset database at a path */
-		GLORY_RUNTIME_API void LoadScene(const std::filesystem::path& path);
-		/** @brief Load a scene only at a path */
-		GLORY_RUNTIME_API void LoadSceneOnly(const std::filesystem::path& path);
 		/** @brief Get the engine attached to this runtime */
 		GLORY_RUNTIME_API Engine* GetEngine();
 		/** @brief Set the data path */
 		GLORY_RUNTIME_API void SetDataPath(const std::string& dataPath);
+		/** @brief Get the data path */
+		GLORY_RUNTIME_API std::string_view GetDataPath();
 
 	private:
 		/** @brief Callback when the rendering of a frame starts */
@@ -58,6 +60,7 @@ namespace Glory
 		RendererModule* m_pRenderer;
 		GraphicsModule* m_pGraphics;
 		WindowModule* m_pWindows;
+		std::unique_ptr<RuntimeSceneManager> m_SceneManager;
 		std::unique_ptr<RuntimeMaterialManager> m_MaterialManager;
 		std::unique_ptr<RuntimeShaderManager> m_ShaderManager;
 		std::vector<std::filesystem::path> m_AppendedAssetDatabases;

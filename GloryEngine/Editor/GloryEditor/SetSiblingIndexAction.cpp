@@ -1,5 +1,6 @@
 #include "SetSiblingIndexAction.h"
 #include "EditorSceneManager.h"
+#include "EditorApplication.h"
 
 #include <GScene.h>
 
@@ -16,7 +17,7 @@ namespace Glory::Editor
 
 	void SetSiblingIndexAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		if (!entity.IsValid()) return;
@@ -29,7 +30,7 @@ namespace Glory::Editor
 
 	void SetSiblingIndexAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		if (!entity.IsValid()) return;

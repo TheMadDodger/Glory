@@ -293,8 +293,8 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", []() { EditorSceneManager::NewScene(false); }, NULL, Shortcut_File_NewScene);
-		MenuBar::AddMenuItem("File/Save Scene", EditorSceneManager::SaveOpenScenes, NULL, Shortcut_File_SaveScene);
+		MenuBar::AddMenuItem("File/New/Scene", []() { EditorApplication::GetInstance()->GetSceneManager().NewScene(false); }, NULL, Shortcut_File_NewScene);
+		MenuBar::AddMenuItem("File/Save Scene", []() { EditorApplication::GetInstance()->GetSceneManager().SaveOpenScenes(); }, NULL, Shortcut_File_SaveScene);
 		//MenuBar::AddMenuItem("File/Load Scene", []()
 		//{
 		//	//YAML::Node node = YAML::LoadFile("test.gscene");
@@ -443,7 +443,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Package, ImGuiKey_P, ImGuiModFlags_Ctrl);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
-			Entity entity = EditorSceneManager::GetOpenScene(e.Object->SceneID())->GetEntityByEntityID(e.Object->EntityID());
+			Entity entity = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(e.Object->SceneID())->GetEntityByEntityID(e.Object->EntityID());
 			EntitySceneObjectEditor::ConvertToPrefab(entity, e.Path);
 		});
 	}

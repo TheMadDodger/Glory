@@ -438,37 +438,38 @@ namespace Glory::Editor
 
 	void PackageAssetDatabase(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
+		/** @todo Let the user decide what the entry scene is */
+		const UUID entryScene = !ScenesToPackage.empty() ? ScenesToPackage[0] : 0;
+
 		task.m_TotalSubTasks = UsedAssets.size();
 
 		std::filesystem::path dataPath = packageRoot;
 		dataPath.append("Data");
 
-		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			/* Package asset database but only for used assets */
+			std::filesystem::path databasePath = dataPath;
+			databasePath.append("Assets.gcdb");
+			BinaryFileStream dbFile{ databasePath };
+			BinaryStream* stream = &dbFile;
+			stream->Write(entryScene);
+			for (size_t i = 0; i < UsedAssets.size(); ++i)
 			{
-				/* Package asset database but only for used assets */
-				std::filesystem::path databasePath = dataPath;
-				databasePath.append("Assets.gcdb");
-				BinaryFileStream dbFile{ databasePath };
-				BinaryStream* stream = &dbFile;
-				for (size_t i = 0; i < UsedAssets.size(); ++i)
-				{
-					const UUID assetID = UsedAssets[i];
+				const UUID assetID = UsedAssets[i];
 
-					const AssetLocation& location = AssetLocations[i];
-					ResourceMeta meta;
-					EditorAssetDatabase::GetAssetMetadata(assetID, meta);
-					task.m_SubTaskName = meta.Name();
-					PACKAGE_LAG
+				const AssetLocation& location = AssetLocations[i];
+				ResourceMeta meta;
+				EditorAssetDatabase::GetAssetMetadata(assetID, meta);
+				task.m_SubTaskName = meta.Name();
+				PACKAGE_LAG
 
-					stream->Write(meta.Name());
-					stream->Write(meta.ID());
-					stream->Write(meta.Hash());
-					stream->Write(location.Path);
-					stream->Write(location.Index);
-					++task.m_ProcessedSubTasks;
-					task.m_SubTaskName = "";
-				}
+				stream->Write(meta.Name());
+				stream->Write(meta.ID());
+				stream->Write(meta.Hash());
+				stream->Write(location.Path);
+				stream->Write(location.Index);
+				++task.m_ProcessedSubTasks;
+				task.m_SubTaskName = "";
 			}
 		}
 	}
@@ -579,13 +580,6 @@ namespace Glory::Editor
 
 		task.m_SubTaskName = "Generating Configuration.h";
 		PACKAGE_LAG
-		std::string entryScene;
-		/** @todo Let the user decide what the entry scene is */
-		if (!ScenesToPackage.empty())
-		{
-			auto sceneZero = ScenesToPackage[0];
-			entryScene = std::to_string(sceneZero);
-		}
 
 		const std::string projectName = ProjectSpace::GetOpenProject()->Name();
 		/* Generate Configuration.h */
@@ -597,7 +591,6 @@ namespace Glory::Editor
 		configHeaderStream << "namespace Config" << std::endl;
 		configHeaderStream << "{" << std::endl;
 		configHeaderStream << "	constexpr char* AppName = \"" << projectName << "\";" << std::endl;
-		configHeaderStream << "	constexpr char* EntryScene = \"./Data/" << entryScene << ".gcs\";" << std::endl;
 		configHeaderStream << "}" << std::endl << std::endl << std::endl;
 		configHeaderStream << "inline void Exec()" << std::endl;
 		configHeaderStream << "{" << std::endl;
@@ -932,7 +925,7 @@ namespace Glory::Editor
 
 		/* Close all open scenes */
 		/** @todo Make a backup of all open scenes to restore after packaging completes */
-		EditorSceneManager::CloseAll();
+		EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
 
 		/* Compile shaders */
 		/** @todo Actually compile the shaders for the chosen platform */
@@ -964,10 +957,10 @@ namespace Glory::Editor
 				BinaryFileStream sceneFile{ path };
 				AssetArchive archive{ &sceneFile, true };
 
-				EditorSceneManager::OpenScene(scenes[i], false);
-				GScene* pScene = EditorSceneManager::GetActiveScene();
+				EditorApplication::GetInstance()->GetSceneManager().OpenScene(scenes[i], false);
+				GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene();
 				archive.Serialize(pScene);
-				EditorSceneManager::CloseAll();
+				EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
 
 				usedAssets.push_back(scenes[i]);
 				assetLocations.push_back({ relativeScenePath.string(), "", 0 });

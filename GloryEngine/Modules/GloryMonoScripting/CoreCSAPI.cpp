@@ -358,7 +358,7 @@ namespace Glory
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return nullptr;
-		GScene* pScene = pScenes->CreateEmptyScene(mono_string_to_utf8(name));
+		GScene* pScene = pScenes->NewScene(mono_string_to_utf8(name));
 		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
 	}
 

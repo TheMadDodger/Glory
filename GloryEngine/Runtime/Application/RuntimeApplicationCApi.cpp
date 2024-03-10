@@ -27,9 +27,9 @@ void CleanupApp()
 	runtimeApp.Cleanup();
 }
 
-void LoadScene(const char* path)
+void LoadScene(const uint64_t uuid)
 {
-	runtimeApp.Runtime().LoadScene(path);
+	runtimeApp.Runtime().LoadScene(uuid);
 }
 
 void RunCommand(const char* command)

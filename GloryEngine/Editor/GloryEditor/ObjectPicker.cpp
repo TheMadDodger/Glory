@@ -28,7 +28,7 @@ namespace Glory::Editor
 
 	bool ObjectPicker::ObjectDropdown(const std::string& label, UUID* sceneValue, UUID* objectValue, const float borderPadding)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(*sceneValue);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(*sceneValue);
 		Entity entity = pScene ? pScene->GetEntityByUUID(*objectValue) : Entity{};
 
 		ImGui::PushID(label.c_str());
@@ -51,7 +51,7 @@ namespace Glory::Editor
 		change = DragAndDropTarget.HandleDragAndDropTarget([&](uint32_t, const ImGuiPayload* payload)
 		{
 			const ObjectPayload objectPayload = *(const ObjectPayload*)payload->Data;
-			GScene* pScene = EditorSceneManager::GetOpenScene(objectPayload.SceneID);
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(objectPayload.SceneID);
 			Entity draggingEntity = pScene->GetEntityByEntityID(objectPayload.EntityID);
 			*sceneValue = pScene->GetUUID();
 			*objectValue = draggingEntity.EntityUUID();
@@ -82,9 +82,9 @@ namespace Glory::Editor
 	void ObjectPicker::RefreshFilter()
 	{
 		m_FilteredObjects.clear();
-		for (size_t i = 0; i < EditorSceneManager::OpenSceneCount(); ++i)
+		for (size_t i = 0; i < EditorApplication::GetInstance()->GetSceneManager().OpenScenesCount(); ++i)
 		{
-			GScene* pScene = EditorSceneManager::GetOpenScene(i);
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(i);
 			for (size_t j = 0; j < pScene->ChildCount(0); ++j)
 			{
 				Entity child = pScene->ChildEntity(0, j);

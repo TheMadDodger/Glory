@@ -30,6 +30,7 @@ namespace Glory::Editor
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo):
 		m_pEngine(createInfo.pEngine),
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
+		m_SceneManager(new EditorSceneManager(this)),
 		m_ShaderProcessor(new EditorShaderProcessor(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
@@ -45,6 +46,7 @@ namespace Glory::Editor
 			}
 		}
 
+		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 
@@ -324,6 +326,11 @@ namespace Glory::Editor
 		return m_pEngine;
 	}
 
+	EditorSceneManager& EditorApplication::GetSceneManager()
+	{
+		return *m_SceneManager;
+	}
+
 	EditorResourceManager& EditorApplication::GetResourceManager()
 	{
 		return *m_ResourceManager;
@@ -343,7 +350,7 @@ namespace Glory::Editor
 			return;
 		}
 
-		if (EditorSceneManager::HasUnsavedChanges())
+		if (m_SceneManager->HasUnsavedChanges())
 		{
 			/* Show popup */
 			QuitPopup::Open("You have unsaved changes to an opened scene.\nAre you sure you want to quit?\nAll changes will be lost!");
