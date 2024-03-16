@@ -45,6 +45,7 @@ namespace Glory
 		size_t OpenScenesCount();
 		GScene* GetOpenScene(size_t index);
 		GScene* GetOpenScene(UUID uuid);
+		void MarkAllScenesForDestruct();
 		void CloseAllScenes();
 
 		void Start();

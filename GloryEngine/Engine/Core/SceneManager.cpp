@@ -63,6 +63,11 @@ namespace Glory
 		return *it;
 	}
 
+	void SceneManager::MarkAllScenesForDestruct()
+	{
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->MarkForDestruction(); });
+	}
+
 	GScene* SceneManager::GetActiveScene(bool force)
 	{
 		if (m_ActiveSceneIndex >= m_pOpenScenes.size())
@@ -151,7 +156,14 @@ namespace Glory
 	void SceneManager::Update()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Tick" };
-		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnTick(); });
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [this](GScene* pScene) {
+			if (pScene->m_MarkedForDestruct)
+			{
+				CloseScene(pScene->GetUUID());
+				return;
+			}
+			pScene->OnTick();
+		});
 	}
 
 	void SceneManager::Draw()

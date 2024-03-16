@@ -63,6 +63,14 @@ namespace Glory
 		dbPath.append("Assets.gcdb");
 		LoadAssetDatabase(dbPath);
 
+		/* Load the shared asset pack */
+		std::filesystem::path sharedPath = dataPath;
+		sharedPath.append("Shared.gcag");
+		if (std::filesystem::exists(sharedPath))
+		{
+			LoadAssetGroup(sharedPath);
+		}
+
 		for (const auto& entry : std::filesystem::directory_iterator(dataPath))
 		{
 			const std::filesystem::path path = entry.path();

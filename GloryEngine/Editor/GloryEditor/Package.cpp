@@ -55,6 +55,8 @@ namespace Glory::Editor
 	std::vector<UUID> UsedAssets;
 	std::vector<AssetLocation> AssetLocations;
 
+	UUID EntryScene = 0;
+
 	bool PackageJob(Engine* pEngine, std::filesystem::path packageRoot)
 	{
 		for (size_t i = 0; i < PackagingTasks.size(); i++)
@@ -84,6 +86,7 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **packageSettings;
 		auto scenePackageMode = file["Scenes/PackageScenesMode"];
 		auto scenesToPackage = file["Scenes/List"];
+		auto entryScene = file["Scenes/EntryScene"];
 
 		const PackageScenes mode = scenePackageMode.AsEnum<PackageScenes>();
 		switch (mode)
@@ -107,6 +110,8 @@ namespace Glory::Editor
 		default:
 			break;
 		}
+
+		EntryScene = entryScene.As<uint64_t>();
 	}
 
 	void ScanForAssets(Engine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)
@@ -275,9 +280,10 @@ namespace Glory::Editor
 	void PackageScenesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Open every scene and package them individually along with their assets */
-		std::filesystem::path relativeScenePath = "Data";
+		std::filesystem::path relativeDataPath = "Data";
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			std::filesystem::path relativeScenePath = relativeDataPath;
 			relativeScenePath.append(std::to_string(ScenesToPackage[i])).replace_extension("gcs");
 			{
 				ResourceMeta meta;
@@ -313,10 +319,10 @@ namespace Glory::Editor
 		totalAssets += SharedAssets.size();
 		task.m_TotalSubTasks = totalAssets;
 
-		std::filesystem::path relativeScenePath = "Data";
-
+		std::filesystem::path relativeDataPath = "Data";
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			std::filesystem::path relativeScenePath = relativeDataPath;
 			relativeScenePath.append(std::to_string(ScenesToPackage[i])).replace_extension("gcag");
 			{
 				std::filesystem::path path = packageRoot;
@@ -353,7 +359,7 @@ namespace Glory::Editor
 			std::filesystem::path sharedAssetsPath = packageRoot;
 			sharedAssetsPath.append(relativePath.string());
 			BinaryFileStream sharedAssetsFile{ sharedAssetsPath };
-			AssetArchive archive{ &sharedAssetsFile };
+			AssetArchive archive{ &sharedAssetsFile, true };
 			for (size_t i = 0; i < SharedAssets.size(); ++i)
 			{
 				const UUID assetID = SharedAssets[i];
@@ -376,10 +382,11 @@ namespace Glory::Editor
 	void PackageShadersTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		task.m_TotalSubTasks = Shaders.size();
-		std::filesystem::path relativeScenePath = "Data";
 
+		std::filesystem::path relativeDataPath = "Data";
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			std::filesystem::path relativeScenePath = relativeDataPath;
 			relativeScenePath.append(std::to_string(ScenesToPackage[i])).replace_extension("gcsp");
 			{
 				std::filesystem::path path = packageRoot;
@@ -438,9 +445,6 @@ namespace Glory::Editor
 
 	void PackageAssetDatabase(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
-		/** @todo Let the user decide what the entry scene is */
-		const UUID entryScene = !ScenesToPackage.empty() ? ScenesToPackage[0] : 0;
-
 		task.m_TotalSubTasks = UsedAssets.size();
 
 		std::filesystem::path dataPath = packageRoot;
@@ -452,7 +456,7 @@ namespace Glory::Editor
 			databasePath.append("Assets.gcdb");
 			BinaryFileStream dbFile{ databasePath };
 			BinaryStream* stream = &dbFile;
-			stream->Write(entryScene);
+			stream->Write(EntryScene);
 			for (size_t i = 0; i < UsedAssets.size(); ++i)
 			{
 				const UUID assetID = UsedAssets[i];

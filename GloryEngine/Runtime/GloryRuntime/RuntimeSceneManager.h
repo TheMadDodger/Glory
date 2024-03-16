@@ -27,7 +27,7 @@ namespace Glory
 		/** @brief Load a scene and its assets and shaders */
 		GLORY_RUNTIME_API void LoadScene(const std::filesystem::path& path);
 		/** @brief Load a scene at a path */
-		GLORY_RUNTIME_API void LoadScene(const std::filesystem::path& path);
+		GLORY_RUNTIME_API void LoadSceneOnly(const std::filesystem::path& path);
 
 		virtual void OnInitialize() override {}
 		virtual void OnCleanup() override {}

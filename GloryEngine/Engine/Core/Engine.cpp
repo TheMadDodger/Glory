@@ -338,7 +338,6 @@ namespace Glory
 			delete m_pAllModules[(size_t)i];
 		}
 
-		m_pSceneManager->Cleanup();
 		m_pSceneManager = nullptr;
 
 		delete m_pJobManager;
@@ -612,10 +611,10 @@ namespace Glory
 	{
 		GameThreadFrameStart();
 		m_Console->Update();
-		m_pSceneManager->Update();
-		m_pSceneManager->Draw();
 		WindowModule* pWindows = GetMainModule<WindowModule>();
 		if (pWindows) pWindows->PollEvents();
+		m_pSceneManager->Update();
+		m_pSceneManager->Draw();
 		ModulesLoop();
 		GameThreadFrameEnd();
 	}

@@ -47,16 +47,26 @@ namespace GloryEngine.SceneManagement
         /// Close all currently open scenes
         /// </summary>
         public static void CloseAllScenes() => SceneManager_CloseAllScenes();
-        /// <summary>
-        /// Open a scene at a specific path
-        /// </summary>
-        /// <param name="path">The path to open the scene from</param>
-        //public static void OpenScene(string path) => SceneManager_OpenScene(path);
+
         /// <summary>
         /// Close a scene
         /// </summary>
         /// <param name="scene">The scene to close</param>
         public static void CloseScene(Scene scene) => SceneManager_CloseScene(scene.ID);
+
+        /// <summary>
+        /// Open a scene by name
+        /// </summary>
+        /// <param name="name">Name of the scene to open</param>
+        /// <param name="additive">Additive load, if set to true then the current loaded scenes will not be closed</param>
+        public static void LoadScene(string name, bool additive=false) => SceneManager_OpenSceneByName(name, additive);
+
+        /// <summary>
+        /// Open a scene by ID
+        /// </summary>
+        /// <param name="sceneID">ID of the scene to open</param>
+        /// <param name="additive">Additive load, if set to true then the current loaded scenes will not be closed</param>
+        public static void LoadScene(UInt64 sceneID, bool additive=false) => SceneManager_OpenScene(sceneID, additive);
 
         #endregion
 
@@ -83,11 +93,14 @@ namespace GloryEngine.SceneManagement
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_CloseAllScenes();
 
-        //[MethodImpl(MethodImplOptions.InternalCall)]
-        //private static extern void SceneManager_OpenScene(string path);
-
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void SceneManager_CloseScene(UInt64 sceneID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void SceneManager_OpenSceneByName(string name, bool additive);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void SceneManager_OpenScene(UInt64 sceneID, bool additive);
 
         #endregion
     }

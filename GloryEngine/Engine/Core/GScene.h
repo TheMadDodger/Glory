@@ -187,6 +187,9 @@ namespace Glory
 		virtual void Serialize(BinaryStream& container) const;
 		virtual void Deserialize(BinaryStream& container);
 
+		/** @brief Mark this scene for destruction to prevent further update() and draw() calls */
+		void MarkForDestruction();
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();
@@ -231,5 +234,7 @@ namespace Glory
 		std::vector<DelayedParentData> m_DelayedParents;
 
 		SceneManager* m_pManager = nullptr;
+
+		bool m_MarkedForDestruct = false;
 	};
 }

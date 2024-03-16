@@ -40,7 +40,7 @@ namespace Glory::Editor
 	{
 		if (additive && IsSceneOpen(uuid))
 			CloseScene(uuid);
-		if (!additive) CloseAllScenes();
+		if (!additive) MarkAllScenesForDestruct();
 
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);

@@ -31,6 +31,8 @@ namespace Glory
 
     void RuntimeSceneManager::OpenScene(UUID uuid, bool additive)
     {
+		if (!additive) MarkAllScenesForDestruct();
+
 		AssetLocation location;
 		if (!m_pEngine->GetAssetDatabase().GetAssetLocation(uuid, location))
 		{
@@ -79,10 +81,10 @@ namespace Glory
 		/* Load scene */
 		std::filesystem::path scenePath = path;
 		scenePath.replace_extension("gcs");
-		LoadScene(scenePath);
+		LoadSceneOnly(scenePath);
 	}
 
-	void RuntimeSceneManager::LoadScene(const std::filesystem::path& path)
+	void RuntimeSceneManager::LoadSceneOnly(const std::filesystem::path& path)
 	{
 		if (!std::filesystem::exists(path))
 		{
