@@ -1,4 +1,5 @@
 #include "GloryRuntime.h"
+#include "RuntimeSceneManager.h"
 #include "RuntimeMaterialManager.h"
 #include "RuntimeShaderManager.h"
 
@@ -23,8 +24,10 @@
 namespace Glory
 {
 	GloryRuntime::GloryRuntime(Engine* pEngine): m_pEngine(pEngine),
-		m_MaterialManager(new RuntimeMaterialManager(pEngine)), m_ShaderManager(new RuntimeShaderManager(pEngine)),
-		m_pRenderer(nullptr), m_pGraphics(nullptr)
+		m_SceneManager(new RuntimeSceneManager(this)),
+		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
+		m_ShaderManager(new RuntimeShaderManager(pEngine)),
+		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr)
 	{
 	}
 
@@ -32,6 +35,7 @@ namespace Glory
 
 	void GloryRuntime::Initialize()
 	{
+		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 		m_pEngine->SetShaderManager(m_ShaderManager.get());
 		m_pEngine->Initialize();
@@ -51,6 +55,20 @@ namespace Glory
 			std::stringstream str;
 			str << "Data path: " << dataPath << " not found";
 			m_pEngine->GetDebug().LogError(str.str());
+			return;
+		}
+
+		/* Load asset database */
+		std::filesystem::path dbPath = dataPath;
+		dbPath.append("Assets.gcdb");
+		LoadAssetDatabase(dbPath);
+
+		/* Load the shared asset pack */
+		std::filesystem::path sharedPath = dataPath;
+		sharedPath.append("Shared.gcag");
+		if (std::filesystem::exists(sharedPath))
+		{
+			LoadAssetGroup(sharedPath);
 		}
 
 		for (const auto& entry : std::filesystem::directory_iterator(dataPath))
@@ -78,6 +96,10 @@ namespace Glory
 		}
 
 		m_pEngine->ProcessData();
+
+		const UUID entryScene = m_pEngine->GetAssetDatabase().GetEntryScene();
+		if (entryScene)
+			LoadScene(entryScene);
 	}
 
 	void GloryRuntime::Run()
@@ -109,6 +131,10 @@ namespace Glory
 		BinaryStream* pStream = &file;
 
 		AssetDatabase& db = m_pEngine->GetAssetDatabase();
+		UUID entryScene;
+		pStream->Read(entryScene);
+		db.SetEntryScene(entryScene);
+
 		while (!pStream->Eof())
 		{
 			ResourceMeta meta;
@@ -120,6 +146,11 @@ namespace Glory
 			pStream->Read(location.Index);
 			db.SetAsset(location, meta);
 		}
+	}
+
+	void GloryRuntime::LoadScene(const UUID uuid)
+	{
+		m_pEngine->GetSceneManager()->OpenScene(uuid, false);
 	}
 
 	void GloryRuntime::LoadAssetGroup(const std::filesystem::path& path)
@@ -154,59 +185,6 @@ namespace Glory
 		}
 	}
 
-	void GloryRuntime::LoadScene(const std::filesystem::path& path)
-	{
-		if (!std::filesystem::exists(path)) return;
-		
-		/* Load asset database */
-		const std::filesystem::path rootPath = path.parent_path();
-		std::filesystem::path dbPath = rootPath;
-		dbPath.append("Assets.gcdb");
-		LoadAssetDatabase(dbPath);
-
-		/* Load shader pack */
-		std::filesystem::path shaderPackPath = path;
-		shaderPackPath.replace_extension("gcsp");
-		LoadShaderPack(shaderPackPath);
-
-		/* Load asset group */
-		std::filesystem::path assetGroupPath = path;
-		assetGroupPath.replace_extension("gcag");
-		LoadAssetGroup(assetGroupPath);
-
-		/* Load scene */
-		std::filesystem::path scenePath = path;
-		scenePath.replace_extension("gcs");
-		LoadSceneOnly(scenePath);
-	}
-
-	void GloryRuntime::LoadSceneOnly(const std::filesystem::path& path)
-	{
-		if (!std::filesystem::exists(path))
-		{
-			m_pEngine->GetDebug().LogFatalError("Missing scene file");
-			return;
-		}
-
-		BinaryFileStream file{ path, true };
-		AssetArchive archive{ &file };
-		archive.Deserialize(m_pEngine);
-
-		if (archive.Size() == 0) return;
-
-		Resource* pRoot = archive.Get(m_pEngine, 0);
-		GScene* pScene = dynamic_cast<GScene*>(pRoot);
-		if (!pScene) return;
-
-		pScene->SetManager(m_pEngine->GetSceneManager());
-
-		/* Have to make sure every components add and validate callbacks are called */
-		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnAdd);
-		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnValidate);
-
-		m_pEngine->GetSceneManager()->AddOpenScene(pScene, pScene->GetUUID());
-	}
-
 	Engine* GloryRuntime::GetEngine()
 	{
 		return m_pEngine;
@@ -215,6 +193,11 @@ namespace Glory
 	void GloryRuntime::SetDataPath(const std::string& dataPath)
 	{
 		m_DataPath = dataPath;
+	}
+
+	std::string_view GloryRuntime::GetDataPath()
+	{
+		return m_DataPath;
 	}
 
 	void GloryRuntime::GraphicsThreadEndRender()

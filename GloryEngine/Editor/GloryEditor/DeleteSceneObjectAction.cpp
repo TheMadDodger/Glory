@@ -25,7 +25,7 @@ namespace Glory::Editor
 
 	void DeleteSceneObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_OriginalSceneUUID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_OriginalSceneUUID);
 		if (pScene == nullptr) return;
 		YAML::Node node = YAML::Load(m_SerializedObject.c_str());
 		Utils::NodeRef entities{node};
@@ -48,7 +48,7 @@ namespace Glory::Editor
 			m_WasSelected = true;
 		}
 
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_OriginalSceneUUID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_OriginalSceneUUID);
 
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		if (!entity.IsValid()) return;

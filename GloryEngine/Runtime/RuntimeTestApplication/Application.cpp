@@ -23,7 +23,6 @@ int main(int argc, char* argv[])
 		create(Config::AppName);
 		init(argc, argv);
 		Exec();
-		loadScene(Config::EntryScene);
 		run();
 		cleanup();
 

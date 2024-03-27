@@ -1,5 +1,6 @@
 #include "AddComponentAction.h"
 #include "EditorSceneManager.h"
+#include "EditorApplication.h"
 
 #include <GScene.h>
 
@@ -19,7 +20,7 @@ namespace Glory::Editor
 		if (!editors.size()) return;
 
 		EditableEntity* pEntityObject = (EditableEntity*)editors[0]->GetTarget();
-		GScene* pScene = EditorSceneManager::GetOpenScene(pEntityObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pEntityObject->SceneID());
 		pScene->GetRegistry().RemoveComponentAt(pEntityObject->EntityID(), m_ComponentIndex);
 
 		for (size_t i = 0; i < editors.size(); i++)
@@ -34,7 +35,7 @@ namespace Glory::Editor
 		if (!editors.size()) return;
 
 		EditableEntity* pEntityObject = (EditableEntity*)editors[0]->GetTarget();
-		GScene* pScene = EditorSceneManager::GetOpenScene(pEntityObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pEntityObject->SceneID());
 		Glory::Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
 		Utils::ECS::EntityID entity = pEntityObject->EntityID();
 		pRegistry.CreateComponent(entity, m_ComponentTypeHash, m_ComponentUUID);

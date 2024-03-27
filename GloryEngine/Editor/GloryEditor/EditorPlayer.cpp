@@ -53,7 +53,8 @@ namespace Glory::Editor
 		Selection::Clear();
 		m_UndoHistoryIndex = Undo::GetHistorySize();
 		YAML::Emitter out;
-		EditorSceneManager::SerializeOpenScenes(out);
+
+		EditorApplication::GetInstance()->GetSceneManager().SerializeOpenScenes(out);
 		m_SerializedScenes = out.c_str();
 
 		//if (pSelected) Selection::SetActiveObject(pSelected);
@@ -109,9 +110,9 @@ namespace Glory::Editor
 		//if (pSelected != nullptr) toSelect = pSelected->GetUUID();
 
 		Selection::Clear();
-		EditorSceneManager::CloseAll();
+		EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
 		YAML::Node node = YAML::Load(m_SerializedScenes);
-		EditorSceneManager::OpenAllFromNode(node);
+		EditorApplication::GetInstance()->GetSceneManager().OpenAllFromNode(node);
 
 		//pSelected = Object::FindObject(toSelect);
 		//Selection::SetActiveObject(pSelected);

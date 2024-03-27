@@ -55,6 +55,8 @@ namespace Glory::Editor
 	std::vector<UUID> UsedAssets;
 	std::vector<AssetLocation> AssetLocations;
 
+	UUID EntryScene = 0;
+
 	bool PackageJob(Engine* pEngine, std::filesystem::path packageRoot)
 	{
 		for (size_t i = 0; i < PackagingTasks.size(); i++)
@@ -84,6 +86,7 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **packageSettings;
 		auto scenePackageMode = file["Scenes/PackageScenesMode"];
 		auto scenesToPackage = file["Scenes/List"];
+		auto entryScene = file["Scenes/EntryScene"];
 
 		const PackageScenes mode = scenePackageMode.AsEnum<PackageScenes>();
 		switch (mode)
@@ -107,6 +110,8 @@ namespace Glory::Editor
 		default:
 			break;
 		}
+
+		EntryScene = entryScene.As<uint64_t>();
 	}
 
 	void ScanForAssets(Engine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)
@@ -275,9 +280,10 @@ namespace Glory::Editor
 	void PackageScenesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Open every scene and package them individually along with their assets */
-		std::filesystem::path relativeScenePath = "Data";
+		std::filesystem::path relativeDataPath = "Data";
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			std::filesystem::path relativeScenePath = relativeDataPath;
 			relativeScenePath.append(std::to_string(ScenesToPackage[i])).replace_extension("gcs");
 			{
 				ResourceMeta meta;
@@ -313,10 +319,10 @@ namespace Glory::Editor
 		totalAssets += SharedAssets.size();
 		task.m_TotalSubTasks = totalAssets;
 
-		std::filesystem::path relativeScenePath = "Data";
-
+		std::filesystem::path relativeDataPath = "Data";
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			std::filesystem::path relativeScenePath = relativeDataPath;
 			relativeScenePath.append(std::to_string(ScenesToPackage[i])).replace_extension("gcag");
 			{
 				std::filesystem::path path = packageRoot;
@@ -353,7 +359,7 @@ namespace Glory::Editor
 			std::filesystem::path sharedAssetsPath = packageRoot;
 			sharedAssetsPath.append(relativePath.string());
 			BinaryFileStream sharedAssetsFile{ sharedAssetsPath };
-			AssetArchive archive{ &sharedAssetsFile };
+			AssetArchive archive{ &sharedAssetsFile, true };
 			for (size_t i = 0; i < SharedAssets.size(); ++i)
 			{
 				const UUID assetID = SharedAssets[i];
@@ -376,10 +382,11 @@ namespace Glory::Editor
 	void PackageShadersTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		task.m_TotalSubTasks = Shaders.size();
-		std::filesystem::path relativeScenePath = "Data";
 
+		std::filesystem::path relativeDataPath = "Data";
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			std::filesystem::path relativeScenePath = relativeDataPath;
 			relativeScenePath.append(std::to_string(ScenesToPackage[i])).replace_extension("gcsp");
 			{
 				std::filesystem::path path = packageRoot;
@@ -443,32 +450,30 @@ namespace Glory::Editor
 		std::filesystem::path dataPath = packageRoot;
 		dataPath.append("Data");
 
-		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
+			/* Package asset database but only for used assets */
+			std::filesystem::path databasePath = dataPath;
+			databasePath.append("Assets.gcdb");
+			BinaryFileStream dbFile{ databasePath };
+			BinaryStream* stream = &dbFile;
+			stream->Write(EntryScene);
+			for (size_t i = 0; i < UsedAssets.size(); ++i)
 			{
-				/* Package asset database but only for used assets */
-				std::filesystem::path databasePath = dataPath;
-				databasePath.append("Assets.gcdb");
-				BinaryFileStream dbFile{ databasePath };
-				BinaryStream* stream = &dbFile;
-				for (size_t i = 0; i < UsedAssets.size(); ++i)
-				{
-					const UUID assetID = UsedAssets[i];
+				const UUID assetID = UsedAssets[i];
 
-					const AssetLocation& location = AssetLocations[i];
-					ResourceMeta meta;
-					EditorAssetDatabase::GetAssetMetadata(assetID, meta);
-					task.m_SubTaskName = meta.Name();
-					PACKAGE_LAG
+				const AssetLocation& location = AssetLocations[i];
+				ResourceMeta meta;
+				EditorAssetDatabase::GetAssetMetadata(assetID, meta);
+				task.m_SubTaskName = meta.Name();
+				PACKAGE_LAG
 
-					stream->Write(meta.Name());
-					stream->Write(meta.ID());
-					stream->Write(meta.Hash());
-					stream->Write(location.Path);
-					stream->Write(location.Index);
-					++task.m_ProcessedSubTasks;
-					task.m_SubTaskName = "";
-				}
+				stream->Write(meta.Name());
+				stream->Write(meta.ID());
+				stream->Write(meta.Hash());
+				stream->Write(location.Path);
+				stream->Write(location.Index);
+				++task.m_ProcessedSubTasks;
+				task.m_SubTaskName = "";
 			}
 		}
 	}
@@ -579,13 +584,6 @@ namespace Glory::Editor
 
 		task.m_SubTaskName = "Generating Configuration.h";
 		PACKAGE_LAG
-		std::string entryScene;
-		/** @todo Let the user decide what the entry scene is */
-		if (!ScenesToPackage.empty())
-		{
-			auto sceneZero = ScenesToPackage[0];
-			entryScene = std::to_string(sceneZero);
-		}
 
 		const std::string projectName = ProjectSpace::GetOpenProject()->Name();
 		/* Generate Configuration.h */
@@ -597,7 +595,6 @@ namespace Glory::Editor
 		configHeaderStream << "namespace Config" << std::endl;
 		configHeaderStream << "{" << std::endl;
 		configHeaderStream << "	constexpr char* AppName = \"" << projectName << "\";" << std::endl;
-		configHeaderStream << "	constexpr char* EntryScene = \"./Data/" << entryScene << ".gcs\";" << std::endl;
 		configHeaderStream << "}" << std::endl << std::endl << std::endl;
 		configHeaderStream << "inline void Exec()" << std::endl;
 		configHeaderStream << "{" << std::endl;
@@ -932,7 +929,7 @@ namespace Glory::Editor
 
 		/* Close all open scenes */
 		/** @todo Make a backup of all open scenes to restore after packaging completes */
-		EditorSceneManager::CloseAll();
+		EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
 
 		/* Compile shaders */
 		/** @todo Actually compile the shaders for the chosen platform */
@@ -964,10 +961,10 @@ namespace Glory::Editor
 				BinaryFileStream sceneFile{ path };
 				AssetArchive archive{ &sceneFile, true };
 
-				EditorSceneManager::OpenScene(scenes[i], false);
-				GScene* pScene = EditorSceneManager::GetActiveScene();
+				EditorApplication::GetInstance()->GetSceneManager().OpenScene(scenes[i], false);
+				GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene();
 				archive.Serialize(pScene);
-				EditorSceneManager::CloseAll();
+				EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
 
 				usedAssets.push_back(scenes[i]);
 				assetLocations.push_back({ relativeScenePath.string(), "", 0 });

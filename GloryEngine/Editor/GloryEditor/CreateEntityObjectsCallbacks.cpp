@@ -17,7 +17,7 @@ namespace Glory::Editor
 		{
 			Selection::SetActiveObject(nullptr);
 			GScene* pActiveScene = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetActiveScene();
-			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
+			if (pActiveScene == nullptr) pActiveScene = EditorApplication::GetInstance()->GetSceneManager().NewScene("Empty Scene", true);
 			Entity newEntity = pActiveScene->CreateEmptyObject(name, UUID());
 			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			return newEntity;
@@ -40,7 +40,7 @@ namespace Glory::Editor
 			Selection::SetActiveObject(nullptr);
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			if (pSceneObject == nullptr) return {};
-			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 			if (pScene == nullptr) return {};
 			Entity newEntity = pScene->CreateEmptyObject(name, UUID());
 			newEntity.SetParent(pSceneObject->EntityID());

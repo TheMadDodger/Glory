@@ -54,7 +54,7 @@ namespace Glory::Editor
 			out << YAML::Value << "SceneObject";
 			out << YAML::Key << "Value";
 			out << YAML::Value << YAML::BeginSeq;
-			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 			EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, pSceneObject->EntityID(), out);
 			out << YAML::EndSeq;
 			out << YAML::EndMap;
@@ -136,22 +136,22 @@ namespace Glory::Editor
 		{
 			if (type != "SceneObject") return;
 			GScene* pScene = (GScene*)pObject;
-			EditorSceneManager::PasteSceneObject(pScene, {}, valueNode);
+			EditorApplication::GetInstance()->GetSceneManager().PasteSceneObject(pScene, {}, valueNode);
 			break;
 		}
 		case T_Hierarchy:
 		case T_SceneObject:
 		{
 			if (type != "SceneObject") return;
-			GScene* pScene = EditorSceneManager::GetActiveScene();
-			if (!pScene) pScene = EditorSceneManager::NewScene();
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene();
+			if (!pScene) pScene = EditorApplication::GetInstance()->GetSceneManager().NewScene();
 			EditableEntity* pSceneObject = nullptr;
 			if (pObject)
 			{
 				pSceneObject = (EditableEntity*)pObject;
-				pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+				pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 			}
-			EditorSceneManager::PasteSceneObject(pScene, pSceneObject ? pSceneObject->EntityID() : 0, valueNode);
+			EditorApplication::GetInstance()->GetSceneManager().PasteSceneObject(pScene, pSceneObject ? pSceneObject->EntityID() : 0, valueNode);
 			break;
 		}
 
@@ -189,9 +189,9 @@ namespace Glory::Editor
 		case T_SceneObject:
 		{
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
-			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 			Entity entity = pScene->GetEntityByEntityID(pSceneObject->EntityID());
-			EditorSceneManager::DuplicateSceneObject(entity);
+			EditorApplication::GetInstance()->GetSceneManager().DuplicateSceneObject(entity);
 			break;
 		}
 		case T_Resource:
@@ -227,7 +227,7 @@ namespace Glory::Editor
 		case ObjectMenuType::T_SceneObject:
 		{
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
-			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
 			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
 			Undo::AddAction(new DeleteSceneObjectAction(pScene, pSceneObject->EntityID()));
@@ -294,7 +294,7 @@ namespace Glory::Editor
 			Selection::SetActiveObject(nullptr);
 			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 			GScene* pActiveScene = pEngine->GetSceneManager()->GetActiveScene();
-			if (pActiveScene == nullptr) pActiveScene = EditorSceneManager::NewScene(true);
+			if (pActiveScene == nullptr) pActiveScene = EditorApplication::GetInstance()->GetSceneManager().NewScene();
 			Entity newEnity = pActiveScene->CreateEmptyObject();
 			Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
 			Undo::AddAction(new CreateObjectAction(pActiveScene));
@@ -323,7 +323,7 @@ namespace Glory::Editor
 			Selection::SetActiveObject(nullptr);
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			if (pSceneObject == nullptr) return;
-			GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 			if (pScene == nullptr) return;
 			Entity newEntity = pScene->CreateEmptyObject();
 			Undo::StartRecord("Create Empty Object", newEntity.EntityUUID());
@@ -341,7 +341,7 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(CreateNewSceneCallback)
 	{
 		Selection::SetActiveObject(nullptr);
-		GScene* pNewScene = EditorSceneManager::NewScene(true);
+		GScene* pNewScene = EditorApplication::GetInstance()->GetSceneManager().NewScene();
 		Selection::SetActiveObject(pNewScene);
 	}
 
@@ -349,7 +349,7 @@ namespace Glory::Editor
 	{
 		GScene* pScene = (GScene*)pObject;
 		if (pScene == nullptr) return;
-		EditorSceneManager::SetActiveScene(pScene);
+		EditorApplication::GetInstance()->GetSceneManager().SetActiveScene(pScene);
 	}
 
 	OBJECTMENU_CALLBACK(RemoveSceneCallback)
@@ -357,7 +357,7 @@ namespace Glory::Editor
 		Selection::SetActiveObject(nullptr);
 		GScene* pScene = (GScene*)pObject;
 		if (pScene == nullptr) return;
-		EditorSceneManager::CloseScene(pScene->GetUUID());
+		EditorApplication::GetInstance()->GetSceneManager().CloseScene(pScene->GetUUID());
 
 		/* TODO: To prevent crashing the Undo history must be cleared :/
 		 * Need to add a RemoveSceneAction and serialize the whole scene in it
@@ -372,8 +372,8 @@ namespace Glory::Editor
 		if (pScene == nullptr) return;
 		UUID uuid = pScene->GetUUID();
 		if (!EditorAssetDatabase::AssetExists(uuid)) return;
-		EditorSceneManager::CloseScene(uuid);
-		EditorSceneManager::OpenScene(uuid, true);
+		EditorApplication::GetInstance()->GetSceneManager().CloseScene(uuid);
+		EditorApplication::GetInstance()->GetSceneManager().OpenScene(uuid, true);
 	}
 
 	OBJECTMENU_CALLBACK(CreateNewTextureCallback)
@@ -455,13 +455,13 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(SaveScene)
 	{
 		GScene* pScene = (GScene*)pObject;
-		EditorSceneManager::SaveScene(pScene->GetUUID());
+		EditorApplication::GetInstance()->GetSceneManager().SaveScene(pScene->GetUUID());
 	}
 
 	OBJECTMENU_CALLBACK(SaveSceneAs)
 	{
 		GScene* pScene = (GScene*)pObject;
-		EditorSceneManager::SaveSceneAs(pScene->GetUUID());
+		EditorApplication::GetInstance()->GetSceneManager().SaveSceneAs(pScene->GetUUID());
 	}
 
 	OBJECTMENU_CALLBACK(ReimportAssetCallback)

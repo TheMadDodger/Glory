@@ -54,7 +54,7 @@ namespace Glory::Editor
 	{
 		if (!m_Initialized) Initialize();
 		m_pObject = (EditableEntity*)m_pTarget;
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_pObject->SceneID());
 		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
 		const std::string uuidString = std::to_string(m_pObject->GetUUID());
 		ImGui::PushID(uuidString.c_str());
@@ -101,7 +101,7 @@ namespace Glory::Editor
 		m_pComponentEditors.clear();
 
 		m_pObject = (EditableEntity*)m_pTarget;
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_pObject->SceneID());
 		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
 		const Utils::ECS::EntityID entityID = entity.GetEntityID();
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
@@ -129,7 +129,7 @@ namespace Glory::Editor
 		ImGui::TextDisabled("Entity Object");
 		ImGui::Separator();
 
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_pObject->SceneID());
 		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
 		Utils::ECS::EntityID entityID = entity.GetEntityID();
 
@@ -178,7 +178,7 @@ namespace Glory::Editor
 	{
 		bool change = false;
 
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_pObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_pObject->SceneID());
 		Entity entity = pScene->GetEntityByEntityID(m_pObject->EntityID());
 		Utils::ECS::EntityID entityID = entity.GetEntityID();
 		Glory::Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
@@ -284,7 +284,7 @@ namespace Glory::Editor
 
 		m_ComponentPopup.OnGUI();
 
-		if (change) EditorSceneManager::SetSceneDirty(pScene);
+		if (change) EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 		ImGui::EndDisabled();
 		return change;
 	}
@@ -344,7 +344,7 @@ namespace Glory::Editor
 	void EntitySceneObjectEditor::ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&)
 	{
 		EditableEntity* pSceneObject = (EditableEntity*)pObject;
-		GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 		Entity entity = pScene->GetEntityByEntityID(pSceneObject->EntityID());
 		const std::filesystem::path path = FileBrowser::GetCurrentPath();
 		ConvertToPrefab(entity, path);
@@ -357,16 +357,16 @@ namespace Glory::Editor
 		path.append(entity.Name()).replace_extension(".gentity");
 		const UUID prefabUUID = EditorAssetDatabase::CreateAsset(pPrefab, path.string());
 		pScene->SetPrefab(entity.GetEntityID(), prefabUUID);
-		EditorSceneManager::SetSceneDirty(pScene);
+		EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 	}
 
 	void EntitySceneObjectEditor::UnpackPrefabMenuItem(Object* pObject, const ObjectMenuType&)
 	{
 		EditableEntity* pSceneObject = (EditableEntity*)pObject;
-		GScene* pScene = EditorSceneManager::GetOpenScene(pSceneObject->SceneID());
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 		Entity entity = pScene->GetEntityByEntityID(pSceneObject->EntityID());
 		if (!pScene->Prefab(pSceneObject->GetUUID())) return;
 		pScene->UnsetPrefab(entity.GetEntityID());
-		EditorSceneManager::SetSceneDirty(pScene);
+		EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 	}
 }

@@ -1,5 +1,6 @@
 #include "EnableObjectAction.h"
 #include "EditorSceneManager.h"
+#include "EditorApplication.h"
 
 #include <GScene.h>
 
@@ -16,7 +17,7 @@ namespace Glory::Editor
 
 	void EnableObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		entity.SetActive(!m_Active);
@@ -24,7 +25,7 @@ namespace Glory::Editor
 
 	void EnableObjectAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		entity.SetActive(m_Active);

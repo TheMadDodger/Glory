@@ -12,6 +12,23 @@
 
 namespace Glory
 {
+	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
+		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
+	{
+	}
+
+	SceneManager::~SceneManager()
+	{
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
+		m_pOpenScenes.clear();
+		m_ActiveSceneIndex = 0;
+	}
+
+	Engine* SceneManager::GetEngine()
+	{
+		return m_pEngine;
+	}
+
 	GScene* SceneManager::GetHoveringEntityScene()
 	{
 		return m_HoveringObjectSceneID ? GetOpenScene(m_HoveringObjectSceneID) : nullptr;
@@ -26,39 +43,6 @@ namespace Glory
 	{
 		m_HoveringObjectSceneID = sceneID;
 		m_HoveringObjectID = objectID;
-	}
-
-	Engine* SceneManager::GetEngine()
-	{
-		return m_pEngine;
-	}
-
-	void SceneManager::Start()
-	{
-		if (m_Started) return;
-		m_Started = true;
-		for (size_t i = 0; i < m_pOpenScenes.size(); ++i)
-		{
-			m_pOpenScenes[i]->Start();
-		}
-	}
-
-	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
-		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
-	{
-	}
-
-	SceneManager::~SceneManager()
-	{
-	}
-
-	GScene* SceneManager::CreateEmptyScene(const std::string& name)
-	{
-		ProfileSample s{ &m_pEngine->Profiler(), "ScenesModule::CreateEmptyScene" };
-		GScene* pScene = new GScene(name);
-		pScene->m_pManager = this;
-		m_pOpenScenes.push_back(pScene);
-		return pScene;
 	}
 
 	size_t SceneManager::OpenScenesCount()
@@ -79,9 +63,18 @@ namespace Glory
 		return *it;
 	}
 
-	GScene* SceneManager::GetActiveScene()
+	void SceneManager::MarkAllScenesForDestruct()
 	{
-		if (m_ActiveSceneIndex >= m_pOpenScenes.size()) return nullptr;
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->MarkForDestruction(); });
+	}
+
+	GScene* SceneManager::GetActiveScene(bool force)
+	{
+		if (m_ActiveSceneIndex >= m_pOpenScenes.size())
+		{
+			if (!force) return nullptr;
+			return NewScene();
+		}
 		return m_pOpenScenes[m_ActiveSceneIndex];
 	}
 
@@ -90,47 +83,7 @@ namespace Glory
 		auto it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pScene);
 		if (it == m_pOpenScenes.end()) return;
 		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
-	}
-
-	void SceneManager::CloseAllScenes()
-	{
-		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
-		m_pOpenScenes.clear();
-		m_ActiveSceneIndex = 0;
-	}
-
-	void SceneManager::AddOpenScene(GScene* pScene, UUID uuid)
-	{
-		if (pScene == nullptr) return;
-		if (uuid) pScene->SetUUID(uuid);
-		pScene->m_pManager = this;
-		m_pOpenScenes.push_back(pScene);
-		OnSceneOpen(uuid);
-
-		if (m_Started)
-			pScene->Start();
-	}
-
-	void SceneManager::CloseScene(UUID uuid)
-	{
-		auto it = std::find_if(m_pOpenScenes.begin(), m_pOpenScenes.end(), [&](GScene* pScene) { return pScene->GetUUID() == uuid; });
-		if (it == m_pOpenScenes.end()) return;
-		size_t index = it - m_pOpenScenes.begin();
-		GScene* pActiveScene = m_pOpenScenes[m_ActiveSceneIndex];
-
-		OnSceneClose(uuid);
-		GScene* pScene = *it;
-		delete pScene;
-		m_pOpenScenes.erase(it);
-
-		if (index == m_ActiveSceneIndex || m_pOpenScenes.size() <= 0)
-		{
-			m_ActiveSceneIndex = 0;
-			return;
-		}
-
-		it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pActiveScene);
-		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+		OnSetActiveScene(pScene);
 	}
 
 	Utils::ECS::ComponentTypes* SceneManager::ComponentTypesInstance() const
@@ -188,25 +141,52 @@ namespace Glory
 
 		// Spin
 		m_pComponentTypesInstance->RegisterInvokaction<Spin>(Glory::Utils::ECS::InvocationType::Update, SpinSystem::OnUpdate);
+
+		OnInitialize();
 	}
 
 	void SceneManager::Cleanup()
 	{
 		CloseAllScenes();
-
 		Utils::ECS::ComponentTypes::DestroyInstance();
 		m_pComponentTypesInstance = nullptr;
+		OnCleanup();
 	}
 
 	void SceneManager::Update()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Tick" };
-		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnTick(); });
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [this](GScene* pScene) {
+			if (pScene->m_MarkedForDestruct)
+			{
+				CloseScene(pScene->GetUUID());
+				return;
+			}
+			pScene->OnTick();
+		});
 	}
 
 	void SceneManager::Draw()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Paint" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
+	}
+
+	void SceneManager::Start()
+	{
+		if (m_Started) return;
+		m_Started = true;
+		for (size_t i = 0; i < m_pOpenScenes.size(); ++i)
+		{
+			m_pOpenScenes[i]->Start();
+		}
+	}
+
+	void SceneManager::CloseAllScenes()
+	{
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
+		m_pOpenScenes.clear();
+		m_ActiveSceneIndex = 0;
+		OnCloseAll();
 	}
 }

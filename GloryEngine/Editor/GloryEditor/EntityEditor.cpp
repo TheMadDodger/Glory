@@ -18,7 +18,7 @@ namespace Glory::Editor
         if (entities.size() <= entity)
             entities.resize(entity + 1);
 
-        UUID entityID = EditorSceneManager::GetOpenScene(sceneID)->GetEntityUUID(entity);
+        UUID entityID = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(sceneID)->GetEntityUUID(entity);
         entities[entity] = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Create<EditableEntity>(entity, entityID, sceneID);
 
         return entities[entity];

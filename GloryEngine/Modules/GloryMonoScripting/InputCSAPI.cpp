@@ -93,7 +93,8 @@ namespace Glory
 	bool Input_IsActionTriggered(size_t playerIndex, MonoString* inputMap, MonoString* actionName)
 	{
 		InputModule* pInputModule = Input_EngineInstance->GetMainModule<InputModule>();
-		return pInputModule->GetBool(playerIndex, mono_string_to_utf8(inputMap), mono_string_to_utf8(actionName));
+		const bool status = pInputModule->GetBool(playerIndex, mono_string_to_utf8(inputMap), mono_string_to_utf8(actionName));
+		return status;
 	}
 
 #pragma endregion

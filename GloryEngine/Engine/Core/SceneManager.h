@@ -14,16 +14,14 @@ namespace Glory
 	class SceneManager
 	{
 	public:
-		GScene* CreateEmptyScene(const std::string& name = "Empty Scene");
+		SceneManager(Engine* pEngine);
+		virtual ~SceneManager();
 
-		size_t OpenScenesCount();
-		GScene* GetOpenScene(size_t index);
-		GScene* GetOpenScene(UUID uuid);
-		GScene* GetActiveScene();
-		void SetActiveScene(GScene* pScene);
-		void CloseAllScenes();
-		void AddOpenScene(GScene* pScene, UUID uuid = 0);
-		void CloseScene(UUID uuid);
+		virtual GScene* NewScene(const std::string& name="Empty Scene", bool additive=false) = 0;
+		virtual void OpenScene(UUID uuid, bool additive) = 0;
+		virtual void CloseScene(UUID uuid) = 0;
+
+		//void AddOpenScene(GScene* pScene, UUID uuid = 0);
 
 		Utils::ECS::ComponentTypes* ComponentTypesInstance() const;
 
@@ -41,22 +39,29 @@ namespace Glory
 
 		/** @brief Get the engine that owns this manager */
 		Engine* GetEngine();
+		GScene* GetActiveScene(bool force=false);
+		void SetActiveScene(GScene* pScene);
+
+		size_t OpenScenesCount();
+		GScene* GetOpenScene(size_t index);
+		GScene* GetOpenScene(UUID uuid);
+		void MarkAllScenesForDestruct();
+		void CloseAllScenes();
 
 		void Start();
 
-	private:
-		friend class Engine;
-		SceneManager(Engine* pEngine);
-		virtual ~SceneManager();
+	protected:
+		virtual void OnInitialize() = 0;
+		virtual void OnCleanup() = 0;
+		virtual void OnCloseAll() = 0;
+		virtual void OnSetActiveScene(GScene* pActiveScene) = 0;
 
 	private:
+		friend class Engine;
 		void Initialize();
 		void Cleanup();
 		void Update();
 		void Draw();
-
-		void OnSceneOpen(UUID uuid) {}
-		void OnSceneClose(UUID uuid) {}
 		
 	protected:
 		Engine* m_pEngine;

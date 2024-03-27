@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include "LayerManager.h"
 #include "Engine.h"
+#include "GScene.h"
 
 namespace Glory
 {
@@ -67,7 +68,12 @@ namespace Glory
 		const uint64_t uuid = meta.ID();
 		m_Metas[uuid] = meta;
 		m_AssetLocations[uuid] = assetLocation;
-		if (assetLocation.SubresourcePath.empty()) m_PathToUUID[assetLocation.Path] = uuid;
+		if (assetLocation.SubresourcePath.empty())
+		{
+			m_PathToUUID[assetLocation.Path] = uuid;
+			if (meta.Hash() == ResourceTypes::GetHash<GScene>())
+				m_SceneNameToID[meta.Name()] = uuid;
+		}
 		m_AssetsByType[meta.m_TypeHash].push_back(uuid);
 	}
 
@@ -90,6 +96,13 @@ namespace Glory
 	void AssetDatabase::SetSettingsPath(const std::filesystem::path& path)
 	{
 		m_SettingsPath = path.string();
+	}
+
+	UUID AssetDatabase::FindSceneID(const std::string name) const
+	{
+		auto itor = m_SceneNameToID.find(name);
+		if (itor == m_SceneNameToID.end()) return 0;
+		return itor->second;
 	}
 
 	void AssetDatabase::GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& out)
@@ -128,6 +141,16 @@ namespace Glory
 		if (!GetAssetLocation(uuid, location)) return "";
 		std::filesystem::path path(location.Path);
 		return path.filename().replace_extension("").string();
+	}
+
+	void AssetDatabase::SetEntryScene(UUID uuid)
+	{
+		m_EntrySceneID = uuid;
+	}
+
+	UUID AssetDatabase::GetEntryScene() const
+	{
+		return m_EntrySceneID;
 	}
 
 	void AssetDatabase::Initialize()

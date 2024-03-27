@@ -255,12 +255,14 @@ namespace Glory
 
 	void GScene::OnTick()
 	{
+		if (m_MarkedForDestruct) return;
 		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Update);
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
 
 	void GScene::OnPaint()
 	{
+		if (m_MarkedForDestruct) return;
 		m_Registry.InvokeAll(Glory::Utils::ECS::InvocationType::Draw);
 		//while (m_Scene.m_Registry.IsUpdating()) {}
 	}
@@ -542,6 +544,11 @@ namespace Glory
 			m_Ids.emplace(id, entity);
 			m_UUIds.emplace(entity, id);
 		}
+	}
+
+	void GScene::MarkForDestruction()
+	{
+		m_MarkedForDestruct = true;
 	}
 
 	SceneManager* GScene::Manager()

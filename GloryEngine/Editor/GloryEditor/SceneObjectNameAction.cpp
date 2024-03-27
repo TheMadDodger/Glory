@@ -1,5 +1,6 @@
 #include "SceneObjectNameAction.h"
 #include "EditorSceneManager.h"
+#include "EditorApplication.h"
 
 #include <GScene.h>
 
@@ -16,7 +17,7 @@ namespace Glory::Editor
 
 	void SceneObjectNameAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		pScene->SetEntityName(entity.GetEntityID(), m_Original);
@@ -24,7 +25,7 @@ namespace Glory::Editor
 
 	void SceneObjectNameAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		pScene->SetEntityName(entity.GetEntityID(), m_NewName);

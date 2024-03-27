@@ -12,6 +12,8 @@
 #include <Reflection.h>
 #include <GScene.h>
 
+#include <IconsFontAwesome6.h>
+
 namespace Glory::Editor
 {
 	std::vector<UUID> Scenes;
@@ -120,6 +122,53 @@ namespace Glory::Editor
 				ImGui::Selectable(name.data());
 			}
 			ImGui::Separator();
+
+			auto entryScene = m_YAMLFile["Scenes/EntryScene"];
+			if (!entryScene.Exists())
+				entryScene.Set(0);
+
+			UUID entrySceneID = entryScene.As<uint64_t>();
+			if (entrySceneID == 0 && !Scenes.empty())
+			{
+				entrySceneID = Scenes[0];
+				entryScene.Set(uint64_t(entrySceneID));
+			}
+
+			if (AssetPicker::ResourceDropdown("Entry Scene", sceneHash, &entrySceneID, false))
+			{
+				entryScene.Set(uint64_t(entrySceneID));
+				FilterScenes = true;
+				change = true;
+			}
+
+			const float childHeight = ImGui::CalcTextSize("A").y * 3;
+			const auto itor = std::find(Scenes.begin(), Scenes.end(), entrySceneID);
+			if (entrySceneID == 0)
+			{
+				ImGui::BeginChild("error", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
+				if (ImGui::BeginMenuBar())
+				{
+					ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, ICON_FA_CIRCLE_EXCLAMATION);
+					ImGui::SameLine();
+					ImGui::Text(" Error");
+					ImGui::EndMenuBar();
+				}
+				ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "ERROR: %s", "No entry scene set");
+				ImGui::EndChild();
+			}
+			else if (itor == Scenes.end())
+			{
+				ImGui::BeginChild("error", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
+				if (ImGui::BeginMenuBar())
+				{
+					ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, ICON_FA_CIRCLE_EXCLAMATION);
+					ImGui::SameLine();
+					ImGui::Text(" Error");
+					ImGui::EndMenuBar();
+				}
+				ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "ERROR: %s", "Chosen entry scene is not selected to be packaged");
+				ImGui::EndChild();
+			}
 		}
 
 		auto alwaysPackageAssets = m_YAMLFile["Assets/ForcePackageList"];

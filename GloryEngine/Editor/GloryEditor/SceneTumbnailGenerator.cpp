@@ -22,6 +22,6 @@ namespace Glory::Editor
 
 	void SceneTumbnailGenerator::OnFileDoubleClick(UUID uuid)
 	{
-		EditorSceneManager::OpenScene(uuid, true);
+		EditorApplication::GetInstance()->GetSceneManager().OpenScene(uuid, true);
 	}
 }

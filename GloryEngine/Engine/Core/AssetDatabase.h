@@ -43,6 +43,13 @@ namespace Glory
 		/** @brief Get the root path where engine and module settings are located */
 		const std::string_view GetSettingsPath() const { return m_SettingsPath; };
 
+		/**
+		 * @brief Get the ID of a scene by name
+		 * @param name Name of the scene to find
+		 * @returns ID of the scene or 0 if not found
+		 */
+		UUID FindSceneID(const std::string name) const;
+
 		struct WriteLock
 		{
 		public:
@@ -53,6 +60,9 @@ namespace Glory
 			static size_t m_LockCounter;
 			AssetDatabase* m_pDatabase;
 		};
+
+		void SetEntryScene(UUID uuid);
+		UUID GetEntryScene() const;
 
 	private:
 		void Initialize();
@@ -68,12 +78,14 @@ namespace Glory
 		bool m_IsWriting;
 		bool m_IsReading;
 		std::map<UUID, AssetLocation> m_AssetLocations;
+		std::map<std::string, UUID> m_SceneNameToID;
 		std::map<std::string, UUID> m_PathToUUID;
 		std::map<UUID, ResourceMeta> m_Metas;
 		std::map<uint32_t, std::vector<UUID>> m_AssetsByType;
 		AssetCallbacks m_Callbacks;
 		std::string m_AssetPath;
 		std::string m_SettingsPath;
+		UUID m_EntrySceneID;
 
 		struct ReadLock
 		{

@@ -48,6 +48,7 @@ namespace Utils::Reflect
 	{
 		Debug* m_pDebug;
 		Console* m_pConsole;
+		SceneManager* pSceneManager = nullptr;
 		ShaderManager* pShaderManager = nullptr;
 		MaterialManager* pMaterialManager = nullptr;
 
@@ -172,6 +173,7 @@ namespace Utils::Reflect
 		EngineProfiler& Profiler();
 		Jobs::JobManager& Jobs();
 
+		void SetSceneManager(SceneManager* pManager);
 		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);
 

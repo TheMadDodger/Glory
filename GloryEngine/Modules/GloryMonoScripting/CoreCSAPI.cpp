@@ -10,6 +10,7 @@
 #include <GameTime.h>
 #include <LayerManager.h>
 #include <EngineProfiler.h>
+#include <AssetDatabase.h>
 #include <AssetManager.h>
 #include <ObjectManager.h>
 
@@ -358,7 +359,7 @@ namespace Glory
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return nullptr;
-		GScene* pScene = pScenes->CreateEmptyScene(mono_string_to_utf8(name));
+		GScene* pScene = pScenes->NewScene(mono_string_to_utf8(name));
 		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
 	}
 
@@ -409,18 +410,27 @@ namespace Glory
 		pScenes->CloseAllScenes();
 	}
 
-	//void SceneManager_OpenScene(MonoString* path)
-	//{
-	//	SceneManager* pScenes = EngineInstance->GetSceneManager();
-	//	if (!pScenes) return;
-	//	pScenes->OpenScene(mono_string_to_utf8(path));
-	//}
+	void SceneManager_OpenScene(uint64_t id, bool additive)
+	{
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
+		if (!pScenes) return;
+		pScenes->OpenScene(id, additive);
+	}
+
+	void SceneManager_OpenSceneByName(MonoString* name, bool additive)
+	{
+		const UUID sceneID = Core_EngineInstance->GetAssetDatabase().FindSceneID(mono_string_to_utf8(name));
+		if (!sceneID) return;
+		SceneManager_OpenScene(sceneID, additive);
+	}
 
 	void SceneManager_CloseScene(uint64_t sceneID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
-		pScenes->CloseScene(UUID(sceneID));
+		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		if (!pScene) return;
+		pScene->MarkForDestruction();
 	}
 
 #pragma endregion
@@ -619,7 +629,8 @@ namespace Glory
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_GetActiveScene", SceneManager_GetActiveScene);
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_SetActiveScene", SceneManager_SetActiveScene);
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseAllScenes", SceneManager_CloseAllScenes);
-		//BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_OpenScene", SceneManager_OpenScene);
+		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_OpenSceneByName", SceneManager_OpenSceneByName);
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
 
 		// Scene Objects

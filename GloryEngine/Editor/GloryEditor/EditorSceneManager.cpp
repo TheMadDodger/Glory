@@ -13,45 +13,53 @@
 #include <TitleBar.h>
 #include <tinyfiledialogs.h>
 #include <ProjectSpace.h>
+#include <GScene.h>
 
 namespace Glory::Editor
 {
-	std::vector<UUID> EditorSceneManager::m_OpenedSceneIDs;
-	std::vector<UUID> EditorSceneManager::m_DirtySceneIDs;
-	UUID EditorSceneManager::m_CurrentlySavingScene = 0;
+	EditorSceneManager::EditorSceneManager(EditorApplication* pApplication):
+		m_pApplication(pApplication), SceneManager(pApplication->GetEngine())
+	{}
 
-	GScene* EditorSceneManager::NewScene(bool additive)
+	EditorSceneManager::~EditorSceneManager() = default;
+
+#pragma region Scene manager overrides
+
+	GScene* EditorSceneManager::NewScene(const std::string& name, bool)
 	{
-		if (!additive) CloseAll();
-		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
-		GScene* pScene = pScenes->CreateEmptyScene();
-		m_OpenedSceneIDs.push_back(pScene->GetUUID());
-		SetSceneDirty(pScene);
-		return pScene;
+		/* New scene is always additive in the editor */
+		GScene* pNewScene = new GScene();
+		m_pOpenScenes.push_back(pNewScene);
+		m_OpenedSceneIDs.push_back(pNewScene->GetUUID());
+		pNewScene->SetManager(this);
+		SetSceneDirty(pNewScene);
+		return pNewScene;
 	}
 
 	void EditorSceneManager::OpenScene(UUID uuid, bool additive)
 	{
 		if (additive && IsSceneOpen(uuid))
 			CloseScene(uuid);
-		if (!additive) CloseAll();
+		if (!additive) MarkAllScenesForDestruct();
 
-		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);
-		std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
+		const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
 
 		YAML::Node node = YAML::LoadFile(path);
 		std::filesystem::path filePath = path;
 		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), node, uuid, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 
-		pScenes->AddOpenScene(pScene);
+		pScene->SetResourceUUID(uuid);
+		m_pOpenScenes.push_back(pScene);
 		m_OpenedSceneIDs.push_back(uuid);
 
-		GScene* pActiveScene = pScenes->GetActiveScene();
+		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 	}
+
+#pragma endregion
 
 	GScene* EditorSceneManager::OpenSceneInMemory(UUID uuid)
 	{
@@ -70,17 +78,17 @@ namespace Glory::Editor
 		if (IsSceneOpen(uuid))
 			CloseScene(uuid);
 
-		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
-		pScenes->AddOpenScene(pScene, uuid);
+		pScene->SetResourceUUID(uuid);
+		m_pOpenScenes.push_back(pScene);
 		m_OpenedSceneIDs.push_back(uuid);
 
-		GScene* pActiveScene = pScenes->GetActiveScene();
+		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 	}
 
 	void EditorSceneManager::SaveOpenScenes()
 	{
-		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [](UUID uuid)
+		std::for_each(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), [this](UUID uuid)
 		{
 			AssetLocation location;
 			if (!EditorAssetDatabase::GetAssetLocation(uuid, location)) return; // new scene
@@ -94,14 +102,16 @@ namespace Glory::Editor
 	{
 		// TODO: Check if scene has changes
 		Selection::SetActiveObject(nullptr);
-		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		if (it == m_OpenedSceneIDs.end()) return;
+		const size_t index = it - m_OpenedSceneIDs.begin();
+		GScene* pScene = GetOpenScene(uuid);
+		SetSceneDirty(pScene, false);
 		m_OpenedSceneIDs.erase(it);
-		SetSceneDirty(pScenes->GetOpenScene(uuid), false);
-		pScenes->CloseScene(uuid);
+		m_pOpenScenes.erase(m_pOpenScenes.begin() + index);
+		delete pScene;
 
-		GScene* pActiveScene = pScenes->GetActiveScene();
+		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 	}
 
@@ -111,34 +121,9 @@ namespace Glory::Editor
 		return it != m_OpenedSceneIDs.end();
 	}
 
-	void EditorSceneManager::CloseAll()
-	{
-		m_OpenedSceneIDs.clear();
-		m_DirtySceneIDs.clear();
-		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
-		pScenes->CloseAllScenes();
-		TitleBar::SetText("Scene", "No Scene open");
-	}
-
-	size_t EditorSceneManager::OpenSceneCount()
-	{
-		return m_OpenedSceneIDs.size();
-	}
-
 	UUID EditorSceneManager::GetOpenSceneUUID(size_t index)
 	{
 		return m_OpenedSceneIDs[index];
-	}
-
-	GScene* EditorSceneManager::GetOpenScene(size_t index)
-	{
-		const UUID uuid = GetOpenSceneUUID(index);
-		return EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetOpenScene(index);
-	}
-
-	GScene* EditorSceneManager::GetOpenScene(UUID uuid)
-	{
-		return EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetOpenScene(uuid);
 	}
 
 	void EditorSceneManager::SaveScene(UUID uuid)
@@ -160,13 +145,17 @@ namespace Glory::Editor
 		m_CurrentlySavingScene = uuid;
 
 		const char* filters[1] = { "*.gscene" };
-		const char* path = tinyfd_saveFileDialog("Save Scene", EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath().data(), 1, filters, "Glory Scene");
+		const char* path = tinyfd_saveFileDialog("Save Scene",
+			EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath().data(),
+			1, filters, "Glory Scene");
 
 		if (!path) return;
 
 		std::filesystem::path relativePath = path;
-		relativePath = relativePath.lexically_relative(EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath());
-		UUID existingAsset = EditorAssetDatabase::FindAssetUUID(relativePath.string());
+		relativePath = relativePath.lexically_relative(
+			EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath()
+		);
+		const UUID existingAsset = EditorAssetDatabase::FindAssetUUID(relativePath.string());
 
 		if (existingAsset != 0)
 		{
@@ -181,12 +170,11 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SerializeOpenScenes(YAML::Emitter& out)
 	{
-		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		out << YAML::BeginSeq;
-		for (size_t i = 0; i < m_OpenedSceneIDs.size(); i++)
+		for (size_t i = 0; i < m_pOpenScenes.size(); i++)
 		{
-			UUID uuid = m_OpenedSceneIDs[i];
-			GScene* pScene = pScenes->GetOpenScene(uuid);
+			GScene* pScene = m_pOpenScenes[i];
+			const UUID uuid = pScene->GetUUID();
 			out << YAML::BeginMap;
 			out << YAML::Key << "Name";
 			out << YAML::Value << pScene->Name();
@@ -222,13 +210,6 @@ namespace Glory::Editor
 		TitleBar::SetText("Scene", pScene ? pScene->Name().c_str() : "No Scene open");
 	}
 
-	GScene* EditorSceneManager::GetActiveScene()
-	{
-		GScene* pScene = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetActiveScene();
-		if (!pScene) pScene = NewScene();
-		return pScene;
-	}
-
 	void EditorSceneManager::SetSceneDirty(GScene* pScene, bool dirty)
 	{
 		if (!pScene) return;
@@ -262,8 +243,8 @@ namespace Glory::Editor
 
 		/* Get correct parent to deserialize to */
 		GScene* pScene = entity.GetScene();
-		if (!pScene) pScene = EditorSceneManager::GetActiveScene();
-		if (!pScene) pScene = EditorSceneManager::NewScene();
+		if (!pScene) pScene = GetActiveScene();
+		if (!pScene) pScene = NewScene();
 
 		/* Serialize the objects entire heirarchy */
 		YAML::Emitter out;
@@ -304,6 +285,26 @@ namespace Glory::Editor
 
 		///* Set scene dirty */
 		SetSceneDirty(pScene);
+	}
+
+	void EditorSceneManager::OnInitialize()
+	{
+	}
+
+	void EditorSceneManager::OnCleanup()
+	{
+	}
+
+	void EditorSceneManager::OnSetActiveScene(GScene* pActiveScene)
+	{
+		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
+	}
+
+	void EditorSceneManager::OnCloseAll()
+	{
+		m_OpenedSceneIDs.clear();
+		m_DirtySceneIDs.clear();
+		TitleBar::SetText("Scene", "No Scene open");
 	}
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)

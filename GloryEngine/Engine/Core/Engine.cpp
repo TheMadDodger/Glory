@@ -210,7 +210,7 @@ namespace Glory
 	}
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
-		: m_pSceneManager(new SceneManager(this)), m_pThreadManager(ThreadManager::GetInstance()),
+		: m_pSceneManager(createInfo.pSceneManager), m_pThreadManager(ThreadManager::GetInstance()),
 		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
 		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
@@ -338,7 +338,7 @@ namespace Glory
 			delete m_pAllModules[(size_t)i];
 		}
 
-		m_pSceneManager->Cleanup();
+		m_pSceneManager = nullptr;
 
 		delete m_pJobManager;
 		m_pJobManager = nullptr;
@@ -352,9 +352,6 @@ namespace Glory
 
 		delete m_pGraphicsThread;
 		m_pGraphicsThread = nullptr;
-
-		delete m_pSceneManager;
-		m_pSceneManager = nullptr;
 
 		m_Initialized = false;
 	}
@@ -432,6 +429,11 @@ namespace Glory
 	Jobs::JobManager& Engine::Jobs()
 	{
 		return *m_pJobManager;
+	}
+
+	void Engine::SetSceneManager(SceneManager* pManager)
+	{
+		m_pSceneManager = pManager;
 	}
 
 	void Engine::SetShaderManager(ShaderManager* pManager)
@@ -609,10 +611,10 @@ namespace Glory
 	{
 		GameThreadFrameStart();
 		m_Console->Update();
-		m_pSceneManager->Update();
-		m_pSceneManager->Draw();
 		WindowModule* pWindows = GetMainModule<WindowModule>();
 		if (pWindows) pWindows->PollEvents();
+		m_pSceneManager->Update();
+		m_pSceneManager->Draw();
 		ModulesLoop();
 		GameThreadFrameEnd();
 	}

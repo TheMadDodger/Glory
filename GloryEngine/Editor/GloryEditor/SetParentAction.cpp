@@ -1,5 +1,6 @@
 #include "SetParentAction.h"
 #include "EditorSceneManager.h"
+#include "EditorApplication.h"
 
 #include <GScene.h>
 
@@ -10,7 +11,7 @@ namespace Glory::Editor
 
 	void SetParentAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		entity.SetParent(m_OldParent ? pScene->GetEntityByUUID(m_OldParent).GetEntityID() : 0);
@@ -19,7 +20,7 @@ namespace Glory::Editor
 
 	void SetParentAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		GScene* pScene = EditorSceneManager::GetOpenScene(m_SceneID);
+		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		entity.SetParent(m_NewParent ? pScene->GetEntityByUUID(m_NewParent).GetEntityID() : 0);

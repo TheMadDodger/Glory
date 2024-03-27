@@ -1,53 +1,69 @@
 #pragma once
 #include "GloryEditor.h"
 
-#include <GScene.h>
+#include <SceneManager.h>
 #include <yaml-cpp/yaml.h>
 #include <vector>
+#include <Entity.h>
+
+namespace Glory
+{
+	class GScene;
+}
 
 namespace Glory::Editor
 {
-	class EditorSceneManager
+	class EditorApplication;
+
+	class EditorSceneManager final : public SceneManager
 	{
 	public:
-		static GLORY_EDITOR_API GScene* NewScene(bool additive = false);
-		static GLORY_EDITOR_API void OpenScene(UUID uuid, bool additive);
-		static GLORY_EDITOR_API GScene* OpenSceneInMemory(UUID uuid);
-		static GLORY_EDITOR_API void OpenScene(GScene* pScene, UUID uuid = 0);
-		static GLORY_EDITOR_API void SaveOpenScenes();
+		EditorSceneManager(EditorApplication* pApplication);
+		virtual ~EditorSceneManager();
 
-		static GLORY_EDITOR_API void CloseScene(UUID uuid);
-		static GLORY_EDITOR_API bool IsSceneOpen(UUID uuid);
+		/* Scene manager overrides */
+		GLORY_EDITOR_API GScene* NewScene(const std::string& name="Empty Scene", bool additive=false);
+		GLORY_EDITOR_API void OpenScene(UUID uuid, bool additive) override;
 
-		static GLORY_EDITOR_API void CloseAll();
+		/* Editor only functionality */
+		GLORY_EDITOR_API static GScene* OpenSceneInMemory(UUID uuid);
+		GLORY_EDITOR_API void OpenScene(GScene* pScene, UUID uuid = 0);
+		GLORY_EDITOR_API void SaveOpenScenes();
 
-		static GLORY_EDITOR_API size_t OpenSceneCount();
-		static GLORY_EDITOR_API UUID GetOpenSceneUUID(size_t index);
-		static GLORY_EDITOR_API GScene* GetOpenScene(size_t index);
-		static GLORY_EDITOR_API GScene* GetOpenScene(UUID uuid);
+		GLORY_EDITOR_API void CloseScene(UUID uuid);
+		GLORY_EDITOR_API bool IsSceneOpen(UUID uuid);
 
-		static GLORY_EDITOR_API void SaveScene(UUID uuid);
-		static GLORY_EDITOR_API void SaveSceneAs(UUID uuid);
+		GLORY_EDITOR_API UUID GetOpenSceneUUID(size_t index);
 
-		static GLORY_EDITOR_API void SerializeOpenScenes(YAML::Emitter& out);
-		static GLORY_EDITOR_API void OpenAllFromNode(YAML::Node& node);
+		GLORY_EDITOR_API void SaveScene(UUID uuid);
+		GLORY_EDITOR_API void SaveSceneAs(UUID uuid);
 
-		static GLORY_EDITOR_API void SetActiveScene(GScene* pScene);
-		static GLORY_EDITOR_API GScene* GetActiveScene();
-		static GLORY_EDITOR_API void SetSceneDirty(GScene* pScene, bool dirty = true);
+		GLORY_EDITOR_API void SerializeOpenScenes(YAML::Emitter& out);
+		GLORY_EDITOR_API void OpenAllFromNode(YAML::Node& node);
 
-		static GLORY_EDITOR_API bool IsSceneDirty(GScene* pScene);
-		static GLORY_EDITOR_API bool HasUnsavedChanges();
+		GLORY_EDITOR_API void SetActiveScene(GScene* pScene);
+		GLORY_EDITOR_API void SetSceneDirty(GScene* pScene, bool dirty = true);
 
-		static GLORY_EDITOR_API void DuplicateSceneObject(Entity entity);
-		static GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, YAML::Node& node);
+		GLORY_EDITOR_API bool IsSceneDirty(GScene* pScene);
+		GLORY_EDITOR_API bool HasUnsavedChanges();
 
-	private:
-		static void Save(UUID uuid, const std::string& path, bool newScene = false);
+		GLORY_EDITOR_API void DuplicateSceneObject(Entity entity);
+		GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, YAML::Node& node);
 
 	private:
-		static std::vector<UUID> m_OpenedSceneIDs;
-		static std::vector<UUID> m_DirtySceneIDs;
-		static UUID m_CurrentlySavingScene;
+		virtual void OnInitialize() override;
+		virtual void OnCleanup() override;
+		virtual void OnCloseAll() override;
+		virtual void OnSetActiveScene(GScene* pActiveScene) override;
+
+	private:
+		void Save(UUID uuid, const std::string& path, bool newScene = false);
+
+	private:
+		std::vector<UUID> m_OpenedSceneIDs;
+		std::vector<UUID> m_DirtySceneIDs;
+		UUID m_CurrentlySavingScene = 0;
+
+		EditorApplication* m_pApplication;
 	};
 }
