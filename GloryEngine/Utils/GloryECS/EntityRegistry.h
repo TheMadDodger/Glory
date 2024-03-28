@@ -197,6 +197,8 @@ namespace Glory::Utils::ECS
 		std::vector<EntityID>& RootOrder();
 		const std::vector<EntityID>& RootOrder() const;
 
+		EntityID CopyEntityToOtherRegistry(EntityID entity, EntityID parent, EntityRegistry* pRegistry);
+
 	private:
 		friend class ComponentTypes;
 

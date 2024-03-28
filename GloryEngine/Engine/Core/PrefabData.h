@@ -2,6 +2,7 @@
 #include "Resource.h"
 
 #include <EntityID.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {
@@ -9,7 +10,7 @@ namespace Glory
     class GScene;
     class Entity;
 
-    struct PrefabNode
+    /*struct PrefabNode
     {
     public:
         PrefabNode(PrefabNode&& other) noexcept;
@@ -45,24 +46,22 @@ namespace Glory
 
     private:
         void Load(const Entity& entity);
-    };
+    };*/
 
     class PrefabData : public Resource
     {
     public:
         PrefabData();
-        PrefabData(PrefabNode&& rootNode) noexcept;
         virtual ~PrefabData() = default;
-
         static PrefabData* CreateFromEntity(GScene* pScene, Utils::ECS::EntityID entity);
 
-        const PrefabNode& RootNode() const;
-
-        void SetRootNode(PrefabNode&& node);
+    private:
+        static void CopyEntity(PrefabData* pPrefab, GScene* pScene, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 
     private:
         friend struct PrefabNode;
-        PrefabNode m_RootNode;
+        Utils::ECS::EntityRegistry m_Registry;
+        std::map<Utils::ECS::EntityID, UUID> m_EntityToID;
         std::vector<UUID> m_OriginalUUIDs;
     };
 }

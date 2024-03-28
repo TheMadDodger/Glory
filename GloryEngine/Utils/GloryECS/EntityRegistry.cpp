@@ -333,6 +333,24 @@ namespace Glory::Utils::ECS
 		return m_RootOrder;
 	}
 
+	EntityID EntityRegistry::CopyEntityToOtherRegistry(EntityID entity, EntityID parent, EntityRegistry* pRegistry)
+	{
+		const EntityID newEntity = pRegistry->CreateEntity();
+		EntityView* pNewEntityView = pRegistry->GetEntityView(newEntity);
+
+		if (parent) pRegistry->SetParent(newEntity, parent);
+		EntityView* pEntityView = GetEntityView(entity);
+		pNewEntityView->Active() = pEntityView->Active();
+		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
+		{
+			const uint32_t type = pEntityView->ComponentTypeAt(i);
+			const UUID uuid = pEntityView->ComponentUUIDAt(i);
+			pRegistry->CreateComponent(newEntity, type, uuid, false);
+		}
+
+		return newEntity;
+	}
+
 	void EntityRegistry::InvokeAll(InvocationType invocationType)
 	{
 		for (size_t i = 0; i < m_pViews.size(); ++i)
