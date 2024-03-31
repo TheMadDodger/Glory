@@ -16,7 +16,8 @@ project "GloryCore"
 
 	vpaths
 	{
-		["Asset Management"] = { "PrefabDataLoader.*", "PrefabData.*", "BinaryStream.*", "AssetArchive.*", "AssetDatabase.*", "AssetGroup.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*", "ShaderManager.*", "AssetCallbacks.*" },
+		["Asset Management"] = { "PrefabData.*", "BinaryStream.*", "AssetArchive.*", "AssetDatabase.*", "AssetGroup.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*", "ShaderManager.*", "AssetCallbacks.*" },
+		["Resources"] = { "PrefabData.*", "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*", "MaterialPropertyInfo.*", "TextureData.*", "MeshData.*", "ModelData.*", "ImageData.*", "FileData.*", "ShaderSourceData.*" },
 		["Console"] = { "Logs.*", "CommandLine.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
 		["Core"] = { "ObjectManager.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "Engine.*", "GraphicsThread.*", "Object.*", "UUID.*", "Glory.*" },
 		["Modules/Base"] = { "Module.*", "ModuleMetaData.*", "IModuleLoopHandler.*", "ModuleSettings.*" },
@@ -32,12 +33,10 @@ project "GloryCore"
 		["Modules/Renderer/Lighting"] = { "LightData.*" },
 		["Modules/ResourceLoading"] = {  },
 		["Modules/ResourceLoading/Base"] = { "ImportSettings.*", "Resource.*", "ResourceLoaderModule.*" },
-		["Modules/ResourceLoading/File"] = { "FileData.*", "FileLoaderModule.*" },
-		["Modules/ResourceLoading/Material"] = { "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*", "MaterialPropertyInfo.*" },
-		["Modules/ResourceLoading/Models"] = { "MeshData.*", "ModelData.*", "ModelLoaderModule.*" },
-		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*", "ShaderSourceData.*" },
-		["Modules/ResourceLoading/Images"] = { "ImageData.*" },
-		["Modules/ResourceLoading/Textures"] = { "TextureData.*", "TextureDataLoaderModule.*" },
+		["Modules/ResourceLoading/File"] = { "FileLoaderModule.*" },
+		["Modules/ResourceLoading/Models"] = { "ModelLoaderModule.*" },
+		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*" },
+		["Modules/ResourceLoading/Textures"] = { "TextureDataLoaderModule.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
 		["Modules/Input"] = { "InputModule.*", "Input.*", "KeyEnums.*", "PlayerInput.*" },
 		["Modules/Physics"] = { "ShapeManager.*", "CharacterManager.*", "PhysicsModule.*", "Shapes.*", "Physics.*", "ShapeProperty.*" },

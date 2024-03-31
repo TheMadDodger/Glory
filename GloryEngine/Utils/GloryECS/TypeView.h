@@ -22,6 +22,7 @@ namespace Glory::Utils::ECS
 		const uint32_t ComponentTypeHash() const;
 		virtual const std::type_index ComponentType() const = 0;
 		virtual void* Create(EntityID entityID) = 0;
+		virtual void* Create(EntityID entityID, void* data) = 0;
 		virtual void* GetComponentAddress(EntityID entityID, size_t number = 0) = 0;
 
 		virtual void Invoke(const InvocationType& callbackType, EntityRegistry* pRegistry, EntityID entity, void* pComponentAddress) = 0;
@@ -98,6 +99,16 @@ namespace Glory::Utils::ECS
 			m_Entities.push_back(entityID);
 			size_t index = m_ComponentData.size();
 			m_ComponentData.push_back(T());
+			m_ActiveStates.Reserve(index);
+			return &m_ComponentData[index];
+		}
+
+		virtual void* Create(EntityID entityID, void* data) override
+		{
+			T& pOther = *static_cast<T*>(data);
+			m_Entities.push_back(entityID);
+			size_t index = m_ComponentData.size();
+			m_ComponentData.push_back(pOther);
 			m_ActiveStates.Reserve(index);
 			return &m_ComponentData[index];
 		}

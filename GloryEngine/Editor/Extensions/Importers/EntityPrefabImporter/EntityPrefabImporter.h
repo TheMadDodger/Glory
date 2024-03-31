@@ -18,9 +18,6 @@ namespace Glory::Editor
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 		virtual bool SaveResource(const std::filesystem::path& path, PrefabData* pResource) const override;
 
-		void WriteChild(YAML::Emitter& out, const PrefabNode& parent) const;
-		void ReadChild(PrefabData* pPrefab, Utils::NodeValueRef nodeValue, PrefabNode& node) const;
-
 	private:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;

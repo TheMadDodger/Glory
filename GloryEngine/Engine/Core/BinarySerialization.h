@@ -1,4 +1,5 @@
 #pragma once
+#include <EntityID.h>
 
 namespace Glory
 {
@@ -6,6 +7,10 @@ namespace Glory
 	namespace Utils::Reflect
 	{
 		struct FieldData;
+	}
+	namespace Utils::ECS
+	{
+		class EntityRegistry;
 	}
 
 	void SerializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data);

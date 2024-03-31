@@ -46,6 +46,16 @@ namespace Editor
          */
         GLORY_EDITOR_API static GScene* DeserializeScene(Engine* pEngine, YAML::Node& object, UUID uuid, const std::string& name, Flags flags = Flags(0));
 
+        /** @brief Deserialize a scene from a YAML node
+         * @param pEngine The current engine instance
+         * @param pScene Scene instance to deserialize the data into
+         * @param object The root yaml node of the serialized scene
+         * @param uuid UUID to pass to the scenes constructor
+         * @param name Name to pass to the scenes constructor
+         * @param flags Deserialization flags
+         */
+        GLORY_EDITOR_API static void DeserializeScene(Engine* pEngine, GScene* pScene, YAML::Node& object, UUID uuid, const std::string& name, Flags flags = Flags(0));
+
         /** @brief Serialize an entity
          * @param pEngine The current engine instance
          * @param pScene The scene in which the entity exists

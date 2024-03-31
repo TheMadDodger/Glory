@@ -71,6 +71,7 @@ namespace Glory::Utils::ECS
 		}
 
 		void* CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, bool invokeAdd=true);
+		void* CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data, bool invokeAdd=true);
 
 		template<typename Component>
 		TypeView<Component>* GetTypeView()

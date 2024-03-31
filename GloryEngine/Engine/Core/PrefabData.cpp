@@ -55,7 +55,9 @@ namespace Glory
 		const UUID uuid = pScene->GetEntityUUID(entity);
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		const Utils::ECS::EntityID newEntity = registry.CopyEntityToOtherRegistry(entity, parent, &pPrefab->m_Registry);
-		pPrefab->m_EntityToID.emplace(newEntity, uuid);
+		pPrefab->m_UUIds.emplace(newEntity, uuid);
+		pPrefab->m_Ids.emplace(uuid, newEntity);
+		pPrefab->m_Names.emplace(newEntity, pScene->EntityName(entity));
 		Utils::ECS::EntityView* pEntityView = registry.GetEntityView(entity);
 		for (size_t i = 0; i < pEntityView->ChildCount(); ++i)
 		{

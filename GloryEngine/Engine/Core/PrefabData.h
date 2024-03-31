@@ -1,5 +1,5 @@
 #pragma once
-#include "Resource.h"
+#include "GScene.h"
 
 #include <EntityID.h>
 #include <EntityRegistry.h>
@@ -7,7 +7,6 @@
 namespace Glory
 {
     class PrefabData;
-    class GScene;
     class Entity;
 
     /*struct PrefabNode
@@ -48,7 +47,7 @@ namespace Glory
         void Load(const Entity& entity);
     };*/
 
-    class PrefabData : public Resource
+    class PrefabData : public GScene
     {
     public:
         PrefabData();
@@ -57,11 +56,5 @@ namespace Glory
 
     private:
         static void CopyEntity(PrefabData* pPrefab, GScene* pScene, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
-
-    private:
-        friend struct PrefabNode;
-        Utils::ECS::EntityRegistry m_Registry;
-        std::map<Utils::ECS::EntityID, UUID> m_EntityToID;
-        std::vector<UUID> m_OriginalUUIDs;
     };
 }
