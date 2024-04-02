@@ -28,7 +28,7 @@ namespace Editor
             /** @brief Skip deserialization of prefab instances */
             IgnorePrefabs = 2,
             /** @brief Prevent component callbacks from firing */
-            NoComponentCallbacks = 3,
+            NoComponentCallbacks = 4,
         };
 
         /** @brief Serialize a scene to a YAML emitter

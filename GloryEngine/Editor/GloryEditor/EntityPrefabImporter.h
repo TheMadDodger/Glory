@@ -5,7 +5,7 @@
 
 namespace Glory::Editor
 {
-	class EntityPrefabImporter : public ImporterTemplate<PrefabData>
+	class EntityPrefabImporter : public YAMLImporterTemplate<PrefabData>
 	{
 	public:
 		EntityPrefabImporter();
