@@ -8,6 +8,7 @@
 #include "SceneManager.h"
 #include "Engine.h"
 #include "BinaryStream.h"
+#include "BinarySerialization.h"
 
 #include <NodeRef.h>
 
@@ -199,15 +200,19 @@ namespace Glory
 		const uint32_t second32Bits = uint32_t(uuid >> 32);
 		const uint32_t seed = first32Bits & second32Bits;
 		UUIDRemapper remapper{ seed };
-		remapper.EnforceRemap(pPrefab->RootNode().OriginalUUID(), uuid);
+
+		const Utils::ECS::EntityID root = pPrefab->Child(0, 0);
+		remapper.EnforceRemap(pPrefab->GetEntityUUID(root), uuid);
 		return InstantiatePrefab(parent, pPrefab, RandomDevice::Seed(), pos, rot, scale);
 	}
 
 	Entity GScene::InstantiatePrefab(UUID parent, PrefabData* pPrefab, uint32_t remapSeed, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
+		auto itor = m_Ids.find(parent);
+		const Utils::ECS::EntityID parentEntity = itor != m_Ids.end() ? itor->second : 0;
+
 		UUIDRemapper remapper{ remapSeed };
-		const PrefabNode& rootNode = pPrefab->RootNode();
-		Entity entity = InstantiatePrefabNode(parent, rootNode, remapper);
+		Entity entity = Instantiate(pPrefab, remapper, parentEntity);
 
 		Transform& transform = entity.GetComponent<Transform>();
 		transform.Position = pos;
@@ -220,8 +225,9 @@ namespace Glory
 
 	Entity GScene::InstantiatePrefab(UUID parent, PrefabData* pPrefab, UUIDRemapper& remapper, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
-		const PrefabNode& rootNode = pPrefab->RootNode();
-		Entity entity = InstantiatePrefabNode(parent, rootNode, remapper);
+		auto itor = m_Ids.find(parent);
+		const Utils::ECS::EntityID parentEntity = itor != m_Ids.end() ? itor->second : 0;
+		Entity entity = Instantiate(pPrefab, remapper, parentEntity);
 
 		Transform& transform = entity.GetComponent<Transform>();
 		transform.Position = pos;
@@ -306,191 +312,140 @@ namespace Glory
 		}
 	}
 
-	Entity GScene::InstantiatePrefabNode(UUID parent, const PrefabNode& node, UUIDRemapper& remapper)
+	Entity GScene::InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent)
 	{
-		const UUID objectID = remapper(node.OriginalUUID());
-		const UUID transformID = remapper(node.TransformUUID());
-		Entity entity = CreateEmptyObject(node.Name(), objectID, transformID);
-		const Utils::ECS::EntityID entityID = entity.GetEntityID();
-		const Entity parentEntity = GetEntityByUUID(parent);
+		const Utils::ECS::EntityID newEntity = m_Registry.CreateEntity();
+		Utils::ECS::EntityView* pNewEntityView = m_Registry.GetEntityView(newEntity);
 
-		if (parentEntity.IsValid())
-			SetParent(entity.GetEntityID(), parentEntity.GetEntityID());
-		
-		entity.SetActive(node.ActiveSelf());
-		
-		const std::string& serializedComponents = node.SerializedComponents();
-		YAML::Node components = YAML::Load(serializedComponents);
-		
-		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
-		
-		size_t currentComponentIndex = 0;
-		for (size_t i = 0; i < components.size(); ++i)
+		const UUID entityID = pOther->GetEntityUUID(entity);
+		const UUID remappedEntityID = IDRemapper(entityID);
+		m_Ids.emplace(remappedEntityID, newEntity);
+		m_UUIds.emplace(newEntity, remappedEntityID);
+		m_Names.emplace(newEntity, pOther->EntityName(entity));
+
+		if (parent) m_Registry.SetParent(newEntity, parent);
+		Utils::ECS::EntityView* pEntityView = pOther->m_Registry.GetEntityView(entity);
+		pNewEntityView->Active() = pEntityView->Active();
+		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
-			YAML::Node nextObject = components[i];
-			YAML::Node subNode;
-			uint32_t typeHash = 0;
-			UUID originalUUID = 0;
-			std::string typeName = "";
-			YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
-			YAML_READ(nextObject, subNode, UUID, originalUUID, uint64_t);
-
-			UUID compUUID = remapper(originalUUID);
-
-			void* pComponentAddress = nullptr;
-			if (typeHash != transformTypeHash) pComponentAddress = m_Registry.CreateComponent(entityID, typeHash, compUUID);
-			else
-			{
-				Utils::ECS::EntityView* pEntityView = m_Registry.GetEntityView(entityID);
-				compUUID = pEntityView->ComponentUUIDAt(0);
-				pComponentAddress = m_Registry.GetComponentAddress(entityID, compUUID);
-			}
-
-			const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(typeHash);
-			YAML::Node originalProperties = nextObject["Properties"];
-			m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
-			/*else
-			{
-				YAML::Node finalProperties = YAML::Node(YAML::NodeType::Map);
-		
-				Utils::NodeRef originalPropertiesRef = originalProperties;
-				Utils::NodeRef finalPropertiesRef = finalProperties;
-		
-				Utils::NodeValueRef props = originalPropertiesRef.ValueRef();
-				Utils::NodeValueRef finalProps = finalPropertiesRef.ValueRef();
-		
-				finalPropertiesRef["m_Script"].Set(originalPropertiesRef["m_Script"].As<uint64_t>());
-				YAML::Node scriptData = originalProperties["ScriptData"];
-				for (YAML::const_iterator itor = scriptData.begin(); itor != scriptData.end(); ++itor)
-				{
-					const std::string name = itor->first.as<std::string>();
-					Utils::NodeValueRef prop = props["ScriptData"][name];
-					if (!prop.IsMap())
-					{
-						finalProps[name].Set(prop.Node());
-						continue;
-					}
-		
-					Utils::NodeValueRef originalSceneUUD = prop["SceneUUID"];
-					Utils::NodeValueRef originalObjectUUD = prop["ObjectUUID"];
-		
-					Utils::NodeValueRef sceneUUID = finalProps["ScriptData"][name]["SceneUUID"];
-					Utils::NodeValueRef objectUUID = finalProps["ScriptData"][name]["ObjectUUID"];
-		
-					if (!originalSceneUUD.Exists() || !originalObjectUUD.Exists())
-					{
-						finalProps["ScriptData"][name].Set(prop.Node());
-						continue;
-					}
-		
-					sceneUUID.Set((uint64_t)GetUUID());
-					const UUID uuid = originalObjectUUD.As<uint64_t>();
-					UUID remapped;
-					if (!remapper.Find(uuid, remapped))
-						remapped = uuid;
-		
-					objectUUID.Set(remapped);
-				}
-
-				
-				m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
-			}*/
-		
-			m_Registry.GetTypeView(typeHash)->Invoke(Utils::ECS::InvocationType::OnValidate, &m_Registry, entityID, pComponentAddress);
-			++currentComponentIndex;
-		}
-		
-		for (size_t i = 0; i < node.ChildCount(); ++i)
-		{
-			const PrefabNode& childNode = node.ChildNode(i);
-			InstantiatePrefabNode(objectID, childNode, remapper);
-		}
-		
-		return entity;
-	}
-
-	void DeserializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data)
-	{
-		const uint32_t type = pFieldData->Type();
-		const uint32_t elementType = pFieldData->ArrayElementType();
-		const Utils::Reflect::TypeData* pElementTypeData = Utils::Reflect::Reflect::GetTyeData(elementType);
-
-		switch (type)
-		{
-		case uint32_t(CustomTypeHash::Struct): {
-			for (size_t i = 0; i < pElementTypeData->FieldCount(); ++i)
-			{
-				const Utils::Reflect::FieldData* pField = pElementTypeData->GetFieldData(i);
-				void* pAddress = pField->GetAddress(data);
-				DeserializeData(container, pField, pAddress);
-			}
-			break;
-		}
-
-		case uint32_t(CustomTypeHash::Array): {
-			size_t arraySize;
-			container.Read(arraySize);
-			Utils::Reflect::Reflect::ResizeArray(data, elementType, arraySize);
-			for (size_t i = 0; i < arraySize; ++i)
-			{
-				const Utils::Reflect::FieldData* pElementField = pFieldData->GetArrayElementFieldData(i);
-				void* pAddress = pElementField->GetAddress(data);
-				DeserializeData(container, pElementField, pAddress);
-			}
-			break;
-		}
-
-		case uint32_t(CustomTypeHash::Enum):
-		case uint32_t(CustomTypeHash::Basic):
-		default: {
-			const size_t size = pFieldData->Size();
-			container.Read(data, size);
-			break;
-		}
-		}
-	}
-
-	void DeserializeTree(BinaryStream& container, Utils::ECS::EntityRegistry& registry)
-	{
-		Utils::ECS::EntityID parent;
-		container.Read(parent);
-
-		/* Child count first */
-		size_t childCount;
-		container.Read(childCount);
-
-		if (parent == 0) {
-			/* We only need to deserialize the order */
-			registry.ResizeRootOrder(childCount);
-			container.Read(registry.RootOrder().data(), sizeof(Utils::ECS::EntityID)*childCount);
-			return;
-		}
-
-		/* Child order */
-		Utils::ECS::EntityView* pEntityView = registry.GetEntityView(parent);
-		pEntityView->ResizeChildren(childCount);
-		container.Read(pEntityView->ChildOrder().data(), sizeof(Utils::ECS::EntityID) * childCount);
-
-		/* Parent of this entity */
-		Utils::ECS::EntityID myParent;
-		container.Read(myParent).Read(pEntityView->HierarchyActive());
-		pEntityView->SetParent(myParent);
-
-		/* Component order */
-		size_t componentCount;
-		container.Read(componentCount);
-		pEntityView->ResizeComponentsOrder(componentCount);
-		container.Read(pEntityView->ComponentsOrder().data(), sizeof(UUID)*componentCount);
-
-		/* Component types */
-		for (size_t i = 0; i < componentCount; ++i)
-		{
+			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
-			uint32_t type;
-			container.Read(type);
-			pEntityView->SetType(uuid, type);
+			const UUID remappedID = IDRemapper(uuid);
+			void* data = pOther->m_Registry.GetComponentAddress(entity, uuid);
+			m_Registry.CopyComponent(newEntity, type, remappedID, data, false);
 		}
+
+		for (size_t i = 0; i < pOther->ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = pOther->Child(entity, i);
+			InstantiateEntity(pOther, IDRemapper, child, newEntity);
+		}
+
+		return Entity{ newEntity, this };
 	}
+
+	//Entity GScene::InstantiatePrefabNode(UUID parent, const PrefabNode& node, UUIDRemapper& remapper)
+	//{
+	//	const UUID objectID = remapper(node.OriginalUUID());
+	//	const UUID transformID = remapper(node.TransformUUID());
+	//	Entity entity = CreateEmptyObject(node.Name(), objectID, transformID);
+	//	const Utils::ECS::EntityID entityID = entity.GetEntityID();
+	//	const Entity parentEntity = GetEntityByUUID(parent);
+
+	//	if (parentEntity.IsValid())
+	//		SetParent(entity.GetEntityID(), parentEntity.GetEntityID());
+	//	
+	//	entity.SetActive(node.ActiveSelf());
+	//	
+	//	const std::string& serializedComponents = node.SerializedComponents();
+	//	YAML::Node components = YAML::Load(serializedComponents);
+	//	
+	//	const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
+	//	
+	//	size_t currentComponentIndex = 0;
+	//	for (size_t i = 0; i < components.size(); ++i)
+	//	{
+	//		YAML::Node nextObject = components[i];
+	//		YAML::Node subNode;
+	//		uint32_t typeHash = 0;
+	//		UUID originalUUID = 0;
+	//		std::string typeName = "";
+	//		YAML_READ(nextObject, subNode, TypeHash, typeHash, uint32_t);
+	//		YAML_READ(nextObject, subNode, UUID, originalUUID, uint64_t);
+
+	//		UUID compUUID = remapper(originalUUID);
+
+	//		void* pComponentAddress = nullptr;
+	//		if (typeHash != transformTypeHash) pComponentAddress = m_Registry.CreateComponent(entityID, typeHash, compUUID);
+	//		else
+	//		{
+	//			Utils::ECS::EntityView* pEntityView = m_Registry.GetEntityView(entityID);
+	//			compUUID = pEntityView->ComponentUUIDAt(0);
+	//			pComponentAddress = m_Registry.GetComponentAddress(entityID, compUUID);
+	//		}
+
+	//		const Utils::Reflect::TypeData* pTypeData = Utils::Reflect::Reflect::GetTyeData(typeHash);
+	//		YAML::Node originalProperties = nextObject["Properties"];
+	//		m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, originalProperties);
+	//		/*else
+	//		{
+	//			YAML::Node finalProperties = YAML::Node(YAML::NodeType::Map);
+	//	
+	//			Utils::NodeRef originalPropertiesRef = originalProperties;
+	//			Utils::NodeRef finalPropertiesRef = finalProperties;
+	//	
+	//			Utils::NodeValueRef props = originalPropertiesRef.ValueRef();
+	//			Utils::NodeValueRef finalProps = finalPropertiesRef.ValueRef();
+	//	
+	//			finalPropertiesRef["m_Script"].Set(originalPropertiesRef["m_Script"].As<uint64_t>());
+	//			YAML::Node scriptData = originalProperties["ScriptData"];
+	//			for (YAML::const_iterator itor = scriptData.begin(); itor != scriptData.end(); ++itor)
+	//			{
+	//				const std::string name = itor->first.as<std::string>();
+	//				Utils::NodeValueRef prop = props["ScriptData"][name];
+	//				if (!prop.IsMap())
+	//				{
+	//					finalProps[name].Set(prop.Node());
+	//					continue;
+	//				}
+	//	
+	//				Utils::NodeValueRef originalSceneUUD = prop["SceneUUID"];
+	//				Utils::NodeValueRef originalObjectUUD = prop["ObjectUUID"];
+	//	
+	//				Utils::NodeValueRef sceneUUID = finalProps["ScriptData"][name]["SceneUUID"];
+	//				Utils::NodeValueRef objectUUID = finalProps["ScriptData"][name]["ObjectUUID"];
+	//	
+	//				if (!originalSceneUUD.Exists() || !originalObjectUUD.Exists())
+	//				{
+	//					finalProps["ScriptData"][name].Set(prop.Node());
+	//					continue;
+	//				}
+	//	
+	//				sceneUUID.Set((uint64_t)GetUUID());
+	//				const UUID uuid = originalObjectUUD.As<uint64_t>();
+	//				UUID remapped;
+	//				if (!remapper.Find(uuid, remapped))
+	//					remapped = uuid;
+	//	
+	//				objectUUID.Set(remapped);
+	//			}
+
+	//			
+	//			m_pManager->GetEngine()->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, finalProperties);
+	//		}*/
+	//	
+	//		m_Registry.GetTypeView(typeHash)->Invoke(Utils::ECS::InvocationType::OnValidate, &m_Registry, entityID, pComponentAddress);
+	//		++currentComponentIndex;
+	//	}
+	//	
+	//	for (size_t i = 0; i < node.ChildCount(); ++i)
+	//	{
+	//		const PrefabNode& childNode = node.ChildNode(i);
+	//		InstantiatePrefabNode(objectID, childNode, remapper);
+	//	}
+	//	
+	//	return entity;
+	//}
 
 	void GScene::Deserialize(BinaryStream& container)
 	{
@@ -551,6 +506,20 @@ namespace Glory
 		m_MarkedForDestruct = true;
 	}
 
+	Entity GScene::Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent)
+	{
+		Entity firstEntity;
+
+		for (size_t i = 0; i < pOther->ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = pOther->Child(0, i);
+			const Entity nextEntity = InstantiateEntity(pOther, IDRemapper, child, parent);
+			if (i == 0)
+				firstEntity = nextEntity;
+		}
+		return firstEntity;
+	}
+
 	SceneManager* GScene::Manager()
 	{
 		return m_pManager;
@@ -559,79 +528,6 @@ namespace Glory
 	void GScene::SetManager(SceneManager* pManager)
 	{
 		m_pManager = pManager;
-	}
-
-	void SerializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data)
-	{
-		const uint32_t type = pFieldData->Type();
-		const uint32_t elementType = pFieldData->ArrayElementType();
-		const Utils::Reflect::TypeData* pElementTypeData = Utils::Reflect::Reflect::GetTyeData(elementType);
-
-		switch (type)
-		{
-		case uint32_t(CustomTypeHash::Struct): {
-			for (size_t i = 0; i < pElementTypeData->FieldCount(); ++i)
-			{
-				const Utils::Reflect::FieldData* pField = pElementTypeData->GetFieldData(i);
-				void* pAddress = pField->GetAddress(data);
-				SerializeData(container, pField, pAddress);
-			}
-			break;
-		}
-
-		case uint32_t(CustomTypeHash::Array): {
-			const size_t arraySize = Utils::Reflect::Reflect::ArraySize(data, elementType);
-			container.Write(arraySize);
-			for (size_t i = 0; i < arraySize; ++i)
-			{
-				const Utils::Reflect::FieldData* pElementField = pFieldData->GetArrayElementFieldData(i);
-				void* pAddress = pElementField->GetAddress(data);
-				SerializeData(container, pElementField, pAddress);
-			}
-			break;
-		}
-
-		case uint32_t(CustomTypeHash::Enum):
-		case uint32_t(CustomTypeHash::Basic):
-		default: {
-			const size_t size = pFieldData->Size();
-			container.Write(data, size);
-			break;
-		}
-		}
-	}
-
-	void SerializeTree(BinaryStream& container, const Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID parent)
-	{
-		/* Child count first */
-		container.Write(parent);
-
-		if (parent == 0) {
-			/* We only need to serialize the order */
-			const auto& rootOrder = registry.RootOrder();
-			container.Write(rootOrder.size()).Write(rootOrder.data(), sizeof(Utils::ECS::EntityID)*rootOrder.size());
-			return;
-		}
-
-		/* Child order */
-		Utils::ECS::EntityView* pEntityView = registry.GetEntityView(parent);
-		const auto& childOrder = pEntityView->ChildOrder();
-		container.Write(childOrder.size()).Write(childOrder.data(), sizeof(Utils::ECS::EntityID)*childOrder.size());
-
-		/* Parent of this entity */
-		container.Write(pEntityView->Parent()).Write(pEntityView->HierarchyActive());
-
-		/* Component order */
-		const auto& componentOrder = pEntityView->ComponentsOrder();
-		container.Write(componentOrder.size()).Write(componentOrder.data(), sizeof(UUID)*componentOrder.size());
-
-		/* Component types */
-		for (size_t i = 0; i < componentOrder.size(); ++i)
-		{
-			const UUID uuid = componentOrder[i];
-			const uint32_t type = pEntityView->ComponentType(uuid);
-			container.Write(type);
-		}
 	}
 
 	void GScene::Serialize(BinaryStream& container) const

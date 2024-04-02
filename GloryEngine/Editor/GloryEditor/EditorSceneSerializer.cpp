@@ -32,8 +32,14 @@ namespace Glory::Editor
 	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)
 	{
 		GScene* pScene = new GScene(name, uuid);
+		DeserializeScene(pEngine, pScene, object, uuid, name, flags);
+		return pScene;
+	}
+
+	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)
+	{
 		pScene->SetManager(pEngine->GetSceneManager());
-		Utils::NodeRef node{object};
+		Utils::NodeRef node{ object };
 
 		Utils::NodeValueRef entities = node["Entities"];
 		for (size_t i = 0; i < entities.Size(); ++i)
@@ -42,7 +48,6 @@ namespace Glory::Editor
 			DeserializeEntity(pEngine, pScene, entity.Node(), flags);
 		}
 		pScene->HandleDelayedParents();
-		return pScene;
 	}
 
 	void EditorSceneSerializer::SerializeEntity(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, YAML::Emitter& out)
@@ -74,9 +79,9 @@ namespace Glory::Editor
 		
 			/* Serialize ID remapping */
 			PrefabData* pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
-			const PrefabNode& rootNode = pPrefab->RootNode();
+			const Utils::ECS::EntityID root = pPrefab->Child(0, 0);
 		
-			if (rootNode.OriginalUUID() != entityHandle.EntityUUID())
+			if (pPrefab->GetEntityUUID(root) != entityHandle.EntityUUID())
 			{
 				out << YAML::Key << "IDRemapSeed";
 				const uint64_t id = entityHandle.EntityUUID();
@@ -162,20 +167,22 @@ namespace Glory::Editor
 				const glm::vec3 position = transformRef["Position"].As<glm::vec3>();
 				const glm::quat rotation = transformRef["Rotation"].As<glm::quat>();
 				const glm::vec3 scale = transformRef["Scale"].As<glm::vec3>();
-		
+
+				const Utils::ECS::EntityID root = pPrefab->Child(0, 0);
+				const UUID rootID = pPrefab->GetEntityUUID(root);
 				if (flags & Flags::GenerateNewUUIDs)
 				{
 					const uint32_t first32Bits = uint32_t((uuid << 32) >> 32);
 					const uint32_t second32Bits = uint32_t(uuid >> 32);
 					seed = first32Bits & second32Bits;
 					uuidRemapper.SoftReset(seed);
-					uuidRemapper.EnforceRemap(pPrefab->RootNode().OriginalUUID(), uuid);
+					uuidRemapper.EnforceRemap(rootID, uuid);
 					instantiatedEntity = pScene->InstantiatePrefab(0, pPrefab, uuidRemapper, position, rotation, scale);
 				}
 				else
 				{
 					UUIDRemapper remapper{ seed };
-					remapper.EnforceRemap(pPrefab->RootNode().OriginalUUID(), uuid);
+					remapper.EnforceRemap(rootID, uuid);
 					instantiatedEntity = pScene->InstantiatePrefab(0, pPrefab, remapper, position, rotation, scale);
 				}
 		

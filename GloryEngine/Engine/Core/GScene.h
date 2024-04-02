@@ -10,7 +10,6 @@ namespace Glory
 	class PrefabData;
 	class SceneManager;
 	struct UUIDRemapper;
-	struct PrefabNode;
 
 	namespace Utils::ECS
 	{
@@ -190,6 +189,8 @@ namespace Glory
 		/** @brief Mark this scene for destruction to prevent further update() and draw() calls */
 		void MarkForDestruction();
 
+		Entity Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent = 0);
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();
@@ -215,8 +216,7 @@ namespace Glory
 		 */
 		void UnsetChildrenPrefab(Utils::ECS::EntityID entity);
 
-		/** @brief Internal function for creating an entity from a prefab */
-		Entity InstantiatePrefabNode(UUID parent, const PrefabNode& node, UUIDRemapper& remapper);
+		Entity InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent = 0);
 
 	protected:
 		friend class Entity;

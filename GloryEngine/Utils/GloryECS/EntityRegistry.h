@@ -71,6 +71,7 @@ namespace Glory::Utils::ECS
 		}
 
 		void* CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, bool invokeAdd=true);
+		void* CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data, bool invokeAdd=true);
 
 		template<typename Component>
 		TypeView<Component>* GetTypeView()
@@ -196,6 +197,8 @@ namespace Glory::Utils::ECS
 		void ResizeRootOrder(size_t size);
 		std::vector<EntityID>& RootOrder();
 		const std::vector<EntityID>& RootOrder() const;
+
+		EntityID CopyEntityToOtherRegistry(EntityID entity, EntityID parent, EntityRegistry* pRegistry);
 
 	private:
 		friend class ComponentTypes;

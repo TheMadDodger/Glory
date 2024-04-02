@@ -1,15 +1,15 @@
 #pragma once
-#include "Resource.h"
+#include "GScene.h"
 
 #include <EntityID.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {
     class PrefabData;
-    class GScene;
     class Entity;
 
-    struct PrefabNode
+    /*struct PrefabNode
     {
     public:
         PrefabNode(PrefabNode&& other) noexcept;
@@ -45,24 +45,16 @@ namespace Glory
 
     private:
         void Load(const Entity& entity);
-    };
+    };*/
 
-    class PrefabData : public Resource
+    class PrefabData : public GScene
     {
     public:
         PrefabData();
-        PrefabData(PrefabNode&& rootNode) noexcept;
         virtual ~PrefabData() = default;
-
         static PrefabData* CreateFromEntity(GScene* pScene, Utils::ECS::EntityID entity);
 
-        const PrefabNode& RootNode() const;
-
-        void SetRootNode(PrefabNode&& node);
-
     private:
-        friend struct PrefabNode;
-        PrefabNode m_RootNode;
-        std::vector<UUID> m_OriginalUUIDs;
+        static void CopyEntity(PrefabData* pPrefab, GScene* pScene, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
     };
 }

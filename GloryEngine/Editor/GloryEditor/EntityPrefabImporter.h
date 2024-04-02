@@ -5,7 +5,7 @@
 
 namespace Glory::Editor
 {
-	class EntityPrefabImporter : public ImporterTemplate<PrefabData>
+	class EntityPrefabImporter : public YAMLImporterTemplate<PrefabData>
 	{
 	public:
 		EntityPrefabImporter();
@@ -17,9 +17,6 @@ namespace Glory::Editor
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 		virtual bool SaveResource(const std::filesystem::path& path, PrefabData* pResource) const override;
-
-		void WriteChild(YAML::Emitter& out, const PrefabNode& parent) const;
-		void ReadChild(PrefabData* pPrefab, Utils::NodeValueRef nodeValue, PrefabNode& node) const;
 
 	private:
 		virtual void Initialize() override;

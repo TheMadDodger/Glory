@@ -93,6 +93,22 @@ namespace Glory::Utils::ECS
 		return pAddress;
 	}
 
+	void* EntityRegistry::CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data, bool invokeAdd)
+	{
+		BaseTypeView* pTypeView = GetTypeView(typeHash);
+		const ComponentType* componentType = ComponentTypes::GetComponentType(pTypeView->m_TypeHash);
+		if (!componentType->m_AllowMultiple && pTypeView->Contains(entityID))
+		{
+			throw new std::exception(("Duplicate component of type " + componentType->m_Name + " not allowed!").c_str());
+		}
+
+		void* pAddress = pTypeView->Create(entityID, data);
+		EntityView* pEntityView = GetEntityView(entityID);
+		pEntityView->Add(pTypeView->m_TypeHash, uuid);
+		if (invokeAdd) pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
+		return pAddress;
+	}
+
 	BaseTypeView* EntityRegistry::GetTypeView(uint32_t typeHash)
 	{
 		if (m_ViewIndices.find(typeHash) == m_ViewIndices.end())
@@ -331,6 +347,25 @@ namespace Glory::Utils::ECS
 	const std::vector<EntityID>& EntityRegistry::RootOrder() const
 	{
 		return m_RootOrder;
+	}
+
+	EntityID EntityRegistry::CopyEntityToOtherRegistry(EntityID entity, EntityID parent, EntityRegistry* pRegistry)
+	{
+		const EntityID newEntity = pRegistry->CreateEntity();
+		EntityView* pNewEntityView = pRegistry->GetEntityView(newEntity);
+
+		if (parent) pRegistry->SetParent(newEntity, parent);
+		EntityView* pEntityView = GetEntityView(entity);
+		pNewEntityView->Active() = pEntityView->Active();
+		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
+		{
+			const uint32_t type = pEntityView->ComponentTypeAt(i);
+			const UUID uuid = pEntityView->ComponentUUIDAt(i);
+			void* data = GetComponentAddress(entity, uuid);
+			pRegistry->CopyComponent(newEntity, type, uuid, data, false);
+		}
+
+		return newEntity;
 	}
 
 	void EntityRegistry::InvokeAll(InvocationType invocationType)
