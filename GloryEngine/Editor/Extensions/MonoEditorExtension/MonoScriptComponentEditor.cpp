@@ -1,4 +1,5 @@
 #include "MonoScriptComponentEditor.h"
+#include "EditorCSLibrary.h"
 
 #include <AssetManager.h>
 #include <EditorApplication.h>
@@ -48,12 +49,13 @@ namespace Glory::Editor
 			return;
 		}
 
-		m_pScript->LoadScriptProperties(scriptComponent.m_ScriptProperties, scriptComponent.m_ScriptData);
+		//m_pScript->LoadScriptProperties(scriptComponent.m_ScriptProperties, scriptComponent.m_ScriptData);
 	}
 
 	bool MonoScriptComponentEditor::OnGUI()
 	{
 		bool change = EntityComponentEditor::OnGUI();
+
 		MonoScriptComponent& scriptComponent = GetTargetComponent();
 		if (m_pScript == nullptr && scriptComponent.m_Script.AssetUUID())
 		{
@@ -69,7 +71,13 @@ namespace Glory::Editor
 
 		if (!m_pScript) return change;
 
-		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
+		GScene* pScene = m_pComponentObject->GetRegistry()->GetUserData<GScene*>();
+		if (!pScene) return change;
+		const UUID entityID = pScene->GetEntityUUID(m_pComponentObject->EntityID());
+		const UUID sceneID = pScene->GetUUID();
+
+		change |= InvokeDrawInspector(m_pScript, entityID, sceneID);
+		/*Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 		bool changedScriptProp = false;
 		for (size_t i = 0; i < scriptComponent.m_ScriptProperties.size(); i++)
 		{
@@ -80,7 +88,8 @@ namespace Glory::Editor
 
 		if (changedScriptProp) Validate();
 		Undo::StopRecord();
-		return change || changedScriptProp;
+		return change || changedScriptProp;*/
+		return change;
 	}
 
 	std::string MonoScriptComponentEditor::Name()

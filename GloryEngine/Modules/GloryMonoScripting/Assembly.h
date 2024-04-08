@@ -25,23 +25,23 @@ namespace Glory
 	struct AssemblyClassField
 	{
 	public:
-		AssemblyClassField();
-		AssemblyClassField(MonoClassField* pField);
-		virtual ~AssemblyClassField();
+		GLORY_API AssemblyClassField();
+		GLORY_API AssemblyClassField(MonoClassField* pField);
+		GLORY_API virtual ~AssemblyClassField();
 
 	public:
-		void SetValue(MonoObject* pObject, void* value) const;
-		void GetValue(MonoObject* pObject, void* value) const;
+		GLORY_API void SetValue(MonoObject* pObject, void* value) const;
+		GLORY_API void GetValue(MonoObject* pObject, void* value) const;
 
-		MonoClassField* ClassField() const;
-		MonoType* FieldType() const;
-		const char* Name() const;
-		const Visibility& FieldVisibility() const;
-		const char* TypeName() const;
-		const int Size() const;
-		const uint32_t TypeHash() const;
-		const uint32_t ElementTypeHash() const;
-		const bool IsStatic() const;
+		GLORY_API MonoClassField* ClassField() const;
+		GLORY_API MonoType* FieldType() const;
+		GLORY_API const char* Name() const;
+		GLORY_API const Visibility& FieldVisibility() const;
+		GLORY_API const char* TypeName() const;
+		GLORY_API const int Size() const;
+		GLORY_API const uint32_t TypeHash() const;
+		GLORY_API const uint32_t ElementTypeHash() const;
+		GLORY_API const bool IsStatic() const;
 
 	private:
 		MonoClassField* m_pMonoField;
@@ -60,17 +60,17 @@ namespace Glory
 	struct AssemblyClass
 	{
 	public:
-		AssemblyClass();
-		AssemblyClass(const std::string& name, MonoClass* pClass);
+		GLORY_API AssemblyClass();
+		GLORY_API AssemblyClass(const std::string& name, MonoClass* pClass);
 
 		std::string m_Name;
 		MonoClass* m_pClass;
 		std::map<std::string, MonoMethod*> m_pMethods;
 
-		MonoMethod* GetMethod(const std::string& name);
-		const AssemblyClassField* GetField(const std::string& name) const;
-		const AssemblyClassField* GetField(const size_t index) const;
-		const size_t NumFields() const;
+		GLORY_API MonoMethod* GetMethod(const std::string& name);
+		GLORY_API const AssemblyClassField* GetField(const std::string& name) const;
+		GLORY_API const AssemblyClassField* GetField(const size_t index) const;
+		GLORY_API const size_t NumFields() const;
 
 	private:
 		MonoMethod* LoadMethod(const std::string& name);

@@ -37,6 +37,9 @@ namespace Glory
         GLORY_API void Serialize(BinaryStream& container) const override;
         GLORY_API void Deserialize(BinaryStream& container) override;
 
+        GLORY_API AssemblyClass* GetClass(Assembly* pAssembly);
+        GLORY_API MonoObject* GetScriptObject(Assembly* pAssembly, UUID objectID, UUID sceneID);
+
     private:
         GLORY_API bool IsBehaviour();
 

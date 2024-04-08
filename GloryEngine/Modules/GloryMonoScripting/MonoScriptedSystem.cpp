@@ -87,6 +87,7 @@ namespace Glory
 		if (pScript == nullptr) return;
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 		const UUID sceneID = pScene->GetUUID();
+		/* @todo this should use the component id not the entity */
 		pScript->Invoke(entityUuid, sceneID, "Update", nullptr);
 		pScript->GetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData);
 	}

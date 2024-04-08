@@ -3,6 +3,9 @@
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
 
+#include "EditorCSLibrary.h"
+#include "EditorCSAPI.h"
+
 #include <Debug.h>
 #include <Engine.h>
 #include <AssetDatabase.h>
@@ -128,6 +131,7 @@ namespace Glory::Editor
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		m_pMonoScriptingModule = pEngine->GetOptionalModule<GloryMonoScipting>();
+		SetMonoScriptModule(m_pMonoScriptingModule);
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
@@ -169,6 +173,13 @@ namespace Glory::Editor
 			};
 			AddPackagingTask(std::move(task), "CompileEXE");
 		});
+
+		/* Add csharp editor assembly */
+		std::filesystem::path csharpEditorPath = m_pMonoScriptingModule->GetPath();
+		csharpEditorPath.append("Editor/Scripting");
+		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib("GloryEngine.Editor.dll", csharpEditorPath.string(), false, nullptr, false));
+
+		LoadInternalCalls();
 	}
 
 	void MonoEditorExtension::FindVisualStudioPath()

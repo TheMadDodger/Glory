@@ -150,6 +150,7 @@ group "Editor/Extensions"
 	include "Editor/Extensions/JoltEditorExtension"
 	include "Editor/Extensions/Importers/SDLImageImporter"
 	include "Editor/Extensions/Importers/ASSIMPImporter"
+	include "Editor/Extensions/GloryEngine.Editor"
 group ""
 
 group "Scripting/Mono"

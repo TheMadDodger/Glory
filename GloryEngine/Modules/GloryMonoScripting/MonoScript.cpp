@@ -296,6 +296,17 @@ namespace Glory
 		container.Read(m_ClassName);
 	}
 
+	AssemblyClass* MonoScript::GetClass(Assembly* pAssembly)
+	{
+		return LoadClass(pAssembly, m_NamespaceName, m_ClassName);
+	}
+
+	MonoObject* MonoScript::GetScriptObject(Assembly* pAssembly, UUID objectID, UUID sceneID)
+	{
+		AssemblyClass* pClass = GetClass(pAssembly);
+		return pClass ? LoadObject(objectID, sceneID, pClass->m_pClass) : nullptr;
+	}
+
 	bool MonoScript::IsBehaviour()
 	{
 		return false;
