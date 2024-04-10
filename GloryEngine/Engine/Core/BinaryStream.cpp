@@ -98,9 +98,10 @@ namespace Glory
 		return Read(reinterpret_cast<char*>(out), size);
 	}
 
-	void BinaryStream::Read(std::vector<char>& buffer)
+	void BinaryStream::Read(std::vector<char>& buffer, size_t size)
 	{
-		const size_t size = Size() - Tell();
+		if (size == 0)
+			size = Size() - Tell();
 		buffer.resize(size);
 		Read(buffer.data(), buffer.size());
 	}

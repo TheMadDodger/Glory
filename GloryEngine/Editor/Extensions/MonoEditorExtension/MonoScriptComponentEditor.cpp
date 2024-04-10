@@ -13,7 +13,7 @@ namespace Glory::Editor
 	{
 	}
 
-	bool DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)
+	bool DrawProperty(const ScriptProperty& scriptProperty, std::vector<char>& data, uint32_t flags)
 	{
 		PropertyDrawer::SetCurrentPropertyPath(scriptProperty.m_Name);
 		const uint32_t typeHash = scriptProperty.m_TypeHash;
@@ -25,7 +25,8 @@ namespace Glory::Editor
 
 		if (pPropertyDrawer)
 		{
-			change = pPropertyDrawer->Draw(scriptProperty.m_Name, node[scriptProperty.m_Name], elementTypeHash, flags);
+			void* offsettedData = &data[scriptProperty.m_RelativeOffset];
+			change = pPropertyDrawer->Draw(scriptProperty.m_Name, offsettedData, elementTypeHash, flags);
 		}
 		else
 		{
@@ -48,7 +49,9 @@ namespace Glory::Editor
 			return;
 		}
 
-		m_pScript->LoadScriptProperties(scriptComponent.m_ScriptProperties, scriptComponent.m_ScriptData);
+		m_pScript->LoadScriptProperties();
+		m_pScript->GetScriptProperties(scriptComponent.m_ScriptProperties);
+		m_pScript->ReadDefaults(scriptComponent.m_ScriptData.m_Buffer);
 	}
 
 	bool MonoScriptComponentEditor::OnGUI()
@@ -75,7 +78,7 @@ namespace Glory::Editor
 		{
 			const ScriptProperty* scriptProperty = &scriptComponent.m_ScriptProperties[i];
 			if (std::string_view{ scriptProperty->m_Name }.empty()) continue;
-			changedScriptProp |= DrawProperty(*scriptProperty, scriptComponent.m_ScriptData, 0);
+			changedScriptProp |= DrawProperty(*scriptProperty, scriptComponent.m_ScriptData.m_Buffer, 0);
 		}
 
 		if (changedScriptProp) Validate();

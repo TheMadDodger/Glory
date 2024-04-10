@@ -1,5 +1,6 @@
 #pragma once
 #include "GloryEditor.h"
+#include "EditableResource.h"
 
 #include <SceneManager.h>
 #include <yaml-cpp/yaml.h>
@@ -50,6 +51,8 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void DuplicateSceneObject(Entity entity);
 		GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, YAML::Node& node);
 
+		GLORY_EDITOR_API YAMLResource<GScene>* GetSceneFile(UUID uuid);
+
 	private:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
@@ -62,6 +65,7 @@ namespace Glory::Editor
 	private:
 		std::vector<UUID> m_OpenedSceneIDs;
 		std::vector<UUID> m_DirtySceneIDs;
+		std::vector<YAMLResource<GScene>> m_SceneFiles;
 		UUID m_CurrentlySavingScene = 0;
 
 		EditorApplication* m_pApplication;

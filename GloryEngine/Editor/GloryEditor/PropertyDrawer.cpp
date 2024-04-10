@@ -112,7 +112,7 @@ namespace Glory::Editor
 		PropertyDrawer* pDrawer = GetPropertyDrawer(pFieldData->Type());
 		if (pDrawer)
 		{
-			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->Type(), flags);
+			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());

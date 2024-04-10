@@ -45,6 +45,7 @@ namespace Glory::Editor
 	std::atomic<bool> Canceled = false;
 
 	std::vector<UUID> ScenesToPackage;
+	std::vector<GScene*> LoadedScenesToPackage;
 
 	std::map<UUID, std::vector<UUID>> AssetsPerScene;
 	std::map<UUID, std::vector<UUID>> ShadersPerScene;
@@ -296,9 +297,8 @@ namespace Glory::Editor
 				BinaryFileStream sceneFile{ path };
 				AssetArchive archive{ &sceneFile, true };
 
-				GScene* pScene = EditorSceneManager::OpenSceneInMemory(ScenesToPackage[i]);
-				archive.Serialize(pScene);
-				delete pScene;
+				archive.Serialize(LoadedScenesToPackage[i]);
+				delete LoadedScenesToPackage[i];
 
 				UsedAssets.push_back(ScenesToPackage[i]);
 				AssetLocations.push_back({ relativeScenePath.string(), "", 0 });
@@ -307,6 +307,7 @@ namespace Glory::Editor
 			}
 			++task.m_ProcessedSubTasks;
 		}
+		LoadedScenesToPackage.clear();
 	}
 
 	void PackageAssetsTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
@@ -778,6 +779,19 @@ namespace Glory::Editor
 		m_TaskCount = PackagingTasks.size();
 
 		if (PackagingTasks.empty()) return;
+
+		for (size_t i = 0; i < LoadedScenesToPackage.size(); ++i)
+		{
+			delete LoadedScenesToPackage[i];
+		}
+		LoadedScenesToPackage.clear();
+
+		/* Preload the to package scenes because scenes must be loaded on the main thread */
+		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
+		{
+			GScene* pScene = EditorSceneManager::OpenSceneInMemory(ScenesToPackage[i]);
+			LoadedScenesToPackage.push_back(pScene);
+		}
 
 		static auto pPackagingJob = pEngine->Jobs().Run<bool, Engine*, std::filesystem::path>();
 		pPackagingJob->QueueSingleJob(PackageJob, pEngine, packageRoot);

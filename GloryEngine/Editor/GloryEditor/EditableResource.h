@@ -55,6 +55,12 @@ namespace Glory::Editor
 	class YAMLResourceBase : public EditableResource
 	{
 	public:
+		/** @brief Constructor for creating new files */
+		YAMLResourceBase() : m_File()
+		{
+			APPEND_TYPE(YAMLResourceBase);
+		}
+
 		/** @brief Constructor
 		 * @param path Absolute path to the YAML file
 		 */
@@ -88,6 +94,14 @@ namespace Glory::Editor
 			m_Dirty = false;
 		}
 
+		/** @brief Change the path of the underlying YAML file
+		 * @param path The new absolute path to the YAML file
+		 */
+		void SetPath(const std::filesystem::path& path)
+		{
+			m_File.ChangePath(path);
+		}
+
 	protected:
 		Utils::YAMLFileRef m_File;
 	};
@@ -97,6 +111,12 @@ namespace Glory::Editor
 	class YAMLResource: public YAMLResourceBase
 	{
 	public:
+		/** @brief Constructor for creating new files */
+		YAMLResource() : YAMLResourceBase()
+		{
+			APPEND_TYPE(YAMLResource<T>);
+		}
+
 		/** @brief Constructor
 		 * @param path Absolute path to the YAML file
 		 */

@@ -4,6 +4,7 @@
 #include <Reflection.h>
 #include <EntityID.h>
 #include <EntityRegistry.h>
+#include <BinaryBuffer.h>
 
 namespace Glory
 {
@@ -34,6 +35,11 @@ namespace Glory
 				void* pAddress = pElementField->GetAddress(data);
 				SerializeData(container, pElementField, pAddress);
 			}
+			break;
+		}
+		case uint32_t(CustomTypeHash::Buffer): {
+			BinaryBuffer* buffer = (BinaryBuffer*)data;
+			container.Write(buffer->m_Buffer);
 			break;
 		}
 
@@ -108,6 +114,13 @@ namespace Glory
 				void* pAddress = pElementField->GetAddress(data);
 				DeserializeData(container, pElementField, pAddress);
 			}
+			break;
+		}
+		case uint32_t(CustomTypeHash::Buffer): {
+			BinaryBuffer* buffer = (BinaryBuffer*)data;
+			size_t size;
+			container.Read(size);
+			if (size) container.Read(buffer->m_Buffer, size);
 			break;
 		}
 

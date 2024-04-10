@@ -21,8 +21,6 @@
 
 namespace Glory
 {
-	char PropertyBuffer[1024] = "\0";
-
 	MonoScript::MonoScript()
 	{
 		APPEND_TYPE(MonoScript);
@@ -90,7 +88,7 @@ namespace Glory
 		pField->GetValue(pMonoObject, value);
 	}
 
-	void MonoScript::LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data)
+	void MonoScript::LoadScriptProperties()
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
@@ -101,12 +99,11 @@ namespace Glory
 
 		// Dummy object for default values
 		MonoObject* pDummyObject = pDomain->ScriptObjectManager()->GetMonoScriptDummyObject(pClass->m_pClass);
-		if (!data.IsDefined() || !data.IsMap())
-			data = YAML::Node(YAML::NodeType::Map);
 
-		scriptProperties.clear();
+		m_ScriptProperties.clear();
+		m_DefaultValues.clear();
 
-		Serializers& pSerializers = MonoManager::Instance()->Module()->GetEngine()->GetSerializers();
+		size_t offset = 0;
 		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
@@ -117,49 +114,43 @@ namespace Glory
 			prop.m_TypeName = pField->TypeName();
 			prop.m_TypeHash = pField->TypeHash();
 			prop.m_ElementTypeHash = pField->ElementTypeHash();
+			prop.m_RelativeOffset = offset;
 			prop.m_ChildrenCount = 0;
 			prop.m_ChildrenOffset = 0;
 			prop.m_Size = pField->Size();
-			prop.ValueType = SerializedType::ST_Value;
-			scriptProperties.push_back(prop);
-
-			if (data[pField->Name()].IsDefined() || !pDummyObject) continue;
-
-			YAML::Emitter e;
-			e << YAML::BeginMap;
+			prop.ValueType = (SerializedType)pField->TypeHash();
 
 			switch (pField->TypeHash())
 			{
 			case ST_Asset:
 			{
 				/* Asset reference from a dummy object will always be null */
-				AssetReferenceBase assetReference{};
-				pSerializers.GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), e);
+				prop.m_Size = sizeof(AssetReferenceBase);
+				m_DefaultValues.resize(m_DefaultValues.size() + prop.m_Size);
 				break;
 			}
 			case ST_Object:
 			{
 				/* Object reference from a dummy object will always be null */
-				SceneObjectRef objectRef{};
-				pSerializers.GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), e);
+				prop.m_Size = sizeof(SceneObjectRef);
+				m_DefaultValues.resize(m_DefaultValues.size() + prop.m_Size);
+				break;
+			}
+			default:
+				m_DefaultValues.resize(m_DefaultValues.size() + prop.m_Size);
+				pField->GetValue(pDummyObject, &m_DefaultValues[prop.m_RelativeOffset]);
 				break;
 			}
 
-			default:
-				pField->GetValue(pDummyObject, PropertyBuffer);
-				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-				pSerializers.SerializeProperty(pField->Name(), pType, PropertyBuffer, e);
-				break;
-			}
-			e << YAML::EndMap;
-			YAML::Node newNode = YAML::Load(e.c_str());
-			data[pField->Name()] = newNode[pField->Name()];
+			offset += prop.m_Size;
+			m_ScriptProperties.push_back(prop);
 		}
 	}
 
-	void MonoScript::SetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node)
+	void MonoScript::SetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
+
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
@@ -168,30 +159,27 @@ namespace Glory
 		if (pMonoObject == nullptr) return;
 
 		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
-		Serializers& pSerializers = pEngine->GetSerializers();
+
+		size_t scriptPropIndex = 0;
 		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
 			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
+			const ScriptProperty& prop = m_ScriptProperties[scriptPropIndex];
 
-			YAML::Node valueNode = node[pField->Name()];
-			if (!valueNode.IsDefined()) continue;
-
+			if (data.size() < prop.m_RelativeOffset + prop.m_Size) break;
 			switch (pField->TypeHash())
 			{
 			case ST_Asset:
 			{
-				AssetReferenceBase assetReference;
-				pSerializers.GetSerializer(ST_Asset)->Deserialize(&assetReference, pField->ElementTypeHash(), valueNode);
+				const AssetReferenceBase& assetReference = reinterpret_cast<const AssetReferenceBase&>(data[prop.m_RelativeOffset]);
 				MonoObject* pAssetObject = MonoAssetManager::MakeMonoAssetObject(pEngine, assetReference.AssetUUID(), pField->TypeName());
 				pField->SetValue(pMonoObject, pAssetObject);
 				break;
 			}
 			case ST_Object:
 			{
-				SceneObjectRef objectRef;
-				pSerializers.GetSerializer(ST_Object)->Deserialize(&objectRef, pField->ElementTypeHash(), valueNode);
-
+				const SceneObjectRef& objectRef = reinterpret_cast<const SceneObjectRef&>(data[prop.m_RelativeOffset]);
 				GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(objectRef.SceneUUID());
 				if (!pScene) continue;
 				MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pEngine, pScene);
@@ -204,15 +192,14 @@ namespace Glory
 			}
 
 			default:
-				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-				pSerializers.DeserializeProperty(pType, PropertyBuffer, valueNode);
-				pField->SetValue(pMonoObject, PropertyBuffer);
+				pField->SetValue(pMonoObject, &data[prop.m_RelativeOffset]);
 				break;
 			}
+			++scriptPropIndex;
 		}
 	}
 
-	void MonoScript::GetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node)
+	void MonoScript::GetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
@@ -230,36 +217,31 @@ namespace Glory
 		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 
-		Serializers& pSerializers = MonoManager::Instance()->Module()->GetEngine()->GetSerializers();
-		/* FIXME: There has to be a better way to do this
-		 * Ideally, store as binary data and use reflection? */
-		YAML::Emitter emitter;
-		emitter << YAML::BeginMap;
+		size_t scriptPropIndex = 0;
 		for (size_t i = 0; i < pClass->NumFields(); ++i)
 		{
 			const AssemblyClassField* pField = pClass->GetField(i);
 			if (pField->FieldVisibility() != Visibility::VISIBILITY_PUBLIC || pField->IsStatic()) continue;
 
+			const ScriptProperty& prop = m_ScriptProperties[scriptPropIndex];
+			if (data.size() < prop.m_RelativeOffset + prop.m_Size)
+				data.resize(data.size() + prop.m_Size);
+
 			switch (pField->TypeHash())
 			{
 			case ST_Asset:
 			{
-				AssetReferenceBase assetReference{};
+				AssetReferenceBase& assetReference = reinterpret_cast<AssetReferenceBase&>(data[prop.m_RelativeOffset]);
 				MonoObject* pMonoResourceObject = nullptr;
 				pField->GetValue(pMonoObject, &pMonoResourceObject);
 
-				if (pMonoResourceObject)
-				{
-					pObjectIDField->GetValue(pMonoResourceObject, assetReference.AssetUUIDMember());
-				}
-
-				pSerializers.GetSerializer(ST_Asset)->Serialize(pField->Name(), &assetReference, pField->ElementTypeHash(), emitter);
-
+				if (!pMonoResourceObject) break;
+				pObjectIDField->GetValue(pMonoResourceObject, assetReference.AssetUUIDMember());
 				break;
 			}
 			case ST_Object:
 			{
-				SceneObjectRef objectRef{};
+				SceneObjectRef& objectRef = reinterpret_cast<SceneObjectRef&>(data[prop.m_RelativeOffset]);
 				MonoObject* pMonoSceneObject = nullptr;
 				pField->GetValue(pMonoObject, &pMonoSceneObject);
 				if (pMonoSceneObject)
@@ -267,21 +249,15 @@ namespace Glory
 					pObjectIDField->GetValue(pMonoSceneObject, objectRef.ObjectUUIDMember());
 					pSceneIDField->GetValue(pMonoSceneObject, objectRef.SceneUUIDMember());
 				}
-				pSerializers.GetSerializer(ST_Object)->Serialize(pField->Name(), &objectRef, pField->ElementTypeHash(), emitter);
 				break;
 			}
 
 			default:
-				pField->GetValue(pMonoObject, PropertyBuffer);
-				const TypeData* pType = Reflect::GetTyeData(pField->ElementTypeHash());
-				pSerializers.SerializeProperty(pField->Name(), pType, PropertyBuffer, emitter);
+				pField->GetValue(pMonoObject, &data[prop.m_RelativeOffset]);
 				break;
 			}
+			++scriptPropIndex;
 		}
-		emitter << YAML::EndMap;
-
-		/* FIXME: Causes a memory leak for some reason */
-		node.reset(YAML::Load(emitter.c_str()));
 	}
 
 	void MonoScript::Serialize(BinaryStream& container) const
@@ -294,6 +270,34 @@ namespace Glory
 	{
 		container.Read(m_NamespaceName);
 		container.Read(m_ClassName);
+	}
+
+	void MonoScript::GetScriptProperties(std::vector<ScriptProperty>& dest) const
+	{
+		if (m_ScriptProperties.empty() || m_DefaultValues.empty()) return;
+
+		if (dest.size() < m_ScriptProperties.size())
+			dest.resize(m_ScriptProperties.size());
+
+		for (size_t i = 0; i < m_ScriptProperties.size(); ++i)
+			dest[i] = m_ScriptProperties[i];
+	}
+
+	const std::vector<ScriptProperty>& MonoScript::ScriptProperties() const
+	{
+		return m_ScriptProperties;
+	}
+
+	void MonoScript::ReadDefaults(std::vector<char>& dest) const
+	{
+		if (m_ScriptProperties.empty() || m_DefaultValues.empty()) return;
+
+		if (dest.size() < m_DefaultValues.size())
+			dest.resize(m_DefaultValues.size());
+		else
+			return;
+
+		std::memcpy(dest.data(), m_DefaultValues.data(), m_DefaultValues.size());
 	}
 
 	bool MonoScript::IsBehaviour()
