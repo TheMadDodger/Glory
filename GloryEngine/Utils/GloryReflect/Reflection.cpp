@@ -1,5 +1,6 @@
 #include "Reflection.h"
 #include "../Hash.h"
+#include "BinaryBuffer.h"
 
 namespace Glory::Utils::Reflect
 {
@@ -49,7 +50,7 @@ namespace Glory::Utils::Reflect
 			str.erase(0, pos + 1);
 		}
 
-		if (str.length() > 0 && tokens.size() <= 0) tokens.push_back(str);
+		if (str.length() > 0) tokens.push_back(str);
 	}
 
 	const TypeData* Reflect::RegisterTemplatedType(const char* typeName, uint32_t typeHash, size_t size)
@@ -165,24 +166,6 @@ namespace Glory::Utils::Reflect
 	{
 		m_InstanceOwned = true;
 		m_pReflectInstance = new Reflect();
-
-		RegisterBasicType<int8_t>();
-		RegisterBasicType<int16_t>();
-		RegisterBasicType<int32_t>();
-		RegisterBasicType<int64_t>();
-		RegisterBasicType<uint8_t>();
-		RegisterBasicType<uint16_t>();
-		RegisterBasicType<uint32_t>();
-		RegisterBasicType<uint64_t>();
-		RegisterBasicType<char>();
-		RegisterBasicType<bool>();
-		RegisterBasicType<float>();
-		RegisterBasicType<double>();
-		RegisterBasicType<long>();
-		RegisterBasicType<unsigned long>();
-
-		RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
-
 		return m_pReflectInstance;
 	}
 
@@ -256,6 +239,26 @@ namespace Glory::Utils::Reflect
 
 	Reflect::Reflect()
 	{
+		m_pReflectInstance = this;
+
+		RegisterBasicType<int8_t>();
+		RegisterBasicType<int16_t>();
+		RegisterBasicType<int32_t>();
+		RegisterBasicType<int64_t>();
+		RegisterBasicType<uint8_t>();
+		RegisterBasicType<uint16_t>();
+		RegisterBasicType<uint32_t>();
+		RegisterBasicType<uint64_t>();
+		RegisterBasicType<char>();
+		RegisterBasicType<bool>();
+		RegisterBasicType<float>();
+		RegisterBasicType<double>();
+		RegisterBasicType<long>();
+		RegisterBasicType<unsigned long>();
+		RegisterBasicType<unsigned long>();
+
+		RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
+		RegisterTemplatedType("Glory::Utils::Reflect::BasicBuffer,Utils::Reflect::BasicBuffer,Reflect::BasicBuffer,BasicBuffer", (size_t)CustomTypeHash::Buffer, 0);
 	}
 
 	Reflect::~Reflect()

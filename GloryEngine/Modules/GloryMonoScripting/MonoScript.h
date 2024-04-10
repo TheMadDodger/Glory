@@ -30,12 +30,16 @@ namespace Glory
         GLORY_API void SetValue(UUID objectID, UUID sceneID, const std::string& name, void* value);
         GLORY_API void GetValue(UUID objectID, UUID sceneID, const std::string& name, void* value);
 
-        GLORY_API void LoadScriptProperties(std::vector<ScriptProperty>& scriptProperties, YAML::Node& data);
-        GLORY_API void SetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node);
-        GLORY_API void GetPropertyValues(UUID objectID, UUID sceneID, YAML::Node& node);
+        GLORY_API void LoadScriptProperties();
+        GLORY_API void SetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data);
+        GLORY_API void GetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data);
 
         GLORY_API void Serialize(BinaryStream& container) const override;
         GLORY_API void Deserialize(BinaryStream& container) override;
+
+        GLORY_API void GetScriptProperties(std::vector<ScriptProperty>& dest) const;
+        GLORY_API const std::vector<ScriptProperty>& ScriptProperties() const;
+        GLORY_API void ReadDefaults(std::vector<char>& dest) const;
 
     private:
         GLORY_API bool IsBehaviour();
@@ -48,5 +52,7 @@ namespace Glory
         friend class MonoScriptLoader;
         std::string m_NamespaceName;
         std::string m_ClassName;
+        std::vector<ScriptProperty> m_ScriptProperties;
+        std::vector<char> m_DefaultValues;
     };
 }

@@ -3,10 +3,10 @@
 
 namespace Glory
 {
-	enum Vec4Flags : uint32_t
+	enum PropertyFlags : uint32_t
 	{
-		None = 0,
-		Color = 1,
-		HDR = 2,
+		None = 1 << 0,
+		Color = 1 << 1,
+		HDR = 1 << 2,
 	};
 }

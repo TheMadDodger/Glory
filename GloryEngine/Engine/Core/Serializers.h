@@ -16,12 +16,13 @@ namespace Glory
 		struct FieldData;
 	}
 
+	class Engine;
 	class PropertySerializer;
 
 	class Serializers
 	{
 	public:
-		Serializers();
+		Serializers(Engine* pEngine);
 		virtual ~Serializers();
 
 		template<class T>
@@ -42,8 +43,11 @@ namespace Glory
 		void DeserializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, YAML::Node& object);
 		void DeserializeProperty(const Utils::Reflect::FieldData* pFieldData, void* data, YAML::Node& object);
 
+		Engine* GetEngine() const;
+
 	private:
 		friend class PropertySerializer;
 		std::vector<PropertySerializer*> m_pRegisteredPropertySerializers;
+		Engine* m_pEngine;
 	};
 }

@@ -19,7 +19,9 @@ namespace Glory
 		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
 		if (pScript == nullptr) return;
 
-		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
+		pScript->LoadScriptProperties();
+		pScript->GetScriptProperties(pComponent.m_ScriptProperties);
+		pScript->ReadDefaults(pComponent.m_ScriptData.m_Buffer);
 	}
 
 	void MonoScriptedSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
@@ -34,9 +36,11 @@ namespace Glory
 		if (pScript == nullptr) return;
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 
-		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
+		pScript->LoadScriptProperties();
+		pScript->GetScriptProperties(pComponent.m_ScriptProperties);
+		pScript->ReadDefaults(pComponent.m_ScriptData.m_Buffer);
 		const UUID sceneID = pScene->GetUUID();
-		pScript->SetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData);
+		pScript->SetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData.m_Buffer);
 
 		pScript->Invoke(entityUuid, sceneID, "Start", nullptr);
 	}
@@ -67,11 +71,13 @@ namespace Glory
 		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
 		if (pScript == nullptr) return;
 
-		pScript->LoadScriptProperties(pComponent.m_ScriptProperties, pComponent.m_ScriptData);
+		pScript->LoadScriptProperties();
+		pScript->GetScriptProperties(pComponent.m_ScriptProperties);
+		pScript->ReadDefaults(pComponent.m_ScriptData.m_Buffer);
 
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 		const UUID sceneID = pScene->GetUUID();
-		pScript->SetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData);
+		pScript->SetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData.m_Buffer);
 		pScript->Invoke(entityUuid, sceneID, "OnValidate", nullptr);
 	}
 
@@ -88,7 +94,7 @@ namespace Glory
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 		const UUID sceneID = pScene->GetUUID();
 		pScript->Invoke(entityUuid, sceneID, "Update", nullptr);
-		pScript->GetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData);
+		pScript->GetPropertyValues(entityUuid, sceneID, pComponent.m_ScriptData.m_Buffer);
 	}
 
 	void MonoScriptedSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)

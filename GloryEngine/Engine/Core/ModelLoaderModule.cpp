@@ -42,7 +42,6 @@ namespace Glory
 	void ModelLoaderModule::Initialize()
 	{
 		ResourceLoaderModule::Initialize();
-		m_pEngine->GetResourceTypes().RegisterResource<MeshData>("");
 	}
 
 	ModelImportSettings::ModelImportSettings() {}

@@ -11,6 +11,7 @@ namespace Glory
 		uint32_t m_TypeHash;
 		uint32_t m_ElementTypeHash;
 		const char* m_TypeName;
+		size_t m_RelativeOffset;
 		size_t m_Size;
 		SerializedType ValueType;
 		size_t m_ChildrenOffset;

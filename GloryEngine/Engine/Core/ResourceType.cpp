@@ -1,5 +1,7 @@
 #include "ResourceType.h"
 
+#include <Reflection.h>
+
 #include <sstream>
 #include <sstream>
 #include <Hash.h>

@@ -215,7 +215,7 @@ namespace Glory
 		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
-		m_Serializers(new Serializers), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
+		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
 		m_pShaderManager(createInfo.pShaderManager), m_pMaterialManager(createInfo.pMaterialManager),
 		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
 	{

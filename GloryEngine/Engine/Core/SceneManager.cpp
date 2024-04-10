@@ -110,7 +110,7 @@ namespace Glory
 		RegisterComponent<LightComponent>();
 
 		const FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
-		Reflect::SetFieldFlags(pColorField, Vec4Flags::Color);
+		Reflect::SetFieldFlags(pColorField, PropertyFlags::Color);
 
 		/* Temporary components for testing */
 		RegisterComponent<Spin>();

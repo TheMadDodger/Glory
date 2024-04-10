@@ -20,6 +20,13 @@ namespace Glory
 			return Write(reinterpret_cast<const char*>(&value), sizeof(T));
 		}
 
+		template<typename T>
+		BinaryStream& Write(const std::vector<T>& value)
+		{
+			return Write(value.size()).
+				Write(reinterpret_cast<const char*>(value.data()), sizeof(T)*value.size());
+		}
+
 		BinaryStream& Write(const std::string& value);
 
 		virtual void Seek(size_t offset, Relative relative = Relative::Start) = 0;
@@ -39,7 +46,7 @@ namespace Glory
 		BinaryStream& Read(void* out, size_t size);
 		virtual BinaryStream& Read(char* out, size_t size) = 0;
 
-		void Read(std::vector<char>& buffer);
+		void Read(std::vector<char>& buffer, size_t size = 0);
 
 		virtual bool Eof() = 0;
 	};

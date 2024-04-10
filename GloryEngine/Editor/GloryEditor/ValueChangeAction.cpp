@@ -22,6 +22,8 @@ namespace Glory::Editor
 
 	void ValueChangeAction::SetOldValue(void* pObject)
 	{
+		if (!m_pRootType) return;
+
 		const FieldData* pField = nullptr;
 		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
@@ -52,6 +54,8 @@ namespace Glory::Editor
 
 	void ValueChangeAction::SetNewValue(void* pObject)
 	{
+		if (!m_pRootType) return;
+
 		const FieldData* pField = nullptr;
 		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
@@ -82,6 +86,8 @@ namespace Glory::Editor
 
 	void ValueChangeAction::OnUndo(const ActionRecord& actionRecord)
 	{
+		if (!m_pRootType) return;
+
 		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 
@@ -122,6 +128,8 @@ namespace Glory::Editor
 
 	void ValueChangeAction::OnRedo(const ActionRecord& actionRecord)
 	{
+		if (!m_pRootType) return;
+
 		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 

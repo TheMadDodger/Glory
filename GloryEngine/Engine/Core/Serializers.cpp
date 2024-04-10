@@ -13,7 +13,7 @@ namespace Glory
 		{ 201832386, 1226719936 }
 	};
 
-	Serializers::Serializers()
+	Serializers::Serializers(Engine* pEngine): m_pEngine(pEngine)
 	{
 	}
 
@@ -140,5 +140,10 @@ namespace Glory
 		}
 
 		throw new std::exception("Missing serializer!");
+	}
+
+	Engine* Serializers::GetEngine() const
+	{
+		return m_pEngine;
 	}
 }
