@@ -116,6 +116,15 @@ namespace Glory::Editor
 		CompilationJobPool->QueueJob(CompileJob, asset);
 	}
 
+	void ImportIfNew(ImportedResource& resource)
+	{
+		if (resource.IsNew())
+			EditorAssetDatabase::ImportAsset(resource.Path().string(), resource, resource.SubPath());
+
+		for (size_t i = 0; i < resource.ChildCount(); ++i)
+			ImportIfNew(resource.Child(i));
+	}
+
 	bool AssetCompiler::CompileJob(const AssetData asset)
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
@@ -140,6 +149,7 @@ namespace Glory::Editor
 
 				/* Import the resource */
 				ImportedResource resource = Importer::Import(path);
+				ImportIfNew(resource);
 				data.emplace(path, std::move(resource));
 			});
 

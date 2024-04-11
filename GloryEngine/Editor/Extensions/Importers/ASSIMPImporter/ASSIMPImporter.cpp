@@ -5,9 +5,15 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+#include <Components.h>
 #include <MeshData.h>
+#include <PrefabData.h>
 #include <Debug.h>
 #include <sstream>
+#include <SceneManager.h>
+
+#include <EntityRegistry.h>
 
 namespace Glory::Editor
 {
@@ -33,6 +39,8 @@ namespace Glory::Editor
 
     void ASSIMPImporter::Initialize()
 	{
+        /* We need to manually set the component types instance */
+        EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->ComponentTypesInstance();
 	}
 
 	void ASSIMPImporter::Cleanup()
@@ -68,26 +76,49 @@ namespace Glory::Editor
 
         ModelData* pModel = new ModelData();
         ImportedResource resource{ path, pModel };
-        ProcessNode(pScene->mRootNode, pScene, resource);
+        Utils::ECS::EntityRegistry registry;
+
+        PrefabData* pPrefab = new PrefabData();
+        ProcessNode(pPrefab, 0, pScene->mRootNode, pScene, resource);
+        resource.AddChild(pPrefab, path.filename().replace_extension().string() + "_Prefab");
 
         importer.FreeScene();
-
         return resource;
     }
 
-    void ASSIMPImporter::ProcessNode(aiNode* node, const aiScene* scene, ImportedResource& resource) const
+    void ASSIMPImporter::ProcessNode(PrefabData* pPrefab, Utils::ECS::EntityID parent, aiNode* node, const aiScene* scene, ImportedResource& resource) const
     {
         // process all the node's meshes (if any)
+        aiVector3D scale, position;
+        aiQuaternion rotation;
+        node->mTransformation.Decompose(scale, rotation, position);
+
+        const glm::vec3 convertedScale{ scale.x, scale.y, scale.z };
+        const glm::quat convertedQuat{ rotation.w, rotation.x, rotation.y, rotation.z };
+        const glm::vec3 convertedPos{ position.x, position.y, position.z };
+
+        Entity entity = pPrefab->CreateEmptyObject(node->mName.C_Str());
+        Transform& transform = entity.GetComponent<Transform>();
+        transform.Position = convertedPos;
+        transform.Rotation = convertedQuat;
+        transform.Scale = convertedScale;
+
+        if (parent)
+            entity.SetParent(parent);
+
         for (unsigned int i = 0; i < node->mNumMeshes; ++i)
         {
+            Entity meshChild = pPrefab->CreateEmptyObject(node->mName.C_Str());
+            meshChild.SetParent(entity.GetEntityID());
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(mesh);
             resource.AddChild(pMeshData, pMeshData->Name());
+            meshChild.AddComponent<MeshRenderer>(pMeshData, nullptr);
         }
         // then do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; ++i)
         {
-            ProcessNode(node->mChildren[i], scene, resource);
+            ProcessNode(pPrefab, entity.GetEntityID(), node->mChildren[i], scene, resource);
         }
     }
 
