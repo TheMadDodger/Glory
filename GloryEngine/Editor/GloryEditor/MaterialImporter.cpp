@@ -34,7 +34,7 @@ namespace Glory::Editor
 		MaterialData* pMaterialData = new MaterialData();
 		Utils::YAMLFileRef file{ path };
 		EditorApplication::GetInstance()->GetMaterialManager().LoadIntoMaterial(file, pMaterialData);
-		return ImportedResource{ pMaterialData };
+		return ImportedResource{ path, pMaterialData };
 	}
 
 	bool MaterialImporter::SaveResource(const std::filesystem::path& path, MaterialData* pResource) const

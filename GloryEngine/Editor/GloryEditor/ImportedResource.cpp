@@ -1,14 +1,21 @@
 #include "ImportedResource.h"
+#include "EditorAssetDatabase.h"
 
 #include <Resource.h>
 
 namespace Glory::Editor
 {
-	ImportedResource::ImportedResource(): m_pResource(nullptr)
+	ImportedResource::ImportedResource(): m_Path(""), m_pResource(nullptr)
 	{
 	}
-	ImportedResource::ImportedResource(Resource* pResource): m_pResource(pResource)
+	ImportedResource::ImportedResource(std::nullptr_t): m_Path(""), m_pResource(nullptr)
 	{
+	}
+	ImportedResource::ImportedResource(const std::filesystem::path& path, Resource* pResource):
+		m_Path(path), m_pResource(pResource)
+	{
+		const UUID uuid = EditorAssetDatabase::FindAssetUUID(m_Path.string());
+		if (uuid) pResource->SetResourceUUID(uuid);
 	}
 
 	ImportedResource& ImportedResource::AddChild(Resource* pResource, const std::string& name)
@@ -21,8 +28,13 @@ namespace Glory::Editor
 		}
 
 		pResource->SetName(name);
-		m_Children.push_back({ pResource });
-		return m_Children[index];
+		m_Children.push_back({ m_Path, pResource });
+		ImportedResource& resource = m_Children[index];
+		resource.m_CachedSubPath = m_CachedSubPath;
+		resource.m_CachedSubPath.append(name);
+		const UUID uuid = EditorAssetDatabase::FindAssetUUID(m_Path.string(), resource.m_CachedSubPath);
+		if (uuid) pResource->SetResourceUUID(uuid);
+		return resource;
 	}
 
 	ImportedResource& ImportedResource::AddChild(ImportedResource&& child, const std::string& name)

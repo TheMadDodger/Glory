@@ -41,7 +41,7 @@ namespace Glory::Editor
 		FileData* pFileData = (FileData*)pModule->Load(path.string(), fileImportSettings);
 
 		constexpr std::string_view namespaceString = "namespace";
-		if (pFileData->Size() <= 0) return new MonoScript(pFileData, "", "");
+		if (pFileData->Size() <= 0) return { path, new MonoScript(pFileData, "", "") };
 		const std::string_view text = pFileData->Data();
 		const std::string_view ns = Find(text, "namespace");
 		const std::string_view cl = Find(text, "class");
@@ -49,7 +49,7 @@ namespace Glory::Editor
 		MonoScript* pMonoScript = new MonoScript(pFileData, ns, cl);
 		delete pFileData;
 
-		return { pMonoScript };
+		return { path, pMonoScript };
 	}
 
 	bool MonoScriptImporter::SaveResource(const std::filesystem::path& path, MonoScript* pScript) const

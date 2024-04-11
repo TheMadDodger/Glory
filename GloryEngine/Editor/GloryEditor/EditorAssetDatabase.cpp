@@ -296,7 +296,7 @@ namespace Glory::Editor
 		std::filesystem::path extension = filePath.extension();
 		std::filesystem::path fileName = filePath.filename().replace_extension("");
 		if (!Importer::Export(path, pResource)) return 0;
-		return ImportAsset(path, ImportedResource{ pResource });
+		return ImportAsset(path, ImportedResource{ path, pResource });
 	}
 
 	UUID EditorAssetDatabase::ImportAsset(const std::string& path, ImportedResource& loadedResource, std::filesystem::path subPath)
@@ -627,6 +627,35 @@ namespace Glory::Editor
 		//	return uuid;
 		//}
 
+		return 0;
+	}
+
+	UUID EditorAssetDatabase::FindAssetUUID(const std::string& path, const std::filesystem::path& subPath)
+	{
+		std::string fixedPath = path;
+		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+
+		std::filesystem::path absolutePath = fixedPath;
+		if (!absolutePath.is_absolute() && fixedPath[0] != '.')
+		{
+			absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
+			absolutePath = absolutePath.append(fixedPath);
+		}
+		if (!m_PathToUUIDCache.Contains(absolutePath.string())) return 0;
+		if (subPath.empty()) return m_PathToUUIDCache[absolutePath.string()];
+
+		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
+		for (const auto& f : assetsNode)
+		{
+			const std::string_view key = f.name.GetString();
+			const UUID uuid = std::stoull(key.data());
+			AssetLocation location;
+			if (GetAssetLocation(uuid, location)) continue;
+			if (location.Path != subPath) continue;
+			return uuid;
+		}
 		return 0;
 	}
 

@@ -127,6 +127,6 @@ namespace Glory::Editor
             ProcessLine(shaderData, line);
         }
 
-        return { new ShaderSourceData(shaderData.Type, std::move(shaderData.Source), std::move(shaderData.ProcessedSource)) };
+        return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source), std::move(shaderData.ProcessedSource)) };
     }
 }

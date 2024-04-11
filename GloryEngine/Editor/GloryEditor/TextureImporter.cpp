@@ -48,7 +48,7 @@ namespace Glory::Editor
 		pTexture->GetSamplerSettings().MinLOD = sampler["MinLOD"].As<float>();
 		pTexture->GetSamplerSettings().MaxLOD = sampler["MaxLOD"].As<float>();
 
-		return ImportedResource{ pTexture };
+		return ImportedResource{ path, pTexture };
 	}
 
 	bool TextureImporter::SaveResource(const std::filesystem::path& path, TextureData* pResource) const
