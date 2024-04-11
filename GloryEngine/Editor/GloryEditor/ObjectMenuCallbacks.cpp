@@ -485,7 +485,7 @@ namespace Glory::Editor
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Resource* pLoadedResource = pEngine->GetAssetManager().FindResource(uuid);
-		if (pLoadedResource) return;
+		//if (pLoadedResource) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
 		EditorAssetDatabase::ImportAsset(file.string());
 	}
