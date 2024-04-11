@@ -67,7 +67,7 @@ namespace Glory::Editor
         }
 
         ModelData* pModel = new ModelData();
-        ImportedResource resource{ pModel };
+        ImportedResource resource{ path, pModel };
         ProcessNode(pScene->mRootNode, pScene, resource);
 
         importer.FreeScene();
@@ -78,14 +78,14 @@ namespace Glory::Editor
     void ASSIMPImporter::ProcessNode(aiNode* node, const aiScene* scene, ImportedResource& resource) const
     {
         // process all the node's meshes (if any)
-        for (unsigned int i = 0; i < node->mNumMeshes; i++)
+        for (unsigned int i = 0; i < node->mNumMeshes; ++i)
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(mesh);
             resource.AddChild(pMeshData, pMeshData->Name());
         }
         // then do the same for each of its children
-        for (unsigned int i = 0; i < node->mNumChildren; i++)
+        for (unsigned int i = 0; i < node->mNumChildren; ++i)
         {
             ProcessNode(node->mChildren[i], scene, resource);
         }

@@ -135,7 +135,7 @@ namespace Glory::Editor
 				if (itor != data.end()) return;
 
 				/* Import the resource */
-				ImportedResource resource = Importer::Import(path, (void*)&uuid);
+				ImportedResource resource = Importer::Import(path);
 				data.emplace(path, std::move(resource));
 			});
 

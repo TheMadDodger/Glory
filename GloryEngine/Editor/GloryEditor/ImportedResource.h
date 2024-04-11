@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <filesystem>
 
 namespace std::filesystem
 {
@@ -20,7 +21,8 @@ namespace Editor
 	{
 	public:
 		GLORY_EDITOR_API ImportedResource();
-		GLORY_EDITOR_API ImportedResource(Resource* pResource);
+		GLORY_EDITOR_API ImportedResource(std::nullptr_t);
+		GLORY_EDITOR_API ImportedResource(const std::filesystem::path& path, Resource* pResource);
 		GLORY_EDITOR_API ~ImportedResource() = default;
 
 		GLORY_EDITOR_API ImportedResource& AddChild(Resource* pResource, const std::string& name);
@@ -44,9 +46,12 @@ namespace Editor
 
 	private:
 		friend class EditorAssetDatabase;
+		friend class Importer;
 		Resource* m_pResource;
 		std::vector<ImportedResource> m_Children;
 		std::map<std::string, size_t> m_NameToSubresourceIndex;
+		std::filesystem::path m_Path;
+		std::filesystem::path m_CachedSubPath;
 	};
 }
 }

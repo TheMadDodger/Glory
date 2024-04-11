@@ -102,13 +102,9 @@ namespace Glory::Editor
 		std::memcpy(data, pSDLImage->pixels, bytesPerPixel * numPixels);
 
 		ImageData* pData = new ImageData(width, height, internalFormat, pixelFormat, bytesPerPixel, std::move(data), bytesPerPixel * numPixels);
-		if (userData && static_cast<UUID*>(userData))
-		{
-			pData->SetResourceUUID(*static_cast<UUID*>(userData));
-		}
-		TextureData* pDefualtTexture = new TextureData(pData);
+		ImportedResource importedResource{ path, pData };
 
-		ImportedResource importedResource{ pData };
+		TextureData* pDefualtTexture = new TextureData(pData);
 		importedResource.AddChild(pDefualtTexture, "Default");
 
 		SDL_FreeSurface(pSDLImage);

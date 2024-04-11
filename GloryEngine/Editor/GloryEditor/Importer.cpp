@@ -1,5 +1,6 @@
 #include "Importer.h"
 #include "EditorApplication.h"
+#include "EditorAssetDatabase.h"
 
 #include <Debug.h>
 #include <sstream>
@@ -27,7 +28,6 @@ namespace Glory::Editor
 		std::stringstream str;
 		str << "Found importer " << (*itor)->Name() << " for loading " << path.extension() << " files to import: " << path;
 		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(str.str());
-
 		return (*itor)->Load(path, userSettings);
 	}
 
