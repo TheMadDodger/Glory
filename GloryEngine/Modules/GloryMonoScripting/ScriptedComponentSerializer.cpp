@@ -51,12 +51,16 @@ namespace Glory
 			pScript->LoadScriptProperties();
 			pScript->ReadDefaults(pScriptedComponent->m_ScriptData.m_Buffer);
 
+			if (!scriptDataNode.IsDefined() && !scriptDataNode.IsMap()) return;
+
 			const std::vector<ScriptProperty>& props = pScript->ScriptProperties();
 			for (size_t i = 0; i < props.size(); ++i)
 			{
 				const ScriptProperty& prop = props[i];
 				const TypeData* pType = Reflect::GetTyeData(prop.m_TypeHash);
-				m_pSerializers->DeserializeProperty(pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], scriptDataNode[prop.m_Name]);
+				YAML::Node propData = scriptDataNode[prop.m_Name];
+				if (!propData.IsDefined()) return;
+				m_pSerializers->DeserializeProperty(pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], propData);
 			}
 		}
 	}
