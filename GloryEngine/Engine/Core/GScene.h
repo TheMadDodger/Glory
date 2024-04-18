@@ -189,7 +189,13 @@ namespace Glory
 		/** @brief Mark this scene for destruction to prevent further update() and draw() calls */
 		void MarkForDestruction();
 
-		Entity Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent = 0);
+		/** @brief Instantiate another scene into this scene
+		 * @param pOther The scene to instantiate
+		 * @param IDRemapper @ref UUIDRemapper instance for remapping IDs
+		 * @param parent Parent of the instantiated scene or 0 to parent to root
+		 * @returns Array containing newly instantiated entities
+		 */
+		std::vector<Utils::ECS::EntityID> Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent = 0);
 
 	protected:
 		/** @brief Invoke an update on all active entities and components */
@@ -216,7 +222,7 @@ namespace Glory
 		 */
 		void UnsetChildrenPrefab(Utils::ECS::EntityID entity);
 
-		Entity InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent = 0);
+		Entity InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity, std::vector<Utils::ECS::EntityID>& newEntities, Utils::ECS::EntityID parent = 0);
 
 	protected:
 		friend class Entity;

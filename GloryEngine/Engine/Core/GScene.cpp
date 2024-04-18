@@ -212,30 +212,55 @@ namespace Glory
 		const Utils::ECS::EntityID parentEntity = itor != m_Ids.end() ? itor->second : 0;
 
 		UUIDRemapper remapper{ remapSeed };
-		Entity entity = Instantiate(pPrefab, remapper, parentEntity);
+		std::vector<Utils::ECS::EntityID> entities = Instantiate(pPrefab, remapper, parentEntity);
 
-		Transform& transform = entity.GetComponent<Transform>();
-		transform.Position = pos;
-		transform.Rotation = rot;
-		transform.Scale = scale;
+		if (m_pManager && m_pManager->HasStarted())
+		{
+			for (auto& entity : entities)
+			{
+				m_Registry.InvokeAll(Utils::ECS::InvocationType::Start, entities);
+			}
+		}
 
-		SetPrefab(entity.GetEntityID(), pPrefab->GetUUID());
-		return entity;
+		if (!entities.empty())
+		{
+			Entity entity{ entities[0], this };
+			Transform& transform = entity.GetComponent<Transform>();
+			transform.Position = pos;
+			transform.Rotation = rot;
+			transform.Scale = scale;
+			SetPrefab(entity.GetEntityID(), pPrefab->GetUUID());
+			return entity;
+		}
+
+		return {};
 	}
 
 	Entity GScene::InstantiatePrefab(UUID parent, PrefabData* pPrefab, UUIDRemapper& remapper, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		auto itor = m_Ids.find(parent);
 		const Utils::ECS::EntityID parentEntity = itor != m_Ids.end() ? itor->second : 0;
-		Entity entity = Instantiate(pPrefab, remapper, parentEntity);
+		std::vector<Utils::ECS::EntityID> entities = Instantiate(pPrefab, remapper, parentEntity);
 
-		Transform& transform = entity.GetComponent<Transform>();
-		transform.Position = pos;
-		transform.Rotation = rot;
-		transform.Scale = scale;
+		if (m_pManager && m_pManager->HasStarted())
+		{
+			for (auto& entity : entities)
+			{
+				m_Registry.InvokeAll(Utils::ECS::InvocationType::Start, entities);
+			}
+		}
 
-		SetPrefab(entity.GetEntityID(), pPrefab->GetUUID());
-		return entity;
+		if (!entities.empty())
+		{
+			Entity entity{ entities[0], this };
+			Transform& transform = entity.GetComponent<Transform>();
+			transform.Position = pos;
+			transform.Rotation = rot;
+			transform.Scale = scale;
+			SetPrefab(entity.GetEntityID(), pPrefab->GetUUID());
+			return entity;
+		}
+		return {};
 	}
 
 	void GScene::DelayedSetParent(Entity entity, UUID parentID)
@@ -312,7 +337,7 @@ namespace Glory
 		}
 	}
 
-	Entity GScene::InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent)
+	Entity GScene::InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity, std::vector<Utils::ECS::EntityID>& newEntities, Utils::ECS::EntityID parent)
 	{
 		const Utils::ECS::EntityID newEntity = m_Registry.CreateEntity();
 		Utils::ECS::EntityView* pNewEntityView = m_Registry.GetEntityView(newEntity);
@@ -332,13 +357,15 @@ namespace Glory
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
 			const UUID remappedID = IDRemapper(uuid);
 			void* data = pOther->m_Registry.GetComponentAddress(entity, uuid);
-			m_Registry.CopyComponent(newEntity, type, remappedID, data, false);
+			m_Registry.CopyComponent(newEntity, type, remappedID, data, true);
 		}
+
+		newEntities.push_back(newEntity);
 
 		for (size_t i = 0; i < pOther->ChildCount(entity); ++i)
 		{
 			const Utils::ECS::EntityID child = pOther->Child(entity, i);
-			InstantiateEntity(pOther, IDRemapper, child, newEntity);
+			InstantiateEntity(pOther, IDRemapper, child, newEntities, newEntity);
 		}
 
 		return Entity{ newEntity, this };
@@ -506,18 +533,16 @@ namespace Glory
 		m_MarkedForDestruct = true;
 	}
 
-	Entity GScene::Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent)
+	std::vector<Utils::ECS::EntityID> GScene::Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent)
 	{
-		Entity firstEntity;
+		std::vector<Utils::ECS::EntityID> newEntities;
 
 		for (size_t i = 0; i < pOther->ChildCount(0); ++i)
 		{
 			const Utils::ECS::EntityID child = pOther->Child(0, i);
-			const Entity nextEntity = InstantiateEntity(pOther, IDRemapper, child, parent);
-			if (i == 0)
-				firstEntity = nextEntity;
+			const Entity nextEntity = InstantiateEntity(pOther, IDRemapper, child, newEntities, parent);
 		}
-		return firstEntity;
+		return newEntities;
 	}
 
 	SceneManager* GScene::Manager()

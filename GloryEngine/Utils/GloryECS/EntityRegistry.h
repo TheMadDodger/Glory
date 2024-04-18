@@ -152,6 +152,8 @@ namespace Glory::Utils::ECS
 		void InvokeAll(uint32_t typeHash, InvocationType invocationType);
 		void InvokeAll(InvocationType invocationType);
 
+		void InvokeAll(InvocationType invocationType, const std::vector<EntityID>& entities);
+
 		template<typename T>
 		T GetUserData()
 		{
@@ -200,6 +202,12 @@ namespace Glory::Utils::ECS
 
 		EntityID CopyEntityToOtherRegistry(EntityID entity, EntityID parent, EntityRegistry* pRegistry);
 
+		/** @brief Disable all component callbacks */
+		void DisableCallbacks();
+
+		/** @brief Check whether callbacks are enabled */
+		bool CallbacksEnabled() const;
+
 	private:
 		friend class ComponentTypes;
 
@@ -213,5 +221,7 @@ namespace Glory::Utils::ECS
 		std::map<size_t, size_t> m_ViewIndices;
 
 		void* m_pUserData;
+
+		bool m_CallbacksEnabled = true;
 	};
 }

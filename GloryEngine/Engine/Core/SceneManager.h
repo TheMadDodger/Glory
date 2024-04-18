@@ -49,6 +49,7 @@ namespace Glory
 		void CloseAllScenes();
 
 		void Start();
+		bool HasStarted() const;
 
 	protected:
 		virtual void OnInitialize() = 0;
