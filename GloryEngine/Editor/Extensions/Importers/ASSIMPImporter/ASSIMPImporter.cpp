@@ -76,10 +76,65 @@ namespace Glory::Editor
 
         ModelData* pModel = new ModelData();
         ImportedResource resource{ path, pModel };
-        Utils::ECS::EntityRegistry registry;
+
+        Context context;
+        if (pScene->HasMaterials())
+        {
+            for (size_t i = 0; i < pScene->mNumMaterials; ++i)
+            {
+                const aiMaterial* material = pScene->mMaterials[i];
+                MaterialData* pMaterial = new MaterialData();
+                pMaterial->SetName(std::string_view{ material->GetName().C_Str() });
+
+                aiShadingMode shadingMode;
+                material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
+
+                /* Get shader/pipeline */
+                switch (shadingMode)
+                {
+                case aiShadingMode_Flat:
+                    break;
+                case aiShadingMode_Gouraud:
+                    break;
+                case aiShadingMode_Phong:
+                    break;
+                case aiShadingMode_Blinn:
+                    break;
+                case aiShadingMode_Toon:
+                    break;
+                case aiShadingMode_OrenNayar:
+                    break;
+                case aiShadingMode_Minnaert:
+                    break;
+                case aiShadingMode_CookTorrance:
+                    break;
+                case aiShadingMode_Unlit:
+                    break;
+                case aiShadingMode_Fresnel:
+                    break;
+                case aiShadingMode_PBR_BRDF:
+                    break;
+                case _aiShadingMode_Force32Bit:
+                    break;
+                default:
+                    break;
+                }
+
+                resource.AddChild(pMaterial, pMaterial->Name());
+                context.Materials.push_back(pMaterial);
+            }
+        }
+
+        /* @todo: Use for unit conversion */
+        //scene->mMetaData
+
+        /* @todo: Import embedded textures */
+        //scene->mTextures
 
         PrefabData* pPrefab = new PrefabData();
-        ProcessNode(pPrefab, 0, pScene->mRootNode, pScene, resource);
+        context.Prefab = pPrefab;
+
+        ProcessNode(context, 0, pScene->mRootNode, pScene, resource);
         resource.AddChild(pPrefab, path.filename().replace_extension().string() + "_Prefab");
 
         importer.FreeScene();
@@ -98,8 +153,10 @@ namespace Glory::Editor
         return glm::vec4(color.r, color.g, color.b, 1.0f);
     }
 
-    void ASSIMPImporter::ProcessNode(PrefabData* pPrefab, Utils::ECS::EntityID parent, aiNode* node, const aiScene* scene, ImportedResource& resource) const
+    void ASSIMPImporter::ProcessNode(Context& context, Utils::ECS::EntityID parent, aiNode* node, const aiScene* scene, ImportedResource& resource) const
     {
+        PrefabData* pPrefab = context.Prefab;
+
         // process all the node's meshes (if any)
         aiVector3D scale, position;
         aiQuaternion rotation;
@@ -159,14 +216,15 @@ namespace Glory::Editor
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(mesh);
             if (!pMeshData) continue;
+            MaterialData* pMaterial = context.Materials[mesh->mMaterialIndex];
             resource.AddChild(pMeshData, pMeshData->Name());
-            meshChild.AddComponent<MeshRenderer>(pMeshData, nullptr);
+            meshChild.AddComponent<MeshRenderer>(pMeshData, pMaterial);
         }
 
         // then do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; ++i)
         {
-            ProcessNode(pPrefab, entity.GetEntityID(), node->mChildren[i], scene, resource);
+            ProcessNode(context, entity.GetEntityID(), node->mChildren[i], scene, resource);
         }
     }
 
