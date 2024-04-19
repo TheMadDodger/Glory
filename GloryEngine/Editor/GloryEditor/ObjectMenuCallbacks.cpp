@@ -19,6 +19,7 @@
 #include <Engine.h>
 #include <SceneManager.h>
 #include <MaterialInstanceData.h>
+#include <PipelineData.h>
 
 namespace Glory::Editor
 {
@@ -388,6 +389,23 @@ namespace Glory::Editor
 
 			TextureData* pTextureData = new TextureData();
 			EditorAssetDatabase::CreateAsset(pTextureData, finalPath.string());
+			FileBrowserItem::GetSelectedFolder()->Refresh();
+			FileBrowserItem::GetSelectedFolder()->SortChildren();
+		});
+	}
+
+	OBJECTMENU_CALLBACK(CreateNewPipelineCallback)
+	{
+		std::filesystem::path path = FileBrowser::GetCurrentPath();
+		path = path.append("NewPipeline.gpln");
+		path = GetUnqiueFilePath(path);
+
+		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [](std::filesystem::path& finalPath) {
+			finalPath.replace_extension("gpln");
+			if (std::filesystem::exists(finalPath)) return;
+
+			PipelineData* pPipelineData = new PipelineData();
+			EditorAssetDatabase::CreateAsset(pPipelineData, finalPath.string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();
 		});

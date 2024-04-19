@@ -461,4 +461,91 @@ namespace Glory
         DT_4Bytes,
         DT_Double
     };
+
+    /** @brief Pipeline type based on ASSIMP aiShadingMode */
+    enum PipelineType
+    {
+        /** @brief Unknown */
+        PT_Unknown = 0,
+
+        /** @brief Flat shading. Shading is done on per-face base,
+         *  diffuse only. Also known as 'faceted shading'.
+         */
+        PT_Flat = 1,
+
+        /** @brief Simple Gouraud shading. */
+        PT_Gouraud = 2,
+
+        /** @brief Phong-Shading */
+        PT_Phong = 3,
+
+        /** @brief Phong-Blinn-Shading */
+        PT_Blinn = 4,
+
+        /** @brief Toon-Shading per pixel
+         *
+         *  Also known as 'comic' shader.
+         */
+        PT_Toon = 5,
+
+        /** @brief OrenNayar-Shading per pixel
+         *
+         *  Extension to standard Lambertian shading, taking the
+         *  roughness of the material into account
+         */
+        PT_OrenNayar = 6,
+
+        /** @brief Minnaert-Shading per pixel
+         *
+         *  Extension to standard Lambertian shading, taking the
+         *  "darkness" of the material into account
+         */
+        PT_Minnaert = 7,
+
+        /** @brief CookTorrance-Shading per pixel
+         *
+         *  Special shader for metallic surfaces.
+         */
+        PT_CookTorrance = 8,
+
+        /** @brief No shading at all. Constant light influence of 1.0. */
+        PT_Unlit = 9,
+
+        /** @brief Fresnel shading */
+        PT_Fresnel = 10,
+
+        /** @brief Physically-Based Rendering (PBR) shading using
+        * Bidirectional scattering/reflectance distribution function (BSDF/BRDF)
+        * There are multiple methods under this banner, and model files may provide
+        * data for more than one PBR-BRDF method.
+        * Applications should use the set of provided properties to determine which
+        * of their preferred PBR rendering methods are likely to be available
+        * eg:
+        * - If AI_MATKEY_METALLIC_FACTOR is set, then a Metallic/Roughness is available
+        * - If AI_MATKEY_GLOSSINESS_FACTOR is set, then a Specular/Glossiness is available
+        * Note that some PBR methods allow layering of techniques
+        */
+        PT_PBR_BRDF = 11,
+
+        /** @brief Number of pipeline types */
+        PT_Count,
+    };
+
+    const std::string Enum<PipelineType>::m_EnumStringValues[] = {
+        "Unknown",
+        "Flat",
+        "Gouraud",
+        "Phong",
+        "Blinn",
+        "Toon",
+        "OrenNayar",
+        "Minnaert",
+        "CookTorrance",
+        "Unlit",
+        "Fresnel",
+        "PBR_BRDF",
+    };
+
+    const size_t Enum<PipelineType>::m_NumValues = PT_Count;
+    bool Enum<PipelineType>::Valid() { return true; }
 }

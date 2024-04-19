@@ -68,6 +68,7 @@
 #include <EntitySceneObjectEditor.h>
 #include <DefaultComponentEditor.h>
 #include <TransformEditor.h>
+#include <PipelineImporter.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -153,6 +154,7 @@ namespace Glory::Editor
 
 		pEngine->GetDebug().LogInfo("Initialized editor");
 
+		Importer::Register<PipelineImporter>();
 		Importer::Register<MaterialImporter>();
 		Importer::Register<MaterialInstanceImporter>();
 		Importer::Register<TextureImporter>();
@@ -423,6 +425,7 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/New Scene", CreateNewSceneCallback, T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/Empty Object", CreateEmptyObjectCallback, T_SceneObject | T_Scene | T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/Texture", CreateNewTextureCallback, T_ContentBrowser | T_Resource);
+		ObjectMenu::AddMenuItem("Create/Pipeline", CreateNewPipelineCallback, T_ContentBrowser);
 		ObjectMenu::AddMenuItem("Create/Material", CreateNewMaterialCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Material Instance", CreateNewMaterialInstanceCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);

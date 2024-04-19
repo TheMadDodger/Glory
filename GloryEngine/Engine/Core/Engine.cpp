@@ -28,6 +28,7 @@
 #include "CameraManager.h"
 #include "ShaderManager.h"
 #include "GameTime.h"
+#include "BinaryStream.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -37,12 +38,12 @@
 #include "ProfilerModule.h"
 #include "MaterialInstanceData.h"
 #include "ShaderSourceData.h"
+#include "PipelineData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
 
 #include <algorithm>
-#include "BinaryStream.h"
 
 namespace Glory
 {
@@ -571,6 +572,7 @@ namespace Glory
 		m_ResourceTypes->RegisterType<SceneObjectRef>();
 		m_ResourceTypes->RegisterType<ShapeProperty>();
 		m_ResourceTypes->RegisterResource<PrefabData>("");
+		m_ResourceTypes->RegisterResource<PipelineData>("");
 		m_ResourceTypes->RegisterResource<MaterialData>("");
 		m_ResourceTypes->RegisterResource<MaterialInstanceData>("");
 		m_ResourceTypes->RegisterResource<MeshData>("");
