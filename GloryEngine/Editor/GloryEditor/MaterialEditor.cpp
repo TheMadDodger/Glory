@@ -31,9 +31,10 @@ namespace Glory::Editor
 		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterial(pMaterial->GetUUID());
 
 		bool node = ImGui::TreeNodeEx("Loaded Shaders", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
+		bool change = false;
 		if (node)
 		{
-			ShaderGUI(pMaterial);
+			change |= ShaderGUI(pMaterial);
 			ImGui::TreePop();
 		}
 
@@ -41,7 +42,6 @@ namespace Glory::Editor
 		ImGui::Spacing();
 		ImGui::Spacing();
 
-		bool change = false;
 		node = ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
 		if (node)
 		{

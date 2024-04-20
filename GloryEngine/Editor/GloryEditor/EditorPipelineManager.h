@@ -1,0 +1,54 @@
+#pragma once
+#include <map>
+
+#include <UUID.h>
+
+namespace Glory
+{
+	class Engine;
+	class PipelineData;
+}
+
+namespace Glory::Editor
+{
+	struct AssetCallbackData;
+
+	class EditorPipelineManager
+	{
+	public:
+		/** @brief Constructor */
+		EditorPipelineManager(Engine* pEngine);
+		/** @brief Destructor */
+		virtual ~EditorPipelineManager();
+
+		/** @brief Initialize the manager by subscribing to asset events */
+		void Initialize();
+		/** @brief Unsubscribe asset events */
+		void Cleanup();
+
+		/** @brief Add a shader to a pipeline and update the cached properties
+		 * @param pipelineID ID of the pipeline
+		 * @param shaderID ID of the shader
+		 */
+		void AddShaderToPipeline(UUID pipelineID, UUID shaderID);
+		/** @brief Remove a shader from a pipeline and update the cached properties
+		 * @param materialID ID of the pipeline
+		 * @param index Index of the shader to remove
+		 */
+		void RemoveShaderFromPipeline(UUID pipelineID, size_t index);
+
+	private:
+		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
+		void AssetAddedCallback(const AssetCallbackData& callback);
+		/** @brief Handler for @ref AssetCallbackType::CT_AssetUpdated events
+		 * Currently does nothing
+		 */
+		void AssetUpdatedCallback(const AssetCallbackData& callback);
+
+	private:
+		std::map<UUID, PipelineData*> m_pPipelineDatas;
+
+		Engine* m_pEngine;
+		UUID m_AssetRegisteredCallback;
+	};
+}

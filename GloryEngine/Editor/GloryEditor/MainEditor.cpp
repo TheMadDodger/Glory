@@ -24,8 +24,6 @@
 #include "SceneTumbnailGenerator.h"
 #include "Editor.h"
 #include "ProfilerWindow.h"
-#include "MaterialEditor.h"
-#include "MaterialInstanceEditor.h"
 #include "EditorSceneManager.h"
 #include "AssetReferencePropertyDrawer.h"
 #include "ArrayPropertyDrawer.h"
@@ -39,6 +37,10 @@
 #include "StructPropertyDrawer.h"
 #include "EditorAssetDatabase.h"
 #include "SettingsEnums.h"
+
+#include "MaterialEditor.h"
+#include "MaterialInstanceEditor.h"
+#include "PipelineEditor.h"
 
 #include "Importer.h"
 #include "MaterialImporter.h"
@@ -496,6 +498,7 @@ namespace Glory::Editor
 	void MainEditor::RegisterEditors()
 	{
 		Editor::RegisterEditor<TextureDataEditor>();
+		Editor::RegisterEditor<PipelineEditor>();
 		Editor::RegisterEditor<MaterialEditor>();
 		Editor::RegisterEditor<MaterialInstanceEditor>();
 

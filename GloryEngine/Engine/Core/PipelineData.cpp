@@ -4,6 +4,7 @@ namespace Glory
 {
 	PipelineData::PipelineData()
 	{
+		APPEND_TYPE(PipelineData);
 	}
 
 	PipelineData::~PipelineData()
@@ -33,6 +34,11 @@ namespace Glory
 	void PipelineData::AddShader(UUID shaderID)
 	{
 		m_Shaders.push_back(shaderID);
+	}
+
+	void PipelineData::RemoveShaderAt(size_t index)
+	{
+		m_Shaders.erase(m_Shaders.begin() + index);
 	}
 
 	void PipelineData::Serialize(BinaryStream& container) const

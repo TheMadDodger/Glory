@@ -31,7 +31,7 @@ namespace Editor
 
 		/** @brief Initialize the manager by subscribing to asset events */
 		void Initialize();
-		/** @brief Unsibscribe asset events */
+		/** @brief Unsubscribe asset events */
 		void Cleanup();
 
 		/** @brief Load editor property data from YAML into material
