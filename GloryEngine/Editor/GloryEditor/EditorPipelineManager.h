@@ -7,6 +7,12 @@ namespace Glory
 {
 	class Engine;
 	class PipelineData;
+
+
+	namespace Utils
+	{
+		struct YAMLFileRef;
+	}
 }
 
 namespace Glory::Editor
@@ -45,10 +51,21 @@ namespace Glory::Editor
 		 */
 		void AssetUpdatedCallback(const AssetCallbackData& callback);
 
+		/** @brief Handler for compiled shader events */
+		void OnShaderCompiled(const UUID& uuid);
+
+		/** @brief Update a pipeline by loading the properties of its attached shaders
+		 * @param pPipeline Pipeline to update
+		 */
+		void UpdatePipeline(PipelineData* pPipeline);
+
+		void LoadIntoPipeline(Utils::YAMLFileRef& file, PipelineData* pPipeline) const;
+
 	private:
 		std::map<UUID, PipelineData*> m_pPipelineDatas;
 
 		Engine* m_pEngine;
 		UUID m_AssetRegisteredCallback;
+		UUID m_ShaderCompiledCallback;
 	};
 }

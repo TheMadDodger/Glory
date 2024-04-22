@@ -1,6 +1,9 @@
 #include "EditorShaderData.h"
 #include "EditorApplication.h"
 
+#include <MaterialData.h>
+#include <PipelineData.h>
+
 #include <ResourceType.h>
 
 namespace Glory::Editor
@@ -49,6 +52,22 @@ namespace Glory::Editor
 			ResourceTypes& types = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
 			const BasicTypeData* pType = types.GetBasicTypeData(info.m_TypeHash);
 			pMaterial->AddProperty(info.m_Name, info.m_Name, pType->m_TypeHash, pType->m_Size, 0);
+		}
+	}
+
+	void EditorShaderData::LoadIntoPipeline(PipelineData* pPipeline)
+	{
+		for (size_t i = 0; i < m_SamplerNames.size(); i++)
+		{
+			pPipeline->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>(), 0);
+		}
+
+		for (size_t i = 0; i < m_PropertyInfos.size(); i++)
+		{
+			EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];
+			ResourceTypes& types = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
+			const BasicTypeData* pType = types.GetBasicTypeData(info.m_TypeHash);
+			pPipeline->AddProperty(info.m_Name, info.m_Name, pType->m_TypeHash, pType->m_Size, 0);
 		}
 	}
 
