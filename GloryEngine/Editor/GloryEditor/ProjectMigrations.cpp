@@ -37,6 +37,7 @@ namespace Glory::Editor
         {
             Migrate_0_3_0_ASSIMPAssets(pProject);
             Migrate_0_3_0_ConvertMaterialPropertiesToMap(pProject);
+            Migrate_0_3_0_ModuleAssetIDS(pProject);
         }
 
         /* Update version to current */
@@ -313,6 +314,93 @@ namespace Glory::Editor
                 std::stringstream str;
                 str << "0.3.0> Moved " << pathStr << " to " << newPath.string();
                 pApplication->GetEngine()->GetDebug().LogInfo(str.str());
+            }
+        }
+    }
+
+    void Migrate_0_3_0_ModuleAssetIDS(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrating module asset IDs to new defaults");
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+
+        std::map<UUID, UUID> moveMap;
+        std::vector<std::string> materials;
+
+        const uint32_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
+
+        for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+        {
+            JSONValueRef asset = assets[itor->name.GetString()];
+            const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+            if (hash == materialDataHash)
+                materials.push_back(itor->name.GetString());
+
+            const std::string_view pathStr = asset["Location/Path"].AsString();
+            if (pathStr._Starts_with(".\\Modules\\"))
+            {
+                std::filesystem::path path = pathStr;
+                while (!path.empty() && path.filename().compare("Assets") != 0)
+                    path = path.parent_path();
+
+                const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+
+                if (path.empty()) continue;
+                path.append("Assets.yaml");
+                if (!std::filesystem::exists(path)) continue;
+
+                Utils::YAMLFileRef file{ path };
+                auto root = file.RootNodeRef().ValueRef();
+                for (size_t i = 0; i < root.Size(); ++i)
+                {
+                    const std::string otherPath = root[i]["Path"].As<std::string>();
+                    const uint64_t oldUUID = asset["Metadata/UUID"].AsUInt64();
+                    const uint64_t newUUID = root[i]["ID"].As<uint64_t>();
+                    if (pathStr.find(otherPath) == std::string::npos) continue;
+                    asset["Metadata/UUID"].SetUInt64(newUUID);
+
+                    std::stringstream str;
+                    str << "0.3.0> Updated ID for " << pathStr << " to " << newUUID;
+                    pApplication->GetEngine()->GetDebug().LogInfo(str.str());
+                    moveMap.emplace(oldUUID, newUUID);
+                    break;
+                }
+            }
+        }
+
+        for (auto itor = moveMap.begin(); itor != moveMap.end(); ++itor)
+        {
+            assets[std::to_string(itor->second)].Value() = assets[std::to_string(itor->first)].Value();
+            assets.Remove(std::to_string(itor->first));
+        }
+
+        for (size_t i = 0; i < materials.size(); ++i)
+        {
+            JSONValueRef asset = assets[materials[i]];
+            JSONValueRef location = asset["Location"];
+            if (!location["SubresourcePath"].AsString().empty()) continue;
+            const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+            EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(uuid);
+            if (!pResource)
+            {
+                pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Failed to migrate a material");
+                continue;
+            }
+
+            YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
+            Utils::YAMLFileRef& file = **pMaterial;
+
+            auto shaders = file["Shaders"];
+            for (size_t i = 0; i < shaders.Size(); ++i)
+            {
+                const UUID oldUUID = shaders[i]["UUID"].As<uint64_t>();
+                const auto itor = moveMap.find(oldUUID);
+                if (itor == moveMap.end()) continue;
+                shaders[i]["UUID"].Set(uint64_t(itor->second));
+                EditorAssetDatabase::SetAssetDirty(uuid);
             }
         }
     }
