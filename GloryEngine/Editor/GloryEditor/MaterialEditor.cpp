@@ -16,6 +16,7 @@
 #include <AssetDatabase.h>
 #include <AssetManager.h>
 #include <EditorUI.h>
+#include <PipelineData.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -30,25 +31,34 @@ namespace Glory::Editor
 		YAMLResource<MaterialData>* pMaterial = (YAMLResource<MaterialData>*)m_pTarget;
 		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterial(pMaterial->GetUUID());
 
-		bool node = ImGui::TreeNodeEx("Loaded Shaders", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
-		bool change = false;
+		/*bool node = ImGui::TreeNodeEx("Loaded Shaders", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
 		if (node)
 		{
 			change |= ShaderGUI(pMaterial);
 			ImGui::TreePop();
+		}*/
+
+		Utils::YAMLFileRef file = **pMaterial;
+		auto pipeline = file["Pipeline"];
+		UUID pipelineID = pipeline.Exists() ? pipeline.As<uint64_t>() : 0;
+
+		bool change = AssetPicker::ResourceDropdown("Pipeline", ResourceTypes::GetHash<PipelineData>(), &pipelineID);
+		if (change)
+		{
+			pipeline.Set(uint64_t(pipelineID));
+			/* Tell pipeline manager to add the chosen pipeline to this material */
 		}
 
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Spacing();
 
-		node = ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
-		if (node)
+		if (ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			Undo::StartRecord("Material Property", pMaterial->GetUUID());
 			change = PropertiesGUI(pMaterial, pMaterialData);
-			ImGui::TreePop();
 			Undo::StopRecord();
+			ImGui::TreePop();
 		}
 
 		const char* error = GetMaterialError(pMaterial);
