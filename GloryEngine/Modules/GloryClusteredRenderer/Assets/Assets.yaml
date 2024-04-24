@@ -1,0 +1,16 @@
+- Path: "Shaders\\Phong_frag.shader"
+  ID: 1
+- Path: "Shaders\\Phong_vert.shader"
+  ID: 2
+- Path: "Shaders\\PhongTextured_frag.shader"
+  ID: 3
+- Path: "Shaders\\PhongTextured_vert.shader"
+  ID: 4
+- Path: "Models\\Cube.fbx"
+  ID: 5
+- Path: "Models\\Plane.fbx"
+  ID: 6
+- Path: "Models\\Sphere.fbx"
+  ID: 7
+- Path: "Models\\Suzanne.fbx"
+  ID: 8

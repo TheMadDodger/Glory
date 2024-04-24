@@ -26,4 +26,11 @@ namespace Glory::Editor
 	 * @param pProject Project to migrate paths in
 	 */
 	GLORY_EDITOR_API void Migrate_0_3_0_ASSIMPAssets(ProjectSpace* pProject);
+
+	/** @brief Update asset IDs from built-in module assets to the default ID
+	 * @param pProject Project to migrate IDs in
+	 *
+	 * Also updates any materials still using old IDs
+	 */
+	GLORY_EDITOR_API void Migrate_0_3_0_ModuleAssetIDS(ProjectSpace* pProject);
 }

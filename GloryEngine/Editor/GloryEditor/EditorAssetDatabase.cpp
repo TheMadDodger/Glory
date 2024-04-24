@@ -299,7 +299,7 @@ namespace Glory::Editor
 		return ImportAsset(path, ImportedResource{ path, pResource });
 	}
 
-	UUID EditorAssetDatabase::ImportAsset(const std::string& path, ImportedResource& loadedResource, std::filesystem::path subPath)
+	UUID EditorAssetDatabase::ImportAsset(const std::string& path, ImportedResource& loadedResource, std::filesystem::path subPath, UUID forceUUID)
 	{
 		std::filesystem::path filePath = path;
 		std::filesystem::path extension = filePath.extension();
@@ -324,6 +324,9 @@ namespace Glory::Editor
 				return 0;
 			}
 		}
+
+		if (forceUUID)
+			loadedResource->SetResourceUUID(forceUUID);
 
 		/* Try getting the resource type from the loaded resource */
 		std::type_index type = typeid(Resource);
@@ -710,15 +713,22 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::ImportModuleAssets()
 	{
-		for (size_t i = 0; i < DB_EngineInstance->ModulesCount(); i++)
+		for (size_t i = 0; i < DB_EngineInstance->ModulesCount(); ++i)
 		{
 			Module* pModule = DB_EngineInstance->GetModule(i);
 			const ModuleMetaData& metaData = pModule->GetMetaData();
 			std::filesystem::path assetsPath = metaData.Path().parent_path();
+			assetsPath.append("Assets/Assets.yaml");
 			if (!std::filesystem::exists(assetsPath)) continue;
-			assetsPath.append("Assets");
-			if (!std::filesystem::exists(assetsPath)) continue;
-			ImportModuleAssets(assetsPath);
+			Utils::YAMLFileRef assetsFile{ assetsPath };
+			auto root = assetsFile.RootNodeRef().ValueRef();
+			for (size_t j = 0; j < root.Size(); ++j)
+			{
+				const std::string path = root[j]["Path"].As<std::string>();
+				std::filesystem::path assetPath = assetsPath.parent_path();
+				assetPath.append(path);
+				ImportModuleAsset(assetPath, root[j]["ID"].As<uint64_t>());
+			}
 		}
 	}
 
@@ -772,25 +782,23 @@ namespace Glory::Editor
 		return true;
 	}
 
-	void EditorAssetDatabase::ImportModuleAssets(const std::filesystem::path& path)
+	void EditorAssetDatabase::ImportModuleAsset(const std::filesystem::path& path, UUID uuid)
 	{
 		std::stringstream stream;
-		stream << "Importing module assets at " << path << "...";
+		stream << "Importing module asset at " << path << "...";
 		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
-		for (auto itor : std::filesystem::directory_iterator(path))
+		const std::string pathString = path.string();
+		if (FindAssetUUID(pathString)) return;
+
+		if (GetAssetLocation(uuid, AssetLocation{}))
 		{
-			std::filesystem::path path = itor.path();
-			const std::string pathString = path.string();
-			if (!itor.is_directory())
-			{
-				/* Is it already imported? */
-				/* FIXME: This lookup is slow! */
-				if (FindAssetUUID(pathString)) continue;
-				ImportAsset(pathString);
-				continue;
-			}
-			ImportModuleAssets(path);
+			stream.clear();
+			stream << "When importing module asset: Asset with ID " << uuid << " already exists";
+			DB_EngineInstance->GetDebug().LogError(stream.str());
+			return;
 		}
+
+		ImportAsset(pathString, ImportedResource{}, "", uuid);
 	}
 }

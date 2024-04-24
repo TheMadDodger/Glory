@@ -29,7 +29,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void DeleteAssets(const std::string& path);
 		static GLORY_EDITOR_API void IncrementAssetVersion(UUID uuid);
 		static GLORY_EDITOR_API UUID CreateAsset(Resource* pResource, const std::string& path);
-		static GLORY_EDITOR_API UUID ImportAsset(const std::string& path, ImportedResource& loadedResource = ImportedResource{}, std::filesystem::path subPath = "");
+		static GLORY_EDITOR_API UUID ImportAsset(const std::string& path, ImportedResource& loadedResource = ImportedResource{}, std::filesystem::path subPath = "", UUID forceUUID = 0);
 		static GLORY_EDITOR_API void ImportAssetsAsync(const std::string& path);
 		static GLORY_EDITOR_API void ImportAssetAsync(const std::string& path);
 		static GLORY_EDITOR_API void ImportNewScene(const std::string& path, GScene* pScene);
@@ -62,7 +62,7 @@ namespace Glory::Editor
 		static void Update();
 
 		static bool ImportJob(std::filesystem::path path);
-		static void ImportModuleAssets(const std::filesystem::path& path);
+		static void ImportModuleAsset(const std::filesystem::path& path, UUID uuid);
 
 	private:
 		friend class EditorApplication;
