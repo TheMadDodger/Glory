@@ -7,6 +7,8 @@
 
 namespace Glory
 {
+	class PipelineData;
+
 	struct VolumeTileAABB
 	{
 		glm::vec4 MinPoint;
@@ -62,18 +64,22 @@ namespace Glory
 	private:
 		// Compute shaders
 		FileData* m_pClusterShaderData;
+		PipelineData* m_pClusterShaderPipelineData;
 		MaterialData* m_pClusterShaderMaterialData;
 		Material* m_pClusterShaderMaterial;
 
 		FileData* m_pMarkActiveClustersShaderData;
+		PipelineData* m_pMarkActiveClustersPipelineData;
 		MaterialData* m_pMarkActiveClustersMaterialData;
 		Material* m_pMarkActiveClustersMaterial;
 
 		FileData* m_pCompactClustersShaderData;
+		PipelineData* m_pCompactClustersPipelineData;
 		MaterialData* m_pCompactClustersMaterialData;
 		Material* m_pCompactClustersMaterial;
 
 		FileData* m_pClusterCullLightShaderData;
+		PipelineData* m_pClusterCullLightPipelineData;
 		MaterialData* m_pClusterCullLightMaterialData;
 		Material* m_pClusterCullLightMaterial;
 
@@ -91,6 +97,7 @@ namespace Glory
 		static const size_t MAX_LIGHTS_PER_TILE = 50;
 
 		// Screen rendering
+		PipelineData* m_pScreenPipeline;
 		MaterialData* m_pScreenMaterial;
 	};
 }

@@ -13,8 +13,8 @@ namespace Glory
 		virtual ~MaterialInstanceData();
 
 	public:
-        virtual size_t ShaderCount(const MaterialManager& manager) const override;
-		virtual UUID GetShaderIDAt(const MaterialManager& manager, size_t index) const override;
+		virtual PipelineData* GetPipeline(const MaterialManager& materialManager, const PipelineManager& pipelineManager) const override;
+		virtual UUID GetPipelineID(const MaterialManager& materialManager) const override;
 
 		UUID BaseMaterialID() const;
 		MaterialData* GetBaseMaterial(const MaterialManager& manager) const;

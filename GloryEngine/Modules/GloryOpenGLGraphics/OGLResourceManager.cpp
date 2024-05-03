@@ -3,6 +3,7 @@
 #include "GLMesh.h"
 #include "GLShader.h"
 #include "OGLMaterial.h"
+#include "OGLPipeline.h"
 #include "GLTexture.h"
 #include "OGLRenderTexture.h"
 #include "GloryOGL.h"
@@ -58,6 +59,11 @@ namespace Glory
 	Material* OGLResourceManager::CreateMaterial_Internal(MaterialData* pMaterialData)
 	{
 		return new OGLMaterial(pMaterialData);
+	}
+
+	Pipeline* OGLResourceManager::CreatePipeline_Internal(PipelineData* pPipelineData)
+	{
+		return new OGLPipeline(pPipelineData);
 	}
 
 	Texture* OGLResourceManager::CreateTexture_Internal(TextureData* pTextureData)

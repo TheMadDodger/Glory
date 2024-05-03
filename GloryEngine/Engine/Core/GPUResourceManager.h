@@ -15,6 +15,8 @@
 namespace Glory
 {
 	class Engine;
+	class Pipeline;
+	class PipelineData;
 
 	class GPUResourceManager
 	{
@@ -29,6 +31,7 @@ namespace Glory
 		Mesh* CreateMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes, Buffer* pVertexBuffer, Buffer* pIndexBuffer);
 		Shader* CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
 		Material* CreateMaterial(MaterialData* pMaterialData);
+		Pipeline* CreatePipeline(PipelineData* pPipelineData);
 		Texture* CreateTexture(TextureData* pTextureData);
 		Texture* CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings);
 		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
@@ -50,6 +53,7 @@ namespace Glory
 		virtual Mesh* CreateMesh_Internal(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes) = 0;
 		virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
+		virtual Pipeline* CreatePipeline_Internal(PipelineData* pPipelineData) = 0;
 		virtual Texture* CreateTexture_Internal(TextureData* pTextureData) = 0;
 		virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) = 0;
 		virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) = 0;

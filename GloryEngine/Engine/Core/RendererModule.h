@@ -12,6 +12,7 @@ namespace Glory
 {
 	class Buffer;
 	class Mesh;
+	class PipelineData;
 
 	class RendererModule : public Module
 	{
@@ -100,6 +101,7 @@ namespace Glory
 		uint32_t m_LineVertexCount;
 		Buffer* m_pLineBuffer;
 		Mesh* m_pLineMesh;
+		PipelineData* m_pLinesPipelineData;
 		MaterialData* m_pLinesMaterialData;
 		Material* m_pLinesMaterial;
 

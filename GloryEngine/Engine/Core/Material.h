@@ -8,6 +8,7 @@
 namespace Glory
 {
 	class Engine;
+	class Pipeline;
 
 	class Material : public GPUResource
 	{
@@ -27,17 +28,12 @@ namespace Glory
 		virtual void SetMatrix4(const std::string& name, const glm::mat4& value) const = 0;
 
 	protected:
-		virtual void Initialize() = 0;
-		void AddShader(Shader* pShader);
-
 		virtual Buffer* CreatePropertiesBuffer(uint32_t size) = 0;
 		virtual Buffer* CreateMVPBuffer() = 0;
 
-		void Clear();
-
 	protected:
 		MaterialData* m_pMaterialData;
-		std::vector<Shader*> m_pShaders;
+		Pipeline* m_pPipeline;
 
 		Buffer* m_pPropertiesBuffer;
 		static Buffer* m_pMVPBuffer;

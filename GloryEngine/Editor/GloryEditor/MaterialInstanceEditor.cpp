@@ -177,9 +177,6 @@ namespace Glory::Editor
 			pMaterial->SetDirty(true);
 		}
 
-		const char* error = MaterialEditor::GetMaterialError(pBaseMaterial);
-		DrawErrorWindow(error);
-
 		return change;
 	}
 

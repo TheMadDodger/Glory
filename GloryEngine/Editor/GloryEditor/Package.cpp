@@ -1160,7 +1160,6 @@ namespace Glory::Editor
 		}
 
 		std::string entryScene;
-		/** @todo Let the user decide what the entry scene is */
 		if (!scenes.empty())
 		{
 			auto sceneZero = scenes[0];

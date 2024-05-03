@@ -2,6 +2,7 @@
 #include "OpenGLGraphicsModule.h"
 #include "Debug.h"
 #include "GLShader.h"
+#include "OGLPipeline.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -11,7 +12,7 @@
 namespace Glory
 {
 	OGLMaterial::OGLMaterial(MaterialData* pMaterialData)
-		: Material(pMaterialData), m_ProgramID(NULL), m_UBOID(NULL), m_TextureCounter(0)
+		: Material(pMaterialData), m_UBOID(NULL), m_TextureCounter(0)
 	{
 	}
 
@@ -26,37 +27,10 @@ namespace Glory
 
 	void OGLMaterial::Use()
 	{
+		if (!m_pPipeline) return;
+		m_pPipeline->Use();
 		m_TextureCounter = 0;
-		glUseProgram(m_ProgramID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OGLMaterial::Initialize()
-	{
-		int success;
-		char infoLog[512];
-
-		m_ProgramID = glCreateProgram();
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		for (size_t i = 0; i < m_pShaders.size(); ++i)
-		{
-			GLShader* pShader = (GLShader*)m_pShaders[i];
-			glAttachShader(m_ProgramID, pShader->m_ShaderID);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-
-		glLinkProgram(m_ProgramID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glGetProgramiv(m_ProgramID, GL_LINK_STATUS, &success);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		if (!success)
-		{
-			glGetProgramInfoLog(m_ProgramID, 512, NULL, infoLog);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-			m_pOwner->GetEngine()->GetDebug().LogError(infoLog);
-		}
 	}
 
 	Buffer* OGLMaterial::CreatePropertiesBuffer(uint32_t size)
@@ -73,7 +47,9 @@ namespace Glory
 
 	void OGLMaterial::SetFloat(const std::string& name, float value) const
 	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (!Pipeline()) return;
+
+		GLint ID = glGetUniformLocation(Pipeline()->ProgramID(), name.c_str());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glUniform1f(ID, value);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -81,7 +57,9 @@ namespace Glory
 
 	void OGLMaterial::SetMatrix4(const std::string& name, const glm::mat4& value) const
 	{
-		GLint ID = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (!Pipeline()) return;
+
+		GLint ID = glGetUniformLocation(Pipeline()->ProgramID(), name.c_str());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		const float* pSource = (const float*)glm::value_ptr(value);
@@ -91,7 +69,9 @@ namespace Glory
 
 	void OGLMaterial::SetTexture(const std::string& name, Texture* pTexture)
 	{
-		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (!Pipeline()) return;
+
+		GLuint texLocation = glGetUniformLocation(Pipeline()->ProgramID(), name.c_str());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glUniform1i(texLocation, m_TextureCounter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -110,7 +90,9 @@ namespace Glory
 
 	void OGLMaterial::SetTexture(const std::string& name, GLuint id)
 	{
-		GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (!Pipeline()) return;
+
+		GLuint texLocation = glGetUniformLocation(Pipeline()->ProgramID(), name.c_str());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glUniform1i(texLocation, m_TextureCounter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -124,6 +106,12 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		++m_TextureCounter;
+	}
+
+	OGLPipeline* OGLMaterial::Pipeline() const
+	{
+		if (!m_pPipeline) return nullptr;
+		return static_cast<OGLPipeline*>(m_pPipeline);
 	}
 
 	//GLuint OGLMaterial::CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex)

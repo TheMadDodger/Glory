@@ -412,6 +412,11 @@ namespace Glory
 		return *m_pMaterialManager;
 	}
 
+	PipelineManager& Engine::GetPipelineManager()
+	{
+		return *m_pPipelineManager;
+	}
+
 	Utils::Reflect::Reflect& Engine::Reflection()
 	{
 		return *m_Reflection;
@@ -445,6 +450,11 @@ namespace Glory
 	void Engine::SetMaterialManager(MaterialManager* pManager)
 	{
 		m_pMaterialManager = pManager;
+	}
+
+	void Engine::SetPipelineManager(PipelineManager* pManager)
+	{
+		m_pPipelineManager = pManager;
 	}
 
 	Debug& Engine::GetDebug()

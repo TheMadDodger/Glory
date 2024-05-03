@@ -1,7 +1,8 @@
 #pragma once
-#include <map>
-
+#include <PipelineManager.h>
 #include <UUID.h>
+
+#include <map>
 
 namespace Glory
 {
@@ -19,7 +20,7 @@ namespace Glory::Editor
 {
 	struct AssetCallbackData;
 
-	class EditorPipelineManager
+	class EditorPipelineManager : public PipelineManager
 	{
 	public:
 		/** @brief Constructor */
@@ -43,6 +44,8 @@ namespace Glory::Editor
 		 */
 		void RemoveShaderFromPipeline(UUID pipelineID, size_t index);
 
+		virtual PipelineData* GetPipelineData(UUID materialID) const override;
+
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
 		void AssetAddedCallback(const AssetCallbackData& callback);
@@ -63,8 +66,8 @@ namespace Glory::Editor
 
 	private:
 		std::map<UUID, PipelineData*> m_pPipelineDatas;
+		std::map<uint64_t, UUID> m_DefaultPipelinesMap;
 
-		Engine* m_pEngine;
 		UUID m_AssetRegisteredCallback;
 		UUID m_ShaderCompiledCallback;
 	};

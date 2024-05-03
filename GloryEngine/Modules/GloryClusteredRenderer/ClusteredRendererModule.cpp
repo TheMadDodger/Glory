@@ -8,6 +8,7 @@
 #include <FileLoaderModule.h>
 #include <CameraManager.h>
 #include <InternalMaterial.h>
+#include <InternalPipeline.h>
 
 namespace Glory
 {
@@ -65,22 +66,26 @@ namespace Glory
 		std::filesystem::path path;
 		GetResourcePath("Shaders/Compute/ClusterShader.shader", path);
 		m_pClusterShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pClusterShaderMaterialData = new InternalMaterial({ m_pClusterShaderData }, { ShaderType::ST_Compute });
+		m_pClusterShaderPipelineData = new InternalPipeline({ m_pClusterShaderData }, { ShaderType::ST_Compute });
+		m_pClusterShaderMaterialData = new InternalMaterial(m_pClusterShaderPipelineData);
 
 		// Active cluster marker shader
 		GetResourcePath("Shaders/Compute/MarkActiveClusters.shader", path);
 		m_pMarkActiveClustersShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pMarkActiveClustersMaterialData = new InternalMaterial({ m_pMarkActiveClustersShaderData }, { ShaderType::ST_Compute });
+		m_pMarkActiveClustersPipelineData = new InternalPipeline({ m_pMarkActiveClustersShaderData }, { ShaderType::ST_Compute });
+		m_pMarkActiveClustersMaterialData = new InternalMaterial(m_pMarkActiveClustersPipelineData);
 
 		// Compact active clusters shader
 		GetResourcePath("Shaders/Compute/BuildCompactClusterList.shader", path);
 		m_pCompactClustersShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pCompactClustersMaterialData = new InternalMaterial({ m_pCompactClustersShaderData }, { ShaderType::ST_Compute });
+		m_pCompactClustersPipelineData = new InternalPipeline({ m_pCompactClustersShaderData }, { ShaderType::ST_Compute });
+		m_pCompactClustersMaterialData = new InternalMaterial(m_pCompactClustersPipelineData);
 
 		// Light culling shader
 		GetResourcePath("Shaders/Compute/ClusterCullLight.shader", path);
 		m_pClusterCullLightShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pClusterCullLightMaterialData = new InternalMaterial({ m_pClusterCullLightShaderData }, { ShaderType::ST_Compute });
+		m_pClusterCullLightPipelineData = new InternalPipeline({ m_pClusterCullLightShaderData }, { ShaderType::ST_Compute });
+		m_pClusterCullLightMaterialData = new InternalMaterial(m_pClusterCullLightPipelineData);
 
 		// Screen shaders
 		GetResourcePath("Shaders/ScreenRenderer_Vert.shader", path);
@@ -88,7 +93,8 @@ namespace Glory
 		GetResourcePath("Shaders/ScreenRenderer_Frag.shader", path);
 		m_pScreenFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 
-		m_pScreenMaterial = new InternalMaterial({ m_pScreenVertShader, m_pScreenFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
+		m_pScreenPipeline = new InternalPipeline({ m_pScreenVertShader, m_pScreenFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
+		m_pScreenMaterial = new InternalMaterial(m_pScreenPipeline);
 	}
 
 	void ClusteredRendererModule::Cleanup()

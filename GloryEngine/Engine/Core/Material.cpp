@@ -8,7 +8,7 @@ namespace Glory
 	Buffer* Material::m_pMVPBuffer = nullptr;
 
 	Material::Material(MaterialData* pMaterialData)
-		: m_pMaterialData(pMaterialData), m_pPropertiesBuffer(nullptr), m_Complete(false)
+		: m_pMaterialData(pMaterialData), m_pPropertiesBuffer(nullptr), m_Complete(false), m_pPipeline(nullptr)
 	{
 	}
 
@@ -44,15 +44,5 @@ namespace Glory
 
 		m_pMVPBuffer->Assign((const void*)&data);
 		m_pMVPBuffer->Bind();
-	}
-
-	void Material::AddShader(Shader* pShader)
-	{
-		m_pShaders.push_back(pShader);
-	}
-
-	void Material::Clear()
-	{
-		m_pShaders.clear();
 	}
 }

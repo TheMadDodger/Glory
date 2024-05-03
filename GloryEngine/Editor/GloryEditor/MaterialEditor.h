@@ -13,10 +13,7 @@ namespace Glory::Editor
 		virtual ~MaterialEditor();
 		virtual bool OnGUI() override;
 
-		static const char* GetMaterialError(YAMLResource<MaterialData>* pMaterial);
-
 	private:
-		bool ShaderGUI(YAMLResource<MaterialData>* pMaterial);
 		bool PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData);
 	};
 }

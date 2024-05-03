@@ -10,6 +10,7 @@ namespace Glory
 	{
 	public:
 		MaterialPropertyInfo();
+		MaterialPropertyInfo(const MaterialPropertyInfo& other);
 		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, size_t offset, uint32_t flags);
 		MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t offset, uint32_t flags);
 
@@ -47,6 +48,7 @@ namespace Glory
 
 	private:
 		friend class MaterialData;
+		friend class PipelineData;
 		std::string m_PropertyDisplayName;
 		std::string m_PropertyShaderName;
 		uint32_t m_TypeHash;

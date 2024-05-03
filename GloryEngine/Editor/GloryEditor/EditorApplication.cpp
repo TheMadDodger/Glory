@@ -51,6 +51,7 @@ namespace Glory::Editor
 		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
+		m_pEngine->SetPipelineManager(m_PipelineManager.get());
 
 		Instance = this;
 	}

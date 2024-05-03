@@ -19,7 +19,6 @@ namespace Glory::Editor
 		bool SaveResource(const std::filesystem::path& path, MaterialData* pResource) const override;
 
 		void SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out) const;
-		void WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData) const;
 		void WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData) const;
 
 	private:

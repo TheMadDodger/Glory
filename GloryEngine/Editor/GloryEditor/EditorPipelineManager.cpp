@@ -17,7 +17,7 @@
 
 namespace Glory::Editor
 {
-	EditorPipelineManager::EditorPipelineManager(Engine* pEngine): m_pEngine(pEngine)
+	EditorPipelineManager::EditorPipelineManager(Engine* pEngine): PipelineManager(pEngine)
 	{
 	}
 
@@ -71,6 +71,13 @@ namespace Glory::Editor
 		UpdatePipeline(itor->second);
 	}
 
+	PipelineData* EditorPipelineManager::GetPipelineData(UUID materialID) const
+	{
+		auto itor = m_pPipelineDatas.find(materialID);
+		if (itor == m_pPipelineDatas.end()) return nullptr;
+		return itor->second;
+	}
+
 	void EditorPipelineManager::AssetAddedCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
@@ -113,7 +120,12 @@ namespace Glory::Editor
 			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
 			pPipeline->SetResourceUUID(callback.m_UUID);
 			m_pPipelineDatas[callback.m_UUID] = pPipeline;
+
 			UpdatePipeline(pPipeline);
+
+			const uint64_t pipelineType = pPipeline->UsesTextures() ? uint64_t(pPipeline->Type()) << 32 : uint64_t(pPipeline->Type());
+			if (m_DefaultPipelinesMap.find(pipelineType) == m_DefaultPipelinesMap.end())
+				m_DefaultPipelinesMap.emplace(pipelineType, callback.m_UUID);
 		}
 	}
 

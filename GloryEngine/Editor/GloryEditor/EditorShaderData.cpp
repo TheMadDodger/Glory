@@ -59,7 +59,7 @@ namespace Glory::Editor
 	{
 		for (size_t i = 0; i < m_SamplerNames.size(); i++)
 		{
-			pPipeline->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>(), 0);
+			pPipeline->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>());
 		}
 
 		for (size_t i = 0; i < m_PropertyInfos.size(); i++)

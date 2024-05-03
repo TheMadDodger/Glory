@@ -12,6 +12,8 @@
 #include <ShaderSourceData.h>
 #include <GLORY_YAML.h>
 
+#include <IconsFontAwesome6.h>
+
 namespace Glory::Editor
 {
 	PipelineEditor::PipelineEditor()
@@ -20,6 +22,56 @@ namespace Glory::Editor
 
 	PipelineEditor::~PipelineEditor()
 	{
+	}
+
+	const char* GetPipelineError(YAMLResource<PipelineData>* pPipeline)
+	{
+		Utils::YAMLFileRef& file = **pPipeline;
+		auto shaders = file["Shaders"];
+
+		if (shaders.Size() == 0)
+			return "The pipeline is empty";
+
+		uint8_t shaderCounts[(size_t)ShaderType::ST_Count] = {};
+		for (size_t i = 0; i < shaders.Size(); ++i)
+		{
+			const UUID shaderID = shaders[i].As<uint64_t>();
+			ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
+			if (!pShaderSourceData)
+				return "Some shaders have not yet loaded.";
+			const ShaderType& type = pShaderSourceData->GetShaderType();
+			++shaderCounts[(size_t)type];
+		}
+
+		if (shaderCounts[(size_t)ShaderType::ST_Vertex] > 1)
+			return "You can only have 1 vertex shader per pipeline.";
+
+		if (shaderCounts[(size_t)ShaderType::ST_Fragment] > 1)
+			return "You can only have 1 fragment shader per pipeline.";
+
+		if (shaderCounts[(size_t)ShaderType::ST_Fragment] > 0 && shaderCounts[(size_t)ShaderType::ST_Vertex] == 0)
+			return "A pipeline with a fragment shader must also have a vertex shader.";
+
+		if (shaderCounts[(size_t)ShaderType::ST_Vertex] > 0 && shaderCounts[(size_t)ShaderType::ST_Fragment] == 0)
+			return "A pipeline with a vertex shader must also have a fragment shader.";
+
+		if (shaderCounts[(size_t)ShaderType::ST_Geomtery] > 0 &&
+			(shaderCounts[(size_t)ShaderType::ST_Fragment] == 0 || shaderCounts[(size_t)ShaderType::ST_Vertex] == 0))
+			return "A pipeline with a geometry shader must also have a vertex and fragment shader.";
+
+		if (shaderCounts[(size_t)ShaderType::ST_Compute] > 0)
+		{
+			for (size_t i = 0; i < (size_t)ShaderType::ST_Count; ++i)
+			{
+				if (i == (size_t)ShaderType::ST_Compute) continue;
+				if (shaderCounts[i] > 0)
+					return "A pipeline with a compute shader should not have other shaders.";
+			}
+		}
+
+		/* TODO: More checks */
+
+		return nullptr;
 	}
 
 	bool ShaderGUI(YAMLResource<PipelineData>* pPipeline)
@@ -127,6 +179,7 @@ namespace Glory::Editor
 		return change;
 	}
 
+
 	bool PipelineEditor::OnGUI()
 	{
 		YAMLResource<PipelineData>* pPipeline = (YAMLResource<PipelineData>*)m_pTarget;
@@ -139,6 +192,24 @@ namespace Glory::Editor
 		{
 			change |= ShaderGUI(pPipeline);
 			ImGui::TreePop();
+		}
+
+		const char* error = GetPipelineError(pPipeline);
+		if (error)
+		{
+			const float childHeight = ImGui::CalcTextSize("A").y * 6;
+			ImGui::BeginChild("error", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
+			if (ImGui::BeginMenuBar())
+			{
+				ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, ICON_FA_CIRCLE_EXCLAMATION);
+				ImGui::SameLine();
+				ImGui::Text(" Material Error");
+				ImGui::EndMenuBar();
+			}
+			ImGui::Text("This material has the following errors:");
+			ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "ERROR: %s", error);
+			ImGui::Text("Using this material may have unexpected results and errors.");
+			ImGui::EndChild();
 		}
 
 		if (change)

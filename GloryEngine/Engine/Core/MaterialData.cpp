@@ -1,7 +1,8 @@
 #include "MaterialData.h"
 #include "AssetManager.h"
 #include "BinaryStream.h"
-#include "ShaderManager.h"
+#include "PipelineData.h"
+#include "PipelineManager.h"
 
 #include <algorithm>
 
@@ -15,47 +16,6 @@ namespace Glory
 
 	MaterialData::~MaterialData()
 	{
-		m_Shaders.clear();
-	}
-
-	size_t MaterialData::ShaderCount(const MaterialManager&) const
-	{
-		return m_Shaders.size();
-	}
-
-	ShaderType MaterialData::GetShaderTypeAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const
-	{
-		const UUID shaderID = GetShaderIDAt(materialManager, index);
-		return manager.GetShaderType(shaderID);
-	}
-
-	FileData* MaterialData::GetShaderAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const
-	{
-		const UUID shaderID = GetShaderIDAt(materialManager, index);
-		return manager.GetCompiledShaderFile(shaderID);
-	}
-
-	UUID MaterialData::GetShaderIDAt(const MaterialManager&, size_t index) const
-	{
-		return m_Shaders[index];
-	}
-
-	void MaterialData::RemoveShaderAt(size_t index)
-	{
-		m_Shaders.erase(m_Shaders.begin() + index);
-	}
-
-	void MaterialData::RemoveAllShaders()
-	{
-		m_Shaders.clear();
-	}
-
-	bool MaterialData::AddShader(UUID shaderID)
-	{
-		const auto it = std::find(m_Shaders.begin(), m_Shaders.end(), shaderID);
-		if (it != m_Shaders.end()) return false;
-		m_Shaders.push_back(shaderID);
-		return true;
 	}
 
 	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags)
@@ -88,6 +48,42 @@ namespace Glory
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
 		m_Resources.push_back(resourceUUID);
+	}
+
+	void MaterialData::AddProperty(const MaterialPropertyInfo& other)
+	{
+		const uint32_t hash = Reflect::Hash(other.DisplayName().data());
+		if (m_HashToPropertyInfoIndex.find(hash) != m_HashToPropertyInfoIndex.end())
+			return;
+
+		const size_t index = m_PropertyInfos.size();
+		m_PropertyInfos.push_back(MaterialPropertyInfo(other));
+		if (other.IsResource())
+		{
+			m_ResourcePropertyInfoIndices.push_back(index);
+			m_Resources.push_back(0);
+		}
+		m_HashToPropertyInfoIndex[hash] = index;
+	}
+
+	void MaterialData::SetPipeline(PipelineData* pPipeline)
+	{
+		m_Pipeline = pPipeline->GetUUID();
+	}
+
+	void MaterialData::SetPipeline(UUID pipelineID)
+	{
+		m_Pipeline = pipelineID;
+	}
+
+	PipelineData* MaterialData::GetPipeline(const MaterialManager& manager, const PipelineManager& pipelineManager) const
+	{
+		return m_Pipeline ? pipelineManager.GetPipelineData(m_Pipeline) : nullptr;
+	}
+
+	UUID MaterialData::GetPipelineID(const MaterialManager&) const
+	{
+		return m_Pipeline;
 	}
 
 	size_t MaterialData::PropertyInfoCount(const MaterialManager&) const
@@ -161,12 +157,8 @@ namespace Glory
 
 	void MaterialData::Serialize(BinaryStream& container) const
 	{
-		/* Write shader IDs */
-		container.Write(m_Shaders.size());
-		for (size_t i = 0; i < m_Shaders.size(); ++i)
-		{
-			container.Write(m_Shaders[i]);
-		}
+		/* Write pipeline ID */
+		container.Write(m_Pipeline);
 
 		/* Write property infos */
 		container.Write(m_PropertyInfos.size());
@@ -196,16 +188,8 @@ namespace Glory
 
 	void MaterialData::Deserialize(BinaryStream& container)
 	{
-		/* Read shader IDs */
-		size_t numShaders;
-		container.Read(numShaders);
-		m_Shaders.resize(numShaders);
-		for (size_t i = 0; i < m_Shaders.size(); ++i)
-		{
-			UUID shaderID;
-			container.Read(shaderID);
-			m_Shaders[i] = shaderID;
-		}
+		/* Read pipeline ID */
+		container.Read(m_Pipeline);
 
 		/* Read property infos */
 		size_t numProperties;
@@ -240,11 +224,6 @@ namespace Glory
 		{
 			container.Read(*m_Resources[i].AssetUUIDMember());
 		}
-	}
-
-	bool MaterialData::HasShader(const UUID shaderID) const
-	{
-		return std::find(m_Shaders.begin(), m_Shaders.end(), shaderID) != m_Shaders.end();
 	}
 
 	void MaterialData::SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value)

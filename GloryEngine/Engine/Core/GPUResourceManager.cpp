@@ -3,6 +3,8 @@
 #include "MaterialInstanceData.h"
 #include "Engine.h"
 #include "EngineProfiler.h"
+#include "Pipeline.h"
+#include "PipelineData.h"
 
 #include <algorithm>
 
@@ -127,25 +129,49 @@ namespace Glory
 		}
 
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMaterial");
-		if (pMaterial) pMaterial->Clear();
-		else pMaterial = CreateMaterial_Internal(pMaterialData);
+		if (!pMaterial) pMaterial = CreateMaterial_Internal(pMaterialData);
 		pMaterial->m_pOwner = this;
 		pMaterial->m_pMaterialData = pMaterialData;
 		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
-		for (size_t i = 0; i < pMaterialData->ShaderCount(m_pEngine->GetMaterialManager()); i++)
+		if (pMaterialData->GetPipelineID(m_pEngine->GetMaterialManager()))
 		{
-			FileData* pCompiledShaderSource = pMaterialData->GetShaderAt(m_pEngine->GetMaterialManager(), m_pEngine->GetShaderManager(), i);
-			if (!pCompiledShaderSource) return nullptr;
-			const ShaderType& shaderType = pMaterialData->GetShaderTypeAt(m_pEngine->GetMaterialManager(), m_pEngine->GetShaderManager(), i);
-			Shader* pShader = CreateShader(pCompiledShaderSource, shaderType, "main");
-			pMaterial->AddShader(pShader);
+			pMaterial->m_pPipeline = CreatePipeline(pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager()));
+			pMaterial->m_Complete = pMaterial->m_pPipeline != nullptr;
 		}
-
-		pMaterial->Initialize();
-		pMaterial->m_Complete = true;
 		m_IDResources[pMaterialData->GetGPUUUID()] = pMaterial;
 		m_pEngine->Profiler().EndSample();
 		return pMaterial;
+	}
+
+	Pipeline* GPUResourceManager::CreatePipeline(PipelineData* pPipelineData)
+	{
+		Pipeline* pPipeline = GetResource<Pipeline>(pPipelineData);
+		if (pPipeline && pPipeline->m_Complete)
+		{
+			pPipeline->m_pPipelineData = pPipelineData;
+			return pPipeline;
+		}
+
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreatePipeline");
+		if (pPipeline) pPipeline->Clear();
+		else pPipeline = CreatePipeline_Internal(pPipelineData);
+		pPipeline->m_pOwner = this;
+		pPipeline->m_pPipelineData = pPipelineData;
+		pPipeline->m_UUID = pPipelineData->GetGPUUUID();
+		for (size_t i = 0; i < pPipelineData->ShaderCount(); ++i)
+		{
+			FileData* pCompiledShaderSource = pPipelineData->Shader(m_pEngine->GetShaderManager(), i);
+			if (!pCompiledShaderSource) return nullptr;
+			const ShaderType& shaderType = pPipelineData->GetShaderType(m_pEngine->GetShaderManager(), i);
+			Shader* pShader = CreateShader(pCompiledShaderSource, shaderType, "main");
+			pPipeline->AddShader(pShader);
+		}
+
+		pPipeline->Initialize();
+		pPipeline->m_Complete = true;
+		m_IDResources[pPipelineData->GetGPUUUID()] = pPipeline;
+		m_pEngine->Profiler().EndSample();
+		return pPipeline;
 	}
 
 	Texture* GPUResourceManager::CreateTexture(TextureData* pTextureData)

@@ -14,3 +14,7 @@
   ID: 7
 - Path: "Models\\Suzanne.fbx"
   ID: 8
+- Path: "Pipelines\\Phong.gpln"
+  ID: 9
+- Path: "Pipelines\\PhongTextured.gpln"
+  ID: 10

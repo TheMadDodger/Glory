@@ -1,10 +1,14 @@
 #pragma once
-#include <Material.h>
-#include <GL/glew.h>
 #include "GLTexture.h"
+
+#include <Material.h>
+
+#include <GL/glew.h>
 
 namespace Glory
 {
+    class OGLPipeline;
+
     class OGLMaterial : public Material
     {
     public:
@@ -14,8 +18,9 @@ namespace Glory
         virtual void Use() override;
         void SetTexture(const std::string& name, GLuint id);
 
+        OGLPipeline* Pipeline() const;
+
     private:
-        virtual void Initialize() override;
         virtual Buffer* CreatePropertiesBuffer(uint32_t size) override;
         virtual Buffer* CreateMVPBuffer() override;
         virtual void SetTexture(const std::string& name, Texture* value) override;
@@ -26,7 +31,6 @@ namespace Glory
         //virtual void SetTexture(const std::string& name, const GLuint& textureID);
 
     private:
-        GLuint m_ProgramID;
         std::vector<GLuint> m_UniformBufferObjects;
         GLuint m_UBOID;
         GLuint m_TextureCounter;

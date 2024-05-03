@@ -6,6 +6,13 @@ namespace Glory
 		m_Size(0), m_Offset(0), m_IsResource(false), m_Flags(0)
 	{
 	}
+
+	MaterialPropertyInfo::MaterialPropertyInfo(const MaterialPropertyInfo& other):
+		m_PropertyDisplayName(other.m_PropertyDisplayName), m_PropertyShaderName(other.m_PropertyShaderName), m_TypeHash(other.m_TypeHash),
+		m_Size(other.m_Size), m_Offset(other.m_Offset), m_IsResource(other.m_IsResource), m_Flags(other.m_Flags)
+	{
+	}
+
 	MaterialPropertyInfo::MaterialPropertyInfo(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, size_t offset, uint32_t flags)
 		: m_PropertyDisplayName(displayName), m_PropertyShaderName(shaderName), m_TypeHash(typeHash),
 		m_Size(size), m_Offset(offset), m_IsResource(false), m_Flags(flags)
