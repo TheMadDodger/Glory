@@ -9,11 +9,13 @@
 #include "EditorShaderData.h"
 #include "EditorUI.h"
 #include "EditorMaterialManager.h"
+#include "EditorPipelineManager.h"
 
 #include <imgui.h>
 #include <MaterialEditor.h>
 #include <PropertySerializer.h>
 #include <IconsFontAwesome6.h>
+#include <PipelineData.h>
 
 namespace Glory::Editor
 {
@@ -24,6 +26,7 @@ namespace Glory::Editor
 	bool MaterialInstanceEditor::OnGUI()
 	{
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
 		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
 		YAMLResource<MaterialInstanceData>* pMaterial = (YAMLResource<MaterialInstanceData>*)m_pTarget;
 		MaterialInstanceData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterialInstance(pMaterial->GetUUID());
@@ -54,24 +57,33 @@ namespace Glory::Editor
 		YAMLResource<MaterialData>* pBaseMaterial = static_cast<YAMLResource<MaterialData>*>(pBaseMaterialResource);
 
 		Utils::YAMLFileRef& baseFile = **pBaseMaterial;
-		auto shaders = baseFile["Shaders"];
+		auto pipeline = baseFile["Pipeline"];
+		const UUID pipelineID = pipeline.As<uint64_t>();
+		if (pipelineID == 0)
+			return false;
+		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
+		if (!pPipeline)
+		{
+			ImGui::TextColored({ 1,0,0,1 }, "The chosen pipeline is not yet compiled");
+			return false;
+		}
 		auto baseProperties = baseFile["Properties"];
 		auto properties = file["Overrides"];
 
-		for (size_t i = 0; i < shaders.Size(); ++i)
+		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
 		{
-			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
+			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
 
-			EditorShaderData* pEditorShader = EditorShaderProcessor::GetEditorShader(shaderID);
-			for (size_t j = 0; j < pEditorShader->m_SamplerNames.size(); ++j)
+			size_t materialPropertyIndex = 0;
+			if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfo->ShaderName(), materialPropertyIndex))
+				continue;
+			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+
+			if (propInfo->IsResource())
 			{
-				const std::string& sampler = pEditorShader->m_SamplerNames[j];
+				const std::string& sampler = propInfo->ShaderName();
 				auto prop = properties[sampler];
 				bool enable = prop.Exists() && (prop["Enable"].Exists() && prop["Enable"].As<bool>());
-
-				size_t materialPropertyIndex = 0;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, sampler, materialPropertyIndex))
-					continue;
 
 				if (!prop["Enable"].Exists())
 					prop["Enable"].Set(false);
@@ -104,7 +116,6 @@ namespace Glory::Editor
 
 				auto propValue = prop["Value"];
 
-				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
 				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
 
 				Undo::StartRecord("Material Instance Property");
@@ -118,57 +129,49 @@ namespace Glory::Editor
 				/* Deserialize new value into resources array */
 				const UUID newUUID = propValue.As<uint64_t>();
 				pMaterialData->SetTexture(materialManager, sampler, newUUID);
+				continue;
 			}
 
-			for (size_t j = 0; j < pEditorShader->m_PropertyInfos.size(); ++j)
+			auto prop = properties[propInfo->ShaderName()];
+			if (!prop["Enable"].Exists())
+				prop["Enable"].Set(false);
+
+			bool enable = prop.Exists() && (prop["Enable"].Exists() && prop["Enable"].As<bool>());
+
+			ImGui::PushID(propInfo->ShaderName().data());
+			EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+			if (EditorUI::CheckBox(file, prop["Enable"].Path()))
 			{
-				EditorShaderData::PropertyInfo& info = pEditorShader->m_PropertyInfos[j];
-				size_t materialPropertyIndex = 0;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, info.m_Name, materialPropertyIndex))
-					continue;
-				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
-
-				auto prop = properties[info.m_Name];
-				if (!prop["Enable"].Exists())
-					prop["Enable"].Set(false);
-
-				bool enable = prop.Exists() && (prop["Enable"].Exists() && prop["Enable"].As<bool>());
-
-				ImGui::PushID(info.m_Name.data());
-				EditorUI::PushFlag(EditorUI::Flag::NoLabel);
-				if (EditorUI::CheckBox(file, prop["Enable"].Path()))
+				enable = prop["Enable"].As<bool>();
+				if (enable)
 				{
-					enable = prop["Enable"].As<bool>();
-					if (enable)
-					{
-						prop["Enable"].Set(true);
-						pMaterialData->EnableProperty(materialPropertyIndex);
-					}
-					else
-					{
-						prop["Enable"].Set(false);
-						pMaterialData->DisableProperty(materialPropertyIndex);
-					}
-					change = true;
+					prop["Enable"].Set(true);
+					pMaterialData->EnableProperty(materialPropertyIndex);
 				}
-				EditorUI::PopFlag();
-				ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-
-				auto baseValue = baseProperties[info.m_Name]["Value"];
-				auto propValue = prop["Value"];
-
-				Undo::StartRecord("Material Instance Property");
-				ImGui::BeginDisabled(!enable);
-				change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), info.m_TypeHash, info.m_TypeHash, pMaterialProperty->Flags());
-				ImGui::EndDisabled();
-				ImGui::PopID();
-				Undo::StopRecord();
-
-				if (!enable) continue;
-				/* Deserialize new value into buffer */
-				serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
-					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
+				else
+				{
+					prop["Enable"].Set(false);
+					pMaterialData->DisableProperty(materialPropertyIndex);
+				}
+				change = true;
 			}
+			EditorUI::PopFlag();
+			ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+
+			auto baseValue = baseProperties[propInfo->ShaderName()]["Value"];
+			auto propValue = prop["Value"];
+
+			Undo::StartRecord("Material Instance Property");
+			ImGui::BeginDisabled(!enable);
+			change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), propInfo->TypeHash(), propInfo->TypeHash(), pMaterialProperty->Flags());
+			ImGui::EndDisabled();
+			ImGui::PopID();
+			Undo::StopRecord();
+
+			if (!enable) continue;
+			/* Deserialize new value into buffer */
+			serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+				pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
 		}
 
 		if (change)

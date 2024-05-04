@@ -44,7 +44,7 @@ namespace Glory::Editor
 		 */
 		void RemoveShaderFromPipeline(UUID pipelineID, size_t index);
 
-		virtual PipelineData* GetPipelineData(UUID materialID) const override;
+		virtual PipelineData* GetPipelineData(UUID pipelineID) const override;
 
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */

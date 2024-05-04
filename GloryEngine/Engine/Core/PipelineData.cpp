@@ -84,12 +84,12 @@ namespace Glory
 		++m_NumResources;
 	}
 
-	size_t PipelineData::PropertyInfoCount(const MaterialManager&) const
+	size_t PipelineData::PropertyInfoCount() const
 	{
 		return m_PropertyInfos.size();
 	}
 
-	MaterialPropertyInfo* PipelineData::GetPropertyInfoAt(const MaterialManager&, size_t index)
+	MaterialPropertyInfo* PipelineData::GetPropertyInfoAt(size_t index)
 	{
 		return &m_PropertyInfos[index];
 	}

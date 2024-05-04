@@ -71,9 +71,9 @@ namespace Glory::Editor
 		UpdatePipeline(itor->second);
 	}
 
-	PipelineData* EditorPipelineManager::GetPipelineData(UUID materialID) const
+	PipelineData* EditorPipelineManager::GetPipelineData(UUID pipelineID) const
 	{
-		auto itor = m_pPipelineDatas.find(materialID);
+		auto itor = m_pPipelineDatas.find(pipelineID);
 		if (itor == m_pPipelineDatas.end()) return nullptr;
 		return itor->second;
 	}

@@ -7,6 +7,7 @@
 #include "EditorApplication.h"
 #include "EditorShaderData.h"
 #include "EditorMaterialManager.h"
+#include "EditorPipelineManager.h"
 
 #include <imgui.h>
 #include <ResourceType.h>
@@ -65,34 +66,39 @@ namespace Glory::Editor
 	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData)
 	{
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
 		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
 
 		bool change = false;
 
 		Utils::YAMLFileRef& file = **pMaterial;
-		auto shaders = file["Shaders"];
-		auto properties = file["Properties"];
-
-		std::vector<EditorShaderData*> compiledShaders;
-
-		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
-		for (size_t i = 0; i < shaders.Size(); ++i)
+		auto pipeline = file["Pipeline"];
+		const UUID pipelineID = pipeline.As<uint64_t>();
+		if (pipelineID == 0)
+			return false;
+		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
+		if (!pPipeline)
 		{
-			const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
-			EditorShaderData* pEditorShader = EditorShaderProcessor::GetEditorShader(shaderID);
-			if (!pEditorShader)
+			ImGui::TextColored({ 1,0,0,1 }, "The chosen pipeline is not yet compiled");
+			return false;
+		}
+
+		auto properties = file["Properties"];
+		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
+
+		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
+		{
+			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
+
+			size_t materialPropertyIndex = 0;
+			if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfo->ShaderName(), materialPropertyIndex))
+				continue;
+
+			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+
+			if (propInfo->IsResource())
 			{
-				ImGui::TextColored({ 1,0,0,1 }, "A shader has not yet compiled");
-				return false;
-			}
-			
-			for (size_t j = 0; j < pEditorShader->m_SamplerNames.size(); ++j)
-			{
-				const std::string& sampler = pEditorShader->m_SamplerNames[j];
-				size_t materialPropertyIndex = 0;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, sampler, materialPropertyIndex))
-					continue;
-				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+				const std::string& sampler = propInfo->ShaderName();
 
 				auto prop = properties[sampler];
 				if (!prop.Exists()) {
@@ -114,35 +120,25 @@ namespace Glory::Editor
 					const UUID newUUID = propValue.As<uint64_t>();
 					pMaterialData->SetTexture(materialManager, sampler, newUUID);
 				}
+				continue;
 			}
 
-			for (size_t j = 0; j < pEditorShader->m_PropertyInfos.size(); ++j)
+			auto prop = properties[propInfo->ShaderName()];
+			if (!prop.Exists()) {
+				prop["ShaderName"].Set(propInfo->ShaderName());
+				prop["TypeHash"].Set(propInfo->TypeHash());
+			}
+
+			ImGui::PushID(propInfo->ShaderName().data());
+			auto propValue = prop["Value"];
+			change |= PropertyDrawer::DrawProperty(file, propValue.Path(), propInfo->TypeHash(), propInfo->TypeHash(), pMaterialProperty->Flags());
+			ImGui::PopID();
+
+			/* Deserialize new value into buffer */
+			if (change)
 			{
-				EditorShaderData::PropertyInfo& info = pEditorShader->m_PropertyInfos[j];
-				size_t materialPropertyIndex = 0;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, info.m_Name, materialPropertyIndex))
-					continue;
-				MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
-
-				const size_t index = j + pEditorShader->m_SamplerNames.size();
-				auto prop = properties[info.m_Name];
-
-				if (!prop.Exists()) {
-					prop["ShaderName"].Set(info.m_Name);
-					prop["TypeHash"].Set(info.m_TypeHash);
-				}
-
-				ImGui::PushID(info.m_Name.data());
-				auto propValue = prop["Value"];
-				change |= PropertyDrawer::DrawProperty(file, propValue.Path(), info.m_TypeHash, info.m_TypeHash, pMaterialProperty->Flags());
-				ImGui::PopID();
-
-				/* Deserialize new value into buffer */
-				if (change)
-				{
-					serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
-						pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
-				}
+				serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
 			}
 		}
 

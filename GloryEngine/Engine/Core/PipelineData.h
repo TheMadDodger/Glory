@@ -6,7 +6,6 @@
 namespace Glory
 {
     class FileData;
-    class MaterialManager;
     class ShaderManager;
     class MaterialData;
 
@@ -48,9 +47,9 @@ namespace Glory
         /** @overload for resources */
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash);
         /** @brief Get the number of properties for this pipeline */
-        size_t PropertyInfoCount(const MaterialManager& materialManager) const;
+        size_t PropertyInfoCount() const;
         /** @brief Get an @ref MaterialPropertyInfo by index */
-        MaterialPropertyInfo* GetPropertyInfoAt(const MaterialManager& materialManager, size_t index);
+        MaterialPropertyInfo* GetPropertyInfoAt(size_t index);
         /** @brief Clear all property infos */
         void ClearProperties();
 
