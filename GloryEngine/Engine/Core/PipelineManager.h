@@ -12,7 +12,7 @@ namespace Glory
 		PipelineManager(Engine* pEngine);
 		virtual ~PipelineManager() = default;
 
-		virtual PipelineData* GetPipelineData(UUID materialID) const = 0;
+		virtual PipelineData* GetPipelineData(UUID pipelineID) const = 0;
 
 	protected:
 		Engine* m_pEngine;

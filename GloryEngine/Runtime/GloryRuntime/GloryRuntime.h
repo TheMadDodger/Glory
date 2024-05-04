@@ -15,6 +15,7 @@ namespace Glory
 {
 	class Engine;
 	class RuntimeSceneManager;
+	class RuntimePipelineManager;
 	class RuntimeMaterialManager;
 	class RuntimeShaderManager;
 	class RendererModule;
@@ -61,6 +62,7 @@ namespace Glory
 		GraphicsModule* m_pGraphics;
 		WindowModule* m_pWindows;
 		std::unique_ptr<RuntimeSceneManager> m_SceneManager;
+		std::unique_ptr<RuntimePipelineManager> m_PipelineManager;
 		std::unique_ptr<RuntimeMaterialManager> m_MaterialManager;
 		std::unique_ptr<RuntimeShaderManager> m_ShaderManager;
 		std::vector<std::filesystem::path> m_AppendedAssetDatabases;
