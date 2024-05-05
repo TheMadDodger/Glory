@@ -95,8 +95,12 @@ namespace Glory::Editor
 		if (!EditorAssetDatabase::GetAssetLocation(uuid, location))
 			return nullptr;
 
-		std::filesystem::path path = ProjectSpace::GetOpenProject()->RootPath();
-		path.append("Assets").append(location.Path);
+		std::filesystem::path path = location.Path;
+		if (!std::filesystem::exists(path))
+		{
+			path = ProjectSpace::GetOpenProject()->RootPath();
+			path.append("Assets").append(location.Path);
+		}
 
 		EditableResource* pResource = Importer::CreateEditableResource(path);
 		if (!pResource) return nullptr;

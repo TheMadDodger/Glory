@@ -26,6 +26,7 @@ namespace Glory
 {
 	GloryRuntime::GloryRuntime(Engine* pEngine): m_pEngine(pEngine),
 		m_SceneManager(new RuntimeSceneManager(this)),
+		m_PipelineManager(new RuntimePipelineManager(pEngine)),
 		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
 		m_ShaderManager(new RuntimeShaderManager(pEngine)),
 		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr)
