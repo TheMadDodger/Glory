@@ -6,6 +6,7 @@
 #include "MaterialData.h"
 #include "MaterialInstanceData.h"
 #include "EditorShaderProcessor.h"
+#include "EditorPipelineManager.h"
 #include "ResourceType.h"
 #include "EditorApplication.h"
 #include "EditorResourceManager.h"
@@ -27,7 +28,7 @@ namespace Glory::Editor
 {
 	EditorMaterialManager::EditorMaterialManager(Engine* pEngine):
 		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0),
-		m_ShaderCompiledCallback(0), MaterialManager(pEngine)
+		m_PipelineUpdatedCallback(0), MaterialManager(pEngine)
 	{
 	}
 
@@ -45,14 +46,17 @@ namespace Glory::Editor
 		//m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated,
 			//[this](const AssetCallbackData& callback) { AssetUpdatedCallback(callback); });
 
-		/* @todo: Capture pipeline changes and update corresponding materials */
+		m_PipelineUpdatedCallback = EditorApplication::GetInstance()->GetPipelineManager().PipelineUpdateEvents().AddListener([this](const PipelineUpdateEvent& e) {
+			PipelineUpdateCallback(e.pPipeline);
+		});
 	}
 
 	void EditorMaterialManager::Cleanup()
 	{
 		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
-		//EditorShaderProcessor::ShaderCompiledEventDispatcher().RemoveListener(m_ShaderCompiledCallback);
 		//EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetUpdatedCallback);
+
+		EditorApplication::GetInstance()->GetPipelineManager().PipelineUpdateEvents().RemoveListener(m_PipelineUpdatedCallback);
 	}
 
 	void EditorMaterialManager::LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialData* pMaterial) const
@@ -186,6 +190,15 @@ namespace Glory::Editor
 		static const size_t shaderSourceDataHash = ResourceTypes::GetHash<MaterialData>();
 		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
 		if (typeHash != shaderSourceDataHash) return;
+	}
+
+	void EditorMaterialManager::PipelineUpdateCallback(PipelineData* pPipeline)
+	{
+		for (auto itor = m_pMaterialDatas.begin(); itor != m_pMaterialDatas.end(); ++itor)
+		{
+			if (itor->second->GetPipelineID(*this) != pPipeline->GetUUID()) continue;
+			UpdateMaterial(itor->second);
+		}
 	}
 
 	void EditorMaterialManager::ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialData* pMaterial, bool clearProperties) const

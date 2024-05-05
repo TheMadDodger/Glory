@@ -7,9 +7,11 @@ namespace Glory
     class ShaderManager;
     class FileData;
 
+    /** @brief Internal pipeline data */
     class InternalPipeline : public PipelineData
     {
     public:
+        /** @brief Constructor */
         InternalPipeline(std::vector<FileData*>&& compiledShaders, std::vector<ShaderType>&& shaderTypes);
 
         virtual size_t ShaderCount() const override;

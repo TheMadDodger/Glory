@@ -6,10 +6,13 @@
 
 namespace Glory::Editor
 {
+    /** @brief Pipeline editor */
     class PipelineEditor : public EditorTemplate<PipelineEditor, YAMLResource<PipelineData>>
     {
     public:
+        /** @brief Constructor */
         PipelineEditor();
+        /** @brief Destructor */
         virtual ~PipelineEditor();
 
     private:

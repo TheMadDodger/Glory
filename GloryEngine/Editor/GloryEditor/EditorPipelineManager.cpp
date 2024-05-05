@@ -78,6 +78,12 @@ namespace Glory::Editor
 		return itor->second;
 	}
 
+	EditorPipelineManager::PipelineUpdateDispatcher& EditorPipelineManager::PipelineUpdateEvents()
+	{
+		static EditorPipelineManager::PipelineUpdateDispatcher dispatcher;
+		return dispatcher;
+	}
+
 	void EditorPipelineManager::AssetAddedCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
@@ -154,6 +160,8 @@ namespace Glory::Editor
 			if (!pShader) continue;
 			pShader->LoadIntoPipeline(pPipeline);
 		}
+
+		PipelineUpdateEvents().Dispatch({ pPipeline });
 	}
 
 	void EditorPipelineManager::LoadIntoPipeline(Utils::YAMLFileRef& file, PipelineData* pPipeline) const

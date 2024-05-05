@@ -5,12 +5,18 @@
 
 namespace Glory::Editor
 {
+	/** @brief Pipeline importer */
     class PipelineImporter : public YAMLImporterTemplate<PipelineData>
     {
 	public:
+		/** @brief Constructor */
 		PipelineImporter();
+		/** @brief Destructor */
 		virtual ~PipelineImporter();
 
+		/** @brief Name of the importer
+		 * @returns "Internal Pipeline Importer"
+		 */
 		std::string_view Name() const override;
 
 	private:

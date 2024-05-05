@@ -5,9 +5,11 @@ namespace Glory
 {
     class PipelineData;
 
+    /** @brief Internal material data */
     class InternalMaterial : public MaterialData
     {
     public:
+        /** @brief Constructor */
         InternalMaterial(PipelineData* pPipeline);
 
         virtual PipelineData* GetPipeline(const MaterialManager&, const PipelineManager& pipelineManager) const override;

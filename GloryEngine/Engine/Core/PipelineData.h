@@ -9,6 +9,7 @@ namespace Glory
     class ShaderManager;
     class MaterialData;
 
+    /** @brief Pipeline data */
 	class PipelineData : public Resource
 	{
     public:
@@ -26,7 +27,15 @@ namespace Glory
          */
         virtual UUID ShaderID(size_t index) const;
 
+        /** @brief Get compiled shader attached to this pipeline
+         * @param manager Shader manager to get shaders from
+         * @param index Index of the shader to get
+         */
         virtual FileData* Shader(const ShaderManager& manager, size_t index) const;
+        /** @brief Get the type of a shader attached to this pipeline
+         * @param manager Shader manager to get shaders from
+         * @param index Index of the shader to get the type from
+         */
         virtual ShaderType GetShaderType(const ShaderManager& manager, size_t index) const;
 
         /** @brief Set the shading type for this pipeline
@@ -64,8 +73,12 @@ namespace Glory
         /** @brief Deserialize the pipeline from a binary stream */
         void Deserialize(BinaryStream& container) override;
 
+        /** @brief Load properties into a material
+         * @param pMaterial Destination material
+         */
         void LoadIntoMaterial(MaterialData* pMaterial) const;
-
+        
+        /** @brief Check if this pipeline has texture parameters */
         bool UsesTextures() const;
 
     protected:

@@ -63,6 +63,9 @@ namespace Editor
 		 */
 		void AssetUpdatedCallback(const AssetCallbackData& callback);
 
+		/** @brief Callback for when a pipeline changes */
+		void PipelineUpdateCallback(PipelineData* pPipeline);
+
 		/** @brief Read properties into a material
 		 * @param properties Properties YAML data
 		 * @param pMaterial Material to read the properties to
@@ -75,9 +78,6 @@ namespace Editor
 		 * @param clearProperties Whether to clear the property data of the material before reading
 		 */
 		void ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialInstanceData* pMaterial, bool clearProperties=true) const;
-
-		/** @brief Handler for compiled shader events */
-		//void OnShaderCompiled(const UUID& uuid);
 
 		/** @brief Update a material by loading the properties of its attached shaders and reload the YAML data if possible
 		 * @param pMaterial Material to update
@@ -98,7 +98,7 @@ namespace Editor
 		Engine* m_pEngine;
 		UUID m_AssetRegisteredCallback;
 		UUID m_AssetUpdatedCallback;
-		UUID m_ShaderCompiledCallback;
+		UUID m_PipelineUpdatedCallback;
 	};
 }
 }

@@ -20,6 +20,16 @@ namespace Glory::Editor
 {
 	struct AssetCallbackData;
 
+	template<typename Arg>
+	struct Dispatcher;
+
+	/** @brief Data for pipeline update events */
+	struct PipelineUpdateEvent
+	{
+		PipelineData* pPipeline;
+	};
+
+	/** @brief Pipeline manager for the editor */
 	class EditorPipelineManager : public PipelineManager
 	{
 	public:
@@ -44,7 +54,15 @@ namespace Glory::Editor
 		 */
 		void RemoveShaderFromPipeline(UUID pipelineID, size_t index);
 
+		/** @brief Get a pipeline by ID
+		 * @param pipelineID ID of the pipeline to get
+		 */
 		virtual PipelineData* GetPipelineData(UUID pipelineID) const override;
+
+		using PipelineUpdateDispatcher = Dispatcher<PipelineUpdateEvent>;
+
+		/** @brief Get pipeline updates event dispatcher */
+		static PipelineUpdateDispatcher& PipelineUpdateEvents();
 
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
@@ -62,6 +80,10 @@ namespace Glory::Editor
 		 */
 		void UpdatePipeline(PipelineData* pPipeline);
 
+		/** @brief Load YAML data into a pipeline
+		 * @param file YAML file to load from
+		 * @param pPipeline pipeline to load the data into
+		 */
 		void LoadIntoPipeline(Utils::YAMLFileRef& file, PipelineData* pPipeline) const;
 
 	private:
