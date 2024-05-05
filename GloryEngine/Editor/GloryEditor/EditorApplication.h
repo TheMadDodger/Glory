@@ -32,6 +32,7 @@ namespace Editor
 	class EditorSceneManager;
 	class EditorShaderProcessor;
 	class EditorResourceManager;
+	class EditorPipelineManager;
 	class EditorMaterialManager;
 
 	class EditorApplication
@@ -61,6 +62,7 @@ namespace Editor
 		GLORY_EDITOR_API Glory::Engine* GetEngine();
 		GLORY_EDITOR_API EditorSceneManager& GetSceneManager();
 		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
+		GLORY_EDITOR_API EditorPipelineManager& GetPipelineManager();
 		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();
 
 		GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
@@ -88,6 +90,7 @@ namespace Editor
 		std::unique_ptr<EditorSceneManager> m_SceneManager;
 		std::unique_ptr<EditorShaderProcessor> m_ShaderProcessor;
 		std::unique_ptr<EditorResourceManager> m_ResourceManager;
+		std::unique_ptr<EditorPipelineManager> m_PipelineManager;
 		std::unique_ptr<EditorMaterialManager> m_MaterialManager;
 		efsw::FileWatcher* m_pFileWatcher;
 

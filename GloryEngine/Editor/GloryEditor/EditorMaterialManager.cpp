@@ -6,6 +6,7 @@
 #include "MaterialData.h"
 #include "MaterialInstanceData.h"
 #include "EditorShaderProcessor.h"
+#include "EditorPipelineManager.h"
 #include "ResourceType.h"
 #include "EditorApplication.h"
 #include "EditorResourceManager.h"
@@ -15,6 +16,7 @@
 #include "MaterialInstanceImporter.h"
 #include "AssetManager.h"
 
+#include <PipelineData.h>
 #include <Serializers.h>
 #include <NodeRef.h>
 
@@ -26,7 +28,7 @@ namespace Glory::Editor
 {
 	EditorMaterialManager::EditorMaterialManager(Engine* pEngine):
 		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0),
-		m_ShaderCompiledCallback(0), MaterialManager(pEngine)
+		m_PipelineUpdatedCallback(0), MaterialManager(pEngine)
 	{
 	}
 
@@ -44,22 +46,23 @@ namespace Glory::Editor
 		//m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated,
 			//[this](const AssetCallbackData& callback) { AssetUpdatedCallback(callback); });
 
-		m_ShaderCompiledCallback = EditorShaderProcessor::ShaderCompiledEventDispatcher().AddListener([this](const ShaderCompiledEvent& e) {
-			OnShaderCompiled(e.ShaderID);
+		m_PipelineUpdatedCallback = EditorApplication::GetInstance()->GetPipelineManager().PipelineUpdateEvents().AddListener([this](const PipelineUpdateEvent& e) {
+			PipelineUpdateCallback(e.pPipeline);
 		});
 	}
 
 	void EditorMaterialManager::Cleanup()
 	{
 		EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetRegisteredCallback);
-		EditorShaderProcessor::ShaderCompiledEventDispatcher().RemoveListener(m_ShaderCompiledCallback);
 		//EditorAssetCallbacks::RemoveCallback(AssetCallbackType::CT_AssetRegistered, m_AssetUpdatedCallback);
+
+		EditorApplication::GetInstance()->GetPipelineManager().PipelineUpdateEvents().RemoveListener(m_PipelineUpdatedCallback);
 	}
 
 	void EditorMaterialManager::LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialData* pMaterial) const
 	{
-		auto shaders = file["Shaders"];
-		ReadShadersInto(shaders, pMaterial);
+		const UUID pipelineID = file["Pipeline"].As<uint64_t>();
+		pMaterial->SetPipeline(pipelineID);
 		auto properties = file["Properties"];
 		ReadPropertiesInto(properties, pMaterial);
 	}
@@ -71,29 +74,15 @@ namespace Glory::Editor
 		ReadPropertiesInto(file["Overrides"], pMaterial);
 	}
 
-	void EditorMaterialManager::AddShaderToMaterial(UUID materialID, UUID shaderID)
+	void EditorMaterialManager::SetMaterialPipeline(UUID materialID, UUID pipelineID)
 	{
 		auto itor = m_pMaterialDatas.find(materialID);
 		if (itor == m_pMaterialDatas.end()) return;
-		itor->second->AddShader(shaderID);
+		itor->second->SetPipeline(pipelineID);
 		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
 		Utils::YAMLFileRef& file = **pMaterialData;
-		auto shaders = file["Shaders"];
-		shaders[shaders.Size()]["UUID"].Set(uint64_t(shaderID));
-		UpdateMaterial(itor->second);
-	}
-
-	void EditorMaterialManager::RemoveShaderFromMaterial(UUID materialID, size_t index)
-	{
-		auto itor = m_pMaterialDatas.find(materialID);
-		if (itor == m_pMaterialDatas.end()) return;
-		itor->second->RemoveShaderAt(index);
-		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
-			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
-		Utils::YAMLFileRef& file = **pMaterialData;
-		auto shaders = file["Shaders"];
-		shaders.Remove(index);
+		file["Pipeline"].Set(uint64_t(pipelineID));
 		UpdateMaterial(itor->second);
 	}
 
@@ -203,15 +192,12 @@ namespace Glory::Editor
 		if (typeHash != shaderSourceDataHash) return;
 	}
 
-	void EditorMaterialManager::ReadShadersInto(Utils::NodeValueRef& shaders, MaterialData* pMaterial) const
+	void EditorMaterialManager::PipelineUpdateCallback(PipelineData* pPipeline)
 	{
-		pMaterial->RemoveAllShaders();
-		if (!shaders.IsSequence()) return;
-		for (size_t i = 0; i < shaders.Size(); ++i)
+		for (auto itor = m_pMaterialDatas.begin(); itor != m_pMaterialDatas.end(); ++itor)
 		{
-			auto shader = shaders[i];
-			const UUID shaderID = shader["UUID"].As<uint64_t>();
-			pMaterial->AddShader(shaderID);
+			if (itor->second->GetPipelineID(*this) != pPipeline->GetUUID()) continue;
+			UpdateMaterial(itor->second);
 		}
 	}
 
@@ -287,27 +273,14 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorMaterialManager::OnShaderCompiled(const UUID& uuid)
-	{
-		for (auto itor = m_pMaterialDatas.begin(); itor != m_pMaterialDatas.end(); ++itor)
-		{
-			if (!itor->second->HasShader(uuid)) continue;
-			UpdateMaterial(itor->second);
-		}
-	}
-
 	void EditorMaterialManager::UpdateMaterial(MaterialData* pMaterial)
 	{
 		EditorApplication* pApplication = EditorApplication::GetInstance();
 
 		pMaterial->ClearProperties();
-		for (size_t i = 0; i < pMaterial->ShaderCount(*this); ++i)
-		{
-			const UUID shaderID = pMaterial->GetShaderIDAt(*this, i);
-			EditorShaderData* pShader = EditorShaderProcessor::GetEditorShader(shaderID);
-			if (!pShader) continue;
-			pShader->LoadIntoMaterial(pMaterial);
-		}
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		PipelineData* pPipeline = pMaterial->GetPipeline(*this, pipelines);
+		pPipeline->LoadIntoMaterial(pMaterial);
 
 		YAMLResource<MaterialData>* pEditorMaterialData = (YAMLResource<MaterialData>*)pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
 		Utils::YAMLFileRef& file = **pEditorMaterialData;

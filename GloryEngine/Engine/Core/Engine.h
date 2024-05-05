@@ -28,6 +28,7 @@ namespace Utils::Reflect
 	class AssetManager;
 	class ShaderManager;
 	class MaterialManager;
+	class PipelineManager;
 
 	class Debug;
 	class Console;
@@ -51,6 +52,7 @@ namespace Utils::Reflect
 		SceneManager* pSceneManager = nullptr;
 		ShaderManager* pShaderManager = nullptr;
 		MaterialManager* pMaterialManager = nullptr;
+		PipelineManager* pPipelineManager = nullptr;
 
 		uint32_t MainModuleCount;
 		/* Order should be: 
@@ -168,6 +170,7 @@ namespace Utils::Reflect
 		LayerManager& GetLayerManager();
 		ShaderManager& GetShaderManager();
 		MaterialManager& GetMaterialManager();
+		PipelineManager& GetPipelineManager();
 		Utils::Reflect::Reflect& Reflection();
 		ObjectManager& GetObjectManager();
 		EngineProfiler& Profiler();
@@ -176,6 +179,7 @@ namespace Utils::Reflect
 		void SetSceneManager(SceneManager* pManager);
 		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);
+		void SetPipelineManager(PipelineManager* pManager);
 
 		template<class T>
 		void AddUserContext(T* pUserContext)
@@ -252,6 +256,7 @@ namespace Utils::Reflect
 		Debug* m_Debug;
 		ShaderManager* m_pShaderManager;
 		MaterialManager* m_pMaterialManager;
+		PipelineManager* m_pPipelineManager;
 
 		bool m_Quit{ false };
 		bool m_Initialized{ false };

@@ -38,6 +38,7 @@ namespace Glory::Editor
             Migrate_0_3_0_ASSIMPAssets(pProject);
             Migrate_0_3_0_ConvertMaterialPropertiesToMap(pProject);
             Migrate_0_3_0_ModuleAssetIDS(pProject);
+            Migrate_0_3_0_MaterialPipelines(pProject);
         }
 
         /* Update version to current */
@@ -402,6 +403,70 @@ namespace Glory::Editor
                 shaders[i]["UUID"].Set(uint64_t(itor->second));
                 EditorAssetDatabase::SetAssetDirty(uuid);
             }
+        }
+    }
+
+    void Migrate_0_3_0_MaterialPipelines(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrating materials to use pipelines");
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+
+        std::map<UUID, UUID> moveMap;
+        std::vector<std::string> materials;
+
+        const uint32_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
+
+        for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+        {
+            JSONValueRef asset = assets[itor->name.GetString()];
+            const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+            if (hash != materialDataHash) continue;
+            materials.push_back(itor->name.GetString());
+
+            JSONValueRef location = asset["Location"];
+            if (!location["SubresourcePath"].AsString().empty()) continue;
+            const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+            EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(uuid);
+            if (!pResource)
+            {
+                pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Failed to migrate a material");
+                continue;
+            }
+
+            YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
+            Utils::YAMLFileRef& file = **pMaterial;
+
+            auto shaders = file["Shaders"];
+            auto pipeline = file["Pipeline"];
+            std::string shadersStr;
+            for (size_t i = 0; i < shaders.Size(); ++i)
+            {
+                const UUID shaderID = shaders[i]["UUID"].As<uint64_t>();
+                shadersStr += std::to_string(shaderID);
+            }
+
+            if (shadersStr == "12" || shadersStr == "21")
+            {
+                /* Use phong, which is ID 9 */
+                pipeline.Set(uint64_t(9));
+            }
+            else if (shadersStr == "34" || shadersStr == "43")
+            {
+                /* Use phong textured, which is ID 10 */
+                pipeline.Set(uint64_t(10));
+            }
+            else
+            {
+                /* Fall back to phong */
+                pipeline.Set(uint64_t(9));
+            }
+
+            file.RootNodeRef().ValueRef().Remove("Shaders");
+            EditorAssetDatabase::SetAssetDirty(uuid);
         }
     }
 }

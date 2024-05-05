@@ -15,6 +15,7 @@ namespace Glory
 
 	private:
 		friend class OGLMaterial;
+		friend class OGLPipeline;
 		GLuint m_ShaderID;
 		GLuint m_GLShaderType;
 	};

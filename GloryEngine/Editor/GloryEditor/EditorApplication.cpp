@@ -7,6 +7,7 @@
 #include "EditorSceneManager.h"
 #include "ProjectSpace.h"
 #include "EditorShaderProcessor.h"
+#include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
 
 #include <GraphicsThread.h>
@@ -33,6 +34,7 @@ namespace Glory::Editor
 		m_SceneManager(new EditorSceneManager(this)),
 		m_ShaderProcessor(new EditorShaderProcessor(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
+		m_PipelineManager(new EditorPipelineManager(createInfo.pEngine)),
 		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
 		m_pFileWatcher(new efsw::FileWatcher())
 	{
@@ -49,6 +51,7 @@ namespace Glory::Editor
 		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
+		m_pEngine->SetPipelineManager(m_PipelineManager.get());
 
 		Instance = this;
 	}
@@ -91,6 +94,7 @@ namespace Glory::Editor
 		m_MainEditor.Destroy();
 		m_Platform.Destroy();
 		m_ShaderProcessor->Stop();
+		m_PipelineManager->Cleanup();
 		m_MaterialManager->Cleanup();
 
 		GloryAPI::Cleanup();
@@ -111,6 +115,7 @@ namespace Glory::Editor
 		m_pEngine->StartThreads();
 		m_Platform.SetState(Idle);
 		m_ShaderProcessor->Start();
+		m_PipelineManager->Initialize();
 		m_MaterialManager->Initialize();
 
 		m_Running = true;
@@ -334,6 +339,11 @@ namespace Glory::Editor
 	EditorResourceManager& EditorApplication::GetResourceManager()
 	{
 		return *m_ResourceManager;
+	}
+
+	EditorPipelineManager& EditorApplication::GetPipelineManager()
+	{
+		return *m_PipelineManager;
 	}
 
 	EditorMaterialManager& EditorApplication::GetMaterialManager()

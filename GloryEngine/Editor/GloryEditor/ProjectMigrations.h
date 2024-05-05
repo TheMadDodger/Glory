@@ -33,4 +33,9 @@ namespace Glory::Editor
 	 * Also updates any materials still using old IDs
 	 */
 	GLORY_EDITOR_API void Migrate_0_3_0_ModuleAssetIDS(ProjectSpace* pProject);
+
+	/** @brief Update materials to use a pipeline instead of shaders directly
+	 * @param pProject Project to migrate materials in
+	 */
+	GLORY_EDITOR_API void Migrate_0_3_0_MaterialPipelines(ProjectSpace* pProject);
 }

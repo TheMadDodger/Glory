@@ -2,6 +2,7 @@
 #include "RuntimeSceneManager.h"
 #include "RuntimeMaterialManager.h"
 #include "RuntimeShaderManager.h"
+#include "RuntimePipelineManager.h"
 
 #include <Engine.h>
 #include <DisplayManager.h>
@@ -25,6 +26,7 @@ namespace Glory
 {
 	GloryRuntime::GloryRuntime(Engine* pEngine): m_pEngine(pEngine),
 		m_SceneManager(new RuntimeSceneManager(this)),
+		m_PipelineManager(new RuntimePipelineManager(pEngine)),
 		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
 		m_ShaderManager(new RuntimeShaderManager(pEngine)),
 		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr)
@@ -38,6 +40,7 @@ namespace Glory
 		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 		m_pEngine->SetShaderManager(m_ShaderManager.get());
+		m_pEngine->SetPipelineManager(m_PipelineManager.get());
 		m_pEngine->Initialize();
 
 		m_pEngine->GetGraphicsThread()->BindBeginAndEndRender(this);

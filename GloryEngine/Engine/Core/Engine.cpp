@@ -28,6 +28,7 @@
 #include "CameraManager.h"
 #include "ShaderManager.h"
 #include "GameTime.h"
+#include "BinaryStream.h"
 
 #include "IModuleLoopHandler.h"
 #include "GraphicsThread.h"
@@ -37,12 +38,12 @@
 #include "ProfilerModule.h"
 #include "MaterialInstanceData.h"
 #include "ShaderSourceData.h"
+#include "PipelineData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
 
 #include <algorithm>
-#include "BinaryStream.h"
 
 namespace Glory
 {
@@ -411,6 +412,11 @@ namespace Glory
 		return *m_pMaterialManager;
 	}
 
+	PipelineManager& Engine::GetPipelineManager()
+	{
+		return *m_pPipelineManager;
+	}
+
 	Utils::Reflect::Reflect& Engine::Reflection()
 	{
 		return *m_Reflection;
@@ -444,6 +450,11 @@ namespace Glory
 	void Engine::SetMaterialManager(MaterialManager* pManager)
 	{
 		m_pMaterialManager = pManager;
+	}
+
+	void Engine::SetPipelineManager(PipelineManager* pManager)
+	{
+		m_pPipelineManager = pManager;
 	}
 
 	Debug& Engine::GetDebug()
@@ -571,6 +582,7 @@ namespace Glory
 		m_ResourceTypes->RegisterType<SceneObjectRef>();
 		m_ResourceTypes->RegisterType<ShapeProperty>();
 		m_ResourceTypes->RegisterResource<PrefabData>("");
+		m_ResourceTypes->RegisterResource<PipelineData>("");
 		m_ResourceTypes->RegisterResource<MaterialData>("");
 		m_ResourceTypes->RegisterResource<MaterialInstanceData>("");
 		m_ResourceTypes->RegisterResource<MeshData>("");
@@ -594,6 +606,7 @@ namespace Glory
 		Reflect::RegisterEnum<Filter>();
 		Reflect::RegisterEnum<SamplerAddressMode>();
 		Reflect::RegisterEnum<CompareOp>();
+		Reflect::RegisterEnum<PipelineType>();
 
 		/* Shape types */
 		Reflect::RegisterEnum<ShapeType>();

@@ -50,26 +50,10 @@ namespace Glory::Editor
 	void MaterialImporter::SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out) const
 	{
 		out << YAML::BeginMap;
-		WriteShaders(out, pMaterialData);
+		out << YAML::Key << "Pipeline";
+		out << YAML::Value << uint64_t(pMaterialData->GetPipelineID(EditorApplication::GetInstance()->GetMaterialManager()));
 		WritePropertyData(out, pMaterialData);
 		out << YAML::EndMap;
-	}
-
-	void MaterialImporter::WriteShaders(YAML::Emitter& out, MaterialData* pMaterialData) const
-	{
-		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
-
-		out << YAML::Key << "Shaders";
-		out << YAML::Value << YAML::BeginSeq;
-		for (size_t i = 0; i < pMaterialData->ShaderCount(manager); i++)
-		{
-			out << YAML::BeginMap;
-			const UUID shaderID = pMaterialData->GetShaderIDAt(manager, i);
-			YAML_WRITE(out, UUID, shaderID);
-			//YAML_WRITE(out, Type, pShaderSourceData->GetShaderType());
-			out << YAML::EndMap;
-		}
-		out << YAML::EndSeq;
 	}
 
 	void MaterialImporter::WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData) const

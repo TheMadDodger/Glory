@@ -1,10 +1,16 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <string>
 #include <vector>
 #include <UUID.h>
 #include <spirv_cross/spirv_cross.hpp>
-#include <MaterialData.h>
-#include "GloryEditor.h"
+
+namespace Glory
+{
+	class MaterialData;
+	class PipelineData;
+}
 
 namespace Glory::Editor
 {
@@ -23,6 +29,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API UUID GetUUID() const;
 
 		GLORY_EDITOR_API void LoadIntoMaterial(MaterialData* pMaterial);
+		GLORY_EDITOR_API void LoadIntoPipeline(PipelineData* pMaterial);
 
 	private:
 		friend class EditorShaderProcessor;

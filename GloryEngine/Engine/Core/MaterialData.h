@@ -15,6 +15,8 @@ namespace Glory
     class FileData;
     class ShaderManager;
     class MaterialManager;
+    class PipelineData;
+    class PipelineManager;
 
     class MaterialData : public Resource
     {
@@ -22,16 +24,14 @@ namespace Glory
         MaterialData();
         virtual ~MaterialData();
 
-        [[nodiscard]]virtual size_t ShaderCount(const MaterialManager& materialManager) const;
-        [[nodiscard]]virtual ShaderType GetShaderTypeAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const;
-        [[nodiscard]]virtual FileData* GetShaderAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const;
-        [[nodiscard]]virtual UUID GetShaderIDAt(const MaterialManager& materialManager, size_t index) const;
-        void RemoveShaderAt(size_t index);
-        void RemoveAllShaders();
-        bool AddShader(UUID shaderID);
-
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, uint32_t flags = 0);
+        void AddProperty(const MaterialPropertyInfo& other);
+
+        void SetPipeline(PipelineData* pPipeline);
+        void SetPipeline(UUID pipelineID);
+        virtual PipelineData* GetPipeline(const MaterialManager&, const PipelineManager& pipelineManager) const;
+        virtual UUID GetPipelineID(const MaterialManager&) const;
 
         [[nodiscard]]virtual size_t PropertyInfoCount(const MaterialManager& materialManager) const;
         virtual MaterialPropertyInfo* GetPropertyInfoAt(const MaterialManager& materialManager, size_t index);
@@ -48,8 +48,6 @@ namespace Glory
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
-
-        bool HasShader(const UUID shaderID) const;
 
     public: // Properties
         // Setters
@@ -80,9 +78,10 @@ namespace Glory
         virtual std::vector<char>& GetPropertyBuffer(MaterialManager& pManager, size_t index);
 
     protected:
+        friend class PipelineData;
         friend class MaterialInstanceData;
 
-        std::vector<UUID> m_Shaders;
+        UUID m_Pipeline;
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<char> m_PropertyBuffer;
 

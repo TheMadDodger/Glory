@@ -1,6 +1,7 @@
 #pragma once
 #include "ObjectMenu.h"
 #include "GloryEditor.h"
+
 #include <Object.h>
 #include <filesystem>
 
@@ -20,6 +21,7 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(RemoveSceneCallback);
 	OBJECTMENU_CALLBACK(ReloadSceneCallback);
 	OBJECTMENU_CALLBACK(CreateNewTextureCallback);
+	OBJECTMENU_CALLBACK(CreateNewPipelineCallback);
 	OBJECTMENU_CALLBACK(CreateNewMaterialCallback);
 	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback);
 	OBJECTMENU_CALLBACK(CreateNewFolderCallback);

@@ -21,18 +21,18 @@ namespace Glory
 	{
 	}
 
-	size_t MaterialInstanceData::ShaderCount(const MaterialManager& manager) const
+	PipelineData* MaterialInstanceData::GetPipeline(const MaterialManager& materialManager, const PipelineManager& pipelineManager) const
 	{
-		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
-		if (!pBaseMaterial) return 0;
-		return pBaseMaterial->ShaderCount(manager);
+		MaterialData* pBaseMaterial = GetBaseMaterial(materialManager);
+		if (!pBaseMaterial) return nullptr;
+		return pBaseMaterial->GetPipeline(materialManager, pipelineManager);
 	}
 
-	UUID MaterialInstanceData::GetShaderIDAt(const MaterialManager& manager, size_t index) const
+	UUID MaterialInstanceData::GetPipelineID(const MaterialManager& manager) const
 	{
 		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
 		if (!pBaseMaterial) return 0;
-		return pBaseMaterial->GetShaderIDAt(manager, index);
+		return pBaseMaterial->GetPipelineID(manager);
 	}
 
 	UUID MaterialInstanceData::BaseMaterialID() const

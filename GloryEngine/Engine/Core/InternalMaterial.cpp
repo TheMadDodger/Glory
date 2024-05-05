@@ -1,30 +1,19 @@
 #include "InternalMaterial.h"
-#include "FileData.h"
+#include "PipelineData.h"
 
 namespace Glory
 {
-	InternalMaterial::InternalMaterial(std::vector<FileData*>&& compiledShaders, std::vector<ShaderType>&& shaderTypes):
-		m_pCompiledShaders(std::move(compiledShaders)), m_ShaderTypes(std::move(shaderTypes))
+	InternalMaterial::InternalMaterial(PipelineData* pPipeline): m_pPipeline(pPipeline)
 	{
 	}
 
-	size_t InternalMaterial::ShaderCount(const MaterialManager&) const
+	PipelineData* InternalMaterial::GetPipeline(const MaterialManager&, const PipelineManager& pipelineManager) const
 	{
-		return m_pCompiledShaders.size();
+		return m_pPipeline;
 	}
 
-	ShaderType InternalMaterial::GetShaderTypeAt(const MaterialManager&, ShaderManager& manager, size_t index) const
+	UUID InternalMaterial::GetPipelineID(const MaterialManager&) const
 	{
-		return m_ShaderTypes[index];
-	}
-
-	UUID InternalMaterial::GetShaderIDAt(const MaterialManager&, size_t index) const
-	{
-		return m_pCompiledShaders[index]->GetUUID();
-	}
-
-	FileData* InternalMaterial::GetShaderAt(const MaterialManager&, ShaderManager&, size_t index) const
-	{
-		return m_pCompiledShaders[index];
+		return m_pPipeline->GetUUID();
 	}
 }

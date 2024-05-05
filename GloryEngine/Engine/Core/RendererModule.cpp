@@ -11,6 +11,7 @@
 #include "GraphicsThread.h"
 #include "Engine.h"
 #include "InternalMaterial.h"
+#include "InternalPipeline.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -239,7 +240,10 @@ namespace Glory
 
 		std::vector<FileData*> pShaderFiles = { pVert, pFrag };
 		std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
-		m_pLinesMaterialData = new InternalMaterial(std::move(pShaderFiles), std::move(shaderTypes));
+
+		m_pLinesPipelineData = new InternalPipeline(std::move(pShaderFiles), std::move(shaderTypes));
+		m_pLinesPipelineData->SetPipelineType(PipelineType::PT_Unknown);
+		m_pLinesMaterialData = new InternalMaterial(m_pLinesPipelineData);
 	}
 
 	void RendererModule::PostInitialize()

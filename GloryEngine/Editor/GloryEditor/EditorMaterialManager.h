@@ -31,7 +31,7 @@ namespace Editor
 
 		/** @brief Initialize the manager by subscribing to asset events */
 		void Initialize();
-		/** @brief Unsibscribe asset events */
+		/** @brief Unsubscribe asset events */
 		void Cleanup();
 
 		/** @brief Load editor property data from YAML into material
@@ -46,16 +46,11 @@ namespace Editor
 		 */
 		void LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialInstanceData*& pMaterial) const;
 
-		/** @brief Add a shader to a material and update the materials properties
+		/** @brief Set a materials pipeline and update its properties
 		 * @param materialID ID of the material
-		 * @param shaderID ID of the shader
+		 * @param pipelineID ID of the pipeline
 		 */
-		void AddShaderToMaterial(UUID materialID, UUID shaderID);
-		/** @brief Remove a shader from a material and update the materials properties
-		 * @param materialID ID of the material
-		 * @param index Index of the shader to remove
-		 */
-		void RemoveShaderFromMaterial(UUID materialID, size_t index);
+		void SetMaterialPipeline(UUID materialID, UUID pipelineID);
 
 		/** @brief Get a material or material instance by ID */
 		virtual MaterialData* GetMaterial(UUID materialID) const override;
@@ -68,11 +63,9 @@ namespace Editor
 		 */
 		void AssetUpdatedCallback(const AssetCallbackData& callback);
 
-		/** @brief Read shaders into a material
-		 * @param shaders Shaders YAML data
-		 * @param pMaterial Material to add the shaders to
-		 */
-		void ReadShadersInto(Utils::NodeValueRef& shaders, MaterialData* pMaterial) const;
+		/** @brief Callback for when a pipeline changes */
+		void PipelineUpdateCallback(PipelineData* pPipeline);
+
 		/** @brief Read properties into a material
 		 * @param properties Properties YAML data
 		 * @param pMaterial Material to read the properties to
@@ -85,9 +78,6 @@ namespace Editor
 		 * @param clearProperties Whether to clear the property data of the material before reading
 		 */
 		void ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialInstanceData* pMaterial, bool clearProperties=true) const;
-
-		/** @brief Handler for compiled shader events */
-		void OnShaderCompiled(const UUID& uuid);
 
 		/** @brief Update a material by loading the properties of its attached shaders and reload the YAML data if possible
 		 * @param pMaterial Material to update
@@ -108,7 +98,7 @@ namespace Editor
 		Engine* m_pEngine;
 		UUID m_AssetRegisteredCallback;
 		UUID m_AssetUpdatedCallback;
-		UUID m_ShaderCompiledCallback;
+		UUID m_PipelineUpdatedCallback;
 	};
 }
 }

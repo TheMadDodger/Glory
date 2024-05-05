@@ -3,18 +3,19 @@
 
 namespace Glory
 {
+    class PipelineData;
+
+    /** @brief Internal material data */
     class InternalMaterial : public MaterialData
     {
     public:
-        InternalMaterial(std::vector<FileData*>&& compiledShaders, std::vector<ShaderType>&& shaderTypes);
+        /** @brief Constructor */
+        InternalMaterial(PipelineData* pPipeline);
 
-        virtual size_t ShaderCount(const MaterialManager& materialManager) const override;
-        virtual ShaderType GetShaderTypeAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const override;
-        virtual UUID GetShaderIDAt(const MaterialManager& materialManager, size_t index) const override;
-        virtual FileData* GetShaderAt(const MaterialManager& materialManager, ShaderManager& manager, size_t index) const override;
+        virtual PipelineData* GetPipeline(const MaterialManager&, const PipelineManager& pipelineManager) const override;
+        virtual UUID GetPipelineID(const MaterialManager&) const override;
 
     private:
-        std::vector<FileData*> m_pCompiledShaders;
-        std::vector<ShaderType> m_ShaderTypes;
+        PipelineData* m_pPipeline;
     };
 }
