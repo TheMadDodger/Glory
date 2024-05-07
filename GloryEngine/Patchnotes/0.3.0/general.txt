@@ -1,21 +1,57 @@
-Engine:
-- GloryEntityScenes has been removed and has become the internal scene graph
-- Improved performance across the board
-- JoltPhysics has become an independant module
+Runtime:
+- Added a runtime
+- Added asset archives/compiled asset groups
+- Added shader packs
 
 Editor:
-- Fixed picking for multiple scenes (delete you projects cache folder if you have issues)
+- Added package settings to project settings
+- Added packaging with progress popup
+- Fixed picking for multiple scenes (delete you projects cache folder if you still have issues)
 - Added an importer system and flow
 - Added ASSIMP importer
 - Added SDLImage importer
-- Added an asset compilation system and flow
+- Added mono script importer
+- Added shader importer
+- Added material importer
+- Added texture importer
+- Added pipeline importer
+- Creating a new asset/folder from the file browser now shows a preview item until confirmed
+- Added a threaded asset compilation system and flow
+- Added internal YAML resource to allow in memory resource editing
+- Made built-in assets use fixed IDs so they can reference each other
+- Added built-in pipelines for Phong and PhongTextured
+- Added undo/redo support to numerous resources and properties
+- Removed sub resources and replaced them with imported resources
+- Added migration for setting pipelines in materials
+- Added migration for updating paths to moved built-in assets
+- Added migration for updating referenced asset IDs to built-in assets
+- Added migration to convert material properties in YAML to a map rather than a sequence
+- Fixed the majority of crashes
+
+Engine:
+- Removed GloryEntityScenes module and has made it the internal scene graph
+- Improved performance across the board
+- Updated JoltPhysics to an independant module
+- Updated resource data to use binary data rather than YAML data
+- Added pipeline resource
+- Materials now reference a pipeline instead of shaders directly
+- Reworked prefabs into runtime instantiable scenes
+- Reworked shader management
+- Reworked material management
+- Reworked asset management
+- Reworked scene management
+- Removed material loader
+- Removed shader loader
+- Removed ASSIMP loader
+- Removed SDLImage loader
+- Removed texture loader
 
 Scripting:
 - Fixed an issue where objects on the CS would have an incorrect scene ID
+- Updated property data to be stored as binary
+- Added API for loading scenes
 
 Launcher:
 - Removed scene module from required module selection in new project wizzard
 - Removed physics module from required module selection in new project wizzard
 - Added JoltPhysics as a default optional module
-
-Bugs:
