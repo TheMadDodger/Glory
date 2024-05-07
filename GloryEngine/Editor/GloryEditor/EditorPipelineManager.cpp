@@ -78,6 +78,14 @@ namespace Glory::Editor
 		return itor->second;
 	}
 
+	UUID EditorPipelineManager::FindPipeline(PipelineType type, bool useTextures) const
+	{
+		const uint64_t pipelineType = useTextures ? uint64_t(type) << 32 : uint64_t(type);
+		auto itor = m_DefaultPipelinesMap.find(pipelineType);
+		if (itor == m_DefaultPipelinesMap.end()) return 0;
+		return itor->second;
+	}
+
 	EditorPipelineManager::PipelineUpdateDispatcher& EditorPipelineManager::PipelineUpdateEvents()
 	{
 		static EditorPipelineManager::PipelineUpdateDispatcher dispatcher;

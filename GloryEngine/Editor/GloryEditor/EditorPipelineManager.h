@@ -1,8 +1,10 @@
 #pragma once
 #include <PipelineManager.h>
 #include <UUID.h>
+#include <GraphicsEnums.h>
 
 #include <map>
+#include <GloryEditor.h>
 
 namespace Glory
 {
@@ -58,6 +60,8 @@ namespace Glory::Editor
 		 * @param pipelineID ID of the pipeline to get
 		 */
 		virtual PipelineData* GetPipelineData(UUID pipelineID) const override;
+
+		GLORY_EDITOR_API UUID FindPipeline(PipelineType type, bool useTextures) const;
 
 		using PipelineUpdateDispatcher = Dispatcher<PipelineUpdateEvent>;
 

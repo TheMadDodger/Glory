@@ -9,7 +9,7 @@
 namespace Glory
 {
 	MaterialData::MaterialData()
-		: m_CurrentOffset(0)
+		: m_Pipeline(0), m_CurrentOffset(0)
 	{
 		APPEND_TYPE(MaterialData);
 	}
@@ -62,6 +62,10 @@ namespace Glory
 		{
 			m_ResourcePropertyInfoIndices.push_back(index);
 			m_Resources.push_back(0);
+		}
+		else
+		{
+			m_PropertyInfos[index].Reserve(m_PropertyBuffer);
 		}
 		m_HashToPropertyInfoIndex[hash] = index;
 	}
