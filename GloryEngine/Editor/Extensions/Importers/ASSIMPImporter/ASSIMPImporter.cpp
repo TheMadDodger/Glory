@@ -12,8 +12,12 @@
 #include <Debug.h>
 #include <sstream>
 #include <SceneManager.h>
+#include <PipelineData.h>
 
 #include <EntityRegistry.h>
+
+#include <EditorPipelineManager.h>
+#include <EditorMaterialManager.h>
 
 namespace Glory::Editor
 {
@@ -88,36 +92,25 @@ namespace Glory::Editor
 
                 aiShadingMode shadingMode;
                 material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
-
-                /* Get shader/pipeline */
-                switch (shadingMode)
+                bool usesTextures = false;
+                for (size_t i = 0; i < material->mNumProperties; ++i)
                 {
-                case aiShadingMode_Flat:
+                    if (material->mProperties[i]->mSemantic == aiTextureType_NONE) continue;
+                    usesTextures = true;
                     break;
-                case aiShadingMode_Gouraud:
-                    break;
-                case aiShadingMode_Phong:
-                    break;
-                case aiShadingMode_Blinn:
-                    break;
-                case aiShadingMode_Toon:
-                    break;
-                case aiShadingMode_OrenNayar:
-                    break;
-                case aiShadingMode_Minnaert:
-                    break;
-                case aiShadingMode_CookTorrance:
-                    break;
-                case aiShadingMode_Unlit:
-                    break;
-                case aiShadingMode_Fresnel:
-                    break;
-                case aiShadingMode_PBR_BRDF:
-                    break;
-                case _aiShadingMode_Force32Bit:
-                    break;
-                default:
-                    break;
+                }
+                MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
+                const UUID pipelineID = EditorApplication::GetInstance()->GetPipelineManager().FindPipeline(PipelineType(shadingMode), usesTextures);
+                if (pipelineID)
+                {
+                    pMaterial->SetPipeline(pipelineID);
+                    PipelineData* pPipeline = EditorApplication::GetInstance()->GetPipelineManager().GetPipelineData(pipelineID);
+                    pPipeline->LoadIntoMaterial(pMaterial);
+
+                    for (size_t i = 0; i < pMaterial->PropertyInfoCount(materials); ++i)
+                    {
+                        MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(materials, i);
+                    }
                 }
 
                 resource.AddChild(pMaterial, pMaterial->Name());
