@@ -33,8 +33,6 @@ namespace Glory
 
 	public:
 		void RegisterCallback(const CallbackType& type, ASSET_CALLBACK callback);
-
-	private:
 		void Initialize();
 		void Cleanup();
 		void TriggerCallback(const CallbackType& type, UUID uuid, Resource* pResource);

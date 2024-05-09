@@ -64,6 +64,9 @@ namespace Glory
 		void SetEntryScene(UUID uuid);
 		UUID GetEntryScene() const;
 
+		/** Get asset callbacks */
+		AssetCallbacks& Callbacks();
+
 	private:
 		void Initialize();
 		void Destroy();

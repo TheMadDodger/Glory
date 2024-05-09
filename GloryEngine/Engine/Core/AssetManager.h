@@ -1,7 +1,6 @@
 #pragma once
 #include "UUID.h"
 #include "Resource.h"
-#include "AssetGroup.h"
 #include "ThreadedVar.h"
 #include "JobManager.h"
 
@@ -12,24 +11,11 @@ namespace Glory
 {
 	class Engine;
 
-	class AssetArchive;
-
-	struct CallbackData
-	{
-		CallbackData();
-		CallbackData(UUID uuid, Resource* pResource);
-
-		UUID m_UUID;
-		Resource* m_pResource;
-	};
-
 	class AssetManager
 	{
 	public:
+		AssetManager(Engine* pEngine);
 		virtual ~AssetManager();
-
-		void GetAsset(UUID uuid, std::function<void(Resource*)> callback);
-		Resource* GetOrLoadAsset(UUID uuid);
 
 		template<class T>
 		T* GetOrLoadAsset(UUID uuid)
@@ -47,53 +33,23 @@ namespace Glory
 			return (T*)pResource;
 		}
 
-		Resource* GetAssetImmediate(UUID uuid);
+		virtual Resource* GetAssetImmediate(UUID uuid) = 0;
+		virtual void GetAsset(UUID uuid, std::function<void(Resource*)> callback) = 0;
+		virtual Resource* GetOrLoadAsset(UUID uuid) = 0;
+		virtual void UnloadAsset(UUID uuid) = 0;
+		virtual Resource* FindResource(UUID uuid) = 0;
+		virtual void AddLoadedResource(Resource* pResource, UUID uuid) = 0;
+		virtual void AddLoadedResource(Resource* pResource) = 0;
 
-		void ReloadAsset(UUID uuid);
-		void UnloadAsset(UUID uuid);
-		Resource* FindResource(UUID uuid);
-		void AddLoadedResource(Resource* pResource, UUID uuid);
-		void AddLoadedResource(Resource* pResource);
+		virtual void Initialize() = 0;
+		virtual void Destroy() = 0;
 
-		bool IsLoading(UUID uuid);
-		void GetAllLoading(std::vector<UUID>& out);
-
-		const AssetArchive* GetOrLoadArchive(const std::filesystem::path& path);
-		void AddAssetArchive(uint32_t hash, AssetArchive&& archive);
-
-	private:
-		bool LoadResourceJob(UUID uuid);
-		Resource* LoadAsset(UUID uuid);
-
-	private:
-		AssetManager(Engine* pEngine);
-
-		void Initialize();
-		void Destroy();
-		void RunCallbacks();
+	protected:
+		Engine* m_pEngine;
 
 	private:
 		friend class Engine;
 		friend class AssetDatabase;
 
-		struct LoadingLock
-		{
-			LoadingLock(AssetManager* pManager, UUID uuid);
-			~LoadingLock();
-
-			AssetManager* m_pManager;
-			bool IsValid;
-			UUID m_UUID;
-		};
-
-		Engine* m_pEngine;
-		ThreadedUMap<uint32_t, AssetArchive> m_LoadedArchives;
-		ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
-		ThreadedVector<UUID> m_pLoadingAssets;
-		ThreadedUMap<std::string, size_t> m_PathToGroupIndex;
-		ThreadedVector<AssetGroup*> m_LoadedAssetGroups;
-		ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;
-		ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> m_AssetLoadedCallbacks;
-		Jobs::JobPool<bool, UUID>* m_pResourceLoadingPool;
 	};
 }

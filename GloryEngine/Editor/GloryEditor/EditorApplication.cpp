@@ -6,6 +6,7 @@
 #include "EditorResourceManager.h"
 #include "EditorSceneManager.h"
 #include "ProjectSpace.h"
+#include "EditorAssetManager.h"
 #include "EditorShaderProcessor.h"
 #include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
@@ -31,6 +32,7 @@ namespace Glory::Editor
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo):
 		m_pEngine(createInfo.pEngine),
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
+		m_AssetManager(new EditorAssetManager(this)),
 		m_SceneManager(new EditorSceneManager(this)),
 		m_ShaderProcessor(new EditorShaderProcessor(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
@@ -128,6 +130,9 @@ namespace Glory::Editor
 
 				EditorAssetsWatcher::RunCallbacks();
 
+				/* Run asset callbacks */
+				m_AssetManager->RunCallbacks();
+
 				/* Run callbacks for compiled shaders */
 				m_ShaderProcessor->RunCallbacks();
 
@@ -160,6 +165,9 @@ namespace Glory::Editor
 
 			/* We must wait for graphics to initialize */
 			if (!m_pEngine->GetGraphicsThread()->IsInitialized()) continue;
+
+			/* Run asset callbacks */
+			m_AssetManager->RunCallbacks();
 
 			/* Run callbacks for compiled shaders */
 			m_ShaderProcessor->RunCallbacks();
@@ -329,6 +337,11 @@ namespace Glory::Editor
 	Engine* EditorApplication::GetEngine()
 	{
 		return m_pEngine;
+	}
+
+	EditorAssetManager& EditorApplication::GetAssetManager()
+	{
+		return *m_AssetManager;
 	}
 
 	EditorSceneManager& EditorApplication::GetSceneManager()

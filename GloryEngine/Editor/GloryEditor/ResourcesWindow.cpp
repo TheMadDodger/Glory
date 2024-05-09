@@ -2,8 +2,8 @@
 #include "EditorAssetDatabase.h"
 #include "Tumbnail.h"
 #include "EditorApplication.h"
+#include "EditorAssetManager.h"
 
-#include <AssetManager.h>
 #include <EditorUI.h>
 #include <StringUtils.h>
 #include <ProjectSpace.h>
@@ -147,7 +147,7 @@ namespace Glory::Editor
 		ImGuiListClipper clipper(m_SearchResultCache.size(), rowHeight + 2*ImGui::GetCurrentTable()->CellPaddingY);
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		AssetManager& assetManager = pEngine->GetAssetManager();
+		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 
 		auto itorStart = m_SearchResultCache.begin();
@@ -282,7 +282,7 @@ namespace Glory::Editor
 		m_SearchResultIndexCache.clear();
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		AssetManager& assetManager = pEngine->GetAssetManager();
+		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 
 		if (TabBarIndex == 0)

@@ -2,6 +2,7 @@
 #include "MonoScriptTumbnail.h"
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
+#include "EditorAssetManager.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -9,7 +10,6 @@
 #include <MonoManager.h>
 #include <MonoScriptObjectManager.h>
 #include <AssemblyDomain.h>
-#include <AssetManager.h>
 #include <MonoScript.h>
 #include <GloryMonoScipting.h>
 #include <Package.h>
@@ -474,7 +474,7 @@ namespace Glory::Editor
 		{
 			size_t subHash = types.GetSubTypeHash(pResourcerType, i);
 			if (scriptHash != subHash) continue;
-			EditorApplication::GetInstance()->GetEngine()->GetAssetManager().ReloadAsset(callback.m_UUID);
+			EditorApplication::GetInstance()->GetAssetManager().ReloadAsset(callback.m_UUID);
 			CompileProject(ProjectSpace::GetOpenProject());
 			return;
 		}
