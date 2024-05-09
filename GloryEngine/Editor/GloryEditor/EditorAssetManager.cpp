@@ -1,5 +1,6 @@
 #include "EditorAssetManager.h"
 #include "EditorApplication.h"
+#include "EditorAssetCallbacks.h"
 
 #include <Engine.h>
 #include <AssetDatabase.h>
@@ -68,9 +69,9 @@ namespace Glory::Editor
 	{
 		UnloadAsset(uuid);
 		GetAsset(uuid, [&](Resource* pResource)
-			{
-				m_pEngine->GetAssetDatabase().Callbacks().EnqueueCallback(CallbackType::CT_AssetReloaded, uuid, pResource);
-			});
+		{
+			EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetReloaded, uuid, pResource);
+		});
 	}
 
 	void EditorAssetManager::UnloadAsset(UUID uuid)
@@ -167,8 +168,6 @@ namespace Glory::Editor
 
 	void EditorAssetManager::RunCallbacks()
 	{
-		m_pEngine->GetAssetDatabase().Callbacks().RunCallbacks();
-
 		CallbackData callbackData;
 		while (m_ResourceLoadedCallbacks.Pop(callbackData))
 		{

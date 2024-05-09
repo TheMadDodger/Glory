@@ -56,11 +56,6 @@ namespace Glory
 		return m_PathToUUID.find(fixedPath) != m_PathToUUID.end();
 	}
 
-	void AssetDatabase::EnqueueCallback(const CallbackType& type, UUID uuid, Resource* pResource)
-	{
-		m_Callbacks.EnqueueCallback(type, uuid, pResource);
-	}
-
 	void AssetDatabase::SetAsset(AssetLocation& assetLocation, const ResourceMeta& meta)
 	{
 		std::replace(assetLocation.Path.begin(), assetLocation.Path.end(), '/', '\\');
@@ -153,19 +148,12 @@ namespace Glory
 		return m_EntrySceneID;
 	}
 
-	AssetCallbacks& AssetDatabase::Callbacks()
-	{
-		return m_Callbacks;
-	}
-
 	void AssetDatabase::Initialize()
 	{
-		m_Callbacks.Initialize();
 	}
 
 	void AssetDatabase::Destroy()
 	{
-		m_Callbacks.Cleanup();
 		Clear();
 	}
 
@@ -190,7 +178,7 @@ namespace Glory
 	}
 
 	AssetDatabase::AssetDatabase()
-		: m_IsWriting(false), m_IsReading(false), m_Callbacks(this) {}
+		: m_IsWriting(false), m_IsReading(false) {}
 
 	AssetDatabase::~AssetDatabase() {}
 
