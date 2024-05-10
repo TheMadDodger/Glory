@@ -1,18 +1,28 @@
 #include "EditorAssetManager.h"
 #include "EditorApplication.h"
 #include "EditorAssetCallbacks.h"
+#include "AssetCompiler.h"
 
 #include <Engine.h>
 #include <AssetDatabase.h>
 
 namespace Glory::Editor
 {
-	EditorAssetManager::EditorAssetManager(EditorApplication* pApplication): AssetManager(pApplication->GetEngine())
+	EditorAssetManager::EditorAssetManager(EditorApplication* pApplication):
+		AssetManager(pApplication->GetEngine()), m_pResourceLoadingPool(nullptr)
 	{
 	}
 
 	EditorAssetManager::~EditorAssetManager()
 	{
+		m_pLoadedAssets.ForEach([](const UUID& key, Resource* value)
+		{
+			delete value;
+		});
+
+		m_pLoadedAssets.Clear();
+
+		m_pResourceLoadingPool = nullptr;
 	}
 
 	void EditorAssetManager::GetAsset(UUID uuid, std::function<void(Resource*)> callback)
@@ -29,9 +39,9 @@ namespace Glory::Editor
 			if (callback != NULL)
 			{
 				m_AssetLoadedCallbacks.Do(uuid, [&](std::vector<std::function<void(Resource*)>>* callbacks)
-					{
-						callbacks->push_back(callback);
-					});
+				{
+					callbacks->push_back(callback);
+				});
 			}
 			return;
 		}
@@ -110,32 +120,6 @@ namespace Glory::Editor
 		});
 	}
 
-	//const AssetArchive* EditorAssetManager::GetOrLoadArchive(const std::filesystem::path& path)
-	//{
-	//	if (!std::filesystem::exists(path))
-	//	{
-	//		std::stringstream str;
-	//		str << "Failed to load asset archive at path " << path << " file not found!";
-	//		m_pEngine->GetDebug().LogError(str.str());
-	//		return nullptr;
-	//	}
-
-	//	/* Load as archive */
-	//	BinaryFileStream stream{ path };
-	//	AssetArchive archive{ &stream };
-	//	archive.Deserialize(m_pEngine);
-	//	const std::string& str = path.string();
-	//	const uint32_t hash = Hashing::Hash(str.data());
-	//	m_LoadedArchives.Emplace(hash, std::move(archive));
-	//	stream.Close();
-	//	return &m_LoadedArchives.at(hash);
-	//}
-
-	//void EditorAssetManager::AddAssetArchive(uint32_t hash, AssetArchive&& archive)
-	//{
-	//	m_LoadedArchives.Emplace(hash, std::move(archive));
-	//}
-
 	bool EditorAssetManager::LoadResourceJob(UUID uuid)
 	{
 		Resource* pResource = LoadAsset(uuid);
@@ -145,25 +129,24 @@ namespace Glory::Editor
 
 	Resource* EditorAssetManager::LoadAsset(UUID uuid)
 	{
+		if (!AssetCompiler::IsCompilingAsset(uuid))
+		{
+			return FindResource(uuid);
+		}
+
+		while (true)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			if (AssetCompiler::IsCompilingAsset(uuid)) continue;
+			return FindResource(uuid);
+		}
+
 		return nullptr;
 	}
 
 	void EditorAssetManager::Initialize()
 	{
 		m_pResourceLoadingPool = Jobs::JobManager::Run<bool, UUID>();
-	}
-
-	void EditorAssetManager::Destroy()
-	{
-		m_pLoadedAssets.ForEach([](const UUID& key, Resource* value)
-		{
-			delete value;
-		});
-
-		m_pLoadedAssets.Clear();
-		m_PathToGroupIndex.Clear();
-
-		m_pResourceLoadingPool = nullptr;
 	}
 
 	void EditorAssetManager::RunCallbacks()

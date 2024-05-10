@@ -98,8 +98,12 @@ namespace Glory::Editor
 
 	bool AssetCompiler::IsBusy()
 	{
-		CompilationJobPool->HasTasksInQueue();
-		return m_CompilingAssets.Size();
+		return CompilationJobPool->HasTasksInQueue() && m_CompilingAssets.Size();
+	}
+
+	bool AssetCompiler::IsCompilingAsset(UUID uuid)
+	{
+		return m_CompilingAssets.Contains(uuid);
 	}
 
 	void AssetCompiler::DispatchCompilationJob(const AssetData& asset)

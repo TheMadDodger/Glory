@@ -327,7 +327,6 @@ namespace Glory
 	{
 		if (!m_Initialized) return;
 
-		m_pAssetsManager->Destroy();
 		m_AssetDatabase->Destroy();
 		m_pGraphicsThread->Stop();
 		m_pJobManager->Kill();

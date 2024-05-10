@@ -50,6 +50,7 @@ namespace Glory::Editor
 			}
 		}
 
+		m_pEngine->SetAssetManager(m_AssetManager.get());
 		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());

@@ -1,4 +1,5 @@
 #include "GloryRuntime.h"
+#include "RuntimeAssetManager.h"
 #include "RuntimeSceneManager.h"
 #include "RuntimeMaterialManager.h"
 #include "RuntimeShaderManager.h"
@@ -25,6 +26,7 @@
 namespace Glory
 {
 	GloryRuntime::GloryRuntime(Engine* pEngine): m_pEngine(pEngine),
+		m_AssetManager(new RuntimeAssetManager(pEngine)),
 		m_SceneManager(new RuntimeSceneManager(this)),
 		m_PipelineManager(new RuntimePipelineManager(pEngine)),
 		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
@@ -37,6 +39,7 @@ namespace Glory
 
 	void GloryRuntime::Initialize()
 	{
+		m_pEngine->SetAssetManager(m_AssetManager.get());
 		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 		m_pEngine->SetShaderManager(m_ShaderManager.get());
