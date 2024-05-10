@@ -2,7 +2,8 @@
 #include "UUID.h"
 #include "ResourceMeta.h"
 #include "Resource.h"
-#include "ThreadedVar.h"
+
+#include <ThreadedVar.h>
 #include <functional>
 #include <vector>
 #include <GloryEditor.h>
@@ -11,6 +12,8 @@ namespace Glory:: Editor
 {
 	enum class AssetCallbackType : unsigned int
 	{
+		CT_AssetLoaded,
+		CT_AssetReloaded,
 		CT_AssetRegistered,
 		CT_AssetDeleted,
 		CT_AssetUpdated,
@@ -35,7 +38,6 @@ namespace Glory:: Editor
 
 	private:
 		static void RunCallbacks();
-
 		static void TriggerCallback(const AssetCallbackType& type, UUID uuid, Resource* pResource);
 
 	private:

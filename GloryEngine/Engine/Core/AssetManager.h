@@ -1,7 +1,6 @@
 #pragma once
 #include "UUID.h"
 #include "Resource.h"
-#include "AssetGroup.h"
 #include "ThreadedVar.h"
 #include "JobManager.h"
 
@@ -12,25 +11,22 @@ namespace Glory
 {
 	class Engine;
 
-	class AssetArchive;
-
-	struct CallbackData
-	{
-		CallbackData();
-		CallbackData(UUID uuid, Resource* pResource);
-
-		UUID m_UUID;
-		Resource* m_pResource;
-	};
-
+	/** @brief Base class for asset management */
 	class AssetManager
 	{
 	public:
+		/** @brief Constructor */
+		AssetManager(Engine* pEngine);
+		/** @brief Destructor */
 		virtual ~AssetManager();
 
-		void GetAsset(UUID uuid, std::function<void(Resource*)> callback);
-		Resource* GetOrLoadAsset(UUID uuid);
-
+		/**
+		 * @brief Get or load an asset
+		 * @param T Type of the asset to load
+		 * @param uuid ID of the asset to load
+		 *
+		 * If the asset is not loaded, it gets loaded asynchronously.
+		 */
 		template<class T>
 		T* GetOrLoadAsset(UUID uuid)
 		{
@@ -39,6 +35,16 @@ namespace Glory
 			return (T*)pResource;
 		}
 
+		/** @overload */
+		virtual Resource* GetOrLoadAsset(UUID uuid) = 0;
+
+		/**
+		 * @brief Get or load an asset
+		 * @param T Type of the asset to load
+		 * @param uuid ID of the asset to load
+		 *
+		 * If the asset is not loaded, it gets loaded synchronously.
+		 */
 		template<class T>
 		T* GetAssetImmediate(UUID uuid)
 		{
@@ -47,53 +53,45 @@ namespace Glory
 			return (T*)pResource;
 		}
 
-		Resource* GetAssetImmediate(UUID uuid);
+		/** @overload */
+		virtual Resource* GetAssetImmediate(UUID uuid) = 0;
 
-		void ReloadAsset(UUID uuid);
-		void UnloadAsset(UUID uuid);
-		Resource* FindResource(UUID uuid);
-		void AddLoadedResource(Resource* pResource, UUID uuid);
-		void AddLoadedResource(Resource* pResource);
+		/**
+		 * @brief Get or load an assdet by callback
+		 * @param uuid ID of the asset
+		 * @param callback Callback to call when the asset is loaded
+		 *
+		 * If the asset is not loaded, it gets loaded asynchronously.
+		 */
+		virtual void GetAsset(UUID uuid, std::function<void(Resource*)> callback) = 0;
+		/**
+		 * @brief Unload an asset by deleting it from memory
+		 * @param uuid ID of the asset to unload
+		 */
+		virtual void UnloadAsset(UUID uuid) = 0;
+		/**
+		 * @brief Find a loaded asset by ID
+		 * @param uuid ID of the asset
+		 */
+		virtual Resource* FindResource(UUID uuid) = 0;
+		/**
+		 * @brief Add a loaded asset to the manager
+		 * @param pResource Loaded asset to add
+		 * @param uuid ID of the asset
+		 */
+		virtual void AddLoadedResource(Resource* pResource, UUID uuid) = 0;
+		/** @overload */
+		virtual void AddLoadedResource(Resource* pResource) = 0;
 
-		bool IsLoading(UUID uuid);
-		void GetAllLoading(std::vector<UUID>& out);
+		/** @brief Initialize the manager */
+		virtual void Initialize() = 0;
 
-		const AssetArchive* GetOrLoadArchive(const std::filesystem::path& path);
-		void AddAssetArchive(uint32_t hash, AssetArchive&& archive);
-
-	private:
-		bool LoadResourceJob(UUID uuid);
-		Resource* LoadAsset(UUID uuid);
-
-	private:
-		AssetManager(Engine* pEngine);
-
-		void Initialize();
-		void Destroy();
-		void RunCallbacks();
+	protected:
+		Engine* m_pEngine;
 
 	private:
 		friend class Engine;
 		friend class AssetDatabase;
 
-		struct LoadingLock
-		{
-			LoadingLock(AssetManager* pManager, UUID uuid);
-			~LoadingLock();
-
-			AssetManager* m_pManager;
-			bool IsValid;
-			UUID m_UUID;
-		};
-
-		Engine* m_pEngine;
-		ThreadedUMap<uint32_t, AssetArchive> m_LoadedArchives;
-		ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
-		ThreadedVector<UUID> m_pLoadingAssets;
-		ThreadedUMap<std::string, size_t> m_PathToGroupIndex;
-		ThreadedVector<AssetGroup*> m_LoadedAssetGroups;
-		ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;
-		ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> m_AssetLoadedCallbacks;
-		Jobs::JobPool<bool, UUID>* m_pResourceLoadingPool;
 	};
 }

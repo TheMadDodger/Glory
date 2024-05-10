@@ -56,11 +56,6 @@ namespace Glory
 		return m_PathToUUID.find(fixedPath) != m_PathToUUID.end();
 	}
 
-	void AssetDatabase::EnqueueCallback(const CallbackType& type, UUID uuid, Resource* pResource)
-	{
-		m_Callbacks.EnqueueCallback(type, uuid, pResource);
-	}
-
 	void AssetDatabase::SetAsset(AssetLocation& assetLocation, const ResourceMeta& meta)
 	{
 		std::replace(assetLocation.Path.begin(), assetLocation.Path.end(), '/', '\\');
@@ -155,12 +150,10 @@ namespace Glory
 
 	void AssetDatabase::Initialize()
 	{
-		m_Callbacks.Initialize();
 	}
 
 	void AssetDatabase::Destroy()
 	{
-		m_Callbacks.Cleanup();
 		Clear();
 	}
 
@@ -184,42 +177,8 @@ namespace Glory
 		pResource->m_Name = name;
 	}
 
-	//void AssetDatabase::ExportEditor(YAML::Emitter& out)
-	//{
-	//	out << YAML::BeginSeq;
-	//
-	//	m_AssetLocations.ForEach([&](const UUID& uuid, const AssetLocation& location)
-	//	{
-	//		if (!m_Metas.Contains(uuid))
-	//			return;
-	//
-	//		ResourceMeta meta = m_Metas[uuid];
-	//
-	//		size_t versionHash = std::hash<ResourceMeta>()(meta);
-	//		long lastSaved = m_LastSavedRecords[uuid];
-	//
-	//		out << YAML::BeginMap;
-	//		out << YAML::Key << "Path";
-	//		out << YAML::Value << location.m_Path;
-	//		out << YAML::Key << "IsSubAsset";
-	//		out << YAML::Value << location.m_IsSubAsset;
-	//		out << YAML::Key << "Index";
-	//		out << YAML::Value << location.m_Index;
-	//		out << YAML::Key << "VersionHash";
-	//		out << YAML::Value << versionHash;
-	//		out << YAML::Key << "LastSaved";
-	//		out << YAML::Value << lastSaved;
-	//		uint32_t hash = meta.Hash();
-	//		LoaderModule* pLoader = Game::GetGame().GetEngine()->GetLoaderModule(hash);
-	//		meta.Write(out, pLoader);
-	//		out << YAML::EndMap;
-	//	});
-	//
-	//	out << YAML::EndSeq;
-	//}
-
 	AssetDatabase::AssetDatabase()
-		: m_IsWriting(false), m_IsReading(false), m_Callbacks(this) {}
+		: m_IsWriting(false), m_IsReading(false) {}
 
 	AssetDatabase::~AssetDatabase() {}
 

@@ -215,7 +215,7 @@ namespace Glory
 		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
 		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
-		m_AssetManager(new AssetManager(this)), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
+		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
 		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
 		m_pShaderManager(createInfo.pShaderManager), m_pMaterialManager(createInfo.pMaterialManager),
 		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
@@ -291,7 +291,8 @@ namespace Glory
 			m_pAllModules[i]->m_IsInitialized = true;
 		}
 
-		m_AssetManager->Initialize();
+		m_AssetDatabase->Initialize();
+		m_pAssetsManager->Initialize();
 
 		/* Create graphics thread */
 		m_pGraphicsThread = new GraphicsThread(this);
@@ -374,7 +375,7 @@ namespace Glory
 
 	AssetManager& Engine::GetAssetManager()
 	{
-		return *m_AssetManager;
+		return *m_pAssetsManager;
 	}
 
 	ResourceTypes& Engine::GetResourceTypes()
@@ -435,6 +436,11 @@ namespace Glory
 	Jobs::JobManager& Engine::Jobs()
 	{
 		return *m_pJobManager;
+	}
+
+	void Engine::SetAssetManager(AssetManager* pManager)
+	{
+		m_pAssetsManager = pManager;
 	}
 
 	void Engine::SetSceneManager(SceneManager* pManager)
@@ -634,8 +640,6 @@ namespace Glory
 
 	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
 	{
-		m_AssetManager->RunCallbacks();
-
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			Module* pModule = m_pAllModules[i];

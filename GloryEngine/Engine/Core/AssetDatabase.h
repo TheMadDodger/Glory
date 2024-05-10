@@ -2,7 +2,6 @@
 #include "UUID.h"
 #include "AssetLocation.h"
 #include "ResourceMeta.h"
-#include "AssetCallbacks.h"
 
 #include <map>
 
@@ -18,7 +17,6 @@ namespace Glory
 		UUID GetAssetUUID(const std::string& path);
 		bool AssetExists(UUID uuid);
 		bool AssetExists(const std::string& path);
-		void EnqueueCallback(const CallbackType& type, UUID uuid, Resource* pResource);
 
 		void GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& out);
 		void GetAllAssetsOfType(uint32_t typeHash, std::vector<std::string>& out);
@@ -71,7 +69,6 @@ namespace Glory
 	private:
 		friend class Engine;
 		friend class AssetManager;
-		friend class AssetCallbacks;
 		AssetDatabase();
 
 	private:
@@ -82,7 +79,6 @@ namespace Glory
 		std::map<std::string, UUID> m_PathToUUID;
 		std::map<UUID, ResourceMeta> m_Metas;
 		std::map<uint32_t, std::vector<UUID>> m_AssetsByType;
-		AssetCallbacks m_Callbacks;
 		std::string m_AssetPath;
 		std::string m_SettingsPath;
 		UUID m_EntrySceneID;

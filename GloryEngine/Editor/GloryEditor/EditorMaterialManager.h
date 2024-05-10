@@ -9,6 +9,7 @@ namespace Glory
 	class MaterialData;
 	class MaterialInstanceData;
 	class Engine;
+	class PipelineData;
 
 namespace Utils
 {

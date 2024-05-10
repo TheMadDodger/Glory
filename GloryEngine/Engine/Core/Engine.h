@@ -49,6 +49,7 @@ namespace Utils::Reflect
 	{
 		Debug* m_pDebug;
 		Console* m_pConsole;
+		AssetManager* pAssetManager = nullptr;
 		SceneManager* pSceneManager = nullptr;
 		ShaderManager* pShaderManager = nullptr;
 		MaterialManager* pMaterialManager = nullptr;
@@ -176,6 +177,7 @@ namespace Utils::Reflect
 		EngineProfiler& Profiler();
 		Jobs::JobManager& Jobs();
 
+		void SetAssetManager(AssetManager* pManager);
 		void SetSceneManager(SceneManager* pManager);
 		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);
@@ -254,6 +256,7 @@ namespace Utils::Reflect
 		/* External objects */
 		Console* m_Console;
 		Debug* m_Debug;
+		AssetManager* m_pAssetsManager;
 		ShaderManager* m_pShaderManager;
 		MaterialManager* m_pMaterialManager;
 		PipelineManager* m_pPipelineManager;
@@ -265,7 +268,6 @@ namespace Utils::Reflect
 		std::unique_ptr<GameTime> m_Time;
 		std::unique_ptr<CameraManager> m_CameraManager;
 		std::unique_ptr<AssetDatabase> m_AssetDatabase;
-		std::unique_ptr<AssetManager> m_AssetManager;
 		std::unique_ptr<ResourceTypes> m_ResourceTypes;
 		std::unique_ptr<Serializers> m_Serializers;
 		std::unique_ptr<DisplayManager> m_DisplayManager;
