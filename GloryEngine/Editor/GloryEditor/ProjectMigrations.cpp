@@ -7,9 +7,11 @@
 
 #include <JSONRef.h>
 #include <TextureData.h>
+#include <PrefabData.h>
 #include <MaterialInstanceData.h>
 #include <NodeRef.h>
 #include <YAML_GLM.h>
+#include <stack>
 
 namespace Glory::Editor
 {
@@ -39,6 +41,7 @@ namespace Glory::Editor
             Migrate_0_3_0_ConvertMaterialPropertiesToMap(pProject);
             Migrate_0_3_0_ModuleAssetIDS(pProject);
             Migrate_0_3_0_MaterialPipelines(pProject);
+            Migrate_0_3_0_PrefabScenes(pProject);
         }
 
         /* Update version to current */
@@ -466,6 +469,78 @@ namespace Glory::Editor
             }
 
             file.RootNodeRef().ValueRef().Remove("Shaders");
+            EditorAssetDatabase::SetAssetDirty(uuid);
+        }
+    }
+
+    void Migrate_0_3_0_PrefabScenes(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrating prefabs to new prefab system");
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+
+        std::map<UUID, UUID> moveMap;
+
+        const uint32_t brokenPrefabDataHash = 1710924035;
+        const uint32_t prefabDataHash = ResourceTypes::GetHash<PrefabData>();
+        const uint32_t sceneHash = ResourceTypes::GetHash<GScene>();
+
+        for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+        {
+            JSONValueRef asset = assets[itor->name.GetString()];
+            const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+            /* PrefabData hash was broken on 0.2.1 */
+            if (hash != prefabDataHash && hash != brokenPrefabDataHash) continue;
+            asset["Metadata/Hash"].SetUInt(prefabDataHash);
+
+            JSONValueRef location = asset["Location"];
+            if (!location["SubresourcePath"].AsString().empty()) continue;
+            const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+            EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(uuid);
+            if (!pResource)
+            {
+                pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Failed to migrate a prefab");
+                continue;
+            }
+
+            YAMLResource<PrefabData>* pPrefab = static_cast<YAMLResource<PrefabData>*>(pResource);
+            Utils::YAMLFileRef& file = **pPrefab;
+            auto entities = file["Entities"];
+            entities.Set(YAML::Node(YAML::NodeType::Sequence));
+
+            auto root = file.RootNodeRef().ValueRef();
+            std::function<void(Utils::NodeValueRef, UUID)> recursiveReadMove =
+            [&entities, &recursiveReadMove](Utils::NodeValueRef child, UUID parent) {
+                const UUID entityUUID = child["OriginalUUID"].As<uint64_t>();
+                const UUID transformUUID = child["TransformUUID"].As<uint64_t>();
+                const bool activeSelf = child["ActiveSelf"].As<bool>();
+                const std::string name = child["Name"].As<std::string>();
+                auto children = child["Children"];
+                auto components = child["Components"];
+
+                const size_t index = entities.Size();
+                entities.PushBack(YAML::Node(YAML::NodeType::Map));
+                entities[index]["Name"].Set(name);
+                entities[index]["UUID"].Set(uint64_t(entityUUID));
+                entities[index]["Active"].Set(activeSelf);
+                entities[index]["ParentUUID"].Set(uint64_t(parent));
+                entities[index]["Components"].Set(components.Node());
+
+                for (size_t i = 0; i < children.Size(); ++i)
+                    recursiveReadMove(children[i], entityUUID);
+            };
+
+            recursiveReadMove(root, 0);
+
+            root.Remove("OriginalUUID");
+            root.Remove("TransformUUID");
+            root.Remove("ActiveSelf");
+            root.Remove("Name");
+            root.Remove("Components");
+            root.Remove("Children");
             EditorAssetDatabase::SetAssetDirty(uuid);
         }
     }

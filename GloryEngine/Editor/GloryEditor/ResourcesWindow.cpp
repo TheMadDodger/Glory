@@ -186,7 +186,8 @@ namespace Glory::Editor
 					AssetPayload payload{ uuid };
 					const uint32_t subTypeHash = resourceTypes.GetSubTypeHash(pType, 1);
 					const ResourceType* pPayloadType = pType;
-					if (subTypeHash != ResourceTypes::GetHash<Resource>())
+					if (subTypeHash != ResourceTypes::GetHash<Resource>() &&
+						subTypeHash != ResourceTypes::GetHash<GScene>())
 					{
 						pPayloadType = resourceTypes.GetResourceType(subTypeHash);
 						if (pPayloadType == nullptr) pPayloadType = pType;
