@@ -36,6 +36,8 @@ namespace Glory
 
 	void GraphicsThread::Stop()
 	{
+		if (!m_pThread) return;
+
 		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
 		REQUIRE_MODULE(m_pEngine, RendererModule, );
 		REQUIRE_MODULE(m_pEngine, WindowModule, );

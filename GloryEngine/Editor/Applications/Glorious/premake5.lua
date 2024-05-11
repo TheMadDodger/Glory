@@ -129,6 +129,8 @@ project "Glorious"
 		("{COPY} %{IncludeDir.FA}/FA %{editorBuildDir}/EditorAssets/Fonts/FA"),
 		("{COPY} %{IncludeDir.FA}/FA %{engineOutDir}/EditorAssets/Fonts/FA"),
 
+		("{COPY} %{engineOutDir}/Splash.bmp %{engineOutDir}/EditorAssets/Runtime"),
+		("{COPY} %{engineOutDir}/Splash.bmp %{editorBuildDir}/EditorAssets/Runtime"),
 		("{COPY} %{engineOutDir}/GloryRuntime.dll %{editorBuildDir}/EditorAssets/Runtime"),
 		("{COPY} %{engineOutDir}/GloryRuntime.dll %{engineOutDir}/EditorAssets/Runtime"),
 		("{COPY} %{engineOutDir}/GloryRuntimeApplication.dll %{editorBuildDir}/EditorAssets/Runtime"),

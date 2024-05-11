@@ -544,6 +544,14 @@ namespace Glory::Editor
 		std::filesystem::copy(runtimePath, packageRoot, std::filesystem::copy_options::overwrite_existing);
 		++task.m_ProcessedSubTasks;
 
+		task.m_SubTaskName = "Splash screen";
+		PACKAGE_LAG
+		runtimePath.replace_filename("Splash.bmp");
+		std::filesystem::path dataPath = packageRoot;
+		dataPath.append("Data");
+		std::filesystem::copy(runtimePath, dataPath, std::filesystem::copy_options::overwrite_existing);
+		++task.m_ProcessedSubTasks;
+
 		task.m_SubTaskName = "Executable";
 		PACKAGE_LAG
 		std::filesystem::path packagingCachePath = ProjectSpace::GetOpenProject()->CachePath();
@@ -770,7 +778,7 @@ namespace Glory::Editor
 		PackageTask copyFilesTask;
 		copyFilesTask.m_TaskID = "CopyFiles";
 		copyFilesTask.m_TaskName = "Copying files";
-		copyFilesTask.m_TotalSubTasks = modulesCount + 3;
+		copyFilesTask.m_TotalSubTasks = modulesCount + 4;
 		copyFilesTask.m_Callback = CopyFilesTask;
 		PackagingTasks.push_back(std::move(copyFilesTask));
 

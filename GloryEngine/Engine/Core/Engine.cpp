@@ -261,6 +261,9 @@ namespace Glory
 	{
 		if (m_Initialized) return;
 
+		WindowModule* pWindows = GetMainModule<WindowModule>();
+		m_Debug->SetWindowModule(pWindows);
+
 		RegisterBasicTypes();
 		RegisterStandardSerializers();
 		m_pSceneManager->Initialize();

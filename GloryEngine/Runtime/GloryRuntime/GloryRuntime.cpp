@@ -22,6 +22,7 @@
 #include <ShaderSourceData.h>
 
 #include <filesystem>
+#include <CRC.h>
 
 namespace Glory
 {
@@ -51,8 +52,31 @@ namespace Glory
 		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		m_pWindows = m_pEngine->GetMainModule<WindowModule>();
 
+		std::filesystem::path splashPath = m_DataPath;
+		splashPath.append("Splash.bmp");
+
+		if (!std::filesystem::exists(splashPath))
+		{
+			m_pEngine->GetDebug().LogFatalError("Missing splash screen!");
+			return;
+		}
+
+		BinaryFileStream splashStream{ splashPath, true };
+		std::vector<char> buffer{};
+		buffer.resize(splashStream.Size());
+		splashStream.Read(buffer.data(), buffer.size());
+
+		static constexpr uint32_t checksum = 2749944603;
+		const uint32_t crc = CRC::Calculate(buffer.data(), buffer.size(), CRC::CRC_32());
+
+		if (checksum != crc)
+		{
+			m_pEngine->GetDebug().LogFatalError("Corrupt splash screen detected!");
+			return;
+		}
+
 		if (m_pWindows)
-			m_pWindows->GetMainWindow()->SetSplashScreen("./Splash.bmp");
+			m_pWindows->GetMainWindow()->SetSplashScreen(buffer.data(), buffer.size());
 
 		if (m_DataPath.empty()) return;
 		const std::filesystem::path dataPath = m_DataPath;
