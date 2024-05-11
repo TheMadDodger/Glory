@@ -38,4 +38,9 @@ namespace Glory::Editor
 	 * @param pProject Project to migrate materials in
 	 */
 	GLORY_EDITOR_API void Migrate_0_3_0_MaterialPipelines(ProjectSpace* pProject);
+
+	/** @brief Load prefabs and rewrite them to match scene serialization
+	 * @param pProject Project to migrate prefabs in
+	 */
+	GLORY_EDITOR_API void Migrate_0_3_0_PrefabScenes(ProjectSpace* pProject);
 }
