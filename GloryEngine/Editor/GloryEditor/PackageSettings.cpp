@@ -207,10 +207,50 @@ namespace Glory::Editor
 
 	void PackageSettings::OnSettingsLoaded()
 	{
+		VerifySettings();
+	}
+
+	void PackageSettings::VerifySettings()
+	{
 		auto packageScenesMode = RootValue()["Scenes/PackageScenesMode"];
 		if (!packageScenesMode.Exists())
 		{
 			packageScenesMode.SetEnum(PackageScenes::All);
+		}
+		auto scenesToPackage = m_YAMLFile["Scenes/List"];
+		if (!scenesToPackage.Exists())
+			scenesToPackage.Set(YAML::Node(YAML::NodeType::Sequence));
+		auto entryScene = m_YAMLFile["Scenes/EntryScene"];
+		if (!entryScene.Exists())
+		{
+			entryScene.Set(0);
+			const PackageScenes mode = packageScenesMode.AsEnum<PackageScenes>();
+
+			Scenes.clear();
+			switch (mode)
+			{
+			case PackageScenes::All: {
+				std::vector<UUID> scenes;
+				static const uint32_t sceneHash = ResourceTypes::GetHash<GScene>();
+				EditorAssetDatabase::GetAllAssetsOfType(sceneHash, scenes);
+				if (!scenes.empty())
+					entryScene.Set(uint64_t(scenes[0]));
+				break;
+			}
+			case PackageScenes::Opened: {
+				break;
+			}
+			case PackageScenes::List: {
+				if (scenesToPackage.Size() > 0)
+				{
+					const UUID sceneID = scenesToPackage[0].As<uint64_t>();
+					entryScene.Set(uint64_t(sceneID));
+				}
+				break;
+			}
+			default:
+				break;
+			}
 		}
 	}
 }

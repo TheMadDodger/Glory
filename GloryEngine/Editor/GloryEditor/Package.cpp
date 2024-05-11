@@ -711,10 +711,23 @@ namespace Glory::Editor
 		if (!std::filesystem::exists(dataPath))
 			std::filesystem::create_directories(dataPath);
 
-		ProjectSettings::CreateCompileTask();
+		PackageSettings* pPackagingSettings = static_cast<PackageSettings*>(ProjectSettings::Get("Packaging"));
+		pPackagingSettings->VerifySettings();
 
+		ProjectSettings::CreateCompileTask();
 		ScenesToPackage.clear();
 		CollectPackagingScenes(ScenesToPackage);
+
+		if (ScenesToPackage.empty())
+		{
+			pEngine->GetDebug().LogError("Packaging failed, no scenes to package");
+			return;
+		}
+		if (!EntryScene)
+		{
+			pEngine->GetDebug().LogError("Packaging failed, no entry scene selected");
+			return;
+		}
 
 		PackageTask assetGroupsTask;
 		assetGroupsTask.m_TaskID = "CalculateAssetGroups";

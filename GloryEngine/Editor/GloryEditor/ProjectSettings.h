@@ -109,6 +109,7 @@ namespace Glory::Editor
 	{
 	public:
 		PackageSettings();
+		void VerifySettings();
 
 	private:
 		virtual bool OnGui() override;
