@@ -16,11 +16,12 @@ namespace Glory
 	class RendererModule;
 	class Console;
 	class GameTime;
+	class WindowModule;
 
 	class Debug
 	{
 	public:
-		Debug(Console* pConsole) : m_pConsole(pConsole) {}
+		Debug(Console* pConsole) : m_pConsole(pConsole), m_pWindowModule(nullptr) {}
 		~Debug() = default;
 
 	public:
@@ -58,6 +59,8 @@ namespace Glory
 
 		void LogOnce(const std::string& key, const std::string& message, const LogLevel& logLevel, bool bIncludeTimeStamp = true);
 
+		void SetWindowModule(WindowModule* pWindows);
+
 #ifndef GLORY_NO_DEBUG_LINES
 
 		void DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, float time = 0.1f);
@@ -73,6 +76,7 @@ namespace Glory
 
 		std::mutex m_Lock;
 		Console* m_pConsole;
+		WindowModule* m_pWindowModule;
 
 #ifndef GLORY_NO_DEBUG_LINES
 

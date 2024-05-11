@@ -34,4 +34,5 @@ constexpr char* AboutText =
 	"- glslang (3-Clause BSD License) - https://github.com/KhronosGroup/glslang\n"
 	"- SPIRV-cross (Apache-2.0) - https://github.com/KhronosGroup/SPIRV-Cross\n"
 	"- SPIRV-tools (Apache-2.0) - https://github.com/KhronosGroup/SPIRV-Tools\n"
-	"- zlib (zlib license) - https://www.zlib.net/\n";
+	"- zlib (zlib license) - https://www.zlib.net/\n"
+	"- CRCpp (CRCpp license) - https://github.com/d-bahr/CRCpp/\n";

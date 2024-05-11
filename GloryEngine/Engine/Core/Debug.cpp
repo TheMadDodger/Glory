@@ -87,7 +87,7 @@ namespace Glory
 		m_pConsole->WriteLine(finalMessage, bIncludeTimeStamp);
 
 		// Open message box
-		//m_pEngine->GetMainModule<WindowModule>()->OpenMessageBox("FATAL ERROR: " + message);
+		if (m_pWindowModule) m_pWindowModule->OpenMessageBox("FATAL ERROR: " + message);
 		exit(-1);
 		//Game::GetGame().Quit();
 	}
@@ -97,6 +97,11 @@ namespace Glory
 		if (m_LoggedKeys.Contains(key)) return;
 		m_LoggedKeys.push_back(key);
 		Log(message, logLevel, bIncludeTimeStamp);
+	}
+
+	void Debug::SetWindowModule(WindowModule* pWindows)
+	{
+		m_pWindowModule = pWindows;
 	}
 
 #ifndef GLORY_NO_DEBUG_LINES

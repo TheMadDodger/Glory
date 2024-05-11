@@ -35,6 +35,7 @@ project "GloryRuntime"
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
 		"%{IncludeDir.ECS}",
+		"%{IncludeDir.CRCpp}",
 	}
 
 	libdirs
