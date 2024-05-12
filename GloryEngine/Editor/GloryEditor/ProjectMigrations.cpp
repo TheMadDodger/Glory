@@ -54,6 +54,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists()) return;
 
         std::vector<std::string_view> imageAssets;
         std::vector<std::string_view> materialAssets;
@@ -205,6 +206,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists()) return;
 
         std::vector<std::string_view> materialAssets;
         std::vector<std::string_view> materialInstanceAssets;
@@ -301,6 +303,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists()) return;
 
         for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
         {
@@ -330,6 +333,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists()) return;
 
         std::map<UUID, UUID> moveMap;
         std::vector<std::string> materials;
@@ -417,6 +421,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists()) return;
 
         std::map<UUID, UUID> moveMap;
         std::vector<std::string> materials;
@@ -481,6 +486,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists()) return;
 
         std::map<UUID, UUID> moveMap;
 

@@ -1,3 +1,202 @@
 {
-    "ProjectName": "Empty"
+    "ProjectName": "Empty",
+    "EditorVersion": "0.3.0.rc-1",
+    "Assets": {
+        "1": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Phong_frag",
+                "UUID": 1,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "2": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Phong_vert",
+                "UUID": 2,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "3": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "PhongTextured_frag",
+                "UUID": 3,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "4": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "PhongTextured_vert",
+                "UUID": 4,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "5": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube",
+                "UUID": 5,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "13258729259137298564": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "Cube Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube\\Cube Material 0",
+                "UUID": 13258729259137298564,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "6": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane",
+                "UUID": 6,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "4450271250415394891": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "Plane Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane\\Plane Material 0",
+                "UUID": 4450271250415394891,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "7": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere",
+                "UUID": 7,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "16473853405263197465": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "Icosphere Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere\\Icosphere Material 0",
+                "UUID": 16473853405263197465,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "8": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne",
+                "UUID": 8,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "4159358141019836566": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "Suzanne Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne\\Suzanne Material 0",
+                "UUID": 4159358141019836566,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "9": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Pipelines\\Phong.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Phong",
+                "UUID": 9,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "10": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Pipelines\\PhongTextured.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "PhongTextured",
+                "UUID": 10,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        }
+    }
 }
