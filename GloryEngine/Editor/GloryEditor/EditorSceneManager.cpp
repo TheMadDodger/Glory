@@ -197,9 +197,8 @@ namespace Glory::Editor
 			out << YAML::Key << "UUID";
 			out << YAML::Value << pScene->GetUUID();
 			out << YAML::Key << "Scene";
-			out << YAML::Value << YAML::BeginMap;
+			out << YAML::Value;
 			EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, out);
-			out << YAML::EndMap;
 			out << YAML::EndMap;
 		}
 		out << YAML::EndSeq;
