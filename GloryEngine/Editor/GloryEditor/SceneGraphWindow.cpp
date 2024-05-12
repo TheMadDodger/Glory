@@ -89,6 +89,7 @@ namespace Glory::Editor
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene();
 			if (HandleAssetDragAndDrop(0, pScene, dndHash, pPayload)) return;
+			if (dndHash != ResourceTypes::GetHash<EditableEntity>()) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(payload.SceneID);
@@ -142,6 +143,7 @@ namespace Glory::Editor
 
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (HandleAssetDragAndDrop(0, pScene, dndHash, pPayload)) return;
+			if (dndHash != ResourceTypes::GetHash<EditableEntity>()) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (pScene->GetUUID() != payload.SceneID)
@@ -220,6 +222,7 @@ namespace Glory::Editor
 				GScene* pScene = entity.GetScene();
 				Entity parentEntity = entity.ParentEntity();
 				if (HandleAssetDragAndDrop(parentEntity.GetEntityID(), pScene, dndHash, pPayload)) return;
+				if (dndHash != ResourceTypes::GetHash<EditableEntity>()) return;
 
 				const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 				if (payload.SceneID != pScene->GetUUID())
@@ -276,6 +279,7 @@ namespace Glory::Editor
 		});
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (HandleAssetDragAndDrop(entity.GetEntityID(), pScene, dndHash, pPayload)) return;
+			if (dndHash != ResourceTypes::GetHash<EditableEntity>()) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (payload.SceneID != pScene->GetUUID())
@@ -348,6 +352,7 @@ namespace Glory::Editor
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			Entity parent = entity.ParentEntity();
 			if (HandleAssetDragAndDrop(parent.GetEntityID(), pScene, dndHash, pPayload)) return;
+			if (dndHash != ResourceTypes::GetHash<EditableEntity>()) return;
 
 			const ObjectPayload payload = *(const ObjectPayload*)pPayload->Data;
 			if (payload.SceneID != pScene->GetUUID())
@@ -457,6 +462,7 @@ namespace Glory::Editor
 				for (size_t i = 0; i < types.SubTypeCount(pResourceType); ++i)
 				{
 					ResourceType* pSubResourceType = types.GetSubType(pResourceType, i);
+					if (!pSubResourceType) continue;
 					if (pSubResourceType->Hash() != ResourceTypes::GetHash<PrefabData>()) continue;
 
 					pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(uuid);
@@ -475,6 +481,9 @@ namespace Glory::Editor
 		}
 
 		if (!pPrefab) return false;
+
+		if (!pScene)
+			pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene(true);
 
 		Entity entityHandle = pScene->GetEntityByEntityID(entity);
 		pScene->InstantiatePrefab(entityHandle.EntityUUID(), pPrefab, glm::vec3{}, glm::quat{0, 0, 0, 1}, glm::vec3{1, 1, 1});
