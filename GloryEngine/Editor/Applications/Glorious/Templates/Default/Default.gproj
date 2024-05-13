@@ -1,34 +1,7 @@
 {
     "ProjectName": "Default",
+    "EditorVersion": "0.3.0.rc-1",
     "Assets": {
-        "3": {
-            "Location": {
-                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_frag.shader",
-                "SubresourcePath": "",
-                "Index": 0
-            },
-            "Metadata": {
-                "Extension": ".shader",
-                "Name": "PhongTextured_frag",
-                "UUID": 3,
-                "Hash": 3732387374,
-                "SerializedVersion": 0
-            }
-        },
-        "4": {
-            "Location": {
-                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_vert.shader",
-                "SubresourcePath": "",
-                "Index": 0
-            },
-            "Metadata": {
-                "Extension": ".shader",
-                "Name": "PhongTextured_vert",
-                "UUID": 4,
-                "Hash": 3732387374,
-                "SerializedVersion": 0
-            }
-        },
         "1": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_frag.shader",
@@ -57,18 +30,32 @@
                 "SerializedVersion": 0
             }
         },
-        "13534698605446403028": {
+        "3": {
             "Location": {
-                "Path": "Materials\\White.gmat",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_frag.shader",
                 "SubresourcePath": "",
                 "Index": 0
             },
             "Metadata": {
-                "Extension": ".gmat",
-                "Name": "White",
-                "UUID": 13534698605446403028,
-                "Hash": 1884319791,
-                "SerializedVersion": 1
+                "Extension": ".shader",
+                "Name": "PhongTextured_frag",
+                "UUID": 3,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "4": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "PhongTextured_vert",
+                "UUID": 4,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
             }
         },
         "5": {
@@ -85,21 +72,7 @@
                 "SerializedVersion": 0
             }
         },
-        "6": {
-            "Location": {
-                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Plane.fbx",
-                "SubresourcePath": "Plane Material 0",
-                "Index": 0
-            },
-            "Metadata": {
-                "Extension": ".fbx",
-                "Name": "Plane\\Plane Material 0",
-                "UUID": 6,
-                "Hash": 111102399,
-                "SerializedVersion": 0
-            }
-        },
-        "8775173730644711025": {
+        "13258729259137298564": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Cube.fbx",
                 "SubresourcePath": "Cube Material 0",
@@ -108,26 +81,54 @@
             "Metadata": {
                 "Extension": ".fbx",
                 "Name": "Cube\\Cube Material 0",
-                "UUID": 8775173730644711025,
+                "UUID": 13258729259137298564,
                 "Hash": 111102399,
                 "SerializedVersion": 0
             }
         },
-        "2878325696344899615": {
+        "6": {
             "Location": {
-                "Path": "Scenes\\SampleScene.gscene",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Plane.fbx",
                 "SubresourcePath": "",
                 "Index": 0
             },
             "Metadata": {
-                "Extension": ".gscene",
-                "Name": "SampleScene",
-                "UUID": 2878325696344899615,
-                "Hash": 2713038901,
+                "Extension": ".fbx",
+                "Name": "Plane",
+                "UUID": 6,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "4450271250415394891": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "Plane Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane\\Plane Material 0",
+                "UUID": 4450271250415394891,
+                "Hash": 111102399,
                 "SerializedVersion": 0
             }
         },
         "7": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere",
+                "UUID": 7,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "16473853405263197465": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Sphere.fbx",
                 "SubresourcePath": "Icosphere Material 0",
@@ -136,26 +137,26 @@
             "Metadata": {
                 "Extension": ".fbx",
                 "Name": "Sphere\\Icosphere Material 0",
-                "UUID": 7,
+                "UUID": 16473853405263197465,
                 "Hash": 111102399,
                 "SerializedVersion": 0
             }
         },
-        "4980135909163643925": {
+        "8": {
             "Location": {
-                "Path": "Scripts\\FlyCam.cs",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Suzanne.fbx",
                 "SubresourcePath": "",
                 "Index": 0
             },
             "Metadata": {
-                "Extension": ".cs",
-                "Name": "FlyCam",
-                "UUID": 4980135909163643925,
-                "Hash": 3098219186,
+                "Extension": ".fbx",
+                "Name": "Suzanne",
+                "UUID": 8,
+                "Hash": 1373658899,
                 "SerializedVersion": 0
             }
         },
-        "8": {
+        "4159358141019836566": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Suzanne.fbx",
                 "SubresourcePath": "Suzanne Material 0",
@@ -164,51 +165,9 @@
             "Metadata": {
                 "Extension": ".fbx",
                 "Name": "Suzanne\\Suzanne Material 0",
-                "UUID": 8,
+                "UUID": 4159358141019836566,
                 "Hash": 111102399,
                 "SerializedVersion": 0
-            }
-        },
-        "11026795263020128071": {
-            "Location": {
-                "Path": "Materials\\Red.gminst",
-                "SubresourcePath": "",
-                "Index": 0
-            },
-            "Metadata": {
-                "Extension": ".gminst",
-                "Name": "Red",
-                "UUID": 11026795263020128071,
-                "Hash": 3688170836,
-                "SerializedVersion": 2
-            }
-        },
-        "15215640328795177848": {
-            "Location": {
-                "Path": "Materials\\Blue.gminst",
-                "SubresourcePath": "",
-                "Index": 0
-            },
-            "Metadata": {
-                "Extension": ".gminst",
-                "Name": "Blue",
-                "UUID": 15215640328795177848,
-                "Hash": 3688170836,
-                "SerializedVersion": 2
-            }
-        },
-        "12631227897872624515": {
-            "Location": {
-                "Path": "Materials\\Green.gminst",
-                "SubresourcePath": "",
-                "Index": 0
-            },
-            "Metadata": {
-                "Extension": ".gminst",
-                "Name": "Green",
-                "UUID": 12631227897872624515,
-                "Hash": 3688170836,
-                "SerializedVersion": 2
             }
         },
         "9": {
@@ -238,7 +197,90 @@
                 "Hash": 4237740980,
                 "SerializedVersion": 0
             }
+        },
+        "16276252282574653123": {
+            "Location": {
+                "Path": "Materials\\White.gmat",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gmat",
+                "Name": "White",
+                "UUID": 16276252282574653123,
+                "Hash": 1884319791,
+                "SerializedVersion": 0
+            }
+        },
+        "17524625016889035669": {
+            "Location": {
+                "Path": "Materials\\Red.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gminst",
+                "Name": "Red",
+                "UUID": 17524625016889035669,
+                "Hash": 3688170836,
+                "SerializedVersion": 0
+            }
+        },
+        "924639813900229687": {
+            "Location": {
+                "Path": "Materials\\Green.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gminst",
+                "Name": "Green",
+                "UUID": 924639813900229687,
+                "Hash": 3688170836,
+                "SerializedVersion": 0
+            }
+        },
+        "6063824960824750761": {
+            "Location": {
+                "Path": "Materials\\Blue.gminst",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gminst",
+                "Name": "Blue",
+                "UUID": 6063824960824750761,
+                "Hash": 3688170836,
+                "SerializedVersion": 0
+            }
+        },
+        "16307556380002627913": {
+            "Location": {
+                "Path": "Scenes\\Sample Scene.gscene",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gscene",
+                "Name": "Sample Scene",
+                "UUID": 16307556380002627913,
+                "Hash": 2713038901,
+                "SerializedVersion": 0
+            }
+        },
+        "9135479976741779691": {
+            "Location": {
+                "Path": "Scripts\\FlyCam.cs",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".cs",
+                "Name": "FlyCam",
+                "UUID": 9135479976741779691,
+                "Hash": 3098219186,
+                "SerializedVersion": 0
+            }
         }
-    },
-    "EditorVersion": "0.3.0.rc-1"
+    }
 }

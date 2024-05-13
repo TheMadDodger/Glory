@@ -1,1 +1,6 @@
-{Enable Debugging: false, MonoLogLevel: error, MonoDebuggingIP: 127.0.0.1, MonoDebuggingPort: 55555, Enable GC allocation logging: false, Auto Collect Garbage: true}
+Enable Debugging: false
+MonoLogLevel: error
+MonoDebuggingIP: 127.0.0.1
+MonoDebuggingPort: 55555
+Enable GC allocation logging: false
+Auto Collect Garbage: true

@@ -1,6 +1,2 @@
-Properties:
-  Color:
-    DisplayName: Color
-    TypeHash: 1650774632
-    Value: [1, 1, 1, 1]
 Pipeline: 9
+Properties: {Color: {ShaderName: Color, TypeHash: 1650774632, Value: [1, 1, 1, 1]}}
