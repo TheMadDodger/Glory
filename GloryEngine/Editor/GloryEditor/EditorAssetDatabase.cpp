@@ -727,7 +727,7 @@ namespace Glory::Editor
 				const std::string path = root[j]["Path"].As<std::string>();
 				std::filesystem::path assetPath = assetsPath.parent_path();
 				assetPath.append(path);
-				ImportModuleAsset(assetPath, root[j]["ID"].As<uint64_t>());
+				ImportModuleAsset(assetPath, root[j]);
 			}
 		}
 	}
@@ -782,8 +782,11 @@ namespace Glory::Editor
 		return true;
 	}
 
-	void EditorAssetDatabase::ImportModuleAsset(const std::filesystem::path& path, UUID uuid)
+	void EditorAssetDatabase::ImportModuleAsset(const std::filesystem::path& path, Utils::NodeValueRef& value)
 	{
+		const UUID uuid = value["ID"].As<uint64_t>();
+		auto children = value["Children"];
+
 		std::stringstream stream;
 		stream << "Importing module asset at " << path << "...";
 		DB_EngineInstance->GetDebug().LogInfo(stream.str());

@@ -7,13 +7,25 @@
 - Path: "Shaders\\PhongTextured_vert.shader"
   ID: 4
 - Path: "Models\\Cube.fbx"
-  ID: 5
+  ID: 11111115
+  Children:
+  - SubPath: "Cube Material 0"
+    ID: 5
 - Path: "Models\\Plane.fbx"
-  ID: 6
+  ID: 11111116
+  Children:
+  - SubPath: "Plane Material 0"
+    ID: 6
 - Path: "Models\\Sphere.fbx"
-  ID: 7
+  ID: 11111117
+  Children:
+  - SubPath: "Icosphere Material 0"
+    ID: 7
 - Path: "Models\\Suzanne.fbx"
-  ID: 8
+  ID: 11111118
+  Children:
+  - SubPath: "Suzanne Material 0"
+    ID: 8
 - Path: "Pipelines\\Phong.gpln"
   ID: 9
 - Path: "Pipelines\\PhongTextured.gpln"

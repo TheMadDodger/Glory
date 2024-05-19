@@ -10,6 +10,11 @@ namespace Glory
 {
 	class GScene;
 	struct JSONFileRef;
+
+	namespace Utils
+	{
+		struct NodeValueRef;
+	}
 }
 
 namespace Glory::Editor
@@ -62,7 +67,7 @@ namespace Glory::Editor
 		static void Update();
 
 		static bool ImportJob(std::filesystem::path path);
-		static void ImportModuleAsset(const std::filesystem::path& path, UUID uuid);
+		static void ImportModuleAsset(const std::filesystem::path& path, Utils::NodeValueRef& value);
 
 	private:
 		friend class EditorApplication;
