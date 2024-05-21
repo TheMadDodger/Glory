@@ -8,12 +8,20 @@
   ID: 4
 - Path: "Models\\Cube.fbx"
   ID: 5
+  Children:
+  - "Cube Material 0"
 - Path: "Models\\Plane.fbx"
   ID: 6
+  Children:
+  - "Plane Material 0"
 - Path: "Models\\Sphere.fbx"
   ID: 7
+  Children:
+  - "Icosphere Material 0"
 - Path: "Models\\Suzanne.fbx"
   ID: 8
+  Children:
+  - "Suzanne Material 0"
 - Path: "Pipelines\\Phong.gpln"
   ID: 9
 - Path: "Pipelines\\PhongTextured.gpln"

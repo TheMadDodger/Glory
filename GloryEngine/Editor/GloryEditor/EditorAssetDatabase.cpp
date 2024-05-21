@@ -56,9 +56,14 @@ namespace Glory::Editor
 			JSONValueRef subPathNode = locationNode["SubresourcePath"];
 			JSONValueRef indexNode = locationNode["Index"];
 
-			if (!subPathNode.AsString().empty()) continue;
+			const std::string_view path = pathNode.AsString();
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(path.data());
+			const std::string_view subPath = subPathNode.AsString();
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(subPath.data());
 
-			std::string_view path = pathNode.AsString();
+			if (!subPath.empty())
+				continue;
+
 			std::filesystem::path absolutePath = path;
 			if (!absolutePath.is_absolute() && path[0] != '.')
 			{
@@ -655,8 +660,9 @@ namespace Glory::Editor
 			const std::string_view key = f.name.GetString();
 			const UUID uuid = std::stoull(key.data());
 			AssetLocation location;
-			if (GetAssetLocation(uuid, location)) continue;
-			if (location.Path != subPath) continue;
+			if (!GetAssetLocation(uuid, location)) continue;
+			if (location.Path != fixedPath) continue;
+			if (location.SubresourcePath != subPath) continue;
 			return uuid;
 		}
 		return 0;
@@ -727,7 +733,7 @@ namespace Glory::Editor
 				const std::string path = root[j]["Path"].As<std::string>();
 				std::filesystem::path assetPath = assetsPath.parent_path();
 				assetPath.append(path);
-				ImportModuleAsset(assetPath, root[j]["ID"].As<uint64_t>());
+				ImportModuleAsset(assetPath, root[j]);
 			}
 		}
 	}
@@ -782,22 +788,28 @@ namespace Glory::Editor
 		return true;
 	}
 
-	void EditorAssetDatabase::ImportModuleAsset(const std::filesystem::path& path, UUID uuid)
+	void EditorAssetDatabase::ImportModuleAsset(const std::filesystem::path& path, Utils::NodeValueRef& value)
 	{
+		const UUID uuid = value["ID"].As<uint64_t>();
+		auto children = value["Children"];
+
+		const std::string pathString = path.string();
+		if (FindAssetUUID(pathString))
+		{
+			bool allSubAssetsFound = true;
+			for (size_t i = 0; i < children.Size(); ++i)
+			{
+				const std::filesystem::path subPath = children[i].As<std::string>();
+				if (FindAssetUUID(pathString, subPath)) continue;
+				allSubAssetsFound = false;
+				break;
+			}
+			if (allSubAssetsFound) return;
+		}
+
 		std::stringstream stream;
 		stream << "Importing module asset at " << path << "...";
 		DB_EngineInstance->GetDebug().LogInfo(stream.str());
-
-		const std::string pathString = path.string();
-		if (FindAssetUUID(pathString)) return;
-
-		if (GetAssetLocation(uuid, AssetLocation{}))
-		{
-			stream.clear();
-			stream << "When importing module asset: Asset with ID " << uuid << " already exists";
-			DB_EngineInstance->GetDebug().LogError(stream.str());
-			return;
-		}
 
 		ImportAsset(pathString, ImportedResource{}, "", uuid);
 	}

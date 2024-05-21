@@ -54,6 +54,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
 
         std::vector<std::string_view> imageAssets;
         std::vector<std::string_view> materialAssets;
@@ -205,6 +206,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
 
         std::vector<std::string_view> materialAssets;
         std::vector<std::string_view> materialInstanceAssets;
@@ -301,6 +303,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
 
         for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
         {
@@ -330,6 +333,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
 
         std::map<UUID, UUID> moveMap;
         std::vector<std::string> materials;
@@ -344,7 +348,8 @@ namespace Glory::Editor
                 materials.push_back(itor->name.GetString());
 
             const std::string_view pathStr = asset["Location/Path"].AsString();
-            if (pathStr._Starts_with(".\\Modules\\"))
+            const std::string_view subPathStr = asset["Location/SubresourcePath"].AsString();
+            if (pathStr._Starts_with(".\\Modules\\") && subPathStr.empty())
             {
                 std::filesystem::path path = pathStr;
                 while (!path.empty() && path.filename().compare("Assets") != 0)
@@ -417,6 +422,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
 
         std::map<UUID, UUID> moveMap;
         std::vector<std::string> materials;
@@ -481,6 +487,7 @@ namespace Glory::Editor
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
 
         std::map<UUID, UUID> moveMap;
 

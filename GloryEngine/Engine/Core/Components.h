@@ -99,7 +99,7 @@ namespace Glory
 
 	struct CameraComponent
 	{
-		GLORY_API CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(10.0f), m_DisplayIndex(0), m_Priority(0), m_ClearColor(glm::vec4(0.0f)), m_LayerMask(0), m_LastHash(0) {}
+		GLORY_API CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(3000.0f), m_DisplayIndex(0), m_Priority(0), m_ClearColor(glm::vec4(0.0f)), m_LayerMask(0), m_LastHash(0) {}
 		GLORY_API CameraComponent(float halfFOV, float near, float far, int displayIndex = 0, int priority = 0, const glm::vec4& clearColor = glm::vec4(0.0f))
 			: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_DisplayIndex(displayIndex), m_Priority(priority), m_ClearColor(clearColor), m_LayerMask(0), m_LastHash(0) {}
 
@@ -152,7 +152,7 @@ namespace Glory
 
 	struct LightComponent
 	{
-		LightComponent() : m_Color(1.0f), m_Intensity(10.0f), m_Range(100.0f) {}
+		LightComponent() : m_Color(1.0f), m_Intensity(1.0f), m_Range(100.0f) {}
 		LightComponent(const glm::vec4& color, float intensity, float range) : m_Color(color), m_Intensity(intensity), m_Range(range) {}
 
 		REFLECTABLE(LightComponent,

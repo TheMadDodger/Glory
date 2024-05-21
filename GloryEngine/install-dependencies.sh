@@ -76,28 +76,18 @@ cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..
 
-# SPIRV-tools
-cd SPIRV-tools
-echo "Cloning SPIRV-Headers"
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git external/spirv-headers
-
-cd ..
-
 # shaderc
 cd shaderc
 echo "Building shaderc"
-echo "Cloning glslang"
+echo "Syncing depencencies"
 
-git clone https://github.com/KhronosGroup/glslang.git third_party/glslang
-cd third_party/glslang
-git reset --hard 52c59ec
-cd ../..
+python ./utils/git-sync-deps
 
 echo "Building ${PLATFORM} binaries"
 rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
-cmake .. -A $PLATFORM -DSHADERC_SKIP_TESTS=ON -DSHADERC_SPIRV_TOOLS_DIR=../../SPIRV-tools -DCMAKE_INSTALL_PREFIX=$DEPSDIR -DSHADERC_ENABLE_SHARED_CRT=ON
+cmake .. -A $PLATFORM -DSHADERC_SKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=$DEPSDIR -DSHADERC_ENABLE_SHARED_CRT=ON
 cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..

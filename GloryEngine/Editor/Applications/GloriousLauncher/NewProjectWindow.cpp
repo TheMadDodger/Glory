@@ -250,8 +250,6 @@ namespace Glory::EditorLauncher
 			// TODO: Load default engine settings?
 			m_EngineSettings = {};
 			m_EngineSettings.OptionalModules.push_back(1);
-			m_EngineSettings.OptionalModules.push_back(2);
-			m_EngineSettings.OptionalModules.push_back(3);
 			m_EngineSettings.OptionalModules.push_back(0);
 		}
 
