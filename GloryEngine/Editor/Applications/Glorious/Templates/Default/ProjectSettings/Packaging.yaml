@@ -1,8 +1,5 @@
 EditorVersion: 0.3.0.rc-1
 Scenes:
   PackageScenesMode: All
-  List:
-    - 0
-  EntryScene: 16307556380002627913
-Assets:
-  ForcePackageList: []
+  List: []
+  EntryScene: 2878325696344899615

@@ -1,8 +1,11 @@
 Modules:
   - GlorySDLWindow
-  - GloryOpenGLGraphics
+  - GloryEntityScenes
   - GloryClusteredRenderer
-  - GlorySDLInput
+  - GloryOpenGLGraphics
+  - GloryASSIMPModelLoader
+  - GlorySDLImage
   - GloryMonoScripting
+  - GlorySDLInput
   - GloryJoltPhysics
 EditorVersion: 0.3.0.rc-1

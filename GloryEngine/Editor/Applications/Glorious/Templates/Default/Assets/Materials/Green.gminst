@@ -1,2 +1,5 @@
-BaseMaterial: 16276252282574653123
-Overrides: {Color: {Enable: true, Value: [0, 1, 0, 1]}}
+BaseMaterial: 13534698605446403028
+Overrides:
+  Color:
+    Enable: true
+    Value: [0.100000001, 1, 0.100000001, 1]
