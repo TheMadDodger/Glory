@@ -348,7 +348,8 @@ namespace Glory::Editor
                 materials.push_back(itor->name.GetString());
 
             const std::string_view pathStr = asset["Location/Path"].AsString();
-            if (pathStr._Starts_with(".\\Modules\\"))
+            const std::string_view subPathStr = asset["Location/SubresourcePath"].AsString();
+            if (pathStr._Starts_with(".\\Modules\\") && subPathStr.empty())
             {
                 std::filesystem::path path = pathStr;
                 while (!path.empty() && path.filename().compare("Assets") != 0)

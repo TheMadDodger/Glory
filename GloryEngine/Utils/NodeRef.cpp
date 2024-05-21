@@ -62,6 +62,7 @@ namespace Glory::Utils
 
 	size_t NodeValueRef::Size()
 	{
+		if (!Exists()) return 0;
 		return Node().size();
 	}
 
