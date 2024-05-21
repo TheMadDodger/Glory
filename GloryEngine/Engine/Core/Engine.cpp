@@ -261,6 +261,8 @@ namespace Glory
 	{
 		if (m_Initialized) return;
 
+		m_UUIDRemapper.Reset();
+
 		WindowModule* pWindows = GetMainModule<WindowModule>();
 		m_Debug->SetWindowModule(pWindows);
 
