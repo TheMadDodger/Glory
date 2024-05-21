@@ -1,9 +1,0 @@
-EditorVersion: 0.3.0.rc-1
-Scenes:
-  PackageScenesMode: All
-  List:
-    - 0
-  EntryScene: 0
-Assets:
-  ForcePackageList:
-    []

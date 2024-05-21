@@ -61,7 +61,6 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialData* pMaterial) const
 	{
-		if (!file["Pipeline"].Exists()) return;
 		const UUID pipelineID = file["Pipeline"].As<uint64_t>();
 		pMaterial->SetPipeline(pipelineID);
 		auto properties = file["Properties"];

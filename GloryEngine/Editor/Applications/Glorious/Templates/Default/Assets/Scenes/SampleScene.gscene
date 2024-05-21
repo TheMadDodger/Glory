@@ -1,13 +1,13 @@
+TypeHash: 3536807891
 Entities:
-  - Name: Plane
+  - TypeHash: 1002038608
+    Name: Plane
     UUID: 14444483842672663668
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 14894679713950030081
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
           Position: [0, 0, 0]
           Rotation: [-0.707278132, -0, -0, -0.706935406]
@@ -15,19 +15,17 @@ Entities:
       - UUID: 6361602995766346262
         TypeName: MeshRenderer
         TypeHash: 346634903
-        Active: true
         Properties:
-          m_Mesh: 6
+          m_Mesh: 13626072069977488810
           m_Material: 13534698605446403028
-  - Name: Light
+  - TypeHash: 1002038608
+    Name: Light
     UUID: 2846236319857627105
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 12335406533271122913
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
           Position: [-107.928406, 47.5893593, -7.34331131]
           Rotation: [-0, -0, -0, 1]
@@ -35,20 +33,18 @@ Entities:
       - UUID: 9621234675004018954
         TypeName: LightComponent
         TypeHash: 1833534594
-        Active: true
         Properties:
           m_Color: [0.800000012, 0.400000006, 1.10000002, 1]
           m_Intensity: 1
           m_Range: 100
-  - Name: Light
+  - TypeHash: 1002038608
+    Name: Light
     UUID: 8281934531754343243
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 6948696469425579692
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
           Position: [-28.7289581, 47.5893173, 0]
           Rotation: [-0, -0, -0, 1]
@@ -56,20 +52,18 @@ Entities:
       - UUID: 18358851645578088572
         TypeName: LightComponent
         TypeHash: 1833534594
-        Active: true
         Properties:
           m_Color: [1, 1, 1, 1]
           m_Intensity: 1
           m_Range: 100
-  - Name: Light
+  - TypeHash: 1002038608
+    Name: Light
     UUID: 2398726306303203326
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 127789030219371760
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
           Position: [37.078373, 47.5893631, -72.2553864]
           Rotation: [-0, -0, -0, 1]
@@ -77,20 +71,18 @@ Entities:
       - UUID: 7133873032200028935
         TypeName: LightComponent
         TypeHash: 1833534594
-        Active: true
         Properties:
           m_Color: [-0.5, 0.600000024, 0.400000006, 1]
           m_Intensity: 1
           m_Range: 100
-  - Name: Light
+  - TypeHash: 1002038608
+    Name: Light
     UUID: 17185265971636399872
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 273735631368523348
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
           Position: [63.4122581, 47.5893593, 16.2651634]
           Rotation: [-0, -0, -0, 1]
@@ -98,20 +90,18 @@ Entities:
       - UUID: 1955574557480198848
         TypeName: LightComponent
         TypeHash: 1833534594
-        Active: true
         Properties:
           m_Color: [0.800000012, 0.100000001, 0.400000006, 1]
           m_Intensity: 1
           m_Range: 100
-  - Name: Light
+  - TypeHash: 1002038608
+    Name: Light
     UUID: 13681712572653402427
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 1070472677894393890
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
           Position: [-19.2780304, 47.5893593, 88.4345169]
           Rotation: [-0, -0, -0, 1]
@@ -119,68 +109,61 @@ Entities:
       - UUID: 17738459304458559483
         TypeName: LightComponent
         TypeHash: 1833534594
-        Active: true
         Properties:
           m_Color: [0.800000012, 1, -0.200000003, 1]
           m_Intensity: 1
           m_Range: 100
-  - Name: Sphere
+  - TypeHash: 1002038608
+    Name: Sphere
     UUID: 4345487058126478835
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 1613821258425797408
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
-          Position: [-34.3321495, 9.44250107, 44.5552177]
-          Rotation: [-0, -0, -0, 1]
+          Position: [-29.3321495, 6.44250107, 29.5552177]
+          Rotation: [-0.00248775189, -0.359826595, -0.932993591, 0.00645048218]
           Scale: [10.6240005, 10.6239977, 10.623991]
       - UUID: 4752584013170062910
         TypeName: MeshRenderer
         TypeHash: 346634903
-        Active: true
         Properties:
-          m_Mesh: 7
+          m_Mesh: 17961775830786883855
           m_Material: 11026795263020128071
-  - Name: Box
+  - TypeHash: 1002038608
+    Name: Box
     UUID: 1121127913509796133
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 7058706370952688588
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
-          Position: [6, 11.1839294, 6]
+          Position: [0, 11.1839294, 0]
           Rotation: [-0, -0, -0, 1]
           Scale: [10.6239996, 10.6239996, 10.6239996]
       - UUID: 4290348745882500702
         TypeName: MeshRenderer
         TypeHash: 346634903
-        Active: true
         Properties:
-          m_Mesh: 8775173730644711025
+          m_Mesh: 9370195999809206538
           m_Material: 15215640328795177848
-  - Name: Sphere
+  - TypeHash: 1002038608
+    Name: Sphere
     UUID: 935191002156100895
-    Active: true
     ParentUUID: 0
     Components:
       - UUID: 17759054221476408974
         TypeName: Transform
         TypeHash: 3193129575
-        Active: true
         Properties:
-          Position: [-45.8871956, 11.1841803, -15.9101372]
+          Position: [-43.8871956, 11.1841803, -2.91013718]
           Rotation: [-0, -0, -0, 1]
           Scale: [10.6239996, 10.6239996, 10.6239996]
       - UUID: 12440825719499956732
         TypeName: MeshRenderer
         TypeHash: 346634903
-        Active: true
         Properties:
-          m_Mesh: 7
+          m_Mesh: 4525122409987139965
           m_Material: 12631227897872624515
