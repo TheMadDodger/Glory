@@ -1,7 +1,7 @@
 {
     "ProjectName": "Default",
     "Assets": {
-        "2931761690942541997": {
+        "3": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_frag.shader",
                 "SubresourcePath": "",
@@ -10,12 +10,12 @@
             "Metadata": {
                 "Extension": ".shader",
                 "Name": "PhongTextured_frag",
-                "UUID": 2931761690942541997,
+                "UUID": 3,
                 "Hash": 3732387374,
                 "SerializedVersion": 0
             }
         },
-        "6486247072400667057": {
+        "4": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\PhongTextured_vert.shader",
                 "SubresourcePath": "",
@@ -24,12 +24,12 @@
             "Metadata": {
                 "Extension": ".shader",
                 "Name": "PhongTextured_vert",
-                "UUID": 6486247072400667057,
+                "UUID": 4,
                 "Hash": 3732387374,
                 "SerializedVersion": 0
             }
         },
-        "699646394544677377": {
+        "1": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_frag.shader",
                 "SubresourcePath": "",
@@ -38,12 +38,12 @@
             "Metadata": {
                 "Extension": ".shader",
                 "Name": "Phong_frag",
-                "UUID": 699646394544677377,
+                "UUID": 1,
                 "Hash": 3732387374,
                 "SerializedVersion": 0
             }
         },
-        "1077033773316096921": {
+        "2": {
             "Location": {
                 "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Shaders\\Phong_vert.shader",
                 "SubresourcePath": "",
@@ -52,28 +52,28 @@
             "Metadata": {
                 "Extension": ".shader",
                 "Name": "Phong_vert",
-                "UUID": 1077033773316096921,
+                "UUID": 2,
                 "Hash": 3732387374,
                 "SerializedVersion": 0
             }
         },
-        "13862167164818647364": {
+        "5": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Cube.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Cube.fbx",
                 "SubresourcePath": "",
                 "Index": 0
             },
             "Metadata": {
                 "Extension": ".fbx",
                 "Name": "Cube",
-                "UUID": 13862167164818647364,
+                "UUID": 5,
                 "Hash": 1373658899,
                 "SerializedVersion": 0
             }
         },
         "9370195999809206538": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Cube.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Cube.fbx",
                 "SubresourcePath": "Cube Material 0",
                 "Index": 0
             },
@@ -85,23 +85,23 @@
                 "SerializedVersion": 0
             }
         },
-        "4558652509875146659": {
+        "6": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Plane.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Plane.fbx",
                 "SubresourcePath": "",
                 "Index": 0
             },
             "Metadata": {
                 "Extension": ".fbx",
                 "Name": "Plane",
-                "UUID": 4558652509875146659,
+                "UUID": 6,
                 "Hash": 1373658899,
                 "SerializedVersion": 0
             }
         },
         "13626072069977488810": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Plane.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Plane.fbx",
                 "SubresourcePath": "Plane Material 0",
                 "Index": 0
             },
@@ -113,23 +113,23 @@
                 "SerializedVersion": 0
             }
         },
-        "3951338153366726389": {
+        "7": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Sphere.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Sphere.fbx",
                 "SubresourcePath": "",
                 "Index": 0
             },
             "Metadata": {
                 "Extension": ".fbx",
                 "Name": "Sphere",
-                "UUID": 3951338153366726389,
+                "UUID": 7,
                 "Hash": 1373658899,
                 "SerializedVersion": 0
             }
         },
         "4525122409987139965": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Sphere.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Sphere.fbx",
                 "SubresourcePath": "Icosphere Material 0",
                 "Index": 0
             },
@@ -141,23 +141,23 @@
                 "SerializedVersion": 0
             }
         },
-        "9867963083657395545": {
+        "8": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Suzanne.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Suzanne.fbx",
                 "SubresourcePath": "",
                 "Index": 0
             },
             "Metadata": {
                 "Extension": ".fbx",
                 "Name": "Suzanne",
-                "UUID": 9867963083657395545,
+                "UUID": 8,
                 "Hash": 1373658899,
                 "SerializedVersion": 0
             }
         },
         "17961775830786883855": {
             "Location": {
-                "Path": ".\\Modules\\GloryASSIMPModelLoader\\Assets\\Models\\Suzanne.fbx",
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Models\\Suzanne.fbx",
                 "SubresourcePath": "Suzanne Material 0",
                 "Index": 0
             },
@@ -253,5 +253,6 @@
                 "SerializedVersion": 0
             }
         }
-    }
+    },
+    "EditorVersion": "0.3.0.rc-1"
 }
