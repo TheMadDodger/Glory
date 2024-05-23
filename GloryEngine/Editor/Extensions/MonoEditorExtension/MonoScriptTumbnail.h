@@ -14,6 +14,6 @@ namespace Glory::Editor
 		virtual void OnFileDoubleClick(UUID uuid) override;
 
 	private:
-		ImageData* m_pScriptTumbnail;
+		TextureData* m_pScriptTumbnail;
     };
 }
