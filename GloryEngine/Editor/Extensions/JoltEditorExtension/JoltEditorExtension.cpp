@@ -20,6 +20,8 @@
 #include <CreateObjectAction.h>
 #include <EditableEntity.h>
 #include <EntityEditor.h>
+#include <EditorApplication.h>
+#include <SceneManager.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -60,6 +62,12 @@ namespace Glory::Editor
 
 		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
 		OBJECT_CREATE_MENU(Character, CharacterController);
+
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Utils::Reflect::Reflect& reflect = pEngine->Reflection();
+		Reflect::SetReflectInstance(&reflect);
+
+		pEngine->GetSceneManager()->ComponentTypesInstance();
 	}
 
 	const char* JoltEditorExtension::ModuleName()
