@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Material instance handle
+    /// </summary>
     public class MaterialInstance : Resource
     {
         #region Constructor

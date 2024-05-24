@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Texture handle
+    /// </summary>
     public class Texture : Resource
     {
         #region Constructor

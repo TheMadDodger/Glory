@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Profiler
+    /// </summary>
     public class Profiler
     {
         #region API Methods

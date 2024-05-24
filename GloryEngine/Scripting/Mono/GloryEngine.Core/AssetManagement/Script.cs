@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Script handle
+    /// </summary>
     public class Script : Resource
     {
         #region Constructor

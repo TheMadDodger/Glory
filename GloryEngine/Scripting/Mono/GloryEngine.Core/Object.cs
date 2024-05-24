@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Basic object handle
+    /// </summary>
     public class Object
     {
         #region Props

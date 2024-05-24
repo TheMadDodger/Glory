@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Prefab handle
+    /// </summary>
     public class Prefab : Resource
     {
         #region Constructor

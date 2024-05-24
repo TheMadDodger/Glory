@@ -9,6 +9,9 @@ namespace GloryEngine
     {
         #region Props
 
+        /// <summary>
+        /// ID of the camera
+        /// </summary>
         public UInt64 CameraID => _cameraID;
 
         #endregion
@@ -21,6 +24,10 @@ namespace GloryEngine
 
         #region Constructor
 
+        /// <summary>
+        /// Construct a camera handle
+        /// </summary>
+        /// <param name="id">ID of the camera</param>
         public Camera(UInt64 id)
         {
             _cameraID = id;

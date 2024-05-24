@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Mesh handle
+    /// </summary>
     public class Mesh : Resource
     {
         #region Constructor

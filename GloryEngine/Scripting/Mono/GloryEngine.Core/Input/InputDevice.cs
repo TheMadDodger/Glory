@@ -37,7 +37,7 @@ namespace GloryEngine
 
         #region Constructor
 
-        public InputDevice(UInt64 deviceID) { _deviceID = deviceID; }
+        internal InputDevice(UInt64 deviceID) { _deviceID = deviceID; }
 
         #endregion
 

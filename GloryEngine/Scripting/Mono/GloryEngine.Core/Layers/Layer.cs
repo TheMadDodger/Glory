@@ -5,6 +5,11 @@
     /// </summary>
     public struct Layer
     {
+        /// <summary>
+        /// Construct a layer
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="mask">Mask</param>
         public Layer(string name, LayerMask mask)
         {
             Name = name;

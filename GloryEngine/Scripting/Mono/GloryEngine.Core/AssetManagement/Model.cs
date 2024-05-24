@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Model handle
+    /// </summary>
     public class Model : Resource
     {
         #region Constructor

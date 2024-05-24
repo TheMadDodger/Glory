@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+	/// <summary>
+	/// Log level
+	/// </summary>
 	public enum LogLevel
 	{
 		/// <summary>

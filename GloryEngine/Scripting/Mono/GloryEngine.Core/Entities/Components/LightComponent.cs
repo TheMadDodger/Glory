@@ -43,17 +43,17 @@ namespace GloryEngine.Entities
 		#region API Methods
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static Vector4 LightComponent_GetColor(ref Entity entity, UInt64 componentID);
+		private extern static Vector4 LightComponent_GetColor(ref Entity entity, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static void LightComponent_SetColor(ref Entity entity, UInt64 componentID, ref Vector4 color);
+        private extern static void LightComponent_SetColor(ref Entity entity, UInt64 componentID, ref Vector4 color);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static float LightComponent_GetIntensity(ref Entity entity, UInt64 componentID);
+        private extern static float LightComponent_GetIntensity(ref Entity entity, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static void LightComponent_SetIntensity(ref Entity entity, UInt64 componentID, float intensity);
+        private extern static void LightComponent_SetIntensity(ref Entity entity, UInt64 componentID, float intensity);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static float LightComponent_GetRange(ref Entity entity, UInt64 componentID);
+        private extern static float LightComponent_GetRange(ref Entity entity, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static void LightComponent_SetRange(ref Entity entity, UInt64 componentID, float range);
+        private extern static void LightComponent_SetRange(ref Entity entity, UInt64 componentID, float range);
 
 		#endregion
 	}

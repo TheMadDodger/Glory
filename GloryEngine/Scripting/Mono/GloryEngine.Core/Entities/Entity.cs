@@ -26,6 +26,9 @@ namespace GloryEngine.Entities
         /// </summary>
         public SceneObject SceneObject => Entity_GetSceneObjectID(this);
 
+        /// <summary>
+        /// The scene that owns this entity
+        /// </summary>
         public Scene Scene => SceneManagement.SceneManager.GetOpenScene(_sceneID) as Scene;
 
         #endregion
@@ -39,7 +42,7 @@ namespace GloryEngine.Entities
 
         #region Constructor
 
-        public Entity(UInt64 id, UInt64 sceneID)
+        internal Entity(UInt64 id, UInt64 sceneID)
         {
             _entityID = id;
 			_sceneID = sceneID;

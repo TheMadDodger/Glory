@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace GloryEngine
 {
-    public static class AssetManager
+    /// <summary>
+    /// Asset manager
+    /// </summary>
+    internal static class AssetManager
     {
         #region Fields
 
@@ -29,7 +32,7 @@ namespace GloryEngine
         //    return method.MakeGenericMethod(type).MethodHandle.Value;
         //}
 
-        public static Resource MakeResource(UInt64 id, string typeString)
+        private static Resource MakeResource(UInt64 id, string typeString)
         {
             if (_resources.ContainsKey(id)) return _resources[id];
             Type type = Type.GetType(typeString);
@@ -44,7 +47,7 @@ namespace GloryEngine
             return resource;
         }
 
-        public static T MakeResource<T>(UInt64 id) where T : Resource, new()
+        internal static T MakeResource<T>(UInt64 id) where T : Resource, new()
         {
             if (_resources.ContainsKey(id)) return _resources[id] as T;
             System.Type type = typeof(T);

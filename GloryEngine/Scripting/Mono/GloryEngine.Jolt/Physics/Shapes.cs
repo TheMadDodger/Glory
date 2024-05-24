@@ -3,8 +3,14 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Shape
+    /// </summary>
     public struct Shape
     {
+        /// <summary>
+        /// Internal ID of the shape
+        /// </summary>
         public UInt64 ShapeID => _shapeID;
 
         public Shape(UInt64 id)
@@ -15,6 +21,9 @@ namespace GloryEngine
         private UInt64 _shapeID;
     }
 
+    /// <summary>
+    /// Shape manager
+    /// </summary>
     public static class Shapes
     {
         #region Methods

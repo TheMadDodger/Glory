@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Image resource
+    /// </summary>
     public class Image : Resource
     {
         #region Constructor

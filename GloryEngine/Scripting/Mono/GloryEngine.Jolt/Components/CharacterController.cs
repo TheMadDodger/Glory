@@ -85,6 +85,9 @@ namespace GloryEngine.Entities
             set => CharacterController_SetAngularVelocity(ref _entity, _objectID, ref value);
         }
 
+        /// <summary>
+        /// Shape of the character
+        /// </summary>
         public Shape Shape
         {
             get => new Shape(CharacterController_GetShapeID(ref _entity, _objectID));

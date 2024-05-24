@@ -42,6 +42,9 @@ namespace GloryEngine.Entities
 
         #region Fields
 
+        /// <summary>
+        /// Entity that owns this component
+        /// </summary>
         protected Entity _entity;
         private Transform _transform = null;
 
@@ -49,6 +52,9 @@ namespace GloryEngine.Entities
 
         #region Constructor
 
+        /// <summary>
+        /// Construct an entity component
+        /// </summary>
         protected EntityComponent()
         {
             _entity = new Entity(0, 0);
@@ -69,7 +75,7 @@ namespace GloryEngine.Entities
             return Entity.GetComponent<T>();
         }
 
-        public void Initialize(Entity entity, UInt64 componentID)
+        internal void Initialize(Entity entity, UInt64 componentID)
         {
             _entity = entity;
             _objectID = componentID;

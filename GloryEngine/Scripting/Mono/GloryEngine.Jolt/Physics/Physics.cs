@@ -9,10 +9,14 @@ namespace GloryEngine
     /// </summary>
     public enum ActivationType
     {
-        /* Activate the body */
+        /// <summary>
+        /// Activate the body
+        /// </summary>
         Activate,
-		/* Leave activation state as is */
-		DontActivate
+        /// <summary>
+        /// Leave activation state as is
+        /// </summary>
+        DontActivate
     };
 
     /// <summary>
@@ -20,8 +24,17 @@ namespace GloryEngine
     /// </summary>
     public enum BodyType
 	{
+		/// <summary>
+		/// Static body
+		/// </summary>
 		Static,
+		/// <summary>
+		/// Kinematic body
+		/// </summary>
 		Kinematic,
+		/// <summary>
+		/// Dynamic body
+		/// </summary>
 		Dynamic
 	};
 
@@ -30,13 +43,24 @@ namespace GloryEngine
 	/// </summary>
     public struct Ray
 	{
+		/// <summary>
+		/// Construct a ray
+		/// </summary>
+		/// <param name="origin">Origin</param>
+		/// <param name="direction">Direction</param>
 		public Ray(Vector3 origin, Vector3 direction)
 		{
 			Origin = origin;
 			Direction = direction;
 		}
 
+		/// <summary>
+		/// Origin
+		/// </summary>
 		public Vector3 Origin;
+		/// <summary>
+		/// Direction
+		/// </summary>
 		public Vector3 Direction;
 	}
 
@@ -103,6 +127,9 @@ namespace GloryEngine
 			return numHits;
         }
 
+		/// <summary>
+		/// Physics gravity
+		/// </summary>
 		public static Vector3 Gravity
 		{
 			get => Physics_GetGravity();

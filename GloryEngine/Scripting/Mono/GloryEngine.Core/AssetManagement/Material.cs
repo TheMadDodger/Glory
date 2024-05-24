@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Material
+    /// </summary>
     public class Material : Resource
     {
         #region Constructor
