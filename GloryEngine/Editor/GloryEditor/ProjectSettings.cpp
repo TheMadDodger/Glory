@@ -129,6 +129,7 @@ namespace Glory::Editor
 				PACKAGE_LAG
 				++task.m_ProcessedSubTasks;
 			}
+			return true;
 		};
 		AddPackagingTask(std::move(task), "");
 	}

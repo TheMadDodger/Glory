@@ -9,6 +9,7 @@
 #include "AssetCompiler.h"
 #include "EditableResource.h"
 #include "Dispatcher.h"
+#include "SystemTools.h"
 
 #include <JobManager.h>
 
@@ -43,6 +44,7 @@ namespace Glory::Editor
 
 	std::atomic<bool> Cancel = false;
 	std::atomic<bool> Canceled = false;
+	std::atomic<bool> Failed = false;
 
 	std::vector<UUID> ScenesToPackage;
 	std::vector<GScene*> LoadedScenesToPackage;
@@ -60,7 +62,7 @@ namespace Glory::Editor
 
 	bool PackageJob(Engine* pEngine, std::filesystem::path packageRoot)
 	{
-		for (size_t i = 0; i < PackagingTasks.size(); i++)
+		for (size_t i = 0; i < PackagingTasks.size(); ++i)
 		{
 			if (Cancel)
 			{
@@ -73,7 +75,13 @@ namespace Glory::Editor
 			PackagingTaskState.m_ProcessedSubTasks = 0;
 			PackageTask& task = PackagingTasks[i];
 			PackagingTaskState.m_TotalSubTasks = task.m_TotalSubTasks;
-			task.m_Callback(pEngine, packageRoot, PackagingTaskState);
+			const bool success = task.m_Callback(pEngine, packageRoot, PackagingTaskState);
+			if (!success)
+			{
+				pEngine->GetDebug().LogError("Packaging failed, check the console for errors");
+				Failed = true;
+				return false;
+			}
 			++m_CurrentTask;
 		}
 
@@ -177,7 +185,7 @@ namespace Glory::Editor
 
 #pragma region Tasks
 
-	void CalculateAssetGroupsTask(Engine* pEngine, const std::filesystem::path&, PackageTaskState& task)
+	bool CalculateAssetGroupsTask(Engine* pEngine, const std::filesystem::path&, PackageTaskState& task)
 	{
 		task.m_SubTaskName = "Calculating";
 
@@ -242,9 +250,10 @@ namespace Glory::Editor
 		}
 
 		++task.m_ProcessedSubTasks;
+		return true;
 	}
 
-	void CompileShadersTask(Engine* pEngine, const std::filesystem::path&, PackageTaskState& task)
+	bool CompileShadersTask(Engine* pEngine, const std::filesystem::path&, PackageTaskState& task)
 	{
 		task.m_TotalSubTasks = Shaders.size();
 
@@ -276,9 +285,11 @@ namespace Glory::Editor
 			++task.m_ProcessedSubTasks;
 			task.m_SubTaskName = "";
 		}
+
+		return true;
 	}
 
-	void PackageScenesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageScenesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Open every scene and package them individually along with their assets */
 		std::filesystem::path relativeDataPath = "Data";
@@ -308,9 +319,11 @@ namespace Glory::Editor
 			++task.m_ProcessedSubTasks;
 		}
 		LoadedScenesToPackage.clear();
+
+		return true;
 	}
 
-	void PackageAssetsTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageAssetsTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		size_t totalAssets = 0;
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
@@ -378,9 +391,11 @@ namespace Glory::Editor
 				task.m_SubTaskName = "";
 			}
 		}
+
+		return true;
 	}
 
-	void PackageShadersTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageShadersTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		task.m_TotalSubTasks = Shaders.size();
 
@@ -442,9 +457,11 @@ namespace Glory::Editor
 				task.m_SubTaskName = "";
 			}
 		}
+
+		return true;
 	}
 
-	void PackageAssetDatabase(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageAssetDatabase(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		task.m_TotalSubTasks = UsedAssets.size();
 
@@ -477,9 +494,11 @@ namespace Glory::Editor
 				task.m_SubTaskName = "";
 			}
 		}
+
+		return true;
 	}
 
-	void CopyFilesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool CopyFilesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Copy modules and their resources and settings */
 		std::filesystem::path modulesPath = packageRoot;
@@ -559,9 +578,11 @@ namespace Glory::Editor
 		exePath.append("Packaging/bin").append(ProjectSpace::GetOpenProject()->Name()).replace_extension(".exe");
 		std::filesystem::copy(exePath, packageRoot, std::filesystem::copy_options::overwrite_existing);
 		++task.m_ProcessedSubTasks;
+
+		return true;
 	}
 
-	void CompileEXETask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool CompileEXETask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Compile exe */
 		task.m_SubTaskName = "Copying source files";
@@ -677,8 +698,26 @@ namespace Glory::Editor
 
 		std::filesystem::path exePath = packagingCachePath;
 		exePath.append("bin").append(projectName).replace_extension(".exe");
+		if (!std::filesystem::exists(exePath))
+		{
+			/* Try again by finding an MSBuild on the machine */
+			std::filesystem::path msBuildPath;
+			if (FindVisualStudio(msBuildPath) && FindMSBuildInVSPath(msBuildPath, msBuildPath))
+			{
+				std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=" + config + " /p:Platform=x64 \"" + packagingCachePath.string() + "\"";
+				system(cmd.c_str());
+			}
+		}
+
+		if (!std::filesystem::exists(exePath))
+		{
+			pEngine->GetDebug().LogError("Failed to compile application EXE");
+			return false;
+		}
+
 		std::filesystem::copy(exePath, packageRoot, std::filesystem::copy_options::overwrite_existing);
 		++task.m_ProcessedSubTasks;
+		return true;
 	}
 
 #pragma endregion
@@ -693,6 +732,7 @@ namespace Glory::Editor
 
 		Cancel = false;
 		Canceled = false;
+		Failed = false;
 
 		m_CurrentTask = 0;
 		PackagingTasks.clear();
@@ -849,6 +889,13 @@ namespace Glory::Editor
 		subIndex = PackagingTaskState.m_ProcessedSubTasks.load();
 		subCount = PackagingTaskState.m_TotalSubTasks.load();
 
+		if (Failed)
+		{
+			name = "Failed!";
+			subName = "Failed!";
+			return true;
+		}
+
 		if (Canceled)
 			return true;
 
@@ -863,6 +910,11 @@ namespace Glory::Editor
 		name = task.m_TaskName;
 		subName = PackagingTaskState.m_SubTaskName;
 		return false;
+	}
+
+	bool PackageFailed()
+	{
+		return Failed;
 	}
 
 	void Package(Engine* pEngine)

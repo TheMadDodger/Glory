@@ -30,6 +30,7 @@
 #include <CreateObjectAction.h>
 #include <EditableEntity.h>
 #include <EntityEditor.h>
+#include <SystemTools.h>
 
 #include <fstream>
 #include <string>
@@ -133,7 +134,7 @@ namespace Glory::Editor
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 		std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
-		if (!FindMSBuild(visualStudioPath))
+		if (!FindMSBuildInVSPath(visualStudioPath, std::filesystem::path{}))
 			FindVisualStudioPath();
 
 		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, MonoEditorExtension::OnProjectClose);
@@ -166,6 +167,7 @@ namespace Glory::Editor
 			task.m_Callback = [this](Glory::Engine*, const std::filesystem::path& packageRoot, PackageTaskState& task) {
 				OnEndPackage(packageRoot);
 				++task.m_ProcessedSubTasks;
+				return true;
 			};
 			AddPackagingTask(std::move(task), "CompileEXE");
 		});
@@ -173,69 +175,19 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::FindVisualStudioPath()
 	{
-		const std::filesystem::path x64Path = "C:\\Program Files\\Microsoft Visual Studio";
-		const std::filesystem::path x86Path = "C:\\Program Files (x86)\\Microsoft Visual Studio";
-
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 
-		if (FindVisualStudioPath(x64Path))
-		{
-			pEditorApp->GetEngine()->GetDebug().LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
-			return;
-		}
+		std::filesystem::path msBuildPath;
 
-		if (FindVisualStudioPath(x86Path))
+		if (FindVisualStudio(msBuildPath))
 		{
+			settings["Mono/VisualStudioPath"].Set(msBuildPath.string());
 			pEditorApp->GetEngine()->GetDebug().LogInfo("Found Visual Studio at " + settings["Mono/VisualStudioPath"].As<std::string>());
 			return;
 		}
 
 		pEditorApp->GetEngine()->GetDebug().LogWarning("Could not find Visual Studio installation");
-	}
-
-	bool MonoEditorExtension::FindVisualStudioPath(const std::filesystem::path& path)
-	{
-		EditorApplication* pEditorApp = EditorApplication::GetInstance();
-		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
-
-		if (!std::filesystem::exists(path)) return false;
-		for (const std::filesystem::directory_entry entry : std::filesystem::directory_iterator(path))
-		{
-			if (!entry.is_directory()) continue;
-			const std::filesystem::path versionPath = entry.path();
-			std::filesystem::path editionPath = versionPath;
-			editionPath.append("Enterprise");
-			if (FindMSBuild(std::filesystem::path(editionPath)))
-			{
-				settings["Mono/VisualStudioPath"].Set(editionPath.string());
-				return true;
-			}
-
-			editionPath = versionPath;
-			editionPath.append("Professional");
-			if (FindMSBuild(std::filesystem::path(editionPath)))
-			{
-				settings["Mono/VisualStudioPath"].Set(editionPath.string());
-				return true;
-			}
-
-			editionPath = versionPath;
-			editionPath.append("Community");
-			if (FindMSBuild(std::filesystem::path(editionPath)))
-			{
-				settings["Mono/VisualStudioPath"].Set(editionPath.string());
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool MonoEditorExtension::FindMSBuild(std::filesystem::path& path)
-	{
-		path.append("MSBuild\\Current\\Bin\\MSBuild.exe");
-		return std::filesystem::exists(path);
 	}
 
 	void MonoEditorExtension::OnProjectClose(ProjectSpace* pProject)
@@ -440,7 +392,7 @@ namespace Glory::Editor
 		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 
 		std::filesystem::path msBuildPath = settings["Mono/VisualStudioPath"].As<std::string>("");
-		if (!FindMSBuild(msBuildPath))
+		if (!FindMSBuildInVSPath(msBuildPath, std::filesystem::path{}))
 		{
 			pEditorApp->GetEngine()->GetDebug().LogError("Could not compile C# project because a valid path to a Visual Studio installation is not specified!");
 			return;
@@ -502,7 +454,7 @@ namespace Glory::Editor
 
 			if (!path) return;
 
-			if (FindMSBuild(std::filesystem::path(path)))
+			if (FindMSBuildInVSPath(std::filesystem::path(path), std::filesystem::path{}))
 			{
 				settings["Mono/VisualStudioPath"].Set(path);
 				return;

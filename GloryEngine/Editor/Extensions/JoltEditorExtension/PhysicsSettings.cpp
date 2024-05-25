@@ -193,7 +193,7 @@ namespace Glory::Editor
 		Utils::NodeValueRef collisionMatrix = RootValue()["CollisionMatrix"];
 		if (!collisionMatrix.Exists())
 		{
-			stream->Write(0);
+			stream->Write(size_t(0));
 			return;
 		}
 
