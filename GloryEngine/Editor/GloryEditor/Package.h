@@ -49,7 +49,7 @@ namespace Glory::Editor
 	{
 		std::string m_TaskID;
 		std::string m_TaskName;
-		std::function<void(Glory::Engine*, const std::filesystem::path&, PackageTaskState&)> m_Callback;
+		std::function<bool(Glory::Engine*, const std::filesystem::path&, PackageTaskState&)> m_Callback;
 		size_t m_TotalSubTasks{ 0 };
 	};
 
@@ -57,6 +57,7 @@ namespace Glory::Editor
 	GLORY_EDITOR_API void CancelPackage();
 	GLORY_EDITOR_API void AddPackagingTask(PackageTask&& task, const std::string& before);
 	GLORY_EDITOR_API bool PackageState(size_t& currentIndex, size_t& count, std::string_view& name, size_t& subIndex, size_t& subCount, std::string_view& subName);
+	GLORY_EDITOR_API bool PackageFailed();
 	GLORY_EDITOR_API void Package(Glory::Engine* pEngine);
 	GLORY_EDITOR_API void ScanSceneFileForAssets(Glory::Engine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets);
 	GLORY_EDITOR_API void PackageScene(GScene* pScene, const std::filesystem::path& path);

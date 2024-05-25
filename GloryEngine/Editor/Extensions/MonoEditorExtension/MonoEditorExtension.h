@@ -41,8 +41,6 @@ namespace Glory::Editor
     private:
         virtual void Initialize() override;
         static void FindVisualStudioPath();
-        static bool FindVisualStudioPath(const std::filesystem::path& path);
-        static bool FindMSBuild(std::filesystem::path& path);
 
         static void OnProjectClose(ProjectSpace* pProject);
         static void OnProjectOpen(ProjectSpace* pProject);

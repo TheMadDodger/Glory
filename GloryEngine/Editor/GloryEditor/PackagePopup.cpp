@@ -36,6 +36,7 @@ namespace Glory::Editor
 			std::string_view name, subName;
 
 			const bool done = PackageState(currentIndex, count, name, subIndex, subCount, subName);
+			const bool failed = PackageFailed();
 
 			if (done && m_Canceling)
 				ImGui::CloseCurrentPopup();
@@ -51,7 +52,16 @@ namespace Glory::Editor
 			const float availableWidth = ImGui::GetContentRegionAvail().x;
 			const float buttonWidth = availableWidth / 4.0f;
 
-			if (done)
+			if (failed)
+			{
+				const float posX = availableWidth - buttonWidth + 8.0f;
+				ImGui::SetCursorPosX(posX);
+				if (ImGui::Button("Ok", { buttonWidth, 0.0f }))
+				{
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			else if (done)
 			{
 				const float posX = availableWidth - buttonWidth*2.0f;
 				ImGui::SetCursorPosX(posX);
@@ -62,7 +72,7 @@ namespace Glory::Editor
 					std::filesystem::path packageRoot = pProject->RootPath();
 					packageRoot.append("Build");
 					std::stringstream str;
-					str << "cd " << packageRoot.string() << " && " << pProject->Name() << ".exe";
+					str << "cd \"" << packageRoot.string() << "\" && \"" << pProject->Name() << ".exe\"";
 					system(str.str().data());
 				}
 				ImGui::SameLine();

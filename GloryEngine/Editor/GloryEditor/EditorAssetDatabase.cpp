@@ -57,9 +57,7 @@ namespace Glory::Editor
 			JSONValueRef indexNode = locationNode["Index"];
 
 			const std::string_view path = pathNode.AsString();
-			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(path.data());
 			const std::string_view subPath = subPathNode.AsString();
-			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(subPath.data());
 
 			if (!subPath.empty())
 				continue;

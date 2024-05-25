@@ -252,6 +252,34 @@
                 "Hash": 3098219186,
                 "SerializedVersion": 0
             }
+        },
+        "9": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Pipelines\\Phong.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Phong",
+                "UUID": 9,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "10": {
+            "Location": {
+                "Path": ".\\Modules\\GloryClusteredRenderer\\Assets\\Pipelines\\PhongTextured.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "PhongTextured",
+                "UUID": 10,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
         }
     },
     "EditorVersion": "0.3.0.rc-1"
