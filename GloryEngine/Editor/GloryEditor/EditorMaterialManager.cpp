@@ -86,6 +86,21 @@ namespace Glory::Editor
 		UpdateMaterial(itor->second);
 	}
 
+	void EditorMaterialManager::SetMaterialInstanceBaseMaterial(UUID materialInstanceID, UUID baseMaterialID)
+	{
+		auto itor = m_pMaterialInstanceDatas.find(materialInstanceID);
+		if (itor == m_pMaterialInstanceDatas.end()) return;
+		YAMLResource<MaterialInstanceData>* pMaterialInstanceData = static_cast<YAMLResource<MaterialInstanceData>*>(
+			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialInstanceID));
+		Utils::YAMLFileRef& file = **pMaterialInstanceData;
+		file["BaseMaterial"].Set(uint64_t(baseMaterialID));
+		itor->second->SetBaseMaterialID(baseMaterialID);
+
+		auto baseItor = m_pMaterialDatas.find(baseMaterialID);
+		if (baseItor == m_pMaterialDatas.end()) return;
+		ReadPropertiesInto(file["Overrides"], itor->second);
+	}
+
 	MaterialData* EditorMaterialManager::GetMaterial(UUID materialID) const
 	{
 		auto itor = m_pMaterialDatas.find(materialID);
@@ -177,7 +192,13 @@ namespace Glory::Editor
 
 			/* If the base material isnt loaded we must update it when it is */
 			const UUID baseMaterial = pMaterial->BaseMaterialID();
-			if (!baseMaterial || m_pMaterialDatas.find(baseMaterial) != m_pMaterialDatas.end()) return;
+			if (!baseMaterial || !EditorAssetDatabase::AssetExists(baseMaterial)) return;
+			auto itor = m_pMaterialDatas.find(baseMaterial);
+			if (itor != m_pMaterialDatas.end())
+			{
+				pMaterial->Resize(*this, itor->second);
+				return;
+			}
 			m_WaitingMaterialInstances[baseMaterial].push_back(callback.m_UUID);
 		}
 	}
@@ -248,6 +269,7 @@ namespace Glory::Editor
 			const std::string displayName = *itor;
 			auto prop = properties[displayName];
 			const bool enable = prop["Enable"].As<bool>();
+			if (!prop.Exists()) continue;
 
 			size_t propertyIndex = 0;
 			if (!pMaterialData->GetPropertyInfoIndex(manager, displayName, propertyIndex)) continue;
@@ -266,6 +288,7 @@ namespace Glory::Editor
 			}
 			else
 			{
+				if (!value.IsDefined() || !value.IsScalar()) continue;
 				const UUID id = value.as<uint64_t>();
 				size_t resourceIndex = propertyInfo->Offset();
 				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(manager, resourceIndex) = id;
