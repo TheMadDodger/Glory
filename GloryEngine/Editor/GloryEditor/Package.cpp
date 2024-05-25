@@ -665,7 +665,7 @@ namespace Glory::Editor
 		luaStream << "		defines \"" << "_DEBUG" << "\"" << std::endl;
 		luaStream << "		symbols \"" << "On" << "\"" << std::endl;
 		luaStream << "	filter \"" << "configurations:Release" << "\"" << std::endl;
-		luaStream << "		kind \"" << "WindowedApp" << "\"" << std::endl;
+		luaStream << "		kind \"" << "ConsoleApp" << "\"" << std::endl;
 		luaStream << "		runtime \"" << "Release" << "\"" << std::endl;
 		luaStream << "		defines \"" << "NDEBUG" << "\"" << std::endl;
 		luaStream << "		optimize \"" << "On" << "\"" << std::endl;
