@@ -35,6 +35,11 @@ namespace Glory
 		return pBaseMaterial->GetPipelineID(manager);
 	}
 
+	void MaterialInstanceData::SetBaseMaterialID(UUID baseMaterial)
+	{
+		m_BaseMaterial = baseMaterial;
+	}
+
 	UUID MaterialInstanceData::BaseMaterialID() const
 	{
 		return m_BaseMaterial;
@@ -142,10 +147,19 @@ namespace Glory
 	void MaterialInstanceData::Resize(const MaterialManager& manager, MaterialData* pBase)
 	{
 		if (!pBase) return;
-		if (!pBase || m_PropertyBuffer.size() == pBase->GetBufferReference(manager).size()) return;
-		m_PropertyOverridesEnable.resize(pBase->PropertyInfoCount(manager), false);
-		m_PropertyBuffer.resize(pBase->GetBufferReference(manager).size());
-		m_Resources.resize(pBase->ResourceCount());
+
+		const size_t bufferSize = pBase->GetBufferReference(manager).size();
+		const size_t propertyInfoCount = pBase->PropertyInfoCount(manager);
+		const size_t resourceCount = pBase->ResourceCount();
+
+		if (m_PropertyBuffer.size() < bufferSize)
+			m_PropertyBuffer.resize(pBase->GetBufferReference(manager).size());
+
+		if (m_PropertyOverridesEnable.size() < propertyInfoCount)
+			m_PropertyOverridesEnable.resize(pBase->PropertyInfoCount(manager), false);
+
+		if (m_Resources.size() < resourceCount)
+			m_Resources.resize(pBase->ResourceCount());
 	}
 
 	bool MaterialInstanceData::IsPropertyOverriden(size_t index) const

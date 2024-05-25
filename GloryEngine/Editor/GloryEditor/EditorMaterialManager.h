@@ -53,6 +53,12 @@ namespace Editor
 		 */
 		void SetMaterialPipeline(UUID materialID, UUID pipelineID);
 
+		/** @brief Set a material instance base material and update its properties
+		 * @param materialInstanceID ID of the material instance
+		 * @param baseMaterialID ID of the material to use as base
+		 */
+		void SetMaterialInstanceBaseMaterial(UUID materialInstanceID, UUID baseMaterialID);
+
 		/** @brief Get a material or material instance by ID */
 		virtual MaterialData* GetMaterial(UUID materialID) const override;
 

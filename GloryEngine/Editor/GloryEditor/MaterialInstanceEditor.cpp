@@ -38,7 +38,7 @@ namespace Glory::Editor
 		if (AssetPicker::ResourceDropdown("Base Material", ResourceTypes::GetHash<MaterialData>(), &baseMaterialID, false))
 		{
 			change = true;
-			baseMaterial.Set(uint64_t(baseMaterialID));
+			materialManager.SetMaterialInstanceBaseMaterial(pMaterial->GetUUID(), baseMaterialID);
 		}
 
 		if (!baseMaterialID || !EditorAssetDatabase::AssetExists(baseMaterialID))
@@ -97,6 +97,9 @@ namespace Glory::Editor
 					{
 						prop["Enable"].Set(true);
 						pMaterialData->EnableProperty(materialPropertyIndex);
+
+						if (!prop["Value"].Exists() && baseProperties[sampler]["Value"].Exists())
+							prop["Value"].Set(baseProperties[sampler]["Value"].Node());
 					}
 					else
 					{
@@ -108,8 +111,9 @@ namespace Glory::Editor
 				EditorUI::PopFlag();
 				ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
 
-				if (!prop.Exists()) {
-					prop["Value"].Set(0);
+				if (!prop.Exists() && baseProperties[sampler]["Value"].Exists())
+				{
+					prop["Value"].Set(baseProperties[sampler]["Value"].Node());
 					prop["Enable"].Set(enable);
 				}
 				auto baseValue = baseProperties[sampler]["Value"];
@@ -147,6 +151,9 @@ namespace Glory::Editor
 				{
 					prop["Enable"].Set(true);
 					pMaterialData->EnableProperty(materialPropertyIndex);
+
+					if (!prop["Value"].Exists() && baseProperties[propInfo->ShaderName()]["Value"].Exists())
+						prop["Value"].Set(baseProperties[propInfo->ShaderName()]["Value"].Node());
 				}
 				else
 				{

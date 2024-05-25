@@ -290,7 +290,7 @@ namespace Glory::Editor
 		const std::vector<FileBrowserItem*>& pDrawList = std::string_view{m_SearchBuffer}.empty() ?
 			m_pSelectedFolder->m_pChildren : m_pSearchResultCache;
 
-		for (size_t i = 0; i < pDrawList.size(); i++)
+		for (size_t i = 0; i < pDrawList.size(); ++i)
 		{
 			FileBrowserItem* pChild = pDrawList[i];
 
@@ -439,8 +439,9 @@ namespace Glory::Editor
 		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
 
 		const UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
+		const bool selected = (selectedID != 0 && selectedID == uuid) || m_HighlightedPath == m_CachedPath.string();
 
-		ImGui::PushStyleColor(ImGuiCol_Button, selectedID == uuid || m_HighlightedPath == m_CachedPath.string() ? buttonColor : buttonInactiveColor);
+		ImGui::PushStyleColor(ImGuiCol_Button, selected ? buttonColor : buttonInactiveColor);
 		ImGui::Button("##fileItem", itemSize);
 
 		if (IsEditable())

@@ -16,6 +16,7 @@ namespace Glory
 		virtual PipelineData* GetPipeline(const MaterialManager& materialManager, const PipelineManager& pipelineManager) const override;
 		virtual UUID GetPipelineID(const MaterialManager& materialManager) const override;
 
+		void SetBaseMaterialID(UUID baseMaterial);
 		UUID BaseMaterialID() const;
 		MaterialData* GetBaseMaterial(const MaterialManager& manager) const;
 
