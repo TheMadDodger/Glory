@@ -94,7 +94,6 @@ namespace Glory::Editor
 
 	void EntitySceneObjectEditor::Initialize()
 	{
-		std::for_each(m_pComponents.begin(), m_pComponents.end(), [](EntityComponentObject* pObject) { delete pObject; });
 		m_pComponents.clear();
 
 		std::for_each(m_pComponentEditors.begin(), m_pComponentEditors.end(), [](Editor* pEditor) { Editor::ReleaseEditor(pEditor); });
