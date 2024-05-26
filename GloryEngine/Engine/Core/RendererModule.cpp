@@ -38,11 +38,12 @@ namespace Glory
 		return typeid(RendererModule);
 	}
 
-	void RendererModule::Submit(const RenderData& renderData)
+	void RendererModule::Submit(RenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(renderData)" };
-		m_CurrentPreparingFrame.ObjectsToRender.push_back(renderData);
-		OnSubmit(renderData);
+		const size_t index = m_CurrentPreparingFrame.ObjectsToRender.size();
+		m_CurrentPreparingFrame.ObjectsToRender.push_back(std::move(renderData));
+		OnSubmit(m_CurrentPreparingFrame.ObjectsToRender[index]);
 	}
 
 	void RendererModule::Submit(CameraRef camera)
@@ -68,11 +69,12 @@ namespace Glory
 	{
 	}
 
-	void RendererModule::Submit(const PointLight& light)
+	void RendererModule::Submit(PointLight&& light)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
-		m_CurrentPreparingFrame.ActiveLights.push_back(light);
-		OnSubmit(light);
+		const size_t index = m_CurrentPreparingFrame.ActiveLights.count();
+		m_CurrentPreparingFrame.ActiveLights.push_back(std::move(light));
+		OnSubmit(m_CurrentPreparingFrame.ActiveLights[index]);
 	}
 
 	void RendererModule::OnGameThreadFrameStart()
@@ -82,7 +84,10 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
-		m_CurrentPreparingFrame = RenderFrame();
+		m_CurrentPreparingFrame = RenderFrame{};
+
+		/* Stall if the queue is full */
+		while (m_pEngine->GetGraphicsThread()->GetRenderQueue()->IsFull()) {}
 	}
 
 	void RendererModule::OnGameThreadFrameEnd()
@@ -92,7 +97,7 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::EndFrame" };
-		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(m_CurrentPreparingFrame);
+		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(std::move(m_CurrentPreparingFrame));
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()

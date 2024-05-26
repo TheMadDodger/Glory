@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <chrono>
 
 namespace std::filesystem
 {
@@ -49,6 +50,8 @@ namespace Glory
 		GLORY_RUNTIME_API void SetDataPath(const std::string& dataPath);
 		/** @brief Get the data path */
 		GLORY_RUNTIME_API std::string_view GetDataPath();
+		/** @brief Set framerate limit */
+		GLORY_RUNTIME_API void SetFramerateLimit(float limit);
 
 	private:
 		/** @brief Callback when the rendering of a frame starts */
@@ -69,5 +72,8 @@ namespace Glory
 		std::unique_ptr<RuntimeShaderManager> m_ShaderManager;
 		std::vector<std::filesystem::path> m_AppendedAssetDatabases;
 		std::string m_DataPath;
+
+		std::chrono::time_point<std::chrono::system_clock> m_LastRenderedFrame;
+		float m_MaxFramerate = 300.0f;
 	};
 }

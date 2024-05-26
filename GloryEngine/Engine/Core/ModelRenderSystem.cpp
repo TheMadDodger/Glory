@@ -63,7 +63,7 @@
 //            renderData.m_LayerMask = mask;
 //            renderData.m_ObjectID = entity;
 //
-//            REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(renderData), );
+//            REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
 //        }
 //    }
 //}

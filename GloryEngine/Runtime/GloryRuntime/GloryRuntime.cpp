@@ -32,7 +32,8 @@ namespace Glory
 		m_PipelineManager(new RuntimePipelineManager(pEngine)),
 		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
 		m_ShaderManager(new RuntimeShaderManager(pEngine)),
-		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr)
+		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr),
+		m_LastRenderedFrame(std::chrono::system_clock::now())
 	{
 	}
 
@@ -230,10 +231,34 @@ namespace Glory
 		return m_DataPath;
 	}
 
+	void GloryRuntime::SetFramerateLimit(float limit)
+	{
+		m_MaxFramerate = limit;
+	}
+
 	void GloryRuntime::GraphicsThreadEndRender()
 	{
 		RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
 		m_pGraphics->Blit(pTexture);
 		m_pGraphics->Swap();
+
+		if (m_MaxFramerate == 0.0f)
+		{
+			m_LastRenderedFrame = std::chrono::system_clock::now();
+			return;
+		}
+
+		/* Limit framerate */
+		std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
+		const double frameIntervals = 1.0f/m_MaxFramerate;
+		double timeSinceRefresh = 0.0f;
+
+		while (timeSinceRefresh < frameIntervals)
+		{
+			currentTime = std::chrono::system_clock::now();
+			std::chrono::duration<double> frameDuration = currentTime - m_LastRenderedFrame;
+			timeSinceRefresh = std::chrono::duration_cast<std::chrono::nanoseconds>(frameDuration).count()/1000000000.0;
+		}
+		m_LastRenderedFrame = std::chrono::system_clock::now();
 	}
 }

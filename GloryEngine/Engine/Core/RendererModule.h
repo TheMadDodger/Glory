@@ -22,10 +22,10 @@ namespace Glory
 
 		virtual const std::type_info& GetModuleType() override;
 
-		void Submit(const RenderData& renderData);
+		void Submit(RenderData&& renderData);
 		void Submit(CameraRef camera);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
-		void Submit(const PointLight& light);
+		void Submit(PointLight&& light);
 
 		void OnGameThreadFrameStart();
 		void OnGameThreadFrameEnd();
