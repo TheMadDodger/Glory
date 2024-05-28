@@ -8,6 +8,7 @@
 #include "ImGuiHelpers.h"
 #include "EditableEntity.h"
 #include "EntityEditor.h"
+#include "Package.h"
 
 #include <imgui.h>
 #include <EditorAssetCallbacks.h>
@@ -179,12 +180,19 @@ namespace Glory::Editor
         /* Ignore folders */
         if (std::filesystem::is_directory(path)) return;
 
+        /* We can't import if we're packaging */
+        if (IsPackagingBusy()) return;
+
         /* Is this file already part of the project? */
         ProjectSpace* pProject = ProjectSpace::GetOpenProject();
         if (!pProject) return;
         std::filesystem::path rootPath = pProject->RootPath();
-        std::filesystem::path relativePath = std::filesystem::relative(path, rootPath);
-        if (relativePath.empty() || relativePath.native()[0] != '.') return;
+        rootPath.append("Assets");
+        if (path.string()._Starts_with(rootPath.string()))
+        {
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning("File already in project");
+            return;
+        }
 
         /* TODO: Prompt the user with a popup for import settings if relevant */
 
