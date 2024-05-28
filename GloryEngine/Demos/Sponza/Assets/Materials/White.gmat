@@ -1,10 +1,6 @@
-Shaders:
-  - UUID: 6885077887218838044
-    Type: Vert
-  - UUID: 472749852331879165
-    Type: Frag
 Properties:
-  - DisplayName: Color
-    ShaderName: Color
+  Color:
+    DisplayName: Color
     TypeHash: 1650774632
     Value: [1, 1, 1, 1]
+Pipeline: 9
