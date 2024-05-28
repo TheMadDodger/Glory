@@ -27,6 +27,8 @@ Editor:
 - Added migration for updating referenced asset IDs to built-in assets
 - Added migration to convert material properties in YAML to a map rather than a sequence
 - Fixed the majority of crashes
+- Fixed issue where importing a file from another drive did not work
+- Updated templates
 
 Engine:
 - Removed GloryEntityScenes module and has made it the internal scene graph
