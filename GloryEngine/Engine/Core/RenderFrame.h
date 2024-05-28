@@ -13,6 +13,11 @@ namespace Glory
 	{
 	public:
 		FrameData(size_t max) : m_Counter(0), m_ActiveObjects(max) {}
+		~FrameData()
+		{
+			m_ActiveObjects.clear();
+			m_Counter = 0;
+		}
 
 		void push_back(const T& value)
 		{
@@ -55,6 +60,7 @@ namespace Glory
 	{
 	public:
 		RenderFrame();
+		~RenderFrame();
 
 	public:
 		std::vector<RenderData> ObjectsToRender;

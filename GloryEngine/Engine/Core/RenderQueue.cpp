@@ -10,10 +10,10 @@ namespace Glory
     {
     }
 
-    void RenderQueue::EnqueueFrame(const RenderFrame& frame)
+    void RenderQueue::EnqueueFrame(RenderFrame&& frame)
     {
         std::unique_lock<std::mutex> lock(m_QueueMutex);
-        m_pRenderQueue.push(frame);
+        m_pRenderQueue.push(std::move(frame));
         lock.unlock();
 
         //m_QueueCondition.notify_one();

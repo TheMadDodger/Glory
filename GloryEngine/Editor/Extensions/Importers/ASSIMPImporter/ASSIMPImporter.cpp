@@ -82,6 +82,7 @@ namespace Glory::Editor
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(mesh);
+            if (!pMeshData) continue;
             resource.AddChild(pMeshData, pMeshData->Name());
         }
         // then do the same for each of its children

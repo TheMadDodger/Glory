@@ -58,6 +58,13 @@ namespace Glory
         m_Runtime->SetDataPath(dataPath);
         m_Runtime->Initialize();
 
+        std::string frameLimitStr;
+        if (commandLine.GetValue("frameLimit", frameLimitStr))
+        {
+            const float frameLimit = std::stof(frameLimitStr);
+            m_Runtime->SetFramerateLimit(frameLimit);
+        }
+
         if (!cmd.empty())
             m_Runtime->GetEngine()->GetConsole().ExecuteCommand(cmd);
 

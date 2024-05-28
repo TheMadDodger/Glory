@@ -60,6 +60,6 @@ namespace Glory
         renderData.m_ObjectID = pScene->GetEntityUUID(entity);
         renderData.m_SceneID = pScene->GetUUID();
 
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(renderData), );
+        REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
     }
 }

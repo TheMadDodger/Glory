@@ -23,7 +23,7 @@ namespace Glory
 		pointLight.intensity = pComponent.m_Intensity;
 		pointLight.range = pComponent.m_Range;
 
-		pEngine->GetMainModule<RendererModule>()->Submit(pointLight);
+		pEngine->GetMainModule<RendererModule>()->Submit(std::move(pointLight));
 	}
 
 	LightSystem::LightSystem()

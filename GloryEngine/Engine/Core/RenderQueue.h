@@ -13,7 +13,7 @@ namespace Glory
 		virtual ~RenderQueue();
 
 	public:
-		void EnqueueFrame(const RenderFrame& frame);
+		void EnqueueFrame(RenderFrame&& frame);
 		void GetNextFrame(std::function<void(const RenderFrame&)> callback);
 		//void IsEmpty();
 

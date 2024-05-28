@@ -42,6 +42,7 @@ namespace Glory::Editor
 	std::vector<PackageTask> PackagingTasks;
 	PackageTaskState PackagingTaskState;
 
+	std::atomic<bool> Running = false;
 	std::atomic<bool> Cancel = false;
 	std::atomic<bool> Canceled = false;
 	std::atomic<bool> Failed = false;
@@ -62,6 +63,7 @@ namespace Glory::Editor
 
 	bool PackageJob(Engine* pEngine, std::filesystem::path packageRoot)
 	{
+		Running = true;
 		for (size_t i = 0; i < PackagingTasks.size(); ++i)
 		{
 			if (Cancel)
@@ -80,11 +82,13 @@ namespace Glory::Editor
 			{
 				pEngine->GetDebug().LogError("Packaging failed, check the console for errors");
 				Failed = true;
+				Running = false;
 				return false;
 			}
 			++m_CurrentTask;
 		}
 
+		Running = false;
 		return true;
 	}
 
@@ -665,7 +669,7 @@ namespace Glory::Editor
 		luaStream << "		defines \"" << "_DEBUG" << "\"" << std::endl;
 		luaStream << "		symbols \"" << "On" << "\"" << std::endl;
 		luaStream << "	filter \"" << "configurations:Release" << "\"" << std::endl;
-		luaStream << "		kind \"" << "WindowedApp" << "\"" << std::endl;
+		luaStream << "		kind \"" << "ConsoleApp" << "\"" << std::endl;
 		luaStream << "		runtime \"" << "Release" << "\"" << std::endl;
 		luaStream << "		defines \"" << "NDEBUG" << "\"" << std::endl;
 		luaStream << "		optimize \"" << "On" << "\"" << std::endl;
@@ -910,6 +914,11 @@ namespace Glory::Editor
 		name = task.m_TaskName;
 		subName = PackagingTaskState.m_SubTaskName;
 		return false;
+	}
+
+	bool IsPackagingBusy()
+	{
+		return Running;
 	}
 
 	bool PackageFailed()
