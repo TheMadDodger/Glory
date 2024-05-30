@@ -1,0 +1,3 @@
+Name: "SDL Window"
+Type: Audio
+Dependencies: ["GPUUtilities", "TrueAudioNext", "phonon"]
