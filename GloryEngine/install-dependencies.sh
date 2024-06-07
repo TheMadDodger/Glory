@@ -19,6 +19,7 @@ elif [ "$OSTYPE" == "cygwin" ]; then
     echo ""
 elif [ "$OSTYPE" == "msys" ]; then
     echo "Windows system detected"
+	echo ${PLAT=windows}
 	echo ${PLATFORM=x64}
 elif [ "$OSTYPE" == "win32" ]; then
     echo "32 bit windows is not supported"
@@ -174,6 +175,39 @@ find "msvc/build/sgen/x64/lib/${CONFIG}" -name \*.* -exec cp {} "../../Dependenc
 find "msvc/build/sgen/x64/bin/${CONFIG}" -name \*.* -exec cp {} "../../Dependencies/${CONFIG}/bin/" \;
 find "msvc/build/sgen/x64/bin/${CONFIG}" -name \*.* -exec cp {} "../../Dependencies/${CONFIG}/bin/" \;
 cp -r msvc/include/mono "../../Dependencies/${CONFIG}/include"
+
+# SteamAudio
+cd ..
+cd third-party
+mkdir SteamAudio
+cd SteamAudio
+#cd core
+#cd build
+
+curl -L -o steamaudio_4.5.3.zip "https://github.com/ValveSoftware/steam-audio/releases/download/v4.5.3/steamaudio_4.5.3.zip"
+unzip steamaudio_4.5.3.zip
+cd steamaudio
+
+cp -r include "../../../Dependencies/${CONFIG}/include/phonon"
+cp -r lib/windows-x64/phonon.lib "../../../Dependencies/${CONFIG}/lib"
+cp -r symbols/windows-x64/phonon.pdb "../../../Dependencies/${CONFIG}/lib"
+cp -r lib/windows-x64/GPUUtilities.dll "../../../Dependencies/${CONFIG}/bin"
+cp -r lib/windows-x64/phonon.dll "../../../Dependencies/${CONFIG}/bin"
+cp -r lib/windows-x64/TrueAudioNext.dll "../../../Dependencies/${CONFIG}/bin"
+
+#python get_dependencies.py --clean build
+#if [ "$CONFIG" == "Debug" ]; then
+    #python get_dependencies.py --platform $PLAT -a $PLATFORM --toolchain vs2022 --debug
+#else
+    #python get_dependencies.py --platform $PLAT -a $PLATFORM --toolchain vs2022
+
+#python get_dependencies.py --platform windows -a x64 --toolchain vs2019
+
+#rm "${PLATFORM}" -r
+#mkdir "${PLATFORM}"
+#cd "${PLATFORM}"
+#cmake ../.. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+#cmake --build . --target INSTALL --config $CONFIG
 
 # Jolt
 # Jolt now gets built in the jolt module itself because I could not solve an illusive linker error

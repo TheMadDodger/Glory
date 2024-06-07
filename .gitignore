@@ -79,3 +79,4 @@ GloryEngine/Editor/WriteVersion/version.txt
 GloryEngine/Utils/**/Debug
 GloryEngine/Utils/**/Release
 Logs
+GloryEngine/third-party/SteamAudio
