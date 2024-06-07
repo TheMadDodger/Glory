@@ -1,0 +1,5 @@
+Name: "SDL Mixer"
+Type: Audio
+Dependencies: ["SDL2_mixer"]
+Editor:
+ Extensions: ["SDLAudioExtension"]

@@ -50,3 +50,6 @@
 [submodule "GloryEngine/submodules/CRCpp"]
 	path = GloryEngine/submodules/CRCpp
 	url = https://github.com/d-bahr/CRCpp
+[submodule "GloryEngine/submodules/SDL_mixer"]
+	path = GloryEngine/submodules/SDL_mixer
+	url = https://github.com/libsdl-org/SDL_mixer

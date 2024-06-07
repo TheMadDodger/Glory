@@ -39,6 +39,7 @@
 #include "MaterialInstanceData.h"
 #include "ShaderSourceData.h"
 #include "PipelineData.h"
+#include "AudioData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
@@ -600,6 +601,7 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<ModelData>("");
 		m_ResourceTypes->RegisterResource<ShaderSourceData>("");
 		m_ResourceTypes->RegisterResource<ImageData>("");
+		m_ResourceTypes->RegisterResource<AudioData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");
