@@ -31,6 +31,7 @@
 #include <EditableEntity.h>
 #include <EntityEditor.h>
 #include <SystemTools.h>
+#include <SceneManager.h>
 
 #include <fstream>
 #include <string>
@@ -130,6 +131,7 @@ namespace Glory::Editor
 
 		m_pMonoScriptingModule = pEngine->GetOptionalModule<GloryMonoScipting>();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
+		pEngine->GetSceneManager()->ComponentTypesInstance();
 
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();

@@ -1,8 +1,15 @@
 #include "SDLAudioModule.h"
+#include "AudioComponents.h"
+#include "AudioEmitterSystem.h"
 
 #include <Engine.h>
+#include <SceneManager.h>
 #include <AudioData.h>
 #include <Debug.h>
+
+#include <EntityRegistry.h>
+#include <EntityID.h>
+#include <ComponentTypes.h>
 
 namespace Glory
 {
@@ -71,6 +78,16 @@ namespace Glory
 			m_pEngine->GetDebug().LogFatalError("Could not initialize SDL_mixer");
 			return;
 		}
+
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+
+		m_pEngine->GetSceneManager()->RegisterComponent<AudioEmitter>();
+
+		// Scripted
+		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
+		pComponentTypes->RegisterInvokaction<AudioEmitter>(Glory::Utils::ECS::InvocationType::Update, AudioEmitterSystem::OnUpdate);
+		pComponentTypes->RegisterInvokaction<AudioEmitter>(Glory::Utils::ECS::InvocationType::Start, AudioEmitterSystem::OnStart);
+		pComponentTypes->RegisterInvokaction<AudioEmitter>(Glory::Utils::ECS::InvocationType::Stop, AudioEmitterSystem::OnStop);
 	}
 
 	void SDLAudioModule::Cleanup()

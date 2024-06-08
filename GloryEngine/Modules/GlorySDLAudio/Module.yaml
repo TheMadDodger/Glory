@@ -1,4 +1,4 @@
-Name: "SDL Mixer"
+Name: "SDL Audio"
 Type: Audio
 Dependencies: ["SDL2_mixer"]
 Editor:
