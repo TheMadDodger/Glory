@@ -5,6 +5,7 @@
 #include <Engine.h>
 #include <AudioComponents.h>
 #include <SceneManager.h>
+#include <SDLAudioModule.h>
 
 #include <EntitySceneObjectEditor.h>
 #include <CreateEntityObjectsCallbacks.h>
@@ -20,6 +21,12 @@ EXTENSION_CPP(SDLAudioExtension)
 namespace Glory::Editor
 {
 	CREATE_OBJECT_CALLBACK_CPP(AudioEmitter, AudioEmitter, ());
+
+	void SDLAudioExtension::HandleStop(Module* pModule)
+	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		pEngine->GetOptionalModule<SDLAudioModule>()->Stop();
+	}
 
 	SDLAudioExtension::SDLAudioExtension()
 	{
@@ -38,6 +45,8 @@ namespace Glory::Editor
 
 		Editor::RegisterEditor<AudioDataEditor>();
 		EntitySceneObjectEditor::AddComponentIcon<AudioEmitter>(ICON_FA_VOLUME_HIGH);
+
+		EditorPlayer::RegisterLoopHandler(this);
 
 		OBJECT_CREATE_MENU(AudioEmitter, AudioEmitter);
 	}
