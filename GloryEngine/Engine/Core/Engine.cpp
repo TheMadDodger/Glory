@@ -97,7 +97,7 @@ namespace Glory
 	{
 		auto it = std::find_if(m_pMainModules.begin(), m_pMainModules.end(), [&](Module* pModule)
 		{
-			return pModule->GetModuleType() == type;
+			return pModule->GetModuleType() == type || pModule->GetBaseModuleType() == type;
 		});
 
 		if (it == m_pMainModules.end()) return nullptr;
@@ -119,7 +119,7 @@ namespace Glory
 	{
 		auto it = std::find_if(m_pOptionalModules.begin(), m_pOptionalModules.end(), [&](Module* pModule)
 		{
-			return pModule->GetModuleType() == type;
+			return pModule->GetModuleType() == type || pModule->GetBaseModuleType() == type;
 		});
 
 		if (it == m_pOptionalModules.end()) return nullptr;
@@ -141,7 +141,7 @@ namespace Glory
 	{
 		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
 		{
-			return pModule->GetModuleType() == type;
+			return pModule->GetModuleType() == type || pModule->GetBaseModuleType() == type;
 		});
 
 		if (it == m_pAllModules.end()) return nullptr;
@@ -163,7 +163,7 @@ namespace Glory
 	{
 		auto it = std::find_if(m_pInternalModules.begin(), m_pInternalModules.end(), [&](Module* pModule)
 		{
-			return pModule->GetModuleType() == type;
+			return pModule->GetModuleType() == type || pModule->GetBaseModuleType() == type;
 		});
 
 		if (it == m_pInternalModules.end()) return nullptr;

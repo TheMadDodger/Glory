@@ -25,6 +25,7 @@ project "GlorySDLAudio"
 	includedirs
 	{
 		"%{DepsIncludeDir}",
+		"%{BaseIncludeDir.audio}",
 
 		"%{IncludeDir.glm}",
 		"%{GloryIncludeDir.core}",
@@ -45,11 +46,14 @@ project "GlorySDLAudio"
 		"%{LibDirs.glory}",
 
 		"%{LibDirs.yaml_cpp}",
+
+		"{moduleBaseOutDir}",
 	}
 
 	links
 	{
 		"GloryCore",
+		"GloryAudioModule",
 		"GloryReflect",
 		"GloryECS",
 

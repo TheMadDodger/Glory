@@ -31,6 +31,7 @@ modulesDir								= "%{rootDir}/Modules"
 engineOutDir							= "%{rootDir}/bin/Engine/%{cfg.buildcfg}/%{cfg.platform}"
 modulesOutDir							= "%{engineOutDir}/Modules"
 moduleOutDir							= "%{modulesOutDir}/%{prj.name}"
+moduleBaseOutDir						= "%{engineOutDir}/ModulesBase"
 
 outputDir								= "%{cfg.buildcfg}/%{cfg.platform}"
 
@@ -58,6 +59,9 @@ GloryIncludeDir["runtimeApp"]			= "%{runtimeDir}/Application"
 GloryIncludeDir["runtimeTestApp"]		= "%{runtimeDir}/RuntimeTestApplication"
 GloryIncludeDir["jobs"]					= "%{engineDir}/Jobs"
 GloryIncludeDir["threads"]				= "%{engineDir}/Threads"
+
+BaseIncludeDir = {}
+BaseIncludeDir["audio"]					= "%{modulesDir}/Base/GloryAudioModule"
 
 SubmodoleDirs = {}
 SubmodoleDirs["ImGui"]					= "%{rootDir}/submodules/ImGui"
@@ -130,6 +134,10 @@ group "Modules"
 	include "Modules/GloryJoltPhysics"
 	include "Modules/GlorySDLAudio"
 	--include "GloryVulkanGraphics"
+group ""
+
+group "Modules/Base"
+	include "Modules/Base/GloryAudioModule"
 group ""
 
 group "Editor"

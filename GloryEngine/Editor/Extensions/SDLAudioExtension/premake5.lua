@@ -21,6 +21,7 @@ project "SDLAudioExtension"
 	includedirs
 	{
 		"%{DepsIncludeDir}",
+		"%{BaseIncludeDir.audio}",
 
 		"%{IncludeDir.glm}",
 

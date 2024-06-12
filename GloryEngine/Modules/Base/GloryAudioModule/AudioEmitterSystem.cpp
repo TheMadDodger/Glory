@@ -1,11 +1,11 @@
 #include "AudioEmitterSystem.h"
 #include "AudioComponents.h"
+#include "AudioModule.h"
 
 #include <EntityRegistry.h>
 #include <GScene.h>
 #include <Engine.h>
 #include <SceneManager.h>
-#include <SDLAudioModule.h>
 
 namespace Glory
 {
@@ -29,7 +29,7 @@ namespace Glory
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		SDLAudioModule* pAudioModule = pEngine->GetOptionalModule<SDLAudioModule>();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		AudioData* pAudio = pComponent.m_Audio.Get(&pEngine->GetAssetManager());
 		if (!pAudio) return;

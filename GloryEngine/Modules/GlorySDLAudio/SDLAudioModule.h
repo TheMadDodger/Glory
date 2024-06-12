@@ -1,13 +1,11 @@
 #pragma once
-#include <Module.h>
+#include <AudioModule.h>
 
 #include <SDL2/SDL_mixer.h>
 
 namespace Glory
 {
-	class AudioData;
-
-    class SDLAudioModule : public Module
+    class SDLAudioModule : public AudioModule
     {
 	public:
 		SDLAudioModule();
@@ -17,9 +15,9 @@ namespace Glory
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
-		GLORY_API void Play(AudioData* pAudio, int loops=0);
-		GLORY_API void Stop();
-		GLORY_API void PlayMusic(AudioData* pAudio, int loops=0);
+		GLORY_API void Play(AudioData* pAudio, int loops=0) override;
+		GLORY_API void Stop() override;
+		GLORY_API void PlayMusic(AudioData* pAudio, int loops=0) override;
 
 	protected:
 		virtual void Initialize() override;

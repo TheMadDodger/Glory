@@ -59,6 +59,7 @@ namespace Glory
 		virtual ~Module();
 
 		virtual const std::type_info& GetModuleType() = 0;
+		virtual const std::type_info& GetBaseModuleType() { return GetModuleType(); };
 
 		Engine* GetEngine();
 
