@@ -39,6 +39,6 @@ namespace Glory
 			pAudioModule->PlayMusic(pAudio, pComponent.m_Loops);
 			return;
 		}
-		pAudioModule->Play(pAudio, pComponent.m_Loops);
+		pAudioModule->Play(pAudio, nullptr, 0, pComponent.m_Loops);
 	}
 }
