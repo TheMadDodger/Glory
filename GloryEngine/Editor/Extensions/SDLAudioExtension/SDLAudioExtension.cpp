@@ -20,7 +20,7 @@ EXTENSION_CPP(SDLAudioExtension)
 
 namespace Glory::Editor
 {
-	CREATE_OBJECT_CALLBACK_CPP(AudioEmitter, AudioEmitter, ());
+	CREATE_OBJECT_CALLBACK_CPP(AudioSource, AudioSource, ());
 
 	void SDLAudioExtension::HandleStop(Module* pModule)
 	{
@@ -44,10 +44,10 @@ namespace Glory::Editor
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
 		Editor::RegisterEditor<AudioDataEditor>();
-		EntitySceneObjectEditor::AddComponentIcon<AudioEmitter>(ICON_FA_VOLUME_HIGH);
+		EntitySceneObjectEditor::AddComponentIcon<AudioSource>(ICON_FA_VOLUME_HIGH);
 
 		EditorPlayer::RegisterLoopHandler(this);
 
-		OBJECT_CREATE_MENU(AudioEmitter, AudioEmitter);
+		OBJECT_CREATE_MENU(AudioSource, AudioSource);
 	}
 }

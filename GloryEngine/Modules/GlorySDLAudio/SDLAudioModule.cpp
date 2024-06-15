@@ -9,9 +9,7 @@ namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(SDLAudioModule);
 
-	SDLAudioModule::SDLAudioModule()
-	{
-	}
+	SDLAudioModule::SDLAudioModule() { }
 	SDLAudioModule::~SDLAudioModule() {}
 
 	const std::type_info& SDLAudioModule::GetModuleType()

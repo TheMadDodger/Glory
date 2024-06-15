@@ -1,4 +1,4 @@
-#include "AudioEmitterSystem.h"
+#include "AudioSourceSystem.h"
 #include "AudioComponents.h"
 #include "AudioModule.h"
 
@@ -9,21 +9,21 @@
 
 namespace Glory
 {
-	void AudioEmitterSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioEmitter& pComponent)
+	void AudioSourceSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
 		if (!pComponent.m_AutoPlay) return;
 		Play(pRegistry, entity, pComponent);
 	}
 
-	void AudioEmitterSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioEmitter& pComponent)
+	void AudioSourceSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
 	}
 
-	void AudioEmitterSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioEmitter& pComponent)
+	void AudioSourceSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
 	}
 
-	void AudioEmitterSystem::Play(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioEmitter& pComponent)
+	void AudioSourceSystem::Play(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
 		if (!pComponent.m_Audio.AssetUUID()) return;
 

@@ -29,6 +29,7 @@ project "GloryMonoScripting"
 	includedirs
 	{
 		"%{DepsIncludeDir}",
+		"%{BaseIncludeDir.audio}",
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
@@ -49,11 +50,14 @@ project "GloryMonoScripting"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
+
+		"{moduleBaseOutDir}",
 	}
 
 	links
 	{
 		"GloryCore",
+		"GloryAudioModule",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
@@ -69,7 +73,6 @@ project "GloryMonoScripting"
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
-		"GloryUtils",
 	}
 
 	dependson

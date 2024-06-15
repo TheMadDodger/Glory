@@ -1,6 +1,6 @@
 #include "AudioModule.h"
 #include "AudioComponents.h"
-#include "AudioEmitterSystem.h"
+#include "AudioSourceSystem.h"
 
 #include <Engine.h>
 #include <SceneManager.h>
@@ -23,11 +23,11 @@ namespace Glory
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
-		m_pEngine->GetSceneManager()->RegisterComponent<AudioEmitter>();
+		m_pEngine->GetSceneManager()->RegisterComponent<AudioSource>();
 
 		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
-		pComponentTypes->RegisterInvokaction<AudioEmitter>(Glory::Utils::ECS::InvocationType::Update, AudioEmitterSystem::OnUpdate);
-		pComponentTypes->RegisterInvokaction<AudioEmitter>(Glory::Utils::ECS::InvocationType::Start, AudioEmitterSystem::OnStart);
-		pComponentTypes->RegisterInvokaction<AudioEmitter>(Glory::Utils::ECS::InvocationType::Stop, AudioEmitterSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Update, AudioSourceSystem::OnUpdate);
+		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Start, AudioSourceSystem::OnStart);
+		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Stop, AudioSourceSystem::OnStop);
 	}
 }

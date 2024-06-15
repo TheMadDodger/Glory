@@ -7,12 +7,12 @@
 
 namespace Glory
 {
-	struct AudioEmitter
+	struct AudioSource
 	{
-		GLORY_API AudioEmitter():
+		GLORY_API AudioSource():
 			m_AsMusic(false), m_AllowExternalEffects(false), m_AutoPlay(false), m_Loops(0) {}
 
-		REFLECTABLE(AudioEmitter,
+		REFLECTABLE(AudioSource,
 			(AssetReference<AudioData>)(m_Audio),
 			(bool)(m_AsMusic),
 			(bool)(m_AllowExternalEffects),
