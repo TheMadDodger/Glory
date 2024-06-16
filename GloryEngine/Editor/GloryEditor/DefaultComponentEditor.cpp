@@ -36,12 +36,18 @@ namespace Glory::Editor
 			change = true;
 		}
 
+		void* pAddress = pRegistry->GetComponentAddress(entity, componentID);
+
 		if (pTypeData)
 		{
-			change |= PropertyDrawer::DrawProperty("", pTypeData, pRegistry->GetComponentAddress(entity, componentID), 0);
+			change |= PropertyDrawer::DrawProperty("", pTypeData, pAddress, 0);
 		}
 
 		Undo::StopRecord();
+
+		if (change)
+			pRegistry->GetTypeView(hash)->Invoke(Utils::ECS::InvocationType::OnValidate, pRegistry, entity, pAddress);
+
 		return change;
 	}
 

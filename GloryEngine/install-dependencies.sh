@@ -76,6 +76,19 @@ cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..
 
+# SDL_mixer
+echo "Building SDL_mixer"
+cd SDL_mixer
+echo "Building ${PLATFORM} binaries"
+rm "${PLATFORM}" -r
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+
+cmake .. -A $PLATFORM -DSDL2_INCLUDE_DIR="../../includes/${CONFIG}/${PLATFORM}/SDL2" -DSDL2_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_LIB}.lib" -DSDL2_MAIN_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_MAIN_LIB}.lib" -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake --build . --target INSTALL --config $CONFIG
+
+cd ../..
+
 # shaderc
 cd shaderc
 echo "Building shaderc"

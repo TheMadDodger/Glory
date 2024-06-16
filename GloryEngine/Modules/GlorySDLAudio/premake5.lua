@@ -1,4 +1,4 @@
-project "GloryMonoScripting"
+project "GlorySDLAudio"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
@@ -19,11 +19,7 @@ project "GloryMonoScripting"
 
 	vpaths
 	{
-		["Module"] = { "GloryMono.*", "GloryMonoScipting.*" },
-		["API"] = { "EntityCSAPI.*", "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*", "PhysicsCSAPI.*", "ScriptingMethodsHelper.*", "AudioCSAPI.*" },
-		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" },
-		["Mono"] = { "Assembly.*", "AssemblyDomain.*", "MonoAssetManager.*", "MonoLibManager.*", "MonoManager.*", "CoreLibManager.*", "IMonoLibManager.*" },
-		["Memory"] = { "MonoEntityObjectManager.*", "MonoEntitySceneManager.*", "MonoSceneObjectManager.*", "MonoSceneManager.*", "MonoScriptObjectManager.*" }
+		["Module"] = { "GlorySDLAudio.*", "SDLAudioModule.*" }
 	}
 
 	includedirs
@@ -32,16 +28,15 @@ project "GloryMonoScripting"
 		"%{BaseIncludeDir.audio}",
 
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
-
-		"%{GloryIncludeDir.threads}",
-		"%{GloryIncludeDir.jobs}",
-
-		"%{IncludeDir.Utils}",
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
+
+		"%{IncludeDir.yaml_cpp}",
+
+		"%{DepIncludesDir}",
 	}
 
 	libdirs
@@ -49,6 +44,7 @@ project "GloryMonoScripting"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.glory}",
+
 		"%{LibDirs.yaml_cpp}",
 
 		"{moduleBaseOutDir}",
@@ -58,42 +54,33 @@ project "GloryMonoScripting"
 	{
 		"GloryCore",
 		"GloryAudioModule",
+		"GloryReflect",
+		"GloryECS",
+
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
-		"mono-2.0-sgen",
-		"MonoPosixHelper",
 
-		"GloryECS",
-		"GloryReflect",
 		"GloryUtilsVersion",
 		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
-	}
-
-	dependson
-	{
-
+		"GloryUtils",
 	}
 
 	defines
 	{
-		"GLORY_EXPORTS",
-		"GLORY_UUID_DEFINED"
+		"GLORY_EXPORTS"
 	}
 
 	postbuildcommands
 	{
+		("{COPY} %{DepsBinDir}/SDL2_mixerd?.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} %{DepsBinDir}/SDL2_mixer?.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
-
-		("{COPY} \"%{monoDir}/lib/mono/4.5/*\" %{moduleOutDir}/Dependencies/mono/4.5/"),
-		("{COPY} %{DepsBinDir}/mono-2.0-sgen.dll %{moduleOutDir}/Dependencies/"),
 	}
 
 	filter "system:windows"
@@ -109,15 +96,41 @@ project "GloryMonoScripting"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			--"%{vulkanDir}/Third-Party/Bin32"
+		}
+
+		postbuildcommands
+		{
+			--("{COPY} %{vulkanDir}/Third-Party/Bin32/*.dll %{moduleOutDir}/Dependencies")
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			--"%{vulkanDir}/Third-Party/Bin"
+		}
+
+		postbuildcommands
+		{
+			--("{COPY} %{vulkanDir}/Third-Party/Bin/*.dll %{moduleOutDir}/Dependencies")
+		}
 
 	filter "configurations:Debug"
 		runtime "Debug"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "SDL2d"
+		links "SDL2_mixerd"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "SDL2"
+		links "SDL2_mixer"

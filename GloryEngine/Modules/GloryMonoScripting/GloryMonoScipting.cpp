@@ -3,6 +3,7 @@
 #include "MathCSAPI.h"
 #include "InputCSAPI.h"
 #include "EntityCSAPI.h"
+#include "AudioCSAPI.h"
 #include "MonoManager.h"
 #include "ScriptedComponentSerializer.h"
 #include "MonoComponents.h"
@@ -69,6 +70,7 @@ namespace Glory
 		CoreCSAPI::SetEngine(m_pEngine);
 		InputCSAPI::SetEngine(m_pEngine);
 		EntityCSAPI::SetEngine(m_pEngine);
+		AudioCSAPI::SetEngine(m_pEngine);
 
 		m_pEngine->GetSceneManager()->RegisterComponent<MonoScriptComponent>();
 		m_pEngine->GetSerializers().RegisterSerializer<ScriptedComponentSerailizer>();
@@ -119,6 +121,7 @@ namespace Glory
 		MathCSAPI::AddInternalCalls(internalCalls);
 		InputCSAPI::AddInternalCalls(internalCalls);
 		EntityCSAPI::GetInternallCalls(internalCalls);
+		AudioCSAPI::GetInternallCalls(internalCalls);
 	}
 
 	void GloryMonoScipting::GetLibs(ScriptingExtender* pScriptingExtender)

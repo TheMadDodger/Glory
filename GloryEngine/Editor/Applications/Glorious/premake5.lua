@@ -92,6 +92,7 @@ project "Glorious"
 		"GloryJoltPhysics",
 		--"GloryEditorVulkan",
 		"GloryMonoScripting",
+		"SDLAudioExtension",
 		"EntityScenesEditorExtension",
 		"JoltEditorExtension",
 		"MonoEditorExtension",

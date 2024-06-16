@@ -1,29 +1,21 @@
-project "GloryMonoScripting"
+project "SDLAudioExtension"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{moduleOutDir}")
+	targetdir ("%{modulesOutDir}/GlorySDLAudio/Editor/Extension")
 	objdir ("%{outputDir}")
 
 	files
 	{
 		"**.h",
 		"**.cpp",
-		"Module.yaml",
-		"premake5.lua",
-		"Assets/**.*",
-		"Resources/**.*",
+		"premake5.lua"
 	}
 
 	vpaths
 	{
-		["Module"] = { "GloryMono.*", "GloryMonoScipting.*" },
-		["API"] = { "EntityCSAPI.*", "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*", "PhysicsCSAPI.*", "ScriptingMethodsHelper.*", "AudioCSAPI.*" },
-		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" },
-		["Mono"] = { "Assembly.*", "AssemblyDomain.*", "MonoAssetManager.*", "MonoLibManager.*", "MonoManager.*", "CoreLibManager.*", "IMonoLibManager.*" },
-		["Memory"] = { "MonoEntityObjectManager.*", "MonoEntitySceneManager.*", "MonoSceneObjectManager.*", "MonoSceneManager.*", "MonoScriptObjectManager.*" }
 	}
 
 	includedirs
@@ -32,68 +24,67 @@ project "GloryMonoScripting"
 		"%{BaseIncludeDir.audio}",
 
 		"%{IncludeDir.glm}",
+
+		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
-
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
+		"%{GloryIncludeDir.sdlaudio}",
+		"%{GloryIncludeDir.editor}",
+		"%{GloryIncludeDir.ImGui}",
 
-		"%{IncludeDir.Utils}",
+		"%{IncludeDir.FA}",
+
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
+
+		"%{rapidjson}",
 	}
 
 	libdirs
 	{
 		"%{DepsLibDir}",
 
+		"%{LibDirs.ImGui}",
+		"%{LibDirs.implot}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 
-		"{moduleBaseOutDir}",
+		"%{modulesOutDir}/GlorySDLAudio",
 	}
 
 	links
 	{
 		"GloryCore",
-		"GloryAudioModule",
+		"GlorySDLAudio",
+		"GloryEditor",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
+		"ImGui",
+		"ImGuizmo",
+		"implot",
 		"yaml-cpp",
-		"mono-2.0-sgen",
-		"MonoPosixHelper",
 
 		"GloryECS",
 		"GloryReflect",
 		"GloryUtilsVersion",
-		"GloryUtils",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
-	}
-
-	dependson
-	{
-
+		"GloryUtils",
 	}
 
 	defines
 	{
 		"GLORY_EXPORTS",
-		"GLORY_UUID_DEFINED"
-	}
-
-	postbuildcommands
-	{
-		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
-
-		("{COPY} \"%{monoDir}/lib/mono/4.5/*\" %{moduleOutDir}/Dependencies/mono/4.5/"),
-		("{COPY} %{DepsBinDir}/mono-2.0-sgen.dll %{moduleOutDir}/Dependencies/"),
+		"GLORY_EDITOR_EXPORTS",
+		"GLORY_EDITOR_EXTENSION_EXPORTS",
+		"GLORY_UUID_DEFINED",
 	}
 
 	filter "system:windows"
@@ -117,7 +108,13 @@ project "GloryMonoScripting"
 		defines "_DEBUG"
 		symbols "On"
 
+		links "SDL2d"
+		links "SDL2_mixerd"
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links "SDL2"
+		links "SDL2_mixer"

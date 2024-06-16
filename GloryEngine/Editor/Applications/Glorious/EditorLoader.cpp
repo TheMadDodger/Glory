@@ -164,6 +164,7 @@ namespace Glory
 		if (!std::filesystem::exists(dllPath))
 		{
 			pEngine->GetDebug().LogError("Failed to load editor extension: " + name + ": The dll was not found!");
+			return;
 		}
 
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());

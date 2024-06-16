@@ -13,6 +13,9 @@
 #include <SceneManager.h>
 #include <ComponentTypes.h>
 #include <Components.h>
+#include <AudioComponents.h>
+#include <AudioModule.h>
+#include <AudioSourceSystem.h>
 #include <LayerManager.h>
 
 namespace Glory
@@ -523,6 +526,193 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region AudioSource
+
+	MonoObject* AudioSource_GetAudio(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		const UUID uuid = source.m_Audio.AssetUUID();
+		return MonoAssetManager::MakeMonoAssetObject<AudioData>(Entity_EngineInstance, uuid);
+	}
+
+	void AudioSource_SetAudio(MonoEntityHandle* pEntityHandle, UUID componentID, UUID audioID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		source.m_Audio = audioID;
+	}
+
+	bool AudioSource_GetAsMusic(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		return source.m_AsMusic;
+	}
+
+	void AudioSource_SetAsMusic(MonoEntityHandle* pEntityHandle, UUID componentID, bool asMusic)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		source.m_AsMusic = asMusic;
+	}
+
+	uint32_t AudioSource_GetLoops(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		return source.m_Loops;
+	}
+
+	void AudioSource_SetLoops(MonoEntityHandle* pEntityHandle, UUID componentID, uint32_t loops)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		source.m_Loops = loops;
+	}
+
+	bool AudioSource_GetAllowEffects(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		return source.m_AllowExternalEffects;
+	}
+
+	void AudioSource_SetAllowEffects(MonoEntityHandle* pEntityHandle, UUID componentID, bool allow)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		source.m_AllowExternalEffects = allow;
+	}
+
+	bool AudioSource_GetAutoPlay(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		return source.m_AutoPlay;
+	}
+
+	void AudioSource_SetAutoPlay(MonoEntityHandle* pEntityHandle, UUID componentID, bool autoPlay)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		source.m_AutoPlay = autoPlay;
+	}
+
+	bool AudioSource_GetPlaying(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		if (source.m_CurrentChannel == -1) return false;
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_GetPlaying > No audio module was loaded to play audio.");
+			return false;
+		}
+		if (source.m_AsMusic)
+			return pAudioModule->IsMusicPlaying();
+		return pAudioModule->IsPlaying(source.m_CurrentChannel);
+	}
+
+	bool AudioSource_GetPaused(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		if (source.m_CurrentChannel == -1) return false;
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_GetPaused > No audio module was loaded to play audio.");
+			return false;
+		}
+
+		if (source.m_AsMusic)
+			return pAudioModule->IsMusicPaused();
+		return pAudioModule->IsPaused(source.m_CurrentChannel);
+	}
+
+	void AudioSource_SetPaused(MonoEntityHandle* pEntityHandle, UUID componentID, bool pause)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		if (source.m_CurrentChannel == -1) return;
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_SetPaused > No audio module was loaded to play audio.");
+			return;
+		}
+		GScene* pScene = GetEntityScene(pEntityHandle);
+
+		if (pause)
+			AudioSourceSystem::Pause(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+		else
+			AudioSourceSystem::Resume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+	}
+
+	float AudioSource_GetVolume(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		return source.m_Volume;
+	}
+
+	void AudioSource_SetVolume(MonoEntityHandle* pEntityHandle, UUID componentID, float volume)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		source.m_Volume = volume;
+		if (source.m_CurrentChannel == -1) return;
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_SetVolume > No audio module was loaded to play audio.");
+			return;
+		}
+		GScene* pScene = GetEntityScene(pEntityHandle);
+		AudioSourceSystem::UpdateVolume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+	}
+
+	void AudioSource_Play(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_Play > No audio module was loaded to play audio.");
+			return;
+		}
+		GScene* pScene = GetEntityScene(pEntityHandle);
+		AudioSourceSystem::Play(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+	}
+
+	void AudioSource_Stop(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_Stop > No audio module was loaded to play audio.");
+			return;
+		}
+		GScene* pScene = GetEntityScene(pEntityHandle);
+		AudioSourceSystem::Stop(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+	}
+
+	void AudioSource_Pause(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_Pause > No audio module was loaded to play audio.");
+			return;
+		}
+		GScene* pScene = GetEntityScene(pEntityHandle);
+		AudioSourceSystem::Stop(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+	}
+
+	void AudioSource_Resume(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_Resume > No audio module was loaded to play audio.");
+			return;
+		}
+		GScene* pScene = GetEntityScene(pEntityHandle);
+		AudioSourceSystem::Resume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+	}
+
+#pragma endregion
+
 #pragma region SceneObject
 
 	MonoEntityHandle SceneObject_GetEntityHandle(uint64_t objectID, uint64_t sceneID)
@@ -636,6 +826,27 @@ namespace Glory
 		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetScript", MonoScriptComponent_GetScript);
 		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_SetScript", MonoScriptComponent_SetScript);
 		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetBehaviour", MonoScriptComponent_GetBehaviour);
+
+		/* AudioSource */
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAudio", AudioSource_GetAudio);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetAudio", AudioSource_SetAudio);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAsMusic", AudioSource_GetAsMusic);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetAsMusic", AudioSource_SetAsMusic);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetLoops", AudioSource_GetLoops);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetLoops", AudioSource_SetLoops);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAllowEffects", AudioSource_GetAllowEffects);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetAllowEffects", AudioSource_SetAllowEffects);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAutoPlay", AudioSource_GetAutoPlay);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetAutoPlay", AudioSource_SetAutoPlay);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetPlaying", AudioSource_GetPlaying);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetPaused", AudioSource_GetPaused);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetPaused", AudioSource_SetPaused);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetVolume", AudioSource_GetVolume);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetVolume", AudioSource_SetVolume);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_Play", AudioSource_Play);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_Stop", AudioSource_Stop);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_Pause", AudioSource_Pause);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_Resume", AudioSource_Resume);
 
 		/* Entity Scene Object */
 		BIND("GloryEngine.Entities.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);
