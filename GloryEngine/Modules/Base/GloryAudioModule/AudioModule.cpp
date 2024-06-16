@@ -26,6 +26,7 @@ namespace Glory
 		m_pEngine->GetSceneManager()->RegisterComponent<AudioSource>();
 
 		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
+		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::OnRemove, AudioSourceSystem::OnRemove);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Update, AudioSourceSystem::OnUpdate);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Start, AudioSourceSystem::OnStart);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Stop, AudioSourceSystem::OnStop);

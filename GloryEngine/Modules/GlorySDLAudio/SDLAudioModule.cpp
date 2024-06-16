@@ -10,6 +10,8 @@ namespace Glory
 	std::vector<AudioChannel> Channels;
 	MusicChannel Music;
 
+	Engine* Audio_EngineInstance = nullptr;
+
 	GLORY_MODULE_VERSION_CPP(SDLAudioModule);
 
 	SDLAudioModule::SDLAudioModule() { }
@@ -20,7 +22,7 @@ namespace Glory
 		return typeid(SDLAudioModule);
 	}
 
-	int SDLAudioModule::Play(AudioData* pAudio, void* udata, size_t udataSize, int loops)
+	int SDLAudioModule::Play(AudioData* pAudio, void* udata, size_t udataSize, int loops, std::function<void(Engine*, const AudioChannel&)> finishedCallback)
 	{
 		auto itor = m_Chunks.find(pAudio->GetUUID());
 		if (itor == m_Chunks.end())
@@ -40,6 +42,7 @@ namespace Glory
 			Channels[i].m_CurrentChunk = itor->second;
 			if (udata)
 				std::memcpy(Channels[i].m_UserData, udata, udataSize);
+			Channels[i].m_FinishedCallback = finishedCallback;
 			if (Mix_PlayChannel(-1, itor->second, loops) == -1)
 			{
 				m_pEngine->GetDebug().LogError("Failed to play audio.");
@@ -79,6 +82,7 @@ namespace Glory
 		m_pEngine->GetDebug().LogWarning("Allocated more mixing channels because all channels are busy.");
 		m_pEngine->GetDebug().LogWarning("Try increasing the mixing channels in the SDL Audio module settings.");
 
+		Channels[oldChannels].m_FinishedCallback = finishedCallback;
 		if (Mix_PlayChannel(int(oldChannels), itor->second, loops) == -1)
 		{
 			m_pEngine->GetDebug().LogError("Failed to play audio.");
@@ -91,9 +95,28 @@ namespace Glory
 		return int(oldChannels);
 	}
 
-	void SDLAudioModule::Stop()
+	void SDLAudioModule::Stop(int channel)
 	{
-		Mix_HaltChannel(-1);
+		/* Will trigger the finished callback which will cleanup the channel */
+		if (Mix_HaltChannel(channel) != 0)
+		{
+			m_pEngine->GetDebug().LogError("Failed to stop audio.");
+			m_pEngine->GetDebug().LogError(Mix_GetError());
+		}
+	}
+
+	void SDLAudioModule::StopMusic()
+	{
+		Mix_HaltMusic();
+	}
+
+	void SDLAudioModule::StopAll()
+	{
+		if (Mix_HaltChannel(-1) != 0)
+		{
+			m_pEngine->GetDebug().LogError("Failed to stop all audio.");
+			m_pEngine->GetDebug().LogError(Mix_GetError());
+		}
 	}
 
 	void SDLAudioModule::PlayMusic(AudioData* pAudio, int loops)
@@ -114,9 +137,27 @@ namespace Glory
 		Mix_PlayMusic(itor->second, loops);
 	}
 
+	bool SDLAudioModule::IsPlaying(int channel)
+	{
+		return Mix_Playing(channel);
+	}
+
+	bool SDLAudioModule::IsMusicPlaying()
+	{
+		return Mix_PlayingMusic();
+	}
+
 	void ChannelFinishedCallback(int channel)
 	{
-		Channels[size_t(channel)].m_CurrentChunk = NULL;
+		AudioChannel& channelData = Channels[size_t(channel)];
+		if (channelData.m_FinishedCallback)
+			channelData.m_FinishedCallback(Audio_EngineInstance, channelData);
+		channelData.m_CurrentChunk = NULL;
+		channelData.m_FinishedCallback = NULL;
+
+#if _DEBUG
+		Audio_EngineInstance->GetDebug().LogNotice("Channel " + std::to_string(channel) + " has finished playing");
+#endif // DEBUG
 	}
 
 	void MusicFinishedCallback()
@@ -126,6 +167,8 @@ namespace Glory
 
 	void SDLAudioModule::Initialize()
 	{
+		Audio_EngineInstance = m_pEngine;
+
 		AudioModule::Initialize();
 
 		if (Mix_Init(0) != 0)

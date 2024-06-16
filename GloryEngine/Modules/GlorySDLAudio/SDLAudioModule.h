@@ -15,9 +15,13 @@ namespace Glory
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
-		GLORY_API int Play(AudioData* pAudio, void* udata=nullptr, size_t udataSize=0, int loops=0) override;
-		GLORY_API void Stop() override;
+		GLORY_API int Play(AudioData* pAudio, void* udata=nullptr, size_t udataSize=0, int loops=0, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) override;
+		GLORY_API void Stop(int channel) override;
+		GLORY_API void StopMusic() override;
+		GLORY_API void StopAll() override;
 		GLORY_API void PlayMusic(AudioData* pAudio, int loops=0) override;
+		GLORY_API bool IsPlaying(int channel) override;
+		GLORY_API bool IsMusicPlaying() override;
 
 	protected:
 		virtual void Initialize() override;

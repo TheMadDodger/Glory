@@ -604,7 +604,16 @@ namespace Glory
 
 	void AudioSource_Stop(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
-		throw new std::exception("Not yet implemented");
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
+		if (!pAudioModule)
+		{
+			Entity_EngineInstance->GetDebug().LogError("AudioSource_Play > No audio module was loaded to play audio.");
+			return;
+		}
+		GScene* pScene = GetEntityScene(pEntityHandle);
+		pAudioModule->Stop(source.m_CurrentChannel);
+		AudioSourceSystem::Stop(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
 	void AudioSource_Pause(MonoEntityHandle* pEntityHandle, UUID componentID)

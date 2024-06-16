@@ -12,5 +12,8 @@ namespace Glory::Editor
 		AudioDataEditor();
 		virtual ~AudioDataEditor() = default;
 		virtual bool OnGUI() override;
+
+	private:
+		int m_PlayingChannel = -1;
 	};
 }

@@ -37,14 +37,18 @@ namespace Glory::Editor
 				return false;
 			}
 
-			pAudioModule->Play(static_cast<AudioData*>(pResource));
+			if (m_PlayingChannel != -1 && pAudioModule->IsPlaying(m_PlayingChannel))
+				pAudioModule->Stop(m_PlayingChannel);
+			m_PlayingChannel = pAudioModule->Play(static_cast<AudioData*>(pResource));
 		}
 
 		ImGui::SameLine();
+		ImGui::BeginDisabled(!(m_PlayingChannel != -1 && pAudioModule->IsPlaying(m_PlayingChannel)));
 		if (ImGui::Button(ICON_FA_STOP, { buttonSize, buttonSize }))
 		{
-			pAudioModule->Stop();
+			pAudioModule->Stop(m_PlayingChannel);
 		}
+		ImGui::EndDisabled();
 
 		return false;
 	}

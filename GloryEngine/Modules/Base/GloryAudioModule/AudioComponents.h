@@ -18,6 +18,8 @@ namespace Glory
 			(bool)(m_AllowExternalEffects),
 			(bool)(m_AutoPlay),
 			(uint32_t)(m_Loops)
-		)
+		);
+
+		int m_CurrentChannel = -1;
 	};
 }
