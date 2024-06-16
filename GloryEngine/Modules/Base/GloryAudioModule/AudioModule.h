@@ -36,6 +36,20 @@ namespace Glory
 		virtual void PlayMusic(AudioData* pAudio, int loops=0) = 0;
 		virtual bool IsPlaying(int channel) = 0;
 		virtual bool IsMusicPlaying() = 0;
+		virtual void Pause() = 0;
+		virtual void Pause(int channel) = 0;
+		virtual void PauseMusic() = 0;
+		virtual bool IsPaused(int channel) = 0;
+		virtual bool IsMusicPaused() = 0;
+		virtual void Resume() = 0;
+		virtual void Resume(int channel) = 0;
+		virtual void ResumeMusic() = 0;
+		virtual void SetVolume(int channel, float volume) = 0;
+		virtual void SetMusicVolume(float volume) = 0;
+		virtual void SetMasterVolume(float volume) = 0;
+		virtual float Volume(int channel) = 0;
+		virtual float MusicVolume() = 0;
+		virtual float MasterVolume() = 0;
 
 		//virtual AudioSourceSystem* AudioSourceManager() = 0;
 

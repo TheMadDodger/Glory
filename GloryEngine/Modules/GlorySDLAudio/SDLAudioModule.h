@@ -22,6 +22,20 @@ namespace Glory
 		GLORY_API void PlayMusic(AudioData* pAudio, int loops=0) override;
 		GLORY_API bool IsPlaying(int channel) override;
 		GLORY_API bool IsMusicPlaying() override;
+		GLORY_API void Pause() override;
+		GLORY_API void Pause(int channel) override;
+		GLORY_API void PauseMusic() override;
+		GLORY_API bool IsPaused(int channel) override;
+		GLORY_API bool IsMusicPaused() override;
+		GLORY_API void Resume() override;
+		GLORY_API void Resume(int channel) override;
+		GLORY_API void ResumeMusic() override;
+		GLORY_API void SetVolume(int channel, float volume) override;
+		GLORY_API void SetMusicVolume(float volume) override;
+		GLORY_API void SetMasterVolume(float volume) override;
+		GLORY_API float Volume(int channel) override;
+		GLORY_API float MusicVolume() override;
+		GLORY_API float MasterVolume() override;
 
 	protected:
 		virtual void Initialize() override;

@@ -5,6 +5,8 @@
 #include <AudioData.h>
 #include <Debug.h>
 
+#define MIX_MAX_VOLUME_FLOAT MIX_MAX_VOLUME##.0f
+
 namespace Glory
 {
 	std::vector<AudioChannel> Channels;
@@ -46,9 +48,6 @@ namespace Glory
 			if (Mix_PlayChannel(-1, itor->second, loops) == -1)
 			{
 				m_pEngine->GetDebug().LogError("Failed to play audio.");
-				m_pEngine->GetDebug().LogError(Mix_GetError());
-				m_pEngine->GetDebug().LogError(Mix_GetError());
-				m_pEngine->GetDebug().LogError(Mix_GetError());
 				m_pEngine->GetDebug().LogError(Mix_GetError());
 				return -1;
 			}
@@ -145,6 +144,76 @@ namespace Glory
 	bool SDLAudioModule::IsMusicPlaying()
 	{
 		return Mix_PlayingMusic();
+	}
+
+	void SDLAudioModule::Pause()
+	{
+		Mix_PauseAudio(1);
+	}
+
+	void SDLAudioModule::Pause(int channel)
+	{
+		Mix_Pause(channel);
+	}
+
+	void SDLAudioModule::PauseMusic()
+	{
+		Mix_PauseMusic();
+	}
+
+	bool SDLAudioModule::IsPaused(int channel)
+	{
+		return Mix_Paused(channel);
+	}
+
+	bool SDLAudioModule::IsMusicPaused()
+	{
+		return Mix_PausedMusic();
+	}
+
+	void SDLAudioModule::Resume()
+	{
+		Mix_PauseAudio(0);
+	}
+
+	void SDLAudioModule::Resume(int channel)
+	{
+		Mix_Resume(channel);
+	}
+
+	void SDLAudioModule::ResumeMusic()
+	{
+		Mix_ResumeMusic();
+	}
+
+	void SDLAudioModule::SetVolume(int channel, float volume)
+	{
+		Mix_Volume(channel, int(MIX_MAX_VOLUME*volume));
+	}
+
+	void SDLAudioModule::SetMusicVolume(float volume)
+	{
+		Mix_VolumeMusic(int(MIX_MAX_VOLUME*volume));
+	}
+
+	void SDLAudioModule::SetMasterVolume(float volume)
+	{
+		Mix_MasterVolume(int(MIX_MAX_VOLUME * volume));
+	}
+
+	float SDLAudioModule::Volume(int channel)
+	{
+		return Mix_Volume(channel, -1)/MIX_MAX_VOLUME_FLOAT;
+	}
+
+	float SDLAudioModule::MusicVolume()
+	{
+		return Mix_VolumeMusic(-1)/MIX_MAX_VOLUME_FLOAT;
+	}
+
+	float SDLAudioModule::MasterVolume()
+	{
+		return Mix_MasterVolume(-1)/MIX_MAX_VOLUME_FLOAT;
 	}
 
 	void ChannelFinishedCallback(int channel)
