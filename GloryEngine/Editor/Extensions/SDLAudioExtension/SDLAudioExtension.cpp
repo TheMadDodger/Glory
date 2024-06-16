@@ -25,7 +25,9 @@ namespace Glory::Editor
 	void SDLAudioExtension::HandleStop(Module* pModule)
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		pEngine->GetOptionalModule<SDLAudioModule>()->StopAll();
+		SDLAudioModule* pAudio = pEngine->GetOptionalModule<SDLAudioModule>();
+		pAudio->StopAll();
+		pAudio->StopMusic();
 	}
 
 	SDLAudioExtension::SDLAudioExtension()

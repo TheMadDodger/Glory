@@ -55,17 +55,26 @@ namespace GloryEngine.Entities
             set => AudioSource_SetAutoPlay(ref _entity, _objectID, value);
         }
 
+        /// <summary>
+        /// Whether the source is currently playing
+        /// </summary>
         public bool Playing
         {
             get => AudioSource_GetPlaying(ref _entity, _objectID);
         }
 
+        /// <summary>
+        /// Whether the source is currently paused
+        /// </summary>
         public bool Paused
         {
             get => AudioSource_GetPaused(ref _entity, _objectID);
             set => AudioSource_SetPaused(ref _entity, _objectID, value);
         }
 
+        /// <summary>
+        /// Current volume of the source
+        /// </summary>
         public float Volume
         {
             get => AudioSource_GetVolume(ref _entity, _objectID);
