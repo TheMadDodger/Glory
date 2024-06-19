@@ -24,6 +24,7 @@ namespace Glory
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
 		m_pEngine->GetSceneManager()->RegisterComponent<AudioSource>();
+		m_pEngine->GetSceneManager()->RegisterComponent<AudioListener>();
 
 		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::OnValidate, AudioSourceSystem::OnValidate);
@@ -31,5 +32,13 @@ namespace Glory
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Update, AudioSourceSystem::OnUpdate);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Start, AudioSourceSystem::OnStart);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Stop, AudioSourceSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<AudioListener>(Glory::Utils::ECS::InvocationType::Update, AudioListenerSystem::OnUpdate);
+	}
+
+	void AudioModule::LoadSettings(ModuleSettings& settings)
+	{
+		settings.RegisterValue<unsigned int>(SettingNames::MixingChannels, 64);
+		settings.RegisterValue<unsigned int>(SettingNames::SamplingRate, 48000);
+		settings.RegisterValue<unsigned int>(SettingNames::Framesize, 1024);
 	}
 }
