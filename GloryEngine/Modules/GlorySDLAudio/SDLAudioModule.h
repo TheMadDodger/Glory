@@ -27,7 +27,9 @@ namespace Glory
 		 * @param finishedCallback Callback that will be called when the audio finishes playing
 		 * @returns The channel that was chosen to play the audio
 		 */
-		GLORY_API int Play(AudioData* pAudio, void* udata=nullptr, size_t udataSize=0, int loops=0, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) override;
+		GLORY_API int Play(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) override;
+		GLORY_API int PlayWithEffects(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback = NULL) override;
+		GLORY_API AudioChannel& Channel(int channel) override;
 
 		/** @brief Stop a channel from playing
 		 * @param channel Channel to stop
@@ -92,14 +94,25 @@ namespace Glory
 		/** @brief Get master volume of the audio engine */
 		GLORY_API float MasterVolume() override;
 
+		GLORY_API uint8_t* GetChunkData(void* chunk) override;
+
+		GLORY_API uint32_t SamplingRate() { return uint32_t(m_Frequency); }
+		GLORY_API uint32_t Channels() override { return uint32_t(m_Channels); }
+		GLORY_API uint32_t MixingChannels() override;
+		GLORY_API glm::mat4& ListenerTransform() override { return m_ListerenTransform; }
+
 	protected:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
 
-		virtual void LoadSettings(ModuleSettings& settings) override;
-
 	private:
 		std::map<UUID, Mix_Chunk*> m_Chunks;
 		std::map<UUID, Mix_Music*> m_Music;
+
+		int m_Frequency;
+		uint16_t m_Format;
+		int m_Channels;
+
+		glm::mat4 m_ListerenTransform;
     };
 }

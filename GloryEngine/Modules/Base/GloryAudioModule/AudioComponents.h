@@ -23,4 +23,13 @@ namespace Glory
 
 		int m_CurrentChannel = -1;
 	};
+
+	struct AudioListener
+	{
+		GLORY_API AudioListener() {}
+
+		REFLECTABLE(AudioListener,
+			(bool)(m_Enabled)
+		);
+	};
 }

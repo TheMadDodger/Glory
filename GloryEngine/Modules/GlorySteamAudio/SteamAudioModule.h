@@ -5,6 +5,9 @@
 
 namespace Glory
 {
+	struct AudioChannel;
+	class AudioModule;
+
     class SteamAudioModule : public Module
     {
 	public:
@@ -15,15 +18,23 @@ namespace Glory
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
-	protected: // Internal functions
-
 	protected:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
 
 	private:
+		void ProcessEffects(AudioChannel& channel, void* stream, int len);
+
+		void AllocateChannels(size_t channels);
+
+	private:
 		IPLContext m_IPLContext = nullptr;
 		IPLHRTF m_IPLHrtf = nullptr;
-		IPLBinauralEffect m_IPLEffect = nullptr;
+		AudioModule* m_pAudioModule = nullptr;
+
+		std::vector<IPLAudioBuffer> m_InBuffers;
+		std::vector<IPLAudioBuffer> m_OutBuffers;
+		std::vector<IPLBinauralEffect> m_BinauralEffects;
+		std::vector<std::vector<float>> m_TemporaryBuffers;
     };
 }

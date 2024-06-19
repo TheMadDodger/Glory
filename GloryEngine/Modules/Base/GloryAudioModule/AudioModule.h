@@ -2,18 +2,38 @@
 #include <Module.h>
 
 #include <functional>
+#include <glm/glm.hpp>
 
 namespace Glory
 {
 	class AudioData;
 	class AudioSourceSystem;
 
+	enum class AudioChannelUDataType
+	{
+		None = 0,
+		Position = 1,
+		Entity = 2
+	};
+
+	struct AudioChannelUData
+	{
+		AudioChannelUDataType m_Type = AudioChannelUDataType::None;
+		char m_UserData[128] = "\0";
+
+		const glm::vec3& pos() { return *reinterpret_cast<glm::vec3*>(m_UserData); }
+		UUID& sceneID() { return *reinterpret_cast<UUID*>(m_UserData); }
+		UUID& entityID() { return *reinterpret_cast<UUID*>(&m_UserData[sizeof(UUID)]); }
+		const UUID& sceneID() const { return *reinterpret_cast<const UUID*>(m_UserData); }
+		const UUID& entityID() const { return *reinterpret_cast<const UUID*>(&m_UserData[sizeof(UUID)]); }
+	};
+
 	/** @brief Audio channel */
 	struct AudioChannel
 	{
 		size_t m_Index = 0;
 		void* m_CurrentChunk = NULL;
-		char m_UserData[128] = "\0";
+		AudioChannelUData m_UserData;
 		std::function<void(Engine*, const AudioChannel&)> m_FinishedCallback = NULL;
 	};
 
@@ -43,7 +63,9 @@ namespace Glory
 		 * @param finishedCallback Callback that will be called when the audio finishes playing
 		 * @returns The channel that was chosen to play the audio
 		 */
-		virtual int Play(AudioData* pAudio, void* udata=nullptr, size_t udataSize=0, int loops=0, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) = 0;
+		virtual int Play(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback = NULL) = 0;
+		virtual int PlayWithEffects(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) = 0;
+		virtual AudioChannel& Channel(int channel) = 0;
 
 		/** @brief Stop a channel from playing
 		 * @param channel Channel to stop
@@ -108,10 +130,28 @@ namespace Glory
 		/** @brief Get master volume of the audio engine */
 		virtual float MasterVolume() = 0;
 
+		virtual uint8_t* GetChunkData(void* chunk) = 0;
+
+		virtual uint32_t SamplingRate() = 0;
+		virtual uint32_t Channels() = 0;
+		virtual uint32_t MixingChannels() = 0;
+		virtual glm::mat4& ListenerTransform() = 0;
+
 		//virtual AudioSourceSystem* AudioSourceManager() = 0;
+
+		std::function<void(AudioChannel&, void*, int)> OnEffectCallback;
+		std::function<void(size_t)> OnMixingChannelsResized;
+
+		struct SettingNames
+		{
+			static constexpr char* MixingChannels = "Mixing MixChannels";
+			static constexpr char* SamplingRate = "Sampling Rate";
+			static constexpr char* Framesize = "Framesize";
+		};
 
 	protected:
 		virtual void Initialize() override;
 		virtual void Cleanup() = 0;
+		virtual void LoadSettings(ModuleSettings& settings) override;
     };
 }
