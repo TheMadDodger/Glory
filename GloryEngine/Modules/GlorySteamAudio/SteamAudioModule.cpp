@@ -98,6 +98,10 @@ namespace Glory
 		glm::quat listenRot;
 		glm::decompose(listener, scale, listenRot, listenPos, skew, pers);
 
+		const glm::vec3 right = glm::vec3(listener[0][0], listener[1][0], listener[2][0]);
+		const glm::vec3 up = glm::vec3(listener[0][1], listener[1][1], listener[2][1]);
+		const glm::vec3 forward = glm::vec3(listener[0][2], listener[1][2], listener[2][2]);
+
 		switch (channel.m_UserData.m_Type)
 		{
 		case AudioChannelUDataType::Entity:
@@ -108,7 +112,7 @@ namespace Glory
 			if (!entity.IsValid()) return;
 			const glm::vec3 pos = entity.GetComponent<Transform>().Position;
 			dir = pos - listenPos;
-			dir = dir*listenRot;
+			//dir = dir*listenRot;
 			break;
 		}
 		default:
@@ -120,20 +124,46 @@ namespace Glory
 		const unsigned int channels = m_pAudioModule->Channels();
 
 		float* outData = reinterpret_cast<float*>(stream);
-
-		/* Deinterleave stream */
 		iplAudioBufferDeinterleave(m_IPLContext, outData, &m_InBuffers[channel.m_Index]);
-		IPLBinauralEffectParams effectParams{};
-		effectParams.direction = IPLVector3{ dir.x, dir.y, dir.z };
-		effectParams.interpolation = IPL_HRTFINTERPOLATION_NEAREST;
-		effectParams.spatialBlend = 1.0f;
-		effectParams.hrtf = m_IPLHrtf;
-		effectParams.peakDelays = nullptr;
-		/* Apply effect */
-		iplBinauralEffectApply(m_BinauralEffects[channel.m_Index], &effectParams, &m_InBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
-		/* Interleave back into stream */
+
+		IPLAmbisonicsEncodeEffectParams ambiSonicsEncodeParams{};
+		ambiSonicsEncodeParams.direction = IPLVector3{ dir.x, dir.y, dir.z };
+		ambiSonicsEncodeParams.order = 2;
+
+		iplAmbisonicsEncodeEffectApply(m_AmbiSonicsEffects[channel.m_Index], &ambiSonicsEncodeParams, &m_InBuffers[channel.m_Index], &m_AmbisonicsBuffers[channel.m_Index]);
+
+		IPLAudioBuffer inBuffer; // must have 9 channels in this example
+		IPLAudioBuffer outBuffer; // must be stereo
+
+		IPLCoordinateSpace3 listenerCoordinates; // the listener's coordinate system
+		listenerCoordinates.origin = IPLVector3{ listenPos.x, listenPos.y, listenPos.z };
+		listenerCoordinates.ahead = IPLVector3{ forward.x, forward.y, -forward.z };
+		listenerCoordinates.right = IPLVector3{ right.x, right.y, right.z };
+		listenerCoordinates.up = IPLVector3{ up.x, up.y, up.z };
+
+		IPLAmbisonicsDecodeEffectParams ambiSonicsDecodeParams{};
+		ambiSonicsDecodeParams.order = 2;
+		ambiSonicsDecodeParams.hrtf = m_IPLHrtf;
+		ambiSonicsDecodeParams.orientation = listenerCoordinates;
+		ambiSonicsDecodeParams.binaural = channels > 2 ? IPL_FALSE : IPL_TRUE;
+
+		iplAmbisonicsDecodeEffectApply(m_AmbiSonicsDecodeEffects[channel.m_Index], &ambiSonicsDecodeParams, &m_AmbisonicsBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
 		iplAudioBufferInterleave(m_IPLContext, &m_OutBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
 		std::memcpy(stream, m_TemporaryBuffers[channel.m_Index].data(), len);
+
+		/* Deinterleave stream */
+		//iplAudioBufferDeinterleave(m_IPLContext, outData, &m_InBuffers[channel.m_Index]);
+		//IPLBinauralEffectParams effectParams{};
+		//effectParams.direction = IPLVector3{ dir.x, dir.y, dir.z };
+		//effectParams.interpolation = IPL_HRTFINTERPOLATION_NEAREST;
+		//effectParams.spatialBlend = 1.0f;
+		//effectParams.hrtf = m_IPLHrtf;
+		//effectParams.peakDelays = nullptr;
+		///* Apply effect */
+		//iplBinauralEffectApply(m_BinauralEffects[channel.m_Index], &effectParams, &m_InBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
+		///* Interleave back into stream */
+		//iplAudioBufferInterleave(m_IPLContext, &m_OutBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
+		//std::memcpy(stream, m_TemporaryBuffers[channel.m_Index].data(), len);
 	}
 
 	void SteamAudioModule::AllocateChannels(size_t mixingChannels)
@@ -147,7 +177,10 @@ namespace Glory
 
 		m_InBuffers.resize(mixingChannels);
 		m_OutBuffers.resize(mixingChannels);
+		m_AmbisonicsBuffers.resize(mixingChannels);
 		m_BinauralEffects.resize(mixingChannels);
+		m_AmbiSonicsEffects.resize(mixingChannels);
+		m_AmbiSonicsDecodeEffects.resize(mixingChannels);
 		m_TemporaryBuffers.resize(mixingChannels);
 
 		IPLAudioSettings audioSettings{};
@@ -157,12 +190,47 @@ namespace Glory
 		IPLBinauralEffectSettings effectSettings{};
 		effectSettings.hrtf = m_IPLHrtf;
 
+		IPLAmbisonicsEncodeEffectSettings ambiSonicsEffectSettings{};
+		ambiSonicsEffectSettings.maxOrder = 2; // 2nd order Ambisonics (9 channels)
+
+		IPLAmbisonicsDecodeEffectSettings ambiSonicsDecodeSettings{};
+		ambiSonicsDecodeSettings.maxOrder = 2;
+		ambiSonicsDecodeSettings.hrtf = m_IPLHrtf;
+
+		switch (channels)
+		{
+		case 1:
+			/* Actually shouldn't be allowed but I should probably disable
+			 * the module completely if the audio module is running in mono */
+			ambiSonicsDecodeSettings.speakerLayout.type = IPL_SPEAKERLAYOUTTYPE_MONO;
+			break;
+		case 2:
+			ambiSonicsDecodeSettings.speakerLayout.type = IPL_SPEAKERLAYOUTTYPE_STEREO;
+			break;
+		case 4:
+			ambiSonicsDecodeSettings.speakerLayout.type = IPL_SPEAKERLAYOUTTYPE_QUADRAPHONIC;
+			break;
+		case 6:
+			ambiSonicsDecodeSettings.speakerLayout.type = IPL_SPEAKERLAYOUTTYPE_SURROUND_5_1;
+			break;
+		case 8:
+			ambiSonicsDecodeSettings.speakerLayout.type = IPL_SPEAKERLAYOUTTYPE_SURROUND_7_1;
+			break;
+
+		default:
+			ambiSonicsDecodeSettings.speakerLayout.type = IPL_SPEAKERLAYOUTTYPE_CUSTOM;
+			break;
+		}
+
 		for (size_t i = oldChannels; i < m_InBuffers.size(); ++i)
 		{
 			m_TemporaryBuffers[i].resize(frameSize*channels);
 			iplAudioBufferAllocate(m_IPLContext, channels, frameSize, &m_InBuffers[i]);
 			iplAudioBufferAllocate(m_IPLContext, channels, frameSize, &m_OutBuffers[i]);
+			iplAudioBufferAllocate(m_IPLContext, 9, frameSize, &m_AmbisonicsBuffers[i]);
 			iplBinauralEffectCreate(m_IPLContext, &audioSettings, &effectSettings, &m_BinauralEffects[i]);
+			iplAmbisonicsEncodeEffectCreate(m_IPLContext, &audioSettings, &ambiSonicsEffectSettings, &m_AmbiSonicsEffects[i]);
+			iplAmbisonicsDecodeEffectCreate(m_IPLContext, &audioSettings, &ambiSonicsDecodeSettings, &m_AmbiSonicsDecodeEffects[i]);
 		}
 	}
 }
