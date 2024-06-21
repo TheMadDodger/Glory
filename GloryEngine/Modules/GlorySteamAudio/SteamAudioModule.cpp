@@ -89,6 +89,12 @@ namespace Glory
 		iplContextRelease(&m_IPLContext);
 	}
 
+	float CalculateAttenuation(IPLfloat32 distance, void* userData)
+	{
+		if (distance <= 10.0f) return 1.0f;
+		return 1.0f - std::clamp(distance/500.0f, 0.0f, 1.0f);
+	}
+
 	void SteamAudioModule::ProcessEffects(AudioChannel& channel, void* stream, int len)
 	{
 		glm::vec3 dir{};
@@ -102,6 +108,7 @@ namespace Glory
 		const glm::vec3 up = glm::vec3(listener[0][1], listener[1][1], listener[2][1]);
 		const glm::vec3 forward = glm::vec3(listener[0][2], listener[1][2], listener[2][2]);
 
+		glm::vec3 sourcePos{};
 		switch (channel.m_UserData.m_Type)
 		{
 		case AudioChannelUDataType::Entity:
@@ -110,9 +117,11 @@ namespace Glory
 			if (!pScene) return;
 			Entity entity = pScene->GetEntityByUUID(channel.m_UserData.entityID());
 			if (!entity.IsValid()) return;
-			const glm::vec3 pos = entity.GetComponent<Transform>().Position;
-			dir = pos - listenPos;
-			//dir = dir*listenRot;
+			const glm::mat4 source = entity.GetComponent<Transform>().MatTransform;
+			glm::quat sourceRot;
+			glm::decompose(source, scale, sourceRot, sourcePos, skew, pers);
+			dir = sourcePos - listenPos;
+			dir = dir*listenRot;
 			break;
 		}
 		default:
@@ -132,14 +141,11 @@ namespace Glory
 
 		iplAmbisonicsEncodeEffectApply(m_AmbiSonicsEffects[channel.m_Index], &ambiSonicsEncodeParams, &m_InBuffers[channel.m_Index], &m_AmbisonicsBuffers[channel.m_Index]);
 
-		IPLAudioBuffer inBuffer; // must have 9 channels in this example
-		IPLAudioBuffer outBuffer; // must be stereo
-
 		IPLCoordinateSpace3 listenerCoordinates; // the listener's coordinate system
 		listenerCoordinates.origin = IPLVector3{ listenPos.x, listenPos.y, listenPos.z };
-		listenerCoordinates.ahead = IPLVector3{ forward.x, forward.y, -forward.z };
-		listenerCoordinates.right = IPLVector3{ right.x, right.y, right.z };
-		listenerCoordinates.up = IPLVector3{ up.x, up.y, up.z };
+		listenerCoordinates.ahead = IPLVector3{ 0.0f, 0.0f, -1.0f };
+		listenerCoordinates.right = IPLVector3{ 1.0f, 0.0f, 0.0f };
+		listenerCoordinates.up = IPLVector3{ 0.0f, 1.0f, 0.0f };
 
 		IPLAmbisonicsDecodeEffectParams ambiSonicsDecodeParams{};
 		ambiSonicsDecodeParams.order = 2;
@@ -148,7 +154,20 @@ namespace Glory
 		ambiSonicsDecodeParams.binaural = channels > 2 ? IPL_FALSE : IPL_TRUE;
 
 		iplAmbisonicsDecodeEffectApply(m_AmbiSonicsDecodeEffects[channel.m_Index], &ambiSonicsDecodeParams, &m_AmbisonicsBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
-		iplAudioBufferInterleave(m_IPLContext, &m_OutBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
+
+		IPLDistanceAttenuationModel distanceAttenuationModel{};
+		distanceAttenuationModel.type = IPL_DISTANCEATTENUATIONTYPE_CALLBACK;
+		distanceAttenuationModel.minDistance = -10.0f;
+		distanceAttenuationModel.callback = CalculateAttenuation;
+		const float distanceAttenuation = iplDistanceAttenuationCalculate(m_IPLContext, { sourcePos.x, sourcePos.y, sourcePos.z }, listenerCoordinates.origin, &distanceAttenuationModel);
+
+		IPLDirectEffectParams directEffectsParams{};
+		directEffectsParams.flags = IPL_DIRECTEFFECTFLAGS_APPLYDISTANCEATTENUATION;
+		directEffectsParams.distanceAttenuation = distanceAttenuation;
+
+		iplDirectEffectApply(m_DirectEffects[channel.m_Index], &directEffectsParams, &m_OutBuffers[channel.m_Index], &m_InBuffers[channel.m_Index]);
+
+		iplAudioBufferInterleave(m_IPLContext, &m_InBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
 		std::memcpy(stream, m_TemporaryBuffers[channel.m_Index].data(), len);
 
 		/* Deinterleave stream */
@@ -179,6 +198,7 @@ namespace Glory
 		m_OutBuffers.resize(mixingChannels);
 		m_AmbisonicsBuffers.resize(mixingChannels);
 		m_BinauralEffects.resize(mixingChannels);
+		m_DirectEffects.resize(mixingChannels);
 		m_AmbiSonicsEffects.resize(mixingChannels);
 		m_AmbiSonicsDecodeEffects.resize(mixingChannels);
 		m_TemporaryBuffers.resize(mixingChannels);
@@ -222,6 +242,9 @@ namespace Glory
 			break;
 		}
 
+		IPLDirectEffectSettings directEffectSettings{};
+		directEffectSettings.numChannels = channels; // input and output buffers will have 1 channel
+
 		for (size_t i = oldChannels; i < m_InBuffers.size(); ++i)
 		{
 			m_TemporaryBuffers[i].resize(frameSize*channels);
@@ -229,6 +252,7 @@ namespace Glory
 			iplAudioBufferAllocate(m_IPLContext, channels, frameSize, &m_OutBuffers[i]);
 			iplAudioBufferAllocate(m_IPLContext, 9, frameSize, &m_AmbisonicsBuffers[i]);
 			iplBinauralEffectCreate(m_IPLContext, &audioSettings, &effectSettings, &m_BinauralEffects[i]);
+			iplDirectEffectCreate(m_IPLContext, &audioSettings, &directEffectSettings, &m_DirectEffects[i]);
 			iplAmbisonicsEncodeEffectCreate(m_IPLContext, &audioSettings, &ambiSonicsEffectSettings, &m_AmbiSonicsEffects[i]);
 			iplAmbisonicsDecodeEffectCreate(m_IPLContext, &audioSettings, &ambiSonicsDecodeSettings, &m_AmbiSonicsDecodeEffects[i]);
 		}

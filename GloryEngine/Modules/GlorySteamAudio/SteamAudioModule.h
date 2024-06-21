@@ -36,6 +36,7 @@ namespace Glory
 		std::vector<IPLAudioBuffer> m_OutBuffers;
 		std::vector<IPLAudioBuffer> m_AmbisonicsBuffers;
 		std::vector<IPLBinauralEffect> m_BinauralEffects;
+		std::vector<IPLDirectEffect> m_DirectEffects;
 		std::vector<IPLAmbisonicsEncodeEffect> m_AmbiSonicsEffects;
 		std::vector<IPLAmbisonicsDecodeEffect> m_AmbiSonicsDecodeEffects;
 		std::vector<std::vector<float>> m_TemporaryBuffers;
