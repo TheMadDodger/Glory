@@ -1,7 +1,7 @@
 #pragma once
-#include "Physics.h"
+#include <Physics.h>
 
-#include <Module.h>
+#include <PhysicsModule.h>
 #include <glm/fwd.hpp>
 
 namespace JPH
@@ -39,7 +39,7 @@ namespace Glory
 	class JoltCharacterManager;
 	class JoltShapeManager;
 
-    class JoltPhysicsModule : public Module
+    class JoltPhysicsModule : public PhysicsModule
     {
 	public:
 		GLORY_API JoltPhysicsModule();
