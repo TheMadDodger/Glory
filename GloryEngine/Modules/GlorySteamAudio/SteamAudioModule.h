@@ -30,6 +30,7 @@ namespace Glory
 	private:
 		IPLContext m_IPLContext = nullptr;
 		IPLHRTF m_IPLHrtf = nullptr;
+		IPLScene m_Scene = nullptr;
 		AudioModule* m_pAudioModule = nullptr;
 
 		std::vector<IPLAudioBuffer> m_InBuffers;
