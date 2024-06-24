@@ -23,6 +23,7 @@ project "GloryJoltMonoExtender"
 	includedirs
 	{
 		"%{DepsIncludeDir}",
+		"%{BaseIncludeDir.physics}",
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",

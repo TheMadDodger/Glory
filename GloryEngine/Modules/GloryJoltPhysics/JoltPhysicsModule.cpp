@@ -1,7 +1,6 @@
 #include "JoltPhysicsModule.h"
 #include "Helpers.h"
 
-#include "JoltComponents.h"
 #include "PhysicsSystem.h"
 #include "CharacterControllerSystem.h"
 
@@ -37,6 +36,7 @@
 #include <Engine.h>
 #include <SceneManager.h>
 #include <BinaryStream.h>
+#include <PhysicsComponents.h>
 
 
 using namespace JPH;
@@ -605,6 +605,8 @@ namespace Glory
 
 	void JoltPhysicsModule::Initialize()
 	{
+		PhysicsModule::Initialize();
+
 		m_ObjectVSBroadPhase.m_pLayers = &m_pEngine->GetLayerManager();
 
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
@@ -658,12 +660,8 @@ namespace Glory
 		// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
 		//m_pJPHPhysicsSystem->OptimizeBroadPhase();
 
-		Reflect::RegisterEnum<BodyType>();
-
 		SceneManager* pScenes = m_pEngine->GetSceneManager();
 		Glory::Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
-		pScenes->RegisterComponent<PhysicsBody>();
-		pScenes->RegisterComponent<CharacterController>();
 
 		/* Physics Bodies */
 		pComponentTypes->RegisterInvokaction<PhysicsBody>(Glory::Utils::ECS::InvocationType::Start, PhysicsSystem::OnStart);

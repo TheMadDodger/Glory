@@ -29,6 +29,7 @@ project "GloryJoltPhysics"
 	{
 		"%{DepsIncludeDir}",
 		"%{IncludeDir.glm}",
+		"%{BaseIncludeDir.physics}",
 
 		"%{GloryIncludeDir.core}",
 
@@ -54,11 +55,14 @@ project "GloryJoltPhysics"
 		"%{LibDirs.glory}",
 
 		"%{LibDirs.yaml_cpp}",
+
+		"{moduleBaseOutDir}",
 	}
 
 	links
 	{
 		"GloryCore",
+		"GloryPhysicsModule",
 		"GloryReflect",
 		"GloryECS",
 

@@ -1,6 +1,5 @@
 #include "CharacterControllerSystem.h"
 #include "JoltPhysicsModule.h"
-#include "JoltComponents.h"
 #include "JoltCharacterManager.h"
 #include "JoltShapeManager.h"
 #include "JoltPhysicsModule.h"
@@ -9,6 +8,7 @@
 #include <Engine.h>
 #include <GScene.h>
 #include <SceneManager.h>
+#include <PhysicsComponents.h>
 
 #include <Components.h>
 #include <Engine.h>

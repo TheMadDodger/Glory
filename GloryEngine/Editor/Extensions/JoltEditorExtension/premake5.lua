@@ -21,6 +21,7 @@ project "JoltEditorExtension"
 	includedirs
 	{
 		"%{DepsIncludeDir}",
+		"%{BaseIncludeDir.physics}",
 
 		"%{IncludeDir.glm}",
 

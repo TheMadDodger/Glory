@@ -1,7 +1,7 @@
 #include "JoltPhysicsModule.h"
 #include "JoltPhysicsModule.h"
-#include "JoltComponents.h"
 
+#include <PhysicsComponents.h>
 #include <PhysicsSystem.h>
 #include <Engine.h>
 #include <GScene.h>

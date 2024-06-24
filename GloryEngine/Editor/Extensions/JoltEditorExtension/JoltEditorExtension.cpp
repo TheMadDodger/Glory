@@ -11,7 +11,7 @@
 #include <JoltPhysicsModule.h>
 #include <GLORY_YAML.h>
 #include <CreateEntityObjectsCallbacks.h>
-#include <JoltComponents.h>
+#include <PhysicsComponents.h>
 
 #include <PhysicsBodyEditor.h>
 #include <CharacterControllerEditor.h>
