@@ -66,6 +66,10 @@ namespace Glory
 
 		iplHRTFCreate(m_IPLContext, &audioSettings, &hrtfSettings, &m_IPLHrtf);
 
+		IPLSceneSettings sceneSettings{};
+		sceneSettings.type = IPL_SCENETYPE_DEFAULT;
+		iplSceneCreate(m_IPLContext, &sceneSettings, &m_Scene);
+
 		m_pAudioModule->OnMixingChannelsResized = [this](size_t channels) {
 			AllocateChannels(channels);
 		};
@@ -84,6 +88,8 @@ namespace Glory
 			iplAudioBufferFree(m_IPLContext, &m_OutBuffers[i]);
 			iplBinauralEffectRelease(&m_BinauralEffects[i]);
 		}
+
+		iplSceneRelease(&m_Scene);
 
 		iplHRTFRelease(&m_IPLHrtf);
 		iplContextRelease(&m_IPLContext);
