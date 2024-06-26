@@ -100,6 +100,7 @@ project "Glorious"
 		"SDLImageImporter",
 		"ASSIMPImporter",
 		"GloryJoltMonoExtender",
+		"SteamAudioExtension",
 		"GloryEngine.Core",
 		"GloryEngine.Entities",
 		"CSAPIInstall",

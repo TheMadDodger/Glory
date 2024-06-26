@@ -9,6 +9,14 @@ namespace Glory
 		APPEND_TYPE(MeshData);
 	}
 
+	MeshData::MeshData(uint32_t reservedVertexCount, uint32_t vertexSize, std::vector<AttributeType>&& attributes):
+		m_VertexCount(0), m_IndexCount(0), m_Vertices(), m_Indices(), m_Attributes(std::move(attributes)), m_VertexSize(vertexSize)
+	{
+		m_Vertices.reserve(reservedVertexCount*vertexSize);
+		m_Indices.reserve(reservedVertexCount);
+		APPEND_TYPE(MeshData);
+	}
+
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const std::vector<float>& vertices, uint32_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(vertices), m_Indices(indices), m_Attributes(attributes), m_VertexSize(vertexSize)
 	{
@@ -57,9 +65,19 @@ namespace Glory
 		return (uint32_t)m_Attributes.size();
 	}
 
+	float* MeshData::Vertices()
+	{
+		return m_Vertices.data();
+	}
+
 	const float* MeshData::Vertices() const
 	{
 		return m_Vertices.data();
+	}
+
+	uint32_t* MeshData::Indices()
+	{
+		return m_Indices.data();
 	}
 
 	const uint32_t* MeshData::Indices() const
@@ -96,5 +114,27 @@ namespace Glory
 		container.Read(m_Vertices.data(), sizeof(float)*m_Vertices.size());
 		m_Indices.resize(m_IndexCount);
 		container.Read(m_Indices.data(), sizeof(uint32_t)*m_Indices.size());
+	}
+
+	uint32_t MeshData::AddVertex(const float* vertex)
+	{
+		const size_t writePos = m_Vertices.size();
+		m_Vertices.resize(writePos + m_VertexSize);
+		std::memcpy(&m_Vertices[writePos], vertex, m_VertexSize);
+		++m_VertexCount;
+		return m_VertexCount - 1;
+	}
+
+	void MeshData::AddFace(uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3)
+	{
+		/* Triangle 1 */
+		m_Indices.push_back(v0);
+		m_Indices.push_back(v1);
+		m_Indices.push_back(v2);
+
+		/* Triangle 2 */
+		m_Indices.push_back(v0);
+		m_Indices.push_back(v2);
+		m_Indices.push_back(v3);
 	}
 }

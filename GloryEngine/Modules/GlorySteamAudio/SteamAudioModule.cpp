@@ -30,6 +30,17 @@ namespace Glory
 		return typeid(SteamAudioModule);
 	}
 
+	IPLContext SteamAudioModule::GetContext()
+	{
+		return m_IPLContext;
+	}
+
+	void SteamAudioModule::SetScene(IPLScene scene)
+	{
+		iplSceneRelease(&m_Scene);
+		m_Scene = scene;
+	}
+
 	void SteamAudioModule::Initialize()
 	{
 		m_pAudioModule = m_pEngine->GetOptionalModule<AudioModule>();
