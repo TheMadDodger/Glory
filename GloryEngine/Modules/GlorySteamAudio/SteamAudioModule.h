@@ -18,6 +18,10 @@ namespace Glory
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
+		GLORY_API IPLContext GetContext();
+
+		GLORY_API void SetScene(IPLScene scene);
+
 	protected:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;

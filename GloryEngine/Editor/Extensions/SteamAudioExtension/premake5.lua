@@ -22,6 +22,7 @@ project "SteamAudioExtension"
 	{
 		"%{DepsIncludeDir}",
 		"%{BaseIncludeDir.audio}",
+		"%{BaseIncludeDir.physics}",
 
 		"%{IncludeDir.glm}",
 
@@ -54,12 +55,14 @@ project "SteamAudioExtension"
 		"%{LibDirs.yaml_cpp}",
 
 		"%{modulesOutDir}/GlorySteamAudio",
+		"%{moduleBaseOutDir}",
 	}
 
 	links
 	{
 		"GloryCore",
 		"GlorySteamAudio",
+		"GloryPhysicsModule",
 		"GloryEditor",
 		"shaderc",
 		"shaderc_combined",
@@ -68,6 +71,8 @@ project "SteamAudioExtension"
 		"ImGuizmo",
 		"implot",
 		"yaml-cpp",
+
+		"phonon",
 
 		"GloryECS",
 		"GloryReflect",
