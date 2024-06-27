@@ -4,10 +4,13 @@
 #include <functional>
 #include <glm/glm.hpp>
 
+#include <memory>
+
 namespace Glory
 {
 	class AudioData;
 	class AudioSourceSystem;
+	class AudioListenerSystem;
 
 	enum class AudioChannelUDataType
 	{
@@ -137,7 +140,8 @@ namespace Glory
 		virtual uint32_t MixingChannels() = 0;
 		virtual glm::mat4& ListenerTransform() = 0;
 
-		//virtual AudioSourceSystem* AudioSourceManager() = 0;
+		AudioSourceSystem& SourceSystem();
+		AudioListenerSystem& ListenerSystem();
 
 		std::function<void(AudioChannel&, void*, int)> OnEffectCallback;
 		std::function<void(size_t)> OnMixingChannelsResized;
@@ -153,5 +157,9 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void Cleanup() = 0;
 		virtual void LoadSettings(ModuleSettings& settings) override;
+
+	private:
+		std::unique_ptr<AudioSourceSystem> m_AudioSourceSystem;
+		std::unique_ptr<AudioListenerSystem> m_AudioListenerSystem;
     };
 }

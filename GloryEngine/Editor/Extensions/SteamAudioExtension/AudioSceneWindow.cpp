@@ -98,11 +98,7 @@ namespace Glory::Editor
 
 		if (ImGui::Button("Build occlusion scene"))
 		{
-			IPLSceneSettings sceneSettings{};
-			sceneSettings.type = IPL_SCENETYPE_DEFAULT;
-
-			IPLScene scene = nullptr;
-			iplSceneCreate(context, &sceneSettings, &scene);
+			IPLScene scene = pSteamAudio->GetScene();
 
 			SceneManager* sceneManager = pEngine->GetSceneManager();
 			for (size_t i = 0; i < sceneManager->OpenScenesCount(); ++i)
@@ -131,14 +127,14 @@ namespace Glory::Editor
 
 					/* @todo: Materials should come from a separate component, maybe even a resource? */
 					IPLMaterial materials[1] = {
-						{ {0.1f, 0.1f, 0.1f}, 0.5f, {0.2f, 0.2f, 0.2f} }
+						{ {0.5f, 0.5f, 0.5f}, 0.5f, {0.1f, 0.1f, 0.1f} }
 					};
 
-					IPLint32 materialIndices[6] = { 0, 0, 0, 0, 0, 0 };
+					IPLint32 materialIndices[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 					IPLStaticMeshSettings staticMeshSettings{};
 					staticMeshSettings.numVertices = mesh.VertexCount();
-					staticMeshSettings.numTriangles = 2;
+					staticMeshSettings.numTriangles = mesh.IndexCount()/3;
 					staticMeshSettings.numMaterials = 1;
 					staticMeshSettings.vertices = reinterpret_cast<IPLVector3*>(mesh.Vertices());
 					staticMeshSettings.triangles = reinterpret_cast<IPLTriangle*>(mesh.Indices());
