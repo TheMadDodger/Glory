@@ -12,6 +12,8 @@
 #include <Components.h>
 
 #include <AudioModule.h>
+#include <AudioSourceSystem.h>
+#include <AudioComponents.h>
 
 #define STEAM_AUDIO_VERSION_STR TOSTRING(STEAMAUDIO_VERSION_MAJOR.STEAMAUDIO_VERSION_MINOR.STEAMAUDIO_VERSION_PATCH)
 
@@ -39,6 +41,14 @@ namespace Glory
 	{
 		iplSceneRelease(&m_Scene);
 		m_Scene = scene;
+
+		iplSimulatorSetScene(m_Simulator, m_Scene);
+		iplSimulatorCommit(m_Simulator);
+	}
+
+	IPLScene SteamAudioModule::GetScene()
+	{
+		return m_Scene;
 	}
 
 	void SteamAudioModule::Initialize()
@@ -89,6 +99,48 @@ namespace Glory
 		m_pAudioModule->OnEffectCallback = [this](AudioChannel& channel, void* stream, int len) {
 			ProcessEffects(channel, stream, len);
 		};
+
+		IPLSimulationSettings simulationSettings{};
+		simulationSettings.flags = IPL_SIMULATIONFLAGS_DIRECT; // this enables occlusion/transmission simulation
+		simulationSettings.sceneType = IPL_SCENETYPE_DEFAULT;
+		// see below for examples of how to initialize the remaining fields of this structure
+		iplSimulatorCreate(m_IPLContext, &simulationSettings, &m_Simulator);
+		iplSimulatorSetScene(m_Simulator, m_Scene);
+		iplSimulatorCommit(m_Simulator);
+
+		m_pAudioModule->SourceSystem().OnSourceStart = [this](Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent) {
+			AddSource(pRegistry, entity, pComponent);
+		};
+
+		m_pAudioModule->SourceSystem().OnSourceStop = [this](Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent) {
+			RemoveSource(pRegistry, entity, pComponent);
+		};
+
+		m_pAudioModule->ListenerSystem().OnListenerUpdate = [this](Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent) {
+			if (!pComponent.m_Enabled) return;
+
+			Transform& transform = pRegistry->GetComponent<Transform>(entity);
+			glm::vec3 scale, listenPos, skew;
+			glm::vec4 pers;
+			glm::quat listenRot;
+			glm::decompose(transform.MatTransform, scale, listenRot, listenPos, skew, pers);
+
+			IPLCoordinateSpace3 listenerCoordinates;
+			listenerCoordinates.origin = IPLVector3{ listenPos.x, listenPos.y, listenPos.z };
+			listenerCoordinates.ahead = IPLVector3{ 0.0f, 0.0f, -1.0f };
+			listenerCoordinates.right = IPLVector3{ 1.0f, 0.0f, 0.0f };
+			listenerCoordinates.up = IPLVector3{ 0.0f, 1.0f, 0.0f };
+
+			IPLSimulationSharedInputs sharedInputs{};
+			sharedInputs.listener = listenerCoordinates;
+
+			iplSimulatorSetSharedInputs(m_Simulator, IPL_SIMULATIONFLAGS_DIRECT, &sharedInputs);
+		};
+	}
+
+	void SteamAudioModule::Update()
+	{
+		iplSimulatorRunDirect(m_Simulator);
 	}
 
 	void SteamAudioModule::Cleanup()
@@ -174,13 +226,16 @@ namespace Glory
 
 		IPLDistanceAttenuationModel distanceAttenuationModel{};
 		distanceAttenuationModel.type = IPL_DISTANCEATTENUATIONTYPE_CALLBACK;
-		distanceAttenuationModel.minDistance = -10.0f;
 		distanceAttenuationModel.callback = CalculateAttenuation;
 		const float distanceAttenuation = iplDistanceAttenuationCalculate(m_IPLContext, { sourcePos.x, sourcePos.y, sourcePos.z }, listenerCoordinates.origin, &distanceAttenuationModel);
 
-		IPLDirectEffectParams directEffectsParams{};
-		directEffectsParams.flags = IPL_DIRECTEFFECTFLAGS_APPLYDISTANCEATTENUATION;
+		IPLSimulationOutputs outputs{};
+		iplSourceGetOutputs(m_Sources[0], IPL_SIMULATIONFLAGS_DIRECT, &outputs);
+
+		IPLDirectEffectParams directEffectsParams = outputs.direct; // this can be passed to a direct 
+		directEffectsParams.flags = IPLDirectEffectFlags(IPL_DIRECTEFFECTFLAGS_APPLYAIRABSORPTION | IPL_DIRECTEFFECTFLAGS_APPLYOCCLUSION | IPL_DIRECTEFFECTFLAGS_APPLYTRANSMISSION);
 		directEffectsParams.distanceAttenuation = distanceAttenuation;
+		directEffectsParams.transmissionType = IPL_TRANSMISSIONTYPE_FREQDEPENDENT;
 
 		iplDirectEffectApply(m_DirectEffects[channel.m_Index], &directEffectsParams, &m_OutBuffers[channel.m_Index], &m_InBuffers[channel.m_Index]);
 
@@ -273,5 +328,44 @@ namespace Glory
 			iplAmbisonicsEncodeEffectCreate(m_IPLContext, &audioSettings, &ambiSonicsEffectSettings, &m_AmbiSonicsEffects[i]);
 			iplAmbisonicsDecodeEffectCreate(m_IPLContext, &audioSettings, &ambiSonicsDecodeSettings, &m_AmbiSonicsDecodeEffects[i]);
 		}
+	}
+
+	void SteamAudioModule::AddSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& audioSource)
+	{
+		IPLSourceSettings sourceSettings{};
+		sourceSettings.flags = IPL_SIMULATIONFLAGS_DIRECT; // this enables occlusion/transmission simulator for this source
+
+		IPLSource source = nullptr;
+		iplSourceCreate(m_Simulator, &sourceSettings, &source);
+		m_Sources.push_back(source);
+
+		iplSourceAdd(source, m_Simulator);
+		iplSimulatorCommit(m_Simulator);
+
+		Transform& transform = pRegistry->GetComponent<Transform>(entity);
+		glm::vec3 scale, pos, skew;
+		glm::vec4 pers;
+		glm::quat rot;
+		glm::decompose(transform.MatTransform, scale, rot, pos, skew, pers);
+
+		IPLCoordinateSpace3 sourceCoordinates;
+		sourceCoordinates.origin = IPLVector3{ pos.x, pos.y, pos.z };
+		sourceCoordinates.ahead = IPLVector3{ 0.0f, 0.0f, -1.0f };
+		sourceCoordinates.right = IPLVector3{ 1.0f, 0.0f, 0.0f };
+		sourceCoordinates.up = IPLVector3{ 0.0f, 1.0f, 0.0f };
+
+		IPLSimulationInputs inputs{};
+		inputs.flags = IPL_SIMULATIONFLAGS_DIRECT;
+		inputs.directFlags = IPLDirectSimulationFlags(IPL_DIRECTSIMULATIONFLAGS_OCCLUSION | IPL_DIRECTSIMULATIONFLAGS_TRANSMISSION | IPL_DIRECTSIMULATIONFLAGS_AIRABSORPTION);
+		inputs.source = sourceCoordinates;
+		inputs.occlusionType = IPL_OCCLUSIONTYPE_VOLUMETRIC;
+		inputs.numTransmissionRays = 2;
+
+		iplSourceSetInputs(source, IPL_SIMULATIONFLAGS_DIRECT, &inputs);
+	}
+
+	void SteamAudioModule::RemoveSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source)
+	{
+
 	}
 }

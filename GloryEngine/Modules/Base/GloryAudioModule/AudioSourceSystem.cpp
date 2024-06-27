@@ -17,6 +17,13 @@ namespace Glory
 
 	void AudioSourceSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->SourceSystem().OnSourceStart;
+		if (callback) callback(pRegistry, entity, pComponent);
+
 		if (!pComponent.m_AutoPlay) return;
 		Play(pRegistry, entity, pComponent);
 	}
@@ -28,6 +35,12 @@ namespace Glory
 
 	void AudioSourceSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->SourceSystem().OnSourceStop;
+		if (callback) callback(pRegistry, entity, pComponent);
 	}
 
 	void AudioSourceSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
@@ -142,6 +155,26 @@ namespace Glory
 		pAudioModule->SetVolume(pComponent.m_CurrentChannel, pComponent.m_Volume);
 	}
 
+	void AudioListenerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->ListenerSystem().OnListenerStart;
+		if (callback) callback(pRegistry, entity, pComponent);
+	}
+
+	void AudioListenerSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->ListenerSystem().OnListenerStop;
+		if (callback) callback(pRegistry, entity, pComponent);
+	}
+
 	void AudioListenerSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
 	{
 		if (!pComponent.m_Enabled) return;
@@ -153,5 +186,8 @@ namespace Glory
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 
 		pAudioModule->ListenerTransform() = transform.MatTransform;
+
+		auto& callback = pAudioModule->ListenerSystem().OnListenerUpdate;
+		if (callback) callback(pRegistry, entity, pComponent);
 	}
 }

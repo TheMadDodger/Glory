@@ -3,9 +3,17 @@
 
 #include <phonon/phonon.h>
 
+#include <EntityID.h>
+
+namespace Glory::Utils::ECS
+{
+	class EntityRegistry;
+}
+
 namespace Glory
 {
 	struct AudioChannel;
+	struct AudioSource;
 	class AudioModule;
 
     class SteamAudioModule : public Module
@@ -21,9 +29,11 @@ namespace Glory
 		GLORY_API IPLContext GetContext();
 
 		GLORY_API void SetScene(IPLScene scene);
+		GLORY_API IPLScene GetScene();
 
 	protected:
 		virtual void Initialize() override;
+		virtual void Update() override;
 		virtual void Cleanup() override;
 
 	private:
@@ -31,11 +41,16 @@ namespace Glory
 
 		void AllocateChannels(size_t channels);
 
+		void AddSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source);
+		void RemoveSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source);
+
 	private:
 		IPLContext m_IPLContext = nullptr;
 		IPLHRTF m_IPLHrtf = nullptr;
 		IPLScene m_Scene = nullptr;
+		IPLSimulator m_Simulator = nullptr;
 		AudioModule* m_pAudioModule = nullptr;
+		std::vector<IPLSource> m_Sources;
 
 		std::vector<IPLAudioBuffer> m_InBuffers;
 		std::vector<IPLAudioBuffer> m_OutBuffers;

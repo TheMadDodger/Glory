@@ -119,7 +119,7 @@ namespace Glory
 	uint32_t MeshData::AddVertex(const float* vertex)
 	{
 		const size_t writePos = m_Vertices.size();
-		m_Vertices.resize(writePos + m_VertexSize);
+		m_Vertices.resize(writePos + m_VertexSize/sizeof(float));
 		std::memcpy(&m_Vertices[writePos], vertex, m_VertexSize);
 		++m_VertexCount;
 		return m_VertexCount - 1;
@@ -136,5 +136,7 @@ namespace Glory
 		m_Indices.push_back(v0);
 		m_Indices.push_back(v2);
 		m_Indices.push_back(v3);
+
+		m_IndexCount += 6;
 	}
 }
