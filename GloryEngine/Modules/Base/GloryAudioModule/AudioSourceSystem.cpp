@@ -45,6 +45,12 @@ namespace Glory
 
 	void AudioSourceSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->SourceSystem().OnSourceUpdate;
+		if (callback) callback(pRegistry, entity, pComponent);
 	}
 
 	void FinishedCallback(Engine* pEngine, const AudioChannel& channel)

@@ -31,6 +31,7 @@ namespace Glory
         std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, AudioSource&)> OnPlaybackFinished;
         std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, AudioSource&)> OnSourceStart;
         std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, AudioSource&)> OnSourceStop;
+        std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, AudioSource&)> OnSourceUpdate;
     };
 
     class AudioListenerSystem
