@@ -16,12 +16,16 @@ namespace Glory
 	struct AudioSource;
 	class AudioModule;
 
+	/** @brief SteamAudio module */
     class SteamAudioModule : public Module
     {
 	public:
+		/** @brief Constructor */
 		SteamAudioModule();
+		/** @brief Destructor */
 		virtual ~SteamAudioModule();
 
+		/** @brief Module type - typeid(SteamAudioModule) */
 		virtual const std::type_info& GetModuleType() override;
 
 		GLORY_MODULE_VERSION_H(0,1,0);
@@ -39,9 +43,32 @@ namespace Glory
 	private:
 		void ProcessEffects(AudioChannel& channel, void* stream, int len);
 
+		/**
+		 * @brief Prepare all effects for the specified number of mixing channels
+		 * @param channels Number of mixing channels to prepare for
+		 */
 		void AllocateChannels(size_t channels);
 
+		/**
+		 * @brief Add a new source to the simulation
+		 * @param pRegistry Registry that owns the entity
+		 * @param entity ID of the entity
+		 * @param source The @ref AudioSource component
+		 */
 		void AddSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source);
+		/**
+		 * @brief Update a source its position in the simulation
+		 * @param pRegistry Registry that owns the entity
+		 * @param entity ID of the entity
+		 * @param source The @ref AudioSource component
+		 */
+		void UpdateSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source);
+		/**
+		 * @brief Remove a source from the simulation
+		 * @param pRegistry Registry that owns the entity
+		 * @param entity ID of the entity
+		 * @param source The @ref AudioSource component
+		 */
 		void RemoveSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source);
 
 	private:
@@ -51,6 +78,7 @@ namespace Glory
 		IPLSimulator m_Simulator = nullptr;
 		AudioModule* m_pAudioModule = nullptr;
 		std::vector<IPLSource> m_Sources;
+		std::vector<UUID> m_SourceEntities;
 
 		std::vector<IPLAudioBuffer> m_InBuffers;
 		std::vector<IPLAudioBuffer> m_OutBuffers;

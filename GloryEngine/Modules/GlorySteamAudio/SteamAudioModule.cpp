@@ -116,20 +116,24 @@ namespace Glory
 			RemoveSource(pRegistry, entity, pComponent);
 		};
 
+		m_pAudioModule->SourceSystem().OnSourceUpdate = [this](Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent) {
+			UpdateSource(pRegistry, entity, pComponent);
+		};
+
 		m_pAudioModule->ListenerSystem().OnListenerUpdate = [this](Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent) {
 			if (!pComponent.m_Enabled) return;
 
 			Transform& transform = pRegistry->GetComponent<Transform>(entity);
-			glm::vec3 scale, listenPos, skew;
-			glm::vec4 pers;
-			glm::quat listenRot;
-			glm::decompose(transform.MatTransform, scale, listenRot, listenPos, skew, pers);
+			const glm::vec3 right = glm::vec3(transform.MatTransform[0][0], transform.MatTransform[1][0], transform.MatTransform[2][0]);
+			const glm::vec3 up = glm::vec3(transform.MatTransform[0][1], transform.MatTransform[1][1], transform.MatTransform[2][1]);
+			const glm::vec3 forward = glm::vec3(transform.MatTransform[0][2], transform.MatTransform[1][2], transform.MatTransform[2][2]);
+			const glm::vec3 pos = glm::vec3(transform.MatTransform[3][0], transform.MatTransform[3][1], transform.MatTransform[3][2]);
 
 			IPLCoordinateSpace3 listenerCoordinates;
-			listenerCoordinates.origin = IPLVector3{ listenPos.x, listenPos.y, listenPos.z };
-			listenerCoordinates.ahead = IPLVector3{ 0.0f, 0.0f, -1.0f };
-			listenerCoordinates.right = IPLVector3{ 1.0f, 0.0f, 0.0f };
-			listenerCoordinates.up = IPLVector3{ 0.0f, 1.0f, 0.0f };
+			listenerCoordinates.origin = IPLVector3{ pos.x, pos.y, pos.z };
+			listenerCoordinates.ahead = IPLVector3{ forward.x, forward.y, -forward.z };
+			listenerCoordinates.right = IPLVector3{ right.x, right.y, right.z };
+			listenerCoordinates.up = IPLVector3{ up.x, up.y, up.z };
 
 			IPLSimulationSharedInputs sharedInputs{};
 			sharedInputs.listener = listenerCoordinates;
@@ -145,14 +149,28 @@ namespace Glory
 
 	void SteamAudioModule::Cleanup()
 	{
+		for (size_t i = 0; i < m_Sources.size(); ++i)
+		{
+			if (!m_Sources[i]) continue;
+			iplSourceRemove(m_Sources[i], m_Simulator);
+			iplSourceRelease(&m_Sources[i]);
+		}
+		m_Sources.clear();
+		m_SourceEntities.clear();
+
 		for (size_t i = 0; i < m_InBuffers.size(); ++i)
 		{
 			iplAudioBufferFree(m_IPLContext, &m_InBuffers[i]);
 			iplAudioBufferFree(m_IPLContext, &m_OutBuffers[i]);
+			iplAudioBufferFree(m_IPLContext, &m_AmbisonicsBuffers[i]);
 			iplBinauralEffectRelease(&m_BinauralEffects[i]);
+			iplDirectEffectRelease(&m_DirectEffects[i]);
+			iplAmbisonicsEncodeEffectRelease(&m_AmbiSonicsEffects[i]);
+			iplAmbisonicsDecodeEffectRelease(&m_AmbiSonicsDecodeEffects[i]);
 		}
 
 		iplSceneRelease(&m_Scene);
+		iplSimulatorRelease(&m_Simulator);
 
 		iplHRTFRelease(&m_IPLHrtf);
 		iplContextRelease(&m_IPLContext);
@@ -177,6 +195,7 @@ namespace Glory
 		const glm::vec3 up = glm::vec3(listener[0][1], listener[1][1], listener[2][1]);
 		const glm::vec3 forward = glm::vec3(listener[0][2], listener[1][2], listener[2][2]);
 
+		UUID sourceID = 0;
 		glm::vec3 sourcePos{};
 		switch (channel.m_UserData.m_Type)
 		{
@@ -184,7 +203,8 @@ namespace Glory
 		{
 			GScene* pScene = m_pEngine->GetSceneManager()->GetOpenScene(channel.m_UserData.sceneID());
 			if (!pScene) return;
-			Entity entity = pScene->GetEntityByUUID(channel.m_UserData.entityID());
+			sourceID = channel.m_UserData.entityID();
+			Entity entity = pScene->GetEntityByUUID(sourceID);
 			if (!entity.IsValid()) return;
 			const glm::mat4 source = entity.GetComponent<Transform>().MatTransform;
 			glm::quat sourceRot;
@@ -196,6 +216,11 @@ namespace Glory
 		default:
 			break;
 		}
+
+		auto iter = std::find(m_SourceEntities.begin(), m_SourceEntities.end(), sourceID);
+		/* The engine could be shutting down so just early return to prevent crashing */
+		if (iter == m_SourceEntities.end()) return;
+		const size_t sourceIndex = iter - m_SourceEntities.begin();
 
 		ModuleSettings& audioSettings = m_pAudioModule->Settings();
 		const unsigned int frameSize = audioSettings.Value<unsigned int>(AudioModule::SettingNames::Framesize);
@@ -230,7 +255,7 @@ namespace Glory
 		const float distanceAttenuation = iplDistanceAttenuationCalculate(m_IPLContext, { sourcePos.x, sourcePos.y, sourcePos.z }, listenerCoordinates.origin, &distanceAttenuationModel);
 
 		IPLSimulationOutputs outputs{};
-		iplSourceGetOutputs(m_Sources[0], IPL_SIMULATIONFLAGS_DIRECT, &outputs);
+		iplSourceGetOutputs(m_Sources[sourceIndex], IPL_SIMULATIONFLAGS_DIRECT, &outputs);
 
 		IPLDirectEffectParams directEffectsParams = outputs.direct; // this can be passed to a direct 
 		directEffectsParams.flags = IPLDirectEffectFlags(IPL_DIRECTEFFECTFLAGS_APPLYAIRABSORPTION | IPL_DIRECTEFFECTFLAGS_APPLYOCCLUSION | IPL_DIRECTEFFECTFLAGS_APPLYTRANSMISSION);
@@ -332,27 +357,55 @@ namespace Glory
 
 	void SteamAudioModule::AddSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& audioSource)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		const UUID id = pScene->GetEntityUUID(entity);
+
+		auto iter = std::find(m_SourceEntities.begin(), m_SourceEntities.end(), 0);
+		size_t sourceIndex = 0;
+		if (iter == m_SourceEntities.end())
+		{
+			sourceIndex = m_Sources.size();
+			m_Sources.push_back(nullptr);
+			m_SourceEntities.push_back(id);
+		}
+		else
+		{
+			sourceIndex = iter - m_SourceEntities.begin();
+			m_SourceEntities[sourceIndex] = id;
+		}
+
 		IPLSourceSettings sourceSettings{};
 		sourceSettings.flags = IPL_SIMULATIONFLAGS_DIRECT; // this enables occlusion/transmission simulator for this source
 
-		IPLSource source = nullptr;
-		iplSourceCreate(m_Simulator, &sourceSettings, &source);
-		m_Sources.push_back(source);
+		iplSourceCreate(m_Simulator, &sourceSettings, &m_Sources[sourceIndex]);
 
-		iplSourceAdd(source, m_Simulator);
+		iplSourceAdd(m_Sources[sourceIndex], m_Simulator);
 		iplSimulatorCommit(m_Simulator);
 
+		UpdateSource(pRegistry, entity, audioSource);
+	}
+
+	void SteamAudioModule::UpdateSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& audioSource)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		const UUID id = pScene->GetEntityUUID(entity);
+
+		auto iter = std::find(m_SourceEntities.begin(), m_SourceEntities.end(), id);
+		if (iter == m_SourceEntities.end()) return;
+		const size_t index = iter - m_SourceEntities.begin();
+		IPLSource source = m_Sources[index];
+
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
-		glm::vec3 scale, pos, skew;
-		glm::vec4 pers;
-		glm::quat rot;
-		glm::decompose(transform.MatTransform, scale, rot, pos, skew, pers);
+		const glm::vec3 right = glm::vec3(transform.MatTransform[0][0], transform.MatTransform[1][0], transform.MatTransform[2][0]);
+		const glm::vec3 up = glm::vec3(transform.MatTransform[0][1], transform.MatTransform[1][1], transform.MatTransform[2][1]);
+		const glm::vec3 forward = glm::vec3(transform.MatTransform[0][2], transform.MatTransform[1][2], transform.MatTransform[2][2]);
+		const glm::vec3 pos = glm::vec3(transform.MatTransform[3][0], transform.MatTransform[3][1], transform.MatTransform[3][2]);
 
 		IPLCoordinateSpace3 sourceCoordinates;
 		sourceCoordinates.origin = IPLVector3{ pos.x, pos.y, pos.z };
-		sourceCoordinates.ahead = IPLVector3{ 0.0f, 0.0f, -1.0f };
-		sourceCoordinates.right = IPLVector3{ 1.0f, 0.0f, 0.0f };
-		sourceCoordinates.up = IPLVector3{ 0.0f, 1.0f, 0.0f };
+		sourceCoordinates.ahead = IPLVector3{ forward.x, forward.y, -forward.z };
+		sourceCoordinates.right = IPLVector3{ right.x, right.y, right.z };
+		sourceCoordinates.up = IPLVector3{ up.x, up.y, up.z };
 
 		IPLSimulationInputs inputs{};
 		inputs.flags = IPL_SIMULATIONFLAGS_DIRECT;
@@ -364,8 +417,20 @@ namespace Glory
 		iplSourceSetInputs(source, IPL_SIMULATIONFLAGS_DIRECT, &inputs);
 	}
 
-	void SteamAudioModule::RemoveSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source)
+	void SteamAudioModule::RemoveSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& audioSource)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		const UUID id = pScene->GetEntityUUID(entity);
 
+		auto iter = std::find(m_SourceEntities.begin(), m_SourceEntities.end(), id);
+		if (iter == m_SourceEntities.end()) return;
+		const size_t index = iter - m_SourceEntities.begin();
+
+		iplSourceRemove(m_Sources[index], m_Simulator);
+		iplSimulatorCommit(m_Simulator);
+
+		iplSourceRelease(&m_Sources[index]);
+		m_Sources[index] = nullptr;
+		m_SourceEntities[index] = 0;
 	}
 }
