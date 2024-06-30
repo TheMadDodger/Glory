@@ -14,6 +14,7 @@ namespace Glory
 	{
 	public:
 		AssetArchive(BinaryStream* pStream, bool isNew=false);
+		AssetArchive(AssetArchive&& other) noexcept;
 		virtual ~AssetArchive();
 
 		bool VerifyVersion();

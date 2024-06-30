@@ -14,6 +14,7 @@
 #include <AudioModule.h>
 #include <AudioSourceSystem.h>
 #include <AudioComponents.h>
+#include <AudioScene.h>
 
 #define STEAM_AUDIO_VERSION_STR TOSTRING(STEAMAUDIO_VERSION_MAJOR.STEAMAUDIO_VERSION_MINOR.STEAMAUDIO_VERSION_PATCH)
 
@@ -37,18 +38,61 @@ namespace Glory
 		return m_IPLContext;
 	}
 
-	void SteamAudioModule::SetScene(IPLScene scene)
+	void SteamAudioModule::AddAudioScene(AudioScene&& audioScene)
 	{
-		iplSceneRelease(&m_Scene);
-		m_Scene = scene;
+		m_AudioScenes.push_back(std::move(audioScene));
+		/** @todo: Keep track of which mesh came from which scene for easier removal when the scene unloads */
+		/** @todo: Load audio scene when a GScene is loaded if available */
+	}
+
+	void SteamAudioModule::RemoveAllAudioScenes()
+	{
+		m_AudioScenes.clear();
+	}
+
+	void SteamAudioModule::RebuildAudioSimulationScene()
+	{
+		if (m_Scene)
+			iplSceneRelease(&m_Scene);
+
+		IPLSceneSettings sceneSettings{};
+		sceneSettings.type = IPL_SCENETYPE_DEFAULT;
+		iplSceneCreate(m_IPLContext, &sceneSettings, &m_Scene);
 
 		iplSimulatorSetScene(m_Simulator, m_Scene);
 		iplSimulatorCommit(m_Simulator);
-	}
 
-	IPLScene SteamAudioModule::GetScene()
-	{
-		return m_Scene;
+		for (size_t i = 0; i < m_AudioScenes.size(); ++i)
+		{
+			AudioScene& scene = m_AudioScenes[i];
+
+			for (size_t i = 0; i < scene.MeshCount(); ++i)
+			{
+				MeshData& mesh = scene.Mesh(i);
+
+				/* @todo: Materials should come from a separate component, maybe even a resource? */
+				IPLMaterial materials[1] = {
+					{ {0.5f, 0.5f, 0.5f}, 0.5f, {0.1f, 0.1f, 0.1f} }
+				};
+
+				IPLint32 materialIndices[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+				IPLStaticMeshSettings staticMeshSettings{};
+				staticMeshSettings.numVertices = mesh.VertexCount();
+				staticMeshSettings.numTriangles = mesh.IndexCount() / 3;
+				staticMeshSettings.numMaterials = 1;
+				staticMeshSettings.vertices = reinterpret_cast<IPLVector3*>(mesh.Vertices());
+				staticMeshSettings.triangles = reinterpret_cast<IPLTriangle*>(mesh.Indices());
+				staticMeshSettings.materialIndices = materialIndices;
+				staticMeshSettings.materials = materials;
+
+				IPLStaticMesh staticMesh = nullptr;
+				iplStaticMeshCreate(m_Scene, &staticMeshSettings, &staticMesh);
+				iplStaticMeshAdd(staticMesh, m_Scene);
+			}
+		}
+
+		iplSceneCommit(m_Scene);
 	}
 
 	void SteamAudioModule::Initialize()
