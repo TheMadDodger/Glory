@@ -7,6 +7,8 @@
 #include <Components.h>
 
 #include <SteamAudioModule.h>
+#include <AudioScene.h>
+#include <BinaryStream.h>
 
 #include <EditorApplication.h>
 
@@ -92,18 +94,13 @@ namespace Glory::Editor
 	void AudioSceneWindow::OnGUI()
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		SteamAudioModule* pSteamAudio = pEngine->GetOptionalModule<SteamAudioModule>();
-		if (!pSteamAudio) return;
-		IPLContext context = pSteamAudio->GetContext();
-
 		if (ImGui::Button("Build occlusion scene"))
 		{
-			IPLScene scene = pSteamAudio->GetScene();
-
 			SceneManager* sceneManager = pEngine->GetSceneManager();
 			for (size_t i = 0; i < sceneManager->OpenScenesCount(); ++i)
 			{
 				GScene* pScene = sceneManager->GetOpenScene(i);
+				AudioScene audioScene{ pScene->GetUUID() };
 				Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 				Utils::ECS::TypeView<PhysicsBody>* pPhysicsBodies = registry.GetTypeView<PhysicsBody>();
 				if (!pPhysicsBodies) continue;
@@ -124,31 +121,19 @@ namespace Glory::Editor
 
 					if (body.m_Shape.m_ShapeType == ShapeType::None) continue;
 					MeshData mesh = GenerateMesh(body.m_Shape, transform.MatTransform);
-
-					/* @todo: Materials should come from a separate component, maybe even a resource? */
-					IPLMaterial materials[1] = {
-						{ {0.5f, 0.5f, 0.5f}, 0.5f, {0.1f, 0.1f, 0.1f} }
-					};
-
-					IPLint32 materialIndices[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-					IPLStaticMeshSettings staticMeshSettings{};
-					staticMeshSettings.numVertices = mesh.VertexCount();
-					staticMeshSettings.numTriangles = mesh.IndexCount()/3;
-					staticMeshSettings.numMaterials = 1;
-					staticMeshSettings.vertices = reinterpret_cast<IPLVector3*>(mesh.Vertices());
-					staticMeshSettings.triangles = reinterpret_cast<IPLTriangle*>(mesh.Indices());
-					staticMeshSettings.materialIndices = materialIndices;
-					staticMeshSettings.materials = materials;
-
-					IPLStaticMesh staticMesh = nullptr;
-					iplStaticMeshCreate(scene, &staticMeshSettings, &staticMesh);
-					iplStaticMeshAdd(staticMesh, scene);
-					iplSceneCommit(scene);
+					audioScene.AddMesh(std::move(mesh));
 				}
-			}
 
-			pSteamAudio->SetScene(scene);
+				ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+				std::filesystem::path cachedScenesPath = pProject->CachePath();
+				cachedScenesPath.append("AudioScenes");
+				if (!std::filesystem::exists(cachedScenesPath))
+					std::filesystem::create_directory(cachedScenesPath);
+				cachedScenesPath.append(std::to_string(pScene->GetUUID())).replace_extension(".gcas");
+
+				BinaryFileStream out{ cachedScenesPath };
+				audioScene.Serialize(out);
+			}
 		}
 	}
 }

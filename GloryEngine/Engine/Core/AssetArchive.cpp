@@ -9,7 +9,7 @@
 
 namespace Glory
 {
-	AssetArchive::AssetArchive(BinaryStream* pStream, bool isNew) : m_pStream(pStream), m_Version(), m_Owned()
+	AssetArchive::AssetArchive(BinaryStream* pStream, bool isNew): m_pStream(pStream), m_Version(), m_Owned()
 	{
 		if (isNew)
 		{
@@ -18,6 +18,12 @@ namespace Glory
 		}
 		else
 			ReadVersion();
+	}
+
+	AssetArchive::AssetArchive(AssetArchive&& other) noexcept:
+		m_pStream(other.m_pStream), m_Version(other.m_Version), m_Owned(std::move(other.m_Owned))
+	{
+		other.m_pStream = nullptr;
 	}
 
 	AssetArchive::~AssetArchive()

@@ -9,6 +9,7 @@ namespace Glory::Utils
 		using Element = uint32_t;
 	public:
 		BitSet(size_t capacity = 32, bool defaultOn = false);
+		BitSet(BitSet&& other) noexcept;
 		~BitSet();
 
 	public:
@@ -19,6 +20,9 @@ namespace Glory::Utils
 		void Clear();
 		void Reserve(size_t capacity);
 		bool IsSet(Element index) const;
+
+		Element* Data() const;
+		size_t DataSize() const;
 
 	private:
 		Element* m_pMemory = nullptr;

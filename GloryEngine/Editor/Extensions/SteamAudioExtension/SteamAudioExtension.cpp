@@ -6,6 +6,9 @@
 #include <AudioComponents.h>
 #include <SceneManager.h>
 #include <SteamAudioModule.h>
+#include <AudioScene.h>
+#include <BinaryStream.h>
+#include <MeshData.h>
 
 #include <EntitySceneObjectEditor.h>
 #include <CreateEntityObjectsCallbacks.h>
@@ -24,13 +27,42 @@ namespace Glory::Editor
 {
 	static constexpr char* Shortcut_Window_SteamAudio = "Open Steam Audio Window";
 
-	CREATE_OBJECT_CALLBACK_CPP(AudioSource, AudioSource, ());
-	CREATE_OBJECT_CALLBACK_CPP(AudioListener, AudioListener, ());
+	//CREATE_OBJECT_CALLBACK_CPP(AudioSource, AudioSource, ());
+	//CREATE_OBJECT_CALLBACK_CPP(AudioListener, AudioListener, ());
+
+	void SteamAudioExtension::HandleBeforeStart(Module* pModule)
+	{
+		/* Build audio occlusion scene and send to SteamAudio */
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		SteamAudioModule* pSteamAudio = pEngine->GetOptionalModule<SteamAudioModule>();
+		if (!pSteamAudio) return;
+		SceneManager* sceneManager = pEngine->GetSceneManager();
+
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		std::filesystem::path cachedScenesPath = pProject->CachePath();
+		cachedScenesPath.append("AudioScenes");
+		if (!std::filesystem::exists(cachedScenesPath)) return;
+
+		for (size_t i = 0; i < sceneManager->OpenScenesCount(); ++i)
+		{
+			GScene* pScene = sceneManager->GetOpenScene(i);
+			std::filesystem::path cachedScenePath = cachedScenesPath;
+			cachedScenePath.append(std::to_string(pScene->GetUUID())).replace_extension(".gcas");
+			if (!std::filesystem::exists(cachedScenePath)) continue;
+			BinaryFileStream fileStream{ cachedScenePath, true };
+			AudioScene audioScene{ pScene->GetUUID() };
+			audioScene.Deserialize(fileStream);
+			pSteamAudio->AddAudioScene(std::move(audioScene));
+		}
+
+		pSteamAudio->RebuildAudioSimulationScene();
+	}
 
 	void SteamAudioExtension::HandleStop(Module* pModule)
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		SteamAudioModule* pAudio = pEngine->GetOptionalModule<SteamAudioModule>();
+		pAudio->RemoveAllAudioScenes();
 	}
 
 	SteamAudioExtension::SteamAudioExtension()

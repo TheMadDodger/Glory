@@ -15,6 +15,7 @@ namespace Glory
 	struct AudioChannel;
 	struct AudioSource;
 	class AudioModule;
+	class AudioScene;
 
 	/** @brief SteamAudio module */
     class SteamAudioModule : public Module
@@ -32,8 +33,22 @@ namespace Glory
 
 		GLORY_API IPLContext GetContext();
 
-		GLORY_API void SetScene(IPLScene scene);
-		GLORY_API IPLScene GetScene();
+		/**
+		 * @brief Add an audio scene for audio simulation
+		 * @param audioScene The @ref AudioScene to add
+		 *
+		 * @note You must call @ref RebuildAudioSimulationScene() before the changes take effect
+		 */
+		GLORY_API void AddAudioScene(AudioScene&& audioScene);
+		/**
+		 * @brief Remove all loaded audio scenes from the simulation
+		 *
+		 * @note You must call @ref RebuildAudioSimulationScene() before the changes take effect
+		 */
+		GLORY_API void RemoveAllAudioScenes();
+
+		/** @bried Rebuild the @ref IPLScene from loaded @ref AudioScene datas */
+		GLORY_API void RebuildAudioSimulationScene();
 
 	protected:
 		virtual void Initialize() override;
@@ -88,5 +103,7 @@ namespace Glory
 		std::vector<IPLAmbisonicsEncodeEffect> m_AmbiSonicsEffects;
 		std::vector<IPLAmbisonicsDecodeEffect> m_AmbiSonicsDecodeEffects;
 		std::vector<std::vector<float>> m_TemporaryBuffers;
+
+		std::vector<AudioScene> m_AudioScenes;
     };
 }
