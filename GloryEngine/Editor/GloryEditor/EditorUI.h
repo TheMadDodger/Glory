@@ -65,6 +65,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool InputEnum(std::string_view label, uint32_t typeHash, uint32_t* value, const std::vector<uint32_t>& excludeValues = std::vector<uint32_t>());
 		static GLORY_EDITOR_API bool InputEnum(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, const std::vector<uint32_t>& excludeValues = std::vector<uint32_t>());
 
+		static GLORY_EDITOR_API void Tooltip(std::string_view text);
+
 		template<typename T>
 		static bool InputEnum(Utils::YAMLFileRef& file, const std::filesystem::path& path, const std::vector<uint32_t>& excludeValues = std::vector<uint32_t>())
 		{

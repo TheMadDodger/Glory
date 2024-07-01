@@ -1,5 +1,7 @@
 #include "SteamAudioExtension.h"
 #include "AudioSceneWindow.h"
+#include "SoundMaterialEditor.h"
+#include "SoundMaterialImporter.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -25,6 +27,9 @@ EXTENSION_CPP(SteamAudioExtension)
 
 namespace Glory::Editor
 {
+	SoundMaterialEditor MaterialEditor;
+	SoundMaterialImporter Importer;
+
 	static constexpr char* Shortcut_Window_SteamAudio = "Open Steam Audio Window";
 
 	//CREATE_OBJECT_CALLBACK_CPP(AudioSource, AudioSource, ());
@@ -90,5 +95,8 @@ namespace Glory::Editor
 		//OBJECT_CREATE_MENU(AudioListener, AudioListener);
 
 		MenuBar::AddMenuItem("Window/Steam Audio", []() { EditorWindow::GetWindow<AudioSceneWindow>(); }, NULL, Shortcut_Window_SteamAudio);
+
+		Editor::RegisterEditor(&MaterialEditor);
+		Importer::Register(&Importer);
 	}
 }

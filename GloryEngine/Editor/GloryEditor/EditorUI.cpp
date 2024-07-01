@@ -792,6 +792,12 @@ namespace Glory::Editor
 		return false;
 	}
 
+	void EditorUI::Tooltip(std::string_view text)
+	{
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(text.data());
+	}
+
 	bool EditorUI::InputLayerMask(std::string_view label, LayerMask* data)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
