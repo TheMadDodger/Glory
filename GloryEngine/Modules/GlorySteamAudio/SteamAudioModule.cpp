@@ -1,4 +1,5 @@
 #include "SteamAudioModule.h"
+#include "SoundMaterialData.h"
 
 #include <fstream>
 #include <vector>
@@ -97,6 +98,8 @@ namespace Glory
 
 	void SteamAudioModule::Initialize()
 	{
+		m_pEngine->GetResourceTypes().RegisterResource<SoundMaterialData>(".gsmat");
+
 		m_pAudioModule = m_pEngine->GetOptionalModule<AudioModule>();
 		if (!m_pAudioModule)
 		{
