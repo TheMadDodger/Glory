@@ -16,6 +16,7 @@
 #include <AudioSourceSystem.h>
 #include <AudioComponents.h>
 #include <AudioScene.h>
+#include <SoundComponents.h>
 
 #define STEAM_AUDIO_VERSION_STR TOSTRING(STEAMAUDIO_VERSION_MAJOR.STEAMAUDIO_VERSION_MINOR.STEAMAUDIO_VERSION_PATCH)
 
@@ -98,7 +99,12 @@ namespace Glory
 
 	void SteamAudioModule::Initialize()
 	{
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+
+		m_pEngine->Reflection().RegisterType<SoundMaterial>();
 		m_pEngine->GetResourceTypes().RegisterResource<SoundMaterialData>(".gsmat");
+
+		m_pEngine->GetSceneManager()->RegisterComponent<SoundOccluder>();
 
 		m_pAudioModule = m_pEngine->GetOptionalModule<AudioModule>();
 		if (!m_pAudioModule)
