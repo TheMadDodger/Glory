@@ -1,4 +1,6 @@
 #pragma once
+#include <GloryEditor.h>
+
 #include <vector>
 #include <map>
 #include <functional>
@@ -38,15 +40,15 @@ namespace Editor
 		 *
 		 * Have a look at @ref EditableResource
 		 */
-		EditableResource* GetEditableResource(const UUID uuid);
+		GLORY_EDITOR_API EditableResource* GetEditableResource(const UUID uuid);
 		/** @brief Save all dirty editor versions of assets */
-		void Save();
+		GLORY_EDITOR_API void Save();
 		/** @brief Reload the contents of an asset and update its path if applicable
 		 * @param uuid ID of the asset
 		 *
 		 * Should be used if the asset was moved.
 		 */
-		void ReloadEditableAsset(const UUID uuid);
+		GLORY_EDITOR_API void ReloadEditableAsset(const UUID uuid);
 
 	private:
 		std::map<UUID, uint32_t> m_Hashes;

@@ -1,6 +1,7 @@
 #include "SteamAudioExtension.h"
 #include "AudioSceneWindow.h"
 #include "SoundMaterialEditor.h"
+#include "SoundOccluderEditor.h"
 #include "SoundMaterialImporter.h"
 
 #include <Debug.h>
@@ -11,6 +12,7 @@
 #include <AudioScene.h>
 #include <BinaryStream.h>
 #include <MeshData.h>
+#include <SoundComponents.h>
 
 #include <EntitySceneObjectEditor.h>
 #include <CreateEntityObjectsCallbacks.h>
@@ -28,12 +30,10 @@ EXTENSION_CPP(SteamAudioExtension)
 namespace Glory::Editor
 {
 	SoundMaterialEditor MaterialEditor;
+	SoundOccluderEditor OccluderCompEditor;
 	SoundMaterialImporter Importer;
 
 	static constexpr char* Shortcut_Window_SteamAudio = "Open Steam Audio Window";
-
-	//CREATE_OBJECT_CALLBACK_CPP(AudioSource, AudioSource, ());
-	//CREATE_OBJECT_CALLBACK_CPP(AudioListener, AudioListener, ());
 
 	void SteamAudioExtension::HandleBeforeStart(Module* pModule)
 	{
@@ -85,18 +85,14 @@ namespace Glory::Editor
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
-		//Editor::RegisterEditor<AudioDataEditor>();
-		//EntitySceneObjectEditor::AddComponentIcon<AudioSource>(ICON_FA_VOLUME_HIGH);
-		//EntitySceneObjectEditor::AddComponentIcon<AudioListener>(ICON_FA_HEADPHONES);
-
 		EditorPlayer::RegisterLoopHandler(this);
-
-		//OBJECT_CREATE_MENU(AudioSource, AudioSource);
-		//OBJECT_CREATE_MENU(AudioListener, AudioListener);
 
 		MenuBar::AddMenuItem("Window/Steam Audio", []() { EditorWindow::GetWindow<AudioSceneWindow>(); }, NULL, Shortcut_Window_SteamAudio);
 
 		Editor::RegisterEditor(&MaterialEditor);
+		Editor::RegisterEditor(&OccluderCompEditor);
 		Importer::Register(&Importer);
+
+		EntitySceneObjectEditor::AddComponentIcon<SoundOccluder>(ICON_FA_EAR_DEAF);
 	}
 }

@@ -32,6 +32,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API std::vector<Editor*> FindEditors(UUID uuid);
 		static GLORY_EDITOR_API void ReleaseEditor(Editor* pEditor);
 		GLORY_EDITOR_API Object* GetTarget() const;
+		GLORY_EDITOR_API void SetTarget(Object* pTarget);
 
 	protected:
 		Object* m_pTarget;
@@ -48,6 +49,7 @@ namespace Glory::Editor
 
 		static std::vector<Editor*> m_pRegisteredEditors;
 		static std::vector<Editor*> m_pActiveEditors;
+		static bool m_CleaningUp;
 	};
 
 	template<class TEditor, class TObject>
