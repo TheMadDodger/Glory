@@ -71,12 +71,18 @@ namespace Glory
 			for (size_t i = 0; i < scene.MeshCount(); ++i)
 			{
 				MeshData& mesh = scene.Mesh(i);
+				const SoundMaterial& material = scene.Material(i);
 
-				/* @todo: Materials should come from a separate component, maybe even a resource? */
-				IPLMaterial materials[1] = {
-					{ {0.5f, 0.5f, 0.5f}, 0.5f, {0.1f, 0.1f, 0.1f} }
-				};
+				IPLMaterial materials[1];
+				materials[0].absorption[0] = material.m_Absorption.x;
+				materials[0].absorption[1] = material.m_Absorption.y;
+				materials[0].absorption[2] = material.m_Absorption.z;
+				materials[0].scattering = material.m_Scattering;
+				materials[0].transmission[0] = material.m_Transmission.x;
+				materials[0].transmission[1] = material.m_Transmission.y;
+				materials[0].transmission[2] = material.m_Transmission.z;
 
+				/* @todo: Generate material indices */
 				IPLint32 materialIndices[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 				IPLStaticMeshSettings staticMeshSettings{};
@@ -95,6 +101,16 @@ namespace Glory
 		}
 
 		iplSceneCommit(m_Scene);
+	}
+
+	const SoundMaterial& SteamAudioModule::DefaultMaterial() const
+	{
+		return m_DefaultSoundMaterial;
+	}
+
+	SoundMaterial& SteamAudioModule::DefaultMaterial()
+	{
+		return m_DefaultSoundMaterial;
 	}
 
 	void SteamAudioModule::Initialize()

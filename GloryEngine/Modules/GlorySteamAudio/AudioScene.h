@@ -3,6 +3,7 @@
 
 #include <UUID.h>
 #include <AssetReference.h>
+#include <SoundMaterialData.h>
 #include <BitSet.h>
 #include <Glory.h>
 
@@ -10,6 +11,7 @@ namespace Glory
 {
 	class MeshData;
 	class BinaryStream;
+	struct SoundMaterial;
 
 	/**
 	 * @brief Meta data of an audio mesh
@@ -26,6 +28,8 @@ namespace Glory
 			UUID m_AssetID;
 			size_t m_Index;
 		} m_Mesh{0};
+
+		size_t m_Material;
 	};
 
 	/**
@@ -50,13 +54,15 @@ namespace Glory
 		/**
 		 * @brief Add a mesh asset reference to the scene
 		 * @param meshID ID of the mesh asset to add
+		 * @param material Material of the mesh
 		 */
-		GLORY_API void AddMesh(UUID meshID);
+		GLORY_API void AddMesh(UUID meshID, SoundMaterial&& material);
 		/**
 		 * @brief Add a mesh to the scene
 		 * @param meshData Mesh to add
+		 * @param material Material of the mesh
 		 */
-		GLORY_API void AddMesh(MeshData&& meshData);
+		GLORY_API void AddMesh(MeshData&& meshData, SoundMaterial&& material);
 
 		/** @brief Serialize this audio scene into a stream */
 		GLORY_API void Serialize(BinaryStream& stream) const;
@@ -75,11 +81,19 @@ namespace Glory
 		GLORY_API const MeshData& Mesh(size_t index) const;
 		/** @overload */
 		GLORY_API MeshData& Mesh(size_t index);
+		/**
+		 * @brief Get the material for a mesh in this audio scene
+		 * @param index Index of the mesh
+		 */
+		GLORY_API const SoundMaterial& Material(size_t index) const;
+		/** @overload */
+		GLORY_API SoundMaterial& Material(size_t index);
 
 	private:
 		UUID m_SceneID;
 		std::vector<MeshData> m_MeshDatas;
 		std::vector<AudioMesh> m_Meshes;
+		std::vector<SoundMaterial> m_Materials;
 		Utils::BitSet m_IsAssetBits;
 	};
 }

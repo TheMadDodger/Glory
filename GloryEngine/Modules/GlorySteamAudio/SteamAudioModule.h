@@ -3,6 +3,8 @@
 
 #include <phonon/phonon.h>
 
+#include <SoundMaterialData.h>
+
 #include <EntityID.h>
 
 namespace Glory::Utils::ECS
@@ -47,8 +49,13 @@ namespace Glory
 		 */
 		GLORY_API void RemoveAllAudioScenes();
 
-		/** @bried Rebuild the @ref IPLScene from loaded @ref AudioScene datas */
+		/** @brief Rebuild the @ref IPLScene from loaded @ref AudioScene datas */
 		GLORY_API void RebuildAudioSimulationScene();
+
+		/** @brief Get the default sound material */
+		GLORY_API const SoundMaterial& DefaultMaterial() const;
+		/** @overload */
+		GLORY_API SoundMaterial& DefaultMaterial();
 
 	protected:
 		virtual void Initialize() override;
@@ -105,5 +112,7 @@ namespace Glory
 		std::vector<std::vector<float>> m_TemporaryBuffers;
 
 		std::vector<AudioScene> m_AudioScenes;
+
+		SoundMaterial m_DefaultSoundMaterial;
     };
 }
