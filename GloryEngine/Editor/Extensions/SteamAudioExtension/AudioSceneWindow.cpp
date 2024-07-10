@@ -8,6 +8,7 @@
 
 #include <SteamAudioModule.h>
 #include <AudioScene.h>
+#include <SoundComponents.h>
 #include <BinaryStream.h>
 
 #include <EditorApplication.h>
@@ -94,6 +95,7 @@ namespace Glory::Editor
 	void AudioSceneWindow::OnGUI()
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		SteamAudioModule* pModule = pEngine->GetOptionalModule<SteamAudioModule>();
 		if (ImGui::Button("Build occlusion scene"))
 		{
 			SceneManager* sceneManager = pEngine->GetSceneManager();
@@ -109,6 +111,8 @@ namespace Glory::Editor
 				{
 					const Utils::ECS::EntityID entity = pPhysicsBodies->EntityAt(i);
 					const PhysicsBody& body = pPhysicsBodies->Get(entity);
+
+					/* Only static bodies will be considered */
 					switch (body.m_BodyType)
 					{
 					case BodyType::Static:
@@ -120,8 +124,31 @@ namespace Glory::Editor
 					const Transform& transform = registry.GetComponent<Transform>(entity);
 
 					if (body.m_Shape.m_ShapeType == ShapeType::None) continue;
+					SoundMaterial materialData;
+					const SoundMaterial* material = &pModule->DefaultMaterial();
+
+					/* Get material from sound occluder */
+					if (registry.HasComponent<SoundOccluder>(entity))
+					{
+						const SoundOccluder& occluder = registry.GetComponent<SoundOccluder>(entity);
+						Utils::ECS::EntityView* pEntityView = registry.GetEntityView(entity);
+						const bool active = pEntityView->IsActive() && registry.GetTypeView<SoundOccluder>()->IsActive(entity);
+						if (!active) continue;
+						material = &occluder.m_Material;
+						if (occluder.m_MaterialAsset)
+						{
+							SoundMaterialData* pMaterial = occluder.m_MaterialAsset.GetImmediate(&pEngine->GetAssetManager());
+							if (pMaterial)
+								material = &pMaterial->Material();
+						}
+					}
+
+					materialData.m_Absorption = material->m_Absorption;
+					materialData.m_Scattering = material->m_Scattering;
+					materialData.m_Transmission = material->m_Transmission;
+
 					MeshData mesh = GenerateMesh(body.m_Shape, transform.MatTransform);
-					audioScene.AddMesh(std::move(mesh));
+					audioScene.AddMesh(std::move(mesh), std::move(materialData));
 				}
 
 				ProjectSpace* pProject = ProjectSpace::GetOpenProject();
