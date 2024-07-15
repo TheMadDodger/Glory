@@ -22,6 +22,7 @@ project "SDLAudioExtension"
 	{
 		"%{DepsIncludeDir}",
 		"%{BaseIncludeDir.audio}",
+		"%{BaseIncludeDir.audio3d}",
 
 		"%{IncludeDir.glm}",
 

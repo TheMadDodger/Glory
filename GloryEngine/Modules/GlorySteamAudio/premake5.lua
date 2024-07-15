@@ -25,6 +25,7 @@ project "GlorySteamAudio"
 	{
 		"%{DepsIncludeDir}",
 		"%{BaseIncludeDir.audio}",
+		"%{BaseIncludeDir.audio3d}",
 
 		"%{IncludeDir.glm}",
 		"%{GloryIncludeDir.core}",
@@ -53,6 +54,7 @@ project "GlorySteamAudio"
 	{
 		"GloryCore",
 		"GloryAudioModule",
+		"Glory3DAudioModule",
 		"GloryReflect",
 		"GloryECS",
 

@@ -64,6 +64,7 @@ GloryIncludeDir["threads"]				= "%{engineDir}/Threads"
 BaseIncludeDir = {}
 BaseIncludeDir["audio"]					= "%{modulesDir}/Base/GloryAudioModule"
 BaseIncludeDir["physics"]				= "%{modulesDir}/Base/GloryPhysicsModule"
+BaseIncludeDir["audio3d"]				= "%{modulesDir}/Base/Glory3DAudioModule"
 
 SubmodoleDirs = {}
 SubmodoleDirs["ImGui"]					= "%{rootDir}/submodules/ImGui"
@@ -142,6 +143,7 @@ group ""
 group "Modules/Base"
 	include "Modules/Base/GloryAudioModule"
 	include "Modules/Base/GloryPhysicsModule"
+	include "Modules/Base/Glory3DAudioModule"
 group ""
 
 group "Editor"

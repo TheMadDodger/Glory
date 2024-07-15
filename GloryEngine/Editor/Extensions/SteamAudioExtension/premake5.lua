@@ -22,6 +22,7 @@ project "SteamAudioExtension"
 	{
 		"%{DepsIncludeDir}",
 		"%{BaseIncludeDir.audio}",
+		"%{BaseIncludeDir.audio3d}",
 		"%{BaseIncludeDir.physics}",
 
 		"%{IncludeDir.glm}",

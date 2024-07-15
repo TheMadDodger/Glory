@@ -88,7 +88,7 @@ namespace Glory
 		udata.sceneID() = pScene->GetUUID();
 		udata.entityID() = pScene->GetEntityUUID(entity);
 
-		if(pComponent.m_AllowExternalEffects)
+		if(pComponent.m_Enable3D)
 			pComponent.m_CurrentChannel = pAudioModule->PlayWithEffects(pAudio, pComponent.m_Loops, std::move(udata), FinishedCallback);
 		else
 			pComponent.m_CurrentChannel = pAudioModule->Play(pAudio, pComponent.m_Loops, std::move(udata), FinishedCallback);

@@ -10,15 +10,16 @@ namespace Glory
 	struct AudioSource
 	{
 		GLORY_API AudioSource():
-			m_AsMusic(false), m_AllowExternalEffects(false), m_AutoPlay(false), m_Loops(0), m_Volume(1.0f) {}
+			m_AsMusic(false), m_AutoPlay(false), m_Loops(0), m_Volume(1.0f), m_Enable3D(true), m_Occlusion(true) {}
 
 		REFLECTABLE(AudioSource,
 			(AssetReference<AudioData>)(m_Audio),
 			(bool)(m_AsMusic),
-			(bool)(m_AllowExternalEffects),
 			(bool)(m_AutoPlay),
 			(uint32_t)(m_Loops),
-			(float)(m_Volume)
+			(float)(m_Volume),
+			(bool)(m_Enable3D),
+			(bool)(m_Occlusion)
 		);
 
 		int m_CurrentChannel = -1;

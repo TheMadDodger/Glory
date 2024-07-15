@@ -42,6 +42,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API bool DrawProperty(const FieldData* pFieldData, void* data, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, const TypeData* pTypeData, void* data, uint32_t flags);
+		static GLORY_EDITOR_API void SetDisabledCheckCallback(std::function<bool(const FieldData*)> disabledCheck = NULL);
 
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);

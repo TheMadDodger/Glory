@@ -1,5 +1,4 @@
 #include "SteamAudioModule.h"
-#include "SoundMaterialData.h"
 
 #include <fstream>
 #include <vector>
@@ -16,6 +15,7 @@
 #include <AudioSourceSystem.h>
 #include <AudioComponents.h>
 #include <AudioScene.h>
+#include <SoundMaterialData.h>
 #include <SoundComponents.h>
 
 #define STEAM_AUDIO_VERSION_STR TOSTRING(STEAMAUDIO_VERSION_MAJOR.STEAMAUDIO_VERSION_MINOR.STEAMAUDIO_VERSION_PATCH)
@@ -111,6 +111,21 @@ namespace Glory
 	SoundMaterial& SteamAudioModule::DefaultMaterial()
 	{
 		return m_DefaultSoundMaterial;
+	}
+
+	bool SteamAudioModule::HasFeature(uint32_t feature) const
+	{
+		switch (feature)
+		{
+		case Features::Occlusion:
+		case Features::Absorption:
+		case Features::Transmission:
+		case Features::Reflection:
+			return true;
+
+		default:
+			return false;
+		}
 	}
 
 	void SteamAudioModule::Initialize()
