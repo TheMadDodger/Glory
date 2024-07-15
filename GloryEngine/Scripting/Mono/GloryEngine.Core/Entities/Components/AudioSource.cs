@@ -42,8 +42,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public bool AllowEffects
         {
-            get => AudioSource_GetAllowEffects(ref _entity, _objectID);
-            set => AudioSource_SetAllowEffects(ref _entity, _objectID, value);
+            get => AudioSource_GetEnable3D(ref _entity, _objectID);
+            set => AudioSource_SetEnable3D(ref _entity, _objectID, value);
         }
 
         /// <summary>
@@ -118,9 +118,9 @@ namespace GloryEngine.Entities
         private extern static void AudioSource_SetLoops(ref Entity entity, UInt64 componentID, UInt32 loops);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static bool AudioSource_GetAllowEffects(ref Entity entity, UInt64 componentID);
+        private extern static bool AudioSource_GetEnable3D(ref Entity entity, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetAllowEffects(ref Entity entity, UInt64 componentID, bool allow);
+        private extern static void AudioSource_SetEnable3D(ref Entity entity, UInt64 componentID, bool allow);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static bool AudioSource_GetAutoPlay(ref Entity entity, UInt64 componentID);

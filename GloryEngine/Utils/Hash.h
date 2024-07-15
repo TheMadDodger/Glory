@@ -6,7 +6,7 @@
 
 namespace Hashing
 {
-	inline uint32_t Hash(const char* c)
+	constexpr inline uint32_t Hash(const char* c)
 	{
 		uint32_t hash = FIRSTH;
 		while (*c) {

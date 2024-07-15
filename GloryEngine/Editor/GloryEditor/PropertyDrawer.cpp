@@ -10,6 +10,8 @@ namespace Glory::Editor
 	const TypeData* PropertyDrawer::m_pRootTypeData = nullptr;
 	std::filesystem::path PropertyDrawer::m_CurrentPropertyPath = "";
 
+	std::function<bool(const FieldData*)> DisabledCheckCallback = NULL;
+
 	PropertyDrawer::PropertyDrawer(uint32_t typeHash) : m_TypeHash(typeHash)
 	{
 	}
@@ -93,9 +95,24 @@ namespace Glory::Editor
 		}
 	};
 
+	struct DisableScope
+	{
+		DisableScope(bool disable)
+		{
+			ImGui::BeginDisabled(disable);
+		}
+		~DisableScope()
+		{
+			ImGui::EndDisabled();
+		}
+	};
+
 	bool PropertyDrawer::DrawProperty(const FieldData* pFieldData, void* data, uint32_t flags)
 	{
 		PathGuard p(pFieldData->Name());
+
+		const bool disabled = DisabledCheckCallback ? DisabledCheckCallback(pFieldData) : false;
+		DisableScope disabledScope{ disabled };
 
 		if (pFieldData->Type() == ST_Array)
 		{
@@ -149,6 +166,11 @@ namespace Glory::Editor
 			m_CurrentPropertyPath = "";
 		}
 		return change;
+	}
+
+	void PropertyDrawer::SetDisabledCheckCallback(std::function<bool(const FieldData*)> disabledCheck)
+	{
+		DisabledCheckCallback = disabledCheck;
 	}
 
 	/*bool PropertyDrawer::DrawProperty(const ScriptProperty& scriptProperty, YAML::Node& node, uint32_t flags)

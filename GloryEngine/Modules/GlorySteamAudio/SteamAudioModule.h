@@ -1,5 +1,5 @@
 #pragma once
-#include <Module.h>
+#include <Audio3DModule.h>
 
 #include <phonon/phonon.h>
 
@@ -20,7 +20,7 @@ namespace Glory
 	class AudioScene;
 
 	/** @brief SteamAudio module */
-    class SteamAudioModule : public Module
+    class SteamAudioModule : public Audio3DModule
     {
 	public:
 		/** @brief Constructor */
@@ -56,6 +56,18 @@ namespace Glory
 		GLORY_API const SoundMaterial& DefaultMaterial() const;
 		/** @overload */
 		GLORY_API SoundMaterial& DefaultMaterial();
+
+		/**
+		 * @brief Check if a feature is supported
+		 * @param feature Hash of the feature to check
+		 *
+		 * Supported features:
+		 * - Occlusion
+		 * - Transmission
+		 * - Absorption
+		 * - Reflection
+		 */
+		GLORY_API bool HasFeature(uint32_t feature) const override;
 
 	protected:
 		virtual void Initialize() override;
