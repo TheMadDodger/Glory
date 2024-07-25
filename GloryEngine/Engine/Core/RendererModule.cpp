@@ -387,7 +387,7 @@ namespace Glory
 	{
 		GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
 		RenderTextureCreateInfo createInfo(width, height, true);
-		createInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, false));
+		createInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
 		GetCameraRenderTextureAttachments(createInfo.Attachments);
 		return pResourceManager->CreateRenderTexture(createInfo);
 	}

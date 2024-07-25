@@ -33,7 +33,7 @@ namespace Glory
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Pipeline* CreatePipeline(PipelineData* pPipelineData);
 		Texture* CreateTexture(TextureData* pTextureData);
-		Texture* CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings);
+		Texture* CreateTexture(TextureCreateInfo&& textureInfo);
 		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
 
 		void Free(GPUResource* pResource);
@@ -55,7 +55,7 @@ namespace Glory
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
 		virtual Pipeline* CreatePipeline_Internal(PipelineData* pPipelineData) = 0;
 		virtual Texture* CreateTexture_Internal(TextureData* pTextureData) = 0;
-		virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) = 0;
+		virtual Texture* CreateTexture_Internal(TextureCreateInfo&& textureInfo) = 0;
 		virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) = 0;
 
 	protected:

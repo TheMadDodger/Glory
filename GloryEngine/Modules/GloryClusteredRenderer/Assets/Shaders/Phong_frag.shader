@@ -26,6 +26,6 @@ layout(location = 2) out vec4 outNormal;
 void main()
 {
 	outColor = inColor * Properties.Color;
-	outNormal = vec4((normal + 1.0) * 0.5, 1.0);
+	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
 }

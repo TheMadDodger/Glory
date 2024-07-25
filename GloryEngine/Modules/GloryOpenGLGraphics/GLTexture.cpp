@@ -6,8 +6,8 @@
 
 namespace Glory
 {
-	GLTexture::GLTexture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
-		: Texture(width, height, format, internalFormat, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings),
+	GLTexture::GLTexture(TextureCreateInfo&& textureInfo)
+		: Texture(std::move(textureInfo)),
 		m_TextureID(0), m_GLImageType(0)
 	{
 	}
@@ -34,10 +34,11 @@ namespace Glory
 		ImageData* pImageData = pTextureData->GetImageData(&m_pOwner->GetEngine()->GetAssetManager());
 		if (!pImageData) return;
 
-		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
+		m_GLImageType = GLConverter::GetGLImageType(m_TextureInfo.m_ImageType);
 
-		GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_InternalFormat);
-		GLuint format = GLConverter::TO_GLFORMAT.at(m_PixelFormat);
+		const GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_InternalFormat);
+		const GLuint format = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_PixelFormat);
+		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(m_TextureInfo.m_Type);
 
 		if (!m_TextureID)
 		{
@@ -48,7 +49,7 @@ namespace Glory
 		glBindTexture(m_GLImageType, m_TextureID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		glTexImage2D(m_GLImageType, 0, internalFormat, (GLsizei)pImageData->GetWidth(), (GLsizei)pImageData->GetHeight(), 0, format, GL_UNSIGNED_BYTE, pImageData->GetPixels());
+		glTexImage2D(m_GLImageType, 0, internalFormat, (GLsizei)pImageData->GetWidth(), (GLsizei)pImageData->GetHeight(), 0, format, dataType, pImageData->GetPixels());
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
@@ -67,12 +68,13 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	GLORY_API void GLTexture::Create()
+	void GLTexture::Create()
 	{
-		m_GLImageType = GLConverter::GetGLImageType(m_ImageType);
+		m_GLImageType = GLConverter::GetGLImageType(m_TextureInfo.m_ImageType);
 
-		GLuint format = GLConverter::TO_GLFORMAT.at(m_PixelFormat);
-		GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_InternalFormat);
+		const GLuint format = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_PixelFormat);
+		const GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_InternalFormat);
+		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(m_TextureInfo.m_Type);
 
 		glGenTextures(1, &m_TextureID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -80,7 +82,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		// Initialize texture
-		glTexImage2D(m_GLImageType, 0, internalFormat, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(m_GLImageType, 0, internalFormat, m_TextureInfo.m_Width, m_TextureInfo.m_Height, 0, format, dataType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -98,7 +100,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	GLORY_API void GLTexture::CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
+	void GLTexture::CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
 	{
 	}
 }

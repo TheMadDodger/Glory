@@ -198,10 +198,10 @@ namespace Glory
 		return pTexture;
 	}
 
-	Texture* GPUResourceManager::CreateTexture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
+	Texture* GPUResourceManager::CreateTexture(TextureCreateInfo&& textureInfo)
 	{
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateTexture (2)");
-		Texture* pTexture = CreateTexture_Internal(width, height, format, internalFormat, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
+		Texture* pTexture = CreateTexture_Internal(std::move(textureInfo));
 		UUID id = UUID();
 		pTexture->m_pOwner = this;
 		pTexture->m_UUID = id;

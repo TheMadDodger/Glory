@@ -2,10 +2,8 @@
 
 namespace Glory
 {
-	Texture::Texture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags,
-		uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
-		: m_Width(width), m_Height(height), m_ImageType(imageType), m_UsageFlags(usageFlags), m_SharingMode(sharingMode),
-		m_ImageAspectFlags(imageAspectFlags), m_SamplerSettings(samplerSettings), m_InternalFormat(internalFormat), m_PixelFormat(format)
+	Texture::Texture(TextureCreateInfo&& textureInfo)
+		: m_TextureInfo(std::move(textureInfo))
 	{
 	}
 
@@ -15,6 +13,6 @@ namespace Glory
 
 	void Texture::CopyFromBuffer(Buffer* pBuffer)
 	{
-		CopyFromBuffer(pBuffer, 0, 0, 0, m_Width, m_Height, 1);
+		CopyFromBuffer(pBuffer, 0, 0, 0, m_TextureInfo.m_Width, m_TextureInfo.m_Height, 1);
 	}
 }
