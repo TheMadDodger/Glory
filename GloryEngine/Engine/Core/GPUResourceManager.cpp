@@ -74,11 +74,11 @@ namespace Glory
 		pMesh = CreateMesh_Internal(pMeshData);
 		pMesh->m_pOwner = this;
 		pMesh->m_UUID = pMeshData->GetGPUUUID();
-		pMesh->Bind();
+		pMesh->BindForDraw();
 		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();
 		Buffer* pVertexBuffer = CreateVertexBuffer(vertexBufferSize);
 		pVertexBuffer->m_pOwner = this;
-		pVertexBuffer->Bind();
+		pVertexBuffer->BindForDraw();
 		pVertexBuffer->Assign(pMeshData->Vertices());
 		pMesh->SetBuffers(pVertexBuffer, nullptr);
 		pMesh->CreateBindingAndAttributeData();
@@ -94,9 +94,9 @@ namespace Glory
 		Mesh* pMesh = CreateMesh_Internal(vertexCount, indexCount, inputRate, binding, stride, primitiveType, attributeTypes);
 		pMesh->m_pOwner = this;
 		pMesh->m_UUID = UUID();
-		pMesh->Bind();
-		pVertexBuffer->Bind();
-		if(pIndexBuffer) pIndexBuffer->Bind();
+		pMesh->BindForDraw();
+		pVertexBuffer->BindForDraw();
+		if(pIndexBuffer) pIndexBuffer->BindForDraw();
 		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
 		pMesh->CreateBindingAndAttributeData();
 		m_IDResources[pMesh->m_UUID] = pMesh;
@@ -198,14 +198,14 @@ namespace Glory
 		return pTexture;
 	}
 
-	Texture* GPUResourceManager::CreateTexture(TextureCreateInfo&& textureInfo)
+	Texture* GPUResourceManager::CreateTexture(TextureCreateInfo&& textureInfo, const void* pixels)
 	{
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateTexture (2)");
 		Texture* pTexture = CreateTexture_Internal(std::move(textureInfo));
 		UUID id = UUID();
 		pTexture->m_pOwner = this;
 		pTexture->m_UUID = id;
-		pTexture->Create();
+		pTexture->Create(pixels);
 
 		m_IDResources[id] = pTexture;
 		m_pEngine->Profiler().EndSample();

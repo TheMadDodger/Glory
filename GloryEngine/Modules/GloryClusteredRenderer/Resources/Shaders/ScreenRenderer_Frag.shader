@@ -5,8 +5,9 @@ in vec2 Coord;
 layout(location = 0) out vec4 out_Color;
 layout (binding = 0) uniform sampler2D Color;
 layout (binding = 1) uniform sampler2D Normal;
-layout (binding = 2) uniform sampler2D Debug;
-layout (binding = 3) uniform sampler2D Depth;
+layout (binding = 2) uniform sampler2D AO;
+layout (binding = 3) uniform sampler2D Debug;
+layout (binding = 4) uniform sampler2D Depth;
 
 //uniform vec3 eyeDirection;
 
@@ -95,6 +96,7 @@ void main()
 
 	vec3 color = texture2D(Color, Coord).xyz;
 	vec3 normal = texture2D(Normal, Coord).xyz * 2.0 - 1.0;
+	vec3 ssao = texture2D(AO, Coord).xyz;
 	float depth = texture2D(Depth, Coord).r;
 	vec3 fragPosition = WorldPosFromDepth(depth);
 
@@ -137,7 +139,7 @@ void main()
 		diffuseColor += diffuse * attenuation;
 	}
 
-	out_Color = vec4(diffuseColor, 1.0);
+	out_Color = vec4(diffuseColor*ssao, 1.0);
 }
 
 uint GetClusterIndex(vec3 pixelCoord)

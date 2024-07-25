@@ -10,6 +10,8 @@
 #include <InternalMaterial.h>
 #include <InternalPipeline.h>
 
+#include <DistributedRandom.h>
+
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
@@ -27,11 +29,19 @@ namespace Glory
 	{
 	}
 
-	void ClusteredRendererModule::GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments)
+	void ClusteredRendererModule::GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos)
 	{
-		attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-		attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-		attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		infos.resize(2);
+		RenderTextureCreateInfo& mainTetxure = infos[0];
+		mainTetxure.HasDepth = true;
+		mainTetxure.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
+		mainTetxure.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		mainTetxure.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		mainTetxure.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		mainTetxure.Attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+
+		RenderTextureCreateInfo& effectsTexture = infos[1];
+		effectsTexture.Attachments.push_back(Attachment("AO", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
 	}
 
 	void ClusteredRendererModule::OnCameraResize(CameraRef camera)
@@ -93,8 +103,24 @@ namespace Glory
 		GetResourcePath("Shaders/ScreenRenderer_Frag.shader", path);
 		m_pScreenFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 
+		/* SSR Shaders */
+		GetResourcePath("Shaders/SSR_Frag.shader", path);
+		m_pSSRFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+
+		/* SSAO Shaders */
+		GetResourcePath("Shaders/SSAO_Frag.shader", path);
+		m_pSSAOFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+		GetResourcePath("Shaders/SSAOBlur_Frag.shader", path);
+		m_pSSAOBlurFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+
 		m_pScreenPipeline = new InternalPipeline({ m_pScreenVertShader, m_pScreenFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
+		m_pSSRPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSRFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
+		m_pSSAOPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
+		m_pSSAOBlurPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOBlurFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pScreenMaterial = new InternalMaterial(m_pScreenPipeline);
+		m_pSSRMaterial = new InternalMaterial(m_pSSRPipeline);
+		m_pSSAOMaterial = new InternalMaterial(m_pSSAOPipeline);
+		m_pSSAOBlurMaterial = new InternalMaterial(m_pSSAOBlurPipeline);
 	}
 
 	void ClusteredRendererModule::Cleanup()
@@ -126,8 +152,25 @@ namespace Glory
 		delete m_pScreenMaterial;
 		m_pScreenMaterial = nullptr;
 
+		delete m_pSSRMaterial;
+		m_pSSRMaterial = nullptr;
+
+		delete m_pSSAOMaterial;
+		m_pSSAOMaterial = nullptr;
+
+		delete m_pSSAOBlurMaterial;
+		m_pSSAOBlurMaterial = nullptr;
+
+		delete m_pScreenPipeline;
+		delete m_pSSRPipeline;
+		delete m_pSSAOPipeline;
+		delete m_pSSAOBlurPipeline;
+
 		delete m_pScreenVertShader;
 		delete m_pScreenFragShader;
+		delete m_pSSRFragShader;
+		delete m_pSSAOFragShader;
+		delete m_pSSAOBlurFragShader;
 	}
 
 	void ClusteredRendererModule::OnThreadedInitialize()
@@ -141,11 +184,14 @@ namespace Glory
 		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
 
+		GenerateDomeSamplePointsSSBO(pResourceManager);
+
 		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
 		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
 		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
 		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
 	}
+
 
 	void ClusteredRendererModule::OnThreadedCleanup()
 	{
@@ -175,6 +221,48 @@ namespace Glory
 		pMaterial->SetObjectData(object);
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 	}
+
+	void ClusteredRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+		pGraphics->EnableDepthTest(false);
+
+		/* Render SSAO */
+		Material* pMaterial = pGraphics->UseMaterial(m_pSSAOMaterial);
+
+		camera.GetRenderTexture(1)->BindForDraw();
+		pRenderTexture->BindAll(pMaterial);
+		pMaterial->SetTexture("Noise", m_pSampleNoiseTexture);
+
+		m_pSamplePointsDomeSSBO->BindForDraw();
+		m_pScreenToViewSSBO->BindForDraw();
+
+		// Draw the triangles !
+		pGraphics->DrawScreenQuad();
+
+		m_pSamplePointsDomeSSBO->Unbind();
+		m_pScreenToViewSSBO->Unbind();
+
+		// Reset render textures and materials
+		camera.GetRenderTexture(1)->UnBindForDraw();
+		pGraphics->UseMaterial(nullptr);
+
+		/* Blur SSAO */
+		pMaterial = pGraphics->UseMaterial(m_pSSAOBlurMaterial);
+
+		pRenderTexture->BindForDraw();
+		camera.GetRenderTexture(1)->BindAll(pMaterial);
+
+		// Draw the triangles !
+		pGraphics->DrawScreenQuad();
+
+		// Reset render textures and materials
+		pRenderTexture->UnBindForDraw();
+		pGraphics->UseMaterial(nullptr);
+		pGraphics->EnableDepthTest(true);
+	}
+
 
 	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
@@ -209,7 +297,7 @@ namespace Glory
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
-		// Set material
+		/* Render final image */
 		Material* pMaterial = pGraphics->UseMaterial(m_pScreenMaterial);
 
 		pRenderTexture->BindAll(pMaterial);
@@ -217,11 +305,11 @@ namespace Glory
 		pMaterial->SetFloat("zNear", camera.GetNear());
 		pMaterial->SetFloat("zFar", camera.GetFar());
 
-		pClusterSSBO->Bind();
-		m_pScreenToViewSSBO->Bind();
-		m_pLightsSSBO->Bind();
-		pLightIndexSSBO->Bind();
-		pLightGridSSBO->Bind();
+		pClusterSSBO->BindForDraw();
+		m_pScreenToViewSSBO->BindForDraw();
+		m_pLightsSSBO->BindForDraw();
+		pLightIndexSSBO->BindForDraw();
+		pLightGridSSBO->BindForDraw();
 
 		// Draw the triangles !
 		pGraphics->DrawScreenQuad();
@@ -314,8 +402,8 @@ namespace Glory
 		//pActiveClustersSSBO->Unbind();
 		//pActiveUniqueClustersSSBO->Unbind();
 
-		uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(PointLight));
+		const uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
+		m_pLightsSSBO->Assign(lights.data(), 0, count*sizeof(PointLight));
 
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
@@ -333,11 +421,11 @@ namespace Glory
 
 		m_pClusterCullLightMaterial->Use();
 		m_pClusterCullLightMaterial->SetMatrix4("viewMatrix", camera.GetView());
-		pClusterSSBO->Bind();
-		m_pScreenToViewSSBO->Bind();
-		m_pLightsSSBO->Bind();
-		pLightIndexSSBO->Bind();
-		pLightGridSSBO->Bind();
+		pClusterSSBO->BindForDraw();
+		m_pScreenToViewSSBO->BindForDraw();
+		m_pLightsSSBO->BindForDraw();
+		pLightIndexSSBO->BindForDraw();
+		pLightGridSSBO->BindForDraw();
 		pGraphics->DispatchCompute(1, 1, 6);
 		pClusterSSBO->Unbind();
 		m_pScreenToViewSSBO->Unbind();
@@ -373,12 +461,66 @@ namespace Glory
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
 		m_pClusterShaderMaterial->Use();
-		pBuffer->Bind();
-		m_pScreenToViewSSBO->Bind();
+		pBuffer->BindForDraw();
+		m_pScreenToViewSSBO->BindForDraw();
 		m_pClusterShaderMaterial->SetFloat("zNear", zNear);
 		m_pClusterShaderMaterial->SetFloat("zFar", zFar);
 		m_pEngine->GetMainModule<GraphicsModule>()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
 		pBuffer->Unbind();
 		m_pScreenToViewSSBO->Unbind();
+	}
+
+	float lerp(float a, float b, float f)
+	{
+		return a + f*(b - a);
+	}
+
+	void ClusteredRendererModule::GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager)
+	{
+		m_pSamplePointsDomeSSBO = pResourceManager->CreateBuffer(sizeof(glm::vec3)*NUM_SAMPLE_POINTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+		m_pSamplePointsDomeSSBO->Assign(NULL);
+
+		std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
+		std::default_random_engine generator;
+		glm::vec3 samplePoints[NUM_SAMPLE_POINTS];
+		for (unsigned int i = 0; i < 64; ++i)
+		{
+			samplePoints[i] = glm::vec3{
+				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator)
+			};
+			samplePoints[i] = glm::normalize(samplePoints[i]);
+			samplePoints[i] *= randomFloats(generator);
+
+			float scale = float(i)/NUM_SAMPLE_POINTS;
+			scale = lerp(0.1f, 1.0f, scale * scale);
+			samplePoints[i] *= scale;
+		}
+
+		m_pSamplePointsDomeSSBO->BindForDraw();
+		m_pSamplePointsDomeSSBO->Assign(samplePoints, 0, sizeof(glm::vec3)*NUM_SAMPLE_POINTS);
+		m_pSamplePointsDomeSSBO->Unbind();
+
+		const size_t textureSize = 4;
+
+		std::vector<glm::vec3> ssaoNoise;
+		for (unsigned int i = 0; i < textureSize*textureSize; ++i)
+		{
+			glm::vec3 noise(
+				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator) * 2.0 - 1.0,
+				0.0f);
+			ssaoNoise.push_back(noise);
+		}
+
+		TextureCreateInfo textureInfo;
+		textureInfo.m_Width = textureSize;
+		textureInfo.m_Height = textureSize;
+		textureInfo.m_PixelFormat = PixelFormat::PF_RGB;
+		textureInfo.m_InternalFormat = PixelFormat::PF_R16G16B16A16Sfloat;
+		textureInfo.m_ImageType = ImageType::IT_2D;
+		textureInfo.m_Type = DataType::DT_Float;
+		m_pSampleNoiseTexture = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateTexture(std::move(textureInfo), static_cast<const void*>(ssaoNoise.data()));
 	}
 }

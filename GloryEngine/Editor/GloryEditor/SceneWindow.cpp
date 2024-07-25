@@ -25,7 +25,7 @@ namespace Glory::Editor
 
 	SceneWindow::SceneWindow()
 		: EditorWindowTemplate("Scene", 1280.0f, 720.0f),
-		m_DrawGrid(true), m_SelectedFrameBufferIndex(0),
+		m_DrawGrid(true), m_SelectedRenderTextureIndex(-1), m_SelectedFrameBufferIndex(0),
 		m_ViewEventID(0)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
@@ -70,11 +70,11 @@ namespace Glory::Editor
 	void SceneWindow::OnGUI()
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RenderTexture* pRenderTexture = pEngine->GetCameraManager().GetRenderTextureForCamera(m_SceneCamera.m_Camera, pEngine, false);
+		RenderTexture* pRenderTexture = pEngine->GetCameraManager().GetRenderTextureForCamera(m_SceneCamera.m_Camera, pEngine, 0, false);
 
-		MenuBar(pRenderTexture);
+		MenuBar();
 		CameraUpdate();
-		DrawScene(pRenderTexture);
+		DrawScene();
 	}
 
 	void SceneWindow::Draw()
@@ -82,7 +82,7 @@ namespace Glory::Editor
 		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_SceneCamera.m_Camera);
 	}
 
-	void SceneWindow::MenuBar(RenderTexture* pRenderTexture)
+	void SceneWindow::MenuBar()
 	{
 		if (ImGui::BeginMenuBar())
 		{
@@ -91,16 +91,27 @@ namespace Glory::Editor
 				m_DrawGrid = !m_DrawGrid;
 			}
 
-			if (pRenderTexture && ImGui::BeginMenu(m_SelectedFrameBufferIndex == 0 ? "Final" : pRenderTexture->AttachmentName(m_SelectedFrameBufferIndex - 1).c_str()))
+			if (ImGui::BeginMenu(m_SelectedRenderTextureIndex == -1 ? "Final" :
+				m_SceneCamera.m_Camera.GetRenderTexture(size_t(m_SelectedRenderTextureIndex))->AttachmentName(m_SelectedFrameBufferIndex).c_str()))
 			{
-				if (ImGui::MenuItem("Final", NULL, m_SelectedFrameBufferIndex == 0))
-					m_SelectedFrameBufferIndex = 0;
-
-				for (size_t i = 0; i < pRenderTexture->AttachmentCount(); i++)
+				if (ImGui::MenuItem("Final", NULL, m_SelectedRenderTextureIndex == -1))
 				{
-					const std::string& name = pRenderTexture->AttachmentName(i);
-					if (ImGui::MenuItem(name.c_str(), NULL, m_SelectedFrameBufferIndex == i + 1))
-						m_SelectedFrameBufferIndex = i + 1;
+					m_SelectedRenderTextureIndex = -1;
+					m_SelectedFrameBufferIndex = 0;
+				}
+
+				for (size_t i = 0; i < m_SceneCamera.m_Camera.GetRenderTextureCount(); ++i)
+				{
+					RenderTexture* pRenderTexture = m_SceneCamera.m_Camera.GetRenderTexture(i);
+					for (size_t j = 0; j < pRenderTexture->AttachmentCount(); ++j)
+					{
+						const std::string& name = pRenderTexture->AttachmentName(j);
+						if (ImGui::MenuItem(name.c_str(), NULL, m_SelectedRenderTextureIndex == i && m_SelectedFrameBufferIndex == j))
+						{
+							m_SelectedRenderTextureIndex = i;
+							m_SelectedFrameBufferIndex = j;
+						}
+					}
 				}
 
 				ImGui::EndMenu();
@@ -150,7 +161,7 @@ namespace Glory::Editor
 		m_SceneCamera.UpdateCamera();
 	}
 
-	void SceneWindow::DrawScene(RenderTexture* pRenderTexture)
+	void SceneWindow::DrawScene()
 	{
 		RenderTexture* pSceneTexture = m_SceneCamera.m_Camera.GetOutputTexture();
 		if (pSceneTexture == nullptr) return;
@@ -163,7 +174,8 @@ namespace Glory::Editor
 		float width = regionAvail.x;
 		float height = width / aspect;
 
-		Texture* pTexture = m_SelectedFrameBufferIndex == 0 ? pSceneTexture->GetTextureAttachment(0) : pRenderTexture->GetTextureAttachment(m_SelectedFrameBufferIndex - 1);
+		Texture* pTexture = m_SelectedRenderTextureIndex == -1 ? pSceneTexture->GetTextureAttachment(0) :
+			m_SceneCamera.m_Camera.GetRenderTexture(size_t(m_SelectedRenderTextureIndex))->GetTextureAttachment(m_SelectedFrameBufferIndex);
 
 		ImVec2 viewportSize = ImVec2(width, height);
 		ImGui::Image(pRenderImpl->GetTextureID(pTexture), viewportSize, ImVec2(0, 1), ImVec2(1, 0));

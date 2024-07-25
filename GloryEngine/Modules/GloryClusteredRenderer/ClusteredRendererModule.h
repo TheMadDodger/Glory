@@ -37,7 +37,7 @@ namespace Glory
 		ClusteredRendererModule();
 		virtual ~ClusteredRendererModule();
 
-		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments) override;
+		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos) override;
 		virtual void OnCameraResize(CameraRef camera) override;
 		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
 
@@ -51,6 +51,7 @@ namespace Glory
 		virtual void OnThreadedCleanup() override;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
+		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
@@ -60,6 +61,7 @@ namespace Glory
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
+		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager);
 
 	private:
 		// Compute shaders
@@ -85,10 +87,15 @@ namespace Glory
 
 		FileData* m_pScreenVertShader;
 		FileData* m_pScreenFragShader;
+		FileData* m_pSSRFragShader;
+		FileData* m_pSSAOFragShader;
+		FileData* m_pSSAOBlurFragShader;
 
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO;
 		Buffer* m_pLightsSSBO;
+		Buffer* m_pSamplePointsDomeSSBO;
+		Texture* m_pSampleNoiseTexture;
 
 		static const size_t m_GridSizeX = 16;
 		static const size_t m_GridSizeY = 9;
@@ -96,8 +103,16 @@ namespace Glory
 		static const size_t NUM_CLUSTERS = m_GridSizeX * m_GridSizeY * NUM_DEPTH_SLICES;
 		static const size_t MAX_LIGHTS_PER_TILE = 50;
 
+		static const size_t NUM_SAMPLE_POINTS = 64;
+
 		// Screen rendering
 		PipelineData* m_pScreenPipeline;
+		PipelineData* m_pSSRPipeline;
+		PipelineData* m_pSSAOPipeline;
+		PipelineData* m_pSSAOBlurPipeline;
 		MaterialData* m_pScreenMaterial;
+		MaterialData* m_pSSRMaterial;
+		MaterialData* m_pSSAOMaterial;
+		MaterialData* m_pSSAOBlurMaterial;
 	};
 }
