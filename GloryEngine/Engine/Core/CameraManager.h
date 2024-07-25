@@ -15,7 +15,8 @@ namespace Glory
 
 		CameraRef GetNewOrUnusedCamera();
 		void SetUnused(Camera* pCamera);
-		RenderTexture* GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, bool createIfNotExist = true);
+		RenderTexture* GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, size_t index = 0, bool createIfNotExist = true);
+		size_t CameraRenderTextureCount(CameraRef camera, Engine* pEngine);
 		Camera* GetCamera(UUID uuid);
 
 	private:

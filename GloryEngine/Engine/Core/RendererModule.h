@@ -30,8 +30,8 @@ namespace Glory
 		void OnGameThreadFrameStart();
 		void OnGameThreadFrameEnd();
 
-		virtual RenderTexture* CreateCameraRenderTexture(uint32_t width, uint32_t height);
-		virtual void GetCameraRenderTextureAttachments(std::vector<Attachment>& atachments);
+		virtual void CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures);
+		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos);
 		virtual void OnCameraResize(CameraRef camera);
 		virtual void OnCameraPerspectiveChanged(CameraRef camera);
 
@@ -66,6 +66,7 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
+		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 
 		virtual void OnInitialize() {};

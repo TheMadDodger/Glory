@@ -30,6 +30,7 @@ namespace Glory
 		virtual void SetTexture(const std::string& name, Texture* value) = 0;
 		/** @brief Set float on material */
 		virtual void SetFloat(const std::string& name, float value) const = 0;
+		virtual void SetFloat3(const std::string& name, const glm::vec3& value) const = 0;
 		/** @brief Set 4x4 matrix on material */
 		virtual void SetMatrix4(const std::string& name, const glm::mat4& value) const = 0;
 

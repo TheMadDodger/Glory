@@ -12,7 +12,7 @@ namespace Glory
         GLMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes);
         virtual ~GLMesh();
         virtual void CreateBindingAndAttributeData() override;
-        virtual void Bind() override;
+        virtual void BindForDraw() override;
 
     private:
         void SetupAttributes();

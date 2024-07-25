@@ -34,7 +34,7 @@ namespace Glory
 		if (propertyBuffer.empty()) return;
 		if (m_pPropertiesBuffer == nullptr) m_pPropertiesBuffer = CreatePropertiesBuffer((uint32_t)propertyBuffer.size());
 		m_pPropertiesBuffer->Assign((const void*)propertyBuffer.data());
-		m_pPropertiesBuffer->Bind();
+		m_pPropertiesBuffer->BindForDraw();
 	}
 
 	void Material::SetObjectData(const ObjectData& data)
@@ -43,6 +43,6 @@ namespace Glory
 			m_pMVPBuffer = CreateMVPBuffer();
 
 		m_pMVPBuffer->Assign((const void*)&data);
-		m_pMVPBuffer->Bind();
+		m_pMVPBuffer->BindForDraw();
 	}
 }

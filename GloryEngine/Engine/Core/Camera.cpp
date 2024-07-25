@@ -6,7 +6,7 @@ namespace Glory
 {
 	Camera::Camera(uint32_t width, uint32_t height)
 		: m_DisplayIndex(0), m_Resolution(width, height), m_TextureIsDirty(true),
-		m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTexture(nullptr),
+		m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTextures(),
 		m_ClearColor(glm::vec4(0.0f)), m_Priority(0), m_LayerMask(0), m_Near(0.0f), m_Far(0.0f),
 		m_pOutputTexture(nullptr), m_OutputEnabled(false), m_PerspectiveDirty(true), m_ViewOffset(glm::identity<glm::mat4>())
 	{
@@ -137,9 +137,14 @@ namespace Glory
 		return m_LayerMask;
 	}
 
-	RenderTexture* Camera::GetRenderTexture() const
+	size_t Camera::RenderTextureCount() const
 	{
-		return m_pRenderTexture;
+		return m_pRenderTextures.size();
+	}
+
+	RenderTexture* Camera::GetRenderTexture(size_t index) const
+	{
+		return m_pRenderTextures[index];
 	}
 
 	RenderTexture* Camera::GetOutputTexture() const

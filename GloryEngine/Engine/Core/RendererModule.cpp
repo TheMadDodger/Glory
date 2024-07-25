@@ -253,7 +253,7 @@ namespace Glory
 
 	void RendererModule::PostInitialize()
 	{
-		m_pEngine->GetGraphicsThread()->Bind(this);
+		m_pEngine->GetGraphicsThread()->BindForDraw(this);
 		OnPostInitialize();
 	}
 
@@ -269,7 +269,7 @@ namespace Glory
 			CameraRef camera = frame.ActiveCameras[i];
 
 			RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
-			pRenderTexture->Bind();
+			pRenderTexture->BindForDraw();
 			m_pEngine->GetMainModule<GraphicsModule>()->Clear(camera.GetClearColor());
 
 			OnStartCameraRender(camera, frame.ActiveLights);
@@ -284,9 +284,9 @@ namespace Glory
 			}
 
 			RenderLines(camera);
-
 			OnEndCameraRender(camera, frame.ActiveLights);
-			pRenderTexture->UnBind();
+			pRenderTexture->UnBindForDraw();
+			OnRenderEffects(camera, pRenderTexture);
 
 			RenderTexture* pOutputTexture = camera.GetOutputTexture();
 			if (camera.HasOutput())
@@ -302,9 +302,9 @@ namespace Glory
 				if (width != resolution.x || height != resolution.y) pOutputTexture->Resize(resolution.x, resolution.y);
 
 				m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
-				pOutputTexture->Bind();
+				pOutputTexture->BindForDraw();
 				OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
-				pOutputTexture->UnBind();
+				pOutputTexture->UnBindForDraw();
 				m_pEngine->Profiler().EndSample();
 			}
 
@@ -319,9 +319,9 @@ namespace Glory
 			pWindow->GetDrawableSize(&width, &height);
 
 			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Display Rendering");
-			pDisplayRenderTexture->Bind();
+			pDisplayRenderTexture->BindForDraw();
 			OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
-			pDisplayRenderTexture->UnBind();
+			pDisplayRenderTexture->UnBindForDraw();
 			m_pEngine->Profiler().EndSample();
 		}
 
@@ -332,7 +332,7 @@ namespace Glory
 	void RendererModule::ReadHoveringObject()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Pick" };
-		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(m_PickCamera, m_pEngine, false);
+		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(m_PickCamera, m_pEngine, 0, false);
 		if (pRenderTexture == nullptr) return;
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;
@@ -362,7 +362,7 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		if (!pGraphics || !m_LineVertexCount) return;
 
-		m_pLineMesh->Bind();
+		m_pLineMesh->BindForDraw();
 		m_pLineBuffer->Assign(m_pLineVertices);
 
 		Material* pMaterial = pGraphics->UseMaterial(m_pLinesMaterialData);
@@ -383,18 +383,28 @@ namespace Glory
 		m_pLineVertex = m_pLineVertices;
 	}
 
-	RenderTexture* RendererModule::CreateCameraRenderTexture(uint32_t width, uint32_t height)
+	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)
 	{
 		GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
-		RenderTextureCreateInfo createInfo(width, height, true);
-		createInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
-		GetCameraRenderTextureAttachments(createInfo.Attachments);
-		return pResourceManager->CreateRenderTexture(createInfo);
+		std::vector<RenderTextureCreateInfo> renderTextureInfos;
+		GetCameraRenderTextureInfos(renderTextureInfos);
+
+		renderTextures.resize(renderTextureInfos.size());
+
+		for (size_t i = 0; i < renderTextureInfos.size(); ++i)
+		{
+			renderTextureInfos[i].Width = width;
+			renderTextureInfos[i].Height = height;
+			renderTextures[i] = pResourceManager->CreateRenderTexture(renderTextureInfos[i]);
+		}
 	}
 
-	void RendererModule::GetCameraRenderTextureAttachments(std::vector<Attachment>& attachments)
+	void RendererModule::GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos)
 	{
-		attachments.push_back(Attachment("color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
+		infos.resize(1);
+		infos[0].HasDepth = true;
+		infos[0].Attachments.push_back({Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false)});
+		infos[0].Attachments.push_back({ Attachment("color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color) });
 	}
 
 	void RendererModule::OnCameraResize(CameraRef camera) {}

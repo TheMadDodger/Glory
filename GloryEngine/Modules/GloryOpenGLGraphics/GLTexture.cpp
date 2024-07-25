@@ -68,7 +68,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void GLTexture::Create()
+	void GLTexture::Create(const void* pixels)
 	{
 		m_GLImageType = GLConverter::GetGLImageType(m_TextureInfo.m_ImageType);
 
@@ -82,18 +82,19 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		// Initialize texture
-		glTexImage2D(m_GLImageType, 0, internalFormat, m_TextureInfo.m_Width, m_TextureInfo.m_Height, 0, format, dataType, NULL);
+		glTexImage2D(m_GLImageType, 0, internalFormat, m_TextureInfo.m_Width, m_TextureInfo.m_Height, 0, format, dataType, pixels);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		SamplerSettings& sampler = m_TextureInfo.m_SamplerSettings;
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GLConverter::TO_GLFILTER.at(sampler.MinFilter));
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GLConverter::TO_GLFILTER.at(sampler.MagFilter));
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(m_GLImageType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeU));
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(m_GLImageType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeV));
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeW));
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glBindTexture(m_GLImageType, NULL);

@@ -14,9 +14,9 @@ namespace Glory
 	private:
 		virtual void Initialize() override;
 		virtual void OnResize() override;
-		virtual void Bind() override;
+		virtual void BindForDraw() override;
 		virtual void BindRead() override;
-		virtual void UnBind() override;
+		virtual void UnBindForDraw() override;
 		virtual void UnBindRead() override;
 
 	private:

@@ -55,6 +55,16 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
+	void OGLMaterial::SetFloat3(const std::string& name, const glm::vec3& value) const
+	{
+		if (!Pipeline()) return;
+
+		GLint ID = glGetUniformLocation(Pipeline()->ProgramID(), name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform3f(ID, value.x, value.y, value.z);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
 	void OGLMaterial::SetMatrix4(const std::string& name, const glm::mat4& value) const
 	{
 		if (!Pipeline()) return;

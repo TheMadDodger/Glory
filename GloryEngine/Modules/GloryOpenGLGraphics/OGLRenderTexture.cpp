@@ -22,7 +22,7 @@ namespace Glory
 
 	void OGLRenderTexture::ReadColorPixel(const std::string& attachment, const glm::ivec2& coord, void* value, DataType type)
 	{
-		Bind();
+		BindForDraw();
 		const uint32_t index = (uint32_t)m_NameToTextureIndex.at(attachment);
 		const GLuint format = GLConverter::TO_GLFORMAT.at(m_CreateInfo.Attachments[index].Format);
 		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(type);
@@ -30,7 +30,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glReadPixels(coord.x, coord.y, 1, 1, format, dataType, value);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		UnBind();
+		UnBindForDraw();
 	}
 
 	void OGLRenderTexture::Initialize()
@@ -129,7 +129,7 @@ namespace Glory
 		Initialize();
 	}
 
-	void OGLRenderTexture::Bind()
+	void OGLRenderTexture::BindForDraw()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_GLFrameBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -143,7 +143,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 	
-	void OGLRenderTexture::UnBind()
+	void OGLRenderTexture::UnBindForDraw()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());

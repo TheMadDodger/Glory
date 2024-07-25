@@ -176,11 +176,18 @@ namespace Glory
 		return pCamera->GetLayerMask();
 	}
 
-	RenderTexture* CameraRef::GetRenderTexture() const
+	size_t CameraRef::GetRenderTextureCount() const
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return 0;
+		return pCamera->RenderTextureCount();
+	}
+
+	RenderTexture* CameraRef::GetRenderTexture(size_t index) const
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return nullptr;
-		return pCamera->GetRenderTexture();
+		return pCamera->GetRenderTexture(index);
 	}
 
 	RenderTexture* CameraRef::GetOutputTexture() const

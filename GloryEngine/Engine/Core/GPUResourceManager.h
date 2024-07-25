@@ -33,7 +33,7 @@ namespace Glory
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Pipeline* CreatePipeline(PipelineData* pPipelineData);
 		Texture* CreateTexture(TextureData* pTextureData);
-		Texture* CreateTexture(TextureCreateInfo&& textureInfo);
+		Texture* CreateTexture(TextureCreateInfo&& textureInfo, const void* pixels=nullptr);
 		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
 
 		void Free(GPUResource* pResource);

@@ -22,7 +22,7 @@ namespace Glory
 		RenderQueue* GetRenderQueue();
 
 		template<typename T>
-		void Bind(T* pModule)
+		void BindForDraw(T* pModule)
 		{
 			m_RenderBinds.push_back(std::bind(&T::Render, pModule, std::placeholders::_1));
 			m_InitializationBinds.push_back(std::bind(&T::ThreadedInitialize, pModule));

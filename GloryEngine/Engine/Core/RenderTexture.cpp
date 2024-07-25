@@ -15,6 +15,9 @@ namespace Glory
 	{
 	}
 
+	RenderTextureCreateInfo::RenderTextureCreateInfo()
+		: Width(0), Height(0), HasDepth(false), Attachments(std::vector<Attachment>()) {}
+
 	RenderTextureCreateInfo::RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth)
 		: Width(width), Height(height), HasDepth(hasDepth), Attachments(std::vector<Attachment>()) {}
 

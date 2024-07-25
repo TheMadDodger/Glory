@@ -14,7 +14,7 @@ namespace Glory
 		virtual ~Mesh();
 
 		virtual void CreateBindingAndAttributeData() = 0;
-		virtual void Bind() = 0;
+		virtual void BindForDraw() = 0;
 		uint32_t GetVertexCount() const;
 		uint32_t GetIndexCount() const;
 

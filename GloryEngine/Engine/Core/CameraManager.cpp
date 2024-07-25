@@ -37,16 +37,20 @@ namespace Glory
 		pCamera->m_IsInUse = false;
 	}
 
-	RenderTexture* CameraManager::GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, bool createIfNotExist)
+	RenderTexture* CameraManager::GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, size_t index, bool createIfNotExist)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "CameraManager::GetNewOrUnusedCamera" };
 		Camera* pCamera = GetCamera(camera.m_CameraID);
 		if (pCamera == nullptr) return nullptr;
-		if (pCamera->m_pRenderTexture)
+		if (pCamera->m_pRenderTextures.size() > index)
 		{
 			if (createIfNotExist && pCamera->m_TextureIsDirty)
 			{
-				pCamera->m_pRenderTexture->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
+				for (size_t i = 0; i < pCamera->m_pRenderTextures.size(); ++i)
+				{
+					pCamera->m_pRenderTextures[i]->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
+				}
+
 				pCamera->m_TextureIsDirty = false;
 				pCamera->m_PerspectiveDirty = false;
 				pEngine->GetMainModule<RendererModule>()->OnCameraResize(camera);
@@ -56,16 +60,23 @@ namespace Glory
 				pCamera->m_PerspectiveDirty = false;
 				pEngine->GetMainModule<RendererModule>()->OnCameraPerspectiveChanged(camera);
 			}
-			return pCamera->m_pRenderTexture;
+			return pCamera->m_pRenderTextures[index];
 		}
 
 		if (!createIfNotExist) return nullptr;
 
 		uint32_t width = pCamera->m_Resolution.x;
 		uint32_t height = pCamera->m_Resolution.y;
-		pCamera->m_pRenderTexture = pEngine->GetMainModule<RendererModule>()->CreateCameraRenderTexture(width, height);
+		pEngine->GetMainModule<RendererModule>()->CreateCameraRenderTextures(width, height, pCamera->m_pRenderTextures);
 		pCamera->m_TextureIsDirty = false;
-		return pCamera->m_pRenderTexture;
+		return pCamera->m_pRenderTextures[index];
+	}
+
+	size_t CameraManager::CameraRenderTextureCount(CameraRef camera, Engine* pEngine)
+	{
+		Camera* pCamera = GetCamera(camera.m_CameraID);
+		if (!pCamera) return 0;
+		return pCamera->m_pRenderTextures.size();
 	}
 
 	Camera* CameraManager::GetCamera(UUID uuid)

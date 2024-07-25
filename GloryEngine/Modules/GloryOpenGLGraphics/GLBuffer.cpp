@@ -71,7 +71,7 @@ namespace Glory
 		
 	}
 
-	void GLBuffer::Bind()
+	void GLBuffer::BindForDraw()
 	{
 		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
 		glBindBuffer(target, m_BufferID);

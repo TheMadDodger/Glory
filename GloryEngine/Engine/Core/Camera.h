@@ -36,7 +36,8 @@ namespace Glory
 		int GetPriority() const;
 		const glm::vec4& GetClearColor() const;
 		const LayerMask& GetLayerMask() const;
-		RenderTexture* GetRenderTexture() const;
+		size_t RenderTextureCount() const;
+		RenderTexture* GetRenderTexture(size_t index=0) const;
 		RenderTexture* GetOutputTexture() const;
 		bool HasOutput() const;
 		template<typename T>
@@ -71,7 +72,7 @@ namespace Glory
 
 		glm::vec4 m_ClearColor;
 
-		RenderTexture* m_pRenderTexture;
+		std::vector<RenderTexture*> m_pRenderTextures;
 		RenderTexture* m_pOutputTexture;
 		bool m_OutputEnabled;
 
