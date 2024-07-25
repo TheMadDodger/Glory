@@ -19,7 +19,7 @@ namespace Glory
         virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) override;
         virtual Pipeline* CreatePipeline_Internal(PipelineData* pPipelineData) override;
         virtual Texture* CreateTexture_Internal(TextureData* pTextureData) override;
-        virtual Texture* CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings) override;
+        virtual Texture* CreateTexture_Internal(TextureCreateInfo&& textureInfo) override;
         virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) override;
     };
 }

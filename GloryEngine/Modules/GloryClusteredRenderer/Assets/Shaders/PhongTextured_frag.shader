@@ -32,6 +32,6 @@ void main()
 	vec3 normal = texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0;
 	normal = normalize(TBN * normal);
 	outColor = texture(texSampler, fragTexCoord) * inColor * Properties.Color;
-	outNormal = vec4((normal + 1.0) * 0.5, 1.0);
+	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
 }

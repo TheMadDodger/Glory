@@ -70,12 +70,12 @@ namespace Glory
 	{
 		ImageData* pImageData = pTextureData->GetImageData(&m_pEngine->GetAssetManager());
 		if (!pImageData) return nullptr;
-		return new GLTexture(pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, 0, 0, ImageAspect::IA_Color);
+		return new GLTexture({ pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, DataType::DT_UByte, 0, 0, ImageAspect::IA_Color });
 	}
 
-	Texture* OGLResourceManager::CreateTexture_Internal(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings)
+	Texture* OGLResourceManager::CreateTexture_Internal(TextureCreateInfo&& textureInfo)
 	{
-		return new GLTexture(width, height, format, internalFormat, imageType, usageFlags, sharingMode, imageAspectFlags, samplerSettings);
+		return new GLTexture(std::move(textureInfo));
 	}
 
 	RenderTexture* OGLResourceManager::CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo)

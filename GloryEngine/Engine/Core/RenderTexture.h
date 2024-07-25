@@ -16,7 +16,8 @@ namespace Glory
 
 	struct Attachment
 	{
-		Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat, const ImageType& imageType, const ImageAspect& imageAspect, bool autoBind = true);
+		Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat,
+			const ImageType& imageType, const ImageAspect& imageAspect, DataType type=DataType::DT_UByte, bool autoBind = true);
 
 		//PixelFormat::PF_R8G8B8A8Srgb
 		std::string Name;
@@ -24,6 +25,7 @@ namespace Glory
 		PixelFormat Format;
 		ImageType ImageType;
 		ImageAspect ImageAspect;
+		DataType m_Type;
 		bool m_AutoBind;
 	};
 
