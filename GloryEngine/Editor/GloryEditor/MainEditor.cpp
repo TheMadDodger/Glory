@@ -70,6 +70,7 @@
 #include <EntitySceneObjectEditor.h>
 #include <DefaultComponentEditor.h>
 #include <TransformEditor.h>
+#include <SceneEditor.h>
 #include <PipelineImporter.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
@@ -505,5 +506,6 @@ namespace Glory::Editor
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
+		Editor::RegisterEditor<SceneEditor>();
 	}
 }
