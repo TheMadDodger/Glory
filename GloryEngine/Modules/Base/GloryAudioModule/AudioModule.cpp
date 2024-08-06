@@ -31,7 +31,9 @@ namespace Glory
 		Reflect::RegisterType<AirAbsorptionSettings>();
 		Reflect::RegisterType<DirectivitySettings>();
 		Reflect::RegisterType<OcclusionSettings>();
+		Reflect::RegisterType<TransmissionSettings>();
 		Reflect::RegisterType<DirectSimulationSettings>();
+		Reflect::RegisterType<ReflectionSimulationSettings>();
 		Reflect::RegisterType<AudioSourceSimulationSettings>();
 
 		m_pEngine->GetSceneManager()->RegisterComponent<AudioSource>();
