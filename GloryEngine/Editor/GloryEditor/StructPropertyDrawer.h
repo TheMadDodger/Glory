@@ -13,6 +13,6 @@ namespace Glory::Editor
 		virtual bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const override;
 
 	private:
-		bool DrawFields(void* data, const TypeData* pStructTypeData, uint32_t flags) const;
+		bool DrawFields(void* data, const TypeData* pStructTypeData, uint32_t flags, size_t start=0) const;
 	};
 }
