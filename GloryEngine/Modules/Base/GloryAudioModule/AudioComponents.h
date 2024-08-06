@@ -98,19 +98,34 @@ namespace Glory
 	struct OcclusionSettings
 	{
 		GLORY_API OcclusionSettings() :
-			m_Enable(true), m_Type(OcclusionType::Raycast)
+			m_Enable(true), m_Type(OcclusionType::Raycast),
+			m_VolumetricRadius(10.0f), m_VolumetricSamples(10)
 		{}
 
 		REFLECTABLE(OcclusionSettings,
 			(bool)(m_Enable),
-			(OcclusionType)(m_Type)
+			(OcclusionType)(m_Type),
+			(float)(m_VolumetricRadius),
+			(int)(m_VolumetricSamples)
+		);
+	};
+
+	struct TransmissionSettings
+	{
+		GLORY_API TransmissionSettings() :
+			m_Enable(true), m_TransmissionRays(3)
+		{}
+
+		REFLECTABLE(TransmissionSettings,
+			(bool)(m_Enable),
+			(int)(m_TransmissionRays)
 		);
 	};
 
 	struct DirectSimulationSettings
 	{
 		GLORY_API DirectSimulationSettings() :
-			m_Enable(true), m_OcclusionSamples(10), m_Transmission(true), m_TransmissionRays(3)
+			m_Enable(true)
 		{}
 
 		REFLECTABLE(DirectSimulationSettings,
@@ -119,9 +134,26 @@ namespace Glory
 			(AirAbsorptionSettings)(m_AirAbsorption),
 			(DirectivitySettings)(m_Directivity),
 			(OcclusionSettings)(m_Occlusion),
-			(int)(m_OcclusionSamples),
-			(bool)(m_Transmission),
-			(int)(m_TransmissionRays)
+			(TransmissionSettings)(m_Transmission)
+		);
+	};
+
+	struct ReflectionSimulationSettings
+	{
+		GLORY_API ReflectionSimulationSettings() :
+			m_Enable(true), m_ReverbScale1(1.0f), 
+			m_ReverbScale2(1.0f), m_ReverbScale3(1.0f),
+			m_HybridReverbTransitionTime(1.0f),
+			m_HybridReverbOverlapPercent(0.25f)
+		{}
+
+		REFLECTABLE(ReflectionSimulationSettings,
+			(bool)(m_Enable),
+			(float)(m_ReverbScale1),
+			(float)(m_ReverbScale2),
+			(float)(m_ReverbScale3),
+			(float)(m_HybridReverbTransitionTime),
+			(float)(m_HybridReverbOverlapPercent)
 		);
 	};
 
@@ -133,7 +165,8 @@ namespace Glory
 
 		REFLECTABLE(AudioSourceSimulationSettings,
 			(bool)(m_Enable),
-			(DirectSimulationSettings)(m_Direct)
+			(DirectSimulationSettings)(m_Direct),
+			(ReflectionSimulationSettings)(m_Reflections)
 		);
 	};
 
