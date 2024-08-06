@@ -32,6 +32,8 @@ namespace Glory
 			FEATURE(Absorption);
 			/** @brief Reflection */
 			FEATURE(Reflection);
+			/** @brief Reflection */
+			FEATURE(DirectSimulation);
 		};
     };
 }

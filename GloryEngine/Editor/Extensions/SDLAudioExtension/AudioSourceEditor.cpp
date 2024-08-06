@@ -34,7 +34,7 @@ namespace Glory::Editor
 			{
 			case offsetof(AudioSource, m_Enable3D):
 				return !p3DAudio;
-			case offsetof(AudioSource, m_Occlusion):
+			case offsetof(AudioSource, m_Simulation):
 				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::Occlusion));
 
 			default:

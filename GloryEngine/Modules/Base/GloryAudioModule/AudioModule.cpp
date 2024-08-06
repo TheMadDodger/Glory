@@ -23,6 +23,17 @@ namespace Glory
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
+		Reflect::RegisterEnum<SpatializationMode>();
+		Reflect::RegisterEnum<OcclusionType>();
+		Reflect::RegisterEnum<AirAbsorptionType>();
+		Reflect::RegisterType<SpatializationSettings>();
+		Reflect::RegisterType<AttenuationSettings>();
+		Reflect::RegisterType<AirAbsorptionSettings>();
+		Reflect::RegisterType<DirectivitySettings>();
+		Reflect::RegisterType<OcclusionSettings>();
+		Reflect::RegisterType<DirectSimulationSettings>();
+		Reflect::RegisterType<AudioSourceSimulationSettings>();
+
 		m_pEngine->GetSceneManager()->RegisterComponent<AudioSource>();
 		m_pEngine->GetSceneManager()->RegisterComponent<AudioListener>();
 
