@@ -24,6 +24,7 @@ namespace Glory
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
 		Reflect::RegisterEnum<SpatializationMode>();
+		Reflect::RegisterEnum<AmbisonicsOrder>();
 		Reflect::RegisterEnum<OcclusionType>();
 		Reflect::RegisterEnum<AirAbsorptionType>();
 		Reflect::RegisterType<SpatializationSettings>();

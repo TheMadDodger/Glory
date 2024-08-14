@@ -6,6 +6,7 @@
 #include <AudioData.h>
 
 REFLECTABLE_ENUM_NS(Glory, SpatializationMode, Binaural, Ambisonics);
+REFLECTABLE_ENUM_NS(Glory, AmbisonicsOrder, First, Second, Third);
 REFLECTABLE_ENUM_NS(Glory, OcclusionType, Raycast, Volumetric);
 REFLECTABLE_ENUM_NS(Glory, AirAbsorptionType, Default, Exponential);
 
@@ -27,13 +28,13 @@ namespace Glory
 	{
 		GLORY_API SpatializationSettings() :
 			m_Enable(true), m_Mode(SpatializationMode::Binaural),
-			m_AmbisonicsOrder(2), m_SpatialBlend(1.0f)
+			m_AmbisonicsOrder(AmbisonicsOrder::Second), m_SpatialBlend(1.0f)
 		{}
 
 		REFLECTABLE(SpatializationSettings,
 			(bool)(m_Enable),
 			(SpatializationMode)(m_Mode),
-			(uint32_t)(m_AmbisonicsOrder),
+			(AmbisonicsOrder)(m_AmbisonicsOrder),
 			(float)(m_SpatialBlend),
 			(AttenuationSettings)(m_Attenuation)
 		);

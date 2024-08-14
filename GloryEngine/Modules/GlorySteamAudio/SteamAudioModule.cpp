@@ -287,18 +287,25 @@ namespace Glory
 		iplBinauralEffectApply(m_BinauralEffects[channel.m_Index], &effectParams, &m_InBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
 	}
 
-	void SteamAudioModule::SpatializeAmbisonics(AudioChannel& channel, const glm::vec3& listenPos, const glm::vec3& dir, void* stream)
+	void SteamAudioModule::SpatializeAmbisonics(AudioChannel& channel, const glm::vec3& listenPos, const glm::vec3& dir, int order, void* stream)
 	{
 		ModuleSettings& audioSettings = m_pAudioModule->Settings();
 		const unsigned int frameSize = audioSettings.Value<unsigned int>(AudioModule::SettingNames::Framesize);
 		const unsigned int channels = m_pAudioModule->Channels();
+
+		if (m_AmbiSonicsOrders[channel.m_Index] != order)
+		{
+			iplAudioBufferFree(m_IPLContext, &m_AmbisonicsBuffers[channel.m_Index]);
+			iplAudioBufferAllocate(m_IPLContext, pow(order + 1, 2), frameSize, &m_AmbisonicsBuffers[channel.m_Index]);
+			m_AmbiSonicsOrders[channel.m_Index] = order;
+		}
 
 		float* outData = reinterpret_cast<float*>(stream);
 		iplAudioBufferDeinterleave(m_IPLContext, outData, &m_InBuffers[channel.m_Index]);
 
 		IPLAmbisonicsEncodeEffectParams ambiSonicsEncodeParams{};
 		ambiSonicsEncodeParams.direction = IPLVector3{ dir.x, dir.y, dir.z };
-		ambiSonicsEncodeParams.order = 2;
+		ambiSonicsEncodeParams.order = order;
 
 		iplAmbisonicsEncodeEffectApply(m_AmbiSonicsEffects[channel.m_Index], &ambiSonicsEncodeParams, &m_InBuffers[channel.m_Index], &m_AmbisonicsBuffers[channel.m_Index]);
 
@@ -309,7 +316,7 @@ namespace Glory
 		listenerCoordinates.up = IPLVector3{ 0.0f, 1.0f, 0.0f };
 
 		IPLAmbisonicsDecodeEffectParams ambiSonicsDecodeParams{};
-		ambiSonicsDecodeParams.order = 2;
+		ambiSonicsDecodeParams.order = order;
 		ambiSonicsDecodeParams.hrtf = m_IPLHrtf;
 		ambiSonicsDecodeParams.orientation = listenerCoordinates;
 		ambiSonicsDecodeParams.binaural = channels > 2 ? IPL_FALSE : IPL_TRUE;
@@ -366,7 +373,7 @@ namespace Glory
 				SpatializeBinaural(channel, dir, audioSource.m_Spatialization.m_SpatialBlend, stream);
 				break;
 			case Glory::SpatializationMode::Ambisonics:
-				SpatializeAmbisonics(channel, listenPos, dir, stream);
+				SpatializeAmbisonics(channel, listenPos, dir, int(audioSource.m_Spatialization.m_AmbisonicsOrder) + 1, stream);
 				break;
 			default:
 				break;
@@ -462,6 +469,7 @@ namespace Glory
 		m_InBuffers.resize(mixingChannels);
 		m_OutBuffers.resize(mixingChannels);
 		m_AmbisonicsBuffers.resize(mixingChannels);
+		m_AmbiSonicsOrders.resize(mixingChannels, 2);
 		m_BinauralEffects.resize(mixingChannels);
 		m_DirectEffects.resize(mixingChannels);
 		m_AmbiSonicsEffects.resize(mixingChannels);
@@ -476,10 +484,10 @@ namespace Glory
 		effectSettings.hrtf = m_IPLHrtf;
 
 		IPLAmbisonicsEncodeEffectSettings ambiSonicsEffectSettings{};
-		ambiSonicsEffectSettings.maxOrder = 2; // 2nd order Ambisonics (9 channels)
+		ambiSonicsEffectSettings.maxOrder = 3; // 2nd order Ambisonics (9 channels)
 
 		IPLAmbisonicsDecodeEffectSettings ambiSonicsDecodeSettings{};
-		ambiSonicsDecodeSettings.maxOrder = 2;
+		ambiSonicsDecodeSettings.maxOrder = 3;
 		ambiSonicsDecodeSettings.hrtf = m_IPLHrtf;
 
 		switch (channels)
@@ -508,14 +516,15 @@ namespace Glory
 		}
 
 		IPLDirectEffectSettings directEffectSettings{};
-		directEffectSettings.numChannels = channels; // input and output buffers will have 1 channel
+		directEffectSettings.numChannels = channels;
 
-		for (size_t i = oldChannels; i < m_InBuffers.size(); ++i)
+		for (size_t i = oldChannels; i < mixingChannels; ++i)
 		{
 			m_TemporaryBuffers[i].resize(frameSize*channels);
 			iplAudioBufferAllocate(m_IPLContext, channels, frameSize, &m_InBuffers[i]);
 			iplAudioBufferAllocate(m_IPLContext, channels, frameSize, &m_OutBuffers[i]);
-			iplAudioBufferAllocate(m_IPLContext, 9, frameSize, &m_AmbisonicsBuffers[i]);
+			const int ambisonicsChannels = pow(m_AmbiSonicsOrders[i] + 1, 2);
+			iplAudioBufferAllocate(m_IPLContext, ambisonicsChannels, frameSize, &m_AmbisonicsBuffers[i]);
 			iplBinauralEffectCreate(m_IPLContext, &audioSettings, &effectSettings, &m_BinauralEffects[i]);
 			iplDirectEffectCreate(m_IPLContext, &audioSettings, &directEffectSettings, &m_DirectEffects[i]);
 			iplAmbisonicsEncodeEffectCreate(m_IPLContext, &audioSettings, &ambiSonicsEffectSettings, &m_AmbiSonicsEffects[i]);

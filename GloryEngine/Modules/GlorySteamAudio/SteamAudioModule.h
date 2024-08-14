@@ -99,7 +99,7 @@ namespace Glory
 		 * @param dir Direction of the audio source relative to the listener
 		 * @param stream Current audio stream
 		 */
-		void SpatializeAmbisonics(AudioChannel& channel, const glm::vec3& listenPos, const glm::vec3& dir, void* stream);
+		void SpatializeAmbisonics(AudioChannel& channel, const glm::vec3& listenPos, const glm::vec3& dir, int order, void* stream);
 
 		/**
 		 * @brief Calculate attenuation factor for an audio source based on distance to the listener
@@ -149,6 +149,7 @@ namespace Glory
 		std::vector<IPLAudioBuffer> m_InBuffers;
 		std::vector<IPLAudioBuffer> m_OutBuffers;
 		std::vector<IPLAudioBuffer> m_AmbisonicsBuffers;
+		std::vector<int> m_AmbiSonicsOrders;
 		std::vector<IPLBinauralEffect> m_BinauralEffects;
 		std::vector<IPLDirectEffect> m_DirectEffects;
 		std::vector<IPLAmbisonicsEncodeEffect> m_AmbiSonicsEffects;
