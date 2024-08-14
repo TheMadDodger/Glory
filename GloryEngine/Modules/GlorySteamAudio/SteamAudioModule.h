@@ -75,7 +75,39 @@ namespace Glory
 		virtual void Cleanup() override;
 
 	private:
+		/**
+		 * @brief Process spatialization and simulation effects
+		 * @param channel Audio channel currently requesting processing
+		 * @param stream Current audio stream
+		 * @param len Length of the current stream
+		 */
 		void ProcessEffects(AudioChannel& channel, void* stream, int len);
+
+		/**
+		 * @brief Spatialize a stream with a binaural effect
+		 * @param channel Audio channel currently requesting processing
+		 * @param dir Direction of the audio source relative to the listener
+		 * @param spatialBlend How much to blend the spatialization with the original audio
+		 * @param stream Current audio stream
+		 */
+		void SpatializeBinaural(AudioChannel& channel, const glm::vec3& dir, float spatialBlend, void* stream);
+
+		/**
+		 * @brief Spatialize a stream with an ambisonics effect
+		 * @param channel Audio channel currently requesting processing
+		 * @param listenPos Position of the listener
+		 * @param dir Direction of the audio source relative to the listener
+		 * @param stream Current audio stream
+		 */
+		void SpatializeAmbisonics(AudioChannel& channel, const glm::vec3& listenPos, const glm::vec3& dir, void* stream);
+
+		/**
+		 * @brief Calculate attenuation factor for an audio source based on distance to the listener
+		 * @param listenPos Position of the listener
+		 * @param sourcePos Position of the source
+		 * @param stream Current audio stream
+		 */
+		float Attenuate(const glm::vec3& listenPos, const glm::vec3& sourcePos) const;
 
 		/**
 		 * @brief Prepare all effects for the specified number of mixing channels

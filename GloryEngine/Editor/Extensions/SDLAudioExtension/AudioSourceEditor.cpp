@@ -30,6 +30,28 @@ namespace Glory::Editor
 		Audio3DModule* p3DAudio = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<Audio3DModule>();
 
 		PropertyDrawer::SetDisabledCheckCallback([&](const Utils::Reflect::FieldData* pField) {
+			if (strcmp(pField->Name(), "m_AmbisonicsOrder") == 0)
+			{
+				return component.m_Spatialization.m_Mode != SpatializationMode::Ambisonics;
+			}
+			if (strcmp(pField->Name(), "m_SpatialBlend") == 0)
+			{
+				return component.m_Spatialization.m_Mode != SpatializationMode::Binaural;
+			}
+
+			if (strcmp(pField->Name(), "m_LowCoefficient") == 0 ||
+				strcmp(pField->Name(), "m_MidCoefficient") == 0 ||
+				strcmp(pField->Name(), "m_HighCoefficient") == 0)
+			{
+				return component.m_Simulation.m_Direct.m_AirAbsorption.m_Type != AirAbsorptionType::Exponential;
+			}
+
+			if (strcmp(pField->Name(), "m_VolumetricRadius") == 0 ||
+				strcmp(pField->Name(), "m_VolumetricSamples") == 0)
+			{
+				return component.m_Simulation.m_Direct.m_Occlusion.m_Type != OcclusionType::Volumetric;
+			}
+
 			switch (pField->Offset())
 			{
 			case offsetof(AudioSource, m_Enable3D):

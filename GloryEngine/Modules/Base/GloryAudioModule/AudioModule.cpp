@@ -34,7 +34,10 @@ namespace Glory
 		Reflect::RegisterType<TransmissionSettings>();
 		Reflect::RegisterType<DirectSimulationSettings>();
 		Reflect::RegisterType<ReflectionSimulationSettings>();
+		Reflect::RegisterType<PathingSimulationSettings>();
 		Reflect::RegisterType<AudioSourceSimulationSettings>();
+
+		Reflect::RegisterType<AudioSimulationSettings>();
 
 		m_pEngine->GetSceneManager()->RegisterComponent<AudioSource>();
 		m_pEngine->GetSceneManager()->RegisterComponent<AudioListener>();

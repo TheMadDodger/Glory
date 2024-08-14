@@ -11,49 +11,6 @@ REFLECTABLE_ENUM_NS(Glory, AirAbsorptionType, Default, Exponential);
 
 namespace Glory
 {
-	//Source settings:
-	//
-	//Spatialize X
-	//	Mode[Binaural, Ambisonics] X
-	//	If Ambisonics->Ambisonics Order X
-	//	If Binaural->Spatial blend X
-	//
-	//Simulation
-	//  Enabled simulation types(flags) : [Direct, Reflections, Pathing]
-	//  Occlusion
-	//Attenuation
-	//	Min distance
-	//	Max distance
-	//
-	//Listener settings:
-	//  Enable simulation
-	//    Num rays
-	// 
-	//Audio scene/module? settings:
-	//  Scene type: Default, Embree, Radeonrays (gather options as module feature?)
-	//  Simulation types(flags) : [Direct, Reflections, Pathing]
-	//    If Direct enabled
-	//      Attenuation
-	//      Airabsorbtion
-	//      Directivity
-	//      Occlusion
-	//      Transmission
-
-	struct SpatializationSettings
-	{
-		GLORY_API SpatializationSettings() :
-			m_Enable(true), m_Mode(SpatializationMode::Binaural),
-			m_AmbisonicsOrder(2), m_SpatialBlend(1.0f)
-		{}
-
-		REFLECTABLE(SpatializationSettings,
-			(bool)(m_Enable),
-			(SpatializationMode)(m_Mode),
-			(uint32_t)(m_AmbisonicsOrder),
-			(float)(m_SpatialBlend)
-		);
-	};
-
 	struct AttenuationSettings
 	{
 		GLORY_API AttenuationSettings() :
@@ -66,19 +23,35 @@ namespace Glory
 		);
 	};
 
+	struct SpatializationSettings
+	{
+		GLORY_API SpatializationSettings() :
+			m_Enable(true), m_Mode(SpatializationMode::Binaural),
+			m_AmbisonicsOrder(2), m_SpatialBlend(1.0f)
+		{}
+
+		REFLECTABLE(SpatializationSettings,
+			(bool)(m_Enable),
+			(SpatializationMode)(m_Mode),
+			(uint32_t)(m_AmbisonicsOrder),
+			(float)(m_SpatialBlend),
+			(AttenuationSettings)(m_Attenuation)
+		);
+	};
+
 	struct AirAbsorptionSettings
 	{
 		GLORY_API AirAbsorptionSettings() :
 			m_Enable(true), m_Type(AirAbsorptionType::Default),
-			m_Coefficient1(1.0f), m_Coefficient2(1.0f), m_Coefficient3(1.0f)
+			m_LowCoefficient(1.0f), m_MidCoefficient(1.0f), m_HighCoefficient(1.0f)
 		{}
 
 		REFLECTABLE(AirAbsorptionSettings,
 			(bool)(m_Enable),
 			(AirAbsorptionType)(m_Type),
-			(float)(m_Coefficient1),
-			(float)(m_Coefficient2),
-			(float)(m_Coefficient3)
+			(float)(m_LowCoefficient),
+			(float)(m_MidCoefficient),
+			(float)(m_HighCoefficient)
 		);
 	};
 
@@ -113,12 +86,13 @@ namespace Glory
 	struct TransmissionSettings
 	{
 		GLORY_API TransmissionSettings() :
-			m_Enable(true), m_TransmissionRays(3)
+			m_Enable(true), m_TransmissionRays(3), m_FrequencyDependant(true)
 		{}
 
 		REFLECTABLE(TransmissionSettings,
 			(bool)(m_Enable),
-			(int)(m_TransmissionRays)
+			(int)(m_TransmissionRays),
+			(bool)(m_FrequencyDependant)
 		);
 	};
 
@@ -157,6 +131,22 @@ namespace Glory
 		);
 	};
 
+	struct PathingSimulationSettings
+	{
+		GLORY_API PathingSimulationSettings() :
+			m_Enable(true), m_VisRadius(1.0f), m_PathingOrder(0),
+			m_Validation(true), m_FindAlternativePaths(true)
+		{}
+
+		REFLECTABLE(PathingSimulationSettings,
+			(bool)(m_Enable),
+			(float)(m_VisRadius),
+			(int)(m_PathingOrder),
+			(bool)(m_Validation),
+			(bool)(m_FindAlternativePaths)
+		);
+	};
+
 	struct AudioSourceSimulationSettings
 	{
 		GLORY_API AudioSourceSimulationSettings() :
@@ -166,7 +156,8 @@ namespace Glory
 		REFLECTABLE(AudioSourceSimulationSettings,
 			(bool)(m_Enable),
 			(DirectSimulationSettings)(m_Direct),
-			(ReflectionSimulationSettings)(m_Reflections)
+			(ReflectionSimulationSettings)(m_Reflections),
+			(PathingSimulationSettings)(m_Pathing)
 		);
 	};
 
@@ -189,12 +180,27 @@ namespace Glory
 		int m_CurrentChannel = -1;
 	};
 
+	struct AudioSimulationSettings
+	{
+		GLORY_API AudioSimulationSettings():
+			m_Enable(true), m_Direct(true), m_Reflection(true), m_Pathing(true) {}
+
+		REFLECTABLE(AudioSimulationSettings,
+			(bool)(m_Enable),
+			(bool)(m_Direct),
+			(bool)(m_Reflection),
+			(bool)(m_Pathing)
+		);
+	};
+
 	struct AudioListener
 	{
-		GLORY_API AudioListener() {}
+		GLORY_API AudioListener():
+			m_Enable(true) {}
 
 		REFLECTABLE(AudioListener,
-			(bool)(m_Enabled)
+			(bool)(m_Enable),
+			(AudioSimulationSettings)(m_Simulation)
 		);
 	};
 }

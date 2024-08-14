@@ -183,7 +183,7 @@ namespace Glory
 
 	void AudioListenerSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
 	{
-		if (!pComponent.m_Enabled) return;
+		if (!pComponent.m_Enable) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();

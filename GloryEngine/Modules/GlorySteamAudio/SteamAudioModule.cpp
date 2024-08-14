@@ -205,7 +205,7 @@ namespace Glory
 		};
 
 		m_pAudioModule->ListenerSystem().OnListenerUpdate = [this](Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent) {
-			if (!pComponent.m_Enabled) return;
+			if (!pComponent.m_Enable) return;
 
 			Transform& transform = pRegistry->GetComponent<Transform>(entity);
 			const glm::vec3 right = glm::vec3(transform.MatTransform[0][0], transform.MatTransform[1][0], transform.MatTransform[2][0]);
@@ -222,7 +222,12 @@ namespace Glory
 			IPLSimulationSharedInputs sharedInputs{};
 			sharedInputs.listener = listenerCoordinates;
 
-			iplSimulatorSetSharedInputs(m_Simulator, IPL_SIMULATIONFLAGS_DIRECT, &sharedInputs);
+			const IPLSimulationFlags simulationFlags = IPLSimulationFlags(
+				pComponent.m_Simulation.m_Enable ? (
+					(pComponent.m_Simulation.m_Direct ? IPL_SIMULATIONFLAGS_DIRECT : 0) |
+					(pComponent.m_Simulation.m_Reflection ? IPL_SIMULATIONFLAGS_REFLECTIONS : 0) |
+					(pComponent.m_Simulation.m_Pathing ? IPL_SIMULATIONFLAGS_PATHING : 0)) : 0);
+			iplSimulatorSetSharedInputs(m_Simulator, simulationFlags, &sharedInputs);
 		};
 	}
 
@@ -262,50 +267,28 @@ namespace Glory
 
 	float CalculateAttenuation(IPLfloat32 distance, void* userData)
 	{
-		if (distance <= 10.0f) return 1.0f;
+		//if (distance <= 10.0f) return 1.0f;
 		return 1.0f - std::clamp(distance/500.0f, 0.0f, 1.0f);
 	}
 
-	void SteamAudioModule::ProcessEffects(AudioChannel& channel, void* stream, int len)
+	void SteamAudioModule::SpatializeBinaural(AudioChannel& channel, const glm::vec3& dir, float spatialBlend, void* stream)
 	{
-		glm::vec3 dir{};
-		const glm::mat4 listener = m_pAudioModule->ListenerTransform();
-		glm::vec3 scale, listenPos, skew;
-		glm::vec4 pers;
-		glm::quat listenRot;
-		glm::decompose(listener, scale, listenRot, listenPos, skew, pers);
+		float* outData = reinterpret_cast<float*>(stream);
 
-		const glm::vec3 right = glm::vec3(listener[0][0], listener[1][0], listener[2][0]);
-		const glm::vec3 up = glm::vec3(listener[0][1], listener[1][1], listener[2][1]);
-		const glm::vec3 forward = glm::vec3(listener[0][2], listener[1][2], listener[2][2]);
+		/* Deinterleave stream */
+		iplAudioBufferDeinterleave(m_IPLContext, outData, &m_InBuffers[channel.m_Index]);
+		IPLBinauralEffectParams effectParams{};
+		effectParams.direction = IPLVector3{ dir.x, dir.y, dir.z };
+		effectParams.interpolation = IPL_HRTFINTERPOLATION_NEAREST;
+		effectParams.spatialBlend = spatialBlend;
+		effectParams.hrtf = m_IPLHrtf;
+		effectParams.peakDelays = nullptr;
+		/* Apply effect */
+		iplBinauralEffectApply(m_BinauralEffects[channel.m_Index], &effectParams, &m_InBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
+	}
 
-		UUID sourceID = 0;
-		glm::vec3 sourcePos{};
-		switch (channel.m_UserData.m_Type)
-		{
-		case AudioChannelUDataType::Entity:
-		{
-			GScene* pScene = m_pEngine->GetSceneManager()->GetOpenScene(channel.m_UserData.sceneID());
-			if (!pScene) return;
-			sourceID = channel.m_UserData.entityID();
-			Entity entity = pScene->GetEntityByUUID(sourceID);
-			if (!entity.IsValid()) return;
-			const glm::mat4 source = entity.GetComponent<Transform>().MatTransform;
-			glm::quat sourceRot;
-			glm::decompose(source, scale, sourceRot, sourcePos, skew, pers);
-			dir = sourcePos - listenPos;
-			dir = dir*listenRot;
-			break;
-		}
-		default:
-			break;
-		}
-
-		auto iter = std::find(m_SourceEntities.begin(), m_SourceEntities.end(), sourceID);
-		/* The engine could be shutting down so just early return to prevent crashing */
-		if (iter == m_SourceEntities.end()) return;
-		const size_t sourceIndex = iter - m_SourceEntities.begin();
-
+	void SteamAudioModule::SpatializeAmbisonics(AudioChannel& channel, const glm::vec3& listenPos, const glm::vec3& dir, void* stream)
+	{
 		ModuleSettings& audioSettings = m_pAudioModule->Settings();
 		const unsigned int frameSize = audioSettings.Value<unsigned int>(AudioModule::SettingNames::Framesize);
 		const unsigned int channels = m_pAudioModule->Channels();
@@ -332,38 +315,139 @@ namespace Glory
 		ambiSonicsDecodeParams.binaural = channels > 2 ? IPL_FALSE : IPL_TRUE;
 
 		iplAmbisonicsDecodeEffectApply(m_AmbiSonicsDecodeEffects[channel.m_Index], &ambiSonicsDecodeParams, &m_AmbisonicsBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
+	}
 
+	float SteamAudioModule::Attenuate(const glm::vec3& listenPos, const glm::vec3& sourcePos) const
+	{
 		IPLDistanceAttenuationModel distanceAttenuationModel{};
 		distanceAttenuationModel.type = IPL_DISTANCEATTENUATIONTYPE_CALLBACK;
 		distanceAttenuationModel.callback = CalculateAttenuation;
-		const float distanceAttenuation = iplDistanceAttenuationCalculate(m_IPLContext, { sourcePos.x, sourcePos.y, sourcePos.z }, listenerCoordinates.origin, &distanceAttenuationModel);
+		return iplDistanceAttenuationCalculate(m_IPLContext, { sourcePos.x, sourcePos.y, sourcePos.z }, IPLVector3{ listenPos.x, listenPos.y, listenPos.z }, &distanceAttenuationModel);
+	}
+
+	void SteamAudioModule::ProcessEffects(AudioChannel& channel, void* stream, int len)
+	{
+		/* For now only audio source components support effects */
+		if (channel.m_UserData.m_Type != AudioChannelUDataType::Entity) return;
+
+		/* Get listsner information */
+		glm::vec3 dir{};
+		const glm::mat4 listener = m_pAudioModule->ListenerTransform();
+		glm::vec3 scale, listenPos, skew;
+		glm::vec4 pers;
+		glm::quat listenRot;
+		glm::decompose(listener, scale, listenRot, listenPos, skew, pers);
+
+		const glm::vec3 right = glm::vec3(listener[0][0], listener[1][0], listener[2][0]);
+		const glm::vec3 up = glm::vec3(listener[0][1], listener[1][1], listener[2][1]);
+		const glm::vec3 forward = glm::vec3(listener[0][2], listener[1][2], listener[2][2]);
+
+		glm::vec3 sourcePos{};
+		GScene* pScene = m_pEngine->GetSceneManager()->GetOpenScene(channel.m_UserData.sceneID());
+		if (!pScene) return;
+		const UUID sourceID = channel.m_UserData.entityID();
+		Entity entity = pScene->GetEntityByUUID(sourceID);
+		if (!entity.IsValid()) return;
+		const glm::mat4 source = entity.GetComponent<Transform>().MatTransform;
+		glm::quat sourceRot;
+		glm::decompose(source, scale, sourceRot, sourcePos, skew, pers);
+		dir = sourcePos - listenPos;
+		dir = dir * listenRot;
+
+		const AudioSource& audioSource = entity.GetComponent<AudioSource>();
+		/* No need to bother doing any copying if spatialization and simulation are off */
+		if (!audioSource.m_Spatialization.m_Enable && !audioSource.m_Simulation.m_Enable) return;
+
+		if (audioSource.m_Spatialization.m_Enable)
+		{
+			switch (audioSource.m_Spatialization.m_Mode)
+			{
+			case Glory::SpatializationMode::Binaural:
+				SpatializeBinaural(channel, dir, audioSource.m_Spatialization.m_SpatialBlend, stream);
+				break;
+			case Glory::SpatializationMode::Ambisonics:
+				SpatializeAmbisonics(channel, listenPos, dir, stream);
+				break;
+			default:
+				break;
+			}
+		}
+		else
+		{
+			/* We still need to deinterleave the stream to apply the simulation */
+			float* outData = reinterpret_cast<float*>(stream);
+			iplAudioBufferDeinterleave(m_IPLContext, outData, &m_OutBuffers[channel.m_Index]);
+		}
+
+		if (!audioSource.m_Simulation.m_Enable)
+		{
+			/* If spatialization had attenuation on we still need to apply it here */
+			if (audioSource.m_Spatialization.m_Attenuation.m_Enable)
+			{
+				IPLDirectEffectParams directAttenuateEffect;
+				directAttenuateEffect.flags = IPL_DIRECTEFFECTFLAGS_APPLYDISTANCEATTENUATION;
+				directAttenuateEffect.distanceAttenuation = Attenuate(listenPos, sourcePos);
+				iplDirectEffectApply(m_DirectEffects[channel.m_Index], &directAttenuateEffect,
+					&m_OutBuffers[channel.m_Index], &m_InBuffers[channel.m_Index]);
+
+				/* Interleave back into stream */
+				iplAudioBufferInterleave(m_IPLContext, &m_InBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
+				std::memcpy(stream, m_TemporaryBuffers[channel.m_Index].data(), len);
+				return;
+			}
+
+			/* Interleave back into stream */
+			iplAudioBufferInterleave(m_IPLContext, &m_OutBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
+			std::memcpy(stream, m_TemporaryBuffers[channel.m_Index].data(), len);
+			return;
+		}
+
+		auto iter = std::find(m_SourceEntities.begin(), m_SourceEntities.end(), sourceID);
+		/* The engine could be shutting down so just early return to prevent crashing */
+		if (iter == m_SourceEntities.end()) return;
+		const size_t sourceIndex = iter - m_SourceEntities.begin();
+
+		const DirectSimulationSettings& directSettings = audioSource.m_Simulation.m_Direct;
+		const IPLSimulationFlags simulationFlags = IPLSimulationFlags(
+			audioSource.m_Simulation.m_Enable ? (
+				(directSettings.m_Enable ? IPL_SIMULATIONFLAGS_DIRECT : 0) |
+				(audioSource.m_Simulation.m_Reflections.m_Enable ? IPL_SIMULATIONFLAGS_REFLECTIONS : 0) |
+				(audioSource.m_Simulation.m_Pathing.m_Enable ? IPL_SIMULATIONFLAGS_PATHING : 0)) : 0);
+
+		const AttenuationSettings& attenuationSettings = directSettings.m_DistanceAttenuation;
+		const AirAbsorptionSettings& airAbsorptionSettings = directSettings.m_AirAbsorption;
+		const DirectivitySettings& directivitySettings = directSettings.m_Directivity;
+		const OcclusionSettings& occlusionSettings = directSettings.m_Occlusion;
+		const TransmissionSettings& transmissionSettings = directSettings.m_Transmission;
+		const IPLDirectEffectFlags directFlags = IPLDirectEffectFlags(
+			directSettings.m_Enable ? (
+				(attenuationSettings.m_Enable ? IPL_DIRECTEFFECTFLAGS_APPLYDISTANCEATTENUATION : 0) |
+				(airAbsorptionSettings.m_Enable ? IPL_DIRECTEFFECTFLAGS_APPLYAIRABSORPTION : 0) |
+				(directivitySettings.m_Enable ? IPL_DIRECTEFFECTFLAGS_APPLYDIRECTIVITY : 0) |
+				(occlusionSettings.m_Enable ? IPL_DIRECTEFFECTFLAGS_APPLYOCCLUSION : 0) |
+				(transmissionSettings.m_Enable ? IPL_DIRECTEFFECTFLAGS_APPLYTRANSMISSION : 0)) : 0);
 
 		IPLSimulationOutputs outputs{};
-		iplSourceGetOutputs(m_Sources[sourceIndex], IPL_SIMULATIONFLAGS_DIRECT, &outputs);
+		iplSourceGetOutputs(m_Sources[sourceIndex], simulationFlags, &outputs);
 
-		IPLDirectEffectParams directEffectsParams = outputs.direct; // this can be passed to a direct 
-		directEffectsParams.flags = IPLDirectEffectFlags(IPL_DIRECTEFFECTFLAGS_APPLYAIRABSORPTION | IPL_DIRECTEFFECTFLAGS_APPLYOCCLUSION | IPL_DIRECTEFFECTFLAGS_APPLYTRANSMISSION);
-		directEffectsParams.distanceAttenuation = distanceAttenuation;
-		directEffectsParams.transmissionType = IPL_TRANSMISSIONTYPE_FREQDEPENDENT;
+		IPLDirectEffectParams directEffectsParams = outputs.direct;
+		directEffectsParams.flags = directFlags;
+
+		if (audioSource.m_Spatialization.m_Enable && audioSource.m_Spatialization.m_Attenuation.m_Enable)
+		{
+			directEffectsParams.flags = IPLDirectEffectFlags(int(directEffectsParams.distanceAttenuation) |
+				IPL_DIRECTEFFECTFLAGS_APPLYDISTANCEATTENUATION);
+			directEffectsParams.distanceAttenuation = Attenuate(listenPos, sourcePos);
+		}
+
+		directEffectsParams.transmissionType = transmissionSettings.m_FrequencyDependant ?
+			IPL_TRANSMISSIONTYPE_FREQDEPENDENT : IPL_TRANSMISSIONTYPE_FREQINDEPENDENT;
 
 		iplDirectEffectApply(m_DirectEffects[channel.m_Index], &directEffectsParams, &m_OutBuffers[channel.m_Index], &m_InBuffers[channel.m_Index]);
 
+		/* Interleave back into stream */
 		iplAudioBufferInterleave(m_IPLContext, &m_InBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
 		std::memcpy(stream, m_TemporaryBuffers[channel.m_Index].data(), len);
-
-		/* Deinterleave stream */
-		//iplAudioBufferDeinterleave(m_IPLContext, outData, &m_InBuffers[channel.m_Index]);
-		//IPLBinauralEffectParams effectParams{};
-		//effectParams.direction = IPLVector3{ dir.x, dir.y, dir.z };
-		//effectParams.interpolation = IPL_HRTFINTERPOLATION_NEAREST;
-		//effectParams.spatialBlend = 1.0f;
-		//effectParams.hrtf = m_IPLHrtf;
-		//effectParams.peakDelays = nullptr;
-		///* Apply effect */
-		//iplBinauralEffectApply(m_BinauralEffects[channel.m_Index], &effectParams, &m_InBuffers[channel.m_Index], &m_OutBuffers[channel.m_Index]);
-		///* Interleave back into stream */
-		//iplAudioBufferInterleave(m_IPLContext, &m_OutBuffers[channel.m_Index], m_TemporaryBuffers[channel.m_Index].data());
-		//std::memcpy(stream, m_TemporaryBuffers[channel.m_Index].data(), len);
 	}
 
 	void SteamAudioModule::AllocateChannels(size_t mixingChannels)
@@ -458,8 +542,14 @@ namespace Glory
 			m_SourceEntities[sourceIndex] = id;
 		}
 
+		const IPLSimulationFlags simulationFlags = IPLSimulationFlags(
+			audioSource.m_Simulation.m_Enable ? (
+				(audioSource.m_Simulation.m_Direct.m_Enable ? IPL_SIMULATIONFLAGS_DIRECT : 0) |
+				(audioSource.m_Simulation.m_Reflections.m_Enable ? IPL_SIMULATIONFLAGS_REFLECTIONS : 0) |
+				(audioSource.m_Simulation.m_Pathing.m_Enable ? IPL_SIMULATIONFLAGS_PATHING : 0)) : 0);
+
 		IPLSourceSettings sourceSettings{};
-		sourceSettings.flags = IPL_SIMULATIONFLAGS_DIRECT; // this enables occlusion/transmission simulator for this source
+		sourceSettings.flags = simulationFlags; // this enables occlusion/transmission simulator for this source
 
 		iplSourceCreate(m_Simulator, &sourceSettings, &m_Sources[sourceIndex]);
 
@@ -491,14 +581,72 @@ namespace Glory
 		sourceCoordinates.right = IPLVector3{ right.x, right.y, right.z };
 		sourceCoordinates.up = IPLVector3{ up.x, up.y, up.z };
 
-		IPLSimulationInputs inputs{};
-		inputs.flags = IPL_SIMULATIONFLAGS_DIRECT;
-		inputs.directFlags = IPLDirectSimulationFlags(IPL_DIRECTSIMULATIONFLAGS_OCCLUSION | IPL_DIRECTSIMULATIONFLAGS_TRANSMISSION | IPL_DIRECTSIMULATIONFLAGS_AIRABSORPTION);
-		inputs.source = sourceCoordinates;
-		inputs.occlusionType = IPL_OCCLUSIONTYPE_VOLUMETRIC;
-		inputs.numTransmissionRays = 2;
+		const DirectSimulationSettings& directSettings = audioSource.m_Simulation.m_Direct;
+		const IPLSimulationFlags simulationFlags = IPLSimulationFlags(
+			audioSource.m_Simulation.m_Enable ? (
+				(directSettings.m_Enable ? IPL_SIMULATIONFLAGS_DIRECT : 0) |
+				(audioSource.m_Simulation.m_Reflections.m_Enable ? IPL_SIMULATIONFLAGS_REFLECTIONS : 0) |
+				(audioSource.m_Simulation.m_Pathing.m_Enable ? IPL_SIMULATIONFLAGS_PATHING : 0)) : 0);
 
-		iplSourceSetInputs(source, IPL_SIMULATIONFLAGS_DIRECT, &inputs);
+		const AttenuationSettings& attenuationSettings = directSettings.m_DistanceAttenuation;
+		const AirAbsorptionSettings& airAbsorptionSettings = directSettings.m_AirAbsorption;
+		const DirectivitySettings& directivitySettings = directSettings.m_Directivity;
+		const OcclusionSettings& occlusionSettings = directSettings.m_Occlusion;
+		const TransmissionSettings& transmissionSettings = directSettings.m_Transmission;
+		const IPLDirectSimulationFlags directFlags = IPLDirectSimulationFlags(
+			directSettings.m_Enable ? (
+				(attenuationSettings.m_Enable ? IPL_DIRECTSIMULATIONFLAGS_DISTANCEATTENUATION : 0) |
+				(airAbsorptionSettings.m_Enable ? IPL_DIRECTSIMULATIONFLAGS_AIRABSORPTION : 0) |
+				(directivitySettings.m_Enable ? IPL_DIRECTSIMULATIONFLAGS_DIRECTIVITY : 0) |
+				(occlusionSettings.m_Enable ? IPL_DIRECTSIMULATIONFLAGS_OCCLUSION : 0) |
+				(transmissionSettings.m_Enable ? IPL_DIRECTSIMULATIONFLAGS_TRANSMISSION : 0)) : 0);
+
+		IPLSimulationInputs inputs{};
+		inputs.flags = simulationFlags;
+		inputs.directFlags = directFlags;
+		inputs.source = sourceCoordinates;
+
+		/* Direct simulation settings */
+		if (attenuationSettings.m_Enable)
+		{
+			inputs.distanceAttenuationModel.type = IPL_DISTANCEATTENUATIONTYPE_CALLBACK;
+			inputs.distanceAttenuationModel.minDistance = attenuationSettings.m_MinDistance;
+			inputs.distanceAttenuationModel.callback = CalculateAttenuation;
+		}
+
+		if (airAbsorptionSettings.m_Enable)
+		{
+			inputs.airAbsorptionModel.type = IPLAirAbsorptionModelType(airAbsorptionSettings.m_Type);
+			inputs.airAbsorptionModel.coefficients[0] = airAbsorptionSettings.m_LowCoefficient;
+			inputs.airAbsorptionModel.coefficients[1] = airAbsorptionSettings.m_MidCoefficient;
+			inputs.airAbsorptionModel.coefficients[2] = airAbsorptionSettings.m_HighCoefficient;
+		}
+
+		if (directivitySettings.m_Enable)
+		{
+			inputs.directivity.dipoleWeight = directivitySettings.m_DipoleWeight;
+			inputs.directivity.dipolePower = directivitySettings.m_DipolePower;
+		}
+
+		if (occlusionSettings.m_Enable)
+		{
+			inputs.occlusionType = IPLOcclusionType(occlusionSettings.m_Type);
+			inputs.occlusionRadius = occlusionSettings.m_VolumetricRadius;
+			inputs.numOcclusionSamples = occlusionSettings.m_VolumetricSamples;
+		}
+
+		if (transmissionSettings.m_Enable)
+		{
+			inputs.numTransmissionRays = transmissionSettings.m_TransmissionRays;
+		}
+
+		/* Reflection simulation settings */
+		/* @todo */
+
+		/* Pathing simulation settings */
+		/* @todo */
+
+		iplSourceSetInputs(source, simulationFlags, &inputs);
 	}
 
 	void SteamAudioModule::RemoveSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& audioSource)
