@@ -11,7 +11,7 @@ namespace Glory
         virtual ~ScriptedComponentSerailizer();
 
     private:
-        virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out) override;
-        virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object) override;
+        virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node) override;
+        virtual void Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node) override;
 	};
 }

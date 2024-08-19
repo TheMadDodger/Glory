@@ -15,13 +15,14 @@ namespace Glory
 	{
 	}
 
-	void ScriptedComponentSerailizer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
+	void ScriptedComponentSerailizer::Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
 		MonoScriptComponent* pScriptedComponent = (MonoScriptComponent*)data;
-		out << YAML::Key << "Properties";
-		out << YAML::BeginMap;
-		out << YAML::Key << "m_Script" << YAML::Value << pScriptedComponent->m_Script.AssetUUID();
-		out << YAML::Key << "ScriptData" << YAML::Value << YAML::BeginMap;
+		auto properties = node["Properties"];
+		properties.Set(YAML::Node(YAML::NodeType::Map));
+		properties["m_Script"].Set(uint64_t(pScriptedComponent->m_Script.AssetUUID()));
+		auto scriptData = properties["ScriptData"];
+		scriptData.Set(YAML::Node(YAML::NodeType::Map));
 
 		MonoScript* pScript = pScriptedComponent->m_Script.GetImmediate(&m_pSerializers->GetEngine()->GetAssetManager());
 		if (pScript)
@@ -33,20 +34,18 @@ namespace Glory
 			{
 				const ScriptProperty& prop = props[i];
 				const TypeData* pType = Reflect::GetTyeData(prop.m_TypeHash);
-				m_pSerializers->SerializeProperty(prop.m_Name, pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], out);
+				m_pSerializers->SerializeProperty(prop.m_Name, pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], scriptData);
 			}
 		}
-
-		out << YAML::EndMap << YAML::EndMap;
 	}
 
-	void ScriptedComponentSerailizer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
+	void ScriptedComponentSerailizer::Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
-		YAML::Node scriptNode = object["m_Script"];
-		YAML::Node scriptDataNode = object["ScriptData"];
+		auto scriptNode = node["m_Script"];
+		auto scriptDataNode = node["ScriptData"];
 
 		MonoScriptComponent* pScriptedComponent = (MonoScriptComponent*)data;
-		pScriptedComponent->m_Script.SetUUID(scriptNode.as<uint64_t>());
+		pScriptedComponent->m_Script.SetUUID(scriptNode.As<uint64_t>());
 		MonoScript* pScript = pScriptedComponent->m_Script.GetImmediate(&m_pSerializers->GetEngine()->GetAssetManager());
 		if (pScript)
 		{

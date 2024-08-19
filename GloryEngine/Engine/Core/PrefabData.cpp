@@ -12,7 +12,7 @@
 namespace Glory
 {
 	/* @fixme Remove this when prefabs no longer require yaml data */
-	void SerializeComponent(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, YAML::Emitter& out)
+	/*void SerializeComponent(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
 	{
 		out << YAML::BeginMap;
 		const UUID compUUID = pEntityView->ComponentUUIDAt(index);
@@ -33,9 +33,9 @@ namespace Glory
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		pEngine->GetSerializers().SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), out);
+		pEngine->GetSerializers().SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), node);
 		out << YAML::EndMap;
-	}
+	}*/
 
 	PrefabData::PrefabData()
 	{

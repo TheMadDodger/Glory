@@ -12,35 +12,33 @@
 
 namespace Glory::Editor
 {
-	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, YAML::Emitter& out)
+	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeRef node)
 	{
-		out << YAML::BeginMap;
-		out << YAML::Key << "Entities";
-		out << YAML::Value << YAML::BeginSeq;
-		/* Entities should be serialized in order off their hierarchies
+		auto root = node.ValueRef();
+		root.Set(YAML::Node(YAML::NodeType::Map));
+		auto entities = root["Entities"];
+		entities.Set(YAML::Node(YAML::NodeType::Sequence));
+		/*
+		 * Entities should be serialized in order of their hierarchies
 		 * so that the sibling indices are preserved naturally.
 		 */
 		for (size_t i = 0; i < pScene->ChildCount(0); ++i)
 		{
 			Utils::ECS::EntityID child = pScene->Child(0, i);
-			SerializeEntityRecursive(pEngine, pScene, child, out);
+			SerializeEntityRecursive(pEngine, pScene, child, entities);
 		}
-		out << YAML::EndSeq;
-		out << YAML::EndMap;
 	}
 
-	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)
+	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, Utils::NodeRef node, UUID uuid, const std::string& name, Flags flags)
 	{
 		GScene* pScene = new GScene(name, uuid);
-		DeserializeScene(pEngine, pScene, object, uuid, name, flags);
+		DeserializeScene(pEngine, pScene, node, uuid, name, flags);
 		return pScene;
 	}
 
-	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, YAML::Node& object, UUID uuid, const std::string& name, Flags flags)
+	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, Utils::NodeRef node, UUID uuid, const std::string& name, Flags flags)
 	{
 		pScene->SetManager(pEngine->GetSceneManager());
-		Utils::NodeRef node{ object };
-
 		Utils::NodeValueRef entities = node["Entities"];
 		for (size_t i = 0; i < entities.Size(); ++i)
 		{
@@ -50,7 +48,7 @@ namespace Glory::Editor
 		pScene->HandleDelayedParents();
 	}
 
-	void EditorSceneSerializer::SerializeEntity(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, YAML::Emitter& out)
+	void EditorSceneSerializer::SerializeEntity(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
 	{
 		Entity entityHandle = pScene->GetEntityByEntityID(entity);
 		Utils::ECS::EntityRegistry& pRegistry = entityHandle.GetScene()->GetRegistry();
@@ -60,22 +58,17 @@ namespace Glory::Editor
 		
 		if (pScene->PrefabChild(entityHandle.EntityUUID())) return;
 
-		out << YAML::BeginMap;
-		out << YAML::Key << "Name";
-		out << YAML::Value << std::string{entityHandle.Name()};
-		out << YAML::Key << "UUID";
-		out << YAML::Value << entityHandle.EntityUUID();
-		out << YAML::Key << "Active";
-		out << YAML::Value << entityHandle.IsActiveSelf();
-		out << YAML::Key << "ParentUUID";
-		out << YAML::Value << (parent.IsValid() ? parent.EntityUUID() : 0);
+		entityNode.Set(YAML::Node(YAML::NodeType::Map));
+		entityNode["Name"].Set(std::string{ entityHandle.Name() });
+		entityNode["UUID"].Set(uint64_t(entityHandle.EntityUUID()));
+		entityNode["Active"].Set(entityHandle.IsActiveSelf());
+		entityNode["ParentUUID"].Set(uint64_t(parent.IsValid() ? parent.EntityUUID() : 0));
 		
 		const UUID prefabID = pScene->Prefab(entityHandle.EntityUUID());
 		if (prefabID)
 		{
 			/* Serialize the prefab ID instead */
-			out << YAML::Key << "PrefabID";
-			out << YAML::Value << prefabID;
+			entityNode["PrefabID"].Set(uint64_t(prefabID));
 		
 			/* Serialize ID remapping */
 			PrefabData* pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
@@ -83,12 +76,11 @@ namespace Glory::Editor
 		
 			if (pPrefab->GetEntityUUID(root) != entityHandle.EntityUUID())
 			{
-				out << YAML::Key << "IDRemapSeed";
 				const uint64_t id = entityHandle.EntityUUID();
 				const uint32_t first32Bits = uint32_t((id << 32) >> 32);
 				const uint32_t second32Bits = uint32_t(id >> 32);
 				const uint32_t seed = first32Bits & second32Bits;
-				out << YAML::Value << seed;
+				entityNode["IDRemapSeed"].Set(seed);
 			}
 		
 			/* For now only serialize the transform.
@@ -98,43 +90,41 @@ namespace Glory::Editor
 			 */
 			const TypeData* pTransformTypeData = Transform::GetTypeData();
 			void* pTransformAddress = pRegistry.GetComponentAddress(entity, pEntityView->ComponentUUIDAt(0));
-			out << YAML::Key << "Transform";
-			out << YAML::Value << YAML::BeginMap;
-			pEngine->GetSerializers().SerializeProperty("Properties", pTransformTypeData, pTransformAddress, out);
-			out << YAML::EndMap;
+			auto transform = entityNode["Transform"];
+			transform.Set(YAML::Node(YAML::NodeType::Map));
+			pEngine->GetSerializers().SerializeProperty("Properties", pTransformTypeData, pTransformAddress, transform);
 		
 			/* TODO: Serialize overrides */
-			out << YAML::EndMap;
 			return;
 		}
 
-		out << YAML::Key << "Components";
-		out << YAML::Value << YAML::BeginSeq;
+		auto components = entityNode["Components"];
+		components.Set(YAML::Node(YAML::NodeType::Sequence));
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
-			SerializeComponent(pEngine, &pScene->GetRegistry(), pEntityView, entity, i, out);
+			//components.PushBack(YAML::Node(YAML::NodeType::Map));
+			SerializeComponent(pEngine, &pScene->GetRegistry(), pEntityView, entity, i, components[i]);
 		}
-		out << YAML::EndSeq;
-		out << YAML::EndMap;
 	}
 
-	void EditorSceneSerializer::SerializeEntityRecursive(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, YAML::Emitter& out)
+	void EditorSceneSerializer::SerializeEntityRecursive(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
 	{
+		const size_t index = entities.Size();
+		entities.PushBack(YAML::Node(YAML::NodeType::Map));
+
 		/* Serialize entity first then its children */
-		SerializeEntity(pEngine, pScene, entity, out);
+		SerializeEntity(pEngine, pScene, entity, entities[index]);
 
 		for (size_t i = 0; i < pScene->ChildCount(entity); ++i)
 		{
 			Utils::ECS::EntityID child = pScene->Child(entity, i);
-			SerializeEntityRecursive(pEngine, pScene, child, out);
+			SerializeEntityRecursive(pEngine, pScene, child, entities);
 		}
 	}
 
-	Entity EditorSceneSerializer::DeserializeEntity(Engine* pEngine, GScene* pScene, YAML::Node& object, Flags flags)
+	Entity EditorSceneSerializer::DeserializeEntity(Engine* pEngine, GScene* pScene, Utils::NodeRef node, Flags flags)
 	{
 		UUIDRemapper& uuidRemapper = pEngine->m_UUIDRemapper;
-		
-		Utils::NodeRef node{object};
 
 		const std::string name = node["Name"].As<std::string>();
 		UUID uuid = node["UUID"].As<uint64_t>();
@@ -150,7 +140,7 @@ namespace Glory::Editor
 			parentUuid = uuidRemapper(parentUuid);
 		}
 		
-		Utils::NodeRef nodeRef{ object };
+		Utils::NodeRef nodeRef{ node };
 		Utils::NodeValueRef prefabIDRef = nodeRef["PrefabID"];
 		if (!(flags & Flags::IgnorePrefabs) && prefabIDRef.Exists())
 		{
@@ -191,7 +181,7 @@ namespace Glory::Editor
 			}
 		}
 		
-		UUID transformUUID = object["Components"][0]["UUID"].as<uint64_t>();
+		UUID transformUUID = nodeRef["Components"][0]["UUID"].As<uint64_t>();
 		if (flags & Flags::GenerateNewUUIDs)
 		{
 			transformUUID = uuidRemapper(transformUUID);
@@ -221,34 +211,27 @@ namespace Glory::Editor
 		return entityHandle;
 	}
 
-	void EditorSceneSerializer::SerializeComponent(Engine* pEngine, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, YAML::Emitter& out)
+	void EditorSceneSerializer::SerializeComponent(Engine* pEngine, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
 	{
-		out << YAML::BeginMap;
+		node.Set(YAML::Node(YAML::NodeType::Map));
 		const UUID compUUID = pEntityView->ComponentUUIDAt(index);
-		out << YAML::Key << "UUID";
-		out << YAML::Value << uint64_t(compUUID);
+		node["UUID"].Set(uint64_t(compUUID));
 
 		const uint32_t type = pEntityView->ComponentTypeAt(index);
 		const Utils::Reflect::TypeData* pType = Utils::Reflect::Reflect::GetTyeData(type);
 
-		out << YAML::Key << "TypeName";
-		out << YAML::Value << pType->TypeName();
+		node["TypeName"].Set(pType->TypeName());
+		node["TypeHash"].Set(uint64_t(type));
+		node["Active"].Set(pRegistry->GetTypeView(type)->IsActive(entity));
 
-		out << YAML::Key << "TypeHash";
-		out << YAML::Value << uint64_t(type);
-
-		out << YAML::Key << "Active";
-		out << YAML::Value << pRegistry->GetTypeView(type)->IsActive(entity);
-
-		pEngine->GetSerializers().SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), out);
-		out << YAML::EndMap;
+		pEngine->GetSerializers().SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), node);
 	}
 
-	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, YAML::Node& object, Flags flags)
+	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeRef node, Flags flags)
 	{
 		const bool noCallbacks = flags & Flags::NoComponentCallbacks;
 
-		Utils::NodeRef component{object};
+		Utils::NodeRef component{ node };
 
 		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
 
@@ -274,7 +257,7 @@ namespace Glory::Editor
 		else pComponentAddress = pRegistry.GetComponentAddress(entity, compUUID);
 
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
-		pEngine->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, component["Properties"].Node());
+		pEngine->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, component["Properties"]);
 
 		Utils::ECS::BaseTypeView* pTypeView = pRegistry.GetTypeView(typeHash);
 		pTypeView->SetActive(entity, active);

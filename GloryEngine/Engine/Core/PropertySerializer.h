@@ -19,11 +19,11 @@ namespace Glory
 		virtual ~PropertySerializer();
 
 	public:
-		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out);
-		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, YAML::Node& object);
+		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node);
+		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, Utils::NodeValueRef node);
 		
-		virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out);
-		virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object);
+		virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node);
+		virtual void Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node);
 
 	protected:
 		Serializers* m_pSerializers;
@@ -45,40 +45,38 @@ namespace Glory
 		virtual ~SimpleTemplatedPropertySerializer() {}
 
 	private:
-		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out) override
+		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node) override
 		{
 			T value;
 			memcpy((void*)&value, (void*)&buffer[offset], size);
-			out << YAML::Key << name;
-			out << YAML::Value << value;
+			node[name].Set(value);
 		}
 
-		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, YAML::Node& object) override
+		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, Utils::NodeValueRef node) override
 		{
-			if (!object.IsDefined()) return;
-			T value = object.as<T>();
+			if (!node.Exists()) return;
+			T value = node.As<T>();
 			memcpy((void*)&buffer[offset], (void*)&value, size);
 		}
 
-		virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out) override
+		virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node) override
 		{
 			T* value = (T*)data;
 			/* Nameless properties can come from array elements */
 			if (name.empty())
 			{
-				out << *value;
+				node.Set(*value);
 				return;
 			}
 
-			out << YAML::Key << name;
-			out << YAML::Value << *value;
+			node[name].Set(*value);
 		}
 
-		virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object) override
+		virtual void Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node) override
 		{
-			if (!object.IsDefined()) return;
+			if (!node.Exists()) return;
 			T* value = (T*)data;
-			*value = object.as<T>();
+			*value = node.As<T>();
 		}
 	};
 }
