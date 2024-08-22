@@ -3,7 +3,7 @@
 #include "GloryEditor.h"
 
 #include "EntityID.h"
-#include <yaml-cpp/yaml.h>
+#include <NodeRef.h>
 
 namespace Glory
 {
@@ -21,7 +21,7 @@ namespace Editor
         virtual void OnRedo(const ActionRecord& actionRecord);
 
     private:
-        std::string m_SerializedObject;
+        Utils::InMemoryYAML m_SerializedObject;
         UUID m_SceneID;
     };
 }

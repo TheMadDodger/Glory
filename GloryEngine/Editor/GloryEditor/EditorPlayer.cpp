@@ -52,10 +52,7 @@ namespace Glory::Editor
 		if (pSelected != nullptr) m_SelectedObjectBeforeStart = pSelected->GetUUID();
 		Selection::Clear();
 		m_UndoHistoryIndex = Undo::GetHistorySize();
-		YAML::Emitter out;
-
-		EditorApplication::GetInstance()->GetSceneManager().SerializeOpenScenes(out);
-		m_SerializedScenes = out.c_str();
+		EditorApplication::GetInstance()->GetSceneManager().SerializeOpenScenes(m_SerializedScenes);
 
 		//if (pSelected) Selection::SetActiveObject(pSelected);
 
@@ -111,8 +108,7 @@ namespace Glory::Editor
 
 		Selection::Clear();
 		EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
-		YAML::Node node = YAML::Load(m_SerializedScenes);
-		EditorApplication::GetInstance()->GetSceneManager().OpenAllFromNode(node);
+		EditorApplication::GetInstance()->GetSceneManager().OpenAllFromYAML(m_SerializedScenes);
 
 		//pSelected = Object::FindObject(toSelect);
 		//Selection::SetActiveObject(pSelected);

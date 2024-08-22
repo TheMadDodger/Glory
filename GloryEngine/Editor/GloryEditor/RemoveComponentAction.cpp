@@ -15,10 +15,8 @@ namespace Glory::Editor
 {
 	RemoveComponentAction::RemoveComponentAction(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entityID, size_t componentIndex) : m_ComponentIndex(componentIndex)
 	{
-		YAML::Emitter out;
 		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entityID);
-		EditorSceneSerializer::SerializeComponent(EditorApplication::GetInstance()->GetEngine(), pRegistry, pEntityView, entityID, componentIndex, out);
-		m_SerializedComponent = out.c_str();
+		EditorSceneSerializer::SerializeComponent(EditorApplication::GetInstance()->GetEngine(), pRegistry, pEntityView, entityID, componentIndex, m_SerializedComponent.RootNodeRef().ValueRef());
 	}
 
 	RemoveComponentAction::~RemoveComponentAction()
@@ -30,15 +28,14 @@ namespace Glory::Editor
 		std::vector<Editor*> editors = Editor::FindEditors(actionRecord.ObjectID);
 		if (!editors.size()) return;
 
-		YAML::Node node = YAML::Load(m_SerializedComponent.c_str());
 		EditableEntity* pEntityObject = (EditableEntity*)editors[0]->GetTarget();
 		GScene* pEntityScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pEntityObject->SceneID());
 		Utils::ECS::EntityView* pEntityView = pEntityScene->GetRegistry().GetEntityView(pEntityObject->EntityID());
 		const size_t index = pEntityView->ComponentCount();
-		EditorSceneSerializer::DeserializeComponent(EditorApplication::GetInstance()->GetEngine(), pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, node);
+		EditorSceneSerializer::DeserializeComponent(EditorApplication::GetInstance()->GetEngine(), pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, m_SerializedComponent.RootNodeRef().ValueRef());
 		pEntityView->SetComponentIndex(index, m_ComponentIndex);
 
-		for (size_t i = 0; i < editors.size(); i++)
+		for (size_t i = 0; i < editors.size(); ++i)
 		{
 			editors[i]->Initialize();
 		}

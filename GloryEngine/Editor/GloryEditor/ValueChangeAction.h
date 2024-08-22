@@ -23,7 +23,7 @@ namespace Glory::Editor
     private:
         const Utils::Reflect::TypeData* m_pRootType;
         const std::filesystem::path m_PropertyPath;
-        YAML::Node m_OldValue;
-        YAML::Node m_NewValue;
+        Utils::InMemoryYAML m_OldValue;
+        Utils::InMemoryYAML m_NewValue;
     };
 }

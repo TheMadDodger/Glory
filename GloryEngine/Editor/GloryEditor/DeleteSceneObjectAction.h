@@ -19,7 +19,7 @@ namespace Editor
 		virtual void OnRedo(const ActionRecord& actionRecord);
 
 	private:
-		std::string m_SerializedObject;
+		Utils::InMemoryYAML m_SerializedObject;
 		UUID m_OriginalSceneUUID;
 		bool m_WasSelected;
 	};

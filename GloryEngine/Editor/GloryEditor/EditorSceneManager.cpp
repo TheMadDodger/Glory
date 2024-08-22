@@ -52,7 +52,7 @@ namespace Glory::Editor
 		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), (*yamlFile).RootNodeRef().ValueRef().Node(), uuid, filePath.filename().replace_extension().string());
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), (*yamlFile).RootNodeRef().ValueRef(), uuid, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 
 		pScene->SetResourceUUID(uuid);
@@ -70,9 +70,9 @@ namespace Glory::Editor
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);
 		std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
-		YAML::Node node = YAML::LoadFile(path);
+		Utils::YAMLFileRef file{ path };
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), node, uuid,
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), file.RootNodeRef().ValueRef(), uuid,
 			filePath.filename().replace_extension().string(), EditorSceneSerializer::NoComponentCallbacks);
 		return pScene;
 	}
@@ -184,36 +184,36 @@ namespace Glory::Editor
 		Save(m_CurrentlySavingScene, path, true);
 	}
 
-	void EditorSceneManager::SerializeOpenScenes(YAML::Emitter& out)
+	void EditorSceneManager::SerializeOpenScenes(Utils::InMemoryYAML out)
 	{
-		out << YAML::BeginSeq;
+		auto scenes = out.RootNodeRef().ValueRef();
+		scenes.SetSequence();
 		for (size_t i = 0; i < m_pOpenScenes.size(); i++)
 		{
 			GScene* pScene = m_pOpenScenes[i];
 			const UUID uuid = pScene->GetUUID();
-			out << YAML::BeginMap;
-			out << YAML::Key << "Name";
-			out << YAML::Value << pScene->Name();
-			out << YAML::Key << "UUID";
-			out << YAML::Value << pScene->GetUUID();
-			out << YAML::Key << "Scene";
-			out << YAML::Value;
-			EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, out);
-			out << YAML::EndMap;
+
+			scenes.PushBack(YAML::Node(YAML::NodeType::Map));
+
+			auto scene = scenes[i];
+			scene["Name"].Set(pScene->Name());
+			scene["UUID"].Set(uint64_t(pScene->GetUUID()));
+
+			EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, scene["Scene"]);
 		}
-		out << YAML::EndSeq;
 	}
 
-	void EditorSceneManager::OpenAllFromNode(YAML::Node& node)
+	void EditorSceneManager::OpenAllFromYAML(Utils::InMemoryYAML data)
 	{
-		for (size_t i = 0; i < node.size(); i++)
+		auto root = data.RootNodeRef().ValueRef();
+		for (size_t i = 0; i < root.Size(); i++)
 		{
-			YAML::Node sceneDataNode = node[i];
-			YAML::Node nameNode = sceneDataNode["Name"];
-			std::string name = nameNode.as<std::string>();
-			YAML::Node uuidNode = sceneDataNode["UUID"];
-			UUID uuid = uuidNode.as<uint64_t>();
-			YAML::Node sceneNode = sceneDataNode["Scene"];
+			auto sceneDataNode = root[i];
+			auto nameNode = sceneDataNode["Name"];
+			std::string name = nameNode.As<std::string>();
+			auto uuidNode = sceneDataNode["UUID"];
+			UUID uuid = uuidNode.As<uint64_t>();
+			auto sceneNode = sceneDataNode["Scene"];
 			GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), sceneNode, uuid, name);
 			OpenScene(pScene, uuid);
 		}
@@ -262,24 +262,22 @@ namespace Glory::Editor
 		if (!pScene) pScene = NewScene();
 
 		/* Serialize the objects entire heirarchy */
-		YAML::Emitter out;
-		out << YAML::BeginSeq;
-		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), out);
-		out << YAML::EndSeq;
+		Utils::InMemoryYAML data;
+		auto root = data.RootNodeRef().ValueRef();
+		root.SetSequence();
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), root);
 
 		/* Deserialize node into a new objects */
-		YAML::Node node = YAML::Load(out.c_str());
-		PasteSceneObject(pScene, entity.Parent(), node);
+		PasteSceneObject(pScene, entity.Parent(), root);
 	}
 
-	void EditorSceneManager::PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, YAML::Node& node)
+	void EditorSceneManager::PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, Utils::NodeValueRef entities)
 	{
 		/* Deserialize node into a new objects */
 		Entity parentEntity = pScene->GetEntityByEntityID(parent);
-		Utils::NodeRef entities{node};
-		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
+		for (size_t i = 0; i < entities.Size(); i++)
 		{
-			Utils::NodeValueRef entity = entities.ValueRef()[i];
+			Utils::NodeValueRef entity = entities[i];
 			if (i == 0 && parentEntity.IsValid())
 			{
 				const UUID parentUUID = parentEntity.EntityUUID();
@@ -287,7 +285,7 @@ namespace Glory::Editor
 				EditorApplication::GetInstance()->GetEngine()->m_UUIDRemapper.EnforceRemap(parentUUID, parentUUID);
 			}
 
-			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity.Node(), EditorSceneSerializer::Flags::GenerateNewUUIDs);
+			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity, EditorSceneSerializer::Flags::GenerateNewUUIDs);
 			if (i == 0 && newEntity.IsValid())
 			{
 				Undo::StartRecord("Duplicate", newEntity.EntityUUID());
@@ -334,12 +332,13 @@ namespace Glory::Editor
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
 	{
+		Utils::YAMLFileRef file{ path };
+		auto root = file.RootNodeRef().ValueRef();
+
 		GScene* pScene = GetOpenScene(uuid);
-		YAML::Emitter out;
-		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, out);
-		std::ofstream outStream(path);
-		outStream << out.c_str();
-		outStream.close();
+		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, root);
+		file.Save();
+
 		if (newScene) EditorAssetDatabase::ImportNewScene(path, pScene);
 		SetSceneDirty(pScene, false);
 

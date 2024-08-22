@@ -39,58 +39,49 @@ namespace Glory::Editor
 
 	bool MaterialImporter::SaveResource(const std::filesystem::path& path, MaterialData* pResource) const
 	{
-		YAML::Emitter out;
-		SaveMaterialData(pResource, out);
-		std::ofstream outStream(path);
-		outStream << out.c_str();
-		outStream.close();
+		Utils::YAMLFileRef file{ path };
+		SaveMaterialData(pResource, file.RootNodeRef().ValueRef());
+		file.Save();
 		return true;
 	}
 
-	void MaterialImporter::SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out) const
+	void MaterialImporter::SaveMaterialData(MaterialData* pMaterialData, Utils::NodeValueRef data) const
 	{
-		out << YAML::BeginMap;
-		out << YAML::Key << "Pipeline";
-		out << YAML::Value << uint64_t(pMaterialData->GetPipelineID(EditorApplication::GetInstance()->GetMaterialManager()));
-		WritePropertyData(out, pMaterialData);
-		out << YAML::EndMap;
+		data.SetMap();
+		data["Pipeline"].Set(uint64_t(pMaterialData->GetPipelineID(EditorApplication::GetInstance()->GetMaterialManager())));
+		WritePropertyData(data, pMaterialData);
 	}
 
-	void MaterialImporter::WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData) const
+	void MaterialImporter::WritePropertyData(Utils::NodeValueRef data, MaterialData* pMaterialData) const
 	{
 		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
 
-		out << YAML::Key << "Properties";
-		out << YAML::Value << YAML::BeginSeq;
+		auto properties = data["Properties"];
 
 		size_t resourceIndex = 0;
 		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(manager); i++)
 		{
-			out << YAML::BeginMap;
+			properties.PushBack(YAML::Node(YAML::NodeType::Map));
+			auto property = properties[i];
 
 			MaterialPropertyInfo* pPropertyInfo = pMaterialData->GetPropertyInfoAt(manager, i);
-			std::string name;
-			YAML_WRITE(out, DisplayName, pPropertyInfo->DisplayName());
-			YAML_WRITE(out, ShaderName, pPropertyInfo->ShaderName());
-			YAML_WRITE(out, TypeHash, pPropertyInfo->TypeHash());
+			property["DisplayName"].Set(pPropertyInfo->DisplayName());
+			property["ShaderName"].Set(pPropertyInfo->ShaderName());
+			property["TypeHash"].Set(pPropertyInfo->TypeHash());
 
 			bool isResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().IsResource(pPropertyInfo->TypeHash());
 			if (!isResource)
 			{
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(manager), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), out);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(manager), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), property["Value"]);
 			}
 			else
 			{
 				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(manager, resourceIndex);
 				++resourceIndex;
-				const UUID uuid = pMaterialData->GetResourceUUIDPointer(manager, index)->AssetUUID();
-				out << YAML::Key << "Value" << YAML::Value << uuid;
+				const uint64_t uuid = pMaterialData->GetResourceUUIDPointer(manager, index)->AssetUUID();
+				property["Value"].Set(uuid);
 			}
-
-			out << YAML::EndMap;
 		}
-
-		out << YAML::EndSeq;
 	}
 
 	void MaterialImporter::Initialize()

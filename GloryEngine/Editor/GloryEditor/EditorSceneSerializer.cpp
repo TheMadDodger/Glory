@@ -12,11 +12,10 @@
 
 namespace Glory::Editor
 {
-	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeRef node)
+	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node)
 	{
-		auto root = node.ValueRef();
-		root.Set(YAML::Node(YAML::NodeType::Map));
-		auto entities = root["Entities"];
+		node.Set(YAML::Node(YAML::NodeType::Map));
+		auto entities = node["Entities"];
 		entities.Set(YAML::Node(YAML::NodeType::Sequence));
 		/*
 		 * Entities should be serialized in order of their hierarchies
@@ -29,21 +28,21 @@ namespace Glory::Editor
 		}
 	}
 
-	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, Utils::NodeRef node, UUID uuid, const std::string& name, Flags flags)
+	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
 	{
 		GScene* pScene = new GScene(name, uuid);
 		DeserializeScene(pEngine, pScene, node, uuid, name, flags);
 		return pScene;
 	}
 
-	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, Utils::NodeRef node, UUID uuid, const std::string& name, Flags flags)
+	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
 	{
 		pScene->SetManager(pEngine->GetSceneManager());
 		Utils::NodeValueRef entities = node["Entities"];
 		for (size_t i = 0; i < entities.Size(); ++i)
 		{
 			Utils::NodeValueRef entity = entities[i];
-			DeserializeEntity(pEngine, pScene, entity.Node(), flags);
+			DeserializeEntity(pEngine, pScene, entity, flags);
 		}
 		pScene->HandleDelayedParents();
 	}
@@ -122,7 +121,7 @@ namespace Glory::Editor
 		}
 	}
 
-	Entity EditorSceneSerializer::DeserializeEntity(Engine* pEngine, GScene* pScene, Utils::NodeRef node, Flags flags)
+	Entity EditorSceneSerializer::DeserializeEntity(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, Flags flags)
 	{
 		UUIDRemapper& uuidRemapper = pEngine->m_UUIDRemapper;
 
@@ -139,21 +138,20 @@ namespace Glory::Editor
 			uuid = uuidRemapper(uuid);
 			parentUuid = uuidRemapper(parentUuid);
 		}
-		
-		Utils::NodeRef nodeRef{ node };
-		Utils::NodeValueRef prefabIDRef = nodeRef["PrefabID"];
+
+		Utils::NodeValueRef prefabIDRef = node["PrefabID"];
 		if (!(flags & Flags::IgnorePrefabs) && prefabIDRef.Exists())
 		{
 			const UUID prefabID = prefabIDRef.As<uint64_t>();
 			PrefabData* pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
 			if (pPrefab)
 			{
-				Utils::NodeValueRef idsRemapValue = nodeRef["IDRemap"];
+				Utils::NodeValueRef idsRemapValue = node["IDRemap"];
 				/* TODO: When GenerateNewUUIDs flag is set generate a new map of UUID remappings */
 				Entity instantiatedEntity = {};
 				/* Deserialize the transform override */
 				Transform transform;
-				Utils::NodeValueRef transformRef = nodeRef["Transform/Properties"];
+				Utils::NodeValueRef transformRef = node["Transform/Properties"];
 				const glm::vec3 position = transformRef["Position"].As<glm::vec3>();
 				const glm::quat rotation = transformRef["Rotation"].As<glm::quat>();
 				const glm::vec3 scale = transformRef["Scale"].As<glm::vec3>();
@@ -181,7 +179,7 @@ namespace Glory::Editor
 			}
 		}
 		
-		UUID transformUUID = nodeRef["Components"][0]["UUID"].As<uint64_t>();
+		UUID transformUUID = node["Components"][0]["UUID"].As<uint64_t>();
 		if (flags & Flags::GenerateNewUUIDs)
 		{
 			transformUUID = uuidRemapper(transformUUID);
@@ -203,7 +201,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < components.Size(); ++i)
 		{
 			Utils::NodeValueRef component = components[i];
-			DeserializeComponent(pEngine, pScene, entity, uuidRemapper, component.Node(), flags);
+			DeserializeComponent(pEngine, pScene, entity, uuidRemapper, component, flags);
 			++currentComponentIndex;
 		}
 		
@@ -227,11 +225,9 @@ namespace Glory::Editor
 		pEngine->GetSerializers().SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), node);
 	}
 
-	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeRef node, Flags flags)
+	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags)
 	{
 		const bool noCallbacks = flags & Flags::NoComponentCallbacks;
-
-		Utils::NodeRef component{ node };
 
 		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
 
