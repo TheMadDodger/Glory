@@ -49,17 +49,15 @@ namespace Glory::Editor
 		case T_SceneObject:
 		{
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
-			YAML::Emitter out;
-			out << YAML::BeginMap;
-			out << YAML::Key << "Type";
-			out << YAML::Value << "SceneObject";
-			out << YAML::Key << "Value";
-			out << YAML::Value << YAML::BeginSeq;
+			Utils::InMemoryYAML data;
+			auto objects = data.RootNodeRef().ValueRef();
+			objects.SetMap();
+			objects["Type"].Set("SceneObject");
+			auto value = objects["Value"];
+			value.SetSequence();
 			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
-			EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, pSceneObject->EntityID(), out);
-			out << YAML::EndSeq;
-			out << YAML::EndMap;
-			ImGui::SetClipboardText(out.c_str());
+			EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, pSceneObject->EntityID(), value);
+			ImGui::SetClipboardText(data.ToString().c_str());
 			break;
 		}
 		case T_Resource:
@@ -109,27 +107,25 @@ namespace Glory::Editor
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		const char* clipboardText = ImGui::GetClipboardText();
-		YAML::Node clipboardNode;
-		try
-		{
-			clipboardNode = YAML::Load(clipboardText);
-		}
-		catch (const std::exception&)
-		{
-			pEngine->GetDebug().LogError("Pasted object is not a YAML object!");
-			return;
-		}
-		if (!clipboardNode.IsDefined() || !clipboardNode.IsMap())
+		Utils::InMemoryYAML clipboard{ clipboardText };
+		auto clipboardNode = clipboard.RootNodeRef().ValueRef();
+		if (clipboard.ParsingFailed())
 		{
 			pEngine->GetDebug().LogError("Pasted object is not a YAML object!");
 			return;
 		}
 
-		YAML::Node typeNode = clipboardNode["Type"];
-		YAML::Node valueNode = clipboardNode["Value"];
+		if (!clipboardNode.Exists() || !clipboardNode.IsMap())
+		{
+			pEngine->GetDebug().LogError("Pasted object is not a YAML object!");
+			return;
+		}
 
-		if (!typeNode.IsDefined() || !typeNode.IsScalar()) return;
-		const std::string& type = typeNode.as<std::string>();
+		auto typeNode = clipboardNode["Type"];
+		auto valueNode = clipboardNode["Value"];
+
+		if (!typeNode.Exists() || !typeNode.IsScalar()) return;
+		const std::string& type = typeNode.As<std::string>();
 
 		switch (currentMenu)
 		{
@@ -161,7 +157,7 @@ namespace Glory::Editor
 		case T_ContentBrowser:
 		{
 			if (type != "Resource" && type != "Folder") return;
-			std::filesystem::path sourcePath = valueNode["Path"].as<std::string>();
+			std::filesystem::path sourcePath = valueNode["Path"].As<std::string>();
 			std::filesystem::path destinationPath = FileBrowserItem::GetCurrentPath();
 			if (type == "Resource")
 			{
@@ -229,10 +225,10 @@ namespace Glory::Editor
 		{
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
-			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
 			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
 			Undo::AddAction(new DeleteSceneObjectAction(pScene, pSceneObject->EntityID()));
-			pScene->DestroyEntity(pSceneObject->EntityID());
+			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObjectNoUndo(nullptr);
+			DestroyEntity(pSceneObject->EntityID(), pScene);
 			Undo::StopRecord();
 			break;
 		}
@@ -300,7 +296,7 @@ namespace Glory::Editor
 			Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
 			Undo::AddAction(new CreateObjectAction(pActiveScene));
 			Undo::StopRecord();
-			Selection::SetActiveObject(GetEditableEntity(newEnity.GetEntityID(), newEnity.GetScene()));
+			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEnity.GetEntityID(), newEnity.GetScene()));
 			return;
 		}
 
@@ -315,7 +311,7 @@ namespace Glory::Editor
 			Undo::StartRecord("Create Empty Object", newEntity.EntityUUID());
 			Undo::AddAction(new CreateObjectAction(pScene));
 			Undo::StopRecord();
-			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
+			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}
 
@@ -331,7 +327,7 @@ namespace Glory::Editor
 			Undo::AddAction(new CreateObjectAction(pScene));
 			newEntity.SetParent(pSceneObject->EntityID());
 			Undo::StopRecord();
-			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
+			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}
 		default:

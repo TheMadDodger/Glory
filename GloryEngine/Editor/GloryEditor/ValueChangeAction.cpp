@@ -45,11 +45,9 @@ namespace Glory::Editor
 
 		if (!pField) return;
 
-		YAML::Emitter out;
-		out << YAML::BeginMap;
-		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, out);
-		out << YAML::EndMap;
-		m_OldValue = YAML::Load(out.c_str());
+		auto value = m_OldValue.RootNodeRef().ValueRef();
+		value.SetMap();
+		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, value);
 	}
 
 	void ValueChangeAction::SetNewValue(void* pObject)
@@ -77,11 +75,9 @@ namespace Glory::Editor
 
 		if (!pField) return;
 
-		YAML::Emitter out;
-		out << YAML::BeginMap;
-		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, out);
-		out << YAML::EndMap;
-		m_NewValue = YAML::Load(out.c_str());
+		auto value = m_NewValue.RootNodeRef().ValueRef();
+		value.SetMap();
+		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, value);
 	}
 
 	void ValueChangeAction::OnUndo(const ActionRecord& actionRecord)

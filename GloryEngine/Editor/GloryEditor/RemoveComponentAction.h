@@ -23,7 +23,7 @@ namespace Glory::Editor
 		virtual void OnRedo(const ActionRecord& actionRecord);
 
 	private:
-		std::string m_SerializedComponent;
+		Utils::InMemoryYAML m_SerializedComponent;
 		size_t m_ComponentIndex;
 	};
 }

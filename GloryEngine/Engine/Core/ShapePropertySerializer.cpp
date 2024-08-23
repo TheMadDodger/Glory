@@ -7,16 +7,16 @@ namespace Glory
 	class ShapeSerializers
 	{
 	public:
-		static void Serialize(Serializers* pSerializers, ShapeProperty* shapeProperty, YAML::Emitter& out)
+		static void Serialize(Serializers* pSerializers, ShapeProperty* shapeProperty, Utils::NodeValueRef node)
 		{
 			if (SHAPE_SERIALIZERS.find(shapeProperty->m_ShapeType) == SHAPE_SERIALIZERS.end()) return;
-			SHAPE_SERIALIZERS.at(shapeProperty->m_ShapeType)->SerializeInternal(pSerializers, shapeProperty, out);
+			SHAPE_SERIALIZERS.at(shapeProperty->m_ShapeType)->SerializeInternal(pSerializers, shapeProperty, node);
 		}
 
-		static void Deserialize(Serializers* pSerializers, const ShapeType shapeType, ShapeProperty* shapeProperty, YAML::Node& object)
+		static void Deserialize(Serializers* pSerializers, const ShapeType shapeType, ShapeProperty* shapeProperty, Utils::NodeValueRef node)
 		{
 			if (SHAPE_SERIALIZERS.find(shapeType) == SHAPE_SERIALIZERS.end()) return;
-			SHAPE_SERIALIZERS.at(shapeType)->DeserializeInternal(pSerializers, shapeProperty, object);
+			SHAPE_SERIALIZERS.at(shapeType)->DeserializeInternal(pSerializers, shapeProperty, node);
 		}
 
 		static void Cleanup()
@@ -29,8 +29,8 @@ namespace Glory
 		}
 
 	protected:
-		virtual void SerializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, YAML::Emitter& out) const = 0;
-		virtual void DeserializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, YAML::Node& object) const = 0;
+		virtual void SerializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, Utils::NodeValueRef node) const = 0;
+		virtual void DeserializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, Utils::NodeValueRef node) const = 0;
 
 	private:
 		static std::map<ShapeType, ShapeSerializers*> SHAPE_SERIALIZERS;
@@ -40,21 +40,21 @@ namespace Glory
 	class ShapeSerializer : public ShapeSerializers
 	{
 	private:
-		void SerializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, YAML::Emitter& out) const override
+		void SerializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, Utils::NodeValueRef node) const override
 		{
 			T* pShape = shapeProperty->ShapePointer<T>();
 
 			const TypeData* pTypeData = Reflect::GetTyeData(ResourceTypes::GetHash<T>());
-			pSerializers->SerializeProperty("Shape", pTypeData, pShape, out);
+			pSerializers->SerializeProperty(pTypeData, pShape, node["Shape"]);
 		}
 
-		void DeserializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, YAML::Node& object) const override
+		void DeserializeInternal(Serializers* pSerializers, ShapeProperty* shapeProperty, Utils::NodeValueRef node) const override
 		{
 			shapeProperty->SetShape<T>(T());
 
 			T* pShape = shapeProperty->ShapePointer<T>();
 
-			YAML::Node shape = object["Shape"];
+			auto shape = node["Shape"];
 			const TypeData* pTypeData = Reflect::GetTyeData(ResourceTypes::GetHash<T>());
 			pSerializers->DeserializeProperty(pTypeData, pShape, shape);
 		}
@@ -77,34 +77,21 @@ namespace Glory
 	ShapePropertySerializer::ShapePropertySerializer(Serializers* pSerializers):
 		PropertySerializer(pSerializers, ResourceTypes::GetHash<ShapeProperty>()) {}
 
-	void ShapePropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
+	void ShapePropertySerializer::Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
 		ShapeProperty* value = (ShapeProperty*)data;
-		std::string shapeType;
-		if (!Enum<ShapeType>().ToString(value->m_ShapeType, shapeType)) return;
-
-		if (!name.empty())
-		{
-			out << YAML::Key << name;
-			out << YAML::Value;
-		}
-
-		out << YAML::BeginMap;
-		out << YAML::Key << "ShapeType";
-		out << YAML::Value << shapeType;
-		ShapeSerializers::Serialize(m_pSerializers, value, out);
-		out << YAML::EndMap;
+		node.Set(YAML::Node(YAML::NodeType::Map));
+		node["ShapeType"].SetEnum(value->m_ShapeType);
+		ShapeSerializers::Serialize(m_pSerializers, value, node);
 	}
 
-	void ShapePropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
+	void ShapePropertySerializer::Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
-		if (!object.IsDefined()) return;
-		YAML::Node shapeTypeNode = object["ShapeType"];
-		std::string shapeTypeStr = shapeTypeNode.as<std::string>();
-		ShapeType shapeTye;
-		if (!Enum<ShapeType>().FromString(shapeTypeStr, shapeTye)) return;
+		if (!node.Exists() || !node.IsMap()) return;
+		auto shapeTypeNode = node["ShapeType"];
+		const ShapeType shapeTye = shapeTypeNode.AsEnum<ShapeType>();
 
 		ShapeProperty* value = (ShapeProperty*)data;
-		ShapeSerializers::Deserialize(m_pSerializers, shapeTye, value, object);
+		ShapeSerializers::Deserialize(m_pSerializers, shapeTye, value, node);
 	}
 }

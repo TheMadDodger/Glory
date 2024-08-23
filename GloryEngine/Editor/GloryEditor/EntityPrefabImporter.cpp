@@ -28,17 +28,16 @@ namespace Glory::Editor
 	{
         Utils::YAMLFileRef yamlFile{ path };
         PrefabData* pPrefab = new PrefabData();
-		EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), pPrefab, yamlFile.RootNodeRef().ValueRef().Node(), 0, "");
+		EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), pPrefab, yamlFile.RootNodeRef().ValueRef(), 0, "");
         return { path, pPrefab };
 	}
 
 	bool EntityPrefabImporter::SaveResource(const std::filesystem::path& path, PrefabData* pResource) const
 	{
+		Utils::YAMLFileRef yamlFile{ path };
         YAML::Emitter out;
-        EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pResource, out);
-        std::ofstream outFile{path};
-        outFile << out.c_str();
-        outFile.close();
+        EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pResource, yamlFile.RootNodeRef().ValueRef());
+		yamlFile.Save();
         return true;
 	}
 

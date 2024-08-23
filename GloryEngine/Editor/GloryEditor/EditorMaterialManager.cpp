@@ -244,7 +244,7 @@ namespace Glory::Editor
 				size_t index = 0;
 				pMaterial->GetPropertyInfoIndex(*this, displayName, index);
 				const size_t offset = pMaterial->GetPropertyInfoAt(*this, index)->Offset();
-				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(*this), type, offset, typeData != nullptr ? typeData->m_Size : 4, value.Node());
+				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(*this), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
 			}
 			else
 			{
@@ -277,7 +277,7 @@ namespace Glory::Editor
 
 			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(manager, propertyIndex);
 
-			YAML::Node value = prop["Value"].Node();
+			auto value = prop["Value"];
 
 			if (!propertyInfo->IsResource())
 			{
@@ -288,8 +288,8 @@ namespace Glory::Editor
 			}
 			else
 			{
-				if (!value.IsDefined() || !value.IsScalar()) continue;
-				const UUID id = value.as<uint64_t>();
+				if (!value.Exists() || !value.IsScalar()) continue;
+				const UUID id = value.As<uint64_t>();
 				size_t resourceIndex = propertyInfo->Offset();
 				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(manager, resourceIndex) = id;
 			}

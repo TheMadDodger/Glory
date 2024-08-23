@@ -6,6 +6,7 @@
 #include <IModuleLoopHandler.h>
 #include <GScene.h>
 #include <vector>
+#include <NodeRef.h>
 
 namespace Glory::Editor
 {
@@ -38,7 +39,7 @@ namespace Glory::Editor
 		EditorPlayer();
 		virtual ~EditorPlayer();
 
-		std::string m_SerializedScenes;
+		Utils::InMemoryYAML m_SerializedScenes;
 		size_t m_UndoHistoryIndex;
 		UUID m_SelectedObjectBeforeStart;
 		bool m_IsPaused;

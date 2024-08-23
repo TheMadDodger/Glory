@@ -20,5 +20,8 @@ namespace Editor
 
 	/** @brief Destroy all instances of editable entities */
 	GLORY_EDITOR_API void DestroyAllEditableEntities();
+
+	/** @brief Destroy an entity from its scene and make sure it is not selected */
+	GLORY_EDITOR_API void DestroyEntity(Utils::ECS::EntityID entity, GScene* pScene);
 }
 }

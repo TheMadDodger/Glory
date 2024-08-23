@@ -178,7 +178,7 @@ namespace Glory::Editor
 			if (!enable) continue;
 			/* Deserialize new value into buffer */
 			serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
-				pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue.Node());
+				pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue);
 		}
 
 		if (change)

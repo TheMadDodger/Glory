@@ -11,6 +11,7 @@ namespace Glory::Editor
 	{
 	public:
 		static GLORY_EDITOR_API void SetActiveObject(Object* pObject);
+		static GLORY_EDITOR_API void SetActiveObjectNoUndo(Object* pObject);
 		static GLORY_EDITOR_API void AddObjectToSelection(Object* pObject);
 		static GLORY_EDITOR_API void RemoveObjectFromSelection(Object* pObject);
 		static GLORY_EDITOR_API void AddObjectToSelection(UUID objectID);

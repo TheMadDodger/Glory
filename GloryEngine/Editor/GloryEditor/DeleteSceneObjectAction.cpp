@@ -10,13 +10,18 @@
 
 namespace Glory::Editor
 {
-	DeleteSceneObjectAction::DeleteSceneObjectAction(GScene* pScene, Utils::ECS::EntityID deletedEntity) : m_OriginalSceneUUID(pScene->GetUUID())
+	DeleteSceneObjectAction::DeleteSceneObjectAction(GScene* pScene, Utils::ECS::EntityID deletedEntity) : m_OriginalSceneUUID(pScene->GetUUID()), m_WasSelected(false)
 	{
-		YAML::Emitter out;
-		out << YAML::BeginSeq;
-		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, deletedEntity, out);
-		out << YAML::EndSeq;
-		m_SerializedObject = out.c_str();
+		Object* pActiveObject = Selection::GetActiveObject();
+		if (pActiveObject != nullptr)
+		{
+			EditableEntity* pEntity = GetEditableEntity(deletedEntity, pScene);
+			m_WasSelected = pEntity != nullptr && pActiveObject == pEntity;
+		}
+
+		auto entities = m_SerializedObject.RootNodeRef().ValueRef();
+		entities.SetSequence();
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, deletedEntity, entities);
 	}
 
 	DeleteSceneObjectAction::~DeleteSceneObjectAction()
@@ -27,16 +32,15 @@ namespace Glory::Editor
 	{
 		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_OriginalSceneUUID);
 		if (pScene == nullptr) return;
-		YAML::Node node = YAML::Load(m_SerializedObject.c_str());
-		Utils::NodeRef entities{node};
-		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
+		auto entities = m_SerializedObject.RootNodeRef().ValueRef();
+		for (size_t i = 0; i < entities.Size(); i++)
 		{
-			Utils::NodeValueRef entity = entities.ValueRef()[i];
-			EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity.Node());
+			Utils::NodeValueRef entity = entities[i];
+			EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity);
 		}
 
 		if (!m_WasSelected) return;
-		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).EntityUUID(), pScene));
+		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).GetEntityID(), pScene));
 	}
 
 	void DeleteSceneObjectAction::OnRedo(const ActionRecord& actionRecord)
@@ -53,13 +57,14 @@ namespace Glory::Editor
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
 		if (!entity.IsValid()) return;
 
-		/* Take a snapshot of the object for redoing */
-		YAML::Emitter out;
-		out << YAML::BeginSeq;
-		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), out);
-		out << YAML::EndSeq;
-		m_SerializedObject = out.c_str();
+		/*
+		 * Take a snapshot of the object for redoing
+		 * Maybe not needed?
+		 */
+		//auto entities = m_SerializedObject.RootNodeRef().ValueRef();
+		//entities.SetSequence();
+		//EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), entities);
 
-		pScene->DestroyEntity(entity.GetEntityID());
+		DestroyEntity(entity.GetEntityID(), pScene);
 	}
 }

@@ -44,98 +44,104 @@ namespace Glory
 		return 0;
 	}
 
-	void Serializers::SerializeProperty(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out)
+	void Serializers::SerializeProperty(const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node)
 	{
 		PropertySerializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return;
-		pSerializer->Serialize(name, buffer, typeHash, offset, size, out);
+		pSerializer->Serialize(buffer, typeHash, offset, size, node);
 	}
 
-	void Serializers::DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Node& object)
+	void Serializers::DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node)
 	{
+		if (!node.Exists()) return;
+
 		PropertySerializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return;
-		pSerializer->Deserialize(buffer, offset, size, object);
+		pSerializer->Deserialize(buffer, offset, size, node);
 	}
 
-	void Serializers::SerializeProperty(const std::string& name, const Utils::Reflect::TypeData* pTypeData, void* data, YAML::Emitter& out)
+	void Serializers::SerializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, Utils::NodeValueRef node)
 	{
 		PropertySerializer* pSerializer = GetSerializer(pTypeData->TypeHash());
 		PropertySerializer* pInternalSerializer = GetSerializer(pTypeData->InternalTypeHash());
 		if (pSerializer)
 		{
-			pSerializer->Serialize(name, data, pTypeData->TypeHash(), out);
+			pSerializer->Serialize(data, pTypeData->TypeHash(), node);
 			return;
 		}
 		if (pInternalSerializer)
 		{
-			pInternalSerializer->Serialize(name, data, pTypeData->TypeHash(), out);
+			pInternalSerializer->Serialize(data, pTypeData->TypeHash(), node);
 			return;
 		}
 
 		throw new std::exception("Missing serializer!");
 	}
 
-	void Serializers::SerializeProperty(const FieldData* pFieldData, void* data, YAML::Emitter& out)
+	void Serializers::SerializeProperty(const FieldData* pFieldData, void* data, Utils::NodeValueRef node)
 	{
 		if (pFieldData->Type() == ST_Array)
 		{
-			return GetSerializer(ST_Array)->Serialize(pFieldData->Name(), data, pFieldData->ArrayElementType(), out);
+			return GetSerializer(ST_Array)->Serialize(data, pFieldData->ArrayElementType(), node);
 		}
 
 		const Utils::Reflect::TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
-			SerializeProperty(pFieldData->Name(), pTypeData, data, out);
+			SerializeProperty(pTypeData, data, node);
 			return;
 		}
 
 		PropertySerializer* pSerializer = GetSerializer(pFieldData->Type());
 		if (pSerializer)
 		{
-			pSerializer->Serialize(pFieldData->Name(), data, pFieldData->Type(), out);
+			pSerializer->Serialize(data, pFieldData->Type(), node);
 			return;
 		}
 
 		throw new std::exception("Missing serializer!");
 	}
 
-	void Serializers::DeserializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, YAML::Node& object)
+	void Serializers::DeserializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, Utils::NodeValueRef node)
 	{
+		if (!node.Exists()) return;
+
 		PropertySerializer* pSerializer = GetSerializer(pTypeData->TypeHash());
 		PropertySerializer* pInternalSerializer = GetSerializer(pTypeData->InternalTypeHash());
 		if (pSerializer)
 		{
-			pSerializer->Deserialize(data, pTypeData->TypeHash(), object);
+			pSerializer->Deserialize(data, pTypeData->TypeHash(), node);
 			return;
 		}
 		if (pInternalSerializer)
 		{
-			pInternalSerializer->Deserialize(data, pTypeData->TypeHash(), object);
+			pInternalSerializer->Deserialize(data, pTypeData->TypeHash(), node);
 			return;
 		}
 
 		throw new std::exception("Missing serializer!");
 	}
 
-	void Serializers::DeserializeProperty(const FieldData* pFieldData, void* data, YAML::Node& object)
+	void Serializers::DeserializeProperty(const FieldData* pFieldData, void* data, Utils::NodeValueRef node)
 	{
+		if (!node.Exists()) return;
+
 		if (pFieldData->Type() == ST_Array)
 		{
-			return GetSerializer(ST_Array)->Deserialize(data, pFieldData->ArrayElementType(), object);
+			return GetSerializer(ST_Array)->Deserialize(data, pFieldData->ArrayElementType(), node);
 		}
 
 		const Utils::Reflect::TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
-			DeserializeProperty(pTypeData, data, object);
+			DeserializeProperty(pTypeData, data, node);
 			return;
 		}
 
 		PropertySerializer* pSerializer = GetSerializer(pFieldData->Type());
 		if (pSerializer)
 		{
-			pSerializer->Deserialize(data, pFieldData->Type(), object);
+			pSerializer->Deserialize(data, pFieldData->Type(), node);
 			return;
 		}
 

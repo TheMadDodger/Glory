@@ -9,9 +9,9 @@ namespace Glory
         SceneObjectRefSerializer(Serializers* pSerializers) : PropertySerializer(pSerializers, SerializedType::ST_Object) {}
 
     private:
-        virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, YAML::Emitter& out) override;
-        virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, YAML::Node& object) override;
-        virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out) override;
-        virtual void Deserialize(void* data, uint32_t typeHash, YAML::Node& object) override;
+        virtual void Serialize(const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node) override;
+        virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, Utils::NodeValueRef node) override;
+        virtual void Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node) override;
+        virtual void Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node) override;
     };
 }

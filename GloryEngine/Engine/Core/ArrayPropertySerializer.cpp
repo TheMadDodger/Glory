@@ -13,37 +13,30 @@ namespace Glory
 	{
 	}
 
-	void ArrayPropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, YAML::Emitter& out)
+	void ArrayPropertySerializer::Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
-		size_t size = Reflect::ArraySize(data, typeHash);
+		const size_t size = Reflect::ArraySize(data, typeHash);
 		const TypeData* pElementTypeData = Reflect::GetTyeData(typeHash);
+		node.Set(YAML::Node(YAML::NodeType::Sequence));
 
-		if (!name.empty())
-		{
-			out << YAML::Key << name;
-			out << YAML::Value;
-		}
-
-		out << YAML::BeginSeq;
-		for (size_t i = 0; i < size; i++)
+		for (size_t i = 0; i < size; ++i)
 		{
 			void* pElementAddress = Reflect::ElementAddress(data, typeHash, i);
-			m_pSerializers->SerializeProperty("", pElementTypeData, pElementAddress, out);
+			m_pSerializers->SerializeProperty(pElementTypeData, pElementAddress, node[i]);
 		}
-		out << YAML::EndSeq;
 	}
 
-	void ArrayPropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object)
+	void ArrayPropertySerializer::Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
+		if (!node.Exists() || !node.IsSequence()) return;
+
 		const TypeData* pElementTypeData = Reflect::GetTyeData(typeHash);
 
-		YAML::Node arrayNode = object;
-
-		size_t size = arrayNode.size();
+		const size_t size = node.Size();
 		Reflect::ResizeArray(data, typeHash, size);
-		for (size_t i = 0; i < size; i++)
+		for (size_t i = 0; i < size; ++i)
 		{
-			YAML::Node elementNode = arrayNode[i];
+			Utils::NodeValueRef elementNode = node[i];
 			void* pElementAddress = Reflect::ElementAddress(data, typeHash, i);
 			m_pSerializers->DeserializeProperty(pElementTypeData, pElementAddress, elementNode);
 		}

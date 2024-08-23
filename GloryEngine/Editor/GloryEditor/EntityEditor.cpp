@@ -1,6 +1,7 @@
 #include "EntityEditor.h"
 #include "EditableEntity.h"
 #include "EditorApplication.h"
+#include "Selection.h"
 
 #include <GScene.h>
 #include <ObjectManager.h>
@@ -49,5 +50,20 @@ namespace Glory::Editor
     void DestroyAllEditableEntities()
     {
         editableEntities.clear();
+    }
+
+    void DestroyEntity(Utils::ECS::EntityID entity, GScene* pScene)
+    {
+        auto itor = editableEntities.find(pScene->GetUUID());
+        if (itor == editableEntities.end())
+            return;
+        
+        if (itor->second.size() <= entity || !itor->second[entity])
+            return;
+
+        if (Selection::GetActiveObject() == itor->second[entity])
+            Selection::SetActiveObjectNoUndo(nullptr);
+
+        pScene->DestroyEntity(entity);
     }
 }

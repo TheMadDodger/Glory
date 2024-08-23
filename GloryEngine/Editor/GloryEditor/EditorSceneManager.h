@@ -39,8 +39,8 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void SaveScene(UUID uuid);
 		GLORY_EDITOR_API void SaveSceneAs(UUID uuid);
 
-		GLORY_EDITOR_API void SerializeOpenScenes(YAML::Emitter& out);
-		GLORY_EDITOR_API void OpenAllFromNode(YAML::Node& node);
+		GLORY_EDITOR_API void SerializeOpenScenes(Utils::InMemoryYAML out);
+		GLORY_EDITOR_API void OpenAllFromYAML(Utils::InMemoryYAML data);
 
 		GLORY_EDITOR_API void SetActiveScene(GScene* pScene);
 		GLORY_EDITOR_API void SetSceneDirty(GScene* pScene, bool dirty = true);
@@ -49,7 +49,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API bool HasUnsavedChanges();
 
 		GLORY_EDITOR_API void DuplicateSceneObject(Entity entity);
-		GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, YAML::Node& node);
+		GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, Utils::NodeValueRef entities);
 
 		GLORY_EDITOR_API YAMLResource<GScene>* GetSceneFile(UUID uuid);
 

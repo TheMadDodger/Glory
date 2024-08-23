@@ -16,11 +16,11 @@ namespace Glory
 		return m_TypeHash;
 	}
 
-	void PropertySerializer::Serialize(const std::string&, const std::vector<char>&, uint32_t, size_t, size_t, YAML::Emitter&) {}
+	void PropertySerializer::Serialize(const std::vector<char>&, uint32_t, size_t, size_t, Utils::NodeValueRef) {}
 
-	void PropertySerializer::Serialize(const std::string&, void*, uint32_t, YAML::Emitter&) {}
+	void PropertySerializer::Serialize(void*, uint32_t, Utils::NodeValueRef) {}
 
-	void PropertySerializer::Deserialize(std::vector<char>&, size_t, size_t, YAML::Node&) {}
+	void PropertySerializer::Deserialize(std::vector<char>&, size_t, size_t, Utils::NodeValueRef) {}
 
-	void PropertySerializer::Deserialize(void* data, uint32_t typeHash, YAML::Node& object) {}
+	void PropertySerializer::Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef) {}
 }

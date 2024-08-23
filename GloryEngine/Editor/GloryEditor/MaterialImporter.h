@@ -18,8 +18,8 @@ namespace Glory::Editor
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 		bool SaveResource(const std::filesystem::path& path, MaterialData* pResource) const override;
 
-		void SaveMaterialData(MaterialData* pMaterialData, YAML::Emitter& out) const;
-		void WritePropertyData(YAML::Emitter& out, MaterialData* pMaterialData) const;
+		void SaveMaterialData(MaterialData* pMaterialData, Utils::NodeValueRef data) const;
+		void WritePropertyData(Utils::NodeValueRef data, MaterialData* pMaterialData) const;
 
 	private:
 		virtual void Initialize() override;
