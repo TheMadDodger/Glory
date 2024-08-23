@@ -28,7 +28,7 @@ namespace Glory
 			size_t offset = pSubFieldData->Offset();
 			void* pAddress = (void*)((char*)(data)+offset);
 			if (!name.empty())
-				m_pSerializers->SerializeProperty(pSubFieldData, pAddress, node[name][pSubFieldData->Name()]);
+				m_pSerializers->SerializeProperty(pSubFieldData, pAddress, node[name]);
 			else
 				m_pSerializers->SerializeProperty(pSubFieldData, pAddress, node[pSubFieldData->Name()]);
 		}

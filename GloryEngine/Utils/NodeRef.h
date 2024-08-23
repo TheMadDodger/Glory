@@ -4,6 +4,9 @@
 
 namespace Glory::Utils
 {
+	/**
+	 * @brief Reference to a node value in a YAML document
+	 */
 	struct NodeValueRef
 	{
 	public:
@@ -52,6 +55,11 @@ namespace Glory::Utils
 		}
 
 		void Set(YAML::Node& node);
+		
+		void SetMap();
+		void SetSequence();
+		void SetNull();
+		void SetScalar();
 
 		template<typename T>
 		void PushBack(const T& value)
@@ -107,6 +115,9 @@ namespace Glory::Utils
 		const std::filesystem::path m_Path;
 	};
 
+	/**
+	 * @brief Reference to a node in a YAML document
+	 */
 	struct NodeRef
 	{
 	public:
@@ -120,7 +131,31 @@ namespace Glory::Utils
 		NodeValueRef m_RootValueRef;
 	};
 
-	struct YAMLFileRef
+	/**
+	 * @brief YAML document held in memory
+	 */
+	struct InMemoryYAML
+	{
+	public:
+		InMemoryYAML();
+		InMemoryYAML(const char* data);
+
+		NodeRef RootNodeRef();
+		NodeValueRef operator[](const std::filesystem::path& path);
+
+		std::string ToString();
+
+		bool ParsingFailed() const;
+
+	protected:
+		YAML::Node m_RootNode;
+		bool m_ParsingFailed;
+	};
+
+	/**
+	 * @brief Reference to a YAML file
+	 */
+	struct YAMLFileRef : public InMemoryYAML
 	{
 	public:
 		YAMLFileRef();
@@ -132,11 +167,7 @@ namespace Glory::Utils
 
 		void ChangePath(const std::filesystem::path& newPath);
 
-		NodeRef RootNodeRef();
-		NodeValueRef operator[](const std::filesystem::path& path);
-
 	private:
-		YAML::Node m_RootNode;
 		std::filesystem::path m_FilePath;
 	};
 }

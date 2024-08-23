@@ -40,6 +40,26 @@ namespace Glory::Utils
 		Node() = node;
 	}
 
+	void NodeValueRef::SetMap()
+	{
+		Node() = YAML::Node(YAML::NodeType::Map);
+	}
+
+	void NodeValueRef::SetSequence()
+	{
+		Node() = YAML::Node(YAML::NodeType::Sequence);
+	}
+
+	void NodeValueRef::SetNull()
+	{
+		Node() = YAML::Node(YAML::NodeType::Null);
+	}
+
+	void NodeValueRef::SetScalar()
+	{
+		Node() = YAML::Node(YAML::NodeType::Scalar);
+	}
+
 	void NodeValueRef::PushBack(YAML::Node& node)
 	{
 		Node().push_back(node);
@@ -170,8 +190,47 @@ namespace Glory::Utils
 		return FindNode(m_RootNode, m_Path);
 	}
 
+	InMemoryYAML::InMemoryYAML()
+		: m_RootNode(), m_ParsingFailed(false)
+	{}
+
+	InMemoryYAML::InMemoryYAML(const char* data)
+	{
+		m_ParsingFailed = false;
+		try
+		{
+			m_RootNode = YAML::Load(data);
+		}
+		catch (const std::exception&)
+		{
+			m_ParsingFailed = true;
+		}
+	}
+
+	NodeRef InMemoryYAML::RootNodeRef()
+	{
+		return NodeRef(m_RootNode);
+	}
+
+	NodeValueRef InMemoryYAML::operator[](const std::filesystem::path& path)
+	{
+		return RootNodeRef()[path];
+	}
+
+	std::string InMemoryYAML::ToString()
+	{
+		YAML::Emitter out;
+		out << m_RootNode;
+		return out.c_str();
+	}
+
+	bool InMemoryYAML::ParsingFailed() const
+	{
+		return m_ParsingFailed;
+	}
+
 	YAMLFileRef::YAMLFileRef()
-		: m_FilePath(), m_RootNode()
+		: m_FilePath(), InMemoryYAML()
 	{
 	}
 
@@ -204,15 +263,5 @@ namespace Glory::Utils
 	void YAMLFileRef::ChangePath(const std::filesystem::path& newPath)
 	{
 		m_FilePath = newPath;
-	}
-
-	NodeRef YAMLFileRef::RootNodeRef()
-	{
-		return NodeRef(m_RootNode);
-	}
-
-	NodeValueRef YAMLFileRef::operator[](const std::filesystem::path& path)
-	{
-		return RootNodeRef()[path];
 	}
 }
