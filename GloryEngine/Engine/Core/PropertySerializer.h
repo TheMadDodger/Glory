@@ -19,10 +19,10 @@ namespace Glory
 		virtual ~PropertySerializer();
 
 	public:
-		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node);
+		virtual void Serialize(const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node);
 		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, Utils::NodeValueRef node);
 		
-		virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node);
+		virtual void Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node);
 		virtual void Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node);
 
 	protected:
@@ -45,11 +45,11 @@ namespace Glory
 		virtual ~SimpleTemplatedPropertySerializer() {}
 
 	private:
-		virtual void Serialize(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node) override
+		virtual void Serialize(const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node) override
 		{
 			T value;
 			memcpy((void*)&value, (void*)&buffer[offset], size);
-			node[name].Set(value);
+			node.Set(value);
 		}
 
 		virtual void Deserialize(std::vector<char>& buffer, size_t offset, size_t size, Utils::NodeValueRef node) override
@@ -59,17 +59,10 @@ namespace Glory
 			memcpy((void*)&buffer[offset], (void*)&value, size);
 		}
 
-		virtual void Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node) override
+		virtual void Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node) override
 		{
 			T* value = (T*)data;
-			/* Nameless properties can come from array elements */
-			if (name.empty())
-			{
-				node.Set(*value);
-				return;
-			}
-
-			node[name].Set(*value);
+			node.Set(*value);
 		}
 
 		virtual void Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node) override

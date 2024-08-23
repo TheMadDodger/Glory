@@ -36,6 +36,18 @@ namespace Glory::Editor
 		TriggerSelectionChangeCallback();
 	}
 
+	void Selection::SetActiveObjectNoUndo(Object* pObject)
+	{
+		m_pSelectedObjects.clear();
+
+		if (pObject == nullptr)
+		{
+			TriggerSelectionChangeCallback();
+			return;
+		}
+		m_pSelectedObjects.push_back(pObject);
+	}
+
 	Object* Selection::GetActiveObject()
 	{
 		if (m_pSelectedObjects.size() <= 0) return nullptr;

@@ -13,24 +13,18 @@ namespace Glory
 	{
 	}
 
-	void StructPropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node)
+	void StructPropertySerializer::Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
 		const TypeData* pStructTypeData = Reflect::GetTyeData(typeHash);
 
-		if (!name.empty())
-			node[name].Set(YAML::Node(YAML::NodeType::Map));
-		else
-			node.Set(YAML::Node(YAML::NodeType::Map));
+		node.Set(YAML::Node(YAML::NodeType::Map));
 
 		for (size_t i = 0; i < pStructTypeData->FieldCount(); ++i)
 		{
 			const FieldData* pSubFieldData = pStructTypeData->GetFieldData(i);
 			size_t offset = pSubFieldData->Offset();
 			void* pAddress = (void*)((char*)(data)+offset);
-			if (!name.empty())
-				m_pSerializers->SerializeProperty(pSubFieldData, pAddress, node[name]);
-			else
-				m_pSerializers->SerializeProperty(pSubFieldData, pAddress, node[pSubFieldData->Name()]);
+			m_pSerializers->SerializeProperty(pSubFieldData, pAddress, node[pSubFieldData->Name()]);
 		}
 	}
 

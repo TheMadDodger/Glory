@@ -13,23 +13,16 @@ namespace Glory
 	{
 	}
 
-	void ArrayPropertySerializer::Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node)
+	void ArrayPropertySerializer::Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
-		size_t size = Reflect::ArraySize(data, typeHash);
+		const size_t size = Reflect::ArraySize(data, typeHash);
 		const TypeData* pElementTypeData = Reflect::GetTyeData(typeHash);
-
-		if (!name.empty())
-			node[name].Set(YAML::Node(YAML::NodeType::Sequence));
-		else
-			node.Set(YAML::Node(YAML::NodeType::Sequence));
+		node.Set(YAML::Node(YAML::NodeType::Sequence));
 
 		for (size_t i = 0; i < size; ++i)
 		{
 			void* pElementAddress = Reflect::ElementAddress(data, typeHash, i);
-			if (!name.empty())
-				m_pSerializers->SerializeProperty("", pElementTypeData, pElementAddress, node[name][i]);
-			else
-				m_pSerializers->SerializeProperty("", pElementTypeData, pElementAddress, node[i]);
+			m_pSerializers->SerializeProperty(pElementTypeData, pElementAddress, node[i]);
 		}
 	}
 
@@ -39,7 +32,7 @@ namespace Glory
 
 		const TypeData* pElementTypeData = Reflect::GetTyeData(typeHash);
 
-		size_t size = node.Size();
+		const size_t size = node.Size();
 		Reflect::ResizeArray(data, typeHash, size);
 		for (size_t i = 0; i < size; ++i)
 		{

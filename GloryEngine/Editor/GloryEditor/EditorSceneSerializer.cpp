@@ -91,7 +91,7 @@ namespace Glory::Editor
 			void* pTransformAddress = pRegistry.GetComponentAddress(entity, pEntityView->ComponentUUIDAt(0));
 			auto transform = entityNode["Transform"];
 			transform.Set(YAML::Node(YAML::NodeType::Map));
-			pEngine->GetSerializers().SerializeProperty("Properties", pTransformTypeData, pTransformAddress, transform);
+			pEngine->GetSerializers().SerializeProperty(pTransformTypeData, pTransformAddress, transform["Properties"]);
 		
 			/* TODO: Serialize overrides */
 			return;
@@ -222,7 +222,7 @@ namespace Glory::Editor
 		node["TypeHash"].Set(uint64_t(type));
 		node["Active"].Set(pRegistry->GetTypeView(type)->IsActive(entity));
 
-		pEngine->GetSerializers().SerializeProperty("Properties", pType, pRegistry->GetComponentAddress(entity, compUUID), node);
+		pEngine->GetSerializers().SerializeProperty(pType, pRegistry->GetComponentAddress(entity, compUUID), node["Properties"]);
 	}
 
 	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags)

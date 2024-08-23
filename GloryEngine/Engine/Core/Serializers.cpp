@@ -44,11 +44,11 @@ namespace Glory
 		return 0;
 	}
 
-	void Serializers::SerializeProperty(const std::string& name, const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node)
+	void Serializers::SerializeProperty(const std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node)
 	{
 		PropertySerializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return;
-		pSerializer->Serialize(name, buffer, typeHash, offset, size, node);
+		pSerializer->Serialize(buffer, typeHash, offset, size, node);
 	}
 
 	void Serializers::DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node)
@@ -58,18 +58,18 @@ namespace Glory
 		pSerializer->Deserialize(buffer, offset, size, node);
 	}
 
-	void Serializers::SerializeProperty(const std::string& name, const Utils::Reflect::TypeData* pTypeData, void* data, Utils::NodeValueRef node)
+	void Serializers::SerializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, Utils::NodeValueRef node)
 	{
 		PropertySerializer* pSerializer = GetSerializer(pTypeData->TypeHash());
 		PropertySerializer* pInternalSerializer = GetSerializer(pTypeData->InternalTypeHash());
 		if (pSerializer)
 		{
-			pSerializer->Serialize(name, data, pTypeData->TypeHash(), node);
+			pSerializer->Serialize(data, pTypeData->TypeHash(), node);
 			return;
 		}
 		if (pInternalSerializer)
 		{
-			pInternalSerializer->Serialize(name, data, pTypeData->TypeHash(), node);
+			pInternalSerializer->Serialize(data, pTypeData->TypeHash(), node);
 			return;
 		}
 
@@ -80,20 +80,20 @@ namespace Glory
 	{
 		if (pFieldData->Type() == ST_Array)
 		{
-			return GetSerializer(ST_Array)->Serialize(pFieldData->Name(), data, pFieldData->ArrayElementType(), node);
+			return GetSerializer(ST_Array)->Serialize(data, pFieldData->ArrayElementType(), node);
 		}
 
 		const Utils::Reflect::TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
-			SerializeProperty(pFieldData->Name(), pTypeData, data, node);
+			SerializeProperty(pTypeData, data, node);
 			return;
 		}
 
 		PropertySerializer* pSerializer = GetSerializer(pFieldData->Type());
 		if (pSerializer)
 		{
-			pSerializer->Serialize(pFieldData->Name(), data, pFieldData->Type(), node);
+			pSerializer->Serialize(data, pFieldData->Type(), node);
 			return;
 		}
 

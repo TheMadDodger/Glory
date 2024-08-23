@@ -72,7 +72,7 @@ namespace Glory::Editor
 			bool isResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().IsResource(pPropertyInfo->TypeHash());
 			if (!isResource)
 			{
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty("Value", pMaterialData->GetBufferReference(manager), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), property["Value"]);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pMaterialData->GetBufferReference(manager), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), property["Value"]);
 			}
 			else
 			{

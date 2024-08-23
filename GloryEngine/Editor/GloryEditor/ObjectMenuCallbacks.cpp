@@ -225,10 +225,10 @@ namespace Glory::Editor
 		{
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
-			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObject(nullptr);
 			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
 			Undo::AddAction(new DeleteSceneObjectAction(pScene, pSceneObject->EntityID()));
-			pScene->DestroyEntity(pSceneObject->EntityID());
+			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObjectNoUndo(nullptr);
+			DestroyEntity(pSceneObject->EntityID(), pScene);
 			Undo::StopRecord();
 			break;
 		}
@@ -296,7 +296,7 @@ namespace Glory::Editor
 			Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
 			Undo::AddAction(new CreateObjectAction(pActiveScene));
 			Undo::StopRecord();
-			Selection::SetActiveObject(GetEditableEntity(newEnity.GetEntityID(), newEnity.GetScene()));
+			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEnity.GetEntityID(), newEnity.GetScene()));
 			return;
 		}
 
@@ -311,7 +311,7 @@ namespace Glory::Editor
 			Undo::StartRecord("Create Empty Object", newEntity.EntityUUID());
 			Undo::AddAction(new CreateObjectAction(pScene));
 			Undo::StopRecord();
-			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
+			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}
 
@@ -327,7 +327,7 @@ namespace Glory::Editor
 			Undo::AddAction(new CreateObjectAction(pScene));
 			newEntity.SetParent(pSceneObject->EntityID());
 			Undo::StopRecord();
-			Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
+			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
 		}
 		default:

@@ -10,8 +10,15 @@
 
 namespace Glory::Editor
 {
-	DeleteSceneObjectAction::DeleteSceneObjectAction(GScene* pScene, Utils::ECS::EntityID deletedEntity) : m_OriginalSceneUUID(pScene->GetUUID())
+	DeleteSceneObjectAction::DeleteSceneObjectAction(GScene* pScene, Utils::ECS::EntityID deletedEntity) : m_OriginalSceneUUID(pScene->GetUUID()), m_WasSelected(false)
 	{
+		Object* pActiveObject = Selection::GetActiveObject();
+		if (pActiveObject != nullptr)
+		{
+			EditableEntity* pEntity = GetEditableEntity(deletedEntity, pScene);
+			m_WasSelected = pEntity != nullptr && pActiveObject == pEntity;
+		}
+
 		auto entities = m_SerializedObject.RootNodeRef().ValueRef();
 		entities.SetSequence();
 		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, deletedEntity, entities);
@@ -33,7 +40,7 @@ namespace Glory::Editor
 		}
 
 		if (!m_WasSelected) return;
-		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).EntityUUID(), pScene));
+		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).GetEntityID(), pScene));
 	}
 
 	void DeleteSceneObjectAction::OnRedo(const ActionRecord& actionRecord)
@@ -58,6 +65,6 @@ namespace Glory::Editor
 		//entities.SetSequence();
 		//EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), entities);
 
-		pScene->DestroyEntity(entity.GetEntityID());
+		DestroyEntity(entity.GetEntityID(), pScene);
 	}
 }

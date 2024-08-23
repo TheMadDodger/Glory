@@ -15,13 +15,12 @@ namespace Glory
 	{
 	}
 
-	void ScriptedComponentSerailizer::Serialize(const std::string& name, void* data, uint32_t typeHash, Utils::NodeValueRef node)
+	void ScriptedComponentSerailizer::Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
 		MonoScriptComponent* pScriptedComponent = (MonoScriptComponent*)data;
-		auto properties = node["Properties"];
-		properties.Set(YAML::Node(YAML::NodeType::Map));
-		properties["m_Script"].Set(uint64_t(pScriptedComponent->m_Script.AssetUUID()));
-		auto scriptData = properties["ScriptData"];
+		node.Set(YAML::Node(YAML::NodeType::Map));
+		node["m_Script"].Set(uint64_t(pScriptedComponent->m_Script.AssetUUID()));
+		auto scriptData = node["ScriptData"];
 		scriptData.Set(YAML::Node(YAML::NodeType::Map));
 
 		MonoScript* pScript = pScriptedComponent->m_Script.GetImmediate(&m_pSerializers->GetEngine()->GetAssetManager());
@@ -34,7 +33,7 @@ namespace Glory
 			{
 				const ScriptProperty& prop = props[i];
 				const TypeData* pType = Reflect::GetTyeData(prop.m_TypeHash);
-				m_pSerializers->SerializeProperty(prop.m_Name, pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], scriptData);
+				m_pSerializers->SerializeProperty(pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], scriptData[prop.m_Name]);
 			}
 		}
 	}

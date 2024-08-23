@@ -20,8 +20,6 @@ namespace Glory::Editor
 
 	void CreateObjectAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		Selection::SetActiveObject(nullptr);
-
 		GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(m_SceneID);
 
 		Entity entity = pScene->GetEntityByUUID(actionRecord.ObjectID);
@@ -32,7 +30,7 @@ namespace Glory::Editor
 		entities.SetSequence();
 		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), entities);
 
-		pScene->DestroyEntity(entity.GetEntityID());
+		DestroyEntity(entity.GetEntityID(), pScene);
 	}
 
 	void CreateObjectAction::OnRedo(const ActionRecord& actionRecord)
