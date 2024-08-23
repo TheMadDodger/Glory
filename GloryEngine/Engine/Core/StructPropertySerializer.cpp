@@ -24,7 +24,8 @@ namespace Glory
 			const FieldData* pSubFieldData = pStructTypeData->GetFieldData(i);
 			size_t offset = pSubFieldData->Offset();
 			void* pAddress = (void*)((char*)(data)+offset);
-			m_pSerializers->SerializeProperty(pSubFieldData, pAddress, node[pSubFieldData->Name()]);
+			Utils::NodeValueRef structFieldObject = node[pSubFieldData->Name()];
+			m_pSerializers->SerializeProperty(pSubFieldData, pAddress, structFieldObject);
 		}
 	}
 

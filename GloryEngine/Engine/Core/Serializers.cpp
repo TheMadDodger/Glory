@@ -53,6 +53,8 @@ namespace Glory
 
 	void Serializers::DeserializeProperty(std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, Utils::NodeValueRef node)
 	{
+		if (!node.Exists()) return;
+
 		PropertySerializer* pSerializer = GetSerializer(typeHash);
 		if (pSerializer == nullptr) return;
 		pSerializer->Deserialize(buffer, offset, size, node);
@@ -102,6 +104,8 @@ namespace Glory
 
 	void Serializers::DeserializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, Utils::NodeValueRef node)
 	{
+		if (!node.Exists()) return;
+
 		PropertySerializer* pSerializer = GetSerializer(pTypeData->TypeHash());
 		PropertySerializer* pInternalSerializer = GetSerializer(pTypeData->InternalTypeHash());
 		if (pSerializer)
@@ -120,6 +124,8 @@ namespace Glory
 
 	void Serializers::DeserializeProperty(const FieldData* pFieldData, void* data, Utils::NodeValueRef node)
 	{
+		if (!node.Exists()) return;
+
 		if (pFieldData->Type() == ST_Array)
 		{
 			return GetSerializer(ST_Array)->Deserialize(data, pFieldData->ArrayElementType(), node);
