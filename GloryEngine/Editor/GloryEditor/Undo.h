@@ -40,7 +40,18 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API void StartRecord(const std::string& name, UUID uuid = 0, bool continuous = false);
 		static GLORY_EDITOR_API void StopRecord();
+		static GLORY_EDITOR_API bool IsRecording();
+
+		template<typename Action, typename... Args>
+		static void AddAction(Args&&... args)
+		{
+			if (GetRecordingName().empty())
+				return;
+
+			AddAction(new Action(std::forward<Args>(args)...));
+		}
 		static GLORY_EDITOR_API void AddAction(IAction* action);
+
 		static GLORY_EDITOR_API void Clear();
 
 		static GLORY_EDITOR_API void YAMLEdit(Utils::YAMLFileRef& file, const std::filesystem::path& path, YAML::Node oldValue, YAML::Node newValue);
@@ -58,6 +69,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API const ActionRecord* RecordAt(const size_t index);
 		static GLORY_EDITOR_API const size_t CurrentRewindIndex();
 		static GLORY_EDITOR_API void JumpTo(size_t historyRewindIndex);
+		static GLORY_EDITOR_API std::string_view GetRecordingName();
 
 		template<typename T>
 		static void ApplyYAMLEdit(Utils::YAMLFileRef& file, const std::filesystem::path& path, const T& oldValue, const T& newValue)

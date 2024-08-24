@@ -64,6 +64,9 @@ namespace Glory::Editor
         if (Selection::GetActiveObject() == itor->second[entity])
             Selection::SetActiveObjectNoUndo(nullptr);
 
+        EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Destroy(itor->second[entity]);
+        itor->second[entity] = nullptr;
+
         pScene->DestroyEntity(entity);
     }
 }

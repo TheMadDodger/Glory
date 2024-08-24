@@ -163,7 +163,7 @@ namespace Glory::Editor
 			if (OnGUI(label, &newValue, flags))
 			{
 				node = newValue;
-				Undo::AddAction(new NodeValueChangeAction(PropertyDrawer::GetCurrentPropertyPath(), YAML::Node(oldValue), YAML::Node(newValue)));
+				Undo::AddAction<NodeValueChangeAction>(PropertyDrawer::GetCurrentPropertyPath(), YAML::Node(oldValue), YAML::Node(newValue));
 				return true;
 			}
 			return false;

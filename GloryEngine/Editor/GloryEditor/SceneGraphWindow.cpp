@@ -101,7 +101,7 @@ namespace Glory::Editor
 			const UUID newParent = 0;
 			const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
 			draggingEntity.SetParent(0);
-			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+			Undo::AddAction<SetParentAction>(pScene, oldParentID, newParent, oldSiblingIndex);
 			Undo::StopRecord();
 
 			EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
@@ -160,7 +160,7 @@ namespace Glory::Editor
 			const UUID newParent = 0;
 			const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
 			draggingEntity.SetParent(0);
-			Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+			Undo::AddAction<SetParentAction>(pScene, oldParentID, newParent, oldSiblingIndex);
 			Undo::StopRecord();
 
 			EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
@@ -258,8 +258,8 @@ namespace Glory::Editor
 					const size_t siblingIndex = 0;
 					draggingEntity.SetParent(parentEntity.GetEntityID());
 					draggingEntity.SetSiblingIndex(siblingIndex);
-					Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
-					Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
+					Undo::AddAction<SetParentAction>(pScene, oldParentID, newParent, oldSiblingIndex);
+					Undo::AddAction<SetSiblingIndexAction>(pScene, oldSiblingIndex, siblingIndex);
 					Undo::StopRecord();
 
 					EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
@@ -312,7 +312,7 @@ namespace Glory::Editor
 				const UUID newParent = entity.IsValid() ? entity.EntityUUID() : UUID(0);
 				const size_t oldSiblingIndex = draggingEntity.SiblingIndex();
 				draggingEntity.SetParent(entity.GetEntityID());
-				Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
+				Undo::AddAction<SetParentAction>(pScene, oldParentID, newParent, oldSiblingIndex);
 				Undo::StopRecord();
 
 				EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
@@ -388,8 +388,8 @@ namespace Glory::Editor
 				const size_t siblingIndex = entity.SiblingIndex() + 1;
 				draggingEntity.SetParent(parent.GetEntityID());
 				draggingEntity.SetSiblingIndex(siblingIndex);
-				Undo::AddAction(new SetParentAction(pScene, oldParentID, newParent, oldSiblingIndex));
-				Undo::AddAction(new SetSiblingIndexAction(pScene, oldSiblingIndex, siblingIndex));
+				Undo::AddAction<SetParentAction>(pScene, oldParentID, newParent, oldSiblingIndex);
+				Undo::AddAction<SetSiblingIndexAction>(pScene, oldSiblingIndex, siblingIndex);
 				Undo::StopRecord();
 
 				EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);

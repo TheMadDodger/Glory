@@ -1,7 +1,6 @@
 #include "Selection.h"
 #include "Undo.h"
-#include "SelectAction.h"
-#include "DeselectAction.h"
+#include "SelectionChangedAction.h"
 #include "EditorApplication.h"
 
 #include <ObjectManager.h>
@@ -15,12 +14,9 @@ namespace Glory::Editor
 
 	void Selection::SetActiveObject(Object* pObject)
 	{
-		Undo::StartRecord("Selection Changed");
-		for (size_t i = 0; i < m_pSelectedObjects.size(); i++)
-		{
-			Undo::AddAction(new DeselectAction(m_pSelectedObjects[i]->GetUUID()));
-		}
-
+		const bool wasRecording = Undo::IsRecording();
+		if (!wasRecording)
+			Undo::StartRecord("Selection Changed");
 		m_pSelectedObjects.clear();
 
 		if (pObject == nullptr)
@@ -30,9 +26,11 @@ namespace Glory::Editor
 			return;
 		}
 
-		Undo::AddAction(new SelectAction(pObject->GetUUID()));
+		std::vector<UUID> oldSelection = CreateOldSelectionArray();
 		m_pSelectedObjects.push_back(pObject);
-		Undo::StopRecord();
+		Undo::AddAction<SelectionChangedAction>(std::move(oldSelection));
+		if (!wasRecording)
+			Undo::StopRecord();
 		TriggerSelectionChangeCallback();
 	}
 
@@ -56,13 +54,14 @@ namespace Glory::Editor
 
 	void Selection::Clear()
 	{
-		Undo::StartRecord("Selection Changed");
-		for (size_t i = 0; i < m_pSelectedObjects.size(); i++)
-		{
-			Undo::AddAction(new DeselectAction(m_pSelectedObjects[i]->GetUUID()));
-		}
+		const bool wasRecording = Undo::IsRecording();
+		if (!wasRecording)
+			Undo::StartRecord("Selection Changed");
+		std::vector<UUID> oldSelection = CreateOldSelectionArray();
 		m_pSelectedObjects.clear();
-		Undo::StopRecord();
+		Undo::AddAction<SelectionChangedAction>(std::move(oldSelection));
+		if (!wasRecording)
+			Undo::StopRecord();
 		TriggerSelectionChangeCallback();
 	}
 
@@ -84,6 +83,16 @@ namespace Glory::Editor
 		m_SelectionChangeCallback.erase(uuid);
 	}
 
+	size_t Selection::SelectionCount()
+	{
+		return m_pSelectedObjects.size();
+	}
+
+	Object* Selection::GetSelectedObject(size_t index)
+	{
+		return m_pSelectedObjects[index];
+	}
+
 	void Selection::TriggerSelectionChangeCallback()
 	{
 		for (auto it = m_SelectionChangeCallback.begin(); it != m_SelectionChangeCallback.end(); ++it)
@@ -92,13 +101,27 @@ namespace Glory::Editor
 		}
 	}
 
+	std::vector<UUID> Selection::CreateOldSelectionArray()
+	{
+		std::vector<UUID> selection;
+		for (size_t i = 0; i < m_pSelectedObjects.size(); ++i)
+		{
+			selection.push_back(m_pSelectedObjects[i]->GetUUID());
+		}
+		return selection;
+	}
+
 	void Selection::AddObjectToSelection(Object* pObject)
 	{
 		if (pObject == nullptr) return;
-		Undo::StartRecord("Selection Changed");
-		Undo::AddAction(new SelectAction(pObject->GetUUID()));
+		const bool wasRecording = Undo::IsRecording();
+		if (!wasRecording)
+			Undo::StartRecord("Selection Changed");
+		std::vector<UUID> oldSelection = CreateOldSelectionArray();
 		m_pSelectedObjects.push_back(pObject);
-		Undo::StopRecord();
+		Undo::AddAction<SelectionChangedAction>(std::move(oldSelection));
+		if (!wasRecording)
+			Undo::StopRecord();
 		TriggerSelectionChangeCallback();
 	}
 
@@ -109,10 +132,14 @@ namespace Glory::Editor
 		auto it = std::find(m_pSelectedObjects.begin(), m_pSelectedObjects.end(), pObject);
 		if (it == m_pSelectedObjects.end()) return;
 
-		Undo::StartRecord("Selection Changed");
-		Undo::AddAction(new DeselectAction(pObject->GetUUID()));
+		const bool wasRecording = Undo::IsRecording();
+		if (!wasRecording)
+			Undo::StartRecord("Selection Changed");
+		std::vector<UUID> oldSelection = CreateOldSelectionArray();
 		m_pSelectedObjects.erase(it);
-		Undo::StopRecord();
+		Undo::AddAction<SelectionChangedAction>(std::move(oldSelection));
+		if (!wasRecording)
+			Undo::StopRecord();
 		TriggerSelectionChangeCallback();
 	}
 

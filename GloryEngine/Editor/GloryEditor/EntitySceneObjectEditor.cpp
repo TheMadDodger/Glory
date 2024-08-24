@@ -63,7 +63,7 @@ namespace Glory::Editor
 		if (EditorUI::CheckBox("Active", &active))
 		{
 			Undo::StartRecord("Set Active", m_pObject->GetUUID());
-			Undo::AddAction(new EnableObjectAction(pScene, active));
+			Undo::AddAction<EnableObjectAction>(pScene, active);
 			Undo::StopRecord();
 
 			entity.SetActive(active);
@@ -163,7 +163,7 @@ namespace Glory::Editor
 		if (change)
 		{
 			Undo::StartRecord("Change Name", m_pObject->GetUUID());
-			Undo::AddAction(new SceneObjectNameAction(pScene, originalName, m_NameBuff));
+			Undo::AddAction<SceneObjectNameAction>(pScene, originalName, m_NameBuff);
 			Undo::StopRecord();
 			pScene->SetEntityName(entityID, m_NameBuff);
 		}
@@ -255,7 +255,7 @@ namespace Glory::Editor
 		if (removeComponent)
 		{
 			Undo::StartRecord("Remove Component", m_pTarget->GetUUID());
-			Undo::AddAction(new RemoveComponentAction(&pRegistry, entityID, toRemoveComponent));
+			Undo::AddAction<RemoveComponentAction>(&pRegistry, entityID, toRemoveComponent);
 			pRegistry.RemoveComponentAt(entityID, toRemoveComponent);
 			Undo::StopRecord();
 
@@ -272,7 +272,7 @@ namespace Glory::Editor
 				UUID uuid = UUID();
 				size_t index = m_pComponentEditors.size();
 				pRegistry.CreateComponent(entityID, toAddTypeHash, uuid);
-				Undo::AddAction(new AddComponentAction(toAddTypeHash, uuid, index));
+				Undo::AddAction<AddComponentAction>(toAddTypeHash, uuid, index);
 				Undo::StopRecord();
 
 				m_AddingComponent = false;

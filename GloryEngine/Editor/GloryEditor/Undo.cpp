@@ -58,9 +58,14 @@ namespace Glory::Editor
 		m_RecordedActions.clear();
 	}
 
+	bool Undo::IsRecording()
+	{
+		return !m_RecordingName.empty();
+	}
+
 	void Undo::AddAction(IAction* action)
 	{
-		if (m_RecordingName == "")
+		if (m_RecordingName.empty())
 		{
 			delete action;
 			return;
@@ -206,6 +211,11 @@ namespace Glory::Editor
 			if (diff < 0) DoUndo();
 			else DoRedo();
 		}
+	}
+
+	std::string_view Undo::GetRecordingName()
+	{
+		return m_RecordingName;
 	}
 
 	Undo::Undo()
