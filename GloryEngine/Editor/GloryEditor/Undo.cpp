@@ -118,7 +118,7 @@ namespace Glory::Editor
 		m_IsBusy = true;
 		++m_RewindIndex;
 		size_t index = m_ActionRecords.size() - m_RewindIndex;
-		for (int i = (int)m_ActionRecords[index].Actions.size() - 1; i >= 0; --i)
+		for (size_t i = 0; i < m_ActionRecords[index].Actions.size(); i++)
 		{
 			m_ActionRecords[index].Actions[i]->OnUndo(m_ActionRecords[index]);
 		}

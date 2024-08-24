@@ -17,16 +17,17 @@ namespace Glory::Editor
 		const bool wasRecording = Undo::IsRecording();
 		if (!wasRecording)
 			Undo::StartRecord("Selection Changed");
+		std::vector<UUID> oldSelection = CreateOldSelectionArray();
 		m_pSelectedObjects.clear();
 
 		if (pObject == nullptr)
 		{
+			Undo::AddAction<SelectionChangedAction>(std::move(oldSelection));
 			Undo::StopRecord();
 			TriggerSelectionChangeCallback();
 			return;
 		}
 
-		std::vector<UUID> oldSelection = CreateOldSelectionArray();
 		m_pSelectedObjects.push_back(pObject);
 		Undo::AddAction<SelectionChangedAction>(std::move(oldSelection));
 		if (!wasRecording)
