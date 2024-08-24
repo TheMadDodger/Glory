@@ -52,12 +52,21 @@ namespace Glory::Editor
 				return component.m_Simulation.m_Direct.m_Occlusion.m_Type != OcclusionType::Volumetric;
 			}
 
+			if (strcmp(pField->Name(), "m_Direct") == 0)
+				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::DirectSimulation));
+			if (strcmp(pField->Name(), "m_Reflections") == 0)
+				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::ReflectionSimulation));
+			if (strcmp(pField->Name(), "m_Pathing") == 0)
+				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::PathingSimulation));
+
 			switch (pField->Offset())
 			{
 			case offsetof(AudioSource, m_Enable3D):
 				return !p3DAudio;
 			case offsetof(AudioSource, m_Simulation):
-				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::Occlusion));
+				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::Occlusion))
+			;case offsetof(AudioSource, m_Spatialization):
+				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::Spatialization));
 
 			default:
 				return false;

@@ -65,7 +65,6 @@ namespace Glory
 		 * - Occlusion
 		 * - Transmission
 		 * - Absorption
-		 * - Reflection
 		 */
 		GLORY_API bool HasFeature(uint32_t feature) const override;
 

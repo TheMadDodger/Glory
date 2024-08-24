@@ -24,16 +24,20 @@ namespace Glory
 		/** @brief 3D Audio feature hashes */
 		struct Features
 		{
+			/** @brief Spatialization */
+			FEATURE(Spatialization);
 			/** @brief Occlusion */
 			FEATURE(Occlusion);
 			/** @brief Transmission */
 			FEATURE(Transmission);
 			/** @brief Absorption */
 			FEATURE(Absorption);
-			/** @brief Reflection */
-			FEATURE(Reflection);
-			/** @brief Reflection */
+			/** @brief Direct simulation */
 			FEATURE(DirectSimulation);
+			/** @brief Reflection simulation */
+			FEATURE(ReflectionSimulation);
+			/** @brief Pathing simulation */
+			FEATURE(PathingSimulation);
 		};
     };
 }

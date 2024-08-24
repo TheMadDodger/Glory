@@ -116,7 +116,7 @@ namespace Glory
 	struct ReflectionSimulationSettings
 	{
 		GLORY_API ReflectionSimulationSettings() :
-			m_Enable(true), m_ReverbScale1(1.0f), 
+			m_Enable(false), m_ReverbScale1(1.0f), 
 			m_ReverbScale2(1.0f), m_ReverbScale3(1.0f),
 			m_HybridReverbTransitionTime(1.0f),
 			m_HybridReverbOverlapPercent(0.25f)
@@ -135,7 +135,7 @@ namespace Glory
 	struct PathingSimulationSettings
 	{
 		GLORY_API PathingSimulationSettings() :
-			m_Enable(true), m_VisRadius(1.0f), m_PathingOrder(0),
+			m_Enable(false), m_VisRadius(1.0f), m_PathingOrder(0),
 			m_Validation(true), m_FindAlternativePaths(true)
 		{}
 
@@ -184,7 +184,7 @@ namespace Glory
 	struct AudioSimulationSettings
 	{
 		GLORY_API AudioSimulationSettings():
-			m_Enable(true), m_Direct(true), m_Reflection(true), m_Pathing(true) {}
+			m_Enable(true), m_Direct(true), m_Reflection(false), m_Pathing(false) {}
 
 		REFLECTABLE(AudioSimulationSettings,
 			(bool)(m_Enable),

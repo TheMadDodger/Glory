@@ -117,11 +117,15 @@ namespace Glory
 	{
 		switch (feature)
 		{
+		case Features::Spatialization:
+		case Features::DirectSimulation:
 		case Features::Occlusion:
 		case Features::Absorption:
 		case Features::Transmission:
-		case Features::Reflection:
 			return true;
+		case Features::ReflectionSimulation:
+		case Features::PathingSimulation:
+			return false;
 
 		default:
 			return false;
@@ -185,9 +189,9 @@ namespace Glory
 		};
 
 		IPLSimulationSettings simulationSettings{};
-		simulationSettings.flags = IPL_SIMULATIONFLAGS_DIRECT; // this enables occlusion/transmission simulation
+		/* Enable occlusion/transmission simulation */
+		simulationSettings.flags = IPL_SIMULATIONFLAGS_DIRECT;
 		simulationSettings.sceneType = IPL_SCENETYPE_DEFAULT;
-		// see below for examples of how to initialize the remaining fields of this structure
 		iplSimulatorCreate(m_IPLContext, &simulationSettings, &m_Simulator);
 		iplSimulatorSetScene(m_Simulator, m_Scene);
 		iplSimulatorCommit(m_Simulator);
@@ -267,7 +271,6 @@ namespace Glory
 
 	float CalculateAttenuation(IPLfloat32 distance, void* userData)
 	{
-		//if (distance <= 10.0f) return 1.0f;
 		return 1.0f - std::clamp(distance/500.0f, 0.0f, 1.0f);
 	}
 
@@ -309,7 +312,7 @@ namespace Glory
 
 		iplAmbisonicsEncodeEffectApply(m_AmbiSonicsEffects[channel.m_Index], &ambiSonicsEncodeParams, &m_InBuffers[channel.m_Index], &m_AmbisonicsBuffers[channel.m_Index]);
 
-		IPLCoordinateSpace3 listenerCoordinates; // the listener's coordinate system
+		IPLCoordinateSpace3 listenerCoordinates;
 		listenerCoordinates.origin = IPLVector3{ listenPos.x, listenPos.y, listenPos.z };
 		listenerCoordinates.ahead = IPLVector3{ 0.0f, 0.0f, -1.0f };
 		listenerCoordinates.right = IPLVector3{ 1.0f, 0.0f, 0.0f };
