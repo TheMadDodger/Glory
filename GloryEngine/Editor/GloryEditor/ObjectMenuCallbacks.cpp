@@ -226,7 +226,7 @@ namespace Glory::Editor
 			EditableEntity* pSceneObject = (EditableEntity*)pObject;
 			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
 			Undo::StartRecord("Delete Object", pSceneObject->GetUUID());
-			Undo::AddAction(new DeleteSceneObjectAction(pScene, pSceneObject->EntityID()));
+			Undo::AddAction<DeleteSceneObjectAction>(pScene, pSceneObject->EntityID());
 			if(Selection::GetActiveObject() == pSceneObject) Selection::SetActiveObjectNoUndo(nullptr);
 			DestroyEntity(pSceneObject->EntityID(), pScene);
 			Undo::StopRecord();
@@ -294,7 +294,7 @@ namespace Glory::Editor
 			if (pActiveScene == nullptr) pActiveScene = EditorApplication::GetInstance()->GetSceneManager().NewScene();
 			Entity newEnity = pActiveScene->CreateEmptyObject();
 			Undo::StartRecord("Create Empty Object", newEnity.EntityUUID());
-			Undo::AddAction(new CreateObjectAction(pActiveScene));
+			Undo::AddAction<CreateObjectAction>(pActiveScene);
 			Undo::StopRecord();
 			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEnity.GetEntityID(), newEnity.GetScene()));
 			return;
@@ -309,7 +309,7 @@ namespace Glory::Editor
 			if (pScene == nullptr) return;
 			Entity newEntity = pScene->CreateEmptyObject();
 			Undo::StartRecord("Create Empty Object", newEntity.EntityUUID());
-			Undo::AddAction(new CreateObjectAction(pScene));
+			Undo::AddAction<CreateObjectAction>(pScene);
 			Undo::StopRecord();
 			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));
 			break;
@@ -324,7 +324,7 @@ namespace Glory::Editor
 			if (pScene == nullptr) return;
 			Entity newEntity = pScene->CreateEmptyObject();
 			Undo::StartRecord("Create Empty Object", newEntity.EntityUUID());
-			Undo::AddAction(new CreateObjectAction(pScene));
+			Undo::AddAction<CreateObjectAction>(pScene);
 			newEntity.SetParent(pSceneObject->EntityID());
 			Undo::StopRecord();
 			Selection::SetActiveObjectNoUndo(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene()));

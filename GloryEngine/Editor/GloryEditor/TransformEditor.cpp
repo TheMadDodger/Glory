@@ -112,7 +112,7 @@ namespace Glory::Editor
 		if (wasManipulated)
 		{
 			Undo::StartRecord("Transform");
-			Undo::AddAction(new GizmoAction(m_pTarget->GetUUID(), oldTransform, newTransform));
+			Undo::AddAction<GizmoAction>(m_pTarget->GetUUID(), oldTransform, newTransform);
 			Undo::StopRecord();
 			UpdateTransform(newTransform);
 			return change;

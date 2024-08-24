@@ -41,9 +41,8 @@ namespace Glory::Editor
 		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
 		{
 			Utils::NodeValueRef entity = entities.ValueRef()[i];
-			EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity);
+			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity);
+			GetEditableEntity(newEntity.GetEntityID(), pScene);
 		}
-
-		Selection::SetActiveObject(GetEditableEntity(pScene->GetEntityByUUID(actionRecord.ObjectID).GetEntityID(), pScene));
 	}
 }

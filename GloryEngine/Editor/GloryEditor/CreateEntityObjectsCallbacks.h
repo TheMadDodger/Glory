@@ -8,13 +8,11 @@
 #define CREATE_OBJECT_CALLBACK_CPP(name, component, ctor) void Create##name(Object* pObject, const ObjectMenuType& currentMenu) \
 {\
     Entity newEntity = CreateNewEmptyObject(pObject, STRINGIFY(name), currentMenu); \
-	if (!newEntity.IsValid()) return; \
-	newEntity.AddComponent<component>(CTOR_ARGS ctor); \
-	Selection::SetActiveObject(nullptr); \
 	Undo::StartRecord("Create Empty Object", newEntity.EntityUUID()); \
-	Undo::AddAction(new CreateObjectAction(newEntity.GetScene())); \
-	Undo::StopRecord(); \
+	newEntity.AddComponent<component>(CTOR_ARGS ctor); \
+	Undo::AddAction<CreateObjectAction>(newEntity.GetScene()); \
 	Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene())); \
+	Undo::StopRecord(); \
 }
 
 namespace Glory::Editor

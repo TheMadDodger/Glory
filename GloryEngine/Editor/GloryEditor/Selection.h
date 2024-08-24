@@ -21,9 +21,13 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool IsObjectSelected(Object* pObject);
 		static GLORY_EDITOR_API UUID SubscribeToSelectionChange(std::function<void()> callback);
 		static GLORY_EDITOR_API void UnsubscribeToSelectionChange(UUID uuid);
+		static GLORY_EDITOR_API size_t SelectionCount();
+		static GLORY_EDITOR_API Object* GetSelectedObject(size_t index);
 
 	private:
 		static void TriggerSelectionChangeCallback();
+
+		static std::vector<UUID> CreateOldSelectionArray();
 
 	private:
 		static std::vector<Object*> m_pSelectedObjects;

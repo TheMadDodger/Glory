@@ -289,7 +289,7 @@ namespace Glory::Editor
 			if (i == 0 && newEntity.IsValid())
 			{
 				Undo::StartRecord("Duplicate", newEntity.EntityUUID());
-				Undo::AddAction(new CreateObjectAction(pScene));
+				Undo::AddAction<CreateObjectAction>(pScene);
 				Undo::StopRecord();
 			}
 		}

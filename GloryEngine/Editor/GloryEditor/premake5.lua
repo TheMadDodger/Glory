@@ -35,7 +35,7 @@ project "GloryEditor"
 		["Windows/ProjectSettings"] = { "ProjectSettingsWindow.*" },
 		["Windows/Analysis"] = { "PerformanceMetrics.*", "ProfilerWindow.*", "ProfilerTimeline.*" },
 		["Undo"] = { "Undo.*" },
-		["Undo/Actions"] = { "EnableObjectAction.*", "YAMLAction.*", "NodeValueChangeAction.*", "ValueChangeAction.*", "SetSiblingIndexAction.*", "SetParentAction.*", "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectAction.*", "DeselectAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
+		["Undo/Actions"] = { "EnableObjectAction.*", "YAMLAction.*", "NodeValueChangeAction.*", "ValueChangeAction.*", "SetSiblingIndexAction.*", "SetParentAction.*", "ChangeObjectSceneAction.*", "DeleteSceneObjectAction.*", "SceneObjectNameAction.*", "SelectionChangedAction.*", "CreateObjectAction.*", "GizmoAction.*", "PropertyAction.*" },
 		["Undo/Actions/Entity"] = { "AddComponentAction.*", "RemoveComponentAction.*" },
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*", "GridToolchain.*" },
 		["UI"] = { "EditorUI.*", "ListView.*" },

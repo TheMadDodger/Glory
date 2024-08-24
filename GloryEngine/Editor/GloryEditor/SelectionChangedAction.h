@@ -5,17 +5,18 @@
 
 namespace Glory::Editor
 {
-    class SelectAction : public IAction
+    class SelectionChangedAction : public IAction
     {
     public:
-        GLORY_EDITOR_API SelectAction(UUID selectedObjectID);
-        virtual GLORY_EDITOR_API ~SelectAction();
+        GLORY_EDITOR_API SelectionChangedAction(std::vector<UUID>&& oldSelection);
+        virtual GLORY_EDITOR_API ~SelectionChangedAction();
 
     private:
         virtual void OnUndo(const ActionRecord& actionRecord);
         virtual void OnRedo(const ActionRecord& actionRecord);
 
     private:
-        UUID m_SelectedObjectID;
+        std::vector<UUID> m_OldSelection;
+        std::vector<UUID> m_NewSelection;
     };
 }
