@@ -32,10 +32,10 @@ namespace Glory
 {
 	typedef Module* (__cdecl* OnLoadModuleProc)();
 	typedef bool(__cdecl* OnLoadExtraProc)(const char*, Module*, Module*);
-	
+
 	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow)
 		: m_CFGPath(cfgPath), m_DefaultWindow(defaultWindow), m_EngineInfo{} {}
-	
+
 	EngineLoader::~EngineLoader()
 	{
 		Unload();
@@ -48,7 +48,7 @@ namespace Glory
 			pDebug->LogFatalError("Missing Engine.yaml file in project directory!");
 			throw std::exception();
 		}
-		
+
 		m_EngineInfo = {};
 		m_EngineInfo.m_pConsole = pConsole;
 		m_EngineInfo.m_pDebug = pDebug;
@@ -87,6 +87,9 @@ namespace Glory
 		m_EngineInfo.m_pDebug = pDebug;
 
 		/* Find and load modules at provided path */
+		/* @todo Loading order should be determined beforehand */
+		std::vector<std::string> modulesToLoad;
+
 		for (auto itor : std::filesystem::directory_iterator(m_CFGPath))
 		{
 			const std::filesystem::path dir = itor.path();
@@ -97,8 +100,34 @@ namespace Glory
 			dllPath.append(name).replace_extension("dll");
 			if (std::filesystem::exists(dllPath))
 			{
-				LoadModule(name);
+				modulesToLoad.push_back(name);
 			}
+		}
+
+		std::sort(modulesToLoad.begin(), modulesToLoad.end(), [](const std::string& moduleNameA, const std::string& moduleNameB) {
+			const std::filesystem::path modulePath = "./Modules";
+			std::filesystem::path modulePathA = modulePath;
+			std::filesystem::path modulePathB = modulePath;
+			modulePathA.append(moduleNameA);
+			modulePathB.append(moduleNameB);
+
+			/* Read meta data */
+			modulePathA.append("Module.yaml");
+			modulePathB.append("Module.yaml");
+			ModuleMetaData metaDataA(modulePathA);
+			ModuleMetaData metaDataB(modulePathB);
+			metaDataA.Read();
+			metaDataB.Read();
+
+			typedef unsigned char byte;
+			const byte typeA = byte(metaDataA.Type());
+			const byte typeB = byte(metaDataB.Type());
+			return typeA < typeB;
+		});
+
+		for (auto moduleName : modulesToLoad)
+		{
+			LoadModule(moduleName);
 		}
 
 		/* Sort modules */
@@ -236,13 +265,13 @@ namespace Glory
 					dependencyPath.replace_filename(debugPath);
 					if (!std::filesystem::exists(dependencyPath))
 					{
-						debugStream.clear();
+						debugStream.str("");
 						debugStream << "Failed to load dependency: " << dependency << ": The library was not found!";
 						m_EngineInfo.m_pDebug->LogError(debugStream.str());
 						return;
 					}
 #else
-					debugStream.clear();
+					debugStream.str("");
 					debugStream << "Failed to load dependency: " << dependency << ": The library was not found!";
 					m_EngineInfo.m_pDebug->LogError(debugStream.str());
 					return;
@@ -252,7 +281,7 @@ namespace Glory
 				HMODULE dependencyLib = LoadLibrary(dependencyPath.c_str());
 				if (dependencyLib == NULL)
 				{
-					debugStream.clear();
+					debugStream.str("");
 					debugStream << "Failed to load dependency: " << dependency << ": There was an error while loading the library!";
 					m_EngineInfo.m_pDebug->LogError(debugStream.str());
 					m_EngineInfo.m_pDebug->LogError(GetLastErrorAsString());
@@ -263,7 +292,7 @@ namespace Glory
 		}
 
 		/* Load module lib */
-		debugStream.clear();
+		debugStream.str("");
 		debugStream << "Loading module: " << moduleName << "...";
 		m_EngineInfo.m_pDebug->LogInfo(debugStream.str());
 
@@ -271,7 +300,7 @@ namespace Glory
 		dllPath = dllPath.append(moduleName).replace_extension(".dll");
 		if (!std::filesystem::exists(dllPath))
 		{
-			debugStream.clear();
+			debugStream.str("");
 			debugStream << "Failed to load module: " << moduleName << ": The module was not found!";
 			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			return;
@@ -280,7 +309,7 @@ namespace Glory
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			debugStream.clear();
+			debugStream.str("");
 			debugStream << "Failed to load module: " << moduleName << ": There was an error while loading the library!";
 			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			m_EngineInfo.m_pDebug->LogError(GetLastErrorAsString());
@@ -371,7 +400,7 @@ namespace Glory
 		dllPath.replace_extension(".dll");
 		if (!std::filesystem::exists(dllPath))
 		{
-			debugStream.clear();
+			debugStream.str("");
 			debugStream << "Failed to load module extra: " << name << ": The module was not found!";
 			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			return;
@@ -380,7 +409,7 @@ namespace Glory
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
 		if (lib == NULL)
 		{
-			debugStream.clear();
+			debugStream.str("");
 			debugStream << "Failed to load module extra: " << name << ": There was an error while loading the library!";
 			m_EngineInfo.m_pDebug->LogError(debugStream.str());
 			m_EngineInfo.m_pDebug->LogError(GetLastErrorAsString());

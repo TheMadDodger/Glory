@@ -5,7 +5,7 @@
 
 namespace Glory
 {
-	enum class ModuleType
+	enum class ModuleType : unsigned char
 	{
 		MT_Invalid,
 
