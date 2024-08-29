@@ -6,6 +6,7 @@
 #include <SoundMaterialData.h>
 #include <BitSet.h>
 #include <Glory.h>
+#include <Resource.h>
 
 namespace Glory
 {
@@ -41,8 +42,10 @@ namespace Glory
 	class AudioScene
 	{
 	public:
+		/** @brief Constructor */
+		GLORY_API AudioScene();
 		/**
-		 * @brief Constructor
+		 * @overload
 		 * @param sceneID ID of the @ref GScene this audio scene is created for
 		 */
 		GLORY_API AudioScene(UUID sceneID);
@@ -95,5 +98,22 @@ namespace Glory
 		std::vector<AudioMesh> m_Meshes;
 		std::vector<SoundMaterial> m_Materials;
 		Utils::BitSet m_IsAssetBits;
+	};
+
+	/** @brief Resource wrapper for AudioScene to be used for asset serialization */
+	class AudioSceneData : public Resource
+	{
+	public:
+		/** @brief Constructor */
+		GLORY_API AudioSceneData();
+		/** @overload */
+		GLORY_API AudioSceneData(AudioScene&& audioScene);
+		/** @brief Destructor */
+		GLORY_API virtual ~AudioSceneData() {}
+
+		GLORY_API void Serialize(BinaryStream& container) const override;
+		GLORY_API void Deserialize(BinaryStream& container) override;
+
+		AudioScene m_AudioScene;
 	};
 }

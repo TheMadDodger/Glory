@@ -10,10 +10,19 @@ namespace Glory
 	class BinaryStream;
 	class Engine;
 
+	enum AssetArchiveFlags
+	{
+		None = 0,
+		Read = 1 << 0,
+		Write = 1 << 1,
+		WriteVersion = 1 << 2,
+		WriteNew = Write | WriteVersion,
+	};
+
 	class AssetArchive
 	{
 	public:
-		AssetArchive(BinaryStream* pStream, bool isNew=false);
+		AssetArchive(BinaryStream* pStream, AssetArchiveFlags flags=AssetArchiveFlags::Read);
 		AssetArchive(AssetArchive&& other) noexcept;
 		virtual ~AssetArchive();
 

@@ -14,6 +14,9 @@ namespace Glory
 
 namespace Glory::Editor
 {
+	template<typename T>
+	struct Dispatcher;
+
 	class EditorApplication;
 
 	class EditorSceneManager final : public SceneManager
@@ -52,6 +55,20 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, Utils::NodeValueRef entities);
 
 		GLORY_EDITOR_API YAMLResource<GScene>* GetSceneFile(UUID uuid);
+
+		enum SceneEventType
+		{
+			Opened,
+			Closed
+		};
+		struct EditorSceneEvent
+		{
+			SceneEventType Type;
+			UUID SceneID;
+		};
+
+		using SceneEventDispatcher = Dispatcher<EditorSceneEvent>;
+		GLORY_EDITOR_API SceneEventDispatcher& SceneEventsDispatcher();
 
 	private:
 		virtual void OnInitialize() override;

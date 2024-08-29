@@ -14,6 +14,7 @@
 #include <tinyfiledialogs.h>
 #include <ProjectSpace.h>
 #include <GScene.h>
+#include <Dispatcher.h>
 
 namespace Glory::Editor
 {
@@ -61,6 +62,8 @@ namespace Glory::Editor
 
 		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
+
+		SceneEventsDispatcher().Dispatch({ SceneEventType::Opened, uuid });
 	}
 
 #pragma endregion
@@ -99,6 +102,8 @@ namespace Glory::Editor
 
 		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
+
+		SceneEventsDispatcher().Dispatch({ SceneEventType::Opened, uuid });
 	}
 
 	void EditorSceneManager::SaveOpenScenes()
@@ -129,6 +134,8 @@ namespace Glory::Editor
 
 		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
+
+		SceneEventsDispatcher().Dispatch({ SceneEventType::Closed, uuid });
 	}
 
 	bool EditorSceneManager::IsSceneOpen(UUID uuid)
@@ -298,6 +305,12 @@ namespace Glory::Editor
 
 		///* Set scene dirty */
 		SetSceneDirty(pScene);
+	}
+
+	EditorSceneManager::SceneEventDispatcher& EditorSceneManager::SceneEventsDispatcher()
+	{
+		static EditorSceneManager::SceneEventDispatcher dispatcher;
+		return dispatcher;
 	}
 
 	void EditorSceneManager::OnInitialize()

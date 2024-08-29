@@ -68,6 +68,8 @@ namespace Glory
 		 */
 		GLORY_API bool HasFeature(uint32_t feature) const override;
 
+		virtual bool ClaimExtraSceneData(Resource* pSceneResource) override;
+
 	protected:
 		virtual void Initialize() override;
 		virtual void Update() override;

@@ -3,6 +3,7 @@
 #include "SoundMaterialEditor.h"
 #include "SoundOccluderEditor.h"
 #include "SoundMaterialImporter.h"
+#include "AudioSceneTools.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -13,6 +14,7 @@
 #include <BinaryStream.h>
 #include <MeshData.h>
 #include <SoundComponents.h>
+#include <AssetArchive.h>
 
 #include <EntitySceneObjectEditor.h>
 #include <CreateEntityObjectsCallbacks.h>
@@ -20,8 +22,12 @@
 #include <EntityEditor.h>
 #include <MainEditor.h>
 #include <EditorApplication.h>
+#include <EditorSceneManager.h>
+#include <EditorAssetDatabase.h>
 #include <MenuBar.h>
 #include <Shortcuts.h>
+#include <Dispatcher.h>
+#include <Package.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -70,12 +76,55 @@ namespace Glory::Editor
 		pAudio->RemoveAllAudioScenes();
 	}
 
-	SteamAudioExtension::SteamAudioExtension()
+	SteamAudioExtension::SteamAudioExtension(): m_SceneEventsListener(0)
 	{
 	}
 
 	SteamAudioExtension::~SteamAudioExtension()
 	{
+	}
+
+	bool PackageAudioScenesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	{
+		SteamAudioModule* pModule = pEngine->GetOptionalModule<SteamAudioModule>();
+
+		/* Open every scene and package them individually along with their assets */
+		for (size_t i = 0; i < NumScenesToPackage(); ++i)
+		{
+			const UUID sceneID = SceneToPackage(i);
+
+			std::filesystem::path path = packageRoot;
+			path.append("Data").append(std::to_string(sceneID)).replace_extension("gcs");
+			{
+				if (!std::filesystem::exists(path))
+				{
+					std::stringstream str;
+					str << "Could not package audio scene: Scene " << sceneID << " packaged scene file not found";
+					pEngine->GetDebug().LogError(str.str());
+					task.m_SubTaskName = "";
+					++task.m_ProcessedSubTasks;
+					continue;
+				}
+
+				ResourceMeta meta;
+				EditorAssetDatabase::GetAssetMetadata(sceneID, meta);
+				task.m_SubTaskName = meta.Name();
+				GScene* pScene = LoadedSceneToPackage(i);
+				AudioScene audioScene = GenerateAudioScene(pEngine, pScene, &pModule->DefaultMaterial());
+
+				/* Append the audio scene to the scenes archive */
+				BinaryFileStream sceneFile{ path, false, false };
+				sceneFile.Seek(0, BinaryStream::Relative::End);
+				AssetArchive archive{ &sceneFile, AssetArchiveFlags::Write };
+				AudioSceneData audioSceneData{ std::move(audioScene) };
+				archive.Serialize(&audioSceneData);
+
+				task.m_SubTaskName = "";
+			}
+			++task.m_ProcessedSubTasks;
+		}
+
+		return true;
 	}
 
 	void SteamAudioExtension::Initialize()
@@ -94,5 +143,33 @@ namespace Glory::Editor
 		Importer::Register(&Importer);
 
 		EntitySceneObjectEditor::AddComponentIcon<SoundOccluder>(ICON_FA_EAR_DEAF);
+
+		EditorSceneManager& sceneManager = EditorApplication::GetInstance()->GetSceneManager();
+		m_SceneEventsListener = sceneManager.SceneEventsDispatcher().AddListener([pEngine](const EditorSceneManager::EditorSceneEvent& e) {
+			switch (e.Type)
+			{
+			case EditorSceneManager::Opened:
+			{
+
+				break;
+			}
+			case EditorSceneManager::Closed:
+			{
+
+				break;
+			}
+			default:
+				break;
+			}
+		});
+
+		GatherPackageTasksEvents().AddListener([&](const EmptyEvent&) {
+			PackageTask task;
+			task.m_TotalSubTasks = NumScenesToPackage();
+			task.m_TaskID = "PackageAudioScenes";
+			task.m_TaskName = "Packaging audio scenes";
+			task.m_Callback = PackageAudioScenesTask;
+			AddPackagingTaskAfter(std::move(task), "PackageScenes");
+		});
 	}
 }

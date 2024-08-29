@@ -44,7 +44,6 @@ namespace Glory
 	{
 		m_AudioScenes.push_back(std::move(audioScene));
 		/** @todo: Keep track of which mesh came from which scene for easier removal when the scene unloads */
-		/** @todo: Load audio scene when a GScene is loaded if available */
 	}
 
 	void SteamAudioModule::RemoveAllAudioScenes()
@@ -132,12 +131,29 @@ namespace Glory
 		}
 	}
 
+	bool SteamAudioModule::ClaimExtraSceneData(Resource* pSceneResource)
+	{
+		std::type_index type = typeid(Resource);
+		for (size_t i = 0; i < pSceneResource->TypeCount(); ++i)
+		{
+			if (!pSceneResource->GetType(i, type)) continue;
+			if (type != typeid(AudioSceneData)) continue;
+			AudioSceneData* pAudioSceneData = static_cast<AudioSceneData*>(pSceneResource);
+			AddAudioScene(std::move(pAudioSceneData->m_AudioScene));
+			delete pAudioSceneData;
+			RebuildAudioSimulationScene();
+			return true;
+		}
+		return false;
+	}
+
 	void SteamAudioModule::Initialize()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
 		m_pEngine->Reflection().RegisterType<SoundMaterial>();
 		m_pEngine->GetResourceTypes().RegisterResource<SoundMaterialData>(".gsmat");
+		m_pEngine->GetResourceTypes().RegisterResource<AudioSceneData>("");
 
 		m_pEngine->GetSceneManager()->RegisterComponent<SoundOccluder>();
 

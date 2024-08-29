@@ -102,6 +102,26 @@ namespace Glory
 		GScene* pScene = dynamic_cast<GScene*>(pRoot);
 		if (!pScene) return;
 
+		/** There might be extra data in the scene */
+		for (size_t i = 1; i < archive.Size(); ++i)
+		{
+			Resource* pResource = archive.Get(m_pEngine, i);
+
+			bool claimed = false;
+			for (size_t j = 0; j < m_pEngine->ModulesCount(); ++j)
+			{
+				if (!m_pEngine->GetModule(j)->ClaimExtraSceneData(pResource)) continue;
+				claimed = true;
+				break;
+			}
+
+			if (!claimed)
+			{
+				/* Send it to the asset manager instead */
+				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+			}
+		}
+
 		pScene->SetManager(m_pEngine->GetSceneManager());
 
 		/* Have to make sure every components add and validate callbacks are called */

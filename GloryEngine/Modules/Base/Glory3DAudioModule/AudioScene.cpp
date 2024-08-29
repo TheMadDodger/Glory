@@ -5,7 +5,13 @@
 
 namespace Glory
 {
-	AudioScene::AudioScene(UUID sceneID): m_SceneID(sceneID) {}
+	AudioScene::AudioScene(): m_SceneID(0)
+	{
+	}
+
+	AudioScene::AudioScene(UUID sceneID): m_SceneID(sceneID)
+	{
+	}
 
 	AudioScene::AudioScene(AudioScene&& other) noexcept:
 		m_MeshDatas(std::move(other.m_MeshDatas)), m_Meshes(std::move(other.m_Meshes)),
@@ -36,6 +42,7 @@ namespace Glory
 
 	void AudioScene::Serialize(BinaryStream& stream) const
 	{
+		stream.Write(m_SceneID);
 		stream.Write(m_MeshDatas.size());
 		for (size_t i = 0; i < m_MeshDatas.size(); ++i)
 		{
@@ -49,6 +56,7 @@ namespace Glory
 
 	void AudioScene::Deserialize(BinaryStream& stream)
 	{
+		stream.Read(m_SceneID);
 		size_t size;
 		stream.Read(size);
 		m_MeshDatas.resize(size);
@@ -101,5 +109,25 @@ namespace Glory
 	SoundMaterial& AudioScene::Material(size_t index)
 	{
 		return m_Materials[m_Meshes[index].m_Material];
+	}
+
+	AudioSceneData::AudioSceneData()
+	{
+		APPEND_TYPE(AudioSceneData);
+	}
+
+	AudioSceneData::AudioSceneData(AudioScene&& audioScene): m_AudioScene(std::move(audioScene))
+	{
+		APPEND_TYPE(AudioSceneData);
+	}
+
+	void AudioSceneData::Serialize(BinaryStream& container) const
+	{
+		m_AudioScene.Serialize(container);
+	}
+
+	void AudioSceneData::Deserialize(BinaryStream& container)
+	{
+		m_AudioScene.Deserialize(container);
 	}
 }

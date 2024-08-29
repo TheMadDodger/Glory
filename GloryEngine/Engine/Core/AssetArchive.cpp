@@ -9,15 +9,18 @@
 
 namespace Glory
 {
-	AssetArchive::AssetArchive(BinaryStream* pStream, bool isNew): m_pStream(pStream), m_Version(), m_Owned()
+	AssetArchive::AssetArchive(BinaryStream* pStream, AssetArchiveFlags flags): m_pStream(pStream), m_Version(), m_Owned()
 	{
-		if (isNew)
+		if ((flags & AssetArchiveFlags::Read) == AssetArchiveFlags::Read)
+		{
+			ReadVersion();
+		}
+		if ((flags & AssetArchiveFlags::Write) == AssetArchiveFlags::Write &&
+			(flags & AssetArchiveFlags::WriteVersion) == AssetArchiveFlags::WriteVersion)
 		{
 			m_Version = Version::Parse(GloryCoreVersion);
 			WriteVersion();
 		}
-		else
-			ReadVersion();
 	}
 
 	AssetArchive::AssetArchive(AssetArchive&& other) noexcept:

@@ -32,6 +32,9 @@ namespace Glory
         /** @overload */
         GLORY_API const SoundMaterial& Material() const;
 
+        GLORY_API void Serialize(BinaryStream& container) const override;
+        GLORY_API void Deserialize(BinaryStream& container) override;
+
     private:
         SoundMaterial m_Material;
     };

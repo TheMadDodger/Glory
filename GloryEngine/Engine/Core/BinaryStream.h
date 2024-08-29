@@ -83,7 +83,7 @@ namespace Glory
 	class BinaryFileStream : public BinaryStream
 	{
 	public:
-		BinaryFileStream(const std::filesystem::path& path, bool read=false);
+		BinaryFileStream(const std::filesystem::path& path, bool read=false, bool trunc=true);
 		virtual ~BinaryFileStream();
 
 		void Seek(size_t offset, Relative relative = Relative::Start) override;
