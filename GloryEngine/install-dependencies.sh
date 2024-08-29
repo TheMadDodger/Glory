@@ -51,12 +51,12 @@ echo "Building ${PLATFORM} binaries"
 rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
-cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR -DSDL_CMAKE_DEBUG_POSTFIX=""
 cmake --build . --target INSTALL --config $CONFIG
 
 if [ "$CONFIG" == "Debug" ]; then
-    echo ${SDL_LIB="SDL2d"}
-    echo ${SDL_MAIN_LIB="SDL2maind"}
+    echo ${SDL_LIB="SDL2"}
+    echo ${SDL_MAIN_LIB="SDL2main"}
 else
     echo ${SDL_LIB="SDL2"}
     echo ${SDL_MAIN_LIB="SDL2main"}
@@ -72,7 +72,7 @@ rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 
-cmake .. -A $PLATFORM -DSDL2_INCLUDE_DIR="../../includes/${CONFIG}/${PLATFORM}/SDL2" -DSDL2_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_LIB}.lib" -DSDL2_MAIN_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_MAIN_LIB}.lib" -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake .. -A $PLATFORM -DSDL2_INCLUDE_DIR="../../includes/${CONFIG}/${PLATFORM}/SDL2" -DSDL2_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_LIB}.lib" -DSDL2_MAIN_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_MAIN_LIB}.lib" -DCMAKE_INSTALL_PREFIX=$DEPSDIR -DSDL2IMAGE_DEBUG_POSTFIX=""
 cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..
@@ -85,7 +85,7 @@ rm "${PLATFORM}" -r
 mkdir "${PLATFORM}"
 cd "${PLATFORM}"
 
-cmake .. -A $PLATFORM -DSDL2_INCLUDE_DIR="../../includes/${CONFIG}/${PLATFORM}/SDL2" -DSDL2_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_LIB}.lib" -DSDL2_MAIN_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_MAIN_LIB}.lib" -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake .. -A $PLATFORM -DSDL2_INCLUDE_DIR="../../includes/${CONFIG}/${PLATFORM}/SDL2" -DSDL2_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_LIB}.lib" -DSDL2_MAIN_LIBRARY="../../SDL/${PLATFORM}/${CONFIG}/${SDL_MAIN_LIB}.lib" -DCMAKE_INSTALL_PREFIX=$DEPSDIR -DSDL2MIXER_DEBUG_POSTFIX=""
 cmake --build . --target INSTALL --config $CONFIG
 
 cd ../..

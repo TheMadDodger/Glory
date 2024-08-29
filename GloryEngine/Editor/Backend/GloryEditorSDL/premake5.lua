@@ -69,6 +69,7 @@ project "GloryEditorSDL"
 		"GloryEditor",
 		"GloryUtilsVersion",
 		"GloryUtils",
+		"SDL2",
 	}
 
 	defines
@@ -107,11 +108,7 @@ project "GloryEditorSDL"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "SDL2d"
-
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-		links "SDL2"
