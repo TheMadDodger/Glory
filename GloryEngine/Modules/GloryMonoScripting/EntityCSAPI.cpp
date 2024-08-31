@@ -164,6 +164,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Position = *position;
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	QuatWrapper Transform_GetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -176,6 +178,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = *rotation;
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -188,6 +192,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = glm::quat(ToGLMVec3(*rotation));
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetLocalScale(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -200,6 +206,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Scale = *scale;
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetForward(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -218,6 +226,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = glm::conjugate(glm::quatLookAt(*forward, { 0.0f, 1.0f, 0.0f }));
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetRight(MonoEntityHandle* pEntityHandle, UUID componentID)

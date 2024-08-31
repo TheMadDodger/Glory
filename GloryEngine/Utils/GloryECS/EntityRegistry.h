@@ -7,6 +7,7 @@
 #include <map>
 #include <unordered_map>
 #include <functional>
+#include <BitSet.h>
 
 namespace Glory::Utils::ECS
 {
@@ -200,12 +201,16 @@ namespace Glory::Utils::ECS
 
 		EntityID CopyEntityToOtherRegistry(EntityID entity, EntityID parent, EntityRegistry* pRegistry);
 
+		bool IsEntityDirty(EntityID entity) const;
+		void SetEntityDirty(EntityID entity, bool dirty=true);
+
 	private:
 		friend class ComponentTypes;
 
 		// Entity data
 		std::map<EntityID, EntityView*> m_pEntityViews;
 		std::vector<EntityID> m_RootOrder;
+		Utils::BitSet m_EntityDirty;
 		EntityID m_NextEntityID;
 
 		// Basic type views

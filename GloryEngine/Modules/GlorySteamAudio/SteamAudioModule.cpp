@@ -597,7 +597,7 @@ namespace Glory
 		const size_t index = iter - m_SourceEntities.begin();
 		IPLSource source = m_Sources[index];
 
-		Transform& transform = pRegistry->GetComponent<Transform>(entity);
+		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		const glm::vec3 right = glm::vec3(transform.MatTransform[0][0], transform.MatTransform[1][0], transform.MatTransform[2][0]);
 		const glm::vec3 up = glm::vec3(transform.MatTransform[0][1], transform.MatTransform[1][1], transform.MatTransform[2][1]);
 		const glm::vec3 forward = glm::vec3(transform.MatTransform[0][2], transform.MatTransform[1][2], transform.MatTransform[2][2]);

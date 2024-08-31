@@ -35,6 +35,10 @@ namespace Glory::Editor
 
 	bool TransformEditor::OnGUI()
 	{
+		/* @todo: Until the Undo/Redo system has been refactored the entity
+		 * will need to update every frame while it is selected */
+		m_pComponentObject->GetRegistry()->SetEntityDirty(m_pComponentObject->EntityID());
+
 		glm::mat4 oldTransform, newTransform;
 		bool wasManipulated = m_pGizmo->WasManipulated(oldTransform, newTransform);
 		const bool isManipulating = m_pGizmo->IsManipulating();
@@ -101,6 +105,7 @@ namespace Glory::Editor
 			Validate();
 			m_pGizmo->UpdateTransform(transform.MatTransform);
 			wasManipulated = false;
+			m_pComponentObject->GetRegistry()->SetEntityDirty(m_pComponentObject->EntityID());
 		}
 
 		if (isManipulating)
@@ -157,6 +162,8 @@ namespace Glory::Editor
 		transform.Position = position;
 		transform.Rotation = glm::conjugate(glm::quatLookAt(-forward, up));
 		transform.Scale = scale;
+
+		m_pComponentObject->GetRegistry()->SetEntityDirty(m_pComponentObject->EntityID());
 	}
 
 	//void TransformEditor::UpdatePhysics()

@@ -3,7 +3,7 @@
 
 namespace Glory::Utils::ECS
 {
-	EntityRegistry::EntityRegistry() : m_NextEntityID(1), m_pUserData(nullptr)
+	EntityRegistry::EntityRegistry() : m_EntityDirty(32, true), m_NextEntityID(1), m_pUserData(nullptr)
 	{
 	}
 
@@ -35,6 +35,8 @@ namespace Glory::Utils::ECS
 		++m_NextEntityID;
 		m_pEntityViews.emplace(newEntity, new EntityView(this));
 		m_RootOrder.push_back(newEntity);
+		m_EntityDirty.Reserve(newEntity);
+		m_EntityDirty.Set(newEntity);
 		return newEntity;
 	}
 
@@ -366,6 +368,28 @@ namespace Glory::Utils::ECS
 		}
 
 		return newEntity;
+	}
+
+	bool EntityRegistry::IsEntityDirty(EntityID entity) const
+	{
+		return m_EntityDirty.IsSet(entity);
+	}
+
+	void EntityRegistry::SetEntityDirty(EntityID entity, bool dirty)
+	{
+		EntityView* pView = GetEntityView(entity);
+		if (!pView) return;
+
+		m_EntityDirty.Set(entity, dirty);
+		
+		if (!dirty) return;
+
+		/* Must set all children as dirty as well! */
+		for (size_t i = 0; i < pView->ChildCount(); ++i)
+		{
+			EntityID child = pView->Child(i);
+			SetEntityDirty(entity, dirty);
+		}
 	}
 
 	void EntityRegistry::InvokeAll(InvocationType invocationType)
