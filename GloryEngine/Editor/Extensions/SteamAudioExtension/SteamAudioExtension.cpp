@@ -76,7 +76,7 @@ namespace Glory::Editor
 		pAudio->RemoveAllAudioScenes();
 	}
 
-	SteamAudioExtension::SteamAudioExtension(): m_SceneEventsListener(0)
+	SteamAudioExtension::SteamAudioExtension()
 	{
 	}
 
@@ -110,7 +110,9 @@ namespace Glory::Editor
 				EditorAssetDatabase::GetAssetMetadata(sceneID, meta);
 				task.m_SubTaskName = meta.Name();
 				GScene* pScene = LoadedSceneToPackage(i);
-				AudioScene audioScene = GenerateAudioScene(pEngine, pScene, &pModule->DefaultMaterial());
+				AudioScene audioScene{ pScene->GetUUID() };
+				if (!GenerateAudioScene(pEngine, pScene, &pModule->DefaultMaterial(), audioScene))
+					continue;
 
 				/* Append the audio scene to the scenes archive */
 				BinaryFileStream sceneFile{ path, false, false };
@@ -143,25 +145,6 @@ namespace Glory::Editor
 		Importer::Register(&Importer);
 
 		EntitySceneObjectEditor::AddComponentIcon<SoundOccluder>(ICON_FA_EAR_DEAF);
-
-		EditorSceneManager& sceneManager = EditorApplication::GetInstance()->GetSceneManager();
-		m_SceneEventsListener = sceneManager.SceneEventsDispatcher().AddListener([pEngine](const EditorSceneManager::EditorSceneEvent& e) {
-			switch (e.Type)
-			{
-			case EditorSceneManager::Opened:
-			{
-
-				break;
-			}
-			case EditorSceneManager::Closed:
-			{
-
-				break;
-			}
-			default:
-				break;
-			}
-		});
 
 		GatherPackageTasksEvents().AddListener([&](const EmptyEvent&) {
 			PackageTask task;

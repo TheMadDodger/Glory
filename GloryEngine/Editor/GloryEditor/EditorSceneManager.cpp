@@ -126,6 +126,7 @@ namespace Glory::Editor
 		if (it == m_OpenedSceneIDs.end()) return;
 		const size_t index = it - m_OpenedSceneIDs.begin();
 		GScene* pScene = GetOpenScene(uuid);
+		pScene->Stop();
 		SetSceneDirty(pScene, false);
 		m_OpenedSceneIDs.erase(it);
 		m_pOpenScenes.erase(m_pOpenScenes.begin() + index);

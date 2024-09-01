@@ -25,7 +25,5 @@ namespace Glory::Editor
 
     private:
         virtual void Initialize() override;
-
-        UUID m_SceneEventsListener;
     };
 }

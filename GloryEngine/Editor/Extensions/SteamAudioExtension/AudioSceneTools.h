@@ -11,5 +11,5 @@ namespace Glory
 
 namespace Glory::Editor
 {
-	GLORY_EDITOR_API AudioScene GenerateAudioScene(Engine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial);
+	GLORY_EDITOR_API bool GenerateAudioScene(Engine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial, AudioScene& audioScene);
 }

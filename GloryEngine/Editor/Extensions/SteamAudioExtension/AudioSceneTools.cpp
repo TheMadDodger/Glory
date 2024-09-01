@@ -10,7 +10,7 @@ namespace Glory::Editor
 {
 	MeshData GenerateMesh(const ShapeProperty& shape, const glm::mat4& transform)
 	{
-		MeshData mesh{ 100, 3 * sizeof(float), {AttributeType::Float3} };
+		MeshData mesh{ 100, 3*sizeof(float), {AttributeType::Float3} };
 
 		switch (shape.m_ShapeType)
 		{
@@ -20,15 +20,15 @@ namespace Glory::Editor
 			const Box& box = *shape.ShapePointer<Box>();
 			const glm::vec3 extends = box.m_Extends;
 
-			const glm::vec4 topFrontLeft = transform * glm::vec4(-extends.x, extends.y, -extends.z, 1.0f);
-			const glm::vec4 topFrontRight = transform * glm::vec4(extends.x, extends.y, -extends.z, 1.0f);
-			const glm::vec4 topBackRight = transform * glm::vec4(extends.x, extends.y, extends.z, 1.0f);
-			const glm::vec4 topBackLeft = transform * glm::vec4(-extends.x, extends.y, extends.z, 1.0f);
+			const glm::vec4 topFrontLeft = transform*glm::vec4(-extends.x, extends.y, -extends.z, 1.0f);
+			const glm::vec4 topFrontRight = transform*glm::vec4(extends.x, extends.y, -extends.z, 1.0f);
+			const glm::vec4 topBackRight = transform*glm::vec4(extends.x, extends.y, extends.z, 1.0f);
+			const glm::vec4 topBackLeft = transform*glm::vec4(-extends.x, extends.y, extends.z, 1.0f);
 
-			const glm::vec4 bottomFrontLeft = transform * glm::vec4(-extends.x, -extends.y, -extends.z, 1.0f);
-			const glm::vec4 bottomFrontRight = transform * glm::vec4(extends.x, -extends.y, -extends.z, 1.0f);
-			const glm::vec4 bottomBackRight = transform * glm::vec4(extends.x, -extends.y, extends.z, 1.0f);
-			const glm::vec4 bottomBackLeft = transform * glm::vec4(-extends.x, -extends.y, extends.z, 1.0f);
+			const glm::vec4 bottomFrontLeft = transform*glm::vec4(-extends.x, -extends.y, -extends.z, 1.0f);
+			const glm::vec4 bottomFrontRight = transform*glm::vec4(extends.x, -extends.y, -extends.z, 1.0f);
+			const glm::vec4 bottomBackRight = transform*glm::vec4(extends.x, -extends.y, extends.z, 1.0f);
+			const glm::vec4 bottomBackLeft = transform*glm::vec4(-extends.x, -extends.y, extends.z, 1.0f);
 
 			const uint32_t vBottomFrontLeft = mesh.AddVertex(reinterpret_cast<const float*>(&bottomFrontLeft));
 			const uint32_t vBottomFrontRight = mesh.AddVertex(reinterpret_cast<const float*>(&bottomFrontRight));
@@ -73,12 +73,11 @@ namespace Glory::Editor
 		return mesh;
 	}
 
-	AudioScene GenerateAudioScene(Engine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial)
+	bool GenerateAudioScene(Engine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial, AudioScene& audioScene)
 	{
-		AudioScene audioScene{ pScene->GetUUID() };
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		Utils::ECS::TypeView<PhysicsBody>* pPhysicsBodies = registry.GetTypeView<PhysicsBody>();
-		if (!pPhysicsBodies) return audioScene;
+		if (!pPhysicsBodies) return false;
 
 		for (size_t i = 0; i < pPhysicsBodies->Size(); ++i)
 		{
@@ -124,6 +123,6 @@ namespace Glory::Editor
 			audioScene.AddMesh(std::move(mesh), std::move(materialData));
 		}
 
-		return audioScene;
+		return true;
 	}
 }

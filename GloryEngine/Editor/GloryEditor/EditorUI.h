@@ -93,6 +93,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool HasFlag(Flag flag);
 		static GLORY_EDITOR_API bool SearchBar(float width, char* buffer, size_t bufferSize);
 
+		static GLORY_EDITOR_API bool LabelText(std::string_view label, std::string_view text);
+
 	private:
 		typedef uint64_t UIFlags;
 		static const size_t BUFFERLENGTH = 256;
