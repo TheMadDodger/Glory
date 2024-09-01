@@ -493,9 +493,9 @@ namespace Glory::EditorLauncher
         {
             system("start \"\" \"https://glory-engine.com\"");
         }
-        if (ImGui::Button("glory-engine.com/docs", { width , 0.0f }))
+        if (ImGui::Button("docs.glory-engine.com/", { width , 0.0f }))
         {
-            system("start \"\" \"https://glory-engine.com/docs\"");
+            system("start \"\" \"https://docs.glory-engine.com\"");
         }
         ImGui::Text("You can also join our discord and get help from our community");
         if (ImGui::Button("Join Discord", { width , 0.0f }))

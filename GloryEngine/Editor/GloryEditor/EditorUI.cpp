@@ -792,6 +792,12 @@ namespace Glory::Editor
 		return false;
 	}
 
+	void EditorUI::Tooltip(std::string_view text)
+	{
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(text.data());
+	}
+
 	bool EditorUI::InputLayerMask(std::string_view label, LayerMask* data)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
@@ -1008,5 +1014,30 @@ namespace Glory::Editor
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4.0f);
 		ImGui::SetNextItemWidth(width - searchTextWidth - 4.0f);
 		return ImGui::InputText("##Search", buffer, bufferSize);
+	}
+
+	bool EditorUI::LabelText(std::string_view label, std::string_view text)
+	{
+		ImGui::PushID(label.data());
+		const bool noLabel = HasFlag(Flag::NoLabel);
+		if (!noLabel)
+		{
+			const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+			ImGui::TextUnformatted(label.data());
+			const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+			const float width = std::max(maxWidth, 100.0f);
+
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+			ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		}
+		ImGui::TextUnformatted(text.data());
+		if (!noLabel) ImGui::PopItemWidth();
+		ImGui::PopID();
+		return false;
 	}
 }

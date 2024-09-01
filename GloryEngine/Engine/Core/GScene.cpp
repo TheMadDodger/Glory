@@ -219,6 +219,8 @@ namespace Glory
 		transform.Rotation = rot;
 		transform.Scale = scale;
 
+		entity.SetDirty();
+
 		SetPrefab(entity.GetEntityID(), pPrefab->GetUUID());
 		return entity;
 	}
@@ -233,6 +235,8 @@ namespace Glory
 		transform.Position = pos;
 		transform.Rotation = rot;
 		transform.Scale = scale;
+
+		entity.SetDirty();
 
 		SetPrefab(entity.GetEntityID(), pPrefab->GetUUID());
 		return entity;

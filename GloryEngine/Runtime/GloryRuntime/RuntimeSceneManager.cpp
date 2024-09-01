@@ -53,8 +53,14 @@ namespace Glory
 		size_t index = it - m_pOpenScenes.begin();
 		GScene* pActiveScene = m_pOpenScenes[m_ActiveSceneIndex];
 		GScene* pScene = *it;
+		pScene->Stop();
 		delete pScene;
 		m_pOpenScenes.erase(it);
+
+		for (size_t j = 0; j < m_pEngine->ModulesCount(); ++j)
+		{
+			m_pEngine->GetModule(j)->OnSceneClosed(uuid);
+		}
 
 		if (index == m_ActiveSceneIndex || m_pOpenScenes.size() <= 0)
 		{
@@ -101,6 +107,26 @@ namespace Glory
 		Resource* pRoot = archive.Get(m_pEngine, 0);
 		GScene* pScene = dynamic_cast<GScene*>(pRoot);
 		if (!pScene) return;
+
+		/** There might be extra data in the scene */
+		for (size_t i = 1; i < archive.Size(); ++i)
+		{
+			Resource* pResource = archive.Get(m_pEngine, i);
+
+			bool claimed = false;
+			for (size_t j = 0; j < m_pEngine->ModulesCount(); ++j)
+			{
+				if (!m_pEngine->GetModule(j)->ClaimExtraSceneData(pResource)) continue;
+				claimed = true;
+				break;
+			}
+
+			if (!claimed)
+			{
+				/* Send it to the asset manager instead */
+				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+			}
+		}
 
 		pScene->SetManager(m_pEngine->GetSceneManager());
 

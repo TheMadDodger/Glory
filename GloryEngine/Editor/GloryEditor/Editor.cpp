@@ -5,6 +5,7 @@ namespace Glory::Editor
 {
 	std::vector<Editor*> Editor::m_pRegisteredEditors;
 	std::vector<Editor*> Editor::m_pActiveEditors;
+	bool Editor::m_CleaningUp = false;
 
 	void Editor::RegisterEditor(Editor* pEditor)
 	{
@@ -71,6 +72,7 @@ namespace Glory::Editor
 
 	void Editor::ReleaseEditor(Editor* pEditor)
 	{
+		if (m_CleaningUp) return;
 		auto it = std::find(m_pActiveEditors.begin(), m_pActiveEditors.end(), pEditor);
 		if (it == m_pActiveEditors.end()) return;
 		m_pActiveEditors.erase(it);
@@ -80,6 +82,12 @@ namespace Glory::Editor
 	Object* Editor::GetTarget() const
 	{
 		return m_pTarget;
+	}
+
+	void Editor::SetTarget(Object* pTarget)
+	{
+		/** @todo Check if type of target matches the edited type */
+		m_pTarget = pTarget;
 	}
 
 	Editor::Editor(const uint32_t type) : m_pTarget(nullptr), m_EditedType(type)
@@ -92,10 +100,12 @@ namespace Glory::Editor
 
 	void Editor::Cleanup()
 	{
+		m_CleaningUp = true;
 		std::for_each(m_pRegisteredEditors.begin(), m_pRegisteredEditors.end(), [](Editor* pEditor) { delete pEditor; });
 		std::for_each(m_pActiveEditors.begin(), m_pActiveEditors.end(), [](Editor* pEditor) { delete pEditor; });
 		m_pRegisteredEditors.clear();
 		m_pActiveEditors.clear();
+		m_CleaningUp = false;
 	}
 
 	template<class TEditor, class TObject>

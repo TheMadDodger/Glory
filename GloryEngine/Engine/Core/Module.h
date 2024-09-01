@@ -76,6 +76,9 @@ namespace Glory
 
 		void LoadSettings(const std::filesystem::path& settingsFile);
 
+		virtual bool ClaimExtraSceneData(Resource* pSceneResource) { return false; }
+		virtual void OnSceneClosed(UUID sceneID) {}
+
 	protected:
 		virtual void LoadSettings(ModuleSettings& settings) {};
 		virtual void Initialize() = 0;

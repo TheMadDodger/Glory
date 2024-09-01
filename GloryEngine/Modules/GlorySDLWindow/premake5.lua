@@ -50,6 +50,8 @@ project "GlorySDLWindow"
 
 	links
 	{
+		"SDL2",
+
 		"GloryCore",
 		"GloryReflect",
 		"GloryECS",
@@ -75,7 +77,6 @@ project "GlorySDLWindow"
 
 	postbuildcommands
 	{
-		("{COPY} %{DepsBinDir}/SDL2d?.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} %{DepsBinDir}/SDL2?.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 	}
@@ -121,11 +122,7 @@ project "GlorySDLWindow"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "SDL2d"
-
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-		links "SDL2"

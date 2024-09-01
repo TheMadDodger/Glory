@@ -47,6 +47,8 @@ namespace Glory
 
 		void Clear();
 		bool IsValid() const;
+		bool IsDirty() const;
+		void SetDirty(bool dirty=true);
 		void Destroy();
 
 		Utils::ECS::EntityID GetEntityID() const;

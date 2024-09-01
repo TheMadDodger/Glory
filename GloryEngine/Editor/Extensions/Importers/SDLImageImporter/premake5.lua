@@ -54,6 +54,9 @@ project "SDLImageImporter"
 
 	links
 	{
+		"SDL2",
+		"SDL2_image",
+
 		"GloryCore",
 		"GloryEditor",
 		"shaderc",
@@ -109,13 +112,7 @@ project "SDLImageImporter"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "SDL2d"
-		links "SDL2_imaged"
-
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-		links "SDL2"
-		links "SDL2_image"

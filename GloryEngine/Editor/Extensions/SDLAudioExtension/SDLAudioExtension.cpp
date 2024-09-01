@@ -1,5 +1,6 @@
 #include "SDLAudioExtension.h"
 #include "AudioDataEditor.h"
+#include "AudioSourceEditor.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -20,7 +21,11 @@ EXTENSION_CPP(SDLAudioExtension)
 
 namespace Glory::Editor
 {
+	AudioDataEditor AudioEditor;
+	AudioSourceEditor SourceEditor;
+
 	CREATE_OBJECT_CALLBACK_CPP(AudioSource, AudioSource, ());
+	CREATE_OBJECT_CALLBACK_CPP(AudioListener, AudioListener, ());
 
 	void SDLAudioExtension::HandleStop(Module* pModule)
 	{
@@ -45,11 +50,14 @@ namespace Glory::Editor
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
-		Editor::RegisterEditor<AudioDataEditor>();
+		Editor::RegisterEditor(&AudioEditor);
+		Editor::RegisterEditor(&SourceEditor);
 		EntitySceneObjectEditor::AddComponentIcon<AudioSource>(ICON_FA_VOLUME_HIGH);
+		EntitySceneObjectEditor::AddComponentIcon<AudioListener>(ICON_FA_HEADPHONES);
 
 		EditorPlayer::RegisterLoopHandler(this);
 
 		OBJECT_CREATE_MENU(AudioSource, AudioSource);
+		OBJECT_CREATE_MENU(AudioListener, AudioListener);
 	}
 }

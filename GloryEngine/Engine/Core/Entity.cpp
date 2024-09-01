@@ -44,6 +44,18 @@ namespace Glory
 		return m_pRegistry->IsValid(m_EntityID);
 	}
 
+	bool Entity::IsDirty() const
+	{
+		if (!m_pGScene) return false;
+		return m_pRegistry->IsEntityDirty(m_EntityID);
+	}
+
+	void Entity::SetDirty(bool dirty)
+	{
+		if (!m_pGScene) return;
+		return m_pRegistry->SetEntityDirty(m_EntityID, dirty);
+	}
+
 	void Entity::Destroy()
 	{
 		if (!m_pGScene) return;

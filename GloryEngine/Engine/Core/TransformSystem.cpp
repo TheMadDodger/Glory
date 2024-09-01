@@ -17,11 +17,13 @@ namespace Glory
 
     void TransformSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent)
     {
+        if (!pRegistry->IsEntityDirty(entity)) return;
         CalculateMatrix(pRegistry, entity, pComponent);
     }
 
     void Glory::TransformSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent)
     {
+        if (!pRegistry->IsEntityDirty(entity)) return;
         CalculateMatrix(pRegistry, entity, pComponent);
     }
 
@@ -31,6 +33,13 @@ namespace Glory
 
         Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
         Entity parent = pRegistry->GetUserData<GScene*>()->GetEntityByEntityID(pEntityView->Parent());
+        
+        if (parent.IsValid() && parent.IsDirty())
+        {
+            Utils::ECS::EntityID parentId = parent.GetEntityID();
+            CalculateMatrix(pRegistry, parentId, parent.GetComponent<Transform>());
+        }
+
         if (parent.IsValid())
         {
             Transform& parentTransform = parent.GetComponent<Transform>();
@@ -41,5 +50,7 @@ namespace Glory
         glm::mat4 rotation = glm::inverse(glm::mat4_cast(pComponent.Rotation));
         glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), pComponent.Position);
         pComponent.MatTransform = startTransform * translation * rotation * scale;
+
+        pRegistry->SetEntityDirty(entity, false);
     }
 }

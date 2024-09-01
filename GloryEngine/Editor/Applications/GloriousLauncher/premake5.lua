@@ -67,6 +67,7 @@ project "GloriousLauncher"
 		"GloryJobs",
 		"GloryThreads",
 		"GloryUtils",
+		"SDL2",
 	}
 
 	dependson
@@ -77,7 +78,6 @@ project "GloriousLauncher"
 	postbuildcommands
 	{
 		("{COPY} ./Fonts %{buildDir}/Launcher/Fonts"),
-		("{COPY} %{DepsBinDir}/SDL2d?.dll %{buildDir}/Launcher"),
 		("{COPY} %{DepsBinDir}/SDL2?.dll %{buildDir}/Launcher"),
 		("{COPY} %{DepsBinDir}/glew32*.dll %{buildDir}/Launcher"),
 		("{COPY} imgui.ini %{buildDir}/Launcher"),
@@ -142,7 +142,6 @@ project "GloriousLauncher"
 
 		links
 		{
-			"SDL2d",
 			"glew32d"
 		}
 
@@ -154,6 +153,5 @@ project "GloriousLauncher"
 
 		links
 		{
-			"SDL2",
 			"glew32"
 		}

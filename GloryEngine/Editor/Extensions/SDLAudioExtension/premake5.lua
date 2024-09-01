@@ -22,6 +22,7 @@ project "SDLAudioExtension"
 	{
 		"%{DepsIncludeDir}",
 		"%{BaseIncludeDir.audio}",
+		"%{BaseIncludeDir.audio3d}",
 
 		"%{IncludeDir.glm}",
 
@@ -58,6 +59,9 @@ project "SDLAudioExtension"
 
 	links
 	{
+		"SDL2",
+		"SDL2_mixer",
+
 		"GloryCore",
 		"GlorySDLAudio",
 		"GloryEditor",
@@ -108,13 +112,7 @@ project "SDLAudioExtension"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "SDL2d"
-		links "SDL2_mixerd"
-
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-		links "SDL2"
-		links "SDL2_mixer"

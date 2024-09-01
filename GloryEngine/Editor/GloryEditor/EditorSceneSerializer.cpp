@@ -45,6 +45,10 @@ namespace Glory::Editor
 			DeserializeEntity(pEngine, pScene, entity, flags);
 		}
 		pScene->HandleDelayedParents();
+
+		/* Update transforms to generate matrices */
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		registry.GetTypeView<Transform>()->InvokeAll(Utils::ECS::InvocationType::Update, &registry);
 	}
 
 	void EditorSceneSerializer::SerializeEntity(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
@@ -150,7 +154,6 @@ namespace Glory::Editor
 				/* TODO: When GenerateNewUUIDs flag is set generate a new map of UUID remappings */
 				Entity instantiatedEntity = {};
 				/* Deserialize the transform override */
-				Transform transform;
 				Utils::NodeValueRef transformRef = node["Transform/Properties"];
 				const glm::vec3 position = transformRef["Position"].As<glm::vec3>();
 				const glm::quat rotation = transformRef["Rotation"].As<glm::quat>();

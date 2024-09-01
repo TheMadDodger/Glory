@@ -1,0 +1,5 @@
+Name: "Steam Audio"
+Type: Audio
+Dependencies: ["GPUUtilities", "TrueAudioNext", "phonon"]
+Editor:
+ Extensions: ["SteamAudioExtension"]

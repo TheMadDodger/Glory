@@ -6,6 +6,7 @@
 #include <GScene.h>
 #include <Engine.h>
 #include <SceneManager.h>
+#include <Components.h>
 
 namespace Glory
 {
@@ -16,6 +17,13 @@ namespace Glory
 
 	void AudioSourceSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->SourceSystem().OnSourceStart;
+		if (callback) callback(pRegistry, entity, pComponent);
+
 		if (!pComponent.m_AutoPlay) return;
 		Play(pRegistry, entity, pComponent);
 	}
@@ -27,18 +35,32 @@ namespace Glory
 
 	void AudioSourceSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->SourceSystem().OnSourceStop;
+		if (callback) callback(pRegistry, entity, pComponent);
+
+		Stop(pRegistry, entity, pComponent);
 	}
 
 	void AudioSourceSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->SourceSystem().OnSourceUpdate;
+		if (callback) callback(pRegistry, entity, pComponent);
 	}
 
 	void FinishedCallback(Engine* pEngine, const AudioChannel& channel)
 	{
-		const uint64_t* ids = reinterpret_cast<const uint64_t*>(channel.m_UserData);
-		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(UUID(ids[0]));
+		if (channel.m_UserData.m_Type != AudioChannelUDataType::Entity) return;
+		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(channel.m_UserData.sceneID());
 		if (!pScene) return;
-		Entity entity = pScene->GetEntityByUUID(ids[1]);
+		Entity entity = pScene->GetEntityByUUID(channel.m_UserData.entityID());
 		if (!entity.IsValid()) return;
 		if (!entity.HasComponent<AudioSource>()) return;
 		entity.GetComponent<AudioSource>().m_CurrentChannel = -1;
@@ -63,10 +85,15 @@ namespace Glory
 			return;
 		}
 
-		uint64_t ids[2];
-		ids[0] = pScene->GetUUID();
-		ids[1] = pScene->GetEntityUUID(entity);
-		pComponent.m_CurrentChannel = pAudioModule->Play(pAudio, ids, sizeof(uint64_t)*2, pComponent.m_Loops, FinishedCallback);
+		AudioChannelUData udata;
+		udata.m_Type = AudioChannelUDataType::Entity;
+		udata.sceneID() = pScene->GetUUID();
+		udata.entityID() = pScene->GetEntityUUID(entity);
+
+		if(pComponent.m_Enable3D)
+			pComponent.m_CurrentChannel = pAudioModule->PlayWithEffects(pAudio, pComponent.m_Loops, std::move(udata), FinishedCallback);
+		else
+			pComponent.m_CurrentChannel = pAudioModule->Play(pAudio, pComponent.m_Loops, std::move(udata), FinishedCallback);
 		pAudioModule->SetVolume(pComponent.m_CurrentChannel, pComponent.m_Volume);
 	}
 
@@ -134,5 +161,41 @@ namespace Glory
 			return;
 		}
 		pAudioModule->SetVolume(pComponent.m_CurrentChannel, pComponent.m_Volume);
+	}
+
+	void AudioListenerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->ListenerSystem().OnListenerStart;
+		if (callback) callback(pRegistry, entity, pComponent);
+	}
+
+	void AudioListenerSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		auto& callback = pAudioModule->ListenerSystem().OnListenerStop;
+		if (callback) callback(pRegistry, entity, pComponent);
+	}
+
+	void AudioListenerSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
+	{
+		if (!pComponent.m_Enable) return;
+
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
+
+		Transform& transform = pRegistry->GetComponent<Transform>(entity);
+
+		pAudioModule->ListenerTransform() = transform.MatTransform;
+
+		auto& callback = pAudioModule->ListenerSystem().OnListenerUpdate;
+		if (callback) callback(pRegistry, entity, pComponent);
 	}
 }

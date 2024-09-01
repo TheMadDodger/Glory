@@ -102,6 +102,14 @@ namespace Glory
 			LoadAssetGroup(sharedPath);
 		}
 
+		/* Load the shared shaders pack */
+		sharedPath = dataPath;
+		sharedPath.append("Shared.gcsp");
+		if (std::filesystem::exists(sharedPath))
+		{
+			LoadShaderPack(sharedPath);
+		}
+
 		for (const auto& entry : std::filesystem::directory_iterator(dataPath))
 		{
 			const std::filesystem::path path = entry.path();

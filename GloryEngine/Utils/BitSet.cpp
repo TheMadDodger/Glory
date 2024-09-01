@@ -11,12 +11,28 @@ namespace Glory::Utils
 		}
 	}
 
+	BitSet::BitSet(BitSet&& other) noexcept: m_pMemory(other.m_pMemory), m_Capacity(other.m_Capacity)
+	{
+		other.m_pMemory = nullptr;
+		other.m_Capacity = 0;
+	}
+
 	BitSet::~BitSet()
 	{
+		if (!m_pMemory) return;
 		delete[] m_pMemory;
 		m_pMemory = nullptr;
 
 		m_Capacity = 0;
+	}
+
+	void BitSet::operator=(BitSet&& other) noexcept
+	{
+		m_pMemory = other.m_pMemory;
+		m_Capacity = other.m_Capacity;
+
+		other.m_pMemory = nullptr;
+		other.m_Capacity = 0;
 	}
 
 	void BitSet::Set(Element index)
@@ -69,5 +85,15 @@ namespace Glory::Utils
 		const Element elementIndex = index / (sizeof(Element) * 8);
 		const uint32_t bitIndex = index - elementIndex * sizeof(Element) * 8;
 		return m_pMemory[elementIndex] & 1 << bitIndex;
+	}
+
+	BitSet::Element* BitSet::Data() const
+	{
+		return m_pMemory;
+	}
+
+	size_t BitSet::DataSize() const
+	{
+		return m_Capacity/8;
 	}
 }

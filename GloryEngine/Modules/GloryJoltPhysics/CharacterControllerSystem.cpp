@@ -132,5 +132,7 @@ namespace Glory
 				pComponent.m_CurrentLayerIndex = 0;
 			}
 		}
+
+		pRegistry->SetEntityDirty(entity);
 	}
 }

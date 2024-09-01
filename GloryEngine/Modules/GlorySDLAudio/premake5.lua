@@ -52,6 +52,9 @@ project "GlorySDLAudio"
 
 	links
 	{
+		"SDL2",
+		"SDL2_mixer",
+
 		"GloryCore",
 		"GloryAudioModule",
 		"GloryReflect",
@@ -78,7 +81,6 @@ project "GlorySDLAudio"
 
 	postbuildcommands
 	{
-		("{COPY} %{DepsBinDir}/SDL2_mixerd?.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} %{DepsBinDir}/SDL2_mixer?.dll %{moduleOutDir}/Dependencies"),
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 	}
@@ -124,13 +126,7 @@ project "GlorySDLAudio"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "SDL2d"
-		links "SDL2_mixerd"
-
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
-
-		links "SDL2"
-		links "SDL2_mixer"

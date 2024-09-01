@@ -42,6 +42,15 @@ namespace Glory
 			return Read(reinterpret_cast<char*>(&out), sizeof(T));
 		}
 
+		template<typename T>
+		BinaryStream& Read(std::vector<T>& out)
+		{
+			size_t size;
+			Read(size);
+			out.resize(size);
+			return Read(reinterpret_cast<char*>(out.data()), size*sizeof(T));
+		}
+
 		BinaryStream& Read(std::string& value);
 		BinaryStream& Read(void* out, size_t size);
 		virtual BinaryStream& Read(char* out, size_t size) = 0;
@@ -74,7 +83,7 @@ namespace Glory
 	class BinaryFileStream : public BinaryStream
 	{
 	public:
-		BinaryFileStream(const std::filesystem::path& path, bool read=false);
+		BinaryFileStream(const std::filesystem::path& path, bool read=false, bool trunc=true);
 		virtual ~BinaryFileStream();
 
 		void Seek(size_t offset, Relative relative = Relative::Start) override;

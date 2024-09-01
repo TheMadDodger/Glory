@@ -164,6 +164,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Position = *position;
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	QuatWrapper Transform_GetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -176,6 +178,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = *rotation;
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -188,6 +192,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = glm::quat(ToGLMVec3(*rotation));
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetLocalScale(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -200,6 +206,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Scale = *scale;
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetForward(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -218,6 +226,8 @@ namespace Glory
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = glm::conjugate(glm::quatLookAt(*forward, { 0.0f, 1.0f, 0.0f }));
+
+		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
 	glm::vec3 Transform_GetRight(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -565,16 +575,16 @@ namespace Glory
 		source.m_Loops = loops;
 	}
 
-	bool AudioSource_GetAllowEffects(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetEnable3D(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
-		return source.m_AllowExternalEffects;
+		return source.m_Enable3D;
 	}
 
-	void AudioSource_SetAllowEffects(MonoEntityHandle* pEntityHandle, UUID componentID, bool allow)
+	void AudioSource_SetEnable3D(MonoEntityHandle* pEntityHandle, UUID componentID, bool allow)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
-		source.m_AllowExternalEffects = allow;
+		source.m_Enable3D = allow;
 	}
 
 	bool AudioSource_GetAutoPlay(MonoEntityHandle* pEntityHandle, UUID componentID)
@@ -834,8 +844,8 @@ namespace Glory
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetAsMusic", AudioSource_SetAsMusic);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetLoops", AudioSource_GetLoops);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetLoops", AudioSource_SetLoops);
-		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAllowEffects", AudioSource_GetAllowEffects);
-		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetAllowEffects", AudioSource_SetAllowEffects);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetEnable3D", AudioSource_GetEnable3D);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetEnable3D", AudioSource_SetEnable3D);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAutoPlay", AudioSource_GetAutoPlay);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetAutoPlay", AudioSource_SetAutoPlay);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetPlaying", AudioSource_GetPlaying);
