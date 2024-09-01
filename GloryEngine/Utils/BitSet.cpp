@@ -26,6 +26,15 @@ namespace Glory::Utils
 		m_Capacity = 0;
 	}
 
+	void BitSet::operator=(BitSet&& other) noexcept
+	{
+		m_pMemory = other.m_pMemory;
+		m_Capacity = other.m_Capacity;
+
+		other.m_pMemory = nullptr;
+		other.m_Capacity = 0;
+	}
+
 	void BitSet::Set(Element index)
 	{
 		const Element elementIndex = index / (sizeof(Element) * 8);

@@ -40,10 +40,11 @@ namespace Glory
 		return m_IPLContext;
 	}
 
-	void SteamAudioModule::AddAudioScene(AudioScene&& audioScene)
+	size_t SteamAudioModule::AddAudioScene(AudioScene&& audioScene)
 	{
+		const size_t index = m_AudioScenes.size();
 		m_AudioScenes.push_back(std::move(audioScene));
-		/** @todo: Keep track of which mesh came from which scene for easier removal when the scene unloads */
+		return index;
 	}
 
 	void SteamAudioModule::RemoveAllAudioScenes()
@@ -65,40 +66,67 @@ namespace Glory
 
 		for (size_t i = 0; i < m_AudioScenes.size(); ++i)
 		{
-			AudioScene& scene = m_AudioScenes[i];
-
-			for (size_t i = 0; i < scene.MeshCount(); ++i)
-			{
-				MeshData& mesh = scene.Mesh(i);
-				const SoundMaterial& material = scene.Material(i);
-
-				IPLMaterial materials[1];
-				materials[0].absorption[0] = material.m_Absorption.x;
-				materials[0].absorption[1] = material.m_Absorption.y;
-				materials[0].absorption[2] = material.m_Absorption.z;
-				materials[0].scattering = material.m_Scattering;
-				materials[0].transmission[0] = material.m_Transmission.x;
-				materials[0].transmission[1] = material.m_Transmission.y;
-				materials[0].transmission[2] = material.m_Transmission.z;
-
-				/* @todo: Generate material indices */
-				IPLint32 materialIndices[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-				IPLStaticMeshSettings staticMeshSettings{};
-				staticMeshSettings.numVertices = mesh.VertexCount();
-				staticMeshSettings.numTriangles = mesh.IndexCount() / 3;
-				staticMeshSettings.numMaterials = 1;
-				staticMeshSettings.vertices = reinterpret_cast<IPLVector3*>(mesh.Vertices());
-				staticMeshSettings.triangles = reinterpret_cast<IPLTriangle*>(mesh.Indices());
-				staticMeshSettings.materialIndices = materialIndices;
-				staticMeshSettings.materials = materials;
-
-				IPLStaticMesh staticMesh = nullptr;
-				iplStaticMeshCreate(m_Scene, &staticMeshSettings, &staticMesh);
-				iplStaticMeshAdd(staticMesh, m_Scene);
-			}
+			BuildAudioSimulationScene(i);
 		}
 
+		iplSceneCommit(m_Scene);
+	}
+
+	void SteamAudioModule::BuildAudioSimulationScene(size_t sceneIndex)
+	{
+		if (!m_Scene)
+		{
+			IPLSceneSettings sceneSettings{};
+			sceneSettings.type = IPL_SCENETYPE_DEFAULT;
+			iplSceneCreate(m_IPLContext, &sceneSettings, &m_Scene);
+
+			iplSimulatorSetScene(m_Simulator, m_Scene);
+			iplSimulatorCommit(m_Simulator);
+		}
+
+		AudioScene& scene = m_AudioScenes[sceneIndex];
+		auto iter = m_StaticAudioMeshes.find(scene.SceneID());
+		if (iter == m_StaticAudioMeshes.end())
+		{
+			iter = m_StaticAudioMeshes.emplace(scene.SceneID(), std::vector<IPLStaticMesh>()).first;
+		}
+		iter->second.clear();
+
+		for (size_t j = 0; j < scene.MeshCount(); ++j)
+		{
+			MeshData& mesh = scene.Mesh(j);
+			const SoundMaterial& material = scene.Material(j);
+
+			IPLMaterial materials[1];
+			materials[0].absorption[0] = material.m_Absorption.x;
+			materials[0].absorption[1] = material.m_Absorption.y;
+			materials[0].absorption[2] = material.m_Absorption.z;
+			materials[0].scattering = material.m_Scattering;
+			materials[0].transmission[0] = material.m_Transmission.x;
+			materials[0].transmission[1] = material.m_Transmission.y;
+			materials[0].transmission[2] = material.m_Transmission.z;
+
+			/* @todo: Generate material indices */
+			IPLint32 materialIndices[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+			IPLStaticMeshSettings staticMeshSettings{};
+			staticMeshSettings.numVertices = mesh.VertexCount();
+			staticMeshSettings.numTriangles = mesh.IndexCount() / 3;
+			staticMeshSettings.numMaterials = 1;
+			staticMeshSettings.vertices = reinterpret_cast<IPLVector3*>(mesh.Vertices());
+			staticMeshSettings.triangles = reinterpret_cast<IPLTriangle*>(mesh.Indices());
+			staticMeshSettings.materialIndices = materialIndices;
+			staticMeshSettings.materials = materials;
+
+			IPLStaticMesh staticMesh = nullptr;
+			iplStaticMeshCreate(m_Scene, &staticMeshSettings, &staticMesh);
+			iplStaticMeshAdd(staticMesh, m_Scene);
+			iter->second.push_back(staticMesh);
+		}
+	}
+
+	void SteamAudioModule::CommitAudioSimulationScene()
+	{
 		iplSceneCommit(m_Scene);
 	}
 
@@ -139,12 +167,35 @@ namespace Glory
 			if (!pSceneResource->GetType(i, type)) continue;
 			if (type != typeid(AudioSceneData)) continue;
 			AudioSceneData* pAudioSceneData = static_cast<AudioSceneData*>(pSceneResource);
-			AddAudioScene(std::move(pAudioSceneData->m_AudioScene));
+			const size_t index = AddAudioScene(std::move(pAudioSceneData->m_AudioScene));
 			delete pAudioSceneData;
-			RebuildAudioSimulationScene();
+			BuildAudioSimulationScene(index);
+			CommitAudioSimulationScene();
 			return true;
 		}
 		return false;
+	}
+
+	void SteamAudioModule::OnSceneClosed(UUID sceneID)
+	{
+		auto iter = m_StaticAudioMeshes.find(sceneID);
+		if (iter != m_StaticAudioMeshes.end())
+		{
+			for (size_t i = 0; i < iter->second.size(); ++i)
+			{
+				iplStaticMeshRemove(iter->second[i], m_Scene);
+				iplStaticMeshRelease(&iter->second[i]);
+			}
+			iter->second.clear();
+			m_StaticAudioMeshes.erase(iter);
+		}
+		CommitAudioSimulationScene();
+
+		auto sceneIter = std::find_if(m_AudioScenes.begin(), m_AudioScenes.end(), [sceneID](const AudioScene& audioScene) {
+			return audioScene.SceneID() == sceneID;
+		});
+
+		m_AudioScenes.erase(sceneIter);
 	}
 
 	void SteamAudioModule::Initialize()

@@ -53,8 +53,14 @@ namespace Glory
 		size_t index = it - m_pOpenScenes.begin();
 		GScene* pActiveScene = m_pOpenScenes[m_ActiveSceneIndex];
 		GScene* pScene = *it;
+		pScene->Stop();
 		delete pScene;
 		m_pOpenScenes.erase(it);
+
+		for (size_t j = 0; j < m_pEngine->ModulesCount(); ++j)
+		{
+			m_pEngine->GetModule(j)->OnSceneClosed(uuid);
+		}
 
 		if (index == m_ActiveSceneIndex || m_pOpenScenes.size() <= 0)
 		{

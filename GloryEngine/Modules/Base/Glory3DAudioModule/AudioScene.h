@@ -54,6 +54,8 @@ namespace Glory
 		/** @brief Destructor */
 		GLORY_API ~AudioScene() = default;
 
+		GLORY_API void operator=(AudioScene&& other) noexcept;
+
 		/**
 		 * @brief Add a mesh asset reference to the scene
 		 * @param meshID ID of the mesh asset to add

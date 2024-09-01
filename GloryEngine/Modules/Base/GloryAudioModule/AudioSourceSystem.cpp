@@ -41,6 +41,8 @@ namespace Glory
 
 		auto& callback = pAudioModule->SourceSystem().OnSourceStop;
 		if (callback) callback(pRegistry, entity, pComponent);
+
+		Stop(pRegistry, entity, pComponent);
 	}
 
 	void AudioSourceSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)

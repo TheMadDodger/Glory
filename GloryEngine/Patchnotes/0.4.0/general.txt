@@ -1,0 +1,19 @@
+Runtime:
+- Fixed runtime not loading the shared shaders pack
+- Fixed runtime not stopping a scene before it gets closed
+
+Editor:
+- Added SteamAudioExtenstion with an AudioScene builder window
+
+Engine:
+- Added Audio base module
+- Added Audio3D base module
+- Added SDLAudio module
+- Added SteamAudio module
+- Added AudioSource component
+- Added AudioListener component
+- Added AudioOccluder component
+
+Scripting:
+- Fixed SceneManager.CloseScene();
+

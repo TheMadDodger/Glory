@@ -428,7 +428,7 @@ namespace Glory
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
-		GScene* pScene = pScenes->GetOpenScene(sceneID);
+		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
 		pScene->MarkForDestruction();
 	}

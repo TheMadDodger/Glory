@@ -11,6 +11,7 @@ namespace Glory::Utils
 		BitSet(size_t capacity = 32, bool defaultOn = false);
 		BitSet(BitSet&& other) noexcept;
 		~BitSet();
+		void operator=(BitSet&& other) noexcept;
 
 	public:
 		void Set(Element index);

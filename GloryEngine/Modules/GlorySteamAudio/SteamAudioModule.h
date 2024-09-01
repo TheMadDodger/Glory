@@ -41,7 +41,7 @@ namespace Glory
 		 *
 		 * @note You must call @ref RebuildAudioSimulationScene() before the changes take effect
 		 */
-		GLORY_API void AddAudioScene(AudioScene&& audioScene);
+		GLORY_API size_t AddAudioScene(AudioScene&& audioScene);
 		/**
 		 * @brief Remove all loaded audio scenes from the simulation
 		 *
@@ -51,6 +51,12 @@ namespace Glory
 
 		/** @brief Rebuild the @ref IPLScene from loaded @ref AudioScene datas */
 		GLORY_API void RebuildAudioSimulationScene();
+
+		/** @brief Append another @ref AudioScene to the @ref IPLScene */
+		GLORY_API void BuildAudioSimulationScene(size_t sceneIndex);
+
+		/** @brief Commit the simulation scene to SteamAudio */
+		GLORY_API void CommitAudioSimulationScene();
 
 		/** @brief Get the default sound material */
 		GLORY_API const SoundMaterial& DefaultMaterial() const;
@@ -69,6 +75,7 @@ namespace Glory
 		GLORY_API bool HasFeature(uint32_t feature) const override;
 
 		virtual bool ClaimExtraSceneData(Resource* pSceneResource) override;
+		virtual void OnSceneClosed(UUID sceneID) override;
 
 	protected:
 		virtual void Initialize() override;
@@ -158,6 +165,7 @@ namespace Glory
 		std::vector<std::vector<float>> m_TemporaryBuffers;
 
 		std::vector<AudioScene> m_AudioScenes;
+		std::map<UUID, std::vector<IPLStaticMesh>> m_StaticAudioMeshes;
 
 		SoundMaterial m_DefaultSoundMaterial;
     };

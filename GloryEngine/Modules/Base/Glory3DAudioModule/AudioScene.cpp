@@ -14,9 +14,19 @@ namespace Glory
 	}
 
 	AudioScene::AudioScene(AudioScene&& other) noexcept:
-		m_MeshDatas(std::move(other.m_MeshDatas)), m_Meshes(std::move(other.m_Meshes)),
-		m_Materials(std::move(other.m_Materials)), m_IsAssetBits(std::move(other.m_IsAssetBits))
+		m_SceneID(other.m_SceneID), m_MeshDatas(std::move(other.m_MeshDatas)),
+		m_Meshes(std::move(other.m_Meshes)), m_Materials(std::move(other.m_Materials)),
+		m_IsAssetBits(std::move(other.m_IsAssetBits))
 	{
+	}
+
+	void AudioScene::operator=(AudioScene&& other) noexcept
+	{
+		m_SceneID = other.m_SceneID;
+		m_MeshDatas = std::move(other.m_MeshDatas);
+		m_Meshes = std::move(other.m_Meshes);
+		m_Materials = std::move(other.m_Materials);
+		m_IsAssetBits = std::move(other.m_IsAssetBits);
 	}
 
 	void AudioScene::AddMesh(UUID meshID, SoundMaterial&& material)
