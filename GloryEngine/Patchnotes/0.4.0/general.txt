@@ -1,6 +1,7 @@
 Runtime:
 - Fixed runtime not loading the shared shaders pack
 - Fixed runtime not stopping a scene before it gets closed
+- Runtime now calls stop on all open scenes when the application quits
 
 Editor:
 - Added SteamAudioExtenstion with an AudioScene builder window
@@ -10,6 +11,9 @@ Engine:
 - Added Audio3D base module
 - Added SDLAudio module
 - Added SteamAudio module
+- Implemented spatialization with Binaural and Ambisonics
+- Implemented distance attenuation
+- Implemented direct simulation for occlusion, absorption, transmission, directivity and attenuation
 - Added AudioSource component
 - Added AudioListener component
 - Added AudioOccluder component

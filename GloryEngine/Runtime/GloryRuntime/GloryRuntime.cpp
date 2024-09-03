@@ -151,6 +151,7 @@ namespace Glory
 			m_pEngine->Update();
 		}
 
+		m_pEngine->GetSceneManager()->Stop();
 		m_pEngine->Cleanup();
 	}
 

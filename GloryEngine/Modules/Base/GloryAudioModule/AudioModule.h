@@ -12,6 +12,7 @@ namespace Glory
 	class AudioSourceSystem;
 	class AudioListenerSystem;
 
+	/** @brief User data types */
 	enum class AudioChannelUDataType
 	{
 		None = 0,
@@ -19,6 +20,7 @@ namespace Glory
 		Entity = 2
 	};
 
+	/** @brief User data for audio mixing channels */
 	struct AudioChannelUData
 	{
 		AudioChannelUDataType m_Type = AudioChannelUDataType::None;
@@ -60,14 +62,21 @@ namespace Glory
 
 		/** @brief Play an audio resource
 		 * @param pAudio Audio asset to play
-		 * @param udata Pointer to data to store in the channels user data buffer
-		 * @param udataSize Size of the user data
 		 * @param loops How many times to loop the audio
+		 * @param udata User data to store in the channel
 		 * @param finishedCallback Callback that will be called when the audio finishes playing
 		 * @returns The channel that was chosen to play the audio
 		 */
 		virtual int Play(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback = NULL) = 0;
+		/** @brief Play an audio resource with 3D effects enabled
+		 * @param pAudio Audio asset to play
+		 * @param loops How many times to loop the audio
+		 * @param udata User data to store in the channel
+		 * @param finishedCallback Callback that will be called when the audio finishes playing
+		 * @returns The channel that was chosen to play the audio
+		 */
 		virtual int PlayWithEffects(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) = 0;
+		/** @brief Get an @ref AudioChannel used for mixing */
 		virtual AudioChannel& Channel(int channel) = 0;
 
 		/** @brief Stop a channel from playing
@@ -133,19 +142,29 @@ namespace Glory
 		/** @brief Get master volume of the audio engine */
 		virtual float MasterVolume() = 0;
 
+		/** @brief Get the chunk data of an audio data pointer */
 		virtual uint8_t* GetChunkData(void* chunk) = 0;
 
+		/** @brief The current sampling rate this module is running at */
 		virtual uint32_t SamplingRate() = 0;
+		/** @brief The current audio output channels this module is running at */
 		virtual uint32_t Channels() = 0;
+		/** @brief The current mixing channels this module is running at */
 		virtual uint32_t MixingChannels() = 0;
+		/** @brief The current listener matrix this module is running at */
 		virtual glm::mat4& ListenerTransform() = 0;
 
+		/** @brief @ref AudioSourceSystem instance */
 		AudioSourceSystem& SourceSystem();
+		/** @brief @ref AudioListenerSystem instance */
 		AudioListenerSystem& ListenerSystem();
 
+		/** @brief Callback that is called when effect processing is needed */
 		std::function<void(AudioChannel&, void*, int)> OnEffectCallback;
+		/** @brief Callback that is called when the number of mixing channels changes */
 		std::function<void(size_t)> OnMixingChannelsResized;
 
+		/** @brief Setting names for AudioModule */
 		struct SettingNames
 		{
 			static constexpr char* MixingChannels = "Mixing MixChannels";
