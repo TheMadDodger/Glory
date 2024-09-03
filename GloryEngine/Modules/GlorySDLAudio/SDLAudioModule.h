@@ -28,7 +28,21 @@ namespace Glory
 		 * @returns The channel that was chosen to play the audio
 		 */
 		GLORY_API int Play(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) override;
+		/** @brief Play an audio resource
+		 * @param pAudio Audio asset to play
+		 * @param loops How many times to loop the audio
+		 * @param udata User data to store in the channel
+		 * @param finishedCallback Callback that will be called when the audio finishes playing
+		 * @returns The channel that was chosen to play the audio
+		 */
 		GLORY_API int PlayWithEffects(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback = NULL) override;
+		/** @brief Play an audio resource with 3D effects enabled
+		 * @param pAudio Audio asset to play
+		 * @param loops How many times to loop the audio
+		 * @param udata User data to store in the channel
+		 * @param finishedCallback Callback that will be called when the audio finishes playing
+		 * @returns The channel that was chosen to play the audio
+		 */
 		GLORY_API AudioChannel& Channel(int channel) override;
 
 		/** @brief Stop a channel from playing
@@ -94,11 +108,16 @@ namespace Glory
 		/** @brief Get master volume of the audio engine */
 		GLORY_API float MasterVolume() override;
 
+		/** @brief Get the chunk data of an audio data pointer */
 		GLORY_API uint8_t* GetChunkData(void* chunk) override;
 
+		/** @brief The current sampling rate this module is running at */
 		GLORY_API uint32_t SamplingRate() { return uint32_t(m_Frequency); }
+		/** @brief The current audio output channels this module is running at */
 		GLORY_API uint32_t Channels() override { return uint32_t(m_Channels); }
+		/** @brief The current mixing channels this module is running at */
 		GLORY_API uint32_t MixingChannels() override;
+		/** @brief The current listener matrix this module is running at */
 		GLORY_API glm::mat4& ListenerTransform() override { return m_ListerenTransform; }
 
 	protected:

@@ -182,6 +182,16 @@ namespace Glory
 		}
 	}
 
+	void SceneManager::Stop()
+	{
+		if (!m_Started) return;
+		m_Started = false;
+		for (size_t i = 0; i < m_pOpenScenes.size(); ++i)
+		{
+			m_pOpenScenes[i]->Stop();
+		}
+	}
+
 	void SceneManager::CloseAllScenes()
 	{
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
