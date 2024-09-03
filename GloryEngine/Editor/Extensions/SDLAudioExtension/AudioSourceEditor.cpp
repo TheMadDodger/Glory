@@ -53,7 +53,8 @@ namespace Glory::Editor
 			}
 
 			if (strcmp(pField->Name(), "m_Direct") == 0)
-				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::DirectSimulation));
+				return !(component.m_Enable3D && !component.m_Spatialization.m_Attenuation.m_Enable
+					&& p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::DirectSimulation));
 			if (strcmp(pField->Name(), "m_Reflections") == 0)
 				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::ReflectionSimulation));
 			if (strcmp(pField->Name(), "m_Pathing") == 0)

@@ -28,6 +28,9 @@
 #include <Shortcuts.h>
 #include <Dispatcher.h>
 #include <Package.h>
+#include <EntitySceneObjectEditor.h>
+#include <CreateEntityObjectsCallbacks.h>
+#include <CreateObjectAction.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -40,6 +43,8 @@ namespace Glory::Editor
 	SoundMaterialImporter Importer;
 
 	static constexpr char* Shortcut_Window_SteamAudio = "Open Steam Audio Window";
+
+	CREATE_OBJECT_CALLBACK_CPP(SoundOccluder, SoundOccluder, ());
 
 	void SteamAudioExtension::HandleBeforeStart(Module* pModule)
 	{
@@ -145,6 +150,8 @@ namespace Glory::Editor
 		Importer::Register(&Importer);
 
 		EntitySceneObjectEditor::AddComponentIcon<SoundOccluder>(ICON_FA_EAR_DEAF);
+
+		OBJECT_CREATE_MENU(SoundOccluder, SoundOccluder);
 
 		GatherPackageTasksEvents().AddListener([&](const EmptyEvent&) {
 			PackageTask task;
