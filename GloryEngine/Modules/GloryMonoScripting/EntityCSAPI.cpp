@@ -727,15 +727,36 @@ namespace Glory
 		return &source.m_Spatialization;
 	}
 
-	//void AudioSource_SetSpatializationSettings(ref Entity entity, UInt64 componentID, ref SpatializationSettings value);
 	AudioSourceSimulationSettings* AudioSource_GetSimulationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return &source.m_Simulation;
 	}
-	//void AudioSource_SetSimulationSettings(ref Entity entity, UInt64 componentID, ref AudioSourceSimulationSettings value);
 
 #pragma endregion
+
+#pragma region Audio listener
+
+	bool AudioListener_GetEnabled(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
+		return listener.m_Enable;
+	}
+
+	void AudioListener_SetEnabled(MonoEntityHandle* pEntityHandle, UUID componentID, bool value)
+	{
+		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
+		listener.m_Enable = value;
+	}
+
+	AudioSimulationSettings* AudioListener_GetSimulationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
+		return &listener.m_Simulation;
+	}
+
+#pragma endregion
+
 
 #pragma region SceneObject
 
@@ -873,6 +894,11 @@ namespace Glory
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_Stop", AudioSource_Stop);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_Pause", AudioSource_Pause);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_Resume", AudioSource_Resume);
+
+		/* AudioListener */
+		BIND("GloryEngine.Entities.AudioSource::AudioListener_GetEnabled", AudioListener_GetEnabled);
+		BIND("GloryEngine.Entities.AudioSource::AudioListener_SetEnabled", AudioListener_SetEnabled);
+		BIND("GloryEngine.Entities.AudioSource::AudioListener_GetSimulationSettings", AudioListener_GetSimulationSettings);
 
 		/* Entity Scene Object */
 		BIND("GloryEngine.Entities.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);

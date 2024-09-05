@@ -234,12 +234,14 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Spatialization settings
         /// </summary>
-        public ref SpatializationSettings SpatializationSettings => ref AudioSource_GetSpatializationSettings(ref _entity, _objectID);
+        public ref SpatializationSettings SpatializationSettings
+            => ref AudioSource_GetSpatializationSettings(ref _entity, _objectID);
 
         /// <summary>
         /// Simulation settings
         /// </summary>
-        public ref AudioSourceSimulationSettings SimulationSettings => ref AudioSource_GetSimulationSettings(ref _entity, _objectID);
+        public ref AudioSourceSimulationSettings SimulationSettings
+            => ref AudioSource_GetSimulationSettings(ref _entity, _objectID);
 
         #endregion
 
@@ -311,13 +313,9 @@ namespace GloryEngine.Entities
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static ref SpatializationSettings AudioSource_GetSpatializationSettings(ref Entity entity, UInt64 componentID);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetSpatializationSettings(ref Entity entity, UInt64 componentID, ref SpatializationSettings value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static ref AudioSourceSimulationSettings AudioSource_GetSimulationSettings(ref Entity entity, UInt64 componentID);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetSimulationSettings(ref Entity entity, UInt64 componentID, ref AudioSourceSimulationSettings value);
 
         #endregion
     }
