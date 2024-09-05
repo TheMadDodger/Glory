@@ -4,6 +4,156 @@ using System.Runtime.CompilerServices;
 namespace GloryEngine.Entities
 {
     /// <summary>
+    /// Spatialization mode
+    /// </summary>
+    public enum SpatializationMode
+    {
+        Binaural,
+        Ambisonics
+    }
+
+    /// <summary>
+    /// Ambisonics order
+    /// </summary>
+    public enum AmbisonicsOrder
+    {
+        First,
+        Second,
+        Third
+    }
+
+    /// <summary>
+    /// Occlusion type
+    /// </summary>
+    public enum OcclusionType
+    {
+        Raycast,
+        Volumetric
+    }
+
+    /// <summary>
+    /// Air absorption type
+    /// </summary>
+    public enum AirAbsorptionType
+    {
+        Default,
+        Exponential
+    }
+
+    /// <summary>
+    /// Attenuation settings
+    /// </summary>
+    public struct AttenuationSettings
+    {
+        public bool Enable;
+        public float MinDistance;
+    };
+
+    /// <summary>
+    /// Spatialization settings
+    /// </summary>
+    public struct SpatializationSettings
+    {
+        public bool Enable;
+        public SpatializationMode Mode;
+        public AmbisonicsOrder AmbisonicsOrder;
+        public float SpatialBlend;
+        public AttenuationSettings Attenuation;
+    };
+
+    /// <summary>
+    /// Air absorption settings
+    /// </summary>
+    public struct AirAbsorptionSettings
+    {
+        public bool Enable;
+        public AirAbsorptionType Type;
+        public float LowCoefficient;
+        public float MidCoefficient;
+        public float HighCoefficient;
+    };
+
+    /// <summary>
+    /// Directivity settings
+    /// </summary>
+    public struct DirectivitySettings
+    {
+        public bool Enable;
+        public float DipoleWeight;
+        public float DipolePowe;
+    };
+
+    /// <summary>
+    /// Occlusion settings
+    /// </summary>
+    public struct OcclusionSettings
+    {
+        public bool Enable;
+        public OcclusionType Type;
+        public float VolumetricRadius;
+        public int VolumetricSamples;
+    };
+
+    /// <summary>
+    /// Transmission settings
+    /// </summary>
+    public struct TransmissionSettings
+    {
+        bool Enable;
+        int TransmissionRays;
+        bool FrequencyDependan;
+    };
+
+    /// <summary>
+    /// Direct simulation settings
+    /// </summary>
+    public struct DirectSimulationSettings
+    {
+        public bool m_Enable;
+        public AttenuationSettings DistanceAttenuation;
+        public AirAbsorptionSettings AirAbsorption;
+        public DirectivitySettings Directivity;
+        public OcclusionSettings Occlusion;
+        public TransmissionSettings Transmission;
+    };
+
+    /// <summary>
+    /// Reflection simulation settings
+    /// </summary>
+    public struct ReflectionSimulationSettings
+    {
+        public bool Enable;
+        public float ReverbScale1;
+        public float ReverbScale2;
+        public float ReverbScale3;
+        public float HybridReverbTransitionTime;
+        public float HybridReverbOverlapPercent;
+    };
+
+    /// <summary>
+    /// Pathing simulation settings
+    /// </summary>
+    public struct PathingSimulationSettings
+    {
+        public bool Enable;
+        public float VisRadius;
+        public int PathingOrder;
+        public bool Validation;
+        public bool FindAlternativePaths;
+    };
+
+    /// <summary>
+    /// Simulation settings
+    /// </summary>
+    public struct AudioSourceSimulationSettings
+    {
+        public bool Enable;
+        public DirectSimulationSettings Direct;
+        public ReflectionSimulationSettings Reflections;
+        public PathingSimulationSettings Pathing;
+    }
+
+    /// <summary>
     /// Handle for an AudioSource component
     /// </summary>
     public class AudioSource : EntityComponent
@@ -81,6 +231,16 @@ namespace GloryEngine.Entities
             set => AudioSource_SetVolume(ref _entity, _objectID, value);
         }
 
+        /// <summary>
+        /// Spatialization settings
+        /// </summary>
+        public ref SpatializationSettings SpatializationSettings => ref AudioSource_GetSpatializationSettings(ref _entity, _objectID);
+
+        /// <summary>
+        /// Simulation settings
+        /// </summary>
+        public ref AudioSourceSimulationSettings SimulationSettings => ref AudioSource_GetSimulationSettings(ref _entity, _objectID);
+
         #endregion
 
         #region Methods
@@ -148,6 +308,16 @@ namespace GloryEngine.Entities
         private extern static void AudioSource_Pause(ref Entity entity, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static void AudioSource_Resume(ref Entity entity, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static ref SpatializationSettings AudioSource_GetSpatializationSettings(ref Entity entity, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void AudioSource_SetSpatializationSettings(ref Entity entity, UInt64 componentID, ref SpatializationSettings value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static ref AudioSourceSimulationSettings AudioSource_GetSimulationSettings(ref Entity entity, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void AudioSource_SetSimulationSettings(ref Entity entity, UInt64 componentID, ref AudioSourceSimulationSettings value);
 
         #endregion
     }

@@ -721,6 +721,20 @@ namespace Glory
 		AudioSourceSystem::Resume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
+	SpatializationSettings* AudioSource_GetSpatializationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		return &source.m_Spatialization;
+	}
+
+	//void AudioSource_SetSpatializationSettings(ref Entity entity, UInt64 componentID, ref SpatializationSettings value);
+	AudioSourceSimulationSettings* AudioSource_GetSimulationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		return &source.m_Simulation;
+	}
+	//void AudioSource_SetSimulationSettings(ref Entity entity, UInt64 componentID, ref AudioSourceSimulationSettings value);
+
 #pragma endregion
 
 #pragma region SceneObject
@@ -853,6 +867,8 @@ namespace Glory
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetPaused", AudioSource_SetPaused);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetVolume", AudioSource_GetVolume);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_SetVolume", AudioSource_SetVolume);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetSpatializationSettings", AudioSource_GetSpatializationSettings);
+		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetSimulationSettings", AudioSource_GetSimulationSettings);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_Play", AudioSource_Play);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_Stop", AudioSource_Stop);
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_Pause", AudioSource_Pause);
