@@ -388,7 +388,7 @@ namespace Glory::Utils::ECS
 		for (size_t i = 0; i < pView->ChildCount(); ++i)
 		{
 			EntityID child = pView->Child(i);
-			SetEntityDirty(entity, dirty);
+			SetEntityDirty(child, dirty);
 		}
 	}
 
