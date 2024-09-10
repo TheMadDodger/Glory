@@ -15,7 +15,7 @@ ARGPAIR(__VA_ARGS__);
 #define REFLECT_FIELD_INFO(x)\
 FieldData(Reflect::Hash(typeid(ARGNAME(x))), ARGNAME_AS_STRING(x), ARGTYPE_AS_STRING(x), offsetof(TypeName, ARGNAME(x)), sizeof(ARGTYPE(x))),
 
-#define REFLECTABLE_TYPEDATA(typeName, bufferOffset, bufferSize, ...)\
+#define REFLECTABLE(typeName, ...)\
 FOR_EACH(REFLECTABLE_FIELD, __VA_ARGS__)\
 typedef typeName TypeName;\
 public:\
@@ -27,32 +27,9 @@ public:\
 		static const FieldData pFields[] = {\
 			FOR_EACH(REFLECT_FIELD_INFO, __VA_ARGS__)\
 		};\
-		static const TypeData pTypeData = TypeData(typeNameString, pFields, uint32_t(CustomTypeHash::Struct), TYPE_HASH, NUM_ARGS, bufferOffset, bufferSize);\
+		static const TypeData pTypeData = TypeData(typeNameString, pFields, uint32_t(CustomTypeHash::Struct), TYPE_HASH, NUM_ARGS);\
 		return &pTypeData;\
 	}
-
-#define REFLECTABLE(typeName, ...)\
-REFLECTABLE_TYPEDATA(typeName, -1, 0, __VA_ARGS__)\
-	static int DataBufferOffset()\
-	{\
-		return -1;\
-	}\
-	static int DataBufferSize()\
-	{\
-		return 0;\
-	}
-
-#define REFLECTABLE_WITH_BUFFER(typeName, bufferMember, bufferSize, ...)\
-REFLECTABLE_TYPEDATA(typeName, offsetof(typeName, bufferMember), bufferSize, __VA_ARGS__);\
-	static int DataBufferOffset()\
-	{\
-		return offsetof(typeName, bufferMember);\
-	}\
-	static int DataBufferSize()\
-	{\
-		return bufferSize;\
-	}
-
 
 #pragma endregion
 
