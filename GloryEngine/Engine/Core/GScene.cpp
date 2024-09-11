@@ -451,60 +451,6 @@ namespace Glory
 	//	return entity;
 	//}
 
-	void GScene::Deserialize(BinaryStream& container)
-	{
-		size_t typeViewCount, entityCount;
-		container.Read(entityCount).Read(typeViewCount);
-
-		for (size_t i = 0; i < entityCount; ++i)
-			m_Registry.CreateEntity();
-
-		/* Deserialize component datas */
-		for (size_t i = 0; i < typeViewCount; ++i)
-		{
-			uint32_t hash;
-			container.Read(hash);
-			Utils::ECS::BaseTypeView* pTypeView = m_Registry.GetTypeView(hash);
-
-			size_t size;
-			container.Read(size);
-
-			const Utils::Reflect::TypeData* pTypeData =
-				Utils::Reflect::Reflect::GetTyeData(hash);
-
-			for (size_t j = 0; j < size; ++j)
-			{
-				Utils::ECS::EntityID entity;
-				container.Read(entity);
-				void* data = pTypeView->Create(entity);
-				for (size_t k = 0; k < pTypeData->FieldCount(); ++k)
-				{
-					const Utils::Reflect::FieldData* pField = pTypeData->GetFieldData(k);
-					void* pAddress = pField->GetAddress(data);
-					DeserializeData(container, pField, pAddress);
-				}
-			}
-		}
-
-		/* Deserialize the hierarchy */
-		for (size_t i = 0; i < entityCount + 1; ++i)
-		{
-			DeserializeTree(container, m_Registry);
-		}
-
-		/* Deserialize scene IDs */
-		size_t idSize;
-		container.Read(idSize);
-		for (size_t i = 0; i < idSize; i++)
-		{
-			UUID id;
-			Utils::ECS::EntityID entity;
-			container.Read(id).Read(entity);
-			m_Ids.emplace(id, entity);
-			m_UUIds.emplace(entity, id);
-		}
-	}
-
 	void GScene::MarkForDestruction()
 	{
 		m_MarkedForDestruct = true;
@@ -551,6 +497,8 @@ namespace Glory
 			const Utils::Reflect::TypeData* pTypeData =
 				Utils::Reflect::Reflect::GetTyeData(hash);
 
+			const int bufferOffset = pTypeData->DataBufferOffset();
+			const size_t bufferSize = pTypeData->DataBufferSize();
 			for (size_t j = 0; j < pTypeView->Size(); ++j)
 			{
 				Utils::ECS::EntityID entity = pTypeView->EntityAt(j);
@@ -561,6 +509,11 @@ namespace Glory
 					const Utils::Reflect::FieldData* pField = pTypeData->GetFieldData(k);
 					void* pAddress = pField->GetAddress(data);
 					SerializeData(container, pField, pAddress);
+				}
+				if (bufferOffset != -1)
+				{
+					const char* pBuffer = (const char*)data + bufferOffset;
+					container.Write(pBuffer, bufferSize);
 				}
 			}
 		}
@@ -578,6 +531,69 @@ namespace Glory
 		for (auto itor = m_Ids.begin(); itor != m_Ids.end(); ++itor)
 		{
 			container.Write(itor->first).Write(itor->second);
+		}
+	}
+
+	void GScene::Deserialize(BinaryStream& container)
+	{
+		size_t typeViewCount, entityCount;
+		container.Read(entityCount).Read(typeViewCount);
+
+		for (size_t i = 0; i < entityCount; ++i)
+			m_Registry.CreateEntity();
+
+		/* Deserialize component datas */
+		for (size_t i = 0; i < typeViewCount; ++i)
+		{
+			uint32_t hash;
+			container.Read(hash);
+			Utils::ECS::BaseTypeView* pTypeView = m_Registry.GetTypeView(hash);
+
+			size_t size;
+			container.Read(size);
+
+			const Utils::Reflect::TypeData* pTypeData =
+				Utils::Reflect::Reflect::GetTyeData(hash);
+
+			const int bufferOffset = pTypeData->DataBufferOffset();
+			const size_t bufferSize = pTypeData->DataBufferSize();
+
+			for (size_t j = 0; j < size; ++j)
+			{
+				Utils::ECS::EntityID entity;
+				container.Read(entity);
+				void* data = pTypeView->Create(entity);
+				for (size_t k = 0; k < pTypeData->FieldCount(); ++k)
+				{
+					const Utils::Reflect::FieldData* pField = pTypeData->GetFieldData(k);
+					void* pAddress = pField->GetAddress(data);
+					DeserializeData(container, pField, pAddress);
+				}
+
+				if (bufferOffset != -1)
+				{
+					char* pBuffer = (char*)data + bufferOffset;
+					container.Read(pBuffer, bufferSize);
+				}
+			}
+		}
+
+		/* Deserialize the hierarchy */
+		for (size_t i = 0; i < entityCount + 1; ++i)
+		{
+			DeserializeTree(container, m_Registry);
+		}
+
+		/* Deserialize scene IDs */
+		size_t idSize;
+		container.Read(idSize);
+		for (size_t i = 0; i < idSize; i++)
+		{
+			UUID id;
+			Utils::ECS::EntityID entity;
+			container.Read(id).Read(entity);
+			m_Ids.emplace(id, entity);
+			m_UUIds.emplace(entity, id);
 		}
 	}
 }

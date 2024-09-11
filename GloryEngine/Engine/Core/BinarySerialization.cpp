@@ -17,11 +17,18 @@ namespace Glory
 		switch (type)
 		{
 		case uint32_t(CustomTypeHash::Struct): {
+			const int bufferOffset = pElementTypeData->DataBufferOffset();
+			const size_t bufferSize = pElementTypeData->DataBufferSize();
 			for (size_t i = 0; i < pElementTypeData->FieldCount(); ++i)
 			{
 				const Utils::Reflect::FieldData* pField = pElementTypeData->GetFieldData(i);
 				void* pAddress = pField->GetAddress(data);
 				SerializeData(container, pField, pAddress);
+			}
+			if (bufferOffset != -1)
+			{
+				const char* pBuffer = (const char*)data + bufferOffset;
+				container.Write(pBuffer, bufferSize);
 			}
 			break;
 		}
@@ -95,11 +102,18 @@ namespace Glory
 		switch (type)
 		{
 		case uint32_t(CustomTypeHash::Struct): {
+			const int bufferOffset = pElementTypeData->DataBufferOffset();
+			const size_t bufferSize = pElementTypeData->DataBufferSize();
 			for (size_t i = 0; i < pElementTypeData->FieldCount(); ++i)
 			{
 				const Utils::Reflect::FieldData* pField = pElementTypeData->GetFieldData(i);
 				void* pAddress = pField->GetAddress(data);
 				DeserializeData(container, pField, pAddress);
+			}
+			if (bufferOffset != -1)
+			{
+				char* pBuffer = (char*)data + bufferOffset;
+				container.Read(pBuffer, bufferSize);
 			}
 			break;
 		}

@@ -3,12 +3,14 @@
 
 namespace Glory::Utils::Reflect
 {
-	TypeData::TypeData(const char* typeName, const FieldData* pFields, uint32_t internalTypeHash, uint32_t typeHash, int numFields) :
+	TypeData::TypeData(const char* typeName, const FieldData* pFields, uint32_t internalTypeHash, uint32_t typeHash, int numFields, int bufferOffset, size_t bufferSize):
 		m_TypeName(typeName),
 		m_pFields(pFields),
 		m_TypeHash(typeHash),
 		m_FieldCount(numFields),
-		m_InternalTypeHash(internalTypeHash)
+		m_InternalTypeHash(internalTypeHash),
+		m_BufferOffset(bufferOffset),
+		m_BufferSize(bufferSize)
 	{
 	}
 
@@ -17,7 +19,9 @@ namespace Glory::Utils::Reflect
 		m_pFields(new FieldData((size_t)CustomTypeHash::Enum, enumTypeHash, "m_value", typeName, 0, sizeof(size_t))),
 		m_TypeHash(enumTypeHash),
 		m_FieldCount(1),
-		m_InternalTypeHash(uint32_t(CustomTypeHash::Enum))
+		m_InternalTypeHash(uint32_t(CustomTypeHash::Enum)),
+		m_BufferOffset(-1),
+		m_BufferSize(0)
 	{
 	}
 
@@ -59,5 +63,15 @@ namespace Glory::Utils::Reflect
 		}
 
 		return nullptr;
+	}
+
+	const int TypeData::DataBufferOffset() const
+	{
+		return m_BufferOffset;
+	}
+
+	const size_t TypeData::DataBufferSize() const
+	{
+		return m_BufferSize;
 	}
 }

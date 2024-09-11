@@ -44,7 +44,7 @@ namespace Glory
 			return std::memcmp(m_ShapeDataBuffer, other.m_ShapeDataBuffer, sizeof(m_ShapeDataBuffer)) == 0;
 		}
 
-		REFLECTABLE(ShapeProperty,
+		REFLECTABLE_WITH_BUFFER(ShapeProperty, m_ShapeDataBuffer, 64,
 			(ShapeType)(m_ShapeType)
 		);
 
