@@ -18,6 +18,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void CompileNewAssets();
 		GLORY_EDITOR_API static void CompileAssets();
 		GLORY_EDITOR_API static void CompileAssets(const std::vector<UUID>& ids);
+		GLORY_EDITOR_API static void CompileAssetsImmediately(const std::vector<UUID>& ids);
 		GLORY_EDITOR_API static bool IsBusy();
 		GLORY_EDITOR_API static bool IsCompilingAsset(UUID uuid);
 

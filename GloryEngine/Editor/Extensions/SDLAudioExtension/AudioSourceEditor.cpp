@@ -2,6 +2,7 @@
 
 #include <EditorApplication.h>
 #include <Audio3DModule.h>
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -65,8 +66,8 @@ namespace Glory::Editor
 			case offsetof(AudioSource, m_Enable3D):
 				return !p3DAudio;
 			case offsetof(AudioSource, m_Simulation):
-				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::Occlusion))
-			;case offsetof(AudioSource, m_Spatialization):
+				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::Occlusion) && !component.m_Spatialization.m_Attenuation.m_Enable);
+			case offsetof(AudioSource, m_Spatialization):
 				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::Spatialization));
 
 			default:
@@ -88,6 +89,21 @@ namespace Glory::Editor
 			PropertyDrawer::DrawProperty("", pTypeData, &component, 0);
 		}
 		PropertyDrawer::SetDisabledCheckCallback();
+
+		if (component.m_Spatialization.m_Attenuation.m_Enable)
+		{
+			const float childHeight = ImGui::CalcTextSize("A").y * 3.5f;
+			ImGui::BeginChild("error", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
+			if (ImGui::BeginMenuBar())
+			{
+				ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, ICON_FA_TRIANGLE_EXCLAMATION);
+				ImGui::SameLine();
+				ImGui::Text(" Warning");
+				ImGui::EndMenuBar();
+			}
+			ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "If you want to enable simulation you have to disable attenuation in the spatialization settimgs.");
+			ImGui::EndChild();
+		}
 
 		Undo::StopRecord();
 

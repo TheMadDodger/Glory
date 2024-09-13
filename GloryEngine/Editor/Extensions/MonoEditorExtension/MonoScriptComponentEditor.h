@@ -16,7 +16,6 @@ namespace Glory::Editor
 		virtual bool OnGUI() override;
 		virtual std::string Name() override;
 
-	private:
-		MonoScript* m_pScript;
+		size_t m_LastCompilationVersion{ 0 };
 	};
 }

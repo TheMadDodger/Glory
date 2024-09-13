@@ -1,11 +1,12 @@
 #include "MonoScriptComponentEditor.h"
+#include "MonoEditorExtension.h"
 
 #include <AssetManager.h>
 #include <EditorApplication.h>
 
 namespace Glory::Editor
 {
-	MonoScriptComponentEditor::MonoScriptComponentEditor() : m_pScript(nullptr)
+	MonoScriptComponentEditor::MonoScriptComponentEditor()
 	{
 	}
 
@@ -39,38 +40,36 @@ namespace Glory::Editor
 
 	void MonoScriptComponentEditor::Initialize()
 	{
+		m_LastCompilationVersion = MonoEditorExtension::CompilationVersion();
 		EntityComponentEditor::Initialize();
 		MonoScriptComponent& scriptComponent = GetTargetComponent();
 		if (!scriptComponent.m_Script.AssetUUID()) return;
-		m_pScript = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MonoScript>(scriptComponent.m_Script.AssetUUID());
-		if (!m_pScript)
+		MonoScript* pScript = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MonoScript>(scriptComponent.m_Script.AssetUUID());
+		if (!pScript)
 		{
 			scriptComponent.m_Script.SetUUID(0);
 			return;
 		}
 
-		m_pScript->LoadScriptProperties();
-		m_pScript->GetScriptProperties(scriptComponent.m_ScriptProperties);
-		m_pScript->ReadDefaults(scriptComponent.m_ScriptData.m_Buffer);
+		scriptComponent.m_ScriptProperties.clear();
+		pScript->LoadScriptProperties();
+		pScript->GetScriptProperties(scriptComponent.m_ScriptProperties);
+		pScript->ReadDefaults(scriptComponent.m_ScriptData.m_Buffer);
 	}
 
 	bool MonoScriptComponentEditor::OnGUI()
 	{
+		const size_t compilationVersion = MonoEditorExtension::CompilationVersion();
+
 		bool change = EntityComponentEditor::OnGUI();
 		MonoScriptComponent& scriptComponent = GetTargetComponent();
-		if (m_pScript == nullptr && scriptComponent.m_Script.AssetUUID())
+		if (change && scriptComponent.m_Script.AssetUUID() || m_LastCompilationVersion != compilationVersion)
 		{
 			Initialize();
 			return change;
 		}
-
-		if (m_pScript != nullptr && m_pScript->GetUUID() != scriptComponent.m_Script.AssetUUID())
-		{
-			Initialize();
-			return change;
-		}
-
-		if (!m_pScript) return change;
+		MonoScript* pScript = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MonoScript>(scriptComponent.m_Script.AssetUUID());
+		if (!pScript) return change;
 
 		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 		bool changedScriptProp = false;

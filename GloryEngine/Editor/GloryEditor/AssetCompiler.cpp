@@ -87,13 +87,46 @@ namespace Glory::Editor
 		if (!CompilationJobPool)
 			CompilationJobPool = Jobs::JobManager::Run<bool, const AssetData>();
 
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
+
 		CompilationJobPool->StartQueue();
 		for (UUID id : ids)
 		{
 			const AssetData& data = m_AssetDatas.at(id);
+
+			std::filesystem::path path = assetDatabase.GetAssetPath();
+			path.append(data.Location.Path);
+
+			if (!std::filesystem::exists(path))
+				path = data.Location.Path;
+
+			ImportedResources.Erase(path);
+
 			DispatchCompilationJob(data);
 		}
 		CompilationJobPool->EndQueue();
+	}
+
+	void AssetCompiler::CompileAssetsImmediately(const std::vector<UUID>& ids)
+	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
+
+		for (UUID id : ids)
+		{
+			const AssetData& data = m_AssetDatas.at(id);
+
+			std::filesystem::path path = assetDatabase.GetAssetPath();
+			path.append(data.Location.Path);
+
+			if (!std::filesystem::exists(path))
+				path = data.Location.Path;
+
+			ImportedResources.Erase(path);
+
+			CompileJob(data);
+		}
 	}
 
 	bool AssetCompiler::IsBusy()

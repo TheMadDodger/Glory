@@ -38,6 +38,8 @@ namespace Glory::Editor
 
         static void OpenFile(const std::filesystem::path& path);
 
+        static size_t CompilationVersion();
+
     private:
         virtual void Initialize() override;
         static void FindVisualStudioPath();
@@ -62,5 +64,6 @@ namespace Glory::Editor
 
     private:
         static GloryMonoScipting* m_pMonoScriptingModule;
+        static size_t m_CompilationCounter;
     };
 }
