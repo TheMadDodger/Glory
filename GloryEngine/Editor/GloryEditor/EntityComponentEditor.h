@@ -47,7 +47,7 @@ namespace Glory::Editor
 				}
 
 				TComponent& component = GetTargetComponent();
-				PropertyDrawer::DrawProperty("", pTypeData, &component, 0);
+				change |= PropertyDrawer::DrawProperty("", pTypeData, &component, 0);
 			}
 
 			Undo::StopRecord();

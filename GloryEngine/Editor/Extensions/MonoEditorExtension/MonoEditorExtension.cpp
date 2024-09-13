@@ -20,6 +20,7 @@
 #include <EditorAssetCallbacks.h>
 #include <ObjectMenuCallbacks.h>
 #include <FileBrowser.h>
+#include <AssetCompiler.h>
 #include <Tumbnail.h>
 #include <EntitySceneObjectEditor.h>
 #include <ScriptingExtender.h>
@@ -47,6 +48,8 @@ EXTENSION_CPP(MonoEditorExtension)
 
 namespace Glory::Editor
 {
+	size_t MonoEditorExtension::m_CompilationCounter = 0;
+
 	CREATE_OBJECT_CALLBACK_CPP(Scripted, MonoScriptComponent, ());
 
 	GloryMonoScipting* MonoEditorExtension::m_pMonoScriptingModule = nullptr;
@@ -123,6 +126,11 @@ namespace Glory::Editor
 	void MonoEditorExtension::OpenFile(const std::filesystem::path& path)
 	{
 		ShellExecute(0, L"open", path.wstring().c_str(), 0, 0, SW_SHOW);
+	}
+
+	size_t MonoEditorExtension::CompilationVersion()
+	{
+		return m_CompilationCounter;
 	}
 
 	void MonoEditorExtension::Initialize()
@@ -407,6 +415,8 @@ namespace Glory::Editor
 
 		if (!reload) return;
 		ReloadAssembly(pProject);
+
+		++m_CompilationCounter;
 	}
 
 	void MonoEditorExtension::ReloadAssembly(ProjectSpace* pProject)
@@ -428,7 +438,11 @@ namespace Glory::Editor
 		{
 			size_t subHash = types.GetSubTypeHash(pResourcerType, i);
 			if (scriptHash != subHash) continue;
-			EditorApplication::GetInstance()->GetAssetManager().ReloadAsset(callback.m_UUID);
+			EditorApplication::GetInstance()->GetAssetManager().UnloadAsset(callback.m_UUID);
+			if (!AssetCompiler::IsCompilingAsset(callback.m_UUID))
+			{
+				AssetCompiler::CompileAssetsImmediately({ callback.m_UUID });
+			}
 			CompileProject(ProjectSpace::GetOpenProject());
 			return;
 		}
