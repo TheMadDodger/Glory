@@ -5,6 +5,7 @@ Runtime:
 
 Editor:
 - Added SteamAudioExtenstion with an AudioScene builder window
+- Fixed script components breaking when scripting is reloaded
 
 Engine:
 - Added Audio base module

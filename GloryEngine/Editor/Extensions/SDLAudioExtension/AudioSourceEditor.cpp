@@ -19,6 +19,21 @@ namespace Glory::Editor
 		EntityComponentEditor::Initialize();
 	}
 
+	void DrawWarningWindow(const char* warning)
+	{
+		const float childHeight = ImGui::CalcTextSize("A").y * 3.5f;
+		ImGui::BeginChild("warning", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
+		if (ImGui::BeginMenuBar())
+		{
+			ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, ICON_FA_TRIANGLE_EXCLAMATION);
+			ImGui::SameLine();
+			ImGui::Text(" Warning");
+			ImGui::EndMenuBar();
+		}
+		ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, warning);
+		ImGui::EndChild();
+	}
+
 	bool AudioSourceEditor::OnGUI()
 	{
 		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
@@ -90,20 +105,10 @@ namespace Glory::Editor
 		}
 		PropertyDrawer::SetDisabledCheckCallback();
 
-		if (component.m_Spatialization.m_Attenuation.m_Enable)
-		{
-			const float childHeight = ImGui::CalcTextSize("A").y * 3.5f;
-			ImGui::BeginChild("error", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
-			if (ImGui::BeginMenuBar())
-			{
-				ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, ICON_FA_TRIANGLE_EXCLAMATION);
-				ImGui::SameLine();
-				ImGui::Text(" Warning");
-				ImGui::EndMenuBar();
-			}
-			ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "If you want to enable simulation you have to disable attenuation in the spatialization settimgs.");
-			ImGui::EndChild();
-		}
+		if (!p3DAudio)
+			DrawWarningWindow("No 3D audio module loaded, spatialization and simulation are disabled.");
+		else if(component.m_Spatialization.m_Attenuation.m_Enable)
+			DrawWarningWindow("If you want to enable simulation you have to disable attenuation in the spatialization settimgs.");
 
 		Undo::StopRecord();
 

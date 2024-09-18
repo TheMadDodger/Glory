@@ -252,6 +252,7 @@ namespace Glory::EditorLauncher
 			m_EngineSettings.OptionalModules.push_back(1);
 			m_EngineSettings.OptionalModules.push_back(0);
 			m_EngineSettings.OptionalModules.push_back(2);
+			m_EngineSettings.OptionalModules.push_back(3);
 		}
 
 #pragma endregion
