@@ -84,7 +84,6 @@ project "GloryJoltPhysics"
 	defines
 	{
 		"GLORY_EXPORTS",
-		"JPH_DEBUG_RENDERER"
 	}
 
 	postbuildcommands
@@ -110,7 +109,11 @@ project "GloryJoltPhysics"
 
 	filter "configurations:Debug"
 		runtime "Debug"
-		defines "_DEBUG"
+		defines
+		{
+			"_DEBUG",
+			"JPH_DEBUG_RENDERER"
+		}
 		symbols "On"
 
 	filter "configurations:Release"
