@@ -1,6 +1,5 @@
-EditorVersion: 0.3.0
+EditorVersion: 0.4.0
 Scenes:
   PackageScenesMode: All
-  List:
-    []
+  List: []
   EntryScene: 16787318667428770552
