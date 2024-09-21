@@ -550,4 +550,17 @@ namespace Glory
 
     const size_t Enum<PipelineType>::m_NumValues = PT_Count;
     bool Enum<PipelineType>::Valid() { return true; }
+
+    struct SSAOSettings
+    {
+        int m_Enabled = 1;
+        int m_Dirty = 1;
+        float m_SampleRadius = 10.0f;
+        float m_SampleBias = 0.0025f;
+        int m_KernelSize = 64;
+        BlurType m_BlurType = BlurType::Box;
+        int m_BlurSize = 4;
+        float m_Separation = 1.0f;
+        int m_BinsSize = 5;
+    };
 }

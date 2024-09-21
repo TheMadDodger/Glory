@@ -7,6 +7,15 @@
 #include <AssetLocation.h>
 #include <ThreadedVar.h>
 
+namespace Glory
+{
+	class GScene;
+	namespace Utils
+	{
+		struct NodeValueRef;
+	}
+}
+
 namespace Glory::Editor
 {
 	class AssetCompiler
@@ -21,6 +30,8 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void CompileAssetsImmediately(const std::vector<UUID>& ids);
 		GLORY_EDITOR_API static bool IsBusy();
 		GLORY_EDITOR_API static bool IsCompilingAsset(UUID uuid);
+		GLORY_EDITOR_API static bool CompileSceneSettings(UUID uuid);
+		GLORY_EDITOR_API static bool CompileSceneSettings(GScene* pScene, Utils::NodeValueRef& root);
 
 		struct AssetData
 		{

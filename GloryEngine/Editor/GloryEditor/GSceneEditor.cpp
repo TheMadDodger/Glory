@@ -2,6 +2,9 @@
 #include "EditorApplication.h"
 #include "EditorSceneManager.h"
 #include "EditorUI.h"
+#include "AssetCompiler.h"
+
+#include <Debug.h>
 
 namespace Glory::Editor
 {
@@ -96,6 +99,8 @@ namespace Glory::Editor
         if (change)
         {
             sceneManager.SetSceneDirty((GScene*)m_pTarget);
+            if (!AssetCompiler::CompileSceneSettings(m_pTarget->GetUUID()))
+                sceneManager.GetEngine()->GetDebug().LogError("Failed to re-compile scene settings");
         }
 
         return change;

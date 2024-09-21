@@ -1,6 +1,7 @@
 #pragma once
 #include "Resource.h"
 #include "Entity.h"
+#include "GraphicsEnums.h"
 
 #include <glm/fwd.hpp>
 #include <EntityRegistry.h>
@@ -22,6 +23,11 @@ namespace Glory
 		
 		Entity ObjectToParent;
 		UUID ParentID;
+	};
+
+	struct SceneSettings
+	{
+		SSAOSettings m_SSAOSettings;
 	};
 
 	/** @brief Glory Scene */
@@ -191,6 +197,12 @@ namespace Glory
 
 		Entity Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent = 0);
 
+		/** @brief Get this scenes settings */
+		SceneSettings& Settings() { return m_Settings; }
+
+		/** @overload */
+		const SceneSettings& Settings() const { return m_Settings; }
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();
@@ -236,5 +248,7 @@ namespace Glory
 		SceneManager* m_pManager = nullptr;
 
 		bool m_MarkedForDestruct = false;
+
+		SceneSettings m_Settings;
 	};
 }

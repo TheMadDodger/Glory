@@ -24,6 +24,19 @@ layout(std430, binding = 3) buffer sampleDome
     vec3 SamplePoints[];
 };
 
+layout(std430, binding = 6) buffer ssaoSettings
+{
+    int AOEnabled;
+    int Dirty;
+    float SampleRadius;
+    float SampleBias;
+    int KernelSize;
+    int BlurType;
+    int BlurSize;
+    float Separation;
+    int BinsSize;
+};
+
 void main()
 {
     vec2 noiseScale = vec2(ScreenDimensions.x/4.0, ScreenDimensions.y/4.0);
@@ -38,16 +51,12 @@ void main()
     vec3 bitangent = cross(normal, tangent);
     mat3 TBN       = mat3(tangent, bitangent, normal);
 
-    float radius = 10.0;
-    float bias = 0.0025;
-    int kernelSize = 64;
-
-    float occlusion = float(kernelSize);
-    for(int i = 0; i < kernelSize; ++i)
+    float occlusion = float(KernelSize);
+    for(int i = 0; i < KernelSize; ++i)
     {
         // get sample position
         vec3 samplePos = TBN * SamplePoints[i]; // from tangent to view-space
-        samplePos = fragPosition.xyz + samplePos*radius; 
+        samplePos = fragPosition.xyz + samplePos*SampleRadius; 
 
         vec4 offset = vec4(samplePos, 1.0);
         offset      = inverse(ProjectionInverse)*offset;    // from view to clip-space
@@ -56,13 +65,13 @@ void main()
 
         float sampleDepth = texture2D(Depth, offset.xy).r;
         vec4 offsetPosition = WorldPosFromDepth(sampleDepth);
-        float intensity = smoothstep(0.0, 1.0, radius/abs(fragPosition.z - offsetPosition.z));
-        float occluded = samplePos.z + bias <= offsetPosition.z ? 1.0 : 0.0;
+        float intensity = smoothstep(0.0, 1.0, SampleRadius/abs(fragPosition.z - offsetPosition.z));
+        float occluded = samplePos.z + SampleBias <= offsetPosition.z ? 1.0 : 0.0;
         occluded *= intensity;
         occlusion -= occluded;
     }
 
-    occlusion = occlusion/kernelSize;
+    occlusion = occlusion/KernelSize;
 	out_Color = vec4(vec3(occlusion), fragPosition.a);
 }
 

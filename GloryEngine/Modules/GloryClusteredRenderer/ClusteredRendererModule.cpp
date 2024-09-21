@@ -9,6 +9,8 @@
 #include <CameraManager.h>
 #include <InternalMaterial.h>
 #include <InternalPipeline.h>
+#include <SceneManager.h>
+#include <GScene.h>
 
 #include <DistributedRandom.h>
 
@@ -17,11 +19,6 @@ namespace Glory
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
 	ClusteredRendererModule::ClusteredRendererModule()
-		: m_pClusterShaderData(nullptr), m_pClusterShaderMaterialData(nullptr), m_pClusterShaderMaterial(nullptr),
-		m_pMarkActiveClustersShaderData(nullptr), m_pMarkActiveClustersMaterialData(nullptr), m_pMarkActiveClustersMaterial(nullptr),
-		m_pCompactClustersShaderData(nullptr), m_pCompactClustersMaterialData(nullptr), m_pCompactClustersMaterial(nullptr),
-		m_pClusterCullLightShaderData(nullptr), m_pClusterCullLightMaterialData(nullptr), m_pClusterCullLightMaterial(nullptr),
-		m_pScreenToViewSSBO(nullptr), m_pLightsSSBO(nullptr), m_pScreenMaterial(nullptr)
 	{
 	}
 
@@ -184,7 +181,10 @@ namespace Glory
 		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
 
-		GenerateDomeSamplePointsSSBO(pResourceManager);
+		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
+		m_pSSAOSettingsSSBO->Assign(NULL);
+
+		GenerateDomeSamplePointsSSBO(pResourceManager, 64);
 
 		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
 		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
@@ -226,10 +226,24 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
-		pGraphics->EnableDepthTest(false);
-
 		/* Render SSAO */
 		Material* pMaterial = pGraphics->UseMaterial(m_pSSAOMaterial);
+
+		static SSAOSettings DefaultSSAO{};
+
+		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
+		SSAOSettings& ssao = pActiveScene ? pActiveScene->Settings().m_SSAOSettings : DefaultSSAO;
+
+		if (pActiveScene && ssao.m_Dirty)
+		{
+			m_pSSAOSettingsSSBO->Assign(&ssao, sizeof(SSAOSettings));
+			ssao.m_Dirty = false;
+		}
+		if (!ssao.m_Enabled) return;
+
+		GenerateDomeSamplePointsSSBO(pGraphics->GetResourceManager(), ssao.m_KernelSize);
+
+		pGraphics->EnableDepthTest(false);
 
 		camera.GetRenderTexture(1)->BindForDraw();
 		pRenderTexture->BindAll(pMaterial);
@@ -237,12 +251,14 @@ namespace Glory
 
 		m_pSamplePointsDomeSSBO->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
+		m_pSSAOSettingsSSBO->BindForDraw();
 
 		// Draw the triangles !
 		pGraphics->DrawScreenQuad();
 
 		m_pSamplePointsDomeSSBO->Unbind();
 		m_pScreenToViewSSBO->Unbind();
+		m_pSSAOSettingsSSBO->Unbind();
 
 		// Reset render textures and materials
 		camera.GetRenderTexture(1)->UnBindForDraw();
@@ -254,8 +270,12 @@ namespace Glory
 		pRenderTexture->BindForDraw();
 		camera.GetRenderTexture(1)->BindAll(pMaterial);
 
+		m_pSSAOSettingsSSBO->BindForDraw();
+
 		// Draw the triangles !
 		pGraphics->DrawScreenQuad();
+
+		m_pSSAOSettingsSSBO->Unbind();
 
 		// Reset render textures and materials
 		pRenderTexture->UnBindForDraw();
@@ -475,15 +495,21 @@ namespace Glory
 		return a + f*(b - a);
 	}
 
-	void ClusteredRendererModule::GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager)
+	void ClusteredRendererModule::GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size)
 	{
-		m_pSamplePointsDomeSSBO = pResourceManager->CreateBuffer(sizeof(glm::vec3)*NUM_SAMPLE_POINTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
-		m_pSamplePointsDomeSSBO->Assign(NULL);
+		if (m_SSAOKernelSize == size) return;
+		m_SSAOKernelSize = size;
+
+		if (!m_pSamplePointsDomeSSBO)
+		{
+			m_pSamplePointsDomeSSBO = pResourceManager->CreateBuffer(sizeof(glm::vec3)*MAX_KERNEL_SIZE, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+			m_pSamplePointsDomeSSBO->Assign(NULL);
+		}
 
 		std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
 		std::default_random_engine generator;
-		glm::vec3 samplePoints[NUM_SAMPLE_POINTS];
-		for (unsigned int i = 0; i < 64; ++i)
+		std::vector<glm::vec3> samplePoints{ m_SSAOKernelSize, glm::vec3{} };
+		for (unsigned int i = 0; i < m_SSAOKernelSize; ++i)
 		{
 			samplePoints[i] = glm::vec3{
 				randomFloats(generator) * 2.0 - 1.0,
@@ -493,13 +519,13 @@ namespace Glory
 			samplePoints[i] = glm::normalize(samplePoints[i]);
 			samplePoints[i] *= randomFloats(generator);
 
-			float scale = float(i)/NUM_SAMPLE_POINTS;
-			scale = lerp(0.1f, 1.0f, scale * scale);
+			float scale = float(i)/m_SSAOKernelSize;
+			scale = lerp(0.1f, 1.0f, scale*scale);
 			samplePoints[i] *= scale;
 		}
 
 		m_pSamplePointsDomeSSBO->BindForDraw();
-		m_pSamplePointsDomeSSBO->Assign(samplePoints, 0, sizeof(glm::vec3)*NUM_SAMPLE_POINTS);
+		m_pSamplePointsDomeSSBO->Assign(samplePoints.data(), 0, sizeof(glm::vec3) * m_SSAOKernelSize);
 		m_pSamplePointsDomeSSBO->Unbind();
 
 		const size_t textureSize = 4;

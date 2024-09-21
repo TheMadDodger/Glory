@@ -1,6 +1,19 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+layout(std430, binding = 6) buffer ssaoSettings
+{
+    int AOEnabled;
+    int Dirty;
+    float SampleRadius;
+    float SampleBias;
+    int KernelSize;
+    int BlurType;
+    int BlurSize;
+    float Separation;
+    int BinsSize;
+};
+
 /* @todo: Move these to a helper file */
 #define MAX_SIZE        4
 #define MAX_KERNEL_SIZE ((MAX_SIZE * 2 + 1) * (MAX_SIZE * 2 + 1))
@@ -120,5 +133,13 @@ void main()
 {
 	int blurSize = 4;
 	int binsSize = 5;
-	out_Color = MedianBlur(AO, blurSize, binsSize);
+
+    if(BlurType == 0)
+    {
+        out_Color = BoxBlur(AO, BlurSize, Separation);
+    }
+    else if(BlurType == 1)
+    {
+	    out_Color = MedianBlur(AO, BlurSize, BinsSize);
+    }
 }
