@@ -25,6 +25,8 @@ REFLECTABLE_ENUM_NS(Glory, CompareOp,
     OP_GreaterOrEqual,
     OP_Always);
 
+REFLECTABLE_ENUM_NS(Glory, BlurType, Box, Median);
+
 namespace Glory
 {
 	enum class PixelFormat

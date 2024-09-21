@@ -14,7 +14,8 @@ namespace Glory::Editor
 {
 	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node)
 	{
-		node.Set(YAML::Node(YAML::NodeType::Map));
+		if (!node.Exists() || !node.IsMap())
+			node.Set(YAML::Node(YAML::NodeType::Map));
 		auto entities = node["Entities"];
 		entities.Set(YAML::Node(YAML::NodeType::Sequence));
 		/*

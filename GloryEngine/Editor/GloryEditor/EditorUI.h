@@ -83,6 +83,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool InputLeyerRef(std::string_view label, LayerRef* data);
 
 		static GLORY_EDITOR_API bool Header(std::string_view label);
+		static GLORY_EDITOR_API bool HeaderWithCheckbox(std::string_view label, bool& open, Utils::YAMLFileRef& file, const std::filesystem::path& path);
 
 		static GLORY_EDITOR_API void EmptyDropdown(std::string_view label, std::string_view value, std::function<void()> callback, float& start, float& width, const float borderPadding = 0.0f);
 

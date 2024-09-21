@@ -620,6 +620,7 @@ namespace Glory
 		Reflect::RegisterEnum<SamplerAddressMode>();
 		Reflect::RegisterEnum<CompareOp>();
 		Reflect::RegisterEnum<PipelineType>();
+		Reflect::RegisterEnum<BlurType>();
 
 		/* Shape types */
 		Reflect::RegisterEnum<ShapeType>();
