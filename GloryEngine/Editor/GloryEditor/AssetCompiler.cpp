@@ -177,16 +177,16 @@ namespace Glory::Editor
 		auto magnitude = ssao["Magnitude"];
 		auto contrast = ssao["Contrast"];
 
-		sceneSettings.m_SSAOSettings.m_Enabled = enable.As<bool>(true);
-		sceneSettings.m_SSAOSettings.m_SampleRadius = sampleRadius.As<float>(5.0f);
-		sceneSettings.m_SSAOSettings.m_SampleBias = sampleBias.As<float>(0.0025f);
-		sceneSettings.m_SSAOSettings.m_KernelSize = kernelSize.As<int>(12);
-		sceneSettings.m_SSAOSettings.m_BlurType = blurType.AsEnum<BlurType>();
-		sceneSettings.m_SSAOSettings.m_BlurSize = blurSize.As<int>(2);
-		sceneSettings.m_SSAOSettings.m_Separation = separation.As<float>(1.0f);
-		sceneSettings.m_SSAOSettings.m_BinsSize = binsSize.As<int>(100);
-		sceneSettings.m_SSAOSettings.m_Magnitude = magnitude.As<float>(1.0f);
-		sceneSettings.m_SSAOSettings.m_Contrast = contrast.As<float>(1.0f);
+		sceneSettings.m_SSAOSettings.m_Enabled = enable.As<bool>(bool(DefaultSSAO.m_Enabled));
+		sceneSettings.m_SSAOSettings.m_SampleRadius = sampleRadius.As<float>(DefaultSSAO.m_SampleRadius);
+		sceneSettings.m_SSAOSettings.m_SampleBias = sampleBias.As<float>(DefaultSSAO.m_SampleBias);
+		sceneSettings.m_SSAOSettings.m_KernelSize = kernelSize.As<int>(DefaultSSAO.m_KernelSize);
+		sceneSettings.m_SSAOSettings.m_BlurType = blurType.AsEnum<BlurType>(DefaultSSAO.m_BlurType);
+		sceneSettings.m_SSAOSettings.m_BlurSize = blurSize.As<int>(DefaultSSAO.m_BlurSize);
+		sceneSettings.m_SSAOSettings.m_Separation = separation.As<float>(DefaultSSAO.m_Separation);
+		sceneSettings.m_SSAOSettings.m_BinsSize = binsSize.As<int>(DefaultSSAO.m_BinsSize);
+		sceneSettings.m_SSAOSettings.m_Magnitude = magnitude.As<float>(DefaultSSAO.m_Magnitude);
+		sceneSettings.m_SSAOSettings.m_Contrast = contrast.As<float>(DefaultSSAO.m_Contrast);
 		sceneSettings.m_SSAOSettings.m_Dirty = true;
 		return true;
 	}
