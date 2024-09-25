@@ -12,6 +12,8 @@ layout(std430, binding = 6) buffer ssaoSettings
     int BlurSize;
     float Separation;
     int BinsSize;
+    float Magnitude;
+    float Contrast;
 };
 
 /* @todo: Move these to a helper file */

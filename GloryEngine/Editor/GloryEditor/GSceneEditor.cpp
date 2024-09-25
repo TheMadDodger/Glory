@@ -69,7 +69,15 @@ namespace Glory::Editor
                 if (!binsSize.Exists())
                     binsSize.Set(5);
 
-                ImGui::TextUnformatted("Generation");
+                auto magnitude = ssao["Magnitude"];
+                if (!magnitude.Exists())
+                    magnitude.Set(1.0f);
+
+                auto contrast = ssao["Contrast"];
+                if (!contrast.Exists())
+                    contrast.Set(1.0f);
+
+                ImGui::TextUnformatted("Render");
                 change |= EditorUI::InputFloat(yamlFile, sampleRadius.Path(), 0.0f);
                 change |= EditorUI::InputFloat(yamlFile, sampleBias.Path(), 0.0f, 10.0f, 0.0001f);
                 change |= EditorUI::InputInt(yamlFile, kernelSize.Path(), 0);
@@ -92,6 +100,11 @@ namespace Glory::Editor
                 default:
                     break;
                 }
+
+                ImGui::Separator();
+                ImGui::TextUnformatted("Compose");
+                change |= EditorUI::InputFloat(yamlFile, magnitude.Path(), 0.0f);
+                change |= EditorUI::InputFloat(yamlFile, contrast.Path(), 0.0f);
             }
             ImGui::EndDisabled();
         }

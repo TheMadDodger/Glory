@@ -562,5 +562,7 @@ namespace Glory
         int m_BlurSize = 4;
         float m_Separation = 1.0f;
         int m_BinsSize = 5;
+        float m_Magnitude = 1.0f;
+        float m_Contrast = 1.0f;
     };
 }
