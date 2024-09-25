@@ -1,6 +1,7 @@
 #include "AssetCompiler.h"
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
+#include "EditorSceneManager.h"
 
 #include <Debug.h>
 #include <AssetDatabase.h>
@@ -137,6 +138,57 @@ namespace Glory::Editor
 	bool AssetCompiler::IsCompilingAsset(UUID uuid)
 	{
 		return m_CompilingAssets.Contains(uuid);
+	}
+
+	bool AssetCompiler::CompileSceneSettings(UUID uuid)
+	{
+		EditorSceneManager& sceneManager = EditorApplication::GetInstance()->GetSceneManager();
+		GScene* pScene = sceneManager.GetOpenScene(uuid);
+		if (!pScene) return false;
+		auto sceneFile = sceneManager.GetSceneFile(uuid);
+		return CompileSceneSettings(pScene, (**sceneFile).RootNodeRef().ValueRef());
+	}
+
+	bool AssetCompiler::CompileSceneSettings(GScene* pScene, Utils::NodeValueRef& root)
+	{
+		if (!pScene) return false;
+
+		SceneSettings& sceneSettings = pScene->Settings();
+		auto settings = root["Settings"];
+		if (!settings.Exists() || !settings.IsMap())
+			return false;
+
+		auto rendering = settings["Rendering"];
+		if (!rendering.Exists() || !rendering.IsMap())
+			return false;
+
+		auto ssao = rendering["SSAO"];
+		if (!ssao.Exists() || !ssao.IsMap())
+			return false;
+
+		auto enable = ssao["Enable"];
+		auto sampleRadius = ssao["SampleRadius"];
+		auto sampleBias = ssao["SampleBias"];
+		auto kernelSize = ssao["KernelSize"];
+		auto blurType = ssao["BlurType"];
+		auto blurSize = ssao["BlurSize"];
+		auto separation = ssao["Separation"];
+		auto binsSize = ssao["BinsSize"];
+		auto magnitude = ssao["Magnitude"];
+		auto contrast = ssao["Contrast"];
+
+		sceneSettings.m_SSAOSettings.m_Enabled = enable.As<bool>(bool(DefaultSSAO.m_Enabled));
+		sceneSettings.m_SSAOSettings.m_SampleRadius = sampleRadius.As<float>(DefaultSSAO.m_SampleRadius);
+		sceneSettings.m_SSAOSettings.m_SampleBias = sampleBias.As<float>(DefaultSSAO.m_SampleBias);
+		sceneSettings.m_SSAOSettings.m_KernelSize = kernelSize.As<int>(DefaultSSAO.m_KernelSize);
+		sceneSettings.m_SSAOSettings.m_BlurType = blurType.AsEnum<BlurType>(DefaultSSAO.m_BlurType);
+		sceneSettings.m_SSAOSettings.m_BlurSize = blurSize.As<int>(DefaultSSAO.m_BlurSize);
+		sceneSettings.m_SSAOSettings.m_Separation = separation.As<float>(DefaultSSAO.m_Separation);
+		sceneSettings.m_SSAOSettings.m_BinsSize = binsSize.As<int>(DefaultSSAO.m_BinsSize);
+		sceneSettings.m_SSAOSettings.m_Magnitude = magnitude.As<float>(DefaultSSAO.m_Magnitude);
+		sceneSettings.m_SSAOSettings.m_Contrast = contrast.As<float>(DefaultSSAO.m_Contrast);
+		sceneSettings.m_SSAOSettings.m_Dirty = true;
+		return true;
 	}
 
 	void AssetCompiler::DispatchCompilationJob(const AssetData& asset)

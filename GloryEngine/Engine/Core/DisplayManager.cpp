@@ -16,9 +16,9 @@ namespace Glory
 		ProfileSample s{ &m_pEngine->Profiler(), "DisplayManager::ClearAllDisplays" };
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
-			m_pRenderTextures[i]->Bind();
+			m_pRenderTextures[i]->BindForDraw();
 			pEngine->GetMainModule<GraphicsModule>()->Clear();
-			m_pRenderTextures[i]->UnBind();
+			m_pRenderTextures[i]->UnBindForDraw();
 		}
 	}
 
@@ -50,9 +50,9 @@ namespace Glory
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
 		{
 			m_pRenderTextures[i] = pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateRenderTexture(createInfo);
-			m_pRenderTextures[i]->Bind();
+			m_pRenderTextures[i]->BindForDraw();
 			pEngine->GetMainModule<GraphicsModule>()->Clear();
-			m_pRenderTextures[i]->UnBind();
+			m_pRenderTextures[i]->UnBindForDraw();
 		}
 	}
 }

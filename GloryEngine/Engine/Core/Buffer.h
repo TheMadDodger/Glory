@@ -17,7 +17,7 @@ namespace Glory
 		virtual void CopyFrom(Buffer* source, uint32_t size) = 0;
 		static void Copy(Buffer* source, Buffer* dest, uint32_t size);
 
-		virtual void Bind() = 0;
+		virtual void BindForDraw() = 0;
 		virtual void Unbind() = 0;
 
 	protected:

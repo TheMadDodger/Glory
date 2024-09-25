@@ -893,13 +893,26 @@ namespace Glory::Editor
 
 	bool EditorUI::Header(std::string_view label)
 	{
-		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
+		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.5f));
 		const bool headerOpen = ImGui::TreeNodeEx("##header", node_flags, label.data());
 		ImGui::PopStyleColor(3);
 		return headerOpen;
+	}
+
+	bool EditorUI::HeaderWithCheckbox(std::string_view label, bool& open, Utils::YAMLFileRef& file, const std::filesystem::path& path)
+	{
+		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
+		open = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+		ImGui::SameLine();
+		const float cursorX = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 25.0f;
+		ImGui::SetCursorPosX(cursorX);
+		PushFlag(EditorUI::Flag::NoLabel);
+		const bool change = CheckBox(file, path);
+		PopFlag();
+		return change;
 	}
 
 	void EditorUI::EmptyDropdown(std::string_view label, std::string_view value, std::function<void()> callback, float& start, float& width, const float borderPadding)

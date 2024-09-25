@@ -121,28 +121,28 @@ namespace Glory
 		};
 
 		glGenVertexArrays(1, &m_ScreenQuadVertexArrayID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 		glBindVertexArray(m_ScreenQuadVertexArrayID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 
 		glGenBuffers(1, &m_ScreenQuadVertexbufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 		glBindBuffer(GL_ARRAY_BUFFER, m_ScreenQuadVertexbufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 
 		glBindBuffer(GL_ARRAY_BUFFER, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 
 		glEnableVertexAttribArray(0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 
 		glBindVertexArray(NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
 	}
 
 	GPUResourceManager* OpenGLGraphicsModule::CreateGPUResourceManager()
@@ -186,7 +186,7 @@ namespace Glory
 
 	void OpenGLGraphicsModule::OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount)
 	{
-		pMesh->Bind();
+		pMesh->BindForDraw();
 		const GLuint primitiveType = GLConverter::TO_GLPRIMITIVETYPE.at(pMesh->GetPrimitiveType());
 		const uint32_t indexCount = pMesh->GetIndexCount();
 		if (indexCount == 0) glDrawArrays(primitiveType, vertexOffset, vertexCount ? vertexCount : pMesh->GetVertexCount());

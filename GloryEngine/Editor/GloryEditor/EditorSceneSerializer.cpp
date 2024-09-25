@@ -1,4 +1,5 @@
 #include "EditorSceneSerializer.h"
+#include "AssetCompiler.h"
 
 #include <Serializers.h>
 #include <PropertySerializer.h>
@@ -14,7 +15,8 @@ namespace Glory::Editor
 {
 	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node)
 	{
-		node.Set(YAML::Node(YAML::NodeType::Map));
+		if (!node.Exists() || !node.IsMap())
+			node.Set(YAML::Node(YAML::NodeType::Map));
 		auto entities = node["Entities"];
 		entities.Set(YAML::Node(YAML::NodeType::Sequence));
 		/*
@@ -49,6 +51,8 @@ namespace Glory::Editor
 		/* Update transforms to generate matrices */
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		registry.GetTypeView<Transform>()->InvokeAll(Utils::ECS::InvocationType::Update, &registry);
+
+		AssetCompiler::CompileSceneSettings(pScene, node);
 	}
 
 	void EditorSceneSerializer::SerializeEntity(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
