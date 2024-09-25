@@ -38,6 +38,13 @@ namespace Glory::Utils
 		}
 
 		template<typename T>
+		T AsEnum(const T& defaultValue)
+		{
+			if (!Exists()) return defaultValue;
+			return AsEnum<T>();
+		}
+
+		template<typename T>
 		void Set(const T& value)
 		{
 			Node() = value;

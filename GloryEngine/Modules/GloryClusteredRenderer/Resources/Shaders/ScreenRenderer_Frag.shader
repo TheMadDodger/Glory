@@ -85,7 +85,7 @@ layout(std430, binding = 5) buffer lightGridSSBO
 layout(std430, binding = 6) buffer ssaoSettings
 {
     int AOEnabled;
-	int Dirty;
+    int Dirty;
     float SampleRadius;
     float SampleBias;
     int KernelSize;
@@ -93,7 +93,7 @@ layout(std430, binding = 6) buffer ssaoSettings
     int BlurSize;
     float Separation;
     int BinsSize;
-	float Magnitude;
+    float Magnitude;
     float Contrast;
 };
 
@@ -112,6 +112,7 @@ void main()
 	vec3 color = texture2D(Color, Coord).xyz;
 	vec3 normal = texture2D(Normal, Coord).xyz*2.0 - 1.0;
 	float ssao = AOEnabled == 1 ? Magnitude*pow(texture2D(AO, Coord).x, Contrast) : 1.0;
+	ssao = min(ssao, 1.0);
 	float depth = texture2D(Depth, Coord).r;
 	vec3 fragPosition = WorldPosFromDepth(depth);
 

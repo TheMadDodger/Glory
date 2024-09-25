@@ -43,39 +43,39 @@ namespace Glory::Editor
             {
                 auto sampleRadius = ssao["SampleRadius"];
                 if (!sampleRadius.Exists())
-                    sampleRadius.Set(10.0f);
+                    sampleRadius.Set(DefaultSSAO.m_SampleRadius);
 
                 auto sampleBias = ssao["SampleBias"];
                 if (!sampleBias.Exists())
-                    sampleBias.Set(0.0025f);
+                    sampleBias.Set(DefaultSSAO.m_SampleBias);
 
                 auto kernelSize = ssao["KernelSize"];
                 if (!kernelSize.Exists())
-                    kernelSize.Set(64);
+                    kernelSize.Set(DefaultSSAO.m_KernelSize);
 
                 auto blurType = ssao["BlurType"];
                 if (!blurType.Exists())
-                    blurType.SetEnum<BlurType>(BlurType::Box);
+                    blurType.SetEnum<BlurType>(DefaultSSAO.m_BlurType);
 
                 auto blurSize = ssao["BlurSize"];
                 if (!blurSize.Exists())
-                    blurSize.Set(4);
+                    blurSize.Set(DefaultSSAO.m_BlurSize);
 
                 auto separation = ssao["Separation"];
                 if (!separation.Exists())
-                    separation.Set(1.0f);
+                    separation.Set(DefaultSSAO.m_Separation);
 
                 auto binsSize = ssao["BinsSize"];
                 if (!binsSize.Exists())
-                    binsSize.Set(5);
+                    binsSize.Set(DefaultSSAO.m_BinsSize);
 
                 auto magnitude = ssao["Magnitude"];
                 if (!magnitude.Exists())
-                    magnitude.Set(1.0f);
+                    magnitude.Set(DefaultSSAO.m_Magnitude);
 
                 auto contrast = ssao["Contrast"];
                 if (!contrast.Exists())
-                    contrast.Set(1.0f);
+                    contrast.Set(DefaultSSAO.m_Contrast);
 
                 ImGui::TextUnformatted("Render");
                 change |= EditorUI::InputFloat(yamlFile, sampleRadius.Path(), 0.0f);
