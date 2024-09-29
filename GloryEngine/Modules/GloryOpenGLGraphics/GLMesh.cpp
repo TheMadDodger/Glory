@@ -46,8 +46,8 @@ namespace Glory
 		glBindVertexArray(m_VertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		m_pVertexBuffer->Bind();
-		if (m_pIndexBuffer) m_pIndexBuffer->Bind();
+		m_pVertexBuffer->BindForDraw();
+		if (m_pIndexBuffer) m_pIndexBuffer->BindForDraw();
 
 		SetupAttributes();
 
@@ -58,7 +58,7 @@ namespace Glory
 		if (m_pIndexBuffer) m_pIndexBuffer->Unbind();
 	}
 
-	void GLMesh::Bind()
+	void GLMesh::BindForDraw()
 	{
 		glBindVertexArray(m_VertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());

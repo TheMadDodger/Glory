@@ -1,4 +1,5 @@
 #include "JoltDebugRenderer.h"
+#ifdef JPH_DEBUG_RENDERER
 #include "Helpers.h"
 
 #include <Engine.h>
@@ -43,3 +44,4 @@ namespace Glory
 	{
 	}
 }
+#endif

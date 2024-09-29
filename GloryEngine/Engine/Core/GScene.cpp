@@ -532,6 +532,9 @@ namespace Glory
 		{
 			container.Write(itor->first).Write(itor->second);
 		}
+
+		/* Serialize SSAO settings */
+		container.Write(m_Settings);
 	}
 
 	void GScene::Deserialize(BinaryStream& container)
@@ -595,5 +598,8 @@ namespace Glory
 			m_Ids.emplace(id, entity);
 			m_UUIds.emplace(entity, id);
 		}
+
+		/* Deserialize SSAO settings */
+		container.Read(m_Settings);
 	}
 }

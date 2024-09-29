@@ -30,7 +30,7 @@ namespace Glory
 		virtual ~Texture();
 
 		virtual void Create(TextureData* pTextureData) = 0;
-		virtual void Create() = 0;
+		virtual void Create(const void* pixels=nullptr) = 0;
 		void CopyFromBuffer(Buffer* pBuffer);
 		virtual void CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth) = 0;
 

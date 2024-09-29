@@ -25,6 +25,8 @@ REFLECTABLE_ENUM_NS(Glory, CompareOp,
     OP_GreaterOrEqual,
     OP_Always);
 
+REFLECTABLE_ENUM_NS(Glory, BlurType, Box, Median);
+
 namespace Glory
 {
 	enum class PixelFormat
@@ -548,4 +550,21 @@ namespace Glory
 
     const size_t Enum<PipelineType>::m_NumValues = PT_Count;
     bool Enum<PipelineType>::Valid() { return true; }
+
+    struct SSAOSettings
+    {
+        int m_Enabled = 1;
+        int m_Dirty = 1;
+        float m_SampleRadius = 2.5f;
+        float m_SampleBias = 0.025f;
+        int m_KernelSize = 12;
+        BlurType m_BlurType = BlurType::Box;
+        int m_BlurSize = 2;
+        float m_Separation = 0.5f;
+        int m_BinsSize = 10;
+        float m_Magnitude = 1.0f;
+        float m_Contrast = 1.0f;
+    };
+
+    constexpr SSAOSettings DefaultSSAO;
 }

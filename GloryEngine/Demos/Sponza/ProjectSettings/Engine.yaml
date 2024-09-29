@@ -8,4 +8,6 @@ Modules:
   - GloryMonoScripting
   - GlorySDLInput
   - GloryJoltPhysics
-EditorVersion: 0.3.0
+  - GlorySDLAudio
+  - GlorySteamAudio
+EditorVersion: 0.4.0

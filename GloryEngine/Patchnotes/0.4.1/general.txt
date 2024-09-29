@@ -1,0 +1,10 @@
+Runtime:
+- Added runtime loading for scene settings
+
+Editor:
+- Added scene settings editor
+
+Engine:
+- Added Screen Space Ambient Occlusion
+- Added scene settings, only has SSAO settings for now
+

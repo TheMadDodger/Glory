@@ -16,7 +16,7 @@ namespace Glory
 		virtual void Assign(const void* data, uint32_t offset, uint32_t size) override;
 		virtual void CopyFrom(Buffer* source, uint32_t size) override;
 
-		virtual void Bind() override;
+		virtual void BindForDraw() override;
 		virtual void Unbind() override;
 
 	private:

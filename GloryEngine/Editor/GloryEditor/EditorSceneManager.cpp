@@ -346,7 +346,9 @@ namespace Glory::Editor
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)
 	{
-		Utils::YAMLFileRef file{ path };
+		auto yamlResource = GetSceneFile(uuid);
+		yamlResource->SetPath(path);
+		auto file = **yamlResource;
 		auto root = file.RootNodeRef().ValueRef();
 
 		GScene* pScene = GetOpenScene(uuid);
@@ -354,6 +356,7 @@ namespace Glory::Editor
 		file.Save();
 
 		if (newScene) EditorAssetDatabase::ImportNewScene(path, pScene);
+		yamlResource->Save();
 		SetSceneDirty(pScene, false);
 
 		for (size_t i = 0; i < m_OpenedSceneIDs.size(); ++i)

@@ -41,6 +41,7 @@
 #include "MaterialEditor.h"
 #include "MaterialInstanceEditor.h"
 #include "PipelineEditor.h"
+#include "GSceneEditor.h"
 
 #include "Importer.h"
 #include "MaterialImporter.h"
@@ -505,5 +506,6 @@ namespace Glory::Editor
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
+		Editor::RegisterEditor<GSceneEditor>();
 	}
 }

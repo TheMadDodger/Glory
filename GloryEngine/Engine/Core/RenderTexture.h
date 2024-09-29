@@ -32,6 +32,7 @@ namespace Glory
 	struct RenderTextureCreateInfo
 	{
 	public:
+		RenderTextureCreateInfo();
 		RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth);
 
 		uint32_t Width;
@@ -48,12 +49,13 @@ namespace Glory
 		Texture* GetTextureAttachment(size_t index);
 		Texture* GetTextureAttachment(const std::string& name);
 
-		virtual void Bind() = 0;
+		virtual void BindForDraw() = 0;
 		virtual void BindRead() = 0;
-		virtual void UnBind() = 0;
+		virtual void UnBindForDraw() = 0;
 		virtual void UnBindRead() = 0;
 
 		void BindAll(Material* pMaterial);
+		//void Bind(size_t index);
 
 		size_t AttachmentCount() const;
 		const std::string AttachmentName(size_t index) const;

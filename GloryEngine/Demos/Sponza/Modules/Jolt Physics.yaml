@@ -1,0 +1,12 @@
+TemporaryAllocationSize: 10485760
+MaxBodies: 1024
+NumBodyMutexes: 0
+MaxBodyPairs: 1024
+MaxContactConstraints: 1024
+TickRate: 60
+BroadPhaseLayerMapping:
+  []
+DefaultCollisionMask: 0
+OneCollisionMask: 0
+TwoCollisionMask: 0
+ThreeCollisionMask: 0
