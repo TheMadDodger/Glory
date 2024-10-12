@@ -11,6 +11,8 @@ namespace Glory::Utils::ECS
 
 	EntityRegistry::~EntityRegistry()
 	{
+		InvokeAll(InvocationType::OnRemove);
+
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
 			delete m_pViews[i];
@@ -44,9 +46,9 @@ namespace Glory::Utils::ECS
 	{
 		EntityView* pEntityView = GetEntityView(entity);
 		/* Destroy children first */
-		for (size_t i = 0; i < pEntityView->ChildCount(); ++i)
+		while (pEntityView->ChildCount())
 		{
-			DestroyEntity(pEntityView->Child(i));
+			DestroyEntity(pEntityView->Child(0));
 		}
 
 		/* Remove all components */
@@ -364,7 +366,7 @@ namespace Glory::Utils::ECS
 			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
 			void* data = GetComponentAddress(entity, uuid);
-			pRegistry->CopyComponent(newEntity, type, uuid, data, false);
+			pRegistry->CopyComponent(newEntity, type, uuid, data, true);
 		}
 
 		return newEntity;
