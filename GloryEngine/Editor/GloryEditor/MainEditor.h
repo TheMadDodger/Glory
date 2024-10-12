@@ -21,7 +21,7 @@ namespace Glory::Editor
 		void Initialize();
 		void Destroy();
 		void PaintEditor();
-		void OnFileDragAndDrop(std::string_view path);
+		void OnFileDragAndDrop(std::vector<std::string_view>& paths);
 
 		static float MENUBAR_SIZE;
 

@@ -67,7 +67,7 @@ namespace Editor
 		GLORY_EDITOR_API EditorPipelineManager& GetPipelineManager();
 		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();
 
-		GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
+		GLORY_EDITOR_API void OnFileDragAndDrop(std::vector<std::string_view>& paths);
 		GLORY_EDITOR_API static EditorApplication* GetInstance();
 
 		GLORY_EDITOR_API void OnBeginPackage(const std::filesystem::path& path);
