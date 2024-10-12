@@ -14,4 +14,10 @@ namespace Glory
 		MatTransform(glm::translate(glm::identity<glm::mat4>(), position) * glm::inverse(glm::mat4_cast(glm::quat(rotation))) * glm::scale(glm::identity<glm::mat4>(), scale))
 	{
 	}
+
+	Transform::Transform(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale)
+		: Position(position), Rotation(rotation), Scale(scale),
+		MatTransform(glm::translate(glm::identity<glm::mat4>(), position)* glm::inverse(glm::mat4_cast(rotation))* glm::scale(glm::identity<glm::mat4>(), scale))
+	{
+	}
 }
