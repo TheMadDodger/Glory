@@ -9,7 +9,7 @@
 namespace Glory
 {
 	MaterialData::MaterialData()
-		: m_Pipeline(0), m_CurrentOffset(0)
+		: m_Pipeline(0), m_CurrentOffset(0), m_TextureTypeIndices(TT_Count)
 	{
 		APPEND_TYPE(MaterialData);
 	}
@@ -18,7 +18,7 @@ namespace Glory
 	{
 	}
 
-	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags)
+	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, uint32_t flags)
 	{
 		const uint32_t hash = Reflect::Hash(displayName.data());
 		if (m_HashToPropertyInfoIndex.find(hash) != m_HashToPropertyInfoIndex.end())
@@ -32,7 +32,7 @@ namespace Glory
 		m_HashToPropertyInfoIndex[hash] = index;
 	}
 
-	void MaterialData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, uint32_t flags)
+	void MaterialData::AddResourceProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, TextureType textureType, uint32_t flags)
 	{
 		const uint32_t hash = Reflect::Hash(displayName.data());
 		if (m_HashToPropertyInfoIndex.find(hash) != m_HashToPropertyInfoIndex.end())
@@ -44,10 +44,12 @@ namespace Glory
 		}
 
 		const size_t index = m_PropertyInfos.size();
-		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_Resources.size(), flags));
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_Resources.size(), textureType, flags));
+		const size_t textureIndex = m_ResourcePropertyInfoIndices.size();
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
 		m_Resources.push_back(resourceUUID);
+		m_TextureTypeIndices[size_t(textureType)].push_back(textureIndex);
 	}
 
 	void MaterialData::AddProperty(const MaterialPropertyInfo& other)
@@ -60,8 +62,10 @@ namespace Glory
 		m_PropertyInfos.push_back(MaterialPropertyInfo(other));
 		if (other.IsResource())
 		{
+			const size_t textureIndex = m_ResourcePropertyInfoIndices.size();
 			m_ResourcePropertyInfoIndices.push_back(index);
 			m_Resources.push_back(0);
+			m_TextureTypeIndices[size_t(other.m_TextureType)].push_back(textureIndex);
 		}
 		else
 		{
@@ -123,6 +127,14 @@ namespace Glory
 		return true;
 	}
 
+	bool MaterialData::GetPropertyInfoIndex(const MaterialManager& materialManager, TextureType textureType, size_t texIndex, size_t& index) const
+	{
+		if (m_TextureTypeIndices[textureType].size() <= texIndex) return false;
+		const size_t resourceIndex = m_TextureTypeIndices[textureType][texIndex];
+		index = m_ResourcePropertyInfoIndices[resourceIndex];
+		return true;
+	}
+
 	size_t MaterialData::ResourceCount() const
 	{
 		return m_Resources.size();
@@ -157,6 +169,16 @@ namespace Glory
 		m_Resources.clear();
 		m_HashToPropertyInfoIndex.clear();
 		m_CurrentOffset = 0;
+
+		for (size_t i = 0; i < m_TextureTypeIndices.size(); ++i)
+		{
+			m_TextureTypeIndices[i].clear();
+		}
+	}
+
+	size_t MaterialData::TextureCount(MaterialManager&, TextureType textureType) const
+	{
+		return m_TextureTypeIndices[size_t(textureType)].size();
 	}
 
 	void MaterialData::Serialize(BinaryStream& container) const
@@ -207,11 +229,13 @@ namespace Glory
 			container.Read(prop.m_PropertyDisplayName);
 			container.Read(prop.m_Size);
 			container.Read(prop.m_Offset);
-			container.Read(prop.m_IsResource);
+			container.Read(prop.m_TextureType);
 			container.Read(prop.m_Flags);
 
-			if (!prop.m_IsResource) continue;
+			if (!prop.m_TextureType) continue;
+			const size_t resourceIndex = m_ResourcePropertyInfoIndices.size();
 			m_ResourcePropertyInfoIndices.push_back(i);
+			m_TextureTypeIndices[size_t(prop.m_TextureType)].push_back(resourceIndex);
 		}
 
 		/* Read property buffer */
@@ -240,6 +264,17 @@ namespace Glory
 	{
 		size_t index;
 		if (!GetPropertyInfoIndex(materialManager, name, index)) return;
+		EnableProperty(index);
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
+		if (!pPropertyInfo->IsResource()) return;
+		const size_t resourceIndex = pPropertyInfo->Offset();
+		m_Resources[resourceIndex] = uuid;
+	}
+
+	void MaterialData::SetTexture(MaterialManager& materialManager, TextureType textureType, size_t texIndex, UUID uuid)
+	{
+		size_t index;
+		if (!GetPropertyInfoIndex(materialManager, textureType, texIndex, index)) return;
 		EnableProperty(index);
 		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
 		if (!pPropertyInfo->IsResource()) return;

@@ -42,6 +42,8 @@ namespace Editor
 		GLORY_EDITOR_API virtual ShaderType GetShaderType(UUID shaderID) const override;
 		GLORY_EDITOR_API virtual FileData* GetCompiledShaderFile(UUID shaderID) const override;
 
+		GLORY_EDITOR_API static TextureType ShaderNameToTextureType(const std::string_view name);
+
 	private:
 		static void CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
 		static void LoadCache(UUID shaderID, std::filesystem::path path);

@@ -248,8 +248,9 @@ namespace Glory::Editor
 			}
 			else
 			{
+				const TextureType textureType = EditorShaderProcessor::ShaderNameToTextureType(name);
 				const UUID id = value.As<uint64_t>();
-				pMaterial->AddProperty(displayName, name, type, id);
+				pMaterial->AddResourceProperty(displayName, name, type, id, textureType);
 			}
 		}
 	}

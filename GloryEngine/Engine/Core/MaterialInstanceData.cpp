@@ -115,6 +115,13 @@ namespace Glory
 		return pBaseMaterial->GetPropertyInfoIndex(manager, name, index);
 	}
 
+	bool MaterialInstanceData::GetPropertyInfoIndex(const MaterialManager& manager, TextureType textureType, size_t texIndex, size_t& index) const
+	{
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return false;
+		return pBaseMaterial->GetPropertyInfoIndex(manager, textureType, texIndex, index);
+	}
+
 	AssetReference<TextureData>* MaterialInstanceData::GetResourceUUIDPointer(MaterialManager& manager, size_t index)
 	{
 		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
@@ -175,6 +182,13 @@ namespace Glory
 	void MaterialInstanceData::DisableProperty(size_t index)
 	{
 		m_PropertyOverridesEnable[index] = false;
+	}
+
+	size_t MaterialInstanceData::TextureCount(MaterialManager& manager, TextureType textureType) const
+	{
+		MaterialData* pBaseMaterial = GetBaseMaterial(manager);
+		if (!pBaseMaterial) return 0;
+		return pBaseMaterial->TextureCount(manager, textureType);
 	}
 
 	void MaterialInstanceData::Serialize(BinaryStream& container) const

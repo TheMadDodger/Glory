@@ -265,6 +265,27 @@ namespace Glory::Editor
 		return pCompiledShader;
 	}
 
+	TextureType EditorShaderProcessor::ShaderNameToTextureType(const std::string_view name)
+	{
+		/* Hardcoded solution for texSampler */
+		if (name.compare("texSampler") == 0)
+		{
+			return TextureType::TT_BaseColor;
+		}
+
+		for (uint32_t i = Enum<TextureType>().NumValues(); i > 0; --i)
+		{
+			const TextureType textureType = TextureType(i-1);
+			std::string valueStr;
+			Enum<TextureType>().ToString(textureType, valueStr);
+			/* Skip the first letter to avoid case mismatch */
+			const std::string_view comparer = &valueStr.c_str()[1];
+			if (name.find(comparer) == std::string::npos) continue;
+			return textureType;
+		}
+		return TT_Unknown;
+	}
+
 	void EditorShaderProcessor::AssetCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;

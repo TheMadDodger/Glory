@@ -54,7 +54,7 @@ namespace Glory
         /** @brief Add a property info to the pipeline */
         void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, uint32_t flags = 0);
         /** @overload for resources */
-        void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash);
+        void AddResourceProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, TextureType textureType);
         /** @brief Get the number of properties for this pipeline */
         size_t PropertyInfoCount() const;
         /** @brief Get an @ref MaterialPropertyInfo by index */
