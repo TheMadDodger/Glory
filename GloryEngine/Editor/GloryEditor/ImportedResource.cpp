@@ -8,13 +8,16 @@ namespace Glory::Editor
 	ImportedResource::ImportedResource(): m_Path(""), m_pResource(nullptr)
 	{
 	}
+
 	ImportedResource::ImportedResource(std::nullptr_t): m_Path(""), m_pResource(nullptr)
 	{
 	}
+
 	ImportedResource::ImportedResource(const std::filesystem::path& path, Resource* pResource):
 		m_Path(path), m_pResource(pResource)
 	{
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(m_Path.string());
+		m_IsNew = !uuid;
 		if (uuid) pResource->SetResourceUUID(uuid);
 	}
 
@@ -28,11 +31,16 @@ namespace Glory::Editor
 		}
 
 		pResource->SetName(name);
-		m_Children.push_back({ m_Path, pResource });
+		m_Children.push_back({});
 		ImportedResource& resource = m_Children[index];
+		resource.m_Path = m_Path;
+		resource.m_pResource = pResource;
+
 		resource.m_CachedSubPath = m_CachedSubPath;
 		resource.m_CachedSubPath.append(name);
+
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(m_Path.string(), resource.m_CachedSubPath);
+		resource.m_IsNew = !uuid;
 		if (uuid) pResource->SetResourceUUID(uuid);
 		return resource;
 	}
@@ -126,6 +134,21 @@ namespace Glory::Editor
 		if (!pSubresource) return nullptr;
 		std::filesystem::path nextPath = path.lexically_relative(subPath);
 		return pSubresource->ChildFromPath(nextPath);
+	}
+
+	bool ImportedResource::IsNew() const
+	{
+		return m_IsNew;
+	}
+
+	const std::filesystem::path& ImportedResource::Path() const
+	{
+		return m_Path;
+	}
+
+	const std::filesystem::path& ImportedResource::SubPath() const
+	{
+		return m_CachedSubPath;
 	}
 
 	void ImportedResource::Cleanup()

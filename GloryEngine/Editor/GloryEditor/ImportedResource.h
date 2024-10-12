@@ -41,6 +41,9 @@ namespace Editor
 
 		GLORY_EDITOR_API ImportedResource* ChildFromPath(const std::filesystem::path& path);
 		GLORY_EDITOR_API const ImportedResource* ChildFromPath(const std::filesystem::path& path) const;
+		GLORY_EDITOR_API bool IsNew() const;
+		GLORY_EDITOR_API const std::filesystem::path& Path() const;
+		GLORY_EDITOR_API const std::filesystem::path& SubPath() const;
 
 		GLORY_EDITOR_API void Cleanup();
 
@@ -50,6 +53,7 @@ namespace Editor
 		Resource* m_pResource;
 		std::vector<ImportedResource> m_Children;
 		std::map<std::string, size_t> m_NameToSubresourceIndex;
+		bool m_IsNew = false;
 		std::filesystem::path m_Path;
 		std::filesystem::path m_CachedSubPath;
 	};
