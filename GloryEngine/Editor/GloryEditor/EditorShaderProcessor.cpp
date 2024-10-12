@@ -273,9 +273,9 @@ namespace Glory::Editor
 			return TextureType::TT_BaseColor;
 		}
 
-		for (uint32_t i = 0; i < Enum<TextureType>().NumValues(); ++i)
+		for (uint32_t i = Enum<TextureType>().NumValues(); i > 0; --i)
 		{
-			const TextureType textureType = TextureType(i);
+			const TextureType textureType = TextureType(i-1);
 			std::string valueStr;
 			Enum<TextureType>().ToString(textureType, valueStr);
 			/* Skip the first letter to avoid case mismatch */
