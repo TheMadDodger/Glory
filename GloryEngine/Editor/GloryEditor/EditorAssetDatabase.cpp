@@ -641,12 +641,7 @@ namespace Glory::Editor
 		std::string fixedPath = path;
 		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
 
-		std::filesystem::path absolutePath = fixedPath;
-		if (!absolutePath.is_absolute() && fixedPath[0] != '.')
-		{
-			absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
-			absolutePath = absolutePath.append(fixedPath);
-		}
+		std::filesystem::path absolutePath = GetAbsoluteAssetPath(fixedPath);
 		if (!m_PathToUUIDCache.Contains(absolutePath.string())) return 0;
 		if (subPath.empty()) return m_PathToUUIDCache[absolutePath.string()];
 
@@ -659,7 +654,7 @@ namespace Glory::Editor
 			const UUID uuid = std::stoull(key.data());
 			AssetLocation location;
 			if (!GetAssetLocation(uuid, location)) continue;
-			if (location.Path != fixedPath) continue;
+			if (GetAbsoluteAssetPath(location.Path) != fixedPath) continue;
 			if (location.SubresourcePath != subPath) continue;
 			return uuid;
 		}
@@ -734,6 +729,17 @@ namespace Glory::Editor
 				ImportModuleAsset(assetPath, root[j]);
 			}
 		}
+	}
+
+	std::filesystem::path EditorAssetDatabase::GetAbsoluteAssetPath(const std::string& path)
+	{
+		std::filesystem::path absolutePath = path;
+		if (!absolutePath.is_absolute() && path[0] != '.')
+		{
+			absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
+			absolutePath = absolutePath.append(path);
+		}
+		return absolutePath;
 	}
 
 	void EditorAssetDatabase::Initialize()
