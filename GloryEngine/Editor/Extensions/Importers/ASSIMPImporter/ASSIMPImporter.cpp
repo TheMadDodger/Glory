@@ -86,6 +86,18 @@ namespace Glory::Editor
         return resource;
     }
 
+    glm::vec4 toColorAndIntensity(const aiColor3D& color)
+    {
+        /* Doesn't recover exact values but it should be a match visually */
+        const float total = color.r + color.b + color.g;
+        return glm::vec4{ color.r/total, color.g/total, color.b/total, total };
+    }
+
+    glm::vec4 toVec4(const aiColor3D& color)
+    {
+        return glm::vec4(color.r, color.g, color.b, 1.0f);
+    }
+
     void ASSIMPImporter::ProcessNode(PrefabData* pPrefab, Utils::ECS::EntityID parent, aiNode* node, const aiScene* scene, ImportedResource& resource) const
     {
         // process all the node's meshes (if any)
@@ -103,6 +115,40 @@ namespace Glory::Editor
         transform.Rotation = convertedQuat;
         transform.Scale = convertedScale;
 
+        if (scene->HasLights())
+        {
+            for (size_t i = 0; i < scene->mNumLights; ++i)
+            {
+                const aiLight* light = scene->mLights[i];
+                if (node->mName == light->mName)
+                {
+                    LightComponent& lightComp = entity.AddComponent<LightComponent>();
+                    const glm::vec4 color = toColorAndIntensity(light->mColorDiffuse);
+                    lightComp.m_Intensity = color.a;
+                    lightComp.m_Color = color;
+                    lightComp.m_Color.a = 1.0f;
+                    lightComp.m_Range = 100.0f;
+                    break;
+                }
+            }
+        }
+
+        if (scene->HasCameras())
+        {
+            for (size_t i = 0; i < scene->mNumCameras; ++i)
+            {
+                const aiCamera* cam = scene->mCameras[i];
+                if (node->mName == cam->mName)
+                {
+                    CameraComponent& cameraComp = entity.AddComponent<CameraComponent>();
+                    cameraComp.m_Far = cam->mClipPlaneFar;
+                    cameraComp.m_Near = cam->mClipPlaneNear;
+                    cameraComp.m_HalfFOV = glm::degrees(cam->mHorizontalFOV);
+                    break;
+                }
+            }
+        }
+
         if (parent)
             entity.SetParent(parent);
 
@@ -116,6 +162,7 @@ namespace Glory::Editor
             resource.AddChild(pMeshData, pMeshData->Name());
             meshChild.AddComponent<MeshRenderer>(pMeshData, nullptr);
         }
+
         // then do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; ++i)
         {
