@@ -11,11 +11,13 @@ namespace Glory::Utils::ECS
 
 	EntityRegistry::~EntityRegistry()
 	{
+		InvokeAll(InvocationType::OnRemove);
+
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
 			delete m_pViews[i];
 		}
-		
+
 		for (auto it = m_pEntityViews.begin(); it != m_pEntityViews.end(); it++)
 		{
 			delete it->second;
@@ -44,9 +46,9 @@ namespace Glory::Utils::ECS
 	{
 		EntityView* pEntityView = GetEntityView(entity);
 		/* Destroy children first */
-		for (size_t i = 0; i < pEntityView->ChildCount(); ++i)
+		while (pEntityView->ChildCount())
 		{
-			DestroyEntity(pEntityView->Child(i));
+			DestroyEntity(pEntityView->Child(0));
 		}
 
 		/* Remove all components */
@@ -123,7 +125,7 @@ namespace Glory::Utils::ECS
 	EntityView* EntityRegistry::GetEntityView(EntityID entity)
 	{
 		const auto itor = m_pEntityViews.find(entity);
-		if(itor == m_pEntityViews.end())
+		if (itor == m_pEntityViews.end())
 			return nullptr;
 
 		return itor->second;
@@ -364,7 +366,7 @@ namespace Glory::Utils::ECS
 			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
 			void* data = GetComponentAddress(entity, uuid);
-			pRegistry->CopyComponent(newEntity, type, uuid, data, false);
+			pRegistry->CopyComponent(newEntity, type, uuid, data, true);
 		}
 
 		return newEntity;
@@ -398,6 +400,24 @@ namespace Glory::Utils::ECS
 		{
 			m_pViews[i]->InvokeAll(invocationType, this);
 		}
+	}
+
+	void EntityRegistry::InvokeAll(InvocationType invocationType, const std::vector<EntityID>& entities)
+	{
+		for (size_t i = 0; i < m_pViews.size(); ++i)
+		{
+			m_pViews[i]->InvokeAll(invocationType, this, entities);
+		}
+	}
+
+	void EntityRegistry::DisableCallbacks()
+	{
+		m_CallbacksEnabled = false;
+	}
+
+	bool EntityRegistry::CallbacksEnabled() const
+	{
+		return m_CallbacksEnabled;
 	}
 //
 //	void SceneObject::SetBeforeObject(SceneObject* pObject)

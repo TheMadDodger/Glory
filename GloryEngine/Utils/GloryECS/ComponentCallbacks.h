@@ -34,7 +34,7 @@ namespace Glory::Utils::ECS
 
 		void Invoke(const InvocationType& invocationType, EntityRegistry* pRegistry, EntityID entity, T& component)
 		{
-			if (!m_Callbacks[invocationType]) return;
+			if (!pRegistry->CallbacksEnabled() || !m_Callbacks[invocationType]) return;
 			m_Callbacks[invocationType](pRegistry, entity, component);
 		}
 

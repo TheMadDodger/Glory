@@ -191,6 +191,11 @@ namespace Glory
 			m_pOpenScenes[i]->Stop();
 		}
 	}
+	
+	bool SceneManager::HasStarted() const
+	{
+		return m_Started;
+	}
 
 	void SceneManager::CloseAllScenes()
 	{
