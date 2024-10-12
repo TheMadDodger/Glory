@@ -15,7 +15,7 @@ namespace Glory::Utils::ECS
 		{
 			delete m_pViews[i];
 		}
-		
+
 		for (auto it = m_pEntityViews.begin(); it != m_pEntityViews.end(); it++)
 		{
 			delete it->second;
@@ -123,7 +123,7 @@ namespace Glory::Utils::ECS
 	EntityView* EntityRegistry::GetEntityView(EntityID entity)
 	{
 		const auto itor = m_pEntityViews.find(entity);
-		if(itor == m_pEntityViews.end())
+		if (itor == m_pEntityViews.end())
 			return nullptr;
 
 		return itor->second;
@@ -398,6 +398,24 @@ namespace Glory::Utils::ECS
 		{
 			m_pViews[i]->InvokeAll(invocationType, this);
 		}
+	}
+
+	void EntityRegistry::InvokeAll(InvocationType invocationType, const std::vector<EntityID>& entities)
+	{
+		for (size_t i = 0; i < m_pViews.size(); ++i)
+		{
+			m_pViews[i]->InvokeAll(invocationType, this, entities);
+		}
+	}
+
+	void EntityRegistry::DisableCallbacks()
+	{
+		m_CallbacksEnabled = false;
+	}
+
+	bool EntityRegistry::CallbacksEnabled() const
+	{
+		return m_CallbacksEnabled;
 	}
 //
 //	void SceneObject::SetBeforeObject(SceneObject* pObject)

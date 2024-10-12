@@ -50,6 +50,7 @@ namespace Glory
 
 		void Start();
 		void Stop();
+		bool HasStarted() const;
 
 	protected:
 		virtual void OnInitialize() = 0;
