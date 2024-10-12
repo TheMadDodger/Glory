@@ -384,6 +384,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < loadedResource.ChildCount(); i++)
 		{
 			ImportedResource& subResource = loadedResource.Child(i);
+			if (!subResource.IsNew()) continue;
 			std::filesystem::path newSubPath = subPath;
 			newSubPath.append(subResource->Name());
 			ImportAsset(path, subResource, newSubPath);
