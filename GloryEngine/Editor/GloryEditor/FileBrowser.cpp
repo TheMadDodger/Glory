@@ -175,35 +175,71 @@ namespace Glory::Editor
         pWindow->RefreshContentBrowser();
     }
 
-    void FileBrowser::OnFileDragAndDrop(const std::filesystem::path& path)
+    void FileBrowser::OnFileDragAndDrop(const std::vector<std::string_view>& paths)
     {
-        /* Ignore folders */
-        if (std::filesystem::is_directory(path)) return;
+        Debug& debug = EditorApplication::GetInstance()->GetEngine()->GetDebug();
 
         /* We can't import if we're packaging */
-        if (IsPackagingBusy()) return;
-
-        /* Is this file already part of the project? */
-        ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-        if (!pProject) return;
-        std::filesystem::path rootPath = pProject->RootPath();
-        rootPath.append("Assets");
-        if (path.string()._Starts_with(rootPath.string()))
+        if (IsPackagingBusy())
         {
-            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning("File already in project");
+            debug.LogError("Can't import while packaging!");
             return;
+        }
+
+        ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+        if (!pProject)
+        {
+            debug.LogError("Can't import: No project loaded!");
+            return;
+        }
+
+        std::vector<std::filesystem::path> copiedFiles;
+        /* Copy everything first */
+        for (const std::string_view pathStr : paths)
+        {
+            std::filesystem::path path = pathStr;
+
+            std::stringstream stream;
+            stream << "Drag and drop file received at " << path;
+            debug.LogInfo(stream.str());
+
+            /* Is this file already part of the project? */
+            std::filesystem::path rootPath = pProject->RootPath();
+            rootPath.append("Assets");
+            if (path.string()._Starts_with(rootPath.string()))
+            {
+                debug.LogWarning("Can't import: File/folder already in project");
+                return;
+            }
+
+            /* Copy the file to the current folder */
+            std::filesystem::path destination = FileBrowserItem::GetCurrentPath();
+            if (destination.string().find("./Modules") != std::string::npos) destination = rootPath.append("Assets");
+            destination.append(path.filename().string());
+            std::filesystem::copy(path, destination);
+            copiedFiles.push_back(destination);
         }
 
         /* TODO: Prompt the user with a popup for import settings if relevant */
 
-        /* Copy the file to the current folder */
-        std::filesystem::path destination = FileBrowserItem::GetCurrentPath();
-        if (destination.string().find("./Modules") != std::string::npos) destination = rootPath.append("Assets");
-        destination.append(path.filename().string());
-        std::filesystem::copy(path, destination);
+        /* Import folders first */
+        std::sort(copiedFiles.begin(), copiedFiles.end(),
+        [](const std::filesystem::path& a, const std::filesystem::path& b) {
+            if (std::filesystem::is_directory(a) && !std::filesystem::is_directory(b))
+                return true;
+            if (!std::filesystem::is_directory(a) && std::filesystem::is_directory(b))
+                return false;
+            return false;
+        });
 
-        /* Import the asset */
-        EditorAssetDatabase::ImportAssetAsync(destination.string());
+        /* Import only the copied assets */
+        for (const std::filesystem::path& copiedFile: copiedFiles)
+        {
+            if (std::filesystem::is_directory(copiedFile))
+                EditorAssetDatabase::ImportAssetsAsync(copiedFile.string());
+            else
+                EditorAssetDatabase::ImportAssetAsync(copiedFile.string());
+        }
     }
 
     void FileBrowser::DirectoryBrowser()

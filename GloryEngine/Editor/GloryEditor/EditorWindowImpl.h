@@ -28,7 +28,7 @@ namespace Glory::Editor
 	protected:
 		virtual bool PollEvents() = 0;
 		virtual void NewFrame() = 0;
-		GLORY_EDITOR_API void OnFileDragAndDrop(std::string_view path);
+		GLORY_EDITOR_API void OnFileDragAndDrop(std::vector<std::string_view>& paths);
 
 	protected:
 		Window* m_pMainWindow;

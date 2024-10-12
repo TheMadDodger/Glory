@@ -384,11 +384,8 @@ namespace Glory::Editor
 		Quit();
 	}
 
-	void EditorApplication::OnFileDragAndDrop(std::string_view path)
+	void EditorApplication::OnFileDragAndDrop(std::vector<std::string_view>& paths)
 	{
-		std::stringstream stream;
-		stream << "Drag and drop file received at " << path;
-		m_pEngine->GetDebug().LogInfo(stream.str());
-		m_MainEditor.OnFileDragAndDrop(path);
+		m_MainEditor.OnFileDragAndDrop(paths);
 	}
 }

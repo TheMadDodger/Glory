@@ -53,6 +53,9 @@ namespace Glory::Editor
 	{
 		SDLWindow* pSDLWindow = (SDLWindow*)m_pMainWindow;
 
+		static std::vector<char*> droppedFilePaths;
+		static std::vector<std::string_view> droppedFiles;
+
 		// Poll and handle events (inputs, window resize, etc.)
 			// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
 			// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -82,10 +85,26 @@ namespace Glory::Editor
 			case SDL_DROPFILE:
 			{
 				std::string_view droppedFilePath = event.drop.file;
-				OnFileDragAndDrop(droppedFilePath);
-				SDL_free(event.drop.file);
+				droppedFilePaths.push_back(event.drop.file);
+				droppedFiles.push_back(droppedFilePath);
 				break;
 			}
+			case SDL_DROPBEGIN:
+				break;
+
+			case SDL_DROPCOMPLETE:
+			{
+				OnFileDragAndDrop(droppedFiles);
+
+				droppedFiles.clear();
+				for (char* droppedFile : droppedFilePaths)
+				{
+					SDL_free(droppedFile);
+				}
+				droppedFilePaths.clear();
+				break;
+			}
+
 			default:
 				break;
 			}
