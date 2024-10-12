@@ -18,14 +18,16 @@
 
 #include <EditorPipelineManager.h>
 #include <EditorMaterialManager.h>
+#include <EditorAssetDatabase.h>
 
 namespace Glory::Editor
 {
-    constexpr size_t NumSupportedExtensions = 9;
+    constexpr size_t NumSupportedExtensions = 4;
     constexpr std::string_view SupportedExtensions[NumSupportedExtensions] = {
         ".obj",
         ".fbx",
         ".gltf",
+        ".glb",
     };
 
     ASSIMPImporter::ASSIMPImporter()
@@ -81,6 +83,23 @@ namespace Glory::Editor
         ModelData* pModel = new ModelData();
         ImportedResource resource{ path, pModel };
 
+        /* @todo: Use for unit conversion */
+        //scene->mMetaData
+
+        /* @todo: Import embedded textures */
+        if (pScene->HasTextures())
+        {
+            for (size_t i = 0; i < pScene->mNumTextures; ++i)
+            {
+                aiTexture* pTexture = pScene->mTextures[i];
+                if (!pTexture) continue;
+            }
+        }
+
+        EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
+        MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
+        const std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
+
         Context context;
         if (pScene->HasMaterials())
         {
@@ -92,19 +111,17 @@ namespace Glory::Editor
 
                 aiShadingMode shadingMode;
                 material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
-                bool usesTextures = false;
-                for (size_t i = 0; i < material->mNumProperties; ++i)
-                {
-                    if (material->mProperties[i]->mSemantic == aiTextureType_NONE) continue;
-                    usesTextures = true;
-                    break;
-                }
+                const bool usesTextures = material->GetTextureCount(aiTextureType_BASE_COLOR) ||
+                    material->GetTextureCount(aiTextureType_NORMALS);
+
                 MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
-                const UUID pipelineID = EditorApplication::GetInstance()->GetPipelineManager().FindPipeline(PipelineType(shadingMode), usesTextures);
+                UUID pipelineID = pipelines.FindPipeline(PipelineType(shadingMode), usesTextures);
+                if (!pipelineID)
+                    pipelineID = pipelines.FindPipeline(PT_Phong, usesTextures);
                 if (pipelineID)
                 {
                     pMaterial->SetPipeline(pipelineID);
-                    PipelineData* pPipeline = EditorApplication::GetInstance()->GetPipelineManager().GetPipelineData(pipelineID);
+                    PipelineData* pPipeline = pipelines.GetPipelineData(pipelineID);
                     pPipeline->LoadIntoMaterial(pMaterial);
 
                     for (size_t i = 0; i < pMaterial->PropertyInfoCount(materials); ++i)
@@ -113,16 +130,39 @@ namespace Glory::Editor
                     }
                 }
 
+                for (size_t textureTypeI = 0; textureTypeI < TT_Count; ++textureTypeI)
+                {
+                    const TextureType textureType = TextureType(textureTypeI);
+                    const aiTextureType aiTexType = aiTextureType(textureType);
+                    const size_t texCount = std::min<size_t>(material->GetTextureCount(aiTexType),
+                        pMaterial->TextureCount(materials, textureType));
+                    for (size_t j = 0; j < texCount; ++j)
+                    {
+                        aiString texPath;
+                        if (material->GetTexture(aiTexType, j, &texPath) != aiReturn_SUCCESS)
+                            continue;
+
+                        std::filesystem::path texturePath = path.parent_path();
+                        texturePath.append(texPath.C_Str());
+                        const UUID texID = EditorAssetDatabase::FindAssetUUID(texturePath.string());
+                        pMaterial->SetTexture(materials, textureType, j, texID);
+                    }
+                }
+
+                /*for (size_t i = 0; i < material->mNumProperties; ++i)
+                {
+                    aiMaterialProperty* pProperty = material->mProperties[i];
+                    if (pProperty->mSemantic == aiTextureType_NONE) continue;
+                    aiString str;
+                    material->Get(pProperty->mKey.C_Str(), unsigned int(pProperty->mType), pProperty->mIndex, str);
+                    usesTextures = true;
+                    break;
+                }*/
+
                 resource.AddChild(pMaterial, pMaterial->Name());
                 context.Materials.push_back(pMaterial);
             }
         }
-
-        /* @todo: Use for unit conversion */
-        //scene->mMetaData
-
-        /* @todo: Import embedded textures */
-        //scene->mTextures
 
         PrefabData* pPrefab = new PrefabData();
         context.Prefab = pPrefab;
@@ -228,7 +268,6 @@ namespace Glory::Editor
         std::vector<uint32_t> indices;
         uint32_t vertexSize = 0;
         size_t arraySize = 0;
-        //vector<Texture> textures;
 
         if (mesh->mNormals == nullptr)
         {
