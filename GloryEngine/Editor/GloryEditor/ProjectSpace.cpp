@@ -4,6 +4,7 @@
 #include "EditorApplication.h"
 #include "ProjectSettings.h"
 #include "EditorAssetDatabase.h"
+#include "AssetCompiler.h"
 #include "TitleBar.h"
 #include "ProjectMigrations.h"
 #include "PopupManager.h"
@@ -218,6 +219,8 @@ namespace Glory::Editor
 
 		EditorAssetDatabase::Load(m_ProjectFile);
 		EditorAssetDatabase::ImportModuleAssets();
+		AssetCompiler::CompileAssetDatabase();
+		AssetCompiler::CompileNewAssets();
 		FileBrowser::LoadProject();
 		ProjectSettings::Load(this);
 

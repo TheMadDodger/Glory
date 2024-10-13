@@ -51,6 +51,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool GetAssetLocation(UUID uuid, AssetLocation& location);
 		static GLORY_EDITOR_API bool GetAssetMetadata(UUID uuid, ResourceMeta& meta);
 
+		static GLORY_EDITOR_API std::pair<UUID, bool> ReserveAssetUUID(const std::string& path, const std::filesystem::path& subPath);
 		static GLORY_EDITOR_API UUID FindAssetUUID(const std::string& path);
 		static GLORY_EDITOR_API UUID FindAssetUUID(const std::string& path, const std::filesystem::path& subPath);
 		static GLORY_EDITOR_API bool AssetExists(UUID uuid);

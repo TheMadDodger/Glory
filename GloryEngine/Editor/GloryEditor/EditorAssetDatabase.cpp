@@ -29,6 +29,7 @@ namespace Glory::Editor
 
 	ThreadedVector<ImportedResourceData> m_ImportedResources;
 	ThreadedUMap<std::string, UUID> m_PathToUUIDCache;
+	ThreadedUMap<std::filesystem::path, UUID> m_ReservedUUIDs;
 
 	std::function<void()> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
@@ -73,8 +74,6 @@ namespace Glory::Editor
 		}
 
 		DB_EngineInstance->GetDebug().LogInfo("Loaded asset database");
-		AssetCompiler::CompileAssetDatabase();
-		AssetCompiler::CompileNewAssets();
 	}
 
 	void EditorAssetDatabase::Reload()
@@ -329,7 +328,9 @@ namespace Glory::Editor
 		}
 
 		if (forceUUID)
+		{
 			loadedResource->SetResourceUUID(forceUUID);
+		}
 
 		/* Try getting the resource type from the loaded resource */
 		std::type_index type = typeid(Resource);
@@ -371,6 +372,10 @@ namespace Glory::Editor
 		InsertAsset(location, meta);
 		const UUID uuid = meta.ID();
 		if (subPath.empty()) m_PathToUUIDCache.Set(path, uuid);
+
+		std::filesystem::path reservedPath = GetAbsoluteAssetPath(path);
+		if (!subPath.empty()) reservedPath.append(subPath.string());
+		m_ReservedUUIDs.Set(reservedPath, forceUUID);
 
 		std::stringstream stream;
 		if (!subPath.empty())
@@ -600,6 +605,28 @@ namespace Glory::Editor
 
 		meta = ResourceMeta(std::string(ext), std::string(name), uuid, hash, version);
 		return true;
+	}
+
+	std::pair<UUID, bool> EditorAssetDatabase::ReserveAssetUUID(const std::string& path, const std::filesystem::path& subPath)
+	{
+		const std::filesystem::path absolutePath = GetAbsoluteAssetPath(path);
+
+		const UUID existingID = FindAssetUUID(path, subPath);
+		if (existingID) return { existingID, true };
+		UUID uuid = 0;
+		m_ReservedUUIDs.Do([absolutePath, subPath, &uuid](std::unordered_map<std::filesystem::path, UUID>& map) {
+			std::filesystem::path combinedPath = absolutePath;
+			if (!subPath.empty()) combinedPath.append(subPath.string());
+			auto iter = map.find(combinedPath);
+			if (iter == map.end())
+			{
+				uuid = UUID();
+				map.emplace(combinedPath, uuid);
+				return;
+			}
+			uuid = iter->second;
+		});
+		return { uuid, false };
 	}
 
 	UUID EditorAssetDatabase::FindAssetUUID(const std::string& path)
