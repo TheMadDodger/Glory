@@ -5,9 +5,19 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+#include <Components.h>
 #include <MeshData.h>
+#include <PrefabData.h>
 #include <Debug.h>
 #include <sstream>
+#include <SceneManager.h>
+#include <PipelineData.h>
+
+#include <EntityRegistry.h>
+
+#include <EditorPipelineManager.h>
+#include <EditorMaterialManager.h>
 
 namespace Glory::Editor
 {
@@ -33,6 +43,8 @@ namespace Glory::Editor
 
     void ASSIMPImporter::Initialize()
 	{
+        /* We need to manually set the component types instance */
+        EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->ComponentTypesInstance();
 	}
 
 	void ASSIMPImporter::Cleanup()
@@ -68,14 +80,70 @@ namespace Glory::Editor
 
         ModelData* pModel = new ModelData();
         ImportedResource resource{ path, pModel };
-        ProcessNode(pScene->mRootNode, pScene, resource);
+
+        Context context;
+        if (pScene->HasMaterials())
+        {
+            for (size_t i = 0; i < pScene->mNumMaterials; ++i)
+            {
+                const aiMaterial* material = pScene->mMaterials[i];
+                MaterialData* pMaterial = new MaterialData();
+                pMaterial->SetName(std::string_view{ material->GetName().C_Str() });
+
+                aiShadingMode shadingMode;
+                material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
+                bool usesTextures = false;
+                for (size_t i = 0; i < material->mNumProperties; ++i)
+                {
+                    if (material->mProperties[i]->mSemantic == aiTextureType_NONE) continue;
+                    usesTextures = true;
+                    break;
+                }
+                MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
+                UUID pipelineID = EditorApplication::GetInstance()->GetPipelineManager().FindPipeline(PipelineType(shadingMode), usesTextures);
+                if (!pipelineID)
+                    pipelineID = EditorApplication::GetInstance()->GetPipelineManager().FindPipeline(PipelineType::PT_Phong, usesTextures);
+                if (pipelineID)
+                {
+                    pMaterial->SetPipeline(pipelineID);
+                    PipelineData* pPipeline = EditorApplication::GetInstance()->GetPipelineManager().GetPipelineData(pipelineID);
+                    pPipeline->LoadIntoMaterial(pMaterial);
+
+                    for (size_t i = 0; i < pMaterial->PropertyInfoCount(materials); ++i)
+                    {
+                        MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(materials, i);
+                        aiColor3D color;
+                        if (info->ShaderName() == "Color" && material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == aiReturn_SUCCESS)
+                        {
+                            pMaterial->Set(materials, info->ShaderName(), glm::vec4(color.r, color.g, color.b, 1.0f));
+                        }
+                    }
+                }
+
+                resource.AddChild(pMaterial, pMaterial->Name());
+                context.Materials.push_back(pMaterial);
+            }
+        }
+
+        ProcessNode(context, pScene->mRootNode, pScene, resource);
 
         importer.FreeScene();
-
         return resource;
     }
 
-    void ASSIMPImporter::ProcessNode(aiNode* node, const aiScene* scene, ImportedResource& resource) const
+    glm::vec4 toColorAndIntensity(const aiColor3D& color)
+    {
+        /* Doesn't recover exact values but it should be a match visually */
+        const float total = color.r + color.b + color.g;
+        return glm::vec4{ color.r/total, color.g/total, color.b/total, total };
+    }
+
+    glm::vec4 toVec4(const aiColor3D& color)
+    {
+        return glm::vec4(color.r, color.g, color.b, 1.0f);
+    }
+
+    void ASSIMPImporter::ProcessNode(Context& context, aiNode* node, const aiScene* scene, ImportedResource& resource) const
     {
         // process all the node's meshes (if any)
         for (unsigned int i = 0; i < node->mNumMeshes; ++i)
@@ -85,10 +153,11 @@ namespace Glory::Editor
             if (!pMeshData) continue;
             resource.AddChild(pMeshData, pMeshData->Name());
         }
+
         // then do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; ++i)
         {
-            ProcessNode(node->mChildren[i], scene, resource);
+            ProcessNode(context, node->mChildren[i], scene, resource);
         }
     }
 
