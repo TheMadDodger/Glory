@@ -47,35 +47,37 @@ namespace Glory::Editor
 
 	void EditorPipelineManager::AddShaderToPipeline(UUID pipelineID, UUID shaderID)
 	{
-		auto itor = m_pPipelineDatas.find(pipelineID);
-		if (itor == m_pPipelineDatas.end()) return;
-		itor->second->AddShader(shaderID);
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+		if (!pResource) return;
+		PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+		pPipeline->AddShader(shaderID);
 		YAMLResource<PipelineData>* pMaterialData = static_cast<YAMLResource<PipelineData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(pipelineID));
 		Utils::YAMLFileRef& file = **pMaterialData;
 		auto shaders = file["Shaders"];
 		shaders[shaders.Size()].Set(uint64_t(shaderID));
-		UpdatePipeline(itor->second);
+		UpdatePipeline(pPipeline);
 	}
 
 	void EditorPipelineManager::RemoveShaderFromPipeline(UUID pipelineID, size_t index)
 	{
-		auto itor = m_pPipelineDatas.find(pipelineID);
-		if (itor == m_pPipelineDatas.end()) return;
-		itor->second->RemoveShaderAt(index);
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+		if (!pResource) return;
+		PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+		pPipeline->RemoveShaderAt(index);
 		YAMLResource<PipelineData>* pMaterialData = static_cast<YAMLResource<PipelineData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(pipelineID));
 		Utils::YAMLFileRef& file = **pMaterialData;
 		auto shaders = file["Shaders"];
 		shaders.Remove(index);
-		UpdatePipeline(itor->second);
+		UpdatePipeline(pPipeline);
 	}
 
 	PipelineData* EditorPipelineManager::GetPipelineData(UUID pipelineID) const
 	{
-		auto itor = m_pPipelineDatas.find(pipelineID);
-		if (itor == m_pPipelineDatas.end()) return nullptr;
-		return itor->second;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+		if (!pResource) return nullptr;
+		return static_cast<PipelineData*>(pResource);
 	}
 
 	UUID EditorPipelineManager::FindPipeline(PipelineType type, bool useTextures) const
@@ -133,7 +135,7 @@ namespace Glory::Editor
 
 			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
 			pPipeline->SetResourceUUID(callback.m_UUID);
-			m_pPipelineDatas[callback.m_UUID] = pPipeline;
+			m_Pipelines.push_back(callback.m_UUID);
 
 			UpdatePipeline(pPipeline);
 
@@ -149,10 +151,13 @@ namespace Glory::Editor
 
 	void EditorPipelineManager::OnShaderCompiled(const UUID& uuid)
 	{
-		for (auto itor = m_pPipelineDatas.begin(); itor != m_pPipelineDatas.end(); ++itor)
+		for (const UUID pipelineID : m_Pipelines)
 		{
-			if (!itor->second->HasShader(uuid)) continue;
-			UpdatePipeline(itor->second);
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+			if (!pResource) continue;
+			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+			if (!pPipeline->HasShader(uuid)) continue;
+			UpdatePipeline(pPipeline);
 		}
 	}
 
