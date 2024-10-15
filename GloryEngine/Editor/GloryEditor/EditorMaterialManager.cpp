@@ -34,8 +34,8 @@ namespace Glory::Editor
 
 	EditorMaterialManager::~EditorMaterialManager()
 	{
-		m_pMaterialDatas.clear();
-		m_pMaterialInstanceDatas.clear();
+		m_Materials.clear();
+		m_MaterialInstances.clear();
 		m_WaitingMaterialInstances.clear();
 	}
 
@@ -76,36 +76,41 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::SetMaterialPipeline(UUID materialID, UUID pipelineID)
 	{
-		auto itor = m_pMaterialDatas.find(materialID);
-		if (itor == m_pMaterialDatas.end()) return;
-		itor->second->SetPipeline(pipelineID);
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
+		if (!pResource) return;
+		MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
+		pMaterial->SetPipeline(pipelineID);
 		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
 		Utils::YAMLFileRef& file = **pMaterialData;
 		file["Pipeline"].Set(uint64_t(pipelineID));
-		UpdateMaterial(itor->second);
+		UpdateMaterial(pMaterial);
 	}
 
 	void EditorMaterialManager::SetMaterialInstanceBaseMaterial(UUID materialInstanceID, UUID baseMaterialID)
 	{
-		auto itor = m_pMaterialInstanceDatas.find(materialInstanceID);
-		if (itor == m_pMaterialInstanceDatas.end()) return;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialInstanceID);
+		if (!pResource) return;
+		MaterialInstanceData* pMaterial = static_cast<MaterialInstanceData*>(pResource);
+
+		pResource = m_pEngine->GetAssetManager().FindResource(baseMaterialID);
+		if (!pResource) return;
+		MaterialData* pBaseMaterial = static_cast<MaterialData*>(pResource);
+
 		YAMLResource<MaterialInstanceData>* pMaterialInstanceData = static_cast<YAMLResource<MaterialInstanceData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialInstanceID));
 		Utils::YAMLFileRef& file = **pMaterialInstanceData;
 		file["BaseMaterial"].Set(uint64_t(baseMaterialID));
-		itor->second->SetBaseMaterialID(baseMaterialID);
+		pMaterial->SetBaseMaterialID(baseMaterialID);
 
-		auto baseItor = m_pMaterialDatas.find(baseMaterialID);
-		if (baseItor == m_pMaterialDatas.end()) return;
-		ReadPropertiesInto(file["Overrides"], itor->second);
+		ReadPropertiesInto(file["Overrides"], pBaseMaterial);
 	}
 
 	MaterialData* EditorMaterialManager::GetMaterial(UUID materialID) const
 	{
-		auto itor = m_pMaterialDatas.find(materialID);
-		if (itor == m_pMaterialDatas.end()) return GetMaterialInstance(materialID);
-		return itor->second;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
+		if (!pResource) return nullptr;
+		return static_cast<MaterialData*>(pResource);
 	}
 
 	void EditorMaterialManager::AssetAddedCallback(const AssetCallbackData& callback)
@@ -149,7 +154,7 @@ namespace Glory::Editor
 
 			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
 			pMaterial->SetResourceUUID(callback.m_UUID);
-			m_pMaterialDatas[callback.m_UUID] = pMaterial;
+			m_Materials.push_back(callback.m_UUID);
 
 			/* Update material instances that were waiting for this material */
 			auto itor = m_WaitingMaterialInstances.find(callback.m_UUID);
@@ -188,15 +193,18 @@ namespace Glory::Editor
 
 			MaterialInstanceData* pMaterial = static_cast<MaterialInstanceData*>(pResource);
 			pMaterial->SetResourceUUID(callback.m_UUID);
-			m_pMaterialInstanceDatas[callback.m_UUID] = pMaterial;
+			m_MaterialInstances.push_back(callback.m_UUID);
 
 			/* If the base material isnt loaded we must update it when it is */
 			const UUID baseMaterial = pMaterial->BaseMaterialID();
 			if (!baseMaterial || !EditorAssetDatabase::AssetExists(baseMaterial)) return;
-			auto itor = m_pMaterialDatas.find(baseMaterial);
-			if (itor != m_pMaterialDatas.end())
+
+			pResource = m_pEngine->GetAssetManager().FindResource(baseMaterial);
+			if (!pResource) return;
+			MaterialData* pBaseMaterial = static_cast<MaterialData*>(pResource);
+			if (pBaseMaterial)
 			{
-				pMaterial->Resize(*this, itor->second);
+				pMaterial->Resize(*this, pBaseMaterial);
 				return;
 			}
 			m_WaitingMaterialInstances[baseMaterial].push_back(callback.m_UUID);
@@ -215,10 +223,13 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::PipelineUpdateCallback(PipelineData* pPipeline)
 	{
-		for (auto itor = m_pMaterialDatas.begin(); itor != m_pMaterialDatas.end(); ++itor)
+		for (const UUID materialID : m_Materials)
 		{
-			if (itor->second->GetPipelineID(*this) != pPipeline->GetUUID()) continue;
-			UpdateMaterial(itor->second);
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
+			if (!pResource) continue;
+			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
+			if (pMaterial->GetPipelineID(*this) != pPipeline->GetUUID()) continue;
+			UpdateMaterial(pMaterial);
 		}
 	}
 
@@ -312,17 +323,20 @@ namespace Glory::Editor
 		/* Update properties in YAML? */
 
 		/* Find and update material instances */
-		for (auto itor = m_pMaterialInstanceDatas.begin(); itor != m_pMaterialInstanceDatas.end(); ++itor)
+		for (const UUID materialID : m_MaterialInstances)
 		{
-			if (itor->second->BaseMaterialID() != pMaterial->GetUUID()) continue;
-			itor->second->Resize(*this, itor->second);
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
+			if (!pResource) continue;
+			MaterialInstanceData* pMaterialInstance = static_cast<MaterialInstanceData*>(pResource);
+			if (pMaterialInstance->BaseMaterialID() != pMaterial->GetUUID()) continue;
+			pMaterialInstance->Resize(*this, pMaterial);
 		}
 	}
 
 	MaterialInstanceData* EditorMaterialManager::GetMaterialInstance(UUID materialID) const
 	{
-		auto itor = m_pMaterialInstanceDatas.find(materialID);
-		if (itor == m_pMaterialInstanceDatas.end()) return nullptr;
-		return itor->second;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
+		if (!pResource) return nullptr;
+		return static_cast<MaterialInstanceData*>(pResource);
 	}
 }
