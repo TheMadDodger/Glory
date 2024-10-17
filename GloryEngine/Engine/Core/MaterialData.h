@@ -52,6 +52,8 @@ namespace Glory
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 
+        virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+
     public: // Properties
         // Setters
         template<typename T>

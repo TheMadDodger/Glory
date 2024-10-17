@@ -142,12 +142,13 @@ namespace Glory::Editor
 				MaterialData* pMaterialData = new MaterialData();
 				pResource = pMaterialData;
 				pResource->SetResourceUUID(callback.m_UUID);
-				YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(resourceManager.GetEditableResource(callback.m_UUID));
-				if (!pMaterial)
+				if (!location.SubresourcePath.empty())
 				{
 					delete pMaterialData;
 					return;
 				}
+				EditableResource* pMaterialResource = resourceManager.GetEditableResource(callback.m_UUID);
+				YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pMaterialResource);
 				LoadIntoMaterial(**pMaterial, pMaterialData);
 				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
 			}

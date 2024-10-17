@@ -3,6 +3,7 @@
 #include "BinaryStream.h"
 #include "PipelineData.h"
 #include "PipelineManager.h"
+#include "Engine.h"
 
 #include <algorithm>
 
@@ -196,7 +197,7 @@ namespace Glory
 			container.Write(prop.DisplayName());
 			container.Write(prop.Size());
 			container.Write(prop.Offset());
-			container.Write(prop.IsResource());
+			container.Write(prop.GetTextureType());
 			container.Write(prop.Flags());
 		}
 
@@ -251,6 +252,18 @@ namespace Glory
 		for (size_t i = 0; i < m_Resources.size(); ++i)
 		{
 			container.Read(*m_Resources[i].AssetUUIDMember());
+		}
+	}
+
+	void MaterialData::References(Engine* pEngine, std::vector<UUID>& references) const
+	{
+		for (auto& ref: m_Resources)
+		{
+			if (!ref.AssetUUID()) continue;
+			references.push_back(ref.AssetUUID());
+			TextureData* pTexture = pEngine->GetAssetManager().GetAssetImmediate<TextureData>(ref.AssetUUID());
+			if (!pTexture) continue;
+			pTexture->References(pEngine, references);
 		}
 	}
 

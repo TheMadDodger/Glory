@@ -607,7 +607,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	std::pair<UUID, bool> EditorAssetDatabase::ReserveAssetUUID(const std::string& path, const std::filesystem::path& subPath)
+	std::pair<UUID, bool> EditorAssetDatabase::ReserveAssetUUID(std::string& path, const std::filesystem::path& subPath)
 	{
 		const std::filesystem::path absolutePath = GetAbsoluteAssetPath(path);
 
@@ -664,12 +664,11 @@ namespace Glory::Editor
 		return 0;
 	}
 
-	UUID EditorAssetDatabase::FindAssetUUID(const std::string& path, const std::filesystem::path& subPath)
+	UUID EditorAssetDatabase::FindAssetUUID(std::string& path, const std::filesystem::path& subPath)
 	{
-		std::string fixedPath = path;
-		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+		std::replace(path.begin(), path.end(), '/', '\\');
 
-		std::filesystem::path absolutePath = GetAbsoluteAssetPath(fixedPath);
+		std::filesystem::path absolutePath = GetAbsoluteAssetPath(path);
 		if (!m_PathToUUIDCache.Contains(absolutePath.string())) return 0;
 		if (subPath.empty()) return m_PathToUUIDCache[absolutePath.string()];
 
@@ -682,7 +681,7 @@ namespace Glory::Editor
 			const UUID uuid = std::stoull(key.data());
 			AssetLocation location;
 			if (!GetAssetLocation(uuid, location)) continue;
-			if (GetAbsoluteAssetPath(location.Path) != fixedPath) continue;
+			if (GetAbsoluteAssetPath(location.Path) != path) continue;
 			if (location.SubresourcePath != subPath) continue;
 			return uuid;
 		}
@@ -825,7 +824,7 @@ namespace Glory::Editor
 		const UUID uuid = value["ID"].As<uint64_t>();
 		auto children = value["Children"];
 
-		const std::string pathString = path.string();
+		std::string pathString = path.string();
 		if (FindAssetUUID(pathString))
 		{
 			bool allSubAssetsFound = true;

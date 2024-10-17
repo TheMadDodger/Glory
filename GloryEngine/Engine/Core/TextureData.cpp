@@ -42,4 +42,9 @@ namespace Glory
 	{
 		container.Read(*m_Image.AssetUUIDMember()).Read(m_SamplerSettings);
 	}
+
+	void TextureData::References(Engine*, std::vector<UUID>& references) const
+	{
+		references.push_back(m_Image.AssetUUID());
+	}
 }
