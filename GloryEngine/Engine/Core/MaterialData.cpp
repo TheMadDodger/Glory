@@ -254,6 +254,11 @@ namespace Glory
 		}
 	}
 
+	void* MaterialData::Address(MaterialManager& materialManager, size_t index)
+	{
+		return m_PropertyInfos[index].Address(GetPropertyBuffer(materialManager, index));
+	}
+
 	void MaterialData::SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value)
 	{
 		const UUID uuid = value ? value->GetUUID() : 0;

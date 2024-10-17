@@ -82,10 +82,15 @@ namespace Glory::Editor
 
 	UUID EditorPipelineManager::FindPipeline(PipelineType type, bool useTextures) const
 	{
-		const uint64_t pipelineType = useTextures ? uint64_t(type) << 32 : uint64_t(type);
-		auto itor = m_DefaultPipelinesMap.find(pipelineType);
-		if (itor == m_DefaultPipelinesMap.end()) return 0;
-		return itor->second;
+		for (auto pipelineID: m_Pipelines)
+		{
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+			if (!pResource) continue;
+			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+			if (pPipeline->Type() == type && pPipeline->UsesTextures() == useTextures)
+				return pipelineID;
+		}
+		return 0;
 	}
 
 	EditorPipelineManager::PipelineUpdateDispatcher& EditorPipelineManager::PipelineUpdateEvents()
@@ -135,13 +140,10 @@ namespace Glory::Editor
 
 			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
 			pPipeline->SetResourceUUID(callback.m_UUID);
-			m_Pipelines.push_back(callback.m_UUID);
+			if (std::find(m_Pipelines.begin(), m_Pipelines.end(), callback.m_UUID) == m_Pipelines.end())
+				m_Pipelines.push_back(callback.m_UUID);
 
 			UpdatePipeline(pPipeline);
-
-			const uint64_t pipelineType = pPipeline->UsesTextures() ? uint64_t(pPipeline->Type()) << 32 : uint64_t(pPipeline->Type());
-			if (m_DefaultPipelinesMap.find(pipelineType) == m_DefaultPipelinesMap.end())
-				m_DefaultPipelinesMap.emplace(pipelineType, callback.m_UUID);
 		}
 	}
 

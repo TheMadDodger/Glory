@@ -73,6 +73,7 @@ namespace Glory::Editor
 
 	private:
 		friend class EditorApplication;
+		friend class ProjectSpace;
 
 		static bool m_IsDirty;
 		static std::function<void()> m_AsyncImportCallback;

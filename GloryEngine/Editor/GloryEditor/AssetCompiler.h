@@ -21,6 +21,7 @@ namespace Glory::Editor
 	class AssetCompiler
 	{
 	public:
+		GLORY_EDITOR_API static void CompilePipelines();
 		GLORY_EDITOR_API static void CompileAssetDatabase();
 		GLORY_EDITOR_API static void CompileAssetDatabase(UUID id);
 		GLORY_EDITOR_API static void CompileAssetDatabase(const std::vector<UUID>& ids);

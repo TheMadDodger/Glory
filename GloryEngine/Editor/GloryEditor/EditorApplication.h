@@ -63,6 +63,7 @@ namespace Editor
 		GLORY_EDITOR_API Glory::Engine* GetEngine();
 		GLORY_EDITOR_API EditorAssetManager& GetAssetManager();
 		GLORY_EDITOR_API EditorSceneManager& GetSceneManager();
+		GLORY_EDITOR_API EditorShaderProcessor& GetShaderProcessor();
 		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
 		GLORY_EDITOR_API EditorPipelineManager& GetPipelineManager();
 		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();

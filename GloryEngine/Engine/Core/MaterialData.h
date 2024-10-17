@@ -72,6 +72,8 @@ namespace Glory
             return m_PropertyInfos[index].Read<T>(GetPropertyBuffer(materialManager, index), value);
         }
 
+        void* Address(MaterialManager& materialManager, size_t index);
+
         virtual void SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value);
         virtual void SetTexture(MaterialManager& materialManager, const std::string& name, UUID uuid);
         virtual void SetTexture(MaterialManager& materialManager, TextureType textureType, size_t texIndex, UUID uuid);

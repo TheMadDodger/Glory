@@ -317,7 +317,10 @@ namespace Glory::Editor
 		PipelineData* pPipeline = pMaterial->GetPipeline(*this, pipelines);
 		pPipeline->LoadIntoMaterial(pMaterial);
 
-		YAMLResource<MaterialData>* pEditorMaterialData = (YAMLResource<MaterialData>*)pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
+		EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
+		if (!pResource || !pResource->IsEditable()) return;
+		YAMLResource<MaterialData>* pEditorMaterialData = static_cast<YAMLResource<MaterialData>*>(pResource);
+
 		Utils::YAMLFileRef& file = **pEditorMaterialData;
 		ReadPropertiesInto(file["Properties"], pMaterial, false);
 		/* Update properties in YAML? */

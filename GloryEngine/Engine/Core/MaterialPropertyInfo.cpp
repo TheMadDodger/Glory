@@ -70,6 +70,13 @@ namespace Glory
 		return m_Flags;
 	}
 
+	void* MaterialPropertyInfo::Address(std::vector<char>& buffer)
+	{
+		if (m_TextureType) return nullptr;
+		if (buffer.size() <= m_Offset + m_Size) buffer.resize(m_Offset + m_Size);
+		return &buffer[m_Offset];
+	}
+
 	bool MaterialPropertyInfo::Write(std::vector<char>& buffer, const void* data)
 	{
 		if (m_TextureType) return false;

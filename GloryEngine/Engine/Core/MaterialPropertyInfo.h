@@ -46,6 +46,8 @@ namespace Glory
 			return true;
 		}
 
+		void* Address(std::vector<char>& buffer);
+
 		bool Write(std::vector<char>& buffer, const void* data);
 		void Reserve(std::vector<char>& buffer);
 

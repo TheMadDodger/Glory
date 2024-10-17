@@ -6,6 +6,10 @@
   ID: 3
 - Path: "Shaders\\PhongTextured_vert.shader"
   ID: 4
+- Path: "Pipelines\\Phong.gpln"
+  ID: 9
+- Path: "Pipelines\\PhongTextured.gpln"
+  ID: 10
 - Path: "Models\\Cube.fbx"
   ID: 5
   Children:
@@ -22,7 +26,3 @@
   ID: 8
   Children:
   - "Suzanne Material 0"
-- Path: "Pipelines\\Phong.gpln"
-  ID: 9
-- Path: "Pipelines\\PhongTextured.gpln"
-  ID: 10

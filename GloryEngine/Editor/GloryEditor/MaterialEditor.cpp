@@ -149,4 +149,83 @@ namespace Glory::Editor
 		}
 		return change;
 	}
+
+	StaticMaterialEditor::StaticMaterialEditor()
+	{
+	}
+
+	StaticMaterialEditor::~StaticMaterialEditor()
+	{
+	}
+
+	bool StaticMaterialEditor::OnGUI()
+	{
+		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		MaterialData* pMaterialData = static_cast<MaterialData*>(m_pTarget);
+
+		UUID pipelineID = pMaterialData->GetPipelineID(materialManager);
+
+		ImGui::BeginDisabled(true);
+		AssetPicker::ResourceDropdown("Pipeline", ResourceTypes::GetHash<PipelineData>(), &pipelineID);
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		if (ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			PropertiesGUI(pMaterialData);
+			ImGui::TreePop();
+		}
+		ImGui::EndDisabled();
+
+		return false;
+	}
+
+	void StaticMaterialEditor::PropertiesGUI(MaterialData* pMaterialData)
+	{
+		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
+		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
+
+		const UUID pipelineID = pMaterialData->GetPipelineID(materialManager);
+		if (pipelineID == 0)
+			return;
+		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
+		if (!pPipeline)
+		{
+			ImGui::TextColored({ 1,0,0,1 }, "The chosen pipeline is not yet compiled");
+			return;
+		}
+
+		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
+
+		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
+		{
+			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
+
+			size_t materialPropertyIndex = 0;
+			if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfo->ShaderName(), materialPropertyIndex))
+				continue;
+
+			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+
+			if (propInfo->IsResource())
+			{
+				auto resourceId = pMaterialData->GetResourceUUIDPointer(materialManager, pMaterialProperty->Offset());
+				const std::string& sampler = propInfo->ShaderName();
+				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
+
+				ImGui::PushID(sampler.data());
+				pPropertyDrawer->Draw(pMaterialProperty->DisplayName(), resourceId, pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
+				ImGui::PopID();
+				continue;
+			}
+
+			ImGui::PushID(propInfo->ShaderName().data());
+			void* pAddress = pMaterialData->Address(materialManager, i);
+			PropertyDrawer::DrawProperty(propInfo->DisplayName(), pAddress, propInfo->TypeHash(), pMaterialProperty->Flags());
+			ImGui::PopID();
+		}
+	}
 }
