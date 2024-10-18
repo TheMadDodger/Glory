@@ -207,8 +207,10 @@ namespace Glory::Editor
             }
         }
 
-        ProcessNode(context, pScene->mRootNode, pScene, resource);
+        context.Prefab = new PrefabData();
+        ProcessNode(context, 0, pScene->mRootNode, pScene, resource);
 
+        resource.AddChild(context.Prefab, path.filename().replace_extension().string() + "_Prefab");
         importer.FreeScene();
         return resource;
     }
@@ -225,21 +227,76 @@ namespace Glory::Editor
         return glm::vec4(color.r, color.g, color.b, 1.0f);
     }
 
-    void ASSIMPImporter::ProcessNode(Context& context, aiNode* node, const aiScene* scene, ImportedResource& resource) const
+    void ASSIMPImporter::ProcessNode(Context& context, Utils::ECS::EntityID parent, aiNode* node, const aiScene* scene, ImportedResource& resource) const
     {
         // process all the node's meshes (if any)
+        aiVector3D scale, position;
+        aiQuaternion rotation;
+        node->mTransformation.Decompose(scale, rotation, position);
+
+        const glm::vec3 convertedScale{ scale.x, scale.y, scale.z };
+        const glm::quat convertedQuat{ rotation.w, rotation.x, rotation.y, rotation.z };
+        const glm::vec3 convertedPos{ position.x, position.y, position.z };
+
+        Entity entity = context.Prefab->CreateEmptyObject(node->mName.C_Str());
+        Transform& transform = entity.GetComponent<Transform>();
+        transform.Position = convertedPos;
+        transform.Rotation = convertedQuat;
+        transform.Scale = convertedScale;
+
+        if (parent)
+            entity.SetParent(parent);
+
+        if (scene->HasLights())
+        {
+            for (size_t i = 0; i < scene->mNumLights; ++i)
+            {
+                const aiLight* light = scene->mLights[i];
+                if (node->mName == light->mName)
+                {
+                    LightComponent& lightComp = entity.AddComponent<LightComponent>();
+                    const glm::vec4 color = toColorAndIntensity(light->mColorDiffuse);
+                    lightComp.m_Intensity = color.a;
+                    lightComp.m_Color = color;
+                    lightComp.m_Color.a = 1.0f;
+                    lightComp.m_Range = 100.0f;
+                    break;
+                }
+            }
+        }
+
+        if (scene->HasCameras())
+        {
+            for (size_t i = 0; i < scene->mNumCameras; ++i)
+            {
+                const aiCamera* cam = scene->mCameras[i];
+                if (node->mName == cam->mName)
+                {
+                    CameraComponent& cameraComp = entity.AddComponent<CameraComponent>();
+                    cameraComp.m_Far = cam->mClipPlaneFar;
+                    cameraComp.m_Near = cam->mClipPlaneNear;
+                    cameraComp.m_HalfFOV = glm::degrees(cam->mHorizontalFOV);
+                    break;
+                }
+            }
+        }
+
         for (unsigned int i = 0; i < node->mNumMeshes; ++i)
         {
+            Entity meshChild = context.Prefab->CreateEmptyObject(node->mName.C_Str());
+            meshChild.SetParent(entity.GetEntityID());
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(mesh);
             if (!pMeshData) continue;
+            MaterialData* pMaterial = mesh->mMaterialIndex >= 0 ? context.Materials[mesh->mMaterialIndex] : nullptr;
             resource.AddChild(pMeshData, pMeshData->Name());
+            meshChild.AddComponent<MeshRenderer>(pMeshData, pMaterial);
         }
 
         // then do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; ++i)
         {
-            ProcessNode(context, node->mChildren[i], scene, resource);
+            ProcessNode(context, entity.GetEntityID(), node->mChildren[i], scene, resource);
         }
     }
 

@@ -31,13 +31,14 @@ namespace Glory::Editor
     private:
         struct Context
         {
+            PrefabData* Prefab;
             std::vector<MaterialData*> Materials;
         };
 
         bool SupportsExtension(const std::filesystem::path& extension) const override;
         ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 
-        void ProcessNode(Context& context, aiNode* node, const aiScene* scene, ImportedResource& resource) const;
+        void ProcessNode(Context& context, Utils::ECS::EntityID parent, aiNode* node, const aiScene* scene, ImportedResource& resource) const;
         MeshData* ProcessMesh(aiMesh* mesh) const;
     };
 }

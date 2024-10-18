@@ -33,6 +33,7 @@ namespace Glory
 	{
 		GLORY_API Transform();
 		GLORY_API Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
+		GLORY_API Transform(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
 
 		REFLECTABLE(Transform,
 			(glm::vec3)	(Position),
