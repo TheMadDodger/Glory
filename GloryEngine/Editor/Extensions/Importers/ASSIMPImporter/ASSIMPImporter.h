@@ -29,16 +29,28 @@ namespace Glory::Editor
         void Cleanup() override;
 
     private:
+        enum AxisConversion
+        {
+            X,
+            Y,
+            Z
+        };
+
         struct Context
         {
             PrefabData* Prefab;
             std::vector<MaterialData*> Materials;
+            AxisConversion UpAxis{ AxisConversion::Y };
+            int UpAxisSign{ 1 };
+            AxisConversion FrontAxis{ AxisConversion::Z };
+            int FrontAxisSign{ 1 };
+            float UnitScaleFactor{ 1.0f };
         };
 
         bool SupportsExtension(const std::filesystem::path& extension) const override;
         ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 
         void ProcessNode(Context& context, Utils::ECS::EntityID parent, aiNode* node, const aiScene* scene, ImportedResource& resource) const;
-        MeshData* ProcessMesh(aiMesh* mesh) const;
+        MeshData* ProcessMesh(Context& context, aiMesh* mesh) const;
     };
 }
