@@ -24,6 +24,15 @@
 #define UNPACK(x) x
 #define FIRST(x) _FIRST(UNPACK(x))
 
+#define ReadMetaData(name, out) if (pScene->mMetaData->HasKey(name)) \
+{ \
+    pScene->mMetaData->Get(name, out); \
+}
+
+#define SWAP(value, a, b) temp = value.a;\
+value.a = value.b;\
+value.b = temp;
+
 namespace Glory::Editor
 {
     constexpr size_t NumSupportedExtensions = 4;
@@ -112,14 +121,22 @@ namespace Glory::Editor
         ModelData* pModel = new ModelData();
         ImportedResource resource{ path, pModel };
 
-        /* @todo: Use for unit conversion */
-        //scene->mMetaData
+        Context context;
+        ReadMetaData("UpAxis", context.UpAxis);
+        ReadMetaData("UpAxisSign", context.UpAxisSign);
+        ReadMetaData("FrontAxis", context.FrontAxis);
+        ReadMetaData("FrontAxisSign", context.FrontAxisSign);
+        ReadMetaData("UnitScaleFactor", context.UnitScaleFactor);
+
+        for (size_t i = 0; i < pScene->mMetaData->mNumProperties; ++i)
+        {
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(pScene->mMetaData->mKeys[i].C_Str());
+        }
 
         EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
         MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
         const std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
 
-        Context context;
         if (pScene->HasMaterials())
         {
             for (size_t i = 0; i < pScene->mNumMaterials; ++i)
@@ -234,9 +251,49 @@ namespace Glory::Editor
         aiQuaternion rotation;
         node->mTransformation.Decompose(scale, rotation, position);
 
-        const glm::vec3 convertedScale{ scale.x, scale.y, scale.z };
+        glm::vec3 convertedScale{ scale.x, scale.y, scale.z };
         const glm::quat convertedQuat{ rotation.w, rotation.x, rotation.y, rotation.z };
-        const glm::vec3 convertedPos{ position.x, position.y, position.z };
+        glm::vec3 convertedPos{ position.x, position.y, position.z };
+
+        /* Axes conversions */
+        float temp;
+        switch (context.UpAxis)
+        {
+        case AxisConversion::X:
+            SWAP(convertedPos, x, y);
+            SWAP(convertedScale, x, y);
+            break;
+        case AxisConversion::Z:
+            SWAP(convertedScale, z, y);
+            SWAP(convertedScale, z, y);
+            break;
+        default:
+            break;
+        }
+        switch (context.FrontAxis)
+        {
+        case AxisConversion::X: {
+            switch (context.UpAxis)
+            {
+            case AxisConversion::Z:
+                /* Z was already swapped with Y */
+                SWAP(convertedScale, x, y);
+                SWAP(convertedScale, x, y);
+                break;
+            default:
+                SWAP(convertedScale, x, z);
+                SWAP(convertedScale, x, z);
+                break;
+            }
+            break;
+        }
+        case AxisConversion::Y:
+            SWAP(convertedScale, y, z);
+            SWAP(convertedScale, y, z);
+            break;
+        default:
+            break;
+        }
 
         Entity entity = context.Prefab->CreateEmptyObject(node->mName.C_Str());
         Transform& transform = entity.GetComponent<Transform>();
@@ -286,7 +343,7 @@ namespace Glory::Editor
             Entity meshChild = context.Prefab->CreateEmptyObject(node->mName.C_Str());
             meshChild.SetParent(entity.GetEntityID());
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            MeshData* pMeshData = ProcessMesh(mesh);
+            MeshData* pMeshData = ProcessMesh(context, mesh);
             if (!pMeshData) continue;
             MaterialData* pMaterial = mesh->mMaterialIndex >= 0 ? context.Materials[mesh->mMaterialIndex] : nullptr;
             resource.AddChild(pMeshData, pMeshData->Name());
@@ -300,7 +357,7 @@ namespace Glory::Editor
         }
     }
 
-    MeshData* ASSIMPImporter::ProcessMesh(aiMesh* mesh) const
+    MeshData* ASSIMPImporter::ProcessMesh(Context& context, aiMesh* mesh) const
     {
         float* vertices = nullptr;
         std::vector<AttributeType> attributes;
@@ -326,20 +383,75 @@ namespace Glory::Editor
         {
             std::vector<float> vertexData;
             // process vertex positions, normals and texture coordinates
-            vertexData.push_back(mesh->mVertices[i].x);
-            vertexData.push_back(mesh->mVertices[i].y);
-            vertexData.push_back(mesh->mVertices[i].z);
-            vertexData.push_back(mesh->mNormals[i].x);
-            vertexData.push_back(mesh->mNormals[i].y);
-            vertexData.push_back(mesh->mNormals[i].z);
+            glm::vec3 pos = glm::vec3{ mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z }*context.UnitScaleFactor;
+            glm::vec3 normal = glm::vec3{ mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z }*context.UnitScaleFactor;
+            glm::vec3 tangent = glm::vec3{ mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z }*context.UnitScaleFactor;
+            glm::vec3 biTangent = glm::vec3{ mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z }*context.UnitScaleFactor;
+
+            /* Axes conversions */
+            float temp;
+            switch (context.UpAxis)
+            {
+            case AxisConversion::X:
+                SWAP(pos, x, y);
+                SWAP(normal, x, y);
+                SWAP(tangent, x, y);
+                SWAP(biTangent, x, y);
+                break;
+            case AxisConversion::Z:
+                SWAP(pos, z, y);
+                SWAP(normal, z, y);
+                SWAP(tangent, z, y);
+                SWAP(biTangent, z, y);
+                break;
+            default:
+                break;
+            }
+            switch (context.FrontAxis)
+            {
+            case AxisConversion::X: {
+                switch (context.UpAxis)
+                {
+                case AxisConversion::Z:
+                    /* Z was already swapped with Y */
+                    SWAP(pos, x, y);
+                    SWAP(normal, x, y);
+                    SWAP(tangent, x, y);
+                    SWAP(biTangent, x, y);
+                    break;
+                default:
+                    SWAP(pos, x, z);
+                    SWAP(normal, x, z);
+                    SWAP(tangent, x, z);
+                    SWAP(biTangent, x, z);
+                    break;
+                }
+                break;
+            }
+            case AxisConversion::Y:
+                SWAP(pos, y, z);
+                SWAP(normal, y, z);
+                SWAP(tangent, y, z);
+                SWAP(biTangent, y, z);
+                break;
+            default:
+                break;
+            }
+
+            vertexData.push_back(pos.x);
+            vertexData.push_back(pos.y*context.UpAxisSign);
+            vertexData.push_back(pos.z*context.FrontAxisSign);
+            vertexData.push_back(normal.x);
+            vertexData.push_back(normal.y*context.UpAxisSign);
+            vertexData.push_back(normal.z*context.FrontAxisSign);
 
             // Tangents and Bitangents
-            vertexData.push_back(mesh->mTangents[i].x);
-            vertexData.push_back(mesh->mTangents[i].y);
-            vertexData.push_back(mesh->mTangents[i].z);
-            vertexData.push_back(mesh->mBitangents[i].x);
-            vertexData.push_back(mesh->mBitangents[i].y);
-            vertexData.push_back(mesh->mBitangents[i].z);
+            vertexData.push_back(tangent.x);
+            vertexData.push_back(tangent.y*context.UpAxisSign);
+            vertexData.push_back(tangent.z*context.FrontAxisSign);
+            vertexData.push_back(biTangent.x);
+            vertexData.push_back(biTangent.y*context.UpAxisSign);
+            vertexData.push_back(biTangent.z*context.FrontAxisSign);
 
             if (mesh->mTextureCoords[0])
             {
