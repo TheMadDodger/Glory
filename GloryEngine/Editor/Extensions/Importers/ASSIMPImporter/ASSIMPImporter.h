@@ -2,9 +2,13 @@
 #include <ImporterTemplate.h>
 #include <ModelData.h>
 
+#include <EntityID.h>
+
 namespace Glory
 {
+    class MaterialData;
     class MeshData;
+    class PrefabData;
 }
 
 struct aiScene;
@@ -25,10 +29,15 @@ namespace Glory::Editor
         void Cleanup() override;
 
     private:
+        struct Context
+        {
+            std::vector<MaterialData*> Materials;
+        };
+
         bool SupportsExtension(const std::filesystem::path& extension) const override;
         ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 
-        void ProcessNode(aiNode* node, const aiScene* scene, ImportedResource& resource) const;
+        void ProcessNode(Context& context, aiNode* node, const aiScene* scene, ImportedResource& resource) const;
         MeshData* ProcessMesh(aiMesh* mesh) const;
     };
 }

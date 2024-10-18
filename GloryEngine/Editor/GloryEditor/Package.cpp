@@ -163,6 +163,9 @@ namespace Glory::Editor
 					/* Add the parent asset */
 					const UUID parentID = EditorAssetDatabase::FindAssetUUID(location.Path);
 					assets.push_back(parentID);
+					Resource* pResource = pEngine->GetAssetManager().GetAssetImmediate(assetID);
+					if (!pResource) return;
+					pResource->References(pEngine, assets);
 				}
 
 				/* We also have to search this asset recursively for any referenced assets */

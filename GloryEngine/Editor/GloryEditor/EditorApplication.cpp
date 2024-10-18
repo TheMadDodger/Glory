@@ -80,6 +80,9 @@ namespace Glory::Editor
 		m_pFileWatcher->watch();
 
 		AssetsWatcher = new EditorAssetsWatcher();
+		m_PipelineManager->Initialize();
+		m_MaterialManager->Initialize();
+		m_ShaderProcessor->Start();
 	}
 
 	void EditorApplication::InitializeExtensions()
@@ -117,9 +120,6 @@ namespace Glory::Editor
 
 		m_pEngine->StartThreads();
 		m_Platform.SetState(Idle);
-		m_ShaderProcessor->Start();
-		m_PipelineManager->Initialize();
-		m_MaterialManager->Initialize();
 
 		m_Running = true;
 		if (m_Platform.m_Windowless)
@@ -348,6 +348,11 @@ namespace Glory::Editor
 	EditorSceneManager& EditorApplication::GetSceneManager()
 	{
 		return *m_SceneManager;
+	}
+
+	EditorShaderProcessor& EditorApplication::GetShaderProcessor()
+	{
+		return *m_ShaderProcessor;
 	}
 
 	EditorResourceManager& EditorApplication::GetResourceManager()

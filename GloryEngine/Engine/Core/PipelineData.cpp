@@ -133,7 +133,7 @@ namespace Glory
 			container.Write(prop.DisplayName());
 			container.Write(prop.Size());
 			container.Write(prop.Offset());
-			container.Write(prop.IsResource());
+			container.Write(prop.GetTextureType());
 			container.Write(prop.Flags());
 		}
 	}

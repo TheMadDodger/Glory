@@ -44,6 +44,9 @@ namespace Editor
 
 		GLORY_EDITOR_API static TextureType ShaderNameToTextureType(const std::string_view name);
 
+		GLORY_EDITOR_API static bool IsBusy();
+		GLORY_EDITOR_API static void WaitIdle();
+
 	private:
 		static void CompileAndCache(ShaderSourceData* pShaderSource, std::filesystem::path path);
 		static void LoadCache(UUID shaderID, std::filesystem::path path);
@@ -66,10 +69,13 @@ namespace Editor
 
 	private:
 		friend class EditorApplication;
+		friend class ProjectSpace;
 		static ThreadedUMap<UUID, ShaderSourceData*> m_pLoadedShaderSources;
 		static ThreadedUMap<UUID, EditorShaderData*> m_pCompiledShaders;
 		static ThreadedVector<UUID> m_QueuedShaders;
 		static ThreadedVector<UUID> m_FinishedShaders;
+		static std::mutex m_WaitMutex;
+		static std::condition_variable m_WaitCondition;
 
 		static Jobs::JobPool<bool, UUID>* m_pShaderJobsPool;
 

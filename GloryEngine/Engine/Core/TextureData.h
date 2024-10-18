@@ -5,6 +5,7 @@
 namespace Glory
 {
     class AssetManager;
+    class Engine;
 
 	class TextureData : public Resource
 	{
@@ -19,6 +20,8 @@ namespace Glory
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
+
+        void References(Engine* pEngine, std::vector<UUID>& references) const override;
 
     private:
         friend class TextureDataLoaderModule;

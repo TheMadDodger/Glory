@@ -9,6 +9,7 @@
 namespace Glory
 {
     class BinaryStream;
+    class Engine;
 
     /** @brief Resource */
     class Resource : public Object
@@ -36,6 +37,9 @@ namespace Glory
          * never use this on an existing resource!
          */
         void SetResourceUUID(UUID uuid);
+
+        /** @brief Get a vector containing other resources referenced by this resource */
+        virtual void References(Engine* pEngine, std::vector<UUID>& references) const { }
 
     private:
         friend class AssetManager;

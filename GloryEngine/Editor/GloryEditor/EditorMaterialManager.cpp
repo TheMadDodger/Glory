@@ -142,12 +142,13 @@ namespace Glory::Editor
 				MaterialData* pMaterialData = new MaterialData();
 				pResource = pMaterialData;
 				pResource->SetResourceUUID(callback.m_UUID);
-				YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(resourceManager.GetEditableResource(callback.m_UUID));
-				if (!pMaterial)
+				if (!location.SubresourcePath.empty())
 				{
 					delete pMaterialData;
 					return;
 				}
+				EditableResource* pMaterialResource = resourceManager.GetEditableResource(callback.m_UUID);
+				YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pMaterialResource);
 				LoadIntoMaterial(**pMaterial, pMaterialData);
 				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
 			}
@@ -317,7 +318,10 @@ namespace Glory::Editor
 		PipelineData* pPipeline = pMaterial->GetPipeline(*this, pipelines);
 		pPipeline->LoadIntoMaterial(pMaterial);
 
-		YAMLResource<MaterialData>* pEditorMaterialData = (YAMLResource<MaterialData>*)pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
+		EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
+		if (!pResource || !pResource->IsEditable()) return;
+		YAMLResource<MaterialData>* pEditorMaterialData = static_cast<YAMLResource<MaterialData>*>(pResource);
+
 		Utils::YAMLFileRef& file = **pEditorMaterialData;
 		ReadPropertiesInto(file["Properties"], pMaterial, false);
 		/* Update properties in YAML? */

@@ -52,6 +52,8 @@ namespace Glory
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 
+        virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+
     public: // Properties
         // Setters
         template<typename T>
@@ -71,6 +73,8 @@ namespace Glory
             if (!GetPropertyInfoIndex(materialManager, name, index)) return false;
             return m_PropertyInfos[index].Read<T>(GetPropertyBuffer(materialManager, index), value);
         }
+
+        void* Address(MaterialManager& materialManager, size_t index);
 
         virtual void SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value);
         virtual void SetTexture(MaterialManager& materialManager, const std::string& name, UUID uuid);

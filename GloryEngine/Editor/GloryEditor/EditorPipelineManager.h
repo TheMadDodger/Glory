@@ -92,7 +92,6 @@ namespace Glory::Editor
 
 	private:
 		std::vector<UUID> m_Pipelines;
-		std::map<uint64_t, UUID> m_DefaultPipelinesMap;
 
 		UUID m_AssetRegisteredCallback;
 		UUID m_ShaderCompiledCallback;

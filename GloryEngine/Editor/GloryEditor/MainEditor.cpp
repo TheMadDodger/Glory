@@ -501,6 +501,7 @@ namespace Glory::Editor
 		Editor::RegisterEditor<TextureDataEditor>();
 		Editor::RegisterEditor<PipelineEditor>();
 		Editor::RegisterEditor<MaterialEditor>();
+		Editor::RegisterEditor<StaticMaterialEditor>();
 		Editor::RegisterEditor<MaterialInstanceEditor>();
 
 		Editor::RegisterEditor<EntitySceneObjectEditor>();

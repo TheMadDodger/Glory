@@ -3,6 +3,7 @@
 #include "Tumbnail.h"
 #include "EditorApplication.h"
 #include "EditorAssetManager.h"
+#include "Selection.h"
 
 #include <EditorUI.h>
 #include <StringUtils.h>
@@ -180,7 +181,8 @@ namespace Glory::Editor
 
 					if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 					{
-						/* Select it? */
+						Resource* pResource = EditorApplication::GetInstance()->GetAssetManager().FindResource(uuid);
+						Selection::SetActiveObject(pResource);
 					}
 
 					AssetPayload payload{ uuid };
