@@ -884,6 +884,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
 			GScene* pScene = EditorSceneManager::OpenSceneInMemory(ScenesToPackage[i]);
+			pScene->GetRegistry().DisableCallbacks();
 			LoadedScenesToPackage.push_back(pScene);
 		}
 

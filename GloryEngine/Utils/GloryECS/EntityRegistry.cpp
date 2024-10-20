@@ -11,7 +11,8 @@ namespace Glory::Utils::ECS
 
 	EntityRegistry::~EntityRegistry()
 	{
-		InvokeAll(InvocationType::OnRemove);
+		if (m_CallbacksEnabled)
+			InvokeAll(InvocationType::OnRemove);
 
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
