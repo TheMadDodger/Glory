@@ -348,15 +348,14 @@ namespace Glory::Editor
 	{
 		auto yamlResource = GetSceneFile(uuid);
 		yamlResource->SetPath(path);
-		auto file = **yamlResource;
+		auto& file = **yamlResource;
 		auto root = file.RootNodeRef().ValueRef();
 
 		GScene* pScene = GetOpenScene(uuid);
 		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, root);
-		file.Save();
+		yamlResource->Save();
 
 		if (newScene) EditorAssetDatabase::ImportNewScene(path, pScene);
-		yamlResource->Save();
 		SetSceneDirty(pScene, false);
 
 		for (size_t i = 0; i < m_OpenedSceneIDs.size(); ++i)
