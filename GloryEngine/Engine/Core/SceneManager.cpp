@@ -138,6 +138,7 @@ namespace Glory
 
 		// MeshRenderer
 		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterReferencesCallback<MeshRenderer>(MeshRenderSystem::GetReferences);
 
 		// Spin
 		m_pComponentTypesInstance->RegisterInvokaction<Spin>(Glory::Utils::ECS::InvocationType::Update, SpinSystem::OnUpdate);

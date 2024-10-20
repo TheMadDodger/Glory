@@ -24,6 +24,8 @@ namespace Glory::Utils::ECS
 		virtual void* Create(EntityID entityID) = 0;
 		virtual void* Create(EntityID entityID, void* data) = 0;
 		virtual void* GetComponentAddress(EntityID entityID, size_t number = 0) = 0;
+		virtual const void* GetComponentAddress(EntityID entityID, size_t number = 0) const = 0;
+		virtual const void* GetComponentAddressFromIndex(size_t index) const = 0;
 
 		virtual void Invoke(const InvocationType& callbackType, EntityRegistry* pRegistry, EntityID entity, void* pComponentAddress) = 0;
 		virtual void InvokeAll(const InvocationType& callbackType, EntityRegistry* pRegistry) = 0;
@@ -36,6 +38,8 @@ namespace Glory::Utils::ECS
 
 		size_t Size() const;
 		EntityID EntityAt(size_t index) const;
+
+		virtual void GetReferences(std::vector<UUID>& references) const {};
 
 	protected:
 		virtual BaseTypeView* Create(EntityRegistry* pRegistry) = 0;
@@ -120,6 +124,17 @@ namespace Glory::Utils::ECS
 			return &m_ComponentData[index];
 		}
 
+		virtual const void* GetComponentAddress(EntityID entityID, size_t number = 0) const override
+		{
+			const uint32_t index = GetComponentIndex(entityID, number);
+			return &m_ComponentData[index];
+		}
+
+		virtual const void* GetComponentAddressFromIndex(size_t index) const override
+		{
+			return &m_ComponentData[index];
+		}
+
 		void Invoke(const InvocationType& callbackType, EntityRegistry* pRegistry, EntityID entity, void* pComponentAddress) override
 		{
 			EntityView* pEntityView = pRegistry->GetEntityView(entity);
@@ -174,6 +189,11 @@ namespace Glory::Utils::ECS
 			TypeView<T>* pTypeView = new TypeView<T>(pRegistry);
 			pTypeView->m_Callbacks = this->m_Callbacks;
 			return pTypeView;
+		}
+
+		virtual void GetReferences(std::vector<UUID>& references) const
+		{
+			m_Callbacks->InvokeReferencesCallback(this, references);
 		}
 
 	private:

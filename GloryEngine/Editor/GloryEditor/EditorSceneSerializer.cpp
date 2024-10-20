@@ -62,8 +62,6 @@ namespace Glory::Editor
 		Utils::ECS::EntityView* pEntityView = entityHandle.GetEntityView();
 		
 		Entity parent = entityHandle.ParentEntity();
-		
-		if (pScene->PrefabChild(entityHandle.EntityUUID())) return;
 
 		entityNode.Set(YAML::Node(YAML::NodeType::Map));
 		entityNode["Name"].Set(std::string{ entityHandle.Name() });
@@ -116,11 +114,14 @@ namespace Glory::Editor
 
 	void EditorSceneSerializer::SerializeEntityRecursive(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
 	{
-		const size_t index = entities.Size();
-		entities.PushBack(YAML::Node(YAML::NodeType::Map));
+		if (!pScene->PrefabChild(pScene->GetEntityUUID(entity)))
+		{
+			const size_t index = entities.Size();
+			entities.PushBack(YAML::Node(YAML::NodeType::Map));
 
-		/* Serialize entity first then its children */
-		SerializeEntity(pEngine, pScene, entity, entities[index]);
+			/* Serialize entity first then its children */
+			SerializeEntity(pEngine, pScene, entity, entities[index]);
+		}
 
 		for (size_t i = 0; i < pScene->ChildCount(entity); ++i)
 		{

@@ -1,10 +1,13 @@
 #pragma once
+#include "UUID.h"
+
 #include <map>
 #include <functional>
 
 namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
+	class BaseTypeView;
 
 	enum class InvocationType
 	{
@@ -38,9 +41,16 @@ namespace Glory::Utils::ECS
 			m_Callbacks[invocationType](pRegistry, entity, component);
 		}
 
+		void InvokeReferencesCallback(const BaseTypeView* pTypeView, std::vector<UUID>& references)
+		{
+			if (!m_ReferencesCallback) return;
+			m_ReferencesCallback(pTypeView, references);
+		}
+
 	private:
 		friend class EntityRegistry;
 		friend class ComponentTypes;
 		std::map<InvocationType, std::function<void(EntityRegistry*, EntityID, T&)>> m_Callbacks;
+		std::function<void(const BaseTypeView*, std::vector<UUID>&)> m_ReferencesCallback;
 	};
 }
