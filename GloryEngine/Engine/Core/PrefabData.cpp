@@ -40,4 +40,14 @@ namespace Glory
 			CopyEntity(pPrefab, pScene, child, newEntity);
 		}
 	}
+
+	void PrefabData::References(Engine* pEngine, std::vector<UUID>& references) const
+	{
+		const size_t typeViewCount = m_Registry.TypeViewCount();
+		for (size_t i = 0; i < typeViewCount; ++i)
+		{
+			Utils::ECS::BaseTypeView* pTypeView = m_Registry.TypeViewAt(i);
+			pTypeView->GetReferences(references);
+		}
+	}
 }

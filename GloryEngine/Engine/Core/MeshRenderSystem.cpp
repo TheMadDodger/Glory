@@ -62,4 +62,16 @@ namespace Glory
 
         REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
     }
+
+    void MeshRenderSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+    {
+        for (size_t i = 0; i < pTypeView->Size(); ++i)
+        {
+            const MeshRenderer* pMeshRenderer = static_cast<const MeshRenderer*>(pTypeView->GetComponentAddressFromIndex(i));
+            const UUID material = pMeshRenderer->m_Material.AssetUUID();
+            const UUID mesh = pMeshRenderer->m_Mesh.AssetUUID();
+            if (mesh) references.push_back(mesh);
+            if (material) references.push_back(material);
+        }
+    }
 }

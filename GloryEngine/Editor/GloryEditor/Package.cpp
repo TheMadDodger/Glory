@@ -127,6 +127,19 @@ namespace Glory::Editor
 		EntryScene = entryScene.As<uint64_t>();
 	}
 
+	void ScanForAssetsInResource(Engine* pEngine, Resource* pResource, std::vector<UUID>& assets)
+	{
+		if (!pResource) return;
+		const size_t count = assets.size();
+		pResource->References(pEngine, assets);
+		for (size_t i = count; i < assets.size(); ++i)
+		{
+			const UUID id = assets[i];
+			pResource = pEngine->GetAssetManager().GetAssetImmediate(id);
+			ScanForAssetsInResource(pEngine, pResource, assets);
+		}
+	}
+
 	void ScanForAssets(Engine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)
 	{
 		if (node.IsMap())
@@ -165,7 +178,7 @@ namespace Glory::Editor
 					assets.push_back(parentID);
 					Resource* pResource = pEngine->GetAssetManager().GetAssetImmediate(assetID);
 					if (!pResource) return;
-					pResource->References(pEngine, assets);
+					ScanForAssetsInResource(pEngine, pResource, assets);
 				}
 
 				/* We also have to search this asset recursively for any referenced assets */
