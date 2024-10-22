@@ -219,7 +219,9 @@ namespace Glory
 
 		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
+		pGraphics->EnableDepthWrite(renderData.m_DepthWrite);
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
+		pGraphics->EnableDepthWrite(true);
 	}
 
 	void ClusteredRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)

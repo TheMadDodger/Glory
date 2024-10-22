@@ -7,9 +7,12 @@
 #include "Selection.h"
 #include "EditableEntity.h"
 #include "EntityEditor.h"
+#include "EditorAssetDatabase.h"
 
 #include <CameraManager.h>
 #include <SceneManager.h>
+#include <AssetManager.h>
+#include <PrefabData.h>
 #include <Engine.h>
 #include <RendererModule.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,6 +20,8 @@
 #include <EditorUI.h>
 #include <Shortcuts.h>
 #include <Dispatcher.h>
+#include <ImGuiHelpers.h>
+#include <Components.h>
 
 namespace Glory::Editor
 {
@@ -29,10 +34,14 @@ namespace Glory::Editor
 		m_ViewEventID(0)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
+		m_pPreviewScene = new GScene("Preview");
+		/* @todo: Render this scene late instead of disabling depth write */
+		m_pPreviewScene->Settings().m_DepthWrite = false;
 	}
 
 	SceneWindow::~SceneWindow()
 	{
+		delete m_pPreviewScene;
 	}
 
 	void SceneWindow::OnOpen()
@@ -51,6 +60,9 @@ namespace Glory::Editor
 			m_SceneCamera.m_IsOrthographic = e.Ortho;
 			m_SceneCamera.UpdateCamera();
 		});
+
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
+		pScenes->AddExternalScene(m_pPreviewScene);
 	}
 
 	void SceneWindow::OnClose()
@@ -59,6 +71,9 @@ namespace Glory::Editor
 		m_SceneCamera.Cleanup();
 
 		GetViewEventDispatcher().RemoveListener(m_ViewEventID);
+
+		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
+		pScenes->RemoveExternalScene(m_pPreviewScene);
 	}
 
 	Dispatcher<ViewEvent>& SceneWindow::GetViewEventDispatcher()
@@ -174,6 +189,34 @@ namespace Glory::Editor
 		float width = regionAvail.x;
 		float height = width / aspect;
 
+		const ImVec2 windowPos = ImGui::GetWindowPos();
+		const ImVec2 min = screenPos;
+		const ImVec2 max = screenPos + ImVec2{ width, height };
+		const ImRect rect{ min, max };
+		if (ImGui::BeginDragDropTargetCustom(rect, ImGui::GetCurrentWindow()->ID))
+		{
+			const ImGuiPayload* pPayload = ImGui::GetDragDropPayload();
+			if (pPayload && pPayload->IsDataType(STNames[ST_Path]))
+			{
+				std::string path = (const char*)pPayload->Data;
+				HandleDragAndDrop(path);
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		if (m_PrefabInstance && !ImGui::IsMouseHoveringRect(rect.Min, rect.Max))
+		{
+			m_pPreviewScene->DestroyEntity(m_pPreviewScene->GetEntityByUUID(m_PrefabInstance).GetEntityID());
+			m_PrefabInstance = 0;
+			m_PreviewPrefabID = 0;
+		}
+		else if (m_PrefabInstance)
+		{
+			Entity entity = m_pPreviewScene->GetEntityByUUID(m_PrefabInstance);
+			entity.GetComponent<Transform>().Position = GetPosition();
+			m_pPreviewScene->GetRegistry().SetEntityDirty(entity.GetEntityID());
+		}
+
 		Texture* pTexture = m_SelectedRenderTextureIndex == -1 ? pSceneTexture->GetTextureAttachment(0) :
 			m_SceneCamera.m_Camera.GetRenderTexture(size_t(m_SelectedRenderTextureIndex))->GetTextureAttachment(m_SelectedFrameBufferIndex);
 
@@ -238,5 +281,91 @@ namespace Glory::Editor
 			}
 			Selection::SetActiveObject(GetEditableEntity(entityHandle.GetEntityID(), pScene));
 		}
+	}
+
+	void SceneWindow::HandleDragAndDrop(std::string& path)
+	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
+		if (!uuid) return;
+		ResourceMeta meta;
+		if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
+		ResourceTypes& types = pEngine->GetResourceTypes();
+		ResourceType* pResourceType = types.GetResourceType(meta.Hash());
+
+		PrefabData* pPrefab = nullptr;
+		if (meta.Hash() != ResourceTypes::GetHash<PrefabData>())
+		{
+			bool found = false;
+			for (size_t i = 0; i < types.SubTypeCount(pResourceType); ++i)
+			{
+				ResourceType* pSubResourceType = types.GetSubType(pResourceType, i);
+				if (!pSubResourceType) continue;
+				if (pSubResourceType->Hash() != ResourceTypes::GetHash<PrefabData>()) continue;
+
+				pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(uuid);
+				found = true;
+				break;
+			}
+			if (!found)
+			{
+				const std::filesystem::path subPath = std::filesystem::path(path).filename().replace_extension().concat("_Prefab");
+				const UUID prefabID = EditorAssetDatabase::FindAssetUUID(path, subPath);
+				if (!prefabID)
+					return;
+				pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
+				if (!pPrefab)
+					return;
+			}
+		}
+		else
+		{
+			pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(uuid);
+		}
+
+		if (!pPrefab) return;
+
+		const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload(STNames[ST_Path]);
+		if (pPayload)
+		{
+			if (m_PrefabInstance)
+			{
+				m_pPreviewScene->DestroyEntity(m_pPreviewScene->GetEntityByUUID(m_PrefabInstance).GetEntityID());
+				m_PrefabInstance = 0;
+			}
+
+			/* Spawn it */
+			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene(true);
+			const glm::vec3 pos = GetPosition();
+			Entity entity = pScene->InstantiatePrefab(0, pPrefab, pos, glm::quat{ 0, 0, 0, 1 }, glm::vec3{ 1, 1, 1 });
+			EditableEntity* pEntity = GetEditableEntity(entity.GetEntityID(), pScene);
+			Selection::SetActiveObject(pEntity);
+			return;
+		}
+
+		if (m_PreviewPrefabID != pPrefab->GetUUID() || m_PrefabInstance == 0)
+		{
+			if (m_PrefabInstance)
+			{
+				m_pPreviewScene->DestroyEntity(m_pPreviewScene->GetEntityByUUID(m_PrefabInstance).GetEntityID());
+				m_PrefabInstance = 0;
+				m_PreviewPrefabID = 0;
+			}
+
+			m_PreviewPrefabID = pPrefab->GetUUID();
+			const Entity entity = m_pPreviewScene->InstantiatePrefab(0, pPrefab, glm::vec3{}, glm::quat{ 0, 0, 0, 1 }, glm::vec3{ 1.0f, 1.0f, 1.0f });
+			m_PrefabInstance = entity.EntityUUID();
+		}
+	}
+
+	const glm::vec3 SceneWindow::GetPosition() const
+	{
+		const float* snap = Gizmos::GetSnap();
+		glm::vec3 pos = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetHoveringPosition();
+		if (!snap) return pos;
+		pos.x = std::round(pos.x / *snap)**snap;
+		pos.y = std::round(pos.y / *snap)**snap;
+		pos.z = std::round(pos.z / *snap)**snap;
+		return pos;
 	}
 }

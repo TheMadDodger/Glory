@@ -59,6 +59,7 @@ namespace Glory
         renderData.m_LayerMask = mask;
         renderData.m_ObjectID = pScene->GetEntityUUID(entity);
         renderData.m_SceneID = pScene->GetUUID();
+        renderData.m_DepthWrite = pScene->Settings().m_DepthWrite;
 
         REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
     }

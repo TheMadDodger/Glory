@@ -28,6 +28,7 @@ namespace Glory
 	struct SceneSettings
 	{
 		SSAOSettings m_SSAOSettings;
+		bool m_DepthWrite{ true };
 	};
 
 	/** @brief Glory Scene */

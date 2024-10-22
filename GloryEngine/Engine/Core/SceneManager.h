@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <ComponentTypes.h>
+#include <glm/vec3.hpp>
 
 namespace Glory
 {
@@ -35,7 +36,9 @@ namespace Glory
 
 		GScene* GetHoveringEntityScene();
 		UUID GetHoveringEntityUUID() const;
+		const glm::vec3& GetHoveringPosition() const;
 		void SetHoveringObject(UUID sceneID, UUID objectID);
+		void SetHoveringPosition(const glm::vec3& pos);
 
 		/** @brief Get the engine that owns this manager */
 		Engine* GetEngine();
@@ -45,12 +48,21 @@ namespace Glory
 		size_t OpenScenesCount();
 		GScene* GetOpenScene(size_t index);
 		GScene* GetOpenScene(UUID uuid);
+		size_t ExternalSceneCount();
+		GScene* GetExternalScene(size_t index);
 		void MarkAllScenesForDestruct();
 		void CloseAllScenes();
+
+		void UpdateScene(GScene* pScene) const;
+		void DrawScene(GScene* pScene) const;
 
 		void Start();
 		void Stop();
 		bool HasStarted() const;
+
+		/** @brief Add an external scene */
+		void AddExternalScene(GScene* pScene);
+		void RemoveExternalScene(GScene* pScene);
 
 	protected:
 		virtual void OnInitialize() = 0;
@@ -68,9 +80,11 @@ namespace Glory
 	protected:
 		Engine* m_pEngine;
 		std::vector<GScene*> m_pOpenScenes;
+		std::vector<GScene*> m_pExternalScenes;
 		size_t m_ActiveSceneIndex;
 		UUID m_HoveringObjectSceneID;
 		UUID m_HoveringObjectID;
+		glm::vec3 m_HoveringPos;
 		bool m_Started{false};
 
 		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;

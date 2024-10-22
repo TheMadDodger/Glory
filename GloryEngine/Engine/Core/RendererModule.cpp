@@ -344,8 +344,26 @@ namespace Glory
 		};
 
 		ObjData object;
+		float depth;
+
 		pRenderTexture->ReadColorPixel("object", m_PickPos, &object, DataType::DT_UInt);
+		pRenderTexture->ReadDepthPixel(m_PickPos, &depth, DataType::DT_Float);
 		m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
+
+		const float z = depth*2.0f - 1.0f;
+		uint32_t width, height;
+		pRenderTexture->GetDimensions(width, height);
+		const glm::vec2 coord = glm::vec2{ m_PickPos.x/(float)width, m_PickPos.y/(float)height };
+
+		const glm::vec4 clipSpacePosition{ coord * 2.0f - 1.0f, z, 1.0f };
+		const glm::mat4 projectionInverse = m_PickCamera.GetProjectionInverse();
+		const glm::mat4 viewInverse = m_PickCamera.GetViewInverse();
+		glm::vec4 viewSpacePosition = projectionInverse*clipSpacePosition;
+
+		/* Perspective division */
+		viewSpacePosition /= viewSpacePosition.w;
+		const glm::vec4 worldSpacePosition = viewInverse*viewSpacePosition;
+		m_pEngine->GetSceneManager()->SetHoveringPosition(worldSpacePosition);
 	}
 
 	void RendererModule::CreateLineBuffer()

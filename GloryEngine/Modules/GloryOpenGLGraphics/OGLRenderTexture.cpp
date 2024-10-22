@@ -33,6 +33,19 @@ namespace Glory
 		UnBindForDraw();
 	}
 
+	void OGLRenderTexture::ReadDepthPixel(const glm::ivec2& coord, void* value, DataType type)
+	{
+		BindForDraw();
+		const uint32_t index = (uint32_t)m_NameToTextureIndex.at("Depth");
+		const GLuint format = GLConverter::TO_GLFORMAT.at(PixelFormat::PF_Depth);
+		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(type);
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glReadPixels(coord.x, coord.y, 1, 1, format, dataType, value);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		UnBindForDraw();
+	}
+
 	void OGLRenderTexture::Initialize()
 	{
 		// Create framebuffer

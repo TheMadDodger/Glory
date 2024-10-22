@@ -159,6 +159,16 @@ namespace Glory::Editor
 					pScene->GetRegistry().InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
 				}
 			}
+
+			for (size_t i = 0; i < pScenes->ExternalSceneCount(); ++i)
+			{
+				GScene* pScene = pScenes->GetExternalScene(i);
+				for (size_t i = 0; i < ComponentsToUpdateInEditor.size(); i++)
+				{
+					const uint32_t hash = ComponentsToUpdateInEditor[i];
+					pScene->GetRegistry().InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
+				}
+			}
 		}
 
 		pEngine->DrawSceneManager();
