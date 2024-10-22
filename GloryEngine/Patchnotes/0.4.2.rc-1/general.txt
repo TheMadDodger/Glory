@@ -1,0 +1,28 @@
+Runtime:
+- Upped the runtime version to 0.4.2
+
+Editor:
+- Drag and dropping multiple fiels at once now copies all files before importing
+- ASSIMP importer now imports embedded textures
+- ASSIMP importer now imports embedded materials
+- ASSIMP importer now imports the whole scene of a model file as a prefab
+- ASSIMP importer now applies axis and unit scale conversions if available
+- Added drag and drop model file into scene graph
+- Selecting a resource in the resource window now opens an available editor (currently debug only)
+- Added an editor for imported textures (currently debug only)
+- Added an editor for imported materials (currently debug only)
+- Fixed asset lookup by path
+- Resource IDs are now reserved when a resource is created to ensure references are correct on imported assets
+- Importer flow will now automatically detect when a new asset is available in an existing file
+- Added ".jpeg" as supported extension for the SDLImageImporter
+- Fixed crash that can happen due to an unloaded/reloaded pipeline
+- Fixed crash that can happen due to an unloaded/reloaded material
+- Shaders and pipelines are now compiled immediately at startup, the editor waits for these to complete
+- Fixed prefab reference serialization in scenes
+- Fixed missing assets when packaging a scene that uses imported assets
+- Fixed scene serialization writing an empty file on the very first save
+
+Engine:
+- Fixed prefab instantiation
+- Fixed entity and component destruction
+- Shader textures are now assigned a type based on their name
