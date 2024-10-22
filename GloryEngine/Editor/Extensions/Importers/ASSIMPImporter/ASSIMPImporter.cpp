@@ -110,11 +110,13 @@ namespace Glory::Editor
             aiProcess_JoinIdenticalVertices |
             aiProcess_SortByPType);
 
+        Debug& debug = EditorApplication::GetInstance()->GetEngine()->GetDebug();
+
         if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
         {
             std::stringstream str;
             str << "ASSIMP: Could not import file: " << path << " Error: " << importer.GetErrorString();
-            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError(str.str());
+            debug.LogError(str.str());
             return nullptr;
         }
 
@@ -128,14 +130,52 @@ namespace Glory::Editor
         ReadMetaData("FrontAxisSign", context.FrontAxisSign);
         ReadMetaData("UnitScaleFactor", context.UnitScaleFactor);
 
-        for (size_t i = 0; i < pScene->mMetaData->mNumProperties; ++i)
-        {
-            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(pScene->mMetaData->mKeys[i].C_Str());
-        }
-
         EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
         MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
         const std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
+
+        if (pScene->HasTextures())
+        {
+            for (size_t i = 0; i < pScene->mNumTextures; ++i)
+            {
+                aiTexture* texture = pScene->mTextures[i];
+                const std::string name = texture->mFilename.length > 0 ? texture->mFilename.C_Str() : "Texture_" + std::to_string(i);
+
+                if (texture->mHeight > 0)
+                {
+                    /* Uncompressed texture */
+                    ImageData* pImage = new ImageData(texture->mWidth, texture->mHeight, PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb,
+                        sizeof(aiTexel), std::move((char*)texture->pcData), sizeof(aiTexel) * texture->mWidth * texture->mHeight);
+                    auto& child = resource.AddChild(pImage, name);
+                    TextureData* pDefualtTexture = new TextureData(pImage);
+                    pDefualtTexture->Image().SetUUID(pImage->GetUUID());
+                    child.AddChild(pDefualtTexture, "Default");
+                    context.Textures.push_back(pDefualtTexture);
+                    continue;
+                }
+
+                /* Compressed, use an image importer to import it */
+                Importer* pImporter = Importer::GetImporter(name + "." + texture->achFormatHint);
+                if (!pImporter)
+                {
+                    context.Textures.push_back(nullptr);
+                    continue;
+                }
+                ImportedResource imageResource = pImporter->Load(texture->pcData, texture->mWidth, nullptr);
+                if (!imageResource)
+                {
+                    context.Textures.push_back(nullptr);
+                    continue;
+                }
+
+                Resource* pImage = *imageResource;
+                auto& child = resource.AddChild(pImage, name);
+                TextureData* pTexture = (TextureData*)*imageResource.Child(0);
+                pTexture->Image().SetUUID(pImage->GetUUID());
+                child.AddChild(pTexture, "Default");
+                context.Textures.push_back(pTexture);
+            }
+        }
 
         if (pScene->HasMaterials())
         {
@@ -211,6 +251,28 @@ namespace Glory::Editor
                         aiString texPath;
                         if (material->GetTexture(aiTexType, j, &texPath) != aiReturn_SUCCESS)
                             continue;
+
+                        const char* texPathRaw = texPath.C_Str();
+                        if (texPathRaw[0] == '*')
+                        {
+                            const std::string_view indexStr{ &texPathRaw[1], texPath.length - 1};
+                            try
+                            {
+                                const uint32_t index = (uint32_t)std::atoi(indexStr.data());
+                                if (index >= context.Textures.size())
+                                {
+                                    debug.LogWarning("Invalid texture index when importing material from model");
+                                    continue;
+                                }
+                                TextureData* pTexture = context.Textures[index];
+                                pMaterial->SetTexture(materials, textureType, j, pTexture ? pTexture->GetUUID() : 0);
+                            }
+                            catch (const std::exception&)
+                            {
+                                debug.LogWarning("Invalid texture index when importing material from model");
+                            }
+                            continue;
+                        }
 
                         std::filesystem::path texturePath = path.parent_path();
                         texturePath.append(texPath.C_Str());

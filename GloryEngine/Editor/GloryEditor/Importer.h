@@ -38,6 +38,7 @@ namespace Glory::Editor
 		}
 
 		virtual std::string_view Name() const = 0;
+		virtual ImportedResource Load(void* data, size_t dataSize, void* userData) const = 0;
 
 	protected:
 		Importer() {};

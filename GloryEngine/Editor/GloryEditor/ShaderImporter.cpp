@@ -9,7 +9,7 @@
 
 namespace Glory::Editor
 {
-    constexpr size_t NumSupportedExtensions = 9;
+    constexpr size_t NumSupportedExtensions = 3;
     constexpr std::string_view SupportedExtensions[NumSupportedExtensions] = {
         ".vert",
         ".frag",
