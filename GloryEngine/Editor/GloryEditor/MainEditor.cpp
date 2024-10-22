@@ -499,6 +499,7 @@ namespace Glory::Editor
 	void MainEditor::RegisterEditors()
 	{
 		Editor::RegisterEditor<TextureDataEditor>();
+		Editor::RegisterEditor<StaticTextureDataEditor>();
 		Editor::RegisterEditor<PipelineEditor>();
 		Editor::RegisterEditor<MaterialEditor>();
 		Editor::RegisterEditor<StaticMaterialEditor>();

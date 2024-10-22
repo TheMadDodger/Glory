@@ -11,6 +11,12 @@ namespace Glory::Editor
 	template<class T>
 	class ImporterTemplate : public Importer
 	{
+	public:
+		virtual ImportedResource Load(void* data, size_t dataSize, void* userData) const override
+		{
+			return LoadResource(data, dataSize, userData);
+		}
+
 	protected:
 		ImporterTemplate() {}
 		virtual ~ImporterTemplate() {}
@@ -40,6 +46,7 @@ namespace Glory::Editor
 
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void* userData) const = 0;
+		virtual ImportedResource LoadResource(void* data, size_t dataSize, void* userData) const { return ImportedResource{}; }
 		virtual bool SaveResource(const std::filesystem::path& path, T* pResource) const { return false; }
 
 	protected:

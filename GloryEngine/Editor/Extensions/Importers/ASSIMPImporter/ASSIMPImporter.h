@@ -6,6 +6,7 @@
 
 namespace Glory
 {
+    class TextureData;
     class MaterialData;
     class MeshData;
     class PrefabData;
@@ -39,6 +40,7 @@ namespace Glory::Editor
         struct Context
         {
             PrefabData* Prefab;
+            std::vector<TextureData*> Textures;
             std::vector<MaterialData*> Materials;
             AxisConversion UpAxis{ AxisConversion::Y };
             int UpAxisSign{ 1 };
