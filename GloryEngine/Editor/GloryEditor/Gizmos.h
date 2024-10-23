@@ -52,6 +52,7 @@ namespace Glory::Editor
 		static void Cleanup();
 
 		static const float* GetSnap();
+		static const float* GetSnap(ImGuizmo::OPERATION operation);
 
 	private:
 		GLORY_EDITOR_API Gizmos();
