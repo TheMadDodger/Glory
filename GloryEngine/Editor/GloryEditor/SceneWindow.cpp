@@ -364,7 +364,7 @@ namespace Glory::Editor
 
 	const glm::vec3 SceneWindow::GetPosition() const
 	{
-		const float* snap = Gizmos::GetSnap();
+		const float* snap = Gizmos::GetSnap(ImGuizmo::OPERATION::TRANSLATE);
 		glm::vec3 pos = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetHoveringPosition();
 		if (!snap) return pos;
 		pos.x = std::round(pos.x / *snap)**snap;
@@ -372,13 +372,16 @@ namespace Glory::Editor
 		pos.z = std::round(pos.z / *snap)**snap;
 		return pos;
 	}
+
 	const glm::quat SceneWindow::GetRotation() const
 	{
 		const glm::vec3 normal = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetHoveringNormal();
-		const glm::vec3 forward{ 0.0f, 0.0f, -1.0f };
+		const glm::vec3 forward{ 0.0f, 0.0f, 1.0f };
 		const glm::vec3 right{ -1.0f, 0.0f, 0.0f };
 		const float forwardDot = std::abs(glm::dot(normal, forward));
 		const float rightDot = std::abs(glm::dot(normal, right));
-		return glm::conjugate(glm::quatLookAt(forwardDot > rightDot ? right : forward, normal));
+		const glm::vec3 other = glm::cross(forwardDot > rightDot ? right : forward, normal);
+		const glm::vec3 actualForward = glm::normalize(glm::cross(other, normal));
+		return glm::conjugate(glm::quatLookAt(actualForward, normal));
 	}
 }
