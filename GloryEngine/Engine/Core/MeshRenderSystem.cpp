@@ -61,7 +61,14 @@ namespace Glory
         renderData.m_SceneID = pScene->GetUUID();
         renderData.m_DepthWrite = pScene->Settings().m_DepthWrite;
 
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
+        if (pScene->Settings().m_RenderLate)
+        {
+            REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitLate(std::move(renderData)), );
+        }
+        else
+        {
+            REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
+        }
     }
 
     void MeshRenderSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)

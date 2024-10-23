@@ -497,7 +497,7 @@ namespace Glory::Editor
 			pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene(true);
 
 		Entity entityHandle = pScene->GetEntityByEntityID(entity);
-		Entity newEntity = pScene->InstantiatePrefab(entityHandle.EntityUUID(), pPrefab, glm::vec3{}, glm::quat{0, 0, 0, 1}, glm::vec3{1, 1, 1});
+		Entity newEntity = pScene->InstantiatePrefab(entityHandle.EntityUUID(), pPrefab, glm::vec3{}, glm::quat{1, 0, 0, 0}, glm::vec3{1, 1, 1});
 		EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
 		EditableEntity* pEntity = GetEditableEntity(newEntity.GetEntityID(), pScene);
 		Selection::SetActiveObject(pEntity);

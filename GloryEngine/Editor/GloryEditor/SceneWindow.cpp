@@ -35,8 +35,7 @@ namespace Glory::Editor
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 		m_pPreviewScene = new GScene("Preview");
-		/* @todo: Render this scene late instead of disabling depth write */
-		m_pPreviewScene->Settings().m_DepthWrite = false;
+		m_pPreviewScene->Settings().m_RenderLate = true;
 	}
 
 	SceneWindow::~SceneWindow()
@@ -95,6 +94,7 @@ namespace Glory::Editor
 	void SceneWindow::Draw()
 	{
 		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_SceneCamera.m_Camera);
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
 	}
 
 	void SceneWindow::MenuBar()
@@ -204,19 +204,6 @@ namespace Glory::Editor
 			ImGui::EndDragDropTarget();
 		}
 
-		if (m_PrefabInstance && !ImGui::IsMouseHoveringRect(rect.Min, rect.Max))
-		{
-			m_pPreviewScene->DestroyEntity(m_pPreviewScene->GetEntityByUUID(m_PrefabInstance).GetEntityID());
-			m_PrefabInstance = 0;
-			m_PreviewPrefabID = 0;
-		}
-		else if (m_PrefabInstance)
-		{
-			Entity entity = m_pPreviewScene->GetEntityByUUID(m_PrefabInstance);
-			entity.GetComponent<Transform>().Position = GetPosition();
-			m_pPreviewScene->GetRegistry().SetEntityDirty(entity.GetEntityID());
-		}
-
 		Texture* pTexture = m_SelectedRenderTextureIndex == -1 ? pSceneTexture->GetTextureAttachment(0) :
 			m_SceneCamera.m_Camera.GetRenderTexture(size_t(m_SelectedRenderTextureIndex))->GetTextureAttachment(m_SelectedFrameBufferIndex);
 
@@ -230,6 +217,21 @@ namespace Glory::Editor
 		float viewManipulateRight = io.DisplaySize.x;
 		float viewManipulateTop = 0;
 		Picking(screenPos, viewportSize);
+
+		if (m_PrefabInstance && !ImGui::IsMouseHoveringRect(rect.Min, rect.Max))
+		{
+			m_pPreviewScene->DestroyEntity(m_pPreviewScene->GetEntityByUUID(m_PrefabInstance).GetEntityID());
+			m_PrefabInstance = 0;
+			m_PreviewPrefabID = 0;
+		}
+		else if (m_PrefabInstance)
+		{
+			Entity entity = m_pPreviewScene->GetEntityByUUID(m_PrefabInstance);
+			Transform& transform = entity.GetComponent<Transform>();
+			transform.Position = GetPosition();
+			transform.Rotation = GetRotation();
+			m_pPreviewScene->GetRegistry().SetEntityDirty(entity.GetEntityID());
+		}
 
 		viewManipulateRight = ImGui::GetWindowPos().x + width;
 		viewManipulateTop = ImGui::GetWindowPos().y;
@@ -260,10 +262,9 @@ namespace Glory::Editor
 		glm::uvec2 resolution = m_SceneCamera.m_Camera.GetResolution();
 		glm::uvec2 textureCoord = viewportCoord * (glm::vec2)resolution;
 		textureCoord.y = resolution.y - textureCoord.y;
+		m_PickPos = textureCoord;
 
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->SetNextFramePick(textureCoord, m_SceneCamera.m_Camera);
-
-		if (!ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
+		if (!m_BlockNextPick && !ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseReleased(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
 			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 			GScene* pScene = pEngine->GetSceneManager()->GetHoveringEntityScene();
@@ -281,6 +282,7 @@ namespace Glory::Editor
 			}
 			Selection::SetActiveObject(GetEditableEntity(entityHandle.GetEntityID(), pScene));
 		}
+		m_BlockNextPick = false;
 	}
 
 	void SceneWindow::HandleDragAndDrop(std::string& path)
@@ -337,9 +339,11 @@ namespace Glory::Editor
 			/* Spawn it */
 			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene(true);
 			const glm::vec3 pos = GetPosition();
-			Entity entity = pScene->InstantiatePrefab(0, pPrefab, pos, glm::quat{ 0, 0, 0, 1 }, glm::vec3{ 1, 1, 1 });
+			const glm::quat rot = GetRotation();
+			Entity entity = pScene->InstantiatePrefab(0, pPrefab, pos, rot, glm::vec3{ 1, 1, 1 });
 			EditableEntity* pEntity = GetEditableEntity(entity.GetEntityID(), pScene);
 			Selection::SetActiveObject(pEntity);
+			m_BlockNextPick = true;
 			return;
 		}
 
@@ -353,7 +357,7 @@ namespace Glory::Editor
 			}
 
 			m_PreviewPrefabID = pPrefab->GetUUID();
-			const Entity entity = m_pPreviewScene->InstantiatePrefab(0, pPrefab, glm::vec3{}, glm::quat{ 0, 0, 0, 1 }, glm::vec3{ 1.0f, 1.0f, 1.0f });
+			Entity entity = m_pPreviewScene->InstantiatePrefab(0, pPrefab, glm::vec3{}, glm::quat{ 1, 0, 0, 0 }, glm::vec3{ 1.0f, 1.0f, 1.0f });
 			m_PrefabInstance = entity.EntityUUID();
 		}
 	}
@@ -367,5 +371,14 @@ namespace Glory::Editor
 		pos.y = std::round(pos.y / *snap)**snap;
 		pos.z = std::round(pos.z / *snap)**snap;
 		return pos;
+	}
+	const glm::quat SceneWindow::GetRotation() const
+	{
+		const glm::vec3 normal = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetHoveringNormal();
+		const glm::vec3 forward{ 0.0f, 0.0f, -1.0f };
+		const glm::vec3 right{ -1.0f, 0.0f, 0.0f };
+		const float forwardDot = std::abs(glm::dot(normal, forward));
+		const float rightDot = std::abs(glm::dot(normal, right));
+		return glm::conjugate(glm::quatLookAt(forwardDot > rightDot ? right : forward, normal));
 	}
 }

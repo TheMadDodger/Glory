@@ -40,6 +40,7 @@ namespace Glory::Editor
 
         void HandleDragAndDrop(std::string& path);
         const glm::vec3 GetPosition() const;
+        const glm::quat GetRotation() const;
 
     private:
         SceneViewCamera m_SceneCamera;
@@ -50,5 +51,7 @@ namespace Glory::Editor
         UUID m_PreviewPrefabID = 0;
         UUID m_PrefabInstance = 0;
         GScene* m_pPreviewScene;
+        glm::uvec2 m_PickPos;
+        bool m_BlockNextPick{ false };
     };
 }

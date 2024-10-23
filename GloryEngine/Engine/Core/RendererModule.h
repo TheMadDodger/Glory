@@ -23,7 +23,9 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void Submit(RenderData&& renderData);
+		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
+		void Submit(const glm::ivec2& pickPos, UUID cameraID);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
 		void Submit(PointLight&& light);
 
@@ -37,8 +39,6 @@ namespace Glory
 
 		size_t LastSubmittedObjectCount();
 		size_t LastSubmittedCameraCount();
-
-		void SetNextFramePick(const glm::ivec2& coord, CameraRef camera);
 
 		enum CircleUp
 		{
@@ -87,8 +87,7 @@ namespace Glory
 		void ThreadedInitialize();
 		void ThreadedCleanup();
 		void Render(const RenderFrame& frame);
-
-		void ReadHoveringObject();
+		void DoPicking(const glm::ivec2& pos, CameraRef camera);
 		void CreateLineBuffer();
 		void RenderLines(CameraRef camera);
 
@@ -96,8 +95,6 @@ namespace Glory
 		RenderFrame m_CurrentPreparingFrame;
 		size_t m_LastSubmittedObjectCount;
 		size_t m_LastSubmittedCameraCount;
-		glm::ivec2 m_PickPos;
-		CameraRef m_PickCamera;
 
 		uint32_t m_LineVertexCount;
 		Buffer* m_pLineBuffer;

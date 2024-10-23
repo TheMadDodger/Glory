@@ -45,6 +45,11 @@ namespace Glory
 		return m_HoveringPos;
 	}
 
+	const glm::vec3& SceneManager::GetHoveringNormal() const
+	{
+		return m_HoveringNormal;
+	}
+
 	void SceneManager::SetHoveringObject(UUID sceneID, UUID objectID)
 	{
 		m_HoveringObjectSceneID = sceneID;
@@ -54,6 +59,11 @@ namespace Glory
 	void SceneManager::SetHoveringPosition(const glm::vec3& pos)
 	{
 		m_HoveringPos = pos;
+	}
+
+	void SceneManager::SetHoveringNormal(const glm::vec3& normal)
+	{
+		m_HoveringNormal = normal;
 	}
 
 	size_t SceneManager::OpenScenesCount()
