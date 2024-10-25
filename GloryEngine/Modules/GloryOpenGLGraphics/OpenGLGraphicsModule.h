@@ -23,6 +23,7 @@ namespace Glory
 		virtual void DrawScreenQuad() override;
 		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;
 		virtual void EnableDepthTest(bool enable) override;
+		virtual void EnableDepthWrite(bool enable) override;
 		virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) override;
 		virtual void Blit(RenderTexture* pTexture) override;
 

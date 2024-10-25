@@ -96,6 +96,11 @@ namespace Glory::Editor
 		return m_pGridToolChain->GetSnap(m_DefaultOperation);
 	}
 
+	const float* Gizmos::GetSnap(ImGuizmo::OPERATION operation)
+	{
+		return m_pGridToolChain->GetSnap(operation);
+	}
+
 	Gizmos::Gizmos() {}
 	Gizmos::~Gizmos() {}
 

@@ -21,6 +21,7 @@ namespace Glory
 	{
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
 		m_pOpenScenes.clear();
+		m_pExternalScenes.clear();
 		m_ActiveSceneIndex = 0;
 	}
 
@@ -39,10 +40,30 @@ namespace Glory
 		return m_HoveringObjectID;
 	}
 
+	const glm::vec3& SceneManager::GetHoveringPosition() const
+	{
+		return m_HoveringPos;
+	}
+
+	const glm::vec3& SceneManager::GetHoveringNormal() const
+	{
+		return m_HoveringNormal;
+	}
+
 	void SceneManager::SetHoveringObject(UUID sceneID, UUID objectID)
 	{
 		m_HoveringObjectSceneID = sceneID;
 		m_HoveringObjectID = objectID;
+	}
+
+	void SceneManager::SetHoveringPosition(const glm::vec3& pos)
+	{
+		m_HoveringPos = pos;
+	}
+
+	void SceneManager::SetHoveringNormal(const glm::vec3& normal)
+	{
+		m_HoveringNormal = normal;
 	}
 
 	size_t SceneManager::OpenScenesCount()
@@ -61,6 +82,17 @@ namespace Glory
 		auto it = std::find_if(m_pOpenScenes.begin(), m_pOpenScenes.end(), [&](GScene* pScene) {return pScene->GetUUID() == uuid; });
 		if (it == m_pOpenScenes.end()) return nullptr;
 		return *it;
+	}
+
+	size_t SceneManager::ExternalSceneCount()
+	{
+		return m_pExternalScenes.size();
+	}
+
+	GScene* SceneManager::GetExternalScene(size_t index)
+	{
+		if (index >= m_pExternalScenes.size()) return nullptr;
+		return m_pExternalScenes[index];
 	}
 
 	void SceneManager::MarkAllScenesForDestruct()
@@ -165,12 +197,16 @@ namespace Glory
 			}
 			pScene->OnTick();
 		});
+		std::for_each(m_pExternalScenes.begin(), m_pExternalScenes.end(), [this](GScene* pScene) {
+			pScene->OnTick();
+		});
 	}
 
 	void SceneManager::Draw()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Paint" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
+		std::for_each(m_pExternalScenes.begin(), m_pExternalScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
 	}
 
 	void SceneManager::Start()
@@ -198,11 +234,34 @@ namespace Glory
 		return m_Started;
 	}
 
+	void SceneManager::AddExternalScene(GScene* pScene)
+	{
+		m_pExternalScenes.push_back(pScene);
+		pScene->m_pManager = this;
+	}
+
+	void SceneManager::RemoveExternalScene(GScene* pScene)
+	{
+		auto iter = std::find(m_pExternalScenes.begin(), m_pExternalScenes.end(), pScene);
+		if (iter == m_pExternalScenes.end()) return;
+		m_pExternalScenes.erase(iter);
+	}
+
 	void SceneManager::CloseAllScenes()
 	{
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
 		m_pOpenScenes.clear();
 		m_ActiveSceneIndex = 0;
 		OnCloseAll();
+	}
+
+	void SceneManager::UpdateScene(GScene* pScene) const
+	{
+		pScene->OnTick();
+	}
+
+	void SceneManager::DrawScene(GScene* pScene) const
+	{
+		pScene->OnPaint();
 	}
 }
