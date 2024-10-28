@@ -73,9 +73,11 @@ namespace Glory
 		OnSubmit(camera);
 	}
 
-	void RendererModule::Submit(const glm::ivec2& pickPos, UUID cameraID)
+	size_t RendererModule::Submit(const glm::ivec2& pickPos, UUID cameraID)
 	{
+		const size_t index = m_CurrentPreparingFrame.Picking.size();
 		m_CurrentPreparingFrame.Picking.push_back({ pickPos, cameraID });
+		return index;
 	}
 
 	void RendererModule::Submit(CameraRef camera, RenderTexture* pTexture)
@@ -231,6 +233,26 @@ namespace Glory
 		}
 	}
 
+	bool RendererModule::PickResultValid(size_t index) const
+	{
+		return m_PickResults.size() > index;
+	}
+
+	bool RendererModule::PickResultIndex(UUID cameraID, size_t& index) const
+	{
+		auto iter = std::find_if(m_PickResults.begin(), m_PickResults.end(), [cameraID](const PickResult& result) {
+			return result.m_CameraID == cameraID;
+		});
+		if (iter == m_PickResults.end()) return false;
+		index = iter - m_PickResults.begin();
+		return true;
+	}
+
+	const PickResult& RendererModule::GetPickResult(size_t index) const
+	{
+		return m_PickResults[index];
+	}
+
 	void RendererModule::Initialize()
 	{
 		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
@@ -266,6 +288,8 @@ namespace Glory
 
 	void RendererModule::Render(const RenderFrame& frame)
 	{
+		m_PickResults.clear();
+
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
 		m_pEngine->GetDisplayManager().ClearAllDisplays(m_pEngine);
 
@@ -394,9 +418,13 @@ namespace Glory
 		normal = normal * 2.0f - 1.0f;
 
 		/* Store results */
-		m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
-		m_pEngine->GetSceneManager()->SetHoveringPosition(worldSpacePosition);
-		m_pEngine->GetSceneManager()->SetHoveringNormal(normal);
+		if (m_PickResults.empty())
+		{
+			m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
+			m_pEngine->GetSceneManager()->SetHoveringPosition(worldSpacePosition);
+			m_pEngine->GetSceneManager()->SetHoveringNormal(normal);
+		}
+		m_PickResults.push_back({ camera.GetUUID(), SceneObjectRef(object.SceneID, object.ObjectID), worldSpacePosition, normal});
 	}
 
 	void RendererModule::CreateLineBuffer()

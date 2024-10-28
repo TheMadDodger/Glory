@@ -15,6 +15,7 @@
 #include <Components.h>
 #include <AudioComponents.h>
 #include <AudioModule.h>
+#include <RendererModule.h>
 #include <AudioSourceSystem.h>
 #include <LayerManager.h>
 
@@ -57,7 +58,7 @@ namespace Glory
 
 	MonoObject* Entity_GetSceneObjectID(MonoEntityHandle* pMonoEntityHandle)
 	{
-		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pMonoEntityHandle->m_SceneID);
+		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(UUID(pMonoEntityHandle->m_SceneID));
 		if (!pScene) return nullptr;
 		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Entity_EngineInstance, pScene);
 		if (!pObjectManager) return nullptr;
@@ -446,6 +447,51 @@ namespace Glory
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_Camera.GetUUID();
 	}
+	
+	void CameraComponent_PrepareNextPick(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec2* position)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
+		if (!cameraComp.m_Camera.GetUUID()) return;
+		pRenderer->Submit(glm::ivec2(*position), cameraComp.m_Camera.GetUUID());
+	}
+
+	struct PickResultWrapper
+	{
+		uint64_t CameraID;
+		MonoObject* Object;
+		Vec3Wrapper Position;
+		Vec3Wrapper Normal;
+	};
+	
+	PickResultWrapper CameraComponent_GetPickResult(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
+		size_t resultIndex;
+		if (!pRenderer->PickResultIndex(cameraComp.m_Camera.GetUUID(), resultIndex))
+			return { 0, nullptr, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
+		const PickResult pickResult = pRenderer->GetPickResult(resultIndex);
+
+		MonoObject* pMonoObject = nullptr;
+
+		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
+		if (pScene)
+		{
+			const Utils::ECS::EntityID entity = pScene->GetEntityByUUID(pickResult.m_Object.ObjectUUID()).GetEntityID();
+			MonoEntityHandle handle{ entity, pickResult.m_Object.SceneUUID() };
+			pMonoObject = Entity_GetSceneObjectID(&handle);
+		}
+		return PickResultWrapper{ pickResult.m_CameraID, pMonoObject,
+			ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
+	}
+	
+	Vec2Wrapper CameraComponent_GetResolution(MonoEntityHandle* pEntityHandle, UUID componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		const glm::uvec2& resolution = cameraComp.m_Camera.GetResolution();
+		return ToVec2Wrapper(resolution);
+	}
 
 #pragma endregion
 
@@ -831,6 +877,11 @@ namespace Glory
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetClearColor", CameraComponent_SetClearColor);
 
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetCameraID", CameraComponent_GetCameraID);
+
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_PrepareNextPick", CameraComponent_PrepareNextPick);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetPickResult", CameraComponent_GetPickResult);
+
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetResolution", CameraComponent_GetResolution);
 
 		/* Layer */
 		BIND("GloryEngine.Entities.LayerComponent::LayerComponent_GetLayer", LayerComponent_GetLayer);
