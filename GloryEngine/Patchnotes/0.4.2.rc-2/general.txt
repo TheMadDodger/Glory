@@ -2,7 +2,7 @@ Runtime:
 - Upped the runtime version to 0.4.2
 
 Editor:
-- Drag and dropping multiple fiels at once now copies all files before importing
+- Drag and dropping multiple files at once now copies all files before importing
 - ASSIMP importer now imports embedded textures
 - ASSIMP importer now imports embedded materials
 - ASSIMP importer now imports the whole scene of a model file as a prefab
@@ -21,8 +21,11 @@ Editor:
 - Fixed prefab reference serialization in scenes
 - Fixed missing assets when packaging a scene that uses imported assets
 - Fixed scene serialization writing an empty file on the very first save
+- Added drag and drop prefab into scene view with preview and snapping to objects
 
 Engine:
 - Fixed prefab instantiation
 - Fixed entity and component destruction
 - Shader textures are now assigned a type based on their name
+- Fixed duplicate entity UUID bug
+- Fixed entities not updating properly when a certain entity count is reached
