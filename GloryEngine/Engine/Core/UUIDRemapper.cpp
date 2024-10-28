@@ -33,12 +33,6 @@ namespace Glory
 		auto itor = m_Results.find(uuid);
 		if (itor != m_Results.end()) return itor->second;
 
-		const uint32_t first32Bits = uint32_t((uuid << 32) >> 32);
-		const uint32_t second32Bits = uint32_t(uuid >> 32);
-		const uint32_t otherSeed = first32Bits & second32Bits;
-		const uint32_t seed = m_Seed & otherSeed;
-
-		m_pRandom->Reset(seed);
 		const UUID result = m_pRandom->Next();
 		m_Results.emplace(uuid, result);
 		return result;

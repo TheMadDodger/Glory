@@ -76,6 +76,7 @@ namespace Glory::Utils::ECS
 			size_t index = m_ComponentData.size();
 			m_ComponentData.push_back(T(args...));
 			m_ActiveStates.Reserve(index);
+			m_ActiveStates.Set(index);
 			return m_ComponentData[index];
 		}
 
@@ -105,6 +106,7 @@ namespace Glory::Utils::ECS
 			size_t index = m_ComponentData.size();
 			m_ComponentData.push_back(T());
 			m_ActiveStates.Reserve(index);
+			m_ActiveStates.Set(index);
 			return &m_ComponentData[index];
 		}
 
@@ -115,6 +117,7 @@ namespace Glory::Utils::ECS
 			size_t index = m_ComponentData.size();
 			m_ComponentData.push_back(pOther);
 			m_ActiveStates.Reserve(index);
+			m_ActiveStates.Set(index);
 			return &m_ComponentData[index];
 		}
 
