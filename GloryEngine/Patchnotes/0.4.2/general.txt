@@ -32,6 +32,8 @@ Engine:
 - Fixed duplicate entity UUID bug
 - Fixed entities not updating properly when a certain entity count is reached
 - Added graphics based camera picking
+- Added support for creating material instances at runtime
 
 Scripting
 - Added camera picking API
+- Added API for creating material instances
