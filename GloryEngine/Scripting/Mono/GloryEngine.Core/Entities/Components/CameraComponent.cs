@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GloryEngine.SceneManagement;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
@@ -79,6 +80,28 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public Camera Camera => new Camera(CameraComponent_GetCameraID(ref _entity, _objectID));
 
+		/// <summary>
+		/// Get the pick result of the last frame
+		/// </summary>
+		public PickResult PickResult => CameraComponent_GetPickResult(ref _entity, _objectID);
+
+		/// <summary>
+		/// Get the rendering resolution for this camera
+		/// </summary>
+		public Vector2 Resolution => CameraComponent_GetResolution(ref _entity, _objectID);
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Tell the renderer to pick the backbuffer at the provided screen position during the next render.
+        /// Picking happens between regular and late rendering, so late rendered objects are ignored.
+        /// NOTE: You can only prepare 1 pick per camera per frame!
+        /// </summary>
+        /// <param name="screenPos">Position to pick at</param>
+        public void PreparePick(Vector2 screenPos) => CameraComponent_PrepareNextPick(ref _entity, _objectID, ref screenPos);
+
 		#endregion
 
 		#region API Methods
@@ -113,7 +136,13 @@ namespace GloryEngine.Entities
 		private extern static void CameraComponent_SetClearColor(ref Entity entity, UInt64 componentID, ref Vector4 clearCol);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern static UInt64 CameraComponent_GetCameraID(ref Entity entity, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void CameraComponent_PrepareNextPick(ref Entity entity, UInt64 componentID, ref Vector2 screenPos);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static PickResult CameraComponent_GetPickResult(ref Entity entity, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Vector2 CameraComponent_GetResolution(ref Entity entity, UInt64 componentID);
 
-		#endregion
-	}
+        #endregion
+    }
 }
