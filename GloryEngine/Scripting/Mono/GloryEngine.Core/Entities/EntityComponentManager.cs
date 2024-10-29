@@ -76,6 +76,11 @@ namespace GloryEngine.Entities
             _componentCache.Remove(componentID);
         }
 
+        internal static void Clear()
+        {
+            _componentCache.Clear();
+        }
+
         #endregion
 
         #region API Methods

@@ -4,6 +4,7 @@
 #include "ScriptingMethodsHelper.h"
 #include "Assembly.h"
 #include "MonoSceneManager.h"
+#include "MonoComponentObjectManager.h"
 
 #include <Engine.h>
 #include <SceneManager.h>
@@ -30,6 +31,7 @@ namespace Glory
 		m_pAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
 
 		MonoSceneManager::Initialize(pEngine, pAssembly);
+		MonoComponentObjectManager::Initialize(m_pAssembly->GetMonoImage());
 
 		Utils::ECS::ComponentTypes::SetInstance(pEngine->GetSceneManager()->ComponentTypesInstance());
 	}
@@ -37,5 +39,7 @@ namespace Glory
 	void CoreLibManager::Cleanup()
 	{
 		MonoSceneManager::Cleanup();
+		MonoAssetManager::Cleanup();
+		MonoComponentObjectManager::Cleanup();
 	}
 }
