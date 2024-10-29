@@ -365,7 +365,26 @@ namespace Glory::Editor
 	const glm::vec3 SceneWindow::GetPosition() const
 	{
 		const float* snap = Gizmos::GetSnap(ImGuizmo::OPERATION::TRANSLATE);
-		glm::vec3 pos = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetHoveringPosition();
+		SceneManager* scenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
+		glm::vec3 pos = scenes->GetHoveringPosition();
+		const UUID hoveringObject = scenes->GetHoveringEntityUUID();
+		const GScene* hoveringScene = scenes->GetHoveringEntityScene();
+		if (!hoveringScene || !hoveringObject)
+		{
+			const glm::uvec2 resolution = m_SceneCamera.m_Camera.GetResolution();
+			const glm::vec2 coord = glm::vec2{ m_PickPos.x / (float)resolution.x, m_PickPos.y / (float)resolution.y };
+
+			const glm::vec4 clipSpacePosition{ coord * 2.0f - 1.0f, 0.99f, 1.0f };
+			const glm::mat4 projectionInverse = m_SceneCamera.m_Camera.GetProjectionInverse();
+			const glm::mat4 viewInverse = m_SceneCamera.m_Camera.GetViewInverse();
+			glm::vec4 viewSpacePosition = projectionInverse * clipSpacePosition;
+
+			/* Perspective division */
+			viewSpacePosition /= viewSpacePosition.w;
+			const glm::vec4 worldSpacePosition = viewInverse * viewSpacePosition;
+			pos = worldSpacePosition;
+		}
+
 		if (!snap) return pos;
 		pos.x = std::round(pos.x / *snap)**snap;
 		pos.y = std::round(pos.y / *snap)**snap;
@@ -375,7 +394,15 @@ namespace Glory::Editor
 
 	const glm::quat SceneWindow::GetRotation() const
 	{
-		const glm::vec3 normal = EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->GetHoveringNormal();
+		SceneManager* scenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
+		const UUID hoveringObject = scenes->GetHoveringEntityUUID();
+		const GScene* hoveringScene = scenes->GetHoveringEntityScene();
+		if (!hoveringScene || !hoveringObject)
+		{
+			return glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		}
+
+		const glm::vec3 normal = scenes->GetHoveringNormal();
 		const glm::vec3 forward{ 0.0f, 0.0f, 1.0f };
 		const glm::vec3 right{ -1.0f, 0.0f, 0.0f };
 		const float forwardDot = std::abs(glm::dot(normal, forward));
