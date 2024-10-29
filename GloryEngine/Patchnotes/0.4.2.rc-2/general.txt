@@ -22,6 +22,8 @@ Editor:
 - Fixed missing assets when packaging a scene that uses imported assets
 - Fixed scene serialization writing an empty file on the very first save
 - Added drag and drop prefab into scene view with preview and snapping to objects
+- Fixed crash caused by scene object reference property
+- Fixed crash caused by scene object reference serialization
 
 Engine:
 - Fixed prefab instantiation
@@ -29,3 +31,7 @@ Engine:
 - Shader textures are now assigned a type based on their name
 - Fixed duplicate entity UUID bug
 - Fixed entities not updating properly when a certain entity count is reached
+- Added graphics based camera picking
+
+Scripting
+- Added camera picking API
