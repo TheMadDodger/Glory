@@ -32,8 +32,27 @@ namespace Glory
 			for (size_t i = 0; i < props.size(); ++i)
 			{
 				const ScriptProperty& prop = props[i];
-				const TypeData* pType = Reflect::GetTyeData(prop.m_TypeHash);
-				m_pSerializers->SerializeProperty(pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], scriptData[prop.m_Name]);
+				switch (prop.m_TypeHash)
+				{
+				case ST_Object:
+				{
+					PropertySerializer* pSerializer = m_pSerializers->GetSerializer(ST_Object);
+					pSerializer->Serialize(&pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], prop.m_ElementTypeHash, scriptData[prop.m_Name]);
+					break;
+				}
+				case ST_Asset:
+				{
+					PropertySerializer* pSerializer = m_pSerializers->GetSerializer(ST_Asset);
+					pSerializer->Serialize(&pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], prop.m_ElementTypeHash, scriptData[prop.m_Name]);
+					break;
+				}
+				default:
+				{
+					const TypeData* pType = Reflect::GetTyeData(prop.m_TypeHash);
+					m_pSerializers->SerializeProperty(pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], scriptData[prop.m_Name]);
+					break;
+				}
+				}
 			}
 		}
 	}
@@ -57,10 +76,29 @@ namespace Glory
 			for (size_t i = 0; i < props.size(); ++i)
 			{
 				const ScriptProperty& prop = props[i];
-				const TypeData* pType = Reflect::GetTyeData(prop.m_TypeHash);
 				auto propData = scriptDataNode[prop.m_Name];
 				if (!propData.Exists()) return;
-				m_pSerializers->DeserializeProperty(pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], propData);
+				switch (prop.m_TypeHash)
+				{
+				case ST_Object:
+				{
+					PropertySerializer* pSerializer = m_pSerializers->GetSerializer(ST_Object);
+					pSerializer->Deserialize(&pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], prop.m_ElementTypeHash, propData);
+					break;
+				}
+				case ST_Asset:
+				{
+					PropertySerializer* pSerializer = m_pSerializers->GetSerializer(ST_Asset);
+					pSerializer->Deserialize(&pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], prop.m_ElementTypeHash, propData);
+					break;
+				}
+				default:
+				{
+					const TypeData* pType = Reflect::GetTyeData(prop.m_TypeHash);
+					m_pSerializers->DeserializeProperty(pType, &pScriptedComponent->m_ScriptData.m_Buffer[prop.m_RelativeOffset], propData);
+					break;
+				}
+				}
 			}
 		}
 	}
