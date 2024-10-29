@@ -56,6 +56,12 @@ namespace GloryEngine
             return resource;
         }
 
+        private static void Clear()
+        {
+            _resources.Clear();
+            Debug.LogNotice("Asset cache cleared");
+        }
+
         #endregion
     }
 }

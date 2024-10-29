@@ -54,6 +54,8 @@ namespace Glory
 
         virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
 
+        virtual bool IsInstance() const { return false; }
+
     public: // Properties
         // Setters
         template<typename T>
@@ -62,7 +64,7 @@ namespace Glory
             size_t index;
             if (!GetPropertyInfoIndex(materialManager, name, index)) return;
             EnableProperty(index);
-            m_PropertyInfos[index].Write<T>(GetPropertyBuffer(materialManager, index), value);
+            GetPropertyInfoAt(materialManager, index)->Write<T>(GetPropertyBuffer(materialManager, index), value);
         }
 
         // Getters
@@ -71,7 +73,7 @@ namespace Glory
         {
             size_t index;
             if (!GetPropertyInfoIndex(materialManager, name, index)) return false;
-            return m_PropertyInfos[index].Read<T>(GetPropertyBuffer(materialManager, index), value);
+            return GetPropertyInfoAt(materialManager, index)->Read<T>(GetPropertyBuffer(materialManager, index), value);
         }
 
         void* Address(MaterialManager& materialManager, size_t index);

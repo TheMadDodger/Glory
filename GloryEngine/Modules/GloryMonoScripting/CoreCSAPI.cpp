@@ -6,6 +6,7 @@
 
 #include <Engine.h>
 #include <SceneManager.h>
+#include <MaterialManager.h>
 #include <Layer.h>
 #include <GameTime.h>
 #include <LayerManager.h>
@@ -15,6 +16,7 @@
 #include <ObjectManager.h>
 
 #include <MaterialData.h>
+#include <MaterialInstanceData.h>
 #include <PrefabData.h>
 
 namespace Glory
@@ -281,6 +283,29 @@ namespace Glory
 		if (!pMaterial->GetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, &pImage, &pManager)) return false;
 		value = pImage ? pImage->GetUUID() : 0;
 		return true;
+	}
+	
+	uint64_t Material_CreateInstance(uint64_t matID)
+	{
+		AssetManager& pManager = Core_EngineInstance->GetAssetManager();
+		MaterialManager& materials = Core_EngineInstance->GetMaterialManager();
+		auto pMaterial = pManager.GetAssetImmediate<MaterialData>(matID);
+		if (!pMaterial)
+		{
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
+			return 0;
+		}
+		if (pMaterial->IsInstance())
+		{
+			pMaterial = static_cast<MaterialInstanceData*>(pMaterial)->GetBaseMaterial(materials);
+		}
+		if (!pMaterial)
+		{
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
+			return 0;
+		}
+		MaterialInstanceData* pInstance = materials.CreateRuntimeMaterialInstance(pMaterial->GetUUID());
+		return pInstance->GetUUID();
 	}
 
 #pragma endregion
@@ -612,6 +637,8 @@ namespace Glory
 
 		BIND("GloryEngine.Material::Material_SetTexture", Material_SetTexture);
 		BIND("GloryEngine.Material::Material_GetTexture", Material_GetTexture);
+
+		BIND("GloryEngine.Material::Material_CreateInstance", Material_CreateInstance);
 
 		// Scenes
 		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObject", Scene_NewEmptyObject);

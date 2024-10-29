@@ -47,6 +47,8 @@ namespace Glory
 		void Serialize(BinaryStream& container) const override;
 		void Deserialize(BinaryStream& container) override;
 
+		virtual bool IsInstance() const override { return true; }
+
 	private:
 		virtual std::vector<char>& GetPropertyBuffer(MaterialManager& manager, size_t index) override;
 

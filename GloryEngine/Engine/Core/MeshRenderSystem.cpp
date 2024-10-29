@@ -38,7 +38,7 @@ namespace Glory
         if (pMeshData == nullptr) return;
 
         const UUID materialID = pComponent.m_Material.AssetUUID();
-        if (!pAssetDB->AssetExists(materialID))
+        if (!pAssets->FindResource(materialID) && !pAssetDB->AssetExists(materialID))
         {
             // TODO: Set some default material
             std::string key = std::to_string(entity) + "_MISSING_MATERIAL";

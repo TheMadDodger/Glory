@@ -1,6 +1,7 @@
 #include "EditorPlayer.h"
 #include "EditorApplication.h"
 #include "EditorSceneManager.h"
+#include "EditorMaterialManager.h"
 #include "Selection.h"
 #include "Undo.h"
 #include "SelectionChangedAction.h"
@@ -9,7 +10,6 @@
 #include "ImGuiHelpers.h"
 #include "ProjectSettings.h"
 
-#include <SceneManager.h>
 #include <IconsFontAwesome6.h>
 #include <Components.h>
 
@@ -108,6 +108,8 @@ namespace Glory::Editor
 		Selection::Clear();
 		EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
 		EditorApplication::GetInstance()->GetSceneManager().OpenAllFromYAML(m_SerializedScenes);
+
+		EditorApplication::GetInstance()->GetMaterialManager().DestroyRuntimeMaterials();
 
 		//pSelected = Object::FindObject(toSelect);
 		//Selection::SetActiveObject(pSelected);

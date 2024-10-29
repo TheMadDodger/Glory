@@ -5,6 +5,8 @@
 #include "CoreLibManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
+#include "MonoAssetManager.h"
+#include "MonoComponentObjectManager.h"
 
 #include <Debug.h>
 
@@ -201,6 +203,8 @@ namespace Glory
 		m_pMethodsHelper->Cleanup();
 		m_pCoreLibManager->Cleanup();
 		MonoSceneManager::Cleanup();
+		MonoAssetManager::Cleanup();
+		MonoComponentObjectManager::Cleanup();
 		
 		if (m_DebuggingEnabled) mono_debug_cleanup();
 	}
