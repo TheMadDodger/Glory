@@ -35,8 +35,7 @@ namespace Glory::Editor
 		std::string objectName = "";
 		bool missing = *sceneValue != 0 && *objectValue != 0 && (pScene == nullptr || !entity.IsValid());
 
-		const std::string name{entity.Name()};
-		objectName = missing ? "Missing Object" : (!entity.IsValid() ? "Noone" : name + ": " + std::to_string(entity.EntityUUID()));
+		objectName = missing ? "Missing Object" : (!entity.IsValid() ? "Noone" : std::string(entity.Name()) + ": " + std::to_string(entity.EntityUUID()));
 
 		bool openPopup = false;
 		float start, width;
