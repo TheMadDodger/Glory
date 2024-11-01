@@ -10,7 +10,7 @@ namespace GloryEngine
         #region Constructor
 
         public Script() : base() { }
-        public Script(UInt64 id) : base(id) { }
+        public Script(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
     }

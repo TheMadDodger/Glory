@@ -18,12 +18,23 @@ namespace GloryEngine
             set => Resource_SetName(_objectID, value);
         }
 
+        public AssetManager Manager => _assetManager;
+
+        #endregion
+
+        #region Fields
+
+        private AssetManager _assetManager;
+
         #endregion
 
         #region Constructor
 
         public Resource() : base() { }
-        public Resource(UInt64 id) : base(id) { }
+        public Resource(AssetManager manager, UInt64 id) : base(id)
+        {
+            _assetManager = manager;
+        }
 
         #endregion
 

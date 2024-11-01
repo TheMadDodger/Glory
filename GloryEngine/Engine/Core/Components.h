@@ -44,16 +44,6 @@ namespace Glory
 		glm::mat4 MatTransform;
 	};
 
-	struct MeshFilter
-	{
-		MeshFilter() : m_Mesh(0) {}
-		MeshFilter(MeshData* pMeshData) : m_Mesh(pMeshData != nullptr ? pMeshData->GetUUID() : 0) {}
-
-		REFLECTABLE(MeshFilter,
-			(AssetReference<MeshData>)	(m_Mesh)
-		)
-	};
-
 	struct MeshMaterial
 	{
 		MeshMaterial() : m_MaterialReference(0) {}

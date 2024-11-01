@@ -9,6 +9,7 @@ namespace GloryEngine.Entities
         #region Fields
 
         private static Dictionary<UInt64, EntityComponent> _componentCache = new Dictionary<ulong, EntityComponent>();
+        public static Engine Engine = null;
 
         #endregion
 

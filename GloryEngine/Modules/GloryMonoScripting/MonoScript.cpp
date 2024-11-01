@@ -1,6 +1,5 @@
 #include "MonoScript.h"
 #include "MonoScriptObjectManager.h"
-#include "MonoAssetManager.h"
 #include "MonoSceneManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "MonoManager.h"
@@ -173,7 +172,7 @@ namespace Glory
 			case ST_Asset:
 			{
 				const AssetReferenceBase& assetReference = reinterpret_cast<const AssetReferenceBase&>(data[prop.m_RelativeOffset]);
-				MonoObject* pAssetObject = MonoAssetManager::MakeMonoAssetObject(pEngine, assetReference.AssetUUID(), pField->TypeName());
+				MonoObject* pAssetObject = MonoManager::Instance()->GetCoreLibManager()->CreateAssetObject(assetReference.AssetUUID(), pField->TypeName());
 				pField->SetValue(pMonoObject, pAssetObject);
 				break;
 			}

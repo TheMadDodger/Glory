@@ -15,7 +15,12 @@ namespace GloryEngine.Entities
         /// </summary>
         public Material Material
         {
-            get => MeshRenderer_GetMaterial(ref _entity, _objectID);
+            get
+            {
+                UInt64 materialID = MeshRenderer_GetMaterial(ref _entity, _objectID);
+                if (materialID == 0) return null;
+                return EntityComponentManager.Engine.AssetManager.Get<Material>(materialID);
+            }
             set => MeshRenderer_SetMaterial(ref _entity, _objectID, value != null ? value.ID : 0);
         }
 
@@ -24,7 +29,12 @@ namespace GloryEngine.Entities
         /// </summary>
         public Mesh Mesh
         {
-            get => MeshRenderer_GetMesh(ref _entity, _objectID);
+            get
+            {
+                UInt64 meshID = MeshRenderer_GetMesh(ref _entity, _objectID);
+                if (meshID == 0) return null;
+                return EntityComponentManager.Engine.AssetManager.Get<Mesh>(meshID);
+            }
             set => MeshRenderer_SetMesh(ref _entity, _objectID, value != null ? value.ID : 0);
         }
 
@@ -33,12 +43,12 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static Material MeshRenderer_GetMaterial(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 MeshRenderer_GetMaterial(ref Entity entity, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static void MeshRenderer_SetMaterial(ref Entity entity, UInt64 componentID, UInt64 materialID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static Mesh MeshRenderer_GetMesh(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 MeshRenderer_GetMesh(ref Entity entity, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static void MeshRenderer_SetMesh(ref Entity entity, UInt64 componentID, UInt64 meshID);
 
