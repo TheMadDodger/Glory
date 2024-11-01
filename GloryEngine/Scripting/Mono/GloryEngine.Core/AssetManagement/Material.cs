@@ -11,7 +11,7 @@ namespace GloryEngine
         #region Constructor
 
         public Material() : base() { }
-        public Material(UInt64 id) : base(id) { }
+        public Material(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
 
@@ -216,7 +216,7 @@ namespace GloryEngine
             UInt64 imageID;
             if (!Material_GetTexture(_objectID, propertyName, out imageID)) return false;
             if (imageID == 0) return true;
-            value = AssetManager.MakeResource<Texture>(imageID);
+            value = Manager.MakeResource<Texture>(imageID);
             return true;
         }
 
@@ -227,7 +227,7 @@ namespace GloryEngine
         public MaterialInstance CreateMaterialInstance()
         {
             UInt64 instanceID = Material_CreateInstance(_objectID);
-            return instanceID != 0 ? AssetManager.MakeResource<MaterialInstance>(instanceID) : null;
+            return instanceID != 0 ? Manager.MakeResource<MaterialInstance>(instanceID) : null;
         }
 
         #endregion

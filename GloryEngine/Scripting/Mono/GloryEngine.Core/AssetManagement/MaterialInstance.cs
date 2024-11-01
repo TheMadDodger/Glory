@@ -10,7 +10,7 @@ namespace GloryEngine
         #region Constructor
 
         public MaterialInstance() : base() { }
-        public MaterialInstance(UInt64 id) : base(id) { }
+        public MaterialInstance(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
     }

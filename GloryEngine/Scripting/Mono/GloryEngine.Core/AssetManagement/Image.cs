@@ -10,7 +10,7 @@ namespace GloryEngine
         #region Constructor
 
         public Image() : base() { }
-        public Image(UInt64 id) : base(id) { }
+        public Image(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
     }

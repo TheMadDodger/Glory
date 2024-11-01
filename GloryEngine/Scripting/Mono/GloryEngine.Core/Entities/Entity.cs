@@ -29,7 +29,7 @@ namespace GloryEngine.Entities
         /// <summary>
         /// The scene that owns this entity
         /// </summary>
-        public Scene Scene => SceneManagement.SceneManager.GetOpenScene(_sceneID) as Scene;
+        public Scene Scene => SceneManager.GetOpenScene(_sceneID) as Scene;
 
         #endregion
 

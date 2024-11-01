@@ -5,7 +5,6 @@
 #include "CoreLibManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
-#include "MonoAssetManager.h"
 #include "MonoComponentObjectManager.h"
 
 #include <Debug.h>
@@ -184,8 +183,8 @@ namespace Glory
 
 	void MonoManager::Cleanup()
 	{
-		CollectGC();
-		WaitForPendingFinalizers();
+		m_pMethodsHelper->Cleanup();
+		m_pCoreLibManager->Cleanup();
 
 		for (auto& itor : m_Domains)
 		{
@@ -194,17 +193,14 @@ namespace Glory
 		}
 		m_Domains.clear();
 
+		CollectGC();
+		WaitForPendingFinalizers();
+
 		m_pRootDomain->Unload(true);
 		mono_jit_cleanup(m_pRootDomain->GetMonoDomain());
 		delete m_pRootDomain;
 		m_pRootDomain = nullptr;
 		m_pActiveDomain = nullptr;
-
-		m_pMethodsHelper->Cleanup();
-		m_pCoreLibManager->Cleanup();
-		MonoSceneManager::Cleanup();
-		MonoAssetManager::Cleanup();
-		MonoComponentObjectManager::Cleanup();
 		
 		if (m_DebuggingEnabled) mono_debug_cleanup();
 	}

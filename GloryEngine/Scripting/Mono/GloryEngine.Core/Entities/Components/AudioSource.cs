@@ -165,7 +165,12 @@ namespace GloryEngine.Entities
         /// </summary>
         public Audio Audio
         {
-            get => AudioSource_GetAudio(ref _entity, _objectID);
+            get
+            {
+                UInt64 audioID = AudioSource_GetAudio(ref _entity, _objectID);
+                if (audioID == 0) return null;
+                return EntityComponentManager.Engine.AssetManager.Get<Audio>(audioID);
+            }
             set => AudioSource_SetAudio(ref _entity, _objectID, value != null ? value.ID : 0);
         }
 
@@ -265,7 +270,7 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static Audio AudioSource_GetAudio(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 AudioSource_GetAudio(ref Entity entity, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static void AudioSource_SetAudio(ref Entity entity, UInt64 componentID, UInt64 audioID);
 

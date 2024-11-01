@@ -5,7 +5,6 @@
 #include "MonoScriptObjectManager.h"
 #include "CoreCSAPI.h"
 #include "MathCSAPI.h"
-#include "MonoAssetManager.h"
 #include "ScriptingExtender.h"
 #include "MonoComponents.h"
 
@@ -25,10 +24,10 @@ namespace Glory
 
 #pragma region Entity
 
-	GScene* GetEntityScene(UUID sceneID)
+	GScene* GetEntityScene(uint64_t sceneID)
 	{
 		if (sceneID == 0) return nullptr;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene(sceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (pScene == nullptr) return nullptr;
 		return pScene;
 	}
@@ -36,11 +35,11 @@ namespace Glory
 	GScene* GetEntityScene(MonoEntityHandle* pEntityHandle)
 	{
 		if (pEntityHandle->m_EntityID == 0) return nullptr;
-		return GetEntityScene((UUID)pEntityHandle->m_SceneID);
+		return GetEntityScene(pEntityHandle->m_SceneID);
 	}
 
 	template<typename T>
-	static T& GetComponent(MonoEntityHandle* pEntityHandle, UUID componentID)
+	static T& GetComponent(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		GScene* pScene = GetEntityScene(pEntityHandle);
 		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
@@ -71,8 +70,8 @@ namespace Glory
 	{
 		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
 		MonoScriptObjectManager* pScriptObjects = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
-		const UUID uuid = pScriptObjects->GetIDForMonoScriptObject(pObject);
-		const UUID sceneID = pScriptObjects->GetSceneIDForMonoScriptObject(pObject);
+		const uint64_t uuid = pScriptObjects->GetIDForMonoScriptObject(pObject);
+		const uint64_t sceneID = pScriptObjects->GetSceneIDForMonoScriptObject(pObject);
 		if (!uuid || !sceneID) return MonoEntityHandle();
 		GScene* pScene = GetEntityScene(sceneID);
 		if (!pScene) return MonoEntityHandle();
@@ -106,7 +105,7 @@ namespace Glory
 		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
-		const UUID uuid{};
+		const uint64_t uuid{};
 		pScene->GetRegistry().CreateComponent(pEntityHandle->m_EntityID, componentHash, uuid);
 		return uuid;
 	}
@@ -155,13 +154,13 @@ namespace Glory
 
 #pragma region Transform
 
-	glm::vec3 Transform_GetLocalPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetLocalPosition(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return transform.Position;
 	}
 
-	void Transform_SetLocalPosition(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* position)
+	void Transform_SetLocalPosition(MonoEntityHandle* pEntityHandle, uint64_t componentID, glm::vec3* position)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Position = *position;
@@ -169,13 +168,13 @@ namespace Glory
 		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
-	QuatWrapper Transform_GetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
+	QuatWrapper Transform_GetLocalRotation(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return transform.Rotation;
 	}
 
-	void Transform_SetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID, glm::quat* rotation)
+	void Transform_SetLocalRotation(MonoEntityHandle* pEntityHandle, uint64_t componentID, glm::quat* rotation)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = *rotation;
@@ -183,13 +182,13 @@ namespace Glory
 		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
-	glm::vec3 Transform_GetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetLocalRotationEuler(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return glm::eulerAngles(transform.Rotation);
 	}
 
-	void Transform_SetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID, Vec3Wrapper* rotation)
+	void Transform_SetLocalRotationEuler(MonoEntityHandle* pEntityHandle, uint64_t componentID, Vec3Wrapper* rotation)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = glm::quat(ToGLMVec3(*rotation));
@@ -197,13 +196,13 @@ namespace Glory
 		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
-	glm::vec3 Transform_GetLocalScale(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetLocalScale(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return transform.Scale;
 	}
 
-	void Transform_SetLocalScale(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* scale)
+	void Transform_SetLocalScale(MonoEntityHandle* pEntityHandle, uint64_t componentID, glm::vec3* scale)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Scale = *scale;
@@ -211,19 +210,19 @@ namespace Glory
 		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
-	glm::vec3 Transform_GetForward(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetForward(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return glm::vec3(transform.MatTransform[2][0], transform.MatTransform[2][1], transform.MatTransform[2][2]);
 	}
 
-	glm::vec3 Transform_GetUp(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetUp(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return glm::vec3(transform.MatTransform[1][0], transform.MatTransform[1][1], transform.MatTransform[1][2]);
 	}
 
-	void Transform_SetForward(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* forward)
+	void Transform_SetForward(MonoEntityHandle* pEntityHandle, uint64_t componentID, glm::vec3* forward)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		transform.Rotation = glm::conjugate(glm::quatLookAt(*forward, { 0.0f, 1.0f, 0.0f }));
@@ -231,13 +230,13 @@ namespace Glory
 		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
 	}
 
-	glm::vec3 Transform_GetRight(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetRight(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return glm::vec3(transform.MatTransform[0][0], transform.MatTransform[0][1], transform.MatTransform[0][2]);
 	}
 
-	Mat4Wrapper Transform_GetWorld(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Mat4Wrapper Transform_GetWorld(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
 		return ToMat4Wrapper(transform.MatTransform);
@@ -245,210 +244,188 @@ namespace Glory
 
 #pragma endregion
 
-#pragma region MeshFilter
-
-	MonoObject* MeshFilter_GetMesh(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		MeshFilter& meshFilter = GetComponent<MeshFilter>(pEntityHandle, componentID);
-		UUID uuid = meshFilter.m_Mesh.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
-	}
-
-	void MeshFilter_SetMesh(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
-	{
-		MeshFilter& meshFilter = GetComponent<MeshFilter>(pEntityHandle, componentID);
-		meshFilter.m_Mesh.SetUUID(modelID);
-	}
-
-#pragma endregion
-
 #pragma region MeshRenderer
 
-	MonoObject* MeshRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t MeshRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		const UUID uuid = meshRenderer.m_Material.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+		return meshRenderer.m_Material.AssetUUID();
 	}
 
-	void MeshRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+	void MeshRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t materialID)
 	{
 		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Material = materialID;
+		meshRenderer.m_Material = UUID(materialID);
 	}
 
-	MonoObject* MeshRenderer_GetMesh(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t MeshRenderer_GetMesh(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		const UUID uuid = meshRenderer.m_Mesh.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MeshData>(Entity_EngineInstance, uuid);
+		return meshRenderer.m_Mesh.AssetUUID();
 	}
 
-	void MeshRenderer_SetMesh(MonoEntityHandle* pEntityHandle, UUID componentID, UUID meshID)
+	void MeshRenderer_SetMesh(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t meshID)
 	{
 		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Mesh = meshID;
+		meshRenderer.m_Mesh = UUID(meshID);
 	}
 
 #pragma endregion
 
 #pragma region ModelRenderer
 
-	MonoObject* ModelRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t ModelRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		UUID uuid = meshRenderer.m_Materials.size() > 0 ? meshRenderer.m_Materials[0].m_MaterialReference.AssetUUID() : 0;
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+		return meshRenderer.m_Materials.size() > 0 ? meshRenderer.m_Materials[0].m_MaterialReference.AssetUUID() : 0;
 	}
 
-	void ModelRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+	void ModelRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t materialID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		if (meshRenderer.m_Materials.size() <= 0) meshRenderer.m_Materials.push_back(materialID);
-		else meshRenderer.m_Materials[0] = materialID;
+		if (meshRenderer.m_Materials.size() <= 0) meshRenderer.m_Materials.push_back(UUID(materialID));
+		else meshRenderer.m_Materials[0] = UUID(materialID);
 	}
 
-	size_t ModelRenderer_GetMaterialCount(MonoEntityHandle* pEntityHandle, UUID componentID)
+	size_t ModelRenderer_GetMaterialCount(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
 		return meshRenderer.m_Materials.size();
 	}
 
-	MonoObject* ModelRenderer_GetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index)
+	uint64_t ModelRenderer_GetMaterialAt(MonoEntityHandle* pEntityHandle, uint64_t componentID, size_t index)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		if (meshRenderer.m_Materials.size() <= index) return nullptr;
-		UUID uuid = meshRenderer.m_Materials[index].m_MaterialReference.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+		if (meshRenderer.m_Materials.size() <= index) return 0;
+		return meshRenderer.m_Materials[index].m_MaterialReference.AssetUUID();
 	}
 
-	void ModelRenderer_AddMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+	void ModelRenderer_AddMaterial(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t materialID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Materials.push_back(materialID);
+		meshRenderer.m_Materials.push_back(UUID(materialID));
 	}
 
-	void ModelRenderer_SetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index, UUID materialID)
+	void ModelRenderer_SetMaterialAt(MonoEntityHandle* pEntityHandle, uint64_t componentID, size_t index, uint64_t materialID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
 		if (meshRenderer.m_Materials.size() <= index) return;
-		meshRenderer.m_Materials[index] = materialID;
+		meshRenderer.m_Materials[index] = UUID(materialID);
 	}
 
-	void ModelRenderer_ClearMaterials(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void ModelRenderer_ClearMaterials(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
 		meshRenderer.m_Materials.clear();
 	}
 
-	MonoObject* ModelRenderer_GetModel(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t ModelRenderer_GetModel(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		const UUID uuid = meshRenderer.m_Model.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
+		return meshRenderer.m_Model.AssetUUID();
 	}
 
-	void ModelRenderer_SetModel(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
+	void ModelRenderer_SetModel(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t modelID)
 	{
 		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Model = modelID;
+		meshRenderer.m_Model = UUID(modelID);
 	}
 
 #pragma endregion
 
 #pragma region CameraComponent
 
-	float CameraComponent_GetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float CameraComponent_GetHalfFOV(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_HalfFOV;
 	}
 
-	void CameraComponent_SetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID, float halfFov)
+	void CameraComponent_SetHalfFOV(MonoEntityHandle* pEntityHandle, uint64_t componentID, float halfFov)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		cameraComp.m_HalfFOV = halfFov;
 	}
 
-	float CameraComponent_GetNear(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float CameraComponent_GetNear(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_Near;
 	}
 
-	void CameraComponent_SetNear(MonoEntityHandle* pEntityHandle, UUID componentID, float near)
+	void CameraComponent_SetNear(MonoEntityHandle* pEntityHandle, uint64_t componentID, float near)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		cameraComp.m_Near = near;
 	}
 
-	float CameraComponent_GetFar(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float CameraComponent_GetFar(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_Far;
 	}
 
-	void CameraComponent_SetFar(MonoEntityHandle* pEntityHandle, UUID componentID, float far)
+	void CameraComponent_SetFar(MonoEntityHandle* pEntityHandle, uint64_t componentID, float far)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		cameraComp.m_Far = far;
 	}
 
-	int CameraComponent_GetDisplayIndex(MonoEntityHandle* pEntityHandle, UUID componentID)
+	int CameraComponent_GetDisplayIndex(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_DisplayIndex;
 	}
 
-	void CameraComponent_SetDisplayIndex(MonoEntityHandle* pEntityHandle, UUID componentID, int displayIndex)
+	void CameraComponent_SetDisplayIndex(MonoEntityHandle* pEntityHandle, uint64_t componentID, int displayIndex)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		cameraComp.m_DisplayIndex = displayIndex;
 	}
 
-	int CameraComponent_GetPriority(MonoEntityHandle* pEntityHandle, UUID componentID)
+	int CameraComponent_GetPriority(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_Priority;
 	}
 
-	void CameraComponent_SetPriority(MonoEntityHandle* pEntityHandle, UUID componentID, int priority)
+	void CameraComponent_SetPriority(MonoEntityHandle* pEntityHandle, uint64_t componentID, int priority)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		cameraComp.m_Priority = priority;
 	}
 
-	LayerMask CameraComponent_GetLayerMask(MonoEntityHandle* pEntityHandle, UUID componentID)
+	LayerMask CameraComponent_GetLayerMask(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_LayerMask;
 	}
 
-	void CameraComponent_SetLayerMask(MonoEntityHandle* pEntityHandle, UUID componentID, LayerMask* pLayerMask)
+	void CameraComponent_SetLayerMask(MonoEntityHandle* pEntityHandle, uint64_t componentID, LayerMask* pLayerMask)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		cameraComp.m_LayerMask.m_Mask = pLayerMask->m_Mask;
 	}
 
-	glm::vec4 CameraComponent_GetClearColor(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec4 CameraComponent_GetClearColor(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_ClearColor;
 	}
 
-	void CameraComponent_SetClearColor(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec4* clearCol)
+	void CameraComponent_SetClearColor(MonoEntityHandle* pEntityHandle, uint64_t componentID, glm::vec4* clearCol)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		cameraComp.m_ClearColor = *clearCol;
 	}
 
-	uint64_t CameraComponent_GetCameraID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t CameraComponent_GetCameraID(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		return cameraComp.m_Camera.GetUUID();
 	}
 	
-	void CameraComponent_PrepareNextPick(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec2* position)
+	void CameraComponent_PrepareNextPick(MonoEntityHandle* pEntityHandle, uint64_t componentID, glm::vec2* position)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
@@ -464,7 +441,7 @@ namespace Glory
 		Vec3Wrapper Normal;
 	};
 	
-	PickResultWrapper CameraComponent_GetPickResult(MonoEntityHandle* pEntityHandle, UUID componentID)
+	PickResultWrapper CameraComponent_GetPickResult(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
@@ -486,7 +463,7 @@ namespace Glory
 			ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
 	}
 	
-	Vec2Wrapper CameraComponent_GetResolution(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec2Wrapper CameraComponent_GetResolution(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
 		const glm::uvec2& resolution = cameraComp.m_Camera.GetResolution();
@@ -497,13 +474,13 @@ namespace Glory
 
 #pragma region Layer Component
 
-	LayerWrapper LayerComponent_GetLayer(MonoEntityHandle* pEntityHandle, UUID componentID)
+	LayerWrapper LayerComponent_GetLayer(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
 		return LayerWrapper(layerComp.m_Layer.Layer(&Entity_EngineInstance->GetLayerManager()));
 	}
 
-	void LayerComponent_SetLayer(MonoEntityHandle* pEntityHandle, UUID componentID, LayerWrapper* layer)
+	void LayerComponent_SetLayer(MonoEntityHandle* pEntityHandle, uint64_t componentID, LayerWrapper* layer)
 	{
 		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
 		const Layer* pLayer = Entity_EngineInstance->GetLayerManager().GetLayerByName(mono_string_to_utf8(layer->Name));
@@ -514,37 +491,37 @@ namespace Glory
 
 #pragma region Light Component
 
-	glm::vec4 LightComponent_GetColor(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec4 LightComponent_GetColor(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		return lightComp.m_Color;
 	}
 
-	void LightComponent_SetColor(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec4* color)
+	void LightComponent_SetColor(MonoEntityHandle* pEntityHandle, uint64_t componentID, glm::vec4* color)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		lightComp.m_Color = *color;
 	}
 
-	float LightComponent_GetIntensity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float LightComponent_GetIntensity(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		return lightComp.m_Intensity;
 	}
 
-	void LightComponent_SetIntensity(MonoEntityHandle* pEntityHandle, UUID componentID, float intensity)
+	void LightComponent_SetIntensity(MonoEntityHandle* pEntityHandle, uint64_t componentID, float intensity)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		lightComp.m_Intensity = intensity;
 	}
 
-	float LightComponent_GetRange(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float LightComponent_GetRange(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		return lightComp.m_Range;
 	}
 
-	void LightComponent_SetRange(MonoEntityHandle* pEntityHandle, UUID componentID, float range)
+	void LightComponent_SetRange(MonoEntityHandle* pEntityHandle, uint64_t componentID, float range)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
 		lightComp.m_Range = range;
@@ -554,14 +531,13 @@ namespace Glory
 
 #pragma region MonoScriptComponent
 
-	MonoObject* MonoScriptComponent_GetScript(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t MonoScriptComponent_GetScript(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
-		const UUID uuid = scriptComp.m_Script.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MonoScript>(Entity_EngineInstance, uuid);
+		return scriptComp.m_Script.AssetUUID();
 	}
 
-	void MonoScriptComponent_SetScript(MonoEntityHandle* pEntityHandle, UUID componentID, UUID scriptID)
+	void MonoScriptComponent_SetScript(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t scriptID)
 	{
 		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
 		if (scriptComp.m_Script.AssetUUID() != 0)
@@ -569,10 +545,10 @@ namespace Glory
 			Entity_EngineInstance->GetDebug().LogError("You are trying to set the script on a MonoScriptComponent that already has a script, this is not allowed.");
 			return;
 		}
-		scriptComp.m_Script = scriptID;
+		scriptComp.m_Script = UUID(scriptID);
 	}
 
-	MonoObject* MonoScriptComponent_GetBehaviour(MonoEntityHandle* pEntityHandle, UUID componentID)
+	MonoObject* MonoScriptComponent_GetBehaviour(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
 		MonoScriptObjectManager* pScriptObjectManager = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
@@ -584,68 +560,67 @@ namespace Glory
 
 #pragma region AudioSource
 
-	MonoObject* AudioSource_GetAudio(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t AudioSource_GetAudio(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
-		const UUID uuid = source.m_Audio.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<AudioData>(Entity_EngineInstance, uuid);
+		return source.m_Audio.AssetUUID();
 	}
 
-	void AudioSource_SetAudio(MonoEntityHandle* pEntityHandle, UUID componentID, UUID audioID)
+	void AudioSource_SetAudio(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t audioID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
-		source.m_Audio = audioID;
+		source.m_Audio = UUID(audioID);
 	}
 
-	bool AudioSource_GetAsMusic(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetAsMusic(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return source.m_AsMusic;
 	}
 
-	void AudioSource_SetAsMusic(MonoEntityHandle* pEntityHandle, UUID componentID, bool asMusic)
+	void AudioSource_SetAsMusic(MonoEntityHandle* pEntityHandle, uint64_t componentID, bool asMusic)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		source.m_AsMusic = asMusic;
 	}
 
-	uint32_t AudioSource_GetLoops(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint32_t AudioSource_GetLoops(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return source.m_Loops;
 	}
 
-	void AudioSource_SetLoops(MonoEntityHandle* pEntityHandle, UUID componentID, uint32_t loops)
+	void AudioSource_SetLoops(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint32_t loops)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		source.m_Loops = loops;
 	}
 
-	bool AudioSource_GetEnable3D(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetEnable3D(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return source.m_Enable3D;
 	}
 
-	void AudioSource_SetEnable3D(MonoEntityHandle* pEntityHandle, UUID componentID, bool allow)
+	void AudioSource_SetEnable3D(MonoEntityHandle* pEntityHandle, uint64_t componentID, bool allow)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		source.m_Enable3D = allow;
 	}
 
-	bool AudioSource_GetAutoPlay(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetAutoPlay(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return source.m_AutoPlay;
 	}
 
-	void AudioSource_SetAutoPlay(MonoEntityHandle* pEntityHandle, UUID componentID, bool autoPlay)
+	void AudioSource_SetAutoPlay(MonoEntityHandle* pEntityHandle, uint64_t componentID, bool autoPlay)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		source.m_AutoPlay = autoPlay;
 	}
 
-	bool AudioSource_GetPlaying(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetPlaying(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		if (source.m_CurrentChannel == -1) return false;
@@ -660,7 +635,7 @@ namespace Glory
 		return pAudioModule->IsPlaying(source.m_CurrentChannel);
 	}
 
-	bool AudioSource_GetPaused(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetPaused(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		if (source.m_CurrentChannel == -1) return false;
@@ -676,7 +651,7 @@ namespace Glory
 		return pAudioModule->IsPaused(source.m_CurrentChannel);
 	}
 
-	void AudioSource_SetPaused(MonoEntityHandle* pEntityHandle, UUID componentID, bool pause)
+	void AudioSource_SetPaused(MonoEntityHandle* pEntityHandle, uint64_t componentID, bool pause)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		if (source.m_CurrentChannel == -1) return;
@@ -694,13 +669,13 @@ namespace Glory
 			AudioSourceSystem::Resume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
-	float AudioSource_GetVolume(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float AudioSource_GetVolume(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return source.m_Volume;
 	}
 
-	void AudioSource_SetVolume(MonoEntityHandle* pEntityHandle, UUID componentID, float volume)
+	void AudioSource_SetVolume(MonoEntityHandle* pEntityHandle, uint64_t componentID, float volume)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		source.m_Volume = volume;
@@ -715,7 +690,7 @@ namespace Glory
 		AudioSourceSystem::UpdateVolume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
-	void AudioSource_Play(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Play(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
@@ -728,7 +703,7 @@ namespace Glory
 		AudioSourceSystem::Play(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
-	void AudioSource_Stop(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Stop(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
@@ -741,7 +716,7 @@ namespace Glory
 		AudioSourceSystem::Stop(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
-	void AudioSource_Pause(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Pause(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
@@ -754,7 +729,7 @@ namespace Glory
 		AudioSourceSystem::Stop(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
-	void AudioSource_Resume(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Resume(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
@@ -767,13 +742,13 @@ namespace Glory
 		AudioSourceSystem::Resume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
 	}
 
-	SpatializationSettings* AudioSource_GetSpatializationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	SpatializationSettings* AudioSource_GetSpatializationSettings(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return &source.m_Spatialization;
 	}
 
-	AudioSourceSimulationSettings* AudioSource_GetSimulationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	AudioSourceSimulationSettings* AudioSource_GetSimulationSettings(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
 		return &source.m_Simulation;
@@ -783,26 +758,25 @@ namespace Glory
 
 #pragma region Audio listener
 
-	bool AudioListener_GetEnabled(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioListener_GetEnabled(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
 		return listener.m_Enable;
 	}
 
-	void AudioListener_SetEnabled(MonoEntityHandle* pEntityHandle, UUID componentID, bool value)
+	void AudioListener_SetEnabled(MonoEntityHandle* pEntityHandle, uint64_t componentID, bool value)
 	{
 		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
 		listener.m_Enable = value;
 	}
 
-	AudioSimulationSettings* AudioListener_GetSimulationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	AudioSimulationSettings* AudioListener_GetSimulationSettings(MonoEntityHandle* pEntityHandle, uint64_t componentID)
 	{
 		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
 		return &listener.m_Simulation;
 	}
 
 #pragma endregion
-
 
 #pragma region SceneObject
 
@@ -896,10 +870,6 @@ namespace Glory
 
 		BIND("GloryEngine.Entities.LightComponent::LightComponent_GetRange", LightComponent_GetRange);
 		BIND("GloryEngine.Entities.LightComponent::LightComponent_SetRange", LightComponent_SetRange);
-
-		/* MeshFilter */
-		BIND("GloryEngine.Entities.MeshFilter::MeshFilter_GetMesh", MeshFilter_GetMesh);
-		BIND("GloryEngine.Entities.MeshFilter::MeshFilter_SetMesh", MeshFilter_SetMesh);
 
 		/* MeshRenderer */
 		BIND("GloryEngine.Entities.MeshRenderer::MeshRenderer_GetMaterial", MeshRenderer_GetMaterial);

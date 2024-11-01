@@ -1,6 +1,5 @@
 #include "Assembly.h"
 #include "AssemblyDomain.h"
-#include "MonoAssetManager.h"
 #include "IMonoLibManager.h"
 #include "MonoManager.h"
 #include "GloryMonoScipting.h"

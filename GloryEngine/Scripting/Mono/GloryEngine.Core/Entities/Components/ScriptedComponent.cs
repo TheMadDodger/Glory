@@ -16,7 +16,12 @@ namespace GloryEngine.Entities
         /// </summary>
         public Script Script
         {
-            get => ScriptedComponent_GetScript(ref _entity, _objectID);
+            get
+            {
+                UInt64 scriptID = ScriptedComponent_GetScript(ref _entity, _objectID);
+                if (scriptID == 0) return null;
+                return EntityComponentManager.Engine.AssetManager.Get<Script>(scriptID);
+            }
             set => ScriptedComponent_SetScript(ref _entity, _objectID, value != null ? value.ID : 0);
         }
 
@@ -44,7 +49,7 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Script ScriptedComponent_GetScript(ref Entity entity, UInt64 componentID);
+        private static extern UInt64 ScriptedComponent_GetScript(ref Entity entity, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void ScriptedComponent_SetScript(ref Entity entity, UInt64 componentID, UInt64 scriptID);
 

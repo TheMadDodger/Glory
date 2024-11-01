@@ -10,7 +10,7 @@ namespace GloryEngine
         #region Constructor
 
         public Model() : base() { }
-        public Model(UInt64 id) : base(id) { }
+        public Model(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
     }
