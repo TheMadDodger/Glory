@@ -76,7 +76,7 @@ namespace GloryEngine
 
         internal void Clear()
         {
-            _resources.Clear();
+            _resources = new Dictionary<ulong, Resource>();
             Debug.LogNotice("Asset cache cleared");
         }
 

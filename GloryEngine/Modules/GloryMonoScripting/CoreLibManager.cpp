@@ -2,7 +2,6 @@
 #include "MonoManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "Assembly.h"
-#include "MonoSceneManager.h"
 #include "MonoComponentObjectManager.h"
 
 #include <Engine.h>
@@ -12,7 +11,8 @@
 namespace Glory
 {
 	CoreLibManager::CoreLibManager(MonoManager* pMonoManager):
-		m_pMonoManager(pMonoManager), m_pAssembly(nullptr), m_pEngineObject(nullptr), m_pEngineReset(nullptr)
+		m_pMonoManager(pMonoManager), m_pAssembly(nullptr), m_pEngineObject(nullptr), m_pEngineReset(nullptr),
+		m_SceneClosingCallback(0), m_SceneObjectDestroyedCallback(0), m_EngineGCHandle(0)
 	{
 	}
 
@@ -32,15 +32,23 @@ namespace Glory
 		m_pAssembly->GetClass("GloryEngine", "Object");
 		m_pAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
 
-		MonoSceneManager::Initialize(pEngine, pAssembly);
+		m_SceneClosingCallback = pEngine->GetSceneManager()->AddSceneClosingCallback([this](UUID sceneID, UUID) {
+			OnSceneDestroy(sceneID);
+		});
+
+		m_SceneObjectDestroyedCallback = pEngine->GetSceneManager()->AddSceneObjectDestroyedCallback([this](UUID sceneID, UUID objectID) {
+			OnSceneObjectDestroy(objectID, sceneID);
+		});
+
 		MonoComponentObjectManager::Initialize(m_pAssembly->GetMonoImage());
 
 		Utils::ECS::ComponentTypes::SetInstance(pEngine->GetSceneManager()->ComponentTypesInstance());
 	}
 
-	void CoreLibManager::Cleanup()
+	void CoreLibManager::Cleanup(Engine* pEngine)
 	{
-		MonoSceneManager::Cleanup();
+		pEngine->GetSceneManager()->RemoveSceneClosingCallback(m_SceneClosingCallback);
+		pEngine->GetSceneManager()->RemoveSceneObjectDestroyedCallback(m_SceneObjectDestroyedCallback);
 		MonoComponentObjectManager::Cleanup();
 	}
 
@@ -52,8 +60,36 @@ namespace Glory
 		MonoString* pMonoString = mono_string_new(mono_domain_get(), type.data());
 		void* args[2] = { &uuid, (void*)pMonoString };
 		MonoObject* pExcept;
-		return mono_runtime_invoke(pCreate, m_pEngineObject, args, &pExcept);
-		/* TODO: Handle exception? */
+		MonoObject* pReturn = mono_runtime_invoke(pCreate, m_pEngineObject, args, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
+		return pReturn;
+	}
+
+	MonoObject* CoreLibManager::CreateSceneObject(UUID objectID, UUID sceneID)
+	{
+		if (!objectID || !sceneID) return nullptr;
+		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
+		MonoMethod* pCreate = pEngineClass->GetMethod(".::MakeSceneObject");
+		void* args[2] = { &objectID, &sceneID };
+		MonoObject* pExcept;
+		MonoObject* pReturn = mono_runtime_invoke(pCreate, m_pEngineObject, args, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
+		return pReturn;
+	}
+
+	void CoreLibManager::ResetEngine(Engine* pEngine)
+	{
+		if (m_EngineGCHandle)
+		{
+			mono_gchandle_free(m_EngineGCHandle);
+			m_pMonoManager->CollectGC();
+			m_pMonoManager->WaitForPendingFinalizers();
+			m_EngineGCHandle = 0;
+		}
+
+		CreateEngine(pEngine);
 	}
 
 	void CoreLibManager::CreateEngine(Engine* pEngine)
@@ -69,5 +105,30 @@ namespace Glory
 
 		mono_runtime_object_init(m_pEngineObject);
 		m_pEngineReset = pEngineClass->GetMethod(".::Reset");
+		m_EngineGCHandle = mono_gchandle_new(m_pEngineObject, false);
+	}
+
+	void CoreLibManager::OnSceneDestroy(UUID sceneID)
+	{
+		if (!sceneID) return;
+		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
+		MonoMethod* pCreate = pEngineClass->GetMethod(".::OnSceneDestroy");
+		void* args[1] = { &sceneID };
+		MonoObject* pExcept;
+		mono_runtime_invoke(pCreate, m_pEngineObject, args, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
+	}
+
+	void CoreLibManager::OnSceneObjectDestroy(UUID objectID, UUID sceneID)
+	{
+		if (!objectID || !sceneID) return;
+		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
+		MonoMethod* pCreate = pEngineClass->GetMethod(".::OnSceneObjectDestroy");
+		void* args[2] = { &objectID, &sceneID };
+		MonoObject* pExcept;
+		mono_runtime_invoke(pCreate, m_pEngineObject, args, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
 	}
 }

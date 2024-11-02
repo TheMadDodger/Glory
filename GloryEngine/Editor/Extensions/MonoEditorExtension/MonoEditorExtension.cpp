@@ -33,6 +33,7 @@
 #include <EntityEditor.h>
 #include <SystemTools.h>
 #include <SceneManager.h>
+#include <CoreLibManager.h>
 
 #include <fstream>
 #include <string>
@@ -61,6 +62,8 @@ namespace Glory::Editor
 		MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->DestroyAllObjects();
 		MonoManager::Instance()->CollectGC();
 		MonoManager::Instance()->WaitForPendingFinalizers();
+
+		MonoManager::Instance()->GetCoreLibManager()->ResetEngine(pModule->GetEngine());
 	}
 
 	void MonoEditorExtension::OnBeginPackage(const std::filesystem::path& path)

@@ -246,6 +246,54 @@ namespace Glory
 		m_pExternalScenes.erase(iter);
 	}
 
+	UUID SceneManager::AddSceneClosingCallback(std::function<void(UUID, UUID)> callback)
+	{
+		const UUID id = UUID();
+		m_SceneClosedCallbacks.push_back({ id, callback });
+		return id;
+	}
+
+	void SceneManager::RemoveSceneClosingCallback(UUID id)
+	{
+		auto iter = std::find_if(m_SceneClosedCallbacks.begin(), m_SceneClosedCallbacks.end(), [id](const SceneCallback& callback) {
+			return callback.m_CallbackID == id;
+		});
+		if (iter == m_SceneClosedCallbacks.end()) return;
+		m_SceneClosedCallbacks.erase(iter);
+	}
+
+	UUID SceneManager::AddSceneObjectDestroyedCallback(std::function<void(UUID, UUID)> callback)
+	{
+		const UUID id = UUID();
+		m_SceneObjectDestroyedCallbacks.push_back({ id, callback });
+		return id;
+	}
+
+	void SceneManager::RemoveSceneObjectDestroyedCallback(UUID id)
+	{
+		auto iter = std::find_if(m_SceneObjectDestroyedCallbacks.begin(), m_SceneObjectDestroyedCallbacks.end(), [id](const SceneCallback& callback) {
+			return callback.m_CallbackID == id;
+		});
+		if (iter == m_SceneObjectDestroyedCallbacks.end()) return;
+		m_SceneObjectDestroyedCallbacks.erase(iter);
+	}
+
+	void SceneManager::OnSceneObjectDestroyed(UUID objectID, UUID sceneID)
+	{
+		for (auto& callback : m_SceneObjectDestroyedCallbacks)
+		{
+			callback.m_Callback(sceneID, objectID);
+		}
+	}
+	
+	void SceneManager::OnSceneClosing(UUID sceneID)
+	{
+		for (auto& callback : m_SceneClosedCallbacks)
+		{
+			callback.m_Callback(sceneID, 0);
+		}
+	}
+
 	void SceneManager::CloseAllScenes()
 	{
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });

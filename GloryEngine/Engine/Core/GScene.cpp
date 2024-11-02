@@ -66,8 +66,9 @@ namespace Glory
 	{
 		const auto itor = m_UUIds.find(entity);
 		if (itor == m_UUIds.end()) return;
-		m_Registry.DestroyEntity(entity);
 		const UUID uuid = itor->second;
+		if (m_pManager) m_pManager->OnSceneObjectDestroyed(GetUUID(), uuid);
+		m_Registry.DestroyEntity(entity);
 		m_UUIds.erase(itor);
 		m_Ids.erase(uuid);
 	}

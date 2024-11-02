@@ -32,8 +32,11 @@ namespace GloryEngine.SceneManagement
         {
             get
             {
-                if (_scene == null)
-                    _scene = SceneManager.GetOpenScene(_sceneID);
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return null;
+                }
                 return _scene;
             }
             private set { }
@@ -45,14 +48,41 @@ namespace GloryEngine.SceneManagement
         /// </summary>
         public uint SiblingIndex
         {
-            get => SceneObject_GetSiblingIndex(_objectID, _sceneID);
-            set => SceneObject_SetSiblingIndex(_objectID, _sceneID, value);
+            get
+            {
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return 0;
+                }
+                return SceneObject_GetSiblingIndex(_objectID, _scene.ID);
+            }
+            set
+            {
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return;
+                }
+                SceneObject_SetSiblingIndex(_objectID, _scene.ID, value);
+            }
         }
 
         /// <summary>
         /// Number of children parented to this object in the hierarchy
         /// </summary>
-        public uint ChildCount => SceneObject_GetChildCount(_objectID, _sceneID);
+        public uint ChildCount
+        {
+            get
+            {
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return 0;
+                }
+                return SceneObject_GetChildCount(_objectID, _scene.ID);
+            }
+        }
 
         /// <summary>
         /// The object this object is parented to in the hierarchy
@@ -63,10 +93,23 @@ namespace GloryEngine.SceneManagement
         {
             get
             {
-                UInt64 objectID = SceneObject_GetParent(_objectID, _sceneID);
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return null;
+                }
+                UInt64 objectID = SceneObject_GetParent(_objectID, _scene.ID);
                 return objectID != 0 ? Scene.GetSceneObject(objectID) : null;
             }
-            set => SceneObject_SetParent(_objectID, _sceneID, value != null ? value.ID : 0);
+            set
+            {
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return;
+                }
+                SceneObject_SetParent(_objectID, _scene.ID, value != null ? value.ID : 0);
+            }
         }
 
         /// <summary>
@@ -74,8 +117,24 @@ namespace GloryEngine.SceneManagement
         /// </summary>
         public override string Name
         {
-            get => SceneObject_GetName(_objectID, _sceneID);
-            set => SceneObject_SetName(_objectID, _sceneID, value);
+            get
+            {
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return null;
+                }
+                return SceneObject_GetName(_objectID, _scene.ID);
+            }
+            set
+            {
+                if (_destroyed)
+                {
+                    Debug.LogError("This SceneObject has been marked for destruction.");
+                    return;
+                }
+                SceneObject_SetName(_objectID, _scene.ID, value);
+            }
         }
 
         #endregion
@@ -85,13 +144,24 @@ namespace GloryEngine.SceneManagement
         private Entity _entity;
         protected UInt64 _sceneID;
         protected Scene _scene;
+        internal bool _destroyed = false;
 
         #endregion
 
         #region Constructor
 
-        protected SceneObject() { }
-        protected SceneObject(UInt64 objectID, UInt64 sceneID) : base(objectID) { _sceneID = sceneID; }
+        internal SceneObject() { }
+        internal SceneObject(UInt64 objectID, Scene scene) : base(objectID) { _scene = scene; }
+
+        #endregion
+
+        #region Methods
+
+        internal void OnObjectDestroy()
+        {
+            _destroyed = true;
+            // @todo: Destroy all components
+        }
 
         #endregion
 

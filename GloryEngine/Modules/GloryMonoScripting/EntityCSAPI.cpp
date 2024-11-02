@@ -1,7 +1,5 @@
 #include "EntityCSAPI.h"
 #include "AssemblyDomain.h"
-#include "MonoSceneManager.h"
-#include "MonoSceneObjectManager.h"
 #include "MonoScriptObjectManager.h"
 #include "CoreCSAPI.h"
 #include "MathCSAPI.h"
@@ -55,15 +53,13 @@ namespace Glory
 		return pScene->GetEntityByEntityID(pMonoEntityHandle->m_EntityID).IsValid();
 	}
 
-	MonoObject* Entity_GetSceneObjectID(MonoEntityHandle* pMonoEntityHandle)
+	uint64_t Entity_GetSceneObjectID(MonoEntityHandle* pMonoEntityHandle)
 	{
 		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(UUID(pMonoEntityHandle->m_SceneID));
-		if (!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Entity_EngineInstance, pScene);
-		if (!pObjectManager) return nullptr;
+		if (!pScene) return 0;
 		Entity entity = pScene->GetEntityByEntityID(pMonoEntityHandle->m_EntityID);
-		if (!entity.IsValid()) return nullptr;
-		return pObjectManager->GetMonoSceneObject(pScene->GetEntityUUID(entity.GetEntityID()));
+		if (!entity.IsValid()) return 0;
+		return pScene->GetEntityUUID(entity.GetEntityID());
 	}
 
 	MonoEntityHandle GetEntityHandle(MonoObject* pObject)
@@ -436,7 +432,7 @@ namespace Glory
 	struct PickResultWrapper
 	{
 		uint64_t CameraID;
-		MonoObject* Object;
+		uint64_t ObjectID;
 		Vec3Wrapper Position;
 		Vec3Wrapper Normal;
 	};
@@ -447,19 +443,19 @@ namespace Glory
 		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
 		size_t resultIndex;
 		if (!pRenderer->PickResultIndex(cameraComp.m_Camera.GetUUID(), resultIndex))
-			return { 0, nullptr, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
+			return { 0, 0, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
 		const PickResult pickResult = pRenderer->GetPickResult(resultIndex);
 
-		MonoObject* pMonoObject = nullptr;
+		uint64_t objectID = 0;
 
 		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
 		if (pScene)
 		{
 			const Utils::ECS::EntityID entity = pScene->GetEntityByUUID(pickResult.m_Object.ObjectUUID()).GetEntityID();
 			MonoEntityHandle handle{ entity, pickResult.m_Object.SceneUUID() };
-			pMonoObject = Entity_GetSceneObjectID(&handle);
+			objectID = Entity_GetSceneObjectID(&handle);
 		}
-		return PickResultWrapper{ pickResult.m_CameraID, pMonoObject,
+		return PickResultWrapper{ pickResult.m_CameraID, objectID,
 			ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
 	}
 	

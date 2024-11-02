@@ -24,12 +24,20 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Object in the scene that owns this Entity
         /// </summary>
-        public SceneObject SceneObject => Entity_GetSceneObjectID(this);
+        public SceneObject SceneObject
+        {
+            get
+            {
+                UInt64 objectID = Entity_GetSceneObjectID(this);
+                if (objectID == 0) return null;
+                return Scene.GetSceneObject(objectID);
+            }
+        }
 
         /// <summary>
         /// The scene that owns this entity
         /// </summary>
-        public Scene Scene => SceneManager.GetOpenScene(_sceneID) as Scene;
+        public Scene Scene => EntityComponentManager.Engine.SceneManager.GetOpenScene(_sceneID) as Scene;
 
         #endregion
 
@@ -98,7 +106,7 @@ namespace GloryEngine.Entities
         private static extern bool Entity_IsValid(Entity entity);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern SceneObject Entity_GetSceneObjectID(Entity entity);
+        private static extern UInt64 Entity_GetSceneObjectID(Entity entity);
 
         #endregion
     }
