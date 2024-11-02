@@ -66,11 +66,20 @@ namespace Glory
 		void AddExternalScene(GScene* pScene);
 		void RemoveExternalScene(GScene* pScene);
 
+		UUID AddSceneClosingCallback(std::function<void(UUID, UUID)> callback);
+		void RemoveSceneClosingCallback(UUID id);
+
+		UUID AddSceneObjectDestroyedCallback(std::function<void(UUID, UUID)> callback);
+		void RemoveSceneObjectDestroyedCallback(UUID id);
+
+		void OnSceneObjectDestroyed(UUID objectID, UUID sceneID);
+
 	protected:
 		virtual void OnInitialize() = 0;
 		virtual void OnCleanup() = 0;
 		virtual void OnCloseAll() = 0;
 		virtual void OnSetActiveScene(GScene* pActiveScene) = 0;
+		void OnSceneClosing(UUID sceneID);
 
 	private:
 		friend class Engine;
@@ -91,5 +100,13 @@ namespace Glory
 		bool m_Started{false};
 
 		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;
+
+		struct SceneCallback
+		{
+			UUID m_CallbackID;
+			std::function<void(UUID, UUID)> m_Callback;
+		};
+		std::vector<SceneCallback> m_SceneClosedCallbacks;
+		std::vector<SceneCallback> m_SceneObjectDestroyedCallbacks;
 	};
 }

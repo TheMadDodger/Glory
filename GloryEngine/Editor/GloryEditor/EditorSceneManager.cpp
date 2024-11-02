@@ -124,6 +124,7 @@ namespace Glory::Editor
 		Selection::SetActiveObject(nullptr);
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		if (it == m_OpenedSceneIDs.end()) return;
+		OnSceneClosing(uuid);
 		const size_t index = it - m_OpenedSceneIDs.begin();
 		GScene* pScene = GetOpenScene(uuid);
 		pScene->Stop();

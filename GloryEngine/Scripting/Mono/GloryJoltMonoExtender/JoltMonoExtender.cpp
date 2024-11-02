@@ -51,7 +51,7 @@ namespace Glory
 		PhysicsSystem::Instance()->OnContactRemoved_Callback = MonoScriptedSystem::OnContactRemoved;
 	}
 
-	void JoltLibManager::Cleanup()
+	void JoltLibManager::Cleanup(Engine*)
 	{
 		PhysicsSystem::Instance()->OnBodyActivated_Callback = NULL;
 		PhysicsSystem::Instance()->OnBodyDeactivated_Callback = NULL;

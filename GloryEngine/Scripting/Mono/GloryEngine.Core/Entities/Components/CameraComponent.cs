@@ -4,10 +4,10 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
 {
-    /// <summary>
-    /// Handle for a CameraComponent component
-    /// </summary>
-    public class CameraComponent : EntityComponent
+	/// <summary>
+	/// Handle for a CameraComponent component
+	/// </summary>
+	public class CameraComponent : EntityComponent
 	{
 		#region Props
 
@@ -83,7 +83,19 @@ namespace GloryEngine.Entities
 		/// <summary>
 		/// Get the pick result of the last frame
 		/// </summary>
-		public PickResult PickResult => CameraComponent_GetPickResult(ref _entity, _objectID);
+		public PickResult PickResult
+		{
+			get
+			{
+                PickResultInternal resultInternal = CameraComponent_GetPickResult(ref _entity, _objectID);
+				PickResult result = new PickResult();
+                result.Position = resultInternal.Position;
+				result.Normal = resultInternal.Normal;
+				result.Object = Entity.Scene.GetSceneObject(resultInternal.ObjectID);
+				result.CameraID = resultInternal.CameraID;
+				return result;
+            }
+		}
 
 		/// <summary>
 		/// Get the rendering resolution for this camera
@@ -139,7 +151,7 @@ namespace GloryEngine.Entities
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static void CameraComponent_PrepareNextPick(ref Entity entity, UInt64 componentID, ref Vector2 screenPos);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static PickResult CameraComponent_GetPickResult(ref Entity entity, UInt64 componentID);
+        private extern static PickResultInternal CameraComponent_GetPickResult(ref Entity entity, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static Vector2 CameraComponent_GetResolution(ref Entity entity, UInt64 componentID);
 

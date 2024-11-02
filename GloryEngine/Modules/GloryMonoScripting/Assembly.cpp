@@ -333,7 +333,8 @@ namespace Glory
 		m_Reloadable = false;
 		m_State = AssemblyState::AS_NotLoaded;
 
-		if (m_pLibManager) m_pLibManager->Cleanup();
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		if (m_pLibManager) m_pLibManager->Cleanup(pEngine);
 		m_pLibManager = nullptr;
 		m_Namespaces.clear();
 
@@ -343,8 +344,6 @@ namespace Glory
 			m_DebugData = nullptr;
 			m_DebugDataSize = 0;
 		}
-
-		if (m_pLibManager) m_pLibManager->Cleanup();
     }
 
     MonoReflectionAssembly* Assembly::GetReflectionAssembly() const

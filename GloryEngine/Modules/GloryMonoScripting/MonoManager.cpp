@@ -1,5 +1,4 @@
 #include "MonoManager.h"
-#include "MonoSceneManager.h"
 #include "GloryMonoScipting.h"
 #include "MonoScriptObjectManager.h"
 #include "CoreLibManager.h"
@@ -184,7 +183,7 @@ namespace Glory
 	void MonoManager::Cleanup()
 	{
 		m_pMethodsHelper->Cleanup();
-		m_pCoreLibManager->Cleanup();
+		m_pCoreLibManager->Cleanup(Module()->GetEngine());
 
 		for (auto& itor : m_Domains)
 		{

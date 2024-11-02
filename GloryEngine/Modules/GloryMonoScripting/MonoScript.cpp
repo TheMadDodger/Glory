@@ -1,6 +1,5 @@
 #include "MonoScript.h"
 #include "MonoScriptObjectManager.h"
-#include "MonoSceneManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "MonoManager.h"
 #include "Assembly.h"
@@ -8,6 +7,7 @@
 #include "CoreLibManager.h"
 
 #include <Engine.h>
+#include <GScene.h>
 #include <Serializers.h>
 #include <SceneManager.h>
 #include <BinaryStream.h>
@@ -181,11 +181,9 @@ namespace Glory
 				const SceneObjectRef& objectRef = reinterpret_cast<const SceneObjectRef&>(data[prop.m_RelativeOffset]);
 				GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(objectRef.SceneUUID());
 				if (!pScene) continue;
-				MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(pEngine, pScene);
-				if (!pObjectManager) continue;
 				Entity entity = pScene->GetEntityByUUID(objectRef.ObjectUUID());
 				if (!entity.IsValid()) continue;
-				MonoObject* pMonoSceneObject = pObjectManager->GetMonoSceneObject(objectRef.ObjectUUID());
+				MonoObject* pMonoSceneObject = MonoManager::Instance()->GetCoreLibManager()->CreateSceneObject(objectRef.ObjectUUID(), objectRef.SceneUUID());
 				pField->SetValue(pMonoObject, pMonoSceneObject);
 				break;
 			}
