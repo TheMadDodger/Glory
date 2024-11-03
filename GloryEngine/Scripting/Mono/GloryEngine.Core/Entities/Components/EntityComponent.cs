@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GloryEngine.SceneManagement;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
@@ -9,11 +10,6 @@ namespace GloryEngine.Entities
     public class EntityComponent : Object
     {
         #region Props
-
-        /// <summary>
-        /// The Entity handle that owns this component
-        /// </summary>
-        public Entity Entity => _entity;
 
         /// <summary>
         /// Transform component linked to the entity that owns this component
@@ -34,32 +30,21 @@ namespace GloryEngine.Entities
         /// </summary>
         public bool Active
         {
-            get => EntityComponent_GetActive(ref _entity, _objectID);
-            set => EntityComponent_SetActive(ref _entity, _objectID, value);
+            get => EntityComponent_GetActive(_object.Scene.ID, _object.ID, _objectID);
+            set => EntityComponent_SetActive(_object.Scene.ID, _object.ID, _objectID, value);
         }
+
+        public SceneObject Object => _object;
+
+        internal bool IsNative => this is NativeComponent;
 
         #endregion
 
         #region Fields
 
-        /// <summary>
-        /// Entity that owns this component
-        /// </summary>
-        protected Entity _entity;
+        protected SceneObject _object;
         private Transform _transform = null;
-
-        #endregion
-
-        #region Constructor
-
-        /// <summary>
-        /// Construct an entity component
-        /// </summary>
-        protected EntityComponent()
-        {
-            _entity = new Entity(0, 0);
-            _objectID = 0;
-        }
+        internal bool _destroyed = false;
 
         #endregion
 
@@ -72,12 +57,17 @@ namespace GloryEngine.Entities
         /// <returns>The component that matches the type, null if the Entity does not have the component</returns>
         public T GetComponent<T>() where T : EntityComponent, new()
         {
-            return Entity.GetComponent<T>();
+            return Object.GetComponent<T>();
         }
 
-        internal void Initialize(Entity entity, UInt64 componentID)
+        internal void OnComponentDestroy()
         {
-            _entity = entity;
+            _destroyed = true;
+        }
+
+        internal void Initialize(SceneObject sceneObject, UInt64 componentID)
+        {
+            _object = sceneObject;
             _objectID = componentID;
         }
 
@@ -86,10 +76,10 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern bool EntityComponent_GetActive(ref Entity entity, UInt64 componentID);
+        private static extern bool EntityComponent_GetActive(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void EntityComponent_SetActive(ref Entity entity, UInt64 componentID, bool active);
+        private static extern void EntityComponent_SetActive(UInt64 sceneID, UInt64 objectID, UInt64 componentID, bool active);
 
         #endregion
     }

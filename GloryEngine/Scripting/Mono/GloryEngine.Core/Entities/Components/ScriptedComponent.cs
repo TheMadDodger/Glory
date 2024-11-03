@@ -6,7 +6,7 @@ namespace GloryEngine.Entities
     /// <summary>
     /// Handle for a script component
     /// </summary>
-    public class ScriptedComponent : EntityComponent
+    public class ScriptedComponent : NativeComponent
     {
         #region Properties
 
@@ -18,11 +18,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 scriptID = ScriptedComponent_GetScript(ref _entity, _objectID);
+                UInt64 scriptID = ScriptedComponent_GetScript(_object.Scene.ID, _object.ID, _objectID);
                 if (scriptID == 0) return null;
-                return EntityComponentManager.Engine.AssetManager.Get<Script>(scriptID);
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Script>(scriptID);
             }
-            set => ScriptedComponent_SetScript(ref _entity, _objectID, value != null ? value.ID : 0);
+            set => ScriptedComponent_SetScript(_object.Scene.ID, _object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         /// <summary>
@@ -49,12 +49,12 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern UInt64 ScriptedComponent_GetScript(ref Entity entity, UInt64 componentID);
+        private static extern UInt64 ScriptedComponent_GetScript(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void ScriptedComponent_SetScript(ref Entity entity, UInt64 componentID, UInt64 scriptID);
+        private static extern void ScriptedComponent_SetScript(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 scriptID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern EntityBehaviour ScriptedComponent_GetBehaviour(ref Entity entity, UInt64 componentID);
+        private static extern EntityBehaviour ScriptedComponent_GetBehaviour(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         #endregion
     }

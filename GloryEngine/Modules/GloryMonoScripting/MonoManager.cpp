@@ -4,7 +4,6 @@
 #include "CoreLibManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
-#include "MonoComponentObjectManager.h"
 
 #include <Debug.h>
 

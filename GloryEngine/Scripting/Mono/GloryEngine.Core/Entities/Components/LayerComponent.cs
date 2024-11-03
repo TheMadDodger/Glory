@@ -6,7 +6,7 @@ namespace GloryEngine.Entities
     /// <summary>
     /// Handle for a LayerComponent component
     /// </summary>
-    public class LayerComponent : EntityComponent
+    public class LayerComponent : NativeComponent
     {
         #region Props
 
@@ -15,8 +15,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Layer Layer
         {
-            get => LayerComponent_GetLayer(ref _entity, _objectID);
-            set => LayerComponent_SetLayer(ref _entity, _objectID, ref value);
+            get => LayerComponent_GetLayer(_object.Scene.ID, _object.ID, _objectID);
+            set => LayerComponent_SetLayer(_object.Scene.ID, _object.ID, _objectID, ref value);
         }
 
         #endregion
@@ -24,9 +24,9 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static Layer LayerComponent_GetLayer(ref Entity entity, UInt64 componentID);
+        private extern static Layer LayerComponent_GetLayer(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void LayerComponent_SetLayer(ref Entity entity, UInt64 componentID, ref Layer layer);
+        private extern static void LayerComponent_SetLayer(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Layer layer);
 
         #endregion
     }

@@ -8,7 +8,6 @@
 #include <Engine.h>
 #include <AssetDatabase.h>
 #include <MonoManager.h>
-#include <MonoScriptObjectManager.h>
 #include <AssemblyDomain.h>
 #include <MonoScript.h>
 #include <GloryMonoScipting.h>
@@ -59,7 +58,6 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::HandleStop(Module* pModule)
 	{
-		MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->DestroyAllObjects();
 		MonoManager::Instance()->CollectGC();
 		MonoManager::Instance()->WaitForPendingFinalizers();
 

@@ -2,7 +2,6 @@
 #include "MonoManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "Assembly.h"
-#include "MonoComponentObjectManager.h"
 
 #include <Engine.h>
 #include <Debug.h>
@@ -40,8 +39,6 @@ namespace Glory
 			OnSceneObjectDestroy(objectID, sceneID);
 		});
 
-		MonoComponentObjectManager::Initialize(m_pAssembly->GetMonoImage());
-
 		Utils::ECS::ComponentTypes::SetInstance(pEngine->GetSceneManager()->ComponentTypesInstance());
 	}
 
@@ -49,7 +46,6 @@ namespace Glory
 	{
 		pEngine->GetSceneManager()->RemoveSceneClosingCallback(m_SceneClosingCallback);
 		pEngine->GetSceneManager()->RemoveSceneObjectDestroyedCallback(m_SceneObjectDestroyedCallback);
-		MonoComponentObjectManager::Cleanup();
 	}
 
 	MonoObject* CoreLibManager::CreateAssetObject(UUID uuid, const std::string_view type)

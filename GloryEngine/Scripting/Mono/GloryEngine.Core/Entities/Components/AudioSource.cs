@@ -156,7 +156,7 @@ namespace GloryEngine.Entities
     /// <summary>
     /// Handle for an AudioSource component
     /// </summary>
-    public class AudioSource : EntityComponent
+    public class AudioSource : NativeComponent
     {
         #region Props
 
@@ -167,11 +167,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 audioID = AudioSource_GetAudio(ref _entity, _objectID);
+                UInt64 audioID = AudioSource_GetAudio(_object.Scene.ID, _object.ID, _objectID);
                 if (audioID == 0) return null;
-                return EntityComponentManager.Engine.AssetManager.Get<Audio>(audioID);
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Audio>(audioID);
             }
-            set => AudioSource_SetAudio(ref _entity, _objectID, value != null ? value.ID : 0);
+            set => AudioSource_SetAudio(_object.Scene.ID, _object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         /// <summary>
@@ -179,8 +179,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public bool AsMusic
         {
-            get => AudioSource_GetAsMusic(ref _entity, _objectID);
-            set => AudioSource_SetAsMusic(ref _entity, _objectID, value);
+            get => AudioSource_GetAsMusic(_object.Scene.ID, _object.ID, _objectID);
+            set => AudioSource_SetAsMusic(_object.Scene.ID, _object.ID, _objectID, value);
         }
 
         /// <summary>
@@ -188,8 +188,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public UInt32 Loops
         {
-            get => AudioSource_GetLoops(ref _entity, _objectID);
-            set => AudioSource_SetLoops(ref _entity, _objectID, value);
+            get => AudioSource_GetLoops(_object.Scene.ID, _object.ID, _objectID);
+            set => AudioSource_SetLoops(_object.Scene.ID, _object.ID, _objectID, value);
         }
 
         /// <summary>
@@ -197,8 +197,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public bool AllowEffects
         {
-            get => AudioSource_GetEnable3D(ref _entity, _objectID);
-            set => AudioSource_SetEnable3D(ref _entity, _objectID, value);
+            get => AudioSource_GetEnable3D(_object.Scene.ID, _object.ID, _objectID);
+            set => AudioSource_SetEnable3D(_object.Scene.ID, _object.ID, _objectID, value);
         }
 
         /// <summary>
@@ -206,8 +206,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public bool AutoPlay
         {
-            get => AudioSource_GetAutoPlay(ref _entity, _objectID);
-            set => AudioSource_SetAutoPlay(ref _entity, _objectID, value);
+            get => AudioSource_GetAutoPlay(_object.Scene.ID, _object.ID, _objectID);
+            set => AudioSource_SetAutoPlay(_object.Scene.ID, _object.ID, _objectID, value);
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace GloryEngine.Entities
         /// </summary>
         public bool Playing
         {
-            get => AudioSource_GetPlaying(ref _entity, _objectID);
+            get => AudioSource_GetPlaying(_object.Scene.ID, _object.ID, _objectID);
         }
 
         /// <summary>
@@ -223,8 +223,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public bool Paused
         {
-            get => AudioSource_GetPaused(ref _entity, _objectID);
-            set => AudioSource_SetPaused(ref _entity, _objectID, value);
+            get => AudioSource_GetPaused(_object.Scene.ID, _object.ID, _objectID);
+            set => AudioSource_SetPaused(_object.Scene.ID, _object.ID, _objectID, value);
         }
 
         /// <summary>
@@ -232,21 +232,21 @@ namespace GloryEngine.Entities
         /// </summary>
         public float Volume
         {
-            get => AudioSource_GetVolume(ref _entity, _objectID);
-            set => AudioSource_SetVolume(ref _entity, _objectID, value);
+            get => AudioSource_GetVolume(_object.Scene.ID, _object.ID, _objectID);
+            set => AudioSource_SetVolume(_object.Scene.ID, _object.ID, _objectID, value);
         }
 
         /// <summary>
         /// Spatialization settings
         /// </summary>
         public ref SpatializationSettings SpatializationSettings
-            => ref AudioSource_GetSpatializationSettings(ref _entity, _objectID);
+            => ref AudioSource_GetSpatializationSettings(_object.Scene.ID, _object.ID, _objectID);
 
         /// <summary>
         /// Simulation settings
         /// </summary>
         public ref AudioSourceSimulationSettings SimulationSettings
-            => ref AudioSource_GetSimulationSettings(ref _entity, _objectID);
+            => ref AudioSource_GetSimulationSettings(_object.Scene.ID, _object.ID, _objectID);
 
         #endregion
 
@@ -255,72 +255,72 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Play or resume the sound on the emitter
         /// </summary>
-        public void Play() => AudioSource_Play(ref _entity, _objectID);
+        public void Play() => AudioSource_Play(_object.Scene.ID, _object.ID, _objectID);
         /// <summary>
         /// Stop the sound on the emitter
         /// </summary>
-        public void Stop() => AudioSource_Stop(ref _entity, _objectID);
+        public void Stop() => AudioSource_Stop(_object.Scene.ID, _object.ID, _objectID);
         /// <summary>
         /// Pause the sound on the emitter
         /// </summary>
-        public void Pause() => AudioSource_Pause(ref _entity, _objectID);
+        public void Pause() => AudioSource_Pause(_object.Scene.ID, _object.ID, _objectID);
 
         #endregion
 
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt64 AudioSource_GetAudio(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 AudioSource_GetAudio(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetAudio(ref Entity entity, UInt64 componentID, UInt64 audioID);
+        private extern static void AudioSource_SetAudio(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 audioID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static bool AudioSource_GetAsMusic(ref Entity entity, UInt64 componentID);
+        private extern static bool AudioSource_GetAsMusic(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetAsMusic(ref Entity entity, UInt64 componentID, bool asMusic);
+        private extern static void AudioSource_SetAsMusic(UInt64 sceneID, UInt64 objectID, UInt64 componentID, bool asMusic);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt32 AudioSource_GetLoops(ref Entity entity, UInt64 componentID);
+        private extern static UInt32 AudioSource_GetLoops(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetLoops(ref Entity entity, UInt64 componentID, UInt32 loops);
+        private extern static void AudioSource_SetLoops(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt32 loops);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static bool AudioSource_GetEnable3D(ref Entity entity, UInt64 componentID);
+        private extern static bool AudioSource_GetEnable3D(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetEnable3D(ref Entity entity, UInt64 componentID, bool allow);
+        private extern static void AudioSource_SetEnable3D(UInt64 sceneID, UInt64 objectID, UInt64 componentID, bool allow);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static bool AudioSource_GetAutoPlay(ref Entity entity, UInt64 componentID);
+        private extern static bool AudioSource_GetAutoPlay(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetAutoPlay(ref Entity entity, UInt64 componentID, bool autoPlay);
+        private extern static void AudioSource_SetAutoPlay(UInt64 sceneID, UInt64 objectID, UInt64 componentID, bool autoPlay);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static bool AudioSource_GetPlaying(ref Entity entity, UInt64 componentID);
+        private extern static bool AudioSource_GetPlaying(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static bool AudioSource_GetPaused(ref Entity entity, UInt64 componentID);
+        private extern static bool AudioSource_GetPaused(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetPaused(ref Entity entity, UInt64 componentID, bool autoPlay);
+        private extern static void AudioSource_SetPaused(UInt64 sceneID, UInt64 objectID, UInt64 componentID, bool autoPlay);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static float AudioSource_GetVolume(ref Entity entity, UInt64 componentID);
+        private extern static float AudioSource_GetVolume(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_SetVolume(ref Entity entity, UInt64 componentID, float volume);
+        private extern static void AudioSource_SetVolume(UInt64 sceneID, UInt64 objectID, UInt64 componentID, float volume);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_Play(ref Entity entity, UInt64 componentID);
+        private extern static void AudioSource_Play(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_Stop(ref Entity entity, UInt64 componentID);
+        private extern static void AudioSource_Stop(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_Pause(ref Entity entity, UInt64 componentID);
+        private extern static void AudioSource_Pause(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void AudioSource_Resume(ref Entity entity, UInt64 componentID);
+        private extern static void AudioSource_Resume(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static ref SpatializationSettings AudioSource_GetSpatializationSettings(ref Entity entity, UInt64 componentID);
+        private extern static ref SpatializationSettings AudioSource_GetSpatializationSettings(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static ref AudioSourceSimulationSettings AudioSource_GetSimulationSettings(ref Entity entity, UInt64 componentID);
+        private extern static ref AudioSourceSimulationSettings AudioSource_GetSimulationSettings(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         #endregion
     }

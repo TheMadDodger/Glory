@@ -29,7 +29,6 @@ namespace GloryEngine
         {
             _assetManager = new AssetManager(this);
             _sceneManager = new SceneManager(this);
-            EntityComponentManager.Engine = this;
         }
 
         #endregion

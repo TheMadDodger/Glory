@@ -6,14 +6,14 @@ namespace GloryEngine.Entities
     /// <summary>
     /// Handle for a PhysicsBody component
     /// </summary>
-    public class PhysicsBody : EntityComponent
+    public class PhysicsBody : NativeComponent
     {
         #region Props
 
         /// <summary>
         /// Internal ID of the Physics managed by the PhysicsModule
         /// </summary>
-        public UInt32 BodyID => PhysicsBody_GetID(ref _entity, _objectID);
+        public UInt32 BodyID => PhysicsBody_GetID(_object.Scene.ID, _object.ID, _objectID);
 
         /// <summary>
         /// Whether the Physics is active and awake
@@ -24,18 +24,18 @@ namespace GloryEngine.Entities
             {
                 if(value)
                 {
-                    PhysicsBody_Activate(ref _entity, _objectID);
+                    PhysicsBody_Activate(_object.Scene.ID, _object.ID, _objectID);
                     return;
                 }
-                PhysicsBody_Deactivate(ref _entity, _objectID);
+                PhysicsBody_Deactivate(_object.Scene.ID, _object.ID, _objectID);
             }
-            get => PhysicsBody_IsActive(ref _entity, _objectID);
+            get => PhysicsBody_IsActive(_object.Scene.ID, _object.ID, _objectID);
         }
 
         /// <summary>
         /// Whether this component has a valid Physics
         /// </summary>
-        public bool Valid => PhysicsBody_IsValid(ref _entity, _objectID);
+        public bool Valid => PhysicsBody_IsValid(_object.Scene.ID, _object.ID, _objectID);
 
         /// <summary>
         /// Default activation type to pass to function calls
@@ -48,8 +48,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 Position
         {
-            get => PhysicsBody_GetPosition(ref _entity, _objectID);
-            set => PhysicsBody_SetPosition(ref _entity, _objectID, ref value, DefaultActivationType);
+            get => PhysicsBody_GetPosition(_object.Scene.ID, _object.ID, _objectID);
+            set => PhysicsBody_SetPosition(_object.Scene.ID, _object.ID, _objectID, ref value, DefaultActivationType);
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Quaternion Rotation
         {
-            get => PhysicsBody_GetRotation(ref _entity, _objectID);
-            set => PhysicsBody_SetRotation(ref _entity, _objectID, ref value, DefaultActivationType);
+            get => PhysicsBody_GetRotation(_object.Scene.ID, _object.ID, _objectID);
+            set => PhysicsBody_SetRotation(_object.Scene.ID, _object.ID, _objectID, ref value, DefaultActivationType);
         }
 
         /// <summary>
@@ -68,21 +68,21 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 Scale
         {
-            set => PhysicsBody_SetScale(ref _entity, _objectID, ref value, DefaultActivationType);
+            set => PhysicsBody_SetScale(_object.Scene.ID, _object.ID, _objectID, ref value, DefaultActivationType);
         }
 
         /// <summary>
         /// Position of the center of mass of the Physics
         /// </summary>
-        public Vector3 CenterOfMassPosition => PhysicsBody_GetCenterOfMassPosition(ref _entity, _objectID);
+        public Vector3 CenterOfMassPosition => PhysicsBody_GetCenterOfMassPosition(_object.Scene.ID, _object.ID, _objectID);
 
         /// <summary>
         /// The current linear velocity of the Physics
         /// </summary>
         public Vector3 LinearVelocity
         {
-            get => PhysicsBody_GetLinearVelocity(ref _entity, _objectID);
-            set => PhysicsBody_SetLinearVelocity(ref _entity, _objectID, ref value);
+            get => PhysicsBody_GetLinearVelocity(_object.Scene.ID, _object.ID, _objectID);
+            set => PhysicsBody_SetLinearVelocity(_object.Scene.ID, _object.ID, _objectID, ref value);
         }
 
         /// <summary>
@@ -90,8 +90,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 AngularVelocity
         {
-            get => PhysicsBody_GetAngularVelocity(ref _entity, _objectID);
-            set => PhysicsBody_SetAngularVelocity(ref _entity, _objectID, ref value);
+            get => PhysicsBody_GetAngularVelocity(_object.Scene.ID, _object.ID, _objectID);
+            set => PhysicsBody_SetAngularVelocity(_object.Scene.ID, _object.ID, _objectID, ref value);
         }
 
         #endregion
@@ -104,122 +104,122 @@ namespace GloryEngine.Entities
         /// <param name="targetPosition">Position to reach</param>
         /// <param name="targetRotation">Desired rotation</param>
         /// <param name="deltaTime">Time to get to the desired state</param>
-        public void MoveKinematic(ref Vector3 targetPosition, ref Quaternion targetRotation, float deltaTime) => PhysicsBody_MoveKinematic(ref _entity, _objectID, ref targetPosition, ref targetRotation, deltaTime);
+        public void MoveKinematic(ref Vector3 targetPosition, ref Quaternion targetRotation, float deltaTime) => PhysicsBody_MoveKinematic(_object.Scene.ID, _object.ID, _objectID, ref targetPosition, ref targetRotation, deltaTime);
 
         /// <summary>
         /// Add a force to the Physics
         /// </summary>
         /// <param name="force">Direction and amplitude of the force</param>
-        public void AddForce(ref Vector3 force) => PhysicsBody_AddForce(ref _entity, _objectID, ref force);
+        public void AddForce(ref Vector3 force) => PhysicsBody_AddForce(_object.Scene.ID, _object.ID, _objectID, ref force);
         /// <summary>
         /// Add a force to the Physics from a point
         /// </summary>
         /// <param name="force">Direction and amplitude of the force</param>
         /// <param name="point">Origin of the applied force</param>
-        public void AddForce(ref Vector3 force, ref Vector3 point) => PhysicsBody_AddForce_Point(ref _entity, _objectID, ref force, ref point);
+        public void AddForce(ref Vector3 force, ref Vector3 point) => PhysicsBody_AddForce_Point(_object.Scene.ID, _object.ID, _objectID, ref force, ref point);
         /// <summary>
         /// Add a torque to the Physics
         /// </summary>
         /// <param name="torque">Direction and amplitude of the torque to add</param>
-        public void AddTorque(ref Vector3 torque) => PhysicsBody_AddTorque(ref _entity, _objectID, ref torque);
+        public void AddTorque(ref Vector3 torque) => PhysicsBody_AddTorque(_object.Scene.ID, _object.ID, _objectID, ref torque);
         /// <summary>
         /// Add both force and torque to the Physics
         /// </summary>
         /// <param name="force">Direction and amplitude of the force</param>
         /// <param name="torque">Direction and amplitude of the torque</param>
-        public void AddForceAndTorque(ref Vector3 force, ref Vector3 torque) => PhysicsBody_AddForceAndTorque(ref _entity, _objectID, ref force, ref torque);
+        public void AddForceAndTorque(ref Vector3 force, ref Vector3 torque) => PhysicsBody_AddForceAndTorque(_object.Scene.ID, _object.ID, _objectID, ref force, ref torque);
 
         /// <summary>
         /// Add an impulse to the Physics
         /// </summary>
         /// <param name="impulse">Direction and amplitude of the impulse</param>
-        public void AddImpulse(ref Vector3 impulse) => PhysicsBody_AddImpulse(ref _entity, _objectID, ref impulse);
+        public void AddImpulse(ref Vector3 impulse) => PhysicsBody_AddImpulse(_object.Scene.ID, _object.ID, _objectID, ref impulse);
         /// <summary>
         /// Add a force to the Physics from a point
         /// </summary>
         /// <param name="impulse">Direction and amplitude of the impulse</param>
         /// <param name="point">Origin of the applied impulse</param>
-        public void AddImpulse(ref Vector3 impulse, ref Vector3 point) => PhysicsBody_AddImpulse_Point(ref _entity, _objectID, ref impulse, ref point);
+        public void AddImpulse(ref Vector3 impulse, ref Vector3 point) => PhysicsBody_AddImpulse_Point(_object.Scene.ID, _object.ID, _objectID, ref impulse, ref point);
         /// <summary>
         /// Add an angular impulse to the Physics
         /// </summary>
         /// <param name="angularImpulse">Direction and amplitude of the impulse</param>
-        public void AddAngularImpulse(ref Vector3 angularImpulse) => PhysicsBody_AddAngularImpulse(ref _entity, _objectID, ref angularImpulse);
+        public void AddAngularImpulse(ref Vector3 angularImpulse) => PhysicsBody_AddAngularImpulse(_object.Scene.ID, _object.ID, _objectID, ref angularImpulse);
         /// <summary>
         /// Add a vector to the linear velocity of the Physics
         /// </summary>
         /// <param name="linearVelocity">Direction and amplitude of the velocity to add</param>
-        public void AddLinearVelocity(ref Vector3 linearVelocity) => PhysicsBody_AddLinearVelocity(ref _entity, _objectID, ref linearVelocity);
+        public void AddLinearVelocity(ref Vector3 linearVelocity) => PhysicsBody_AddLinearVelocity(_object.Scene.ID, _object.ID, _objectID, ref linearVelocity);
         /// <summary>
         /// Get the velocity of the Physics from a point
         /// </summary>
         /// <param name="point">Origin of the velocity</param>
-        public Vector3 GetPointVelocity(ref Vector3 point) => PhysicsBody_GetPointVelocity(ref _entity, _objectID, ref point);
+        public Vector3 GetPointVelocity(ref Vector3 point) => PhysicsBody_GetPointVelocity(_object.Scene.ID, _object.ID, _objectID, ref point);
 
         #endregion
 
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern UInt32 PhysicsBody_GetID(ref Entity entity, UInt64 componentID);
+        private static extern UInt32 PhysicsBody_GetID(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         /* States */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_Activate(ref Entity entity, UInt64 componentID);
+        private static extern void PhysicsBody_Activate(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_Deactivate(ref Entity entity, UInt64 componentID);
+        private static extern void PhysicsBody_Deactivate(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern bool PhysicsBody_IsActive(ref Entity entity, UInt64 componentID);
+        private static extern bool PhysicsBody_IsActive(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern bool PhysicsBody_IsValid(ref Entity entity, UInt64 componentID);
+        private static extern bool PhysicsBody_IsValid(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         /* Position and rotation */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Vector3 PhysicsBody_GetPosition(ref Entity entity, UInt64 componentID);
+        private static extern Vector3 PhysicsBody_GetPosition(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_SetPosition(ref Entity entity, UInt64 componentID, ref Vector3 position, ActivationType activationType);
+        private static extern void PhysicsBody_SetPosition(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 position, ActivationType activationType);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Quaternion PhysicsBody_GetRotation(ref Entity entity, UInt64 componentID);
+        private static extern Quaternion PhysicsBody_GetRotation(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_SetRotation(ref Entity entity, UInt64 componentID, ref Quaternion rotation, ActivationType activationType);
+        private static extern void PhysicsBody_SetRotation(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Quaternion rotation, ActivationType activationType);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_SetScale(ref Entity entity, UInt64 componentID, ref Vector3 scale, ActivationType activationType);
+        private static extern void PhysicsBody_SetScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 scale, ActivationType activationType);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Vector3 PhysicsBody_GetCenterOfMassPosition(ref Entity entity, UInt64 componentID);
+        private static extern Vector3 PhysicsBody_GetCenterOfMassPosition(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         /* Velocities */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_MoveKinematic(ref Entity entity, UInt64 componentID, ref Vector3 targetPosition, ref Quaternion targetRotation, float deltaTime);
+        private static extern void PhysicsBody_MoveKinematic(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 targetPosition, ref Quaternion targetRotation, float deltaTime);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Vector3 PhysicsBody_GetLinearVelocity(ref Entity entity, UInt64 componentID);
+        private static extern Vector3 PhysicsBody_GetLinearVelocity(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_SetLinearVelocity(ref Entity entity, UInt64 componentID, ref Vector3 linearVelocity);
+        private static extern void PhysicsBody_SetLinearVelocity(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 linearVelocity);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddLinearVelocity(ref Entity entity, UInt64 componentID, ref Vector3 linearVelocity);
+        private static extern void PhysicsBody_AddLinearVelocity(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 linearVelocity);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Vector3 PhysicsBody_GetAngularVelocity(ref Entity entity, UInt64 componentID);
+        private static extern Vector3 PhysicsBody_GetAngularVelocity(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_SetAngularVelocity(ref Entity entity, UInt64 componentID, ref Vector3 angularVelocity);
+        private static extern void PhysicsBody_SetAngularVelocity(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 angularVelocity);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Vector3 PhysicsBody_GetPointVelocity(ref Entity entity, UInt64 componentID, ref Vector3 point);
+        private static extern Vector3 PhysicsBody_GetPointVelocity(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 point);
 
         /* Forces */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddForce(ref Entity entity, UInt64 componentID, ref Vector3 force);
+        private static extern void PhysicsBody_AddForce(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 force);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddForce_Point(ref Entity entity, UInt64 componentID, ref Vector3 force, ref Vector3 point);
+        private static extern void PhysicsBody_AddForce_Point(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 force, ref Vector3 point);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddTorque(ref Entity entity, UInt64 componentID, ref Vector3 torque);
+        private static extern void PhysicsBody_AddTorque(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 torque);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddForceAndTorque(ref Entity entity, UInt64 componentID, ref Vector3 force, ref Vector3 torque);
+        private static extern void PhysicsBody_AddForceAndTorque(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 force, ref Vector3 torque);
 
         /* Impulses */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddImpulse(ref Entity entity, UInt64 componentID, ref Vector3 impulse);
+        private static extern void PhysicsBody_AddImpulse(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 impulse);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddImpulse_Point(ref Entity entity, UInt64 componentID, ref Vector3 impulse, ref Vector3 point);
+        private static extern void PhysicsBody_AddImpulse_Point(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 impulse, ref Vector3 point);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void PhysicsBody_AddAngularImpulse(ref Entity entity, UInt64 componentID, ref Vector3 angularImpulse);
+        private static extern void PhysicsBody_AddAngularImpulse(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 angularImpulse);
 
         #endregion
     }
