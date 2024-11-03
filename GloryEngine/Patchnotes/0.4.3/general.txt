@@ -1,0 +1,8 @@
+Runtime:
+- Upped the runtime version to 0.4.3
+
+Scripting
+- Rewrote csharp scripting libraries
+- Moved all object management to csharp
+- EntityBehaviour now inherits EntityComponent, allowing GetComponent<T>() to retrieve behaviours
+- GetComponent<T>() can now retrieve components by interface
