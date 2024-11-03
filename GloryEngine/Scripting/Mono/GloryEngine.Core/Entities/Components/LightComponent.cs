@@ -15,8 +15,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public Vector4 Color
         {
-			get => LightComponent_GetColor(_object.Scene.ID, _object.ID, _objectID);
-			set => LightComponent_SetColor(_object.Scene.ID, _object.ID, _objectID, ref value);
+			get => LightComponent_GetColor(Object.Scene.ID, Object.ID, _objectID);
+			set => LightComponent_SetColor(Object.Scene.ID, Object.ID, _objectID, ref value);
 
 		}
 
@@ -25,8 +25,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public float Intensity
         {
-			get => LightComponent_GetIntensity(_object.Scene.ID, _object.ID, _objectID);
-			set => LightComponent_SetIntensity(_object.Scene.ID, _object.ID, _objectID, value);
+			get => LightComponent_GetIntensity(Object.Scene.ID, Object.ID, _objectID);
+			set => LightComponent_SetIntensity(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		/// <summary>
@@ -34,8 +34,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public float Range
         {
-			get => LightComponent_GetRange(_object.Scene.ID, _object.ID, _objectID);
-			set => LightComponent_SetRange(_object.Scene.ID, _object.ID, _objectID, value);
+			get => LightComponent_GetRange(Object.Scene.ID, Object.ID, _objectID);
+			set => LightComponent_SetRange(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		#endregion

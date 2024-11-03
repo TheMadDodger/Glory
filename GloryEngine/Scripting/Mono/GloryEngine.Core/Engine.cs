@@ -12,7 +12,13 @@ namespace GloryEngine
     {
         #region Props
 
+        /// <summary>
+        /// Resource manager
+        /// </summary>
         public AssetManager AssetManager => _assetManager;
+        /// <summary>
+        /// Scene manager
+        /// </summary>
         public SceneManager SceneManager => _sceneManager;
 
         #endregion
@@ -28,7 +34,7 @@ namespace GloryEngine
 
         #region Constructor
 
-        public Engine()
+        internal Engine()
         {
             _assetManager = new AssetManager(this);
             _sceneManager = new SceneManager(this);

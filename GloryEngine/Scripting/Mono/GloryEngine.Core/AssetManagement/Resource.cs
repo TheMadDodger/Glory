@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine
 {
+    /// <summary>
+    /// Base class for all resources
+    /// </summary>
     public class Resource : Object
     {
         #region Props
@@ -18,6 +21,9 @@ namespace GloryEngine
             set => Resource_SetName(_objectID, value);
         }
 
+        /// <summary>
+        /// Resource manager
+        /// </summary>
         public AssetManager Manager => _assetManager;
 
         #endregion

@@ -13,12 +13,12 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Internal ID of the character
         /// </summary>
-        public UInt32 CharacterID => CharacterController_GetCharacterID(_object.Scene.ID, _object.ID, _objectID);
+        public UInt32 CharacterID => CharacterController_GetCharacterID(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
         /// Internal ID of the Physics body of the character managed by the PhysicsModule
         /// </summary>
-        public UInt32 BodyID => CharacterController_GetBodyID(_object.Scene.ID, _object.ID, _objectID);
+        public UInt32 BodyID => CharacterController_GetBodyID(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
         /// Whether the character is active and awake
@@ -29,12 +29,12 @@ namespace GloryEngine.Entities
             {
                 if (value)
                 {
-                    CharacterController_Activate(_object.Scene.ID, _object.ID, _objectID);
+                    CharacterController_Activate(Object.Scene.ID, Object.ID, _objectID);
                     return;
                 }
-                CharacterController_Deactivate(_object.Scene.ID, _object.ID, _objectID);
+                CharacterController_Deactivate(Object.Scene.ID, Object.ID, _objectID);
             }
-            get => CharacterController_IsActive(_object.Scene.ID, _object.ID, _objectID);
+            get => CharacterController_IsActive(Object.Scene.ID, Object.ID, _objectID);
         }
 
         /// <summary>
@@ -48,8 +48,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 Position
         {
-            get => CharacterController_GetPosition(_object.Scene.ID, _object.ID, _objectID);
-            set => CharacterController_SetPosition(_object.Scene.ID, _object.ID, _objectID, ref value, DefaultActivationType);
+            get => CharacterController_GetPosition(Object.Scene.ID, Object.ID, _objectID);
+            set => CharacterController_SetPosition(Object.Scene.ID, Object.ID, _objectID, ref value, DefaultActivationType);
         }
 
         /// <summary>
@@ -58,22 +58,22 @@ namespace GloryEngine.Entities
         /// </summary>
         public Quaternion Rotation
         {
-            get => CharacterController_GetRotation(_object.Scene.ID, _object.ID, _objectID);
-            set => CharacterController_SetRotation(_object.Scene.ID, _object.ID, _objectID, ref value, DefaultActivationType);
+            get => CharacterController_GetRotation(Object.Scene.ID, Object.ID, _objectID);
+            set => CharacterController_SetRotation(Object.Scene.ID, Object.ID, _objectID, ref value, DefaultActivationType);
         }
 
         /// <summary>
         /// Position of the center of mass of the character
         /// </summary>
-        public Vector3 CenterOfMassPosition => CharacterController_GetCenterOfMassPosition(_object.Scene.ID, _object.ID, _objectID);
+        public Vector3 CenterOfMassPosition => CharacterController_GetCenterOfMassPosition(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
         /// The current linear velocity of the character
         /// </summary>
         public Vector3 LinearVelocity
         {
-            get => CharacterController_GetLinearVelocity(_object.Scene.ID, _object.ID, _objectID);
-            set => CharacterController_SetLinearVelocity(_object.Scene.ID, _object.ID, _objectID, ref value);
+            get => CharacterController_GetLinearVelocity(Object.Scene.ID, Object.ID, _objectID);
+            set => CharacterController_SetLinearVelocity(Object.Scene.ID, Object.ID, _objectID, ref value);
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 AngularVelocity
         {
-            get => CharacterController_GetAngularVelocity(_object.Scene.ID, _object.ID, _objectID);
-            set => CharacterController_SetAngularVelocity(_object.Scene.ID, _object.ID, _objectID, ref value);
+            get => CharacterController_GetAngularVelocity(Object.Scene.ID, Object.ID, _objectID);
+            set => CharacterController_SetAngularVelocity(Object.Scene.ID, Object.ID, _objectID, ref value);
         }
 
         /// <summary>
@@ -90,8 +90,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Shape Shape
         {
-            get => new Shape(CharacterController_GetShapeID(_object.Scene.ID, _object.ID, _objectID));
-            set => CharacterController_SetShape(_object.Scene.ID, _object.ID, _objectID, value.ShapeID);
+            get => new Shape(CharacterController_GetShapeID(Object.Scene.ID, Object.ID, _objectID));
+            set => CharacterController_SetShape(Object.Scene.ID, Object.ID, _objectID, value.ShapeID);
         }
 
         #endregion
@@ -102,12 +102,12 @@ namespace GloryEngine.Entities
         /// Add an impulse to the character
         /// </summary>
         /// <param name="impulse">Direction and amplitude of the impulse</param>
-        public void AddImpulse(ref Vector3 impulse) => CharacterController_AddImpulse(_object.Scene.ID, _object.ID, _objectID, ref impulse);
+        public void AddImpulse(ref Vector3 impulse) => CharacterController_AddImpulse(Object.Scene.ID, Object.ID, _objectID, ref impulse);
         /// <summary>
         /// Add a vector to the linear velocity of the character
         /// </summary>
         /// <param name="linearVelocity">Direction and amplitude of the velocity to add</param>
-        public void AddLinearVelocity(ref Vector3 linearVelocity) => CharacterController_AddLinearVelocity(_object.Scene.ID, _object.ID, _objectID, ref linearVelocity);
+        public void AddLinearVelocity(ref Vector3 linearVelocity) => CharacterController_AddLinearVelocity(Object.Scene.ID, Object.ID, _objectID, ref linearVelocity);
 
         /// <summary>
         /// Set the shape of the character controller
@@ -118,7 +118,7 @@ namespace GloryEngine.Entities
         /// <returns>True if the switch succeeded</returns>
         public bool SetShape(Shape shape, float maxPenetrationDepth = float.MaxValue, bool lockBodies = true)
         {
-            return CharacterController_SetShape(_object.Scene.ID, _object.ID, _objectID, shape.ShapeID, maxPenetrationDepth, lockBodies);
+            return CharacterController_SetShape(Object.Scene.ID, Object.ID, _objectID, shape.ShapeID, maxPenetrationDepth, lockBodies);
         }
 
         #endregion

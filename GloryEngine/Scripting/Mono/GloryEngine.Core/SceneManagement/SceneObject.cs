@@ -128,7 +128,7 @@ namespace GloryEngine.SceneManagement
 
         #region Fields
 
-        protected Scene _scene;
+        private Scene _scene;
         internal bool _destroyed = false;
 
         private Dictionary<UInt64, EntityComponent> _componentCache = new Dictionary<ulong, EntityComponent>();
@@ -145,9 +145,10 @@ namespace GloryEngine.SceneManagement
         #region Methods
 
         /// <summary>
-        /// Gets a native component by type on the Entity that owns this component
+        /// Gets a component by type on the Entity that owns this component.
+        /// Can be either a native or script component.
         /// </summary>
-        /// <typeparam name="T">Type of the native component to get</typeparam>
+        /// <typeparam name="T">Type of the component to get</typeparam>
         /// <returns>The component that matches the type, null if the Entity does not have the component</returns>
         public T GetComponent<T>() where T : class
         {
@@ -174,22 +175,12 @@ namespace GloryEngine.SceneManagement
             return component as T;
         }
 
-        internal EntityBehaviour CreateScriptComponent(Type type, UInt64 componentID)
-        {
-            if (_componentCache.ContainsKey(componentID))
-                return _componentCache[componentID] as EntityBehaviour;
-            EntityBehaviour entityBehaviour = Activator.CreateInstance(type) as EntityBehaviour;
-            entityBehaviour.Initialize(this, componentID);
-            _componentCache.Add(componentID , entityBehaviour);
-            return entityBehaviour;
-        }
-
         /// <summary>
-        /// Add a new component to this entity
+        /// Add a new native component to this entity
         /// </summary>
         /// <typeparam name="T">Type of component to add</typeparam>
         /// <returns>The newly constructed component or null if failed</returns>
-        public T AddComponent<T>() where T : EntityComponent, new()
+        public T AddComponent<T>() where T : NativeComponent, new()
         {
             UInt64 componentID = SceneObject_AddComponent(_scene.ID, _objectID, typeof(T).Name);
             if (componentID == 0) return null;
@@ -200,10 +191,10 @@ namespace GloryEngine.SceneManagement
         }
 
         /// <summary>
-        /// Remove a component from this entity
+        /// Remove a native component from this entity
         /// </summary>
         /// <typeparam name="T">The type of component to remove</typeparam>
-        public void RemoveComponent<T>() where T : EntityComponent, new()
+        public void RemoveComponent<T>() where T : NativeComponent, new()
         {
             UInt64 componentID = SceneObject_RemoveComponent(_scene.ID, _objectID, typeof(T).Name);
             if (componentID == 0) return;
@@ -213,7 +204,7 @@ namespace GloryEngine.SceneManagement
         /// <summary>
         /// Remove a component from this entity
         /// </summary>
-        /// <typeparam name="T">The type of component to remove</typeparam>
+        /// <param name="component">Component to remove</param>
         public void RemoveComponent(EntityComponent component)
         {
             SceneObject_RemoveComponentByID(_scene.ID, _objectID, component.ID);
@@ -221,14 +212,24 @@ namespace GloryEngine.SceneManagement
         }
 
         /// <summary>
-        /// Check if this entity has certain component
+        /// Check if this entity has a certain native component
         /// </summary>
         /// <typeparam name="T">The type of component to check for</typeparam>
-        /// <returns>True of the entity has the component</returns>
-        public bool HasComponent<T>() where T : EntityComponent, new()
+        /// <returns>True if the entity has the component</returns>
+        public bool HasComponent<T>() where T : NativeComponent, new()
         {
             UInt64 componentID = SceneObject_GetComponentID(_scene.ID, _objectID, typeof(T).Name);
             return componentID != 0;
+        }
+
+        internal EntityBehaviour CreateScriptComponent(Type type, UInt64 componentID)
+        {
+            if (_componentCache.ContainsKey(componentID))
+                return _componentCache[componentID] as EntityBehaviour;
+            EntityBehaviour entityBehaviour = Activator.CreateInstance(type) as EntityBehaviour;
+            entityBehaviour.Initialize(this, componentID);
+            _componentCache.Add(componentID, entityBehaviour);
+            return entityBehaviour;
         }
 
         internal void OnObjectDestroy()

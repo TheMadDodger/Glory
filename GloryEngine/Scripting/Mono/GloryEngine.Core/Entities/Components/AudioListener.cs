@@ -26,15 +26,15 @@ namespace GloryEngine.Entities.Components
         /// </summary>
         public bool Enabled
         {
-            get => AudioListener_GetEnabled(_object.Scene.ID, _object.ID, _objectID);
-            set => AudioListener_SetEnabled(_object.Scene.ID, _object.ID, _objectID, value);
+            get => AudioListener_GetEnabled(Object.Scene.ID, Object.ID, _objectID);
+            set => AudioListener_SetEnabled(Object.Scene.ID, Object.ID, _objectID, value);
         }
 
         /// <summary>
         /// Simulation settings for this listener
         /// </summary>
         public ref AudioSimulationSettings SimulationSettings
-            => ref AudioListener_GetSimulationSettings(_object.Scene.ID, _object.ID, _objectID);
+            => ref AudioListener_GetSimulationSettings(Object.Scene.ID, Object.ID, _objectID);
 
         #endregion
 

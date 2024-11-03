@@ -17,11 +17,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 materialID = MeshRenderer_GetMaterial(_object.Scene.ID, _object.ID, _objectID);
+                UInt64 materialID = MeshRenderer_GetMaterial(Object.Scene.ID, Object.ID, _objectID);
                 if (materialID == 0) return null;
                 return Object.Scene.SceneManager.Engine.AssetManager.Get<Material>(materialID);
             }
-            set => MeshRenderer_SetMaterial(_object.Scene.ID, _object.ID, _objectID, value != null ? value.ID : 0);
+            set => MeshRenderer_SetMaterial(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         /// <summary>
@@ -31,11 +31,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 meshID = MeshRenderer_GetMesh(_object.Scene.ID, _object.ID, _objectID);
+                UInt64 meshID = MeshRenderer_GetMesh(Object.Scene.ID, Object.ID, _objectID);
                 if (meshID == 0) return null;
                 return Object.Scene.SceneManager.Engine.AssetManager.Get<Mesh>(meshID);
             }
-            set => MeshRenderer_SetMesh(_object.Scene.ID, _object.ID, _objectID, value != null ? value.ID : 0);
+            set => MeshRenderer_SetMesh(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         #endregion

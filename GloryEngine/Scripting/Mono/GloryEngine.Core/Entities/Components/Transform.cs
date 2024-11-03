@@ -15,8 +15,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 LocalPosition
         {
-            get => Transform_GetLocalPosition(_object.Scene.ID, _object.ID, _objectID);
-            set => Transform_SetLocalPosition(_object.Scene.ID, _object.ID, _objectID, ref value);
+            get => Transform_GetLocalPosition(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetLocalPosition(Object.Scene.ID, Object.ID, _objectID, ref value);
         }
 
         /// <summary>
@@ -24,8 +24,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Quaternion LocalRotation
         {
-            get => Transform_GetLocalRotation(_object.Scene.ID, _object.ID, _objectID);
-            set => Transform_SetLocalRotation(_object.Scene.ID, _object.ID, _objectID, ref value);
+            get => Transform_GetLocalRotation(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetLocalRotation(Object.Scene.ID, Object.ID, _objectID, ref value);
         }
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 LocalRotationEuler
         {
-            get => Transform_GetLocalRotationEuler(_object.Scene.ID, _object.ID, _objectID);
-            set => Transform_SetLocalRotationEuler(_object.Scene.ID, _object.ID, _objectID, ref value);
+            get => Transform_GetLocalRotationEuler(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetLocalRotationEuler(Object.Scene.ID, Object.ID, _objectID, ref value);
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 LocalScale
         {
-            get => Transform_GetLocalScale(_object.Scene.ID, _object.ID, _objectID);
-            set => Transform_SetLocalScale(_object.Scene.ID, _object.ID, _objectID, ref value);
+            get => Transform_GetLocalScale(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetLocalScale(Object.Scene.ID, Object.ID, _objectID, ref value);
         }
 
         /// <summary>
@@ -51,24 +51,24 @@ namespace GloryEngine.Entities
         /// </summary>
         public Vector3 Forward
         {
-            get => Transform_GetForward(_object.Scene.ID, _object.ID, _objectID);
-            set => Transform_SetForward(_object.Scene.ID, _object.ID, _objectID, ref value);
+            get => Transform_GetForward(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetForward(Object.Scene.ID, Object.ID, _objectID, ref value);
         }
 
         /// <summary>
         /// The direction the x axis of the Entity is facing
         /// </summary>
-        public Vector3 Right => Transform_GetRight(_object.Scene.ID, _object.ID, _objectID);
+        public Vector3 Right => Transform_GetRight(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
         /// The direction the y axis of the Entity is facing
         /// </summary>
-        public Vector3 Up => Transform_GetUp(_object.Scene.ID, _object.ID, _objectID);
+        public Vector3 Up => Transform_GetUp(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
         /// Transform matrix of the Entity in world space
         /// </summary>
-        public Mat4 World => Transform_GetWorld(_object.Scene.ID, _object.ID, _objectID);
+        public Mat4 World => Transform_GetWorld(Object.Scene.ID, Object.ID, _objectID);
 
         #endregion
 

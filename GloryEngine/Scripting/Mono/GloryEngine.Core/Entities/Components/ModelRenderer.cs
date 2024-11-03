@@ -17,17 +17,17 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 materialID = ModelRenderer_GetMaterial(_object.Scene.ID, _object.ID, _objectID);
+                UInt64 materialID = ModelRenderer_GetMaterial(Object.Scene.ID, Object.ID, _objectID);
                 if (materialID == 0) return null;
                 return Object.Scene.SceneManager.Engine.AssetManager.Get<Material>(materialID);
             }
-            set => ModelRenderer_SetMaterial(_object.Scene.ID, _object.ID, _objectID, value != null ? value.ID : 0);
+            set => ModelRenderer_SetMaterial(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         /// <summary>
         /// Number of materials on this component
         /// </summary>
-        public uint MaterialCount => ModelRenderer_GetMaterialCount(_object.Scene.ID, _object.ID, _objectID);
+        public uint MaterialCount => ModelRenderer_GetMaterialCount(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
         /// The Model to render
@@ -36,11 +36,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 modelID = ModelRenderer_GetModel(_object.Scene.ID, _object.ID, _objectID);
+                UInt64 modelID = ModelRenderer_GetModel(Object.Scene.ID, Object.ID, _objectID);
                 if (modelID == 1) return null;
                 return Object.Scene.SceneManager.Engine.AssetManager.Get<Model>(modelID);
             }
-            set => ModelRenderer_SetModel(_object.Scene.ID, _object.ID, _objectID, value != null ? value.ID : 0);
+            set => ModelRenderer_SetModel(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         #endregion
@@ -54,7 +54,7 @@ namespace GloryEngine.Entities
         /// <returns>The Material object or null of out of bounds</returns>
         public Material GetMaterial(uint index)
         {
-            UInt64 materialID = ModelRenderer_GetMaterialAt(_object.Scene.ID, _object.ID, _objectID, index);
+            UInt64 materialID = ModelRenderer_GetMaterialAt(Object.Scene.ID, Object.ID, _objectID, index);
             if (materialID == 0) return null;
             return Object.Scene.SceneManager.Engine.AssetManager.Get<Material>(materialID);
         }
@@ -66,7 +66,7 @@ namespace GloryEngine.Entities
         public void AddMaterial(Material material)
         {
             if (material == null) return;
-            ModelRenderer_AddMaterial(_object.Scene.ID, _object.ID, _objectID, material.ID);
+            ModelRenderer_AddMaterial(Object.Scene.ID, Object.ID, _objectID, material.ID);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace GloryEngine.Entities
         public void SetMaterial(uint index, Material material)
         {
             if (material == null) return;
-            ModelRenderer_SetMaterialAt(_object.Scene.ID, _object.ID, _objectID, index, material.ID);
+            ModelRenderer_SetMaterialAt(Object.Scene.ID, Object.ID, _objectID, index, material.ID);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace GloryEngine.Entities
         /// </summary>
         public void ClearMaterials()
         {
-            ModelRenderer_ClearMaterials(_object.Scene.ID, _object.ID, _objectID);
+            ModelRenderer_ClearMaterials(Object.Scene.ID, Object.ID, _objectID);
         }
 
         #endregion

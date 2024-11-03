@@ -16,8 +16,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public float HalfFOV
 		{
-			get => CameraComponent_GetHalfFOV(_object.Scene.ID, _object.ID, _objectID);
-			set => CameraComponent_SetHalfFOV(_object.Scene.ID, _object.ID, _objectID, value);
+			get => CameraComponent_GetHalfFOV(Object.Scene.ID, Object.ID, _objectID);
+			set => CameraComponent_SetHalfFOV(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		/// <summary>
@@ -25,8 +25,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public float Near
 		{
-			get => CameraComponent_GetNear(_object.Scene.ID, _object.ID, _objectID);
-			set => CameraComponent_SetNear(_object.Scene.ID, _object.ID, _objectID, value);
+			get => CameraComponent_GetNear(Object.Scene.ID, Object.ID, _objectID);
+			set => CameraComponent_SetNear(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		/// <summary>
@@ -34,8 +34,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public float Far
 		{
-			get => CameraComponent_GetFar(_object.Scene.ID, _object.ID, _objectID);
-			set => CameraComponent_SetFar(_object.Scene.ID, _object.ID, _objectID, value);
+			get => CameraComponent_GetFar(Object.Scene.ID, Object.ID, _objectID);
+			set => CameraComponent_SetFar(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		/// <summary>
@@ -44,8 +44,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public int DisplayIndex
 		{
-			get => CameraComponent_GetDisplayIndex(_object.Scene.ID, _object.ID, _objectID);
-			set => CameraComponent_SetDisplayIndex(_object.Scene.ID, _object.ID, _objectID, value);
+			get => CameraComponent_GetDisplayIndex(Object.Scene.ID, Object.ID, _objectID);
+			set => CameraComponent_SetDisplayIndex(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		/// <summary>
@@ -53,8 +53,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public int Priority
 		{
-			get => CameraComponent_GetPriority(_object.Scene.ID, _object.ID, _objectID);
-			set => CameraComponent_SetPriority(_object.Scene.ID, _object.ID, _objectID, value);
+			get => CameraComponent_GetPriority(Object.Scene.ID, Object.ID, _objectID);
+			set => CameraComponent_SetPriority(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		/// <summary>
@@ -62,8 +62,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public LayerMask LayerMask
 		{
-			get => CameraComponent_GetLayerMask(_object.Scene.ID, _object.ID, _objectID);
-			set => CameraComponent_SetLayerMask(_object.Scene.ID, _object.ID, _objectID, ref value);
+			get => CameraComponent_GetLayerMask(Object.Scene.ID, Object.ID, _objectID);
+			set => CameraComponent_SetLayerMask(Object.Scene.ID, Object.ID, _objectID, ref value);
 		}
 
 		/// <summary>
@@ -71,14 +71,14 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public Vector4 ClearColor
 		{
-			get => CameraComponent_GetClearColor(_object.Scene.ID, _object.ID, _objectID);
-			set => CameraComponent_SetClearColor(_object.Scene.ID, _object.ID, _objectID, ref value);
+			get => CameraComponent_GetClearColor(Object.Scene.ID, Object.ID, _objectID);
+			set => CameraComponent_SetClearColor(Object.Scene.ID, Object.ID, _objectID, ref value);
 		}
 
 		/// <summary>
 		/// The Camera handle for this component
 		/// </summary>
-		public Camera Camera => new Camera(CameraComponent_GetCameraID(_object.Scene.ID, _object.ID, _objectID));
+		public Camera Camera => new Camera(CameraComponent_GetCameraID(Object.Scene.ID, Object.ID, _objectID));
 
 		/// <summary>
 		/// Get the pick result of the last frame
@@ -87,7 +87,7 @@ namespace GloryEngine.Entities
 		{
 			get
 			{
-                PickResultInternal resultInternal = CameraComponent_GetPickResult(_object.Scene.ID, _object.ID, _objectID);
+                PickResultInternal resultInternal = CameraComponent_GetPickResult(Object.Scene.ID, Object.ID, _objectID);
 				PickResult result = new PickResult();
                 result.Position = resultInternal.Position;
 				result.Normal = resultInternal.Normal;
@@ -100,7 +100,7 @@ namespace GloryEngine.Entities
 		/// <summary>
 		/// Get the rendering resolution for this camera
 		/// </summary>
-		public Vector2 Resolution => CameraComponent_GetResolution(_object.Scene.ID, _object.ID, _objectID);
+		public Vector2 Resolution => CameraComponent_GetResolution(Object.Scene.ID, Object.ID, _objectID);
 
         #endregion
 
@@ -112,7 +112,7 @@ namespace GloryEngine.Entities
         /// NOTE: You can only prepare 1 pick per camera per frame!
         /// </summary>
         /// <param name="screenPos">Position to pick at</param>
-        public void PreparePick(Vector2 screenPos) => CameraComponent_PrepareNextPick(_object.Scene.ID, _object.ID, _objectID, ref screenPos);
+        public void PreparePick(Vector2 screenPos) => CameraComponent_PrepareNextPick(Object.Scene.ID, Object.ID, _objectID, ref screenPos);
 
 		#endregion
 

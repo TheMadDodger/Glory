@@ -33,6 +33,9 @@ namespace GloryEngine.SceneManagement
         /// </summary>
         public uint OpenSceneCount => SceneManager_OpenScenesCount();
 
+        /// <summary>
+        /// Engine
+        /// </summary>
         public Engine Engine => _engine;
 
         #endregion
@@ -46,7 +49,7 @@ namespace GloryEngine.SceneManagement
 
         #region Constructor
 
-        public SceneManager(Engine engine)
+        internal SceneManager(Engine engine)
         {
             _engine = engine;
         }
