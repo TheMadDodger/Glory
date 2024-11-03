@@ -1,5 +1,6 @@
 #pragma once
 #include "IMonoLibManager.h"
+#include "MonoScriptManager.h"
 
 #include <UUID.h>
 #include <Glory.h>
@@ -15,6 +16,8 @@ namespace Glory
         GLORY_API CoreLibManager(MonoManager* pMonoManager);
         GLORY_API Assembly* GetAssemblyBinding() const;
         GLORY_API void ResetEngine(Engine* pEngine);
+        GLORY_API MonoObject* GetScriptDummy(MonoClass* pClass);
+        GLORY_API MonoObject* GetScript(MonoClass* pClass, UUID sceneID, UUID objectID, UUID componentID);
 
     public:
         void Initialize(Engine* pEngine, Assembly* pAssembly) override;
@@ -31,6 +34,7 @@ namespace Glory
 
     private:
         MonoManager* m_pMonoManager;
+        MonoScriptManager m_ScriptManager;
         Assembly* m_pAssembly;
         MonoObject* m_pEngineObject;
         MonoMethod* m_pEngineReset;

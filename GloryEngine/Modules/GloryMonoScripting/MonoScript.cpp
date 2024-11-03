@@ -1,10 +1,10 @@
 #include "MonoScript.h"
-#include "MonoScriptObjectManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "MonoManager.h"
 #include "Assembly.h"
 #include "AssemblyDomain.h"
 #include "CoreLibManager.h"
+#include "GloryMonoScipting.h"
 
 #include <Engine.h>
 #include <GScene.h>
@@ -97,7 +97,7 @@ namespace Glory
 		if (pClass == nullptr) return;
 
 		// Dummy object for default values
-		MonoObject* pDummyObject = pDomain->ScriptObjectManager()->GetMonoScriptDummyObject(pClass->m_pClass);
+		MonoObject* pDummyObject = MonoManager::Instance()->GetCoreLibManager()->GetScriptDummy(pClass->m_pClass);
 
 		m_ScriptProperties.clear();
 		m_DefaultValues.clear();
@@ -312,6 +312,9 @@ namespace Glory
 
 	MonoObject* MonoScript::LoadObject(UUID objectID, UUID sceneID, MonoClass* pClass)
 	{
-		return MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->GetMonoScriptObject(pClass, objectID, sceneID);
+		MonoType* pType = mono_class_get_type(pClass);
+		MonoReflectionType* pReflectionType = mono_type_get_object(MonoManager::Instance()->ActiveDomain()->GetMonoDomain(), pType);
+		/* @todo: Fix component ID */
+		return MonoManager::Instance()->GetCoreLibManager()->GetScript(pClass, sceneID, objectID, 0);
 	}
 }

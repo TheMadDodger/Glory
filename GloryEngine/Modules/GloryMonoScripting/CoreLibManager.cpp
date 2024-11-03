@@ -2,6 +2,7 @@
 #include "MonoManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "Assembly.h"
+#include "AssemblyDomain.h"
 
 #include <Engine.h>
 #include <Debug.h>
@@ -62,6 +63,33 @@ namespace Glory
 		return pReturn;
 	}
 
+	MonoObject* CoreLibManager::GetScriptDummy(MonoClass* pClass)
+	{
+		MonoType* pType = mono_class_get_type(pClass);
+		char* pTypeName = mono_type_get_name(pType);
+		int index = m_ScriptManager.TypeIndexFromName(pTypeName);
+		mono_free(pTypeName);
+		if (index == -1) return nullptr;
+		return m_ScriptManager.Dummy((size_t)index);
+	}
+	
+	MonoObject* CoreLibManager::GetScript(MonoClass* pClass, UUID sceneID, UUID objectID, UUID componentID)
+	{
+		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
+		MonoMethod* pCreate = pEngineClass->GetMethod(".::GetScript");
+		MonoType* pType = mono_class_get_type(pClass);
+		char* pTypeName = mono_type_get_name(pType);
+		int index = m_ScriptManager.TypeIndexFromName(pTypeName);
+		mono_free(pTypeName);
+		if (index == -1) return nullptr;
+		void* args[4] = { &index, &sceneID, &objectID, &componentID };
+		MonoObject* pExcept;
+		MonoObject* pReturn = mono_runtime_invoke(pCreate, m_pEngineObject, args, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
+		return pReturn;
+	}
+
 	MonoObject* CoreLibManager::CreateSceneObject(UUID objectID, UUID sceneID)
 	{
 		if (!objectID || !sceneID) return nullptr;
@@ -77,6 +105,11 @@ namespace Glory
 
 	void CoreLibManager::ResetEngine(Engine* pEngine)
 	{
+		CreateEngine(pEngine);
+	}
+
+	void CoreLibManager::CreateEngine(Engine* pEngine)
+	{
 		if (m_EngineGCHandle)
 		{
 			mono_gchandle_free(m_EngineGCHandle);
@@ -85,11 +118,6 @@ namespace Glory
 			m_EngineGCHandle = 0;
 		}
 
-		CreateEngine(pEngine);
-	}
-
-	void CoreLibManager::CreateEngine(Engine* pEngine)
-	{
 		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
 
 		m_pEngineObject = mono_object_new(mono_domain_get(), pEngineClass->m_pClass);
@@ -102,6 +130,8 @@ namespace Glory
 		mono_runtime_object_init(m_pEngineObject);
 		m_pEngineReset = pEngineClass->GetMethod(".::Reset");
 		m_EngineGCHandle = mono_gchandle_new(m_pEngineObject, false);
+
+		m_ScriptManager.Initialize(pEngineClass, m_pEngineObject);
 	}
 
 	void CoreLibManager::OnSceneDestroy(UUID sceneID)

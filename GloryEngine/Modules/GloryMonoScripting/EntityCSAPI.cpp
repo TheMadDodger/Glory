@@ -1,10 +1,10 @@
 #include "EntityCSAPI.h"
 #include "AssemblyDomain.h"
-#include "MonoScriptObjectManager.h"
 #include "CoreCSAPI.h"
 #include "MathCSAPI.h"
 #include "ScriptingExtender.h"
 #include "MonoComponents.h"
+#include "GloryMonoScipting.h"
 
 #include <GScene.h>
 #include <SceneManager.h>
@@ -43,7 +43,7 @@ namespace Glory
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
 		if (objectID == 0 || sceneID == 0) return 0;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene(sceneID);
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		Entity entity = pScene->GetEntityByUUID(objectID);
@@ -513,14 +513,6 @@ namespace Glory
 		scriptComp.m_Script = UUID(scriptID);
 	}
 
-	MonoObject* MonoScriptComponent_GetBehaviour(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(sceneID, objectID, componentID);
-		MonoScriptObjectManager* pScriptObjectManager = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
-		/* TODO */
-		return nullptr;
-	}
-
 #pragma endregion
 
 #pragma region AudioSource
@@ -753,10 +745,10 @@ namespace Glory
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
 	{
 		/* Entity */
-		BIND("GloryEngine.Entities.SceneObject::SceneObject_GetComponentID", SceneObject_GetComponentID);
-		BIND("GloryEngine.Entities.SceneObject::SceneObject_AddComponent", SceneObject_AddComponent);
-		BIND("GloryEngine.Entities.SceneObject::SceneObject_RemoveComponent", SceneObject_RemoveComponent);
-		BIND("GloryEngine.Entities.SceneObject::SceneObject_RemoveComponentByID", SceneObject_RemoveComponentByID);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetComponentID", SceneObject_GetComponentID);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_AddComponent", SceneObject_AddComponent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponent", SceneObject_RemoveComponent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponentByID", SceneObject_RemoveComponentByID);
 
 		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_GetActive", EntityComponent_GetActive);
 		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_SetActive", EntityComponent_SetActive);
@@ -842,7 +834,6 @@ namespace Glory
 		/* MonoScriptComponent */
 		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetScript", MonoScriptComponent_GetScript);
 		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_SetScript", MonoScriptComponent_SetScript);
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetBehaviour", MonoScriptComponent_GetBehaviour);
 
 		/* AudioSource */
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAudio", AudioSource_GetAudio);

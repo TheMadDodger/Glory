@@ -1,6 +1,5 @@
 #include "MonoManager.h"
 #include "GloryMonoScipting.h"
-#include "MonoScriptObjectManager.h"
 #include "CoreLibManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
@@ -217,6 +216,7 @@ namespace Glory
 		{
 			m_pActiveDomain->LoadLib(m_Libs[i]);
 		}
+		m_pActiveDomain->Initialize();
 		m_HadInitialLoad = true;
 
 		m_ScriptExecutionAllowed = true;
@@ -234,6 +234,7 @@ namespace Glory
 		m_Libs.push_back(lib);
 		if (!m_HadInitialLoad) return;
 		m_pActiveDomain->LoadLib(lib);
+		m_pActiveDomain->Initialize();
 	}
 
 	GloryMonoScipting* MonoManager::Module() const
@@ -318,6 +319,7 @@ namespace Glory
 		{
 			m_pActiveDomain->LoadLib(m_Libs[i]);
 		}
+		m_pActiveDomain->Initialize();
 
 		m_ScriptExecutionAllowed = true;
 	}

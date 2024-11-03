@@ -171,6 +171,18 @@ namespace GloryEngine.SceneManagement
         /// <returns>The component that matches the type, null if the Entity does not have the component</returns>
         public T GetComponent<T>() where T : EntityComponent, new()
         {
+            Type type = typeof(T);
+            if (!(type.IsSubclassOf(typeof(NativeComponent))))
+            {
+                foreach (EntityComponent comp in _componentCache.Values)
+                {
+                    Type compType = comp.GetType();
+                    if (compType != type && !compType.IsSubclassOf(type)) continue;
+                    return comp as T;
+                }
+                return null;
+            }
+
             UInt64 componentID = SceneObject_GetComponentID(_scene.ID, _objectID, typeof(T).Name);
             if (componentID == 0)
                 return null;
@@ -180,6 +192,16 @@ namespace GloryEngine.SceneManagement
             component.Initialize(this, componentID);
             _componentCache.Add(componentID, component);
             return component;
+        }
+
+        internal EntityBehaviour CreateScriptComponent(Type type, UInt64 componentID)
+        {
+            if (_componentCache.ContainsKey(componentID))
+                return _componentCache[componentID] as EntityBehaviour;
+            EntityBehaviour entityBehaviour = Activator.CreateInstance(type) as EntityBehaviour;
+            entityBehaviour.Initialize(this, componentID);
+            _componentCache.Add(componentID , entityBehaviour);
+            return entityBehaviour;
         }
 
         /// <summary>
