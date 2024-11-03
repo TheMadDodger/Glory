@@ -6,7 +6,7 @@ namespace GloryEngine.Entities
     /// <summary>
     /// Handle for a ModelRenderer component
     /// </summary>
-    public class ModelRenderer : EntityComponent
+    public class ModelRenderer : NativeComponent
     {
         #region Props
 
@@ -17,17 +17,17 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 materialID = ModelRenderer_GetMaterial(ref _entity, _objectID);
+                UInt64 materialID = ModelRenderer_GetMaterial(Object.Scene.ID, Object.ID, _objectID);
                 if (materialID == 0) return null;
-                return EntityComponentManager.Engine.AssetManager.Get<Material>(materialID);
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Material>(materialID);
             }
-            set => ModelRenderer_SetMaterial(ref _entity, _objectID, value != null ? value.ID : 0);
+            set => ModelRenderer_SetMaterial(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         /// <summary>
         /// Number of materials on this component
         /// </summary>
-        public uint MaterialCount => ModelRenderer_GetMaterialCount(ref _entity, _objectID);
+        public uint MaterialCount => ModelRenderer_GetMaterialCount(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
         /// The Model to render
@@ -36,11 +36,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 modelID = ModelRenderer_GetModel(ref _entity, _objectID);
+                UInt64 modelID = ModelRenderer_GetModel(Object.Scene.ID, Object.ID, _objectID);
                 if (modelID == 1) return null;
-                return EntityComponentManager.Engine.AssetManager.Get<Model>(modelID);
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Model>(modelID);
             }
-            set => ModelRenderer_SetModel(ref _entity, _objectID, value != null ? value.ID : 0);
+            set => ModelRenderer_SetModel(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         #endregion
@@ -54,9 +54,9 @@ namespace GloryEngine.Entities
         /// <returns>The Material object or null of out of bounds</returns>
         public Material GetMaterial(uint index)
         {
-            UInt64 materialID = ModelRenderer_GetMaterialAt(ref _entity, _objectID, index);
+            UInt64 materialID = ModelRenderer_GetMaterialAt(Object.Scene.ID, Object.ID, _objectID, index);
             if (materialID == 0) return null;
-            return EntityComponentManager.Engine.AssetManager.Get<Material>(materialID);
+            return Object.Scene.SceneManager.Engine.AssetManager.Get<Material>(materialID);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace GloryEngine.Entities
         public void AddMaterial(Material material)
         {
             if (material == null) return;
-            ModelRenderer_AddMaterial(ref _entity, _objectID, material.ID);
+            ModelRenderer_AddMaterial(Object.Scene.ID, Object.ID, _objectID, material.ID);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace GloryEngine.Entities
         public void SetMaterial(uint index, Material material)
         {
             if (material == null) return;
-            ModelRenderer_SetMaterialAt(ref _entity, _objectID, index, material.ID);
+            ModelRenderer_SetMaterialAt(Object.Scene.ID, Object.ID, _objectID, index, material.ID);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace GloryEngine.Entities
         /// </summary>
         public void ClearMaterials()
         {
-            ModelRenderer_ClearMaterials(ref _entity, _objectID);
+            ModelRenderer_ClearMaterials(Object.Scene.ID, Object.ID, _objectID);
         }
 
         #endregion
@@ -93,25 +93,25 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt64 ModelRenderer_GetMaterial(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 ModelRenderer_GetMaterial(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void ModelRenderer_SetMaterial(ref Entity entity, UInt64 componentID, UInt64 materialID);
+        private extern static void ModelRenderer_SetMaterial(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 materialID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static uint ModelRenderer_GetMaterialCount(ref Entity entity, UInt64 componentID);
+        private extern static uint ModelRenderer_GetMaterialCount(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt64 ModelRenderer_GetMaterialAt(ref Entity entity, UInt64 componentID, uint index);
+        private extern static UInt64 ModelRenderer_GetMaterialAt(UInt64 sceneID, UInt64 objectID, UInt64 componentID, uint index);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void ModelRenderer_AddMaterial(ref Entity entity, UInt64 componentID, UInt64 materialID);
+        private extern static void ModelRenderer_AddMaterial(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 materialID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void ModelRenderer_SetMaterialAt(ref Entity entity, UInt64 componentID, uint index, UInt64 materialID);
+        private extern static void ModelRenderer_SetMaterialAt(UInt64 sceneID, UInt64 objectID, UInt64 componentID, uint index, UInt64 materialID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void ModelRenderer_ClearMaterials(ref Entity entity, UInt64 componentID);
+        private extern static void ModelRenderer_ClearMaterials(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt64 ModelRenderer_GetModel(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 ModelRenderer_GetModel(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void ModelRenderer_SetModel(ref Entity entity, UInt64 componentID, UInt64 modelID);
+        private extern static void ModelRenderer_SetModel(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 modelID);
 
         #endregion
     }

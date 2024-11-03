@@ -26,6 +26,9 @@ namespace GloryEngine.SceneManagement
             }
         }
 
+        /// <summary>
+        /// Scene manager
+        /// </summary>
         public SceneManager SceneManager => _sceneManager;
         
         #endregion

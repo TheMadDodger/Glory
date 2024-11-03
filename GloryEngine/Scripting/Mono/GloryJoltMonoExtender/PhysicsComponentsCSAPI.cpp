@@ -18,27 +18,14 @@ namespace Glory
 {
 	Engine* PhysicsComponents_EngineInstance;
 
-	GScene* GetEntityScene(UUID sceneID)
-	{
-		if (sceneID == 0) return nullptr;
-		GScene* pScene = PhysicsComponents_EngineInstance->GetSceneManager()->GetOpenScene(sceneID);
-		if (pScene == nullptr) return nullptr;
-		return pScene;
-	}
-
-	GScene* GetEntityScene(MonoEntityHandle* pEntityHandle)
-	{
-		if (pEntityHandle->m_EntityID == 0) return nullptr;
-		return GetEntityScene((UUID)pEntityHandle->m_SceneID);
-	}
-
 	template<typename T>
-	static T& GetComponent(MonoEntityHandle* pEntityHandle, UUID componentID)
+	static T& GetComponent(UUID sceneID, UUID objectID, uint64_t componentID)
 	{
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		uint32_t hash = pEntityView->ComponentType(componentID);
-		return pScene->GetRegistry().GetComponent<T>(pEntityHandle->m_EntityID);
+		return pScene->GetRegistry().GetComponent<T>(entity.GetEntityID());
 	}
 
 #pragma region Physics Component
@@ -47,33 +34,33 @@ namespace Glory
 
 #pragma region States
 
-	uint32_t PhysicsBody_GetID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint32_t PhysicsBody_GetID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return physicsComp.m_BodyID;
 	}
 
-	void PhysicsBody_Activate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void PhysicsBody_Activate(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->ActivateBody(physicsComp.m_BodyID);
 	}
 
-	void PhysicsBody_Deactivate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void PhysicsBody_Deactivate(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->DeactivateBody(physicsComp.m_BodyID);
 	}
 
-	bool PhysicsBody_IsActive(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool PhysicsBody_IsActive(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->IsBodyActive(physicsComp.m_BodyID);
 	}
 
-	bool PhysicsBody_IsValid(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool PhysicsBody_IsValid(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->IsValidBody(physicsComp.m_BodyID);
 	}
 
@@ -81,39 +68,39 @@ namespace Glory
 
 #pragma region Position and rotation
 
-	void PhysicsBody_SetPosition(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* position, const ActivationType activationType)
+	void PhysicsBody_SetPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* position, const ActivationType activationType)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->SetBodyPosition(physicsComp.m_BodyID, ToGLMVec3(*position), activationType);
 	}
 
-	void PhysicsBody_SetRotation(MonoEntityHandle* pEntityHandle, UUID componentID, const QuatWrapper* rotation, const ActivationType activationType)
+	void PhysicsBody_SetRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const QuatWrapper* rotation, const ActivationType activationType)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->SetBodyRotation(physicsComp.m_BodyID, ToGLMQuat(*rotation), activationType);
 	}
 
-	void PhysicsBody_SetScale(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* scale, const ActivationType activationType)
+	void PhysicsBody_SetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* scale, const ActivationType activationType)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->SetBodyScale(physicsComp.m_BodyID, ToGLMVec3(*scale), activationType);
 	}
 
-	Vec3Wrapper PhysicsBody_GetPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec3Wrapper PhysicsBody_GetPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->GetBodyPosition(physicsComp.m_BodyID);
 	}
 
-	Vec3Wrapper PhysicsBody_GetCenterOfMassPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec3Wrapper PhysicsBody_GetCenterOfMassPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->GetBodyCenterOfMassPosition(physicsComp.m_BodyID);
 	}
 
-	QuatWrapper PhysicsBody_GetRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
+	QuatWrapper PhysicsBody_GetRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->GetBodyRotation(physicsComp.m_BodyID);
 	}
 
@@ -121,72 +108,72 @@ namespace Glory
 
 #pragma region Velocities
 
-	void PhysicsBody_MoveKinematic(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* targetPosition, const QuatWrapper* targetRotation, float deltaTime)
+	void PhysicsBody_MoveKinematic(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* targetPosition, const QuatWrapper* targetRotation, float deltaTime)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->MoveBodyKinematic(physicsComp.m_BodyID, ToGLMVec3(*targetPosition), ToGLMQuat(*targetRotation), deltaTime);
 	}
 
-	void PhysicsBody_SetLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	void PhysicsBody_SetLinearAndAngularVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->SetBodyLinearAndAngularVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
 	}
 
-	void PhysicsBody_GetLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, Vec3Wrapper* linearVelocity, Vec3Wrapper* angularVelocity)
+	void PhysicsBody_GetLinearAndAngularVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper* linearVelocity, Vec3Wrapper* angularVelocity)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		glm::vec3 lv, av;
 		PHYSICS->GetBodyLinearAndAngularVelocity(physicsComp.m_BodyID, lv, av);
 		*linearVelocity = lv;
 		*angularVelocity = av;
 	}
 
-	void PhysicsBody_SetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	void PhysicsBody_SetLinearVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* linearVelocity)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->SetBodyLinearVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity));
 	}
 
-	Vec3Wrapper PhysicsBody_GetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec3Wrapper PhysicsBody_GetLinearVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->GetBodyLinearVelocity(physicsComp.m_BodyID);
 	}
 
-	void PhysicsBody_AddLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	void PhysicsBody_AddLinearVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* linearVelocity)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyLinearVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity));
 	}
 
-	void PhysicsBody_AddLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	void PhysicsBody_AddLinearAndAngularVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyLinearAndAngularVelocity(physicsComp.m_BodyID, ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
 	}
 
-	void PhysicsBody_SetAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* angularVelocity)
+	void PhysicsBody_SetAngularVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* angularVelocity)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->SetBodyAngularVelocity(physicsComp.m_BodyID, ToGLMVec3(*angularVelocity));
 	}
 
-	Vec3Wrapper PhysicsBody_GetAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec3Wrapper PhysicsBody_GetAngularVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->GetBodyAngularVelocity(physicsComp.m_BodyID);
 	}
 
-	Vec3Wrapper PhysicsBody_GetPointVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* point)
+	Vec3Wrapper PhysicsBody_GetPointVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* point)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->GetBodyPointVelocity(physicsComp.m_BodyID, ToGLMVec3(*point));
 	}
 
-	void PhysicsBody_SetPositionRotationAndVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* position, const QuatWrapper* rotation, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	void PhysicsBody_SetPositionRotationAndVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* position, const QuatWrapper* rotation, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->SetBodyPositionRotationAndVelocity(physicsComp.m_BodyID, ToGLMVec3(*position), ToGLMQuat(*rotation), ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
 	}
 
@@ -194,27 +181,27 @@ namespace Glory
 
 #pragma region Forces
 
-	void PhysicsBody_AddForce(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* force)
+	void PhysicsBody_AddForce(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* force)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyForce(physicsComp.m_BodyID, ToGLMVec3(*force));
 	}
 
-	void PhysicsBody_AddForce_Point(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* force, const Vec3Wrapper* point)
+	void PhysicsBody_AddForce_Point(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* force, const Vec3Wrapper* point)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyForce(physicsComp.m_BodyID, ToGLMVec3(*force), ToGLMVec3(*point));
 	}
 
-	void PhysicsBody_AddTorque(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* torque)
+	void PhysicsBody_AddTorque(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* torque)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyTorque(physicsComp.m_BodyID, ToGLMVec3(*torque));
 	}
 
-	void PhysicsBody_AddForceAndTorque(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* force, const Vec3Wrapper* torque)
+	void PhysicsBody_AddForceAndTorque(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* force, const Vec3Wrapper* torque)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyForceAndTorque(physicsComp.m_BodyID, ToGLMVec3(*force), ToGLMVec3(*torque));
 	}
 
@@ -222,21 +209,21 @@ namespace Glory
 
 #pragma region Impulses
 
-	void PhysicsBody_AddImpulse(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* impulse)
+	void PhysicsBody_AddImpulse(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* impulse)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyImpulse(physicsComp.m_BodyID, ToGLMVec3(*impulse));
 	}
 
-	void PhysicsBody_AddImpulse_Point(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* impulse, const Vec3Wrapper* point)
+	void PhysicsBody_AddImpulse_Point(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* impulse, const Vec3Wrapper* point)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyForce(physicsComp.m_BodyID, ToGLMVec3(*impulse), ToGLMVec3(*point));
 	}
 
-	void PhysicsBody_AddAngularImpulse(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* angularImpulse)
+	void PhysicsBody_AddAngularImpulse(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* angularImpulse)
 	{
-		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(pEntityHandle, componentID);
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		PHYSICS->AddBodyAngularImpulse(physicsComp.m_BodyID, ToGLMVec3(*angularImpulse));
 	}
 
@@ -251,34 +238,34 @@ namespace Glory
 
 #pragma region States
 
-	uint32_t CharacterController_GetCharacterID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint32_t CharacterController_GetCharacterID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		return characterController.m_CharacterID;
 	}
 
-	uint32_t CharacterController_GetBodyID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint32_t CharacterController_GetBodyID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		return CHARACTERS->GetBodyID(characterController.m_CharacterID);
 	}
 
-	void CharacterController_Activate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void CharacterController_Activate(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		CHARACTERS->Activate(characterController.m_CharacterID);
 	}
 
-	void CharacterController_Deactivate(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void CharacterController_Deactivate(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		const uint32_t bodyID = CHARACTERS->GetBodyID(characterController.m_CharacterID);
 		PHYSICS->DeactivateBody(bodyID);
 	}
 
-	bool CharacterController_IsActive(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool CharacterController_IsActive(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		const uint32_t bodyID = CHARACTERS->GetBodyID(characterController.m_CharacterID);
 		return PHYSICS->IsBodyActive(bodyID);
 	}
@@ -287,33 +274,33 @@ namespace Glory
 
 #pragma region Position and rotation
 
-	void CharacterController_SetPosition(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* position, const ActivationType activationType)
+	void CharacterController_SetPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* position, const ActivationType activationType)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		CHARACTERS->SetPosition(characterController.m_CharacterID, ToGLMVec3(*position), activationType);
 	}
 
-	void CharacterController_SetRotation(MonoEntityHandle* pEntityHandle, UUID componentID, const QuatWrapper* rotation, const ActivationType activationType)
+	void CharacterController_SetRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const QuatWrapper* rotation, const ActivationType activationType)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		CHARACTERS->SetRotation(characterController.m_CharacterID, ToGLMQuat(*rotation), activationType);
 	}
 
-	Vec3Wrapper CharacterController_GetPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec3Wrapper CharacterController_GetPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		return CHARACTERS->GetPosition(characterController.m_CharacterID);
 	}
 
-	Vec3Wrapper CharacterController_GetCenterOfMassPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec3Wrapper CharacterController_GetCenterOfMassPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		return CHARACTERS->GetCenterOfMassPosition(characterController.m_CharacterID);
 	}
 
-	QuatWrapper CharacterController_GetRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
+	QuatWrapper CharacterController_GetRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		return CHARACTERS->GetRotation(characterController.m_CharacterID);
 	}
 
@@ -321,27 +308,27 @@ namespace Glory
 
 #pragma region Velocities
 
-	void CharacterController_SetLinearAndAngularVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
+	void CharacterController_SetLinearAndAngularVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* linearVelocity, const Vec3Wrapper* angularVelocity)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		CHARACTERS->SetLinearAndAngularVelocity(characterController.m_CharacterID, ToGLMVec3(*linearVelocity), ToGLMVec3(*angularVelocity));
 	}
 
-	void CharacterController_SetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	void CharacterController_SetLinearVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* linearVelocity)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		CHARACTERS->SetLinearVelocity(characterController.m_CharacterID, ToGLMVec3(*linearVelocity));
 	}
 
-	Vec3Wrapper CharacterController_GetLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Vec3Wrapper CharacterController_GetLinearVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		return CHARACTERS->GetLinearVelocity(characterController.m_CharacterID);
 	}
 
-	void CharacterController_AddLinearVelocity(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* linearVelocity)
+	void CharacterController_AddLinearVelocity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* linearVelocity)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		CHARACTERS->AddLinearVelocity(characterController.m_CharacterID, ToGLMVec3(*linearVelocity));
 	}
 
@@ -349,9 +336,9 @@ namespace Glory
 
 #pragma region Impulses
 
-	void CharacterController_AddImpulse(MonoEntityHandle* pEntityHandle, UUID componentID, const Vec3Wrapper* impulse)
+	void CharacterController_AddImpulse(uint64_t sceneID, uint64_t objectID, uint64_t componentID, const Vec3Wrapper* impulse)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		CHARACTERS->AddImpulse(characterController.m_CharacterID, ToGLMVec3(*impulse));
 	}
 
@@ -359,15 +346,15 @@ namespace Glory
 
 #pragma region Shapes
 
-	uint64_t CharacterController_GetShapeID(MonoEntityHandle* pEntityHandle, uint64_t componentID)
+	uint64_t CharacterController_GetShapeID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		return characterController.m_ShapeID;
 	}
 
-	bool CharacterController_SetShape(MonoEntityHandle* pEntityHandle, uint64_t componentID, uint64_t shapeID, float maxPenetrationDepth = 0.0f, bool lockBodies = true)
+	bool CharacterController_SetShape(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t shapeID, float maxPenetrationDepth = 0.0f, bool lockBodies = true)
 	{
-		CharacterController& characterController = GetComponent<CharacterController>(pEntityHandle, componentID);
+		CharacterController& characterController = GetComponent<CharacterController>(sceneID, objectID, componentID);
 		const ShapeData* pShapeData = SHAPES->GetShape(shapeID);
 		if (!pShapeData)
 		{

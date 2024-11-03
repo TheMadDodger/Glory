@@ -10,6 +10,9 @@ namespace GloryEngine
     {
         #region Props
 
+        /// <summary>
+        /// Engine instance
+        /// </summary>
         public Engine Engine => _engine;
 
         #endregion
@@ -43,6 +46,12 @@ namespace GloryEngine
             return _resources[id];
         }
 
+        /// <summary>
+        /// Get a resource by type
+        /// </summary>
+        /// <typeparam name="T">Type of the resource to get</typeparam>
+        /// <param name="id">ID of the resource</param>
+        /// <returns></returns>
         public T Get<T>(UInt64 id) where T : Resource, new()
         {
             Resource resource = GetResource(id);

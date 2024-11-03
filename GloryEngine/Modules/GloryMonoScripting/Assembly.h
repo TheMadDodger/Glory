@@ -111,6 +111,7 @@ namespace Glory
 		GLORY_API bool Load(MonoImage* monoImage);
 		GLORY_API void Unload(bool isReloading = false);
 		GLORY_API MonoReflectionAssembly* GetReflectionAssembly() const;
+		GLORY_API void Initialize();
 
 		GLORY_API bool IsLoading() const
 		{

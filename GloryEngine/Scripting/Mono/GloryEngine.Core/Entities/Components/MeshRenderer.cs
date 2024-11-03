@@ -6,7 +6,7 @@ namespace GloryEngine.Entities
     /// <summary>
     /// Handle for a MeshRenderer component
     /// </summary>
-    public class MeshRenderer : EntityComponent
+    public class MeshRenderer : NativeComponent
     {
         #region Props
 
@@ -17,11 +17,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 materialID = MeshRenderer_GetMaterial(ref _entity, _objectID);
+                UInt64 materialID = MeshRenderer_GetMaterial(Object.Scene.ID, Object.ID, _objectID);
                 if (materialID == 0) return null;
-                return EntityComponentManager.Engine.AssetManager.Get<Material>(materialID);
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Material>(materialID);
             }
-            set => MeshRenderer_SetMaterial(ref _entity, _objectID, value != null ? value.ID : 0);
+            set => MeshRenderer_SetMaterial(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         /// <summary>
@@ -31,11 +31,11 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 meshID = MeshRenderer_GetMesh(ref _entity, _objectID);
+                UInt64 meshID = MeshRenderer_GetMesh(Object.Scene.ID, Object.ID, _objectID);
                 if (meshID == 0) return null;
-                return EntityComponentManager.Engine.AssetManager.Get<Mesh>(meshID);
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Mesh>(meshID);
             }
-            set => MeshRenderer_SetMesh(ref _entity, _objectID, value != null ? value.ID : 0);
+            set => MeshRenderer_SetMesh(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
         #endregion
@@ -43,14 +43,14 @@ namespace GloryEngine.Entities
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt64 MeshRenderer_GetMaterial(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 MeshRenderer_GetMaterial(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void MeshRenderer_SetMaterial(ref Entity entity, UInt64 componentID, UInt64 materialID);
+        private extern static void MeshRenderer_SetMaterial(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 materialID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt64 MeshRenderer_GetMesh(ref Entity entity, UInt64 componentID);
+        private extern static UInt64 MeshRenderer_GetMesh(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void MeshRenderer_SetMesh(ref Entity entity, UInt64 componentID, UInt64 meshID);
+        private extern static void MeshRenderer_SetMesh(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 meshID);
 
         #endregion
     }

@@ -1,10 +1,10 @@
 #include "MonoScript.h"
-#include "MonoScriptObjectManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "MonoManager.h"
 #include "Assembly.h"
 #include "AssemblyDomain.h"
 #include "CoreLibManager.h"
+#include "GloryMonoScipting.h"
 
 #include <Engine.h>
 #include <GScene.h>
@@ -97,7 +97,7 @@ namespace Glory
 		if (pClass == nullptr) return;
 
 		// Dummy object for default values
-		MonoObject* pDummyObject = pDomain->ScriptObjectManager()->GetMonoScriptDummyObject(pClass->m_pClass);
+		MonoObject* pDummyObject = MonoManager::Instance()->GetCoreLibManager()->GetScriptDummy(pClass->m_pClass);
 
 		m_ScriptProperties.clear();
 		m_DefaultValues.clear();
@@ -208,8 +208,9 @@ namespace Glory
 		Assembly* pCoreAssembly = pCoreLibManager->GetAssemblyBinding();
 		AssemblyClass* pObjectClass = pCoreAssembly->GetClass("GloryEngine", "Object");
 		AssemblyClass* pSceneObjectClass = pCoreAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
+		AssemblyClass* pSceneClass = pCoreAssembly->GetClass("GloryEngine.SceneManagement", "Scene");
 		const AssemblyClassField* pObjectIDField = pObjectClass->GetField("_objectID");
-		const AssemblyClassField* pSceneIDField = pSceneObjectClass->GetField("_sceneID");
+		const AssemblyClassField* pObjectSceneField = pSceneObjectClass->GetField("_scene");
 
 		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
@@ -240,11 +241,16 @@ namespace Glory
 			{
 				SceneObjectRef& objectRef = reinterpret_cast<SceneObjectRef&>(data[prop.m_RelativeOffset]);
 				MonoObject* pMonoSceneObject = nullptr;
+				MonoObject* pMonoScene = nullptr;
 				pField->GetValue(pMonoObject, &pMonoSceneObject);
 				if (pMonoSceneObject)
 				{
 					pObjectIDField->GetValue(pMonoSceneObject, objectRef.ObjectUUIDMember());
-					pSceneIDField->GetValue(pMonoSceneObject, objectRef.SceneUUIDMember());
+					pObjectSceneField->GetValue(pMonoSceneObject, &pMonoScene);
+					if (pMonoScene)
+					{
+						pObjectIDField->GetValue(pMonoScene, objectRef.SceneUUIDMember());
+					}
 				}
 				break;
 			}
@@ -312,6 +318,9 @@ namespace Glory
 
 	MonoObject* MonoScript::LoadObject(UUID objectID, UUID sceneID, MonoClass* pClass)
 	{
-		return MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->GetMonoScriptObject(pClass, objectID, sceneID);
+		MonoType* pType = mono_class_get_type(pClass);
+		MonoReflectionType* pReflectionType = mono_type_get_object(MonoManager::Instance()->ActiveDomain()->GetMonoDomain(), pType);
+		/* @todo: Fix component ID */
+		return MonoManager::Instance()->GetCoreLibManager()->GetScript(pClass, sceneID, objectID, 0);
 	}
 }

@@ -5,8 +5,9 @@ namespace GloryEngine.Entities
 {
     /// <summary>
     /// Handle for a script component
+    /// You can retrieve the EntityBehaviour directly with Object.GetComponent().
     /// </summary>
-    public class ScriptedComponent : EntityComponent
+    public class ScriptedComponent : NativeComponent
     {
         #region Properties
 
@@ -18,43 +19,21 @@ namespace GloryEngine.Entities
         {
             get
             {
-                UInt64 scriptID = ScriptedComponent_GetScript(ref _entity, _objectID);
+                UInt64 scriptID = ScriptedComponent_GetScript(Object.Scene.ID, Object.ID, _objectID);
                 if (scriptID == 0) return null;
-                return EntityComponentManager.Engine.AssetManager.Get<Script>(scriptID);
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Script>(scriptID);
             }
-            set => ScriptedComponent_SetScript(ref _entity, _objectID, value != null ? value.ID : 0);
+            set => ScriptedComponent_SetScript(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
-
-        /// <summary>
-        /// Get the instanced EntityBehaviour script
-        /// </summary>
-        //public EntityBehaviour Behaviour => ScriptedComponent_GetBehaviour(ref _entity, _objectID);
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Get the casted instanced EntityBehaviour script
-        /// </summary>
-        /// <typeparam name="T">Type to cast to</typeparam>
-        /// <returns>The casted behaviour</returns>
-        //public T GetBehaviour<T>() where T : EntityBehaviour
-        //{
-        //    return Behaviour != null ? Behaviour as T : null;
-        //}
 
         #endregion
 
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern UInt64 ScriptedComponent_GetScript(ref Entity entity, UInt64 componentID);
+        private static extern UInt64 ScriptedComponent_GetScript(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void ScriptedComponent_SetScript(ref Entity entity, UInt64 componentID, UInt64 scriptID);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern EntityBehaviour ScriptedComponent_GetBehaviour(ref Entity entity, UInt64 componentID);
+        private static extern void ScriptedComponent_SetScript(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 scriptID);
 
         #endregion
     }

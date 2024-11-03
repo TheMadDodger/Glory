@@ -6,7 +6,7 @@ namespace GloryEngine.Entities
     /// <summary>
     /// Handle for a LightComponent component
     /// </summary>
-    public class LightComponent : EntityComponent
+    public class LightComponent : NativeComponent
     {
 		#region Props
 
@@ -15,8 +15,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public Vector4 Color
         {
-			get => LightComponent_GetColor(ref _entity, _objectID);
-			set => LightComponent_SetColor(ref _entity, _objectID, ref value);
+			get => LightComponent_GetColor(Object.Scene.ID, Object.ID, _objectID);
+			set => LightComponent_SetColor(Object.Scene.ID, Object.ID, _objectID, ref value);
 
 		}
 
@@ -25,8 +25,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public float Intensity
         {
-			get => LightComponent_GetIntensity(ref _entity, _objectID);
-			set => LightComponent_SetIntensity(ref _entity, _objectID, value);
+			get => LightComponent_GetIntensity(Object.Scene.ID, Object.ID, _objectID);
+			set => LightComponent_SetIntensity(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		/// <summary>
@@ -34,8 +34,8 @@ namespace GloryEngine.Entities
 		/// </summary>
 		public float Range
         {
-			get => LightComponent_GetRange(ref _entity, _objectID);
-			set => LightComponent_SetRange(ref _entity, _objectID, value);
+			get => LightComponent_GetRange(Object.Scene.ID, Object.ID, _objectID);
+			set => LightComponent_SetRange(Object.Scene.ID, Object.ID, _objectID, value);
 		}
 
 		#endregion
@@ -43,17 +43,17 @@ namespace GloryEngine.Entities
 		#region API Methods
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern static Vector4 LightComponent_GetColor(ref Entity entity, UInt64 componentID);
+		private extern static Vector4 LightComponent_GetColor(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void LightComponent_SetColor(ref Entity entity, UInt64 componentID, ref Vector4 color);
+        private extern static void LightComponent_SetColor(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector4 color);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static float LightComponent_GetIntensity(ref Entity entity, UInt64 componentID);
+        private extern static float LightComponent_GetIntensity(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void LightComponent_SetIntensity(ref Entity entity, UInt64 componentID, float intensity);
+        private extern static void LightComponent_SetIntensity(UInt64 sceneID, UInt64 objectID, UInt64 componentID, float intensity);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static float LightComponent_GetRange(ref Entity entity, UInt64 componentID);
+        private extern static float LightComponent_GetRange(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void LightComponent_SetRange(ref Entity entity, UInt64 componentID, float range);
+        private extern static void LightComponent_SetRange(UInt64 sceneID, UInt64 objectID, UInt64 componentID, float range);
 
 		#endregion
 	}

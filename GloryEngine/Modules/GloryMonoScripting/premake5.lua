@@ -23,7 +23,6 @@ project "GloryMonoScripting"
 		["API"] = { "EntityCSAPI.*", "InputCSAPI.*", "CoreCSAPI.*", "MathCSAPI.*", "PhysicsCSAPI.*", "ScriptingMethodsHelper.*", "AudioCSAPI.*" },
 		["Resource"] = { "MonoScriptLoader.*", "MonoScript.*" },
 		["Mono"] = { "Assembly.*", "AssemblyDomain.*", "MonoLibManager.*", "MonoManager.*", "CoreLibManager.*", "IMonoLibManager.*" },
-		["Memory"] = { "MonoScriptObjectManager.*" }
 	}
 
 	includedirs

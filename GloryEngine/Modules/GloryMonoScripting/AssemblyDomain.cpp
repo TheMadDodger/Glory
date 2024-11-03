@@ -1,13 +1,14 @@
 #include "AssemblyDomain.h"
 #include "Assembly.h"
-#include "MonoScriptObjectManager.h"
+
+#include "ScriptExtensions.h"
 
 #include <mono/metadata/exception.h>
 
 namespace Glory
 {
 	AssemblyDomain::AssemblyDomain(const std::string& name, MonoDomain* pDomain)
-		: m_Name(name), m_pMonoDomain(pDomain), m_pScriptObjectManager(new MonoScriptObjectManager()) {}
+		: m_Name(name), m_pMonoDomain(pDomain) {}
 
 	AssemblyDomain::~AssemblyDomain()
 	{
@@ -35,7 +36,6 @@ namespace Glory
 
 	void AssemblyDomain::Unload(bool isReloading)
 	{
-		m_pScriptObjectManager->Cleanup();
 		for (auto it = m_Assemblies.begin(); it != m_Assemblies.end(); it++)
 		{
 			it->second.Unload(isReloading);
@@ -58,11 +58,6 @@ namespace Glory
 	const std::string& AssemblyDomain::GetMainAssemblyName()
 	{
 		return m_MainAssemblyName;
-	}
-
-	MonoScriptObjectManager* AssemblyDomain::ScriptObjectManager()
-	{
-		return m_pScriptObjectManager;
 	}
 
 	MonoObject* AssemblyDomain::InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, void** args)
@@ -93,5 +88,13 @@ namespace Glory
 	bool AssemblyDomain::SetCurrentDomain(bool force)
 	{
 		return mono_domain_set(m_pMonoDomain, force);
+	}
+
+	void AssemblyDomain::Initialize()
+	{
+		for (auto& assembly : m_Assemblies)
+		{
+			assembly.second.Initialize();
+		}
 	}
 }
