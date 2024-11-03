@@ -32,21 +32,25 @@ namespace Glory
 		m_pAssembly->GetClass("GloryEngine", "Object");
 		m_pAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
 
-		m_SceneClosingCallback = pEngine->GetSceneManager()->AddSceneClosingCallback([this](UUID sceneID, UUID) {
-			OnSceneDestroy(sceneID);
-		});
+		if (!m_SceneClosingCallback)
+		{
+			m_SceneClosingCallback = pEngine->GetSceneManager()->AddSceneClosingCallback([this](UUID sceneID, UUID) {
+				OnSceneDestroy(sceneID);
+			});
+		}
 
-		m_SceneObjectDestroyedCallback = pEngine->GetSceneManager()->AddSceneObjectDestroyedCallback([this](UUID sceneID, UUID objectID) {
-			OnSceneObjectDestroy(objectID, sceneID);
-		});
+		if (!m_SceneObjectDestroyedCallback)
+		{
+			m_SceneObjectDestroyedCallback = pEngine->GetSceneManager()->AddSceneObjectDestroyedCallback([this](UUID sceneID, UUID objectID) {
+				OnSceneObjectDestroy(objectID, sceneID);
+			});
+		}
 
 		Utils::ECS::ComponentTypes::SetInstance(pEngine->GetSceneManager()->ComponentTypesInstance());
 	}
 
 	void CoreLibManager::Cleanup(Engine* pEngine)
 	{
-		pEngine->GetSceneManager()->RemoveSceneClosingCallback(m_SceneClosingCallback);
-		pEngine->GetSceneManager()->RemoveSceneObjectDestroyedCallback(m_SceneObjectDestroyedCallback);
 	}
 
 	MonoObject* CoreLibManager::CreateAssetObject(UUID uuid, const std::string_view type)
