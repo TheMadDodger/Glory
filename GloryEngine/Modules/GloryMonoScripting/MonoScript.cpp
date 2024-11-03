@@ -35,14 +35,13 @@ namespace Glory
 	{
 	}
 
-	void MonoScript::Invoke(UUID objectID, UUID sceneID, const std::string& method, void** args)
+	void MonoScript::Invoke(MonoObject* pMonoObject, const std::string& method, void** args)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
 		Assembly* pAssembly = pDomain->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
-		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 		std::string fullMethodName = ".::" + method;
 		MonoMethod* pMethod = pClass->GetMethod(fullMethodName);
@@ -50,37 +49,34 @@ namespace Glory
 		pDomain->InvokeMethod(pMethod, pMonoObject, args);
 	}
 
-	void MonoScript::InvokeSafe(UUID objectID, UUID sceneID, const std::string& method, std::vector<void*>& args)
+	void MonoScript::InvokeSafe(MonoObject* pMonoObject, const std::string& method, std::vector<void*>& args)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
-		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 		MonoManager::Instance()->GetMethodsHelper()->InvokeScriptingMethod(pMonoObject, method, args);
 	}
 
-	void MonoScript::SetValue(UUID objectID, UUID sceneID, const std::string& name, void* value)
+	void MonoScript::SetValue(MonoObject* pMonoObject, const std::string& name, void* value)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
-		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 		const AssemblyClassField* pField = pClass->GetField(name);
 		if (pField == nullptr) return;
 		pField->SetValue(pMonoObject, value);
 	}
 
-	void MonoScript::GetValue(UUID objectID, UUID sceneID, const std::string& name, void* value)
+	void MonoScript::GetValue(MonoObject* pMonoObject, const std::string& name, void* value)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
-		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 		const AssemblyClassField* pField = pClass->GetField(name);
 		if (pField == nullptr) return;
@@ -146,15 +142,27 @@ namespace Glory
 		}
 	}
 
-	void MonoScript::SetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data)
+	MonoObject* MonoScript::CreateScriptObject(UUID objectID, UUID sceneID, UUID componentID)
+	{
+		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
+		return MonoManager::Instance()->GetCoreLibManager()->CreateScript(pClass->m_pClass, sceneID, objectID, componentID);
+	}
+
+	MonoObject* MonoScript::GetScriptObject(UUID objectID, UUID sceneID, UUID componentID)
+	{
+		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
+		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
+		return MonoManager::Instance()->GetCoreLibManager()->GetScript(sceneID, objectID, componentID);
+	}
+
+	void MonoScript::SetPropertyValues(MonoObject* pMonoObject, std::vector<char>& data)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
 		AssemblyClass* pClass = LoadClass(pAssembly, m_NamespaceName, m_ClassName);
 		if (pClass == nullptr) return;
-
-		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 
 		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
@@ -196,7 +204,7 @@ namespace Glory
 		}
 	}
 
-	void MonoScript::GetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data)
+	void MonoScript::GetPropertyValues(MonoObject* pMonoObject, std::vector<char>& data)
 	{
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		Assembly* pAssembly = MonoManager::Instance()->ActiveDomain()->GetMainAssembly();
@@ -212,7 +220,6 @@ namespace Glory
 		const AssemblyClassField* pObjectIDField = pObjectClass->GetField("_objectID");
 		const AssemblyClassField* pObjectSceneField = pSceneObjectClass->GetField("_scene");
 
-		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
 
 		size_t scriptPropIndex = 0;
@@ -314,13 +321,5 @@ namespace Glory
 		AssemblyClass* pClass = pAssembly->GetClass(namespaceName, className);
 		if (pClass == nullptr) return nullptr;
 		return pClass;
-	}
-
-	MonoObject* MonoScript::LoadObject(UUID objectID, UUID sceneID, MonoClass* pClass)
-	{
-		MonoType* pType = mono_class_get_type(pClass);
-		MonoReflectionType* pReflectionType = mono_type_get_object(MonoManager::Instance()->ActiveDomain()->GetMonoDomain(), pType);
-		/* @todo: Fix component ID */
-		return MonoManager::Instance()->GetCoreLibManager()->GetScript(pClass, sceneID, objectID, 0);
 	}
 }

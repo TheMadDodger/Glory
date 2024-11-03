@@ -24,15 +24,17 @@ namespace Glory
         GLORY_API MonoScript(FileData* pFileData, std::string_view ns, std::string_view className);
         GLORY_API virtual ~MonoScript();
 
-        GLORY_API void Invoke(UUID objectID, UUID sceneID, const std::string& method, void** args);
-        GLORY_API void InvokeSafe(UUID objectID, UUID sceneID, const std::string& method, std::vector<void*>& args);
+        GLORY_API void Invoke(MonoObject* pMonoObject, const std::string& method, void** args);
+        GLORY_API void InvokeSafe(MonoObject* pMonoObject, const std::string& method, std::vector<void*>& args);
 
-        GLORY_API void SetValue(UUID objectID, UUID sceneID, const std::string& name, void* value);
-        GLORY_API void GetValue(UUID objectID, UUID sceneID, const std::string& name, void* value);
+        GLORY_API void SetValue(MonoObject* pMonoObject, const std::string& name, void* value);
+        GLORY_API void GetValue(MonoObject* pMonoObject, const std::string& name, void* value);
 
         GLORY_API void LoadScriptProperties();
-        GLORY_API void SetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data);
-        GLORY_API void GetPropertyValues(UUID objectID, UUID sceneID, std::vector<char>& data);
+        GLORY_API MonoObject* CreateScriptObject(UUID objectID, UUID sceneID, UUID componentID);
+        GLORY_API MonoObject* GetScriptObject(UUID objectID, UUID sceneID, UUID componentID);
+        GLORY_API void SetPropertyValues(MonoObject* pMonoObject, std::vector<char>& data);
+        GLORY_API void GetPropertyValues(MonoObject* pMonoObject, std::vector<char>& data);
 
         GLORY_API void Serialize(BinaryStream& container) const override;
         GLORY_API void Deserialize(BinaryStream& container) override;
@@ -46,7 +48,6 @@ namespace Glory
 
     private:
         AssemblyClass* LoadClass(Assembly* pAssembly, const std::string& namespaceName, const std::string& className);
-        MonoObject* LoadObject(UUID objectID, UUID sceneID, MonoClass* pClass);
 
     private:
         friend class MonoScriptLoader;

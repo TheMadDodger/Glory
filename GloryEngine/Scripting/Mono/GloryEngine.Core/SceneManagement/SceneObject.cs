@@ -225,11 +225,19 @@ namespace GloryEngine.SceneManagement
         internal EntityBehaviour CreateScriptComponent(Type type, UInt64 componentID)
         {
             if (_componentCache.ContainsKey(componentID))
-                return _componentCache[componentID] as EntityBehaviour;
+                _componentCache.Remove(componentID);
             EntityBehaviour entityBehaviour = Activator.CreateInstance(type) as EntityBehaviour;
             entityBehaviour.Initialize(this, componentID);
             _componentCache.Add(componentID, entityBehaviour);
             return entityBehaviour;
+        }
+
+        internal EntityBehaviour GetScript(UInt64 componentID)
+        {
+            if (!_componentCache.ContainsKey(componentID)) return null;
+            EntityComponent component = _componentCache[componentID];
+            if (!(component is EntityBehaviour)) return null;
+            return _componentCache[componentID] as EntityBehaviour;
         }
 
         internal void OnObjectDestroy()

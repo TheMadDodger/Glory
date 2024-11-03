@@ -423,6 +423,13 @@ namespace Glory::Editor
 	void MonoEditorExtension::ReloadAssembly(ProjectSpace* pProject)
 	{
 		m_pMonoScriptingModule->GetMonoManager()->Reload();
+
+		/* Re-validate all script components */
+		SceneManager* pScenes = m_pMonoScriptingModule->GetEngine()->GetSceneManager();
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
+		{
+			pScenes->GetOpenScene(i)->GetRegistry().InvokeAll(MonoScriptComponent::GetTypeData()->TypeHash(), Utils::ECS::InvocationType::OnValidate);
+		}
 	}
 
 	void MonoEditorExtension::AssetCallback(const AssetCallbackData& callback)

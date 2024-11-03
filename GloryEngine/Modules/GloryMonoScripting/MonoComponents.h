@@ -13,8 +13,9 @@ namespace Glory
 
 	struct MonoScriptComponent
 	{
-		MonoScriptComponent() : m_Script(0), m_ScriptData() {}
-		MonoScriptComponent(MonoScript* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0), m_ScriptData() {}
+		MonoScriptComponent() : m_Script(0), m_ScriptData(), m_CachedComponentID(0), m_pScriptObject(nullptr) {}
+		MonoScriptComponent(MonoScript* pScript) : m_Script(pScript != nullptr ? pScript->GetUUID() : 0),
+			m_ScriptData(), m_CachedComponentID(0), m_pScriptObject(nullptr) {}
 
 		REFLECTABLE(MonoScriptComponent,
 			(BasicBuffer<char>) (m_ScriptData),
@@ -22,5 +23,7 @@ namespace Glory
 		);
 
 		std::vector<ScriptProperty> m_ScriptProperties;
+		UUID m_CachedComponentID;
+		MonoObject* m_pScriptObject;
 	};
 }
