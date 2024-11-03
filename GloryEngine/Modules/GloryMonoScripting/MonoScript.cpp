@@ -208,8 +208,9 @@ namespace Glory
 		Assembly* pCoreAssembly = pCoreLibManager->GetAssemblyBinding();
 		AssemblyClass* pObjectClass = pCoreAssembly->GetClass("GloryEngine", "Object");
 		AssemblyClass* pSceneObjectClass = pCoreAssembly->GetClass("GloryEngine.SceneManagement", "SceneObject");
+		AssemblyClass* pSceneClass = pCoreAssembly->GetClass("GloryEngine.SceneManagement", "Scene");
 		const AssemblyClassField* pObjectIDField = pObjectClass->GetField("_objectID");
-		const AssemblyClassField* pSceneIDField = pSceneObjectClass->GetField("_sceneID");
+		const AssemblyClassField* pObjectSceneField = pSceneObjectClass->GetField("_scene");
 
 		MonoObject* pMonoObject = LoadObject(objectID, sceneID, pClass->m_pClass);
 		if (pMonoObject == nullptr) return;
@@ -240,11 +241,16 @@ namespace Glory
 			{
 				SceneObjectRef& objectRef = reinterpret_cast<SceneObjectRef&>(data[prop.m_RelativeOffset]);
 				MonoObject* pMonoSceneObject = nullptr;
+				MonoObject* pMonoScene = nullptr;
 				pField->GetValue(pMonoObject, &pMonoSceneObject);
 				if (pMonoSceneObject)
 				{
 					pObjectIDField->GetValue(pMonoSceneObject, objectRef.ObjectUUIDMember());
-					pSceneIDField->GetValue(pMonoSceneObject, objectRef.SceneUUIDMember());
+					pObjectSceneField->GetValue(pMonoSceneObject, &pMonoScene);
+					if (pMonoScene)
+					{
+						pObjectIDField->GetValue(pMonoScene, objectRef.SceneUUIDMember());
+					}
 				}
 				break;
 			}

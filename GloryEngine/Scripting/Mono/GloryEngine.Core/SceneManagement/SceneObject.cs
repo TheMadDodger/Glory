@@ -13,25 +13,6 @@ namespace GloryEngine.SceneManagement
         #region Props
 
         /// <summary>
-        /// The Entity handle for this object
-        /// </summary>
-        public UInt64 EntityID
-        {
-            get
-            {
-                if (_destroyed)
-                {
-                    Debug.LogError("This SceneObject has been marked for destruction.");
-                    return 0;
-                }
-                if (_entityID != 0) return _entityID;
-                _entityID = SceneObject_GetEntityID(_scene.ID, _objectID);
-                return _entityID;
-            }
-            private set { }
-        }
-
-        /// <summary>
         /// The scene this object exists in
         /// </summary>
         public virtual Scene Scene
@@ -147,7 +128,6 @@ namespace GloryEngine.SceneManagement
 
         #region Fields
 
-        private UInt64 _entityID;
         protected Scene _scene;
         internal bool _destroyed = false;
 
@@ -169,15 +149,15 @@ namespace GloryEngine.SceneManagement
         /// </summary>
         /// <typeparam name="T">Type of the native component to get</typeparam>
         /// <returns>The component that matches the type, null if the Entity does not have the component</returns>
-        public T GetComponent<T>() where T : EntityComponent, new()
+        public T GetComponent<T>() where T : class
         {
             Type type = typeof(T);
-            if (!(type.IsSubclassOf(typeof(NativeComponent))))
+            if (!type.IsSubclassOf(typeof(NativeComponent)))
             {
                 foreach (EntityComponent comp in _componentCache.Values)
                 {
                     Type compType = comp.GetType();
-                    if (compType != type && !compType.IsSubclassOf(type)) continue;
+                    if (compType != type && !type.IsAssignableFrom(compType)) continue;
                     return comp as T;
                 }
                 return null;
@@ -188,10 +168,10 @@ namespace GloryEngine.SceneManagement
                 return null;
 
             if (_componentCache.ContainsKey(componentID)) return _componentCache[componentID] is T cachedComp ? cachedComp : null;
-            T component = Activator.CreateInstance(typeof(T)) as T;
+            EntityComponent component = Activator.CreateInstance(typeof(T)) as EntityComponent;
             component.Initialize(this, componentID);
             _componentCache.Add(componentID, component);
-            return component;
+            return component as T;
         }
 
         internal EntityBehaviour CreateScriptComponent(Type type, UInt64 componentID)
@@ -264,9 +244,6 @@ namespace GloryEngine.SceneManagement
         #endregion
 
         #region API Methods
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static UInt64 SceneObject_GetEntityID(UInt64 sceneID, UInt64 objectID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static string SceneObject_GetName(UInt64 sceneID, UInt64 objectID);
