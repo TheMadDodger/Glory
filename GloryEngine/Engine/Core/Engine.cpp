@@ -219,7 +219,7 @@ namespace Glory
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
 		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
 		m_pShaderManager(createInfo.pShaderManager), m_pMaterialManager(createInfo.pMaterialManager),
-		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager)
+		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager), m_RootPath("./")
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -532,6 +532,16 @@ namespace Glory
 	std::vector<char>& Engine::GetData(const std::string& name)
 	{
 		return m_Datas.at(name);
+	}
+
+	void Engine::SetRootPath(const std::filesystem::path& path)
+	{
+		m_RootPath = path;
+	}
+
+	const std::filesystem::path& Engine::RootPath() const
+	{
+		return m_RootPath;
 	}
 
 	void Engine::RegisterStandardSerializers()

@@ -34,6 +34,7 @@
 #include <SystemTools.h>
 #include <SceneManager.h>
 #include <CoreLibManager.h>
+#include <BinaryStream.h>
 
 #include <fstream>
 #include <string>
@@ -72,8 +73,6 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::OnGenerateConfigExec(std::ofstream& stream)
 	{
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		stream << "	runCommand(\"loadMainAssembly " << pProject->Name() << ".dll" << " ./\");" << std::endl;
 	}
 
 	void MonoEditorExtension::OnEndPackage(const std::filesystem::path& path)
@@ -83,15 +82,26 @@ namespace Glory::Editor
 #else
 		const bool release = true;
 #endif
-
 		/* Compile and copy assembly */
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		CompileProject(pProject, release, false);
 
+		const std::string mainAssembly = pProject->Name() + ".dll";
 		std::filesystem::path assemblyPath = pProject->LibraryPath();
-		assemblyPath.append("Assembly").append(pProject->Name()).replace_extension(".dll");
+		assemblyPath.append("Assembly").append(mainAssembly);
 
 		std::filesystem::copy(assemblyPath, path, std::filesystem::copy_options::overwrite_existing);
+
+		/* Write Assemblies.dat */
+		std::filesystem::path assembliesPath = path;
+		assembliesPath.append("Data/Assemblies.dat");
+		BinaryFileStream fileStream{ assembliesPath };
+		BinaryStream& stream = fileStream;
+
+		stream.Write(CoreVersion);
+		std::vector<std::string> assemblies;
+		assemblies.push_back(mainAssembly);
+		stream.Write(assemblies);
 	}
 
 	MonoEditorExtension::MonoEditorExtension()
@@ -220,7 +230,7 @@ namespace Glory::Editor
 		path = path.parent_path().append("Library/Assembly");
 		/* TODO: Lib manager for user assemblies */
 
-		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib(name, path.string(), true, nullptr, true));
+		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib(name, path.string(), true, nullptr));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)

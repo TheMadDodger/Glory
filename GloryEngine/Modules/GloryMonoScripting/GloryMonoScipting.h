@@ -31,6 +31,8 @@ namespace Glory
         virtual void PostInitialize() override;
         virtual void Cleanup() override;
 
+        virtual void OnProcessData() override;
+
         void GetInternalCalls(std::vector<InternalCall>& internalCalls);
         void GetLibs(ScriptingExtender* pScriptingExtender);
 
@@ -41,5 +43,6 @@ namespace Glory
         friend class ScriptingExtender;
         MonoManager* m_pMonoManager;
         ScriptingExtender* m_pScriptingExtender;
+        std::vector<std::string> m_AssembliesToLoad;
 	};
 }
