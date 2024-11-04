@@ -11,7 +11,7 @@ namespace Sponza
 
         public void Start()
         {
-            camera = Entity.GetComponent<CameraComponent>();
+            camera = Object.GetComponent<CameraComponent>();
             Input.SetPlayerInputMode(0, "Keyboard and Mouse");
         }
 
