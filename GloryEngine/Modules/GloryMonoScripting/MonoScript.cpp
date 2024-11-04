@@ -34,4 +34,11 @@ namespace Glory
 	MonoScript::~MonoScript()
 	{
 	}
+
+	std::string MonoScript::FullName() const
+	{
+		std::stringstream str;
+		str << m_NamespaceName << "." << m_Name;
+		return str.str();
+	}
 }

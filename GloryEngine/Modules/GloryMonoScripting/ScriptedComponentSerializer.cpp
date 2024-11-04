@@ -4,6 +4,8 @@
 #include "MonoScriptManager.h"
 #include "MonoManager.h"
 #include "CoreLibManager.h"
+#include "GloryMonoScipting.h"
+#include "AssetManager.h"
 
 #include <Engine.h>
 
@@ -60,9 +62,23 @@ namespace Glory
 
 	void ScriptedComponentSerailizer::Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
-		//auto scriptNode = node["m_Script"];
+		auto scriptNode = node["m_Script"];
 		auto scriptTypeNode = node["m_ScriptType"];
 		auto scriptDataNode = node["ScriptData"];
+
+		/* Migrate old script type */
+		if (scriptNode.Exists())
+		{
+			const UUID scriptID = scriptNode.As<uint64_t>();
+			Resource* pScriptResource = MonoManager::Instance()->Module()->GetEngine()->GetAssetManager().GetAssetImmediate(scriptID);
+			if (pScriptResource)
+			{
+				MonoScript* pScript = (MonoScript*)pScriptResource;
+				const std::string fullName = pScript->FullName();
+				const uint32_t hash = Hashing::Hash(fullName.c_str());
+				scriptTypeNode.Set(hash);
+			}
+		}
 
 		MonoScriptComponent* pScriptedComponent = (MonoScriptComponent*)data;
 		pScriptedComponent->m_ScriptType.m_Hash = scriptTypeNode.As<uint32_t>(0);

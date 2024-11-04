@@ -27,6 +27,8 @@ namespace Glory
         GLORY_API void Serialize(BinaryStream& container) const override {};
         GLORY_API void Deserialize(BinaryStream& container) override {};
 
+        GLORY_API std::string FullName() const;
+
     private:
         friend class MonoScriptLoader;
         std::string m_NamespaceName;
