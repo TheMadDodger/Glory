@@ -64,10 +64,24 @@ namespace Glory
 
 	void GScene::DestroyEntity(Utils::ECS::EntityID entity)
 	{
+		/* Destroy children first */
+		Entity e = GetEntityByEntityID(entity);
+		while (e.ChildCount())
+		{
+			DestroyEntity(e.Child(0));
+		}
+
 		const auto itor = m_UUIds.find(entity);
 		if (itor == m_UUIds.end()) return;
 		const UUID uuid = itor->second;
-		if (m_pManager) m_pManager->OnSceneObjectDestroyed(GetUUID(), uuid);
+
+		if (m_pManager)
+		{
+			m_pManager->OnSceneObjectDestroyed(GetUUID(), uuid);
+			if (m_pManager->HasStarted())
+				m_Registry.InvokeAll(Utils::ECS::InvocationType::Stop, { entity });
+		}
+
 		m_Registry.DestroyEntity(entity);
 		m_UUIds.erase(itor);
 		m_Ids.erase(uuid);

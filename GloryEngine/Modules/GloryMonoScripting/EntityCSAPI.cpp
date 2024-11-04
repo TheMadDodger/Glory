@@ -106,7 +106,15 @@ namespace Glory
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		Entity entity = pScene->GetEntityByUUID(objectID);
-		return pScene->GetRegistry().RemoveComponent(entity.GetEntityID(), componentHash);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
+			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
+		}
+		return registry.RemoveComponent(entity.GetEntityID(), componentHash);
 	}
 
 	void SceneObject_RemoveComponentByID(uint64_t sceneID, uint64_t objectID, uint64_t id)
@@ -117,6 +125,14 @@ namespace Glory
 		Entity entity = pScene->GetEntityByUUID(objectID);
 		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(entity.GetEntityID());
 		const uint32_t hash = pEntityView->ComponentType(id);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(hash);
+			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
+			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
+		}
 		pScene->GetRegistry().RemoveComponent(entity.GetEntityID(), hash);
 	}
 
