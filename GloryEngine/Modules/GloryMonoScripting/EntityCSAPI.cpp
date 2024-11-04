@@ -494,27 +494,6 @@ namespace Glory
 
 #pragma endregion
 
-#pragma region MonoScriptComponent
-
-	uint64_t MonoScriptComponent_GetScript(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(sceneID, objectID, componentID);
-		return scriptComp.m_Script.AssetUUID();
-	}
-
-	void MonoScriptComponent_SetScript(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t scriptID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(sceneID, objectID, componentID);
-		if (scriptComp.m_Script.AssetUUID() != 0)
-		{
-			Entity_EngineInstance->GetDebug().LogError("You are trying to set the script on a MonoScriptComponent that already has a script, this is not allowed.");
-			return;
-		}
-		scriptComp.m_Script = UUID(scriptID);
-	}
-
-#pragma endregion
-
 #pragma region AudioSource
 
 	uint64_t AudioSource_GetAudio(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -830,10 +809,6 @@ namespace Glory
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_ClearMaterials", ModelRenderer_ClearMaterials);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);
-
-		/* MonoScriptComponent */
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetScript", MonoScriptComponent_GetScript);
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_SetScript", MonoScriptComponent_SetScript);
 
 		/* AudioSource */
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAudio", AudioSource_GetAudio);
