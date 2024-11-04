@@ -80,9 +80,29 @@ namespace Glory
 		return Write(value.data(), value.size());
 	}
 
+	BinaryStream& BinaryStream::Write(const std::vector<std::string>& value)
+	{
+		Write(value.size());
+		for (size_t i = 0; i < value.size(); ++i)
+		{
+			Write(value[i]);
+		}
+		return *this;
+	}
+
 	BinaryStream& BinaryStream::Write(const void* data, size_t size)
 	{
 		return Write(reinterpret_cast<const char*>(data), size);
+	}
+
+	BinaryStream& BinaryStream::Read(std::vector<std::string>& out)
+	{
+		size_t size;
+		Read(size);
+		out.resize(size);
+		for (size_t i = 0; i < size; ++i)
+			Read(out[i]);
+		return *this;
 	}
 
 	BinaryStream& BinaryStream::Read(std::string& value)

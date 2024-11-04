@@ -24,8 +24,6 @@ namespace Glory
 		GLORY_API void Unload(bool isReloading = false);
 
 		GLORY_API Assembly* GetAssembly(const std::string& name);
-		GLORY_API Assembly* GetMainAssembly();
-		GLORY_API const std::string& GetMainAssemblyName();
 
 		GLORY_API MonoObject* InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, void** args);
 
@@ -45,6 +43,5 @@ namespace Glory
 		MonoDomain* m_pMonoDomain;
 
 		std::map<std::string, Assembly> m_Assemblies;
-		std::string m_MainAssemblyName;
 	};
 }

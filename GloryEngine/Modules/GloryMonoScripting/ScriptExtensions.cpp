@@ -10,8 +10,8 @@ namespace Glory
 	{
 	}
 
-	ScriptingLib::ScriptingLib(const std::string& libraryName, const std::string& location, bool reloadable, void* data, bool isMainLib)
-		: m_LibraryName(libraryName), m_Location(location), m_Reloadable(reloadable), m_Data(data), m_MainLib(isMainLib)
+	ScriptingLib::ScriptingLib(const std::string& libraryName, const std::string& location, bool reloadable, void* data)
+		: m_LibraryName(libraryName), m_Location(location), m_Reloadable(reloadable), m_Data(data)
 	{
 
 	}
@@ -34,11 +34,6 @@ namespace Glory
 	bool ScriptingLib::Reloadable() const
 	{
 		return m_Reloadable;
-	}
-
-	bool ScriptingLib::IsMainLib() const
-	{
-		return m_MainLib;
 	}
 
 	const void* ScriptingLib::Data() const

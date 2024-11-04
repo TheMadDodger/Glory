@@ -15,6 +15,7 @@
 #include <SceneManager.h>
 #include <PropertySerializer.h>
 #include <Engine.h>
+#include <BinaryStream.h>
 
 namespace Glory
 {
@@ -88,20 +89,40 @@ namespace Glory
 
 		m_pEngine->AddLoaderModule(new MonoScriptLoader());
 
-		m_pEngine->GetConsole().RegisterCommand(new ConsoleCommand2<std::string, std::string>("loadMainAssembly", [this](std::string name, std::string file) {
-			AddLib(ScriptingLib{ name, file, false, nullptr, true });
+		m_pEngine->GetConsole().RegisterCommand(new ConsoleCommand2<std::string, std::string>("loadAssembly", [this](std::string name, std::string file) {
+			AddLib(ScriptingLib{ name, file, false, nullptr });
 			return true;
 		}));
 	}
 
 	void GloryMonoScipting::PostInitialize()
 	{
+		if (m_pEngine->HasData("Assemblies")) return;
 		m_pMonoManager->InitialLoad();
 	}
 
 	void GloryMonoScipting::Cleanup()
 	{
 		m_pMonoManager->Cleanup();
+	}
+
+	void GloryMonoScipting::OnProcessData()
+	{
+		if (!m_pEngine->HasData("Assemblies")) return;
+		std::vector<char>& data = m_pEngine->GetData("Assemblies");
+		BinaryMemoryStream memoryStream{ data };
+		BinaryStream& stream = memoryStream;
+		stream.Read(m_AssembliesToLoad);
+
+		const std::filesystem::path& rootPath = m_pEngine->RootPath();
+
+		for (const std::filesystem::path& assembly : m_AssembliesToLoad)
+		{
+			std::filesystem::path path = rootPath;
+			path.append(assembly.parent_path().string());
+			AddLib(ScriptingLib{ assembly.filename().string(), path.string(), false, nullptr});
+		}
+		m_pMonoManager->InitialLoad();
 	}
 
 	void GloryMonoScipting::AddLib(const ScriptingLib& library)

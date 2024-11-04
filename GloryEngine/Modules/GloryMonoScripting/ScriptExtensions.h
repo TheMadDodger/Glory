@@ -17,20 +17,18 @@ namespace Glory
 	class ScriptingLib : public ScriptExtension
 	{
 	public:
-		GLORY_API ScriptingLib(const std::string& libraryName, const std::string& location, bool reloadable, void* data = nullptr, bool isMainLib = false);
+		GLORY_API ScriptingLib(const std::string& libraryName, const std::string& location, bool reloadable, void* data = nullptr);
 		GLORY_API virtual ~ScriptingLib();
 
 		GLORY_API const std::string& LibraryName() const;
 		GLORY_API const std::string& Location() const;
 		GLORY_API bool Reloadable() const;
-		GLORY_API bool IsMainLib() const;
 		GLORY_API const void* Data() const;
 
 	private:
 		const std::string m_LibraryName;
 		const std::string m_Location;
 		const bool m_Reloadable;
-		const bool m_MainLib;
 		const void* m_Data;
 	};
 

@@ -28,6 +28,7 @@ namespace Glory
 		}
 
 		BinaryStream& Write(const std::string& value);
+		BinaryStream& Write(const std::vector<std::string>& value);
 
 		virtual void Seek(size_t offset, Relative relative = Relative::Start) = 0;
 		virtual size_t Tell() const = 0;
@@ -50,6 +51,8 @@ namespace Glory
 			out.resize(size);
 			return Read(reinterpret_cast<char*>(out.data()), size*sizeof(T));
 		}
+
+		BinaryStream& Read(std::vector<std::string>& out);
 
 		BinaryStream& Read(std::string& value);
 		BinaryStream& Read(void* out, size_t size);

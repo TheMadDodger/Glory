@@ -22,7 +22,6 @@ namespace Glory
 		const void* data = lib.Data();
 		IMonoLibManager* pLibManager = data ? (IMonoLibManager*)data : nullptr;
 		m_Assemblies.emplace(name, Assembly{ this });
-		if (lib.IsMainLib()) m_MainAssemblyName = lib.LibraryName();
 		m_Assemblies.at(name).Load(lib, pLibManager);
 	}
 
@@ -47,17 +46,6 @@ namespace Glory
 	{
 		if (m_Assemblies.find(name) == m_Assemblies.end()) return nullptr;
 		return &m_Assemblies.at(name);
-	}
-
-	Assembly* AssemblyDomain::GetMainAssembly()
-	{
-		if (m_MainAssemblyName.empty()) return nullptr;
-		return &m_Assemblies.at(m_MainAssemblyName);
-	}
-
-	const std::string& AssemblyDomain::GetMainAssemblyName()
-	{
-		return m_MainAssemblyName;
 	}
 
 	MonoObject* AssemblyDomain::InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, void** args)
