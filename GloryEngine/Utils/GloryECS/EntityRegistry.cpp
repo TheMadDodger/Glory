@@ -46,11 +46,6 @@ namespace Glory::Utils::ECS
 	void EntityRegistry::DestroyEntity(EntityID entity)
 	{
 		EntityView* pEntityView = GetEntityView(entity);
-		/* Destroy children first */
-		while (pEntityView->ChildCount())
-		{
-			DestroyEntity(pEntityView->Child(0));
-		}
 
 		/* Remove all components */
 		for (auto it = pEntityView->m_ComponentTypes.begin(); it != pEntityView->m_ComponentTypes.end(); it++)

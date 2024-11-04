@@ -66,6 +66,7 @@ namespace Glory
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
 		Reflect::RegisterEnum<MonoLogLevel>();
+		Reflect::RegisterType<ScriptTypeReference>();
 
 		CoreCSAPI::SetEngine(m_pEngine);
 		InputCSAPI::SetEngine(m_pEngine);
@@ -79,7 +80,6 @@ namespace Glory
 
 		// Scripted
 		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
-		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnAdd, MonoScriptedSystem::OnAdd);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Update, MonoScriptedSystem::OnUpdate);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Draw, MonoScriptedSystem::OnDraw);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Start, MonoScriptedSystem::OnStart);

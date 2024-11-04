@@ -2,6 +2,10 @@
 #include "MonoEditorExtension.h"
 
 #include <AssetManager.h>
+#include <MonoManager.h>
+#include <CoreLibManager.h>
+#include <GloryMonoScipting.h>
+
 #include <EditorApplication.h>
 
 namespace Glory::Editor
@@ -43,18 +47,11 @@ namespace Glory::Editor
 		m_LastCompilationVersion = MonoEditorExtension::CompilationVersion();
 		EntityComponentEditor::Initialize();
 		MonoScriptComponent& scriptComponent = GetTargetComponent();
-		if (!scriptComponent.m_Script.AssetUUID()) return;
-		MonoScript* pScript = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MonoScript>(scriptComponent.m_Script.AssetUUID());
-		if (!pScript)
-		{
-			scriptComponent.m_Script.SetUUID(0);
-			return;
-		}
-
-		scriptComponent.m_ScriptProperties.clear();
-		pScript->LoadScriptProperties();
-		pScript->GetScriptProperties(scriptComponent.m_ScriptProperties);
-		pScript->ReadDefaults(scriptComponent.m_ScriptData.m_Buffer);
+		GloryMonoScipting* pScripting = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<GloryMonoScipting>();
+		const MonoScriptManager& scriptManager = pScripting->GetMonoManager()->GetCoreLibManager()->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+		scriptManager.ReadDefaults((size_t)typeIndex, scriptComponent.m_ScriptData.m_Buffer);
 	}
 
 	bool MonoScriptComponentEditor::OnGUI()
@@ -63,21 +60,25 @@ namespace Glory::Editor
 
 		bool change = EntityComponentEditor::OnGUI();
 		MonoScriptComponent& scriptComponent = GetTargetComponent();
-		if (change && scriptComponent.m_Script.AssetUUID() || m_LastCompilationVersion != compilationVersion)
+		if (change && scriptComponent.m_ScriptType.m_Hash || m_LastCompilationVersion != compilationVersion)
 		{
 			Initialize();
 			return change;
 		}
-		MonoScript* pScript = EditorApplication::GetInstance()->GetEngine()->GetAssetManager().GetAssetImmediate<MonoScript>(scriptComponent.m_Script.AssetUUID());
-		if (!pScript) return change;
+		GloryMonoScipting* pScripting = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<GloryMonoScipting>();
+		const MonoScriptManager& scriptManager = pScripting->GetMonoManager()->GetCoreLibManager()->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+
+		if (typeIndex == -1) return change;
 
 		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 		bool changedScriptProp = false;
-		for (size_t i = 0; i < scriptComponent.m_ScriptProperties.size(); i++)
+		const auto& properties = scriptManager.ScriptProperties((size_t)typeIndex);
+		for (size_t i = 0; i < properties.size(); i++)
 		{
-			const ScriptProperty* scriptProperty = &scriptComponent.m_ScriptProperties[i];
-			if (std::string_view{ scriptProperty->m_Name }.empty()) continue;
-			changedScriptProp |= DrawProperty(*scriptProperty, scriptComponent.m_ScriptData.m_Buffer, 0);
+			const ScriptProperty& scriptProperty = properties[i];
+			if (std::string_view{ scriptProperty.m_Name }.empty()) continue;
+			changedScriptProp |= DrawProperty(scriptProperty, scriptComponent.m_ScriptData.m_Buffer, 0);
 		}
 
 		if (changedScriptProp) Validate();

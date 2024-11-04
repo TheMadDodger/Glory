@@ -3,6 +3,7 @@
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
 #include "EditorAssetManager.h"
+#include "ScriptTypeReferenceDrawer.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -166,6 +167,7 @@ namespace Glory::Editor
 		Importer::Register(&ScriptImporter);
 
 		Editor::RegisterEditor<MonoScriptComponentEditor>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<ScriptTypeReference>>();
 		EntitySceneObjectEditor::AddComponentIcon<MonoScriptComponent>(ICON_FA_FILE_CODE);
 
 		OBJECT_CREATE_MENU(Scripted, MonoScriptComponent);
@@ -423,6 +425,13 @@ namespace Glory::Editor
 	void MonoEditorExtension::ReloadAssembly(ProjectSpace* pProject)
 	{
 		m_pMonoScriptingModule->GetMonoManager()->Reload();
+
+		/* Re-validate all script components */
+		SceneManager* pScenes = m_pMonoScriptingModule->GetEngine()->GetSceneManager();
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
+		{
+			pScenes->GetOpenScene(i)->GetRegistry().InvokeAll(MonoScriptComponent::GetTypeData()->TypeHash(), Utils::ECS::InvocationType::OnValidate);
+		}
 	}
 
 	void MonoEditorExtension::AssetCallback(const AssetCallbackData& callback)

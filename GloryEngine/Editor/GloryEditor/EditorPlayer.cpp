@@ -59,11 +59,7 @@ namespace Glory::Editor
 		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
 		Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
-		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
-		{
-			GScene* pScene = pScenes->GetOpenScene(i);
-			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Start);
-		}
+		pScenes->Start();
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
@@ -84,11 +80,7 @@ namespace Glory::Editor
 		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
 		Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
-		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
-		{
-			GScene* pScene = pScenes->GetOpenScene(i);
-			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Stop);
-		}
+		pScenes->Stop();
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{

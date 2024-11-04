@@ -5,6 +5,7 @@
 #include "ScriptingExtender.h"
 #include "MonoComponents.h"
 #include "GloryMonoScipting.h"
+#include "CoreLibManager.h"
 
 #include <GScene.h>
 #include <SceneManager.h>
@@ -66,7 +67,34 @@ namespace Glory
 		Entity entity = pScene->GetEntityByUUID(objectID);
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		const UUID uuid{};
-		pScene->GetRegistry().CreateComponent(entity.GetEntityID(), componentHash, uuid);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		void* pNewComponent = registry.CreateComponent(entity.GetEntityID(), componentHash, uuid);
+
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), pNewComponent);
+		}
+		return uuid;
+	}
+	
+	uint64_t SceneObject_AddScriptComponent(uint64_t sceneID, uint64_t objectID, int typeIndex)
+	{
+		if (objectID == 0 || sceneID == 0) return 0;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
+		if (pScene == nullptr) return 0;
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		const uint32_t typeHash = MonoManager::Instance()->GetCoreLibManager()->ScriptManager().TypeHash((size_t)typeIndex);
+		const UUID uuid{};
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		MonoScriptComponent& comp = registry.AddComponent<MonoScriptComponent>(entity.GetEntityID(), uuid, typeHash);
+
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = registry.GetTypeView<MonoScriptComponent>();
+			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), &comp);
+		}
 		return uuid;
 	}
 
@@ -78,7 +106,15 @@ namespace Glory
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		Entity entity = pScene->GetEntityByUUID(objectID);
-		return pScene->GetRegistry().RemoveComponent(entity.GetEntityID(), componentHash);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
+			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
+		}
+		return registry.RemoveComponent(entity.GetEntityID(), componentHash);
 	}
 
 	void SceneObject_RemoveComponentByID(uint64_t sceneID, uint64_t objectID, uint64_t id)
@@ -89,6 +125,14 @@ namespace Glory
 		Entity entity = pScene->GetEntityByUUID(objectID);
 		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(entity.GetEntityID());
 		const uint32_t hash = pEntityView->ComponentType(id);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(hash);
+			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
+			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
+		}
 		pScene->GetRegistry().RemoveComponent(entity.GetEntityID(), hash);
 	}
 
@@ -494,27 +538,6 @@ namespace Glory
 
 #pragma endregion
 
-#pragma region MonoScriptComponent
-
-	uint64_t MonoScriptComponent_GetScript(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(sceneID, objectID, componentID);
-		return scriptComp.m_Script.AssetUUID();
-	}
-
-	void MonoScriptComponent_SetScript(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t scriptID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(sceneID, objectID, componentID);
-		if (scriptComp.m_Script.AssetUUID() != 0)
-		{
-			Entity_EngineInstance->GetDebug().LogError("You are trying to set the script on a MonoScriptComponent that already has a script, this is not allowed.");
-			return;
-		}
-		scriptComp.m_Script = UUID(scriptID);
-	}
-
-#pragma endregion
-
 #pragma region AudioSource
 
 	uint64_t AudioSource_GetAudio(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -747,6 +770,7 @@ namespace Glory
 		/* Entity */
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetComponentID", SceneObject_GetComponentID);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_AddComponent", SceneObject_AddComponent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_AddScriptComponent", SceneObject_AddScriptComponent);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponent", SceneObject_RemoveComponent);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponentByID", SceneObject_RemoveComponentByID);
 
@@ -830,10 +854,6 @@ namespace Glory
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_ClearMaterials", ModelRenderer_ClearMaterials);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);
-
-		/* MonoScriptComponent */
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetScript", MonoScriptComponent_GetScript);
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_SetScript", MonoScriptComponent_SetScript);
 
 		/* AudioSource */
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAudio", AudioSource_GetAudio);

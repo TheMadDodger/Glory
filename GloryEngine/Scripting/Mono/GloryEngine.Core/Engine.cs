@@ -101,6 +101,17 @@ namespace GloryEngine
             return _scriptTypes[index];
         }
 
+        internal int GetTypeIndex<T>() where T : class
+        {
+            Type type = typeof(T);
+            for (int i = 0; i < _scriptTypes.Count; ++i)
+            {
+                if (_scriptTypes[i] != type) continue;
+                return i;
+            }
+            return -1;
+        }
+
         internal string GetScriptTypeName(int index)
         {
             return _scriptTypes[index].FullName;
@@ -111,13 +122,22 @@ namespace GloryEngine
             return _scriptDummyCache[index];
         }
 
-        internal EntityBehaviour GetScript(int typeIndex, UInt64 sceneID, UInt64 objectID, UInt64 componentID)
+        internal EntityBehaviour CreateScript(int typeIndex, UInt64 sceneID, UInt64 objectID, UInt64 componentID)
         {
             Scene scene = _sceneManager.GetOpenScene(sceneID);
             if (scene._destroyed) throw new Exception("Scene was destroyed!");
             SceneObject sceneObject = scene.GetSceneObject(objectID);
             if (sceneObject == null || sceneObject._destroyed) throw new Exception("Scene object was destroyed!");
             return sceneObject.CreateScriptComponent(GetScriptType(typeIndex), componentID);
+        }
+
+        internal EntityBehaviour GetScript(UInt64 sceneID, UInt64 objectID, UInt64 componentID)
+        {
+            Scene scene = _sceneManager.GetOpenScene(sceneID);
+            if (scene._destroyed) throw new Exception("Scene was destroyed!");
+            SceneObject sceneObject = scene.GetSceneObject(objectID);
+            if (sceneObject == null || sceneObject._destroyed) throw new Exception("Scene object was destroyed!");
+            return sceneObject.GetScript(componentID);
         }
 
         #endregion

@@ -12,7 +12,7 @@ namespace Glory
 {
 	CoreLibManager::CoreLibManager(MonoManager* pMonoManager):
 		m_pMonoManager(pMonoManager), m_pAssembly(nullptr), m_pEngineObject(nullptr), m_pEngineReset(nullptr),
-		m_SceneClosingCallback(0), m_SceneObjectDestroyedCallback(0), m_EngineGCHandle(0)
+		m_SceneClosingCallback(0), m_SceneObjectDestroyedCallback(0), m_EngineGCHandle(0), m_ScriptManager(this)
 	{
 	}
 
@@ -77,21 +77,38 @@ namespace Glory
 		return m_ScriptManager.Dummy((size_t)index);
 	}
 	
-	MonoObject* CoreLibManager::GetScript(MonoClass* pClass, UUID sceneID, UUID objectID, UUID componentID)
+	MonoObject* CoreLibManager::CreateScript(size_t typeIndex, UUID sceneID, UUID objectID, UUID componentID)
 	{
 		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
-		MonoMethod* pCreate = pEngineClass->GetMethod(".::GetScript");
-		MonoType* pType = mono_class_get_type(pClass);
-		char* pTypeName = mono_type_get_name(pType);
-		int index = m_ScriptManager.TypeIndexFromName(pTypeName);
-		mono_free(pTypeName);
-		if (index == -1) return nullptr;
-		void* args[4] = { &index, &sceneID, &objectID, &componentID };
+		MonoMethod* pCreate = pEngineClass->GetMethod(".::CreateScript");
+		void* args[4] = { &typeIndex, &sceneID, &objectID, &componentID };
 		MonoObject* pExcept;
 		MonoObject* pReturn = mono_runtime_invoke(pCreate, m_pEngineObject, args, &pExcept);
 		if (pExcept)
 			mono_print_unhandled_exception(pExcept);
 		return pReturn;
+	}
+
+	MonoObject* CoreLibManager::GetScript(UUID sceneID, UUID objectID, UUID componentID)
+	{
+		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
+		MonoMethod* pGetScript = pEngineClass->GetMethod(".::GetScript");
+		void* args[3] = { &sceneID, &objectID, &componentID };
+		MonoObject* pExcept;
+		MonoObject* pReturn = mono_runtime_invoke(pGetScript, m_pEngineObject, args, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
+		return pReturn;
+	}
+
+	const MonoScriptManager& CoreLibManager::ScriptManager() const
+	{
+		return m_ScriptManager;
+	}
+
+	MonoScriptManager& CoreLibManager::ScriptManager()
+	{
+		return m_ScriptManager;
 	}
 
 	MonoObject* CoreLibManager::CreateSceneObject(UUID objectID, UUID sceneID)
