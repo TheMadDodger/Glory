@@ -6,6 +6,7 @@
 #include <WindowsDebugConsole.h>
 #include <GloryRuntime.h>
 #include <CommandLine.h>
+#include <AssetDatabase.h>
 
 namespace Glory
 {
@@ -67,6 +68,10 @@ namespace Glory
 
         if (!cmd.empty())
             m_Runtime->GetEngine()->GetConsole().ExecuteCommand(cmd);
+
+        const UUID entryScene = m_Runtime->GetEngine()->GetAssetDatabase().GetEntryScene();
+        if (entryScene)
+            m_Runtime->LoadScene(entryScene);
 
         /* Ensure 3 second wait for splash screen */
         std::this_thread::sleep_for(std::chrono::seconds(3));

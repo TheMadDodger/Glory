@@ -135,10 +135,6 @@ namespace Glory
 		}
 
 		m_pEngine->ProcessData();
-
-		const UUID entryScene = m_pEngine->GetAssetDatabase().GetEntryScene();
-		if (entryScene)
-			LoadScene(entryScene);
 	}
 
 	void GloryRuntime::Run()
