@@ -17,8 +17,10 @@ namespace Glory
         GLORY_API Assembly* GetAssemblyBinding() const;
         GLORY_API void ResetEngine(Engine* pEngine);
         GLORY_API MonoObject* GetScriptDummy(MonoClass* pClass);
-        GLORY_API MonoObject* CreateScript(MonoClass* pClass, UUID sceneID, UUID objectID, UUID componentID);
+        GLORY_API MonoObject* CreateScript(size_t typeIndex, UUID sceneID, UUID objectID, UUID componentID);
         GLORY_API MonoObject* GetScript(UUID sceneID, UUID objectID, UUID componentID);
+        GLORY_API const MonoScriptManager& ScriptManager() const;
+        GLORY_API MonoScriptManager& ScriptManager();
 
     public:
         void Initialize(Engine* pEngine, Assembly* pAssembly) override;

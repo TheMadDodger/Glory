@@ -5,6 +5,8 @@
 #include "SceneManager.h"
 #include "AssetManager.h"
 #include "MonoComponents.h"
+#include "MonoManager.h"
+#include "CoreLibManager.h"
 
 namespace Glory
 {
@@ -14,19 +16,14 @@ namespace Glory
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
-		const UUID uuid = pComponent.m_Script.AssetUUID();
-		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
-		if (pScript == nullptr) return;
-		const UUID entityUuid = pScene->GetEntityUUID(entity);
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
 
-		pScript->LoadScriptProperties();
-		pScript->GetScriptProperties(pComponent.m_ScriptProperties);
-		pScript->ReadDefaults(pComponent.m_ScriptData.m_Buffer);
-		const UUID sceneID = pScene->GetUUID();
-		pScript->SetPropertyValues(pComponent.m_pScriptObject, pComponent.m_ScriptData.m_Buffer);
-
-		pScript->Invoke(pComponent.m_pScriptObject, "Start", nullptr);
+		scriptManager.ReadDefaults((size_t)typeIndex, pComponent.m_ScriptData.m_Buffer);
+		scriptManager.SetPropertyValues((size_t)typeIndex, pComponent.m_pScriptObject, pComponent.m_ScriptData.m_Buffer);
+		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "Start", nullptr);
 	}
 
 	void MonoScriptedSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
@@ -35,13 +32,11 @@ namespace Glory
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
-		const UUID uuid = pComponent.m_Script.AssetUUID();
-		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetOrLoadAsset<MonoScript>(uuid);
-		if (pScript == nullptr) return;
-		const UUID entityUuid = pScene->GetEntityUUID(entity);
-		const UUID sceneID = pRegistry->GetUserData<GScene*>()->GetUUID();
-		pScript->Invoke(pComponent.m_pScriptObject, "Stop", nullptr);
+		MonoScriptManager& scriptManager = MonoManager::Instance()->GetCoreLibManager()->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
+		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "Stop", nullptr);
 	}
 
 	void MonoScriptedSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
@@ -58,20 +53,17 @@ namespace Glory
 			break;
 		}
 
-		const UUID uuid = pComponent.m_Script.AssetUUID();
-		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetAssetImmediate<MonoScript>(uuid);
-		if (pScript == nullptr) return;
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
 
 		const UUID entityUuid = pScene->GetEntityUUID(entity);
 		const UUID sceneID = pScene->GetUUID();
-		pComponent.m_pScriptObject = pScript->CreateScriptObject(entityUuid, sceneID, pComponent.m_CachedComponentID);
-
-		pScript->LoadScriptProperties();
-		pScript->GetScriptProperties(pComponent.m_ScriptProperties);
-		pScript->ReadDefaults(pComponent.m_ScriptData.m_Buffer);
-		pScript->SetPropertyValues(pComponent.m_pScriptObject, pComponent.m_ScriptData.m_Buffer);
-		pScript->Invoke(pComponent.m_pScriptObject, "OnValidate", nullptr);
+		pComponent.m_pScriptObject = pCoreLibManager->CreateScript((size_t)typeIndex, sceneID, entityUuid, pComponent.m_CachedComponentID);
+		scriptManager.ReadDefaults((size_t)typeIndex, pComponent.m_ScriptData.m_Buffer);
+		scriptManager.SetPropertyValues((size_t)typeIndex, pComponent.m_pScriptObject, pComponent.m_ScriptData.m_Buffer);
+		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "OnValidate", nullptr);
 	}
 
 	void MonoScriptedSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
@@ -80,14 +72,13 @@ namespace Glory
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
-		const UUID uuid = pComponent.m_Script.AssetUUID();
-		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetOrLoadAsset<MonoScript>(uuid);
-		if (pScript == nullptr) return;
-		const UUID entityUuid = pScene->GetEntityUUID(entity);
-		const UUID sceneID = pScene->GetUUID();
-		pScript->Invoke(pComponent.m_pScriptObject, "Update", nullptr);
-		pScript->GetPropertyValues(pComponent.m_pScriptObject, pComponent.m_ScriptData.m_Buffer);
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
+		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "Update", nullptr);
+		scriptManager.GetPropertyValues((size_t)typeIndex, pComponent.m_pScriptObject, pComponent.m_ScriptData.m_Buffer);
 	}
 
 	void MonoScriptedSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
@@ -96,13 +87,12 @@ namespace Glory
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
-		const UUID uuid = pComponent.m_Script.AssetUUID();
-		if (!uuid) return;
-		MonoScript* pScript = pAssets->GetOrLoadAsset<MonoScript>(uuid);
-		if (pScript == nullptr) return;
-		const UUID entityUuid = pScene->GetEntityUUID(entity);
-		const UUID sceneID = pScene->GetUUID();
-		pScript->Invoke(pComponent.m_pScriptObject, "Draw", nullptr);
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
+		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "Draw", nullptr);
 	}
 
 	void MonoScriptedSystem::OnBodyActivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID)
@@ -114,14 +104,16 @@ namespace Glory
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
 
-		if (!pScript) return;
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
 		std::vector<void*> args = {
 			&bodyID
 		};
-
-		pScript->Invoke(scriptComponent.m_pScriptObject, "OnBodyActivated", args.data());
+		scriptManager.Invoke((size_t)typeIndex, scriptComponent.m_pScriptObject, "OnBodyActivated", args.data());
 	}
 
 	void MonoScriptedSystem::OnBodyDeactivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID)
@@ -133,14 +125,16 @@ namespace Glory
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
 
-		if (!pScript) return;
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
 		std::vector<void*> args = {
 			&bodyID
 		};
-
-		pScript->Invoke(scriptComponent.m_pScriptObject, "OnBodyDeactivated", args.data());
+		scriptManager.Invoke((size_t)typeIndex, scriptComponent.m_pScriptObject, "OnBodyDeactivated", args.data());
 	}
 
 	void MonoScriptedSystem::OnContactAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
@@ -151,13 +145,17 @@ namespace Glory
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
-		if (!pScript) return;
+
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
 		std::vector<void*> args = {
 			&body1ID,
 			&body2ID
 		};
-		pScript->Invoke(scriptComponent.m_pScriptObject, "OnContactAdded", args.data());
+		scriptManager.Invoke((size_t)typeIndex, scriptComponent.m_pScriptObject, "OnContactAdded", args.data());
 	}
 
 	void MonoScriptedSystem::OnContactPersisted(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
@@ -168,13 +166,17 @@ namespace Glory
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
-		if (!pScript) return;
+
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
 		std::vector<void*> args = {
 			&body1ID,
 			&body2ID
 		};
-		pScript->Invoke(scriptComponent.m_pScriptObject, "OnContactPersisted", args.data());
+		scriptManager.Invoke((size_t)typeIndex, scriptComponent.m_pScriptObject, "OnContactPersisted", args.data());
 	}
 
 	void MonoScriptedSystem::OnContactRemoved(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
@@ -185,12 +187,16 @@ namespace Glory
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-		MonoScript* pScript = scriptComponent.m_Script.Get(pAssets);
-		if (!pScript) return;
+
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
 		std::vector<void*> args = {
 			&body1ID,
 			&body2ID
 		};
-		pScript->Invoke(scriptComponent.m_pScriptObject, "OnContactRemoved", args.data());
+		scriptManager.Invoke((size_t)typeIndex, scriptComponent.m_pScriptObject, "OnContactRemoved", args.data());
 	}
 }

@@ -3,6 +3,7 @@
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
 #include "EditorAssetManager.h"
+#include "ScriptTypeReferenceDrawer.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -166,6 +167,7 @@ namespace Glory::Editor
 		Importer::Register(&ScriptImporter);
 
 		Editor::RegisterEditor<MonoScriptComponentEditor>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<ScriptTypeReference>>();
 		EntitySceneObjectEditor::AddComponentIcon<MonoScriptComponent>(ICON_FA_FILE_CODE);
 
 		OBJECT_CREATE_MENU(Scripted, MonoScriptComponent);

@@ -66,6 +66,7 @@ namespace Glory
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 
 		Reflect::RegisterEnum<MonoLogLevel>();
+		Reflect::RegisterType<ScriptTypeReference>();
 
 		CoreCSAPI::SetEngine(m_pEngine);
 		InputCSAPI::SetEngine(m_pEngine);
