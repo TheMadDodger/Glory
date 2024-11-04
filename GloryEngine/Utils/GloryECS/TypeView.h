@@ -156,7 +156,8 @@ namespace Glory::Utils::ECS
 
 		void InvokeAll(const InvocationType& invocationType, EntityRegistry* pRegistry) override
 		{
-			for (size_t i = 0; i < m_ComponentData.size(); ++i)
+			const size_t count = m_ComponentData.size();
+			for (size_t i = 0; i < count; ++i)
 			{
 				T& component = m_ComponentData[i];
 				EntityID entity = m_Entities[i];

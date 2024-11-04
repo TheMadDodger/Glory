@@ -5,6 +5,7 @@
 #include "ScriptingExtender.h"
 #include "MonoComponents.h"
 #include "GloryMonoScipting.h"
+#include "CoreLibManager.h"
 
 #include <GScene.h>
 #include <SceneManager.h>
@@ -66,7 +67,34 @@ namespace Glory
 		Entity entity = pScene->GetEntityByUUID(objectID);
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		const UUID uuid{};
-		pScene->GetRegistry().CreateComponent(entity.GetEntityID(), componentHash, uuid);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		void* pNewComponent = registry.CreateComponent(entity.GetEntityID(), componentHash, uuid);
+
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), pNewComponent);
+		}
+		return uuid;
+	}
+	
+	uint64_t SceneObject_AddScriptComponent(uint64_t sceneID, uint64_t objectID, int typeIndex)
+	{
+		if (objectID == 0 || sceneID == 0) return 0;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
+		if (pScene == nullptr) return 0;
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		const uint32_t typeHash = MonoManager::Instance()->GetCoreLibManager()->ScriptManager().TypeHash((size_t)typeIndex);
+		const UUID uuid{};
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		MonoScriptComponent& comp = registry.AddComponent<MonoScriptComponent>(entity.GetEntityID(), uuid, typeHash);
+
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = registry.GetTypeView<MonoScriptComponent>();
+			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), &comp);
+		}
 		return uuid;
 	}
 
@@ -726,6 +754,7 @@ namespace Glory
 		/* Entity */
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetComponentID", SceneObject_GetComponentID);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_AddComponent", SceneObject_AddComponent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_AddScriptComponent", SceneObject_AddScriptComponent);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponent", SceneObject_RemoveComponent);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponentByID", SceneObject_RemoveComponentByID);
 

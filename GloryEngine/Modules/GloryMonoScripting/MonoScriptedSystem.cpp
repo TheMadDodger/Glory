@@ -21,6 +21,18 @@ namespace Glory
 		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
 		if (typeIndex == -1) return;
 
+		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
+		{
+			if (pEntityView->ComponentTypeAt(i) != MonoScriptComponent::GetTypeData()->TypeHash()) continue;
+			pComponent.m_CachedComponentID = pEntityView->ComponentUUIDAt(i);
+			break;
+		}
+
+		const UUID entityUuid = pScene->GetEntityUUID(entity);
+		const UUID sceneID = pScene->GetUUID();
+		pComponent.m_pScriptObject = pCoreLibManager->GetScript(sceneID, entityUuid, pComponent.m_CachedComponentID);
+
 		scriptManager.ReadDefaults((size_t)typeIndex, pComponent.m_ScriptData.m_Buffer);
 		scriptManager.SetPropertyValues((size_t)typeIndex, pComponent.m_pScriptObject, pComponent.m_ScriptData.m_Buffer);
 		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "Start", nullptr);

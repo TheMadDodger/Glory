@@ -176,26 +176,51 @@ namespace GloryEngine.SceneManagement
         }
 
         /// <summary>
-        /// Add a new native component to this entity
+        /// Add a new component to this entity
         /// </summary>
         /// <typeparam name="T">Type of component to add</typeparam>
         /// <returns>The newly constructed component or null if failed</returns>
-        public T AddComponent<T>() where T : NativeComponent, new()
+        public T AddComponent<T>() where T : class
         {
-            UInt64 componentID = SceneObject_AddComponent(_scene.ID, _objectID, typeof(T).Name);
+            UInt64 componentID = 0;
+            Type type = typeof(T);
+            if (type.IsSubclassOf(typeof(NativeComponent)))
+            {
+                componentID = SceneObject_AddComponent(_scene.ID, _objectID, type.Name);
+            }
+            else
+            {
+                int typeIndex = Scene.SceneManager.Engine.GetTypeIndex<T>();
+                if (typeIndex == -1) return null;
+                componentID = SceneObject_AddScriptComponent(_scene.ID, _objectID, typeIndex);
+            }
+
             if (componentID == 0) return null;
-            T component = Activator.CreateInstance(typeof(T)) as T;
+            EntityComponent component = Activator.CreateInstance(type) as EntityComponent;
             component.Initialize(this, componentID);
             _componentCache.Add(componentID, component);
-            return component;
+            return component as T;
         }
 
         /// <summary>
-        /// Remove a native component from this entity
+        /// Remove a component from this entity
         /// </summary>
         /// <typeparam name="T">The type of component to remove</typeparam>
-        public void RemoveComponent<T>() where T : NativeComponent, new()
+        public void RemoveComponent<T>() where T : class
         {
+            Type type = typeof(T);
+            if (!type.IsSubclassOf(typeof(NativeComponent)))
+            {
+                foreach (EntityComponent comp in _componentCache.Values)
+                {
+                    Type compType = comp.GetType();
+                    if (compType != type && !type.IsAssignableFrom(compType)) continue;
+                    SceneObject_RemoveComponentByID(_scene.ID, _objectID, comp.ID);
+                    _componentCache.Remove(comp.ID);
+                    return;
+                }
+                return;
+            }
             UInt64 componentID = SceneObject_RemoveComponent(_scene.ID, _objectID, typeof(T).Name);
             if (componentID == 0) return;
             _componentCache.Remove(componentID);
@@ -212,14 +237,24 @@ namespace GloryEngine.SceneManagement
         }
 
         /// <summary>
-        /// Check if this entity has a certain native component
+        /// Check if this entity has a certain component
         /// </summary>
         /// <typeparam name="T">The type of component to check for</typeparam>
         /// <returns>True if the entity has the component</returns>
-        public bool HasComponent<T>() where T : NativeComponent, new()
+        public bool HasComponent<T>() where T : class
         {
-            UInt64 componentID = SceneObject_GetComponentID(_scene.ID, _objectID, typeof(T).Name);
-            return componentID != 0;
+            Type type = typeof(T);
+            if (!type.IsSubclassOf(typeof(NativeComponent)))
+            {
+                foreach (EntityComponent comp in _componentCache.Values)
+                {
+                    Type compType = comp.GetType();
+                    if (compType != type && !type.IsAssignableFrom(compType)) continue;
+                    return true;
+                }
+                return false;
+            }
+            return SceneObject_GetComponentID(_scene.ID, _objectID, typeof(T).Name) != 0;
         }
 
         internal EntityBehaviour CreateScriptComponent(Type type, UInt64 componentID)
@@ -279,6 +314,9 @@ namespace GloryEngine.SceneManagement
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 SceneObject_AddComponent(UInt64 sceneID, UInt64 objectID, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 SceneObject_AddScriptComponent(UInt64 sceneID, UInt64 objectID, int typeIndex);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 SceneObject_RemoveComponent(UInt64 sceneID, UInt64 objectID, string name);

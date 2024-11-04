@@ -101,6 +101,17 @@ namespace GloryEngine
             return _scriptTypes[index];
         }
 
+        internal int GetTypeIndex<T>() where T : class
+        {
+            Type type = typeof(T);
+            for (int i = 0; i < _scriptTypes.Count; ++i)
+            {
+                if (_scriptTypes[i] != type) continue;
+                return i;
+            }
+            return -1;
+        }
+
         internal string GetScriptTypeName(int index)
         {
             return _scriptTypes[index].FullName;
