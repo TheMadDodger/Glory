@@ -265,9 +265,9 @@ namespace Glory::Editor
 		}
 	}
 
-	void MainEditor::OnFileDragAndDrop(std::string_view path)
+	void MainEditor::OnFileDragAndDrop(std::vector<std::string_view>& paths)
 	{
-		FileBrowser::OnFileDragAndDrop(path);
+		FileBrowser::OnFileDragAndDrop(paths);
 	}
 
 	EditorSettings& MainEditor::Settings()
@@ -499,8 +499,10 @@ namespace Glory::Editor
 	void MainEditor::RegisterEditors()
 	{
 		Editor::RegisterEditor<TextureDataEditor>();
+		Editor::RegisterEditor<StaticTextureDataEditor>();
 		Editor::RegisterEditor<PipelineEditor>();
 		Editor::RegisterEditor<MaterialEditor>();
+		Editor::RegisterEditor<StaticMaterialEditor>();
 		Editor::RegisterEditor<MaterialInstanceEditor>();
 
 		Editor::RegisterEditor<EntitySceneObjectEditor>();

@@ -7,4 +7,3 @@ Editor:
 Engine:
 - Added Screen Space Ambient Occlusion
 - Added scene settings, only has SSAO settings for now
-

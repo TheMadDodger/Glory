@@ -124,6 +124,7 @@ namespace Glory::Editor
 		Selection::SetActiveObject(nullptr);
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		if (it == m_OpenedSceneIDs.end()) return;
+		OnSceneClosing(uuid);
 		const size_t index = it - m_OpenedSceneIDs.begin();
 		GScene* pScene = GetOpenScene(uuid);
 		pScene->Stop();
@@ -348,15 +349,14 @@ namespace Glory::Editor
 	{
 		auto yamlResource = GetSceneFile(uuid);
 		yamlResource->SetPath(path);
-		auto file = **yamlResource;
+		auto& file = **yamlResource;
 		auto root = file.RootNodeRef().ValueRef();
 
 		GScene* pScene = GetOpenScene(uuid);
 		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, root);
-		file.Save();
+		yamlResource->Save();
 
 		if (newScene) EditorAssetDatabase::ImportNewScene(path, pScene);
-		yamlResource->Save();
 		SetSceneDirty(pScene, false);
 
 		for (size_t i = 0; i < m_OpenedSceneIDs.size(); ++i)

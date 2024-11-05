@@ -3,12 +3,12 @@
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
 #include "EditorAssetManager.h"
+#include "ScriptTypeReferenceDrawer.h"
 
 #include <Debug.h>
 #include <Engine.h>
 #include <AssetDatabase.h>
 #include <MonoManager.h>
-#include <MonoScriptObjectManager.h>
 #include <AssemblyDomain.h>
 #include <MonoScript.h>
 #include <GloryMonoScipting.h>
@@ -33,6 +33,8 @@
 #include <EntityEditor.h>
 #include <SystemTools.h>
 #include <SceneManager.h>
+#include <CoreLibManager.h>
+#include <BinaryStream.h>
 
 #include <fstream>
 #include <string>
@@ -58,9 +60,10 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::HandleStop(Module* pModule)
 	{
-		MonoManager::Instance()->ActiveDomain()->ScriptObjectManager()->DestroyAllObjects();
 		MonoManager::Instance()->CollectGC();
 		MonoManager::Instance()->WaitForPendingFinalizers();
+
+		MonoManager::Instance()->GetCoreLibManager()->ResetEngine(pModule->GetEngine());
 	}
 
 	void MonoEditorExtension::OnBeginPackage(const std::filesystem::path& path)
@@ -70,8 +73,6 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::OnGenerateConfigExec(std::ofstream& stream)
 	{
-		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		stream << "	runCommand(\"loadMainAssembly " << pProject->Name() << ".dll" << " ./\");" << std::endl;
 	}
 
 	void MonoEditorExtension::OnEndPackage(const std::filesystem::path& path)
@@ -81,15 +82,26 @@ namespace Glory::Editor
 #else
 		const bool release = true;
 #endif
-
 		/* Compile and copy assembly */
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		CompileProject(pProject, release, false);
 
+		const std::string mainAssembly = pProject->Name() + ".dll";
 		std::filesystem::path assemblyPath = pProject->LibraryPath();
-		assemblyPath.append("Assembly").append(pProject->Name()).replace_extension(".dll");
+		assemblyPath.append("Assembly").append(mainAssembly);
 
 		std::filesystem::copy(assemblyPath, path, std::filesystem::copy_options::overwrite_existing);
+
+		/* Write Assemblies.dat */
+		std::filesystem::path assembliesPath = path;
+		assembliesPath.append("Data/Assemblies.dat");
+		BinaryFileStream fileStream{ assembliesPath };
+		BinaryStream& stream = fileStream;
+
+		stream.Write(CoreVersion);
+		std::vector<std::string> assemblies;
+		assemblies.push_back(mainAssembly);
+		stream.Write(assemblies);
 	}
 
 	MonoEditorExtension::MonoEditorExtension()
@@ -165,6 +177,7 @@ namespace Glory::Editor
 		Importer::Register(&ScriptImporter);
 
 		Editor::RegisterEditor<MonoScriptComponentEditor>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<ScriptTypeReference>>();
 		EntitySceneObjectEditor::AddComponentIcon<MonoScriptComponent>(ICON_FA_FILE_CODE);
 
 		OBJECT_CREATE_MENU(Scripted, MonoScriptComponent);
@@ -217,7 +230,7 @@ namespace Glory::Editor
 		path = path.parent_path().append("Library/Assembly");
 		/* TODO: Lib manager for user assemblies */
 
-		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib(name, path.string(), true, nullptr, true));
+		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib(name, path.string(), true, nullptr));
 	}
 
 	void MonoEditorExtension::OnCreateScript(Object* pObject, const ObjectMenuType& menuType)
@@ -422,6 +435,13 @@ namespace Glory::Editor
 	void MonoEditorExtension::ReloadAssembly(ProjectSpace* pProject)
 	{
 		m_pMonoScriptingModule->GetMonoManager()->Reload();
+
+		/* Re-validate all script components */
+		SceneManager* pScenes = m_pMonoScriptingModule->GetEngine()->GetSceneManager();
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
+		{
+			pScenes->GetOpenScene(i)->GetRegistry().InvokeAll(MonoScriptComponent::GetTypeData()->TypeHash(), Utils::ECS::InvocationType::OnValidate);
+		}
 	}
 
 	void MonoEditorExtension::AssetCallback(const AssetCallbackData& callback)

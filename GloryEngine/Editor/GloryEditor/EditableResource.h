@@ -28,6 +28,9 @@ namespace Glory::Editor
 		/** @brief Overidable method for handling reloading of the asset */
 		virtual void Reload(const std::filesystem::path&) {}
 
+		/** @brief Is this resourc editable */
+		virtual bool IsEditable() const { return true; }
+
 	protected:
 		bool m_Dirty{ false };
 	};
@@ -49,6 +52,9 @@ namespace Glory::Editor
 
 		/** @brief Save does nothing for this asset */
 		virtual void OnSave() override {};
+
+		/** @brief Not editable */
+		virtual bool IsEditable() const override { return false; }
 	};
 
 	/** @brief A YAML based editor asset */

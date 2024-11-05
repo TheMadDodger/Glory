@@ -448,7 +448,7 @@ namespace Glory::Editor
 		AssetManager& assetManager = pEngine->GetAssetManager();
 		if (dndHash == ST_Path)
 		{
-			const std::string path = (const char*)pPayload->Data;
+			std::string path = (const char*)pPayload->Data;
 			const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
 			if (!uuid) return false;
 			ResourceMeta meta;
@@ -469,10 +469,21 @@ namespace Glory::Editor
 					found = true;
 					break;
 				}
-				if(!found) return false;
+				if (!found)
+				{
+					const std::filesystem::path subPath = std::filesystem::path(path).filename().replace_extension().concat("_Prefab");
+					const UUID prefabID = EditorAssetDatabase::FindAssetUUID(path, subPath);
+					if (!prefabID)
+						return false;
+					pPrefab = pEngine->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
+					if (!pPrefab)
+						return false;
+				}
 			}
-
-			pPrefab = assetManager.GetAssetImmediate<PrefabData>(uuid);
+			else
+			{
+				pPrefab = assetManager.GetAssetImmediate<PrefabData>(uuid);
+			}
 		}
 		else if (dndHash = ResourceTypes::GetHash<PrefabData>())
 		{
@@ -486,8 +497,10 @@ namespace Glory::Editor
 			pScene = EditorApplication::GetInstance()->GetSceneManager().GetActiveScene(true);
 
 		Entity entityHandle = pScene->GetEntityByEntityID(entity);
-		pScene->InstantiatePrefab(entityHandle.EntityUUID(), pPrefab, glm::vec3{}, glm::quat{0, 0, 0, 1}, glm::vec3{1, 1, 1});
+		Entity newEntity = pScene->InstantiatePrefab(entityHandle.EntityUUID(), pPrefab, glm::vec3{}, glm::quat{1, 0, 0, 0}, glm::vec3{1, 1, 1});
 		EditorApplication::GetInstance()->GetSceneManager().SetSceneDirty(pScene);
+		EditableEntity* pEntity = GetEditableEntity(newEntity.GetEntityID(), pScene);
+		Selection::SetActiveObject(pEntity);
 		return true;
 	}
 }

@@ -10,7 +10,7 @@ namespace GloryEngine
         #region Constructor
 
         public Mesh() : base() { }
-        public Mesh(UInt64 id) : base(id) { }
+        public Mesh(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
     }

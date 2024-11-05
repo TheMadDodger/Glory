@@ -33,6 +33,7 @@ namespace Glory
 	{
 		GLORY_API Transform();
 		GLORY_API Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
+		GLORY_API Transform(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
 
 		REFLECTABLE(Transform,
 			(glm::vec3)	(Position),
@@ -41,16 +42,6 @@ namespace Glory
 		)
 
 		glm::mat4 MatTransform;
-	};
-
-	struct MeshFilter
-	{
-		MeshFilter() : m_Mesh(0) {}
-		MeshFilter(MeshData* pMeshData) : m_Mesh(pMeshData != nullptr ? pMeshData->GetUUID() : 0) {}
-
-		REFLECTABLE(MeshFilter,
-			(AssetReference<MeshData>)	(m_Mesh)
-		)
 	};
 
 	struct MeshMaterial

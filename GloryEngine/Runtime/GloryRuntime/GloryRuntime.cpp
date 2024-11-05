@@ -41,6 +41,45 @@ namespace Glory
 
 	void GloryRuntime::Initialize()
 	{
+		if (m_DataPath.empty())
+		{
+			m_pEngine->GetDebug().LogError("No data path provided");
+		}
+		const std::filesystem::path dataPath = m_DataPath;
+		if (!std::filesystem::exists(dataPath))
+		{
+			std::stringstream str;
+			str << "Data path: " << dataPath << " not found";
+			m_pEngine->GetDebug().LogError(str.str());
+			return;
+		}
+
+		/* Load data files */
+		for (const auto& entry : std::filesystem::directory_iterator(dataPath))
+		{
+			const std::filesystem::path path = entry.path();
+			if (path.extension().compare(".dat") != 0) continue;
+			const std::string name = path.filename().replace_extension("").string();
+			BinaryFileStream file{ path, true };
+			BinaryStream* stream = &file;
+			Version version;
+			stream->Read(version);
+			if (Version::Compare(version, CoreVersion) != 0)
+			{
+				std::stringstream str;
+				std::string versionStr;
+				version.GetVersionString(versionStr);
+				str << name << " was compiled with a different Core/Runtime version: "
+					<< versionStr << " current: " << GloryCoreVersion;
+				m_pEngine->GetDebug().LogError(str.str());
+				continue;
+			}
+			std::vector<char> data;
+			stream->Read(data);
+			m_pEngine->AddData(name, std::move(data));
+		}
+
+		/* Initialize engine */
 		m_pEngine->SetAssetManager(m_AssetManager.get());
 		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
@@ -53,6 +92,7 @@ namespace Glory
 		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		m_pWindows = m_pEngine->GetMainModule<WindowModule>();
 
+		/* Load splash screen */
 		std::filesystem::path splashPath = m_DataPath;
 		splashPath.append("Splash.bmp");
 
@@ -79,16 +119,6 @@ namespace Glory
 		if (m_pWindows)
 			m_pWindows->GetMainWindow()->SetSplashScreen(buffer.data(), buffer.size());
 
-		if (m_DataPath.empty()) return;
-		const std::filesystem::path dataPath = m_DataPath;
-		if (!std::filesystem::exists(dataPath))
-		{
-			std::stringstream str;
-			str << "Data path: " << dataPath << " not found";
-			m_pEngine->GetDebug().LogError(str.str());
-			return;
-		}
-
 		/* Load asset database */
 		std::filesystem::path dbPath = dataPath;
 		dbPath.append("Assets.gcdb");
@@ -110,35 +140,8 @@ namespace Glory
 			LoadShaderPack(sharedPath);
 		}
 
-		for (const auto& entry : std::filesystem::directory_iterator(dataPath))
-		{
-			const std::filesystem::path path = entry.path();
-			if (path.extension().compare(".dat") != 0) continue;
-			const std::string name = path.filename().replace_extension("").string();
-			BinaryFileStream file{ path, true };
-			BinaryStream* stream = &file;
-			Version version;
-			stream->Read(version);
-			if (Version::Compare(version, CoreVersion) != 0)
-			{
-				std::stringstream str;
-				std::string versionStr;
-				version.GetVersionString(versionStr);
-				str << name << " was compiled with a different Core/Runtime version: "
-					<< versionStr << " current: " << GloryCoreVersion;
-				m_pEngine->GetDebug().LogError(str.str());
-				continue;
-			}
-			std::vector<char> data;
-			stream->Read(data);
-			m_pEngine->AddData(name, std::move(data));
-		}
-
+		/* Process data files */
 		m_pEngine->ProcessData();
-
-		const UUID entryScene = m_pEngine->GetAssetDatabase().GetEntryScene();
-		if (entryScene)
-			LoadScene(entryScene);
 	}
 
 	void GloryRuntime::Run()
@@ -233,6 +236,7 @@ namespace Glory
 	void GloryRuntime::SetDataPath(const std::string& dataPath)
 	{
 		m_DataPath = dataPath;
+		m_pEngine->SetRootPath(std::filesystem::path(dataPath).parent_path());
 	}
 
 	std::string_view GloryRuntime::GetDataPath()

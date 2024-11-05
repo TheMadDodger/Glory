@@ -8,9 +8,10 @@
 
 namespace Glory::Editor
 {
-	constexpr size_t NumSupportedExtensions = 9;
+	constexpr size_t NumSupportedExtensions = 10;
 	constexpr std::string_view SupportedExtensions[NumSupportedExtensions] = {
 		".jpg",
+		".jpeg",
 		".JPEG",
 		".JPG",
 		".png",
@@ -57,6 +58,44 @@ namespace Glory::Editor
 			return nullptr;
 		}
 
+		return Process(path, pSDLImage);
+	}
+
+	ImportedResource SDLImageImporter::LoadResource(void* data, size_t dataSize, void* userData) const
+	{
+		SDL_RWops* rwops = SDL_RWFromMem(data, dataSize);
+		SDL_Surface* pSDLImage = IMG_Load_RW(rwops, 1);
+
+		if (pSDLImage == NULL)
+		{
+			const char* error = SDL_GetError();
+			std::stringstream str;
+			str << "SDL Could not load image from memory, SDL Error: " << error;
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
+			return nullptr;
+		}
+
+		return Process("", pSDLImage);
+	}
+
+	void SDLImageImporter::Initialize()
+	{
+		// Initialize for all available extensions
+		m_InitializedFlags = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
+		if (m_InitializedFlags == 0)
+		{
+			const char* error = SDL_GetError();
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
+		}
+	}
+
+	void SDLImageImporter::Cleanup()
+	{
+		IMG_Quit();
+	}
+
+	ImportedResource SDLImageImporter::Process(const std::filesystem::path& path, SDL_Surface* pSDLImage) const
+	{
 		const uint32_t width = static_cast<uint32_t>(pSDLImage->w);
 		const uint32_t height = static_cast<uint32_t>(pSDLImage->h);
 
@@ -101,7 +140,7 @@ namespace Glory::Editor
 		char* data = new char[bytesPerPixel * numPixels];
 		std::memcpy(data, pSDLImage->pixels, bytesPerPixel * numPixels);
 
-		ImageData* pData = new ImageData(width, height, internalFormat, pixelFormat, bytesPerPixel, std::move(data), bytesPerPixel * numPixels);
+		ImageData* pData = new ImageData(width, height, internalFormat, pixelFormat, bytesPerPixel, std::move(data), bytesPerPixel*numPixels);
 		ImportedResource importedResource{ path, pData };
 
 		TextureData* pDefualtTexture = new TextureData(pData);
@@ -109,21 +148,5 @@ namespace Glory::Editor
 
 		SDL_FreeSurface(pSDLImage);
 		return importedResource;
-	}
-
-	void SDLImageImporter::Initialize()
-	{
-		// Initialize for all available extensions
-		m_InitializedFlags = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
-		if (m_InitializedFlags == 0)
-		{
-			const char* error = SDL_GetError();
-			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogFatalError("Could not initialize SDL_image, SDL Error: " + std::string(error));
-		}
-	}
-
-	void SDLImageImporter::Cleanup()
-	{
-		IMG_Quit();
 	}
 }

@@ -1,5 +1,6 @@
 #include "EditorShaderData.h"
 #include "EditorApplication.h"
+#include "EditorShaderProcessor.h"
 
 #include <MaterialData.h>
 #include <PipelineData.h>
@@ -40,13 +41,14 @@ namespace Glory::Editor
 	{
 		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
 
-		for (size_t i = 0; i < m_SamplerNames.size(); i++)
+		for (size_t i = 0; i < m_SamplerNames.size(); ++i)
 		{
-			pMaterial->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>(), 0);
+			const TextureType textureType = EditorShaderProcessor::ShaderNameToTextureType(m_SamplerNames[i]);
+			pMaterial->AddResourceProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>(), 0, textureType, 0);
 		}
 
 		if (pMaterial->GetCurrentBufferOffset(manager) > 0) return; // Already added from other shader
-		for (size_t i = 0; i < m_PropertyInfos.size(); i++)
+		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
 		{
 			EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];
 			ResourceTypes& types = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
@@ -59,7 +61,8 @@ namespace Glory::Editor
 	{
 		for (size_t i = 0; i < m_SamplerNames.size(); i++)
 		{
-			pPipeline->AddProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>());
+			const TextureType textureType = EditorShaderProcessor::ShaderNameToTextureType(m_SamplerNames[i]);
+			pPipeline->AddResourceProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>(), textureType);
 		}
 
 		for (size_t i = 0; i < m_PropertyInfos.size(); i++)

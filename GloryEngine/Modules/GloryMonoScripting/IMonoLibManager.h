@@ -9,6 +9,6 @@ namespace Glory
 	{
 	public:
 		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) = 0;
-		virtual void Cleanup() = 0;
+		virtual void Cleanup(Engine* pEngine) = 0;
 	};
 }

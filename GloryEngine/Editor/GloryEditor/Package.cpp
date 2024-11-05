@@ -127,6 +127,19 @@ namespace Glory::Editor
 		EntryScene = entryScene.As<uint64_t>();
 	}
 
+	void ScanForAssetsInResource(Engine* pEngine, Resource* pResource, std::vector<UUID>& assets)
+	{
+		if (!pResource) return;
+		const size_t count = assets.size();
+		pResource->References(pEngine, assets);
+		for (size_t i = count; i < assets.size(); ++i)
+		{
+			const UUID id = assets[i];
+			pResource = pEngine->GetAssetManager().GetAssetImmediate(id);
+			ScanForAssetsInResource(pEngine, pResource, assets);
+		}
+	}
+
 	void ScanForAssets(Engine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)
 	{
 		if (node.IsMap())
@@ -163,6 +176,9 @@ namespace Glory::Editor
 					/* Add the parent asset */
 					const UUID parentID = EditorAssetDatabase::FindAssetUUID(location.Path);
 					assets.push_back(parentID);
+					Resource* pResource = pEngine->GetAssetManager().GetAssetImmediate(assetID);
+					if (!pResource) return;
+					ScanForAssetsInResource(pEngine, pResource, assets);
 				}
 
 				/* We also have to search this asset recursively for any referenced assets */
@@ -868,6 +884,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
 		{
 			GScene* pScene = EditorSceneManager::OpenSceneInMemory(ScenesToPackage[i]);
+			pScene->GetRegistry().DisableCallbacks();
 			LoadedScenesToPackage.push_back(pScene);
 		}
 

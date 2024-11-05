@@ -55,6 +55,14 @@ namespace Glory::Utils::ECS
 			pTypeView->m_Callbacks->m_Callbacks[invocationType] = callback;
 		}
 
+		template<typename T>
+		void RegisterReferencesCallback(std::function<void(const BaseTypeView*, std::vector<UUID>&)> callback)
+		{
+			const uint32_t hash = Hashing::Hash(typeid(T).name());
+			TypeView<T>* pTypeView = (TypeView<T>*)m_pTypeViewTemplates.at(hash);
+			pTypeView->m_Callbacks->m_ReferencesCallback = callback;
+		}
+
 	private:
 		static void AddTypeView(std::string& name, uint32_t hash, BaseTypeView* pTypeView);
 		static void AddComponentType(std::string& name, uint32_t hash, bool allowMultiple, uint64_t customFlags);

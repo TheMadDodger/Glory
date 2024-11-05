@@ -24,8 +24,8 @@ namespace Glory
         MaterialData();
         virtual ~MaterialData();
 
-        void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, bool isResource, uint32_t flags = 0);
-        void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, uint32_t flags = 0);
+        void AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, size_t size, uint32_t flags = 0);
+        void AddResourceProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, TextureType type, uint32_t flags = 0);
         void AddProperty(const MaterialPropertyInfo& other);
 
         void SetPipeline(PipelineData* pPipeline);
@@ -39,6 +39,7 @@ namespace Glory
         virtual std::vector<char>& GetBufferReference(const MaterialManager& materialManager);
         virtual std::vector<char>& GetFinalBufferReference(MaterialManager& materialManager);
         virtual bool GetPropertyInfoIndex(const MaterialManager& materialManager, const std::string& name, size_t& index) const;
+        virtual bool GetPropertyInfoIndex(const MaterialManager& materialManager, TextureType textureType, size_t texIndex, size_t& index) const;
         [[nodiscard]]size_t ResourceCount() const;
         virtual AssetReference<TextureData>* GetResourceUUIDPointer(MaterialManager& materialManager, size_t index);
         [[nodiscard]]virtual size_t GetResourcePropertyCount(MaterialManager& materialManager) const;
@@ -46,8 +47,14 @@ namespace Glory
         [[nodiscard]]virtual size_t GetPropertyIndexFromResourceIndex(MaterialManager& materialManager, size_t index) const;
         void ClearProperties();
 
+        virtual size_t TextureCount(MaterialManager&, TextureType textureType) const;
+
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
+
+        virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+
+        virtual bool IsInstance() const { return false; }
 
     public: // Properties
         // Setters
@@ -57,7 +64,7 @@ namespace Glory
             size_t index;
             if (!GetPropertyInfoIndex(materialManager, name, index)) return;
             EnableProperty(index);
-            m_PropertyInfos[index].Write<T>(GetPropertyBuffer(materialManager, index), value);
+            GetPropertyInfoAt(materialManager, index)->Write<T>(GetPropertyBuffer(materialManager, index), value);
         }
 
         // Getters
@@ -66,11 +73,14 @@ namespace Glory
         {
             size_t index;
             if (!GetPropertyInfoIndex(materialManager, name, index)) return false;
-            return m_PropertyInfos[index].Read<T>(GetPropertyBuffer(materialManager, index), value);
+            return GetPropertyInfoAt(materialManager, index)->Read<T>(GetPropertyBuffer(materialManager, index), value);
         }
+
+        void* Address(MaterialManager& materialManager, size_t index);
 
         virtual void SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value);
         virtual void SetTexture(MaterialManager& materialManager, const std::string& name, UUID uuid);
+        virtual void SetTexture(MaterialManager& materialManager, TextureType textureType, size_t texIndex, UUID uuid);
         virtual bool GetTexture(MaterialManager& materialManager, const std::string& name, TextureData** value, AssetManager* pManager);
 
     protected:
@@ -88,6 +98,8 @@ namespace Glory
         std::vector<size_t> m_ResourcePropertyInfoIndices;
         std::vector<AssetReference<TextureData>> m_Resources;
         std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;
+
+        std::vector<std::vector<size_t>> m_TextureTypeIndices;
 
         size_t m_CurrentOffset;
 

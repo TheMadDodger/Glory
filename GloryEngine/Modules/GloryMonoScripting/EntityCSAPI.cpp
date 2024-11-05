@@ -1,13 +1,11 @@
 #include "EntityCSAPI.h"
 #include "AssemblyDomain.h"
-#include "MonoSceneManager.h"
-#include "MonoSceneObjectManager.h"
-#include "MonoScriptObjectManager.h"
 #include "CoreCSAPI.h"
 #include "MathCSAPI.h"
-#include "MonoAssetManager.h"
 #include "ScriptingExtender.h"
 #include "MonoComponents.h"
+#include "GloryMonoScipting.h"
+#include "CoreLibManager.h"
 
 #include <GScene.h>
 #include <SceneManager.h>
@@ -15,6 +13,7 @@
 #include <Components.h>
 #include <AudioComponents.h>
 #include <AudioModule.h>
+#include <RendererModule.h>
 #include <AudioSourceSystem.h>
 #include <LayerManager.h>
 
@@ -24,71 +23,32 @@ namespace Glory
 
 #pragma region Entity
 
-	GScene* GetEntityScene(UUID sceneID)
+	GScene* GetEntityScene(uint64_t sceneID)
 	{
 		if (sceneID == 0) return nullptr;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene(sceneID);
-		if (pScene == nullptr) return nullptr;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		return pScene;
 	}
 
-	GScene* GetEntityScene(MonoEntityHandle* pEntityHandle)
-	{
-		if (pEntityHandle->m_EntityID == 0) return nullptr;
-		return GetEntityScene((UUID)pEntityHandle->m_SceneID);
-	}
-
 	template<typename T>
-	static T& GetComponent(MonoEntityHandle* pEntityHandle, UUID componentID)
+	static T& GetComponent(UUID sceneID, UUID objectID, uint64_t componentID)
 	{
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
-		uint32_t hash = pEntityView->ComponentType(componentID);
-		return pScene->GetRegistry().GetComponent<T>(pEntityHandle->m_EntityID);
-	}
-
-	bool Entity_IsValid(MonoEntityHandle* pMonoEntityHandle)
-	{
-		if (pMonoEntityHandle->m_EntityID == 0 || pMonoEntityHandle->m_SceneID == 0) return false;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pMonoEntityHandle->m_SceneID);
-		if (pScene == nullptr) return false;
-		return pScene->GetEntityByEntityID(pMonoEntityHandle->m_EntityID).IsValid();
-	}
-
-	MonoObject* Entity_GetSceneObjectID(MonoEntityHandle* pMonoEntityHandle)
-	{
-		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pMonoEntityHandle->m_SceneID);
-		if (!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Entity_EngineInstance, pScene);
-		if (!pObjectManager) return nullptr;
-		Entity entity = pScene->GetEntityByEntityID(pMonoEntityHandle->m_EntityID);
-		if (!entity.IsValid()) return nullptr;
-		return pObjectManager->GetMonoSceneObject(pScene->GetEntityUUID(entity.GetEntityID()));
-	}
-
-	MonoEntityHandle GetEntityHandle(MonoObject* pObject)
-	{
-		AssemblyDomain* pDomain = MonoManager::Instance()->ActiveDomain();
-		MonoScriptObjectManager* pScriptObjects = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
-		const UUID uuid = pScriptObjects->GetIDForMonoScriptObject(pObject);
-		const UUID sceneID = pScriptObjects->GetSceneIDForMonoScriptObject(pObject);
-		if (!uuid || !sceneID) return MonoEntityHandle();
 		GScene* pScene = GetEntityScene(sceneID);
-		if (!pScene) return MonoEntityHandle();
-		Entity entity = pScene->GetEntityByUUID(uuid);
-		if (!entity.IsValid()) return MonoEntityHandle();
-		Utils::ECS::EntityID entityID = entity.GetEntityID();
-		return MonoEntityHandle(entityID, pScene->GetUUID());
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+		uint32_t hash = pEntityView->ComponentType(componentID);
+		return pScene->GetRegistry().GetComponent<T>(entity.GetEntityID());
 	}
 
-	uint64_t Component_GetComponentID(MonoEntityHandle* pEntityHandle, MonoString* pComponentName)
+	uint64_t SceneObject_GetComponentID(uint64_t sceneID, uint64_t objectID, MonoString* pComponentName)
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
-		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (objectID == 0 || sceneID == 0) return 0;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
-		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 
 		for (auto iter = pEntityView->GetIterator(); iter != pEntityView->GetIteratorEnd(); iter++)
 		{
@@ -98,368 +58,440 @@ namespace Glory
 		return 0;
 	}
 
-	uint64_t Component_AddComponent(MonoEntityHandle* pEntityHandle, MonoString* pComponentName)
+	uint64_t SceneObject_AddComponent(uint64_t sceneID, uint64_t objectID, MonoString* pComponentName)
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
-		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (objectID == 0 || sceneID == 0) return 0;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
 		if (pScene == nullptr) return 0;
+		Entity entity = pScene->GetEntityByUUID(objectID);
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
 		const UUID uuid{};
-		pScene->GetRegistry().CreateComponent(pEntityHandle->m_EntityID, componentHash, uuid);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		void* pNewComponent = registry.CreateComponent(entity.GetEntityID(), componentHash, uuid);
+
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), pNewComponent);
+		}
+		return uuid;
+	}
+	
+	uint64_t SceneObject_AddScriptComponent(uint64_t sceneID, uint64_t objectID, int typeIndex)
+	{
+		if (objectID == 0 || sceneID == 0) return 0;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
+		if (pScene == nullptr) return 0;
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		const uint32_t typeHash = MonoManager::Instance()->GetCoreLibManager()->ScriptManager().TypeHash((size_t)typeIndex);
+		const UUID uuid{};
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		MonoScriptComponent& comp = registry.AddComponent<MonoScriptComponent>(entity.GetEntityID(), uuid, typeHash);
+
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = registry.GetTypeView<MonoScriptComponent>();
+			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), &comp);
+		}
 		return uuid;
 	}
 
-	uint64_t Component_RemoveComponent(MonoEntityHandle* pEntityHandle, MonoString* pComponentName)
+	uint64_t SceneObject_RemoveComponent(uint64_t sceneID, uint64_t objectID, MonoString* pComponentName)
 	{
 		const std::string componentName{ mono_string_to_utf8(pComponentName) };
-		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return 0;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (objectID == 0 || sceneID == 0) return 0;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
 		if (pScene == nullptr) return 0;
 		const uint32_t componentHash = Glory::ComponentTypes::GetComponentHash(componentName);
-		return pScene->GetRegistry().RemoveComponent(pEntityHandle->m_EntityID, componentHash);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
+			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
+		}
+		return registry.RemoveComponent(entity.GetEntityID(), componentHash);
 	}
 
-	void Component_RemoveComponentByID(MonoEntityHandle* pEntityHandle, uint64_t id)
+	void SceneObject_RemoveComponentByID(uint64_t sceneID, uint64_t objectID, uint64_t id)
 	{
-		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return;
-		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)pEntityHandle->m_SceneID);
+		if (objectID == 0 || sceneID == 0) return;
+		GScene* pScene = Entity_EngineInstance->GetSceneManager()->GetOpenScene((UUID)sceneID);
 		if (pScene == nullptr) return;
-		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(entity.GetEntityID());
 		const uint32_t hash = pEntityView->ComponentType(id);
-		pScene->GetRegistry().RemoveComponent(pEntityHandle->m_EntityID, hash);
+
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		if (pScene->Manager()->HasStarted())
+		{
+			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(hash);
+			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
+			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
+		}
+		pScene->GetRegistry().RemoveComponent(entity.GetEntityID(), hash);
 	}
 
-	bool EntityComponent_GetActive(MonoEntityHandle* pEntityHandle, uint64_t componentID)
+	bool EntityComponent_GetActive(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return false;
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
+		if (objectID == 0 || sceneID == 0) return false;
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		const uint32_t type = pEntityView->ComponentType(componentID);
 		Utils::ECS::BaseTypeView* pTypeView = pScene->GetRegistry().GetTypeView(type);
-		return pTypeView->IsActive(pEntityHandle->m_EntityID);
+		return pTypeView->IsActive(entity.GetEntityID());
 	}
 
-	void EntityComponent_SetActive(MonoEntityHandle* pEntityHandle, uint64_t componentID, bool active)
+	void EntityComponent_SetActive(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool active)
 	{
-		if (pEntityHandle->m_EntityID == 0 || pEntityHandle->m_SceneID == 0) return;
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		Utils::ECS::EntityView* pEntityView = pScene->GetRegistry().GetEntityView(pEntityHandle->m_EntityID);
+		if (objectID == 0 || sceneID == 0) return;
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		const uint32_t type = pEntityView->ComponentType(componentID);
 		Utils::ECS::BaseTypeView* pTypeView = pScene->GetRegistry().GetTypeView(type);
-		pTypeView->SetActive(pEntityHandle->m_EntityID, active);
+		pTypeView->SetActive(entity.GetEntityID(), active);
 	}
 
 #pragma endregion
 
 #pragma region Transform
 
-	glm::vec3 Transform_GetLocalPosition(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetLocalPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return transform.Position;
 	}
 
-	void Transform_SetLocalPosition(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* position)
+	void Transform_SetLocalPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec3* position)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		transform.Position = *position;
-
-		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
+		Entity entity = GetEntityScene(sceneID)->GetEntityByUUID(objectID);
+		entity.SetDirty();
 	}
 
-	QuatWrapper Transform_GetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID)
+	QuatWrapper Transform_GetLocalRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return transform.Rotation;
 	}
 
-	void Transform_SetLocalRotation(MonoEntityHandle* pEntityHandle, UUID componentID, glm::quat* rotation)
+	void Transform_SetLocalRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::quat* rotation)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		transform.Rotation = *rotation;
 
-		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
+		Entity entity = GetEntityScene(sceneID)->GetEntityByUUID(objectID);
+		entity.SetDirty();
 	}
 
-	glm::vec3 Transform_GetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetLocalRotationEuler(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return glm::eulerAngles(transform.Rotation);
 	}
 
-	void Transform_SetLocalRotationEuler(MonoEntityHandle* pEntityHandle, UUID componentID, Vec3Wrapper* rotation)
+	void Transform_SetLocalRotationEuler(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper* rotation)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		transform.Rotation = glm::quat(ToGLMVec3(*rotation));
 
-		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
+		Entity entity = GetEntityScene(sceneID)->GetEntityByUUID(objectID);
+		entity.SetDirty();
 	}
 
-	glm::vec3 Transform_GetLocalScale(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetLocalScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return transform.Scale;
 	}
 
-	void Transform_SetLocalScale(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* scale)
+	void Transform_SetLocalScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec3* scale)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		transform.Scale = *scale;
 
-		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
+		Entity entity = GetEntityScene(sceneID)->GetEntityByUUID(objectID);
+		entity.SetDirty();
 	}
 
-	glm::vec3 Transform_GetForward(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetForward(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return glm::vec3(transform.MatTransform[2][0], transform.MatTransform[2][1], transform.MatTransform[2][2]);
 	}
 
-	glm::vec3 Transform_GetUp(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetUp(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return glm::vec3(transform.MatTransform[1][0], transform.MatTransform[1][1], transform.MatTransform[1][2]);
 	}
 
-	void Transform_SetForward(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec3* forward)
+	void Transform_SetForward(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec3* forward)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		transform.Rotation = glm::conjugate(glm::quatLookAt(*forward, { 0.0f, 1.0f, 0.0f }));
 
-		GetEntityScene(pEntityHandle)->GetRegistry().SetEntityDirty(pEntityHandle->m_EntityID);
+		Entity entity = GetEntityScene(sceneID)->GetEntityByUUID(objectID);
+		entity.SetDirty();
 	}
 
-	glm::vec3 Transform_GetRight(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec3 Transform_GetRight(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return glm::vec3(transform.MatTransform[0][0], transform.MatTransform[0][1], transform.MatTransform[0][2]);
 	}
 
-	Mat4Wrapper Transform_GetWorld(MonoEntityHandle* pEntityHandle, UUID componentID)
+	Mat4Wrapper Transform_GetWorld(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		Transform& transform = GetComponent<Transform>(pEntityHandle, componentID);
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
 		return ToMat4Wrapper(transform.MatTransform);
-	}
-
-#pragma endregion
-
-#pragma region MeshFilter
-
-	MonoObject* MeshFilter_GetMesh(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		MeshFilter& meshFilter = GetComponent<MeshFilter>(pEntityHandle, componentID);
-		UUID uuid = meshFilter.m_Mesh.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
-	}
-
-	void MeshFilter_SetMesh(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
-	{
-		MeshFilter& meshFilter = GetComponent<MeshFilter>(pEntityHandle, componentID);
-		meshFilter.m_Mesh.SetUUID(modelID);
 	}
 
 #pragma endregion
 
 #pragma region MeshRenderer
 
-	MonoObject* MeshRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t MeshRenderer_GetMaterial(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		const UUID uuid = meshRenderer.m_Material.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(sceneID, objectID, componentID);
+		return meshRenderer.m_Material.AssetUUID();
 	}
 
-	void MeshRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+	void MeshRenderer_SetMaterial(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t materialID)
 	{
-		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Material = materialID;
+		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(sceneID, objectID, componentID);
+		meshRenderer.m_Material = UUID(materialID);
 	}
 
-	MonoObject* MeshRenderer_GetMesh(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t MeshRenderer_GetMesh(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		const UUID uuid = meshRenderer.m_Mesh.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MeshData>(Entity_EngineInstance, uuid);
+		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(sceneID, objectID, componentID);
+		return meshRenderer.m_Mesh.AssetUUID();
 	}
 
-	void MeshRenderer_SetMesh(MonoEntityHandle* pEntityHandle, UUID componentID, UUID meshID)
+	void MeshRenderer_SetMesh(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t meshID)
 	{
-		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Mesh = meshID;
+		MeshRenderer& meshRenderer = GetComponent<MeshRenderer>(sceneID, objectID, componentID);
+		meshRenderer.m_Mesh = UUID(meshID);
 	}
 
 #pragma endregion
 
 #pragma region ModelRenderer
 
-	MonoObject* ModelRenderer_GetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t ModelRenderer_GetMaterial(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		UUID uuid = meshRenderer.m_Materials.size() > 0 ? meshRenderer.m_Materials[0].m_MaterialReference.AssetUUID() : 0;
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
+		return meshRenderer.m_Materials.size() > 0 ? meshRenderer.m_Materials[0].m_MaterialReference.AssetUUID() : 0;
 	}
 
-	void ModelRenderer_SetMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+	void ModelRenderer_SetMaterial(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t materialID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		if (meshRenderer.m_Materials.size() <= 0) meshRenderer.m_Materials.push_back(materialID);
-		else meshRenderer.m_Materials[0] = materialID;
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
+		if (meshRenderer.m_Materials.size() <= 0) meshRenderer.m_Materials.push_back(UUID(materialID));
+		else meshRenderer.m_Materials[0] = UUID(materialID);
 	}
 
-	size_t ModelRenderer_GetMaterialCount(MonoEntityHandle* pEntityHandle, UUID componentID)
+	size_t ModelRenderer_GetMaterialCount(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
 		return meshRenderer.m_Materials.size();
 	}
 
-	MonoObject* ModelRenderer_GetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index)
+	uint64_t ModelRenderer_GetMaterialAt(uint64_t sceneID, uint64_t objectID, uint64_t componentID, size_t index)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		if (meshRenderer.m_Materials.size() <= index) return nullptr;
-		UUID uuid = meshRenderer.m_Materials[index].m_MaterialReference.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MaterialData>(Entity_EngineInstance, uuid);
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
+		if (meshRenderer.m_Materials.size() <= index) return 0;
+		return meshRenderer.m_Materials[index].m_MaterialReference.AssetUUID();
 	}
 
-	void ModelRenderer_AddMaterial(MonoEntityHandle* pEntityHandle, UUID componentID, UUID materialID)
+	void ModelRenderer_AddMaterial(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t materialID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Materials.push_back(materialID);
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
+		meshRenderer.m_Materials.push_back(UUID(materialID));
 	}
 
-	void ModelRenderer_SetMaterialAt(MonoEntityHandle* pEntityHandle, UUID componentID, size_t index, UUID materialID)
+	void ModelRenderer_SetMaterialAt(uint64_t sceneID, uint64_t objectID, uint64_t componentID, size_t index, uint64_t materialID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
 		if (meshRenderer.m_Materials.size() <= index) return;
-		meshRenderer.m_Materials[index] = materialID;
+		meshRenderer.m_Materials[index] = UUID(materialID);
 	}
 
-	void ModelRenderer_ClearMaterials(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void ModelRenderer_ClearMaterials(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
 		meshRenderer.m_Materials.clear();
 	}
 
-	MonoObject* ModelRenderer_GetModel(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t ModelRenderer_GetModel(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		const UUID uuid = meshRenderer.m_Model.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<ModelData>(Entity_EngineInstance, uuid);
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
+		return meshRenderer.m_Model.AssetUUID();
 	}
 
-	void ModelRenderer_SetModel(MonoEntityHandle* pEntityHandle, UUID componentID, UUID modelID)
+	void ModelRenderer_SetModel(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t modelID)
 	{
-		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(pEntityHandle, componentID);
-		meshRenderer.m_Model = modelID;
+		ModelRenderer& meshRenderer = GetComponent<ModelRenderer>(sceneID, objectID, componentID);
+		meshRenderer.m_Model = UUID(modelID);
 	}
 
 #pragma endregion
 
 #pragma region CameraComponent
 
-	float CameraComponent_GetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float CameraComponent_GetHalfFOV(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_HalfFOV;
 	}
 
-	void CameraComponent_SetHalfFOV(MonoEntityHandle* pEntityHandle, UUID componentID, float halfFov)
+	void CameraComponent_SetHalfFOV(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float halfFov)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		cameraComp.m_HalfFOV = halfFov;
 	}
 
-	float CameraComponent_GetNear(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float CameraComponent_GetNear(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_Near;
 	}
 
-	void CameraComponent_SetNear(MonoEntityHandle* pEntityHandle, UUID componentID, float near)
+	void CameraComponent_SetNear(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float near)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		cameraComp.m_Near = near;
 	}
 
-	float CameraComponent_GetFar(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float CameraComponent_GetFar(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_Far;
 	}
 
-	void CameraComponent_SetFar(MonoEntityHandle* pEntityHandle, UUID componentID, float far)
+	void CameraComponent_SetFar(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float far)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		cameraComp.m_Far = far;
 	}
 
-	int CameraComponent_GetDisplayIndex(MonoEntityHandle* pEntityHandle, UUID componentID)
+	int CameraComponent_GetDisplayIndex(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_DisplayIndex;
 	}
 
-	void CameraComponent_SetDisplayIndex(MonoEntityHandle* pEntityHandle, UUID componentID, int displayIndex)
+	void CameraComponent_SetDisplayIndex(uint64_t sceneID, uint64_t objectID, uint64_t componentID, int displayIndex)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		cameraComp.m_DisplayIndex = displayIndex;
 	}
 
-	int CameraComponent_GetPriority(MonoEntityHandle* pEntityHandle, UUID componentID)
+	int CameraComponent_GetPriority(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_Priority;
 	}
 
-	void CameraComponent_SetPriority(MonoEntityHandle* pEntityHandle, UUID componentID, int priority)
+	void CameraComponent_SetPriority(uint64_t sceneID, uint64_t objectID, uint64_t componentID, int priority)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		cameraComp.m_Priority = priority;
 	}
 
-	LayerMask CameraComponent_GetLayerMask(MonoEntityHandle* pEntityHandle, UUID componentID)
+	LayerMask CameraComponent_GetLayerMask(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_LayerMask;
 	}
 
-	void CameraComponent_SetLayerMask(MonoEntityHandle* pEntityHandle, UUID componentID, LayerMask* pLayerMask)
+	void CameraComponent_SetLayerMask(uint64_t sceneID, uint64_t objectID, uint64_t componentID, LayerMask* pLayerMask)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		cameraComp.m_LayerMask.m_Mask = pLayerMask->m_Mask;
 	}
 
-	glm::vec4 CameraComponent_GetClearColor(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec4 CameraComponent_GetClearColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_ClearColor;
 	}
 
-	void CameraComponent_SetClearColor(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec4* clearCol)
+	void CameraComponent_SetClearColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec4* clearCol)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		cameraComp.m_ClearColor = *clearCol;
 	}
 
-	uint64_t CameraComponent_GetCameraID(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t CameraComponent_GetCameraID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(pEntityHandle, componentID);
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		return cameraComp.m_Camera.GetUUID();
+	}
+	
+	void CameraComponent_PrepareNextPick(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec2* position)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
+		if (!cameraComp.m_Camera.GetUUID()) return;
+		pRenderer->Submit(glm::ivec2(*position), cameraComp.m_Camera.GetUUID());
+	}
+
+	struct PickResultWrapper
+	{
+		uint64_t CameraID;
+		uint64_t ObjectID;
+		Vec3Wrapper Position;
+		Vec3Wrapper Normal;
+	};
+	
+	PickResultWrapper CameraComponent_GetPickResult(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
+		size_t resultIndex;
+		if (!pRenderer->PickResultIndex(cameraComp.m_Camera.GetUUID(), resultIndex))
+			return { 0, 0, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
+		const PickResult pickResult = pRenderer->GetPickResult(resultIndex);
+
+		uint64_t pickedObjectID = 0;
+
+		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
+		if (pScene)
+			pickedObjectID = pickResult.m_Object.ObjectUUID();
+
+		return PickResultWrapper{ pickResult.m_CameraID, pickedObjectID,
+			ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
+	}
+	
+	Vec2Wrapper CameraComponent_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		const glm::uvec2& resolution = cameraComp.m_Camera.GetResolution();
+		return ToVec2Wrapper(resolution);
 	}
 
 #pragma endregion
 
 #pragma region Layer Component
 
-	LayerWrapper LayerComponent_GetLayer(MonoEntityHandle* pEntityHandle, UUID componentID)
+	LayerWrapper LayerComponent_GetLayer(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
+		LayerComponent& layerComp = GetComponent<LayerComponent>(sceneID, objectID, componentID);
 		return LayerWrapper(layerComp.m_Layer.Layer(&Entity_EngineInstance->GetLayerManager()));
 	}
 
-	void LayerComponent_SetLayer(MonoEntityHandle* pEntityHandle, UUID componentID, LayerWrapper* layer)
+	void LayerComponent_SetLayer(uint64_t sceneID, uint64_t objectID, uint64_t componentID, LayerWrapper* layer)
 	{
-		LayerComponent& layerComp = GetComponent<LayerComponent>(pEntityHandle, componentID);
+		LayerComponent& layerComp = GetComponent<LayerComponent>(sceneID, objectID, componentID);
 		const Layer* pLayer = Entity_EngineInstance->GetLayerManager().GetLayerByName(mono_string_to_utf8(layer->Name));
 		layerComp.m_Layer = pLayer ? Entity_EngineInstance->GetLayerManager().GetLayerIndex(pLayer) + 1 : 0;
 	}
@@ -468,140 +500,109 @@ namespace Glory
 
 #pragma region Light Component
 
-	glm::vec4 LightComponent_GetColor(MonoEntityHandle* pEntityHandle, UUID componentID)
+	glm::vec4 LightComponent_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		LightComponent& lightComp = GetComponent<LightComponent>(sceneID, objectID, componentID);
 		return lightComp.m_Color;
 	}
 
-	void LightComponent_SetColor(MonoEntityHandle* pEntityHandle, UUID componentID, glm::vec4* color)
+	void LightComponent_SetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec4* color)
 	{
-		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		LightComponent& lightComp = GetComponent<LightComponent>(sceneID, objectID, componentID);
 		lightComp.m_Color = *color;
 	}
 
-	float LightComponent_GetIntensity(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float LightComponent_GetIntensity(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		LightComponent& lightComp = GetComponent<LightComponent>(sceneID, objectID, componentID);
 		return lightComp.m_Intensity;
 	}
 
-	void LightComponent_SetIntensity(MonoEntityHandle* pEntityHandle, UUID componentID, float intensity)
+	void LightComponent_SetIntensity(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float intensity)
 	{
-		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		LightComponent& lightComp = GetComponent<LightComponent>(sceneID, objectID, componentID);
 		lightComp.m_Intensity = intensity;
 	}
 
-	float LightComponent_GetRange(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float LightComponent_GetRange(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		LightComponent& lightComp = GetComponent<LightComponent>(sceneID, objectID, componentID);
 		return lightComp.m_Range;
 	}
 
-	void LightComponent_SetRange(MonoEntityHandle* pEntityHandle, UUID componentID, float range)
+	void LightComponent_SetRange(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float range)
 	{
-		LightComponent& lightComp = GetComponent<LightComponent>(pEntityHandle, componentID);
+		LightComponent& lightComp = GetComponent<LightComponent>(sceneID, objectID, componentID);
 		lightComp.m_Range = range;
-	}
-
-#pragma endregion
-
-#pragma region MonoScriptComponent
-
-	MonoObject* MonoScriptComponent_GetScript(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
-		const UUID uuid = scriptComp.m_Script.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<MonoScript>(Entity_EngineInstance, uuid);
-	}
-
-	void MonoScriptComponent_SetScript(MonoEntityHandle* pEntityHandle, UUID componentID, UUID scriptID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
-		if (scriptComp.m_Script.AssetUUID() != 0)
-		{
-			Entity_EngineInstance->GetDebug().LogError("You are trying to set the script on a MonoScriptComponent that already has a script, this is not allowed.");
-			return;
-		}
-		scriptComp.m_Script = scriptID;
-	}
-
-	MonoObject* MonoScriptComponent_GetBehaviour(MonoEntityHandle* pEntityHandle, UUID componentID)
-	{
-		MonoScriptComponent& scriptComp = GetComponent<MonoScriptComponent>(pEntityHandle, componentID);
-		MonoScriptObjectManager* pScriptObjectManager = MonoManager::Instance()->ActiveDomain()->ScriptObjectManager();
-		/* TODO */
-		return nullptr;
 	}
 
 #pragma endregion
 
 #pragma region AudioSource
 
-	MonoObject* AudioSource_GetAudio(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint64_t AudioSource_GetAudio(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
-		const UUID uuid = source.m_Audio.AssetUUID();
-		return MonoAssetManager::MakeMonoAssetObject<AudioData>(Entity_EngineInstance, uuid);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
+		return source.m_Audio.AssetUUID();
 	}
 
-	void AudioSource_SetAudio(MonoEntityHandle* pEntityHandle, UUID componentID, UUID audioID)
+	void AudioSource_SetAudio(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t audioID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
-		source.m_Audio = audioID;
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
+		source.m_Audio = UUID(audioID);
 	}
 
-	bool AudioSource_GetAsMusic(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetAsMusic(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		return source.m_AsMusic;
 	}
 
-	void AudioSource_SetAsMusic(MonoEntityHandle* pEntityHandle, UUID componentID, bool asMusic)
+	void AudioSource_SetAsMusic(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool asMusic)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		source.m_AsMusic = asMusic;
 	}
 
-	uint32_t AudioSource_GetLoops(MonoEntityHandle* pEntityHandle, UUID componentID)
+	uint32_t AudioSource_GetLoops(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		return source.m_Loops;
 	}
 
-	void AudioSource_SetLoops(MonoEntityHandle* pEntityHandle, UUID componentID, uint32_t loops)
+	void AudioSource_SetLoops(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint32_t loops)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		source.m_Loops = loops;
 	}
 
-	bool AudioSource_GetEnable3D(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetEnable3D(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		return source.m_Enable3D;
 	}
 
-	void AudioSource_SetEnable3D(MonoEntityHandle* pEntityHandle, UUID componentID, bool allow)
+	void AudioSource_SetEnable3D(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool allow)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		source.m_Enable3D = allow;
 	}
 
-	bool AudioSource_GetAutoPlay(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetAutoPlay(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		return source.m_AutoPlay;
 	}
 
-	void AudioSource_SetAutoPlay(MonoEntityHandle* pEntityHandle, UUID componentID, bool autoPlay)
+	void AudioSource_SetAutoPlay(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool autoPlay)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		source.m_AutoPlay = autoPlay;
 	}
 
-	bool AudioSource_GetPlaying(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetPlaying(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		if (source.m_CurrentChannel == -1) return false;
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
 		if (!pAudioModule)
@@ -614,9 +615,9 @@ namespace Glory
 		return pAudioModule->IsPlaying(source.m_CurrentChannel);
 	}
 
-	bool AudioSource_GetPaused(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioSource_GetPaused(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		if (source.m_CurrentChannel == -1) return false;
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
 		if (!pAudioModule)
@@ -630,9 +631,9 @@ namespace Glory
 		return pAudioModule->IsPaused(source.m_CurrentChannel);
 	}
 
-	void AudioSource_SetPaused(MonoEntityHandle* pEntityHandle, UUID componentID, bool pause)
+	void AudioSource_SetPaused(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool pause)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		if (source.m_CurrentChannel == -1) return;
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
 		if (!pAudioModule)
@@ -640,23 +641,23 @@ namespace Glory
 			Entity_EngineInstance->GetDebug().LogError("AudioSource_SetPaused > No audio module was loaded to play audio.");
 			return;
 		}
-		GScene* pScene = GetEntityScene(pEntityHandle);
-
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
 		if (pause)
-			AudioSourceSystem::Pause(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+			AudioSourceSystem::Pause(&pScene->GetRegistry(), entity.GetEntityID(), source);
 		else
-			AudioSourceSystem::Resume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+			AudioSourceSystem::Resume(&pScene->GetRegistry(), entity.GetEntityID(), source);
 	}
 
-	float AudioSource_GetVolume(MonoEntityHandle* pEntityHandle, UUID componentID)
+	float AudioSource_GetVolume(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		return source.m_Volume;
 	}
 
-	void AudioSource_SetVolume(MonoEntityHandle* pEntityHandle, UUID componentID, float volume)
+	void AudioSource_SetVolume(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float volume)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		source.m_Volume = volume;
 		if (source.m_CurrentChannel == -1) return;
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
@@ -665,71 +666,76 @@ namespace Glory
 			Entity_EngineInstance->GetDebug().LogError("AudioSource_SetVolume > No audio module was loaded to play audio.");
 			return;
 		}
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		AudioSourceSystem::UpdateVolume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		AudioSourceSystem::UpdateVolume(&pScene->GetRegistry(), entity.GetEntityID(), source);
 	}
 
-	void AudioSource_Play(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Play(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
 		if (!pAudioModule)
 		{
 			Entity_EngineInstance->GetDebug().LogError("AudioSource_Play > No audio module was loaded to play audio.");
 			return;
 		}
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		AudioSourceSystem::Play(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		AudioSourceSystem::Play(&pScene->GetRegistry(), entity.GetEntityID(), source);
 	}
 
-	void AudioSource_Stop(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Stop(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
 		if (!pAudioModule)
 		{
 			Entity_EngineInstance->GetDebug().LogError("AudioSource_Stop > No audio module was loaded to play audio.");
 			return;
 		}
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		AudioSourceSystem::Stop(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		AudioSourceSystem::Stop(&pScene->GetRegistry(), entity.GetEntityID(), source);
 	}
 
-	void AudioSource_Pause(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Pause(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
 		if (!pAudioModule)
 		{
 			Entity_EngineInstance->GetDebug().LogError("AudioSource_Pause > No audio module was loaded to play audio.");
 			return;
 		}
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		AudioSourceSystem::Stop(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		AudioSourceSystem::Stop(&pScene->GetRegistry(), entity.GetEntityID(), source);
 	}
 
-	void AudioSource_Resume(MonoEntityHandle* pEntityHandle, UUID componentID)
+	void AudioSource_Resume(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		AudioModule* pAudioModule = Entity_EngineInstance->GetOptionalModule<AudioModule>();
 		if (!pAudioModule)
 		{
 			Entity_EngineInstance->GetDebug().LogError("AudioSource_Resume > No audio module was loaded to play audio.");
 			return;
 		}
-		GScene* pScene = GetEntityScene(pEntityHandle);
-		AudioSourceSystem::Resume(&pScene->GetRegistry(), pEntityHandle->m_EntityID, source);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		AudioSourceSystem::Resume(&pScene->GetRegistry(), entity.GetEntityID(), source);
 	}
 
-	SpatializationSettings* AudioSource_GetSpatializationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	SpatializationSettings* AudioSource_GetSpatializationSettings(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		return &source.m_Spatialization;
 	}
 
-	AudioSourceSimulationSettings* AudioSource_GetSimulationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	AudioSourceSimulationSettings* AudioSource_GetSimulationSettings(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioSource& source = GetComponent<AudioSource>(pEntityHandle, componentID);
+		AudioSource& source = GetComponent<AudioSource>(sceneID, objectID, componentID);
 		return &source.m_Simulation;
 	}
 
@@ -737,37 +743,22 @@ namespace Glory
 
 #pragma region Audio listener
 
-	bool AudioListener_GetEnabled(MonoEntityHandle* pEntityHandle, UUID componentID)
+	bool AudioListener_GetEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
+		AudioListener& listener = GetComponent<AudioListener>(sceneID, objectID, componentID);
 		return listener.m_Enable;
 	}
 
-	void AudioListener_SetEnabled(MonoEntityHandle* pEntityHandle, UUID componentID, bool value)
+	void AudioListener_SetEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool value)
 	{
-		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
+		AudioListener& listener = GetComponent<AudioListener>(sceneID, objectID, componentID);
 		listener.m_Enable = value;
 	}
 
-	AudioSimulationSettings* AudioListener_GetSimulationSettings(MonoEntityHandle* pEntityHandle, UUID componentID)
+	AudioSimulationSettings* AudioListener_GetSimulationSettings(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
-		AudioListener& listener = GetComponent<AudioListener>(pEntityHandle, componentID);
+		AudioListener& listener = GetComponent<AudioListener>(sceneID, objectID, componentID);
 		return &listener.m_Simulation;
-	}
-
-#pragma endregion
-
-
-#pragma region SceneObject
-
-	MonoEntityHandle SceneObject_GetEntityHandle(uint64_t objectID, uint64_t sceneID)
-	{
-		GScene* pScene = GetEntityScene(sceneID);
-		if(!pScene) return MonoEntityHandle();
-		Entity entity = pScene->GetEntityByUUID(objectID);
-		if (!entity.IsValid()) return MonoEntityHandle();
-		Utils::ECS::EntityID entityID = entity.GetEntityID();
-		return MonoEntityHandle(entityID, pScene->GetUUID());
 	}
 
 #pragma endregion
@@ -777,15 +768,11 @@ namespace Glory
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
 	{
 		/* Entity */
-		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);
-		BIND("GloryEngine.Entities.Entity::Entity_IsValid", Entity_IsValid);
-		BIND("GloryEngine.Entities.Entity::Entity_GetSceneObjectID", Entity_GetSceneObjectID);
-		BIND("GloryEngine.Entities.EntityBehaviour::GetEntityHandle()", GetEntityHandle);
-
-		BIND("GloryEngine.Entities.EntityComponentManager::Component_GetComponentID", Component_GetComponentID);
-		BIND("GloryEngine.Entities.EntityComponentManager::Component_AddComponent", Component_AddComponent);
-		BIND("GloryEngine.Entities.EntityComponentManager::Component_RemoveComponent", Component_RemoveComponent);
-		BIND("GloryEngine.Entities.EntityComponentManager::Component_RemoveComponentByID", Component_RemoveComponentByID);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetComponentID", SceneObject_GetComponentID);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_AddComponent", SceneObject_AddComponent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_AddScriptComponent", SceneObject_AddScriptComponent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponent", SceneObject_RemoveComponent);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_RemoveComponentByID", SceneObject_RemoveComponentByID);
 
 		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_GetActive", EntityComponent_GetActive);
 		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_SetActive", EntityComponent_SetActive);
@@ -832,6 +819,11 @@ namespace Glory
 
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetCameraID", CameraComponent_GetCameraID);
 
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_PrepareNextPick", CameraComponent_PrepareNextPick);
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetPickResult", CameraComponent_GetPickResult);
+
+		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetResolution", CameraComponent_GetResolution);
+
 		/* Layer */
 		BIND("GloryEngine.Entities.LayerComponent::LayerComponent_GetLayer", LayerComponent_GetLayer);
 		BIND("GloryEngine.Entities.LayerComponent::LayerComponent_SetLayer", LayerComponent_SetLayer);
@@ -845,10 +837,6 @@ namespace Glory
 
 		BIND("GloryEngine.Entities.LightComponent::LightComponent_GetRange", LightComponent_GetRange);
 		BIND("GloryEngine.Entities.LightComponent::LightComponent_SetRange", LightComponent_SetRange);
-
-		/* MeshFilter */
-		BIND("GloryEngine.Entities.MeshFilter::MeshFilter_GetMesh", MeshFilter_GetMesh);
-		BIND("GloryEngine.Entities.MeshFilter::MeshFilter_SetMesh", MeshFilter_SetMesh);
 
 		/* MeshRenderer */
 		BIND("GloryEngine.Entities.MeshRenderer::MeshRenderer_GetMaterial", MeshRenderer_GetMaterial);
@@ -866,11 +854,6 @@ namespace Glory
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_ClearMaterials", ModelRenderer_ClearMaterials);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_GetModel", ModelRenderer_GetModel);
 		BIND("GloryEngine.Entities.MeshRenderer::ModelRenderer_SetModel", ModelRenderer_SetModel);
-
-		/* MonoScriptComponent */
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetScript", MonoScriptComponent_GetScript);
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_SetScript", MonoScriptComponent_SetScript);
-		BIND("GloryEngine.Entities.MonoScriptComponent::MonoScriptComponent_GetBehaviour", MonoScriptComponent_GetBehaviour);
 
 		/* AudioSource */
 		BIND("GloryEngine.Entities.AudioSource::AudioSource_GetAudio", AudioSource_GetAudio);
@@ -899,22 +882,11 @@ namespace Glory
 		BIND("GloryEngine.Entities.AudioSource::AudioListener_GetEnabled", AudioListener_GetEnabled);
 		BIND("GloryEngine.Entities.AudioSource::AudioListener_SetEnabled", AudioListener_SetEnabled);
 		BIND("GloryEngine.Entities.AudioSource::AudioListener_GetSimulationSettings", AudioListener_GetSimulationSettings);
-
-		/* Entity Scene Object */
-		BIND("GloryEngine.Entities.SceneObject::SceneObject_GetEntityHandle", SceneObject_GetEntityHandle);
 	}
 
 	void EntityCSAPI::SetEngine(Engine* pEngine)
 	{
 		Entity_EngineInstance = pEngine;
-	}
-
-	MonoEntityHandle::MonoEntityHandle() : m_EntityID(0), m_SceneID(0)
-	{
-	}
-
-	MonoEntityHandle::MonoEntityHandle(uint64_t entityID, uint64_t sceneID) : m_EntityID(entityID), m_SceneID(sceneID)
-	{
 	}
 
 #pragma endregion

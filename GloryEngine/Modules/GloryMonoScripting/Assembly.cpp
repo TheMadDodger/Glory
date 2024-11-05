@@ -1,6 +1,5 @@
 #include "Assembly.h"
 #include "AssemblyDomain.h"
-#include "MonoAssetManager.h"
 #include "IMonoLibManager.h"
 #include "MonoManager.h"
 #include "GloryMonoScipting.h"
@@ -288,8 +287,6 @@ namespace Glory
 		m_Location = lib.Location();
 		m_Reloadable = lib.Reloadable();
 		m_pLibManager = pLibManager;
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
-		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
 		m_State = AssemblyState::AS_Loaded;
 		return true;
     }
@@ -309,8 +306,6 @@ namespace Glory
         m_pImage = monoImage;
         //m_IsDependency = true;
 
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
-		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
 		m_State = AssemblyState::AS_Loaded;
         return true;
     }
@@ -334,7 +329,8 @@ namespace Glory
 		m_Reloadable = false;
 		m_State = AssemblyState::AS_NotLoaded;
 
-		if (m_pLibManager) m_pLibManager->Cleanup();
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		if (m_pLibManager) m_pLibManager->Cleanup(pEngine);
 		m_pLibManager = nullptr;
 		m_Namespaces.clear();
 
@@ -344,8 +340,6 @@ namespace Glory
 			m_DebugData = nullptr;
 			m_DebugDataSize = 0;
 		}
-
-		if (m_pLibManager) m_pLibManager->Cleanup();
     }
 
     MonoReflectionAssembly* Assembly::GetReflectionAssembly() const
@@ -354,6 +348,12 @@ namespace Glory
 			return nullptr;
         return mono_assembly_get_object(mono_domain_get(), m_pAssembly);
     }
+
+	void Assembly::Initialize()
+	{
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
+	}
 
     bool Assembly::LoadAssembly(const std::filesystem::path& assemblyPath)
     {

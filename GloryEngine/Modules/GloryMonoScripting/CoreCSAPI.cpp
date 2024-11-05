@@ -1,11 +1,11 @@
 #include "CoreCSAPI.h"
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
-#include "MonoSceneManager.h"
 #include "MathCSAPI.h"
 
 #include <Engine.h>
 #include <SceneManager.h>
+#include <MaterialManager.h>
 #include <Layer.h>
 #include <GameTime.h>
 #include <LayerManager.h>
@@ -15,6 +15,7 @@
 #include <ObjectManager.h>
 
 #include <MaterialData.h>
+#include <MaterialInstanceData.h>
 #include <PrefabData.h>
 
 namespace Glory
@@ -282,32 +283,51 @@ namespace Glory
 		value = pImage ? pImage->GetUUID() : 0;
 		return true;
 	}
+	
+	uint64_t Material_CreateInstance(uint64_t matID)
+	{
+		AssetManager& pManager = Core_EngineInstance->GetAssetManager();
+		MaterialManager& materials = Core_EngineInstance->GetMaterialManager();
+		auto pMaterial = pManager.GetAssetImmediate<MaterialData>(matID);
+		if (!pMaterial)
+		{
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
+			return 0;
+		}
+		if (pMaterial->IsInstance())
+		{
+			pMaterial = static_cast<MaterialInstanceData*>(pMaterial)->GetBaseMaterial(materials);
+		}
+		if (!pMaterial)
+		{
+			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
+			return 0;
+		}
+		MaterialInstanceData* pInstance = materials.CreateRuntimeMaterialInstance(pMaterial->GetUUID());
+		return pInstance->GetUUID();
+	}
 
 #pragma endregion
 
 #pragma region Scenes
 
-	MonoObject* Scene_NewEmptyObject(uint64_t sceneID)
+	uint64_t Scene_NewEmptyObject(uint64_t sceneID)
 	{
 		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
-		if(!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
-		if (!pObjectManager) return nullptr;
+		if(!pScene) return 0;
 		const Entity entity = pScene->CreateEmptyObject();
-		if (!entity.IsValid()) return nullptr;
-		return pObjectManager->GetMonoSceneObject(pScene->GetEntityUUID(entity.GetEntityID()));
+		if (!entity.IsValid()) return 0;
+		return pScene->GetEntityUUID(entity.GetEntityID());
 	}
 
-	MonoObject* Scene_NewEmptyObjectWithName(uint64_t sceneID, MonoString* name)
+	uint64_t Scene_NewEmptyObjectWithName(uint64_t sceneID, MonoString* name)
 	{
 		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
-		if (!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
-		if (!pObjectManager) return nullptr;
+		if (!pScene) return 0;
 		const std::string nameStr = mono_string_to_utf8(name);
 		const Entity entity = pScene->CreateEmptyObject(nameStr, UUID());
-		if (!entity.IsValid()) return nullptr;
-		return pObjectManager->GetMonoSceneObject(pScene->GetEntityUUID(entity.GetEntityID()));
+		if (!entity.IsValid()) return 0;
+		return pScene->GetEntityUUID(entity.GetEntityID());
 	}
 
 	size_t Scene_ObjectsCount(uint64_t sceneID)
@@ -315,17 +335,6 @@ namespace Glory
 		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
 		if (!pScene) return 0;
 		return pScene->SceneObjectsCount();
-	}
-
-	MonoObject* Scene_GetSceneObject(uint64_t sceneID, uint64_t objectID)
-	{
-		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
-		if (!pScene) return nullptr;
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
-		if (!pObjectManager) return nullptr;
-		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
-		if (!entity.IsValid()) return nullptr;
-		return pObjectManager->GetMonoSceneObject(pScene->GetEntityUUID(entity.GetEntityID()));
 	}
 
 	void Scene_Destroy(uint64_t sceneID, uint64_t objectID)
@@ -337,30 +346,28 @@ namespace Glory
 		pScene->DestroyEntity(entity.GetEntityID());
 	}
 
-	MonoObject* Scene_InstantiatePrefab(uint64_t sceneID, uint64_t prefabID, Vec3Wrapper position, QuatWrapper rotation, Vec3Wrapper scale, uint64_t parentID)
+	uint64_t Scene_InstantiatePrefab(uint64_t sceneID, uint64_t prefabID, Vec3Wrapper position, QuatWrapper rotation, Vec3Wrapper scale, uint64_t parentID)
 	{
 		PrefabData* pPrefab = Core_EngineInstance->GetAssetManager().GetAssetImmediate<PrefabData>(prefabID);
-		if (!pPrefab) return nullptr;
+		if (!pPrefab) return 0;
 		GScene* pScene = Core_EngineInstance->GetSceneManager()->GetOpenScene(UUID(sceneID));
-		if (!pScene) return nullptr;
+		if (!pScene) return 0;
 		const Entity parentEntity = pScene->GetEntityByUUID(UUID(parentID));
-		MonoSceneObjectManager* pObjectManager = MonoSceneManager::GetSceneObjectManager(Core_EngineInstance, pScene);
-		if (!pObjectManager) return nullptr;
 		const Entity entity = pScene->InstantiatePrefab(parentEntity.IsValid() ? pScene->GetEntityUUID(parentEntity.GetEntityID()) : 0, pPrefab, ToGLMVec3(position), ToGLMQuat(rotation), ToGLMVec3(scale));
-		if (!entity.IsValid()) return nullptr;
-		return pObjectManager->GetMonoSceneObject(pScene->GetEntityUUID(entity.GetEntityID()));
+		if (!entity.IsValid()) return 0;
+		return pScene->GetEntityUUID(entity.GetEntityID());
 	}
 
 #pragma endregion
 
 #pragma region Scene Management
 
-	MonoObject* SceneManager_CreateEmptyScene(MonoString* name)
+	uint64_t SceneManager_CreateEmptyScene(MonoString* name)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
-		if (!pScenes) return nullptr;
+		if (!pScenes) return 0;
 		GScene* pScene = pScenes->NewScene(mono_string_to_utf8(name));
-		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
+		return pScene->GetUUID();
 	}
 
 	size_t SceneManager_OpenScenesCount()
@@ -370,28 +377,28 @@ namespace Glory
 		return pScenes->OpenScenesCount();
 	}
 
-	MonoObject* SceneManager_GetOpenSceneAt(size_t index)
+	uint64_t SceneManager_GetOpenSceneAt(size_t index)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(index);
-		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
+		return pScene->GetUUID();
 	}
 
-	MonoObject* SceneManager_GetOpenScene(uint64_t sceneID)
+	uint64_t SceneManager_GetOpenScene(uint64_t sceneID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
-		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
+		return pScene->GetUUID();
 	}
 
-	MonoObject* SceneManager_GetActiveScene()
+	uint64_t SceneManager_GetActiveScene()
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
 		GScene* pScene = pScenes->GetActiveScene();
-		return MonoSceneManager::GetSceneObject(Core_EngineInstance, pScene);
+		return pScene->GetUUID();
 	}
 
 	void SceneManager_SetActiveScene(uint64_t sceneID)
@@ -437,7 +444,7 @@ namespace Glory
 
 #pragma region Scene Objects
 
-	MonoString* SceneObject_GetName(uint64_t objectID, uint64_t sceneID)
+	MonoString* SceneObject_GetName(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return nullptr;
@@ -447,7 +454,7 @@ namespace Glory
 		return entity.IsValid() ? mono_string_new(mono_domain_get(), pScene->EntityName(entity.GetEntityID()).data()) : nullptr;
 	}
 
-	void SceneObject_SetName(uint64_t objectID, uint64_t sceneID, MonoString* name)
+	void SceneObject_SetName(uint64_t sceneID, uint64_t objectID, MonoString* name)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
@@ -458,7 +465,7 @@ namespace Glory
 		pScene->SetEntityName(entity.GetEntityID(), std::string{mono_string_to_utf8(name)});
 	}
 
-	size_t SceneObject_GetSiblingIndex(uint64_t objectID, uint64_t sceneID)
+	size_t SceneObject_GetSiblingIndex(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -469,7 +476,7 @@ namespace Glory
 		return pScene->SiblingIndex(entity.GetEntityID());
 	}
 
-	void SceneObject_SetSiblingIndex(uint64_t objectID, uint64_t sceneID, size_t index)
+	void SceneObject_SetSiblingIndex(uint64_t sceneID, uint64_t objectID, size_t index)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
@@ -480,7 +487,7 @@ namespace Glory
 		pScene->SetSiblingIndex(entity.GetEntityID(), index);
 	}
 
-	size_t SceneObject_GetChildCount(uint64_t objectID, uint64_t sceneID)
+	size_t SceneObject_GetChildCount(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -491,7 +498,7 @@ namespace Glory
 		return pScene->ChildCount(entity.GetEntityID());
 	}
 
-	uint64_t SceneObject_GetChild(uint64_t objectID, uint64_t sceneID, size_t index)
+	uint64_t SceneObject_GetChild(uint64_t sceneID, uint64_t objectID, size_t index)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -503,7 +510,7 @@ namespace Glory
 		return childEntity.IsValid() ? pScene->GetEntityUUID(childEntity.GetEntityID()) : 0;
 	}
 
-	uint64_t SceneObject_GetParent(uint64_t objectID, uint64_t sceneID)
+	uint64_t SceneObject_GetParent(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -516,7 +523,7 @@ namespace Glory
 		return parentEntity.IsValid() ? pScene->GetEntityUUID(parent) : 0;
 	}
 
-	void SceneObject_SetParent(uint64_t objectID, uint64_t sceneID, uint64_t parentID)
+	void SceneObject_SetParent(uint64_t sceneID, uint64_t objectID, uint64_t parentID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
@@ -613,11 +620,12 @@ namespace Glory
 		BIND("GloryEngine.Material::Material_SetTexture", Material_SetTexture);
 		BIND("GloryEngine.Material::Material_GetTexture", Material_GetTexture);
 
+		BIND("GloryEngine.Material::Material_CreateInstance", Material_CreateInstance);
+
 		// Scenes
 		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObject", Scene_NewEmptyObject);
 		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObjectWithName", Scene_NewEmptyObjectWithName);
 		BIND("GloryEngine.SceneManagement.Scene::Scene_ObjectsCount", Scene_ObjectsCount);
-		BIND("GloryEngine.SceneManagement.Scene::Scene_GetSceneObject", Scene_GetSceneObject);
 		BIND("GloryEngine.SceneManagement.Scene::Scene_Destroy", Scene_Destroy);
 		BIND("GloryEngine.SceneManagement.Scene::Scene_InstantiatePrefab", Scene_InstantiatePrefab);
 

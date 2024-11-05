@@ -38,7 +38,7 @@ namespace Glory
         if (pMeshData == nullptr) return;
 
         const UUID materialID = pComponent.m_Material.AssetUUID();
-        if (!pAssetDB->AssetExists(materialID))
+        if (!pAssets->FindResource(materialID) && !pAssetDB->AssetExists(materialID))
         {
             // TODO: Set some default material
             std::string key = std::to_string(entity) + "_MISSING_MATERIAL";
@@ -59,7 +59,27 @@ namespace Glory
         renderData.m_LayerMask = mask;
         renderData.m_ObjectID = pScene->GetEntityUUID(entity);
         renderData.m_SceneID = pScene->GetUUID();
+        renderData.m_DepthWrite = pScene->Settings().m_DepthWrite;
 
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
+        if (pScene->Settings().m_RenderLate)
+        {
+            REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitLate(std::move(renderData)), );
+        }
+        else
+        {
+            REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
+        }
+    }
+
+    void MeshRenderSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+    {
+        for (size_t i = 0; i < pTypeView->Size(); ++i)
+        {
+            const MeshRenderer* pMeshRenderer = static_cast<const MeshRenderer*>(pTypeView->GetComponentAddressFromIndex(i));
+            const UUID material = pMeshRenderer->m_Material.AssetUUID();
+            const UUID mesh = pMeshRenderer->m_Mesh.AssetUUID();
+            if (mesh) references.push_back(mesh);
+            if (material) references.push_back(material);
+        }
     }
 }

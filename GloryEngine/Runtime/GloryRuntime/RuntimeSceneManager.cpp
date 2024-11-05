@@ -50,6 +50,7 @@ namespace Glory
 	{
 		auto it = std::find_if(m_pOpenScenes.begin(), m_pOpenScenes.end(), [&](GScene* pScene) { return pScene->GetUUID() == uuid; });
 		if (it == m_pOpenScenes.end()) return;
+		OnSceneClosing(uuid);
 		size_t index = it - m_pOpenScenes.begin();
 		GScene* pActiveScene = m_pOpenScenes[m_ActiveSceneIndex];
 		GScene* pScene = *it;

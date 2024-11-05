@@ -29,6 +29,7 @@ namespace Glory::Editor
 
 	ThreadedVector<ImportedResourceData> m_ImportedResources;
 	ThreadedUMap<std::string, UUID> m_PathToUUIDCache;
+	ThreadedUMap<std::filesystem::path, UUID> m_ReservedUUIDs;
 
 	std::function<void()> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
@@ -73,8 +74,6 @@ namespace Glory::Editor
 		}
 
 		DB_EngineInstance->GetDebug().LogInfo("Loaded asset database");
-		AssetCompiler::CompileAssetDatabase();
-		AssetCompiler::CompileNewAssets();
 	}
 
 	void EditorAssetDatabase::Reload()
@@ -329,7 +328,9 @@ namespace Glory::Editor
 		}
 
 		if (forceUUID)
+		{
 			loadedResource->SetResourceUUID(forceUUID);
+		}
 
 		/* Try getting the resource type from the loaded resource */
 		std::type_index type = typeid(Resource);
@@ -372,6 +373,10 @@ namespace Glory::Editor
 		const UUID uuid = meta.ID();
 		if (subPath.empty()) m_PathToUUIDCache.Set(path, uuid);
 
+		std::filesystem::path reservedPath = GetAbsoluteAssetPath(path);
+		if (!subPath.empty()) reservedPath.append(subPath.string());
+		m_ReservedUUIDs.Set(reservedPath, forceUUID);
+
 		std::stringstream stream;
 		if (!subPath.empty())
 			stream << "Imported subasset " << subPath.string() << " at " << path;
@@ -384,6 +389,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < loadedResource.ChildCount(); i++)
 		{
 			ImportedResource& subResource = loadedResource.Child(i);
+			if (!subResource.IsNew()) continue;
 			std::filesystem::path newSubPath = subPath;
 			newSubPath.append(subResource->Name());
 			ImportAsset(path, subResource, newSubPath);
@@ -601,6 +607,28 @@ namespace Glory::Editor
 		return true;
 	}
 
+	std::pair<UUID, bool> EditorAssetDatabase::ReserveAssetUUID(std::string& path, const std::filesystem::path& subPath)
+	{
+		const std::filesystem::path absolutePath = GetAbsoluteAssetPath(path);
+
+		const UUID existingID = FindAssetUUID(path, subPath);
+		if (existingID) return { existingID, true };
+		UUID uuid = 0;
+		m_ReservedUUIDs.Do([absolutePath, subPath, &uuid](std::unordered_map<std::filesystem::path, UUID>& map) {
+			std::filesystem::path combinedPath = absolutePath;
+			if (!subPath.empty()) combinedPath.append(subPath.string());
+			auto iter = map.find(combinedPath);
+			if (iter == map.end())
+			{
+				uuid = UUID();
+				map.emplace(combinedPath, uuid);
+				return;
+			}
+			uuid = iter->second;
+		});
+		return { uuid, false };
+	}
+
 	UUID EditorAssetDatabase::FindAssetUUID(const std::string& path)
 	{
 		std::string fixedPath = path;
@@ -636,17 +664,11 @@ namespace Glory::Editor
 		return 0;
 	}
 
-	UUID EditorAssetDatabase::FindAssetUUID(const std::string& path, const std::filesystem::path& subPath)
+	UUID EditorAssetDatabase::FindAssetUUID(std::string& path, const std::filesystem::path& subPath)
 	{
-		std::string fixedPath = path;
-		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+		std::replace(path.begin(), path.end(), '/', '\\');
 
-		std::filesystem::path absolutePath = fixedPath;
-		if (!absolutePath.is_absolute() && fixedPath[0] != '.')
-		{
-			absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
-			absolutePath = absolutePath.append(fixedPath);
-		}
+		std::filesystem::path absolutePath = GetAbsoluteAssetPath(path);
 		if (!m_PathToUUIDCache.Contains(absolutePath.string())) return 0;
 		if (subPath.empty()) return m_PathToUUIDCache[absolutePath.string()];
 
@@ -659,7 +681,7 @@ namespace Glory::Editor
 			const UUID uuid = std::stoull(key.data());
 			AssetLocation location;
 			if (!GetAssetLocation(uuid, location)) continue;
-			if (location.Path != fixedPath) continue;
+			if (GetAbsoluteAssetPath(location.Path) != path) continue;
 			if (location.SubresourcePath != subPath) continue;
 			return uuid;
 		}
@@ -736,6 +758,17 @@ namespace Glory::Editor
 		}
 	}
 
+	std::filesystem::path EditorAssetDatabase::GetAbsoluteAssetPath(const std::string& path)
+	{
+		std::filesystem::path absolutePath = path;
+		if (!absolutePath.is_absolute() && path[0] != '.')
+		{
+			absolutePath = DB_EngineInstance->GetAssetDatabase().GetAssetPath();
+			absolutePath = absolutePath.append(path);
+		}
+		return absolutePath;
+	}
+
 	void EditorAssetDatabase::Initialize()
 	{
 		DB_EngineInstance = EditorApplication::GetInstance()->GetEngine();
@@ -791,7 +824,7 @@ namespace Glory::Editor
 		const UUID uuid = value["ID"].As<uint64_t>();
 		auto children = value["Children"];
 
-		const std::string pathString = path.string();
+		std::string pathString = path.string();
 		if (FindAssetUUID(pathString))
 		{
 			bool allSubAssetsFound = true;

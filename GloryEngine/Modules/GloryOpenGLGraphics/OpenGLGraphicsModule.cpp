@@ -220,6 +220,11 @@ namespace Glory
 			glDisable(GL_DEPTH_TEST);
 	}
 
+	void OpenGLGraphicsModule::EnableDepthWrite(bool enable)
+	{
+		glDepthMask(enable);
+	}
+
 	void OpenGLGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
 	{
 		glViewport(0, 0, width, height);

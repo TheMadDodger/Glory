@@ -14,7 +14,7 @@ namespace Glory
 	{
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
 		if (!pResource) return nullptr;
-		PipelineData* pMaterial = static_cast<PipelineData*>(pResource);
-		return pMaterial;
+		PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+		return pPipeline;
 	}
 }

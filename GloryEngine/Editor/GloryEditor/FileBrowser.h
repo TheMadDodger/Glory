@@ -17,7 +17,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void BeginCreate(const std::string& name, const std::string& icon, std::function<void(std::filesystem::path&)> callback);
 		static GLORY_EDITOR_API void CancelCreate();
 
-		static GLORY_EDITOR_API void OnFileDragAndDrop(const std::filesystem::path& path);
+		static GLORY_EDITOR_API void OnFileDragAndDrop(const std::vector<std::string_view>& paths);
 
 	private:
 		virtual void OnOpen() override;

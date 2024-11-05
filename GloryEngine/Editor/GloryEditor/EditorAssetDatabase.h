@@ -51,8 +51,9 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool GetAssetLocation(UUID uuid, AssetLocation& location);
 		static GLORY_EDITOR_API bool GetAssetMetadata(UUID uuid, ResourceMeta& meta);
 
+		static GLORY_EDITOR_API std::pair<UUID, bool> ReserveAssetUUID(std::string& path, const std::filesystem::path& subPath);
 		static GLORY_EDITOR_API UUID FindAssetUUID(const std::string& path);
-		static GLORY_EDITOR_API UUID FindAssetUUID(const std::string& path, const std::filesystem::path& subPath);
+		static GLORY_EDITOR_API UUID FindAssetUUID(std::string& path, const std::filesystem::path& subPath);
 		static GLORY_EDITOR_API bool AssetExists(UUID uuid);
 		static GLORY_EDITOR_API std::string GetAssetName(UUID uuid);
 		static GLORY_EDITOR_API void GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& result);
@@ -60,6 +61,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void RegisterAsyncImportCallback(std::function<void()> func);
 
 		static GLORY_EDITOR_API void ImportModuleAssets();
+		static GLORY_EDITOR_API std::filesystem::path GetAbsoluteAssetPath(const std::string& path);
 
 	private:
 		static void Initialize();
@@ -71,6 +73,7 @@ namespace Glory::Editor
 
 	private:
 		friend class EditorApplication;
+		friend class ProjectSpace;
 
 		static bool m_IsDirty;
 		static std::function<void()> m_AsyncImportCallback;

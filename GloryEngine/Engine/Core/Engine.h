@@ -209,6 +209,9 @@ namespace Utils::Reflect
 		bool HasData(const std::string& name);
 		std::vector<char>& GetData(const std::string& name);
 
+		void SetRootPath(const std::filesystem::path& path);
+		const std::filesystem::path& RootPath() const;
+
 	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
@@ -278,5 +281,7 @@ namespace Utils::Reflect
 		std::map<size_t, void*> m_pUserContexts;
 		std::vector<PropertySerializer*> m_pRegisteredPropertySerializers;
 		std::map<std::string, std::vector<char>> m_Datas;
+
+		std::filesystem::path m_RootPath;
 	};
 }

@@ -1,6 +1,7 @@
 #include "EditorPlayer.h"
 #include "EditorApplication.h"
 #include "EditorSceneManager.h"
+#include "EditorMaterialManager.h"
 #include "Selection.h"
 #include "Undo.h"
 #include "SelectionChangedAction.h"
@@ -9,7 +10,6 @@
 #include "ImGuiHelpers.h"
 #include "ProjectSettings.h"
 
-#include <SceneManager.h>
 #include <IconsFontAwesome6.h>
 #include <Components.h>
 
@@ -59,11 +59,7 @@ namespace Glory::Editor
 		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
 		Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
-		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
-		{
-			GScene* pScene = pScenes->GetOpenScene(i);
-			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Start);
-		}
+		pScenes->Start();
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
@@ -84,11 +80,7 @@ namespace Glory::Editor
 		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
 		Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
-		for (size_t i = 0; i < pScenes->OpenScenesCount(); i++)
-		{
-			GScene* pScene = pScenes->GetOpenScene(i);
-			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::Stop);
-		}
+		pScenes->Stop();
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
@@ -108,6 +100,8 @@ namespace Glory::Editor
 		Selection::Clear();
 		EditorApplication::GetInstance()->GetSceneManager().CloseAllScenes();
 		EditorApplication::GetInstance()->GetSceneManager().OpenAllFromYAML(m_SerializedScenes);
+
+		EditorApplication::GetInstance()->GetMaterialManager().DestroyRuntimeMaterials();
 
 		//pSelected = Object::FindObject(toSelect);
 		//Selection::SetActiveObject(pSelected);
@@ -153,6 +147,16 @@ namespace Glory::Editor
 			for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
 			{
 				GScene* pScene = pScenes->GetOpenScene(i);
+				for (size_t i = 0; i < ComponentsToUpdateInEditor.size(); i++)
+				{
+					const uint32_t hash = ComponentsToUpdateInEditor[i];
+					pScene->GetRegistry().InvokeAll(hash, Glory::Utils::ECS::InvocationType::Update);
+				}
+			}
+
+			for (size_t i = 0; i < pScenes->ExternalSceneCount(); ++i)
+			{
+				GScene* pScene = pScenes->GetExternalScene(i);
 				for (size_t i = 0; i < ComponentsToUpdateInEditor.size(); i++)
 				{
 					const uint32_t hash = ComponentsToUpdateInEditor[i];

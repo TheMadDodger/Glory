@@ -5,6 +5,7 @@
 #include "LightData.h"
 #include "VertexHelpers.h"
 #include "ShapeProperty.h"
+#include "SceneObjectRef.h"
 
 #include <vector>
 
@@ -13,6 +14,14 @@ namespace Glory
 	class Buffer;
 	class Mesh;
 	class PipelineData;
+
+	struct PickResult
+	{
+		const UUID m_CameraID;
+		const SceneObjectRef m_Object;
+		const glm::vec3 m_WorldPosition;
+		const glm::vec3 m_Normal;
+	};
 
 	class RendererModule : public Module
 	{
@@ -23,7 +32,9 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void Submit(RenderData&& renderData);
+		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
+		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
 		void Submit(PointLight&& light);
 
@@ -37,8 +48,6 @@ namespace Glory
 
 		size_t LastSubmittedObjectCount();
 		size_t LastSubmittedCameraCount();
-
-		void SetNextFramePick(const glm::ivec2& coord, CameraRef camera);
 
 		enum CircleUp
 		{
@@ -54,6 +63,10 @@ namespace Glory
 		void DrawLineSphere(const glm::mat4& transform, const glm::vec3& position, float radius, const glm::vec4& color);
 
 		void DrawLineShape(const glm::mat4& transform, const glm::vec3& position, const ShapeProperty& shape, const glm::vec4& color);
+
+		bool PickResultValid(size_t index) const;
+		bool PickResultIndex(UUID cameraID, size_t& index) const;
+		const PickResult& GetPickResult(size_t index) const;
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
@@ -87,8 +100,7 @@ namespace Glory
 		void ThreadedInitialize();
 		void ThreadedCleanup();
 		void Render(const RenderFrame& frame);
-
-		void ReadHoveringObject();
+		void DoPicking(const glm::ivec2& pos, CameraRef camera);
 		void CreateLineBuffer();
 		void RenderLines(CameraRef camera);
 
@@ -96,8 +108,6 @@ namespace Glory
 		RenderFrame m_CurrentPreparingFrame;
 		size_t m_LastSubmittedObjectCount;
 		size_t m_LastSubmittedCameraCount;
-		glm::ivec2 m_PickPos;
-		CameraRef m_PickCamera;
 
 		uint32_t m_LineVertexCount;
 		Buffer* m_pLineBuffer;
@@ -109,5 +119,7 @@ namespace Glory
 		static const uint32_t MAX_LINE_VERTICES = 1000;
 		LineVertex* m_pLineVertices;
 		LineVertex* m_pLineVertex;
+
+		std::vector<PickResult> m_PickResults;
 	};
 }

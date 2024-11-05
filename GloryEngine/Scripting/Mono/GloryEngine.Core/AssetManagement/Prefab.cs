@@ -10,7 +10,7 @@ namespace GloryEngine
         #region Constructor
 
         public Prefab() : base() { }
-        public Prefab(UInt64 id) : base(id) { }
+        public Prefab(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
     }

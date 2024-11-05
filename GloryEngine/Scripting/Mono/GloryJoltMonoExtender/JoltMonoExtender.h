@@ -14,7 +14,7 @@ namespace Glory
 	{
 	public: /* Lib manager implementation */
 		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) override;
-		virtual void Cleanup() override;
+		virtual void Cleanup(Engine*) override;
 	};
 
 	class JoltMonoExtender : public IScriptExtender

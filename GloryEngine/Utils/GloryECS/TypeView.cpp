@@ -32,6 +32,21 @@ namespace Glory::Utils::ECS
 		return m_TypeHash;
 	}
 
+	uint32_t BaseTypeView::GetComponentIndex(EntityID entityID, size_t number) const
+	{
+		auto it = std::find_if(m_Entities.begin(), m_Entities.end(), [&](EntityID othereEntity)
+		{
+			if (othereEntity != entityID) return false;
+			if (number != 0)
+			{
+				--number;
+				return false;
+			}
+			return true;
+		});
+		return uint32_t(it - m_Entities.begin());
+	}
+
 	bool BaseTypeView::IsActive(EntityID entity) const
 	{
 		const uint32_t index = GetComponentIndex(entity, 0);

@@ -62,6 +62,10 @@ namespace Editor
 		/** @brief Get a material or material instance by ID */
 		virtual MaterialData* GetMaterial(UUID materialID) const override;
 
+		virtual MaterialInstanceData* CreateRuntimeMaterialInstance(UUID baseMaterial) override;
+
+		virtual void DestroyRuntimeMaterials() override;
+
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
 		void AssetAddedCallback(const AssetCallbackData& callback);
@@ -98,8 +102,9 @@ namespace Editor
 
 	private:
 		friend class MaterialInstanceEditor;
-		std::map<UUID, MaterialData*> m_pMaterialDatas;
-		std::map<UUID, MaterialInstanceData*> m_pMaterialInstanceDatas;
+		std::vector<UUID> m_Materials;
+		std::vector<UUID> m_MaterialInstances;
+		std::vector<UUID> m_RuntimeMaterials;
 		std::map<UUID, std::vector<UUID>> m_WaitingMaterialInstances;
 
 		Engine* m_pEngine;

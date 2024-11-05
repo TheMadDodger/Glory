@@ -61,6 +61,7 @@ namespace Glory
 		const std::string AttachmentName(size_t index) const;
 
 		virtual void ReadColorPixel(const std::string& attachment, const glm::ivec2& coord, void* value, DataType type) = 0;
+		virtual void ReadDepthPixel(const glm::ivec2& coord, void* value, DataType type) = 0;
 
 	protected:
 		RenderTexture(const RenderTextureCreateInfo& createInfo);

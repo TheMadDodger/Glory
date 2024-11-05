@@ -1,0 +1,22 @@
+Runtime:
+- Upped the runtime version to 0.4.3
+- Script assembly now gets loaded based on Assemblies.dat instead of a command
+
+Editor:
+- Script dropdown now only lists viable options instead of all MonoScript resources
+- Loading a scene will automatically migrate the script reference to the correct script type if it exists
+- Added packaging for what assemblies to load (Assemblies.dat)
+
+Engine:
+- GloryMonoScripting can now load EntityBehaviours from any assembly
+Note: There is no way to load other assemblies yet
+
+Scripting
+- Rewrote csharp scripting libraries
+- Moved all object management to csharp
+- EntityBehaviour now inherits EntityComponent, allowing GetComponent to retrieve behaviours
+- GetComponent can now retrieve components with an interface
+- Removed ScriptedComponent
+- AddComponent, RemoveComponent and HasComponent now work with both native and script components
+- Adding a component while running now calls Start on that component
+- Removing a component while running now calls Stop on that component

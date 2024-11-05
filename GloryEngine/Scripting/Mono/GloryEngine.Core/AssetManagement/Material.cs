@@ -11,7 +11,7 @@ namespace GloryEngine
         #region Constructor
 
         public Material() : base() { }
-        public Material(UInt64 id) : base(id) { }
+        public Material(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
 
@@ -144,7 +144,7 @@ namespace GloryEngine
         /// <param name="propertyName">Name of the property</param>
         /// <param name="value">Value to write to</param>
         /// <returns>True if successfull, false if the property does not exist</returns>
-        public bool GeVec2(string propertyName, out Vector2 value)
+        public bool GetVec2(string propertyName, out Vector2 value)
         {
             return Material_GetVec2(_objectID, propertyName, out value);
         }
@@ -166,7 +166,7 @@ namespace GloryEngine
         /// <param name="propertyName">Name of the property</param>
         /// <param name="value">Value to write to</param>
         /// <returns>True if successfull, false if the property does not exist</returns>
-        public bool GeVec3(string propertyName, out Vector3 value)
+        public bool GetVec3(string propertyName, out Vector3 value)
         {
             return Material_GetVec3(_objectID, propertyName, out value);
         }
@@ -188,7 +188,7 @@ namespace GloryEngine
         /// <param name="propertyName">Name of the property</param>
         /// <param name="value">Value to write to</param>
         /// <returns>True if successfull, false if the property does not exist</returns>
-        public bool GeVec4(string propertyName, out Vector4 value)
+        public bool GetVec4(string propertyName, out Vector4 value)
         {
             return Material_GetVec4(_objectID, propertyName, out value);
         }
@@ -216,8 +216,18 @@ namespace GloryEngine
             UInt64 imageID;
             if (!Material_GetTexture(_objectID, propertyName, out imageID)) return false;
             if (imageID == 0) return true;
-            value = AssetManager.MakeResource<Texture>(imageID);
+            value = Manager.MakeResource<Texture>(imageID);
             return true;
+        }
+
+        /// <summary>
+        /// Create a material instance from this material
+        /// </summary>
+        /// <returns>The newly created material instance</returns>
+        public MaterialInstance CreateMaterialInstance()
+        {
+            UInt64 instanceID = Material_CreateInstance(_objectID);
+            return instanceID != 0 ? Manager.MakeResource<MaterialInstance>(instanceID) : null;
         }
 
         #endregion
@@ -269,6 +279,9 @@ namespace GloryEngine
         private static extern void Material_SetTexture(UInt64 materialID, string propertyName, UInt64 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern bool Material_GetTexture(UInt64 materialID, string propertyName, out UInt64 value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 Material_CreateInstance(UInt64 materialID);
 
         #endregion
     }

@@ -23,6 +23,8 @@ namespace Glory::Editor
 	ThreadedUMap<UUID, EditorShaderData*> EditorShaderProcessor::m_pCompiledShaders;
 	ThreadedVector<UUID> EditorShaderProcessor::m_QueuedShaders;
 	ThreadedVector<UUID> EditorShaderProcessor::m_FinishedShaders;
+	std::mutex EditorShaderProcessor::m_WaitMutex;
+	std::condition_variable EditorShaderProcessor::m_WaitCondition;
 
 	std::map<ShaderType, shaderc_shader_kind> ShaderTypeToKind = {
 		{ ShaderType::ST_Compute, shaderc_shader_kind::shaderc_compute_shader },
@@ -265,6 +267,38 @@ namespace Glory::Editor
 		return pCompiledShader;
 	}
 
+	TextureType EditorShaderProcessor::ShaderNameToTextureType(const std::string_view name)
+	{
+		/* Hardcoded solution for texSampler */
+		if (name.compare("texSampler") == 0)
+		{
+			return TextureType::TT_BaseColor;
+		}
+
+		for (uint32_t i = Enum<TextureType>().NumValues(); i > 0; --i)
+		{
+			const TextureType textureType = TextureType(i-1);
+			std::string valueStr;
+			Enum<TextureType>().ToString(textureType, valueStr);
+			/* Skip the first letter to avoid case mismatch */
+			const std::string_view comparer = &valueStr.c_str()[1];
+			if (name.find(comparer) == std::string::npos) continue;
+			return textureType;
+		}
+		return TT_Unknown;
+	}
+
+	bool EditorShaderProcessor::IsBusy()
+	{
+		return m_QueuedShaders.Size() != 0;
+	}
+
+	void EditorShaderProcessor::WaitIdle()
+	{
+		std::unique_lock<std::mutex> lock(m_WaitMutex);
+		m_WaitCondition.wait(lock, [&]() { return m_QueuedShaders.Size() == 0; });
+	}
+
 	void EditorShaderProcessor::AssetCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
@@ -366,6 +400,7 @@ namespace Glory::Editor
 
 		m_QueuedShaders.Erase(uuid);
 		m_FinishedShaders.push_back(uuid);
+		m_WaitCondition.notify_one();
 		return true;
 	}
 

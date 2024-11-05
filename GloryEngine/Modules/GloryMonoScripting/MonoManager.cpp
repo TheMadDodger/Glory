@@ -1,7 +1,5 @@
 #include "MonoManager.h"
-#include "MonoSceneManager.h"
 #include "GloryMonoScipting.h"
-#include "MonoScriptObjectManager.h"
 #include "CoreLibManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
@@ -182,8 +180,8 @@ namespace Glory
 
 	void MonoManager::Cleanup()
 	{
-		CollectGC();
-		WaitForPendingFinalizers();
+		m_pMethodsHelper->Cleanup();
+		m_pCoreLibManager->Cleanup(Module()->GetEngine());
 
 		for (auto& itor : m_Domains)
 		{
@@ -192,15 +190,14 @@ namespace Glory
 		}
 		m_Domains.clear();
 
+		CollectGC();
+		WaitForPendingFinalizers();
+
 		m_pRootDomain->Unload(true);
 		mono_jit_cleanup(m_pRootDomain->GetMonoDomain());
 		delete m_pRootDomain;
 		m_pRootDomain = nullptr;
 		m_pActiveDomain = nullptr;
-
-		m_pMethodsHelper->Cleanup();
-		m_pCoreLibManager->Cleanup();
-		MonoSceneManager::Cleanup();
 		
 		if (m_DebuggingEnabled) mono_debug_cleanup();
 	}
@@ -219,6 +216,7 @@ namespace Glory
 		{
 			m_pActiveDomain->LoadLib(m_Libs[i]);
 		}
+		m_pActiveDomain->Initialize();
 		m_HadInitialLoad = true;
 
 		m_ScriptExecutionAllowed = true;
@@ -236,6 +234,7 @@ namespace Glory
 		m_Libs.push_back(lib);
 		if (!m_HadInitialLoad) return;
 		m_pActiveDomain->LoadLib(lib);
+		m_pActiveDomain->Initialize();
 	}
 
 	GloryMonoScipting* MonoManager::Module() const
@@ -320,6 +319,7 @@ namespace Glory
 		{
 			m_pActiveDomain->LoadLib(m_Libs[i]);
 		}
+		m_pActiveDomain->Initialize();
 
 		m_ScriptExecutionAllowed = true;
 	}

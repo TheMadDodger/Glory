@@ -91,8 +91,7 @@ namespace Glory::Editor
 		void LoadIntoPipeline(Utils::YAMLFileRef& file, PipelineData* pPipeline) const;
 
 	private:
-		std::map<UUID, PipelineData*> m_pPipelineDatas;
-		std::map<uint64_t, UUID> m_DefaultPipelinesMap;
+		std::vector<UUID> m_Pipelines;
 
 		UUID m_AssetRegisteredCallback;
 		UUID m_ShaderCompiledCallback;

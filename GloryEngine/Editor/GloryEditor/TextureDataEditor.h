@@ -13,4 +13,12 @@ namespace Glory::Editor
 		virtual ~TextureDataEditor();
 		virtual bool OnGUI() override;
 	};
+
+	class StaticTextureDataEditor : public EditorTemplate<StaticTextureDataEditor, TextureData>
+	{
+	public:
+		StaticTextureDataEditor();
+		virtual ~StaticTextureDataEditor();
+		virtual bool OnGUI() override;
+	};
 }

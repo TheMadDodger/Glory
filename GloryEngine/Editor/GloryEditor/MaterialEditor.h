@@ -16,4 +16,15 @@ namespace Glory::Editor
 	private:
 		bool PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData);
 	};
+
+	class StaticMaterialEditor : public EditorTemplate<StaticMaterialEditor, MaterialData>
+	{
+	public:
+		StaticMaterialEditor();
+		virtual ~StaticMaterialEditor();
+		virtual bool OnGUI() override;
+
+	private:
+		void PropertiesGUI(MaterialData* pMaterialData);
+	};
 }

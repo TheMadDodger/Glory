@@ -45,4 +45,31 @@ namespace Glory::Editor
 		}
 		return change;
 	}
+
+	StaticTextureDataEditor::StaticTextureDataEditor()
+	{
+	}
+
+	StaticTextureDataEditor::~StaticTextureDataEditor()
+	{
+	}
+
+	bool StaticTextureDataEditor::OnGUI()
+	{
+		TextureData* pTextureData = (TextureData*)m_pTarget;
+
+		ImGui::BeginDisabled(true);
+		AssetReference<ImageData>& imageRef = pTextureData->Image();
+		AssetPicker::ResourceDropdown("Image", ResourceTypes::GetHash<ImageData>(), imageRef.AssetUUIDMember());
+
+		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
+		EditorUI::InputEnum<Filter>("Sampler/MinFilter", &sampler.MinFilter);
+		EditorUI::InputEnum<Filter>("Sampler/MagFilter", &sampler.MagFilter);
+		EditorUI::InputEnum<SamplerAddressMode>("Sampler/AddressModeU", &sampler.AddressModeU);
+		EditorUI::InputEnum<SamplerAddressMode>("Sampler/AddressModeV", &sampler.AddressModeV);
+		EditorUI::InputEnum<SamplerAddressMode>("Sampler/AddressModeW", &sampler.AddressModeW);
+		ImGui::EndDisabled();
+
+		return false;
+	}
 }

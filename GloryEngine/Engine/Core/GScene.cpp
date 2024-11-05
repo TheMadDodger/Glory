@@ -64,10 +64,25 @@ namespace Glory
 
 	void GScene::DestroyEntity(Utils::ECS::EntityID entity)
 	{
+		/* Destroy children first */
+		Entity e = GetEntityByEntityID(entity);
+		while (e.ChildCount())
+		{
+			DestroyEntity(e.Child(0));
+		}
+
 		const auto itor = m_UUIds.find(entity);
 		if (itor == m_UUIds.end()) return;
-		m_Registry.DestroyEntity(entity);
 		const UUID uuid = itor->second;
+
+		if (m_pManager)
+		{
+			m_pManager->OnSceneObjectDestroyed(GetUUID(), uuid);
+			if (m_pManager->HasStarted())
+				m_Registry.InvokeAll(Utils::ECS::InvocationType::Stop, { entity });
+		}
+
+		m_Registry.DestroyEntity(entity);
 		m_UUIds.erase(itor);
 		m_Ids.erase(uuid);
 	}
@@ -203,7 +218,7 @@ namespace Glory
 
 		const Utils::ECS::EntityID root = pPrefab->Child(0, 0);
 		remapper.EnforceRemap(pPrefab->GetEntityUUID(root), uuid);
-		return InstantiatePrefab(parent, pPrefab, RandomDevice::Seed(), pos, rot, scale);
+		return InstantiatePrefab(parent, pPrefab, remapper, pos, rot, scale);
 	}
 
 	Entity GScene::InstantiatePrefab(UUID parent, PrefabData* pPrefab, uint32_t remapSeed, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
@@ -323,6 +338,23 @@ namespace Glory
 
 		const UUID entityID = pOther->GetEntityUUID(entity);
 		const UUID remappedEntityID = IDRemapper(entityID);
+		auto iter1 = m_Ids.find(remappedEntityID);
+		auto iter2 = m_UUIds.find(newEntity);
+		auto iter3 = m_Names.find(newEntity);
+
+		if (iter1 != m_Ids.end())
+		{
+			m_pManager->GetEngine()->GetDebug().LogError("ID already exists!");
+		}
+		if (iter2 != m_UUIds.end())
+		{
+			m_pManager->GetEngine()->GetDebug().LogError("Entity ID already exists!");
+		}
+		if (iter3 != m_Names.end())
+		{
+			m_pManager->GetEngine()->GetDebug().LogError("Entity ID already has a name!");
+		}
+
 		m_Ids.emplace(remappedEntityID, newEntity);
 		m_UUIds.emplace(newEntity, remappedEntityID);
 		m_Names.emplace(newEntity, pOther->EntityName(entity));
@@ -336,7 +368,7 @@ namespace Glory
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
 			const UUID remappedID = IDRemapper(uuid);
 			void* data = pOther->m_Registry.GetComponentAddress(entity, uuid);
-			m_Registry.CopyComponent(newEntity, type, remappedID, data, false);
+			m_Registry.CopyComponent(newEntity, type, remappedID, data, true);
 		}
 
 		for (size_t i = 0; i < pOther->ChildCount(entity); ++i)

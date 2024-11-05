@@ -2,6 +2,8 @@
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
 #include "EditorSceneManager.h"
+#include "EditorPipelineManager.h"
+#include "EditorAssetManager.h"
 
 #include <Debug.h>
 #include <AssetDatabase.h>
@@ -9,6 +11,7 @@
 #include <AssetManager.h>
 #include <Importer.h>
 #include <BinaryStream.h>
+#include <PipelineData.h>
 #include <AssetArchive.h>
 #include <ProjectSpace.h>
 
@@ -19,6 +22,20 @@ namespace Glory::Editor
 	ThreadedUMap<std::filesystem::path, ImportedResource> ImportedResources;
 
 	Jobs::JobPool<bool, const AssetCompiler::AssetData>* CompilationJobPool = nullptr;
+
+	void AssetCompiler::CompilePipelines()
+	{
+		std::vector<UUID> ids;
+		EditorAssetDatabase::GetAllAssetsOfType(ResourceTypes::GetHash<PipelineData>(), ids);
+		CompileAssetsImmediately(ids);
+		/*for (auto id: ids)
+		{
+			Resource* pResource = EditorApplication::GetInstance()->GetAssetManager().FindResource(id);
+			if (!pResource) continue;
+			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+			EditorApplication::GetInstance()->GetPipelineManager().AddPipeline(pPipeline);
+		}*/
+	}
 
 	void AssetCompiler::CompileAssetDatabase()
 	{
@@ -201,6 +218,15 @@ namespace Glory::Editor
 		CompilationJobPool->QueueJob(CompileJob, asset);
 	}
 
+	void ImportIfNew(ImportedResource& resource)
+	{
+		if (resource.IsNew())
+			EditorAssetDatabase::ImportAsset(resource.Path().string(), resource, resource.SubPath());
+
+		for (size_t i = 0; i < resource.ChildCount(); ++i)
+			ImportIfNew(resource.Child(i));
+	}
+
 	bool AssetCompiler::CompileJob(const AssetData asset)
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
@@ -225,6 +251,7 @@ namespace Glory::Editor
 
 				/* Import the resource */
 				ImportedResource resource = Importer::Import(path);
+				ImportIfNew(resource);
 				data.emplace(path, std::move(resource));
 			});
 

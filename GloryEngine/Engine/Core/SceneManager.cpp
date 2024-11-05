@@ -21,6 +21,7 @@ namespace Glory
 	{
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
 		m_pOpenScenes.clear();
+		m_pExternalScenes.clear();
 		m_ActiveSceneIndex = 0;
 	}
 
@@ -39,10 +40,30 @@ namespace Glory
 		return m_HoveringObjectID;
 	}
 
+	const glm::vec3& SceneManager::GetHoveringPosition() const
+	{
+		return m_HoveringPos;
+	}
+
+	const glm::vec3& SceneManager::GetHoveringNormal() const
+	{
+		return m_HoveringNormal;
+	}
+
 	void SceneManager::SetHoveringObject(UUID sceneID, UUID objectID)
 	{
 		m_HoveringObjectSceneID = sceneID;
 		m_HoveringObjectID = objectID;
+	}
+
+	void SceneManager::SetHoveringPosition(const glm::vec3& pos)
+	{
+		m_HoveringPos = pos;
+	}
+
+	void SceneManager::SetHoveringNormal(const glm::vec3& normal)
+	{
+		m_HoveringNormal = normal;
 	}
 
 	size_t SceneManager::OpenScenesCount()
@@ -61,6 +82,17 @@ namespace Glory
 		auto it = std::find_if(m_pOpenScenes.begin(), m_pOpenScenes.end(), [&](GScene* pScene) {return pScene->GetUUID() == uuid; });
 		if (it == m_pOpenScenes.end()) return nullptr;
 		return *it;
+	}
+
+	size_t SceneManager::ExternalSceneCount()
+	{
+		return m_pExternalScenes.size();
+	}
+
+	GScene* SceneManager::GetExternalScene(size_t index)
+	{
+		if (index >= m_pExternalScenes.size()) return nullptr;
+		return m_pExternalScenes[index];
 	}
 
 	void SceneManager::MarkAllScenesForDestruct()
@@ -104,7 +136,6 @@ namespace Glory
 		RegisterComponent<Transform>();
 		RegisterComponent<LayerComponent>();
 		RegisterComponent<CameraComponent>();
-		RegisterComponent<MeshFilter>();
 		RegisterComponent<MeshRenderer>();
 		RegisterComponent<ModelRenderer>();
 		RegisterComponent<LightComponent>();
@@ -138,6 +169,7 @@ namespace Glory
 
 		// MeshRenderer
 		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterReferencesCallback<MeshRenderer>(MeshRenderSystem::GetReferences);
 
 		// Spin
 		m_pComponentTypesInstance->RegisterInvokaction<Spin>(Glory::Utils::ECS::InvocationType::Update, SpinSystem::OnUpdate);
@@ -164,12 +196,16 @@ namespace Glory
 			}
 			pScene->OnTick();
 		});
+		std::for_each(m_pExternalScenes.begin(), m_pExternalScenes.end(), [this](GScene* pScene) {
+			pScene->OnTick();
+		});
 	}
 
 	void SceneManager::Draw()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Paint" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
+		std::for_each(m_pExternalScenes.begin(), m_pExternalScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
 	}
 
 	void SceneManager::Start()
@@ -191,6 +227,72 @@ namespace Glory
 			m_pOpenScenes[i]->Stop();
 		}
 	}
+	
+	bool SceneManager::HasStarted() const
+	{
+		return m_Started;
+	}
+
+	void SceneManager::AddExternalScene(GScene* pScene)
+	{
+		m_pExternalScenes.push_back(pScene);
+		pScene->m_pManager = this;
+	}
+
+	void SceneManager::RemoveExternalScene(GScene* pScene)
+	{
+		auto iter = std::find(m_pExternalScenes.begin(), m_pExternalScenes.end(), pScene);
+		if (iter == m_pExternalScenes.end()) return;
+		m_pExternalScenes.erase(iter);
+	}
+
+	UUID SceneManager::AddSceneClosingCallback(std::function<void(UUID, UUID)> callback)
+	{
+		const UUID id = UUID();
+		m_SceneClosedCallbacks.push_back({ id, callback });
+		return id;
+	}
+
+	void SceneManager::RemoveSceneClosingCallback(UUID id)
+	{
+		auto iter = std::find_if(m_SceneClosedCallbacks.begin(), m_SceneClosedCallbacks.end(), [id](const SceneCallback& callback) {
+			return callback.m_CallbackID == id;
+		});
+		if (iter == m_SceneClosedCallbacks.end()) return;
+		m_SceneClosedCallbacks.erase(iter);
+	}
+
+	UUID SceneManager::AddSceneObjectDestroyedCallback(std::function<void(UUID, UUID)> callback)
+	{
+		const UUID id = UUID();
+		m_SceneObjectDestroyedCallbacks.push_back({ id, callback });
+		return id;
+	}
+
+	void SceneManager::RemoveSceneObjectDestroyedCallback(UUID id)
+	{
+		auto iter = std::find_if(m_SceneObjectDestroyedCallbacks.begin(), m_SceneObjectDestroyedCallbacks.end(), [id](const SceneCallback& callback) {
+			return callback.m_CallbackID == id;
+		});
+		if (iter == m_SceneObjectDestroyedCallbacks.end()) return;
+		m_SceneObjectDestroyedCallbacks.erase(iter);
+	}
+
+	void SceneManager::OnSceneObjectDestroyed(UUID objectID, UUID sceneID)
+	{
+		for (auto& callback : m_SceneObjectDestroyedCallbacks)
+		{
+			callback.m_Callback(sceneID, objectID);
+		}
+	}
+	
+	void SceneManager::OnSceneClosing(UUID sceneID)
+	{
+		for (auto& callback : m_SceneClosedCallbacks)
+		{
+			callback.m_Callback(sceneID, 0);
+		}
+	}
 
 	void SceneManager::CloseAllScenes()
 	{
@@ -198,5 +300,15 @@ namespace Glory
 		m_pOpenScenes.clear();
 		m_ActiveSceneIndex = 0;
 		OnCloseAll();
+	}
+
+	void SceneManager::UpdateScene(GScene* pScene) const
+	{
+		pScene->OnTick();
+	}
+
+	void SceneManager::DrawScene(GScene* pScene) const
+	{
+		pScene->OnPaint();
 	}
 }

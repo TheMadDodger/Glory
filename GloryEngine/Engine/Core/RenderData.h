@@ -33,5 +33,6 @@ namespace Glory
 		// Material
 		UUID m_MaterialID;
 		LayerMask m_LayerMask;
+		bool m_DepthWrite{ true };
 	};
 }

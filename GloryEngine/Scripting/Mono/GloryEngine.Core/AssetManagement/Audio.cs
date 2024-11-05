@@ -10,7 +10,7 @@ namespace GloryEngine
         #region Constructor
 
         public Audio() : base() { }
-        public Audio(UInt64 id) : base(id) { }
+        public Audio(AssetManager manager, UInt64 id) : base(manager, id) { }
 
         #endregion
     }

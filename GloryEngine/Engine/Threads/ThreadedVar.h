@@ -9,7 +9,6 @@ namespace Glory
 {
 	struct BaseThreadedVar
 	{
-	protected:
 		std::recursive_mutex m_Mutex;
 	};
 

@@ -2,6 +2,9 @@
 
 namespace GloryEngine
 {
+	/// <summary>
+	/// Layer manager
+	/// </summary>
 	public static class LayerManager
     {
 		#region API Methods

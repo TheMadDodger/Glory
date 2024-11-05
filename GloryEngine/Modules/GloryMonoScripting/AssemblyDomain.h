@@ -11,7 +11,6 @@ namespace Glory
 {
 	class Assembly;
 	class ScriptingLib;
-	class MonoScriptObjectManager;
 
 	class AssemblyDomain
 	{
@@ -25,9 +24,6 @@ namespace Glory
 		GLORY_API void Unload(bool isReloading = false);
 
 		GLORY_API Assembly* GetAssembly(const std::string& name);
-		GLORY_API Assembly* GetMainAssembly();
-		GLORY_API const std::string& GetMainAssemblyName();
-		GLORY_API MonoScriptObjectManager* ScriptObjectManager();
 
 		GLORY_API MonoObject* InvokeMethod(MonoMethod* pMethod, MonoObject* pObject, void** args);
 
@@ -35,6 +31,7 @@ namespace Glory
 		GLORY_API void ForEachAssembly(std::function<void(Assembly*)> callback);
 
 		GLORY_API bool SetCurrentDomain(bool force = false);
+		GLORY_API void Initialize();
 
 	private:
 		AssemblyDomain(const std::string& name, MonoDomain* pMonoDomain);
@@ -44,9 +41,7 @@ namespace Glory
 		friend class MonoManager;
 		const std::string m_Name;
 		MonoDomain* m_pMonoDomain;
-		MonoScriptObjectManager* m_pScriptObjectManager;
 
 		std::map<std::string, Assembly> m_Assemblies;
-		std::string m_MainAssemblyName;
 	};
 }

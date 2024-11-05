@@ -67,7 +67,7 @@ namespace Glory
 		m_HashToPropertyInfoIndex[hash] = index;
 	}
 
-	void PipelineData::AddProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash)
+	void PipelineData::AddResourceProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, TextureType textureType)
 	{
 		const uint32_t hash = Reflect::Hash(displayName.data());
 		if (m_HashToPropertyInfoIndex.find(hash) != m_HashToPropertyInfoIndex.end())
@@ -78,7 +78,7 @@ namespace Glory
 		}
 
 		const size_t index = m_PropertyInfos.size();
-		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_NumResources, 0));
+		m_PropertyInfos.push_back(MaterialPropertyInfo(displayName, shaderName, typeHash, m_NumResources, textureType, 0));
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
 		++m_NumResources;
@@ -133,7 +133,7 @@ namespace Glory
 			container.Write(prop.DisplayName());
 			container.Write(prop.Size());
 			container.Write(prop.Offset());
-			container.Write(prop.IsResource());
+			container.Write(prop.GetTextureType());
 			container.Write(prop.Flags());
 		}
 	}
@@ -162,10 +162,10 @@ namespace Glory
 			container.Read(prop.m_PropertyDisplayName);
 			container.Read(prop.m_Size);
 			container.Read(prop.m_Offset);
-			container.Read(prop.m_IsResource);
+			container.Read(prop.m_TextureType);
 			container.Read(prop.m_Flags);
 
-			if (!prop.m_IsResource) continue;
+			if (!prop.m_TextureType) continue;
 			m_ResourcePropertyInfoIndices.push_back(i);
 		}
 	}
@@ -181,7 +181,7 @@ namespace Glory
 	{
 		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
 		{
-			if (!m_PropertyInfos[i].m_IsResource) continue;
+			if (!m_PropertyInfos[i].m_TextureType) continue;
 			return true;
 		}
 		return false;

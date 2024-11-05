@@ -22,7 +22,7 @@
 namespace Glory
 {
 	RendererModule::RendererModule()
-		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_PickPos(0, 0), m_LineVertexCount(0),
+		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr), m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr)
 	{
 	}
@@ -46,6 +46,14 @@ namespace Glory
 		OnSubmit(m_CurrentPreparingFrame.ObjectsToRender[index]);
 	}
 
+	void RendererModule::SubmitLate(RenderData&& renderData)
+	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(renderData)" };
+		const size_t index = m_CurrentPreparingFrame.ObjectsToRenderLate.size();
+		m_CurrentPreparingFrame.ObjectsToRenderLate.push_back(std::move(renderData));
+		OnSubmit(m_CurrentPreparingFrame.ObjectsToRenderLate[index]);
+	}
+
 	void RendererModule::Submit(CameraRef camera)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(camera)" };
@@ -63,6 +71,13 @@ namespace Glory
 
 		m_CurrentPreparingFrame.ActiveCameras.push_back(camera);
 		OnSubmit(camera);
+	}
+
+	size_t RendererModule::Submit(const glm::ivec2& pickPos, UUID cameraID)
+	{
+		const size_t index = m_CurrentPreparingFrame.Picking.size();
+		m_CurrentPreparingFrame.Picking.push_back({ pickPos, cameraID });
+		return index;
 	}
 
 	void RendererModule::Submit(CameraRef camera, RenderTexture* pTexture)
@@ -108,12 +123,6 @@ namespace Glory
 	size_t RendererModule::LastSubmittedCameraCount()
 	{
 		return m_LastSubmittedCameraCount;
-	}
-
-	void RendererModule::SetNextFramePick(const glm::ivec2& coord, CameraRef camera)
-	{
-		m_PickPos = coord;
-		m_PickCamera = camera;
 	}
 
 	void RendererModule::DrawLine(const glm::mat4& transform, const glm::vec3& p1, const glm::vec3& p2, const glm::vec4& color)
@@ -224,6 +233,26 @@ namespace Glory
 		}
 	}
 
+	bool RendererModule::PickResultValid(size_t index) const
+	{
+		return m_PickResults.size() > index;
+	}
+
+	bool RendererModule::PickResultIndex(UUID cameraID, size_t& index) const
+	{
+		auto iter = std::find_if(m_PickResults.begin(), m_PickResults.end(), [cameraID](const PickResult& result) {
+			return result.m_CameraID == cameraID;
+		});
+		if (iter == m_PickResults.end()) return false;
+		index = iter - m_PickResults.begin();
+		return true;
+	}
+
+	const PickResult& RendererModule::GetPickResult(size_t index) const
+	{
+		return m_PickResults[index];
+	}
+
 	void RendererModule::Initialize()
 	{
 		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
@@ -259,12 +288,12 @@ namespace Glory
 
 	void RendererModule::Render(const RenderFrame& frame)
 	{
-		ReadHoveringObject();
+		m_PickResults.clear();
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
 		m_pEngine->GetDisplayManager().ClearAllDisplays(m_pEngine);
 
-		for (size_t i = 0; i < frame.ActiveCameras.size(); i++)
+		for (size_t i = 0; i < frame.ActiveCameras.size(); ++i)
 		{
 			CameraRef camera = frame.ActiveCameras[i];
 
@@ -274,12 +303,30 @@ namespace Glory
 
 			OnStartCameraRender(camera, frame.ActiveLights);
 
-			for (size_t j = 0; j < frame.ObjectsToRender.size(); j++)
+			for (size_t j = 0; j < frame.ObjectsToRender.size(); ++j)
 			{
 				LayerMask mask = camera.GetLayerMask();
 				if (mask != 0 && (mask & frame.ObjectsToRender[j].m_LayerMask) == 0) continue;
 				m_pEngine->Profiler().BeginSample("RendererModule::OnRender");
 				OnRender(camera, frame.ObjectsToRender[j]);
+				m_pEngine->Profiler().EndSample();
+			}
+
+			/* Picking? */
+			for (size_t j = 0; j < frame.Picking.size(); ++j)
+			{
+				const auto& picking = frame.Picking[j];
+				if (picking.second != camera.GetUUID()) continue;
+				DoPicking(picking.first, camera);
+			}
+			
+			pRenderTexture->BindForDraw();
+			for (size_t j = 0; j < frame.ObjectsToRenderLate.size(); ++j)
+			{
+				LayerMask mask = camera.GetLayerMask();
+				if (mask != 0 && (mask & frame.ObjectsToRenderLate[j].m_LayerMask) == 0) continue;
+				m_pEngine->Profiler().BeginSample("RendererModule::OnRender with late render object");
+				OnRender(camera, frame.ObjectsToRenderLate[j]);
 				m_pEngine->Profiler().EndSample();
 			}
 
@@ -329,10 +376,10 @@ namespace Glory
 		m_LastSubmittedCameraCount = frame.ActiveCameras.size();
 	}
 
-	void RendererModule::ReadHoveringObject()
+	void RendererModule::DoPicking(const glm::ivec2& pos, CameraRef camera)
 	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Pick" };
-		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(m_PickCamera, m_pEngine, 0, false);
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DoPicking" };
+		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine, 0, false);
 		if (pRenderTexture == nullptr) return;
 		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
 		if (pTexture == nullptr) return;
@@ -344,8 +391,40 @@ namespace Glory
 		};
 
 		ObjData object;
-		pRenderTexture->ReadColorPixel("object", m_PickPos, &object, DataType::DT_UInt);
-		m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
+		glm::vec4 normal;
+		float depth;
+
+		/* Read pixels */
+		pRenderTexture->ReadColorPixel("object", pos, &object, DataType::DT_UInt);
+		pRenderTexture->ReadColorPixel("Normal", pos, &normal, DataType::DT_Float);
+		pRenderTexture->ReadDepthPixel(pos, &depth, DataType::DT_Float);
+
+		/* Calculate position */
+		const float z = depth * 2.0f - 1.0f;
+		uint32_t width, height;
+		pRenderTexture->GetDimensions(width, height);
+		const glm::vec2 coord = glm::vec2{ pos.x / (float)width, pos.y / (float)height };
+
+		const glm::vec4 clipSpacePosition{ coord * 2.0f - 1.0f, z, 1.0f };
+		const glm::mat4 projectionInverse = camera.GetProjectionInverse();
+		const glm::mat4 viewInverse = camera.GetViewInverse();
+		glm::vec4 viewSpacePosition = projectionInverse * clipSpacePosition;
+
+		/* Perspective division */
+		viewSpacePosition /= viewSpacePosition.w;
+		const glm::vec4 worldSpacePosition = viewInverse * viewSpacePosition;
+
+		/* Calculate normal */
+		normal = normal * 2.0f - 1.0f;
+
+		/* Store results */
+		if (m_PickResults.empty())
+		{
+			m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
+			m_pEngine->GetSceneManager()->SetHoveringPosition(worldSpacePosition);
+			m_pEngine->GetSceneManager()->SetHoveringNormal(normal);
+		}
+		m_PickResults.push_back({ camera.GetUUID(), SceneObjectRef(object.SceneID, object.ObjectID), worldSpacePosition, normal});
 	}
 
 	void RendererModule::CreateLineBuffer()

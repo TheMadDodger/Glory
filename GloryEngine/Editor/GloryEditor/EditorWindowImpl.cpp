@@ -22,8 +22,8 @@ namespace Glory::Editor
 		return m_pMainWindow;
 	}
 
-	void EditorWindowImpl::OnFileDragAndDrop(std::string_view path)
+	void EditorWindowImpl::OnFileDragAndDrop(std::vector<std::string_view>& paths)
 	{
-		EditorApplication::GetInstance()->OnFileDragAndDrop(path);
+		EditorApplication::GetInstance()->OnFileDragAndDrop(paths);
 	}
 }
