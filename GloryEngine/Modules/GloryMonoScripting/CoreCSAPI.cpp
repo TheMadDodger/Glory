@@ -444,7 +444,7 @@ namespace Glory
 
 #pragma region Scene Objects
 
-	MonoString* SceneObject_GetName(uint64_t objectID, uint64_t sceneID)
+	MonoString* SceneObject_GetName(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return nullptr;
@@ -454,7 +454,7 @@ namespace Glory
 		return entity.IsValid() ? mono_string_new(mono_domain_get(), pScene->EntityName(entity.GetEntityID()).data()) : nullptr;
 	}
 
-	void SceneObject_SetName(uint64_t objectID, uint64_t sceneID, MonoString* name)
+	void SceneObject_SetName(uint64_t sceneID, uint64_t objectID, MonoString* name)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
@@ -465,7 +465,7 @@ namespace Glory
 		pScene->SetEntityName(entity.GetEntityID(), std::string{mono_string_to_utf8(name)});
 	}
 
-	size_t SceneObject_GetSiblingIndex(uint64_t objectID, uint64_t sceneID)
+	size_t SceneObject_GetSiblingIndex(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -476,7 +476,7 @@ namespace Glory
 		return pScene->SiblingIndex(entity.GetEntityID());
 	}
 
-	void SceneObject_SetSiblingIndex(uint64_t objectID, uint64_t sceneID, size_t index)
+	void SceneObject_SetSiblingIndex(uint64_t sceneID, uint64_t objectID, size_t index)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
@@ -487,7 +487,7 @@ namespace Glory
 		pScene->SetSiblingIndex(entity.GetEntityID(), index);
 	}
 
-	size_t SceneObject_GetChildCount(uint64_t objectID, uint64_t sceneID)
+	size_t SceneObject_GetChildCount(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -498,7 +498,7 @@ namespace Glory
 		return pScene->ChildCount(entity.GetEntityID());
 	}
 
-	uint64_t SceneObject_GetChild(uint64_t objectID, uint64_t sceneID, size_t index)
+	uint64_t SceneObject_GetChild(uint64_t sceneID, uint64_t objectID, size_t index)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -510,7 +510,7 @@ namespace Glory
 		return childEntity.IsValid() ? pScene->GetEntityUUID(childEntity.GetEntityID()) : 0;
 	}
 
-	uint64_t SceneObject_GetParent(uint64_t objectID, uint64_t sceneID)
+	uint64_t SceneObject_GetParent(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return 0;
@@ -523,7 +523,7 @@ namespace Glory
 		return parentEntity.IsValid() ? pScene->GetEntityUUID(parent) : 0;
 	}
 
-	void SceneObject_SetParent(uint64_t objectID, uint64_t sceneID, uint64_t parentID)
+	void SceneObject_SetParent(uint64_t sceneID, uint64_t objectID, uint64_t parentID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;

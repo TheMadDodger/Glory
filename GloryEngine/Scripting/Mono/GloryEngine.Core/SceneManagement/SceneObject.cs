@@ -257,6 +257,18 @@ namespace GloryEngine.SceneManagement
             return SceneObject_GetComponentID(_scene.ID, _objectID, typeof(T).Name) != 0;
         }
 
+        /// <summary>
+        /// Get a child in the hierarchy of this object
+        /// </summary>
+        /// <param name="index">Index of the child to get</param>
+        /// <returns>The child SceneObject or null if an invalid index was provided</returns>
+        public SceneObject GetChild(int index)
+        {
+            UInt64 childID = SceneObject_GetChild(_scene.ID, _objectID, (uint)index);
+            if (childID == 0) return null;
+            return Scene.GetSceneObject(childID);
+        }
+
         internal EntityBehaviour CreateScriptComponent(Type type, UInt64 componentID)
         {
             if (_componentCache.ContainsKey(componentID))
