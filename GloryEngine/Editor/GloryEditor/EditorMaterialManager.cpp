@@ -330,7 +330,7 @@ namespace Glory::Editor
 				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(manager, resourceIndex) = id;
 			}
 		}
-	}
+ 	}
 
 	void EditorMaterialManager::UpdateMaterial(MaterialData* pMaterial)
 	{
@@ -356,7 +356,12 @@ namespace Glory::Editor
 			if (!pResource) continue;
 			MaterialInstanceData* pMaterialInstance = static_cast<MaterialInstanceData*>(pResource);
 			if (pMaterialInstance->BaseMaterialID() != pMaterial->GetUUID()) continue;
-			pMaterialInstance->Resize(*this, pMaterial);
+
+			EditableResource* pInstanceResource = pApplication->GetResourceManager().GetEditableResource(pMaterialInstance->GetUUID());
+			if (!pInstanceResource || !pInstanceResource->IsEditable()) return;
+			YAMLResource<MaterialInstanceData>* pEditorMaterialInstanceData = static_cast<YAMLResource<MaterialInstanceData>*>(pInstanceResource);
+			Utils::YAMLFileRef& instanceFile = **pEditorMaterialInstanceData;
+			ReadPropertiesInto(instanceFile["Overrides"], pMaterialInstance);
 		}
 	}
 

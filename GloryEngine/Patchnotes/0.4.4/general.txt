@@ -1,0 +1,2 @@
+Editor:
+- Fixed material instances not updating properly when their base material is updated
