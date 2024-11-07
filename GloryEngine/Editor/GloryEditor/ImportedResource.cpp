@@ -1,20 +1,22 @@
 #include "ImportedResource.h"
 #include "EditorAssetDatabase.h"
 
+#include <Debug.h>
 #include <Resource.h>
+#include <EditorApplication.h>
 
 namespace Glory::Editor
 {
-	ImportedResource::ImportedResource(): m_Path(""), m_pResource(nullptr)
+	ImportedResource::ImportedResource(): m_Path(""), m_pResource(nullptr), m_Claimed(false)
 	{
 	}
 
-	ImportedResource::ImportedResource(std::nullptr_t): m_Path(""), m_pResource(nullptr)
+	ImportedResource::ImportedResource(std::nullptr_t): m_Path(""), m_pResource(nullptr), m_Claimed(false)
 	{
 	}
 
 	ImportedResource::ImportedResource(const std::filesystem::path& path, Resource* pResource):
-		m_Path(path), m_pResource(pResource)
+		m_Path(path), m_pResource(pResource), m_Claimed(false)
 	{
 		const auto reserve = EditorAssetDatabase::ReserveAssetUUID(m_Path.string(), "");
 		m_IsNew = !reserve.second;
@@ -24,11 +26,10 @@ namespace Glory::Editor
 	ImportedResource& ImportedResource::AddChild(Resource* pResource, const std::string& name)
 	{
 		const size_t index = m_Children.size();
-		if (m_NameToSubresourceIndex.find(name) == m_NameToSubresourceIndex.end())
-		{
-			//m_pEngine->GetDebug().LogError("Could not add Subresource because a Subresource with the same name already exists!");
+		if (m_NameToSubresourceIndex.find(name) != m_NameToSubresourceIndex.end())
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Could not add Subresource because a Subresource with the same name already exists!");
+		else
 			m_NameToSubresourceIndex.emplace(name, index);
-		}
 
 		pResource->SetName(name);
 		m_Children.push_back({});
@@ -73,9 +74,8 @@ namespace Glory::Editor
 
 	Resource* ImportedResource::operator*()
 	{
-		Resource* temp = m_pResource;
-		m_pResource = nullptr;
-		return temp;
+		m_Claimed = true;
+		return m_pResource;
 	}
 
 	ImportedResource::operator bool() const
@@ -153,7 +153,7 @@ namespace Glory::Editor
 
 	void ImportedResource::Cleanup()
 	{
-		if (m_pResource)
+		if (m_pResource && !m_Claimed)
 		{
 			delete m_pResource;
 			m_pResource = nullptr;

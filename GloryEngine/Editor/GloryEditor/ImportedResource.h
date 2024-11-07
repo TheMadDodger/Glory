@@ -51,6 +51,7 @@ namespace Editor
 		friend class EditorAssetDatabase;
 		friend class Importer;
 		Resource* m_pResource;
+		bool m_Claimed;
 		std::vector<ImportedResource> m_Children;
 		std::map<std::string, size_t> m_NameToSubresourceIndex;
 		bool m_IsNew = false;

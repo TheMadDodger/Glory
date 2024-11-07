@@ -4,6 +4,7 @@
 #include "EditorSceneManager.h"
 #include "EditorPipelineManager.h"
 #include "EditorAssetManager.h"
+#include "RemovedAssetsPopup.h"
 
 #include <Debug.h>
 #include <AssetDatabase.h>
@@ -19,6 +20,7 @@ namespace Glory::Editor
 {
 	std::map<UUID, AssetCompiler::AssetData> AssetCompiler::m_AssetDatas;
 	ThreadedVector<UUID> AssetCompiler::m_CompilingAssets;
+	ThreadedVector<UUID> AssetCompiler::m_ToRemoveAssets;
 	ThreadedUMap<std::filesystem::path, ImportedResource> ImportedResources;
 
 	Jobs::JobPool<bool, const AssetCompiler::AssetData>* CompilationJobPool = nullptr;
@@ -149,6 +151,7 @@ namespace Glory::Editor
 
 	bool AssetCompiler::IsBusy()
 	{
+		if (!CompilationJobPool) return false;
 		return CompilationJobPool->HasTasksInQueue() && m_CompilingAssets.Size();
 	}
 
@@ -208,6 +211,22 @@ namespace Glory::Editor
 		return true;
 	}
 
+	void AssetCompiler::RemoveDeletedAssets()
+	{
+		if (IsBusy()) return;
+		std::vector<UUID> removed{};
+		std::vector<AssetLocation> removedLocations{};
+		removed.reserve(m_ToRemoveAssets.Size());
+		m_ToRemoveAssets.ForEachClear([&removed, &removedLocations](UUID uuid) {
+			EditorAssetDatabase::RemoveAsset(uuid, false);
+			removed.push_back(uuid);
+			removedLocations.push_back(m_AssetDatas.at(uuid).Location);
+		});
+		if (removed.empty()) return;
+		CompileAssetDatabase(removed);
+		RemovedAssetsPopup::AddRemovedAssets(std::move(removedLocations));
+	}
+
 	void AssetCompiler::DispatchCompilationJob(const AssetData& asset)
 	{
 		if (m_CompilingAssets.Contains(asset.Meta.ID())) return;
@@ -245,15 +264,32 @@ namespace Glory::Editor
 		Resource* pResource = assetManager.FindResource(uuid);
 		if (!pResource)
 		{
-			ImportedResources.Do([&path, &uuid](std::unordered_map<std::filesystem::path, ImportedResource>& data) {
+			bool fail = false;
+			ImportedResources.Do([&path, &uuid, &fail, pEngine, &asset](std::unordered_map<std::filesystem::path, ImportedResource>& data) {
 				auto itor = data.find(path);
 				if (itor != data.end()) return;
 
 				/* Import the resource */
 				ImportedResource resource = Importer::Import(path);
+				if (!resource)
+				{
+					/* There was an error during importing */
+					fail = true;
+					return;
+				}
+
 				ImportIfNew(resource);
 				data.emplace(path, std::move(resource));
 			});
+
+			if (fail)
+			{
+				std::stringstream str;
+				str << "AssetCompiler: Failed to import asset at " << asset.Location.Path;
+				pEngine->GetDebug().LogError(str.str());
+				m_CompilingAssets.Erase(uuid);
+				return false;
+			}
 
 			ImportedResources.Do(path, [asset, &pResource](ImportedResource& resource) {
 				ImportedResource* pChild = resource.ChildFromPath(asset.Location.SubresourcePath);
@@ -263,10 +299,9 @@ namespace Glory::Editor
 
 			if (!pResource)
 			{
-				std::stringstream str;
-				str << "AssetCompiler: Failed to compile asset " << uuid << " there was an error when importing the asset.";
-				pEngine->GetDebug().LogError(str.str());
+				/* Importing did not fail, the resource no longer exists */
 				m_CompilingAssets.Erase(uuid);
+				m_ToRemoveAssets.push_back(uuid);
 				return false;
 			}
 

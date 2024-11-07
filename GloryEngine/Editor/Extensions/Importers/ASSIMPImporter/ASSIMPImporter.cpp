@@ -134,6 +134,18 @@ namespace Glory::Editor
         MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
         const std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
 
+        std::function<void(ImportedResource&, Resource*, const std::string_view)> giveName =
+        [](ImportedResource& resource, Resource* pResource, const std::string_view name) {
+            std::string uniqueName{ name };
+            size_t index = 0;
+            while (resource.ChildFromPath(uniqueName))
+            {
+                ++index;
+                uniqueName = std::string{ name } + " " + std::to_string(index);
+            }
+            pResource->SetName(uniqueName);
+        };
+
         if (pScene->HasTextures())
         {
             for (size_t i = 0; i < pScene->mNumTextures; ++i)
@@ -183,7 +195,8 @@ namespace Glory::Editor
             {
                 const aiMaterial* material = pScene->mMaterials[i];
                 MaterialData* pMaterial = new MaterialData();
-                pMaterial->SetName(std::string_view{ material->GetName().C_Str(), material->GetName().length });
+                const std::string_view name{ material->GetName().C_Str(), material->GetName().length };
+                giveName(resource, pMaterial, name);
 
                 aiShadingMode shadingMode;
                 material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
