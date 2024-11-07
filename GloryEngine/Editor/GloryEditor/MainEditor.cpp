@@ -52,9 +52,10 @@
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
-#include "QuitPopup.h"
 
+#include "QuitPopup.h"
 #include "VersionPopup.h"
+#include "RemovedAssetsPopup.h"
 
 #include "CreateEntityObjectsCallbacks.h"
 #include "EditableEntity.h"
@@ -244,6 +245,7 @@ namespace Glory::Editor
 		ObjectMenu::OnGUI();
 		m_pProjectPopup->OnGui();
 		QuitPopup::Draw();
+		RemovedAssetsPopup::Draw();
 		VersionPopup::Draw();
 		DrawAboutPopup();
 	}

@@ -104,7 +104,13 @@ namespace Glory::Editor
 
 	void EditorAssetManager::AddLoadedResource(Resource* pResource)
 	{
-		UnloadAsset(pResource->GetUUID());
+		const bool replaced = m_pLoadedAssets.Do(pResource->GetUUID(), [pResource](Resource** pOther) {
+			if (*pOther == pResource) return;
+			delete *pOther;
+			*pOther = pResource;
+		});
+
+		if (replaced) return;
 		m_pLoadedAssets.Set(pResource->GetUUID(), pResource);
 	}
 

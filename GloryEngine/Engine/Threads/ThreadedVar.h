@@ -249,7 +249,7 @@ namespace Glory
 				m_Mutex.unlock();
 				return false;
 			}
-			callback(m_Data[key]);
+			callback(m_Data.at(key));
 			m_Mutex.unlock();
 			return true;
 		}
