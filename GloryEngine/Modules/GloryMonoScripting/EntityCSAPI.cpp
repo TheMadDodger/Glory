@@ -69,8 +69,13 @@ namespace Glory
 		const UUID uuid{};
 
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
-		void* pNewComponent = registry.CreateComponent(entity.GetEntityID(), componentHash, uuid);
+		if (registry.HasComponent(entity.GetEntityID(), componentHash))
+		{
+			Entity_EngineInstance->GetDebug().LogError("Mutliple components of the same type on one entity is currently not supported");
+			return 0;
+		}
 
+		void* pNewComponent = registry.CreateComponent(entity.GetEntityID(), componentHash, uuid);
 		if (pScene->Manager()->HasStarted())
 		{
 			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
@@ -88,6 +93,12 @@ namespace Glory
 		const uint32_t typeHash = MonoManager::Instance()->GetCoreLibManager()->ScriptManager().TypeHash((size_t)typeIndex);
 		const UUID uuid{};
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		if (registry.HasComponent<MonoScriptComponent>(entity.GetEntityID()))
+		{
+			Entity_EngineInstance->GetDebug().LogError("Mutliple script components on one entity is currently not supported");
+			return 0;
+		}
+
 		MonoScriptComponent& comp = registry.AddComponent<MonoScriptComponent>(entity.GetEntityID(), uuid, typeHash);
 
 		if (pScene->Manager()->HasStarted())

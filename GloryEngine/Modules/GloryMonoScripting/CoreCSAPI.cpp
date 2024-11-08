@@ -506,6 +506,7 @@ namespace Glory
 		if (!pScene) return 0;
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return 0;
+		if (index >= entity.ChildCount()) return 0;
 		const Entity childEntity = { pScene->Child(entity.GetEntityID(), index), pScene};
 		return childEntity.IsValid() ? pScene->GetEntityUUID(childEntity.GetEntityID()) : 0;
 	}
@@ -519,6 +520,7 @@ namespace Glory
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		if (!entity.IsValid()) return 0;
 		Utils::ECS::EntityID parent = pScene->Parent(entity.GetEntityID());
+		if (!parent) return 0;
 		Entity parentEntity = pScene->GetEntityByEntityID(parent);
 		return parentEntity.IsValid() ? pScene->GetEntityUUID(parent) : 0;
 	}
