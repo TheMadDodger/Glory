@@ -15,7 +15,7 @@
 #define PHYSICS Physics_EngineInstance->GetOptionalModule<JoltPhysicsModule>()
 #define RENDERER Physics_EngineInstance->GetMainModule<RendererModule>()
 #define SCRIPTING Physics_EngineInstance->GetOptionalModule<GloryMonoScipting>()
-#define ASSEMBLY SCRIPTING->GetMonoManager()->ActiveDomain()->GetAssembly("GloryEngine.Jolt.dll")
+#define ASSEMBLY SCRIPTING->GetMonoManager()->AppDomain()->GetAssembly("GloryEngine.Jolt.dll")
 
 namespace Glory
 {

@@ -164,9 +164,6 @@ namespace Glory
 		AssemblyState m_State = AssemblyState::AS_NotLoaded;
 		bool m_Locked = false;
 
-		mono_byte* m_DebugData;
-		size_t m_DebugDataSize;
-
 		std::string m_Name;
 		std::string m_Location;
 		bool m_Reloadable;

@@ -15,7 +15,6 @@ namespace Glory
 	public:
 		GLORY_API void InitialLoad();
 
-		GLORY_API AssemblyDomain* GetDomain(const std::string& name);
 		GLORY_API void AddLib(const ScriptingLib& lib);
 
 		GLORY_API GloryMonoScipting* Module() const;
@@ -23,9 +22,7 @@ namespace Glory
 		GLORY_API ScriptingMethodsHelper* GetMethodsHelper() const;
 		GLORY_API bool ScriptExecutionAllowed() const;
 
-		GLORY_API AssemblyDomain* CreateDomain(const std::string& name);
-		GLORY_API AssemblyDomain* ActiveDomain();
-		GLORY_API void UnloadDomain(const std::string& name, bool remove = true);
+		GLORY_API AssemblyDomain* AppDomain();
 
 		GLORY_API void Reload();
 
@@ -52,9 +49,8 @@ namespace Glory
 		GloryMonoScipting* m_pModule;
 		CoreLibManager* m_pCoreLibManager;
 		ScriptingMethodsHelper* m_pMethodsHelper;
-		std::map<std::string, AssemblyDomain*> m_Domains;
 		AssemblyDomain* m_pRootDomain;
-		AssemblyDomain* m_pActiveDomain;
+		AssemblyDomain* m_pAppDomain;
 
 		bool m_DebuggingEnabled;
 

@@ -315,6 +315,6 @@ namespace Glory
 		std::string fullMethodName = ".::" + method;
 		MonoMethod* pMethod = cls.GetMethod(fullMethodName);
 		if (pMethod == nullptr) return;
-		MonoManager::Instance()->ActiveDomain()->InvokeMethod(pMethod, pMonoObject, args);
+		MonoManager::Instance()->AppDomain()->InvokeMethod(pMethod, pMonoObject, args);
 	}
 }

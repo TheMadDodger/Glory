@@ -375,7 +375,7 @@ namespace Glory::Editor
 
 		std::filesystem::path reservedPath = GetAbsoluteAssetPath(path);
 		if (!subPath.empty()) reservedPath.append(subPath.string());
-		m_ReservedUUIDs.Set(reservedPath, forceUUID);
+		m_ReservedUUIDs.Set(reservedPath, uuid);
 
 		std::stringstream stream;
 		if (!subPath.empty())
@@ -514,7 +514,7 @@ namespace Glory::Editor
 		AssetCompiler::CompileAssetDatabase(pResource->GetUUID());
 	}
 
-	void EditorAssetDatabase::RemoveAsset(UUID uuid)
+	void EditorAssetDatabase::RemoveAsset(UUID uuid, bool compile)
 	{
 		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
@@ -529,7 +529,7 @@ namespace Glory::Editor
 		stream << "Removed asset " << uuid;
 		DB_EngineInstance->GetDebug().LogInfo(stream.str());
 
-		AssetCompiler::CompileAssetDatabase(uuid);
+		if (compile) AssetCompiler::CompileAssetDatabase(uuid);
 	}
 
 	void EditorAssetDatabase::SetAssetDirty(Object* pResource)
@@ -797,6 +797,7 @@ namespace Glory::Editor
 		});
 
 		EditorAssetCallbacks::RunCallbacks();
+		AssetCompiler::RemoveDeletedAssets();
 	}
 
 	bool EditorAssetDatabase::ImportJob(std::filesystem::path path)
