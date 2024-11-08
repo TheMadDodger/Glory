@@ -36,6 +36,7 @@ namespace Glory::Editor
 
 	protected:
 		virtual void Initialize() = 0;
+		virtual void Update() {};
 		virtual void OnBeginPackage(const std::filesystem::path& path) {};
 		virtual void OnGenerateConfigExec(std::ofstream& stream) {};
 		virtual void OnEndPackage(const std::filesystem::path& path) {};

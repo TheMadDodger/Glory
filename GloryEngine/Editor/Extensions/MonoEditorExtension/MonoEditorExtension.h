@@ -5,6 +5,7 @@
 #include <Glory.h>
 #include <ResourceMeta.h>
 #include <IPlayModeHandler.h>
+#include <efsw/efsw.hpp>
 
 EXTENSION_H
 
@@ -17,7 +18,7 @@ namespace Glory::Editor
 {
     struct AssetCallbackData;
 
-    class MonoEditorExtension : public BaseEditorExtension, public IPlayModeHandler
+    class MonoEditorExtension : public BaseEditorExtension, public IPlayModeHandler, public efsw::FileWatchListener
     {
     public:
         virtual const char* ModuleName() override { return "Mono Scripting"; };
@@ -29,6 +30,9 @@ namespace Glory::Editor
         virtual void OnBeginPackage(const std::filesystem::path& path) override;
         virtual void OnGenerateConfigExec(std::ofstream& stream) override;
         virtual void OnEndPackage(const std::filesystem::path& path) override;
+        virtual void handleFileAction(efsw::WatchID watchid, const std::string& dir,
+            const std::string& filename, efsw::Action action,
+            std::string oldFilename = "") override;
 
     public:
         MonoEditorExtension();
@@ -42,10 +46,11 @@ namespace Glory::Editor
 
     private:
         virtual void Initialize() override;
+        virtual void Update() override;
         static void FindVisualStudioPath();
 
-        static void OnProjectClose(ProjectSpace* pProject);
-        static void OnProjectOpen(ProjectSpace* pProject);
+        void OnProjectClose(ProjectSpace* pProject);
+        void OnProjectOpen(ProjectSpace* pProject);
 
         static void OnCreateScript(Object* pObject, const ObjectMenuType& menuType);
         static void OnOpenCSharpProject(Object* pObject, const ObjectMenuType& menuType);
@@ -55,7 +60,7 @@ namespace Glory::Editor
         static void GenerateBatchFile(ProjectSpace* pProject);
         static void RunGenerateProjectFilesBatch(ProjectSpace* pProject);
 
-        static void CompileProject(ProjectSpace* pProject, bool release=false, bool reload=true);
+        static void CompileProject(ProjectSpace* pProject, bool release=false);
         static void ReloadAssembly(ProjectSpace* pProject);
 
         static void AssetCallback(const AssetCallbackData& callback);

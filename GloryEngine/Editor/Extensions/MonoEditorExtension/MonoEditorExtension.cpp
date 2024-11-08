@@ -52,6 +52,10 @@ namespace Glory::Editor
 {
 	size_t MonoEditorExtension::m_CompilationCounter = 0;
 
+	efsw::WatchID FileWatch = -1;
+
+	std::atomic_bool ShouldReload = false;
+
 	CREATE_OBJECT_CALLBACK_CPP(Scripted, MonoScriptComponent, ());
 
 	GloryMonoScipting* MonoEditorExtension::m_pMonoScriptingModule = nullptr;
@@ -84,7 +88,7 @@ namespace Glory::Editor
 #endif
 		/* Compile and copy assembly */
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
-		CompileProject(pProject, release, false);
+		CompileProject(pProject, release);
 
 		const std::string mainAssembly = pProject->Name() + ".dll";
 		std::filesystem::path assemblyPath = pProject->LibraryPath();
@@ -102,6 +106,21 @@ namespace Glory::Editor
 		std::vector<std::string> assemblies;
 		assemblies.push_back(mainAssembly);
 		stream.Write(assemblies);
+	}
+
+	void MonoEditorExtension::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
+	{
+		std::filesystem::path filePath = dir;
+		filePath.append(filename);
+
+		switch (action)
+		{
+		case efsw::Actions::Add:
+		case efsw::Actions::Modified:
+			if (filePath.extension().compare(".dll") != 0) break;
+			ShouldReload = true;
+			break;
+		}
 	}
 
 	MonoEditorExtension::MonoEditorExtension()
@@ -159,8 +178,10 @@ namespace Glory::Editor
 		if (!FindMSBuildInVSPath(visualStudioPath, std::filesystem::path{}))
 			FindVisualStudioPath();
 
-		ProjectSpace::RegisterCallback(ProjectCallback::OnClose, MonoEditorExtension::OnProjectClose);
-		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, MonoEditorExtension::OnProjectOpen);
+		ProjectSpace::RegisterCallback(ProjectCallback::OnClose,
+			[this](ProjectSpace* pProject) { OnProjectClose(pProject); });
+		ProjectSpace::RegisterCallback(ProjectCallback::OnOpen,
+			[this](ProjectSpace* pProject) { OnProjectOpen(pProject); });
 
 		ObjectMenu::AddMenuItem("Create/Script/C#", MonoEditorExtension::OnCreateScript, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		ObjectMenu::AddMenuItem("Open C# Project", MonoEditorExtension::OnOpenCSharpProject, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
@@ -196,6 +217,13 @@ namespace Glory::Editor
 		});
 	}
 
+	void MonoEditorExtension::Update()
+	{
+		if (!ShouldReload) return;
+		ReloadAssembly(ProjectSpace::GetOpenProject());
+		ShouldReload = false;
+	}
+
 	void MonoEditorExtension::FindVisualStudioPath()
 	{
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
@@ -215,7 +243,9 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::OnProjectClose(ProjectSpace* pProject)
 	{
-
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		if (FileWatch != -1)
+			pEditorApp->FileWatch().removeWatch(FileWatch);
 	}
 
 	void MonoEditorExtension::OnProjectOpen(ProjectSpace* pProject)
@@ -227,8 +257,14 @@ namespace Glory::Editor
 
 		std::string name = pProject->Name() + ".dll";
 		std::filesystem::path path = pProject->ProjectPath();
-		path = path.parent_path().append("Library/Assembly");
+		path = path.parent_path().append("Library\\Assembly");
 		/* TODO: Lib manager for user assemblies */
+
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+
+		if (FileWatch != -1)
+			pEditorApp->FileWatch().removeWatch(FileWatch);
+		FileWatch = pEditorApp->FileWatch().addWatch(path.string(), this, false);
 
 		m_pMonoScriptingModule->GetMonoManager()->AddLib(ScriptingLib(name, path.string(), true, nullptr));
 	}
@@ -277,7 +313,7 @@ namespace Glory::Editor
 
 		const std::string projectName = pProject->Name();
 		// TODO: Make this setable in engine settings later
-		const std::string dotNetFramework = "4.7.1";
+		const std::string dotNetFramework = "4.7.2";
 
 		std::filesystem::path cachePath = pProject->CachePath();
 		std::filesystem::path luaPath = cachePath;
@@ -289,13 +325,11 @@ namespace Glory::Editor
 		std::filesystem::path premakePath = editorPath.append("premake").append("premake5.exe");
 		editorPath = std::filesystem::current_path();
 		luaStream << "workspace \"" << projectName << "\"" << std::endl;
-		luaStream << "	platforms { \"Win32\", \"x64\" }" << std::endl;
+		luaStream << "	platforms { \"x64\" }" << std::endl;
 		luaStream << "	configurations { \"Debug\", \"Release\" }" << std::endl;
-		luaStream << "	flags { \"MultiProcessorCompile\" }" << std::endl;
 		luaStream << "project \"" << projectName << "\"" << std::endl;
 		luaStream << "	kind \"SharedLib\"" << std::endl;
 		luaStream << "	language \"C#\"" << std::endl;
-		luaStream << "	staticruntime \"Off\"" << std::endl;
 		luaStream << "	namespace (\"" << projectName << "\")" << std::endl;
 		luaStream << "	dotnetframework \"" << dotNetFramework << "\"" << std::endl;
 		luaStream << "	targetdir \"" << "Library/Assembly" << "\"" << std::endl;
@@ -325,19 +359,16 @@ namespace Glory::Editor
 			luaStream << std::endl;
 		}
 		luaStream << "	}" << std::endl;
-		luaStream << "	filter \"" << "platforms:Win32" << "\"" << std::endl;
-		luaStream << "		architecture \"" << "x86" << "\"" << std::endl;
-		luaStream << "		defines \"" << "WIN32" << "\"" << std::endl;
 		luaStream << "	filter \"" << "platforms:x64" << "\"" << std::endl;
 		luaStream << "		architecture \"" << "x64" << "\"" << std::endl;
 		luaStream << "	filter \"" << "configurations:Debug" << "\"" << std::endl;
-		luaStream << "		runtime \"" << "Debug" << "\"" << std::endl;
+		luaStream << "		optimize \"" << "Off" << "\"" << std::endl;
 		luaStream << "		defines \"" << "DEBUG" << "\"" << std::endl;
-		luaStream << "		symbols \"" << "On" << "\"" << std::endl;
+		luaStream << "		symbols \"" << "Default" << "\"" << std::endl;
 		luaStream << "	filter \"" << "configurations:Release" << "\"" << std::endl;
-		luaStream << "		runtime \"" << "Release" << "\"" << std::endl;
-		luaStream << "		defines \"" << "NDEBUG" << "\"" << std::endl;
 		luaStream << "		optimize \"" << "On" << "\"" << std::endl;
+		luaStream << "		defines \"" << "NDEBUG" << "\"" << std::endl;
+		luaStream << "		symbols \"" << "Default" << "\"" << std::endl;
 		luaStream.close();
 
 		std::filesystem::path tempLuaPath = pProject->RootPath();
@@ -404,7 +435,7 @@ namespace Glory::Editor
 		std::filesystem::remove(tempLuaPath);
 	}
 
-	void MonoEditorExtension::CompileProject(ProjectSpace* pProject, bool release, bool reload)
+	void MonoEditorExtension::CompileProject(ProjectSpace* pProject, bool release)
 	{
 		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		pEditorApp->StopPlay();
@@ -425,9 +456,6 @@ namespace Glory::Editor
 
 		std::string cmd = "cd \"" + msBuildPath.parent_path().string() + "\" && " + "msbuild /m /p:Configuration=" + config + " /p:Platform=x64 \"" + projectPath.string() + "\"";
 		system(cmd.c_str());
-
-		if (!reload) return;
-		ReloadAssembly(pProject);
 
 		++m_CompilationCounter;
 	}
