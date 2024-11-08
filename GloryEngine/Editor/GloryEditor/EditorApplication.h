@@ -74,6 +74,7 @@ namespace Editor
 		GLORY_EDITOR_API void OnBeginPackage(const std::filesystem::path& path);
 		GLORY_EDITOR_API void OnGenerateConfigExec(std::ofstream& stream);
 		GLORY_EDITOR_API void OnEndPackage(const std::filesystem::path& path);
+		GLORY_EDITOR_API void UpdateExtensions();
 
 		static const Version Version;
 

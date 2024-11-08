@@ -112,7 +112,33 @@ project "MonoEditorExtension"
 		defines "_DEBUG"
 		symbols "On"
 
+		links
+		{
+			"spirv-cross-cd",
+			"spirv-cross-cored",
+			"spirv-cross-cppd",
+			"spirv-cross-glsld",
+			"spirv-cross-hlsld",
+			"spirv-cross-msld",
+			"spirv-cross-reflectd",
+			"spirv-cross-utild",
+			"efsw-static-debug"
+		}
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links
+		{
+			"spirv-cross-c",
+			"spirv-cross-core",
+			"spirv-cross-cpp",
+			"spirv-cross-glsl",
+			"spirv-cross-hlsl",
+			"spirv-cross-msl",
+			"spirv-cross-reflect",
+			"spirv-cross-util",
+			"efsw-static-release"
+		}

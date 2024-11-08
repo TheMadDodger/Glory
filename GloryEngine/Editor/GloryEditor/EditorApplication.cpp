@@ -146,6 +146,9 @@ namespace Glory::Editor
 				// Update asset database
 				EditorAssetDatabase::Update();
 
+				/* Update editor extensions */
+				UpdateExtensions();
+
 				m_Player.Tick(m_pEngine);
 
 				// Update engine (this also does the render loop)
@@ -186,6 +189,9 @@ namespace Glory::Editor
 
 			// Update asset database
 			EditorAssetDatabase::Update();
+
+			/* Update editor extensions */
+			UpdateExtensions();
 
 			m_Player.Tick(m_pEngine);
 
@@ -300,6 +306,14 @@ namespace Glory::Editor
 		for (size_t i = 0; i < m_pExtensions.size(); i++)
 		{
 			m_pExtensions[i]->OnEndPackage(path);
+		}
+	}
+
+	void EditorApplication::UpdateExtensions()
+	{
+		for (size_t i = 0; i < m_pExtensions.size(); i++)
+		{
+			m_pExtensions[i]->Update();
 		}
 	}
 

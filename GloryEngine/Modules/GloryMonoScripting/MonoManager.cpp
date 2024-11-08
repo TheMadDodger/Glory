@@ -113,9 +113,6 @@ namespace Glory
 
 	void MonoManager::Initialize(const std::string& assemblyDir, const std::string& configDir)
 	{
-        /* Setup AOT */
-		mono_jit_set_aot_mode(MonoAotMode::MONO_AOT_MODE_NONE);
-
         /* Setup mono dirs */
 		mono_set_dirs(assemblyDir.c_str(), configDir.c_str());
 
@@ -134,17 +131,15 @@ namespace Glory
 		if (m_DebuggingEnabled)
 		{
 			std::stringstream debuggerAgentStream;
-			debuggerAgentStream << "--debugger-agent=transport=dt_socket,address=" << debugAgentIP << ":" << debugAgentPort << ",embedding=1,server=y,suspend=n,loglevel=10";
+			debuggerAgentStream << "--debugger-agent=transport=dt_socket,address=" << debugAgentIP << ":" << debugAgentPort << ",server=y,suspend=n,loglevel=3,logfile=Logs/MonoDebugger.log";
 
 			const std::string debuggerAgentString = debuggerAgentStream.str();
 
 			const char* options[] = {
-				"--soft-breakpoints",
-				//"--debugger-agent=transport=dt_socket,address=127.0.0.1:55555"
 				debuggerAgentString.c_str(),
+				"--soft-breakpoints",
 			};
-			mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
-
+			mono_jit_parse_options(2, (char**)options);
 			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 		}
 
@@ -153,20 +148,15 @@ namespace Glory
         mono_trace_set_print_handler(OnPrintCallback);
         mono_trace_set_printerr_handler(OnPrintErrorCallback);
 
-		mono_config_parse(nullptr);
-
 		GProfiler.m_pMonoManager = this;
 		GProfiler.Handle = mono_profiler_create((MonoProfiler*)&GProfiler);
 		mono_profiler_set_gc_allocation_callback(GProfiler.Handle, &OnGCAllocation);
 		//mono_profiler_set_gc_event_callback(GProfiler.Handle, &OnGCEvent);
 		mono_profiler_enable_allocations();
 
-		const char* monoVersion = "v4.0.30319";
-
-		MonoDomain* pMonoDomain = mono_jit_init_version("GloryRootDomain", monoVersion);
-		m_pRootDomain = new AssemblyDomain("root", pMonoDomain);
-		m_Domains.emplace("root", m_pRootDomain);
-		m_pActiveDomain = m_pRootDomain;
+		MonoDomain* pRootDomain = mono_jit_init("GloryJITRuntime");
+		mono_debug_domain_create(pRootDomain);
+		m_pRootDomain = new AssemblyDomain("root", pRootDomain);
 
 		//mono_domain_set_config(m_pRootDomain, configDir.c_str(), configFilename.c_str());
 		mono_thread_set_main(mono_thread_current());
@@ -183,58 +173,45 @@ namespace Glory
 		m_pMethodsHelper->Cleanup();
 		m_pCoreLibManager->Cleanup(Module()->GetEngine());
 
-		for (auto& itor : m_Domains)
-		{
-			if (itor.first == "root") continue;
-			UnloadDomain(itor.first, false);
-		}
-		m_Domains.clear();
+		mono_domain_set(mono_get_root_domain(), false);
+		mono_domain_unload(m_pAppDomain->GetMonoDomain());
+		delete m_pAppDomain;
+		m_pAppDomain = nullptr;
 
-		CollectGC();
-		WaitForPendingFinalizers();
-
-		m_pRootDomain->Unload(true);
 		mono_jit_cleanup(m_pRootDomain->GetMonoDomain());
+
 		delete m_pRootDomain;
 		m_pRootDomain = nullptr;
-		m_pActiveDomain = nullptr;
 		
 		if (m_DebuggingEnabled) mono_debug_cleanup();
 	}
 
 	void MonoManager::InitialLoad()
 	{
-		AssemblyDomain* pStartDomain = CreateDomain("GloryDomain");
-		if (!pStartDomain->SetCurrentDomain())
+		const auto pMonoDomain = mono_domain_create_appdomain("GloryScriptRuntime", nullptr);
+		m_pAppDomain = new AssemblyDomain("app", pMonoDomain);
+		if (!m_pAppDomain->SetCurrentDomain())
 		{
 			Module()->GetEngine()->GetDebug().LogFatalError("MonoManager::InitialLoad > Failed to set initial domain");
 			return;
 		}
-		m_pActiveDomain = pStartDomain;
 
 		for (size_t i = 0; i < m_Libs.size(); ++i)
 		{
-			m_pActiveDomain->LoadLib(m_Libs[i]);
+			m_pAppDomain->LoadLib(m_Libs[i]);
 		}
-		m_pActiveDomain->Initialize();
+		m_pAppDomain->Initialize();
 		m_HadInitialLoad = true;
 
 		m_ScriptExecutionAllowed = true;
-	}
-
-	AssemblyDomain* MonoManager::GetDomain(const std::string& name)
-	{
-		auto itor = m_Domains.find(name);
-		if (itor == m_Domains.end()) return nullptr;
-		return itor->second;
 	}
 
 	void MonoManager::AddLib(const ScriptingLib& lib)
 	{
 		m_Libs.push_back(lib);
 		if (!m_HadInitialLoad) return;
-		m_pActiveDomain->LoadLib(lib);
-		m_pActiveDomain->Initialize();
+		m_pAppDomain->LoadLib(lib);
+		m_pAppDomain->Initialize();
 	}
 
 	GloryMonoScipting* MonoManager::Module() const
@@ -257,69 +234,34 @@ namespace Glory
 		return m_ScriptExecutionAllowed;
 	}
 
-	AssemblyDomain* MonoManager::CreateDomain(const std::string& name)
+	AssemblyDomain* MonoManager::AppDomain()
 	{
-		auto itor = m_Domains.find(name);
-		if (itor != m_Domains.end()) return itor->second;
-
-		const auto pMonoDomain = mono_domain_create_appdomain((char*)name.data(), nullptr);
-		if (m_DebuggingEnabled) mono_debug_domain_create(pMonoDomain);
-		AssemblyDomain* pDomain = new AssemblyDomain(name, pMonoDomain);
-		m_Domains.emplace(name, pDomain);
-		return pDomain;
-	}
-
-	AssemblyDomain* MonoManager::ActiveDomain()
-	{
-		return m_pActiveDomain;
-	}
-
-	void MonoManager::UnloadDomain(const std::string& name, bool remove)
-	{
-		auto itor = m_Domains.find(name);
-		if (itor == m_Domains.end()) return;
-
-		AssemblyDomain* pDomain = itor->second;
-		pDomain->Unload(true);
-
-		if (m_pActiveDomain == pDomain)
-		{
-			if (!m_pRootDomain->SetCurrentDomain())
-			{
-				Module()->GetEngine()->GetDebug().LogFatalError("MonoManager::UnloadDomain > Failed to set root domain as active!");
-				return;
-			}
-			m_pActiveDomain = m_pRootDomain;
-		}
-
-		MonoObject* exception = nullptr;
-		mono_domain_finalize(pDomain->GetMonoDomain(), 2000);
-		mono_domain_try_unload(pDomain->GetMonoDomain(), &exception);
-		//if (m_DebuggingEnabled) mono_debug_domain_unload(pDomain->GetMonoDomain());
-		delete pDomain;
-		
-		if (!remove) return;
-		m_Domains.erase(itor);
+		return m_pAppDomain;
 	}
 
 	void MonoManager::Reload()
 	{
 		m_ScriptExecutionAllowed = false;
 
-		UnloadDomain("GloryDomain");
-		AssemblyDomain* pNewDomain = CreateDomain("GloryDomain");
-		if (!pNewDomain->SetCurrentDomain())
+		mono_domain_set(mono_get_root_domain(), false);
+
+		mono_domain_unload(m_pAppDomain->GetMonoDomain());
+		delete m_pAppDomain;
+		m_pAppDomain = nullptr;
+
+		const auto pMonoDomain = mono_domain_create_appdomain("GloryScriptRuntime", nullptr);
+		m_pAppDomain = new AssemblyDomain("app", pMonoDomain);
+		if (!m_pAppDomain->SetCurrentDomain())
 		{
-			Module()->GetEngine()->GetDebug().LogFatalError("MonoManager::Reload > Failed to set new domain as active");
+			Module()->GetEngine()->GetDebug().LogFatalError("MonoManager::InitialLoad > Failed to set initial domain");
 			return;
 		}
-		m_pActiveDomain = pNewDomain;
 
 		for (size_t i = 0; i < m_Libs.size(); ++i)
 		{
-			m_pActiveDomain->LoadLib(m_Libs[i]);
+			m_pAppDomain->LoadLib(m_Libs[i]);
 		}
-		m_pActiveDomain->Initialize();
+		m_pAppDomain->Initialize();
 
 		m_ScriptExecutionAllowed = true;
 	}
@@ -363,7 +305,7 @@ namespace Glory
 
 	MonoManager::MonoManager(GloryMonoScipting* pModule)
 		: m_pModule(pModule), m_pMethodsHelper(new ScriptingMethodsHelper()),
-		m_pCoreLibManager(new CoreLibManager(this)), m_pRootDomain(nullptr), m_pActiveDomain(nullptr),
+		m_pCoreLibManager(new CoreLibManager(this)), m_pRootDomain(nullptr), m_pAppDomain(nullptr),
 		m_HadInitialLoad(false), m_ScriptExecutionAllowed(false), m_DebuggingEnabled(false)
 	{
 		m_pInstance = this;
