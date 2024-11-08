@@ -181,6 +181,13 @@ namespace Glory::Editor
 					remapper.EnforceRemap(rootID, uuid);
 					instantiatedEntity = pScene->InstantiatePrefab(0, pPrefab, remapper, position, rotation, scale);
 				}
+
+				if (parentUuid != NULL)
+				{
+					Entity parentEntity = pScene->GetEntityByUUID(parentUuid);
+					if (!parentEntity.IsValid()) pScene->DelayedSetParent(instantiatedEntity, parentUuid);
+					else instantiatedEntity.SetParent(parentEntity.GetEntityID());
+				}
 		
 				/* TODO: Deserialize overrides */
 				return instantiatedEntity;
