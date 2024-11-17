@@ -60,7 +60,6 @@ namespace Glory
 
 		void Start();
 		void Stop();
-		bool HasStarted() const;
 
 		/** @brief Add an external scene */
 		void AddExternalScene(GScene* pScene);
@@ -97,7 +96,6 @@ namespace Glory
 		UUID m_HoveringObjectID;
 		glm::vec3 m_HoveringPos;
 		glm::vec3 m_HoveringNormal;
-		bool m_Started{false};
 
 		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;
 

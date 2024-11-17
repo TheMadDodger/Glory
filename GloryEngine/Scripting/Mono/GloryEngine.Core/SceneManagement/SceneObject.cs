@@ -191,11 +191,17 @@ namespace GloryEngine.SceneManagement
             else
             {
                 int typeIndex = Scene.SceneManager.Engine.GetTypeIndex<T>();
-                if (typeIndex == -1) return null;
+                if (typeIndex == -1)
+                    throw new Exception("Invalid component type");
                 componentID = SceneObject_AddScriptComponent(_scene.ID, _objectID, typeIndex);
             }
 
-            if (componentID == 0) return null;
+            if (componentID == 0)
+                throw new Exception("Failed to create component");
+            // Script components get added automatically, so check if the component was already added
+            if (_componentCache.ContainsKey(componentID))
+                return _componentCache[componentID] as T;
+
             EntityComponent component = Activator.CreateInstance(type) as EntityComponent;
             component.Initialize(this, componentID);
             _componentCache.Add(componentID, component);

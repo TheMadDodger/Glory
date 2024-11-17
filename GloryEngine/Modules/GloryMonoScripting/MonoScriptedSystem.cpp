@@ -78,6 +78,34 @@ namespace Glory
 		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "OnValidate", nullptr);
 	}
 
+	void MonoScriptedSystem::OnEnable(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager* pAssets = &pEngine->GetAssetManager();
+
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
+		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "OnEnable", nullptr);
+	}
+
+	void MonoScriptedSystem::OnDisable(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		AssetManager* pAssets = &pEngine->GetAssetManager();
+
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		int typeIndex = scriptManager.TypeIndexFromHash(pComponent.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+
+		scriptManager.Invoke((size_t)typeIndex, pComponent.m_pScriptObject, "OnDisable", nullptr);
+	}
+
 	void MonoScriptedSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();

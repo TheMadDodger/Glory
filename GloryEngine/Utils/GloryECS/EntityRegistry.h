@@ -71,8 +71,8 @@ namespace Glory::Utils::ECS
 			return component;
 		}
 
-		void* CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, bool invokeAdd=true);
-		void* CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data, bool invokeAdd=true);
+		void* CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid);
+		void* CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data);
 
 		template<typename Component>
 		TypeView<Component>* GetTypeView()
@@ -126,9 +126,6 @@ namespace Glory::Utils::ECS
 			if (!pTypeView->Contains(entity))
 				throw new std::exception("Entity does not have component!");
 
-			Component& component = pTypeView->Get(entity);
-			pTypeView->m_Callbacks->Invoke(InvocationType::OnRemove, this, entity, component);
-
 			pTypeView->Remove(entity);
 			pEntityView->Remove(pTypeView->m_TypeHash);
 		}
@@ -151,7 +148,7 @@ namespace Glory::Utils::ECS
 		}
 
 		void InvokeAll(uint32_t typeHash, InvocationType invocationType);
-		void InvokeAll(InvocationType invocationType);
+		void InvokeAll(InvocationType invocationType, std::function<bool(BaseTypeView*, EntityView*, size_t)> canCallCallback);
 
 		void InvokeAll(InvocationType invocationType, const std::vector<EntityID>& entities);
 
@@ -206,11 +203,20 @@ namespace Glory::Utils::ECS
 		bool IsEntityDirty(EntityID entity) const;
 		void SetEntityDirty(EntityID entity, bool dirty=true);
 
-		/** @brief Disable all component callbacks */
+		/** @brief Disable any execution of component callbacks */
 		void DisableCallbacks();
 
-		/** @brief Check whether callbacks are enabled */
+		/** @brief Check whether callbacks are allowed in general */
 		bool CallbacksEnabled() const;
+
+		/**
+		 * @brief Set all callback bits to allow their execution
+		 * Note: If callbacks are disabled on this registry they still won't run
+		 */
+		void EnableAllIndividualCallbacks();
+
+		/** @brief Enable/disable an individual callback on all type views */
+		void SetCallbackEnabled(InvocationType type, bool enabled);
 
 	private:
 		friend class ComponentTypes;

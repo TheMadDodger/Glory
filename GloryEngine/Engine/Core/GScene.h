@@ -230,7 +230,8 @@ namespace Glory
 		 */
 		void UnsetChildrenPrefab(Utils::ECS::EntityID entity);
 
-		Entity InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent = 0);
+		Entity InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity,
+			std::vector<Utils::ECS::EntityID>& newEntities, Utils::ECS::EntityID parent = 0);
 
 	protected:
 		friend class Entity;

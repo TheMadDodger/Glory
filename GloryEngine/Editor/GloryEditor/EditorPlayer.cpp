@@ -59,6 +59,13 @@ namespace Glory::Editor
 		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
 		Utils::ECS::ComponentTypes::SetInstance(pComponentTypes);
 
+		/* Enable all callbacks */
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
+		{
+			GScene* pScene = pScenes->GetOpenScene(i);
+			pScene->GetRegistry().EnableAllIndividualCallbacks();
+		}
+
 		pScenes->Start();
 
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
