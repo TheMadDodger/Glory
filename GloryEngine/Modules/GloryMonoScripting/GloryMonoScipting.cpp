@@ -56,7 +56,6 @@ namespace Glory
 
 		settings.PushGroup("Garbage Collection");
 		settings.RegisterValue<bool>("Enable GC allocation logging", false);
-		settings.RegisterValue<bool>("Auto Collect Garbage", true);
 	}
 
 	void GloryMonoScipting::Initialize()

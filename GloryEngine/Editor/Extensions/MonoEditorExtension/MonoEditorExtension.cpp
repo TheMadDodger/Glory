@@ -64,9 +64,7 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::HandleStop(Module* pModule)
 	{
-		MonoManager::Instance()->CollectGC();
 		MonoManager::Instance()->WaitForPendingFinalizers();
-
 		MonoManager::Instance()->GetCoreLibManager()->ResetEngine(pModule->GetEngine());
 	}
 
