@@ -18,6 +18,10 @@ namespace Glory::Editor
 	{
 		if (!node.Exists() || !node.IsMap())
 			node.Set(YAML::Node(YAML::NodeType::Map));
+
+		auto settings = node["Settings"];
+		SerializeSceneSettings(pEngine, pScene, settings);
+
 		auto entities = node["Entities"];
 		entities.Set(YAML::Node(YAML::NodeType::Sequence));
 		/*
@@ -29,6 +33,43 @@ namespace Glory::Editor
 			Utils::ECS::EntityID child = pScene->Child(0, i);
 			SerializeEntityRecursive(pEngine, pScene, child, entities);
 		}
+	}
+
+	void EditorSceneSerializer::SerializeSceneSettings(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node)
+	{
+		if (!node.Exists() || !node.IsMap())
+			node.SetMap();
+
+		SceneSettings& sceneSettings = pScene->Settings();
+		auto rendering = node["Rendering"];
+		if (!rendering.Exists() || !rendering.IsMap())
+			rendering.SetMap();
+
+		auto ssao = rendering["SSAO"];
+		if (!ssao.Exists() || !ssao.IsMap())
+			ssao.SetMap();
+
+		auto enable = ssao["Enable"];
+		auto sampleRadius = ssao["SampleRadius"];
+		auto sampleBias = ssao["SampleBias"];
+		auto kernelSize = ssao["KernelSize"];
+		auto blurType = ssao["BlurType"];
+		auto blurSize = ssao["BlurSize"];
+		auto separation = ssao["Separation"];
+		auto binsSize = ssao["BinsSize"];
+		auto magnitude = ssao["Magnitude"];
+		auto contrast = ssao["Contrast"];
+
+		enable.Set(sceneSettings.m_SSAOSettings.m_Enabled);
+		sampleRadius.Set(sceneSettings.m_SSAOSettings.m_SampleRadius);
+		sampleBias.Set(sceneSettings.m_SSAOSettings.m_SampleBias);
+		kernelSize.Set(sceneSettings.m_SSAOSettings.m_KernelSize);
+		blurType.SetEnum(sceneSettings.m_SSAOSettings.m_BlurType);
+		blurSize.Set(sceneSettings.m_SSAOSettings.m_BlurSize);
+		separation.Set(sceneSettings.m_SSAOSettings.m_Separation);
+		binsSize.Set(sceneSettings.m_SSAOSettings.m_BinsSize);
+		magnitude.Set(sceneSettings.m_SSAOSettings.m_Magnitude);
+		contrast.Set(sceneSettings.m_SSAOSettings.m_Contrast);
 	}
 
 	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
