@@ -1,3 +1,6 @@
+Runtime:
+- Fixed object name loading
+
 Engine:
 - Upped runtime version to 0.4.4
 - Fixed incorrect mouse button mapping from SDL module
@@ -7,6 +10,8 @@ Editor:
 - Added detection of removed sub assets with a prompt notifying the user they have been removed
 - Fixed prefab instance parent not being restored when loading a scene
 - Duplicated and pasted objects in the scene now get selected automatically
+- Fixed scene settings serialization
+- Fixed object name packaging
 
 Scripting:
 - Added GetChild() to SceneObject
