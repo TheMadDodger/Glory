@@ -475,11 +475,11 @@ namespace Glory
 			SerializeTree(container, m_Registry, entity);
 		}
 
-		/* Serialize scene IDs */
+		/* Serialize scene IDs and names */
 		container.Write(m_Ids.size());
 		for (auto itor = m_Ids.begin(); itor != m_Ids.end(); ++itor)
 		{
-			container.Write(itor->first).Write(itor->second);
+			container.Write(itor->first).Write(itor->second).Write(m_Names.at(itor->second));
 		}
 
 		/* Serialize SSAO settings */
@@ -536,16 +536,18 @@ namespace Glory
 			DeserializeTree(container, m_Registry);
 		}
 
-		/* Deserialize scene IDs */
+		/* Deserialize scene IDs and names */
 		size_t idSize;
 		container.Read(idSize);
 		for (size_t i = 0; i < idSize; i++)
 		{
 			UUID id;
 			Utils::ECS::EntityID entity;
-			container.Read(id).Read(entity);
+			std::string name;
+			container.Read(id).Read(entity).Read(name);
 			m_Ids.emplace(id, entity);
 			m_UUIds.emplace(entity, id);
+			m_Names.emplace(entity, name);
 		}
 
 		/* Deserialize SSAO settings */
