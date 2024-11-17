@@ -202,6 +202,13 @@ namespace Glory
 		{SDLK_KP_RIGHTBRACE,		   KeyBraceRight,				},
 		{SDLK_SYSREQ,			   KeySysRq,					   },
 	};
+	const std::map<uint8_t, MouseButton> MOUSE_BUTTONMAP = {
+		{ SDL_BUTTON_LEFT, MouseButton::MouseButtonLeft },
+		{ SDL_BUTTON_RIGHT, MouseButton::MouseButtonRight },
+		{ SDL_BUTTON_MIDDLE, MouseButton::MouseButtonMiddle },
+		{ SDL_BUTTON_X1, MouseButton::MouseButtonSide1 },
+		{ SDL_BUTTON_X2, MouseButton::MouseButtonSide2 },
+	};
 
 	void SDLWindow::GetVulkanSurface(void* instance, void* surface)
 	{
@@ -287,9 +294,10 @@ namespace Glory
 		case SDL_KEYDOWN:
 		{
 			SDL_Keycode keycode = event.key.keysym.sym;
-			if (KEYBOARD_KEYMAP.find(keycode) == KEYBOARD_KEYMAP.end()) break;
+			const auto iter = KEYBOARD_KEYMAP.find(keycode);
+			if (iter == KEYBOARD_KEYMAP.end()) break;
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
-			inputEvent.KeyID = KEYBOARD_KEYMAP.at(event.key.keysym.sym);
+			inputEvent.KeyID = iter->second;
 			inputEvent.State = InputState::KeyDown;
 			inputEvent.SourceDeviceID = 0;
 			inputEvent.Value = 1.0f;
@@ -299,9 +307,10 @@ namespace Glory
 		case SDL_KEYUP:
 		{
 			SDL_Keycode keycode = event.key.keysym.sym;
-			if (KEYBOARD_KEYMAP.find(keycode) == KEYBOARD_KEYMAP.end()) break;
+			const auto iter = KEYBOARD_KEYMAP.find(keycode);
+			if (iter == KEYBOARD_KEYMAP.end()) break;
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
-			inputEvent.KeyID = KEYBOARD_KEYMAP.at(event.key.keysym.sym);
+			inputEvent.KeyID = iter->second;
 			inputEvent.State = InputState::KeyUp;
 			inputEvent.SourceDeviceID = 0;
 			inputEvent.Value = 0.0f;
@@ -309,21 +318,37 @@ namespace Glory
 			return ForwardInputEvent(inputEvent);
 		}
 		case SDL_MOUSEBUTTONDOWN:
+		{
 			inputEvent.InputDeviceType = InputDeviceType::Mouse;
-			inputEvent.KeyID = event.button.button;
 			inputEvent.State = InputState::KeyDown;
+
+			const auto iter = MOUSE_BUTTONMAP.find(event.button.button);
+			if (iter == MOUSE_BUTTONMAP.end())
+				inputEvent.KeyID = event.button.button - 1;
+			else
+				inputEvent.KeyID = iter->second;
+
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 1.0f;
 			inputEvent.Delta = 1.0f;
 			return ForwardInputEvent(inputEvent);
+		}
 		case SDL_MOUSEBUTTONUP:
+		{
 			inputEvent.InputDeviceType = InputDeviceType::Mouse;
-			inputEvent.KeyID = event.button.button;
 			inputEvent.State = InputState::KeyUp;
+
+			const auto iter = MOUSE_BUTTONMAP.find(event.button.button);
+			if (iter == MOUSE_BUTTONMAP.end())
+				inputEvent.KeyID = event.button.button - 1;
+			else
+				inputEvent.KeyID = iter->second;
+
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 0.0f;
 			inputEvent.Delta = -1.0f;
 			return ForwardInputEvent(inputEvent);
+		}
 		case SDL_MOUSEWHEEL:
 		{
 			bool consumed = false;

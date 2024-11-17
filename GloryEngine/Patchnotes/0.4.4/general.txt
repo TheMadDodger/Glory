@@ -1,5 +1,6 @@
 Engine:
 - Upped runtime version to 0.4.4
+- Fixed incorrect mouse button mapping from SDL module
 
 Editor:
 - Fixed material instances not updating properly when their base material is updated
@@ -15,3 +16,4 @@ Scripting:
 - Added OnEnable and OnDisable calls to behaviours
 - Removed garbage collection on the engine side, this is no longer needed
 - Fixed crashes caused by garbage collection
+- Creating a new script now generates a template for you
