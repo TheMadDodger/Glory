@@ -12,7 +12,7 @@ namespace Glory::Utils::ECS
 	EntityRegistry::~EntityRegistry()
 	{
 		if (m_CallbacksEnabled)
-			InvokeAll(InvocationType::OnRemove);
+			InvokeAll(InvocationType::OnRemove, NULL);
 
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
@@ -53,6 +53,8 @@ namespace Glory::Utils::ECS
 			uint32_t typeHash = it->second;
 			BaseTypeView* pTypeView = GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity);
+			pTypeView->Invoke(InvocationType::OnDisable, this, entity, pAddress);
+			pTypeView->Invoke(InvocationType::Stop, this, entity, pAddress);
 			pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);
 			pTypeView->Remove(entity);
 		}
@@ -77,7 +79,7 @@ namespace Glory::Utils::ECS
 		m_pEntityViews.erase(entity);
 	}
 
-	void* EntityRegistry::CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, bool invokeAdd)
+	void* EntityRegistry::CreateComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid)
 	{
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		const ComponentType* componentType = ComponentTypes::GetComponentType(pTypeView->m_TypeHash);
@@ -89,11 +91,11 @@ namespace Glory::Utils::ECS
 		void* pAddress = pTypeView->Create(entityID);
 		EntityView* pEntityView = GetEntityView(entityID);
 		pEntityView->Add(pTypeView->m_TypeHash, uuid);
-		if (invokeAdd) pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
+		pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
 		return pAddress;
 	}
 
-	void* EntityRegistry::CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data, bool invokeAdd)
+	void* EntityRegistry::CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data)
 	{
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		const ComponentType* componentType = ComponentTypes::GetComponentType(pTypeView->m_TypeHash);
@@ -105,7 +107,8 @@ namespace Glory::Utils::ECS
 		void* pAddress = pTypeView->Create(entityID, data);
 		EntityView* pEntityView = GetEntityView(entityID);
 		pEntityView->Add(pTypeView->m_TypeHash, uuid);
-		if (invokeAdd) pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
+		pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
+		pTypeView->Invoke(InvocationType::OnValidate, this, entityID, pAddress);
 		return pAddress;
 	}
 
@@ -167,7 +170,6 @@ namespace Glory::Utils::ECS
 		EntityView* pEntityView = GetEntityView(entity);
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		void* pAddress = pTypeView->GetComponentAddress(entity);
-		pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);
 		pTypeView->Remove(entity);
 		return m_pEntityViews[entity]->Remove(typeHash);
 	}
@@ -178,7 +180,6 @@ namespace Glory::Utils::ECS
 		uint32_t typeHash = pEntityView->ComponentTypeAt(index);
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		void* pAddress = pTypeView->GetComponentAddress(entity);
-		pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);
 		pTypeView->Remove(entity);
 		m_pEntityViews[entity]->Remove(typeHash);
 	}
@@ -197,7 +198,6 @@ namespace Glory::Utils::ECS
 			uint32_t typeHash = it->second;
 			BaseTypeView* pTypeView = GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity);
-			pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);
 			pTypeView->Remove(entity);
 		}
 	}
@@ -225,7 +225,7 @@ namespace Glory::Utils::ECS
 	void EntityRegistry::InvokeAll(uint32_t typeHash, InvocationType invocationType)
 	{
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
-		pTypeView->InvokeAll(invocationType, this);
+		pTypeView->InvokeAll(invocationType, this, NULL);
 	}
 
 	void EntityRegistry::ForEach(std::function<void(EntityRegistry*, EntityID)> func)
@@ -362,7 +362,7 @@ namespace Glory::Utils::ECS
 			const uint32_t type = pEntityView->ComponentTypeAt(i);
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
 			void* data = GetComponentAddress(entity, uuid);
-			pRegistry->CopyComponent(newEntity, type, uuid, data, true);
+			pRegistry->CopyComponent(newEntity, type, uuid, data);
 		}
 
 		return newEntity;
@@ -390,11 +390,11 @@ namespace Glory::Utils::ECS
 		}
 	}
 
-	void EntityRegistry::InvokeAll(InvocationType invocationType)
+	void EntityRegistry::InvokeAll(InvocationType invocationType, std::function<bool(BaseTypeView*, EntityView*, size_t)> canCallCallback)
 	{
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
-			m_pViews[i]->InvokeAll(invocationType, this);
+			m_pViews[i]->InvokeAll(invocationType, this, canCallCallback);
 		}
 	}
 
@@ -414,6 +414,22 @@ namespace Glory::Utils::ECS
 	bool EntityRegistry::CallbacksEnabled() const
 	{
 		return m_CallbacksEnabled;
+	}
+
+	void EntityRegistry::EnableAllIndividualCallbacks()
+	{
+		for (auto pView : m_pViews)
+		{
+			pView->EnableAllCallbacks();
+		}
+	}
+
+	void EntityRegistry::SetCallbackEnabled(InvocationType type, bool enabled)
+	{
+		for (auto pView : m_pViews)
+		{
+			pView->SetCallbackEnabled(type, enabled);
+		}
 	}
 //
 //	void SceneObject::SetBeforeObject(SceneObject* pObject)

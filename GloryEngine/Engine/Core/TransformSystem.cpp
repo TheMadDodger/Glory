@@ -15,6 +15,11 @@ namespace Glory
     {
     }
 
+    void TransformSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent)
+    {
+        CalculateMatrix(pRegistry, entity, pComponent);
+    }
+
     void TransformSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Transform& pComponent)
     {
         if (!pRegistry->IsEntityDirty(entity)) return;

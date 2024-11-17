@@ -1,5 +1,6 @@
 #include "EditorSceneSerializer.h"
 #include "AssetCompiler.h"
+#include "EditorSceneManager.h"
 
 #include <Serializers.h>
 #include <PropertySerializer.h>
@@ -39,6 +40,7 @@ namespace Glory::Editor
 
 	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
 	{
+		EditorSceneManager::SetupCallbacks(pScene);
 		pScene->SetManager(pEngine->GetSceneManager());
 		Utils::NodeValueRef entities = node["Entities"];
 		for (size_t i = 0; i < entities.Size(); ++i)
@@ -50,7 +52,7 @@ namespace Glory::Editor
 
 		/* Update transforms to generate matrices */
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
-		registry.GetTypeView<Transform>()->InvokeAll(Utils::ECS::InvocationType::Update, &registry);
+		registry.GetTypeView<Transform>()->InvokeAll(Utils::ECS::InvocationType::OnValidate, &registry, NULL);
 
 		AssetCompiler::CompileSceneSettings(pScene, node);
 	}
@@ -242,8 +244,6 @@ namespace Glory::Editor
 
 	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags)
 	{
-		const bool noCallbacks = flags & Flags::NoComponentCallbacks;
-
 		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
 
 		UUID compUUID = component["UUID"].As<uint64_t>();
@@ -264,7 +264,7 @@ namespace Glory::Editor
 		Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
 
 		void* pComponentAddress = nullptr;
-		if (typeHash != transformTypeHash) pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID, !noCallbacks);
+		if (typeHash != transformTypeHash) pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID);
 		else pComponentAddress = pRegistry.GetComponentAddress(entity, compUUID);
 
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
@@ -272,8 +272,6 @@ namespace Glory::Editor
 
 		Utils::ECS::BaseTypeView* pTypeView = pRegistry.GetTypeView(typeHash);
 		pTypeView->SetActive(entity, active);
-
-		if (noCallbacks) return;
 		pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, &pRegistry, entity, pComponentAddress);
 	}
 }

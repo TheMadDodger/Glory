@@ -210,8 +210,6 @@ namespace Glory
 
 	void SceneManager::Start()
 	{
-		if (m_Started) return;
-		m_Started = true;
 		for (size_t i = 0; i < m_pOpenScenes.size(); ++i)
 		{
 			m_pOpenScenes[i]->Start();
@@ -220,17 +218,10 @@ namespace Glory
 
 	void SceneManager::Stop()
 	{
-		if (!m_Started) return;
-		m_Started = false;
 		for (size_t i = 0; i < m_pOpenScenes.size(); ++i)
 		{
 			m_pOpenScenes[i]->Stop();
 		}
-	}
-	
-	bool SceneManager::HasStarted() const
-	{
-		return m_Started;
 	}
 
 	void SceneManager::AddExternalScene(GScene* pScene)

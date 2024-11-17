@@ -10,6 +10,7 @@
 namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
+	class EntityView;
 
 	class BaseTypeView
 	{
@@ -26,15 +27,20 @@ namespace Glory::Utils::ECS
 		virtual void* GetComponentAddress(EntityID entityID, size_t number = 0) = 0;
 		virtual const void* GetComponentAddress(EntityID entityID, size_t number = 0) const = 0;
 		virtual const void* GetComponentAddressFromIndex(size_t index) const = 0;
+		virtual void* GetComponentAddressFromIndex(size_t index) = 0;
 
 		virtual void Invoke(const InvocationType& callbackType, EntityRegistry* pRegistry, EntityID entity, void* pComponentAddress) = 0;
-		virtual void InvokeAll(const InvocationType& callbackType, EntityRegistry* pRegistry) = 0;
+		virtual void InvokeAll(const InvocationType& callbackType, EntityRegistry* pRegistry, std::function<bool(BaseTypeView*, EntityView*, size_t)> canCallCallback) = 0;
 		virtual void InvokeAll(const InvocationType& callbackType, EntityRegistry* pRegistry, const std::vector<EntityID>& entities) = 0;
+		virtual void EnableAllCallbacks() = 0;
+		virtual void SetCallbackEnabled(InvocationType type, bool enabled) = 0;
 
 		virtual uint32_t GetComponentIndex(EntityID entityID, size_t number = 0) const;
 
 		bool IsActive(EntityID entity) const;
+		bool IsActiveByIndex(size_t index) const;
 		void SetActive(EntityID entity, bool active);
+		void SetActiveByIndex(size_t index, bool active);
 
 		size_t Size() const;
 		EntityID EntityAt(size_t index) const;
@@ -138,6 +144,11 @@ namespace Glory::Utils::ECS
 			return &m_ComponentData[index];
 		}
 
+		virtual void* GetComponentAddressFromIndex(size_t index) override
+		{
+			return &m_ComponentData[index];
+		}
+
 		void Invoke(const InvocationType& callbackType, EntityRegistry* pRegistry, EntityID entity, void* pComponentAddress) override
 		{
 			EntityView* pEntityView = pRegistry->GetEntityView(entity);
@@ -154,7 +165,7 @@ namespace Glory::Utils::ECS
 			m_Callbacks->Invoke(callbackType, pRegistry, entity, *pComponent);
 		}
 
-		void InvokeAll(const InvocationType& invocationType, EntityRegistry* pRegistry) override
+		void InvokeAll(const InvocationType& invocationType, EntityRegistry* pRegistry, std::function<bool(BaseTypeView*, EntityView*, size_t)> canCallCallback) override
 		{
 			const size_t count = m_ComponentData.size();
 			for (size_t i = 0; i < count; ++i)
@@ -162,12 +173,15 @@ namespace Glory::Utils::ECS
 				T& component = m_ComponentData[i];
 				EntityID entity = m_Entities[i];
 				EntityView* pEntityView = pRegistry->GetEntityView(entity);
+				const bool isActive = pEntityView->IsActive() && m_ActiveStates.IsSet(uint32_t(i));
 				if (!pEntityView) continue;
+				const bool canCall = canCallCallback ? canCallCallback(this, pEntityView, i) : true;
+				if (!canCall) continue;
 				switch (invocationType)
 				{
 				case InvocationType::Update:
 				case InvocationType::Draw:
-					if (!pEntityView->IsActive() || !m_ActiveStates.IsSet(uint32_t(i))) continue;
+					if (!isActive) continue;
 					break;
 				}
 				m_Callbacks->Invoke(invocationType, pRegistry, entity, component);
@@ -182,6 +196,16 @@ namespace Glory::Utils::ECS
 				if (index >= m_Entities.size()) continue;
 				Invoke(invocationType, pRegistry, m_Entities[index], &m_ComponentData[index]);
 			}
+		}
+
+		void EnableAllCallbacks() override
+		{
+			m_Callbacks->SetAllEnabled();
+		}
+
+		void SetCallbackEnabled(InvocationType type, bool enabled) override
+		{
+			m_Callbacks->SetEnabled(type, enabled);
 		}
 
 	private:

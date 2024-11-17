@@ -86,6 +86,8 @@ namespace Glory
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Start, MonoScriptedSystem::OnStart);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Stop, MonoScriptedSystem::OnStop);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnValidate, MonoScriptedSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnEnable, MonoScriptedSystem::OnEnable);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnDisable, MonoScriptedSystem::OnDisable);
 
 		m_pEngine->AddLoaderModule(new MonoScriptLoader());
 

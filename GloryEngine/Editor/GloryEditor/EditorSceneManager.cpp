@@ -86,6 +86,8 @@ namespace Glory::Editor
 		if (IsSceneOpen(uuid))
 			CloseScene(uuid);
 
+		SetupCallbacks(pScene);
+
 		pScene->SetResourceUUID(uuid);
 		m_pOpenScenes.push_back(pScene);
 		m_OpenedSceneIDs.push_back(uuid);
@@ -308,7 +310,7 @@ namespace Glory::Editor
 
 		EditorApplication::GetInstance()->GetEngine()->m_UUIDRemapper.Reset();
 
-		///* Set scene dirty */
+		/* Set scene dirty */
 		SetSceneDirty(pScene);
 
 		if (newEntityID)
@@ -380,5 +382,15 @@ namespace Glory::Editor
 		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(stream.str());
 
 		ProjectSpace::Save();
+	}
+
+	void EditorSceneManager::SetupCallbacks(GScene* pScene)
+	{
+		if (EditorApplication::GetInstance()->CurrentMode() == EditorMode::M_Play) return;
+		Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::OnEnable, false);
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::OnDisable, false);
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::Start, false);
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::Stop, false);
 	}
 }
