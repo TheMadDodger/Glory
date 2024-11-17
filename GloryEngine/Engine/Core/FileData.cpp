@@ -12,6 +12,11 @@ namespace Glory
 	{
 		APPEND_TYPE(FileData);
 	}
+	
+	FileData::FileData(std::vector<char>&& data) : m_Data(std::move(data))
+	{
+		APPEND_TYPE(FileData);
+	}
 
 	FileData::~FileData()
 	{

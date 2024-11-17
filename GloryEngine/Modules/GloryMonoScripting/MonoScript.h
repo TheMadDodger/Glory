@@ -22,6 +22,7 @@ namespace Glory
     public:
         GLORY_API MonoScript();
         GLORY_API MonoScript(FileData* pFileData, std::string_view ns, std::string_view className);
+        GLORY_API MonoScript(std::vector<char>&& data);
         GLORY_API virtual ~MonoScript();
 
         GLORY_API void Serialize(BinaryStream& container) const override {};
