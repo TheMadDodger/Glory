@@ -48,6 +48,9 @@ namespace Glory
 
 	void GloryMonoScipting::LoadSettings(ModuleSettings& settings)
 	{
+		settings.PushGroup("Scripting");
+		settings.RegisterValue<std::string>("Default Namespace", "$ProjectName");
+		
 		settings.PushGroup("Debugging");
 		settings.RegisterValue<bool>("Enable Debugging", false);
 		settings.RegisterEnumValue<MonoLogLevel>("MonoLogLevel", MonoLogLevel::error);

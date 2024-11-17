@@ -30,6 +30,12 @@ namespace Glory
 	{
 		APPEND_TYPE(MonoScript);
 	}
+	
+	MonoScript::MonoScript(std::vector<char>&& data)
+		: FileData(std::move(data)), m_NamespaceName(""), m_ClassName("")
+	{
+		APPEND_TYPE(MonoScript);
+	}
 
 	MonoScript::~MonoScript()
 	{

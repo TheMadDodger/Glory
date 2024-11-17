@@ -9,6 +9,7 @@ namespace Glory
     public:
         FileData();
         FileData(FileData* pFileData);
+        FileData(std::vector<char>&& data);
         virtual ~FileData();
 
         size_t Size();

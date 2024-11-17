@@ -273,10 +273,64 @@ namespace Glory::Editor
 		path = GetUnqiueFilePath(path.append("New CSharp Script.cs"));
 
 		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [](std::filesystem::path& finalPath) {
+			const std::string scriptName = finalPath.filename().replace_extension().string();
 			finalPath.replace_extension("cs");
 			if (std::filesystem::exists(finalPath)) return;
 
-			MonoScript* pMonoScript = new MonoScript();
+			std::string ns = m_pMonoScriptingModule->Settings().Value<std::string>("Default Namespace");
+			if (ns == "$ProjectName")
+				ns = ProjectSpace::GetOpenProject()->Name();
+
+			const std::string extraTab = ns.empty() ? "" : "	";
+
+			std::stringstream str;
+			str << "using GloryEngine.Entities;" << std::endl << std::endl;
+			if (!ns.empty())
+			{
+				str << "namespace " << ns << std::endl;
+				str << "{" << std::endl;
+			}
+			str << extraTab << "public class " << scriptName << " : EntityBehaviour" << std::endl;
+			str << extraTab << "{" << std::endl;
+			str << extraTab << "	void Start()" << std::endl;
+			str << extraTab << "	{" << std::endl;
+			str << extraTab << "		// Start is called for the first frame regardless of active state" << std::endl;
+			str << extraTab << "	}" << std::endl << std::endl;
+			str << extraTab << "	void Stop()" << std::endl;
+			str << extraTab << "	{" << std::endl;
+			str << extraTab << "		// Stop is called when this component is destroyed, regardless of active state" << std::endl;
+			str << extraTab << "	}" << std::endl << std::endl;
+			str << extraTab << "	void OnEnable()" << std::endl;
+			str << extraTab << "	{" << std::endl;
+			str << extraTab << "		// OnEnable is called when the component switches from inactive to active" << std::endl;
+			str << extraTab << "	}" << std::endl << std::endl;
+			str << extraTab << "	void OnDisable()" << std::endl;
+			str << extraTab << "	{" << std::endl;
+			str << extraTab << "		// OnDisable is called when the component switches from active to inactive" << std::endl;
+			str << extraTab << "	}" << std::endl << std::endl;
+			str << extraTab << "	void OnValidate()" << std::endl;
+			str << extraTab << "	{" << std::endl;
+			str << extraTab << "		// OnValidate is called by the editor when a property on the component changes" << std::endl;
+			str << extraTab << "		// It is also called once before start" << std::endl;
+			str << extraTab << "	}" << std::endl << std::endl;
+			str << extraTab << "	void Update()" << std::endl;
+			str << extraTab << "	{" << std::endl;
+			str << extraTab << "		// Update is called once every frame if the component is active" << std::endl;
+			str << extraTab << "	}" << std::endl << std::endl;
+			str << extraTab << "	void Draw()" << std::endl;
+			str << extraTab << "	{" << std::endl;
+			str << extraTab << "		// Draw is called once every frame during draw" << std::endl;
+			str << extraTab << "	}" << std::endl;
+			str << extraTab << "}" << std::endl;
+			if (!ns.empty())
+				str << "}" << std::endl;
+
+			const std::string fileStr = str.str();
+			std::vector<char> fileData;
+			fileData.resize(fileStr.size());
+			std::memcpy(fileData.data(), fileStr.data(), fileStr.size());
+
+			MonoScript* pMonoScript = new MonoScript(std::move(fileData));
 			EditorAssetDatabase::CreateAsset(pMonoScript, finalPath.string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();
