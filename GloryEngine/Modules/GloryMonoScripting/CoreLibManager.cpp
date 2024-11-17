@@ -126,7 +126,12 @@ namespace Glory
 
 	void CoreLibManager::ResetEngine(Engine* pEngine)
 	{
-		CreateEngine(pEngine);
+		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
+		MonoMethod* pCreate = pEngineClass->GetMethod(".::Reset");
+		MonoObject* pExcept;
+		MonoObject* pReturn = mono_runtime_invoke(pCreate, m_pEngineObject, nullptr, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
 	}
 
 	void CoreLibManager::CreateEngine(Engine* pEngine)

@@ -30,9 +30,6 @@ namespace Glory
 		/* Counts the number of calls observed. */
 		unsigned long long NCalls;
 
-		/* Number of allocated bytes since last collection */
-		unsigned long long ActiveGCBytes;
-
 		/* Mono manager instance */
 		MonoManager* m_pMonoManager;
 	};
@@ -87,12 +84,6 @@ namespace Glory
 			log << "New GC allocation of type " << nameSpace << "." << name << " with size " << size << " bytes";
 			pEngine->GetDebug().LogInfo(log.str());
 		}
-
-		const bool autoGarbageCollect = settings.Value<bool>("Auto Collect Garbage");
-		pGProfiler->ActiveGCBytes += size;
-		if (pGProfiler->ActiveGCBytes < GMonoProfiler::MaxGCAllocations || !autoGarbageCollect) return;
-		pGProfiler->m_pMonoManager->CollectGC();
-		pGProfiler->ActiveGCBytes = 0;
 	}
 
 	void OnGCEvent(MonoProfiler* profiler, MonoProfilerGCEvent event, uint32_t generation, mono_bool isSerial)
