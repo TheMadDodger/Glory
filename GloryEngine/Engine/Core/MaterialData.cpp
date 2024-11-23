@@ -233,6 +233,9 @@ namespace Glory
 			container.Read(prop.m_TextureType);
 			container.Read(prop.m_Flags);
 
+			const uint32_t hash = Reflect::Hash(prop.m_PropertyDisplayName.data());
+			m_HashToPropertyInfoIndex[hash] = i;
+
 			if (!prop.m_TextureType) continue;
 			const size_t resourceIndex = m_ResourcePropertyInfoIndices.size();
 			m_ResourcePropertyInfoIndices.push_back(i);

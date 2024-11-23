@@ -1,5 +1,6 @@
 Runtime:
 - Fixed object name loading
+- Fixed material property hash loading
 
 Engine:
 - Upped runtime version to 0.4.4
