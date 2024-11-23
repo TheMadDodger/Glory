@@ -468,19 +468,19 @@ namespace Glory
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
-		size_t resultIndex;
-		if (!pRenderer->PickResultIndex(cameraComp.m_Camera.GetUUID(), resultIndex))
-			return { 0, 0, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
-		const PickResult pickResult = pRenderer->GetPickResult(resultIndex);
+		PickResultWrapper result{ 0, 0, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
 
-		uint64_t pickedObjectID = 0;
+		pRenderer->GetPickResult(cameraComp.m_Camera.GetUUID(), [&result](const PickResult& pickResult) {
+			uint64_t pickedObjectID = 0;
 
-		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
-		if (pScene)
-			pickedObjectID = pickResult.m_Object.ObjectUUID();
+			GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
+			if (pScene)
+				pickedObjectID = pickResult.m_Object.ObjectUUID();
 
-		return PickResultWrapper{ pickResult.m_CameraID, pickedObjectID,
-			ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
+			result = PickResultWrapper{ pickResult.m_CameraID, pickedObjectID,
+				ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
+		});
+		return result;
 	}
 	
 	Vec2Wrapper CameraComponent_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
