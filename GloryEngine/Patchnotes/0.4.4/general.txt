@@ -14,13 +14,14 @@ Editor:
 - Duplicated and pasted objects in the scene now get selected automatically
 - Fixed scene settings serialization
 - Fixed object name packaging
+- Creating a new script now generates a template for you
 
 Scripting:
 - Added GetChild() to SceneObject
 - Fixed all SceneObject APIs
 - Reworked assembly reloading
+- Updated mono to 2020.02
 - Script debugging now works, you can use any mono debugger extension for any IDE
 - Added OnEnable and OnDisable calls to behaviours
 - Removed garbage collection on the engine side, this is no longer needed
 - Fixed crashes caused by garbage collection
-- Creating a new script now generates a template for you
