@@ -4,6 +4,7 @@ Runtime:
 Engine:
 - Upped runtime version to 0.4.4
 - Fixed incorrect mouse button mapping from SDL module
+- Fixed camera picking sometimes clearing the results before they can be read due to a race condition
 
 Editor:
 - Fixed material instances not updating properly when their base material is updated
