@@ -60,7 +60,7 @@ namespace Glory::Editor
 		auto magnitude = ssao["Magnitude"];
 		auto contrast = ssao["Contrast"];
 
-		enable.Set(sceneSettings.m_SSAOSettings.m_Enabled);
+		enable.Set(bool(sceneSettings.m_SSAOSettings.m_Enabled));
 		sampleRadius.Set(sceneSettings.m_SSAOSettings.m_SampleRadius);
 		sampleBias.Set(sceneSettings.m_SSAOSettings.m_SampleBias);
 		kernelSize.Set(sceneSettings.m_SSAOSettings.m_KernelSize);
