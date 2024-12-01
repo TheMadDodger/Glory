@@ -368,7 +368,7 @@ namespace Glory
 			{
 				/* Axis event */
 				inputEvent.InputDeviceType = InputDeviceType::Mouse;
-				inputEvent.KeyID = MouseAxis::MouseAxisScrollX;
+				inputEvent.KeyID = MouseAxis::MouseAxisScrollY;
 				inputEvent.State = InputState::Axis;
 				inputEvent.SourceDeviceID = event.wheel.which;
 				inputEvent.Value = (float)event.wheel.y;
