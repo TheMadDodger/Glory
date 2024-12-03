@@ -22,7 +22,7 @@ jobs:
     steps:
     - name: Download artifact
       id: download-artifact
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v6
       with:
         # Optional, workflow file name or ID
         # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
