@@ -195,6 +195,31 @@ cp -r lib/windows-x64/GPUUtilities.dll "../../../Dependencies/${CONFIG}/bin"
 cp -r lib/windows-x64/phonon.dll "../../../Dependencies/${CONFIG}/bin"
 cp -r lib/windows-x64/TrueAudioNext.dll "../../../Dependencies/${CONFIG}/bin"
 
+cd ../..
+cd submodules
+
+# RmlUi
+cd RmlUi
+
+# Clone and build freetype dependency
+cd Dependencies
+git clone https://github.com/freetype/freetype
+
+cd freetype
+
+rm "${PLATFORM}" -r
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake --build . --target INSTALL --config $CONFIG
+
+cd ../../..
+rm "${PLATFORM}" -r
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR -DFreetype_ROOT=$DEPSDIR
+cmake --build . --target INSTALL --config $CONFIG
+
 #python get_dependencies.py --clean build
 #if [ "$CONFIG" == "Debug" ]; then
     #python get_dependencies.py --platform $PLAT -a $PLATFORM --toolchain vs2022 --debug
