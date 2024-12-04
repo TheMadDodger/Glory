@@ -195,6 +195,18 @@ cp -r lib/windows-x64/GPUUtilities.dll "../../../Dependencies/${CONFIG}/bin"
 cp -r lib/windows-x64/phonon.dll "../../../Dependencies/${CONFIG}/bin"
 cp -r lib/windows-x64/TrueAudioNext.dll "../../../Dependencies/${CONFIG}/bin"
 
+# Build freetype
+cd ..
+cd submodules
+cd freetype
+
+rm "${PLATFORM}" -r
+mkdir "${PLATFORM}"
+cd "${PLATFORM}"
+
+cmake .. -A $PLATFORM -DCMAKE_INSTALL_PREFIX=$DEPSDIR
+cmake --build . --target INSTALL --config $CONFIG
+
 #python get_dependencies.py --clean build
 #if [ "$CONFIG" == "Debug" ]; then
     #python get_dependencies.py --platform $PLAT -a $PLATFORM --toolchain vs2022 --debug
