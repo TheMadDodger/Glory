@@ -1,6 +1,7 @@
 #pragma once
 #include "UUID.h"
 
+#include <BitSet.h>
 #include <map>
 #include <functional>
 
@@ -14,6 +15,8 @@ namespace Glory::Utils::ECS
 		OnAdd,
 		OnRemove,
 		OnValidate,
+		OnEnable,
+		OnDisable,
 		Start,
 		Stop,
 		Update,
@@ -26,7 +29,7 @@ namespace Glory::Utils::ECS
 	class ComponentInvokations
 	{
 	public:
-		ComponentInvokations()
+		ComponentInvokations() : m_EnabledCallbacks(size_t(InvocationType::Count), true)
 		{
 			for (size_t i = 0; i < (size_t)InvocationType::Count; i++)
 			{
@@ -37,7 +40,9 @@ namespace Glory::Utils::ECS
 
 		void Invoke(const InvocationType& invocationType, EntityRegistry* pRegistry, EntityID entity, T& component)
 		{
-			if (!pRegistry->CallbacksEnabled() || !m_Callbacks[invocationType]) return;
+			if (!pRegistry->CallbacksEnabled()
+				|| !m_EnabledCallbacks.IsSet(uint32_t(invocationType))
+				|| !m_Callbacks[invocationType]) return;
 			m_Callbacks[invocationType](pRegistry, entity, component);
 		}
 
@@ -47,10 +52,21 @@ namespace Glory::Utils::ECS
 			m_ReferencesCallback(pTypeView, references);
 		}
 
+		void SetEnabled(InvocationType callbackType, bool enabled)
+		{
+			m_EnabledCallbacks.Set(uint32_t(callbackType), enabled);
+		}
+
+		void SetAllEnabled()
+		{
+			m_EnabledCallbacks.SetAll();
+		}
+
 	private:
 		friend class EntityRegistry;
 		friend class ComponentTypes;
 		std::map<InvocationType, std::function<void(EntityRegistry*, EntityID, T&)>> m_Callbacks;
 		std::function<void(const BaseTypeView*, std::vector<UUID>&)> m_ReferencesCallback;
+		BitSet m_EnabledCallbacks;
 	};
 }

@@ -132,6 +132,7 @@ namespace Glory
 	void Entity::SetActiveHierarchy(bool active)
 	{
 		Utils::ECS::EntityView* pEntityView = m_pRegistry->GetEntityView(m_EntityID);
+		const bool wasActive = pEntityView->HierarchyActive();
 		pEntityView->HierarchyActive() = active;
 	}
 

@@ -5,6 +5,7 @@
 #include "CreateObjectAction.h"
 #include "Undo.h"
 #include "EditorApplication.h"
+#include "EntityEditor.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -84,6 +85,8 @@ namespace Glory::Editor
 	{
 		if (IsSceneOpen(uuid))
 			CloseScene(uuid);
+
+		SetupCallbacks(pScene);
 
 		pScene->SetResourceUUID(uuid);
 		m_pOpenScenes.push_back(pScene);
@@ -283,6 +286,7 @@ namespace Glory::Editor
 	void EditorSceneManager::PasteSceneObject(GScene* pScene, Utils::ECS::EntityID parent, Utils::NodeValueRef entities)
 	{
 		/* Deserialize node into a new objects */
+		Utils::ECS::EntityID newEntityID = 0;
 		Entity parentEntity = pScene->GetEntityByEntityID(parent);
 		for (size_t i = 0; i < entities.Size(); i++)
 		{
@@ -300,13 +304,20 @@ namespace Glory::Editor
 				Undo::StartRecord("Duplicate", newEntity.EntityUUID());
 				Undo::AddAction<CreateObjectAction>(pScene);
 				Undo::StopRecord();
+				newEntityID = newEntity.GetEntityID();
 			}
 		}
 
 		EditorApplication::GetInstance()->GetEngine()->m_UUIDRemapper.Reset();
 
-		///* Set scene dirty */
+		/* Set scene dirty */
 		SetSceneDirty(pScene);
+
+		if (newEntityID)
+		{
+			EditableEntity* pEntity = GetEditableEntity(newEntityID, pScene);
+			Selection::SetActiveObject((Object*)pEntity);
+		}
 	}
 
 	EditorSceneManager::SceneEventDispatcher& EditorSceneManager::SceneEventsDispatcher()
@@ -371,5 +382,15 @@ namespace Glory::Editor
 		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(stream.str());
 
 		ProjectSpace::Save();
+	}
+
+	void EditorSceneManager::SetupCallbacks(GScene* pScene)
+	{
+		if (EditorApplication::GetInstance()->CurrentMode() == EditorMode::M_Play) return;
+		Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::OnEnable, false);
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::OnDisable, false);
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::Start, false);
+		pRegistry.SetCallbackEnabled(Utils::ECS::InvocationType::Stop, false);
 	}
 }

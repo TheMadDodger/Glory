@@ -16,6 +16,7 @@
 #include <RendererModule.h>
 #include <AudioSourceSystem.h>
 #include <LayerManager.h>
+#include <ComponentHelpers.h>
 
 namespace Glory
 {
@@ -76,11 +77,13 @@ namespace Glory
 		}
 
 		void* pNewComponent = registry.CreateComponent(entity.GetEntityID(), componentHash, uuid);
-		if (pScene->Manager()->HasStarted())
-		{
-			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
-			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), pNewComponent);
-		}
+		Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+		pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), pNewComponent);
+		pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), pNewComponent);
+		/* We can assume the component is active, but is the entity active? */
+		if (entity.IsActive())
+			pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, &registry, entity.GetEntityID(), pNewComponent);
+
 		return uuid;
 	}
 	
@@ -100,12 +103,12 @@ namespace Glory
 		}
 
 		MonoScriptComponent& comp = registry.AddComponent<MonoScriptComponent>(entity.GetEntityID(), uuid, typeHash);
-
-		if (pScene->Manager()->HasStarted())
-		{
-			Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = registry.GetTypeView<MonoScriptComponent>();
-			pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), &comp);
-		}
+		Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = registry.GetTypeView<MonoScriptComponent>();
+		pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &comp);
+		pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), &comp);
+		/* We can assume the component is active, but is the entity active? */
+		if (entity.IsActive())
+			pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, &registry, entity.GetEntityID(), &comp);
 		return uuid;
 	}
 
@@ -119,13 +122,9 @@ namespace Glory
 		Entity entity = pScene->GetEntityByUUID(objectID);
 
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
-		if (pScene->Manager()->HasStarted())
-		{
-			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
-			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
-			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
-		}
-		return registry.RemoveComponent(entity.GetEntityID(), componentHash);
+		Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(componentHash);
+		const uint32_t index = pTypeView->GetComponentIndex(entity.GetEntityID());
+		return Components::Destroy(entity, pTypeView, index);
 	}
 
 	void SceneObject_RemoveComponentByID(uint64_t sceneID, uint64_t objectID, uint64_t id)
@@ -138,13 +137,9 @@ namespace Glory
 		const uint32_t hash = pEntityView->ComponentType(id);
 
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
-		if (pScene->Manager()->HasStarted())
-		{
-			Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(hash);
-			void* pComponent = pTypeView->GetComponentAddress(entity.GetEntityID());
-			pTypeView->Invoke(Utils::ECS::InvocationType::Stop, &registry, entity.GetEntityID(), &pComponent);
-		}
-		pScene->GetRegistry().RemoveComponent(entity.GetEntityID(), hash);
+		Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(hash);
+		const size_t index = pTypeView->GetComponentIndex(entity.GetEntityID());
+		Components::Destroy(entity, pTypeView, index);
 	}
 
 	bool EntityComponent_GetActive(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -166,7 +161,12 @@ namespace Glory
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		const uint32_t type = pEntityView->ComponentType(componentID);
 		Utils::ECS::BaseTypeView* pTypeView = pScene->GetRegistry().GetTypeView(type);
-		pTypeView->SetActive(entity.GetEntityID(), active);
+		const size_t componentIndex = pTypeView->GetComponentIndex(entity.GetEntityID());
+
+		if (active)
+			Components::Activate(entity, pTypeView, componentIndex);
+		else
+			Components::Deactivate(entity, pTypeView, componentIndex);
 	}
 
 #pragma endregion
@@ -468,19 +468,19 @@ namespace Glory
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
-		size_t resultIndex;
-		if (!pRenderer->PickResultIndex(cameraComp.m_Camera.GetUUID(), resultIndex))
-			return { 0, 0, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
-		const PickResult pickResult = pRenderer->GetPickResult(resultIndex);
+		PickResultWrapper result{ 0, 0, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
 
-		uint64_t pickedObjectID = 0;
+		pRenderer->GetPickResult(cameraComp.m_Camera.GetUUID(), [&result](const PickResult& pickResult) {
+			uint64_t pickedObjectID = 0;
 
-		GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
-		if (pScene)
-			pickedObjectID = pickResult.m_Object.ObjectUUID();
+			GScene* pScene = (GScene*)Entity_EngineInstance->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
+			if (pScene)
+				pickedObjectID = pickResult.m_Object.ObjectUUID();
 
-		return PickResultWrapper{ pickResult.m_CameraID, pickedObjectID,
-			ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
+			result = PickResultWrapper{ pickResult.m_CameraID, pickedObjectID,
+				ToVec3Wrapper(pickResult.m_WorldPosition), ToVec3Wrapper(pickResult.m_Normal) };
+		});
+		return result;
 	}
 	
 	Vec2Wrapper CameraComponent_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)

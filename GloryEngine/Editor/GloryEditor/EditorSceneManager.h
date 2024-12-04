@@ -56,6 +56,8 @@ namespace Glory::Editor
 
 		GLORY_EDITOR_API YAMLResource<GScene>* GetSceneFile(UUID uuid);
 
+		GLORY_EDITOR_API static void SetupCallbacks(GScene* pScene);
+
 		enum SceneEventType
 		{
 			Opened,

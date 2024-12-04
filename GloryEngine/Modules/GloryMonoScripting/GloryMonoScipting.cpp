@@ -48,6 +48,9 @@ namespace Glory
 
 	void GloryMonoScipting::LoadSettings(ModuleSettings& settings)
 	{
+		settings.PushGroup("Scripting");
+		settings.RegisterValue<std::string>("Default Namespace", "$ProjectName");
+		
 		settings.PushGroup("Debugging");
 		settings.RegisterValue<bool>("Enable Debugging", false);
 		settings.RegisterEnumValue<MonoLogLevel>("MonoLogLevel", MonoLogLevel::error);
@@ -56,7 +59,6 @@ namespace Glory
 
 		settings.PushGroup("Garbage Collection");
 		settings.RegisterValue<bool>("Enable GC allocation logging", false);
-		settings.RegisterValue<bool>("Auto Collect Garbage", true);
 	}
 
 	void GloryMonoScipting::Initialize()
@@ -86,6 +88,8 @@ namespace Glory
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Start, MonoScriptedSystem::OnStart);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::Stop, MonoScriptedSystem::OnStop);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnValidate, MonoScriptedSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnEnable, MonoScriptedSystem::OnEnable);
+		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnDisable, MonoScriptedSystem::OnDisable);
 
 		m_pEngine->AddLoaderModule(new MonoScriptLoader());
 

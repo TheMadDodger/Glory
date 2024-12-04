@@ -67,6 +67,7 @@ namespace Glory
 		bool PickResultValid(size_t index) const;
 		bool PickResultIndex(UUID cameraID, size_t& index) const;
 		const PickResult& GetPickResult(size_t index) const;
+		void GetPickResult(UUID cameraID, std::function<void(const PickResult&)> callback);
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
@@ -120,6 +121,8 @@ namespace Glory
 		LineVertex* m_pLineVertices;
 		LineVertex* m_pLineVertex;
 
+		std::mutex m_PickLock;
+		std::vector<PickResult> m_LastFramePickResults;
 		std::vector<PickResult> m_PickResults;
 	};
 }

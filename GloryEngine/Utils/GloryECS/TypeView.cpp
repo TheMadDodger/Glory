@@ -53,9 +53,21 @@ namespace Glory::Utils::ECS
 		return m_ActiveStates.IsSet(index);
 	}
 
+	bool BaseTypeView::IsActiveByIndex(size_t index) const
+	{
+		return m_ActiveStates.IsSet(index);
+	}
+
 	void BaseTypeView::SetActive(EntityID entity, bool active)
 	{
 		const uint32_t index = GetComponentIndex(entity, 0);
+		const bool wasActive = m_ActiveStates.IsSet(index);
+		m_ActiveStates.Set(index, active);
+	}
+
+	void BaseTypeView::SetActiveByIndex(size_t index, bool active)
+	{
+		const bool wasActive = m_ActiveStates.IsSet(index);
 		m_ActiveStates.Set(index, active);
 	}
 

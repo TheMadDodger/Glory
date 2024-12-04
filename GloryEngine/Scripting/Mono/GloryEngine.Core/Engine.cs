@@ -62,9 +62,8 @@ namespace GloryEngine
 
         internal void Reset()
         {
-            _assetManager = new AssetManager(this);
-            _sceneManager = new SceneManager(this);
-            _scriptDummyCache = new List<EntityBehaviour>();
+            _assetManager.Clear();
+            _sceneManager.Clear();
         }
 
         internal Resource MakeResource(UInt64 id, string typeString)

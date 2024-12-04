@@ -235,22 +235,30 @@ namespace Glory
 
 	bool RendererModule::PickResultValid(size_t index) const
 	{
-		return m_PickResults.size() > index;
+		return m_LastFramePickResults.size() > index;
 	}
 
 	bool RendererModule::PickResultIndex(UUID cameraID, size_t& index) const
 	{
-		auto iter = std::find_if(m_PickResults.begin(), m_PickResults.end(), [cameraID](const PickResult& result) {
+		auto iter = std::find_if(m_LastFramePickResults.begin(), m_LastFramePickResults.end(), [cameraID](const PickResult& result) {
 			return result.m_CameraID == cameraID;
 		});
-		if (iter == m_PickResults.end()) return false;
-		index = iter - m_PickResults.begin();
+		if (iter == m_LastFramePickResults.end()) return false;
+		index = iter - m_LastFramePickResults.begin();
 		return true;
 	}
 
 	const PickResult& RendererModule::GetPickResult(size_t index) const
 	{
-		return m_PickResults[index];
+		return m_LastFramePickResults[index];
+	}
+
+	void RendererModule::GetPickResult(UUID cameraID, std::function<void(const PickResult&)> callback)
+	{
+		std::scoped_lock<std::mutex> lock(m_PickLock);
+		size_t index;
+		if (!PickResultIndex(cameraID, index)) return;
+		callback(m_LastFramePickResults[index]);
 	}
 
 	void RendererModule::Initialize()
@@ -374,6 +382,10 @@ namespace Glory
 
 		m_LastSubmittedObjectCount = frame.ObjectsToRender.size();
 		m_LastSubmittedCameraCount = frame.ActiveCameras.size();
+
+		std::scoped_lock lock(m_PickLock);
+		m_LastFramePickResults.resize(m_PickResults.size());
+		std::memcpy(m_LastFramePickResults.data(), m_PickResults.data(), m_PickResults.size()*sizeof(PickResult));
 	}
 
 	void RendererModule::DoPicking(const glm::ivec2& pos, CameraRef camera)

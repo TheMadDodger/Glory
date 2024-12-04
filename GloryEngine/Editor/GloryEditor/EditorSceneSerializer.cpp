@@ -1,5 +1,6 @@
 #include "EditorSceneSerializer.h"
 #include "AssetCompiler.h"
+#include "EditorSceneManager.h"
 
 #include <Serializers.h>
 #include <PropertySerializer.h>
@@ -17,6 +18,10 @@ namespace Glory::Editor
 	{
 		if (!node.Exists() || !node.IsMap())
 			node.Set(YAML::Node(YAML::NodeType::Map));
+
+		auto settings = node["Settings"];
+		SerializeSceneSettings(pEngine, pScene, settings);
+
 		auto entities = node["Entities"];
 		entities.Set(YAML::Node(YAML::NodeType::Sequence));
 		/*
@@ -30,6 +35,43 @@ namespace Glory::Editor
 		}
 	}
 
+	void EditorSceneSerializer::SerializeSceneSettings(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node)
+	{
+		if (!node.Exists() || !node.IsMap())
+			node.SetMap();
+
+		SceneSettings& sceneSettings = pScene->Settings();
+		auto rendering = node["Rendering"];
+		if (!rendering.Exists() || !rendering.IsMap())
+			rendering.SetMap();
+
+		auto ssao = rendering["SSAO"];
+		if (!ssao.Exists() || !ssao.IsMap())
+			ssao.SetMap();
+
+		auto enable = ssao["Enable"];
+		auto sampleRadius = ssao["SampleRadius"];
+		auto sampleBias = ssao["SampleBias"];
+		auto kernelSize = ssao["KernelSize"];
+		auto blurType = ssao["BlurType"];
+		auto blurSize = ssao["BlurSize"];
+		auto separation = ssao["Separation"];
+		auto binsSize = ssao["BinsSize"];
+		auto magnitude = ssao["Magnitude"];
+		auto contrast = ssao["Contrast"];
+
+		enable.Set(bool(sceneSettings.m_SSAOSettings.m_Enabled));
+		sampleRadius.Set(sceneSettings.m_SSAOSettings.m_SampleRadius);
+		sampleBias.Set(sceneSettings.m_SSAOSettings.m_SampleBias);
+		kernelSize.Set(sceneSettings.m_SSAOSettings.m_KernelSize);
+		blurType.SetEnum(sceneSettings.m_SSAOSettings.m_BlurType);
+		blurSize.Set(sceneSettings.m_SSAOSettings.m_BlurSize);
+		separation.Set(sceneSettings.m_SSAOSettings.m_Separation);
+		binsSize.Set(sceneSettings.m_SSAOSettings.m_BinsSize);
+		magnitude.Set(sceneSettings.m_SSAOSettings.m_Magnitude);
+		contrast.Set(sceneSettings.m_SSAOSettings.m_Contrast);
+	}
+
 	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
 	{
 		GScene* pScene = new GScene(name, uuid);
@@ -39,6 +81,7 @@ namespace Glory::Editor
 
 	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
 	{
+		EditorSceneManager::SetupCallbacks(pScene);
 		pScene->SetManager(pEngine->GetSceneManager());
 		Utils::NodeValueRef entities = node["Entities"];
 		for (size_t i = 0; i < entities.Size(); ++i)
@@ -50,7 +93,7 @@ namespace Glory::Editor
 
 		/* Update transforms to generate matrices */
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
-		registry.GetTypeView<Transform>()->InvokeAll(Utils::ECS::InvocationType::Update, &registry);
+		registry.GetTypeView<Transform>()->InvokeAll(Utils::ECS::InvocationType::OnValidate, &registry, NULL);
 
 		AssetCompiler::CompileSceneSettings(pScene, node);
 	}
@@ -242,8 +285,6 @@ namespace Glory::Editor
 
 	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags)
 	{
-		const bool noCallbacks = flags & Flags::NoComponentCallbacks;
-
 		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
 
 		UUID compUUID = component["UUID"].As<uint64_t>();
@@ -264,7 +305,7 @@ namespace Glory::Editor
 		Utils::ECS::EntityRegistry& pRegistry = pScene->GetRegistry();
 
 		void* pComponentAddress = nullptr;
-		if (typeHash != transformTypeHash) pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID, !noCallbacks);
+		if (typeHash != transformTypeHash) pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID);
 		else pComponentAddress = pRegistry.GetComponentAddress(entity, compUUID);
 
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
@@ -272,8 +313,6 @@ namespace Glory::Editor
 
 		Utils::ECS::BaseTypeView* pTypeView = pRegistry.GetTypeView(typeHash);
 		pTypeView->SetActive(entity, active);
-
-		if (noCallbacks) return;
 		pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, &pRegistry, entity, pComponentAddress);
 	}
 }

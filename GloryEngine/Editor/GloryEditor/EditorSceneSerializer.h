@@ -34,12 +34,19 @@ namespace Editor
         };
 
         /**
-         * @brief Serialize a scene to a YAML emitter
+         * @brief Serialize a scene to YAML
          * @param pEngine The current engine instance
          * @param pScene The scene to serialize
          * @param node YAML node to serialize the scene to
          */
         GLORY_EDITOR_API static void SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node);
+        /**
+         * @brief Serialize scene settings to YAML
+         * @param pEngine The current engine instance
+         * @param pScene The scene to serialize
+         * @param node YAML node to serialize the scene settings to
+         */
+        GLORY_EDITOR_API static void SerializeSceneSettings(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node);
         /**
          * @brief Deserialize a scene from a YAML node
          * @param pEngine The current engine instance
