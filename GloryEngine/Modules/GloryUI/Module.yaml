@@ -1,0 +1,5 @@
+Name: "Glory UI"
+Type: UI
+Dependencies: []
+Editor:
+ Extensions: ["UIToolsExtension"]

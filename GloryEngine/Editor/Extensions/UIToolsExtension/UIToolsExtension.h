@@ -5,11 +5,11 @@ EXTENSION_H
 
 namespace Glory::Editor
 {
-    class UIEditorExtension : public BaseEditorExtension
+    class UIToolsExtension : public BaseEditorExtension
     {
     public:
-        UIEditorExtension();
-        virtual ~UIEditorExtension();
+        UIToolsExtension();
+        virtual ~UIToolsExtension();
 
     private:
         virtual void Initialize() override;

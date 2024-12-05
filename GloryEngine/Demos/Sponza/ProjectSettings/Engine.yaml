@@ -10,4 +10,5 @@ Modules:
   - GloryJoltPhysics
   - GlorySDLAudio
   - GlorySteamAudio
+  - GloryUI
 EditorVersion: 0.4.0
