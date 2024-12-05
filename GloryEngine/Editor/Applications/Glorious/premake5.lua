@@ -91,6 +91,7 @@ project "Glorious"
 		"GloryEditorOGL",
 		"GloryJoltPhysics",
 		"GlorySteamAudio",
+		"GloryUI",
 		--"GloryEditorVulkan",
 		"GloryMonoScripting",
 		"SDLAudioExtension",
