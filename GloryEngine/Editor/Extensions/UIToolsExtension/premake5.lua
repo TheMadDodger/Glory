@@ -1,10 +1,10 @@
-project "UIEditorExtension"
+project "UIToolsExtension"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{engineOutDir}/Extensions")
+	targetdir ("%{modulesOutDir}/GloryUI/Editor/Extension")
 	objdir ("%{outputDir}")
 
 	files
@@ -27,6 +27,7 @@ project "UIEditorExtension"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.ui}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.editor}",
@@ -55,6 +56,7 @@ project "UIEditorExtension"
 	links
 	{
 		"GloryCore",
+		"GloryUI",
 		"GloryEditor",
 		"shaderc",
 		"shaderc_combined",
