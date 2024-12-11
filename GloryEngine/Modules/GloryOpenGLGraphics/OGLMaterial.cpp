@@ -98,6 +98,11 @@ namespace Glory
 		++m_TextureCounter;
 	}
 
+	void OGLMaterial::ResetTextureCounter()
+	{
+		m_TextureCounter = 0;
+	}
+
 	void OGLMaterial::SetTexture(const std::string& name, GLuint id)
 	{
 		if (!Pipeline()) return;

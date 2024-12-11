@@ -7,6 +7,7 @@
 #include "ShapeProperty.h"
 #include "SceneObjectRef.h"
 
+#include <functional>
 #include <vector>
 
 namespace Glory
@@ -14,6 +15,7 @@ namespace Glory
 	class Buffer;
 	class Mesh;
 	class PipelineData;
+	class IFontImageGenerator;
 
 	struct PickResult
 	{
@@ -32,6 +34,7 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void Submit(RenderData&& renderData);
+		void Submit(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
@@ -69,8 +72,11 @@ namespace Glory
 		const PickResult& GetPickResult(size_t index) const;
 		void GetPickResult(UUID cameraID, std::function<void(const PickResult&)> callback);
 
+		void SetFontGenerator(IFontImageGenerator* pGenerator);
+
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
+		virtual void OnSubmit(const TextRenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
 		virtual void OnSubmit(const PointLight& light) {}
 
@@ -80,6 +86,7 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
+		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 
@@ -95,6 +102,7 @@ namespace Glory
 
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
+		IFontImageGenerator* m_pFontGenerator;
 
 	private:
 		// Run on Graphics Thread

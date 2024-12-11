@@ -22,7 +22,7 @@ namespace Glory::Editor
 		LoaderModule* pModule = EditorApplication::GetInstance()->GetEngine()->GetLoaderModule<FileData>();
 		FileImportSettings fileImportSettings;
 		fileImportSettings.m_Extension = "ttf";
-		fileImportSettings.Flags = std::ios::ate;
+		fileImportSettings.Flags = std::ios::binary | std::ios::ate;
 		FileData* pFileData = (FileData*)pModule->Load(path.string(), fileImportSettings);
 
 		FontData* pFont = new FontData(pFileData);
