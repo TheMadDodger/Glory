@@ -441,6 +441,7 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(Model, ModelRenderer);
 		OBJECT_CREATE_MENU(Camera, CameraComponent);
 		OBJECT_CREATE_MENU(Light, LightComponent);
+		OBJECT_CREATE_MENU(Text, TextComponent);
 
 		ObjectMenu::AddMenuItem("Convert to Prefab", &EntitySceneObjectEditor::ConvertToPrefabMenuItem, T_SceneObject);
 		ObjectMenu::AddMenuItem("Unpack Prefab", &EntitySceneObjectEditor::UnpackPrefabMenuItem, T_SceneObject);

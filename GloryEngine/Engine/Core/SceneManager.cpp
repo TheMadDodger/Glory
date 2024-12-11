@@ -139,6 +139,7 @@ namespace Glory
 		RegisterComponent<MeshRenderer>();
 		RegisterComponent<ModelRenderer>();
 		RegisterComponent<LightComponent>();
+		RegisterComponent<TextComponent>();
 
 		const FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
 		Reflect::SetFieldFlags(pColorField, PropertyFlags::Color);
@@ -173,6 +174,9 @@ namespace Glory
 
 		// Spin
 		m_pComponentTypesInstance->RegisterInvokaction<Spin>(Glory::Utils::ECS::InvocationType::Update, SpinSystem::OnUpdate);
+
+		/* Text Renderer */
+		m_pComponentTypesInstance->RegisterInvokaction<TextComponent>(Glory::Utils::ECS::InvocationType::Draw, TextSystem::OnDraw);
 
 		OnInitialize();
 	}

@@ -32,6 +32,7 @@ namespace Glory::Editor
 		{ ResourceTypes::GetHash<CameraComponent>(), ICON_FA_VIDEO },
 		{ ResourceTypes::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceTypes::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
+		{ ResourceTypes::GetHash<TextComponent>(), ICON_FA_FONT },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)

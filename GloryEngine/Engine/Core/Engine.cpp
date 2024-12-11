@@ -12,10 +12,16 @@
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "ShapeProperty.h"
-#include "PrefabData.h"
 #include "SceneManager.h"
 #include "WindowModule.h"
 #include "EngineProfiler.h"
+
+#include "MaterialInstanceData.h"
+#include "ShaderSourceData.h"
+#include "PipelineData.h"
+#include "PrefabData.h"
+#include "AudioData.h"
+#include "FontData.h"
 
 #include "Debug.h"
 #include "Console.h"
@@ -36,10 +42,6 @@
 
 #include "TimerModule.h"
 #include "ProfilerModule.h"
-#include "MaterialInstanceData.h"
-#include "ShaderSourceData.h"
-#include "PipelineData.h"
-#include "AudioData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
@@ -612,6 +614,7 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<ShaderSourceData>("");
 		m_ResourceTypes->RegisterResource<ImageData>("");
 		m_ResourceTypes->RegisterResource<AudioData>("");
+		m_ResourceTypes->RegisterResource<FontData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");
