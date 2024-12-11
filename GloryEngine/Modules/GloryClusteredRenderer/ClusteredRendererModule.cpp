@@ -11,7 +11,6 @@
 #include <InternalPipeline.h>
 #include <SceneManager.h>
 #include <GScene.h>
-#include <IFontImageGenerator.h>
 #include <FontData.h>
 #include <FontDataStructs.h>
 
@@ -286,29 +285,24 @@ namespace Glory
 		m_pTextMaterial->SetProperties(m_pEngine);
 		m_pTextMaterial->SetObjectData(object);
 
-		Character* characters = m_pFontGenerator->GetCharacterMap(pFontData, 48);
-
 		const float scale = 1.0f;
 		float writeX = 0.0f;
 
 		for (char c : renderData.m_Text)
 		{
 			m_pTextMaterial->ResetTextureCounter();
-			const Character& character = characters[c];
+			const Character* character = pFontData->GetCharacter(c);
+			InternalTexture* pTextureData = pFontData->GetCharacterTexture(c);
+			if (!character || !pTextureData) continue;
 
-			float xpos = writeX + character.Bearing.x*scale;
-			float ypos = -(character.Size.y - character.Bearing.y)*scale;
+			float xpos = writeX + character->Bearing.x*scale;
+			float ypos = -(character->Size.y - character->Bearing.y)*scale;
 
-			float w = character.Size.x*scale;
-			float h = character.Size.y*scale;
+			float w = character->Size.x*scale;
+			float h = character->Size.y*scale;
 
-			Resource* pTextureResource = m_pEngine->GetAssetManager().FindResource(character.TextureID);
-			if (pTextureResource)
-			{
-				TextureData* pTextureData = static_cast<TextureData*>(pTextureResource);
-				Texture* pTexture = pResourceManager->CreateTexture(pTextureData);
-				if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
-			}
+			Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
+			if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
 
 			VertexPosColorTex vertices[4] = {
 				{ { xpos, ypos + h, }, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f } },
@@ -320,7 +314,7 @@ namespace Glory
 
 			pGraphics->DrawMesh(m_pQuadMesh, 0, 4);
 
-			writeX += (character.Advance >> 6)*scale;
+			writeX += (character->Advance >> 6)*scale;
 		}
 	}
 

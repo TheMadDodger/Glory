@@ -24,8 +24,7 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr),
-		m_pFontGenerator(nullptr)
+		m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr)
 	{
 	}
 
@@ -269,11 +268,6 @@ namespace Glory
 		size_t index;
 		if (!PickResultIndex(cameraID, index)) return;
 		callback(m_LastFramePickResults[index]);
-	}
-
-	void RendererModule::SetFontGenerator(IFontImageGenerator* pGenerator)
-	{
-		m_pFontGenerator = pGenerator;
 	}
 
 	void RendererModule::Initialize()

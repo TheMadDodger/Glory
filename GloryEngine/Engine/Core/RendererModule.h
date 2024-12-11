@@ -15,7 +15,6 @@ namespace Glory
 	class Buffer;
 	class Mesh;
 	class PipelineData;
-	class IFontImageGenerator;
 
 	struct PickResult
 	{
@@ -72,8 +71,6 @@ namespace Glory
 		const PickResult& GetPickResult(size_t index) const;
 		void GetPickResult(UUID cameraID, std::function<void(const PickResult&)> callback);
 
-		void SetFontGenerator(IFontImageGenerator* pGenerator);
-
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
 		virtual void OnSubmit(const TextRenderData& renderData) {}
@@ -102,7 +99,6 @@ namespace Glory
 
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
-		IFontImageGenerator* m_pFontGenerator;
 
 	private:
 		// Run on Graphics Thread

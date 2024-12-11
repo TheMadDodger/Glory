@@ -8,7 +8,6 @@ namespace Glory
 {
 	struct Character
 	{
-		UUID TextureID;
 		glm::ivec2 Size;
 		glm::ivec2 Bearing;
 		uint32_t Advance;

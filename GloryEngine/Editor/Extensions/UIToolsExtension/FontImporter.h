@@ -18,7 +18,7 @@ namespace Glory::Editor
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
 
 	private:
-		virtual void Initialize() override {};
-		virtual void Cleanup() override {};
+		virtual void Initialize() override;
+		virtual void Cleanup() override;
 	};
 }

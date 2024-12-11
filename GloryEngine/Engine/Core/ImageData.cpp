@@ -21,7 +21,7 @@ namespace Glory
 
 	ImageData::~ImageData()
 	{
-		delete m_pPixels;
+		delete[] m_pPixels;
 		m_pPixels = nullptr;
 	}
 
