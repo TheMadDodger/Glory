@@ -24,6 +24,7 @@ namespace Glory
         virtual Buffer* CreatePropertiesBuffer(uint32_t size) override;
         virtual Buffer* CreateMVPBuffer() override;
         virtual void SetTexture(const std::string& name, Texture* value) override;
+        virtual void ResetTextureCounter() override;
 
     public: // Set shader vars
         virtual void SetFloat(const std::string& name, float value) const override;

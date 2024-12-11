@@ -35,4 +35,21 @@ namespace Glory
 		LayerMask m_LayerMask;
 		bool m_DepthWrite{ true };
 	};
+
+	struct TextRenderData
+	{
+		/* Font */
+		UUID m_FontID;
+		UUID m_SceneID;
+		UUID m_ObjectID;
+		bool m_TextDirty;
+
+		/* Text */
+		std::string m_Text;
+
+		/* World matrix */
+		glm::mat4 m_World;
+
+		LayerMask m_LayerMask;
+	};
 }

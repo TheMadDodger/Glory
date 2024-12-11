@@ -1,6 +1,6 @@
 #pragma once
-#include <Glory.h>
-#include <FileData.h>
+#include "Glory.h"
+#include "FileData.h"
 
 namespace Glory
 {

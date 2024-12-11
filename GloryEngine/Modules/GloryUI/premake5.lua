@@ -27,8 +27,11 @@ project "GloryUI"
 		"%{DepsIncludeDir}",
 		"%{DepsIncludeDir}/freetype2",
 
-		"%{IncludeDir.glm}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.threads}",
+		"%{GloryIncludeDir.jobs}",
+
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
