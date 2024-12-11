@@ -774,6 +774,49 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Text Components
+
+	uint64_t TextComponent_GetFont(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		return text.m_Font.AssetUUID();
+	}
+
+	void TextComponent_SetFont(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t fontID)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		text.m_Font.SetUUID(fontID);
+		text.m_Dirty = true;
+	}
+
+	MonoString* TextComponent_GetText(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		return mono_string_new(mono_domain_get(), text.m_Text.c_str());
+	}
+
+	void TextComponent_SetText(uint64_t sceneID, uint64_t objectID, uint64_t componentID, MonoString* str)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		text.m_Text = mono_string_to_utf8(str);
+		text.m_Dirty = true;
+	}
+
+	int TextComponent_GetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		return text.m_Size;
+	}
+
+	void TextComponent_SetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID, int size)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		text.m_Size = uint32_t(size);
+		text.m_Dirty = true;
+	}
+
+#pragma endregion
+
 #pragma region Binding
 
 	void EntityCSAPI::GetInternallCalls(std::vector<InternalCall>& internalCalls)
@@ -893,6 +936,14 @@ namespace Glory
 		BIND("GloryEngine.Entities.AudioSource::AudioListener_GetEnabled", AudioListener_GetEnabled);
 		BIND("GloryEngine.Entities.AudioSource::AudioListener_SetEnabled", AudioListener_SetEnabled);
 		BIND("GloryEngine.Entities.AudioSource::AudioListener_GetSimulationSettings", AudioListener_GetSimulationSettings);
+
+		/* Text */
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetFont", TextComponent_GetFont);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetFont", TextComponent_SetFont);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetText", TextComponent_GetText);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetText", TextComponent_SetText);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetSize", TextComponent_GetSize);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetSize", TextComponent_SetSize);
 	}
 
 	void EntityCSAPI::SetEngine(Engine* pEngine)

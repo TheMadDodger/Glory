@@ -160,10 +160,10 @@ namespace Glory
 
 		REFLECTABLE(TextComponent,
 			(AssetReference<FontData>)(m_Font),
-			(uint32_t)(m_Size),
-			(std::string)(m_Text)
+			(uint32_t)(m_Size)
 		);
 
+		std::string m_Text;
 		bool m_Dirty;
 	};
 
