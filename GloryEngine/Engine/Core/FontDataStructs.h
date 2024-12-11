@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	struct Character
+	struct GlyphData
 	{
 		glm::ivec2 Size;
 		glm::ivec2 Bearing;

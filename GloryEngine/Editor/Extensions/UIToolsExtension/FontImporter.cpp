@@ -43,12 +43,17 @@ namespace Glory::Editor
 
 		FT_Set_Pixel_Sizes(face, 0, 48);
 
-		std::vector<Character> characters;
+		FT_ULong charcode;
+		FT_UInt gid;
+		charcode = FT_Get_First_Char(face, &gid);
+
+		std::vector<uint64_t> characterCodes;
+		std::vector<GlyphData> glyphs;
 		std::vector<InternalTexture*> textures;
-		for (unsigned char c = 0; c < 128; c++)
+		while (gid != 0)
 		{
 			// load character glyph 
-			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+			if (FT_Load_Char(face, charcode, FT_LOAD_RENDER))
 			{
 				debug.LogError("FREETYTPE: Failed to load Glyph");
 				continue;
@@ -62,17 +67,20 @@ namespace Glory::Editor
 				PixelFormat::PF_R, PixelFormat::PF_R, 1, std::move(pixels), face->glyph->bitmap.width * face->glyph->bitmap.rows);
 			InternalTexture* pTexture = new InternalTexture(pImageData);
 
-			Character character = {
+			GlyphData character = {
 				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 				face->glyph->advance.x
 			};
 
-			characters.emplace_back(character);
+			characterCodes.emplace_back(charcode);
+			glyphs.emplace_back(character);
 			textures.emplace_back(pTexture);
+
+			charcode = FT_Get_Next_Char(face, charcode, &gid);
 		}
 
-		FontData* pFont = new FontData(std::move(characters), std::move(textures));
+		FontData* pFont = new FontData(std::move(characterCodes), std::move(glyphs), std::move(textures));
 		delete pFileData;
 
 		return { path, pFont };

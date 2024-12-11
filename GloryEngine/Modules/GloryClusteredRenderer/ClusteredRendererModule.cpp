@@ -291,15 +291,16 @@ namespace Glory
 		for (char c : renderData.m_Text)
 		{
 			m_pTextMaterial->ResetTextureCounter();
-			const Character* character = pFontData->GetCharacter(c);
-			InternalTexture* pTextureData = pFontData->GetCharacterTexture(c);
-			if (!character || !pTextureData) continue;
+			const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+			const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
+			InternalTexture* pTextureData = pFontData->GetGlyphTexture(glyphIndex);
+			if (!glyph || !pTextureData) continue;
 
-			float xpos = writeX + character->Bearing.x*scale;
-			float ypos = -(character->Size.y - character->Bearing.y)*scale;
+			float xpos = writeX + glyph->Bearing.x*scale;
+			float ypos = -(glyph->Size.y - glyph->Bearing.y)*scale;
 
-			float w = character->Size.x*scale;
-			float h = character->Size.y*scale;
+			float w = glyph->Size.x*scale;
+			float h = glyph->Size.y*scale;
 
 			Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
 			if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
@@ -314,7 +315,7 @@ namespace Glory
 
 			pGraphics->DrawMesh(m_pQuadMesh, 0, 4);
 
-			writeX += (character->Advance >> 6)*scale;
+			writeX += (glyph->Advance >> 6)*scale;
 		}
 	}
 
