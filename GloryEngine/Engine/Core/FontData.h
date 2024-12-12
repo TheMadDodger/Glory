@@ -11,10 +11,11 @@ namespace Glory
     {
     public:
         GLORY_API FontData();
-        GLORY_API FontData(std::vector<uint64_t>&& characterCodes,
+        GLORY_API FontData(uint32_t height, std::vector<uint64_t>&& characterCodes,
             std::vector<GlyphData>&& chars, std::vector<InternalTexture*>&& textures);
         GLORY_API virtual ~FontData();
 
+        GLORY_API uint32_t FontHeight() const;
         GLORY_API size_t GetGlyphIndex(uint64_t c) const;
         GLORY_API const GlyphData* GetGlyph(size_t index) const;
         GLORY_API InternalTexture* GetGlyphTexture(size_t index) const;
@@ -23,6 +24,7 @@ namespace Glory
         GLORY_API void Deserialize(BinaryStream& container) override;
 
     private:
+        uint32_t m_FontHeight;
         std::vector<uint64_t> m_CharacterCodes;
         std::vector<GlyphData> m_Glyphs;
         std::vector<InternalTexture*> m_Textures;

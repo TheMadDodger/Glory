@@ -4,14 +4,14 @@
 
 namespace Glory
 {
-	FontData::FontData()
+	FontData::FontData(): m_FontHeight(0)
 	{
 		APPEND_TYPE(FontData);
 	}
 	
-	FontData::FontData(std::vector<uint64_t>&& characterCodes,
+	FontData::FontData(uint32_t height, std::vector<uint64_t>&& characterCodes,
 		std::vector<GlyphData>&& chars, std::vector<InternalTexture*>&& textures):
-		m_CharacterCodes(std::move(characterCodes)), m_Glyphs(std::move(chars)), m_Textures(textures)
+		m_FontHeight(height), m_CharacterCodes(std::move(characterCodes)), m_Glyphs(std::move(chars)), m_Textures(textures)
 	{
 		APPEND_TYPE(FontData);
 	}
@@ -26,6 +26,11 @@ namespace Glory
 		m_Textures.clear();
 	}
 
+	uint32_t FontData::FontHeight() const
+	{
+		return m_FontHeight;
+	}
+
 	size_t FontData::GetGlyphIndex(uint64_t c) const
 	{
 		auto iter = std::find(m_CharacterCodes.begin(), m_CharacterCodes.end(), c);
@@ -35,19 +40,19 @@ namespace Glory
 
 	const GlyphData* FontData::GetGlyph(size_t index) const
 	{
-		if (index > m_Glyphs.size()) return nullptr;
+		if (index >= m_Glyphs.size()) return nullptr;
 		return &m_Glyphs[index];
 	}
 
 	InternalTexture* FontData::GetGlyphTexture(size_t index) const
 	{
-		if (index > m_Glyphs.size()) return nullptr;
+		if (index >= m_Glyphs.size()) return nullptr;
 		return m_Textures[index];
 	}
 
 	void FontData::Serialize(BinaryStream& container) const
 	{
-		container.Write(m_Glyphs).Write(m_Textures.size());
+		container.Write(m_FontHeight).Write(m_Glyphs).Write(m_Textures.size());
 		for (size_t i = 0; i < m_Textures.size(); ++i)
 		{
 			m_Textures[i]->Serialize(container);
@@ -57,7 +62,7 @@ namespace Glory
 	void FontData::Deserialize(BinaryStream& container)
 	{
 		size_t numTextures;
-		container.Read(m_Glyphs).Read(numTextures);
+		container.Read(m_FontHeight).Read(m_Glyphs).Read(numTextures);
 		m_Textures.resize(numTextures);
 		for (size_t i = 0; i < m_Textures.size(); ++i)
 		{

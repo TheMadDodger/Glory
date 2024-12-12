@@ -43,6 +43,7 @@ namespace Glory
 		UUID m_SceneID;
 		UUID m_ObjectID;
 		bool m_TextDirty;
+		float m_Scale;
 
 		/* Text */
 		std::string m_Text;

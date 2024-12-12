@@ -36,10 +36,10 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Scale to render the text at
         /// </summary>
-        public int Size
+        public float Scale
         {
-            get => TextComponent_GetSize(Object.Scene.ID, Object.ID, _objectID);
-            set => TextComponent_SetSize(Object.Scene.ID, Object.ID, _objectID, value);
+            get => TextComponent_GetScale(Object.Scene.ID, Object.ID, _objectID);
+            set => TextComponent_SetScale(Object.Scene.ID, Object.ID, _objectID, value);
         }
 
         #endregion
@@ -57,9 +57,9 @@ namespace GloryEngine.Entities
         private extern static void TextComponent_SetText(UInt64 sceneID, UInt64 objectID, UInt64 componentID, string str);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static int TextComponent_GetSize(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        private extern static float TextComponent_GetScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void TextComponent_SetSize(UInt64 sceneID, UInt64 objectID, UInt64 componentID, int size);
+        private extern static void TextComponent_SetScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID, float size);
 
         #endregion
     }

@@ -802,16 +802,16 @@ namespace Glory
 		text.m_Dirty = true;
 	}
 
-	int TextComponent_GetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	float TextComponent_GetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
-		return text.m_Size;
+		return text.m_Scale;
 	}
 
-	void TextComponent_SetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID, int size)
+	void TextComponent_SetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float scale)
 	{
 		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
-		text.m_Size = uint32_t(size);
+		text.m_Scale = uint32_t(scale);
 		text.m_Dirty = true;
 	}
 
@@ -942,8 +942,8 @@ namespace Glory
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetFont", TextComponent_SetFont);
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetText", TextComponent_GetText);
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetText", TextComponent_SetText);
-		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetSize", TextComponent_GetSize);
-		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetSize", TextComponent_SetSize);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetScale", TextComponent_GetScale);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetScale", TextComponent_SetScale);
 	}
 
 	void EntityCSAPI::SetEngine(Engine* pEngine)

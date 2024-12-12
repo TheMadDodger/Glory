@@ -41,7 +41,9 @@ namespace Glory::Editor
 			return {};
 		}
 
-		FT_Set_Pixel_Sizes(face, 0, 48);
+		const uint32_t fontHeight = 48;
+
+		FT_Set_Pixel_Sizes(face, 0, fontHeight);
 
 		FT_ULong charcode;
 		FT_UInt gid;
@@ -80,7 +82,7 @@ namespace Glory::Editor
 			charcode = FT_Get_Next_Char(face, charcode, &gid);
 		}
 
-		FontData* pFont = new FontData(std::move(characterCodes), std::move(glyphs), std::move(textures));
+		FontData* pFont = new FontData(fontHeight, std::move(characterCodes), std::move(glyphs), std::move(textures));
 		delete pFileData;
 
 		return { path, pFont };

@@ -563,6 +563,7 @@ namespace Glory
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerMask>>();
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerRef>>();
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<SceneObjectRef>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<std::string>>();
 
 		// Special
 		m_Serializers->RegisterSerializer<AssetReferencePropertySerializer>();

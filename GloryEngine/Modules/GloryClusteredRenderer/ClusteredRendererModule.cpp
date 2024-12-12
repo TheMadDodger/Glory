@@ -285,11 +285,19 @@ namespace Glory
 		m_pTextMaterial->SetProperties(m_pEngine);
 		m_pTextMaterial->SetObjectData(object);
 
-		const float scale = 1.0f;
+		const float scale = renderData.m_Scale;
 		float writeX = 0.0f;
+		float writeY = 0.0f;
 
 		for (char c : renderData.m_Text)
 		{
+			if (c == '\n')
+			{
+				writeY -= pFontData->FontHeight()*scale;
+				writeX = 0.0f;
+				continue;
+			}
+
 			m_pTextMaterial->ResetTextureCounter();
 			const size_t glyphIndex = pFontData->GetGlyphIndex(c);
 			const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
@@ -297,7 +305,7 @@ namespace Glory
 			if (!glyph || !pTextureData) continue;
 
 			float xpos = writeX + glyph->Bearing.x*scale;
-			float ypos = -(glyph->Size.y - glyph->Bearing.y)*scale;
+			float ypos = writeY - (glyph->Size.y - glyph->Bearing.y)*scale;
 
 			float w = glyph->Size.x*scale;
 			float h = glyph->Size.y*scale;
