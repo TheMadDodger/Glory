@@ -289,6 +289,8 @@ namespace Glory
 		float writeX = 0.0f;
 		float writeY = 0.0f;
 
+		const glm::vec3 color = renderData.m_Color;
+
 		for (char c : renderData.m_Text)
 		{
 			if (c == '\n')
@@ -304,20 +306,20 @@ namespace Glory
 			InternalTexture* pTextureData = pFontData->GetGlyphTexture(glyphIndex);
 			if (!glyph || !pTextureData) continue;
 
-			float xpos = writeX + glyph->Bearing.x*scale;
-			float ypos = writeY - (glyph->Size.y - glyph->Bearing.y)*scale;
+			const float xpos = writeX + glyph->Bearing.x*scale;
+			const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y)*scale;
 
-			float w = glyph->Size.x*scale;
-			float h = glyph->Size.y*scale;
+			const float w = glyph->Size.x*scale;
+			const float h = glyph->Size.y*scale;
 
 			Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
 			if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
 
 			VertexPosColorTex vertices[4] = {
-				{ { xpos, ypos + h, }, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f } },
-				{ { xpos, ypos, }, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f } },
-				{ { xpos + w, ypos, }, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f } },
-				{ { xpos + w, ypos + h, }, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f }, }
+				{ { xpos, ypos + h, }, color, {0.0f, 0.0f } },
+				{ { xpos, ypos, }, color, {0.0f, 1.0f } },
+				{ { xpos + w, ypos, }, color, {1.0f, 1.0f } },
+				{ { xpos + w, ypos + h, }, color, {1.0f, 0.0f }, }
 			};
 			m_pQuadMeshVertexBuffer->Assign(vertices, 4*sizeof(VertexPosColorTex));
 

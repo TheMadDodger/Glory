@@ -40,6 +40,7 @@ namespace Glory
 		renderData.m_Text = pComponent.m_Text;
 		renderData.m_TextDirty = pComponent.m_Dirty;
 		renderData.m_Scale = pComponent.m_Scale;
+		renderData.m_Color = pComponent.m_Color;
 		pComponent.m_Dirty = false;
 
 		REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );

@@ -47,6 +47,7 @@ namespace Glory
 
 		/* Text */
 		std::string m_Text;
+		glm::vec4 m_Color;
 
 		/* World matrix */
 		glm::mat4 m_World;

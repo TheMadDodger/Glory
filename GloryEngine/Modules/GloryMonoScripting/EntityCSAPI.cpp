@@ -815,6 +815,18 @@ namespace Glory
 		text.m_Dirty = true;
 	}
 
+	glm::vec4 TextComponent_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		return text.m_Color;
+	}
+
+	void TextComponent_SetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec4* clearCol)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		text.m_Color = *clearCol;
+	}
+
 #pragma endregion
 
 #pragma region Binding
@@ -944,6 +956,8 @@ namespace Glory
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetText", TextComponent_SetText);
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetScale", TextComponent_GetScale);
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetScale", TextComponent_SetScale);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetColor", TextComponent_GetColor);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetColor", TextComponent_SetColor);
 	}
 
 	void EntityCSAPI::SetEngine(Engine* pEngine)

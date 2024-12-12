@@ -42,6 +42,12 @@ namespace GloryEngine.Entities
             set => TextComponent_SetScale(Object.Scene.ID, Object.ID, _objectID, value);
         }
 
+        public Vector4 Color
+        {
+            get => TextComponent_GetColor(Object.Scene.ID, Object.ID, _objectID);
+            set => TextComponent_SetColor(Object.Scene.ID, Object.ID, _objectID, ref value);
+        }
+
         #endregion
 
         #region API Methods
@@ -60,6 +66,11 @@ namespace GloryEngine.Entities
         private extern static float TextComponent_GetScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static void TextComponent_SetScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID, float size);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Vector4 TextComponent_GetColor(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void TextComponent_SetColor(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector4 color);
 
         #endregion
     }
