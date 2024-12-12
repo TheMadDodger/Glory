@@ -99,4 +99,13 @@ namespace Glory::Editor
     {
 		return EditorUI::InputLeyerRef(EditorUI::MakeCleanName(label), data);
     }
+
+	template<>
+	bool PropertyDrawerTemplate<std::string>::OnGUI(const std::string& label, std::string* data, uint32_t flags) const
+	{
+		if(flags & AreaText)
+			return EditorUI::InputTextMultiline(EditorUI::MakeCleanName(label), data);
+
+		return EditorUI::InputText(EditorUI::MakeCleanName(label), data);
+	}
 }

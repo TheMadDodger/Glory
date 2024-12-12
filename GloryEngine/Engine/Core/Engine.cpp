@@ -591,6 +591,7 @@ namespace Glory
 		Reflect::RegisterBasicType<double>();
 		Reflect::RegisterBasicType<long>();
 		Reflect::RegisterBasicType<unsigned long>();
+		Reflect::RegisterBasicType<std::string>();
 
 		Reflect::RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
 

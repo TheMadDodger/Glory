@@ -140,6 +140,8 @@ namespace Glory
 		RegisterComponent<ModelRenderer>();
 		RegisterComponent<LightComponent>();
 		RegisterComponent<TextComponent>();
+		const Utils::Reflect::FieldData* pTextField = TextComponent::GetTypeData()->GetFieldData("m_Text");
+		Reflect::SetFieldFlags(pTextField, AreaText);
 
 		const FieldData* pColorField = LightComponent::GetTypeData()->GetFieldData(0);
 		Reflect::SetFieldFlags(pColorField, PropertyFlags::Color);

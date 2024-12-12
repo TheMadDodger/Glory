@@ -488,6 +488,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::quat>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<LayerMask>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<LayerRef>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<std::string>>();
 
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
