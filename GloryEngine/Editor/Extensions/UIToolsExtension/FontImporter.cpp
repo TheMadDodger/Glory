@@ -70,6 +70,7 @@ namespace Glory::Editor
 			InternalTexture* pTexture = new InternalTexture(pImageData);
 
 			GlyphData character = {
+				charcode,
 				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 				face->glyph->advance.x
@@ -83,8 +84,9 @@ namespace Glory::Editor
 		}
 
 		FontData* pFont = new FontData(fontHeight, std::move(characterCodes), std::move(glyphs), std::move(textures));
-		delete pFileData;
 
+		FT_Done_Face(face);
+		delete pFileData;
 		return { path, pFont };
 	}
 

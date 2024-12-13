@@ -181,6 +181,7 @@ namespace Glory
 
 		/* Text Renderer */
 		m_pComponentTypesInstance->RegisterInvokaction<TextComponent>(Glory::Utils::ECS::InvocationType::Draw, TextSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterReferencesCallback<TextComponent>(TextSystem::GetReferences);
 
 		OnInitialize();
 	}

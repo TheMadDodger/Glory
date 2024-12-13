@@ -64,10 +64,12 @@ namespace Glory
 		size_t numTextures;
 		container.Read(m_FontHeight).Read(m_Glyphs).Read(numTextures);
 		m_Textures.resize(numTextures);
+		m_CharacterCodes.resize(numTextures);
 		for (size_t i = 0; i < m_Textures.size(); ++i)
 		{
 			if (!m_Textures[i]) m_Textures[i] = new InternalTexture();
 			m_Textures[i]->Deserialize(container);
+			m_CharacterCodes[i] = m_Glyphs[i].Code;
 		}
 	}
 }

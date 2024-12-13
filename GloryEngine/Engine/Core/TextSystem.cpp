@@ -3,11 +3,13 @@
 
 #include "GScene.h"
 #include "RendererModule.h"
-#include "EntityRegistry.h"
 #include "SceneManager.h"
 #include "Engine.h"
 #include "Components.h"
 #include "RenderData.h"
+
+#include <TypeView.h>
+#include <EntityRegistry.h>
 
 namespace Glory
 {
@@ -44,5 +46,15 @@ namespace Glory
 		pComponent.m_Dirty = false;
 
 		REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
+	}
+
+	void TextSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+	{
+		for (size_t i = 0; i < pTypeView->Size(); ++i)
+		{
+			const TextComponent* pText = static_cast<const TextComponent*>(pTypeView->GetComponentAddressFromIndex(i));
+			const UUID font = pText->m_Font.AssetUUID();
+			if (font) references.push_back(font);
+		}
 	}
 }

@@ -577,23 +577,6 @@ namespace Glory
 	void Engine::RegisterBasicTypes()
 	{
 		Reflect::SetReflectInstance(m_Reflection.get());
-
-		Reflect::RegisterBasicType<int8_t>();
-		Reflect::RegisterBasicType<int16_t>();
-		Reflect::RegisterBasicType<int32_t>();
-		Reflect::RegisterBasicType<int64_t>();
-		Reflect::RegisterBasicType<uint8_t>();
-		Reflect::RegisterBasicType<uint16_t>();
-		Reflect::RegisterBasicType<uint32_t>();
-		Reflect::RegisterBasicType<uint64_t>();
-		Reflect::RegisterBasicType<char>();
-		Reflect::RegisterBasicType<bool>();
-		Reflect::RegisterBasicType<float>();
-		Reflect::RegisterBasicType<double>();
-		Reflect::RegisterBasicType<long>();
-		Reflect::RegisterBasicType<unsigned long>();
-		Reflect::RegisterBasicType<std::string>();
-
 		Reflect::RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
 
 		m_ResourceTypes->RegisterType<int>();

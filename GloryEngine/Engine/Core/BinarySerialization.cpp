@@ -13,6 +13,7 @@ namespace Glory
 		const uint32_t type = pFieldData->Type();
 		const uint32_t elementType = pFieldData->ArrayElementType();
 		const Utils::Reflect::TypeData* pElementTypeData = Utils::Reflect::Reflect::GetTyeData(elementType);
+		static const uint32_t stringType = Reflect::Hash(typeid(std::string));
 
 		switch (type)
 		{
@@ -53,6 +54,12 @@ namespace Glory
 		case uint32_t(CustomTypeHash::Enum):
 		case uint32_t(CustomTypeHash::Basic):
 		default: {
+			if (elementType == stringType)
+			{
+				const std::string* str = static_cast<std::string*>(data);
+				container.Write(*str);
+				break;
+			}
 			const size_t size = pFieldData->Size();
 			container.Write(data, size);
 			break;
@@ -98,6 +105,7 @@ namespace Glory
 		const uint32_t type = pFieldData->Type();
 		const uint32_t elementType = pFieldData->ArrayElementType();
 		const Utils::Reflect::TypeData* pElementTypeData = Utils::Reflect::Reflect::GetTyeData(elementType);
+		static const uint32_t stringType = Reflect::Hash(typeid(std::string));
 
 		switch (type)
 		{
@@ -141,6 +149,12 @@ namespace Glory
 		case uint32_t(CustomTypeHash::Enum):
 		case uint32_t(CustomTypeHash::Basic):
 		default: {
+			if (elementType == stringType)
+			{
+				std::string* str = static_cast<std::string*>(data);
+				container.Read(*str);
+				break;
+			}
 			const size_t size = pFieldData->Size();
 			container.Read(data, size);
 			break;
