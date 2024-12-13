@@ -12,7 +12,8 @@ layout(std430, binding = 2) buffer ObjectData
 layout(binding = 0) uniform sampler2D texSampler;
 
 layout(location = 0) in vec4 inColor;
-layout(location = 1) in vec2 fragTexCoord;
+layout(location = 1) in vec4 inNormal;
+layout(location = 2) in vec2 fragTexCoord;
 
 layout(location = 0) out uvec4 outID;
 layout(location = 1) out vec4 outColor;
@@ -23,6 +24,6 @@ void main()
 	float pixel = texture(texSampler, fragTexCoord).r;
 	if(pixel == 0.0) discard;
 	outColor = pixel * inColor;
-	outNormal = vec4(0.5, 0.5, 1.0, 1.0);
+	outNormal = vec4((inNormal.xyz + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
 }
