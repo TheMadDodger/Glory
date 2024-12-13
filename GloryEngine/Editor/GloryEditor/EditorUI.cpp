@@ -596,6 +596,61 @@ namespace Glory::Editor
 		return false;
 	}
 
+	bool EditorUI::InputText(std::string_view label, std::string* value, ImGuiInputTextFlags flags)
+	{
+		strcpy(m_TextBuffer, value->c_str());
+
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::PushID(label.data());
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		const bool change = ImGui::InputText("##value", m_TextBuffer, TEXTSIZE, flags);
+		const bool deactivated = ImGui::IsItemDeactivated();
+
+		if (deactivated) *value = m_TextBuffer;
+
+		ImGui::PopItemWidth();
+		ImGui::PopID();
+		return deactivated && change;
+	}
+
+	bool EditorUI::InputTextMultiline(std::string_view label, std::string* value, ImGuiInputTextFlags flags)
+	{
+		strcpy(m_TextBuffer, value->c_str());
+
+		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);
+		ImGui::PushID(label.data());
+		ImGui::TextUnformatted(label.data());
+		const float maxWidth = ImGui::GetContentRegionAvail().x - labelReservedWidth;
+		ImGui::SameLine();
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+		const float width = std::max(maxWidth, 100.0f);
+
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
+
+		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
+		const bool change = ImGui::InputTextMultiline("##value", m_TextBuffer, TEXTSIZE,
+			{ width - REMOVE_BUTTON_PADDING, 0.0f }, flags);
+		const bool deactivated = ImGui::IsItemDeactivated();
+
+		if (deactivated) *value = m_TextBuffer;
+
+		ImGui::PopItemWidth();
+		ImGui::PopID();
+		return deactivated && change;
+	}
+
 	bool EditorUI::InputText(std::string_view label, char* value, size_t bufferSize, ImGuiInputTextFlags flags)
 	{
 		const float labelReservedWidth = std::max(ImGui::CalcTextSize(label.data()).x, 150.0f);

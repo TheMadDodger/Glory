@@ -11,6 +11,8 @@
 #include <InternalPipeline.h>
 #include <SceneManager.h>
 #include <GScene.h>
+#include <FontData.h>
+#include <FontDataStructs.h>
 
 #include <DistributedRandom.h>
 
@@ -110,14 +112,22 @@ namespace Glory
 		GetResourcePath("Shaders/SSAOBlur_Frag.shader", path);
 		m_pSSAOBlurFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 
+		/* Text Shaders */
+		GetResourcePath("Shaders/Text_vert.shader", path);
+		m_pTextVertShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+		GetResourcePath("Shaders/Text_frag.shader", path);
+		m_pTextFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+
 		m_pScreenPipeline = new InternalPipeline({ m_pScreenVertShader, m_pScreenFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pSSRPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSRFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pSSAOPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pSSAOBlurPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOBlurFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
+		m_pTextPipelineData = new InternalPipeline({ m_pTextVertShader, m_pTextFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pScreenMaterial = new InternalMaterial(m_pScreenPipeline);
 		m_pSSRMaterial = new InternalMaterial(m_pSSRPipeline);
 		m_pSSAOMaterial = new InternalMaterial(m_pSSAOPipeline);
 		m_pSSAOBlurMaterial = new InternalMaterial(m_pSSAOBlurPipeline);
+		m_pTextMaterialData = new InternalMaterial(m_pTextPipelineData);
 	}
 
 	void ClusteredRendererModule::Cleanup()
@@ -158,16 +168,22 @@ namespace Glory
 		delete m_pSSAOBlurMaterial;
 		m_pSSAOBlurMaterial = nullptr;
 
+		delete m_pTextMaterialData;
+		m_pTextMaterialData = nullptr;
+
 		delete m_pScreenPipeline;
 		delete m_pSSRPipeline;
 		delete m_pSSAOPipeline;
 		delete m_pSSAOBlurPipeline;
+		delete m_pTextPipelineData;
 
 		delete m_pScreenVertShader;
 		delete m_pScreenFragShader;
 		delete m_pSSRFragShader;
 		delete m_pSSAOFragShader;
 		delete m_pSSAOBlurFragShader;
+		delete m_pTextVertShader;
+		delete m_pTextFragShader;
 	}
 
 	void ClusteredRendererModule::OnThreadedInitialize()
@@ -190,8 +206,29 @@ namespace Glory
 		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
 		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
 		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
-	}
+		m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
 
+		uint32_t vertexBufferSize = 4*sizeof(VertexPosColorTex);
+		uint32_t indexBufferSize = 6*sizeof(uint32_t);
+		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+
+		uint32_t indices[6] = {
+			0, 1, 2,
+			2, 3, 0
+		};
+		VertexPosColorTex defaultVertices[4] = {
+			{{-1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+			{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+			{{1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+			{{1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+		};
+
+		m_pQuadMeshIndexBuffer->Assign(indices, 6*sizeof(uint32_t));
+		m_pQuadMeshVertexBuffer->Assign(defaultVertices, 4*sizeof(VertexPosColorTex));
+		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
+			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
+	}
 
 	void ClusteredRendererModule::OnThreadedCleanup()
 	{
@@ -222,6 +259,74 @@ namespace Glory
 		pGraphics->EnableDepthWrite(renderData.m_DepthWrite);
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 		pGraphics->EnableDepthWrite(true);
+	}
+
+	void ClusteredRendererModule::OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		Resource* pFontResource = m_pEngine->GetAssetManager().FindResource(renderData.m_FontID);
+		if (!pFontResource) return;
+		FontData* pFontData = static_cast<FontData*>(pFontResource);
+		if (!pFontData) return;
+		if (!m_pTextMaterialData) return;
+
+		if (!m_pTextMaterial) return;
+		m_pTextMaterial->Use();
+
+		ObjectData object;
+		object.Model = renderData.m_World;
+		object.View = camera.GetView();
+		object.Projection = camera.GetProjection();
+		object.ObjectID = renderData.m_ObjectID;
+		object.SceneID = renderData.m_SceneID;
+
+		m_pTextMaterial->SetProperties(m_pEngine);
+		m_pTextMaterial->SetObjectData(object);
+
+		const float scale = renderData.m_Scale;
+		float writeX = 0.0f;
+		float writeY = 0.0f;
+
+		const glm::vec3 color = renderData.m_Color;
+
+		for (char c : renderData.m_Text)
+		{
+			if (c == '\n')
+			{
+				writeY -= pFontData->FontHeight()*scale;
+				writeX = 0.0f;
+				continue;
+			}
+
+			m_pTextMaterial->ResetTextureCounter();
+			const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+			const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
+			InternalTexture* pTextureData = pFontData->GetGlyphTexture(glyphIndex);
+			if (!glyph || !pTextureData) continue;
+
+			const float xpos = writeX + glyph->Bearing.x*scale;
+			const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y)*scale;
+
+			const float w = glyph->Size.x*scale;
+			const float h = glyph->Size.y*scale;
+
+			Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
+			if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
+
+			VertexPosColorTex vertices[4] = {
+				{ { xpos, ypos + h, }, color, {0.0f, 0.0f } },
+				{ { xpos, ypos, }, color, {0.0f, 1.0f } },
+				{ { xpos + w, ypos, }, color, {1.0f, 1.0f } },
+				{ { xpos + w, ypos + h, }, color, {1.0f, 0.0f }, }
+			};
+			m_pQuadMeshVertexBuffer->Assign(vertices, 4*sizeof(VertexPosColorTex));
+
+			pGraphics->DrawMesh(m_pQuadMesh, 0, 4);
+
+			writeX += (glyph->Advance >> 6)*scale;
+		}
 	}
 
 	void ClusteredRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)

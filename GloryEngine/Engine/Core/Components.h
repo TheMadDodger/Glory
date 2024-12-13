@@ -5,6 +5,7 @@
 
 #include "ModelData.h"
 #include "MaterialData.h"
+#include "FontData.h"
 #include "Camera.h"
 #include "CameraRef.h"
 #include "LayerManager.h"
@@ -151,6 +152,20 @@ namespace Glory
 			(float)	(m_Intensity),
 			(float)	(m_Range)
 		)
+	};
+
+	struct TextComponent
+	{
+		TextComponent() : m_Font(0), m_Text("Hello World!"), m_Scale(0.01f),
+			m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Dirty(true) {}
+
+		REFLECTABLE(TextComponent,
+			(AssetReference<FontData>)(m_Font),
+			(std::string)(m_Text),
+			(float)(m_Scale),
+			(glm::vec4)(m_Color)
+		);
+		bool m_Dirty;
 	};
 
 	//settings->mSupportingVolume = Plane(Vec3::sAxisY(), -cCharacterRadiusStanding); // Accept contacts that touch the lower sphere of the capsule

@@ -171,6 +171,7 @@ group "Editor/Extensions"
 	include "Editor/Extensions/Importers/SDLImageImporter"
 	include "Editor/Extensions/Importers/ASSIMPImporter"
 	include "Editor/Extensions/Importers/GenericAudioImporter"
+	include "Editor/Extensions/Importers/FreeTypeFontImporter"
 group ""
 
 group "Scripting/Mono"

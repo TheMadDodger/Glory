@@ -33,6 +33,8 @@ namespace Glory
 		virtual void SetFloat3(const std::string& name, const glm::vec3& value) const = 0;
 		/** @brief Set 4x4 matrix on material */
 		virtual void SetMatrix4(const std::string& name, const glm::mat4& value) const = 0;
+		/** @brief Resets the texture counter */
+		virtual void ResetTextureCounter() = 0;
 
 	protected:
 		virtual Buffer* CreatePropertiesBuffer(uint32_t size) = 0;

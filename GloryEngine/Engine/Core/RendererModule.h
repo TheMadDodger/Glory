@@ -7,6 +7,7 @@
 #include "ShapeProperty.h"
 #include "SceneObjectRef.h"
 
+#include <functional>
 #include <vector>
 
 namespace Glory
@@ -32,6 +33,7 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void Submit(RenderData&& renderData);
+		void Submit(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
@@ -71,6 +73,7 @@ namespace Glory
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
+		virtual void OnSubmit(const TextRenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
 		virtual void OnSubmit(const PointLight& light) {}
 
@@ -80,6 +83,7 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
+		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 

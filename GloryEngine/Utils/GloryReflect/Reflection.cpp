@@ -256,6 +256,7 @@ namespace Glory::Utils::Reflect
 		RegisterBasicType<long>();
 		RegisterBasicType<unsigned long>();
 		RegisterBasicType<unsigned long>();
+		RegisterBasicType<std::string>();
 
 		RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
 		RegisterTemplatedType("Glory::Utils::Reflect::BasicBuffer,Utils::Reflect::BasicBuffer,Reflect::BasicBuffer,BasicBuffer", (size_t)CustomTypeHash::Buffer, 0);

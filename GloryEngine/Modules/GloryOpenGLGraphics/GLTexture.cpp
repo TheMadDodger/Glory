@@ -40,6 +40,9 @@ namespace Glory
 		const GLuint format = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_PixelFormat);
 		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(m_TextureInfo.m_Type);
 
+		if (pImageData->GetBytesPerPixel() == 1)
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 		if (!m_TextureID)
 		{
 			glGenTextures(1, &m_TextureID);

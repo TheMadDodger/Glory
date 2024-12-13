@@ -50,4 +50,5 @@ namespace Glory::Editor
 	CREATE_OBJECT_CALLBACK_CPP(Model, ModelRenderer, ());
 	CREATE_OBJECT_CALLBACK_CPP(Camera, CameraComponent, ());
 	CREATE_OBJECT_CALLBACK_CPP(Light, LightComponent, ());
+	CREATE_OBJECT_CALLBACK_CPP(Text, TextComponent, ());
 }

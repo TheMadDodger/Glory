@@ -1,0 +1,16 @@
+Runtime:
+- Upped version to 0.4.5
+- Added font loading
+
+Engine:
+- Added font resource
+- Added text component
+- Added text rendering
+
+Editor:
+- Added freetype font importer
+- Added property drawer for string properties
+
+Scripting:
+- Added CS API for text component
+- Added CS API for font resource

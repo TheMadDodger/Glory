@@ -25,6 +25,7 @@ namespace Glory::Editor
 	CREATE_OBJECT_CALLBACK_H(Light);
 	CREATE_OBJECT_CALLBACK_H(PhysicsBody);
 	CREATE_OBJECT_CALLBACK_H(Character);
+	CREATE_OBJECT_CALLBACK_H(Text);
 }
 
 #define CTOR_ARGS(...) __VA_ARGS__

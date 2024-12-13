@@ -23,7 +23,8 @@ namespace Glory
 {
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
-		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr), m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr)
+		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
+		m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr)
 	{
 	}
 
@@ -40,15 +41,23 @@ namespace Glory
 
 	void RendererModule::Submit(RenderData&& renderData)
 	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(renderData)" };
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(RenderData)" };
 		const size_t index = m_CurrentPreparingFrame.ObjectsToRender.size();
 		m_CurrentPreparingFrame.ObjectsToRender.push_back(std::move(renderData));
 		OnSubmit(m_CurrentPreparingFrame.ObjectsToRender[index]);
 	}
 
+	void RendererModule::Submit(TextRenderData&& renderData)
+	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(TextRenderData)" };
+		const size_t index = m_CurrentPreparingFrame.TextsToRender.size();
+		m_CurrentPreparingFrame.TextsToRender.push_back(std::move(renderData));
+		OnSubmit(m_CurrentPreparingFrame.TextsToRender[index]);
+	}
+
 	void RendererModule::SubmitLate(RenderData&& renderData)
 	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(renderData)" };
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(RenderData)" };
 		const size_t index = m_CurrentPreparingFrame.ObjectsToRenderLate.size();
 		m_CurrentPreparingFrame.ObjectsToRenderLate.push_back(std::move(renderData));
 		OnSubmit(m_CurrentPreparingFrame.ObjectsToRenderLate[index]);
@@ -317,6 +326,15 @@ namespace Glory
 				if (mask != 0 && (mask & frame.ObjectsToRender[j].m_LayerMask) == 0) continue;
 				m_pEngine->Profiler().BeginSample("RendererModule::OnRender");
 				OnRender(camera, frame.ObjectsToRender[j]);
+				m_pEngine->Profiler().EndSample();
+			}
+
+			for (size_t j = 0; j < frame.TextsToRender.size(); ++j)
+			{
+				LayerMask mask = camera.GetLayerMask();
+				if (mask != 0 && (mask & frame.TextsToRender[j].m_LayerMask) == 0) continue;
+				m_pEngine->Profiler().BeginSample("RendererModule::OnRender rendering text object");
+				OnRender(camera, frame.TextsToRender[j]);
 				m_pEngine->Profiler().EndSample();
 			}
 

@@ -12,10 +12,16 @@
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "ShapeProperty.h"
-#include "PrefabData.h"
 #include "SceneManager.h"
 #include "WindowModule.h"
 #include "EngineProfiler.h"
+
+#include "MaterialInstanceData.h"
+#include "ShaderSourceData.h"
+#include "PipelineData.h"
+#include "PrefabData.h"
+#include "AudioData.h"
+#include "FontData.h"
 
 #include "Debug.h"
 #include "Console.h"
@@ -36,10 +42,6 @@
 
 #include "TimerModule.h"
 #include "ProfilerModule.h"
-#include "MaterialInstanceData.h"
-#include "ShaderSourceData.h"
-#include "PipelineData.h"
-#include "AudioData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
@@ -561,6 +563,7 @@ namespace Glory
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerMask>>();
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerRef>>();
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<SceneObjectRef>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<std::string>>();
 
 		// Special
 		m_Serializers->RegisterSerializer<AssetReferencePropertySerializer>();
@@ -574,22 +577,6 @@ namespace Glory
 	void Engine::RegisterBasicTypes()
 	{
 		Reflect::SetReflectInstance(m_Reflection.get());
-
-		Reflect::RegisterBasicType<int8_t>();
-		Reflect::RegisterBasicType<int16_t>();
-		Reflect::RegisterBasicType<int32_t>();
-		Reflect::RegisterBasicType<int64_t>();
-		Reflect::RegisterBasicType<uint8_t>();
-		Reflect::RegisterBasicType<uint16_t>();
-		Reflect::RegisterBasicType<uint32_t>();
-		Reflect::RegisterBasicType<uint64_t>();
-		Reflect::RegisterBasicType<char>();
-		Reflect::RegisterBasicType<bool>();
-		Reflect::RegisterBasicType<float>();
-		Reflect::RegisterBasicType<double>();
-		Reflect::RegisterBasicType<long>();
-		Reflect::RegisterBasicType<unsigned long>();
-
 		Reflect::RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
 
 		m_ResourceTypes->RegisterType<int>();
@@ -612,6 +599,7 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<ShaderSourceData>("");
 		m_ResourceTypes->RegisterResource<ImageData>("");
 		m_ResourceTypes->RegisterResource<AudioData>("");
+		m_ResourceTypes->RegisterResource<FontData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");
