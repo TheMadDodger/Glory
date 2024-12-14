@@ -25,8 +25,6 @@ namespace Glory
 		GLORY_API int TypeIndexFromHash(uint32_t hash) const;
 		/** @brief Get a dummy object for a type index */
 		GLORY_API MonoObject* Dummy(size_t index) const;
-		/** @brief Get a type from a type index */
-		GLORY_API MonoObject* Type(size_t index) const;
 		/** @brief Get the type name of a type index */
 		GLORY_API std::string_view TypeName(size_t index) const;
 		/** @brief Get the type hash of a type index */
@@ -58,8 +56,7 @@ namespace Glory
 
 	private:
 		CoreLibManager* m_pCoreLibManager;
-		std::vector<MonoObject*> m_pScriptTypes;
-		std::vector<MonoObject*> m_pScriptDummies;
+		std::vector<uint32_t> m_ScriptDummyHandles;
 		std::vector<std::string> m_ScriptTypeNames;
 		std::vector<uint32_t> m_ScriptTypeHashes;
 		std::vector<AssemblyClass> m_ScriptClasses;

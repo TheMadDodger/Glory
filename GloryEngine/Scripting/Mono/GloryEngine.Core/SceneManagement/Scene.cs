@@ -104,7 +104,6 @@ namespace GloryEngine.SceneManagement
             if (objectID == 0) return null;
             if (_objectsCache.ContainsKey(objectID)) return _objectsCache[objectID];
             SceneObject sceneObject = new SceneObject(objectID, this);
-            Debug.LogInfo("Created mono scene object for ID " + objectID.ToString());
             _objectsCache.Add(objectID, sceneObject);
             return sceneObject;
         }

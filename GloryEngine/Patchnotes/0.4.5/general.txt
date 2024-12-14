@@ -14,3 +14,5 @@ Editor:
 Scripting:
 - Added CS API for text component
 - Added CS API for font resource
+- Fixed crash caused by automatic garbage collection
+- Removed mono object creation debug logs
