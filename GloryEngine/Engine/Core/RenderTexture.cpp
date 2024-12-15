@@ -84,10 +84,15 @@ namespace Glory
 	{
 		m_Names.resize(m_CreateInfo.Attachments.size() + (m_CreateInfo.HasDepth ? 1 : 0));
 
+		SamplerSettings sampler;
+		sampler.MipmapMode = Filter::F_None;
+		sampler.MinFilter = Filter::F_Nearest;
+		sampler.MagFilter = Filter::F_Nearest;
+
 		for (size_t i = 0; i < m_CreateInfo.Attachments.size(); ++i)
 		{
 			Attachment attachment = m_CreateInfo.Attachments[i];
-			Texture* pTexture = m_pOwner->CreateTexture({ m_Width, m_Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, SamplerSettings() });
+			Texture* pTexture = m_pOwner->CreateTexture({ m_Width, m_Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
 			m_pTextures[i] = pTexture;
 			m_NameToTextureIndex[attachment.Name] = i;
 			m_Names[i] = attachment.Name;
@@ -96,7 +101,7 @@ namespace Glory
 		if (!m_CreateInfo.HasDepth) return;
 		size_t depthIndex = m_CreateInfo.Attachments.size();
 
-		Texture* pDepthTexture = m_pOwner->CreateTexture({ m_Width, m_Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, SamplerSettings() });
+		Texture* pDepthTexture = m_pOwner->CreateTexture({ m_Width, m_Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
 		m_pTextures[depthIndex] = pDepthTexture;
 		m_NameToTextureIndex["Depth"] = depthIndex;
 		m_Names.back() = "Depth";

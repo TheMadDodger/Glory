@@ -33,20 +33,20 @@ namespace Glory::Editor
 		pTexture->Image().SetUUID(imageUUID);
 
 		Utils::NodeValueRef sampler = file["Sampler"];
-		pTexture->GetSamplerSettings().MagFilter = sampler["MinFilter"].AsEnum<Filter>();
-		pTexture->GetSamplerSettings().MinFilter = sampler["MagFilter"].AsEnum<Filter>();
-		pTexture->GetSamplerSettings().AddressModeU = sampler["AddressModeU"].AsEnum<SamplerAddressMode>();
-		pTexture->GetSamplerSettings().AddressModeV = sampler["AddressModeV"].AsEnum<SamplerAddressMode>();
-		pTexture->GetSamplerSettings().AddressModeW = sampler["AddressModeW"].AsEnum<SamplerAddressMode>();
-		pTexture->GetSamplerSettings().AnisotropyEnable = sampler["AnisotropyEnable"].As<bool>();
-		pTexture->GetSamplerSettings().MaxAnisotropy = sampler["MaxAnisotropy"].As<float>();
-		pTexture->GetSamplerSettings().UnnormalizedCoordinates = sampler["UnnormalizedCoordinates"].As<bool>();
-		pTexture->GetSamplerSettings().CompareEnable = sampler["CompareEnable"].As<bool>();
-		pTexture->GetSamplerSettings().CompareOp = sampler["CompareOp"].AsEnum<CompareOp>();
-		pTexture->GetSamplerSettings().MipmapMode = sampler["MipmapMode"].AsEnum<Filter>();
-		pTexture->GetSamplerSettings().MipLODBias = sampler["MipLODBias"].As<float>();
-		pTexture->GetSamplerSettings().MinLOD = sampler["MinLOD"].As<float>();
-		pTexture->GetSamplerSettings().MaxLOD = sampler["MaxLOD"].As<float>();
+		pTexture->GetSamplerSettings().MagFilter = sampler["MinFilter"].AsEnum<Filter>(DefaultSampler.MagFilter);
+		pTexture->GetSamplerSettings().MinFilter = sampler["MagFilter"].AsEnum<Filter>(DefaultSampler.MinFilter);
+		pTexture->GetSamplerSettings().AddressModeU = sampler["AddressModeU"].AsEnum<SamplerAddressMode>(DefaultSampler.AddressModeU);
+		pTexture->GetSamplerSettings().AddressModeV = sampler["AddressModeV"].AsEnum<SamplerAddressMode>(DefaultSampler.AddressModeV);
+		pTexture->GetSamplerSettings().AddressModeW = sampler["AddressModeW"].AsEnum<SamplerAddressMode>(DefaultSampler.AddressModeW);
+		pTexture->GetSamplerSettings().AnisotropyEnable = sampler["AnisotropyEnable"].As<bool>(DefaultSampler.AnisotropyEnable);
+		pTexture->GetSamplerSettings().MaxAnisotropy = sampler["MaxAnisotropy"].As<float>(DefaultSampler.MaxAnisotropy);
+		pTexture->GetSamplerSettings().UnnormalizedCoordinates = sampler["UnnormalizedCoordinates"].As<bool>(DefaultSampler.UnnormalizedCoordinates);
+		pTexture->GetSamplerSettings().CompareEnable = sampler["CompareEnable"].As<bool>(DefaultSampler.CompareEnable);
+		pTexture->GetSamplerSettings().CompareOp = sampler["CompareOp"].AsEnum<CompareOp>(DefaultSampler.CompareOp);
+		pTexture->GetSamplerSettings().MipmapMode = sampler["MipmapMode"].AsEnum<Filter>(DefaultSampler.MipmapMode);
+		pTexture->GetSamplerSettings().MipLODBias = sampler["MipLODBias"].As<float>(DefaultSampler.MipLODBias);
+		pTexture->GetSamplerSettings().MinLOD = sampler["MinLOD"].As<float>(DefaultSampler.MinLOD);
+		pTexture->GetSamplerSettings().MaxLOD = sampler["MaxLOD"].As<float>(DefaultSampler.MaxLOD);
 
 		return ImportedResource{ path, pTexture };
 	}

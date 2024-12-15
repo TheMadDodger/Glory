@@ -68,6 +68,8 @@ namespace Glory::Editor
 			ImageData* pImageData = new ImageData(face->glyph->bitmap.width, face->glyph->bitmap.rows,
 				PixelFormat::PF_R, PixelFormat::PF_R, 1, std::move(pixels), face->glyph->bitmap.width * face->glyph->bitmap.rows);
 			InternalTexture* pTexture = new InternalTexture(pImageData);
+			SamplerSettings& sampler = pTexture->GetSamplerSettings();
+			sampler.MipmapMode = Filter::F_None;
 
 			GlyphData character = {
 				charcode,
