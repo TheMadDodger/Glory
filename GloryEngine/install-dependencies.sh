@@ -196,7 +196,7 @@ cp -r lib/windows-x64/phonon.dll "../../../Dependencies/${CONFIG}/bin"
 cp -r lib/windows-x64/TrueAudioNext.dll "../../../Dependencies/${CONFIG}/bin"
 
 # Build freetype
-cd ..
+cd ../../..
 cd submodules
 cd freetype
 
