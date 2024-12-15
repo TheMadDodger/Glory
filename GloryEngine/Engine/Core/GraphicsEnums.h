@@ -2,6 +2,7 @@
 #include <Reflection.h>
 
 REFLECTABLE_ENUM_NS(Glory, Filter,
+    F_None,
     F_Nearest,
     F_Linear,
     F_CubicIMG,
@@ -366,11 +367,11 @@ namespace Glory
 
 	struct SamplerSettings
 	{
-        SamplerSettings() : MagFilter(Filter::F_Nearest), MinFilter(Filter::F_Nearest),
+        constexpr SamplerSettings() : MagFilter(Filter::F_Linear), MinFilter(Filter::F_Linear),
             AddressModeU(SamplerAddressMode::SAM_Repeat), AddressModeV(SamplerAddressMode::SAM_Repeat),
             AddressModeW(SamplerAddressMode::SAM_Repeat), AnisotropyEnable(false), MaxAnisotropy(1.f),
             UnnormalizedCoordinates(false), CompareEnable(false), CompareOp(CompareOp::OP_Never),
-            MipmapMode(Filter::F_Nearest), MipLODBias(0.0f), MinLOD(0.f), MaxLOD(0.f)
+            MipmapMode(Filter::F_Linear), MipLODBias(0.0f), MinLOD(0.f), MaxLOD(0.f)
         {};
 
 		Filter MagFilter;
@@ -388,6 +389,8 @@ namespace Glory
 		float MinLOD;
 		float MaxLOD;
 	};
+
+    static constexpr SamplerSettings DefaultSampler = SamplerSettings();
 
     enum class ShaderType
     {
