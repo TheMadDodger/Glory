@@ -6,6 +6,7 @@ Engine:
 - Added font resource
 - Added text component
 - Added text rendering
+- Fixed incorrect scene object references in script properties when instantiating a prefab
 
 Editor:
 - Added freetype font importer
@@ -16,3 +17,4 @@ Scripting:
 - Added CS API for font resource
 - Fixed crash caused by automatic garbage collection
 - Removed mono object creation debug logs
+- Fixed duplicate SceneObject in Scene cs api when instantiating prefabs
