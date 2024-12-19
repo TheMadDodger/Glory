@@ -3,11 +3,15 @@
 
 namespace Glory::Utils::ECS
 {
-	EntityRegistry::EntityRegistry() : m_EntityDirty(32, true), m_NextEntityID(1), m_pUserData(nullptr)
+	EntityRegistry::EntityRegistry() : m_EntityDirty(32, true),
+		m_EnabledCallbacks(size_t(InvocationType::Count), true),
+		m_NextEntityID(1), m_pUserData(nullptr)
 	{
 	}
 
-	EntityRegistry::EntityRegistry(void* pUserData) : m_NextEntityID(1), m_pUserData(pUserData) {}
+	EntityRegistry::EntityRegistry(void* pUserData) : m_EntityDirty(32, true),
+		m_EnabledCallbacks(size_t(InvocationType::Count), true),
+		m_NextEntityID(1), m_pUserData(pUserData) {}
 
 	EntityRegistry::~EntityRegistry()
 	{
@@ -224,6 +228,7 @@ namespace Glory::Utils::ECS
 
 	void EntityRegistry::InvokeAll(uint32_t typeHash, InvocationType invocationType)
 	{
+		if (!m_CallbacksEnabled || !CallbackEnabled(invocationType)) return;
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		pTypeView->InvokeAll(invocationType, this, NULL);
 	}
@@ -392,6 +397,7 @@ namespace Glory::Utils::ECS
 
 	void EntityRegistry::InvokeAll(InvocationType invocationType, std::function<bool(BaseTypeView*, EntityView*, size_t)> canCallCallback)
 	{
+		if (!m_CallbacksEnabled || !CallbackEnabled(invocationType)) return;
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
 			m_pViews[i]->InvokeAll(invocationType, this, canCallCallback);
@@ -400,6 +406,7 @@ namespace Glory::Utils::ECS
 
 	void EntityRegistry::InvokeAll(InvocationType invocationType, const std::vector<EntityID>& entities)
 	{
+		if (!m_CallbacksEnabled || !CallbackEnabled(invocationType)) return;
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
 			m_pViews[i]->InvokeAll(invocationType, this, entities);
@@ -416,20 +423,19 @@ namespace Glory::Utils::ECS
 		return m_CallbacksEnabled;
 	}
 
+	bool EntityRegistry::CallbackEnabled(InvocationType type) const
+	{
+		return m_EnabledCallbacks.IsSet(uint32_t(type));
+	}
+
 	void EntityRegistry::EnableAllIndividualCallbacks()
 	{
-		for (auto pView : m_pViews)
-		{
-			pView->EnableAllCallbacks();
-		}
+		m_EnabledCallbacks.SetAll();
 	}
 
 	void EntityRegistry::SetCallbackEnabled(InvocationType type, bool enabled)
 	{
-		for (auto pView : m_pViews)
-		{
-			pView->SetCallbackEnabled(type, enabled);
-		}
+		m_EnabledCallbacks.Set(uint32_t(type), enabled);
 	}
 //
 //	void SceneObject::SetBeforeObject(SceneObject* pObject)

@@ -143,6 +143,7 @@ namespace Glory::Utils::ECS
 		template<typename T>
 		void InvokeAll(InvocationType invocationType)
 		{
+			if (!m_CallbacksEnabled || !CallbackEnabled(invocationType)) return;
 			TypeView<T>* pTypeView = GetTypeView<T>();
 			pTypeView->InvokeAll(invocationType, this);
 		}
@@ -208,6 +209,8 @@ namespace Glory::Utils::ECS
 
 		/** @brief Check whether callbacks are allowed in general */
 		bool CallbacksEnabled() const;
+		/** @brief Check whether a specific callback is allowed */
+		bool CallbackEnabled(InvocationType type) const;
 
 		/**
 		 * @brief Set all callback bits to allow their execution
@@ -225,6 +228,7 @@ namespace Glory::Utils::ECS
 		std::map<EntityID, EntityView*> m_pEntityViews;
 		std::vector<EntityID> m_RootOrder;
 		Utils::BitSet m_EntityDirty;
+		Utils::BitSet m_EnabledCallbacks;
 		EntityID m_NextEntityID;
 
 		// Basic type views

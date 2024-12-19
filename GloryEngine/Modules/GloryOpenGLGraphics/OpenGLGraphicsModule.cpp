@@ -99,6 +99,9 @@ namespace Glory
 		glEnable(GL_LINE_SMOOTH);
 		LogGLError(glGetError());
 
+		glEnable(GL_MULTISAMPLE);
+		LogGLError(glGetError());
+
 		int width, height;
 		pMainWindow->GetWindowSize(&width, &height);
 		glViewport(0, 0, width, height);
