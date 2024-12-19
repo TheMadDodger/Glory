@@ -286,6 +286,18 @@ namespace Glory
 		}
 	}
 	
+	void SceneManager::SubscribeOnCopy(uint32_t hash, std::function<void(GScene*, void*, UUID, UUIDRemapper&)> callback)
+	{
+		m_OnComponentCopyCallbacks.emplace(hash, callback);
+	}
+
+	void SceneManager::TriggerOnCopy(uint32_t hash, GScene* pScene, void* data, UUID componentID, UUIDRemapper& remapper)
+	{
+		auto iter = m_OnComponentCopyCallbacks.find(hash);
+		if (iter == m_OnComponentCopyCallbacks.end()) return;
+		iter->second(pScene, data, componentID, remapper);
+	}
+
 	void SceneManager::OnSceneClosing(UUID sceneID)
 	{
 		for (auto& callback : m_SceneClosedCallbacks)

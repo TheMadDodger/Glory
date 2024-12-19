@@ -8,6 +8,8 @@
 #include <SceneManager.h>
 #include <AssetManager.h>
 #include <Debug.h>
+#include <UUIDRemapper.h>
+#include <SceneObjectRef.h>
 
 namespace Glory
 {
@@ -148,6 +150,30 @@ namespace Glory
 		MonoObject* pScriptObject = mono_gchandle_get_target(pComponent.m_ScriptObjectHandle);
 		if (!pScriptObject) return;
 		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "Draw", nullptr);
+	}
+
+	void MonoScriptedSystem::OnCopy(GScene* pScene, void* data, UUID componentId, UUIDRemapper& remapper)
+	{
+		MonoScriptComponent& component = *static_cast<MonoScriptComponent*>(data);
+		component.m_ScriptObjectHandle = 0;
+		component.m_CachedComponentID = 0;
+		if (!component.m_ScriptType.m_Hash) return;
+		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
+		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
+		const int typeIndex = scriptManager.TypeIndexFromHash(component.m_ScriptType.m_Hash);
+		if (typeIndex == -1) return;
+		component.m_CachedComponentID = componentId;
+		auto& properties = scriptManager.ScriptProperties(typeIndex);
+		for (size_t i = 0; i < properties.size(); ++i)
+		{
+			auto& prop = properties[i];
+			if (prop.m_TypeHash != ST_Object) continue;
+			char* idData = &component.m_ScriptData.m_Buffer[prop.m_RelativeOffset];
+			SceneObjectRef* id = reinterpret_cast<SceneObjectRef*>(idData);
+			const UUID newId = remapper(id->ObjectUUID());
+			*id->ObjectUUIDMember() = newId;
+			*id->SceneUUIDMember() = pScene->GetUUID();
+		}
 	}
 
 	void MonoScriptedSystem::OnBodyActivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID)

@@ -378,7 +378,8 @@ namespace Glory
 			const UUID uuid = pEntityView->ComponentUUIDAt(i);
 			const UUID remappedID = IDRemapper(uuid);
 			void* data = pOther->m_Registry.GetComponentAddress(entity, uuid);
-			m_Registry.CopyComponent(newEntity, type, remappedID, data);
+			void* newComponent = m_Registry.CopyComponent(newEntity, type, remappedID, data);
+			m_pManager->TriggerOnCopy(type, this, newComponent, remappedID, IDRemapper);
 		}
 
 		for (size_t i = 0; i < pOther->ChildCount(entity); ++i)

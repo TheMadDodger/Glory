@@ -11,6 +11,7 @@ namespace Glory
 {
 	class Engine;
 	class GScene;
+	struct UUIDRemapper;
 
 	class SceneManager
 	{
@@ -73,6 +74,16 @@ namespace Glory
 
 		void OnSceneObjectDestroyed(UUID objectID, UUID sceneID);
 
+		template<typename T>
+		void SubscribeOnCopy(std::function<void(GScene*, void*, UUID, UUIDRemapper&)> callback)
+		{
+			const uint32_t hash = T::GetTypeData()->TypeHash();
+			SubscribeOnCopy(hash, callback);
+		}
+
+		void SubscribeOnCopy(uint32_t hash, std::function<void(GScene*, void*, UUID, UUIDRemapper&)> callback);
+		void TriggerOnCopy(uint32_t hash, GScene* pScene, void* data, UUID componentID, UUIDRemapper& remapper);
+
 	protected:
 		virtual void OnInitialize() = 0;
 		virtual void OnCleanup() = 0;
@@ -106,5 +117,6 @@ namespace Glory
 		};
 		std::vector<SceneCallback> m_SceneClosedCallbacks;
 		std::vector<SceneCallback> m_SceneObjectDestroyedCallbacks;
+		std::map<uint32_t, std::function<void(GScene*, void*, UUID, UUIDRemapper&)>> m_OnComponentCopyCallbacks;
 	};
 }
