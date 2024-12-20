@@ -167,7 +167,7 @@ namespace Glory::Utils::ECS
 		void InvokeAll(const InvocationType& invocationType, EntityRegistry* pRegistry, std::function<bool(BaseTypeView*, EntityView*, size_t)> canCallCallback) override
 		{
 			if (!pRegistry->CallbacksEnabled() || !pRegistry->CallbackEnabled(invocationType)) return;
-			const size_t count = m_ComponentData.size();
+			size_t count = m_ComponentData.size();
 			for (size_t i = 0; i < count; ++i)
 			{
 				T& component = m_ComponentData[i];
@@ -185,6 +185,9 @@ namespace Glory::Utils::ECS
 					break;
 				}
 				m_Callbacks->Invoke(invocationType, pRegistry, entity, component);
+				if (m_ComponentData.size() < count)
+					/* Component was removed during last invoke */
+					count = m_ComponentData.size();
 			}
 		}
 
