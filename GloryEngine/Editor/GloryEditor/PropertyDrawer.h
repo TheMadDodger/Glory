@@ -74,6 +74,17 @@ namespace Glory::Editor
 		static std::filesystem::path m_CurrentPropertyPath;
 	};
 
+	/** Makes sure buffers aren't drawn at all */
+	class BufferPropertyDrawer : public PropertyDrawer
+	{
+	public:
+		BufferPropertyDrawer() : PropertyDrawer(uint32_t(CustomTypeHash::Buffer)) {}
+
+	protected:
+		virtual bool Draw(const std::string&, void*, uint32_t, uint32_t) const override { return false; }
+		virtual bool Draw(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags) const override { return false; }
+	};
+
 	template<typename PropertyType>
 	class SimplePropertyDrawerTemplate : public PropertyDrawer
 	{

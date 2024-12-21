@@ -119,17 +119,17 @@ namespace Glory::Editor
 			return GetPropertyDrawer(ST_Array)->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
 		}
 
+		PropertyDrawer* pDrawer = GetPropertyDrawer(pFieldData->Type());
+		if (pDrawer)
+		{
+			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
+		}
+
 		const TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
 			const bool change = DrawProperty(pFieldData->Name(), pTypeData, data, flags);
 			return change;
-		}
-
-		PropertyDrawer* pDrawer = GetPropertyDrawer(pFieldData->Type());
-		if (pDrawer)
-		{
-			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
