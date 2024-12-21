@@ -73,13 +73,10 @@ namespace Glory::Editor
 			actualHeight = maxWidth / textureAspect;
 		}
 
-		ImVec2 halfMax = vMax / 2.0f;
-		ImVec2 center = pos + halfMax;
+		const ImVec2 halfMax = vMax / 2.0f;
+		const ImVec2 center = pos + halfMax;
 
-		ImVec2 halfOffsets = ImVec2(maxWidth / 2.0f, actualHeight / 2.0f);
-
-		//ImGui::GetForegroundDrawList()->AddRect(center, center + halfMax, IM_COL32(255, 255, 0, 255));
-		//ImGui::GetForegroundDrawList()->AddRect(center, center - halfMax, IM_COL32(255, 255, 0, 255));
+		const ImVec2 halfOffsets = ImVec2(maxWidth / 2.0f, actualHeight / 2.0f);
 
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 

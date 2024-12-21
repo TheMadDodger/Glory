@@ -71,6 +71,8 @@ namespace Glory
 		const PickResult& GetPickResult(size_t index) const;
 		void GetPickResult(UUID cameraID, std::function<void(const PickResult&)> callback);
 
+		void OnWindowResize(glm::uvec2 size);
+
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
 		virtual void OnSubmit(const TextRenderData& renderData) {}
@@ -128,5 +130,7 @@ namespace Glory
 		std::mutex m_PickLock;
 		std::vector<PickResult> m_LastFramePickResults;
 		std::vector<PickResult> m_PickResults;
+
+		std::atomic_bool m_DisplaysDirty;
 	};
 }

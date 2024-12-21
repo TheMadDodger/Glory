@@ -24,7 +24,7 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr)
+		m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false)
 	{
 	}
 
@@ -270,6 +270,12 @@ namespace Glory
 		callback(m_LastFramePickResults[index]);
 	}
 
+	void RendererModule::OnWindowResize(glm::uvec2 size)
+	{
+		m_pEngine->GetCameraManager().ResizeAllCameras(size);
+		m_DisplaysDirty = true;
+	}
+
 	void RendererModule::Initialize()
 	{
 		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
@@ -305,6 +311,14 @@ namespace Glory
 
 	void RendererModule::Render(const RenderFrame& frame)
 	{
+		if (m_DisplaysDirty)
+		{
+			int width, height;
+			m_pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
+			m_pEngine->GetDisplayManager().ResizeAllTextures(uint32_t(width), uint32_t(height));
+			m_DisplaysDirty = false;
+		}
+
 		m_PickResults.clear();
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
@@ -388,8 +402,8 @@ namespace Glory
 
 			Window* pWindow = m_pEngine->GetMainModule<WindowModule>()->GetMainWindow();
 			
-			int width, height;
-			pWindow->GetDrawableSize(&width, &height);
+			uint32_t width, height;
+			pRenderTexture->GetDimensions(width, height);
 
 			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Display Rendering");
 			pDisplayRenderTexture->BindForDraw();

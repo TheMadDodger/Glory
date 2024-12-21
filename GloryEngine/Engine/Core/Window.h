@@ -21,6 +21,8 @@ namespace Glory
 		uint32_t Width;
 		uint32_t Height;
 		uint32_t WindowFlags;
+		bool Fullscreen;
+		bool Maximize;
 	};
 
 	class Window : public Object
@@ -39,6 +41,8 @@ namespace Glory
 		virtual void GetPosition(int* x, int* y) = 0;
 		virtual void SetPosition(int x, int y) = 0;
 		virtual void SetCursorPosition(int x, int y) = 0;
+		virtual void SetFullscreen(bool fullscreen, bool borderless) = 0;
+		virtual void Maximize() = 0;
 
 		virtual void SetWindowTitle(const char* title) = 0;
 
@@ -50,7 +54,9 @@ namespace Glory
 		void ShowCursor(bool shown);
 		void ForceShowCursor(bool show);
 		void ForceUnlockCursor(bool unlock);
-		bool IsCursorShown();
+		bool IsCursorShown() const;
+		bool HasFocus() const;
+		bool IsShown() const;
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);
@@ -73,6 +79,12 @@ namespace Glory
 		bool m_ShowCursor;
 		bool m_ForceShowCursor;
 		bool m_ForceUnlockCursor;
+
+		bool m_HasFocus;
+		bool m_IsShown;
+
+		bool m_Fullscreen;
+		bool m_Maximized;
 
 	private:
 		friend class WindowModule;

@@ -86,6 +86,14 @@ namespace Glory
 		return &m_Cameras[index];
 	}
 
+	void CameraManager::ResizeAllCameras(glm::uvec2 resolution)
+	{
+		for (Camera& camera : m_Cameras)
+		{
+			camera.SetResolution(resolution.x, resolution.y);
+		}
+	}
+
 	void CameraManager::Cleanup()
 	{
 		m_Cameras.clear();
