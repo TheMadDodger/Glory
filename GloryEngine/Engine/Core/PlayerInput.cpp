@@ -48,6 +48,13 @@ namespace Glory
 		}
 	}
 
+	void PlayerInput::HandleCursorEvent(CursorEvent& event)
+	{
+		m_CursorPos = event.IsDelta ? m_CursorPos + event.Cursor : event.Cursor;
+		const glm::vec4& bounds = m_pInputModule->GetCursorBounds();
+		m_CursorPos -= glm::vec2{ bounds.x, bounds.y };
+	}
+
 	void PlayerInput::ClearActions()
 	{
 		for (size_t i = 0; i < m_InputData.size(); ++i)
@@ -104,6 +111,11 @@ namespace Glory
 				!= m_InputData[i].m_TriggeredActions.end();
 		}
 		return false;
+	}
+
+	const glm::vec2& PlayerInput::GetCursorPos() const
+	{
+		return m_CursorPos;
 	}
 
 	void PlayerInput::Unbind()

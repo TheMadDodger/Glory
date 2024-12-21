@@ -1,5 +1,6 @@
 #pragma once
 #include "KeyEnums.h"
+#include <glm/vec2.hpp>
 
 REFLECTABLE_ENUM_NS(Glory, InputDeviceType, Keyboard, Mouse, Gamepad)
 REFLECTABLE_ENUM_NS(Glory, InputMappingType, Bool, Float)
@@ -36,6 +37,14 @@ namespace Glory
 		InputState State;
 		float Value;
 		float Delta;
+	};
+
+	struct CursorEvent
+	{
+		InputDeviceType InputDeviceType;
+		size_t SourceDeviceID;
+		glm::vec2 Cursor;
+		bool IsDelta;
 	};
 
 	struct KeyBindingCompact

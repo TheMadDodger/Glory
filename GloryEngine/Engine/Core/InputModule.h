@@ -17,6 +17,7 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		bool OnInput(InputEvent& event);
+		void OnCursor(CursorEvent& event);
 
 		size_t AddPlayer();
 		void RemovePlayer(size_t playerIndex);
@@ -42,6 +43,9 @@ namespace Glory
 		void FreeDevice(const UUID deviceId);
 
 		const UUID FindAvailableInputDevice(const InputDeviceType deviceType) const;
+
+		GLORY_API void SetCursorBounds(const glm::vec4& bounds);
+		GLORY_API const glm::vec4& GetCursorBounds();
 
 	protected:
 		virtual void OnInitialize() {};
@@ -71,5 +75,6 @@ namespace Glory
 		std::map<std::string, std::map<std::string, InputMap>> m_InputMaps;
 
 		bool m_InputBlocked;
+		glm::vec4 m_CursorBounds;
 	};
 }

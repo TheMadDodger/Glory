@@ -1,5 +1,7 @@
 #include <DisplayManager.h>
 #include <imgui.h>
+#include <InputModule.h>
+
 #include "GameWindow.h"
 #include "EditorApplication.h"
 #include "ImGuiHelpers.h"
@@ -81,8 +83,14 @@ namespace Glory::Editor
 
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
+		const ImVec2 topLeft = center - halfOffsets;
+		const ImVec2 bottomRight = center + halfOffsets;
+
+		InputModule* pInput = EditorApplication::GetInstance()->GetEngine()->GetMainModule<InputModule>();
+		pInput->SetCursorBounds({ topLeft.x, topLeft.y, bottomRight.x, bottomRight.y });
+
 		ImGui::GetWindowDrawList()->AddImage(
-			pRenderImpl->GetTextureID(pTexture), center - halfOffsets,
-			center + halfOffsets, ImVec2(0, 1), ImVec2(1, 0));
+			pRenderImpl->GetTextureID(pTexture), topLeft,
+			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
 	}
 }

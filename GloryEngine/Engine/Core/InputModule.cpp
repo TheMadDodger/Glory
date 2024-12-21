@@ -9,7 +9,7 @@ namespace Glory
 	const char* Key_InputModes = "InputModes";
 
 	InputModule::InputModule()
-		: m_Players(), m_InputBlocked(true)
+		: m_Players(), m_InputBlocked(true), m_CursorBounds()
 	{
 	}
 
@@ -42,6 +42,28 @@ namespace Glory
 
 		m_Players[inputDevice.m_PlayerIndex].HandleInputEvent(event);
 		return true;
+	}
+
+	void InputModule::OnCursor(CursorEvent& event)
+	{
+		UUID deviceUUID = GetDeviceUUID(event.InputDeviceType, event.SourceDeviceID);
+		/* Unknown device? */
+		if (deviceUUID == 0) return;
+		/* Not claimed by a player? */
+		InputDevice& inputDevice = m_InputDevices.at(deviceUUID);
+		if (inputDevice.m_PlayerIndex == -1)
+		{
+			for (size_t i = 0; i < m_Players.size(); i++)
+			{
+				std::string_view inputMode = m_Players[i].InputMode();
+				//if()
+			}
+			return;
+		}
+
+		m_Players[inputDevice.m_PlayerIndex].HandleCursorEvent(event);
+		const glm::vec2& cursor = m_Players[inputDevice.m_PlayerIndex].GetCursorPos();
+		m_pEngine->GetDebug().LogInfo(std::to_string(cursor.x) + "," + std::to_string(cursor.y));
 	}
 
 	size_t InputModule::AddPlayer()
@@ -183,6 +205,16 @@ namespace Glory
 			return itor->first;
 		}
 		return 0;
+	}
+
+	void InputModule::SetCursorBounds(const glm::vec4& bounds)
+	{
+		m_CursorBounds = bounds;
+	}
+
+	const glm::vec4& InputModule::GetCursorBounds()
+	{
+		return m_CursorBounds;
 	}
 
 	void InputModule::OnProcessData()
