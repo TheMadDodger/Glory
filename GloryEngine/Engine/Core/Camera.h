@@ -59,10 +59,12 @@ namespace Glory
 		friend class CameraManager;
 		bool m_IsInUse;
 		bool m_TextureIsDirty;
+		bool m_IsOrtho;
 		int m_DisplayIndex;
 		int m_Priority;
 		float m_Near;
 		float m_Far;
+		float m_HalfFOV;
 		LayerMask m_LayerMask;
 
 		glm::mat4 m_View;

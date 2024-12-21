@@ -1,6 +1,8 @@
 Runtime:
 - Upped version to 0.4.5
 - Added font loading
+- Window resizing is now properly handles
+- Runtime application now starts in fullscreen
 
 Engine:
 - Added font resource
@@ -8,11 +10,13 @@ Engine:
 - Added text rendering
 - Fixed incorrect scene object references in script properties when instantiating a prefab
 - InputModule now tracks cursor position for the mouse
+- Added fullscreen support to SDLWindowModule
 
 Editor:
 - Added freetype font importer
 - Added property drawer for string properties
 - Added cursor bounds to limit cursor position to game view
+- Fixed game view not showing rendered image correctly when window is resized
 
 Scripting:
 - Added CS API for text component

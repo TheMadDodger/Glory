@@ -9,7 +9,8 @@ namespace Glory
 		m_WindowName(createInfo.WindowName), m_Width(createInfo.Width),
 		m_Height(createInfo.Height), m_WindowFlags(createInfo.WindowFlags),
 		m_pWindowManager(createInfo.pWindowManager), m_ShowCursor(true),
-		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_HasFocus(false), m_IsShown(false)
+		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_HasFocus(false),
+		m_IsShown(false), m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize)
 	{
 	}
 

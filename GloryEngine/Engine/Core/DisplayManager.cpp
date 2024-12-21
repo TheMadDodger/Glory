@@ -22,6 +22,14 @@ namespace Glory
 		}
 	}
 
+	void DisplayManager::ResizeAllTextures(uint32_t width, uint32_t height)
+	{
+		for (size_t i = 0; i < MAX_DISPLAYS; i++)
+		{
+			m_pRenderTextures[i]->Resize(width, height);
+		}
+	}
+
 	RenderTexture* DisplayManager::CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height)
 	{
 		RenderTextureCreateInfo createInfo(width, height, false);

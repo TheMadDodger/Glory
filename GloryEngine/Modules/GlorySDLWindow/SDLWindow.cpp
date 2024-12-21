@@ -3,6 +3,7 @@
 #include "WindowModule.h"
 
 #include <Input.h>
+#include <RendererModule.h>
 #include <Engine.h>
 #include <Debug.h>
 #include <SDL2/SDL_syswm.h>
@@ -461,34 +462,35 @@ namespace Glory
 
 	void SDLWindow::HandleWindowSizeEvents(SDL_WindowEvent& event)
 	{
+		Engine* pEngine = m_pWindowManager->GetEngine();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer) return;
 		switch (event.event)
 		{
 		case SDL_WINDOWEVENT_EXPOSED:
-			/**< Window has been exposed and should be redrawn */
+			/* Window has been exposed and should be redrawn */
 			break;
 		case SDL_WINDOWEVENT_MOVED:
-			/**< Window has been moved to data1, data2 */
+			/* Window has been moved to data1, data2 */
 			break;
 		case SDL_WINDOWEVENT_RESIZED:
-			/**< Window has been resized to data1xdata2 */
+			/* Window has been resized to data1xdata2 */
+			pRenderer->OnWindowResize({ event.data1, event.data2 });
 			break;
 		case SDL_WINDOWEVENT_SIZE_CHANGED:
-			/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
+			/* The window size has changed, either as a result of an API call or through the system or user changing the window size. */
 			break;
 		case SDL_WINDOWEVENT_MINIMIZED:
-			/**< Window has been minimized */
+			/* Window has been minimized */
+			m_Maximized = false;
 			break;
 		case SDL_WINDOWEVENT_MAXIMIZED:
-			/**< Window has been maximized */
+			/* Window has been maximized */
+			m_Maximized = true;
 			break;
 		case SDL_WINDOWEVENT_RESTORED:
-			/**< Window has been restored to normal size and position */
-			break;
-		case SDL_WINDOWEVENT_TAKE_FOCUS:
-			/* Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) */
-			break;
-		case SDL_WINDOWEVENT_HIT_TEST:
-			/* Window had a hit test that wasn't SDL_HITTEST_NORMAL. */
+			/* Window has been restored to normal size and position */
+			m_Maximized = false;
 			break;
 		case SDL_WINDOWEVENT_ICCPROF_CHANGED:
 			/* The ICC profile of the window's display has changed. */
@@ -523,6 +525,18 @@ namespace Glory
 	{
 		if (m_ForceUnlockCursor || !m_HasFocus || !m_IsShown) return;
 		SDL_WarpMouseInWindow(m_pWindow, x, y);
+	}
+
+	void SDLWindow::SetFullscreen(bool fullscreen, bool borderless)
+	{
+		m_Fullscreen = fullscreen;
+		SDL_SetWindowFullscreen(m_pWindow, !fullscreen ? 0 :
+			(borderless ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN));
+	}
+
+	void SDLWindow::Maximize()
+	{
+		SDL_MaximizeWindow(m_pWindow);
 	}
 
 	void SDLWindow::UpdateCursorShow()
@@ -602,6 +616,7 @@ namespace Glory
 			return;
 		case SDL_WINDOWEVENT:
 			HandleWindowFocusEvents(event.window);
+			HandleWindowSizeEvents(event.window);
 			break;
 		default:
 			break;
@@ -610,9 +625,14 @@ namespace Glory
 
 	void SDLWindow::Open()
 	{
+		if (m_Width == 0 && m_Height == 0)
+			m_pWindowManager->GetCurrentScreenResolution(m_Width, m_Height);
+
 		// Create an SDL window that supports Vulkan rendering.
 		m_pWindow = SDL_CreateWindow(m_WindowName.c_str(), SDL_WINDOWPOS_CENTERED,
 			SDL_WINDOWPOS_CENTERED, m_Width, m_Height, m_WindowFlags);
+		SetFullscreen(m_Fullscreen, false);
+		if (m_Maximized) Maximize();
 
 		if (m_pWindow == NULL) throw new SDLErrorException(SDL_GetError());
 
