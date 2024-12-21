@@ -11,12 +11,14 @@ Engine:
 - Fixed incorrect scene object references in script properties when instantiating a prefab
 - InputModule now tracks cursor position for the mouse
 - Added fullscreen support to SDLWindowModule
+- Max prepared frames is now 1 in the graphics thread due to issues with the renderer
 
 Editor:
 - Added freetype font importer
 - Added property drawer for string properties
 - Added cursor bounds to limit cursor position to game view
 - Fixed game view not showing rendered image correctly when window is resized
+- Removed red "m_ScriptData" label in MonoScriptComponent editor
 
 Scripting:
 - Added CS API for text component

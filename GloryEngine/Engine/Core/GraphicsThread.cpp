@@ -30,7 +30,7 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, RendererModule, );
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
-		m_pRenderQueue = new RenderQueue(2);
+		m_pRenderQueue = new RenderQueue(1);
 		m_pThread = ThreadManager::Run(std::bind(&GraphicsThread::Run, this));
 	}
 
