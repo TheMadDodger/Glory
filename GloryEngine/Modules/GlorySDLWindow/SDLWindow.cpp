@@ -425,6 +425,83 @@ namespace Glory
 		return false;
 	}
 
+	void SDLWindow::HandleWindowFocusEvents(SDL_WindowEvent& event)
+	{
+		switch (event.event)
+		{
+		case SDL_WINDOWEVENT_SHOWN:
+			/* Window has been shown */
+			m_IsShown = true;
+			break;
+		case SDL_WINDOWEVENT_HIDDEN:
+			/* Window has been hidden */
+			m_IsShown = false;
+			break;
+		case SDL_WINDOWEVENT_ENTER:
+			/* Window has gained mouse focus */
+			break;
+		case SDL_WINDOWEVENT_LEAVE:
+			/* Window has lost mouse focus */
+			break;
+		case SDL_WINDOWEVENT_FOCUS_GAINED:
+			/* Window has gained keyboard focus */
+			m_HasFocus = true;
+			break;
+		case SDL_WINDOWEVENT_FOCUS_LOST:
+			/* Window has lost keyboard focus */
+			m_HasFocus = false;
+			break;
+		case SDL_WINDOWEVENT_TAKE_FOCUS:
+			/* Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) */
+			break;
+		default:
+			break;
+		}
+	}
+
+	void SDLWindow::HandleWindowSizeEvents(SDL_WindowEvent& event)
+	{
+		switch (event.event)
+		{
+		case SDL_WINDOWEVENT_EXPOSED:
+			/**< Window has been exposed and should be redrawn */
+			break;
+		case SDL_WINDOWEVENT_MOVED:
+			/**< Window has been moved to data1, data2 */
+			break;
+		case SDL_WINDOWEVENT_RESIZED:
+			/**< Window has been resized to data1xdata2 */
+			break;
+		case SDL_WINDOWEVENT_SIZE_CHANGED:
+			/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
+			break;
+		case SDL_WINDOWEVENT_MINIMIZED:
+			/**< Window has been minimized */
+			break;
+		case SDL_WINDOWEVENT_MAXIMIZED:
+			/**< Window has been maximized */
+			break;
+		case SDL_WINDOWEVENT_RESTORED:
+			/**< Window has been restored to normal size and position */
+			break;
+		case SDL_WINDOWEVENT_TAKE_FOCUS:
+			/* Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) */
+			break;
+		case SDL_WINDOWEVENT_HIT_TEST:
+			/* Window had a hit test that wasn't SDL_HITTEST_NORMAL. */
+			break;
+		case SDL_WINDOWEVENT_ICCPROF_CHANGED:
+			/* The ICC profile of the window's display has changed. */
+			break;
+		case SDL_WINDOWEVENT_DISPLAY_CHANGED:
+			/* Window has been moved to display data1. */
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	void SDLWindow::Resize(int width, int height)
 	{
 		m_Width = width;
@@ -444,7 +521,7 @@ namespace Glory
 
 	void SDLWindow::SetCursorPosition(int x, int y)
 	{
-		if (m_ForceUnlockCursor) return;
+		if (m_ForceUnlockCursor || !m_HasFocus || !m_IsShown) return;
 		SDL_WarpMouseInWindow(m_pWindow, x, y);
 	}
 
@@ -523,6 +600,9 @@ namespace Glory
 		case SDL_QUIT:
 			m_pWindowManager->GetEngine()->RequestQuit();
 			return;
+		case SDL_WINDOWEVENT:
+			HandleWindowFocusEvents(event.window);
+			break;
 		default:
 			break;
 		}

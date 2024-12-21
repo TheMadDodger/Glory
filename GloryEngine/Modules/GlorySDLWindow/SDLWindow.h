@@ -33,6 +33,8 @@ namespace Glory
 
 		GLORY_API bool PollEvent(SDL_Event* event);
 		GLORY_API bool HandleInputEvents(SDL_Event& event);
+		GLORY_API void HandleWindowFocusEvents(SDL_WindowEvent& event);
+		GLORY_API void HandleWindowSizeEvents(SDL_WindowEvent& event);
 
 	private:
 		SDLWindow(const WindowCreateInfo& createInfo);

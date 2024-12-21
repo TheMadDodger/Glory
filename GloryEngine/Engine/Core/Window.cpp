@@ -9,7 +9,7 @@ namespace Glory
 		m_WindowName(createInfo.WindowName), m_Width(createInfo.Width),
 		m_Height(createInfo.Height), m_WindowFlags(createInfo.WindowFlags),
 		m_pWindowManager(createInfo.pWindowManager), m_ShowCursor(true),
-		m_ForceShowCursor(false), m_ForceUnlockCursor(false)
+		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_HasFocus(false), m_IsShown(false)
 	{
 	}
 
@@ -34,9 +34,19 @@ namespace Glory
 		m_ForceUnlockCursor = unlock;
 	}
 
-	bool Window::IsCursorShown()
+	bool Window::IsCursorShown() const
 	{
 		return m_ForceShowCursor || m_ShowCursor;
+	}
+
+	bool Window::HasFocus() const
+	{
+		return m_HasFocus;
+	}
+
+	bool Window::IsShown() const
+	{
+		return m_IsShown;
 	}
 
 	void Window::GetVulkanRequiredExtensions(std::vector<const char*>&) {}

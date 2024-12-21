@@ -50,7 +50,9 @@ namespace Glory
 		void ShowCursor(bool shown);
 		void ForceShowCursor(bool show);
 		void ForceUnlockCursor(bool unlock);
-		bool IsCursorShown();
+		bool IsCursorShown() const;
+		bool HasFocus() const;
+		bool IsShown() const;
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);
@@ -73,6 +75,9 @@ namespace Glory
 		bool m_ShowCursor;
 		bool m_ForceShowCursor;
 		bool m_ForceUnlockCursor;
+
+		bool m_HasFocus;
+		bool m_IsShown;
 
 	private:
 		friend class WindowModule;
