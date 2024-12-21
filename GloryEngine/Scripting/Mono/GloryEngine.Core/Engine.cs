@@ -2,6 +2,7 @@
 using GloryEngine.SceneManagement;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace GloryEngine
 {
@@ -20,6 +21,20 @@ namespace GloryEngine
         /// Scene manager
         /// </summary>
         public SceneManager SceneManager => _sceneManager;
+
+        /// <summary>
+        /// Size of the game window
+        /// </summary>
+        public Vector2 WindowSize => Engine_GetWindowSize();
+
+        /// <summary>
+        /// Whether the cursor of the OS is shown
+        /// </summary>
+        public bool ShowWindowCursor
+        {
+            get => Engine_GetShowWindowCursor();
+            set => Engine_SetShowWindowCursor(value);
+        }
 
         #endregion
 
@@ -138,6 +153,24 @@ namespace GloryEngine
             if (sceneObject == null || sceneObject._destroyed) throw new Exception("Scene object was destroyed!");
             return sceneObject.GetScript(componentID);
         }
+
+        public void SetWindowCursorPos(Vector2 pos) => Engine_SetWindowCursorPos(ref pos);
+
+        #endregion
+
+        #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern Vector2 Engine_GetWindowSize();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void Engine_SetShowWindowCursor(bool show);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool Engine_GetShowWindowCursor();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void Engine_SetWindowCursorPos(ref Vector2 pos);
 
         #endregion
     }

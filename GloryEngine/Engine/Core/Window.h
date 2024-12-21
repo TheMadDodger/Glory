@@ -38,6 +38,7 @@ namespace Glory
 		virtual void Resize(int width, int height) = 0;
 		virtual void GetPosition(int* x, int* y) = 0;
 		virtual void SetPosition(int x, int y) = 0;
+		virtual void SetCursorPosition(int x, int y) = 0;
 
 		virtual void SetWindowTitle(const char* title) = 0;
 
@@ -46,6 +47,11 @@ namespace Glory
 		virtual void SetSplashScreen(const char* data, size_t size) = 0;
 		virtual void SetSplashScreen(const std::filesystem::path& path) = 0;
 
+		void ShowCursor(bool shown);
+		void ForceShowCursor(bool show);
+		void ForceUnlockCursor(bool unlock);
+		bool IsCursorShown();
+
 	protected:
 		Window(const WindowCreateInfo& createInfo);
 		virtual ~Window();
@@ -53,6 +59,7 @@ namespace Glory
 		virtual void Open() = 0;
 		virtual void Close() = 0;
 		virtual void PollEvents() = 0;
+		virtual void UpdateCursorShow() = 0;
 
 		bool ForwardInputEvent(InputEvent& input);
 		void ForwardCursorEvent(CursorEvent& input);
@@ -63,6 +70,9 @@ namespace Glory
 		uint32_t m_Height;
 		uint32_t m_WindowFlags;
 		WindowModule* m_pWindowManager;
+		bool m_ShowCursor;
+		bool m_ForceShowCursor;
+		bool m_ForceUnlockCursor;
 
 	private:
 		friend class WindowModule;
