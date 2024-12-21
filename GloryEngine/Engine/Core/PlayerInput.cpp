@@ -6,7 +6,8 @@
 namespace Glory
 {
 	PlayerInput::PlayerInput(InputModule* pInputModule, size_t playerIndex)
-		: m_pInputModule(pInputModule), m_PlayerIndex(playerIndex), m_InputMode(InputMode::None.m_Name)
+		: m_pInputModule(pInputModule), m_PlayerIndex(playerIndex),
+		m_InputMode(InputMode::None.m_Name), m_CursorPos(0.0f, 0.0f)
 	{
 	}
 
@@ -82,27 +83,32 @@ namespace Glory
 		}
 	}
 
-	const float PlayerInput::GetAxis(const std::string& inputMap, const std::string& actionName)
+	const float PlayerInput::GetAxis(const std::string& inputMap, const std::string& actionName) const
 	{
 		for (size_t i = 0; i < m_InputData.size(); i++)
 		{
 			if (m_InputData[i].m_InputMap->m_Name != inputMap) continue;
-			return m_InputData[i].m_AxisValueRight[actionName] + m_InputData[i].m_AxisValueLeft[actionName];
+			auto iterLeft = m_InputData[i].m_AxisValueLeft.find(actionName);
+			auto iterRight = m_InputData[i].m_AxisValueRight.find(actionName);
+			const float axisLeft = iterLeft != m_InputData[i].m_AxisValueLeft.end() ? iterLeft->second : 0.0f;
+			const float axisRight = iterRight != m_InputData[i].m_AxisValueRight.end() ? iterRight->second : 0.0f;
+			return axisRight + axisLeft;
 		}
 		return 0.0f;
 	}
 
-	const float PlayerInput::GetAxisDelta(const std::string& inputMap, const std::string& actionName)
+	const float PlayerInput::GetAxisDelta(const std::string& inputMap, const std::string& actionName) const
 	{
 		for (size_t i = 0; i < m_InputData.size(); i++)
 		{
 			if (m_InputData[i].m_InputMap->m_Name != inputMap) continue;
-			return m_InputData[i].m_AxisDeltas[actionName];
+			auto iter = m_InputData[i].m_AxisDeltas.find(actionName);
+			return iter != m_InputData[i].m_AxisDeltas.end() ? iter->second : 0.0f;
 		}
 		return 0.0f;
 	}
 
-	const bool PlayerInput::GetBool(const std::string& inputMap, const std::string& actionName)
+	const bool PlayerInput::GetBool(const std::string& inputMap, const std::string& actionName) const
 	{
 		for (size_t i = 0; i < m_InputData.size(); i++)
 		{

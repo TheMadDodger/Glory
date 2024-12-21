@@ -62,8 +62,6 @@ namespace Glory
 		}
 
 		m_Players[inputDevice.m_PlayerIndex].HandleCursorEvent(event);
-		const glm::vec2& cursor = m_Players[inputDevice.m_PlayerIndex].GetCursorPos();
-		m_pEngine->GetDebug().LogInfo(std::to_string(cursor.x) + "," + std::to_string(cursor.y));
 	}
 
 	size_t InputModule::AddPlayer()
@@ -171,22 +169,33 @@ namespace Glory
 		return playIndex >= m_Players.size() ? nullptr : &m_Players[playIndex];
 	}
 
-	float InputModule::GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName)
+	const PlayerInput* InputModule::GetPlayer(size_t playIndex) const
 	{
-		PlayerInput* player = GetPlayer(playerIndex);
+		return playIndex >= m_Players.size() ? nullptr : &m_Players[playIndex];
+	}
+
+	float InputModule::GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const
+	{
+		const PlayerInput* player = GetPlayer(playerIndex);
 		return player ? player->GetAxis(inputMap, actionName) : 0.0f;
 	}
 
-	float InputModule::GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName)
+	float InputModule::GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const
 	{
-		PlayerInput* player = GetPlayer(playerIndex);
+		const PlayerInput* player = GetPlayer(playerIndex);
 		return player ? player->GetAxisDelta(inputMap, actionName) : 0.0f;
 	}
 
-	bool InputModule::GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName)
+	bool InputModule::GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const
 	{
-		PlayerInput* player = GetPlayer(playerIndex);
+		const PlayerInput* player = GetPlayer(playerIndex);
 		return player ? player->GetBool(inputMap, actionName) : 0.0f;
+	}
+
+	glm::vec2 InputModule::GetCursorPos(size_t playerIndex) const
+	{
+		const PlayerInput* player = GetPlayer(playerIndex);
+		return player ? player->GetCursorPos() : glm::vec2{};
 	}
 
 	void InputModule::FreeDevice(const UUID deviceId)

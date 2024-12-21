@@ -72,9 +72,9 @@ namespace Glory
 		/* Clears all data from actions during the current frame */
 		void ClearActions();
 
-		const float GetAxis(const std::string& inputMap, const std::string& actionName);
-		const float GetAxisDelta(const std::string& inputMap, const std::string& actionName);
-		const bool GetBool(const std::string& inputMap, const std::string& actionName);
+		const float GetAxis(const std::string& inputMap, const std::string& actionName) const;
+		const float GetAxisDelta(const std::string& inputMap, const std::string& actionName) const;
+		const bool GetBool(const std::string& inputMap, const std::string& actionName) const;
 		const glm::vec2& GetCursorPos() const;
 
 		void Unbind();

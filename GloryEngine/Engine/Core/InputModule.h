@@ -36,9 +36,11 @@ namespace Glory
 		bool& InputBlocked();
 
 		PlayerInput* GetPlayer(size_t playIndex);
-		float GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
-		float GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
-		bool GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
+		const PlayerInput* GetPlayer(size_t playIndex) const;
+		float GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
+		float GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
+		bool GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
+		glm::vec2 GetCursorPos(size_t playerIndex) const;
 
 		void FreeDevice(const UUID deviceId);
 
