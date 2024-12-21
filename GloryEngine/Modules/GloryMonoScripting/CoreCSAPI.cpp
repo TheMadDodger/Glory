@@ -13,6 +13,7 @@
 #include <AssetDatabase.h>
 #include <AssetManager.h>
 #include <ObjectManager.h>
+#include <WindowModule.h>
 
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
@@ -539,6 +540,48 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Window
+
+	Vec2Wrapper Engine_GetWindowSize()
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return {};
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return {};
+		int width, height;
+		pWindow->GetWindowSize(&width, &height);
+		return { float(width), float(height) };
+	}
+
+	void Engine_SetShowWindowCursor(bool show)
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return;
+		pWindow->ShowCursor(show);
+	}
+
+	bool Engine_GetShowWindowCursor()
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return false;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return false;
+		return pWindow->IsCursorShown();
+	}
+
+	void Engine_SetWindowCursorPos(Vec2Wrapper* pos)
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return;
+		pWindow->SetCursorPosition(float(pos->x), float(pos->y));
+	}
+
+#pragma endregion
+
 #pragma region Binding
 
 	void CoreCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -652,6 +695,12 @@ namespace Glory
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetChild", SceneObject_GetChild);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetParent", SceneObject_GetParent);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetParent", SceneObject_SetParent);
+
+		/* Engine */
+		BIND("GloryEngine.Engine::Engine_GetWindowSize", Engine_GetWindowSize);
+		BIND("GloryEngine.Engine::Engine_SetShowWindowCursor", Engine_SetShowWindowCursor);
+		BIND("GloryEngine.Engine::Engine_GetShowWindowCursor", Engine_GetShowWindowCursor);
+		BIND("GloryEngine.Engine::Engine_SetWindowCursorPos", Engine_SetWindowCursorPos);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)
