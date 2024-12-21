@@ -70,6 +70,9 @@ project "GloryEditorSDL"
 		"GloryUtilsVersion",
 		"GloryUtils",
 		"SDL2",
+
+		"GloryJobs",
+		"GloryThreads",
 	}
 
 	defines

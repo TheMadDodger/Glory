@@ -442,6 +442,18 @@ namespace Glory
 		SDL_SetWindowPosition(m_pWindow, width, height);
 	}
 
+	void SDLWindow::SetCursorPosition(int x, int y)
+	{
+		if (m_ForceUnlockCursor) return;
+		SDL_WarpMouseInWindow(m_pWindow, x, y);
+	}
+
+	void SDLWindow::UpdateCursorShow()
+	{
+		const bool show = m_ForceShowCursor || m_ShowCursor;
+		SDL_ShowCursor(show ? SDL_ENABLE : SDL_DISABLE);
+	}
+
 	void SDLWindow::SetWindowTitle(const char* title)
 	{
 		SDL_SetWindowTitle(m_pWindow, title);

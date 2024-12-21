@@ -19,6 +19,7 @@ namespace Glory
 		GLORY_API virtual void Resize(int width, int height) override;
 		GLORY_API virtual void GetPosition(int* x, int* y) override;
 		GLORY_API virtual void SetPosition(int x, int y) override;
+		GLORY_API virtual void SetCursorPosition(int x, int y) override;
 
 		GLORY_API virtual void SetWindowTitle(const char* title) override;
 
@@ -38,6 +39,7 @@ namespace Glory
 		virtual ~SDLWindow();
 
 		void HandleAllEvents(SDL_Event& event);
+		virtual void UpdateCursorShow() override;
 
 	private:
 		GLORY_API virtual void Open() override;
