@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <filesystem>
+#include <glm/vec2.hpp>
 
 #include "Input.h"
 #include "UUID.h"
@@ -66,13 +67,15 @@ namespace Glory
 		std::string_view InputMode();
 
 		void HandleInputEvent(InputEvent& event);
+		void HandleCursorEvent(CursorEvent& event);
 
 		/* Clears all data from actions during the current frame */
 		void ClearActions();
 
-		const float GetAxis(const std::string& inputMap, const std::string& actionName);
-		const float GetAxisDelta(const std::string& inputMap, const std::string& actionName);
-		const bool GetBool(const std::string& inputMap, const std::string& actionName);
+		const float GetAxis(const std::string& inputMap, const std::string& actionName) const;
+		const float GetAxisDelta(const std::string& inputMap, const std::string& actionName) const;
+		const bool GetBool(const std::string& inputMap, const std::string& actionName) const;
+		const glm::vec2& GetCursorPos() const;
 
 		void Unbind();
 
@@ -92,5 +95,6 @@ namespace Glory
 		std::vector<PlayerInputData> m_InputData;
 		std::vector<UUID> m_ClaimedDevices;
 		std::vector<InputDeviceType> m_ClaimedDeviceTypes;
+		glm::vec2 m_CursorPos;
 	};
 }

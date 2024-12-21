@@ -36,4 +36,10 @@ namespace Glory
 		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
 		return pInput->OnInput(input);
 	}
+
+	void Window::ForwardCursorEvent(CursorEvent& input)
+	{
+		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
+		return pInput->OnCursor(input);
+	}
 }

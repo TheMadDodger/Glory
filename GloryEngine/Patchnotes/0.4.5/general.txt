@@ -7,10 +7,12 @@ Engine:
 - Added text component
 - Added text rendering
 - Fixed incorrect scene object references in script properties when instantiating a prefab
+- InputModule now tracks cursor position for the mouse
 
 Editor:
 - Added freetype font importer
 - Added property drawer for string properties
+- Added cursor bounds to limit cursor position to game view
 
 Scripting:
 - Added CS API for text component
@@ -18,3 +20,4 @@ Scripting:
 - Fixed crash caused by automatic garbage collection
 - Removed mono object creation debug logs
 - Fixed duplicate SceneObject in Scene cs api when instantiating prefabs
+- Added CS API for getting cursor position

@@ -55,6 +55,7 @@ namespace Glory
 		virtual void PollEvents() = 0;
 
 		bool ForwardInputEvent(InputEvent& input);
+		void ForwardCursorEvent(CursorEvent& input);
 
 	protected:
 		std::string m_WindowName;
