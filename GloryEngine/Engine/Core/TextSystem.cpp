@@ -15,7 +15,7 @@ namespace Glory
 {
 	void TextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, TextComponent& pComponent)
 	{
-		if (!pComponent.m_Font) return;
+		if (!pComponent.m_Font || pComponent.m_Text.empty()) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();

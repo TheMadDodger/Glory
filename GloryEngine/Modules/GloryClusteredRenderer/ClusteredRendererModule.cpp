@@ -261,6 +261,52 @@ namespace Glory
 		pGraphics->EnableDepthWrite(true);
 	}
 
+	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, std::string_view text, const glm::vec4& color, float scale)
+	{
+		float writeX = 0.0f;
+		float writeY = 0.0f;
+
+		pMesh->ClearVertices();
+		pMesh->ClearIndices();
+
+		size_t letterCount = 0;
+		for (char c : text)
+		{
+			if (c == '\n')
+			{
+				writeY -= pFontData->FontHeight() * scale;
+				writeX = 0.0f;
+				continue;
+			}
+
+			const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+			const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
+
+			if (!glyph) continue;
+
+			const float xpos = writeX + glyph->Bearing.x * scale;
+			const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y) * scale;
+
+			const float w = glyph->Size.x * scale;
+			const float h = glyph->Size.y * scale;
+
+			VertexPosColorTex vertices[4] = {
+				{ { xpos, ypos + h, }, color, { glyph->Coords.x, glyph->Coords.y } },
+				{ { xpos, ypos, }, color, { glyph->Coords.x, glyph->Coords.w } },
+				{ { xpos + w, ypos, }, color, { glyph->Coords.z, glyph->Coords.w } },
+				{ { xpos + w, ypos + h, }, color, { glyph->Coords.z, glyph->Coords.y }, }
+			};
+
+			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[0]));
+			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
+			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
+			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
+			pMesh->AddFace(letterCount*4 + 0, letterCount*4 + 1, letterCount*4 + 2, letterCount*4 + 3);
+			++letterCount;
+			writeX += (glyph->Advance >> 6) * scale;
+		}
+	}
+
 	void ClusteredRendererModule::OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -289,46 +335,26 @@ namespace Glory
 		float writeX = 0.0f;
 		float writeY = 0.0f;
 
-		const glm::vec3 color = renderData.m_Color;
-
 		InternalTexture* pTextureData = pFontData->GetGlyphTexture();
 		if (!pTextureData) return;
 
 		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
 		if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
 
-		for (char c : renderData.m_Text)
+		auto iter = m_pTextMeshes.find(renderData.m_ObjectID);
+		const bool exists = iter != m_pTextMeshes.end();
+		if (!exists)
 		{
-			if (c == '\n')
-			{
-				writeY -= pFontData->FontHeight()*scale;
-				writeX = 0.0f;
-				continue;
-			}
-
-			const size_t glyphIndex = pFontData->GetGlyphIndex(c);
-			const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
-
-			if (!glyph) continue;
-
-			const float xpos = writeX + glyph->Bearing.x*scale;
-			const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y)*scale;
-
-			const float w = glyph->Size.x*scale;
-			const float h = glyph->Size.y*scale;
-
-			VertexPosColorTex vertices[4] = {
-				{ { xpos, ypos + h, }, color, { glyph->Coords.x, glyph->Coords.y } },
-				{ { xpos, ypos, }, color, { glyph->Coords.x, glyph->Coords.w } },
-				{ { xpos + w, ypos, }, color, { glyph->Coords.z, glyph->Coords.w } },
-				{ { xpos + w, ypos + h, }, color, { glyph->Coords.z, glyph->Coords.y }, }
-			};
-			m_pQuadMeshVertexBuffer->Assign(vertices, 4*sizeof(VertexPosColorTex));
-
-			pGraphics->DrawMesh(m_pQuadMesh, 0, 4);
-
-			writeX += (glyph->Advance >> 6)*scale;
+			MeshData* pMesh = new MeshData(renderData.m_Text.size()*4, sizeof(VertexPosColorTex),
+				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+			iter = m_pTextMeshes.emplace(renderData.m_ObjectID, pMesh).first;
 		}
+
+		if (renderData.m_TextDirty || !exists)
+			GenerateTextMesh(iter->second.get(), pFontData, renderData.m_Text, renderData.m_Color, renderData.m_Scale);
+
+		Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
+		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 
 	void ClusteredRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)
