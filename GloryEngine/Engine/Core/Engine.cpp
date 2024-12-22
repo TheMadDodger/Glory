@@ -619,6 +619,7 @@ namespace Glory
 		Reflect::RegisterEnum<CompareOp>();
 		Reflect::RegisterEnum<PipelineType>();
 		Reflect::RegisterEnum<BlurType>();
+		Reflect::RegisterEnum<Alignment>();
 
 		/* Shape types */
 		Reflect::RegisterEnum<ShapeType>();

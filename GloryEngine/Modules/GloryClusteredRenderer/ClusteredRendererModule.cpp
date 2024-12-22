@@ -261,49 +261,118 @@ namespace Glory
 		pGraphics->EnableDepthWrite(true);
 	}
 
-	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, std::string_view text, const glm::vec4& color, float scale)
+	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextRenderData& renderData)
 	{
-		float writeX = 0.0f;
-		float writeY = 0.0f;
+		const std::string_view text = renderData.m_Text;
+		const glm::vec4& color = renderData.m_Color;
+		const float scale = renderData.m_Scale;
+		const Alignment alignment = renderData.m_Alignment;
+		const float textWrap = renderData.m_TextWrap*scale;
 
 		pMesh->ClearVertices();
 		pMesh->ClearIndices();
 
-		size_t letterCount = 0;
-		for (char c : text)
-		{
-			if (c == '\n')
-			{
-				writeY -= pFontData->FontHeight() * scale;
-				writeX = 0.0f;
-				continue;
-			}
+		std::vector<std::string_view> lines;
+		std::vector<float> lineWidths;
 
-			const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+		const char* start = text.data();
+		size_t length = 0;
+		float currentLineWidth = 0.0f;
+
+		for (size_t i = 0; i < text.size(); ++i)
+		{
+			const size_t glyphIndex = pFontData->GetGlyphIndex(text[i]);
 			const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
 
 			if (!glyph) continue;
 
-			const float xpos = writeX + glyph->Bearing.x * scale;
-			const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y) * scale;
+			const float advance = (glyph->Advance >> 6)*scale;
 
-			const float w = glyph->Size.x * scale;
-			const float h = glyph->Size.y * scale;
+			if (text[i] == '\n')
+			{
+				lines.push_back(std::string_view(start, currentLineWidth));
+				lineWidths.push_back(currentLineWidth);
+				start = &text[i+1];
+				currentLineWidth = 0.0f;
+				length = 0;
+				continue;
+			}
 
-			VertexPosColorTex vertices[4] = {
-				{ { xpos, ypos + h, }, color, { glyph->Coords.x, glyph->Coords.y } },
-				{ { xpos, ypos, }, color, { glyph->Coords.x, glyph->Coords.w } },
-				{ { xpos + w, ypos, }, color, { glyph->Coords.z, glyph->Coords.w } },
-				{ { xpos + w, ypos + h, }, color, { glyph->Coords.z, glyph->Coords.y }, }
-			};
+			if (length > 0 && textWrap > 0.0f && currentLineWidth + advance >= textWrap)
+			{
+				lines.push_back(std::string_view(start, length));
+				lineWidths.push_back(currentLineWidth);
+				start = &text[i];
+				--i;
+				currentLineWidth = 0.0f;
+				length = 0;
+				continue;
+			}
 
-			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[0]));
-			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
-			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
-			pMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
-			pMesh->AddFace(letterCount*4 + 0, letterCount*4 + 1, letterCount*4 + 2, letterCount*4 + 3);
-			++letterCount;
-			writeX += (glyph->Advance >> 6) * scale;
+			++length;
+			currentLineWidth += advance;
+		}
+
+		if (length > 0)
+		{
+			lines.push_back(std::string_view(start, length));
+			lineWidths.push_back(currentLineWidth);
+		}
+
+		float writeX = 0.0f;
+		float writeY = 0.0f;
+
+		size_t letterCount = 0;
+		for (size_t i = 0; i < lines.size(); ++i)
+		{
+			const std::string_view line = lines[i];
+			const float lineWidth = lineWidths[i];
+
+			switch (alignment)
+			{
+			case Alignment::Left:
+				writeX = 0.0f;
+				break;
+			case Alignment::Center:
+				writeX = -lineWidth/2.0f;
+				break;
+			case Alignment::Right:
+				writeX = -lineWidth;
+				break;
+			default:
+				break;
+			}
+
+			for (char c : line)
+			{
+				const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+				const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
+
+				if (!glyph) continue;
+
+				const float xpos = writeX + glyph->Bearing.x*scale;
+				const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y)*scale;
+
+				const float w = glyph->Size.x*scale;
+				const float h = glyph->Size.y*scale;
+
+				VertexPosColorTex vertices[4] = {
+					{ { xpos, ypos + h, }, color, { glyph->Coords.x, glyph->Coords.y } },
+					{ { xpos, ypos, }, color, { glyph->Coords.x, glyph->Coords.w } },
+					{ { xpos + w, ypos, }, color, { glyph->Coords.z, glyph->Coords.w } },
+					{ { xpos + w, ypos + h, }, color, { glyph->Coords.z, glyph->Coords.y }, }
+				};
+
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[0]));
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
+				pMesh->AddFace(letterCount*4 + 0, letterCount*4 + 1, letterCount*4 + 2, letterCount*4 + 3);
+				++letterCount;
+				writeX += (glyph->Advance >> 6)*scale;
+			}
+
+			writeY -= pFontData->FontHeight()*scale;
 		}
 	}
 
@@ -351,7 +420,7 @@ namespace Glory
 		}
 
 		if (renderData.m_TextDirty || !exists)
-			GenerateTextMesh(iter->second.get(), pFontData, renderData.m_Text, renderData.m_Color, renderData.m_Scale);
+			GenerateTextMesh(iter->second.get(), pFontData, renderData);
 
 		Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
 		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());

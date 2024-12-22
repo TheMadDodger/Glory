@@ -13,6 +13,7 @@
 #include "AssetReference.h"
 #include "LayerRef.h"
 #include "ShapeProperty.h"
+#include "RenderData.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -157,13 +158,15 @@ namespace Glory
 	struct TextComponent
 	{
 		TextComponent() : m_Font(0), m_Text("Hello World!"), m_Scale(0.01f),
-			m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Dirty(true) {}
+			m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Alignment(Alignment::Left), m_WrapWidth(0.0f), m_Dirty(true) {}
 
 		REFLECTABLE(TextComponent,
 			(AssetReference<FontData>)(m_Font),
 			(std::string)(m_Text),
 			(float)(m_Scale),
-			(glm::vec4)(m_Color)
+			(glm::vec4)(m_Color),
+			(Alignment)(m_Alignment),
+			(float)(m_WrapWidth)
 		);
 		bool m_Dirty;
 	};
