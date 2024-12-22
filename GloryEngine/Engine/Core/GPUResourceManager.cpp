@@ -43,8 +43,21 @@ namespace Glory
 
 	Mesh* GPUResourceManager::CreateMesh(MeshData* pMeshData)
 	{
+		const bool isDirty = pMeshData->IsDirty();
+		pMeshData->SetDirty(false);
+
 		Mesh* pMesh = GetResource<Mesh>(pMeshData);
-		if (pMesh) return pMesh;
+		if (pMesh)
+		{
+			if (isDirty)
+			{
+				pMesh->m_pVertexBuffer->Assign(pMeshData->Vertices(), pMeshData->VertexCount()*pMeshData->VertexSize());
+				pMesh->m_pIndexBuffer->Assign(pMeshData->Indices(), pMeshData->IndexCount()*sizeof(uint32_t));
+				pMesh->m_VertexCount = pMeshData->VertexCount();
+				pMesh->m_IndexCount = pMeshData->IndexCount();
+			}
+			return pMesh;
+		}
 
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMesh");
 		uint32_t vertexBufferSize = pMeshData->VertexCount() * pMeshData->VertexSize();

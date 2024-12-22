@@ -127,5 +127,7 @@ namespace Glory
 		PipelineData* m_pTextPipelineData = nullptr;
 		MaterialData* m_pTextMaterialData = nullptr;
 		Material* m_pTextMaterial = nullptr;
+
+		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 	};
 }

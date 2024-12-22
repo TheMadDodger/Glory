@@ -46,6 +46,8 @@ namespace Glory
 		const GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
 		const GLuint usage = GLConverter::TO_GLBUFFERUSAGE.at(m_MemoryFlags);
 
+		m_BufferSize = size;
+
 		glBindBuffer(target, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBufferData(target, size, data, usage);
@@ -57,6 +59,8 @@ namespace Glory
 	void GLBuffer::Assign(const void* data, uint32_t offset, uint32_t size)
 	{
 		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+
+		m_BufferSize = size;
 
 		glBindBuffer(target, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());

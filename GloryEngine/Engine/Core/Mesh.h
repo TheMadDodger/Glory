@@ -26,11 +26,12 @@ namespace Glory
 		void GetNextOffset(const AttributeType& atributeType, uint32_t& offest);
 
 	protected:
+		friend class GPUResourceManager;
 		const InputRate m_InputRate;
 		const uint32_t m_Binding;
 		const uint32_t m_Stride;
-		const uint32_t m_VertexCount;
-		const uint32_t m_IndexCount;
+		uint32_t m_VertexCount;
+		uint32_t m_IndexCount;
 		const PrimitiveType m_PrimitiveType;
 		const std::vector<AttributeType> m_AttributeTypes;
 
