@@ -267,56 +267,76 @@ namespace Glory
 		const glm::vec4& color = renderData.m_Color;
 		const float scale = renderData.m_Scale;
 		const Alignment alignment = renderData.m_Alignment;
-		const float textWrap = renderData.m_TextWrap*scale;
+		const float textWrap = renderData.m_TextWrap*scale*pFontData->FontHeight();
 
 		pMesh->ClearVertices();
 		pMesh->ClearIndices();
 
-		std::vector<std::string_view> lines;
-		std::vector<float> lineWidths;
+		/* Get words */
+		std::vector<std::pair<size_t, size_t>> wordPositions;
+		size_t currentStringPos = 0;
 
-		const char* start = text.data();
-		size_t length = 0;
-		float currentLineWidth = 0.0f;
-
-		for (size_t i = 0; i < text.size(); ++i)
+		while (currentStringPos < text.size())
 		{
-			const size_t glyphIndex = pFontData->GetGlyphIndex(text[i]);
-			const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
-
-			if (!glyph) continue;
-
-			const float advance = (glyph->Advance >> 6)*scale;
-
-			if (text[i] == '\n')
+			const size_t nextSpace = text.find(' ', currentStringPos);
+			if (nextSpace == std::string::npos)
 			{
-				lines.push_back(std::string_view(start, currentLineWidth));
-				lineWidths.push_back(currentLineWidth);
-				start = &text[i+1];
-				currentLineWidth = 0.0f;
-				length = 0;
-				continue;
+				wordPositions.push_back({ currentStringPos, text.size() - currentStringPos });
+				break;
 			}
-
-			if (length > 0 && textWrap > 0.0f && currentLineWidth + advance >= textWrap)
-			{
-				lines.push_back(std::string_view(start, length));
-				lineWidths.push_back(currentLineWidth);
-				start = &text[i];
-				--i;
-				currentLineWidth = 0.0f;
-				length = 0;
-				continue;
-			}
-
-			++length;
-			currentLineWidth += advance;
+			wordPositions.push_back({ currentStringPos, nextSpace - currentStringPos });
+			currentStringPos = nextSpace + 1;
 		}
 
-		if (length > 0)
+		/* Process words into lines */
+		std::vector<std::string_view> lines;
+		std::vector<float> lineWidths;
+		size_t currentLineLength = 0;
+		float currentLineWidth = 0.0f;
+		size_t lineStart = 0;
+
+		const size_t spaceGlyphIndex = pFontData->GetGlyphIndex(' ');
+		const GlyphData* spaceGlyph = pFontData->GetGlyph(spaceGlyphIndex);
+
+		const float space = spaceGlyph ? (spaceGlyph->Advance >> 6)*scale : 0.0f;
+
+		for (size_t i = 0; i < wordPositions.size(); ++i)
 		{
-			lines.push_back(std::string_view(start, length));
-			lineWidths.push_back(currentLineWidth);
+			const std::pair<size_t, size_t>& wordPosition = wordPositions[i];
+			const std::string_view word = text.substr(wordPosition.first, wordPosition.second);
+
+			/* Calculate word width */
+			float wordWidth = 0.0f;
+			for (char c : word)
+			{
+				const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+				const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
+
+				if (!glyph) continue;
+				const float advance = (glyph->Advance >> 6)*scale;
+				wordWidth += advance;
+			}
+
+			if (currentLineLength > 0 && textWrap > 0.0f && currentLineWidth + wordWidth >= textWrap)
+			{
+				const std::string_view line = text.substr(lineStart, wordPosition.first - lineStart);
+				lines.push_back(line);
+				lineWidths.push_back(currentLineWidth);
+				lineStart = wordPosition.first;
+				currentLineWidth = 0.0f;
+				currentLineLength = 0;
+				--i;
+				continue;
+			}
+
+			currentLineWidth += wordWidth + space;
+			currentLineLength += word.length() + 1;
+		}
+
+		if (currentLineLength > 0)
+		{
+			lines.push_back(text.substr(lineStart));
+			lineWidths.push_back(currentLineWidth - space);
 		}
 
 		float writeX = 0.0f;
