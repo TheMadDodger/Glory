@@ -4,26 +4,26 @@
 
 namespace Glory
 {
-	FontData::FontData(): m_FontHeight(0)
+	FontData::FontData(): m_FontHeight(0), m_pTexture(nullptr)
 	{
 		APPEND_TYPE(FontData);
 	}
 	
 	FontData::FontData(uint32_t height, std::vector<uint64_t>&& characterCodes,
-		std::vector<GlyphData>&& chars, std::vector<InternalTexture*>&& textures):
-		m_FontHeight(height), m_CharacterCodes(std::move(characterCodes)), m_Glyphs(std::move(chars)), m_Textures(textures)
+		std::vector<GlyphData>&& chars, InternalTexture* pTexture):
+		m_FontHeight(height), m_CharacterCodes(std::move(characterCodes)), m_Glyphs(std::move(chars)), m_pTexture(pTexture)
 	{
 		APPEND_TYPE(FontData);
 	}
 
 	FontData::~FontData()
 	{
-		for (size_t i = 0; i < m_Textures.size(); ++i)
-		{
-			delete m_Textures[i];
-		}
 		m_Glyphs.clear();
-		m_Textures.clear();
+		if (m_pTexture)
+		{
+			delete m_pTexture;
+			m_pTexture = nullptr;
+		}
 	}
 
 	uint32_t FontData::FontHeight() const
@@ -44,32 +44,24 @@ namespace Glory
 		return &m_Glyphs[index];
 	}
 
-	InternalTexture* FontData::GetGlyphTexture(size_t index) const
+	InternalTexture* FontData::GetGlyphTexture() const
 	{
-		if (index >= m_Glyphs.size()) return nullptr;
-		return m_Textures[index];
+		return m_pTexture;
 	}
 
 	void FontData::Serialize(BinaryStream& container) const
 	{
-		container.Write(m_FontHeight).Write(m_Glyphs).Write(m_Textures.size());
-		for (size_t i = 0; i < m_Textures.size(); ++i)
-		{
-			m_Textures[i]->Serialize(container);
-		}
+		container.Write(m_FontHeight).Write(m_Glyphs);
+		m_pTexture->Serialize(container);
 	}
 
 	void FontData::Deserialize(BinaryStream& container)
 	{
-		size_t numTextures;
-		container.Read(m_FontHeight).Read(m_Glyphs).Read(numTextures);
-		m_Textures.resize(numTextures);
-		m_CharacterCodes.resize(numTextures);
-		for (size_t i = 0; i < m_Textures.size(); ++i)
-		{
-			if (!m_Textures[i]) m_Textures[i] = new InternalTexture();
-			m_Textures[i]->Deserialize(container);
+		container.Read(m_FontHeight).Read(m_Glyphs);
+		if (!m_pTexture) m_pTexture = new InternalTexture();
+		m_pTexture->Deserialize(container);
+		m_CharacterCodes.resize(m_Glyphs.size());
+		for (size_t i = 0; i < m_CharacterCodes.size(); ++i)
 			m_CharacterCodes[i] = m_Glyphs[i].Code;
-		}
 	}
 }

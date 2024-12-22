@@ -49,9 +49,18 @@ namespace Glory::Editor
 		FT_UInt gid;
 		charcode = FT_Get_First_Char(face, &gid);
 
+		uint32_t width = 512, height = 512;
+
+		char* texturePixels = new char[width*height];
+		std::memset(texturePixels, '\0', width * height);
+		const uint32_t padding = 4;
+		const uint32_t edgePadding = padding;
+		uint32_t writeX = edgePadding, writeY = edgePadding;
+		uint32_t highestGlyph = 0;
+
+
 		std::vector<uint64_t> characterCodes;
 		std::vector<GlyphData> glyphs;
-		std::vector<InternalTexture*> textures;
 		while (gid != 0)
 		{
 			// load character glyph 
@@ -61,31 +70,44 @@ namespace Glory::Editor
 				continue;
 			}
 
-			const size_t dataSize = face->glyph->bitmap.width * face->glyph->bitmap.rows;
-			char* pixels = new char[dataSize];
-			std::memcpy(pixels, face->glyph->bitmap.buffer, dataSize);
+			if (writeX + padding + face->glyph->bitmap.width >= width - edgePadding)
+			{
+				writeX = edgePadding;
+				writeY += highestGlyph + padding;
+				highestGlyph = 0;
+			}
+			for (size_t row = 0; row < face->glyph->bitmap.rows; ++row)
+			{
+				char* writeBuffer = &texturePixels[writeY*width + writeX + row*width];
+				unsigned char* readBuffer = &face->glyph->bitmap.buffer[row*face->glyph->bitmap.width];
+				std::memcpy(writeBuffer, readBuffer, face->glyph->bitmap.width);
+				highestGlyph = std::max(highestGlyph, face->glyph->bitmap.rows);
+			}
 
-			ImageData* pImageData = new ImageData(face->glyph->bitmap.width, face->glyph->bitmap.rows,
-				PixelFormat::PF_R, PixelFormat::PF_R, 1, std::move(pixels), face->glyph->bitmap.width * face->glyph->bitmap.rows);
-			InternalTexture* pTexture = new InternalTexture(pImageData);
-			SamplerSettings& sampler = pTexture->GetSamplerSettings();
-			sampler.MipmapMode = Filter::F_None;
+			const glm::vec4 texCoords{ float(writeX) / width, float(writeY) / height,
+				float(writeX + face->glyph->bitmap.width) / width, float(writeY + face->glyph->bitmap.rows) / height };
+			writeX += face->glyph->bitmap.width + padding;
 
 			GlyphData character = {
 				charcode,
 				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-				face->glyph->advance.x
+				face->glyph->advance.x,
+				texCoords
 			};
 
 			characterCodes.emplace_back(charcode);
 			glyphs.emplace_back(character);
-			textures.emplace_back(pTexture);
-
 			charcode = FT_Get_Next_Char(face, charcode, &gid);
 		}
 
-		FontData* pFont = new FontData(fontHeight, std::move(characterCodes), std::move(glyphs), std::move(textures));
+		ImageData* pImageData = new ImageData(width, height,
+			PixelFormat::PF_R, PixelFormat::PF_R, 1, std::move(texturePixels), width*height);
+		InternalTexture* pTexture = new InternalTexture(pImageData);
+		SamplerSettings& sampler = pTexture->GetSamplerSettings();
+		sampler.MipmapMode = Filter::F_None;
+
+		FontData* pFont = new FontData(fontHeight, std::move(characterCodes), std::move(glyphs), pTexture);
 
 		FT_Done_Face(face);
 		delete pFileData;

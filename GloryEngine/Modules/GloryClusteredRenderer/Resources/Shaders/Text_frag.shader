@@ -22,7 +22,7 @@ layout(location = 2) out vec4 outNormal;
 void main()
 {
 	float pixel = texture(texSampler, fragTexCoord).r;
-	if(pixel == 0.0) discard;
+	if(pixel < 1.0) discard;
 	outColor = pixel * inColor;
 	outNormal = vec4((inNormal.xyz + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
