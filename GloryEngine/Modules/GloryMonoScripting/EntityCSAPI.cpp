@@ -825,6 +825,33 @@ namespace Glory
 	{
 		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
 		text.m_Color = *clearCol;
+		text.m_Dirty = true;
+	}
+
+	void TextComponent_SetAlignment(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Alignment alignment)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		text.m_Alignment = alignment;
+		text.m_Dirty = true;
+	}
+
+	Alignment TextComponent_GetAlignment(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		return text.m_Alignment;
+	}
+
+	void TextComponent_SetWrapWidth(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float wrap)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		text.m_WrapWidth = wrap;
+		text.m_Dirty = true;
+	}
+
+	float TextComponent_GetWrapWidth(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		TextComponent& text = GetComponent<TextComponent>(sceneID, objectID, componentID);
+		return text.m_WrapWidth;
 	}
 
 #pragma endregion
@@ -958,6 +985,10 @@ namespace Glory
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetScale", TextComponent_SetScale);
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetColor", TextComponent_GetColor);
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetColor", TextComponent_SetColor);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetAlignment", TextComponent_SetAlignment);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetAlignment", TextComponent_GetAlignment);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_SetWrapWidth", TextComponent_SetWrapWidth);
+		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetWrapWidth", TextComponent_GetWrapWidth);
 	}
 
 	void EntityCSAPI::SetEngine(Engine* pEngine)
