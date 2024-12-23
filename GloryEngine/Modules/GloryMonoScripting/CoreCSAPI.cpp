@@ -83,29 +83,9 @@ namespace Glory
 		return Core_EngineInstance->Time().GetDeltaTime<float, std::ratio<1, 1>>();
 	}
 
-	float Time_GetGameDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetGameDeltaTime<float, std::ratio<1, 1>>();
-	}
-
-	float Time_GetGraphicsDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetGraphicsDeltaTime<float, std::ratio<1, 1>>();
-	}
-
 	float Time_GetUnscaledDeltaTime()
 	{
 		return Core_EngineInstance->Time().GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
-	}
-
-	float Time_GetUnscaledGameDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetUnscaledGameDeltaTime<float, std::ratio<1, 1>>();
-	}
-
-	float Time_GetUnscaledGraphicsDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetUnscaledGraphicsDeltaTime<float, std::ratio<1, 1>>();
 	}
 
 	float Time_GetCurrentTime()
@@ -126,11 +106,6 @@ namespace Glory
 	int Time_GetTotalFrames()
 	{
 		return Core_EngineInstance->Time().GetTotalFrames();
-	}
-
-	int Time_GetTotalGameFrames()
-	{
-		return Core_EngineInstance->Time().GetTotalGameFrames();
 	}
 
 	float Time_GetTimeScale()
@@ -599,16 +574,11 @@ namespace Glory
 
 		// Time
 		BIND("GloryEngine.Time::Time_GetDeltaTime", Time_GetDeltaTime);
-		BIND("GloryEngine.Time::Time_GetGameDeltaTime", Time_GetGameDeltaTime);
-		BIND("GloryEngine.Time::Time_GetGraphicsDeltaTime", Time_GetGraphicsDeltaTime);
 		BIND("GloryEngine.Time::Time_GetUnscaledDeltaTime", Time_GetUnscaledDeltaTime);
-		BIND("GloryEngine.Time::Time_GetUnscaledGameDeltaTime", Time_GetUnscaledGameDeltaTime);
-		BIND("GloryEngine.Time::Time_GetUnscaledGraphicsDeltaTime", Time_GetUnscaledGraphicsDeltaTime);
 		BIND("GloryEngine.Time::Time_GetCurrentTime", Time_GetCurrentTime);
 		BIND("GloryEngine.Time::Time_GetUnscaledTime", Time_GetUnscaledTime);
 		BIND("GloryEngine.Time::Time_GetFrameRate", Time_GetFrameRate);
 		BIND("GloryEngine.Time::Time_GetTotalFrames", Time_GetTotalFrames);
-		BIND("GloryEngine.Time::Time_GetTotalGameFrames", Time_GetTotalGameFrames);
 		BIND("GloryEngine.Time::Time_SetTimeScale", Time_SetTimeScale);
 		BIND("GloryEngine.Time::Time_GetTimeScale", Time_GetTimeScale);
 

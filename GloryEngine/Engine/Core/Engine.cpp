@@ -35,9 +35,9 @@
 #include "ShaderManager.h"
 #include "GameTime.h"
 #include "BinaryStream.h"
+#include "RenderData.h"
 
 #include "IModuleLoopHandler.h"
-#include "GraphicsThread.h"
 #include "ResourceLoaderModule.h"
 
 #include "TimerModule.h"
@@ -193,16 +193,6 @@ namespace Glory
 		return m_pLoaderModules[loaderIndex];
 	}
 
-	GraphicsThread* Engine::GetGraphicsThread() const
-	{
-		return m_pGraphicsThread;
-	}
-
-	void Engine::StartThreads()
-	{
-		m_pGraphicsThread->Start();
-	}
-
 	void Engine::UpdateSceneManager()
 	{
 		m_pSceneManager->Update();
@@ -215,7 +205,7 @@ namespace Glory
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pSceneManager(createInfo.pSceneManager), m_pThreadManager(ThreadManager::GetInstance()),
-		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
+		m_pJobManager(Jobs::JobManager::GetInstance()), m_Reflection(new Reflect),
 		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
@@ -302,9 +292,6 @@ namespace Glory
 		m_AssetDatabase->Initialize();
 		m_pAssetsManager->Initialize();
 
-		/* Create graphics thread */
-		m_pGraphicsThread = new GraphicsThread(this);
-
 		/* Run Post Initialize */
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
@@ -336,7 +323,6 @@ namespace Glory
 		if (!m_Initialized) return;
 
 		m_AssetDatabase->Destroy();
-		m_pGraphicsThread->Stop();
 		m_pJobManager->Kill();
 		m_pThreadManager->Destroy();
 
@@ -359,9 +345,6 @@ namespace Glory
 		m_TypeToLoader.clear();
 		m_TypeHashToLoader.clear();
 		m_pLoaderModules.clear();
-
-		delete m_pGraphicsThread;
-		m_pGraphicsThread = nullptr;
 
 		m_Initialized = false;
 	}
@@ -635,14 +618,14 @@ namespace Glory
 
 	void Engine::Update()
 	{
-		GameThreadFrameStart();
+		BeginFrame();
 		m_Console->Update();
 		WindowModule* pWindows = GetMainModule<WindowModule>();
 		if (pWindows) pWindows->PollEvents();
 		m_pSceneManager->Update();
 		m_pSceneManager->Draw();
 		ModulesLoop();
-		GameThreadFrameEnd();
+		EndFrame();
 	}
 
 	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
@@ -658,19 +641,19 @@ namespace Glory
 		}
 	}
 
-	void Engine::GameThreadFrameStart()
+	void Engine::BeginFrame()
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
-			m_pAllModules[i]->OnGameThreadFrameStart();
+			m_pAllModules[i]->OnBeginFrame();
 		}
 	}
 
-	void Engine::GameThreadFrameEnd()
+	void Engine::EndFrame()
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
-			m_pAllModules[i]->OnGameThreadFrameEnd();
+			m_pAllModules[i]->OnEndFrame();
 		}
 	}
 
@@ -722,22 +705,6 @@ namespace Glory
 			std::filesystem::path settingsFilePath = overrideRootPath;
 			settingsFilePath.append(moduleMetaData.Name() + ".yaml");
 			pModule->LoadSettings(settingsFilePath);
-		}
-	}
-
-	void Engine::GraphicsThreadFrameStart()
-	{
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->OnGraphicsThreadFrameStart();
-		}
-	}
-
-	void Engine::GraphicsThreadFrameEnd()
-	{
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->OnGraphicsThreadFrameEnd();
 		}
 	}
 }

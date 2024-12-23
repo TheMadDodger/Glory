@@ -128,6 +128,47 @@ namespace Glory
 		m_pSSAOMaterial = new InternalMaterial(m_pSSAOPipeline);
 		m_pSSAOBlurMaterial = new InternalMaterial(m_pSSAOBlurPipeline);
 		m_pTextMaterialData = new InternalMaterial(m_pTextPipelineData);
+
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
+		m_pScreenToViewSSBO->Assign(NULL);
+
+		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+		m_pLightsSSBO->Assign(NULL);
+
+		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
+		m_pSSAOSettingsSSBO->Assign(NULL);
+
+		GenerateDomeSamplePointsSSBO(pResourceManager, 64);
+
+		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
+		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
+		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
+		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
+		m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
+
+		uint32_t vertexBufferSize = 4 * sizeof(VertexPosColorTex);
+		uint32_t indexBufferSize = 6 * sizeof(uint32_t);
+		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+
+		uint32_t indices[6] = {
+			0, 1, 2,
+			2, 3, 0
+		};
+		VertexPosColorTex defaultVertices[4] = {
+			{{-1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+			{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+			{{1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+			{{1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+		};
+
+		m_pQuadMeshIndexBuffer->Assign(indices, 6 * sizeof(uint32_t));
+		m_pQuadMeshVertexBuffer->Assign(defaultVertices, 4 * sizeof(VertexPosColorTex));
+		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
+			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
 	}
 
 	void ClusteredRendererModule::Cleanup()
@@ -184,55 +225,6 @@ namespace Glory
 		delete m_pSSAOBlurFragShader;
 		delete m_pTextVertShader;
 		delete m_pTextFragShader;
-	}
-
-	void ClusteredRendererModule::OnThreadedInitialize()
-	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-
-		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
-		m_pScreenToViewSSBO->Assign(NULL);
-
-		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
-		m_pLightsSSBO->Assign(NULL);
-
-		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
-		m_pSSAOSettingsSSBO->Assign(NULL);
-
-		GenerateDomeSamplePointsSSBO(pResourceManager, 64);
-
-		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
-		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
-		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
-		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
-		m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
-
-		uint32_t vertexBufferSize = 4*sizeof(VertexPosColorTex);
-		uint32_t indexBufferSize = 6*sizeof(uint32_t);
-		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
-		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
-
-		uint32_t indices[6] = {
-			0, 1, 2,
-			2, 3, 0
-		};
-		VertexPosColorTex defaultVertices[4] = {
-			{{-1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-			{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-			{{1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-			{{1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-		};
-
-		m_pQuadMeshIndexBuffer->Assign(indices, 6*sizeof(uint32_t));
-		m_pQuadMeshVertexBuffer->Assign(defaultVertices, 4*sizeof(VertexPosColorTex));
-		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
-			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
-	}
-
-	void ClusteredRendererModule::OnThreadedCleanup()
-	{
-
 	}
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights)

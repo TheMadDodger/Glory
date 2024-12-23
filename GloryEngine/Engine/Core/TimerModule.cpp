@@ -2,30 +2,17 @@
 
 namespace Glory
 {
-	void TimerModule::OnGameThreadFrameStart()
+	void TimerModule::OnBeginFrame()
 	{
-		m_CurrentGameThreadFrameStart = std::chrono::steady_clock::now();
+		m_CurrentFrameStart = std::chrono::steady_clock::now();
 	}
 
-	void TimerModule::OnGameThreadFrameEnd()
+	void TimerModule::OnEndFrame()
 	{
-		m_LastGameThreadFrameEnd = std::chrono::steady_clock::now();
-		m_LastGameThreadFrameStart = m_CurrentGameThreadFrameStart;
+		m_LastFrameEnd = std::chrono::steady_clock::now();
+		m_LastFrameStart = m_CurrentFrameStart;
 
-		++m_TotalGameFrames;
-	}
-
-	void TimerModule::OnGraphicsThreadFrameStart()
-	{
-		m_CurrentGraphicsThreadFrameStart = std::chrono::steady_clock::now();
-	}
-
-	void TimerModule::OnGraphicsThreadFrameEnd()
-	{
-		m_LastGraphicsThreadFrameEnd = std::chrono::steady_clock::now();
-		m_LastGraphicsThreadFrameStart = m_CurrentGraphicsThreadFrameStart;
-
-		++m_TotalGraphicsFrames;
+		++m_TotalFrames;
 	}
 
 	float TimerModule::CalculateTime(bool unscaled)

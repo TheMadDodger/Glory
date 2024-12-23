@@ -54,13 +54,10 @@ namespace Glory
 		GLORY_RUNTIME_API void SetFramerateLimit(float limit);
 
 	private:
-		/** @brief Callback when the rendering of a frame starts */
-		void GraphicsThreadBeginRender() {}
-		/** @brief Callback when the rendering of a frame ends */
-		void GraphicsThreadEndRender();
+		/** @brief End of a frame */
+		void EndFrame();
 
 	private:
-		friend class GraphicsThread;
 		Engine* m_pEngine;
 		RendererModule* m_pRenderer;
 		GraphicsModule* m_pGraphics;

@@ -20,10 +20,8 @@ namespace Glory
     private:
         virtual void Initialize() override;
         virtual void Cleanup() override;
-        void OnGameThreadFrameStart() override;
-        void OnGameThreadFrameEnd() override;
-        void OnGraphicsThreadFrameStart() override;
-        void OnGraphicsThreadFrameEnd() override;
+        void OnBeginFrame() override;
+        void OnEndFrame() override;
 
     private:
         float CalculateTime(bool unscaled);
@@ -32,18 +30,12 @@ namespace Glory
         friend class GameTime;
 
         float m_TimeScale = 1.0f;
-        int m_TotalGameFrames = 0;
-        int m_TotalGraphicsFrames = 0;
+        int m_TotalFrames = 0;
 
     private:
-        std::chrono::time_point<std::chrono::steady_clock> m_CurrentGameThreadFrameStart;
-        std::chrono::time_point<std::chrono::steady_clock> m_LastGameThreadFrameStart;
-        std::chrono::time_point<std::chrono::steady_clock> m_LastGameThreadFrameEnd;
-
-        std::chrono::time_point<std::chrono::steady_clock> m_CurrentGraphicsThreadFrameStart;
-        std::chrono::time_point<std::chrono::steady_clock> m_LastGraphicsThreadFrameStart;
-        std::chrono::time_point<std::chrono::steady_clock> m_LastGraphicsThreadFrameEnd;
-
+        std::chrono::time_point<std::chrono::steady_clock> m_CurrentFrameStart;
+        std::chrono::time_point<std::chrono::steady_clock> m_LastFrameStart;
+        std::chrono::time_point<std::chrono::steady_clock> m_LastFrameEnd;
         std::chrono::time_point<std::chrono::steady_clock> m_AppStart;
     };
 }

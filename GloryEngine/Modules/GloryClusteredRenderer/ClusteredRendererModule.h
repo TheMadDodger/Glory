@@ -45,10 +45,7 @@ namespace Glory
 
 	private:
 		virtual void Cleanup() override;
-		virtual void OnPostInitialize() override;
-
-		virtual void OnThreadedInitialize() override;
-		virtual void OnThreadedCleanup() override;
+		virtual void OnPostInitialize() override;;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;

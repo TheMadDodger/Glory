@@ -30,8 +30,6 @@ namespace Glory
 	protected:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
-		virtual void ThreadedCleanup() override;
-		virtual void ThreadedInitialize() override;
 		virtual GPUResourceManager* CreateGPUResourceManager() override;
 
 	private:

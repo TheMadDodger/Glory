@@ -88,11 +88,6 @@ namespace Glory
 		virtual void OnBeginFrame() {};
 		virtual void OnEndFrame() {};
 
-		virtual void OnGameThreadFrameStart() {};
-		virtual void OnGameThreadFrameEnd() {};
-		virtual void OnGraphicsThreadFrameStart() {};
-		virtual void OnGraphicsThreadFrameEnd() {};
-
 		virtual void Update() {};
 		virtual void Draw() {};
 

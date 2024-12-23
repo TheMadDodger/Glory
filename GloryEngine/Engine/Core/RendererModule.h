@@ -40,8 +40,7 @@ namespace Glory
 		void Submit(CameraRef camera, RenderTexture* pTexture);
 		void Submit(PointLight&& light);
 
-		void OnGameThreadFrameStart();
-		void OnGameThreadFrameEnd();
+		virtual void OnBeginFrame() override;
 
 		virtual void CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures);
 		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos);
@@ -80,7 +79,6 @@ namespace Glory
 		virtual void OnSubmit(const PointLight& light) {}
 
 	protected:
-		friend class GraphicsThread;
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
@@ -89,10 +87,7 @@ namespace Glory
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 
-		virtual void OnInitialize() {};
 		virtual void OnPostInitialize() {};
-		virtual void OnThreadedInitialize() {}
-		virtual void OnThreadedCleanup() {}
 
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
@@ -104,15 +99,13 @@ namespace Glory
 
 	private:
 		// Run on Graphics Thread
-		void ThreadedInitialize();
-		void ThreadedCleanup();
-		void Render(const RenderFrame& frame);
+		void Render();
 		void DoPicking(const glm::ivec2& pos, CameraRef camera);
 		void CreateLineBuffer();
 		void RenderLines(CameraRef camera);
 
 	private:
-		RenderFrame m_CurrentPreparingFrame;
+		RenderFrame m_FrameData;
 		size_t m_LastSubmittedObjectCount;
 		size_t m_LastSubmittedCameraCount;
 

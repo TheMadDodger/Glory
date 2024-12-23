@@ -35,8 +35,6 @@ namespace Glory
     protected:
         virtual void OnInitialize() = 0;
         virtual void OnCleanup() = 0;
-        virtual void ThreadedInitialize() {}
-        virtual void ThreadedCleanup();
 
         virtual void OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset = 0, uint32_t vertexCount = 0) = 0;
 
@@ -44,14 +42,12 @@ namespace Glory
 
     private:
         virtual void Initialize() override;
-        virtual void PostInitialize() override;
         virtual void Cleanup() override;
 
-        virtual void OnGraphicsThreadFrameStart() override;
-        virtual void OnGraphicsThreadFrameEnd() override;
+        virtual void OnBeginFrame() override;
+        virtual void OnEndFrame() override;
 
     private:
-        friend class GraphicsThread;
         GPUResourceManager* m_pResourceManager;
 
         int m_CurrentDrawCalls;

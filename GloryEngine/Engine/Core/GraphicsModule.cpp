@@ -1,5 +1,4 @@
 #include "GraphicsModule.h"
-#include "GraphicsThread.h"
 #include "Engine.h"
 
 namespace Glory
@@ -54,37 +53,28 @@ namespace Glory
 		return m_pResourceManager;
 	}
 
-	void GraphicsModule::ThreadedCleanup()
-	{
-		delete m_pResourceManager;
-		m_pResourceManager = nullptr;
-	}
-
 	void GraphicsModule::Initialize()
 	{
 		m_pResourceManager = CreateGPUResourceManager();
 		OnInitialize();
 	}
 
-	void GraphicsModule::PostInitialize()
-	{
-		/* Bind to graphics thread */
-		m_pEngine->GetGraphicsThread()->BindNoRender(this);
-	}
-
 	void GraphicsModule::Cleanup()
 	{
 		OnCleanup();
+
+		delete m_pResourceManager;
+		m_pResourceManager = nullptr;
 	}
 
-	void GraphicsModule::OnGraphicsThreadFrameStart()
+	void GraphicsModule::OnBeginFrame()
 	{
 		m_CurrentDrawCalls = 0;
 		m_CurrentVertices = 0;
 		m_CurrentTriangles = 0;
 	}
 
-	void GraphicsModule::OnGraphicsThreadFrameEnd()
+	void GraphicsModule::OnEndFrame()
 	{
 		m_LastDrawCalls = m_CurrentDrawCalls;
 		m_LastVertices = m_CurrentVertices;

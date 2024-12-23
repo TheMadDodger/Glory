@@ -8,7 +8,6 @@
 #include "WindowModule.h"
 #include "SceneManager.h"
 #include "GraphicsModule.h"
-#include "GraphicsThread.h"
 #include "Engine.h"
 #include "InternalMaterial.h"
 #include "InternalPipeline.h"
@@ -42,50 +41,50 @@ namespace Glory
 	void RendererModule::Submit(RenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(RenderData)" };
-		const size_t index = m_CurrentPreparingFrame.ObjectsToRender.size();
-		m_CurrentPreparingFrame.ObjectsToRender.push_back(std::move(renderData));
-		OnSubmit(m_CurrentPreparingFrame.ObjectsToRender[index]);
+		const size_t index = m_FrameData.ObjectsToRender.size();
+		m_FrameData.ObjectsToRender.push_back(std::move(renderData));
+		OnSubmit(m_FrameData.ObjectsToRender[index]);
 	}
 
 	void RendererModule::Submit(TextRenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(TextRenderData)" };
-		const size_t index = m_CurrentPreparingFrame.TextsToRender.size();
-		m_CurrentPreparingFrame.TextsToRender.push_back(std::move(renderData));
-		OnSubmit(m_CurrentPreparingFrame.TextsToRender[index]);
+		const size_t index = m_FrameData.TextsToRender.size();
+		m_FrameData.TextsToRender.push_back(std::move(renderData));
+		OnSubmit(m_FrameData.TextsToRender[index]);
 	}
 
 	void RendererModule::SubmitLate(RenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(RenderData)" };
-		const size_t index = m_CurrentPreparingFrame.ObjectsToRenderLate.size();
-		m_CurrentPreparingFrame.ObjectsToRenderLate.push_back(std::move(renderData));
-		OnSubmit(m_CurrentPreparingFrame.ObjectsToRenderLate[index]);
+		const size_t index = m_FrameData.ObjectsToRenderLate.size();
+		m_FrameData.ObjectsToRenderLate.push_back(std::move(renderData));
+		OnSubmit(m_FrameData.ObjectsToRenderLate[index]);
 	}
 
 	void RendererModule::Submit(CameraRef camera)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(camera)" };
-		auto it = std::find_if(m_CurrentPreparingFrame.ActiveCameras.begin(), m_CurrentPreparingFrame.ActiveCameras.end(), [camera, this](const CameraRef& other)
+		auto it = std::find_if(m_FrameData.ActiveCameras.begin(), m_FrameData.ActiveCameras.end(), [camera, this](const CameraRef& other)
 		{
 			return camera.GetPriority() < other.GetPriority();
 		});
 
-		if (it != m_CurrentPreparingFrame.ActiveCameras.end())
+		if (it != m_FrameData.ActiveCameras.end())
 		{
-			m_CurrentPreparingFrame.ActiveCameras.insert(it, camera);
+			m_FrameData.ActiveCameras.insert(it, camera);
 			OnSubmit(camera);
 			return;
 		}
 
-		m_CurrentPreparingFrame.ActiveCameras.push_back(camera);
+		m_FrameData.ActiveCameras.push_back(camera);
 		OnSubmit(camera);
 	}
 
 	size_t RendererModule::Submit(const glm::ivec2& pickPos, UUID cameraID)
 	{
-		const size_t index = m_CurrentPreparingFrame.Picking.size();
-		m_CurrentPreparingFrame.Picking.push_back({ pickPos, cameraID });
+		const size_t index = m_FrameData.Picking.size();
+		m_FrameData.Picking.push_back({ pickPos, cameraID });
 		return index;
 	}
 
@@ -96,32 +95,19 @@ namespace Glory
 	void RendererModule::Submit(PointLight&& light)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
-		const size_t index = m_CurrentPreparingFrame.ActiveLights.count();
-		m_CurrentPreparingFrame.ActiveLights.push_back(std::move(light));
-		OnSubmit(m_CurrentPreparingFrame.ActiveLights[index]);
+		const size_t index = m_FrameData.ActiveLights.count();
+		m_FrameData.ActiveLights.push_back(std::move(light));
+		OnSubmit(m_FrameData.ActiveLights[index]);
 	}
 
-	void RendererModule::OnGameThreadFrameStart()
+	void RendererModule::OnBeginFrame()
 	{
 		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
 		REQUIRE_MODULE(m_pEngine, RendererModule, );
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
-		m_CurrentPreparingFrame = RenderFrame{};
-
-		/* Stall if the queue is full */
-		while (m_pEngine->GetGraphicsThread()->GetRenderQueue()->IsFull()) {}
-	}
-
-	void RendererModule::OnGameThreadFrameEnd()
-	{
-		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
-		REQUIRE_MODULE(m_pEngine, RendererModule, );
-		REQUIRE_MODULE(m_pEngine, WindowModule, );
-
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::EndFrame" };
-		m_pEngine->GetGraphicsThread()->GetRenderQueue()->EnqueueFrame(std::move(m_CurrentPreparingFrame));
+		m_FrameData = RenderFrame{};
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -305,11 +291,12 @@ namespace Glory
 
 	void RendererModule::PostInitialize()
 	{
-		m_pEngine->GetGraphicsThread()->BindForDraw(this);
+		m_pEngine->GetDisplayManager().Initialize(m_pEngine);
+		CreateLineBuffer();
 		OnPostInitialize();
 	}
 
-	void RendererModule::Render(const RenderFrame& frame)
+	void RendererModule::Render()
 	{
 		if (m_DisplaysDirty)
 		{
@@ -324,54 +311,54 @@ namespace Glory
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
 		m_pEngine->GetDisplayManager().ClearAllDisplays(m_pEngine);
 
-		for (size_t i = 0; i < frame.ActiveCameras.size(); ++i)
+		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
 		{
-			CameraRef camera = frame.ActiveCameras[i];
+			CameraRef camera = m_FrameData.ActiveCameras[i];
 
 			RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 			pRenderTexture->BindForDraw();
 			m_pEngine->GetMainModule<GraphicsModule>()->Clear(camera.GetClearColor());
 
-			OnStartCameraRender(camera, frame.ActiveLights);
+			OnStartCameraRender(camera, m_FrameData.ActiveLights);
 
-			for (size_t j = 0; j < frame.ObjectsToRender.size(); ++j)
+			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				LayerMask mask = camera.GetLayerMask();
-				if (mask != 0 && (mask & frame.ObjectsToRender[j].m_LayerMask) == 0) continue;
+				if (mask != 0 && (mask & m_FrameData.ObjectsToRender[j].m_LayerMask) == 0) continue;
 				m_pEngine->Profiler().BeginSample("RendererModule::OnRender");
-				OnRender(camera, frame.ObjectsToRender[j]);
+				OnRender(camera, m_FrameData.ObjectsToRender[j]);
 				m_pEngine->Profiler().EndSample();
 			}
 
-			for (size_t j = 0; j < frame.TextsToRender.size(); ++j)
+			for (size_t j = 0; j < m_FrameData.TextsToRender.size(); ++j)
 			{
 				LayerMask mask = camera.GetLayerMask();
-				if (mask != 0 && (mask & frame.TextsToRender[j].m_LayerMask) == 0) continue;
+				if (mask != 0 && (mask & m_FrameData.TextsToRender[j].m_LayerMask) == 0) continue;
 				m_pEngine->Profiler().BeginSample("RendererModule::OnRender rendering text object");
-				OnRender(camera, frame.TextsToRender[j]);
+				OnRender(camera, m_FrameData.TextsToRender[j]);
 				m_pEngine->Profiler().EndSample();
 			}
 
 			/* Picking? */
-			for (size_t j = 0; j < frame.Picking.size(); ++j)
+			for (size_t j = 0; j < m_FrameData.Picking.size(); ++j)
 			{
-				const auto& picking = frame.Picking[j];
+				const auto& picking = m_FrameData.Picking[j];
 				if (picking.second != camera.GetUUID()) continue;
 				DoPicking(picking.first, camera);
 			}
 			
 			pRenderTexture->BindForDraw();
-			for (size_t j = 0; j < frame.ObjectsToRenderLate.size(); ++j)
+			for (size_t j = 0; j < m_FrameData.ObjectsToRenderLate.size(); ++j)
 			{
 				LayerMask mask = camera.GetLayerMask();
-				if (mask != 0 && (mask & frame.ObjectsToRenderLate[j].m_LayerMask) == 0) continue;
+				if (mask != 0 && (mask & m_FrameData.ObjectsToRenderLate[j].m_LayerMask) == 0) continue;
 				m_pEngine->Profiler().BeginSample("RendererModule::OnRender with late render object");
-				OnRender(camera, frame.ObjectsToRenderLate[j]);
+				OnRender(camera, m_FrameData.ObjectsToRenderLate[j]);
 				m_pEngine->Profiler().EndSample();
 			}
 
 			RenderLines(camera);
-			OnEndCameraRender(camera, frame.ActiveLights);
+			OnEndCameraRender(camera, m_FrameData.ActiveLights);
 			pRenderTexture->UnBindForDraw();
 			OnRenderEffects(camera, pRenderTexture);
 
@@ -390,7 +377,7 @@ namespace Glory
 
 				m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
 				pOutputTexture->BindForDraw();
-				OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
+				OnDoScreenRender(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
 				pOutputTexture->UnBindForDraw();
 				m_pEngine->Profiler().EndSample();
 			}
@@ -407,13 +394,13 @@ namespace Glory
 
 			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Display Rendering");
 			pDisplayRenderTexture->BindForDraw();
-			OnDoScreenRender(camera, frame.ActiveLights, width, height, pRenderTexture);
+			OnDoScreenRender(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
 			pDisplayRenderTexture->UnBindForDraw();
 			m_pEngine->Profiler().EndSample();
 		}
 
-		m_LastSubmittedObjectCount = frame.ObjectsToRender.size();
-		m_LastSubmittedCameraCount = frame.ActiveCameras.size();
+		m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
+		m_LastSubmittedCameraCount = m_FrameData.ActiveCameras.size();
 
 		std::scoped_lock lock(m_PickLock);
 		m_LastFramePickResults.resize(m_PickResults.size());
@@ -537,17 +524,6 @@ namespace Glory
 	void RendererModule::Draw()
 	{
 		m_pEngine->GetDebug().SubmitLines(this, &m_pEngine->Time());
-	}
-
-	void RendererModule::ThreadedInitialize()
-	{
-		m_pEngine->GetDisplayManager().Initialize(m_pEngine);
-		CreateLineBuffer();
-		OnThreadedInitialize();
-	}
-
-	void RendererModule::ThreadedCleanup()
-	{
-		OnThreadedCleanup();
+		Render();
 	}
 }
