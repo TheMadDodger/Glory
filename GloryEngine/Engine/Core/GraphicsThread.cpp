@@ -1,9 +1,9 @@
 #include "GraphicsThread.h"
 #include "ThreadManager.h"
 #include "Engine.h"
-#include "FrameStates.h"
 #include "WindowModule.h"
 #include "RendererModule.h"
+#include "GraphicsModule.h"
 
 namespace Glory
 {
@@ -103,13 +103,10 @@ namespace Glory
 	{
 		for (size_t i = 0; i < m_BeginRenderBinds.size(); i++) m_BeginRenderBinds[i]();
 		m_pEngine->GraphicsThreadFrameStart();
-		FrameStates* pFrameStates = m_pEngine->GetMainModule<GraphicsModule>()->GetFrameStates();
-		pFrameStates->OnFrameStart();
 		for (size_t i = 0; i < m_RenderBinds.size(); i++)
 		{
 			m_RenderBinds[i](frame);
 		}
-		pFrameStates->OnFrameEnd();
 		m_pEngine->GraphicsThreadFrameEnd();
 		for (size_t i = 0; i < m_EndRenderBinds.size(); i++) m_EndRenderBinds[i]();
 	}

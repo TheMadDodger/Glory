@@ -4,8 +4,6 @@
 
 namespace Glory
 {
-    class FrameStates;
-
     class GraphicsModule : public Module
     {
     public:
@@ -32,7 +30,6 @@ namespace Glory
         virtual void Blit(RenderTexture* pTexture) = 0;
 
     public: // Getters
-        FrameStates* GetFrameStates();
         GPUResourceManager* GetResourceManager();
 
     protected:
@@ -43,7 +40,6 @@ namespace Glory
 
         virtual void OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset = 0, uint32_t vertexCount = 0) = 0;
 
-        virtual FrameStates* CreateFrameStates();
         virtual GPUResourceManager* CreateGPUResourceManager() = 0;
 
     private:
@@ -56,7 +52,6 @@ namespace Glory
 
     private:
         friend class GraphicsThread;
-        FrameStates* m_pFrameStates;
         GPUResourceManager* m_pResourceManager;
 
         int m_CurrentDrawCalls;
