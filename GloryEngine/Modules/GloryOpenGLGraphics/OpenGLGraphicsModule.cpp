@@ -30,28 +30,7 @@ namespace Glory
 	void OpenGLGraphicsModule::OnInitialize()
 	{
 		EngineInstance = m_pEngine;
-	}
 
-	void OpenGLGraphicsModule::OnCleanup()
-	{
-	}
-
-	void OpenGLGraphicsModule::ThreadedCleanup()
-	{
-		glDeleteVertexArrays(1, &m_ScreenQuadVertexArrayID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glDeleteBuffers(1, &m_ScreenQuadVertexbufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		m_ScreenQuadVertexArrayID = 0;
-		m_ScreenQuadVertexbufferID = 0;
-
-		GraphicsModule::ThreadedCleanup();
-		GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->CleanupOpenGL();
-		LogGLError(glGetError());
-	}
-
-	void OpenGLGraphicsModule::ThreadedInitialize()
-	{
 		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
 		LogGLError(glGetError());
@@ -145,6 +124,19 @@ namespace Glory
 		LogGLError(glGetError());
 
 		glBindVertexArray(NULL);
+		LogGLError(glGetError());
+	}
+
+	void OpenGLGraphicsModule::OnCleanup()
+	{
+		glDeleteVertexArrays(1, &m_ScreenQuadVertexArrayID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glDeleteBuffers(1, &m_ScreenQuadVertexbufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		m_ScreenQuadVertexArrayID = 0;
+		m_ScreenQuadVertexbufferID = 0;
+
+		GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->CleanupOpenGL();
 		LogGLError(glGetError());
 	}
 

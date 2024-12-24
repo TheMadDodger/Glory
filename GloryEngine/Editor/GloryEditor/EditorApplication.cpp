@@ -11,7 +11,6 @@
 #include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
 
-#include <GraphicsThread.h>
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
@@ -118,9 +117,6 @@ namespace Glory::Editor
 		/* @fixme There is a better place for this */
 		m_pEngine->GetSceneManager()->ComponentTypesInstance();
 
-		m_pEngine->StartThreads();
-		m_Platform.SetState(Idle);
-
 		m_Running = true;
 		if (m_Platform.m_Windowless)
 		{
@@ -138,7 +134,7 @@ namespace Glory::Editor
 				m_ShaderProcessor->RunCallbacks();
 
 				// Start a frame
-				m_pEngine->GameThreadFrameStart();
+				m_pEngine->BeginFrame();
 
 				// Update console
 				m_pEngine->GetConsole().Update();
@@ -155,7 +151,7 @@ namespace Glory::Editor
 				m_pEngine->ModulesLoop(&m_Player);
 
 				// End the current frame
-				m_pEngine->GameThreadFrameEnd();
+				m_pEngine->EndFrame();
 			}
 			return;
 		}
@@ -167,9 +163,6 @@ namespace Glory::Editor
 
 			EditorAssetsWatcher::RunCallbacks();
 
-			/* We must wait for graphics to initialize */
-			if (!m_pEngine->GetGraphicsThread()->IsInitialized()) continue;
-
 			/* Run asset callbacks */
 			m_AssetManager->RunCallbacks();
 
@@ -177,7 +170,8 @@ namespace Glory::Editor
 			m_ShaderProcessor->RunCallbacks();
 
 			// Start a frame
-			m_pEngine->GameThreadFrameStart();
+			m_pEngine->BeginFrame();
+
 			// Update console
 			m_pEngine->GetConsole().Update();
 
@@ -193,26 +187,24 @@ namespace Glory::Editor
 			/* Update editor extensions */
 			UpdateExtensions();
 
+			/* Tick the player */
 			m_Player.Tick(m_pEngine);
 
 			// Update engine (this also does the render loop)
 			m_pEngine->ModulesLoop(&m_Player);
 
-			// End the current frame
-			m_pEngine->GameThreadFrameEnd();
+			/* End the current frame */
+			m_pEngine->EndFrame();
 
-			// We need to wait for the frame to start its rendering
-			m_Platform.Wait(Begin);
-			// Render the editor (imgui calls)
-			RenderEditor();
 			/* Run API callbacks */
 			GloryAPI::RunRequests();
-			// Now we notify the editor platform it can perform rendering
-			m_Platform.SetState(Idle);
-			// Wait for the end of rendering
-			m_Platform.Wait(End);
-			// Sync
-			m_Platform.SetState(Idle);
+
+			/* Begin an ImGui frame */
+			m_Platform.BeginFrame();
+			/* Paint the editor(imgui calls) */
+			RenderEditor();
+			/* Render the ImGui frame */
+			m_Platform.EndFrame();
 		}
 	}
 

@@ -10,15 +10,6 @@ namespace Glory
 
 namespace Editor
 {
-
-	enum EditorRenderState
-	{
-		Initializing,
-		Idle,
-		Begin,
-		End,
-	};
-
 	class EditorRenderImpl;
 	class EditorWindowImpl;
 
@@ -29,17 +20,14 @@ namespace Editor
 		virtual ~EditorPlatform();
 
 		void Initialize(Engine* pEngine);
-		void ThreadedInitialize();
 		bool PollEvents();
 		void Destroy();
-
-		void Wait(const EditorRenderState& waitState);
 
 		GLORY_EDITOR_API EditorWindowImpl* GetWindowImpl();
 		GLORY_EDITOR_API EditorRenderImpl* GetRenderImpl();
 
-		void GraphicsThreadBeginRender();
-		void GraphicsThreadEndRender();
+		void BeginFrame();
+		void EndFrame();
 
 		static ImFont* LargeFont;
 
@@ -50,16 +38,11 @@ namespace Editor
 
 		void LoadFonts();
 
-		void SetState(const EditorRenderState& state);
-
 	private:
-		friend class GraphicsThread;
 		friend class EditorApplication;
 		EditorWindowImpl* m_pWindowImpl;
 		EditorRenderImpl* m_pRenderImpl;
 
-		std::mutex m_Mutex;
-		EditorRenderState m_RenderState;
 		ImGuiContext* m_pImguiConext;
 		bool m_Windowless;
 

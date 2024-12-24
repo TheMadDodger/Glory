@@ -18,7 +18,6 @@ namespace Utils::Reflect
 
 	class Module;
 	class IModuleLoopHandler;
-	class GraphicsThread;
 	class ThreadManager;
 	class LoaderModule;
 	class SceneManager;
@@ -137,14 +136,11 @@ namespace Utils::Reflect
 		LoaderModule* GetLoaderModule(const std::type_info& resourceType);
 		LoaderModule* GetLoaderModule(uint32_t typeHash);
 
-		GraphicsThread* GetGraphicsThread() const;
-
-		void StartThreads();
 		void UpdateSceneManager();
 		void DrawSceneManager();
 		void ModulesLoop(IModuleLoopHandler* pLoopHandler = nullptr);
-		void GameThreadFrameStart();
-		void GameThreadFrameEnd();
+		void BeginFrame();
+		void EndFrame();
 
 		void CallModuleUpdate(Module* pModule);
 		void CallModuleDraw(Module* pModule);
@@ -217,12 +213,7 @@ namespace Utils::Reflect
 		void RegisterBasicTypes();
 
 	private:
-		void GraphicsThreadFrameStart();
-		void GraphicsThreadFrameEnd();
-
-	private:
 		friend class GameThread;
-		friend class GraphicsThread;
 
 		/* Original create info*/
 		const EngineCreateInfo m_CreateInfo;
@@ -252,9 +243,6 @@ namespace Utils::Reflect
 		/* Threading */
 		ThreadManager* m_pThreadManager;
 		Jobs::JobManager* m_pJobManager;
-
-		/* Threads */
-		GraphicsThread* m_pGraphicsThread;
 
 		/* External objects */
 		Console* m_Console;

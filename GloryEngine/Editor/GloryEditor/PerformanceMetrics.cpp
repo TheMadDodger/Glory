@@ -13,7 +13,7 @@ namespace Glory::Editor
 	const float PerformanceMetrics::REFRESHINTERVALS = 0.1f;
 
 	PerformanceMetrics::PerformanceMetrics() : EditorWindowTemplate("Performance Metrics", 200.0f, 200.0f), 
-		m_LastFrameTime(0.0f), m_LastFramerate(0.0f), m_LastGameThreadFrameTime(0.0f), m_LastGraphicsThreadFrameTime(0.0f) {}
+		m_LastFrameTime(0.0f), m_LastFramerate(0.0f) {}
 
 	PerformanceMetrics::~PerformanceMetrics() {}
 
@@ -28,8 +28,7 @@ namespace Glory::Editor
 			Refresh();
 
 		ImGui::Text("Average Frame Time: %.3f ms - Framerate: %.1f", m_LastFrameTime, m_LastFramerate);
-		ImGui::Text("Average Game Time: %.3f ms - Average Graphics Time: %.3f ms", m_LastGameThreadFrameTime, m_LastGraphicsThreadFrameTime);
-		ImGui::Text("Frame Count: %d - Game Frame Count: %d", pEngine->Time().GetTotalFrames(), pEngine->Time().GetTotalGameFrames());
+		ImGui::Text("Frame Count: %d", pEngine->Time().GetTotalFrames());
 
 		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
 		ImGui::Text("Draw Calls: %d - Vertices: %d - Triangles: %d", pGraphics->GetLastDrawCalls(), pGraphics->GetLastVertexCount(), pGraphics->GetLastTriangleCount());
@@ -44,8 +43,6 @@ namespace Glory::Editor
 
 		m_LastFrameTime = pEngine->Time().GetUnscaledDeltaTime<float, std::milli>();
 		m_LastFramerate = pEngine->Time().GetFrameRate();
-		m_LastGameThreadFrameTime = pEngine->Time().GetUnscaledGameDeltaTime<float, std::milli>();
-		m_LastGraphicsThreadFrameTime = pEngine->Time().GetUnscaledGraphicsDeltaTime<float, std::milli>();
 
 		m_LastRefresh = std::chrono::system_clock::now();
 	}

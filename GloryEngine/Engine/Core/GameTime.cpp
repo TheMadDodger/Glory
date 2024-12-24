@@ -27,12 +27,7 @@ namespace Glory
 
     const int GameTime::GetTotalFrames()
     {
-        return GetTimer()->m_TotalGraphicsFrames;
-    }
-
-    const int GameTime::GetTotalGameFrames()
-    {
-        return GetTimer()->m_TotalGameFrames;
+        return GetTimer()->m_TotalFrames;
     }
 
     void GameTime::SetTimeScale(float scale)

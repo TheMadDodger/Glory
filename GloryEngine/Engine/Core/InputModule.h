@@ -61,7 +61,7 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Cleanup() override;
 		virtual void Update() override;
-		virtual void OnGameThreadFrameStart() override;
+		virtual void OnBeginFrame() override;
 
 		void ReadInputModes(YAML::Node& node);
 		void ReadInputMaps(YAML::Node& node);

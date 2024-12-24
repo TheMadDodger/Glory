@@ -351,7 +351,7 @@ namespace Glory
 		}
 	}
 
-	void InputModule::OnGameThreadFrameStart()
+	void InputModule::OnBeginFrame()
 	{
 		for (size_t i = 0; i < m_Players.size(); ++i)
 		{

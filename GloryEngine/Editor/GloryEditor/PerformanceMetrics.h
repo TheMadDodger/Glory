@@ -21,8 +21,5 @@ namespace Glory::Editor
 
         float m_LastFrameTime;
         float m_LastFramerate;
-
-        float m_LastGameThreadFrameTime;
-        float m_LastGraphicsThreadFrameTime;
     };
 }
