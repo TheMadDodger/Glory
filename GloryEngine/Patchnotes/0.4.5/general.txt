@@ -11,7 +11,8 @@ Engine:
 - Fixed incorrect scene object references in script properties when instantiating a prefab
 - InputModule now tracks cursor position for the mouse
 - Added fullscreen support to SDLWindowModule
-- Max prepared frames is now 1 in the graphics thread due to issues with the renderer
+- Removed graphics thread, rendering now happens on the main thread
+- Added support for grabbing exclusive input in SDLWindowModule
 
 Editor:
 - Added freetype font importer
@@ -26,4 +27,5 @@ Scripting:
 - Fixed crash caused by automatic garbage collection
 - Removed mono object creation debug logs
 - Fixed duplicate SceneObject in Scene cs api when instantiating prefabs
-- Added CS API for getting cursor position
+- Added CS API for setting cursor position
+- Added CS API for enabling/disabling input grabbing
