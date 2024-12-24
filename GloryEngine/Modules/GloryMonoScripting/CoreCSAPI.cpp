@@ -555,6 +555,24 @@ namespace Glory
 		pWindow->SetCursorPosition(float(pos->x), float(pos->y));
 	}
 
+	bool Engine_GetGrabInput()
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return false;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return false;
+		return pWindow->IsGrabInput();
+	}
+
+	void Engine_SetGrabInput(bool grab)
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return;
+		pWindow->GrabInput(grab);
+	}
+
 #pragma endregion
 
 #pragma region Binding
@@ -671,6 +689,8 @@ namespace Glory
 		BIND("GloryEngine.Engine::Engine_SetShowWindowCursor", Engine_SetShowWindowCursor);
 		BIND("GloryEngine.Engine::Engine_GetShowWindowCursor", Engine_GetShowWindowCursor);
 		BIND("GloryEngine.Engine::Engine_SetWindowCursorPos", Engine_SetWindowCursorPos);
+		BIND("GloryEngine.Engine::Engine_GetGrabInput", Engine_GetGrabInput);
+		BIND("GloryEngine.Engine::Engine_SetGrabInput", Engine_SetGrabInput);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)

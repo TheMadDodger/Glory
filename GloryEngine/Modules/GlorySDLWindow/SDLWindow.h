@@ -44,6 +44,7 @@ namespace Glory
 
 		void HandleAllEvents(SDL_Event& event);
 		virtual void UpdateCursorShow() override;
+		virtual void UpdateGrabInput() override;
 
 	private:
 		GLORY_API virtual void Open() override;

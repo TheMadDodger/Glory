@@ -9,8 +9,9 @@ namespace Glory
 		m_WindowName(createInfo.WindowName), m_Width(createInfo.Width),
 		m_Height(createInfo.Height), m_WindowFlags(createInfo.WindowFlags),
 		m_pWindowManager(createInfo.pWindowManager), m_ShowCursor(true),
-		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_HasFocus(false),
-		m_IsShown(false), m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize)
+		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_GrabInput(false),
+		m_ForceUngrabInput(false), m_HasFocus(false), m_IsShown(false),
+		m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize)
 	{
 	}
 
@@ -20,12 +21,14 @@ namespace Glory
 
 	void Window::ShowCursor(bool show)
 	{
+		if (m_ShowCursor == show) return;
 		m_ShowCursor = show;
 		UpdateCursorShow();
 	}
 
 	void Window::ForceShowCursor(bool show)
 	{
+		if (m_ForceShowCursor == show) return;
 		m_ForceShowCursor = show;
 		UpdateCursorShow();
 	}
@@ -38,6 +41,25 @@ namespace Glory
 	bool Window::IsCursorShown() const
 	{
 		return m_ForceShowCursor || m_ShowCursor;
+	}
+
+	void Window::GrabInput(bool grab)
+	{
+		if (m_GrabInput == grab) return;
+		m_GrabInput = grab;
+		UpdateGrabInput();
+	}
+
+	bool Window::IsGrabInput()
+	{
+		return m_GrabInput && !m_ForceUngrabInput;
+	}
+	
+	void Window::ForceUngrabInput(bool ungrab)
+	{
+		if (m_ForceUngrabInput == ungrab) return;
+		m_ForceUngrabInput = ungrab;
+		UpdateGrabInput();
 	}
 
 	bool Window::HasFocus() const
