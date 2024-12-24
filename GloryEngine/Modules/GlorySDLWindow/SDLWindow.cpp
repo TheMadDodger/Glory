@@ -545,6 +545,12 @@ namespace Glory
 		SDL_ShowCursor(show ? SDL_ENABLE : SDL_DISABLE);
 	}
 
+	void SDLWindow::UpdateGrabInput()
+	{
+		const bool grab = !m_ForceUngrabInput && m_GrabInput;
+		SDL_SetRelativeMouseMode(grab ? SDL_TRUE : SDL_FALSE);
+	}
+
 	void SDLWindow::SetWindowTitle(const char* title)
 	{
 		SDL_SetWindowTitle(m_pWindow, title);

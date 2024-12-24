@@ -74,6 +74,7 @@ namespace Glory::Editor
 				&& pSDLWindow->HandleInputEvents(event) && pSDLWindow->HasFocus();
 			pSDLWindow->ForceShowCursor(!lockInput);
 			pSDLWindow->ForceUnlockCursor(!lockInput);
+			pSDLWindow->ForceUngrabInput(!lockInput);
 
 			if (event.type == SDL_WINDOWEVENT)
 				pSDLWindow->HandleWindowFocusEvents(event.window);

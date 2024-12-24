@@ -55,6 +55,9 @@ namespace Glory
 		void ForceShowCursor(bool show);
 		void ForceUnlockCursor(bool unlock);
 		bool IsCursorShown() const;
+		void GrabInput(bool grab);
+		bool IsGrabInput();
+		void ForceUngrabInput(bool ungrab);
 		bool HasFocus() const;
 		bool IsShown() const;
 
@@ -66,6 +69,7 @@ namespace Glory
 		virtual void Close() = 0;
 		virtual void PollEvents() = 0;
 		virtual void UpdateCursorShow() = 0;
+		virtual void UpdateGrabInput() = 0;
 
 		bool ForwardInputEvent(InputEvent& input);
 		void ForwardCursorEvent(CursorEvent& input);
@@ -79,6 +83,8 @@ namespace Glory
 		bool m_ShowCursor;
 		bool m_ForceShowCursor;
 		bool m_ForceUnlockCursor;
+		bool m_GrabInput;
+		bool m_ForceUngrabInput;
 
 		bool m_HasFocus;
 		bool m_IsShown;

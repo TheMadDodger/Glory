@@ -36,6 +36,16 @@ namespace GloryEngine
             set => Engine_SetShowWindowCursor(value);
         }
 
+        /// <summary>
+        /// Whether to claim exclusive input to the application
+        /// this locks the cursor to the window.
+        /// </summary>
+        public bool GrabInput
+        {
+            get => Engine_GetGrabInput();
+            set => Engine_SetGrabInput(value);
+        }
+
         #endregion
 
         #region Fields
@@ -171,6 +181,11 @@ namespace GloryEngine
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void Engine_SetWindowCursorPos(ref Vector2 pos);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool Engine_GetGrabInput();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void Engine_SetGrabInput(bool grab);
 
         #endregion
     }
