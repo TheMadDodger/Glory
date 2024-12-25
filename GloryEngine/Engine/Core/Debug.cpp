@@ -150,7 +150,7 @@ namespace Glory
 		{
 			const size_t index = i - 1;
 			DebugLine& line = m_DebugLines[index];
-			line.Time -= pTime->GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
+			line.Time -= pTime->GetUnscaledDeltaTime();
 			if (line.Time <= 0.f)
 			{
 				m_DebugLines.erase(m_DebugLines.begin() + index);

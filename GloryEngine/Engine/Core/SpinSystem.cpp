@@ -16,7 +16,7 @@ namespace Glory
 		Engine* pEngine = pScene->Manager()->GetEngine();
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
-		pComponent.m_Time += pEngine->Time().GetDeltaTime<float, std::ratio<1, 1>>()* pComponent.m_Speed;
+		pComponent.m_Time += pEngine->Time().GetDeltaTime()*pComponent.m_Speed;
 		transform.Rotation = glm::quat(glm::vec3(0.0f, pComponent.m_Time * glm::radians(90.0f), 0.0f));
 	}
 }

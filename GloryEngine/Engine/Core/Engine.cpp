@@ -40,7 +40,6 @@
 #include "IModuleLoopHandler.h"
 #include "ResourceLoaderModule.h"
 
-#include "TimerModule.h"
 #include "ProfilerModule.h"
 
 #include <JobManager.h>
@@ -239,7 +238,6 @@ namespace Glory
 			m_pAllModules[currentSize + i] = m_pOptionalModules[i];
 		}
 
-		AddInternalModule(new TimerModule);
 		ProfilerModule* pProfiler = new ProfilerModule();
 		m_Profiler->m_pProfiler = pProfiler;
 		AddInternalModule(pProfiler);
@@ -316,6 +314,8 @@ namespace Glory
 		}));
 
 		m_Initialized = true;
+
+		m_Time->Initialize();
 	}
 
 	void Engine::Cleanup()
@@ -643,6 +643,7 @@ namespace Glory
 
 	void Engine::BeginFrame()
 	{
+		m_Time->BeginFrame();
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->OnBeginFrame();
@@ -655,6 +656,7 @@ namespace Glory
 		{
 			m_pAllModules[i]->OnEndFrame();
 		}
+		m_Time->EndFrame();
 	}
 
 	void Engine::CallModuleUpdate(Module* pModule)
