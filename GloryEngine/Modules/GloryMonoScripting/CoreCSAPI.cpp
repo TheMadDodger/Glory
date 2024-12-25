@@ -80,12 +80,12 @@ namespace Glory
 
 	float Time_GetDeltaTime()
 	{
-		return Core_EngineInstance->Time().GetDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetDeltaTime();
 	}
 
 	float Time_GetUnscaledDeltaTime()
 	{
-		return Core_EngineInstance->Time().GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetUnscaledDeltaTime();
 	}
 
 	float Time_GetCurrentTime()

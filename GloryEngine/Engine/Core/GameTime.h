@@ -1,5 +1,5 @@
 #pragma once
-#include "TimerModule.h"
+#include <cstdint>
 
 namespace Glory
 {
@@ -10,32 +10,33 @@ namespace Glory
 	public:
 		virtual ~GameTime();
 
-		template<typename T, typename Ratio>
-		const float GetDeltaTime()
-		{
-			return GetUnscaledDeltaTime<T, Ratio>()*GetTimer()->m_TimeScale;
-		}
+		void Initialize();
 
-		template<typename T, typename Ratio>
-		const float GetUnscaledDeltaTime()
-		{
-			std::chrono::duration<T, Ratio> deltaTime = GetTimer()->m_LastFrameEnd - GetTimer()->m_LastFrameStart;
-			return deltaTime.count();
-		}
+		void BeginFrame();
+		void EndFrame();
 
-		const float GetTime();
-		const float GetUnscaledTime();
-		const float GetTimeScale();
-		const float GetFrameRate();
-		const int GetTotalFrames();
+		const float GetTime() const;
+		const float GetUnscaledTime() const;
+		const float GetDeltaTime() const;
+		const float GetUnscaledDeltaTime() const;
+		const float GetTimeScale() const;
+		const float GetFrameRate() const;
+		const int GetTotalFrames() const;
 		void SetTimeScale(float scale);
+
+		static uint64_t Now();
+		static float TimeSinceSeconds(uint64_t timestamp);
 
 	private:
 		friend class Engine;
-		TimerModule* GetTimer();
-
 		GameTime(Engine* pEngine);
 
 		Engine* m_pEngine;
+		float m_TimeScale = 1.0f;
+		int m_TotalFrames = 0;
+
+		double m_DeltaTime = 0.0f;
+		double m_LastTime = 0.0f;
+		uint64_t m_StartTime = 0;
 	};
 }

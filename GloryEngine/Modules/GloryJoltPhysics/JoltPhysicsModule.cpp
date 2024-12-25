@@ -728,7 +728,7 @@ namespace Glory
 		static uint32_t step = 0;
 		
 		// We simulate the physics world in discrete time steps.
-		const float engineDeltaTime = m_pEngine->Time().GetDeltaTime<float, std::ratio<1, 1>>();
+		const float engineDeltaTime = m_pEngine->Time().GetDeltaTime();
 		const uint32_t tickRate = Settings().Value<unsigned int>("TickRate");
 		static float timer = 0.0f;
 		timer += engineDeltaTime;

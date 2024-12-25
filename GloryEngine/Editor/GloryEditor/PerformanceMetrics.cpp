@@ -3,10 +3,10 @@
 
 #include <GameTime.h>
 #include <imgui.h>
-#include <TimerModule.h>
 #include <Engine.h>
 #include <GraphicsModule.h>
 #include <RendererModule.h>
+#include <GameTime.h>
 
 namespace Glory::Editor
 {
@@ -23,7 +23,7 @@ namespace Glory::Editor
 
 		std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
 		std::chrono::duration<float> frameDuration = currentTime - m_LastRefresh;
-		float timeSinceRefresh = std::chrono::duration_cast<seconds>(frameDuration).count();
+		float timeSinceRefresh = std::chrono::duration_cast<std::chrono::seconds>(frameDuration).count();
 		if (timeSinceRefresh >= REFRESHINTERVALS)
 			Refresh();
 
@@ -41,7 +41,7 @@ namespace Glory::Editor
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
-		m_LastFrameTime = pEngine->Time().GetUnscaledDeltaTime<float, std::milli>();
+		m_LastFrameTime = pEngine->Time().GetUnscaledDeltaTime();
 		m_LastFramerate = pEngine->Time().GetFrameRate();
 
 		m_LastRefresh = std::chrono::system_clock::now();
