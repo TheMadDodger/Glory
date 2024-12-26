@@ -420,6 +420,26 @@ namespace Glory
 
 #pragma region Scene Objects
 
+	bool SceneObject_GetActive(uint64_t sceneID, uint64_t objectID)
+	{
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
+		if (!pScenes) return nullptr;
+		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
+		if (!pScene) return nullptr;
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
+		return entity.IsActive();
+	}
+
+	void SceneObject_SetActive(uint64_t sceneID, uint64_t objectID, bool active)
+	{
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
+		if (!pScenes) return;
+		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(UUID(objectID));
+		entity.SetActive(active);
+	}
+
 	MonoString* SceneObject_GetName(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
@@ -675,6 +695,8 @@ namespace Glory
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
 
 		// Scene Objects
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetActive", SceneObject_GetActive);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetActive", SceneObject_SetActive);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetName", SceneObject_GetName);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetName", SceneObject_SetName);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetSiblingIndex", SceneObject_GetSiblingIndex);
