@@ -297,6 +297,12 @@ namespace Glory
 			SDL_Keycode keycode = event.key.keysym.sym;
 			const auto iter = KEYBOARD_KEYMAP.find(keycode);
 			if (iter == KEYBOARD_KEYMAP.end()) break;
+			if (iter->second == KeyboardKey::KeyAltL) m_LAltDown = true;
+			if (iter->second == KeyboardKey::KeyAltR) m_RAltDown = true;
+
+			if ((m_LAltDown || m_RAltDown) && iter->second == KeyboardKey::KeyReturn)
+				SetFullscreen(!m_Fullscreen, false);
+
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
 			inputEvent.KeyID = iter->second;
 			inputEvent.State = InputState::KeyDown;
@@ -310,6 +316,9 @@ namespace Glory
 			SDL_Keycode keycode = event.key.keysym.sym;
 			const auto iter = KEYBOARD_KEYMAP.find(keycode);
 			if (iter == KEYBOARD_KEYMAP.end()) break;
+			if (iter->second == KeyboardKey::KeyAltL) m_LAltDown = false;
+			if (iter->second == KeyboardKey::KeyAltR) m_RAltDown = false;
+
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
 			inputEvent.KeyID = iter->second;
 			inputEvent.State = InputState::KeyUp;
@@ -604,7 +613,7 @@ namespace Glory
 	}
 
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo),
-		m_pWindow(nullptr), m_GLSDLContext(NULL), m_pWindowSurface(nullptr), m_pSplashScreen(nullptr)
+		m_pWindow(nullptr), m_GLSDLContext(NULL), m_pWindowSurface(nullptr), m_pSplashScreen(nullptr), m_LAltDown(false), m_RAltDown(false)
 	{}
 
 	SDLWindow::~SDLWindow()

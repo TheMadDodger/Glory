@@ -58,5 +58,8 @@ namespace Glory
 		SDL_Surface* m_pWindowSurface;
 		SDL_Surface* m_pSplashScreen;
 		SDL_GLContext m_GLSDLContext;
+
+		bool m_LAltDown;
+		bool m_RAltDown;
 	};
 }
