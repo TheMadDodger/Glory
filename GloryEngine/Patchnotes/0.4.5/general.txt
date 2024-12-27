@@ -3,6 +3,7 @@ Runtime:
 - Added font loading
 - Window resizing is now properly handles
 - Runtime application now starts in fullscreen
+- Alt+Enter now toggles between fullscreen
 
 Engine:
 - Added font resource
