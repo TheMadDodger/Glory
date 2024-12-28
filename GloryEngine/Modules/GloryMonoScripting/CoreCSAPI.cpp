@@ -595,6 +595,16 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Application
+
+	void Application_Quit()
+	{
+		Core_EngineInstance->RequestQuit();
+	}
+
+#pragma endregion
+
+
 #pragma region Binding
 
 	void CoreCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -713,6 +723,8 @@ namespace Glory
 		BIND("GloryEngine.Engine::Engine_SetWindowCursorPos", Engine_SetWindowCursorPos);
 		BIND("GloryEngine.Engine::Engine_GetGrabInput", Engine_GetGrabInput);
 		BIND("GloryEngine.Engine::Engine_SetGrabInput", Engine_SetGrabInput);
+
+		BIND("GloryEngine.Application::Application_Quit", Application_Quit);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)
