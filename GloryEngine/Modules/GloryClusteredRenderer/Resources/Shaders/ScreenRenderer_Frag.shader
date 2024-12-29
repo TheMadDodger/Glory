@@ -127,7 +127,7 @@ void main()
 	float clusterFrac = float(clusterColorIndex) / float(totalClusters);
 
 	uint clusterZVal = GetDepthSlice(depth);
-	vec3 clusterColor = depthSliceColors[uint(mod(clusterZVal, 5.0))];
+	vec3 clusterColor = depthSliceColors[uint(mod(clusterZVal, 5))];
 
 	uint offset = LightGrid[clusterID].Offset;
 	uint count = LightGrid[clusterID].Count;
