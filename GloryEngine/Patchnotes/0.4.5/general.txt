@@ -15,6 +15,7 @@ Engine:
 - Removed graphics thread, rendering now happens on the main thread
 - Added support for grabbing exclusive input in SDLWindowModule
 - Fixed audio popping and crashing on runtime
+- Fixed OnEnable/OnDisable callbacks not being called when activating/deactivating an entity
 
 Editor:
 - Added freetype font importer
