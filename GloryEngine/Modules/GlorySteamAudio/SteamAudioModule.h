@@ -168,5 +168,7 @@ namespace Glory
 		std::map<UUID, std::vector<IPLStaticMesh>> m_StaticAudioMeshes;
 
 		SoundMaterial m_DefaultSoundMaterial;
+
+		std::vector<float> m_TemporaryStreamData;
     };
 }
