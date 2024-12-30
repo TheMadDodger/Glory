@@ -14,6 +14,7 @@ Engine:
 - Added fullscreen support to SDLWindowModule
 - Removed graphics thread, rendering now happens on the main thread
 - Added support for grabbing exclusive input in SDLWindowModule
+- Fixed audio popping and crashing on runtime
 
 Editor:
 - Added freetype font importer
@@ -30,3 +31,5 @@ Scripting:
 - Fixed duplicate SceneObject in Scene cs api when instantiating prefabs
 - Added CS API for setting cursor position
 - Added CS API for enabling/disabling input grabbing
+- Added Active property to SceneObject CS API
+- Added Application.Quit() CS API
