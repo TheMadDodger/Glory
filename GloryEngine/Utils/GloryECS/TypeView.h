@@ -45,6 +45,9 @@ namespace Glory::Utils::ECS
 
 		virtual void GetReferences(std::vector<UUID>& references) const {};
 
+		BitSet& ActiveStates();
+		const BitSet& ActiveStates() const;
+
 	protected:
 		virtual BaseTypeView* Create(EntityRegistry* pRegistry) = 0;
 		virtual void OnRemove(size_t index) = 0;

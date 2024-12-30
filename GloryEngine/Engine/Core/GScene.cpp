@@ -466,6 +466,7 @@ namespace Glory
 					container.Write(pBuffer, bufferSize);
 				}
 			}
+			container.Write(pTypeView->ActiveStates());
 		}
 
 		/* Serialize the hierarchy */
@@ -529,6 +530,7 @@ namespace Glory
 					container.Read(pBuffer, bufferSize);
 				}
 			}
+			container.Read(pTypeView->ActiveStates());
 		}
 
 		/* Deserialize the hierarchy */

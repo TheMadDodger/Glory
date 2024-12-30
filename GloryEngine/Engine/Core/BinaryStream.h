@@ -4,6 +4,11 @@
 
 namespace Glory
 {
+	namespace Utils
+	{
+		struct BitSet;
+	}
+
 	class BinaryStream
 	{
 	public:
@@ -29,6 +34,7 @@ namespace Glory
 
 		BinaryStream& Write(const std::string& value);
 		BinaryStream& Write(const std::vector<std::string>& value);
+		BinaryStream& Write(const Utils::BitSet& value);
 
 		virtual void Seek(size_t offset, Relative relative = Relative::Start) = 0;
 		virtual size_t Tell() const = 0;
@@ -53,8 +59,9 @@ namespace Glory
 		}
 
 		BinaryStream& Read(std::vector<std::string>& out);
-
 		BinaryStream& Read(std::string& value);
+		BinaryStream& Read(Utils::BitSet& value);
+
 		BinaryStream& Read(void* out, size_t size);
 		virtual BinaryStream& Read(char* out, size_t size) = 0;
 
