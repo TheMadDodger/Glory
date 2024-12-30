@@ -20,6 +20,7 @@
 #include <StringUtils.h>
 #include <Reflection.h>
 #include <PrefabData.h>
+#include <ComponentHelpers.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -66,7 +67,10 @@ namespace Glory::Editor
 			Undo::AddAction<EnableObjectAction>(pScene, active);
 			Undo::StopRecord();
 
-			entity.SetActive(active);
+			if (active)
+				Components::Activate(entity);
+			else
+				Components::Deactivate(entity);
 			change = true;
 		}
 		change |= NameGUI();

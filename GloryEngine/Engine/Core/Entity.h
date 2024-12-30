@@ -67,6 +67,7 @@ namespace Glory
 		bool IsActive() const;
 		bool IsHierarchyActive() const;
 		void SetActive(bool active);
+		void SetActiveSelf(bool active);
 		void SetActiveHierarchy(bool active);
 
 		std::string_view Name() const;

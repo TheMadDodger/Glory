@@ -2,6 +2,7 @@
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
 #include "MathCSAPI.h"
+#include "ComponentHelpers.h"
 
 #include <Engine.h>
 #include <SceneManager.h>
@@ -437,7 +438,10 @@ namespace Glory
 		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
 		if (!pScene) return;
 		Entity entity = pScene->GetEntityByUUID(UUID(objectID));
-		entity.SetActive(active);
+		if (active)
+			Components::Activate(entity);
+		else
+			Components::Deactivate(entity);
 	}
 
 	MonoString* SceneObject_GetName(uint64_t sceneID, uint64_t objectID)
