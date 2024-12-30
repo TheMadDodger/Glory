@@ -22,6 +22,7 @@ Editor:
 - Added cursor bounds to limit cursor position to game view
 - Fixed game view not showing rendered image correctly when window is resized
 - Removed red "m_ScriptData" label in MonoScriptComponent editor
+- Fixed crash when creating a new scene using File->New->Scene
 
 Scripting:
 - Added CS API for text component
