@@ -303,19 +303,13 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", []() { EditorApplication::GetInstance()->GetSceneManager().NewScene(false); }, NULL, Shortcut_File_NewScene);
-		MenuBar::AddMenuItem("File/Save Scene", []() { EditorApplication::GetInstance()->GetSceneManager().SaveOpenScenes(); }, NULL, Shortcut_File_SaveScene);
-		//MenuBar::AddMenuItem("File/Load Scene", []()
-		//{
-		//	//YAML::Node node = YAML::LoadFile("test.gscene");
-		//	//Serializer::DeserializeObject(node);
-		//}, NULL, Shortcut_File_LoadScene);
-
 		EditorApplication* app = EditorApplication::GetInstance();
+		MenuBar::AddMenuItem("File/New/Scene", [app]() { app->GetSceneManager().NewScene(); }, NULL, Shortcut_File_NewScene);
+		MenuBar::AddMenuItem("File/Save Scene", [app]() { app->GetSceneManager().SaveOpenScenes(); }, NULL, Shortcut_File_SaveScene);
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
-		MenuBar::AddMenuItem("File/Package", []() { StartPackage(EditorApplication::GetInstance()->GetEngine()); }, NULL, Shortcut_Package);
+		MenuBar::AddMenuItem("File/Package", [app]() { StartPackage(app->GetEngine()); }, NULL, Shortcut_Package);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
 		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);
