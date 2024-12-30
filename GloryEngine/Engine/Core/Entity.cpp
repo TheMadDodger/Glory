@@ -129,10 +129,15 @@ namespace Glory
 		UpdateHierarchyActive();
 	}
 
+	void Entity::SetActiveSelf(bool active)
+	{
+		Utils::ECS::EntityView* pEntityView = m_pRegistry->GetEntityView(m_EntityID);
+		pEntityView->Active() = active;
+	}
+
 	void Entity::SetActiveHierarchy(bool active)
 	{
 		Utils::ECS::EntityView* pEntityView = m_pRegistry->GetEntityView(m_EntityID);
-		const bool wasActive = pEntityView->HierarchyActive();
 		pEntityView->HierarchyActive() = active;
 	}
 
