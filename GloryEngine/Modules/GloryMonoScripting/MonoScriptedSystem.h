@@ -13,6 +13,7 @@ namespace Glory
     struct MonoScriptComponent;
     struct UUIDRemapper;
     class GScene;
+    class Engine;
 
     class MonoScriptedSystem
     {
@@ -26,12 +27,12 @@ namespace Glory
         static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent);
         static void OnCopy(GScene* pScene, void* data, UUID componentId, UUIDRemapper& remapper);
 
-        GLORY_API static void OnBodyActivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID);
-        GLORY_API static void OnBodyDeactivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID);
+        GLORY_API static void OnBodyActivated(Engine* pEngine, UUID sceneID, UUID entityUUID);
+        GLORY_API static void OnBodyDeactivated(Engine* pEngine, UUID sceneID, UUID entityUUID);
 
-        GLORY_API static void OnContactAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID);
-        GLORY_API static void OnContactPersisted(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID);
-        GLORY_API static void OnContactRemoved(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID);
+        GLORY_API static void OnContactAdded(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
+        GLORY_API static void OnContactPersisted(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
+        GLORY_API static void OnContactRemoved(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
 
     private:
         MonoScriptedSystem() {}

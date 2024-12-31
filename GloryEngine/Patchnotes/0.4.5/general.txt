@@ -17,6 +17,7 @@ Engine:
 - Added support for grabbing exclusive input in SDLWindowModule
 - Fixed audio popping and crashing on runtime
 - Fixed OnEnable/OnDisable callbacks not being called when activating/deactivating an entity
+- Reworked and optimized physics callbacks
 
 Editor:
 - Added freetype font importer
@@ -37,3 +38,4 @@ Scripting:
 - Added CS API for enabling/disabling input grabbing
 - Added Active property to SceneObject CS API
 - Added Application.Quit() CS API
+- Physics callbacks now have the SceneObject directly instead of ambiguous body IDs

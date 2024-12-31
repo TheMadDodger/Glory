@@ -887,6 +887,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.Transform::Transform_SetForward", Transform_SetForward);
 		BIND("GloryEngine.Entities.Transform::Transform_GetRight", Transform_GetRight);
 		BIND("GloryEngine.Entities.Transform::Transform_GetUp", Transform_GetUp);
+		BIND("GloryEngine.Entities.Transform::Transform_GetWorld", Transform_GetWorld);
 
 		/* Camera */
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetHalfFOV", CameraComponent_GetHalfFOV);
