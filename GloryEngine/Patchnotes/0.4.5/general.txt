@@ -4,6 +4,7 @@ Runtime:
 - Window resizing is now properly handles
 - Runtime application now starts in fullscreen
 - Alt+Enter now toggles between fullscreen
+- Component active states now get loaded at runtime
 
 Engine:
 - Added font resource
@@ -24,6 +25,7 @@ Editor:
 - Fixed game view not showing rendered image correctly when window is resized
 - Removed red "m_ScriptData" label in MonoScriptComponent editor
 - Fixed crash when creating a new scene using File->New->Scene
+- Component active states now get packaged
 
 Scripting:
 - Added CS API for text component
