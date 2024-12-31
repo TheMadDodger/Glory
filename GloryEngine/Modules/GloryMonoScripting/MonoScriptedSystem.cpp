@@ -176,123 +176,175 @@ namespace Glory
 		}
 	}
 
-	void MonoScriptedSystem::OnBodyActivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID)
+	void MonoScriptedSystem::OnBodyActivated(Engine* pEngine, UUID sceneID, UUID entityUUID)
 	{
-		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
-
-		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
-
-		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-
+		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(sceneID);
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(entityUUID);
+		if (!entity.IsValid()) return;
+		if (!entity.HasComponent<MonoScriptComponent>()) return;
+		MonoScriptComponent& scriptComponent = entity.GetComponent<MonoScriptComponent>();
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
 		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
 		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
 		if (typeIndex == -1) return;
-
-		std::vector<void*> args = {
-			&bodyID
-		};
-
 		MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
 		if (!pScriptObject) return;
-		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnBodyActivated", args.data());
+		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnBodyActivated", nullptr);
 	}
 
-	void MonoScriptedSystem::OnBodyDeactivated(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t bodyID)
+	void MonoScriptedSystem::OnBodyDeactivated(Engine* pEngine, UUID sceneID, UUID entityUUID)
 	{
-		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
-
-		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
-
-		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
-
+		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(sceneID);
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(entityUUID);
+		if (!entity.IsValid()) return;
+		if (!entity.HasComponent<MonoScriptComponent>()) return;
+		MonoScriptComponent& scriptComponent = entity.GetComponent<MonoScriptComponent>();
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
 		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
 		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
 		if (typeIndex == -1) return;
-
-		std::vector<void*> args = {
-			&bodyID
-		};
-
 		MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
 		if (!pScriptObject) return;
-		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnBodyDeactivated", args.data());
+		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnBodyDeactivated", nullptr);
 	}
 
-	void MonoScriptedSystem::OnContactAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
+	void MonoScriptedSystem::OnContactAdded(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
 	{
-		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
-		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
-
-		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		GScene* pScene1 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
+		if (!pScene1) return;
+		Entity entity1 = pScene1->GetEntityByUUID(entity1UUID);
+		if (!entity1.IsValid()) return;
+		GScene* pScene2 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
+		if (!pScene2) return;
+		Entity entity2 = pScene2->GetEntityByUUID(entity2UUID);
+		if (!entity2.IsValid()) return;
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
 		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
-		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
-		if (typeIndex == -1) return;
+		MonoObject* pMonoObject1 = pCoreLibManager->CreateSceneObject(entity1UUID, scene1ID);
+		MonoObject* pMonoObject2 = pCoreLibManager->CreateSceneObject(entity2UUID, scene2ID);
+		if (!pMonoObject1 || !pMonoObject2) return;
 
-		std::vector<void*> args = {
-			&body1ID,
-			&body2ID
-		};
+		if (entity1.HasComponent<MonoScriptComponent>())
+		{
+			MonoScriptComponent& scriptComponent = entity1.GetComponent<MonoScriptComponent>();
+			int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+			MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
+			if (typeIndex != -1 && pScriptObject)
+			{
+				std::vector<void*> args = {
+					pMonoObject2
+				};
+				scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactAdded", args.data());
+			}
+		}
 
-		MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
-		if (!pScriptObject) return;
-		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactAdded", args.data());
+		if (entity2.HasComponent<MonoScriptComponent>())
+		{
+			MonoScriptComponent& scriptComponent = entity2.GetComponent<MonoScriptComponent>();
+			int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+			MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
+			if (typeIndex != -1 && pScriptObject)
+			{
+				std::vector<void*> args = {
+					pMonoObject1
+				};
+				scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactAdded", args.data());
+			}
+		}
 	}
 
-	void MonoScriptedSystem::OnContactPersisted(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
+	void MonoScriptedSystem::OnContactPersisted(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
 	{
-		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
-		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
-
-		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		GScene* pScene1 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
+		if (!pScene1) return;
+		Entity entity1 = pScene1->GetEntityByUUID(entity1UUID);
+		if (!entity1.IsValid()) return;
+		GScene* pScene2 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
+		if (!pScene2) return;
+		Entity entity2 = pScene2->GetEntityByUUID(entity2UUID);
+		if (!entity2.IsValid()) return;
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
 		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
-		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
-		if (typeIndex == -1) return;
+		MonoObject* pMonoObject1 = pCoreLibManager->CreateSceneObject(entity1UUID, scene1ID);
+		MonoObject* pMonoObject2 = pCoreLibManager->CreateSceneObject(entity2UUID, scene2ID);
+		if (!pMonoObject1 || !pMonoObject2) return;
 
-		std::vector<void*> args = {
-			&body1ID,
-			&body2ID
-		};
+		if (entity1.HasComponent<MonoScriptComponent>())
+		{
+			MonoScriptComponent& scriptComponent = entity1.GetComponent<MonoScriptComponent>();
+			int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+			MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
+			if (typeIndex != -1 && pScriptObject)
+			{
+				std::vector<void*> args = {
+					pMonoObject2
+				};
+				scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactPersisted", args.data());
+			}
+		}
 
-		MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
-		if (!pScriptObject) return;
-		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactPersisted", args.data());
+		if (entity2.HasComponent<MonoScriptComponent>())
+		{
+			MonoScriptComponent& scriptComponent = entity2.GetComponent<MonoScriptComponent>();
+			int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+			MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
+			if (typeIndex != -1 && pScriptObject)
+			{
+				std::vector<void*> args = {
+					pMonoObject1
+				};
+				scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactPersisted", args.data());
+			}
+		}
 	}
 
-	void MonoScriptedSystem::OnContactRemoved(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, uint32_t body1ID, uint32_t body2ID)
+	void MonoScriptedSystem::OnContactRemoved(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
 	{
-		if (!pRegistry->HasComponent<MonoScriptComponent>(entity)) return;
-		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
-		AssetManager* pAssets = &pEngine->GetAssetManager();
-
-		MonoScriptComponent& scriptComponent = pRegistry->GetComponent<MonoScriptComponent>(entity);
+		GScene* pScene1 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
+		if (!pScene1) return;
+		Entity entity1 = pScene1->GetEntityByUUID(entity1UUID);
+		if (!entity1.IsValid()) return;
+		GScene* pScene2 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
+		if (!pScene2) return;
+		Entity entity2 = pScene2->GetEntityByUUID(entity2UUID);
+		if (!entity2.IsValid()) return;
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
 		MonoScriptManager& scriptManager = pCoreLibManager->ScriptManager();
-		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
-		if (typeIndex == -1) return;
+		MonoObject* pMonoObject1 = pCoreLibManager->CreateSceneObject(entity1UUID, scene1ID);
+		MonoObject* pMonoObject2 = pCoreLibManager->CreateSceneObject(entity2UUID, scene2ID);
+		if (!pMonoObject1 || !pMonoObject2) return;
 
-		std::vector<void*> args = {
-			&body1ID,
-			&body2ID
-		};
+		if (entity1.HasComponent<MonoScriptComponent>())
+		{
+			MonoScriptComponent& scriptComponent = entity1.GetComponent<MonoScriptComponent>();
+			int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+			MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
+			if (typeIndex != -1 && pScriptObject)
+			{
+				std::vector<void*> args = {
+					pMonoObject2
+				};
+				scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactRemoved", args.data());
+			}
+		}
 
-		MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
-		if (!pScriptObject) return;
-		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactRemoved", args.data());
+		if (entity2.HasComponent<MonoScriptComponent>())
+		{
+			MonoScriptComponent& scriptComponent = entity2.GetComponent<MonoScriptComponent>();
+			int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+			MonoObject* pScriptObject = mono_gchandle_get_target(scriptComponent.m_ScriptObjectHandle);
+			if (typeIndex != -1 && pScriptObject)
+			{
+				std::vector<void*> args = {
+					pMonoObject1
+				};
+				scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnContactRemoved", args.data());
+			}
+		}
 	}
 }

@@ -48,7 +48,9 @@ namespace Glory
 		pComponent.m_ShapeID = shapeID;
 		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_CurrentLayerIndex, translation, rotation, *pShapeData, pComponent.m_Friction);
 		pComponent.m_BodyID = pCharacters->GetBodyID(pComponent.m_CharacterID);
-		PhysicsSystem::AddBody(pComponent.m_BodyID, pRegistry, entity);
+		const UUID entityUUID = pScene->GetEntityUUID(entity);
+		pPhysics->SetBodyUserData(pComponent.m_BodyID, entityUUID);
+		PhysicsSystem::AddToSceneIDsCache(entityUUID, pScene->GetUUID());
 	}
 
 	void CharacterControllerSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
@@ -61,8 +63,8 @@ namespace Glory
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
 
-		PhysicsSystem::RemoveBody(pComponent.m_BodyID);
 		pCharacters->DestroyCharacter(pComponent.m_CharacterID);
+		PhysicsSystem::RemoveFromSceneIDsCache(pScene->GetEntityUUID(entity));
 		pComponent.m_CharacterID = 0;
 		pComponent.m_BodyID = 0;
 		pComponent.m_ShapeID = 0;
