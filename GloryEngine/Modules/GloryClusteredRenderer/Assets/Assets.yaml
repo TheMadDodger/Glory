@@ -6,10 +6,16 @@
   ID: 3
 - Path: "Shaders\\PhongTextured_vert.shader"
   ID: 4
+- Path: "Shaders\\PBR_frag.shader"
+  ID: 11
+- Path: "Shaders\\PBR_vert.shader"
+  ID: 12
 - Path: "Pipelines\\Phong.gpln"
   ID: 9
 - Path: "Pipelines\\PhongTextured.gpln"
   ID: 10
+- Path: "Pipelines\\PBR.gpln"
+  ID: 13
 - Path: "Models\\Cube.fbx"
   ID: 5
   Children:
