@@ -7,6 +7,7 @@
 #include "ShapeProperty.h"
 #include "SceneObjectRef.h"
 
+#include <functional>
 #include <vector>
 
 namespace Glory
@@ -32,14 +33,14 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void Submit(RenderData&& renderData);
+		void Submit(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
 		void Submit(PointLight&& light);
 
-		void OnGameThreadFrameStart();
-		void OnGameThreadFrameEnd();
+		virtual void OnBeginFrame() override;
 
 		virtual void CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures);
 		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos);
@@ -69,24 +70,24 @@ namespace Glory
 		const PickResult& GetPickResult(size_t index) const;
 		void GetPickResult(UUID cameraID, std::function<void(const PickResult&)> callback);
 
+		void OnWindowResize(glm::uvec2 size);
+
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
+		virtual void OnSubmit(const TextRenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
 		virtual void OnSubmit(const PointLight& light) {}
 
 	protected:
-		friend class GraphicsThread;
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
+		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 
-		virtual void OnInitialize() {};
 		virtual void OnPostInitialize() {};
-		virtual void OnThreadedInitialize() {}
-		virtual void OnThreadedCleanup() {}
 
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
@@ -98,15 +99,13 @@ namespace Glory
 
 	private:
 		// Run on Graphics Thread
-		void ThreadedInitialize();
-		void ThreadedCleanup();
-		void Render(const RenderFrame& frame);
+		void Render();
 		void DoPicking(const glm::ivec2& pos, CameraRef camera);
 		void CreateLineBuffer();
 		void RenderLines(CameraRef camera);
 
 	private:
-		RenderFrame m_CurrentPreparingFrame;
+		RenderFrame m_FrameData;
 		size_t m_LastSubmittedObjectCount;
 		size_t m_LastSubmittedCameraCount;
 
@@ -124,5 +123,7 @@ namespace Glory
 		std::mutex m_PickLock;
 		std::vector<PickResult> m_LastFramePickResults;
 		std::vector<PickResult> m_PickResults;
+
+		std::atomic_bool m_DisplaysDirty;
 	};
 }

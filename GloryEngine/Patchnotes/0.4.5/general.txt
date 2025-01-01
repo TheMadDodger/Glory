@@ -1,0 +1,41 @@
+Runtime:
+- Upped version to 0.4.5
+- Added font loading
+- Window resizing is now properly handles
+- Runtime application now starts in fullscreen
+- Alt+Enter now toggles between fullscreen
+- Component active states now get loaded at runtime
+
+Engine:
+- Added font resource
+- Added text component
+- Added text rendering
+- Fixed incorrect scene object references in script properties when instantiating a prefab
+- InputModule now tracks cursor position for the mouse
+- Added fullscreen support to SDLWindowModule
+- Removed graphics thread, rendering now happens on the main thread
+- Added support for grabbing exclusive input in SDLWindowModule
+- Fixed audio popping and crashing on runtime
+- Fixed OnEnable/OnDisable callbacks not being called when activating/deactivating an entity
+- Reworked and optimized physics callbacks
+
+Editor:
+- Added freetype font importer
+- Added property drawer for string properties
+- Added cursor bounds to limit cursor position to game view
+- Fixed game view not showing rendered image correctly when window is resized
+- Removed red "m_ScriptData" label in MonoScriptComponent editor
+- Fixed crash when creating a new scene using File->New->Scene
+- Component active states now get packaged
+
+Scripting:
+- Added CS API for text component
+- Added CS API for font resource
+- Fixed crash caused by automatic garbage collection
+- Removed mono object creation debug logs
+- Fixed duplicate SceneObject in Scene cs api when instantiating prefabs
+- Added CS API for setting cursor position
+- Added CS API for enabling/disabling input grabbing
+- Added Active property to SceneObject CS API
+- Added Application.Quit() CS API
+- Physics callbacks now have the SceneObject directly instead of ambiguous body IDs

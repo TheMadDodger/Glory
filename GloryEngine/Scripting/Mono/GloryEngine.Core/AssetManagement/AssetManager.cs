@@ -70,7 +70,6 @@ namespace GloryEngine
             }
             Resource resource = Activator.CreateInstance(type, this, id) as Resource;
             _resources.Add(id, resource);
-            Debug.LogInfo(string.Format("New {0} mono resource with ID {1} created", typeString, id));
             return resource;
         }
 

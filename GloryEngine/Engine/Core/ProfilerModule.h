@@ -30,10 +30,8 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
 
-		virtual void OnGameThreadFrameStart() override;
-		virtual void OnGameThreadFrameEnd() override;
-		virtual void OnGraphicsThreadFrameStart() override;
-		virtual void OnGraphicsThreadFrameEnd() override;
+		virtual void OnBeginFrame() override;
+		virtual void OnEndFrame() override;
 
 	private:
 		std::unordered_map<std::string, ProfilerThreadSample> m_CurrentThreadSamples;

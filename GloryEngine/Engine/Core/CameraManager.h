@@ -18,6 +18,7 @@ namespace Glory
 		RenderTexture* GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, size_t index = 0, bool createIfNotExist = true);
 		size_t CameraRenderTextureCount(CameraRef camera, Engine* pEngine);
 		Camera* GetCamera(UUID uuid);
+		void ResizeAllCameras(glm::uvec2 resolution);
 
 	private:
 		friend class Engine;

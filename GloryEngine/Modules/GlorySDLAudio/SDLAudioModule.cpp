@@ -24,6 +24,17 @@ namespace Glory
 		return typeid(SDLAudioModule);
 	}
 
+	void EffectCallback(int chan, void* stream, int len, void* udata)
+	{
+		AudioChannel& channel = *static_cast<AudioChannel*>(udata);
+		Audio_EngineInstance->GetOptionalModule<AudioModule>()->OnEffectCallback(channel, stream, len);
+	}
+
+	void EffectDoneCallback(int, void*)
+	{
+
+	}
+
 	int SDLAudioModule::Play(AudioData* pAudio, int loops, AudioChannelUData&& udata, std::function<void(Engine*, const AudioChannel&)> finishedCallback)
 	{
 		auto itor = m_Chunks.find(pAudio->GetUUID());
@@ -44,12 +55,13 @@ namespace Glory
 			MixChannels[i].m_CurrentChunk = itor->second;
 			MixChannels[i].m_UserData = std::move(udata);
 			MixChannels[i].m_FinishedCallback = finishedCallback;
-			if (Mix_PlayChannel(-1, itor->second, loops) == -1)
+			if (Mix_PlayChannel(int(i), itor->second, loops) == -1)
 			{
 				m_pEngine->GetDebug().LogError("Failed to play audio.");
 				m_pEngine->GetDebug().LogError(Mix_GetError());
 				return -1;
 			}
+			Mix_UnregisterEffect(int(i), EffectCallback);
 #if _DEBUG
 			m_pEngine->GetDebug().LogNotice("Used channel " + std::to_string(i) + " to play sound");
 #endif // DEBUG
@@ -92,17 +104,6 @@ namespace Glory
 		m_pEngine->GetDebug().LogNotice("Used channel " + std::to_string(oldChannels) + " to play sound");
 #endif // DEBUG
 		return int(oldChannels);
-	}
-
-	void EffectCallback(int chan, void* stream, int len, void* udata)
-	{
-		AudioChannel& channel = *static_cast<AudioChannel*>(udata);
-		Audio_EngineInstance->GetOptionalModule<AudioModule>()->OnEffectCallback(channel, stream, len);
-	}
-
-	void EffectDoneCallback(int, void*)
-	{
-
 	}
 
 	int SDLAudioModule::PlayWithEffects(AudioData* pAudio, int loops, AudioChannelUData&& udata, std::function<void(Engine*, const AudioChannel&)> finishedCallback)

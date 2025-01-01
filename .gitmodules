@@ -53,3 +53,6 @@
 [submodule "GloryEngine/submodules/SDL_mixer"]
 	path = GloryEngine/submodules/SDL_mixer
 	url = https://github.com/libsdl-org/SDL_mixer
+[submodule "GloryEngine/submodules/freetype"]
+	path = GloryEngine/submodules/freetype
+	url = https://github.com/freetype/freetype

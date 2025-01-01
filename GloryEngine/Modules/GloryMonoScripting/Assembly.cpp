@@ -15,6 +15,7 @@
 #include <MaterialInstanceData.h>
 #include <PrefabData.h>
 #include <AudioData.h>
+#include <FontData.h>
 
 #include <glm/detail/type_quat.hpp>
 
@@ -38,6 +39,7 @@ namespace Glory
 		{"GloryEngine.Image", SerializedType::ST_Asset},
 		{"GloryEngine.Prefab", SerializedType::ST_Asset},
 		{"GloryEngine.Audio", SerializedType::ST_Asset},
+		{"GloryEngine.Font", SerializedType::ST_Asset},
 		{"GloryEngine.Quaternion", ResourceTypes::GetHash<glm::quat>()},
 		{"GloryEngine.Vector2", ResourceTypes::GetHash<glm::vec2>()},
 		{"GloryEngine.Vector3", ResourceTypes::GetHash<glm::vec3>()},
@@ -52,6 +54,7 @@ namespace Glory
 		{"GloryEngine.Image", ResourceTypes::GetHash<ImageData>()},
 		{"GloryEngine.Prefab", ResourceTypes::GetHash<PrefabData>()},
 		{"GloryEngine.Audio", ResourceTypes::GetHash<AudioData>()},
+		{"GloryEngine.Font", ResourceTypes::GetHash<FontData>()},
 	};
 
 	Assembly::Assembly(AssemblyDomain* pDomain)

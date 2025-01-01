@@ -11,7 +11,6 @@
 #include <GraphicsModule.h>
 #include <WindowModule.h>
 
-#include <GraphicsThread.h>
 #include <Debug.h>
 #include <AssetArchive.h>
 #include <BinaryStream.h>
@@ -87,7 +86,6 @@ namespace Glory
 		m_pEngine->SetPipelineManager(m_PipelineManager.get());
 		m_pEngine->Initialize();
 
-		m_pEngine->GetGraphicsThread()->BindBeginAndEndRender(this);
 		m_pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		m_pWindows = m_pEngine->GetMainModule<WindowModule>();
@@ -146,12 +144,12 @@ namespace Glory
 
 	void GloryRuntime::Run()
 	{
-		m_pEngine->StartThreads();
 		m_pEngine->GetSceneManager()->Start();
 
 		while (!m_pEngine->WantsToQuit())
 		{
 			m_pEngine->Update();
+			EndFrame();
 		}
 
 		m_pEngine->GetSceneManager()->Stop();
@@ -249,7 +247,7 @@ namespace Glory
 		m_MaxFramerate = limit;
 	}
 
-	void GloryRuntime::GraphicsThreadEndRender()
+	void GloryRuntime::EndFrame()
 	{
 		RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
 		m_pGraphics->Blit(pTexture);
@@ -263,14 +261,14 @@ namespace Glory
 
 		/* Limit framerate */
 		std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
-		const double frameIntervals = 1.0f/m_MaxFramerate;
+		const double frameIntervals = 1.0f / m_MaxFramerate;
 		double timeSinceRefresh = 0.0f;
 
 		while (timeSinceRefresh < frameIntervals)
 		{
 			currentTime = std::chrono::system_clock::now();
 			std::chrono::duration<double> frameDuration = currentTime - m_LastRenderedFrame;
-			timeSinceRefresh = std::chrono::duration_cast<std::chrono::nanoseconds>(frameDuration).count()/1000000000.0;
+			timeSinceRefresh = std::chrono::duration_cast<std::chrono::nanoseconds>(frameDuration).count() / 1000000000.0;
 		}
 		m_LastRenderedFrame = std::chrono::system_clock::now();
 	}

@@ -3,17 +3,17 @@
 
 #include <GameTime.h>
 #include <imgui.h>
-#include <TimerModule.h>
 #include <Engine.h>
 #include <GraphicsModule.h>
 #include <RendererModule.h>
+#include <GameTime.h>
 
 namespace Glory::Editor
 {
 	const float PerformanceMetrics::REFRESHINTERVALS = 0.1f;
 
 	PerformanceMetrics::PerformanceMetrics() : EditorWindowTemplate("Performance Metrics", 200.0f, 200.0f), 
-		m_LastFrameTime(0.0f), m_LastFramerate(0.0f), m_LastGameThreadFrameTime(0.0f), m_LastGraphicsThreadFrameTime(0.0f) {}
+		m_LastFrameTime(0.0f), m_LastFramerate(0.0f) {}
 
 	PerformanceMetrics::~PerformanceMetrics() {}
 
@@ -23,13 +23,12 @@ namespace Glory::Editor
 
 		std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
 		std::chrono::duration<float> frameDuration = currentTime - m_LastRefresh;
-		float timeSinceRefresh = std::chrono::duration_cast<seconds>(frameDuration).count();
+		float timeSinceRefresh = std::chrono::duration_cast<std::chrono::seconds>(frameDuration).count();
 		if (timeSinceRefresh >= REFRESHINTERVALS)
 			Refresh();
 
 		ImGui::Text("Average Frame Time: %.3f ms - Framerate: %.1f", m_LastFrameTime, m_LastFramerate);
-		ImGui::Text("Average Game Time: %.3f ms - Average Graphics Time: %.3f ms", m_LastGameThreadFrameTime, m_LastGraphicsThreadFrameTime);
-		ImGui::Text("Frame Count: %d - Game Frame Count: %d", pEngine->Time().GetTotalFrames(), pEngine->Time().GetTotalGameFrames());
+		ImGui::Text("Frame Count: %d", pEngine->Time().GetTotalFrames());
 
 		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
 		ImGui::Text("Draw Calls: %d - Vertices: %d - Triangles: %d", pGraphics->GetLastDrawCalls(), pGraphics->GetLastVertexCount(), pGraphics->GetLastTriangleCount());
@@ -42,10 +41,8 @@ namespace Glory::Editor
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
-		m_LastFrameTime = pEngine->Time().GetUnscaledDeltaTime<float, std::milli>();
+		m_LastFrameTime = pEngine->Time().GetUnscaledDeltaTime();
 		m_LastFramerate = pEngine->Time().GetFrameRate();
-		m_LastGameThreadFrameTime = pEngine->Time().GetUnscaledGameDeltaTime<float, std::milli>();
-		m_LastGraphicsThreadFrameTime = pEngine->Time().GetUnscaledGraphicsDeltaTime<float, std::milli>();
 
 		m_LastRefresh = std::chrono::system_clock::now();
 	}

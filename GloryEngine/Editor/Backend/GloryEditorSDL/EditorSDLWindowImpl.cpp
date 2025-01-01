@@ -70,9 +70,16 @@ namespace Glory::Editor
 				m_AltIsDown = false;
 
 			EditorWindow* gameWindow = EditorWindow::FindEditorWindow(typeid(GameWindow));
-			if (gameWindow && gameWindow->IsFocused() && !m_AltIsDown && pSDLWindow->HandleInputEvents(event)) continue;
+			const bool lockInput = gameWindow && gameWindow->IsFocused() && !m_AltIsDown
+				&& pSDLWindow->HandleInputEvents(event) && pSDLWindow->HasFocus();
+			pSDLWindow->ForceShowCursor(!lockInput);
+			pSDLWindow->ForceUnlockCursor(!lockInput);
+			pSDLWindow->ForceUngrabInput(!lockInput);
 
-			if (ImGui_ImplSDL2_ProcessEvent(&event)) continue;
+			if (event.type == SDL_WINDOWEVENT)
+				pSDLWindow->HandleWindowFocusEvents(event.window);
+
+			if (!lockInput && ImGui_ImplSDL2_ProcessEvent(&event)) continue;
 
 			switch (event.type)
 			{

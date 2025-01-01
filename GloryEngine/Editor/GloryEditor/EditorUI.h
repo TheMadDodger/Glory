@@ -57,6 +57,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool InputColor(std::string_view label, glm::vec4* value, const bool hdr);
 		static GLORY_EDITOR_API bool InputColor(Utils::YAMLFileRef& file, const std::filesystem::path& path, const bool hdr);
 
+		static GLORY_EDITOR_API bool InputText(std::string_view label, std::string* value, ImGuiInputTextFlags flags = 0);
+		static GLORY_EDITOR_API bool InputTextMultiline(std::string_view label, std::string* value, ImGuiInputTextFlags flags = 0);
 		static GLORY_EDITOR_API bool InputText(std::string_view label, char* value, size_t bufferSize, ImGuiInputTextFlags flags = 0);
 		static GLORY_EDITOR_API bool InputText(Utils::YAMLFileRef& file, const std::filesystem::path& path, ImGuiInputTextFlags flags = 0);
 

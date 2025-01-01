@@ -36,12 +36,16 @@ namespace Glory::Editor
 		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeU");
 		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeV");
 		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeW");
+		change |= EditorUI::InputEnum<Filter>(file, "Sampler/MipmapMode");
 
 		if (change)
 		{
-			EditorApplication::GetInstance()->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
+			EditorApplication* pApplication = EditorApplication::GetInstance();
+			pApplication->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
+			EditorAssetDatabase::SetAssetDirty(pTextureData);
 			Tumbnail::SetDirty(pTextureData->GetUUID());
 			pTextureData->SetDirty(true);
+			
 		}
 		return change;
 	}
@@ -63,11 +67,12 @@ namespace Glory::Editor
 		AssetPicker::ResourceDropdown("Image", ResourceTypes::GetHash<ImageData>(), imageRef.AssetUUIDMember());
 
 		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
-		EditorUI::InputEnum<Filter>("Sampler/MinFilter", &sampler.MinFilter);
-		EditorUI::InputEnum<Filter>("Sampler/MagFilter", &sampler.MagFilter);
-		EditorUI::InputEnum<SamplerAddressMode>("Sampler/AddressModeU", &sampler.AddressModeU);
-		EditorUI::InputEnum<SamplerAddressMode>("Sampler/AddressModeV", &sampler.AddressModeV);
-		EditorUI::InputEnum<SamplerAddressMode>("Sampler/AddressModeW", &sampler.AddressModeW);
+		EditorUI::InputEnum<Filter>("MinFilter", &sampler.MinFilter);
+		EditorUI::InputEnum<Filter>("MagFilter", &sampler.MagFilter);
+		EditorUI::InputEnum<SamplerAddressMode>("AddressModeU", &sampler.AddressModeU);
+		EditorUI::InputEnum<SamplerAddressMode>("AddressModeV", &sampler.AddressModeV);
+		EditorUI::InputEnum<SamplerAddressMode>("AddressModeW", &sampler.AddressModeW);
+		EditorUI::InputEnum<Filter>("MipmapMode", &sampler.MipmapMode);
 		ImGui::EndDisabled();
 
 		return false;

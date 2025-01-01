@@ -80,4 +80,14 @@ namespace Glory::Utils::ECS
 	{
 		return m_Entities[index];
 	}
+
+	BitSet& BaseTypeView::ActiveStates()
+	{
+		return m_ActiveStates;
+	}
+
+	const BitSet& BaseTypeView::ActiveStates() const
+	{
+		return m_ActiveStates;
+	}
 }

@@ -68,22 +68,12 @@ namespace Glory
 	{
 	}
 
-	void ProfilerModule::OnGameThreadFrameStart()
+	void ProfilerModule::OnBeginFrame()
 	{
 		BeginThread("Game");
 	}
 
-	void ProfilerModule::OnGameThreadFrameEnd()
-	{
-		EndThread();
-	}
-
-	void ProfilerModule::OnGraphicsThreadFrameStart()
-	{
-		BeginThread("Graphics");
-	}
-
-	void ProfilerModule::OnGraphicsThreadFrameEnd()
+	void ProfilerModule::OnEndFrame()
 	{
 		EndThread();
 	}

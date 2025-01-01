@@ -7,7 +7,6 @@
 #include <ImGuizmo.h>
 #include <imgui_internal.h>
 #include <Engine.h>
-#include <GraphicsThread.h>
 
 #include <IconsFontAwesome6.h>
 #include <IconsFontAwesome6Brand.h>
@@ -18,7 +17,7 @@ namespace Glory::Editor
 
 	EditorPlatform::EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl):
 		m_pWindowImpl(pWindowImpl), m_pRenderImpl(pRenderImpl),
-		m_RenderState(Initializing), m_pImguiConext(nullptr), m_Windowless(!m_pWindowImpl)
+		m_pImguiConext(nullptr), m_Windowless(!m_pWindowImpl)
 	{
 		if (m_pWindowImpl) m_pWindowImpl->m_pEditorPlatform = this;
 		if (m_pRenderImpl) m_pRenderImpl->m_pEditorPlatform = this;
@@ -43,12 +42,6 @@ namespace Glory::Editor
 		LoadFonts();
 		m_pRenderImpl->UploadImGUIFonts();
 
-		pEngine->GetGraphicsThread()->BindInitializeOnly<EditorPlatform>(this);
-		pEngine->GetGraphicsThread()->BindBeginAndEndRender<EditorPlatform>(this);
-	}
-
-	void EditorPlatform::ThreadedInitialize()
-	{
 		m_pRenderImpl->Initialize();
 		m_pRenderImpl->SetupBackend();
 	}
@@ -67,17 +60,6 @@ namespace Glory::Editor
 		ImGui::DestroyContext();
 
 		EditorAssets::Destroy();
-	}
-
-	void EditorPlatform::Wait(const EditorRenderState& waitState)
-	{
-		while (true)
-		{
-			std::unique_lock<std::mutex> lock(m_Mutex);
-			EditorRenderState renderState = m_RenderState;
-			lock.unlock();
-			if (renderState == waitState) return;
-		}
 	}
 
 	EditorWindowImpl* EditorPlatform::GetWindowImpl()
@@ -125,26 +107,15 @@ namespace Glory::Editor
 		ImGuizmo::Enable(true);
 	}
 
-	void EditorPlatform::GraphicsThreadBeginRender()
+	void EditorPlatform::BeginFrame()
 	{
 		EditorAssets::LoadAssets();
-
-		Wait(Idle);
-
 		m_pRenderImpl->BeforeRender();
 		NewFrame();
-
-		std::unique_lock<std::mutex> lock(m_Mutex);
-		m_RenderState = Begin;
-		lock.unlock();
-
-		Wait(Idle);
 	}
 
-	void EditorPlatform::GraphicsThreadEndRender()
+	void EditorPlatform::EndFrame()
 	{
-		Wait(Idle);
-
 		ImGuiIO& io = m_pImguiConext->IO;
 		// Rendering
 		ImGui::Render();
@@ -167,12 +138,6 @@ namespace Glory::Editor
 		// Present Main Platform Window
 		if (!main_is_minimized)
 			m_pRenderImpl->FramePresent();
-
-		std::unique_lock<std::mutex> lock(m_Mutex);
-		m_RenderState = End;
-		lock.unlock();
-
-		Wait(Idle);
 	}
 
 	void EditorPlatform::LoadFonts()
@@ -193,12 +158,5 @@ namespace Glory::Editor
 		ImFont* pIconBrandsFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/FA/" FONT_ICON_FILE_NAME_FAB, 14.0f, &config, brandIconRanges);
 
 		LargeFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/PT_Sans/PTSans-Regular.ttf", 24.0f);
-	}
-
-	void EditorPlatform::SetState(const EditorRenderState& state)
-	{
-		std::unique_lock<std::mutex> lock(m_Mutex);
-		m_RenderState = state;
-		lock.unlock();
 	}
 }

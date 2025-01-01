@@ -1,17 +1,13 @@
 #include "GraphicsModule.h"
-#include "GraphicsThread.h"
-#include "FrameStates.h"
 #include "Engine.h"
 
 namespace Glory
 {
-	GraphicsModule::GraphicsModule() : m_pFrameStates(nullptr), m_pResourceManager(nullptr), m_CurrentDrawCalls(0), m_LastDrawCalls(0),
+	GraphicsModule::GraphicsModule() : m_pResourceManager(nullptr), m_CurrentDrawCalls(0), m_LastDrawCalls(0),
 		m_LastVertices(0), m_CurrentVertices(0), m_LastTriangles(0), m_CurrentTriangles(0) {}
 
 	GraphicsModule::~GraphicsModule()
 	{
-		delete m_pFrameStates;
-		m_pFrameStates = nullptr;
 	}
 
 	const std::type_info& GraphicsModule::GetModuleType()
@@ -52,54 +48,33 @@ namespace Glory
 		OnDrawMesh(pMesh, vertexOffset, vertexCount);
 	}
 
-	FrameStates* GraphicsModule::GetFrameStates()
-	{
-		return m_pFrameStates;
-	}
-
 	GPUResourceManager* GraphicsModule::GetResourceManager()
 	{
 		return m_pResourceManager;
 	}
 
-	void GraphicsModule::ThreadedCleanup()
-	{
-		delete m_pResourceManager;
-		m_pResourceManager = nullptr;
-	}
-
-	FrameStates* GraphicsModule::CreateFrameStates()
-	{
-		return new FrameStates(this);
-	}
-
 	void GraphicsModule::Initialize()
 	{
-		m_pFrameStates = CreateFrameStates();
 		m_pResourceManager = CreateGPUResourceManager();
 		OnInitialize();
-		m_pFrameStates->Initialize();
-	}
-
-	void GraphicsModule::PostInitialize()
-	{
-		/* Bind to graphics thread */
-		m_pEngine->GetGraphicsThread()->BindNoRender(this);
 	}
 
 	void GraphicsModule::Cleanup()
 	{
 		OnCleanup();
+
+		delete m_pResourceManager;
+		m_pResourceManager = nullptr;
 	}
 
-	void GraphicsModule::OnGraphicsThreadFrameStart()
+	void GraphicsModule::OnBeginFrame()
 	{
 		m_CurrentDrawCalls = 0;
 		m_CurrentVertices = 0;
 		m_CurrentTriangles = 0;
 	}
 
-	void GraphicsModule::OnGraphicsThreadFrameEnd()
+	void GraphicsModule::OnEndFrame()
 	{
 		m_LastDrawCalls = m_CurrentDrawCalls;
 		m_LastVertices = m_CurrentVertices;

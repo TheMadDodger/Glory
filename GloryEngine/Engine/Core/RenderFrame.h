@@ -64,6 +64,7 @@ namespace Glory
 
 	public:
 		std::vector<RenderData> ObjectsToRender;
+		std::vector<TextRenderData> TextsToRender;
 		std::vector<RenderData> ObjectsToRenderLate;
 		std::vector<CameraRef> ActiveCameras;
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;

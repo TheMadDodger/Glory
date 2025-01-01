@@ -36,6 +36,7 @@ namespace Glory::Editor
 		m_SceneFiles.push_back(YAMLResource<GScene>{});
 		pNewScene->SetManager(this);
 		SetSceneDirty(pNewScene);
+		SetupCallbacks(pNewScene);
 		return pNewScene;
 	}
 

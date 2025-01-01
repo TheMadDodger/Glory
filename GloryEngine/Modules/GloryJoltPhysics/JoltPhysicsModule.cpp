@@ -97,6 +97,18 @@ namespace Glory
 		return bodyID.GetIndexAndSequenceNumber();
 	}
 
+	void JoltPhysicsModule::SetBodyUserData(uint32_t bodyID, uint64_t userData)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		bodyInterface.SetUserData(JPH::BodyID{ bodyID }, userData);
+	}
+
+	uint64_t JoltPhysicsModule::GetBodyUserData(uint32_t bodyID)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		return bodyInterface.GetUserData(JPH::BodyID{ bodyID });
+	}
+
 	void JoltPhysicsModule::DestroyPhysicsBody(uint32_t& bodyID)
 	{
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
@@ -536,12 +548,12 @@ namespace Glory
 		return m_CollisionMatrix[layer1][layer2];
 	}
 
-	void JoltPhysicsModule::RegisterContactCallback(ContactCallback callbackType, std::function<void(uint32_t, uint32_t)> callback)
+	void JoltPhysicsModule::RegisterContactCallback(ContactCallback callbackType, std::function<void(JoltPhysicsModule*, uint32_t, uint32_t)> callback)
 	{
 		m_ContactCallbacks[callbackType].push_back(callback);
 	}
 
-	void JoltPhysicsModule::RegisterActivationCallback(ActivationCallback callbackType, std::function<void(uint32_t)> callback)
+	void JoltPhysicsModule::RegisterActivationCallback(ActivationCallback callbackType, std::function<void(JoltPhysicsModule*, uint32_t)> callback)
 	{
 		m_ActivationCallbacks[callbackType].push_back(callback);
 	}
@@ -550,7 +562,7 @@ namespace Glory
 	{
 		for (size_t i = 0; i < m_ContactCallbacks[callbackType].size(); i++)
 		{
-			m_ContactCallbacks[callbackType][i](bodyID1, bodyID2);
+			m_ContactCallbacks[callbackType][i](this, bodyID1, bodyID2);
 		}
 	}
 
@@ -558,7 +570,7 @@ namespace Glory
 	{
 		for (size_t i = 0; i < m_ActivationCallbacks[callbackType].size(); i++)
 		{
-			m_ActivationCallbacks[callbackType][i](bodyID);
+			m_ActivationCallbacks[callbackType][i](this, bodyID);
 		}
 	}
 
@@ -728,7 +740,7 @@ namespace Glory
 		static uint32_t step = 0;
 		
 		// We simulate the physics world in discrete time steps.
-		const float engineDeltaTime = m_pEngine->Time().GetDeltaTime<float, std::ratio<1, 1>>();
+		const float engineDeltaTime = m_pEngine->Time().GetDeltaTime();
 		const uint32_t tickRate = Settings().Value<unsigned int>("TickRate");
 		static float timer = 0.0f;
 		timer += engineDeltaTime;

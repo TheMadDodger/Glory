@@ -30,6 +30,11 @@ namespace Glory
 
 		uint32_t AddVertex(const float* vertex);
 		void AddFace(uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3);
+		void ClearVertices();
+		void ClearIndices();
+
+		bool IsDirty() const;
+		void SetDirty(bool dirty);
 
 	private:
 		friend class Mesh;
@@ -39,5 +44,6 @@ namespace Glory
 		uint32_t m_VertexCount;
 		uint32_t m_IndexCount;
 		uint32_t m_VertexSize;
+		bool m_IsDirty;
 	};
 }

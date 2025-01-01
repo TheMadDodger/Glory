@@ -45,10 +45,12 @@ namespace Glory
 		GLORY_API JoltPhysicsModule();
 		GLORY_API virtual ~JoltPhysicsModule();
 
-		GLORY_MODULE_VERSION_H(0,4,0);
+		GLORY_MODULE_VERSION_H(0,5,0);
 
 		/* Body management */
 		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex);
+		GLORY_API void SetBodyUserData(uint32_t bodyID, uint64_t userData);
+		GLORY_API uint64_t GetBodyUserData(uint32_t bodyID);
 		GLORY_API void DestroyPhysicsBody(uint32_t& bodyID);
 		GLORY_API void PollPhysicsState(uint32_t bodyID, glm::vec3* outPosition, glm::quat* outRotation);
 
@@ -116,8 +118,8 @@ namespace Glory
 		GLORY_API void SetCollisionMatrix(std::vector<std::vector<bool>>&& matrix);
 		GLORY_API bool ShouldCollide(uint16_t layer1, uint16_t layer2) const;
 
-		GLORY_API void RegisterContactCallback(ContactCallback callbackType, std::function<void(uint32_t, uint32_t)> callback);
-		GLORY_API void RegisterActivationCallback(ActivationCallback callbackType, std::function<void(uint32_t)> callback);
+		GLORY_API void RegisterContactCallback(ContactCallback callbackType, std::function<void(JoltPhysicsModule*, uint32_t, uint32_t)> callback);
+		GLORY_API void RegisterActivationCallback(ActivationCallback callbackType, std::function<void(JoltPhysicsModule*, uint32_t)> callback);
 
 		GLORY_API void TriggerContactCallback(ContactCallback callbackType, uint32_t bodyID1, uint32_t bodyID2);
 		GLORY_API void TriggerActivationCallback(ActivationCallback callbackType, uint32_t bodyID);
@@ -199,7 +201,7 @@ namespace Glory
 		std::map<ContactCallback, std::vector<std::pair<uint32_t, uint32_t>>> m_LateContactCallbacks;
 
 		std::vector<std::vector<bool>> m_CollisionMatrix;
-		std::map<ContactCallback, std::vector<std::function<void(uint32_t, uint32_t)>>> m_ContactCallbacks;
-		std::map<ActivationCallback, std::vector<std::function<void(uint32_t)>>> m_ActivationCallbacks;
+		std::map<ContactCallback, std::vector<std::function<void(JoltPhysicsModule*, uint32_t, uint32_t)>>> m_ContactCallbacks;
+		std::map<ActivationCallback, std::vector<std::function<void(JoltPhysicsModule*, uint32_t)>>> m_ActivationCallbacks;
     };
 }

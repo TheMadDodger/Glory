@@ -41,16 +41,14 @@ namespace Glory
 		virtual void OnCameraResize(CameraRef camera) override;
 		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
 
-		GLORY_MODULE_VERSION_H(0,2,0);
+		GLORY_MODULE_VERSION_H(0,3,0);
 
 	private:
 		virtual void Cleanup() override;
-		virtual void OnPostInitialize() override;
-
-		virtual void OnThreadedInitialize() override;
-		virtual void OnThreadedCleanup() override;
+		virtual void OnPostInitialize() override;;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
+		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
 		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 
@@ -116,5 +114,17 @@ namespace Glory
 		MaterialData* m_pSSRMaterial = nullptr;
 		MaterialData* m_pSSAOMaterial = nullptr;
 		MaterialData* m_pSSAOBlurMaterial = nullptr;
+
+		Mesh* m_pQuadMesh;
+		Buffer* m_pQuadMeshVertexBuffer;
+		Buffer* m_pQuadMeshIndexBuffer;
+
+		FileData* m_pTextVertShader = nullptr;
+		FileData* m_pTextFragShader = nullptr;
+		PipelineData* m_pTextPipelineData = nullptr;
+		MaterialData* m_pTextMaterialData = nullptr;
+		Material* m_pTextMaterial = nullptr;
+
+		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 	};
 }

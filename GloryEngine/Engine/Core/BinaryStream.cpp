@@ -1,5 +1,7 @@
 #include "BinaryStream.h"
 
+#include <BitSet.h>
+
 namespace Glory
 {
 	BinaryFileStream::BinaryFileStream(const std::filesystem::path& path, bool read, bool trunc):
@@ -80,6 +82,11 @@ namespace Glory
 		return Write(value.data(), value.size());
 	}
 
+	BinaryStream& BinaryStream::Write(const Utils::BitSet& value)
+	{
+		return Write(value.DataSize()).Write(value.Data(), value.DataSize());
+	}
+
 	BinaryStream& BinaryStream::Write(const std::vector<std::string>& value)
 	{
 		Write(value.size());
@@ -111,6 +118,14 @@ namespace Glory
 		Read(size);
 		value.resize(size);
 		return Read(value.data(), size);
+	}
+
+	BinaryStream& BinaryStream::Read(Utils::BitSet& value)
+	{
+		size_t size = 0;
+		Read(size);
+		value.Reserve(size*8);
+		return Read(value.Data(), size);
 	}
 
 	BinaryStream& BinaryStream::Read(void* out, size_t size)

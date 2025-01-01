@@ -11,7 +11,7 @@
 
 namespace Glory
 {
-	std::map<uint32_t, std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>> PhysicsSystem::m_BodyOwners;
+	std::map<UUID, UUID> PhysicsSystem::m_CachedSceneIDs;
 
 	PhysicsSystem::~PhysicsSystem()
 	{
@@ -45,7 +45,7 @@ namespace Glory
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics) return;
 		if (pComponent.m_BodyID == PhysicsBody::InvalidBodyID) return;
-		m_BodyOwners.erase(pComponent.m_BodyID);
+		m_CachedSceneIDs.erase(pScene->GetEntityUUID(entity));
 		pPhysics->DestroyPhysicsBody(pComponent.m_BodyID);
 	}
 
@@ -65,7 +65,7 @@ namespace Glory
 		if(pComponent.m_BodyID == PhysicsBody::InvalidBodyID) return;
 
 		/* Destroy the body */
-		m_BodyOwners.erase(pComponent.m_BodyID);
+		m_CachedSceneIDs.erase(pScene->GetEntityUUID(entity));
 		pPhysics->DestroyPhysicsBody(pComponent.m_BodyID);
 
 		/* Create new body */
@@ -128,84 +128,81 @@ namespace Glory
 		pRegistry->SetEntityDirty(entity);
 	}
 
-	void PhysicsSystem::OnBodyActivated(uint32_t bodyID)
+	void PhysicsSystem::OnBodyActivated(JoltPhysicsModule* pPhysics, uint32_t bodyID)
 	{
-		if (m_BodyOwners.find(bodyID) == m_BodyOwners.end()) return;
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair = m_BodyOwners.at(bodyID);
-		Utils::ECS::EntityRegistry* pRegistry = pair.first;
-		Utils::ECS::EntityID entity = pair.second;
-		if (!pRegistry->IsValid(entity)) return;
+		const UUID entityUUID = pPhysics->GetBodyUserData(bodyID);
+		auto iter = m_CachedSceneIDs.find(entityUUID);
+		if (iter == m_CachedSceneIDs.end()) return;
+		GScene* pScene = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter->second);
+		if (!pScene) return;
 		if (!Instance()->OnBodyActivated_Callback) return;
-		Instance()->OnBodyActivated_Callback(pRegistry, entity, bodyID);
+		Instance()->OnBodyActivated_Callback(pPhysics->GetEngine(), pScene->GetUUID(), entityUUID);
 	}
 
-	void PhysicsSystem::OnBodyDeactivated(uint32_t bodyID)
+	void PhysicsSystem::OnBodyDeactivated(JoltPhysicsModule* pPhysics, uint32_t bodyID)
 	{
-		if (m_BodyOwners.find(bodyID) == m_BodyOwners.end()) return;
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair = m_BodyOwners.at(bodyID);
-		Utils::ECS::EntityRegistry* pRegistry = pair.first;
-		Utils::ECS::EntityID entity = pair.second;
-		if (!pRegistry->IsValid(entity)) return;
+		const UUID entityUUID = pPhysics->GetBodyUserData(bodyID);
+		auto iter = m_CachedSceneIDs.find(entityUUID);
+		if (iter == m_CachedSceneIDs.end()) return;
+		GScene* pScene = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter->second);
+		if (!pScene) return;
 		if (!Instance()->OnBodyDeactivated_Callback) return;
-		Instance()->OnBodyDeactivated_Callback(pRegistry, entity, bodyID);
+		Instance()->OnBodyDeactivated_Callback(pPhysics->GetEngine(), pScene->GetUUID(), entityUUID);
 	}
 
-	void PhysicsSystem::OnContactAdded(uint32_t body1ID, uint32_t body2ID)
+	void PhysicsSystem::OnContactAdded(JoltPhysicsModule* pPhysics, uint32_t body1ID, uint32_t body2ID)
 	{
-		if (m_BodyOwners.find(body1ID) == m_BodyOwners.end()) return;
-		if (m_BodyOwners.find(body2ID) == m_BodyOwners.end()) return;
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair1 = m_BodyOwners.at(body1ID);
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair2 = m_BodyOwners.at(body2ID);
-		Utils::ECS::EntityRegistry* pRegistry1 = pair1.first;
-		Utils::ECS::EntityRegistry* pRegistry2 = pair2.first;
-		Utils::ECS::EntityID entity1 = pair1.second;
-		Utils::ECS::EntityID entity2 = pair2.second;
-		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+		const UUID entity1UUID = pPhysics->GetBodyUserData(body1ID);
+		const UUID entity2UUID = pPhysics->GetBodyUserData(body2ID);
+		auto iter1 = m_CachedSceneIDs.find(entity1UUID);
+		auto iter2 = m_CachedSceneIDs.find(entity2UUID);
+		if (iter1 == m_CachedSceneIDs.end()) return;
+		if (iter2 == m_CachedSceneIDs.end()) return;
+		GScene* pScene1 = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter1->second);
+		GScene* pScene2 = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter2->second);
+		if (!pScene1 || !pScene2) return;
 		if (!Instance()->OnContactAdded_Callback) return;
-		Instance()->OnContactAdded_Callback(pRegistry1, entity1, body1ID, body2ID);
-		Instance()->OnContactAdded_Callback(pRegistry2, entity2, body2ID, body1ID);
+		Instance()->OnContactAdded_Callback(pPhysics->GetEngine(), pScene1->GetUUID(), entity1UUID, pScene2->GetUUID(), entity2UUID);
 	}
 
-	void PhysicsSystem::OnContactPersisted(uint32_t body1ID, uint32_t body2ID)
+	void PhysicsSystem::OnContactPersisted(JoltPhysicsModule* pPhysics, uint32_t body1ID, uint32_t body2ID)
 	{
-		if (m_BodyOwners.find(body1ID) == m_BodyOwners.end()) return;
-		if (m_BodyOwners.find(body2ID) == m_BodyOwners.end()) return;
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair1 = m_BodyOwners.at(body1ID);
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair2 = m_BodyOwners.at(body2ID);
-		Utils::ECS::EntityRegistry* pRegistry1 = pair1.first;
-		Utils::ECS::EntityRegistry* pRegistry2 = pair2.first;
-		Utils::ECS::EntityID entity1 = pair1.second;
-		Utils::ECS::EntityID entity2 = pair2.second;
-		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+		const UUID entity1UUID = pPhysics->GetBodyUserData(body1ID);
+		const UUID entity2UUID = pPhysics->GetBodyUserData(body2ID);
+		auto iter1 = m_CachedSceneIDs.find(entity1UUID);
+		auto iter2 = m_CachedSceneIDs.find(entity2UUID);
+		if (iter1 == m_CachedSceneIDs.end()) return;
+		if (iter2 == m_CachedSceneIDs.end()) return;
+		GScene* pScene1 = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter1->second);
+		GScene* pScene2 = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter2->second);
+		if (!pScene1 || !pScene2) return;
 		if (!Instance()->OnContactPersisted_Callback) return;
-		Instance()->OnContactPersisted_Callback(pRegistry1, entity1, body1ID, body2ID);
-		Instance()->OnContactPersisted_Callback(pRegistry2, entity2, body2ID, body1ID);
+		Instance()->OnContactPersisted_Callback(pPhysics->GetEngine(), pScene1->GetUUID(), entity1UUID, pScene2->GetUUID(), entity2UUID);
 	}
 
-	void PhysicsSystem::OnContactRemoved(uint32_t body1ID, uint32_t body2ID)
+	void PhysicsSystem::OnContactRemoved(JoltPhysicsModule* pPhysics, uint32_t body1ID, uint32_t body2ID)
 	{
-		if (m_BodyOwners.find(body1ID) == m_BodyOwners.end()) return;
-		if (m_BodyOwners.find(body2ID) == m_BodyOwners.end()) return;
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair1 = m_BodyOwners.at(body1ID);
-		const std::pair<Utils::ECS::EntityRegistry*, Utils::ECS::EntityID>& pair2 = m_BodyOwners.at(body2ID);
-		Utils::ECS::EntityRegistry* pRegistry1 = pair1.first;
-		Utils::ECS::EntityRegistry* pRegistry2 = pair2.first;
-		Utils::ECS::EntityID entity1 = pair1.second;
-		Utils::ECS::EntityID entity2 = pair2.second;
-		if (!pRegistry1->IsValid(entity1) || !pRegistry2->IsValid(entity2)) return;
+		const UUID entity1UUID = pPhysics->GetBodyUserData(body1ID);
+		const UUID entity2UUID = pPhysics->GetBodyUserData(body2ID);
+		auto iter1 = m_CachedSceneIDs.find(entity1UUID);
+		auto iter2 = m_CachedSceneIDs.find(entity2UUID);
+		if (iter1 == m_CachedSceneIDs.end()) return;
+		if (iter2 == m_CachedSceneIDs.end()) return;
+		GScene* pScene1 = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter1->second);
+		GScene* pScene2 = pPhysics->GetEngine()->GetSceneManager()->GetOpenScene(iter2->second);
+		if (!pScene1 || !pScene2) return;
 		if (!Instance()->OnContactRemoved_Callback) return;
-		Instance()->OnContactRemoved_Callback(pRegistry1, entity1, body1ID, body2ID);
-		Instance()->OnContactRemoved_Callback(pRegistry2, entity2, body2ID, body1ID);
+		Instance()->OnContactRemoved_Callback(pPhysics->GetEngine(), pScene1->GetUUID(), entity1UUID, pScene2->GetUUID(), entity2UUID);
 	}
 
-	void PhysicsSystem::AddBody(uint32_t bodyID, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity)
+	void PhysicsSystem::AddToSceneIDsCache(UUID entityUUID, UUID sceneID)
 	{
-		m_BodyOwners[bodyID] = { pRegistry, entity };
+		m_CachedSceneIDs.emplace(entityUUID, sceneID);
 	}
 
-	void PhysicsSystem::RemoveBody(uint32_t bodyID)
+	void PhysicsSystem::RemoveFromSceneIDsCache(UUID entityUUID)
 	{
-		m_BodyOwners.erase(bodyID);
+		m_CachedSceneIDs.erase(entityUUID);
 	}
 
 	PhysicsSystem* PhysicsSystem::Instance()
@@ -216,6 +213,8 @@ namespace Glory
 
 	void PhysicsSystem::SetupBody(JoltPhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+
 		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
 
 		const Transform& transform = pRegistry->GetComponent<Transform>(entity);
@@ -235,6 +234,8 @@ namespace Glory
 		glm::vec4 perspective;
 		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
 		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, translation, rotation, scale, pComponent.m_BodyType, pComponent.m_CurrentLayerIndex);
-		m_BodyOwners[pComponent.m_BodyID] = { pRegistry, entity };
+		const UUID entityUUID = pScene->GetEntityUUID(entity);
+		pPhysics->SetBodyUserData(pComponent.m_BodyID, entityUUID);
+		m_CachedSceneIDs.emplace(entityUUID, pScene->GetUUID());
 	}
 }

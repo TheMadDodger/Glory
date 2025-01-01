@@ -16,6 +16,7 @@ namespace Glory
 		static const int MAX_DISPLAYS = 10;
 
 		void ClearAllDisplays(Engine* pEngine);
+		void ResizeAllTextures(uint32_t width, uint32_t height);
 
 		RenderTexture* CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height);
 

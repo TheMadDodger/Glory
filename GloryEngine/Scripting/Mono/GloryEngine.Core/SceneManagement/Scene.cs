@@ -104,7 +104,6 @@ namespace GloryEngine.SceneManagement
             if (objectID == 0) return null;
             if (_objectsCache.ContainsKey(objectID)) return _objectsCache[objectID];
             SceneObject sceneObject = new SceneObject(objectID, this);
-            Debug.LogInfo("Created mono scene object for ID " + objectID.ToString());
             _objectsCache.Add(objectID, sceneObject);
             return sceneObject;
         }
@@ -138,9 +137,7 @@ namespace GloryEngine.SceneManagement
                 throw new Exception("This Scene has been marked for destruction.");
             }
             UInt64 newObjectID = Scene_InstantiatePrefab(_objectID, prefab.ID, new Vector3(), Quaternion.Identity, new Vector3(1, 1, 1), parent != null ? parent.ID : 0);
-            SceneObject sceneObject = new SceneObject(newObjectID, this);
-            _objectsCache.Add(newObjectID, sceneObject);
-            return sceneObject;
+            return GetSceneObject(newObjectID);
         }
 
         /// <summary>
@@ -159,9 +156,7 @@ namespace GloryEngine.SceneManagement
                 throw new Exception("This Scene has been marked for destruction.");
             }
             UInt64 newObjectID = Scene_InstantiatePrefab(_objectID, prefab.ID, position, rotation, scale, parent != null ? parent.ID : 0);
-            SceneObject sceneObject = new SceneObject(newObjectID, this);
-            _objectsCache.Add(newObjectID, sceneObject);
-            return sceneObject;
+            return GetSceneObject(newObjectID);
         }
 
         internal void OnSceneDestroy()

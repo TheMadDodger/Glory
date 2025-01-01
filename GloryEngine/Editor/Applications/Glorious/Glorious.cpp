@@ -18,10 +18,12 @@ int main(int argc, char* argv[])
     {
         Glory::WindowCreateInfo windowCreateInfo;
         windowCreateInfo.WindowName = "Glorious";
-        windowCreateInfo.Width = 2560;
-        windowCreateInfo.Height = 1300;
+        windowCreateInfo.Width = 0.0f;
+        windowCreateInfo.Height = 0.0f;
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
         windowCreateInfo.WindowFlags = 2 | 32;
+        windowCreateInfo.Fullscreen = false;
+        windowCreateInfo.Maximize = true;
 
         Glory::Console console;
         Glory::Debug debug{ &console };

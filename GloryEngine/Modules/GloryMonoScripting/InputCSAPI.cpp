@@ -1,4 +1,5 @@
 #include "InputCSAPI.h"
+#include "MathCSAPI.h"
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
 
@@ -89,6 +90,12 @@ namespace Glory
 		InputModule* pInputModule = Input_EngineInstance->GetMainModule<InputModule>();
 		return pInputModule->GetAxisDelta(playerIndex, mono_string_to_utf8(inputMap), mono_string_to_utf8(actionName));
 	}
+	
+	Vec2Wrapper Input_GetCursorPos(size_t playerIndex, MonoString* inputMap, MonoString* actionName)
+	{
+		InputModule* pInputModule = Input_EngineInstance->GetMainModule<InputModule>();
+		return ToVec2Wrapper(pInputModule->GetCursorPos(playerIndex));
+	}
 
 	bool Input_IsActionTriggered(size_t playerIndex, MonoString* inputMap, MonoString* actionName)
 	{
@@ -129,6 +136,7 @@ namespace Glory
 		BIND("GloryEngine.Input::Input_SetPlayerInputMode", Input_SetPlayerInputMode);
 		BIND("GloryEngine.Input::Input_GetAxis", Input_GetAxis);
 		BIND("GloryEngine.Input::Input_GetAxisDelta", Input_GetAxisDelta);
+		BIND("GloryEngine.Input::Input_GetCursorPos", Input_GetCursorPos);
 		BIND("GloryEngine.Input::Input_IsActionTriggered", Input_IsActionTriggered);
 
 		/* Input Device */

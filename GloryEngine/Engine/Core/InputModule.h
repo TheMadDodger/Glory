@@ -17,6 +17,7 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		bool OnInput(InputEvent& event);
+		void OnCursor(CursorEvent& event);
 
 		size_t AddPlayer();
 		void RemovePlayer(size_t playerIndex);
@@ -35,13 +36,18 @@ namespace Glory
 		bool& InputBlocked();
 
 		PlayerInput* GetPlayer(size_t playIndex);
-		float GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
-		float GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
-		bool GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName);
+		const PlayerInput* GetPlayer(size_t playIndex) const;
+		float GetAxis(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
+		float GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
+		bool GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
+		glm::vec2 GetCursorPos(size_t playerIndex) const;
 
 		void FreeDevice(const UUID deviceId);
 
 		const UUID FindAvailableInputDevice(const InputDeviceType deviceType) const;
+
+		GLORY_API void SetCursorBounds(const glm::vec4& bounds);
+		GLORY_API const glm::vec4& GetCursorBounds();
 
 	protected:
 		virtual void OnInitialize() {};
@@ -55,7 +61,7 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Cleanup() override;
 		virtual void Update() override;
-		virtual void OnGameThreadFrameStart() override;
+		virtual void OnBeginFrame() override;
 
 		void ReadInputModes(YAML::Node& node);
 		void ReadInputMaps(YAML::Node& node);
@@ -71,5 +77,6 @@ namespace Glory
 		std::map<std::string, std::map<std::string, InputMap>> m_InputMaps;
 
 		bool m_InputBlocked;
+		glm::vec4 m_CursorBounds;
 	};
 }

@@ -1,5 +1,7 @@
 #include <DisplayManager.h>
 #include <imgui.h>
+#include <InputModule.h>
+
 #include "GameWindow.h"
 #include "EditorApplication.h"
 #include "ImGuiHelpers.h"
@@ -71,18 +73,21 @@ namespace Glory::Editor
 			actualHeight = maxWidth / textureAspect;
 		}
 
-		ImVec2 halfMax = vMax / 2.0f;
-		ImVec2 center = pos + halfMax;
+		const ImVec2 halfMax = vMax / 2.0f;
+		const ImVec2 center = pos + halfMax;
 
-		ImVec2 halfOffsets = ImVec2(maxWidth / 2.0f, actualHeight / 2.0f);
-
-		//ImGui::GetForegroundDrawList()->AddRect(center, center + halfMax, IM_COL32(255, 255, 0, 255));
-		//ImGui::GetForegroundDrawList()->AddRect(center, center - halfMax, IM_COL32(255, 255, 0, 255));
+		const ImVec2 halfOffsets = ImVec2(maxWidth / 2.0f, actualHeight / 2.0f);
 
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
+		const ImVec2 topLeft = center - halfOffsets;
+		const ImVec2 bottomRight = center + halfOffsets;
+
+		InputModule* pInput = EditorApplication::GetInstance()->GetEngine()->GetMainModule<InputModule>();
+		pInput->SetCursorBounds({ topLeft.x, topLeft.y, bottomRight.x, bottomRight.y });
+
 		ImGui::GetWindowDrawList()->AddImage(
-			pRenderImpl->GetTextureID(pTexture), center - halfOffsets,
-			center + halfOffsets, ImVec2(0, 1), ImVec2(1, 0));
+			pRenderImpl->GetTextureID(pTexture), topLeft,
+			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
 	}
 }

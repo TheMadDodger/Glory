@@ -40,6 +40,9 @@ namespace Glory
 		const GLuint format = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_PixelFormat);
 		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(m_TextureInfo.m_Type);
 
+		if (pImageData->GetBytesPerPixel() == 1)
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 		if (!m_TextureID)
 		{
 			glGenTextures(1, &m_TextureID);
@@ -53,7 +56,15 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		SamplerSettings& sampler = pTextureData->GetSamplerSettings();
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GLConverter::TO_GLFILTER.at(sampler.MinFilter));
+		if (sampler.MipmapMode != Filter::F_None)
+		{
+			glGenerateMipmap(m_GLImageType);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		const GLint minFilter = GLConverter::GetMinFilter(sampler.MipmapMode, sampler.MinFilter);
+
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, minFilter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GLConverter::TO_GLFILTER.at(sampler.MagFilter));
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -62,6 +73,12 @@ namespace Glory
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeV));
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeW));
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		float aniso = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glBindTexture(m_GLImageType, NULL);
@@ -86,7 +103,15 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		SamplerSettings& sampler = m_TextureInfo.m_SamplerSettings;
-		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, GLConverter::TO_GLFILTER.at(sampler.MinFilter));
+		if (sampler.MipmapMode != Filter::F_None)
+		{
+			glGenerateMipmap(m_GLImageType);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		const GLint minFilter = GLConverter::GetMinFilter(sampler.MipmapMode, sampler.MinFilter);
+
+		glTexParameteri(m_GLImageType, GL_TEXTURE_MIN_FILTER, minFilter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(m_GLImageType, GL_TEXTURE_MAG_FILTER, GLConverter::TO_GLFILTER.at(sampler.MagFilter));
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -95,6 +120,12 @@ namespace Glory
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeV));
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GLConverter::TO_GLTEXTUREWRAP.at(sampler.AddressModeW));
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		float aniso = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glBindTexture(m_GLImageType, NULL);

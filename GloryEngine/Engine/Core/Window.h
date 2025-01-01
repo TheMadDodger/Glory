@@ -21,6 +21,8 @@ namespace Glory
 		uint32_t Width;
 		uint32_t Height;
 		uint32_t WindowFlags;
+		bool Fullscreen;
+		bool Maximize;
 	};
 
 	class Window : public Object
@@ -38,6 +40,9 @@ namespace Glory
 		virtual void Resize(int width, int height) = 0;
 		virtual void GetPosition(int* x, int* y) = 0;
 		virtual void SetPosition(int x, int y) = 0;
+		virtual void SetCursorPosition(int x, int y) = 0;
+		virtual void SetFullscreen(bool fullscreen, bool borderless) = 0;
+		virtual void Maximize() = 0;
 
 		virtual void SetWindowTitle(const char* title) = 0;
 
@@ -46,6 +51,16 @@ namespace Glory
 		virtual void SetSplashScreen(const char* data, size_t size) = 0;
 		virtual void SetSplashScreen(const std::filesystem::path& path) = 0;
 
+		void ShowCursor(bool shown);
+		void ForceShowCursor(bool show);
+		void ForceUnlockCursor(bool unlock);
+		bool IsCursorShown() const;
+		void GrabInput(bool grab);
+		bool IsGrabInput();
+		void ForceUngrabInput(bool ungrab);
+		bool HasFocus() const;
+		bool IsShown() const;
+
 	protected:
 		Window(const WindowCreateInfo& createInfo);
 		virtual ~Window();
@@ -53,8 +68,11 @@ namespace Glory
 		virtual void Open() = 0;
 		virtual void Close() = 0;
 		virtual void PollEvents() = 0;
+		virtual void UpdateCursorShow() = 0;
+		virtual void UpdateGrabInput() = 0;
 
 		bool ForwardInputEvent(InputEvent& input);
+		void ForwardCursorEvent(CursorEvent& input);
 
 	protected:
 		std::string m_WindowName;
@@ -62,6 +80,17 @@ namespace Glory
 		uint32_t m_Height;
 		uint32_t m_WindowFlags;
 		WindowModule* m_pWindowManager;
+		bool m_ShowCursor;
+		bool m_ForceShowCursor;
+		bool m_ForceUnlockCursor;
+		bool m_GrabInput;
+		bool m_ForceUngrabInput;
+
+		bool m_HasFocus;
+		bool m_IsShown;
+
+		bool m_Fullscreen;
+		bool m_Maximized;
 
 	private:
 		friend class WindowModule;

@@ -127,9 +127,9 @@ namespace Glory
 	void CoreLibManager::ResetEngine(Engine* pEngine)
 	{
 		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
-		MonoMethod* pCreate = pEngineClass->GetMethod(".::Reset");
+		MonoMethod* pReset = pEngineClass->GetMethod(".::Reset");
 		MonoObject* pExcept;
-		MonoObject* pReturn = mono_runtime_invoke(pCreate, m_pEngineObject, nullptr, &pExcept);
+		MonoObject* pReturn = mono_runtime_invoke(pReset, m_pEngineObject, nullptr, &pExcept);
 		if (pExcept)
 			mono_print_unhandled_exception(pExcept);
 	}
@@ -155,7 +155,7 @@ namespace Glory
 
 		mono_runtime_object_init(m_pEngineObject);
 		m_pEngineReset = pEngineClass->GetMethod(".::Reset");
-		m_EngineGCHandle = mono_gchandle_new(m_pEngineObject, false);
+		m_EngineGCHandle = mono_gchandle_new(m_pEngineObject, true);
 
 		m_ScriptManager.Initialize(pEngineClass, m_pEngineObject);
 	}

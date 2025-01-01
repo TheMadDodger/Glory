@@ -2,6 +2,7 @@
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
 #include "MathCSAPI.h"
+#include "ComponentHelpers.h"
 
 #include <Engine.h>
 #include <SceneManager.h>
@@ -13,6 +14,7 @@
 #include <AssetDatabase.h>
 #include <AssetManager.h>
 #include <ObjectManager.h>
+#include <WindowModule.h>
 
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
@@ -79,32 +81,12 @@ namespace Glory
 
 	float Time_GetDeltaTime()
 	{
-		return Core_EngineInstance->Time().GetDeltaTime<float, std::ratio<1, 1>>();
-	}
-
-	float Time_GetGameDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetGameDeltaTime<float, std::ratio<1, 1>>();
-	}
-
-	float Time_GetGraphicsDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetGraphicsDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetDeltaTime();
 	}
 
 	float Time_GetUnscaledDeltaTime()
 	{
-		return Core_EngineInstance->Time().GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
-	}
-
-	float Time_GetUnscaledGameDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetUnscaledGameDeltaTime<float, std::ratio<1, 1>>();
-	}
-
-	float Time_GetUnscaledGraphicsDeltaTime()
-	{
-		return Core_EngineInstance->Time().GetUnscaledGraphicsDeltaTime<float, std::ratio<1, 1>>();
+		return Core_EngineInstance->Time().GetUnscaledDeltaTime();
 	}
 
 	float Time_GetCurrentTime()
@@ -125,11 +107,6 @@ namespace Glory
 	int Time_GetTotalFrames()
 	{
 		return Core_EngineInstance->Time().GetTotalFrames();
-	}
-
-	int Time_GetTotalGameFrames()
-	{
-		return Core_EngineInstance->Time().GetTotalGameFrames();
 	}
 
 	float Time_GetTimeScale()
@@ -444,6 +421,29 @@ namespace Glory
 
 #pragma region Scene Objects
 
+	bool SceneObject_GetActive(uint64_t sceneID, uint64_t objectID)
+	{
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
+		if (!pScenes) return nullptr;
+		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
+		if (!pScene) return nullptr;
+		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
+		return entity.IsActive();
+	}
+
+	void SceneObject_SetActive(uint64_t sceneID, uint64_t objectID, bool active)
+	{
+		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
+		if (!pScenes) return;
+		GScene* pScene = pScenes->GetOpenScene(UUID(sceneID));
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByUUID(UUID(objectID));
+		if (active)
+			Components::Activate(entity);
+		else
+			Components::Deactivate(entity);
+	}
+
 	MonoString* SceneObject_GetName(uint64_t sceneID, uint64_t objectID)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
@@ -539,6 +539,76 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region Window
+
+	Vec2Wrapper Engine_GetWindowSize()
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return {};
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return {};
+		int width, height;
+		pWindow->GetWindowSize(&width, &height);
+		return { float(width), float(height) };
+	}
+
+	void Engine_SetShowWindowCursor(bool show)
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return;
+		pWindow->ShowCursor(show);
+	}
+
+	bool Engine_GetShowWindowCursor()
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return false;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return false;
+		return pWindow->IsCursorShown();
+	}
+
+	void Engine_SetWindowCursorPos(Vec2Wrapper* pos)
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return;
+		pWindow->SetCursorPosition(float(pos->x), float(pos->y));
+	}
+
+	bool Engine_GetGrabInput()
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return false;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return false;
+		return pWindow->IsGrabInput();
+	}
+
+	void Engine_SetGrabInput(bool grab)
+	{
+		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindowModule) return;
+		Window* pWindow = pWindowModule->GetMainWindow();
+		if (!pWindow) return;
+		pWindow->GrabInput(grab);
+	}
+
+#pragma endregion
+
+#pragma region Application
+
+	void Application_Quit()
+	{
+		Core_EngineInstance->RequestQuit();
+	}
+
+#pragma endregion
+
+
 #pragma region Binding
 
 	void CoreCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -556,16 +626,11 @@ namespace Glory
 
 		// Time
 		BIND("GloryEngine.Time::Time_GetDeltaTime", Time_GetDeltaTime);
-		BIND("GloryEngine.Time::Time_GetGameDeltaTime", Time_GetGameDeltaTime);
-		BIND("GloryEngine.Time::Time_GetGraphicsDeltaTime", Time_GetGraphicsDeltaTime);
 		BIND("GloryEngine.Time::Time_GetUnscaledDeltaTime", Time_GetUnscaledDeltaTime);
-		BIND("GloryEngine.Time::Time_GetUnscaledGameDeltaTime", Time_GetUnscaledGameDeltaTime);
-		BIND("GloryEngine.Time::Time_GetUnscaledGraphicsDeltaTime", Time_GetUnscaledGraphicsDeltaTime);
 		BIND("GloryEngine.Time::Time_GetCurrentTime", Time_GetCurrentTime);
 		BIND("GloryEngine.Time::Time_GetUnscaledTime", Time_GetUnscaledTime);
 		BIND("GloryEngine.Time::Time_GetFrameRate", Time_GetFrameRate);
 		BIND("GloryEngine.Time::Time_GetTotalFrames", Time_GetTotalFrames);
-		BIND("GloryEngine.Time::Time_GetTotalGameFrames", Time_GetTotalGameFrames);
 		BIND("GloryEngine.Time::Time_SetTimeScale", Time_SetTimeScale);
 		BIND("GloryEngine.Time::Time_GetTimeScale", Time_GetTimeScale);
 
@@ -644,6 +709,8 @@ namespace Glory
 		BIND("GloryEngine.SceneManagement.SceneManager::SceneManager_CloseScene", SceneManager_CloseScene);
 
 		// Scene Objects
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetActive", SceneObject_GetActive);
+		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetActive", SceneObject_SetActive);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetName", SceneObject_GetName);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetName", SceneObject_SetName);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetSiblingIndex", SceneObject_GetSiblingIndex);
@@ -652,6 +719,16 @@ namespace Glory
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetChild", SceneObject_GetChild);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_GetParent", SceneObject_GetParent);
 		BIND("GloryEngine.SceneManagement.SceneObject::SceneObject_SetParent", SceneObject_SetParent);
+
+		/* Engine */
+		BIND("GloryEngine.Engine::Engine_GetWindowSize", Engine_GetWindowSize);
+		BIND("GloryEngine.Engine::Engine_SetShowWindowCursor", Engine_SetShowWindowCursor);
+		BIND("GloryEngine.Engine::Engine_GetShowWindowCursor", Engine_GetShowWindowCursor);
+		BIND("GloryEngine.Engine::Engine_SetWindowCursorPos", Engine_SetWindowCursorPos);
+		BIND("GloryEngine.Engine::Engine_GetGrabInput", Engine_GetGrabInput);
+		BIND("GloryEngine.Engine::Engine_SetGrabInput", Engine_SetGrabInput);
+
+		BIND("GloryEngine.Application::Application_Quit", Application_Quit);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)

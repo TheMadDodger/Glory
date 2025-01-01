@@ -42,6 +42,11 @@
 #include "MaterialInstanceEditor.h"
 #include "PipelineEditor.h"
 #include "GSceneEditor.h"
+#include "TextComponentEditor.h"
+#include "TextureDataEditor.h"
+#include "EntitySceneObjectEditor.h"
+#include "DefaultComponentEditor.h"
+#include "TransformEditor.h"
 
 #include "Importer.h"
 #include "MaterialImporter.h"
@@ -49,6 +54,7 @@
 #include "TextureImporter.h"
 #include "EntityPrefabImporter.h"
 #include "ShaderImporter.h"
+#include "PipelineImporter.h"
 
 #include "Shortcuts.h"
 #include "TitleBar.h"
@@ -61,18 +67,13 @@
 #include "EditableEntity.h"
 
 #include "Package.h"
+#include "About.h"
+#include "Dispatcher.h"
 
 #include <imgui.h>
 #include <Engine.h>
 #include <ImGuizmo.h>
-#include <TextureDataEditor.h>
-#include <About.h>
-#include <Dispatcher.h>
 #include <Components.h>
-#include <EntitySceneObjectEditor.h>
-#include <DefaultComponentEditor.h>
-#include <TransformEditor.h>
-#include <PipelineImporter.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -302,19 +303,13 @@ namespace Glory::Editor
 
 	void MainEditor::CreateDefaultMainMenuBar()
 	{
-		MenuBar::AddMenuItem("File/New/Scene", []() { EditorApplication::GetInstance()->GetSceneManager().NewScene(false); }, NULL, Shortcut_File_NewScene);
-		MenuBar::AddMenuItem("File/Save Scene", []() { EditorApplication::GetInstance()->GetSceneManager().SaveOpenScenes(); }, NULL, Shortcut_File_SaveScene);
-		//MenuBar::AddMenuItem("File/Load Scene", []()
-		//{
-		//	//YAML::Node node = YAML::LoadFile("test.gscene");
-		//	//Serializer::DeserializeObject(node);
-		//}, NULL, Shortcut_File_LoadScene);
-
 		EditorApplication* app = EditorApplication::GetInstance();
+		MenuBar::AddMenuItem("File/New/Scene", [app]() { app->GetSceneManager().NewScene(); }, NULL, Shortcut_File_NewScene);
+		MenuBar::AddMenuItem("File/Save Scene", [app]() { app->GetSceneManager().SaveOpenScenes(); }, NULL, Shortcut_File_SaveScene);
 
 		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
 		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
-		MenuBar::AddMenuItem("File/Package", []() { StartPackage(EditorApplication::GetInstance()->GetEngine()); }, NULL, Shortcut_Package);
+		MenuBar::AddMenuItem("File/Package", [app]() { StartPackage(app->GetEngine()); }, NULL, Shortcut_Package);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
 		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);
@@ -441,6 +436,7 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(Model, ModelRenderer);
 		OBJECT_CREATE_MENU(Camera, CameraComponent);
 		OBJECT_CREATE_MENU(Light, LightComponent);
+		OBJECT_CREATE_MENU(Text, TextComponent);
 
 		ObjectMenu::AddMenuItem("Convert to Prefab", &EntitySceneObjectEditor::ConvertToPrefabMenuItem, T_SceneObject);
 		ObjectMenu::AddMenuItem("Unpack Prefab", &EntitySceneObjectEditor::UnpackPrefabMenuItem, T_SceneObject);
@@ -487,6 +483,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<glm::quat>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<LayerMask>>();
 		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<LayerRef>>();
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<std::string>>();
 
 		PropertyDrawer::RegisterPropertyDrawer<AssetReferencePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ArrayPropertyDrawer>();
@@ -496,6 +493,7 @@ namespace Glory::Editor
 		PropertyDrawer::RegisterPropertyDrawer<SceneObjectRedirectPropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<ShapePropertyDrawer>();
 		PropertyDrawer::RegisterPropertyDrawer<SimplePropertyDrawerTemplate<MeshMaterial>>();
+		PropertyDrawer::RegisterPropertyDrawer<BufferPropertyDrawer>();
 	}
 
 	void MainEditor::RegisterEditors()
@@ -511,5 +509,6 @@ namespace Glory::Editor
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
 		Editor::RegisterEditor<GSceneEditor>();
+		Editor::RegisterEditor<TextComponentEditor>();
 	}
 }

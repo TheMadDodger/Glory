@@ -12,7 +12,7 @@ namespace Glory
 
 		virtual void GetCurrentScreenResolution(uint32_t& width, uint32_t& height) override;
 
-		GLORY_MODULE_VERSION_H(0,1,0);
+		GLORY_MODULE_VERSION_H(0,2,0);
 
 	protected: // Internal functions
 		virtual Window* CreateWindow_Internal(const WindowCreateInfo& createInfo) override;

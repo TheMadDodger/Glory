@@ -404,6 +404,16 @@ namespace Glory
 
 	void SteamAudioModule::ProcessEffects(AudioChannel& channel, void* stream, int len)
 	{
+		ModuleSettings& audioModuleSettings = m_pAudioModule->Settings();
+		const unsigned int frameSize = audioModuleSettings.Value<unsigned int>(AudioModule::SettingNames::Framesize);
+		const unsigned int channels = m_pAudioModule->Channels();
+
+		/* Copy to a temprary buffer to ensure frame size */
+		m_TemporaryStreamData.resize(frameSize*channels);
+		float* temporaryStream = m_TemporaryStreamData.data();
+		std:memset(temporaryStream, 0, frameSize*channels*sizeof(float));
+		std::memcpy(temporaryStream, stream, len);
+
 		/* For now only audio source components support effects */
 		if (channel.m_UserData.m_Type != AudioChannelUDataType::Entity) return;
 
@@ -440,10 +450,10 @@ namespace Glory
 			switch (audioSource.m_Spatialization.m_Mode)
 			{
 			case Glory::SpatializationMode::Binaural:
-				SpatializeBinaural(channel, dir, audioSource.m_Spatialization.m_SpatialBlend, stream);
+				SpatializeBinaural(channel, dir, audioSource.m_Spatialization.m_SpatialBlend, temporaryStream);
 				break;
 			case Glory::SpatializationMode::Ambisonics:
-				SpatializeAmbisonics(channel, listenPos, dir, int(audioSource.m_Spatialization.m_AmbisonicsOrder) + 1, stream);
+				SpatializeAmbisonics(channel, listenPos, dir, int(audioSource.m_Spatialization.m_AmbisonicsOrder) + 1, temporaryStream);
 				break;
 			default:
 				break;
@@ -452,11 +462,11 @@ namespace Glory
 		else
 		{
 			/* We still need to deinterleave the stream to apply the simulation */
-			float* outData = reinterpret_cast<float*>(stream);
+			float* outData = temporaryStream;
 			iplAudioBufferDeinterleave(m_IPLContext, outData, &m_OutBuffers[channel.m_Index]);
 		}
 
-		if (!audioSource.m_Simulation.m_Enable)
+		if (!audioSource.m_Simulation.m_Enable || audioSource.m_Spatialization.m_Attenuation.m_Enable)
 		{
 			/* If spatialization had attenuation on we still need to apply it here */
 			if (audioSource.m_Spatialization.m_Attenuation.m_Enable)

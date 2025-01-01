@@ -20,6 +20,7 @@
 #include <StringUtils.h>
 #include <Reflection.h>
 #include <PrefabData.h>
+#include <ComponentHelpers.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -32,6 +33,7 @@ namespace Glory::Editor
 		{ ResourceTypes::GetHash<CameraComponent>(), ICON_FA_VIDEO },
 		{ ResourceTypes::GetHash<LayerComponent>(), ICON_FA_LAYER_GROUP },
 		{ ResourceTypes::GetHash<LightComponent>(), ICON_FA_LIGHTBULB },
+		{ ResourceTypes::GetHash<TextComponent>(), ICON_FA_FONT },
 	};
 
 	EntitySceneObjectEditor::EntitySceneObjectEditor() : m_NameBuff(""), m_Initialized(false), m_AddingComponent(false), m_pObject(nullptr)
@@ -65,7 +67,10 @@ namespace Glory::Editor
 			Undo::AddAction<EnableObjectAction>(pScene, active);
 			Undo::StopRecord();
 
-			entity.SetActive(active);
+			if (active)
+				Components::Activate(entity);
+			else
+				Components::Deactivate(entity);
 			change = true;
 		}
 		change |= NameGUI();

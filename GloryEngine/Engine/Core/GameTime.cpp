@@ -1,48 +1,76 @@
 #include "GameTime.h"
 #include "Engine.h"
-#include "TimerModule.h"
 
 namespace Glory
 {
-    const float GameTime::GetTime()
+    void GameTime::Initialize()
     {
-        return GetTimer()->CalculateTime(false);
+        m_StartTime = Now();
+        m_LastTime = TimeSinceSeconds(m_StartTime);
+        m_DeltaTime = 0.0f;
     }
 
-    const float GameTime::GetUnscaledTime()
+    void GameTime::BeginFrame()
     {
-        return GetTimer()->CalculateTime(true);
+        const double time = TimeSinceSeconds(m_StartTime);
+        m_DeltaTime = time - m_LastTime;
+        m_LastTime = time;
     }
 
-    const float GameTime::GetTimeScale()
+    void GameTime::EndFrame()
     {
-        return GetTimer()->m_TimeScale;
+        ++m_TotalFrames;
     }
 
-    const float GameTime::GetFrameRate()
+    const float GameTime::GetTime() const
     {
-        float deltaTime = GetUnscaledDeltaTime<float, std::ratio<1, 1>>();
-        return 1.0f / deltaTime;
+        return m_LastTime*m_TimeScale;
     }
 
-    const int GameTime::GetTotalFrames()
+    const float GameTime::GetUnscaledTime() const
     {
-        return GetTimer()->m_TotalGraphicsFrames;
+        return m_LastTime;
     }
 
-    const int GameTime::GetTotalGameFrames()
+    const float GameTime::GetDeltaTime() const
     {
-        return GetTimer()->m_TotalGameFrames;
+        return m_DeltaTime*m_TimeScale;
+    }
+
+    const float GameTime::GetUnscaledDeltaTime() const
+    {
+        return m_DeltaTime;
+    }
+
+    const float GameTime::GetTimeScale() const
+    {
+        return m_TimeScale;
+    }
+
+    const float GameTime::GetFrameRate() const
+    {
+        return 1.0f/m_DeltaTime;
+    }
+
+    const int GameTime::GetTotalFrames() const
+    {
+        return m_TotalFrames;
     }
 
     void GameTime::SetTimeScale(float scale)
     {
-        GetTimer()->m_TimeScale = scale;
+        m_TimeScale = scale;
     }
 
-    TimerModule* GameTime::GetTimer()
+    uint64_t GameTime::Now()
     {
-        return m_pEngine->GetInternalModule<TimerModule>();
+        return std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+    }
+
+    float GameTime::TimeSinceSeconds(uint64_t timestamp)
+    {
+        return (Now() - timestamp)/(1000.0f*1000.0f);
     }
 
     GameTime::GameTime(Engine* pEngine): m_pEngine(pEngine) {}

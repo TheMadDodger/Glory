@@ -20,7 +20,6 @@ namespace Glory
 
 namespace Editor
 {
-
 	enum class EditorMode
 	{
 		M_Edit,

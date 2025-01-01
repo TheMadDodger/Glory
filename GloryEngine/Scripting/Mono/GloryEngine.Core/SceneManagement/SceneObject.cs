@@ -13,6 +13,15 @@ namespace GloryEngine.SceneManagement
         #region Props
 
         /// <summary>
+        /// Whether this object is active
+        /// </summary>
+        public bool Active
+        {
+            get => SceneObject_GetActive(_scene.ID, _objectID);
+            set => SceneObject_SetActive(_scene.ID, _objectID, value);
+        }
+
+        /// <summary>
         /// The scene this object exists in
         /// </summary>
         public virtual Scene Scene
@@ -306,6 +315,11 @@ namespace GloryEngine.SceneManagement
         #endregion
 
         #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static bool SceneObject_GetActive(UInt64 sceneID, UInt64 objectID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void SceneObject_SetActive(UInt64 sceneID, UInt64 objectID, bool active);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static string SceneObject_GetName(UInt64 sceneID, UInt64 objectID);

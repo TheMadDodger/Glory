@@ -24,10 +24,8 @@ namespace Glory
 		if (pExcept)
 			mono_print_unhandled_exception(pExcept);
 
-		m_pScriptTypes.clear();
-		m_pScriptTypes.reserve((size_t)typeCount);
-		m_pScriptDummies.clear();
-		m_pScriptDummies.reserve((size_t)typeCount);
+		m_ScriptDummyHandles.clear();
+		m_ScriptDummyHandles.reserve((size_t)typeCount);
 		m_ScriptTypeNames.clear();
 		m_ScriptTypeNames.reserve((size_t)typeCount);
 		m_ScriptTypeHashes.clear();
@@ -39,20 +37,12 @@ namespace Glory
 		m_DefaultValues.clear();
 		m_DefaultValues.reserve((size_t)typeCount);
 
-		MonoMethod* pTypeMethod = pEngineClass->GetMethod(".::GetScriptType");
 		MonoMethod* pDummyMethod = pEngineClass->GetMethod(".::GetScriptDummy");
 		MonoMethod* pTypeNameMethod = pEngineClass->GetMethod(".::GetScriptTypeName");
 
 		for (int i = 0; i < typeCount; ++i)
 		{
 			void* args[1] = { &i };
-			result = mono_runtime_invoke(pTypeMethod, pEngineObject, args, &pExcept);
-			if (pExcept)
-			{
-				mono_print_unhandled_exception(pExcept);
-				return;
-			}
-			m_pScriptTypes.push_back(result);
 			result = mono_runtime_invoke(pDummyMethod, pEngineObject, args, &pExcept);
 			if (pExcept)
 			{
@@ -60,7 +50,7 @@ namespace Glory
 				return;
 			}
 			MonoClass* pClass = mono_object_get_class(result);
-			m_pScriptDummies.push_back(result);
+			m_ScriptDummyHandles.push_back(mono_gchandle_new_weakref(result, false));
 			result = mono_runtime_invoke(pTypeNameMethod, pEngineObject, args, &pExcept);
 			if (pExcept)
 			{
@@ -99,12 +89,7 @@ namespace Glory
 
 	MonoObject* MonoScriptManager::Dummy(size_t index) const
 	{
-		return m_pScriptDummies[index];
-	}
-
-	MonoObject* MonoScriptManager::Type(size_t index) const
-	{
-		return m_pScriptTypes[index];
+		return mono_gchandle_get_target(m_ScriptDummyHandles[index]);
 	}
 
 	std::string_view MonoScriptManager::TypeName(size_t index) const
@@ -119,13 +104,13 @@ namespace Glory
 
 	size_t MonoScriptManager::TypeCount() const
 	{
-		return m_pScriptTypes.size();
+		return m_ScriptTypeHashes.size();
 	}
 
 	void MonoScriptManager::LoadScriptProperties(size_t index, AssemblyClass& cls)
 	{
 		// Dummy object for default values
-		MonoObject* pDummyObject = m_pScriptDummies[index];
+		MonoObject* pDummyObject = mono_gchandle_get_target(m_ScriptDummyHandles[index]);
 
 		m_ScriptProperties.push_back(std::vector<ScriptProperty>());
 		m_DefaultValues.push_back(std::vector<char>());

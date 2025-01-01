@@ -11,6 +11,8 @@
 #include <InternalPipeline.h>
 #include <SceneManager.h>
 #include <GScene.h>
+#include <FontData.h>
+#include <FontDataStructs.h>
 
 #include <DistributedRandom.h>
 
@@ -110,14 +112,63 @@ namespace Glory
 		GetResourcePath("Shaders/SSAOBlur_Frag.shader", path);
 		m_pSSAOBlurFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
 
+		/* Text Shaders */
+		GetResourcePath("Shaders/Text_vert.shader", path);
+		m_pTextVertShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+		GetResourcePath("Shaders/Text_frag.shader", path);
+		m_pTextFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+
 		m_pScreenPipeline = new InternalPipeline({ m_pScreenVertShader, m_pScreenFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pSSRPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSRFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pSSAOPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pSSAOBlurPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOBlurFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
+		m_pTextPipelineData = new InternalPipeline({ m_pTextVertShader, m_pTextFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
 		m_pScreenMaterial = new InternalMaterial(m_pScreenPipeline);
 		m_pSSRMaterial = new InternalMaterial(m_pSSRPipeline);
 		m_pSSAOMaterial = new InternalMaterial(m_pSSAOPipeline);
 		m_pSSAOBlurMaterial = new InternalMaterial(m_pSSAOBlurPipeline);
+		m_pTextMaterialData = new InternalMaterial(m_pTextPipelineData);
+
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
+		m_pScreenToViewSSBO->Assign(NULL);
+
+		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+		m_pLightsSSBO->Assign(NULL);
+
+		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
+		m_pSSAOSettingsSSBO->Assign(NULL);
+
+		GenerateDomeSamplePointsSSBO(pResourceManager, 64);
+
+		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
+		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
+		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
+		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
+		m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
+
+		uint32_t vertexBufferSize = 4 * sizeof(VertexPosColorTex);
+		uint32_t indexBufferSize = 6 * sizeof(uint32_t);
+		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+
+		uint32_t indices[6] = {
+			0, 1, 2,
+			2, 3, 0
+		};
+		VertexPosColorTex defaultVertices[4] = {
+			{{-1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+			{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+			{{1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+			{{1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+		};
+
+		m_pQuadMeshIndexBuffer->Assign(indices, 6 * sizeof(uint32_t));
+		m_pQuadMeshVertexBuffer->Assign(defaultVertices, 4 * sizeof(VertexPosColorTex));
+		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
+			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
 	}
 
 	void ClusteredRendererModule::Cleanup()
@@ -158,44 +209,22 @@ namespace Glory
 		delete m_pSSAOBlurMaterial;
 		m_pSSAOBlurMaterial = nullptr;
 
+		delete m_pTextMaterialData;
+		m_pTextMaterialData = nullptr;
+
 		delete m_pScreenPipeline;
 		delete m_pSSRPipeline;
 		delete m_pSSAOPipeline;
 		delete m_pSSAOBlurPipeline;
+		delete m_pTextPipelineData;
 
 		delete m_pScreenVertShader;
 		delete m_pScreenFragShader;
 		delete m_pSSRFragShader;
 		delete m_pSSAOFragShader;
 		delete m_pSSAOBlurFragShader;
-	}
-
-	void ClusteredRendererModule::OnThreadedInitialize()
-	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-
-		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
-		m_pScreenToViewSSBO->Assign(NULL);
-
-		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
-		m_pLightsSSBO->Assign(NULL);
-
-		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
-		m_pSSAOSettingsSSBO->Assign(NULL);
-
-		GenerateDomeSamplePointsSSBO(pResourceManager, 64);
-
-		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
-		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
-		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
-		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
-	}
-
-
-	void ClusteredRendererModule::OnThreadedCleanup()
-	{
-
+		delete m_pTextVertShader;
+		delete m_pTextFragShader;
 	}
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights)
@@ -222,6 +251,185 @@ namespace Glory
 		pGraphics->EnableDepthWrite(renderData.m_DepthWrite);
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 		pGraphics->EnableDepthWrite(true);
+	}
+
+	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextRenderData& renderData)
+	{
+		const std::string_view text = renderData.m_Text;
+		const glm::vec4& color = renderData.m_Color;
+		const float scale = renderData.m_Scale;
+		const Alignment alignment = renderData.m_Alignment;
+		const float textWrap = renderData.m_TextWrap*scale*pFontData->FontHeight();
+
+		pMesh->ClearVertices();
+		pMesh->ClearIndices();
+
+		/* Get words */
+		std::vector<std::pair<size_t, size_t>> wordPositions;
+		size_t currentStringPos = 0;
+
+		while (currentStringPos < text.size())
+		{
+			const size_t nextSpace = text.find(' ', currentStringPos);
+			if (nextSpace == std::string::npos)
+			{
+				wordPositions.push_back({ currentStringPos, text.size() - currentStringPos });
+				break;
+			}
+			wordPositions.push_back({ currentStringPos, nextSpace - currentStringPos });
+			currentStringPos = nextSpace + 1;
+		}
+
+		float writeX = 0.0f;
+		float writeY = 0.0f;
+		size_t letterCount = 0;
+		/* For generating the mesh one line at a time */
+		std::function<void(const std::string_view, float)> drawLine = [&](const std::string_view line, float lineWidth) {
+			switch (alignment)
+			{
+			case Alignment::Left:
+				writeX = 0.0f;
+				break;
+			case Alignment::Center:
+				writeX = -lineWidth / 2.0f;
+				break;
+			case Alignment::Right:
+				writeX = -lineWidth;
+				break;
+			default:
+				break;
+			}
+
+			for (char c : line)
+			{
+				const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+				const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
+
+				if (!glyph) continue;
+
+				const float xpos = writeX + glyph->Bearing.x * scale;
+				const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y) * scale;
+
+				const float w = glyph->Size.x * scale;
+				const float h = glyph->Size.y * scale;
+
+				VertexPosColorTex vertices[4] = {
+					{ { xpos, ypos + h, }, color, { glyph->Coords.x, glyph->Coords.y } },
+					{ { xpos, ypos, }, color, { glyph->Coords.x, glyph->Coords.w } },
+					{ { xpos + w, ypos, }, color, { glyph->Coords.z, glyph->Coords.w } },
+					{ { xpos + w, ypos + h, }, color, { glyph->Coords.z, glyph->Coords.y }, }
+				};
+
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[0]));
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
+				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
+				pMesh->AddFace(letterCount * 4 + 0, letterCount * 4 + 1, letterCount * 4 + 2, letterCount * 4 + 3);
+				++letterCount;
+				writeX += (glyph->Advance >> 6) * scale;
+			}
+
+			writeY -= pFontData->FontHeight() * scale;
+		};
+
+		/* Calculate lines and generate the mesh */
+		/* Process words into lines */
+		size_t currentLineLength = 0;
+		float currentLineWidth = 0.0f;
+		size_t lineStart = 0;
+
+		const size_t spaceGlyphIndex = pFontData->GetGlyphIndex(' ');
+		const GlyphData* spaceGlyph = pFontData->GetGlyph(spaceGlyphIndex);
+
+		const float space = spaceGlyph ? (spaceGlyph->Advance >> 6) * scale : 0.0f;
+		for (size_t i = 0; i < wordPositions.size(); ++i)
+		{
+			const std::pair<size_t, size_t>& wordPosition = wordPositions[i];
+			const std::string_view word = text.substr(wordPosition.first, wordPosition.second);
+
+			/* Calculate word width */
+			float wordWidth = 0.0f;
+			for (char c : word)
+			{
+				const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+				const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
+
+				if (!glyph) continue;
+				const float advance = (glyph->Advance >> 6)*scale;
+				wordWidth += advance;
+			}
+
+			if (currentLineLength > 0 && textWrap > 0.0f && currentLineWidth + wordWidth >= textWrap)
+			{
+				const std::string_view line = text.substr(lineStart, wordPosition.first - lineStart);
+				drawLine(line, currentLineWidth);
+				lineStart = wordPosition.first;
+				currentLineWidth = 0.0f;
+				currentLineLength = 0;
+				--i;
+				continue;
+			}
+
+			currentLineWidth += wordWidth + space;
+			currentLineLength += word.length() + 1;
+		}
+
+		/* If there was 1 more line we could not generate yet we can generate it now */
+		if (currentLineLength > 0)
+		{
+			const std::string_view line = text.substr(lineStart);
+			drawLine(line, currentLineWidth);
+		}
+	}
+
+	void ClusteredRendererModule::OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		Resource* pFontResource = m_pEngine->GetAssetManager().FindResource(renderData.m_FontID);
+		if (!pFontResource) return;
+		FontData* pFontData = static_cast<FontData*>(pFontResource);
+		if (!pFontData) return;
+		if (!m_pTextMaterialData) return;
+
+		if (!m_pTextMaterial) return;
+		m_pTextMaterial->Use();
+
+		ObjectData object;
+		object.Model = renderData.m_World;
+		object.View = camera.GetView();
+		object.Projection = camera.GetProjection();
+		object.ObjectID = renderData.m_ObjectID;
+		object.SceneID = renderData.m_SceneID;
+
+		m_pTextMaterial->SetProperties(m_pEngine);
+		m_pTextMaterial->SetObjectData(object);
+
+		const float scale = renderData.m_Scale;
+		float writeX = 0.0f;
+		float writeY = 0.0f;
+
+		InternalTexture* pTextureData = pFontData->GetGlyphTexture();
+		if (!pTextureData) return;
+
+		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
+		if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
+
+		auto iter = m_pTextMeshes.find(renderData.m_ObjectID);
+		const bool exists = iter != m_pTextMeshes.end();
+		if (!exists)
+		{
+			MeshData* pMesh = new MeshData(renderData.m_Text.size()*4, sizeof(VertexPosColorTex),
+				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+			iter = m_pTextMeshes.emplace(renderData.m_ObjectID, pMesh).first;
+		}
+
+		if (renderData.m_TextDirty || !exists)
+			GenerateTextMesh(iter->second.get(), pFontData, renderData);
+
+		Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
+		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 
 	void ClusteredRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)

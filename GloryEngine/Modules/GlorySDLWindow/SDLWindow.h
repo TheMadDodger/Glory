@@ -19,6 +19,9 @@ namespace Glory
 		GLORY_API virtual void Resize(int width, int height) override;
 		GLORY_API virtual void GetPosition(int* x, int* y) override;
 		GLORY_API virtual void SetPosition(int x, int y) override;
+		GLORY_API virtual void SetCursorPosition(int x, int y) override;
+		GLORY_API virtual void SetFullscreen(bool fullscreen, bool borderless) override;
+		GLORY_API virtual void Maximize() override;
 
 		GLORY_API virtual void SetWindowTitle(const char* title) override;
 
@@ -32,12 +35,16 @@ namespace Glory
 
 		GLORY_API bool PollEvent(SDL_Event* event);
 		GLORY_API bool HandleInputEvents(SDL_Event& event);
+		GLORY_API void HandleWindowFocusEvents(SDL_WindowEvent& event);
+		GLORY_API void HandleWindowSizeEvents(SDL_WindowEvent& event);
 
 	private:
 		SDLWindow(const WindowCreateInfo& createInfo);
 		virtual ~SDLWindow();
 
 		void HandleAllEvents(SDL_Event& event);
+		virtual void UpdateCursorShow() override;
+		virtual void UpdateGrabInput() override;
 
 	private:
 		GLORY_API virtual void Open() override;
@@ -51,5 +58,8 @@ namespace Glory
 		SDL_Surface* m_pWindowSurface;
 		SDL_Surface* m_pSplashScreen;
 		SDL_GLContext m_GLSDLContext;
+
+		bool m_LAltDown;
+		bool m_RAltDown;
 	};
 }

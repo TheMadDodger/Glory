@@ -12,10 +12,16 @@
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "ShapeProperty.h"
-#include "PrefabData.h"
 #include "SceneManager.h"
 #include "WindowModule.h"
 #include "EngineProfiler.h"
+
+#include "MaterialInstanceData.h"
+#include "ShaderSourceData.h"
+#include "PipelineData.h"
+#include "PrefabData.h"
+#include "AudioData.h"
+#include "FontData.h"
 
 #include "Debug.h"
 #include "Console.h"
@@ -29,17 +35,12 @@
 #include "ShaderManager.h"
 #include "GameTime.h"
 #include "BinaryStream.h"
+#include "RenderData.h"
 
 #include "IModuleLoopHandler.h"
-#include "GraphicsThread.h"
 #include "ResourceLoaderModule.h"
 
-#include "TimerModule.h"
 #include "ProfilerModule.h"
-#include "MaterialInstanceData.h"
-#include "ShaderSourceData.h"
-#include "PipelineData.h"
-#include "AudioData.h"
 
 #include <JobManager.h>
 #include <ThreadManager.h>
@@ -191,16 +192,6 @@ namespace Glory
 		return m_pLoaderModules[loaderIndex];
 	}
 
-	GraphicsThread* Engine::GetGraphicsThread() const
-	{
-		return m_pGraphicsThread;
-	}
-
-	void Engine::StartThreads()
-	{
-		m_pGraphicsThread->Start();
-	}
-
 	void Engine::UpdateSceneManager()
 	{
 		m_pSceneManager->Update();
@@ -213,7 +204,7 @@ namespace Glory
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_pSceneManager(createInfo.pSceneManager), m_pThreadManager(ThreadManager::GetInstance()),
-		m_pJobManager(Jobs::JobManager::GetInstance()), m_pGraphicsThread(nullptr), m_Reflection(new Reflect),
+		m_pJobManager(Jobs::JobManager::GetInstance()), m_Reflection(new Reflect),
 		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
@@ -247,7 +238,6 @@ namespace Glory
 			m_pAllModules[currentSize + i] = m_pOptionalModules[i];
 		}
 
-		AddInternalModule(new TimerModule);
 		ProfilerModule* pProfiler = new ProfilerModule();
 		m_Profiler->m_pProfiler = pProfiler;
 		AddInternalModule(pProfiler);
@@ -300,9 +290,6 @@ namespace Glory
 		m_AssetDatabase->Initialize();
 		m_pAssetsManager->Initialize();
 
-		/* Create graphics thread */
-		m_pGraphicsThread = new GraphicsThread(this);
-
 		/* Run Post Initialize */
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
@@ -327,6 +314,8 @@ namespace Glory
 		}));
 
 		m_Initialized = true;
+
+		m_Time->Initialize();
 	}
 
 	void Engine::Cleanup()
@@ -334,7 +323,6 @@ namespace Glory
 		if (!m_Initialized) return;
 
 		m_AssetDatabase->Destroy();
-		m_pGraphicsThread->Stop();
 		m_pJobManager->Kill();
 		m_pThreadManager->Destroy();
 
@@ -357,9 +345,6 @@ namespace Glory
 		m_TypeToLoader.clear();
 		m_TypeHashToLoader.clear();
 		m_pLoaderModules.clear();
-
-		delete m_pGraphicsThread;
-		m_pGraphicsThread = nullptr;
 
 		m_Initialized = false;
 	}
@@ -561,6 +546,7 @@ namespace Glory
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerMask>>();
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerRef>>();
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<SceneObjectRef>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<std::string>>();
 
 		// Special
 		m_Serializers->RegisterSerializer<AssetReferencePropertySerializer>();
@@ -574,22 +560,6 @@ namespace Glory
 	void Engine::RegisterBasicTypes()
 	{
 		Reflect::SetReflectInstance(m_Reflection.get());
-
-		Reflect::RegisterBasicType<int8_t>();
-		Reflect::RegisterBasicType<int16_t>();
-		Reflect::RegisterBasicType<int32_t>();
-		Reflect::RegisterBasicType<int64_t>();
-		Reflect::RegisterBasicType<uint8_t>();
-		Reflect::RegisterBasicType<uint16_t>();
-		Reflect::RegisterBasicType<uint32_t>();
-		Reflect::RegisterBasicType<uint64_t>();
-		Reflect::RegisterBasicType<char>();
-		Reflect::RegisterBasicType<bool>();
-		Reflect::RegisterBasicType<float>();
-		Reflect::RegisterBasicType<double>();
-		Reflect::RegisterBasicType<long>();
-		Reflect::RegisterBasicType<unsigned long>();
-
 		Reflect::RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
 
 		m_ResourceTypes->RegisterType<int>();
@@ -612,6 +582,7 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<ShaderSourceData>("");
 		m_ResourceTypes->RegisterResource<ImageData>("");
 		m_ResourceTypes->RegisterResource<AudioData>("");
+		m_ResourceTypes->RegisterResource<FontData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");
@@ -631,6 +602,7 @@ namespace Glory
 		Reflect::RegisterEnum<CompareOp>();
 		Reflect::RegisterEnum<PipelineType>();
 		Reflect::RegisterEnum<BlurType>();
+		Reflect::RegisterEnum<Alignment>();
 
 		/* Shape types */
 		Reflect::RegisterEnum<ShapeType>();
@@ -646,14 +618,14 @@ namespace Glory
 
 	void Engine::Update()
 	{
-		GameThreadFrameStart();
+		BeginFrame();
 		m_Console->Update();
 		WindowModule* pWindows = GetMainModule<WindowModule>();
 		if (pWindows) pWindows->PollEvents();
 		m_pSceneManager->Update();
 		m_pSceneManager->Draw();
 		ModulesLoop();
-		GameThreadFrameEnd();
+		EndFrame();
 	}
 
 	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
@@ -669,20 +641,22 @@ namespace Glory
 		}
 	}
 
-	void Engine::GameThreadFrameStart()
+	void Engine::BeginFrame()
 	{
+		m_Time->BeginFrame();
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
-			m_pAllModules[i]->OnGameThreadFrameStart();
+			m_pAllModules[i]->OnBeginFrame();
 		}
 	}
 
-	void Engine::GameThreadFrameEnd()
+	void Engine::EndFrame()
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
-			m_pAllModules[i]->OnGameThreadFrameEnd();
+			m_pAllModules[i]->OnEndFrame();
 		}
+		m_Time->EndFrame();
 	}
 
 	void Engine::CallModuleUpdate(Module* pModule)
@@ -733,22 +707,6 @@ namespace Glory
 			std::filesystem::path settingsFilePath = overrideRootPath;
 			settingsFilePath.append(moduleMetaData.Name() + ".yaml");
 			pModule->LoadSettings(settingsFilePath);
-		}
-	}
-
-	void Engine::GraphicsThreadFrameStart()
-	{
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->OnGraphicsThreadFrameStart();
-		}
-	}
-
-	void Engine::GraphicsThreadFrameEnd()
-	{
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			m_pAllModules[i]->OnGraphicsThreadFrameEnd();
 		}
 	}
 }

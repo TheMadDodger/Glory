@@ -10,6 +10,7 @@ namespace Glory
 	public:
 		static GLuint GetGLImageType(const ImageType& imageType);
 		static GLuint GetShaderStageFlag(const ShaderType& shaderType);
+		static GLint GetMinFilter(Filter mipMap, Filter minFilter);
 
 		static const std::map<PixelFormat, GLuint> TO_GLFORMAT;
 		static const std::map<BufferBindingTarget, GLuint> TO_GLBUFFERTARGET;

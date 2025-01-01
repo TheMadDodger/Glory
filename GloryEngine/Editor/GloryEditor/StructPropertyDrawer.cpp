@@ -85,7 +85,8 @@ namespace Glory::Editor
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
 			const size_t offset = pFieldData->Offset();
 			void* pAddress = (void*)((char*)(data)+offset);
-			change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, flags);
+			const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
+			change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, fieldFlags);
 		}
 		return change;
 	}

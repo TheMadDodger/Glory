@@ -337,4 +337,32 @@ namespace Glory
 
         return 0;
     }
+
+    GLint GLConverter::GetMinFilter(Filter mipMap, Filter minFilter)
+    {
+        switch (mipMap)
+        {
+        case Glory::Filter::F_None:
+            return TO_GLFILTER.at(minFilter);
+        case Glory::Filter::F_Nearest:
+            switch (minFilter)
+            {
+            case Glory::Filter::F_Nearest:
+                return GL_NEAREST_MIPMAP_NEAREST;
+            case Glory::Filter::F_Linear:
+                return GL_LINEAR_MIPMAP_NEAREST;
+            }
+            break;
+        case Glory::Filter::F_Linear:
+            switch (minFilter)
+            {
+            case Glory::Filter::F_Nearest:
+                return GL_NEAREST_MIPMAP_LINEAR;
+            case Glory::Filter::F_Linear:
+                return GL_LINEAR_MIPMAP_LINEAR;
+            }
+            break;
+        }
+        return TO_GLFILTER.at(minFilter);
+    }
 }

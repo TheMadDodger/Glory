@@ -71,6 +71,12 @@ namespace GloryEngine
         /// <returns>Current axis delta value, if the axis is not found 0 is returned by default</returns>
         public static float GetAxisDelta(uint playerIndex, string inputMap, string actionName) => Input_GetAxisDelta(playerIndex, inputMap, actionName);
         /// <summary>
+        /// Get the current cursor position for a player
+        /// </summary>
+        /// <param name="playerIndex">The player to get the cursor from</param>
+        /// <returns>Current cursor position</returns>
+        public static Vector2 GetCursorPos(uint playerIndex) => Input_GetCursorPos(playerIndex);
+        /// <summary>
         /// Check wether an action was triggered this frame
         /// </summary>
         /// <param name="playerIndex">The player to get the input data from</param>
@@ -113,6 +119,8 @@ namespace GloryEngine
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static float Input_GetAxisDelta(uint playerIndex, string inputMap, string actionName);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Vector2 Input_GetCursorPos(uint playerIndex);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static bool Input_IsActionTriggered(uint playerIndex, string inputMap, string actionName);
