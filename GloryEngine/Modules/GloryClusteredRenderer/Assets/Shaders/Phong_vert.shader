@@ -3,13 +3,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(std430, binding = 2) buffer ObjectData
-{
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-	uvec4 ObjectID;
-} Object;
+#include "internal/ObjectData.glsl"
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;

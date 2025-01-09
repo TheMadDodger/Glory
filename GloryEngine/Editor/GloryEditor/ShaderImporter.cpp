@@ -40,7 +40,11 @@ namespace Glory::Editor
         std::vector<char> ProcessedSource;
     };
 
-    bool GetShaderTypeFromString(TemporaryShaderData& shaderData, const std::string& typeString)
+    void AppendLine(const std::string& line, std::vector<char>& buffer);
+    bool ProcessSymbol(TemporaryShaderData& shaderData, const std::string& symbol, const std::string& argument, const std::filesystem::path& path);
+    void ProcessLine(TemporaryShaderData& shaderData, const std::string& line, const std::filesystem::path& path);
+
+    bool GetShaderTypeFromString(TemporaryShaderData& shaderData, const std::string& typeString, const std::filesystem::path& path)
     {
         auto itor = ShaderTypes.find(typeString);
         if (itor == ShaderTypes.end()) return false;
@@ -48,8 +52,53 @@ namespace Glory::Editor
         return true;
     }
 
-    std::map<std::string, std::function<bool(TemporaryShaderData&, const std::string&)>> SymbolCallbacks = {
-        { "type", GetShaderTypeFromString }
+    bool ProcessInclude(TemporaryShaderData& shaderData, const std::string& includePath, const std::filesystem::path& path)
+    {
+        if (includePath.front() != '\"' || includePath.back() != includePath[0])
+        {
+            /* @todo: Log an error */
+            return false;
+        }
+
+        const std::string actualInclude = includePath.substr(1, includePath.size() - 2);
+        const std::filesystem::path pathToFile = path.parent_path().append(actualInclude);
+
+        TemporaryShaderData includeShader;
+        includeShader.Type = ShaderType::ST_Unknown;
+
+        std::ifstream file(pathToFile, std::ios::binary);
+
+        if (!file.is_open())
+        {
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Could not open file: " + path.string());
+            return nullptr;
+        }
+
+        file.seekg(0, std::ios_base::end);
+        size_t fileSize = (size_t)file.tellg();
+        includeShader.Source.resize(fileSize);
+        file.seekg(0, std::ios_base::beg);
+        file.read(includeShader.Source.data(), fileSize);
+        file.close();
+
+        std::string originalSourceString(includeShader.Source.begin(), includeShader.Source.end());
+        std::istringstream stream(originalSourceString);
+        std::string line;
+
+        for (std::string line; std::getline(stream, line); )
+        {
+            ProcessLine(includeShader, line, pathToFile);
+        }
+
+        const size_t currentSize = shaderData.ProcessedSource.size();
+        shaderData.ProcessedSource.resize(currentSize + includeShader.ProcessedSource.size());
+        std::memcpy(&shaderData.ProcessedSource[currentSize], includeShader.ProcessedSource.data(), includeShader.ProcessedSource.size());
+        return true;
+    }
+
+    std::map<std::string, std::function<bool(TemporaryShaderData&, const std::string&, const std::filesystem::path&)>> SymbolCallbacks = {
+        { "type", GetShaderTypeFromString },
+        { "include", ProcessInclude }
     };
 
     std::string_view ShaderImporter::Name() const
@@ -73,13 +122,13 @@ namespace Glory::Editor
         buffer.push_back('\n');
     }
 
-    bool ProcessSymbol(TemporaryShaderData& shaderData, const std::string& symbol, const std::string& argument)
+    bool ProcessSymbol(TemporaryShaderData& shaderData, const std::string& symbol, const std::string& argument, const std::filesystem::path& path)
     {
         if (SymbolCallbacks.find(symbol) == SymbolCallbacks.end()) return false;
-        return SymbolCallbacks[symbol](shaderData, argument);
+        return SymbolCallbacks[symbol](shaderData, argument, path);
     }
 
-    void ProcessLine(TemporaryShaderData& shaderData, const std::string& line)
+    void ProcessLine(TemporaryShaderData& shaderData, const std::string& line, const std::filesystem::path& path)
     {
         if (line[0] != '#')
         {
@@ -95,7 +144,7 @@ namespace Glory::Editor
         std::string argument = line.substr(spaceIndex + 1);
         if (argument[argument.length() - 1] == '\r') argument = argument.substr(0, argument.length() - 1);
 
-        if (!ProcessSymbol(shaderData, symbol, argument)) AppendLine(line, shaderData.ProcessedSource);
+        if (!ProcessSymbol(shaderData, symbol, argument, path)) AppendLine(line, shaderData.ProcessedSource);
     }
 
     ImportedResource ShaderImporter::LoadResource(const std::filesystem::path& path, void*) const
@@ -124,7 +173,7 @@ namespace Glory::Editor
 
         for (std::string line; std::getline(stream, line); )
         {
-            ProcessLine(shaderData, line);
+            ProcessLine(shaderData, line, path);
         }
 
         return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source), std::move(shaderData.ProcessedSource)) };
