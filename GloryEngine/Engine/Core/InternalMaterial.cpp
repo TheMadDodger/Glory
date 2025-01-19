@@ -14,6 +14,6 @@ namespace Glory
 
 	UUID InternalMaterial::GetPipelineID(const MaterialManager&) const
 	{
-		return m_pPipeline ? m_pPipeline->GetUUID() : 0;
+		return m_pPipeline->GetUUID();
 	}
 }

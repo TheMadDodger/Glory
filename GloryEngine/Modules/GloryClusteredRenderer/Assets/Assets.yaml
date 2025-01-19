@@ -6,36 +6,10 @@
   ID: 3
 - Path: "Shaders\\PhongTextured_vert.shader"
   ID: 4
-- Path: "Shaders\\Lines_Vert.shader"
-  ID: 11
-- Path: "Shaders\\Lines_Frag.shader"
-  ID: 12
-- Path: "Shaders\\ScreenRenderer_Vert.shader"
-  ID: 13
-- Path: "Shaders\\ScreenRenderer_Frag.shader"
-  ID: 14
-- Path: "Shaders\\SSAO_Frag.shader"
-  ID: 15
-- Path: "Shaders\\SSAOBlur_Frag.shader"
-  ID: 16
-- Path: "Shaders\\Text_Vert.shader"
-  ID: 17
-- Path: "Shaders\\Text_Frag.shader"
-  ID: 18
 - Path: "Pipelines\\Phong.gpln"
   ID: 9
 - Path: "Pipelines\\PhongTextured.gpln"
   ID: 10
-- Path: "Pipelines\\Lines.gpln"
-  ID: 19
-- Path: "Pipelines\\ScreenRenderer.gpln"
-  ID: 20
-- Path: "Pipelines\\SSAO_Prepass.gpln"
-  ID: 21
-- Path: "Pipelines\\SSAO_Blur.gpln"
-  ID: 22
-- Path: "Pipelines\\Text.gpln"
-  ID: 23
 - Path: "Models\\Cube.fbx"
   ID: 5
   Children:

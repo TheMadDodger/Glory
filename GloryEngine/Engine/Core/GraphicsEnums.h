@@ -532,15 +532,6 @@ namespace Glory
         */
         PT_PBR_BRDF = 11,
 
-        /** @brief Text rendering */
-        PT_Text = 12,
-
-        /** @brief Screen effects */
-        PT_Screen = 13,
-
-        /** @brief For any other pipelines */
-        PT_Other = 14,
-
         /** @brief Number of pipeline types */
         PT_Count,
     };
@@ -558,9 +549,6 @@ namespace Glory
         "Unlit",
         "Fresnel",
         "PBR_BRDF",
-        "Text",
-        "Screen",
-        "Other",
     };
 
     const size_t Enum<PipelineType>::m_NumValues = PT_Count;

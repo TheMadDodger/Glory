@@ -45,7 +45,7 @@ namespace Glory
 
 	private:
 		virtual void Cleanup() override;
-		virtual void OnPostInitialize() override;
+		virtual void OnPostInitialize() override;;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
@@ -54,8 +54,6 @@ namespace Glory
 
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
-
-		virtual void LoadSettings(ModuleSettings& settings) override;
 
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
@@ -85,6 +83,12 @@ namespace Glory
 		MaterialData* m_pClusterCullLightMaterialData = nullptr;
 		Material* m_pClusterCullLightMaterial = nullptr;
 
+		FileData* m_pScreenVertShader = nullptr;
+		FileData* m_pScreenFragShader = nullptr;
+		FileData* m_pSSRFragShader = nullptr;
+		FileData* m_pSSAOFragShader = nullptr;
+		FileData* m_pSSAOBlurFragShader = nullptr;
+
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO = nullptr;
 		Buffer* m_pLightsSSBO = nullptr;
@@ -102,6 +106,10 @@ namespace Glory
 		uint32_t m_SSAOKernelSize = 0;
 
 		// Screen rendering
+		PipelineData* m_pScreenPipeline = nullptr;
+		PipelineData* m_pSSRPipeline = nullptr;
+		PipelineData* m_pSSAOPipeline = nullptr;
+		PipelineData* m_pSSAOBlurPipeline = nullptr;
 		MaterialData* m_pScreenMaterial = nullptr;
 		MaterialData* m_pSSRMaterial = nullptr;
 		MaterialData* m_pSSAOMaterial = nullptr;
@@ -111,6 +119,9 @@ namespace Glory
 		Buffer* m_pQuadMeshVertexBuffer;
 		Buffer* m_pQuadMeshIndexBuffer;
 
+		FileData* m_pTextVertShader = nullptr;
+		FileData* m_pTextFragShader = nullptr;
+		PipelineData* m_pTextPipelineData = nullptr;
 		MaterialData* m_pTextMaterialData = nullptr;
 		Material* m_pTextMaterial = nullptr;
 
