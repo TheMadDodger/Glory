@@ -52,6 +52,17 @@ namespace Glory
 		}
 
 		template<typename T>
+		void RegisterAssetReference(const std::string& name, uint64_t defaultValue)
+		{
+			YAML::Node node = m_SettingsNode[name];
+			if (!node.IsDefined())
+				m_SettingsNode[name] = defaultValue;
+
+			const uint32_t type = ResourceTypes::GetHash<T>();
+			RegisterValue(name, ST_Asset, type);
+		}
+
+		template<typename T>
 		T Value(const std::string& name) const
 		{
 			YAML::Node node = m_SettingsNode[name];
