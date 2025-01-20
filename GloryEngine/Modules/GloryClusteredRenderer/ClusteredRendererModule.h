@@ -23,6 +23,8 @@ namespace Glory
 		glm::uvec2 ScreenDimensions;
 		float Scale;
 		float Bias;
+		float zNear;
+		float zFar;
 	};
 
 	struct LightGrid

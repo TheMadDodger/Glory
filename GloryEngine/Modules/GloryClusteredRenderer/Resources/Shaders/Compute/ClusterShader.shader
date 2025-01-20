@@ -21,11 +21,9 @@ layout(std430, binding = 2) buffer screenToView
     uvec2 ScreenDimensions;
     float Scale;
     float Bias;
+    float zNear;
+	float zFar;
 };
-
-//Shared between all clusters
-uniform float zNear;
-uniform float zFar;
 
 //Function prototypes
 vec4 ClipToView(vec4 clip);

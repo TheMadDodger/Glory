@@ -97,10 +97,10 @@ namespace Glory
 		m_pClusterCullLightMaterialData = new InternalMaterial(m_pClusterCullLightPipelineData);
 
 		const ModuleSettings& settings = Settings();
-		const UUID linesPipeline = settings.Value<uint64_t>("Lines Pipeline");
 		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
 		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
 		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
+		const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
 
 		m_pScreenMaterial = new MaterialData();
 		m_pScreenMaterial->SetPipeline(screenPipeline);
@@ -110,7 +110,7 @@ namespace Glory
 		m_pSSAOBlurMaterial = new MaterialData();
 		m_pSSAOBlurMaterial->SetPipeline(SSAOBlurPipeline);
 		m_pTextMaterialData = new MaterialData();
-		m_pTextMaterialData->SetPipeline(linesPipeline);
+		m_pTextMaterialData->SetPipeline(textPipeline);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -362,7 +362,11 @@ namespace Glory
 		if (!pFontData) return;
 		if (!m_pTextMaterialData) return;
 
-		if (!m_pTextMaterial) return;
+		if (!m_pTextMaterial)
+		{
+			m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
+			if (!m_pTextMaterial) return;
+		}
 		m_pTextMaterial->Use();
 
 		ObjectData object;
@@ -462,7 +466,6 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
-
 	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -493,6 +496,8 @@ namespace Glory
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
 		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
 		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.zNear = zNear;
+		screenToView.zFar = zFar;
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
@@ -500,9 +505,6 @@ namespace Glory
 		Material* pMaterial = pGraphics->UseMaterial(m_pScreenMaterial);
 
 		pRenderTexture->BindAll(pMaterial);
-
-		pMaterial->SetFloat("zNear", camera.GetNear());
-		pMaterial->SetFloat("zFar", camera.GetFar());
 
 		pClusterSSBO->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
@@ -615,6 +617,8 @@ namespace Glory
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
 		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
 		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.zNear = zNear;
+		screenToView.zFar = zFar;
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
@@ -635,10 +639,11 @@ namespace Glory
 
 	void ClusteredRendererModule::LoadSettings(ModuleSettings& settings)
 	{
-		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
+		RendererModule::LoadSettings(settings);
 		settings.RegisterAssetReference<PipelineData>("Screen Pipeline", 20);
 		settings.RegisterAssetReference<PipelineData>("SSAO Prepass Pipeline", 21);
 		settings.RegisterAssetReference<PipelineData>("SSAO Blur Pipeline", 22);
+		settings.RegisterAssetReference<PipelineData>("Text Pipeline", 23);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
@@ -664,14 +669,14 @@ namespace Glory
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
 		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
 		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.zNear = zNear;
+		screenToView.zFar = zFar;
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
 		m_pClusterShaderMaterial->Use();
 		pBuffer->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
-		m_pClusterShaderMaterial->SetFloat("zNear", zNear);
-		m_pClusterShaderMaterial->SetFloat("zFar", zFar);
 		m_pEngine->GetMainModule<GraphicsModule>()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
 		pBuffer->Unbind();
 		m_pScreenToViewSSBO->Unbind();

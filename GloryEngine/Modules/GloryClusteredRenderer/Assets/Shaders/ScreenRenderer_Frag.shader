@@ -2,7 +2,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-in vec2 Coord;
+layout(location = 0) in vec2 Coord;
 layout(location = 0) out vec4 out_Color;
 layout (binding = 0) uniform sampler2D Color;
 layout (binding = 1) uniform sampler2D Normal;
@@ -11,9 +11,6 @@ layout (binding = 3) uniform sampler2D Debug;
 layout (binding = 4) uniform sampler2D Depth;
 
 //uniform vec3 eyeDirection;
-
-uniform float zNear;
-uniform float zFar;
 
 uint GetClusterIndex(vec3 pixelCoord);
 uint GetDepthSlice(float z);
@@ -65,6 +62,8 @@ layout(std430, binding = 2) buffer screenToView
     uvec2 ScreenDimensions;
     float Scale;
     float Bias;
+	float zNear;
+	float zFar;
 };
 
 layout(std430, binding = 3) buffer lightSSBO
@@ -103,18 +102,18 @@ const vec3 BadColor = vec3(1.0, 0.0, 0.0);
 
 void main()
 {
-	vec3 debug = texture2D(Debug, Coord).xzy;
+	vec3 debug = texture(Debug, Coord).xyz;
 	if (debug.r > 0.0 || debug.g > 0.0 || debug.b > 0.0)
 	{
 		out_Color = vec4(debug, 1.0);
 		return;
 	}
 
-	vec3 color = texture2D(Color, Coord).xyz;
-	vec3 normal = texture2D(Normal, Coord).xyz*2.0 - 1.0;
-	float ssao = AOEnabled == 1 ? Magnitude*pow(texture2D(AO, Coord).x, Contrast) : 1.0;
+	vec3 color = texture(Color, Coord).xyz;
+	vec3 normal = texture(Normal, Coord).xyz*2.0 - 1.0;
+	float ssao = AOEnabled == 1 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
 	ssao = min(ssao, 1.0);
-	float depth = texture2D(Depth, Coord).r;
+	float depth = texture(Depth, Coord).r;
 	vec3 fragPosition = WorldPosFromDepth(depth);
 
 	//vec3 lightReflected = reflect(lightVec, normal);

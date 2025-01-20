@@ -23,7 +23,7 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLinesMaterial(nullptr), m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false)
+		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false)
 	{
 	}
 
@@ -274,19 +274,10 @@ namespace Glory
 		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
 		importSettings.AddNullTerminateAtEnd = true;
 
-		/* Line Shaders */
-		std::filesystem::path path;
-		GetResourcePath("Shaders/Lines_Vert.shader", path);
-		FileData* pVert = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-		GetResourcePath("Shaders/Lines_Frag.shader", path);
-		FileData* pFrag = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-
-		std::vector<FileData*> pShaderFiles = { pVert, pFrag };
-		std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
-
-		m_pLinesPipelineData = new InternalPipeline(std::move(pShaderFiles), std::move(shaderTypes));
-		m_pLinesPipelineData->SetPipelineType(PipelineType::PT_Unknown);
-		m_pLinesMaterialData = new InternalMaterial(m_pLinesPipelineData);
+		/* Line rendering */
+		const UUID linesPipeline = Settings().Value<uint64_t>("Lines Pipeline");
+		m_pLinesMaterialData = new MaterialData();
+		m_pLinesMaterialData->SetPipeline(linesPipeline);
 	}
 
 	void RendererModule::PostInitialize()
@@ -464,7 +455,6 @@ namespace Glory
 		if (!pGraphics) return;
 		m_pLineBuffer = pGraphics->GetResourceManager()->CreateBuffer(sizeof(LineVertex) * MAX_LINE_VERTICES, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 		m_pLineMesh = pGraphics->GetResourceManager()->CreateMesh(MAX_LINE_VERTICES, 0, InputRate::Vertex, 0, sizeof(LineVertex), PrimitiveType::PT_Lines, { AttributeType::Float3, AttributeType::Float4 }, m_pLineBuffer, nullptr);
-		m_pLinesMaterial = pGraphics->GetResourceManager()->CreateMaterial(m_pLinesMaterialData);
 	}
 
 	void RendererModule::RenderLines(CameraRef camera)
@@ -525,5 +515,10 @@ namespace Glory
 	{
 		m_pEngine->GetDebug().SubmitLines(this, &m_pEngine->Time());
 		Render();
+	}
+
+	void RendererModule::LoadSettings(ModuleSettings& settings)
+	{
+		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
 	}
 }
