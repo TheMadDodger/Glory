@@ -1,0 +1,12 @@
+Runtime:
+
+Engine:
+- Shader #includes are now supported
+- Shaders and pipelines for rendering the screen as well as effects are now managed by the asset manager and can now be referenced
+
+Editor:
+- Added options in ClusteredRendererModule to set the pipelines used for rendering to the screen and for rendering effects
+- Assets referenced directly by modules are now also packaged
+- Compiled shader caches will now be compared to their shader sources last write date to detect changes on startup
+
+Scripting:
