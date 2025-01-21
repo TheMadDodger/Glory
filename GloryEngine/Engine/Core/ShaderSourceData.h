@@ -24,10 +24,14 @@ namespace Glory
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 
+        uint64_t& TimeSinceLastWrite();
+        const uint64_t& TimeSinceLastWrite() const;
+
     private:
         ShaderType m_ShaderType;
         FileData* m_pPlatformCompiledShader;
         std::vector<char> m_OriginalSource;
         std::vector<char> m_ProcessedSource;
+        uint64_t m_TimeSinceLastWrite;
 	};
 }

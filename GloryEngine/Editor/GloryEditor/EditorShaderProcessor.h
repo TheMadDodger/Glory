@@ -67,6 +67,8 @@ namespace Editor
 		static std::filesystem::path GetShaderSourceCachePath(UUID uuid);
 		static std::filesystem::path GetCompiledShaderCachePath(UUID uuid);
 
+		static bool IsCacheOutdated(const std::filesystem::path& cachePath, ShaderSourceData* shaderSource);
+
 	private:
 		friend class EditorApplication;
 		friend class ProjectSpace;
