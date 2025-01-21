@@ -43,7 +43,9 @@ namespace Glory
 		virtual void OnCameraResize(CameraRef camera) override;
 		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
 
-		GLORY_MODULE_VERSION_H(0,3,0);
+		virtual void CollectReferences(std::vector<UUID>& references) override;
+
+		GLORY_MODULE_VERSION_H(0,4,0);
 
 	private:
 		virtual void Cleanup() override;

@@ -65,6 +65,32 @@ namespace Glory
 		GenerateClusterSSBO(pClusterSSBO, camera);
 	}
 
+	void ClusteredRendererModule::CollectReferences(std::vector<UUID>& references)
+	{
+		ModuleSettings& settings = Settings();
+
+		const size_t start = references.size();
+		references.push_back(settings.Value<uint64_t>("Lines Pipeline"));
+		references.push_back(settings.Value<uint64_t>("Screen Pipeline"));
+		references.push_back(settings.Value<uint64_t>("SSAO Prepass Pipeline"));
+		references.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
+		references.push_back(settings.Value<uint64_t>("Text Pipeline"));
+		const size_t end = references.size();
+
+		for (size_t i = start; i < end; ++i)
+		{
+			Resource* pPipelineResource = m_pEngine->GetAssetManager().GetAssetImmediate(references[i]);
+			if (!pPipelineResource) continue;
+			PipelineData* pPipelineData = static_cast<PipelineData*>(pPipelineResource);
+			for (size_t i = 0; i < pPipelineData->ShaderCount(); ++i)
+			{
+				const UUID shaderID = pPipelineData->ShaderID(i);
+				if (!shaderID) continue;
+				references.push_back(shaderID);
+			}
+		}
+	}
+
 	void ClusteredRendererModule::OnPostInitialize()
 	{
 		FileImportSettings importSettings;
@@ -130,7 +156,6 @@ namespace Glory
 		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
 		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
 		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
-		//m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
 
 		uint32_t vertexBufferSize = 4 * sizeof(VertexPosColorTex);
 		uint32_t indexBufferSize = 6 * sizeof(uint32_t);
