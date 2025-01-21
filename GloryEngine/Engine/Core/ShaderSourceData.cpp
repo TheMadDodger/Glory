@@ -3,19 +3,24 @@
 
 namespace Glory
 {
-    ShaderSourceData::ShaderSourceData() : m_ProcessedSource(), m_OriginalSource(), m_ShaderType(ShaderType::ST_Unknown), m_pPlatformCompiledShader(nullptr)
+    ShaderSourceData::ShaderSourceData() : m_ProcessedSource(), m_OriginalSource(),
+        m_ShaderType(ShaderType::ST_Unknown), m_pPlatformCompiledShader(nullptr),
+        m_TimeSinceLastWrite(0)
     {
         APPEND_TYPE(ShaderSourceData);
     }
 
     ShaderSourceData::ShaderSourceData(ShaderType shaderType, FileData* pCompiledSource)
-        : m_ShaderType(shaderType), m_pPlatformCompiledShader(pCompiledSource), m_OriginalSource(), m_ProcessedSource()
+        : m_ShaderType(shaderType), m_pPlatformCompiledShader(pCompiledSource),
+        m_OriginalSource(), m_ProcessedSource(), m_TimeSinceLastWrite(0)
     {
         APPEND_TYPE(ShaderSourceData);
     }
 
     ShaderSourceData::ShaderSourceData(ShaderType shaderType, std::vector<char>&& source, std::vector<char>&& processed)
-        : m_ShaderType(shaderType), m_pPlatformCompiledShader(nullptr), m_OriginalSource(std::move(source)), m_ProcessedSource(std::move(processed))
+        : m_ShaderType(shaderType), m_pPlatformCompiledShader(nullptr),
+        m_OriginalSource(std::move(source)), m_ProcessedSource(std::move(processed)),
+        m_TimeSinceLastWrite(0)
     {
         APPEND_TYPE(ShaderSourceData);
     }
@@ -72,5 +77,15 @@ namespace Glory
             m_pPlatformCompiledShader = new FileData();
             m_pPlatformCompiledShader->Deserialize(container);
         }
+    }
+
+    uint64_t& ShaderSourceData::TimeSinceLastWrite()
+    {
+        return m_TimeSinceLastWrite;
+    }
+
+    const uint64_t& ShaderSourceData::TimeSinceLastWrite() const
+    {
+        return m_TimeSinceLastWrite;
     }
 }

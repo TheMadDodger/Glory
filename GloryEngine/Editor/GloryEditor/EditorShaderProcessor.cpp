@@ -349,6 +349,9 @@ namespace Glory::Editor
 		if (!resource) return false;
 		resource->SetResourceUUID(uuid);
 		ShaderSourceData* pShaderSource = static_cast<ShaderSourceData*>(*resource);
+		const auto time = std::filesystem::last_write_time(assetPath);
+		pShaderSource->TimeSinceLastWrite() = std::chrono::duration_cast<std::chrono::seconds>(
+			time.time_since_epoch()).count();
 
 		if (m_pLoadedShaderSources.Contains(pShaderSource->GetUUID()))
 		{
@@ -371,7 +374,7 @@ namespace Glory::Editor
 		const std::filesystem::path cachedShaderSourceFile = GetShaderSourceCachePath(uuid);
 
 		GetShaderSource(uuid, [uuid, cachedShaderSourceFile](ShaderSourceData* pShaderSource) {
-			if (std::filesystem::exists(cachedShaderSourceFile))
+			if (std::filesystem::exists(cachedShaderSourceFile) && !IsCacheOutdated(cachedShaderSourceFile, pShaderSource))
 				LoadCache(uuid, cachedShaderSourceFile);
 			else
 				CompileAndCache(pShaderSource, cachedShaderSourceFile);
@@ -418,5 +421,13 @@ namespace Glory::Editor
 		std::filesystem::path cachedCompiledShaderFile = pProject->CachePath();
 		cachedCompiledShaderFile.append("CompiledShaders").append(std::to_string(uuid));
 		return cachedCompiledShaderFile;
+	}
+
+	bool EditorShaderProcessor::IsCacheOutdated(const std::filesystem::path& cachePath, ShaderSourceData* shaderSource)
+	{
+		const auto time = std::filesystem::last_write_time(cachePath);
+		const uint64_t cacheWriteTime = std::chrono::duration_cast<std::chrono::seconds>(
+			time.time_since_epoch()).count();
+		return cacheWriteTime < shaderSource->TimeSinceLastWrite();
 	}
 }
