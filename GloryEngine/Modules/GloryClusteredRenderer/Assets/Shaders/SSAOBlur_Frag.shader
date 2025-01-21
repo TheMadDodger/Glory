@@ -1,3 +1,4 @@
+#type frag
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
@@ -28,7 +29,7 @@ vec4 BoxBlur(sampler2D tex, int blurSize, float seperation)
 
     if (blurSize <= 0)
     {
-        return texture2D(tex, texCoord);
+        return texture(tex, texCoord);
     }
     seperation = max(seperation, 1.0);
 
@@ -37,7 +38,7 @@ vec4 BoxBlur(sampler2D tex, int blurSize, float seperation)
 	{
 	    for(int y = -blurSize; y <= blurSize; ++y)
 	    {
-	        color += texture2D(tex, (gl_FragCoord.xy + vec2(x, y)*seperation)/texSize).xyz;
+	        color += texture(tex, (gl_FragCoord.xy + vec2(x, y)*seperation)/texSize).xyz;
 	    }
 	}
 	color /= pow(blurSize*2.0 + 1.0, 2.0);
@@ -51,7 +52,7 @@ vec4 MedianBlur(sampler2D tex, int blurSize, int binsSize)
 
     if (blurSize <= 0)
     {
-        return texture2D(tex, texCoord);
+        return texture(tex, texCoord);
     }
 	
     if (blurSize > MAX_SIZE)
@@ -82,7 +83,7 @@ vec4 MedianBlur(sampler2D tex, int blurSize, int binsSize)
         {
             colors[count] =
 
-            texture2D(tex, ( gl_FragCoord.
+            texture(tex, ( gl_FragCoord.
             xy + vec2(i, j)) / texSize);
             count += 1;
         }
@@ -127,7 +128,7 @@ vec4 MedianBlur(sampler2D tex, int blurSize, int binsSize)
     return color;
 }
 
-in vec2 Coord;
+layout(location = 0) in vec2 Coord;
 layout(location = 3) out vec4 out_Color;
 layout (binding = 0) uniform sampler2D AO;
 

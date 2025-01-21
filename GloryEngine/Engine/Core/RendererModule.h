@@ -94,6 +94,8 @@ namespace Glory
 
 		virtual void Draw() override;
 
+		virtual void LoadSettings(ModuleSettings& settings) override;
+
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
 
@@ -112,9 +114,7 @@ namespace Glory
 		uint32_t m_LineVertexCount;
 		Buffer* m_pLineBuffer;
 		Mesh* m_pLineMesh;
-		PipelineData* m_pLinesPipelineData;
 		MaterialData* m_pLinesMaterialData;
-		Material* m_pLinesMaterial;
 
 		static const uint32_t MAX_LINE_VERTICES = 1000;
 		LineVertex* m_pLineVertices;

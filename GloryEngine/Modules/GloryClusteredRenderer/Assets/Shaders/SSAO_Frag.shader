@@ -1,7 +1,8 @@
+#type frag
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-in vec2 Coord;
+layout(location = 0) in vec2 Coord;
 layout(location = 0) out vec4 out_Color;
 layout (binding = 2) uniform sampler2D Normal;
 layout (binding = 5) uniform sampler2D Depth;
@@ -17,6 +18,8 @@ layout(std430, binding = 2) buffer screenToView
     uvec2 ScreenDimensions;
     float Scale;
     float Bias;
+    float zNear;
+	float zFar;
 };
 
 layout(std430, binding = 3) buffer sampleDome
@@ -43,10 +46,10 @@ void main()
 {
     vec2 noiseScale = vec2(ScreenDimensions.x/4.0, ScreenDimensions.y/4.0);
 
-	vec3 normal = texture2D(Normal, Coord).xyz * 2.0 - 1.0;
+	vec3 normal = texture(Normal, Coord).xyz * 2.0 - 1.0;
     normal = mat3(inverse(ViewInverse)) * normalize(normal);
-	vec3 randomVec = texture2D(Noise, Coord*noiseScale).xyz;
-	float depth = texture2D(Depth, Coord).r;
+	vec3 randomVec = texture(Noise, Coord*noiseScale).xyz;
+	float depth = texture(Depth, Coord).r;
 	vec4 fragPosition = WorldPosFromDepth(depth);
 
     vec3 tangent   = normalize(randomVec - normal*dot(randomVec, normal));
@@ -65,7 +68,7 @@ void main()
         offset.xyz /= offset.w;               // perspective divide
         offset.xyz  = offset.xyz * 0.5 + 0.5; // transform to range 0.0 - 1.0
 
-        float sampleDepth = texture2D(Depth, offset.xy).r;
+        float sampleDepth = texture(Depth, offset.xy).r;
         vec4 offsetPosition = WorldPosFromDepth(sampleDepth);
         float intensity = smoothstep(0.0, 1.0, SampleRadius/abs(fragPosition.z - offsetPosition.z));
         float occluded = samplePos.z + SampleBias <= offsetPosition.z ? 1.0 : 0.0;

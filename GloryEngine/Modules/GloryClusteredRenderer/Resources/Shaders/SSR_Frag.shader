@@ -1,17 +1,12 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-in vec2 Coord;
+layout(location = 0) in vec2 Coord;
 layout(location = 0) out vec4 out_Color;
 layout (binding = 1) uniform sampler2D Color;
 layout (binding = 2) uniform sampler2D Normal;
 layout (binding = 3) uniform sampler2D Debug;
 layout (binding = 4) uniform sampler2D Depth;
-
-//uniform vec3 eyeDirection;
-
-uniform float zNear;
-uniform float zFar;
 
 float LinearDepth(float depthSample);
 vec3 WorldPosFromDepth(float depth);
@@ -24,6 +19,8 @@ layout(std430, binding = 2) buffer screenToView
     uvec2 ScreenDimensions;
     float Scale;
     float Bias;
+    float zNear;
+	float zFar;
 };
 
 void main()

@@ -35,6 +35,8 @@ layout(std430, binding = 2) buffer screenToView
     uvec2 ScreenDimensions;
     float Scale;
     float Bias;
+    float zNear;
+	float zFar;
 };
 
 layout(std430, binding = 3) buffer lightSSBO

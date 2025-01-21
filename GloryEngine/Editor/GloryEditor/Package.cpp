@@ -50,6 +50,7 @@ namespace Glory::Editor
 	std::vector<UUID> ScenesToPackage;
 	std::vector<GScene*> LoadedScenesToPackage;
 
+	std::vector<UUID> GlobalAssets;
 	std::map<UUID, std::vector<UUID>> AssetsPerScene;
 	std::map<UUID, std::vector<UUID>> ShadersPerScene;
 	std::vector<UUID> SharedAssets;
@@ -229,6 +230,30 @@ namespace Glory::Editor
 		SharedAssets.clear();
 		SharedShaders.clear();
 		Shaders.clear();
+		GlobalAssets.clear();
+
+		/* Find assets used by modules */
+		for (size_t i = 0; i < pEngine->ModulesCount(); ++i)
+		{
+			Module* pModule = pEngine->GetModule(i);
+			pModule->CollectReferences(GlobalAssets);
+		}
+
+		/* Add global assets and shaders */
+		for (size_t i = 0; i < GlobalAssets.size(); ++i)
+		{
+			ResourceMeta meta;
+			EditorAssetDatabase::GetAssetMetadata(GlobalAssets[i], meta);
+
+			/* Shaders are separate */
+			if (meta.Hash() == ShaderSourceHash)
+			{
+				Shaders.push_back(GlobalAssets[i]);
+				SharedShaders.push_back(GlobalAssets[i]);
+				continue;
+			}
+			SharedAssets.push_back(GlobalAssets[i]);
+		}
 
 		/* Find all resources in use for each scene */
 		std::map<UUID, std::vector<UUID>> assetScenes;

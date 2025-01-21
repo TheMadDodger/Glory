@@ -65,6 +65,32 @@ namespace Glory
 		GenerateClusterSSBO(pClusterSSBO, camera);
 	}
 
+	void ClusteredRendererModule::CollectReferences(std::vector<UUID>& references)
+	{
+		ModuleSettings& settings = Settings();
+
+		const size_t start = references.size();
+		references.push_back(settings.Value<uint64_t>("Lines Pipeline"));
+		references.push_back(settings.Value<uint64_t>("Screen Pipeline"));
+		references.push_back(settings.Value<uint64_t>("SSAO Prepass Pipeline"));
+		references.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
+		references.push_back(settings.Value<uint64_t>("Text Pipeline"));
+		const size_t end = references.size();
+
+		for (size_t i = start; i < end; ++i)
+		{
+			Resource* pPipelineResource = m_pEngine->GetAssetManager().GetAssetImmediate(references[i]);
+			if (!pPipelineResource) continue;
+			PipelineData* pPipelineData = static_cast<PipelineData*>(pPipelineResource);
+			for (size_t i = 0; i < pPipelineData->ShaderCount(); ++i)
+			{
+				const UUID shaderID = pPipelineData->ShaderID(i);
+				if (!shaderID) continue;
+				references.push_back(shaderID);
+			}
+		}
+	}
+
 	void ClusteredRendererModule::OnPostInitialize()
 	{
 		FileImportSettings importSettings;
@@ -96,38 +122,21 @@ namespace Glory
 		m_pClusterCullLightPipelineData = new InternalPipeline({ m_pClusterCullLightShaderData }, { ShaderType::ST_Compute });
 		m_pClusterCullLightMaterialData = new InternalMaterial(m_pClusterCullLightPipelineData);
 
-		// Screen shaders
-		GetResourcePath("Shaders/ScreenRenderer_Vert.shader", path);
-		m_pScreenVertShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-		GetResourcePath("Shaders/ScreenRenderer_Frag.shader", path);
-		m_pScreenFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
+		const ModuleSettings& settings = Settings();
+		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
+		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
+		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
+		const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
 
-		/* SSR Shaders */
-		GetResourcePath("Shaders/SSR_Frag.shader", path);
-		m_pSSRFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-
-		/* SSAO Shaders */
-		GetResourcePath("Shaders/SSAO_Frag.shader", path);
-		m_pSSAOFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-		GetResourcePath("Shaders/SSAOBlur_Frag.shader", path);
-		m_pSSAOBlurFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-
-		/* Text Shaders */
-		GetResourcePath("Shaders/Text_vert.shader", path);
-		m_pTextVertShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-		GetResourcePath("Shaders/Text_frag.shader", path);
-		m_pTextFragShader = (FileData*)m_pEngine->GetModule<FileLoaderModule>()->Load(path.string(), importSettings);
-
-		m_pScreenPipeline = new InternalPipeline({ m_pScreenVertShader, m_pScreenFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
-		m_pSSRPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSRFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
-		m_pSSAOPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
-		m_pSSAOBlurPipeline = new InternalPipeline({ m_pScreenVertShader, m_pSSAOBlurFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
-		m_pTextPipelineData = new InternalPipeline({ m_pTextVertShader, m_pTextFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
-		m_pScreenMaterial = new InternalMaterial(m_pScreenPipeline);
-		m_pSSRMaterial = new InternalMaterial(m_pSSRPipeline);
-		m_pSSAOMaterial = new InternalMaterial(m_pSSAOPipeline);
-		m_pSSAOBlurMaterial = new InternalMaterial(m_pSSAOBlurPipeline);
-		m_pTextMaterialData = new InternalMaterial(m_pTextPipelineData);
+		m_pScreenMaterial = new MaterialData();
+		m_pScreenMaterial->SetPipeline(screenPipeline);
+		m_pSSRMaterial = new MaterialData();
+		m_pSSAOMaterial = new MaterialData();
+		m_pSSAOMaterial->SetPipeline(SSAOPrePassPipeline);
+		m_pSSAOBlurMaterial = new MaterialData();
+		m_pSSAOBlurMaterial->SetPipeline(SSAOBlurPipeline);
+		m_pTextMaterialData = new MaterialData();
+		m_pTextMaterialData->SetPipeline(textPipeline);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -147,7 +156,6 @@ namespace Glory
 		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
 		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
 		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
-		m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
 
 		uint32_t vertexBufferSize = 4 * sizeof(VertexPosColorTex);
 		uint32_t indexBufferSize = 6 * sizeof(uint32_t);
@@ -211,20 +219,6 @@ namespace Glory
 
 		delete m_pTextMaterialData;
 		m_pTextMaterialData = nullptr;
-
-		delete m_pScreenPipeline;
-		delete m_pSSRPipeline;
-		delete m_pSSAOPipeline;
-		delete m_pSSAOBlurPipeline;
-		delete m_pTextPipelineData;
-
-		delete m_pScreenVertShader;
-		delete m_pScreenFragShader;
-		delete m_pSSRFragShader;
-		delete m_pSSAOFragShader;
-		delete m_pSSAOBlurFragShader;
-		delete m_pTextVertShader;
-		delete m_pTextFragShader;
 	}
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights)
@@ -393,7 +387,11 @@ namespace Glory
 		if (!pFontData) return;
 		if (!m_pTextMaterialData) return;
 
-		if (!m_pTextMaterial) return;
+		if (!m_pTextMaterial)
+		{
+			m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
+			if (!m_pTextMaterial) return;
+		}
 		m_pTextMaterial->Use();
 
 		ObjectData object;
@@ -493,7 +491,6 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
-
 	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -524,6 +521,8 @@ namespace Glory
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
 		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
 		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.zNear = zNear;
+		screenToView.zFar = zFar;
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
@@ -531,9 +530,6 @@ namespace Glory
 		Material* pMaterial = pGraphics->UseMaterial(m_pScreenMaterial);
 
 		pRenderTexture->BindAll(pMaterial);
-
-		pMaterial->SetFloat("zNear", camera.GetNear());
-		pMaterial->SetFloat("zFar", camera.GetFar());
 
 		pClusterSSBO->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
@@ -646,6 +642,8 @@ namespace Glory
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
 		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
 		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.zNear = zNear;
+		screenToView.zFar = zFar;
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
@@ -662,6 +660,15 @@ namespace Glory
 		m_pLightsSSBO->Unbind();
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
+	}
+
+	void ClusteredRendererModule::LoadSettings(ModuleSettings& settings)
+	{
+		RendererModule::LoadSettings(settings);
+		settings.RegisterAssetReference<PipelineData>("Screen Pipeline", 20);
+		settings.RegisterAssetReference<PipelineData>("SSAO Prepass Pipeline", 21);
+		settings.RegisterAssetReference<PipelineData>("SSAO Blur Pipeline", 22);
+		settings.RegisterAssetReference<PipelineData>("Text Pipeline", 23);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
@@ -687,14 +694,14 @@ namespace Glory
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
 		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
 		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.zNear = zNear;
+		screenToView.zFar = zFar;
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
 		m_pClusterShaderMaterial->Use();
 		pBuffer->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
-		m_pClusterShaderMaterial->SetFloat("zNear", zNear);
-		m_pClusterShaderMaterial->SetFloat("zFar", zFar);
 		m_pEngine->GetMainModule<GraphicsModule>()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
 		pBuffer->Unbind();
 		m_pScreenToViewSSBO->Unbind();
