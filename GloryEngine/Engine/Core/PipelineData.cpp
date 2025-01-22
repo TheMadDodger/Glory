@@ -186,4 +186,54 @@ namespace Glory
 		}
 		return false;
 	}
+
+	void PipelineData::AddFeature(std::string_view feature, bool isOn)
+	{
+		const size_t index = FeatureIndex(feature);
+		if (index != m_Features.size())
+		{
+			m_FeaturesEnabled.Set(index, isOn);
+			return;
+		}
+
+		m_Features.push_back(std::string(feature));
+		m_FeaturesEnabled.Reserve(m_Features.size());
+		m_FeaturesEnabled.Set(index, isOn);
+	}
+
+	size_t PipelineData::FeatureIndex(std::string_view feature) const
+	{
+		for (size_t i = 0; i < m_Features.size(); ++i)
+		{
+			if (m_Features[i] != feature) continue;
+			return i;
+		}
+		return m_Features.size();
+	}
+
+	size_t PipelineData::FeatureCount() const
+	{
+		return m_Features.size();
+	}
+
+	std::string_view PipelineData::FeatureName(size_t index) const
+	{
+		return m_Features[index];
+	}
+
+	bool PipelineData::FeatureEnabled(size_t index)
+	{
+		return m_FeaturesEnabled.IsSet(index);
+	}
+
+	void PipelineData::SetFeatureEnabled(size_t index, bool enabled)
+	{
+		m_FeaturesEnabled.Set(index, enabled);
+	}
+
+	void PipelineData::ClearFeatures()
+	{
+		m_Features.clear();
+		m_FeaturesEnabled.Clear();
+	}
 }

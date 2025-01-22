@@ -10,6 +10,7 @@
 #include "Dispatcher.h"
 #include "Importer.h"
 
+#include <ShaderSourceData.h>
 #include <Engine.h>
 #include <AssetManager.h>
 
@@ -51,9 +52,9 @@ namespace Glory::Editor
 		if (!pResource) return;
 		PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
 		pPipeline->AddShader(shaderID);
-		YAMLResource<PipelineData>* pMaterialData = static_cast<YAMLResource<PipelineData>*>(
+		YAMLResource<PipelineData>* pPipelineData = static_cast<YAMLResource<PipelineData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(pipelineID));
-		Utils::YAMLFileRef& file = **pMaterialData;
+		Utils::YAMLFileRef& file = **pPipelineData;
 		auto shaders = file["Shaders"];
 		shaders[shaders.Size()].Set(uint64_t(shaderID));
 		UpdatePipeline(pPipeline);
@@ -168,12 +169,21 @@ namespace Glory::Editor
 		EditorApplication* pApplication = EditorApplication::GetInstance();
 
 		pPipeline->ClearProperties();
+		pPipeline->ClearFeatures();
 		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
 		{
 			const UUID shaderID = pPipeline->ShaderID(i);
+			ShaderSourceData* pShaderSource = EditorShaderProcessor::GetShaderSource(shaderID);
 			EditorShaderData* pShader = EditorShaderProcessor::GetEditorShader(shaderID);
 			if (!pShader) continue;
 			pShader->LoadIntoPipeline(pPipeline);
+
+			if (!pShaderSource) continue;
+			for (size_t i = 0; i < pShaderSource->FeatureCount(); ++i)
+			{
+				std::string_view feature = pShaderSource->Feature(i);
+				pPipeline->AddFeature(feature, true);
+			}
 		}
 
 		PipelineUpdateEvents().Dispatch({ pPipeline });
@@ -183,8 +193,7 @@ namespace Glory::Editor
 	{
 		pPipeline->SetPipelineType(file["Type"].AsEnum<PipelineType>());
 		pPipeline->RemoveAllShaders();
-		if (!file["Shaders"].IsSequence()) return;
-		for (size_t i = 0; i < file["Shaders"].Size(); ++i)
+		for (size_t i = 0; i < file["Shaders"].IsSequence() && file["Shaders"].Size(); ++i)
 		{
 			auto shader = file["Shaders"][i];
 			const UUID shaderID = shader.As<uint64_t>();

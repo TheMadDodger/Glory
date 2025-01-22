@@ -132,7 +132,6 @@ namespace Glory::Editor
 					continue;
 				}
 
-
 				ImGui::TableSetColumnIndex(0);
 
 				if (ImGui::Selectable(std::to_string(row_n).c_str(), false, selectableFlags, ImVec2(0, rowHeight)) && ImGui::IsMouseDoubleClicked(0))
@@ -179,7 +178,6 @@ namespace Glory::Editor
 		return change;
 	}
 
-
 	bool PipelineEditor::OnGUI()
 	{
 		YAMLResource<PipelineData>* pPipeline = (YAMLResource<PipelineData>*)m_pTarget;
@@ -192,6 +190,22 @@ namespace Glory::Editor
 		{
 			change |= ShaderGUI(pPipeline);
 			ImGui::TreePop();
+		}
+
+		PipelineData* pPipelineData = EditorApplication::GetInstance()->
+			GetPipelineManager().GetPipelineData(pPipeline->GetUUID());
+
+		auto features = file["Features"];
+		if (!features.Exists() || !features.IsMap())
+			features.SetMap();
+
+		for (size_t i = 0; pPipelineData && i < pPipelineData->FeatureCount(); ++i)
+		{
+			std::string_view featureName = pPipelineData->FeatureName(i);
+			auto feature = features[featureName];
+			if (!feature.Exists() || !feature.IsScalar())
+				feature.Set(pPipelineData->FeatureEnabled(i));
+			change |= EditorUI::CheckBox(file, feature.Path());
 		}
 
 		const char* error = GetPipelineError(pPipeline);

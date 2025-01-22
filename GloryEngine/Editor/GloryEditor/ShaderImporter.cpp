@@ -38,6 +38,7 @@ namespace Glory::Editor
         ShaderType Type;
         std::vector<char> Source;
         std::vector<char> ProcessedSource;
+        std::vector<std::string> Features;
     };
 
     void AppendLine(const std::string& line, std::vector<char>& buffer);
@@ -96,9 +97,20 @@ namespace Glory::Editor
         return true;
     }
 
+    bool ProcessDefine(TemporaryShaderData& shaderData, const std::string& define, const std::filesystem::path& path)
+    {
+        if (define._Starts_with("FEATURE_"))
+        {
+            shaderData.Features.push_back(define);
+            return true;
+        }
+        return false;
+    }
+
     std::map<std::string, std::function<bool(TemporaryShaderData&, const std::string&, const std::filesystem::path&)>> SymbolCallbacks = {
         { "type", GetShaderTypeFromString },
-        { "include", ProcessInclude }
+        { "include", ProcessInclude },
+        { "define", ProcessDefine }
     };
 
     std::string_view ShaderImporter::Name() const
@@ -176,6 +188,7 @@ namespace Glory::Editor
             ProcessLine(shaderData, line, path);
         }
 
-        return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source), std::move(shaderData.ProcessedSource)) };
+        return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source),
+            std::move(shaderData.ProcessedSource), std::move(shaderData.Features)) };
     }
 }

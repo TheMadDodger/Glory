@@ -17,10 +17,11 @@ namespace Glory
         APPEND_TYPE(ShaderSourceData);
     }
 
-    ShaderSourceData::ShaderSourceData(ShaderType shaderType, std::vector<char>&& source, std::vector<char>&& processed)
+    ShaderSourceData::ShaderSourceData(ShaderType shaderType, std::vector<char>&& source,
+        std::vector<char>&& processed, std::vector<std::string>&& features)
         : m_ShaderType(shaderType), m_pPlatformCompiledShader(nullptr),
         m_OriginalSource(std::move(source)), m_ProcessedSource(std::move(processed)),
-        m_TimeSinceLastWrite(0)
+        m_Features(std::move(features)), m_TimeSinceLastWrite(0)
     {
         APPEND_TYPE(ShaderSourceData);
     }
@@ -87,5 +88,15 @@ namespace Glory
     const uint64_t& ShaderSourceData::TimeSinceLastWrite() const
     {
         return m_TimeSinceLastWrite;
+    }
+
+    size_t ShaderSourceData::FeatureCount() const
+    {
+        return m_Features.size();
+    }
+
+    std::string_view ShaderSourceData::Feature(size_t index) const
+    {
+        return m_Features[index];
     }
 }
