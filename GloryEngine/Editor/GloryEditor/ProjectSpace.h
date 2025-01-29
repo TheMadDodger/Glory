@@ -23,7 +23,7 @@ namespace Glory::Editor
 	class ProjectSpace
 	{
 	public:
-		GLORY_EDITOR_API static void OpenProject(const std::string& path);
+		GLORY_EDITOR_API static ProjectSpace* OpenProject(const std::string& path);
 		GLORY_EDITOR_API static void CloseProject();
 		GLORY_EDITOR_API static ProjectSpace* GetOpenProject();
 		GLORY_EDITOR_API static bool ProjectExists(const std::string& path);
@@ -58,7 +58,6 @@ namespace Glory::Editor
 
 	private:
 		static ProjectSpace* m_pCurrentProject;
-		static std::recursive_mutex m_ProjectLock;
 		std::string m_ProjectFilePath;
 		std::string m_ProjectRootPath;
 		std::string m_CachePath;

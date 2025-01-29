@@ -75,9 +75,7 @@ int main(int argc, char* argv[])
 
         Glory::Editor::EditorApplication application(editorCreateInfo);
         application.Initialize();
-
-        Glory::Editor::ProjectSpace::OpenProject(projectPath);
-
+        application.Start(projectPath);
         application.Run();
     }
 

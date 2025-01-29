@@ -19,35 +19,29 @@
 namespace Glory::Editor
 {
 	ProjectSpace* ProjectSpace::m_pCurrentProject = nullptr;
-	std::recursive_mutex ProjectSpace::m_ProjectLock;
 
 	Dispatcher<ProjectSpace*> ProjectCallbacks[ProjectCallback::Count];
 
-	void ProjectSpace::OpenProject(const std::string& path)
+	ProjectSpace* ProjectSpace::OpenProject(const std::string& path)
 	{
 		std::string absolutePath = std::filesystem::absolute(path).string();
 		CloseProject();
-		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		m_pCurrentProject = new ProjectSpace(absolutePath);
-		lock.unlock();
 		m_pCurrentProject->Open();
+		return m_pCurrentProject;
 	}
 
 	void ProjectSpace::CloseProject()
 	{
 		if (m_pCurrentProject == nullptr) return;
 		m_pCurrentProject->Close();
-		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		delete m_pCurrentProject;
 		m_pCurrentProject = nullptr;
-		lock.unlock();
 	}
 
 	ProjectSpace* ProjectSpace::GetOpenProject()
 	{
-		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		ProjectSpace* pProject = m_pCurrentProject;
-		lock.unlock();
 		return pProject;
 	}
 
@@ -182,7 +176,6 @@ namespace Glory::Editor
 		std::filesystem::path path = RootPath();
 		path.append("Assets");
 
-		std::unique_lock<std::recursive_mutex> lock(m_ProjectLock);
 		CreateFolder("Assets");
 		CreateFolder("Cache");
 		CreateFolder("Cache/ShaderSource");
@@ -216,21 +209,8 @@ namespace Glory::Editor
 
 		ProjectCallbacks[ProjectCallback::OnOpen].Dispatch(this);
 
-		lock.unlock();
-
 		EditorAssetDatabase::Load(m_ProjectFile);
-		EditorAssetDatabase::ImportModuleAssets();
-		AssetCompiler::CompileAssetDatabase();
-		AssetCompiler::CompilePipelines();
-		EditorAssetDatabase::Update();
-		EditorShaderProcessor::WaitIdle();
-		EditorApplication::GetInstance()->GetShaderProcessor().RunCallbacks();
-		AssetCompiler::CompileNewAssets();
-		FileBrowser::LoadProject();
-		ProjectSettings::Load(this);
-
 		TitleBar::SetText("Project", m_ProjectName.c_str());
-
 		std::stringstream stream;
 		stream << "Opened project at: " << m_ProjectFilePath;
 		EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(stream.str());
