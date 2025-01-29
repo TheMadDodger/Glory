@@ -10,6 +10,9 @@
 #include "EditorShaderProcessor.h"
 #include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
+#include "AssetCompiler.h"
+#include "FileBrowser.h"
+#include "ProjectSettings.h"
 
 #include <imgui.h>
 #include <Console.h>
@@ -19,6 +22,8 @@
 #include <GloryAPI.h>
 
 #include <SceneManager.h>
+#include <WindowModule.h>
+#include <ThreadManager.h>
 
 namespace Glory::Editor
 {
@@ -27,6 +32,9 @@ namespace Glory::Editor
 	const Version EditorApplication::Version = Version::Parse(GloryEditorVersion);
 
 	EditorAssetsWatcher* AssetsWatcher = nullptr;
+
+	std::mutex m_StartupMutex;
+	std::string m_StartupStatus = "";
 
 	EditorApplication::EditorApplication(const EditorCreateInfo& createInfo):
 		m_pEngine(createInfo.pEngine),
@@ -82,6 +90,9 @@ namespace Glory::Editor
 		m_PipelineManager->Initialize();
 		m_MaterialManager->Initialize();
 		m_ShaderProcessor->Start();
+
+		m_Running = false;
+		m_IsStarting = false;
 	}
 
 	void EditorApplication::InitializeExtensions()
@@ -91,6 +102,69 @@ namespace Glory::Editor
 			m_pExtensions[i]->SetCurrentContext();
 			m_pExtensions[i]->Initialize();
 		}
+	}
+
+	void EditorApplication::RenderStartup()
+	{
+		int width, height;
+		m_pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
+
+		ImGui::SetNextWindowPos({ width/2.0f, height/2.0f }, 0, {.5f, .5f});
+		ImGui::OpenPopup("Welcome");
+		ImGui::BeginPopupModal("Welcome", nullptr,
+			ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+		std::scoped_lock lock(m_StartupMutex);
+		ImGui::TextUnformatted("Getting things ready for you.");
+		ImGui::TextUnformatted(m_StartupStatus.data());
+		ImGui::EndPopup();
+	}
+
+	void EditorApplication::Start(const std::string& projectPath)
+	{
+		ProjectSpace::OpenProject(projectPath);
+
+		m_IsStarting = true;
+		ThreadManager::Run([this] {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			RunStartup();
+		});
+
+		while (m_IsStarting)
+		{
+			/* Start a frame */
+			if (!m_Platform.m_Windowless)
+				m_pEngine->BeginFrame();
+
+			/* Update console */
+			m_pEngine->GetConsole().Update();
+
+			/* Poll window events */
+			if (m_Platform.PollEvents()) TryToQuit();
+
+			/* Update editor */
+			EditorWindow::UpdateWindows();
+
+			if (!m_Platform.m_Windowless)
+			{
+				/* End the current frame */
+				m_pEngine->EndFrame();
+
+				/* Begin an ImGui frame */
+				m_Platform.BeginFrame();
+				/* Paint the editor(imgui calls) */
+				RenderEditor();
+
+				/* Show startup popup */
+				RenderStartup();
+
+				/* Render the ImGui frame */
+				m_Platform.EndFrame();
+			}
+		}
+
+		FileBrowser::LoadProject();
+		ProjectSettings::Load(ProjectSpace::GetOpenProject());
 	}
 
 	void EditorApplication::Destroy()
@@ -339,6 +413,43 @@ namespace Glory::Editor
 		if (!latestVersion.IsValid()) return;
 		if (Version::Compare(latestVersion, Version) == 1)
 			MainEditor::VersionOutdated(latestVersion);
+	}
+
+	void EditorApplication::RunStartup()
+	{
+		std::unique_lock lock(m_StartupMutex);
+		m_StartupStatus = "Importing Module Assets...";
+		lock.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		EditorAssetDatabase::ImportModuleAssets();
+
+		lock.lock();
+		m_StartupStatus = "Compiling Asset Database...";
+		lock.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		AssetCompiler::CompileAssetDatabase();
+
+		lock.lock();
+		m_StartupStatus = "Compiling Pipelines...";
+		lock.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		AssetCompiler::CompilePipelines();
+		EditorAssetDatabase::Update();
+
+		lock.lock();
+		m_StartupStatus = "Waiting for shader compilation to finish...";
+		lock.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		EditorShaderProcessor::WaitIdle();
+		EditorApplication::GetInstance()->GetShaderProcessor().RunCallbacks();
+
+		lock.lock();
+		m_StartupStatus = "Compiling new assets...";
+		lock.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		AssetCompiler::CompileNewAssets();
+
+		m_IsStarting = false;
 	}
 
 	Engine* EditorApplication::GetEngine()

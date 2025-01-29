@@ -43,6 +43,7 @@ namespace Editor
 
 		GLORY_EDITOR_API void Initialize();
 
+		GLORY_EDITOR_API void Start(const std::string& projectPath);
 		GLORY_EDITOR_API void Destroy();
 		GLORY_EDITOR_API void Run();
 
@@ -81,8 +82,11 @@ namespace Editor
 		void RenderEditor();
 		void InitializePlatform();
 		void InitializeExtensions();
+		void RenderStartup();
 
 		static void VersionCheck(const Glory::Version& latestVersion);
+
+		void RunStartup();
 
 	private:
 		Glory::Engine* m_pEngine;
@@ -101,6 +105,7 @@ namespace Editor
 		std::vector<BaseEditorExtension*> m_pExtensions;
 		EditorMode m_Mode = EditorMode::M_Edit;
 		bool m_Running = false;
+		std::atomic_bool m_IsStarting = false;
 	};
 }
 }
