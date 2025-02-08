@@ -1,6 +1,8 @@
 #pragma once
 #include "UUID.h"
 
+#include <string>
+
 namespace Glory
 {
 	class Engine;
@@ -19,6 +21,9 @@ namespace Glory
 		 * @param pipelineID ID of the pipeline to get
 		 */
 		virtual PipelineData* GetPipelineData(UUID pipelineID) const = 0;
+
+		/** @brief Get all platform compiled shaders for a pipeline */
+		virtual const std::vector<std::string>& GetPipelineCompiledShaders(UUID pipelineID) const { return {}; };
 
 	protected:
 		Engine* m_pEngine;

@@ -4,23 +4,33 @@
 #include <GraphicsEnums.h>
 
 #include <map>
+#include <filesystem>
 #include <GloryEditor.h>
 
 namespace Glory
 {
 	class Engine;
 	class PipelineData;
-
+	class BinaryStream;
+	class ShaderSourceData;
 
 	namespace Utils
 	{
 		struct YAMLFileRef;
+	}
+
+	namespace Jobs
+	{
+		template<typename ret, typename ...args>
+		class JobPool;
 	}
 }
 
 namespace Glory::Editor
 {
 	struct AssetCallbackData;
+	class EditorShaderData;
+	class EditorPipeline;
 
 	template<typename Arg>
 	struct Dispatcher;
@@ -61,6 +71,8 @@ namespace Glory::Editor
 		 */
 		virtual PipelineData* GetPipelineData(UUID pipelineID) const override;
 
+		virtual const std::vector<std::string>& GetPipelineCompiledShaders(UUID pipelineID) const override;
+
 		GLORY_EDITOR_API UUID FindPipeline(PipelineType type, bool useTextures) const;
 
 		using PipelineUpdateDispatcher = Dispatcher<PipelineUpdateEvent>;
@@ -77,12 +89,12 @@ namespace Glory::Editor
 		void AssetUpdatedCallback(const AssetCallbackData& callback);
 
 		/** @brief Handler for compiled shader events */
-		void OnShaderCompiled(const UUID& uuid);
+		//void OnShaderCompiled(const UUID& uuid);
 
 		/** @brief Update a pipeline by loading the properties of its attached shaders
 		 * @param pPipeline Pipeline to update
 		 */
-		void UpdatePipeline(PipelineData* pPipeline);
+		void UpdatePipeline(PipelineData* pPipeline, EditorPipeline* pEditorPipeline);
 
 		/** @brief Load YAML data into a pipeline
 		 * @param file YAML file to load from
@@ -90,10 +102,41 @@ namespace Glory::Editor
 		 */
 		void LoadIntoPipeline(Utils::YAMLFileRef& file, PipelineData* pPipeline) const;
 
+		/** @brief Check whether compiled shader cache is outdated
+		 * @param cachePath Path to shader cache file
+		 * @param shaderSource Original shader data
+		 *
+		 * Compares the last write date of the cache to that of the shader
+		 */
+		bool IsCacheOutdated(const std::filesystem::path& cachePath, ShaderSourceData* shaderSource);
+
+		/** @brief Compile a pipeline for use in the editor
+		 * @param pPipeline Pipeline to compile
+		 */
+		EditorPipeline* CompilePipelineForEditor(PipelineData* pPipeline);
+
+		/** @brief Compile the platform shader for use in the editor
+		 * @param pEditorPipeline Pipeline to compile
+		 */
+		void CompileForEditorPlatform(EditorPipeline* pEditorPipeline);
+
+		/** @brief Get path to compiled pipeline cache file */
+		std::filesystem::path GetCompiledPipelineSPVCachePath(UUID uuid);
+
+		/** @brief Load the original and processed shader source */
+		ShaderSourceData* LoadOriginalShader(UUID uuid);
+		/** @brief Run shaderc reflection to store shader properties
+		 * @param pEditorShader Data to process and store reflecdtion on
+		 */
+		void ProcessReflection(EditorShaderData* pEditorShader);
+
 	private:
 		std::vector<UUID> m_Pipelines;
+		std::vector<std::vector<std::string>> m_CompiledShaders;
 
 		UUID m_AssetRegisteredCallback;
-		UUID m_ShaderCompiledCallback;
+		UUID m_AssetUpdatedCallback;
+
+		Jobs::JobPool<bool, UUID>* m_pPipelineJobsPool;
 	};
 }

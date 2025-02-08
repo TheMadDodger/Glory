@@ -4,11 +4,13 @@
 
 #include <MaterialData.h>
 #include <PipelineData.h>
+#include <BinaryStream.h>
 
 #include <ResourceType.h>
 
 namespace Glory::Editor
 {
+	EditorShaderData::EditorShaderData(): m_UUID(0) {}
 	EditorShaderData::EditorShaderData(UUID uuid) : m_UUID(uuid) {}
 	EditorShaderData::~EditorShaderData() {}
 
@@ -37,7 +39,7 @@ namespace Glory::Editor
 		return m_UUID;
 	}
 
-	void EditorShaderData::LoadIntoMaterial(MaterialData* pMaterial)
+	void EditorShaderData::LoadIntoMaterial(MaterialData* pMaterial) const
 	{
 		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
 
@@ -50,14 +52,14 @@ namespace Glory::Editor
 		if (pMaterial->GetCurrentBufferOffset(manager) > 0) return; // Already added from other shader
 		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
 		{
-			EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];
+			const EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];
 			ResourceTypes& types = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
 			const BasicTypeData* pType = types.GetBasicTypeData(info.m_TypeHash);
 			pMaterial->AddProperty(info.m_Name, info.m_Name, pType->m_TypeHash, pType->m_Size, 0);
 		}
 	}
 
-	void EditorShaderData::LoadIntoPipeline(PipelineData* pPipeline)
+	void EditorShaderData::LoadIntoPipeline(PipelineData* pPipeline) const
 	{
 		for (size_t i = 0; i < m_SamplerNames.size(); i++)
 		{
@@ -67,11 +69,40 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < m_PropertyInfos.size(); i++)
 		{
-			EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];
+			const EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];
 			ResourceTypes& types = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
 			const BasicTypeData* pType = types.GetBasicTypeData(info.m_TypeHash);
 			pPipeline->AddProperty(info.m_Name, info.m_Name, pType->m_TypeHash, pType->m_Size, 0);
 		}
+	}
+
+	void EditorShaderData::Serialize(BinaryStream& container) const
+	{
+		container.Write(m_ShaderData).Write(m_SamplerNames).Write(m_PropertyInfos.size());
+		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
+		{
+			const PropertyInfo& prop = m_PropertyInfos[i];
+			container.Write(prop.m_Name).Write(prop.m_TypeHash);
+		}
+		container.Write(m_Features);
+	}
+
+	void EditorShaderData::Deserialize(BinaryStream& container)
+	{
+		size_t numProperties;
+		container.Read(m_ShaderData).Read(m_SamplerNames).Read(numProperties);
+		m_PropertyInfos.resize(numProperties);
+		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
+		{
+			PropertyInfo& prop = m_PropertyInfos[i];
+			container.Read(prop.m_Name).Read(prop.m_TypeHash);
+		}
+		container.Read(m_Features);
+	}
+
+	EditorShaderData::PropertyInfo::PropertyInfo():
+		m_Name(""), m_TypeHash(0)
+	{
 	}
 
 	EditorShaderData::PropertyInfo::PropertyInfo(const std::string& name, uint32_t typeHash):
