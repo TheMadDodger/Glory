@@ -1,6 +1,5 @@
 #include "MaterialEditor.h"
 #include "PropertyDrawer.h"
-#include "EditorShaderProcessor.h"
 #include "AssetPicker.h"
 #include "Selection.h"
 #include "EditorAssetDatabase.h"

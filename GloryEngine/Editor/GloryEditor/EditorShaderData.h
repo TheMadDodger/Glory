@@ -1,9 +1,11 @@
 #pragma once
 #include "GloryEditor.h"
 
+#include <UUID.h>
+#include <GraphicsEnums.h>
+
 #include <string>
 #include <vector>
-#include <UUID.h>
 #include <spirv_cross/spirv_cross.hpp>
 
 namespace Glory
@@ -37,10 +39,10 @@ namespace Glory::Editor
 		void Deserialize(BinaryStream& container);
 
 	private:
-		friend class EditorShaderProcessor;
 		friend class EditorPipelineManager;
 		friend class MaterialEditor;
 		friend class MaterialInstanceEditor;
+		ShaderType m_ShaderType;
 		std::vector<uint32_t> m_ShaderData;
 		UUID m_UUID;
 

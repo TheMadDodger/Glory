@@ -7,7 +7,7 @@ namespace Glory
 	class GLShader : public Shader
 	{
 	public:
-		GLShader(FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
+		GLShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
 		virtual ~GLShader();
 
 	private:

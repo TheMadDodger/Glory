@@ -5,7 +5,6 @@
 #include "EditorAssetDatabase.h"
 #include "EditorApplication.h"
 #include "EditorResourceManager.h"
-#include "EditorShaderProcessor.h"
 #include "EditorShaderData.h"
 #include "EditorUI.h"
 #include "EditorMaterialManager.h"

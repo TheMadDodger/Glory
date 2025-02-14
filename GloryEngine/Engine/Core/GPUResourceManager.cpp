@@ -117,7 +117,7 @@ namespace Glory
 		return pMesh;
 	}
 
-	Shader* GPUResourceManager::CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function)
+	Shader* GPUResourceManager::CreateShader(const FileData* pShaderFile, const ShaderType& shaderType, const std::string& function)
 	{
 		Shader* pShader = GetResource<Shader>(pShaderFile);
 		if (pShader) return pShader;
@@ -173,9 +173,9 @@ namespace Glory
 		pPipeline->m_UUID = pPipelineData->GetGPUUUID();
 		for (size_t i = 0; i < pPipelineData->ShaderCount(); ++i)
 		{
-			FileData* pCompiledShaderSource = pPipelineData->Shader(m_pEngine->GetShaderManager(), i);
+			const FileData* pCompiledShaderSource = pPipelineData->Shader(m_pEngine->GetPipelineManager(), i);
 			if (!pCompiledShaderSource) return nullptr;
-			const ShaderType& shaderType = pPipelineData->GetShaderType(m_pEngine->GetShaderManager(), i);
+			const ShaderType& shaderType = pPipelineData->GetShaderType(m_pEngine->GetPipelineManager(), i);
 			Shader* pShader = CreateShader(pCompiledShaderSource, shaderType, "main");
 			pPipeline->AddShader(pShader);
 		}

@@ -1,5 +1,4 @@
 #include "PipelineEditor.h"
-#include "EditorShaderProcessor.h"
 #include "Selection.h"
 #include "EditorApplication.h"
 #include "EditorMaterialManager.h"
@@ -36,7 +35,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < shaders.Size(); ++i)
 		{
 			const UUID shaderID = shaders[i].As<uint64_t>();
-			ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
+			ShaderSourceData* pShaderSourceData = EditorPipelineManager::GetShaderSource(shaderID);
 			if (!pShaderSourceData)
 				return "Some shaders have not yet loaded.";
 			const ShaderType& type = pShaderSourceData->GetShaderType();
@@ -112,7 +111,7 @@ namespace Glory::Editor
 
 				auto shader = shaders[row_n];
 				const UUID shaderID = shader.As<uint64_t>();
-				ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
+				ShaderSourceData* pShaderSourceData = EditorPipelineManager::GetShaderSource(shaderID);
 				if (!pShaderSourceData)
 				{
 					ImGui::TableSetColumnIndex(0);

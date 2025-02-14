@@ -16,7 +16,7 @@ project "GloryCore"
 
 	vpaths
 	{
-		["Asset Management"] = { "PrefabData.*", "BinaryStream.*", "AssetArchive.*", "AssetDatabase.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*", "ShaderManager.*" },
+		["Asset Management"] = { "PrefabData.*", "BinaryStream.*", "AssetArchive.*", "AssetDatabase.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*" },
 		["Resources"] = { "PrefabData.*", "MaterialData.*", "MaterialPropertyData.*", "MaterialInstanceData.*", "MaterialPropertyInfo.*", "TextureData.*", "MeshData.*", "ModelData.*", "ImageData.*", "FileData.*", "ShaderSourceData.*" },
 		["Console"] = { "Logs.*", "CommandLine.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
 		["Core"] = { "ObjectManager.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "Engine.*", "Object.*", "UUID.*", "Glory.*", "GameTime.*" },

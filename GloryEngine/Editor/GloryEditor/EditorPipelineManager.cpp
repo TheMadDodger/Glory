@@ -6,7 +6,6 @@
 #include "EditorApplication.h"
 #include "EditableResource.h"
 #include "EditorShaderData.h"
-#include "EditorShaderProcessor.h"
 #include "Dispatcher.h"
 #include "Importer.h"
 #include "EditorPipeline.h"
@@ -20,10 +19,16 @@
 #include <JobManager.h>
 #include <PipelineData.h>
 
+#include <shaderc/shaderc.hpp>
 #include <spirv_cross/spirv_glsl.hpp>
 
 namespace Glory::Editor
 {
+	ThreadedVector<UUID> EditorPipelineManager::m_QueuedPipelines;
+	std::mutex EditorPipelineManager::m_WaitMutex;
+	std::condition_variable EditorPipelineManager::m_WaitCondition;
+	ThreadedUMap<UUID, ShaderSourceData*> EditorPipelineManager::m_pLoadedShaderSources;
+
 	std::map<ShaderType, shaderc_shader_kind> ShaderTypeToKindOne = {
 		{ ShaderType::ST_Compute, shaderc_shader_kind::shaderc_compute_shader },
 		{ ShaderType::ST_Fragment, shaderc_shader_kind::shaderc_fragment_shader },
@@ -77,6 +82,7 @@ namespace Glory::Editor
 
 	EditorPipelineManager::~EditorPipelineManager()
 	{
+		m_pLoadedShaderSources.ForEachClear([](ShaderSourceData* pShader) { delete pShader; });
 		m_pEngine = nullptr;
 	}
 
@@ -132,12 +138,23 @@ namespace Glory::Editor
 		return static_cast<PipelineData*>(pResource);
 	}
 
-	const std::vector<std::string>& EditorPipelineManager::GetPipelineCompiledShaders(UUID pipelineID) const
+	const std::vector<FileData>& EditorPipelineManager::GetPipelineCompiledShaders(UUID pipelineID) const
 	{
 		for (size_t i = 0; i < m_Pipelines.size(); ++i)
 		{
 			if (m_Pipelines[i] != pipelineID) continue;
 			return m_CompiledShaders[i];
+		}
+
+		return {};
+	}
+
+	const std::vector<ShaderType>& EditorPipelineManager::GetPipelineShaderTypes(UUID pipelineID) const
+	{
+		for (size_t i = 0; i < m_Pipelines.size(); ++i)
+		{
+			if (m_Pipelines[i] != pipelineID) continue;
+			return m_ShaderTypes[i];
 		}
 
 		return {};
@@ -160,6 +177,33 @@ namespace Glory::Editor
 	{
 		static EditorPipelineManager::PipelineUpdateDispatcher dispatcher;
 		return dispatcher;
+	}
+
+	TextureType EditorPipelineManager::ShaderNameToTextureType(const std::string_view name)
+	{
+		/* Hardcoded solution for texSampler */
+		if (name.compare("texSampler") == 0)
+		{
+			return TextureType::TT_BaseColor;
+		}
+
+		for (uint32_t i = Enum<TextureType>().NumValues(); i > 0; --i)
+		{
+			const TextureType textureType = TextureType(i - 1);
+			std::string valueStr;
+			Enum<TextureType>().ToString(textureType, valueStr);
+			/* Skip the first letter to avoid case mismatch */
+			const std::string_view comparer = &valueStr.c_str()[1];
+			if (name.find(comparer) == std::string::npos) continue;
+			return textureType;
+		}
+		return TT_Unknown;
+	}
+
+	ShaderSourceData* EditorPipelineManager::GetShaderSource(UUID shaderID)
+	{
+		if (!m_pLoadedShaderSources.Contains(shaderID)) return nullptr;
+		return m_pLoadedShaderSources.at(shaderID);
 	}
 
 	void EditorPipelineManager::AssetAddedCallback(const AssetCallbackData& callback)
@@ -207,6 +251,7 @@ namespace Glory::Editor
 			{
 				m_Pipelines.emplace_back(callback.m_UUID);
 				m_CompiledShaders.emplace_back();
+				m_ShaderTypes.emplace_back();
 			}
 
 			EditorPipeline* pEditorPipeline = CompilePipelineForEditor(pPipeline);
@@ -257,8 +302,15 @@ namespace Glory::Editor
 		{
 			if (m_Pipelines[i] != pPipeline->GetUUID()) continue;
 			m_CompiledShaders[i].clear();
-			m_CompiledShaders[i].assign(pEditorPipeline->m_EditorPlatformShaders.begin(),
-				pEditorPipeline->m_EditorPlatformShaders.end());
+			m_ShaderTypes[i].clear();
+			m_CompiledShaders[i].reserve(pEditorPipeline->m_EditorPlatformShaders.size());
+			m_ShaderTypes[i].reserve(pEditorPipeline->m_EditorPlatformShaders.size());
+			for (size_t j = 0; j < pEditorPipeline->m_EditorPlatformShaders.size(); ++j)
+			{
+				const std::string_view compiledShader = pEditorPipeline->m_EditorPlatformShaders[j];
+				m_CompiledShaders[i].push_back(FileData(compiledShader));
+				m_ShaderTypes[i].push_back(pEditorPipeline->m_EditorShaderDatas[j].m_ShaderType);
+			}
 		}
 
 		PipelineUpdateEvents().Dispatch({ pPipeline });
@@ -286,9 +338,6 @@ namespace Glory::Editor
 
 	EditorPipeline* EditorPipelineManager::CompilePipelineForEditor(PipelineData* pPipeline)
 	{
-		EditorShaderProcessor& shaders =
-			static_cast<EditorShaderProcessor&>(m_pEngine->GetShaderManager());
-
 		Debug& debug = m_pEngine->GetDebug();
 
 		static const size_t featureLength = strlen("FEATURE_");
@@ -325,7 +374,7 @@ namespace Glory::Editor
 			ShaderSourceData* pShaderSource = LoadOriginalShader(pPipeline->ShaderID(i));
 			if (!pShaderSource) continue;
 
-			ShaderType shaderType = pShaderSource->GetShaderType();
+			const ShaderType shaderType = pShaderSource->GetShaderType();
 			if (ShaderTypeToKindOne.find(shaderType) == ShaderTypeToKindOne.end())
 			{
 				debug.LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
@@ -343,6 +392,7 @@ namespace Glory::Editor
 				compiledShaders[i].m_Features.emplace_back(name);
 			}
 
+			compiledShaders[i].m_ShaderType = shaderType;
 			shaderc::Compiler compiler;
 			shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(pShaderSource->Data(),
 				pShaderSource->Size(), ShaderTypeToKindOne.at(shaderType), pShaderSource->Name().data(),
@@ -364,7 +414,6 @@ namespace Glory::Editor
 				debug.LogWarning(result.GetErrorMessage());
 
 			compiledShaders[i].m_ShaderData.assign(result.begin(), result.end());
-			delete pShaderSource;
 			ProcessReflection(&compiledShaders[i]);
 		}
 
@@ -402,6 +451,9 @@ namespace Glory::Editor
 
 	ShaderSourceData* EditorPipelineManager::LoadOriginalShader(UUID uuid)
 	{
+		if (m_pLoadedShaderSources.Contains(uuid))
+			return m_pLoadedShaderSources.at(uuid);
+
 		AssetLocation location;
 		if (!EditorAssetDatabase::GetAssetLocation(uuid, location))
 			return nullptr;
@@ -420,6 +472,9 @@ namespace Glory::Editor
 		const auto time = std::filesystem::last_write_time(assetPath);
 		pShaderSource->TimeSinceLastWrite() = std::chrono::duration_cast<std::chrono::seconds>(
 			time.time_since_epoch()).count();
+
+		m_pLoadedShaderSources.Set(pShaderSource->GetUUID(), pShaderSource);
+
 		return pShaderSource;
 	}
 
@@ -452,5 +507,16 @@ namespace Glory::Editor
 				pEditorShader->m_PropertyInfos.push_back(EditorShaderData::PropertyInfo(name, hash));
 			}
 		}
+	}
+
+	bool EditorPipelineManager::IsBusy()
+	{
+		return m_QueuedPipelines.Size() != 0;
+	}
+
+	void EditorPipelineManager::WaitIdle()
+	{
+		std::unique_lock<std::mutex> lock(m_WaitMutex);
+		m_WaitCondition.wait(lock, [&]() { return m_QueuedPipelines.Size() == 0; });
 	}
 }

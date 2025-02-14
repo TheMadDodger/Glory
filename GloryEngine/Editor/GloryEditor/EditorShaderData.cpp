@@ -1,6 +1,6 @@
 #include "EditorShaderData.h"
 #include "EditorApplication.h"
-#include "EditorShaderProcessor.h"
+#include "EditorPipelineManager.h"
 
 #include <MaterialData.h>
 #include <PipelineData.h>
@@ -45,7 +45,7 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < m_SamplerNames.size(); ++i)
 		{
-			const TextureType textureType = EditorShaderProcessor::ShaderNameToTextureType(m_SamplerNames[i]);
+			const TextureType textureType = EditorPipelineManager::ShaderNameToTextureType(m_SamplerNames[i]);
 			pMaterial->AddResourceProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>(), 0, textureType, 0);
 		}
 
@@ -63,7 +63,7 @@ namespace Glory::Editor
 	{
 		for (size_t i = 0; i < m_SamplerNames.size(); i++)
 		{
-			const TextureType textureType = EditorShaderProcessor::ShaderNameToTextureType(m_SamplerNames[i]);
+			const TextureType textureType = EditorPipelineManager::ShaderNameToTextureType(m_SamplerNames[i]);
 			pPipeline->AddResourceProperty(m_SamplerNames[i], m_SamplerNames[i], ResourceTypes::GetHash<TextureData>(), textureType);
 		}
 
@@ -78,7 +78,8 @@ namespace Glory::Editor
 
 	void EditorShaderData::Serialize(BinaryStream& container) const
 	{
-		container.Write(m_ShaderData).Write(m_SamplerNames).Write(m_PropertyInfos.size());
+		container.Write(m_ShaderType).Write(m_ShaderData).
+			Write(m_SamplerNames).Write(m_PropertyInfos.size());
 		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
 		{
 			const PropertyInfo& prop = m_PropertyInfos[i];
@@ -90,7 +91,8 @@ namespace Glory::Editor
 	void EditorShaderData::Deserialize(BinaryStream& container)
 	{
 		size_t numProperties;
-		container.Read(m_ShaderData).Read(m_SamplerNames).Read(numProperties);
+		container.Read(m_ShaderType).Read(m_ShaderData).
+			Read(m_SamplerNames).Read(numProperties);
 		m_PropertyInfos.resize(numProperties);
 		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
 		{

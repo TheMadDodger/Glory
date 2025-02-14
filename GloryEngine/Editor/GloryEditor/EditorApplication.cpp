@@ -7,7 +7,6 @@
 #include "EditorSceneManager.h"
 #include "ProjectSpace.h"
 #include "EditorAssetManager.h"
-#include "EditorShaderProcessor.h"
 #include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
 #include "AssetCompiler.h"
@@ -41,7 +40,6 @@ namespace Glory::Editor
 		m_Platform(createInfo.pWindowImpl, createInfo.pRenderImpl),
 		m_AssetManager(new EditorAssetManager(this)),
 		m_SceneManager(new EditorSceneManager(this)),
-		m_ShaderProcessor(new EditorShaderProcessor(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_PipelineManager(new EditorPipelineManager(createInfo.pEngine)),
 		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
@@ -59,7 +57,6 @@ namespace Glory::Editor
 
 		m_pEngine->SetAssetManager(m_AssetManager.get());
 		m_pEngine->SetSceneManager(m_SceneManager.get());
-		m_pEngine->SetShaderManager(m_ShaderProcessor.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
 		m_pEngine->SetPipelineManager(m_PipelineManager.get());
 
@@ -89,7 +86,6 @@ namespace Glory::Editor
 		AssetsWatcher = new EditorAssetsWatcher();
 		m_PipelineManager->Initialize();
 		m_MaterialManager->Initialize();
-		m_ShaderProcessor->Start();
 
 		m_Running = false;
 		m_IsStarting = false;
@@ -172,7 +168,6 @@ namespace Glory::Editor
 		EditorAssetDatabase::Cleanup();
 		m_MainEditor.Destroy();
 		m_Platform.Destroy();
-		m_ShaderProcessor->Stop();
 		m_PipelineManager->Cleanup();
 		m_MaterialManager->Cleanup();
 
@@ -204,8 +199,8 @@ namespace Glory::Editor
 				/* Run asset callbacks */
 				m_AssetManager->RunCallbacks();
 
-				/* Run callbacks for compiled shaders */
-				m_ShaderProcessor->RunCallbacks();
+				/* Run callbacks for compiled pipelines */
+				//m_PipelineManager->RunCallbacks();
 
 				// Start a frame
 				m_pEngine->BeginFrame();
@@ -240,8 +235,8 @@ namespace Glory::Editor
 			/* Run asset callbacks */
 			m_AssetManager->RunCallbacks();
 
-			/* Run callbacks for compiled shaders */
-			m_ShaderProcessor->RunCallbacks();
+			/* Run callbacks for compiled pipeline */
+			//m_PipelineManager->RunCallbacks();
 
 			// Start a frame
 			m_pEngine->BeginFrame();
@@ -435,13 +430,7 @@ namespace Glory::Editor
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		AssetCompiler::CompilePipelines();
 		EditorAssetDatabase::Update();
-
-		lock.lock();
-		m_StartupStatus = "Waiting for shader compilation to finish...";
-		lock.unlock();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		EditorShaderProcessor::WaitIdle();
-		EditorApplication::GetInstance()->GetShaderProcessor().RunCallbacks();
+		//EditorApplication::GetInstance()->GetPipelineManager().RunCallbacks();
 
 		lock.lock();
 		m_StartupStatus = "Compiling new assets...";
@@ -465,11 +454,6 @@ namespace Glory::Editor
 	EditorSceneManager& EditorApplication::GetSceneManager()
 	{
 		return *m_SceneManager;
-	}
-
-	EditorShaderProcessor& EditorApplication::GetShaderProcessor()
-	{
-		return *m_ShaderProcessor;
 	}
 
 	EditorResourceManager& EditorApplication::GetResourceManager()

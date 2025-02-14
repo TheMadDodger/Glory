@@ -8,8 +8,8 @@
 namespace Glory
 {
     class FileData;
-    class ShaderManager;
     class MaterialData;
+    class PipelineManager;
 
     /** @brief Pipeline data */
 	class PipelineData : public Resource
@@ -33,12 +33,12 @@ namespace Glory
          * @param manager Shader manager to get shaders from
          * @param index Index of the shader to get
          */
-        virtual FileData* Shader(const ShaderManager& manager, size_t index) const;
+        virtual const FileData* Shader(const PipelineManager& manager, size_t index) const;
         /** @brief Get the type of a shader attached to this pipeline
          * @param manager Shader manager to get shaders from
          * @param index Index of the shader to get the type from
          */
-        virtual ShaderType GetShaderType(const ShaderManager& manager, size_t index) const;
+        virtual ShaderType GetShaderType(const PipelineManager& manager, size_t index) const;
 
         /** @brief Set the shading type for this pipeline
          * @param type @ref PipelineType to set

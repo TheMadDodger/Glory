@@ -18,6 +18,12 @@ namespace Glory
 		APPEND_TYPE(FileData);
 	}
 
+	FileData::FileData(std::string_view data): m_Data(data.begin(), data.end())
+	{
+		APPEND_TYPE(FileData);
+		m_Data.push_back('\0');
+	}
+
 	FileData::~FileData()
 	{
 		m_Data.clear();
@@ -31,6 +37,26 @@ namespace Glory
 	const char* FileData::Data()
 	{
 		return m_Data.data();
+	}
+
+	std::vector<char>::iterator FileData::Begin()
+	{
+		return m_Data.begin();
+	}
+
+	const std::vector<char>::const_iterator FileData::Begin() const
+	{
+		return m_Data.cbegin();
+	}
+
+	std::vector<char>::iterator FileData::End()
+	{
+		return m_Data.end();
+	}
+
+	const std::vector<char>::const_iterator FileData::End() const
+	{
+		return m_Data.cend();
 	}
 
 	void FileData::Serialize(BinaryStream& container) const

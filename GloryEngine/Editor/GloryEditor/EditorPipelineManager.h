@@ -2,6 +2,7 @@
 #include <PipelineManager.h>
 #include <UUID.h>
 #include <GraphicsEnums.h>
+#include <ThreadedVar.h>
 
 #include <map>
 #include <filesystem>
@@ -10,7 +11,6 @@
 namespace Glory
 {
 	class Engine;
-	class PipelineData;
 	class BinaryStream;
 	class ShaderSourceData;
 
@@ -71,7 +71,8 @@ namespace Glory::Editor
 		 */
 		virtual PipelineData* GetPipelineData(UUID pipelineID) const override;
 
-		virtual const std::vector<std::string>& GetPipelineCompiledShaders(UUID pipelineID) const override;
+		virtual const std::vector<FileData>& GetPipelineCompiledShaders(UUID pipelineID) const override;
+		virtual const std::vector<ShaderType>& GetPipelineShaderTypes(UUID pipelineID) const override;
 
 		GLORY_EDITOR_API UUID FindPipeline(PipelineType type, bool useTextures) const;
 
@@ -79,6 +80,11 @@ namespace Glory::Editor
 
 		/** @brief Get pipeline updates event dispatcher */
 		static PipelineUpdateDispatcher& PipelineUpdateEvents();
+
+		/** @brief Get the @ref TextureType from a samplers name */
+		static TextureType ShaderNameToTextureType(const std::string_view name);
+
+		static ShaderSourceData* GetShaderSource(UUID shaderID);
 
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
@@ -130,13 +136,21 @@ namespace Glory::Editor
 		 */
 		void ProcessReflection(EditorShaderData* pEditorShader);
 
+		bool IsBusy();
+		void WaitIdle();
+
 	private:
 		std::vector<UUID> m_Pipelines;
-		std::vector<std::vector<std::string>> m_CompiledShaders;
+		std::vector<std::vector<FileData>> m_CompiledShaders;
+		std::vector<std::vector<ShaderType>> m_ShaderTypes;
 
 		UUID m_AssetRegisteredCallback;
 		UUID m_AssetUpdatedCallback;
 
 		Jobs::JobPool<bool, UUID>* m_pPipelineJobsPool;
+		static ThreadedVector<UUID> m_QueuedPipelines;
+		static std::mutex m_WaitMutex;
+		static std::condition_variable m_WaitCondition;
+		static ThreadedUMap<UUID, ShaderSourceData*> m_pLoadedShaderSources;
 	};
 }

@@ -1,6 +1,6 @@
 #include "PipelineData.h"
 #include "MaterialData.h"
-#include "ShaderManager.h"
+#include "PipelineManager.h"
 #include "BinaryStream.h"
 
 namespace Glory
@@ -29,14 +29,14 @@ namespace Glory
 		return m_Shaders[index];
 	}
 
-	FileData* PipelineData::Shader(const ShaderManager& manager, size_t index) const
+	const FileData* PipelineData::Shader(const PipelineManager& manager, size_t index) const
 	{
-		return manager.GetCompiledShaderFile(ShaderID(index));
+		return &manager.GetPipelineCompiledShaders(GetUUID())[index];
 	}
 
-	ShaderType PipelineData::GetShaderType(const ShaderManager& manager, size_t index) const
+	ShaderType PipelineData::GetShaderType(const PipelineManager& manager, size_t index) const
 	{
-		return manager.GetShaderType(ShaderID(index));
+		return manager.GetPipelineShaderTypes(GetUUID())[index];
 	}
 
 	void PipelineData::SetPipelineType(PipelineType type)

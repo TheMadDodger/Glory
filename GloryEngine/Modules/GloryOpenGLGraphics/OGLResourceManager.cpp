@@ -51,7 +51,7 @@ namespace Glory
 		return new GLBuffer(bufferSize, usageFlag, memoryFlags, bindIndex);
 	}
 
-	Shader* OGLResourceManager::CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function)
+	Shader* OGLResourceManager::CreateShader_Internal(const FileData* pShaderFile, const ShaderType& shaderType, const std::string& function)
 	{
 		return new GLShader(pShaderFile, shaderType, function);
 	}

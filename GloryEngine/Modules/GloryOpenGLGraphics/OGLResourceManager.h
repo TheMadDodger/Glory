@@ -15,7 +15,7 @@ namespace Glory
         virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) override;
         virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) override;
         virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex) override;
-        virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) override;
+        virtual Shader* CreateShader_Internal(const FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) override;
         virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) override;
         virtual Pipeline* CreatePipeline_Internal(PipelineData* pPipelineData) override;
         virtual Texture* CreateTexture_Internal(TextureData* pTextureData) override;

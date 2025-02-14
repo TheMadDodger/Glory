@@ -13,7 +13,6 @@
 namespace Glory
 {
     class FileData;
-    class ShaderManager;
     class MaterialManager;
     class PipelineData;
     class PipelineManager;

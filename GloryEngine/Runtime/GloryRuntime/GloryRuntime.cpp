@@ -2,7 +2,6 @@
 #include "RuntimeAssetManager.h"
 #include "RuntimeSceneManager.h"
 #include "RuntimeMaterialManager.h"
-#include "RuntimeShaderManager.h"
 #include "RuntimePipelineManager.h"
 
 #include <Engine.h>
@@ -30,7 +29,6 @@ namespace Glory
 		m_SceneManager(new RuntimeSceneManager(this)),
 		m_PipelineManager(new RuntimePipelineManager(pEngine)),
 		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
-		m_ShaderManager(new RuntimeShaderManager(pEngine)),
 		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr),
 		m_LastRenderedFrame(std::chrono::system_clock::now())
 	{
@@ -82,7 +80,6 @@ namespace Glory
 		m_pEngine->SetAssetManager(m_AssetManager.get());
 		m_pEngine->SetSceneManager(m_SceneManager.get());
 		m_pEngine->SetMaterialManager(m_MaterialManager.get());
-		m_pEngine->SetShaderManager(m_ShaderManager.get());
 		m_pEngine->SetPipelineManager(m_PipelineManager.get());
 		m_pEngine->Initialize();
 
@@ -222,7 +219,8 @@ namespace Glory
 			Resource* pResource = archive.Get(m_pEngine, i);
 			ShaderSourceData* pShader = static_cast<ShaderSourceData*>(pResource);
 
-			m_pEngine->GetShaderManager().AddShader(pShader);
+			/** @todo */
+			//m_pEngine->GetShaderManager().AddShader(pShader);
 		}
 	}
 

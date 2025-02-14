@@ -2,7 +2,7 @@
 #include "ProjectSettings.h"
 #include "SettingsEnums.h"
 #include "EditorAssetDatabase.h"
-#include "EditorShaderProcessor.h"
+#include "EditorPipelineManager.h"
 #include "EditorSceneManager.h"
 #include "EditorApplication.h"
 #include "EditorResourceManager.h"
@@ -339,9 +339,10 @@ namespace Glory::Editor
 			if (pCompiledShader)
 				delete pCompiledShader;
 
-			FileData* pNewCompiled = pEngine->GetShaderManager().GetCompiledShaderFile(uuid);
-			pCompiledShader = new FileData(pNewCompiled);
-			pShaderSource->SetCompiledShader(pCompiledShader);
+			/** @todo */
+			//FileData* pNewCompiled = pEngine->GetPipelineManager().GetCompiledShaderFile(uuid);
+			//pCompiledShader = new FileData(pNewCompiled);
+			//pShaderSource->SetCompiledShader(pCompiledShader);
 			++task.m_ProcessedSubTasks;
 			task.m_SubTaskName = "";
 		}
@@ -1111,9 +1112,10 @@ namespace Glory::Editor
 			if (pCompiledShader)
 				delete pCompiledShader;
 
-			FileData* pNewCompiled = pEngine->GetShaderManager().GetCompiledShaderFile(uuid);
-			pCompiledShader = new FileData(pNewCompiled);
-			pShaderSource->SetCompiledShader(pCompiledShader);
+			/** @todo */
+			//FileData* pNewCompiled = pEngine->GetPipelineManager().GetCompiledShaderFile(uuid);
+			//pCompiledShader = new FileData(pNewCompiled);
+			//pShaderSource->SetCompiledShader(pCompiledShader);
 		}
 
 		/* Open every scene and package them individually along with their assets */

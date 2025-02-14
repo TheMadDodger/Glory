@@ -5,7 +5,6 @@
 #include "ProjectSpace.h"
 #include "MaterialData.h"
 #include "MaterialInstanceData.h"
-#include "EditorShaderProcessor.h"
 #include "EditorPipelineManager.h"
 #include "ResourceType.h"
 #include "EditorApplication.h"
@@ -283,7 +282,7 @@ namespace Glory::Editor
 			}
 			else
 			{
-				const TextureType textureType = EditorShaderProcessor::ShaderNameToTextureType(name);
+				const TextureType textureType = EditorPipelineManager::ShaderNameToTextureType(name);
 				const UUID id = value.As<uint64_t>();
 				pMaterial->AddResourceProperty(displayName, name, type, id, textureType);
 			}

@@ -25,7 +25,6 @@ namespace Utils::Reflect
 
 	class AssetDatabase;
 	class AssetManager;
-	class ShaderManager;
 	class MaterialManager;
 	class PipelineManager;
 
@@ -50,7 +49,6 @@ namespace Utils::Reflect
 		Console* m_pConsole;
 		AssetManager* pAssetManager = nullptr;
 		SceneManager* pSceneManager = nullptr;
-		ShaderManager* pShaderManager = nullptr;
 		MaterialManager* pMaterialManager = nullptr;
 		PipelineManager* pPipelineManager = nullptr;
 
@@ -165,7 +163,6 @@ namespace Utils::Reflect
 		Serializers& GetSerializers();
 		DisplayManager& GetDisplayManager();
 		LayerManager& GetLayerManager();
-		ShaderManager& GetShaderManager();
 		MaterialManager& GetMaterialManager();
 		PipelineManager& GetPipelineManager();
 		Utils::Reflect::Reflect& Reflection();
@@ -175,7 +172,6 @@ namespace Utils::Reflect
 
 		void SetAssetManager(AssetManager* pManager);
 		void SetSceneManager(SceneManager* pManager);
-		void SetShaderManager(ShaderManager* pManager);
 		void SetMaterialManager(MaterialManager* pManager);
 		void SetPipelineManager(PipelineManager* pManager);
 
@@ -248,7 +244,6 @@ namespace Utils::Reflect
 		Console* m_Console;
 		Debug* m_Debug;
 		AssetManager* m_pAssetsManager;
-		ShaderManager* m_pShaderManager;
 		MaterialManager* m_pMaterialManager;
 		PipelineManager* m_pPipelineManager;
 
