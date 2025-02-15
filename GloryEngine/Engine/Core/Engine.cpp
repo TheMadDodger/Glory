@@ -16,7 +16,6 @@
 #include "EngineProfiler.h"
 
 #include "MaterialInstanceData.h"
-#include "ShaderSourceData.h"
 #include "PipelineData.h"
 #include "PrefabData.h"
 #include "AudioData.h"
@@ -567,7 +566,6 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<MaterialInstanceData>("");
 		m_ResourceTypes->RegisterResource<MeshData>("");
 		m_ResourceTypes->RegisterResource<ModelData>("");
-		m_ResourceTypes->RegisterResource<ShaderSourceData>("");
 		m_ResourceTypes->RegisterResource<ImageData>("");
 		m_ResourceTypes->RegisterResource<AudioData>("");
 		m_ResourceTypes->RegisterResource<FontData>("");

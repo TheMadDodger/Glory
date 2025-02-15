@@ -756,4 +756,10 @@ namespace Glory
     };
 
     constexpr SSAOSettings DefaultSSAO;
+
+    struct PipelineShaderMetaData
+    {
+        uint64_t PipelineID;
+        ShaderType Type;
+    };
 }

@@ -74,6 +74,9 @@ namespace Glory::Editor
 		virtual const std::vector<FileData>& GetPipelineCompiledShaders(UUID pipelineID) const override;
 		virtual const std::vector<ShaderType>& GetPipelineShaderTypes(UUID pipelineID) const override;
 
+		/** @brief Add a compiled shader, not allowed in the editor */
+		virtual void AddShader(FileData* pShader) override;
+
 		GLORY_EDITOR_API UUID FindPipeline(PipelineType type, bool useTextures) const;
 
 		using PipelineUpdateDispatcher = Dispatcher<PipelineUpdateEvent>;

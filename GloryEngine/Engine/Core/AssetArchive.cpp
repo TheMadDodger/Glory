@@ -49,7 +49,20 @@ namespace Glory
 		return Version::Compare(m_Version, currentVersion) == 0;
 	}
 
-	void AssetArchive::Serialize(Resource* pResource)
+	void AssetArchive::Serialize(Resource* pResource) const
+	{
+		std::type_index type = typeid(Resource);
+		if (!pResource->GetType(0, type)) return;
+		const uint32_t typeHash = ResourceTypes::GetHash(type);
+
+		/* Write ID, name and type */
+		m_pStream->Write(pResource->GetUUID()).Write(pResource->Name()).Write(typeHash);
+
+		/* Write the resource */
+		pResource->Serialize(*m_pStream);
+	}
+
+	void AssetArchive::Serialize(const Resource* pResource) const
 	{
 		std::type_index type = typeid(Resource);
 		if (!pResource->GetType(0, type)) return;

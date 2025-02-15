@@ -25,9 +25,12 @@ namespace Glory
 		virtual PipelineData* GetPipelineData(UUID pipelineID) const = 0;
 
 		/** @brief Get all platform compiled shaders for a pipeline */
-		virtual const std::vector<FileData>& GetPipelineCompiledShaders(UUID pipelineID) const { return {}; };
+		virtual const std::vector<FileData>& GetPipelineCompiledShaders(UUID pipelineID) const = 0;
 		/** @brief Get shader types */
-		virtual const std::vector<ShaderType>& GetPipelineShaderTypes(UUID pipelineID) const { return {}; };
+		virtual const std::vector<ShaderType>& GetPipelineShaderTypes(UUID pipelineID) const = 0;
+
+		/** @brief Add a compiled shader */
+		virtual void AddShader(FileData* pShader) = 0;
 
 	protected:
 		Engine* m_pEngine;

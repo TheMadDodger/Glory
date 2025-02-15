@@ -17,7 +17,6 @@
 #include <SceneManager.h>
 #include <AssetManager.h>
 #include <AssetDatabase.h>
-#include <ShaderSourceData.h>
 
 #include <filesystem>
 #include <CRC.h>
@@ -217,10 +216,8 @@ namespace Glory
 		for (size_t i = 0; i < archive.Size(); ++i)
 		{
 			Resource* pResource = archive.Get(m_pEngine, i);
-			ShaderSourceData* pShader = static_cast<ShaderSourceData*>(pResource);
-
-			/** @todo */
-			//m_pEngine->GetShaderManager().AddShader(pShader);
+			FileData* pShader = static_cast<FileData*>(pResource);
+			m_pEngine->GetPipelineManager().AddShader(pShader);
 		}
 	}
 

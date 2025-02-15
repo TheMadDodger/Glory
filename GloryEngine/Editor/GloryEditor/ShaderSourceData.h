@@ -18,9 +18,6 @@ namespace Glory
         size_t Size() const;
         const char* Data() const;
         const ShaderType& GetShaderType() const;
-        FileData* GetCompiledShader() const;
-
-        void SetCompiledShader(FileData* pCompiledShader);
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
@@ -33,7 +30,6 @@ namespace Glory
 
     private:
         ShaderType m_ShaderType;
-        FileData* m_pPlatformCompiledShader;
         std::vector<char> m_OriginalSource;
         std::vector<char> m_ProcessedSource;
         std::vector<std::string> m_Features;

@@ -177,8 +177,6 @@ namespace Glory::Editor
 
 		CreateFolder("Assets");
 		CreateFolder("Cache");
-		CreateFolder("Cache/ShaderSource");
-		CreateFolder("Cache/CompiledShaders");
 		CreateFolder("Cache/CompiledPipelines");
 		CreateFolder("Modules");
 		CreateFolder("Cache/CompiledAssets");

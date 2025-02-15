@@ -88,6 +88,7 @@ namespace Glory::Editor
 
 	void EditorPipelineManager::Initialize()
 	{
+		m_pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
 		m_pEngine->GetResourceTypes().RegisterResource<EditorPipeline>("");
 		m_AssetRegisteredCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetRegistered,
 			[this](const AssetCallbackData& callback) { AssetAddedCallback(callback); });
@@ -158,6 +159,11 @@ namespace Glory::Editor
 		}
 
 		return {};
+	}
+
+	void EditorPipelineManager::AddShader(FileData* pShader)
+	{
+		throw new std::exception("Adding extrenally compiled shaders is not allowed in the editor!");
 	}
 
 	UUID EditorPipelineManager::FindPipeline(PipelineType type, bool useTextures) const
@@ -308,8 +314,10 @@ namespace Glory::Editor
 			for (size_t j = 0; j < pEditorPipeline->m_EditorPlatformShaders.size(); ++j)
 			{
 				const std::string_view compiledShader = pEditorPipeline->m_EditorPlatformShaders[j];
+				const size_t index = m_CompiledShaders[i].size();
 				m_CompiledShaders[i].push_back(FileData(compiledShader));
 				m_ShaderTypes[i].push_back(pEditorPipeline->m_EditorShaderDatas[j].m_ShaderType);
+				m_CompiledShaders[i][index].SetMetaData(PipelineShaderMetaData{ m_Pipelines[i], m_ShaderTypes[i][index] });
 			}
 		}
 

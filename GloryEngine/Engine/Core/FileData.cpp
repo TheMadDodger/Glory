@@ -61,7 +61,8 @@ namespace Glory
 
 	void FileData::Serialize(BinaryStream& container) const
 	{
-		container.Write(m_Data.size()).Write(m_Data.data(), m_Data.size());
+		container.Write(m_Data.size()).
+			Write(m_Data.data(), m_Data.size()).Write(m_MetaData);
 	}
 
 	void FileData::Deserialize(BinaryStream& container)
@@ -69,6 +70,13 @@ namespace Glory
 		size_t size;
 		container.Read(size);
 		m_Data.resize(size);
-		container.Read(m_Data.data(), m_Data.size());
+		container.Read(m_Data.data(), m_Data.size()).Read<char>(m_MetaData);
+	}
+
+	void FileData::SetMetaData(const void* data, size_t size)
+	{
+		m_MetaData.clear();
+		m_MetaData.resize(size);
+		std::memcpy(m_MetaData.data(), data, size);
 	}
 }

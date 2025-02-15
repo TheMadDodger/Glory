@@ -65,7 +65,7 @@ namespace Glory
 		BinaryStream& Read(void* out, size_t size);
 		virtual BinaryStream& Read(char* out, size_t size) = 0;
 
-		void Read(std::vector<char>& buffer, size_t size = 0);
+		BinaryStream& Read(std::vector<char>& buffer, size_t size = 0);
 
 		virtual bool Eof() = 0;
 	};
