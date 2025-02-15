@@ -369,12 +369,17 @@ namespace Glory::Editor
 			/* Load cache */
 			BinaryFileStream file{ cachePath, true, false };
 			AssetArchive archive{ &file, AssetArchiveFlags::Read };
-			archive.Deserialize(m_pEngine);
-			if (archive.Size())
+			/* If the cache is from an older version it is likely invalid */
+			if (archive.VerifyVersion())
 			{
-				Resource* pResource = archive.Get(m_pEngine, 0);
-				return static_cast<EditorPipeline*>(pResource);
+				archive.Deserialize(m_pEngine);
+				if (archive.Size())
+				{
+					Resource* pResource = archive.Get(m_pEngine, 0);
+					return static_cast<EditorPipeline*>(pResource);
+				}
 			}
+			validCacheAvailable = false;
 		}
 
 		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
