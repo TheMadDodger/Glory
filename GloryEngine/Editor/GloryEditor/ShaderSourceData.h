@@ -11,15 +11,13 @@ namespace Glory
     public:
         ShaderSourceData();
         ShaderSourceData(ShaderType shaderType, FileData* pCompiledSource);
-        ShaderSourceData(ShaderType shaderType, std::vector<char>&& source, std::vector<char>&& processed);
+        ShaderSourceData(ShaderType shaderType, std::vector<char>&& source,
+            std::vector<char>&& processed, std::vector<std::string>&& features);
         virtual ~ShaderSourceData();
 
         size_t Size() const;
         const char* Data() const;
         const ShaderType& GetShaderType() const;
-        FileData* GetCompiledShader() const;
-
-        void SetCompiledShader(FileData* pCompiledShader);
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
@@ -27,11 +25,14 @@ namespace Glory
         uint64_t& TimeSinceLastWrite();
         const uint64_t& TimeSinceLastWrite() const;
 
+        size_t FeatureCount() const;
+        std::string_view Feature(size_t index) const;
+
     private:
         ShaderType m_ShaderType;
-        FileData* m_pPlatformCompiledShader;
         std::vector<char> m_OriginalSource;
         std::vector<char> m_ProcessedSource;
+        std::vector<std::string> m_Features;
         uint64_t m_TimeSinceLastWrite;
 	};
 }

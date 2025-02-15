@@ -29,7 +29,7 @@ namespace Glory
 		Mesh* CreateMesh(MeshData* pMeshData);
 		Mesh* CreateMeshNoIndexBuffer(MeshData* pMeshData);
 		Mesh* CreateMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes, Buffer* pVertexBuffer, Buffer* pIndexBuffer);
-		Shader* CreateShader(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
+		Shader* CreateShader(const FileData* pShaderFile, const ShaderType& shaderType, const std::string& function);
 		Material* CreateMaterial(MaterialData* pMaterialData);
 		Pipeline* CreatePipeline(PipelineData* pPipelineData);
 		Texture* CreateTexture(TextureData* pTextureData);
@@ -51,7 +51,7 @@ namespace Glory
 		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex) = 0;
 		virtual Mesh* CreateMesh_Internal(MeshData* pMeshData) = 0;
 		virtual Mesh* CreateMesh_Internal(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes) = 0;
-		virtual Shader* CreateShader_Internal(FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
+		virtual Shader* CreateShader_Internal(const FileData* pShaderFile, const ShaderType& shaderType, const std::string& function) = 0;
 		virtual Material* CreateMaterial_Internal(MaterialData* pMaterialData) = 0;
 		virtual Pipeline* CreatePipeline_Internal(PipelineData* pPipelineData) = 0;
 		virtual Texture* CreateTexture_Internal(TextureData* pTextureData) = 0;
@@ -64,6 +64,15 @@ namespace Glory
 	private: // Resource lookups
 		template<class T>
 		T* GetResource(Resource* pResource)
+		{
+			const UUID& uuid = pResource->GetGPUUUID();
+			auto it = m_IDResources.find(uuid);
+			if (it == m_IDResources.end()) return nullptr;
+			return (T*)m_IDResources[uuid];
+		}
+
+		template<class T>
+		T* GetResource(const Resource* pResource)
 		{
 			const UUID& uuid = pResource->GetGPUUUID();
 			auto it = m_IDResources.find(uuid);

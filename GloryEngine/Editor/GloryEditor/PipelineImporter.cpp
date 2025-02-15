@@ -32,6 +32,17 @@ namespace Glory::Editor
 			pPipeline->AddShader(shaderID);
 		}
 
+		auto features = file["Features"];
+		if (features.Exists() && features.IsMap())
+		{
+			for (auto iter = features.Begin(); iter != features.End(); ++iter)
+			{
+				const std::string name = *iter;
+				const bool isOn = features[name].As<bool>();
+				pPipeline->AddFeature(name, isOn);
+			}
+		}
+
 		return ImportedResource(path, pPipeline);
 	}
 
@@ -44,6 +55,16 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < pResource->ShaderCount(); ++i)
 			file["Shaders"].PushBack((uint64_t)pResource->ShaderID(i));
+
+		auto features = file["Features"];
+		features.SetMap();
+
+		for (size_t i = 0; i < pResource->FeatureCount(); ++i)
+		{
+			const std::string_view name = pResource->FeatureName(i);
+			const bool isOn = pResource->FeatureEnabled(i);
+			features[name].Set(isOn);
+		}
 
 		file.Save();
 		return true;

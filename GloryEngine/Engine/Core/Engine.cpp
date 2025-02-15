@@ -8,7 +8,6 @@
 #include "StructPropertySerializer.h"
 #include "SceneObjectRefSerializer.h"
 #include "ShapePropertySerializer.h"
-#include "ShaderManager.h"
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "ShapeProperty.h"
@@ -17,7 +16,6 @@
 #include "EngineProfiler.h"
 
 #include "MaterialInstanceData.h"
-#include "ShaderSourceData.h"
 #include "PipelineData.h"
 #include "PrefabData.h"
 #include "AudioData.h"
@@ -32,7 +30,6 @@
 #include "LayerManager.h"
 #include "ObjectManager.h"
 #include "CameraManager.h"
-#include "ShaderManager.h"
 #include "GameTime.h"
 #include "BinaryStream.h"
 #include "RenderData.h"
@@ -209,8 +206,8 @@ namespace Glory
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
 		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
-		m_pShaderManager(createInfo.pShaderManager), m_pMaterialManager(createInfo.pMaterialManager),
-		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager), m_RootPath("./")
+		m_pMaterialManager(createInfo.pMaterialManager), m_AssetDatabase(new AssetDatabase),
+		m_ObjectManager(new ObjectManager), m_RootPath("./")
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -394,11 +391,6 @@ namespace Glory
 		return *m_LayerManager;
 	}
 
-	ShaderManager& Engine::GetShaderManager()
-	{
-		return *m_pShaderManager;
-	}
-
 	MaterialManager& Engine::GetMaterialManager()
 	{
 		return *m_pMaterialManager;
@@ -437,11 +429,6 @@ namespace Glory
 	void Engine::SetSceneManager(SceneManager* pManager)
 	{
 		m_pSceneManager = pManager;
-	}
-
-	void Engine::SetShaderManager(ShaderManager* pManager)
-	{
-		m_pShaderManager = pManager;
 	}
 
 	void Engine::SetMaterialManager(MaterialManager* pManager)
@@ -579,7 +566,6 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<MaterialInstanceData>("");
 		m_ResourceTypes->RegisterResource<MeshData>("");
 		m_ResourceTypes->RegisterResource<ModelData>("");
-		m_ResourceTypes->RegisterResource<ShaderSourceData>("");
 		m_ResourceTypes->RegisterResource<ImageData>("");
 		m_ResourceTypes->RegisterResource<AudioData>("");
 		m_ResourceTypes->RegisterResource<FontData>("");

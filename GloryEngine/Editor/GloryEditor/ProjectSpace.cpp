@@ -5,7 +5,6 @@
 #include "ProjectSettings.h"
 #include "EditorAssetDatabase.h"
 #include "AssetCompiler.h"
-#include "EditorShaderProcessor.h"
 #include "TitleBar.h"
 #include "ProjectMigrations.h"
 #include "PopupManager.h"
@@ -178,8 +177,7 @@ namespace Glory::Editor
 
 		CreateFolder("Assets");
 		CreateFolder("Cache");
-		CreateFolder("Cache/ShaderSource");
-		CreateFolder("Cache/CompiledShaders");
+		CreateFolder("Cache/CompiledPipelines");
 		CreateFolder("Modules");
 		CreateFolder("Cache/CompiledAssets");
 

@@ -15,14 +15,14 @@ namespace Glory
 	class Shader : public GPUResource
 	{
 	public:
-		Shader(FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
+		Shader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
 		virtual ~Shader();
 
 	protected:
 		virtual void Initialize() = 0;
 
 	protected:
-		FileData* m_pShaderFileData;
+		std::vector<char> m_CompiledShader;
 		const ShaderType m_ShaderType;
 		const std::string m_Function;
 

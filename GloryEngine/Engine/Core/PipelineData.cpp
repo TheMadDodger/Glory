@@ -1,6 +1,6 @@
 #include "PipelineData.h"
 #include "MaterialData.h"
-#include "ShaderManager.h"
+#include "PipelineManager.h"
 #include "BinaryStream.h"
 
 namespace Glory
@@ -29,14 +29,14 @@ namespace Glory
 		return m_Shaders[index];
 	}
 
-	FileData* PipelineData::Shader(const ShaderManager& manager, size_t index) const
+	const FileData* PipelineData::Shader(const PipelineManager& manager, size_t index) const
 	{
-		return manager.GetCompiledShaderFile(ShaderID(index));
+		return &manager.GetPipelineCompiledShaders(GetUUID())[index];
 	}
 
-	ShaderType PipelineData::GetShaderType(const ShaderManager& manager, size_t index) const
+	ShaderType PipelineData::GetShaderType(const PipelineManager& manager, size_t index) const
 	{
-		return manager.GetShaderType(ShaderID(index));
+		return manager.GetPipelineShaderTypes(GetUUID())[index];
 	}
 
 	void PipelineData::SetPipelineType(PipelineType type)
@@ -185,5 +185,56 @@ namespace Glory
 			return true;
 		}
 		return false;
+	}
+
+	void PipelineData::AddFeature(std::string_view feature, bool isOn)
+	{
+		const size_t index = FeatureIndex(feature);
+		if (index != m_Features.size())
+		{
+			m_FeaturesEnabled.Set(index, isOn);
+			return;
+		}
+
+		m_Features.push_back(std::string(feature));
+		m_FeaturesEnabled.Reserve(m_Features.size());
+		m_FeaturesEnabled.Set(index, isOn);
+	}
+
+	size_t PipelineData::FeatureIndex(std::string_view feature) const
+	{
+		for (size_t i = 0; i < m_Features.size(); ++i)
+		{
+			if (m_Features[i] != feature) continue;
+			return i;
+		}
+		return m_Features.size();
+	}
+
+	size_t PipelineData::FeatureCount() const
+	{
+		return m_Features.size();
+	}
+
+	std::string_view PipelineData::FeatureName(size_t index) const
+	{
+		return m_Features[index];
+	}
+
+	bool PipelineData::FeatureEnabled(size_t index)
+	{
+		if (index >= m_Features.size()) return true;
+		return m_FeaturesEnabled.IsSet(index);
+	}
+
+	void PipelineData::SetFeatureEnabled(size_t index, bool enabled)
+	{
+		m_FeaturesEnabled.Set(index, enabled);
+	}
+
+	void PipelineData::ClearFeatures()
+	{
+		m_Features.clear();
+		m_FeaturesEnabled.Clear();
 	}
 }

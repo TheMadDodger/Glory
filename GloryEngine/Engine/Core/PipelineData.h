@@ -3,11 +3,13 @@
 #include "GraphicsEnums.h"
 #include "MaterialPropertyInfo.h"
 
+#include <BitSet.h>
+
 namespace Glory
 {
     class FileData;
-    class ShaderManager;
     class MaterialData;
+    class PipelineManager;
 
     /** @brief Pipeline data */
 	class PipelineData : public Resource
@@ -31,12 +33,12 @@ namespace Glory
          * @param manager Shader manager to get shaders from
          * @param index Index of the shader to get
          */
-        virtual FileData* Shader(const ShaderManager& manager, size_t index) const;
+        virtual const FileData* Shader(const PipelineManager& manager, size_t index) const;
         /** @brief Get the type of a shader attached to this pipeline
          * @param manager Shader manager to get shaders from
          * @param index Index of the shader to get the type from
          */
-        virtual ShaderType GetShaderType(const ShaderManager& manager, size_t index) const;
+        virtual ShaderType GetShaderType(const PipelineManager& manager, size_t index) const;
 
         /** @brief Set the shading type for this pipeline
          * @param type @ref PipelineType to set
@@ -81,6 +83,28 @@ namespace Glory
         /** @brief Check if this pipeline has texture parameters */
         bool UsesTextures() const;
 
+        /** @brief Add a feature
+         * @param feature The name of the feature
+         * @param isOn Is the feature on by default
+         */
+        void AddFeature(std::string_view feature, bool isOn);
+
+        size_t FeatureIndex(std::string_view feature) const;
+
+        /** @brief Number of available features for this pipeline */
+        size_t FeatureCount() const;
+
+        /** @brief Get the name of a feature */
+        std::string_view FeatureName(size_t index) const;
+
+        /** @brief Check if a feature is enabled */
+        bool FeatureEnabled(size_t index);
+
+        /** @brief Enable a feature */
+        void SetFeatureEnabled(size_t index, bool enabled);
+        /** @brief Remove all features */
+        void ClearFeatures();
+
     protected:
         PipelineType m_Type = PT_Phong;
         std::vector<UUID> m_Shaders;
@@ -88,6 +112,8 @@ namespace Glory
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<size_t> m_ResourcePropertyInfoIndices;
         std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;
+        std::vector<std::string> m_Features;
+        Utils::BitSet m_FeaturesEnabled;
 
         size_t m_CurrentOffset = 0;
         size_t m_NumResources = 0;

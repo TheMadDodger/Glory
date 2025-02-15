@@ -28,7 +28,8 @@ namespace Glory
 
 		bool VerifyVersion();
 
-		void Serialize(Resource* pResource);
+		void Serialize(Resource* pResource) const;
+		void Serialize(const Resource* pResource) const;
 		void Deserialize(Engine* pEngine);
 
 		size_t Size() const;

@@ -1,6 +1,5 @@
 #include "MaterialEditor.h"
 #include "PropertyDrawer.h"
-#include "EditorShaderProcessor.h"
 #include "AssetPicker.h"
 #include "Selection.h"
 #include "EditorAssetDatabase.h"
@@ -47,12 +46,11 @@ namespace Glory::Editor
 		ImGui::Spacing();
 		ImGui::Spacing();
 
-		if (ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen))
+		if (EditorUI::Header("Properties"))
 		{
 			Undo::StartRecord("Material Property", pMaterial->GetUUID());
 			change = PropertiesGUI(pMaterial, pMaterialData);
 			Undo::StopRecord();
-			ImGui::TreePop();
 		}
 
 		if (change)
@@ -172,7 +170,7 @@ namespace Glory::Editor
 		ImGui::Spacing();
 		ImGui::Spacing();
 
-		if (ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen))
+		if (EditorUI::Header("Properties"))
 		{
 			PropertiesGUI(pMaterialData);
 			ImGui::TreePop();

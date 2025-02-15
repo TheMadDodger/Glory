@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	GLShader::GLShader(FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
+	GLShader::GLShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
 		: Shader(pShaderFileData, shaderType, function), m_ShaderID(NULL)
 	{
 	}
@@ -21,7 +21,7 @@ namespace Glory
 
 	void GLShader::Initialize()
 	{
-		const char* shaderSource = m_pShaderFileData->Data();
+		const char* shaderSource = m_CompiledShader.data();
 
 		m_GLShaderType = GLConverter::GetShaderStageFlag(m_ShaderType);
 		m_ShaderID = glCreateShader(m_GLShaderType);

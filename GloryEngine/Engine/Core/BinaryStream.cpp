@@ -133,12 +133,13 @@ namespace Glory
 		return Read(reinterpret_cast<char*>(out), size);
 	}
 
-	void BinaryStream::Read(std::vector<char>& buffer, size_t size)
+	BinaryStream& BinaryStream::Read(std::vector<char>& buffer, size_t size)
 	{
 		if (size == 0)
 			size = Size() - Tell();
+		if (size == 0) return *this;
 		buffer.resize(size);
-		Read(buffer.data(), buffer.size());
+		return Read(buffer.data(), buffer.size());
 	}
 
 	BinaryMemoryStream::BinaryMemoryStream(std::vector<char>& data):

@@ -17,4 +17,21 @@ namespace Glory
 		PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
 		return pPipeline;
 	}
+
+	const std::vector<FileData>& RuntimePipelineManager::GetPipelineCompiledShaders(UUID pipelineID) const
+	{
+		return m_Shaders.at(pipelineID);
+	}
+
+	const std::vector<ShaderType>& RuntimePipelineManager::GetPipelineShaderTypes(UUID pipelineID) const
+	{
+		return m_ShaderTypes.at(pipelineID);
+	}
+
+	void RuntimePipelineManager::AddShader(FileData* pShader)
+	{
+		const PipelineShaderMetaData& metaData = pShader->GetMetaData<PipelineShaderMetaData>();
+		m_Shaders[metaData.PipelineID].push_back(std::move(*pShader));
+		m_ShaderTypes[metaData.PipelineID].push_back(metaData.Type);
+	}
 }

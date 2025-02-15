@@ -8,8 +8,6 @@
 #include <filesystem>
 #include <BinaryStream.h>
 #include <AssetArchive.h>
-#include <ShaderManager.h>
-#include <ShaderSourceData.h>
 #include <AssetManager.h>
 
 namespace Glory

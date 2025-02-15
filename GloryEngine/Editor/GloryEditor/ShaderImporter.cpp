@@ -1,5 +1,6 @@
 #include "ShaderImporter.h"
 #include "EditorApplication.h"
+#include "EditorPipelineManager.h"
 
 #include <fstream>
 #include <functional>
@@ -38,7 +39,10 @@ namespace Glory::Editor
         ShaderType Type;
         std::vector<char> Source;
         std::vector<char> ProcessedSource;
+        std::vector<std::string> Features;
     };
+
+    std::vector<std::filesystem::path> ShaderIncludeDirs;
 
     void AppendLine(const std::string& line, std::vector<char>& buffer);
     bool ProcessSymbol(TemporaryShaderData& shaderData, const std::string& symbol, const std::string& argument, const std::filesystem::path& path);
@@ -61,7 +65,17 @@ namespace Glory::Editor
         }
 
         const std::string actualInclude = includePath.substr(1, includePath.size() - 2);
-        const std::filesystem::path pathToFile = path.parent_path().append(actualInclude);
+
+        std::filesystem::path pathToFile = ShaderImporter::FindShaderInclude(actualInclude);
+
+        if (!std::filesystem::exists(pathToFile))
+            pathToFile = path.parent_path().append(actualInclude);
+
+        if (!std::filesystem::exists(pathToFile))
+        {
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Could not open shader include: " + includePath + " File not found.");
+            return nullptr;
+        }
 
         TemporaryShaderData includeShader;
         includeShader.Type = ShaderType::ST_Unknown;
@@ -70,7 +84,7 @@ namespace Glory::Editor
 
         if (!file.is_open())
         {
-            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Could not open file: " + path.string());
+            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Could not open file: " + pathToFile.string());
             return nullptr;
         }
 
@@ -96,14 +110,37 @@ namespace Glory::Editor
         return true;
     }
 
+    bool ProcessDefine(TemporaryShaderData& shaderData, const std::string& define, const std::filesystem::path& path)
+    {
+        if (define._Starts_with("FEATURE_"))
+        {
+            shaderData.Features.push_back(define);
+            return true;
+        }
+        return false;
+    }
+
     std::map<std::string, std::function<bool(TemporaryShaderData&, const std::string&, const std::filesystem::path&)>> SymbolCallbacks = {
         { "type", GetShaderTypeFromString },
-        { "include", ProcessInclude }
+        { "include", ProcessInclude },
+        { "define", ProcessDefine }
     };
 
     std::string_view ShaderImporter::Name() const
     {
         return "Internal Shader Importer";
+    }
+
+    std::filesystem::path ShaderImporter::FindShaderInclude(const std::filesystem::path& path)
+    {
+        for (const std::filesystem::path& includeDir : ShaderIncludeDirs)
+        {
+            std::filesystem::path searchPath = includeDir;
+            searchPath.append(path.string());
+            if (!std::filesystem::exists(searchPath)) continue;
+            return searchPath;
+        }
+        return path;
     }
 
     bool ShaderImporter::SupportsExtension(const std::filesystem::path& extension) const
@@ -138,6 +175,12 @@ namespace Glory::Editor
 
         size_t spaceIndex = line.find(' ');
         if (spaceIndex == std::string::npos) spaceIndex = line.length() - 1;
+        if (line[spaceIndex] == '\r')
+        {
+            AppendLine(line, shaderData.ProcessedSource);
+            return;
+        }
+
         std::string symbol = line.substr(1, spaceIndex - 1);
         if (symbol[symbol.length() - 1] == '\r') symbol = symbol.substr(0, symbol.length() - 1);
 
@@ -176,6 +219,21 @@ namespace Glory::Editor
             ProcessLine(shaderData, line, path);
         }
 
-        return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source), std::move(shaderData.ProcessedSource)) };
+        return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source),
+            std::move(shaderData.ProcessedSource), std::move(shaderData.Features)) };
+    }
+
+    void ShaderImporter::Initialize()
+    {
+        Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+
+        for (size_t i = 0; i < pEngine->ModulesCount(); ++i)
+        {
+            Module* pModule = pEngine->GetModule(i);
+            std::filesystem::path path = pModule->GetPath();
+            path.append("Assets/Shaders");
+            if (!std::filesystem::exists(path)) continue;
+            ShaderIncludeDirs.push_back(path);
+        }
     }
 }

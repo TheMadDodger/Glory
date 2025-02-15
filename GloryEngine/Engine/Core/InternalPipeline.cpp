@@ -1,5 +1,4 @@
 #include "InternalPipeline.h"
-#include "ShaderManager.h"
 #include "FileData.h"
 
 namespace Glory
@@ -19,12 +18,12 @@ namespace Glory
 		return m_pCompiledShaders[index]->GetUUID();
 	}
 
-	ShaderType InternalPipeline::GetShaderType(const ShaderManager& manager, size_t index) const
+	ShaderType InternalPipeline::GetShaderType(const PipelineManager& manager, size_t index) const
 	{
 		return m_ShaderTypes[index];
 	}
 
-	FileData* InternalPipeline::Shader(const ShaderManager&, size_t index) const
+	FileData* InternalPipeline::Shader(const PipelineManager&, size_t index) const
 	{
 		return m_pCompiledShaders[index];
 	}

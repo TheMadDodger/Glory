@@ -5,7 +5,6 @@
 #include "ProjectSpace.h"
 #include "MaterialData.h"
 #include "MaterialInstanceData.h"
-#include "EditorShaderProcessor.h"
 #include "EditorPipelineManager.h"
 #include "ResourceType.h"
 #include "EditorApplication.h"
@@ -80,6 +79,7 @@ namespace Glory::Editor
 		if (!pResource) return;
 		MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
 		pMaterial->SetPipeline(pipelineID);
+		pMaterial->SetDirty(true);
 		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
 		Utils::YAMLFileRef& file = **pMaterialData;
@@ -283,7 +283,7 @@ namespace Glory::Editor
 			}
 			else
 			{
-				const TextureType textureType = EditorShaderProcessor::ShaderNameToTextureType(name);
+				const TextureType textureType = EditorPipelineManager::ShaderNameToTextureType(name);
 				const UUID id = value.As<uint64_t>();
 				pMaterial->AddResourceProperty(displayName, name, type, id, textureType);
 			}

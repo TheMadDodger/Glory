@@ -1,5 +1,4 @@
 #include "PipelineEditor.h"
-#include "EditorShaderProcessor.h"
 #include "Selection.h"
 #include "EditorApplication.h"
 #include "EditorMaterialManager.h"
@@ -36,7 +35,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < shaders.Size(); ++i)
 		{
 			const UUID shaderID = shaders[i].As<uint64_t>();
-			ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
+			ShaderSourceData* pShaderSourceData = EditorPipelineManager::GetShaderSource(shaderID);
 			if (!pShaderSourceData)
 				return "Some shaders have not yet loaded.";
 			const ShaderType& type = pShaderSourceData->GetShaderType();
@@ -112,7 +111,7 @@ namespace Glory::Editor
 
 				auto shader = shaders[row_n];
 				const UUID shaderID = shader.As<uint64_t>();
-				ShaderSourceData* pShaderSourceData = EditorShaderProcessor::GetShaderSource(shaderID);
+				ShaderSourceData* pShaderSourceData = EditorPipelineManager::GetShaderSource(shaderID);
 				if (!pShaderSourceData)
 				{
 					ImGui::TableSetColumnIndex(0);
@@ -131,7 +130,6 @@ namespace Glory::Editor
 					ImGui::PopID();
 					continue;
 				}
-
 
 				ImGui::TableSetColumnIndex(0);
 
@@ -179,7 +177,6 @@ namespace Glory::Editor
 		return change;
 	}
 
-
 	bool PipelineEditor::OnGUI()
 	{
 		YAMLResource<PipelineData>* pPipeline = (YAMLResource<PipelineData>*)m_pTarget;
@@ -187,13 +184,46 @@ namespace Glory::Editor
 
 		bool change = EditorUI::InputEnum<PipelineType>(file, "Type", { PipelineType::PT_Unknown, PipelineType::PT_Count });
 
-		bool node = ImGui::TreeNodeEx("Loaded Shaders", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
-		if (node)
+		ImGui::PushID("Shaders");
+		if (EditorUI::Header("Shaders"))
 		{
 			change |= ShaderGUI(pPipeline);
-			ImGui::TreePop();
 		}
+		ImGui::PopID();
 
+		ImGui::Spacing();
+		ImGui::PushID("Features");
+		if (EditorUI::Header("Features"))
+		{
+			PipelineData* pPipelineData = EditorApplication::GetInstance()->
+				GetPipelineManager().GetPipelineData(pPipeline->GetUUID());
+
+			auto features = file["Features"];
+			if (!features.Exists() || !features.IsMap())
+				features.SetMap();
+
+			for (size_t i = 0; pPipelineData && i < pPipelineData->FeatureCount(); ++i)
+			{
+				std::string_view featureName = pPipelineData->FeatureName(i);
+				auto feature = features[featureName];
+				if (!feature.Exists() || !feature.IsScalar())
+					feature.Set(pPipelineData->FeatureEnabled(i));
+				if (EditorUI::CheckBox(file, feature.Path()))
+				{
+					change = true;
+					EditorApplication::GetInstance()->GetPipelineManager().
+						SetPipelineFeatureEnabled(pPipeline->GetUUID(), featureName, feature.As<bool>());
+				}
+			}
+
+			if (pPipelineData && pPipelineData->FeatureCount() == 0)
+			{
+				ImGui::TextUnformatted("This pipeline has no features.");
+			}
+		}
+		ImGui::PopID();
+
+		ImGui::Spacing();
 		const char* error = GetPipelineError(pPipeline);
 		if (error)
 		{

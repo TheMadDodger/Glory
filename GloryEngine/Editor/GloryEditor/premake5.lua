@@ -21,7 +21,7 @@ project "GloryEditor"
 		["Extensions"] = { "BaseEditorExtension.*" },
 		["Editor"] = { "EntityEditor.*", "EditableEntity.*", "Dispatcher.h", "DND.*", "Configure.*", "QuitPopup.*", "TitleBar.*", "Shortcuts.*", "EditorApplication.*", "EditorPlatform.*", "MainEditor.*", "MenuBar.*", "EditorAssets.*", "ProjectSpace.*", "Selection.*", "EditorCreateInfo.*", "Gizmos.*", "RemovedAssetsPopup.*" },
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*", "CreateEntityObjectsCallbacks.*" },
-		["Editor/Pipeline"] = { "EditorShaderProcessor.*", "EditorShaderData.*" },
+		["Editor/Pipeline"] = { "EditorShaderData.*" },
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
 		["Editor/Tumbnails"] = { "ImageTumbnailGenerator.*", "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
 		["Editor/PropertyDrawers"] = { "MeshMaterialPropertyDrawer.*", "SceneObjectPropertyDrawer.*", "StructPropertyDrawer.*", "EnumPropertyDrawer.*", "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*", "ShapePropertyDrawer.*" },

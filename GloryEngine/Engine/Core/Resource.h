@@ -26,6 +26,11 @@ namespace Glory
         /** @brief Destructor */
         virtual ~Resource();
 
+        /** @brief Whether the resource is dirty */
+        bool IsDirty() const;
+        /** @brief Set resource dirty */
+        void SetDirty(bool dirty);
+
     public:
         virtual void Serialize(BinaryStream& container) const {};
         virtual void Deserialize(BinaryStream& container) {};
@@ -45,5 +50,7 @@ namespace Glory
         friend class AssetManager;
         friend class AssetDatabase;
         friend class LoaderModule;
+
+        bool m_IsDirty;
     };
 }
