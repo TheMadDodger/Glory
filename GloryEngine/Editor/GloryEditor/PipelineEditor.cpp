@@ -184,34 +184,46 @@ namespace Glory::Editor
 
 		bool change = EditorUI::InputEnum<PipelineType>(file, "Type", { PipelineType::PT_Unknown, PipelineType::PT_Count });
 
-		bool node = ImGui::TreeNodeEx("Loaded Shaders", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
-		if (node)
+		ImGui::PushID("Shaders");
+		if (EditorUI::Header("Shaders"))
 		{
 			change |= ShaderGUI(pPipeline);
-			ImGui::TreePop();
 		}
+		ImGui::PopID();
 
-		PipelineData* pPipelineData = EditorApplication::GetInstance()->
-			GetPipelineManager().GetPipelineData(pPipeline->GetUUID());
-
-		auto features = file["Features"];
-		if (!features.Exists() || !features.IsMap())
-			features.SetMap();
-
-		for (size_t i = 0; pPipelineData && i < pPipelineData->FeatureCount(); ++i)
+		ImGui::Spacing();
+		ImGui::PushID("Features");
+		if (EditorUI::Header("Features"))
 		{
-			std::string_view featureName = pPipelineData->FeatureName(i);
-			auto feature = features[featureName];
-			if (!feature.Exists() || !feature.IsScalar())
-				feature.Set(pPipelineData->FeatureEnabled(i));
-			if (EditorUI::CheckBox(file, feature.Path()))
+			PipelineData* pPipelineData = EditorApplication::GetInstance()->
+				GetPipelineManager().GetPipelineData(pPipeline->GetUUID());
+
+			auto features = file["Features"];
+			if (!features.Exists() || !features.IsMap())
+				features.SetMap();
+
+			for (size_t i = 0; pPipelineData && i < pPipelineData->FeatureCount(); ++i)
 			{
-				change = true;
-				EditorApplication::GetInstance()->GetPipelineManager().
-					SetPipelineFeatureEnabled(pPipeline->GetUUID(), featureName, feature.As<bool>());
+				std::string_view featureName = pPipelineData->FeatureName(i);
+				auto feature = features[featureName];
+				if (!feature.Exists() || !feature.IsScalar())
+					feature.Set(pPipelineData->FeatureEnabled(i));
+				if (EditorUI::CheckBox(file, feature.Path()))
+				{
+					change = true;
+					EditorApplication::GetInstance()->GetPipelineManager().
+						SetPipelineFeatureEnabled(pPipeline->GetUUID(), featureName, feature.As<bool>());
+				}
+			}
+
+			if (pPipelineData && pPipelineData->FeatureCount() == 0)
+			{
+				ImGui::TextUnformatted("This pipeline has no features.");
 			}
 		}
+		ImGui::PopID();
 
+		ImGui::Spacing();
 		const char* error = GetPipelineError(pPipeline);
 		if (error)
 		{
