@@ -79,6 +79,7 @@ namespace Glory::Editor
 		if (!pResource) return;
 		MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
 		pMaterial->SetPipeline(pipelineID);
+		pMaterial->SetDirty(true);
 		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
 		Utils::YAMLFileRef& file = **pMaterialData;

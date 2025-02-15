@@ -131,7 +131,7 @@ namespace Glory
 	Material* GPUResourceManager::CreateMaterial(MaterialData* pMaterialData)
 	{
 		Material* pMaterial = GetResource<Material>(pMaterialData);
-		if (pMaterial && pMaterial->m_Complete)
+		if (!pMaterialData->IsDirty() && pMaterial && pMaterial->m_Complete)
 		{
 			PipelineData* pPipelineData =
 				pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager());
@@ -141,6 +141,7 @@ namespace Glory
 				return pMaterial;
 			}
 		}
+		pMaterialData->SetDirty(false);
 
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMaterial");
 		if (!pMaterial) pMaterial = CreateMaterial_Internal(pMaterialData);
