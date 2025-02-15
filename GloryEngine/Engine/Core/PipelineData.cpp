@@ -223,6 +223,7 @@ namespace Glory
 
 	bool PipelineData::FeatureEnabled(size_t index)
 	{
+		if (index >= m_Features.size()) return true;
 		return m_FeaturesEnabled.IsSet(index);
 	}
 

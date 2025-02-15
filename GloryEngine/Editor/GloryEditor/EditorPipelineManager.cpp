@@ -139,6 +139,17 @@ namespace Glory::Editor
 		QueueCompileJob(pipelineID);
 	}
 
+	void EditorPipelineManager::SetPipelineFeatureEnabled(UUID pipelineID, std::string_view feature, bool enable)
+	{
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+		if (!pResource) return;
+		PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+		const size_t index = pPipeline->FeatureIndex(feature);
+		pPipeline->SetFeatureEnabled(index, enable);
+		DeletePipelineCache(pipelineID);
+		QueueCompileJob(pipelineID);
+	}
+
 	PipelineData* EditorPipelineManager::GetPipelineData(UUID pipelineID) const
 	{
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
@@ -426,13 +437,16 @@ namespace Glory::Editor
 
 			shaderc::CompileOptions options{};
 
-			for (size_t j = 0; j < pPipeline->FeatureCount(); ++j)
+			for (size_t j = 0; j < pShaderSource->FeatureCount(); ++j)
 			{
-				const std::string_view name = pPipeline->FeatureName(j);
+				const std::string_view name = pShaderSource->Feature(j);
+				compiledShaders[i].m_Features.emplace_back(name);
+				const size_t index = pPipeline->FeatureIndex(name);
+				const bool enabled = pPipeline->FeatureEnabled(index);
+				if (!enabled) continue;
 				const std::string_view actualName = name.substr(featureLength);
 				const std::string definition = "WITH_" + std::string(actualName);
 				options.AddMacroDefinition(definition);
-				compiledShaders[i].m_Features.emplace_back(name);
 			}
 
 			compiledShaders[i].m_ShaderType = shaderType;

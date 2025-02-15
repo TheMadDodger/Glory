@@ -204,7 +204,12 @@ namespace Glory::Editor
 			auto feature = features[featureName];
 			if (!feature.Exists() || !feature.IsScalar())
 				feature.Set(pPipelineData->FeatureEnabled(i));
-			change |= EditorUI::CheckBox(file, feature.Path());
+			if (EditorUI::CheckBox(file, feature.Path()))
+			{
+				change = true;
+				EditorApplication::GetInstance()->GetPipelineManager().
+					SetPipelineFeatureEnabled(pPipeline->GetUUID(), featureName, feature.As<bool>());
+			}
 		}
 
 		const char* error = GetPipelineError(pPipeline);

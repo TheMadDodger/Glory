@@ -1,12 +1,17 @@
 Runtime:
-
-Engine:
-- Shader #includes are now supported
-- Shaders and pipelines for rendering the screen as well as effects are now managed by the asset manager and can now be referenced
+- Upped runtime version to 0.4.6 as shader packs have changed
 
 Editor:
+- Added a startup popup
+- Shaders are now compiled by the pipeline system and cached into a single pipeline file
+- Shader #includes are now supported
+- Shaders and pipelines for rendering the screen as well as effects are now managed by the asset manager and can be referenced
 - Added options in ClusteredRendererModule to set the pipelines used for rendering to the screen and for rendering effects
 - Assets referenced directly by modules are now also packaged
 - Compiled shader caches will now be compared to their shader sources last write date to detect changes on startup
+- Implemented shader hot reloading
+- Implemented material reloading
+- Implemented pipeline features
+- Fixed crash caused by shader importer when a preprocessor symbol is detected for a single word line
 
 Scripting:

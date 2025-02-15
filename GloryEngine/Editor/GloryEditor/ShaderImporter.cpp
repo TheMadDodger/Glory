@@ -175,6 +175,12 @@ namespace Glory::Editor
 
         size_t spaceIndex = line.find(' ');
         if (spaceIndex == std::string::npos) spaceIndex = line.length() - 1;
+        if (line[spaceIndex] == '\r')
+        {
+            AppendLine(line, shaderData.ProcessedSource);
+            return;
+        }
+
         std::string symbol = line.substr(1, spaceIndex - 1);
         if (symbol[symbol.length() - 1] == '\r') symbol = symbol.substr(0, symbol.length() - 1);
 

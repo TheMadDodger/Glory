@@ -66,6 +66,8 @@ namespace Glory::Editor
 		 */
 		void RemoveShaderFromPipeline(UUID pipelineID, size_t index);
 
+		void SetPipelineFeatureEnabled(UUID pipelineID, std::string_view feature, bool enable);
+
 		/** @brief Get a pipeline by ID
 		 * @param pipelineID ID of the pipeline to get
 		 */
