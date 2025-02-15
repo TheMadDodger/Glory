@@ -200,7 +200,7 @@ namespace Glory::Editor
 				m_AssetManager->RunCallbacks();
 
 				/* Run callbacks for compiled pipelines */
-				//m_PipelineManager->RunCallbacks();
+				m_PipelineManager->RunCallbacks();
 
 				// Start a frame
 				m_pEngine->BeginFrame();
@@ -236,7 +236,7 @@ namespace Glory::Editor
 			m_AssetManager->RunCallbacks();
 
 			/* Run callbacks for compiled pipeline */
-			//m_PipelineManager->RunCallbacks();
+			m_PipelineManager->RunCallbacks();
 
 			// Start a frame
 			m_pEngine->BeginFrame();

@@ -25,9 +25,11 @@
 namespace Glory::Editor
 {
 	ThreadedVector<UUID> EditorPipelineManager::m_QueuedPipelines;
+	ThreadedVector<EditorPipeline*> EditorPipelineManager::m_FinishedPipelines;
 	std::mutex EditorPipelineManager::m_WaitMutex;
 	std::condition_variable EditorPipelineManager::m_WaitCondition;
 	ThreadedUMap<UUID, ShaderSourceData*> EditorPipelineManager::m_pLoadedShaderSources;
+	std::vector<ShaderSourceData*> EditorPipelineManager::m_pOutdatedShaders;
 
 	std::map<ShaderType, shaderc_shader_kind> ShaderTypeToKindOne = {
 		{ ShaderType::ST_Compute, shaderc_shader_kind::shaderc_compute_shader },
@@ -83,6 +85,9 @@ namespace Glory::Editor
 	EditorPipelineManager::~EditorPipelineManager()
 	{
 		m_pLoadedShaderSources.ForEachClear([](ShaderSourceData* pShader) { delete pShader; });
+		for (ShaderSourceData* pShader : m_pOutdatedShaders)
+			delete pShader;
+		m_pOutdatedShaders.clear();
 		m_pEngine = nullptr;
 	}
 
@@ -115,7 +120,8 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **pPipelineData;
 		auto shaders = file["Shaders"];
 		shaders[shaders.Size()].Set(uint64_t(shaderID));
-		UpdatePipeline(pPipeline, nullptr);
+		DeletePipelineCache(pipelineID);
+		QueueCompileJob(pipelineID);
 	}
 
 	void EditorPipelineManager::RemoveShaderFromPipeline(UUID pipelineID, size_t index)
@@ -129,7 +135,8 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **pMaterialData;
 		auto shaders = file["Shaders"];
 		shaders.Remove(index);
-		UpdatePipeline(pPipeline, nullptr);
+		DeletePipelineCache(pipelineID);
+		QueueCompileJob(pipelineID);
 	}
 
 	PipelineData* EditorPipelineManager::GetPipelineData(UUID pipelineID) const
@@ -212,6 +219,23 @@ namespace Glory::Editor
 		return m_pLoadedShaderSources.at(shaderID);
 	}
 
+	void EditorPipelineManager::RunCallbacks()
+	{
+		m_FinishedPipelines.ForEachClear([this](EditorPipeline* pEditorPipeline) {
+			PipelineData* pPipeline = GetPipelineData(pEditorPipeline->GetUUID());
+			if (!pPipeline) return;
+			UpdatePipeline(pPipeline, pEditorPipeline);
+			delete pEditorPipeline;
+		});
+
+		if (!IsBusy())
+		{
+			for (ShaderSourceData* pShader : m_pOutdatedShaders)
+				delete pShader;
+			m_pOutdatedShaders.clear();
+		}
+	}
+
 	void EditorPipelineManager::AssetAddedCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
@@ -274,6 +298,10 @@ namespace Glory::Editor
 		static const size_t shaderSourceDataHash = ResourceTypes::GetHash<ShaderSourceData>();
 		if (typeHash != shaderSourceDataHash) return;
 
+		/* Mark loaded shader as outdated */
+		m_pLoadedShaderSources.DoErase(callback.m_UUID,
+			[this](ShaderSourceData** pShader) { m_pOutdatedShaders.push_back(*pShader); });
+
 		/* Recompile pipelines that use this shader */
 		for (const UUID pipelineID : m_Pipelines)
 		{
@@ -281,7 +309,8 @@ namespace Glory::Editor
 			if (!pResource) continue;
 			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
 			if (!pPipeline->HasShader(callback.m_UUID)) continue;
-			UpdatePipeline(pPipeline, nullptr);
+			DeletePipelineCache(pipelineID);
+			QueueCompileJob(pipelineID);
 		}
 	}
 
@@ -321,6 +350,7 @@ namespace Glory::Editor
 			}
 		}
 
+		pPipeline->SetDirty(true);
 		PipelineUpdateEvents().Dispatch({ pPipeline });
 	}
 
@@ -531,5 +561,37 @@ namespace Glory::Editor
 	{
 		std::unique_lock<std::mutex> lock(m_WaitMutex);
 		m_WaitCondition.wait(lock, [&]() { return m_QueuedPipelines.Size() == 0; });
+	}
+
+	void EditorPipelineManager::QueueCompileJob(UUID pipelineID)
+	{
+		if (m_QueuedPipelines.Contains(pipelineID)) return;
+		m_QueuedPipelines.push_back(pipelineID);
+		m_pPipelineJobsPool->QueueSingleJob([this](UUID id) { return CompilePipelineJob(id); }, pipelineID);
+	}
+
+	bool EditorPipelineManager::CompilePipelineJob(UUID pipelineID)
+	{
+		PipelineData* pPipeline = GetPipelineData(pipelineID);
+		if (!pPipeline)
+		{
+			m_QueuedPipelines.Erase(pipelineID);
+			return false;
+		}
+		EditorPipeline* pEditorPipeline = CompilePipelineForEditor(pPipeline);
+		if (!pEditorPipeline)
+		{
+			m_QueuedPipelines.Erase(pipelineID);
+			return false;
+		}
+		m_QueuedPipelines.Erase(pipelineID);
+		m_FinishedPipelines.push_back(pEditorPipeline);
+		return true;
+	}
+
+	void EditorPipelineManager::DeletePipelineCache(UUID pipelineID)
+	{
+		const std::filesystem::path path = GetCompiledPipelineSPVCachePath(pipelineID);
+		std::filesystem::remove(path);
 	}
 }

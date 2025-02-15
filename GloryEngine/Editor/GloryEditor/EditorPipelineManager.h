@@ -89,6 +89,8 @@ namespace Glory::Editor
 
 		static ShaderSourceData* GetShaderSource(UUID shaderID);
 
+		void RunCallbacks();
+
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
 		void AssetAddedCallback(const AssetCallbackData& callback);
@@ -142,6 +144,12 @@ namespace Glory::Editor
 		bool IsBusy();
 		void WaitIdle();
 
+		void QueueCompileJob(UUID pipelineID);
+
+		bool CompilePipelineJob(UUID pipelineID);
+
+		void DeletePipelineCache(UUID pipelineID);
+
 	private:
 		std::vector<UUID> m_Pipelines;
 		std::vector<std::vector<FileData>> m_CompiledShaders;
@@ -152,8 +160,10 @@ namespace Glory::Editor
 
 		Jobs::JobPool<bool, UUID>* m_pPipelineJobsPool;
 		static ThreadedVector<UUID> m_QueuedPipelines;
+		static ThreadedVector<EditorPipeline*> m_FinishedPipelines;
 		static std::mutex m_WaitMutex;
 		static std::condition_variable m_WaitCondition;
 		static ThreadedUMap<UUID, ShaderSourceData*> m_pLoadedShaderSources;
+		static std::vector<ShaderSourceData*> m_pOutdatedShaders;
 	};
 }

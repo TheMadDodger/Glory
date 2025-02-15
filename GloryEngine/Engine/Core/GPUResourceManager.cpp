@@ -119,15 +119,11 @@ namespace Glory
 
 	Shader* GPUResourceManager::CreateShader(const FileData* pShaderFile, const ShaderType& shaderType, const std::string& function)
 	{
-		Shader* pShader = GetResource<Shader>(pShaderFile);
-		if (pShader) return pShader;
-
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateShader");
-		pShader = CreateShader_Internal(pShaderFile, shaderType, function);
+		Shader* pShader = CreateShader_Internal(pShaderFile, shaderType, function);
 		pShader->m_pOwner = this;
 		pShader->m_UUID = pShaderFile->GetGPUUUID();
 		pShader->Initialize();
-		m_IDResources[pShaderFile->GetGPUUUID()] = pShader;
 		m_pEngine->Profiler().EndSample();
 		return pShader;
 	}
@@ -137,8 +133,13 @@ namespace Glory
 		Material* pMaterial = GetResource<Material>(pMaterialData);
 		if (pMaterial && pMaterial->m_Complete)
 		{
-			pMaterial->m_pMaterialData = pMaterialData;
-			return pMaterial;
+			PipelineData* pPipelineData =
+				pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager());
+			if (!pPipelineData->IsDirty())
+			{
+				pMaterial->m_pMaterialData = pMaterialData;
+				return pMaterial;
+			}
 		}
 
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateMaterial");
@@ -148,7 +149,8 @@ namespace Glory
 		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
 		if (pMaterialData->GetPipelineID(m_pEngine->GetMaterialManager()))
 		{
-			pMaterial->m_pPipeline = CreatePipeline(pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager()));
+			PipelineData* pPipelineData = pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager());
+			pMaterial->m_pPipeline = CreatePipeline(pPipelineData);
 			pMaterial->m_Complete = pMaterial->m_pPipeline != nullptr;
 		}
 		m_IDResources[pMaterialData->GetGPUUUID()] = pMaterial;
@@ -159,11 +161,13 @@ namespace Glory
 	Pipeline* GPUResourceManager::CreatePipeline(PipelineData* pPipelineData)
 	{
 		Pipeline* pPipeline = GetResource<Pipeline>(pPipelineData);
-		if (pPipeline && pPipeline->m_Complete)
+		if (!pPipelineData->IsDirty() && pPipeline && pPipeline->m_Complete)
 		{
 			pPipeline->m_pPipelineData = pPipelineData;
 			return pPipeline;
 		}
+
+		pPipelineData->SetDirty(false);
 
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreatePipeline");
 		if (pPipeline) pPipeline->Clear();
