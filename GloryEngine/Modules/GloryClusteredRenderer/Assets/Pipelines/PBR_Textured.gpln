@@ -1,4 +1,4 @@
 Type: "PBR_BRDF"
 Shaders: [24, 25]
 Features:
-  FEATURE_TEXTURED: false
+  FEATURE_TEXTURED: true

@@ -1,2 +1,4 @@
 Type: "Screen"
 Shaders: [13, 14]
+Features:
+  FEATURE_PBR: false

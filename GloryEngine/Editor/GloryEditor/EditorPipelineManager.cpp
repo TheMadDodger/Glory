@@ -327,6 +327,8 @@ namespace Glory::Editor
 
 	void EditorPipelineManager::UpdatePipeline(PipelineData* pPipeline, EditorPipeline* pEditorPipeline)
 	{
+		if (!pEditorPipeline) return;
+
 		EditorApplication* pApplication = EditorApplication::GetInstance();
 
 		pPipeline->ClearProperties();

@@ -16,6 +16,8 @@
 
 #include <DistributedRandom.h>
 
+#include <glm/gtx/matrix_decompose.hpp>
+
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
@@ -142,7 +144,7 @@ namespace Glory
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
+		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 		m_pScreenToViewSSBO->Assign(NULL);
 
 		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);

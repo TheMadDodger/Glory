@@ -31,12 +31,16 @@ namespace Glory
 
 	const FileData* PipelineData::Shader(const PipelineManager& manager, size_t index) const
 	{
-		return &manager.GetPipelineCompiledShaders(GetUUID())[index];
+		auto& shaders = manager.GetPipelineCompiledShaders(GetUUID());
+		if (index >= shaders.size()) return nullptr;
+		return &shaders[index];
 	}
 
 	ShaderType PipelineData::GetShaderType(const PipelineManager& manager, size_t index) const
 	{
-		return manager.GetPipelineShaderTypes(GetUUID())[index];
+		auto& types = manager.GetPipelineShaderTypes(GetUUID());
+		if (index >= types.size()) return ShaderType::ST_Unknown;
+		return types[index];
 	}
 
 	void PipelineData::SetPipelineType(PipelineType type)

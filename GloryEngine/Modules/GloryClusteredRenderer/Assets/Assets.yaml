@@ -34,6 +34,8 @@
   ID: 19
 - Path: "Pipelines\\ScreenRenderer.gpln"
   ID: 20
+- Path: "Pipelines\\ScreenRenderer_PBR.gpln"
+  ID: 27
 - Path: "Pipelines\\SSAO_Prepass.gpln"
   ID: 21
 - Path: "Pipelines\\SSAO_Blur.gpln"
@@ -42,6 +44,8 @@
   ID: 23
 - Path: "Pipelines\\PBR.gpln"
   ID: 26
+- Path: "Pipelines\\PBR_Textured.gpln"
+  ID: 28
 - Path: "Models\\Cube.fbx"
   ID: 5
   Children:

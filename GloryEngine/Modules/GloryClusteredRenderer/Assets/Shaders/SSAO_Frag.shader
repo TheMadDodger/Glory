@@ -8,19 +8,7 @@ layout (binding = 2) uniform sampler2D Normal;
 layout (binding = 5) uniform sampler2D Depth;
 layout (binding = 6) uniform sampler2D Noise;
 
-vec4 WorldPosFromDepth(float depth);
-
-layout(std430, binding = 2) buffer screenToView
-{
-    mat4 ProjectionInverse;
-    mat4 ViewInverse;
-    uvec4 TileSizes;
-    uvec2 ScreenDimensions;
-    float Scale;
-    float Bias;
-    float zNear;
-	float zFar;
-};
+#include "Internal/DepthHelpers.glsl"
 
 layout(std430, binding = 3) buffer sampleDome
 {
@@ -50,7 +38,7 @@ void main()
     normal = mat3(inverse(ViewInverse)) * normalize(normal);
 	vec3 randomVec = texture(Noise, Coord*noiseScale).xyz;
 	float depth = texture(Depth, Coord).r;
-	vec4 fragPosition = WorldPosFromDepth(depth);
+	vec4 fragPosition = ViewPosFromDepth(depth);
 
     vec3 tangent   = normalize(randomVec - normal*dot(randomVec, normal));
     vec3 bitangent = cross(normal, tangent);
@@ -69,7 +57,7 @@ void main()
         offset.xyz  = offset.xyz * 0.5 + 0.5; // transform to range 0.0 - 1.0
 
         float sampleDepth = texture(Depth, offset.xy).r;
-        vec4 offsetPosition = WorldPosFromDepth(sampleDepth);
+        vec3 offsetPosition = ViewPosFromDepth(sampleDepth).xyz;
         float intensity = smoothstep(0.0, 1.0, SampleRadius/abs(fragPosition.z - offsetPosition.z));
         float occluded = samplePos.z + SampleBias <= offsetPosition.z ? 1.0 : 0.0;
         occluded *= intensity;
@@ -78,19 +66,4 @@ void main()
 
     occlusion = occlusion/KernelSize;
 	out_Color = vec4(vec3(occlusion), fragPosition.a);
-}
-
-vec4 WorldPosFromDepth(float depth)
-{
-    float z = depth * 2.0 - 1.0;
-
-    vec4 clipSpacePosition = vec4(Coord * 2.0 - 1.0, z, 1.0);
-    vec4 viewSpacePosition = ProjectionInverse * clipSpacePosition;
-
-    // Perspective division
-    viewSpacePosition /= viewSpacePosition.w;
-
-    vec4 worldSpacePosition = ViewInverse * viewSpacePosition;
-
-    return viewSpacePosition;
 }

@@ -20,6 +20,7 @@ layout(location = 2) in mat3 TBN;
 layout(location = 0) out uvec4 outID;
 layout(location = 1) out vec4 outColor;
 layout(location = 2) out vec4 outNormal;
+layout(location = 4) out vec4 outPBR;
 
 void main()
 {
@@ -28,4 +29,5 @@ void main()
 	outColor = texture(texSampler, fragTexCoord) * inColor * Properties.Color;
 	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
+	outPBR = vec4(1.0, 1.0, 1.0, 1.0);
 }
