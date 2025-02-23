@@ -1,6 +1,9 @@
 Runtime:
 - Upped runtime version to 0.4.6 as shader packs have changed
 
+Engine:
+- Fixed line rendering
+
 Editor:
 - Added a startup popup
 - Shaders are now compiled by the pipeline system and cached into a single pipeline file
@@ -13,5 +16,6 @@ Editor:
 - Implemented material reloading
 - Implemented pipeline features
 - Fixed crash caused by shader importer when a preprocessor symbol is detected for a single word line
+- Fixed double rendering
 
 Scripting:
