@@ -472,12 +472,15 @@ namespace Glory
 		object.View = camera.GetView();
 		object.Projection = camera.GetProjection();
 		object.ObjectID = 0;
-
+		pGraphics->EnableDepthWrite(false);
+		pGraphics->EnableDepthTest(false);
 		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
 
 		pGraphics->DrawMesh(m_pLineMesh, 0, m_LineVertexCount);
 		pGraphics->UseMaterial(nullptr);
+		pGraphics->EnableDepthWrite(true);
+		pGraphics->EnableDepthTest(true);
 
 		m_LineVertexCount = 0;
 		m_pLineVertex = m_pLineVertices;

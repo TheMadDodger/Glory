@@ -197,8 +197,6 @@ namespace Glory::Editor
 			});
 			if (it == m_pSceneLoopHandlers.end())
 			{
-				pModule->GetEngine()->CallModuleUpdate(pModule);
-				pModule->GetEngine()->CallModuleDraw(pModule);
 				return false;
 			}
 			IPlayModeHandler* pEditorLoopHandler = *it;

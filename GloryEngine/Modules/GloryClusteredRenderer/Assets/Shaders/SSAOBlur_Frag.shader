@@ -129,7 +129,7 @@ vec4 MedianBlur(sampler2D tex, int blurSize, int binsSize)
 }
 
 layout(location = 0) in vec2 Coord;
-layout(location = 3) out vec4 out_Color;
+layout(location = 4) out vec4 out_Color;
 layout (binding = 0) uniform sampler2D AO;
 
 void main()
