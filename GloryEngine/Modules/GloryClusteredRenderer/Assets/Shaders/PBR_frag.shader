@@ -24,8 +24,8 @@ layout(std430, binding = 1) buffer PropertiesSSBO
 {
 	vec4 Color;
 	float AO;
-	float Roughness;
-	float Metalness;
+	float RoughnessFactor;
+	float MetallicFactor;
 
 } Properties;
 #endif
@@ -41,7 +41,7 @@ layout(location = 2) in vec3 inNormal;
 layout(location = 0) out uvec4 outID;
 layout(location = 1) out vec4 outColor;
 layout(location = 2) out vec4 outNormal;
-layout(location = 4) out vec4 outPBR;
+layout(location = 4) out vec4 outData;
 
 void main()
 {
@@ -56,16 +56,16 @@ void main()
 	outColor = inColor * Properties.Color;
 	vec3 normal = inNormal;
 	float ambient = Properties.AO;
-	float roughness = Properties.Roughness;
-	float metalic = Properties.Metalness;
+	float roughness = Properties.RoughnessFactor;
+	float metalic = Properties.MetallicFactor;
 #endif
 	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
 
-	vec4 pbr;
-	pbr.r = ambient;
-	pbr.g = roughness;
-	pbr.b = metalic;
-	pbr.a = 1.0;
-	outPBR = pbr;
+	vec4 data;
+	data.r = ambient;
+	data.g = roughness;
+	data.b = metalic;
+	data.a = 1.0;
+	outData = data;
 }

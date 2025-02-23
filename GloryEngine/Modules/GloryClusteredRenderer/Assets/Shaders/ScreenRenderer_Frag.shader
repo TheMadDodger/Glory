@@ -9,9 +9,7 @@ layout(location = 0) out vec4 out_Color;
 layout (binding = 0) uniform sampler2D Color;
 layout (binding = 1) uniform sampler2D Normal;
 layout (binding = 2) uniform sampler2D AO;
-#ifdef WITH_PBR
-layout (binding = 3) uniform sampler2D PBR;
-#endif
+layout (binding = 3) uniform sampler2D Data;
 layout (binding = 4) uniform sampler2D Debug;
 layout (binding = 5) uniform sampler2D Depth;
 
@@ -137,7 +135,7 @@ void main()
 	vec3 CameraPos = ViewInverse[3].xyz;
 
 	vec3 color = texture(Color, Coord).xyz;
-	vec3 metallicRoughnessAO = texture(PBR, Coord).xyz;
+	vec3 metallicRoughnessAO = texture(Data, Coord).xyz;
 	float roughness = metallicRoughnessAO.g;
 	float metallic = metallicRoughnessAO.b;
 	vec3 normal = normalize(texture(Normal, Coord).xyz*2.0 - 1.0);
@@ -216,6 +214,8 @@ void main()
 	}
 
 	vec3 color = texture(Color, Coord).xyz;
+	vec3 metallicRoughnessAO = texture(Data, Coord).xyz;
+	float specularIntensity = metallicRoughnessAO.g;
 	vec3 normal = texture(Normal, Coord).xyz*2.0 - 1.0;
 	float ssao = AOEnabled == 1 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
 	ssao = min(ssao, 1.0);
@@ -260,7 +260,7 @@ void main()
 
         vec3 reflectDir = reflect(-lightDir, normal);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-        vec3 specular = 1.0 * spec * lightColor;
+        vec3 specular = specularIntensity * spec * lightColor;
 
 		diffuseColor += diffuse * attenuation + specular * attenuation;
 	}

@@ -173,7 +173,6 @@ namespace Glory::Editor
 		if (EditorUI::Header("Properties"))
 		{
 			PropertiesGUI(pMaterialData);
-			ImGui::TreePop();
 		}
 		ImGui::EndDisabled();
 
