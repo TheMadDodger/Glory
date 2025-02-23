@@ -1,0 +1,6 @@
+- Path: "Shaders\\UI_Frag.shader"
+  ID: 100
+- Path: "Shaders\\UI_Vert.shader"
+  ID: 101
+- Path: "Pipelines\\UI.gpln"
+  ID: 102
