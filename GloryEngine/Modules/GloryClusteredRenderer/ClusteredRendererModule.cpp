@@ -407,10 +407,6 @@ namespace Glory
 		m_pTextMaterial->SetProperties(m_pEngine);
 		m_pTextMaterial->SetObjectData(object);
 
-		const float scale = renderData.m_Scale;
-		float writeX = 0.0f;
-		float writeY = 0.0f;
-
 		InternalTexture* pTextureData = pFontData->GetGlyphTexture();
 		if (!pTextureData) return;
 

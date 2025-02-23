@@ -137,6 +137,7 @@ group "Modules"
 	include "Modules/GloryJoltPhysics"
 	include "Modules/GlorySDLAudio"
 	include "Modules/GlorySteamAudio"
+	include "Modules/GloryUIRenderer"
 	--include "GloryVulkanGraphics"
 group ""
 

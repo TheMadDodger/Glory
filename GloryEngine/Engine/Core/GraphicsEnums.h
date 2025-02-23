@@ -538,8 +538,11 @@ namespace Glory
         /** @brief Screen effects */
         PT_Screen = 13,
 
+        /** @brief UI rendering */
+        PT_UI = 14,
+
         /** @brief For any other pipelines */
-        PT_Other = 14,
+        PT_Other = 15,
 
         /** @brief Number of pipeline types */
         PT_Count,
