@@ -6,11 +6,11 @@
 
 layout(location = 0) in vec2 Coord;
 layout(location = 0) out vec4 out_Color;
-layout (binding = 0) uniform sampler2D Color;
-layout (binding = 1) uniform sampler2D Normal;
-layout (binding = 2) uniform sampler2D AO;
-layout (binding = 3) uniform sampler2D Data;
-layout (binding = 4) uniform sampler2D Debug;
+layout (binding = 0) uniform sampler2D Debug;
+layout (binding = 1) uniform sampler2D Color;
+layout (binding = 2) uniform sampler2D Normal;
+layout (binding = 3) uniform sampler2D AO;
+layout (binding = 4) uniform sampler2D Data;
 layout (binding = 5) uniform sampler2D Depth;
 
 #include "Internal/DepthHelpers.glsl"
@@ -132,6 +132,13 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 void main()
 {
+	vec3 debug = texture(Debug, Coord).xyz;
+	if (debug.r > 0.0 || debug.g > 0.0 || debug.b > 0.0)
+	{
+		out_Color = vec4(debug, 1.0);
+		return;
+	}
+
 	vec3 CameraPos = ViewInverse[3].xyz;
 
 	vec3 color = texture(Color, Coord).xyz;

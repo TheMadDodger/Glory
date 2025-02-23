@@ -15,9 +15,9 @@ layout(location = 0) in vec3 normal;
 layout(location = 1) in vec4 inColor;
 
 layout(location = 0) out uvec4 outID;
-layout(location = 1) out vec4 outColor;
-layout(location = 2) out vec4 outNormal;
-layout(location = 4) out vec4 outData;
+layout(location = 2) out vec4 outColor;
+layout(location = 3) out vec4 outNormal;
+layout(location = 5) out vec4 outData;
 
 void main()
 {
