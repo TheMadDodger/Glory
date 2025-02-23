@@ -21,6 +21,7 @@ layout(std430, binding = 2) buffer screenToView
     float Bias;
     float zNear;
 	float zFar;
+    vec3 CameraPos;
 };
 
 void main()

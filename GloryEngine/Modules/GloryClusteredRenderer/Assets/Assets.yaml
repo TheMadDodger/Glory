@@ -22,6 +22,10 @@
   ID: 17
 - Path: "Shaders\\Text_Frag.shader"
   ID: 18
+- Path: "Shaders\\PBR_frag.shader"
+  ID: 24
+- Path: "Shaders\\PBR_vert.shader"
+  ID: 25
 - Path: "Pipelines\\Phong.gpln"
   ID: 9
 - Path: "Pipelines\\PhongTextured.gpln"
@@ -30,12 +34,18 @@
   ID: 19
 - Path: "Pipelines\\ScreenRenderer.gpln"
   ID: 20
+- Path: "Pipelines\\ScreenRenderer_PBR.gpln"
+  ID: 27
 - Path: "Pipelines\\SSAO_Prepass.gpln"
   ID: 21
 - Path: "Pipelines\\SSAO_Blur.gpln"
   ID: 22
 - Path: "Pipelines\\Text.gpln"
   ID: 23
+- Path: "Pipelines\\PBR.gpln"
+  ID: 26
+- Path: "Pipelines\\PBR_Textured.gpln"
+  ID: 28
 - Path: "Models\\Cube.fbx"
   ID: 5
   Children:
