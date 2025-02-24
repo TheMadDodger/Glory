@@ -8,6 +8,7 @@ namespace Glory
 	class MaterialData;
 	class RenderTexture;
 	class UIDocumentData;
+	class UIDocument;
 
 	namespace Utils::ECS
 	{
@@ -45,6 +46,7 @@ namespace Glory
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
 		RenderTexture* GetRenderTexture(UUID id);
+		UIDocument& GetDocument(UUID id, UIDocumentData* pDocument);
 
 	private:
 		MaterialData* m_pUIMaterial = nullptr;
@@ -53,6 +55,7 @@ namespace Glory
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::map<UUID, RenderTexture*> m_pRenderTextures;
+		std::map<UUID, UIDocument> m_Documents;
 
 		std::vector<UIRenderData> m_Frame;
 	};

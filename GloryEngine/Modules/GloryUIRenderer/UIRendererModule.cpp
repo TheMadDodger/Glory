@@ -1,5 +1,6 @@
 #include "UIRendererModule.h"
 #include "UIComponents.h"
+#include "UIDocument.h"
 #include "UIDocumentData.h"
 #include "UIRenderSystem.h"
 
@@ -211,53 +212,6 @@ namespace Glory
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 	}
 
-	/*void UIRendererModule::Draw()
-	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-
-		ModuleSettings& settings = Settings();
-		const UUID fontID = settings.Value<uint64_t>("Font");
-		if (fontID == 0) return;
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(fontID);
-		if (!pResource) return;
-		FontData* pFont = static_cast<FontData*>(pResource);
-
-		TextRenderData text;
-		text.m_Alignment = Alignment::Left;
-		text.m_Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		text.m_Scale = 1.0f;
-		text.m_Text = "Hello World!";
-
-		if (!m_pTextMesh)
-		{
-			m_pTextMesh = new MeshData(text.m_Text.size()*4, sizeof(VertexPosColorTex),
-				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-			GenerateTextMesh(m_pTextMesh, pFont, text);
-		}
-
-		Mesh* pMesh = pResourceManager->CreateMesh(m_pTextMesh);
-
-		ObjectData object;
-		object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(25.0f, 25.0f, 1.0f));
-		object.Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
-
-		Material* pMaterial = pGraphics->UseMaterial(m_pUIMaterial);
-
-		pMaterial->SetProperties(m_pEngine);
-		pMaterial->SetObjectData(object);
-
-		InternalTexture* pTextureData = pFont->GetGlyphTexture();
-		if (!pTextureData) return;
-
-		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
-		if (pTexture) pMaterial->SetTexture("texSampler", pTexture);
-
-		m_pUITexture->BindForDraw();
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
-		m_pUITexture->UnBindForDraw();
-	}*/
-
 	void UIRendererModule::Draw()
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -276,7 +230,10 @@ namespace Glory
 			if (!pResource) continue;
 			UIDocumentData* pDocument = static_cast<UIDocumentData*>(pResource);
 
-			Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
+			RenderTexture* pRenderTexture = GetRenderTexture(data.m_ObjectID);
+			UIDocument& document = GetDocument(data.m_ObjectID, pDocument);
+
+			Utils::ECS::EntityRegistry& registry = document.m_Registry;
 			Utils::ECS::TypeView<UIText>* pTextView = registry.GetTypeView<UIText>();
 
 			for (size_t i = 0; i < pTextView->Size(); ++i)
@@ -284,8 +241,6 @@ namespace Glory
 				Utils::ECS::EntityID entity = pTextView->EntityAt(i);
 				const UIText& text = pTextView->Get(entity);
 				const UITransform& transform = registry.GetComponent<UITransform>(entity);
-
-				RenderTexture* pRenderTexture = GetRenderTexture(data.m_ObjectID);
 
 				TextRenderData textData;
 				textData.m_Alignment = Alignment::Left;
@@ -385,5 +340,24 @@ namespace Glory
 			return pUITexture;
 		}
 		return iter->second;
+	}
+
+	UIDocument& UIRendererModule::GetDocument(UUID id, UIDocumentData* pDocument)
+	{
+		auto iter = m_Documents.find(id);
+		if (iter == m_Documents.end())
+		{
+			m_Documents.emplace(id, pDocument);
+			return m_Documents.at(id);
+		}
+
+		UIDocument& document = iter->second;
+		if (document.m_OriginalDocumentID != pDocument->GetUUID())
+		{
+			m_Documents.erase(iter);
+			m_Documents.emplace(id, pDocument);
+			return m_Documents.at(id);
+		}
+		return document;
 	}
 }
