@@ -1,22 +1,25 @@
 #include "UIRendererModule.h"
+#include "UIComponents.h"
+#include "UIDocumentData.h"
 
 #include <AssetManager.h>
 #include <MaterialManager.h>
 #include <Engine.h>
 #include <GraphicsModule.h>
 #include <GPUResourceManager.h>
-#include <FileLoaderModule.h>
 #include <CameraManager.h>
 #include <InternalMaterial.h>
 #include <InternalPipeline.h>
-#include <SceneManager.h>
-#include <GScene.h>
 #include <FontData.h>
 #include <FontDataStructs.h>
 #include <Material.h>
 #include <MaterialData.h>
 
 #include <DistributedRandom.h>
+
+#include <EntityRegistry.h>
+#include <GloryECS/ComponentTypes.h>
+#include <Reflection.h>
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -191,10 +194,6 @@ namespace Glory
 
 	void UIRendererModule::PostInitialize()
 	{
-		FileImportSettings importSettings;
-		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
-		importSettings.AddNullTerminateAtEnd = true;
-
 		const ModuleSettings& settings = Settings();
 		const UUID uiPipeline = settings.Value<uint64_t>("UI Pipeline");
 
@@ -212,7 +211,7 @@ namespace Glory
 		m_pUITexture = pResourceManager->CreateRenderTexture(uiTextureInfo);
 	}
 
-	void UIRendererModule::Draw()
+	/*void UIRendererModule::Draw()
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -241,7 +240,7 @@ namespace Glory
 
 		ObjectData object;
 		object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(25.0f, 25.0f, 1.0f));
-		object.Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);;
+		object.Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
 
 		Material* pMaterial = pGraphics->UseMaterial(m_pUIMaterial);
 
@@ -257,10 +256,91 @@ namespace Glory
 		m_pUITexture->BindForDraw();
 		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 		m_pUITexture->UnBindForDraw();
+	}*/
+
+	void UIRendererModule::Draw()
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		ModuleSettings& settings = Settings();
+		const UUID fontID = settings.Value<uint64_t>("Font");
+		if (fontID == 0) return;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(fontID);
+		if (!pResource) return;
+		FontData* pFont = static_cast<FontData*>(pResource);
+
+
+		Utils::ECS::EntityRegistry& registry = m_TestDocument.GetRegistry();
+		Utils::ECS::TypeView<UIText>* pTextView = registry.GetTypeView<UIText>();
+
+		for (size_t i = 0; i < pTextView->Size(); ++i)
+		{
+			Utils::ECS::EntityID entity = pTextView->EntityAt(i);
+			const UIText& text = pTextView->Get(entity);
+			const UITransform& transform = registry.GetComponent<UITransform>(entity);
+
+			TextRenderData textData;
+			textData.m_Alignment = Alignment::Left;
+			textData.m_Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			textData.m_Scale = 1.0f;
+			textData.m_Text = text.m_Text;
+			textData.m_ObjectID = entity;
+			textData.m_TextDirty = false;
+
+			auto iter = m_pTextMeshes.find(textData.m_ObjectID);
+			const bool exists = iter != m_pTextMeshes.end();
+			if (!exists)
+			{
+				MeshData* pMesh = new MeshData(textData.m_Text.size() * 4, sizeof(VertexPosColorTex),
+					{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+				iter = m_pTextMeshes.emplace(textData.m_ObjectID, pMesh).first;
+			}
+
+			if (textData.m_TextDirty || !exists)
+				GenerateTextMesh(iter->second.get(), pFont, textData);
+
+			Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
+
+			ObjectData object;
+			object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Rect.x, transform.m_Rect.y, 1.0f));
+			object.Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+
+			Material* pMaterial = pGraphics->UseMaterial(m_pUIMaterial);
+
+			pMaterial->SetProperties(m_pEngine);
+			pMaterial->SetObjectData(object);
+
+			InternalTexture* pTextureData = pFont->GetGlyphTexture();
+			if (!pTextureData) return;
+
+			Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
+			if (pTexture) pMaterial->SetTexture("texSampler", pTexture);
+
+			m_pUITexture->BindForDraw();
+			pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+			m_pUITexture->UnBindForDraw();
+		}
 	}
 
 	void UIRendererModule::Initialize()
 	{
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterType<UITransform>();
+		Reflect::RegisterType<UIText>();
+
+		m_pEngine->GetResourceTypes().RegisterResource<UIDocumentData>("");
+
+		m_pComponentTypes = Utils::ECS::ComponentTypes::CreateInstance();
+		m_pComponentTypes->RegisterComponent<UITransform>();
+		m_pComponentTypes->RegisterComponent<UIText>();
+
+		UIEntity text = m_TestDocument.Create<UIText>();
+		UITransform& transform = text.GetComponent<UITransform>();
+		transform.m_Rect = glm::vec4(100.0f, 60.0f, 0.0f, 0.0f);
+
+		UIText& textComp = text.GetComponent<UIText>();
+		textComp.m_Text = "Hello World!";
 	}
 
 	void UIRendererModule::Cleanup()

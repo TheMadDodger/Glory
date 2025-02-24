@@ -1,4 +1,6 @@
 #pragma once
+#include "UIDocumentData.h"
+
 #include <RendererModule.h>
 #include <FileData.h>
 #include <glm/glm.hpp>
@@ -7,6 +9,11 @@ namespace Glory
 {
 	class MaterialData;
 	class RenderTexture;
+
+	namespace Utils::ECS
+	{
+		class ComponentTypes;
+	}
 
 	class UIRendererModule : public Module
 	{
@@ -32,6 +39,10 @@ namespace Glory
 		MaterialData* m_pUIMaterial = nullptr;
 		RenderTexture* m_pUITexture = nullptr;
 
-		MeshData* m_pTextMesh = nullptr;
+		Utils::ECS::ComponentTypes* m_pComponentTypes = nullptr;
+
+		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
+
+		UIDocumentData m_TestDocument;
 	};
 }
