@@ -1,6 +1,4 @@
 #pragma once
-#include "UIDocumentData.h"
-
 #include <RendererModule.h>
 #include <FileData.h>
 #include <glm/glm.hpp>
@@ -9,11 +7,18 @@ namespace Glory
 {
 	class MaterialData;
 	class RenderTexture;
+	class UIDocumentData;
 
 	namespace Utils::ECS
 	{
 		class ComponentTypes;
 	}
+
+	struct UIRenderData
+	{
+		UUID m_DocumentID;
+		UUID m_ObjectID;
+	};
 
 	class UIRendererModule : public Module
 	{
@@ -25,6 +30,10 @@ namespace Glory
 
 		virtual const std::type_info& GetModuleType() override;
 
+		Utils::ECS::ComponentTypes* GetComponentTypes() { return m_pComponentTypes; }
+
+		void Submit(UIRenderData&& data);
+
 		GLORY_MODULE_VERSION_H(0,1,0);
 
 	private:
@@ -35,14 +44,16 @@ namespace Glory
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
+		RenderTexture* GetRenderTexture(UUID id);
+
 	private:
 		MaterialData* m_pUIMaterial = nullptr;
-		RenderTexture* m_pUITexture = nullptr;
 
 		Utils::ECS::ComponentTypes* m_pComponentTypes = nullptr;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
+		std::map<UUID, RenderTexture*> m_pRenderTextures;
 
-		UIDocumentData m_TestDocument;
+		std::vector<UIRenderData> m_Frame;
 	};
 }
