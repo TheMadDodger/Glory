@@ -1,5 +1,8 @@
 #pragma once
+#include "UIDocumentData.h"
+
 #include <Reflection.h>
+#include <AssetReference.h>
 
 #include <glm/glm.hpp>
 
@@ -21,6 +24,13 @@ namespace Glory
     {
         REFLECTABLE(UIText,
             (std::string)(m_Text)
+        );
+    };
+
+    struct UIRenderer
+    {
+        REFLECTABLE(UIRenderer,
+            (AssetReference<UIDocumentData>)(m_Document)
         );
     };
 }

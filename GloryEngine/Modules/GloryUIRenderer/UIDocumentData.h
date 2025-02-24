@@ -22,8 +22,8 @@ namespace Glory
     class UIDocumentData : public Resource
     {
     public:
-        UIDocumentData();
-        virtual ~UIDocumentData();
+        GLORY_API UIDocumentData();
+        GLORY_API virtual ~UIDocumentData();
 
         template<typename T>
         UIEntity Create()
@@ -36,10 +36,12 @@ namespace Glory
             return uiEntity;
         }
 
-        Utils::ECS::EntityRegistry& GetRegistry();
+        GLORY_API Utils::ECS::EntityRegistry& GetRegistry();
+        GLORY_API const std::string& Name(Utils::ECS::EntityID entity) const;
+        GLORY_API Utils::ECS::EntityID CreateEmptyEntity(std::string_view name);
+        GLORY_API Utils::ECS::EntityID CreateEntity(std::string_view name);
 
     private:
-        Utils::ECS::EntityID CreateEntity(std::string_view name);
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
