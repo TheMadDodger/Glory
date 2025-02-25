@@ -130,9 +130,12 @@ namespace Glory
 		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
 		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
 		const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
+		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
 
-		m_pScreenMaterial = new MaterialData();
-		m_pScreenMaterial->SetPipeline(screenPipeline);
+		m_pDeferredCompositeMaterial = new MaterialData();
+		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
+		m_pDisplayCopyMaterial = new MaterialData();
+		m_pDisplayCopyMaterial->SetPipeline(displayPipeline);
 		m_pSSRMaterial = new MaterialData();
 		m_pSSAOMaterial = new MaterialData();
 		m_pSSAOMaterial->SetPipeline(SSAOPrePassPipeline);
@@ -208,8 +211,11 @@ namespace Glory
 		delete m_pClusterCullLightMaterialData;
 		m_pClusterCullLightMaterialData = nullptr;
 
-		delete m_pScreenMaterial;
-		m_pScreenMaterial = nullptr;
+		delete m_pDeferredCompositeMaterial;
+		m_pDeferredCompositeMaterial = nullptr;
+		
+		delete m_pDisplayCopyMaterial;
+		m_pDisplayCopyMaterial = nullptr;
 
 		delete m_pSSRMaterial;
 		m_pSSRMaterial = nullptr;
@@ -464,7 +470,7 @@ namespace Glory
 		m_pScreenToViewSSBO->BindForDraw();
 		m_pSSAOSettingsSSBO->BindForDraw();
 
-		// Draw the triangles !
+		/* Draw the screen quad */
 		pGraphics->DrawScreenQuad();
 
 		m_pSamplePointsDomeSSBO->Unbind();
@@ -494,7 +500,7 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
-	void ClusteredRendererModule::OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
+	void ClusteredRendererModule::OnDoCompositing(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
@@ -530,7 +536,7 @@ namespace Glory
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
 		/* Render final image */
-		Material* pMaterial = pGraphics->UseMaterial(m_pScreenMaterial);
+		Material* pMaterial = pGraphics->UseMaterial(m_pDeferredCompositeMaterial);
 
 		pRenderTexture->BindAll(pMaterial);
 
@@ -540,7 +546,7 @@ namespace Glory
 		pLightIndexSSBO->BindForDraw();
 		pLightGridSSBO->BindForDraw();
 
-		// Draw the triangles !
+		/* Draw the screen quad */
 		pGraphics->DrawScreenQuad();
 
 		pClusterSSBO->Unbind();
@@ -550,6 +556,25 @@ namespace Glory
 		pLightGridSSBO->Unbind();
 
 		// Reset render textures and materials
+		pGraphics->UseMaterial(nullptr);
+		pGraphics->EnableDepthTest(true);
+	}
+
+	void ClusteredRendererModule::OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+		pGraphics->EnableDepthTest(false);
+		pGraphics->SetViewport(0, 0, width, height);
+
+		Material* pMaterial = pGraphics->UseMaterial(m_pDisplayCopyMaterial);
+
+		pRenderTexture->BindAll(pMaterial);
+
+		/* Draw the screen quad */
+		pGraphics->DrawScreenQuad();
+
+		/* Reset render textures and materials */
 		pGraphics->UseMaterial(nullptr);
 		pGraphics->EnableDepthTest(true);
 	}
@@ -672,6 +697,7 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("SSAO Prepass Pipeline", 21);
 		settings.RegisterAssetReference<PipelineData>("SSAO Blur Pipeline", 22);
 		settings.RegisterAssetReference<PipelineData>("Text Pipeline", 23);
+		settings.RegisterAssetReference<PipelineData>("Display Copy Pipeline", 30);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)

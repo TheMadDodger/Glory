@@ -10,9 +10,11 @@
   ID: 11
 - Path: "Shaders\\Lines_Frag.shader"
   ID: 12
-- Path: "Shaders\\ScreenRenderer_Vert.shader"
+- Path: "Shaders\\Screen_Vert.shader"
   ID: 13
-- Path: "Shaders\\ScreenRenderer_Frag.shader"
+- Path: "Shaders\\Screen_Frag.shader"
+  ID: 29
+- Path: "Shaders\\ClusteredDeferred_Frag.shader"
   ID: 14
 - Path: "Shaders\\SSAO_Frag.shader"
   ID: 15
@@ -32,9 +34,9 @@
   ID: 10
 - Path: "Pipelines\\Lines.gpln"
   ID: 19
-- Path: "Pipelines\\ScreenRenderer.gpln"
+- Path: "Pipelines\\ClusteredDeferred.gpln"
   ID: 20
-- Path: "Pipelines\\ScreenRenderer_PBR.gpln"
+- Path: "Pipelines\\ClusteredDeferred_PBR.gpln"
   ID: 27
 - Path: "Pipelines\\SSAO_Prepass.gpln"
   ID: 21
@@ -46,6 +48,8 @@
   ID: 26
 - Path: "Pipelines\\PBR_Textured.gpln"
   ID: 28
+- Path: "Pipelines\\DisplayCopy.gpln"
+  ID: 30
 - Path: "Models\\Cube.fbx"
   ID: 5
   Children:

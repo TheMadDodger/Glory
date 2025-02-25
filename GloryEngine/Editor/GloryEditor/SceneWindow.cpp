@@ -53,7 +53,6 @@ namespace Glory::Editor
 		m_SceneCamera.m_Width = (uint32_t)m_WindowDimensions.x;
 		m_SceneCamera.m_Height = (uint32_t)m_WindowDimensions.x;
 		m_SceneCamera.SetPerspective((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
-		m_SceneCamera.m_Camera.EnableOutput(true);
 
 		m_ViewEventID = GetViewEventDispatcher().AddListener([&](const ViewEvent& e) {
 			m_SceneCamera.m_IsOrthographic = e.Ortho;

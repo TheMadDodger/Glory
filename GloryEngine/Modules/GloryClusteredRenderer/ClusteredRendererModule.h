@@ -54,7 +54,8 @@ namespace Glory
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
-		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDoCompositing(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;
 
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
@@ -106,7 +107,8 @@ namespace Glory
 		uint32_t m_SSAOKernelSize = 0;
 
 		// Screen rendering
-		MaterialData* m_pScreenMaterial = nullptr;
+		MaterialData* m_pDeferredCompositeMaterial = nullptr;
+		MaterialData* m_pDisplayCopyMaterial = nullptr;
 		MaterialData* m_pSSRMaterial = nullptr;
 		MaterialData* m_pSSAOMaterial = nullptr;
 		MaterialData* m_pSSAOBlurMaterial = nullptr;

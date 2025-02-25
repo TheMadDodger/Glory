@@ -76,13 +76,6 @@ namespace Glory
 		pCamera->SetOutputTexture(pTexture);
 	}
 
-	void CameraRef::EnableOutput(bool enable)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->EnableOutput(enable);
-	}
-
 	void CameraRef::SetUserData(const std::string& name, void* data)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
@@ -195,13 +188,6 @@ namespace Glory
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return nullptr;
 		return pCamera->GetOutputTexture();
-	}
-
-	bool CameraRef::HasOutput() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return false;
-		return pCamera->HasOutput();
 	}
 
 	void CameraRef::Free()

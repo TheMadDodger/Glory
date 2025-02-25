@@ -6,6 +6,9 @@ namespace Glory
 {
 	class OGLRenderTexture : public RenderTexture
 	{
+	public:
+		GLuint ID() const { return m_GLFrameBufferID; };
+
 	private:
 		OGLRenderTexture(const RenderTextureCreateInfo& createInfo);
 		virtual ~OGLRenderTexture();

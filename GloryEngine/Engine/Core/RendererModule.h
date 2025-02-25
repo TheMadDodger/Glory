@@ -85,7 +85,8 @@ namespace Glory
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
-		virtual void OnDoScreenRender(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
+		virtual void OnDoCompositing(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
+		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) = 0;
 
 		virtual void OnPostInitialize() {};
 

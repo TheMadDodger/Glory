@@ -49,7 +49,7 @@ namespace Glory::Editor
 		FT_UInt gid;
 		charcode = FT_Get_First_Char(face, &gid);
 
-		uint32_t width = 512, height = 512;
+		uint32_t width = 1024, height = 1024;
 
 		char* texturePixels = new char[width*height];
 		std::memset(texturePixels, '\0', width * height);
@@ -57,7 +57,6 @@ namespace Glory::Editor
 		const uint32_t edgePadding = padding;
 		uint32_t writeX = edgePadding, writeY = edgePadding;
 		uint32_t highestGlyph = 0;
-
 
 		std::vector<uint64_t> characterCodes;
 		std::vector<GlyphData> glyphs;

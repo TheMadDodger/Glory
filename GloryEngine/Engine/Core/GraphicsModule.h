@@ -27,7 +27,10 @@ namespace Glory
         virtual void EnableDepthTest(bool enable) = 0;
         virtual void EnableDepthWrite(bool enable) = 0;
         virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) = 0;
-        virtual void Blit(RenderTexture* pTexture) = 0;
+        virtual void Blit(RenderTexture* pTexture, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
+            Filter filter = Filter::F_Nearest) = 0;
+        virtual void Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
+            Filter filter = Filter::F_Nearest) = 0;
 
     public: // Getters
         GPUResourceManager* GetResourceManager();
