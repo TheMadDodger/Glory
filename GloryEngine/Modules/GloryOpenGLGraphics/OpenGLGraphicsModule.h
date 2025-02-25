@@ -25,7 +25,10 @@ namespace Glory
 		virtual void EnableDepthTest(bool enable) override;
 		virtual void EnableDepthWrite(bool enable) override;
 		virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) override;
-		virtual void Blit(RenderTexture* pTexture) override;
+		virtual void Blit(RenderTexture* pTexture, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
+			Filter filter = Filter::F_Nearest) override;
+		virtual void Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
+			Filter filter = Filter::F_Nearest) override;
 
 	protected:
 		virtual void OnInitialize() override;

@@ -5,6 +5,7 @@
 #include "OGLResourceManager.h"
 #include "GloryOGL.h"
 #include "GLConverter.h"
+#include "OGLRenderTexture.h"
 
 #include <Engine.h>
 #include <Debug.h>
@@ -225,15 +226,45 @@ namespace Glory
 		glViewport(0, 0, width, height);
 	}
 
-	void OpenGLGraphicsModule::Blit(RenderTexture* pTexture)
+	void OpenGLGraphicsModule::Blit(RenderTexture* pTexture, glm::uvec4 src, glm::uvec4 dst, Filter filter)
 	{
+		GLenum glFilter = GLConverter::TO_GLFILTER.at(filter);
+
 		pTexture->BindRead();
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		uint32_t width, height;
 		pTexture->GetDimensions(width, height);
-		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-			GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		if (src.z == 0) src.z = width;
+		if (src.w == 0) src.z = height;
+		if (dst.z == 0) dst.z = width;
+		if (dst.w == 0) dst.w = height;
+
+		glBlitFramebuffer(src.x, src.y, src.z, src.w, dst.x, dst.y, dst.z, dst.w,
+			GL_COLOR_BUFFER_BIT, glFilter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		pTexture->UnBindRead();
+	}
+
+	void OpenGLGraphicsModule::Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src, glm::uvec4 dst, Filter filter)
+	{
+		GLenum glFilter = GLConverter::TO_GLFILTER.at(filter);
+
+		uint32_t srcWidth, srcHeight, dstWidth, dstHeight;
+		pSource->GetDimensions(srcWidth, srcHeight);
+		pDest->GetDimensions(dstWidth, dstHeight);
+
+		if (src.z == 0) src.z = srcWidth;
+		if (src.w == 0) src.z = srcHeight;
+		if (dst.z == 0) dst.z = dstWidth;
+		if (dst.w == 0) dst.w = dstHeight;
+
+		const GLuint srcID = static_cast<OGLRenderTexture*>(pSource)->ID();
+		const GLuint dstID = static_cast<OGLRenderTexture*>(pDest)->ID();
+
+		glBlitNamedFramebuffer(srcID, dstID, src.x, src.y, src.z, src.w, dst.x, dst.y, dst.z, dst.w,
+			GL_COLOR_BUFFER_BIT, glFilter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 }

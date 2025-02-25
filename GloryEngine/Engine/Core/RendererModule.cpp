@@ -297,6 +297,8 @@ namespace Glory
 			m_DisplaysDirty = false;
 		}
 
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
 		m_PickResults.clear();
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
@@ -308,10 +310,11 @@ namespace Glory
 
 			RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 			pRenderTexture->BindForDraw();
-			m_pEngine->GetMainModule<GraphicsModule>()->Clear(camera.GetClearColor());
+			pGraphics->Clear(camera.GetClearColor());
 
 			OnStartCameraRender(camera, m_FrameData.ActiveLights);
 
+			/* Render objects */
 			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				LayerMask mask = camera.GetLayerMask();
@@ -321,6 +324,7 @@ namespace Glory
 				m_pEngine->Profiler().EndSample();
 			}
 
+			/* Render texts */
 			for (size_t j = 0; j < m_FrameData.TextsToRender.size(); ++j)
 			{
 				LayerMask mask = camera.GetLayerMask();
@@ -330,7 +334,7 @@ namespace Glory
 				m_pEngine->Profiler().EndSample();
 			}
 
-			/* Picking? */
+			/* Picking */
 			for (size_t j = 0; j < m_FrameData.Picking.size(); ++j)
 			{
 				const auto& picking = m_FrameData.Picking[j];
@@ -353,39 +357,36 @@ namespace Glory
 			pRenderTexture->UnBindForDraw();
 			OnRenderEffects(camera, pRenderTexture);
 
+			/* Composite to cameras render texture */
 			RenderTexture* pOutputTexture = camera.GetOutputTexture();
-			if (camera.HasOutput())
+			const glm::uvec2& resolution = camera.GetResolution();
+			if (pOutputTexture == nullptr)
 			{
-				const glm::uvec2& resolution = camera.GetResolution();
-				if (pOutputTexture == nullptr)
-				{
-					pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
-					camera.SetOutputTexture(pOutputTexture);
-				}
-				uint32_t width, height;
-				pOutputTexture->GetDimensions(width, height);
-				if (width != resolution.x || height != resolution.y) pOutputTexture->Resize(resolution.x, resolution.y);
-
-				m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
-				pOutputTexture->BindForDraw();
-				OnDoScreenRender(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
-				pOutputTexture->UnBindForDraw();
-				m_pEngine->Profiler().EndSample();
+				pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+				camera.SetOutputTexture(pOutputTexture);
+			}
+			uint32_t width, height;
+			pOutputTexture->GetDimensions(width, height);
+			if (width != resolution.x || height != resolution.y)
+			{
+				pOutputTexture->Resize(resolution.x, resolution.y);
+				pRenderTexture->GetDimensions(width, height);
 			}
 
+			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
+			pOutputTexture->BindForDraw();
+			OnDoCompositing(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
+			pOutputTexture->UnBindForDraw();
+			m_pEngine->Profiler().EndSample();
+
+			/* Copy to display */
 			int displayIndex = camera.GetDisplayIndex();
 			if (displayIndex == -1) continue;
 			RenderTexture* pDisplayRenderTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(displayIndex);
 			if (pDisplayRenderTexture == nullptr) continue;
-
-			Window* pWindow = m_pEngine->GetMainModule<WindowModule>()->GetMainWindow();
-			
-			uint32_t width, height;
-			pRenderTexture->GetDimensions(width, height);
-
-			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Display Rendering");
+			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Blit to Display");
 			pDisplayRenderTexture->BindForDraw();
-			OnDoScreenRender(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
+			OnDisplayCopy(pOutputTexture, width, height);
 			pDisplayRenderTexture->UnBindForDraw();
 			m_pEngine->Profiler().EndSample();
 		}

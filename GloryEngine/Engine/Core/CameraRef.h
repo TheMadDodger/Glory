@@ -25,7 +25,6 @@ namespace Glory
 		void SetLayerMask(const LayerMask& layerMask);
 		void SetClearColor(const glm::vec4& clearColor);
 		void SetOutputTexture(RenderTexture* pTexture);
-		void EnableOutput(bool enable);
 		void SetUserData(const std::string& name, void* data);
 
 		const glm::uvec2& GetResolution() const;
@@ -45,7 +44,6 @@ namespace Glory
 		size_t GetRenderTextureCount() const;
 		RenderTexture* GetRenderTexture(size_t index) const;
 		RenderTexture* GetOutputTexture() const;
-		bool HasOutput() const;
 
 		template<typename T>
 		bool GetUserData(const std::string& name, T*& data)
