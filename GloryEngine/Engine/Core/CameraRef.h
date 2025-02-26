@@ -14,6 +14,7 @@ namespace Glory
 	{
 	public:
 		CameraRef();
+		CameraRef(std::nullptr_t);
 
 	public:
 		void SetResolution(uint32_t width, uint32_t height);

@@ -15,6 +15,7 @@ namespace Glory
 	class Buffer;
 	class Mesh;
 	class PipelineData;
+	struct RenderPass;
 
 	struct PickResult
 	{
@@ -72,6 +73,8 @@ namespace Glory
 
 		void OnWindowResize(glm::uvec2 size);
 
+		void AddRenderPass(RenderPassType type, RenderPass&& pass);
+
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
 		virtual void OnSubmit(const TextRenderData& renderData) {}
@@ -107,6 +110,11 @@ namespace Glory
 		void CreateLineBuffer();
 		void RenderLines(CameraRef camera);
 
+		void MainObjectPass(CameraRef camera, const RenderFrame& frame);
+		void MainTextPass(CameraRef camera, const RenderFrame& frame);
+		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
+		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
+
 	private:
 		RenderFrame m_FrameData;
 		size_t m_LastSubmittedObjectCount;
@@ -126,5 +134,7 @@ namespace Glory
 		std::vector<PickResult> m_PickResults;
 
 		std::atomic_bool m_DisplaysDirty;
+
+		std::vector<std::vector<RenderPass>> m_RenderPasses;
 	};
 }
