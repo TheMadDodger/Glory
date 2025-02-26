@@ -200,19 +200,63 @@ namespace Glory
 		}
 	}
 
+	void UIRendererModule::Initialize()
+	{
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterType<UIRenderer>();
+		Reflect::RegisterType<UITransform>();
+		Reflect::RegisterType<UIText>();
+
+		/* Register the renderer component using the main component types instance */
+		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
+		m_pEngine->GetSceneManager()->RegisterComponent<UIRenderer>();
+		m_pEngine->GetResourceTypes().RegisterResource<UIDocumentData>("");
+		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Draw, UIRenderSystem::OnDraw);
+
+		/* Register the UI components with a different component types instance */
+		m_pComponentTypes = Utils::ECS::ComponentTypes::CreateInstance();
+		m_pComponentTypes->RegisterComponent<UITransform>();
+		m_pComponentTypes->RegisterComponent<UIText>();
+
+		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
+			UIPrepass(camera, frame);
+		} });
+
+		pRenderer->AddRenderPass(RenderPassType::RP_CameraPostpass, { "UI Overlay Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			UIOverlayPass(camera, frame);
+		} });
+	}
+
 	void UIRendererModule::PostInitialize()
 	{
 		const ModuleSettings& settings = Settings();
-		const UUID uiPipeline = settings.Value<uint64_t>("UI Pipeline");
+		const UUID uiPrepassPipeline = settings.Value<uint64_t>("UI Prepass Pipeline");
+		const UUID uiOverlayPipeline = settings.Value<uint64_t>("UI Overlay Pipeline");
 
-		m_pUIMaterial = new MaterialData();
-		m_pUIMaterial->SetPipeline(uiPipeline);
-
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		m_pUIPrepassMaterial = new MaterialData();
+		m_pUIPrepassMaterial->SetPipeline(uiPrepassPipeline);
+		m_pUIOverlayMaterial = new MaterialData();
+		m_pUIOverlayMaterial->SetPipeline(uiOverlayPipeline);
 	}
 
-	void UIRendererModule::Draw()
+	void UIRendererModule::Update()
+	{
+		m_Frame.clear();
+	}
+
+	void UIRendererModule::Cleanup()
+	{
+		delete m_pUIPrepassMaterial;
+		m_pUIPrepassMaterial = nullptr;
+
+		delete m_pUIOverlayMaterial;
+		m_pUIOverlayMaterial = nullptr;
+
+		Utils::ECS::ComponentTypes::DestroyInstance();
+	}
+
+	void UIRendererModule::UIPrepass(CameraRef, const RenderFrame&)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -230,8 +274,8 @@ namespace Glory
 			if (!pResource) continue;
 			UIDocumentData* pDocument = static_cast<UIDocumentData*>(pResource);
 
-			RenderTexture* pRenderTexture = GetRenderTexture(data.m_ObjectID);
 			UIDocument& document = GetDocument(data.m_ObjectID, pDocument);
+			RenderTexture* pRenderTexture = document.m_pUITexture;
 
 			Utils::ECS::EntityRegistry& registry = document.m_Registry;
 			Utils::ECS::TypeView<UIText>* pTextView = registry.GetTypeView<UIText>();
@@ -268,7 +312,7 @@ namespace Glory
 				object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Rect.x, transform.m_Rect.y, 1.0f));
 				object.Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
 
-				Material* pMaterial = pGraphics->UseMaterial(m_pUIMaterial);
+				Material* pMaterial = pGraphics->UseMaterial(m_pUIPrepassMaterial);
 
 				pMaterial->SetProperties(m_pEngine);
 				pMaterial->SetObjectData(object);
@@ -280,83 +324,101 @@ namespace Glory
 				if (pTexture) pMaterial->SetTexture("textSampler", pTexture);
 
 				pRenderTexture->BindForDraw();
+				pGraphics->Clear({ 0.0f, 0.0f, 0.0f, 0.0f });
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 				pRenderTexture->UnBindForDraw();
 			}
 		}
-
-		m_Frame.clear();
 	}
 
-	void UIRendererModule::Initialize()
-	{
-		Reflect::SetReflectInstance(&m_pEngine->Reflection());
-		Reflect::RegisterType<UIRenderer>();
-		Reflect::RegisterType<UITransform>();
-		Reflect::RegisterType<UIText>();
-
-		/* Register the renderer component using the main component types instance */
-		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
-		m_pEngine->GetSceneManager()->RegisterComponent<UIRenderer>();
-		m_pEngine->GetResourceTypes().RegisterResource<UIDocumentData>("");
-		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Draw, UIRenderSystem::OnDraw);
-
-		/* Register the UI components with a different component types instance */
-		m_pComponentTypes = Utils::ECS::ComponentTypes::CreateInstance();
-		m_pComponentTypes->RegisterComponent<UITransform>();
-		m_pComponentTypes->RegisterComponent<UIText>();
-	}
-
-	void UIRendererModule::Cleanup()
-	{
-		delete m_pUIMaterial;
-		m_pUIMaterial = nullptr;
-
-		Utils::ECS::ComponentTypes::DestroyInstance();
-	}
-
-	void UIRendererModule::LoadSettings(ModuleSettings& settings)
-	{
-		settings.RegisterAssetReference<PipelineData>("UI Pipeline", 102);
-		settings.RegisterAssetReference<FontData>("Font", 0);
-	}
-
-	RenderTexture* UIRendererModule::GetRenderTexture(UUID id)
+	void UIRendererModule::UIOverlayPass(CameraRef camera, const RenderFrame&)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
-		auto iter = m_pRenderTextures.find(id);
-		if (iter == m_pRenderTextures.end())
-		{
-			RenderTextureCreateInfo uiTextureInfo;
-			uiTextureInfo.HasDepth = false;
-			uiTextureInfo.Width = 800.0f;
-			uiTextureInfo.Height = 600.0f;
-			uiTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		RenderTexture* pCameraTexture = camera.GetOutputTexture();
+		RenderTexture* pOutputTexture = camera.GetSecondaryOutputTexture();
+		uint32_t width, height;
+		pOutputTexture->GetDimensions(width, height);
 
-			RenderTexture* pUITexture = pResourceManager->CreateRenderTexture(uiTextureInfo);
-			m_pRenderTextures.emplace(id, pUITexture);
-			return pUITexture;
+		pGraphics->EnableDepthTest(false);
+		pGraphics->SetViewport(0, 0, width, height);
+
+		for (auto& data : m_Frame)
+		{
+			/* Get document */
+			auto& iter = m_Documents.find(data.m_ObjectID);
+			if (iter == m_Documents.end()) continue;
+			UIDocument& document = iter->second;
+			RenderTexture* pDocumentTexture = document.m_pUITexture;
+
+			pCameraTexture = camera.GetOutputTexture();
+			pOutputTexture = camera.GetSecondaryOutputTexture();
+
+			/* Render to the output texture */
+			pOutputTexture->BindForDraw();
+
+			/* Use overlay material */
+			Material* pMaterial = pGraphics->UseMaterial(m_pUIOverlayMaterial);
+
+			/* Bind camera texture and document texture */
+			pCameraTexture->BindAll(pMaterial);
+			pDocumentTexture->BindAll(pMaterial);
+
+			/* Draw the screen quad */
+			pGraphics->DrawScreenQuad();
+
+			pOutputTexture->UnBindForDraw();
+
+			pGraphics->UseMaterial(nullptr);
+
+			/* Swap the cameras textures for the next pass */
+			camera.Swap();
 		}
-		return iter->second;
+
+		/* Reset render textures and materials */
+		pGraphics->UseMaterial(nullptr);
+		pGraphics->EnableDepthTest(true);
+	}
+
+	void UIRendererModule::LoadSettings(ModuleSettings& settings)
+	{
+		settings.RegisterAssetReference<PipelineData>("UI Prepass Pipeline", 102);
+		settings.RegisterAssetReference<PipelineData>("UI Overlay Pipeline", 105);
+		settings.RegisterAssetReference<FontData>("Font", 0);
 	}
 
 	UIDocument& UIRendererModule::GetDocument(UUID id, UIDocumentData* pDocument)
 	{
-		auto iter = m_Documents.find(id);
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		auto& iter = m_Documents.find(id);
 		if (iter == m_Documents.end())
 		{
 			m_Documents.emplace(id, pDocument);
-			return m_Documents.at(id);
+			UIDocument& newDocument = m_Documents.at(id);
+
+			RenderTextureCreateInfo uiTextureInfo;
+			uiTextureInfo.HasDepth = false;
+			uiTextureInfo.Width = 800.0f;
+			uiTextureInfo.Height = 600.0f;
+			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			uiTextureInfo.HasDepth = false;
+
+			newDocument.m_pUITexture = pResourceManager->CreateRenderTexture(uiTextureInfo);
+			return newDocument;
 		}
 
 		UIDocument& document = iter->second;
 		if (document.m_OriginalDocumentID != pDocument->GetUUID())
 		{
+			RenderTexture* pUITexture = document.m_pUITexture;
 			m_Documents.erase(iter);
 			m_Documents.emplace(id, pDocument);
-			return m_Documents.at(id);
+			UIDocument& newDocument = m_Documents.at(id);
+			newDocument.m_pUITexture = pUITexture;
+			return newDocument;
 		}
 		return document;
 	}

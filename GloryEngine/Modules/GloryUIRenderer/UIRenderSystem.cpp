@@ -17,6 +17,7 @@ namespace Glory
 
 		UIRenderData data;
 		data.m_DocumentID = pComponent.m_Document.AssetUUID();
+		data.m_ObjectID = pScene->GetEntityUUID(entity);
 		pModule->Submit(std::move(data));
 	}
 }

@@ -14,7 +14,7 @@ namespace Glory
 		}
 	}
 
-	UIDocument::UIDocument(UIDocumentData* pDocument): m_OriginalDocumentID(pDocument->GetUUID())
+	UIDocument::UIDocument(UIDocumentData* pDocument): m_OriginalDocumentID(pDocument->GetUUID()), m_pUITexture(nullptr)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
@@ -22,5 +22,10 @@ namespace Glory
 			const Utils::ECS::EntityID child = registry.Child(0, i);
 			CopyEntity(registry, child, 0);
 		}
+	}
+
+	RenderTexture* UIDocument::GetUITexture()
+	{
+		return m_pUITexture;
 	}
 }

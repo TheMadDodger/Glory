@@ -1,6 +1,12 @@
-- Path: "Shaders\\UI_Frag.shader"
+- Path: "Shaders\\UIPrepass_Frag.shader"
   ID: 100
-- Path: "Shaders\\UI_Vert.shader"
+- Path: "Shaders\\UIPrepass_Vert.shader"
   ID: 101
-- Path: "Pipelines\\UI.gpln"
+- Path: "Pipelines\\UIPrepass.gpln"
   ID: 102
+- Path: "Shaders\\UIOverlay_Frag.shader"
+  ID: 103
+- Path: "Shaders\\UIOverlay_Vert.shader"
+  ID: 104
+- Path: "Pipelines\\UIOverlay.gpln"
+  ID: 105

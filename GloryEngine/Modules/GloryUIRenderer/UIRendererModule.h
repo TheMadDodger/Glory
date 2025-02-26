@@ -39,22 +39,23 @@ namespace Glory
 
 	private:
 		virtual void Initialize() override;
-		virtual void Cleanup() override;
 		virtual void PostInitialize() override;
-		virtual void Draw() override;
+		virtual void Update() override;
+		virtual void Cleanup() override;
+		virtual void UIPrepass(CameraRef, const RenderFrame&);
+		virtual void UIOverlayPass(CameraRef camera, const RenderFrame&);
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
-		RenderTexture* GetRenderTexture(UUID id);
 		UIDocument& GetDocument(UUID id, UIDocumentData* pDocument);
 
 	private:
-		MaterialData* m_pUIMaterial = nullptr;
+		MaterialData* m_pUIPrepassMaterial = nullptr;
+		MaterialData* m_pUIOverlayMaterial = nullptr;
 
 		Utils::ECS::ComponentTypes* m_pComponentTypes = nullptr;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
-		std::map<UUID, RenderTexture*> m_pRenderTextures;
 		std::map<UUID, UIDocument> m_Documents;
 
 		std::vector<UIRenderData> m_Frame;

@@ -538,17 +538,24 @@ namespace Glory
 		/* Composite to cameras render texture */
 		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 		RenderTexture* pOutputTexture = camera.GetOutputTexture();
+		RenderTexture* pSecondaryOutputTexture = camera.GetSecondaryOutputTexture();
 		const glm::uvec2& resolution = camera.GetResolution();
 		if (pOutputTexture == nullptr)
 		{
 			pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
 			camera.SetOutputTexture(pOutputTexture);
 		}
+		if (pSecondaryOutputTexture == nullptr)
+		{
+			pSecondaryOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+			camera.SetSecondaryOutputTexture(pSecondaryOutputTexture);
+		}
 		uint32_t width, height;
 		pOutputTexture->GetDimensions(width, height);
 		if (width != resolution.x || height != resolution.y)
 		{
 			pOutputTexture->Resize(resolution.x, resolution.y);
+			pSecondaryOutputTexture->Resize(resolution.x, resolution.y);
 			pOutputTexture->GetDimensions(width, height);
 		}
 
