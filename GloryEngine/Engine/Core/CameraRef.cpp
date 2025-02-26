@@ -9,6 +9,10 @@ namespace Glory
 	{
 	}
 
+	CameraRef::CameraRef(std::nullptr_t) : m_pManager(nullptr), m_CameraID(0)
+	{
+	}
+
 	CameraRef::CameraRef(CameraManager* pManager, UUID uuid) : m_pManager(pManager), m_CameraID(uuid)
 	{
 	}

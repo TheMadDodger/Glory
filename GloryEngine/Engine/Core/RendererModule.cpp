@@ -23,7 +23,7 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false)
+		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false), m_RenderPasses(RP_Count)
 	{
 	}
 
@@ -262,6 +262,11 @@ namespace Glory
 		m_DisplaysDirty = true;
 	}
 
+	void RendererModule::AddRenderPass(RenderPassType type, RenderPass&& pass)
+	{
+		m_RenderPasses[type].push_back(std::move(pass));
+	}
+
 	void RendererModule::Initialize()
 	{
 		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
@@ -278,6 +283,26 @@ namespace Glory
 		const UUID linesPipeline = Settings().Value<uint64_t>("Lines Pipeline");
 		m_pLinesMaterialData = new MaterialData();
 		m_pLinesMaterialData->SetPipeline(linesPipeline);
+
+		m_RenderPasses[RP_Objectpass].push_back(RenderPass{ "Main Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			MainObjectPass(camera, frame);
+		} });
+
+		m_RenderPasses[RP_Objectpass].push_back(RenderPass{ "Main Text Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			MainTextPass(camera, frame);
+		} });
+
+		m_RenderPasses[RP_Lateobjectpass].push_back(RenderPass{ "Main Late Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			MainLateObjectPass(camera, frame);
+		} });
+
+		m_RenderPasses[RP_Lateobjectpass].push_back(RenderPass{ "Line Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			RenderLines(camera);
+		} });
+
+		m_RenderPasses[RP_CameraPostpass].push_back(RenderPass{ "Deferred Composite Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			DeferredCompositePass(camera, frame);
+		} });
 	}
 
 	void RendererModule::PostInitialize()
@@ -304,6 +329,11 @@ namespace Glory
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
 		m_pEngine->GetDisplayManager().ClearAllDisplays(m_pEngine);
 
+		for (auto& pass : m_RenderPasses[RP_Prepass])
+		{
+			pass.m_Callback(nullptr, m_FrameData);
+		}
+
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
 		{
 			CameraRef camera = m_FrameData.ActiveCameras[i];
@@ -312,26 +342,16 @@ namespace Glory
 			pRenderTexture->BindForDraw();
 			pGraphics->Clear(camera.GetClearColor());
 
-			OnStartCameraRender(camera, m_FrameData.ActiveLights);
-
-			/* Render objects */
-			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
+			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
 			{
-				LayerMask mask = camera.GetLayerMask();
-				if (mask != 0 && (mask & m_FrameData.ObjectsToRender[j].m_LayerMask) == 0) continue;
-				m_pEngine->Profiler().BeginSample("RendererModule::OnRender");
-				OnRender(camera, m_FrameData.ObjectsToRender[j]);
-				m_pEngine->Profiler().EndSample();
+				pass.m_Callback(camera, m_FrameData);
 			}
 
-			/* Render texts */
-			for (size_t j = 0; j < m_FrameData.TextsToRender.size(); ++j)
+			OnStartCameraRender(camera, m_FrameData.ActiveLights);
+
+			for (auto& pass : m_RenderPasses[RP_Objectpass])
 			{
-				LayerMask mask = camera.GetLayerMask();
-				if (mask != 0 && (mask & m_FrameData.TextsToRender[j].m_LayerMask) == 0) continue;
-				m_pEngine->Profiler().BeginSample("RendererModule::OnRender rendering text object");
-				OnRender(camera, m_FrameData.TextsToRender[j]);
-				m_pEngine->Profiler().EndSample();
+				pass.m_Callback(camera, m_FrameData);
 			}
 
 			/* Picking */
@@ -343,45 +363,28 @@ namespace Glory
 			}
 			
 			pRenderTexture->BindForDraw();
-			for (size_t j = 0; j < m_FrameData.ObjectsToRenderLate.size(); ++j)
+			for (auto& pass : m_RenderPasses[RP_Lateobjectpass])
 			{
-				LayerMask mask = camera.GetLayerMask();
-				if (mask != 0 && (mask & m_FrameData.ObjectsToRenderLate[j].m_LayerMask) == 0) continue;
-				m_pEngine->Profiler().BeginSample("RendererModule::OnRender with late render object");
-				OnRender(camera, m_FrameData.ObjectsToRenderLate[j]);
-				m_pEngine->Profiler().EndSample();
+				pass.m_Callback(camera, m_FrameData);
 			}
 
-			RenderLines(camera);
 			OnEndCameraRender(camera, m_FrameData.ActiveLights);
 			pRenderTexture->UnBindForDraw();
 			OnRenderEffects(camera, pRenderTexture);
 
-			/* Composite to cameras render texture */
-			RenderTexture* pOutputTexture = camera.GetOutputTexture();
-			const glm::uvec2& resolution = camera.GetResolution();
-			if (pOutputTexture == nullptr)
+			for (auto& pass : m_RenderPasses[RP_CameraPostpass])
 			{
-				pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
-				camera.SetOutputTexture(pOutputTexture);
+				pass.m_Callback(camera, m_FrameData);
 			}
-			uint32_t width, height;
-			pOutputTexture->GetDimensions(width, height);
-			if (width != resolution.x || height != resolution.y)
-			{
-				pOutputTexture->Resize(resolution.x, resolution.y);
-				pRenderTexture->GetDimensions(width, height);
-			}
-
-			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
-			pOutputTexture->BindForDraw();
-			OnDoCompositing(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
-			pOutputTexture->UnBindForDraw();
-			m_pEngine->Profiler().EndSample();
 
 			/* Copy to display */
 			int displayIndex = camera.GetDisplayIndex();
 			if (displayIndex == -1) continue;
+
+			RenderTexture* pOutputTexture = camera.GetOutputTexture();
+			uint32_t width, height;
+			pOutputTexture->GetDimensions(width, height);
+
 			RenderTexture* pDisplayRenderTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(displayIndex);
 			if (pDisplayRenderTexture == nullptr) continue;
 			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Blit to Display");
@@ -389,6 +392,11 @@ namespace Glory
 			OnDisplayCopy(pOutputTexture, width, height);
 			pDisplayRenderTexture->UnBindForDraw();
 			m_pEngine->Profiler().EndSample();
+		}
+
+		for (auto& pass : m_RenderPasses[RP_Postpass])
+		{
+			pass.m_Callback(nullptr, m_FrameData);
 		}
 
 		m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
@@ -485,6 +493,70 @@ namespace Glory
 
 		m_LineVertexCount = 0;
 		m_pLineVertex = m_pLineVertices;
+	}
+
+	void RendererModule::MainObjectPass(CameraRef camera, const RenderFrame& frame)
+	{
+		/* Render objects */
+		for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
+		{
+			LayerMask mask = camera.GetLayerMask();
+			if (mask != 0 && (mask & m_FrameData.ObjectsToRender[j].m_LayerMask) == 0) continue;
+			m_pEngine->Profiler().BeginSample("RendererModule::OnRender");
+			OnRender(camera, m_FrameData.ObjectsToRender[j]);
+			m_pEngine->Profiler().EndSample();
+		}
+	}
+
+	void RendererModule::MainTextPass(CameraRef camera, const RenderFrame& frame)
+	{
+		/* Render texts */
+		for (size_t j = 0; j < m_FrameData.TextsToRender.size(); ++j)
+		{
+			LayerMask mask = camera.GetLayerMask();
+			if (mask != 0 && (mask & m_FrameData.TextsToRender[j].m_LayerMask) == 0) continue;
+			m_pEngine->Profiler().BeginSample("RendererModule::OnRender rendering text object");
+			OnRender(camera, m_FrameData.TextsToRender[j]);
+			m_pEngine->Profiler().EndSample();
+		}
+	}
+
+	void RendererModule::MainLateObjectPass(CameraRef camera, const RenderFrame& frame)
+	{
+		for (size_t j = 0; j < m_FrameData.ObjectsToRenderLate.size(); ++j)
+		{
+			LayerMask mask = camera.GetLayerMask();
+			if (mask != 0 && (mask & m_FrameData.ObjectsToRenderLate[j].m_LayerMask) == 0) continue;
+			m_pEngine->Profiler().BeginSample("RendererModule::OnRender with late render object");
+			OnRender(camera, m_FrameData.ObjectsToRenderLate[j]);
+			m_pEngine->Profiler().EndSample();
+		}
+	}
+
+	void RendererModule::DeferredCompositePass(CameraRef camera, const RenderFrame& frame)
+	{
+		/* Composite to cameras render texture */
+		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
+		RenderTexture* pOutputTexture = camera.GetOutputTexture();
+		const glm::uvec2& resolution = camera.GetResolution();
+		if (pOutputTexture == nullptr)
+		{
+			pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+			camera.SetOutputTexture(pOutputTexture);
+		}
+		uint32_t width, height;
+		pOutputTexture->GetDimensions(width, height);
+		if (width != resolution.x || height != resolution.y)
+		{
+			pOutputTexture->Resize(resolution.x, resolution.y);
+			pOutputTexture->GetDimensions(width, height);
+		}
+
+		m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
+		pOutputTexture->BindForDraw();
+		OnDoCompositing(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
+		pOutputTexture->UnBindForDraw();
+		m_pEngine->Profiler().EndSample();
 	}
 
 	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)

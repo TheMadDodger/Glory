@@ -70,4 +70,21 @@ namespace Glory
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;
 		FrameData<PointLight> ActiveLights;
 	};
+
+	enum RenderPassType : size_t
+	{
+		RP_Prepass,
+		RP_CameraPrepass,
+		RP_Objectpass,
+		RP_Lateobjectpass,
+		RP_CameraPostpass,
+		RP_Postpass,
+		RP_Count
+	};
+
+	struct RenderPass
+	{
+		std::string m_Name;
+		std::function<void(CameraRef, const RenderFrame&)> m_Callback;
+	};
 }
