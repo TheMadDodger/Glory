@@ -8,7 +8,8 @@ namespace Glory
 		: m_DisplayIndex(0), m_Resolution(width, height), m_TextureIsDirty(true), m_IsOrtho(false),
 		m_IsInUse(true), m_View(1.0f), m_Projection(1.0f), m_pRenderTextures(),
 		m_ClearColor(glm::vec4(0.0f)), m_Priority(0), m_LayerMask(0), m_Near(0.0f), m_Far(0.0f), m_HalfFOV(60.0f),
-		m_pOutputTexture(nullptr), m_PerspectiveDirty(true), m_ViewOffset(glm::identity<glm::mat4>())
+		m_pOutputTexture(nullptr), m_pSecondaryOutputTexture(nullptr),
+		m_PerspectiveDirty(true), m_ViewOffset(glm::identity<glm::mat4>())
 	{
 
 	}
@@ -78,6 +79,18 @@ namespace Glory
 	void Camera::SetOutputTexture(RenderTexture* pTexture)
 	{
 		m_pOutputTexture = pTexture;
+	}
+
+	void Camera::SetSecondaryOutputTexture(RenderTexture* pTexture)
+	{
+		m_pSecondaryOutputTexture = pTexture;
+	}
+
+	void Camera::Swap()
+	{
+		RenderTexture* pTempTexture = m_pOutputTexture;
+		m_pOutputTexture = m_pSecondaryOutputTexture;
+		m_pSecondaryOutputTexture = pTempTexture;
 	}
 
 	void Camera::SetUserData(const std::string& name, void* data)
@@ -153,6 +166,11 @@ namespace Glory
 	RenderTexture* Camera::GetOutputTexture() const
 	{
 		return m_pOutputTexture;
+	}
+
+	RenderTexture* Camera::GetSecondaryOutputTexture() const
+	{
+		return m_pSecondaryOutputTexture;
 	}
 
 	float Camera::GetNear() const

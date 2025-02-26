@@ -80,6 +80,20 @@ namespace Glory
 		pCamera->SetOutputTexture(pTexture);
 	}
 
+	void CameraRef::SetSecondaryOutputTexture(RenderTexture* pTexture)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetSecondaryOutputTexture(pTexture);
+	}
+
+	void CameraRef::Swap()
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->Swap();
+	}
+
 	void CameraRef::SetUserData(const std::string& name, void* data)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
@@ -192,6 +206,13 @@ namespace Glory
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return nullptr;
 		return pCamera->GetOutputTexture();
+	}
+
+	RenderTexture* CameraRef::GetSecondaryOutputTexture() const
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return nullptr;
+		return pCamera->GetSecondaryOutputTexture();
 	}
 
 	void CameraRef::Free()

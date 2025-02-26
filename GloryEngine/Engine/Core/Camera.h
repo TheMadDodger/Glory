@@ -20,6 +20,8 @@ namespace Glory
 		void SetLayerMask(const LayerMask& layerMask);
 		void SetClearColor(const glm::vec4& clearColor);
 		void SetOutputTexture(RenderTexture* pTexture);
+		void SetSecondaryOutputTexture(RenderTexture* pTexture);
+		void Swap();
 		void SetUserData(const std::string& name, void* data);
 
 		const glm::uvec2& GetResolution() const;
@@ -38,6 +40,7 @@ namespace Glory
 		size_t RenderTextureCount() const;
 		RenderTexture* GetRenderTexture(size_t index=0) const;
 		RenderTexture* GetOutputTexture() const;
+		RenderTexture* GetSecondaryOutputTexture() const;
 		template<typename T>
 		bool GetUserData(const std::string& name, T*& data)
 		{
@@ -74,6 +77,7 @@ namespace Glory
 
 		std::vector<RenderTexture*> m_pRenderTextures;
 		RenderTexture* m_pOutputTexture;
+		RenderTexture* m_pSecondaryOutputTexture;
 
 		bool m_PerspectiveDirty;
 
