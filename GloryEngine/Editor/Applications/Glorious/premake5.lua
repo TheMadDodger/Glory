@@ -98,6 +98,8 @@ project "Glorious"
 		"EntityScenesEditorExtension",
 		"JoltEditorExtension",
 		"MonoEditorExtension",
+		"FreeTypeFontImporter",
+		"UIEditorExtension",
 		"SDLImageImporter",
 		"ASSIMPImporter",
 		"GloryJoltMonoExtender",
