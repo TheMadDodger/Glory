@@ -19,6 +19,9 @@ namespace Glory
 	{
 		UUID m_DocumentID;
 		UUID m_ObjectID;
+
+		UUID m_TargetCamera;
+		glm::uvec2 m_Resolution;
 	};
 
 	class UIRendererModule : public Module
@@ -47,7 +50,7 @@ namespace Glory
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
-		UIDocument& GetDocument(UUID id, UIDocumentData* pDocument);
+		UIDocument& GetDocument(const UIRenderData& data, UIDocumentData* pDocument);
 
 	private:
 		MaterialData* m_pUIPrepassMaterial = nullptr;

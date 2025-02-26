@@ -203,6 +203,9 @@ namespace Glory
 	void UIRendererModule::Initialize()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterEnum<UITarget>();
+		Reflect::RegisterEnum<ResolutionMode>();
+
 		Reflect::RegisterType<UIRenderer>();
 		Reflect::RegisterType<UITransform>();
 		Reflect::RegisterType<UIText>();
@@ -274,7 +277,7 @@ namespace Glory
 			if (!pResource) continue;
 			UIDocumentData* pDocument = static_cast<UIDocumentData*>(pResource);
 
-			UIDocument& document = GetDocument(data.m_ObjectID, pDocument);
+			UIDocument& document = GetDocument(data, pDocument);
 			RenderTexture* pRenderTexture = document.m_pUITexture;
 
 			Utils::ECS::EntityRegistry& registry = document.m_Registry;
@@ -310,7 +313,7 @@ namespace Glory
 
 				ObjectData object;
 				object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Rect.x, transform.m_Rect.y, 1.0f));
-				object.Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+				object.Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
 
 				Material* pMaterial = pGraphics->UseMaterial(m_pUIPrepassMaterial);
 
@@ -346,6 +349,8 @@ namespace Glory
 
 		for (auto& data : m_Frame)
 		{
+			if (camera.GetUUID() != data.m_TargetCamera) continue;
+
 			/* Get document */
 			auto& iter = m_Documents.find(data.m_ObjectID);
 			if (iter == m_Documents.end()) continue;
@@ -388,10 +393,12 @@ namespace Glory
 		settings.RegisterAssetReference<FontData>("Font", 0);
 	}
 
-	UIDocument& UIRendererModule::GetDocument(UUID id, UIDocumentData* pDocument)
+	UIDocument& UIRendererModule::GetDocument(const UIRenderData& data, UIDocumentData* pDocument)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		const UUID id = data.m_ObjectID;
 
 		auto& iter = m_Documents.find(id);
 		if (iter == m_Documents.end())
@@ -401,8 +408,8 @@ namespace Glory
 
 			RenderTextureCreateInfo uiTextureInfo;
 			uiTextureInfo.HasDepth = false;
-			uiTextureInfo.Width = 800.0f;
-			uiTextureInfo.Height = 600.0f;
+			uiTextureInfo.Width = uint32_t(data.m_Resolution.x);
+			uiTextureInfo.Height = uint32_t(data.m_Resolution.y);
 			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
 			uiTextureInfo.HasDepth = false;
 
@@ -411,6 +418,13 @@ namespace Glory
 		}
 
 		UIDocument& document = iter->second;
+		uint32_t width, height;
+		document.m_pUITexture->GetDimensions(width, height);
+		if (width != data.m_Resolution.x || width != data.m_Resolution.y)
+		{
+			document.m_pUITexture->Resize(data.m_Resolution.x, data.m_Resolution.y);
+		}
+
 		if (document.m_OriginalDocumentID != pDocument->GetUUID())
 		{
 			RenderTexture* pUITexture = document.m_pUITexture;

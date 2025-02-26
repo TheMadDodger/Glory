@@ -6,6 +6,9 @@
 
 #include <glm/glm.hpp>
 
+REFLECTABLE_ENUM_NS(Glory, UITarget, CameraOverlay);
+REFLECTABLE_ENUM_NS(Glory, ResolutionMode, CameraScale, Fixed);
+
 namespace Glory
 {
     struct UITransform
@@ -30,7 +33,10 @@ namespace Glory
     struct UIRenderer
     {
         REFLECTABLE(UIRenderer,
-            (AssetReference<UIDocumentData>)(m_Document)
+            (AssetReference<UIDocumentData>)(m_Document),
+            (UITarget)(m_Target),
+            (ResolutionMode)(m_ResolutionMode),
+            (glm::vec2)(m_Resolution)
         );
     };
 }
