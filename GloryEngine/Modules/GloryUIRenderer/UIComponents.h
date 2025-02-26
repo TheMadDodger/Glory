@@ -32,6 +32,10 @@ namespace Glory
 
     struct UIRenderer
     {
+        UIRenderer(): m_Target(UITarget::CameraOverlay),
+            m_ResolutionMode(ResolutionMode::CameraScale), m_Resolution(1.0f, 1.0f)
+        {}
+
         REFLECTABLE(UIRenderer,
             (AssetReference<UIDocumentData>)(m_Document),
             (UITarget)(m_Target),
