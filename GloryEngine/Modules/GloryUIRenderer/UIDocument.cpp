@@ -205,4 +205,36 @@ namespace Glory
 			GenerateTextMesh(iter->second.get(), pFont, data);
 		return iter->second.get();
 	}
+
+	MeshData* UIDocument::GetImageMesh()
+	{
+		if (!m_pImageMesh)
+		{
+			m_pImageMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
+				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
+
+			const float xpos = 0.0f;
+			const float ypos = 0.0f;
+
+			const float w = 1.0f;
+			const float h = 1.0f;
+
+			const glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+			VertexPosColorTex vertices[4] = {
+				{ { xpos, ypos + h, }, color, {0.0f, 0.0f}},
+				{ { xpos, ypos, }, color, { 0.0f, 1.0f } },
+				{ { xpos + w, ypos, }, color, { 1.0f, 1.0f } },
+				{ { xpos + w, ypos + h, }, color, { 1.0f, 0.0f }, }
+			};
+
+			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[0]));
+			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
+			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
+			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
+			m_pImageMesh->AddFace(0, 1, 2, 3);
+		}
+
+		return m_pImageMesh.get();
+	}
 }

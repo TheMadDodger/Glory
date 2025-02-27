@@ -3,6 +3,7 @@
 
 #include <Reflection.h>
 #include <AssetReference.h>
+#include <TextureData.h>
 
 #include <glm/glm.hpp>
 
@@ -11,6 +12,7 @@ REFLECTABLE_ENUM_NS(Glory, ResolutionMode, CameraScale, Fixed);
 
 namespace Glory
 {
+    /** @brief Transform for UI components */
     struct UITransform
     {
         UITransform() : m_Rotation(0.0f), m_IsDirty(false) {}
@@ -23,17 +25,26 @@ namespace Glory
         bool m_IsDirty;
     };
 
-    struct UIPanel
+    /** @brief UI Image renderer */
+    struct UIImage
     {
-        REFLECTABLE(UIPanel,
-            (glm::vec4)(m_Rect)
+        REFLECTABLE(UIImage,
+            (AssetReference<TextureData>)(m_Image)
         );
     };
 
+    /** @brief UI Text renderer */
     struct UIText
     {
         REFLECTABLE(UIText,
             (std::string)(m_Text)
+        );
+    };
+
+    struct UIPanel
+    {
+        REFLECTABLE(UIPanel,
+            (glm::vec4)(m_Rect)
         );
     };
 

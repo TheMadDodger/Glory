@@ -13,6 +13,7 @@ namespace Glory::Utils::ECS
 namespace Glory
 {
 	struct UITransform;
+	struct UIImage;
 	struct UIText;
 
 	class UITransformSystem
@@ -22,6 +23,13 @@ namespace Glory
 
 	private:
 		static void CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent);
+	};
+
+	class UIImageSystem
+	{
+	public:
+		static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIImage& pComponent);
+		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIImage& pComponent);
 	};
 
 	class UITextSystem

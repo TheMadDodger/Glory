@@ -96,6 +96,7 @@ namespace Glory
 
 		Reflect::RegisterType<UIRenderer>();
 		Reflect::RegisterType<UITransform>();
+		Reflect::RegisterType<UIImage>();
 		Reflect::RegisterType<UIText>();
 
 		/* Register the renderer component using the main component types instance */
@@ -107,9 +108,13 @@ namespace Glory
 		/* Register the UI components with a different component types instance */
 		m_pComponentTypes = Utils::ECS::ComponentTypes::CreateInstance();
 		m_pComponentTypes->RegisterComponent<UITransform>();
+		m_pComponentTypes->RegisterComponent<UIImage>();
 		m_pComponentTypes->RegisterComponent<UIText>();
 		/* Transform */
 		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
+		/* Image */
+		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Update, UIImageSystem::OnUpdate);
+		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Draw, UIImageSystem::OnDraw);
 		/* Text */
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Update, UITextSystem::OnUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);

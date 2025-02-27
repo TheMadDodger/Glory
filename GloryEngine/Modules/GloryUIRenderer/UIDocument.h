@@ -31,6 +31,7 @@ namespace Glory
 		const glm::mat4& Projection() const;
 
 		MeshData* GetTextMesh(const TextRenderData& data, FontData* pFont);
+		MeshData* GetImageMesh();
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -45,5 +46,6 @@ namespace Glory
 		glm::mat4 m_Projection;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
+		std::unique_ptr<MeshData> m_pImageMesh;
 	};
 }
