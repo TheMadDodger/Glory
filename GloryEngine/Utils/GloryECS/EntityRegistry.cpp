@@ -233,6 +233,11 @@ namespace Glory::Utils::ECS
 		pTypeView->InvokeAll(invocationType, this, NULL);
 	}
 
+	void EntityRegistry::SetUserData(void* data)
+	{
+		m_pUserData = data;
+	}
+
 	void EntityRegistry::ForEach(std::function<void(EntityRegistry*, EntityID)> func)
 	{
 		for (auto& itor : m_pEntityViews)

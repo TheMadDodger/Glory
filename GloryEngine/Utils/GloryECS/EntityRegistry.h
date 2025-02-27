@@ -159,6 +159,7 @@ namespace Glory::Utils::ECS
 			if (!m_pUserData) return nullptr;
 			return static_cast<T>(m_pUserData);
 		}
+		void SetUserData(void* data);
 
 		void ForEach(std::function<void(EntityRegistry*, EntityID)> func);
 

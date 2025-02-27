@@ -13,14 +13,21 @@ namespace Glory
 {
     struct UITransform
     {
+        UITransform() : m_Rotation(0.0f), m_IsDirty(false) {}
         REFLECTABLE(UITransform,
-            (glm::vec4)(m_Rect));
+            (glm::vec4)(m_Rect),
+            (float)(m_Rotation)
+        );
+
+        glm::mat4 m_Transform;
+        bool m_IsDirty;
     };
 
     struct UIPanel
     {
         REFLECTABLE(UIPanel,
-            (glm::vec4)(m_Rect));
+            (glm::vec4)(m_Rect)
+        );
     };
 
     struct UIText
