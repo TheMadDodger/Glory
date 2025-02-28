@@ -83,7 +83,7 @@ namespace Glory
 		pDocument->Update();
 
 		pRenderTexture->BindForDraw();
-		pGraphics->Clear({ 0.0f, 0.0f, 0.0f, 0.0f });
+		pGraphics->Clear({ 0.0f, 0.0f, 0.0f, 1.0f });
 		pDocument->Draw();
 		pRenderTexture->UnBindForDraw();
 	}
