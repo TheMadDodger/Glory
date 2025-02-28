@@ -1,5 +1,5 @@
 constexpr char* AboutText =
-	"Glory Engine is copyright (C) 2020-2023 Robin Cordemans\n"
+	"Glory Engine is copyright (C) 2020-2025 Robin Cordemans\n"
 	"All rights reserved.\n"
 	"\n"
 	"License\n"
