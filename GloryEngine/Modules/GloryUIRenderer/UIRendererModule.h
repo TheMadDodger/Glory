@@ -1,6 +1,8 @@
 #pragma once
 #include <RendererModule.h>
+#include <Glory.h>
 #include <FileData.h>
+
 #include <glm/glm.hpp>
 
 namespace Glory
@@ -28,19 +30,22 @@ namespace Glory
 	class UIRendererModule : public Module
 	{
 	public:
-		UIRendererModule();
-		virtual ~UIRendererModule();
+		GLORY_API UIRendererModule();
+		GLORY_API virtual ~UIRendererModule();
 
-		virtual void CollectReferences(std::vector<UUID>& references) override;
+		GLORY_API virtual void CollectReferences(std::vector<UUID>& references) override;
 
-		virtual const std::type_info& GetModuleType() override;
+		GLORY_API virtual const std::type_info& GetModuleType() override;
 
-		Utils::ECS::ComponentTypes* GetComponentTypes() { return m_pComponentTypes; }
+		GLORY_API Utils::ECS::ComponentTypes* GetComponentTypes() { return m_pComponentTypes; }
 
-		void Submit(UIRenderData&& data);
+		GLORY_API void Submit(UIRenderData&& data);
 
-		FontData* GetFont();
-		MaterialData* PrepassMaterial();
+		GLORY_API void DrawDocument(UIDocument* pDocument, const UIRenderData& data);
+
+		GLORY_API FontData* GetFont();
+		GLORY_API MaterialData* PrepassMaterial();
+		GLORY_API MeshData* GetImageMesh();
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
@@ -65,5 +70,6 @@ namespace Glory
 		std::map<UUID, UIDocument> m_Documents;
 
 		std::vector<UIRenderData> m_Frame;
+		std::unique_ptr<MeshData> m_pImageMesh;
 	};
 }

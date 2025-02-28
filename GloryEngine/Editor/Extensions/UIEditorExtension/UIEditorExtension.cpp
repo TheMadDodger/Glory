@@ -1,6 +1,7 @@
 #include "UIEditorExtension.h"
 #include "UIEditor.h"
 #include "UIDocumentImporter.h"
+#include "UIDocumentTumbnailGenerator.h"
 #include "UIMainWindow.h"
 
 #include <SceneManager.h>
@@ -19,6 +20,7 @@
 #include <CreateEntityObjectsCallbacks.h>
 #include <CreateObjectAction.h>
 #include <EntityEditor.h>
+#include <Tumbnail.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -90,6 +92,7 @@ namespace Glory::Editor
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
 		MenuBar::AddMenuItem("Window/UI Editor", [&editor]() { editor.GetWindow<UIMainWindow, UIEditor>(); }, NULL, Shortcut_Window_UIEditor);
+		Tumbnail::AddGenerator<UIDocumentTumbnailGenerator>();
 
 		ObjectMenu::AddMenuItem("Create/UI Document", OnCreateUIDocument, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 
