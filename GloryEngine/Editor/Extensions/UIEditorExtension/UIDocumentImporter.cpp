@@ -22,7 +22,7 @@ namespace Glory::Editor
         return extension.compare(".gui") == 0;
     }
 
-	void DeserializeComponent(Engine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component)
+	void UIDocumentImporter::DeserializeComponent(Engine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component)
 	{
 		const UUID compUUID = component["UUID"].As<uint64_t>();
 		Utils::NodeValueRef activeNode = component["Active"];
@@ -40,7 +40,7 @@ namespace Glory::Editor
 		pTypeView->SetActive(entity, active);
 	}
 
-	void DeserializeEntity(Engine* pEngine, UIDocumentData* pDocument, Utils::NodeValueRef node)
+	void UIDocumentImporter::DeserializeEntity(Engine* pEngine, UIDocumentData* pDocument, Utils::NodeValueRef node)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 

@@ -71,7 +71,7 @@ namespace Glory
 
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 
-		MeshData* pMeshData = pDocument->GetImageMesh();
+		MeshData* pMeshData = pUIRenderer->GetImageMesh();
 		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(float(width), float(height), 0.0f));
@@ -116,6 +116,7 @@ namespace Glory
 		textData.m_TextDirty = false;
 
 		FontData* pFont = pUIRenderer->GetFont();
+		if (!pFont) return;
 		MeshData* pMeshData = pDocument->GetTextMesh(textData, pFont);
 		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 

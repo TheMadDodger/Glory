@@ -1,4 +1,5 @@
 #pragma once
+#include <Glory.h>
 #include <EntityRegistry.h>
 
 #include <glm/matrix.hpp>
@@ -19,19 +20,20 @@ namespace Glory
 	class UIDocument
 	{
 	public:
-		UIDocument(UIDocumentData* pDocument);
+		GLORY_API UIDocument(UIDocumentData* pDocument);
 
-		RenderTexture* GetUITexture();
+		GLORY_API RenderTexture* GetUITexture();
 
-		void Update();
-		void Draw();
+		GLORY_API void Update();
+		GLORY_API void Draw();
 
-		UIRendererModule* Renderer();
-		glm::mat4& Projection();
-		const glm::mat4& Projection() const;
+		GLORY_API UIRendererModule* Renderer();
+		GLORY_API glm::mat4& Projection();
+		GLORY_API const glm::mat4& Projection() const;
 
-		MeshData* GetTextMesh(const TextRenderData& data, FontData* pFont);
-		MeshData* GetImageMesh();
+		GLORY_API MeshData* GetTextMesh(const TextRenderData& data, FontData* pFont);
+
+		GLORY_API void SetRenderTexture(RenderTexture* pTexture);
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -46,6 +48,5 @@ namespace Glory
 		glm::mat4 m_Projection;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
-		std::unique_ptr<MeshData> m_pImageMesh;
 	};
 }
