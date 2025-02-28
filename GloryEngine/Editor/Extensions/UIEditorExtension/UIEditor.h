@@ -26,5 +26,6 @@ namespace Glory::Editor
 	private:
 		UUID m_EditingDocument;
 		UIDocument* m_pDocument;
+		glm::uvec2 m_Resolution;
 	};
 }
