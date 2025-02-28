@@ -27,7 +27,7 @@ namespace Glory::Editor
 	void Toolbar::Paint()
 	{
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + MainEditor::MENUBAR_SIZE));
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + MainEditor::WORKTABS_SIZE));
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, TOOLBAR_SIZE));
 		ImGui::SetNextWindowViewport(viewport->ID);
 

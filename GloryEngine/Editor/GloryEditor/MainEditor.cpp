@@ -115,10 +115,16 @@ namespace Glory::Editor
 
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
-	const float MainEditor::TOOLBAR_SIZE = 50.0f;
+	float MainEditor::WORKTABS_SIZE = 65.0f;
+
+	SceneEditingMainWindow MainSceneWindow;
+	TestMainWindow TestWindow;
+
+	size_t TabIndex = 0;
 
 	MainEditor::MainEditor()
-		: m_pProjectPopup(new ProjectPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), m_Settings("./EditorSettings.yaml")
+		: m_pProjectPopup(new ProjectPopup()), m_Settings("./EditorSettings.yaml"),
+		m_pMainWindows{ &MainSceneWindow, &TestWindow }
 	{
 	}
 
@@ -127,8 +133,7 @@ namespace Glory::Editor
 		delete m_pProjectPopup;
 		m_pProjectPopup = nullptr;
 
-		delete m_pToolbar;
-		m_pToolbar = nullptr;
+		m_pMainWindows.clear();
 	}
 
 	void MainEditor::Initialize()
@@ -205,18 +210,10 @@ namespace Glory::Editor
 	void MainEditor::PaintEditor()
 	{
 		MenuBar::OnGUI();
-		Dockspace();
-		m_pToolbar->Paint();
-		DrawUserEditor();
-	}
-
-	void MainEditor::Dockspace()
-	{
-		const float toolbarSize = 50;
 
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos + ImVec2(0, toolbarSize));
-		ImGui::SetNextWindowSize(viewport->Size - ImVec2(0, toolbarSize));
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, WORKTABS_SIZE));
 		ImGui::SetNextWindowViewport(viewport->ID);
 		ImGuiWindowFlags window_flags = 0
 			| ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking
@@ -224,27 +221,36 @@ namespace Glory::Editor
 			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
 			| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::Begin("Master DockSpace", NULL, window_flags);
-		ImGuiID dockMain = ImGui::GetID("MyDockspace");
+		ImGui::Begin("Worktabs", NULL, window_flags);
+		ImGui::BeginTabBar("Worktabs");
+		for (size_t i = 0; i < m_pMainWindows.size(); i++)
+		{
+			MainWindow* pWindow = m_pMainWindows[i];
+			if (ImGui::BeginTabItem(pWindow->Name().data()))
+			{
+				if (TabIndex != i)
+				{
+					TabIndex = i;
+				}
+				ImGui::EndTabItem();
+			}
+		}
+		ImGui::EndTabBar();
 
-		// Save off menu bar height for later.
+		/* Save off menu bar height for later. */
 		MENUBAR_SIZE = ImGui::GetCurrentWindow()->MenuBarHeight();
-
-		ImGui::DockSpace(dockMain);
 		ImGui::End();
-		ImGui::PopStyleVar(3);
+
+		m_pMainWindows[TabIndex]->OnGui(WORKTABS_SIZE - MENUBAR_SIZE);
+
+		DrawUserEditor();
 	}
 
 	void MainEditor::DrawUserEditor()
 	{
-		EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
 		m_PackagePopup.Draw();
 		ObjectMenu::OnGUI();
-		m_pProjectPopup->OnGui();
 		QuitPopup::Draw();
 		RemovedAssetsPopup::Draw();
 		VersionPopup::Draw();

@@ -62,6 +62,7 @@ namespace Glory::Editor
 
 	protected:
 		friend class MainEditor;
+		friend class SceneEditingMainWindow;
 		const std::string m_WindowName;
 		ImVec2 m_WindowDimensions;
 		static std::vector<EditorWindow*> m_pActiveEditorWindows;

@@ -3,6 +3,7 @@
 #include "EditorSettings.h"
 #include "Toolbar.h"
 #include "PackagePopup.h"
+#include "MainWindow.h"
 
 #include <imgui_internal.h>
 
@@ -24,6 +25,7 @@ namespace Glory::Editor
 		void OnFileDragAndDrop(std::vector<std::string_view>& paths);
 
 		static float MENUBAR_SIZE;
+		static float WORKTABS_SIZE;
 
 		GLORY_EDITOR_API EditorSettings& Settings();
 		static void VersionOutdated(const Glory::Version& latestVersion);
@@ -40,7 +42,6 @@ namespace Glory::Editor
 		void RegisterPropertyDrawers();
 		void RegisterEditors();
 
-		void Dockspace();
 		void DrawUserEditor();
 
 		void DrawAboutPopup();
@@ -48,14 +49,14 @@ namespace Glory::Editor
 	private:
 		friend class EditorApplication;
 		ProjectPopup* m_pProjectPopup;
-		Toolbar* m_pToolbar;
 		EditorSettings m_Settings;
 
 		PackagePopup m_PackagePopup;
 
 		static size_t m_SaveSceneIndex;
 
-		static const float TOOLBAR_SIZE;
 		bool m_OpenAboutPopup = false;
+
+		std::vector<MainWindow*> m_pMainWindows;
 	};
 }
