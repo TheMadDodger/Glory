@@ -8,6 +8,7 @@ namespace Glory
 	class MaterialData;
 	class RenderTexture;
 	class UIDocumentData;
+	class FontData;
 	class UIDocument;
 
 	namespace Utils::ECS
@@ -38,6 +39,9 @@ namespace Glory
 
 		void Submit(UIRenderData&& data);
 
+		FontData* GetFont();
+		MaterialData* PrepassMaterial();
+
 		GLORY_MODULE_VERSION_H(0,1,0);
 
 	private:
@@ -58,7 +62,6 @@ namespace Glory
 
 		Utils::ECS::ComponentTypes* m_pComponentTypes = nullptr;
 
-		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::map<UUID, UIDocument> m_Documents;
 
 		std::vector<UIRenderData> m_Frame;
