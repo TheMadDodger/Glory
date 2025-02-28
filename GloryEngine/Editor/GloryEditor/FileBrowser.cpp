@@ -134,7 +134,8 @@ namespace Glory::Editor
 
     void FileBrowser::LoadProject()
     {
-        FileBrowser* pWindow = GetWindow<FileBrowser>();
+        MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+        FileBrowser* pWindow = editor.GetWindow<FileBrowser>();
         FileBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
         pWindow->LoadItems();
         pWindow->RefreshContentBrowser();
@@ -162,7 +163,8 @@ namespace Glory::Editor
 
     void FileBrowser::OnAsyncImport()
     {
-        FileBrowser* pWindow = GetWindow<FileBrowser>();
+        MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+        FileBrowser* pWindow = editor.GetWindow<FileBrowser>();
         std::filesystem::path currentPath = FileBrowserItem::GetCurrentPath();
         FileBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
         pWindow->LoadItems();

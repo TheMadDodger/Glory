@@ -69,7 +69,8 @@ namespace Glory::Editor
 			else if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_LALT)
 				m_AltIsDown = false;
 
-			EditorWindow* gameWindow = EditorWindow::FindEditorWindow(typeid(GameWindow));
+			MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+			EditorWindow* gameWindow = editor.FindEditorWindow<GameWindow>();
 			const bool lockInput = gameWindow && gameWindow->IsFocused() && !m_AltIsDown
 				&& pSDLWindow->HandleInputEvents(event) && pSDLWindow->HasFocus();
 			pSDLWindow->ForceShowCursor(!lockInput);

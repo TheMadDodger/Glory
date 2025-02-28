@@ -1,6 +1,7 @@
 #include "UIEditorExtension.h"
 #include "UIEditor.h"
 #include "UIDocumentImporter.h"
+#include "UIMainWindow.h"
 
 #include <SceneManager.h>
 #include <UIDocumentData.h>
@@ -28,6 +29,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Window_UIEditor = "Open UI Editor";
 
 	UIDocumentImporter importer;
+	UIMainWindow UIEditorMainWindow;
 
 	void CreateUIRenderer(Object* pObject, const ObjectMenuType& currentMenu)
 	{
@@ -79,12 +81,15 @@ namespace Glory::Editor
 	{
 		Importer::Register(&importer);
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		MainEditor& editor = pApp->GetMainEditor();
+		editor.RegisterMainWindow(&UIEditorMainWindow);
+		Engine* pEngine = pApp->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
-		MenuBar::AddMenuItem("Window/UI Editor", []() { EditorWindow::GetWindow<UIEditor>(); }, NULL, Shortcut_Window_UIEditor);
+		MenuBar::AddMenuItem("Window/UI Editor", [&editor]() { editor.GetWindow<UIMainWindow, UIEditor>(); }, NULL, Shortcut_Window_UIEditor);
 
 		ObjectMenu::AddMenuItem("Create/UI Document", OnCreateUIDocument, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 
