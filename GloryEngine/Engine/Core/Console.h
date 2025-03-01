@@ -29,14 +29,6 @@ namespace Glory
 		void SetNextColor(const glm::vec4& color);
 		void Update();
 
-		template<class T>
-		void RegisterConsole()
-		{
-			IConsole* pConsole = new T(this);
-			m_pConsoles.push_back(pConsole);
-			pConsole->Initialize();
-		}
-
 		void RegisterConsole(IConsole* pConsole)
 		{
 			m_pConsoles.push_back(pConsole);

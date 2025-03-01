@@ -13,13 +13,13 @@ namespace Glory
 	class WindowsDebugConsole : public IConsole
 	{
 	public:
+		WindowsDebugConsole(Console* pConsole);
+		virtual ~WindowsDebugConsole();
+
 		bool Running();
 		void WaitForInput();
 
 	private:
-		WindowsDebugConsole(Console* pConsole);
-		virtual ~WindowsDebugConsole();
-
 		void Initialize() override;
 		void OnConsoleClose() override;
 
