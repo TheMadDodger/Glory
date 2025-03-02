@@ -53,9 +53,9 @@ namespace Glory::Editor
 		auto node = file.RootNodeRef().ValueRef();
 
 		Utils::NodeValueRef entities = node["Entities"];
-		for (size_t i = 0; i < entities.Size(); ++i)
+		for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
 		{
-			Utils::NodeValueRef entity = entities[i];
+			Utils::NodeValueRef entity = entities[*iter];
 			UIDocumentImporter::DeserializeEntity(pEngine, &document, entity);
 		}
 		document.SetName(EditorAssetDatabase::GetAssetName(documentID));

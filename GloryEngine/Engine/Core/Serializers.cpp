@@ -85,6 +85,11 @@ namespace Glory
 			return GetSerializer(ST_Array)->Serialize(data, pFieldData->ArrayElementType(), node);
 		}
 
+		if (pFieldData->Type() == ST_Asset)
+		{
+			return GetSerializer(ST_Asset)->Serialize(data, pFieldData->ArrayElementType(), node);
+		}
+
 		const Utils::Reflect::TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
@@ -129,6 +134,11 @@ namespace Glory
 		if (pFieldData->Type() == ST_Array)
 		{
 			return GetSerializer(ST_Array)->Deserialize(data, pFieldData->ArrayElementType(), node);
+		}
+
+		if (pFieldData->Type() == ST_Asset)
+		{
+			return GetSerializer(ST_Asset)->Deserialize(data, pFieldData->ArrayElementType(), node);
 		}
 
 		const Utils::Reflect::TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
