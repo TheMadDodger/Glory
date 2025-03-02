@@ -16,6 +16,10 @@ namespace Glory::Editor
 
 	bool Undo::m_IsBusy = false;
 
+	std::map<std::string, std::map<std::string,
+		std::vector<std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)>>>>
+		Undo::m_ChangeHandlers;
+
 	void Undo::StartRecord(const std::string& name, UUID uuid, bool continuous)
 	{
 		if (m_IsBusy) return;
@@ -110,6 +114,7 @@ namespace Glory::Editor
 		YAMLAction* pAction = new YAMLAction(file, path, oldValue, newValue);
 		AddAction(pAction);
 		file[path].Set(newValue);
+		TriggerChangeHandler(file, path);
 	}
 
 	void Undo::DoUndo()
@@ -216,6 +221,39 @@ namespace Glory::Editor
 	std::string_view Undo::GetRecordingName()
 	{
 		return m_RecordingName;
+	}
+
+	void Undo::RegisterChangeHandler(std::string& extension, std::string& pathComponent, std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)> handler)
+	{
+		auto& extIter = m_ChangeHandlers.find(extension);
+		if (extIter == m_ChangeHandlers.end())
+		{
+			extIter = m_ChangeHandlers.emplace(extension, std::map<std::string,
+				std::vector<std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)>>>()).first;
+		}
+		auto& pathComp = extIter->second;
+		auto& pathCompIter = pathComp.find(pathComponent);
+		if (pathCompIter == pathComp.end())
+		{
+			pathCompIter = pathComp.emplace(pathComponent, std::vector<std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)>>()).first;
+		}
+		pathCompIter->second.push_back(handler);
+	}
+
+	void Undo::TriggerChangeHandler(Utils::YAMLFileRef& file, const std::filesystem::path& path)
+	{
+		auto& extIter = m_ChangeHandlers.find(file.Path().extension().string());
+		if (extIter == m_ChangeHandlers.end()) return;
+		auto& pathComp = extIter->second;
+
+		for (auto iter = path.begin(); iter != path.end(); ++iter)
+		{
+			const std::filesystem::path& pathComponent = *iter;
+			auto& pathCompIter = pathComp.find(pathComponent.string());
+			if (pathCompIter == pathComp.end()) continue;
+			for (auto& handler : pathCompIter->second)
+				handler(file, path);
+		}
 	}
 
 	Undo::Undo()

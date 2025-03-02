@@ -46,9 +46,13 @@ namespace Glory
     /** @brief UI Text renderer */
     struct UIText
     {
+        UIText() : m_Text("For Glory!"), m_Dirty(true) {}
+
         REFLECTABLE(UIText,
             (std::string)(m_Text)
         );
+
+        bool m_Dirty;
     };
 
     struct UIPanel

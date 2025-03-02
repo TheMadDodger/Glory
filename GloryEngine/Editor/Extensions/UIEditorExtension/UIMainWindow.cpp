@@ -5,9 +5,12 @@
 #include <EditableResource.h>
 #include <EditorApplication.h>
 #include <EditorAssetDatabase.h>
+#include <Undo.h>
 
 #include <Engine.h>
 #include <GraphicsModule.h>
+#include <Serializers.h>
+
 #include <UIDocument.h>
 #include <UIDocumentData.h>
 
@@ -116,5 +119,35 @@ namespace Glory::Editor
 
 	void UIMainWindow::Initialize()
 	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Serializers& serializers = pEngine->GetSerializers();
+
+		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Components"),
+		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			std::vector<std::string> components;
+			Reflect::Tokenize(path.string(), components, '\\');
+			if (components.size() <= 5) return;
+
+			const std::filesystem::path filePath = file.Path();
+			const UUID documentID = EditorAssetDatabase::FindAssetUUID(filePath.string());
+
+			const size_t entityUUID = (size_t)std::stoull(components[1]);
+			const size_t index = (size_t)std::stoull(components[3].substr(2));
+
+			UIDocument* pDocument = FindEditingDocument(documentID);
+			Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+
+			std::filesystem::path componentPath = components[0];
+			componentPath.append(components[1]).append(components[2]).append(components[3]);
+			const UUID componentID = file[componentPath]["UUID"].As<uint64_t>();
+			const uint32_t componentType = file[componentPath]["TypeHash"].As<uint64_t>();
+			const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(componentType);
+
+			Utils::ECS::EntityRegistry& registry = pDocument->Registry();
+			void* data = registry.GetComponentAddress(entity, componentID);
+			serializers.DeserializeProperty(pType, data, file[componentPath]["Properties"]);
+
+			registry.SetEntityDirty(entity);
+		});
 	}
 }

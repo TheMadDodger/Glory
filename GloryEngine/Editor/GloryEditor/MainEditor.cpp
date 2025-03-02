@@ -174,6 +174,12 @@ namespace Glory::Editor
 		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
 
 		RegisterSettingsEnums(pEngine);
+
+		for (size_t i = 0; i < m_pMainWindows.size(); ++i)
+		{
+			MainWindow* pWindow = m_pMainWindows[i];
+			pWindow->Initialize();
+		}
 	}
 
 	void MainEditor::Destroy()
@@ -316,6 +322,7 @@ namespace Glory::Editor
 	void MainEditor::RegisterMainWindow(MainWindow* pWindow)
 	{
 		m_pMainWindows.push_back(pWindow);
+		pWindow->Initialize();
 	}
 
 	void MainEditor::SetupTitleBar()
