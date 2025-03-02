@@ -43,11 +43,13 @@ namespace Glory::Editor
 	void UIDocumentImporter::DeserializeEntity(Engine* pEngine, UIDocumentData* pDocument, Utils::NodeValueRef node)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
-
-		const std::string name = node["Name"].As<std::string>();
 		const UUID uuid = node["UUID"].As<uint64_t>();
+		const bool active = node["Active"].As<bool>();
+		const std::string name = node["Name"].As<std::string>();
 		const UUID parentUuid = node["Parent"].As<uint64_t>();
 		const Utils::ECS::EntityID entity = pDocument->CreateEmptyEntity(name, uuid);
+		registry.GetEntityView(entity)->Active() = active;
+
 
 		if (parentUuid != NULL)
 		{
@@ -74,9 +76,9 @@ namespace Glory::Editor
 		auto node = file.RootNodeRef().ValueRef();
 
 		Utils::NodeValueRef entities = node["Entities"];
-		for (size_t i = 0; i < entities.Size(); ++i)
+		for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
 		{
-			Utils::NodeValueRef entity = entities[i];
+			Utils::NodeValueRef entity = entities[*iter];
 			DeserializeEntity(pEngine, pNewDocument, entity);
 		}
 
@@ -110,6 +112,7 @@ namespace Glory::Editor
 
 		entityNode.Set(YAML::Node(YAML::NodeType::Map));
 		entityNode["UUID"].Set(uint64_t(pDocument->EntityUUID(entity)));
+		entityNode["Active"].Set(pEntityView->Active());
 		entityNode["Name"].Set(std::string{ pDocument->Name(entity) });
 		entityNode["Parent"].Set(uint64_t(parent ? pDocument->EntityUUID(parent) : 0));
 
@@ -125,11 +128,12 @@ namespace Glory::Editor
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 
-		const size_t index = entities.Size();
-		entities.PushBack(YAML::Node(YAML::NodeType::Map));
+		const UUID uuid = pDocument->EntityUUID(entity);
+		const std::string idStr = std::to_string(uuid);
+		entities[idStr].SetMap();
 
 		/* Serialize entity first then its children */
-		SerializeEntity(pEngine, pDocument, entity, entities[index]);
+		SerializeEntity(pEngine, pDocument, entity, entities[idStr]);
 
 		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
 		{
@@ -165,6 +169,7 @@ namespace Glory::Editor
 
 		entityNode.Set(YAML::Node(YAML::NodeType::Map));
 		entityNode["UUID"].Set(uint64_t(pDocument->EntityUUID(entity)));
+		entityNode["Active"].Set(pEntityView->Active());
 		entityNode["Name"].Set(std::string{ pDocument->Name(entity) });
 		entityNode["Parent"].Set(uint64_t(parent ? pDocument->EntityUUID(parent) : 0));
 
@@ -180,11 +185,12 @@ namespace Glory::Editor
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 
-		const size_t index = entities.Size();
-		entities.PushBack(YAML::Node(YAML::NodeType::Map));
+		const UUID uuid = pDocument->EntityUUID(entity);
+		const std::string idStr = std::to_string(uuid);
+		entities[idStr].SetMap();
 
 		/* Serialize entity first then its children */
-		SerializeEntity(pEngine, pDocument, entity, entities[index]);
+		SerializeEntity(pEngine, pDocument, entity, entities[idStr]);
 
 		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
 		{
@@ -205,7 +211,7 @@ namespace Glory::Editor
             node.Set(YAML::Node(YAML::NodeType::Map));
 
         auto entities = node["Entities"];
-        entities.Set(YAML::Node(YAML::NodeType::Sequence));
+        entities.Set(YAML::Node(YAML::NodeType::Map));
 
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 

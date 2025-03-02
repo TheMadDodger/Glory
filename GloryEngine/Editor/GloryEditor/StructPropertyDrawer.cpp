@@ -77,10 +77,26 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool StructPropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
+	{
+		auto structData = file[path];
+
+		const TypeData* pStructTypeData = Reflect::GetTyeData(typeHash);
+		bool change = false;
+		for (size_t i = 0; i < pStructTypeData->FieldCount(); ++i)
+		{
+			const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
+			auto field = structData[pFieldData->Name()];
+			const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
+			change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), fieldFlags);
+		}
+		return change;
+	}
+
 	bool StructPropertyDrawer::DrawFields(void* data, const TypeData* pStructTypeData, uint32_t flags, size_t start) const
 	{
 		bool change = false;
-		for (size_t i = start; i < pStructTypeData->FieldCount(); i++)
+		for (size_t i = start; i < pStructTypeData->FieldCount(); ++i)
 		{
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
 			const size_t offset = pFieldData->Offset();

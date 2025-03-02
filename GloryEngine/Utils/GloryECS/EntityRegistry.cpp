@@ -259,6 +259,7 @@ namespace Glory::Utils::ECS
 
 		if (itor1 == m_pEntityViews.end()) return false;
 		const Utils::ECS::EntityID oldParent = itor1->second->m_Parent;
+		if (oldParent == parent) return true;
 		if (oldParent)
 		{
 			auto& oldParentChildren = m_pEntityViews.at(oldParent)->m_Children;

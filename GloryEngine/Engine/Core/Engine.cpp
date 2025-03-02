@@ -599,6 +599,7 @@ namespace Glory
 		Reflect::RegisterType<TaperedCapsule>();
 		Reflect::RegisterType<ShapeProperty>();
 
+		Reflect::RegisterBasicType<TextureData>("TextureData");
 		Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}
 

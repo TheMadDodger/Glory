@@ -12,12 +12,12 @@ namespace Glory::Utils::Reflect
 		m_Offset(offset),
 		m_Size(size)
 	{
-		std::string tempTypeName = typeName;
-		size_t templateIndex = tempTypeName.find('<');
-		size_t templateEndIndex = tempTypeName.find('>');
+		const std::string tempTypeName = typeName;
+		const size_t templateIndex = tempTypeName.find('<');
+		const size_t templateEndIndex = tempTypeName.find('>');
 		if (templateIndex == std::string::npos) return;
-		std::string templateTypeName = tempTypeName.substr(0, templateIndex);
-		std::string templatedTypeName = tempTypeName.substr(templateIndex + 1, templateEndIndex - templateIndex - 1 );
+		const std::string templateTypeName = tempTypeName.substr(0, templateIndex);
+		const std::string templatedTypeName = tempTypeName.substr(templateIndex + 1, templateEndIndex - templateIndex - 1 );
 		const TypeData* pTemplateType = Reflect::GetTyeData(templateTypeName);
 		const TypeData* pTemplatedType = Reflect::GetTyeData(templatedTypeName);
 
