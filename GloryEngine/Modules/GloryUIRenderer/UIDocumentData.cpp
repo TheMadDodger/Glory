@@ -22,18 +22,32 @@ namespace Glory
 		return m_Names.at(entity);
 	}
 
-	Utils::ECS::EntityID UIDocumentData::CreateEmptyEntity(std::string_view name)
+	Utils::ECS::EntityID UIDocumentData::CreateEmptyEntity(std::string_view name, UUID uuid)
 	{
 		Utils::ECS::EntityID entity = m_Registry.CreateEntity();
+		m_UUIds.emplace(entity, uuid);
+		m_Ids.emplace(uuid, entity);
 		m_Names.emplace(entity, name);
 		return entity;
 	}
 
-	Utils::ECS::EntityID UIDocumentData::CreateEntity(std::string_view name)
+	Utils::ECS::EntityID UIDocumentData::CreateEntity(std::string_view name, UUID uuid)
 	{
 		Utils::ECS::EntityID entity = m_Registry.CreateEntity<UITransform>();
+		m_UUIds.emplace(entity, uuid);
+		m_Ids.emplace(uuid, entity);
 		m_Names.emplace(entity, name);
 		return entity;
+	}
+
+	UUID UIDocumentData::EntityUUID(Utils::ECS::EntityID entity) const
+	{
+		return m_UUIds.at(entity);
+	}
+
+	Utils::ECS::EntityID UIDocumentData::EntityID(UUID uuid) const
+	{
+		return m_Ids.at(uuid);
 	}
 
 	void UIDocumentData::Serialize(BinaryStream& container) const

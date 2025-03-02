@@ -33,15 +33,25 @@ namespace Glory::Editor
 		template<typename T>
 		static void DragAndDropSource(void* payload, size_t payloadSize, std::function<void()> previewCallback, ImGuiDragDropFlags flags = 0)
 		{
-			ResourceType* pType = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetResourceType<T>();
-			DragAndDropSource(pType->Name(), payload, payloadSize, previewCallback, flags);
+			std::string_view name;
+			ResourceType* pResourceType = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetResourceType<T>();
+			if (!pResourceType)
+			{
+				const TypeData* pType = Reflect::GetTyeData(ResourceTypes::GetHash<T>());
+				name = pType->TypeName();
+			}
+			else
+			{
+				name = pResourceType->Name();
+			}
+			DragAndDropSource(name, payload, payloadSize, previewCallback, flags);
 		}
 
-		static void DragAndDropSource(const std::string_view name, void* payload, size_t payloadSize, std::function<void()> previewCallback, ImGuiDragDropFlags flags = 0);
+		GLORY_EDITOR_API static void DragAndDropSource(const std::string_view name, void* payload, size_t payloadSize, std::function<void()> previewCallback, ImGuiDragDropFlags flags = 0);
 
-		bool IsEnabled() { return !m_AcceptedTypes.empty(); }
-		bool HandleDragAndDropTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback);
-		bool HandleDragAndDropWindowTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback);
+		GLORY_EDITOR_API bool IsEnabled() { return !m_AcceptedTypes.empty(); }
+		GLORY_EDITOR_API bool HandleDragAndDropTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback);
+		GLORY_EDITOR_API bool HandleDragAndDropWindowTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback);
 
 		std::vector<uint32_t> m_AcceptedTypes;
 		ImGuiDragDropFlags m_DNDFlags = 0;

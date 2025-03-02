@@ -88,6 +88,7 @@ namespace Glory::Editor
 		editor.RegisterMainWindow(&UIEditorMainWindow);
 		Engine* pEngine = pApp->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
+		Reflect::RegisterType<UIElementType>();
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 

@@ -10,13 +10,13 @@ namespace Glory
 
 namespace Glory::Editor
 {
+	class UIMainWindow;
+
 	class UIEditor : public EditorWindowTemplate<UIEditor>
 	{
 	public:
 		UIEditor();
 		virtual ~UIEditor();
-
-		void SetDocument(UUID documentID);
 
 	private:
 		virtual void OnGUI() override;
@@ -24,8 +24,6 @@ namespace Glory::Editor
 		virtual void Draw() override;
 
 	private:
-		UUID m_EditingDocument;
-		UIDocument* m_pDocument;
-		glm::uvec2 m_Resolution;
+		UIMainWindow* GetMainWindow();
 	};
 }
