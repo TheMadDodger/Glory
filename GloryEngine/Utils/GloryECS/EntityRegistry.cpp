@@ -393,6 +393,8 @@ namespace Glory::Utils::ECS
 		
 		if (!dirty) return;
 
+		InvokeAll(InvocationType::OnDirty, { entity });
+
 		/* Must set all children as dirty as well! */
 		for (size_t i = 0; i < pView->ChildCount(); ++i)
 		{

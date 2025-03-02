@@ -87,13 +87,12 @@ namespace Glory::Utils::Reflect
 
 		static uint32_t Hash(const std::type_info& type);
 		static uint32_t Hash(const char* str);
+		static void Tokenize(std::string str, std::vector<std::string>& tokens, char separator = ',');
 
 	private:
 		static void RegisterType(uint32_t hash, const TypeData* pTypeData, uint64_t flags = 0);
 		static const TypeData* RegisterBasicType(const std::type_info& type, size_t size, const std::string& aliasName, uint64_t flags);
 		static const TypeData* RegisterEnumType(const char* typeName, uint32_t enumTypeHash, const std::string& aliasName, uint64_t flags);
-
-		static void Tokenize(std::string str, std::vector<std::string>& tokens, char separator = ',');
 
 		template<typename T>
 		static void RegisterArrayType(const TypeData* pTypeData)

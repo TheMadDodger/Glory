@@ -113,7 +113,8 @@ namespace Glory
 		textData.m_Scale = 1.0f;
 		textData.m_Text = pComponent.m_Text;
 		textData.m_ObjectID = entity;
-		textData.m_TextDirty = false;
+		textData.m_TextDirty = pComponent.m_Dirty;
+		pComponent.m_Dirty = false;
 
 		FontData* pFont = pUIRenderer->GetFont();
 		if (!pFont) return;
@@ -137,4 +138,9 @@ namespace Glory
 
 		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
     }
+
+	void UITextSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
+	{
+		pComponent.m_Dirty = true;
+	}
 }

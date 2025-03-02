@@ -4,6 +4,7 @@
 #include <UIDocument.h>
 
 #include <EditableResource.h>
+#include <EditorAssetDatabase.h>
 #include <EditorResourceManager.h>
 #include <EditorUI.h>
 #include <PropertyDrawer.h>
@@ -52,7 +53,8 @@ namespace Glory::Editor
 	{
 		UIMainWindow* pMainWindow = GetMainWindow();
 		UIDocument* pDocument = pMainWindow->CurrentDocument();
-		if (!pMainWindow->CurrentDocumentID() || !pDocument)
+		const UUID documentID = pMainWindow->CurrentDocumentID();
+		if (!documentID || !pDocument)
 		{
 			ImGui::TextUnformatted("No UI document open");
 			return;
@@ -114,7 +116,7 @@ namespace Glory::Editor
 			if (open)
 			{
 				Undo::StartRecord("Property Change", selected, true);
-				PropertyDrawer::DrawProperty(file, component["Properties"].Path(), pType->InternalTypeHash(), pType->TypeHash(), 0);
+				change |= PropertyDrawer::DrawProperty(file, component["Properties"].Path(), pType->InternalTypeHash(), pType->TypeHash(), 0);
 				Undo::StopRecord();
 			}
 
@@ -149,6 +151,9 @@ namespace Glory::Editor
 
 		ImGui::PopID();
 		ImGui::PopID();
+
+		if (change)
+			EditorAssetDatabase::SetAssetDirty(documentID);
 	}
 
 	UIMainWindow* UIElementInspector::GetMainWindow()

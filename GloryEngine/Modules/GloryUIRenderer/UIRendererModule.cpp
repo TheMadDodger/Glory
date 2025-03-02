@@ -139,6 +139,7 @@ namespace Glory
 		/* Text */
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Update, UITextSystem::OnUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);
+		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
