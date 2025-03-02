@@ -1,5 +1,7 @@
 #include "UIDocumentTumbnailGenerator.h"
+#include "UIMainWindow.h"
 #include "UIEditor.h"
+#include "UIElementsGraphWindow.h"
 
 #include <Importer.h>
 #include <EditorTextureData.h>
@@ -32,7 +34,10 @@ namespace Glory::Editor
 
     void UIDocumentTumbnailGenerator::OnFileDoubleClick(UUID uuid)
     {
-        UIEditor* pEditor = EditorWindow::GetWindow<UIEditor>();
-        pEditor->SetDocument(uuid);
+        MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+        UIMainWindow* pMainWindow = editor.GetMainWindow<UIMainWindow>();
+        pMainWindow->SetDocument(uuid);
+        editor.GetWindow<UIMainWindow, UIEditor>();
+        editor.GetWindow<UIMainWindow, UIElementsGraphWindow>();
     }
 }

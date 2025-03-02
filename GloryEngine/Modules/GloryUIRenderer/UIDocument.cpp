@@ -19,7 +19,10 @@ namespace Glory
 		}
 	}
 
-	UIDocument::UIDocument(UIDocumentData* pDocument): m_OriginalDocumentID(pDocument->GetUUID()), m_pUITexture(nullptr)
+	UIDocument::UIDocument(UIDocumentData* pDocument):
+		m_OriginalDocumentID(pDocument->GetUUID()), m_pUITexture(nullptr),
+		m_Name(pDocument->m_Name), m_Ids(pDocument->m_Ids),
+		m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
@@ -44,6 +47,11 @@ namespace Glory
 	{
 		m_Registry.SetUserData(this);
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Draw, NULL);
+	}
+
+	UUID UIDocument::OriginalDocumentID() const
+	{
+		return m_OriginalDocumentID;
 	}
 
 	UIRendererModule* UIDocument::Renderer()
@@ -209,5 +217,30 @@ namespace Glory
 	void UIDocument::SetRenderTexture(RenderTexture* pTexture)
 	{
 		m_pUITexture = pTexture;
+	}
+
+	Utils::ECS::EntityRegistry& UIDocument::Registry()
+	{
+		return m_Registry;
+	}
+
+	std::string_view UIDocument::Name() const
+	{
+		return m_Name;
+	}
+
+	std::string_view UIDocument::Name(Utils::ECS::EntityID entity) const
+	{
+		return m_Names.at(entity);
+	}
+
+	UUID UIDocument::EntityUUID(Utils::ECS::EntityID entity) const
+	{
+		return m_UUIds.at(entity);
+	}
+
+	Utils::ECS::EntityID UIDocument::EntityID(UUID uuid) const
+	{
+		return m_Ids.at(uuid);
 	}
 }
