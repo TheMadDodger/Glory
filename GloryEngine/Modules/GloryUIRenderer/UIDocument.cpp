@@ -1,5 +1,6 @@
 #include "UIDocument.h"
 #include "UIDocumentData.h"
+#include "UIComponents.h"
 
 #include <FontData.h>
 #include <MeshData.h>
@@ -242,5 +243,37 @@ namespace Glory
 	Utils::ECS::EntityID UIDocument::EntityID(UUID uuid) const
 	{
 		return m_Ids.at(uuid);
+	}
+
+	Utils::ECS::EntityID UIDocument::CreateEmptyEntity(std::string_view name, UUID uuid)
+	{
+		Utils::ECS::EntityID entity = m_Registry.CreateEntity();
+		m_UUIds.emplace(entity, uuid);
+		m_Ids.emplace(uuid, entity);
+		m_Names.emplace(entity, name);
+		return entity;
+	}
+
+	Utils::ECS::EntityID UIDocument::CreateEntity(std::string_view name, UUID uuid)
+	{
+		Utils::ECS::EntityID entity = m_Registry.CreateEntity<UITransform>();
+		m_UUIds.emplace(entity, uuid);
+		m_Ids.emplace(uuid, entity);
+		m_Names.emplace(entity, name);
+		return entity;
+	}
+
+	void UIDocument::DestroyEntity(UUID uuid)
+	{
+		const Utils::ECS::EntityID entity = m_Ids.at(uuid);
+		m_Registry.DestroyEntity(entity);
+		m_Ids.erase(uuid);
+		m_UUIds.erase(entity);
+		m_Names.erase(entity);
+	}
+
+	bool UIDocument::EntityExists(UUID uuid)
+	{
+		return m_Ids.find(uuid) != m_Ids.end();
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <Glory.h>
 #include <EntityRegistry.h>
+#include <TypeData.h>
 
 #include <glm/matrix.hpp>
 
@@ -42,6 +43,11 @@ namespace Glory
 
 		GLORY_API UUID EntityUUID(Utils::ECS::EntityID entity) const;
 		GLORY_API Utils::ECS::EntityID EntityID(UUID uuid) const;
+
+		GLORY_API Utils::ECS::EntityID CreateEmptyEntity(std::string_view name, UUID uuid = UUID());
+		GLORY_API Utils::ECS::EntityID CreateEntity(std::string_view name, UUID uuid = UUID());
+		GLORY_API void DestroyEntity(UUID uuid);
+		GLORY_API bool EntityExists(UUID uuid);
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
