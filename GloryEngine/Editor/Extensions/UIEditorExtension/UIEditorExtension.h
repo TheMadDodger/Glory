@@ -10,6 +10,7 @@ namespace Glory::Editor
     struct UIElementType
     {
         REFLECTABLE(UIElementType,
+            (bool)(m_NewEntity),
             (uint64_t)(m_EntityID)
         );
     };

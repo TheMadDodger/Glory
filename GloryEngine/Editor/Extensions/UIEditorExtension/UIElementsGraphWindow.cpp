@@ -64,7 +64,14 @@ namespace Glory::Editor
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
-			const Utils::ECS::EntityID draggingEntity = *(const Utils::ECS::EntityID*)pPayload->Data;
+			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			if (payload.m_NewEntity)
+			{
+				/* Create new entity */
+				return;
+			}
+
+			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			Utils::ECS::EntityID oldParent = registry.GetParent(draggingEntity);
 			const size_t newSiblingIndex = 0;
 			const UUID toReParent = pDocument->EntityUUID(draggingEntity);
@@ -102,7 +109,14 @@ namespace Glory::Editor
 		ImGui::InvisibleButton("WINDOWTARGET", { size.x, availableRegion.y });
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
-			const Utils::ECS::EntityID draggingEntity = *(const Utils::ECS::EntityID*)pPayload->Data;
+			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			if (payload.m_NewEntity)
+			{
+				/* Create new entity */
+				return;
+			}
+
+			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			Utils::ECS::EntityID oldParent = registry.GetParent(draggingEntity);
 			const size_t newSiblingIndex = registry.ChildCount(0);
 			const UUID toReParent = pDocument->EntityUUID(draggingEntity);
@@ -154,7 +168,14 @@ namespace Glory::Editor
 			ImGui::InvisibleButton("##reorderbefore", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 			DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 				if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
-				const Utils::ECS::EntityID draggingEntity = *(const Utils::ECS::EntityID*)pPayload->Data;
+				const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+				if (payload.m_NewEntity)
+				{
+					/* Create new entity */
+					return;
+				}
+
+				const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 				if (draggingEntity == entity) return;
 				Utils::ECS::EntityID parent = registry.GetParent(entity);
 
@@ -192,12 +213,20 @@ namespace Glory::Editor
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		const bool node_open = ImGui::TreeNodeEx("##entitynode", node_flags, "");
-		DND::DragAndDropSource<UIElementType>(&entity, sizeof(Utils::ECS::EntityID), [entity, name]() {
+		UIElementType payload{ false, entity };
+		DND::DragAndDropSource<UIElementType>(&payload, sizeof(UIElementType), [entity, name]() {
 			ImGui::Text("%s: %s", name.data(), std::to_string(entity).data());
 		});
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
-			const Utils::ECS::EntityID draggingEntity = *(const Utils::ECS::EntityID*)pPayload->Data;
+			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			if (payload.m_NewEntity)
+			{
+				/* Create new entity */
+				return;
+			}
+
+			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			if (draggingEntity == entity) return;
 			Utils::ECS::EntityID parent = registry.GetParent(entity);
 			bool canParent = true;
@@ -260,7 +289,14 @@ namespace Glory::Editor
 		ImGui::InvisibleButton("##reorderafter", ImVec2(ImGui::GetWindowContentRegionWidth(), 2.0f));
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
-			const Utils::ECS::EntityID draggingEntity = *(const Utils::ECS::EntityID*)pPayload->Data;
+			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			if (payload.m_NewEntity)
+			{
+				/* Create new entity */
+				return;
+			}
+
+			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			if (draggingEntity == entity) return;
 			Utils::ECS::EntityID parent = registry.GetParent(entity);
 

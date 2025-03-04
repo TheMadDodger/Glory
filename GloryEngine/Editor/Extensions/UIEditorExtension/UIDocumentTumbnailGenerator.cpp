@@ -3,6 +3,7 @@
 #include "UIEditor.h"
 #include "UIElementsGraphWindow.h"
 #include "UIElementInspector.h"
+#include "AddUIElementWindow.h"
 
 #include <Importer.h>
 #include <EditorTextureData.h>
@@ -41,5 +42,6 @@ namespace Glory::Editor
         editor.GetWindow<UIMainWindow, UIEditor>();
         editor.GetWindow<UIMainWindow, UIElementsGraphWindow>();
         editor.GetWindow<UIMainWindow, UIElementInspector>();
+        editor.GetWindow<UIMainWindow, AddUIElementWindow>();
     }
 }

@@ -29,7 +29,11 @@ namespace Editor
 		void BeginFrame();
 		void EndFrame();
 
+		GLORY_EDITOR_API static ImFont* GetLargeFont();
+		GLORY_EDITOR_API static ImFont* GetHugeFont();
+
 		static ImFont* LargeFont;
+		static ImFont* HugeFont;
 
 	private:
 		void SetupDearImGuiContext();

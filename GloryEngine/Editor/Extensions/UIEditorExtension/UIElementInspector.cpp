@@ -61,7 +61,7 @@ namespace Glory::Editor
 		}
 
 		const UUID& selected = pMainWindow->SelectedEntity();
-		if (!selected)
+		if (!selected || !pDocument->EntityExists(selected))
 		{
 			ImGui::TextUnformatted("No UI element selected");
 			return;
