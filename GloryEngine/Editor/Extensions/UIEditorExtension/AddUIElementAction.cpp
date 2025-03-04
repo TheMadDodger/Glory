@@ -16,15 +16,18 @@ namespace Glory::Editor
 	{
 	}
 
-	UUID AddUIElementAction::AddElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, std::string_view name, uint32_t type)
+	UUID AddUIElementAction::AddElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file,
+		std::string_view name, uint32_t type, UUID parent, size_t siblingIndex)
 	{
 		const UUID newEntityID{};
+		const Utils::ECS::EntityID parentEntity = parent ? pDocument->EntityID(parent) : 0;
 		const Utils::ECS::EntityID entity = pDocument->CreateEntity(name, newEntityID);
 		pDocument->Registry().CreateComponent(entity, type, UUID());
-		const size_t siblingIndex = pDocument->Registry().ChildCount(0);
+		pDocument->Registry().SetParent(entity, parentEntity);
+		pDocument->Registry().SetSiblingIndex(entity, siblingIndex);
 
 		Undo::StartRecord("Add UI Element", pDocument->OriginalDocumentID());
-		Undo::AddAction<AddUIElementAction>(type, newEntityID, 0, siblingIndex);
+		Undo::AddAction<AddUIElementAction>(type, newEntityID, parent, siblingIndex);
 		Undo::StopRecord();
 
 		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);

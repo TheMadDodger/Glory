@@ -3,6 +3,7 @@
 #include "UIDocument.h"
 #include "UIEditorExtension.h"
 #include "SetUIParentAction.h"
+#include "AddUIElementAction.h"
 #include "UIDocumentImporter.h"
 
 #include <UIComponents.h>
@@ -65,18 +66,22 @@ namespace Glory::Editor
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
 			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			const size_t newSiblingIndex = 0;
+			const UUID newParentID = 0;
+
 			if (payload.m_NewEntity)
 			{
 				/* Create new entity */
+				const uint32_t type = (uint32_t)payload.m_EntityID;
+				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
+				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
 			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			Utils::ECS::EntityID oldParent = registry.GetParent(draggingEntity);
-			const size_t newSiblingIndex = 0;
 			const UUID toReParent = pDocument->EntityUUID(draggingEntity);
 			const UUID oldParentID = oldParent ? pDocument->EntityUUID(oldParent) : 0;
-			const UUID newParentID = 0;
 			const size_t oldSiblingIndex = registry.SiblingIndex(draggingEntity);
 			Undo::StartRecord("UI Re-parent", pDocument->OriginalDocumentID());
 			Undo::AddAction<SetUIParentAction>(toReParent, oldParentID, newParentID, oldSiblingIndex, newSiblingIndex);
@@ -110,18 +115,22 @@ namespace Glory::Editor
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
 			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			const size_t newSiblingIndex = registry.ChildCount(0);
+			const UUID newParentID = 0;
+
 			if (payload.m_NewEntity)
 			{
 				/* Create new entity */
+				const uint32_t type = (uint32_t)payload.m_EntityID;
+				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
+				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
 			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			Utils::ECS::EntityID oldParent = registry.GetParent(draggingEntity);
-			const size_t newSiblingIndex = registry.ChildCount(0);
 			const UUID toReParent = pDocument->EntityUUID(draggingEntity);
 			const UUID oldParentID = oldParent ? pDocument->EntityUUID(oldParent) : 0;
-			const UUID newParentID = 0;
 			const size_t oldSiblingIndex = registry.SiblingIndex(draggingEntity);
 			Undo::StartRecord("UI Re-parent", pDocument->OriginalDocumentID());
 			Undo::AddAction<SetUIParentAction>(toReParent, oldParentID, newParentID, oldSiblingIndex, newSiblingIndex);
@@ -169,15 +178,21 @@ namespace Glory::Editor
 			DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 				if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
 				const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+				Utils::ECS::EntityID parent = registry.GetParent(entity);
+				const UUID newParentID = parent ? pDocument->EntityUUID(parent) : 0;
+				const size_t newSiblingIndex = 0;
+
 				if (payload.m_NewEntity)
 				{
 					/* Create new entity */
+					const uint32_t type = (uint32_t)payload.m_EntityID;
+					const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
+					AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 					return;
 				}
 
 				const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 				if (draggingEntity == entity) return;
-				Utils::ECS::EntityID parent = registry.GetParent(entity);
 
 				bool canParent = true;
 				while (parent != 0)
@@ -196,9 +211,7 @@ namespace Glory::Editor
 					Utils::ECS::EntityID oldParent = registry.GetParent(draggingEntity);
 					const UUID toReParent = pDocument->EntityUUID(draggingEntity);
 					const UUID oldParentID = oldParent ? pDocument->EntityUUID(oldParent) : 0;
-					const UUID newParentID = parent ? pDocument->EntityUUID(parent) : 0;
 					const size_t oldSiblingIndex = registry.SiblingIndex(draggingEntity);
-					const size_t newSiblingIndex = 0;
 					Undo::StartRecord("UI Re-parent", pDocument->OriginalDocumentID());
 					Undo::AddAction<SetUIParentAction>(toReParent, oldParentID, newParentID, oldSiblingIndex, newSiblingIndex);
 					Undo::StopRecord();
@@ -220,15 +233,21 @@ namespace Glory::Editor
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
 			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			Utils::ECS::EntityID parent = registry.GetParent(entity);
+			const UUID newParentID = pDocument->EntityUUID(entity);
+			const size_t newSiblingIndex = registry.ChildCount(entity);
+
 			if (payload.m_NewEntity)
 			{
 				/* Create new entity */
+				const uint32_t type = (uint32_t)payload.m_EntityID;
+				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
+				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
 			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			if (draggingEntity == entity) return;
-			Utils::ECS::EntityID parent = registry.GetParent(entity);
 			bool canParent = true;
 			while (parent != 0)
 			{
@@ -241,17 +260,15 @@ namespace Glory::Editor
 			}
 			if (canParent)
 			{
+				parent = registry.GetParent(entity);
 				Utils::ECS::EntityID oldParent = registry.GetParent(draggingEntity);
 				const UUID toReParent = pDocument->EntityUUID(draggingEntity);
 				const UUID oldParentID = oldParent ? pDocument->EntityUUID(oldParent) : 0;
-				const UUID newParentID = pDocument->EntityUUID(entity);
 				const size_t oldSiblingIndex = registry.SiblingIndex(draggingEntity);
-				const size_t newSiblingIndex = registry.ChildCount(entity);
 				Undo::StartRecord("UI Re-parent", pDocument->OriginalDocumentID());
 				Undo::AddAction<SetUIParentAction>(toReParent, oldParentID, newParentID, oldSiblingIndex, newSiblingIndex);
 				Undo::StopRecord();
 
-				parent = registry.GetParent(entity);
 				registry.SetParent(draggingEntity, entity);
 				SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
 			}
@@ -290,15 +307,21 @@ namespace Glory::Editor
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
 			if (dndHash != ResourceTypes::GetHash<UIElementType>()) return;
 			const UIElementType& payload = *(const UIElementType*)pPayload->Data;
+			Utils::ECS::EntityID parent = registry.GetParent(entity);
+			const UUID newParentID = parent ? pDocument->EntityUUID(parent) : 0;
+			const size_t newSiblingIndex = registry.SiblingIndex(entity) + 1;
+
 			if (payload.m_NewEntity)
 			{
 				/* Create new entity */
+				const uint32_t type = (uint32_t)payload.m_EntityID;
+				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
+				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
 			const Utils::ECS::EntityID draggingEntity = payload.m_EntityID;
 			if (draggingEntity == entity) return;
-			Utils::ECS::EntityID parent = registry.GetParent(entity);
 
 			bool canParent = true;
 			while (parent != 0)
@@ -316,10 +339,8 @@ namespace Glory::Editor
 			{
 				parent = registry.GetParent(entity);
 				Utils::ECS::EntityID oldParent = registry.GetParent(draggingEntity);
-				const size_t newSiblingIndex = registry.SiblingIndex(entity) + 1;
 				const UUID toReParent = pDocument->EntityUUID(draggingEntity);
 				const UUID oldParentID = oldParent ? pDocument->EntityUUID(oldParent) : 0;
-				const UUID newParentID = parent ? pDocument->EntityUUID(parent) : 0;
 				const size_t oldSiblingIndex = registry.SiblingIndex(draggingEntity);
 				Undo::StartRecord("UI Re-parent", pDocument->OriginalDocumentID());
 				Undo::AddAction<SetUIParentAction>(toReParent, oldParentID, newParentID, oldSiblingIndex, newSiblingIndex);
