@@ -100,7 +100,9 @@ namespace Glory::Editor
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
 			Utils::YAMLFileRef& file = **pDocumentData;
 
-			pMainWindow->SelectedEntity() = AddUIElementAction::AddElement(pEngine, pDocument, file, typeName, type->m_TypeHash);
+			const size_t siblingIndex = pDocument->Registry().ChildCount(0);
+			pMainWindow->SelectedEntity() =
+				AddUIElementAction::AddElement(pEngine, pDocument, file, typeName, type->m_TypeHash, 0, siblingIndex);
 		}
 
 		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
