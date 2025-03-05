@@ -266,6 +266,13 @@ namespace Glory
 	void UIDocument::DestroyEntity(UUID uuid)
 	{
 		const Utils::ECS::EntityID entity = m_Ids.at(uuid);
+		for (size_t i = 0; i < m_Registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(entity, i);
+			const UUID uuid = m_UUIds.at(child);
+			DestroyEntity(uuid);
+		}
+
 		m_Registry.DestroyEntity(entity);
 		m_Ids.erase(uuid);
 		m_UUIds.erase(entity);

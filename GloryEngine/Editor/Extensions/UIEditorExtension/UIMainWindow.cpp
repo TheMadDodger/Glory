@@ -1,5 +1,6 @@
 #include "UIMainWindow.h"
 #include "UIDocumentImporter.h"
+#include "DeleteUIElementAction.h"
 
 #include <EditorResourceManager.h>
 #include <EditableResource.h>
@@ -13,6 +14,7 @@
 
 #include <UIDocument.h>
 #include <UIDocumentData.h>
+#include <Shortcuts.h>
 
 namespace Glory::Editor
 {
@@ -119,8 +121,10 @@ namespace Glory::Editor
 
 	void UIMainWindow::Initialize()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		Engine* pEngine = pApp->GetEngine();
 		Serializers& serializers = pEngine->GetSerializers();
+		EditorResourceManager& resources = pApp->GetResourceManager();
 
 		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Components"),
 		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
@@ -148,6 +152,16 @@ namespace Glory::Editor
 			serializers.DeserializeProperty(pType, data, file[componentPath]["Properties"]);
 
 			registry.SetEntityDirty(entity);
+		});
+
+		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pEngine, &resources]() {
+			UIDocument* pDocument = CurrentDocument();
+			if (!m_EditingDocument || !pDocument || !m_SelectedEntity) return;
+
+			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
+			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
+			Utils::YAMLFileRef& file = **pDocumentData;
+			DeleteUIElementAction::DeleteElement(pEngine, pDocument, file, m_SelectedEntity);
 		});
 	}
 }

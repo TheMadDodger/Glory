@@ -68,6 +68,52 @@ namespace Glory::Editor
 		}
 	}
 
+	void UIDocumentImporter::DeserializeComponent(Engine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component)
+	{
+		const UUID compUUID = component["UUID"].As<uint64_t>();
+		Utils::NodeValueRef activeNode = component["Active"];
+		const bool active = activeNode.Exists() ? activeNode.As<bool>() : true;
+		const std::string typeName = component["TypeName"].As<std::string>();
+		const uint32_t typeHash = component["TypeHash"].As<uint32_t>();
+
+		Utils::ECS::EntityRegistry& pRegistry = pDocument->Registry();
+
+		void* pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID);
+		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
+		pEngine->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, component["Properties"]);
+
+		Utils::ECS::BaseTypeView* pTypeView = pRegistry.GetTypeView(typeHash);
+		pTypeView->SetActive(entity, active);
+	}
+
+	void UIDocumentImporter::DeserializeEntity(Engine* pEngine, UIDocument* pDocument, Utils::NodeValueRef node)
+	{
+		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
+		const UUID uuid = node["UUID"].As<uint64_t>();
+		const bool active = node["Active"].As<bool>();
+		const std::string name = node["Name"].As<std::string>();
+		const UUID parentUuid = node["Parent"].As<uint64_t>();
+		const Utils::ECS::EntityID entity = pDocument->CreateEmptyEntity(name, uuid);
+		registry.GetEntityView(entity)->Active() = active;
+
+
+		if (parentUuid != NULL)
+		{
+			Utils::ECS::EntityID parent = pDocument->EntityID(parentUuid);
+			registry.SetParent(entity, parent);
+		}
+
+		size_t currentComponentIndex = 0;
+
+		Utils::NodeValueRef components = node["Components"];
+		for (size_t i = 0; i < components.Size(); ++i)
+		{
+			Utils::NodeValueRef component = components[i];
+			DeserializeComponent(pEngine, pDocument, entity, component);
+			++currentComponentIndex;
+		}
+	}
+
     ImportedResource UIDocumentImporter::LoadResource(const std::filesystem::path& path, void*) const
     {
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();

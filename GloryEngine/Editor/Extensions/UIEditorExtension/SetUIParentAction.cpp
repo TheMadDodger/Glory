@@ -23,7 +23,7 @@ namespace Glory::Editor
 	void SetUIParentAction::StoreDocumentState(Engine* pEngine, UIDocument* pDocument, Utils::NodeValueRef entities)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
-		entities.SetSequence();
+		entities.SetMap();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
 		{
 			const Utils::ECS::EntityID child = registry.Child(0, i);

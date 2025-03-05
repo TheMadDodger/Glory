@@ -16,6 +16,8 @@ namespace Glory::Editor
 
 		GLORY_API static void DeserializeComponent(Engine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component);
 		GLORY_API static void DeserializeEntity(Engine* pEngine, UIDocumentData* pDocument, Utils::NodeValueRef node);
+		GLORY_API static void DeserializeComponent(Engine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component);
+		GLORY_API static void DeserializeEntity(Engine* pEngine, UIDocument* pDocument, Utils::NodeValueRef node);
 		GLORY_API static void SerializeEntityRecursive(Engine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
 		GLORY_API static void SerializeEntityRecursive(Engine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
 
