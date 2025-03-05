@@ -6,7 +6,7 @@
 
 namespace Glory::Editor
 {
-    MainWindow::MainWindow()
+    MainWindow::MainWindow(): m_MainWindowIndex(0)
     {
     }
 
@@ -41,10 +41,11 @@ namespace Glory::Editor
 
         m_pClosingEditorWindows.clear();
 
-        std::for_each(m_pActiveEditorWindows.begin(), m_pActiveEditorWindows.end(), [&](EditorWindow* pWindow)
+        const size_t numWindows = m_pActiveEditorWindows.size();
+        for (size_t i = 0; i < numWindows; ++i)
         {
-            pWindow->RenderGUI();
-        });
+            m_pActiveEditorWindows[i]->RenderGUI();
+        }
     }
 
     EditorWindow* MainWindow::FindEditorWindow(const std::type_info& type)

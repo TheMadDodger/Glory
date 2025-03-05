@@ -51,6 +51,9 @@ namespace Glory::Editor
 	protected:
 		GLORY_EDITOR_API void Dockspace(float height);
 
+	protected:
+		size_t m_MainWindowIndex;
+
 	private:
 		friend class MainEditor;
 		friend class EditorWindow;

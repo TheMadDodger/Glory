@@ -19,6 +19,7 @@ namespace Glory::Editor
 
 		const char* m_Name;
 		const std::function<void()> m_Action;
+		std::vector<std::function<void()>> m_MainWindowActions;
 		ImGuiKey m_Key;
 		ImGuiModFlags m_Mods;
 		bool m_Blocked;
@@ -33,6 +34,13 @@ namespace Glory::Editor
 		 * @param name The name of the action
 		 * @param callback The function to bind to the action */
 		static GLORY_EDITOR_API const Shortcut* AddAction(const char* action, std::function<void()> callback);
+
+		/* @brief Adds a window specific action to an existing shortcut.
+		 * If the action does not exist then an error will be thrown.
+		 * @param name The name of the action
+		 * @param index Index of the main window
+		 * @param callback The function to bind to the action */
+		static GLORY_EDITOR_API const Shortcut* AddMainWindowAction(const char* action, size_t index, std::function<void()> callback);
 
 		/* @brief Gets the Shortcut belonging to the action.
 		 * @param action The name of the action to get the shortcut from
@@ -70,7 +78,7 @@ namespace Glory::Editor
 		static void Clear();
 
 		/* @brief Check for triggered shortcuts this frame. */
-		static void Update();
+		static void Update(size_t currentMainWindowIndex);
 
 	private:
 		Shortcuts() = delete;

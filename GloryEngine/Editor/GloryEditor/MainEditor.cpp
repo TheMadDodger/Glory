@@ -174,6 +174,12 @@ namespace Glory::Editor
 		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
 
 		RegisterSettingsEnums(pEngine);
+
+		for (size_t i = 0; i < m_pMainWindows.size(); ++i)
+		{
+			MainWindow* pWindow = m_pMainWindows[i];
+			pWindow->Initialize();
+		}
 	}
 
 	void MainEditor::Destroy()
@@ -315,7 +321,9 @@ namespace Glory::Editor
 
 	void MainEditor::RegisterMainWindow(MainWindow* pWindow)
 	{
+		pWindow->m_MainWindowIndex = m_pMainWindows.size();
 		m_pMainWindows.push_back(pWindow);
+		pWindow->Initialize();
 	}
 
 	void MainEditor::SetupTitleBar()
@@ -451,10 +459,10 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Set As Active Scene", SetActiveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Remove Scene", RemoveSceneCallback, T_Scene);
 		ObjectMenu::AddMenuItem("Reload Scene", ReloadSceneCallback, T_Scene);
-		ObjectMenu::AddMenuItem("Copy", CopyObjectCallback, T_Resource | T_SceneObject | T_Folder, Shortcut_Copy);
-		ObjectMenu::AddMenuItem("Paste", PasteObjectCallback, T_SceneObject | T_Resource | T_ContentBrowser | T_Hierarchy | T_Scene | T_Folder, Shortcut_Paste);
-		ObjectMenu::AddMenuItem("Duplicate", DuplicateObjectCallback, T_SceneObject | T_Resource | T_Folder, Shortcut_Duplicate);
-		ObjectMenu::AddMenuItem("Delete", DeleteObjectCallback, T_SceneObject | T_Resource | T_Folder, Shortcut_Delete);
+		ObjectMenu::AddMenuItemMainWindow("Copy", CopyObjectCallback, T_Resource | T_SceneObject | T_Folder, Shortcut_Copy);
+		ObjectMenu::AddMenuItemMainWindow("Paste", PasteObjectCallback, T_SceneObject | T_Resource | T_ContentBrowser | T_Hierarchy | T_Scene | T_Folder, Shortcut_Paste);
+		ObjectMenu::AddMenuItemMainWindow("Duplicate", DuplicateObjectCallback, T_SceneObject | T_Resource | T_Folder, Shortcut_Duplicate);
+		ObjectMenu::AddMenuItemMainWindow("Delete", DeleteObjectCallback, T_SceneObject | T_Resource | T_Folder, Shortcut_Delete);
 		ObjectMenu::AddMenuItem("Create/New Scene", CreateNewSceneCallback, T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/Empty Object", CreateEmptyObjectCallback, T_SceneObject | T_Scene | T_Hierarchy);
 		ObjectMenu::AddMenuItem("Create/Texture", CreateNewTextureCallback, T_ContentBrowser | T_Resource);
@@ -462,7 +470,7 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/Material", CreateNewMaterialCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Material Instance", CreateNewMaterialInstanceCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
-		ObjectMenu::AddMenuItem("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
+		ObjectMenu::AddMenuItemMainWindow("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
 		ObjectMenu::AddMenuItem("Reimport", ReimportAssetCallback, T_Resource);
 
 		OBJECT_CREATE_MENU(Mesh, MeshRenderer);
@@ -489,7 +497,7 @@ namespace Glory::Editor
 
 	void MainEditor::Update()
 	{
-		Shortcuts::Update();
+		Shortcuts::Update(TabIndex);
 		UpdateWindows();
 	}
 
