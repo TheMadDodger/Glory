@@ -600,6 +600,7 @@ namespace Glory
 		Reflect::RegisterType<ShapeProperty>();
 
 		Reflect::RegisterBasicType<TextureData>("TextureData");
+		Reflect::RegisterBasicType<FontData>("FontData");
 		Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}
 

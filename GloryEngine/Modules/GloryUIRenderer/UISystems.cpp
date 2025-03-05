@@ -39,9 +39,14 @@ namespace Glory
             startTransform = parentTransform.m_Transform;
         }
 
+		const glm::vec2 size{ pComponent.m_Rect.z - pComponent.m_Rect.x,
+			pComponent.m_Rect.w - pComponent.m_Rect.y };
+
         const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), pComponent.m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Rect.x, pComponent.m_Rect.y, 0.0f));
-        pComponent.m_Transform = startTransform * translation * rotation;
+        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Rect.x, pComponent.m_Rect.y, pComponent.m_Depth));
+		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
+		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, pComponent.m_Pivot.y*size.y, 0.0f));
+        pComponent.m_Transform = startTransform*translation*pivotOffset*rotation*glm::inverse(pivotOffset)*scale;
 
         pRegistry->SetEntityDirty(entity, false);
     }
@@ -66,18 +71,12 @@ namespace Glory
 		ImageData* pImage = pTextureData->GetImageData(&assets);
 		if (!pImage) return;
 
-		const uint32_t width = pImage->GetWidth();
-		const uint32_t height = pImage->GetHeight();
-
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 
 		MeshData* pMeshData = pUIRenderer->GetImageMesh();
 		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-
-		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(float(width), float(height), 0.0f));
-
 		ObjectData object;
-		object.Model = transform.m_Transform*scale;
+		object.Model = transform.m_Transform;
 		object.Projection = pDocument->Projection();
 
 		Material* pMaterial = pGraphics->UseMaterial(pUIRenderer->PrepassMaterial());
@@ -86,7 +85,7 @@ namespace Glory
 		pMaterial->SetObjectData(object);
 
 		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
-		if (pTexture) pMaterial->SetTexture("textSampler", pTexture);
+		if (pTexture) pMaterial->SetTexture("texSampler", pTexture);
 
 		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
@@ -104,19 +103,22 @@ namespace Glory
 		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
 		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		AssetManager& assets = pEngine->GetAssetManager();
 
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 
 		TextRenderData textData;
-		textData.m_Alignment = Alignment::Left;
-		textData.m_Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		textData.m_Scale = 1.0f;
-		textData.m_Text = pComponent.m_Text;
+		textData.m_FontID = pComponent.m_Font.AssetUUID();
 		textData.m_ObjectID = entity;
+		textData.m_Text = pComponent.m_Text;
 		textData.m_TextDirty = pComponent.m_Dirty;
+		textData.m_Scale = pComponent.m_Scale;
+		textData.m_Alignment = pComponent.m_Alignment;
+		textData.m_TextWrap = pComponent.m_WrapWidth;
+		textData.m_Color = pComponent.m_Color;
 		pComponent.m_Dirty = false;
 
-		FontData* pFont = pUIRenderer->GetFont();
+		FontData* pFont = pComponent.m_Font.Get(&assets);
 		if (!pFont) return;
 		MeshData* pMeshData = pDocument->GetTextMesh(textData, pFont);
 		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
@@ -125,7 +127,7 @@ namespace Glory
 		object.Model = transform.m_Transform;
 		object.Projection = pDocument->Projection();
 
-		Material* pMaterial = pGraphics->UseMaterial(pUIRenderer->PrepassMaterial());
+		Material* pMaterial = pGraphics->UseMaterial(pUIRenderer->TextPrepassMaterial());
 
 		pMaterial->SetProperties(pEngine);
 		pMaterial->SetObjectData(object);

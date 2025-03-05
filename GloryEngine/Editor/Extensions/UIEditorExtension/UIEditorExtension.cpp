@@ -72,13 +72,6 @@ namespace Glory::Editor
 			finalPath.replace_extension("gui");
 			if (std::filesystem::exists(finalPath)) return;
 			UIDocumentData* pUIDocument = new UIDocumentData();
-			UIEntity entity = pUIDocument->Create<UIText>();
-			entity.GetComponent<UIText>().m_Text = "Hello World!";
-			entity.GetComponent<UITransform>().m_Rect = glm::vec4(200.0f, 400.0f, 0.0f, 0.0f);
-			UIEntity imageEntity = pUIDocument->Create<UIImage>();
-			//imageEntity.GetComponent<UIImage>().m_Image = "Hello World!";
-			imageEntity.GetComponent<UITransform>().m_Rect = glm::vec4(400.0f, 600.0f, 0.0f, 0.0f);
-
 			EditorAssetDatabase::CreateAsset(pUIDocument, finalPath.string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();
