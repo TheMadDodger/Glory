@@ -13,14 +13,17 @@ namespace Glory::Editor
 		if (m_OldValue.IsNull())
 		{
 			node.Erase();
+			Undo::TriggerChangeHandler(m_File, m_PropertyPath);
 			return;
 		}
 		if (m_NewValue.IsNull() && node.Parent().IsSequence())
 		{
 			node.Parent().PushBack(m_OldValue);
+			Undo::TriggerChangeHandler(m_File, m_PropertyPath);
 			return;
 		}
 		node.Set(m_OldValue);
+		Undo::TriggerChangeHandler(m_File, m_PropertyPath);
 	}
 
 	void YAMLAction::OnRedo(const ActionRecord& actionRecord)
@@ -29,13 +32,16 @@ namespace Glory::Editor
 		if (m_NewValue.IsNull())
 		{
 			node.Erase();
+			Undo::TriggerChangeHandler(m_File, m_PropertyPath);
 			return;
 		}
 		if (m_OldValue.IsNull() && node.Parent().IsSequence())
 		{
 			node.Parent().PushBack(m_NewValue);
+			Undo::TriggerChangeHandler(m_File, m_PropertyPath);
 			return;
 		}
 		node.Set(m_NewValue);
+		Undo::TriggerChangeHandler(m_File, m_PropertyPath);
 	}
 }

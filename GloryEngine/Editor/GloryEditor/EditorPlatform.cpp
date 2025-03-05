@@ -13,7 +13,8 @@
 
 namespace Glory::Editor
 {
-	ImFont* EditorPlatform::LargeFont;
+	ImFont* EditorPlatform::LargeFont = nullptr;
+	ImFont* EditorPlatform::HugeFont = nullptr;
 
 	EditorPlatform::EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl):
 		m_pWindowImpl(pWindowImpl), m_pRenderImpl(pRenderImpl),
@@ -140,6 +141,16 @@ namespace Glory::Editor
 			m_pRenderImpl->FramePresent();
 	}
 
+	ImFont* EditorPlatform::GetLargeFont()
+	{
+		return LargeFont;
+	}
+
+	ImFont* EditorPlatform::GetHugeFont()
+	{
+		return HugeFont;
+	}
+
 	void EditorPlatform::LoadFonts()
 	{
 		auto& io = ImGui::GetIO();
@@ -158,5 +169,12 @@ namespace Glory::Editor
 		ImFont* pIconBrandsFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/FA/" FONT_ICON_FILE_NAME_FAB, 14.0f, &config, brandIconRanges);
 
 		LargeFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/PT_Sans/PTSans-Regular.ttf", 24.0f);
+		HugeFont = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/PT_Sans/PTSans-Regular.ttf", 64.0f);
+
+		config.DstFont = HugeFont;
+		config.MergeMode = true;
+		config.PixelSnapH = true;
+		config.GlyphMinAdvanceX = 14.0f;
+		ImFont* pIconFontHuge = io.Fonts->AddFontFromFileTTF("./EditorAssets/Fonts/FA/" FONT_ICON_FILE_NAME_FAS, 64.0f, &config, iconRanges);
 	}
 }

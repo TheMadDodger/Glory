@@ -72,6 +72,22 @@ namespace Glory
 		m_Frame.push_back(std::move(data));
 	}
 
+	void UIRendererModule::DrawDocument(UIDocument* pDocument, const UIRenderData& data)
+	{
+		pDocument->m_Registry.SetUserData(pDocument);
+		pDocument->m_pRenderer = this;
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		RenderTexture* pRenderTexture = pDocument->m_pUITexture;
+		pDocument->m_Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
+		pDocument->Update();
+
+		pRenderTexture->BindForDraw();
+		pGraphics->Clear({ 0.0f, 0.0f, 0.0f, 1.0f });
+		pDocument->Draw();
+		pRenderTexture->UnBindForDraw();
+	}
+
 	FontData* UIRendererModule::GetFont()
 	{
 		ModuleSettings& settings = Settings();
@@ -86,6 +102,11 @@ namespace Glory
 	MaterialData* UIRendererModule::PrepassMaterial()
 	{
 		return m_pUIPrepassMaterial;
+	}
+
+	MeshData* UIRendererModule::GetImageMesh()
+	{
+		return m_pImageMesh.get();
 	}
 
 	void UIRendererModule::Initialize()
@@ -118,6 +139,7 @@ namespace Glory
 		/* Text */
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Update, UITextSystem::OnUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);
+		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
@@ -127,6 +149,30 @@ namespace Glory
 		pRenderer->AddRenderPass(RenderPassType::RP_CameraPostpass, { "UI Overlay Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			UIOverlayPass(camera, frame);
 		} });
+
+		m_pImageMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
+
+		const float xpos = 0.0f;
+		const float ypos = 0.0f;
+
+		const float w = 1.0f;
+		const float h = 1.0f;
+
+		const glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+		VertexPosColorTex vertices[4] = {
+			{ { xpos, ypos + h, }, color, {0.0f, 0.0f}},
+			{ { xpos, ypos, }, color, { 0.0f, 1.0f } },
+			{ { xpos + w, ypos, }, color, { 1.0f, 1.0f } },
+			{ { xpos + w, ypos + h, }, color, { 1.0f, 0.0f }, }
+		};
+
+		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[0]));
+		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
+		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
+		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
+		m_pImageMesh->AddFace(0, 1, 2, 3);
 	}
 
 	void UIRendererModule::PostInitialize()
@@ -257,7 +303,6 @@ namespace Glory
 			uiTextureInfo.Width = uint32_t(data.m_Resolution.x);
 			uiTextureInfo.Height = uint32_t(data.m_Resolution.y);
 			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-			uiTextureInfo.HasDepth = false;
 
 			newDocument.m_pUITexture = pResourceManager->CreateRenderTexture(uiTextureInfo);
 			newDocument.m_pRenderer = this;

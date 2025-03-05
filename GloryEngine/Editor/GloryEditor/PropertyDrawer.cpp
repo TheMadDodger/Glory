@@ -231,6 +231,17 @@ namespace Glory::Editor
 			return drawer->Draw(file, path, elementTypeHash, flags);
 		}
 
+		it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
+		{
+			return propertyDrawer->GetPropertyTypeHash() == elementTypeHash;
+		});
+
+		if (it != m_PropertyDrawers.end())
+		{
+			PropertyDrawer* drawer = *it;
+			return drawer->Draw(file, path, elementTypeHash, flags);
+		}
+
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
 		if (pTypeData)
 		{

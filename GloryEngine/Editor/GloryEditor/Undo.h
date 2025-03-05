@@ -2,6 +2,8 @@
 #include "GloryEditor.h"
 #include <string>
 #include <vector>
+#include <functional>
+#include <map>
 #include <UUID.h>
 #include <NodeRef.h>
 
@@ -70,6 +72,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API const size_t CurrentRewindIndex();
 		static GLORY_EDITOR_API void JumpTo(size_t historyRewindIndex);
 		static GLORY_EDITOR_API std::string_view GetRecordingName();
+		static GLORY_EDITOR_API void RegisterChangeHandler(std::string& extension, std::string& pathComponent, std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)> handler);
+		static GLORY_EDITOR_API void TriggerChangeHandler(Utils::YAMLFileRef& file, const std::filesystem::path& path);
 
 		template<typename T>
 		static void ApplyYAMLEdit(Utils::YAMLFileRef& file, const std::filesystem::path& path, const T& oldValue, const T& newValue)
@@ -96,5 +100,8 @@ namespace Glory::Editor
 
 		static std::vector<ActionRecord> m_ActionRecords;
 		static size_t m_RewindIndex;
+		static std::map<std::string, std::map<std::string,
+			std::vector<std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)>>>>
+			m_ChangeHandlers;
 	};
 }

@@ -1,7 +1,11 @@
 #include "UIEditorExtension.h"
 #include "UIEditor.h"
 #include "UIDocumentImporter.h"
+#include "UIDocumentTumbnailGenerator.h"
 #include "UIMainWindow.h"
+#include "UIElementInspector.h"
+#include "UIElementsGraphWindow.h"
+#include "AddUIElementWindow.h"
 
 #include <SceneManager.h>
 #include <UIDocumentData.h>
@@ -19,6 +23,7 @@
 #include <CreateEntityObjectsCallbacks.h>
 #include <CreateObjectAction.h>
 #include <EntityEditor.h>
+#include <Tumbnail.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -26,7 +31,10 @@ EXTENSION_CPP(UIEditorExtension)
 
 namespace Glory::Editor
 {
-	static constexpr char* Shortcut_Window_UIEditor = "Open UI Editor";
+	static constexpr char* Shortcut_Window_UIEditor = "Open UI Preview";
+	static constexpr char* Shortcut_Window_UIGraph = "Open UI Graph";
+	static constexpr char* Shortcut_Window_UIInspector = "Open UI Inspector";
+	static constexpr char* Shortcut_Window_UILibrary = "Open UI Library";
 
 	UIDocumentImporter importer;
 	UIMainWindow UIEditorMainWindow;
@@ -86,10 +94,21 @@ namespace Glory::Editor
 		editor.RegisterMainWindow(&UIEditorMainWindow);
 		Engine* pEngine = pApp->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
+		Reflect::RegisterType<UIElementType>();
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
-		MenuBar::AddMenuItem("Window/UI Editor", [&editor]() { editor.GetWindow<UIMainWindow, UIEditor>(); }, NULL, Shortcut_Window_UIEditor);
+		MenuBar::AddMenuItem("Window/UI Editor/Preview", [&editor]() { editor.GetWindow<UIMainWindow, UIEditor>(); }, NULL, Shortcut_Window_UIEditor);
+		MenuBar::AddMenuItem("Window/UI Editor/Inspector", [&editor]() { editor.GetWindow<UIMainWindow, UIElementInspector>(); }, NULL, Shortcut_Window_UIInspector);
+		MenuBar::AddMenuItem("Window/UI Editor/Graph", [&editor]() { editor.GetWindow<UIMainWindow, UIElementsGraphWindow>(); }, NULL, Shortcut_Window_UIGraph);
+		MenuBar::AddMenuItem("Window/UI Editor/Library", [&editor]() { editor.GetWindow<UIMainWindow, AddUIElementWindow>(); }, NULL, Shortcut_Window_UILibrary);
+		Tumbnail::AddGenerator<UIDocumentTumbnailGenerator>();
+
+		UIMainWindow* pMainWindow = editor.FindMainWindow<UIMainWindow>();
+		pMainWindow->GetWindow<UIEditor>();
+		pMainWindow->GetWindow<UIElementInspector>();
+		pMainWindow->GetWindow<UIElementsGraphWindow>();
+		pMainWindow->GetWindow<AddUIElementWindow>();
 
 		ObjectMenu::AddMenuItem("Create/UI Document", OnCreateUIDocument, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 

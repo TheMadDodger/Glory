@@ -28,17 +28,31 @@ namespace Glory
     /** @brief UI Image renderer */
     struct UIImage
     {
-        REFLECTABLE(UIImage,
-            (AssetReference<TextureData>)(m_Image)
-        );
+    AssetReference<TextureData> m_Image;
+    typedef UIImage TypeName;
+    public:
+        static const TypeData* GetTypeData() {
+            static const char* typeNameString = "UIImage";
+            static const uint32_t TYPE_HASH = Reflect::Hash<UIImage>();
+            static const int NUM_ARGS = 1;
+            static const FieldData pFields[] = { FieldData(Reflect::Hash(typeid(m_Image)), "m_Image", "AssetReference<TextureData>", ((::size_t) & reinterpret_cast<char const volatile&>((((TypeName*)0)->m_Image))), sizeof(AssetReference<TextureData>)), }; static const TypeData pTypeData = TypeData(typeNameString, pFields, uint32_t(CustomTypeHash::Struct), TYPE_HASH, NUM_ARGS, -1, 0); return &pTypeData;
+    } static int DataBufferOffset() {
+        return -1;
+    } static int DataBufferSize() {
+        return 0;
+    };
     };
 
     /** @brief UI Text renderer */
     struct UIText
     {
+        UIText() : m_Text("For Glory!"), m_Dirty(true) {}
+
         REFLECTABLE(UIText,
             (std::string)(m_Text)
         );
+
+        bool m_Dirty;
     };
 
     struct UIPanel

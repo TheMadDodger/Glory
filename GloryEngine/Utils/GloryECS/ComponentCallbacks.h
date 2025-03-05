@@ -17,6 +17,7 @@ namespace Glory::Utils::ECS
 		OnValidate,
 		OnEnable,
 		OnDisable,
+		OnDirty,
 		Start,
 		Stop,
 		Update,

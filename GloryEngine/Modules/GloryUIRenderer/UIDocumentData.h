@@ -26,10 +26,10 @@ namespace Glory
         GLORY_API virtual ~UIDocumentData();
 
         template<typename T>
-        UIEntity Create()
+        UIEntity Create(UUID uuid = UUID())
         {
             const std::string_view name = T::GetTypeData()->TypeName();
-            Utils::ECS::EntityID entity = CreateEntity(name);
+            Utils::ECS::EntityID entity = CreateEntity(name, uuid);
             m_Registry.AddComponent<T>(entity);
 
             UIEntity uiEntity{ this, entity };
@@ -38,17 +38,22 @@ namespace Glory
 
         GLORY_API Utils::ECS::EntityRegistry& GetRegistry();
         GLORY_API const std::string& Name(Utils::ECS::EntityID entity) const;
-        GLORY_API Utils::ECS::EntityID CreateEmptyEntity(std::string_view name);
-        GLORY_API Utils::ECS::EntityID CreateEntity(std::string_view name);
+        GLORY_API Utils::ECS::EntityID CreateEmptyEntity(std::string_view name, UUID uuid = UUID());
+        GLORY_API Utils::ECS::EntityID CreateEntity(std::string_view name, UUID uuid = UUID());
+
+        GLORY_API UUID EntityUUID(Utils::ECS::EntityID entity) const;
+        GLORY_API Utils::ECS::EntityID EntityID(UUID uuid) const;
 
     private:
-
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 
     private:
+        friend class UIDocument;
         friend struct UIEntity;
         Utils::ECS::EntityRegistry m_Registry;
+        std::map<UUID, Utils::ECS::EntityID> m_Ids;
+        std::map<Utils::ECS::EntityID, UUID> m_UUIds;
         std::map<Utils::ECS::EntityID, std::string> m_Names;
     };
 }

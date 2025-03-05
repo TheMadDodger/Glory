@@ -2,8 +2,16 @@
 #include <EditorWindow.h>
 #include <AudioData.h>
 
+namespace Glory
+{
+	class UIDocumentData;
+	class UIDocument;
+}
+
 namespace Glory::Editor
 {
+	class UIMainWindow;
+
 	class UIEditor : public EditorWindowTemplate<UIEditor>
 	{
 	public:
@@ -14,5 +22,8 @@ namespace Glory::Editor
 		virtual void OnGUI() override;
 		virtual void Update() override;
 		virtual void Draw() override;
+
+	private:
+		UIMainWindow* GetMainWindow();
 	};
 }

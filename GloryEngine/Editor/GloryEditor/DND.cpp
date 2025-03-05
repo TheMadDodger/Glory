@@ -60,8 +60,18 @@ namespace Glory::Editor
                 return true;
             }
 
+            std::string_view name;
             ResourceType* pResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetResourceType(type);
-            const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(pResource->Name().c_str(), m_DNDFlags);
+            if (!pResource)
+            {
+                const TypeData* pType = Reflect::GetTyeData(type);
+                name = pType->TypeName();
+            }
+            else
+            {
+                name = pResource->Name();
+            }
+            const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(name.data(), m_DNDFlags);
             if (!payload) continue;
             callback(type, payload);
             return true;

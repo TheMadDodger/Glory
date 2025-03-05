@@ -1,5 +1,6 @@
 #include "UIDocument.h"
 #include "UIDocumentData.h"
+#include "UIComponents.h"
 
 #include <FontData.h>
 #include <MeshData.h>
@@ -19,7 +20,10 @@ namespace Glory
 		}
 	}
 
-	UIDocument::UIDocument(UIDocumentData* pDocument): m_OriginalDocumentID(pDocument->GetUUID()), m_pUITexture(nullptr)
+	UIDocument::UIDocument(UIDocumentData* pDocument):
+		m_OriginalDocumentID(pDocument->GetUUID()), m_pUITexture(nullptr),
+		m_Name(pDocument->m_Name), m_Ids(pDocument->m_Ids),
+		m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
@@ -44,6 +48,11 @@ namespace Glory
 	{
 		m_Registry.SetUserData(this);
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Draw, NULL);
+	}
+
+	UUID UIDocument::OriginalDocumentID() const
+	{
+		return m_OriginalDocumentID;
 	}
 
 	UIRendererModule* UIDocument::Renderer()
@@ -206,35 +215,72 @@ namespace Glory
 		return iter->second.get();
 	}
 
-	MeshData* UIDocument::GetImageMesh()
+	void UIDocument::SetRenderTexture(RenderTexture* pTexture)
 	{
-		if (!m_pImageMesh)
+		m_pUITexture = pTexture;
+	}
+
+	Utils::ECS::EntityRegistry& UIDocument::Registry()
+	{
+		return m_Registry;
+	}
+
+	std::string_view UIDocument::Name() const
+	{
+		return m_Name;
+	}
+
+	std::string_view UIDocument::Name(Utils::ECS::EntityID entity) const
+	{
+		return m_Names.at(entity);
+	}
+
+	UUID UIDocument::EntityUUID(Utils::ECS::EntityID entity) const
+	{
+		return m_UUIds.at(entity);
+	}
+
+	Utils::ECS::EntityID UIDocument::EntityID(UUID uuid) const
+	{
+		return m_Ids.at(uuid);
+	}
+
+	Utils::ECS::EntityID UIDocument::CreateEmptyEntity(std::string_view name, UUID uuid)
+	{
+		Utils::ECS::EntityID entity = m_Registry.CreateEntity();
+		m_UUIds.emplace(entity, uuid);
+		m_Ids.emplace(uuid, entity);
+		m_Names.emplace(entity, name);
+		return entity;
+	}
+
+	Utils::ECS::EntityID UIDocument::CreateEntity(std::string_view name, UUID uuid)
+	{
+		Utils::ECS::EntityID entity = m_Registry.CreateEntity<UITransform>();
+		m_UUIds.emplace(entity, uuid);
+		m_Ids.emplace(uuid, entity);
+		m_Names.emplace(entity, name);
+		return entity;
+	}
+
+	void UIDocument::DestroyEntity(UUID uuid)
+	{
+		const Utils::ECS::EntityID entity = m_Ids.at(uuid);
+		for (size_t i = 0; i < m_Registry.ChildCount(entity); ++i)
 		{
-			m_pImageMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
-				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
-
-			const float xpos = 0.0f;
-			const float ypos = 0.0f;
-
-			const float w = 1.0f;
-			const float h = 1.0f;
-
-			const glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
-
-			VertexPosColorTex vertices[4] = {
-				{ { xpos, ypos + h, }, color, {0.0f, 0.0f}},
-				{ { xpos, ypos, }, color, { 0.0f, 1.0f } },
-				{ { xpos + w, ypos, }, color, { 1.0f, 1.0f } },
-				{ { xpos + w, ypos + h, }, color, { 1.0f, 0.0f }, }
-			};
-
-			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[0]));
-			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
-			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
-			m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
-			m_pImageMesh->AddFace(0, 1, 2, 3);
+			const Utils::ECS::EntityID child = m_Registry.Child(entity, i);
+			const UUID uuid = m_UUIds.at(child);
+			DestroyEntity(uuid);
 		}
 
-		return m_pImageMesh.get();
+		m_Registry.DestroyEntity(entity);
+		m_Ids.erase(uuid);
+		m_UUIds.erase(entity);
+		m_Names.erase(entity);
+	}
+
+	bool UIDocument::EntityExists(UUID uuid)
+	{
+		return m_Ids.find(uuid) != m_Ids.end();
 	}
 }

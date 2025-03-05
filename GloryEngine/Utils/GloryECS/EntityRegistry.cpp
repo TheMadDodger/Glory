@@ -259,6 +259,7 @@ namespace Glory::Utils::ECS
 
 		if (itor1 == m_pEntityViews.end()) return false;
 		const Utils::ECS::EntityID oldParent = itor1->second->m_Parent;
+		if (oldParent == parent) return true;
 		if (oldParent)
 		{
 			auto& oldParentChildren = m_pEntityViews.at(oldParent)->m_Children;
@@ -391,6 +392,8 @@ namespace Glory::Utils::ECS
 		m_EntityDirty.Set(entity, dirty);
 		
 		if (!dirty) return;
+
+		InvokeAll(InvocationType::OnDirty, { entity });
 
 		/* Must set all children as dirty as well! */
 		for (size_t i = 0; i < pView->ChildCount(); ++i)
