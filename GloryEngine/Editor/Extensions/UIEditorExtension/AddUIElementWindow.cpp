@@ -113,10 +113,10 @@ namespace Glory::Editor
 		ImGui::EndChild();
 	}
 
-	void DrawCategories()
+	void DrawCategories(float height)
 	{
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::BeginChild("Categories", ImVec2(0, 0), false, window_flags);
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
+		ImGui::BeginChild("Categories", ImVec2(0, height), false, window_flags);
 		for (size_t i = 0; i < ElementCategories.size(); ++i)
 		{
 			ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAvailWidth;
@@ -128,10 +128,10 @@ namespace Glory::Editor
 		ImGui::EndChild();
 	}
 
-	void DrawElements(UIMainWindow* pMainWindow)
+	void DrawElements(UIMainWindow* pMainWindow, float height)
 	{
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::BeginChild("Elements", ImVec2(0, 0), true, window_flags);
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
+		ImGui::BeginChild("Elements", ImVec2(0, height), false, window_flags);
 
 		static const float iconSize = 64.0f;
 
@@ -162,16 +162,14 @@ namespace Glory::Editor
 	void AddUIElementWindow::OnGUI()
 	{
 		UIMainWindow* pMainWindow = GetMainWindow();
+		const float height = ImGui::GetContentRegionAvail().y - 10.0f;
 
-		const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing() + 4.0f;
-		static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable;// | ImGuiTableFlags_BordersOuter;// | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody;
-
-		if (ImGui::BeginTable("ElementsTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
+		if (ImGui::BeginTable("ElementsTable", 2, ImGuiTableFlags_Resizable))
 		{
 			ImGui::TableNextColumn();
-			DrawCategories();
+			DrawCategories(height);
 			ImGui::TableNextColumn();
-			DrawElements(pMainWindow);
+			DrawElements(pMainWindow, height);
 			ImGui::EndTable();
 		}
 	}
