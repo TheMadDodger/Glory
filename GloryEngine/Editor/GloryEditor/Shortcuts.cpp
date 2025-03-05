@@ -28,6 +28,23 @@ namespace Glory::Editor
 		return &m_Shortcuts.at(action);
 	}
 
+	const Shortcut* Shortcuts::AddMainWindowAction(const char* action, size_t index, std::function<void()> callback)
+	{
+		auto& iter = m_Shortcuts.find(action);
+
+		if (iter == m_Shortcuts.end())
+		{
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(std::string("Shortcut action ") + action + " does not exist.");
+			return nullptr;
+		}
+
+		if (iter->second.m_MainWindowActions.size() <= index)
+			iter->second.m_MainWindowActions.resize(index + 1, NULL);
+
+		iter->second.m_MainWindowActions[index] = callback;
+		return &iter->second;
+	}
+
 	const Shortcut* Shortcuts::GetShortcut(std::string_view action)
 	{
 		if (m_Shortcuts.find(action) == m_Shortcuts.end()) return nullptr;
@@ -128,7 +145,7 @@ namespace Glory::Editor
 		m_CurrentBlockedKeys.clear();
 	}
 
-	void Shortcuts::Update()
+	void Shortcuts::Update(size_t currentMainWindowIndex)
 	{
 		/* If any ImGui item is active we want to ignore all shortcuts */
 		if (ImGui::IsAnyItemActive())
@@ -157,7 +174,16 @@ namespace Glory::Editor
 				continue;
 			}
 
-			itor->second.m_Action();
+			if (itor->second.m_MainWindowActions.size() > currentMainWindowIndex)
+			{
+				auto& mainWindowCallback = itor->second.m_MainWindowActions[currentMainWindowIndex];
+				if (mainWindowCallback)
+				{
+					mainWindowCallback();
+					return;
+				}
+			}
+			if (itor->second.m_Action) itor->second.m_Action();
 		}
 
 		m_CurrentBlockedKeys.clear();

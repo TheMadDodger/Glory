@@ -52,6 +52,7 @@ namespace Glory::Editor
 	public:
 		static GLORY_EDITOR_API void Open(Object* pObject, ObjectMenuType forceMenuType);
 		static GLORY_EDITOR_API void AddMenuItem(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus, std::string_view shortcut = "");
+		static GLORY_EDITOR_API void AddMenuItemMainWindow(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus, std::string_view shortcut = "");
 
 	private:
 		static void OnGUI();

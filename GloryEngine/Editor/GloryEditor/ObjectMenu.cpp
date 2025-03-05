@@ -32,6 +32,17 @@ namespace Glory::Editor
 			Shortcuts::AddAction(shortcut.data(), std::bind(&ObjectMenuItemData::ShortcutCallback, m_MenuItems[index]));
 	}
 
+	void ObjectMenu::AddMenuItemMainWindow(const std::string& path, std::function<void(Object*, const ObjectMenuType&)> func, const ObjectMenuTypeFlags& relevantMenus, std::string_view shortcut)
+	{
+		const size_t index = m_MenuItems.size();
+		m_MenuItems.push_back(ObjectMenuItemData(path, func, (ObjectMenuType)relevantMenus));
+		if (!shortcut.empty())
+		{
+			Shortcuts::AddAction(shortcut.data(), NULL);
+			Shortcuts::AddMainWindowAction(shortcut.data(), 0, std::bind(&ObjectMenuItemData::ShortcutCallback, m_MenuItems[index]));
+		}
+	}
+
 	void ObjectMenu::OnGUI()
 	{
 		if (m_Open)
