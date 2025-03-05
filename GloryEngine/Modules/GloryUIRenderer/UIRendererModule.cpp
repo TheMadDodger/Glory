@@ -45,7 +45,9 @@ namespace Glory
 		ModuleSettings& settings = Settings();
 
 		const size_t start = references.size();
-		references.push_back(settings.Value<uint64_t>("UI Pipeline"));
+		references.push_back(settings.Value<uint64_t>("UI Prepass Pipeline"));
+		references.push_back(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
+		references.push_back(settings.Value<uint64_t>("UI Overlay Pipeline"));
 		const size_t end = references.size();
 
 		for (size_t i = start; i < end; ++i)
@@ -88,20 +90,14 @@ namespace Glory
 		pRenderTexture->UnBindForDraw();
 	}
 
-	FontData* UIRendererModule::GetFont()
-	{
-		ModuleSettings& settings = Settings();
-		const UUID fontID = settings.Value<uint64_t>("Font");
-		if (fontID == 0) return nullptr;
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(fontID);
-		if (!pResource) return nullptr;
-		FontData* pFont = static_cast<FontData*>(pResource);
-		return pFont;
-	}
-
 	MaterialData* UIRendererModule::PrepassMaterial()
 	{
 		return m_pUIPrepassMaterial;
+	}
+
+	MaterialData* UIRendererModule::TextPrepassMaterial()
+	{
+		return m_pUITextPrepassMaterial;
 	}
 
 	MeshData* UIRendererModule::GetImageMesh()
@@ -179,10 +175,13 @@ namespace Glory
 	{
 		const ModuleSettings& settings = Settings();
 		const UUID uiPrepassPipeline = settings.Value<uint64_t>("UI Prepass Pipeline");
+		const UUID uiTextPrepassPipeline = settings.Value<uint64_t>("UI Text Prepass Pipeline");
 		const UUID uiOverlayPipeline = settings.Value<uint64_t>("UI Overlay Pipeline");
 
 		m_pUIPrepassMaterial = new MaterialData();
 		m_pUIPrepassMaterial->SetPipeline(uiPrepassPipeline);
+		m_pUITextPrepassMaterial = new MaterialData();
+		m_pUITextPrepassMaterial->SetPipeline(uiTextPrepassPipeline);
 		m_pUIOverlayMaterial = new MaterialData();
 		m_pUIOverlayMaterial->SetPipeline(uiOverlayPipeline);
 	}
@@ -281,8 +280,8 @@ namespace Glory
 	void UIRendererModule::LoadSettings(ModuleSettings& settings)
 	{
 		settings.RegisterAssetReference<PipelineData>("UI Prepass Pipeline", 102);
+		settings.RegisterAssetReference<PipelineData>("UI Text Prepass Pipeline", 107);
 		settings.RegisterAssetReference<PipelineData>("UI Overlay Pipeline", 105);
-		settings.RegisterAssetReference<FontData>("Font", 0);
 	}
 
 	UIDocument& UIRendererModule::GetDocument(const UIRenderData& data, UIDocumentData* pDocument)
@@ -299,7 +298,7 @@ namespace Glory
 			UIDocument& newDocument = m_Documents.at(id);
 
 			RenderTextureCreateInfo uiTextureInfo;
-			uiTextureInfo.HasDepth = false;
+			uiTextureInfo.HasDepth = true;
 			uiTextureInfo.Width = uint32_t(data.m_Resolution.x);
 			uiTextureInfo.Height = uint32_t(data.m_Resolution.y);
 			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));

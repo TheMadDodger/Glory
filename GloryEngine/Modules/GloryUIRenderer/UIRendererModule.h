@@ -43,8 +43,8 @@ namespace Glory
 
 		GLORY_API void DrawDocument(UIDocument* pDocument, const UIRenderData& data);
 
-		GLORY_API FontData* GetFont();
 		GLORY_API MaterialData* PrepassMaterial();
+		GLORY_API MaterialData* TextPrepassMaterial();
 		GLORY_API MeshData* GetImageMesh();
 
 		GLORY_MODULE_VERSION_H(0,1,0);
@@ -63,6 +63,7 @@ namespace Glory
 
 	private:
 		MaterialData* m_pUIPrepassMaterial = nullptr;
+		MaterialData* m_pUITextPrepassMaterial = nullptr;
 		MaterialData* m_pUIOverlayMaterial = nullptr;
 
 		Utils::ECS::ComponentTypes* m_pComponentTypes = nullptr;

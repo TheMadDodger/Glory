@@ -1,9 +1,11 @@
 #pragma once
 #include "UIDocumentData.h"
 
+#include <RenderData.h>
 #include <Reflection.h>
 #include <AssetReference.h>
 #include <TextureData.h>
+#include <FontData.h>
 
 #include <glm/glm.hpp>
 
@@ -15,9 +17,14 @@ namespace Glory
     /** @brief Transform for UI components */
     struct UITransform
     {
-        UITransform() : m_Rotation(0.0f), m_IsDirty(false) {}
+        UITransform() : m_Rect(0.0f, 0.0f, 100.0f, 100.0f),
+            m_Pivot(0.0f, 0.0f), m_Depth(0.0f),
+            m_Rotation(0.0f), m_IsDirty(false) {}
+
         REFLECTABLE(UITransform,
             (glm::vec4)(m_Rect),
+            (glm::vec2)(m_Pivot),
+            (float)(m_Depth),
             (float)(m_Rotation)
         );
 
@@ -28,30 +35,26 @@ namespace Glory
     /** @brief UI Image renderer */
     struct UIImage
     {
-    AssetReference<TextureData> m_Image;
-    typedef UIImage TypeName;
-    public:
-        static const TypeData* GetTypeData() {
-            static const char* typeNameString = "UIImage";
-            static const uint32_t TYPE_HASH = Reflect::Hash<UIImage>();
-            static const int NUM_ARGS = 1;
-            static const FieldData pFields[] = { FieldData(Reflect::Hash(typeid(m_Image)), "m_Image", "AssetReference<TextureData>", ((::size_t) & reinterpret_cast<char const volatile&>((((TypeName*)0)->m_Image))), sizeof(AssetReference<TextureData>)), }; static const TypeData pTypeData = TypeData(typeNameString, pFields, uint32_t(CustomTypeHash::Struct), TYPE_HASH, NUM_ARGS, -1, 0); return &pTypeData;
-    } static int DataBufferOffset() {
-        return -1;
-    } static int DataBufferSize() {
-        return 0;
-    };
+        REFLECTABLE(UIImage,
+            (AssetReference<TextureData>)(m_Image)
+        );
     };
 
     /** @brief UI Text renderer */
     struct UIText
     {
-        UIText() : m_Text("For Glory!"), m_Dirty(true) {}
+        UIText() : m_Font(0), m_Text("Hello World!"), m_Scale(0.01f),
+            m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Alignment(Alignment::Left),
+            m_WrapWidth(0.0f), m_Dirty(true) {}
 
         REFLECTABLE(UIText,
-            (std::string)(m_Text)
+            (AssetReference<FontData>)(m_Font),
+            (std::string)(m_Text),
+            (float)(m_Scale),
+            (glm::vec4)(m_Color),
+            (Alignment)(m_Alignment),
+            (float)(m_WrapWidth)
         );
-
         bool m_Dirty;
     };
 

@@ -69,7 +69,7 @@ namespace Glory::Editor
 		m_pDocuments.push_back(new UIDocument(&document));
 
 		RenderTextureCreateInfo uiTextureInfo;
-		uiTextureInfo.HasDepth = false;
+		uiTextureInfo.HasDepth = true;
 		uiTextureInfo.Width = m_Resolution.x;
 		uiTextureInfo.Height = m_Resolution.y;
 		uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
