@@ -115,10 +115,15 @@ namespace Glory::Editor
 
 	size_t MainEditor::m_SaveSceneIndex = 0;
 	float MainEditor::MENUBAR_SIZE = 0.0f;
-	const float MainEditor::TOOLBAR_SIZE = 50.0f;
+	float MainEditor::WORKTABS_SIZE = 65.0f;
+
+	SceneEditingMainWindow MainSceneWindow;
+
+	size_t TabIndex = 0;
 
 	MainEditor::MainEditor()
-		: m_pProjectPopup(new ProjectPopup()), m_pToolbar(new Toolbar(TOOLBAR_SIZE)), m_Settings("./EditorSettings.yaml")
+		: m_pProjectPopup(new ProjectPopup()), m_Settings("./EditorSettings.yaml"),
+		m_pMainWindows{ &MainSceneWindow }
 	{
 	}
 
@@ -127,8 +132,7 @@ namespace Glory::Editor
 		delete m_pProjectPopup;
 		m_pProjectPopup = nullptr;
 
-		delete m_pToolbar;
-		m_pToolbar = nullptr;
+		m_pMainWindows.clear();
 	}
 
 	void MainEditor::Initialize()
@@ -181,7 +185,6 @@ namespace Glory::Editor
 		Shortcuts::Clear();
 
 		ProjectSpace::CloseProject();
-		EditorWindow::Cleanup();
 		PropertyDrawer::Cleanup();
 
 		Gizmos::Cleanup();
@@ -205,18 +208,10 @@ namespace Glory::Editor
 	void MainEditor::PaintEditor()
 	{
 		MenuBar::OnGUI();
-		Dockspace();
-		m_pToolbar->Paint();
-		DrawUserEditor();
-	}
-
-	void MainEditor::Dockspace()
-	{
-		const float toolbarSize = 50;
 
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos + ImVec2(0, toolbarSize));
-		ImGui::SetNextWindowSize(viewport->Size - ImVec2(0, toolbarSize));
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, WORKTABS_SIZE));
 		ImGui::SetNextWindowViewport(viewport->ID);
 		ImGuiWindowFlags window_flags = 0
 			| ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking
@@ -224,27 +219,37 @@ namespace Glory::Editor
 			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
 			| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::Begin("Master DockSpace", NULL, window_flags);
-		ImGuiID dockMain = ImGui::GetID("MyDockspace");
+		ImGui::Begin("Worktabs", NULL, window_flags);
+		ImGui::BeginTabBar("Worktabs");
+		for (size_t i = 0; i < m_pMainWindows.size(); i++)
+		{
+			MainWindow* pWindow = m_pMainWindows[i];
+			if (ImGui::BeginTabItem(pWindow->Name().data(), NULL, ForceTabIndex == i ? ImGuiTabItemFlags_SetSelected : 0))
+			{
+				if (TabIndex != i)
+				{
+					TabIndex = i;
+				}
+				ImGui::EndTabItem();
+			}
+		}
+		ForceTabIndex = -1;
+		ImGui::EndTabBar();
 
-		// Save off menu bar height for later.
+		/* Save off menu bar height for later. */
 		MENUBAR_SIZE = ImGui::GetCurrentWindow()->MenuBarHeight();
-
-		ImGui::DockSpace(dockMain);
 		ImGui::End();
-		ImGui::PopStyleVar(3);
+
+		m_pMainWindows[TabIndex]->DrawGui(WORKTABS_SIZE - MENUBAR_SIZE);
+
+		DrawPopups();
 	}
 
-	void MainEditor::DrawUserEditor()
+	void MainEditor::DrawPopups()
 	{
-		EditorWindow::RenderWindows();
 		PopupManager::OnGUI();
 		m_PackagePopup.Draw();
 		ObjectMenu::OnGUI();
-		m_pProjectPopup->OnGui();
 		QuitPopup::Draw();
 		RemovedAssetsPopup::Draw();
 		VersionPopup::Draw();
@@ -285,6 +290,34 @@ namespace Glory::Editor
 		VersionPopup::Open(latestVersionString);
 	}
 
+	MainWindow* MainEditor::GetMainWindow(std::type_index type)
+	{
+		for (size_t i = 0; i < m_pMainWindows.size(); ++i)
+		{
+			MainWindow* pWindow = m_pMainWindows[i];
+			if (pWindow->Type() != type) continue;
+			ForceTabIndex = i;
+			return pWindow;
+		}
+		return nullptr;
+	}
+
+	MainWindow* MainEditor::FindMainWindow(std::type_index type)
+	{
+		for (size_t i = 0; i < m_pMainWindows.size(); ++i)
+		{
+			MainWindow* pWindow = m_pMainWindows[i];
+			if (pWindow->Type() != type) continue;
+			return pWindow;
+		}
+		return nullptr;
+	}
+
+	void MainEditor::RegisterMainWindow(MainWindow* pWindow)
+	{
+		m_pMainWindows.push_back(pWindow);
+	}
+
 	void MainEditor::SetupTitleBar()
 	{
 		TitleBar::AddSection("Application", "Glorious");
@@ -307,8 +340,8 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("File/New/Scene", [app]() { app->GetSceneManager().NewScene(); }, NULL, Shortcut_File_NewScene);
 		MenuBar::AddMenuItem("File/Save Scene", [app]() { app->GetSceneManager().SaveOpenScenes(); }, NULL, Shortcut_File_SaveScene);
 
-		MenuBar::AddMenuItem("File/Preferences", []() { EditorWindow::GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
-		MenuBar::AddMenuItem("File/Save Project", []() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
+		MenuBar::AddMenuItem("File/Preferences", [this]() { GetWindow<EditorPreferencesWindow>(); }, NULL, Shortcut_File_Preferences);
+		MenuBar::AddMenuItem("File/Save Project", [this]() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
 		MenuBar::AddMenuItem("File/Package", [app]() { StartPackage(app->GetEngine()); }, NULL, Shortcut_Package);
 
 		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
@@ -316,18 +349,18 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
 		MenuBar::AddMenuItem("Edit/Redo", Undo::DoRedo, NULL, Shortcut_Edit_Redo);
-		MenuBar::AddMenuItem("Edit/History", []() { EditorWindow::GetWindow<HistoryWindow>(); }, NULL, Shortcut_Edit_History);
+		MenuBar::AddMenuItem("Edit/History", [this]() { GetWindow<HistoryWindow>(); }, NULL, Shortcut_Edit_History);
 
-		MenuBar::AddMenuItem("Window/Scene View", []() { EditorWindow::GetWindow<SceneWindow>(); }, NULL, Shortcut_Window_Scene);
-		MenuBar::AddMenuItem("Window/Game View", []() { EditorWindow::GetWindow<GameWindow>(); }, NULL, Shortcut_Window_Game);
-		MenuBar::AddMenuItem("Window/Scene Graph", []() { EditorWindow::GetWindow<SceneGraphWindow>(); }, NULL, Shortcut_Window_SceneGraph);
-		MenuBar::AddMenuItem("Window/Inspector", []() { EditorWindow::GetWindow<InspectorWindow>(true); }, NULL, Shortcut_Window_Inspector);
-		MenuBar::AddMenuItem("Window/Content Browser", []() { EditorWindow::GetWindow<FileBrowser>(); }, NULL, Shortcut_Window_Content);
-		MenuBar::AddMenuItem("Window/Console", []() { EditorWindow::GetWindow<EditorConsoleWindow>(); }, NULL, Shortcut_Window_Console);
-		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", []() { EditorWindow::GetWindow<PerformanceMetrics>(); }, NULL, Shortcut_Window_Performance);
-		MenuBar::AddMenuItem("Window/Analysis/Profiler", []() { EditorWindow::GetWindow<ProfilerWindow>(); }, NULL, Shortcut_Window_Profiler);
-		MenuBar::AddMenuItem("Window/Project Settings", []() { EditorWindow::GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
-		MenuBar::AddMenuItem("Window/Resources", []() { EditorWindow::GetWindow<ResourcesWindow>(); }, NULL, Shortcut_Window_Resources);
+		MenuBar::AddMenuItem("Window/Scene View", [this]() { GetWindow<SceneWindow>(); }, NULL, Shortcut_Window_Scene);
+		MenuBar::AddMenuItem("Window/Game View", [this]() { GetWindow<GameWindow>(); }, NULL, Shortcut_Window_Game);
+		MenuBar::AddMenuItem("Window/Scene Graph", [this]() { GetWindow<SceneGraphWindow>(); }, NULL, Shortcut_Window_SceneGraph);
+		MenuBar::AddMenuItem("Window/Inspector", [this]() { GetWindow<InspectorWindow>(true); }, NULL, Shortcut_Window_Inspector);
+		MenuBar::AddMenuItem("Window/Content Browser", [this]() { GetWindow<FileBrowser>(); }, NULL, Shortcut_Window_Content);
+		MenuBar::AddMenuItem("Window/Console", [this]() { GetWindow<EditorConsoleWindow>(); }, NULL, Shortcut_Window_Console);
+		MenuBar::AddMenuItem("Window/Analysis/Performance Metrics", [this]() { GetWindow<PerformanceMetrics>(); }, NULL, Shortcut_Window_Performance);
+		MenuBar::AddMenuItem("Window/Analysis/Profiler", [this]() { GetWindow<ProfilerWindow>(); }, NULL, Shortcut_Window_Profiler);
+		MenuBar::AddMenuItem("Window/Project Settings", [this]() { GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
+		MenuBar::AddMenuItem("Window/Resources", [this]() { GetWindow<ResourcesWindow>(); }, NULL, Shortcut_Window_Resources);
 
 		MenuBar::AddMenuItem("Play/Start", [app]() { app->StartPlay(); }, NULL, Shortcut_Play_Start);
 		MenuBar::AddMenuItem("Play/Stop", [app]() { app->StopPlay(); }, NULL, Shortcut_Play_Stop);
@@ -457,17 +490,25 @@ namespace Glory::Editor
 	void MainEditor::Update()
 	{
 		Shortcuts::Update();
-		EditorWindow::UpdateWindows();
+		UpdateWindows();
+	}
+
+	void MainEditor::UpdateWindows()
+	{
+		for (MainWindow* pWindow : m_pMainWindows)
+		{
+			pWindow->UpdateWindows();
+		}
 	}
 
 	void MainEditor::RegisterWindows()
 	{
-		EditorWindow::GetWindow<GameWindow>();
-		EditorWindow::GetWindow<SceneWindow>();
-		EditorWindow::GetWindow<InspectorWindow>();
-		EditorWindow::GetWindow<SceneGraphWindow>();
-		EditorWindow::GetWindow<FileBrowser>();
-		EditorWindow::GetWindow<EditorConsoleWindow>();
+		GetWindow<GameWindow>();
+		GetWindow<SceneWindow>();
+		GetWindow<InspectorWindow>();
+		GetWindow<SceneGraphWindow>();
+		GetWindow<FileBrowser>();
+		GetWindow<EditorConsoleWindow>();
 	}
 
 	void MainEditor::RegisterPropertyDrawers()

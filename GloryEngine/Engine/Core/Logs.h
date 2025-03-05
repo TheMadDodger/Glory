@@ -8,9 +8,10 @@ namespace Glory
 
 	class Logs : public IConsole
 	{
-	private:
-		Logs(Console*) {};
+	public:
+		Logs() {};
 
+	private:
 		GLORY_API void Initialize() override;
 		void OnConsoleClose() override {};
 		void SetNextColor(const glm::vec4& color) override {};

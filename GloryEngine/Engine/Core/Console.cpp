@@ -223,7 +223,6 @@ namespace Glory
 		for (size_t i = 0; i < m_pConsoles.size(); i++)
 		{
 			m_pConsoles[i]->OnConsoleClose();
-			delete m_pConsoles[i];
 		}
 		m_pConsoles.clear();
 

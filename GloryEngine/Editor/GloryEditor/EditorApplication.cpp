@@ -139,7 +139,7 @@ namespace Glory::Editor
 			if (m_Platform.PollEvents()) TryToQuit();
 
 			/* Update editor */
-			EditorWindow::UpdateWindows();
+			m_MainEditor.UpdateWindows();
 
 			if (!m_Platform.m_Windowless)
 			{

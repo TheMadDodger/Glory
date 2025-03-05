@@ -47,8 +47,11 @@ namespace Glory
         windowCreateInfo.Fullscreen = true;
         windowCreateInfo.Maximize = false;
 
-        m_Console->RegisterConsole<Glory::Logs>();
-        m_Console->RegisterConsole<Glory::WindowsDebugConsole>();
+        Glory::Logs logs;
+        Glory::WindowsDebugConsole windowsConsole(m_Console.get());
+
+        m_Console->RegisterConsole(&logs);
+        m_Console->RegisterConsole(&windowsConsole);
 
         m_EngineLoader.reset(new EngineLoader("./Modules", windowCreateInfo));
 

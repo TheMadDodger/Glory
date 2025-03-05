@@ -28,8 +28,11 @@ int main(int argc, char* argv[])
         Glory::Console console;
         Glory::Debug debug{ &console };
 
-        console.RegisterConsole<Glory::Logs>();
-        console.RegisterConsole<Glory::WindowsDebugConsole>();
+        Glory::Logs logs;
+        Glory::WindowsDebugConsole windowsConsole(&console);
+
+        console.RegisterConsole(&logs);
+        console.RegisterConsole(&windowsConsole);
 
         Glory::CommandLine commandLine(argc, argv);
 

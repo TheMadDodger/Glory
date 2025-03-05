@@ -136,14 +136,15 @@ namespace Glory::Editor
 
 	void SteamAudioExtension::Initialize()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		Engine* pEngine = pApp->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
 		EditorPlayer::RegisterLoopHandler(this);
 
-		MenuBar::AddMenuItem("Window/Steam Audio", []() { EditorWindow::GetWindow<AudioSceneWindow>(); }, NULL, Shortcut_Window_SteamAudio);
+		MenuBar::AddMenuItem("Window/Steam Audio", [pApp]() { pApp->GetMainEditor().GetWindow<AudioSceneWindow>(); }, NULL, Shortcut_Window_SteamAudio);
 
 		Editor::RegisterEditor(&MaterialEditor);
 		Editor::RegisterEditor(&OccluderCompEditor);

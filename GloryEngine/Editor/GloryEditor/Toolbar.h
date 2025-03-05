@@ -31,7 +31,7 @@ namespace Glory::Editor
 		void DrawSubBar(float startPos, const ToolChainPosition& toolChain);
 
 	private:
-		friend class MainEditor;
+		friend class SceneEditingMainWindow;
 		const float TOOLBAR_SIZE;
 		float m_ToolbarLength;
 		static const float BUTTON_SPACING;
