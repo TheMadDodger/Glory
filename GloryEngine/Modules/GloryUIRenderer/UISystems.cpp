@@ -26,7 +26,7 @@ namespace Glory
         glm::mat4 startTransform = glm::identity<glm::mat4>();
 
         Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
-        Utils::ECS::EntityID parent = pEntityView->Parent();
+        const Utils::ECS::EntityID parent = pEntityView->Parent();
 
         if (pRegistry->IsValid(parent) && pRegistry->IsEntityDirty(parent))
         {

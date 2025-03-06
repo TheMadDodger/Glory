@@ -19,36 +19,6 @@ namespace Glory::Editor
 	{
 	}
 
-	/*bool NameGUI(Utils::ECS::EntityID entityID)
-	{
-		ImGui::PushID("Object");
-
-		ImGui::TextDisabled("UI Element");
-		ImGui::Separator();
-
-		const std::string_view originalName = entity.Name();
-		const char* name = originalName.data();
-		memcpy(m_NameBuff, name, originalName.length() + 1);
-		m_NameBuff[originalName.length()] = '\0';
-
-		const UUID uuid = m_pObject->GetUUID();
-		std::string uuidString = std::to_string(uuid);
-		ImGui::Text("UUID:");
-		const float textWitdh = ImGui::CalcTextSize(uuidString.data()).x;
-		ImGui::SameLine();
-		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
-		ImGui::Text(uuidString.data());
-		const bool change = EditorUI::InputText("Name", m_NameBuff, MAXNAMESIZE, ImGuiInputTextFlags_EnterReturnsTrue);
-		if (change)
-		{
-			pScene->SetEntityName(entityID, m_NameBuff);
-		}
-
-		ImGui::PopID();
-		return change;
-	}*/
-
 	void UIElementInspector::OnGUI()
 	{
 		UIMainWindow* pMainWindow = GetMainWindow();
@@ -115,7 +85,7 @@ namespace Glory::Editor
 
 			if (open)
 			{
-				Undo::StartRecord("Property Change", selected, true);
+				Undo::StartRecord("UI Property Change", selected, true);
 				change |= PropertyDrawer::DrawProperty(file, component["Properties"].Path(), pType->InternalTypeHash(), pType->TypeHash(), 0);
 				Undo::StopRecord();
 			}
