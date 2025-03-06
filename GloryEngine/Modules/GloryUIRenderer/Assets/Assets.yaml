@@ -10,3 +10,7 @@
   ID: 104
 - Path: "Pipelines\\UIOverlay.gpln"
   ID: 105
+- Path: "Shaders\\UITextPrepass_Frag.shader"
+  ID: 106
+- Path: "Pipelines\\UITextPrepass.gpln"
+  ID: 107

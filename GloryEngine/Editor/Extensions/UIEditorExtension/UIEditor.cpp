@@ -7,6 +7,8 @@
 #include <UIRendererModule.h>
 #include <Debug.h>
 #include <GraphicsModule.h>
+#include <UIComponents.h>
+#include <YAML_GLM.h>
 
 #include <EditorApplication.h>
 #include <EditableResource.h>
@@ -15,9 +17,14 @@
 #include <MeshData.h>
 #include <NodeRef.h>
 #include <ImGuiHelpers.h>
+#include <Undo.h>
 
 #include <fstream>
 #include <sstream>
+
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/glm.hpp>
 
 namespace Glory::Editor
 {
@@ -31,6 +38,8 @@ namespace Glory::Editor
 
 	void UIEditor::OnGUI()
 	{
+		UIRendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<UIRendererModule>();
+
 		UIMainWindow* pMainWindow = GetMainWindow();
 		UIDocument* pDocument = pMainWindow->CurrentDocument();
 
@@ -45,7 +54,7 @@ namespace Glory::Editor
 		float textureAspect = (float)width / (float)height;
 
 		ImVec2 pos = ImGui::GetWindowPos();
-		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+		const ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 		pos = pos + vMin;
 		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
 		vMax = vMax - vMin;
@@ -71,10 +80,104 @@ namespace Glory::Editor
 
 		const ImVec2 topLeft = center - halfOffsets;
 		const ImVec2 bottomRight = center + halfOffsets;
+		const ImVec2 bottomLeft{ topLeft.x, bottomRight.y };
 
-		ImGui::GetWindowDrawList()->AddImage(
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		drawList->AddImage(
 			pRenderImpl->GetTextureID(pTexture), topLeft,
 			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
+
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		Engine* pEngine = pApp->GetEngine();
+		EditorResourceManager& resources = pApp->GetResourceManager();
+		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
+		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
+		Utils::YAMLFileRef& file = **pDocumentData;
+
+		/* Selection box */
+		const UUID selected = pMainWindow->SelectedEntity();
+		if (!selected || !pDocument->EntityExists(selected)) return;
+
+		const ImVec2 drawnSize = bottomRight - topLeft;
+		const ImVec2 sizeFactor{ drawnSize.x/width , drawnSize.y/height };
+
+		const Utils::ECS::EntityID entity = pDocument->EntityID(selected);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		const glm::vec2 size{ transform.m_Rect.z - transform.m_Rect.x,
+			transform.m_Rect.w - transform.m_Rect.y };
+		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), transform.m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Rect.x*sizeFactor.x, transform.m_Rect.y*sizeFactor.y, 0.0f));
+		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x*sizeFactor.x, size.y*sizeFactor.y, 0.0f));
+		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Pivot.x*sizeFactor.x*size.x, transform.m_Pivot.y*sizeFactor.y*size.y, 0.0f));
+
+		glm::mat4 startTransform = glm::identity<glm::mat4>();
+		const Utils::ECS::EntityID parent = pDocument->Registry().GetParent(entity);
+
+		const bool mouseClicked = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && m_IsFocused;
+		static bool dragging = false;
+		static ImVec2 mousePosLastFrame{};
+		static glm::vec4 startRect;
+
+		if (pDocument->Registry().IsValid(parent))
+		{
+			UITransform& parentTransform = pDocument->Registry().GetComponent<UITransform>(parent);
+			startTransform = parentTransform.m_Transform;
+		}
+		const glm::mat4 finalTransform = startTransform*translation*pivotOffset*rotation*glm::inverse(pivotOffset)*scale;
+
+		MeshData* pMesh = pRenderer->GetImageMesh();
+		const float* vertices = pMesh->Vertices();
+
+		std::vector<ImVec2> points(4);
+		for (size_t i = 0; i < pMesh->VertexCount(); ++i)
+		{
+			auto v = vertices + pMesh->VertexSize()/sizeof(float)*i;
+			const VertexPosColorTex* vertex = reinterpret_cast<const VertexPosColorTex*>(v);
+			glm::vec4 point{ vertex->Pos, 0.0f, 1.0f };
+			point = finalTransform * point;
+			points[i] = ImVec2{ bottomLeft.x + point.x, bottomLeft.y - point.y };
+		}
+
+		drawList->AddLine(points[0], points[1], ImColor(255, 255, 255, 255));
+		drawList->AddLine(points[1], points[2], ImColor(255, 255, 255, 255));
+		drawList->AddLine(points[2], points[3], ImColor(255, 255, 255, 255));
+		drawList->AddLine(points[3], points[0], ImColor(255, 255, 255, 255));
+		drawList->AddLine(points[0], points[2], ImColor(255, 255, 255, 255));
+		drawList->AddLine(points[1], points[3], ImColor(255, 255, 255, 255));
+
+		for (size_t i = 0; i < points.size(); ++i)
+		{
+			drawList->AddCircleFilled(points[i], 10.0f*sizeFactor.x, ImColor(0, 0, 255, 255), 100);
+			drawList->AddCircle(points[i], 10.0f*sizeFactor.x, ImColor(255, 255, 255, 255), 100);
+		}
+
+		const glm::vec4 pivotPoint = finalTransform*glm::vec4(transform.m_Pivot, 0.0f, 1.0f);
+		const ImVec2 pivot{ bottomLeft.x + pivotPoint.x, bottomLeft.y - pivotPoint.y };
+		drawList->AddCircle(pivot, 10.0f*sizeFactor.x, ImColor(255, 255, 255, 255), 100);
+
+		if (mouseClicked && ImGui::IsMouseHoveringRect(points[0], points[2]))
+		{
+			dragging = true;
+			mousePosLastFrame = ImGui::GetMousePos();
+			startRect = transform.m_Rect;
+		}
+		if (dragging && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		{
+			dragging = false;
+			auto rectValue = file["Entities"][std::to_string(selected)]["Components"][0]["Properties\\m_Rect"];
+			Undo::StartRecord("UI Property Change", pDocument->OriginalDocumentID());
+			Undo::ApplyYAMLEdit(file, rectValue.Path(), startRect, transform.m_Rect);
+			Undo::StopRecord();
+		}
+
+		if (dragging)
+		{
+			const ImVec2 mousePos = ImGui::GetMousePos();
+			const ImVec2 delta = mousePos - mousePosLastFrame;
+			mousePosLastFrame = mousePos;
+			transform.m_Rect += glm::vec4{ delta.x*1.0f/sizeFactor.x, -delta.y*1.0f/sizeFactor.y, delta.x*1.0f/sizeFactor.x, -delta.y*1.0f/sizeFactor.y };
+			pDocument->Registry().SetEntityDirty(entity);
+		}
 	}
 
 	void UIEditor::Update()
