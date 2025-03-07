@@ -80,16 +80,68 @@ namespace Glory::Editor
 	bool StructPropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
 	{
 		auto structData = file[path];
+		std::string label = path.filename().string().data();
+		if (label == "Value")
+			label = path.parent_path().filename().string();
+
+		bool change = false;
 
 		const TypeData* pStructTypeData = Reflect::GetTyeData(typeHash);
-		bool change = false;
-		for (size_t i = 0; i < pStructTypeData->FieldCount(); ++i)
+		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
+		if (pPropertyDrawer) return PropertyDrawer::DrawProperty(file, path, pStructTypeData->TypeHash(), pStructTypeData->InternalTypeHash(), flags);
+
+		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+		ImGui::PushID(label.c_str());
+
+		if (label.empty())
 		{
-			const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
-			auto field = structData[pFieldData->Name()];
-			const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
-			change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), fieldFlags);
+			change |= DrawFields(file, path, pStructTypeData, flags);
+			ImGui::PopID();
+			return change;
 		}
+
+		bool mainToggle = false;
+		if (pStructTypeData->FieldCount())
+		{
+			static uint32_t booleanType = ResourceTypes::GetHash<bool>();
+			const FieldData* pFieldData = pStructTypeData->GetFieldData(0);
+			mainToggle = strcmp(pFieldData->Name(), "m_Enable") == 0 && pFieldData->ArrayElementType() == booleanType;
+		}
+
+		bool headerOpen = false;
+		if (mainToggle)
+		{
+			node_flags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
+			headerOpen = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+			const FieldData* pFieldData = pStructTypeData->GetFieldData(0);
+			auto enableValue = structData[pFieldData->Name()];
+			ImGui::SameLine();
+			const float cursorX = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 25.0f;
+			ImGui::SetCursorPosX(cursorX);
+			EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+			change |= PropertyDrawer::DrawProperty(file, enableValue.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), flags);
+			EditorUI::PopFlag();
+			const bool enabled = enableValue.As<bool>();
+			ImGui::BeginDisabled(!enabled);
+		}
+		else
+		{
+			headerOpen = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+		}
+
+		if (headerOpen)
+		{
+			ImGui::Indent(5.0f);
+			change |= DrawFields(file, path, pStructTypeData, flags, mainToggle ? 1 : 0);
+			if (!mainToggle) ImGui::TreePop();
+			ImGui::Unindent(5.0f);
+		}
+		if (mainToggle)
+		{
+			ImGui::EndDisabled();
+		}
+		ImGui::PopID();
 		return change;
 	}
 
@@ -103,6 +155,20 @@ namespace Glory::Editor
 			void* pAddress = (void*)((char*)(data)+offset);
 			const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
 			change |= PropertyDrawer::DrawProperty(pFieldData, pAddress, fieldFlags);
+		}
+		return change;
+	}
+
+	bool StructPropertyDrawer::DrawFields(Utils::YAMLFileRef& file, const std::filesystem::path& path, const TypeData* pStructTypeData, uint32_t flags, size_t start) const
+	{
+		auto structData = file[path];
+		bool change = false;
+		for (size_t i = start; i < pStructTypeData->FieldCount(); ++i)
+		{
+			const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
+			auto field = structData[pFieldData->Name()];
+			const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
+			change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), fieldFlags);
 		}
 		return change;
 	}

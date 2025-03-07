@@ -86,7 +86,18 @@ namespace Glory::Editor
 			if (open)
 			{
 				Undo::StartRecord("UI Property Change", selected, true);
-				change |= PropertyDrawer::DrawProperty(file, component["Properties"].Path(), pType->InternalTypeHash(), pType->TypeHash(), 0);
+
+				auto structData = component["Properties"];
+
+				const TypeData* pStructTypeData = pType;
+				bool change = false;
+				for (size_t i = 0; i < pStructTypeData->FieldCount(); ++i)
+				{
+					const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
+					auto field = structData[pFieldData->Name()];
+					const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
+					change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), fieldFlags);
+				}
 				Undo::StopRecord();
 			}
 

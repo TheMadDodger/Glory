@@ -15,5 +15,6 @@ namespace Glory::Editor
 
 	private:
 		bool DrawFields(void* data, const TypeData* pStructTypeData, uint32_t flags, size_t start=0) const;
+		bool DrawFields(Utils::YAMLFileRef& file, const std::filesystem::path& path, const TypeData* pStructTypeData, uint32_t flags, size_t start=0) const;
 	};
 }
