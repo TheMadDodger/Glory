@@ -4,6 +4,7 @@
 #include "UIDocumentData.h"
 #include "UIRenderSystem.h"
 #include "UISystems.h"
+#include "Constraints.h"
 
 #include <AssetManager.h>
 #include <MaterialManager.h>
@@ -110,11 +111,17 @@ namespace Glory
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 		Reflect::RegisterEnum<UITarget>();
 		Reflect::RegisterEnum<ResolutionMode>();
+		Reflect::RegisterType<XConstraint>();
+		Reflect::RegisterType<YConstraint>();
+		Reflect::RegisterType<WidthConstraint>();
+		Reflect::RegisterType<HeightConstraint>();
 
 		Reflect::RegisterType<UIRenderer>();
 		Reflect::RegisterType<UITransform>();
 		Reflect::RegisterType<UIImage>();
 		Reflect::RegisterType<UIText>();
+
+		Constraints::AddBuiltinConstraints();
 
 		/* Register the renderer component using the main component types instance */
 		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
@@ -136,6 +143,8 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Update, UITextSystem::OnUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
+		/* Constraints */
+		//m_pComponentTypes->RegisterInvokaction<UIConstraint>(Glory::Utils::ECS::InvocationType::OnDirty, UIConstraintSystem::OnUpdate);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {

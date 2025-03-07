@@ -103,10 +103,9 @@ namespace Glory::Editor
 
 		const Utils::ECS::EntityID entity = pDocument->EntityID(selected);
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
-		const glm::vec2 size{ transform.m_Rect.z - transform.m_Rect.x,
-			transform.m_Rect.w - transform.m_Rect.y };
+		const glm::vec2 size{ transform.m_Width, transform.m_Height };
 		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), transform.m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Rect.x*sizeFactor.x, transform.m_Rect.y*sizeFactor.y, 0.0f));
+		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(float(transform.m_X)*sizeFactor.x, float(transform.m_Y)*sizeFactor.y, 0.0f));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x*sizeFactor.x, size.y*sizeFactor.y, 0.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Pivot.x*sizeFactor.x*size.x, transform.m_Pivot.y*sizeFactor.y*size.y, 0.0f));
 
@@ -123,7 +122,7 @@ namespace Glory::Editor
 			UITransform& parentTransform = pDocument->Registry().GetComponent<UITransform>(parent);
 			startTransform = parentTransform.m_Transform;
 		}
-		const glm::mat4 finalTransform = startTransform*translation*pivotOffset*rotation*glm::inverse(pivotOffset)*scale;
+		const glm::mat4 finalTransform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
 
 		MeshData* pMesh = pRenderer->GetImageMesh();
 		const float* vertices = pMesh->Vertices();
@@ -155,18 +154,18 @@ namespace Glory::Editor
 		const ImVec2 pivot{ bottomLeft.x + pivotPoint.x, bottomLeft.y - pivotPoint.y };
 		drawList->AddCircle(pivot, 10.0f*sizeFactor.x, ImColor(255, 255, 255, 255), 100);
 
-		if (mouseClicked && ImGui::IsMouseHoveringRect(points[0], points[2]))
+		/*if (mouseClicked && ImGui::IsMouseHoveringRect(points[0], points[2]))
 		{
 			dragging = true;
 			mousePosLastFrame = ImGui::GetMousePos();
-			startRect = transform.m_Rect;
+			startRect = transform.m_Rect.m_Value;
 		}
 		if (dragging && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{
 			dragging = false;
-			auto rectValue = file["Entities"][std::to_string(selected)]["Components"][0]["Properties\\m_Rect"];
+			auto rectValue = file["Entities"][std::to_string(selected)]["Components"][0]["Properties\\m_Rect\\m_Value"];
 			Undo::StartRecord("UI Property Change", pDocument->OriginalDocumentID());
-			Undo::ApplyYAMLEdit(file, rectValue.Path(), startRect, transform.m_Rect);
+			Undo::ApplyYAMLEdit(file, rectValue.Path(), startRect, transform.m_Rect.m_Value);
 			Undo::StopRecord();
 		}
 
@@ -175,9 +174,9 @@ namespace Glory::Editor
 			const ImVec2 mousePos = ImGui::GetMousePos();
 			const ImVec2 delta = mousePos - mousePosLastFrame;
 			mousePosLastFrame = mousePos;
-			transform.m_Rect += glm::vec4{ delta.x*1.0f/sizeFactor.x, -delta.y*1.0f/sizeFactor.y, delta.x*1.0f/sizeFactor.x, -delta.y*1.0f/sizeFactor.y };
+			transform.m_Rect.m_Value += glm::vec4{ delta.x*1.0f/sizeFactor.x, -delta.y*1.0f/sizeFactor.y, delta.x*1.0f/sizeFactor.x, -delta.y*1.0f/sizeFactor.y };
 			pDocument->Registry().SetEntityDirty(entity);
-		}
+		}*/
 	}
 
 	void UIEditor::Update()

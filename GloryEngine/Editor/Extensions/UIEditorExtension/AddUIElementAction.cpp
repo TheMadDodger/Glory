@@ -9,6 +9,9 @@
 #include <EditorResourceManager.h>
 #include <SetUIParentAction.h>
 
+/* TEMP */
+#include <UIComponents.h>
+
 namespace Glory::Editor
 {
 	AddUIElementAction::AddUIElementAction(uint32_t type, UUID uuid, UUID parent, size_t siblingIndex):
