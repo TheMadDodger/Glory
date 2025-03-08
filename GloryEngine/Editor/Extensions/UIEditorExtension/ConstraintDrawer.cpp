@@ -35,7 +35,15 @@ namespace Glory::Editor
             Undo::ApplyYAMLEdit(file, constraintType.Path(), oldType, type);
             change = true;
         }
-        change |= EditorUI::InputFloat(file, constraintValue.Path());
+
+        const float oldValue = constraintValue.As<float>();
+        float newValue = oldValue;
+        if (EditorUI::InputFloat(EditorUI::MakeCleanName(label), &newValue))
+        {
+            Undo::ApplyYAMLEdit(file, constraintValue.Path(), oldValue, newValue);
+            change = true;
+        }
+
         ImGui::Unindent();
         ImGui::Separator();
         ImGui::PopID();
