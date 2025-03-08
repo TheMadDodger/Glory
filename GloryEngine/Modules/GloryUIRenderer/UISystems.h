@@ -15,6 +15,7 @@ namespace Glory
 	struct UITransform;
 	struct UIImage;
 	struct UIText;
+	struct UIConstraint;
 
 	class UITransformSystem
 	{
@@ -39,4 +40,10 @@ namespace Glory
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent);
 		static void OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent);
 	};
+
+	/*class UIConstraintSystem
+	{
+	public:
+		static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIConstraint& pComponent);
+	};*/
 }

@@ -2,6 +2,7 @@
 #include "UIComponents.h"
 #include "UIDocument.h"
 #include "UIRendererModule.h"
+#include "Constraints.h"
 
 #include <GScene.h>
 #include <Engine.h>
@@ -33,20 +34,29 @@ namespace Glory
             CalculateMatrix(pRegistry, parent, pRegistry->GetComponent<UITransform>(parent));
         }
 
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		uint32_t width, height;
+		pDocument->GetUITexture()->GetDimensions(width, height);
+		glm::vec2 parentSize{ float(width), float(height) };
+
         if (pRegistry->IsValid(parent))
         {
             UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
             startTransform = parentTransform.m_Transform;
+			parentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
-		const glm::vec2 size{ pComponent.m_Rect.z - pComponent.m_Rect.x,
-			pComponent.m_Rect.w - pComponent.m_Rect.y };
+		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
+		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
+		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
+		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
 
+		const glm::vec2 size{ pComponent.m_Width, pComponent.m_Height };
         const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), pComponent.m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Rect.x, pComponent.m_Rect.y, pComponent.m_Depth));
+        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, pComponent.m_Y, pComponent.m_Depth));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, pComponent.m_Pivot.y*size.y, 0.0f));
-        pComponent.m_Transform = startTransform*translation*pivotOffset*rotation*glm::inverse(pivotOffset)*scale;
+        pComponent.m_Transform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
 
         pRegistry->SetEntityDirty(entity, false);
     }
@@ -145,4 +155,71 @@ namespace Glory
 	{
 		pComponent.m_Dirty = true;
 	}
+
+	/*void ApplyPosConstraint(float& outValue, glm::vec4& parent, const PosConstraint& constraint)
+	{
+		if (!constraint.m_Enable) return;
+		float start = 0.0f;
+		switch (constraint.m_Alignment)
+		{
+		case ConstraintAlignment::Left:
+			start = parent.x;
+			break;
+		case ConstraintAlignment::Center:
+			start = parent.z/2.0f;
+			break;
+		case ConstraintAlignment::Right:
+			start = parent.z;
+			break;
+		case ConstraintAlignment::Bottom:
+			start = parent.y;
+			break;
+		case ConstraintAlignment::Middle:
+			start = parent.w/2.0f;
+			break;
+		case ConstraintAlignment::Top:
+			start = parent.w;
+			break;
+		default:
+			break;
+		}
+
+		float value = constraint.m_Value;
+		switch (constraint.m_Mode)
+		{
+		case ConstraintMode::SizePercentage:
+			value = parent.x * value / 100.0f;
+			break;
+		case ConstraintMode::HalfSizePercentage:
+			value = parent.x / 2.0f * value / 100.0f;
+			break;
+		default:
+			break;
+		}
+		outValue = start + value;
+	}*/
+
+	/*void UIConstraintSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIConstraint& pComponent)
+	{
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		UIRendererModule* pUIRenderer = pDocument->Renderer();
+		Engine* pEngine = pUIRenderer->GetEngine();
+
+		uint32_t width, height;
+		pDocument->GetUITexture()->GetDimensions(width, height);
+		glm::vec4 parentRect{ 0.0f, 0.0f, float(width), float(height) };
+
+		UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+		const Utils::ECS::EntityID parent = pRegistry->GetParent(entity);
+		if (parent)
+		{
+			const UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
+			parentRect = parentTransform.m_Rect.m_Value;
+			parentRect = { 0.0f, 0.0f, parentTransform.m_Rect.m_Value.z - parentTransform.m_Rect.m_Value.x,
+				parentTransform.m_Rect.m_Value.w - parentTransform.m_Rect.m_Value.y };
+		}
+
+		ApplyPosConstraint(transform.m_Rect.x, transform.m_Rect, pComponent.m_X);
+		ApplyPosConstraint(transform.m_Rect.y, transform.m_Rect, pComponent.m_Y);
+	}*/
 }

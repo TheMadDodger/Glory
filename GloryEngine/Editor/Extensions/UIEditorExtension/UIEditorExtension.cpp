@@ -6,6 +6,7 @@
 #include "UIElementInspector.h"
 #include "UIElementsGraphWindow.h"
 #include "AddUIElementWindow.h"
+#include "ConstraintDrawer.h"
 
 #include <SceneManager.h>
 #include <UIDocumentData.h>
@@ -26,6 +27,7 @@
 #include <Tumbnail.h>
 
 #include <IconsFontAwesome6.h>
+#include <PropertyDrawer.h>
 
 EXTENSION_CPP(UIEditorExtension)
 
@@ -110,5 +112,10 @@ namespace Glory::Editor
 
 		UIRendererModule* pModule = pEngine->GetOptionalModule<UIRendererModule>();
 		Utils::ECS::ComponentTypes::SetInstance(pModule->GetComponentTypes());
+
+		PropertyDrawer::RegisterPropertyDrawer<ConstraintDrawer<XConstraint>>();
+		PropertyDrawer::RegisterPropertyDrawer<ConstraintDrawer<YConstraint>>();
+		PropertyDrawer::RegisterPropertyDrawer<ConstraintDrawer<WidthConstraint>>();
+		PropertyDrawer::RegisterPropertyDrawer<ConstraintDrawer<HeightConstraint>>();
 	}
 }

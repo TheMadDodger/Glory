@@ -73,7 +73,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat(label.string(), &newValue, min, max))
+		if (InputFloat(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -116,7 +116,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat2(label.string(), &newValue, min, max))
+		if (InputFloat2(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -159,7 +159,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat3(label.string(), &newValue, min, max))
+		if (InputFloat3(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -202,7 +202,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat4(label.string(), &newValue, min, max))
+		if (InputFloat4(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -245,7 +245,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt(label.string(), &newValue, min, max))
+		if (InputInt(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -288,7 +288,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt2(label.string(), &newValue, min, max))
+		if (InputInt2(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -331,7 +331,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt3(label.string(), &newValue, min, max))
+		if (InputInt3(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -374,7 +374,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt4(label.string(), &newValue, min, max))
+		if (InputInt4(MakeCleanName(label.string()), &newValue, min, max))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -442,7 +442,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputDouble(label.string(), &newValue, slowSteps, fastSteps))
+		if (InputDouble(MakeCleanName(label.string()), &newValue, slowSteps, fastSteps))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -478,7 +478,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (CheckBox(label.string(), &newValue))
+		if (CheckBox(MakeCleanName(label.string()), &newValue))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -586,7 +586,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputColor(label.string(), &newValue, hdr))
+		if (InputColor(MakeCleanName(label.string()), &newValue, hdr))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -680,7 +680,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputText(label.string(), m_TextBuffer, TEXTSIZE, flags))
+		if (InputText(MakeCleanName(label.string()), m_TextBuffer, TEXTSIZE, flags))
 		{
 			Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, std::string(m_TextBuffer));
@@ -835,7 +835,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputEnum(label.string(),typeHash, &newValue, excludeValues))
+		if (InputEnum(MakeCleanName(label.string()), typeHash, &newValue, excludeValues))
 		{
 			std::string newValueStr;
 			pEnumType->ToString(&newValue, newValueStr);
