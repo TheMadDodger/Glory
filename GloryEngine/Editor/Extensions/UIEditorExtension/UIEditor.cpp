@@ -18,6 +18,7 @@
 #include <NodeRef.h>
 #include <ImGuiHelpers.h>
 #include <Undo.h>
+#include <EditorUI.h>
 
 #include <fstream>
 #include <sstream>
@@ -28,8 +29,31 @@
 
 namespace Glory::Editor
 {
+	constexpr size_t AspectRatioCount = 5;
+	constexpr char* AspectRatios[AspectRatioCount] = {
+		"4:3",
+		"16:9",
+		"16:10",
+		"21:9",
+		"32:9",
+	};
+
+	const std::vector<glm::uvec2> Resolutions[AspectRatioCount] = {
+		{ { 1400, 1050 }, { 1440, 1080 }, { 1600, 1200 }, { 1920, 1440 }, { 2048, 1536 } },
+		{ { 1280, 720 }, { 1366, 768 }, { 1600, 900 }, { 1920, 1080 }, { 2560, 1440 }, { 3840, 2160 }, { 5120, 2880 }, { 7680, 4320 } },
+		{ { 1280, 800 }, { 1920, 1200 }, { 2560, 1600 } },
+		{ { 2560, 1080 }, { 3440, 1440 }, { 3840, 1600 },  { 5120, 2160 } },
+		{ { 3840, 1080 }, { 5120, 1440 }, { 7680, 2160 } }
+	};
+
+	/* 1080p selected by default */
+	size_t SelectedAspect = 1;
+	size_t SelectedResolution = 3;
+	glm::vec2 CustomResolution{ 1920.0f, 1080.0f };
+
 	UIEditor::UIEditor() : EditorWindowTemplate("UI Editor", 600.0f, 600.0f)
 	{
+		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 	}
 
 	UIEditor::~UIEditor()
@@ -42,6 +66,8 @@ namespace Glory::Editor
 
 		UIMainWindow* pMainWindow = GetMainWindow();
 		UIDocument* pDocument = pMainWindow->CurrentDocument();
+
+		MenuBar(pMainWindow);
 
 		if (pMainWindow->CurrentDocumentID() == 0 || !pDocument) return;
 
@@ -200,6 +226,54 @@ namespace Glory::Editor
 		data.m_Resolution = glm::vec2(resolution.x, resolution.y);
 
 		pRenderer->DrawDocument(pDocument, data);
+	}
+
+	void UIEditor::MenuBar(UIMainWindow* pMainWindow)
+	{
+		if (ImGui::BeginMenuBar())
+		{
+			const glm::uvec2& selectedResolution = Resolutions[SelectedAspect][SelectedResolution];
+			std::stringstream str;
+			str << selectedResolution.x << "x" << selectedResolution.y;
+
+			if (ImGui::BeginMenu(str.str().data()))
+			{
+				for (size_t i = 0; i < AspectRatioCount; ++i)
+				{
+					if (ImGui::BeginMenu(AspectRatios[i]))
+					{
+						for (size_t j = 0; j < Resolutions[i].size(); ++j)
+						{
+							const glm::uvec2& resolution = Resolutions[i][j];
+							str.str("");
+							str << resolution.x << "x" << resolution.y;
+							if (ImGui::MenuItem(str.str().data(), NULL, SelectedAspect == i && SelectedResolution == j))
+							{
+								SelectedAspect = i;
+								SelectedResolution = j;
+								CustomResolution = resolution;
+								pMainWindow->SetResolution(resolution);
+							}
+						}
+						ImGui::EndMenu();
+					}
+				}
+				if (ImGui::BeginMenu("Custom"))
+				{
+					EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+					const bool change = EditorUI::InputFloat2("Resolution", &CustomResolution, 1, FLT_MAX, 1);
+					EditorUI::PopFlag();
+					if (change)
+					{
+						pMainWindow->SetResolution(CustomResolution);
+					}
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
+		}
 	}
 
 	UIMainWindow* UIEditor::GetMainWindow()

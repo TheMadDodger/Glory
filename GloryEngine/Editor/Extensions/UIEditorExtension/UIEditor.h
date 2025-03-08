@@ -23,6 +23,8 @@ namespace Glory::Editor
 		virtual void Update() override;
 		virtual void Draw() override;
 
+		void MenuBar(UIMainWindow* pMainWindow);
+
 	private:
 		UIMainWindow* GetMainWindow();
 	};

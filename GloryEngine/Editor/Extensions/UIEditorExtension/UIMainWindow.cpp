@@ -109,6 +109,22 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
+	void UIMainWindow::SetResolution(const glm::uvec2& resolution)
+	{
+		m_Resolution = resolution;
+
+		for (size_t i = 0; i < m_pDocuments.size(); ++i)
+		{
+			m_pDocuments[i]->GetUITexture()->Resize(resolution.x, resolution.y);
+			Utils::ECS::EntityRegistry& registry = m_pDocuments[i]->Registry();
+			for (size_t i = 0; i < registry.ChildCount(0); ++i)
+			{
+				registry.SetEntityDirty(registry.Child(0, i));
+			}
+			registry.InvokeAll(Utils::ECS::InvocationType::OnDirty, NULL);
+		}
+	}
+
 	std::string_view UIMainWindow::Name()
 	{
 		return "UI Editing";

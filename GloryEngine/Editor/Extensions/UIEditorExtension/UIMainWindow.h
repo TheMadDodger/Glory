@@ -27,6 +27,8 @@ namespace Glory::Editor
 		UUID& SelectedEntity();
 		UIDocument* FindEditingDocument(UUID uuid) const;
 
+		void SetResolution(const glm::uvec2& resolution);
+
 	private:
 		virtual std::string_view Name() override;
 		virtual void OnGui(float height) override;
