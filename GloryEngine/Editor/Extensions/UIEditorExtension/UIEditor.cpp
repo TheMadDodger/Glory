@@ -104,7 +104,7 @@ namespace Glory::Editor
 		const Utils::ECS::EntityID entity = pDocument->EntityID(selected);
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		const glm::vec2 size{ transform.m_Width, transform.m_Height };
-		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), transform.m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), glm::radians(transform.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(float(transform.m_X)*sizeFactor.x, float(transform.m_Y)*sizeFactor.y, 0.0f));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x*sizeFactor.x, size.y*sizeFactor.y, 0.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Pivot.x*sizeFactor.x*size.x, transform.m_Pivot.y*sizeFactor.y*size.y, 0.0f));
@@ -120,7 +120,7 @@ namespace Glory::Editor
 		if (pDocument->Registry().IsValid(parent))
 		{
 			UITransform& parentTransform = pDocument->Registry().GetComponent<UITransform>(parent);
-			startTransform = parentTransform.m_Transform;
+			startTransform = parentTransform.m_TransformNoScale;
 		}
 		const glm::mat4 finalTransform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
 

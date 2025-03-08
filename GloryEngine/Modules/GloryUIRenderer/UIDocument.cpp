@@ -76,7 +76,7 @@ namespace Glory
 		const glm::vec4& color = renderData.m_Color;
 		const float scale = renderData.m_Scale;
 		const Alignment alignment = renderData.m_Alignment;
-		const float textWrap = renderData.m_TextWrap * scale * pFontData->FontHeight();
+		const float textWrap = renderData.m_TextWrap / scale;
 
 		pMesh->ClearVertices();
 		pMesh->ClearIndices();

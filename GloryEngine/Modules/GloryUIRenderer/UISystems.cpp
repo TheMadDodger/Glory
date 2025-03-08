@@ -24,7 +24,7 @@ namespace Glory
 
     void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
     {
-        glm::mat4 startTransform = glm::identity<glm::mat4>();
+		glm::mat4 startTransform = glm::identity<glm::mat4>();
 
         Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
         const Utils::ECS::EntityID parent = pEntityView->Parent();
@@ -37,30 +37,31 @@ namespace Glory
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
 		uint32_t width, height;
 		pDocument->GetUITexture()->GetDimensions(width, height);
-		glm::vec2 parentSize{ float(width), float(height) };
+		pComponent.m_ParentSize = { float(width), float(height) };
 
         if (pRegistry->IsValid(parent))
         {
             UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
-            startTransform = parentTransform.m_Transform;
-			parentSize = { parentTransform.m_Width, parentTransform.m_Height };
+			startTransform = parentTransform.m_TransformNoScale;
+			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
-		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
-		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
-		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
+		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 
 		/* Conversion top to bottom rather than bottom to top */
-		const float actualY = parentSize.y - float(pComponent.m_Y);
+		const float actualY = pComponent.m_ParentSize.y - float(pComponent.m_Y);
 		const float actualYPivot = 1.0f - pComponent.m_Pivot.y;
 
 		const glm::vec2 size{ pComponent.m_Width, pComponent.m_Height };
-        const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), pComponent.m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, pComponent.m_Depth));
+		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), -glm::radians(pComponent.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, pComponent.m_Depth));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, actualYPivot*size.y, 0.0f));
         pComponent.m_Transform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
+        pComponent.m_TransformNoScale = startTransform*translation*rotation*glm::inverse(pivotOffset);
 
         pRegistry->SetEntityDirty(entity, false);
     }
@@ -104,11 +105,6 @@ namespace Glory
 		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 
-	void UITextSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
-	{
-		
-	}
-
     void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
     {
         UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
@@ -120,15 +116,18 @@ namespace Glory
 		AssetManager& assets = pEngine->GetAssetManager();
 
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+		const glm::vec2 size{ transform.m_Width, transform.m_Height };
+
+		Constraints::ProcessConstraint(pComponent.m_Scale, size, transform.m_ParentSize);
 
 		TextRenderData textData;
 		textData.m_FontID = pComponent.m_Font.AssetUUID();
 		textData.m_ObjectID = entity;
 		textData.m_Text = pComponent.m_Text;
 		textData.m_TextDirty = pComponent.m_Dirty;
-		textData.m_Scale = pComponent.m_Scale;
+		textData.m_Scale = float(pComponent.m_Scale);
 		textData.m_Alignment = pComponent.m_Alignment;
-		textData.m_TextWrap = pComponent.m_WrapWidth;
+		textData.m_TextWrap = float(transform.m_Width)*float(pComponent.m_Scale);
 		textData.m_Color = pComponent.m_Color;
 		pComponent.m_Dirty = false;
 
@@ -137,8 +136,25 @@ namespace Glory
 		MeshData* pMeshData = pDocument->GetTextMesh(textData, pFont);
 		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 
+		const uint32_t height = pFont->FontHeight();
+		glm::vec2 textOffset{ 0.0f, height*textData.m_Scale - size.y };
+		switch (textData.m_Alignment)
+		{
+		case Alignment::Left:
+			break;
+		case Alignment::Center:
+			textOffset.x = -size.x/2.0f;
+			break;
+		case Alignment::Right:
+			textOffset.x = -size.x;
+			break;
+		default:
+			break;
+		}
+
 		ObjectData object;
-		object.Model = transform.m_Transform;
+		const glm::mat4 matTextOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(textOffset, 0.0f));
+		object.Model = transform.m_TransformNoScale*glm::inverse(matTextOffset);
 		object.Projection = pDocument->Projection();
 
 		Material* pMaterial = pGraphics->UseMaterial(pUIRenderer->TextPrepassMaterial());
@@ -159,71 +175,4 @@ namespace Glory
 	{
 		pComponent.m_Dirty = true;
 	}
-
-	/*void ApplyPosConstraint(float& outValue, glm::vec4& parent, const PosConstraint& constraint)
-	{
-		if (!constraint.m_Enable) return;
-		float start = 0.0f;
-		switch (constraint.m_Alignment)
-		{
-		case ConstraintAlignment::Left:
-			start = parent.x;
-			break;
-		case ConstraintAlignment::Center:
-			start = parent.z/2.0f;
-			break;
-		case ConstraintAlignment::Right:
-			start = parent.z;
-			break;
-		case ConstraintAlignment::Bottom:
-			start = parent.y;
-			break;
-		case ConstraintAlignment::Middle:
-			start = parent.w/2.0f;
-			break;
-		case ConstraintAlignment::Top:
-			start = parent.w;
-			break;
-		default:
-			break;
-		}
-
-		float value = constraint.m_Value;
-		switch (constraint.m_Mode)
-		{
-		case ConstraintMode::SizePercentage:
-			value = parent.x * value / 100.0f;
-			break;
-		case ConstraintMode::HalfSizePercentage:
-			value = parent.x / 2.0f * value / 100.0f;
-			break;
-		default:
-			break;
-		}
-		outValue = start + value;
-	}*/
-
-	/*void UIConstraintSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIConstraint& pComponent)
-	{
-		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
-		UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
-
-		uint32_t width, height;
-		pDocument->GetUITexture()->GetDimensions(width, height);
-		glm::vec4 parentRect{ 0.0f, 0.0f, float(width), float(height) };
-
-		UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
-		const Utils::ECS::EntityID parent = pRegistry->GetParent(entity);
-		if (parent)
-		{
-			const UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
-			parentRect = parentTransform.m_Rect.m_Value;
-			parentRect = { 0.0f, 0.0f, parentTransform.m_Rect.m_Value.z - parentTransform.m_Rect.m_Value.x,
-				parentTransform.m_Rect.m_Value.w - parentTransform.m_Rect.m_Value.y };
-		}
-
-		ApplyPosConstraint(transform.m_Rect.x, transform.m_Rect, pComponent.m_X);
-		ApplyPosConstraint(transform.m_Rect.y, transform.m_Rect, pComponent.m_Y);
-	}*/
 }
