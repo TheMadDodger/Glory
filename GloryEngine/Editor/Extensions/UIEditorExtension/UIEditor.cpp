@@ -160,7 +160,7 @@ namespace Glory::Editor
 			const VertexPosColorTex* vertex = reinterpret_cast<const VertexPosColorTex*>(v);
 			glm::vec4 point{ vertex->Pos, 0.0f, 1.0f };
 			point = finalTransform * point;
-			points[i] = ImVec2{ bottomLeft.x + point.x, bottomLeft.y - point.y };
+			points[i] = ImVec2{ topLeft.x + point.x, topLeft.y + point.y };
 		}
 
 		drawList->AddLine(points[0], points[1], ImColor(255, 255, 255, 255));
@@ -172,13 +172,13 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < points.size(); ++i)
 		{
-			drawList->AddCircleFilled(points[i], 10.0f*sizeFactor.x, ImColor(0, 0, 255, 255), 100);
-			drawList->AddCircle(points[i], 10.0f*sizeFactor.x, ImColor(255, 255, 255, 255), 100);
+			drawList->AddCircleFilled(points[i], 6.5f, ImColor(0, 0, 255, 255), 100);
+			drawList->AddCircle(points[i], 6.5f, ImColor(255, 255, 255, 255), 100);
 		}
 
 		const glm::vec4 pivotPoint = finalTransform*glm::vec4(transform.m_Pivot, 0.0f, 1.0f);
-		const ImVec2 pivot{ bottomLeft.x + pivotPoint.x, bottomLeft.y - pivotPoint.y };
-		drawList->AddCircle(pivot, 10.0f*sizeFactor.x, ImColor(255, 255, 255, 255), 100);
+		const ImVec2 pivot{ topLeft.x + pivotPoint.x, topLeft.y + pivotPoint.y };
+		drawList->AddCircle(pivot, 6.5f, ImColor(255, 255, 255, 255), 100);
 
 		/*if (mouseClicked && ImGui::IsMouseHoveringRect(points[0], points[2]))
 		{

@@ -51,11 +51,15 @@ namespace Glory
 		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
 		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, parentSize);
 
+		/* Conversion top to bottom rather than bottom to top */
+		const float actualY = parentSize.y - float(pComponent.m_Y);
+		const float actualYPivot = 1.0f - pComponent.m_Pivot.y;
+
 		const glm::vec2 size{ pComponent.m_Width, pComponent.m_Height };
         const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), pComponent.m_Rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, pComponent.m_Y, pComponent.m_Depth));
+        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, pComponent.m_Depth));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
-		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, pComponent.m_Pivot.y*size.y, 0.0f));
+		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, actualYPivot*size.y, 0.0f));
         pComponent.m_Transform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
 
         pRegistry->SetEntityDirty(entity, false);
