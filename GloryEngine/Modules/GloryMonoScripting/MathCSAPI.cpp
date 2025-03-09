@@ -59,6 +59,10 @@ namespace Glory
 		return Mat4Wrapper(v1, v2, v3, v4);
 	}
 
+	Vec2Wrapper::Vec2Wrapper() : x(0.0f), y(0.0f) {}
+	Vec2Wrapper::Vec2Wrapper(const glm::vec2& v) : Vec2Wrapper(v.x, v.y) {}
+	Vec2Wrapper::Vec2Wrapper(float _x, float _y) : x(_x), y(_y) {}
+
 	Vec3Wrapper::Vec3Wrapper(const glm::vec3& v) : Vec3Wrapper(v.x, v.y, v.z) {}
 
 	Vec3Wrapper::Vec3Wrapper(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
