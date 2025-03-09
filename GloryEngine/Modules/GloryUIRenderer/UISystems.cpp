@@ -42,7 +42,7 @@ namespace Glory
         if (pRegistry->IsValid(parent))
         {
             UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
-			startTransform = parentTransform.m_TransformNoScale;
+			startTransform = parentTransform.m_TransformNoScaleNoPivot;
 			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
@@ -52,16 +52,19 @@ namespace Glory
 		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 
 		/* Conversion top to bottom rather than bottom to top */
-		const float actualY = pComponent.m_ParentSize.y - float(pComponent.m_Y);
+		const float actualY = parent ? -float(pComponent.m_Y) : pComponent.m_ParentSize.y - float(pComponent.m_Y);
 		const float actualYPivot = 1.0f - pComponent.m_Pivot.y;
 
 		const glm::vec2 size{ pComponent.m_Width, pComponent.m_Height };
 		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), -glm::radians(pComponent.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, pComponent.m_Depth));
+		const glm::mat4 hierarchyTranslation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, pComponent.m_Y, pComponent.m_Depth));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
+		const glm::mat4 selfScale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Scale.x, pComponent.m_Scale.y, 0.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, actualYPivot*size.y, 0.0f));
-        pComponent.m_Transform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
-        pComponent.m_TransformNoScale = startTransform*translation*rotation*glm::inverse(pivotOffset);
+        pComponent.m_Transform = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset)*scale;
+        pComponent.m_TransformNoScale = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset);
+        pComponent.m_TransformNoScaleNoPivot = startTransform*translation*rotation*selfScale;
 
         pRegistry->SetEntityDirty(entity, false);
     }

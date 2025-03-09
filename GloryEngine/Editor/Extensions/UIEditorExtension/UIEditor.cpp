@@ -60,6 +60,26 @@ namespace Glory::Editor
 	{
 	}
 
+	void CalculateTransform(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, glm::mat4& parentTransform, glm::mat4& result, const glm::vec2& sizeFactor)
+	{
+		const Utils::ECS::EntityID parent = registry.GetParent(entity);
+		if (parent && registry.IsValid(parent))
+		{
+			CalculateTransform(parent, registry, parentTransform, result, sizeFactor);
+		}
+
+		UITransform& transform = registry.GetComponent<UITransform>(entity);
+		const glm::vec2 size{ transform.m_Width, transform.m_Height };
+		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), glm::radians(transform.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(float(transform.m_X) * sizeFactor.x, float(transform.m_Y) * sizeFactor.y, 0.0f));
+		const glm::mat4 parentTranslation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(float(transform.m_X), float(transform.m_Y), 0.0f));
+		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x*sizeFactor.x, size.y*sizeFactor.y, 0.0f));
+		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Pivot.x * sizeFactor.x * size.x, transform.m_Pivot.y * sizeFactor.y * size.y, 0.0f));
+
+		result = parentTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
+		parentTransform = parentTransform*translation*rotation;
+	}
+
 	void UIEditor::OnGUI()
 	{
 		UIRendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<UIRendererModule>();
@@ -125,30 +145,17 @@ namespace Glory::Editor
 		if (!selected || !pDocument->EntityExists(selected)) return;
 
 		const ImVec2 drawnSize = bottomRight - topLeft;
-		const ImVec2 sizeFactor{ drawnSize.x/width , drawnSize.y/height };
+		const glm::vec2 sizeFactor{ drawnSize.x/width , drawnSize.y/height };
 
 		const Utils::ECS::EntityID entity = pDocument->EntityID(selected);
-		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
-		const glm::vec2 size{ transform.m_Width, transform.m_Height };
-		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), glm::radians(transform.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(float(transform.m_X)*sizeFactor.x, float(transform.m_Y)*sizeFactor.y, 0.0f));
-		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x*sizeFactor.x, size.y*sizeFactor.y, 0.0f));
-		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(transform.m_Pivot.x*sizeFactor.x*size.x, transform.m_Pivot.y*sizeFactor.y*size.y, 0.0f));
-
-		glm::mat4 startTransform = glm::identity<glm::mat4>();
-		const Utils::ECS::EntityID parent = pDocument->Registry().GetParent(entity);
+		glm::mat4 parentTransform{ glm::identity<glm::mat4>() };
+		glm::mat4 finalTransform{ glm::identity<glm::mat4>() };
+		CalculateTransform(entity, pDocument->Registry(), parentTransform, finalTransform, sizeFactor);
 
 		const bool mouseClicked = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && m_IsFocused;
 		static bool dragging = false;
 		static ImVec2 mousePosLastFrame{};
 		static glm::vec4 startRect;
-
-		if (pDocument->Registry().IsValid(parent))
-		{
-			UITransform& parentTransform = pDocument->Registry().GetComponent<UITransform>(parent);
-			startTransform = parentTransform.m_TransformNoScale;
-		}
-		const glm::mat4 finalTransform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
 
 		MeshData* pMesh = pRenderer->GetImageMesh();
 		const float* vertices = pMesh->Vertices();
@@ -176,6 +183,7 @@ namespace Glory::Editor
 			drawList->AddCircle(points[i], 6.5f, ImColor(255, 255, 255, 255), 100);
 		}
 
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		const glm::vec4 pivotPoint = finalTransform*glm::vec4(transform.m_Pivot, 0.0f, 1.0f);
 		const ImVec2 pivot{ topLeft.x + pivotPoint.x, topLeft.y + pivotPoint.y };
 		drawList->AddCircle(pivot, 6.5f, ImColor(255, 255, 255, 255), 100);
