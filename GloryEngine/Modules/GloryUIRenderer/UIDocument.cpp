@@ -44,10 +44,24 @@ namespace Glory
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Update, NULL);
 	}
 
+	void DrawEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry)
+	{
+		registry.InvokeAll(Utils::ECS::InvocationType::Draw, { entity });
+		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			DrawEntity(child, registry);
+		}
+	}
+
 	void UIDocument::Draw()
 	{
 		m_Registry.SetUserData(this);
-		m_Registry.InvokeAll(Utils::ECS::InvocationType::Draw, NULL);
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			DrawEntity(child, m_Registry);
+		}
 	}
 
 	UUID UIDocument::OriginalDocumentID() const
