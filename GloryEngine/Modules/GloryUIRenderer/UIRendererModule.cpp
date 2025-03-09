@@ -304,7 +304,7 @@ namespace Glory
 			UIDocument& newDocument = m_Documents.at(id);
 
 			RenderTextureCreateInfo uiTextureInfo;
-			uiTextureInfo.HasDepth = true;
+			uiTextureInfo.HasDepth = false;
 			uiTextureInfo.Width = uint32_t(data.m_Resolution.x);
 			uiTextureInfo.Height = uint32_t(data.m_Resolution.y);
 			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
