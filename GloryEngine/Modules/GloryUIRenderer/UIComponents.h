@@ -57,6 +57,7 @@ namespace Glory
             m_Pivot(0.0f, 0.0f), m_Depth(0.0f), m_Rotation(0.0f),
             m_ParentSize(), m_Transform(glm::identity<glm::mat4>()),
             m_TransformNoScale(glm::identity<glm::mat4>()),
+            m_TransformNoScaleNoPivot(glm::identity<glm::mat4>()),
             m_IsDirty(false) {}
 
         REFLECTABLE(UITransform,
@@ -72,6 +73,7 @@ namespace Glory
         glm::vec2 m_ParentSize;
         glm::mat4 m_Transform;
         glm::mat4 m_TransformNoScale;
+        glm::mat4 m_TransformNoScaleNoPivot;
         bool m_IsDirty;
     };
 
