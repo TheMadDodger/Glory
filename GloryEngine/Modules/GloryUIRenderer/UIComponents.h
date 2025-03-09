@@ -81,8 +81,11 @@ namespace Glory
     /** @brief UI Image renderer */
     struct UIImage
     {
+        UIImage() : m_Image(0), m_Color(1.0f, 1.0f, 1.0f, 1.0f) {}
+
         REFLECTABLE(UIImage,
-            (AssetReference<TextureData>)(m_Image)
+            (AssetReference<TextureData>)(m_Image),
+            (glm::vec4)(m_Color)
         );
     };
 
