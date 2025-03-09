@@ -186,6 +186,7 @@ namespace Glory
 
 		m_pUIPrepassMaterial = new MaterialData();
 		m_pUIPrepassMaterial->SetPipeline(uiPrepassPipeline);
+		m_pUIPrepassMaterial->AddProperty("Color", "Color", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
 		m_pUITextPrepassMaterial = new MaterialData();
 		m_pUITextPrepassMaterial->SetPipeline(uiTextPrepassPipeline);
 		m_pUIOverlayMaterial = new MaterialData();

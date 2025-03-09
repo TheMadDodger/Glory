@@ -78,6 +78,7 @@ namespace Glory
 		UIRendererModule* pUIRenderer = pDocument->Renderer();
 		Engine* pEngine = pUIRenderer->GetEngine();
 		AssetManager& assets = pEngine->GetAssetManager();
+		MaterialManager& materials = pEngine->GetMaterialManager();
 		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
 		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -96,8 +97,10 @@ namespace Glory
 		object.Model = transform.m_Transform;
 		object.Projection = pDocument->Projection();
 
-		Material* pMaterial = pGraphics->UseMaterial(pUIRenderer->PrepassMaterial());
+		MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
+		pPrepassMaterial->Set(materials, "Color", pComponent.m_Color);
 
+		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
 		pMaterial->SetProperties(pEngine);
 		pMaterial->SetObjectData(object);
 
