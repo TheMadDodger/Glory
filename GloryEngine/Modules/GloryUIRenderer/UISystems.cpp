@@ -60,10 +60,11 @@ namespace Glory
 		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, pComponent.m_Depth));
 		const glm::mat4 hierarchyTranslation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, pComponent.m_Y, pComponent.m_Depth));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
+		const glm::mat4 selfScale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Scale.x, pComponent.m_Scale.y, 0.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, actualYPivot*size.y, 0.0f));
-        pComponent.m_Transform = startTransform*translation*rotation*glm::inverse(pivotOffset)*scale;
-        pComponent.m_TransformNoScale = startTransform*translation*rotation*glm::inverse(pivotOffset);
-        pComponent.m_TransformNoScaleNoPivot = startTransform*translation*rotation;
+        pComponent.m_Transform = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset)*scale;
+        pComponent.m_TransformNoScale = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset);
+        pComponent.m_TransformNoScaleNoPivot = startTransform*translation*rotation*selfScale;
 
         pRegistry->SetEntityDirty(entity, false);
     }
