@@ -9,6 +9,10 @@ namespace Glory
 {
 	struct Vec2Wrapper
 	{
+		GLORY_API Vec2Wrapper();
+		GLORY_API Vec2Wrapper(const glm::vec2& v);
+		GLORY_API Vec2Wrapper(float _x, float _y);
+
 		float x;
 		float y;
 	};

@@ -20,4 +20,5 @@ project "CSAPIInstall"
 	postbuildcommands
 	{
 		("{COPY} %{engineOutDir}/Mono/GloryEngine.Jolt/GloryEngine.Jolt.dll \"%{modulesOutDir}/GloryJoltPhysics/Scripting/csharp/\""),
+		("{COPY} %{engineOutDir}/Mono/GloryEngine.UI/GloryEngine.UI.dll \"%{modulesOutDir}/GloryUIRenderer/Scripting/csharp/\""),
 	}

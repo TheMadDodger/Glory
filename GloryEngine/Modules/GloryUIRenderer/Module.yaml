@@ -2,3 +2,6 @@ Name: "UI Renderer"
 Type: Other
 Editor:
  Extensions: ["UIEditorExtension"]
+Extras:
+ - File: Scripting/csharp/GloryUIMonoExtender
+   Requires: "GloryMonoScripting"
