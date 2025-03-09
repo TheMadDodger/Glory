@@ -4,21 +4,33 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.UI
 {
+    /// <summary>
+    /// UI target
+    /// </summary>
     public enum UITarget
     {
         CameraOverlay,
     }
 
+    /// <summary>
+    /// Resolution mode
+    /// </summary>
     public enum ResolutionMode
     {
         CameraScale,
         Fixed,
     }
 
+    /// <summary>
+    /// UI Renderer component
+    /// </summary>
     public class UIRenderer : NativeComponent
     {
         #region Props
 
+        /// <summary>
+        /// Document to render
+        /// </summary>
         public UIDocument Document
         {
             get
@@ -30,18 +42,27 @@ namespace GloryEngine.UI
             set => UIRenderer_SetDocumentID(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
         }
 
+        /// <summary>
+        /// Target to render the result to
+        /// </summary>
         public UITarget Target
         {
             get => UIRenderer_GetTarget(Object.Scene.ID, Object.ID, _objectID);
             set => UIRenderer_SetTarget(Object.Scene.ID, Object.ID, _objectID, value);
         }
 
+        /// <summary>
+        /// How to handle resolution
+        /// </summary>
         public ResolutionMode ResolutionMode
         {
             get => UIRenderer_GetResolutionMode(Object.Scene.ID, Object.ID, _objectID);
             set => UIRenderer_SetResolutionMode(Object.Scene.ID, Object.ID, _objectID, value);
         }
 
+        /// <summary>
+        /// Resolution of the UI texture
+        /// </summary>
         public Vector2 Resolution
         {
             get => UIRenderer_GetResolution(Object.Scene.ID, Object.ID, _objectID);

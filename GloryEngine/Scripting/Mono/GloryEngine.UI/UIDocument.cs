@@ -2,6 +2,9 @@
 
 namespace GloryEngine.UI
 {
+    /// <summary>
+    /// UI Document resource
+    /// </summary>
     public class UIDocument : Resource
     {
         #region Constructor
