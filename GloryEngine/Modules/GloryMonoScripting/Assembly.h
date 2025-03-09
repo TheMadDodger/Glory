@@ -178,4 +178,6 @@ namespace Glory
 	private:
 		std::map<std::string, MonoClass*> m_AttributeClasses;
 	};
+
+	GLORY_API void AddMonoType(std::string name, uint32_t type, uint32_t elementType);
 }

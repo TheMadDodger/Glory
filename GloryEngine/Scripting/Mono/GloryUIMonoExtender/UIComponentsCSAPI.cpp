@@ -30,6 +30,12 @@ namespace Glory
 
 #define UI UIComponents_EngineInstance->GetOptionalModule<UIRendererModule>()
 
+	uint64_t UIRenderer_GetRenderDocumentID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		return uiComp.m_RenderDocumentID;
+	}
+
 	uint64_t UIRenderer_GetDocumentID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
@@ -66,16 +72,16 @@ namespace Glory
 		uiComp.m_ResolutionMode = mode;
 	}
 
-	Vec2Wrapper UIRenderer_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	Vec3Wrapper UIRenderer_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
-		return uiComp.m_Resolution;
+		return Vec3Wrapper(uiComp.m_Resolution.x, uiComp.m_Resolution.y, 1.0f);
 	}
 
-	void UIRenderer_SetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec2Wrapper resolution)
+	void UIRenderer_SetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper resolution)
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
-		uiComp.m_Resolution = ToGLMVec2(resolution);
+		uiComp.m_Resolution = ToGLMVec3(resolution);
 	}
 
 #pragma endregion
@@ -85,6 +91,7 @@ namespace Glory
 	void UIComponentsCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
 		/* UI Renderer */
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetRenderDocumentID", UIRenderer_GetRenderDocumentID);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetDocumentID", UIRenderer_GetDocumentID);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetDocumentID", UIRenderer_SetDocumentID);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetTarget", UIRenderer_GetTarget);

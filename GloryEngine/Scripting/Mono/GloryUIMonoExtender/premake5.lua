@@ -16,7 +16,7 @@ project "GloryUIMonoExtender"
 
 	vpaths
 	{
-		["API"] = { "UIComponentsCSAPI.*" },
+		["API"] = { "UIComponentsCSAPI.*", "UISceneCSAPI.*" },
 		["Extenstion"] = { "UIMonoExtender.*" }
 	}
 

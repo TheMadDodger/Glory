@@ -47,6 +47,8 @@ namespace Glory
 		GLORY_API MaterialData* TextPrepassMaterial();
 		GLORY_API MeshData* GetImageMesh();
 
+		GLORY_API UIDocument* FindDocument(UUID uuid);
+
 		GLORY_MODULE_VERSION_H(0,1,0);
 
 	private:

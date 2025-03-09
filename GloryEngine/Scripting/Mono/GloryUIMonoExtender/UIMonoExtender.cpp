@@ -1,10 +1,14 @@
 #include "UIMonoExtender.h"
 #include "UIComponentsCSAPI.h"
+#include "UISceneCSAPI.h"
 #include "MonoScriptedSystem.h"
 
+#include <UIRendererModule.h>
 #include <GloryMonoScipting.h>
 #include <ScriptingExtender.h>
 #include <Engine.h>
+#include <Assembly.h>
+#include <UIDocument.h>
 
 namespace Glory
 {
@@ -21,6 +25,7 @@ namespace Glory
 	void UIMonoExtender::GetInternalCalls(std::vector<InternalCall>& internalCalls)
 	{
 		UIComponentsCSAPI::AddInternalCalls(internalCalls);
+		UISceneCSAPI::AddInternalCalls(internalCalls);
 	}
 
 	void UIMonoExtender::GetLibs(ScriptingExtender* pScriptingExtender)
@@ -39,6 +44,11 @@ namespace Glory
 	void UILibManager::Initialize(Engine* pEngine, Assembly*)
 	{
 		UIComponentsCSAPI::SetEngine(pEngine);
+		UISceneCSAPI::SetEngine(pEngine);
+		AddMonoType("GloryEngine.UI.UIDocument", SerializedType::ST_Asset, ResourceTypes::GetHash<UIDocument>());
+
+		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
+		Utils::ECS::ComponentTypes::SetInstance(pUIRenderer->GetComponentTypes());
 	}
 
 	void UILibManager::Cleanup(Engine*)

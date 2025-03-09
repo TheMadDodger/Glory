@@ -29,6 +29,21 @@ namespace GloryEngine.UI
         #region Props
 
         /// <summary>
+        /// The current instance of the UI document for rendering
+        /// </summary>
+        public UIScene RenderDocument
+        {
+            get
+            {
+                UInt64 docID = UIRenderer_GetRenderDocumentID(Object.Scene.ID, Object.ID, _objectID);
+                if (docID == 0) return null;
+                _document.ID = docID;
+                return _document;
+            }
+            private set { }
+        }
+
+        /// <summary>
         /// Document to render
         /// </summary>
         public UIDocument Document
@@ -65,13 +80,22 @@ namespace GloryEngine.UI
         /// </summary>
         public Vector2 Resolution
         {
-            get => UIRenderer_GetResolution(Object.Scene.ID, Object.ID, _objectID);
-            set => UIRenderer_SetResolution(Object.Scene.ID, Object.ID, _objectID, value);
+            get => UIRenderer_GetResolution(Object.Scene.ID, Object.ID, _objectID).xy;
+            set => UIRenderer_SetResolution(Object.Scene.ID, Object.ID, _objectID, new Vector3(value.x, value.y, 0.0f));
         }
 
         #endregion
 
+        #region Fields
+
+        private UIScene _document = new UIScene();
+
+        #endregion
+
         #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 UIRenderer_GetRenderDocumentID(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 UIRenderer_GetDocumentID(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
@@ -92,10 +116,10 @@ namespace GloryEngine.UI
         private static extern void UIRenderer_SetResolutionMode(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ResolutionMode mode);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Vector2 UIRenderer_GetResolution(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        private static extern Vector3 UIRenderer_GetResolution(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void UIRenderer_SetResolution(UInt64 sceneID, UInt64 objectID, UInt64 componentID, Vector2 resolution);
+        private static extern void UIRenderer_SetResolution(UInt64 sceneID, UInt64 objectID, UInt64 componentID, Vector3 resolution);
 
         #endregion
     }

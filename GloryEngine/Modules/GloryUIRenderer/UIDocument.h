@@ -40,6 +40,7 @@ namespace Glory
 		GLORY_API Utils::ECS::EntityRegistry& Registry();
 		GLORY_API std::string_view Name() const;
 		GLORY_API std::string_view Name(Utils::ECS::EntityID entity) const;
+		GLORY_API void SetName(Utils::ECS::EntityID entity, std::string_view name);
 
 		GLORY_API UUID EntityUUID(Utils::ECS::EntityID entity) const;
 		GLORY_API Utils::ECS::EntityID EntityID(UUID uuid) const;
@@ -48,6 +49,7 @@ namespace Glory
 		GLORY_API Utils::ECS::EntityID CreateEntity(std::string_view name, UUID uuid = UUID());
 		GLORY_API void DestroyEntity(UUID uuid);
 		GLORY_API bool EntityExists(UUID uuid);
+		GLORY_API size_t ElementCount();
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
