@@ -106,6 +106,13 @@ namespace Glory
 		return m_pImageMesh.get();
 	}
 
+	UIDocument* UIRendererModule::FindDocument(UUID uuid)
+	{
+		auto& iter = m_Documents.find(uuid);
+		if (iter == m_Documents.end()) return nullptr;
+		return &iter->second;
+	}
+
 	void UIRendererModule::Initialize()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());

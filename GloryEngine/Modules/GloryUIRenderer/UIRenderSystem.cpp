@@ -20,6 +20,7 @@ namespace Glory
 		data.m_DocumentID = pComponent.m_Document.AssetUUID();
 		data.m_ObjectID = pScene->GetEntityUUID(entity);
 		data.m_TargetCamera = 0;
+		pComponent.m_RenderDocumentID = data.m_ObjectID;
 
 		glm::uvec2 resolution = pComponent.m_Resolution;
 

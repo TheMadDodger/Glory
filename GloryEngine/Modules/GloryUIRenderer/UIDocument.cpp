@@ -249,6 +249,13 @@ namespace Glory
 		return m_Names.at(entity);
 	}
 
+	void UIDocument::SetName(Utils::ECS::EntityID entity, std::string_view name)
+	{
+		auto& iter = m_Names.find(entity);
+		if (iter == m_Names.end()) return;
+		iter->second = name;
+	}
+
 	UUID UIDocument::EntityUUID(Utils::ECS::EntityID entity) const
 	{
 		return m_UUIds.at(entity);
@@ -296,5 +303,10 @@ namespace Glory
 	bool UIDocument::EntityExists(UUID uuid)
 	{
 		return m_Ids.find(uuid) != m_Ids.end();
+	}
+
+	size_t UIDocument::ElementCount()
+	{
+		return m_Ids.size();
 	}
 }

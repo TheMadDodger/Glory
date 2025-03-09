@@ -439,4 +439,10 @@ namespace Glory
         m_Locked = false;
         return true;
     }
+
+	void AddMonoType(std::string name, uint32_t type, uint32_t elementType)
+	{
+		MonoTypeToHash.emplace(name, type);
+		MonoTypeToElementHash.emplace(name, elementType);
+	}
 }

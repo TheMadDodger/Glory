@@ -117,7 +117,8 @@ namespace Glory
     struct UIRenderer
     {
         UIRenderer(): m_Target(UITarget::CameraOverlay),
-            m_ResolutionMode(ResolutionMode::CameraScale), m_Resolution(1.0f, 1.0f)
+            m_ResolutionMode(ResolutionMode::CameraScale),
+            m_Resolution(1.0f, 1.0f), m_RenderDocumentID(0)
         {}
 
         REFLECTABLE(UIRenderer,
@@ -126,5 +127,7 @@ namespace Glory
             (ResolutionMode)(m_ResolutionMode),
             (glm::vec2)(m_Resolution)
         );
+
+        UUID m_RenderDocumentID;
     };
 }
