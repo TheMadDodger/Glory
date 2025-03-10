@@ -127,6 +127,7 @@ namespace Glory
 		Reflect::RegisterType<UITransform>();
 		Reflect::RegisterType<UIImage>();
 		Reflect::RegisterType<UIText>();
+		Reflect::RegisterType<UIBox>();
 
 		Constraints::AddBuiltinConstraints();
 
@@ -141,14 +142,16 @@ namespace Glory
 		m_pComponentTypes->RegisterComponent<UITransform>();
 		m_pComponentTypes->RegisterComponent<UIImage>();
 		m_pComponentTypes->RegisterComponent<UIText>();
+		m_pComponentTypes->RegisterComponent<UIBox>();
 		/* Transform */
 		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
 		/* Image */
-		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Update, UIImageSystem::OnUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Draw, UIImageSystem::OnDraw);
 		/* Text */
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
+		/* Box */
+		m_pComponentTypes->RegisterInvokaction<UIBox>(Glory::Utils::ECS::InvocationType::Draw, UIBoxSystem::OnDraw);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
@@ -194,6 +197,7 @@ namespace Glory
 		m_pUIPrepassMaterial = new MaterialData();
 		m_pUIPrepassMaterial->SetPipeline(uiPrepassPipeline);
 		m_pUIPrepassMaterial->AddProperty("Color", "Color", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
+		m_pUIPrepassMaterial->AddProperty("HasTexture", "HasTexture", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
 		m_pUITextPrepassMaterial = new MaterialData();
 		m_pUITextPrepassMaterial->SetPipeline(uiTextPrepassPipeline);
 		m_pUIOverlayMaterial = new MaterialData();

@@ -115,7 +115,8 @@ namespace Glory
         const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
         const size_t childCount = pDocument->Registry().ChildCount(entity);
         if (index >= childCount) return 0;
-        return pDocument->Registry().Child(entity, index);
+        const Utils::ECS::EntityID child = pDocument->Registry().Child(entity, index);
+        return child ? pDocument->EntityUUID(child) : 0;
     }
 
     uint64_t UIElement_GetParent(uint64_t sceneID, uint64_t objectID)

@@ -106,6 +106,13 @@ namespace Glory
         bool m_Dirty;
     };
 
+    struct UIBox
+    {
+        REFLECTABLE(UIBox,
+            (glm::vec4)(m_Color)
+        );
+    };
+
     struct UIPanel
     {
         REFLECTABLE(UIPanel,
