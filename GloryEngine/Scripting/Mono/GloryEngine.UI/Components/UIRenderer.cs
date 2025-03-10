@@ -37,6 +37,8 @@ namespace GloryEngine.UI
             {
                 UInt64 docID = UIRenderer_GetRenderDocumentID(Object.Scene.ID, Object.ID, _objectID);
                 if (docID == 0) return null;
+                if (_document == null)
+                    _document = new UIScene(this);
                 _document.ID = docID;
                 return _document;
             }
@@ -88,7 +90,7 @@ namespace GloryEngine.UI
 
         #region Fields
 
-        private UIScene _document = new UIScene();
+        private UIScene _document;
 
         #endregion
 

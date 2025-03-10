@@ -17,7 +17,6 @@ namespace GloryEngine.Entities
         {
 			get => LightComponent_GetColor(Object.Scene.ID, Object.ID, _objectID);
 			set => LightComponent_SetColor(Object.Scene.ID, Object.ID, _objectID, ref value);
-
 		}
 
 		/// <summary>

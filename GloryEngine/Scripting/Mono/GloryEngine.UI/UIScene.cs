@@ -8,6 +8,8 @@ namespace GloryEngine.UI
     {
         #region Props
 
+        public UIRenderer Renderer => _renderer;
+
         public UInt64 ID
         {
             get => _id;
@@ -40,12 +42,13 @@ namespace GloryEngine.UI
         private UInt64 _id = 0;
         private Dictionary<UInt64, UIElement> _objectsCache = new Dictionary<UInt64, UIElement>();
         internal bool _destroyed = false;
+        private UIRenderer _renderer;
 
         #endregion
 
         #region Constructor
 
-        internal UIScene() { }
+        internal UIScene(UIRenderer renderer) { _renderer = renderer; }
 
         #endregion
 
@@ -102,6 +105,21 @@ namespace GloryEngine.UI
             return sceneObject;
         }
 
+        /// <summary>
+        /// Find an element in the root of the scene with a name
+        /// </summary>
+        /// <param name="name">Name of the element to find</param>
+        /// <returns>The first element which name matches the one supplied or null if none found</returns>
+        public UIElement FindUIElement(string name)
+        {
+            UInt64 objectID = UIScene_FindElement(_id, name);
+            if (objectID == 0) return null;
+            if (_objectsCache.ContainsKey(objectID)) return _objectsCache[objectID];
+            UIElement sceneObject = new UIElement(objectID, this);
+            _objectsCache.Add(objectID, sceneObject);
+            return sceneObject;
+        }
+
         internal void OnSceneDestroy()
         {
             if (_destroyed) return;
@@ -138,6 +156,9 @@ namespace GloryEngine.UI
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern uint UIScene_ObjectsCount(UInt64 sceneID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 UIScene_FindElement(UInt64 sceneID, string name);
 
         #endregion
     }
