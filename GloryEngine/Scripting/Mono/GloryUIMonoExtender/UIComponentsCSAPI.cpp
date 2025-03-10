@@ -94,7 +94,7 @@ namespace Glory
 		if (!pDocument) return {};
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
-		return { float(transform.m_X), float(transform.m_Y), 0.0f };
+		return { float(transform.m_X.m_Value), float(transform.m_Y.m_Value), 0.0f };
 	}
 
 	void UITransform_SetPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper pos)
@@ -325,6 +325,28 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region UI Box
+
+	Vec4Wrapper UIBox_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIBox& uiBox = pDocument->Registry().GetComponent<UIBox>(entity);
+		return ToVec4Wrapper(uiBox.m_Color);
+	}
+
+	void UIBox_SetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec4Wrapper color)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIBox& uiBox = pDocument->Registry().GetComponent<UIBox>(entity);
+		uiBox.m_Color = ToGLMVec4(color);
+	}
+
+#pragma endregion
+
 #pragma region Binding
 
 	void UIComponentsCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -369,6 +391,10 @@ namespace Glory
 		BIND("GloryEngine.UI.UIImage::UIImage_SetImage", UIImage_SetImage);
 		BIND("GloryEngine.UI.UIImage::UIImage_GetColor", UIImage_GetColor);
 		BIND("GloryEngine.UI.UIImage::UIImage_SetColor", UIImage_SetColor);
+
+		/* UI Box */
+		BIND("GloryEngine.UI.UIBox::UIBox_GetColor", UIBox_GetColor);
+		BIND("GloryEngine.UI.UIBox::UIBox_SetColor", UIBox_SetColor);
 	}
 
 	void UIComponentsCSAPI::SetEngine(Engine* pEngine)

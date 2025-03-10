@@ -123,7 +123,7 @@
             result.x = Math.Lerp(a.x, b.x, t);
             result.y = Math.Lerp(a.y, b.y, t);
             result.z = Math.Lerp(a.z, b.z, t);
-            result.z = Math.Lerp(a.w, b.w, t);
+            result.w = Math.Lerp(a.w, b.w, t);
             return result;
         }
 
