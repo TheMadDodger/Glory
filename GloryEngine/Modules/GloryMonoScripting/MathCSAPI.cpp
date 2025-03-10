@@ -63,12 +63,11 @@ namespace Glory
 	Vec2Wrapper::Vec2Wrapper(const glm::vec2& v) : Vec2Wrapper(v.x, v.y) {}
 	Vec2Wrapper::Vec2Wrapper(float _x, float _y) : x(_x), y(_y) {}
 
+	Vec3Wrapper::Vec3Wrapper() : Vec3Wrapper(0.0f, 0.0f, 0.0f) {}
 	Vec3Wrapper::Vec3Wrapper(const glm::vec3& v) : Vec3Wrapper(v.x, v.y, v.z) {}
-
 	Vec3Wrapper::Vec3Wrapper(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
 
 	QuatWrapper::QuatWrapper(const glm::quat& q) : QuatWrapper(q.x, q.y, q.z, q.w) {}
-
 	QuatWrapper::QuatWrapper(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
 
 #pragma endregion

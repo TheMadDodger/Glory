@@ -309,4 +309,18 @@ namespace Glory
 	{
 		return m_Ids.size();
 	}
+
+	UUID UIDocument::FindElement(UUID parentId, std::string_view name)
+	{
+		const Utils::ECS::EntityID parent = parentId ? m_Ids.at(parentId) : 0;
+
+		for (size_t i = 0; i < m_Registry.ChildCount(parent); i++)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(parent, i);
+			const std::string_view otherName = m_Names.at(child);
+			if (name != otherName) continue;
+			return m_UUIds.at(child);
+		}
+		return 0;
+	}
 }

@@ -19,6 +19,7 @@ namespace Glory
 
 	struct Vec3Wrapper
 	{
+		GLORY_API Vec3Wrapper();
 		GLORY_API Vec3Wrapper(const glm::vec3& v);
 		GLORY_API Vec3Wrapper(float _x, float _y, float _z);
 

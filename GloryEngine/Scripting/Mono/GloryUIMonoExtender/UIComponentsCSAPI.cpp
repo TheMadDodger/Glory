@@ -1,5 +1,6 @@
 #include "UIComponentsCSAPI.h"
 
+#include <UIDocument.h>
 #include <UIRendererModule.h>
 #include <UIComponents.h>
 #include <EntityCSAPI.h>
@@ -12,6 +13,7 @@
 #include <Debug.h>
 #include <Engine.h>
 
+#define UI_MODULE UIComponents_EngineInstance->GetOptionalModule<UIRendererModule>()
 namespace Glory
 {
 	Engine* UIComponents_EngineInstance;
@@ -27,8 +29,6 @@ namespace Glory
 	}
 
 #pragma region UI Renderer
-
-#define UI UIComponents_EngineInstance->GetOptionalModule<UIRendererModule>()
 
 	uint64_t UIRenderer_GetRenderDocumentID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
@@ -86,6 +86,245 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region UI Transform
+
+	Vec3Wrapper UITransform_GetPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		return { float(transform.m_X), float(transform.m_Y), 0.0f };
+	}
+
+	void UITransform_SetPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper pos)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		transform.m_X = pos.x;
+		transform.m_Y = pos.y;
+		pDocument->Registry().SetEntityDirty(entity, true);
+	}
+
+	Vec3Wrapper UITransform_GetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		return { float(transform.m_Width), float(transform.m_Height), 0.0f };
+	}
+
+	void UITransform_SetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper size)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		transform.m_Width = size.x;
+		transform.m_Height = size.y;
+		pDocument->Registry().SetEntityDirty(entity, true);
+	}
+
+	Vec3Wrapper UITransform_GetPivot(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		return Vec3Wrapper{ transform.m_Pivot.x, transform.m_Pivot.y, 0.0f };
+	}
+
+	void UITransform_SetPivot(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper pivot)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		transform.m_Pivot.x = pivot.x;
+		transform.m_Pivot.y = pivot.y;
+		pDocument->Registry().SetEntityDirty(entity, true);
+	}
+
+	float UITransform_GetRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		return transform.m_Rotation;
+	}
+
+	void UITransform_SetRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float rotation)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		transform.m_Rotation = rotation;
+		pDocument->Registry().SetEntityDirty(entity, true);
+	}
+
+	Vec3Wrapper UITransform_GetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		return Vec3Wrapper{ transform.m_Scale.x, transform.m_Scale.y, 0.0f };
+	}
+
+	void UITransform_SetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper scale)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
+		transform.m_Scale.x = scale.x;
+		transform.m_Scale.y = scale.y;
+		pDocument->Registry().SetEntityDirty(entity, true);
+	}
+
+#pragma endregion
+
+#pragma region UI text
+
+	uint64_t UIText_GetFont(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return 0;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		return uiText.m_Font.AssetUUID();
+	}
+
+	void UIText_SetFont(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t fontID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		uiText.m_Font.SetUUID(fontID);
+		uiText.m_Dirty = true;
+	}
+
+	MonoString* UIText_GetText(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return nullptr;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		return mono_string_new(mono_domain_get(), uiText.m_Text.data());
+	}
+
+	void UIText_SetText(uint64_t sceneID, uint64_t objectID, uint64_t componentID, MonoString* text)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		uiText.m_Text = mono_string_to_utf8(text);
+		uiText.m_Dirty = true;
+	}
+
+	float UIText_GetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return 0.0f;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		return float(uiText.m_Scale);
+	}
+
+	void UIText_SetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float scale)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		uiText.m_Scale = scale;
+	}
+
+	Vec4Wrapper UIText_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		return ToVec4Wrapper(uiText.m_Color);
+	}
+
+	void UIText_SetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec4Wrapper color)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		uiText.m_Color = ToGLMVec4(color);
+	}
+
+	Alignment UIText_GetAlignment(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return Alignment::Left;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		return uiText.m_Alignment;
+	}
+
+	void UIText_SetAlignment(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Alignment alignment)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		uiText.m_Alignment = alignment;
+	}
+
+#pragma endregion
+
+#pragma region UI Image
+
+	uint64_t UIImage_GetImage(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return 0;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIImage& uiImage = pDocument->Registry().GetComponent<UIImage>(entity);
+		return uiImage.m_Image.AssetUUID();
+	}
+
+	void UIImage_SetImage(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t imageID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIImage& uiImage = pDocument->Registry().GetComponent<UIImage>(entity);
+		uiImage.m_Image.SetUUID(imageID);
+	}
+
+	Vec4Wrapper UIImage_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return {};
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIImage& uiImage = pDocument->Registry().GetComponent<UIImage>(entity);
+		return ToVec4Wrapper(uiImage.m_Color);
+	}
+
+	void UIImage_SetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec4Wrapper color)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIImage& uiImage = pDocument->Registry().GetComponent<UIImage>(entity);
+		uiImage.m_Color = ToGLMVec4(color);
+	}
+
+#pragma endregion
+
 #pragma region Binding
 
 	void UIComponentsCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -100,6 +339,36 @@ namespace Glory
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetResolutionMode", UIRenderer_SetResolutionMode);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetResolution", UIRenderer_GetResolution);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetResolution", UIRenderer_SetResolution);
+
+		/* UI Transform */
+		BIND("GloryEngine.UI.UITransform::UITransform_GetPosition", UITransform_GetPosition);
+		BIND("GloryEngine.UI.UITransform::UITransform_SetPosition", UITransform_SetPosition);
+		BIND("GloryEngine.UI.UITransform::UITransform_GetSize", UITransform_GetSize);
+		BIND("GloryEngine.UI.UITransform::UITransform_SetSize", UITransform_SetSize);
+		BIND("GloryEngine.UI.UITransform::UITransform_GetPivot", UITransform_GetPivot);
+		BIND("GloryEngine.UI.UITransform::UITransform_SetPivot", UITransform_SetPivot);
+		BIND("GloryEngine.UI.UITransform::UITransform_GetRotation", UITransform_GetRotation);
+		BIND("GloryEngine.UI.UITransform::UITransform_SetRotation", UITransform_SetRotation);
+		BIND("GloryEngine.UI.UITransform::UITransform_GetScale", UITransform_GetScale);
+		BIND("GloryEngine.UI.UITransform::UITransform_SetScale", UITransform_SetScale);
+
+		/* UI Text */
+		BIND("GloryEngine.UI.UIText::UIText_GetFont", UIText_GetFont);
+		BIND("GloryEngine.UI.UIText::UIText_SetFont", UIText_SetFont);
+		BIND("GloryEngine.UI.UIText::UIText_GetText", UIText_GetText);
+		BIND("GloryEngine.UI.UIText::UIText_SetText", UIText_SetText);
+		BIND("GloryEngine.UI.UIText::UIText_GetScale", UIText_GetScale);
+		BIND("GloryEngine.UI.UIText::UIText_SetScale", UIText_SetScale);
+		BIND("GloryEngine.UI.UIText::UIText_GetColor", UIText_GetColor);
+		BIND("GloryEngine.UI.UIText::UIText_SetColor", UIText_SetColor);
+		BIND("GloryEngine.UI.UIText::UIText_GetAlignment", UIText_GetAlignment);
+		BIND("GloryEngine.UI.UIText::UIText_SetAlignment", UIText_SetAlignment);
+
+		/* UI Image */
+		BIND("GloryEngine.UI.UIImage::UIImage_GetImage", UIImage_GetImage);
+		BIND("GloryEngine.UI.UIImage::UIImage_SetImage", UIImage_SetImage);
+		BIND("GloryEngine.UI.UIImage::UIImage_GetColor", UIImage_GetColor);
+		BIND("GloryEngine.UI.UIImage::UIImage_SetColor", UIImage_SetColor);
 	}
 
 	void UIComponentsCSAPI::SetEngine(Engine* pEngine)

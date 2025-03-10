@@ -40,6 +40,14 @@ namespace Glory
         return pDocument->ElementCount();
     }
 
+    uint64_t UIScene_FindElement(uint64_t sceneID, MonoString* name)
+    {
+        const std::string_view nameStr = mono_string_to_utf8(name);
+        UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+        if (!pDocument) return 0;
+        return pDocument->FindElement(0, nameStr);
+    }
+
 #pragma endregion
 
 #pragma region UI Element
@@ -202,6 +210,14 @@ namespace Glory
         registry.RemoveComponent(entity, hash);
     }
 
+    uint64_t UIElement_FindElement(uint64_t sceneID, uint64_t elementId, MonoString* name)
+    {
+        const std::string_view nameStr = mono_string_to_utf8(name);
+        UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+        if (!pDocument) return 0;
+        return pDocument->FindElement(elementId, nameStr);
+    }
+
 #pragma endregion
 
 #pragma region UI Component
@@ -242,6 +258,7 @@ namespace Glory
         BIND("GloryEngine.UI.UIScene::UIScene_NewEmptyObject", UIScene_NewEmptyObject);
         BIND("GloryEngine.UI.UIScene::UIScene_NewEmptyObjectWithName", UIScene_NewEmptyObjectWithName);
         BIND("GloryEngine.UI.UIScene::UIScene_ObjectsCount", UIScene_ObjectsCount);
+        BIND("GloryEngine.UI.UIScene::UIScene_FindElement", UIScene_FindElement);
 
         /* UI Element */
         BIND("GloryEngine.UI.UIElement::UIElement_GetActive", UIElement_GetActive);
@@ -258,6 +275,7 @@ namespace Glory
         BIND("GloryEngine.UI.UIElement::UIElement_AddComponent", UIElement_AddComponent);
         BIND("GloryEngine.UI.UIElement::UIElement_RemoveComponent", UIElement_RemoveComponent);
         BIND("GloryEngine.UI.UIElement::UIElement_RemoveComponentByID", UIElement_RemoveComponentByID);
+        BIND("GloryEngine.UI.UIElement::UIElement_FindElement", UIElement_FindElement);
 
         /* UI Component */
         BIND("GloryEngine.UI.UIComponent::UIComponent_GetActive", UIComponent_GetActive);

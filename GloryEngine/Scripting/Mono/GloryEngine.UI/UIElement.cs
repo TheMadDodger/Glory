@@ -248,6 +248,18 @@ namespace GloryEngine.UI
             return UIScene.GetUIElement(childID);
         }
 
+        /// <summary>
+        /// Find an element in the children of this object with a name, the search only goes one tree deep
+        /// </summary>
+        /// <param name="name">Name of the element to find</param>
+        /// <returns>The first element which name matches the one supplied or null if none found</returns>
+        public UIElement FindUIElement(string name)
+        {
+            UInt64 objectID = UIElement_FindElement(_scene.ID, _objectID, name);
+            if (objectID == 0) return null;
+            return UIScene.GetUIElement(objectID);
+        }
+
         internal void OnObjectDestroy()
         {
             _destroyed = true;
@@ -298,6 +310,9 @@ namespace GloryEngine.UI
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void UIElement_RemoveComponentByID(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 UIElement_FindElement(UInt64 sceneID, UInt64 objectID, string name);
 
         #endregion
     }

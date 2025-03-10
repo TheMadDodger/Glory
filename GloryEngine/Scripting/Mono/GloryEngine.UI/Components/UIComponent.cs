@@ -1,5 +1,4 @@
-﻿using GloryEngine.Entities;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine.UI
@@ -11,12 +10,12 @@ namespace GloryEngine.UI
         /// <summary>
         /// Transform component linked to the entity that owns this component
         /// </summary>
-        public Transform Transform
+        public UITransform Transform
         {
             get
             {
                 if (_transform != null) return _transform;
-                _transform = GetComponent<Transform>();
+                _transform = GetComponent<UITransform>();
                 return _transform;
             }
             private set { }
@@ -41,7 +40,7 @@ namespace GloryEngine.UI
         #region Fields
 
         private UIElement _object;
-        private Transform _transform = null;
+        private UITransform _transform = null;
         internal bool _destroyed = false;
 
         #endregion

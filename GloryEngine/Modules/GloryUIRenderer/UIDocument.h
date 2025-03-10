@@ -50,6 +50,7 @@ namespace Glory
 		GLORY_API void DestroyEntity(UUID uuid);
 		GLORY_API bool EntityExists(UUID uuid);
 		GLORY_API size_t ElementCount();
+		GLORY_API UUID FindElement(UUID parentId, std::string_view name);
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);

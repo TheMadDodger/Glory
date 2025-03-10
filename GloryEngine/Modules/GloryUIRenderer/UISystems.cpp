@@ -57,7 +57,7 @@ namespace Glory
 
 		const glm::vec2 size{ pComponent.m_Width, pComponent.m_Height };
 		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), -glm::radians(pComponent.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, pComponent.m_Depth));
+		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, 0.0f));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
 		const glm::mat4 selfScale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Scale.x, pComponent.m_Scale.y, 0.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, actualYPivot*size.y, 0.0f));

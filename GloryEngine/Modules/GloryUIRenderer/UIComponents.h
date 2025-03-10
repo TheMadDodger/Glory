@@ -22,6 +22,7 @@ struct axis##Constraint\
 \
     explicit operator float() const { return m_FinalValue; }\
     explicit operator float() { return m_FinalValue; }\
+    void operator=(float value) { m_Value = value; }\
 \
     REFLECTABLE(axis##Constraint,\
         (uint32_t)(m_Constraint),\
@@ -54,7 +55,7 @@ namespace Glory
     struct UITransform
     {
         UITransform() : m_X(0.0f), m_Y(0.0f), m_Width(100.0f), m_Height(100.0f),
-            m_Pivot(0.0f, 0.0f), m_Depth(0.0f), m_Rotation(0.0f), m_Scale(1.0f, 1.0f),
+            m_Pivot(0.0f, 0.0f), m_Rotation(0.0f), m_Scale(1.0f, 1.0f),
             m_ParentSize(), m_Transform(glm::identity<glm::mat4>()),
             m_TransformNoScale(glm::identity<glm::mat4>()),
             m_TransformNoScaleNoPivot(glm::identity<glm::mat4>()),
@@ -66,7 +67,6 @@ namespace Glory
             (WidthConstraint)(m_Width),
             (HeightConstraint)(m_Height),
             (glm::vec2)(m_Pivot),
-            (float)(m_Depth),
             (float)(m_Rotation),
             (glm::vec2)(m_Scale)
         );
