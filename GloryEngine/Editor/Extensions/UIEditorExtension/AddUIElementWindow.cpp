@@ -20,10 +20,11 @@ namespace Glory::Editor
 	std::map<uint32_t, std::string_view> ElementIcons = {
 		{ ResourceTypes::GetHash<UIText>(), ICON_FA_FONT },
 		{ ResourceTypes::GetHash<UIImage>(), ICON_FA_IMAGE },
+		{ ResourceTypes::GetHash<UIBox>(), ICON_FA_BOX },
 	};
 
 	std::vector<std::pair<std::string_view, std::vector<uint32_t>>> ElementCategories = {
-		{ "Graphics", { ResourceTypes::GetHash<UIText>(), ResourceTypes::GetHash<UIImage>() } },
+		{ "Graphics", { ResourceTypes::GetHash<UIText>(), ResourceTypes::GetHash<UIImage>(), ResourceTypes::GetHash<UIBox>() } },
 		{ "Test", { } },
 	};
 

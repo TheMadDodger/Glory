@@ -114,7 +114,7 @@ namespace Glory
 		if (!pDocument) return {};
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
-		return { float(transform.m_Width), float(transform.m_Height), 0.0f };
+		return { float(transform.m_Width.m_Value), float(transform.m_Height.m_Value), 0.0f };
 	}
 
 	void UITransform_SetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper size)

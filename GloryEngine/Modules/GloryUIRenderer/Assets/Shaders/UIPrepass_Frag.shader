@@ -9,10 +9,11 @@ layout(location = 0) out vec4 outColor;
 layout(binding = 1, std430) buffer PropertiesSSBO
 {
 	vec4 Color;
+    vec4 HasTexture;
 } Properties;
 
 void main()
 {    
-    vec4 sampled = texture(texSampler, inTexCoord);
+    vec4 sampled = Properties.HasTexture.x == 1.0 ? texture(texSampler, inTexCoord) : vec4(1.0, 1.0, 1.0, 1.0);
     outColor = vec4(inColor, 1.0)*sampled*Properties.Color;
 }

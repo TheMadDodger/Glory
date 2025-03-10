@@ -68,10 +68,6 @@ namespace Glory
         pRegistry->SetEntityDirty(entity, false);
     }
 
-	void UIImageSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIImage& pComponent)
-	{
-	}
-
 	void UIImageSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIImage& pComponent)
 	{
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
@@ -99,6 +95,7 @@ namespace Glory
 
 		MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
 		pPrepassMaterial->Set(materials, "Color", pComponent.m_Color);
+		pPrepassMaterial->Set(materials, "HasTexture", glm::vec4{ 1.0f });
 
 		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
 		pMaterial->SetProperties(pEngine);
@@ -179,5 +176,35 @@ namespace Glory
 	void UITextSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
 	{
 		pComponent.m_Dirty = true;
+	}
+
+	void UIBoxSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIBox& pComponent)
+	{
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		UIRendererModule* pUIRenderer = pDocument->Renderer();
+		Engine* pEngine = pUIRenderer->GetEngine();
+		AssetManager& assets = pEngine->GetAssetManager();
+		MaterialManager& materials = pEngine->GetMaterialManager();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+
+		MeshData* pMeshData = pUIRenderer->GetImageMesh();
+		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+		ObjectData object;
+		object.Model = transform.m_Transform;
+		object.Projection = pDocument->Projection();
+
+		MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
+		pPrepassMaterial->Set(materials, "Color", pComponent.m_Color);
+		pPrepassMaterial->Set(materials, "HasTexture", glm::vec4{ 0.0f });
+
+		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
+		pMaterial->SetProperties(pEngine);
+		pMaterial->SetObjectData(object);
+
+		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 }
