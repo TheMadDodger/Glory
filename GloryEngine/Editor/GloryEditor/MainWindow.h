@@ -51,6 +51,8 @@ namespace Glory::Editor
 	protected:
 		GLORY_EDITOR_API void Dockspace(float height);
 
+		virtual void OnUpdate() {}
+
 	protected:
 		size_t m_MainWindowIndex;
 

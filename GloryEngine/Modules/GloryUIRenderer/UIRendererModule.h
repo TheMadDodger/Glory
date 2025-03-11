@@ -43,6 +43,7 @@ namespace Glory
 		GLORY_API Utils::ECS::ComponentTypes* GetComponentTypes() { return m_pComponentTypes; }
 
 		GLORY_API void Submit(UIRenderData&& data);
+		GLORY_API void Create(const UIRenderData& data, UIDocumentData* pDocument);
 
 		GLORY_API void DrawDocument(UIDocument* pDocument, const UIRenderData& data);
 
@@ -64,7 +65,7 @@ namespace Glory
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
-		UIDocument& GetDocument(const UIRenderData& data, UIDocumentData* pDocument);
+		UIDocument& GetDocument(const UIRenderData& data, UIDocumentData* pDocument, bool forceCreate=false);
 
 	private:
 		MaterialData* m_pUIPrepassMaterial = nullptr;

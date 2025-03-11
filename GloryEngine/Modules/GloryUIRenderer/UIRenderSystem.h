@@ -14,6 +14,7 @@ namespace Glory
 	class UIRenderSystem
 	{
 	public:
+		static void OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent);
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent);
 	};
 }

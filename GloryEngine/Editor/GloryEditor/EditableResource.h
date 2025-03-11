@@ -28,11 +28,15 @@ namespace Glory::Editor
 		/** @brief Overidable method for handling reloading of the asset */
 		virtual void Reload(const std::filesystem::path&) {}
 
-		/** @brief Is this resourc editable */
+		/** @brief Is this resource editable */
 		virtual bool IsEditable() const { return true; }
+
+		/** @brief True if the resource was recently saved */
+		bool& WasSaved() { return m_WasSaved; }
 
 	protected:
 		bool m_Dirty{ false };
+		bool m_WasSaved{ false };
 	};
 
 	/**

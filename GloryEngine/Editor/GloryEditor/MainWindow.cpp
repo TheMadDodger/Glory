@@ -79,6 +79,7 @@ namespace Glory::Editor
             m_pActiveEditorWindows[i]->Update();
             m_pActiveEditorWindows[i]->Draw();
         }
+        OnUpdate();
     }
 
     void MainWindow::Dockspace(float height)

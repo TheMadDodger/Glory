@@ -3,6 +3,7 @@
 #include "DeleteUIElementAction.h"
 
 #include <EditorResourceManager.h>
+#include <EditorAssetManager.h>
 #include <EditableResource.h>
 #include <EditorApplication.h>
 #include <EditorAssetDatabase.h>
@@ -179,5 +180,48 @@ namespace Glory::Editor
 			Utils::YAMLFileRef& file = **pDocumentData;
 			DeleteUIElementAction::DeleteElement(pEngine, pDocument, file, m_SelectedEntity);
 		});
+
+		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources]() {
+			UIDocument* pDocument = CurrentDocument();
+			if (!m_EditingDocument || !pDocument) return;
+
+			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
+			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
+			pDocumentData->Save();
+		});
+	}
+
+	void UIMainWindow::OnUpdate()
+	{
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		EditorResourceManager& resources = pApp->GetResourceManager();
+		Engine* pEngine = pApp->GetEngine();
+
+		for (size_t i = 0; i < m_pDocuments.size(); ++i)
+		{
+			const UUID docID = m_pDocuments[i]->OriginalDocumentID();
+			EditableResource* pResource = resources.GetEditableResource(docID);
+
+			if (pResource->WasSaved())
+			{
+				pResource->WasSaved() = false;
+				Resource* pDocumentResource = pApp->GetAssetManager().FindResource(m_EditingDocument);
+				if (!pDocumentResource) return;
+				UIDocumentData* pUIDcoumentData = static_cast<UIDocumentData*>(pDocumentResource);
+
+				YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
+				Utils::YAMLFileRef& file = **pDocumentData;
+
+				auto node = file.RootNodeRef().ValueRef();
+				pUIDcoumentData->Reset();
+
+				Utils::NodeValueRef entities = node["Entities"];
+				for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
+				{
+					Utils::NodeValueRef entity = entities[*iter];
+					UIDocumentImporter::DeserializeEntity(pEngine, pUIDcoumentData, entity);
+				}
+			}
+		}
 	}
 }
