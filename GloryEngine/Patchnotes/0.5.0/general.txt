@@ -11,6 +11,7 @@ Engine:
 - Added UIText component
 - Added UIImage component
 - Added UIBox component
+- Added UIInteraction component
 
 Editor:
 - Added a startup popup
@@ -43,3 +44,5 @@ Scripting:
 - Added CS API for UIText
 - Added CS API for UIImage
 - Added CS API for UIBox
+- Added CS API for UIInteraction
+- Added world position/rotation/scale properties to Transform CS API

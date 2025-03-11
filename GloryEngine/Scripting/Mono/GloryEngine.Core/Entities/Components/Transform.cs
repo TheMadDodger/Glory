@@ -47,6 +47,42 @@ namespace GloryEngine.Entities
         }
 
         /// <summary>
+        /// The world position of the Entity in world space
+        /// </summary>
+        public Vector3 WorldPosition
+        {
+            get => Transform_GetWorldPosition(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetWorldPosition(Object.Scene.ID, Object.ID, _objectID, ref value);
+        }
+
+        /// <summary>
+        /// The Quaternion rotation of the Entity in world space
+        /// </summary>
+        public Quaternion WorldRotation
+        {
+            get => Transform_GetWorldRotation(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetWorldRotation(Object.Scene.ID, Object.ID, _objectID, ref value);
+        }
+
+        /// <summary>
+        /// The Euler rotation of the Entity in world space
+        /// </summary>
+        public Vector3 WorldRotationEuler
+        {
+            get => Transform_GetWorldRotationEuler(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetWorldRotationEuler(Object.Scene.ID, Object.ID, _objectID, ref value);
+        }
+
+        /// <summary>
+        /// The scale of the Entity in world space
+        /// </summary>
+        public Vector3 WorldScale
+        {
+            get => Transform_GetWorldScale(Object.Scene.ID, Object.ID, _objectID);
+            set => Transform_SetWorldScale(Object.Scene.ID, Object.ID, _objectID, ref value);
+        }
+
+        /// <summary>
         /// The direction the z axis of the Entity is facing
         /// </summary>
         public Vector3 Forward
@@ -81,15 +117,33 @@ namespace GloryEngine.Entities
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static Quaternion Transform_GetLocalRotation(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void Transform_SetLocalRotation(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Quaternion position);
+        private extern static void Transform_SetLocalRotation(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Quaternion rotation);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static Vector3 Transform_GetLocalRotationEuler(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void Transform_SetLocalRotationEuler(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 position);
+        private extern static void Transform_SetLocalRotationEuler(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 rotation);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static Vector3 Transform_GetLocalScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void Transform_SetLocalScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 position);
+        private extern static void Transform_SetLocalScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 scale);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Vector3 Transform_GetWorldPosition(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void Transform_SetWorldPosition(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 position);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Quaternion Transform_GetWorldRotation(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void Transform_SetWorldRotation(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Quaternion rotation);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Vector3 Transform_GetWorldRotationEuler(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void Transform_SetWorldRotationEuler(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 rotation);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static Vector3 Transform_GetWorldScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void Transform_SetWorldScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID, ref Vector3 scale);
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static Vector3 Transform_GetForward(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
