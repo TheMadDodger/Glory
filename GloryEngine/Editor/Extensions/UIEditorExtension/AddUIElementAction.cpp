@@ -26,6 +26,7 @@ namespace Glory::Editor
 		const Utils::ECS::EntityID parentEntity = parent ? pDocument->EntityID(parent) : 0;
 		const Utils::ECS::EntityID entity = pDocument->CreateEntity(name, newEntityID);
 		pDocument->Registry().CreateComponent(entity, type, UUID());
+		pDocument->Registry().AddComponent<UIInteraction>(entity, UUID());
 		pDocument->Registry().SetParent(entity, parentEntity);
 		pDocument->Registry().SetSiblingIndex(entity, siblingIndex);
 
@@ -68,6 +69,7 @@ namespace Glory::Editor
 		const Utils::ECS::EntityID entity = pDocument->CreateEntity(pType->TypeName(), m_ID);
 		const Utils::ECS::EntityID parent = m_Parent ? pDocument->EntityID(m_Parent) : 0;
 		registry.CreateComponent(entity, m_Type, UUID());
+		registry.AddComponent<UIInteraction>(entity, UUID());
 		registry.SetParent(entity, parent);
 		registry.SetSiblingIndex(entity, m_SiblingIndex);
 		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);

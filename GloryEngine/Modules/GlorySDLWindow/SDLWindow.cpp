@@ -341,7 +341,21 @@ namespace Glory
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 1.0f;
 			inputEvent.Delta = 1.0f;
-			return ForwardInputEvent(inputEvent);
+
+			const bool consumed = ForwardInputEvent(inputEvent);
+
+			if (inputEvent.KeyID == MouseButton::MouseButtonLeft)
+			{
+				CursorEvent cursorEvent;
+				cursorEvent.Type = CursorEvent::Button;
+				cursorEvent.InputDeviceType = InputDeviceType::Mouse;
+				cursorEvent.SourceDeviceID = inputEvent.SourceDeviceID;
+				cursorEvent.Cursor = glm::vec2{ 0.0f, 0.0f };
+				cursorEvent.IsDelta = false;
+				cursorEvent.IsDown = true;
+				ForwardCursorEvent(cursorEvent);
+			}
+			return consumed;
 		}
 		case SDL_MOUSEBUTTONUP:
 		{
@@ -357,7 +371,20 @@ namespace Glory
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 0.0f;
 			inputEvent.Delta = -1.0f;
-			return ForwardInputEvent(inputEvent);
+			const bool consumed = ForwardInputEvent(inputEvent);
+
+			if (inputEvent.KeyID == MouseButton::MouseButtonLeft)
+			{
+				CursorEvent cursorEvent;
+				cursorEvent.Type = CursorEvent::Button;
+				cursorEvent.InputDeviceType = InputDeviceType::Mouse;
+				cursorEvent.SourceDeviceID = inputEvent.SourceDeviceID;
+				cursorEvent.Cursor = glm::vec2{ 0.0f, 0.0f };
+				cursorEvent.IsDelta = false;
+				cursorEvent.IsDown = false;
+				ForwardCursorEvent(cursorEvent);
+			}
+			return consumed;
 		}
 		case SDL_MOUSEWHEEL:
 		{
@@ -420,10 +447,12 @@ namespace Glory
 			consumed |= ForwardInputEvent(inputEvent);
 
 			CursorEvent cursorEvent;
+			cursorEvent.Type = CursorEvent::Motion;
 			cursorEvent.InputDeviceType = InputDeviceType::Mouse;
 			cursorEvent.SourceDeviceID = event.motion.which;
 			cursorEvent.Cursor = glm::vec2{ event.motion.x, event.motion.y };
 			cursorEvent.IsDelta = false;
+			cursorEvent.IsDown = false;
 			ForwardCursorEvent(cursorEvent);
 			return consumed;
 		}

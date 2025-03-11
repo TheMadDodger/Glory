@@ -106,8 +106,11 @@ namespace Glory
         bool m_Dirty;
     };
 
+    /** #brief UI Box renderer */
     struct UIBox
     {
+        UIBox() : m_Color(1.0f, 1.0f, 1.0f, 1.0f) {}
+
         REFLECTABLE(UIBox,
             (glm::vec4)(m_Color)
         );
@@ -120,12 +123,26 @@ namespace Glory
         );
     };
 
+    /** @brief UI Interactions */
+    struct UIInteraction
+    {
+        UIInteraction() : m_Enabled(true), m_Hovered(false), m_Down(false) {}
+
+        REFLECTABLE(UIInteraction,
+            (bool)(m_Enabled)
+        );
+
+        bool m_Hovered;
+        bool m_Down;
+    };
+
     /** @brief UI Document renderer component */
     struct UIRenderer
     {
         UIRenderer(): m_Target(UITarget::CameraOverlay),
             m_ResolutionMode(ResolutionMode::CameraScale),
-            m_Resolution(1.0f, 1.0f), m_RenderDocumentID(0)
+            m_Resolution(1.0f, 1.0f), m_RenderDocumentID(0),
+            m_CursorPos(0.0f, 0.0f), m_CursorDown(false)
         {}
 
         REFLECTABLE(UIRenderer,
@@ -136,5 +153,7 @@ namespace Glory
         );
 
         UUID m_RenderDocumentID;
+        glm::vec2 m_CursorPos;
+        bool m_CursorDown;
     };
 }

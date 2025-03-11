@@ -83,8 +83,18 @@ namespace Glory::Editor
 		const ImVec2 topLeft = center - halfOffsets;
 		const ImVec2 bottomRight = center + halfOffsets;
 
-		InputModule* pInput = EditorApplication::GetInstance()->GetEngine()->GetMainModule<InputModule>();
-		pInput->SetCursorBounds({ topLeft.x, topLeft.y, bottomRight.x, bottomRight.y });
+		if (m_IsFocused || ImGui::IsWindowHovered())
+		{
+			InputModule* pInput = EditorApplication::GetInstance()->GetEngine()->GetMainModule<InputModule>();
+			pInput->SetCursorBounds({ topLeft.x, topLeft.y, bottomRight.x, bottomRight.y });
+
+			const glm::vec2 size{ bottomRight.x - topLeft.x, bottomRight.y - topLeft.y };
+			if (size.x && size.y)
+			{
+				const glm::vec2 screenScale = size / glm::vec2(float(width), float(height));
+				pInput->SetScreenScale(screenScale);
+			}
+		}
 
 		ImGui::GetWindowDrawList()->AddImage(
 			pRenderImpl->GetTextureID(pTexture), topLeft,

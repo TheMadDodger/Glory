@@ -21,10 +21,13 @@ namespace Glory
 	struct UIRenderData
 	{
 		UUID m_DocumentID;
+		UUID m_SceneID;
 		UUID m_ObjectID;
 
 		UUID m_TargetCamera;
 		glm::uvec2 m_Resolution;
+		glm::vec2 m_CursorPos;
+		bool m_CursorDown;
 	};
 
 	class UIRendererModule : public Module

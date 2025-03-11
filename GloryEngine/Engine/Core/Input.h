@@ -41,10 +41,18 @@ namespace Glory
 
 	struct CursorEvent
 	{
+		enum Type
+		{
+			Motion,
+			Button
+		};
+
+		Type Type;
 		InputDeviceType InputDeviceType;
 		size_t SourceDeviceID;
 		glm::vec2 Cursor;
 		bool IsDelta;
+		bool IsDown;
 	};
 
 	struct KeyBindingCompact

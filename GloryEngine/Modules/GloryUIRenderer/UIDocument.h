@@ -29,6 +29,8 @@ namespace Glory
 		GLORY_API void Draw();
 
 		GLORY_API UUID OriginalDocumentID() const;
+		GLORY_API UUID SceneID() const;
+		GLORY_API UUID ObjectID() const;
 		GLORY_API UIRendererModule* Renderer();
 		GLORY_API glm::mat4& Projection();
 		GLORY_API const glm::mat4& Projection() const;
@@ -51,18 +53,23 @@ namespace Glory
 		GLORY_API bool EntityExists(UUID uuid);
 		GLORY_API size_t ElementCount();
 		GLORY_API UUID FindElement(UUID parentId, std::string_view name);
+		GLORY_API const glm::vec2& GetCursorPos() const;
+		GLORY_API bool IsCursorDown() const;
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 
 	private:
 		friend class UIRendererModule;
+		UUID m_SceneID;
 		UUID m_ObjectID;
 		UUID m_OriginalDocumentID;
 		Utils::ECS::EntityRegistry m_Registry;
 		RenderTexture* m_pUITexture;
 		UIRendererModule* m_pRenderer;
 		glm::mat4 m_Projection;
+		glm::vec2 m_CursorPos;
+		bool m_CursorDown;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::string m_Name;

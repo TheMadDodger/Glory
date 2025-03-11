@@ -18,6 +18,7 @@ namespace Glory::Utils::ECS
 		Glory::UUID ComponentUUIDAt(size_t index) const;
 		uint32_t ComponentTypeAt(size_t index) const;
 		uint32_t ComponentType(Glory::UUID uuid) const;
+		Glory::UUID ComponentUUID(uint32_t type) const;
 		std::map<Glory::UUID, uint32_t>::iterator GetIterator();
 		std::map<Glory::UUID, uint32_t>::iterator GetIteratorEnd();
 		void SwapComponentIndex(size_t index1, size_t index2);

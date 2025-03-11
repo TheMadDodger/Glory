@@ -128,6 +128,7 @@ namespace Glory
 		Reflect::RegisterType<UIImage>();
 		Reflect::RegisterType<UIText>();
 		Reflect::RegisterType<UIBox>();
+		Reflect::RegisterType<UIInteraction>();
 
 		Constraints::AddBuiltinConstraints();
 
@@ -143,6 +144,7 @@ namespace Glory
 		m_pComponentTypes->RegisterComponent<UIImage>();
 		m_pComponentTypes->RegisterComponent<UIText>();
 		m_pComponentTypes->RegisterComponent<UIBox>();
+		m_pComponentTypes->RegisterComponent<UIInteraction>();
 		/* Transform */
 		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
 		/* Image */
@@ -152,6 +154,8 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
 		/* Box */
 		m_pComponentTypes->RegisterInvokaction<UIBox>(Glory::Utils::ECS::InvocationType::Draw, UIBoxSystem::OnDraw);
+		/* Interaction */
+		m_pComponentTypes->RegisterInvokaction<UIInteraction>(Glory::Utils::ECS::InvocationType::Update, UIInteractionSystem::OnUpdate);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
@@ -234,6 +238,8 @@ namespace Glory
 			UIDocument& document = GetDocument(data, pDocument);
 			RenderTexture* pRenderTexture = document.m_pUITexture;
 			document.m_Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
+			document.m_CursorPos = data.m_CursorPos;
+			document.m_CursorDown = data.m_CursorDown;
 			document.Update();
 
 			pRenderTexture->BindForDraw();
@@ -321,6 +327,8 @@ namespace Glory
 			uiTextureInfo.Height = uint32_t(data.m_Resolution.y);
 			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
 
+			newDocument.m_SceneID = data.m_SceneID;
+			newDocument.m_ObjectID = data.m_ObjectID;
 			newDocument.m_pUITexture = pResourceManager->CreateRenderTexture(uiTextureInfo);
 			newDocument.m_pRenderer = this;
 			return newDocument;
@@ -340,6 +348,8 @@ namespace Glory
 			m_Documents.erase(iter);
 			m_Documents.emplace(id, pDocument);
 			UIDocument& newDocument = m_Documents.at(id);
+			newDocument.m_SceneID = data.m_SceneID;
+			newDocument.m_ObjectID = data.m_ObjectID;
 			newDocument.m_pUITexture = pUITexture;
 			newDocument.m_pRenderer = this;
 			return newDocument;

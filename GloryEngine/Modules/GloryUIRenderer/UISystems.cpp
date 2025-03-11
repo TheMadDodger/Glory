@@ -58,8 +58,8 @@ namespace Glory
 		const glm::vec2 size{ pComponent.m_Width, pComponent.m_Height };
 		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), -glm::radians(pComponent.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, 0.0f));
-		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 0.0f));
-		const glm::mat4 selfScale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Scale.x, pComponent.m_Scale.y, 0.0f));
+		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 1.0f));
+		const glm::mat4 selfScale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Scale.x, pComponent.m_Scale.y, 1.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, actualYPivot*size.y, 0.0f));
         pComponent.m_Transform = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset)*scale;
         pComponent.m_TransformNoScale = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset);
@@ -206,5 +206,72 @@ namespace Glory
 		pMaterial->SetObjectData(object);
 
 		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+	}
+
+	void UIInteractionSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIInteraction& pComponent)
+	{
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		UIRendererModule* pUIRenderer = pDocument->Renderer();
+		Engine* pEngine = pUIRenderer->GetEngine();
+		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+
+		const glm::vec4 cursor{ pDocument->GetCursorPos(), 0.0f, 1.0f };
+		const glm::mat4 inverse = glm::inverse(transform.m_TransformNoScale);
+		const glm::mat4 screenScaleTransform = glm::scale(glm::identity<glm::mat4>(), {});
+		const glm::vec4 transformedCursor = cursor * inverse;
+
+		const bool isMouseInRect = transformedCursor.x > 0.0f && transformedCursor.x < float(transform.m_Width) &&
+			transformedCursor.y > 0.0f && transformedCursor.y < float(transform.m_Height);
+
+		Utils::ECS::EntityView* pEntity = pRegistry->GetEntityView(entity);
+		const UUID entityUUID = pDocument->EntityUUID(entity);
+		const UUID componentID = pEntity->ComponentUUID(UIInteraction::GetTypeData()->TypeHash());
+		const UUID sceneID = pDocument->SceneID();
+		const UUID objectID = pDocument->ObjectID();
+
+		static bool wasDown = false;
+		const bool isCursorDown = pDocument->IsCursorDown();
+
+		if (isMouseInRect && !pComponent.m_Hovered)
+		{
+			pEngine->GetDebug().LogInfo("HOVER!");
+
+			pComponent.m_Hovered = true;
+			if (!Instance()->OnElementHover_Callback) return;
+			Instance()->OnElementHover_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
+		}
+		else if (!isMouseInRect && pComponent.m_Hovered)
+		{
+			pEngine->GetDebug().LogInfo("UNHOVER!");
+
+			pComponent.m_Hovered = false;
+			if (!Instance()->OnElementUnHover_Callback) return;
+			Instance()->OnElementUnHover_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
+		}
+
+		if (!wasDown && isCursorDown && pComponent.m_Hovered && !pComponent.m_Down)
+		{
+			pEngine->GetDebug().LogInfo("DOWN!");
+
+			pComponent.m_Down = true;
+			if (!Instance()->OnElementDown_Callback) return;
+			Instance()->OnElementDown_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
+		}
+		else if (!isCursorDown && pComponent.m_Down || pComponent.m_Down && !pComponent.m_Hovered)
+		{
+			pEngine->GetDebug().LogInfo("UP!");
+
+			pComponent.m_Down = false;
+			if (!Instance()->OnElementUp_Callback) return;
+			Instance()->OnElementUp_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
+		}
+
+		wasDown = isCursorDown;
+	}
+
+	UIInteractionSystem* UIInteractionSystem::Instance()
+	{
+		static UIInteractionSystem Inst;
+		return &Inst;
 	}
 }
