@@ -143,6 +143,8 @@ namespace Glory
 		m_pEngine->GetResourceTypes().RegisterResource<UIDocumentData>("");
 		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Draw, UIRenderSystem::OnDraw);
 		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, UIRenderSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, UIRenderSystem::OnValidate);
+		pComponentTypes->RegisterReferencesCallback<UIRenderer>(UIRenderSystem::GetReferences);
 
 		/* Register the UI components with a different component types instance */
 		m_pComponentTypes = Utils::ECS::ComponentTypes::CreateInstance();

@@ -237,7 +237,7 @@ namespace Glory
 		pTexture->GetDimensions(width, height);
 
 		if (src.z == 0) src.z = width;
-		if (src.w == 0) src.z = height;
+		if (src.w == 0) src.w = height;
 		if (dst.z == 0) dst.z = width;
 		if (dst.w == 0) dst.w = height;
 

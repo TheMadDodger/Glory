@@ -5,6 +5,7 @@
 namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
+	class BaseTypeView;
 }
 
 namespace Glory
@@ -16,5 +17,6 @@ namespace Glory
 	public:
 		static void OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent);
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent);
+		static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);
 	};
 }
