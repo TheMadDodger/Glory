@@ -78,6 +78,7 @@ namespace Glory
 		references.push_back(settings.Value<uint64_t>("SSAO Prepass Pipeline"));
 		references.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
 		references.push_back(settings.Value<uint64_t>("Text Pipeline"));
+		references.push_back(settings.Value<uint64_t>("Display Copy Pipeline"));
 		const size_t end = references.size();
 
 		for (size_t i = start; i < end; ++i)

@@ -47,8 +47,8 @@ namespace Glory
         windowCreateInfo.Fullscreen = true;
         windowCreateInfo.Maximize = false;
 
-        Glory::Logs logs;
-        Glory::WindowsDebugConsole windowsConsole(m_Console.get());
+        static Glory::Logs logs;
+        static Glory::WindowsDebugConsole windowsConsole(m_Console.get());
 
         m_Console->RegisterConsole(&logs);
         m_Console->RegisterConsole(&windowsConsole);
