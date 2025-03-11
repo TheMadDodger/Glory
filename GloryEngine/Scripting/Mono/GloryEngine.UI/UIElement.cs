@@ -260,6 +260,25 @@ namespace GloryEngine.UI
             return UIScene.GetUIElement(objectID);
         }
 
+        /// <summary>
+        /// Gets a component by ID directly, for internal use only.
+        /// Must be a UIComponent.
+        /// </summary>
+        /// <typeparam name="T">Type to cast the component to</typeparam>
+        /// <returns>The component with the same ID and type, null if type casting failed</returns>
+        internal T GetComponent<T>(UInt64 componentID) where T : class
+        {
+            Type type = typeof(T);
+            if (!type.IsSubclassOf(typeof(UIComponent)))
+                throw new Exception("Cannot get a non-native component on a UIElement");
+
+            if (_componentCache.ContainsKey(componentID)) return _componentCache[componentID] is T cachedComp ? cachedComp : null;
+            UIComponent component = Activator.CreateInstance(typeof(T)) as UIComponent;
+            component.Initialize(this, componentID);
+            _componentCache.Add(componentID, component);
+            return component as T;
+        }
+
         internal void OnObjectDestroy()
         {
             _destroyed = true;

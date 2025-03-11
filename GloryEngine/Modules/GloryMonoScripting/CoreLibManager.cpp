@@ -111,6 +111,11 @@ namespace Glory
 		return m_ScriptManager;
 	}
 
+	MonoObject* CoreLibManager::GetEngine()
+	{
+		return m_pEngineObject;
+	}
+
 	MonoObject* CoreLibManager::CreateSceneObject(UUID objectID, UUID sceneID)
 	{
 		if (!objectID || !sceneID) return nullptr;

@@ -18,13 +18,14 @@ namespace Glory
 {
 	void UITransformSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
 	{
-        if (!pRegistry->IsEntityDirty(entity)) return;
+        //if (!pRegistry->IsEntityDirty(entity)) return;
         CalculateMatrix(pRegistry, entity, pComponent);
 	}
 
     void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
     {
 		glm::mat4 startTransform = glm::identity<glm::mat4>();
+		glm::mat4 startInteractionTransform = glm::identity<glm::mat4>();
 
         Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
         const Utils::ECS::EntityID parent = pEntityView->Parent();
@@ -43,13 +44,14 @@ namespace Glory
         {
             UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
 			startTransform = parentTransform.m_TransformNoScaleNoPivot;
+			startInteractionTransform = parentTransform.m_InteractionTransform;
 			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
+		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+ 		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 
 		/* Conversion top to bottom rather than bottom to top */
 		const float actualY = parent ? -float(pComponent.m_Y) : pComponent.m_ParentSize.y - float(pComponent.m_Y);
@@ -58,12 +60,15 @@ namespace Glory
 		const glm::vec2 size{ pComponent.m_Width, pComponent.m_Height };
 		const glm::mat4 rotation = glm::rotate(glm::identity<glm::mat4>(), -glm::radians(pComponent.m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, actualY, 0.0f));
+		const glm::mat4 interactionTranslation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_X, pComponent.m_Y, 0.0f));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(size.x, size.y, 1.0f));
 		const glm::mat4 selfScale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Scale.x, pComponent.m_Scale.y, 1.0f));
 		const glm::mat4 pivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, actualYPivot*size.y, 0.0f));
+		const glm::mat4 interactionPivotOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pComponent.m_Pivot.x*size.x, pComponent.m_Pivot.y*size.y, 0.0f));
         pComponent.m_Transform = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset)*scale;
         pComponent.m_TransformNoScale = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset);
         pComponent.m_TransformNoScaleNoPivot = startTransform*translation*rotation*selfScale;
+        pComponent.m_InteractionTransform = startInteractionTransform*interactionTranslation*rotation*selfScale;
 
         pRegistry->SetEntityDirty(entity, false);
     }
@@ -210,15 +215,17 @@ namespace Glory
 
 	void UIInteractionSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIInteraction& pComponent)
 	{
+		if (!pComponent.m_Enabled) return;
+
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
 		UIRendererModule* pUIRenderer = pDocument->Renderer();
 		Engine* pEngine = pUIRenderer->GetEngine();
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 
 		const glm::vec4 cursor{ pDocument->GetCursorPos(), 0.0f, 1.0f };
-		const glm::mat4 inverse = glm::inverse(transform.m_TransformNoScale);
+		const glm::mat4 inverse = glm::inverse(transform.m_InteractionTransform);
 		const glm::mat4 screenScaleTransform = glm::scale(glm::identity<glm::mat4>(), {});
-		const glm::vec4 transformedCursor = cursor * inverse;
+		const glm::vec4 transformedCursor = inverse*cursor;
 
 		const bool isMouseInRect = transformedCursor.x > 0.0f && transformedCursor.x < float(transform.m_Width) &&
 			transformedCursor.y > 0.0f && transformedCursor.y < float(transform.m_Height);
@@ -229,21 +236,17 @@ namespace Glory
 		const UUID sceneID = pDocument->SceneID();
 		const UUID objectID = pDocument->ObjectID();
 
-		static bool wasDown = false;
+		const bool wasDown = pDocument->WasCursorDown();
 		const bool isCursorDown = pDocument->IsCursorDown();
 
 		if (isMouseInRect && !pComponent.m_Hovered)
 		{
-			pEngine->GetDebug().LogInfo("HOVER!");
-
 			pComponent.m_Hovered = true;
 			if (!Instance()->OnElementHover_Callback) return;
 			Instance()->OnElementHover_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
 		}
 		else if (!isMouseInRect && pComponent.m_Hovered)
 		{
-			pEngine->GetDebug().LogInfo("UNHOVER!");
-
 			pComponent.m_Hovered = false;
 			if (!Instance()->OnElementUnHover_Callback) return;
 			Instance()->OnElementUnHover_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
@@ -251,22 +254,16 @@ namespace Glory
 
 		if (!wasDown && isCursorDown && pComponent.m_Hovered && !pComponent.m_Down)
 		{
-			pEngine->GetDebug().LogInfo("DOWN!");
-
 			pComponent.m_Down = true;
 			if (!Instance()->OnElementDown_Callback) return;
 			Instance()->OnElementDown_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
 		}
 		else if (!isCursorDown && pComponent.m_Down || pComponent.m_Down && !pComponent.m_Hovered)
 		{
-			pEngine->GetDebug().LogInfo("UP!");
-
 			pComponent.m_Down = false;
 			if (!Instance()->OnElementUp_Callback) return;
 			Instance()->OnElementUp_Callback(pEngine, sceneID, objectID, entityUUID, componentID);
 		}
-
-		wasDown = isCursorDown;
 	}
 
 	UIInteractionSystem* UIInteractionSystem::Instance()

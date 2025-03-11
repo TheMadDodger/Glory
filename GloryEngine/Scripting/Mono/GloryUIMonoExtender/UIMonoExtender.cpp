@@ -3,6 +3,10 @@
 #include "UISceneCSAPI.h"
 #include "MonoScriptedSystem.h"
 
+#include <MonoManager.h>
+#include <AssemblyDomain.h>
+#include <CoreLibManager.h>
+#include <UISystems.h>
 #include <UIRendererModule.h>
 #include <GloryMonoScipting.h>
 #include <ScriptingExtender.h>
@@ -41,7 +45,7 @@ namespace Glory
 		return true;
 	}
 
-	void UILibManager::Initialize(Engine* pEngine, Assembly*)
+	void UILibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
 	{
 		UIComponentsCSAPI::SetEngine(pEngine);
 		UISceneCSAPI::SetEngine(pEngine);
@@ -49,6 +53,70 @@ namespace Glory
 
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		Utils::ECS::ComponentTypes::SetInstance(pUIRenderer->GetComponentTypes());
+
+		AssemblyClass* pInteractionHandlerClass = pAssembly->GetClass("GloryEngine.UI", "InteractionHandler");
+		MonoMethod* pHoverMethod = pInteractionHandlerClass->GetMethod(".::OnElementHover");
+		MonoMethod* pUnhoverMethod = pInteractionHandlerClass->GetMethod(".::OnElementUnHover");
+		MonoMethod* pDownMethod = pInteractionHandlerClass->GetMethod(".::OnElementDown");
+		MonoMethod* pUpMethod = pInteractionHandlerClass->GetMethod(".::OnElementUp");
+
+		AssemblyDomain* pDomain = pAssembly->GetDomain();
+
+		UIInteractionSystem::Instance()->OnElementHover_Callback =
+		[pDomain, pHoverMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
+			void* args[] = {
+				pEngineObject,
+				&sceneID,
+				&objectID,
+				&elementID,
+				&componentID
+			};
+
+			pDomain->InvokeMethod(pHoverMethod, nullptr, args);
+		};
+
+		UIInteractionSystem::Instance()->OnElementUnHover_Callback =
+		[pDomain, pUnhoverMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
+			void* args[] = {
+				pEngineObject,
+				&sceneID,
+				&objectID,
+				&elementID,
+				&componentID
+			};
+
+			pDomain->InvokeMethod(pUnhoverMethod, nullptr, args);
+		};
+
+		UIInteractionSystem::Instance()->OnElementDown_Callback =
+		[pDomain, pDownMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
+			void* args[] = {
+				pEngineObject,
+				&sceneID,
+				&objectID,
+				&elementID,
+				&componentID
+			};
+
+			pDomain->InvokeMethod(pDownMethod, nullptr, args);
+		};
+
+		UIInteractionSystem::Instance()->OnElementUp_Callback =
+		[pDomain, pUpMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
+			void* args[] = {
+				pEngineObject,
+				&sceneID,
+				&objectID,
+				&elementID,
+				&componentID
+			};
+
+			pDomain->InvokeMethod(pUpMethod, nullptr, args);
+		};
 	}
 
 	void UILibManager::Cleanup(Engine*)

@@ -55,6 +55,7 @@ namespace Glory
 		GLORY_API UUID FindElement(UUID parentId, std::string_view name);
 		GLORY_API const glm::vec2& GetCursorPos() const;
 		GLORY_API bool IsCursorDown() const;
+		GLORY_API bool WasCursorDown() const;
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -70,6 +71,7 @@ namespace Glory
 		glm::mat4 m_Projection;
 		glm::vec2 m_CursorPos;
 		bool m_CursorDown;
+		bool m_WasCursorDown;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::string m_Name;
