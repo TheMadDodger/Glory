@@ -37,7 +37,6 @@ namespace Glory
 		GScene* pScene = GetEntityScene(sceneID);
 		Entity entity = pScene->GetEntityByUUID(objectID);
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
-		uint32_t hash = pEntityView->ComponentType(componentID);
 		return pScene->GetRegistry().GetComponent<T>(entity.GetEntityID());
 	}
 
@@ -230,6 +229,116 @@ namespace Glory
 
 		Entity entity = GetEntityScene(sceneID)->GetEntityByUUID(objectID);
 		entity.SetDirty();
+	}
+
+	Vec3Wrapper Transform_GetWorldPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
+		glm::vec3 translation;
+		glm::decompose(transform.MatTransform, glm::vec3(), glm::quat(), translation, glm::vec3(), glm::vec4());
+		return translation;
+	}
+
+	void Transform_SetWorldPosition(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper* position)
+	{
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+
+		Transform& transform = entity.GetComponent<Transform>();
+		const Utils::ECS::EntityID parent = entity.Parent();
+
+		glm::mat4 parentTransform = glm::identity<glm::mat4>();
+
+		if (parent)
+			parentTransform = pScene->GetRegistry().GetComponent<Transform>(parent).MatTransform;
+
+		const glm::vec4 worldPosition = glm::vec4(ToGLMVec3(*position), 1.0f);
+		transform.Position = glm::inverse(parentTransform)*worldPosition;
+		entity.SetDirty(true);
+	}
+
+	QuatWrapper Transform_GetWorldRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
+		glm::quat rotation;
+		glm::decompose(transform.MatTransform, glm::vec3(), rotation, glm::vec3(), glm::vec3(), glm::vec4());
+		return rotation;
+	}
+
+	void Transform_SetWorldRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID, QuatWrapper* rotation)
+	{
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+
+		Transform& transform = entity.GetComponent<Transform>();
+		const Utils::ECS::EntityID parent = entity.Parent();
+
+		glm::mat4 parentTransform = glm::identity<glm::mat4>();
+
+		if (parent)
+			parentTransform = pScene->GetRegistry().GetComponent<Transform>(parent).MatTransform;
+
+		const glm::quat worldRotation = ToGLMQuat(*rotation);
+		const glm::mat4 transformRotation = glm::inverse(parentTransform)*glm::mat4_cast(worldRotation);
+		glm::decompose(transformRotation, glm::vec3(), transform.Rotation, glm::vec3(), glm::vec3(), glm::vec4());
+		entity.SetDirty(true);
+	}
+
+	Vec3Wrapper Transform_GetWorldRotationEuler(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
+		glm::quat rotation;
+		glm::decompose(transform.MatTransform, glm::vec3(), rotation, glm::vec3(), glm::vec3(), glm::vec4());
+		return glm::eulerAngles(rotation);
+	}
+
+	void Transform_SetWorldRotationEuler(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper* rotation)
+	{
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+
+		Transform& transform = entity.GetComponent<Transform>();
+		const Utils::ECS::EntityID parent = entity.Parent();
+
+		glm::mat4 parentTransform = glm::identity<glm::mat4>();
+
+		if (parent)
+			parentTransform = pScene->GetRegistry().GetComponent<Transform>(parent).MatTransform;
+
+		const glm::quat worldRotation = glm::quat(ToGLMVec3(*rotation));
+		const glm::mat4 transformRotation = glm::inverse(parentTransform)*glm::mat4_cast(worldRotation);
+		glm::decompose(transformRotation, glm::vec3(), transform.Rotation, glm::vec3(), glm::vec3(), glm::vec4());
+		entity.SetDirty(true);
+	}
+
+	Vec3Wrapper Transform_GetWorldScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
+		glm::vec3 scale;
+		glm::decompose(transform.MatTransform, scale, glm::quat(), glm::vec3(), glm::vec3(), glm::vec4());
+		return scale;
+	}
+
+	void Transform_SetWorldScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper* scale)
+	{
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+
+		Transform& transform = entity.GetComponent<Transform>();
+		const Utils::ECS::EntityID parent = entity.Parent();
+
+		glm::mat4 parentTransform = glm::identity<glm::mat4>();
+
+		if (parent)
+			parentTransform = pScene->GetRegistry().GetComponent<Transform>(parent).MatTransform;
+
+		const glm::vec4 worldScale = glm::vec4(ToGLMVec3(*scale), 0.0f);
+		transform.Scale = glm::inverse(parentTransform)*worldScale;
+		entity.SetDirty(true);
 	}
 
 	glm::vec3 Transform_GetForward(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -882,6 +991,18 @@ namespace Glory
 
 		BIND("GloryEngine.Entities.Transform::Transform_GetLocalScale", Transform_GetLocalScale);
 		BIND("GloryEngine.Entities.Transform::Transform_SetLocalScale", Transform_SetLocalScale);
+
+		BIND("GloryEngine.Entities.Transform::Transform_GetWorldPosition", Transform_GetWorldPosition);
+		BIND("GloryEngine.Entities.Transform::Transform_SetWorldPosition", Transform_SetWorldPosition);
+
+		BIND("GloryEngine.Entities.Transform::Transform_GetWorldRotation", Transform_GetWorldRotation);
+		BIND("GloryEngine.Entities.Transform::Transform_SetWorldRotation", Transform_SetWorldRotation);
+
+		BIND("GloryEngine.Entities.Transform::Transform_GetWorldRotationEuler", Transform_GetWorldRotationEuler);
+		BIND("GloryEngine.Entities.Transform::Transform_SetWorldRotationEuler", Transform_SetWorldRotationEuler);
+
+		BIND("GloryEngine.Entities.Transform::Transform_GetWorldScale", Transform_GetWorldScale);
+		BIND("GloryEngine.Entities.Transform::Transform_SetWorldScale", Transform_SetWorldScale);
 
 		BIND("GloryEngine.Entities.Transform::Transform_GetForward", Transform_GetForward);
 		BIND("GloryEngine.Entities.Transform::Transform_SetForward", Transform_SetForward);
