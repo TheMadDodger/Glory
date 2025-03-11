@@ -50,6 +50,14 @@ namespace Glory
 		return m_Ids.at(uuid);
 	}
 
+	void UIDocumentData::Reset()
+	{
+		m_Registry.Reset();
+		m_Ids.clear();
+		m_UUIds.clear();
+		m_Names.clear();
+	}
+
 	void UIDocumentData::Serialize(BinaryStream& container) const
 	{
 	}

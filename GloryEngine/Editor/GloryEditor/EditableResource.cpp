@@ -11,6 +11,7 @@ namespace Glory::Editor
 	{
 		OnSave();
 		m_Dirty = false;
+		m_WasSaved = true;
 	}
 
 	void EditableResource::SetDirty(bool dirty)

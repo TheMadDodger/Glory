@@ -75,6 +75,11 @@ namespace Glory
 		m_Frame.push_back(std::move(data));
 	}
 
+	void UIRendererModule::Create(const UIRenderData& data, UIDocumentData* pDocument)
+	{
+		GetDocument(data, pDocument, true);
+	}
+
 	void UIRendererModule::DrawDocument(UIDocument* pDocument, const UIRenderData& data)
 	{
 		pDocument->m_Registry.SetUserData(pDocument);
@@ -137,6 +142,7 @@ namespace Glory
 		m_pEngine->GetSceneManager()->RegisterComponent<UIRenderer>();
 		m_pEngine->GetResourceTypes().RegisterResource<UIDocumentData>("");
 		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Draw, UIRenderSystem::OnDraw);
+		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, UIRenderSystem::OnValidate);
 
 		/* Register the UI components with a different component types instance */
 		m_pComponentTypes = Utils::ECS::ComponentTypes::CreateInstance();
@@ -308,7 +314,7 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("UI Overlay Pipeline", 105);
 	}
 
-	UIDocument& UIRendererModule::GetDocument(const UIRenderData& data, UIDocumentData* pDocument)
+	UIDocument& UIRendererModule::GetDocument(const UIRenderData& data, UIDocumentData* pDocument, bool forceCreate)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -342,7 +348,7 @@ namespace Glory
 			document.m_pUITexture->Resize(data.m_Resolution.x, data.m_Resolution.y);
 		}
 
-		if (document.m_OriginalDocumentID != pDocument->GetUUID())
+		if (document.m_OriginalDocumentID != pDocument->GetUUID() || forceCreate)
 		{
 			RenderTexture* pUITexture = document.m_pUITexture;
 			m_Documents.erase(iter);

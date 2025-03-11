@@ -222,6 +222,8 @@ namespace Glory::Utils::ECS
 		/** @brief Enable/disable an individual callback on all type views */
 		void SetCallbackEnabled(InvocationType type, bool enabled);
 
+		void Reset();
+
 	private:
 		friend class ComponentTypes;
 

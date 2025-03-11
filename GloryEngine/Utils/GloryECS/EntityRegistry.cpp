@@ -15,25 +15,7 @@ namespace Glory::Utils::ECS
 
 	EntityRegistry::~EntityRegistry()
 	{
-		if (m_CallbacksEnabled)
-			InvokeAll(InvocationType::OnRemove, NULL);
-
-		for (size_t i = 0; i < m_pViews.size(); ++i)
-		{
-			delete m_pViews[i];
-		}
-
-		for (auto it = m_pEntityViews.begin(); it != m_pEntityViews.end(); it++)
-		{
-			delete it->second;
-		}
-
-		m_pEntityViews.clear();
-		m_pViews.clear();
-		m_ViewIndices.clear();
-		m_RootOrder.clear();
-
-		m_pUserData = nullptr;
+		Reset();
 	}
 
 	EntityID EntityRegistry::CreateEntity()
@@ -444,6 +426,30 @@ namespace Glory::Utils::ECS
 	void EntityRegistry::SetCallbackEnabled(InvocationType type, bool enabled)
 	{
 		m_EnabledCallbacks.Set(uint32_t(type), enabled);
+	}
+
+	void EntityRegistry::Reset()
+	{
+		if (m_CallbacksEnabled)
+			InvokeAll(InvocationType::OnRemove, NULL);
+
+		for (size_t i = 0; i < m_pViews.size(); ++i)
+		{
+			delete m_pViews[i];
+		}
+
+		for (auto it = m_pEntityViews.begin(); it != m_pEntityViews.end(); it++)
+		{
+			delete it->second;
+		}
+
+		m_pEntityViews.clear();
+		m_pViews.clear();
+		m_ViewIndices.clear();
+		m_RootOrder.clear();
+
+		m_pUserData = nullptr;
+		m_NextEntityID = 1;
 	}
 //
 //	void SceneObject::SetBeforeObject(SceneObject* pObject)

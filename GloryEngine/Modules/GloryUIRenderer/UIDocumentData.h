@@ -43,6 +43,7 @@ namespace Glory
 
         GLORY_API UUID EntityUUID(Utils::ECS::EntityID entity) const;
         GLORY_API Utils::ECS::EntityID EntityID(UUID uuid) const;
+        GLORY_API void Reset();
 
     private:
         void Serialize(BinaryStream& container) const override;

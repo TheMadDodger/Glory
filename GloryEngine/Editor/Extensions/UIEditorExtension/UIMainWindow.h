@@ -33,6 +33,7 @@ namespace Glory::Editor
 		virtual std::string_view Name() override;
 		virtual void OnGui(float height) override;
 		virtual void Initialize() override;
+		virtual void OnUpdate() override;
 
 	private:
 		UUID m_EditingDocument;
