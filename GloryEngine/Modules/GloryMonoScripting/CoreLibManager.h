@@ -21,6 +21,7 @@ namespace Glory
         GLORY_API MonoObject* GetScript(UUID sceneID, UUID objectID, UUID componentID);
         GLORY_API const MonoScriptManager& ScriptManager() const;
         GLORY_API MonoScriptManager& ScriptManager();
+        GLORY_API MonoObject* GetEngine();
 
     public:
         void Initialize(Engine* pEngine, Assembly* pAssembly) override;

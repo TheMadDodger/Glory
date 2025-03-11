@@ -86,7 +86,7 @@ namespace Glory::Utils::ECS
 			}
 
 			const size_t index = m_ViewIndices.at(hash);
-			TypeView<Component>* pTypeView = (TypeView<Component>*)m_pViews[index];
+			TypeView<Component>* pTypeView = static_cast<TypeView<Component>*>(m_pViews[index]);
 			return pTypeView;
 		}
 

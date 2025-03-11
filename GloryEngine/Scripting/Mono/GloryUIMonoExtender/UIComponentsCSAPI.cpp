@@ -347,6 +347,28 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region UI Interaction
+
+	bool UIInteraction_GetEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return false;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIInteraction& interaction = pDocument->Registry().GetComponent<UIInteraction>(entity);
+		return interaction.m_Enabled;
+	}
+
+	void UIInteraction_SetEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool enabled)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIInteraction& interaction = pDocument->Registry().GetComponent<UIInteraction>(entity);
+		interaction.m_Enabled = enabled;
+	}
+
+#pragma endregion
+
 #pragma region Binding
 
 	void UIComponentsCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -395,6 +417,10 @@ namespace Glory
 		/* UI Box */
 		BIND("GloryEngine.UI.UIBox::UIBox_GetColor", UIBox_GetColor);
 		BIND("GloryEngine.UI.UIBox::UIBox_SetColor", UIBox_SetColor);
+
+		/* UI Interaction */
+		BIND("GloryEngine.UI.UIInteraction::UIInteraction_GetEnabled", UIInteraction_GetEnabled);
+		BIND("GloryEngine.UI.UIInteraction::UIInteraction_SetEnabled", UIInteraction_SetEnabled);
 	}
 
 	void UIComponentsCSAPI::SetEngine(Engine* pEngine)

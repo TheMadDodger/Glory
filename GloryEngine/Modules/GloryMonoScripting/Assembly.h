@@ -67,10 +67,10 @@ namespace Glory
 		MonoClass* m_pClass;
 		std::map<std::string, MonoMethod*> m_pMethods;
 
-		MonoMethod* GetMethod(const std::string& name);
-		const AssemblyClassField* GetField(const std::string& name) const;
-		const AssemblyClassField* GetField(const size_t index) const;
-		const size_t NumFields() const;
+		GLORY_API MonoMethod* GetMethod(const std::string& name);
+		GLORY_API const AssemblyClassField* GetField(const std::string& name) const;
+		GLORY_API const AssemblyClassField* GetField(const size_t index) const;
+		GLORY_API const size_t NumFields() const;
 
 	private:
 		MonoMethod* LoadMethod(const std::string& name);

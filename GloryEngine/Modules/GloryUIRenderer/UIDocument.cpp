@@ -23,7 +23,7 @@ namespace Glory
 	UIDocument::UIDocument(UIDocumentData* pDocument):
 		m_OriginalDocumentID(pDocument->GetUUID()), m_SceneID(0), m_ObjectID(0),
 		m_pUITexture(nullptr), m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
-		m_CursorPos(0.0f, 0.0f), m_CursorDown(false), m_Name(pDocument->m_Name),
+		m_CursorPos(0.0f, 0.0f), m_CursorDown(false), m_WasCursorDown(false), m_Name(pDocument->m_Name),
 		m_Ids(pDocument->m_Ids), m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
@@ -43,6 +43,7 @@ namespace Glory
 	{
 		m_Registry.SetUserData(this);
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Update, NULL);
+		m_WasCursorDown = m_CursorDown;
 	}
 
 	void DrawEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry)
@@ -343,5 +344,10 @@ namespace Glory
 	bool UIDocument::IsCursorDown() const
 	{
 		return m_CursorDown;
+	}
+
+	bool UIDocument::WasCursorDown() const
+	{
+		return m_WasCursorDown;
 	}
 }
