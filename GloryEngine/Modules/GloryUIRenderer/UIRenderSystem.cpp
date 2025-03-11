@@ -119,4 +119,14 @@ namespace Glory
 		data.m_CursorDown = pComponent.m_CursorDown;
 		pModule->Submit(std::move(data));
 	}
+
+	void UIRenderSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+	{
+		for (size_t i = 0; i < pTypeView->Size(); ++i)
+		{
+			const UIRenderer* pMeshRenderer = static_cast<const UIRenderer*>(pTypeView->GetComponentAddressFromIndex(i));
+			const UUID document = pMeshRenderer->m_Document.AssetUUID();
+			if (document) references.push_back(document);
+		}
+	}
 }

@@ -49,6 +49,9 @@ namespace Glory
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 
+        /** @brief Get a vector containing other resources referenced by this resource */
+        virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+
     private:
         friend class UIDocument;
         friend struct UIEntity;
