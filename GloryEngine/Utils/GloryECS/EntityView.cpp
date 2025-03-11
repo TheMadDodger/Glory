@@ -128,6 +128,13 @@ namespace Glory::Utils::ECS
         return itor->second;
     }
 
+    UUID EntityView::ComponentUUID(uint32_t type) const
+    {
+        auto itor = m_TypeToUUID.find(type);
+        if (itor == m_TypeToUUID.end()) return 0;
+        return itor->second;
+    }
+
     void EntityView::Add(uint32_t hash, Glory::UUID uuid)
     {
         m_TypeToUUID.emplace(hash, uuid);

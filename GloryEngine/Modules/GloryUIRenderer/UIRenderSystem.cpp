@@ -6,6 +6,7 @@
 #include <SceneManager.h>
 #include <GScene.h>
 #include <Engine.h>
+#include <InputModule.h>
 #include <Components.h>
 
 namespace Glory
@@ -19,6 +20,7 @@ namespace Glory
 		UIRenderData data;
 		data.m_DocumentID = pComponent.m_Document.AssetUUID();
 		data.m_ObjectID = pScene->GetEntityUUID(entity);
+		data.m_SceneID = pScene->GetUUID();
 		data.m_TargetCamera = 0;
 		pComponent.m_RenderDocumentID = data.m_ObjectID;
 
@@ -36,6 +38,14 @@ namespace Glory
 			CameraComponent& camera = pRegistry->GetComponent<CameraComponent>(entity);
 			data.m_TargetCamera = camera.m_Camera.GetUUID();
 			resolution = camera.m_Camera.GetResolution();
+
+			InputModule* pInput = pEngine->GetMainModule<InputModule>();
+			if (pInput)
+			{
+				const glm::vec2 screenScale = 1.0f/pInput->GetScreenScale();
+				pComponent.m_CursorPos = pInput->GetCursorPos(0)*screenScale;
+				pComponent.m_CursorDown = pInput->IsCursorDown(0);
+			}
 			break;
 		}
 		default:
@@ -54,6 +64,8 @@ namespace Glory
 			break;
 		}
 
+		data.m_CursorPos = pComponent.m_CursorPos;
+		data.m_CursorDown = pComponent.m_CursorDown;
 		pModule->Submit(std::move(data));
 	}
 }

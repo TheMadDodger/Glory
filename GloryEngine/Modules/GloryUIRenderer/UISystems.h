@@ -1,9 +1,11 @@
 #pragma once
 #include <EntityID.h>
+#include <UUID.h>
 
 #include <functional>
 #include <map>
 #include <memory>
+#include <Glory.h>
 
 namespace Glory::Utils::ECS
 {
@@ -16,7 +18,9 @@ namespace Glory
 	struct UIImage;
 	struct UIText;
 	struct UIBox;
+	struct UIInteraction;
 	struct UIConstraint;
+	class Engine;
 
 	class UITransformSystem
 	{
@@ -45,10 +49,22 @@ namespace Glory
 	public:
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIBox& pComponent);
 	};
-
-	/*class UIConstraintSystem
+	
+	class UIInteractionSystem
 	{
 	public:
-		static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIConstraint& pComponent);
-	};*/
+		static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIInteraction& pComponent);
+
+		static GLORY_API UIInteractionSystem* Instance();
+
+	public:
+		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementHover_Callback;
+		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementUnHover_Callback;
+		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementDown_Callback;
+		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementUp_Callback;
+	};
 }

@@ -76,6 +76,7 @@ namespace Glory
 		const float GetAxisDelta(const std::string& inputMap, const std::string& actionName) const;
 		const bool GetBool(const std::string& inputMap, const std::string& actionName) const;
 		const glm::vec2& GetCursorPos() const;
+		bool IsCursorDown() const;
 
 		void Unbind();
 
@@ -96,5 +97,6 @@ namespace Glory
 		std::vector<UUID> m_ClaimedDevices;
 		std::vector<InputDeviceType> m_ClaimedDeviceTypes;
 		glm::vec2 m_CursorPos;
+		bool m_CursorDown;
 	};
 }

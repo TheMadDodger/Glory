@@ -7,7 +7,7 @@ namespace Glory
 {
 	PlayerInput::PlayerInput(InputModule* pInputModule, size_t playerIndex)
 		: m_pInputModule(pInputModule), m_PlayerIndex(playerIndex),
-		m_InputMode(InputMode::None.m_Name), m_CursorPos(0.0f, 0.0f)
+		m_InputMode(InputMode::None.m_Name), m_CursorPos(0.0f, 0.0f), m_CursorDown(false)
 	{
 	}
 
@@ -51,9 +51,19 @@ namespace Glory
 
 	void PlayerInput::HandleCursorEvent(CursorEvent& event)
 	{
-		m_CursorPos = event.IsDelta ? m_CursorPos + event.Cursor : event.Cursor;
-		const glm::vec4& bounds = m_pInputModule->GetCursorBounds();
-		m_CursorPos -= glm::vec2{ bounds.x, bounds.y };
+		switch (event.Type)
+		{
+		case CursorEvent::Motion:
+		{
+			m_CursorPos = event.IsDelta ? m_CursorPos + event.Cursor : event.Cursor;
+			const glm::vec4& bounds = m_pInputModule->GetCursorBounds();
+			m_CursorPos -= glm::vec2{ bounds.x, bounds.y };
+			break;
+		}
+		case CursorEvent::Button:
+			m_CursorDown = event.IsDown;
+			break;
+		}
 	}
 
 	void PlayerInput::ClearActions()
@@ -122,6 +132,11 @@ namespace Glory
 	const glm::vec2& PlayerInput::GetCursorPos() const
 	{
 		return m_CursorPos;
+	}
+
+	bool PlayerInput::IsCursorDown() const
+	{
+		return m_CursorDown;
 	}
 
 	void PlayerInput::Unbind()

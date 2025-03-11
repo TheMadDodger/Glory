@@ -41,6 +41,7 @@ namespace Glory
 		float GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
 		bool GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
 		glm::vec2 GetCursorPos(size_t playerIndex) const;
+		bool IsCursorDown(size_t playerIndex) const;
 
 		void FreeDevice(const UUID deviceId);
 
@@ -48,6 +49,9 @@ namespace Glory
 
 		GLORY_API void SetCursorBounds(const glm::vec4& bounds);
 		GLORY_API const glm::vec4& GetCursorBounds();
+
+		GLORY_API void SetScreenScale(const glm::vec2& scale);
+		GLORY_API const glm::vec2& GetScreenScale();
 
 	protected:
 		virtual void OnInitialize() {};
@@ -78,5 +82,6 @@ namespace Glory
 
 		bool m_InputBlocked;
 		glm::vec4 m_CursorBounds;
+		glm::vec2 m_ScreenScale;
 	};
 }

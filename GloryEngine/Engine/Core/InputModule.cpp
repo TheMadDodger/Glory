@@ -9,7 +9,7 @@ namespace Glory
 	const char* Key_InputModes = "InputModes";
 
 	InputModule::InputModule()
-		: m_Players(), m_InputBlocked(true), m_CursorBounds()
+		: m_Players(), m_InputBlocked(true), m_CursorBounds(), m_ScreenScale(1.0f, 1.0f)
 	{
 	}
 
@@ -198,6 +198,12 @@ namespace Glory
 		return player ? player->GetCursorPos() : glm::vec2{};
 	}
 
+	bool InputModule::IsCursorDown(size_t playerIndex) const
+	{
+		const PlayerInput* player = GetPlayer(playerIndex);
+		return player ? player->IsCursorDown() : false;
+	}
+
 	void InputModule::FreeDevice(const UUID deviceId)
 	{
 		InputDevice* pDevice = GetInputDevice(deviceId);
@@ -224,6 +230,16 @@ namespace Glory
 	const glm::vec4& InputModule::GetCursorBounds()
 	{
 		return m_CursorBounds;
+	}
+
+	void InputModule::SetScreenScale(const glm::vec2& scale)
+	{
+		m_ScreenScale = scale;
+	}
+
+	const glm::vec2& InputModule::GetScreenScale()
+	{
+		return m_ScreenScale;
 	}
 
 	void InputModule::OnProcessData()
