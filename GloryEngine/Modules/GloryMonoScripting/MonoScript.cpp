@@ -25,14 +25,14 @@ namespace Glory
 		APPEND_TYPE(MonoScript);
 	}
 
-	MonoScript::MonoScript(FileData* pFileData, std::string_view ns, std::string_view className)
-		: FileData(pFileData), m_NamespaceName(ns), m_ClassName(className)
+	MonoScript::MonoScript(FileData* pFileData, std::vector<std::string>&& classes)
+		: FileData(pFileData), m_Classes(std::move(classes))
 	{
 		APPEND_TYPE(MonoScript);
 	}
 	
 	MonoScript::MonoScript(std::vector<char>&& data)
-		: FileData(std::move(data)), m_NamespaceName(""), m_ClassName("")
+		: FileData(std::move(data))
 	{
 		APPEND_TYPE(MonoScript);
 	}
@@ -41,10 +41,19 @@ namespace Glory
 	{
 	}
 
-	std::string MonoScript::FullName() const
+	bool MonoScript::HasClass(std::string_view name) const
 	{
-		std::stringstream str;
-		str << m_NamespaceName << "." << m_Name;
-		return str.str();
+		for (size_t i = 0; i < m_Classes.size(); ++i)
+		{
+			if (m_Classes[i] != name) continue;
+			return true;
+		}
+		return false;
+	}
+
+	std::string_view MonoScript::ClassName(size_t index) const
+	{
+		if (index >= m_Classes.size()) return "";
+		return m_Classes[index];
 	}
 }
