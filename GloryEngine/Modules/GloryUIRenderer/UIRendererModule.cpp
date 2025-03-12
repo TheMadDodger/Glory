@@ -174,6 +174,10 @@ namespace Glory
 			UIOverlayPass(camera, frame);
 		} });
 
+		pRenderer->AddRenderPass(RenderPassType::RP_Objectpass, { "UI Worldspace Quad Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			UIWorldSpaceQuadPass(camera, frame);
+		} });
+
 		m_pImageMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
 			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
 
@@ -257,6 +261,42 @@ namespace Glory
 		}
 	}
 
+	void UIRendererModule::UIWorldSpaceQuadPass(CameraRef camera, const RenderFrame&)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+		for (auto& data : m_Frame)
+		{
+			if (data.m_Target != UITarget::WorldSpaceQuad) continue;
+
+			/* Get document */
+			auto& iter = m_Documents.find(data.m_ObjectID);
+			if (iter == m_Documents.end()) continue;
+			UIDocument& document = iter->second;
+			RenderTexture* pDocumentTexture = document.m_pUITexture;
+
+			MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(data.m_MaterialID);
+			if (!pMaterialData) return;
+			Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
+			if (!pMaterial) return;
+
+
+			ObjectData object;
+			object.Model = data.m_WorldTransform;
+			object.View = camera.GetView();
+			object.Projection = camera.GetProjection();
+			object.ObjectID = data.m_ObjectID;
+			object.SceneID = data.m_SceneID;
+
+			MeshData* pMeshData = GetDocumentQuadMesh(data);
+			pMaterial->SetProperties(m_pEngine);
+			pMaterial->ResetTextureCounter();
+			pMaterial->SetTexture("texSampler", pDocumentTexture->GetTextureAttachment(0));
+			pMaterial->SetObjectData(object);
+			pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
+		}
+	}
+
 	void UIRendererModule::UIOverlayPass(CameraRef camera, const RenderFrame&)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -272,7 +312,7 @@ namespace Glory
 
 		for (auto& data : m_Frame)
 		{
-			if (camera.GetUUID() != data.m_TargetCamera) continue;
+			if (data.m_Target != UITarget::CameraOverlay || camera.GetUUID() != data.m_TargetCamera) continue;
 
 			/* Get document */
 			auto& iter = m_Documents.find(data.m_ObjectID);
@@ -363,5 +403,54 @@ namespace Glory
 			return newDocument;
 		}
 		return document;
+	}
+
+	MeshData* UIRendererModule::GetDocumentQuadMesh(const UIRenderData& data)
+	{
+		bool createMesh = data.m_WorldDirty;
+
+		auto iter = m_pDocumentQuads.find(data.m_ObjectID);
+		if (iter == m_pDocumentQuads.end())
+		{
+			iter = m_pDocumentQuads.emplace(data.m_ObjectID,
+				new MeshData(4, sizeof(DefaultVertex3D), {AttributeType::Float3, AttributeType::Float3,
+					AttributeType::Float3, AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 })
+			).first;
+
+			createMesh = true;
+		}
+
+		if (createMesh)
+		{
+			iter->second->ClearIndices();
+			iter->second->ClearVertices();
+
+			const float xpos = -(data.m_WorldSize.x/2.0f);
+			const float ypos = -(data.m_WorldSize.y/2.0f);
+
+			const float w = data.m_WorldSize.x;
+			const float h = data.m_WorldSize.y;
+
+			const glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
+			const glm::vec3 normal{ 0.0f, 0.0f, 1.0f };
+			const glm::vec3 tangent{ 1.0f, 0.0f, 0.0f };
+			const glm::vec3 bitangent{ 0.0f, 1.0f, 0.0f };
+
+			DefaultVertex3D vertices[4] = {
+				{ { xpos, ypos + h, 0.0f }, normal, tangent, bitangent, { 0.0f, 1.0f }, color},
+				{ { xpos, ypos, 0.0f }, normal, tangent, bitangent, { 0.0f, 0.0f }, color },
+				{ { xpos + w, ypos, 0.0f }, normal, tangent, bitangent, { 1.0f, 0.0f }, color },
+				{ { xpos + w, ypos + h, 0.0f }, normal, tangent, bitangent, { 1.0f, 1.0f }, color }
+			};
+
+			iter->second->AddVertex(reinterpret_cast<float*>(&vertices[0]));
+			iter->second->AddVertex(reinterpret_cast<float*>(&vertices[1]));
+			iter->second->AddVertex(reinterpret_cast<float*>(&vertices[2]));
+			iter->second->AddVertex(reinterpret_cast<float*>(&vertices[3]));
+			iter->second->AddFace(0, 1, 2, 3);
+			iter->second->SetDirty(true);
+		}
+
+		return iter->second.get();
 	}
 }

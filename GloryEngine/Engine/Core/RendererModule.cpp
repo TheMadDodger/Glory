@@ -267,6 +267,11 @@ namespace Glory
 		m_RenderPasses[type].push_back(std::move(pass));
 	}
 
+	void RendererModule::RenderObject(CameraRef camera, const RenderData& renderData)
+	{
+		OnRender(camera, renderData);
+	}
+
 	void RendererModule::Initialize()
 	{
 		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );

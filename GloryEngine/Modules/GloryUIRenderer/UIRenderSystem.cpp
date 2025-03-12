@@ -20,12 +20,17 @@ namespace Glory
 		UIDocumentData* pDocument = pComponent.m_Document.Get(&pEngine->GetAssetManager());
 		if (!pDocument) return;
 
+		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		UIRenderData data;
 		data.m_DocumentID = pComponent.m_Document.AssetUUID();
 		data.m_ObjectID = pScene->GetEntityUUID(entity);
 		data.m_SceneID = pScene->GetUUID();
 		data.m_TargetCamera = 0;
+		data.m_WorldTransform = transform.MatTransform;
+		data.m_Target = pComponent.m_Target;
 		pComponent.m_RenderDocumentID = data.m_ObjectID;
+		pComponent.m_IsDirty = true;
+		data.m_WorldDirty = pComponent.m_IsDirty;
 
 		glm::uvec2 resolution = pComponent.m_Resolution;
 
@@ -35,7 +40,7 @@ namespace Glory
 		{
 			if (!pRegistry->HasComponent<CameraComponent>(entity))
 			{
-				pEngine->GetDebug().LogOnce("UIOverlay", "Can't overlay UI on camera, entity has no camera component", Debug::LogLevel::Error);
+				pEngine->GetDebug().LogError("Can't overlay UI on camera, entity has no camera component");
 				return;
 			}
 			CameraComponent& camera = pRegistry->GetComponent<CameraComponent>(entity);
@@ -50,6 +55,11 @@ namespace Glory
 		switch (pComponent.m_ResolutionMode)
 		{
 		case ResolutionMode::CameraScale:
+			if (pComponent.m_Target != UITarget::CameraOverlay)
+			{
+				pEngine->GetDebug().LogError("Target not set to CameraOverlay, can't base resolution on camera");
+				return;
+			}
 			data.m_Resolution = glm::uvec2(resolution.x*pComponent.m_Resolution.x, resolution.y*pComponent.m_Resolution.y);
 			break;
 		case ResolutionMode::Fixed:
@@ -68,12 +78,19 @@ namespace Glory
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		UIRendererModule* pModule = pEngine->GetOptionalModule<UIRendererModule>();
 
+		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		UIRenderData data;
 		data.m_DocumentID = pComponent.m_Document.AssetUUID();
 		data.m_ObjectID = pScene->GetEntityUUID(entity);
 		data.m_SceneID = pScene->GetUUID();
 		data.m_TargetCamera = 0;
+		data.m_WorldTransform = transform.MatTransform;
+		data.m_Target = pComponent.m_Target;
+		data.m_MaterialID = pComponent.m_WorldMaterial.AssetUUID();
+		data.m_WorldSize = pComponent.m_WorldSize;
+		data.m_WorldDirty = pComponent.m_IsDirty;
 		pComponent.m_RenderDocumentID = data.m_ObjectID;
+		pComponent.m_IsDirty = false;
 
 		glm::uvec2 resolution = pComponent.m_Resolution;
 
@@ -82,10 +99,7 @@ namespace Glory
 		case UITarget::CameraOverlay:
 		{
 			if (!pRegistry->HasComponent<CameraComponent>(entity))
-			{
-				pEngine->GetDebug().LogOnce("UIOverlay", "Can't overlay UI on camera, entity has no camera component", Debug::LogLevel::Error);
 				return;
-			}
 			CameraComponent& camera = pRegistry->GetComponent<CameraComponent>(entity);
 			data.m_TargetCamera = camera.m_Camera.GetUUID();
 			resolution = camera.m_Camera.GetResolution();
@@ -93,8 +107,8 @@ namespace Glory
 			InputModule* pInput = pEngine->GetMainModule<InputModule>();
 			if (pInput)
 			{
-				const glm::vec2 screenScale = 1.0f/pInput->GetScreenScale();
-				pComponent.m_CursorPos = pInput->GetCursorPos(0)*screenScale;
+				const glm::vec2 screenScale = 1.0f / pInput->GetScreenScale();
+				pComponent.m_CursorPos = pInput->GetCursorPos(0) * screenScale;
 				pComponent.m_CursorDown = pInput->IsCursorDown(0);
 			}
 			break;
@@ -106,6 +120,8 @@ namespace Glory
 		switch (pComponent.m_ResolutionMode)
 		{
 		case ResolutionMode::CameraScale:
+			if (pComponent.m_Target != UITarget::CameraOverlay)
+				return;
 			data.m_Resolution = glm::uvec2(resolution.x*pComponent.m_Resolution.x, resolution.y*pComponent.m_Resolution.y);
 			break;
 		case ResolutionMode::Fixed:
@@ -117,6 +133,16 @@ namespace Glory
 
 		data.m_CursorPos = pComponent.m_CursorPos;
 		data.m_CursorDown = pComponent.m_CursorDown;
+
+		LayerManager* pLayers = &pEngine->GetLayerManager();
+		LayerMask mask;
+		if (pRegistry->HasComponent<LayerComponent>(entity))
+		{
+			LayerComponent& layer = pRegistry->GetComponent<LayerComponent>(entity);
+			mask = layer.m_Layer.Layer(pLayers) != nullptr ? layer.m_Layer.Layer(pLayers)->m_Mask : 0;
+		}
+		data.m_LayerMask = mask;
+
 		pModule->Submit(std::move(data));
 	}
 

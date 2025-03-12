@@ -6,11 +6,12 @@
 #include <AssetReference.h>
 #include <TextureData.h>
 #include <FontData.h>
+#include <MaterialData.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-REFLECTABLE_ENUM_NS(Glory, UITarget, CameraOverlay);
+REFLECTABLE_ENUM_NS(Glory, UITarget, None, CameraOverlay, WorldSpaceQuad);
 REFLECTABLE_ENUM_NS(Glory, ResolutionMode, CameraScale, Fixed);
 
 #define CONSTRAINT(axis)\
@@ -144,6 +145,7 @@ namespace Glory
         UIRenderer(): m_Target(UITarget::CameraOverlay),
             m_ResolutionMode(ResolutionMode::CameraScale),
             m_Resolution(1.0f, 1.0f), m_RenderDocumentID(0),
+            m_WorldMaterial(0), m_WorldSize(1.0f, 1.0f),
             m_CursorPos(0.0f, 0.0f), m_CursorDown(false)
         {}
 
@@ -151,11 +153,14 @@ namespace Glory
             (AssetReference<UIDocumentData>)(m_Document),
             (UITarget)(m_Target),
             (ResolutionMode)(m_ResolutionMode),
-            (glm::vec2)(m_Resolution)
+            (glm::vec2)(m_Resolution),
+            (AssetReference<MaterialData>)(m_WorldMaterial),
+            (glm::vec2)(m_WorldSize)
         );
 
         UUID m_RenderDocumentID;
         glm::vec2 m_CursorPos;
         bool m_CursorDown;
+        bool m_IsDirty;
     };
 }
