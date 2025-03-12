@@ -3,6 +3,9 @@
 #include "Engine.h"
 #include "GameTime.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace Glory
 {
 	PlayerInput::PlayerInput(InputModule* pInputModule, size_t playerIndex)
@@ -189,11 +192,13 @@ namespace Glory
 					break;
 				case AxisBlending::Lerp:
 				{
-					m_InputData[i].m_AxisValueRight[itor->first] = Lerp(m_InputData[i].m_AxisValueRight[itor->first], m_InputData[i].m_AxisDesiredValueRight[itor->first], lFrac);
+					m_InputData[i].m_AxisValueRight[itor->first] =
+						Lerp(m_InputData[i].m_AxisValueRight[itor->first], m_InputData[i].m_AxisDesiredValueRight[itor->first], lFrac);
 					break;
 				}
 				case AxisBlending::SLerp:
-
+					m_InputData[i].m_AxisValueRight[itor->first] =
+						SLerp(m_InputData[i].m_AxisValueRight[itor->first], m_InputData[i].m_AxisDesiredValueRight[itor->first], lFrac);
 					break;
 				default:
 					break;
@@ -274,6 +279,14 @@ namespace Glory
 	float PlayerInput::Lerp(float a, float b, float t)
 	{
 		return a + (b - a) * t;
+	}
+
+	float PlayerInput::SLerp(float a, float b, float t)
+	{
+		t = Lerp(-M_PI / 2.0f, M_PI / 2.0f, t);
+		t = std::sin(t);
+		t = (t/2.0f) + 0.5f;
+		return Lerp(a, b, t);
 	}
 
 	PlayerInputData::PlayerInputData(InputMap* pInputMap) : m_InputMap(pInputMap)
