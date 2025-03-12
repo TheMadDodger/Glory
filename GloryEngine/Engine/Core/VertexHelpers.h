@@ -34,4 +34,14 @@ namespace Glory
 		glm::vec3 Pos;
 		glm::vec4 Color;
 	};
+
+	struct DefaultVertex3D
+	{
+		glm::vec3 Pos;
+		glm::vec3 Normal;
+		glm::vec3 Tangent;
+		glm::vec3 Bitangent;
+		glm::vec2 TexCoord;
+		glm::vec4 Color;
+	};
 }

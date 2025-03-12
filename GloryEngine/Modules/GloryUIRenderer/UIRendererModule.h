@@ -1,4 +1,6 @@
 #pragma once
+#include "UIComponents.h"
+
 #include <RendererModule.h>
 #include <Glory.h>
 #include <FileData.h>
@@ -24,10 +26,16 @@ namespace Glory
 		UUID m_SceneID;
 		UUID m_ObjectID;
 
+		UITarget m_Target;
 		UUID m_TargetCamera;
 		glm::uvec2 m_Resolution;
+		glm::vec2 m_WorldSize;
 		glm::vec2 m_CursorPos;
 		bool m_CursorDown;
+		glm::mat4 m_WorldTransform;
+		LayerMask m_LayerMask;
+		UUID m_MaterialID;
+		bool m_WorldDirty;
 	};
 
 	class UIRendererModule : public Module
@@ -61,11 +69,14 @@ namespace Glory
 		virtual void Update() override;
 		virtual void Cleanup() override;
 		virtual void UIPrepass(CameraRef, const RenderFrame&);
+		virtual void UIWorldSpaceQuadPass(CameraRef camera, const RenderFrame&);
 		virtual void UIOverlayPass(CameraRef camera, const RenderFrame&);
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
 		UIDocument& GetDocument(const UIRenderData& data, UIDocumentData* pDocument, bool forceCreate=false);
+
+		MeshData* GetDocumentQuadMesh(const UIRenderData& data);
 
 	private:
 		MaterialData* m_pUIPrepassMaterial = nullptr;
@@ -78,5 +89,6 @@ namespace Glory
 
 		std::vector<UIRenderData> m_Frame;
 		std::unique_ptr<MeshData> m_pImageMesh;
+		std::map<UUID, std::unique_ptr<MeshData>> m_pDocumentQuads;
 	};
 }

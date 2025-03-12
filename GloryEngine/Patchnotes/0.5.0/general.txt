@@ -36,6 +36,7 @@ Editor:
 - Added a UI element library window
 - Added packaging for UI documents
 - Fixed Start and OnEnable not being called when loading a scene in playmode
+- Added renderpass for worldspace UIs
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

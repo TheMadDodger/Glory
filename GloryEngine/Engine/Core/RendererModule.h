@@ -75,6 +75,8 @@ namespace Glory
 
 		void AddRenderPass(RenderPassType type, RenderPass&& pass);
 
+		void RenderObject(CameraRef camera, const RenderData& renderData);
+
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
 		virtual void OnSubmit(const TextRenderData& renderData) {}
