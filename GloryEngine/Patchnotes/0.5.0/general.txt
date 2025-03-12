@@ -14,6 +14,7 @@ Engine:
 - Added UIImage component
 - Added UIBox component
 - Added UIInteraction component
+- Fixed SLerp input blending doing nothing
 
 Editor:
 - Added a startup popup
