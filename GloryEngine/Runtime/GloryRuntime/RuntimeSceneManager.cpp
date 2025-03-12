@@ -129,10 +129,10 @@ namespace Glory
 
 		pScene->SetManager(m_pEngine->GetSceneManager());
 
-		/* Have to make sure every components add and validate callbacks are called */
+		/* Have to make sure every components add callbacks are called */
 		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnAdd, NULL);
-		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnValidate, NULL);
-
 		m_pOpenScenes.push_back(pScene);
+		if (m_pRuntime->IsRunning())
+			pScene->Start();
 	}
 }

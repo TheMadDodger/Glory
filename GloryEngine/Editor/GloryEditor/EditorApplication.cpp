@@ -378,6 +378,11 @@ namespace Glory::Editor
 		}
 	}
 
+	bool EditorApplication::IsInPlayMode()
+	{
+		return m_Mode == EditorMode::M_Play;
+	}
+
 	void EditorApplication::OnGenerateConfigExec(std::ofstream& stream)
 	{
 		for (size_t i = 0; i < m_pExtensions.size(); i++)

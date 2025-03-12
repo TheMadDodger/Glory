@@ -141,6 +141,7 @@ namespace Glory
 	void GloryRuntime::Run()
 	{
 		m_pEngine->GetSceneManager()->Start();
+		m_IsRunning = true;
 
 		while (!m_pEngine->WantsToQuit())
 		{
@@ -148,6 +149,7 @@ namespace Glory
 			EndFrame();
 		}
 
+		m_IsRunning = false;
 		m_pEngine->GetSceneManager()->Stop();
 		m_pEngine->Cleanup();
 	}
@@ -240,6 +242,11 @@ namespace Glory
 	void GloryRuntime::SetFramerateLimit(float limit)
 	{
 		m_MaxFramerate = limit;
+	}
+
+	bool GloryRuntime::IsRunning() const
+	{
+		return m_IsRunning;
 	}
 
 	void GloryRuntime::EndFrame()

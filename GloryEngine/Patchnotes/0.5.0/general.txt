@@ -1,5 +1,7 @@
 Runtime:
 - Upped runtime version to 0.5.0 as shader packs have changed
+- Added loading of UI documents
+- Fixed Start and OnEnable not being called when loading a scene
 
 Engine:
 - Fixed line rendering
@@ -32,6 +34,8 @@ Editor:
 - Added a UI Document preview window
 - Added a UI element inspector window
 - Added a UI element library window
+- Added packaging for UI documents
+- Fixed Start and OnEnable not being called when loading a scene in playmode
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

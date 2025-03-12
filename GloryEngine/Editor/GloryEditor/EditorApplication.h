@@ -73,6 +73,7 @@ namespace Editor
 		GLORY_EDITOR_API void OnGenerateConfigExec(std::ofstream& stream);
 		GLORY_EDITOR_API void OnEndPackage(const std::filesystem::path& path);
 		GLORY_EDITOR_API void UpdateExtensions();
+		GLORY_EDITOR_API bool IsInPlayMode();
 
 		static const Version Version;
 
