@@ -51,6 +51,8 @@ namespace Glory
 		GLORY_RUNTIME_API std::string_view GetDataPath();
 		/** @brief Set framerate limit */
 		GLORY_RUNTIME_API void SetFramerateLimit(float limit);
+		/** @brief Is the runtime running? */
+		GLORY_RUNTIME_API bool IsRunning() const;
 
 	private:
 		/** @brief End of a frame */
@@ -70,5 +72,6 @@ namespace Glory
 
 		std::chrono::time_point<std::chrono::system_clock> m_LastRenderedFrame;
 		float m_MaxFramerate = 300.0f;
+		bool m_IsRunning = false;
 	};
 }
