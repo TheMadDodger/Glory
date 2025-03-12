@@ -21,19 +21,19 @@ namespace Glory
     {
     public:
         GLORY_API MonoScript();
-        GLORY_API MonoScript(FileData* pFileData, std::string_view ns, std::string_view className);
+        GLORY_API MonoScript(FileData* pFileData, std::vector<std::string>&& classes);
         GLORY_API MonoScript(std::vector<char>&& data);
         GLORY_API virtual ~MonoScript();
 
         GLORY_API void Serialize(BinaryStream& container) const override {};
         GLORY_API void Deserialize(BinaryStream& container) override {};
 
-        GLORY_API std::string FullName() const;
+        GLORY_API bool HasClass(std::string_view name) const;
+        GLORY_API std::string_view ClassName(size_t index) const;
 
     private:
         friend class MonoScriptLoader;
-        std::string m_NamespaceName;
-        std::string m_ClassName;
+        std::vector<std::string> m_Classes;
         std::vector<ScriptProperty> m_ScriptProperties;
         std::vector<char> m_DefaultValues;
     };

@@ -37,6 +37,7 @@ Editor:
 - Added packaging for UI documents
 - Fixed Start and OnEnable not being called when loading a scene in playmode
 - Added renderpass for worldspace UIs
+- Added edit script button to mono script component editor
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

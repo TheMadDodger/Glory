@@ -7,6 +7,8 @@
 #include <GloryMonoScipting.h>
 
 #include <EditorApplication.h>
+#include <AssetLocation.h>
+#include <EditorAssetDatabase.h>
 
 namespace Glory::Editor
 {
@@ -66,8 +68,46 @@ namespace Glory::Editor
 			return change;
 		}
 		GloryMonoScipting* pScripting = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<GloryMonoScipting>();
+		AssetManager& assets = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
 		const MonoScriptManager& scriptManager = pScripting->GetMonoManager()->GetCoreLibManager()->ScriptManager();
-		int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+		const int typeIndex = scriptManager.TypeIndexFromHash(scriptComponent.m_ScriptType.m_Hash);
+
+		ImGui::BeginDisabled(typeIndex == -1);
+		if (ImGui::Button("Edit Script", { ImGui::GetContentRegionAvail().x, 0.0f }))
+		{
+			const std::string_view typeName = scriptManager.TypeName(typeIndex);
+
+			UUID foundScriptID = 0;
+			std::vector<UUID> scripts;
+			EditorAssetDatabase::GetAllAssetsOfType(ResourceTypes::GetHash<MonoScript>(), scripts);
+			for (size_t i = 0; i < scripts.size(); ++i)
+			{
+				const UUID scriptID = scripts[i];
+				Resource* pResource = assets.FindResource(scriptID);
+				if (pResource)
+				{
+					MonoScript* pScript = static_cast<MonoScript*>(pResource);
+					if (pScript->HasClass(typeName))
+					{
+						foundScriptID = scriptID;
+						break;
+					}
+				}
+			}
+
+			AssetLocation location;
+			if (foundScriptID && EditorAssetDatabase::GetAssetLocation(foundScriptID, location))
+			{
+				/* Open project first before opening a single file */
+				MonoEditorExtension::OpenCSharpProject();
+
+				ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+				std::filesystem::path path = pProject->RootPath();
+				path = path.append("Assets").append(location.Path);
+				MonoEditorExtension::OpenFile(path);
+			}
+		}
+		ImGui::EndDisabled();
 
 		if (typeIndex == -1) return change;
 

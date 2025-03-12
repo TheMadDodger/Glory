@@ -36,14 +36,12 @@ namespace Glory
 		fileImportSettings.m_Extension = "cs";
 		fileImportSettings.Flags = std::ios::ate;
 		FileData* pFileData = (FileData*)pModule->Load(path, fileImportSettings);
-		MonoScript* pMonoScript = new MonoScript(pFileData, "", "");
+		MonoScript* pMonoScript = new MonoScript(pFileData, {});
 		delete pFileData;
 
 		std::string namespaceString = "namespace";
 		if (pMonoScript->Size() <= 0) return pMonoScript;
 		std::string text = pMonoScript->Data();
-		pMonoScript->m_NamespaceName = Find(text, "namespace");
-		pMonoScript->m_ClassName = Find(text, "class");
 
 		return pMonoScript;
 	}
@@ -55,7 +53,7 @@ namespace Glory
 		fileImportSettings.m_Extension = "cs";
 		fileImportSettings.Flags = std::ios::ate;
 		FileData* pFileData = (FileData*)pModule->Load(buffer, length, fileImportSettings);
-		MonoScript* pMonoScript = new MonoScript(pFileData, "", "");
+		MonoScript* pMonoScript = new MonoScript(pFileData, {});
 		delete pFileData;
 
 		return pMonoScript;

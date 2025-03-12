@@ -74,8 +74,8 @@ namespace Glory
 			if (pScriptResource)
 			{
 				MonoScript* pScript = (MonoScript*)pScriptResource;
-				const std::string fullName = pScript->FullName();
-				const uint32_t hash = Hashing::Hash(fullName.c_str());
+				const std::string_view fullName = pScript->ClassName(0);
+				const uint32_t hash = Hashing::Hash(fullName.data());
 				scriptTypeNode.Set(hash);
 			}
 		}
