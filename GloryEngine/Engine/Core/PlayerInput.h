@@ -87,6 +87,7 @@ namespace Glory
 		void MapOnFloat(PlayerInputData& inputData, InputAction& inputAction, InputBinding& inputBinding, InputEvent& e);
 
 		float Lerp(float a, float b, float t);
+		float SLerp(float a, float b, float t);
 
 	private:
 		friend class InputModule;
