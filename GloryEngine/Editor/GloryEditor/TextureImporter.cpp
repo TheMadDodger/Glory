@@ -22,14 +22,9 @@ namespace Glory::Editor
 		return extension.compare(".gtex") == 0;
 	}
 
-	ImportedResource TextureImporter::LoadResource(const std::filesystem::path& path, void*) const
+	void TextureImporter::LoadIntoTexture(Utils::YAMLFileRef file, TextureData* pTexture)
 	{
-		Utils::YAMLFileRef file{ path };
-		file.Load();
-
 		const UUID imageUUID = file["Image"].As<uint64_t>();
-
-		TextureData* pTexture = new TextureData();
 		pTexture->Image().SetUUID(imageUUID);
 
 		Utils::NodeValueRef sampler = file["Sampler"];
@@ -47,7 +42,15 @@ namespace Glory::Editor
 		pTexture->GetSamplerSettings().MipLODBias = sampler["MipLODBias"].As<float>(DefaultSampler.MipLODBias);
 		pTexture->GetSamplerSettings().MinLOD = sampler["MinLOD"].As<float>(DefaultSampler.MinLOD);
 		pTexture->GetSamplerSettings().MaxLOD = sampler["MaxLOD"].As<float>(DefaultSampler.MaxLOD);
+	}
 
+	ImportedResource TextureImporter::LoadResource(const std::filesystem::path& path, void*) const
+	{
+		Utils::YAMLFileRef file{ path };
+		file.Load();
+
+		TextureData* pTexture = new TextureData();
+		LoadIntoTexture(file, pTexture);
 		return ImportedResource{ path, pTexture };
 	}
 

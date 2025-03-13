@@ -72,7 +72,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API const size_t CurrentRewindIndex();
 		static GLORY_EDITOR_API void JumpTo(size_t historyRewindIndex);
 		static GLORY_EDITOR_API std::string_view GetRecordingName();
-		static GLORY_EDITOR_API void RegisterChangeHandler(std::string& extension, std::string& pathComponent, std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)> handler);
+		static GLORY_EDITOR_API void RegisterChangeHandler(const std::string& extension, const std::string& pathComponent, std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)> handler);
 		static GLORY_EDITOR_API void TriggerChangeHandler(Utils::YAMLFileRef& file, const std::filesystem::path& path);
 
 		template<typename T>

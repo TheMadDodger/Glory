@@ -25,10 +25,13 @@ namespace Glory::Editor
 		bool change = false;
 
 		auto image = file["Image"];
-		AssetReference<ImageData> imageRef = image.As<uint64_t>();
+
+		const uint64_t oldValue = image.As<uint64_t>();
+		AssetReference<ImageData> imageRef = oldValue;
 		if(AssetPicker::ResourceDropdown("Image", ResourceTypes::GetHash<ImageData>(), imageRef.AssetUUIDMember()))
 		{
-			image.Set(imageRef.AssetUUID());
+			Undo::ApplyYAMLEdit(file, image.Path(), oldValue, uint64_t(imageRef.AssetUUID()));
+			change = true;
 		}
 
 		change |= EditorUI::InputEnum<Filter>(file, "Sampler/MinFilter");

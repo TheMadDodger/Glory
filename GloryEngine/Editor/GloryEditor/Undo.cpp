@@ -223,7 +223,7 @@ namespace Glory::Editor
 		return m_RecordingName;
 	}
 
-	void Undo::RegisterChangeHandler(std::string& extension, std::string& pathComponent, std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)> handler)
+	void Undo::RegisterChangeHandler(const std::string& extension, const std::string& pathComponent, std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)> handler)
 	{
 		auto& extIter = m_ChangeHandlers.find(extension);
 		if (extIter == m_ChangeHandlers.end())
@@ -245,6 +245,13 @@ namespace Glory::Editor
 		auto& extIter = m_ChangeHandlers.find(file.Path().extension().string());
 		if (extIter == m_ChangeHandlers.end()) return;
 		auto& pathComp = extIter->second;
+
+		auto anyPathIter = pathComp.find("");
+		if (anyPathIter != pathComp.end())
+		{
+			for (auto& handler : anyPathIter->second)
+				handler(file, path);
+		}
 
 		for (auto iter = path.begin(); iter != path.end(); ++iter)
 		{

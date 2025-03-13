@@ -43,6 +43,13 @@ namespace Glory
 		if (pImageData->GetBytesPerPixel() == 1)
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+		if (m_TextureID)
+		{
+			glDeleteTextures(1, &m_TextureID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			m_TextureID = NULL;
+		}
+
 		if (!m_TextureID)
 		{
 			glGenTextures(1, &m_TextureID);
