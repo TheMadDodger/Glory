@@ -68,7 +68,7 @@ namespace Glory
         pComponent.m_Transform = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset)*scale;
         pComponent.m_TransformNoScale = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset);
         pComponent.m_TransformNoScaleNoPivot = startTransform*translation*rotation*selfScale;
-        pComponent.m_InteractionTransform = startInteractionTransform*interactionTranslation*rotation*selfScale;
+        pComponent.m_InteractionTransform = startInteractionTransform*interactionTranslation*rotation*glm::inverse(interactionPivotOffset)*selfScale;
 
         pRegistry->SetEntityDirty(entity, false);
     }

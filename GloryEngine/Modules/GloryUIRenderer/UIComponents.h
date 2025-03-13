@@ -146,7 +146,8 @@ namespace Glory
             m_ResolutionMode(ResolutionMode::CameraScale),
             m_Resolution(1.0f, 1.0f), m_RenderDocumentID(0),
             m_WorldMaterial(0), m_WorldSize(1.0f, 1.0f),
-            m_CursorPos(0.0f, 0.0f), m_CursorDown(false)
+            m_CursorPos(0.0f, 0.0f), m_CursorDown(false),
+            m_IsDirty(false)
         {}
 
         REFLECTABLE(UIRenderer,

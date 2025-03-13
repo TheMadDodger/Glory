@@ -86,11 +86,65 @@ namespace GloryEngine.UI
             set => UIRenderer_SetResolution(Object.Scene.ID, Object.ID, _objectID, new Vector3(value.x, value.y, 0.0f));
         }
 
+        /// <summary>
+        /// Material to use for world space rendering
+        /// </summary>
+        public Material WorldMaterial
+        {
+            get
+            {
+                UInt64 materialID = UIRenderer_GetWorldMaterialID(Object.Scene.ID, Object.ID, _objectID);
+                if (materialID == 0) return null;
+                return Object.Scene.SceneManager.Engine.AssetManager.Get<Material>(materialID);
+            }
+            set => UIRenderer_SetWorldMaterialID(Object.Scene.ID, Object.ID, _objectID, value != null ? value.ID : 0);
+        }
+
+        /// <summary>
+        /// Size of the quad for world space rendering
+        /// </summary>
+        public Vector2 WorldSize
+        {
+            get => UIRenderer_GetWorldSize(Object.Scene.ID, Object.ID, _objectID).xy;
+            set => UIRenderer_SetWorldSize(Object.Scene.ID, Object.ID, _objectID, new Vector3(value.x, value.y, 0.0f));
+        }
+
+        /// <summary>
+        /// Current input cursor position
+        /// </summary>
+        public Vector2 Cursor
+        {
+            get => UIRenderer_GetCursor(Object.Scene.ID, Object.ID, _objectID).xy;
+            set => UIRenderer_SetCursor(Object.Scene.ID, Object.ID, _objectID, new Vector3(value.x, value.y, 0.0f));
+        }
+
+        /// <summary>
+        /// Current input cursor down state
+        /// </summary>
+        public bool CursorDown
+        {
+            get => UIRenderer_GetCursorDown(Object.Scene.ID, Object.ID, _objectID);
+            set => UIRenderer_SetCursorDown(Object.Scene.ID, Object.ID, _objectID, value);
+        }
+
         #endregion
 
         #region Fields
 
         private UIScene _document;
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Convert a world space position to a 2D position on the world
+        /// space rendered quad that can be used as the cursor position for input.
+        /// </summary>
+        /// <param name="worldPos">World space position to convert</param>
+        /// <returns>The converted 2D position on the UI document</returns>
+        public Vector2 ConvertWorldToLocalPos(Vector3 worldPos) =>
+            UIRenderer_ConvertWorldToLocalPos(Object.Scene.ID, Object.ID, _objectID, worldPos).xy;
 
         #endregion
 
@@ -122,6 +176,33 @@ namespace GloryEngine.UI
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void UIRenderer_SetResolution(UInt64 sceneID, UInt64 objectID, UInt64 componentID, Vector3 resolution);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 UIRenderer_GetWorldMaterialID(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void UIRenderer_SetWorldMaterialID(UInt64 sceneID, UInt64 objectID, UInt64 componentID, UInt64 materialID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern Vector3 UIRenderer_GetWorldSize(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void UIRenderer_SetWorldSize(UInt64 sceneID, UInt64 objectID, UInt64 componentID, Vector3 size);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern Vector3 UIRenderer_GetCursor(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void UIRenderer_SetCursor(UInt64 sceneID, UInt64 objectID, UInt64 componentID, Vector3 cursor);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool UIRenderer_GetCursorDown(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void UIRenderer_SetCursorDown(UInt64 sceneID, UInt64 objectID, UInt64 componentID, bool down);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern Vector3 UIRenderer_ConvertWorldToLocalPos(UInt64 sceneID, UInt64 objectID, UInt64 componentID, Vector3 worldPos);
 
         #endregion
     }
