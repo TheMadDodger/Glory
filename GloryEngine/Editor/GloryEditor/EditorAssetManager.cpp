@@ -2,9 +2,13 @@
 #include "EditorApplication.h"
 #include "EditorAssetCallbacks.h"
 #include "AssetCompiler.h"
+#include "EditorAssetDatabase.h"
+#include "TextureImporter.h"
+#include "Tumbnail.h"
 
 #include <Engine.h>
 #include <AssetDatabase.h>
+#include <Undo.h>
 
 namespace Glory::Editor
 {
@@ -153,6 +157,16 @@ namespace Glory::Editor
 	void EditorAssetManager::Initialize()
 	{
 		m_pResourceLoadingPool = Jobs::JobManager::Run<bool, UUID>();
+
+		Undo::RegisterChangeHandler(".gtex", "", [this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			const UUID uuid = EditorAssetDatabase::FindAssetUUID(file.Path().string());
+			if (uuid == 0) return;
+			Resource* pResource = FindResource(uuid);
+			if (!pResource) return;
+			TextureData* pTexture = static_cast<TextureData*>(pResource);
+			TextureImporter::LoadIntoTexture(file, pTexture);
+			Tumbnail::SetDirty(uuid);
+		});
 	}
 
 	void EditorAssetManager::RunCallbacks()

@@ -34,6 +34,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static bool CompileSceneSettings(UUID uuid);
 		GLORY_EDITOR_API static bool CompileSceneSettings(GScene* pScene, Utils::NodeValueRef& root);
 		GLORY_EDITOR_API static void RemoveDeletedAssets();
+		GLORY_EDITOR_API static void Update();
 
 		struct AssetData
 		{
@@ -45,6 +46,7 @@ namespace Glory::Editor
 		static std::map<UUID, AssetData> m_AssetDatas;
 		static ThreadedVector<UUID> m_CompilingAssets;
 		static ThreadedVector<UUID> m_ToRemoveAssets;
+		static ThreadedVector<UUID> m_CompletedAssets;
 
 	private:
 		static void DispatchCompilationJob(const AssetData& asset);

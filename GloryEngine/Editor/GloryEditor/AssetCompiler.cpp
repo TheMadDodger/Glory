@@ -5,6 +5,7 @@
 #include "EditorPipelineManager.h"
 #include "EditorAssetManager.h"
 #include "RemovedAssetsPopup.h"
+#include "Tumbnail.h"
 
 #include <Debug.h>
 #include <AssetDatabase.h>
@@ -22,6 +23,7 @@ namespace Glory::Editor
 	ThreadedVector<UUID> AssetCompiler::m_CompilingAssets;
 	ThreadedVector<UUID> AssetCompiler::m_ToRemoveAssets;
 	ThreadedUMap<std::filesystem::path, ImportedResource> ImportedResources;
+	ThreadedVector<UUID> AssetCompiler::m_CompletedAssets;
 
 	Jobs::JobPool<bool, const AssetCompiler::AssetData>* CompilationJobPool = nullptr;
 
@@ -227,6 +229,11 @@ namespace Glory::Editor
 		RemovedAssetsPopup::AddRemovedAssets(std::move(removedLocations));
 	}
 
+	void AssetCompiler::Update()
+	{
+		m_CompletedAssets.ForEachClear([](UUID& uuid) { Tumbnail::SetDirty(uuid); });
+	}
+
 	void AssetCompiler::DispatchCompilationJob(const AssetData& asset)
 	{
 		if (m_CompilingAssets.Contains(asset.Meta.ID())) return;
@@ -325,6 +332,7 @@ namespace Glory::Editor
 
 		/* We're done here */
 		m_CompilingAssets.Erase(uuid);
+		m_CompletedAssets.push_back(uuid);
 		return true;
 	}
 

@@ -681,7 +681,7 @@ namespace Glory::Editor
 			const UUID uuid = std::stoull(key.data());
 			AssetLocation location;
 			if (!GetAssetLocation(uuid, location)) continue;
-			if (GetAbsoluteAssetPath(location.Path) != path) continue;
+			if (GetAbsoluteAssetPath(location.Path) != absolutePath) continue;
 			if (location.SubresourcePath != subPath) continue;
 			return uuid;
 		}
@@ -798,6 +798,7 @@ namespace Glory::Editor
 
 		EditorAssetCallbacks::RunCallbacks();
 		AssetCompiler::RemoveDeletedAssets();
+		AssetCompiler::Update();
 	}
 
 	bool EditorAssetDatabase::ImportJob(std::filesystem::path path)
