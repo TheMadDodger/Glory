@@ -592,11 +592,11 @@ namespace Glory
 		return result;
 	}
 	
-	Vec2Wrapper CameraComponent_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	Vec3Wrapper CameraComponent_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
 		const glm::uvec2& resolution = cameraComp.m_Camera.GetResolution();
-		return ToVec2Wrapper(resolution);
+		return Vec3Wrapper(resolution.x, resolution.y, 0.0f);
 	}
 
 #pragma endregion

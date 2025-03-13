@@ -1,5 +1,6 @@
 #include "UIComponentsCSAPI.h"
 
+#include <Components.h>
 #include <UIDocument.h>
 #include <UIRendererModule.h>
 #include <UIComponents.h>
@@ -46,6 +47,7 @@ namespace Glory
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_Document.SetUUID(documentID);
+		uiComp.m_IsDirty = true;
 	}
 
 	UITarget UIRenderer_GetTarget(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -58,6 +60,7 @@ namespace Glory
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_Target = target;
+		uiComp.m_IsDirty = true;
 	}
 
 	ResolutionMode UIRenderer_GetResolutionMode(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -70,6 +73,7 @@ namespace Glory
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_ResolutionMode = mode;
+		uiComp.m_IsDirty = true;
 	}
 
 	Vec3Wrapper UIRenderer_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -82,6 +86,69 @@ namespace Glory
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_Resolution = ToGLMVec3(resolution);
+		uiComp.m_IsDirty = true;
+	}
+
+	uint64_t UIRenderer_GetWorldMaterialID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		return uiComp.m_WorldMaterial.AssetUUID();
+	}
+
+	void UIRenderer_SetWorldMaterialID(uint64_t sceneID, uint64_t objectID, uint64_t componentID, uint64_t materialID)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		uiComp.m_WorldMaterial.SetUUID(materialID);
+		uiComp.m_IsDirty = true;
+	}
+
+	Vec3Wrapper UIRenderer_GetWorldSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		return Vec3Wrapper(uiComp.m_WorldSize.x, uiComp.m_WorldSize.y, 1.0f);
+	}
+
+	void UIRenderer_SetWorldSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper size)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		uiComp.m_WorldSize = ToGLMVec3(size);
+		uiComp.m_IsDirty = true;
+	}
+
+	Vec3Wrapper UIRenderer_GetCursor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		return Vec3Wrapper(uiComp.m_CursorPos.x, uiComp.m_CursorPos.y, 1.0f);
+	}
+
+	void UIRenderer_SetCursor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper cursor)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		uiComp.m_CursorPos = ToGLMVec3(cursor);
+	}
+
+	bool UIRenderer_GetCursorDown(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		return uiComp.m_CursorDown;
+	}
+
+	void UIRenderer_SetCursorDown(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool down)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		uiComp.m_CursorDown = down;
+	}
+
+	Vec3Wrapper UIRenderer_ConvertWorldToLocalPos(uint64_t sceneID, uint64_t objectID, uint64_t componentID, Vec3Wrapper worldPos)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Transform& transform = entity.GetComponent<Transform>();
+		const glm::vec4 localPos = glm::inverse(transform.MatTransform)*glm::vec4(ToGLMVec3(worldPos), 1.0f);
+		const glm::vec2 screenNDCPos{ (glm::vec2(localPos)/(uiComp.m_WorldSize/2.0f)) };
+		const glm::vec2 screenPos{ (screenNDCPos + 1.0f)*0.5f*uiComp.m_Resolution };
+		return Vec3Wrapper(screenPos.x, screenPos.y, 0.0f);
 	}
 
 #pragma endregion
@@ -383,6 +450,15 @@ namespace Glory
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetResolutionMode", UIRenderer_SetResolutionMode);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetResolution", UIRenderer_GetResolution);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetResolution", UIRenderer_SetResolution);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetWorldMaterialID", UIRenderer_GetWorldMaterialID);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetWorldMaterialID", UIRenderer_SetWorldMaterialID);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetWorldSize", UIRenderer_GetWorldSize);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetWorldSize", UIRenderer_SetWorldSize);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetCursor", UIRenderer_GetCursor);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetCursor", UIRenderer_SetCursor);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetCursorDown", UIRenderer_GetCursorDown);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetCursorDown", UIRenderer_SetCursorDown);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_ConvertWorldToLocalPos", UIRenderer_ConvertWorldToLocalPos);
 
 		/* UI Transform */
 		BIND("GloryEngine.UI.UITransform::UITransform_GetPosition", UITransform_GetPosition);

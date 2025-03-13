@@ -100,7 +100,7 @@ namespace GloryEngine.Entities
 		/// <summary>
 		/// Get the rendering resolution for this camera
 		/// </summary>
-		public Vector2 Resolution => CameraComponent_GetResolution(Object.Scene.ID, Object.ID, _objectID);
+		public Vector2 Resolution => CameraComponent_GetResolution(Object.Scene.ID, Object.ID, _objectID).xy;
 
         #endregion
 
@@ -153,7 +153,7 @@ namespace GloryEngine.Entities
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static PickResultInternal CameraComponent_GetPickResult(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static Vector2 CameraComponent_GetResolution(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        private extern static Vector3 CameraComponent_GetResolution(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 
         #endregion
     }
