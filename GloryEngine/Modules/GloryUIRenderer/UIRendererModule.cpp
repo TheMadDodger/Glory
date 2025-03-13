@@ -88,6 +88,7 @@ namespace Glory
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 		RenderTexture* pRenderTexture = pDocument->m_pUITexture;
 		pDocument->m_Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
+		pDocument->m_InputEnabled = data.m_InputEnabled;
 		pDocument->Update();
 
 		pRenderTexture->BindForDraw();
@@ -252,6 +253,7 @@ namespace Glory
 			document.m_Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
 			document.m_CursorPos = data.m_CursorPos;
 			document.m_CursorDown = data.m_CursorDown;
+			document.m_InputEnabled = data.m_InputEnabled;
 			document.Update();
 
 			pRenderTexture->BindForDraw();
@@ -279,7 +281,6 @@ namespace Glory
 			if (!pMaterialData) return;
 			Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
 			if (!pMaterial) return;
-
 
 			ObjectData object;
 			object.Model = data.m_WorldTransform;

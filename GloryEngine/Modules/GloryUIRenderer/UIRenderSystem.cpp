@@ -28,6 +28,7 @@ namespace Glory
 		data.m_TargetCamera = 0;
 		data.m_WorldTransform = transform.MatTransform;
 		data.m_Target = pComponent.m_Target;
+		data.m_InputEnabled = pComponent.m_InputEnabled;
 		pComponent.m_RenderDocumentID = data.m_ObjectID;
 		pComponent.m_IsDirty = true;
 		data.m_WorldDirty = pComponent.m_IsDirty;
@@ -89,6 +90,7 @@ namespace Glory
 		data.m_MaterialID = pComponent.m_WorldMaterial.AssetUUID();
 		data.m_WorldSize = pComponent.m_WorldSize;
 		data.m_WorldDirty = pComponent.m_IsDirty;
+		data.m_InputEnabled = pComponent.m_InputEnabled;
 		pComponent.m_RenderDocumentID = data.m_ObjectID;
 		pComponent.m_IsDirty = false;
 

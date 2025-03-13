@@ -110,6 +110,15 @@ namespace GloryEngine.UI
         }
 
         /// <summary>
+        /// Whether input processing is allowed
+        /// </summary>
+        public bool InputEnabled
+        {
+            get => UIRenderer_GetInputEnabled(Object.Scene.ID, Object.ID, _objectID);
+            set => UIRenderer_SetInputEnabled(Object.Scene.ID, Object.ID, _objectID, value);
+        }
+
+        /// <summary>
         /// Current input cursor position
         /// </summary>
         public Vector2 Cursor
@@ -188,6 +197,12 @@ namespace GloryEngine.UI
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void UIRenderer_SetWorldSize(UInt64 sceneID, UInt64 objectID, UInt64 componentID, Vector3 size);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern bool UIRenderer_GetInputEnabled(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void UIRenderer_SetInputEnabled(UInt64 sceneID, UInt64 objectID, UInt64 componentID, bool enabled);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern Vector3 UIRenderer_GetCursor(UInt64 sceneID, UInt64 objectID, UInt64 componentID);

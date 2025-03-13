@@ -218,6 +218,9 @@ namespace Glory
 		if (!pComponent.m_Enabled) return;
 
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		const bool inputAllowed = pDocument->IsEnputEnabled();
+		if (!inputAllowed) return;
+
 		UIRendererModule* pUIRenderer = pDocument->Renderer();
 		Engine* pEngine = pUIRenderer->GetEngine();
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
