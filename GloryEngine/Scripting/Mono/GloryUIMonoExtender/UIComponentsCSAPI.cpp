@@ -115,6 +115,18 @@ namespace Glory
 		uiComp.m_IsDirty = true;
 	}
 
+	bool UIRenderer_GetInputEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		return uiComp.m_InputEnabled;
+	}
+
+	void UIRenderer_SetInputEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool enabled)
+	{
+		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
+		uiComp.m_InputEnabled = enabled;
+	}
+
 	Vec3Wrapper UIRenderer_GetCursor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
@@ -454,6 +466,8 @@ namespace Glory
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetWorldMaterialID", UIRenderer_SetWorldMaterialID);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetWorldSize", UIRenderer_GetWorldSize);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetWorldSize", UIRenderer_SetWorldSize);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetInputEnabled", UIRenderer_GetInputEnabled);
+		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetInputEnabled", UIRenderer_SetInputEnabled);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetCursor", UIRenderer_GetCursor);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_SetCursor", UIRenderer_SetCursor);
 		BIND("GloryEngine.UI.UIRenderer::UIRenderer_GetCursorDown", UIRenderer_GetCursorDown);

@@ -56,6 +56,8 @@ namespace Glory
 		GLORY_API const glm::vec2& GetCursorPos() const;
 		GLORY_API bool IsCursorDown() const;
 		GLORY_API bool WasCursorDown() const;
+		GLORY_API bool IsEnputEnabled() const;
+		GLORY_API void SetEnputEnabled(bool enabled);
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -72,6 +74,7 @@ namespace Glory
 		glm::vec2 m_CursorPos;
 		bool m_CursorDown;
 		bool m_WasCursorDown;
+		bool m_InputEnabled;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::string m_Name;

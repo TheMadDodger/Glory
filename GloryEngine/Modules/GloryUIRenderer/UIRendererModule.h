@@ -36,6 +36,7 @@ namespace Glory
 		LayerMask m_LayerMask;
 		UUID m_MaterialID;
 		bool m_WorldDirty;
+		bool m_InputEnabled;
 	};
 
 	class UIRendererModule : public Module

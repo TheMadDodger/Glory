@@ -146,8 +146,8 @@ namespace Glory
             m_ResolutionMode(ResolutionMode::CameraScale),
             m_Resolution(1.0f, 1.0f), m_RenderDocumentID(0),
             m_WorldMaterial(0), m_WorldSize(1.0f, 1.0f),
-            m_CursorPos(0.0f, 0.0f), m_CursorDown(false),
-            m_IsDirty(false)
+            m_InputEnabled(true), m_CursorPos(0.0f, 0.0f),
+            m_CursorDown(false), m_IsDirty(false)
         {}
 
         REFLECTABLE(UIRenderer,
@@ -156,7 +156,8 @@ namespace Glory
             (ResolutionMode)(m_ResolutionMode),
             (glm::vec2)(m_Resolution),
             (AssetReference<MaterialData>)(m_WorldMaterial),
-            (glm::vec2)(m_WorldSize)
+            (glm::vec2)(m_WorldSize),
+            (bool)(m_InputEnabled)
         );
 
         UUID m_RenderDocumentID;
