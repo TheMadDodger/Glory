@@ -127,7 +127,12 @@ namespace Glory::Editor
 		bool openPopup = false;
 		const float start = popupStart, width = popupWidth;
 		Texture* pTumbnail = Tumbnail::GetTumbnail(*value);
-		if(ImGui::ImageButton(pTumbnail ? pRenderImpl->GetTextureID(pTumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
+		if(*value && ImGui::ImageButton(pTumbnail ? pRenderImpl->GetTextureID(pTumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
+		{
+			ForceFilter = true;
+			openPopup = true;
+		}
+		if (!*value && ImGui::Button(ICON_FA_CIRCLE_XMARK, ImVec2(buttonWidth*1.4f, buttonWidth*1.4f)))
 		{
 			ForceFilter = true;
 			openPopup = true;

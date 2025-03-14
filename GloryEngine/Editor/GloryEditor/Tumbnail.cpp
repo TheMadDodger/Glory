@@ -25,8 +25,7 @@ namespace Glory::Editor
 		}
 
 		ResourceMeta meta;
-		if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta))
-			return nullptr;
+		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 
 		BaseTumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
 		if (pGenerator == nullptr)

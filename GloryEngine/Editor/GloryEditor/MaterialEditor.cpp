@@ -65,29 +65,8 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData)
+	void MaterialEditor::GeneratePropertyPairs(PipelineData* pPipeline, std::vector<std::pair<size_t, size_t>>& propertyPairs)
 	{
-		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
-		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
-		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
-
-		bool change = false;
-
-		Utils::YAMLFileRef& file = **pMaterial;
-		auto pipeline = file["Pipeline"];
-		const UUID pipelineID = pipeline.As<uint64_t>();
-		if (pipelineID == 0)
-			return false;
-		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
-		if (!pPipeline)
-		{
-			ImGui::TextColored({ 1,0,0,1 }, "The chosen pipeline is not yet compiled");
-			return false;
-		}
-
-		/* Group properties */
-		std::vector<std::pair<size_t, size_t>> propertyPairs;
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
 		{
 			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
@@ -112,6 +91,32 @@ namespace Glory::Editor
 				break;
 			}
 		}
+	}
+
+	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData)
+	{
+		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
+		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
+		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+
+		bool change = false;
+
+		Utils::YAMLFileRef& file = **pMaterial;
+		auto pipeline = file["Pipeline"];
+		const UUID pipelineID = pipeline.As<uint64_t>();
+		if (pipelineID == 0)
+			return false;
+		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
+		if (!pPipeline)
+		{
+			ImGui::TextColored({ 1,0,0,1 }, "The chosen pipeline is not yet compiled");
+			return false;
+		}
+
+		/* Group properties */
+		std::vector<std::pair<size_t, size_t>> propertyPairs;
+		GeneratePropertyPairs(pPipeline, propertyPairs);
 
 		auto properties = file["Properties"];
 		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
@@ -313,30 +318,7 @@ namespace Glory::Editor
 
 		/* Group properties */
 		std::vector<std::pair<size_t, size_t>> propertyPairs;
-		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
-		{
-			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
-			if (!propInfo->IsResource()) continue;
-			std::string_view name = propInfo->ShaderName();
-			const size_t samplerNameEnd = name.find("Sampler");
-			if (samplerNameEnd != std::string_view::npos)
-				name = name.substr(0, samplerNameEnd);
-			if (name == "tex") name = "color";
-			name = name.substr(1);
-
-			/* Find a non-resource property that matches this resource property */
-			bool found = false;
-			for (size_t j = 0; j < pPipeline->PropertyInfoCount(); ++j)
-			{
-				const MaterialPropertyInfo* otherProp = pPipeline->GetPropertyInfoAt(j);
-				if (otherProp->IsResource()) continue;
-				std::string_view otherName = otherProp->ShaderName();
-				otherName = otherName.substr(1);
-				if (name != otherName) continue;
-				propertyPairs.push_back({ j, i });
-				break;
-			}
-		}
+		MaterialEditor::GeneratePropertyPairs(pPipeline, propertyPairs);
 
 		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
