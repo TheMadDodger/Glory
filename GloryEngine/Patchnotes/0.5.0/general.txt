@@ -15,6 +15,10 @@ Engine:
 - Added UIBox component
 - Added UIInteraction component
 - Fixed SLerp input blending doing nothing
+- Shaders now support detecting whether a texture was set or not allowing them to choose texture or property value
+- Phong and PhongTextured now have a shininess property and support specular highlights
+- Added PBR shaders and pipeline
+- Added an extra G buffer to the renderer for extra data
 
 Editor:
 - Added a startup popup
@@ -41,6 +45,8 @@ Editor:
 - Added edit script button to mono script component editor
 - Fixed texture not updating when editing it in the editor
 - Fixed image tumbnails not showing
+- Texture and value properties in materials are now paired together automatically
+- Overhauled the material editors
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
