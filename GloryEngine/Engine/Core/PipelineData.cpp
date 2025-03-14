@@ -107,6 +107,17 @@ namespace Glory
 		m_CurrentOffset = 0;
 	}
 
+	size_t PipelineData::ResourcePropertyCount() const
+	{
+		return m_ResourcePropertyInfoIndices.size();
+	}
+
+	MaterialPropertyInfo* PipelineData::ResourcePropertyInfo(size_t resourceIndex)
+	{
+		const size_t propertyIndex = m_ResourcePropertyInfoIndices[resourceIndex];
+		return &m_PropertyInfos[propertyIndex];
+	}
+
 	bool PipelineData::HasShader(const UUID shaderID) const
 	{
 		return std::find(m_Shaders.begin(), m_Shaders.end(), shaderID) != m_Shaders.end();

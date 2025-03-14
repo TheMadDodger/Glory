@@ -64,6 +64,9 @@ namespace Glory
         /** @brief Clear all property infos */
         void ClearProperties();
 
+        size_t ResourcePropertyCount() const;
+        MaterialPropertyInfo* ResourcePropertyInfo(size_t resourceIndex);
+
         /** @brief Check if this pipeline is using a shader */
         bool HasShader(const UUID shaderID) const;
 

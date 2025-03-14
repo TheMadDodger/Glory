@@ -25,7 +25,7 @@ namespace Glory::Editor
 			HasSmallButton = 2,
 		};
 
-		static constexpr float RemoveButtonPadding = 24.0f;
+		static float RemoveButtonPadding;
 
 	public:
 		static GLORY_EDITOR_API bool InputFloat(std::string_view label, float* value, const float min = -FLT_MAX, const float max = FLT_MAX, const float steps = 0.1f);

@@ -113,6 +113,74 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool AssetPicker::ResourceTumbnailButton(const std::string& label, float buttonWidth, float popupStart, float popupWidth, uint32_t resourceType, UUID* value, bool includeSubAssets)
+	{
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+
+		ImGui::PushID(label.c_str());
+		std::string assetName = "";
+		assetName = EditorAssetDatabase::GetAssetName(*value);
+		if (assetName == "") assetName = "Noone";
+
+		ResourceTypes& resourceTypes = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
+
+		bool openPopup = false;
+		const float start = popupStart, width = popupWidth;
+		Texture* pTumbnail = Tumbnail::GetTumbnail(*value);
+		if(ImGui::ImageButton(pTumbnail ? pRenderImpl->GetTextureID(pTumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
+		{
+			ForceFilter = true;
+			openPopup = true;
+		}
+
+		bool change = false;
+		if (resourceType)
+		{
+			change = DND{ { ST_Path, resourceType } }.HandleDragAndDropTarget([&](uint32_t type, const ImGuiPayload* payload)
+			{
+				if (type == ST_Path)
+				{
+					const std::string path = (const char*)payload->Data;
+					const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
+					if (!uuid) return;
+					ResourceMeta meta;
+					if (!EditorAssetDatabase::GetAssetMetadata(uuid, meta)) return;
+					ResourceType* pResourceType = resourceTypes.GetResourceType(meta.Hash());
+
+					if (meta.Hash() == resourceType)
+					{
+						*value = uuid;
+						return;
+					}
+
+					for (size_t i = 0; i < resourceTypes.SubTypeCount(pResourceType); ++i)
+					{
+						if (resourceTypes.GetSubTypeHash(pResourceType, i) != resourceType) continue;
+						*value = uuid;
+					}
+					return;
+				}
+
+				*value = *(const UUID*)payload->Data;
+			});
+		}
+
+		if (openPopup)
+			ImGui::OpenPopup("AssetPicker");
+		openPopup = false;
+
+		const ImVec2 cursor = ImGui::GetCursorPos();
+		const ImVec2 windowPos = ImGui::GetWindowPos();
+		Window* pWindow = EditorApplication::GetInstance()->GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
+		int mainWindowWidth, mainWindowHeight;
+		pWindow->GetDrawableSize(&mainWindowWidth, &mainWindowHeight);
+		ImGui::SetNextWindowPos({ windowPos.x + start, windowPos.y + cursor.y - 2.5f });
+		ImGui::SetNextWindowSize({ width, mainWindowHeight - windowPos.y - cursor.y - 10.0f });
+		change |= DrawPopup(value, resourceType, includeSubAssets);
+		ImGui::PopID();
+		return change;
+	}
+
 	void AssetPicker::LoadAssets(uint32_t typeHash, bool includeSubAssets)
 	{
 		std::vector<UUID> assets;
@@ -162,6 +230,7 @@ namespace Glory::Editor
 		if (ImGui::BeginPopup("AssetPicker"))
 		{
 			const bool needsFilter = EditorUI::SearchBar(ImGui::GetContentRegionAvail().x, m_SearchBuffer, 200) || ForceFilter;
+			ForceFilter = false;
 			if (needsFilter)
 				LoadAssets(typeHash, includeSubAssets);
 

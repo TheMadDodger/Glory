@@ -19,12 +19,16 @@
 #include <PipelineData.h>
 
 #include <IconsFontAwesome6.h>
+#include <PropertyFlags.h>
+#include <Tumbnail.h>
 
 namespace Glory::Editor
 {
 	MaterialEditor::MaterialEditor() {}
 
 	MaterialEditor::~MaterialEditor() {}
+
+	static constexpr float TumbnailSize = 128.0f;
 
 	bool MaterialEditor::OnGUI()
 	{
@@ -66,6 +70,7 @@ namespace Glory::Editor
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
 		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
 		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		bool change = false;
 
@@ -81,11 +86,116 @@ namespace Glory::Editor
 			return false;
 		}
 
+		/* Group properties */
+		std::vector<std::pair<size_t, size_t>> propertyPairs;
+		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
+		{
+			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
+			if (!propInfo->IsResource()) continue;
+			std::string_view name = propInfo->ShaderName();
+			const size_t samplerNameEnd = name.find("Sampler");
+			if (samplerNameEnd != std::string_view::npos)
+				name = name.substr(0, samplerNameEnd);
+			if (name == "tex") name = "color";
+			name = name.substr(1);
+
+			/* Find a non-resource property that matches this resource property */
+			bool found = false;
+			for (size_t j = 0; j < pPipeline->PropertyInfoCount(); ++j)
+			{
+				const MaterialPropertyInfo* otherProp = pPipeline->GetPropertyInfoAt(j);
+				if (otherProp->IsResource()) continue;
+				std::string_view otherName = otherProp->ShaderName();
+				otherName = otherName.substr(1);
+				if (name != otherName) continue;
+				propertyPairs.push_back({ j, i });
+				break;
+			}
+		}
+
 		auto properties = file["Properties"];
 		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
 
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
 		{
+			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.second == i; });
+			if (pairIter != propertyPairs.end()) continue;
+			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.first == i; });
+			if (pairIter != propertyPairs.end())
+			{
+				/* Draw the pair instead */
+				std::pair<size_t, size_t>& pair = *pairIter;
+				const MaterialPropertyInfo* propInfoOne = pPipeline->GetPropertyInfoAt(pair.first);
+				const MaterialPropertyInfo* propInfoTwo = pPipeline->GetPropertyInfoAt(pair.second);
+
+				size_t materialPropertyIndexOne = 0;
+				size_t materialPropertyIndexTwo = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoOne->ShaderName(), materialPropertyIndexOne))
+					continue;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoTwo->ShaderName(), materialPropertyIndexTwo))
+					continue;
+
+				MaterialPropertyInfo* pMaterialPropertyOne = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexOne);
+				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexTwo);
+
+				auto propOne = properties[propInfoOne->ShaderName()];
+				if (!propOne.Exists()) {
+					propOne["ShaderName"].Set(propInfoOne->ShaderName());
+					propOne["TypeHash"].Set(propInfoOne->TypeHash());
+				}
+
+				const float start = ImGui::GetCursorPosX();
+				const float totalWidth = ImGui::GetContentRegionAvail().x;
+
+				ImGui::PushID(pMaterialPropertyOne->ShaderName().data());
+				auto propValueOne = propOne["Value"];
+				EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
+				EditorUI::RemoveButtonPadding = 34.0f;
+				const bool propertyChange = PropertyDrawer::DrawProperty(file, propValueOne.Path(), propInfoOne->TypeHash(), propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
+				EditorUI::RemoveButtonPadding = 24.0f;
+				EditorUI::PopFlag();
+				ImGui::PopID();
+
+				/* Deserialize new value into buffer */
+				if (propertyChange)
+				{
+					serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+						pMaterialPropertyOne->TypeHash(), pMaterialPropertyOne->Offset(), pMaterialPropertyOne->Size(), propValueOne);
+					change = true;
+				}
+
+				const std::string& sampler = propInfoTwo->ShaderName();
+
+				auto propTwo = properties[sampler];
+				if (!propTwo.Exists()) {
+					propTwo["DisplayName"].Set(sampler);
+					propTwo["TypeHash"].Set(textureDataHash);
+					propTwo["Value"].Set(0);
+				}
+
+				auto propValueTwo = propTwo["Value"];
+				ImGui::SameLine();
+				ImGui::PushID(sampler.data());
+				const UUID oldValue = propTwo["Value"].As<uint64_t>();
+				UUID value = oldValue;
+				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, &value);
+				Texture* pTumbnail = Tumbnail::GetTumbnail(value);
+				if (pTumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
+				ImGui::PopID();
+
+				/* Deserialize new value into resources array */
+				if (textureChange)
+				{
+					Undo::ApplyYAMLEdit(file, propTwo["Value"].Path(), uint64_t(oldValue), uint64_t(value));
+					const UUID newUUID = propValueTwo.As<uint64_t>();
+					pMaterialData->SetTexture(materialManager, sampler, newUUID);
+					change = true;
+				}
+				continue;
+			}
+			
+			/* Draw as normal */
 			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
 
 			size_t materialPropertyIndex = 0;
@@ -109,14 +219,18 @@ namespace Glory::Editor
 				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
 
 				ImGui::PushID(sampler.data());
-				change |= pPropertyDrawer->Draw(file, propValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
+				const bool changed = pPropertyDrawer->Draw(file, propValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
+				Texture* pTumbnail = Tumbnail::GetTumbnail(propValue.As<uint64_t>());
+				if (pTumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
 				ImGui::PopID();
 
 				/* Deserialize new value into resources array */
-				if (change)
+				if (changed)
 				{
 					const UUID newUUID = propValue.As<uint64_t>();
 					pMaterialData->SetTexture(materialManager, sampler, newUUID);
+					change = true;
 				}
 				continue;
 			}
@@ -129,14 +243,15 @@ namespace Glory::Editor
 
 			ImGui::PushID(propInfo->ShaderName().data());
 			auto propValue = prop["Value"];
-			change |= PropertyDrawer::DrawProperty(file, propValue.Path(), propInfo->TypeHash(), propInfo->TypeHash(), pMaterialProperty->Flags());
+			const bool changed = PropertyDrawer::DrawProperty(file, propValue.Path(), propInfo->TypeHash(), propInfo->TypeHash(), pMaterialProperty->Flags() | PropertyFlags::Color);
 			ImGui::PopID();
 
 			/* Deserialize new value into buffer */
-			if (change)
+			if (changed)
 			{
 				serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
 					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue);
+				change = true;
 			}
 		}
 
@@ -184,6 +299,7 @@ namespace Glory::Editor
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
 		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
 		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
+		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		const UUID pipelineID = pMaterialData->GetPipelineID(materialManager);
 		if (pipelineID == 0)
@@ -195,10 +311,82 @@ namespace Glory::Editor
 			return;
 		}
 
-		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
-
+		/* Group properties */
+		std::vector<std::pair<size_t, size_t>> propertyPairs;
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
 		{
+			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
+			if (!propInfo->IsResource()) continue;
+			std::string_view name = propInfo->ShaderName();
+			const size_t samplerNameEnd = name.find("Sampler");
+			if (samplerNameEnd != std::string_view::npos)
+				name = name.substr(0, samplerNameEnd);
+			if (name == "tex") name = "color";
+			name = name.substr(1);
+
+			/* Find a non-resource property that matches this resource property */
+			bool found = false;
+			for (size_t j = 0; j < pPipeline->PropertyInfoCount(); ++j)
+			{
+				const MaterialPropertyInfo* otherProp = pPipeline->GetPropertyInfoAt(j);
+				if (otherProp->IsResource()) continue;
+				std::string_view otherName = otherProp->ShaderName();
+				otherName = otherName.substr(1);
+				if (name != otherName) continue;
+				propertyPairs.push_back({ j, i });
+				break;
+			}
+		}
+
+		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
+		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
+		{
+			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.second == i; });
+			if (pairIter != propertyPairs.end()) continue;
+			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.first == i; });
+			if (pairIter != propertyPairs.end())
+			{
+				/* Draw the pair instead */
+				std::pair<size_t, size_t>& pair = *pairIter;
+				const MaterialPropertyInfo* propInfoOne = pPipeline->GetPropertyInfoAt(pair.first);
+				const MaterialPropertyInfo* propInfoTwo = pPipeline->GetPropertyInfoAt(pair.second);
+
+				size_t materialPropertyIndexOne = 0;
+				size_t materialPropertyIndexTwo = 0;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoOne->ShaderName(), materialPropertyIndexOne))
+					continue;
+				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoTwo->ShaderName(), materialPropertyIndexTwo))
+					continue;
+
+				MaterialPropertyInfo* pMaterialPropertyOne = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexOne);
+				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexTwo);
+
+				const float start = ImGui::GetCursorPosX();
+				const float totalWidth = ImGui::GetContentRegionAvail().x;
+
+				ImGui::PushID(propInfoOne->ShaderName().data());
+				void* pAddress = pMaterialData->Address(materialManager, i);
+				EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
+				EditorUI::RemoveButtonPadding = 34.0f;
+				PropertyDrawer::DrawProperty(propInfoOne->DisplayName(), pAddress, propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
+				EditorUI::RemoveButtonPadding = 24.0f;
+				EditorUI::PopFlag();
+				ImGui::PopID();
+
+				const std::string& sampler = propInfoTwo->ShaderName();
+				auto resourceId = pMaterialData->GetResourceUUIDPointer(materialManager, pMaterialPropertyTwo->Offset());
+				ImGui::SameLine();
+				ImGui::PushID(sampler.data());
+				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, resourceId->AssetUUIDMember());
+				Texture* pTumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
+				if (pTumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
+				ImGui::PopID();
+
+				continue;
+			}
+
+			/* Draw as normal */
 			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
 
 			size_t materialPropertyIndex = 0;
@@ -215,6 +403,9 @@ namespace Glory::Editor
 
 				ImGui::PushID(sampler.data());
 				pPropertyDrawer->Draw(pMaterialProperty->DisplayName(), resourceId, pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
+				Texture* pTumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
+				if (pTumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
 				ImGui::PopID();
 				continue;
 			}
