@@ -11,6 +11,8 @@
 
 namespace Glory::Editor
 {
+	float EditorUI::RemoveButtonPadding = 24.0f;
+
 	size_t EditorUI::m_BufferWriteIndex = 0;
 	char EditorUI::m_CleanNameBuffer[BUFFERLENGTH] = "\0";
 	char EditorUI::m_TextBuffer[TEXTSIZE] = "\0";
@@ -504,7 +506,7 @@ namespace Glory::Editor
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ cursorPos.x + availableWidth - width, cursorPos.y });
 
-		ImGui::PushItemWidth(width - colorIconWidth - 7.8f);
+		ImGui::PushItemWidth(width - colorIconWidth - 7.8f - REMOVE_BUTTON_PADDING);
 		glm::vec4 tempValue = *value;
 		tempValue *= 255.0f;
 		bool change = ImGui::DragFloat4("##value", (float*)&tempValue, 1.0f, 0, 255, "%.0f");

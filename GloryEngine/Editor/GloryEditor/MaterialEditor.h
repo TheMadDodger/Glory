@@ -13,6 +13,8 @@ namespace Glory::Editor
 		virtual ~MaterialEditor();
 		virtual bool OnGUI() override;
 
+		static void GeneratePropertyPairs(PipelineData* pPipeline, std::vector<std::pair<size_t, size_t>>& propertyPairs);
+
 	private:
 		bool PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData);
 	};

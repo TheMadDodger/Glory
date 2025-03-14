@@ -25,7 +25,7 @@ namespace Glory::Editor
 
 	bool AssetReferencePropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
 	{
-		UUID uuid = node.as<uint64_t>();
+		UUID uuid = node.as<uint64_t>(0);
 		const UUID oldUuid = uuid;
 		if (AssetPicker::ResourceDropdown(label, typeHash, &uuid))
 		{
@@ -39,7 +39,7 @@ namespace Glory::Editor
 
 	bool AssetReferencePropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
 	{
-		UUID uuid = file[path].As<uint64_t>();
+		UUID uuid = file[path].As<uint64_t>(0);
 		const UUID oldUuid = uuid;
 
 		std::string label = path.filename().string().data();

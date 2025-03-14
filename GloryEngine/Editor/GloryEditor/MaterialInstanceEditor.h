@@ -4,6 +4,11 @@
 
 #include <MaterialInstanceData.h>
 
+namespace Glory::Utils
+{
+    struct YAMLFileRef;
+}
+
 namespace Glory::Editor
 {
     class MaterialInstanceEditor : public EditorTemplate<MaterialInstanceEditor, YAMLResource<MaterialInstanceData>>
@@ -17,5 +22,7 @@ namespace Glory::Editor
     private:
         virtual bool OnGUI() override;
         virtual void Initialize() override;
+
+        bool PropertiesGUI(Utils::YAMLFileRef& file, Utils::YAMLFileRef& baseFile, MaterialInstanceData* pMaterialData, PipelineData* pPipeline);
     };
 }
