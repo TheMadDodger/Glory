@@ -133,7 +133,7 @@ namespace Glory::Editor
 
 					if (!enable) continue;
 					/* Deserialize new value into resources array */
-					const UUID newUUID = propValue.As<uint64_t>();
+					const UUID newUUID = propValue.As<uint64_t>(0);
 					pMaterialData->SetTexture(materialManager, sampler, newUUID);
 					continue;
 				}

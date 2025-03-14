@@ -38,6 +38,7 @@ namespace Glory
 
 	protected:
 		virtual Buffer* CreatePropertiesBuffer(uint32_t size) = 0;
+		virtual Buffer* CreateHasTexturesBuffer() = 0;
 		virtual Buffer* CreateMVPBuffer() = 0;
 
 	protected:
@@ -45,6 +46,7 @@ namespace Glory
 		Pipeline* m_pPipeline;
 
 		Buffer* m_pPropertiesBuffer;
+		Buffer* m_pHasTexturesBuffer;
 		static Buffer* m_pMVPBuffer;
 		bool m_Complete;
 

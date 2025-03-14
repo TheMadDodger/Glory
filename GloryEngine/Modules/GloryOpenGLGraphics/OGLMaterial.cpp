@@ -39,6 +39,12 @@ namespace Glory
 			->CreateBuffer(size, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 1);
 	}
 
+	Buffer* OGLMaterial::CreateHasTexturesBuffer()
+	{
+		return m_pOwner->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
+			->CreateBuffer((uint32_t)sizeof(uint64_t), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 3);
+	}
+
 	Buffer* OGLMaterial::CreateMVPBuffer()
 	{
 		return m_pOwner->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
