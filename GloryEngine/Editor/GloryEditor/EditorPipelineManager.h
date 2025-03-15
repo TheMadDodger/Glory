@@ -87,7 +87,7 @@ namespace Glory::Editor
 		static PipelineUpdateDispatcher& PipelineUpdateEvents();
 
 		/** @brief Get the @ref TextureType from a samplers name */
-		static TextureType ShaderNameToTextureType(const std::string_view name);
+		static TextureType ShaderNameToTextureType(std::string_view name);
 
 		static ShaderSourceData* GetShaderSource(UUID shaderID);
 
