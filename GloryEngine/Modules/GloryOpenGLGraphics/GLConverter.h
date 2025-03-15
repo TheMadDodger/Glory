@@ -19,6 +19,8 @@ namespace Glory
 		static const std::map<Filter, GLint> TO_GLFILTER;
 		static const std::map<SamplerAddressMode, GLint> TO_GLTEXTUREWRAP;
 		static const std::map<DataType, GLenum> TO_GLDATATYPE;
+		static const std::map<CompareOp, GLenum> TO_GLOP;
+		static const std::map<Func, GLenum> TO_GLFUNC;
 
 	private:
 		GLConverter() {}

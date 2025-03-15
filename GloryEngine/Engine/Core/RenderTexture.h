@@ -33,11 +33,12 @@ namespace Glory
 	{
 	public:
 		RenderTextureCreateInfo();
-		RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth);
+		RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth, bool hasStencil = false);
 
 		uint32_t Width;
 		uint32_t Height;
 		bool HasDepth;
+		bool HasStencil;
 		std::vector<Attachment> Attachments;
 	};
 

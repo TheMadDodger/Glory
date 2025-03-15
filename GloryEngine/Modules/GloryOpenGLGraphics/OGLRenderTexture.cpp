@@ -56,39 +56,6 @@ namespace Glory
 
 		CreateTextures();
 		
-		//GLTexture* pGLTexture = (GLTexture*)m_pTexture;
-		//glBindTexture(GL_TEXTURE_2D, pGLTexture->GetID());
-		//OpenGLGraphicsModule::LogGLError(glGetError());
-
-		// Make the depth buffer
-		//if (m_HasDepthBuffer)
-		//{
-		//	// The depth buffer
-		//	//glGenRenderbuffers(1, &m_GLDepthBufferID);
-		//	//OpenGLGraphicsModule::LogGLError(glGetError());
-		//	//glBindRenderbuffer(GL_RENDERBUFFER, m_GLDepthBufferID);
-		//	//OpenGLGraphicsModule::LogGLError(glGetError());
-		//	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-		//	//OpenGLGraphicsModule::LogGLError(glGetError());
-		//	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_GLDepthBufferID);
-		//	//OpenGLGraphicsModule::LogGLError(glGetError());
-		//
-		//	glGenTextures(1, &m_GLDepthBufferID);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//	glBindTexture(GL_TEXTURE_2D, m_GLDepthBufferID);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_Width, m_Height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//}
-		
 		// Initialize the framebuffer
 		size_t attachmentCount = m_CreateInfo.Attachments.size();
 		std::vector<GLenum> drawBuffers = std::vector<GLenum>(attachmentCount);
@@ -104,6 +71,12 @@ namespace Glory
 		{
 			GLTexture* pDepthTexture = (GLTexture*)GetTextureAttachment("Depth");
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, pDepthTexture->GetID(), 0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+		if (m_CreateInfo.HasStencil)
+		{
+			GLTexture* pStencilTexture = (GLTexture*)GetTextureAttachment("Stencil");
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, pStencilTexture->GetID(), 0);
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
 
@@ -138,7 +111,12 @@ namespace Glory
 		{
 			pResourceManager->Free(m_pTextures[i]);
 		}
-		if (m_CreateInfo.HasDepth) pResourceManager->Free(m_pTextures[attachmentCount]);
+		if (m_CreateInfo.HasDepth)
+		{
+			pResourceManager->Free(m_pTextures[attachmentCount]);
+			++attachmentCount;
+		}
+		if (m_CreateInfo.HasStencil) pResourceManager->Free(m_pTextures[attachmentCount]);
 		Initialize();
 	}
 
