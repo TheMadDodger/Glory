@@ -72,7 +72,7 @@ namespace Glory::Editor
 
 		if (EditorUI::Header("Overrides"))
 		{
-			Undo::StartRecord("Material Instance Property");
+			Undo::StartRecord("Material Instance Property", pMaterialData->GetUUID(), true);
 			change |= PropertiesGUI(file, baseFile, pMaterialData, pPipeline);
 			Undo::StopRecord();
 		}

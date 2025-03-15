@@ -20,19 +20,17 @@ namespace Glory::Editor
 		std::vector<std::function<void(Utils::YAMLFileRef&, const std::filesystem::path&)>>>>
 		Undo::m_ChangeHandlers;
 
-	void Undo::StartRecord(const std::string& name, UUID uuid, bool continuous)
+	bool Undo::StartRecord(const std::string& name, UUID uuid, bool continuous)
 	{
-		if (m_IsBusy) return;
+		if (m_IsBusy) return false;
 
 		if (m_RecordingName != "")
-		{
-			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Recording already started, call StopRecord before starting a new one! Name: " + m_RecordingName);
-			return;
-		}
+			return false;
 
 		m_RecordingName = name;
 		m_RecordingUUID = uuid;
 		m_RecordingContinuous = continuous;
+		return true;
 	}
 
 	void Undo::StopRecord()

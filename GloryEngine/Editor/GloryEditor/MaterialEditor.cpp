@@ -52,9 +52,7 @@ namespace Glory::Editor
 
 		if (EditorUI::Header("Properties"))
 		{
-			Undo::StartRecord("Material Property", pMaterial->GetUUID());
 			change = PropertiesGUI(pMaterial, pMaterialData);
-			Undo::StopRecord();
 		}
 
 		if (change)
