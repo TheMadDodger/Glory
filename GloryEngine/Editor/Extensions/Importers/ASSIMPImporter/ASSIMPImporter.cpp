@@ -201,7 +201,7 @@ namespace Glory::Editor
                 aiShadingMode shadingMode;
                 material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
                 const bool usesTextures = material->GetTextureCount(aiTextureType_BASE_COLOR) ||
-                    material->GetTextureCount(aiTextureType_NORMALS);
+                    material->GetTextureCount(aiTextureType_NORMALS) || material->GetTextureCount(aiTextureType_DIFFUSE);
 
                 MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
                 UUID pipelineID = pipelines.FindPipeline(PipelineType(shadingMode), usesTextures);
@@ -227,11 +227,12 @@ namespace Glory::Editor
                             for (size_t i = 0; i < MaterialPropertyKeysCount; ++i)
                             {
                                 const std::string_view key = MaterialPropertyKeys[i];
-                                const std::string_view comparator = key.substr(5);
+                                const std::string_view comparator = key.substr(6);
                                 if (name != comparator) continue;
                                 float value;
                                 if (material->Get(key.data(), 0, 0, value) != aiReturn_SUCCESS) continue;
                                 pMaterial->Set(materials, info->ShaderName(), value);
+                                break;
                             }
                             break;
                         }
@@ -241,11 +242,12 @@ namespace Glory::Editor
                             for (size_t i = 0; i < MaterialColorPropertyKeysCount; ++i)
                             {
                                 const std::string_view key = MaterialColorPropertyKeys[i];
-                                const std::string_view comparator = key.substr(5);
+                                const std::string_view comparator = key.substr(6);
                                 if (name != comparator && name != "olor") continue;
                                 if (name == "olor" && key != "$clr.diffuse" && key != "$clr.base") continue;
                                 if (material->Get(key.data(), 0, 0, color) != aiReturn_SUCCESS) continue;
                                 pMaterial->Set(materials, info->ShaderName(), glm::vec4(color.r, color.g, color.b, 1.0f));
+                                break;
                             }
                             break;
                         }

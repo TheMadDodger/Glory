@@ -203,7 +203,7 @@ namespace Glory::Editor
 		return dispatcher;
 	}
 
-	TextureType EditorPipelineManager::ShaderNameToTextureType(const std::string_view name)
+	TextureType EditorPipelineManager::ShaderNameToTextureType(std::string_view name)
 	{
 		/* Hardcoded solution for texSampler */
 		if (name.compare("texSampler") == 0)
@@ -211,17 +211,52 @@ namespace Glory::Editor
 			return TextureType::TT_BaseColor;
 		}
 
+		const size_t samplerNameIndex = name.find("Sampler");
+		if (samplerNameIndex != std::string::npos)
+			name = name.substr(0, samplerNameIndex);
+		/* Skip the first letter to avoid case mismatch */
+		name = name.substr(1);
+
+		std::vector<TextureType> contenders;
 		for (uint32_t i = Enum<TextureType>().NumValues(); i > 0; --i)
 		{
 			const TextureType textureType = TextureType(i - 1);
 			std::string valueStr;
 			Enum<TextureType>().ToString(textureType, valueStr);
-			/* Skip the first letter to avoid case mismatch */
-			const std::string_view comparer = &valueStr.c_str()[1];
-			if (name.find(comparer) == std::string::npos) continue;
-			return textureType;
+			if (valueStr.find(name) == std::string::npos) continue;
+			contenders.push_back(textureType);
 		}
-		return TT_Unknown;
+
+		if (contenders.size() == 0)
+			return TT_Unknown;
+
+		if (contenders.size() == 1)
+			return contenders[0];
+
+		size_t bestContender = 0;
+		size_t bestContenderScore = 0;
+		for (size_t i = 0; i < contenders.size(); ++i)
+		{
+			const TextureType textureType = contenders[i];
+			std::string valueStr;
+			Enum<TextureType>().ToString(textureType, valueStr);
+			const size_t startPos = valueStr.find(name);
+			const size_t endPos = startPos + name.size();
+			const size_t score = valueStr.size() - endPos + startPos - 1;
+			if (i == 0)
+			{
+				bestContender = 0;
+				bestContenderScore = score;
+				continue;
+			}
+
+			if (score < bestContenderScore)
+			{
+				bestContenderScore = score;
+				bestContender = i;
+			}
+		}
+		return contenders[bestContender];
 	}
 
 	ShaderSourceData* EditorPipelineManager::GetShaderSource(UUID shaderID)
