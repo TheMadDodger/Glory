@@ -24,6 +24,10 @@ namespace Glory
 		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;
 		virtual void EnableDepthTest(bool enable) override;
 		virtual void EnableDepthWrite(bool enable) override;
+		virtual void EnableStencilTest(bool enable) override;
+		virtual void SetStencilMask(unsigned int mask) override;
+		virtual void SetStencilFunc(CompareOp func, int ref, unsigned int mask) override;
+		virtual void SetStencilOP(Func fail, Func dpfail, Func dppass) override;
 		virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) override;
 		virtual void Blit(RenderTexture* pTexture, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
 			Filter filter = Filter::F_Nearest) override;

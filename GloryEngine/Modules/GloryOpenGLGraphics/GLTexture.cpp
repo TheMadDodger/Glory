@@ -36,8 +36,9 @@ namespace Glory
 
 		m_GLImageType = GLConverter::GetGLImageType(m_TextureInfo.m_ImageType);
 
-		const GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_InternalFormat);
 		const GLuint format = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_PixelFormat);
+		const GLuint internalFormat = m_TextureInfo.m_PixelFormat == PixelFormat::PF_Stencil ? GL_STENCIL_INDEX8 :
+			GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_InternalFormat);
 		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(m_TextureInfo.m_Type);
 
 		if (pImageData->GetBytesPerPixel() == 1)
@@ -97,7 +98,8 @@ namespace Glory
 		m_GLImageType = GLConverter::GetGLImageType(m_TextureInfo.m_ImageType);
 
 		const GLuint format = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_PixelFormat);
-		const GLuint internalFormat = GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_InternalFormat);
+		const GLuint internalFormat = m_TextureInfo.m_PixelFormat == PixelFormat::PF_Stencil ? GL_STENCIL_INDEX8 :
+			GLConverter::TO_GLFORMAT.at(m_TextureInfo.m_InternalFormat);
 		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(m_TextureInfo.m_Type);
 
 		glGenTextures(1, &m_TextureID);

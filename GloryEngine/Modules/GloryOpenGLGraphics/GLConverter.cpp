@@ -213,6 +213,7 @@ namespace Glory
         { PixelFormat::PF_Depth32,                   GL_DEPTH_COMPONENT32 },
     };
 
+
     const std::map<BufferBindingTarget, GLuint> GLConverter::TO_GLBUFFERTARGET
     {
         { BufferBindingTarget::B_ARRAY,               GL_ARRAY_BUFFER              },
@@ -288,6 +289,28 @@ namespace Glory
         { DataType::DT_3Bytes, GL_3_BYTES },
         { DataType::DT_4Bytes, GL_4_BYTES },
         { DataType::DT_Double, GL_DOUBLE },
+    };
+
+    const std::map<CompareOp, GLenum> GLConverter::TO_GLOP = {
+        { CompareOp::OP_Never, GL_NEVER },
+        { CompareOp::OP_Less, GL_LESS },
+        { CompareOp::OP_Equal, GL_EQUAL },
+        { CompareOp::OP_LessOrEqual, GL_LEQUAL },
+        { CompareOp::OP_Greater, GL_GREATER },
+        { CompareOp::OP_NotEqual, GL_NOTEQUAL },
+        { CompareOp::OP_GreaterOrEqual, GL_GEQUAL },
+        { CompareOp::OP_Always, GL_ALWAYS },
+    };
+
+    const std::map<Func, GLenum> GLConverter::TO_GLFUNC = {
+        { Func::OP_Keep, GL_KEEP },
+        { Func::OP_Zero, GL_ZERO },
+        { Func::OP_Replace, GL_REPLACE },
+        { Func::OP_Increment, GL_INCR },
+        { Func::OP_IncrementWrap, GL_INCR_WRAP },
+        { Func::OP_Decrement, GL_DECR },
+        { Func::OP_DecrementWrap, GL_DECR_WRAP },
+        { Func::OP_Invert, GL_INVERT },
     };
 
     GLuint GLConverter::GetGLImageType(const ImageType& imageType)

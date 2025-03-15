@@ -159,7 +159,7 @@ namespace Glory
 	{
 		glClearColor(color.r, color.g, color.b, color.a);
 		LogGLError(glGetError());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		LogGLError(glGetError());
 	}
 
@@ -219,6 +219,33 @@ namespace Glory
 	void OpenGLGraphicsModule::EnableDepthWrite(bool enable)
 	{
 		glDepthMask(enable);
+	}
+
+	void OpenGLGraphicsModule::EnableStencilTest(bool enable)
+	{
+		if (enable)
+			glEnable(GL_STENCIL_TEST);
+		else
+			glDisable(GL_STENCIL_TEST);
+	}
+
+	void OpenGLGraphicsModule::SetStencilMask(unsigned int mask)
+	{
+		glStencilMask(mask);
+	}
+
+	void OpenGLGraphicsModule::SetStencilFunc(CompareOp func, int ref, unsigned int mask)
+	{
+		const GLenum glFunc = GLConverter::TO_GLOP.at(func);
+		glStencilFunc(glFunc, ref, mask);
+	}
+
+	void OpenGLGraphicsModule::SetStencilOP(Func fail, Func dpfail, Func dppass)
+	{
+		const GLenum glFail = GLConverter::TO_GLFUNC.at(fail);
+		const GLenum gldpFail = GLConverter::TO_GLFUNC.at(dpfail);
+		const GLenum gldpPass = GLConverter::TO_GLFUNC.at(dppass);
+		glStencilOp(glFail, gldpFail, gldpPass);
 	}
 
 	void OpenGLGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
