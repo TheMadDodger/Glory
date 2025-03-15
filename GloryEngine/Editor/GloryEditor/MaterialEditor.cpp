@@ -76,6 +76,7 @@ namespace Glory::Editor
 			if (samplerNameEnd != std::string_view::npos)
 				name = name.substr(0, samplerNameEnd);
 			if (name == "tex") name = "color";
+			if (name == "metalness") name = "metallic";
 			name = name.substr(1);
 
 			/* Find a non-resource property that matches this resource property */
@@ -86,7 +87,7 @@ namespace Glory::Editor
 				if (otherProp->IsResource()) continue;
 				std::string_view otherName = otherProp->ShaderName();
 				otherName = otherName.substr(1);
-				if (name != otherName) continue;
+				if (name.find(otherName) == std::string::npos && otherName.find(name) == std::string::npos) continue;
 				propertyPairs.push_back({ j, i });
 				break;
 			}
@@ -123,9 +124,9 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
 		{
-			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.second == i; });
+			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) { return pair.first == i; });
 			if (pairIter != propertyPairs.end()) continue;
-			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.first == i; });
+			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) { return pair.second == i; });
 			if (pairIter != propertyPairs.end())
 			{
 				/* Draw the pair instead */
@@ -323,9 +324,9 @@ namespace Glory::Editor
 		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
 		{
-			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.second == i; });
+			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) { return pair.first == i; });
 			if (pairIter != propertyPairs.end()) continue;
-			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.first == i; });
+			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) { return pair.second == i; });
 			if (pairIter != propertyPairs.end())
 			{
 				/* Draw the pair instead */
@@ -347,7 +348,7 @@ namespace Glory::Editor
 				const float totalWidth = ImGui::GetContentRegionAvail().x;
 
 				ImGui::PushID(propInfoOne->ShaderName().data());
-				void* pAddress = pMaterialData->Address(materialManager, i);
+				void* pAddress = pMaterialData->Address(materialManager, materialPropertyIndexOne);
 				EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
 				EditorUI::RemoveButtonPadding = 34.0f;
 				PropertyDrawer::DrawProperty(propInfoOne->DisplayName(), pAddress, propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
