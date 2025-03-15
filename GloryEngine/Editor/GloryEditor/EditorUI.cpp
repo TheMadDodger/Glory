@@ -77,9 +77,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputFloat(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -120,9 +120,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputFloat2(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -163,9 +163,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputFloat3(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -206,9 +206,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputFloat4(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -249,9 +249,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputInt(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -292,9 +292,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputInt2(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -335,9 +335,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputInt3(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -378,9 +378,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputInt4(MakeCleanName(label.string()), &newValue, min, max))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -446,9 +446,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputDouble(MakeCleanName(label.string()), &newValue, slowSteps, fastSteps))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -482,9 +482,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (CheckBox(MakeCleanName(label.string()), &newValue))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -590,9 +590,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputColor(MakeCleanName(label.string()), &newValue, hdr))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -684,9 +684,9 @@ namespace Glory::Editor
 		const std::filesystem::path label = *end;
 		if (InputText(MakeCleanName(label.string()), m_TextBuffer, TEXTSIZE, flags))
 		{
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, std::string(m_TextBuffer));
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;
@@ -841,9 +841,9 @@ namespace Glory::Editor
 		{
 			std::string newValueStr;
 			pEnumType->ToString(&newValue, newValueStr);
-			Undo::StartRecord(label.string());
+			const bool record = Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, strValue, newValueStr);
-			Undo::StopRecord();
+			if (record) Undo::StopRecord();
 			return true;
 		}
 		return false;

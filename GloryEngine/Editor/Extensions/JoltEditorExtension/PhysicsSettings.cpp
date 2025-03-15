@@ -1,12 +1,13 @@
 #include "PhysicsSettings.h"
+#include "EditorUI.h"
+#include "EditorApplication.h"
+#include "Undo.h"
 
-#include <EditorApplication.h>
 #include <JoltPhysicsModule.h>
 #include <Engine.h>
 #include <YAML_GLM.h>
 #include <LayerManager.h>
 #include <imgui.h>
-#include <EditorUI.h>
 #include <BinaryStream.h>
 
 namespace Glory::Editor

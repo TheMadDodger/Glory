@@ -40,7 +40,7 @@ namespace Glory::Editor
 	class Undo
 	{
 	public:
-		static GLORY_EDITOR_API void StartRecord(const std::string& name, UUID uuid = 0, bool continuous = false);
+		static GLORY_EDITOR_API bool StartRecord(const std::string& name, UUID uuid = 0, bool continuous = false);
 		static GLORY_EDITOR_API void StopRecord();
 		static GLORY_EDITOR_API bool IsRecording();
 

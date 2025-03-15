@@ -44,4 +44,13 @@ namespace Glory::Editor
 		node.Set(m_NewValue);
 		Undo::TriggerChangeHandler(m_File, m_PropertyPath);
 	}
+
+	bool YAMLAction::Combine(IAction* pOther)
+	{
+		YAMLAction* pOtherYAMLAction = dynamic_cast<YAMLAction*>(pOther);
+		if (!pOtherYAMLAction) return false;
+		if (m_PropertyPath != pOtherYAMLAction->m_PropertyPath) return false;
+		if (pOtherYAMLAction->m_NewValue.Type() != m_NewValue.Type()) return false;
+		m_NewValue = pOtherYAMLAction->m_NewValue;
+	}
 }
