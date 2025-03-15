@@ -108,9 +108,9 @@ namespace Glory::Editor
 		auto properties = file["Overrides"];
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
 		{
-			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.second == i; });
+			auto pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) { return pair.first == i; });
 			if (pairIter != propertyPairs.end()) continue;
-			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) {return pair.first == i; });
+			pairIter = std::find_if(propertyPairs.begin(), propertyPairs.end(), [i](std::pair<size_t, size_t>& pair) { return pair.second == i; });
 			if (pairIter != propertyPairs.end())
 			{
 				/* Draw the pair instead */

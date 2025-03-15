@@ -3,15 +3,18 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+#include "Internal/ObjectData.glsl"
+#include "Internal/Textured.glsl"
+
 #define FEATURE_TEXTURED
 
-layout(std430, binding = 2) buffer ObjectData
+layout(std430, binding = 1) buffer PropertiesSSBO
 {
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-	uvec4 ObjectID;
-} Object;
+	vec4 Color;
+	float AmbientOcclusion;
+	float RoughnessFactor;
+	float MetallicFactor;
+} Properties;
 
 #ifdef WITH_TEXTURED
 layout(binding = 0) uniform sampler2D texSampler;
@@ -19,15 +22,6 @@ layout(binding = 1) uniform sampler2D normalSampler;
 layout(binding = 2) uniform sampler2D ambientSampler;
 layout(binding = 3) uniform sampler2D roughnessSampler;
 layout(binding = 4) uniform sampler2D metalnessSampler;
-#else
-layout(std430, binding = 1) buffer PropertiesSSBO
-{
-	vec4 Color;
-	float AO;
-	float RoughnessFactor;
-	float MetallicFactor;
-
-} Properties;
 #endif
 
 layout(location = 0) in vec2 fragTexCoord;
@@ -46,16 +40,16 @@ layout(location = 5) out vec4 outData;
 void main()
 {
 #ifdef WITH_TEXTURED
-	outColor = texture(texSampler, fragTexCoord) * inColor;
-	vec3 normal = texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0;
-	normal = normalize(TBN * normal);
-	float ambient = texture(ambientSampler, fragTexCoord).r;
-	float roughness = texture(roughnessSampler, fragTexCoord).g;
-	float metalic = texture(metalnessSampler, fragTexCoord).b;
+	vec4 texColor = texture(texSampler, fragTexCoord);
+	outColor = (TextureEnabled(0) ? vec4(pow(texColor.rgb, vec3(2.2)), texColor.a) : Properties.Color) * inColor;
+	vec3 normal = TextureEnabled(1) ? normalize(TBN * (texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0)) : TBN[2];
+	float ambient = TextureEnabled(2) ? texture(ambientSampler, fragTexCoord).r : Properties.AmbientOcclusion;
+	float roughness = TextureEnabled(3) ? texture(roughnessSampler, fragTexCoord).g : Properties.RoughnessFactor;
+	float metalic = TextureEnabled(4) ? texture(metalnessSampler, fragTexCoord).b : Properties.MetallicFactor;
 #else
 	outColor = inColor * Properties.Color;
 	vec3 normal = inNormal;
-	float ambient = Properties.AO;
+	float ambient = Properties.AmbientOcclusion;
 	float roughness = Properties.RoughnessFactor;
 	float metalic = Properties.MetallicFactor;
 #endif

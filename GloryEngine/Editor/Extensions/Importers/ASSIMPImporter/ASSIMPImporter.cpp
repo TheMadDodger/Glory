@@ -46,7 +46,7 @@ namespace Glory::Editor
 #pragma warning(push)
 #pragma warning(disable : 4002)
 #pragma warning(disable : 4003)
-    constexpr size_t MaterialPropertyKeysCount = 7;
+    constexpr size_t MaterialPropertyKeysCount = 10;
     constexpr std::string_view MaterialPropertyKeys[MaterialPropertyKeysCount] = {
         FIRST(AI_MATKEY_OPACITY),
         FIRST(AI_MATKEY_TRANSPARENCYFACTOR),
@@ -55,16 +55,24 @@ namespace Glory::Editor
         FIRST(AI_MATKEY_REFLECTIVITY),
         FIRST(AI_MATKEY_SHININESS_STRENGTH),
         FIRST(AI_MATKEY_REFRACTI),
+
+        /* PBR */
+        FIRST(AI_MATKEY_METALLIC_FACTOR),
+        FIRST(AI_MATKEY_ROUGHNESS_FACTOR),
+        FIRST(AI_MATKEY_EMISSIVE_INTENSITY),
     };
 
-    constexpr size_t MaterialColorPropertyKeysCount = 6;
+    constexpr size_t MaterialColorPropertyKeysCount = 7;
     constexpr std::string_view MaterialColorPropertyKeys[MaterialColorPropertyKeysCount] = {
         FIRST(AI_MATKEY_COLOR_DIFFUSE),
         FIRST(AI_MATKEY_COLOR_AMBIENT),
         FIRST(AI_MATKEY_COLOR_SPECULAR),
-        FIRST(AI_MATKEY_COLOR_EMISSIVE),
         FIRST(AI_MATKEY_COLOR_TRANSPARENT),
         FIRST(AI_MATKEY_COLOR_REFLECTIVE),
+
+        /* PBR */
+        FIRST(AI_MATKEY_BASE_COLOR),
+        FIRST(AI_MATKEY_COLOR_EMISSIVE),
     };
 #pragma warning(pop)
 
