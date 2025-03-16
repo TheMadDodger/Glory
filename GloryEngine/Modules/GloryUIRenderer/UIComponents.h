@@ -78,6 +78,7 @@ namespace Glory
         glm::mat4 m_TransformNoScale;
         glm::mat4 m_TransformNoScaleNoPivot;
         glm::mat4 m_InteractionTransform;
+        glm::mat4 m_InteractionTransformNoPivot;
         bool m_IsDirty;
     };
 

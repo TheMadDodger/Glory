@@ -101,6 +101,8 @@ namespace Glory
 		glActiveTexture(GL_TEXTURE0);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
+		if (pTexture)
+			m_TextureSetBits |= 1 << m_TextureCounter;
 		++m_TextureCounter;
 	}
 
@@ -134,54 +136,4 @@ namespace Glory
 		if (!m_pPipeline) return nullptr;
 		return static_cast<OGLPipeline*>(m_pPipeline);
 	}
-
-	//GLuint OGLMaterial::CreateUniformBuffer(const std::string& name, GLuint bufferSize, GLuint bindingIndex)
-	//{
-	//	GLuint uniformBlockIndex = glGetUniformBlockIndex(m_ProgramID, name.data());
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	if (uniformBlockIndex == GL_INVALID_INDEX)
-	//	{
-	//		m_pEngine->GetDebug().LogError("OGLMaterial::CreateUniformBuffer > Uniform buffer block with name " + name + " not found!");
-	//		return 0;
-	//	}
-	//
-	//	// Manually bind the uniform block
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	glUniformBlockBinding(m_ProgramID, uniformBlockIndex, bindingIndex);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//
-	//	// Uniform buffer object for lights
-	//	GLuint bufferID;
-	//	glGenBuffers(1, &bufferID);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	glBindBuffer(GL_UNIFORM_BUFFER, bufferID);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	glBufferData(GL_UNIFORM_BUFFER, bufferSize, NULL, GL_DYNAMIC_DRAW);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockIndex, bufferID);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//
-	//	m_UniformBufferObjects.push_back(bufferID);
-	//	return bufferID;
-	//}
-
-	//void OGLMaterial::SetTexture(const std::string& name, GLTexture* pTexture)
-	//{
-	//	GLuint texLocation = glGetUniformLocation(m_ProgramID, name.c_str());
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	glUniform1i(texLocation, m_TextureCounter);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//
-	//	glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//	glBindTexture(pTexture->GetGLImageType(), pTexture->GetID());
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//
-	//	glActiveTexture(GL_TEXTURE0);
-	//	OpenGLGraphicsModule::LogGLError(glGetError());
-	//
-	//	++m_TextureCounter;
-	//}
 }

@@ -110,9 +110,21 @@ namespace Glory
 			if (pInput)
 			{
 				const glm::vec2 screenScale = 1.0f / pInput->GetScreenScale();
-				pComponent.m_CursorPos = pInput->GetCursorPos(0) * screenScale;
+				pComponent.m_CursorPos = pInput->GetCursorPos(0)*screenScale;
 				pComponent.m_CursorDown = pInput->IsCursorDown(0);
 			}
+			break;
+		}
+		case UITarget::WorldSpaceQuad:
+		{
+			LayerManager* pLayers = &pEngine->GetLayerManager();
+			LayerMask mask;
+			if (pRegistry->HasComponent<LayerComponent>(entity))
+			{
+				LayerComponent& layer = pRegistry->GetComponent<LayerComponent>(entity);
+				mask = layer.m_Layer.Layer(pLayers) != nullptr ? layer.m_Layer.Layer(pLayers)->m_Mask : 0;
+			}
+			data.m_LayerMask = mask;
 			break;
 		}
 		default:
@@ -135,15 +147,6 @@ namespace Glory
 
 		data.m_CursorPos = pComponent.m_CursorPos;
 		data.m_CursorDown = pComponent.m_CursorDown;
-
-		LayerManager* pLayers = &pEngine->GetLayerManager();
-		LayerMask mask;
-		if (pRegistry->HasComponent<LayerComponent>(entity))
-		{
-			LayerComponent& layer = pRegistry->GetComponent<LayerComponent>(entity);
-			mask = layer.m_Layer.Layer(pLayers) != nullptr ? layer.m_Layer.Layer(pLayers)->m_Mask : 0;
-		}
-		data.m_LayerMask = mask;
 
 		pModule->Submit(std::move(data));
 	}
