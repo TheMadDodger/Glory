@@ -44,7 +44,7 @@ namespace Glory
         {
             UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
 			startTransform = parentTransform.m_TransformNoScaleNoPivot;
-			startInteractionTransform = parentTransform.m_InteractionTransform;
+			startInteractionTransform = parentTransform.m_InteractionTransformNoPivot;
 			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
@@ -69,6 +69,7 @@ namespace Glory
         pComponent.m_TransformNoScale = startTransform*translation*rotation*selfScale*glm::inverse(pivotOffset);
         pComponent.m_TransformNoScaleNoPivot = startTransform*translation*rotation*selfScale;
         pComponent.m_InteractionTransform = startInteractionTransform*interactionTranslation*rotation*glm::inverse(interactionPivotOffset)*selfScale;
+        pComponent.m_InteractionTransformNoPivot = startInteractionTransform*interactionTranslation*rotation*selfScale;
 
         pRegistry->SetEntityDirty(entity, false);
     }

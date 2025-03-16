@@ -290,9 +290,10 @@ namespace Glory
 			object.SceneID = data.m_SceneID;
 
 			MeshData* pMeshData = GetDocumentQuadMesh(data);
-			pMaterial->SetProperties(m_pEngine);
+			pMaterial->SetSamplers(m_pEngine);
 			pMaterial->ResetTextureCounter();
 			pMaterial->SetTexture("texSampler", pDocumentTexture->GetTextureAttachment(0));
+			pMaterial->SetPropertiesBuffer(m_pEngine);
 			pMaterial->SetObjectData(object);
 			pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 		}
@@ -387,9 +388,7 @@ namespace Glory
 		uint32_t width, height;
 		document.m_pUITexture->GetDimensions(width, height);
 		if (width != data.m_Resolution.x || width != data.m_Resolution.y)
-		{
 			document.m_pUITexture->Resize(data.m_Resolution.x, data.m_Resolution.y);
-		}
 
 		if (document.m_OriginalDocumentID != pDocument->GetUUID() || forceCreate)
 		{

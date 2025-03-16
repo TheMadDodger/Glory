@@ -21,10 +21,15 @@ namespace Glory
 
 		/** @brief Use this material and its pipeline */
 		virtual void Use() = 0;
-		/** @brief Update properties buffer */
+		/** @brief Update properties buffer and samplers */
 		void SetProperties(Engine* pEngine);
 		/** @brief Update object data for rendering objects */
 		void SetObjectData(const ObjectData& data);
+
+		/** @brief Update only samplers */
+		void SetSamplers(Engine* pEngine);
+		/** @brief Update only propertties buffer and texture bits */
+		void SetPropertiesBuffer(Engine* pEngine);
 
 		/** @brief Set texture on material */
 		virtual void SetTexture(const std::string& name, Texture* value) = 0;
@@ -49,6 +54,7 @@ namespace Glory
 		Buffer* m_pHasTexturesBuffer;
 		static Buffer* m_pMVPBuffer;
 		bool m_Complete;
+		uint64_t m_TextureSetBits;
 
 	private:
 		friend class GPUResourceManager;
