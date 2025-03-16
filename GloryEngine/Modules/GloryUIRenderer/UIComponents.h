@@ -120,10 +120,13 @@ namespace Glory
         );
     };
 
+    /** @brief UI Panel that crops child elements or can be used as an empty element */
     struct UIPanel
     {
+        UIPanel() : m_Crop(true) {}
+
         REFLECTABLE(UIPanel,
-            (glm::vec4)(m_Rect)
+            (bool)(m_Crop)
         );
     };
 

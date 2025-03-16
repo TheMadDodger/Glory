@@ -56,6 +56,7 @@ namespace Glory
 
 		GLORY_API void DrawDocument(UIDocument* pDocument, const UIRenderData& data);
 
+		GLORY_API MaterialData* PrepassStencilMaterial();
 		GLORY_API MaterialData* PrepassMaterial();
 		GLORY_API MaterialData* TextPrepassMaterial();
 		GLORY_API MeshData* GetImageMesh();
@@ -80,6 +81,7 @@ namespace Glory
 		MeshData* GetDocumentQuadMesh(const UIRenderData& data);
 
 	private:
+		MaterialData* m_pUIPrepassStencilMaterial = nullptr;
 		MaterialData* m_pUIPrepassMaterial = nullptr;
 		MaterialData* m_pUITextPrepassMaterial = nullptr;
 		MaterialData* m_pUIOverlayMaterial = nullptr;

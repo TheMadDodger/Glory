@@ -28,6 +28,8 @@ namespace Glory
 		virtual void SetStencilMask(unsigned int mask) override;
 		virtual void SetStencilFunc(CompareOp func, int ref, unsigned int mask) override;
 		virtual void SetStencilOP(Func fail, Func dpfail, Func dppass) override;
+		virtual void SetColorMask(bool r, bool g, bool b, bool a) override;
+		virtual void ClearStencil(int value) override;
 		virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) override;
 		virtual void Blit(RenderTexture* pTexture, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
 			Filter filter = Filter::F_Nearest) override;

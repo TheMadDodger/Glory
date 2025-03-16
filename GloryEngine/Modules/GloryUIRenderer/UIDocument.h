@@ -58,6 +58,7 @@ namespace Glory
 		GLORY_API bool WasCursorDown() const;
 		GLORY_API bool IsEnputEnabled() const;
 		GLORY_API void SetEnputEnabled(bool enabled);
+		GLORY_API size_t& PanelCounter();
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -75,6 +76,7 @@ namespace Glory
 		bool m_CursorDown;
 		bool m_WasCursorDown;
 		bool m_InputEnabled;
+		size_t m_PanelCounter;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::string m_Name;
