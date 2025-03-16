@@ -248,6 +248,17 @@ namespace Glory
 		glStencilOp(glFail, gldpFail, gldpPass);
 	}
 
+	void OpenGLGraphicsModule::SetColorMask(bool r, bool g, bool b, bool a)
+	{
+		glColorMask(r, g, b, a);
+	}
+
+	void OpenGLGraphicsModule::ClearStencil(int value)
+	{
+		glClearStencil(value);
+		glClear(GL_STENCIL_BUFFER_BIT);
+	}
+
 	void OpenGLGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
 	{
 		glViewport(0, 0, width, height);

@@ -22,6 +22,7 @@ namespace Glory::Utils::ECS
 		Stop,
 		Update,
 		Draw,
+		PostDraw,
 
 		Count
 	};

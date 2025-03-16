@@ -24,8 +24,8 @@ namespace Glory
 		m_OriginalDocumentID(pDocument->GetUUID()), m_SceneID(0), m_ObjectID(0),
 		m_pUITexture(nullptr), m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
 		m_CursorPos(0.0f, 0.0f), m_CursorDown(false), m_WasCursorDown(false), m_InputEnabled(true),
-		m_Name(pDocument->m_Name), m_Ids(pDocument->m_Ids), m_UUIds(pDocument->m_UUIds),
-		m_Names(pDocument->m_Names)
+		m_PanelCounter(0), m_Name(pDocument->m_Name), m_Ids(pDocument->m_Ids),
+		m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
@@ -55,10 +55,12 @@ namespace Glory
 			const Utils::ECS::EntityID child = registry.Child(entity, i);
 			DrawEntity(child, registry);
 		}
+		registry.InvokeAll(Utils::ECS::InvocationType::PostDraw, { entity });
 	}
 
 	void UIDocument::Draw()
 	{
+		m_PanelCounter = 0;
 		m_Registry.SetUserData(this);
 		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
 		{
@@ -360,5 +362,10 @@ namespace Glory
 	void UIDocument::SetEnputEnabled(bool enabled)
 	{
 		m_InputEnabled = enabled;
+	}
+
+	size_t& UIDocument::PanelCounter()
+	{
+		return m_PanelCounter;
 	}
 }

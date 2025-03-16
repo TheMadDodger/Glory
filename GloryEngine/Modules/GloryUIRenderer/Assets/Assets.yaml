@@ -14,3 +14,7 @@
   ID: 106
 - Path: "Pipelines\\UITextPrepass.gpln"
   ID: 107
+- Path: "Shaders\\UIPrepassStencil_Frag.shader"
+  ID: 108
+- Path: "Pipelines\\UIPrepassStencil.gpln"
+  ID: 109

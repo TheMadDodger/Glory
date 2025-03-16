@@ -19,6 +19,7 @@ namespace Glory
 	struct UIText;
 	struct UIBox;
 	struct UIInteraction;
+	struct UIPanel;
 	struct UIConstraint;
 	class Engine;
 
@@ -66,5 +67,12 @@ namespace Glory
 		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementDown_Callback;
 		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
 		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementUp_Callback;
+	};
+
+	class UIPanelSystem
+	{
+	public:
+		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIPanel& pComponent);
+		static void OnPostDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIPanel& pComponent);
 	};
 }

@@ -30,6 +30,8 @@ namespace Glory
         virtual void SetStencilMask(unsigned int mask) = 0;
         virtual void SetStencilFunc(CompareOp func, int ref, unsigned int mask) = 0;
         virtual void SetStencilOP(Func fail, Func dpfail, Func dppass) = 0;
+        virtual void SetColorMask(bool r, bool g, bool b, bool a) = 0;
+        virtual void ClearStencil(int value) = 0;
         virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) = 0;
         virtual void Blit(RenderTexture* pTexture, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
             Filter filter = Filter::F_Nearest) = 0;

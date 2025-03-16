@@ -46,6 +46,7 @@ namespace Glory
 		ModuleSettings& settings = Settings();
 
 		const size_t start = references.size();
+		references.push_back(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
 		references.push_back(settings.Value<uint64_t>("UI Prepass Pipeline"));
 		references.push_back(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
 		references.push_back(settings.Value<uint64_t>("UI Overlay Pipeline"));
@@ -97,6 +98,11 @@ namespace Glory
 		pRenderTexture->UnBindForDraw();
 	}
 
+	MaterialData* UIRendererModule::PrepassStencilMaterial()
+	{
+		return m_pUIPrepassStencilMaterial;
+	}
+
 	MaterialData* UIRendererModule::PrepassMaterial()
 	{
 		return m_pUIPrepassMaterial;
@@ -135,6 +141,7 @@ namespace Glory
 		Reflect::RegisterType<UIText>();
 		Reflect::RegisterType<UIBox>();
 		Reflect::RegisterType<UIInteraction>();
+		Reflect::RegisterType<UIPanel>();
 
 		Constraints::AddBuiltinConstraints();
 
@@ -154,6 +161,7 @@ namespace Glory
 		m_pComponentTypes->RegisterComponent<UIText>();
 		m_pComponentTypes->RegisterComponent<UIBox>();
 		m_pComponentTypes->RegisterComponent<UIInteraction>();
+		m_pComponentTypes->RegisterComponent<UIPanel>();
 		/* Transform */
 		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
 		/* Image */
@@ -165,6 +173,9 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIBox>(Glory::Utils::ECS::InvocationType::Draw, UIBoxSystem::OnDraw);
 		/* Interaction */
 		m_pComponentTypes->RegisterInvokaction<UIInteraction>(Glory::Utils::ECS::InvocationType::Update, UIInteractionSystem::OnUpdate);
+		/* Panel */
+		m_pComponentTypes->RegisterInvokaction<UIPanel>(Glory::Utils::ECS::InvocationType::Draw, UIPanelSystem::OnDraw);
+		m_pComponentTypes->RegisterInvokaction<UIPanel>(Glory::Utils::ECS::InvocationType::PostDraw, UIPanelSystem::OnPostDraw);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
@@ -207,10 +218,13 @@ namespace Glory
 	void UIRendererModule::PostInitialize()
 	{
 		const ModuleSettings& settings = Settings();
+		const UUID uiPrepassStencilPipeline = settings.Value<uint64_t>("UI Prepass Stencil Pipeline");
 		const UUID uiPrepassPipeline = settings.Value<uint64_t>("UI Prepass Pipeline");
 		const UUID uiTextPrepassPipeline = settings.Value<uint64_t>("UI Text Prepass Pipeline");
 		const UUID uiOverlayPipeline = settings.Value<uint64_t>("UI Overlay Pipeline");
 
+		m_pUIPrepassStencilMaterial = new MaterialData();
+		m_pUIPrepassStencilMaterial->SetPipeline(uiPrepassStencilPipeline);
 		m_pUIPrepassMaterial = new MaterialData();
 		m_pUIPrepassMaterial->SetPipeline(uiPrepassPipeline);
 		m_pUIPrepassMaterial->AddProperty("Color", "Color", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
@@ -228,8 +242,14 @@ namespace Glory
 
 	void UIRendererModule::Cleanup()
 	{
+		delete m_pUIPrepassStencilMaterial;
+		m_pUIPrepassStencilMaterial = nullptr;
+		
 		delete m_pUIPrepassMaterial;
 		m_pUIPrepassMaterial = nullptr;
+		
+		delete m_pUITextPrepassMaterial;
+		m_pUITextPrepassMaterial = nullptr;
 
 		delete m_pUIOverlayMaterial;
 		m_pUIOverlayMaterial = nullptr;
@@ -353,6 +373,7 @@ namespace Glory
 
 	void UIRendererModule::LoadSettings(ModuleSettings& settings)
 	{
+		settings.RegisterAssetReference<PipelineData>("UI Prepass Stencil Pipeline", 109);
 		settings.RegisterAssetReference<PipelineData>("UI Prepass Pipeline", 102);
 		settings.RegisterAssetReference<PipelineData>("UI Text Prepass Pipeline", 107);
 		settings.RegisterAssetReference<PipelineData>("UI Overlay Pipeline", 105);
@@ -373,6 +394,7 @@ namespace Glory
 
 			RenderTextureCreateInfo uiTextureInfo;
 			uiTextureInfo.HasDepth = false;
+			uiTextureInfo.HasStencil = true;
 			uiTextureInfo.Width = uint32_t(data.m_Resolution.x);
 			uiTextureInfo.Height = uint32_t(data.m_Resolution.y);
 			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));

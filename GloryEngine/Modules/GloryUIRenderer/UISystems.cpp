@@ -275,4 +275,99 @@ namespace Glory
 		static UIInteractionSystem Inst;
 		return &Inst;
 	}
+
+	void UIPanelSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIPanel& pComponent)
+	{
+		if (!pComponent.m_Crop) return;
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		UIRendererModule* pUIRenderer = pDocument->Renderer();
+		Engine* pEngine = pUIRenderer->GetEngine();
+		AssetManager& assets = pEngine->GetAssetManager();
+		MaterialManager& materials = pEngine->GetMaterialManager();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+
+		MeshData* pMeshData = pUIRenderer->GetImageMesh();
+		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+		ObjectData object;
+		object.Model = transform.m_Transform;
+		object.Projection = pDocument->Projection();
+
+		MaterialData* pPrepassMaterial = pUIRenderer->PrepassStencilMaterial();
+		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
+		pMaterial->SetProperties(pEngine);
+		pMaterial->SetObjectData(object);
+
+		size_t& counter = pDocument->PanelCounter();
+		pGraphics->SetColorMask(false, false, false, false);
+		pGraphics->EnableStencilTest(true);
+		pGraphics->SetStencilMask(0xFF);
+		if (counter == 0)
+			pGraphics->ClearStencil(0);
+
+		/* First stencil pass increases stencil value by 1 */
+		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Increment);
+		pGraphics->SetStencilFunc(CompareOp::OP_Always, counter, 0xFF);
+		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+
+		/* Second stencil pass compares stencil with the the expected addition, on fail it is reduced by 1 */
+		pGraphics->SetStencilOP(Func::OP_Decrement, Func::OP_Decrement, Func::OP_Replace);
+		pGraphics->SetStencilFunc(CompareOp::OP_Equal, counter + 1, 0xFF);
+		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+		++counter;
+
+		/* Disable writing to the stencil buffer, value must be equal to counter */
+		pGraphics->SetColorMask(true, true, true, true);
+		pGraphics->SetStencilMask(0x00);
+		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
+		pGraphics->SetStencilFunc(CompareOp::OP_LessOrEqual, counter, 0xFF);
+	}
+
+	void UIPanelSystem::OnPostDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIPanel& pComponent)
+	{
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		UIRendererModule* pUIRenderer = pDocument->Renderer();
+		Engine* pEngine = pUIRenderer->GetEngine();
+		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		size_t& counter = pDocument->PanelCounter();
+		--counter;
+		if (counter == 0)
+		{
+			pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
+			pGraphics->SetStencilFunc(CompareOp::OP_Always, 0, 0xFF);
+			pGraphics->SetStencilMask(0x00);
+			pGraphics->EnableStencilTest(false);
+			return;
+		}
+
+		if (!pComponent.m_Crop) return;
+		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+		MeshData* pMeshData = pUIRenderer->GetImageMesh();
+		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+		ObjectData object;
+		object.Model = transform.m_Transform;
+		object.Projection = pDocument->Projection();
+
+		MaterialData* pPrepassMaterial = pUIRenderer->PrepassStencilMaterial();
+		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
+		pMaterial->SetProperties(pEngine);
+		pMaterial->SetObjectData(object);
+
+		/* Remove the shape from the stencil */
+		pGraphics->SetColorMask(false, false, false, false);
+		pGraphics->SetStencilMask(0xFF);
+		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Decrement);
+		pGraphics->SetStencilFunc(CompareOp::OP_Equal, counter + 1, 0xFF);
+		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+		pGraphics->SetColorMask(true, true, true, true);
+
+		/* Disable writing to the stencil buffer, value must be equal to counter */
+		pGraphics->SetStencilMask(0x00);
+		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
+		pGraphics->SetStencilFunc(CompareOp::OP_LessOrEqual, counter, 0xFF);
+	}
 }
