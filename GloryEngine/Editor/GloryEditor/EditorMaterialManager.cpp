@@ -290,6 +290,37 @@ namespace Glory::Editor
 		}
 	}
 
+	void EditorMaterialManager::WritePropertiesTo(Utils::NodeValueRef& properties, MaterialData* pMaterial)
+	{
+		if (!properties.IsMap()) properties.SetMap();
+
+		for (size_t i = 0; i < pMaterial->PropertyInfoCount(*this); ++i)
+		{
+			const MaterialPropertyInfo* propInfo = pMaterial->GetPropertyInfoAt(*this, i);
+			const uint32_t type = propInfo->TypeHash();
+			const BasicTypeData* typeData = m_pEngine->GetResourceTypes().GetBasicTypeData(type);
+
+			const std::string_view name = propInfo->ShaderName();
+			auto prop = properties[name];
+			if (!prop.IsMap()) prop.SetMap();
+			prop["DisplayName"].Set(propInfo->ShaderName());
+			prop["TypeHash"].Set(propInfo->TypeHash());
+			auto value = prop["Value"];
+
+			const bool isResource = propInfo->IsResource();
+			if (!isResource)
+			{
+				const size_t offset = propInfo->Offset();
+				m_pEngine->GetSerializers().SerializeProperty(pMaterial->GetBufferReference(*this), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
+			}
+			else
+			{
+				const UUID id = *pMaterial->GetResourceUUIDPointer(*this, propInfo->Offset());
+				value.Set(uint64_t(id));
+			}
+		}
+	}
+
 	void EditorMaterialManager::ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialInstanceData* pMaterialData, bool clearProperties) const
 	{
 		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
@@ -344,10 +375,11 @@ namespace Glory::Editor
 		EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
 		if (!pResource || !pResource->IsEditable()) return;
 		YAMLResource<MaterialData>* pEditorMaterialData = static_cast<YAMLResource<MaterialData>*>(pResource);
-
 		Utils::YAMLFileRef& file = **pEditorMaterialData;
+
 		ReadPropertiesInto(file["Properties"], pMaterial, false);
-		/* Update properties in YAML? */
+		/* Update properties in YAML */
+		WritePropertiesTo(file["Properties"], pMaterial);
 
 		/* Find and update material instances */
 		for (const UUID materialID : m_MaterialInstances)

@@ -7,6 +7,7 @@
 #include "PropertySerializer.h"
 #include "SceneManager.h"
 #include "Engine.h"
+#include "Debug.h"
 #include "BinaryStream.h"
 #include "BinarySerialization.h"
 #include "ComponentHelpers.h"

@@ -4,6 +4,7 @@
 #include "JoltShapeManager.h"
 #include "JoltPhysicsModule.h"
 #include "PhysicsSystem.h"
+#include "Debug.h"
 
 #include <Engine.h>
 #include <GScene.h>

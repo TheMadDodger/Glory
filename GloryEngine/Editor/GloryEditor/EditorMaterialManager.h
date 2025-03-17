@@ -83,6 +83,11 @@ namespace Editor
 		 * @param clearProperties Whether to clear the property data of the material before reading
 		 */
 		void ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialData* pMaterial, bool clearProperties=true) const;
+		/** @brief Write properties to YAML
+		 * @param properties Properties YAML destination
+		 * @param pMaterial Material to read the properties from
+		 */
+		void WritePropertiesTo(Utils::NodeValueRef& properties, MaterialData* pMaterial);
 		/** @overload Read properties into a material instance
 		 * @param properties Properties YAML data
 		 * @param pMaterial Material instance to read the properties to

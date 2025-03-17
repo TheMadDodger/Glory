@@ -393,7 +393,7 @@ namespace Glory::Editor
 
 			ImGui::PushID(propInfo->ShaderName().data());
 			void* pAddress = pMaterialData->Address(materialManager, i);
-			PropertyDrawer::DrawProperty(propInfo->DisplayName(), pAddress, propInfo->TypeHash(), pMaterialProperty->Flags());
+			PropertyDrawer::DrawProperty(propInfo->DisplayName(), pAddress, propInfo->TypeHash(), pMaterialProperty->Flags() | PropertyFlags::Color);
 			ImGui::PopID();
 		}
 	}

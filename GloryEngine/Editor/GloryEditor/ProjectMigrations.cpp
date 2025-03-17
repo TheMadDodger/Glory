@@ -5,12 +5,15 @@
 #include "EditorResourceManager.h"
 #include "EditableResource.h"
 
-#include <JSONRef.h>
 #include <TextureData.h>
+#include <Debug.h>
 #include <PrefabData.h>
 #include <MaterialInstanceData.h>
+
+#include <JSONRef.h>
 #include <NodeRef.h>
 #include <YAML_GLM.h>
+
 #include <stack>
 
 namespace Glory::Editor

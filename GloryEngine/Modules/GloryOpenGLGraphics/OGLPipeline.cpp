@@ -3,6 +3,7 @@
 #include "GLShader.h"
 
 #include <Engine.h>
+#include <Debug.h>
 
 namespace Glory
 {

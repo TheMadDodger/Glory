@@ -7,6 +7,8 @@
 #include <GScene.h>
 #include <SceneManager.h>
 #include <Components.h>
+#include <Debug.h>
+
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory
