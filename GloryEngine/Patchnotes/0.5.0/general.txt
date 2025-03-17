@@ -47,6 +47,7 @@ Editor:
 - Fixed image tumbnails not showing
 - Texture and value properties in materials are now paired together automatically
 - Overhauled the material editors
+- Added default values for material properties
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
