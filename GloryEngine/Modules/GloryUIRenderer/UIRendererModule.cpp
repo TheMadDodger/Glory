@@ -28,6 +28,7 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <PropertyFlags.h>
 
 namespace Glory
 {
@@ -137,9 +138,15 @@ namespace Glory
 
 		Reflect::RegisterType<UIRenderer>();
 		Reflect::RegisterType<UITransform>();
-		Reflect::RegisterType<UIImage>();
-		Reflect::RegisterType<UIText>();
-		Reflect::RegisterType<UIBox>();
+		const FieldData* pColorField = Reflect::RegisterType<UIImage>()->GetFieldData("m_Color");
+		Reflect::SetFieldFlags(pColorField, PropertyFlags::Color);
+		const TypeData* pTextType = Reflect::RegisterType<UIText>();
+		pColorField = pTextType->GetFieldData("m_Color");
+		const FieldData* pTextField = pTextType->GetFieldData("m_Text");
+		Reflect::SetFieldFlags(pColorField, PropertyFlags::Color);
+		Reflect::SetFieldFlags(pTextField, PropertyFlags::AreaText);
+		pColorField = Reflect::RegisterType<UIBox>()->GetFieldData("m_Color");
+		Reflect::SetFieldFlags(pColorField, PropertyFlags::Color);
 		Reflect::RegisterType<UIInteraction>();
 		Reflect::RegisterType<UIPanel>();
 
