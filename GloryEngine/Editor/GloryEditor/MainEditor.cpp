@@ -71,9 +71,11 @@
 #include "Dispatcher.h"
 
 #include <imgui.h>
-#include <Engine.h>
 #include <ImGuizmo.h>
+
+#include <Engine.h>
 #include <Components.h>
+#include <Debug.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)

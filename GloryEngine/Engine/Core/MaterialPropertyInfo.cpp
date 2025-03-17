@@ -1,7 +1,21 @@
 #include "MaterialPropertyInfo.h"
 
+#include <glm/vec4.hpp>
+
 namespace Glory
 {
+	constexpr glm::vec4 DefaultColor{ 1.0f };
+	constexpr glm::vec4 DefaultEmissiveColor{ 0.0f };
+
+	constexpr size_t DefaultValuePairsCount = 5;
+	std::pair<std::string, float> DefaultValuePairs[DefaultValuePairsCount] = {
+		{ "roughness", 1.0f },
+		{ "metallic", 0.0f },
+		{ "shininess", 1.0f },
+		{ "emissiveIntensity", 1.0f },
+		{ "ambient", 1.0f },
+	};
+
 	MaterialPropertyInfo::MaterialPropertyInfo(): m_PropertyDisplayName(""), m_PropertyShaderName(""), m_TypeHash(0),
 		m_Size(0), m_Offset(0), m_TextureType(TT_None), m_Flags(0)
 	{
@@ -88,5 +102,29 @@ namespace Glory
 	void MaterialPropertyInfo::Reserve(std::vector<char>& buffer)
 	{
 		buffer.resize(m_Offset + m_Size);
+	}
+
+	void MaterialPropertyInfo::SetDefaultValue(void* dst) const
+	{
+		if (m_Size == sizeof(glm::vec4))
+		{
+			const bool isEmissive = m_PropertyShaderName.find("emissive") != std::string::npos;
+			std::memcpy(dst, isEmissive ? &DefaultEmissiveColor : &DefaultColor, sizeof(glm::vec4));
+			return;
+		}
+		if (m_Size == sizeof(float))
+		{
+			std::string lowerCaseName = m_PropertyShaderName;
+			std::for_each(lowerCaseName.begin(), lowerCaseName.end(), [](char& c) { c = std::tolower(c); });
+			for (size_t i = 0; i < DefaultValuePairsCount; ++i)
+			{
+				auto& pair = DefaultValuePairs[i];
+				const bool match = pair.first.find(lowerCaseName) != std::string::npos
+					|| lowerCaseName.find(pair.first) != std::string::npos;
+				if (!match) continue;
+				std::memcpy(dst, &pair.second, sizeof(float));
+				return;
+			}
+		}
 	}
 }

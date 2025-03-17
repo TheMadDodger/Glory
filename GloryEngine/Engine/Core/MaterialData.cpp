@@ -26,11 +26,13 @@ namespace Glory
 			return;
 
 		const size_t index = m_PropertyInfos.size();
-		size_t lastIndex = index - 1;
+		const size_t lastIndex = index - 1;
 		m_PropertyInfos.emplace_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
 		m_CurrentOffset = m_PropertyInfos[index].EndOffset();
 		m_PropertyInfos[index].Reserve(m_PropertyBuffer);
 		m_HashToPropertyInfoIndex[hash] = index;
+		void* pAddress = m_PropertyInfos[index].Address(m_PropertyBuffer);
+		m_PropertyInfos[index].SetDefaultValue(pAddress);
 	}
 
 	void MaterialData::AddResourceProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, UUID resourceUUID, TextureType textureType, uint32_t flags)
@@ -71,6 +73,8 @@ namespace Glory
 		else
 		{
 			m_PropertyInfos[index].Reserve(m_PropertyBuffer);
+			void* pAddress = m_PropertyInfos[index].Address(m_PropertyBuffer);
+			m_PropertyInfos[index].SetDefaultValue(pAddress);
 		}
 		m_HashToPropertyInfoIndex[hash] = index;
 	}

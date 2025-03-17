@@ -51,6 +51,8 @@ namespace Glory
 		bool Write(std::vector<char>& buffer, const void* data);
 		void Reserve(std::vector<char>& buffer);
 
+		void SetDefaultValue(void* dst) const;
+
 	private:
 		friend class MaterialData;
 		friend class PipelineData;

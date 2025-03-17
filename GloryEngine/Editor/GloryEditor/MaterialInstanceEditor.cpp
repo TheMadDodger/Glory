@@ -14,6 +14,7 @@
 #include <imgui.h>
 #include <MaterialEditor.h>
 #include <PropertySerializer.h>
+#include <PropertyFlags.h>
 #include <IconsFontAwesome6.h>
 #include <PipelineData.h>
 
@@ -182,7 +183,7 @@ namespace Glory::Editor
 				auto propValueOne = propOne["Value"];
 				EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
 				EditorUI::RemoveButtonPadding = 34.0f;
-				change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValueOne.Path() : baseValueOne.Path(), propInfoOne->TypeHash(), propInfoOne->TypeHash(), pMaterialPropertyOne->Flags());
+				change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValueOne.Path() : baseValueOne.Path(), propInfoOne->TypeHash(), propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
 				EditorUI::RemoveButtonPadding = 24.0f;
 				EditorUI::PopFlag();
 				ImGui::PopID();
@@ -314,7 +315,7 @@ namespace Glory::Editor
 			auto propValue = prop["Value"];
 
 			ImGui::BeginDisabled(!enable);
-			change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), propInfo->TypeHash(), propInfo->TypeHash(), pMaterialProperty->Flags());
+			change |= PropertyDrawer::DrawProperty(enable ? file : baseFile, enable ? propValue.Path() : baseValue.Path(), propInfo->TypeHash(), propInfo->TypeHash(), pMaterialProperty->Flags() | PropertyFlags::Color);
 			ImGui::EndDisabled();
 			ImGui::PopID();
 
