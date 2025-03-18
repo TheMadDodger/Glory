@@ -669,9 +669,10 @@ namespace Glory::Editor
 
 		ImGui::PushItemWidth(width - REMOVE_BUTTON_PADDING);
 		const bool change = ImGui::InputText("##value", value, bufferSize, flags);
+		const bool deactivated = ImGui::IsItemDeactivated();
 		ImGui::PopItemWidth();
 		ImGui::PopID();
-		return change;
+		return change && deactivated;
 	}
 
 	bool EditorUI::InputText(Utils::YAMLFileRef& file, const std::filesystem::path& path, ImGuiInputTextFlags flags)
