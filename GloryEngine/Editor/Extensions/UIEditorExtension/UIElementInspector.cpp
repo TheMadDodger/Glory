@@ -133,7 +133,10 @@ namespace Glory::Editor
 		ImGui::PopID();
 
 		if (change)
+		{
 			EditorAssetDatabase::SetAssetDirty(documentID);
+			pDocument->SetDrawDirty();
+		}
 	}
 
 	UIMainWindow* UIElementInspector::GetMainWindow()

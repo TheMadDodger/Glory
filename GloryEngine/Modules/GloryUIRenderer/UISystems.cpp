@@ -18,7 +18,7 @@ namespace Glory
 {
 	void UITransformSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
 	{
-        //if (!pRegistry->IsEntityDirty(entity)) return;
+        if (!pRegistry->IsEntityDirty(entity)) return;
         CalculateMatrix(pRegistry, entity, pComponent);
 	}
 
@@ -72,6 +72,7 @@ namespace Glory
         pComponent.m_InteractionTransformNoPivot = startInteractionTransform*interactionTranslation*rotation*selfScale;
 
         pRegistry->SetEntityDirty(entity, false);
+		pDocument->SetDrawDirty();
     }
 
 	void UIImageSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIImage& pComponent)

@@ -6,6 +6,7 @@
 #include "EditorAssetManager.h"
 #include "RemovedAssetsPopup.h"
 #include "Tumbnail.h"
+#include "Dispatcher.h"
 
 #include <Debug.h>
 #include <AssetDatabase.h>
@@ -32,13 +33,6 @@ namespace Glory::Editor
 		std::vector<UUID> ids;
 		EditorAssetDatabase::GetAllAssetsOfType(ResourceTypes::GetHash<PipelineData>(), ids);
 		CompileAssetsImmediately(ids);
-		/*for (auto id: ids)
-		{
-			Resource* pResource = EditorApplication::GetInstance()->GetAssetManager().FindResource(id);
-			if (!pResource) continue;
-			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
-			EditorApplication::GetInstance()->GetPipelineManager().AddPipeline(pPipeline);
-		}*/
 	}
 
 	void AssetCompiler::CompileAssetDatabase()
@@ -231,7 +225,16 @@ namespace Glory::Editor
 
 	void AssetCompiler::Update()
 	{
-		m_CompletedAssets.ForEachClear([](UUID& uuid) { Tumbnail::SetDirty(uuid); });
+		m_CompletedAssets.ForEachClear([](UUID& uuid) {
+			Tumbnail::SetDirty(uuid);
+			GetAssetCompilerEventDispatcher().Dispatch({ uuid });
+		});
+	}
+
+	AssetCompilerEventDispatcher& AssetCompiler::GetAssetCompilerEventDispatcher()
+	{
+		static AssetCompilerEventDispatcher dispatcher;
+		return dispatcher;
 	}
 
 	void AssetCompiler::DispatchCompilationJob(const AssetData& asset)

@@ -8,6 +8,8 @@
 #include <EditorApplication.h>
 #include <EditorAssetDatabase.h>
 #include <Undo.h>
+#include <AssetCompiler.h>
+#include <Dispatcher.h>
 
 #include <Engine.h>
 #include <GraphicsModule.h>
@@ -41,6 +43,7 @@ namespace Glory::Editor
 			if (m_pDocuments[i]->OriginalDocumentID() != documentID) continue;
 			m_EditingDocumentIndex = i;
 			m_EditingDocument = m_pDocuments[i]->OriginalDocumentID();
+			m_pDocuments[i]->SetDrawDirty();
 			m_SelectedEntity = 0;
 			return;
 		}
@@ -189,6 +192,12 @@ namespace Glory::Editor
 			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
 			pDocumentData->Save();
+		});
+
+		AssetCompiler::GetAssetCompilerEventDispatcher().AddListener([this](const AssetCompilerEvent&) {
+			UIDocument* pDocument = CurrentDocument();
+			if (!pDocument) return;
+			pDocument->SetDrawDirty();
 		});
 	}
 
