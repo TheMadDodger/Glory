@@ -5,6 +5,7 @@
 #include <FontData.h>
 #include <MeshData.h>
 #include <RenderData.h>
+#include <GraphicsModule.h>
 #include <VertexHelpers.h>
 
 namespace Glory
@@ -25,7 +26,7 @@ namespace Glory
 		m_pUITexture(nullptr), m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
 		m_CursorPos(0.0f, 0.0f), m_CursorDown(false), m_WasCursorDown(false), m_InputEnabled(true),
 		m_PanelCounter(0), m_Name(pDocument->m_Name), m_Ids(pDocument->m_Ids),
-		m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names)
+		m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names), m_DrawIsDirty(true)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
@@ -58,15 +59,21 @@ namespace Glory
 		registry.InvokeAll(Utils::ECS::InvocationType::PostDraw, { entity });
 	}
 
-	void UIDocument::Draw()
+	void UIDocument::Draw(GraphicsModule* pGraphics, const glm::vec4& clearColor)
 	{
 		m_PanelCounter = 0;
 		m_Registry.SetUserData(this);
+		if (!m_DrawIsDirty) return;
+		m_pUITexture->BindForDraw();
+		pGraphics->Clear({ clearColor.x, clearColor.y, clearColor.z, clearColor.w });
+		pGraphics->ClearStencil(0);
 		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
 		{
 			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
 			DrawEntity(child, m_Registry);
 		}
+		m_DrawIsDirty = false;
+		m_pUITexture->UnBindForDraw();
 	}
 
 	UUID UIDocument::OriginalDocumentID() const
@@ -247,6 +254,7 @@ namespace Glory
 	void UIDocument::SetRenderTexture(RenderTexture* pTexture)
 	{
 		m_pUITexture = pTexture;
+		m_DrawIsDirty = true;
 	}
 
 	Utils::ECS::EntityRegistry& UIDocument::Registry()
@@ -367,5 +375,10 @@ namespace Glory
 	size_t& UIDocument::PanelCounter()
 	{
 		return m_PanelCounter;
+	}
+
+	void UIDocument::SetDrawDirty()
+	{
+		m_DrawIsDirty = true;
 	}
 }

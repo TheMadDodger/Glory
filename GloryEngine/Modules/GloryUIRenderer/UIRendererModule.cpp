@@ -94,8 +94,7 @@ namespace Glory
 		pDocument->Update();
 
 		pRenderTexture->BindForDraw();
-		pGraphics->Clear({ 0.0f, 0.0f, 0.0f, 1.0f });
-		pDocument->Draw();
+		pDocument->Draw(pGraphics, { 0.0f, 0.0f, 0.0f, 1.0f });
 		pRenderTexture->UnBindForDraw();
 	}
 
@@ -283,10 +282,7 @@ namespace Glory
 			document.m_InputEnabled = data.m_InputEnabled;
 			document.Update();
 
-			pRenderTexture->BindForDraw();
-			pGraphics->Clear({ 0.0f, 0.0f, 0.0f, 0.0f });
-			document.Draw();
-			pRenderTexture->UnBindForDraw();
+			document.Draw(pGraphics);
 		}
 	}
 
@@ -416,8 +412,11 @@ namespace Glory
 		UIDocument& document = iter->second;
 		uint32_t width, height;
 		document.m_pUITexture->GetDimensions(width, height);
-		if (width != data.m_Resolution.x || width != data.m_Resolution.y)
+		if (width != data.m_Resolution.x || height != data.m_Resolution.y)
+		{
 			document.m_pUITexture->Resize(data.m_Resolution.x, data.m_Resolution.y);
+			document.m_DrawIsDirty = true;
+		}
 
 		if (document.m_OriginalDocumentID != pDocument->GetUUID() || forceCreate)
 		{

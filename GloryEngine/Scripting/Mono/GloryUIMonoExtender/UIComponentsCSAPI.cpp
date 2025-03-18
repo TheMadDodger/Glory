@@ -185,6 +185,7 @@ namespace Glory
 		transform.m_X = pos.x;
 		transform.m_Y = pos.y;
 		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetDrawDirty();
 	}
 
 	Vec3Wrapper UITransform_GetSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -205,6 +206,7 @@ namespace Glory
 		transform.m_Width = size.x;
 		transform.m_Height = size.y;
 		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetDrawDirty();
 	}
 
 	Vec3Wrapper UITransform_GetPivot(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -225,6 +227,7 @@ namespace Glory
 		transform.m_Pivot.x = pivot.x;
 		transform.m_Pivot.y = pivot.y;
 		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetDrawDirty();
 	}
 
 	float UITransform_GetRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -244,6 +247,7 @@ namespace Glory
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		transform.m_Rotation = rotation;
 		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetDrawDirty();
 	}
 
 	Vec3Wrapper UITransform_GetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -264,6 +268,7 @@ namespace Glory
 		transform.m_Scale.x = scale.x;
 		transform.m_Scale.y = scale.y;
 		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetDrawDirty();
 	}
 
 #pragma endregion
@@ -287,6 +292,7 @@ namespace Glory
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Font.SetUUID(fontID);
 		uiText.m_Dirty = true;
+		pDocument->SetDrawDirty();
 	}
 
 	MonoString* UIText_GetText(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -306,6 +312,7 @@ namespace Glory
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Text = mono_string_to_utf8(text);
 		uiText.m_Dirty = true;
+		pDocument->SetDrawDirty();
 	}
 
 	float UIText_GetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -324,6 +331,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Scale = scale;
+		pDocument->SetDrawDirty();
 	}
 
 	Vec4Wrapper UIText_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -342,6 +350,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Color = ToGLMVec4(color);
+		pDocument->SetDrawDirty();
 	}
 
 	Alignment UIText_GetAlignment(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -360,6 +369,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Alignment = alignment;
+		pDocument->SetDrawDirty();
 	}
 
 #pragma endregion
@@ -382,6 +392,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIImage& uiImage = pDocument->Registry().GetComponent<UIImage>(entity);
 		uiImage.m_Image.SetUUID(imageID);
+		pDocument->SetDrawDirty();
 	}
 
 	Vec4Wrapper UIImage_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -400,6 +411,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIImage& uiImage = pDocument->Registry().GetComponent<UIImage>(entity);
 		uiImage.m_Color = ToGLMVec4(color);
+		pDocument->SetDrawDirty();
 	}
 
 #pragma endregion
@@ -422,6 +434,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIBox& uiBox = pDocument->Registry().GetComponent<UIBox>(entity);
 		uiBox.m_Color = ToGLMVec4(color);
+		pDocument->SetDrawDirty();
 	}
 
 #pragma endregion
@@ -444,6 +457,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIInteraction& interaction = pDocument->Registry().GetComponent<UIInteraction>(entity);
 		interaction.m_Enabled = enabled;
+		pDocument->SetDrawDirty();
 	}
 
 #pragma endregion

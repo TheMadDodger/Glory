@@ -18,6 +18,16 @@ namespace Glory
 
 namespace Glory::Editor
 {
+	struct AssetCompilerEvent
+	{
+		UUID AssetID;
+	};
+
+	template<typename T>
+	struct Dispatcher;
+
+	using AssetCompilerEventDispatcher = Dispatcher<AssetCompilerEvent>;
+
 	class AssetCompiler
 	{
 	public:
@@ -35,6 +45,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static bool CompileSceneSettings(GScene* pScene, Utils::NodeValueRef& root);
 		GLORY_EDITOR_API static void RemoveDeletedAssets();
 		GLORY_EDITOR_API static void Update();
+		GLORY_EDITOR_API static AssetCompilerEventDispatcher& GetAssetCompilerEventDispatcher();
 
 		struct AssetData
 		{

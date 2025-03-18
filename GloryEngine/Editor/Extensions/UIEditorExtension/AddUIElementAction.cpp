@@ -35,6 +35,7 @@ namespace Glory::Editor
 		Undo::StopRecord();
 
 		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		pDocument->SetDrawDirty();
 		return newEntityID;
 	}
 

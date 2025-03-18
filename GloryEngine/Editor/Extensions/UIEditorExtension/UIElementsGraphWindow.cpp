@@ -90,6 +90,7 @@ namespace Glory::Editor
 			registry.SetParent(draggingEntity, newParentID);
 			registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
 			SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+			pDocument->SetDrawDirty();
 		});
 
 		UUID& selectedEntity = pMainWindow->SelectedEntity();
@@ -139,6 +140,7 @@ namespace Glory::Editor
 			registry.SetParent(draggingEntity, newParentID);
 			registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
 			SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+			pDocument->SetDrawDirty();
 		});
 
 		ImGui::PopStyleVar();
@@ -219,6 +221,7 @@ namespace Glory::Editor
 					registry.SetParent(draggingEntity, parent);
 					registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
 					SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+					pDocument->SetDrawDirty();
 				}
 			});
 		}
@@ -271,6 +274,7 @@ namespace Glory::Editor
 
 				registry.SetParent(draggingEntity, entity);
 				SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+				pDocument->SetDrawDirty();
 			}
 		});
 
@@ -349,6 +353,7 @@ namespace Glory::Editor
 				registry.SetParent(draggingEntity, parent);
 				registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
 				SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+				pDocument->SetDrawDirty();
 			}
 		});
 

@@ -15,6 +15,7 @@ namespace Glory
 	class RenderTexture;
 	class MeshData;
 	class FontData;
+	class GraphicsModule;
 	struct TextRenderData;
 
 	/** @brief Renderable copy of a UI document */
@@ -26,7 +27,7 @@ namespace Glory
 		GLORY_API RenderTexture* GetUITexture();
 
 		GLORY_API void Update();
-		GLORY_API void Draw();
+		GLORY_API void Draw(GraphicsModule* pGraphics, const glm::vec4& clearColor={0.0f, 0.0f, 0.0f, 0.0f});
 
 		GLORY_API UUID OriginalDocumentID() const;
 		GLORY_API UUID SceneID() const;
@@ -59,6 +60,7 @@ namespace Glory
 		GLORY_API bool IsEnputEnabled() const;
 		GLORY_API void SetEnputEnabled(bool enabled);
 		GLORY_API size_t& PanelCounter();
+		GLORY_API void SetDrawDirty();
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -77,6 +79,7 @@ namespace Glory
 		bool m_WasCursorDown;
 		bool m_InputEnabled;
 		size_t m_PanelCounter;
+		bool m_DrawIsDirty;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::string m_Name;
