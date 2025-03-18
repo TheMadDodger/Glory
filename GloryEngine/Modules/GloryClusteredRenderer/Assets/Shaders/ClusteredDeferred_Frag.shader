@@ -28,13 +28,13 @@ const vec3 depthSliceColors[8] = vec3[8](
 
 const float PI = 3.14159265359;
 
-struct PointLight
+struct LightData
 {
+	/* Type is in the w value */
     vec4 Position;
-    vec4 Color;
-    uint Enabled;
-    float Intensity;
-    float Range;
+	vec4 Direction;
+	vec4 Color;
+	vec4 Data;
 };
 
 struct LightGridElement
@@ -56,7 +56,7 @@ layout(std430, binding = 1) buffer clusterAABB
 
 layout(std430, binding = 3) buffer lightSSBO
 {
-    PointLight Lights[];
+    LightData Lights[];
 };
 
 layout(std430, binding = 4) buffer lightIndexSSBO
@@ -87,6 +87,10 @@ layout(std430, binding = 6) buffer ssaoSettings
 
 const vec3 GoodColor = vec3(0.0, 1.0, 0.0);
 const vec3 BadColor = vec3(1.0, 0.0, 0.0);
+
+const uint Sun = 1;
+const uint Point = 2;
+const uint Spot = 3;
 
 #ifdef WITH_PBR
 
@@ -170,8 +174,8 @@ void main()
 		uint lightIndex = GlobalLightIndexList[indexListIndex];
 
 		vec3 lightPos = Lights[lightIndex].Position.xyz;
-		float intensity = Lights[lightIndex].Intensity;
-		float radius = Lights[lightIndex].Range;
+		float radius = Lights[lightIndex].Data.z;
+		float intensity = Lights[lightIndex].Data.w;
 		vec3 lightColor = Lights[lightIndex].Color.xyz;
 
 		vec3 L = normalize(lightPos - worldPosition);
@@ -256,8 +260,8 @@ void main()
 		uint lightIndex = GlobalLightIndexList[indexListIndex];
 
 		vec3 lightPos = Lights[lightIndex].Position.xyz;
-		float intensity = Lights[lightIndex].Intensity;
-		float radius = Lights[lightIndex].Range;
+		float radius = Lights[lightIndex].Data.z;
+		float intensity = Lights[lightIndex].Data.w;
 		vec3 lightColor = Lights[lightIndex].Color.xyz;
 		float lightColorAlpha = Lights[lightIndex].Color.a;
 

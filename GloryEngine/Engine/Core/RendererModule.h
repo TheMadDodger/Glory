@@ -39,7 +39,7 @@ namespace Glory
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
-		void Submit(PointLight&& light);
+		void Submit(LightData&& light);
 
 		virtual void OnBeginFrame() override;
 
@@ -81,22 +81,22 @@ namespace Glory
 		virtual void OnSubmit(const RenderData& renderData) {}
 		virtual void OnSubmit(const TextRenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
-		virtual void OnSubmit(const PointLight& light) {}
+		virtual void OnSubmit(const LightData& light) {}
 
 	protected:
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
-		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
-		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) = 0;
+		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
+		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
-		virtual void OnDoCompositing(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
+		virtual void OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) = 0;
 
 		virtual void OnPostInitialize() {};
 
-		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
-		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) = 0;
+		virtual void OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights) = 0;
+		virtual void OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights) = 0;
 
 		virtual void Draw() override;
 
