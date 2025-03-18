@@ -26,7 +26,7 @@ project "GloryEditor"
 		["Editor/Tumbnails"] = { "ImageTumbnailGenerator.*", "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
 		["Editor/PropertyDrawers"] = { "MeshMaterialPropertyDrawer.*", "SceneObjectPropertyDrawer.*", "StructPropertyDrawer.*", "EnumPropertyDrawer.*", "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*", "ShapePropertyDrawer.*" },
 		["Editor/Editors"] = { "TextureDataEditor.*", "GloryEditor.*", "GloryEditorVersion.*", "FileDialog.*", "EditorSettings.*", "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
-		["Editor/Editors/Component"] = { "TransformEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*", "EntitySceneObjectEditor.*" },
+		["Editor/Editors/Component"] = { "TransformEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*", "EntitySceneObjectEditor.*", "LightComponentEditor.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "VersionPopup.*", "ObjectPicker.*", "AssetPicker.*", "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
 		["Windows"] = { "ResourcesWindow.*", "ProjectSettingsWindow.*", "HistoryWindow.*", "EditorPreferencesWindow.*", "EditorWindow.*", "GameWindow.*", "InspectorWindow.*", "SceneGraphWindow.*", "EditorConsoleWindow.*" },

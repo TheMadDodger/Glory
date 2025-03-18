@@ -196,6 +196,7 @@ namespace Glory
 
 	void RendererModule::DrawLineSphere(const glm::mat4& transform, const glm::vec3& position, float radius, const glm::vec4& color)
 	{
+		DrawLineCircle(transform, position, radius, CircleUp::x, color);
 		DrawLineCircle(transform, position, radius, CircleUp::y, color);
 		DrawLineCircle(transform, position, radius, CircleUp::z, color);
 	}
