@@ -43,6 +43,7 @@
 #include "PipelineEditor.h"
 #include "GSceneEditor.h"
 #include "TextComponentEditor.h"
+#include "LightComponentEditor.h"
 #include "TextureDataEditor.h"
 #include "EntitySceneObjectEditor.h"
 #include "DefaultComponentEditor.h"
@@ -559,6 +560,7 @@ namespace Glory::Editor
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
+		Editor::RegisterEditor<LightComponentEditor>();
 		Editor::RegisterEditor<GSceneEditor>();
 		Editor::RegisterEditor<TextComponentEditor>();
 	}

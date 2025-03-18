@@ -127,7 +127,7 @@ namespace Glory
 		Mesh* m_pLineMesh;
 		MaterialData* m_pLinesMaterialData;
 
-		static const uint32_t MAX_LINE_VERTICES = 1000;
+		static const uint32_t MAX_LINE_VERTICES = 100000;
 		LineVertex* m_pLineVertices;
 		LineVertex* m_pLineVertex;
 
