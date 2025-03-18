@@ -62,7 +62,7 @@ namespace GloryEngine
         internal Resource MakeResource(UInt64 id, string typeString)
         {
             if (_resources.ContainsKey(id)) return _resources[id];
-            Type type = Type.GetType(typeString);
+            Type type = Engine.GetResourceType(typeString);
             if (type == null)
             {
                 Debug.LogError(string.Format("Mono resource could not be created, the type {0} does not exist", typeString));

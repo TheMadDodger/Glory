@@ -49,7 +49,7 @@ namespace Glory
 	{
 		UIComponentsCSAPI::SetEngine(pEngine);
 		UISceneCSAPI::SetEngine(pEngine);
-		AddMonoType("GloryEngine.UI.UIDocument", SerializedType::ST_Asset, ResourceTypes::GetHash<UIDocument>());
+		AddMonoType("GloryEngine.UI.UIDocument", SerializedType::ST_Asset, ResourceTypes::GetHash<UIDocumentData>());
 
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		Utils::ECS::ComponentTypes::SetInstance(pUIRenderer->GetComponentTypes());

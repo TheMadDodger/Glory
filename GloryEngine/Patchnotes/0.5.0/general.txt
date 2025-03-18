@@ -62,3 +62,4 @@ Scripting:
 - Added CS API for UIBox
 - Added CS API for UIInteraction
 - Added world position/rotation/scale properties to Transform CS API
+- Fixed resource type not existing if the resource is not in the main assembly

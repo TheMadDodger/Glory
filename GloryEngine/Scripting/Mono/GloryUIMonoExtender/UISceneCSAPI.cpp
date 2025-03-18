@@ -8,6 +8,7 @@
 #include <Debug.h>
 #include <Engine.h>
 #include <ComponentTypes.h>
+#include <AssetManager.h>
 
 namespace Glory
 {
@@ -46,6 +47,16 @@ namespace Glory
         UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
         if (!pDocument) return 0;
         return pDocument->FindElement(0, nameStr);
+    }
+
+    uint64_t UIScene_Instantiate(uint64_t sceneID, uint64_t documentID, uint64_t parentID)
+    {
+        UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+        if (!pDocument) return 0;
+        Resource* pResource = UIScene_EngineInstance->GetAssetManager().FindResource(documentID);
+        if (!pResource) return 0;
+        UIDocumentData* pDocumentData = static_cast<UIDocumentData*>(pResource);
+        return pDocument->Instantiate(pDocumentData, parentID);
     }
 
 #pragma endregion
@@ -260,6 +271,7 @@ namespace Glory
         BIND("GloryEngine.UI.UIScene::UIScene_NewEmptyObjectWithName", UIScene_NewEmptyObjectWithName);
         BIND("GloryEngine.UI.UIScene::UIScene_ObjectsCount", UIScene_ObjectsCount);
         BIND("GloryEngine.UI.UIScene::UIScene_FindElement", UIScene_FindElement);
+        BIND("GloryEngine.UI.UIScene::UIScene_Instantiate", UIScene_Instantiate);
 
         /* UI Element */
         BIND("GloryEngine.UI.UIElement::UIElement_GetActive", UIElement_GetActive);

@@ -120,6 +120,22 @@ namespace GloryEngine.UI
             return sceneObject;
         }
 
+        /// <summary>
+        /// Instantiate a document into this scene
+        /// </summary>
+        /// <param name="document">Document to instantiate</param>
+        /// <param name="parent">Element to parent the instantiated elements to</param>
+        /// <returns>First UI element created by this operation</returns>
+        public UIElement Instantiate(UIDocument document, UIElement parent)
+        {
+            if (document == null) return null;
+            UInt64 elementID = UIScene_Instantiate(_id, document.ID, parent != null ? parent.ID : 0);
+            if (_objectsCache.ContainsKey(elementID)) return _objectsCache[elementID];
+            UIElement sceneObject = new UIElement(elementID, this);
+            _objectsCache.Add(elementID, sceneObject);
+            return sceneObject;
+        }
+
         internal void OnSceneDestroy()
         {
             if (_destroyed) return;
@@ -159,6 +175,9 @@ namespace GloryEngine.UI
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern UInt64 UIScene_FindElement(UInt64 sceneID, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern UInt64 UIScene_Instantiate(UInt64 sceneID, UInt64 documentID, UInt64 parentID);
 
         #endregion
     }
