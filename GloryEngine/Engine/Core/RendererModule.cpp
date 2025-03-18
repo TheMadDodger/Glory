@@ -92,7 +92,7 @@ namespace Glory
 	{
 	}
 
-	void RendererModule::Submit(PointLight&& light)
+	void RendererModule::Submit(LightData&& light)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
 		const size_t index = m_FrameData.ActiveLights.count();

@@ -1,13 +1,13 @@
 #version 430 core
 layout(local_size_x = 16, local_size_y = 9, local_size_z = 4) in;
 
-struct PointLight
+struct LightData
 {
-    vec4 Position;
-    vec4 Color;
-    uint Enabled;
-    float Intensity;
-    float Range;
+    /* Type is in the w value */
+	vec4 Position;
+	vec4 Direction;
+	vec4 Color;
+	vec4 Data;
 };
 
 struct LightGridElement
@@ -42,7 +42,7 @@ layout(std430, binding = 2) buffer screenToView
 
 layout(std430, binding = 3) buffer lightSSBO
 {
-    PointLight Lights[];
+    LightData Lights[];
 };
 
 layout(std430, binding = 4) buffer lightIndexSSBO
@@ -57,12 +57,16 @@ layout(std430, binding = 5) buffer lightGridSSBO
 };
 
 //Shared variables 
-shared PointLight sharedLights[16 * 9 * 4];
+shared LightData sharedLights[16 * 9 * 4];
 
 uniform mat4 viewMatrix;
 
 bool TestSphereAABB(uint light, uint tile);
 float SQDistPointAABB(vec3 point, uint tile);
+
+const uint Sun = 1;
+const uint Point = 2;
+const uint Spot = 3;
 
 void main()
 {
@@ -90,13 +94,10 @@ void main()
         //Iterating within the current batch of lights
         for (uint light = 0; light < threadCount; ++light)
         {
-            if (sharedLights[light].Enabled == 1)
+            if (sharedLights[light].Position.w == Point && TestSphereAABB(light, tileIndex))
             {
-                if (TestSphereAABB(light, tileIndex))
-                {
-                    visibleLightIndices[visibleLightCount] = batch * threadCount + light;
-                    visibleLightCount += 1;
-                }
+                visibleLightIndices[visibleLightCount] = batch * threadCount + light;
+                visibleLightCount += 1;
             }
         }
     }
@@ -117,8 +118,8 @@ void main()
 
 bool TestSphereAABB(uint light, uint tile)
 {
-    float radius = sharedLights[light].Range;
-    vec3 center = vec3(viewMatrix * sharedLights[light].Position);
+    float radius = sharedLights[light].Data.z;
+    vec3 center = vec3(viewMatrix * vec4(sharedLights[light].Position.xyz, 1.0));
     float squaredDistance = SQDistPointAABB(center, tile);
 
     return squaredDistance <= (radius * radius);

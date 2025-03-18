@@ -51,14 +51,14 @@ namespace Glory
 		virtual void Cleanup() override;
 		virtual void OnPostInitialize() override;
 
-		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
-		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights = std::vector<PointLight>()) override;
+		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
+		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
-		virtual void OnDoCompositing(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;
 
-		virtual void OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
-		virtual void OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights) override;
+		virtual void OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights) override;
+		virtual void OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights) override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 

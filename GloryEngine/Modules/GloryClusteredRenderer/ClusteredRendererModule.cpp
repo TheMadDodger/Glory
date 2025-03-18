@@ -151,7 +151,7 @@ namespace Glory
 		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 		m_pScreenToViewSSBO->Assign(NULL);
 
-		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(PointLight) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
 
 		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
@@ -231,7 +231,7 @@ namespace Glory
 		m_pTextMaterialData = nullptr;
 	}
 
-	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<PointLight>&)
+	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>&)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
@@ -386,7 +386,7 @@ namespace Glory
 		}
 	}
 
-	void ClusteredRendererModule::OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<PointLight>& lights)
+	void ClusteredRendererModule::OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -497,7 +497,7 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
-	void ClusteredRendererModule::OnDoCompositing(CameraRef camera, const FrameData<PointLight>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
+	void ClusteredRendererModule::OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
@@ -512,7 +512,7 @@ namespace Glory
 		pGraphics->SetViewport(0, 0, width, height);
 
 		uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(PointLight));
+		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(LightData));
 
 		glm::uvec2 resolution = camera.GetResolution();
 		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
@@ -576,7 +576,7 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
-	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<PointLight>& lights)
+	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -614,7 +614,7 @@ namespace Glory
 		}
 	}
 
-	void ClusteredRendererModule::OnEndCameraRender(CameraRef camera, const FrameData<PointLight>& lights)
+	void ClusteredRendererModule::OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -654,7 +654,7 @@ namespace Glory
 		//pActiveUniqueClustersSSBO->Unbind();
 
 		const uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(lights.data(), 0, count*sizeof(PointLight));
+		m_pLightsSSBO->Assign(lights.data(), 0, count*sizeof(LightData));
 
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();

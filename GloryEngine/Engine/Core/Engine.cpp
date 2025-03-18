@@ -14,6 +14,7 @@
 #include "SceneManager.h"
 #include "WindowModule.h"
 #include "EngineProfiler.h"
+#include "LightData.h"
 
 #include "MaterialInstanceData.h"
 #include "PipelineData.h"
@@ -589,6 +590,7 @@ namespace Glory
 		Reflect::RegisterEnum<PipelineType>();
 		Reflect::RegisterEnum<BlurType>();
 		Reflect::RegisterEnum<Alignment>();
+		Reflect::RegisterEnum<LightType>();
 
 		/* Shape types */
 		Reflect::RegisterEnum<ShapeType>();

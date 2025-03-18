@@ -16,14 +16,18 @@ namespace Glory
 		Engine* pEngine = pScene->Manager()->GetEngine();
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
-		PointLight pointLight;
-		pointLight.enabled = 1;
-		pointLight.position = transform.MatTransform[3];
-		pointLight.color = pComponent.m_Color;
-		pointLight.intensity = pComponent.m_Intensity;
-		pointLight.range = pComponent.m_Range;
+		LightData light;
+		light.position = transform.MatTransform[3];
+		light.position.w = (float)pComponent.m_Type;
+		light.direction = transform.MatTransform[2];
+		light.color = pComponent.m_Color;
+		light.color.a = 1.0f;
+		light.data.x = pComponent.m_Inner;
+		light.data.y = pComponent.m_Outer;
+		light.data.z = pComponent.m_Range;
+		light.data.w = pComponent.m_Intensity;
 
-		pEngine->GetMainModule<RendererModule>()->Submit(std::move(pointLight));
+		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light));
 	}
 
 	LightSystem::LightSystem()

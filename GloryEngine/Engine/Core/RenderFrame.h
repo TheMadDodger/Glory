@@ -68,7 +68,7 @@ namespace Glory
 		std::vector<RenderData> ObjectsToRenderLate;
 		std::vector<CameraRef> ActiveCameras;
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;
-		FrameData<PointLight> ActiveLights;
+		FrameData<LightData> ActiveLights;
 	};
 
 	enum RenderPassType : size_t
