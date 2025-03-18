@@ -21,6 +21,24 @@ namespace Glory
 		}
 	}
 
+	UUID UIDocument::CopyEntity(UIDocumentData* pOtherDocument, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent)
+	{
+		Utils::ECS::EntityRegistry& registry = pOtherDocument->GetRegistry();
+		const Utils::ECS::EntityID newEntity = registry.CopyEntityToOtherRegistry(entity, parent, &m_Registry);
+		const UUID uuid = UUID();
+		m_Ids.emplace(uuid, newEntity);
+		m_UUIds.emplace(newEntity, uuid);
+		m_Names.emplace(newEntity, pOtherDocument->Name(entity));
+
+		Utils::ECS::EntityView* pEntityView = registry.GetEntityView(entity);
+		for (size_t i = 0; i < pEntityView->ChildCount(); ++i)
+		{
+			const Utils::ECS::EntityID child = pEntityView->Child(i);
+			CopyEntity(pOtherDocument, child, newEntity);
+		}
+		return uuid;
+	}
+
 	UIDocument::UIDocument(UIDocumentData* pDocument):
 		m_OriginalDocumentID(pDocument->GetUUID()), m_SceneID(0), m_ObjectID(0),
 		m_pUITexture(nullptr), m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
@@ -380,5 +398,19 @@ namespace Glory
 	void UIDocument::SetDrawDirty()
 	{
 		m_DrawIsDirty = true;
+	}
+
+	UUID UIDocument::Instantiate(UIDocumentData* pOtherDocument, UUID parentID)
+	{
+		UUID firstElementID = 0;
+		const Utils::ECS::EntityID parent = parentID ? m_Ids.at(parentID) : 0;
+		Utils::ECS::EntityRegistry& registry = pOtherDocument->GetRegistry();
+		for (size_t i = 0; i < registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(0, i);
+			const UUID uuid = CopyEntity(pOtherDocument, child, parent);
+			if (i == 0) firstElementID = uuid;
+		}
+		return firstElementID;
 	}
 }

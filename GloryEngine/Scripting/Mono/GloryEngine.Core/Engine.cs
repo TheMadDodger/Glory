@@ -2,6 +2,7 @@
 using GloryEngine.SceneManagement;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine
@@ -54,6 +55,7 @@ namespace GloryEngine
         private SceneManager _sceneManager;
         private List<EntityBehaviour> _scriptDummyCache;
         private List<Type> _scriptTypes;
+        private Dictionary<string, Type> _resourceTypes;
 
         #endregion
 
@@ -65,18 +67,27 @@ namespace GloryEngine
             _sceneManager = new SceneManager(this);
             _scriptDummyCache = new List<EntityBehaviour>();
             _scriptTypes = new List<Type>();
+            _resourceTypes = new Dictionary<string, Type>();
 
-            Type baseType = typeof(EntityBehaviour);
+            Type baseScriptType = typeof(EntityBehaviour);
+            Type baseResourceType = typeof(Resource);
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (type == baseType || !baseType.IsAssignableFrom(type)) continue;
-                    int index = _scriptTypes.Count;
-                    _scriptTypes.Add(type);
-                    Debug.LogNotice("Script type found " + type.Name + " for type index " + index.ToString());
-                    EntityBehaviour dummy = Activator.CreateInstance(type) as EntityBehaviour;
-                    _scriptDummyCache.Add(dummy);
+                    if (type != baseScriptType && baseScriptType.IsAssignableFrom(type))
+                    {
+                        int index = _scriptTypes.Count;
+                        _scriptTypes.Add(type);
+                        Debug.LogNotice("Script type found " + type.Name + " for type index " + index.ToString());
+                        EntityBehaviour dummy = Activator.CreateInstance(type) as EntityBehaviour;
+                        _scriptDummyCache.Add(dummy);
+                    }
+                    else if (type != baseResourceType && baseResourceType.IsAssignableFrom(type))
+                    {
+                        _resourceTypes.Add(type.FullName, type);
+                        Debug.LogNotice("Resource type found " + type.Name);
+                    }
                 }
             }
         }
@@ -94,6 +105,12 @@ namespace GloryEngine
         internal Resource MakeResource(UInt64 id, string typeString)
         {
             return _assetManager.MakeResource(id, typeString);
+        }
+
+        internal Type GetResourceType(string typeString)
+        {
+            if (!_resourceTypes.ContainsKey(typeString)) return null;
+            return _resourceTypes[typeString];
         }
 
         internal SceneObject MakeSceneObject(UInt64 objectID, UInt64 sceneID)

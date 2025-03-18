@@ -1,11 +1,10 @@
 #pragma once
 #include "UUID.h"
 #include "Resource.h"
-#include "ThreadedVar.h"
-#include "JobManager.h"
 
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
 namespace Glory
 {
@@ -92,6 +91,5 @@ namespace Glory
 	private:
 		friend class Engine;
 		friend class AssetDatabase;
-
 	};
 }
