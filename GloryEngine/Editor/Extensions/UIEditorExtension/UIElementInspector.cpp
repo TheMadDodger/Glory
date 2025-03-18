@@ -57,9 +57,9 @@ namespace Glory::Editor
 			selectedEntity["Active"].Set(active);
 			change = true;
 		}
-		/*change |= NameGUI();
+
+		change |= NameGUI();
 		ImGui::Spacing();
-		change |= ComponentGUI();*/
 
 		ImGui::PushID("Components");
 		ImGui::TextDisabled("Components");
@@ -100,7 +100,7 @@ namespace Glory::Editor
 				Undo::StopRecord();
 			}
 
-			if (ImGui::BeginPopup("ComponentRightClick"))
+			/*if (ImGui::BeginPopup("ComponentRightClick"))
 			{
 				const bool removeAllowed = i != 0;
 				if (ImGui::MenuItem("Remove", "", false, removeAllowed))
@@ -112,12 +112,12 @@ namespace Glory::Editor
 					ImGui::SetTooltip("You cannot remove the Transform of an entity");
 
 				ImGui::EndPopup();
-			}
+			}*/
 			ImGui::PopID();
 			ImGui::Spacing();
 		}
 		ImGui::Separator();
-		const float buttonWidth = ImGui::GetContentRegionAvail().x;
+		/*const float buttonWidth = ImGui::GetContentRegionAvail().x;
 		if (ImGui::Button("Add Component", { buttonWidth, 0.0f }))
 		{
 			
@@ -127,7 +127,7 @@ namespace Glory::Editor
 		{
 			components.Remove(toRemoveComponent);
 			change = true;
-		}
+		}*/
 
 		ImGui::PopID();
 		ImGui::PopID();
@@ -142,5 +142,37 @@ namespace Glory::Editor
 	UIMainWindow* UIElementInspector::GetMainWindow()
 	{
 		return static_cast<UIMainWindow*>(m_pOwner);
+	}
+
+	bool UIElementInspector::NameGUI()
+	{
+		UIMainWindow* pMainWindow = GetMainWindow();
+		UIDocument* pDocument = pMainWindow->CurrentDocument();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		Engine* pEngine = pApp->GetEngine();
+		EditorResourceManager& resources = pApp->GetResourceManager();
+		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
+		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
+		Utils::YAMLFileRef& file = **pDocumentData;
+		const UUID& selected = pMainWindow->SelectedEntity();
+		const std::string uuidString = std::to_string(selected);
+		auto entities = file["Entities"];
+		auto selectedEntity = entities[uuidString];
+		auto name = selectedEntity["Name"];
+
+		ImGui::PushID("Object");
+		ImGui::TextDisabled("UI Element");
+		ImGui::Separator();
+		ImGui::Text("UUID:");
+		const float textWitdh = ImGui::CalcTextSize(uuidString.data()).x;
+		ImGui::SameLine();
+		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
+		ImGui::Text(uuidString.data());
+		Undo::StartRecord("Change Element Name", pDocument->OriginalDocumentID());
+		const bool change = EditorUI::InputText(file, name.Path());
+		Undo::StopRecord();
+		ImGui::PopID();
+		return change;
 	}
 }

@@ -156,7 +156,7 @@ namespace Glory::Editor
 			const std::filesystem::path filePath = file.Path();
 			const UUID documentID = EditorAssetDatabase::FindAssetUUID(filePath.string());
 
-			const size_t entityUUID = (size_t)std::stoull(components[1]);
+			const UUID entityUUID = (UUID)std::stoull(components[1]);
 			const size_t index = (size_t)std::stoull(components[3].substr(2));
 
 			UIDocument* pDocument = FindEditingDocument(documentID);
@@ -173,6 +173,22 @@ namespace Glory::Editor
 			serializers.DeserializeProperty(pType, data, file[componentPath]["Properties"]);
 
 			registry.SetEntityDirty(entity);
+		});
+
+		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Name"),
+		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			std::vector<std::string> components;
+			Reflect::Tokenize(path.string(), components, '\\');
+			if (components.size() != 3) return;
+
+			const std::filesystem::path filePath = file.Path();
+			const UUID documentID = EditorAssetDatabase::FindAssetUUID(filePath.string());
+			const UUID entityUUID = (UUID)std::stoull(components[1]);
+
+			UIDocument* pDocument = FindEditingDocument(documentID);
+			const Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+			const std::string newName = file[path].As<std::string>();
+			pDocument->SetName(entity, newName);
 		});
 
 		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pEngine, &resources]() {

@@ -14,5 +14,6 @@ namespace Glory::Editor
 	private:
 		virtual void OnGUI() override;
 		UIMainWindow* GetMainWindow();
+		bool NameGUI();
 	};
 }
