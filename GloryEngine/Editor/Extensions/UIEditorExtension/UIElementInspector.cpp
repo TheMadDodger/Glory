@@ -90,7 +90,6 @@ namespace Glory::Editor
 				auto structData = component["Properties"];
 
 				const TypeData* pStructTypeData = pType;
-				bool change = false;
 				for (size_t i = 0; i < pStructTypeData->FieldCount(); ++i)
 				{
 					const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
