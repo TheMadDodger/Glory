@@ -70,7 +70,7 @@ namespace Glory
 	{
 		ImageData* pImageData = pTextureData->GetImageData(&m_pEngine->GetAssetManager());
 		if (!pImageData) return nullptr;
-		return new GLTexture({ pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, DataType::DT_UByte, 0, 0, ImageAspect::IA_Color });
+		return new GLTexture({ pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, pImageData->GetDataType(), 0, 0, ImageAspect::IA_Color});
 	}
 
 	Texture* OGLResourceManager::CreateTexture_Internal(TextureCreateInfo&& textureInfo)

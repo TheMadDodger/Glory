@@ -19,6 +19,7 @@ Engine:
 - Phong and PhongTextured now have a shininess property and support specular highlights
 - Added PBR shaders and pipeline
 - Added an extra G buffer to the renderer for extra data
+- Added HDRImageData resource
 
 Editor:
 - Added a startup popup
@@ -48,6 +49,7 @@ Editor:
 - Texture and value properties in materials are now paired together automatically
 - Overhauled the material editors
 - Added default values for material properties
+- Added an HDR image importer using stb_image
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

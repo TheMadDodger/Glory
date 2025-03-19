@@ -8,8 +8,8 @@
 
 namespace Glory
 {
-	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed)
-		: m_Header{ w, h, internalFormat, format, bytesPerPixel, dataSize, compressed }, m_pPixels(std::move(pPixels))
+	ImageData::ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed, DataType dataType)
+		: m_Header{ w, h, internalFormat, format, bytesPerPixel, dataSize, compressed, dataType }, m_pPixels(std::move(pPixels))
 	{
 		APPEND_TYPE(ImageData);
 	}
@@ -53,6 +53,11 @@ namespace Glory
 	size_t ImageData::DataSize() const
 	{
 		return m_Header.m_DataSize;
+	}
+
+	DataType ImageData::GetDataType() const
+	{
+		return m_Header.m_DataType;
 	}
 
 	void ImageData::Serialize(BinaryStream& container) const
