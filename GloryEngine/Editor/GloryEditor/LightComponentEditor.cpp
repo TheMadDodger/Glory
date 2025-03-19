@@ -47,9 +47,8 @@ namespace Glory::Editor
 			break;
 		}
 		case LightType::Point:
-			pRenderer->DrawLineSphere(glm::identity<glm::mat4>(), pos, light.m_Range, light.m_Color);
-			pRenderer->DrawLineSphere(glm::identity<glm::mat4>(), pos, light.m_Inner, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-			pRenderer->DrawLineSphere(glm::identity<glm::mat4>(), pos, light.m_Outer, glm::vec4(0.25f, 0.25f, 0.25f, 1.0f));
+			pRenderer->DrawLineSphere(glm::identity<glm::mat4>(), pos, light.m_Inner, light.m_Color);
+			pRenderer->DrawLineSphere(glm::identity<glm::mat4>(), pos, light.m_Outer, light.m_Color*0.5f);
 			break;
 		case LightType::Spot:
 		{

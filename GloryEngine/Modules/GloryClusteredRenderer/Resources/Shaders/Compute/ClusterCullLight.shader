@@ -123,7 +123,7 @@ void main()
 
 bool TestSphereAABB(uint light, uint tile)
 {
-    float radius = sharedLights[light].Data.z;
+    float radius = sharedLights[light].Data.y;
     vec3 center = vec3(viewMatrix * vec4(sharedLights[light].Position.xyz, 1.0));
     float squaredDistance = SQDistPointAABB(center, tile);
 

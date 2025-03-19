@@ -147,10 +147,10 @@ namespace Glory
 	{
 		LightComponent() :
 			m_Type(LightType::Point), m_Color(1.0f), m_Inner(45.0f),
-			m_Outer(45.0f), m_Range(100.0f), m_Intensity(1.0f) {}
+			m_Outer(60.0f), m_Range(100.0f), m_Intensity(1.0f) {}
 		LightComponent(const glm::vec4& color, float intensity, float range) :
 			m_Type(LightType::Point), m_Color(color), m_Inner(45.0f),
-			m_Outer(45.0f), m_Range(range), m_Intensity(intensity) {}
+			m_Outer(60.0f), m_Range(range), m_Intensity(intensity) {}
 
 		REFLECTABLE(LightComponent,
 			(LightType)	(m_Type),
