@@ -99,6 +99,11 @@ void main()
                 visibleLightIndices[visibleLightCount] = batch * threadCount + light;
                 visibleLightCount += 1;
             }
+            if (sharedLights[light].Position.w == Sun)
+            {
+                visibleLightIndices[visibleLightCount] = batch * threadCount + light;
+                visibleLightCount += 1;
+            }
         }
     }
 

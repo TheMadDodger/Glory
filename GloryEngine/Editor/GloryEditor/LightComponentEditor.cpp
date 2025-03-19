@@ -35,8 +35,8 @@ namespace Glory::Editor
 		{
 			const float radius = 1.0f;
 			const glm::vec3 startPoint{};
-			const glm::vec3 endPoint = startPoint + glm::vec3{ 0.0f, 0.0f, radius*10.0f };
-			const glm::vec3 circlePoint = endPoint - glm::vec3{ 0.0f, 0.0f, radius*2.0f };
+			const glm::vec3 endPoint = startPoint - glm::vec3{ 0.0f, 0.0f, radius*10.0f };
+			const glm::vec3 circlePoint = endPoint + glm::vec3{ 0.0f, 0.0f, radius*2.0f };
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint, glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
 			pRenderer->DrawLineCircle(transform.MatTransform, circlePoint, radius, RendererModule::CircleUp::z, glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, endPoint, circlePoint + glm::vec3(0.0f, 0.0f, 0.0f), glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
@@ -54,7 +54,7 @@ namespace Glory::Editor
 		case LightType::Spot:
 		{
 			const glm::vec3 startPoint{};
-			const glm::vec3 endPoint = startPoint + glm::vec3{ 0.0f, 0.0f, light.m_Range };
+			const glm::vec3 endPoint = startPoint - glm::vec3{ 0.0f, 0.0f, light.m_Range };
 
 			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, light.m_Inner, RendererModule::CircleUp::z, light.m_Color);
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, 0.0f, 0.0f), light.m_Color);

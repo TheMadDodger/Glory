@@ -134,6 +134,53 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
+vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosition, vec3 CameraPos, vec3 V, float roughness, float metallic)
+{
+	vec3 lightPos = light.Position.xyz;
+	float lightType = light.Position.w;
+	vec3 direction = light.Direction.xyz;
+	float radius = light.Data.z;
+	float intensity = light.Data.w;
+	vec3 lightColor = light.Color.xyz;
+
+	vec3 L;
+	float attenuation = 0.0;
+
+	if (lightType == Sun)
+	{
+		L = direction;
+		attenuation = 1.0;
+	}
+	if (lightType == Point)
+	{
+		L = normalize(lightPos - worldPosition);
+		float distance = length(lightPos - worldPosition);
+		attenuation = clamp(1.0 - (distance / radius), 0.0, 1.0);
+	}
+
+	vec3 radiance = lightColor * attenuation * intensity;
+
+	vec3 H = normalize(V + L);
+	vec3 F0 = vec3(0.04);
+	F0 = mix(F0, color, metallic);
+	vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+
+	float NDF = DistributionGGX(normal, H, roughness);
+	float G = GeometrySmith(normal, V, L, roughness);
+
+	vec3 numerator = NDF * G * F;
+	float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0)  + 0.0001;
+	vec3 specular = numerator / denominator;
+
+	vec3 kS = F;
+	vec3 kD = vec3(1.0) - kS;
+
+	kD *= 1.0 - metallic;
+
+	float NdotL = max(dot(normal, L), 0.0);
+	return (kD * color / PI + specular) * radiance * NdotL;
+}
+
 void main()
 {
 	vec3 debug = texture(Debug, Coord).xyz;
@@ -165,49 +212,20 @@ void main()
 
 	vec3 Lo = vec3(0.0);
 
+	/* Find light array */
 	uint offset = LightGrid[clusterID].Offset;
 	uint count = LightGrid[clusterID].Count;
-
 	for (uint i = 0; i < count; i++)
 	{
 		uint indexListIndex = offset + i;
 		uint lightIndex = GlobalLightIndexList[indexListIndex];
-
-		vec3 lightPos = Lights[lightIndex].Position.xyz;
-		float radius = Lights[lightIndex].Data.z;
-		float intensity = Lights[lightIndex].Data.w;
-		vec3 lightColor = Lights[lightIndex].Color.xyz;
-
-		vec3 L = normalize(lightPos - worldPosition);
-		vec3 H = normalize(V + L);
-
-		float distance    = length(lightPos - worldPosition);
-		float attenuation = clamp(1.0 - (distance / radius), 0.0, 1.0);
-		vec3 radiance     = lightColor * attenuation * intensity;
-
-		vec3 F0 = vec3(0.04); 
-		F0      = mix(F0, color, metallic);
-		vec3 F  = FresnelSchlick(max(dot(H, V), 0.0), F0);
-
-		float NDF = DistributionGGX(normal, H, roughness);       
-		float G   = GeometrySmith(normal, V, L, roughness);
-
-		vec3 numerator    = NDF * G * F;
-		float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0)  + 0.0001;
-		vec3 specular     = numerator / denominator;
-
-		vec3 kS = F;
-		vec3 kD = vec3(1.0) - kS;
-
-		kD *= 1.0 - metallic;
-
-		float NdotL = max(dot(normal, L), 0.0);
-		Lo += (kD * color / PI + specular) * radiance * NdotL;
+		Lo += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, CameraPos, V, roughness, metallic);
 	}
 
 	vec3 ambient = vec3(0.03) * color * ao;
 	vec3 fragColor   = ambient + Lo;
 
+	/* Gamma correction */
 	fragColor = fragColor / (fragColor + vec3(1.0));
 	fragColor = pow(fragColor, vec3(1.0/2.2));
 
@@ -215,6 +233,41 @@ void main()
 }
 
 #else
+
+vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosition, vec3 viewDir, float specularIntensity)
+{
+	vec3 lightPos = light.Position.xyz;
+	float lightType = light.Position.w;
+	vec3 direction = light.Direction.xyz;
+	float radius = light.Data.z;
+	float intensity = light.Data.w;
+	vec3 lightColor = light.Color.xyz;
+	float lightColorAlpha = light.Color.a;
+
+	vec3 lightDir;
+	float attenuation = 0.0;
+
+	if (lightType == Sun)
+	{
+		lightDir = direction;
+		attenuation = 1.0;
+	}
+	if (lightType == Point)
+	{
+		vec3 lightVec = lightPos - worldPosition;
+		float distance = length(lightVec);
+		attenuation = clamp(1.0 - (distance / radius), 0.0, 1.0); //pow(clamp(1 - pow((distance / radius), 4.0), 0.0, 1.0), 2.0)/(1.0  + (distance * distance));
+		lightDir = normalize(lightVec);
+	}
+
+	vec3 diffuse = max(dot(normal, lightDir), 0.0) * color * intensity * lightColor * lightColorAlpha;
+
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = specularIntensity * spec * lightColor;
+
+	return diffuse * attenuation + specular * attenuation;
+}
 
 void main()
 {
@@ -259,24 +312,7 @@ void main()
 		uint indexListIndex = offset + i;
 		uint lightIndex = GlobalLightIndexList[indexListIndex];
 
-		vec3 lightPos = Lights[lightIndex].Position.xyz;
-		float radius = Lights[lightIndex].Data.z;
-		float intensity = Lights[lightIndex].Data.w;
-		vec3 lightColor = Lights[lightIndex].Color.xyz;
-		float lightColorAlpha = Lights[lightIndex].Color.a;
-
-		vec3 lightVec = lightPos - worldPosition;
-		float distance = length(lightVec);
-		float attenuation = clamp(1.0 - (distance / radius), 0.0, 1.0); //pow(clamp(1 - pow((distance / radius), 4.0), 0.0, 1.0), 2.0)/(1.0  + (distance * distance));
-
-        vec3 lightDir = normalize(lightVec);
-		vec3 diffuse = max(dot(normal, lightDir), 0.0) * color * intensity * lightColor * lightColorAlpha;
-
-        vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-        vec3 specular = specularIntensity * spec * lightColor;
-
-		diffuseColor += diffuse * attenuation + specular * attenuation;
+		diffuseColor += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, viewDir, specularIntensity);
 	}
 
 	out_Color = vec4(diffuseColor*ssao, 1.0);
