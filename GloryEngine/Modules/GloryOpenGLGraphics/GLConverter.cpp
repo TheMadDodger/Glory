@@ -113,7 +113,7 @@ namespace Glory
         { PixelFormat::PF_R16G16B16Sscaled,          0 },
         { PixelFormat::PF_R16G16B16Uint,             0 },
         { PixelFormat::PF_R16G16B16Sint,             0 },
-        { PixelFormat::PF_R16G16B16Sfloat,           0 },
+        { PixelFormat::PF_R16G16B16Sfloat,           GL_RGB16F },
         { PixelFormat::PF_R16G16B16A16Unorm,         0 },
         { PixelFormat::PF_R16G16B16A16Snorm ,        0 },
         { PixelFormat::PF_R16G16B16A16Uscaled,       0 },

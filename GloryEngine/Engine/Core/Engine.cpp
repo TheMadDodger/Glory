@@ -21,6 +21,7 @@
 #include "PrefabData.h"
 #include "AudioData.h"
 #include "FontData.h"
+#include "HDRImageData.h"
 
 #include "Debug.h"
 #include "Console.h"
@@ -568,6 +569,7 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<MeshData>("");
 		m_ResourceTypes->RegisterResource<ModelData>("");
 		m_ResourceTypes->RegisterResource<ImageData>("");
+		m_ResourceTypes->RegisterResource<HDRImageData>("");
 		m_ResourceTypes->RegisterResource<AudioData>("");
 		m_ResourceTypes->RegisterResource<FontData>("");
 

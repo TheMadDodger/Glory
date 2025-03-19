@@ -17,10 +17,11 @@ namespace Glory
             uint8_t m_BytesPerPixel;
             size_t m_DataSize;
             bool m_Compressed;
+            DataType m_DataType;
         };
 
     public:
-        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed=false);
+        ImageData(uint32_t w, uint32_t h, PixelFormat internalFormat, PixelFormat format, uint8_t bytesPerPixel, char*&& pPixels, size_t dataSize, bool compressed=false, DataType dataType=DataType::DT_UByte);
         ImageData();
         virtual ~ImageData();
 
@@ -32,6 +33,7 @@ namespace Glory
         uint32_t GetByteSize() const;
         virtual const void* GetPixels() const;
         virtual size_t DataSize() const;
+        virtual DataType GetDataType() const;
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;

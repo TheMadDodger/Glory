@@ -101,6 +101,7 @@ project "Glorious"
 		"FreeTypeFontImporter",
 		"UIEditorExtension",
 		"SDLImageImporter",
+		"STBImageImporter",
 		"ASSIMPImporter",
 		"GloryJoltMonoExtender",
 		"GloryUIMonoExtender",
