@@ -56,3 +56,6 @@
 [submodule "GloryEngine/submodules/freetype"]
 	path = GloryEngine/submodules/freetype
 	url = https://github.com/freetype/freetype
+[submodule "GloryEngine/submodules/HdriToCubemap"]
+	path = GloryEngine/submodules/HdriToCubemap
+	url = https://github.com/TheMadDodger/HdriToCubemap
