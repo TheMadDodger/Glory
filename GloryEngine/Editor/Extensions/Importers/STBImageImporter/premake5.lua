@@ -38,8 +38,9 @@ project "STBImageImporter"
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
+		"%{IncludeDir.HdriToCubemap}",
 
-		"%{stb_image}",
+		"%{stb_image}/..",
 		"%{rapidjson}",
 	}
 
