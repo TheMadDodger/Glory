@@ -70,6 +70,9 @@ namespace Glory::Editor
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(-outerRadius, 0.0f, 0.0f), light.m_Color*0.5f);
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, outerRadius, 0.0f), light.m_Color*0.5f);
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, -outerRadius, 0.0f), light.m_Color*0.5f);
+
+			pRenderer->DrawLineSphere(transform.MatTransform, endPoint, innerRadius, light.m_Color);
+			pRenderer->DrawLineSphere(transform.MatTransform, endPoint, outerRadius, light.m_Color * 0.5f);
 			break;
 		}
 		default:

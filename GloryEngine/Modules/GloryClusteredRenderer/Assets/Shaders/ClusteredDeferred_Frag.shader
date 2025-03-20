@@ -166,7 +166,7 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 		vec3 lightVec = lightPos - worldPosition;
 		float projected = dot(lightVec, direction);
 		if (projected <= 0.0) return vec3(0.0);
-		if (projected > range) return vec3(0.0);
+		if (projected > range) projected = range;
 		vec3 pointInCone = lightPos - projected*direction;
 		vec3 centerToPos = worldPosition - pointInCone;
 		float distance = length(centerToPos);
@@ -299,7 +299,7 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 		vec3 lightVec = lightPos - worldPosition;
 		float projected = dot(lightVec, direction);
 		if (projected <= 0.0) return vec3(0.0);
-		if (projected > range) return vec3(0.0);
+		if (projected > range) projected = range;
 		vec3 pointInCone = lightPos - projected*direction;
 		vec3 centerToPos = worldPosition - pointInCone;
 		float distance = length(centerToPos);
