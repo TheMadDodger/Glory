@@ -54,20 +54,22 @@ namespace Glory::Editor
 		{
 			const glm::vec3 startPoint{};
 			const glm::vec3 endPoint = startPoint - glm::vec3{ 0.0f, 0.0f, light.m_Range };
+			const float innerRadius = light.m_Range*std::tan(glm::radians(light.m_Inner/2.0f));
+			const float outerRadius = light.m_Range*std::tan(glm::radians(light.m_Outer/2.0f));
 
-			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, light.m_Inner, RendererModule::CircleUp::z, light.m_Color);
+			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, innerRadius, RendererModule::CircleUp::z, light.m_Color);
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, 0.0f, 0.0f), light.m_Color);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(light.m_Inner, 0.0f, 0.0f), light.m_Color);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(-light.m_Inner, 0.0f, 0.0f), light.m_Color);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, light.m_Inner, 0.0f), light.m_Color);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, -light.m_Inner, 0.0f), light.m_Color);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(innerRadius, 0.0f, 0.0f), light.m_Color);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(-innerRadius, 0.0f, 0.0f), light.m_Color);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, innerRadius, 0.0f), light.m_Color);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, -innerRadius, 0.0f), light.m_Color);
 
-			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, light.m_Outer, RendererModule::CircleUp::z, light.m_Color*0.5f);
+			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, outerRadius, RendererModule::CircleUp::z, light.m_Color*0.5f);
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, 0.0f, 0.0f), light.m_Color*0.5f);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(light.m_Outer, 0.0f, 0.0f), light.m_Color*0.5f);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(-light.m_Outer, 0.0f, 0.0f), light.m_Color*0.5f);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, light.m_Outer, 0.0f), light.m_Color*0.5f);
-			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, -light.m_Outer, 0.0f), light.m_Color*0.5f);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(outerRadius, 0.0f, 0.0f), light.m_Color*0.5f);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(-outerRadius, 0.0f, 0.0f), light.m_Color*0.5f);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, outerRadius, 0.0f), light.m_Color*0.5f);
+			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, -outerRadius, 0.0f), light.m_Color*0.5f);
 			break;
 		}
 		default:

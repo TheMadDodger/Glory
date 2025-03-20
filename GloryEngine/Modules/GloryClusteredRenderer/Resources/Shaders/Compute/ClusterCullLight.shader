@@ -62,11 +62,14 @@ shared LightData sharedLights[16 * 9 * 4];
 uniform mat4 viewMatrix;
 
 bool TestSphereAABB(uint light, uint tile);
+bool TestConeAABB(uint light, uint tile);
 float SQDistPointAABB(vec3 point, uint tile);
 
 const uint Sun = 1;
 const uint Point = 2;
 const uint Spot = 3;
+
+const float PI = 3.14159265359;
 
 void main()
 {
@@ -104,6 +107,11 @@ void main()
                 visibleLightIndices[visibleLightCount] = batch * threadCount + light;
                 visibleLightCount += 1;
             }
+            if (sharedLights[light].Position.w == Spot && TestConeAABB(light, tileIndex))
+            {
+                visibleLightIndices[visibleLightCount] = batch * threadCount + light;
+                visibleLightCount += 1;
+            }
         }
     }
 
@@ -127,6 +135,35 @@ bool TestSphereAABB(uint light, uint tile)
     vec3 center = vec3(viewMatrix * vec4(sharedLights[light].Position.xyz, 1.0));
     float squaredDistance = SQDistPointAABB(center, tile);
 
+    return squaredDistance <= (radius * radius);
+}
+
+vec4 ConeBoundingSphere(vec3 origin, vec3 forward, float size, float angle)
+{
+    vec4 boundingSphere;
+    if (angle > PI/4.0)
+    {
+        boundingSphere.xyz = origin + cos(angle) * size * forward;
+        boundingSphere.w = sin(angle) * size;
+    }
+    else
+    {
+        boundingSphere.xyz = origin + size / (2.0 * cos(angle)) * forward;
+        boundingSphere.w = size / (2.0 * cos(angle));
+    }
+    return boundingSphere;
+}
+
+bool TestConeAABB(uint light, uint tile)
+{
+    float outerAngle = sharedLights[light].Data.y;
+    float range = sharedLights[light].Data.z;
+    vec3 start = sharedLights[light].Position.xyz;
+    vec3 direction = sharedLights[light].Direction.xyz;
+    vec4 boundingSphere = ConeBoundingSphere(start, -direction, range, outerAngle*PI/180.0);
+    vec3 center = vec3(viewMatrix * vec4(boundingSphere.xyz, 1.0));
+    float squaredDistance = SQDistPointAABB(center, tile);
+    float radius = boundingSphere.w;
     return squaredDistance <= (radius * radius);
 }
 

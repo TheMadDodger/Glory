@@ -141,7 +141,7 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 	vec3 direction = light.Direction.xyz;
 	float innerRadius = light.Data.x;
 	float outerRadius = light.Data.y;
-	float radius = light.Data.z;
+	float range = light.Data.z;
 	float intensity = light.Data.w;
 	vec3 lightColor = light.Color.xyz;
 
@@ -160,6 +160,26 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 		float falloffRadius = max(outerRadius - innerRadius, 0.001);
 		float distanceFalloff = clamp(distance - innerRadius, 0.0, distance);
 		attenuation = clamp(1.0 - (distanceFalloff / falloffRadius), 0.0, 1.0);
+	}
+	if (lightType == Spot)
+	{
+		vec3 lightVec = lightPos - worldPosition;
+		float projected = dot(lightVec, direction);
+		if (projected <= 0.0) return vec3(0.0);
+		if (projected > range) return vec3(0.0);
+		vec3 pointInCone = lightPos - projected*direction;
+		vec3 centerToPos = worldPosition - pointInCone;
+		float distance = length(centerToPos);
+
+		float innerRadians = innerRadius*PI/180.0;
+		float outerRadians = outerRadius*PI/180.0;
+		float inner = projected*tan(innerRadians/2.0);
+		float outer = projected*tan(outerRadians/2.0);
+		float falloffRadius = max(outer - inner, 0.001);
+		float distanceFalloff1 = clamp(distance - inner, 0.0, distance);
+
+		attenuation = clamp(1.0 - (distanceFalloff1 / falloffRadius), 0.0, 1.0);
+		L = normalize(lightVec);
 	}
 
 	vec3 radiance = lightColor * attenuation * intensity;
@@ -249,10 +269,10 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 {
 	vec3 lightPos = light.Position.xyz;
 	float lightType = light.Position.w;
-	vec3 direction = light.Direction.xyz;
+	vec3 direction = normalize(light.Direction.xyz);
 	float innerRadius = light.Data.x;
 	float outerRadius = light.Data.y;
-	float radius = light.Data.z;
+	float range = light.Data.z;
 	float intensity = light.Data.w;
 	vec3 lightColor = light.Color.xyz;
 	float lightColorAlpha = light.Color.a;
@@ -272,6 +292,26 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 		float falloffRadius = max(outerRadius - innerRadius, 0.001);
 		float distanceFalloff = clamp(distance - innerRadius, 0.0, distance);
 		attenuation = clamp(1.0 - (distanceFalloff / falloffRadius), 0.0, 1.0); //pow(clamp(1 - pow((distance / radius), 4.0), 0.0, 1.0), 2.0)/(1.0  + (distance * distance));
+		lightDir = normalize(lightVec);
+	}
+	if (lightType == Spot)
+	{
+		vec3 lightVec = lightPos - worldPosition;
+		float projected = dot(lightVec, direction);
+		if (projected <= 0.0) return vec3(0.0);
+		if (projected > range) return vec3(0.0);
+		vec3 pointInCone = lightPos - projected*direction;
+		vec3 centerToPos = worldPosition - pointInCone;
+		float distance = length(centerToPos);
+
+		float innerRadians = innerRadius*PI/180.0;
+		float outerRadians = outerRadius*PI/180.0;
+		float inner = projected*tan(innerRadians/2.0);
+		float outer = projected*tan(outerRadians/2.0);
+		float falloffRadius = max(outer - inner, 0.001);
+		float distanceFalloff1 = clamp(distance - inner, 0.0, distance);
+
+		attenuation = clamp(1.0 - (distanceFalloff1 / falloffRadius), 0.0, 1.0);
 		lightDir = normalize(lightVec);
 	}
 
