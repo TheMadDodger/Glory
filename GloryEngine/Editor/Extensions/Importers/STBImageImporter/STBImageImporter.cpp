@@ -102,11 +102,6 @@ namespace Glory::Editor
 		const uint32_t numChanels = uint32_t(hdriToCube_hdr.getNumChannels());
 		if (numChanels == 0) return importedResource;
 
-		std::filesystem::path outPath = "./cubemaps/";
-		outPath.append(path.filename().replace_extension().string());
-		std::filesystem::create_directories(outPath);
-		hdriToCube_hdr.writeCubemap(outPath.string());
-
 		ImageData* pFront = GenerateImageData(path, "Front", cubemapResolution, numChanels, hdriToCube_hdr.getFront());
 		ImageData* pBack = GenerateImageData(path, "Back", cubemapResolution, numChanels, hdriToCube_hdr.getBack());
 		ImageData* pUp = GenerateImageData(path, "Up", cubemapResolution, numChanels, hdriToCube_hdr.getUp());
