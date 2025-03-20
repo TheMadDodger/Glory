@@ -15,6 +15,7 @@ namespace Glory
 	class Buffer;
 	class Mesh;
 	class PipelineData;
+	class CubemapData;
 	struct RenderPass;
 
 	struct PickResult
@@ -90,6 +91,7 @@ namespace Glory
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
+		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) = 0;
 		virtual void OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) = 0;
 
@@ -113,6 +115,7 @@ namespace Glory
 		void RenderLines(CameraRef camera);
 
 		void MainObjectPass(CameraRef camera, const RenderFrame& frame);
+		void SkyboxPass(CameraRef camera, const RenderFrame& frame);
 		void MainTextPass(CameraRef camera, const RenderFrame& frame);
 		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
 		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);

@@ -5,6 +5,7 @@
 #include "EngineProfiler.h"
 #include "Pipeline.h"
 #include "PipelineData.h"
+#include "CubemapData.h"
 
 #include <algorithm>
 
@@ -226,6 +227,30 @@ namespace Glory
 		pTexture->Create(pixels);
 
 		m_IDResources[id] = pTexture;
+		m_pEngine->Profiler().EndSample();
+		return pTexture;
+	}
+
+	Texture* GPUResourceManager::CreateCubemapTexture(CubemapData* pCubemap)
+	{
+		Texture* pTexture = GetResource<Texture>(pCubemap);
+		if (pTexture)
+		{
+			if (pTexture->IsDirty())
+			{
+				pTexture->Create(pCubemap);
+				pTexture->SetDirty(false);
+			}
+			return pTexture;
+		}
+
+		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateTexture");
+		pTexture = CreateTexture_Internal(pCubemap);
+		if (!pTexture) return nullptr;
+		pTexture->m_pOwner = this;
+		pTexture->m_UUID = pCubemap->GetGPUUUID();
+		pTexture->Create(pCubemap);
+		m_IDResources[pCubemap->GetGPUUUID()] = pTexture;
 		m_pEngine->Profiler().EndSample();
 		return pTexture;
 	}

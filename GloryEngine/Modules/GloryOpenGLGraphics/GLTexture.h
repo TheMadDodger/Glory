@@ -5,6 +5,8 @@
 
 namespace Glory
 {
+	class CubemapData;
+
 	class GLTexture : public Texture
 	{
 	public:
@@ -16,6 +18,7 @@ namespace Glory
 
 	private:
 		GLORY_API virtual void Create(TextureData* pTextureData) override;
+		GLORY_API virtual void Create(CubemapData* pCubemapData) override;
 		GLORY_API virtual void Create(const void* pixels=nullptr) override;
 		GLORY_API virtual void CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth) override;
 

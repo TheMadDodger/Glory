@@ -11,6 +11,9 @@
 #include "Engine.h"
 #include "InternalMaterial.h"
 #include "InternalPipeline.h"
+#include "GScene.h"
+#include "AssetManager.h"
+#include "CubemapData.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -290,6 +293,10 @@ namespace Glory
 		m_pLinesMaterialData = new MaterialData();
 		m_pLinesMaterialData->SetPipeline(linesPipeline);
 
+		m_RenderPasses[RP_Objectpass].push_back(RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			SkyboxPass(camera, frame);
+		} });
+
 		m_RenderPasses[RP_Objectpass].push_back(RenderPass{ "Main Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			MainObjectPass(camera, frame);
 		} });
@@ -512,6 +519,21 @@ namespace Glory
 			OnRender(camera, m_FrameData.ObjectsToRender[j]);
 			m_pEngine->Profiler().EndSample();
 		}
+	}
+
+	void RendererModule::SkyboxPass(CameraRef camera, const RenderFrame&)
+	{
+		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
+		if (!pActiveScene) return;
+		const UUID environmentMapID = pActiveScene->Settings().m_LightingSettings.m_EnvironmentMap;
+		if (!environmentMapID) return;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(environmentMapID);
+		if (!pResource) return;
+		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		pGraphics->EnableDepthWrite(false);
+		OnRenderSkybox(camera, pCubemap);
+		pGraphics->EnableDepthWrite(true);
 	}
 
 	void RendererModule::MainTextPass(CameraRef camera, const RenderFrame& frame)

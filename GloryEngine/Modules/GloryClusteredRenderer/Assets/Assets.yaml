@@ -66,3 +66,9 @@
   ID: 8
   Children:
   - "Suzanne Material 0"
+- Path: "Shaders\\Skybox_Frag.shader"
+  ID: 31
+- Path: "Shaders\\Skybox_Vert.shader"
+  ID: 32
+- Path: "Pipelines\\Skybox.gpln"
+  ID: 33

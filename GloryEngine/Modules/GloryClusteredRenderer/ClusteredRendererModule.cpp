@@ -79,6 +79,7 @@ namespace Glory
 		references.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
 		references.push_back(settings.Value<uint64_t>("Text Pipeline"));
 		references.push_back(settings.Value<uint64_t>("Display Copy Pipeline"));
+		references.push_back(settings.Value<uint64_t>("Skybox Pipeline"));
 		const size_t end = references.size();
 
 		for (size_t i = start; i < end; ++i)
@@ -132,6 +133,7 @@ namespace Glory
 		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
 		const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
 		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
+		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
 
 		m_pDeferredCompositeMaterial = new MaterialData();
 		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
@@ -144,6 +146,8 @@ namespace Glory
 		m_pSSAOBlurMaterial->SetPipeline(SSAOBlurPipeline);
 		m_pTextMaterialData = new MaterialData();
 		m_pTextMaterialData->SetPipeline(textPipeline);
+		m_pSkyboxMaterialData = new MaterialData();
+		m_pSkyboxMaterialData->SetPipeline(skyboxPipeline);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -229,6 +233,9 @@ namespace Glory
 
 		delete m_pTextMaterialData;
 		m_pTextMaterialData = nullptr;
+		
+		delete m_pSkyboxMaterialData;
+		m_pSkyboxMaterialData = nullptr;
 	}
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>&)
@@ -576,6 +583,32 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
+	void ClusteredRendererModule::OnRenderSkybox(CameraRef camera, CubemapData* pCubemap)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		Texture* pCubemapTexture = pGraphics->GetResourceManager()->CreateCubemapTexture(pCubemap);
+		if (!pCubemapTexture) return;
+		Material* pMaterial = pGraphics->UseMaterial(m_pSkyboxMaterialData);
+		if (!pMaterial) return;
+
+		ObjectData object;
+		object.Model = glm::identity<glm::mat4>();
+		object.View = glm::mat4(glm::mat3(camera.GetView()));
+		object.Projection = camera.GetProjection();
+		object.SceneID = 0;
+		object.ObjectID = 0;
+		pMaterial->SetObjectData(object);
+
+		/* Set skybox texture */
+		pMaterial->SetSubemapTexture("skybox", pCubemapTexture);
+
+		/* Draw the skybox */
+		pGraphics->DrawUnitCube();
+
+		/* Reset render textures and materials */
+		pGraphics->UseMaterial(nullptr);
+	}
+
 	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -695,6 +728,7 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("SSAO Blur Pipeline", 22);
 		settings.RegisterAssetReference<PipelineData>("Text Pipeline", 23);
 		settings.RegisterAssetReference<PipelineData>("Display Copy Pipeline", 30);
+		settings.RegisterAssetReference<PipelineData>("Skybox Pipeline", 33);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)

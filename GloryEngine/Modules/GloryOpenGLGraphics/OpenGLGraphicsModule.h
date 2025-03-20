@@ -21,6 +21,7 @@ namespace Glory
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
 		virtual void OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount) override;
 		virtual void DrawScreenQuad() override;
+		virtual void DrawUnitCube() override;
 		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;
 		virtual void EnableDepthTest(bool enable) override;
 		virtual void EnableDepthWrite(bool enable) override;
@@ -44,5 +45,7 @@ namespace Glory
 	private:
 		GLuint m_ScreenQuadVertexArrayID;
 		GLuint m_ScreenQuadVertexbufferID;
+		GLuint m_UnitCubeVertexArrayID;
+		GLuint m_UnitCubeVertexbufferID;
 	};
 }

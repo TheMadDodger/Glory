@@ -25,4 +25,5 @@ void main()
 	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
 	outData.g = Properties.Shininess;
+	outData.a = 1.0;
 }

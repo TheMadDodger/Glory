@@ -27,6 +27,7 @@ namespace Glory
 
 	struct SceneSettings
 	{
+		LightingSettings m_LightingSettings;
 		SSAOSettings m_SSAOSettings;
 		bool m_DepthWrite{ true };
 		bool m_RenderLate{ false };
