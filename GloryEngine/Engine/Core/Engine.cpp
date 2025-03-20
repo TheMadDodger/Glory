@@ -22,6 +22,7 @@
 #include "AudioData.h"
 #include "FontData.h"
 #include "HDRImageData.h"
+#include "CubemapData.h"
 
 #include "Debug.h"
 #include "Console.h"
@@ -572,6 +573,7 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<HDRImageData>("");
 		m_ResourceTypes->RegisterResource<AudioData>("");
 		m_ResourceTypes->RegisterResource<FontData>("");
+		m_ResourceTypes->RegisterResource<CubemapData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");

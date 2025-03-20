@@ -5,6 +5,7 @@
 
 #include <Debug.h>
 #include <TextureData.h>
+#include <CubemapData.h>
 
 #include <HdriToCubemap.hpp>
 #include <sstream>
@@ -125,6 +126,9 @@ namespace Glory::Editor
 		importedResource.AddChild(pDown, "Down").AddChild(pDownTexture, "Default");
 		importedResource.AddChild(pLeft, "Left").AddChild(pLeftTexture, "Default");
 		importedResource.AddChild(pRight, "Right").AddChild(pRightTexture, "Default");
+
+		CubemapData* pCubemap = new CubemapData(pRight, pLeft, pUp, pDown, pFront, pBack);
+		importedResource.AddChild(pCubemap, "Cubemap");
 
 		return importedResource;
 	}
