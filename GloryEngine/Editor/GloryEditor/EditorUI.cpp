@@ -960,6 +960,13 @@ namespace Glory::Editor
 		return headerOpen;
 	}
 
+	bool EditorUI::HeaderLight(std::string_view label)
+	{
+		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
+		const bool headerOpen = ImGui::TreeNodeEx("##header", node_flags, label.data());
+		return headerOpen;
+	}
+
 	bool EditorUI::HeaderWithCheckbox(std::string_view label, bool& open, Utils::YAMLFileRef& file, const std::filesystem::path& path)
 	{
 		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;

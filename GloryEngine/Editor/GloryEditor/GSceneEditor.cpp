@@ -3,8 +3,11 @@
 #include "EditorSceneManager.h"
 #include "EditorUI.h"
 #include "AssetCompiler.h"
+#include "AssetPicker.h"
+#include "Undo.h"
 
 #include <Debug.h>
+#include <CubemapData.h>
 
 namespace Glory::Editor
 {
@@ -27,6 +30,19 @@ namespace Glory::Editor
 
         if (EditorUI::Header("Rendering"))
         {
+            if (EditorUI::HeaderLight("Lighting"))
+            {
+                auto lighting = rendering["Lighting"];
+                auto environmentMap = lighting["Environment"];
+                const UUID oldValue = environmentMap.As<uint64_t>(0);
+                UUID newValue = oldValue;
+                if (AssetPicker::ResourceDropdown("Environment Map", ResourceTypes::GetHash<CubemapData>(), &newValue))
+                {
+                    Undo::ApplyYAMLEdit(yamlFile, environmentMap.Path(), uint64_t(oldValue), uint64_t(newValue));
+                    change = true;
+                }
+            }
+
             auto ssao = rendering["SSAO"];
             if (!ssao.Exists() || !ssao.IsMap())
                 ssao.SetMap();

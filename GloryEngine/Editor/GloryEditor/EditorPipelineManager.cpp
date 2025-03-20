@@ -581,7 +581,28 @@ namespace Glory::Editor
 		for (size_t i = 0; i < resources.sampled_images.size(); ++i)
 		{
 			spirv_cross::Resource sampler = resources.sampled_images[i];
+			const spirv_cross::SPIRType& type = compiler.get_type(sampler.type_id);
+			ImageType imageType = ImageType::IT_UNDEFINED;
+			const bool isArray = type.image.arrayed;
+			switch (type.image.dim)
+			{
+				case spv::Dim::Dim1D:
+					imageType = isArray ? ImageType::IT_1DArray : ImageType::IT_1D;
+					break;
+				case spv::Dim::Dim2D:
+					imageType = isArray ? ImageType::IT_2DArray : ImageType::IT_2D;
+					break;
+				case spv::Dim::Dim3D:
+					imageType = ImageType::IT_3D;
+					break;
+				case spv::Dim::DimCube:
+					imageType = isArray ? ImageType::IT_CubeArray : ImageType::IT_Cube;
+					break;
+			default:
+				continue;
+			}
 			pEditorShader->m_SamplerNames.push_back(sampler.name);
+			pEditorShader->m_SamplerTypes.push_back(imageType);
 		}
 
 		for (size_t i = 0; i < resources.storage_buffers.size(); ++i)

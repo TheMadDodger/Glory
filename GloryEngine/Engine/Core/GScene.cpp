@@ -485,7 +485,7 @@ namespace Glory
 			container.Write(itor->first).Write(itor->second).Write(m_Names.at(itor->second));
 		}
 
-		/* Serialize SSAO settings */
+		/* Serialize Scene settings */
 		container.Write(m_Settings);
 	}
 
@@ -554,7 +554,7 @@ namespace Glory
 			m_Names.emplace(entity, name);
 		}
 
-		/* Deserialize SSAO settings */
+		/* Deserialize Scene settings */
 		container.Read(m_Settings);
 	}
 }

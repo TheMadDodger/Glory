@@ -355,6 +355,7 @@ namespace Glory
 		IT_1DArray,
 		IT_2DArray,
 		IT_CubeArray,
+        IT_Count
 	};
 
 	enum ImageAspect : int
@@ -554,6 +555,9 @@ namespace Glory
         /** @brief For any other pipelines */
         PT_Other = 15,
 
+        /** @brief For skybox rendering */
+        PT_Skybox = 16,
+
         /** @brief Number of pipeline types */
         PT_Count,
     };
@@ -574,6 +578,7 @@ namespace Glory
         "Text",
         "Screen",
         "Other",
+        "Skybox",
     };
 
     const size_t Enum<PipelineType>::m_NumValues = PT_Count;
@@ -752,6 +757,11 @@ namespace Glory
 
     const size_t Enum<TextureType>::m_NumValues = TT_Count;
     bool Enum<TextureType>::Valid() { return true; }
+
+    struct LightingSettings
+    {
+        uint64_t m_EnvironmentMap;
+    };
 
     struct SSAOSettings
     {

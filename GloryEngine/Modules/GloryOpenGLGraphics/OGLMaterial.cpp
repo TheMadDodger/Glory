@@ -106,6 +106,29 @@ namespace Glory
 		++m_TextureCounter;
 	}
 
+	void OGLMaterial::SetSubemapTexture(const std::string& name, Texture* pTexture)
+	{
+		if (!Pipeline()) return;
+
+		GLuint texLocation = glGetUniformLocation(Pipeline()->ProgramID(), name.c_str());
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glUniform1i(texLocation, m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		GLTexture* pGLTexture = (GLTexture*)pTexture;
+		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindTexture(GL_TEXTURE_CUBE_MAP, pGLTexture ? pGLTexture->GetID() : 0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glActiveTexture(GL_TEXTURE0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		if (pTexture)
+			m_TextureSetBits |= 1 << m_TextureCounter;
+		++m_TextureCounter;
+	}
+
 	void OGLMaterial::ResetTextureCounter()
 	{
 		m_TextureCounter = 0;

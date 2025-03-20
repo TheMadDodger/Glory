@@ -197,12 +197,19 @@ void main()
 	vec3 CameraPos = ViewInverse[3].xyz;
 
 	vec3 color = texture(Color, Coord).xyz;
-	vec3 metallicRoughnessAO = texture(Data, Coord).xyz;
+	vec4 metallicRoughnessAO = texture(Data, Coord);
 	float ssao = AOEnabled == 1 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
 	ssao = min(ssao, 1.0);
 	float ao = AOEnabled == 1 ? ssao : metallicRoughnessAO.r;
 	float roughness = metallicRoughnessAO.g;
 	float metallic = metallicRoughnessAO.b;
+	float shadingEnabled = metallicRoughnessAO.a;
+	if (shadingEnabled == 0.0)
+	{
+		out_Color = vec4(color, 1.0);
+		return;
+	}
+
 	vec3 normal = normalize(texture(Normal, Coord).xyz*2.0 - 1.0);
 
 	float depth = texture(Depth, Coord).r;
@@ -289,8 +296,14 @@ void main()
 	}
 
 	vec3 color = texture(Color, Coord).xyz;
-	vec3 metallicRoughnessAO = texture(Data, Coord).xyz;
+	vec4 metallicRoughnessAO = texture(Data, Coord);
 	float specularIntensity = metallicRoughnessAO.g;
+	float shadingEnabled = metallicRoughnessAO.a;
+	if (shadingEnabled == 0.0)
+	{
+		out_Color = vec4(color, 1.0);
+		return;
+	}
 	vec3 normal = texture(Normal, Coord).xyz*2.0 - 1.0;
 	float ssao = AOEnabled == 1 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
 	ssao = min(ssao, 1.0);

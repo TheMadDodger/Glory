@@ -71,7 +71,6 @@ namespace Glory::Editor
 	ImportedResource STBHDRImageImporter::LoadResource(const std::filesystem::path& path, void* userData) const
 	{
 		/* Load HDRI */
-		stbi_set_flip_vertically_on_load(true);
 		int width, height, nrComponents;
 		float* imageData = stbi_loadf(path.string().data(), &width, &height, &nrComponents, 0);
 
@@ -97,14 +96,16 @@ namespace Glory::Editor
 
 		/* Convert to cubemap */
 		const uint32_t cubemapResolution = 1024;
-		bool linearFilter = true;
+		bool linearFilter = false;
 
 		HdriToCubemap<float> hdriToCube_hdr(path.string(), int(cubemapResolution), linearFilter);
 		const uint32_t numChanels = uint32_t(hdriToCube_hdr.getNumChannels());
 		if (numChanels == 0) return importedResource;
 
-		const size_t cubemapFaceSize = cubemapResolution*cubemapResolution*numChanels*sizeof(float);
-		float* front = hdriToCube_hdr.getFront();
+		std::filesystem::path outPath = "./cubemaps/";
+		outPath.append(path.filename().replace_extension().string());
+		std::filesystem::create_directories(outPath);
+		hdriToCube_hdr.writeCubemap(outPath.string());
 
 		ImageData* pFront = GenerateImageData(path, "Front", cubemapResolution, numChanels, hdriToCube_hdr.getFront());
 		ImageData* pBack = GenerateImageData(path, "Back", cubemapResolution, numChanels, hdriToCube_hdr.getBack());
@@ -127,7 +128,12 @@ namespace Glory::Editor
 		importedResource.AddChild(pLeft, "Left").AddChild(pLeftTexture, "Default");
 		importedResource.AddChild(pRight, "Right").AddChild(pRightTexture, "Default");
 
-		CubemapData* pCubemap = new CubemapData(pRight, pLeft, pUp, pDown, pFront, pBack);
+		CubemapData* pCubemap = new CubemapData(pRight, pLeft, pDown, pUp, pFront, pBack);
+		SamplerSettings& sampler = pCubemap->GetSamplerSettings();
+		sampler.MipmapMode = Filter::F_None;
+		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToEdge;
+		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToEdge;
+		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToEdge;
 		importedResource.AddChild(pCubemap, "Cubemap");
 
 		return importedResource;

@@ -9,6 +9,7 @@
 #include "GloryOGL.h"
 
 #include <Engine.h>
+#include <CubemapData.h>
 #include <GL/glew.h>
 
 namespace Glory
@@ -70,7 +71,18 @@ namespace Glory
 	{
 		ImageData* pImageData = pTextureData->GetImageData(&m_pEngine->GetAssetManager());
 		if (!pImageData) return nullptr;
-		return new GLTexture({ pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(), pImageData->GetInternalFormat(), ImageType::IT_2D, pImageData->GetDataType(), 0, 0, ImageAspect::IA_Color});
+		return new GLTexture({ pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(),
+			pImageData->GetInternalFormat(), ImageType::IT_2D, pImageData->GetDataType(),
+			0, 0, ImageAspect::IA_Color, pTextureData->GetSamplerSettings() });
+	}
+
+	Texture* OGLResourceManager::CreateTexture_Internal(CubemapData* pCubemapData)
+	{
+		ImageData* pImageData = pCubemapData->GetImageData(&m_pEngine->GetAssetManager(), 0);
+		if (!pImageData) return nullptr;
+		return new GLTexture({ pImageData->GetWidth(), pImageData->GetHeight(), pImageData->GetFormat(),
+			pImageData->GetInternalFormat(), ImageType::IT_Cube, pImageData->GetDataType(),
+			0, 0, ImageAspect::IA_Color, pCubemapData->GetSamplerSettings() });
 	}
 
 	Texture* OGLResourceManager::CreateTexture_Internal(TextureCreateInfo&& textureInfo)

@@ -56,6 +56,7 @@ namespace Glory
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
 		virtual void OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;
+		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) override;
 
 		virtual void OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights) override;
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights) override;
@@ -119,6 +120,8 @@ namespace Glory
 
 		MaterialData* m_pTextMaterialData = nullptr;
 		Material* m_pTextMaterial = nullptr;
+
+		MaterialData* m_pSkyboxMaterialData = nullptr;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 	};

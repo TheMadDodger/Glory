@@ -178,9 +178,16 @@ namespace Glory::Editor
 		if (!rendering.Exists() || !rendering.IsMap())
 			return false;
 
+		auto lighting = rendering["Lighting"];
+		if (!lighting.Exists() || !lighting.IsMap())
+			lighting.SetMap();
+
+		auto environmentMap = lighting["Environment"];
+		sceneSettings.m_LightingSettings.m_EnvironmentMap = environmentMap.As<uint64_t>(0);
+
 		auto ssao = rendering["SSAO"];
 		if (!ssao.Exists() || !ssao.IsMap())
-			return false;
+			ssao.SetMap();
 
 		auto enable = ssao["Enable"];
 		auto sampleRadius = ssao["SampleRadius"];

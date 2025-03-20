@@ -19,6 +19,7 @@ layout(location = 2) in vec2 fragTexCoord;
 layout(location = 0) out uvec4 outID;
 layout(location = 2) out vec4 outColor;
 layout(location = 3) out vec4 outNormal;
+layout(location = 5) out vec4 outData;
 
 void main()
 {
@@ -27,4 +28,5 @@ void main()
 	outColor = pixel * inColor;
 	outNormal = vec4((inNormal.xyz + 1.0) * 0.5, 1.0);
 	outID = Object.ObjectID;
+	outData.a = 1.0;
 }
