@@ -72,3 +72,7 @@
   ID: 32
 - Path: "Pipelines\\Skybox.gpln"
   ID: 33
+- Path: "Shaders\\Irradiance_Frag.shader"
+  ID: 34
+- Path: "Pipelines\\Irradiance.gpln"
+  ID: 35

@@ -2,7 +2,7 @@
 #version 450
 
 layout (location = 0) in vec3 aPos;
-layout(location = 0) out vec3 TexCoords;
+layout (location = 0) out vec3 TexCoords;
 
 #include "internal/ObjectData.glsl"
 

@@ -42,6 +42,7 @@ namespace Glory
 		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos) override;
 		virtual void OnCameraResize(CameraRef camera) override;
 		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
+		virtual MaterialData* GetInternalMaterial(std::string_view name) const override;
 
 		virtual void CollectReferences(std::vector<UUID>& references) override;
 
@@ -122,6 +123,7 @@ namespace Glory
 		Material* m_pTextMaterial = nullptr;
 
 		MaterialData* m_pSkyboxMaterialData = nullptr;
+		MaterialData* m_pIrradianceMaterialData = nullptr;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 	};

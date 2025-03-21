@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <vector>
+#include <string_view>
 
 namespace Glory
 {
@@ -16,6 +17,7 @@ namespace Glory
 	class Mesh;
 	class PipelineData;
 	class CubemapData;
+	class MaterialData;
 	struct RenderPass;
 
 	struct PickResult
@@ -48,6 +50,7 @@ namespace Glory
 		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos);
 		virtual void OnCameraResize(CameraRef camera);
 		virtual void OnCameraPerspectiveChanged(CameraRef camera);
+		virtual MaterialData* GetInternalMaterial(std::string_view name) const = 0;
 
 		size_t LastSubmittedObjectCount();
 		size_t LastSubmittedCameraCount();
@@ -78,6 +81,7 @@ namespace Glory
 		void RemoveRenderPass(RenderPassType type, std::string_view name);
 
 		void RenderObject(CameraRef camera, const RenderData& renderData);
+
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}

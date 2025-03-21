@@ -68,6 +68,13 @@ namespace Glory
 		GenerateClusterSSBO(pClusterSSBO, camera);
 	}
 
+	MaterialData* ClusteredRendererModule::GetInternalMaterial(std::string_view name) const
+	{
+		if (name == "irradiance")
+			return m_pIrradianceMaterialData;
+		return nullptr;
+	}
+
 	void ClusteredRendererModule::CollectReferences(std::vector<UUID>& references)
 	{
 		ModuleSettings& settings = Settings();
@@ -134,6 +141,7 @@ namespace Glory
 		const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
 		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
 		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
+		const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
 
 		m_pDeferredCompositeMaterial = new MaterialData();
 		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
@@ -148,6 +156,8 @@ namespace Glory
 		m_pTextMaterialData->SetPipeline(textPipeline);
 		m_pSkyboxMaterialData = new MaterialData();
 		m_pSkyboxMaterialData->SetPipeline(skyboxPipeline);
+		m_pIrradianceMaterialData = new MaterialData();
+		m_pIrradianceMaterialData->SetPipeline(irradiancePipeline);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -236,6 +246,9 @@ namespace Glory
 		
 		delete m_pSkyboxMaterialData;
 		m_pSkyboxMaterialData = nullptr;
+		
+		delete m_pIrradianceMaterialData;
+		m_pIrradianceMaterialData = nullptr;
 	}
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>&)
@@ -729,6 +742,7 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("Text Pipeline", 23);
 		settings.RegisterAssetReference<PipelineData>("Display Copy Pipeline", 30);
 		settings.RegisterAssetReference<PipelineData>("Skybox Pipeline", 33);
+		settings.RegisterAssetReference<PipelineData>("Irradiance Pipeline", 35);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
