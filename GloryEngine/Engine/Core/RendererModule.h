@@ -75,6 +75,7 @@ namespace Glory
 		void OnWindowResize(glm::uvec2 size);
 
 		void AddRenderPass(RenderPassType type, RenderPass&& pass);
+		void RemoveRenderPass(RenderPassType type, std::string_view name);
 
 		void RenderObject(CameraRef camera, const RenderData& renderData);
 
