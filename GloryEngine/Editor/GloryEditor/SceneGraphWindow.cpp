@@ -411,7 +411,7 @@ namespace Glory::Editor
 	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(Entity& entity)
 	{
 		const std::string_view search{SearchBuffer};
-		const bool searchPassed = true;//EntitySceneObjectEditor::SearchCompare(search, pObject);
+		const bool searchPassed = EntitySceneObjectEditor::SearchCompare(search, entity);
 
 		bool hasNonFilteredChild = false;
 		for (size_t i = 0; i < entity.ChildCount(); i++)

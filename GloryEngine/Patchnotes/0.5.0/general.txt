@@ -63,6 +63,7 @@ Editor:
 - Added skybox option to scene settings
 - Added irradiance map option to scene settings
 - Fixed extra unindent from tree leaf in scene graph
+- Fixed search bar not filtering objects in scene graph
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
