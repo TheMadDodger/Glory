@@ -1,15 +1,15 @@
 #pragma once
-#include <ImporterTemplate.h>
-#include <ImageData.h>
-#include <HDRImageData.h>
+#include "ImporterTemplate.h"
+
+#include <CubemapData.h>
 
 namespace Glory::Editor
 {
-	class STBHDRImageImporter : public ImporterTemplate<HDRImageData>
-	{
+    class CubemapImporter : public ImporterTemplate<CubemapData>
+    {
 	public:
-		STBHDRImageImporter();
-		virtual ~STBHDRImageImporter();
+		CubemapImporter();
+		virtual ~CubemapImporter();
 
 		std::string_view Name() const override;
 
@@ -17,9 +17,9 @@ namespace Glory::Editor
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void* userData) const override;
 		virtual ImportedResource LoadResource(void* data, size_t dataSize, void* userData) const override;
-		virtual bool Save(const std::filesystem::path& path, Resource* pResource) const override;
+		virtual bool SaveResource(const std::filesystem::path& path, CubemapData* pResource) const override;
 
 		virtual void Initialize() override {}
 		virtual void Cleanup() override {}
-	};
+    };
 }

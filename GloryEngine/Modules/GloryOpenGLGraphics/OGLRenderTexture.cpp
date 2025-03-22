@@ -33,6 +33,19 @@ namespace Glory
 		UnBindForDraw();
 	}
 
+	void OGLRenderTexture::ReadColorPixels(const std::string& attachment, void* buffer, DataType type)
+	{
+		BindForDraw();
+		const uint32_t index = (uint32_t)m_NameToTextureIndex.at(attachment);
+		const GLuint format = GLConverter::TO_GLFORMAT.at(m_CreateInfo.Attachments[index].Format);
+		const GLenum dataType = GLConverter::TO_GLDATATYPE.at(type);
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glReadPixels(0, 0, m_Width, m_Height, format, dataType, buffer);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		UnBindForDraw();
+	}
+
 	void OGLRenderTexture::ReadDepthPixel(const glm::ivec2& coord, void* value, DataType type)
 	{
 		BindForDraw();

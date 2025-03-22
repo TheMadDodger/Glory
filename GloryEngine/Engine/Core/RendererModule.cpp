@@ -271,6 +271,13 @@ namespace Glory
 		m_RenderPasses[type].push_back(std::move(pass));
 	}
 
+	void RendererModule::RemoveRenderPass(RenderPassType type, std::string_view name)
+	{
+		auto iter = std::find_if(m_RenderPasses[type].begin(), m_RenderPasses[type].end(), [name](const RenderPass& pass) {return pass.m_Name == name; });
+		if (iter == m_RenderPasses[type].end()) return;
+		m_RenderPasses[type].erase(iter);
+	}
+
 	void RendererModule::RenderObject(CameraRef camera, const RenderData& renderData)
 	{
 		OnRender(camera, renderData);

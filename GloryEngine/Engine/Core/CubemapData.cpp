@@ -9,6 +9,12 @@ namespace Glory
 		APPEND_TYPE(CubemapData);
 	}
 
+	CubemapData::CubemapData(UUID right, UUID left, UUID down, UUID up, UUID front, UUID back):
+		m_Faces{ right, left, down, up, front, back }
+	{
+		APPEND_TYPE(CubemapData);
+	}
+
 	CubemapData::CubemapData(ImageData* pRight, ImageData* pLeft, ImageData* pDown, ImageData* pUp, ImageData* pFront, ImageData* pBack):
 		m_Faces{ pRight->GetUUID(), pLeft->GetUUID(), pDown->GetUUID(), pUp->GetUUID(), pFront->GetUUID(), pBack->GetUUID() }
 	{

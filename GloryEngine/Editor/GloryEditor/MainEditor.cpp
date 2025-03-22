@@ -7,6 +7,7 @@
 #include "SceneGraphWindow.h"
 #include "FileBrowser.h"
 #include "ResourcesWindow.h"
+#include "EnvironmentGenerator.h"
 #include "EditorConsoleWindow.h"
 #include "HistoryWindow.h"
 #include "PerformanceMetrics.h"
@@ -56,6 +57,7 @@
 #include "TextureImporter.h"
 #include "EntityPrefabImporter.h"
 #include "ShaderImporter.h"
+#include "CubemapImporter.h"
 #include "PipelineImporter.h"
 
 #include "Shortcuts.h"
@@ -104,6 +106,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Window_Profiler			= "Open Profiler";
 	static constexpr char* Shortcut_Window_ProjectSettings	= "Open Project Settings";
 	static constexpr char* Shortcut_Window_Resources		= "Open Resources";
+	static constexpr char* Shortcut_Window_Environment		= "Open Environment Generator";
 	static constexpr char* Shortcut_View_Perspective		= "Switch To Perspective";
 	static constexpr char* Shortcut_View_Orthographic		= "Switch To Orthographic";
 	static constexpr char* Shortcut_Edit_Undo				= "Undo";
@@ -174,6 +177,7 @@ namespace Glory::Editor
 		Importer::Register<TextureImporter>();
 		Importer::Register<EntityPrefabImporter>();
 		Importer::Register<ShaderImporter>();
+		Importer::Register<CubemapImporter>();
 
 		pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
 		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");
@@ -374,6 +378,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Analysis/Profiler", [this]() { GetWindow<ProfilerWindow>(); }, NULL, Shortcut_Window_Profiler);
 		MenuBar::AddMenuItem("Window/Project Settings", [this]() { GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
 		MenuBar::AddMenuItem("Window/Resources", [this]() { GetWindow<ResourcesWindow>(); }, NULL, Shortcut_Window_Resources);
+		MenuBar::AddMenuItem("Window/Environment Generator", [this]() { GetWindow<EnvironmentGenerator>(); }, NULL, Shortcut_Window_Environment);
 
 		MenuBar::AddMenuItem("Play/Start", [app]() { app->StartPlay(); }, NULL, Shortcut_Play_Start);
 		MenuBar::AddMenuItem("Play/Stop", [app]() { app->StopPlay(); }, NULL, Shortcut_Play_Stop);
