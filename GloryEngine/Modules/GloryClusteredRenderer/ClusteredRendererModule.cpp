@@ -12,6 +12,7 @@
 #include <SceneManager.h>
 #include <GScene.h>
 #include <FontData.h>
+#include <CubemapData.h>
 #include <FontDataStructs.h>
 
 #include <DistributedRandom.h>
@@ -521,6 +522,12 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
+		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
+		const UUID irradianceMapID = pActiveScene ? pActiveScene->Settings().m_LightingSettings.m_IrradianceMap : 0;
+		Resource* pIrradianceResource = irradianceMapID ? m_pEngine->GetAssetManager().FindResource(irradianceMapID) : nullptr;
+		CubemapData* pIrradianceMap = pIrradianceResource ? static_cast<CubemapData*>(pIrradianceResource) : nullptr;
+		Texture* pIrradianceTexture = pIrradianceMap ? pGraphics->GetResourceManager()->CreateCubemapTexture(pIrradianceMap) : 0;
+
 		Buffer* pClusterSSBO = nullptr;
 		Buffer* pLightIndexSSBO = nullptr;
 		Buffer* pLightGridSSBO = nullptr;
@@ -556,6 +563,7 @@ namespace Glory
 		Material* pMaterial = pGraphics->UseMaterial(m_pDeferredCompositeMaterial);
 
 		pRenderTexture->BindAll(pMaterial);
+		if (pIrradianceTexture) pMaterial->SetCubemapTexture("IrradianceMap", pIrradianceTexture);
 
 		pClusterSSBO->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
@@ -613,7 +621,7 @@ namespace Glory
 		pMaterial->SetObjectData(object);
 
 		/* Set skybox texture */
-		pMaterial->SetSubemapTexture("skybox", pCubemapTexture);
+		pMaterial->SetCubemapTexture("skybox", pCubemapTexture);
 
 		/* Draw the skybox */
 		pGraphics->DrawUnitCube();

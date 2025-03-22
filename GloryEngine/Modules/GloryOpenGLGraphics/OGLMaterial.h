@@ -25,7 +25,7 @@ namespace Glory
         virtual Buffer* CreateHasTexturesBuffer() override;
         virtual Buffer* CreateMVPBuffer() override;
         virtual void SetTexture(const std::string& name, Texture* value) override;
-        virtual void SetSubemapTexture(const std::string& name, Texture* value) override;
+        virtual void SetCubemapTexture(const std::string& name, Texture* value) override;
         virtual void ResetTextureCounter() override;
 
     public: // Set shader vars

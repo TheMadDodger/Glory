@@ -532,9 +532,9 @@ namespace Glory
 	{
 		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
 		if (!pActiveScene) return;
-		const UUID environmentMapID = pActiveScene->Settings().m_LightingSettings.m_EnvironmentMap;
-		if (!environmentMapID) return;
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(environmentMapID);
+		const UUID skyboxID = pActiveScene->Settings().m_LightingSettings.m_Skybox;
+		if (!skyboxID) return;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(skyboxID);
 		if (!pResource) return;
 		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();

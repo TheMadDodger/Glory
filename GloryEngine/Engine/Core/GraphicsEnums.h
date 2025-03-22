@@ -760,7 +760,8 @@ namespace Glory
 
     struct LightingSettings
     {
-        uint64_t m_EnvironmentMap;
+        uint64_t m_Skybox;
+        uint64_t m_IrradianceMap;
     };
 
     struct SSAOSettings

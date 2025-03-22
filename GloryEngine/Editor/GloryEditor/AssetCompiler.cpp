@@ -182,8 +182,10 @@ namespace Glory::Editor
 		if (!lighting.Exists() || !lighting.IsMap())
 			lighting.SetMap();
 
-		auto environmentMap = lighting["Environment"];
-		sceneSettings.m_LightingSettings.m_EnvironmentMap = environmentMap.As<uint64_t>(0);
+		auto skybox = lighting["Skybox"];
+		sceneSettings.m_LightingSettings.m_Skybox = skybox.As<uint64_t>(0);
+		auto irradiance = lighting["Irradiance"];
+		sceneSettings.m_LightingSettings.m_IrradianceMap = irradiance.As<uint64_t>(0);
 
 		auto ssao = rendering["SSAO"];
 		if (!ssao.Exists() || !ssao.IsMap())

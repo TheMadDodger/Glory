@@ -106,7 +106,7 @@ namespace Glory
 		++m_TextureCounter;
 	}
 
-	void OGLMaterial::SetSubemapTexture(const std::string& name, Texture* pTexture)
+	void OGLMaterial::SetCubemapTexture(const std::string& name, Texture* pTexture)
 	{
 		if (!Pipeline()) return;
 

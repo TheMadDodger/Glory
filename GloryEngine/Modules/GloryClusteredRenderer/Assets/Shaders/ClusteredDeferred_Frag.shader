@@ -13,6 +13,8 @@ layout (binding = 3) uniform sampler2D AO;
 layout (binding = 4) uniform sampler2D Data;
 layout (binding = 5) uniform sampler2D Depth;
 
+layout (binding = 6) uniform samplerCube IrradianceMap;
+
 #include "Internal/DepthHelpers.glsl"
 
 const vec3 depthSliceColors[8] = vec3[8](
@@ -94,9 +96,9 @@ const uint Spot = 3;
 
 #ifdef WITH_PBR
 
-vec3 FresnelSchlick(float cosTheta, vec3 F0)
+vec3 FresnelSchlick(float cosTheta, vec3 F0, float roughness)
 {
-    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0)*pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -187,7 +189,7 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 	vec3 H = normalize(V + L);
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, color, metallic);
-	vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+	vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0, roughness);
 
 	float NDF = DistributionGGX(normal, H, roughness);
 	float G = GeometrySmith(normal, V, L, roughness);
@@ -231,7 +233,6 @@ void main()
 	}
 
 	vec3 normal = normalize(texture(Normal, Coord).xyz*2.0 - 1.0);
-
 	float depth = texture(Depth, Coord).r;
 	vec3 worldPosition = WorldPosFromDepth(depth);
 
@@ -253,8 +254,16 @@ void main()
 		Lo += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, CameraPos, V, roughness, metallic);
 	}
 
-	vec3 ambient = vec3(0.03) * color * ao;
-	vec3 fragColor   = ambient + Lo;
+	/* Ambient lighting */
+	vec3 F0 = vec3(0.04);
+	F0 = mix(F0, color, metallic);
+    vec3 kS = FresnelSchlick(max(dot(normal, V), 0.0), F0, roughness);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+    vec3 irradiance = texture(IrradianceMap, normal).rgb;
+    vec3 diffuse = irradiance*color;
+    vec3 ambient = (kD * diffuse) * ao;
+	vec3 fragColor = ambient + Lo;
 
 	/* Gamma correction */
 	fragColor = fragColor / (fragColor + vec3(1.0));
@@ -349,6 +358,7 @@ void main()
 	ssao = min(ssao, 1.0);
 	float depth = texture(Depth, Coord).r;
 	vec3 worldPosition = WorldPosFromDepth(depth);
+	vec3 ambient = texture(IrradianceMap, normal).rgb;
 
 	vec2 pixelID = Coord * ScreenDimensions;
 	uint clusterID = GetClusterIndex(vec3(pixelID.xy, depth));
@@ -376,7 +386,7 @@ void main()
 		diffuseColor += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, viewDir, specularIntensity);
 	}
 
-	out_Color = vec4(diffuseColor*ssao, 1.0);
+	out_Color = vec4(ambient*diffuseColor*ssao, 1.0);
 }
 
 #endif

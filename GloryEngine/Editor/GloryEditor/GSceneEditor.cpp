@@ -33,12 +33,21 @@ namespace Glory::Editor
             if (EditorUI::HeaderLight("Lighting"))
             {
                 auto lighting = rendering["Lighting"];
-                auto environmentMap = lighting["Environment"];
-                const UUID oldValue = environmentMap.As<uint64_t>(0);
+                auto skybox = lighting["Skybox"];
+                auto irradiance = lighting["Irradiance"];
+                UUID oldValue = skybox.As<uint64_t>(0);
                 UUID newValue = oldValue;
-                if (AssetPicker::ResourceDropdown("Environment Map", ResourceTypes::GetHash<CubemapData>(), &newValue))
+                if (AssetPicker::ResourceDropdown("Skybox", ResourceTypes::GetHash<CubemapData>(), &newValue))
                 {
-                    Undo::ApplyYAMLEdit(yamlFile, environmentMap.Path(), uint64_t(oldValue), uint64_t(newValue));
+                    Undo::ApplyYAMLEdit(yamlFile, skybox.Path(), uint64_t(oldValue), uint64_t(newValue));
+                    change = true;
+                }
+
+                oldValue = irradiance.As<uint64_t>(0);
+                newValue = oldValue;
+                if (AssetPicker::ResourceDropdown("Irradiance Map", ResourceTypes::GetHash<CubemapData>(), &newValue))
+                {
+                    Undo::ApplyYAMLEdit(yamlFile, irradiance.Path(), uint64_t(oldValue), uint64_t(newValue));
                     change = true;
                 }
             }

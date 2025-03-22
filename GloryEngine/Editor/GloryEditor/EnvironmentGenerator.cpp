@@ -152,7 +152,7 @@ namespace Glory::Editor
 		object.SceneID = 0;
 		object.ObjectID = 0;
 
-		pMaterial->SetSubemapTexture("cubemap", pCubemapTexture);
+		pMaterial->SetCubemapTexture("cubemap", pCubemapTexture);
 		for (size_t i = 0; i < 6; ++i)
 		{
 			/* ReadColorPixels() unbinds the buffer so we should rebind is every iteration */
