@@ -267,7 +267,6 @@ namespace Glory::Editor
 			});
 		}
 
-		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
 		GScene* pScene = entity.GetScene();
@@ -332,8 +331,6 @@ namespace Glory::Editor
 
 		ImGui::SameLine();
 		EntitySceneObjectEditor::DrawObjectNodeName(entity, isPrefab);
-
-		ImGui::PopStyleVar();
 
 		if (node_open)
 		{

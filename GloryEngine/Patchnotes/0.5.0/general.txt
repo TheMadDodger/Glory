@@ -62,6 +62,7 @@ Editor:
 - Added an irradiance map generator in the new Environment Generator window
 - Added skybox option to scene settings
 - Added irradiance map option to scene settings
+- Fixed extra unindent from tree leaf in scene graph
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
