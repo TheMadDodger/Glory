@@ -541,7 +541,7 @@ namespace Glory
 
 #pragma region Window
 
-	Vec2Wrapper Engine_GetWindowSize()
+	Vec3Wrapper Engine_GetWindowSize()
 	{
 		WindowModule* pWindowModule = Core_EngineInstance->GetMainModule<WindowModule>();
 		if (!pWindowModule) return {};
@@ -549,7 +549,7 @@ namespace Glory
 		if (!pWindow) return {};
 		int width, height;
 		pWindow->GetWindowSize(&width, &height);
-		return { float(width), float(height) };
+		return { float(width), float(height), 0.0f };
 	}
 
 	void Engine_SetShowWindowCursor(bool show)
