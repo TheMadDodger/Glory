@@ -267,7 +267,6 @@ namespace Glory::Editor
 			});
 		}
 
-		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 20.0f);
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
 		GScene* pScene = entity.GetScene();
@@ -332,8 +331,6 @@ namespace Glory::Editor
 
 		ImGui::SameLine();
 		EntitySceneObjectEditor::DrawObjectNodeName(entity, isPrefab);
-
-		ImGui::PopStyleVar();
 
 		if (node_open)
 		{
@@ -414,7 +411,7 @@ namespace Glory::Editor
 	bool SceneGraphWindow::GetExcludedObjectsFromFilterRecursive(Entity& entity)
 	{
 		const std::string_view search{SearchBuffer};
-		const bool searchPassed = true;//EntitySceneObjectEditor::SearchCompare(search, pObject);
+		const bool searchPassed = EntitySceneObjectEditor::SearchCompare(search, entity);
 
 		bool hasNonFilteredChild = false;
 		for (size_t i = 0; i < entity.ChildCount(); i++)
