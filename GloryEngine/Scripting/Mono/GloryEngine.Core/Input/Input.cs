@@ -75,7 +75,7 @@ namespace GloryEngine
         /// </summary>
         /// <param name="playerIndex">The player to get the cursor from</param>
         /// <returns>Current cursor position</returns>
-        public static Vector2 GetCursorPos(uint playerIndex) => Input_GetCursorPos(playerIndex);
+        public static Vector2 GetCursorPos(uint playerIndex) => Input_GetCursorPos(playerIndex).xy;
         /// <summary>
         /// Check wether an action was triggered this frame
         /// </summary>
@@ -120,7 +120,7 @@ namespace GloryEngine
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static float Input_GetAxisDelta(uint playerIndex, string inputMap, string actionName);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static Vector2 Input_GetCursorPos(uint playerIndex);
+        private extern static Vector3 Input_GetCursorPos(uint playerIndex);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static bool Input_IsActionTriggered(uint playerIndex, string inputMap, string actionName);

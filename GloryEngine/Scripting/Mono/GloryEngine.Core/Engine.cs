@@ -26,7 +26,7 @@ namespace GloryEngine
         /// <summary>
         /// Size of the game window
         /// </summary>
-        public Vector2 WindowSize => Engine_GetWindowSize();
+        public Vector2 WindowSize => Engine_GetWindowSize().xy;
 
         /// <summary>
         /// Whether the cursor of the OS is shown
@@ -188,7 +188,7 @@ namespace GloryEngine
         #region API Methods
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Vector2 Engine_GetWindowSize();
+        private static extern Vector3 Engine_GetWindowSize();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void Engine_SetShowWindowCursor(bool show);

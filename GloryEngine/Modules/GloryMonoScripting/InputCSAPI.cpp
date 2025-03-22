@@ -91,10 +91,11 @@ namespace Glory
 		return pInputModule->GetAxisDelta(playerIndex, mono_string_to_utf8(inputMap), mono_string_to_utf8(actionName));
 	}
 	
-	Vec2Wrapper Input_GetCursorPos(size_t playerIndex, MonoString* inputMap, MonoString* actionName)
+	Vec3Wrapper Input_GetCursorPos(size_t playerIndex, MonoString* inputMap, MonoString* actionName)
 	{
 		InputModule* pInputModule = Input_EngineInstance->GetMainModule<InputModule>();
-		return ToVec2Wrapper(pInputModule->GetCursorPos(playerIndex));
+		const glm::vec2 cursorPos = pInputModule->GetCursorPos(playerIndex);
+		return { cursorPos.x, cursorPos.y, 0.0f };
 	}
 
 	bool Input_IsActionTriggered(size_t playerIndex, MonoString* inputMap, MonoString* actionName)
