@@ -57,6 +57,7 @@
 #include "TextureImporter.h"
 #include "EntityPrefabImporter.h"
 #include "ShaderImporter.h"
+#include "CubemapImporter.h"
 #include "PipelineImporter.h"
 
 #include "Shortcuts.h"
@@ -176,6 +177,7 @@ namespace Glory::Editor
 		Importer::Register<TextureImporter>();
 		Importer::Register<EntityPrefabImporter>();
 		Importer::Register<ShaderImporter>();
+		Importer::Register<CubemapImporter>();
 
 		pEngine->GetResourceTypes().RegisterResource<EditableEntity>("");
 		pEngine->GetResourceTypes().RegisterResource<ShaderSourceData>("");

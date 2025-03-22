@@ -88,6 +88,19 @@ namespace Glory::Editor
 		std::memcpy(data, imageData, dataSize);
 		stbi_image_free(imageData);
 
+		if (width == height)
+		{
+			/* Cubemap face */
+			ImageData* pData = new ImageData(width, height, PixelFormat::PF_R16G16B16Sfloat,
+				PixelFormat::PF_RGB, 3*sizeof(float), std::move(data), dataSize, false, DataType::DT_Float);
+			const UUID imageID = EditorAssetDatabase::ReserveAssetUUID(path.string(), "").first;
+			pData->SetResourceUUID(imageID);
+			ImportedResource importedResource{ path, pData };
+			TextureData* pDefaultTexture = new TextureData(pData);
+			importedResource.AddChild(pDefaultTexture, "Default");
+			return importedResource;
+		}
+
 		HDRImageData* pData = new HDRImageData(width, height, std::move(data), dataSize);
 		ImportedResource importedResource{ path, pData };
 
@@ -137,5 +150,12 @@ namespace Glory::Editor
 	ImportedResource STBHDRImageImporter::LoadResource(void* data, size_t dataSize, void* userData) const
 	{
 		return nullptr;
+	}
+
+	bool STBHDRImageImporter::Save(const std::filesystem::path& path, Resource* pResource) const
+	{
+		ImageData* pImage = static_cast<ImageData*>(pResource);
+		const int result = stbi_write_hdr(path.string().data(), pImage->GetWidth(), pImage->GetHeight(), 3, static_cast<const float*>(pImage->GetPixels()));
+		return result != 0;
 	}
 }

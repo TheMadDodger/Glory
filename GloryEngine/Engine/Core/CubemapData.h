@@ -7,7 +7,8 @@ namespace Glory
 	{
     public:
         CubemapData();
-        CubemapData(ImageData* pRight, ImageData* pLeft, ImageData* pUp, ImageData* pDown, ImageData* pFront, ImageData* pBack);
+        CubemapData(UUID right, UUID left, UUID down, UUID up, UUID front, UUID back);
+        CubemapData(ImageData* pRight, ImageData* pLeft, ImageData* pDown, ImageData* pUp, ImageData* pFront, ImageData* pBack);
         virtual ~CubemapData();
 
         virtual ImageData* GetImageData(AssetManager* pAssetManager, size_t face);

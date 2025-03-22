@@ -25,6 +25,9 @@ namespace Glory::Editor
 		bool m_Generate;
 		RenderTexture* m_pIrradianceResult;
 
+		std::string m_OutputPath;
+		std::string m_Filename;
+
 		float* m_pFaces[6];
 	};
 }

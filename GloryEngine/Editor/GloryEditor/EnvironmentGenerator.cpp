@@ -2,12 +2,13 @@
 
 #include "AssetPicker.h"
 #include "EditorUI.h"
+#include "Importer.h"
+#include "EditorAssetDatabase.h"
 
 #include <RendererModule.h>
 #include <AssetManager.h>
 #include <CubemapData.h>
 #include <GraphicsModule.h>
-
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -25,12 +26,12 @@ namespace Glory::Editor
 	EnvironmentGenerator::EnvironmentGenerator() :
 		EditorWindowTemplate("Environment Generator", 600.0f, 600.0f), m_CurrentCubemap(0), m_Generate(false), m_pIrradianceResult(nullptr),
 		m_pFaces{
-			new float[32 * 32 * 3],
-			new float[32 * 32 * 3],
-			new float[32 * 32 * 3],
-			new float[32 * 32 * 3],
-			new float[32 * 32 * 3],
-			new float[32 * 32 * 3],
+			new float[32*32*3],
+			new float[32*32*3],
+			new float[32*32*3],
+			new float[32*32*3],
+			new float[32*32*3],
+			new float[32*32*3],
 		}
 	{
 	}
@@ -48,7 +49,13 @@ namespace Glory::Editor
 		AssetManager& assets = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
 		if (AssetPicker::ResourceDropdown("Cubemap", ResourceTypes::GetHash<CubemapData>(), &m_CurrentCubemap))
 		{
-
+			AssetLocation location;
+			if (EditorAssetDatabase::GetAssetLocation(m_CurrentCubemap, location))
+			{
+				std::filesystem::path path = location.Path;
+				m_Filename = path.filename().replace_extension().string();
+				m_OutputPath = path.parent_path().string();
+			}
 		}
 
 		Resource* pResource = m_CurrentCubemap ? assets.FindResource(m_CurrentCubemap) : nullptr;
@@ -146,7 +153,7 @@ namespace Glory::Editor
 		object.ObjectID = 0;
 
 		pMaterial->SetSubemapTexture("cubemap", pCubemapTexture);
-		for (unsigned int i = 0; i < 6; ++i)
+		for (size_t i = 0; i < 6; ++i)
 		{
 			/* ReadColorPixels() unbinds the buffer so we should rebind is every iteration */
 			m_pIrradianceResult->BindForDraw();
@@ -161,7 +168,43 @@ namespace Glory::Editor
 		}
 		m_pIrradianceResult->UnBindForDraw();
 
-		/* Generate assets */
+		static constexpr std::string_view sides[6] = {
+			"Right",
+			"Left",
+			"Down",
+			"Up",
+			"Front",
+			"Back",
+		};
+
+		/* Generate images */
+		ImageData* pImages[6];
+		for (size_t i = 0; i < 6; ++i)
+		{
+			pImages[i] = new ImageData(32, 32, PixelFormat::PF_R16G16B16Sfloat, PixelFormat::PF_RGB,
+				3*sizeof(float), std::move((char*)m_pFaces[i]), 32*32*3*sizeof(float), false, DataType::DT_Float);
+			m_pFaces[i] = new float[32*32*3];
+			std::filesystem::path path = m_OutputPath;
+			path.append(m_Filename + "_irradiance_" + sides[i].data()).replace_extension(".hdr");
+			path = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
+			Importer::Export(path, pImages[i]);
+			ImportedResource importedResource{ path, pImages[i] };
+			TextureData* pDefault = new TextureData(pImages[i]);
+			importedResource.AddChild(pDefault, "Default");
+			EditorAssetDatabase::ImportAsset(path.string(), importedResource);
+		}
+
+		/* Generate cubemap */
+		CubemapData* pIrradianceMap = new CubemapData(pImages[0], pImages[1], pImages[2], pImages[3], pImages[4], pImages[5]);
+		SamplerSettings& sampler = pIrradianceMap->GetSamplerSettings();
+		sampler.MipmapMode = Filter::F_None;
+		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToEdge;
+		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToEdge;
+		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToEdge;
+		std::filesystem::path path = m_OutputPath;
+		path.append(m_Filename + "_irradiance").replace_extension(".gcube");
+		path = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
+		EditorAssetDatabase::CreateAsset(pIrradianceMap, path.string());
 
 		m_Generate = false;
 	}
