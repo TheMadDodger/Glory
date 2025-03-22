@@ -20,6 +20,14 @@ Engine:
 - Added PBR shaders and pipeline
 - Added an extra G buffer to the renderer for extra data
 - Added HDRImageData resource
+- Added light type property to light component
+- Light components now have 4 float properties for their data
+- Point light now uses inner and outer values for inner and outer range
+- Added support for directional lights (sun)
+- Added support for spotlights
+- Added HDRImageData resource
+- Added skybox rendering
+- Added diffuse irradiance to ClusteredDeferred
 
 Editor:
 - Added a startup popup
@@ -46,10 +54,14 @@ Editor:
 - Added edit script button to mono script component editor
 - Fixed texture not updating when editing it in the editor
 - Fixed image tumbnails not showing
+- Fixed continous YAML changes being recorded as separate changes
 - Texture and value properties in materials are now paired together automatically
 - Overhauled the material editors
 - Added default values for material properties
-- Added an HDR image importer using stb_image
+- Added an HDRI image importer using stb_image that automatically converts equirectangular maps to cubemaps
+- Added an irradiance map generator in the new Environment Generator window
+- Added skybox option to scene settings
+- Added irradiance map option to scene settings
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
