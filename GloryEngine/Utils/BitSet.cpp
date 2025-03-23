@@ -87,6 +87,16 @@ namespace Glory::Utils
 		return m_pMemory[elementIndex] & 1 << bitIndex;
 	}
 
+	bool BitSet::HasAnySet() const
+	{
+		for (size_t i = 0; i < m_Capacity/32; ++i)
+		{
+			if (m_pMemory[i] == 0) continue;
+			return true;
+		}
+		return false;
+	}
+
 	BitSet::Element* BitSet::Data() const
 	{
 		return m_pMemory;

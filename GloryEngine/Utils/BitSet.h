@@ -21,6 +21,7 @@ namespace Glory::Utils
 		void Clear();
 		void Reserve(size_t capacity);
 		bool IsSet(Element index) const;
+		bool HasAnySet() const;
 
 		Element* Data() const;
 		size_t DataSize() const;

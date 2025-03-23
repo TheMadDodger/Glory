@@ -84,6 +84,13 @@ namespace Glory
 		return *it;
 	}
 
+	size_t SceneManager::GetSceneIndex(UUID uuid) const
+	{
+		auto it = std::find_if(m_pOpenScenes.begin(), m_pOpenScenes.end(), [&](GScene* pScene) {return pScene->GetUUID() == uuid; });
+		if (it == m_pOpenScenes.end()) return m_pOpenScenes.size();
+		return it - m_pOpenScenes.begin();
+	}
+
 	size_t SceneManager::ExternalSceneCount()
 	{
 		return m_pExternalScenes.size();
