@@ -30,15 +30,51 @@ namespace Glory::Editor
 
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
+		m_SelectionChanged = Selection::SubscribeToSelectionChange([this]() { m_SelectionNeedsFilter = true; });
 	}
 
 	SceneGraphWindow::~SceneGraphWindow()
 	{
+		Selection::UnsubscribeToSelectionChange(m_SelectionChanged);
 	}
 
 	void SceneGraphWindow::OnGUI()
 	{
 		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
+
+		m_ForceOpen.resize(pScenes->OpenScenesCount());
+
+		for (size_t i = 0; i < pScenes->OpenScenesCount(); ++i)
+		{
+			m_ForceOpen[i].Reserve(pScenes->GetOpenScene(i)->GetRegistry().MaxEntityID() + 1);
+			m_ForceOpen[i].Clear();
+		}
+
+		if (m_SelectionNeedsFilter)
+		{
+			for (size_t i = 0; i < Selection::SelectionCount(); ++i)
+			{
+				Object* pObject = Selection::GetSelectedObject(i);
+				std::type_index type = typeid(Object);
+				pObject->GetType(0, type);
+				if (type != typeid(EditableEntity)) continue;
+				EditableEntity* editorEntity = static_cast<EditableEntity*>(pObject);
+				const UUID sceneID = editorEntity->SceneID();
+				const Utils::ECS::EntityID entityID = editorEntity->EntityID();
+				const size_t sceneIndex = pScenes->GetSceneIndex(sceneID);
+				Utils::BitSet& forceOpen = m_ForceOpen[sceneIndex];
+				GScene* pScene = pScenes->GetOpenScene(sceneIndex);
+				Entity entity = pScene->GetEntityByEntityID(entityID);
+				Entity parent = entity.ParentEntity();
+				while (parent.IsValid())
+				{
+					forceOpen.Set(parent.GetEntityID());
+					parent = parent.ParentEntity();
+				}
+			}
+
+			m_SelectionNeedsFilter = false;
+		}
 
 		const GScene* pActiveScene = pScenes->GetActiveScene();
 
@@ -134,7 +170,7 @@ namespace Glory::Editor
 		if (isActive) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
 
 		const std::string label = pScene->Name() + (EditorApplication::GetInstance()->GetSceneManager().IsSceneDirty(pScene) ? " *" : "");
-		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
+		if (m_NeedsFilter || m_ForceOpen[index].HasAnySet()) ImGui::SetNextItemOpen(true);
 		const bool nodeOpen = ImGui::TreeNodeEx("##scenenode", node_flags, label.data());
 		if (isActive) ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
@@ -175,26 +211,23 @@ namespace Glory::Editor
 			ObjectMenu::Open(pScene, T_Scene);
 		}
 
+		const Utils::BitSet& forceOpen = m_ForceOpen[index];
 		if (nodeOpen)
 		{
-			//ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
-
 			size_t index = 0;
 			for (size_t i = 0; i < pScene->ChildCount(0); i++)
 			{
 				Entity childEntity = pScene->ChildEntity(0, i);
-				if (!ChildrenList(index, childEntity)) continue;
+				if (!ChildrenList(forceOpen, index, childEntity)) continue;
 				++index;
 			}
-
-			//ImGui::PopStyleVar();
 			ImGui::TreePop();
 		}
 
 		ImGui::PopID();
 	}
 
-	bool SceneGraphWindow::ChildrenList(size_t index, Entity& entity)
+	bool SceneGraphWindow::ChildrenList(const Utils::BitSet& forceOpen, size_t index, Entity& entity)
 	{
 		ImGui::PushID(int(index));
 
@@ -268,7 +301,7 @@ namespace Glory::Editor
 		}
 
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		if (m_NeedsFilter) ImGui::SetNextItemOpen(true);
+		if (m_NeedsFilter || forceOpen.IsSet(entity.GetEntityID())) ImGui::SetNextItemOpen(true);
 		GScene* pScene = entity.GetScene();
 		const bool isPrefab = entity.GetScene()->Prefab(entity.EntityUUID()) || pScene->PrefabChild(entity.EntityUUID());
 		const bool node_open = ImGui::TreeNodeEx("##entitynode", node_flags, "");
@@ -338,7 +371,7 @@ namespace Glory::Editor
 			for (size_t i = 0; i < entity.ChildCount(); i++)
 			{
 				Entity child = entity.ChildEntity(i);
-				if (!ChildrenList(index, child)) continue;
+				if (!ChildrenList(forceOpen, index, child)) continue;
 				++index;
 			}
 

@@ -20,7 +20,7 @@ namespace Editor
 		virtual void OnGUI() override;
 
 		void SceneDropdown(size_t index, GScene* pScene, bool isActive);
-		bool ChildrenList(size_t index, Entity& entity);
+		bool ChildrenList(const Utils::BitSet& forceOpen, size_t index, Entity& entity);
 
 		bool GetExcludedObjectsFromFilterRecursive(GScene* pScene);
 		bool GetExcludedObjectsFromFilterRecursive(Entity& entity);
@@ -35,6 +35,10 @@ namespace Editor
 		bool m_NeedsFilter = false;
 
 		std::vector<UUID> m_SearchResultExcludeCache;
+
+		UUID m_SelectionChanged;
+		bool m_SelectionNeedsFilter;
+		std::vector<Utils::BitSet> m_ForceOpen;
 	};
 }
 }

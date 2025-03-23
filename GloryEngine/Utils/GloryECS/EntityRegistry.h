@@ -224,6 +224,8 @@ namespace Glory::Utils::ECS
 
 		void Reset();
 
+		EntityID MaxEntityID() const;
+
 	private:
 		friend class ComponentTypes;
 

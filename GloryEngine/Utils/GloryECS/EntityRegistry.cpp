@@ -451,6 +451,11 @@ namespace Glory::Utils::ECS
 		m_pUserData = nullptr;
 		m_NextEntityID = 1;
 	}
+
+	EntityID EntityRegistry::MaxEntityID() const
+	{
+		return m_NextEntityID;
+	}
 //
 //	void SceneObject::SetBeforeObject(SceneObject* pObject)
 //	{
