@@ -24,6 +24,9 @@ namespace Glory
         GLORY_API void Deserialize(BinaryStream& container) override;
 
     private:
+        virtual void References(Engine*, std::vector<UUID>&) const override {}
+
+    private:
         uint32_t m_FontHeight;
         std::vector<uint64_t> m_CharacterCodes;
         std::vector<GlyphData> m_Glyphs;

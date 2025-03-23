@@ -63,6 +63,7 @@ Editor:
 - Fixed extra unindent from tree leaf in scene graph
 - Fixed search bar not filtering objects in scene graph
 - Scene graph will now automatically open nodes to selected object
+- Improved collecting of assets during packaging
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

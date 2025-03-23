@@ -1,11 +1,13 @@
 #pragma once
 #include <EntityID.h>
+#include <UUID.h>
 
 #include <functional>
 
 namespace Glory::Utils::ECS
 {
     class EntityRegistry;
+    class BaseTypeView;
 }
 
 namespace Glory
@@ -27,6 +29,8 @@ namespace Glory
         static void Pause(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent);
         static void Resume(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent);
         static void UpdateVolume(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent);
+
+        static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);
 
         std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, AudioSource&)> OnPlaybackFinished;
         std::function<void(Utils::ECS::EntityRegistry*, Utils::ECS::EntityID, AudioSource&)> OnSourceStart;

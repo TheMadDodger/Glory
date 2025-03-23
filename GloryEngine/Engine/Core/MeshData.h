@@ -37,6 +37,9 @@ namespace Glory
 		void SetDirty(bool dirty);
 
 	private:
+		virtual void References(Engine*, std::vector<UUID>&) const override {}
+
+	private:
 		friend class Mesh;
 		std::vector<float> m_Vertices;
 		std::vector<uint32_t> m_Indices;

@@ -90,6 +90,7 @@ namespace Glory
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnValidate, MonoScriptedSystem::OnValidate);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnEnable, MonoScriptedSystem::OnEnable);
 		pComponentTypes->RegisterInvokaction<MonoScriptComponent>(Glory::Utils::ECS::InvocationType::OnDisable, MonoScriptedSystem::OnDisable);
+		pComponentTypes->RegisterReferencesCallback<MonoScriptComponent>(MonoScriptedSystem::GetReferences);
 		m_pEngine->GetSceneManager()->SubscribeOnCopy<MonoScriptComponent>(MonoScriptedSystem::OnCopy);
 
 		m_pEngine->AddLoaderModule(new MonoScriptLoader());

@@ -234,6 +234,8 @@ namespace Glory
 		Entity InstantiateEntity(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID entity,
 			std::vector<Utils::ECS::EntityID>& newEntities, Utils::ECS::EntityID parent = 0);
 
+		virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+
 	protected:
 		friend class Entity;
 		friend class SceneSerializer;

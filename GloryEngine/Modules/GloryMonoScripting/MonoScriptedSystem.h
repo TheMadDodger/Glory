@@ -6,6 +6,7 @@
 namespace Glory::Utils::ECS
 {
     class EntityRegistry;
+    class BaseTypeView;
 }
 
 namespace Glory
@@ -26,6 +27,8 @@ namespace Glory
         static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent);
         static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent);
         static void OnCopy(GScene* pScene, void* data, UUID componentId, UUIDRemapper& remapper);
+
+        static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);
 
         GLORY_API static void OnBodyActivated(Engine* pEngine, UUID sceneID, UUID entityUUID);
         GLORY_API static void OnBodyDeactivated(Engine* pEngine, UUID sceneID, UUID entityUUID);

@@ -51,6 +51,7 @@ namespace Glory
 
 	private:
 		virtual std::vector<char>& GetPropertyBuffer(MaterialManager& manager, size_t index) override;
+		virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
 
 	private:
 		UUID m_BaseMaterial;

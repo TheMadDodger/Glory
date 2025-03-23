@@ -46,16 +46,17 @@ namespace Glory
 	{
 		ModuleSettings& settings = Settings();
 
-		const size_t start = references.size();
-		references.push_back(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
-		references.push_back(settings.Value<uint64_t>("UI Prepass Pipeline"));
-		references.push_back(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
-		references.push_back(settings.Value<uint64_t>("UI Overlay Pipeline"));
-		const size_t end = references.size();
+		std::vector<UUID> newReferences;
+		newReferences.push_back(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("UI Prepass Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("UI Overlay Pipeline"));
 
-		for (size_t i = start; i < end; ++i)
+		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
-			Resource* pPipelineResource = m_pEngine->GetAssetManager().GetAssetImmediate(references[i]);
+			if (!newReferences[i]) continue;
+			references.push_back(newReferences[i]);
+			Resource* pPipelineResource = m_pEngine->GetAssetManager().GetAssetImmediate(newReferences[i]);
 			if (!pPipelineResource) continue;
 			PipelineData* pPipelineData = static_cast<PipelineData*>(pPipelineResource);
 			for (size_t i = 0; i < pPipelineData->ShaderCount(); ++i)
@@ -172,9 +173,11 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
 		/* Image */
 		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Draw, UIImageSystem::OnDraw);
+		m_pComponentTypes->RegisterReferencesCallback<UIImage>(UIImageSystem::GetReferences);
 		/* Text */
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
+		m_pComponentTypes->RegisterReferencesCallback<UIText>(UITextSystem::GetReferences);
 		/* Box */
 		m_pComponentTypes->RegisterInvokaction<UIBox>(Glory::Utils::ECS::InvocationType::Draw, UIBoxSystem::OnDraw);
 		/* Interaction */

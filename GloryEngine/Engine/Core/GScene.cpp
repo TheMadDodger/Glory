@@ -11,6 +11,7 @@
 #include "BinaryStream.h"
 #include "BinarySerialization.h"
 #include "ComponentHelpers.h"
+#include "AssetManager.h"
 
 #include <NodeRef.h>
 
@@ -390,6 +391,29 @@ namespace Glory
 		}
 
 		return Entity{ newEntity, this };
+	}
+
+	void GScene::References(Engine* pEngine, std::vector<UUID>& references) const
+	{
+		if (m_Settings.m_LightingSettings.m_Skybox)
+		{
+			references.push_back(m_Settings.m_LightingSettings.m_Skybox);
+			Resource* pResource = pEngine->GetAssetManager().GetAssetImmediate(m_Settings.m_LightingSettings.m_Skybox);
+			if (pResource) pResource->References(pEngine, references);
+		}
+		if (m_Settings.m_LightingSettings.m_IrradianceMap)
+		{
+			references.push_back(m_Settings.m_LightingSettings.m_IrradianceMap);
+			Resource* pResource = pEngine->GetAssetManager().GetAssetImmediate(m_Settings.m_LightingSettings.m_IrradianceMap);
+			if (pResource) pResource->References(pEngine, references);
+		}
+
+		const size_t typeViewCount = m_Registry.TypeViewCount();
+		for (size_t i = 0; i < typeViewCount; ++i)
+		{
+			Utils::ECS::BaseTypeView* pTypeView = m_Registry.TypeViewAt(i);
+			pTypeView->GetReferences(references);
+		}
 	}
 
 	void GScene::MarkForDestruction()

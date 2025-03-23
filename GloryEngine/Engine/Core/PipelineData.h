@@ -108,6 +108,9 @@ namespace Glory
         /** @brief Remove all features */
         void ClearFeatures();
 
+    private:
+        virtual void References(Engine*, std::vector<UUID>&) const override {}
+
     protected:
         PipelineType m_Type = PT_Phong;
         std::vector<UUID> m_Shaders;

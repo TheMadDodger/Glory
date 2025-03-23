@@ -34,6 +34,9 @@ namespace Glory::Editor
 		/** @brief True if the resource was recently saved */
 		bool& WasSaved() { return m_WasSaved; }
 
+	private:
+		virtual void References(Engine*, std::vector<UUID>&) const override {}
+
 	protected:
 		bool m_Dirty{ false };
 		bool m_WasSaved{ false };

@@ -2,6 +2,7 @@
 #include "ResourceType.h"
 #include "BinaryStream.h"
 #include "MaterialManager.h"
+#include "Engine.h"
 
 #include <algorithm>
 
@@ -254,5 +255,16 @@ namespace Glory
 		if (!pBaseMaterial) return m_PropertyBuffer;
 		if (!m_PropertyOverridesEnable[index]) return pBaseMaterial->m_PropertyBuffer;
 		return m_PropertyBuffer;
+	}
+
+	void MaterialInstanceData::References(Engine* pEngine, std::vector<UUID>& references) const
+	{
+		if (m_BaseMaterial)
+		{
+			references.push_back(m_BaseMaterial);
+			MaterialData* pBaseMaterial = GetBaseMaterial(pEngine->GetMaterialManager());
+			pBaseMaterial->References(pEngine, references);
+		}
+		MaterialData::References(pEngine, references);
 	}
 }

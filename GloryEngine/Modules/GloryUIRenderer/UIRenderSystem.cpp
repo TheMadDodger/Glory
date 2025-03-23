@@ -157,7 +157,9 @@ namespace Glory
 		{
 			const UIRenderer* pMeshRenderer = static_cast<const UIRenderer*>(pTypeView->GetComponentAddressFromIndex(i));
 			const UUID document = pMeshRenderer->m_Document.AssetUUID();
+			const UUID material = pMeshRenderer->m_WorldMaterial.AssetUUID();
 			if (document) references.push_back(document);
+			if (material) references.push_back(material);
 		}
 	}
 }

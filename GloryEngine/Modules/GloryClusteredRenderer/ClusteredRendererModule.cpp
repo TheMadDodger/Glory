@@ -80,19 +80,20 @@ namespace Glory
 	{
 		ModuleSettings& settings = Settings();
 
-		const size_t start = references.size();
-		references.push_back(settings.Value<uint64_t>("Lines Pipeline"));
-		references.push_back(settings.Value<uint64_t>("Screen Pipeline"));
-		references.push_back(settings.Value<uint64_t>("SSAO Prepass Pipeline"));
-		references.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
-		references.push_back(settings.Value<uint64_t>("Text Pipeline"));
-		references.push_back(settings.Value<uint64_t>("Display Copy Pipeline"));
-		references.push_back(settings.Value<uint64_t>("Skybox Pipeline"));
-		const size_t end = references.size();
+		std::vector<UUID> newReferences;
+		newReferences.push_back(settings.Value<uint64_t>("Lines Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("Screen Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("SSAO Prepass Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("Text Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("Display Copy Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("Skybox Pipeline"));
 
-		for (size_t i = start; i < end; ++i)
+		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
-			Resource* pPipelineResource = m_pEngine->GetAssetManager().GetAssetImmediate(references[i]);
+			if (!newReferences[i]) continue;
+			references.push_back(newReferences[i]);
+			Resource* pPipelineResource = m_pEngine->GetAssetManager().GetAssetImmediate(newReferences[i]);
 			if (!pPipelineResource) continue;
 			PipelineData* pPipelineData = static_cast<PipelineData*>(pPipelineResource);
 			for (size_t i = 0; i < pPipelineData->ShaderCount(); ++i)
