@@ -101,7 +101,8 @@ namespace Glory::Editor
 			return importedResource;
 		}
 
-		HDRImageData* pData = new HDRImageData(width, height, std::move(data), dataSize);
+		ImageData* pData = new ImageData(width, height, PixelFormat::PF_R16G16B16Sfloat, PixelFormat::PF_RGB,
+			12, std::move(data), dataSize, false, DataType::DT_Float);
 		ImportedResource importedResource{ path, pData };
 
 		TextureData* pDefualtTexture = new TextureData(pData);
@@ -152,9 +153,8 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
-	bool STBHDRImageImporter::Save(const std::filesystem::path& path, Resource* pResource) const
+	bool STBHDRImageImporter::SaveResource(const std::filesystem::path& path, ImageData* pImage) const
 	{
-		ImageData* pImage = static_cast<ImageData*>(pResource);
 		const int result = stbi_write_hdr(path.string().data(), pImage->GetWidth(), pImage->GetHeight(), 3, static_cast<const float*>(pImage->GetPixels()));
 		return result != 0;
 	}
