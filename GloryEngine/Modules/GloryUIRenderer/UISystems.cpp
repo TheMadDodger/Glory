@@ -114,6 +114,16 @@ namespace Glory
 		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 
+	void UIImageSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+	{
+		for (size_t i = 0; i < pTypeView->Size(); ++i)
+		{
+			const UIImage* pImage = static_cast<const UIImage*>(pTypeView->GetComponentAddressFromIndex(i));
+			const UUID image = pImage->m_Image.AssetUUID();
+			if (image) references.push_back(image);
+		}
+	}
+
     void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
     {
         UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
@@ -183,6 +193,16 @@ namespace Glory
 	void UITextSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
 	{
 		pComponent.m_Dirty = true;
+	}
+
+	void UITextSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+	{
+		for (size_t i = 0; i < pTypeView->Size(); ++i)
+		{
+			const UIText* pText = static_cast<const UIText*>(pTypeView->GetComponentAddressFromIndex(i));
+			const UUID font = pText->m_Font.AssetUUID();
+			if (font) references.push_back(font);
+		}
 	}
 
 	void UIBoxSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIBox& pComponent)

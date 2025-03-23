@@ -36,6 +36,9 @@ namespace Glory
         GLORY_API void Deserialize(BinaryStream& container) override;
 
     private:
+        virtual void References(Engine*, std::vector<UUID>&) const override {}
+
+    private:
         SoundMaterial m_Material;
     };
 }

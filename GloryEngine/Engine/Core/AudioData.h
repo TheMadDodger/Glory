@@ -17,6 +17,9 @@ namespace Glory
 		void Deserialize(BinaryStream& container) override;
 
 	private:
+		virtual void References(Engine*, std::vector<UUID>&) const override {}
+
+	private:
 		std::vector<char> m_Data;
 	};
 }

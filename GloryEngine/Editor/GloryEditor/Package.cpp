@@ -266,21 +266,10 @@ namespace Glory::Editor
 
 		/* Find all resources in use for each scene */
 		std::map<UUID, std::vector<UUID>> assetScenes;
-		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
+		for (size_t i = 0; i < LoadedScenesToPackage.size(); ++i)
 		{
-			AssetLocation location;
-			EditorAssetDatabase::GetAssetLocation(ScenesToPackage[i], location);
-			std::filesystem::path path = pEngine->GetAssetDatabase().GetAssetPath();
-
-			path.append(location.Path);
-
-			if (!std::filesystem::exists(path))
-				path = location.Path;
-
-			Utils::YAMLFileRef sceneFile{ path };
 			std::vector<UUID> assets;
-			ScanSceneFileForAssets(pEngine, sceneFile, assets);
-
+			ScanForAssetsInResource(pEngine, LoadedScenesToPackage[i], assets);
 			for (size_t j = 0; j < assets.size(); ++j)
 			{
 				const UUID asset = assets[j];

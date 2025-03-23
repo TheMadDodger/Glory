@@ -45,6 +45,6 @@ namespace Glory
 
 	void TextureData::References(Engine*, std::vector<UUID>& references) const
 	{
-		references.push_back(m_Image.AssetUUID());
+		if (m_Image.AssetUUID()) references.push_back(m_Image.AssetUUID());
 	}
 }

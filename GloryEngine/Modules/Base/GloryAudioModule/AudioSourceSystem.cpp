@@ -163,6 +163,16 @@ namespace Glory
 		pAudioModule->SetVolume(pComponent.m_CurrentChannel, pComponent.m_Volume);
 	}
 
+	void AudioSourceSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+	{
+		for (size_t i = 0; i < pTypeView->Size(); ++i)
+		{
+			const AudioSource* pAudioSource = static_cast<const AudioSource*>(pTypeView->GetComponentAddressFromIndex(i));
+			const UUID audio = pAudioSource->m_Audio.AssetUUID();
+			if (audio) references.push_back(audio);
+		}
+	}
+
 	void AudioListenerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();

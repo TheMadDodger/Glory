@@ -117,5 +117,8 @@ namespace Glory
 		GLORY_API void Deserialize(BinaryStream& container) override;
 
 		AudioScene m_AudioScene;
+
+	private:
+		virtual void References(Engine*, std::vector<UUID>&) const override {}
 	};
 }

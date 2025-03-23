@@ -39,6 +39,9 @@ namespace Glory
         }
 
     private:
+        virtual void References(Engine*, std::vector<UUID>&) const override {}
+
+    private:
         friend class FileLoaderModule;
         std::vector<char> m_Data;
         std::vector<char> m_MetaData;

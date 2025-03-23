@@ -44,6 +44,8 @@ namespace Glory
 
         virtual void BuildTexture();
 
+        virtual void References(Engine*, std::vector<UUID>&) const override {}
+
     private:
         friend class ImageLoaderModule;
     };

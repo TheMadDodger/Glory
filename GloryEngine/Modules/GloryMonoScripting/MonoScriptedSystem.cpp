@@ -176,6 +176,28 @@ namespace Glory
 		}
 	}
 
+	void MonoScriptedSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
+	{
+		for (size_t i = 0; i < pTypeView->Size(); ++i)
+		{
+			const MonoScriptComponent* pScriptComponent = static_cast<const MonoScriptComponent*>(pTypeView->GetComponentAddressFromIndex(i));
+			if (!pScriptComponent->m_ScriptType.m_Hash) continue;
+			MonoScriptManager& scripts = MonoManager::Instance()->GetCoreLibManager()->ScriptManager();
+			const int typeIndex = scripts.TypeIndexFromHash(pScriptComponent->m_ScriptType.m_Hash);
+			if (typeIndex == -1) continue;
+			const std::vector<ScriptProperty>& properties = scripts.ScriptProperties(typeIndex);
+			for (size_t i = 0; i < properties.size(); ++i)
+			{
+				if (properties[i].m_TypeHash != ST_Asset) continue;
+				const size_t offset = properties[i].m_RelativeOffset;
+				if (offset + sizeof(uint64_t) >= pScriptComponent->m_ScriptData.m_Buffer.size()) continue;
+				const AssetReferenceBase* pReferenceMember =
+					reinterpret_cast<const AssetReferenceBase*>(&pScriptComponent->m_ScriptData.m_Buffer[offset]);
+				if (pReferenceMember->AssetUUID()) references.push_back(pReferenceMember->AssetUUID());
+			}
+		}
+	}
+
 	void MonoScriptedSystem::OnBodyActivated(Engine* pEngine, UUID sceneID, UUID entityUUID)
 	{
 		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(sceneID);

@@ -48,6 +48,7 @@ namespace Glory
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::OnRemove, AudioSourceSystem::OnRemove);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Update, AudioSourceSystem::OnUpdate);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Start, AudioSourceSystem::OnStart);
+		pComponentTypes->RegisterReferencesCallback<AudioSource>(AudioSourceSystem::GetReferences);
 		pComponentTypes->RegisterInvokaction<AudioSource>(Glory::Utils::ECS::InvocationType::Stop, AudioSourceSystem::OnStop);
 		pComponentTypes->RegisterInvokaction<AudioListener>(Glory::Utils::ECS::InvocationType::Update, AudioListenerSystem::OnUpdate);
 		pComponentTypes->RegisterInvokaction<AudioListener>(Glory::Utils::ECS::InvocationType::Start, AudioListenerSystem::OnStart);

@@ -10,6 +10,7 @@
 namespace Glory::Utils::ECS
 {
 	class EntityRegistry;
+	class BaseTypeView;
 }
 
 namespace Glory
@@ -36,6 +37,7 @@ namespace Glory
 	{
 	public:
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIImage& pComponent);
+		static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);
 	};
 
 	class UITextSystem
@@ -43,6 +45,7 @@ namespace Glory
 	public:
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent);
 		static void OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent);
+		static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);
 	};
 	
 	class UIBoxSystem

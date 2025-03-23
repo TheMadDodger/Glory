@@ -29,6 +29,9 @@ namespace Glory
         std::string_view Feature(size_t index) const;
 
     private:
+        virtual void References(Engine*, std::vector<UUID>&) const override {}
+
+    private:
         ShaderType m_ShaderType;
         std::vector<char> m_OriginalSource;
         std::vector<char> m_ProcessedSource;
