@@ -19,13 +19,11 @@ Engine:
 - Phong and PhongTextured now have a shininess property and support specular highlights
 - Added PBR shaders and pipeline
 - Added an extra G buffer to the renderer for extra data
-- Added HDRImageData resource
 - Added light type property to light component
 - Light components now have 4 float properties for their data
 - Point light now uses inner and outer values for inner and outer range
 - Added support for directional lights (sun)
 - Added support for spotlights
-- Added HDRImageData resource
 - Added skybox rendering
 - Added diffuse irradiance to ClusteredDeferred
 
