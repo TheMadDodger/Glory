@@ -50,7 +50,7 @@ namespace Glory
 		}
 	}
 
-	void Material::SetPropertiesBuffer(Engine* pEngine)
+	void Material::SetPropertiesBuffer(Engine* pEngine, uint32_t hasTexturesBinding)
 	{
 		std::vector<char>& propertyBuffer = m_pMaterialData->GetBufferReference(pEngine->GetMaterialManager());
 		if (!propertyBuffer.empty())
@@ -58,7 +58,7 @@ namespace Glory
 			if (m_pPropertiesBuffer == nullptr) m_pPropertiesBuffer = CreatePropertiesBuffer((uint32_t)propertyBuffer.size());
 			m_pPropertiesBuffer->Assign((const void*)propertyBuffer.data());
 		}
-		if (m_pHasTexturesBuffer == nullptr) m_pHasTexturesBuffer = CreateHasTexturesBuffer();
+		if (m_pHasTexturesBuffer == nullptr) m_pHasTexturesBuffer = CreateHasTexturesBuffer(hasTexturesBinding);
 		m_pHasTexturesBuffer->Assign((const void*)&m_TextureSetBits);
 
 		if (m_pPropertiesBuffer) m_pPropertiesBuffer->BindForDraw();

@@ -29,7 +29,7 @@ namespace Glory
 		/** @brief Update only samplers */
 		void SetSamplers(Engine* pEngine);
 		/** @brief Update only propertties buffer and texture bits */
-		void SetPropertiesBuffer(Engine* pEngine);
+		void SetPropertiesBuffer(Engine* pEngine, uint32_t hasTexturesBinding=3);
 
 		/** @brief Set texture on material */
 		virtual void SetTexture(const std::string& name, Texture* value) = 0;
@@ -45,7 +45,7 @@ namespace Glory
 
 	protected:
 		virtual Buffer* CreatePropertiesBuffer(uint32_t size) = 0;
-		virtual Buffer* CreateHasTexturesBuffer() = 0;
+		virtual Buffer* CreateHasTexturesBuffer(uint32_t bindingIndex=3) = 0;
 		virtual Buffer* CreateMVPBuffer() = 0;
 
 	protected:

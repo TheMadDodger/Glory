@@ -437,6 +437,7 @@ namespace Glory
 
 		pRenderTexture->BindAll(pMaterial);
 		if (pIrradianceTexture) pMaterial->SetCubemapTexture("IrradianceMap", pIrradianceTexture);
+		pMaterial->SetPropertiesBuffer(m_pEngine, 7);
 
 		pClusterSSBO->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();

@@ -604,7 +604,7 @@ namespace Glory
 
 		m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
 		pOutputTexture->BindForDraw();
-		OnDoCompositing(camera, m_FrameData.ActiveLights, width, height, pRenderTexture);
+		OnDoCompositing(camera, frame.ActiveLights, width, height, pRenderTexture);
 		pOutputTexture->UnBindForDraw();
 		m_pEngine->Profiler().EndSample();
 	}

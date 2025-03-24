@@ -22,7 +22,7 @@ namespace Glory
 
     private:
         virtual Buffer* CreatePropertiesBuffer(uint32_t size) override;
-        virtual Buffer* CreateHasTexturesBuffer() override;
+        virtual Buffer* CreateHasTexturesBuffer(uint32_t bindingIndex=3) override;
         virtual Buffer* CreateMVPBuffer() override;
         virtual void SetTexture(const std::string& name, Texture* value) override;
         virtual void SetCubemapTexture(const std::string& name, Texture* value) override;
