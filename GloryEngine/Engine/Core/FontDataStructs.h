@@ -15,4 +15,13 @@ namespace Glory
 		uint32_t Advance;
 		glm::vec4 Coords;
 	};
+
+	struct TextRenderData;
+	class MeshData;
+	class FontData;
+
+	namespace Utils
+	{
+		void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextRenderData& renderData, float textWrap=0.0f);
+	}
 }
