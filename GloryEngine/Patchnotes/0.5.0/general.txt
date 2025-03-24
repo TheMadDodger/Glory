@@ -66,6 +66,8 @@ Editor:
 - Scene graph will now automatically open nodes to selected object
 - Improved collecting of assets during packaging
 - Added a resolution dropdown to the game window so you can preview your game in multiple resolutions
+- Moved default rename shortcut to F2 and preferences window shortcut to Ctrl + P
+- Added shortcut for opening the about window with F1 as default
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

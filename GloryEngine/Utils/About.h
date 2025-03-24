@@ -21,11 +21,14 @@ constexpr char* AboutText =
 	"- curl - https://curl.se/\n"
 	"- FontAwesome - https://fontawesome.com/\n"
 	"- Mono - https://www.mono-project.com/\n"
+	"- HdriToCubemap - https://github.com/ivarout/HdriToCubemap\n"
 	"\n"
 	"Other:\n"
 	"- ASSIMP - http://assimp.org/\n"
 	"- SDL (zlib license) - https://www.libsdl.org/index.php\n"
 	"- SDL_image (zlib license) - https://github.com/libsdl-org/SDL_image\n"
+	"- SDL_mixer (zlib license) - https://github.com/libsdl-org/SDL_mixer\n"
+	"- SteamAudio (Apache-2.0) - https://github.com/ValveSoftware/steam-audio\n"
 	"- premake (BSD 3-Clause license) - https://premake.github.io/\n"
 	"- shaderc (Apache-2.0) - https://github.com/google/shaderc\n"
 	"- esfw - https://github.com/SpartanJ/efsw\n"
@@ -35,4 +38,5 @@ constexpr char* AboutText =
 	"- SPIRV-cross (Apache-2.0) - https://github.com/KhronosGroup/SPIRV-Cross\n"
 	"- SPIRV-tools (Apache-2.0) - https://github.com/KhronosGroup/SPIRV-Tools\n"
 	"- zlib (zlib license) - https://www.zlib.net/\n"
-	"- CRCpp (CRCpp license) - https://github.com/d-bahr/CRCpp/\n";
+	"- CRCpp (CRCpp license) - https://github.com/d-bahr/CRCpp/\n"
+	"- FreeType (FreeType License) - https://github.com/freetype/freetype";
