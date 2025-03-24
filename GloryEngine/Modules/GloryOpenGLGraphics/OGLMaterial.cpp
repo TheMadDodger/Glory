@@ -30,6 +30,7 @@ namespace Glory
 		if (!m_pPipeline) return;
 		m_pPipeline->Use();
 		m_TextureCounter = 0;
+		m_TextureSetBits = 0;
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
@@ -39,10 +40,10 @@ namespace Glory
 			->CreateBuffer(size, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 1);
 	}
 
-	Buffer* OGLMaterial::CreateHasTexturesBuffer()
+	Buffer* OGLMaterial::CreateHasTexturesBuffer(uint32_t bindingIndex)
 	{
 		return m_pOwner->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
-			->CreateBuffer((uint32_t)sizeof(uint64_t), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 3);
+			->CreateBuffer((uint32_t)sizeof(uint64_t), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, bindingIndex);
 	}
 
 	Buffer* OGLMaterial::CreateMVPBuffer()

@@ -1,6 +1,7 @@
 #type frag
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : enable
 
 #define FEATURE_PBR
 
@@ -86,6 +87,17 @@ layout(std430, binding = 6) buffer ssaoSettings
     float Magnitude;
     float Contrast;
 };
+
+layout(std430, binding = 7) buffer HasTextureSSBO
+{
+    uint64_t HasTexture;
+};
+
+bool TextureEnabled(int index)
+{
+	uint64_t bit = 1 << index;
+	return (HasTexture & bit) > 0;
+}
 
 const vec3 GoodColor = vec3(0.0, 1.0, 0.0);
 const vec3 BadColor = vec3(1.0, 0.0, 0.0);
@@ -260,7 +272,7 @@ void main()
     vec3 kS = FresnelSchlick(max(dot(normal, V), 0.0), F0, roughness);
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
-    vec3 irradiance = texture(IrradianceMap, normal).rgb;
+    vec3 irradiance = TextureEnabled(6) ? texture(IrradianceMap, normal).rgb : vec3(0.03);
     vec3 diffuse = irradiance*color;
     vec3 ambient = (kD * diffuse) * ao;
 	vec3 fragColor = ambient + Lo;
@@ -358,17 +370,17 @@ void main()
 	ssao = min(ssao, 1.0);
 	float depth = texture(Depth, Coord).r;
 	vec3 worldPosition = WorldPosFromDepth(depth);
-	vec3 ambient = texture(IrradianceMap, normal).rgb;
+	vec3 ambient = TextureEnabled(6) ? texture(IrradianceMap, normal).rgb : vec3(1.0);
 
 	vec2 pixelID = Coord * ScreenDimensions;
 	uint clusterID = GetClusterIndex(vec3(pixelID.xy, depth));
 
-	uint clusterColorIndex = uint(mod(clusterID, 5));
-	uint totalClusters = TileSizes.x * TileSizes.y * TileSizes.z;
-	float clusterFrac = float(clusterColorIndex) / float(totalClusters);
-
-	uint clusterZVal = GetDepthSlice(depth);
-	vec3 clusterColor = depthSliceColors[uint(mod(clusterZVal, 5))];
+	//uint clusterColorIndex = uint(mod(clusterID, 5));
+	//uint totalClusters = TileSizes.x * TileSizes.y * TileSizes.z;
+	//float clusterFrac = float(clusterColorIndex) / float(totalClusters);
+	//
+	//uint clusterZVal = GetDepthSlice(depth);
+	//vec3 clusterColor = depthSliceColors[uint(mod(clusterZVal, 5))];
 
 	uint offset = LightGrid[clusterID].Offset;
 	uint count = LightGrid[clusterID].Count;
