@@ -36,23 +36,38 @@ namespace Glory
 		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 		return pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateRenderTexture(createInfo);
 	}
+
+	void DisplayManager::SetResolution(uint32_t width, uint32_t height)
+	{
+		if (width == 0 || height == 0) return;
+		if (width == m_Width && height == m_Height) return;
+		m_Width = width;
+		m_Height = height;
+		if (!m_Initialized) return;
+		ResizeAllTextures(m_Width, m_Height);
+	}
+
+	void DisplayManager::GetResolution(uint32_t& width, uint32_t& height)
+	{
+		width = m_Width;
+		height = m_Height;
+	}
 	
-	DisplayManager::DisplayManager() : m_pEngine(nullptr), m_pRenderTextures()
+	DisplayManager::DisplayManager() : m_pEngine(nullptr), m_Initialized(false),
+		m_pRenderTextures(), m_Width(1920), m_Height(1080)
 	{
 	}
 
 	DisplayManager::~DisplayManager()
 	{
+		m_Initialized = false;
 	}
 
 	void DisplayManager::Initialize(Engine* pEngine)
 	{
 		m_pEngine = pEngine;
 
-		int width, height;
-		pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
-
-		RenderTextureCreateInfo createInfo(width, height, false);
+		RenderTextureCreateInfo createInfo(m_Width, m_Height, false);
 		createInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color));
 
 		for (size_t i = 0; i < MAX_DISPLAYS; i++)
@@ -62,5 +77,7 @@ namespace Glory
 			pEngine->GetMainModule<GraphicsModule>()->Clear();
 			m_pRenderTextures[i]->UnBindForDraw();
 		}
+
+		m_Initialized = true;
 	}
 }

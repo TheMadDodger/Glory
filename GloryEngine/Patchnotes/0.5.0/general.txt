@@ -26,6 +26,7 @@ Engine:
 - Added support for spotlights
 - Added skybox rendering
 - Added diffuse irradiance to ClusteredDeferred
+- Cameras with a display output will now resize to the display
 
 Editor:
 - Added a startup popup
@@ -64,6 +65,7 @@ Editor:
 - Fixed search bar not filtering objects in scene graph
 - Scene graph will now automatically open nodes to selected object
 - Improved collecting of assets during packaging
+- Added a resolution dropdown to the game window so you can preview your game in multiple resolutions
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

@@ -80,6 +80,14 @@ namespace Glory
 			return;
 		}
 
+		if (camera.GetDisplayIndex() != -1)
+		{
+			/* Resize camera to display manager */
+			uint32_t width, height;
+			m_pEngine->GetDisplayManager().GetResolution(width, height);
+			camera.SetResolution(width, height);
+		}
+
 		m_FrameData.ActiveCameras.push_back(camera);
 		OnSubmit(camera);
 	}

@@ -1,13 +1,19 @@
+#include "GameWindow.h"
+#include "EditorApplication.h"
+#include "ImGuiHelpers.h"
+#include "EditorUI.h"
+
 #include <DisplayManager.h>
 #include <imgui.h>
 #include <InputModule.h>
 
-#include "GameWindow.h"
-#include "EditorApplication.h"
-#include "ImGuiHelpers.h"
-
 namespace Glory::Editor
 {
+	/* 1080p selected by default */
+	size_t SelectedAspect = 1;
+	size_t SelectedResolution = 3;
+	glm::vec2 CustomResolution{ 1920.0f, 1080.0f };
+
 	GameWindow::GameWindow() : EditorWindowTemplate("Game", 1280.0f, 720.0f), m_DisplayIndex(0)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
@@ -21,6 +27,12 @@ namespace Glory::Editor
 	{
 		MenuBar();
 		View();
+	}
+
+	void GameWindow::OnOpen()
+	{
+		const glm::uvec2& resolution = Resolutions[SelectedAspect][SelectedResolution];
+		EditorApplication::GetInstance()->GetEngine()->GetDisplayManager().SetResolution(resolution.x, resolution.y);
 	}
 
 	void GameWindow::MenuBar()
@@ -41,6 +53,47 @@ namespace Glory::Editor
 				}
 				ImGui::EndMenu();
 			}
+
+			const glm::uvec2& selectedResolution = Resolutions[SelectedAspect][SelectedResolution];
+			std::stringstream str;
+			str << selectedResolution.x << "x" << selectedResolution.y;
+
+			DisplayManager& displays = EditorApplication::GetInstance()->GetEngine()->GetDisplayManager();
+
+			if (ImGui::BeginMenu(str.str().data()))
+			{
+				for (size_t i = 0; i < AspectRatioCount; ++i)
+				{
+					if (ImGui::BeginMenu(AspectRatios[i]))
+					{
+						for (size_t j = 0; j < Resolutions[i].size(); ++j)
+						{
+							const glm::uvec2& resolution = Resolutions[i][j];
+							str.str("");
+							str << resolution.x << "x" << resolution.y;
+							if (ImGui::MenuItem(str.str().data(), NULL, SelectedAspect == i && SelectedResolution == j))
+							{
+								SelectedAspect = i;
+								SelectedResolution = j;
+								CustomResolution = resolution;
+								displays.SetResolution(resolution.x, resolution.y);
+							}
+						}
+						ImGui::EndMenu();
+					}
+				}
+				if (ImGui::BeginMenu("Custom"))
+				{
+					EditorUI::PushFlag(EditorUI::Flag::NoLabel);
+					const bool change = EditorUI::InputFloat2("Resolution", &CustomResolution, 1, FLT_MAX, 1);
+					EditorUI::PopFlag();
+					if (change)
+						displays.SetResolution(CustomResolution.x, CustomResolution.y);
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMenuBar();
 		}
 	}
