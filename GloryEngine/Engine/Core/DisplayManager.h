@@ -20,6 +20,9 @@ namespace Glory
 
 		RenderTexture* CreateOutputTexture(Engine* pEngine, uint32_t width, uint32_t height);
 
+		void SetResolution(uint32_t width, uint32_t height);
+		void GetResolution(uint32_t& width, uint32_t& height);
+
 	private:
 		DisplayManager();
 
@@ -30,6 +33,10 @@ namespace Glory
 		friend class Engine;
 		friend class RendererModule;
 		Engine* m_pEngine;
+		bool m_Initialized;
 		RenderTexture* m_pRenderTextures[MAX_DISPLAYS];
+
+		uint32_t m_Width;
+		uint32_t m_Height;
 	};
 }

@@ -29,23 +29,6 @@
 
 namespace Glory::Editor
 {
-	constexpr size_t AspectRatioCount = 5;
-	constexpr char* AspectRatios[AspectRatioCount] = {
-		"4:3",
-		"16:9",
-		"16:10",
-		"21:9",
-		"32:9",
-	};
-
-	const std::vector<glm::uvec2> Resolutions[AspectRatioCount] = {
-		{ { 1400, 1050 }, { 1440, 1080 }, { 1600, 1200 }, { 1920, 1440 }, { 2048, 1536 } },
-		{ { 1280, 720 }, { 1366, 768 }, { 1600, 900 }, { 1920, 1080 }, { 2560, 1440 }, { 3840, 2160 }, { 5120, 2880 }, { 7680, 4320 } },
-		{ { 1280, 800 }, { 1920, 1200 }, { 2560, 1600 } },
-		{ { 2560, 1080 }, { 3440, 1440 }, { 3840, 1600 },  { 5120, 2160 } },
-		{ { 3840, 1080 }, { 5120, 1440 }, { 7680, 2160 } }
-	};
-
 	/* 1080p selected by default */
 	size_t SelectedAspect = 1;
 	size_t SelectedResolution = 3;

@@ -4,7 +4,6 @@
 #include "GraphicsEnums.h"
 #include "Texture.h"
 #include "Material.h"
-#include <GL/glew.h>
 
 namespace Glory
 {

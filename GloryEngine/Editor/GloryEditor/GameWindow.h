@@ -10,6 +10,7 @@ namespace Glory::Editor
 
     private:
         virtual void OnGUI() override;
+        virtual void OnOpen() override;
 
     private:
         void MenuBar();

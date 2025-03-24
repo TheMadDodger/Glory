@@ -1,4 +1,6 @@
 #include "WindowModule.h"
+#include "Engine.h"
+#include "DisplayManager.h"
 
 namespace Glory
 {
@@ -49,6 +51,10 @@ namespace Glory
     {
         OnInitialize();
         m_pMainWindow = CreateNewWindow(m_MainWindowCreateInfo);
+
+        int width, height;
+        m_pMainWindow->GetDrawableSize(&width, &height);
+        m_pEngine->GetDisplayManager().SetResolution(uint32_t(width), uint32_t(height));
     }
 
     void WindowModule::Cleanup()
