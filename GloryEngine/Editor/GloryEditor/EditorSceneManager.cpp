@@ -6,6 +6,7 @@
 #include "Undo.h"
 #include "EditorApplication.h"
 #include "EntityEditor.h"
+#include "AssetCompiler.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -340,6 +341,17 @@ namespace Glory::Editor
 
 	void EditorSceneManager::OnInitialize()
 	{
+		Undo::RegisterChangeHandler(".gscene", "Settings", [this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			for (size_t i = 0; i < m_SceneFiles.size(); ++i)
+			{
+				if (m_SceneFiles[i].Path() != file.Path()) continue;
+				GScene* pScene = GetOpenScene(i);
+				SetSceneDirty(pScene);
+				if (!AssetCompiler::CompileSceneSettings(pScene->GetUUID()))
+					m_pEngine->GetDebug().LogError("Failed to re-compile scene settings");
+				break;
+			}
+		});
 	}
 
 	void EditorSceneManager::OnCleanup()

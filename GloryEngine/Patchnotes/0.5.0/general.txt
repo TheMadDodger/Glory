@@ -68,6 +68,8 @@ Editor:
 - Added a resolution dropdown to the game window so you can preview your game in multiple resolutions
 - Moved default rename shortcut to F2 and preferences window shortcut to Ctrl + P
 - Added shortcut for opening the about window with F1 as default
+- Fixed crash when undoing a scene setting change
+- Fixed undo/redo of scene settings changes not updating the visual scene
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

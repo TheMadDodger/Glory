@@ -76,6 +76,14 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void TriggerChangeHandler(Utils::YAMLFileRef& file, const std::filesystem::path& path);
 
 		template<typename T>
+		static void RecordAndApplyYAMLEdit(const std::string& name, UUID uuid, bool continuous, Utils::YAMLFileRef& file, const std::filesystem::path& path, const T& oldValue, const T& newValue)
+		{
+			StartRecord(name, uuid, continuous);
+			ApplyYAMLEdit<T>(file, path, oldValue, newValue);
+			StopRecord();
+		}
+
+		template<typename T>
 		static void ApplyYAMLEdit(Utils::YAMLFileRef& file, const std::filesystem::path& path, const T& oldValue, const T& newValue)
 		{
 			YAML::Node oldValueNode = YAML::Node(YAML::NodeType::Scalar);
@@ -83,7 +91,7 @@ namespace Glory::Editor
 			oldValueNode = oldValue;
 			newValueNode = newValue;
 			file[path].Set(newValue);
-			Undo::YAMLEdit(file, path, oldValueNode, newValueNode);
+			YAMLEdit(file, path, oldValueNode, newValueNode);
 		}
 
 	private:
