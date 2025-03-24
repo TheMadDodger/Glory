@@ -244,6 +244,12 @@ namespace Glory
 			return pTexture;
 		}
 
+		for (size_t i = 0; i < 6; ++i)
+		{
+			ImageData* pImage = pCubemap->GetImageData(&GetEngine()->GetAssetManager(), i);
+			if (!pImage) return nullptr;
+		}
+
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateTexture");
 		pTexture = CreateTexture_Internal(pCubemap);
 		if (!pTexture) return nullptr;
