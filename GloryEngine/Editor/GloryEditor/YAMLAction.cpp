@@ -1,4 +1,9 @@
 #include "YAMLAction.h"
+#include "EditorApplication.h"
+#include "EditorResourceManager.h"
+#include "EditableResource.h"
+#include "EditorAssetDatabase.h"
+#include "EditorSceneManager.h"
 
 namespace Glory::Editor
 {
@@ -7,9 +12,38 @@ namespace Glory::Editor
 	{
 	}
 
+	YAMLResourceBase* GetResource(UUID id, bool& skipAction)
+	{
+		static uint32_t sceneHash = ResourceTypes::GetHash<GScene>();
+
+		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
+		EditorSceneManager& scenes = EditorApplication::GetInstance()->GetSceneManager();
+		YAMLResourceBase* pYAMLResource = nullptr;
+		if (!id) return nullptr;
+		ResourceMeta meta;
+		if (!EditorAssetDatabase::GetAssetMetadata(id, meta)) return nullptr;
+		if (meta.Hash() == sceneHash)
+		{
+			YAMLResourceBase* pResource = scenes.GetSceneFile(id);
+			skipAction = !pResource;
+			return pResource;
+		}
+
+		EditableResource* pResource = resources.GetEditableResource(id);
+		if (pResource && pResource->IsEditable())
+		{
+			return static_cast<YAMLResourceBase*>(pResource);
+		}
+		return nullptr;
+	}
+
 	void YAMLAction::OnUndo(const ActionRecord& actionRecord)
 	{
-		Utils::NodeValueRef node = m_File[m_PropertyPath];
+		bool skipAction = false;
+		YAMLResourceBase* pYAMLResource = GetResource(actionRecord.ObjectID, skipAction);
+		if (skipAction) return;
+
+		Utils::NodeValueRef node = pYAMLResource ? (**pYAMLResource)[m_PropertyPath] : m_File[m_PropertyPath];
 		if (m_OldValue.IsNull())
 		{
 			node.Erase();
@@ -23,12 +57,16 @@ namespace Glory::Editor
 			return;
 		}
 		node.Set(m_OldValue);
-		Undo::TriggerChangeHandler(m_File, m_PropertyPath);
+		Undo::TriggerChangeHandler(pYAMLResource ? (**pYAMLResource) : m_File, m_PropertyPath);
 	}
 
 	void YAMLAction::OnRedo(const ActionRecord& actionRecord)
 	{
-		Utils::NodeValueRef node = m_File[m_PropertyPath];
+		bool skipAction = false;
+		YAMLResourceBase* pYAMLResource = GetResource(actionRecord.ObjectID, skipAction);
+		if (skipAction) return;
+
+		Utils::NodeValueRef node = pYAMLResource ? (**pYAMLResource)[m_PropertyPath] : m_File[m_PropertyPath];
 		if (m_NewValue.IsNull())
 		{
 			node.Erase();
@@ -42,7 +80,7 @@ namespace Glory::Editor
 			return;
 		}
 		node.Set(m_NewValue);
-		Undo::TriggerChangeHandler(m_File, m_PropertyPath);
+		Undo::TriggerChangeHandler(pYAMLResource ? (**pYAMLResource) : m_File, m_PropertyPath);
 	}
 
 	bool YAMLAction::Combine(IAction* pOther)

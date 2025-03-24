@@ -15,8 +15,9 @@ namespace Glory::Editor
     {
         bool change = false;
 
+        const UUID sceneID = m_pTarget->GetUUID();
         EditorSceneManager& sceneManager = EditorApplication::GetInstance()->GetSceneManager();
-        auto sceneFile = sceneManager.GetSceneFile(m_pTarget->GetUUID());
+        auto sceneFile = sceneManager.GetSceneFile(sceneID);
         if (!sceneFile) return false;
 
         auto yamlFile = **sceneFile;
@@ -39,7 +40,7 @@ namespace Glory::Editor
                 UUID newValue = oldValue;
                 if (AssetPicker::ResourceDropdown("Skybox", ResourceTypes::GetHash<CubemapData>(), &newValue))
                 {
-                    Undo::ApplyYAMLEdit(yamlFile, skybox.Path(), uint64_t(oldValue), uint64_t(newValue));
+                    Undo::RecordAndApplyYAMLEdit("Scene Settings", sceneID, false, yamlFile, skybox.Path(), uint64_t(oldValue), uint64_t(newValue));
                     change = true;
                 }
 
@@ -47,7 +48,7 @@ namespace Glory::Editor
                 newValue = oldValue;
                 if (AssetPicker::ResourceDropdown("Irradiance Map", ResourceTypes::GetHash<CubemapData>(), &newValue))
                 {
-                    Undo::ApplyYAMLEdit(yamlFile, irradiance.Path(), uint64_t(oldValue), uint64_t(newValue));
+                    Undo::RecordAndApplyYAMLEdit("Scene Settings", sceneID, false, yamlFile, irradiance.Path(), uint64_t(oldValue), uint64_t(newValue));
                     change = true;
                 }
             }
@@ -61,7 +62,10 @@ namespace Glory::Editor
                 enable.Set(true);
 
             bool open = false;
+
+            Undo::StartRecord("Scene Settings", sceneID);
             change |= EditorUI::HeaderWithCheckbox("SSAO", open, yamlFile, enable.Path());
+            Undo::StopRecord();
 
             ImGui::BeginDisabled(!enable.As<bool>());
             if (open)
@@ -103,15 +107,20 @@ namespace Glory::Editor
                     contrast.Set(DefaultSSAO.m_Contrast);
 
                 ImGui::TextUnformatted("Render");
+                Undo::StartRecord("Scene Settings", sceneID, true);
                 change |= EditorUI::InputFloat(yamlFile, sampleRadius.Path(), 0.0f);
                 change |= EditorUI::InputFloat(yamlFile, sampleBias.Path(), 0.0f, 10.0f, 0.0001f);
                 change |= EditorUI::InputInt(yamlFile, kernelSize.Path(), 0);
+                Undo::StopRecord();
 
                 ImGui::Separator();
                 ImGui::TextUnformatted("Blur");
+                Undo::StartRecord("Scene Settings", sceneID);
                 change |= EditorUI::InputEnum<BlurType>(yamlFile, blurType.Path());
+                Undo::StopRecord();
                 const BlurType selectedBlur = blurType.AsEnum<BlurType>();
 
+                Undo::StartRecord("Scene Settings", sceneID, true);
                 switch (selectedBlur)
                 {
                 case BlurType::Box:
@@ -130,15 +139,9 @@ namespace Glory::Editor
                 ImGui::TextUnformatted("Compose");
                 change |= EditorUI::InputFloat(yamlFile, magnitude.Path(), 0.0f);
                 change |= EditorUI::InputFloat(yamlFile, contrast.Path(), 0.0f);
+                Undo::StopRecord();
             }
             ImGui::EndDisabled();
-        }
-
-        if (change)
-        {
-            sceneManager.SetSceneDirty((GScene*)m_pTarget);
-            if (!AssetCompiler::CompileSceneSettings(m_pTarget->GetUUID()))
-                sceneManager.GetEngine()->GetDebug().LogError("Failed to re-compile scene settings");
         }
 
         return change;

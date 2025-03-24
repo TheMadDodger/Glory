@@ -115,6 +115,12 @@ namespace Glory::Editor
 			m_File.ChangePath(path);
 		}
 
+		/** @brief Path of the underlying YAML file */
+		const std::filesystem::path& Path() const
+		{
+			return m_File.Path();
+		}
+
 	protected:
 		Utils::YAMLFileRef m_File;
 	};
