@@ -95,6 +95,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Play_Stop				= "Stop Playmode";
 	static constexpr char* Shortcut_Play_Pauze				= "Toggle Pauze Playmode";
 	static constexpr char* Shortcut_Play_NextFrame			= "Playmode Next Frame";
+	static constexpr char* Shortcut_About					= "Open About";
 	static constexpr char* Shortcut_Window_Scene			= "Open Scene View";
 	static constexpr char* Shortcut_Window_Game				= "Open Game View";
 	static constexpr char* Shortcut_Window_SceneGraph		= "Open Scene Graph";
@@ -359,7 +360,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("File/Save Project", [this]() { ProjectSpace::Save(); }, NULL, Shortcut_File_SaveProject);
 		MenuBar::AddMenuItem("File/Package", [app]() { StartPackage(app->GetEngine()); }, NULL, Shortcut_Package);
 
-		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL);
+		MenuBar::AddMenuItem("File/About", [&]() { m_OpenAboutPopup = true; }, NULL, Shortcut_About);
 		MenuBar::AddMenuItem("File/Exit", [app]() { app->TryToQuit(); }, NULL, Shortcut_File_Exit);
 
 		MenuBar::AddMenuItem("Edit/Undo", Undo::DoUndo, NULL, Shortcut_Edit_Undo);
@@ -398,8 +399,9 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_File_SaveScene, ImGuiKey_S, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_File_LoadScene, ImGuiKey_O, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_File_Exit, ImGuiKey_Escape, ImGuiMod_Ctrl);
-		Shortcuts::SetShortcut(Shortcut_File_Preferences, ImGuiKey_F2, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_File_Preferences, ImGuiKey_P, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_File_SaveProject, ImGuiKey_S, ImGuiMod_Ctrl | ImGuiMod_Shift);
+		Shortcuts::SetShortcut(Shortcut_About, ImGuiKey_F1, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Play_Start, ImGuiKey_F5, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Play_Stop, ImGuiKey_F6, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Play_Pauze, ImGuiKey_F7, ImGuiMod_None);
@@ -494,7 +496,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Paste, ImGuiKey_V, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Duplicate, ImGuiKey_D, ImGuiModFlags_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Delete, ImGuiKey_Delete, ImGuiModFlags_None);
-		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_R, ImGuiModFlags_Ctrl);
+		Shortcuts::SetShortcut(Shortcut_Rename, ImGuiKey_F2, ImGuiModFlags_None);
 		Shortcuts::SetShortcut(Shortcut_Package, ImGuiKey_P, ImGuiModFlags_Ctrl);
 
 		FileBrowserItem::ObjectDNDEventDispatcher().AddListener([](const FileBrowserItem::ObjectDNDEvent& e) {
