@@ -51,6 +51,7 @@ namespace Glory
 	private:
 		virtual void Cleanup() override;
 		virtual void OnPostInitialize() override;
+		virtual void Update() override;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;

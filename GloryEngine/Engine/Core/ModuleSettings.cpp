@@ -3,10 +3,11 @@
 namespace Glory
 {
 	ModuleSettings::ModuleSettings()
-		: m_SettingsNode(0) {}
+		: m_SettingsNode(0), m_Dirty(false) {}
 
 	ModuleSettings::ModuleSettings(YAML::Node& settingsNode)
-		: m_SettingsNode(settingsNode), m_GroupNames({ "General" }), m_Groups({ {"General", std::vector<std::string>()}}) {}
+		: m_SettingsNode(settingsNode), m_GroupNames({ "General" }),
+		m_Groups({ {"General", std::vector<std::string>()}}), m_Dirty(false) {}
 
 	ModuleSettings::~ModuleSettings() {}
 
@@ -68,6 +69,16 @@ namespace Glory
 	const bool ModuleSettings::HasSettings() const
 	{
 		return m_ValueNames.size();
+	}
+
+	void ModuleSettings::SetDirty(bool dirty)
+	{
+		m_Dirty = dirty;
+	}
+
+	bool ModuleSettings::IsDirty() const
+	{
+		return m_Dirty;
 	}
 
 	void ModuleSettings::RegisterValue(const std::string& name, uint32_t type, uint32_t elementType)
