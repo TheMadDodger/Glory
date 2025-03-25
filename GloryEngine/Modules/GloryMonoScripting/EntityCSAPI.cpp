@@ -105,8 +105,9 @@ namespace Glory
 		Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = registry.GetTypeView<MonoScriptComponent>();
 		pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &comp);
 		pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), &comp);
+		/* If the scene is starting the enable callback will be called for us */
 		/* We can assume the component is active, but is the entity active? */
-		if (entity.IsActive())
+		if (entity.IsActive() && !pScene->IsStarting())
 			pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, &registry, entity.GetEntityID(), &comp);
 		return uuid;
 	}
