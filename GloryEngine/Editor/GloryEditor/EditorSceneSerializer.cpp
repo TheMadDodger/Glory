@@ -244,6 +244,15 @@ namespace Glory::Editor
 				/* TODO: Deserialize overrides */
 				return instantiatedEntity;
 			}
+			Entity instantiatedEntity = pScene->CreateEmptyObject(name, uuid);
+			if (parentUuid != NULL)
+			{
+				Entity parentEntity = pScene->GetEntityByUUID(parentUuid);
+				if (!parentEntity.IsValid()) pScene->DelayedSetParent(instantiatedEntity, parentUuid);
+				else instantiatedEntity.SetParent(parentEntity.GetEntityID());
+			}
+			pScene->SetPrefab(instantiatedEntity.GetEntityID(), prefabID);
+			return instantiatedEntity;
 		}
 		
 		UUID transformUUID = node["Components"][0]["UUID"].As<uint64_t>();

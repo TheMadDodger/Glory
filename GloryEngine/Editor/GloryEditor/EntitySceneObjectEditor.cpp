@@ -138,15 +138,17 @@ namespace Glory::Editor
 
 		const UUID prefabID = pScene->Prefab(m_pObject->GetUUID());
 		const UUID childOfPrefabID = pScene->PrefabChild(m_pObject->GetUUID());
-		if (prefabID || childOfPrefabID)
+		const UUID actualPrefabID = prefabID ? prefabID : childOfPrefabID;
+		if (actualPrefabID)
 		{
+			const bool prefabExists = EditorAssetDatabase::AssetExists(actualPrefabID);
 			std::string prefabIDString = std::to_string(prefabID ? prefabID : childOfPrefabID);
-			ImGui::Text("Linked to prefab:");
+			ImGui::Text("Linked to prefab%s:", !prefabExists ? " (Missing)" : "");
 			const float textWitdh = ImGui::CalcTextSize(prefabIDString.data()).x;
 			ImGui::SameLine();
 			const ImVec2 cursorPos = ImGui::GetCursorPos();
 			ImGui::SetCursorPos({ cursorPos.x + ImGui::GetContentRegionAvail().x - textWitdh, cursorPos.y });
-			ImGui::Text(prefabIDString.data());
+			ImGui::TextColored(prefabExists ? ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f } : ImVec4{ 1.0f, 0.25f, 0.25f, 1.0f }, prefabIDString.data());
 		}
 
 		ImGui::BeginDisabled(prefabID || childOfPrefabID);
@@ -292,7 +294,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	void EntitySceneObjectEditor::DrawObjectNodeName(Entity& entity, bool isPrefab)
+	void EntitySceneObjectEditor::DrawObjectNodeName(Entity& entity, bool isPrefab, bool isPrefabMissing)
 	{
 		Utils::ECS::EntityView* pEntityView = entity.GetScene()->GetRegistry().GetEntityView(entity.GetEntityID());
 		std::stringstream stream;
@@ -303,8 +305,8 @@ namespace Glory::Editor
 		}
 
 		const std::string componentLabels = stream.str();
-		ImGui::TextColored(isPrefab ? ImVec4{0.5f, 0.5f, 1.0f, 1.0f} : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
-			" %s %s", entity.IsHierarchyActive() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, entity.Name().data());
+		ImGui::TextColored(isPrefab ? (isPrefabMissing ? ImVec4{ 1.0f, 0.25f, 0.25f, 1.0f } : ImVec4{0.5f, 0.5f, 1.0f, 1.0f}) : ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f },
+			" %s %s %s", entity.IsHierarchyActive() ? ICON_FA_EYE : ICON_FA_EYE_SLASH, entity.Name().data(), isPrefab && isPrefabMissing ? "(Missing)" : "");
 
 		const float compLabelsWidth = ImGui::CalcTextSize(componentLabels.data()).x;
 		const float availableWidth = ImGui::GetWindowContentRegionWidth() - ImGui::GetWindowPos().x;

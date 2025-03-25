@@ -303,7 +303,14 @@ namespace Glory::Editor
 		if (childCount <= 0) node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		if (m_NeedsFilter || forceOpen.IsSet(entity.GetEntityID())) ImGui::SetNextItemOpen(true);
 		GScene* pScene = entity.GetScene();
-		const bool isPrefab = entity.GetScene()->Prefab(entity.EntityUUID()) || pScene->PrefabChild(entity.EntityUUID());
+
+		const UUID prefabID = entity.GetScene()->Prefab(entity.EntityUUID());
+		const UUID childPrefabID = pScene->PrefabChild(entity.EntityUUID());
+		const UUID actualyPrefabID = prefabID ? prefabID : childPrefabID;
+
+		const bool isPrefab = actualyPrefabID != 0;
+		const bool isPrefabMissing = !EditorAssetDatabase::AssetExists(actualyPrefabID);
+
 		const bool node_open = ImGui::TreeNodeEx("##entitynode", node_flags, "");
 		ObjectPayload payload{ entity.GetEntityID(), pScene->GetUUID() };
 		DND::DragAndDropSource<EditableEntity>(&payload, sizeof(ObjectPayload), [entity]() {
@@ -363,7 +370,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SameLine();
-		EntitySceneObjectEditor::DrawObjectNodeName(entity, isPrefab);
+		EntitySceneObjectEditor::DrawObjectNodeName(entity, isPrefab, isPrefabMissing);
 
 		if (node_open)
 		{
