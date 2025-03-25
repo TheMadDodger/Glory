@@ -206,6 +206,9 @@ namespace Glory
 		/** @overload */
 		const SceneSettings& Settings() const { return m_Settings; }
 
+		/** @brief Is the scene currently starting up? */
+		bool IsStarting() const;
+
 	protected:
 		/** @brief Invoke an update on all active entities and components */
 		void OnTick();
@@ -256,5 +259,7 @@ namespace Glory
 		bool m_MarkedForDestruct = false;
 
 		SceneSettings m_Settings;
+
+		bool m_Starting = false;
 	};
 }
