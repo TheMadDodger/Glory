@@ -90,6 +90,7 @@ namespace Glory
 		
 	void GScene::Start()
 	{
+		m_Starting = true;
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::OnValidate, NULL);
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Start, NULL);
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::OnEnable,
@@ -97,6 +98,7 @@ namespace Glory
 			const bool isActive = pEntity->IsActive() && pTypeView->IsActiveByIndex(componentIndex);
 			return isActive;
 		});
+		m_Starting = false;
 	}
 		
 	void GScene::Stop()
@@ -288,6 +290,11 @@ namespace Glory
 			data.ObjectToParent.SetParent(parent.GetEntityID());
 		});
 		m_DelayedParents.clear();
+	}
+
+	bool GScene::IsStarting() const
+	{
+		return m_Starting;
 	}
 
 	void GScene::OnTick()
