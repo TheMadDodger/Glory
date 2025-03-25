@@ -13,7 +13,8 @@
 namespace Glory
 {
 	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
-		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_pComponentTypesInstance(nullptr)
+		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_HoveringPos(),
+		m_HoveringNormal(), m_pComponentTypesInstance(nullptr)
 	{
 	}
 
@@ -23,6 +24,57 @@ namespace Glory
 		m_pOpenScenes.clear();
 		m_pExternalScenes.clear();
 		m_ActiveSceneIndex = 0;
+	}
+
+	void SceneManager::LoadScene(UUID uuid, bool additive)
+	{
+		if (!additive)
+			UnloadAllScenes();
+		else if (GetOpenScene(uuid))
+			UnloadScene(uuid);
+
+		OnLoadScene(uuid);
+	}
+
+	void SceneManager::UnloadScene(UUID uuid)
+	{
+		GScene* pActiveScene = GetActiveScene();
+		const size_t index = GetSceneIndex(uuid);
+		if (index == m_pOpenScenes.size()) return;
+		GScene* pScene = m_pOpenScenes[index];
+		pScene->Stop();
+		OnUnloadScene(pScene);
+		pScene->m_MarkedForDestruct = true;
+		m_pRemovedScenes.push_back(pScene);
+		m_pOpenScenes.erase(m_pOpenScenes.begin() + index);
+
+		if (m_pOpenScenes.empty() || pActiveScene == pScene)
+			m_ActiveSceneIndex = 0;
+		else
+		{
+			auto iter = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pActiveScene);
+			m_ActiveSceneIndex = iter - m_pOpenScenes.begin();
+		}
+
+		for (auto& callback : m_SceneClosedCallbacks)
+		{
+			callback.m_Callback(uuid, 0);
+		}
+	}
+
+	void SceneManager::UnloadAllScenes()
+	{
+		for (size_t i = 0; i < m_pOpenScenes.size(); ++i)
+		{
+			GScene* pScene = m_pOpenScenes[i];
+			pScene->Stop();
+			OnUnloadScene(pScene);
+			pScene->m_MarkedForDestruct = true;
+			pScene->m_Registry.DisableCallbacks();
+			m_pRemovedScenes.push_back(pScene);
+		}
+		OnUnloadAllScenes();
+		m_pOpenScenes.clear();
 	}
 
 	Engine* SceneManager::GetEngine()
@@ -100,11 +152,6 @@ namespace Glory
 	{
 		if (index >= m_pExternalScenes.size()) return nullptr;
 		return m_pExternalScenes[index];
-	}
-
-	void SceneManager::MarkAllScenesForDestruct()
-	{
-		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->MarkForDestruction(); });
 	}
 
 	GScene* SceneManager::GetActiveScene(bool force)
@@ -195,7 +242,12 @@ namespace Glory
 
 	void SceneManager::Cleanup()
 	{
-		CloseAllScenes();
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
+		m_pOpenScenes.clear();
+		std::for_each(m_pRemovedScenes.begin(), m_pRemovedScenes.end(), [](GScene* pScene) { delete pScene; });
+		m_pRemovedScenes.clear();
+		m_pExternalScenes.clear();
+		m_ActiveSceneIndex = 0;
 		Utils::ECS::ComponentTypes::DestroyInstance();
 		m_pComponentTypesInstance = nullptr;
 		OnCleanup();
@@ -205,16 +257,14 @@ namespace Glory
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Tick" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [this](GScene* pScene) {
-			if (pScene->m_MarkedForDestruct)
-			{
-				CloseScene(pScene->GetUUID());
-				return;
-			}
 			pScene->OnTick();
 		});
 		std::for_each(m_pExternalScenes.begin(), m_pExternalScenes.end(), [this](GScene* pScene) {
 			pScene->OnTick();
 		});
+
+		std::for_each(m_pRemovedScenes.begin(), m_pRemovedScenes.end(), [](GScene* pScene) { delete pScene; });
+		m_pRemovedScenes.clear();
 	}
 
 	void SceneManager::Draw()
@@ -305,29 +355,15 @@ namespace Glory
 		iter->second(pScene, data, componentID, remapper);
 	}
 
-	void SceneManager::OnSceneClosing(UUID sceneID)
-	{
-		for (auto& callback : m_SceneClosedCallbacks)
-		{
-			callback.m_Callback(sceneID, 0);
-		}
-	}
-
-	void SceneManager::CloseAllScenes()
-	{
-		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
-		m_pOpenScenes.clear();
-		m_ActiveSceneIndex = 0;
-		OnCloseAll();
-	}
-
 	void SceneManager::UpdateScene(GScene* pScene) const
 	{
+		if (pScene->m_MarkedForDestruct) return;
 		pScene->OnTick();
 	}
 
 	void SceneManager::DrawScene(GScene* pScene) const
 	{
+		if (pScene->m_MarkedForDestruct) return;
 		pScene->OnPaint();
 	}
 }

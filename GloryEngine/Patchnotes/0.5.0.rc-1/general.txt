@@ -27,6 +27,7 @@ Engine:
 - Added skybox rendering
 - Added diffuse irradiance to ClusteredDeferred
 - Cameras with a display output will now resize to the display
+- Fixed an issue where reloading a scene would unload it next frame
 
 Editor:
 - Added a startup popup
@@ -85,3 +86,4 @@ Scripting:
 - Added CS API for UIInteraction
 - Added world position/rotation/scale properties to Transform CS API
 - Fixed resource type not existing if the resource is not in the main assembly
+- Fixed OnEnable being called twice when adding a component during Start()

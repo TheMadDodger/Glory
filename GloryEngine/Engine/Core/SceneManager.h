@@ -20,10 +20,13 @@ namespace Glory
 		virtual ~SceneManager();
 
 		virtual GScene* NewScene(const std::string& name="Empty Scene", bool additive=false) = 0;
-		virtual void OpenScene(UUID uuid, bool additive) = 0;
-		virtual void CloseScene(UUID uuid) = 0;
+		void LoadScene(UUID uuid, bool additive);
+		void UnloadScene(UUID uuid);
+		void UnloadAllScenes();
 
-		//void AddOpenScene(GScene* pScene, UUID uuid = 0);
+		virtual void OnLoadScene(UUID uuid) = 0;
+		virtual void OnUnloadScene(GScene* pScene) = 0;
+		virtual void OnUnloadAllScenes() = 0;
 
 		Utils::ECS::ComponentTypes* ComponentTypesInstance() const;
 
@@ -54,8 +57,6 @@ namespace Glory
 		size_t GetSceneIndex(UUID uuid) const;
 		size_t ExternalSceneCount();
 		GScene* GetExternalScene(size_t index);
-		void MarkAllScenesForDestruct();
-		void CloseAllScenes();
 
 		void UpdateScene(GScene* pScene) const;
 		void DrawScene(GScene* pScene) const;
@@ -88,9 +89,7 @@ namespace Glory
 	protected:
 		virtual void OnInitialize() = 0;
 		virtual void OnCleanup() = 0;
-		virtual void OnCloseAll() = 0;
 		virtual void OnSetActiveScene(GScene* pActiveScene) = 0;
-		void OnSceneClosing(UUID sceneID);
 
 	private:
 		friend class Engine;
@@ -103,6 +102,7 @@ namespace Glory
 		Engine* m_pEngine;
 		std::vector<GScene*> m_pOpenScenes;
 		std::vector<GScene*> m_pExternalScenes;
+		std::vector<GScene*> m_pRemovedScenes;
 		size_t m_ActiveSceneIndex;
 		UUID m_HoveringObjectSceneID;
 		UUID m_HoveringObjectID;
