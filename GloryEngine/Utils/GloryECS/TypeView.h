@@ -173,6 +173,7 @@ namespace Glory::Utils::ECS
 			size_t count = m_ComponentData.size();
 			for (size_t i = 0; i < count; ++i)
 			{
+				if (!pRegistry->CallbacksEnabled() || !pRegistry->CallbackEnabled(invocationType)) return;
 				T& component = m_ComponentData[i];
 				EntityID entity = m_Entities[i];
 				EntityView* pEntityView = pRegistry->GetEntityView(entity);
@@ -199,6 +200,7 @@ namespace Glory::Utils::ECS
 			if (!pRegistry->CallbacksEnabled() || !pRegistry->CallbackEnabled(invocationType)) return;
 			for (auto entity : entities)
 			{
+				if (!pRegistry->CallbacksEnabled() || !pRegistry->CallbackEnabled(invocationType)) return;
 				const uint32_t index = GetComponentIndex(entity);
 				if (index >= m_Entities.size()) continue;
 				Invoke(invocationType, pRegistry, m_Entities[index], &m_ComponentData[index]);

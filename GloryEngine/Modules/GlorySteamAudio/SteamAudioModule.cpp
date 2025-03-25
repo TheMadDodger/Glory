@@ -24,7 +24,7 @@ namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(SteamAudioModule);
 
-	SteamAudioModule::SteamAudioModule()
+	SteamAudioModule::SteamAudioModule(): m_SceneClosing(0)
 	{
 	}
 
@@ -300,6 +300,8 @@ namespace Glory
 					(pComponent.m_Simulation.m_Pathing ? IPL_SIMULATIONFLAGS_PATHING : 0)) : 0);
 			iplSimulatorSetSharedInputs(m_Simulator, simulationFlags, &sharedInputs);
 		};
+
+		m_SceneClosing = m_pEngine->GetSceneManager()->AddSceneClosingCallback([this](UUID sceneID, UUID) { OnSceneClosed(sceneID); });
 	}
 
 	void SteamAudioModule::Update()
@@ -309,6 +311,8 @@ namespace Glory
 
 	void SteamAudioModule::Cleanup()
 	{
+		m_pEngine->GetSceneManager()->RemoveSceneClosingCallback(m_SceneClosing);
+
 		for (size_t i = 0; i < m_Sources.size(); ++i)
 		{
 			if (!m_Sources[i]) continue;

@@ -75,7 +75,6 @@ namespace Glory
 		GLORY_API bool HasFeature(uint32_t feature) const override;
 
 		virtual bool ClaimExtraSceneData(Resource* pSceneResource) override;
-		virtual void OnSceneClosed(UUID sceneID) override;
 
 	protected:
 		virtual void Initialize() override;
@@ -145,6 +144,8 @@ namespace Glory
 		 */
 		void RemoveSource(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& source);
 
+		void OnSceneClosed(UUID sceneID);
+
 	private:
 		IPLContext m_IPLContext = nullptr;
 		IPLHRTF m_IPLHrtf = nullptr;
@@ -170,5 +171,6 @@ namespace Glory
 		SoundMaterial m_DefaultSoundMaterial;
 
 		std::vector<float> m_TemporaryStreamData;
+		UUID m_SceneClosing;
     };
 }

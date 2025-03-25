@@ -390,6 +390,7 @@ namespace Glory::Utils::ECS
 		if (!m_CallbacksEnabled || !CallbackEnabled(invocationType)) return;
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
+			if (!m_CallbacksEnabled) return;
 			m_pViews[i]->InvokeAll(invocationType, this, canCallCallback);
 		}
 	}
@@ -399,6 +400,7 @@ namespace Glory::Utils::ECS
 		if (!m_CallbacksEnabled || !CallbackEnabled(invocationType)) return;
 		for (size_t i = 0; i < m_pViews.size(); ++i)
 		{
+			if (!m_CallbacksEnabled) return;
 			m_pViews[i]->InvokeAll(invocationType, this, entities);
 		}
 	}
@@ -456,47 +458,4 @@ namespace Glory::Utils::ECS
 	{
 		return m_NextEntityID;
 	}
-//
-//	void SceneObject::SetBeforeObject(SceneObject* pObject)
-//	{
-//		SceneObject* pParent = GetParent();
-//
-//		std::vector<SceneObject*>* targetVector = &m_pScene->m_pSceneObjects;
-//		if (pParent != nullptr)
-//			targetVector = &pParent->m_pChildren;
-//
-//		auto it = std::find(targetVector->begin(), targetVector->end(), this);
-//		if (it == targetVector->end()) return;
-//		targetVector->erase(it);
-//
-//		auto targetIterator = std::find(targetVector->begin(), targetVector->end(), pObject);
-//		if (targetIterator == targetVector->end())
-//		{
-//			targetVector->push_back(this);
-//			return;
-//		}
-//		targetVector->insert(targetIterator, this);
-//	}
-//
-//	void SceneObject::SetAfterObject(SceneObject* pObject)
-//	{
-//		SceneObject* pParent = GetParent();
-//
-//		std::vector<SceneObject*>* targetVector = &m_pScene->m_pSceneObjects;
-//		if (pParent != nullptr)
-//			targetVector = &pParent->m_pChildren;
-//
-//		auto it = std::find(targetVector->begin(), targetVector->end(), this);
-//		if (it == targetVector->end()) return;
-//		targetVector->erase(it);
-//
-//		auto targetIterator = std::find(targetVector->begin(), targetVector->end(), pObject);
-//
-//		if (targetIterator == targetVector->end() || targetIterator + 1 == targetVector->end())
-//		{
-//			targetVector->push_back(this);
-//			return;
-//		}
-//		targetVector->insert(targetIterator + 1, this);
-//	}
 }

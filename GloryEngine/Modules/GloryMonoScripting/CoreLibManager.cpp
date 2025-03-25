@@ -51,6 +51,11 @@ namespace Glory
 
 	void CoreLibManager::Cleanup(Engine* pEngine)
 	{
+		if (m_SceneClosingCallback) pEngine->GetSceneManager()->RemoveSceneClosingCallback(m_SceneClosingCallback);
+		if (m_SceneObjectDestroyedCallback) pEngine->GetSceneManager()->RemoveSceneObjectDestroyedCallback(m_SceneObjectDestroyedCallback);
+
+		m_SceneClosingCallback = 0;
+		m_SceneObjectDestroyedCallback = 0;
 	}
 
 	MonoObject* CoreLibManager::CreateAssetObject(UUID uuid, const std::string_view type)

@@ -189,7 +189,7 @@ namespace Glory
 
 	void GloryRuntime::LoadScene(const UUID uuid)
 	{
-		m_pEngine->GetSceneManager()->OpenScene(uuid, false);
+		m_pEngine->GetSceneManager()->LoadScene(uuid, false);
 	}
 
 	void GloryRuntime::LoadAssetGroup(const std::filesystem::path& path)

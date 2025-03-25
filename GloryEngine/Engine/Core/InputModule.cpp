@@ -98,7 +98,8 @@ namespace Glory
 
 	void InputModule::SetPlayerInputMode(const size_t playerIndex, const std::string& inputMode)
 	{
-		if (m_InputModes.find(inputMode) == m_InputModes.end())
+		auto& iter = m_InputModes.find(inputMode);
+		if (iter == m_InputModes.end())
 		{
 			m_pEngine->GetDebug().LogError("SetPlayerInputMode: InputMode " + inputMode + " does not exist!");
 			return;
@@ -113,6 +114,7 @@ namespace Glory
 
 		/* Unbind current input maps and free devices */
 		player->Unbind();
+		player->m_InputMode = iter->second.m_Name;
 
 		/* Add input maps */
 		for (auto itor = m_InputMaps.begin(); itor != m_InputMaps.end(); ++itor)

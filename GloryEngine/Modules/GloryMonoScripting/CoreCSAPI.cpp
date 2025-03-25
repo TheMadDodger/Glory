@@ -391,14 +391,14 @@ namespace Glory
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
-		pScenes->CloseAllScenes();
+		pScenes->UnloadAllScenes();
 	}
 
 	void SceneManager_OpenScene(uint64_t id, bool additive)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
-		pScenes->OpenScene(id, additive);
+		pScenes->LoadScene(id, additive);
 	}
 
 	void SceneManager_OpenSceneByName(MonoString* name, bool additive)
