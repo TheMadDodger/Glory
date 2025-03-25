@@ -149,6 +149,9 @@ namespace Glory::Editor
 
         ImGui::EndChild();
 
+        if (change)
+            settings.SetDirty();
+
         return change;
     }
 }

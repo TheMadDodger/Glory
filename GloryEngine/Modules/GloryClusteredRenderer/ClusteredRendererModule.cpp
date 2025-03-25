@@ -202,6 +202,30 @@ namespace Glory
 			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
 	}
 
+	void ClusteredRendererModule::Update()
+	{
+		ModuleSettings& settings = Settings();
+		if (!settings.IsDirty()) return;
+
+		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
+		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
+		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
+		const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
+		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
+		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
+		const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
+
+		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
+		m_pDisplayCopyMaterial->SetPipeline(displayPipeline);
+		m_pSSAOMaterial->SetPipeline(SSAOPrePassPipeline);
+		m_pSSAOBlurMaterial->SetPipeline(SSAOBlurPipeline);
+		m_pTextMaterialData->SetPipeline(textPipeline);
+		m_pSkyboxMaterialData->SetPipeline(skyboxPipeline);
+		m_pIrradianceMaterialData->SetPipeline(irradiancePipeline);
+
+		settings.SetDirty(false);
+	}
+
 	void ClusteredRendererModule::Cleanup()
 	{
 		delete m_pClusterShaderData;

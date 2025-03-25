@@ -136,6 +136,9 @@ namespace Glory
 		{
 			PipelineData* pPipelineData =
 				pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager());
+			if (pMaterial->m_pPipeline->m_pPipelineData != pPipelineData)
+				pMaterial->m_pPipeline = CreatePipeline(pPipelineData);
+
 			if (!pPipelineData->IsDirty())
 			{
 				pMaterial->m_pMaterialData = pMaterialData;
