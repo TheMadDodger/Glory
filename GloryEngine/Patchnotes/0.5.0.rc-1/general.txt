@@ -71,6 +71,8 @@ Editor:
 - Added shortcut for opening the about window with F1 as default
 - Fixed crash when undoing a scene setting change
 - Fixed undo/redo of scene settings changes not updating the visual scene
+- Fixed crash when opening a scene that has a missing prefab
+- Objects that are linked to a missing prefab are now highlighted in red in the scene graph
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values

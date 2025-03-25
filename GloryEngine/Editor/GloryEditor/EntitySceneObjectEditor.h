@@ -29,7 +29,7 @@ namespace Editor
 		}
 
 		GLORY_EDITOR_API static std::string_view GetComponentIcon(uint32_t typeHash);
-		GLORY_EDITOR_API static void DrawObjectNodeName(Entity& entity, bool isPrefab);
+		GLORY_EDITOR_API static void DrawObjectNodeName(Entity& entity, bool isPrefab, bool isPrefabMissing);
 		GLORY_EDITOR_API static bool SearchCompare(std::string_view search, Entity& entity);
 
 		GLORY_EDITOR_API static void ConvertToPrefabMenuItem(Object* pObject, const ObjectMenuType&);
