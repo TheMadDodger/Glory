@@ -28,7 +28,7 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Active state of the component
         /// </summary>
-        public bool Active
+        public virtual bool Active
         {
             get => EntityComponent_GetActive(Object.Scene.ID, Object.ID, _objectID);
             set => EntityComponent_SetActive(Object.Scene.ID, Object.ID, _objectID, value);
