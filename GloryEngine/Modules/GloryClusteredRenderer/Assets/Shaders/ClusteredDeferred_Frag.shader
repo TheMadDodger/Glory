@@ -234,7 +234,7 @@ void main()
 	vec4 metallicRoughnessAO = texture(Data, Coord);
 	float ssao = AOEnabled == 1 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
 	ssao = min(ssao, 1.0);
-	float ao = AOEnabled == 1 ? ssao : metallicRoughnessAO.r;
+	float ao = metallicRoughnessAO.r;
 	float roughness = metallicRoughnessAO.g;
 	float metallic = metallicRoughnessAO.b;
 	float shadingEnabled = metallicRoughnessAO.a;
@@ -281,7 +281,7 @@ void main()
 	fragColor = fragColor / (fragColor + vec3(1.0));
 	fragColor = pow(fragColor, vec3(1.0/2.2));
 
-	out_Color = vec4(fragColor, 1.0);
+	out_Color = vec4(fragColor*ssao, 1.0);
 }
 
 #else
