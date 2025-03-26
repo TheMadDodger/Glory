@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.UI
 {
+    /// <summary>
+    /// Base class for UI components
+    /// </summary>
     public class UIComponent : Object
     {
         #region Props
