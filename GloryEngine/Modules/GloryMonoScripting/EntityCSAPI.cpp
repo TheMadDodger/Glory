@@ -169,6 +169,29 @@ namespace Glory
 			Components::Deactivate(entity, pTypeView, componentIndex);
 	}
 
+	bool EntityBehaviour_GetActive(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		if (objectID == 0 || sceneID == 0) return false;
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = pScene->GetRegistry().GetTypeView<MonoScriptComponent>();
+		return pTypeView->IsActive(entity.GetEntityID());
+	}
+
+	void EntityBehaviour_SetActive(uint64_t sceneID, uint64_t objectID, uint64_t componentID, bool active)
+	{
+		if (objectID == 0 || sceneID == 0) return;
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::TypeView<MonoScriptComponent>* pTypeView = pScene->GetRegistry().GetTypeView<MonoScriptComponent>();
+		const size_t componentIndex = pTypeView->GetComponentIndex(entity.GetEntityID());
+
+		if (active)
+			Components::Activate(entity, pTypeView, componentIndex);
+		else
+			Components::Deactivate(entity, pTypeView, componentIndex);
+	}
+
 #pragma endregion
 
 #pragma region Transform
@@ -979,6 +1002,9 @@ namespace Glory
 
 		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_GetActive", EntityComponent_GetActive);
 		BIND("GloryEngine.Entities.EntityComponent::EntityComponent_SetActive", EntityComponent_SetActive);
+		
+		BIND("GloryEngine.Entities.EntityBehaviour::EntityBehaviour_GetActive", EntityBehaviour_GetActive);
+		BIND("GloryEngine.Entities.EntityBehaviour::EntityBehaviour_SetActive", EntityBehaviour_SetActive);
 
 		/* Transform */
 		BIND("GloryEngine.Entities.Transform::Transform_GetLocalPosition", Transform_GetLocalPosition);
