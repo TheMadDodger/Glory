@@ -89,3 +89,4 @@ Scripting:
 - Added world position/rotation/scale properties to Transform CS API
 - Fixed resource type not existing if the resource is not in the main assembly
 - Fixed OnEnable being called twice when adding a component during Start()
+- Fixed crash when getting/setting active state of a script component
