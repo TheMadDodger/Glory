@@ -533,8 +533,9 @@ namespace Glory
 		if (!pScene) return;
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		const Entity parent = pScene->GetEntityByUUID(UUID(parentID));
-		if (!entity.IsValid() || !parent.IsValid()) return;
-		pScene->SetParent(entity.GetEntityID(), parent.GetEntityID());
+		if (!entity.IsValid()) return;
+		const Utils::ECS::EntityID parentEntityID = parent.IsValid() ? parent.GetEntityID() : 0;
+		pScene->SetParent(entity.GetEntityID(), parentEntityID);
 	}
 
 #pragma endregion
