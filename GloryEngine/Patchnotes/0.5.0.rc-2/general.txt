@@ -28,6 +28,7 @@ Engine:
 - Added diffuse irradiance to ClusteredDeferred
 - Cameras with a display output will now resize to the display
 - Fixed an issue where reloading a scene would unload it next frame
+- Fixed crash when trying to render an empty text
 
 Editor:
 - Added a startup popup

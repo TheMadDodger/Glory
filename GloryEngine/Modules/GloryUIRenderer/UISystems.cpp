@@ -126,6 +126,8 @@ namespace Glory
 
     void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
     {
+		/* No need to do anything if there is no text */
+		if (pComponent.m_Text.empty()) return;
         UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
         UIRendererModule* pUIRenderer = pDocument->Renderer();
 		Engine* pEngine = pUIRenderer->GetEngine();
