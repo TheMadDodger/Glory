@@ -73,6 +73,7 @@ Editor:
 - Fixed undo/redo of scene settings changes not updating the visual scene
 - Fixed crash when opening a scene that has a missing prefab
 - Objects that are linked to a missing prefab are now highlighted in red in the scene graph
+- Fixed material not being saved if only the pipeline was changed
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
