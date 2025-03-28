@@ -59,6 +59,7 @@ namespace Glory
 		GLORY_API void DeactivateBody(uint32_t bodyID);
 		GLORY_API bool IsBodyActive(uint32_t bodyID) const;
 		GLORY_API bool IsValidBody(uint32_t bodyID) const;
+		GLORY_API void SetBodyType(uint32_t bodyID, BodyType bodyType, const ActivationType activationType);
 
 		/* Position and rotation */
 		GLORY_API void SetBodyPosition(uint32_t bodyID, const glm::vec3& position, const ActivationType activationType = ActivationType::Activate);

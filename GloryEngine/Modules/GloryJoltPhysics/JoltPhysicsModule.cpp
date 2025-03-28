@@ -187,6 +187,14 @@ namespace Glory
 		return bodyInterface.IsAdded(jphBodyID);
 	}
 
+	void JoltPhysicsModule::SetBodyType(uint32_t bodyID, BodyType bodyType, const ActivationType activationType)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		if (jphBodyID.IsInvalid()) return;
+		bodyInterface.SetMotionType(jphBodyID, EMotionType(bodyType), EActivation(activationType));
+	}
+
 	glm::vec3 JoltPhysicsModule::GetBodyPosition(uint32_t bodyID) const
 	{
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();

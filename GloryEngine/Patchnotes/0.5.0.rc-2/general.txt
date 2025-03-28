@@ -93,3 +93,4 @@ Scripting:
 - Fixed OnEnable being called twice when adding a component during Start()
 - Fixed crash when getting/setting active state of a script component
 - Fixed a bug where you can't set the parent to nothing
+- Added BodyType property to PhysicsBody CS API
