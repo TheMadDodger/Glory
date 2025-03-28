@@ -95,3 +95,4 @@ Scripting:
 - Fixed a bug where you can't set the parent to nothing
 - Added BodyType property to PhysicsBody CS API
 - Added Transform property to SceneObject
+- Fixed properties of base class not showing in script editor
