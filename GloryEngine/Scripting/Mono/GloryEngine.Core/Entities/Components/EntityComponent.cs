@@ -14,16 +14,7 @@ namespace GloryEngine.Entities
         /// <summary>
         /// Transform component linked to the entity that owns this component
         /// </summary>
-        public Transform Transform
-        {
-            get
-            {
-                if (_transform != null) return _transform;
-                _transform = GetComponent<Transform>();
-                return _transform;
-            }
-            private set { }
-        }
+        public Transform Transform => _object.Transform;
 
         /// <summary>
         /// Active state of the component
@@ -46,7 +37,6 @@ namespace GloryEngine.Entities
         #region Fields
 
         private SceneObject _object;
-        private Transform _transform = null;
         internal bool _destroyed = false;
 
         #endregion
