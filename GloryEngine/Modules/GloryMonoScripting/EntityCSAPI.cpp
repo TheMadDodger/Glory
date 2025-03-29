@@ -285,9 +285,11 @@ namespace Glory
 	QuatWrapper Transform_GetWorldRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
-		glm::quat rotation;
-		glm::decompose(transform.MatTransform, glm::vec3(), rotation, glm::vec3(), glm::vec3(), glm::vec4());
-		return rotation;
+		glm::mat3 mat = transform.MatTransform;
+		mat[0] = glm::normalize(mat[0]);
+		mat[1] = glm::normalize(mat[1]);
+		mat[2] = glm::normalize(mat[2]);
+		return glm::quat_cast(mat);
 	}
 
 	void Transform_SetWorldRotation(uint64_t sceneID, uint64_t objectID, uint64_t componentID, QuatWrapper* rotation)
@@ -305,16 +307,22 @@ namespace Glory
 			parentTransform = pScene->GetRegistry().GetComponent<Transform>(parent).MatTransform;
 
 		const glm::quat worldRotation = ToGLMQuat(*rotation);
-		const glm::mat4 transformRotation = glm::inverse(parentTransform)*glm::mat4_cast(worldRotation);
-		glm::decompose(transformRotation, glm::vec3(), transform.Rotation, glm::vec3(), glm::vec3(), glm::vec4());
+		glm::mat3 transformRotation = glm::inverse(parentTransform)*glm::mat4_cast(worldRotation);
+		transformRotation[0] = glm::normalize(transformRotation[0]);
+		transformRotation[1] = glm::normalize(transformRotation[1]);
+		transformRotation[2] = glm::normalize(transformRotation[2]);
+		transform.Rotation = glm::quat_cast(transformRotation);
 		entity.SetDirty(true);
 	}
 
 	Vec3Wrapper Transform_GetWorldRotationEuler(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		Transform& transform = GetComponent<Transform>(sceneID, objectID, componentID);
-		glm::quat rotation;
-		glm::decompose(transform.MatTransform, glm::vec3(), rotation, glm::vec3(), glm::vec3(), glm::vec4());
+		glm::mat3 mat = transform.MatTransform;
+		mat[0] = glm::normalize(mat[0]);
+		mat[1] = glm::normalize(mat[1]);
+		mat[2] = glm::normalize(mat[2]);
+		const glm::quat rotation = glm::quat_cast(mat);
 		return glm::eulerAngles(rotation);
 	}
 
@@ -333,8 +341,11 @@ namespace Glory
 			parentTransform = pScene->GetRegistry().GetComponent<Transform>(parent).MatTransform;
 
 		const glm::quat worldRotation = glm::quat(ToGLMVec3(*rotation));
-		const glm::mat4 transformRotation = glm::inverse(parentTransform)*glm::mat4_cast(worldRotation);
-		glm::decompose(transformRotation, glm::vec3(), transform.Rotation, glm::vec3(), glm::vec3(), glm::vec4());
+		glm::mat3 transformRotation = glm::inverse(parentTransform)*glm::mat4_cast(worldRotation);
+		transformRotation[0] = glm::normalize(transformRotation[0]);
+		transformRotation[1] = glm::normalize(transformRotation[1]);
+		transformRotation[2] = glm::normalize(transformRotation[2]);
+		transform.Rotation = glm::quat_cast(transformRotation);
 		entity.SetDirty(true);
 	}
 
