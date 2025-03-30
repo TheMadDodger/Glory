@@ -30,6 +30,7 @@ Engine:
 - Fixed an issue where reloading a scene would unload it next frame
 - Fixed crash when trying to render an empty text
 - Fixed crash when PhysicsBody box or cylinder shape is too small
+- Added simulation settings to PhysicsBody component
 
 Editor:
 - Added a startup popup

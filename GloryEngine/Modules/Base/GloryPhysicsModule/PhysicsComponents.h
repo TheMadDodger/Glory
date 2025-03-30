@@ -9,6 +9,32 @@
 
 namespace Glory
 {
+	struct PhysicsSimulationSettings
+	{
+		PhysicsSimulationSettings() : m_DegreesOfFreedom(AllowedDOFFlag::All), m_AllowDynamicOrKinematic(false), m_IsSensor(false),
+			m_SensorDetectsStatic(false), m_UseManifoldReduction(true), m_MotionQuality(MotionQuality::Discrete),
+			m_AllowSleeping(true), m_Friction(0.2f), m_Restitution(0.0f), m_LinearDamping(0.05f), 
+			m_AngularDamping(0.05f), m_MaxLinearVelocity(500.0f), m_MaxAngularVelocity(2700.0f),
+			m_GravityFactor(1.0f) {}
+
+		REFLECTABLE(PhysicsSimulationSettings,
+			(AllowedDOFFlag)(m_DegreesOfFreedom),
+			(bool)(m_AllowDynamicOrKinematic),
+			(bool)(m_IsSensor),
+			(bool)(m_SensorDetectsStatic),
+			(bool)(m_UseManifoldReduction),
+			(MotionQuality)(m_MotionQuality),
+			(bool)(m_AllowSleeping),
+			(float)(m_Friction),
+			(float)(m_Restitution),
+			(float)(m_LinearDamping),
+			(float)(m_AngularDamping),
+			(float)(m_MaxLinearVelocity),
+			(float)(m_MaxAngularVelocity),
+			(float)(m_GravityFactor)
+		);
+	};
+
 	struct PhysicsBody
 	{
 		static constexpr uint32_t InvalidBodyID = 0xffffffff;
@@ -17,7 +43,8 @@ namespace Glory
 
 		REFLECTABLE(PhysicsBody,
 			(BodyType)(m_BodyType),
-			(ShapeProperty)(m_Shape)
+			(ShapeProperty)(m_Shape),
+			(PhysicsSimulationSettings)(m_SimulationSettings)
 		);
 
 		uint32_t m_BodyID;

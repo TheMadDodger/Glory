@@ -33,6 +33,7 @@ namespace Glory
 	struct Shape;
 	struct Layer;
 	struct LayerMask;
+	struct PhysicsSimulationSettings;
 
 	class ObjectVsBroadPhaseLayerFilterImpl;
 	class BPLayerInterfaceImpl;
@@ -48,7 +49,7 @@ namespace Glory
 		GLORY_MODULE_VERSION_H(0,5,0);
 
 		/* Body management */
-		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex);
+		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex, const PhysicsSimulationSettings& settings);
 		GLORY_API void SetBodyUserData(uint32_t bodyID, uint64_t userData);
 		GLORY_API uint64_t GetBodyUserData(uint32_t bodyID);
 		GLORY_API void DestroyPhysicsBody(uint32_t& bodyID);

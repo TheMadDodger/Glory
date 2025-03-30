@@ -6,6 +6,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 REFLECTABLE_ENUM_NS(Glory, BodyType, Static, Kinematic, Dynamic);
+REFLECTABLE_ENUM_NS(Glory, MotionQuality, Discrete, LinearCast);
 
 namespace Glory
 {
@@ -40,4 +41,31 @@ namespace Glory
 	{
 		std::vector<RayCastHit> m_Hits;
 	};
+
+	enum class AllowedDOFFlag : uint32_t {
+		None = 0b000000,
+		TranslationX = 1 << 0,
+		TranslationY = 1 << 1,
+		TranslationZ = 1 << 2,
+		RotationX = 1 << 3,
+		RotationY = 1 << 4,
+		RotationZ = 1 << 5,
+		All = TranslationX | TranslationY | TranslationZ | RotationX | RotationY | RotationZ,
+	};
 }
+
+const std::string Enum<Glory::AllowedDOFFlag>::m_EnumStringValues[] = {
+	"None",
+	"TranslationX",
+	"TranslationY",
+	"TranslationZ",
+	"RotationX",
+	"RotationY",
+	"RotationZ",
+};
+
+const size_t Enum<Glory::AllowedDOFFlag>::m_NumValues = 3;
+
+bool Enum<Glory::AllowedDOFFlag>::Valid() {
+	return true;
+};

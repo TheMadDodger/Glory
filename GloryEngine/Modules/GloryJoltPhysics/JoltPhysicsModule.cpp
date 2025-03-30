@@ -87,12 +87,28 @@ namespace Glory
 		m_ActivationCallbacks.clear();
 	}
 
-	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex)
+	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex, const PhysicsSimulationSettings& settings)
 	{
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
 		JPH::Shape* pShape = GetJPHShape(shape);
 		JPH::Shape::ShapeResult scaledShape = pShape->ScaleShape(ToJPHVec3(inScale));
 		BodyCreationSettings bodySettings(scaledShape.Get(), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, layerIndex);
+
+		bodySettings.mAllowedDOFs = EAllowedDOFs(settings.m_DegreesOfFreedom);
+		bodySettings.mAllowDynamicOrKinematic = settings.m_AllowDynamicOrKinematic;
+		bodySettings.mIsSensor = settings.m_IsSensor;
+		bodySettings.mSensorDetectsStatic = settings.m_SensorDetectsStatic;
+		bodySettings.mUseManifoldReduction = settings.m_UseManifoldReduction;
+		bodySettings.mMotionQuality = EMotionQuality(settings.m_MotionQuality);
+		bodySettings.mAllowSleeping = settings.m_AllowSleeping;
+		bodySettings.mFriction = settings.m_Friction;
+		bodySettings.mRestitution = settings.m_Restitution;
+		bodySettings.mLinearDamping = settings.m_LinearDamping;
+		bodySettings.mAngularDamping = settings.m_AngularDamping;
+		bodySettings.mMaxLinearVelocity = settings.m_MaxLinearVelocity;
+		bodySettings.mMaxAngularVelocity = settings.m_MaxAngularVelocity/180.0f*glm::pi<float>();
+		bodySettings.mGravityFactor = settings.m_GravityFactor;
+
 		JPH::BodyID bodyID = bodyInterface.CreateAndAddBody(bodySettings, EActivation::Activate);
 		return bodyID.GetIndexAndSequenceNumber();
 	}

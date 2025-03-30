@@ -12,8 +12,12 @@
 #include <GLORY_YAML.h>
 #include <CreateEntityObjectsCallbacks.h>
 #include <PhysicsComponents.h>
+#include <SceneManager.h>
+#include <Serializers.h>
+#include <PropertySerializer.h>
 
 #include <PhysicsBodyEditor.h>
+#include <AllowedDOFsPropertyDrawer.h>
 #include <CharacterControllerEditor.h>
 #include <ObjectMenu.h>
 #include <EntitySceneObjectEditor.h>
@@ -21,7 +25,6 @@
 #include <EditableEntity.h>
 #include <EntityEditor.h>
 #include <EditorApplication.h>
-#include <SceneManager.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -53,6 +56,8 @@ namespace Glory::Editor
 		Editor::RegisterEditor<PhysicsBodyEditor>();
 		Editor::RegisterEditor<CharacterControllerEditor>();
 
+		PropertyDrawer::RegisterPropertyDrawer<PropertyDrawerTemplate<AllowedDOFFlag>>();
+
 		static constexpr char* bodyIcon = ICON_FA_CUBES_STACKED;
 		static constexpr char* characterIcon = ICON_FA_PERSON;
 		EntitySceneObjectEditor::AddComponentIcon<PhysicsBody>(bodyIcon);
@@ -66,6 +71,8 @@ namespace Glory::Editor
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Utils::Reflect::Reflect& reflect = pEngine->Reflection();
 		Reflect::SetReflectInstance(&reflect);
+
+		pEngine->GetSerializers().RegisterSerializer<SimpleTemplatedPropertySerializer<AllowedDOFFlag>>();
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 	}

@@ -472,6 +472,45 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::CheckBoxFlags(std::string_view label, uint32_t* value, const std::vector<std::string_view>& names, const std::vector<uint32_t>& values)
+	{
+		ImGui::PushID(label.data());
+		const bool noLabel = HasFlag(Flag::NoLabel);
+
+		if (!noLabel)
+		{
+			ImGui::TextUnformatted(label.data());
+			ImGui::SameLine();
+			const float availableWidth = ImGui::GetContentRegionAvail().x;
+
+			float width = values.size() * 24.0f;
+			for (size_t i = 0; i < names.size(); ++i)
+			{
+				width += ImGui::CalcTextSize(names[i].data()).x + ImGui::GetStyle().ItemSpacing.x;
+			}
+
+			const float size = width;
+			const ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImGui::SetCursorPos({ cursorPos.x + availableWidth - size, cursorPos.y });
+		}
+
+		bool change = false;
+		for (size_t i = 0; i < names.size(); ++i)
+		{
+			bool isOn = (*value & values[i]) > 0;
+			if (i != 0) ImGui::SameLine();
+			if (ImGui::Checkbox(names[i].data(), &isOn))
+			{
+				if (isOn) *value |= values[i];
+				else *value &= ~values[i];
+				change = true;
+			}
+		}
+
+		ImGui::PopID();
+		return change;
+	}
+
 	bool EditorUI::CheckBox(Utils::YAMLFileRef& file, const std::filesystem::path& path)
 	{
 		Scope s{ path };
