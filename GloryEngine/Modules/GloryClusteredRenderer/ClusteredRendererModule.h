@@ -46,7 +46,7 @@ namespace Glory
 
 		virtual void CollectReferences(std::vector<UUID>& references) override;
 
-		GLORY_MODULE_VERSION_H(0,4,0);
+		GLORY_MODULE_VERSION_H(0,5,0);
 
 	private:
 		virtual void Cleanup() override;

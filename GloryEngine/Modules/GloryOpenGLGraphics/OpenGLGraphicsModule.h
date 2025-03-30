@@ -13,7 +13,7 @@ namespace Glory
 		virtual ~OpenGLGraphicsModule();
 		static void LogGLError(const GLenum& err, bool bIncludeTimeStamp = true);
 
-		GLORY_MODULE_VERSION_H(0,1,0);
+		GLORY_MODULE_VERSION_H(0,2,0);
 
 	public: // Commands
 		virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) override;
