@@ -30,6 +30,7 @@ namespace Glory
 
         GLORY_API bool HasClass(std::string_view name) const;
         GLORY_API std::string_view ClassName(size_t index) const;
+        GLORY_API size_t ClassCount() const;
 
     private:
         virtual void References(Engine*, std::vector<UUID>&) const override {}

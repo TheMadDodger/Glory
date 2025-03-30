@@ -76,6 +76,7 @@ Editor:
 - Fixed crash when opening a scene that has a missing prefab
 - Objects that are linked to a missing prefab are now highlighted in red in the scene graph
 - Fixed material not being saved if only the pipeline was changed
+- Added a search bar to script dropdown and added support for drag and dropping a script onto it
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
