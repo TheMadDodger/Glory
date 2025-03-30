@@ -15,7 +15,8 @@ namespace Glory
 		m_pPhysicsSystem = pPhysics;
 	}
 
-	uint32_t JoltCharacterManager::CreateCharacter(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& position, const glm::quat& rotation, const ShapeData& shape, float friction)
+	uint32_t JoltCharacterManager::CreateCharacter(float maxSlopeAngle, float mass, float friction, float gravityFactor,
+		uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const ShapeData& shape)
 	{
 		uint32_t characterID = uint32_t(UUID());
 
@@ -25,9 +26,11 @@ namespace Glory
 		settings.mMaxSlopeAngle = JPH::DegreesToRadians(maxSlopeAngle);
 		settings.mLayer = JPH::ObjectLayer(layerIndex);
 		settings.mShape = (JPH::Shape*)shape.m_pShape;
+		settings.mMass = mass;
+		settings.mGravityFactor = gravityFactor;
 		settings.mFriction = friction;
 		settings.mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -cCharacterRadiusStanding); // Accept contacts that touch the lower sphere of the capsule
-		JPH::Character* pCharacter = new JPH::Character(&settings, ToJPHVec3(position), ToJPHQuat(rotation), 0, m_pPhysicsSystem);
+		JPH::Character* pCharacter = new JPH::Character(&settings, ToJPHVec3(inPosition), ToJPHQuat(inRotation), 0, m_pPhysicsSystem);
 		pCharacter->AddToPhysicsSystem(JPH::EActivation::Activate);
 
 		m_pCharacters.emplace(characterID, pCharacter);

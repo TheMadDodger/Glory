@@ -31,6 +31,7 @@ Engine:
 - Fixed crash when trying to render an empty text
 - Fixed crash when PhysicsBody box or cylinder shape is too small
 - Added simulation settings to PhysicsBody component
+- Added mass and gravity factor settings to CharacterController component
 
 Editor:
 - Added a startup popup
