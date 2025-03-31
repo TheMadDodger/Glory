@@ -430,12 +430,18 @@ namespace Glory
 
 	void JoltPhysicsModule::TriggerLateActivationCallback(ActivationCallback callbackType, uint32_t bodyID)
 	{
+		auto iter = m_LateActivationCallbacks.find(callbackType);
+		if (iter == m_LateActivationCallbacks.end())
+			iter = m_LateActivationCallbacks.emplace(callbackType, std::vector<uint32_t>()).first;
 		m_LateActivationCallbacks[callbackType].push_back(bodyID);
 	}
 
 	void JoltPhysicsModule::TriggerLateContactCallback(ContactCallback callbackType, uint32_t body1ID, uint32_t body2ID)
 	{
-		m_LateContactCallbacks[callbackType].push_back({ body1ID, body2ID });
+		auto iter = m_LateContactCallbacks.find(callbackType);
+		if (iter == m_LateContactCallbacks.end())
+			iter = m_LateContactCallbacks.emplace(callbackType, std::vector<std::pair<uint32_t, uint32_t>>()).first;
+		iter->second.push_back({ body1ID, body2ID });
 	}
 
 	JoltCharacterManager* JoltPhysicsModule::GetCharacterManager()
