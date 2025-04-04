@@ -183,12 +183,6 @@ namespace Glory::Editor
 	{
 	}
 
-	bool GeneralSettings::OnGui()
-	{
-		ImGui::TextUnformatted("Comming soon!");
-		return false;
-	}
-
 	EngineSettings::EngineSettings() : ProjectSettings("Engine"), m_MenuIndex(0)
 	{
 	}
