@@ -4,6 +4,8 @@ Runtime:
 Engine:
 - Fixed prefab instantiation not properly setting the start location
 - Added application version
+- Fixed setting ui elements active/inactive not properly hiding/unhiding elements and/or rerendering the UI texture
+- Fixed ui element width being incorrect when using the aspect constraint
 
 Editor:
 - Fixed dupplicate start calls or start not being called at all sometimes when entering playmode

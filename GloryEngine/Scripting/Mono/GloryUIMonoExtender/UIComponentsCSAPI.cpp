@@ -61,6 +61,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_Target = target;
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	ResolutionMode UIRenderer_GetResolutionMode(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -74,6 +77,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_ResolutionMode = mode;
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	Vec3Wrapper UIRenderer_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -87,6 +93,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_Resolution = ToGLMVec3(resolution);
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	uint64_t UIRenderer_GetWorldMaterialID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -100,6 +109,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_WorldMaterial.SetUUID(materialID);
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	Vec3Wrapper UIRenderer_GetWorldSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -113,6 +125,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_WorldSize = ToGLMVec3(size);
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	bool UIRenderer_GetInputEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -331,6 +346,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Scale = scale;
+		uiText.m_Dirty = true;
 		pDocument->SetDrawDirty();
 	}
 
@@ -350,6 +366,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Color = ToGLMVec4(color);
+		uiText.m_Dirty = true;
 		pDocument->SetDrawDirty();
 	}
 
@@ -369,6 +386,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Alignment = alignment;
+		uiText.m_Dirty = true;
 		pDocument->SetDrawDirty();
 	}
 

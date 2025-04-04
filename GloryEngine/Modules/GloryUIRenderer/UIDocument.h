@@ -62,10 +62,14 @@ namespace Glory
 		GLORY_API size_t& PanelCounter();
 		GLORY_API void SetDrawDirty();
 		GLORY_API UUID Instantiate(UIDocumentData* pOtherDocument, UUID parentID);
+		GLORY_API void SetAllEntitiesDirty();
+		GLORY_API void SetEntityActive(Utils::ECS::EntityID entity, bool active);
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 		UUID CopyEntity(UIDocumentData* pOtherDocument, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
+
+		void UpdateEntityActiveHierarchy(Utils::ECS::EntityID entity);
 
 	private:
 		friend class UIRendererModule;
