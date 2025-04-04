@@ -607,6 +607,11 @@ namespace Glory
 		Core_EngineInstance->RequestQuit();
 	}
 
+	Version Application_GetVersion()
+	{
+		return Core_EngineInstance->GetApplicationVersion();
+	}
+
 #pragma endregion
 
 
@@ -730,6 +735,7 @@ namespace Glory
 		BIND("GloryEngine.Engine::Engine_SetGrabInput", Engine_SetGrabInput);
 
 		BIND("GloryEngine.Application::Application_Quit", Application_Quit);
+		BIND("GloryEngine.Application::Application_GetVersion", Application_GetVersion);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)
