@@ -204,6 +204,8 @@ namespace Utils::Reflect
 		void SetRootPath(const std::filesystem::path& path);
 		const std::filesystem::path& RootPath() const;
 
+		void SetApplicationVersion(uint32_t major, uint32_t minor, uint32_t subMinor, uint32_t rc=0);
+
 	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
@@ -266,5 +268,7 @@ namespace Utils::Reflect
 		std::map<std::string, std::vector<char>> m_Datas;
 
 		std::filesystem::path m_RootPath;
+
+		Version m_ApplicationVersion;
 	};
 }

@@ -411,6 +411,24 @@ namespace Glory::Editor
 		return change;
 	}
 
+	bool EditorUI::InputUInt(Utils::YAMLFileRef& file, const std::filesystem::path& path, const uint32_t min, const uint32_t max, const uint32_t steps)
+	{
+		Scope s{ path };
+		const uint32_t oldValue = file[path].As<uint32_t>();
+		uint32_t newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (InputUInt(MakeCleanName(label.string()), &newValue, min, max, steps))
+		{
+			const bool record = Undo::StartRecord(label.string(), 0, true);
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			if (record) Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::InputDouble(std::string_view label, double* value, const double slowSteps, const double fastSteps)
 	{
 		ImGui::PushID(label.data());

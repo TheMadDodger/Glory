@@ -492,6 +492,14 @@ namespace Glory
 			}
 		}
 
+		if (HasData("General"))
+		{
+			BinaryMemoryStream memoryStream{ GetData("General") };
+			BinaryStream* stream = &memoryStream;
+			uint32_t value;
+			stream->Read(m_ApplicationVersion);
+		}
+
 		for (size_t i = 0; i < m_pAllModules.size(); ++i)
 		{
 			m_pAllModules[i]->OnProcessData();
@@ -516,6 +524,14 @@ namespace Glory
 	const std::filesystem::path& Engine::RootPath() const
 	{
 		return m_RootPath;
+	}
+
+	void Engine::SetApplicationVersion(uint32_t major, uint32_t minor, uint32_t subMinor, uint32_t rc)
+	{
+		m_ApplicationVersion.Major = (int)major;
+		m_ApplicationVersion.Minor = (int)minor;
+		m_ApplicationVersion.SubMinor = (int)subMinor;
+		m_ApplicationVersion.RC = (int)rc;
 	}
 
 	void Engine::RegisterStandardSerializers()

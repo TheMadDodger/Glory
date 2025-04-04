@@ -380,7 +380,7 @@ namespace Glory::Editor
 
 	bool EditorApplication::IsInPlayMode()
 	{
-		return m_Mode == EditorMode::M_Play;
+		return m_Mode == EditorMode::M_Play || m_Mode == EditorMode::M_EnteringPlay;
 	}
 
 	void EditorApplication::OnGenerateConfigExec(std::ofstream& stream)

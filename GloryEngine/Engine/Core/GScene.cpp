@@ -242,12 +242,7 @@ namespace Glory
 		const Utils::ECS::EntityID parentEntity = itor != m_Ids.end() ? itor->second : 0;
 
 		UUIDRemapper remapper{ remapSeed };
-		Entity entity = Instantiate(pPrefab, remapper, parentEntity);
-
-		Transform& transform = entity.GetComponent<Transform>();
-		transform.Position = pos;
-		transform.Rotation = rot;
-		transform.Scale = scale;
+		Entity entity = Instantiate(pPrefab, remapper, parentEntity, pos, rot, scale);
 
 		entity.SetDirty();
 
@@ -259,12 +254,7 @@ namespace Glory
 	{
 		auto itor = m_Ids.find(parent);
 		const Utils::ECS::EntityID parentEntity = itor != m_Ids.end() ? itor->second : 0;
-		Entity entity = Instantiate(pPrefab, remapper, parentEntity);
-
-		Transform& transform = entity.GetComponent<Transform>();
-		transform.Position = pos;
-		transform.Rotation = rot;
-		transform.Scale = scale;
+		Entity entity = Instantiate(pPrefab, remapper, parentEntity, pos, rot, scale);
 
 		entity.SetDirty();
 
@@ -429,7 +419,8 @@ namespace Glory
 		m_MarkedForDestruct = true;
 	}
 
-	Entity GScene::Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent)
+	Entity GScene::Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent,
+		const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		Entity firstEntity;
 
@@ -440,6 +431,14 @@ namespace Glory
 			const Entity nextEntity = InstantiateEntity(pOther, IDRemapper, child, newEntities, parent);
 			if (i == 0)
 				firstEntity = nextEntity;
+		}
+
+		if (firstEntity.IsValid())
+		{
+			Transform& transform = firstEntity.GetComponent<Transform>();
+			transform.Position = pos;
+			transform.Rotation = rot;
+			transform.Scale = scale;
 		}
 
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::OnValidate, newEntities);
