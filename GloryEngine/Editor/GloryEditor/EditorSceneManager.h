@@ -27,15 +27,18 @@ namespace Glory::Editor
 
 		/* Scene manager overrides */
 		GLORY_EDITOR_API GScene* NewScene(const std::string& name="Empty Scene", bool additive=false);
-		GLORY_EDITOR_API void OpenScene(UUID uuid, bool additive) override;
+		GLORY_EDITOR_API void OnLoadScene(UUID uuid) override;
+		GLORY_EDITOR_API void OnUnloadScene(GScene* pScene) override;
+		GLORY_EDITOR_API void OnUnloadAllScenes() override;
 
 		/* Editor only functionality */
 		GLORY_EDITOR_API static GScene* OpenSceneInMemory(UUID uuid);
+		GLORY_EDITOR_API void OpenScene(UUID uuid, bool additive);
 		GLORY_EDITOR_API void OpenScene(GScene* pScene, UUID uuid = 0);
 		GLORY_EDITOR_API void SaveOpenScenes();
+		GLORY_EDITOR_API void CloseAllScenes();
 
 		GLORY_EDITOR_API void CloseScene(UUID uuid);
-		GLORY_EDITOR_API bool IsSceneOpen(UUID uuid);
 
 		GLORY_EDITOR_API UUID GetOpenSceneUUID(size_t index);
 
@@ -45,7 +48,6 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void SerializeOpenScenes(Utils::InMemoryYAML out);
 		GLORY_EDITOR_API void OpenAllFromYAML(Utils::InMemoryYAML data);
 
-		GLORY_EDITOR_API void SetActiveScene(GScene* pScene);
 		GLORY_EDITOR_API void SetSceneDirty(GScene* pScene, bool dirty = true);
 
 		GLORY_EDITOR_API bool IsSceneDirty(GScene* pScene);
@@ -75,7 +77,6 @@ namespace Glory::Editor
 	private:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
-		virtual void OnCloseAll() override;
 		virtual void OnSetActiveScene(GScene* pActiveScene) override;
 
 	private:

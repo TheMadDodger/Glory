@@ -21,6 +21,9 @@ namespace Glory
     {
         Reflect::SetReflectInstance(&m_pEngine->Reflection());
         Reflect::RegisterEnum<BodyType>();
+        Reflect::RegisterEnum<MotionQuality>();
+        Reflect::RegisterEnum<AllowedDOFFlag>();
+        Reflect::RegisterType<PhysicsSimulationSettings>();
 
         m_pEngine->GetSceneManager()->RegisterComponent<PhysicsBody>();
         m_pEngine->GetSceneManager()->RegisterComponent<CharacterController>();

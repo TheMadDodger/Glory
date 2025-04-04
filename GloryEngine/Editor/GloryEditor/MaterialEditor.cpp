@@ -52,7 +52,7 @@ namespace Glory::Editor
 
 		if (EditorUI::Header("Properties"))
 		{
-			change = PropertiesGUI(pMaterial, pMaterialData);
+			change |= PropertiesGUI(pMaterial, pMaterialData);
 		}
 
 		if (change)

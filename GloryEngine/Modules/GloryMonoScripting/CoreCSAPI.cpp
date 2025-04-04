@@ -391,14 +391,14 @@ namespace Glory
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
-		pScenes->CloseAllScenes();
+		pScenes->UnloadAllScenes();
 	}
 
 	void SceneManager_OpenScene(uint64_t id, bool additive)
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
-		pScenes->OpenScene(id, additive);
+		pScenes->LoadScene(id, additive);
 	}
 
 	void SceneManager_OpenSceneByName(MonoString* name, bool additive)
@@ -533,8 +533,9 @@ namespace Glory
 		if (!pScene) return;
 		const Entity entity = pScene->GetEntityByUUID(UUID(objectID));
 		const Entity parent = pScene->GetEntityByUUID(UUID(parentID));
-		if (!entity.IsValid() || !parent.IsValid()) return;
-		pScene->SetParent(entity.GetEntityID(), parent.GetEntityID());
+		if (!entity.IsValid()) return;
+		const Utils::ECS::EntityID parentEntityID = parent.IsValid() ? parent.GetEntityID() : 0;
+		pScene->SetParent(entity.GetEntityID(), parentEntityID);
 	}
 
 #pragma endregion
@@ -604,6 +605,11 @@ namespace Glory
 	void Application_Quit()
 	{
 		Core_EngineInstance->RequestQuit();
+	}
+
+	Version Application_GetVersion()
+	{
+		return Core_EngineInstance->GetApplicationVersion();
 	}
 
 #pragma endregion
@@ -729,6 +735,7 @@ namespace Glory
 		BIND("GloryEngine.Engine::Engine_SetGrabInput", Engine_SetGrabInput);
 
 		BIND("GloryEngine.Application::Application_Quit", Application_Quit);
+		BIND("GloryEngine.Application::Application_GetVersion", Application_GetVersion);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)

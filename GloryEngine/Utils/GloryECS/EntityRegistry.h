@@ -75,11 +75,12 @@ namespace Glory::Utils::ECS
 		void* CopyComponent(EntityID entityID, uint32_t typeHash, Glory::UUID uuid, void* data);
 
 		template<typename Component>
-		TypeView<Component>* GetTypeView()
+		TypeView<Component>* GetTypeView(bool createIfNotExixsts=true)
 		{
 			const uint32_t hash = Hashing::Hash(typeid(Component).name());
 			if (m_ViewIndices.find(hash) == m_ViewIndices.end())
 			{
+				if (!createIfNotExixsts) return nullptr;
 				const size_t index = m_pViews.size();
 				TypeView<Component>* pTypeView = ComponentTypes::CreateTypeView<Component>(this);
 				m_ViewIndices.emplace(hash, index);
@@ -101,8 +102,8 @@ namespace Glory::Utils::ECS
 		template<typename Component>
 		bool HasComponent(EntityID entity)
 		{
-			TypeView<Component>* pTypeView = GetTypeView<Component>();
-			return pTypeView->Contains(entity);
+			TypeView<Component>* pTypeView = GetTypeView<Component>(false);
+			return pTypeView ? pTypeView->Contains(entity) : false;
 		}
 
 		bool HasComponent(EntityID entity, uint32_t type);
@@ -132,7 +133,6 @@ namespace Glory::Utils::ECS
 
 		UUID RemoveComponent(EntityID entity, uint32_t typeHash);
 		void RemoveComponentAt(EntityID entity, size_t index);
-		//void ChangeComponentIndex(EntityID entity, size_t index, size_t newIndex);
 		size_t ComponentCount(EntityID entity);
 		void Clear(EntityID entity);
 		const size_t Alive() const;
@@ -169,32 +169,6 @@ namespace Glory::Utils::ECS
 		EntityID Child(Utils::ECS::EntityID entity, size_t index) const;
 		size_t SiblingIndex(Utils::ECS::EntityID entity) const;
 		void SetSiblingIndex(Utils::ECS::EntityID entity, size_t index);
-		//void ForEachComponent(EntityID entity, std::function<void(EntityRegistry*, EntityID, size_t, size_t)> func);
-		//
-		//template<typename C, typename Component>
-		//EntitySystem* RegisterSystem()
-		//{
-		//	return m_Systems.Register<C, Component>(this);
-		//}
-		//
-		//template<typename Component>
-		//EntitySystem* RegisterSystem()
-		//{
-		//	return m_Systems.Register<Component>(this);
-		//}
-		//
-		//template<typename Component>
-		//void ForEach(std::function<void(EntityRegistry*, EntityID, EntityComponentData*)> func)
-		//{
-		//	ForEach(typeid(Component), func);
-		//}
-		//
-		//void ForEach(const std::type_index& type, std::function<void(EntityRegistry*, EntityID, EntityComponentData*)> func);
-		//
-		//void Update();
-		//bool IsUpdating();
-		//void Draw();
-		//EntitySystems* GetSystems();
 
 		void ResizeRootOrder(size_t size);
 		std::vector<EntityID>& RootOrder();

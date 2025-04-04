@@ -20,17 +20,15 @@ namespace Glory
 	GScene* RuntimeSceneManager::NewScene(const std::string& name, bool additive)
     {
         if (!additive)
-            CloseAllScenes();
+            UnloadAllScenes();
         GScene* pNewScene = new GScene(name);
 		pNewScene->SetManager(this);
         m_pOpenScenes.push_back(pNewScene);
         return pNewScene;
     }
 
-    void RuntimeSceneManager::OpenScene(UUID uuid, bool additive)
+    void RuntimeSceneManager::OnLoadScene(UUID uuid)
     {
-		if (!additive) MarkAllScenesForDestruct();
-
 		AssetLocation location;
 		if (!m_pEngine->GetAssetDatabase().GetAssetLocation(uuid, location))
 		{
@@ -44,31 +42,14 @@ namespace Glory
 		LoadScene(path);
     }
 
-	void RuntimeSceneManager::CloseScene(UUID uuid)
+	void RuntimeSceneManager::OnUnloadScene(GScene* pScene)
 	{
-		auto it = std::find_if(m_pOpenScenes.begin(), m_pOpenScenes.end(), [&](GScene* pScene) { return pScene->GetUUID() == uuid; });
-		if (it == m_pOpenScenes.end()) return;
-		OnSceneClosing(uuid);
-		size_t index = it - m_pOpenScenes.begin();
-		GScene* pActiveScene = m_pOpenScenes[m_ActiveSceneIndex];
-		GScene* pScene = *it;
-		pScene->Stop();
-		delete pScene;
-		m_pOpenScenes.erase(it);
+		/* Everything is already handled in the base class */
+	}
 
-		for (size_t j = 0; j < m_pEngine->ModulesCount(); ++j)
-		{
-			m_pEngine->GetModule(j)->OnSceneClosed(uuid);
-		}
-
-		if (index == m_ActiveSceneIndex || m_pOpenScenes.size() <= 0)
-		{
-			m_ActiveSceneIndex = 0;
-			return;
-		}
-
-		it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pActiveScene);
-		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+	void RuntimeSceneManager::OnUnloadAllScenes()
+	{
+		/* Everything is already handled in the base class */
 	}
 
 	void RuntimeSceneManager::LoadScene(const std::filesystem::path& path)

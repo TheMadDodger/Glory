@@ -56,4 +56,9 @@ namespace Glory
 		if (index >= m_Classes.size()) return "";
 		return m_Classes[index];
 	}
+
+	size_t MonoScript::ClassCount() const
+	{
+		return m_Classes.size();
+	}
 }

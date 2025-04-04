@@ -33,6 +33,7 @@ namespace Glory
 	struct Shape;
 	struct Layer;
 	struct LayerMask;
+	struct PhysicsSimulationSettings;
 
 	class ObjectVsBroadPhaseLayerFilterImpl;
 	class BPLayerInterfaceImpl;
@@ -45,10 +46,10 @@ namespace Glory
 		GLORY_API JoltPhysicsModule();
 		GLORY_API virtual ~JoltPhysicsModule();
 
-		GLORY_MODULE_VERSION_H(0,5,0);
+		GLORY_MODULE_VERSION_H(0,6,0);
 
 		/* Body management */
-		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex);
+		GLORY_API uint32_t CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex, const PhysicsSimulationSettings& settings);
 		GLORY_API void SetBodyUserData(uint32_t bodyID, uint64_t userData);
 		GLORY_API uint64_t GetBodyUserData(uint32_t bodyID);
 		GLORY_API void DestroyPhysicsBody(uint32_t& bodyID);
@@ -59,6 +60,7 @@ namespace Glory
 		GLORY_API void DeactivateBody(uint32_t bodyID);
 		GLORY_API bool IsBodyActive(uint32_t bodyID) const;
 		GLORY_API bool IsValidBody(uint32_t bodyID) const;
+		GLORY_API void SetBodyType(uint32_t bodyID, BodyType bodyType, const ActivationType activationType);
 
 		/* Position and rotation */
 		GLORY_API void SetBodyPosition(uint32_t bodyID, const glm::vec3& position, const ActivationType activationType = ActivationType::Activate);

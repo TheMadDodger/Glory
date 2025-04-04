@@ -47,7 +47,8 @@ namespace Glory
 
 		pComponent.m_CurrentLayerIndex = pRegistry->HasComponent<LayerComponent>(entity) ? pRegistry->GetComponent<LayerComponent>(entity).m_Layer.m_LayerIndex : 0;
 		pComponent.m_ShapeID = shapeID;
-		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_CurrentLayerIndex, translation, rotation, *pShapeData, pComponent.m_Friction);
+		pComponent.m_CharacterID = pCharacters->CreateCharacter(pComponent.m_MaxSlopeAngle, pComponent.m_Mass, pComponent.m_Friction,
+			pComponent.m_GravityFactor, pComponent.m_CurrentLayerIndex, translation, rotation, *pShapeData);
 		pComponent.m_BodyID = pCharacters->GetBodyID(pComponent.m_CharacterID);
 		const UUID entityUUID = pScene->GetEntityUUID(entity);
 		pPhysics->SetBodyUserData(pComponent.m_BodyID, entityUUID);

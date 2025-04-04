@@ -41,12 +41,8 @@ namespace Glory::Editor
 		return pNewScene;
 	}
 
-	void EditorSceneManager::OpenScene(UUID uuid, bool additive)
+	void EditorSceneManager::OnLoadScene(UUID uuid)
 	{
-		if (additive && IsSceneOpen(uuid))
-			CloseScene(uuid);
-		if (!additive) MarkAllScenesForDestruct();
-
 		AssetLocation location;
 		EditorAssetDatabase::GetAssetLocation(uuid, location);
 		const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
@@ -74,6 +70,27 @@ namespace Glory::Editor
 		SceneEventsDispatcher().Dispatch({ SceneEventType::Opened, uuid });
 	}
 
+	void EditorSceneManager::OnUnloadScene(GScene* pScene)
+	{
+		// TODO: Check if scene has changes
+		const UUID uuid = pScene->GetUUID();
+		Selection::SetActiveObject(nullptr);
+		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
+		if (it == m_OpenedSceneIDs.end()) return;
+		const size_t index = it - m_OpenedSceneIDs.begin();
+		m_OpenedSceneIDs.erase(it);
+		m_SceneFiles.erase(m_SceneFiles.begin() + index);
+		GScene* pActiveScene = SceneManager::GetActiveScene();
+		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
+		SceneEventsDispatcher().Dispatch({ SceneEventType::Closed, uuid });
+	}
+
+	void EditorSceneManager::OnUnloadAllScenes()
+	{
+		m_OpenedSceneIDs.clear();
+		m_SceneFiles.clear();
+	}
+
 #pragma endregion
 
 	GScene* EditorSceneManager::OpenSceneInMemory(UUID uuid)
@@ -90,7 +107,9 @@ namespace Glory::Editor
 
 	void EditorSceneManager::OpenScene(GScene* pScene, UUID uuid)
 	{
-		if (IsSceneOpen(uuid))
+		if (m_pApplication->IsInPlayMode()) return;
+
+		if (GetOpenScene(uuid))
 			CloseScene(uuid);
 
 		SetupCallbacks(pScene);
@@ -118,7 +137,43 @@ namespace Glory::Editor
 
 		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
+		SceneEventsDispatcher().Dispatch({ SceneEventType::Opened, uuid });
+	}
 
+	void EditorSceneManager::OpenScene(UUID uuid, bool additive)
+	{
+		if (m_pApplication->IsInPlayMode()) return;
+
+		if (GetOpenScene(uuid))
+			CloseScene(uuid);
+
+		if (!additive)
+			CloseAllScenes();
+
+		AssetLocation location;
+		EditorAssetDatabase::GetAssetLocation(uuid, location);
+		const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
+
+		const size_t index = m_SceneFiles.size();
+		m_SceneFiles.push_back(YAMLResource<GScene>{path});
+		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
+
+		std::filesystem::path filePath = path;
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), (*yamlFile).RootNodeRef().ValueRef(), uuid, filePath.filename().replace_extension().string());
+
+		if (pScene == nullptr) return;
+		pScene->SetResourceUUID(uuid);
+		m_pOpenScenes.push_back(pScene);
+		m_OpenedSceneIDs.push_back(uuid);
+
+		if (m_pApplication->IsInPlayMode())
+		{
+			pScene->GetRegistry().EnableAllIndividualCallbacks();
+			pScene->Start();
+		}
+
+		GScene* pActiveScene = SceneManager::GetActiveScene();
+		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 		SceneEventsDispatcher().Dispatch({ SceneEventType::Opened, uuid });
 	}
 
@@ -134,13 +189,23 @@ namespace Glory::Editor
 		});
 	}
 
+	void EditorSceneManager::CloseAllScenes()
+	{
+		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { delete pScene; });
+		m_pOpenScenes.clear();
+		m_ActiveSceneIndex = 0;
+		m_OpenedSceneIDs.clear();
+		m_DirtySceneIDs.clear();
+		m_SceneFiles.clear();
+		TitleBar::SetText("Scene", "No Scene open");
+	}
+
 	void EditorSceneManager::CloseScene(UUID uuid)
 	{
 		// TODO: Check if scene has changes
 		Selection::SetActiveObject(nullptr);
 		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
 		if (it == m_OpenedSceneIDs.end()) return;
-		OnSceneClosing(uuid);
 		const size_t index = it - m_OpenedSceneIDs.begin();
 		GScene* pScene = GetOpenScene(uuid);
 		pScene->Stop();
@@ -156,12 +221,6 @@ namespace Glory::Editor
 		SceneEventsDispatcher().Dispatch({ SceneEventType::Closed, uuid });
 	}
 
-	bool EditorSceneManager::IsSceneOpen(UUID uuid)
-	{
-		auto it = std::find(m_OpenedSceneIDs.begin(), m_OpenedSceneIDs.end(), uuid);
-		return it != m_OpenedSceneIDs.end();
-	}
-
 	UUID EditorSceneManager::GetOpenSceneUUID(size_t index)
 	{
 		return m_OpenedSceneIDs[index];
@@ -169,7 +228,7 @@ namespace Glory::Editor
 
 	void EditorSceneManager::SaveScene(UUID uuid)
 	{
-		if (!IsSceneOpen(uuid)) return;
+		if (!GetOpenScene(uuid)) return;
 		AssetLocation location;
 		if (!EditorAssetDatabase::GetAssetLocation(uuid, location))
 		{
@@ -244,16 +303,10 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorSceneManager::SetActiveScene(GScene* pScene)
-	{
-		EditorApplication::GetInstance()->GetEngine()->GetSceneManager()->SetActiveScene(pScene);
-		TitleBar::SetText("Scene", pScene ? pScene->Name().c_str() : "No Scene open");
-	}
-
 	void EditorSceneManager::SetSceneDirty(GScene* pScene, bool dirty)
 	{
 		if (!pScene) return;
-		if (!IsSceneOpen(pScene->GetUUID())) return;
+		if (dirty && !GetOpenScene(pScene->GetUUID())) return;
 		auto itor = std::find(m_DirtySceneIDs.begin(), m_DirtySceneIDs.end(), pScene->GetUUID());
 		if (dirty)
 		{
@@ -356,6 +409,10 @@ namespace Glory::Editor
 
 	void EditorSceneManager::OnCleanup()
 	{
+		m_OpenedSceneIDs.clear();
+		m_DirtySceneIDs.clear();
+		m_SceneFiles.clear();
+		m_CurrentlySavingScene = 0;
 	}
 
 	YAMLResource<GScene>* EditorSceneManager::GetSceneFile(UUID uuid)
@@ -371,13 +428,6 @@ namespace Glory::Editor
 	void EditorSceneManager::OnSetActiveScene(GScene* pActiveScene)
 	{
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
-	}
-
-	void EditorSceneManager::OnCloseAll()
-	{
-		m_OpenedSceneIDs.clear();
-		m_DirtySceneIDs.clear();
-		TitleBar::SetText("Scene", "No Scene open");
 	}
 
 	void EditorSceneManager::Save(UUID uuid, const std::string& path, bool newScene)

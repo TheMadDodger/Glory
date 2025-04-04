@@ -47,11 +47,13 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool InputInt4(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min = INT_MIN, const int max = INT_MAX, const int steps = 1);
 		
 		static GLORY_EDITOR_API bool InputUInt(std::string_view label, uint32_t* value, const uint32_t min = 0, const uint32_t max = INT_MAX, const uint32_t steps = 1);
+		static GLORY_EDITOR_API bool InputUInt(Utils::YAMLFileRef& file, const std::filesystem::path& path, const uint32_t min = 0, const uint32_t max = INT_MAX, const uint32_t steps = 1);
 
 		static GLORY_EDITOR_API bool InputDouble(std::string_view label, double* value, const double slowSteps = 0.01f, const double fastSteps = 0.1f);
 		static GLORY_EDITOR_API bool InputDouble(Utils::YAMLFileRef& file, const std::filesystem::path& path, const double slowSteps = 0.01f, const double fastSteps = 0.1f);
 
 		static GLORY_EDITOR_API bool CheckBox(std::string_view label, bool* value);
+		static GLORY_EDITOR_API bool CheckBoxFlags(std::string_view label, uint32_t* value, const std::vector<std::string_view>& names, const std::vector<uint32_t>& values);
 		static GLORY_EDITOR_API bool CheckBox(Utils::YAMLFileRef& file, const std::filesystem::path& path);
 
 		static GLORY_EDITOR_API bool InputColor(std::string_view label, glm::vec4* value, const bool hdr);

@@ -408,7 +408,11 @@ namespace Glory::Editor
 				{
 					const UUID assetID = assets[j];
 					ResourceMeta meta;
-					EditorAssetDatabase::GetAssetMetadata(assetID, meta);
+					if (!EditorAssetDatabase::GetAssetMetadata(assetID, meta))
+					{
+						++task.m_ProcessedSubTasks;
+						task.m_SubTaskName = "";
+					}
 					task.m_SubTaskName = meta.Name();
 					PACKAGE_LAG
 

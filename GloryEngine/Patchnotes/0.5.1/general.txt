@@ -1,0 +1,16 @@
+Runtime:
+- Added loading for application version from data folder
+
+Engine:
+- Fixed prefab instantiation not properly setting the start location
+- Added application version
+
+Editor:
+- Fixed dupplicate start calls or start not being called at all sometimes when entering playmode
+- Fixed crash when packaging tries to package an invalid asset
+- Added application version to general settings
+
+Scripting:
+- Fixed WorldRotationEuler property not working properly
+- Improved WorldRotation property
+- Added Application.Version()

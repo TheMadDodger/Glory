@@ -13,6 +13,20 @@ namespace GloryEngine.SceneManagement
         #region Props
 
         /// <summary>
+        /// Transform component linked to this entity
+        /// </summary>
+        public Transform Transform
+        {
+            get
+            {
+                if (_transform != null) return _transform;
+                _transform = GetComponent<Transform>();
+                return _transform;
+            }
+            private set { }
+        }
+
+        /// <summary>
         /// Whether this object is active
         /// </summary>
         public bool Active
@@ -139,6 +153,7 @@ namespace GloryEngine.SceneManagement
 
         private Scene _scene;
         internal bool _destroyed = false;
+        private Transform _transform = null;
 
         private Dictionary<UInt64, EntityComponent> _componentCache = new Dictionary<ulong, EntityComponent>();
 

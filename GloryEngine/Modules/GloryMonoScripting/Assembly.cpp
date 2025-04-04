@@ -164,9 +164,20 @@ namespace Glory
 
 	void AssemblyClass::LoadFields()
 	{
+		LoadFieldsRecursive(m_pClass);
+	}
+
+	void AssemblyClass::LoadFieldsRecursive(MonoClass* pClass)
+	{
+		if (!pClass) return;
+
+		MonoClass* pParentClass = mono_class_get_parent(m_pClass);
+		if (pParentClass != pClass)
+			LoadFieldsRecursive(pParentClass);
+
 		void* iter = NULL;
 		MonoClassField* pField = nullptr;
-		while ((pField = mono_class_get_fields(m_pClass, &iter)) != nullptr)
+		while ((pField = mono_class_get_fields(pClass, &iter)) != nullptr)
 		{
 			size_t index = m_Fields.size();
 			m_Fields.push_back(AssemblyClassField(pField));

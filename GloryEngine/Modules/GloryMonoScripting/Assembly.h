@@ -77,6 +77,8 @@ namespace Glory
 
 		void LoadFields();
 
+		void LoadFieldsRecursive(MonoClass* pClass);
+
 		std::vector<AssemblyClassField> m_Fields;
 		std::map<std::string, size_t> m_NameToFieldIndex;
 	};

@@ -122,6 +122,9 @@ namespace Glory
 
 		const bool HasSettings() const;
 
+		void SetDirty(bool dirty = true);
+		bool IsDirty() const;
+
 	private:
 		template<typename T>
 		void RegisterValue(const std::string& name)
@@ -141,5 +144,6 @@ namespace Glory
 		std::map<std::string, uint32_t> m_Types;
 		std::map<std::string, uint32_t> m_ElementTypes;
 		std::map<std::string, std::vector<std::string>> m_Groups;
+		bool m_Dirty;
 	};
 }

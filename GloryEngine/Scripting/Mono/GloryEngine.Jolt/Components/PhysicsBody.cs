@@ -38,6 +38,15 @@ namespace GloryEngine.Entities
         public bool Valid => PhysicsBody_IsValid(Object.Scene.ID, Object.ID, _objectID);
 
         /// <summary>
+        /// Body type
+        /// </summary>
+        public BodyType BodyType
+        {
+            get => PhysicsBody_GetBodyType(Object.Scene.ID, Object.ID, _objectID);
+            set => PhysicsBody_SetBodyType(Object.Scene.ID, Object.ID, _objectID, value, DefaultActivationType);
+        }
+
+        /// <summary>
         /// Default activation type to pass to function calls
         /// </summary>
         public ActivationType DefaultActivationType = ActivationType.Activate;
@@ -172,6 +181,10 @@ namespace GloryEngine.Entities
         private static extern bool PhysicsBody_IsActive(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern bool PhysicsBody_IsValid(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern BodyType PhysicsBody_GetBodyType(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void PhysicsBody_SetBodyType(UInt64 sceneID, UInt64 objectID, UInt64 componentID, BodyType bodyType, ActivationType activationType);
 
         /* Position and rotation */
         [MethodImpl(MethodImplOptions.InternalCall)]

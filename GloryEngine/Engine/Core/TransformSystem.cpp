@@ -41,19 +41,19 @@ namespace Glory
         
         if (parent.IsValid() && parent.IsDirty())
         {
-            Utils::ECS::EntityID parentId = parent.GetEntityID();
+            const Utils::ECS::EntityID parentId = parent.GetEntityID();
             CalculateMatrix(pRegistry, parentId, parent.GetComponent<Transform>());
         }
 
         if (parent.IsValid())
         {
-            Transform& parentTransform = parent.GetComponent<Transform>();
+            const Transform& parentTransform = parent.GetComponent<Transform>();
             startTransform = parentTransform.MatTransform;
         }
 
-        glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), pComponent.Scale);
-        glm::mat4 rotation = glm::inverse(glm::mat4_cast(pComponent.Rotation));
-        glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), pComponent.Position);
+        const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), pComponent.Scale);
+        const glm::mat4 rotation = glm::inverse(glm::mat4_cast(pComponent.Rotation));
+        const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), pComponent.Position);
         pComponent.MatTransform = startTransform * translation * rotation * scale;
 
         pRegistry->SetEntityDirty(entity, false);

@@ -20,8 +20,9 @@ namespace Glory
 		virtual ~RuntimeSceneManager();
 
 		GLORY_RUNTIME_API GScene* NewScene(const std::string& name = "Empty Scene", bool additive = false);
-		GLORY_RUNTIME_API void OpenScene(UUID uuid, bool additive) override;
-		GLORY_RUNTIME_API void CloseScene(UUID uuid) override;
+		GLORY_RUNTIME_API void OnLoadScene(UUID uuid) override;
+		GLORY_RUNTIME_API void OnUnloadScene(GScene* pScene) override;
+		GLORY_RUNTIME_API void OnUnloadAllScenes() override;
 
 	private:
 		/** @brief Load a scene and its assets and shaders */
@@ -31,7 +32,6 @@ namespace Glory
 
 		virtual void OnInitialize() override {}
 		virtual void OnCleanup() override {}
-		virtual void OnCloseAll() override {}
 		virtual void OnSetActiveScene(GScene*) override {}
 
 	private:

@@ -19,7 +19,8 @@ namespace Glory
     class JoltCharacterManager
     {
 	public:
-        GLORY_API uint32_t CreateCharacter(float maxSlopeAngle, uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const ShapeData& shape, float friction);
+        GLORY_API uint32_t CreateCharacter(float maxSlopeAngle, float mass, float friction, float gravityFactor,
+			uint32_t layerIndex, const glm::vec3& inPosition, const glm::quat& inRotation, const ShapeData& shape);
         GLORY_API void DestroyCharacter(uint32_t characterID);
         GLORY_API void DestroyAll();
 

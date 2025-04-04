@@ -36,13 +36,18 @@ namespace Glory
 	JPH::Shape* BoxCreator(const Shape& shape)
 	{
 		const Box& box = static_cast<const Box&>(shape);
-		return new JPH::BoxShape(ToJPHVec3(box.m_Extends));
+		JPH::Vec3 extends = ToJPHVec3(box.m_Extends);
+		const float min = extends.ReduceMin();
+		float convexRadius = min < JPH::cDefaultConvexRadius ? min : JPH::cDefaultConvexRadius;
+		return new JPH::BoxShape(ToJPHVec3(box.m_Extends), convexRadius);
 	}
 
 	JPH::Shape* CylinderCreator(const Shape& shape)
 	{
 		const Cylinder& cylinder = static_cast<const Cylinder&>(shape);
-		return new JPH::CylinderShape(cylinder.m_HalfHeight, cylinder.m_Radius);
+		float convexRadius = JPH::cDefaultConvexRadius;
+		if (cylinder.m_Radius < convexRadius) convexRadius = cylinder.m_Radius;
+		return new JPH::CylinderShape(cylinder.m_HalfHeight, cylinder.m_Radius, convexRadius);
 	}
 
 	JPH::Shape* CapsuleCreator(const Shape& shape)

@@ -63,6 +63,19 @@ namespace Glory
 		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
 		return PHYSICS->IsValidBody(physicsComp.m_BodyID);
 	}
+	
+	BodyType PhysicsBody_GetBodyType(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
+		return physicsComp.m_BodyType;
+	}
+
+	void PhysicsBody_SetBodyType(uint64_t sceneID, uint64_t objectID, uint64_t componentID, BodyType bodyType, const ActivationType activationType)
+	{
+		PhysicsBody& physicsComp = GetComponent<PhysicsBody>(sceneID, objectID, componentID);
+		physicsComp.m_BodyType = bodyType;
+		PHYSICS->SetBodyType(physicsComp.m_BodyID, bodyType, activationType);
+	}
 
 #pragma endregion
 
@@ -385,6 +398,8 @@ namespace Glory
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_Deactivate", PhysicsBody_Deactivate);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_IsActive", PhysicsBody_IsActive);
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_IsValid", PhysicsBody_IsValid);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_GetBodyType", PhysicsBody_GetBodyType);
+		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetBodyType", PhysicsBody_SetBodyType);
 
 		/* Position and rotation */
 		BIND("GloryEngine.Entities.PhysicsBody::PhysicsBody_SetPosition", PhysicsBody_SetPosition);

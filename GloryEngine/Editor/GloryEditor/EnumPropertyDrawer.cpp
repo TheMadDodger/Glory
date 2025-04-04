@@ -28,7 +28,7 @@ namespace Glory::Editor
 		if (!pEnumType->ToString(data, value)) value = "none";
 
 		uint32_t* currentValue = (uint32_t*)data;
-		return EditorUI::InputEnum(label, typeHash, currentValue);
+		return EditorUI::InputEnum(EditorUI::MakeCleanName(label), typeHash, currentValue);
 	}
 
 	bool EnumPropertyDrawer::Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const
@@ -46,7 +46,7 @@ namespace Glory::Editor
 		uint32_t currentValue = 0;
 		if (!pEnumType->FromString(value, &currentValue)) currentValue = 0;
 
-		if (EditorUI::InputEnum(label, typeHash, &currentValue))
+		if (EditorUI::InputEnum(EditorUI::MakeCleanName(label), typeHash, &currentValue))
 		{
 			if (!pEnumType->ToString(&currentValue, value)) value = "none";
 			node = value;
@@ -80,7 +80,7 @@ namespace Glory::Editor
 
 		if (!pEnumType->FromString(value, &currentValue)) currentValue = 0;
 
-		if (EditorUI::InputEnum(label, typeHash, &currentValue))
+		if (EditorUI::InputEnum(EditorUI::MakeCleanName(label), typeHash, &currentValue))
 		{
 			if (!pEnumType->ToString(&currentValue, value)) value = "none";
 			Undo::ApplyYAMLEdit(file, path, originalValue, value);

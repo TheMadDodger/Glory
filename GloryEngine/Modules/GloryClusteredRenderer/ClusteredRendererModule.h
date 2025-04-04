@@ -46,11 +46,12 @@ namespace Glory
 
 		virtual void CollectReferences(std::vector<UUID>& references) override;
 
-		GLORY_MODULE_VERSION_H(0,4,0);
+		GLORY_MODULE_VERSION_H(0,5,0);
 
 	private:
 		virtual void Cleanup() override;
 		virtual void OnPostInitialize() override;
+		virtual void Update() override;
 
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;

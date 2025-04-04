@@ -67,7 +67,7 @@ namespace Glory
 
 		/** @brief Destroy an entity
 		 * @param entity Entity ID
-		 * 
+		 *
 		 * This removes it from the registry and internal ID caches
 		 * Also deletes the entire child hierarchy under this entity
 		 */
@@ -152,7 +152,7 @@ namespace Glory
 		 * @parem scale Scale of the created entity
 		 */
 		Entity InstantiatePrefab(UUID parent, PrefabData* pPrefab,
-		    const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
 		/** @overload
 		 * @param parent The entity to parent the created object to
 		 * @param pPrefab The prefab to instantiate
@@ -162,7 +162,7 @@ namespace Glory
 		 * @parem scale Scale of the created entity
 		 */
 		Entity InstantiatePrefab(UUID parent, PrefabData* pPrefab, uint32_t remapSeed,
-		    const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
 		/** @overload
 		 * @param parent The entity to parent the created object to
 		 * @param pPrefab The prefab to instantiate
@@ -172,7 +172,7 @@ namespace Glory
 		 * @parem scale Scale of the created entity
 		 */
 		Entity InstantiatePrefab(UUID parent, PrefabData* pPrefab, UUIDRemapper& remapper,
-		    const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
 
 		/** @brief Set the parent of an entity at the next @ref HandleDelayedParents() call
 		 *
@@ -198,7 +198,8 @@ namespace Glory
 		/** @brief Mark this scene for destruction to prevent further update() and draw() calls */
 		void MarkForDestruction();
 
-		Entity Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent = 0);
+		Entity Instantiate(GScene* pOther, UUIDRemapper& IDRemapper, Utils::ECS::EntityID parent,
+			const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
 
 		/** @brief Get this scenes settings */
 		SceneSettings& Settings() { return m_Settings; }

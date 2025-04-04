@@ -4,12 +4,21 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.UI
 {
+    /// <summary>
+    /// UI scene
+    /// </summary>
     public class UIScene
     {
         #region Props
 
+        /// <summary>
+        /// Renderer component that owns this scene
+        /// </summary>
         public UIRenderer Renderer => _renderer;
 
+        /// <summary>
+        /// Unique ID of the UI scene
+        /// </summary>
         public UInt64 ID
         {
             get => _id;

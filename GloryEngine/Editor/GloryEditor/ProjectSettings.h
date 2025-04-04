@@ -62,6 +62,9 @@ namespace Glory::Editor
 
 	private:
 		virtual bool OnGui() override;
+		virtual void OnSettingsLoaded() override;
+		virtual void OnCompile(const std::filesystem::path& path) override;
+		virtual void OnStartPlay_Impl() override;
 	};
 
 	class EngineSettings : public ProjectSettings

@@ -9,7 +9,18 @@ namespace GloryEngine.UI
     /// </summary>
     public enum UITarget
     {
+        /// <summary>
+        /// No target, only renders the UI texture
+        /// </summary>
+        None,
+        /// <summary>
+        /// Overlay onto camera render
+        /// </summary>
         CameraOverlay,
+        /// <summary>
+        /// 3D Quad in world space
+        /// </summary>
+        WorldSpaceQuad,
     }
 
     /// <summary>
@@ -17,7 +28,13 @@ namespace GloryEngine.UI
     /// </summary>
     public enum ResolutionMode
     {
+        /// <summary>
+        /// Scale factor of the camera resolution
+        /// </summary>
         CameraScale,
+        /// <summary>
+        /// Fixed resolution
+        /// </summary>
         Fixed,
     }
 

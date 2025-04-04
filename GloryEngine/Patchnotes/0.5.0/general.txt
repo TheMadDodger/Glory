@@ -27,6 +27,11 @@ Engine:
 - Added skybox rendering
 - Added diffuse irradiance to ClusteredDeferred
 - Cameras with a display output will now resize to the display
+- Fixed an issue where reloading a scene would unload it next frame
+- Fixed crash when trying to render an empty text
+- Fixed crash when PhysicsBody box or cylinder shape is too small
+- Added simulation settings to PhysicsBody component
+- Added mass and gravity factor settings to CharacterController component
 
 Editor:
 - Added a startup popup
@@ -70,6 +75,10 @@ Editor:
 - Added shortcut for opening the about window with F1 as default
 - Fixed crash when undoing a scene setting change
 - Fixed undo/redo of scene settings changes not updating the visual scene
+- Fixed crash when opening a scene that has a missing prefab
+- Objects that are linked to a missing prefab are now highlighted in red in the scene graph
+- Fixed material not being saved if only the pipeline was changed
+- Added a search bar to script dropdown and added support for drag and dropping a script onto it
 
 Scripting:
 - Fixed Vector4.Lerp returning wrong values
@@ -85,3 +94,9 @@ Scripting:
 - Added CS API for UIInteraction
 - Added world position/rotation/scale properties to Transform CS API
 - Fixed resource type not existing if the resource is not in the main assembly
+- Fixed OnEnable being called twice when adding a component during Start()
+- Fixed crash when getting/setting active state of a script component
+- Fixed a bug where you can't set the parent to nothing
+- Added BodyType property to PhysicsBody CS API
+- Added Transform property to SceneObject
+- Fixed properties of base class not showing in script editor

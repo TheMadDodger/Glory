@@ -235,7 +235,7 @@ namespace Glory
 		glm::vec3 skew;
 		glm::vec4 perspective;
 		if (!glm::decompose(transform.MatTransform, scale, rotation, translation, skew, perspective)) return;
-		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, translation, rotation, scale, pComponent.m_BodyType, pComponent.m_CurrentLayerIndex);
+		pComponent.m_BodyID = pPhysics->CreatePhysicsBody(*pShape, translation, rotation, scale, pComponent.m_BodyType, pComponent.m_CurrentLayerIndex, pComponent.m_SimulationSettings);
 		const UUID entityUUID = pScene->GetEntityUUID(entity);
 		pPhysics->SetBodyUserData(pComponent.m_BodyID, entityUUID);
 		m_CachedSceneIDs.emplace(entityUUID, pScene->GetUUID());

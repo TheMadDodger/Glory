@@ -87,12 +87,28 @@ namespace Glory
 		m_ActivationCallbacks.clear();
 	}
 
-	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex)
+	uint32_t JoltPhysicsModule::CreatePhysicsBody(const Shape& shape, const glm::vec3& inPosition, const glm::quat& inRotation, const glm::vec3& inScale, const BodyType bodyType, const uint16_t layerIndex, const PhysicsSimulationSettings& settings)
 	{
 		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
 		JPH::Shape* pShape = GetJPHShape(shape);
 		JPH::Shape::ShapeResult scaledShape = pShape->ScaleShape(ToJPHVec3(inScale));
 		BodyCreationSettings bodySettings(scaledShape.Get(), ToJPHVec3(inPosition), ToJPHQuat(inRotation), (EMotionType)bodyType, layerIndex);
+
+		bodySettings.mAllowedDOFs = EAllowedDOFs(settings.m_DegreesOfFreedom);
+		bodySettings.mAllowDynamicOrKinematic = settings.m_AllowDynamicOrKinematic;
+		bodySettings.mIsSensor = settings.m_IsSensor;
+		bodySettings.mSensorDetectsStatic = settings.m_SensorDetectsStatic;
+		bodySettings.mUseManifoldReduction = settings.m_UseManifoldReduction;
+		bodySettings.mMotionQuality = EMotionQuality(settings.m_MotionQuality);
+		bodySettings.mAllowSleeping = settings.m_AllowSleeping;
+		bodySettings.mFriction = settings.m_Friction;
+		bodySettings.mRestitution = settings.m_Restitution;
+		bodySettings.mLinearDamping = settings.m_LinearDamping;
+		bodySettings.mAngularDamping = settings.m_AngularDamping;
+		bodySettings.mMaxLinearVelocity = settings.m_MaxLinearVelocity;
+		bodySettings.mMaxAngularVelocity = settings.m_MaxAngularVelocity/180.0f*glm::pi<float>();
+		bodySettings.mGravityFactor = settings.m_GravityFactor;
+
 		JPH::BodyID bodyID = bodyInterface.CreateAndAddBody(bodySettings, EActivation::Activate);
 		return bodyID.GetIndexAndSequenceNumber();
 	}
@@ -185,6 +201,14 @@ namespace Glory
 		JPH::BodyID jphBodyID{ bodyID };
 		if (jphBodyID.IsInvalid()) return false;
 		return bodyInterface.IsAdded(jphBodyID);
+	}
+
+	void JoltPhysicsModule::SetBodyType(uint32_t bodyID, BodyType bodyType, const ActivationType activationType)
+	{
+		JPH::BodyInterface& bodyInterface = m_pJPHPhysicsSystem->GetBodyInterface();
+		JPH::BodyID jphBodyID{ bodyID };
+		if (jphBodyID.IsInvalid()) return;
+		bodyInterface.SetMotionType(jphBodyID, EMotionType(bodyType), EActivation(activationType));
 	}
 
 	glm::vec3 JoltPhysicsModule::GetBodyPosition(uint32_t bodyID) const
@@ -406,12 +430,18 @@ namespace Glory
 
 	void JoltPhysicsModule::TriggerLateActivationCallback(ActivationCallback callbackType, uint32_t bodyID)
 	{
+		auto iter = m_LateActivationCallbacks.find(callbackType);
+		if (iter == m_LateActivationCallbacks.end())
+			iter = m_LateActivationCallbacks.emplace(callbackType, std::vector<uint32_t>()).first;
 		m_LateActivationCallbacks[callbackType].push_back(bodyID);
 	}
 
 	void JoltPhysicsModule::TriggerLateContactCallback(ContactCallback callbackType, uint32_t body1ID, uint32_t body2ID)
 	{
-		m_LateContactCallbacks[callbackType].push_back({ body1ID, body2ID });
+		auto iter = m_LateContactCallbacks.find(callbackType);
+		if (iter == m_LateContactCallbacks.end())
+			iter = m_LateContactCallbacks.emplace(callbackType, std::vector<std::pair<uint32_t, uint32_t>>()).first;
+		iter->second.push_back({ body1ID, body2ID });
 	}
 
 	JoltCharacterManager* JoltPhysicsModule::GetCharacterManager()
