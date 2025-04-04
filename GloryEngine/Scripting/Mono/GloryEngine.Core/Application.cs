@@ -7,6 +7,15 @@ namespace GloryEngine
     /// </summary>
     public static class Application
     {
+        #region Props
+
+        /// <summary>
+        /// Current version of the application, set in the General settings of the project
+        /// </summary>
+        public static Version Version => Application_GetVersion();
+
+        #endregion
+
         #region Methods
 
         /// <summary>
@@ -20,6 +29,8 @@ namespace GloryEngine
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         internal extern static void Application_Quit();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static Version Application_GetVersion();
 
         #endregion
     }

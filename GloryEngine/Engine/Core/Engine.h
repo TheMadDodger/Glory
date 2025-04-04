@@ -205,6 +205,7 @@ namespace Utils::Reflect
 		const std::filesystem::path& RootPath() const;
 
 		void SetApplicationVersion(uint32_t major, uint32_t minor, uint32_t subMinor, uint32_t rc=0);
+		const Version& GetApplicationVersion() const;
 
 	private:
 		void RegisterStandardSerializers();

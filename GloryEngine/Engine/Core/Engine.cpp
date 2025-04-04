@@ -534,6 +534,11 @@ namespace Glory
 		m_ApplicationVersion.RC = (int)rc;
 	}
 
+	const Version& Engine::GetApplicationVersion() const
+	{
+		return m_ApplicationVersion;
+	}
+
 	void Engine::RegisterStandardSerializers()
 	{
 		// Standard
