@@ -13,3 +13,4 @@ Editor:
 Scripting:
 - Fixed WorldRotationEuler property not working properly
 - Improved WorldRotation property
+- Added Application.Version()
