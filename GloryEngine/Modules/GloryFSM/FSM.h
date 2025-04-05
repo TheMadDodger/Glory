@@ -36,8 +36,15 @@ namespace Glory
 	class FSMData : public Resource
 	{
 	public:
-		FSMData();
-		virtual ~FSMData();
+		GLORY_API FSMData();
+		GLORY_API virtual ~FSMData();
+
+	private:
+		/** @brief Get a vector containing other resources referenced by this resource */
+		virtual void References(Engine*, std::vector<UUID>&) const override;
+
+		virtual void Serialize(BinaryStream& container) const override;
+		virtual void Deserialize(BinaryStream& container) override;
 
 	private:
 		std::vector<FSMNode> m_Nodes;

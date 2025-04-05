@@ -1,4 +1,5 @@
 #include "FSMModule.h"
+#include "FSM.h"
 
 #include <AssetManager.h>
 #include <Engine.h>
@@ -22,6 +23,10 @@ namespace Glory
 
 	void FSMModule::Initialize()
 	{
+		Utils::Reflect::Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterType<FSMNode>();
+		Reflect::RegisterType<FSMTransition>();
+		m_pEngine->GetResourceTypes().RegisterResource<FSMData>("");
 	}
 
 	void FSMModule::PostInitialize()
