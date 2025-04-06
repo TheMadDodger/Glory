@@ -93,6 +93,8 @@ namespace Glory
 		 */
 		GLORY_API void SetStartNodeIndex(size_t index);
 
+		GLORY_API FSMNode* FindNode(std::string_view name);
+
 	private:
 		/** @brief Get a vector containing other resources referenced by this resource */
 		virtual void References(Engine*, std::vector<UUID>&) const override;
@@ -104,5 +106,19 @@ namespace Glory
 		std::vector<FSMNode> m_Nodes;
 		std::vector<FSMTransition> m_Transitions;
 		size_t m_StartNodeIndex;
+	};
+
+	class FSMModule;
+	class FSMState
+	{
+	public:
+		GLORY_API FSMState(FSMModule* pModule, UUID originalFSMID, UUID instanceID);
+		GLORY_API void SetCurrentState(UUID stateID);
+
+	private:
+		FSMModule* m_pModule;
+		UUID m_OriginalFSMID;
+		UUID m_InstanceID;
+		UUID m_CurrentState;
 	};
 }

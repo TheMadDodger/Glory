@@ -66,4 +66,27 @@ namespace Glory::Editor
 		Tumbnail::AddGenerator<FSMTumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Finite State Machine", OnCreateFSM, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 	}
+
+	const char* FSMEditorExtension::ModuleName()
+	{
+		return "Finite State Machines";
+	}
+
+	void FSMEditorExtension::HandleBeforeStart(Module* pModule)
+	{
+	}
+
+	void FSMEditorExtension::HandleStart(Module* pModule)
+	{
+	}
+
+	void FSMEditorExtension::HandleStop(Module* pModule)
+	{
+		FSMModule* pFSMModule = static_cast<FSMModule*>(pModule);
+		pFSMModule->CleanupStates();
+	}
+
+	void FSMEditorExtension::HandleUpdate(Module* pModule)
+	{
+	}
 }

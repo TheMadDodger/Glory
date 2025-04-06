@@ -59,4 +59,8 @@ namespace Glory
 		PhysicsSystem::Instance()->OnContactPersisted_Callback = NULL;
 		PhysicsSystem::Instance()->OnContactRemoved_Callback = NULL;
 	}
+
+	void JoltLibManager::Reset(Engine*)
+	{
+	}
 }

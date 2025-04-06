@@ -21,6 +21,19 @@ namespace Glory
 		return typeid(FSMModule);
 	}
 
+	UUID FSMModule::CreateFSMState(FSMData* pData)
+	{
+		UUID id = UUID();
+		FSMState& state = m_States.emplace_back(this, pData->GetUUID(), id);
+		state.SetCurrentState(pData->StartNodeID());
+		return id;
+	}
+
+	void FSMModule::CleanupStates()
+	{
+		m_States.clear();
+	}
+
 	void FSMModule::Initialize()
 	{
 		Utils::Reflect::Reflect::SetReflectInstance(&m_pEngine->Reflection());

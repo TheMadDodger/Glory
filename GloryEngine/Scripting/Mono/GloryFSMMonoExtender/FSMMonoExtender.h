@@ -3,6 +3,8 @@
 #include <Glory.h>
 #include <IMonoLibManager.h>
 
+#include <mono/metadata/object-forward.h>
+
 namespace Glory
 {
 	class Engine;
@@ -10,26 +12,32 @@ namespace Glory
 
 	extern "C" GLORY_API bool OnLoadExtra(const char* path, Module* pModule, Module* pRequiredModule);
 
-	class UILibManager : public IMonoLibManager
+	class FSMLibManager : public IMonoLibManager
 	{
 	public: /* Lib manager implementation */
 		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) override;
 		virtual void Cleanup(Engine*) override;
 		virtual void Reset(Engine*) override;
+
+	private:
+		Assembly* m_pAssembly;
+		MonoObject* m_pFSMManagerObject;
+		MonoMethod* m_pFSMReset;
+		uint32_t m_FSMGCHandle;
 	};
 
-	class UIMonoExtender : public IScriptExtender
+	class FSMMonoExtender : public IScriptExtender
 	{
 	public:
-		UIMonoExtender(const char* path);
-		virtual ~UIMonoExtender();
+		FSMMonoExtender(const char* path);
+		virtual ~FSMMonoExtender();
 
 	public: /* Script extension implementation */
 		virtual void GetInternalCalls(std::vector<InternalCall>& internalCalls) override;
 		virtual void GetLibs(ScriptingExtender* pScriptingExtender) override;
 
 	private:
-		UILibManager* m_pLibManager;
+		FSMLibManager* m_pLibManager;
 		std::string m_Path;
 	};
 }

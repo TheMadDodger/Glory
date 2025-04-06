@@ -150,6 +150,11 @@ namespace Glory
 			return m_Location;
 		}
 
+		GLORY_API IMonoLibManager* LibManager()
+		{
+			return m_pLibManager;
+		}
+
 	private:
 		bool LoadAssembly(const std::filesystem::path& assemblyPath);
 		bool LoadAssemblyWithImage(const std::filesystem::path& assemblyPath);

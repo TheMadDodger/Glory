@@ -60,6 +60,16 @@ namespace Glory
 		m_StartNodeIndex = index;
 	}
 
+	FSMNode* FSMData::FindNode(std::string_view name)
+	{
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (m_Nodes[i].m_Name != name) continue;
+			return &m_Nodes[i];
+		}
+		return nullptr;
+	}
+
 	void FSMData::References(Engine*, std::vector<UUID>&) const {}
 
 	void FSMData::Serialize(BinaryStream& container) const
@@ -97,5 +107,13 @@ namespace Glory
 			container.Read(m_Transitions[i].m_Name).Read(m_Transitions[i].m_ID)
 				.Read(m_Transitions[i].m_FromNode).Read(m_Transitions[i].m_ToNode);
 		}
+	}
+
+	FSMState::FSMState(FSMModule* pModule, UUID originalFSMID, UUID instanceID) :
+		m_pModule(pModule), m_OriginalFSMID(originalFSMID), m_InstanceID(instanceID), m_CurrentState(0) {}
+
+	void FSMState::SetCurrentState(UUID stateID)
+	{
+		m_CurrentState = stateID;
 	}
 }

@@ -122,4 +122,8 @@ namespace Glory
 	void UILibManager::Cleanup(Engine*)
 	{
 	}
+
+	void UILibManager::Reset(Engine*)
+	{
+	}
 }
