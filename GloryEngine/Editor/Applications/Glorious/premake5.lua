@@ -100,6 +100,7 @@ project "Glorious"
 		"MonoEditorExtension",
 		"FreeTypeFontImporter",
 		"UIEditorExtension",
+		"FSMEditorExtension",
 		"SDLImageImporter",
 		"STBImageImporter",
 		"ASSIMPImporter",

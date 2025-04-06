@@ -1,0 +1,7 @@
+Name: "Finite State Machines"
+Type: Other
+Editor:
+ Extensions: [FSMEditorExtension]
+Extras:
+ - File: Scripting/csharp/GloryFSMMonoExtender
+   Requires: "GloryMonoScripting"
