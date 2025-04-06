@@ -34,9 +34,26 @@ namespace Glory::Editor
 		path = GetUnqiueFilePath(path.append("New State Machine.gfsm"));
 
 		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [](std::filesystem::path& finalPath) {
-			finalPath.replace_extension("gui");
+			finalPath.replace_extension("gfsm");
 			if (std::filesystem::exists(finalPath)) return;
 			FSMData* pFSM = new FSMData();
+
+			UUID node1;
+			UUID node2;
+			UUID node3;
+			UUID node4;
+
+			pFSM->NewNode("State 1", node1);
+			pFSM->NewNode("State 2", node2);
+			pFSM->NewNode("State 3", node3);
+			pFSM->NewNode("State 4", node4);
+
+			pFSM->NewTransition("Transition 1", node1, node2);
+			pFSM->NewTransition("Transition 2", node1, node3);
+			pFSM->NewTransition("Transition 3", node2, node3);
+			pFSM->NewTransition("Transition 4", node3, node4);
+			pFSM->NewTransition("Transition 5", node4, node1);
+
 			EditorAssetDatabase::CreateAsset(pFSM, finalPath.string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();
