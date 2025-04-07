@@ -54,7 +54,13 @@ namespace Glory::Editor
             const std::string name = transition["Name"].As<std::string>();
             const UUID from = transition["From"].As<uint64_t>();
             const UUID to = transition["To"].As<uint64_t>();
+            const UUID prop = transition["Property"].As<uint64_t>();
+            const FSMTransitionOP op = transition["OP"].AsEnum<FSMTransitionOP>();
+            const float compareValue = transition["CompareValue"].As<float>();
             FSMTransition& fsmTransition = pNewFSM->NewTransition(name, from, to, id);
+            fsmTransition.m_Property = prop;
+            fsmTransition.m_TransitionOp = op;
+            fsmTransition.m_CompareValue = compareValue;
         }
 
         for (auto iter = properties.Begin(); iter != properties.End(); ++iter)
@@ -111,6 +117,9 @@ namespace Glory::Editor
             transition["Name"].Set(fsmTransition.m_Name);
             transition["From"].Set((uint64_t)fsmTransition.m_FromNode);
             transition["To"].Set((uint64_t)fsmTransition.m_FromNode);
+            transition["Property"].Set((uint64_t)fsmTransition.m_Property);
+            transition["OP"].SetEnum(fsmTransition.m_TransitionOp);
+            transition["CompareValue"].Set(fsmTransition.m_CompareValue);
         }
 
         for (size_t i = 0; i < pFSM->PropertyCount(); ++i)

@@ -8,6 +8,7 @@
 #include <UUID.h>
 
 REFLECTABLE_ENUM_NS(Glory, FSMPropertyType, Number, Bool, Trigger);
+REFLECTABLE_ENUM_NS(Glory, FSMTransitionOP, Trigger, On, Off, Equal, Greater, GreaterOrEqual, Less, LessOrEqual, Custom);
 
 namespace Glory
 {
@@ -16,7 +17,8 @@ namespace Glory
 	{
 		/** @brief Constructor */
 		FSMTransition() :
-			m_Name("New Transition"), m_FromNode(0), m_ToNode(0) {}
+			m_Name("New Transition"), m_FromNode(0), m_ToNode(0), m_Property(0),
+			m_TransitionOp(FSMTransitionOP::Trigger), m_CompareValue(0.0f) {}
 		/** @override
 		 * @param name Name of the transition
 		 * @param from Node the transition comes from
@@ -24,12 +26,16 @@ namespace Glory
 		 * @param id ID of the transition
 		 */
 		FSMTransition(const std::string& name, UUID from, UUID to, UUID id) :
-			m_Name(name), m_FromNode(from), m_ToNode(to), m_ID(id) {}
+			m_Name(name), m_FromNode(from), m_ToNode(to), m_ID(id), m_Property(0),
+			m_TransitionOp(FSMTransitionOP::Trigger), m_CompareValue(0.0f) {}
 
 		REFLECTABLE(FSMTransition,
 			(std::string)(m_Name),
 			(UUID)(m_FromNode),
-			(UUID)(m_ToNode)
+			(UUID)(m_ToNode),
+			(UUID)(m_Property),
+			(FSMTransitionOP)(m_TransitionOp),
+			(float)(m_CompareValue)
 		);
 
 		UUID m_ID;

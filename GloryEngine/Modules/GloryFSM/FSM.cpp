@@ -41,7 +41,7 @@ namespace Glory
 	FSMTransition& FSMData::NewTransition(const std::string& name, UUID from, UUID to, UUID id)
 	{
 		const size_t index = NodeIndex(from);
-		if (index == m_Nodes.size()) return;
+		_ASSERT(index != m_Nodes.size());
 		m_Nodes[index].m_Transitions.push_back(id);
 		return m_Transitions.emplace_back(name, from, to, id);
 	}
@@ -118,6 +118,21 @@ namespace Glory
 		return m_Transitions.size();
 	}
 
+	FSMProperty& FSMData::NewProperty(const std::string& name, FSMPropertyType type, UUID id)
+	{
+		return m_Properties.emplace_back(name, type, id);
+	}
+
+	size_t FSMData::PropertyCount() const
+	{
+		return m_Properties.size();
+	}
+
+	const FSMProperty& FSMData::Property(size_t index) const
+	{
+		return m_Properties[index];
+	}
+
 	void FSMData::References(Engine*, std::vector<UUID>&) const {}
 
 	void FSMData::Serialize(BinaryStream& container) const
@@ -133,7 +148,15 @@ namespace Glory
 		for (size_t i = 0; i < m_Transitions.size(); ++i)
 		{
 			container.Write(m_Transitions[i].m_Name).Write(m_Transitions[i].m_ID)
-				.Write(m_Transitions[i].m_FromNode).Write(m_Transitions[i].m_ToNode);
+				.Write(m_Transitions[i].m_FromNode).Write(m_Transitions[i].m_ToNode)
+				.Write(m_Transitions[i].m_Property).Write(m_Transitions[i].m_TransitionOp)
+				.Write(m_Transitions[i].m_CompareValue);
+		}
+
+		container.Write(m_Properties.size());
+		for (size_t i = 0; i < m_Properties.size(); ++i)
+		{
+			container.Write(m_Properties[i].m_Name).Write(m_Properties[i].m_Type).Write(m_Properties[i].m_ID);
 		}
 	}
 
@@ -153,12 +176,23 @@ namespace Glory
 		for (size_t i = 0; i < size; ++i)
 		{
 			container.Read(m_Transitions[i].m_Name).Read(m_Transitions[i].m_ID)
-				.Read(m_Transitions[i].m_FromNode).Read(m_Transitions[i].m_ToNode);
+				.Read(m_Transitions[i].m_FromNode).Read(m_Transitions[i].m_ToNode)
+				.Read(m_Transitions[i].m_Property).Read(m_Transitions[i].m_TransitionOp)
+				.Read(m_Transitions[i].m_CompareValue);
+		}
+
+		container.Read(size);
+		m_Properties.resize(size);
+		for (size_t i = 0; i < size; ++i)
+		{
+			container.Read(m_Properties[i].m_Name).Read(m_Properties[i].m_Type)
+				.Read(m_Properties[i].m_ID);
 		}
 	}
 
-	FSMState::FSMState(FSMModule* pModule, UUID originalFSMID, UUID instanceID) :
-		m_pModule(pModule), m_OriginalFSMID(originalFSMID), m_InstanceID(instanceID), m_CurrentState(0) {}
+	FSMState::FSMState(FSMModule* pModule, FSMData* pFSM, UUID instanceID) :
+		m_pModule(pModule), m_OriginalFSMID(pFSM->GetUUID()), m_InstanceID(instanceID), m_CurrentState(0),
+		m_PropertyData(pFSM->PropertyCount()*sizeof(float)) {}
 
 	void FSMState::SetCurrentState(UUID stateID)
 	{
