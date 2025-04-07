@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace GloryEngine.FSM
 {
@@ -11,6 +12,21 @@ namespace GloryEngine.FSM
         #region Props
 
         public UInt64 ID => _id;
+
+        public FSMNode CurrentState
+        {
+            set
+            {
+                if (value == null) throw new Exception("State cannot be null");
+                FSMInstance_SetState(_id, value.ID);
+            }
+            get
+            {
+                UInt64 nodeId = FSMInstance_GetState(_id);
+                if (nodeId == 0) return null;
+                return _template.GetNode(nodeId);
+            }
+        }
 
         #endregion
 
@@ -54,6 +70,26 @@ namespace GloryEngine.FSM
             if (!_stateHandlers.ContainsKey(nodeId)) return;
             _stateHandlers[nodeId].OnStateExit(this);
         }
+
+        public void SetTrigger(string name) => FSMInstance_SetTrigger(_id, name);
+        public void SetBool(string name, bool value) => FSMInstance_SetBool(_id, name, value);
+        public void SetNumber(string name, float value) => FSMInstance_SetFloat(_id, name, value);
+
+        #endregion
+
+        #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void FSMInstance_SetState(UInt64 stateId, UInt64 nodeId);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static UInt64 FSMInstance_GetState(UInt64 stateId);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void FSMInstance_SetTrigger(UInt64 stateId, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void FSMInstance_SetBool(UInt64 stateId, string name, bool value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void FSMInstance_SetFloat(UInt64 stateId, string name, float value);
 
         #endregion
     }

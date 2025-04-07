@@ -22,6 +22,7 @@ namespace Glory
 		GLORY_API virtual const std::type_info& GetModuleType() override;
 
 		GLORY_API UUID CreateFSMState(FSMData* pData);
+		GLORY_API FSMState* GetFSMState(UUID id);
 		GLORY_API void DestroyFSMState(UUID id);
 		GLORY_API void CleanupStates();
 

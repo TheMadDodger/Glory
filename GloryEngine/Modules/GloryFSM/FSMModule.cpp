@@ -29,6 +29,15 @@ namespace Glory
 		return id;
 	}
 
+	FSMState* Glory::FSMModule::GetFSMState(UUID id)
+	{
+		for (size_t i = 0; i < m_States.size(); ++i)
+		{
+			if (m_States[i].ID() != id) continue;
+			return &m_States[i];
+		}
+	}
+
 	void FSMModule::DestroyFSMState(UUID id)
 	{
 		for (size_t i = 0; i < m_States.size(); ++i)

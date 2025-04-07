@@ -92,6 +92,66 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region FSM State
+
+	void FSMInstance_SetState(uint64_t stateId, uint64_t nodeId)
+	{
+		FSMState* state = FSM_MODULE->GetFSMState(stateId);
+		if (!state) return;
+		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(state->OriginalFSMID());
+		if (!pFSMResource) return;
+		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
+		const FSMNode* node = pFSMData->Node(UUID(nodeId));
+		if (!node) return;
+		state->SetCurrentState(nodeId, pFSMData);
+	}
+
+	uint64_t FSMInstance_GetState(uint64_t stateId)
+	{
+		FSMState* state = FSM_MODULE->GetFSMState(stateId);
+		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(state->OriginalFSMID());
+		if (!pFSMResource) return 0;
+		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
+		const FSMNode* node = pFSMData->Node(state->CurrentState());
+		return node ? node->m_ID : 0;
+	}
+
+	void FSMInstance_SetTrigger(uint64_t stateId, MonoString* name)
+	{
+		FSMState* state = FSM_MODULE->GetFSMState(stateId);
+		if (!state) return;
+		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(state->OriginalFSMID());
+		if (!pFSMResource) return;
+		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
+		const std::string_view nameStr = mono_string_to_utf8(name);
+		int trigger = 1;
+		state->SetPropertyValue(pFSMData, nameStr, &trigger);
+	}
+
+	void FSMInstance_SetBool(uint64_t stateId, MonoString* name, bool value)
+	{
+		FSMState* state = FSM_MODULE->GetFSMState(stateId);
+		if (!state) return;
+		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(state->OriginalFSMID());
+		if (!pFSMResource) return;
+		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
+		const std::string_view nameStr = mono_string_to_utf8(name);
+		state->SetPropertyValue(pFSMData, nameStr, &value);
+	}
+
+	void FSMInstance_SetFloat(uint64_t stateId, MonoString* name, float value)
+	{
+		FSMState* state = FSM_MODULE->GetFSMState(stateId);
+		if (!state) return;
+		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(state->OriginalFSMID());
+		if (!pFSMResource) return;
+		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
+		const std::string_view nameStr = mono_string_to_utf8(name);
+		state->SetPropertyValue(pFSMData, nameStr, &value);
+	}
+
+#pragma endregion
+
 #pragma region Binding
 
 	void FSMCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -105,9 +165,15 @@ namespace Glory
         BIND("GloryEngine.FSM.FSMNode::FSMNode_FindTransitionID", FSMNode_FindTransitionID);
         BIND("GloryEngine.FSM.FSMNode::FSMNode_GetTransitionID", FSMNode_GetTransitionID);
 
-
 		/* FSM Manager */
-        BIND("FSMManager.FSM.FSMManager::FSMManager_DestroyInstance", FSMManager_DestroyInstance);
+        BIND("GloryEngine.FSM.FSMManager::FSMManager_DestroyInstance", FSMManager_DestroyInstance);
+
+		/* FSM State */
+        BIND("GloryEngine.FSM.FSMInstance::FSMInstance_SetState", FSMInstance_SetState);
+        BIND("GloryEngine.FSM.FSMInstance::FSMInstance_GetState", FSMInstance_GetState);
+        BIND("GloryEngine.FSM.FSMInstance::FSMInstance_SetTrigger", FSMInstance_SetTrigger);
+        BIND("GloryEngine.FSM.FSMInstance::FSMInstance_SetBool", FSMInstance_SetBool);
+        BIND("GloryEngine.FSM.FSMInstance::FSMInstance_SetFloat", FSMInstance_SetFloat);
 	}
 
 	void FSMCSAPI::SetEngine(Engine* pEngine)

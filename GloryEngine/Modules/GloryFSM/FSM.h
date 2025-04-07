@@ -196,6 +196,8 @@ namespace Glory
 		 * @param stateID ID of the state to set
 		 */
 		GLORY_API void SetCurrentState(UUID stateID);
+		GLORY_API void SetCurrentState(UUID stateID, FSMData* pFSM);
+		GLORY_API UUID CurrentState() const;
 
 		/** @brief ID of this state instance */
 		GLORY_API UUID ID() const;

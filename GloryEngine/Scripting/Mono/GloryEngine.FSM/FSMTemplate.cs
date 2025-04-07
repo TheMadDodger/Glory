@@ -40,6 +40,14 @@ namespace GloryEngine.FSM
             return node;
         }
 
+        internal FSMNode GetNode(ulong nodeId)
+        {
+            if (_nodeCache.ContainsKey(nodeId)) return _nodeCache[nodeId];
+            FSMNode node = new FSMNode(this, nodeId);
+            _nodeCache.Add(nodeId, node);
+            return node;
+        }
+
         #endregion
 
         #region API Methods

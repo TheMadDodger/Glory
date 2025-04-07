@@ -235,6 +235,23 @@ namespace Glory
 	void FSMState::SetCurrentState(UUID stateID)
 	{
 		m_CurrentState = stateID;
+		m_FirstUpdate = true;
+		m_PropertyDataChanged = true;
+	}
+
+	void FSMState::SetCurrentState(UUID stateID, FSMData* pFSM)
+	{
+		const FSMNode* node = pFSM->Node(m_CurrentState);
+		if (!m_FirstUpdate && node && m_pModule->ExitCallback) m_pModule->ExitCallback(*this, *node);
+
+		m_CurrentState = stateID;
+		m_FirstUpdate = true;
+		m_PropertyDataChanged = true;
+	}
+
+	UUID FSMState::CurrentState() const
+	{
+		return m_CurrentState;
 	}
 
 	UUID FSMState::ID() const
