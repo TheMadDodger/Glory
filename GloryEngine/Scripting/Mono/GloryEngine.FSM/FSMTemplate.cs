@@ -24,12 +24,21 @@ namespace GloryEngine.FSM
 
         #region Methods
 
+        /// <summary>
+        /// Create a new instance of this state machine
+        /// </summary>
+        /// <returns></returns>
         public FSMInstance NewInstance()
         {
             UInt64 instanceID = FSMTemplate_CreateInstance(_objectID);
             return FSMManager.CreateInstance(instanceID, this);
         }
 
+        /// <summary>
+        /// Find a node in this state machine
+        /// </summary>
+        /// <param name="name">Name of the node to find</param>
+        /// <returns></returns>
         public FSMNode FindNode(string name)
         {
             UInt64 nodeId = FSMTemplate_FindNode(_objectID, name);

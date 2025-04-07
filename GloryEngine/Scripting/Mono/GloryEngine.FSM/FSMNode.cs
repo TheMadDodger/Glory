@@ -11,8 +11,14 @@ namespace GloryEngine.FSM
     {
         #region Props
 
+        /// <summary>
+        /// ID of this node
+        /// </summary>
         public UInt64 ID => _id;
 
+        /// <summary>
+        /// Number of transitions going from this node
+        /// </summary>
         public uint TransitionCount => FSMNode_GetTransitionCount(_owner.ID, _id);
 
         #endregion
@@ -38,6 +44,11 @@ namespace GloryEngine.FSM
 
         #region Methods
 
+        /// <summary>
+        /// Find a transition going from this node
+        /// </summary>
+        /// <param name="name">Name of the transition to find</param>
+        /// <returns></returns>
         public FSMTransition FindTransition(string name)
         {
             UInt64 transitionId = FSMNode_FindTransitionID(_owner.ID, _id, name);
@@ -48,6 +59,11 @@ namespace GloryEngine.FSM
             return transition;
         }
 
+        /// <summary>
+        /// Get a transition going from this node
+        /// </summary>
+        /// <param name="index">Index of the transition</param>
+        /// <returns></returns>
         public FSMTransition GetTransition(uint index)
         {
             UInt64 transitionId = FSMNode_GetTransitionID(_owner.ID, _id, index);

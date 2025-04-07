@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace GloryEngine.FSM
 {
+    /// <summary>
+    /// Manager for finite state machines
+    /// </summary>
     public class FSMManager
     {
         #region Fields
@@ -47,6 +50,10 @@ namespace GloryEngine.FSM
             _cachedFSMInstances[fsmId].Exit(nodeId);
         }
 
+        /// <summary>
+        /// Destroy an instance of a state machine
+        /// </summary>
+        /// <param name="instance">Instance to destroy</param>
         public static void DestroyInstance(FSMInstance instance)
         {
             if (!_cachedFSMInstances.Remove(instance.ID)) return;

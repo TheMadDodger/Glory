@@ -36,6 +36,7 @@ namespace Glory
 			if (m_States[i].ID() != id) continue;
 			return &m_States[i];
 		}
+		return nullptr;
 	}
 
 	void FSMModule::DestroyFSMState(UUID id)
