@@ -196,7 +196,12 @@ namespace Glory
 		 * @param stateID ID of the state to set
 		 */
 		GLORY_API void SetCurrentState(UUID stateID);
+		/** @overload Calls the Exit method on the current state if it was already started
+		 * @param stateID ID of the state to set
+		 * @param pFSM FSM data resource
+		 */
 		GLORY_API void SetCurrentState(UUID stateID, FSMData* pFSM);
+		/** @biref Get the current state of this state machine */
 		GLORY_API UUID CurrentState() const;
 
 		/** @brief ID of this state instance */
