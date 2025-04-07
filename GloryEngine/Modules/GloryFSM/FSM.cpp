@@ -1,6 +1,7 @@
 #include "FSM.h"
 
 #include <BinaryStream.h>
+#include <AssetManager.h>
 
 namespace Glory
 {
@@ -95,6 +96,11 @@ namespace Glory
 
 	const FSMTransition* FSMData::Transition(UUID id) const
 	{
+		for (size_t i = 0; i < m_Transitions.size(); ++i)
+		{
+			if (m_Transitions[i].m_ID != id) continue;
+			return &m_Transitions[i];
+		}
 		return nullptr;
 	}
 
@@ -131,6 +137,36 @@ namespace Glory
 	const FSMProperty& FSMData::Property(size_t index) const
 	{
 		return m_Properties[index];
+	}
+
+	const FSMProperty* FSMData::Property(UUID id) const
+	{
+		for (size_t i = 0; i < m_Properties.size(); ++i)
+		{
+			if (m_Properties[i].m_ID != id) continue;
+			return &m_Properties[i];
+		}
+		return nullptr;
+	}
+
+	size_t FSMData::PropertyIndex(UUID id) const
+	{
+		for (size_t i = 0; i < m_Properties.size(); ++i)
+		{
+			if (m_Properties[i].m_ID != id) continue;
+			return i;
+		}
+		return m_Properties.size();
+	}
+
+	size_t FSMData::PropertyIndex(std::string_view name) const
+	{
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (m_Properties[i].m_Name != name) continue;
+			return i;
+		}
+		return m_Properties.size();
 	}
 
 	void FSMData::References(Engine*, std::vector<UUID>&) const {}
@@ -192,7 +228,7 @@ namespace Glory
 
 	FSMState::FSMState(FSMModule* pModule, FSMData* pFSM, UUID instanceID) :
 		m_pModule(pModule), m_OriginalFSMID(pFSM->GetUUID()), m_InstanceID(instanceID), m_CurrentState(0),
-		m_PropertyData(pFSM->PropertyCount()*sizeof(float)) {}
+		m_PropertyData(pFSM->PropertyCount()*sizeof(float)), m_PropertyDataChanged(true) {}
 
 	void FSMState::SetCurrentState(UUID stateID)
 	{
@@ -207,5 +243,101 @@ namespace Glory
 	UUID FSMState::OriginalFSMID() const
 	{
 		return m_OriginalFSMID;
+	}
+
+	void FSMState::SetPropertyValue(FSMData* pFSM, std::string_view name, void* data)
+	{
+		const size_t propIndex = pFSM->PropertyIndex(name);
+		if (propIndex == pFSM->PropertyCount()) return;
+		char* propData = &m_PropertyData[propIndex*sizeof(float)];
+		std::memcpy(propData, data, sizeof(float));
+	}
+
+	void FSMState::Update(AssetManager* pAssets)
+	{
+		if (!m_PropertyDataChanged) return;
+		if (m_CurrentState == 0) return;
+
+		Resource* pFSMResource = pAssets->FindResource(m_OriginalFSMID);
+		if (!pFSMResource) return;
+		FSMData* pFSM = static_cast<FSMData*>(pFSMResource);
+
+		const FSMNode* node = pFSM->Node(m_CurrentState);
+
+		for (size_t i = 0; i < node->m_Transitions.size(); ++i)
+		{
+			const UUID transitionID = node->m_Transitions[i];
+			const FSMTransition* transition = pFSM->Transition(transitionID);
+
+			if (transition->m_TransitionOp == FSMTransitionOP::Custom)
+			{
+				/* @todo: Trigger custom condition */
+				continue;
+			}
+
+			if (transition->m_Property == 0) continue;
+			const size_t propIndex = pFSM->PropertyIndex(transition->m_Property);
+			if (propIndex == pFSM->PropertyCount()) continue;
+			const FSMProperty& prop = pFSM->Property(propIndex);
+
+			const char* propData = &m_PropertyData[propIndex*sizeof(float)];
+
+			bool triggerTransition = false;
+
+			switch (transition->m_TransitionOp)
+			{
+			case FSMTransitionOP::Trigger:
+				if (prop.m_Type != FSMPropertyType::Trigger) continue;
+				triggerTransition = *reinterpret_cast<const int*>(propData) > 0;
+				break;
+			case FSMTransitionOP::On:
+				if (prop.m_Type != FSMPropertyType::Bool) continue;
+				triggerTransition = *reinterpret_cast<const int*>(propData) != 0;
+				break;
+			case FSMTransitionOP::Off:
+				if (prop.m_Type != FSMPropertyType::Bool) continue;
+				triggerTransition = *reinterpret_cast<const int*>(propData) == 0;
+				break;
+			case FSMTransitionOP::Equal:
+				if (prop.m_Type == FSMPropertyType::Bool || prop.m_Type != FSMPropertyType::Trigger) continue;
+				triggerTransition = *reinterpret_cast<const float*>(propData) == transition->m_CompareValue;
+				break;
+			case FSMTransitionOP::Greater:
+				if (prop.m_Type == FSMPropertyType::Bool || prop.m_Type != FSMPropertyType::Trigger) continue;
+				triggerTransition = *reinterpret_cast<const float*>(propData) > transition->m_CompareValue;
+				break;
+			case FSMTransitionOP::GreaterOrEqual:
+				if (prop.m_Type == FSMPropertyType::Bool || prop.m_Type != FSMPropertyType::Trigger) continue;
+				triggerTransition = *reinterpret_cast<const float*>(propData) >= transition->m_CompareValue;
+				break;
+			case FSMTransitionOP::Less:
+				if (prop.m_Type == FSMPropertyType::Bool || prop.m_Type != FSMPropertyType::Trigger) continue;
+				triggerTransition = *reinterpret_cast<const float*>(propData) < transition->m_CompareValue;
+				break;
+			case FSMTransitionOP::LessOrEqual:
+				if (prop.m_Type == FSMPropertyType::Bool || prop.m_Type != FSMPropertyType::Trigger) continue;
+				triggerTransition = *reinterpret_cast<const float*>(propData) <= transition->m_CompareValue;
+				break;
+			}
+
+			if (triggerTransition)
+			{
+				const UUID oldState = m_CurrentState;
+				m_CurrentState = transition->m_ToNode;
+
+				/* @todo: Trigger events */
+				break;
+			}
+		}
+
+		/* Reset all triggers */
+		for (size_t i = 0; i < pFSM->PropertyCount(); ++i)
+		{
+			const FSMProperty& prop = pFSM->Property(i);
+			if (prop.m_Type != FSMPropertyType::Trigger) continue;
+			std::memset(&m_PropertyData[i*sizeof(float)], 0, sizeof(float));
+		}
+
+		m_PropertyDataChanged = false;
 	}
 }

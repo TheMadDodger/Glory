@@ -76,6 +76,8 @@ namespace Glory::Editor
 		Importer::Register(&importer);
 		Tumbnail::AddGenerator<FSMTumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Finite State Machine", OnCreateFSM, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
+
+		EditorPlayer::RegisterLoopHandler(this);
 	}
 
 	const char* FSMEditorExtension::ModuleName()

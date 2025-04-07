@@ -60,6 +60,10 @@ namespace Glory
 
 	void FSMModule::Update()
 	{
+		for (size_t i = 0; i < m_States.size(); ++i)
+		{
+			m_States[i].Update(&m_pEngine->GetAssetManager());
+		}
 	}
 
 	void FSMModule::Cleanup()

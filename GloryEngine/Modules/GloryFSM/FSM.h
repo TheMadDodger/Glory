@@ -143,9 +143,28 @@ namespace Glory
 		 */
 		GLORY_API size_t TransitionIndex(UUID id) const;
 
+		/** @brief Add a new property to the state machine
+		 * @param name Name of the property
+		 * @param type Type of the property
+		 * @param id ID of the property
+		 */
 		GLORY_API FSMProperty& NewProperty(const std::string& name, FSMPropertyType type, UUID id);
+		/** @brief Number of properties in this state machine */
 		GLORY_API size_t PropertyCount() const;
+		/** @brief Get a property in this state machine
+		 * @param index Index of the property to get
+		 */
 		GLORY_API const FSMProperty& Property(size_t index) const;
+		/** @overload */
+		GLORY_API const FSMProperty* Property(UUID id) const;
+		/** @brief Find the index of a property in this state machine
+		 * @param id ID of the property to find
+		 */
+		GLORY_API size_t PropertyIndex(UUID id) const;
+		/** @overload Find the index of a property in this state machine by name
+		 * @param name Name of the property to find
+		 */
+		GLORY_API size_t PropertyIndex(std::string_view name) const;
 
 	private:
 		/** @brief Get a vector containing other resources referenced by this resource */
@@ -162,6 +181,7 @@ namespace Glory
 	};
 
 	class FSMModule;
+	class AssetManager;
 
 	/** @brief Runtime state of a finite state machine */
 	class FSMState
@@ -183,11 +203,23 @@ namespace Glory
 		/** @brief ID of the finite state machine data resource */
 		GLORY_API UUID OriginalFSMID() const;
 
+		/** @brief Set the value of a property in this state machine instance
+		 * @param pFSM FSM data resource
+		 * @param name Name of the property
+		 * @param data New property value
+		 */
+		GLORY_API void SetPropertyValue(FSMData* pFSM, std::string_view name, void* data);
+		/** @brief Update the state machine if any properties have changed since the last frame
+		 * @param pFSM FSM data resource
+		 */
+		GLORY_API void Update(AssetManager* pAssets);
+
 	private:
 		FSMModule* m_pModule;
 		UUID m_OriginalFSMID;
 		UUID m_InstanceID;
 		UUID m_CurrentState;
 		std::vector<char> m_PropertyData;
+		bool m_PropertyDataChanged;
 	};
 }
