@@ -5,8 +5,14 @@
 
 #include <glm/glm.hpp>
 
+#include <vector>
+
 namespace Glory
 {
+	class FSMData;
+	class FSMState;
+	struct FSMNode;
+
 	class FSMModule : public Module
 	{
 	public:
@@ -15,7 +21,15 @@ namespace Glory
 
 		GLORY_API virtual const std::type_info& GetModuleType() override;
 
+		GLORY_API UUID CreateFSMState(FSMData* pData);
+		GLORY_API FSMState* GetFSMState(UUID id);
+		GLORY_API void DestroyFSMState(UUID id);
+		GLORY_API void CleanupStates();
+
 		GLORY_MODULE_VERSION_H(0,1,0);
+
+		std::function<void(const FSMState&, const FSMNode&)> EntryCallback = NULL;
+		std::function<void(const FSMState&, const FSMNode&)> ExitCallback = NULL;
 
 	private:
 		virtual void Initialize() override;
@@ -24,5 +38,8 @@ namespace Glory
 		virtual void Cleanup() override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
+
+	private:
+		std::vector<FSMState> m_States;
 	};
 }

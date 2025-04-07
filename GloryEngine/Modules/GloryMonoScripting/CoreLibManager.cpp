@@ -58,6 +58,16 @@ namespace Glory
 		m_SceneObjectDestroyedCallback = 0;
 	}
 
+	void CoreLibManager::Reset(Engine* pEngine)
+	{
+		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
+		MonoMethod* pReset = pEngineClass->GetMethod(".::Reset");
+		MonoObject* pExcept;
+		MonoObject* pReturn = mono_runtime_invoke(pReset, m_pEngineObject, nullptr, &pExcept);
+		if (pExcept)
+			mono_print_unhandled_exception(pExcept);
+	}
+
 	MonoObject* CoreLibManager::CreateAssetObject(UUID uuid, const std::string_view type)
 	{
 		if (!uuid) return nullptr;
@@ -132,16 +142,6 @@ namespace Glory
 		if (pExcept)
 			mono_print_unhandled_exception(pExcept);
 		return pReturn;
-	}
-
-	void CoreLibManager::ResetEngine(Engine* pEngine)
-	{
-		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
-		MonoMethod* pReset = pEngineClass->GetMethod(".::Reset");
-		MonoObject* pExcept;
-		MonoObject* pReturn = mono_runtime_invoke(pReset, m_pEngineObject, nullptr, &pExcept);
-		if (pExcept)
-			mono_print_unhandled_exception(pExcept);
 	}
 
 	void CoreLibManager::CreateEngine(Engine* pEngine)

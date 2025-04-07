@@ -65,7 +65,7 @@ namespace Glory::Editor
 	void MonoEditorExtension::HandleStop(Module* pModule)
 	{
 		MonoManager::Instance()->WaitForPendingFinalizers();
-		MonoManager::Instance()->GetCoreLibManager()->ResetEngine(pModule->GetEngine());
+		MonoManager::Instance()->Reset(pModule->GetEngine());
 	}
 
 	void MonoEditorExtension::OnBeginPackage(const std::filesystem::path& path)
