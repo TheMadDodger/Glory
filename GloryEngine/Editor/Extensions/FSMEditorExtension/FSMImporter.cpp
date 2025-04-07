@@ -32,6 +32,7 @@ namespace Glory::Editor
 		Utils::NodeValueRef startNode = node["StartNode"];
 		Utils::NodeValueRef nodes = node["Nodes"];
 		Utils::NodeValueRef transitions = node["Transitions"];
+		Utils::NodeValueRef properties = node["Properties"];
         const UUID startNodeID = startNode.As<uint64_t>();
 
         for (auto iter = nodes.Begin(); iter != nodes.End(); ++iter)
@@ -56,6 +57,16 @@ namespace Glory::Editor
             FSMTransition& fsmTransition = pNewFSM->NewTransition(name, from, to, id);
         }
 
+        for (auto iter = properties.Begin(); iter != properties.End(); ++iter)
+        {
+            const std::string idStr = *iter;
+            auto prop = properties[idStr];
+            const UUID id = prop["ID"].As<uint64_t>();
+            const FSMPropertyType type = prop["Type"].AsEnum<FSMPropertyType>();
+            const std::string name = prop["Name"].As<std::string>();
+            FSMProperty& newFsmProperty = pNewFSM->NewProperty(name, type, id);
+        }
+
         return { path, pNewFSM };
     }
 
@@ -73,8 +84,10 @@ namespace Glory::Editor
         Utils::NodeValueRef startNode = node["StartNode"];
         Utils::NodeValueRef nodes = node["Nodes"];
         Utils::NodeValueRef transitions = node["Transitions"];
+        Utils::NodeValueRef properties = node["Properties"];
         nodes.Set(YAML::Node(YAML::NodeType::Map));
         transitions.Set(YAML::Node(YAML::NodeType::Map));
+        properties.Set(YAML::Node(YAML::NodeType::Map));
 
         startNode.Set((uint64_t)pFSM->StartNodeID());
         nodes.SetMap();
@@ -98,6 +111,16 @@ namespace Glory::Editor
             transition["Name"].Set(fsmTransition.m_Name);
             transition["From"].Set((uint64_t)fsmTransition.m_FromNode);
             transition["To"].Set((uint64_t)fsmTransition.m_FromNode);
+        }
+
+        for (size_t i = 0; i < pFSM->PropertyCount(); ++i)
+        {
+            const FSMProperty& fsmProperty = pFSM->Property(i);
+            const std::string idStr = std::to_string(fsmProperty.m_ID);
+            auto prop = properties[idStr];
+            prop["ID"].Set((uint64_t)fsmProperty.m_ID);
+            prop["Type"].SetEnum(fsmProperty.m_Type);
+            prop["Name"].Set(fsmProperty.m_Name);
         }
 
         file.Save();

@@ -54,6 +54,12 @@ namespace Glory::Editor
 			pFSM->NewTransition("Transition 4", node3, node4);
 			pFSM->NewTransition("Transition 5", node4, node1);
 
+			pFSM->NewProperty("1To2", FSMPropertyType::Trigger, UUID());
+			pFSM->NewProperty("1To3", FSMPropertyType::Trigger, UUID());
+			pFSM->NewProperty("2To3", FSMPropertyType::Trigger, UUID());
+			pFSM->NewProperty("3To4", FSMPropertyType::Trigger, UUID());
+			pFSM->NewProperty("4To1", FSMPropertyType::Trigger, UUID());
+
 			EditorAssetDatabase::CreateAsset(pFSM, finalPath.string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();

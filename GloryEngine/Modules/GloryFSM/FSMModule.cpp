@@ -24,7 +24,7 @@ namespace Glory
 	UUID FSMModule::CreateFSMState(FSMData* pData)
 	{
 		UUID id = UUID();
-		FSMState& state = m_States.emplace_back(this, pData->GetUUID(), id);
+		FSMState& state = m_States.emplace_back(this, pData, id);
 		state.SetCurrentState(pData->StartNodeID());
 		return id;
 	}
@@ -47,8 +47,10 @@ namespace Glory
 	void FSMModule::Initialize()
 	{
 		Utils::Reflect::Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterEnum<FSMPropertyType>();
 		Reflect::RegisterType<FSMNode>();
 		Reflect::RegisterType<FSMTransition>();
+		Reflect::RegisterType<FSMProperty>();
 		m_pEngine->GetResourceTypes().RegisterResource<FSMData>("");
 	}
 

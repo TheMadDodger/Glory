@@ -7,6 +7,8 @@
 #include <Reflection.h>
 #include <UUID.h>
 
+REFLECTABLE_ENUM_NS(Glory, FSMPropertyType, Number, Bool, Trigger);
+
 namespace Glory
 {
 	/** @brief Transition data */
@@ -49,6 +51,25 @@ namespace Glory
 		);
 
 		std::vector<UUID> m_Transitions;
+		UUID m_ID;
+	};
+
+	/** @brief Property data */
+	struct FSMProperty
+	{
+		/** @brief Constructor */
+		FSMProperty() : m_Name("New Property"), m_Type(FSMPropertyType::Number) {}
+		/** @override
+		 * @param name Name of the property
+		 * @param id ID of the property
+		 */
+		FSMProperty(const std::string& name, FSMPropertyType type, UUID id) : m_Name(name), m_Type(type), m_ID(id) {}
+
+		REFLECTABLE(FSMProperty,
+			(std::string)(m_Name),
+			(FSMPropertyType)(m_Type)
+		);
+
 		UUID m_ID;
 	};
 
@@ -116,6 +137,10 @@ namespace Glory
 		 */
 		GLORY_API size_t TransitionIndex(UUID id) const;
 
+		GLORY_API FSMProperty& NewProperty(const std::string& name, FSMPropertyType type, UUID id);
+		GLORY_API size_t PropertyCount() const;
+		GLORY_API const FSMProperty& Property(size_t index) const;
+
 	private:
 		/** @brief Get a vector containing other resources referenced by this resource */
 		virtual void References(Engine*, std::vector<UUID>&) const override;
@@ -126,6 +151,7 @@ namespace Glory
 	private:
 		std::vector<FSMNode> m_Nodes;
 		std::vector<FSMTransition> m_Transitions;
+		std::vector<FSMProperty> m_Properties;
 		size_t m_StartNodeIndex;
 	};
 
@@ -140,7 +166,7 @@ namespace Glory
 		 * @param originalFSMID ID of the FSM data resource
 		 * @param instanceID ID if this state instance
 		 */
-		GLORY_API FSMState(FSMModule* pModule, UUID originalFSMID, UUID instanceID);
+		GLORY_API FSMState(FSMModule* pModule, FSMData* pFSM, UUID instanceID);
 		/** @biref Set the current state of this machine
 		 * @param stateID ID of the state to set
 		 */
@@ -156,5 +182,6 @@ namespace Glory
 		UUID m_OriginalFSMID;
 		UUID m_InstanceID;
 		UUID m_CurrentState;
+		std::vector<char> m_PropertyData;
 	};
 }
