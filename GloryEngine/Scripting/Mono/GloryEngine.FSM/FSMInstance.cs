@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace GloryEngine.FSM
 {
@@ -18,6 +19,8 @@ namespace GloryEngine.FSM
         private UInt64 _id;
         private FSMTemplate _template;
 
+        private Dictionary<UInt64, IFSMNodeHandler> _stateHandlers = new Dictionary<ulong, IFSMNodeHandler>();
+
         #endregion
 
         #region Constructor
@@ -33,6 +36,24 @@ namespace GloryEngine.FSM
         #region Methods
 
         public void Destroy() => FSMManager.DestroyInstance(this);
+
+        public void SetNodeHandler(FSMNode node, IFSMNodeHandler handler)
+        {
+            if (_stateHandlers.ContainsKey(node.ID)) _stateHandlers.Remove(node.ID);
+            _stateHandlers.Add(node.ID, handler);
+        }
+
+        public void Entry(UInt64 nodeId)
+        {
+            if (!_stateHandlers.ContainsKey(nodeId)) return;
+            _stateHandlers[nodeId].OnStateEntry(this);
+        }
+
+        public void Exit(UInt64 nodeId)
+        {
+            if (!_stateHandlers.ContainsKey(nodeId)) return;
+            _stateHandlers[nodeId].OnStateExit(this);
+        }
 
         #endregion
     }

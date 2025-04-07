@@ -116,7 +116,7 @@ namespace Glory::Editor
             transition["ID"].Set((uint64_t)fsmTransition.m_ID);
             transition["Name"].Set(fsmTransition.m_Name);
             transition["From"].Set((uint64_t)fsmTransition.m_FromNode);
-            transition["To"].Set((uint64_t)fsmTransition.m_FromNode);
+            transition["To"].Set((uint64_t)fsmTransition.m_ToNode);
             transition["Property"].Set((uint64_t)fsmTransition.m_Property);
             transition["OP"].SetEnum(fsmTransition.m_TransitionOp);
             transition["CompareValue"].Set(fsmTransition.m_CompareValue);

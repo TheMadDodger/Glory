@@ -11,6 +11,7 @@ namespace Glory
 {
 	class FSMData;
 	class FSMState;
+	struct FSMNode;
 
 	class FSMModule : public Module
 	{
@@ -25,6 +26,9 @@ namespace Glory
 		GLORY_API void CleanupStates();
 
 		GLORY_MODULE_VERSION_H(0,1,0);
+
+		std::function<void(const FSMState&, const FSMNode&)> EntryCallback = NULL;
+		std::function<void(const FSMState&, const FSMNode&)> ExitCallback = NULL;
 
 	private:
 		virtual void Initialize() override;

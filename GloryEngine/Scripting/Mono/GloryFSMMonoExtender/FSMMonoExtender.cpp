@@ -73,68 +73,32 @@ namespace Glory
 
 		FSMModule* pFSMModule = pEngine->GetOptionalModule<FSMModule>();
 
-		//MonoMethod* pHoverMethod = pInteractionHandlerClass->GetMethod(".::OnElementHover");
-		//MonoMethod* pUnhoverMethod = pInteractionHandlerClass->GetMethod(".::OnElementUnHover");
-		//MonoMethod* pDownMethod = pInteractionHandlerClass->GetMethod(".::OnElementDown");
-		//MonoMethod* pUpMethod = pInteractionHandlerClass->GetMethod(".::OnElementUp");
+		MonoMethod* pEntryMethod = pFSDMManagerClass->GetMethod(".::CallNodeEntry");
+		MonoMethod* pExitMethod = pFSDMManagerClass->GetMethod(".::CallNodeExit");
 
-		//AssemblyDomain* pDomain = pAssembly->GetDomain();
+		AssemblyDomain* pDomain = pAssembly->GetDomain();
 
-		/*UIInteractionSystem::Instance()->OnElementHover_Callback =
-		[pDomain, pHoverMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
-			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
+		pFSMModule->EntryCallback =
+		[pDomain, pEntryMethod](const FSMState& state, const FSMNode& node) {
+			UUID nodeId = node.m_ID;
 			void* args[] = {
-				pEngineObject,
-				&sceneID,
-				&objectID,
-				&elementID,
-				&componentID
+				&state.ID(),
+				&nodeId,
 			};
 
-			pDomain->InvokeMethod(pHoverMethod, nullptr, args);
+			pDomain->InvokeMethod(pEntryMethod, nullptr, args);
 		};
 
-		UIInteractionSystem::Instance()->OnElementUnHover_Callback =
-		[pDomain, pUnhoverMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
-			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
+		pFSMModule->ExitCallback =
+		[pDomain, pExitMethod](const FSMState& state, const FSMNode& node) {
+			UUID nodeId = node.m_ID;
 			void* args[] = {
-				pEngineObject,
-				&sceneID,
-				&objectID,
-				&elementID,
-				&componentID
+				&state.ID(),
+				&nodeId,
 			};
 
-			pDomain->InvokeMethod(pUnhoverMethod, nullptr, args);
+			pDomain->InvokeMethod(pExitMethod, nullptr, args);
 		};
-
-		UIInteractionSystem::Instance()->OnElementDown_Callback =
-		[pDomain, pDownMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
-			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
-			void* args[] = {
-				pEngineObject,
-				&sceneID,
-				&objectID,
-				&elementID,
-				&componentID
-			};
-
-			pDomain->InvokeMethod(pDownMethod, nullptr, args);
-		};
-
-		UIInteractionSystem::Instance()->OnElementUp_Callback =
-		[pDomain, pUpMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
-			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
-			void* args[] = {
-				pEngineObject,
-				&sceneID,
-				&objectID,
-				&elementID,
-				&componentID
-			};
-
-			pDomain->InvokeMethod(pUpMethod, nullptr, args);
-		};*/
 	}
 
 	void FSMLibManager::Cleanup(Engine*)

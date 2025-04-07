@@ -62,7 +62,7 @@ namespace Glory
 	{
 		for (size_t i = 0; i < m_States.size(); ++i)
 		{
-			m_States[i].Update(&m_pEngine->GetAssetManager());
+			m_States[i].Update();
 		}
 	}
 

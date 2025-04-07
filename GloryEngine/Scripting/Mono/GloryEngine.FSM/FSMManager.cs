@@ -35,6 +35,18 @@ namespace GloryEngine.FSM
             return instance;
         }
 
+        internal static void CallNodeEntry(UInt64 fsmId, UInt64 nodeId)
+        {
+            if (!_cachedFSMInstances.ContainsKey(fsmId)) return;
+            _cachedFSMInstances[fsmId].Entry(nodeId);
+        }
+
+        internal static void CallNodeExit(UInt64 fsmId, UInt64 nodeId)
+        {
+            if (!_cachedFSMInstances.ContainsKey(fsmId)) return;
+            _cachedFSMInstances[fsmId].Exit(nodeId);
+        }
+
         public static void DestroyInstance(FSMInstance instance)
         {
             if (!_cachedFSMInstances.Remove(instance.ID)) return;

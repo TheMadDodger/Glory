@@ -181,7 +181,6 @@ namespace Glory
 	};
 
 	class FSMModule;
-	class AssetManager;
 
 	/** @brief Runtime state of a finite state machine */
 	class FSMState
@@ -209,10 +208,8 @@ namespace Glory
 		 * @param data New property value
 		 */
 		GLORY_API void SetPropertyValue(FSMData* pFSM, std::string_view name, void* data);
-		/** @brief Update the state machine if any properties have changed since the last frame
-		 * @param pFSM FSM data resource
-		 */
-		GLORY_API void Update(AssetManager* pAssets);
+		/** @brief Update the state machine if any properties have changed since the last frame */
+		GLORY_API void Update();
 
 	private:
 		FSMModule* m_pModule;
@@ -221,5 +218,6 @@ namespace Glory
 		UUID m_CurrentState;
 		std::vector<char> m_PropertyData;
 		bool m_PropertyDataChanged;
+		bool m_FirstUpdate;
 	};
 }

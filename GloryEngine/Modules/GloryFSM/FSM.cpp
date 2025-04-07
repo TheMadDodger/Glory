@@ -1,7 +1,9 @@
 #include "FSM.h"
+#include "FSMModule.h"
 
 #include <BinaryStream.h>
 #include <AssetManager.h>
+#include <Engine.h>
 
 namespace Glory
 {
@@ -228,7 +230,7 @@ namespace Glory
 
 	FSMState::FSMState(FSMModule* pModule, FSMData* pFSM, UUID instanceID) :
 		m_pModule(pModule), m_OriginalFSMID(pFSM->GetUUID()), m_InstanceID(instanceID), m_CurrentState(0),
-		m_PropertyData(pFSM->PropertyCount()*sizeof(float)), m_PropertyDataChanged(true) {}
+		m_PropertyData(pFSM->PropertyCount()*sizeof(float)), m_PropertyDataChanged(true), m_FirstUpdate(true) {}
 
 	void FSMState::SetCurrentState(UUID stateID)
 	{
@@ -251,18 +253,27 @@ namespace Glory
 		if (propIndex == pFSM->PropertyCount()) return;
 		char* propData = &m_PropertyData[propIndex*sizeof(float)];
 		std::memcpy(propData, data, sizeof(float));
+		m_PropertyDataChanged = true;
 	}
 
-	void FSMState::Update(AssetManager* pAssets)
+	void FSMState::Update()
 	{
 		if (!m_PropertyDataChanged) return;
 		if (m_CurrentState == 0) return;
 
-		Resource* pFSMResource = pAssets->FindResource(m_OriginalFSMID);
+		AssetManager& assets = m_pModule->GetEngine()->GetAssetManager();
+
+		Resource* pFSMResource = assets.FindResource(m_OriginalFSMID);
 		if (!pFSMResource) return;
 		FSMData* pFSM = static_cast<FSMData*>(pFSMResource);
 
 		const FSMNode* node = pFSM->Node(m_CurrentState);
+
+		if (m_FirstUpdate)
+		{
+			if (m_pModule->EntryCallback) m_pModule->EntryCallback(*this, *node);
+			m_FirstUpdate = false;
+		}
 
 		for (size_t i = 0; i < node->m_Transitions.size(); ++i)
 		{
@@ -322,10 +333,12 @@ namespace Glory
 
 			if (triggerTransition)
 			{
+				const FSMNode* nextNode = pFSM->Node(transition->m_ToNode);
+				if (!nextNode) return;
 				const UUID oldState = m_CurrentState;
 				m_CurrentState = transition->m_ToNode;
-
-				/* @todo: Trigger events */
+				if (m_pModule->ExitCallback) m_pModule->ExitCallback(*this, *node);
+				if (m_pModule->EntryCallback) m_pModule->EntryCallback(*this, *nextNode);
 				break;
 			}
 		}

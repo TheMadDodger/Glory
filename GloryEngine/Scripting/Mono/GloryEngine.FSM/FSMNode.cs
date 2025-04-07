@@ -11,6 +11,8 @@ namespace GloryEngine.FSM
     {
         #region Props
 
+        public UInt64 ID => _id;
+
         public uint TransitionCount => FSMNode_GetTransitionCount(_owner.ID, _id);
 
         #endregion
