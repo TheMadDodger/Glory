@@ -40,6 +40,9 @@ namespace Glory
 
 	FSMTransition& FSMData::NewTransition(const std::string& name, UUID from, UUID to, UUID id)
 	{
+		const size_t index = NodeIndex(from);
+		if (index == m_Nodes.size()) return;
+		m_Nodes[index].m_Transitions.push_back(id);
 		return m_Transitions.emplace_back(name, from, to, id);
 	}
 
@@ -60,7 +63,7 @@ namespace Glory
 		m_StartNodeIndex = index;
 	}
 
-	FSMNode* FSMData::FindNode(std::string_view name)
+	const FSMNode* FSMData::FindNode(std::string_view name) const
 	{
 		for (size_t i = 0; i < m_Nodes.size(); ++i)
 		{
@@ -68,6 +71,51 @@ namespace Glory
 			return &m_Nodes[i];
 		}
 		return nullptr;
+	}
+
+	const FSMTransition* FSMData::FindTransition(std::string_view name) const
+	{
+		for (size_t i = 0; i < m_Transitions.size(); ++i)
+		{
+			if (m_Transitions[i].m_Name != name) continue;
+			return &m_Transitions[i];
+		}
+		return nullptr;
+	}
+
+	const FSMNode* FSMData::Node(UUID id) const
+	{
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (m_Nodes[i].m_ID != id) continue;
+			return &m_Nodes[i];
+		}
+		return nullptr;
+	}
+
+	const FSMTransition* FSMData::Transition(UUID id) const
+	{
+		return nullptr;
+	}
+
+	size_t FSMData::NodeIndex(UUID id) const
+	{
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (m_Nodes[i].m_ID != id) continue;
+			return i;
+		}
+		return m_Nodes.size();
+	}
+
+	size_t FSMData::TransitionIndex(UUID id) const
+	{
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (m_Transitions[i].m_ID != id) continue;
+			return i;
+		}
+		return m_Transitions.size();
 	}
 
 	void FSMData::References(Engine*, std::vector<UUID>&) const {}
@@ -115,5 +163,15 @@ namespace Glory
 	void FSMState::SetCurrentState(UUID stateID)
 	{
 		m_CurrentState = stateID;
+	}
+
+	UUID FSMState::ID() const
+	{
+		return m_InstanceID;
+	}
+
+	UUID FSMState::OriginalFSMID() const
+	{
+		return m_OriginalFSMID;
 	}
 }

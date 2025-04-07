@@ -48,6 +48,7 @@ namespace Glory
 			(std::string)(m_Name)
 		);
 
+		std::vector<UUID> m_Transitions;
 		UUID m_ID;
 	};
 
@@ -68,10 +69,14 @@ namespace Glory
 		 * @param index Index of the node to get
 		 */
 		GLORY_API const FSMNode& Node(size_t index) const;
+		/** @overload */
+		GLORY_API const FSMNode* Node(UUID id) const;
 		/** @brief Get a transition in this state machine
 		 * @param index Index of the transition to get
 		 */
 		GLORY_API const FSMTransition& Transition(size_t index) const;
+		/** @overload */
+		GLORY_API const FSMTransition* Transition(UUID id) const;
 		/** @brief Add a new node to the state machine
 		 * @param name Name of the state
 		 * @param id ID of the node
@@ -93,7 +98,23 @@ namespace Glory
 		 */
 		GLORY_API void SetStartNodeIndex(size_t index);
 
-		GLORY_API FSMNode* FindNode(std::string_view name);
+		/** @brief Find a state/node by name
+		 * @param name Name of the state to find
+		 */
+		GLORY_API const FSMNode* FindNode(std::string_view name) const;
+		/** @brief Find a transition by name
+		 * @param name Name of the transition to find
+		 */
+		GLORY_API const FSMTransition* FindTransition(std::string_view name) const;
+
+		/** @brief Find the index of a node/state by id
+		 * @param id ID of the node
+		 */
+		GLORY_API size_t NodeIndex(UUID id) const;
+		/** @brief Find the index of a transition by id
+		 * @param id ID of the transition
+		 */
+		GLORY_API size_t TransitionIndex(UUID id) const;
 
 	private:
 		/** @brief Get a vector containing other resources referenced by this resource */
@@ -109,11 +130,26 @@ namespace Glory
 	};
 
 	class FSMModule;
+
+	/** @brief Runtime state of a finite state machine */
 	class FSMState
 	{
 	public:
+		/** @biref Constructor
+		 * @param pModule The FSM module
+		 * @param originalFSMID ID of the FSM data resource
+		 * @param instanceID ID if this state instance
+		 */
 		GLORY_API FSMState(FSMModule* pModule, UUID originalFSMID, UUID instanceID);
+		/** @biref Set the current state of this machine
+		 * @param stateID ID of the state to set
+		 */
 		GLORY_API void SetCurrentState(UUID stateID);
+
+		/** @brief ID of this state instance */
+		GLORY_API UUID ID() const;
+		/** @brief ID of the finite state machine data resource */
+		GLORY_API UUID OriginalFSMID() const;
 
 	private:
 		FSMModule* m_pModule;

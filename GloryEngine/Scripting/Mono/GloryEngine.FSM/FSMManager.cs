@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace GloryEngine.FSM
 {
-    internal class FSMManager
+    public class FSMManager
     {
         #region Fields
 
@@ -33,6 +34,19 @@ namespace GloryEngine.FSM
             _cachedFSMInstances.Add(id, instance);
             return instance;
         }
+
+        public static void DestroyInstance(FSMInstance instance)
+        {
+            if (!_cachedFSMInstances.Remove(instance.ID)) return;
+            FSMManager_DestroyInstance(instance.ID);
+        }
+
+        #endregion
+
+        #region API Methods
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void FSMManager_DestroyInstance(UInt64 instanceId);
 
         #endregion
     }

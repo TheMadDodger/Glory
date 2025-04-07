@@ -29,6 +29,16 @@ namespace Glory
 		return id;
 	}
 
+	void FSMModule::DestroyFSMState(UUID id)
+	{
+		for (size_t i = 0; i < m_States.size(); ++i)
+		{
+			if (m_States[i].ID() != id) continue;
+			m_States.erase(m_States.begin() + i);
+			return;
+		}
+	}
+
 	void FSMModule::CleanupStates()
 	{
 		m_States.clear();

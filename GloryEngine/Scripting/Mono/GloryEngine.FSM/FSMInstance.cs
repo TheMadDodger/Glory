@@ -29,5 +29,11 @@ namespace GloryEngine.FSM
         }
 
         #endregion
+
+        #region Methods
+
+        public void Destroy() => FSMManager.DestroyInstance(this);
+
+        #endregion
     }
 }

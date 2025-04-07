@@ -9,14 +9,14 @@ namespace GloryEngine.FSM
     {
         #region Fields
 
-        private FSMTemplate _owner;
+        private FSMNode _owner;
         private UInt64 _id;
 
         #endregion
 
         #region Constructor
 
-        internal FSMTransition(FSMTemplate owner, UInt64 id)
+        internal FSMTransition(FSMNode owner, UInt64 id)
         {
             _owner = owner;
             _id = id;
