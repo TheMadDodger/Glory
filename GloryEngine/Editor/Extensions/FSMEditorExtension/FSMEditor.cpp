@@ -35,6 +35,64 @@ namespace Glory::Editor
 		return m_SelectedNode;
 	}
 
+	void FSMEditor::DeleteNode(UUID nodeID)
+	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
+		EditableResource* pResource = resources.GetEditableResource(m_EditingFSM);
+		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
+		Utils::YAMLFileRef& file = **pDocument;
+
+		auto entryNode = file["StartNode"];
+		auto nodes = file["Nodes"];
+		auto transitions = file["Transitions"];
+
+		const UUID entryNodeID = entryNode.As<uint64_t>();
+
+		std::string idStr = std::to_string(nodeID);
+		auto node = nodes[idStr];
+
+		Undo::StartRecord("Remove Node");
+		Undo::YAMLEdit(file, node.Path(), node.Node(), YAML::Node{ YAML::NodeType::Null });
+
+		std::vector<std::string> toRemoveTransitions;
+		for (auto iter = transitions.Begin(); iter != transitions.End(); ++iter)
+		{
+			const std::string key = *iter;
+			auto transition = transitions[key];
+			auto from = transition["From"];
+			auto to = transition["To"];
+
+			const UUID startNodeID = from.As<uint64_t>();
+			const UUID endNodeID = to.As<uint64_t>();
+
+			if (startNodeID != nodeID && endNodeID != nodeID) continue;
+			toRemoveTransitions.push_back(key);
+		}
+
+		for (size_t i = 0; i < toRemoveTransitions.size(); ++i)
+		{
+			const std::string& key = toRemoveTransitions[i];
+			auto transition = transitions[key];
+			Undo::YAMLEdit(file, transition.Path(), transition.Node(), YAML::Node{ YAML::NodeType::Null });
+		}
+
+		if (entryNodeID == nodeID)
+		{
+			UUID newEntryNode = 0;
+			if (nodes.Begin() != nodes.End())
+			{
+				auto node = nodes[*nodes.Begin()];
+				newEntryNode = node["ID"].As<uint64_t>();
+			}
+			Undo::ApplyYAMLEdit(file, entryNode.Path(), uint64_t(entryNodeID), uint64_t(newEntryNode));
+		}
+
+		Undo::StopRecord();
+
+		if (m_SelectedNode == nodeID) m_SelectedNode = 0;
+	}
+
 	std::string_view FSMEditor::Name()
 	{
 		return "FSM";
@@ -86,15 +144,11 @@ namespace Glory::Editor
 
 		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pEngine, &resources]() {
 			if (!m_EditingFSM || !m_SelectedNode) return;
-
-			EditableResource* pResource = resources.GetEditableResource(m_EditingFSM);
-			YAMLResource<FSMData>* pDocumentData = static_cast<YAMLResource<FSMData>*>(pResource);
-			Utils::YAMLFileRef& file = **pDocumentData;
+			DeleteNode(m_SelectedNode);
 		});
 
 		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources]() {
 			if (!m_EditingFSM) return;
-
 			EditableResource* pResource = resources.GetEditableResource(m_EditingFSM);
 			YAMLResource<FSMData>* pDocumentData = static_cast<YAMLResource<FSMData>*>(pResource);
 			pDocumentData->Save();

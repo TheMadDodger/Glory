@@ -6,6 +6,7 @@
 #include <EditorUI.h>
 #include <EditorAssetDatabase.h>
 #include <Undo.h>
+#include <Shortcuts.h>
 
 #include <Engine.h>
 #include <WindowModule.h>
@@ -16,6 +17,9 @@ namespace Glory::Editor
 {
 	glm::vec2 TempDraggingPos{0.0f};
 	UUID DraggingNode{0};
+	UUID ConnectingNodeID{0};
+	UUID CurrentHoveringNodeID{0};
+	bool DraggingView = false;
 
 	FSMNodeEditor::FSMNodeEditor() : EditorWindowTemplate("Nodes", 600.0f, 600.0f), m_PanPosition(0.0f, 0.0f, 0.0f), m_Zoom(1.0f, 1.0f, 1.0f)
 	{
@@ -71,11 +75,10 @@ namespace Glory::Editor
 			drawlist->AddLine({ windowPos.x + x, windowPos.y }, { windowPos.x + x, windowPos.y + windowSize.y }, ImGui::GetColorU32({ 0.3f, 0.3f, 0.3f, 0.5f }));
 		}
 
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-		{
-			selectedNode = 0;
-		}
+		UUID toRemoveNode = 0;
+		CurrentHoveringNodeID = 0;
 
+		bool isMouseInNode = false;
 		std::map<UUID, std::pair<glm::vec4, glm::vec2>> cachedNodePositions;
 		for (auto iter = nodes.Begin(); iter != nodes.End(); ++iter)
 		{
@@ -108,9 +111,13 @@ namespace Glory::Editor
 			drawlist->AddRect({ transformedMin.x, transformedMin.y }, { transformedMax.x, transformedMax.y }, isSelected ? selectedBorderColor : defaultBorderColor, rounding, 0, isSelected ? 4.0f : 1.0f);
 			drawlist->AddText(font, fontSize, { transformedTextStartPoint.x, transformedTextStartPoint.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }), nameStr.data());
 
-			if (DraggingNode == nodeID || ImGui::IsMouseHoveringRect({ transformedMin.x, transformedMin.y }, { transformedMax.x, transformedMax.y }))
+			const bool isHovering = ImGui::IsMouseHoveringRect({ transformedMin.x, transformedMin.y }, { transformedMax.x, transformedMax.y });
+			isMouseInNode |= isHovering;
+
+			ImGui::PushID(key.data());
+			if (DraggingNode == nodeID || isHovering)
 			{
-				if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
+				if (ConnectingNodeID == 0 && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 				{
 					if (DraggingNode == 0)
 					{
@@ -134,12 +141,43 @@ namespace Glory::Editor
 					change = true;
 				}
 
-				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+				CurrentHoveringNodeID = nodeID;
+
+				if (ConnectingNodeID == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 				{
 					selectedNode = nodeID;
 				}
+
+				if (ConnectingNodeID == 0 && DraggingNode == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+				{
+					selectedNode = nodeID;
+					ImGui::OpenPopup("NodeRightClick");
+				}
 			}
+
+			if (ImGui::BeginPopup("NodeRightClick"))
+			{
+				if (ImGui::MenuItem("Set as start node", "", false, entryNodeID != nodeID))
+				{
+					Undo::StartRecord("Set Start Node");
+					Undo::ApplyYAMLEdit(file, entryNode.Path(), uint64_t(entryNodeID), uint64_t(nodeID));
+					Undo::StopRecord();
+				}
+				if (ImGui::MenuItem("Delete", Shortcuts::GetShortcutString("Delete").data(), false))
+				{
+					toRemoveNode = nodeID;
+				}
+				if (ImGui::MenuItem("Create Transition", "", false))
+				{
+					ConnectingNodeID = nodeID;
+				}
+				ImGui::EndPopup();
+			}
+			ImGui::PopID();
 		}
+
+		if (toRemoveNode != 0)
+			GetMainWindow()->DeleteNode(toRemoveNode);
 
 		for (auto iter = transitions.Begin(); iter != transitions.End(); ++iter)
 		{
@@ -217,6 +255,88 @@ namespace Glory::Editor
 			const glm::vec4 trianglePointLeft = { offsettedMiddle - glm::vec2(perpendicular)*5.0f, glm::vec2{0.0f, 1.0f} };
 			const glm::vec4 trianglePointRight = { offsettedMiddle + glm::vec2(perpendicular)*5.0f, glm::vec2{0.0f, 1.0f} };
 
+			const glm::vec4 transformedStart = matFinal*start;
+			const glm::vec4 transformedEnd = matFinal*end;
+			const glm::vec4 transformedMiddle = matFinal*middle;
+			const glm::vec4 transformedLeft = matFinal*trianglePointLeft;
+			const glm::vec4 transformedRight = matFinal*trianglePointRight;
+			ImGui::PushID(key.data());
+			drawlist->AddLine({ transformedStart.x, transformedStart.y }, { transformedEnd.x, transformedEnd.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
+			drawlist->AddTriangleFilled({ transformedMiddle.x, transformedMiddle.y }, { transformedLeft.x, transformedLeft.y }, { transformedRight.x, transformedRight.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
+			ImGui::PopID();
+		}
+
+		const ImVec2 mousePos = ImGui::GetMousePos();
+		const glm::vec4 transformedMouse = glm::inverse(matFinal)*glm::vec4{ mousePos.x, mousePos.y, 0.0f, 1.0f };
+		if (ConnectingNodeID != 0)
+		{
+			const auto& startIter = cachedNodePositions.find(ConnectingNodeID);
+			const std::pair<glm::vec4, glm::vec2>& startNode = startIter->second;
+
+			glm::vec4 endRect = { transformedMouse.x, transformedMouse.y, transformedMouse.x, transformedMouse.y };
+			glm::vec2 endMid{ transformedMouse.x, transformedMouse.y };
+
+			if (CurrentHoveringNodeID != 0)
+			{
+				const auto& endIter = cachedNodePositions.find(CurrentHoveringNodeID);
+				const std::pair<glm::vec4, glm::vec2>& endNode = endIter->second;
+				endRect = endNode.first;
+				endMid = endNode.second;
+			}
+
+			const glm::vec4& startRect = startNode.first;
+			const glm::vec2& startMid = startNode.second;
+
+			glm::vec4 start{ startMid, glm::vec2{0.0f, 1.0f} };
+			glm::vec4 end{ glm::vec2{ transformedMouse.x, transformedMouse.y }, glm::vec2{0.0f, 1.0f} };
+
+			if (startRect.z < endRect.x)
+			{
+				/* Left edge */
+				end.x = endRect.x;
+				end.y = endMid.y;
+
+				/* Right edge */
+				start.x = startRect.z;
+				start.y = startMid.y;
+			}
+			else if (startRect.x > endRect.z)
+			{
+				/* Right edge */
+				end.x = endRect.z;
+				end.y = endMid.y;
+
+				/* Left edge */
+				start.x = startRect.x;
+				start.y = startMid.y;
+			}
+			else if (startRect.w < endRect.y)
+			{
+				/* Top edge */
+				end.x = endMid.x;
+				end.y = endRect.y;
+
+				/* Bottom edge */
+				start.x = startMid.x;
+				start.y = startRect.w;
+			}
+			else if (startRect.y > endRect.w)
+			{
+				/* Bottom edge */
+				end.x = endMid.x;
+				end.y = endRect.w;
+
+				/* Top edge */
+				start.x = startMid.x;
+				start.y = startRect.y;
+			}
+
+			const glm::vec2 startToEnd = glm::vec2(end - start);
+			const glm::vec4 middle = { glm::vec2(start) + startToEnd / 2.0f, glm::vec2{0.0f, 1.0f} };
+			const glm::vec2 offsettedMiddle{ glm::vec2(middle) - glm::normalize(startToEnd) * 5.0f };
+			const glm::vec3 perpendicular = glm::cross(glm::vec3(glm::normalize(startToEnd), 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			const glm::vec4 trianglePointLeft = { offsettedMiddle - glm::vec2(perpendicular) * 5.0f, glm::vec2{0.0f, 1.0f} };
+			const glm::vec4 trianglePointRight = { offsettedMiddle + glm::vec2(perpendicular) * 5.0f, glm::vec2{0.0f, 1.0f} };
 
 			const glm::vec4 transformedStart = matFinal*start;
 			const glm::vec4 transformedEnd = matFinal*end;
@@ -225,17 +345,84 @@ namespace Glory::Editor
 			const glm::vec4 transformedRight = matFinal*trianglePointRight;
 			drawlist->AddLine({ transformedStart.x, transformedStart.y }, { transformedEnd.x, transformedEnd.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
 			drawlist->AddTriangleFilled({ transformedMiddle.x, transformedMiddle.y }, { transformedLeft.x, transformedLeft.y }, { transformedRight.x, transformedRight.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
+
+			if (CurrentHoveringNodeID != 0 && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			{
+				const UUID newTransitionID{};
+				const std::string idStr = std::to_string(newTransitionID);
+				auto transition = transitions[idStr];
+
+				YAML::Node newTransitionNode{ YAML::NodeType::Map };
+				newTransitionNode["ID"] = uint64_t(newTransitionID);
+				newTransitionNode["Name"] = "New Transition";
+				newTransitionNode["From"] = uint64_t(ConnectingNodeID);
+				newTransitionNode["To"] = uint64_t(CurrentHoveringNodeID);
+				newTransitionNode["Property"] = uint64_t(0);
+				newTransitionNode["OP"] = "Trigger";
+				newTransitionNode["CompareValue"] = 0;
+
+				Undo::StartRecord("New Transition");
+				Undo::YAMLEdit(file, transition.Path(), YAML::Node{ YAML::NodeType::Null }, newTransitionNode);
+				Undo::StopRecord();
+
+				ConnectingNodeID = 0;
+				CurrentHoveringNodeID = 0;
+			}
+			else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			{
+				ConnectingNodeID = 0;
+			}
+		}
+
+		if (!DraggingView && ImGui::IsMouseReleased(ImGuiMouseButton_Right)
+			&& ConnectingNodeID == 0 && DraggingNode == 0 && CurrentHoveringNodeID == 0)
+		{
+			ImGui::OpenPopup("RightClick");
+		}
+
+		if (ImGui::BeginPopup("RightClick"))
+		{
+			if (ImGui::MenuItem("New Node", "", false))
+			{
+				const UUID newNodeID{};
+				const std::string idStr = std::to_string(newNodeID);
+				auto node = nodes[idStr];
+
+				YAML::Node newNodeNode{ YAML::NodeType::Map };
+				newNodeNode["ID"] = uint64_t(newNodeID);
+				newNodeNode["Name"] = "New Node";
+				newNodeNode["Position"] = glm::vec2(transformedMouse.x, transformedMouse.y);
+
+				Undo::StartRecord("New Transition");
+				Undo::YAMLEdit(file, node.Path(), YAML::Node{ YAML::NodeType::Null }, newNodeNode);
+				Undo::StopRecord();
+			}
+			ImGui::EndPopup();
 		}
 
 		const ImVec2 panningDelta = ImGui::IsMouseDown(ImGuiMouseButton_Middle) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle) :
 			ImGui::IsMouseDown(ImGuiMouseButton_Right) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Right) : ImVec2{};
 		m_PanPosition.x += panningDelta.x*1.0f/m_Zoom.x;
 		m_PanPosition.y += panningDelta.y*1.0f/m_Zoom.x;
+		DraggingView |= panningDelta.x != 0.0f || panningDelta.y != 0.0f;
 		ImGui::ResetMouseDragDelta(ImGuiMouseButton_Middle);
 		ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
 
+		if (DraggingView && !ImGui::IsMouseDown(ImGuiMouseButton_Middle) && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
+			DraggingView = false;
+
 		m_Zoom += ImGui::GetIO().MouseWheel*0.1f;
 		m_Zoom = glm::clamp(m_Zoom, glm::vec3{ 0.5f }, glm::vec3{ 10.0f });
+
+		if (!isMouseInNode && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		{
+			selectedNode = 0;
+		}
+
+		if (!isMouseInNode && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+		{
+
+		}
 
 		if (change)
 			EditorAssetDatabase::SetAssetDirty(fsmID);
