@@ -111,7 +111,11 @@ namespace Glory::Editor
 	{
 		YAMLAction* pAction = new YAMLAction(file, path, oldValue, newValue);
 		AddAction(pAction);
-		file[path].Set(newValue);
+
+		if (newValue.IsNull())
+			file[path].Erase();
+		else
+			file[path].Set(newValue);
 		TriggerChangeHandler(file, path);
 	}
 
