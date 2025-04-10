@@ -43,6 +43,11 @@ namespace Glory::Utils::Reflect
 			return m_NumValues;
 		}
 
+		virtual const std::string& GetName(size_t index) override
+		{
+			return m_EnumStringValues[index];
+		}
+
 	protected:
 		virtual bool FromString(const std::string& str, void* out) override
 		{
@@ -54,11 +59,6 @@ namespace Glory::Utils::Reflect
 		{
 			const T* inValue = (T*)value;
 			return ToString(*inValue, out);
-		}
-
-		virtual const std::string& GetName(size_t index) override
-		{
-			return m_EnumStringValues[index];
 		}
 
 	private:
