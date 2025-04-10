@@ -18,5 +18,6 @@ namespace Glory::Editor
 
 	private:
 		FSMEditor* GetMainWindow();
+		UUID m_LastFrameFSMID;
     };
 }
