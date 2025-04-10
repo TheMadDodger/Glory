@@ -15,6 +15,8 @@ namespace Glory::Editor
 		UUID CurrentFSMID() const;
 		UUID& SelectedNode();
 
+		void DeleteNode(UUID nodeID);
+
 	private:
 		virtual std::string_view Name() override;
 		virtual void OnGui(float height) override;
