@@ -13,6 +13,7 @@ namespace Glory::Editor
 
 		void SetFSM(UUID fsmID);
 		UUID CurrentFSMID() const;
+		UUID& SelectedNode();
 
 	private:
 		virtual std::string_view Name() override;
@@ -22,6 +23,7 @@ namespace Glory::Editor
 
 	private:
 		UUID m_EditingFSM;
+		UUID m_SelectedNode;
 		std::vector<UUID> m_OpenFSMs;
 		size_t m_EditingFSMIndex;
     };

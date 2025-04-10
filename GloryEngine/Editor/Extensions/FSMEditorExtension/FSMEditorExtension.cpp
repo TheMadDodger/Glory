@@ -3,6 +3,7 @@
 #include "FSMTumbnailGenerator.h"
 #include "FSMEditor.h"
 #include "FSMPropertiesWindow.h"
+#include "FSMNodeEditor.h"
 
 #include <FSM.h>
 #include <FSMModule.h>
@@ -22,6 +23,7 @@ EXTENSION_CPP(FSMEditorExtension)
 namespace Glory::Editor
 {
 	static constexpr char* Shortcut_Window_FSMProperties = "Open FSM Properties";
+	static constexpr char* Shortcut_Window_FSMNodes = "Open FSM Node Editor";
 
 	FSMImporter Importer;
 	FSMEditor Editor;
@@ -86,12 +88,14 @@ namespace Glory::Editor
 		Importer::Register(&Importer);
 		Tumbnail::AddGenerator<FSMTumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Finite State Machine", OnCreateFSM, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
-		MenuBar::AddMenuItem("Window/UI Editor/Preview", [&editor]() { editor.GetWindow<FSMEditor, FSMPropertiesWindow>(); }, NULL, Shortcut_Window_FSMProperties);
+		MenuBar::AddMenuItem("Window/FSM Editor/Properties", [&editor]() { editor.GetWindow<FSMEditor, FSMPropertiesWindow>(); }, NULL, Shortcut_Window_FSMProperties);
+		MenuBar::AddMenuItem("Window/FSM Editor/Nodes", [&editor]() { editor.GetWindow<FSMEditor, FSMNodeEditor>(); }, NULL, Shortcut_Window_FSMNodes);
 
 		EditorPlayer::RegisterLoopHandler(this);
 
 		FSMEditor* pMainWindow = editor.FindMainWindow<FSMEditor>();
 		pMainWindow->GetWindow<FSMPropertiesWindow>();
+		pMainWindow->GetWindow<FSMNodeEditor>();
 	}
 
 	const char* FSMEditorExtension::ModuleName()

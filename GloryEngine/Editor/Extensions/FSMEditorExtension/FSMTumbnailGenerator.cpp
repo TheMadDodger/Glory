@@ -1,6 +1,7 @@
 #include "FSMTumbnailGenerator.h"
 #include "FSMEditor.h"
 #include "FSMPropertiesWindow.h"
+#include "FSMNodeEditor.h"
 
 #include <EditorTextureData.h>
 #include <Importer.h>
@@ -39,5 +40,6 @@ namespace Glory::Editor
         FSMEditor* pMainWindow = editor.GetMainWindow<FSMEditor>();
         pMainWindow->SetFSM(uuid);
         editor.GetWindow<FSMEditor, FSMPropertiesWindow>();
+        editor.GetWindow<FSMEditor, FSMNodeEditor>();
     }
 }
