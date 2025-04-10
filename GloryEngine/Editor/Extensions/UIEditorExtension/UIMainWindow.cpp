@@ -231,7 +231,7 @@ namespace Glory::Editor
 			if (pResource->WasSaved())
 			{
 				pResource->WasSaved() = false;
-				Resource* pDocumentResource = pApp->GetAssetManager().FindResource(m_EditingDocument);
+				Resource* pDocumentResource = pApp->GetAssetManager().FindResource(docID);
 				if (!pDocumentResource) return;
 				UIDocumentData* pUIDcoumentData = static_cast<UIDocumentData*>(pDocumentResource);
 

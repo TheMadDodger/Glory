@@ -1,0 +1,28 @@
+#pragma once
+#include <MainWindow.h>
+
+#include <UUID.h>
+
+namespace Glory::Editor
+{
+    class FSMEditor : public MainWindowTemplate<FSMEditor>
+    {
+	public:
+		FSMEditor();
+		virtual ~FSMEditor();
+
+		void SetFSM(UUID fsmID);
+		UUID CurrentFSMID() const;
+
+	private:
+		virtual std::string_view Name() override;
+		virtual void OnGui(float height) override;
+		virtual void Initialize() override;
+		virtual void OnUpdate() override;
+
+	private:
+		UUID m_EditingFSM;
+		std::vector<UUID> m_OpenFSMs;
+		size_t m_EditingFSMIndex;
+    };
+}
