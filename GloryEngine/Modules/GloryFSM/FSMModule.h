@@ -26,7 +26,11 @@ namespace Glory
 		GLORY_API void DestroyFSMState(UUID id);
 		GLORY_API void CleanupStates();
 
-		GLORY_MODULE_VERSION_H(0,1,0);
+		GLORY_API size_t FSMInstanceCount() const;
+		GLORY_API const FSMState& FSMInstance(size_t index) const;
+		GLORY_API const FSMState* FSMInstance(UUID instanceID) const;
+
+		GLORY_MODULE_VERSION_H(1,0,0);
 
 		std::function<void(const FSMState&, const FSMNode&)> EntryCallback = NULL;
 		std::function<void(const FSMState&, const FSMNode&)> ExitCallback = NULL;

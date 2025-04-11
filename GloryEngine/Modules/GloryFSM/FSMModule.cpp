@@ -54,6 +54,24 @@ namespace Glory
 		m_States.clear();
 	}
 
+	size_t FSMModule::FSMInstanceCount() const
+	{
+		return m_States.size();
+	}
+
+	const FSMState& FSMModule::FSMInstance(size_t index) const
+	{
+		return m_States[index];
+	}
+
+	const FSMState* FSMModule::FSMInstance(UUID instanceID) const
+	{
+		auto& iter = std::find_if(m_States.begin(), m_States.end(),
+			[instanceID](const FSMState& state) { return state.ID() == instanceID; });
+		if (iter == m_States.end()) return nullptr;
+		return &*iter;
+	}
+
 	void FSMModule::Initialize()
 	{
 		Utils::Reflect::Reflect::SetReflectInstance(&m_pEngine->Reflection());

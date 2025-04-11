@@ -342,6 +342,14 @@ namespace Glory
 		m_PropertyDataChanged = true;
 	}
 
+	void FSMState::GetPropertyValue(FSMData* pFSM, std::string_view name, void* out) const
+	{
+		const size_t propIndex = pFSM->PropertyIndex(name);
+		if (propIndex == pFSM->PropertyCount()) return;
+		const char* propData = &m_PropertyData[propIndex * sizeof(float)];
+		std::memcpy(out, propData, sizeof(float));
+	}
+
 	void FSMState::Update()
 	{
 		if (!m_PropertyDataChanged) return;

@@ -14,6 +14,9 @@ namespace Glory::Editor
 		void SetFSM(UUID fsmID);
 		UUID CurrentFSMID() const;
 		UUID& SelectedNode();
+		UUID& ActiveNode();
+		UUID& LastActiveNode();
+		UUID& DebuggingInstance();
 
 		void DeleteNode(UUID nodeID);
 
@@ -28,5 +31,8 @@ namespace Glory::Editor
 		UUID m_SelectedNode;
 		std::vector<UUID> m_OpenFSMs;
 		size_t m_EditingFSMIndex;
+		UUID m_ActiveNodeID;
+		UUID m_LastActiveNode;
+		UUID m_DebuggingInstance;
     };
 }

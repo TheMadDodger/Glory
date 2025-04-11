@@ -92,11 +92,14 @@ namespace Glory::Editor
 			}
 		}
 
+		const bool inPlayMode = EditorApplication::GetInstance()->IsInPlayMode();
 		const std::string idStr = std::to_string(selectedNode);
 		auto node = nodes[idStr];
 		ImGui::PushID(idStr.data());
 		EditorUI::LabelText("Node ID", idStr);
+		ImGui::BeginDisabled(inPlayMode);
 		bool change = EditorUI::InputText(file, node["Name"].Path());
+		ImGui::EndDisabled();
 
 		ImGui::TextUnformatted("Transitions from this node");
 		for (size_t i = 0; i < CachedFromTransitions.size(); ++i)
@@ -128,7 +131,9 @@ namespace Glory::Editor
 			ImGui::PushID(toIDStr.data());
 			if (EditorUI::Header(name.As<std::string>()))
 			{
+				ImGui::BeginDisabled(inPlayMode);
 				change |= EditorUI::InputText(file, name.Path());
+				ImGui::EndDisabled();
 				ImGui::Text("To: %s", toNode["Name"].As<std::string>().data());
 				ImGui::SameLine();
 				constexpr float buttonWidth = 50.0f;
@@ -140,6 +145,7 @@ namespace Glory::Editor
 
 				float start, width;
 				bool openPopup = false;
+				ImGui::BeginDisabled(inPlayMode);
 				EditorUI::EmptyDropdown("Property", currentPropName, [&openPopup]() {
 					openPopup = true;
 					ForcePropertiesFilter = true;
@@ -186,8 +192,9 @@ namespace Glory::Editor
 						break;
 					}
 				}
+				ImGui::EndDisabled();
 
-				ImGui::BeginDisabled(disable);
+				ImGui::BeginDisabled(inPlayMode || disable);
 				change |= EditorUI::InputEnum<FSMTransitionOP>(file, op.Path(), excludedOptions);
 				ImGui::EndDisabled();
 				transitionOP = op.AsEnum<FSMTransitionOP>(FSMTransitionOP::Trigger);

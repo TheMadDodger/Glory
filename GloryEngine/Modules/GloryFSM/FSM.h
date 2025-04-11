@@ -235,6 +235,12 @@ namespace Glory
 		 * @param data New property value
 		 */
 		GLORY_API void SetPropertyValue(FSMData* pFSM, std::string_view name, void* data);
+		/** @brief Get the value of a property in this state machine instance
+		 * @param pFSM FSM data resource
+		 * @param name Name of the property
+		 * @param out Value to write to
+		 */
+		GLORY_API void GetPropertyValue(FSMData* pFSM, std::string_view name, void* out) const;
 		/** @brief Update the state machine if any properties have changed since the last frame */
 		GLORY_API void Update();
 
