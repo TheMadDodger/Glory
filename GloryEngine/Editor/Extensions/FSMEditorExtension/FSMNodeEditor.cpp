@@ -32,13 +32,18 @@ namespace Glory::Editor
 	void FSMNodeEditor::OnGUI()
 	{
 		const UUID fsmID = GetMainWindow()->CurrentFSMID();
+		if (!fsmID) return;
+
 		UUID& selectedNode = GetMainWindow()->SelectedNode();
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(fsmID);
+		if (!pResource) return;
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
 		Utils::YAMLFileRef& file = **pDocument;
+
+		const bool allowInput = m_IsFocused && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 
 		const ImVec2 windowSize = ImGui::GetWindowSize();
 		const ImVec2 windowPos = ImGui::GetWindowPos();
@@ -117,7 +122,7 @@ namespace Glory::Editor
 			ImGui::PushID(key.data());
 			if (DraggingNode == nodeID || isHovering)
 			{
-				if (ConnectingNodeID == 0 && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+				if (allowInput && ConnectingNodeID == 0 && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 				{
 					if (DraggingNode == 0)
 					{
@@ -143,12 +148,12 @@ namespace Glory::Editor
 
 				CurrentHoveringNodeID = nodeID;
 
-				if (ConnectingNodeID == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+				if (allowInput && ConnectingNodeID == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 				{
 					selectedNode = nodeID;
 				}
 
-				if (ConnectingNodeID == 0 && DraggingNode == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+				if (allowInput && ConnectingNodeID == 0 && DraggingNode == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
 				{
 					selectedNode = nodeID;
 					ImGui::OpenPopup("NodeRightClick");
@@ -268,7 +273,7 @@ namespace Glory::Editor
 
 		const ImVec2 mousePos = ImGui::GetMousePos();
 		const glm::vec4 transformedMouse = glm::inverse(matFinal)*glm::vec4{ mousePos.x, mousePos.y, 0.0f, 1.0f };
-		if (ConnectingNodeID != 0)
+		if (ConnectingNodeID != 0 && allowInput)
 		{
 			const auto& startIter = cachedNodePositions.find(ConnectingNodeID);
 			const std::pair<glm::vec4, glm::vec2>& startNode = startIter->second;
@@ -346,7 +351,7 @@ namespace Glory::Editor
 			drawlist->AddLine({ transformedStart.x, transformedStart.y }, { transformedEnd.x, transformedEnd.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
 			drawlist->AddTriangleFilled({ transformedMiddle.x, transformedMiddle.y }, { transformedLeft.x, transformedLeft.y }, { transformedRight.x, transformedRight.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
 
-			if (CurrentHoveringNodeID != 0 && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			if (allowInput && CurrentHoveringNodeID != ConnectingNodeID && CurrentHoveringNodeID != 0 && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 			{
 				const UUID newTransitionID{};
 				const std::string idStr = std::to_string(newTransitionID);
@@ -373,8 +378,13 @@ namespace Glory::Editor
 				ConnectingNodeID = 0;
 			}
 		}
+		else if (!allowInput)
+		{
+			ConnectingNodeID = 0;
+			CurrentHoveringNodeID = 0;
+		}
 
-		if (!DraggingView && ImGui::IsMouseReleased(ImGuiMouseButton_Right)
+		if (allowInput && !DraggingView && ImGui::IsMouseReleased(ImGuiMouseButton_Right)
 			&& ConnectingNodeID == 0 && DraggingNode == 0 && CurrentHoveringNodeID == 0)
 		{
 			ImGui::OpenPopup("RightClick");
@@ -400,28 +410,26 @@ namespace Glory::Editor
 			ImGui::EndPopup();
 		}
 
-		const ImVec2 panningDelta = ImGui::IsMouseDown(ImGuiMouseButton_Middle) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle) :
-			ImGui::IsMouseDown(ImGuiMouseButton_Right) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Right) : ImVec2{};
-		m_PanPosition.x += panningDelta.x*1.0f/m_Zoom.x;
-		m_PanPosition.y += panningDelta.y*1.0f/m_Zoom.x;
-		DraggingView |= panningDelta.x != 0.0f || panningDelta.y != 0.0f;
-		ImGui::ResetMouseDragDelta(ImGuiMouseButton_Middle);
-		ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
-
-		if (DraggingView && !ImGui::IsMouseDown(ImGuiMouseButton_Middle) && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
-			DraggingView = false;
-
-		m_Zoom += ImGui::GetIO().MouseWheel*0.1f;
-		m_Zoom = glm::clamp(m_Zoom, glm::vec3{ 0.5f }, glm::vec3{ 10.0f });
-
-		if (!isMouseInNode && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		if (allowInput)
 		{
-			selectedNode = 0;
+			const ImVec2 panningDelta = ImGui::IsMouseDown(ImGuiMouseButton_Middle) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle) :
+				ImGui::IsMouseDown(ImGuiMouseButton_Right) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Right) : ImVec2{};
+			m_PanPosition.x += panningDelta.x * 1.0f / m_Zoom.x;
+			m_PanPosition.y += panningDelta.y * 1.0f / m_Zoom.x;
+			DraggingView |= panningDelta.x != 0.0f || panningDelta.y != 0.0f;
+			ImGui::ResetMouseDragDelta(ImGuiMouseButton_Middle);
+			ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
+
+			m_Zoom += ImGui::GetIO().MouseWheel * 0.1f;
+			m_Zoom = glm::clamp(m_Zoom, glm::vec3{ 0.5f }, glm::vec3{ 10.0f });
 		}
 
-		if (!isMouseInNode && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-		{
+		if ((DraggingView && !ImGui::IsMouseDown(ImGuiMouseButton_Middle) && !ImGui::IsMouseDown(ImGuiMouseButton_Right)) || !allowInput)
+			DraggingView = false;
 
+		if (allowInput && !isMouseInNode && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		{
+			selectedNode = 0;
 		}
 
 		if (change)
