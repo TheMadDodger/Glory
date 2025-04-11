@@ -29,10 +29,12 @@ namespace Glory::Editor
 	void FSMPropertiesWindow::OnGUI()
 	{
 		const UUID fsmID = GetMainWindow()->CurrentFSMID();
+		if (!fsmID) return;
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(fsmID);
+		if (!pResource) return;
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
 		Utils::YAMLFileRef& file = **pDocument;
 

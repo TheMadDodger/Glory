@@ -2,6 +2,7 @@
 #include "FSMEditor.h"
 #include "FSMPropertiesWindow.h"
 #include "FSMNodeEditor.h"
+#include "FSMNodeInspector.h"
 
 #include <EditorTextureData.h>
 #include <Importer.h>
@@ -41,5 +42,6 @@ namespace Glory::Editor
         pMainWindow->SetFSM(uuid);
         editor.GetWindow<FSMEditor, FSMPropertiesWindow>();
         editor.GetWindow<FSMEditor, FSMNodeEditor>();
+        editor.GetWindow<FSMEditor, FSMNodeInspector>();
     }
 }

@@ -58,6 +58,7 @@ namespace Glory
 	{
 		Utils::Reflect::Reflect::SetReflectInstance(&m_pEngine->Reflection());
 		Reflect::RegisterEnum<FSMPropertyType>();
+		Reflect::RegisterEnum<FSMTransitionOP>();
 		Reflect::RegisterType<FSMNode>();
 		Reflect::RegisterType<FSMTransition>();
 		Reflect::RegisterType<FSMProperty>();
