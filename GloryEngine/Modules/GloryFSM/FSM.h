@@ -98,6 +98,8 @@ namespace Glory
 		GLORY_API const FSMNode& Node(size_t index) const;
 		/** @overload */
 		GLORY_API const FSMNode* Node(UUID id) const;
+		/** @overload */
+		GLORY_API FSMNode* FindNode(UUID id);
 		/** @brief Get a transition in this state machine
 		 * @param index Index of the transition to get
 		 */
@@ -133,6 +135,8 @@ namespace Glory
 		 * @param name Name of the transition to find
 		 */
 		GLORY_API const FSMTransition* FindTransition(std::string_view name) const;
+		/** @overload */
+		GLORY_API FSMTransition* FindTransition(UUID transitionID);
 
 		/** @brief Find the index of a node/state by id
 		 * @param id ID of the node
@@ -157,6 +161,8 @@ namespace Glory
 		GLORY_API const FSMProperty& Property(size_t index) const;
 		/** @overload */
 		GLORY_API const FSMProperty* Property(UUID id) const;
+		/** @overload */
+		GLORY_API FSMProperty* FindProperty(UUID id);
 		/** @brief Find the index of a property in this state machine
 		 * @param id ID of the property to find
 		 */
@@ -165,6 +171,20 @@ namespace Glory
 		 * @param name Name of the property to find
 		 */
 		GLORY_API size_t PropertyIndex(std::string_view name) const;
+		/** @brief Remove a node from the state machine
+		 * @param nodeID ID of the node to remove
+		 */
+		GLORY_API void RemoveNode(UUID nodeID);
+		/** @brief Remove a property from the state machine
+		 * @param propID ID of the property to remove
+		 */
+		GLORY_API void RemoveProperty(UUID propID);
+		/** @brief Remove a transition from the state machine
+		 * @param transitionID ID of the transition to remove
+		 */
+		GLORY_API void RemoveTransition(UUID transitionID);
+		/** @brief Clear all data from this FSM */
+		GLORY_API void Clear();
 
 	private:
 		/** @brief Get a vector containing other resources referenced by this resource */

@@ -363,7 +363,7 @@ namespace Glory::Editor
 				newTransitionNode["From"] = uint64_t(ConnectingNodeID);
 				newTransitionNode["To"] = uint64_t(CurrentHoveringNodeID);
 				newTransitionNode["Property"] = uint64_t(0);
-				newTransitionNode["OP"] = "Trigger";
+				newTransitionNode["OP"] = "Custom";
 				newTransitionNode["CompareValue"] = 0;
 
 				Undo::StartRecord("New Transition");

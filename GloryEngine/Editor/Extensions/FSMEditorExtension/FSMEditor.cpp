@@ -1,4 +1,5 @@
 #include "FSMEditor.h"
+#include "FSMImporter.h"
 
 #include <EditorApplication.h>
 #include <EditorAssetDatabase.h>
@@ -8,6 +9,7 @@
 #include <Shortcuts.h>
 
 #include <FSM.h>
+#include <AssetManager.h>
 
 namespace Glory::Editor
 {
@@ -103,6 +105,16 @@ namespace Glory::Editor
 		Dockspace(height);
 	}
 
+	FSMData* FindFSM(const std::filesystem::path& path, Engine* pEngine)
+	{
+		const UUID fsmID = EditorAssetDatabase::FindAssetUUID(path.string());
+		if (!fsmID) return nullptr;
+		Resource* pResource = pEngine->GetAssetManager().FindResource(fsmID);
+		if (!pResource) return nullptr;
+		FSMData* pFSM = static_cast<FSMData*>(pResource);
+		return pFSM;
+	}
+
 	void FSMEditor::Initialize()
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
@@ -111,35 +123,158 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Nodes"),
-		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			FSMData* pFSM = FindFSM(file.Path(), pEngine);
+			if (!pFSM) return;
+
 			std::vector<std::string> components;
 			Reflect::Tokenize(path.string(), components, '\\');
-			if (components.size() <= 5) return;
+			if (components.size() == 2)
+			{
+				const std::string& idStr = components.back();
+				auto node = file["Nodes"][idStr];
+				if (!node.Exists() || !node.IsMap())
+				{
+					/* Node was deleted */
+					const UUID nodeID = std::stoull(idStr);
+					pFSM->RemoveNode(nodeID);
+					return;
+				}
 
+				/* Node was added */
+				const UUID nodeID = node["ID"].As<uint64_t>();
+				const std::string name = node["Name"].As<std::string>();
+				pFSM->NewNode(name, nodeID);
+				return;
+			}
+			if (components.size() == 3 && components.back() == "Name")
+			{
+				/* Node was renamed */
+				const std::string& idStr = components[1];
+				auto node = file["Nodes"][idStr];
+				const UUID nodeID = node["ID"].As<uint64_t>();
+				const std::string name = node["Name"].As<std::string>();
+				FSMNode* pNode = pFSM->FindNode(nodeID);
+				if (pNode) pNode->m_Name = name;
+				return;
+			}
 		});
 
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Transitions"),
-		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			FSMData* pFSM = FindFSM(file.Path(), pEngine);
+			if (!pFSM) return;
+
 			std::vector<std::string> components;
 			Reflect::Tokenize(path.string(), components, '\\');
-			if (components.size() <= 5) return;
+			if (components.size() == 2)
+			{
+				const std::string& idStr = components.back();
+				auto transition = file["Transitions"][idStr];
+				if (!transition.Exists() || !transition.IsMap())
+				{
+					/* Transition was deleted */
+					const UUID transitionID = std::stoull(idStr);
+					pFSM->RemoveTransition(transitionID);
+					return;
+				}
 
+				/* Transition was added */
+				const UUID transitionID = transition["ID"].As<uint64_t>();
+				const std::string name = transition["Name"].As<std::string>();
+				const UUID from = transition["From"].As<uint64_t>();
+				const UUID to = transition["To"].As<uint64_t>();
+				const UUID prop = transition["Property"].As<uint64_t>();
+				const FSMTransitionOP op = transition["OP"].AsEnum<FSMTransitionOP>();
+				const float compareValue = transition["CompareValue"].As<float>();
+				FSMTransition& newTransition = pFSM->NewTransition(name, from, to, transitionID);
+				newTransition.m_Property = prop;
+				newTransition.m_TransitionOp = op;
+				newTransition.m_CompareValue = compareValue;
+				return;
+			}
+			if (components.size() == 3)
+			{
+				/* Property changed */
+				const std::string& idStr = components[1];
+				auto transition = file["Transitions"][idStr];
+				const UUID transitionID = transition["ID"].As<uint64_t>();
+				const std::string name = transition["Name"].As<std::string>();
+				const UUID from = transition["From"].As<uint64_t>();
+				const UUID to = transition["To"].As<uint64_t>();
+				const UUID prop = transition["Property"].As<uint64_t>();
+				const FSMTransitionOP op = transition["OP"].AsEnum<FSMTransitionOP>();
+				const float compareValue = transition["CompareValue"].As<float>();
+				FSMTransition* pTransition = pFSM->FindTransition(transitionID);
+				if (pTransition)
+				{
+					pTransition->m_Name = name;
+					pTransition->m_FromNode = from;
+					pTransition->m_ToNode = to;
+					pTransition->m_Property = prop;
+					pTransition->m_TransitionOp = op;
+					pTransition->m_CompareValue = compareValue;
+				}
+				return;
+			}
 		});
 		
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Properties"),
-		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			FSMData* pFSM = FindFSM(file.Path(), pEngine);
+			if (!pFSM) return;
+
 			std::vector<std::string> components;
 			Reflect::Tokenize(path.string(), components, '\\');
-			if (components.size() <= 5) return;
+			if (components.size() == 2)
+			{
+				const std::string& idStr = components.back();
+				auto prop = file["Properties"][idStr];
+				if (!prop.Exists() || !prop.IsMap())
+				{
+					/* Property was deleted */
+					const UUID propID = std::stoull(idStr);
+					pFSM->RemoveProperty(propID);
+					return;
+				}
 
+				/* Property was added */
+				const UUID propID = prop["ID"].As<uint64_t>();
+				const std::string name = prop["Name"].As<std::string>();
+				const FSMPropertyType type = prop["Type"].AsEnum<FSMPropertyType>();
+				pFSM->NewProperty(name, type, propID);
+				return;
+			}
+			if (components.size() == 3)
+			{
+				/* Property was renamed or type was changed */
+				const std::string& idStr = components[1];
+				auto prop = file["Properties"][idStr];
+				const UUID propID = prop["ID"].As<uint64_t>();
+				const std::string name = prop["Name"].As<std::string>();
+				const FSMPropertyType type = prop["Type"].AsEnum<FSMPropertyType>();
+				FSMProperty* pProp = pFSM->FindProperty(propID);
+				if (pProp)
+				{
+					pProp->m_Name = name;
+					pProp->m_Type = type;
+				}
+				return;
+			}
 		});
 		
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("StartNode"),
-		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			FSMData* pFSM = FindFSM(file.Path(), pEngine);
+			if (!pFSM) return;
+				
 			std::vector<std::string> components;
 			Reflect::Tokenize(path.string(), components, '\\');
-			if (components.size() <= 5) return;
-
+			if (components.size() != 1) return;
+			const UUID startNode = file["StartNode"].As<uint64_t>();
+			const size_t index = pFSM->NodeIndex(startNode);
+			if (index == pFSM->NodeCount()) return;
+			pFSM->SetStartNodeIndex(index);
 		});
 
 		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pEngine, &resources]() {
@@ -147,11 +282,17 @@ namespace Glory::Editor
 			DeleteNode(m_SelectedNode);
 		});
 
-		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources]() {
+		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources, pEngine]() {
 			if (!m_EditingFSM) return;
 			EditableResource* pResource = resources.GetEditableResource(m_EditingFSM);
 			YAMLResource<FSMData>* pDocumentData = static_cast<YAMLResource<FSMData>*>(pResource);
 			pDocumentData->Save();
+
+			Resource* pFSMResource = pEngine->GetAssetManager().FindResource(m_EditingFSM);
+			if (!pResource) return;
+			FSMData* pFSM = static_cast<FSMData*>(pFSMResource);
+			pFSM->Clear();
+			FSMImporter::LoadInto(pFSM, **pDocumentData);
 		});
 	}
 

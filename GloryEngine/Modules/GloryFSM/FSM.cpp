@@ -86,7 +86,27 @@ namespace Glory
 		return nullptr;
 	}
 
+	FSMTransition* FSMData::FindTransition(UUID transitionID)
+	{
+		for (size_t i = 0; i < m_Transitions.size(); ++i)
+		{
+			if (m_Transitions[i].m_ID != transitionID) continue;
+			return &m_Transitions[i];
+		}
+		return nullptr;
+	}
+
 	const FSMNode* FSMData::Node(UUID id) const
+	{
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (m_Nodes[i].m_ID != id) continue;
+			return &m_Nodes[i];
+		}
+		return nullptr;
+	}
+
+	FSMNode* FSMData::FindNode(UUID id)
 	{
 		for (size_t i = 0; i < m_Nodes.size(); ++i)
 		{
@@ -151,6 +171,16 @@ namespace Glory
 		return nullptr;
 	}
 
+	FSMProperty* FSMData::FindProperty(UUID id)
+	{
+		for (size_t i = 0; i < m_Properties.size(); ++i)
+		{
+			if (m_Properties[i].m_ID != id) continue;
+			return &m_Properties[i];
+		}
+		return nullptr;
+	}
+
 	size_t FSMData::PropertyIndex(UUID id) const
 	{
 		for (size_t i = 0; i < m_Properties.size(); ++i)
@@ -169,6 +199,45 @@ namespace Glory
 			return i;
 		}
 		return m_Properties.size();
+	}
+
+	void FSMData::RemoveNode(UUID nodeID)
+	{
+		auto iter = std::find_if(m_Nodes.begin(), m_Nodes.end(),
+			[nodeID](const FSMNode& node) {return node.m_ID == nodeID; });
+		if (iter == m_Nodes.end()) return;
+		m_Nodes.erase(iter);
+	}
+
+	void FSMData::RemoveProperty(UUID propID)
+	{
+		auto iter = std::find_if(m_Properties.begin(), m_Properties.end(),
+			[propID](const FSMProperty& prop) {return prop.m_ID == propID; });
+		if (iter == m_Properties.end()) return;
+		m_Properties.erase(iter);
+	}
+
+	void FSMData::RemoveTransition(UUID transitionID)
+	{
+		auto iter = std::find_if(m_Transitions.begin(), m_Transitions.end(),
+			[transitionID](const FSMTransition& transition) {return transition.m_ID == transitionID; });
+		if (iter == m_Transitions.end()) return;
+		const UUID fromNode = iter->m_FromNode;
+		FSMNode* node = FindNode(fromNode);
+		if (node)
+		{
+			auto nodeTransIter = std::find(node->m_Transitions.begin(), node->m_Transitions.end(), transitionID);
+			if (nodeTransIter != node->m_Transitions.end()) node->m_Transitions.erase(nodeTransIter);
+		}
+		m_Transitions.erase(iter);
+	}
+
+	void FSMData::Clear()
+	{
+		m_Nodes.clear();
+		m_Transitions.clear();
+		m_Properties.clear();
+		m_StartNodeIndex = 0;
 	}
 
 	void FSMData::References(Engine*, std::vector<UUID>&) const {}

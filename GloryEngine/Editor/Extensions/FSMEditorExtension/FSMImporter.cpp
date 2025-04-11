@@ -17,22 +17,14 @@ namespace Glory::Editor
         return "FSM Importer";
     }
 
-    bool FSMImporter::SupportsExtension(const std::filesystem::path& extension) const
+    void FSMImporter::LoadInto(FSMData* pData, Utils::InMemoryYAML& yamlData)
     {
-        return extension.compare(".gfsm") == 0;
-    }
+        auto node = yamlData.RootNodeRef().ValueRef();
 
-    ImportedResource FSMImporter::LoadResource(const std::filesystem::path& path, void*) const
-    {
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-        FSMData* pNewFSM = new FSMData();
-		Utils::YAMLFileRef file{ path };
-		auto node = file.RootNodeRef().ValueRef();
-
-		Utils::NodeValueRef startNode = node["StartNode"];
-		Utils::NodeValueRef nodes = node["Nodes"];
-		Utils::NodeValueRef transitions = node["Transitions"];
-		Utils::NodeValueRef properties = node["Properties"];
+        Utils::NodeValueRef startNode = node["StartNode"];
+        Utils::NodeValueRef nodes = node["Nodes"];
+        Utils::NodeValueRef transitions = node["Transitions"];
+        Utils::NodeValueRef properties = node["Properties"];
         const UUID startNodeID = startNode.As<uint64_t>();
 
         for (auto iter = nodes.Begin(); iter != nodes.End(); ++iter)
@@ -41,9 +33,9 @@ namespace Glory::Editor
             auto node = nodes[idStr];
             const UUID id = node["ID"].As<uint64_t>();
             const std::string name = node["Name"].As<std::string>();
-            const size_t index = pNewFSM->NodeCount();
-            FSMNode& newFsmNode = pNewFSM->NewNode(name, id);
-            if (id == startNodeID) pNewFSM->SetStartNodeIndex(index);
+            const size_t index = pData->NodeCount();
+            FSMNode& newFsmNode = pData->NewNode(name, id);
+            if (id == startNodeID) pData->SetStartNodeIndex(index);
         }
 
         for (auto iter = transitions.Begin(); iter != transitions.End(); ++iter)
@@ -57,7 +49,7 @@ namespace Glory::Editor
             const UUID prop = transition["Property"].As<uint64_t>();
             const FSMTransitionOP op = transition["OP"].AsEnum<FSMTransitionOP>();
             const float compareValue = transition["CompareValue"].As<float>();
-            FSMTransition& fsmTransition = pNewFSM->NewTransition(name, from, to, id);
+            FSMTransition& fsmTransition = pData->NewTransition(name, from, to, id);
             fsmTransition.m_Property = prop;
             fsmTransition.m_TransitionOp = op;
             fsmTransition.m_CompareValue = compareValue;
@@ -70,9 +62,21 @@ namespace Glory::Editor
             const UUID id = prop["ID"].As<uint64_t>();
             const FSMPropertyType type = prop["Type"].AsEnum<FSMPropertyType>();
             const std::string name = prop["Name"].As<std::string>();
-            FSMProperty& newFsmProperty = pNewFSM->NewProperty(name, type, id);
+            FSMProperty& newFsmProperty = pData->NewProperty(name, type, id);
         }
+    }
 
+    bool FSMImporter::SupportsExtension(const std::filesystem::path& extension) const
+    {
+        return extension.compare(".gfsm") == 0;
+    }
+
+    ImportedResource FSMImporter::LoadResource(const std::filesystem::path& path, void*) const
+    {
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+        FSMData* pNewFSM = new FSMData();
+		Utils::YAMLFileRef file{ path };
+        LoadInto(pNewFSM, file);
         return { path, pNewFSM };
     }
 
