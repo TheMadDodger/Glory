@@ -3,6 +3,7 @@
 #include "FSMPropertiesWindow.h"
 #include "FSMNodeEditor.h"
 #include "FSMNodeInspector.h"
+#include "FSMDebugger.h"
 
 #include <EditorTextureData.h>
 #include <Importer.h>
@@ -43,5 +44,6 @@ namespace Glory::Editor
         editor.GetWindow<FSMEditor, FSMPropertiesWindow>();
         editor.GetWindow<FSMEditor, FSMNodeEditor>();
         editor.GetWindow<FSMEditor, FSMNodeInspector>();
+        editor.GetWindow<FSMEditor, FSMDebugger>();
     }
 }

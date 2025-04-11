@@ -9,6 +9,8 @@
 
 #include <Engine.h>
 #include <FSM.h>
+#include <FSMModule.h>
+#include <AssetManager.h>
 
 #include <StringUtils.h>
 
@@ -44,11 +46,13 @@ namespace Glory::Editor
 		bool needsFilter = m_LastFrameFSMID != fsmID || ForceFilter;
 		m_LastFrameFSMID = fsmID;
 
+		const bool inPlayMode = EditorApplication::GetInstance()->IsInPlayMode();
 		if (ImGui::BeginMenuBar())
 		{
 			const float searchBarWidth = ImGui::GetContentRegionAvail().x - 100.0f;
 			needsFilter |= EditorUI::SearchBar(searchBarWidth, SearchBuffer, 256);
 
+			ImGui::BeginDisabled(inPlayMode);
 			if (ImGui::BeginMenu("Add Property"))
 			{
 				auto enumType = Enum<FSMPropertyType>();
@@ -74,6 +78,7 @@ namespace Glory::Editor
 
 				ImGui::EndMenu();
 			}
+			ImGui::EndDisabled();
 			ImGui::EndMenuBar();
 		}
 
@@ -98,6 +103,18 @@ namespace Glory::Editor
 			}
 		}
 
+		UUID& debuggingInstance = GetMainWindow()->DebuggingInstance();
+		FSMModule* pFSMModule = pEngine->GetOptionalModule<FSMModule>();
+		const FSMState* debuggingState = debuggingInstance ? pFSMModule->FSMInstance(debuggingInstance) : nullptr;
+		FSMData* debuggingFSM = nullptr;
+
+		if (debuggingState)
+		{
+			Resource* pResource = pEngine->GetAssetManager().FindResource(fsmID);
+			if (pResource) debuggingFSM = static_cast<FSMData*>(pResource);
+		}
+
+		ImGui::BeginDisabled(inPlayMode);
 		std::string toRemoveProp = "";
 		for (size_t i = 0; i < filteredProperties.size(); ++i)
 		{
@@ -108,9 +125,40 @@ namespace Glory::Editor
 			auto name = prop["Name"];
 
 			ImGui::PushID(key.data());
-			ImGui::BeginChild(key.data(), ImVec2{0.0f, 68.0f}, true, ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::BeginChild(key.data(), ImVec2{ 0.0f, inPlayMode && debuggingState && debuggingFSM ? 96.0f : 68.0f },
+				true, ImGuiWindowFlags_AlwaysAutoResize);
 			change |= EditorUI::InputText(file, name.Path());
 			change |= EditorUI::InputEnum<FSMPropertyType>(file, type.Path());
+
+			if (inPlayMode && debuggingState && debuggingFSM)
+			{
+				const FSMPropertyType propType = type.AsEnum<FSMPropertyType>();
+				switch (propType)
+				{
+				case FSMPropertyType::Trigger:
+				{
+					int triggerInt;
+					debuggingState->GetPropertyValue(debuggingFSM, name.As<std::string>(), &triggerInt);
+					bool trigger = triggerInt > 0;
+					EditorUI::CheckBox("Trigger", &trigger);
+					break;
+				}
+				case FSMPropertyType::Bool:
+				{
+					bool boolean;
+					debuggingState->GetPropertyValue(debuggingFSM, name.As<std::string>(), &boolean);
+					EditorUI::CheckBox("Boolean", &boolean);
+					break;
+				}
+				case FSMPropertyType::Number:
+				{
+					float number;
+					debuggingState->GetPropertyValue(debuggingFSM, name.As<std::string>(), &number);
+					EditorUI::InputFloat("Number", &number);
+					break;
+				}
+				}
+			}
 
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
 				ImGui::OpenPopup("PropertyRightClick");
@@ -134,6 +182,7 @@ namespace Glory::Editor
 			Undo::StopRecord();
 			ForceFilter = true;
 		}
+		ImGui::EndDisabled();
 
 		if (change)
 			EditorAssetDatabase::SetAssetDirty(fsmID);

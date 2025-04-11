@@ -5,6 +5,7 @@
 #include "FSMPropertiesWindow.h"
 #include "FSMNodeEditor.h"
 #include "FSMNodeInspector.h"
+#include "FSMDebugger.h"
 
 #include <FSM.h>
 #include <FSMModule.h>
@@ -26,6 +27,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Window_FSMProperties = "Open FSM Properties";
 	static constexpr char* Shortcut_Window_FSMNodes = "Open FSM Node Editor";
 	static constexpr char* Shortcut_Window_FSMInspector = "Open FSM Inspector";
+	static constexpr char* Shortcut_Window_FSMDebugger = "Open FSM Debugger";
 
 	FSMImporter Importer;
 	FSMEditor Editor;
@@ -93,6 +95,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/FSM Editor/Properties", [&editor]() { editor.GetWindow<FSMEditor, FSMPropertiesWindow>(); }, NULL, Shortcut_Window_FSMProperties);
 		MenuBar::AddMenuItem("Window/FSM Editor/Nodes", [&editor]() { editor.GetWindow<FSMEditor, FSMNodeEditor>(); }, NULL, Shortcut_Window_FSMNodes);
 		MenuBar::AddMenuItem("Window/FSM Editor/Inspector", [&editor]() { editor.GetWindow<FSMEditor, FSMNodeInspector>(); }, NULL, Shortcut_Window_FSMInspector);
+		MenuBar::AddMenuItem("Window/FSM Editor/Debugger", [&editor]() { editor.GetWindow<FSMEditor, FSMDebugger>(); }, NULL, Shortcut_Window_FSMDebugger);
 
 		EditorPlayer::RegisterLoopHandler(this);
 
@@ -100,6 +103,7 @@ namespace Glory::Editor
 		pMainWindow->GetWindow<FSMPropertiesWindow>();
 		pMainWindow->GetWindow<FSMNodeEditor>();
 		pMainWindow->GetWindow<FSMNodeInspector>();
+		pMainWindow->GetWindow<FSMDebugger>();
 	}
 
 	const char* FSMEditorExtension::ModuleName()

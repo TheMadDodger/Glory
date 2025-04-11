@@ -13,7 +13,7 @@
 
 namespace Glory::Editor
 {
-	FSMEditor::FSMEditor(): m_EditingFSM(0), m_SelectedNode(0), m_EditingFSMIndex(0)
+	FSMEditor::FSMEditor(): m_EditingFSM(0), m_SelectedNode(0), m_EditingFSMIndex(0), m_ActiveNodeID(0), m_LastActiveNode(0)
 	{
 	}
 
@@ -25,6 +25,8 @@ namespace Glory::Editor
 	{
 		m_EditingFSM = fsmID;
 		m_SelectedNode = 0;
+		m_ActiveNodeID = 0;
+		m_LastActiveNode = 0;
 	}
 
 	UUID FSMEditor::CurrentFSMID() const
@@ -37,8 +39,25 @@ namespace Glory::Editor
 		return m_SelectedNode;
 	}
 
+	UUID& FSMEditor::ActiveNode()
+	{
+		return m_ActiveNodeID;
+	}
+
+	UUID& FSMEditor::LastActiveNode()
+	{
+		return m_LastActiveNode;
+	}
+
+	UUID& FSMEditor::DebuggingInstance()
+	{
+		return m_DebuggingInstance;
+	}
+
 	void FSMEditor::DeleteNode(UUID nodeID)
 	{
+		if (EditorApplication::GetInstance()->IsInPlayMode()) return;
+
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(m_EditingFSM);
@@ -298,5 +317,12 @@ namespace Glory::Editor
 
 	void FSMEditor::OnUpdate()
 	{
+		if (!EditorApplication::GetInstance()->IsInPlayMode())
+		{
+			m_ActiveNodeID = 0;
+			m_LastActiveNode = 0;
+			m_DebuggingInstance = 0;
+			return;
+		}
 	}
 }

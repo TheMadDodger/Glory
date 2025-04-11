@@ -35,6 +35,8 @@ namespace Glory::Editor
 		if (!fsmID) return;
 
 		UUID& selectedNode = GetMainWindow()->SelectedNode();
+		const UUID& activeNode = GetMainWindow()->ActiveNode();
+		const UUID& lastActiveNode = GetMainWindow()->LastActiveNode();
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
@@ -43,7 +45,8 @@ namespace Glory::Editor
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
 		Utils::YAMLFileRef& file = **pDocument;
 
-		const bool allowInput = m_IsFocused && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+		const bool allowViewInput = m_IsFocused && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+		const bool allowInput = allowViewInput && !EditorApplication::GetInstance()->IsInPlayMode();
 
 		const ImVec2 windowSize = ImGui::GetWindowSize();
 		const ImVec2 windowPos = ImGui::GetWindowPos();
@@ -66,6 +69,8 @@ namespace Glory::Editor
 		const float fontSize = m_Zoom.x*ImGui::GetFontSize();
 		static const ImU32 defaultColor = ImGui::GetColorU32({ 0.5f, 0.5f, 0.5f, 1.0f });
 		static const ImU32 entryNodeColor = ImGui::GetColorU32({ 1.0f, 0.0f, 0.0f, 1.0f });
+		static const ImU32 activeNodeColor = ImGui::GetColorU32({ 0.0f, 1.0f, 0.0f, 1.0f });
+		static const ImU32 lastActiveNodeColor = ImGui::GetColorU32({ 0.0f, 0.0f, 1.0f, 1.0f });
 		static const ImU32 defaultBorderColor = ImGui::GetColorU32({ 0.0f, 0.0f, 0.0f, 1.0f });
 		static const ImU32 selectedBorderColor = ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f });
 		bool change = false;
@@ -96,6 +101,8 @@ namespace Glory::Editor
 			const UUID nodeID = id.As<uint64_t>();
 			glm::vec2 pos = DraggingNode == nodeID ? TempDraggingPos : position.As<glm::vec2>({ 0.0f, 0.0f });
 			const bool isEntryNode = entryNodeID == nodeID;
+			const bool isActiveNode = activeNode == nodeID;
+			const bool isLastActiveNode = lastActiveNode == nodeID;
 			const bool isSelected = selectedNode == nodeID;
 
 			const ImVec2 textSize = ImGui::CalcTextSize(nameStr.data());
@@ -112,7 +119,8 @@ namespace Glory::Editor
 			const glm::vec4 transformedMin = matFinal*minPoint;
 			const glm::vec4 transformedMax = matFinal*maxPoint;
 
-			drawlist->AddRectFilled({ transformedMin.x, transformedMin.y }, { transformedMax.x, transformedMax.y }, isEntryNode ? entryNodeColor : defaultColor, rounding);
+			drawlist->AddRectFilled({ transformedMin.x, transformedMin.y }, { transformedMax.x, transformedMax.y },
+				isActiveNode ? activeNodeColor : isLastActiveNode ? lastActiveNodeColor : isEntryNode ? entryNodeColor : defaultColor, rounding);
 			drawlist->AddRect({ transformedMin.x, transformedMin.y }, { transformedMax.x, transformedMax.y }, isSelected ? selectedBorderColor : defaultBorderColor, rounding, 0, isSelected ? 4.0f : 1.0f);
 			drawlist->AddText(font, fontSize, { transformedTextStartPoint.x, transformedTextStartPoint.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }), nameStr.data());
 
@@ -148,18 +156,19 @@ namespace Glory::Editor
 
 				CurrentHoveringNodeID = nodeID;
 
-				if (allowInput && ConnectingNodeID == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+				if (allowViewInput && ConnectingNodeID == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 				{
 					selectedNode = nodeID;
 				}
 
-				if (allowInput && ConnectingNodeID == 0 && DraggingNode == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+				if (allowViewInput && ConnectingNodeID == 0 && DraggingNode == 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
 				{
 					selectedNode = nodeID;
 					ImGui::OpenPopup("NodeRightClick");
 				}
 			}
 
+			ImGui::BeginDisabled(!allowInput);
 			if (ImGui::BeginPopup("NodeRightClick"))
 			{
 				if (ImGui::MenuItem("Set as start node", "", false, entryNodeID != nodeID))
@@ -178,6 +187,7 @@ namespace Glory::Editor
 				}
 				ImGui::EndPopup();
 			}
+			ImGui::EndDisabled();
 			ImGui::PopID();
 		}
 
@@ -351,7 +361,7 @@ namespace Glory::Editor
 			drawlist->AddLine({ transformedStart.x, transformedStart.y }, { transformedEnd.x, transformedEnd.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
 			drawlist->AddTriangleFilled({ transformedMiddle.x, transformedMiddle.y }, { transformedLeft.x, transformedLeft.y }, { transformedRight.x, transformedRight.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
 
-			if (allowInput && CurrentHoveringNodeID != ConnectingNodeID && CurrentHoveringNodeID != 0 && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			if (allowViewInput && CurrentHoveringNodeID != ConnectingNodeID && CurrentHoveringNodeID != 0 && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 			{
 				const UUID newTransitionID{};
 				const std::string idStr = std::to_string(newTransitionID);
@@ -384,12 +394,13 @@ namespace Glory::Editor
 			CurrentHoveringNodeID = 0;
 		}
 
-		if (allowInput && !DraggingView && ImGui::IsMouseReleased(ImGuiMouseButton_Right)
+		if (allowViewInput && !DraggingView && ImGui::IsMouseReleased(ImGuiMouseButton_Right)
 			&& ConnectingNodeID == 0 && DraggingNode == 0 && CurrentHoveringNodeID == 0)
 		{
 			ImGui::OpenPopup("RightClick");
 		}
 
+		ImGui::BeginDisabled(!allowInput);
 		if (ImGui::BeginPopup("RightClick"))
 		{
 			if (ImGui::MenuItem("New Node", "", false))
@@ -409,8 +420,9 @@ namespace Glory::Editor
 			}
 			ImGui::EndPopup();
 		}
+		ImGui::EndDisabled();
 
-		if (allowInput)
+		if (allowViewInput)
 		{
 			const ImVec2 panningDelta = ImGui::IsMouseDown(ImGuiMouseButton_Middle) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle) :
 				ImGui::IsMouseDown(ImGuiMouseButton_Right) ? ImGui::GetMouseDragDelta(ImGuiMouseButton_Right) : ImVec2{};
@@ -424,10 +436,10 @@ namespace Glory::Editor
 			m_Zoom = glm::clamp(m_Zoom, glm::vec3{ 0.5f }, glm::vec3{ 10.0f });
 		}
 
-		if ((DraggingView && !ImGui::IsMouseDown(ImGuiMouseButton_Middle) && !ImGui::IsMouseDown(ImGuiMouseButton_Right)) || !allowInput)
+		if ((DraggingView && !ImGui::IsMouseDown(ImGuiMouseButton_Middle) && !ImGui::IsMouseDown(ImGuiMouseButton_Right)) || !allowViewInput)
 			DraggingView = false;
 
-		if (allowInput && !isMouseInNode && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		if (allowViewInput && !isMouseInNode && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{
 			selectedNode = 0;
 		}
