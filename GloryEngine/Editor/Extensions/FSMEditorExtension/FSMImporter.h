@@ -13,6 +13,8 @@ namespace Glory::Editor
 
 		std::string_view Name() const override;
 
+		static void LoadInto(FSMData* pData, Utils::InMemoryYAML& yamlData);
+
 	private:
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;

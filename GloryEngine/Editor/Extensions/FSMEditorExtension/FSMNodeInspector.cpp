@@ -22,6 +22,15 @@ namespace Glory::Editor
 
 	FSMNodeInspector::FSMNodeInspector() : EditorWindowTemplate("Inspector", 600.0f, 600.0f), m_LastFrameSelectedNode(0)
 	{
+		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Transitions"),
+		[](Utils::YAMLFileRef&, const std::filesystem::path&) {
+			ForceTransitionFilter = true;
+		});
+
+		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Properties"),
+		[](Utils::YAMLFileRef&, const std::filesystem::path&) {
+			ForcePropertiesFilter = true;
+		});
 	}
 
 	FSMNodeInspector::~FSMNodeInspector()
@@ -143,7 +152,7 @@ namespace Glory::Editor
 				{
 					disable = true;
 					if (transitionOP != FSMTransitionOP::Custom)
-						op.SetEnum(FSMTransitionOP::Custom);
+						Undo::ApplyYAMLEdit(file, op.Path(), op.As<std::string>(), std::string("Custom"));
 				}
 				else
 				{
@@ -155,7 +164,7 @@ namespace Glory::Editor
 						excludedOptions.push_back(uint32_t(FSMTransitionOP::Off));
 						excludedOptions.push_back(uint32_t(FSMTransitionOP::Custom));
 						if (transitionOP < FSMTransitionOP::Equal || transitionOP > FSMTransitionOP::LessOrEqual)
-							op.SetEnum(FSMTransitionOP::Equal);
+							Undo::ApplyYAMLEdit(file, op.Path(), op.As<std::string>(), std::string("Equal"));
 						break;
 					case Glory::FSMPropertyType::Bool:
 						excludedOptions.push_back(uint32_t(FSMTransitionOP::Trigger));
@@ -166,12 +175,12 @@ namespace Glory::Editor
 						excludedOptions.push_back(uint32_t(FSMTransitionOP::LessOrEqual));
 						excludedOptions.push_back(uint32_t(FSMTransitionOP::Custom));
 						if (transitionOP != FSMTransitionOP::On && transitionOP != FSMTransitionOP::Off)
-							op.SetEnum(FSMTransitionOP::On);
+							Undo::ApplyYAMLEdit(file, op.Path(), op.As<std::string>(), std::string("On"));
 						break;
 					case Glory::FSMPropertyType::Trigger:
 						disable = true;
 						if (transitionOP != FSMTransitionOP::Trigger)
-							op.SetEnum(FSMTransitionOP::Trigger);
+							Undo::ApplyYAMLEdit(file, op.Path(), op.As<std::string>(), std::string("Trigger"));
 						break;
 					default:
 						break;
