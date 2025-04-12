@@ -12,6 +12,11 @@ namespace GloryEngine.FSM
         #region Props
 
         /// <summary>
+        /// Name of this node
+        /// </summary>
+        public string Name => FSMNode_GetName(_owner.ID, _id);
+
+        /// <summary>
         /// ID of this node
         /// </summary>
         public UInt64 ID => _id;
@@ -86,6 +91,9 @@ namespace GloryEngine.FSM
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static UInt64 FSMNode_GetTransitionID(UInt64 fsmId, UInt64 nodeId, uint index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static string FSMNode_GetName(UInt64 fsmId, UInt64 nodeId);
 
         #endregion
     }

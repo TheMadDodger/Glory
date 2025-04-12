@@ -49,6 +49,21 @@ namespace GloryEngine.FSM
             return node;
         }
 
+        /// <summary>
+        /// Find a node in this state machine by ID
+        /// </summary>
+        /// <param name="nodeId">ID of the node to find</param>
+        /// <returns></returns>
+        public FSMNode FindNode(UInt64 nodeId)
+        {
+            if (_nodeCache.ContainsKey(nodeId)) return _nodeCache[nodeId];
+            bool nodeExists = FSMTemplate_NodeExists(_objectID, nodeId);
+            if (nodeId == 0) return null;
+            FSMNode node = new FSMNode(this, nodeId);
+            _nodeCache.Add(nodeId, node);
+            return node;
+        }
+
         internal FSMNode GetNode(ulong nodeId)
         {
             if (_nodeCache.ContainsKey(nodeId)) return _nodeCache[nodeId];
@@ -66,6 +81,9 @@ namespace GloryEngine.FSM
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static UInt64 FSMTemplate_FindNode(UInt64 fsmId, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static bool FSMTemplate_NodeExists(UInt64 fsmId, UInt64 nodeID);
 
         #endregion
     }

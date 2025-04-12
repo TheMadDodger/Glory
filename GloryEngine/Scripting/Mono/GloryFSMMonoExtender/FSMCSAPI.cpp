@@ -34,6 +34,15 @@ namespace Glory
 		const FSMNode* node = pFSMData->FindNode(nameStr);
 		return node ? node->m_ID : 0;
 	}
+	
+	bool FSMTemplate_NodeExists(uint64_t fsmId, uint64_t nodeId)
+	{
+		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(fsmId);
+		if (!pFSMResource) return 0;
+		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
+		const FSMNode* node = pFSMData->FindNode(nodeId);
+		return node != nullptr;
+	}
 
 #pragma endregion
 
@@ -88,6 +97,16 @@ namespace Glory
 
 		if (index >= node->m_Transitions.size()) return 0;
 		return node->m_Transitions[index];
+	}
+	
+	MonoString* FSMNode_GetName(uint64_t fsmId, uint64_t nodeId)
+	{
+		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(fsmId);
+		if (!pFSMResource) return 0;
+		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
+		const FSMNode* node = pFSMData->Node((UUID)nodeId);
+		if (!node) return nullptr;
+		return mono_string_new(mono_domain_get(), node->m_Name.data());
 	}
 
 #pragma endregion
@@ -159,11 +178,13 @@ namespace Glory
         /* FSM Data */
         BIND("GloryEngine.FSM.FSMTemplate::FSMTemplate_CreateInstance", FSMTemplate_CreateInstance);
         BIND("GloryEngine.FSM.FSMTemplate::FSMTemplate_FindNode", FSMTemplate_FindNode);
+        BIND("GloryEngine.FSM.FSMTemplate::FSMTemplate_NodeExists", FSMTemplate_NodeExists);
 
 		/* FSM Node */
         BIND("GloryEngine.FSM.FSMNode::FSMNode_GetTransitionCount", FSMNode_GetTransitionCount);
         BIND("GloryEngine.FSM.FSMNode::FSMNode_FindTransitionID", FSMNode_FindTransitionID);
         BIND("GloryEngine.FSM.FSMNode::FSMNode_GetTransitionID", FSMNode_GetTransitionID);
+        BIND("GloryEngine.FSM.FSMNode::FSMNode_GetName", FSMNode_GetName);
 
 		/* FSM Manager */
         BIND("GloryEngine.FSM.FSMManager::FSMManager_DestroyInstance", FSMManager_DestroyInstance);
