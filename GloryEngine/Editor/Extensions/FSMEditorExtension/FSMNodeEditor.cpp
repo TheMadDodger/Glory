@@ -45,7 +45,14 @@ namespace Glory::Editor
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
 		Utils::YAMLFileRef& file = **pDocument;
 
-		const bool allowViewInput = m_IsFocused && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+		const bool allowViewInput = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+
+		if (allowViewInput && (ImGui::IsMouseClicked(ImGuiMouseButton_Right) || ImGui::IsMouseClicked(ImGuiMouseButton_Middle)))
+		{
+			ImGui::FocusWindow(ImGui::GetCurrentWindow());
+			m_IsFocused = true;
+		}
+
 		const bool allowInput = allowViewInput && !EditorApplication::GetInstance()->IsInPlayMode();
 
 		const ImVec2 windowSize = ImGui::GetWindowSize();

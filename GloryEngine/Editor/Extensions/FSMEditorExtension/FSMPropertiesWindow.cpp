@@ -41,6 +41,7 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **pDocument;
 
 		auto properties = file["Properties"];
+		auto transitions = file["Transitions"];
 
 		bool change = false;
 		bool needsFilter = m_LastFrameFSMID != fsmID || ForceFilter;
@@ -128,7 +129,43 @@ namespace Glory::Editor
 			ImGui::BeginChild(key.data(), ImVec2{ 0.0f, inPlayMode && debuggingState && debuggingFSM ? 96.0f : 68.0f },
 				true, ImGuiWindowFlags_AlwaysAutoResize);
 			change |= EditorUI::InputText(file, name.Path());
-			change |= EditorUI::InputEnum<FSMPropertyType>(file, type.Path());
+
+			Undo::StartRecord("Change Property");
+			const bool changedType = EditorUI::InputEnum<FSMPropertyType>(file, type.Path());
+
+			if (changedType)
+			{
+				for (auto iter = transitions.Begin(); iter != transitions.End(); ++iter)
+				{
+					auto transition = transitions[*iter];
+					auto transitionProp = transition["Property"];
+					const UUID transitionPropID = transitionProp.As<uint64_t>();
+					if (transitionPropID != propID) continue;
+					auto op = transition["OP"];
+					auto transitionOP = op.AsEnum<FSMTransitionOP>();
+					
+					switch (type.AsEnum<FSMPropertyType>())
+					{
+					case Glory::FSMPropertyType::Number:
+						if (transitionOP < FSMTransitionOP::Equal || transitionOP > FSMTransitionOP::LessOrEqual)
+							Undo::ApplyYAMLEdit(file, op.Path(), op.As<std::string>(), std::string("Equal"));
+						break;
+					case Glory::FSMPropertyType::Bool:
+						if (transitionOP != FSMTransitionOP::On && transitionOP != FSMTransitionOP::Off)
+							Undo::ApplyYAMLEdit(file, op.Path(), op.As<std::string>(), std::string("On"));
+						break;
+					case Glory::FSMPropertyType::Trigger:
+						if (transitionOP != FSMTransitionOP::Trigger)
+							Undo::ApplyYAMLEdit(file, op.Path(), op.As<std::string>(), std::string("Trigger"));
+						break;
+					default:
+						break;
+					}
+				}
+			}
+
+			change |= changedType;
+			Undo::StopRecord();
 
 			if (inPlayMode && debuggingState && debuggingFSM)
 			{
@@ -177,8 +214,21 @@ namespace Glory::Editor
 		if (!toRemoveProp.empty())
 		{
 			auto prop = properties[toRemoveProp];
+			const UUID propID = prop["ID"].As<uint64_t>();
 			Undo::StartRecord("Remove Property");
 			Undo::YAMLEdit(file, prop.Path(), prop.Node(), YAML::Node(YAML::NodeType::Null));
+
+			for (auto iter = transitions.Begin(); iter != transitions.End(); ++iter)
+			{
+				auto transition = transitions[*iter];
+				auto transitionProp = transition["Property"];
+				const UUID transitionPropID = transitionProp.As<uint64_t>();
+				if (transitionPropID != propID) continue;
+				auto transitionOP = transition["OP"];
+				Undo::ApplyYAMLEdit(file, transitionProp.Path(), uint64_t(transitionPropID), uint64_t(0));
+				Undo::ApplyYAMLEdit(file, transitionOP.Path(), transitionOP.As<std::string>(), std::string("Custom"));
+			}
+
 			Undo::StopRecord();
 			ForceFilter = true;
 		}
