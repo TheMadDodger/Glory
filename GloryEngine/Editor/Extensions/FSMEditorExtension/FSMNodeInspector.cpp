@@ -101,7 +101,7 @@ namespace Glory::Editor
 		bool change = EditorUI::InputText(file, node["Name"].Path());
 		ImGui::EndDisabled();
 
-		ImGui::TextUnformatted("Transitions from this node");
+		ImGui::TextUnformatted(CachedFromTransitions.empty() ? "No transitions from this node" : "Transitions from this node");
 		for (size_t i = 0; i < CachedFromTransitions.size(); ++i)
 		{
 			const UUID transitionID = CachedFromTransitions[i];
@@ -342,7 +342,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::Separator();
-		ImGui::TextUnformatted("Transitions to this node");
+		ImGui::TextUnformatted(CachedToTransitions.empty() ? "No transitions to this node" : "Transitions to this node");
 		for (size_t i = 0; i < CachedToTransitions.size(); ++i)
 		{
 			const UUID transitionID = CachedToTransitions[i];
