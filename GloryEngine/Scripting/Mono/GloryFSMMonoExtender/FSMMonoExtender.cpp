@@ -9,6 +9,7 @@
 #include <ScriptingExtender.h>
 #include <Engine.h>
 #include <Assembly.h>
+#include <Debug.h>
 #include <FSM.h>
 
 namespace Glory

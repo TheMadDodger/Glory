@@ -1,9 +1,6 @@
 #pragma once
-#include <RendererModule.h>
+#include <Module.h>
 #include <Glory.h>
-#include <FileData.h>
-
-#include <glm/glm.hpp>
 
 #include <vector>
 
