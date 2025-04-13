@@ -40,5 +40,7 @@ namespace Glory
 
 	void LocalizeModule::LoadSettings(ModuleSettings& settings)
 	{
+		settings.RegisterValue<std::string>("Default Language", "English");
+		settings.RegisterArray<std::string>("Other Languages");
 	}
 }
