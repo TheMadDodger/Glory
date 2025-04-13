@@ -19,6 +19,7 @@
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
 #include <PrefabData.h>
+#include <TextFileData.h>
 
 namespace Glory
 {
@@ -282,6 +283,22 @@ namespace Glory
 		}
 		MaterialInstanceData* pInstance = materials.CreateRuntimeMaterialInstance(pMaterial->GetUUID());
 		return pInstance->GetUUID();
+	}
+
+#pragma endregion
+
+#pragma region Text File
+
+	MonoString* TextFile_GetFullBody(uint64_t textID)
+	{
+		AssetManager& pManager = Core_EngineInstance->GetAssetManager();
+		auto pFile = pManager.GetAssetImmediate<TextFileData>(textID);
+		if (!pFile)
+		{
+			Core_EngineInstance->GetDebug().LogError("Text file does not exist!");
+			return nullptr;
+		}
+		return pFile->Size() > 0 ? mono_string_new(mono_domain_get(), pFile->Data()) : nullptr;
 	}
 
 #pragma endregion
@@ -694,6 +711,9 @@ namespace Glory
 		BIND("GloryEngine.Material::Material_GetTexture", Material_GetTexture);
 
 		BIND("GloryEngine.Material::Material_CreateInstance", Material_CreateInstance);
+
+		/* Text files */
+		BIND("GloryEngine.TextFile::TextFile_GetFullBody", TextFile_GetFullBody);
 
 		// Scenes
 		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObject", Scene_NewEmptyObject);

@@ -8,6 +8,7 @@ Engine:
 - Fixed setting ui elements active/inactive not properly hiding/unhiding elements and/or rerendering the UI texture
 - Fixed ui element width being incorrect when using the aspect constraint
 - Added FSM data resource
+- Added text file data resource
 
 Editor:
 - Fixed dupplicate start calls or start not being called at all sometimes when entering playmode
@@ -19,9 +20,11 @@ Editor:
 - Added FSM node inspector window
 - Added FSM debugger window
 - Added packaging of FSM data resource
+- Added raw .txt file importer
 
 Scripting:
 - Fixed WorldRotationEuler property not working properly
 - Improved WorldRotation property
 - Added Application.Version()
 - Added FSM CS API
+- Added text file CS API
