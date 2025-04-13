@@ -1,0 +1,7 @@
+Name: "Localize"
+Type: Other
+Editor:
+ Extensions: [LocalizeEditorExtension]
+Extras:
+ - File: Scripting/csharp/GloryLocalizeMonoExtender
+   Requires: "GloryMonoScripting"
