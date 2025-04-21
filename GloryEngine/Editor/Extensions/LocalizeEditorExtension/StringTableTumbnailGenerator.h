@@ -1,14 +1,14 @@
 #pragma once
 #include <TumbnailGenerator.h>
-#include <TextDatabase.h>
+#include <StringTable.h>
 
 namespace Glory::Editor
 {
-    class TextDatabaseTumbnailGenerator : public TumbnailGenerator<TextDatabase>
+    class StringTableTumbnailGenerator : public TumbnailGenerator<StringTable>
     {
 	public:
-		TextDatabaseTumbnailGenerator();
-		virtual ~TextDatabaseTumbnailGenerator();
+		StringTableTumbnailGenerator();
+		virtual ~StringTableTumbnailGenerator();
 
 		virtual TextureData* GetTumbnail(const ResourceMeta* pResourceType) override;
 		virtual void OnFileDoubleClick(UUID uuid) override;

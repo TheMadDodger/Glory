@@ -18,7 +18,7 @@ project "GloryLocalize"
 	vpaths
 	{
 		["Module"] = { "GloryLocalize.*", "LocalizeModule.*" },
-		["Resource"] = { "TextDatabase.*" },
+		["Resource"] = { "StringTable.*" },
 	}
 
 	includedirs

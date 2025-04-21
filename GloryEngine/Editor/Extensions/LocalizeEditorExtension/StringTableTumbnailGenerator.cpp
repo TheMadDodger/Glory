@@ -1,5 +1,5 @@
-#include "TextDatabaseTumbnailGenerator.h"
-#include "TextDatabaseEditor.h"
+#include "StringTableTumbnailGenerator.h"
+//#include "StringTableEditor.h"
 
 #include <EditorTextureData.h>
 #include <Importer.h>
@@ -8,18 +8,18 @@
 
 namespace Glory::Editor
 {
-    TextDatabaseTumbnailGenerator::TextDatabaseTumbnailGenerator(): m_pTextDBTumbnail(nullptr)
+    StringTableTumbnailGenerator::StringTableTumbnailGenerator(): m_pTextDBTumbnail(nullptr)
     {
     }
 
-    TextDatabaseTumbnailGenerator::~TextDatabaseTumbnailGenerator()
+    StringTableTumbnailGenerator::~StringTableTumbnailGenerator()
     {
         if (!m_pTextDBTumbnail) return;
         delete m_pTextDBTumbnail;
         m_pTextDBTumbnail = nullptr;
     }
 
-    TextureData* TextDatabaseTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
+    TextureData* StringTableTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
     {
         if (!m_pTextDBTumbnail)
         {
@@ -32,9 +32,9 @@ namespace Glory::Editor
         return m_pTextDBTumbnail;
     }
 
-    void TextDatabaseTumbnailGenerator::OnFileDoubleClick(UUID uuid)
+    void StringTableTumbnailGenerator::OnFileDoubleClick(UUID uuid)
     {
-        MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
-        editor.GetWindow<TextDatabaseEditor>();
+        //MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+        //editor.GetWindow<StringTableEditor>();
     }
 }
