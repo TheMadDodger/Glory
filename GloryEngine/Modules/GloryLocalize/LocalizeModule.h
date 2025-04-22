@@ -11,18 +11,31 @@ namespace Glory
 	class FSMState;
 	struct FSMNode;
 
+	/** @brief Localize module */
 	class LocalizeModule : public LocalizeModuleBase
 	{
 	public:
+		/** @brief Constructor */
 		GLORY_API LocalizeModule();
+		/** @brief Destructor */
 		GLORY_API virtual ~LocalizeModule();
 
+		/** @brief LocalizeModule type */
 		GLORY_API virtual const std::type_info& GetModuleType() override;
 
+		/** @brief Load a string table */
 		GLORY_API void LoadStringTable(UUID tableID);
+		/** @brief Unload a string table */
 		GLORY_API void UnloadStringTable(UUID tableID);
+		/** @brief Clear all loaded tables */
 		GLORY_API void Clear();
 
+		/** @brief Find a string in the loaded tables
+		 * @param tableName Name of the table to search in
+		 * @param term Key of the string to find in the table
+		 * @param out Output to write the result to if the term is found
+		 * @returns true if the term was found, false otherwise
+		 */
 		GLORY_API bool FindString(const std::string_view tableName, const std::string_view term, std::string& out) override;
 
 		GLORY_MODULE_VERSION_H(0,1,0);

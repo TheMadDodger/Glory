@@ -3,6 +3,7 @@
 
 namespace Glory
 {
+	/** @brief String table resource */
 	class StringTable : public Resource
 	{
 	public:
@@ -39,7 +40,9 @@ namespace Glory
 		 */
 		GLORY_API LookupResult FindString(const std::string& key) const;
 
+		/** @brief Begin iterator for terms */
 		GLORY_API std::map<std::string, std::string>::const_iterator Begin() const;
+		/** @brief End iterator for terms */
 		GLORY_API std::map<std::string, std::string>::const_iterator End() const;
 
 	private:

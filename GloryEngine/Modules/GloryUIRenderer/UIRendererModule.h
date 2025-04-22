@@ -63,7 +63,7 @@ namespace Glory
 
 		GLORY_API UIDocument* FindDocument(UUID uuid);
 
-		GLORY_MODULE_VERSION_H(0,1,0);
+		GLORY_MODULE_VERSION_H(0,2,0);
 
 	private:
 		virtual void Initialize() override;

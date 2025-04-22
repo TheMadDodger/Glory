@@ -27,6 +27,7 @@ namespace Glory
 		)
 	};
 
+	/** @brief String table loader component */
 	struct StringTableLoader
 	{
 		REFLECTABLE(StringTableLoader,
@@ -34,6 +35,7 @@ namespace Glory
 		);
 	};
 	
+	/** @brief Text localizer component */
 	struct Localize
 	{
 		REFLECTABLE(Localize,
