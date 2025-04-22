@@ -59,6 +59,14 @@ namespace Glory
 			if (!pResource)
 			{
 				/* Must load it in */
+				std::filesystem::path path = m_LocalePath;
+				path.append(std::to_string(localeData.m_OverrideTableID)).replace_extension(".gcl");
+				if (!std::filesystem::exists(path)) continue;
+				BinaryFileStream stream{ path, true, false };
+				AssetArchive archive{ &stream };
+				archive.Deserialize(m_pEngine);
+				if (archive.Size() != 1) continue;
+				pResource = archive.Get(m_pEngine, 0);
 				continue;
 			}
 			StringsOverrideTable* pOverrideTable = static_cast<StringsOverrideTable*>(pResource);
@@ -85,8 +93,16 @@ namespace Glory
 	{
 		auto iter = std::find(m_LoadedTableIDs.begin(), m_LoadedTableIDs.end(), tableID);
 		if (iter == m_LoadedTableIDs.end()) return;
-
 		const size_t index = iter - m_LoadedTableIDs.begin();
+
+		std::vector<UUID> toUnloadOverrideTables;
+		for (size_t i = m_LoadedOverrideTables.size(); i > 0; --i)
+		{
+			const LoadedTable& table = m_LoadedOverrideTables[i - 1];
+			if (m_LoadedTables[index].m_Name != table.m_Name) continue;
+			UnloadStringOverrideTable(m_LoadedOverrideTableIDs[i - 1]);
+		}
+
 		m_LoadedTables.erase(m_LoadedTables.begin() + index);
 		m_LoadedTableIDs.erase(iter);
 	}
@@ -97,7 +113,7 @@ namespace Glory
 		if (iter == m_LoadedOverrideTableIDs.end()) return;
 
 		const size_t index = iter - m_LoadedOverrideTableIDs.begin();
-		m_LoadedOverrideTables.erase(m_LoadedTables.begin() + index);
+		m_LoadedOverrideTables.erase(m_LoadedOverrideTables.begin() + index);
 		m_LoadedOverrideTableIDs.erase(iter);
 	}
 
@@ -187,6 +203,16 @@ namespace Glory
 			LoadStringOverrideTable(pOverrideTable);
 		}
 		RefreshText();
+	}
+
+	size_t LocalizeModule::LanguageCount() const
+	{
+		return m_SupportedLanguages.size() + 1;
+	}
+
+	std::string_view LocalizeModule::GetLanguage(size_t index) const
+	{
+		return index == 0 ? m_DefaultLanguage : m_SupportedLanguages[index - 1];
 	}
 
 	void LocalizeModule::Initialize()

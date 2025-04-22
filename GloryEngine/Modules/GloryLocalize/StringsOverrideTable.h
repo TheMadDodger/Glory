@@ -13,7 +13,9 @@ namespace Glory
 		/** @brief Destructor */
 		GLORY_API virtual ~StringsOverrideTable();
 
+		/** @brief Base table ID */
 		GLORY_API UUID BaseTableID() const;
+		/** @brief Language */
 		GLORY_API const std::string& Language() const;
 
 	private:
