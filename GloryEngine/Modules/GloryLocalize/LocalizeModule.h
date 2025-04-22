@@ -58,7 +58,7 @@ namespace Glory
 		virtual void Cleanup() override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
-		virtual void LocalizeModule::OnProcessData() override;
+		virtual void OnProcessData() override;
 
 		void RefreshText();
 
@@ -80,5 +80,7 @@ namespace Glory
 		std::vector<UUID> m_LoadedOverrideTableIDs;
 		std::vector<LoadedTable> m_LoadedOverrideTables;
 		std::vector<LocaleData> m_LocaleData;
+
+		std::string m_LocalePath;
 	};
 }

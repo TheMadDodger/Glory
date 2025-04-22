@@ -474,9 +474,10 @@ namespace Glory
 		return m_Quit;
 	}
 
-	void Engine::AddData(const std::string& name, std::vector<char>&& data)
+	void Engine::AddData(const std::filesystem::path& path, const std::string& name, std::vector<char>&& data)
 	{
 		m_Datas.emplace(name, std::move(data));
+		m_DataPaths.emplace(name, path);
 	}
 
 	void Engine::ProcessData()
@@ -507,9 +508,14 @@ namespace Glory
 		}
 	}
 
-	bool Engine::HasData(const std::string& name)
+	bool Engine::HasData(const std::string& name) const
 	{
 		return m_Datas.find(name) != m_Datas.end();
+	}
+
+	const std::filesystem::path& Engine::DataPath(const std::string& name) const
+	{
+		return m_DataPaths.at(name);
 	}
 
 	std::vector<char>& Engine::GetData(const std::string& name)

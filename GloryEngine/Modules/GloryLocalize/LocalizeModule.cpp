@@ -12,12 +12,13 @@
 
 #include <EntityRegistry.h>
 #include <BinaryStream.h>
+#include <AssetArchive.h>
 
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(LocalizeModule);
 
-	LocalizeModule::LocalizeModule() : m_DefaultLanguage("English"), m_CurrentLanguage(m_DefaultLanguage)
+	LocalizeModule::LocalizeModule() : m_DefaultLanguage("English"), m_CurrentLanguage(m_DefaultLanguage), m_LocalePath("./Data/Locale")
 	{
 	}
 
@@ -173,7 +174,14 @@ namespace Glory
 			if (!pResource)
 			{
 				/* Must load it in */
-				continue;
+				std::filesystem::path path = m_LocalePath;
+				path.append(std::to_string(localeData.m_OverrideTableID)).replace_extension(".gcl");
+				if (!std::filesystem::exists(path)) continue;
+				BinaryFileStream stream{ path, true, false };
+				AssetArchive archive{ &stream };
+				archive.Deserialize(m_pEngine);
+				if (archive.Size() != 1) continue;
+				pResource = archive.Get(m_pEngine, 0);
 			}
 			StringsOverrideTable* pOverrideTable = static_cast<StringsOverrideTable*>(pResource);
 			LoadStringOverrideTable(pOverrideTable);
@@ -226,13 +234,35 @@ namespace Glory
 
 	void LocalizeModule::OnProcessData()
 	{
-		if (!m_pEngine->HasData("Languages")) return;
-		std::vector<char>& data = m_pEngine->GetData("Languages");
-		BinaryMemoryStream memoryStream{ data };
-		BinaryStream& stream = memoryStream;
-		stream.Read(m_DefaultLanguage);
-		stream.Read(m_SupportedLanguages);
-		m_CurrentLanguage = m_DefaultLanguage;
+		if (m_pEngine->HasData("Languages"))
+		{
+			std::vector<char>& data = m_pEngine->GetData("Languages");
+			BinaryMemoryStream memoryStream{ data };
+			BinaryStream& stream = memoryStream;
+			stream.Read(m_DefaultLanguage);
+			stream.Read(m_SupportedLanguages);
+			m_CurrentLanguage = m_DefaultLanguage;
+		}
+		if (m_pEngine->HasData("Locale"))
+		{
+			std::filesystem::path localePath = m_pEngine->DataPath("Locale");
+			localePath = localePath.parent_path();
+			localePath.append("Locale");
+			m_LocalePath = localePath.string();
+
+			std::vector<char>& data = m_pEngine->GetData("Locale");
+			BinaryMemoryStream memoryStream{ data };
+			BinaryStream& stream = memoryStream;
+
+			size_t numLocaleDatas;
+			stream.Read(numLocaleDatas);
+			m_LocaleData.resize(numLocaleDatas);
+
+			for (LocaleData& localeData : m_LocaleData)
+			{
+				stream.Read(localeData.m_BaseTableID).Read(localeData.m_OverrideTableID).Read(localeData.m_Language);
+			}
+		}
 	}
 
 	void LocalizeModule::RefreshText()

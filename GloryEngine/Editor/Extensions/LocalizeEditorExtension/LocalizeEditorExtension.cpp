@@ -93,8 +93,11 @@ namespace Glory::Editor
 		});
 	}
 
+	std::vector<LocaleData> LocaleDatas;
 	void PackageStringOverrideTables(Glory::Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
+		LocaleDatas.clear();
+
 		std::filesystem::path localePath = packageRoot;
 		localePath.append("Data/Locale");
 		std::filesystem::create_directories(localePath);
@@ -131,8 +134,32 @@ namespace Glory::Editor
 			AssetArchive archive{ &fileStream, AssetArchiveFlags::WriteNew };
 			archive.Serialize(pStringTable);
 
+			LocaleData localeData;
+			localeData.m_BaseTableID = pStringTable->BaseTableID();
+			localeData.m_OverrideTableID = pStringTable->GetUUID();
+			localeData.m_Language = pStringTable->Language();
+			LocaleDatas.push_back(std::move(localeData));
+
 			++task.m_ProcessedSubTasks;
 			task.m_SubTaskName = "";
+		}
+	}
+
+	void PackageLocaleData(Glory::Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	{
+		task.m_SubTaskName = "Locale.dat";
+
+		std::filesystem::path localeDataPath = packageRoot;
+		localeDataPath.append("Data/Locale.dat");
+		const std::filesystem::path localePath = "./Data/Locale";
+
+		BinaryFileStream file{ localeDataPath };
+		BinaryStream* stream = &file;
+		stream->Write(CoreVersion);
+		stream->Write(LocaleDatas.size());
+		for (const LocaleData& localeData : LocaleDatas)
+		{
+			stream->Write(localeData.m_BaseTableID).Write(localeData.m_OverrideTableID).Write(localeData.m_Language);
 		}
 	}
 
@@ -166,15 +193,15 @@ namespace Glory::Editor
 			};
 			AddPackagingTaskAfter(std::move(stringTablesTask), "PackageAssets");
 
-			/*PackageTask localeTask;
+			PackageTask localeTask;
 			localeTask.m_TotalSubTasks = 1;
 			localeTask.m_TaskID = "PackageLocale";
 			localeTask.m_TaskName = "Packaging locale data";
 			localeTask.m_Callback = [this](Glory::Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task) {
-				
+				PackageLocaleData(pEngine, packageRoot, task);
 				return true;
 			};
-			AddPackagingTaskAfter(std::move(localeTask), "PackageStringTables");*/
+			AddPackagingTaskAfter(std::move(localeTask), "PackageStringOverrideTables");
 		});
 
 		EntitySceneObjectEditor::AddComponentIcon<StringTableLoader>(ICON_FA_LANGUAGE);

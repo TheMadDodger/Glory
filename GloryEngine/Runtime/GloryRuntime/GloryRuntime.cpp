@@ -72,7 +72,7 @@ namespace Glory
 			}
 			std::vector<char> data;
 			stream->Read(data);
-			m_pEngine->AddData(name, std::move(data));
+			m_pEngine->AddData(path, name, std::move(data));
 		}
 
 		/* Initialize engine */
