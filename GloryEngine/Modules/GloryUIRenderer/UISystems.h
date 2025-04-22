@@ -43,6 +43,7 @@ namespace Glory
 	class UITextSystem
 	{
 	public:
+		static void OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent);
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent);
 		static void OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent);
 		static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);

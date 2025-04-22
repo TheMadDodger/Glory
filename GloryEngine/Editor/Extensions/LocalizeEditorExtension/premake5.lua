@@ -1,25 +1,21 @@
-project "GloryUIRenderer"
+project "LocalizeEditorExtension"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{moduleOutDir}")
+	targetdir ("%{modulesOutDir}/GloryLocalize/Editor/Extension")
 	objdir ("%{outputDir}")
 
 	files
 	{
 		"**.h",
 		"**.cpp",
-		"Module.yaml",
-		"premake5.lua",
-		"Assets/**.*",
-		"Resources/**.*",
+		"premake5.lua"
 	}
 
 	vpaths
 	{
-		["Module"] = { "GloryUIRenderer.*", "UIRendererModule.*" }
 	}
 
 	includedirs
@@ -27,23 +23,33 @@ project "GloryUIRenderer"
 		"%{DepsIncludeDir}",
 
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
 
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
+		"%{GloryIncludeDir.editor}",
+		"%{GloryIncludeDir.ImGui}",
 		"%{BaseIncludeDir.localize}",
+		"%{GloryIncludeDir.Localize}",
 
+		"%{IncludeDir.FA}",
+
+		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Utils}",
+
+		"%{rapidjson}",
 	}
 
 	libdirs
 	{
 		"%{DepsLibDir}",
 
+		"%{LibDirs.ImGui}",
+		"%{LibDirs.implot}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -51,16 +57,20 @@ project "GloryUIRenderer"
 	links
 	{
 		"GloryCore",
-		"GloryLocalizeModule",
+		"GloryEditor",
+		"GloryLocalize",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
+		"ImGui",
+		"ImGuizmo",
+		"implot",
 		"yaml-cpp",
 
-		"GloryReflect",
 		"GloryECS",
-		"GloryUtilsVersion",
+		"GloryReflect",
 		"GloryUtils",
+		"GloryUtilsVersion",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
@@ -69,13 +79,10 @@ project "GloryUIRenderer"
 
 	defines
 	{
-		"GLORY_EXPORTS"
-	}
-
-	postbuildcommands
-	{
-		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
+		"GLORY_EXPORTS",
+		"GLORY_EDITOR_EXPORTS",
+		"GLORY_EDITOR_EXTENSION_EXPORTS",
+		"GLORY_UUID_DEFINED",
 	}
 
 	filter "system:windows"

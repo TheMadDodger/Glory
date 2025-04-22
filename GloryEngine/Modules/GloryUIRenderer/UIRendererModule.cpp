@@ -158,7 +158,7 @@ namespace Glory
 		m_pEngine->GetResourceTypes().RegisterResource<UIDocumentData>("");
 		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Draw, UIRenderSystem::OnDraw);
 		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, UIRenderSystem::OnValidate);
-		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, UIRenderSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Start, UIRenderSystem::OnStart);
 		pComponentTypes->RegisterReferencesCallback<UIRenderer>(UIRenderSystem::GetReferences);
 
 		/* Register the UI components with a different component types instance */
@@ -175,6 +175,7 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Draw, UIImageSystem::OnDraw);
 		m_pComponentTypes->RegisterReferencesCallback<UIImage>(UIImageSystem::GetReferences);
 		/* Text */
+		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Start, UITextSystem::OnStart);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
 		m_pComponentTypes->RegisterReferencesCallback<UIText>(UITextSystem::GetReferences);

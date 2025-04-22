@@ -1,6 +1,7 @@
 #include "UIRenderSystem.h"
 #include "UIRendererModule.h"
 #include "UIComponents.h"
+#include "UIDocument.h"
 
 #include <EntityRegistry.h>
 #include <SceneManager.h>
@@ -11,6 +12,17 @@
 
 namespace Glory
 {
+	void UIRenderSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent)
+	{
+		if (!pComponent.m_RenderDocumentID) return;
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		UIRendererModule* pModule = pEngine->GetOptionalModule<UIRendererModule>();
+		UIDocument* pDocument = pModule->FindDocument(pComponent.m_RenderDocumentID);
+		if (!pDocument) return;
+		pDocument->Start();
+	}
+
 	void UIRenderSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();

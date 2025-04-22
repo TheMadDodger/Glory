@@ -1,4 +1,4 @@
-project "GloryUIRenderer"
+project "GloryLocalize"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
@@ -13,31 +13,28 @@ project "GloryUIRenderer"
 		"**.cpp",
 		"Module.yaml",
 		"premake5.lua",
-		"Assets/**.*",
-		"Resources/**.*",
 	}
 
 	vpaths
 	{
-		["Module"] = { "GloryUIRenderer.*", "UIRendererModule.*" }
+		["Module"] = { "GloryLocalize.*", "LocalizeModule.*" },
+		["Resource"] = { "StringTable.*" },
 	}
 
 	includedirs
 	{
+		"%{BaseIncludeDir.localize}",
 		"%{DepsIncludeDir}",
-
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
 
 		"%{GloryIncludeDir.core}",
-		"%{GloryIncludeDir.threads}",
-		"%{GloryIncludeDir.jobs}",
-		"%{BaseIncludeDir.localize}",
 
+		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Utils}",
+
+		"%{IncludeDir.yaml_cpp}",
 	}
 
 	libdirs
@@ -52,15 +49,16 @@ project "GloryUIRenderer"
 	{
 		"GloryCore",
 		"GloryLocalizeModule",
+		"GloryReflect",
+		"GloryECS",
+
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",
 		"yaml-cpp",
 
-		"GloryReflect",
-		"GloryECS",
-		"GloryUtilsVersion",
 		"GloryUtils",
+		"GloryUtilsVersion",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
@@ -69,13 +67,12 @@ project "GloryUIRenderer"
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
 	}
 
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
 	}
 
 	filter "system:windows"
@@ -96,7 +93,11 @@ project "GloryUIRenderer"
 
 	filter "configurations:Debug"
 		runtime "Debug"
-		defines "_DEBUG"
+		defines
+		{
+			"_DEBUG",
+			"JPH_DEBUG_RENDERER"
+		}
 		symbols "On"
 
 	filter "configurations:Release"
