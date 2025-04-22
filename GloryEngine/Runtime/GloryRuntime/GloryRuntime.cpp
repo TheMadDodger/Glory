@@ -140,8 +140,8 @@ namespace Glory
 
 	void GloryRuntime::Run()
 	{
-		m_pEngine->GetSceneManager()->Start();
 		m_IsRunning = true;
+		m_pEngine->GetSceneManager()->Start();
 
 		while (!m_pEngine->WantsToQuit())
 		{

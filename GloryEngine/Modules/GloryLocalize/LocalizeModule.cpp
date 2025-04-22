@@ -227,7 +227,7 @@ namespace Glory
 	void LocalizeModule::OnProcessData()
 	{
 		if (!m_pEngine->HasData("Languages")) return;
-		std::vector<char>& data = m_pEngine->GetData("Assemblies");
+		std::vector<char>& data = m_pEngine->GetData("Languages");
 		BinaryMemoryStream memoryStream{ data };
 		BinaryStream& stream = memoryStream;
 		stream.Read(m_DefaultLanguage);

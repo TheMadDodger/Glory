@@ -211,7 +211,7 @@ namespace Glory
 		m_TypeName(mono_type_get_name(m_pType)),
 		m_SizeAllignment(0),
 		m_Size(mono_type_size(m_pType, &m_SizeAllignment)),
-		m_TypeHash(MonoTypeToHash[m_TypeName]),
+		m_TypeHash(MonoTypeToHash.find(m_TypeName) != MonoTypeToHash.end() ? MonoTypeToHash.at(m_TypeName) : 0),
 		m_ElementTypeHash(MonoTypeToElementHash.find(m_TypeName) != MonoTypeToElementHash.end() ? MonoTypeToElementHash[m_TypeName] : m_TypeHash),
 		m_IsStatic((m_Flags & MONO_FIELD_ATTR_STATIC) == MONO_FIELD_ATTR_STATIC)
 	{
@@ -357,6 +357,12 @@ namespace Glory
 	{
 		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
+	}
+
+	void Assembly::CollectTypes()
+	{
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		if (m_pLibManager) m_pLibManager->CollectTypes(pEngine, this);
 	}
 
     bool Assembly::LoadAssembly(const std::filesystem::path& assemblyPath)

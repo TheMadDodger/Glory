@@ -30,8 +30,11 @@ namespace Glory
 	/** @brief String table loader component */
 	struct StringTableLoader
 	{
+		StringTableLoader() : m_StringTable(0), m_KeepLoaded(false) {}
+
 		REFLECTABLE(StringTableLoader,
-			(std::vector<StringTableRef>)(m_StringTables)
+			(AssetReference<StringTable>)(m_StringTable),
+			(bool)(m_KeepLoaded)
 		);
 	};
 	

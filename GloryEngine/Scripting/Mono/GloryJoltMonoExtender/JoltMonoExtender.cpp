@@ -39,6 +39,10 @@ namespace Glory
 		return true;
 	}
 
+	void JoltLibManager::CollectTypes(Engine*, Assembly*)
+	{
+	}
+
 	void JoltLibManager::Initialize(Engine* pEngine, Assembly*)
 	{
 		PhysicsCSAPI::SetEngine(pEngine);

@@ -42,12 +42,16 @@ namespace Glory
 		return true;
 	}
 
+	void FSMLibManager::CollectTypes(Engine*, Assembly*)
+	{
+		AddMonoType("GloryEngine.FSM.FSMTemplate", SerializedType::ST_Asset, ResourceTypes::GetHash<FSMData>());
+	}
+
 	void FSMLibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
 	{
 		m_pAssembly = pAssembly;
 
 		FSMCSAPI::SetEngine(pEngine);
-		AddMonoType("GloryEngine.FSM.FSMTemplate", SerializedType::ST_Asset, ResourceTypes::GetHash<FSMData>());
 
 		MonoManager* pMonoManager = MonoManager::Instance();
 

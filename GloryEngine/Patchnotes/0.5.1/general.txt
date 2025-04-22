@@ -1,6 +1,7 @@
 Runtime:
 - Added loading for application version from data folder
 - Added loading of FSM data resource
+- Fixed OnValidate, Start and OnEnable callbacks not working when loading a scene at runtime
 
 Engine:
 - Fixed prefab instantiation not properly setting the start location
@@ -28,3 +29,4 @@ Scripting:
 - Added Application.Version()
 - Added FSM CS API
 - Added text file CS API
+- Fixed a bug that could cause a crash where types are loaded too late
