@@ -21,6 +21,10 @@ namespace Glory
 		return m_pAssembly;
 	}
 
+	void CoreLibManager::CollectTypes(Engine*, Assembly*)
+	{
+	}
+
 	void CoreLibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
 	{
 		m_pAssembly = pAssembly;

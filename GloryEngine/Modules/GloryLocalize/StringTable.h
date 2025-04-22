@@ -45,7 +45,7 @@ namespace Glory
 		/** @brief End iterator for terms */
 		GLORY_API std::map<std::string, std::string>::const_iterator End() const;
 
-	private:
+	protected:
 		/** @brief Get a vector containing other resources referenced by this resource */
 		virtual void References(Engine*, std::vector<UUID>&) const override;
 

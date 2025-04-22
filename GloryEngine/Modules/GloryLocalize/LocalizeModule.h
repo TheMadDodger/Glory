@@ -7,9 +7,15 @@
 
 namespace Glory
 {
-	class FSMData;
-	class FSMState;
-	struct FSMNode;
+	/** @brief Locale Data */
+	struct LocaleData
+	{
+		UUID m_BaseTableID;
+		UUID m_OverrideTableID;
+		std::string m_Language;
+	};
+
+	class StringsOverrideTable;
 
 	/** @brief Localize module */
 	class LocalizeModule : public LocalizeModuleBase
@@ -25,8 +31,12 @@ namespace Glory
 
 		/** @brief Load a string table */
 		GLORY_API void LoadStringTable(UUID tableID);
+		/** @brief Load a strings override table */
+		GLORY_API void LoadStringOverrideTable(StringsOverrideTable* pTable);
 		/** @brief Unload a string table */
 		GLORY_API void UnloadStringTable(UUID tableID);
+		/** @brief Unload a strings override table */
+		GLORY_API void UnloadStringOverrideTable(UUID overrideTableID);
 		/** @brief Clear all loaded tables */
 		GLORY_API void Clear();
 
@@ -38,6 +48,26 @@ namespace Glory
 		 */
 		GLORY_API bool FindString(const std::string_view tableName, const std::string_view term, std::string& out) override;
 
+		/** @brief Set language data
+		 * @param defaultLanguage Default language
+		 * @param supportedLanguages Other languages
+		 */
+		GLORY_API void SetLanguages(std::string&& defaultLanguage, std::vector<std::string>&& supportedLanguages);
+		/** @brief Set the locale data needed for finding override tables
+		 * @param localeDatas Locale datas
+		 */
+		GLORY_API void SetLocaleDatas(std::vector<LocaleData>&& localeDatas);
+		/** @brief Set current language and retrigger string swapping
+		 * @param language Language to set as current
+		 */
+		GLORY_API void SetLanguage(std::string_view language);
+		/** @brief Get number of languages */
+		GLORY_API size_t LanguageCount() const;
+		/** @brief Get language at index
+		 * @param index Index of the language, use 0 to get the default
+		 */
+		GLORY_API std::string_view GetLanguage(size_t index) const;
+
 		GLORY_MODULE_VERSION_H(0,1,0);
 
 	private:
@@ -47,17 +77,29 @@ namespace Glory
 		virtual void Cleanup() override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
+		virtual void OnProcessData() override;
+
+		void RefreshText();
 
 	private:
 		struct LoadedTable
 		{
 			LoadedTable(std::string_view name) : m_Name(name) {}
 
-			std::string_view m_Name;
+			std::string m_Name;
 			std::map<std::string_view, std::string_view> m_Strings;
 		};
 
+		std::string m_DefaultLanguage;
+		std::string_view m_CurrentLanguage;
+		std::vector<std::string> m_SupportedLanguages;
+
 		std::vector<UUID> m_LoadedTableIDs;
 		std::vector<LoadedTable> m_LoadedTables;
+		std::vector<UUID> m_LoadedOverrideTableIDs;
+		std::vector<LoadedTable> m_LoadedOverrideTables;
+		std::vector<LocaleData> m_LocaleData;
+
+		std::string m_LocalePath;
 	};
 }

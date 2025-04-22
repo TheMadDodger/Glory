@@ -1004,6 +1004,11 @@ namespace Glory::Editor
 		return Failed;
 	}
 
+	bool IsAssetPackaged(UUID assetID)
+	{
+		return std::find(UsedAssets.begin(), UsedAssets.end(), assetID) != UsedAssets.end();
+	}
+
     void PackageScene(GScene* pScene, const std::filesystem::path& path)
     {
         BinaryFileStream file{ path };

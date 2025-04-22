@@ -3,6 +3,7 @@
 #include <Engine.h>
 #include <Serializers.h>
 #include <SceneManager.h>
+#include <StringsOverrideTable.h>
 
 #include <EditorApplication.h>
 
@@ -18,25 +19,49 @@ namespace Glory::Editor
 
     bool StringTableImporter::SupportsExtension(const std::filesystem::path& extension) const
     {
-        return extension.compare(".gtable") == 0;
+        return extension.compare(".gtable") == 0 || extension.compare(".gotable") == 0;
     }
 
-    ImportedResource StringTableImporter::LoadResource(const std::filesystem::path& path, void*) const
+    void ReadStrings(Utils::NodeValueRef root, StringTable* pStringTable)
     {
-        StringTable* pStringTable = new StringTable();
-
-        Utils::YAMLFileRef file{ path };
-        auto root = file.RootNodeRef().ValueRef();
-        if (!root.Exists() || !root.IsMap()) root.SetMap();
-
         for (auto iter = root.Begin(); iter != root.End(); ++iter)
         {
             std::string key = *iter;
             std::string value = root[key].As<std::string>();
             pStringTable->AddString(std::move(key), std::move(value));
         }
+    }
+
+    ImportedResource StringTableImporter::LoadResource(const std::filesystem::path& path, void*) const
+    {
+        Utils::YAMLFileRef file{ path };
+        auto root = file.RootNodeRef().ValueRef();
+        if (!root.Exists() || !root.IsMap()) root.SetMap();
+
+        if (path.extension().compare(".gotable") == 0)
+        {
+            /* Override table */
+            const UUID baseTableID = root["BaseTable"].As<uint64_t>();
+            std::string language = root["Language"].As<std::string>();
+
+            StringsOverrideTable* pStringOverrideTable = new StringsOverrideTable(baseTableID, std::move(language));
+
+            ReadStrings(root["Overrides"], pStringOverrideTable);
+            return { path, pStringOverrideTable };
+        }
+
+        StringTable* pStringTable = new StringTable();
+        ReadStrings(root, pStringTable);
 
         return { path, pStringTable };
+    }
+
+    void WriteStrings(Utils::NodeValueRef root, StringTable* pStringTable)
+    {
+        for (auto& iter = pStringTable->Begin(); iter != pStringTable->End(); ++iter)
+        {
+            root[iter->first].Set(iter->second);
+        }
     }
 
     bool StringTableImporter::SaveResource(const std::filesystem::path& path, StringTable* pStringTable) const
@@ -45,11 +70,22 @@ namespace Glory::Editor
         auto root = file.RootNodeRef().ValueRef();
         if (!root.Exists() || !root.IsMap()) root.SetMap();
 
-        for (auto& iter = pStringTable->Begin(); iter != pStringTable->End(); ++iter)
+        if (path.extension().compare(".gotable") == 0)
         {
-            root[iter->first].Set(iter->second);
+            /* Override table */
+            auto baseTableID = root["BaseTable"];
+            auto language = root["Language"];
+
+            StringsOverrideTable* pStringOverrideTable = static_cast<StringsOverrideTable*>(pStringTable);
+            baseTableID.Set(uint64_t(pStringOverrideTable->BaseTableID()));
+            language.Set(pStringOverrideTable->Language());
+
+            WriteStrings(root["Overrides"], pStringOverrideTable);
+            file.Save();
+            return true;
         }
 
+        WriteStrings(root, pStringTable);
         file.Save();
         return true;
     }

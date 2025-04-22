@@ -23,6 +23,7 @@ namespace Glory
         GLORY_API MonoObject* GetEngine();
 
     public:
+        virtual void CollectTypes(Engine*, Assembly*) override;
         void Initialize(Engine* pEngine, Assembly* pAssembly) override;
         void Cleanup(Engine* pEngine) override;
         void Reset(Engine* pEngine) override;

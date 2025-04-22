@@ -15,6 +15,7 @@ namespace Glory
 	class FSMLibManager : public IMonoLibManager
 	{
 	public: /* Lib manager implementation */
+		virtual void CollectTypes(Engine*, Assembly*) override;
 		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) override;
 		virtual void Cleanup(Engine*) override;
 		virtual void Reset(Engine*) override;

@@ -82,6 +82,11 @@ namespace Glory
 	{
 		for (auto& assembly : m_Assemblies)
 		{
+			assembly.second.CollectTypes();
+		}
+
+		for (auto& assembly : m_Assemblies)
+		{
 			assembly.second.Initialize();
 		}
 	}

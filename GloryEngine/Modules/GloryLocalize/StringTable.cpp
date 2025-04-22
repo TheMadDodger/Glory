@@ -7,8 +7,6 @@ namespace Glory
 	StringTable::StringTable()
 	{
 		APPEND_TYPE(StringTable);
-
-		AddString("test", "Hello World!");
 	}
 
 	StringTable::~StringTable()
@@ -54,7 +52,7 @@ namespace Glory
 	void StringTable::Deserialize(BinaryStream& container)
 	{
 		size_t numStrings = 0;
-		container.Write(numStrings);
+		container.Read(numStrings);
 		for (size_t i = 0; i < numStrings; ++i)
 		{
 			std::string key, value;

@@ -18,21 +18,16 @@ namespace Glory
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		LocalizeModule* pModule = pEngine->GetOptionalModule<LocalizeModule>();
-		for (const auto& stringTable : pComponent.m_StringTables)
-		{
-			pModule->LoadStringTable(stringTable.m_STReference.AssetUUID());
-		}
+		pModule->LoadStringTable(pComponent.m_StringTable.AssetUUID());
 	}
 
 	void StringTableLoaderSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, StringTableLoader& pComponent)
 	{
+		if (pComponent.m_KeepLoaded) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		LocalizeModule* pModule = pEngine->GetOptionalModule<LocalizeModule>();
-		for (const auto& stringTable : pComponent.m_StringTables)
-		{
-			pModule->UnloadStringTable(stringTable.m_STReference.AssetUUID());
-		}
+		pModule->UnloadStringTable(pComponent.m_StringTable.AssetUUID());
 	}
 
 	void StringTableLoaderSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
@@ -40,12 +35,9 @@ namespace Glory
 		for (size_t i = 0; i < pTypeView->Size(); ++i)
 		{
 			const StringTableLoader* pLocalizeComponent = static_cast<const StringTableLoader*>(pTypeView->GetComponentAddressFromIndex(i));
-			for (const auto& stringTable : pLocalizeComponent->m_StringTables)
-			{
-				const UUID id = stringTable.m_STReference.AssetUUID();
-				if (!id) continue;
-				references.push_back(id);
-			}
+			const UUID id = pLocalizeComponent->m_StringTable.AssetUUID();
+			if (!id) continue;
+			references.push_back(id);
 		}
 	}
 
