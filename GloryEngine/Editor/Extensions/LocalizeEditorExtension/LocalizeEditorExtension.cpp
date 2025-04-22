@@ -1,6 +1,7 @@
 #include "LocalizeEditorExtension.h"
 #include "StringTableImporter.h"
 #include "StringTableTumbnailGenerator.h"
+#include "LanguageSettings.h"
 //#include "StringTableEditor.h"
 
 #include <Localize.h>
@@ -39,6 +40,8 @@ namespace Glory::Editor
 
 	StringTableImporter Importer;
 	//StringTableEditor Editor;
+
+	LanguageSettings LangSettings;
 
 	LocalizeEditorExtension::LocalizeEditorExtension()
 	{
@@ -99,6 +102,8 @@ namespace Glory::Editor
 
 	void LocalizeEditorExtension::Initialize()
 	{
+		ProjectSettings::Add(&LangSettings);
+
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 		pEngine->GetSceneManager()->ComponentTypesInstance();

@@ -38,6 +38,8 @@ namespace Glory
 		 */
 		GLORY_API bool FindString(const std::string_view tableName, const std::string_view term, std::string& out) override;
 
+		GLORY_API void SetLanguages(std::string&& defaultLanguage, std::vector<std::string>&& supportedLanguages);
+
 		GLORY_MODULE_VERSION_H(0,1,0);
 
 	private:
@@ -47,6 +49,7 @@ namespace Glory
 		virtual void Cleanup() override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
+		virtual void LocalizeModule::OnProcessData() override;
 
 	private:
 		struct LoadedTable
@@ -56,6 +59,10 @@ namespace Glory
 			std::string_view m_Name;
 			std::map<std::string_view, std::string_view> m_Strings;
 		};
+
+		std::string m_DefaultLanguage;
+		std::string_view m_CurrentLanguage;
+		std::vector<std::string> m_SupportedLanguages;
 
 		std::vector<UUID> m_LoadedTableIDs;
 		std::vector<LoadedTable> m_LoadedTables;

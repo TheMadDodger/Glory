@@ -8,12 +8,13 @@
 #include <SceneManager.h>
 
 #include <EntityRegistry.h>
+#include <BinaryStream.h>
 
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(LocalizeModule);
 
-	LocalizeModule::LocalizeModule()
+	LocalizeModule::LocalizeModule() : m_DefaultLanguage("English"), m_CurrentLanguage(m_DefaultLanguage)
 	{
 	}
 
@@ -71,6 +72,13 @@ namespace Glory
 		return true;
 	}
 
+	void LocalizeModule::SetLanguages(std::string&& defaultLanguage, std::vector<std::string>&& supportedLanguages)
+	{
+		m_DefaultLanguage = std::move(defaultLanguage);
+		m_CurrentLanguage = m_DefaultLanguage;
+		m_SupportedLanguages = std::move(supportedLanguages);
+	}
+
 	void LocalizeModule::Initialize()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
@@ -106,5 +114,16 @@ namespace Glory
 
 	void LocalizeModule::LoadSettings(ModuleSettings& settings)
 	{
+	}
+
+	void LocalizeModule::OnProcessData()
+	{
+		if (!m_pEngine->HasData("Languages")) return;
+		std::vector<char>& data = m_pEngine->GetData("Assemblies");
+		BinaryMemoryStream memoryStream{ data };
+		BinaryStream& stream = memoryStream;
+		stream.Read(m_DefaultLanguage);
+		stream.Read(m_SupportedLanguages);
+		m_CurrentLanguage = m_DefaultLanguage;
 	}
 }
