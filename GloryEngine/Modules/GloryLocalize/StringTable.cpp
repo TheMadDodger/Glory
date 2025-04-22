@@ -7,8 +7,6 @@ namespace Glory
 	StringTable::StringTable()
 	{
 		APPEND_TYPE(StringTable);
-
-		AddString("test", "Hello World!");
 	}
 
 	StringTable::~StringTable()

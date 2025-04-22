@@ -25,5 +25,6 @@ namespace Glory
 		 */
 		virtual bool FindString(const std::string_view tableName, const std::string_view term, std::string& out) = 0;
 
+		std::function<void()> OnLanguageChanged;
     };
 }

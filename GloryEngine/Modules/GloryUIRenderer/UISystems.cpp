@@ -143,7 +143,11 @@ namespace Glory
 		if (firstDot == std::string::npos) return;
 		const std::string_view tableName = fullTerm.substr(0, firstDot);
 		const std::string_view term = fullTerm.substr(firstDot + 1);
-		pComponent.m_Dirty |= pLocalize->FindString(tableName, term, pComponent.m_Text);
+		if (pLocalize->FindString(tableName, term, pComponent.m_Text))
+		{
+			pComponent.m_Dirty = true;
+			pDocument->SetDrawDirty();
+		}
 	}
 
 	void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)

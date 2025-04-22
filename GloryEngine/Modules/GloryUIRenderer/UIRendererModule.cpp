@@ -19,6 +19,7 @@
 #include <Material.h>
 #include <MaterialData.h>
 #include <SceneManager.h>
+#include <LocalizeModuleBase.h>
 
 #include <DistributedRandom.h>
 
@@ -199,6 +200,17 @@ namespace Glory
 		pRenderer->AddRenderPass(RenderPassType::RP_Objectpass, { "UI Worldspace Quad Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			UIWorldSpaceQuadPass(camera, frame);
 		} });
+
+		LocalizeModuleBase* pLocalize = m_pEngine->GetOptionalModule<LocalizeModuleBase>();
+		if (pLocalize)
+		{
+			pLocalize->OnLanguageChanged = [this]() {
+				for (auto& iter : m_Documents)
+				{
+					iter.second.Registry().InvokeAll<UIText>(Utils::ECS::InvocationType::Start);
+				}
+			};
+		}
 
 		m_pImageMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
 			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));

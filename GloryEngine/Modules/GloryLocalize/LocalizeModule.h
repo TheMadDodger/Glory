@@ -7,9 +7,14 @@
 
 namespace Glory
 {
-	class FSMData;
-	class FSMState;
-	struct FSMNode;
+	struct LocaleData
+	{
+		UUID m_BaseTableID;
+		UUID m_OverrideTableID;
+		std::string m_Language;
+	};
+
+	class StringsOverrideTable;
 
 	/** @brief Localize module */
 	class LocalizeModule : public LocalizeModuleBase
@@ -25,8 +30,10 @@ namespace Glory
 
 		/** @brief Load a string table */
 		GLORY_API void LoadStringTable(UUID tableID);
+		GLORY_API void LoadStringOverrideTable(StringsOverrideTable* pTable);
 		/** @brief Unload a string table */
 		GLORY_API void UnloadStringTable(UUID tableID);
+		GLORY_API void UnloadStringOverrideTable(UUID overrideTableID);
 		/** @brief Clear all loaded tables */
 		GLORY_API void Clear();
 
@@ -39,6 +46,8 @@ namespace Glory
 		GLORY_API bool FindString(const std::string_view tableName, const std::string_view term, std::string& out) override;
 
 		GLORY_API void SetLanguages(std::string&& defaultLanguage, std::vector<std::string>&& supportedLanguages);
+		GLORY_API void SetLocaleDatas(std::vector<LocaleData>&& localeDatas);
+		GLORY_API void SetLanguage(std::string_view language);
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
@@ -50,6 +59,8 @@ namespace Glory
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void LocalizeModule::OnProcessData() override;
+
+		void RefreshText();
 
 	private:
 		struct LoadedTable
@@ -66,5 +77,8 @@ namespace Glory
 
 		std::vector<UUID> m_LoadedTableIDs;
 		std::vector<LoadedTable> m_LoadedTables;
+		std::vector<UUID> m_LoadedOverrideTableIDs;
+		std::vector<LoadedTable> m_LoadedOverrideTables;
+		std::vector<LocaleData> m_LocaleData;
 	};
 }
