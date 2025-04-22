@@ -23,6 +23,7 @@ project "GloryLocalize"
 
 	includedirs
 	{
+		"%{BaseIncludeDir.localize}",
 		"%{DepsIncludeDir}",
 		"%{IncludeDir.glm}",
 
@@ -47,6 +48,7 @@ project "GloryLocalize"
 	links
 	{
 		"GloryCore",
+		"GloryLocalizeModule",
 		"GloryReflect",
 		"GloryECS",
 

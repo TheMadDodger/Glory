@@ -64,6 +64,7 @@ namespace Glory
 		GLORY_API UUID Instantiate(UIDocumentData* pOtherDocument, UUID parentID);
 		GLORY_API void SetAllEntitiesDirty();
 		GLORY_API void SetEntityActive(Utils::ECS::EntityID entity, bool active);
+		GLORY_API void Start();
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);

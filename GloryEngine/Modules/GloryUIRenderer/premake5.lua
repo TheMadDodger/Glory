@@ -32,6 +32,7 @@ project "GloryUIRenderer"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
+		"%{BaseIncludeDir.localize}",
 
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
@@ -50,6 +51,7 @@ project "GloryUIRenderer"
 	links
 	{
 		"GloryCore",
+		"GloryLocalizeModule",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",

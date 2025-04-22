@@ -31,6 +31,7 @@ project "LocalizeEditorExtension"
 		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.ImGui}",
+		"%{BaseIncludeDir.localize}",
 		"%{GloryIncludeDir.Localize}",
 
 		"%{IncludeDir.FA}",

@@ -28,36 +28,47 @@ namespace Glory
 
 	void LocalizeModule::LoadStringTable(UUID tableID)
 	{
+		if (std::find(m_LoadedTableIDs.begin(), m_LoadedTableIDs.end(), tableID) != m_LoadedTableIDs.end()) return;
+
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(tableID);
 		if (!pResource) return;
 
 		StringTable* pTable = static_cast<StringTable*>(pResource);
-		for (auto iter = pTable->Begin(); iter != pTable->End(); ++iter)
-		{
-			m_LoadedStrings.erase(iter->first);
-		}
+		m_LoadedTableIDs.emplace_back(tableID);
+		LoadedTable& table = m_LoadedTables.emplace_back(pTable->Name());
 
 		for (auto iter = pTable->Begin(); iter != pTable->End(); ++iter)
 		{
-			m_LoadedStrings.emplace(iter->first, iter->second);
+			table.m_Strings.emplace(iter->first, iter->second);
 		}
 	}
 
 	void LocalizeModule::UnloadStringTable(UUID tableID)
 	{
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(tableID);
-		if (!pResource) return;
+		auto iter = std::find(m_LoadedTableIDs.begin(), m_LoadedTableIDs.end(), tableID);
+		if (iter == m_LoadedTableIDs.end()) return;
 
-		StringTable* pTable = static_cast<StringTable*>(pResource);
-		for (auto iter = pTable->Begin(); iter != pTable->End(); ++iter)
-		{
-			m_LoadedStrings.erase(iter->first);
-		}
+		const size_t index = iter - m_LoadedTableIDs.begin();
+		m_LoadedTables.erase(m_LoadedTables.begin() + index);
+		m_LoadedTableIDs.erase(iter);
 	}
 
 	void LocalizeModule::Clear()
 	{
-		m_LoadedStrings.clear();
+		m_LoadedTables.clear();
+		m_LoadedTableIDs.clear();
+	}
+
+	bool LocalizeModule::FindString(const std::string_view tableName, const std::string_view term, std::string& out)
+	{
+		auto iter = std::find_if(m_LoadedTables.begin(), m_LoadedTables.end(),
+			[&tableName](const LoadedTable& table) { return table.m_Name == tableName; });
+		if (iter == m_LoadedTables.end()) return false;
+		const LoadedTable& table = *iter;
+		auto termIter = table.m_Strings.find(term);
+		if (termIter == table.m_Strings.end()) return false;
+		out = termIter->second;
+		return true;
 	}
 
 	void LocalizeModule::Initialize()
@@ -66,15 +77,19 @@ namespace Glory
 		m_pEngine->GetResourceTypes().RegisterResource<StringTable>("");
 
 		Reflect::RegisterType<StringTableRef>();
+		Reflect::RegisterType<StringTableLoader>();
 		Reflect::RegisterType<Localize>();
 
 		Utils::ECS::ComponentTypes* pComponentTypes = m_pEngine->GetSceneManager()->ComponentTypesInstance();
+		pComponentTypes->RegisterComponent<StringTableLoader>();
 		pComponentTypes->RegisterComponent<Localize>();
 
+		pComponentTypes->RegisterInvokaction<StringTableLoader>(Utils::ECS::InvocationType::OnValidate, StringTableLoaderSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<StringTableLoader>(Utils::ECS::InvocationType::OnRemove, StringTableLoaderSystem::OnStop);
+		pComponentTypes->RegisterInvokaction<StringTableLoader>(Utils::ECS::InvocationType::Stop, StringTableLoaderSystem::OnStop);
+		pComponentTypes->RegisterReferencesCallback<StringTableLoader>(StringTableLoaderSystem::GetReferences);
 		pComponentTypes->RegisterInvokaction<Localize>(Utils::ECS::InvocationType::OnValidate, LocalizeSystem::OnValidate);
-		pComponentTypes->RegisterInvokaction<Localize>(Utils::ECS::InvocationType::OnRemove, LocalizeSystem::OnStop);
-		pComponentTypes->RegisterInvokaction<Localize>(Utils::ECS::InvocationType::Stop, LocalizeSystem::OnStop);
-		pComponentTypes->RegisterReferencesCallback<Localize>(LocalizeSystem::GetReferences);
+		pComponentTypes->RegisterInvokaction<Localize>(Utils::ECS::InvocationType::Start, LocalizeSystem::OnStart);
 	}
 
 	void LocalizeModule::PostInitialize()

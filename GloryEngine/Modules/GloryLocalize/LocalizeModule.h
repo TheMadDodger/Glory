@@ -1,5 +1,5 @@
 #pragma once
-#include <Module.h>
+#include <LocalizeModuleBase.h>
 #include <Glory.h>
 
 #include <map>
@@ -11,7 +11,7 @@ namespace Glory
 	class FSMState;
 	struct FSMNode;
 
-	class LocalizeModule : public Module
+	class LocalizeModule : public LocalizeModuleBase
 	{
 	public:
 		GLORY_API LocalizeModule();
@@ -19,11 +19,13 @@ namespace Glory
 
 		GLORY_API virtual const std::type_info& GetModuleType() override;
 
-		void LoadStringTable(UUID tableID);
-		void UnloadStringTable(UUID tableID);
-		void Clear();
+		GLORY_API void LoadStringTable(UUID tableID);
+		GLORY_API void UnloadStringTable(UUID tableID);
+		GLORY_API void Clear();
 
-		GLORY_MODULE_VERSION_H(1,0,0);
+		GLORY_API bool FindString(const std::string_view tableName, const std::string_view term, std::string& out) override;
+
+		GLORY_MODULE_VERSION_H(0,1,0);
 
 	private:
 		virtual void Initialize() override;
@@ -34,6 +36,15 @@ namespace Glory
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
 	private:
-		std::map<std::string_view, std::string_view> m_LoadedStrings;
+		struct LoadedTable
+		{
+			LoadedTable(std::string_view name) : m_Name(name) {}
+
+			std::string_view m_Name;
+			std::map<std::string_view, std::string_view> m_Strings;
+		};
+
+		std::vector<UUID> m_LoadedTableIDs;
+		std::vector<LoadedTable> m_LoadedTables;
 	};
 }

@@ -9,10 +9,12 @@
 #include <FontData.h>
 #include <RendererModule.h>
 #include <GraphicsModule.h>
+#include <SceneManager.h>
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/glm.hpp>
+#include <LocalizeModuleBase.h>
 
 namespace Glory
 {
@@ -126,7 +128,25 @@ namespace Glory
 		}
 	}
 
-    void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
+	void UITextSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
+	{
+		if (pComponent.m_LocalizeTerm.empty()) return;
+
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		UIRendererModule* pUIRenderer = pDocument->Renderer();
+		Engine* pEngine = pUIRenderer->GetEngine();
+		LocalizeModuleBase* pLocalize = pEngine->GetOptionalModule<LocalizeModuleBase>();
+		if (!pLocalize) return;
+
+		const std::string_view fullTerm = pComponent.m_LocalizeTerm;
+		const size_t firstDot = fullTerm.find('.');
+		if (firstDot == std::string::npos) return;
+		const std::string_view tableName = fullTerm.substr(0, firstDot);
+		const std::string_view term = fullTerm.substr(firstDot + 1);
+		pComponent.m_Dirty |= pLocalize->FindString(tableName, term, pComponent.m_Text);
+	}
+
+	void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
     {
 		/* No need to do anything if there is no text */
 		if (pComponent.m_Text.empty()) return;

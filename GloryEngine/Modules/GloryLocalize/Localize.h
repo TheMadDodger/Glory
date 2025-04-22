@@ -27,10 +27,19 @@ namespace Glory
 		)
 	};
 
-	struct Localize
+	struct StringTableLoader
 	{
-		REFLECTABLE(Localize,
+		REFLECTABLE(StringTableLoader,
 			(std::vector<StringTableRef>)(m_StringTables)
 		);
 	};
+	
+	struct Localize
+	{
+		REFLECTABLE(Localize,
+			(std::string) (m_Term)
+		);
+	};
+
+
 }

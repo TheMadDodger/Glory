@@ -103,6 +103,7 @@ namespace Glory
         REFLECTABLE(UIText,
             (AssetReference<FontData>)(m_Font),
             (std::string)(m_Text),
+            (std::string)(m_LocalizeTerm),
             (WidthConstraint)(m_Scale),
             (glm::vec4)(m_Color),
             (Alignment)(m_Alignment)

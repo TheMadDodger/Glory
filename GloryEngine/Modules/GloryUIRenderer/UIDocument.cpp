@@ -320,4 +320,10 @@ namespace Glory
 		UpdateEntityActiveHierarchy(entity);
 		m_DrawIsDirty = true;
 	}
+
+	void UIDocument::Start()
+	{
+		m_Registry.SetUserData(this);
+		m_Registry.InvokeAll(Utils::ECS::InvocationType::Start, NULL);
+	}
 }

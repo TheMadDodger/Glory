@@ -33,7 +33,7 @@ EXTENSION_CPP(LocalizeEditorExtension)
 
 namespace Glory::Editor
 {
-	CREATE_OBJECT_CALLBACK_CPP(Localize, Localize, ());
+	CREATE_OBJECT_CALLBACK_CPP(StringTableLoader, StringTableLoader, ());
 
 	static constexpr char* Shortcut_Window_StringTableEditor = "Open String Table Editor";
 
@@ -135,9 +135,10 @@ namespace Glory::Editor
 		//	AddPackagingTaskAfter(std::move(localeTask), "PackageStringTables");*/
 		//});
 
+		EntitySceneObjectEditor::AddComponentIcon<StringTableLoader>(ICON_FA_LANGUAGE);
 		EntitySceneObjectEditor::AddComponentIcon<Localize>(ICON_FA_LANGUAGE);
 
-		OBJECT_CREATE_MENU(Localize, Localize);
+		OBJECT_CREATE_MENU(StringTableLoader, StringTableLoader);
 	}
 
 	const char* LocalizeEditorExtension::ModuleName()

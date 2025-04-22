@@ -13,7 +13,7 @@ namespace Glory::Editor
 {
     std::string_view StringTableImporter::Name() const
     {
-        return "Text Database Importer";
+        return "String Table Importer";
     }
 
     bool StringTableImporter::SupportsExtension(const std::filesystem::path& extension) const
