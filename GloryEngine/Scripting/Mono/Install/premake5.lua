@@ -17,6 +17,7 @@ project "CSAPIInstall"
 		"GloryEngine.Jolt",
 		"GloryEngine.UI",
 		"GloryEngine.FSM",
+		"GloryEngine.Localize",
 	}
 
 	postbuildcommands
@@ -24,4 +25,5 @@ project "CSAPIInstall"
 		("{COPY} %{engineOutDir}/Mono/GloryEngine.Jolt/GloryEngine.Jolt.dll \"%{modulesOutDir}/GloryJoltPhysics/Scripting/csharp/\""),
 		("{COPY} %{engineOutDir}/Mono/GloryEngine.UI/GloryEngine.UI.dll \"%{modulesOutDir}/GloryUIRenderer/Scripting/csharp/\""),
 		("{COPY} %{engineOutDir}/Mono/GloryEngine.FSM/GloryEngine.FSM.dll \"%{modulesOutDir}/GloryFSM/Scripting/csharp/\""),
+		("{COPY} %{engineOutDir}/Mono/GloryEngine.Localize/GloryEngine.Localize.dll \"%{modulesOutDir}/GloryLocalize/Scripting/csharp/\""),
 	}
