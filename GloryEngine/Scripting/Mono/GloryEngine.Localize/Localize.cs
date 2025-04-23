@@ -44,6 +44,14 @@ namespace GloryEngine.Localize
         /// <returns></returns>
         public static string GetLanguage(uint index) => Locale_GetLanguage(index);
 
+        /// <summary>
+        /// Translate a term from the loaded string tables
+        /// </summary>
+        /// <param name="term">Term to translate</param>
+        /// <returns>The translation of the term in the current language,
+        /// or the term if the translation was not found.</returns>
+        public static string Translate(string term) => Locale_Translate(term);
+
         internal static void LanguageChanged(string language)
         {
             OnLanguageChanged?.Invoke(language);
@@ -69,6 +77,9 @@ namespace GloryEngine.Localize
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static string Locale_GetLanguage(uint index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static string Locale_Translate(string term);
 
         #endregion
     }
