@@ -35,6 +35,15 @@ namespace GloryEngine.UI
         }
 
         /// <summary>
+        /// Term for translation by external module
+        /// </summary>
+        public string Term
+        {
+            get => UIText_GetTerm(Element.UIScene.ID, Element.ID, _objectID);
+            set => UIText_SetTerm(Element.UIScene.ID, Element.ID, _objectID, value);
+        }
+
+        /// <summary>
         /// Font scale
         /// </summary>
         public float Scale
@@ -76,6 +85,12 @@ namespace GloryEngine.UI
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void UIText_SetText(UInt64 sceneID, UInt64 objectID, UInt64 componentID, string text);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern string UIText_GetTerm(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void UIText_SetTerm(UInt64 sceneID, UInt64 objectID, UInt64 componentID, string term);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern float UIText_GetScale(UInt64 sceneID, UInt64 objectID, UInt64 componentID);

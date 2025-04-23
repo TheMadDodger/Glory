@@ -1,10 +1,10 @@
-project "GloryUIMonoExtender"
+project "GloryLocalizeMonoExtender"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GloryUIRenderer/Scripting/csharp")
+	targetdir ("%{modulesOutDir}/GloryLocalize/Scripting/csharp")
 	objdir ("%{outputDir}")
 
 	files
@@ -16,8 +16,8 @@ project "GloryUIMonoExtender"
 
 	vpaths
 	{
-		["API"] = { "UIComponentsCSAPI.*", "UISceneCSAPI.*" },
-		["Extenstion"] = { "UIMonoExtender.*" }
+		["API"] = { "LocalizeCSAPI.*" },
+		["Extenstion"] = { "LocalizeMonoExtender.*" }
 	}
 
 	includedirs
@@ -27,8 +27,8 @@ project "GloryUIMonoExtender"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
-		"%{GloryIncludeDir.ui}",
 		"%{BaseIncludeDir.localize}",
+		"%{GloryIncludeDir.Localize}",
 		"%{GloryIncludeDir.mono}",
 
 		"%{IncludeDir.ECS}",
@@ -47,7 +47,7 @@ project "GloryUIMonoExtender"
 	links
 	{
 		"GloryCore",
-		"GloryUIRenderer",
+		"GloryLocalize",
 		"GloryMonoScripting",
 		"yaml-cpp",
 		"mono-2.0-sgen",
@@ -61,7 +61,6 @@ project "GloryUIMonoExtender"
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
-		"GloryUtils",
 	}
 
 	defines

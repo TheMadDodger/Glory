@@ -67,6 +67,11 @@ namespace Glory
 		 * @param index Index of the language, use 0 to get the default
 		 */
 		GLORY_API std::string_view GetLanguage(size_t index) const;
+		/** @brief Get the current language */
+		GLORY_API std::string_view CurrentLanguage() const;
+
+		/** @brief Same as OnLanguageChanged but for scripting only */
+		std::function<void(std::string_view)> LanguageChanged;
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 

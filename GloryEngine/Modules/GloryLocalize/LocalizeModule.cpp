@@ -215,6 +215,11 @@ namespace Glory
 		return index == 0 ? m_DefaultLanguage : m_SupportedLanguages[index - 1];
 	}
 
+	std::string_view LocalizeModule::CurrentLanguage() const
+	{
+		return m_CurrentLanguage;
+	}
+
 	void LocalizeModule::Initialize()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
@@ -300,5 +305,6 @@ namespace Glory
 			pScene->GetRegistry().InvokeAll<Localize>(Utils::ECS::InvocationType::Start);
 		}
 		if (OnLanguageChanged) OnLanguageChanged();
+		if (LanguageChanged) LanguageChanged(m_CurrentLanguage);
 	}
 }
