@@ -58,14 +58,6 @@ namespace Glory::Editor
 			finalPath.replace_extension("gtable");
 			if (std::filesystem::exists(finalPath)) return;
 			StringTable* pStringTable = new StringTable();
-
-			pStringTable->AddString("test", "Hello World!");
-			pStringTable->AddString("testin.test1", "Hello World! 1");
-			pStringTable->AddString("testin.test2", "Hello World! 2");
-			pStringTable->AddString("testin.test3.test", "Hello World! deep");
-			pStringTable->AddString("testin.test3.testtest", "Hello World! deep 2");
-			pStringTable->AddString("testin.testin.testin.testin.testin.testin", "Hello World! super deep");
-
 			EditorAssetDatabase::CreateAsset(pStringTable, finalPath.string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();
