@@ -88,6 +88,7 @@ namespace Glory::Utils::Reflect
 		static uint32_t Hash(const std::type_info& type);
 		static uint32_t Hash(const char* str);
 		static void Tokenize(std::string str, std::vector<std::string>& tokens, char separator = ',');
+		static void Tokenize(std::string_view str, std::vector<std::string_view>& tokens, char separator = ',');
 
 	private:
 		static void RegisterType(uint32_t hash, const TypeData* pTypeData, uint64_t flags = 0);

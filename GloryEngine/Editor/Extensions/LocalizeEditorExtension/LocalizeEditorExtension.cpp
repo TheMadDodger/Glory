@@ -2,7 +2,7 @@
 #include "StringTableImporter.h"
 #include "StringTableTumbnailGenerator.h"
 #include "LanguageSettings.h"
-//#include "StringTableEditor.h"
+#include "StringTableEditor.h"
 
 #include <Localize.h>
 #include <StringsOverrideTable.h>
@@ -39,8 +39,6 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Window_StringTableEditor = "Open String Table Editor";
 
 	StringTableImporter Importer;
-	//StringTableEditor Editor;
-
 	LanguageSettings LangSettings;
 
 	LocalizeEditorExtension::LocalizeEditorExtension()
@@ -60,6 +58,14 @@ namespace Glory::Editor
 			finalPath.replace_extension("gtable");
 			if (std::filesystem::exists(finalPath)) return;
 			StringTable* pStringTable = new StringTable();
+
+			pStringTable->AddString("test", "Hello World!");
+			pStringTable->AddString("testin.test1", "Hello World! 1");
+			pStringTable->AddString("testin.test2", "Hello World! 2");
+			pStringTable->AddString("testin.test3.test", "Hello World! deep");
+			pStringTable->AddString("testin.test3.testtest", "Hello World! deep 2");
+			pStringTable->AddString("testin.testin.testin.testin.testin.testin", "Hello World! super deep");
+
 			EditorAssetDatabase::CreateAsset(pStringTable, finalPath.string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();
@@ -176,9 +182,10 @@ namespace Glory::Editor
 
 		Importer::Register(&Importer);
 		Tumbnail::AddGenerator<StringTableTumbnailGenerator>();
+		Tumbnail::AddGenerator<StringsOverrideTableTumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Localize/String Table", OnCreateStringTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		ObjectMenu::AddMenuItem("Create/Localize/String Override Table", OnCreateStringOverrideTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
-		//MenuBar::AddMenuItem("Window/Localize/String Table Editor", [&editor]() { editor.GetWindow<StringTableEditor>(); }, NULL, Shortcut_Window_StringTableEditor);
+		MenuBar::AddMenuItem("Window/Localize/String Table Editor", [&editor]() { editor.GetWindow<StringTableEditor>(); }, NULL, Shortcut_Window_StringTableEditor);
 
 		EditorPlayer::RegisterLoopHandler(this);
 
