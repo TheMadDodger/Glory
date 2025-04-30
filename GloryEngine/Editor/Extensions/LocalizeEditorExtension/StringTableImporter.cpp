@@ -22,13 +22,21 @@ namespace Glory::Editor
         return extension.compare(".gtable") == 0 || extension.compare(".gotable") == 0;
     }
 
-    void ReadStrings(Utils::NodeValueRef root, StringTable* pStringTable)
+    void ReadFolder(Utils::NodeValueRef folder, StringTable* pStringTable, std::string fullKey="")
     {
-        for (auto iter = root.Begin(); iter != root.End(); ++iter)
+        for (auto iter = folder.Begin(); iter != folder.End(); ++iter)
         {
-            std::string key = *iter;
-            std::string value = root[key].As<std::string>();
-            pStringTable->AddString(std::move(key), std::move(value));
+            const std::string key = *iter;
+            auto node = folder[key];
+            std::string newFullKey = fullKey.empty() ? key : fullKey + "." + key;
+
+            if (node.IsMap())
+            {
+                ReadFolder(node, pStringTable, newFullKey);
+                continue;
+            }
+            std::string value = node.As<std::string>();
+            pStringTable->AddString(std::move(newFullKey), std::move(value));
         }
     }
 
@@ -46,12 +54,12 @@ namespace Glory::Editor
 
             StringsOverrideTable* pStringOverrideTable = new StringsOverrideTable(baseTableID, std::move(language));
 
-            ReadStrings(root["Overrides"], pStringOverrideTable);
+            ReadFolder(root["Overrides"], pStringOverrideTable);
             return { path, pStringOverrideTable };
         }
 
         StringTable* pStringTable = new StringTable();
-        ReadStrings(root, pStringTable);
+        ReadFolder(root, pStringTable);
 
         return { path, pStringTable };
     }
@@ -60,7 +68,16 @@ namespace Glory::Editor
     {
         for (auto& iter = pStringTable->Begin(); iter != pStringTable->End(); ++iter)
         {
-            root[iter->first].Set(iter->second);
+            std::vector<std::string_view> pathComponents;
+            Reflect::Tokenize(iter->first, pathComponents, '.');
+
+            std::filesystem::path path;
+            for (size_t i = 0; i < pathComponents.size(); ++i)
+            {
+                path.append(pathComponents[i]);
+            }
+
+            root[path.string()].Set(iter->second);
         }
     }
 

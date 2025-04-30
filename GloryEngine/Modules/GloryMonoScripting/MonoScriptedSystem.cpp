@@ -133,7 +133,10 @@ namespace Glory
 		MonoObject* pScriptObject = mono_gchandle_get_target(pComponent.m_ScriptObjectHandle);
 		if (!pScriptObject) return;
 		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "Update", nullptr);
-		scriptManager.GetPropertyValues((size_t)typeIndex, pScriptObject, pComponent.m_ScriptData.m_Buffer);
+
+		/** @todo: This should be handled by the editor somehow */
+		//if (pComponent.m_ScriptData.m_Buffer.empty()) pComponent.m_ScriptData.m_Buffer = std::vector<char>(4, '\0');
+		//scriptManager.GetPropertyValues((size_t)typeIndex, pScriptObject, pComponent.m_ScriptData.m_Buffer);
 	}
 
 	void MonoScriptedSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)

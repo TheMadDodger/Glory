@@ -1,6 +1,7 @@
 #include "StringTable.h"
 
 #include <BinaryStream.h>
+#include <Reflection.h>
 
 namespace Glory
 {
@@ -16,7 +17,27 @@ namespace Glory
 	void StringTable::AddString(std::string&& key, std::string&& value)
 	{
 		if (m_Strings.find(key) != m_Strings.end()) return;
-		m_Strings.emplace(std::move(key), std::move(value));
+		std::vector<std::string> tokens;
+		Reflect::Tokenize(key, tokens, '.');
+		m_Strings.emplace(std::move(key), std::move(value)).first->first;
+
+		GroupData* group = &m_RootGroup;
+		for (size_t i = 0; i < tokens.size(); ++i)
+		{
+			std::string token = tokens[i];
+			auto& iter = group->m_Subgroups.find(token);
+
+			if (i == tokens.size() - 1)
+			{
+				group->m_Keys.emplace_back(std::move(token));
+				break;
+			}
+
+			if (iter == group->m_Subgroups.end())
+				iter = group->m_Subgroups.emplace(std::move(token), GroupData{}).first;
+
+			group = &iter->second;
+		}
 	}
 
 	StringTable::LookupResult StringTable::FindString(const std::string& key) const

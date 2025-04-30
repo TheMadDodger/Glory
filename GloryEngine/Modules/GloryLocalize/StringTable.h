@@ -53,6 +53,13 @@ namespace Glory
 		virtual void Deserialize(BinaryStream& container) override;
 
 	private:
+		struct GroupData
+		{
+			std::map<std::string, GroupData> m_Subgroups;
+			std::vector<std::string> m_Keys;
+		};
+		GroupData m_RootGroup;
+
 		std::map<std::string, std::string> m_Strings;
 	};
 }

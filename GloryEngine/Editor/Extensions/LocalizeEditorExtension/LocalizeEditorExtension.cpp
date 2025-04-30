@@ -2,7 +2,7 @@
 #include "StringTableImporter.h"
 #include "StringTableTumbnailGenerator.h"
 #include "LanguageSettings.h"
-//#include "StringTableEditor.h"
+#include "StringTableEditor.h"
 
 #include <Localize.h>
 #include <StringsOverrideTable.h>
@@ -39,8 +39,6 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Window_StringTableEditor = "Open String Table Editor";
 
 	StringTableImporter Importer;
-	//StringTableEditor Editor;
-
 	LanguageSettings LangSettings;
 
 	LocalizeEditorExtension::LocalizeEditorExtension()
@@ -176,9 +174,10 @@ namespace Glory::Editor
 
 		Importer::Register(&Importer);
 		Tumbnail::AddGenerator<StringTableTumbnailGenerator>();
+		Tumbnail::AddGenerator<StringsOverrideTableTumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Localize/String Table", OnCreateStringTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		ObjectMenu::AddMenuItem("Create/Localize/String Override Table", OnCreateStringOverrideTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
-		//MenuBar::AddMenuItem("Window/Localize/String Table Editor", [&editor]() { editor.GetWindow<StringTableEditor>(); }, NULL, Shortcut_Window_StringTableEditor);
+		MenuBar::AddMenuItem("Window/Localize/String Table Editor", [&editor]() { editor.GetWindow<StringTableEditor>(); }, NULL, Shortcut_Window_StringTableEditor);
 
 		EditorPlayer::RegisterLoopHandler(this);
 
@@ -208,6 +207,11 @@ namespace Glory::Editor
 		EntitySceneObjectEditor::AddComponentIcon<Localize>(ICON_FA_LANGUAGE);
 
 		OBJECT_CREATE_MENU(StringTableLoader, StringTableLoader);
+
+		Undo::RegisterChangeHandler(std::string(".gtable"), std::string(""),
+		[this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			/** @todo */
+		});
 	}
 
 	const char* LocalizeEditorExtension::ModuleName()
