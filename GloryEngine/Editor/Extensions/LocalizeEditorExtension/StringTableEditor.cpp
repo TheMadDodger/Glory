@@ -41,18 +41,28 @@ namespace Glory::Editor
 	char KeyBuffer[256] = "\0";
 	char ValueBuffer[1024] = "\0";
 	bool KeyFinished = false;
+	std::filesystem::path ToRemovePath;
+	std::filesystem::path EditingItemPath;
+	std::filesystem::path EditingKeyPath;
 
-	void FolderRightClickMenu(Utils::NodeValueRef item)
+	std::filesystem::path MoveFrom;
+	std::filesystem::path MoveTo;
+
+	void FolderRightClickMenu(Utils::NodeValueRef item, bool hasRemoveAndRename)
 	{
 		if (ImGui::BeginPopup("FolderRightClick"))
 		{
-			if (ImGui::MenuItem("Remove", "", false))
+			if (hasRemoveAndRename && ImGui::MenuItem("Remove", "", false))
 			{
 				ImGui::CloseCurrentPopup();
+				ToRemovePath = item.Path();
 			}
 			if (ImGui::MenuItem("Add Key", "", false))
 			{
 				ImGui::CloseCurrentPopup();
+				EditingKeyPath = "";
+				EditingItemPath = "";
+
 				CreatingKeyPath = item.Path();
 				CreatingNewItem = true;
 				CreatingNewFolder = false;
@@ -62,17 +72,95 @@ namespace Glory::Editor
 			if (ImGui::MenuItem("Add Sub Folder", "", false))
 			{
 				ImGui::CloseCurrentPopup();
+				EditingKeyPath = "";
+				EditingItemPath = "";
+
 				CreatingKeyPath = item.Path();
 				CreatingNewItem = true;
 				CreatingNewFolder = true;
 				std::strcpy(KeyBuffer, "New Folder");
 				ValueBuffer[0] = '\0';
 			}
+			if (hasRemoveAndRename && ImGui::MenuItem("Rename", "", false))
+			{
+				ImGui::CloseCurrentPopup();
+				CreatingNewItem = false;
+				CreatingNewFolder = false;
+				CreatingKeyPath = "";
+				EditingItemPath = "";
+
+				EditingKeyPath = item.Path();
+				const std::string key = item.Path().filename().string();
+				std::strcpy(KeyBuffer, key.data());
+			}
 			ImGui::EndPopup();
 		}
 	}
 
-	void StringTableEditor::FolderGUI(Utils::NodeValueRef node, float rowHeight)
+	void ItemRightClickMenu(Utils::NodeValueRef item)
+	{
+		if (ImGui::BeginPopup("ItemRightClick"))
+		{
+			if (ImGui::MenuItem("Remove", "", false))
+			{
+				ImGui::CloseCurrentPopup();
+				ToRemovePath = item.Path();
+			}
+			if (ImGui::MenuItem("Edit", "", false))
+			{
+				ImGui::CloseCurrentPopup();
+				CreatingNewItem = false;
+				CreatingNewFolder = false;
+				CreatingKeyPath = "";
+				EditingKeyPath = "";
+
+				EditingItemPath = item.Path();
+				const std::string value = item.As<std::string>();
+				std::strcpy(ValueBuffer, value.data());
+			}
+			if (ImGui::MenuItem("Rename", "", false))
+			{
+				ImGui::CloseCurrentPopup();
+				CreatingNewItem = false;
+				CreatingNewFolder = false;
+				CreatingKeyPath = "";
+				EditingItemPath = "";
+
+				EditingKeyPath = item.Path();
+				const std::string key = item.Path().filename().string();
+				std::strcpy(KeyBuffer, key.data());
+			}
+			ImGui::EndPopup();
+		}
+	}
+
+	void ValueEdit(bool& change, bool& confirm, float rowHeight)
+	{
+		constexpr float buttonWidth = 32.0f;
+		const float cellPadding = ImGui::GetStyle().CellPadding.y*2.0f;
+
+		if (!TextArea)
+		{
+			change = ImGui::InputTextEx("##valueInput", nullptr, ValueBuffer, 256,
+				{ ImGui::GetContentRegionAvail().x - buttonWidth - cellPadding, 0.0f },
+				ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
+			confirm = change;
+		}
+		else
+		{
+			change = ImGui::InputTextMultiline("##valueInput", ValueBuffer, 1024,
+				{ ImGui::GetContentRegionAvail().x - buttonWidth - cellPadding, rowHeight*5.0f - cellPadding },
+				ImGuiInputTextFlags_AllowTabInput);
+			confirm = ImGui::IsItemDeactivated();
+		}
+
+		ImGui::SameLine();
+		ImGui::Button(TextArea ? ICON_FA_ARROW_UP : ICON_FA_ARROW_DOWN, { buttonWidth, 0.0f });
+		if (ImGui::IsItemClicked())
+			TextArea = !TextArea;
+	}
+
+	void StringTableEditor::FolderGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight)
 	{
 		const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 		std::vector<std::string> stringKeys;
@@ -107,15 +195,28 @@ namespace Glory::Editor
 				ImGui::OpenPopup("FolderRightClick");
 
 			ImGui::SameLine();
-			ImGui::Text("%s %s", treeOpen ? ICON_FA_FOLDER : ICON_FA_FOLDER_CLOSED, key.data());
+			if (EditingKeyPath == item.Path())
+			{
+				ImGui::SetKeyboardFocusHere();
+				const bool change = ImGui::InputTextEx("##keyInput", nullptr, KeyBuffer, 256, { 0.0f, 0.0f },
+					ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
+				if ((ImGui::IsItemDeactivated() || change))
+				{
+					auto newNode = node[KeyBuffer];
+					MoveFrom = EditingKeyPath;
+					MoveTo = newNode.Path();
+				}
+				if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) EditingKeyPath = "";
+			}
+			else ImGui::Text("%s %s", treeOpen ? ICON_FA_FOLDER : ICON_FA_FOLDER_CLOSED, key.data());
 
 			ImGui::TableNextColumn();
 			ImGui::TextUnformatted("Folder");
 
-			FolderRightClickMenu(item);
+			FolderRightClickMenu(item, true);
 
 			if (treeOpen)
-				FolderGUI(item, rowHeight);
+				FolderGUI(file, item, rowHeight);
 			ImGui::TreePop();
 			ImGui::PopID();
 		}
@@ -133,24 +234,68 @@ namespace Glory::Editor
 				if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 					CreatingNewItem = false;
 
+				if (ImGui::IsItemClicked(1))
+					ImGui::OpenPopup("ItemRightClick");
+
 				ImGui::SameLine();
-				ImGui::Text(" %s", key.data());
+
+				if (EditingKeyPath == item.Path())
+				{
+					ImGui::SetKeyboardFocusHere();
+					const bool change = ImGui::InputTextEx("##keyInput", nullptr, KeyBuffer, 256, { 0.0f, 0.0f },
+						ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
+					if ((ImGui::IsItemDeactivated() || change) && !node[KeyBuffer].Exists())
+					{
+						auto newNode = node[KeyBuffer];
+						Undo::StartRecord("Edit Value", m_TableID);
+						Undo::YAMLEdit(file, newNode.Path(), YAML::Node(YAML::NodeType::Null), item.Node());
+						Undo::YAMLEdit(file, EditingKeyPath, item.Node(), YAML::Node(YAML::NodeType::Null));
+						Undo::StopRecord();
+						EditingKeyPath = "";
+
+						ImGui::PopID();
+						continue;
+					}
+					if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) EditingKeyPath = "";
+				}
+				else ImGui::Text(" %s", key.data());
 			}
 
 			if (ImGui::TableNextColumn())
 			{
-				ImGui::Text("%s", item.As<std::string>().data());
+				if (EditingItemPath == item.Path())
+				{
+					bool change = false;
+					bool confirm = false;
+
+					ImGui::SetKeyboardFocusHere();
+					ValueEdit(change, confirm, rowHeight);
+
+					if (confirm)
+					{
+						const std::string oldValue = file[EditingItemPath].As<std::string>();
+						const std::string newValue = ValueBuffer;
+
+						Undo::StartRecord("Edit Value", m_TableID);
+						Undo::ApplyYAMLEdit(file, EditingItemPath, oldValue, newValue);
+						Undo::StopRecord();
+						EditingItemPath = "";
+					}
+					if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) EditingItemPath = "";
+				}
+				else ImGui::Text("%s", item.As<std::string>().data());
 			}
+
+			ItemRightClickMenu(item);
 
 			ImGui::PopID();
 		}
 
-		NewItemGUI(node, rowHeight);
-		
+		NewItemGUI(file, node, rowHeight);		
 		ImGui::Unindent();
 	}
 
-	void StringTableEditor::NewItemGUI(Utils::NodeValueRef node, float rowHeight)
+	void StringTableEditor::NewItemGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight)
 	{
 		const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 
@@ -173,6 +318,9 @@ namespace Glory::Editor
 					CreatingNewFolder = false;
 				}
 
+				if (ImGui::IsItemClicked())
+					KeyFinished = false;
+
 				ImGui::SameLine();
 				if (!KeyFinished)
 					ImGui::SetKeyboardFocusHere();
@@ -180,8 +328,6 @@ namespace Glory::Editor
 					ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
 				if ((ImGui::IsItemDeactivated() || change) && !node[KeyBuffer].Exists())
 					KeyFinished = true;
-				if (ImGui::IsItemClicked())
-					KeyFinished = false;
 			}
 
 			if (CreatingNewFolder && KeyFinished && node[KeyBuffer].Exists())
@@ -191,7 +337,11 @@ namespace Glory::Editor
 			{
 				auto newNode = node[KeyBuffer];
 				if (!newNode.Exists())
-					newNode.SetMap();
+				{
+					Undo::StartRecord("New Folder", m_TableID);
+					Undo::YAMLEdit(file, newNode.Path(), YAML::Node(YAML::NodeType::Null), YAML::Node(YAML::NodeType::Map));
+					Undo::StopRecord();
+				}
 
 				KeyFinished = false;
 				std::strcpy(KeyBuffer, "New Folder");
@@ -200,39 +350,26 @@ namespace Glory::Editor
 
 			if (!CreatingNewFolder && ImGui::TableNextColumn())
 			{
-				constexpr float buttonWidth = 32.0f;
-				const float cellPadding = ImGui::GetStyle().CellPadding.y * 2.0f;
-
 				if (KeyFinished)
 					ImGui::SetKeyboardFocusHere();
 
 				bool change = false;
 				bool confirm = false;
-				if (!TextArea)
-				{
-					change = ImGui::InputTextEx("##valueInput", nullptr, ValueBuffer, 256,
-						{ ImGui::GetContentRegionAvail().x - buttonWidth - cellPadding, 0.0f },
-						ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
-					confirm = change;
-				}
-				else
-				{
-					change = ImGui::InputTextMultiline("##valueInput", ValueBuffer, 1024,
-						{ ImGui::GetContentRegionAvail().x - buttonWidth - cellPadding, rowHeight*5.0f - cellPadding },
-						ImGuiInputTextFlags_AllowTabInput);
-					confirm = ImGui::IsItemDeactivated();
-				}
-
-				ImGui::SameLine();
-				ImGui::Button(TextArea ? ICON_FA_ARROW_UP : ICON_FA_ARROW_DOWN, { buttonWidth, 0.0f });
-				if (ImGui::IsItemClicked())
-					TextArea = !TextArea;
+				
+				ValueEdit(change, confirm, rowHeight);
 
 				if (confirm)
 				{
 					auto newNode = node[KeyBuffer];
 					if (!newNode.Exists())
-						newNode.Set(ValueBuffer);
+					{
+						YAML::Node newValue{ YAML::NodeType::Scalar };
+						newValue = ValueBuffer;
+
+						Undo::StartRecord("New Key", m_TableID);
+						Undo::YAMLEdit(file, newNode.Path(), YAML::Node(YAML::NodeType::Null), newValue);
+						Undo::StopRecord();
+					}
 
 					KeyFinished = false;
 					std::strcpy(KeyBuffer, "New Key");
@@ -300,6 +437,7 @@ namespace Glory::Editor
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
+		const std::string tableName = EditorAssetDatabase::GetAssetName(m_TableID);
 
 		ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
 
@@ -319,20 +457,47 @@ namespace Glory::Editor
 			if (ImGui::IsItemClicked(1))
 				ImGui::OpenPopup("FolderRightClick");
 
-			FolderRightClickMenu(rootFolder);
+			FolderRightClickMenu(rootFolder, false);
 
 			ImGui::SameLine();
-			ImGui::Text("%s Root", treeOpen ? ICON_FA_FOLDER : ICON_FA_FOLDER_CLOSED);
+			ImGui::Text("%s %s", treeOpen ? ICON_FA_FOLDER : ICON_FA_FOLDER_CLOSED, tableName.data());
 		}
 
 		if (ImGui::TableNextColumn()) {}
 
 		if (treeOpen)
-			FolderGUI(rootFolder, rowHeight);
+			FolderGUI(file, rootFolder, rowHeight);
 		ImGui::TreePop();
+
+		if (!ToRemovePath.empty())
+		{
+			Undo::StartRecord("Remove Folder", m_TableID);
+			Undo::YAMLEdit(file, ToRemovePath, rootNode[ToRemovePath].Node(), YAML::Node(YAML::NodeType::Null));
+			Undo::StopRecord();
+			ToRemovePath.clear();
+		}
 
 		ImGui::EndTable();
 		ImGui::EndChild();
+
+		if (!MoveFrom.empty() && !MoveTo.empty())
+		{
+			if (!file[MoveTo].Exists())
+			{
+				auto oldNode = file[MoveFrom];
+				auto newNode = file[MoveTo];
+				Undo::StartRecord("Edit Value", m_TableID);
+				Undo::YAMLEdit(file, newNode.Path(), YAML::Node(YAML::NodeType::Null), oldNode.Node());
+				Undo::YAMLEdit(file, EditingKeyPath, oldNode.Node(), YAML::Node(YAML::NodeType::Null));
+				Undo::StopRecord();
+				EditingKeyPath.clear();
+			}
+
+			if (MoveFrom == MoveTo) EditingKeyPath.clear();
+
+			MoveFrom.clear();
+			MoveTo.clear();
+		}
 	}
 
 	void StringTableEditor::Update()
