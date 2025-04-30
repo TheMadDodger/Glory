@@ -160,8 +160,9 @@ namespace Glory::Editor
 			TextArea = !TextArea;
 	}
 
-	void StringTableEditor::FolderGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight)
+	bool StringTableEditor::FolderGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight)
 	{
+		bool changed = false;
 		const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 		std::vector<std::string> stringKeys;
 
@@ -216,7 +217,7 @@ namespace Glory::Editor
 			FolderRightClickMenu(item, true);
 
 			if (treeOpen)
-				FolderGUI(file, item, rowHeight);
+				changed |= FolderGUI(file, item, rowHeight);
 			ImGui::TreePop();
 			ImGui::PopID();
 		}
@@ -252,6 +253,7 @@ namespace Glory::Editor
 						Undo::YAMLEdit(file, EditingKeyPath, item.Node(), YAML::Node(YAML::NodeType::Null));
 						Undo::StopRecord();
 						EditingKeyPath = "";
+						changed = true;
 
 						ImGui::PopID();
 						continue;
@@ -280,6 +282,7 @@ namespace Glory::Editor
 						Undo::ApplyYAMLEdit(file, EditingItemPath, oldValue, newValue);
 						Undo::StopRecord();
 						EditingItemPath = "";
+						changed = true;
 					}
 					if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) EditingItemPath = "";
 				}
@@ -291,12 +294,16 @@ namespace Glory::Editor
 			ImGui::PopID();
 		}
 
-		NewItemGUI(file, node, rowHeight);		
+		changed |= NewItemGUI(file, node, rowHeight);
 		ImGui::Unindent();
+
+		return changed;
 	}
 
-	void StringTableEditor::NewItemGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight)
+	bool StringTableEditor::NewItemGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight)
 	{
+		bool changed = false;
+
 		const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 
 		if (CreatingNewItem && CreatingKeyPath == node.Path())
@@ -341,6 +348,7 @@ namespace Glory::Editor
 					Undo::StartRecord("New Folder", m_TableID);
 					Undo::YAMLEdit(file, newNode.Path(), YAML::Node(YAML::NodeType::Null), YAML::Node(YAML::NodeType::Map));
 					Undo::StopRecord();
+					changed = true;
 				}
 
 				KeyFinished = false;
@@ -369,6 +377,7 @@ namespace Glory::Editor
 						Undo::StartRecord("New Key", m_TableID);
 						Undo::YAMLEdit(file, newNode.Path(), YAML::Node(YAML::NodeType::Null), newValue);
 						Undo::StopRecord();
+						changed = true;
 					}
 
 					KeyFinished = false;
@@ -381,10 +390,13 @@ namespace Glory::Editor
 				ImGui::TextUnformatted("Folder");
 			}
 		}
+		return changed;
 	}
 
 	void StringTableEditor::OnGUI()
 	{
+		bool changed = false;
+
 		if (!m_TableID)
 		{
 			ImGui::TextUnformatted("No table opened");
@@ -466,7 +478,7 @@ namespace Glory::Editor
 		if (ImGui::TableNextColumn()) {}
 
 		if (treeOpen)
-			FolderGUI(file, rootFolder, rowHeight);
+			changed |= FolderGUI(file, rootFolder, rowHeight);
 		ImGui::TreePop();
 
 		if (!ToRemovePath.empty())
@@ -475,6 +487,7 @@ namespace Glory::Editor
 			Undo::YAMLEdit(file, ToRemovePath, rootNode[ToRemovePath].Node(), YAML::Node(YAML::NodeType::Null));
 			Undo::StopRecord();
 			ToRemovePath.clear();
+			changed = true;
 		}
 
 		ImGui::EndTable();
@@ -491,12 +504,19 @@ namespace Glory::Editor
 				Undo::YAMLEdit(file, EditingKeyPath, oldNode.Node(), YAML::Node(YAML::NodeType::Null));
 				Undo::StopRecord();
 				EditingKeyPath.clear();
+				changed = true;
 			}
 
 			if (MoveFrom == MoveTo) EditingKeyPath.clear();
 
 			MoveFrom.clear();
 			MoveTo.clear();
+		}
+
+		if (changed)
+		{
+			EditorAssetDatabase::SetAssetDirty(m_TableID);
+			pYAMLResource->SetDirty(true);
 		}
 	}
 
@@ -505,6 +525,10 @@ namespace Glory::Editor
 	}
 
 	void StringTableEditor::Draw()
+	{
+	}
+
+	void StringTableEditor::OnOpen()
 	{
 	}
 }

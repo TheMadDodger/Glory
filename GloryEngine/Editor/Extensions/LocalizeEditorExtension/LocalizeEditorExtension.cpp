@@ -207,6 +207,11 @@ namespace Glory::Editor
 		EntitySceneObjectEditor::AddComponentIcon<Localize>(ICON_FA_LANGUAGE);
 
 		OBJECT_CREATE_MENU(StringTableLoader, StringTableLoader);
+
+		Undo::RegisterChangeHandler(std::string(".gtable"), std::string(""),
+		[this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			/** @todo */
+		});
 	}
 
 	const char* LocalizeEditorExtension::ModuleName()
