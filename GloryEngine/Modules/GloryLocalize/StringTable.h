@@ -17,6 +17,28 @@ namespace Glory
 		 * @param value The value of the string
 		 */
 		GLORY_API void AddString(std::string&& key, std::string&& value);
+		/** @brief Update the value of a string
+		 * @param key The key of the string
+		 * @param value The new value of the string
+		 */
+		GLORY_API void UpdateString(const std::string& key, std::string&& value);
+		/** @brief Check if this table contains a sepcific key
+		 * @param key The key to check for
+		 */
+		GLORY_API bool HasKey(const std::string& key) const;
+		/** @brief Remove a string from this table
+		 * @param key The key of the string to remove
+		 */
+		GLORY_API void RemoveKey(const std::string& key);
+		/** @brief Find all keys belonging to a specific group at a specified path
+		 * @param path Path to the group
+		 */
+		GLORY_API std::vector<std::string>* FindKeys(const std::string& path);
+		/** @brief Search for all keys recursively starting at a path
+		 * @param path Path to the group to search recursively
+		 * @param keys Vector containing all found keys
+		 */
+		GLORY_API void FindKeysRecursively(const std::string& path, std::vector<std::string>& keys);
 
 		/** @brief String lookup result */
 		struct LookupResult
@@ -58,8 +80,15 @@ namespace Glory
 			std::map<std::string, GroupData> m_Subgroups;
 			std::vector<std::string> m_Keys;
 		};
-		GroupData m_RootGroup;
+		/** @brief Search for all keys recursively inside a group
+		 * @param basePath Base path to add to the start of the key
+		 * @param group Group to search keys in
+		 * @param keys Vector containing all found keys
+		 */
+		void FindKeysRecursively(std::string basePath, GroupData* group, std::vector<std::string>& keys);
 
+	private:
+		GroupData m_RootGroup;
 		std::map<std::string, std::string> m_Strings;
 	};
 }
