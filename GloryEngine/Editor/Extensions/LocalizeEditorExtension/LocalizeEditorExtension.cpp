@@ -27,6 +27,7 @@
 #include <CreateObjectAction.h>
 #include <EditableEntity.h>
 #include <EntityEditor.h>
+#include <EditorAssetManager.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -161,6 +162,27 @@ namespace Glory::Editor
 		}
 	}
 
+	void RecursiveAdd(StringTable* pTable, Utils::NodeValueRef item)
+	{
+		for (auto iter = item.Begin(); iter != item.End(); ++iter)
+		{
+			std::string key = *iter;
+			auto child = item[key];
+			if (!child.IsMap())
+			{
+				std::filesystem::path path = child.Path();
+				std::string fixedPath = "";
+				for (auto iter = path.begin(); iter != path.end(); ++iter)
+					fixedPath += iter->string() + ".";
+				fixedPath = fixedPath.substr(0, fixedPath.size() - 1);
+				std::string value = child.As<std::string>();
+				pTable->AddString(std::move(fixedPath), std::move(value));
+				continue;
+			}
+			RecursiveAdd(pTable, child);
+		}
+	};
+
 	void LocalizeEditorExtension::Initialize()
 	{
 		ProjectSettings::Add(&LangSettings);
@@ -209,8 +231,96 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(StringTableLoader, StringTableLoader);
 
 		Undo::RegisterChangeHandler(std::string(".gtable"), std::string(""),
-		[this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
-			/** @todo */
+		[this, pApp](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			const UUID tableID = EditorAssetDatabase::FindAssetUUID(file.Path().string());
+			if (!tableID) return;
+			Resource* pResource = pApp->GetAssetManager().FindResource(tableID);
+			if (!pResource) return;
+			StringTable* pTable = static_cast<StringTable*>(pResource);
+			auto item = file[path];
+
+			if (item.Exists() && item.IsMap())
+			{
+				/* Go through the map and add all keys recursively */
+				RecursiveAdd(pTable, item);
+				return;
+			}
+
+			std::string fullPath = "";
+			for (auto iter = path.begin(); iter != path.end(); ++iter)
+				fullPath += iter->string() + ".";
+			fullPath = fullPath.substr(0, fullPath.size() - 1);
+			if (item.Exists())
+			{
+				std::string value = item.As<std::string>();
+				if (pTable->HasKey(fullPath))
+				{
+					pTable->UpdateString(fullPath, std::move(value));
+					return;
+				}
+
+				pTable->AddString(std::move(fullPath), std::move(value));
+				return;
+			}
+			if (pTable->HasKey(fullPath)) pTable->RemoveKey(fullPath);
+			else
+			{
+				std::vector<std::string> keys;
+				pTable->FindKeysRecursively(fullPath, keys);
+				if (keys.empty()) return;
+				for (size_t i = keys.size(); i > 0; --i)
+				{
+					const std::string& key = keys[i - 1];
+					const std::string path = fullPath + "." + key;
+					pTable->RemoveKey(path);
+				}
+			}
+		});
+
+		Undo::RegisterChangeHandler(std::string(".gotable"), std::string(""),
+		[this, pApp](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			const UUID tableID = EditorAssetDatabase::FindAssetUUID(file.Path().string());
+			if (!tableID) return;
+			Resource* pResource = pApp->GetAssetManager().FindResource(tableID);
+			if (!pResource) return;
+			StringsOverrideTable* pTable = static_cast<StringsOverrideTable*>(pResource);
+
+			std::vector<std::string> components;
+			Reflect::Tokenize(path.string(), components, '\\');
+			if (components.size() <= 1) return;
+
+			auto item = file[path];
+			if (item.Exists() && item.IsMap()) return;
+
+			std::string fullPath = "";
+			for (auto iter = ++path.begin(); iter != path.end(); ++iter)
+				fullPath += iter->string() + ".";
+			fullPath = fullPath.substr(0, fullPath.size() - 1);
+			if (item.Exists())
+			{
+				std::string value = item.As<std::string>();
+				if (pTable->HasKey(fullPath))
+				{
+					pTable->UpdateString(fullPath, std::move(value));
+					return;
+				}
+
+				pTable->AddString(std::move(fullPath), std::move(value));
+				return;
+			}
+			if (pTable->HasKey(fullPath)) pTable->RemoveKey(fullPath);
+			else
+			{
+				std::vector<std::string> keys;
+				pTable->FindKeysRecursively(fullPath, keys);
+				if (keys.empty()) return;
+				for (size_t i = keys.size(); i > 0; --i)
+				{
+					const std::string& key = keys[i - 1];
+					const std::string path = fullPath + "." + key;
+					pTable->RemoveKey(path);
+				}
+			}
 		});
 	}
 

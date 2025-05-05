@@ -40,6 +40,75 @@ namespace Glory
 		}
 	}
 
+	void StringTable::UpdateString(const std::string& key, std::string&& value)
+	{
+		if (m_Strings.find(key) == m_Strings.end()) return;
+		m_Strings[key] = std::move(value);
+	}
+
+	bool StringTable::HasKey(const std::string& key) const
+	{
+		return m_Strings.find(key) != m_Strings.end();
+	}
+
+	void StringTable::RemoveKey(const std::string& key)
+	{
+		if (m_Strings.find(key) == m_Strings.end()) return;
+		m_Strings.erase(key);
+
+		std::vector<std::string> tokens;
+		Reflect::Tokenize(key, tokens, '.');
+
+		GroupData* group = &m_RootGroup;
+		for (size_t i = 0; i < tokens.size(); ++i)
+		{
+			std::string token = tokens[i];
+			auto& iter = group->m_Subgroups.find(token);
+
+			if (i == tokens.size() - 1)
+			{
+				auto keyIter = std::find(group->m_Keys.begin(), group->m_Keys.end(), tokens.back());
+				if (keyIter == group->m_Keys.end()) return;
+				group->m_Keys.erase(keyIter);
+				return;
+			}
+
+			if (iter == group->m_Subgroups.end()) return;
+			group = &iter->second;
+		}
+	}
+
+	std::vector<std::string>* StringTable::FindKeys(const std::string& path)
+	{
+		std::vector<std::string> tokens;
+		Reflect::Tokenize(path, tokens, '.');
+
+		GroupData* group = &m_RootGroup;
+		for (size_t i = 0; i < tokens.size(); ++i)
+		{
+			std::string token = tokens[i];
+			auto& iter = group->m_Subgroups.find(token);
+			if (iter == group->m_Subgroups.end()) return nullptr;
+			group = &iter->second;
+		}
+		return &group->m_Keys;
+	}
+
+	void StringTable::FindKeysRecursively(const std::string& path, std::vector<std::string>& keys)
+	{
+		std::vector<std::string> tokens;
+		Reflect::Tokenize(path, tokens, '.');
+		GroupData* group = &m_RootGroup;
+		for (size_t i = 0; i < tokens.size(); ++i)
+		{
+			std::string token = tokens[i];
+			auto& iter = group->m_Subgroups.find(token);
+			if (iter == group->m_Subgroups.end()) return;
+			group = &iter->second;
+		}
+		FindKeysRecursively("", group, keys);
+	}
+
 	StringTable::LookupResult StringTable::FindString(const std::string& key) const
 	{
 		auto& iter = m_Strings.find(key);
@@ -65,9 +134,7 @@ namespace Glory
 	{
 		container.Write(m_Strings.size());
 		for (auto iter = m_Strings.begin(); iter != m_Strings.end(); ++iter)
-		{
 			container.Write(iter->first).Write(iter->second);
-		}
 	}
 
 	void StringTable::Deserialize(BinaryStream& container)
@@ -80,5 +147,14 @@ namespace Glory
 			container.Read(key).Read(value);
 			m_Strings.emplace(std::move(key), std::move(value));
 		}
+	}
+
+	void StringTable::FindKeysRecursively(std::string basePath, GroupData* group, std::vector<std::string>& keys)
+	{
+		for (size_t i = 0; i < group->m_Keys.size(); ++i)
+			keys.emplace_back(basePath.empty() ? group->m_Keys[i] : (basePath + "." + group->m_Keys[i]));
+
+		for (auto& iter : group->m_Subgroups)
+			FindKeysRecursively(basePath.empty() ? iter.first : basePath + "." + iter.first, &iter.second, keys);
 	}
 }
